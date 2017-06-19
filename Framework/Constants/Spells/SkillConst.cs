@@ -1,0 +1,246 @@
+﻿/*
+ * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */﻿
+
+namespace Framework.Constants
+{
+    public struct SkillConst
+    {
+        public const int MaxPlayerSkills = 128;
+        public const uint MaxSkillStep = 15;
+    }
+
+    public enum SkillType
+    {
+        None = 0,
+
+        Swords = 43,
+        Axes = 44,
+        Bows = 45,
+        Guns = 46,
+        Maces = 54,
+        TwoHandedSwords = 55,
+        Defense = 95,
+        LangCommon = 98,
+        RacialDwarf = 101,
+        LangOrcish = 109,
+        LangDwarven = 111,
+        LangDarnassian = 113,
+        LangTaurahe = 115,
+        DualWield = 118,
+        RacialTauren = 124,
+        RacialOrc = 125,
+        RacialNightElf = 126,
+        FirstAid = 129,
+        Staves = 136,
+        LangThalassian = 137,
+        LangDraconic = 138,
+        LangDemonTongue = 139,
+        LangTitan = 140,
+        LangOldTongue = 141,
+        Survival = 142,
+        HorseRiding = 148,
+        WolfRiding = 149,
+        TigerRiding = 150,
+        RamRiding = 152,
+        Swimming = 155,
+        TwoHandedMaces = 160,
+        Unarmed = 162,
+        Blacksmithing = 164,
+        Leatherworking = 165,
+        Alchemy = 171,
+        TwoHandedAxes = 172,
+        Daggers = 173,
+        Herbalism = 182,
+        GenericDnd = 183,
+        Cooking = 185,
+        Mining = 186,
+        PetImp = 188,
+        PetFelhunter = 189,
+        Tailoring = 197,
+        Engineering = 202,
+        PetSpider = 203,
+        PetVoidwalker = 204,
+        PetSuccubus = 205,
+        PetInfernal = 206,
+        PetDoomguard = 207,
+        PetWolf = 208,
+        PetCat = 209,
+        PetBear = 210,
+        PetBoar = 211,
+        PetCrocolisk = 212,
+        PetCarrionBird = 213,
+        PetCrab = 214,
+        PetGorilla = 215,
+        PetRaptor = 217,
+        PetTallstrider = 218,
+        RacialUndead = 220,
+        Crossbows = 226,
+        Wands = 228,
+        Polearms = 229,
+        PetScorpid = 236,
+        PetTurtle = 251,
+        PetGenericHunter = 270,
+        PlateMail = 293,
+        LangGnomish = 313,
+        LangTroll = 315,
+        Enchanting = 333,
+        Fishing = 356,
+        Skinning = 393,
+        Mail = 413,
+        Leather = 414,
+        Cloth = 415,
+        Shield = 433,
+        FistWeapons = 473,
+        RaptorRiding = 533,
+        MechanostriderPiloting = 553,
+        UndeadHorsemanship = 554,
+        PetBat = 653,
+        PetHyena = 654,
+        PetBirdOfPrey = 655,
+        PetWindSerpent = 656,
+        LangForsaken = 673,
+        KodoRiding = 713,
+        RacialTroll = 733,
+        RacialGnome = 753,
+        RacialHuman = 754,
+        Jewelcrafting = 755,
+        RacialBloodElf = 756,
+        PetEventRemoteControl = 758,
+        LangDraenei = 759,
+        RacialDraenei = 760,
+        PetFelguard = 761,
+        Riding = 762,
+        PetDragonhawk = 763,
+        PetNetherRay = 764,
+        PetSporebat = 765,
+        PetWarpStalker = 766,
+        PetRavager = 767,
+        PetSerpent = 768,
+        Internal = 769,
+        Inscription = 773,
+        PetMoth = 775,
+        Mounts = 777,
+        Companions = 778,
+        PetExoticChimaera = 780,
+        PetExoticDevilsaur = 781,
+        PetGhoul = 782,
+        PetExoticSilithid = 783,
+        PetExoticWorm = 784,
+        PetWasp = 785,
+        PetExoticClefthoof = 786,
+        PetExoticCoreHound = 787,
+        PetExoticSpiritBeast = 788,
+        RacialWorgen = 789,
+        RacialGoblin = 790,
+        LangGilnean = 791,
+        LangGoblin = 792,
+        Archaeology = 794,
+        Hunter = 795,
+        DeathKnight = 796,
+        Druid = 798,
+        Paladin = 800,
+        Priest = 804,
+        PetWaterElemental = 805,
+        PetFox = 808,
+        AllGlyphs = 810,
+        PetDog = 811,
+        PetMonkey = 815,
+        PetShaleSpider = 817,
+        Beetle = 818,
+        AllGuildPerks = 821,
+        PetHydra = 824,
+        Monk = 829,
+        Warrior = 840,
+        Warlock = 849,
+        RacialPandaren = 899,
+        Mage = 904,
+        LangPandarenNeutral = 905,
+        LangPandarenAlliance = 906,
+        LangPandarenHorde = 907,
+        Rogue = 921,
+        Shaman = 924,
+        FelImp = 927,
+        Voidlord = 928,
+        Shivarra = 929,
+        Observer = 930,
+        Wrathguard = 931,
+        AllSpecializations = 934,
+        Runeforging = 960,
+        PetPrimalFireElemental = 962,
+        PetPrimalEarthElemental = 963,
+        WayOfTheGrill = 975,
+        WayOfTheWok = 976,
+        WayOfThePot = 977,
+        WayOfTheSteamer = 978,
+        WayOfTheOven = 979,
+        WayOfTheBrew = 980,
+        ApprenticeCooking = 981,
+        JourneymanCookbook = 982,
+        Porcupine = 983,
+        Crane = 984,
+        WaterStrider = 985,
+        PetExoticQuilen = 986,
+        PetGoat = 987,
+        Basilisk = 988,
+        NoPlayers = 999,
+        Direhorn = 1305,
+        PetPrimalStormElemental = 1748,
+        PetWaterElementalMinorTalentVersion = 1777,
+        PetExoticRylak = 1818,
+        PetRiverbeast = 1819,
+        Unused = 1830,
+        DemonHunter = 1848,
+        Logging = 1945,
+        PetTerrorguard = 1981,
+        PetAbyssal = 1982,
+        PetStag = 1993,
+        TradingPost = 2000,
+        Warglaives = 2152,
+        PetMechanical = 2189,
+        PetAbomination = 2216,
+    }
+
+    public enum SkillState
+    {
+        Unchanged = 0,
+        Changed = 1,
+        New = 2,
+        Deleted = 3
+    }
+
+    public enum SkillCategory : byte
+    {
+        Unk = 0,
+        Attributes = 5,
+        Weapon = 6,
+        Class = 7,
+        Armor = 8,
+        Secondary = 9,
+        Languages = 10,
+        Profession = 11,
+        Generic = 12
+    }
+
+    public enum SkillRangeType
+    {
+        Language,                                   // 300..300
+        Level,                                      // 1..max skill for level
+        Mono,                                       // 1..1, grey monolite bar
+        Rank,                                       // 1..skill for known rank
+        None                                        // 0..0 always
+    }
+}
