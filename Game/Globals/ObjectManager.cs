@@ -1836,7 +1836,10 @@ namespace Game
                 byte i = 0;
                 for (var c = 0; c < tokens.Length; ++c)
                 {
-                    uint spellId = uint.Parse(tokens[c].Replace(",", ""));
+                    string id = tokens[c].Trim().Replace(",", "");
+                    if (!uint.TryParse(id, out uint spellId))
+                        continue;
+
                     SpellInfo AdditionalSpellInfo = Global.SpellMgr.GetSpellInfo(spellId);
                     if (AdditionalSpellInfo == null)
                     {
@@ -1940,7 +1943,10 @@ namespace Game
                 creatureAddon.auras = new uint[tokens.Length];
                 for (var c = 0; c < tokens.Length; ++c)
                 {
-                    uint spellId = uint.Parse(tokens[c]);
+                    string id = tokens[c].Trim().Replace(",", "");
+                    if (!uint.TryParse(id, out uint spellId))
+                        continue;
+
                     SpellInfo AdditionalSpellInfo = Global.SpellMgr.GetSpellInfo(spellId);
                     if (AdditionalSpellInfo == null)
                     {
