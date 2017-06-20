@@ -4,4 +4,9 @@ solution: ./CypherCore.sln
 install:
   - sudo apt install xmlstarlet
   - echo "Removing Pre-build events.."
+  - find $TRAVIS_BUILD_DIR -type f -iname "*.csproj" -exec sh -c 'xmlstarlet ed --inplace -d "(/_:Project/_:PropertyGroup/_:PreBuildEvent)[0]/.." "{}"' \;
   - find $TRAVIS_BUILD_DIR -type f -iname "*.csproj" -exec sh -c 'xmlstarlet ed --inplace -d "(/_:Project/_:PropertyGroup/_:PreBuildEvent)[1]/.." "{}"' \;
+  - find $TRAVIS_BUILD_DIR -type f -iname "*.csproj" -exec sh -c 'xmlstarlet ed --inplace -d "(/_:Project/_:PropertyGroup/_:PreBuildEvent)[2]/.." "{}"' \;
+  - find $TRAVIS_BUILD_DIR -type f -iname "*.csproj" -exec sh -c 'xmlstarlet ed --inplace -d "(/_:Project/_:PropertyGroup/_:PreBuildEvent)[3]/.." "{}"' \;
+  - find $TRAVIS_BUILD_DIR -type f -iname "*.csproj" -exec sh -c 'xmlstarlet ed --inplace -d "(/_:Project/_:PropertyGroup/_:PreBuildEvent)[4]/.." "{}"' \;
+  - nuget restore CypherCore.sln
