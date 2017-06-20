@@ -1,5 +1,7 @@
 language: csharp
 solution: ./CypherCore.sln
 
-script:
-	- find $TRAVIS_BUILD_DIR -type f -iname "*.csproj" -exec sh -c 'xmlstarlet ed --inplace -d "(/_:Project/_:PropertyGroup/_:PreBuildEvent)[1]/.." "{}"' \;
+install:
+  - sudo apt install xmlstarlet
+  - echo "Removing Pre-build events.."
+  - find $TRAVIS_BUILD_DIR -type f -iname "*.csproj" -exec sh -c 'xmlstarlet ed --inplace -d "(/_:Project/_:PropertyGroup/_:PreBuildEvent)[1]/.." "{}"' \;
