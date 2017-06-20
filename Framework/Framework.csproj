@@ -160,8 +160,8 @@
     <Compile Include="GameMath\Vector4.cs" />
     <Compile Include="IO\ByteBuffer.cs" />
     <Compile Include="Collections\StringArray.cs" />
-    <Compile Include="IO\Zlib\Compress.cs" />
     <Compile Include="IO\Zlib\Adler32.cs" />
+    <Compile Include="IO\Zlib\compress.cs" />
     <Compile Include="IO\Zlib\Crc32.cs" />
     <Compile Include="IO\Zlib\Deflate.cs" />
     <Compile Include="IO\Zlib\Trees.cs" />
