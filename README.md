@@ -1,4 +1,4 @@
-## CypherCore [![Build Status](https://travis-ci.org/CypherCore/CypherCore.svg?branch=master)](https://travis-ci.org/CypherCore/CypherCore) [![Build status](https://ci.appveyor.com/api/projects/status/6290gij98ukvt6ob/branch/master?svg=true)](https://ci.appveyor.com/project/CypherCore/CypherCore/branch/master)
+## CypherCore [![Build Status](https://travis-ci.org/CypherCore/CypherCore.svg?branch=master)](https://travis-ci.org/CypherCore/CypherCore) [![Build status](https://ci.appveyor.com/api/projects/status/6290gij98ukvt6ob/branch/master?svg=true)](https://ci.appveyor.com/project/hondacrx/CypherCore/branch/master)
 
 CypherCore is an open source server project for World of Warcraft written in C# (.NET Core).
 
