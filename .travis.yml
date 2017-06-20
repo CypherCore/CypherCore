@@ -1,5 +1,5 @@
 language: csharp
 solution: ./CypherCore.sln
 
-before_install:
+script:
 	- find $TRAVIS_BUILD_DIR -type f -iname "*.csproj" -exec sh -c 'xmlstarlet ed --inplace -d "(/_:Project/_:PropertyGroup/_:PreBuildEvent)[1]/.." "{}"' \;
