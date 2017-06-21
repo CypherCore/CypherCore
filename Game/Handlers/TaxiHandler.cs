@@ -204,7 +204,7 @@ namespace Game
                         }).ToList();
 
                         if (!usableDisplays.Empty())
-                            preferredMountDisplay = usableDisplays.PickRandom().DisplayID;
+                            preferredMountDisplay = usableDisplays.SelectRandom().DisplayID;
                     }
                 }
             }

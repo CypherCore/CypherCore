@@ -1063,7 +1063,7 @@ namespace Game.Loots
                 possibleLoot = EqualChanced;
                 possibleLoot.RemoveAll(new LootGroupInvalidSelector(loot, lootMode).Check);
                 if (!possibleLoot.Empty())                              // If nothing selected yet - an item is taken from equal-chanced part
-                    return possibleLoot.PickRandom();
+                    return possibleLoot.SelectRandom();
 
                 return null;                                            // Empty drop from the group
             }

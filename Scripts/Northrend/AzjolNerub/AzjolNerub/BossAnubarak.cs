@@ -205,7 +205,7 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.Anubarak
                                 me.GetCreatureListWithEntryInGrid(triggers, CreatureIds.WorldTrigger);
                                 if (!triggers.Empty())
                                 {
-                                    var it = triggers.PickRandom();
+                                    var it = triggers.SelectRandom();
                                     it.CastSpell(it, SpellIds.SummonDarter, true);
                                     _events.Repeat(TimeSpan.FromSeconds(11));
                                 }

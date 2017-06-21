@@ -822,7 +822,7 @@ namespace Game
             {
                 do
                 {
-                    ulong questId = currentQuests.PickRandom();
+                    ulong questId = currentQuests.SelectRandom();
                     newQuests.Add(questId);
                     currentQuests.Remove(questId);
                 } while (newQuests.Count < limit && !currentQuests.Empty()); // failsafe
@@ -834,7 +834,7 @@ namespace Game
             // activate <limit> random quests
             do
             {
-                ulong questId = newQuests.PickRandom();
+                ulong questId = newQuests.SelectRandom();
                 spawns.ActivateObject<Quest>(questId, poolId);
                 PoolObject tempObj = new PoolObject(questId, 0.0f);
                 Spawn1Object(tempObj);

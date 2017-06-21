@@ -588,7 +588,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                 if (temp.Empty())
                     return;
 
-                Creature cultist = temp.PickRandom();
+                Creature cultist = temp.SelectRandom();
                 DoCast(cultist, LadySpells.DARK_MARTYRDOM_T, true);
             }
 
@@ -611,7 +611,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                     return;
 
                 // select random cultist
-                Creature cultist = temp.PickRandom();
+                Creature cultist = temp.SelectRandom();
                 DoCast(cultist, cultist.GetEntry() == CreatureIds.CultFanatic ? LadySpells.DARK_TRANSFORMATION_T : LadySpells.DARK_EMPOWERMENT_T, true);
                 Talk(cultist.GetEntry() == CreatureIds.CultFanatic ? LadyTexts.SAY_DARK_TRANSFORMATION : LadyTexts.SAY_DARK_EMPOWERMENT);
             }

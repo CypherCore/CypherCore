@@ -1613,7 +1613,7 @@ namespace Game.Entities
                                 for (uint i = 0; i < info.Ritual.casterTargetSpellTargets; i++)
                                 {
                                     // m_unique_users can contain only player GUIDs
-                                    Player target = Global.ObjAccessor.GetPlayer(this, m_unique_users.PickRandom());
+                                    Player target = Global.ObjAccessor.GetPlayer(this, m_unique_users.SelectRandom());
                                     if (target != null)
                                         spellCaster.CastSpell(target, info.Ritual.casterTargetSpell, true);
                                 }

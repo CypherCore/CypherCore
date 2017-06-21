@@ -159,7 +159,7 @@ namespace Game.AI
                 }
                 case SelectAggroTarget.Random:
                 {
-                    return targetList.PickRandom();
+                    return targetList.SelectRandom();
                 }
                 default:
                     break;
@@ -197,7 +197,7 @@ namespace Game.AI
                 targetList.Reverse();
 
             if (targetType == SelectAggroTarget.Random)
-                targetList = targetList.PickRandom(maxTargets).ToList();
+                targetList = targetList.SelectRandom(maxTargets).ToList();
             else
                 targetList.Resize(maxTargets);
 

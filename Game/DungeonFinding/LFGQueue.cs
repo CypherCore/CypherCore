@@ -526,7 +526,7 @@ namespace Game.DungeonFinding
             proposal.cancelTime = Time.UnixTime + SharedConst.LFGTimeProposal;
             proposal.state = LfgProposalState.Initiating;
             proposal.leader = ObjectGuid.Empty;
-            proposal.dungeonId = proposalDungeons.PickRandom();
+            proposal.dungeonId = proposalDungeons.SelectRandom();
 
             bool leader = false;
             foreach (var rolePair in proposalRoles)

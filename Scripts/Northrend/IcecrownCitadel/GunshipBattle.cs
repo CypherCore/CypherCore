@@ -2188,7 +2188,7 @@ namespace Scripts.Northrend.IcecrownCitadel
 
                 if (!targets.Empty())
                 {
-                    WorldObject target = targets.PickRandom();
+                    WorldObject target = targets.SelectRandom();
                     targets.Clear();
                     targets.Add(target);
                 }
@@ -2250,7 +2250,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             {
                 if (!targets.Empty())
                 {
-                    WorldObject target = targets.PickRandom();
+                    WorldObject target = targets.SelectRandom();
                     targets.Clear();
                     targets.Add(target);
                 }

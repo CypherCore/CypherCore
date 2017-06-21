@@ -94,7 +94,7 @@ namespace Scripts.Spells.Rogue
             {
                 while (!_targets.Empty())
                 {
-                    ObjectGuid guid = _targets.PickRandom();
+                    ObjectGuid guid = _targets.SelectRandom();
                     Unit target = Global.ObjAccessor.GetUnit(GetTarget(), guid);
                     if (target)
                     {

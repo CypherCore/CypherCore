@@ -2110,7 +2110,7 @@ namespace Game.Spells
                         }).ToList();
 
                         if (!usableDisplays.Empty())
-                            displayId = usableDisplays.PickRandom().DisplayID;
+                            displayId = usableDisplays.SelectRandom().DisplayID;
                     }
                     // TODO: CREATE TABLE mount_vehicle (mountId, vehicleCreatureId) for future mounts that are vehicles (new mounts no longer have proper data in MiscValue)
                     //if (MountVehicle const* mountVehicle = sObjectMgr->GetMountVehicle(mountEntry->Id))

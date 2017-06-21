@@ -1829,7 +1829,7 @@ namespace Scripts.Northrend.Ulduar
                     if (_noTarget)
                         return;
 
-                    WorldObject target = targets.PickRandom();
+                    WorldObject target = targets.SelectRandom();
                     targets.Clear();
                     targets.Add(target);
                 }
@@ -1964,12 +1964,12 @@ namespace Scripts.Northrend.Ulduar
                     if (targets.Empty())
                         return;
 
-                    WorldObject target = targets.PickRandom();
+                    WorldObject target = targets.SelectRandom();
 
                     targets.RemoveAll(new AllWorldObjectsInRange(GetCaster(), 15.0f).Invoke);
 
                     if (!targets.Empty())
-                        target = targets.PickRandom();
+                        target = targets.SelectRandom();
 
                     targets.Clear();
                     targets.Add(target);
@@ -2289,12 +2289,12 @@ namespace Scripts.Northrend.Ulduar
                     if (targets.Empty())
                         return;
 
-                    WorldObject target = targets.PickRandom();
+                    WorldObject target = targets.SelectRandom();
 
                     targets.RemoveAll(new AllWorldObjectsInRange(GetCaster(), 15.0f).Invoke);
 
                     if (!targets.Empty())
-                        target = targets.PickRandom();
+                        target = targets.SelectRandom();
 
                     targets.Clear();
                     targets.Add(target);
@@ -2567,7 +2567,7 @@ namespace Scripts.Northrend.Ulduar
                     if (targets.Empty())
                         return;
 
-                    WorldObject target = targets.PickRandom();
+                    WorldObject target = targets.SelectRandom();
 
                     targets.Clear();
                     targets.Add(target);

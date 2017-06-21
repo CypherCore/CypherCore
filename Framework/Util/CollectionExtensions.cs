@@ -80,16 +80,6 @@ namespace System.Collections.Generic
             collection.RemoveAll(check.Invoke);
         }
 
-        public static T PickRandom<T>(this IEnumerable<T> source)
-        {
-            return source.PickRandom(1).Single();
-        }
-
-        public static IEnumerable<T> PickRandom<T>(this IEnumerable<T> source, uint count)
-        {
-            return source.Shuffle().Take((int)count);
-        }
-
         public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source)
         {
             return source.OrderBy(x => Guid.NewGuid());
@@ -134,6 +124,17 @@ namespace System.Collections.Generic
                 listCopy.Resize(size);
 
             list = listCopy;
+        }
+
+
+        public static T SelectRandom<T>(this IEnumerable<T> source)
+        {
+            return source.SelectRandom(1).Single();
+        }
+
+        public static IEnumerable<T> SelectRandom<T>(this IEnumerable<T> source, uint count)
+        {
+            return source.Shuffle().Take((int)count);
         }
 
         public static T SelectRandomElementByWeight<T>(this IEnumerable<T> sequence, Func<T, float> weightSelector)

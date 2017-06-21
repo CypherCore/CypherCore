@@ -1154,7 +1154,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                         case EventTypes.ArnathPwShield:
                             {
                                 List<Creature> targets = DoFindFriendlyMissingBuff(40.0f, InstanceSpells.SpellPowerWordShield(IsUndead));
-                                DoCast(targets.PickRandom(), InstanceSpells.SpellPowerWordShield(IsUndead));
+                                DoCast(targets.SelectRandom(), InstanceSpells.SpellPowerWordShield(IsUndead));
                                 _events.ScheduleEvent(EventTypes.ArnathPwShield, RandomHelper.URand(15000, 20000));
                                 break;
                             }
@@ -1656,7 +1656,7 @@ namespace Scripts.Northrend.IcecrownCitadel
 
                 if (!targets.Empty())
                 {
-                    WorldObject target = targets.PickRandom();
+                    WorldObject target = targets.SelectRandom();
                     targets.Clear();
                     targets.Add(target);
                 }
@@ -1737,7 +1737,7 @@ namespace Scripts.Northrend.IcecrownCitadel
 
                     return true;
                 });
-                targets = targets.PickRandom(2).ToList();
+                targets = targets.SelectRandom(2).ToList();
             }
 
             void Land(uint effIndex)

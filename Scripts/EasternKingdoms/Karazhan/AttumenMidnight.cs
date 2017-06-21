@@ -158,7 +158,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
                         }
                         Unit target = null;
                         if (!target_list.Empty())
-                            target = target_list.PickRandom();
+                            target = target_list.SelectRandom();
 
                         DoCast(target, SpellIds.BerserkerCharge);
                         ChargeTimer = 20000;

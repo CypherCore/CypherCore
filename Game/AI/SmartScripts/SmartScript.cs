@@ -2302,7 +2302,7 @@ namespace Game.AI
                             {
                                 if (IsUnit(obj))
                                 {
-                                    uint sound = sounds.PickRandom();
+                                    uint sound = sounds.SelectRandom();
                                     obj.PlayDirectSound(sound, onlySelf ? obj.ToPlayer() : null);
                                     Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction:: SMART_ACTION_RANDOM_SOUND: target: {0} ({1}), sound: {2}, onlyself: {3}",
                                         obj.GetName(), obj.GetGUID().ToString(), sound, onlySelf);

@@ -1040,7 +1040,7 @@ namespace Scripts.Spells.Druid
                         return;
                     }
 
-                    Unit target = tempTargets.PickRandom();
+                    Unit target = tempTargets.SelectRandom();
                     targets.Clear();
                     targets.Add(target);
                 }

@@ -769,7 +769,7 @@ namespace Scripts.World.NpcSpecial
 
                 if (!targets.Empty())
                 {
-                    _lastTargetGUID = targets.PickRandom().GetGUID();
+                    _lastTargetGUID = targets.SelectRandom().GetGUID();
 
                     return _lastTargetGUID;
                 }

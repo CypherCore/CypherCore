@@ -800,7 +800,7 @@ namespace Game.Entities
                 return null;
 
             // select random
-            return targets.PickRandom();
+            return targets.SelectRandom();
         }
 
         public void EnterVehicle(Unit Base, sbyte seatId = -1)

@@ -1639,7 +1639,7 @@ namespace Scripts.Northrend.Ulduar
                     else
                     {
                         //! In the end, only one target should be selected
-                        _target = targets.PickRandom();
+                        _target = targets.SelectRandom();
                         FilterTargetsSubsequently(targets);
                     }
                 }

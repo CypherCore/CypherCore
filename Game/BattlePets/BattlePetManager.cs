@@ -129,7 +129,7 @@ namespace Game.BattlePets
             if (list.Empty())
                 return 3; // default B/B
 
-            return list.PickRandom();
+            return list.SelectRandom();
         }
 
         public static byte GetDefaultPetQuality(uint species)
@@ -263,7 +263,7 @@ namespace Game.BattlePets
             byte quality = 0;
 
             if (_availableBreedsPerSpecies.ContainsKey(species))
-                breed = _availableBreedsPerSpecies[species].PickRandom();
+                breed = _availableBreedsPerSpecies[species].SelectRandom();
 
             if (_defaultQualityPerSpecies.ContainsKey(species))
                 quality = _defaultQualityPerSpecies[species];

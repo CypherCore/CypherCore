@@ -963,7 +963,7 @@ namespace Game.DataStorage
             if (listNameGen[gender].Empty())
                 return "";
 
-            LocalizedString data = listNameGen[gender].PickRandom().Name;
+            LocalizedString data = listNameGen[gender].SelectRandom().Name;
             if (data.HasString(locale))
                 return data[locale];
 

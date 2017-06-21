@@ -543,7 +543,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                 if (targets.Empty())
                     return;
 
-                WorldObject target = targets.PickRandom();
+                WorldObject target = targets.SelectRandom();
                 targets.Clear();
                 targets.Add(target);
             }

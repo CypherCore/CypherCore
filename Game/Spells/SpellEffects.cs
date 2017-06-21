@@ -294,7 +294,7 @@ namespace Game.Spells
                                 int maxTargets = Math.Min(3, attackers.Count);
                                 for (uint i = 0; i < maxTargets; ++i)
                                 {
-                                    Unit attacker = attackers.PickRandom();
+                                    Unit attacker = attackers.SelectRandom();
                                     AddUnitTarget(attacker, 1 << 1);
                                     attackers.Remove(attacker);
                                 }
@@ -1408,7 +1408,7 @@ namespace Game.Spells
                 if (!avalibleElixirs.Empty())
                 {
                     // cast random elixir on target
-                    m_caster.CastSpell(unitTarget, (uint)avalibleElixirs.PickRandom(), true, m_CastItem);
+                    m_caster.CastSpell(unitTarget, (uint)avalibleElixirs.SelectRandom(), true, m_CastItem);
                 }
             }
         }

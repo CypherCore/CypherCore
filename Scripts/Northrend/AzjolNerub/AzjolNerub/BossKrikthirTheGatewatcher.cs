@@ -889,7 +889,7 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.KrikthirTheGatewatcher
                 if (!targetList.Empty())
                 {
                     // If there are, pick one of them at random
-                    target = targetList.PickRandom();
+                    target = targetList.SelectRandom();
                 }
                 // And hit only that one
                 targetList.Clear();

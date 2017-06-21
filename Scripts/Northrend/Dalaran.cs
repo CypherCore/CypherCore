@@ -162,7 +162,7 @@ namespace Scripts.Northrend
                 if (PlayerInDalaranList.Empty())
                     return null;
 
-                return PlayerInDalaranList.PickRandom();
+                return PlayerInDalaranList.SelectRandom();
             }
 
             void SendMailToPlayer(Player player)

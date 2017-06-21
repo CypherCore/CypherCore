@@ -210,7 +210,7 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet
                             if (vInitiands.Empty())
                                 return ObjectGuid.Empty;
 
-                            return vInitiands.PickRandom();
+                            return vInitiands.SelectRandom();
                         }
                     case DataTypes.AddJedogaVictim:
                         return JedogaSacrifices;

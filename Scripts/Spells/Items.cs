@@ -734,7 +734,7 @@ namespace Scripts.Spells.Items
 
                 PreventDefaultAction();
                 Unit caster = eventInfo.GetActor();
-                uint spellId = triggeredSpells[(int)caster.GetClass()].PickRandom();
+                uint spellId = triggeredSpells[(int)caster.GetClass()].SelectRandom();
                 caster.CastSpell(caster, spellId, true);
 
                 if (RandomHelper.randChance(10))
@@ -960,7 +960,7 @@ namespace Scripts.Spells.Items
                 if (randomSpells.Empty())
                     return;
 
-                uint spellId = randomSpells.PickRandom();
+                uint spellId = randomSpells.SelectRandom();
                 caster.CastSpell(caster, spellId, true);
             }
 
@@ -1293,7 +1293,7 @@ namespace Scripts.Spells.Items
                     return;
                 }
 
-                caster.CastSpell(caster, possibleSpells.PickRandom(), true);
+                caster.CastSpell(caster, possibleSpells.SelectRandom(), true);
             }
 
             public override void Register()
@@ -2357,7 +2357,7 @@ namespace Scripts.Spells.Items
             void HandleTeleport(uint effIndex)
             {
                 PreventHitDefaultEffect(effIndex);
-                uint spellId = SpellIds.WormholeTargetLocations.PickRandom();
+                uint spellId = SpellIds.WormholeTargetLocations.SelectRandom();
                 GetCaster().CastSpell(GetHitUnit(), spellId, true);
             }
 
