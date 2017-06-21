@@ -375,8 +375,8 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WritePackedGuid(CasterGUID);
             _worldPacket.WritePackedGuid(TargetGUID);
+            _worldPacket.WritePackedGuid(CasterGUID);
 
             _worldPacket.WriteUInt32(SpellID);
             _worldPacket.WriteUInt32(Type);
