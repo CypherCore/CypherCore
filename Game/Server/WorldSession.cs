@@ -881,12 +881,12 @@ namespace Game
     {
         public ulong Raw
         {
-            get { return ((ulong)AccountId) | ((ulong)connectionType << 32) | (Key << 33); }
+            get { return ((ulong)AccountId | ((ulong)connectionType << 32) | (Key << 33)); }
             set
             {
-                AccountId = (uint)(value & ((1 << 33) - 1));
-                connectionType = (ConnectionType)(uint)((value >> 32) & ((1 << 1) - 1));
-                Key = (uint)(value >> 33) & ((1 << 30) - 1);
+                AccountId = (uint)(value & 0xFFFFFFFF);
+                connectionType = (ConnectionType)(value & (1u >> 32));
+                Key = (value >> 33);
             }
         }
 
