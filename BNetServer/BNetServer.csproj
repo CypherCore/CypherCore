@@ -130,7 +130,7 @@
     <Content Include="Red.ico" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="BNetServer.conf">
+    <None Include="BNetServer.conf.dist">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

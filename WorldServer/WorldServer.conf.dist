@@ -37,10 +37,10 @@ LogsDir = "./Logs"
 #        Description: Database connection settings for the world server.
 #        Example:     "hostname;port;username;password;database"
 
-#        Default:     "127.0.0.1;3306;cypher;cypher;auth"       - (LoginDatabaseInfo)
-#                     "127.0.0.1;3306;cypher;cypher;world"      - (WorldDatabaseInfo)
-#                     "127.0.0.1;3306;cypher;cypher;characters" - (CharacterDatabaseInfo)
-#                     "127.0.0.1;3306;cypher;cypher;hotfixes"   - (HotfixDatabaseInfo)
+#        Default:     "127.0.0.1;3306;username;password;auth"       - (LoginDatabaseInfo)
+#                     "127.0.0.1;3306;username;password;world"      - (WorldDatabaseInfo)
+#                     "127.0.0.1;3306;username;password;characters" - (CharacterDatabaseInfo)
+#                     "127.0.0.1;3306;username;password;hotfixes"   - (HotfixDatabaseInfo)
 
 LoginDatabaseInfo     = "127.0.0.1;3306;username;password;auth"
 WorldDatabaseInfo     = "127.0.0.1;3306;username;password;world"

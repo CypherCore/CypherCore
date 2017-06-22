@@ -101,7 +101,7 @@
     <Content Include="Blue.ico" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="WorldServer.conf">
+    <None Include="WorldServer.conf.dist">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
