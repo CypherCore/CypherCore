@@ -44,7 +44,7 @@ namespace Framework.Configuration
                 foreach (var line in ConfigContent)
                 {
                     lineCounter++;
-                    if (line.StartsWith("#") || line.StartsWith("-") || string.IsNullOrEmpty(line))
+                    if (string.IsNullOrEmpty(line) || line.StartsWith("#") || line.StartsWith("-"))
                         continue;
 
                     var configOption = new StringArray(line, '=');

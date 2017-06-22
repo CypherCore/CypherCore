@@ -131,12 +131,12 @@ namespace Framework.GameMath
             vertices[0] = _lo;
             vertices[1] = new Vector3(_hi.X, _lo.Y, _lo.Z);
             vertices[2] = new Vector3(_hi.X, _hi.Y, _lo.Z);
-            vertices[4] = new Vector3(_lo.X, _hi.Y, _lo.Z);
+            vertices[3] = new Vector3(_lo.X, _hi.Y, _lo.Z);
 
-            vertices[5] = new Vector3(_lo.X, _lo.Y, _hi.Z);
-            vertices[6] = new Vector3(_hi.X, _lo.Y, _hi.Z);
-            vertices[7] = _hi;
-            vertices[8] = new Vector3(_lo.X, _hi.Y, _hi.Z);
+            vertices[4] = new Vector3(_lo.X, _lo.Y, _hi.Z);
+            vertices[5] = new Vector3(_hi.X, _lo.Y, _hi.Z);
+            vertices[6] = _hi;
+            vertices[7] = new Vector3(_lo.X, _hi.Y, _hi.Z);
 
             return vertices;
         }

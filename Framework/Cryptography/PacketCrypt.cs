@@ -50,8 +50,6 @@ namespace Framework.Cryptography
 
         public void Initialize(byte[] sessionKey, byte[] serverSeed, byte[] clientSeed)
         {
-            IsInitialized = false;
-
             if (IsInitialized)
                 throw new InvalidOperationException("PacketCrypt already initialized!");
 

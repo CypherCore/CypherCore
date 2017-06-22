@@ -368,7 +368,7 @@ namespace Scripts.Northrend.IcecrownCitadel
         public SlotInfo(uint _entry, float x, float y, float z, float o, uint _cooldown)
         {
             Entry = _entry;
-            TargetPosition = new Position(x, y, z);
+            TargetPosition = new Position(x, y, z, o);
             Cooldown = _cooldown;
         }
         public SlotInfo(uint _entry, Position pos, uint _cooldown)

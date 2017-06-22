@@ -3792,7 +3792,7 @@ namespace Game.Maps
                             if (unit)
                             {
                                 // Target must be GameObject.
-                                if (target != null)
+                                if (target == null)
                                 {
                                     Log.outError(LogFilter.Scripts, "{0} target object is NULL.", step.script.GetDebugInfo());
                                     break;

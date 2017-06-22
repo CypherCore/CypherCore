@@ -588,7 +588,7 @@ namespace Game.Arenas
             }
         }
 
-        public int WonAgainst(uint ownMMRating, uint opponentMMRating, int ratingChange)
+        public int WonAgainst(uint ownMMRating, uint opponentMMRating, ref int ratingChange)
         {
             // Called when the team has won
             // Change in Matchmaker rating
@@ -608,7 +608,7 @@ namespace Game.Arenas
             return mod;
         }
 
-        public int LostAgainst(uint ownMMRating, uint opponentMMRating, int ratingChange)
+        public int LostAgainst(uint ownMMRating, uint opponentMMRating, ref int ratingChange)
         {
             // Called when the team has lost
             // Change in Matchmaker Rating

@@ -4930,7 +4930,7 @@ namespace Game.Spells
                             int skillValue = 0;
 
                             // check lock compatibility
-                            SpellCastResult res = CanOpenLock(effect.EffectIndex, lockId, skillId, ref reqSkillValue, ref skillValue);
+                            SpellCastResult res = CanOpenLock(effect.EffectIndex, lockId, ref skillId, ref reqSkillValue, ref skillValue);
                             if (res != SpellCastResult.SpellCastOk)
                                 return res;
                             break;
@@ -6541,7 +6541,7 @@ namespace Game.Spells
                 modOwner.SetSpellModTakingSpell(this, false);
         }
 
-        SpellCastResult CanOpenLock(uint effIndex, uint lockId, SkillType skillId, ref int reqSkillValue, ref int skillValue)
+        SpellCastResult CanOpenLock(uint effIndex, uint lockId, ref SkillType skillId, ref int reqSkillValue, ref int skillValue)
         {
             if (lockId == 0)                                             // possible case for GO and maybe for items.
                 return SpellCastResult.SpellCastOk;

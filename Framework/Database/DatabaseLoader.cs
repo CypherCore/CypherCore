@@ -51,7 +51,7 @@ namespace Framework.Database
                         Log.outInfo(LogFilter.ServerLoading, "Database \"{0}\" does not exist, do you want to create it? [yes (default) / no]: ", name);
 
                         string answer = Console.ReadLine();
-                        if (string.IsNullOrEmpty(answer) && answer[0] != 'y')
+                        if (string.IsNullOrEmpty(answer) || answer[0] != 'y')
                             return false;
 
                         Log.outInfo(LogFilter.ServerLoading, "Creating database \"{0}\"...", name);

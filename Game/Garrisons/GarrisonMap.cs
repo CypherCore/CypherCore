@@ -34,7 +34,7 @@ namespace Game.Garrisons
 
         public override void LoadGridObjects(Grid grid, Cell cell)
         {
-            LoadGridObjects(grid, cell);
+            base.LoadGridObjects(grid, cell);
 
             GarrisonGridLoader loader = new GarrisonGridLoader(grid, this, cell);
             loader.LoadN();

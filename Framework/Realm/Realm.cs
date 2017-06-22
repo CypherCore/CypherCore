@@ -26,7 +26,7 @@ public class Realm : IEquatable<Realm>
     {
         Name = name;
         NormalizedName = name;
-        NormalizedName.Replace(" ", "");
+        NormalizedName = NormalizedName.Replace(" ", "");
     }
 
     public IPEndPoint GetAddressForClient(IPAddress clientAddr)

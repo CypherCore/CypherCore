@@ -482,8 +482,7 @@ namespace Framework.Dynamic
         public void ModifyIf(Func<Task, bool> filter)
         {
             List<Task> cache = new List<Task>();
-            container.Where(filter);
-            foreach (var task in container.ToList())
+            foreach (var task in container.Where(filter))
             {
                 if (filter(task))
                 {

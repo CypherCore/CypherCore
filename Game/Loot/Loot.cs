@@ -184,7 +184,7 @@ namespace Game.Loots
                 if (_difficultyBonusTreeMod != 0)
                 {
                     List<uint> bonusListIDs = Global.DB2Mgr.GetItemBonusTree(generatedLoot.itemid, _difficultyBonusTreeMod);
-                    generatedLoot.BonusListIDs.AddRange(generatedLoot.BonusListIDs);
+                    generatedLoot.BonusListIDs.AddRange(bonusListIDs);
                 }
                 lootItems.Add(generatedLoot);
                 count -= proto.GetMaxStackSize();
@@ -767,7 +767,7 @@ namespace Game.Loots
                     if (!fi.is_looted && !item.is_looted)
                     {
                         LootItemData lootItem = new LootItemData();
-                        lootItem.LootListID = (byte)(items.Count + fi.index + 1);
+                        lootItem.LootListID = (byte)(fi.index + 1);
                         lootItem.UIType = slotType;
                         lootItem.Quantity = item.count;
                         lootItem.Loot = new ItemInstance(item);
@@ -786,7 +786,7 @@ namespace Game.Loots
                     if (!ci.is_looted && !item.is_looted)
                     {
                         LootItemData lootItem = new LootItemData();
-                        lootItem.LootListID = (byte)(items.Count + ci.index + 1);
+                        lootItem.LootListID = (byte)(ci.index + 1);
                         lootItem.Quantity = item.count;
                         lootItem.Loot = new ItemInstance(item);
 

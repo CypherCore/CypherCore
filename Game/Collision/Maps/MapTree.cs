@@ -227,7 +227,7 @@ namespace Game.Collision
         }
         
         static uint packTileID(uint tileX, uint tileY) { return tileX << 16 | tileY; }
-        static void unpackTileID(uint ID, uint tileX, uint tileY) { tileX = ID >> 16; tileY = ID & 0xFF; }
+        static void unpackTileID(uint ID, ref uint tileX, ref uint tileY) { tileX = ID >> 16; tileY = ID & 0xFF; }
         public static bool CanLoadMap(string vmapPath, uint mapID, uint tileX, uint tileY)
         {
             string fullname = vmapPath + VMapManager.getMapFileName(mapID);

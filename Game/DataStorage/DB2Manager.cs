@@ -612,9 +612,6 @@ namespace Game.DataStorage
                 return 0.0f;
 
             CurveRecord curve = CliDB.CurveStorage.LookupByKey(curveId);
-            if (points.Empty())
-                return 0.0f;
-
             switch (DetermineCurveType(curve, points))
             {
                 case CurveInterpolationMode.Linear:

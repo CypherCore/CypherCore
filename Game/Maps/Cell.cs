@@ -302,7 +302,7 @@ namespace Game.Maps
             high_bound = high;
         }
 
-        void ResizeBorders(ICoord begin_cell, ICoord end_cell)
+        void ResizeBorders(ref ICoord begin_cell, ref ICoord end_cell)
         {
             begin_cell = low_bound;
             end_cell = high_bound;

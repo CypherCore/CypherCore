@@ -705,7 +705,7 @@ namespace Game.Entities
 
         public void SetState(ItemUpdateState state, Player forplayer = null)
         {
-            if (uState == ItemUpdateState.New && uState == ItemUpdateState.Removed)
+            if (uState == ItemUpdateState.New && state == ItemUpdateState.Removed)
             {
                 // pretend the item never existed
                 if (forplayer)

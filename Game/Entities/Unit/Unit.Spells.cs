@@ -1836,7 +1836,7 @@ namespace Game.Entities
                     }
                 }
 
-                if (!IsTriggeredAtSpellProcEvent(target, triggerData.aura, procSpell, procFlag, procExtra, attType, isVictim, active, triggerData.spellProcEvent))
+                if (!IsTriggeredAtSpellProcEvent(target, triggerData.aura, procSpell, procFlag, procExtra, attType, isVictim, active, ref triggerData.spellProcEvent))
                     continue;
 
                 // do checks using conditions table
@@ -2415,7 +2415,7 @@ namespace Game.Entities
             }
         }
 
-        bool IsTriggeredAtSpellProcEvent(Unit victim, Aura aura, SpellInfo procSpell, ProcFlags procFlag, ProcFlagsExLegacy procExtra, WeaponAttackType attType, bool isVictim, bool active, SpellProcEventEntry spellProcEvent)
+        bool IsTriggeredAtSpellProcEvent(Unit victim, Aura aura, SpellInfo procSpell, ProcFlags procFlag, ProcFlagsExLegacy procExtra, WeaponAttackType attType, bool isVictim, bool active, ref SpellProcEventEntry spellProcEvent)
         {
             SpellInfo spellInfo = aura.GetSpellInfo();
 

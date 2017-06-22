@@ -269,7 +269,7 @@ namespace Game.Garrisons
                 }
 
                 List<GarrAbilityRecord> genericTraits = genericTraitsTemp.Except(forcedTraits).ToList();
-                genericTraits.AddRange(genericTraits);
+                genericTraits.AddRange(traitList);
                 genericTraits.Sort((GarrAbilityRecord a1, GarrAbilityRecord a2) =>
                 {
                     int e1 = (int)(a1.Flags & GarrisonAbilityFlags.Exclusive);

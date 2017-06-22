@@ -1147,7 +1147,8 @@ namespace Scripts.Spells.Druid
 
             void SetTargets(List<WorldObject> targets)
             {
-                targets = _targets;
+                targets.Clear();
+                targets .AddRange(_targets);
             }
 
             public override void Register()

@@ -1579,7 +1579,7 @@ namespace Game.Spells
             int reqSkillValue = 0;
             int skillValue = 0;
 
-            SpellCastResult res = CanOpenLock(effIndex, lockId, skillId, ref reqSkillValue, ref skillValue);
+            SpellCastResult res = CanOpenLock(effIndex, lockId, ref skillId, ref reqSkillValue, ref skillValue);
             if (res != SpellCastResult.SpellCastOk)
             {
                 SendCastResult(res);

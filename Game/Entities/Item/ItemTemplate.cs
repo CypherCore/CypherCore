@@ -192,7 +192,7 @@ namespace Game.Entities
 
             float avgDamage = dps * GetDelay() * 0.001f;
             minDamage = (GetStatScalingFactor() * -0.5f + 1.0f) * avgDamage;
-            maxDamage = (float)Math.Floor((avgDamage * (GetStatScalingFactor() * 0.5f + 1.0f) + 0.5f));
+            maxDamage = (float)Math.Floor(avgDamage * (GetStatScalingFactor() * 0.5f + 1.0f) + 0.5f);
         }
 
         public bool IsUsableByLootSpecialization(Player player)

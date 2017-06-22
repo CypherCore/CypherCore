@@ -85,7 +85,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             if (player.IsInCombat())
             {
                 SpellInfo spell = Global.SpellMgr.GetSpellInfo(TeleporterSpells.FROZEN_THRONE_TELEPORT);
-                if (spell == null)
+                if (spell != null)
                 {
                     ObjectGuid castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, player.GetMapId(), spell.Id, player.GetMap().GenerateLowGuid(HighGuid.Cast));
                     Spell.SendCastResult(player, spell, 0, castId, SpellCastResult.AffectingCombat);

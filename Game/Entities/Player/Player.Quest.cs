@@ -164,9 +164,6 @@ namespace Game.Entities
             if (eventList.Empty())
                 return;
 
-            if (eventList.Empty())
-                return;
-
             foreach (uint questId in eventList)
             {
                 uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(questId);

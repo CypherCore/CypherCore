@@ -91,7 +91,7 @@ namespace Game.Spells
                 _visuals = visuals;
             // sort all visuals so that the ones without a condition requirement are last on the list
             foreach (var key in _visuals.Keys)
-                _visuals[key].OrderByDescending(x => x.PlayerConditionID);
+                _visuals[key] = _visuals[key].OrderByDescending(x => x.PlayerConditionID).ToList();
 
             // SpellScalingEntry
             SpellScalingRecord _scaling = data.Scaling;
