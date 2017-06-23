@@ -106,19 +106,7 @@ namespace Framework.Networking
 
             try
             {
-                _stream.BeginWrite(data, 0, data.Length, WriteHandlerInternal, _stream);
-            }
-            catch (Exception ex)
-            {
-                Log.outException(ex);
-            }
-        }
-
-        void WriteHandlerInternal(IAsyncResult result)
-        {
-            try
-            {
-                _stream.EndWrite(result);
+                _stream.Write(data, 0, data.Length);
             }
             catch (Exception ex)
             {
