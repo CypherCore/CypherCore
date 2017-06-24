@@ -126,7 +126,6 @@ namespace System.Collections.Generic
             list = listCopy;
         }
 
-
         public static T SelectRandom<T>(this IEnumerable<T> source)
         {
             return source.SelectRandom(1).Single();

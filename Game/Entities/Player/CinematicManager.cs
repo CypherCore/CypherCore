@@ -124,19 +124,19 @@ namespace Game.Entities
                 angle += 2 * MathFunctions.PI;
 
             // Look for position around 2 second ahead of us.
-            uint workDiff = m_cinematicDiff;
+            int workDiff = (int)m_cinematicDiff;
 
             // Modify result based on camera direction (Humans for example, have the camera point behind)
-            workDiff += (uint)((2 * Time.InMilliseconds) * Math.Cos(angle));
+            workDiff += (int)((2 * Time.InMilliseconds) * Math.Cos(angle));
 
             // Get an iterator to the last entry in the cameras, to make sure we don't go beyond the end
             var endItr = m_cinematicCamera.LastOrDefault();
             if (endItr != null && workDiff > endItr.timeStamp)
-                workDiff = endItr.timeStamp;
+                workDiff = (int)endItr.timeStamp;
 
             // Never try to go back in time before the start of cinematic!
             if (workDiff < 0)
-                workDiff = m_cinematicDiff;
+                workDiff = (int)m_cinematicDiff;
 
             // Obtain the previous and next waypoint based on timestamp
             foreach (FlyByCamera cam in m_cinematicCamera)
@@ -153,11 +153,11 @@ namespace Game.Entities
 
             // Never try to go beyond the end of the cinematic
             if (workDiff > nextTimestamp)
-                workDiff = nextTimestamp;
+                workDiff = (int)nextTimestamp;
 
             // Interpolate the position for this moment in time (or the adjusted moment in time)
             uint timeDiff = nextTimestamp - lastTimestamp;
-            uint interDiff = workDiff - lastTimestamp;
+            uint interDiff = (uint)(workDiff - lastTimestamp);
             float xDiff = nextPosition.posX - lastPosition.posX;
             float yDiff = nextPosition.posY - lastPosition.posY;
             float zDiff = nextPosition.posZ - lastPosition.posZ;

@@ -149,8 +149,8 @@ namespace Game.DataStorage
                     _curvePoints[curvePoint.CurveID].Add(curvePoint);
             }
 
-            foreach (var key in _curvePoints.Keys)
-                _curvePoints[key].OrderBy(point => point.Index);
+            foreach (var key in _curvePoints.Keys.ToList())
+                _curvePoints[key] = _curvePoints[key].OrderBy(point => point.Index).ToList();
 
             foreach (EmotesTextSoundRecord emoteTextSound in CliDB.EmotesTextSoundStorage.Values)
                 _emoteTextSounds[Tuple.Create((uint)emoteTextSound.EmotesTextId, emoteTextSound.RaceId, emoteTextSound.SexId, emoteTextSound.ClassId)] = emoteTextSound;

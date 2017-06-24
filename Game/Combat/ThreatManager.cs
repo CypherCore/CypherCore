@@ -359,7 +359,7 @@ namespace Game.Combat
         public void update()
         {
             if (iDirty && threatList.Count > 1)
-                threatList.OrderByDescending(p => p.getThreat());
+                threatList = threatList.OrderByDescending(p => p.getThreat()).ToList();
 
             iDirty = false;
         }
