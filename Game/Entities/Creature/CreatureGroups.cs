@@ -19,6 +19,7 @@ using Framework.Database;
 using Game.Maps;
 using System;
 using System.Collections.Generic;
+using Framework.Constants;
 
 namespace Game.Entities
 {
@@ -173,11 +174,8 @@ namespace Game.Entities
 
         public void MemberAttackStart(Creature member, Unit target)
         {
-            byte groupAI = FormationMgr.CreatureGroupMap[member.GetSpawnId()].groupAI;
+            GroupAIFlags groupAI = (GroupAIFlags)FormationMgr.CreatureGroupMap[member.GetSpawnId()].groupAI;
             if (groupAI == 0)
-                return;
-
-            if (groupAI == 1 && member != m_leader)
                 return;
 
             foreach (var pair in m_members)
@@ -197,7 +195,7 @@ namespace Game.Entities
                 if (other.GetVictim())
                     continue;
 
-                if (other.IsValidAttackTarget(target))
+                if (((other != m_leader && groupAI.HasAnyFlag(GroupAIFlags.LeaderAggro)) || (other == m_leader && groupAI.HasAnyFlag(GroupAIFlags.MemberAggro))) && other.IsValidAttackTarget(target))
                     other.GetAI().AttackStart(target);
             }
         }
@@ -230,7 +228,8 @@ namespace Game.Entities
             foreach (var pair in m_members)
             {
                 Creature member = pair.Key;
-                if (member == m_leader || !member.IsAlive() || member.GetVictim())
+                GroupAIFlags groupAI = (GroupAIFlags)FormationMgr.CreatureGroupMap[member.GetSpawnId()].groupAI;
+                if (member == m_leader || !member.IsAlive() || member.GetVictim() || !groupAI.HasAnyFlag(GroupAIFlags.Follow))
                     continue;
 
                 if (pair.Value.point_1 != 0)

@@ -335,4 +335,12 @@ namespace Framework.Constants
         SequenceBreak,    // this is a boss and the pre-requisite encounters for engaging it are not defeated yet
         Other
     }
+
+    public enum GroupAIFlags
+    {
+        None = 0,          // If any creature from group is attacked, members won't assist and won't follow
+        LeaderAggro = 0x00000001, // The member aggroes if the leader aggroes
+        MemberAggro = 0x00000002, // The leader aggroes if the member aggroes
+        Follow = 0x00000004, // The member will follow the leader
+    }
 }

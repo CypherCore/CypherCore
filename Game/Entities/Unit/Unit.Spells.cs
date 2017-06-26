@@ -4123,9 +4123,9 @@ namespace Game.Entities
             }
 
             uint spellId = aura.GetId();
-            var range = m_ownedAuras.Where(p => p.Key == spellId);
 
-            foreach (var pair in range)
+            var range = m_ownedAuras.Where(p => p.Key == spellId);
+            foreach (var pair in range.ToList())
             {
                 if (pair.Value == aura)
                 {
@@ -4235,9 +4235,9 @@ namespace Game.Entities
                 return;
 
             uint spellId = aurApp.GetBase().GetId();
-            var range = m_appliedAuras.Where(p => p.Key == spellId);
 
-            foreach (var pair in range)
+            var range = m_appliedAuras.Where(p => p.Key == spellId);
+            foreach (var pair in range.ToList())
             {
                 if (aurApp == pair.Value)
                 {
