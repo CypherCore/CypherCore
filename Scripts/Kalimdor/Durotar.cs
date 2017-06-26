@@ -94,7 +94,7 @@ namespace Scripts.Kalimdor
                 //DoMeleeAttackIfReady();
             }
 
-            const int QuestLazyPeons = 25134;
+            const int QuestLazyPeons = 37446;
             const int GoLumberpile = 175784;
             const uint SpellBuffSleep = 17743;
             const int SpellAwakenPeon = 19938;
