@@ -259,7 +259,7 @@ namespace Game.Loots
 
         void FillNotNormalLootFor(Player player, bool presentAtLooting)
         {
-            ulong plguid = player.GetGUID().GetCounter();
+            ObjectGuid plguid = player.GetGUID();
 
             var questItemList = PlayerQuestItems.LookupByKey(plguid);
             if (questItemList.Empty())
@@ -315,7 +315,7 @@ namespace Game.Loots
                 return null;
 
 
-            PlayerFFAItems[player.GetGUID().GetCounter()] = ql;
+            PlayerFFAItems[player.GetGUID()] = ql;
             return ql;
         }
 
@@ -330,8 +330,8 @@ namespace Game.Loots
             {
                 LootItem item = quest_items[i];
 
-                if (!item.is_looted && (item.AllowedForPlayer(player) || (item.follow_loot_rules && player.GetGroup() != null
-                    && ((player.GetGroup().GetLootMethod() == LootMethod.MasterLoot && player.GetGroup().GetLooterGuid() == player.GetGUID()) || player.GetGroup().GetLootMethod() != LootMethod.MasterLoot))))
+                if (!item.is_looted && (item.AllowedForPlayer(player) || (item.follow_loot_rules && player.GetGroup() && ((player.GetGroup().GetLootMethod() == LootMethod.MasterLoot
+                    && player.GetGroup().GetMasterLooterGuid() == player.GetGUID()) || player.GetGroup().GetLootMethod() != LootMethod.MasterLoot))))
                 {
                     ql.Add(new QuestItem(i));
 
@@ -351,7 +351,7 @@ namespace Game.Loots
             if (ql.Empty())
                 return null;
 
-            PlayerQuestItems[player.GetGUID().GetCounter()] = ql;
+            PlayerQuestItems[player.GetGUID()] = ql;
             return ql;
         }
 
@@ -381,7 +381,7 @@ namespace Game.Loots
             if (ql.Empty())
                 return null;
 
-            PlayerNonQuestNonFFAConditionalItems[player.GetGUID().GetCounter()] = ql;
+            PlayerNonQuestNonFFAConditionalItems[player.GetGUID()] = ql;
             return ql;
         }
 
@@ -423,7 +423,7 @@ namespace Game.Loots
                 Player player = Global.ObjAccessor.FindPlayer(PlayersLooting[i]);
                 if (player)
                 {
-                    var pql = PlayerQuestItems.LookupByKey(player.GetGUID().GetCounter());
+                    var pql = PlayerQuestItems.LookupByKey(player.GetGUID());
                     if (!pql.Empty())
                     {
                         byte j;
@@ -496,7 +496,7 @@ namespace Game.Loots
             if (lootSlot >= items.Count)
             {
                 uint questSlot = (uint)(lootSlot - items.Count);
-                var questItems = PlayerQuestItems.LookupByKey(player.GetGUID().GetCounter());
+                var questItems = PlayerQuestItems.LookupByKey(player.GetGUID());
                 if (!questItems.Empty())
                 {
                     QuestItem qitem2 = questItems.Find(p => p.index == questSlot);
@@ -514,7 +514,7 @@ namespace Game.Loots
                 is_looted = item.is_looted;
                 if (item.freeforall)
                 {
-                    var questItemList = PlayerFFAItems.LookupByKey(player.GetGUID().GetCounter());
+                    var questItemList = PlayerFFAItems.LookupByKey(player.GetGUID());
                     if (!questItemList.Empty())
                     {
                         foreach (var c in questItemList)
@@ -531,7 +531,7 @@ namespace Game.Loots
                 }
                 else if (!item.conditions.Empty())
                 {
-                    var questItemList = PlayerNonQuestNonFFAConditionalItems.LookupByKey(player.GetGUID().GetCounter());
+                    var questItemList = PlayerNonQuestNonFFAConditionalItems.LookupByKey(player.GetGUID());
                     if (!questItemList.Empty())
                     {
                         foreach (var iter in questItemList)
@@ -556,7 +556,7 @@ namespace Game.Loots
 
         public uint GetMaxSlotInLootFor(Player player)
         {
-            var questItemList = PlayerQuestItems.LookupByKey(player.GetGUID().GetCounter());
+            var questItemList = PlayerQuestItems.LookupByKey(player.GetGUID());
             return (uint)(items.Count + questItemList.Count);
         }
 
@@ -578,7 +578,7 @@ namespace Game.Loots
         public bool hasItemFor(Player player)
         {
             var lootPlayerQuestItems = GetPlayerQuestItems();
-            var q_list = lootPlayerQuestItems.LookupByKey(player.GetGUID().GetCounter());
+            var q_list = lootPlayerQuestItems.LookupByKey(player.GetGUID());
             if (!q_list.Empty())
             {
                 foreach (var qi in q_list)
@@ -590,7 +590,7 @@ namespace Game.Loots
             }
 
             var lootPlayerFFAItems = GetPlayerFFAItems();
-            var ffa_list = lootPlayerFFAItems.LookupByKey(player.GetGUID().GetCounter());
+            var ffa_list = lootPlayerFFAItems.LookupByKey(player.GetGUID());
             if (!ffa_list.Empty())
             {
                 foreach (var fi in ffa_list)
@@ -602,7 +602,7 @@ namespace Game.Loots
             }
 
             var lootPlayerNonQuestNonFFAConditionalItems = GetPlayerNonQuestNonFFAConditionalItems();
-            var conditional_list = lootPlayerNonQuestNonFFAConditionalItems.LookupByKey(player.GetGUID().GetCounter());
+            var conditional_list = lootPlayerNonQuestNonFFAConditionalItems.LookupByKey(player.GetGUID());
             if (!conditional_list.Empty())
             {
                 foreach (var ci in conditional_list)
@@ -715,16 +715,17 @@ namespace Game.Loots
 
             LootSlotType slotType = permission == PermissionTypes.Owner ? LootSlotType.Owner : LootSlotType.AllowLoot;
             var lootPlayerQuestItems = GetPlayerQuestItems();
-            var q_list = lootPlayerQuestItems.LookupByKey(viewer.GetGUID().GetCounter());
+            var q_list = lootPlayerQuestItems.LookupByKey(viewer.GetGUID());
             if (!q_list.Empty())
             {
-                foreach (var qi in q_list)
+                for (var i = 0; i < q_list.Count; ++i)
                 {
+                    QuestItem qi = q_list[i];
                     LootItem item = quest_items[qi.index];
                     if (!qi.is_looted && !item.is_looted)
                     {
                         LootItemData lootItem = new LootItemData();
-                        lootItem.LootListID = (byte)(items.Count + qi.index + 1);
+                        lootItem.LootListID = (byte)(items.Count + i + 1);
                         lootItem.Quantity = item.count;
                         lootItem.Loot = new ItemInstance(item);
 
@@ -758,7 +759,7 @@ namespace Game.Loots
             }
 
             var lootPlayerFFAItems = GetPlayerFFAItems();
-            var ffa_list = lootPlayerFFAItems.LookupByKey(viewer.GetGUID().GetCounter());
+            var ffa_list = lootPlayerFFAItems.LookupByKey(viewer.GetGUID());
             if (!ffa_list.Empty())
             {
                 foreach (var fi in ffa_list)
@@ -777,7 +778,7 @@ namespace Game.Loots
             }
 
             var lootPlayerNonQuestNonFFAConditionalItems = GetPlayerNonQuestNonFFAConditionalItems();
-            var conditional_list = lootPlayerNonQuestNonFFAConditionalItems.LookupByKey(viewer.GetGUID().GetCounter());
+            var conditional_list = lootPlayerNonQuestNonFFAConditionalItems.LookupByKey(viewer.GetGUID());
             if (!conditional_list.Empty())
             {
                 foreach (var ci in conditional_list)
@@ -852,9 +853,9 @@ namespace Game.Loots
         public ObjectGuid GetGUID() { return _GUID; }
         public void SetGUID(ObjectGuid guid) { _GUID = guid; }
 
-        public MultiMap<ulong, QuestItem> GetPlayerQuestItems() { return PlayerQuestItems; }
-        public MultiMap<ulong, QuestItem> GetPlayerFFAItems() { return PlayerFFAItems; }
-        public MultiMap<ulong, QuestItem> GetPlayerNonQuestNonFFAConditionalItems() { return PlayerNonQuestNonFFAConditionalItems; }
+        public MultiMap<ObjectGuid, QuestItem> GetPlayerQuestItems() { return PlayerQuestItems; }
+        public MultiMap<ObjectGuid, QuestItem> GetPlayerFFAItems() { return PlayerFFAItems; }
+        public MultiMap<ObjectGuid, QuestItem> GetPlayerNonQuestNonFFAConditionalItems() { return PlayerNonQuestNonFFAConditionalItems; }
 
         public List<LootItem> items = new List<LootItem>();
         public List<LootItem> quest_items = new List<LootItem>();
@@ -867,9 +868,9 @@ namespace Game.Loots
         public ObjectGuid containerID;
 
         List<ObjectGuid> PlayersLooting = new List<ObjectGuid>();
-        MultiMap<ulong, QuestItem> PlayerQuestItems = new MultiMap<ulong, QuestItem>();
-        MultiMap<ulong, QuestItem> PlayerFFAItems = new MultiMap<ulong, QuestItem>();
-        MultiMap<ulong, QuestItem> PlayerNonQuestNonFFAConditionalItems = new MultiMap<ulong, QuestItem>();
+        MultiMap<ObjectGuid, QuestItem> PlayerQuestItems = new MultiMap<ObjectGuid, QuestItem>();
+        MultiMap<ObjectGuid, QuestItem> PlayerFFAItems = new MultiMap<ObjectGuid, QuestItem>();
+        MultiMap<ObjectGuid, QuestItem> PlayerNonQuestNonFFAConditionalItems = new MultiMap<ObjectGuid, QuestItem>();
 
         // All rolls are registered here. They need to know, when the loot is not valid anymore
         LootValidatorRefManager i_LootValidatorRefManager = new LootValidatorRefManager();
