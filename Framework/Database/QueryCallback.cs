@@ -42,7 +42,7 @@ namespace Framework.Database
 
         public QueryCallback WithChainingCallback(Action<QueryCallback, SQLResult> callback)
         {
-            _callbacks.Add(new QueryCallbackData(callback));
+            _callbacks.Enqueue(new QueryCallbackData(callback));
             return this;
         }
 
@@ -53,36 +53,41 @@ namespace Framework.Database
 
         public QueryCallbackStatus InvokeIfReady()
         {
-            QueryCallbackData callback = _callbacks.First();
-            if (_result.IsCompleted)
+            QueryCallbackData callback = _callbacks.Dequeue();
+
+            bool hasNext = true;
+            while (hasNext)
             {
-                Task<SQLResult> f = _result;
-                Action<QueryCallback, SQLResult> cb = callback._result;
-                _result = null;
-                callback.Clear();
-
-                cb(this, f.Result);
-
-                _callbacks.RemoveAt(0);
-                bool hasNext = _result != null;
-                if (_callbacks.Empty())
+                if (_result != null && _result.Wait(0))
                 {
-                    Contract.Assert(!hasNext);
-                    return QueryCallbackStatus.Completed;
+                    Task<SQLResult> f = _result;
+                    Action<QueryCallback, SQLResult> cb = callback._result;
+                    _result = null;
+
+                    cb(this, f.Result);
+
+                    hasNext = _result != null;
+                    if (_callbacks.Count == 0)
+                    {
+                        Contract.Assert(!hasNext);
+                        return QueryCallbackStatus.Completed;
+                    }
+
+                    // abort chain
+                    if (!hasNext)
+                        return QueryCallbackStatus.Completed;
+
+                    callback = _callbacks.Dequeue();
                 }
-
-                // abort chain
-                if (!hasNext)
-                    return QueryCallbackStatus.Completed;
-
-                return QueryCallbackStatus.NextStep;
+                else
+                    return QueryCallbackStatus.NotReady;
             }
 
-            return QueryCallbackStatus.NotReady;
+            return QueryCallbackStatus.Completed;
         }
 
         Task<SQLResult> _result;
-        List<QueryCallbackData> _callbacks = new List<QueryCallbackData>();
+        Queue<QueryCallbackData> _callbacks = new Queue<QueryCallbackData>();
     }
 
     struct QueryCallbackData
