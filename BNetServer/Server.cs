@@ -124,31 +124,5 @@ namespace BNetServer
         }
 
         static Timer _banExpiryCheckTimer;
-
-        static void Profile(string description, int iterations, Action func)
-        {
-            //Run at highest priority to minimize fluctuations caused by other processes/threads
-            System.Diagnostics.Process.GetCurrentProcess().PriorityClass = System.Diagnostics.ProcessPriorityClass.High;
-            System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Highest;
-
-            // warm up 
-            func();
-
-            var watch = new System.Diagnostics.Stopwatch();
-
-            // clean up
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
-
-            watch.Start();
-            for (int i = 0; i < iterations; i++)
-            {
-                func();
-            }
-            watch.Stop();
-            Console.Write(description);
-            Console.WriteLine(" Time Elapsed {0} ms", watch.Elapsed.TotalMilliseconds);
-        }
     }
 }
