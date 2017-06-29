@@ -34,6 +34,7 @@ using Game.PvP;
 using Game.Scenarios;
 using Game.Scripting;
 using Game.SupportSystem;
+using Game.Services;
 
 public static class Global
 {
@@ -42,6 +43,7 @@ public static class Global
     public static ObjectManager ObjectMgr { get { return ObjectManager.Instance; } }
     public static WorldManager WorldMgr { get { return WorldManager.Instance; } }
     public static RealmManager RealmMgr { get { return RealmManager.Instance; } }
+    public static ServiceDispatcher ServiceMgr { get { return ServiceDispatcher.Instance; } }
 
     //Guild
     public static GuildManager GuildMgr { get { return GuildManager.Instance; } }

@@ -50,7 +50,7 @@
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Google.Protobuf">
@@ -191,7 +191,7 @@
     <Compile Include="Scenarios\Scenario.cs" />
     <Compile Include="Scenarios\ScenarioManager.cs" />
     <Compile Include="Services\GameUtilitiesService.cs" />
-    <Compile Include="Services\ServiceManager.cs" />
+    <Compile Include="Services\ServiceDispatcher.cs" />
     <Compile Include="Text\ChatTextBuilder.cs" />
     <Compile Include="Chat\CommandAttribute.cs" />
     <Compile Include="Chat\CommandHandler.cs" />

@@ -29,17 +29,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.BattlenetRequest, Status = SessionStatus.Authed)]
         void HandleBattlenetRequest(BattlenetRequest request)
         {
-            var handler = ServiceManager.GetHandler((NameHash)request.Method.GetServiceHash(), request.Method.GetMethodId());
-            if (handler == null)
-            {
-                Log.outError(LogFilter.Server, "No defined handler ServiceHash {0} MethodId {1} Sent by {2}", (NameHash)request.Method.GetServiceHash(), request.Method.GetMethodId(), GetPlayerInfo());
-            }
-            else
-            {
-                var status = handler.Invoke(this, new CodedInputStream(request.Data));
-                if (status != BattlenetRpcErrorCode.Ok)
-                    SendBattlenetResponse(request.Method.GetServiceHash(), request.Method.GetMethodId(), status);
-            }
+            Global.ServiceMgr.Dispatch(this, request.Method.GetServiceHash(), request.Method.Token, request.Method.GetMethodId(), new CodedInputStream(request.Data));
         }
 
         [WorldPacketHandler(ClientOpcodes.BattlenetRequestRealmListTicket, Status = SessionStatus.Authed)]
@@ -56,13 +46,13 @@ namespace Game
             SendPacket(realmListTicket);
         }        
 
-        public void SendBattlenetResponse(uint serviceHash, uint methodId, IMessage response)
+        public void SendBattlenetResponse(uint serviceHash, uint methodId, uint token, IMessage response)
         {
             Response bnetResponse = new Response();
             bnetResponse.BnetStatus = BattlenetRpcErrorCode.Ok;
             bnetResponse.Method.Type = MathFunctions.MakePair64(methodId, serviceHash);
             bnetResponse.Method.ObjectId = 1;
-            bnetResponse.Method.Token = _battlenetRequestToken++;
+            bnetResponse.Method.Token = token;
 
             if (response.CalculateSize() != 0)
                 bnetResponse.Data.WriteBytes(response.ToByteArray());
@@ -70,13 +60,13 @@ namespace Game
             SendPacket(bnetResponse);
         }
 
-        public void SendBattlenetResponse(uint serviceHash, uint methodId, BattlenetRpcErrorCode status)
+        public void SendBattlenetResponse(uint serviceHash, uint methodId, uint token,  BattlenetRpcErrorCode status)
         {
             Response bnetResponse = new Response();
             bnetResponse.BnetStatus = status;
             bnetResponse.Method.Type = MathFunctions.MakePair64(methodId, serviceHash);
             bnetResponse.Method.ObjectId = 1;
-            bnetResponse.Method.Token = _battlenetRequestToken++;
+            bnetResponse.Method.Token = token;
 
             SendPacket(bnetResponse);
         }
