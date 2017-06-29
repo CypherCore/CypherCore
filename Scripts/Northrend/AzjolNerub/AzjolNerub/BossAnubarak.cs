@@ -409,7 +409,6 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.Anubarak
         }
     }
 
-    [Script]
     class npc_anubarak_pet_template : ScriptedAI
     {
         public npc_anubarak_pet_template(Creature creature, bool isLarge) : base(creature)

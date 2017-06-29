@@ -77,34 +77,39 @@ namespace Game.Scripting
 
             foreach (var type in asm.GetTypes())
             {
-                var attributes = (ScriptAttribute[])type.GetCustomAttributes<ScriptAttribute>(true);
+                var attributes = (ScriptAttribute[])type.GetCustomAttributes<ScriptAttribute>();
                 if (attributes.Empty())
                 {
                     var baseType = type.BaseType;
                     while (baseType != null)
                     {
                         if (baseType == typeof(ScriptObject))
+                        {
                             Log.outWarn(LogFilter.Server, "Script {0} does not have ScriptAttribute", type.Name);
+                            continue;
+                        }
 
                         baseType = baseType.BaseType;
                     }
                 }
-
-                var constructors = type.GetConstructors();
-                if (constructors.Length == 0)
+                else
                 {
-                    Log.outError(LogFilter.Scripts, "Type: {0} contains no Public Constructors. Can't load script.", type.Name);
-                    break;
-                }
-
-                foreach (var attribute in attributes)
-                {
-                    if (!constructors.Any(p => p.GetParameters().Length == attribute.Args.Length))
+                    var constructors = type.GetConstructors();
+                    if (constructors.Length == 0)
                     {
-                        Log.outError(LogFilter.Scripts, "Type: {0} has ScriptAttribute that does not match paramter count: {1} Can't load script.", type.Name, attribute.Args.Length);
+                        Log.outError(LogFilter.Scripts, "Type: {0} contains no Public Constructors. Can't load script.", type.Name);
                         continue;
                     }
-                    Activator.CreateInstance(type, attribute.Args);
+
+                    foreach (var attribute in attributes)
+                    {
+                        if (!constructors.Any(p => p.GetParameters().Length == attribute.Args.Length))
+                        {
+                            Log.outError(LogFilter.Scripts, "Type: {0} has ScriptAttribute that does not match paramter count: {1} Can't load script.", type.Name, attribute.Args.Length);
+                            continue;
+                        }
+                        Activator.CreateInstance(type, attribute.Args);
+                    }
                 }
             }
 

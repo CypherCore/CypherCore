@@ -74,8 +74,8 @@ namespace Scripts.Spells.Items
         public const uint StrengthOfTheTaunkaHero = 71561;  // +700 Strength
 
         //Defibrillate
-        public const uint GoblinJumperCablesFail = 8338;
-        public const uint GoblinJumperCablesXlFail = 23055;
+        public const int GoblinJumperCablesFail = 8338;
+        public const int GoblinJumperCablesXlFail = 23055;
 
         //Desperatedefense
         public const uint DesperateRage = 33898;
@@ -1032,15 +1032,15 @@ namespace Scripts.Spells.Items
     // 8342  - Defibrillate (Goblin Jumper Cables) have 33% chance on success
     // 22999 - Defibrillate (Goblin Jumper Cables XL) have 50% chance on success
     // 54732 - Defibrillate (Gnomish Army Knife) have 67% chance on success
-    [Script("spell_item_goblin_jumper_cables", 33u, SpellIds.GoblinJumperCablesFail)]
-    [Script("spell_item_goblin_jumper_cables_xl", 50u, SpellIds.GoblinJumperCablesXlFail)]
-    [Script("spell_item_gnomish_army_knife", 67u)]
+    [Script("spell_item_goblin_jumper_cables", 33, SpellIds.GoblinJumperCablesFail)]
+    [Script("spell_item_goblin_jumper_cables_xl", 50, SpellIds.GoblinJumperCablesXlFail)]
+    [Script("spell_item_gnomish_army_knife", 67, 0)]
     class spell_item_defibrillate : SpellScriptLoader
     {
-        public spell_item_defibrillate(string name, uint chance, uint failSpell = 0) : base(name)
+        public spell_item_defibrillate(string name, int chance, int failSpell) : base(name)
         {
-            _chance = chance;
-            _failSpell = failSpell;
+            _chance = (uint)chance;
+            _failSpell = (uint)failSpell;
         }
 
         class spell_item_defibrillate_SpellScript : SpellScript
