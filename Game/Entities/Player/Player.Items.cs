@@ -3397,7 +3397,7 @@ namespace Game.Entities
                 uint etime = (uint)(time - m_logintime + (30 * 3600));
                 int eslot = (int)slot - InventorySlots.BuyBackStart;
 
-                SetGuidValue(PlayerFields.InvSlotHead + (eslot * 4), pItem.GetGUID());
+                SetGuidValue(PlayerFields.InvSlotHead + ((int)slot * 4), pItem.GetGUID());
                 ItemTemplate proto = pItem.GetTemplate();
                 if (proto != null)
                     SetUInt32Value(PlayerFields.BuyBackPrice1 + eslot, proto.GetSellPrice() * pItem.GetCount());
