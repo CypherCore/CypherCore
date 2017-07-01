@@ -470,6 +470,7 @@ namespace Game.Misc
                 }
             }
 
+            packet.Info.QuestID = quest.Id;
             packet.Info.QuestType = (int)quest.Type;
             packet.Info.QuestLevel = quest.Level;
             packet.Info.QuestPackageID = quest.PackageID;
