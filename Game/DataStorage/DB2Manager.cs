@@ -121,7 +121,6 @@ namespace Game.DataStorage
 
                 _powersByClass[power.ClassID][power.PowerType] = index;
             }
-            CliDB.ChrClassesXPowerTypesStorage.Clear();
 
             foreach (ChrSpecializationRecord chrSpec in CliDB.ChrSpecializationStorage.Values)
             {
@@ -391,31 +390,45 @@ namespace Game.DataStorage
 
         void ClearNotUsedTables()
         {
-            CliDB.AreaGroupMemberStorage.Clear();
-            CliDB.CharSectionsStorage.Clear();
-            CliDB.ChrClassesXPowerTypesStorage.Clear();
-            CliDB.EmotesTextSoundStorage.Clear();
-            CliDB.HeirloomStorage.Clear();
-            CliDB.ItemBonusStorage.Clear();
-            CliDB.ItemBonusTreeNodeStorage.Clear();
-            CliDB.ItemChildEquipmentStorage.Clear();
-            CliDB.ItemModifiedAppearanceStorage.Clear();
-            CliDB.ItemSetSpellStorage.Clear();
-            CliDB.ItemSpecOverrideStorage.Clear();
-            CliDB.ItemXBonusTreeStorage.Clear();
-            CliDB.CurvePointStorage.Clear();
-            CliDB.MountTypeXCapabilityStorage.Clear();
-            CliDB.NameGenStorage.Clear();
-            CliDB.NamesProfanityStorage.Clear();
-            CliDB.NamesReservedStorage.Clear();
-            CliDB.NamesReservedLocaleStorage.Clear();
-            CliDB.PhaseXPhaseGroupStorage.Clear();
-            CliDB.QuestPackageItemStorage.Clear();
-            CliDB.SpecializationSpellsStorage.Clear();
-            CliDB.SpellPowerDifficultyStorage.Clear();
-            CliDB.SpellPowerStorage.Clear();
-            CliDB.ToyStorage.Clear();
-            CliDB.WMOAreaTableStorage.Clear();
+            CliDB.AreaGroupMemberStorage = null;
+            CliDB.ArtifactPowerLinkStorage = null;
+            CliDB.ArtifactPowerRankStorage = null;
+            CliDB.CharSectionsStorage = null;
+            CliDB.ChrClassesXPowerTypesStorage = null;
+            CliDB.CurvePointStorage = null;
+            CliDB.EmotesTextSoundStorage = null;
+            CliDB.GlyphBindableSpellStorage = null;
+            CliDB.GlyphRequiredSpecStorage = null;
+            CliDB.HeirloomStorage = null;
+            CliDB.ItemBonusStorage = null;
+            CliDB.ItemBonusListLevelDeltaStorage = null;
+            CliDB.ItemBonusTreeNodeStorage = null;
+            CliDB.ItemClassStorage = null;
+            CliDB.ItemChildEquipmentStorage = null;
+            CliDB.ItemCurrencyCostStorage = null;
+            CliDB.ItemSetSpellStorage = null;
+            CliDB.ItemSpecOverrideStorage = null;
+            CliDB.ItemXBonusTreeStorage = null;
+            CliDB.MapDifficultyStorage = null;
+            CliDB.MountTypeXCapabilityStorage = null;
+            CliDB.MountXDisplayStorage = null;
+            CliDB.NameGenStorage = null;
+            CliDB.NamesProfanityStorage = null;
+            CliDB.NamesReservedStorage = null;
+            CliDB.NamesReservedLocaleStorage = null;
+            CliDB.PhaseXPhaseGroupStorage = null;
+            CliDB.PowerTypeStorage = null;
+            CliDB.PvpRewardStorage = null;
+            CliDB.QuestPackageItemStorage = null;
+            CliDB.RewardPackXItemStorage = null;
+            CliDB.RulesetItemUpgradeStorage = null;
+            CliDB.SpecializationSpellsStorage = null;
+            CliDB.SpellPowerDifficultyStorage = null;
+            CliDB.SpellPowerStorage = null;
+            CliDB.SpellProcsPerMinuteModStorage = null;
+            CliDB.ToyStorage = null;
+            CliDB.WMOAreaTableStorage = null;
+            CliDB.WorldMapAreaStorage = null;
         }
 
         public IDB2Storage GetStorage(uint type)
@@ -1274,9 +1287,9 @@ namespace Game.DataStorage
 
         public Dictionary<uint, Dictionary<uint, MapDifficultyRecord>> GetMapDifficulties() { return _mapDifficulties; }
 
-        public void AddDB2<T>(DB6Storage<T> store) where T : new()
+        public void AddDB2<T>(uint tableHash, DB6Storage<T> store) where T : new()
         {
-            _storage[store.tableHash] = store;
+            _storage[tableHash] = store;
         }
 
         Dictionary<uint, IDB2Storage> _storage = new Dictionary<uint, IDB2Storage>();

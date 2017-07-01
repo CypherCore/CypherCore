@@ -353,7 +353,5 @@ namespace Game.DataStorage
         {
             Remove(id);
         }
-
-        public uint tableHash;
     }
 }

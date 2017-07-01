@@ -140,6 +140,7 @@ namespace Game.DataStorage
                 storage.LoadData(index, fieldsInfo, preparedStatement, preparedStatementLocale);
             }
 
+            Global.DB2Mgr.AddDB2(_header.TableHash, storage);
             CliDB.LoadedFileCount++;
             return storage;
         }
