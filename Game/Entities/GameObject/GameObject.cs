@@ -2009,10 +2009,10 @@ namespace Game.Entities
 
         public void SetParentRotation(Quaternion rotation)
         {
-            SetFloatValue(GameObjectFields.ParentRotation + 0, (float)rotation.X);
-            SetFloatValue(GameObjectFields.ParentRotation + 1, (float)rotation.Y);
-            SetFloatValue(GameObjectFields.ParentRotation + 2, (float)rotation.Z);
-            SetFloatValue(GameObjectFields.ParentRotation + 3, (float)rotation.W);
+            SetFloatValue(GameObjectFields.ParentRotation + 0, rotation.X);
+            SetFloatValue(GameObjectFields.ParentRotation + 1, rotation.Y);
+            SetFloatValue(GameObjectFields.ParentRotation + 2, rotation.Z);
+            SetFloatValue(GameObjectFields.ParentRotation + 3, rotation.W);
         }
 
         public void SetWorldRotationAngles(float z_rot, float y_rot, float x_rot)

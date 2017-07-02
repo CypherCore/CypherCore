@@ -796,11 +796,11 @@ namespace Framework.GameMath
         {
             get
             {
-                return this[(row - 1) * 3 + (column - 1)];
+                return this[row * 3 + column];
             }
             set
             {
-                this[(row - 1) * 3 + (column - 1)] = value;
+                this[row * 3 + column] = value;
             }
         }
         #endregion

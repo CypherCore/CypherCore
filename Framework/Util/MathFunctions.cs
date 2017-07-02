@@ -58,37 +58,9 @@ public static class MathFunctions
     /// Returns the clamped value.
     /// result = (tolerance > Abs(value-calmpedValue)) ? calmpedValue : value;
     /// </returns>
-    public static double Clamp(double value, double calmpedValue, double tolerance)
-    {
-        return (tolerance > Math.Abs(value - calmpedValue)) ? calmpedValue : value;
-    }
-    /// <summary>
-    /// Clamp a <paramref name="value"/> to <paramref name="calmpedValue"/> if it is withon the <paramref name="tolerance"/> range.
-    /// </summary>
-    /// <param name="value">The value to clamp.</param>
-    /// <param name="calmpedValue">The clamped value.</param>
-    /// <param name="tolerance">The tolerance value.</param>
-    /// <returns>
-    /// Returns the clamped value.
-    /// result = (tolerance > Abs(value-calmpedValue)) ? calmpedValue : value;
-    /// </returns>
     public static float Clamp(float value, float calmpedValue, float tolerance)
     {
         return (tolerance > Math.Abs(value - calmpedValue)) ? calmpedValue : value;
-    }
-    /// <summary>
-    /// Clamp a <paramref name="value"/> to <paramref name="calmpedValue"/> using the default tolerance value.
-    /// </summary>
-    /// <param name="value">The value to clamp.</param>
-    /// <param name="calmpedValue">The clamped value.</param>
-    /// <returns>
-    /// Returns the clamped value.
-    /// result = (Epsilon > Abs(value-calmpedValue)) ? calmpedValue : value;
-    /// </returns>
-    /// <remarks><see cref="MathFunctions.EpsilonD"/> is used for tolerance.</remarks>
-    public static double Clamp(double value, double calmpedValue)
-    {
-        return (Epsilon > Math.Abs(value - calmpedValue)) ? calmpedValue : value;
     }
     /// <summary>
     /// Clamp a <paramref name="value"/> to <paramref name="calmpedValue"/> using the default tolerance value.

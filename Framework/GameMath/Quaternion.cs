@@ -44,10 +44,10 @@ namespace Framework.GameMath
     public struct Quaternion : ICloneable
     {
         #region Private Fields
-        private double _w;
-        private double _x;
-        private double _y;
-        private double _z;
+        private float _w;
+        private float _x;
+        private float _y;
+        private float _z;
         #endregion
 
         #region Constructors
@@ -58,7 +58,7 @@ namespace Framework.GameMath
         /// <param name="y">The quaternions's Y coordinate.</param>
         /// <param name="z">The quaternions's Z coordinate.</param>
         /// /// <param name="w">The quaternions's W coordinate.</param>
-        public Quaternion(double x, double y, double z, double w)
+        public Quaternion(float x, float y, float z, float w)
         {
             _w = w;
             _x = x;
@@ -83,7 +83,7 @@ namespace Framework.GameMath
             // Find the index of the largest diagonal component
             // These ? operations hopefully compile to conditional
             // move instructions instead of branches.
-            int i = (rot[1, 1] > rot[0, 0]) ? 1 : 0;
+            int i = (rot[1, 1] > rot[0, 0]) ? 2 : 1;
             i = (rot[2, 2] > rot[i, i]) ? 2 : i;
 
             // Find the indices of the other elements
@@ -162,7 +162,7 @@ namespace Framework.GameMath
         /// Gets or sets the x-coordinate of this quaternion.
         /// </summery>
         /// <value>The x-coordinate of this quaternion.</value>
-        public double X
+        public float X
         {
             get { return _x; }
             set { _x = value; }
@@ -171,7 +171,7 @@ namespace Framework.GameMath
         /// Gets or sets the y-coordinate of this quaternion.
         /// </summery>
         /// <value>The y-coordinate of this quaternion.</value>
-        public double Y
+        public float Y
         {
             get { return _y; }
             set { _y = value; }
@@ -180,7 +180,7 @@ namespace Framework.GameMath
         /// Gets or sets the z-coordinate of this quaternion.
         /// </summery>
         /// <value>The z-coordinate of this quaternion.</value>
-        public double Z
+        public float Z
         {
             get { return _z; }
             set { _z = value; }
@@ -189,7 +189,7 @@ namespace Framework.GameMath
         /// Gets or sets the w-coordinate of this quaternion.
         /// </summery>
         /// <value>The w-coordinate of this quaternion.</value>
-        public double W
+        public float W
         {
             get { return _w; }
             set { _w = value; }
@@ -199,18 +199,18 @@ namespace Framework.GameMath
         /// Gets the the modulus of the quaternion.
         /// </summary>
         /// <value>A double-precision floating-point number.</value>
-        public double Modulus
+        public float Modulus
         {
             get
             {
-                return System.Math.Sqrt(_w * _w + _x * _x + _y * _y + _z * _z);
+                return (float)System.Math.Sqrt(_w * _w + _x * _x + _y * _y + _z * _z);
             }
         }
         /// <summary>
         /// Gets the the squared modulus of the quaternion.
         /// </summary>
         /// <value>A double-precision floating-point number.</value>
-        public double ModulusSquared
+        public float ModulusSquared
         {
             get
             {
@@ -266,10 +266,10 @@ namespace Framework.GameMath
             if (m.Success)
             {
                 return new Quaternion(
-                    double.Parse(m.Result("${x}")),
-                    double.Parse(m.Result("${y}")),
-                    double.Parse(m.Result("${z}")),
-                    double.Parse(m.Result("${w}"))
+                    float.Parse(m.Result("${x}")),
+                    float.Parse(m.Result("${y}")),
+                    float.Parse(m.Result("${z}")),
+                    float.Parse(m.Result("${w}"))
                     );
             }
             else
@@ -294,10 +294,10 @@ namespace Framework.GameMath
             if (m.Success)
             {
                 result = new Quaternion(
-                    double.Parse(m.Result("${x}")),
-                    double.Parse(m.Result("${y}")),
-                    double.Parse(m.Result("${z}")),
-                    double.Parse(m.Result("${w}"))
+                    float.Parse(m.Result("${x}")),
+                    float.Parse(m.Result("${y}")),
+                    float.Parse(m.Result("${z}")),
+                    float.Parse(m.Result("${w}"))
                     );
 
                 return true;
@@ -392,7 +392,7 @@ namespace Framework.GameMath
         /// <param name="quaternion">A <see cref="Quaternion"/> instance.</param>
         /// <param name="scalar">A scalar.</param>
         /// <returns>A <see cref="Quaternion"/> instance to hold the result.</returns>
-        public static Quaternion Multiply(Quaternion quaternion, double scalar)
+        public static Quaternion Multiply(Quaternion quaternion, float scalar)
         {
             Quaternion result = new Quaternion(quaternion);
             result.X *= scalar;
@@ -408,7 +408,7 @@ namespace Framework.GameMath
         /// <param name="quaternion">A <see cref="Quaternion"/> instance.</param>
         /// <param name="scalar">A scalar.</param>
         /// <param name="result">A <see cref="Quaternion"/> instance to hold the result.</param>
-        public static void Multiply(Quaternion quaternion, double scalar, ref Quaternion result)
+        public static void Multiply(Quaternion quaternion, float scalar, ref Quaternion result)
         {
             result.X = quaternion.X * scalar;
             result.Y = quaternion.Y * scalar;
@@ -422,7 +422,7 @@ namespace Framework.GameMath
         /// <param name="quaternion">A <see cref="Quaternion"/> instance.</param>
         /// <param name="scalar">A scalar.</param>
         /// <returns>A <see cref="Quaternion"/> instance to hold the result.</returns>
-        public static Quaternion Divide(Quaternion quaternion, double scalar)
+        public static Quaternion Divide(Quaternion quaternion, float scalar)
         {
             if (scalar == 0)
             {
@@ -443,7 +443,7 @@ namespace Framework.GameMath
         /// <param name="quaternion">A <see cref="Quaternion"/> instance.</param>
         /// <param name="scalar">A scalar.</param>
         /// <param name="result">A <see cref="Quaternion"/> instance to hold the result.</param>
-        public static void Divide(Quaternion quaternion, double scalar, ref Quaternion result)
+        public static void Divide(Quaternion quaternion, float scalar, ref Quaternion result)
         {
             if (scalar == 0)
             {
@@ -502,12 +502,12 @@ namespace Framework.GameMath
 
             if (Math.Abs(quaternion.W) < 1.0)
             {
-                double angle = System.Math.Acos(quaternion.W);
-                double sin = System.Math.Sin(angle);
+                float angle = (float)System.Math.Acos(quaternion.W);
+                float sin = (float)System.Math.Sin(angle);
 
                 if (Math.Abs(sin) >= 0)
                 {
-                    double coeff = angle / sin;
+                    float coeff = angle / sin;
                     result.X = coeff * quaternion.X;
                     result.Y = coeff * quaternion.Y;
                     result.Z = coeff * quaternion.Z;
@@ -531,12 +531,12 @@ namespace Framework.GameMath
         {
             Quaternion result = new Quaternion(0, 0, 0, 0);
 
-            double angle = System.Math.Sqrt(quaternion.X * quaternion.X + quaternion.Y * quaternion.Y + quaternion.Z * quaternion.Z);
-            double sin = System.Math.Sin(angle);
+            float angle = (float)System.Math.Sqrt(quaternion.X * quaternion.X + quaternion.Y * quaternion.Y + quaternion.Z * quaternion.Z);
+            float sin = (float)System.Math.Sin(angle);
 
             if (Math.Abs(sin) > 0)
             {
-                double coeff = angle / sin;
+                float coeff = angle / sin;
                 result.X = coeff * quaternion.X;
                 result.Y = coeff * quaternion.Y;
                 result.Z = coeff * quaternion.Z;
@@ -558,10 +558,10 @@ namespace Framework.GameMath
         /// </summary>
         public void Inverse()
         {
-            double norm = ModulusSquared;
+            float norm = ModulusSquared;
             if (norm > 0)
             {
-                double invNorm = 1.0 / norm;
+                float invNorm = 1.0f / norm;
                 _w *= invNorm;
                 _x *= -invNorm;
                 _y *= -invNorm;
@@ -577,7 +577,7 @@ namespace Framework.GameMath
         /// </summary>
         public void Normalize()
         {
-            double norm = Modulus;
+            float norm = Modulus;
             if (norm == 0)
             {
                 throw new DivideByZeroException("Trying to normalize a quaternion with modulus of zero.");
@@ -595,7 +595,7 @@ namespace Framework.GameMath
         /// <remarks>
         /// The quaternion values that are close to zero within the given tolerance are set to zero.
         /// </remarks>
-        public void ClampZero(double tolerance)
+        public void ClampZero(float tolerance)
         {
             _x = MathFunctions.Clamp(_x, 0, tolerance);
             _y = MathFunctions.Clamp(_y, 0, tolerance);
@@ -712,7 +712,7 @@ namespace Framework.GameMath
         /// <param name="quaternion">A <see cref="Quaternion"/> instance.</param>
         /// <param name="scalar">A scalar.</param>
         /// <returns>A <see cref="Quaternion"/> instance to hold the result.</returns>
-        public static Quaternion operator *(Quaternion quaternion, double scalar)
+        public static Quaternion operator *(Quaternion quaternion, float scalar)
         {
             return Quaternion.Multiply(quaternion, scalar);
         }
@@ -722,7 +722,7 @@ namespace Framework.GameMath
         /// <param name="quaternion">A <see cref="Quaternion"/> instance.</param>
         /// <param name="scalar">A scalar.</param>
         /// <returns>A <see cref="Quaternion"/> instance to hold the result.</returns>
-        public static Quaternion operator *(double scalar, Quaternion quaternion)
+        public static Quaternion operator *(float scalar, Quaternion quaternion)
         {
             return Quaternion.Multiply(quaternion, scalar);
         }
@@ -732,7 +732,7 @@ namespace Framework.GameMath
         /// <param name="quaternion">A <see cref="Quaternion"/> instance.</param>
         /// <param name="scalar">A scalar.</param>
         /// <returns>A <see cref="Quaternion"/> instance to hold the result.</returns>
-        public static Quaternion operator /(Quaternion quaternion, double scalar)
+        public static Quaternion operator /(Quaternion quaternion, float scalar)
         {
             return Quaternion.Divide(quaternion, scalar);
         }
@@ -742,9 +742,9 @@ namespace Framework.GameMath
         /// <param name="quaternion">A <see cref="Quaternion"/> instance.</param>
         /// <param name="scalar">A scalar.</param>
         /// <returns>A <see cref="Quaternion"/> instance to hold the result.</returns>
-        public static Quaternion operator /(double scalar, Quaternion quaternion)
+        public static Quaternion operator /(float scalar, Quaternion quaternion)
         {
-            return Quaternion.Multiply(quaternion, (1.0 / scalar));
+            return Quaternion.Multiply(quaternion, (1.0f / scalar));
         }
         #endregion
 
@@ -752,7 +752,7 @@ namespace Framework.GameMath
         /// <summary>
         /// Indexer ( [w, x, y, z] ).
         /// </summary>
-        public double this[int index]
+        public float this[int index]
         {
             get
             {
