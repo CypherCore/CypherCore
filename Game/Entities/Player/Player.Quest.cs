@@ -1021,7 +1021,7 @@ namespace Game.Entities
             // (to prevent rewarding this quest another time while rewards were already given out)
             _SaveQuestStatus(null);
 
-            SendQuestReward(quest, questGiver.ToCreature(), XP, !announce);
+            SendQuestReward(quest, questGiver?.ToCreature(), XP, !announce);
 
             // cast spells after mark quest complete (some spells have quest completed state requirements in spell_area data)
             if (quest.RewardSpell > 0)
