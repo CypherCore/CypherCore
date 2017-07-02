@@ -4340,6 +4340,11 @@ namespace Game
                     }
                 }
 
+                // Items that have no specializations set can be used by everyone
+                foreach (var specs in itemTemplate.Specializations)
+                    if (specs.Count == 0)
+                        specs.SetAll(true);
+
                 ++sparseCount;
                 ItemTemplateStorage.Add(sparse.Id, itemTemplate);
             }

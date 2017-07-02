@@ -195,8 +195,11 @@ namespace Game.Entities
             maxDamage = (float)Math.Floor(avgDamage * (GetStatScalingFactor() * 0.5f + 1.0f) + 0.5f);
         }
 
-        public bool IsUsableByLootSpecialization(Player player)
+        public bool IsUsableByLootSpecialization(Player player, bool alwaysAllowBoundToAccount)
         {
+            if (GetFlags().HasAnyFlag(ItemFlags.IsBoundToAccount) && alwaysAllowBoundToAccount)
+                return true;
+
             uint spec = player.GetUInt32Value(PlayerFields.LootSpecId);
             if (spec == 0)
                 spec = player.GetUInt32Value(PlayerFields.CurrentSpecId);

@@ -806,7 +806,7 @@ namespace Game.Entities
             switch (questPackageItem.FilterType)
             {
                 case QuestPackageFilter.LootSpecialization:
-                    return rewardProto.IsUsableByLootSpecialization(this);
+                    return rewardProto.IsUsableByLootSpecialization(this, true);
                 case QuestPackageFilter.Class:
                     return rewardProto.ItemSpecClassMask == 0 || (rewardProto.ItemSpecClassMask & getClassMask()) != 0;
                 case QuestPackageFilter.Everyone:
