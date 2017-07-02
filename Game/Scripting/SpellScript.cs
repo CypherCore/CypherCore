@@ -1124,6 +1124,7 @@ namespace Game.Scripting
                 case AuraScriptHookType.EffectAbsorb:
                 case AuraScriptHookType.EffectSplit:
                 case AuraScriptHookType.PrepareProc:
+                case AuraScriptHookType.Proc:
                 case AuraScriptHookType.EffectProc:
                     return m_defaultActionPrevented;
                 default:

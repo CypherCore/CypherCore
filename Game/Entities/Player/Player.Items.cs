@@ -4232,7 +4232,7 @@ namespace Game.Entities
                 if (spellproto == null)
                     continue;
 
-                if (spellproto.HasAura(GetMap().GetDifficultyID(), AuraType.ModXpPct) || !GetSession().GetCollectionMgr().CanApplyHeirloomXpBonus(item.GetEntry(), getLevel())
+                if (spellproto.HasAura(GetMap().GetDifficultyID(), AuraType.ModXpPct) && !GetSession().GetCollectionMgr().CanApplyHeirloomXpBonus(item.GetEntry(), getLevel())
                     && Global.DB2Mgr.GetHeirloomByItemId(item.GetEntry()) != null)
                     continue;
 

@@ -1484,7 +1484,7 @@ namespace Game.Entities
 
             float value = GetTotalPercentageModValue(modGroup) + GetRatingBonusValue(cr);
             // Modify crit from weapon skill and maximized defense skill of same level victim difference
-            value += GetMaxSkillValueForLevel() - GetMaxSkillValueForLevel() * 0.04f;
+            value += (GetMaxSkillValueForLevel() - GetMaxSkillValueForLevel()) * 0.04f;
 
             if (WorldConfig.GetBoolValue(WorldCfg.StatsLimitsEnable))
                 value = value > WorldConfig.GetFloatValue(WorldCfg.StatsLimitsCrit) ? WorldConfig.GetFloatValue(WorldCfg.StatsLimitsCrit) : value;

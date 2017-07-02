@@ -39,7 +39,7 @@
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>..\Build\x64\Release\</OutputPath>
@@ -48,7 +48,7 @@
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Google.Protobuf, Version=3.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -181,7 +181,7 @@
     <Compile Include="GameMath\Matrix2.cs" />
     <Compile Include="GameMath\Matrix3.cs" />
     <Compile Include="GameMath\Matrix4.cs" />
-    <Compile Include="GameMath\QuaternionD.cs" />
+    <Compile Include="GameMath\Quaternion.cs" />
     <Compile Include="GameMath\Ray.cs" />
     <Compile Include="Networking\SSLSocket.cs" />
     <Compile Include="Constants\ServiceHash.cs" />

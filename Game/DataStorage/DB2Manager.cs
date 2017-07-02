@@ -145,7 +145,7 @@ namespace Game.DataStorage
             foreach (CurvePointRecord curvePoint in CliDB.CurvePointStorage.Values)
             {
                 if (CliDB.CurveStorage.ContainsKey(curvePoint.CurveID))
-                    _curvePoints[curvePoint.CurveID].Add(curvePoint);
+                    _curvePoints.Add(curvePoint.CurveID, curvePoint);
             }
 
             foreach (var key in _curvePoints.Keys.ToList())

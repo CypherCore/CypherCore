@@ -167,8 +167,8 @@ namespace Game.Entities
             if (xp != 0)
             {
                 // 4.2.2. Apply auras modifying rewarded XP (SPELL_AURA_MOD_XP_PCT and SPELL_AURA_MOD_XP_FROM_CREATURE_TYPE).
-                xp *= (uint)player.GetTotalAuraMultiplier(AuraType.ModXpPct);
-                xp *= (uint)player.GetTotalAuraMultiplierByMiscValue(AuraType.ModXpFromCreatureType, (int)_victim.GetCreatureType());
+                xp = (uint)(xp * player.GetTotalAuraMultiplier(AuraType.ModXpPct));
+                xp = (uint)(xp * player.GetTotalAuraMultiplierByMiscValue(AuraType.ModXpFromCreatureType, (int)_victim.GetCreatureType()));
 
                 // 4.2.3. Give XP to player.
                 player.GiveXP(xp, _victim, _groupRate);
