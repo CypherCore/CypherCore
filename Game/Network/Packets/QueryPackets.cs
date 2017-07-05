@@ -499,7 +499,6 @@ namespace Game.Network.Packets
         {
             _worldPacket.WritePackedGuid(UnitGUID);
             _worldPacket.WriteBit(Allow);
-            _worldPacket.FlushBits();
 
             if (Allow)
             {
@@ -515,13 +514,15 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt32(Timestamp);
                 _worldPacket.WriteString(Name);
             }
+
+            _worldPacket.FlushBits();
         }
 
         public ObjectGuid UnitGUID;
         public bool Allow;
 
         public bool HasDeclined;
-        public DeclinedName DeclinedNames;
+        public DeclinedName DeclinedNames = new DeclinedName();
         public uint Timestamp;
         public string Name = "";
     }
