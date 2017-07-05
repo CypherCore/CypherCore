@@ -658,7 +658,7 @@ namespace Game.Entities
                 }
             }
 
-            //if (GameObject)
+            //if (HasGameObject)
             //{
             //    *data << uint32(WorldEffectID);
 
@@ -671,6 +671,7 @@ namespace Game.Entities
             //{
             //    data.WriteBit(ReplaceActive);
             //    data.WriteBit(HasReplaceObjectt);
+            //    data.FlushBits();
             //    if (HasReplaceObject)
             //        *data << ObjectGuid(ReplaceObject);
             //}
@@ -679,10 +680,12 @@ namespace Game.Entities
             //{
             //    data.WriteBit(HasLocalScriptData);
             //    data.WriteBit(HasPetBattleFullUpdate);
+            //    data.FlushBits();
 
             //    if (HasLocalScriptData)
             //    {
             //        data.WriteBits(Data.length(), 7);
+            //        data.FlushBits();
             //        data.WriteString(Data);
             //    }
 
@@ -698,6 +701,7 @@ namespace Game.Entities
             //            *data << uint8(Players[i].InputFlags);
 
             //            data.WriteBits(Players[i].Pets.size(), 2);
+            //            data.FlushBits();
             //            for (std::size_t j = 0; j < Players[i].Pets.size(); ++j)
             //            {
             //                *data << ObjectGuid(Players[i].Pets[j].BattlePetGUID);
@@ -743,6 +747,7 @@ namespace Game.Entities
             //                }
 
             //                data.WriteBits(Players[i].Pets[j].CustomName.length(), 7);
+            //                data.FlushBits();
             //                data.WriteString(Players[i].Pets[j].CustomName);
             //            }
             //        }
@@ -777,6 +782,7 @@ namespace Game.Entities
             //        *data << ObjectGuid(InitialWildPetGUID);
             //        data.WriteBit(IsPVP);
             //        data.WriteBit(CanAwardXP);
+            //        data.FlushBits();
             //    }
             //}
 
@@ -784,6 +790,7 @@ namespace Game.Entities
             //{
             //    data.WriteBit(HasSceneInstanceIDs);
             //    data.WriteBit(HasRuneState);
+            //    data.FlushBits();
             //    if (HasSceneInstanceIDs)
             //    {
             //        *data << uint32(SceneInstanceIDs.size());
@@ -845,11 +852,11 @@ namespace Game.Entities
                 {
                     fieldMask.SetBit(index);
 
-                    DynamicUpdateMask arrayMask = new DynamicUpdateMask((uint)(!values.Empty() ? values.Keys.Max() + 1 : 0));
+                    DynamicUpdateMask arrayMask = new DynamicUpdateMask((uint)(values.Empty() ? 0 : values.Keys.Max() + 1));
 
                     arrayMask.EncodeDynamicFieldChangeType(_dynamicChangesMask[index], updateType);
                     if (updateType == UpdateType.Values && _dynamicChangesMask[index] == DynamicFieldChangeType.ValueAndSizeChanged)
-                        arrayMask.ValueCount = values.Keys.Max() + 1;
+                        arrayMask.ValueCount = values.Empty() ? 0 : values.Keys.Max() + 1;
 
                     foreach (var pair in values)
                     {
