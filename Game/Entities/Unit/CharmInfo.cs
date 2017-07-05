@@ -60,6 +60,7 @@ namespace Game.Entities
 
         public void InitPetActionBar()
         {
+
             // the first 3 SpellOrActions are attack, follow and stay
             for (byte i = 0; i < SharedConst.ActionBarIndexPetSpellStart - SharedConst.ActionBarIndexStart; ++i)
                 SetActionBar((byte)(SharedConst.ActionBarIndexStart + i), (uint)CommandStates.Attack - i, ActiveStates.Command);
@@ -247,10 +248,11 @@ namespace Game.Entities
             if (tokens.Length != (SharedConst.ActionBarIndexEnd - SharedConst.ActionBarIndexStart) * 2)
                 return;                                             // non critical, will reset to default
 
-            for (byte index = SharedConst.ActionBarIndexStart; index < SharedConst.ActionBarIndexEnd; ++index)
+            byte index = 0;
+            for (byte i = 0; i < tokens.Length && index < SharedConst.ActionBarIndexEnd; ++i, ++index)
             {
-                ActiveStates type = tokens[index++].ToEnum<ActiveStates>();
-                uint action = uint.Parse(tokens[index]);
+                ActiveStates type = tokens[i++].ToEnum<ActiveStates>();
+                uint action = uint.Parse(tokens[i]);
 
                 PetActionBar[index].SetActionAndType(action, type);
 
