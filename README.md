@@ -1,8 +1,8 @@
 ## CypherCore [![Build Status](https://travis-ci.org/CypherCore/CypherCore.svg?branch=master)](https://travis-ci.org/CypherCore/CypherCore) [![Build status](https://ci.appveyor.com/api/projects/status/ge4hjp1h1d28q25j?svg=true)](https://ci.appveyor.com/project/hondacrx/cyphercore)
 
-CypherCore is an open source server project for World of Warcraft written in C# (.NET Core).
+CypherCore is an open source server project for World of Warcraft written in C#.
 
-The current support game version is: 7.2.5.24367
+The current support game version is: 7.2.5.24461
 
 Credit for the great work goes to TrinityCore Team and hondacrx for the porting.
 
