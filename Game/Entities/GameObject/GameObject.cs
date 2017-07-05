@@ -291,7 +291,8 @@ namespace Game.Entities
                     SetGoAnimProgress(animprogress);
                     break;
                 case GameObjectTypes.FishingNode:
-                    SetGoAnimProgress(0);
+                    SetUInt32Value(GameObjectFields.Level, 1);
+                    SetGoAnimProgress(255);
                     break;
                 case GameObjectTypes.Trap:
                     if (goinfo.Trap.stealthed != 0)
