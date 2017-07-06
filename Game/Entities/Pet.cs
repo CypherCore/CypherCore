@@ -858,7 +858,7 @@ namespace Game.Entities
                     uint effectIndex = result.Read<byte>(3);
                     if (effectIndex < SpellConst.MaxEffects)
                     {
-                        casterGuid.SetRawValue(result.Read<string>(0).ToByteArray());
+                        casterGuid.SetRawValue(result.Read<byte[]>(0));
                         if (casterGuid.IsEmpty())
                             casterGuid = GetGUID();
 
@@ -881,7 +881,7 @@ namespace Game.Entities
                 do
                 {
                     // NULL guid stored - pet is the caster of the spell - see Pet._SaveAuras
-                    casterGuid.SetRawValue(result.Read<string>(0).ToByteArray());
+                    casterGuid.SetRawValue(result.Read<byte[]>(0));
                     if (casterGuid.IsEmpty())
                         casterGuid = GetGUID();
 
