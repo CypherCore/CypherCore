@@ -561,7 +561,7 @@ namespace Game.Entities
         {
             i_source = src;
             i_message = msg;
-            i_distSq = dist;
+            i_distSq = dist * dist;
         }
 
         bool IsInRangeHelper(WorldObject obj)
