@@ -125,7 +125,7 @@ namespace Game.Entities
             }
 
             DailyQuestsReset dailyQuestsReset = new DailyQuestsReset();
-            dailyQuestsReset.Count = GetDynamicValues(PlayerDynamicFields.DailyQuests).Count;
+            dailyQuestsReset.Count = GetDynamicValues(PlayerDynamicFields.DailyQuests).Length;
             SendPacket(dailyQuestsReset);
 
             ClearDynamicValue(PlayerDynamicFields.DailyQuests);

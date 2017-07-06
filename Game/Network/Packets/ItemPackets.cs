@@ -730,7 +730,7 @@ namespace Game.Network.Packets
             RandomPropertiesSeed = item.GetItemSuffixFactor();
             RandomPropertiesID = (uint)item.GetItemRandomPropertyId();
             var bonusListIds = item.GetDynamicValues(ItemDynamicFields.BonusListIds);
-            if (bonusListIds.Count != 0)
+            if (!bonusListIds.Empty())
             {
                 ItemBonus.HasValue = true;
                 ItemBonus.Value.BonusListIDs.AddRange(bonusListIds);

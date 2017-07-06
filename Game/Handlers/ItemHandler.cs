@@ -359,7 +359,7 @@ namespace Game
                     packet.Item = item->GetGUID();
                     packet.Subcode = ??;
                     packet.Delay = ??;
-                    SendPacket(packet.Write());*/
+                    SendPacket(packet);*/
 
                     Log.outInfo(LogFilter.Network, "STORAGE: Unable to read item");
                     _player.SendEquipError(msg, item);
@@ -791,7 +791,7 @@ namespace Game
                     gems[i] = gem;
                     gemData[i].ItemId = gem.GetEntry();
                     gemData[i].Context = (byte)gem.GetUInt32Value(ItemFields.Context);
-                    for (ushort b = 0; b < gem.GetDynamicValues(ItemDynamicFields.BonusListIds).Count && b < 16; ++b)
+                    for (ushort b = 0; b < gem.GetDynamicValues(ItemDynamicFields.BonusListIds).Length && b < 16; ++b)
                         gemData[i].BonusListIDs[b] = (ushort)gem.GetDynamicValue(ItemDynamicFields.BonusListIds, b);
 
                     gemProperties[i] = CliDB.GemPropertiesStorage.LookupByKey(gem.GetTemplate().GetGemProperties());

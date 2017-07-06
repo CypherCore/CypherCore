@@ -1233,20 +1233,20 @@ namespace Game.Entities
                     ByteBuffer arrayValuesBuffer = new ByteBuffer();
                     fieldMask.SetBit(index);
 
-                    DynamicUpdateMask arrayValuesMask = new DynamicUpdateMask((uint)values.Count);
+                    DynamicUpdateMask arrayValuesMask = new DynamicUpdateMask((uint)values.Length);
                     arrayValuesMask.EncodeDynamicFieldChangeType(_dynamicChangesMask[index], updateType);
 
                     if (updateType == UpdateType.Values && _dynamicChangesMask[index] == DynamicFieldChangeType.ValueAndSizeChanged)
-                        arrayValuesMask.ValueCount = values.Count;
+                        arrayValuesMask.ValueCount = values.Length;
 
                     if (index != (int)ItemDynamicFields.Modifiers)
                     {
-                        foreach (var pair in values)
+                        for (var v = 0; v < values.Length; ++v)
                         {
-                            if (updateType != UpdateType.Values || _dynamicChangesArrayMask[index].Get(pair.Key))
+                            if (updateType != UpdateType.Values || _dynamicChangesArrayMask[index].Get(v))
                             {
-                                arrayValuesMask.SetBit(pair.Key);
-                                arrayValuesBuffer.WriteUInt32(pair.Value);
+                                arrayValuesMask.SetBit(v);
+                                arrayValuesBuffer.WriteUInt32(values[v]);
                             }
                         }
                     }
@@ -1262,12 +1262,12 @@ namespace Game.Entities
 
                         // in case of ITEM_DYNAMIC_FIELD_MODIFIERS it is ITEM_FIELD_MODIFIERS_MASK that controls index of each value, not updatemask
                         // so we just have to write this starting from 0 index
-                        foreach (var pair in values)
+                        for (var v = 0; v < values.Length; ++v)
                         {
-                            if (pair.Value != 0)
+                            if (values[v] != 0)
                             {
                                 arrayValuesMask.SetBit(m++);
-                                arrayValuesBuffer.WriteUInt32(pair.Value);
+                                arrayValuesBuffer.WriteUInt32(values[v]);
                             }
                         }
 

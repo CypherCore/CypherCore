@@ -249,8 +249,8 @@ namespace Game.Entities
                 item.AddBonuses(bonusId);
 
             // Get heirloom offset to update only one part of dynamic field
-            var heirloomsFields = player.GetDynamicKeyAndValues(PlayerDynamicFields.Heirlooms);
-            ushort offset = (ushort)heirloomsFields.FirstOrDefault(p => p.Value == itemId).Key;
+            var fields = player.GetDynamicValues(PlayerDynamicFields.Heirlooms);
+            ushort offset = (ushort)Array.IndexOf(fields, itemId);
 
             player.SetDynamicValue(PlayerDynamicFields.HeirloomsFlags, offset, (uint)flags);
             data.flags = flags;
@@ -292,8 +292,8 @@ namespace Game.Entities
 
                 if (newItemId != 0)
                 {
-                    var heirloomsFields = player.GetDynamicKeyAndValues(PlayerDynamicFields.Heirlooms);
-                    ushort offset = (ushort)heirloomsFields.FirstOrDefault(p => p.Value == item.GetEntry()).Key;
+                    var heirloomFields = player.GetDynamicValues(PlayerDynamicFields.Heirlooms);
+                    ushort offset = (ushort)Array.IndexOf(heirloomFields, item.GetEntry());
 
                     player.SetDynamicValue(PlayerDynamicFields.Heirlooms, offset, newItemId);
                     player.SetDynamicValue(PlayerDynamicFields.HeirloomsFlags, offset, 0);

@@ -96,12 +96,12 @@ namespace Game.Entities
 
             if (_dynamicValuesCount != 0)
             {
-                _dynamicValues = new Dictionary<int, uint>[_dynamicValuesCount];
+                _dynamicValues = new uint[_dynamicValuesCount][];
                 _dynamicChangesArrayMask = new BitArray[_dynamicValuesCount];
 
                 for (var i = 0; i < _dynamicValuesCount; ++i)
                 {
-                    _dynamicValues[i] = new Dictionary<int, uint>();
+                    _dynamicValues[i] = new uint[0];
                     _dynamicChangesArrayMask[i] = new BitArray(0);
                     _dynamicChangesMask[i] = DynamicFieldChangeType.Unchanged;
                 }
@@ -213,11 +213,6 @@ namespace Game.Entities
             if (unit)
                 if (unit.GetVictim())
                     flags |= UpdateFlag.HasTarget;
-
-            if (target.m_clientGUIDs.Contains(GetGUID()))
-            {
-
-            }
 
             WorldPacket buffer = new WorldPacket();
             buffer.WriteUInt8(updateType);
@@ -852,18 +847,18 @@ namespace Game.Entities
                 {
                     fieldMask.SetBit(index);
 
-                    DynamicUpdateMask arrayMask = new DynamicUpdateMask((uint)(values.Empty() ? 0 : values.Keys.Max() + 1));
+                    DynamicUpdateMask arrayMask = new DynamicUpdateMask((uint)values.Length);
 
                     arrayMask.EncodeDynamicFieldChangeType(_dynamicChangesMask[index], updateType);
                     if (updateType == UpdateType.Values && _dynamicChangesMask[index] == DynamicFieldChangeType.ValueAndSizeChanged)
-                        arrayMask.ValueCount = values.Empty() ? 0 : values.Keys.Max() + 1;
+                        arrayMask.ValueCount = values.Length;
 
-                    foreach (var pair in values)
+                    for (var v = 0; v < values.Length; ++v)
                     {
-                        if (updateType != UpdateType.Values || _dynamicChangesArrayMask[index].Get(pair.Key))
+                        if (updateType != UpdateType.Values || _dynamicChangesArrayMask[index].Get(v))
                         {
-                            arrayMask.SetBit(pair.Key);
-                            valueBuffer.WriteUInt32(pair.Value);
+                            arrayMask.SetBit(v);
+                            valueBuffer.WriteUInt32(values[v]);
                         }
                     }
 
@@ -1422,22 +1417,16 @@ namespace Game.Entities
                 RemoveFlag64(index, flag);
         }
 
-        public Dictionary<int, uint> GetDynamicKeyAndValues(object index)
+        public uint[] GetDynamicValues(object index)
         {
             Contract.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, false));
             return _dynamicValues[(int)index];
         }
 
-        public ICollection<uint> GetDynamicValues(object index)
-        {
-            Contract.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, false));
-            return _dynamicValues[(int)index].Values;
-        }
-
         public uint GetDynamicValue(object index, ushort offset)
         {
             Contract.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, false));
-            if (!_dynamicValues[(int)index].ContainsKey(offset))
+            if (offset >= _dynamicValues[(int)index].Length)
                 return 0;
 
             return _dynamicValues[(int)index][offset];
@@ -1447,7 +1436,7 @@ namespace Game.Entities
         {
             Contract.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, true));
 
-            SetDynamicValue(index, (byte)_dynamicValues[(int)index].Count, value);
+            SetDynamicValue(index, (byte)_dynamicValues[(int)index].Length, value);
         }
 
         public void RemoveDynamicValue(object index, uint value)
@@ -1455,14 +1444,13 @@ namespace Game.Entities
             Contract.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, false));
 
             // TODO: Research if this is blizzlike to just set value to 0
-            var values = _dynamicValues[(int)index];
-            foreach (var pair in values.ToList())
+            for (var i = 0; i < _dynamicValues[(int)index].Length; ++i)
             {
-                if (pair.Value == value)
+                if (_dynamicValues[(int)index][i] == value)
                 {
-                    values[pair.Key] = 0;
+                    _dynamicValues[(int)index][i] = 0;
                     _dynamicChangesMask[(int)index] = DynamicFieldChangeType.ValueChanged;
-                    _dynamicChangesArrayMask[(int)index].Set(pair.Key, true);
+                    _dynamicChangesArrayMask[(int)index].Set(i, true);
 
                     AddToObjectUpdateIfNeeded();
                 }
@@ -1475,7 +1463,7 @@ namespace Game.Entities
 
             if (!_dynamicValues[(int)index].Empty())
             {
-                _dynamicValues[(int)index].Clear();
+                _dynamicValues[(int)index] = new uint[0];
                 _dynamicChangesMask[(int)index] = DynamicFieldChangeType.ValueAndSizeChanged;
                 _dynamicChangesArrayMask[(int)index].SetAll(false);
 
@@ -1488,19 +1476,18 @@ namespace Game.Entities
             Contract.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, true));
 
             DynamicFieldChangeType changeType = DynamicFieldChangeType.ValueChanged;
-            var values = _dynamicValues[(int)index];
-            if (!values.ContainsKey(offset))
+            if (_dynamicValues[(int)index].Length <= offset)
             {
-                values.Add(offset, 0u);
+                Array.Resize(ref _dynamicValues[(int)index], offset + 1);
                 changeType = DynamicFieldChangeType.ValueAndSizeChanged;
             }
 
             if (_dynamicChangesArrayMask[(int)index].Count <= offset)
                 _dynamicChangesArrayMask[(int)index].Length = offset + 1;
 
-            if (values[offset] != value || changeType == DynamicFieldChangeType.ValueAndSizeChanged)
+            if (_dynamicValues[(int)index][offset] != value || changeType == DynamicFieldChangeType.ValueAndSizeChanged)
             {
-                values[offset] = value;
+                _dynamicValues[(int)index][offset] = value;
                 _dynamicChangesMask[(int)index] = changeType;
                 _dynamicChangesArrayMask[(int)index].Set(offset, true);
 
@@ -1510,7 +1497,7 @@ namespace Game.Entities
 
         public List<T> GetDynamicStructuredValues<T>(object index)
         {
-            var values = _dynamicValues[(int)index].Values;
+            var values = _dynamicValues[(int)index];
             return new List<T>(values.DeserializeObjects<T>());
         }
 
@@ -1531,8 +1518,7 @@ namespace Game.Entities
         public void AddDynamicStructuredValue<T>(object index, T value)
         {
             int BlockCount = Marshal.SizeOf<T>() / sizeof(uint);
-            var values = _dynamicValues[(int)index];
-            ushort offset = (ushort)(values.Count / BlockCount);
+            ushort offset = (ushort)(_dynamicValues[(int)index].Length / BlockCount);
             SetDynamicValue(index, (ushort)((offset + 1) * BlockCount - 1), 0); // reserve space
             for (ushort i = 0; i < BlockCount; ++i)
                 SetDynamicValue(index, (ushort)(offset * BlockCount + i), Extensions.SerializeObject(value)[i]);
@@ -3139,7 +3125,7 @@ namespace Game.Entities
         protected UpdateFlag m_updateFlag { get; set; }
 
         protected Hashtable UpdateData;
-        protected Dictionary<int, uint>[] _dynamicValues;
+        protected uint[][] _dynamicValues;
         protected BitArray _changesMask { get; set; }
         protected Dictionary<int, DynamicFieldChangeType> _dynamicChangesMask = new Dictionary<int, DynamicFieldChangeType>();
         protected BitArray[] _dynamicChangesArrayMask;
