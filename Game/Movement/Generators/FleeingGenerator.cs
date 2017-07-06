@@ -132,7 +132,7 @@ namespace Game.Movement
             if (owner.IsTypeId(TypeId.Player))
             {
                 owner.RemoveFlag(UnitFields.Flags, UnitFlags.Fleeing);
-                owner.ClearUnitState(UnitState.Fleeing | UnitState.Fleeing);
+                owner.ClearUnitState(UnitState.Fleeing | UnitState.FleeingMove);
                 owner.StopMoving();
             }
             else

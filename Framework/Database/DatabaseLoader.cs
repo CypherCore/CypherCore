@@ -90,6 +90,8 @@ namespace Framework.Database
 
                 _update.Add(() =>
                 {
+                    //Hack used to allow big querys
+                    database.Apply("SET GLOBAL max_allowed_packet=1073741824;");
                     if (!database.GetUpdater().Update())
                     {
                         Log.outError(LogFilter.ServerLoading, "Could not update the {0} database, see log for details.", name);

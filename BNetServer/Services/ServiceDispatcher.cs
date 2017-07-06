@@ -43,7 +43,6 @@ namespace BNetServer.Services
 
         public void Dispatch(Session session, uint serviceHash, uint token, uint methodId, CodedInputStream stream)
         {
-            Log.outInfo(LogFilter.Server, "ServiceHash = {0}, methodId = {1}", serviceHash, methodId);
             var action = _dispatchers.LookupByKey(serviceHash);
             if (action != null)
                 action(session, serviceHash, token, methodId, stream);

@@ -49,10 +49,10 @@ namespace Game.DataStorage
             ArtifactPowerLinkStorage = DB6Reader.Read<ArtifactPowerLinkRecord>("ArtifactPowerLink.db2", DB6Metas.ArtifactPowerLinkMeta, HotfixStatements.SEL_ARTIFACT_POWER_LINK);
             ArtifactPowerPickerStorage = DB6Reader.Read<ArtifactPowerPickerRecord>("ArtifactPowerPicker.db2", DB6Metas.ArtifactPowerPickerMeta, HotfixStatements.SEL_ARTIFACT_POWER_PICKER);
             ArtifactPowerRankStorage = DB6Reader.Read<ArtifactPowerRankRecord>("ArtifactPowerRank.db2", DB6Metas.ArtifactPowerRankMeta, HotfixStatements.SEL_ARTIFACT_POWER_RANK);
-            ArtifactQuestXPStorage = DB6Reader.Read<ArtifactQuestXPRecord>("ArtifactQuestXP.db2", DB6Metas.ArtifactQuestXPMeta, HotfixStatements.SEL_ARTIFACT_QUEST_XP);
+            //ArtifactQuestXPStorage = DB6Reader.Read<ArtifactQuestXPRecord>("ArtifactQuestXP.db2", DB6Metas.ArtifactQuestXPMeta, HotfixStatements.SEL_ARTIFACT_QUEST_XP);
             AuctionHouseStorage = DB6Reader.Read<AuctionHouseRecord>("AuctionHouse.db2", DB6Metas.AuctionHouseMeta, HotfixStatements.SEL_AUCTION_HOUSE, HotfixStatements.SEL_AUCTION_HOUSE_LOCALE);
             BankBagSlotPricesStorage = DB6Reader.Read<BankBagSlotPricesRecord>("BankBagSlotPrices.db2", DB6Metas.BankBagSlotPricesMeta, HotfixStatements.SEL_BANK_BAG_SLOT_PRICES);
-            BannedAddOnsStorage = DB6Reader.Read<BannedAddOnsRecord>("BannedAddOns.db2", DB6Metas.BannedAddOnsMeta, HotfixStatements.SEL_BANNED_ADDONS);
+            //BannedAddOnsStorage = DB6Reader.Read<BannedAddOnsRecord>("BannedAddOns.db2", DB6Metas.BannedAddOnsMeta, HotfixStatements.SEL_BANNED_ADDONS);
             BarberShopStyleStorage = DB6Reader.Read<BarberShopStyleRecord>("BarberShopStyle.db2", DB6Metas.BarberShopStyleMeta, HotfixStatements.SEL_BARBER_SHOP_STYLE, HotfixStatements.SEL_BARBER_SHOP_STYLE_LOCALE);
             BattlePetBreedQualityStorage = DB6Reader.Read<BattlePetBreedQualityRecord>("BattlePetBreedQuality.db2", DB6Metas.BattlePetBreedQualityMeta, HotfixStatements.SEL_BATTLE_PET_BREED_QUALITY);
             BattlePetBreedStateStorage = DB6Reader.Read<BattlePetBreedStateRecord>("BattlePetBreedState.db2", DB6Metas.BattlePetBreedStateMeta, HotfixStatements.SEL_BATTLE_PET_BREED_STATE);
@@ -122,7 +122,7 @@ namespace Game.DataStorage
             ItemArmorQualityStorage = DB6Reader.Read<ItemArmorQualityRecord>("ItemArmorQuality.db2", DB6Metas.ItemArmorQualityMeta, HotfixStatements.SEL_ITEM_ARMOR_QUALITY);
             ItemArmorShieldStorage = DB6Reader.Read<ItemArmorShieldRecord>("ItemArmorShield.db2", DB6Metas.ItemArmorShieldMeta, HotfixStatements.SEL_ITEM_ARMOR_SHIELD);
             ItemArmorTotalStorage = DB6Reader.Read<ItemArmorTotalRecord>("ItemArmorTotal.db2", DB6Metas.ItemArmorTotalMeta, HotfixStatements.SEL_ITEM_ARMOR_TOTAL);
-            ItemBagFamilyStorage = DB6Reader.Read<ItemBagFamilyRecord>("ItemBagFamily.db2", DB6Metas.ItemBagFamilyMeta, HotfixStatements.SEL_ITEM_BAG_FAMILY, HotfixStatements.SEL_ITEM_BAG_FAMILY_LOCALE);
+            //ItemBagFamilyStorage = DB6Reader.Read<ItemBagFamilyRecord>("ItemBagFamily.db2", DB6Metas.ItemBagFamilyMeta, HotfixStatements.SEL_ITEM_BAG_FAMILY, HotfixStatements.SEL_ITEM_BAG_FAMILY_LOCALE);
             ItemBonusStorage = DB6Reader.Read<ItemBonusRecord>("ItemBonus.db2", DB6Metas.ItemBonusMeta, HotfixStatements.SEL_ITEM_BONUS);
             ItemBonusListLevelDeltaStorage = DB6Reader.Read<ItemBonusListLevelDeltaRecord>("ItemBonusListLevelDelta.db2", DB6Metas.ItemBonusListLevelDeltaMeta, HotfixStatements.SEL_ITEM_BONUS_LIST_LEVEL_DELTA);
             ItemBonusTreeNodeStorage = DB6Reader.Read<ItemBonusTreeNodeRecord>("ItemBonusTreeNode.db2", DB6Metas.ItemBonusTreeNodeMeta, HotfixStatements.SEL_ITEM_BONUS_TREE_NODE);
@@ -151,7 +151,7 @@ namespace Game.DataStorage
             ItemSpecOverrideStorage = DB6Reader.Read<ItemSpecOverrideRecord>("ItemSpecOverride.db2", DB6Metas.ItemSpecOverrideMeta, HotfixStatements.SEL_ITEM_SPEC_OVERRIDE);
             ItemUpgradeStorage = DB6Reader.Read<ItemUpgradeRecord>("ItemUpgrade.db2", DB6Metas.ItemUpgradeMeta, HotfixStatements.SEL_ITEM_UPGRADE);
             ItemXBonusTreeStorage = DB6Reader.Read<ItemXBonusTreeRecord>("ItemXBonusTree.db2", DB6Metas.ItemXBonusTreeMeta, HotfixStatements.SEL_ITEM_X_BONUS_TREE);
-            KeyChainStorage = DB6Reader.Read<KeyChainRecord>("KeyChain.db2", DB6Metas.KeyChainMeta, HotfixStatements.SEL_KEY_CHAIN);
+            //KeyChainStorage = DB6Reader.Read<KeyChainRecord>("KeyChain.db2", DB6Metas.KeyChainMeta, HotfixStatements.SEL_KEY_CHAIN);
             LfgDungeonsStorage = DB6Reader.Read<LfgDungeonsRecord>("LfgDungeons.db2", DB6Metas.LfgDungeonsMeta, HotfixStatements.SEL_LFG_DUNGEONS, HotfixStatements.SEL_LFG_DUNGEONS_LOCALE);
             LightStorage = DB6Reader.Read<LightRecord>("Light.db2", DB6Metas.LightMeta, HotfixStatements.SEL_LIGHT);
             LiquidTypeStorage = DB6Reader.Read<LiquidTypeRecord>("LiquidType.db2", DB6Metas.LiquidTypeMeta, HotfixStatements.SEL_LIQUID_TYPE, HotfixStatements.SEL_LIQUID_TYPE_LOCALE);
@@ -191,7 +191,7 @@ namespace Game.DataStorage
             ScalingStatDistributionStorage = DB6Reader.Read<ScalingStatDistributionRecord>("ScalingStatDistribution.db2", DB6Metas.ScalingStatDistributionMeta, HotfixStatements.SEL_SCALING_STAT_DISTRIBUTION);
             ScenarioStorage = DB6Reader.Read<ScenarioRecord>("Scenario.db2", DB6Metas.ScenarioMeta, HotfixStatements.SEL_SCENARIO, HotfixStatements.SEL_SCENARIO_LOCALE);
             ScenarioStepStorage = DB6Reader.Read<ScenarioStepRecord>("ScenarioStep.db2", DB6Metas.ScenarioStepMeta, HotfixStatements.SEL_SCENARIO_STEP, HotfixStatements.SEL_SCENARIO_STEP_LOCALE);
-            SceneScriptStorage = DB6Reader.Read<SceneScriptRecord>("SceneScript.db2", DB6Metas.SceneScriptMeta, HotfixStatements.SEL_SCENE_SCRIPT);
+            //SceneScriptStorage = DB6Reader.Read<SceneScriptRecord>("SceneScript.db2", DB6Metas.SceneScriptMeta, HotfixStatements.SEL_SCENE_SCRIPT);
             SceneScriptPackageStorage = DB6Reader.Read<SceneScriptPackageRecord>("SceneScriptPackage.db2", DB6Metas.SceneScriptPackageMeta, HotfixStatements.SEL_SCENE_SCRIPT_PACKAGE);
             SkillLineStorage = DB6Reader.Read<SkillLineRecord>("SkillLine.db2", DB6Metas.SkillLineMeta, HotfixStatements.SEL_SKILL_LINE, HotfixStatements.SEL_SKILL_LINE_LOCALE);
             SkillLineAbilityStorage = DB6Reader.Read<SkillLineAbilityRecord>("SkillLineAbility.db2", DB6Metas.SkillLineAbilityMeta, HotfixStatements.SEL_SKILL_LINE_ABILITY);
@@ -232,7 +232,7 @@ namespace Game.DataStorage
             SpellTotemsStorage = DB6Reader.Read<SpellTotemsRecord>("SpellTotems.db2", DB6Metas.SpellTotemsMeta, HotfixStatements.SEL_SPELL_TOTEMS);
             SpellXSpellVisualStorage = DB6Reader.Read<SpellXSpellVisualRecord>("SpellXSpellVisual.db2", DB6Metas.SpellXSpellVisualMeta, HotfixStatements.SEL_SPELL_X_SPELL_VISUAL);
             SummonPropertiesStorage = DB6Reader.Read<SummonPropertiesRecord>("SummonProperties.db2", DB6Metas.SummonPropertiesMeta, HotfixStatements.SEL_SUMMON_PROPERTIES);
-            TactKeyStorage = DB6Reader.Read<TactKeyRecord>("TactKey.db2", DB6Metas.TactKeyMeta, HotfixStatements.SEL_TACT_KEY);
+            //TactKeyStorage = DB6Reader.Read<TactKeyRecord>("TactKey.db2", DB6Metas.TactKeyMeta, HotfixStatements.SEL_TACT_KEY);
             TalentStorage = DB6Reader.Read<TalentRecord>("Talent.db2", DB6Metas.TalentMeta, HotfixStatements.SEL_TALENT, HotfixStatements.SEL_TALENT_LOCALE);
             TaxiNodesStorage = DB6Reader.Read<TaxiNodesRecord>("TaxiNodes.db2", DB6Metas.TaxiNodesMeta, HotfixStatements.SEL_TAXI_NODES, HotfixStatements.SEL_TAXI_NODES_LOCALE);
             TaxiPathStorage = DB6Reader.Read<TaxiPathRecord>("TaxiPath.db2", DB6Metas.TaxiPathMeta, HotfixStatements.SEL_TAXI_PATH);
@@ -273,7 +273,7 @@ namespace Game.DataStorage
             foreach (var entry in TaxiPathNodeStorage.Values)
                 TaxiPathNodesByPath[entry.PathID][entry.NodeIndex] = entry;
 
-            TaxiPathNodeStorage.Clear();
+            TaxiPathNodeStorage = null;
 
             foreach (var node in TaxiNodesStorage.Values)
             {
@@ -367,10 +367,10 @@ namespace Game.DataStorage
         public static DB6Storage<ArtifactPowerLinkRecord> ArtifactPowerLinkStorage;
         public static DB6Storage<ArtifactPowerPickerRecord> ArtifactPowerPickerStorage;
         public static DB6Storage<ArtifactPowerRankRecord> ArtifactPowerRankStorage;
-        public static DB6Storage<ArtifactQuestXPRecord> ArtifactQuestXPStorage;
+        //public static DB6Storage<ArtifactQuestXPRecord> ArtifactQuestXPStorage;
         public static DB6Storage<AuctionHouseRecord> AuctionHouseStorage;
         public static DB6Storage<BankBagSlotPricesRecord> BankBagSlotPricesStorage;
-        public static DB6Storage<BannedAddOnsRecord> BannedAddOnsStorage;
+        //public static DB6Storage<BannedAddOnsRecord> BannedAddOnsStorage;
         public static DB6Storage<BarberShopStyleRecord> BarberShopStyleStorage;
         public static DB6Storage<BattlePetBreedQualityRecord> BattlePetBreedQualityStorage;
         public static DB6Storage<BattlePetBreedStateRecord> BattlePetBreedStateStorage;
@@ -440,7 +440,7 @@ namespace Game.DataStorage
         public static DB6Storage<ItemArmorQualityRecord> ItemArmorQualityStorage;
         public static DB6Storage<ItemArmorShieldRecord> ItemArmorShieldStorage;
         public static DB6Storage<ItemArmorTotalRecord> ItemArmorTotalStorage;
-        public static DB6Storage<ItemBagFamilyRecord> ItemBagFamilyStorage;
+        //public static DB6Storage<ItemBagFamilyRecord> ItemBagFamilyStorage;
         public static DB6Storage<ItemBonusRecord> ItemBonusStorage;
         public static DB6Storage<ItemBonusListLevelDeltaRecord> ItemBonusListLevelDeltaStorage;
         public static DB6Storage<ItemBonusTreeNodeRecord> ItemBonusTreeNodeStorage;
@@ -469,7 +469,7 @@ namespace Game.DataStorage
         public static DB6Storage<ItemSpecOverrideRecord> ItemSpecOverrideStorage;
         public static DB6Storage<ItemUpgradeRecord> ItemUpgradeStorage;
         public static DB6Storage<ItemXBonusTreeRecord> ItemXBonusTreeStorage;
-        public static DB6Storage<KeyChainRecord> KeyChainStorage;
+        //public static DB6Storage<KeyChainRecord> KeyChainStorage;
         public static DB6Storage<LfgDungeonsRecord> LfgDungeonsStorage;
         public static DB6Storage<LightRecord> LightStorage;
         public static DB6Storage<LiquidTypeRecord> LiquidTypeStorage;
@@ -509,7 +509,7 @@ namespace Game.DataStorage
         public static DB6Storage<ScalingStatDistributionRecord> ScalingStatDistributionStorage;
         public static DB6Storage<ScenarioRecord> ScenarioStorage;
         public static DB6Storage<ScenarioStepRecord> ScenarioStepStorage;
-        public static DB6Storage<SceneScriptRecord> SceneScriptStorage;
+        //public static DB6Storage<SceneScriptRecord> SceneScriptStorage;
         public static DB6Storage<SceneScriptPackageRecord> SceneScriptPackageStorage;
         public static DB6Storage<SkillLineRecord> SkillLineStorage;
         public static DB6Storage<SkillLineAbilityRecord> SkillLineAbilityStorage;
@@ -550,7 +550,7 @@ namespace Game.DataStorage
         public static DB6Storage<SpellTotemsRecord> SpellTotemsStorage;
         public static DB6Storage<SpellXSpellVisualRecord> SpellXSpellVisualStorage;
         public static DB6Storage<SummonPropertiesRecord> SummonPropertiesStorage;
-        public static DB6Storage<TactKeyRecord> TactKeyStorage;
+        //public static DB6Storage<TactKeyRecord> TactKeyStorage;
         public static DB6Storage<TalentRecord> TalentStorage;
         public static DB6Storage<TaxiNodesRecord> TaxiNodesStorage;
         public static DB6Storage<TaxiPathRecord> TaxiPathStorage;

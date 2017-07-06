@@ -956,7 +956,7 @@ namespace Game.Spells
                         {
                             Creature targetCreature = unitTarget.ToCreature();
                             if (targetCreature != null)
-                                if (targetCreature.hasLootRecipient() && targetCreature.isTappedBy(caster.ToPlayer()))
+                                if (targetCreature.hasLootRecipient() && !targetCreature.isTappedBy(caster.ToPlayer()))
                                     return SpellCastResult.CantCastOnTapped;
                         }
 

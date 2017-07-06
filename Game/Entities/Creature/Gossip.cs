@@ -470,6 +470,7 @@ namespace Game.Misc
                 }
             }
 
+            packet.Info.QuestID = quest.Id;
             packet.Info.QuestType = (int)quest.Type;
             packet.Info.QuestLevel = quest.Level;
             packet.Info.QuestPackageID = quest.PackageID;
@@ -682,7 +683,10 @@ namespace Game.Misc
             packet.QuestFlags[0] = (uint)quest.Flags;
             packet.QuestFlags[1] = (uint)quest.FlagsEx;
             packet.SuggestPartyMembers = quest.SuggestedPlayers;
-            packet.StatusFlags = 0xDF; // Unk, send common value
+
+            // incomplete: FD
+            // incomplete quest with item objective but item objective is complete DD
+            packet.StatusFlags = canComplete ? 0xFF : 0xFD;
 
             packet.MoneyToGet = 0;
             foreach (QuestObjective obj in quest.Objectives)

@@ -178,9 +178,9 @@ namespace Game.Entities
             SetFaction(owner.getFaction());
             SetUInt32Value(UnitFields.CreatedBySpell, summonSpellId);
 
+            float px, py, pz;
             if (IsCritter())
             {
-                float px, py, pz;
                 owner.GetClosePoint(out px, out py, out pz, GetObjectSize(), SharedConst.PetFollowDist, GetFollowAngle());
                 Relocate(px, py, pz, owner.GetOrientation());
 
@@ -233,6 +233,15 @@ namespace Game.Entities
             SetUInt32Value(UnitFields.PetExperience, result.Read<uint>(5));
 
             SynchronizeLevelWithOwner();
+
+            // Set pet's position after setting level, its size depends on it
+            owner.GetClosePoint(out px, out py, out pz, GetObjectSize(), SharedConst.PetFollowDist, GetFollowAngle());
+            Relocate(px, py, pz, owner.GetOrientation());
+            if (!IsPositionValid())
+            {
+                Log.outError(LogFilter.Pet, "Pet ({0}, entry {1}) not loaded. Suggested coordinates isn't valid (X: {2} Y: {3})", GetGUID().ToString(), GetEntry(), GetPositionX(), GetPositionY());
+                return false;
+            }
 
             SetReactState((ReactStates)result.Read<byte>(6));
             SetCanModifyStats(true);

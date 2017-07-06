@@ -25,10 +25,144 @@ using System.Collections.Generic;
 
 namespace Game
 {
-    public partial class WorldSession
+    class GameUtilitiesService : ServiceBase
     {
-        [BnetService(NameHash.GameUtilitiesService, 1)]
-        BattlenetRpcErrorCode HandleProcessClientRequest(ClientRequest request)
+        public GameUtilitiesService(WorldSession session, uint serviceHash) : base(session, serviceHash) { }
+
+        public override void CallServerMethod(uint token, uint methodId, CodedInputStream stream)
+        {
+            switch (methodId)
+            {
+                case 1:
+                    {
+                        ClientRequest request = new ClientRequest();
+                        request.MergeFrom(stream);
+
+
+                        ClientResponse response = new ClientResponse();
+                        BattlenetRpcErrorCode status = HandleProcessClientRequest(request, response);
+                        Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method GameUtilitiesService.ProcessClientRequest(bgs.protocol.game_utilities.v1.ClientRequest: {1}) returned bgs.protocol.game_utilities.v1.ClientResponse: {2} status: {3}.",
+                          GetCallerInfo(), request.ToString(), response.ToString(), status);
+                        if (status == 0)
+                            SendResponse(1, token, response);
+                        else
+                            SendResponse(1, token, status);
+                        break;
+                    }
+                case 2:
+                    {
+                        PresenceChannelCreatedRequest request = new PresenceChannelCreatedRequest();
+                        request.MergeFrom(stream);
+
+
+                        Bgs.Protocol.NoData response = new Bgs.Protocol.NoData();
+                        BattlenetRpcErrorCode status = HandlePresenceChannelCreated(request, response);
+                        Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method GameUtilitiesService.PresenceChannelCreated(bgs.protocol.game_utilities.v1.PresenceChannelCreatedRequest: {1}) returned bgs.protocol.NoData: {2} status: {3}.",
+                          GetCallerInfo(), request.ToString(), response.ToString(), status);
+                        if (status == 0)
+                            SendResponse(2, token, response);
+                        else
+                            SendResponse(2, token, status);
+                        break;
+                    }
+                case 3:
+                    {
+                        GetPlayerVariablesRequest request = new GetPlayerVariablesRequest();
+                        request.MergeFrom(stream);
+
+
+                        GetPlayerVariablesResponse response = new GetPlayerVariablesResponse();
+                        BattlenetRpcErrorCode status = HandleGetPlayerVariables(request, response);
+                        Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method GameUtilitiesService.GetPlayerVariables(bgs.protocol.game_utilities.v1.GetPlayerVariablesRequest: {1}) returned bgs.protocol.game_utilities.v1.GetPlayerVariablesResponse: {2} status: {3}.",
+                          GetCallerInfo(), request.ToString(), response.ToString(), status);
+                        if (status == 0)
+                            SendResponse(3, token, response);
+                        else
+                            SendResponse(3, token, status);
+                        break;
+                    }
+                case 6:
+                    {
+                        ServerRequest request = new ServerRequest();
+                        request.MergeFrom(stream);
+
+
+                        ServerResponse response = new ServerResponse();
+                        BattlenetRpcErrorCode status = HandleProcessServerRequest(request, response);
+                        Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method GameUtilitiesService.ProcessServerRequest(bgs.protocol.game_utilities.v1.ServerRequest: {1}) returned bgs.protocol.game_utilities.v1.ServerResponse: {2} status: {3}.",
+                          GetCallerInfo(), request.ToString(), response.ToString(), status);
+                        if (status == 0)
+                            SendResponse(6, token, response);
+                        else
+                            SendResponse(6, token, status);
+                        break;
+                    }
+                case 7:
+                    {
+                        GameAccountOnlineNotification request = new GameAccountOnlineNotification();
+                        request.MergeFrom(stream);
+
+
+                        BattlenetRpcErrorCode status = HandleOnGameAccountOnline(request);
+                        Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method GameUtilitiesService.OnGameAccountOnline(bgs.protocol.game_utilities.v1.GameAccountOnlineNotification: {1}) status: {2}.",
+                          GetCallerInfo(), request.ToString(), status);
+                        if (status != 0)
+                            SendResponse(7, token, status);
+                        break;
+                    }
+                case 8:
+                    {
+                        GameAccountOfflineNotification request = new GameAccountOfflineNotification();
+                        request.MergeFrom(stream);
+
+
+                        BattlenetRpcErrorCode status = HandleOnGameAccountOffline(request);
+                        Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method GameUtilitiesService.OnGameAccountOffline(bgs.protocol.game_utilities.v1.GameAccountOfflineNotification: {1}) status: {2}.",
+                          GetCallerInfo(), request.ToString(), status);
+                        if (status != 0)
+                            SendResponse(8, token, status);
+                        break;
+                    }
+                case 9:
+                    {
+                        GetAchievementsFileRequest request = new GetAchievementsFileRequest();
+                        request.MergeFrom(stream);
+
+
+                        GetAchievementsFileResponse response = new GetAchievementsFileResponse();
+                        BattlenetRpcErrorCode status = HandleGetAchievementsFile(request, response);
+                        Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method GameUtilitiesService.GetAchievementsFile(bgs.protocol.game_utilities.v1.GetAchievementsFileRequest: {1}) returned bgs.protocol.game_utilities.v1.GetAchievementsFileResponse: {2} status: {3}.",
+                          GetCallerInfo(), request.ToString(), response.ToString(), status);
+                        if (status == 0)
+                            SendResponse(9, token, response);
+                        else
+                            SendResponse(9, token, status);
+                        break;
+                    }
+                case 10:
+                    {
+                        GetAllValuesForAttributeRequest request = new GetAllValuesForAttributeRequest();
+                        request.MergeFrom(stream);
+
+
+                        GetAllValuesForAttributeResponse response = new GetAllValuesForAttributeResponse();
+                        BattlenetRpcErrorCode status = HandleGetAllValuesForAttribute(request, response);
+                        Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server method GameUtilitiesService.GetAllValuesForAttribute(bgs.protocol.game_utilities.v1.GetAllValuesForAttributeRequest: {1}) returned bgs.protocol.game_utilities.v1.GetAllValuesForAttributeResponse: {2} status: {3}.",
+                          GetCallerInfo(), request.ToString(), response.ToString(), status);
+                        if (status == 0)
+                            SendResponse(10, token, response);
+                        else
+                            SendResponse(10, token, status);
+                        break;
+                    }
+                default:
+                    Log.outError(LogFilter.ServiceProtobuf, "Bad method id {0}.", methodId);
+                    SendResponse(methodId, token, BattlenetRpcErrorCode.RpcInvalidMethod);
+                    break;
+            }
+        }
+
+        BattlenetRpcErrorCode HandleProcessClientRequest(ClientRequest request, ClientResponse response)
         {
             Bgs.Protocol.Attribute command = null;
             Dictionary<string, Bgs.Protocol.Variant> Params = new Dictionary<string, Bgs.Protocol.Variant>();
@@ -43,73 +177,65 @@ namespace Game
 
             if (command == null)
             {
-                Log.outError(LogFilter.SessionRpc, "{0} sent ClientRequest with no command.", GetPlayerInfo());
+                Log.outError(LogFilter.SessionRpc, "{0} sent ClientRequest with no command.", GetCallerInfo());
                 return BattlenetRpcErrorCode.RpcMalformedRequest;
             }
-            ClientResponse response = new ClientResponse();
 
-            var status = BattlenetRpcErrorCode.RpcNotImplemented;
             if (command.Name == "Command_RealmListRequest_v1_b9")
-                status= HandleRealmListRequest(Params, response);
+                return HandleRealmListRequest(Params, response);
             else if (command.Name == "Command_RealmJoinRequest_v1_b9")
-                status= HandleRealmJoinRequest(Params, response);
+                return HandleRealmJoinRequest(Params, response);
 
-            if (status == 0)
-                SendBattlenetResponse((uint)NameHash.GameUtilitiesService, 1, response);
-
-            return status;
-        }
-
-        [BnetService(NameHash.GameUtilitiesService, 2)]
-        BattlenetRpcErrorCode HandlePresenceChannelCreated(PresenceChannelCreatedRequest request)
-        {
-            Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method GameUtilitiesService.PresenceChannelCreated: {1}", GetPlayerInfo(), request.ToString());
             return BattlenetRpcErrorCode.RpcNotImplemented;
         }
 
-        [BnetService(NameHash.GameUtilitiesService, 3)]
-        BattlenetRpcErrorCode HandleGetPlayerVariables(GetPlayerVariablesRequest request)
+        BattlenetRpcErrorCode HandlePresenceChannelCreated(PresenceChannelCreatedRequest request, Bgs.Protocol.NoData response)
         {
-            Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method GameUtilitiesService.GetPlayerVariables: {1}", GetPlayerInfo(), request.ToString());
+            Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method GameUtilitiesService.PresenceChannelCreated: {1}",
+              GetCallerInfo(), request.ToString());
             return BattlenetRpcErrorCode.RpcNotImplemented;
         }
 
-        [BnetService(NameHash.GameUtilitiesService, 6)]
-        BattlenetRpcErrorCode HandleProcessServerRequest(ServerRequest request)
+        BattlenetRpcErrorCode HandleGetPlayerVariables(GetPlayerVariablesRequest request, GetPlayerVariablesResponse response)
         {
-            Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method GameUtilitiesService.ProcessServerRequest: {1}", GetPlayerInfo(), request.ToString());
+            Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method GameUtilitiesService.GetPlayerVariables: {1}",
+              GetCallerInfo(), request.ToString());
             return BattlenetRpcErrorCode.RpcNotImplemented;
         }
 
-        [BnetService(NameHash.GameUtilitiesService, 7)]
+        BattlenetRpcErrorCode HandleProcessServerRequest(ServerRequest request, ServerResponse response)
+        {
+            Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method GameUtilitiesService.ProcessServerRequest: {1}",
+              GetCallerInfo(), request.ToString());
+            return BattlenetRpcErrorCode.RpcNotImplemented;
+        }
+
         BattlenetRpcErrorCode HandleOnGameAccountOnline(GameAccountOnlineNotification request)
         {
-            Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method GameUtilitiesService.OnGameAccountOnline: {1}", GetPlayerInfo(), request.ToString());
+            Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method GameUtilitiesService.OnGameAccountOnline: {1}",
+              GetCallerInfo(), request.ToString());
             return BattlenetRpcErrorCode.RpcNotImplemented;
         }
 
-        [BnetService(NameHash.GameUtilitiesService, 8)]
         BattlenetRpcErrorCode HandleOnGameAccountOffline(GameAccountOfflineNotification request)
         {
-            Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method GameUtilitiesService.OnGameAccountOffline: {1}", GetPlayerInfo(), request.ToString());
+            Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method GameUtilitiesService.OnGameAccountOffline: {1}",
+              GetCallerInfo(), request.ToString());
             return BattlenetRpcErrorCode.RpcNotImplemented;
         }
 
-        [BnetService(NameHash.GameUtilitiesService, 9)]
-        BattlenetRpcErrorCode HandleGetAchievementsFile(GetAchievementsFileRequest request)
+        BattlenetRpcErrorCode HandleGetAchievementsFile(GetAchievementsFileRequest request, GetAchievementsFileResponse response)
         {
-            Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method GameUtilitiesService.GetAchievementsFile: {1}", GetPlayerInfo(), request.ToString());
+            Log.outError(LogFilter.ServiceProtobuf, "{0} Client tried to call not implemented method GameUtilitiesService.GetAchievementsFile: {1}",
+              GetCallerInfo(), request.ToString());
             return BattlenetRpcErrorCode.RpcNotImplemented;
         }
 
-        [BnetService(NameHash.GameUtilitiesService, 10)]
-        BattlenetRpcErrorCode HandleGetAllValuesForAttribute(GetAllValuesForAttributeRequest request)
+        BattlenetRpcErrorCode HandleGetAllValuesForAttribute(GetAllValuesForAttributeRequest request, GetAllValuesForAttributeResponse response)
         {
             if (request.AttributeKey == "Command_RealmListRequest_v1_b9")
             {
-                GetAllValuesForAttributeResponse response = new GetAllValuesForAttributeResponse();
                 Global.RealmMgr.WriteSubRegions(response);
-                SendBattlenetResponse((uint)NameHash.GameUtilitiesService, 10, response);
                 return BattlenetRpcErrorCode.Ok;
             }
 
@@ -134,7 +260,7 @@ namespace Game
             response.Attribute.Add(attribute);
 
             var realmCharacterCounts = new RealmCharacterCountList();
-            foreach (var characterCount in GetRealmCharacterCounts())
+            foreach (var characterCount in _session.GetRealmCharacterCounts())
             {
                 RealmCharacterCountEntry countEntry = new RealmCharacterCountEntry();
                 countEntry.WowRealmAddress = (int)characterCount.Key;
@@ -155,8 +281,8 @@ namespace Game
         {
             var realmAddress = Params.LookupByKey("Param_RealmAddress");
             if (realmAddress != null)
-                return Global.RealmMgr.JoinRealm((uint)realmAddress.UintValue, Global.WorldMgr.GetRealm().Build, System.Net.IPAddress.Parse(GetRemoteAddress()), GetRealmListSecret(),
-                    GetSessionDbcLocale(), GetOS(), GetAccountName(), response);
+                return Global.RealmMgr.JoinRealm((uint)realmAddress.UintValue, Global.WorldMgr.GetRealm().Build, System.Net.IPAddress.Parse(_session.GetRemoteAddress()), _session.GetRealmListSecret(),
+                    _session.GetSessionDbcLocale(), _session.GetOS(), _session.GetAccountName(), response);
 
             return BattlenetRpcErrorCode.Ok;
         }

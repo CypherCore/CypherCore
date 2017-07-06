@@ -55,45 +55,45 @@ namespace Game.BattleFields
         {
             // Wall (Not spawned in db)
             // Entry  WS      X          Y          Z           O                rX   rY   rZ             rW             Type
-            new WintergraspBuildingSpawnData(190219, 3749, 5371.457f, 3047.472f, 407.5710f,  3.14159300f, 0.0f, 0.0f, -1.000000000f, 0.00000000,  WGGameObjectBuildingType.Wall),
-            new WintergraspBuildingSpawnData(190220, 3750, 5331.264f, 3047.105f, 407.9228f,  0.05235888f, 0.0f, 0.0f,  0.026176450f, 0.99965730,  WGGameObjectBuildingType.Wall),
-            new WintergraspBuildingSpawnData(191795, 3764, 5385.841f, 2909.490f, 409.7127f,  0.00872424f, 0.0f, 0.0f,  0.004362106f, 0.99999050,  WGGameObjectBuildingType.Wall),
-            new WintergraspBuildingSpawnData(191796, 3772, 5384.452f, 2771.835f, 410.2704f,  3.14159300f, 0.0f, 0.0f, -1.000000000f, 0.00000000,  WGGameObjectBuildingType.Wall),
-            new WintergraspBuildingSpawnData(191799, 3762, 5371.436f, 2630.610f, 408.8163f,  3.13285800f, 0.0f, 0.0f,  0.999990500f, 0.00436732,  WGGameObjectBuildingType.Wall),
-            new WintergraspBuildingSpawnData(191800, 3766, 5301.838f, 2909.089f, 409.8661f,  0.00872424f, 0.0f, 0.0f,  0.004362106f, 0.99999050,  WGGameObjectBuildingType.Wall),
-            new WintergraspBuildingSpawnData(191801, 3770, 5301.063f, 2771.411f, 409.9014f,  3.14159300f, 0.0f, 0.0f, -1.000000000f, 0.00000000,  WGGameObjectBuildingType.Wall),
-            new WintergraspBuildingSpawnData(191802, 3751, 5280.197f, 2995.583f, 408.8249f,  1.61442800f, 0.0f, 0.0f,  0.722363500f, 0.69151360,  WGGameObjectBuildingType.Wall),
-            new WintergraspBuildingSpawnData(191803, 3752, 5279.136f, 2956.023f, 408.6041f,  1.57079600f, 0.0f, 0.0f,  0.707106600f, 0.70710690,  WGGameObjectBuildingType.Wall),
-            new WintergraspBuildingSpawnData(191804, 3767, 5278.685f, 2882.513f, 409.5388f,  1.57079600f, 0.0f, 0.0f,  0.707106600f, 0.70710690,  WGGameObjectBuildingType.Wall),
-            new WintergraspBuildingSpawnData(191806, 3769, 5279.502f, 2798.945f, 409.9983f,  1.57079600f, 0.0f, 0.0f,  0.707106600f, 0.70710690,  WGGameObjectBuildingType.Wall),
-            new WintergraspBuildingSpawnData(191807, 3759, 5279.937f, 2724.766f, 409.9452f,  1.56207000f, 0.0f, 0.0f,  0.704014800f, 0.71018530,  WGGameObjectBuildingType.Wall),
-            new WintergraspBuildingSpawnData(191808, 3760, 5279.601f, 2683.786f, 409.8488f,  1.55334100f, 0.0f, 0.0f,  0.700908700f, 0.71325110,  WGGameObjectBuildingType.Wall),
-            new WintergraspBuildingSpawnData(191809, 3761, 5330.955f, 2630.777f, 409.2826f,  3.13285800f, 0.0f, 0.0f,  0.999990500f, 0.00436732,  WGGameObjectBuildingType.Wall),
-            new WintergraspBuildingSpawnData(190369, 3753, 5256.085f, 2933.963f, 409.3571f,  3.13285800f, 0.0f, 0.0f,  0.999990500f, 0.00436732,  WGGameObjectBuildingType.Wall),
-            new WintergraspBuildingSpawnData(190370, 3758, 5257.463f, 2747.327f, 409.7427f, -3.13285800f, 0.0f, 0.0f, -0.999990500f, 0.00436732,  WGGameObjectBuildingType.Wall),
-            new WintergraspBuildingSpawnData(190371, 3754, 5214.960f, 2934.089f, 409.1905f, -0.00872424f, 0.0f, 0.0f, -0.004362106f, 0.99999050,  WGGameObjectBuildingType.Wall),
-            new WintergraspBuildingSpawnData(190372, 3757, 5215.821f, 2747.566f, 409.1884f, -3.13285800f, 0.0f, 0.0f, -0.999990500f, 0.00436732,  WGGameObjectBuildingType.Wall),
-            new WintergraspBuildingSpawnData(190374, 3755, 5162.273f, 2883.043f, 410.2556f,  1.57952200f, 0.0f, 0.0f,  0.710185100f, 0.70401500,  WGGameObjectBuildingType.Wall),
-            new WintergraspBuildingSpawnData(190376, 3756, 5163.724f, 2799.838f, 409.2270f,  1.57952200f, 0.0f, 0.0f,  0.710185100f, 0.70401500,  WGGameObjectBuildingType.Wall),
+            new WintergraspBuildingSpawnData(190219, 3749, 5371.457f, 3047.472f, 407.5710f,  3.14159300f, 0.0f, 0.0f, -1.000000000f, 0.00000000f,  WGGameObjectBuildingType.Wall),
+            new WintergraspBuildingSpawnData(190220, 3750, 5331.264f, 3047.105f, 407.9228f,  0.05235888f, 0.0f, 0.0f,  0.026176450f, 0.99965730f,  WGGameObjectBuildingType.Wall),
+            new WintergraspBuildingSpawnData(191795, 3764, 5385.841f, 2909.490f, 409.7127f,  0.00872424f, 0.0f, 0.0f,  0.004362106f, 0.99999050f,  WGGameObjectBuildingType.Wall),
+            new WintergraspBuildingSpawnData(191796, 3772, 5384.452f, 2771.835f, 410.2704f,  3.14159300f, 0.0f, 0.0f, -1.000000000f, 0.00000000f,  WGGameObjectBuildingType.Wall),
+            new WintergraspBuildingSpawnData(191799, 3762, 5371.436f, 2630.610f, 408.8163f,  3.13285800f, 0.0f, 0.0f,  0.999990500f, 0.00436732f,  WGGameObjectBuildingType.Wall),
+            new WintergraspBuildingSpawnData(191800, 3766, 5301.838f, 2909.089f, 409.8661f,  0.00872424f, 0.0f, 0.0f,  0.004362106f, 0.99999050f,  WGGameObjectBuildingType.Wall),
+            new WintergraspBuildingSpawnData(191801, 3770, 5301.063f, 2771.411f, 409.9014f,  3.14159300f, 0.0f, 0.0f, -1.000000000f, 0.00000000f,  WGGameObjectBuildingType.Wall),
+            new WintergraspBuildingSpawnData(191802, 3751, 5280.197f, 2995.583f, 408.8249f,  1.61442800f, 0.0f, 0.0f,  0.722363500f, 0.69151360f,  WGGameObjectBuildingType.Wall),
+            new WintergraspBuildingSpawnData(191803, 3752, 5279.136f, 2956.023f, 408.6041f,  1.57079600f, 0.0f, 0.0f,  0.707106600f, 0.70710690f,  WGGameObjectBuildingType.Wall),
+            new WintergraspBuildingSpawnData(191804, 3767, 5278.685f, 2882.513f, 409.5388f,  1.57079600f, 0.0f, 0.0f,  0.707106600f, 0.70710690f,  WGGameObjectBuildingType.Wall),
+            new WintergraspBuildingSpawnData(191806, 3769, 5279.502f, 2798.945f, 409.9983f,  1.57079600f, 0.0f, 0.0f,  0.707106600f, 0.70710690f,  WGGameObjectBuildingType.Wall),
+            new WintergraspBuildingSpawnData(191807, 3759, 5279.937f, 2724.766f, 409.9452f,  1.56207000f, 0.0f, 0.0f,  0.704014800f, 0.71018530f,  WGGameObjectBuildingType.Wall),
+            new WintergraspBuildingSpawnData(191808, 3760, 5279.601f, 2683.786f, 409.8488f,  1.55334100f, 0.0f, 0.0f,  0.700908700f, 0.71325110f,  WGGameObjectBuildingType.Wall),
+            new WintergraspBuildingSpawnData(191809, 3761, 5330.955f, 2630.777f, 409.2826f,  3.13285800f, 0.0f, 0.0f,  0.999990500f, 0.00436732f,  WGGameObjectBuildingType.Wall),
+            new WintergraspBuildingSpawnData(190369, 3753, 5256.085f, 2933.963f, 409.3571f,  3.13285800f, 0.0f, 0.0f,  0.999990500f, 0.00436732f,  WGGameObjectBuildingType.Wall),
+            new WintergraspBuildingSpawnData(190370, 3758, 5257.463f, 2747.327f, 409.7427f, -3.13285800f, 0.0f, 0.0f, -0.999990500f, 0.00436732f,  WGGameObjectBuildingType.Wall),
+            new WintergraspBuildingSpawnData(190371, 3754, 5214.960f, 2934.089f, 409.1905f, -0.00872424f, 0.0f, 0.0f, -0.004362106f, 0.99999050f,  WGGameObjectBuildingType.Wall),
+            new WintergraspBuildingSpawnData(190372, 3757, 5215.821f, 2747.566f, 409.1884f, -3.13285800f, 0.0f, 0.0f, -0.999990500f, 0.00436732f,  WGGameObjectBuildingType.Wall),
+            new WintergraspBuildingSpawnData(190374, 3755, 5162.273f, 2883.043f, 410.2556f,  1.57952200f, 0.0f, 0.0f,  0.710185100f, 0.70401500f,  WGGameObjectBuildingType.Wall),
+            new WintergraspBuildingSpawnData(190376, 3756, 5163.724f, 2799.838f, 409.2270f,  1.57952200f, 0.0f, 0.0f,  0.710185100f, 0.70401500f,  WGGameObjectBuildingType.Wall),
 
             // Tower of keep (Not spawned in db)
-            new WintergraspBuildingSpawnData(190221, 3711, 5281.154f, 3044.588f, 407.8434f,  3.115388f, 0.0f, 0.0f,  0.9999142f, 0.013101960,  WGGameObjectBuildingType.KeepTower), // NW
-            new WintergraspBuildingSpawnData(190373, 3713, 5163.757f, 2932.228f, 409.1904f,  3.124123f, 0.0f, 0.0f,  0.9999619f, 0.008734641,  WGGameObjectBuildingType.KeepTower), // SW
-            new WintergraspBuildingSpawnData(190377, 3714, 5166.397f, 2748.368f, 409.1884f, -1.570796f, 0.0f, 0.0f, -0.7071066f, 0.707106900,  WGGameObjectBuildingType.KeepTower), // SE
-            new WintergraspBuildingSpawnData(190378, 3712, 5281.192f, 2632.479f, 409.0985f, -1.588246f, 0.0f, 0.0f, -0.7132492f, 0.700910500,  WGGameObjectBuildingType.KeepTower), // NE
+            new WintergraspBuildingSpawnData(190221, 3711, 5281.154f, 3044.588f, 407.8434f,  3.115388f, 0.0f, 0.0f,  0.9999142f, 0.013101960f,  WGGameObjectBuildingType.KeepTower), // NW
+            new WintergraspBuildingSpawnData(190373, 3713, 5163.757f, 2932.228f, 409.1904f,  3.124123f, 0.0f, 0.0f,  0.9999619f, 0.008734641f,  WGGameObjectBuildingType.KeepTower), // SW
+            new WintergraspBuildingSpawnData(190377, 3714, 5166.397f, 2748.368f, 409.1884f, -1.570796f, 0.0f, 0.0f, -0.7071066f, 0.707106900f,  WGGameObjectBuildingType.KeepTower), // SE
+            new WintergraspBuildingSpawnData(190378, 3712, 5281.192f, 2632.479f, 409.0985f, -1.588246f, 0.0f, 0.0f, -0.7132492f, 0.700910500f,  WGGameObjectBuildingType.KeepTower), // NE
 
             // Wall (with passage) (Not spawned in db)
-            new WintergraspBuildingSpawnData(191797, 3765, 5343.290f, 2908.860f, 409.5757f, 0.00872424f, 0.0f, 0.0f,  0.004362106f, 0.9999905,  WGGameObjectBuildingType.Wall),
-            new WintergraspBuildingSpawnData(191798, 3771, 5342.719f, 2771.386f, 409.6249f, 3.14159300f, 0.0f, 0.0f, -1.000000000f, 0.0000000,  WGGameObjectBuildingType.Wall),
-            new WintergraspBuildingSpawnData(191805, 3768, 5279.126f, 2840.797f, 409.7826f, 1.57952200f, 0.0f, 0.0f,  0.710185100f, 0.7040150,  WGGameObjectBuildingType.Wall),
+            new WintergraspBuildingSpawnData(191797, 3765, 5343.290f, 2908.860f, 409.5757f, 0.00872424f, 0.0f, 0.0f,  0.004362106f, 0.9999905f,  WGGameObjectBuildingType.Wall),
+            new WintergraspBuildingSpawnData(191798, 3771, 5342.719f, 2771.386f, 409.6249f, 3.14159300f, 0.0f, 0.0f, -1.000000000f, 0.0000000f,  WGGameObjectBuildingType.Wall),
+            new WintergraspBuildingSpawnData(191805, 3768, 5279.126f, 2840.797f, 409.7826f, 1.57952200f, 0.0f, 0.0f,  0.710185100f, 0.7040150f,  WGGameObjectBuildingType.Wall),
 
             // South tower (Not spawned in db)
-            new WintergraspBuildingSpawnData(190356, 3704, 4557.173f, 3623.943f, 395.8828f,  1.675516f, 0.0f, 0.0f,  0.7431450f, 0.669130400,  WGGameObjectBuildingType.Tower), // W
-            new WintergraspBuildingSpawnData(190357, 3705, 4398.172f, 2822.497f, 405.6270f, -3.124123f, 0.0f, 0.0f, -0.9999619f, 0.008734641,  WGGameObjectBuildingType.Tower), // S
-            new WintergraspBuildingSpawnData(190358, 3706, 4459.105f, 1944.326f, 434.9912f, -2.002762f, 0.0f, 0.0f, -0.8422165f, 0.539139500,  WGGameObjectBuildingType.Tower), // E
+            new WintergraspBuildingSpawnData(190356, 3704, 4557.173f, 3623.943f, 395.8828f,  1.675516f, 0.0f, 0.0f,  0.7431450f, 0.669130400f,  WGGameObjectBuildingType.Tower), // W
+            new WintergraspBuildingSpawnData(190357, 3705, 4398.172f, 2822.497f, 405.6270f, -3.124123f, 0.0f, 0.0f, -0.9999619f, 0.008734641f,  WGGameObjectBuildingType.Tower), // S
+            new WintergraspBuildingSpawnData(190358, 3706, 4459.105f, 1944.326f, 434.9912f, -2.002762f, 0.0f, 0.0f, -0.8422165f, 0.539139500f,  WGGameObjectBuildingType.Tower), // E
 
             // Door of forteress (Not spawned in db)
-            new WintergraspBuildingSpawnData(WGGameObjects.FortressGate, 3763, 5162.991f, 2841.232f, 410.1892f, -3.132858f, 0.0f, 0.0f, -0.9999905f, 0.00436732,  WGGameObjectBuildingType.Door),
+            new WintergraspBuildingSpawnData(WGGameObjects.FortressGate, 3763, 5162.991f, 2841.232f, 410.1892f, -3.132858f, 0.0f, 0.0f, -0.9999905f, 0.00436732f,  WGGameObjectBuildingType.Door),
 
             // Last door (Not spawned in db)
             new WintergraspBuildingSpawnData(WGGameObjects.VaultGate, 3773, 5397.108f, 2841.54f, 425.9014f, 3.141593f, 0.0f, 0.0f, -1.0f, 0.0f,  WGGameObjectBuildingType.DoorLast),
@@ -742,7 +742,7 @@ namespace Game.BattleFields
 
     struct WintergraspBuildingSpawnData
     {
-        public WintergraspBuildingSpawnData(uint entry, uint worldstate, float x, float y, float z, float o, double rX, double rY, double rZ, double rW, WGGameObjectBuildingType type)
+        public WintergraspBuildingSpawnData(uint entry, uint worldstate, float x, float y, float z, float o, float rX, float rY, float rZ, float rW, WGGameObjectBuildingType type)
         {
             Entry = entry;
             WorldState = worldstate;

@@ -284,7 +284,6 @@ namespace Game.DataStorage
                                 }
 
                                 string str = locStr[locale];
-                                buffer.WriteUInt16(str.Length + 1);
                                 buffer.WriteCString(str);
                                 break;
                         }
@@ -296,54 +295,44 @@ namespace Game.DataStorage
         void WriteArrayValues(object entry, FieldInfo fieldInfo, ByteBuffer buffer)
         {
             var type = fieldInfo.FieldType.GetElementType();
-            var length = ((Array)fieldInfo.GetValue(entry)).Length;
-            for (var i = 0; i < length; ++i)
+            var array = (Array)fieldInfo.GetValue(entry);
+            for (var i = 0; i < array.Length; ++i)
             {
-                var value = (Array)fieldInfo.GetValue(entry);
                 switch (Type.GetTypeCode(type))
                 {
                     case TypeCode.Boolean:
-                        buffer.WriteUInt8(value.GetValue(i));
+                        buffer.WriteUInt8(array.GetValue(i));
                         break;
                     case TypeCode.SByte:
-                        buffer.WriteInt8(value.GetValue(i));
+                        buffer.WriteInt8(array.GetValue(i));
                         break;
                     case TypeCode.Byte:
-                        buffer.WriteUInt8(value.GetValue(i));
+                        buffer.WriteUInt8(array.GetValue(i));
                         break;
                     case TypeCode.Int16:
-                        buffer.WriteInt16(value.GetValue(i));
+                        buffer.WriteInt16(array.GetValue(i));
                         break;
                     case TypeCode.UInt16:
-                        buffer.WriteUInt16(value.GetValue(i));
+                        buffer.WriteUInt16(array.GetValue(i));
                         break;
                     case TypeCode.Int32:
-                        buffer.WriteInt32(value.GetValue(i));
+                        buffer.WriteInt32(array.GetValue(i));
                         break;
                     case TypeCode.UInt32:
-                        buffer.WriteUInt32(value.GetValue(i));
+                        buffer.WriteUInt32(array.GetValue(i));
                         break;
                     case TypeCode.Int64:
-                        buffer.WriteInt64(value.GetValue(i));
+                        buffer.WriteInt64(array.GetValue(i));
                         break;
                     case TypeCode.UInt64:
-                        buffer.WriteUInt64(value.GetValue(i));
+                        buffer.WriteUInt64(array.GetValue(i));
                         break;
                     case TypeCode.Single:
-                        buffer.WriteFloat(value.GetValue(i));
+                        buffer.WriteFloat(array.GetValue(i));
                         break;
                     case TypeCode.String:
-                        var str = (string)value.GetValue(i);
-                        buffer.WriteInt32(str.Length);
-                        buffer.WriteString(str);
-                        break;
-                    case TypeCode.Object:
-                        switch (type.Name)
-                        {
-                            case "Unused":
-                                buffer.WriteUInt32(0u);
-                                break;
-                        }
+                        var str = (string)array.GetValue(i);
+                        buffer.WriteCString(str);
                         break;
                 }
             }
@@ -353,7 +342,5 @@ namespace Game.DataStorage
         {
             Remove(id);
         }
-
-        public uint tableHash;
     }
 }

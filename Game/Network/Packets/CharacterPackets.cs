@@ -173,10 +173,10 @@ namespace Game.Network.Packets
                 if (atLoginFlags.HasAnyFlag(AtLoginFlags.Rename))
                     Flags |= CharacterFlags.Rename;
 
-                if (fields.Read<uint>(23) != 0)
+                if (fields.Read<uint>(26) != 0)
                     Flags |= CharacterFlags.LockedByBilling;
 
-                if (WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed) && !string.IsNullOrEmpty(fields.Read<string>(26)))
+                if (WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed) && !string.IsNullOrEmpty(fields.Read<string>(30)))
                     Flags |= CharacterFlags.Declined;
 
                 if (atLoginFlags.HasAnyFlag(AtLoginFlags.Customize))
@@ -209,6 +209,10 @@ namespace Game.Network.Packets
                 StringArguments equipment = new StringArguments(fields.Read<string>(25));
                 ListPosition = fields.Read<byte>(27);
                 LastPlayedTime = fields.Read<uint>(28);
+
+                var spec = Global.DB2Mgr.GetChrSpecializationByIndex(ClassId, fields.Read<byte>(29));
+                if (spec != null)
+                    SpecID = (ushort)spec.Id;
 
                 for (byte slot = 0; slot < InventorySlots.BagEnd; ++slot)
                 {

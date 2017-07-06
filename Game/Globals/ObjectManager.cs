@@ -4340,6 +4340,11 @@ namespace Game
                     }
                 }
 
+                // Items that have no specializations set can be used by everyone
+                foreach (var specs in itemTemplate.Specializations)
+                    if (specs.Count == 0)
+                        specs.SetAll(true);
+
                 ++sparseCount;
                 ItemTemplateStorage.Add(sparse.Id, itemTemplate);
             }
@@ -6170,7 +6175,7 @@ namespace Game
 
             // Load `quest_objectives`
             //                               0   1        2     3             4         5       6      7      8                  9
-            result = DB.World.Query("SELECT ID, QuestID, Type, StorageIndex, ObjectID, Amount, Flags, Flags, ProgressBarWeight, Description FROM quest_objectives ORDER BY StorageIndex ASC");
+            result = DB.World.Query("SELECT ID, QuestID, Type, StorageIndex, ObjectID, Amount, Flags, Flags2, ProgressBarWeight, Description FROM quest_objectives ORDER BY StorageIndex ASC");
 
             if (result.IsEmpty())
             {
