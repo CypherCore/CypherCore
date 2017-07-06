@@ -35,14 +35,14 @@ namespace Framework.Database
             bool updatesEnabled = database.IsAutoUpdateEnabled(_updateFlags);
             _open.Add(() =>
             {
-	            ConnectionObject co = new ConnectionObject
-									  {
-										  Database = ConfigMgr.GetDefaultValue(name + "DatabaseInfo.Database", ""),
-										  Host = ConfigMgr.GetDefaultValue(name + "DatabaseInfo.Host", ""),
-										  Password = ConfigMgr.GetDefaultValue(name + "DatabaseInfo.Password", ""),
-										  Port = ConfigMgr.GetDefaultValue(name + "DatabaseInfo.Port", ""),
-										  Username = ConfigMgr.GetDefaultValue(name + "DatabaseInfo.Username", "")
-									  };
+                ConnectionObject co = new ConnectionObject
+                                      {
+                                          Database = ConfigMgr.GetDefaultValue(name + "DatabaseInfo.Database", ""),
+                                          Host = ConfigMgr.GetDefaultValue(name + "DatabaseInfo.Host", ""),
+                                          Password = ConfigMgr.GetDefaultValue(name + "DatabaseInfo.Password", ""),
+                                          Port = ConfigMgr.GetDefaultValue(name + "DatabaseInfo.Port", ""),
+                                          Username = ConfigMgr.GetDefaultValue(name + "DatabaseInfo.Username", "")
+                                      };
 
                 var error = database.Initialize(co);
                 if (error != MySqlErrorCode.None)

@@ -39,15 +39,15 @@ namespace Framework.Database
             Poolsize = poolSize;
         }
 
-	    public MySqlConnectionInfo(ConnectionObject connectionObject, int poolSize = 10)
-	    {
-		    Host = connectionObject.Host;
-		    Port = connectionObject.Port;
-		    Username = connectionObject.Username;
-		    Password = connectionObject.Password;
-		    Database = connectionObject.Database;
-		    Poolsize = poolSize;
-	    }
+        public MySqlConnectionInfo(ConnectionObject connectionObject, int poolSize = 10)
+        {
+            Host = connectionObject.Host;
+            Port = connectionObject.Port;
+            Username = connectionObject.Username;
+            Password = connectionObject.Password;
+            Database = connectionObject.Database;
+            Poolsize = poolSize;
+        }
 
         public MySqlConnection GetConnection()
         {
@@ -91,25 +91,25 @@ namespace Framework.Database
             }
         }
 
-	    public MySqlErrorCode Initialize(ConnectionObject connectionObject)
-	    {
-		    _connectionInfo = new MySqlConnectionInfo(connectionObject);
-		    _updater = new DatabaseUpdater<T>(this);
+        public MySqlErrorCode Initialize(ConnectionObject connectionObject)
+        {
+            _connectionInfo = new MySqlConnectionInfo(connectionObject);
+            _updater = new DatabaseUpdater<T>(this);
 
-		    using (var connection = _connectionInfo.GetConnection())
-		    {
-			    try
-			    {
-				    connection.Open();
-				    Log.outInfo(LogFilter.SqlDriver, "Connected to MySQL(ver: {0}) Database: {1}", connection.ServerVersion, _connectionInfo.Database);
-				    return MySqlErrorCode.None;
-			    }
-			    catch (MySqlException ex)
-			    {
-				    return (MySqlErrorCode)((MySqlException)ex.InnerException).Number;
-			    }
-		    }
-	    }
+            using (var connection = _connectionInfo.GetConnection())
+            {
+                try
+                {
+                    connection.Open();
+                    Log.outInfo(LogFilter.SqlDriver, "Connected to MySQL(ver: {0}) Database: {1}", connection.ServerVersion, _connectionInfo.Database);
+                    return MySqlErrorCode.None;
+                }
+                catch (MySqlException ex)
+                {
+                    return (MySqlErrorCode)((MySqlException)ex.InnerException).Number;
+                }
+            }
+        }
 
         public void Execute(string sql, params object[] args)
         {
