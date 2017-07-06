@@ -18,6 +18,7 @@
 using Framework.Constants;
 using Framework.IO;
 using System.Collections;
+using System;
 
 namespace Game.Entities
 {
@@ -27,6 +28,14 @@ namespace Game.Entities
         {
             _fieldCount = valuesCount;
             _blockCount = (valuesCount + 32 - 1) / 32;
+
+            _mask = new BitArray((int)valuesCount, false);
+        }
+
+        public void SetCount(int valuesCount)
+        {
+            _fieldCount = (uint)valuesCount;
+            _blockCount = (uint)(valuesCount + 32 - 1) / 32;
 
             _mask = new BitArray((int)valuesCount, false);
         }
@@ -62,7 +71,7 @@ namespace Game.Entities
             _mask.SetAll(false);
         }
 
-        uint _fieldCount;
+        protected uint _fieldCount;
         protected uint _blockCount;
         protected BitArray _mask;
     }
@@ -79,8 +88,8 @@ namespace Game.Entities
         public override void AppendToPacket(ByteBuffer data)
         {
             data.WriteUInt16(DynamicFieldChangeType);
-            if (ValueCount != 0)
-                data.WriteUInt32(ValueCount);
+            if (DynamicFieldChangeType.HasAnyFlag((uint)Entities.DynamicFieldChangeType.ValueAndSizeChanged))
+                data.WriteUInt32(_fieldCount);
 
             var maskArray = new byte[_blockCount << 2];
 
@@ -89,7 +98,6 @@ namespace Game.Entities
         }
 
         public uint DynamicFieldChangeType;
-        public int ValueCount;
     }
 
     public enum DynamicFieldChangeType

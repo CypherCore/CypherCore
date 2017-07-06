@@ -1237,7 +1237,7 @@ namespace Game.Entities
                     arrayValuesMask.EncodeDynamicFieldChangeType(_dynamicChangesMask[index], updateType);
 
                     if (updateType == UpdateType.Values && _dynamicChangesMask[index] == DynamicFieldChangeType.ValueAndSizeChanged)
-                        arrayValuesMask.ValueCount = values.Length;
+                        arrayValuesMask.SetCount(values.Length);
 
                     if (index != (int)ItemDynamicFields.Modifiers)
                     {
@@ -1257,7 +1257,7 @@ namespace Game.Entities
                         if (updateType == UpdateType.Values && _dynamicChangesMask[index] != DynamicFieldChangeType.ValueAndSizeChanged && _changesMask.Get((int)ItemFields.ModifiersMask))
                         {
                             arrayValuesMask.DynamicFieldChangeType |= (int)DynamicFieldChangeType.ValueAndSizeChanged;
-                            arrayValuesMask.ValueCount = m;
+                            arrayValuesMask.SetCount(m);
                         }
 
                         // in case of ITEM_DYNAMIC_FIELD_MODIFIERS it is ITEM_FIELD_MODIFIERS_MASK that controls index of each value, not updatemask
@@ -1272,7 +1272,7 @@ namespace Game.Entities
                         }
 
                         if (updateType == UpdateType.Values && _changesMask.Get((int)ItemFields.ModifiersMask))
-                            arrayValuesMask.ValueCount = m;
+                            arrayValuesMask.SetCount(m);
                     }
 
                     arrayValuesMask.AppendToPacket(fieldBuffer);

@@ -848,10 +848,9 @@ namespace Game.Entities
                     fieldMask.SetBit(index);
 
                     DynamicUpdateMask arrayMask = new DynamicUpdateMask((uint)values.Length);
-
                     arrayMask.EncodeDynamicFieldChangeType(_dynamicChangesMask[index], updateType);
                     if (updateType == UpdateType.Values && _dynamicChangesMask[index] == DynamicFieldChangeType.ValueAndSizeChanged)
-                        arrayMask.ValueCount = values.Length;
+                         arrayMask.SetCount(values.Length);
 
                     for (var v = 0; v < values.Length; ++v)
                     {
