@@ -48,7 +48,18 @@ namespace Game.Entities
             return Orientation;
         }
 
-        public void Relocate(float x, float y, float z, float o = 0.0f)
+        public void Relocate(float x, float y)
+        {
+            posX = x;
+            posY = y;
+        }
+        public void Relocate(float x, float y, float z)
+        {
+            posX = x;
+            posY = y;
+            posZ = z;
+        }
+        public void Relocate(float x, float y, float z, float o)
         {
             posX = x;
             posY = y;
@@ -61,16 +72,14 @@ namespace Game.Entities
         }
         public void Relocate(Vector3 pos)
         {
-            posX = pos.X;
-            posY = pos.Y;
-            posZ = pos.Z;
+            Relocate(pos.X, pos.Y, pos.Z);
         }
         public void RelocateOffset(Position offset)
         {
-            posX = (float)(posX + (offset.posX * Math.Cos(Orientation) + offset.posX * Math.Sin(Orientation + MathFunctions.PI)));
-            posY = (float)(posY + (offset.posY * Math.Cos(Orientation) + offset.posY * Math.Sin(Orientation)));
+            posX = (float)(posX + (offset.posX * Math.Cos(Orientation) + offset.posY * Math.Sin(Orientation + MathFunctions.PI)));
+            posY = (float)(posY + (offset.posY * Math.Cos(Orientation) + offset.posX * Math.Sin(Orientation)));
             posZ = posZ + offset.posZ;
-            Orientation = (Orientation + offset.Orientation);
+            SetOrientation(Orientation + offset.Orientation);
         }
 
         public bool IsPositionValid()
