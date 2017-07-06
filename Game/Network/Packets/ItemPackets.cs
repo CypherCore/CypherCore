@@ -20,6 +20,7 @@ using Framework.Dynamic;
 using Game.Entities;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace Game.Network.Packets
 {
@@ -661,6 +662,38 @@ namespace Game.Network.Packets
         }
 
         public ObjectGuid Item;
+    }
+
+    class SortBags : ClientPacket
+    {
+        public SortBags(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
+    }
+
+    class SortBankBags : ClientPacket
+    {
+        public SortBankBags(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
+    }
+
+    class SortReagentBankBags : ClientPacket
+    {
+        public SortReagentBankBags(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
+
+    }
+
+    class SortBagsResult : ServerPacket
+    {
+        public SortBagsResult() : base(ServerOpcodes.SortBagsResult, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     //Structs

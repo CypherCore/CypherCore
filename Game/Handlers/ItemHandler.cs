@@ -1123,5 +1123,28 @@ namespace Game
             _player.ModifyCurrency((CurrencyTypes)itemUpgradeEntry.CurrencyID, -(int)itemUpgradeEntry.CurrencyCost);
         }
 
+        [WorldPacketHandler(ClientOpcodes.SortBags)]
+        void HandleSortBags(SortBags sortBags)
+        {
+            // TODO: Implement sorting
+            // Placeholder to prevent completely locking out bags clientside
+            SendPacket(new SortBagsResult());
+        }
+
+        [WorldPacketHandler(ClientOpcodes.SortBankBags)]
+        void HandleSortBankBags(SortBankBags sortBankBags)
+        {
+            // TODO: Implement sorting
+            // Placeholder to prevent completely locking out bags clientside
+            SendPacket(new SortBagsResult());
+        }
+
+        [WorldPacketHandler(ClientOpcodes.SortReagentBankBags)]
+        void HandleSortReagentBankBags(SortReagentBankBags sortReagentBankBags)
+        {
+            // TODO: Implement sorting
+            // Placeholder to prevent completely locking out bags clientside
+            SendPacket(new SortBagsResult());
+        }
     }
 }
