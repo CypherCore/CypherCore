@@ -3636,10 +3636,9 @@ namespace Game.Spells
             packet.ArbiterGUID = pGameObj.GetGUID();
             packet.RequestedByGUID = caster.GetGUID();
             packet.RequestedByWowAccount = caster.GetSession().GetAccountGUID();
-            packet.Write();
 
-            caster.SendPacket(packet, false);
-            target.SendPacket(packet, false);
+            caster.SendPacket(packet);
+            target.SendPacket(packet);
 
             // create duel-info
             DuelInfo duel = new DuelInfo();

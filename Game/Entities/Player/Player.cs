@@ -982,9 +982,9 @@ namespace Game.Entities
         new PlayerAI GetAI() { return (PlayerAI)i_AI; }
 
         //Network
-        public void SendPacket(ServerPacket data, bool writePacket = true)
+        public void SendPacket(ServerPacket data)
         {
-            Session.SendPacket(data, writePacket);
+            Session.SendPacket(data);
         }
 
         //Time
@@ -5298,6 +5298,8 @@ namespace Game.Entities
             if (WorldConfig.GetBoolValue(WorldCfg.AlwaysMaxskill)) // Max weapon skill when leveling up
                 UpdateSkillsToMaxSkillsForLevel();
 
+            _ApplyAllLevelScaleItemMods(true); // Moved to above SetFullHealth so player will have full health from Heirlooms
+
             // set current level health and mana/energy to maximum after applying all mods.
             SetFullHealth();
             SetPower(PowerType.Mana, GetMaxPower(PowerType.Mana));
@@ -5305,8 +5307,6 @@ namespace Game.Entities
             if (GetPower(PowerType.Rage) > GetMaxPower(PowerType.Rage))
                 SetPower(PowerType.Rage, GetMaxPower(PowerType.Rage));
             SetPower(PowerType.Focus, 0);
-
-            _ApplyAllLevelScaleItemMods(true);
 
             // update level to hunter/summon pet
             Pet pet = GetPet();

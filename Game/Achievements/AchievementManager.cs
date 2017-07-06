@@ -637,6 +637,7 @@ namespace Game.Achievements
             achievementEarned.EarnerNativeRealm = achievementEarned.EarnerVirtualRealm = Global.WorldMgr.GetVirtualRealmAddress();
             achievementEarned.AchievementID = achievement.Id;
             achievementEarned.Time = Time.UnixTime;
+
             if (!achievement.Flags.HasAnyFlag(AchievementFlags.TrackingFlag))
                 _owner.SendMessageToSetInRange(achievementEarned, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay), true);
             else

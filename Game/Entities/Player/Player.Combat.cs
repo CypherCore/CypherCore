@@ -376,11 +376,10 @@ namespace Game.Entities
 
             DuelComplete duelCompleted = new DuelComplete();
             duelCompleted.Started = type != DuelCompleteType.Interrupted;
-            duelCompleted.Write();
-            SendPacket(duelCompleted, false);
+            SendPacket(duelCompleted);
 
             if (duel.opponent.GetSession() != null)
-                duel.opponent.SendPacket(duelCompleted, false);
+                duel.opponent.SendPacket(duelCompleted);
 
             if (type != DuelCompleteType.Interrupted)
             {

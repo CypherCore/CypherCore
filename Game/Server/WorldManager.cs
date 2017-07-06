@@ -1401,13 +1401,12 @@ namespace Game
         public bool SendZoneMessage(uint zone, ServerPacket packet, WorldSession self = null, uint team = 0)
         {
             bool foundPlayerToSend = false;
-            packet.Write();
             foreach (var session in m_sessions.Values)
             {
                 if (session != null && session.GetPlayer() && session.GetPlayer().IsInWorld &&
                     session.GetPlayer().GetZoneId() == zone && session != self && (team == 0 || (uint)session.GetPlayer().GetTeam() == team))
                 {
-                    session.SendPacket(packet, false);
+                    session.SendPacket(packet);
                     foundPlayerToSend = true;
                 }
             }

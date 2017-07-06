@@ -342,7 +342,7 @@ namespace Game.Guilds
 
             Player player = Global.ObjAccessor.FindPlayer(guild.GetLeaderGUID());
             if (player)
-                player.SendPacket(applicantListChanged, false);
+                player.SendPacket(applicantListChanged);
         }
 
         void SendMembershipRequestListUpdate(Player player)

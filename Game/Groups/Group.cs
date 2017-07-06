@@ -823,7 +823,6 @@ namespace Game.Groups
             lootRoll.Roll = rollNumber;
             lootRoll.RollType = rollType;
             roll.FillPacket(lootRoll.Item);
-            lootRoll.Write();
 
             foreach (var pair in roll.playerVote)
             {
@@ -832,7 +831,7 @@ namespace Game.Groups
                     continue;
 
                 if (pair.Value != RollType.NotValid)
-                    p.SendPacket(lootRoll, false);
+                    p.SendPacket(lootRoll);
             }
         }
 
@@ -845,7 +844,6 @@ namespace Game.Groups
             lootRollWon.RollType = rollType;
             roll.FillPacket(lootRollWon.Item);
             lootRollWon.MainSpec = true;    // offspec rolls not implemented
-            lootRollWon.Write();
 
             foreach (var pair in roll.playerVote)
             {
@@ -854,7 +852,7 @@ namespace Game.Groups
                     continue;
 
                 if (pair.Value != RollType.NotValid)
-                    p.SendPacket(lootRollWon, false);
+                    p.SendPacket(lootRollWon);
             }
         }
 
@@ -863,7 +861,6 @@ namespace Game.Groups
             LootAllPassed lootAllPassed = new LootAllPassed();
             lootAllPassed.LootObj = roll.getTarget().GetGUID();
             roll.FillPacket(lootAllPassed.Item);
-            lootAllPassed.Write();
 
             foreach (var pair in roll.playerVote)
             {
@@ -872,7 +869,7 @@ namespace Game.Groups
                     continue;
 
                 if (pair.Value != RollType.NotValid)
-                    player.SendPacket(lootAllPassed, false);
+                    player.SendPacket(lootAllPassed);
             }
         }
 
@@ -881,7 +878,6 @@ namespace Game.Groups
             LootRollsComplete lootRollsComplete = new LootRollsComplete();
             lootRollsComplete.LootObj = roll.getTarget().GetGUID();
             lootRollsComplete.LootListID = (byte)(roll.itemSlot + 1);
-            lootRollsComplete.Write();
 
             foreach (var pair in roll.playerVote)
             {
@@ -890,7 +886,7 @@ namespace Game.Groups
                     continue;
 
                 if (pair.Value != RollType.NotValid)
-                    player.SendPacket(lootRollsComplete, false);
+                    player.SendPacket(lootRollsComplete);
             }
         }
 
@@ -1443,13 +1439,12 @@ namespace Game.Groups
 
             PartyMemberState packet = new PartyMemberState();
             packet.Initialize(player);
-            packet.Write();
 
             for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.next())
             {
                 Player member = refe.GetSource();
                 if (member && member != player && (!member.IsInMap(player) || !member.IsWithinDist(player, member.GetSightRange(), false)))
-                    member.SendPacket(packet, false);
+                    member.SendPacket(packet);
             }
         }
 
@@ -1469,7 +1464,6 @@ namespace Game.Groups
 
         public void BroadcastPacket(ServerPacket packet, bool ignorePlayersInBGRaid, int group = -1, ObjectGuid ignore = default(ObjectGuid))
         {
-            packet.Write();
             for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.next())
             {
                 Player player = refe.GetSource();
@@ -1477,7 +1471,7 @@ namespace Game.Groups
                     continue;
 
                 if (player.GetSession() != null && (group == -1 || refe.getSubGroup() == group))
-                    player.SendPacket(packet, false);
+                    player.SendPacket(packet);
             }
         }
 

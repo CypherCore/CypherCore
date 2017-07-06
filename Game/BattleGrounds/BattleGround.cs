@@ -349,13 +349,12 @@ namespace Game.BattleGrounds
                 timer.Type = TimerType.Pvp;
                 timer.TimeRemaining = countdownMaxForBGType - (GetElapsedTime() / 1000);
                 timer.TotalTime = countdownMaxForBGType;
-                timer.Write();
 
                 foreach (var guid in GetPlayers().Keys)
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
                     if (player)
-                        player.SendPacket(timer, false);
+                        player.SendPacket(timer);
                 }
 
                 m_CountdownTimer = 0;

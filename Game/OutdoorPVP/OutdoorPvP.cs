@@ -181,14 +181,13 @@ namespace Game.PvP
         void BroadcastPacket(ServerPacket packet)
         {
             // This is faster than sWorld.SendZoneMessage
-            packet.Write();
             for (int team = 0; team < 2; ++team)
             {
                 foreach (var guid in m_players[team])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
                     if (player)
-                        player.SendPacket(packet, false);
+                        player.SendPacket(packet);
                 }
             }
         }

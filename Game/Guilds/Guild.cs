@@ -1402,39 +1402,36 @@ namespace Game.Guilds
 
         public void BroadcastPacketToRank(ServerPacket packet, byte rankId)
         {
-            packet.Write();
             foreach (var member in m_members.Values)
             {
                 if (member.IsRank(rankId))
                 {
                     Player player = member.FindPlayer();
                     if (player != null)
-                        player.SendPacket(packet, false);
+                        player.SendPacket(packet);
                 }
             }
         }
 
         public void BroadcastPacket(ServerPacket packet)
         {
-            packet.Write();
             foreach (var member in m_members.Values)
             {
                 Player player = member.FindPlayer();
                 if (player != null)
-                    player.SendPacket(packet, false);
+                    player.SendPacket(packet);
             }
         }
 
         public void BroadcastPacketIfTrackingAchievement(ServerPacket packet, uint criteriaId)
         {
-            packet.Write();
             foreach (var member in m_members.Values)
             {
                 if (member.IsTrackingCriteriaId(criteriaId))
                 {
                     Player player = member.FindPlayer();
                     if (player)
-                        player.SendPacket(packet, false);
+                        player.SendPacket(packet);
                 }
             }
         }

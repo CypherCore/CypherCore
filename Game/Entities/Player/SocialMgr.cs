@@ -94,8 +94,6 @@ namespace Game.Entities
             if (!player)
                 return;
 
-            packet.Write();
-
             AccountTypes gmSecLevel = (AccountTypes)WorldConfig.GetIntValue(WorldCfg.GmLevelInWhoList);
             foreach (var pair in _socialMap)
             {
@@ -114,7 +112,7 @@ namespace Game.Entities
                         continue;
 
                     if (player.IsVisibleGloballyFor(target))
-                        session.SendPacket(packet, false);
+                        session.SendPacket(packet);
                 }
             }
         }

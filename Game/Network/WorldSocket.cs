@@ -250,21 +250,18 @@ namespace Game.Network
             return true;
         }
 
-        public void SendPacket(ServerPacket packet, bool writePacket = true)
+        public void SendPacket(ServerPacket packet)
         {
             if (!IsOpen())
                 return;
 
             packet.LogPacket(_worldSession);
 
-            if (writePacket)
-                packet.Write();
-
-            uint packetSize = packet.GetSize();
-            ServerOpcodes opcode = packet.GetOpcode();
+            packet.WritePacketData();
 
             var data = packet.GetData();
-            packet.Dispose();
+            uint packetSize = (uint)data.Length;
+            ServerOpcodes opcode = packet.GetOpcode();
             PacketLog.Write(data, opcode, GetRemoteIpAddress(), GetRemotePort(), _connectType);
 
             if (packetSize > 0x400 && worldCrypt.IsInitialized)
@@ -602,7 +599,7 @@ namespace Game.Network
                 //else
                 //{
                 //    transfer_aborted when/if we get map node redirection
-                //    SendPacket(*WorldPackets.Auth.ResumeComms().Write());
+                //    SendPacket(*WorldPackets.Auth.ResumeComms());
                 //}
             }
 

@@ -373,7 +373,7 @@ namespace Game
             Log.outError(LogFilter.Network, "Received unexpected opcode {0} Status: {1} Reason: {2} from {3}", (ClientOpcodes)packet.GetOpcode(), status, reason, GetPlayerInfo());
         }
 
-        public void SendPacket(ServerPacket packet, bool writePacket = true)
+        public void SendPacket(ServerPacket packet)
         {
             if (packet == null)
                 return;
@@ -397,7 +397,7 @@ namespace Game
                 return;
             }
 
-            m_Socket[(int)conIdx].SendPacket(packet, writePacket);
+            m_Socket[(int)conIdx].SendPacket(packet);
         }
 
         public void AddInstanceConnection(WorldSocket sock) { m_Socket[(int)ConnectionType.Instance] = sock; }

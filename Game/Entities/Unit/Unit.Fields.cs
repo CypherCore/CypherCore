@@ -562,8 +562,6 @@ namespace Game.Entities
             i_source = src;
             i_message = msg;
             i_distSq = dist;
-
-            i_message.Write();
         }
 
         bool IsInRangeHelper(WorldObject obj)
@@ -636,7 +634,7 @@ namespace Game.Entities
             if (!player.IsAdvancedCombatLoggingEnabled())
                 i_message.DisableAdvancedCombatLogging();
 
-            player.SendPacket(i_message, false);
+            player.SendPacket(i_message);
         }
 
         WorldObject i_source;

@@ -785,10 +785,10 @@ namespace Game.Maps
                 obj.BuildOutOfRangeUpdateBlock(data);
                 UpdateObject packet;
                 data.BuildPacket(out packet);
-                packet.Write();
+
                 foreach (var pl in players)
                     if (pl.GetTransport() != obj)
-                        pl.SendPacket(packet, false);
+                        pl.SendPacket(packet);
             }
 
             if (!_transports.Contains(obj))
@@ -2215,9 +2215,8 @@ namespace Game.Maps
 
         public void SendToPlayers(ServerPacket data)
         {
-            data.Write();
             foreach (Player pl in m_activePlayers)
-                pl.SendPacket(data, false);
+                pl.SendPacket(data);
         }
 
         public bool ActiveObjectsNearGrid(Grid grid)
@@ -2653,11 +2652,10 @@ namespace Game.Maps
             if (!players.Empty())
             {
                 PlayMusic data = new PlayMusic(musicId);
-                data.Write();
 
                 foreach (var player in players)
                     if (player.GetZoneId() == zoneId)
-                        player.SendPacket(data, false);
+                        player.SendPacket(data);
             }
         }
 
@@ -2674,10 +2672,10 @@ namespace Game.Maps
             if (!players.Empty())
             {
                 WeatherPkt weather = new WeatherPkt(weatherId, weatherGrade);
-                weather.Write();
+
                 foreach (var player in players)
                     if (player.GetZoneId() == zoneId)
-                        player.SendPacket(weather, false);
+                        player.SendPacket(weather);
             }
         }
 
@@ -2697,11 +2695,10 @@ namespace Game.Maps
                 overrideLight.AreaLightID = _defaultLight;
                 overrideLight.OverrideLightID = lightId;
                 overrideLight.TransitionMilliseconds = fadeInTime;
-                overrideLight.Write();
 
                 foreach (var player in players)
                     if (player.GetZoneId() == zoneId)
-                        player.SendPacket(overrideLight, false);
+                        player.SendPacket(overrideLight);
             }
         }
 

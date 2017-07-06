@@ -74,10 +74,9 @@ namespace Game
             plTarget.duel.startTimer = now;
 
             DuelCountdown packet = new DuelCountdown(3000);
-            packet.Write();
 
-            player.SendPacket(packet, false);
-            plTarget.SendPacket(packet, false);
+            player.SendPacket(packet);
+            plTarget.SendPacket(packet);
         }
 
         void HandleDuelCancelled()

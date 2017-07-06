@@ -64,7 +64,7 @@ namespace Game.Entities
             playScene.Location = position;
             playScene.TransportGUID = GetPlayer().GetTransGUID();
 
-            GetPlayer().SendPacket(playScene, true);
+            GetPlayer().SendPacket(playScene);
 
             AddInstanceIdToSceneMap(sceneInstanceID, sceneTemplate);
 
@@ -91,7 +91,7 @@ namespace Game.Entities
 
             CancelScene cancelScene = new CancelScene();
             cancelScene.SceneInstanceID = sceneInstanceID;
-            GetPlayer().SendPacket(cancelScene, true);
+            GetPlayer().SendPacket(cancelScene);
         }
 
         public void OnSceneTrigger(uint sceneInstanceID, string triggerName)

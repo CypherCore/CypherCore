@@ -29,12 +29,12 @@ namespace Game.Network
             _worldPacket = worldPacket;
         }
 
+        public abstract void Read();
+
         public void Dispose()
         {
             _worldPacket.Dispose();
         }
-
-        public abstract void Read();
 
         public ClientOpcodes GetOpcode() { return (ClientOpcodes)_worldPacket.GetOpcode(); }
 
@@ -46,7 +46,7 @@ namespace Game.Network
         protected WorldPacket _worldPacket;
     }
 
-    public abstract class ServerPacket : IDisposable
+    public abstract class ServerPacket
     {
         public ServerPacket(ServerOpcodes opcode)
         {
@@ -60,15 +60,21 @@ namespace Game.Network
             _worldPacket = new WorldPacket(opcode);
         }
 
-        public void Dispose()
+        public void Clear()
         {
-            _worldPacket.Dispose();
+            _worldPacket.Clear();
+            buffer = null;
         }
 
-        public void Clear() { _worldPacket.Clear(); }
-        public ServerOpcodes GetOpcode() { return (ServerOpcodes)_worldPacket.GetOpcode(); }
-        public uint GetSize() { return _worldPacket.GetSize(); }
-        public byte[] GetData() { return _worldPacket.GetData(); }
+        public ServerOpcodes GetOpcode()
+        {
+            return (ServerOpcodes)_worldPacket.GetOpcode();
+        }
+
+        public byte[] GetData()
+        {
+            return buffer;
+        }
 
         public void LogPacket(WorldSession session)
         {
@@ -77,10 +83,21 @@ namespace Game.Network
 
         public abstract void Write();
 
+        public void WritePacketData()
+        {
+            if (buffer != null)
+                return;
+
+            Write();
+
+            buffer = _worldPacket.GetData();
+            _worldPacket.Dispose();
+        }
+
         public ConnectionType GetConnection() { return connectionType; }
 
+        byte[] buffer;
         ConnectionType connectionType;
-
         protected WorldPacket _worldPacket;
     }
 
@@ -88,12 +105,12 @@ namespace Game.Network
     {
         public WorldPacket(ServerOpcodes opcode = ServerOpcodes.None)
         {
-            Opcode = (uint)opcode;
+            this.opcode = (uint)opcode;
         }
 
         public WorldPacket(byte[] data, uint opcode) : base(data)
         {
-            Opcode = opcode;
+            this.opcode = opcode;
         }
 
         public ObjectGuid ReadPackedGuid()
@@ -201,9 +218,9 @@ namespace Game.Network
             WriteFloat(o);
         }
 
-        public uint GetOpcode() { return Opcode; }
+        public uint GetOpcode() { return opcode; }
 
-        uint Opcode;
+        uint opcode;
     }
 
     public class ServerPacketHeader
