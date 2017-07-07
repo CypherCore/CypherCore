@@ -39,6 +39,16 @@ namespace Framework.Database
             Poolsize = poolSize;
         }
 
+        public MySqlConnectionInfo(ConnectionObject connectionObject, int poolSize = 10)
+        {
+            Host = connectionObject.Host;
+            Port = connectionObject.Port;
+            Username = connectionObject.Username;
+            Password = connectionObject.Password;
+            Database = connectionObject.Database;
+            Poolsize = poolSize;
+        }
+
         public MySqlConnection GetConnection()
         {
             return new MySqlConnection(string.Format("Server={0};Port={1};User Id={2};Password={3};Database={4};Allow Zero Datetime=True;Allow User Variables=True;Pooling=true;MaximumPoolSize={5};",
@@ -64,6 +74,26 @@ namespace Framework.Database
         public MySqlErrorCode Initialize(string infoString)
         {
             _connectionInfo = new MySqlConnectionInfo(infoString);
+            _updater = new DatabaseUpdater<T>(this);
+
+            using (var connection = _connectionInfo.GetConnection())
+            {
+                try
+                {
+                    connection.Open();
+                    Log.outInfo(LogFilter.SqlDriver, "Connected to MySQL(ver: {0}) Database: {1}", connection.ServerVersion, _connectionInfo.Database);
+                    return MySqlErrorCode.None;
+                }
+                catch (MySqlException ex)
+                {
+                    return (MySqlErrorCode)((MySqlException)ex.InnerException).Number;
+                }
+            }
+        }
+
+        public MySqlErrorCode Initialize(ConnectionObject connectionObject)
+        {
+            _connectionInfo = new MySqlConnectionInfo(connectionObject);
             _updater = new DatabaseUpdater<T>(this);
 
             using (var connection = _connectionInfo.GetConnection())

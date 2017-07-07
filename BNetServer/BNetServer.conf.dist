@@ -92,7 +92,11 @@ WrongPass.BanType = 0
 #                                                                           Unix/Linux)
 #        Default:     "127.0.0.1;3306;username;password;auth"
 
-LoginDatabaseInfo = "127.0.0.1;3306;username;password;auth"
+LoginDatabaseInfo.Host = "127.0.0.1"
+LoginDatabaseInfo.Port = "3306"
+LoginDatabaseInfo.Username = "username"
+LoginDatabaseInfo.Password = "password"
+LoginDatabaseInfo.Database = "auth"
 
 #
 #    DBQueryWorkerInterval

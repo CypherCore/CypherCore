@@ -42,10 +42,29 @@ LogsDir = "./Logs"
 #                     "127.0.0.1;3306;username;password;characters" - (CharacterDatabaseInfo)
 #                     "127.0.0.1;3306;username;password;hotfixes"   - (HotfixDatabaseInfo)
 
-LoginDatabaseInfo     = "127.0.0.1;3306;username;password;auth"
-WorldDatabaseInfo     = "127.0.0.1;3306;username;password;world"
-CharacterDatabaseInfo = "127.0.0.1;3306;username;password;characters"
-HotfixDatabaseInfo    = "127.0.0.1;3306;username;password;hotfixes"
+LoginDatabaseInfo.Host = "127.0.0.1"
+LoginDatabaseInfo.Port = "3306"
+LoginDatabaseInfo.Username = "username"
+LoginDatabaseInfo.Password = "password"
+LoginDatabaseInfo.Database = "auth"
+
+WorldDatabaseInfo.Host = "127.0.0.1"
+WorldDatabaseInfo.Port = "3306"
+WorldDatabaseInfo.Username = "username"
+WorldDatabaseInfo.Password = "password"
+WorldDatabaseInfo.Database = "world"
+
+CharacterDatabaseInfo.Host = "127.0.0.1"
+CharacterDatabaseInfo.Port = "3306"
+CharacterDatabaseInfo.Username = "username"
+CharacterDatabaseInfo.Password = "password"
+CharacterDatabaseInfo.Database = "characters"
+
+HotfixDatabaseInfo.Host = "127.0.0.1"
+HotfixDatabaseInfo.Port = "3306"
+HotfixDatabaseInfo.Username = "username"
+HotfixDatabaseInfo.Password = "password"
+HotfixDatabaseInfo.Database = "hotfixes"
 
 #
 #    WorldServerPort
