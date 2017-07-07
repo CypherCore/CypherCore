@@ -1492,6 +1492,12 @@ namespace Game.Entities
                     continue;
                 }
 
+                // target facing is in degrees for 6484 & 9268... (blizz sucks)
+                if (effect.PositionFacing > 2 * Math.PI)
+                    st.target_Orientation = effect.PositionFacing * (float)Math.PI / 180;
+                else
+                    st.target_Orientation = effect.PositionFacing;
+
                 if (effect.TargetA.GetTarget() == Targets.DestDb || effect.TargetB.GetTarget() == Targets.DestDb)
                 {
                     var key = new KeyValuePair<uint, uint>(spellId, effIndex);
