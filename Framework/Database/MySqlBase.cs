@@ -28,17 +28,6 @@ namespace Framework.Database
 {
     public class MySqlConnectionInfo
     {
-        public MySqlConnectionInfo(string info, int poolSize = 10)
-        {
-            var lines = new StringArray(info, ';');
-            Host = lines[0];
-            Port = lines[1];
-            Username = lines[2];
-            Password = lines[3];
-            Database = lines[4];
-            Poolsize = poolSize;
-        }
-
         public MySqlConnectionInfo(ConnectionObject connectionObject, int poolSize = 10)
         {
             Host = connectionObject.Host;
@@ -71,26 +60,6 @@ namespace Framework.Database
 
     public abstract class MySqlBase<T>
     {
-        public MySqlErrorCode Initialize(string infoString)
-        {
-            _connectionInfo = new MySqlConnectionInfo(infoString);
-            _updater = new DatabaseUpdater<T>(this);
-
-            using (var connection = _connectionInfo.GetConnection())
-            {
-                try
-                {
-                    connection.Open();
-                    Log.outInfo(LogFilter.SqlDriver, "Connected to MySQL(ver: {0}) Database: {1}", connection.ServerVersion, _connectionInfo.Database);
-                    return MySqlErrorCode.None;
-                }
-                catch (MySqlException ex)
-                {
-                    return (MySqlErrorCode)((MySqlException)ex.InnerException).Number;
-                }
-            }
-        }
-
         public MySqlErrorCode Initialize(ConnectionObject connectionObject)
         {
             _connectionInfo = new MySqlConnectionInfo(connectionObject);

@@ -35,12 +35,6 @@ LogsDir = "./Logs"
 #    WorldDatabaseInfo
 #    CharacterDatabaseInfo
 #        Description: Database connection settings for the world server.
-#        Example:     "hostname;port;username;password;database"
-
-#        Default:     "127.0.0.1;3306;username;password;auth"       - (LoginDatabaseInfo)
-#                     "127.0.0.1;3306;username;password;world"      - (WorldDatabaseInfo)
-#                     "127.0.0.1;3306;username;password;characters" - (CharacterDatabaseInfo)
-#                     "127.0.0.1;3306;username;password;hotfixes"   - (HotfixDatabaseInfo)
 
 LoginDatabaseInfo.Host = "127.0.0.1"
 LoginDatabaseInfo.Port = "3306"

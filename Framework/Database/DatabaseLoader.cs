@@ -35,16 +35,16 @@ namespace Framework.Database
             bool updatesEnabled = database.IsAutoUpdateEnabled(_updateFlags);
             _open.Add(() =>
             {
-                ConnectionObject co = new ConnectionObject
-                                      {
-                                          Database = ConfigMgr.GetDefaultValue(name + "DatabaseInfo.Database", ""),
-                                          Host = ConfigMgr.GetDefaultValue(name + "DatabaseInfo.Host", ""),
-                                          Password = ConfigMgr.GetDefaultValue(name + "DatabaseInfo.Password", ""),
-                                          Port = ConfigMgr.GetDefaultValue(name + "DatabaseInfo.Port", ""),
-                                          Username = ConfigMgr.GetDefaultValue(name + "DatabaseInfo.Username", "")
-                                      };
+                ConnectionObject connectionObject = new ConnectionObject
+                {
+                    Database = ConfigMgr.GetDefaultValue(name + "DatabaseInfo.Database", ""),
+                    Host = ConfigMgr.GetDefaultValue(name + "DatabaseInfo.Host", ""),
+                    Password = ConfigMgr.GetDefaultValue(name + "DatabaseInfo.Password", ""),
+                    Port = ConfigMgr.GetDefaultValue(name + "DatabaseInfo.Port", ""),
+                    Username = ConfigMgr.GetDefaultValue(name + "DatabaseInfo.Username", "")
+                };
 
-                var error = database.Initialize(co);
+                var error = database.Initialize(connectionObject);
                 if (error != MySqlErrorCode.None)
                 {
                     // Database does not exist
@@ -59,7 +59,7 @@ namespace Framework.Database
                         Log.outInfo(LogFilter.ServerLoading, "Creating database \"{0}\"...", name);
                         string sqlString = string.Format("CREATE DATABASE `{0}` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci", name);
                         // Try to create the database and connect again if auto setup is enabled
-                        if (database.Apply(sqlString) && database.Initialize(co) == MySqlErrorCode.None)
+                        if (database.Apply(sqlString) && database.Initialize(connectionObject) == MySqlErrorCode.None)
                             error = MySqlErrorCode.None;
                     }
 
