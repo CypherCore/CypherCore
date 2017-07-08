@@ -86,7 +86,7 @@ namespace Game
 
             }
 
-            Global.LFGMgr.JoinLfg(GetPlayer(), dfJoin.Roles, newDungeons, dfJoin.Comment);
+            Global.LFGMgr.JoinLfg(GetPlayer(), dfJoin.Roles, newDungeons);
         }
 
         [WorldPacketHandler(ClientOpcodes.DfLeave)]

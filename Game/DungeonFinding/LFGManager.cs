@@ -329,10 +329,10 @@ namespace Game.DungeonFinding
                         if (!gguid.IsEmpty())
                         {
                             SetState(gguid, LfgState.Proposal);
-                            SendLfgUpdateStatus(guid, new LfgUpdateData(LfgUpdateType.ProposalBegin, GetSelectedDungeons(guid), GetComment(guid)), true);
+                            SendLfgUpdateStatus(guid, new LfgUpdateData(LfgUpdateType.ProposalBegin, GetSelectedDungeons(guid)), true);
                         }
                         else
-                            SendLfgUpdateStatus(guid, new LfgUpdateData(LfgUpdateType.ProposalBegin, GetSelectedDungeons(guid), GetComment(guid)), false);
+                            SendLfgUpdateStatus(guid, new LfgUpdateData(LfgUpdateType.ProposalBegin, GetSelectedDungeons(guid)), false);
                         SendLfgUpdateProposal(guid, proposal);
                     }
 
@@ -352,7 +352,7 @@ namespace Game.DungeonFinding
                 m_QueueTimer += diff;
         }
 
-        public void JoinLfg(Player player, LfgRoles roles, List<uint> dungeons, string comment)
+        public void JoinLfg(Player player, LfgRoles roles, List<uint> dungeons)
         {
             if (!player || player.GetSession() == null || dungeons.Empty())
                 return;
@@ -487,8 +487,6 @@ namespace Game.DungeonFinding
                 return;
             }
 
-            SetComment(guid, comment);
-
             if (isRaid)
             {
                 Log.outDebug(LogFilter.Lfg, "Join: [{0}] trying to join raid browser and it's disabled.", guid);
@@ -516,7 +514,7 @@ namespace Game.DungeonFinding
 
                 SetState(gguid, LfgState.Rolecheck);
                 // Send update to player
-                LfgUpdateData updateData = new LfgUpdateData(LfgUpdateType.JoinQueue, dungeons, comment);
+                LfgUpdateData updateData = new LfgUpdateData(LfgUpdateType.JoinQueue, dungeons);
                 for (GroupReference refe = grp.GetFirstMember(); refe != null; refe = refe.next())
                 {
                     Player plrg = refe.GetSource();
@@ -554,7 +552,7 @@ namespace Game.DungeonFinding
                 }
                 // Send update to player
                 SetRoles(guid, roles);
-                player.GetSession().SendLfgUpdateStatus(new LfgUpdateData(LfgUpdateType.JoinQueue, dungeons, comment), false);
+                player.GetSession().SendLfgUpdateStatus(new LfgUpdateData(LfgUpdateType.JoinQueue, dungeons), false);
                 player.GetSession().SendLfgJoinResult(joinData);
                 SetState(gguid, LfgState.Queued);
                 debugNames += player.GetName();
@@ -693,7 +691,7 @@ namespace Game.DungeonFinding
                     case LfgRoleCheckState.Finished:
                         SetState(pguid, LfgState.Queued);
                         SetRoles(pguid, it.Value);
-                        SendLfgUpdateStatus(pguid, new LfgUpdateData(LfgUpdateType.AddedToQueue, dungeons, GetComment(pguid)), true);
+                        SendLfgUpdateStatus(pguid, new LfgUpdateData(LfgUpdateType.AddedToQueue, dungeons), true);
                         break;
                     default:
                         if (roleCheck.leader == pguid)
@@ -1078,10 +1076,10 @@ namespace Game.DungeonFinding
                     if (gguid != guid)
                     {
                         SetState(gguid, LfgState.Queued);
-                        SendLfgUpdateStatus(guid, new LfgUpdateData(LfgUpdateType.AddedToQueue, GetSelectedDungeons(guid), GetComment(guid)), true);
+                        SendLfgUpdateStatus(guid, new LfgUpdateData(LfgUpdateType.AddedToQueue, GetSelectedDungeons(guid)), true);
                     }
                     else
-                        SendLfgUpdateStatus(guid, new LfgUpdateData(LfgUpdateType.AddedToQueue, GetSelectedDungeons(guid), GetComment(guid)), false);
+                        SendLfgUpdateStatus(guid, new LfgUpdateData(LfgUpdateType.AddedToQueue, GetSelectedDungeons(guid)), false);
                 }
             }
 
@@ -1458,12 +1456,6 @@ namespace Game.DungeonFinding
             return roles;
         }
 
-        public string GetComment(ObjectGuid guid)
-        {
-            Log.outDebug(LogFilter.Lfg, "GetComment: [{0}] = {1}", guid, PlayersStore[guid].GetComment());
-            return PlayersStore[guid].GetComment();
-        }
-
         public List<uint> GetSelectedDungeons(ObjectGuid guid)
         {
             Log.outDebug(LogFilter.Lfg, "GetSelectedDungeons: [{0}]", guid);
@@ -1602,13 +1594,6 @@ namespace Game.DungeonFinding
             AddPlayerData(guid);
             Log.outDebug(LogFilter.Lfg, "SetRoles: [{0}] roles: {1}", guid, roles);
             PlayersStore[guid].SetRoles(roles);
-        }
-
-        public void SetComment(ObjectGuid guid, string comment)
-        {
-            AddPlayerData(guid);
-            Log.outDebug(LogFilter.Lfg, "SetComment: [{0}] comment: {1}", guid, comment);
-            PlayersStore[guid].SetComment(comment);
         }
 
         public void SetSelectedDungeons(ObjectGuid guid, List<uint> dungeons)
@@ -1997,27 +1982,23 @@ namespace Game.DungeonFinding
         {
             updateType = _type;
             state = LfgState.None;
-            comment = "";
         }
-        public LfgUpdateData(LfgUpdateType _type, List<uint> _dungeons, string _comment)
+        public LfgUpdateData(LfgUpdateType _type, List<uint> _dungeons)
         {
             updateType = _type;
             state = LfgState.None;
             dungeons = _dungeons;
-            comment = _comment;
         }
-        public LfgUpdateData(LfgUpdateType _type, LfgState _state, List<uint> _dungeons, string _comment = "")
+        public LfgUpdateData(LfgUpdateType _type, LfgState _state, List<uint> _dungeons)
         {
             updateType = _type;
             state = _state;
             dungeons = _dungeons;
-            comment = _comment;
         }
 
         public LfgUpdateType updateType;
         public LfgState state;
         public List<uint> dungeons = new List<uint>();
-        public string comment;
     }
 
     public class LfgQueueStatusData

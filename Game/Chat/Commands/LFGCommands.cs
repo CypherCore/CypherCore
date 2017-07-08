@@ -137,7 +137,7 @@ namespace Game.Chat
             var dungeons = Global.LFGMgr.GetSelectedDungeons(guid);
 
             handler.SendSysMessage(CypherStrings.LfgPlayerInfo, player.GetName(), Global.LFGMgr.GetState(guid), dungeons.Count, LFGQueue.ConcatenateDungeons(dungeons),
-                LFGQueue.GetRolesString(Global.LFGMgr.GetRoles(guid)), Global.LFGMgr.GetComment(guid));
+                LFGQueue.GetRolesString(Global.LFGMgr.GetRoles(guid)));
         }
     }
 }

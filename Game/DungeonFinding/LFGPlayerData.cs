@@ -27,7 +27,6 @@ namespace Game.DungeonFinding
         {
             m_State = LfgState.None;
             m_OldState = LfgState.None;
-            m_Comment = "";
         }
 
         public void SetState(LfgState state)
@@ -38,7 +37,6 @@ namespace Game.DungeonFinding
                 case LfgState.FinishedDungeon:
                     m_Roles = 0;
                     m_SelectedDungeons.Clear();
-                    m_Comment = "";
                     goto case LfgState.Dungeon;
                 case LfgState.Dungeon:
                     m_OldState = state;
@@ -72,11 +70,6 @@ namespace Game.DungeonFinding
             m_Roles = roles;
         }
 
-        public void SetComment(string comment)
-        {
-            m_Comment = comment;
-        }
-
         public void SetSelectedDungeons(List<uint> dungeons)
         {
             m_SelectedDungeons = dungeons;
@@ -107,11 +100,6 @@ namespace Game.DungeonFinding
             return m_Roles;
         }
 
-        public string GetComment()
-        {
-            return m_Comment;
-        }
-
         public List<uint> GetSelectedDungeons()
         {
             return m_SelectedDungeons;
@@ -126,7 +114,6 @@ namespace Game.DungeonFinding
 
         // Queue
         LfgRoles m_Roles;
-        string m_Comment;
         List<uint> m_SelectedDungeons = new List<uint>();
     }
 }

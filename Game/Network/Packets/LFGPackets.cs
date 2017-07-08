@@ -483,20 +483,6 @@ namespace Game.Network.Packets
         }
     }
 
-    class DFSetComment : ClientPacket
-    {
-        public DFSetComment(WorldPacket packet) : base(packet) { }
-
-        public override void Read()
-        {
-            Ticket.Read(_worldPacket);
-            Comment = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(9));
-        }
-
-        public RideTicket Ticket;
-        public string Comment;
-    }
-
     class DFSetRoles : ClientPacket
     {
         public DFSetRoles(WorldPacket packet) : base(packet) { }
