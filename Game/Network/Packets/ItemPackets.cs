@@ -683,17 +683,13 @@ namespace Game.Network.Packets
         public SortReagentBankBags(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
-
     }
 
     class SortBagsResult : ServerPacket
     {
         public SortBagsResult() : base(ServerOpcodes.SortBagsResult, ConnectionType.Instance) { }
 
-        public override void Write()
-        {
-            throw new NotImplementedException();
-        }
+        public override void Write() { }
     }
 
     //Structs
