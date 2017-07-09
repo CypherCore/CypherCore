@@ -65,18 +65,18 @@ namespace Framework.Database
             _connectionInfo = new MySqlConnectionInfo(connectionObject);
             _updater = new DatabaseUpdater<T>(this);
 
-            using (var connection = _connectionInfo.GetConnection())
+            try
             {
-                try
+                using (var connection = _connectionInfo.GetConnection())
                 {
                     connection.Open();
                     Log.outInfo(LogFilter.SqlDriver, "Connected to MySQL(ver: {0}) Database: {1}", connection.ServerVersion, _connectionInfo.Database);
                     return MySqlErrorCode.None;
                 }
-                catch (MySqlException ex)
-                {
-                    return (MySqlErrorCode)((MySqlException)ex.InnerException).Number;
-                }
+            }
+            catch (MySqlException ex)
+            {                
+                return HandleMySQLException(ex);
             }
         }
 
@@ -86,12 +86,12 @@ namespace Framework.Database
         }
         public void Execute(PreparedStatement stmt)
         {
-            using (var Connection = _connectionInfo.GetConnection())
+            try
             {
-                Connection.Open();
-                using (MySqlCommand cmd = Connection.CreateCommand())
+                using (var Connection = _connectionInfo.GetConnection())
                 {
-                    try
+                    Connection.Open();
+                    using (MySqlCommand cmd = Connection.CreateCommand())
                     {
                         cmd.CommandText = stmt.CommandText;
                         foreach (var parameter in stmt.Parameters)
@@ -99,11 +99,11 @@ namespace Framework.Database
 
                         cmd.ExecuteNonQuery();
                     }
-                    catch (MySqlException ex)
-                    {
-                        HandleMySQLException(ex, stmt.CommandText);
-                    }
                 }
+            }
+            catch (MySqlException ex)
+            {
+                HandleMySQLException(ex, stmt.CommandText);
             }
         }
 
@@ -123,13 +123,14 @@ namespace Framework.Database
         public SQLResult Query(PreparedStatement stmt)
         {
             List<object[]> rows = new List<object[]>();
-            using (var Connection = _connectionInfo.GetConnection())
+            try
             {
-                Connection.Open();
-                using (MySqlCommand cmd = Connection.CreateCommand())
+                using (var Connection = _connectionInfo.GetConnection())
                 {
-                    try
+                    Connection.Open();
+                    using (MySqlCommand cmd = Connection.CreateCommand())
                     {
+
                         cmd.CommandText = stmt.CommandText;
                         foreach (var parameter in stmt.Parameters)
                             cmd.Parameters.AddWithValue("@" + parameter.Key, parameter.Value);
@@ -149,11 +150,12 @@ namespace Framework.Database
                             }
                         }
                     }
-                    catch (MySqlException ex)
-                    {
-                        HandleMySQLException(ex, stmt.CommandText);
-                    }
+
                 }
+            }
+            catch (MySqlException ex)
+            {
+                HandleMySQLException(ex, stmt.CommandText);
             }
 
             return new SQLResult(rows);
@@ -177,7 +179,7 @@ namespace Framework.Database
             {
                 using (var Connection = _connectionInfo.GetConnection())
                 {
-                    Connection.Open();
+                    await Connection.OpenAsync();
                     using (MySqlCommand cmd = Connection.CreateCommand())
                     {
                         cmd.CommandText = stmt.CommandText;
@@ -186,7 +188,7 @@ namespace Framework.Database
 
                         using (var reader = await cmd.ExecuteReaderAsync())
                         {
-                            if (reader.Read() && reader.HasRows)
+                            if (await reader.ReadAsync() && reader.HasRows)
                             {
                                 do
                                 {
@@ -195,7 +197,7 @@ namespace Framework.Database
                                     reader.GetValues(row);
                                     rows.Add(row);
                                 }
-                                while (reader.Read());
+                                while (await reader.ReadAsync());
                             }
                         }
                     }
@@ -211,54 +213,51 @@ namespace Framework.Database
 
         public async Task<SQLQueryHolder<R>> DelayQueryHolder<R>(SQLQueryHolder<R> holder)
         {
-            return await Task.Run(async () =>
+            string query = "";
+
+            try
             {
-                string query = "";
-
-                try
+                using (var Connection = _connectionInfo.GetConnection())
                 {
-                    using (var Connection = _connectionInfo.GetConnection())
+                    await Connection.OpenAsync();
+
+                    foreach (var pair in holder.m_queries)
                     {
-                        Connection.Open();
-
-                        foreach (var pair in holder.m_queries)
+                        List<object[]> rows = new List<object[]>();
+                        using (MySqlCommand cmd = Connection.CreateCommand())
                         {
-                            List<object[]> rows = new List<object[]>();
-                            using (MySqlCommand cmd = Connection.CreateCommand())
+                            cmd.CommandText = pair.Value.stmt.CommandText;
+                            foreach (var parameter in pair.Value.stmt.Parameters)
+                                cmd.Parameters.AddWithValue("@" + parameter.Key, parameter.Value);
+
+                            query = cmd.CommandText;
+                            using (var reader = await cmd.ExecuteReaderAsync())
                             {
-                                cmd.CommandText = pair.Value.stmt.CommandText;
-                                foreach (var parameter in pair.Value.stmt.Parameters)
-                                    cmd.Parameters.AddWithValue("@" + parameter.Key, parameter.Value);
-
-                                query = cmd.CommandText;
-                                using (var reader = await cmd.ExecuteReaderAsync())
+                                if (await reader.ReadAsync() && reader.HasRows)
                                 {
-                                    if (reader.Read() && reader.HasRows)
+                                    do
                                     {
-                                        do
-                                        {
-                                            var row = new object[reader.FieldCount];
+                                        var row = new object[reader.FieldCount];
 
-                                            reader.GetValues(row);
-                                            rows.Add(row);
-                                        }
-                                        while (reader.Read());
+                                        reader.GetValues(row);
+                                        rows.Add(row);
                                     }
+                                    while (await reader.ReadAsync());
                                 }
                             }
-
-                            holder.SetResult(pair.Key, new SQLResult(rows));
                         }
-                    }
 
-                    return holder;
+                        holder.SetResult(pair.Key, new SQLResult(rows));
+                    }
                 }
-                catch (MySqlException ex)
-                {
-                    HandleMySQLException(ex, query);
-                    return holder;
-                }
-            });
+
+                return holder;
+            }
+            catch (MySqlException ex)
+            {
+                HandleMySQLException(ex, query);
+                return holder;
+            }
         }
 
         public void LoadPreparedStatements()
@@ -288,43 +287,45 @@ namespace Framework.Database
 
         public bool Apply(string sql)
         {
-            using (var Connection = _connectionInfo.GetConnectionNoDatabase())
+            try
             {
-                using (MySqlCommand cmd = Connection.CreateCommand())
+                using (var Connection = _connectionInfo.GetConnectionNoDatabase())
                 {
-                    try
+                    using (MySqlCommand cmd = Connection.CreateCommand())
                     {
+
                         Connection.Open();
                         cmd.CommandText = sql;
                         return cmd.ExecuteNonQuery() > 0;
                     }
-                    catch (MySqlException ex)
-                    {
-                        HandleMySQLException(ex, sql);
-                        return false;
-                    }
                 }
+            }
+            catch (MySqlException ex)
+            {
+                HandleMySQLException(ex, sql);
+                return false;
             }
         }
 
         public bool ApplyFile(string path)
         {
-            using (var connection = _connectionInfo.GetConnection())
+            try
             {
-                using (MySqlCommand cmd = connection.CreateCommand())
+                using (var connection = _connectionInfo.GetConnection())
                 {
-                    try
+                    using (MySqlCommand cmd = connection.CreateCommand())
                     {
                         connection.Open();
                         cmd.CommandText = File.ReadAllText(path);
                         return cmd.ExecuteNonQuery() > 0;
-                    }
-                    catch (MySqlException ex)
-                    {
-                        HandleMySQLException(ex, path);
-                        return false;
+
                     }
                 }
+            }
+            catch (MySqlException ex)
+            {
+                HandleMySQLException(ex, path);
+                return false;
             }
         }
 
@@ -338,6 +339,7 @@ namespace Framework.Database
             using (var Connection = _connectionInfo.GetConnection())
             {
                 string query = "";
+
                 Connection.Open();
                 using (MySqlTransaction trans = Connection.BeginTransaction())
                 {
@@ -366,13 +368,13 @@ namespace Framework.Database
             }
         }
 
-        void HandleMySQLException(MySqlException ex, string query)
+        MySqlErrorCode HandleMySQLException(MySqlException ex, string query = "")
         {
-            int code = ex.Number;
+            MySqlErrorCode code = (MySqlErrorCode)ex.Number;
             if (ex.InnerException != null)
-                code = ((MySqlException)ex.InnerException).Number;
+                code = (MySqlErrorCode)((MySqlException)ex.InnerException).Number;
 
-            switch ((MySqlErrorCode)code)
+            switch (code)
             {
                 case MySqlErrorCode.BadFieldError:
                 case MySqlErrorCode.NoSuchTable:
@@ -384,6 +386,7 @@ namespace Framework.Database
             }
 
             Log.outError(LogFilter.Sql, "SqlException: {0} SqlQuery: {1}", ex.Message, query);
+            return code;
         }
 
         public DatabaseUpdater<T> GetUpdater()
