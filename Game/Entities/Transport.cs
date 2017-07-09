@@ -252,9 +252,14 @@ namespace Game.Entities
                      3. transport moves from active to inactive grid
                      4. the grid that transport is currently in unloads
                      */
-                    
-                    if (_staticPassengers.Empty() && GetMap().IsGridLoaded(GetPositionX(), GetPositionY())) // 2.
+                    bool gridActive = GetMap().IsGridLoaded(GetPositionX(), GetPositionY());
+
+                    if (_staticPassengers.Empty() && gridActive) // 2.
                         LoadStaticPassengers();
+                    else if (!_staticPassengers.Empty() && !gridActive)
+                        // 4. - if transports stopped on grid edge, some passengers can remain in active grids
+                        //      unload all static passengers otherwise passengers won't load correctly when the grid that transport is currently in becomes active
+                        UnloadStaticPassengers();
                 }
             }
 
@@ -284,10 +289,17 @@ namespace Game.Entities
 
         public void RemovePassenger(WorldObject passenger)
         {
-            _passengers.Remove(passenger);
+            bool erased = _passengers.Remove(passenger);
 
-            if (passenger.IsTypeId(TypeId.Player))
-                Global.ScriptMgr.OnRemovePassenger(this, passenger.ToPlayer());
+            if (erased || _staticPassengers.Remove(passenger))
+            {
+                passenger.SetTransport(null);
+                passenger.m_movementInfo.transport.Reset();
+                Log.outDebug(LogFilter.Transport, "Object {0} removed from transport {1}.", passenger.GetName(), GetName());
+
+                if (passenger.IsTypeId(TypeId.Player))
+                    Global.ScriptMgr.OnRemovePassenger(this, passenger.ToPlayer());
+            }
         }
 
         public Creature CreateNPCPassenger(ulong guid, CreatureData data)
@@ -547,7 +559,6 @@ namespace Game.Entities
             while (!_staticPassengers.Empty())
             {
                 WorldObject obj = _staticPassengers.First();
-                _staticPassengers.RemoveAt(0);
                 obj.AddObjectToRemoveList();   // also removes from _staticPassengers
             }
         }
