@@ -234,7 +234,7 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt8(SlashCmd);
-            _worldPacket.WriteUInt8(_Language);
+            _worldPacket.WriteInt8(_Language);
             _worldPacket.WritePackedGuid(SenderGUID);
             _worldPacket.WritePackedGuid(SenderGuildGUID);
             _worldPacket.WritePackedGuid(SenderAccountGUID);

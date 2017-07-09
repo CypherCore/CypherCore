@@ -17,7 +17,7 @@
 
 namespace Framework.Constants
 {
-    public enum Language : uint
+    public enum Language : int
     {
         Universal = 0,
         Orcish = 1,
@@ -43,7 +43,7 @@ namespace Framework.Constants
         PandarenAlliance = 43,
         PandarenHorde = 44,
         Rikkitun = 168,
-        Addon = 0xffffffff                        // Used By Addons, In 2.4.0 Not Exist, Replaced By Messagetype?
+        Addon = -1                        // Used By Addons, In 2.4.0 Not Exist, Replaced By Messagetype?
     }
 
     public enum CypherStrings
