@@ -90,7 +90,7 @@ namespace Game.Entities
                 group_member = new FormationInfo();
                 group_member.leaderGUID = result.Read<uint>(0);
                 uint memberGUID = result.Read<uint>(1);
-                group_member.groupAI = (byte)result.Read<uint>(4);
+                group_member.groupAI = result.Read<uint>(4);
                 group_member.point_1 = result.Read<ushort>(5);
                 group_member.point_2 = result.Read<ushort>(6);
                 //If creature is group leader we may skip loading of dist/angle
@@ -136,7 +136,7 @@ namespace Game.Entities
         public uint leaderGUID;
         public float follow_dist;
         public float follow_angle;
-        public byte groupAI;
+        public uint groupAI;
         public ushort point_1;
         public ushort point_2;
     }
