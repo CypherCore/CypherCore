@@ -955,10 +955,8 @@ namespace Game.AI
 
     public class SmartGameObjectAI : GameObjectAI
     {
-        public SmartGameObjectAI(GameObject g)
-            : base(g)
+        public SmartGameObjectAI(GameObject g) : base(g)
         {
-            go = g;
             mScript = new SmartScript();
         }
 
@@ -1047,8 +1045,6 @@ namespace Game.AI
 
         public SmartScript GetScript() { return mScript; }
 
-
-        new GameObject go;
         SmartScript mScript;
     }
 
