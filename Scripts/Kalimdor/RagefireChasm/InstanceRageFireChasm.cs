@@ -21,9 +21,9 @@ using Game.Scripting;
 namespace Scripts.Kalimdor
 {
     [Script]
-    public class RageFireChasm : InstanceMapScript
+    public class instance_ragefire_chasm : InstanceMapScript
     {
-        public RageFireChasm() : base("instance_ragefire_chasm", 389) { }
+        public instance_ragefire_chasm() : base("instance_ragefire_chasm", 389) { }
 
         public override InstanceScript GetInstanceScript(InstanceMap map)
         {

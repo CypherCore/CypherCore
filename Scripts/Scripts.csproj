@@ -60,6 +60,7 @@
     <Compile Include="EasternKingdoms\Deadmines\InstanceDeadmines.cs" />
     <Compile Include="EasternKingdoms\TheStockade\BossHogger.cs" />
     <Compile Include="EasternKingdoms\TheStockade\InstanceTheStockade.cs" />
+    <Compile Include="Kalimdor\ZoneAshenvale.cs" />
     <Compile Include="Northrend\AzjolNerub\AzjolNerub\BossAnubarak.cs" />
     <Compile Include="Northrend\AzjolNerub\AzjolNerub\BossKrikthirTheGatewatcher.cs" />
     <Compile Include="Northrend\AzjolNerub\AzjolNerub\BossNadronox.cs" />
@@ -84,8 +85,8 @@
     <Compile Include="EasternKingdoms\Karazhan\OperaEvent.cs" />
     <Compile Include="EasternKingdoms\ScarletEnclave\Chapter1.cs" />
     <Compile Include="EasternKingdoms\EversongWoods.cs" />
-    <Compile Include="Kalimdor\Durotar.cs" />
-    <Compile Include="Kalimdor\RageFireChasm.cs" />
+    <Compile Include="Kalimdor\ZoneDurotar.cs" />
+    <Compile Include="Kalimdor\RagefireChasm\InstanceRageFireChasm.cs" />
     <Compile Include="Northrend\AzjolNerub\Ahnkahet\BossAmanitar.cs" />
     <Compile Include="Northrend\AzjolNerub\Ahnkahet\BossElderNadox.cs" />
     <Compile Include="Northrend\AzjolNerub\Ahnkahet\BossHeraldVolazj.cs" />
