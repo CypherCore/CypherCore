@@ -178,6 +178,14 @@ namespace Game.Entities
             if (groupAI == 0)
                 return;
 
+            if (member == m_leader)
+            {
+                if (!groupAI.HasAnyFlag(GroupAIFlags.MembersAssistLeader))
+                    return;
+            }
+            else if (!groupAI.HasAnyFlag(GroupAIFlags.LeaderAssistsMember))
+                return;
+
             foreach (var pair in m_members)
             {
                 if (m_leader) // avoid crash if leader was killed and reset.
@@ -195,7 +203,7 @@ namespace Game.Entities
                 if (other.GetVictim())
                     continue;
 
-                if (((other != m_leader && groupAI.HasAnyFlag(GroupAIFlags.LeaderAggro)) || (other == m_leader && groupAI.HasAnyFlag(GroupAIFlags.MemberAggro))) && other.IsValidAttackTarget(target))
+                if (((other != m_leader && groupAI.HasAnyFlag(GroupAIFlags.MembersAssistLeader)) || (other == m_leader && groupAI.HasAnyFlag(GroupAIFlags.LeaderAssistsMember))) && other.IsValidAttackTarget(target))
                     other.GetAI().AttackStart(target);
             }
         }
@@ -228,8 +236,7 @@ namespace Game.Entities
             foreach (var pair in m_members)
             {
                 Creature member = pair.Key;
-                GroupAIFlags groupAI = (GroupAIFlags)FormationMgr.CreatureGroupMap[member.GetSpawnId()].groupAI;
-                if (member == m_leader || !member.IsAlive() || member.GetVictim() || !groupAI.HasAnyFlag(GroupAIFlags.Follow))
+                if (member == m_leader || !member.IsAlive() || member.GetVictim() || !pair.Value.groupAI.HasAnyFlag((uint)GroupAIFlags.IdleInFormation))
                     continue;
 
                 if (pair.Value.point_1 != 0)

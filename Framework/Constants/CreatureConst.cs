@@ -338,9 +338,10 @@ namespace Framework.Constants
 
     public enum GroupAIFlags
     {
-        None = 0,          // If any creature from group is attacked, members won't assist and won't follow
-        LeaderAggro = 0x00000001, // The member aggroes if the leader aggroes
-        MemberAggro = 0x00000002, // The leader aggroes if the member aggroes
-        Follow = 0x00000004, // The member will follow the leader
+        None = 0,          // No creature group behavior
+        MembersAssistLeader = 0x01, // The member aggroes if the leader aggroes
+        LeaderAssistsMember = 0x02, // The leader aggroes if the member aggroes
+        MembersAssistMember = (MembersAssistLeader | LeaderAssistsMember), // every member will assist if any member is attacked
+        IdleInFormation = 0x200, // The member will follow the leader when pathing idly
     }
 }
