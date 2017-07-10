@@ -222,12 +222,12 @@ namespace Game.Chat.Commands
             }
 
             // We compare the old, saved password to the entered old password - no chance for the unauthorized.
-            if (!Global.BNetAccountMgr.CheckPassword(handler.GetSession().GetAccountId(), oldPassword))
+            if (!Global.BNetAccountMgr.CheckPassword(handler.GetSession().GetBattlenetAccountId(), oldPassword))
             {
                 handler.SendSysMessage(CypherStrings.CommandWrongoldpassword);
 
                 Log.outInfo(LogFilter.Player, "Battle.net account: {0} (IP: {1}) Character:[{2}] ({3}) Tried to change password, but the provided old password is wrong.",
-                    handler.GetSession().GetAccountId(), handler.GetSession().GetRemoteAddress(), handler.GetSession().GetPlayer().GetName(), handler.GetSession().GetPlayer().GetGUID().ToString());
+                    handler.GetSession().GetBattlenetAccountId(), handler.GetSession().GetRemoteAddress(), handler.GetSession().GetPlayer().GetName(), handler.GetSession().GetPlayer().GetGUID().ToString());
                 return false;
             }
 

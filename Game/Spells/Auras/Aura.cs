@@ -1834,10 +1834,10 @@ namespace Game.Spells
             }
         }
 
-        public virtual void Remove(AuraRemoveMode removeMode = AuraRemoveMode.Default) { }        
+        public virtual void Remove(AuraRemoveMode removeMode = AuraRemoveMode.Default) { }
         #region CallScripts
 
-    bool CallScriptCheckAreaTargetHandlers(Unit target)
+        bool CallScriptCheckAreaTargetHandlers(Unit target)
         {
             bool result = true;
             foreach (var auraScript in m_loadedScripts)
