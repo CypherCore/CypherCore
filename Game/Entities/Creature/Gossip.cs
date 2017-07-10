@@ -315,9 +315,9 @@ namespace Game.Misc
             _session.SendPacket(packet);
         }
 
-        public void SendQuestGiverQuestList(ObjectGuid guid)
+        public void SendQuestGiverQuestListMessage(ObjectGuid guid)
         {
-            QuestGiverQuestList questList = new QuestGiverQuestList();
+            QuestGiverQuestListMessage questList = new QuestGiverQuestListMessage();
             questList.QuestGiverGUID = guid;
 
             QuestGreeting questGreeting = Global.ObjectMgr.GetQuestGreeting(guid);
@@ -348,7 +348,7 @@ namespace Game.Misc
                             ObjectManager.GetLocaleString(localeData.LogTitle, locale, ref title);
                     }
 
-                    GossipTextData text = new GossipTextData();
+                    GossipText text = new GossipText();
                     text.QuestID = questID;
                     text.QuestType = questMenuItem.QuestIcon;
                     text.QuestLevel = (uint)quest.Level;
@@ -356,7 +356,7 @@ namespace Game.Misc
                     text.QuestFlagsEx = (uint)quest.FlagsEx;
                     text.Repeatable = false; // NYI
                     text.QuestTitle = title;
-                    questList.GossipTexts.Add(text);
+                    questList.QuestDataText.Add(text);
                 }
             }
 

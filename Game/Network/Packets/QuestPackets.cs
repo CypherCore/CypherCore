@@ -600,20 +600,20 @@ namespace Game.Network.Packets
         public byte Entry;
     }
 
-    public class QuestGiverQuestList : ServerPacket
+    public class QuestGiverQuestListMessage : ServerPacket
     {
-        public QuestGiverQuestList() : base(ServerOpcodes.QuestGiverQuestListMessage) { }
+        public QuestGiverQuestListMessage() : base(ServerOpcodes.QuestGiverQuestListMessage) { }
 
         public override void Write()
         {
             _worldPacket.WritePackedGuid(QuestGiverGUID);
             _worldPacket.WriteUInt32(GreetEmoteDelay);
             _worldPacket.WriteUInt32(GreetEmoteType);
-            _worldPacket.WriteUInt32(GossipTexts.Count);
+            _worldPacket.WriteUInt32(QuestDataText.Count);
             _worldPacket.WriteBits(Greeting.Length, 11);
             _worldPacket.FlushBits();
 
-            foreach (GossipTextData gossip in GossipTexts)
+            foreach (GossipText gossip in QuestDataText)
             {
                 _worldPacket.WriteUInt32(gossip.QuestID);
                 _worldPacket.WriteUInt32(gossip.QuestType);
@@ -634,7 +634,7 @@ namespace Game.Network.Packets
         public ObjectGuid QuestGiverGUID;
         public uint GreetEmoteDelay;
         public uint GreetEmoteType;
-        public List<GossipTextData> GossipTexts = new List<GossipTextData>();
+        public List<GossipText> QuestDataText = new List<GossipText>();
         public string Greeting = "";
     }
 
@@ -1086,9 +1086,9 @@ namespace Game.Network.Packets
         public int Amount;
     }
 
-    public struct GossipTextData
+    public struct GossipText
     {
-        public GossipTextData(uint questID, uint questType, uint questLevel, uint questFlags, uint questFlagsEx, bool repeatable, string questTitle)
+        public GossipText(uint questID, uint questType, uint questLevel, uint questFlags, uint questFlagsEx, bool repeatable, string questTitle)
         {
             QuestID = questID;
             QuestType = questType;

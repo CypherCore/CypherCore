@@ -321,7 +321,7 @@ namespace Game.Entities
                 }
             }
 
-            PlayerTalkClass.SendQuestGiverQuestList(guid);
+            PlayerTalkClass.SendQuestGiverQuestListMessage(guid);
         }
 
         public bool IsActiveQuest(uint quest_id)
