@@ -1048,6 +1048,48 @@ namespace Game.AI
         SmartScript mScript;
     }
 
+    public class SmartSpell : SpellScript
+    {
+        public override bool Load()
+        {
+            mScript.OnInitialize(GetSpell());
+            scriptHolders = Global.SmartAIMgr.GetScript((int)GetSpellInfo().Id, SmartScriptType.Spell);
+            return true;
+        }
+
+        void HandleEffectHit(uint effIndex)
+        {
+            mScript.ProcessEventsFor(SmartEvents.SpellEffectHit);
+        }
+
+        void HandleEffectHitTarget(uint effIndex)
+        {
+            mScript.ProcessEventsFor(SmartEvents.SpellEffectHitTarget);
+        }
+
+        public override void Register()
+        {
+            foreach (var holder in scriptHolders)
+            {
+                switch (holder.GetEventType())
+                {
+                    case SmartEvents.SpellEffectHit:
+                        OnEffectHit.Add(new EffectHandler(HandleEffectHit, holder.Event.spell.effIndex, SpellEffectName.ScriptEffect));
+                        OnEffectHit.Add(new EffectHandler(HandleEffectHit, holder.Event.spell.effIndex, SpellEffectName.Dummy));
+                        break;
+                    case SmartEvents.SpellEffectHitTarget:
+                        OnEffectHitTarget.Add(new EffectHandler(HandleEffectHitTarget, holder.Event.spell.effIndex, SpellEffectName.ScriptEffect));
+                        OnEffectHitTarget.Add(new EffectHandler(HandleEffectHitTarget, holder.Event.spell.effIndex, SpellEffectName.Dummy));
+                        break;
+                }
+
+            }
+        }
+
+        List<SmartScriptHolder> scriptHolders = new List<SmartScriptHolder>();
+        SmartScript mScript = new SmartScript();
+    }
+
     [Script]
     class SmartTrigger : AreaTriggerScript
     {
@@ -1060,7 +1102,7 @@ namespace Game.AI
 
             Log.outDebug(LogFilter.ScriptsAi, "AreaTrigger {0} is using SmartTrigger script", trigger.Id);
             SmartScript script = new SmartScript();
-            script.OnInitialize(null, trigger);
+            script.OnInitialize(trigger);
             script.ProcessEventsFor(SmartEvents.AreatriggerOntrigger, player, trigger.Id);
             return true;
         }
@@ -1074,28 +1116,28 @@ namespace Game.AI
         public override void OnSceneStart(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
             SmartScript smartScript = new SmartScript();
-            smartScript.OnInitialize(null, null, sceneTemplate);
+            smartScript.OnInitialize(sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneStart, player);
         }
 
         public override void OnSceneTriggerEvent(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
         {
             SmartScript smartScript = new SmartScript();
-            smartScript.OnInitialize(null, null, sceneTemplate);
+            smartScript.OnInitialize(sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneTrigger, player, 0, 0, false, null, null, triggerName);
         }
 
         public override void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
             SmartScript smartScript = new SmartScript();
-            smartScript.OnInitialize(null, null, sceneTemplate);
+            smartScript.OnInitialize(sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneCancel, player);
         }
 
         public override void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
             SmartScript smartScript = new SmartScript();
-            smartScript.OnInitialize(null, null, sceneTemplate);
+            smartScript.OnInitialize(sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneComplete, player);
         }
     }

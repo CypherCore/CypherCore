@@ -528,9 +528,13 @@ namespace Game.AI
                                 }
                                 else if (go)
                                     go.CastSpell(obj.ToUnit(), e.Action.cast.spell, triggerFlag);
+                                else if (spellTemplate != null)
+                                {
+                                    spellTemplate.GetCaster().CastSpell(obj.ToUnit(), e.Action.cast.spell, triggerFlag);
+                                }
 
-                                Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_CAST. Creature {0} casts spell {1} on target {2} with castflags {3}",
-                                    me.GetGUID().ToString(), e.Action.cast.spell, obj.GetGUID().ToString(), e.Action.cast.castFlags);
+                                //Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_CAST. Creature {0} casts spell {1} on target {2} with castflags {3}",
+                                   // me.GetGUID().ToString(), e.Action.cast.spell, obj.GetGUID().ToString(), e.Action.cast.castFlags);
                             }
                             else
                                 Log.outDebug(LogFilter.ScriptsAi, "Spell {0} not casted because it has flag SMARTCAST_AURA_NOT_PRESENT and the target (Guid: {1} Entry: {2} Type: {3}) already has the aura",
@@ -2850,6 +2854,12 @@ namespace Game.AI
                         }
                         break;
                     }
+                case SmartTargets.Caster:
+                    {
+                        if (spellTemplate != null)
+                            l.Add(spellTemplate.GetCaster());
+                        break;
+                    }
                 case SmartTargets.Position:
                 default:
                     break;
@@ -3428,6 +3438,9 @@ namespace Game.AI
                         ProcessAction(e, unit, var0, 0, false, null, null, varString);
                         break;
                     }
+                case SmartEvents.SpellEffectHit:
+                    ProcessAction(e, null, var0);
+                    break;
                 default:
                     Log.outError(LogFilter.Sql, "SmartScript.ProcessEvent: Unhandled Event type {0}", e.GetEventType());
                     break;
@@ -3623,7 +3636,7 @@ namespace Game.AI
             }
         }
 
-        void FillScript(List<SmartScriptHolder> e, WorldObject obj, AreaTriggerRecord at, SceneTemplate scene)
+        void FillScript(List<SmartScriptHolder> e, WorldObject obj, AreaTriggerRecord at, SceneTemplate scene, Spell spell = null)
         {
             if (e.Empty())
             {
@@ -3632,6 +3645,8 @@ namespace Game.AI
                 if (at != null)
                     Log.outDebug(LogFilter.ScriptsAi, "SmartScript: EventMap for AreaTrigger {0} is empty but is using SmartScript.", at.Id);
                 if (scene != null)
+                    Log.outDebug(LogFilter.ScriptsAi, "SmartScript: EventMap for SceneId {0} is empty but is using SmartScript.", scene.SceneId);
+                if (spell != null)
                     Log.outDebug(LogFilter.ScriptsAi, "SmartScript: EventMap for SceneId {0} is empty but is using SmartScript.", scene.SceneId);
                 return;
             }
@@ -3656,6 +3671,8 @@ namespace Game.AI
                 Log.outError(LogFilter.Sql, "SmartScript: AreaTrigger {0} has events but no events added to list because of instance flags. NOTE: triggers can not handle any instance flags.", at.Id);
             if (mEvents.Empty() && scene != null)
                 Log.outError(LogFilter.Sql, "SmartScript: SceneId {0} has events but no events added to list because of instance flags. NOTE: scenes can not handle any instance flags.", scene.SceneId);
+            if (mEvents.Empty() && spell != null)
+                Log.outError(LogFilter.Sql, "SmartScript: Spell {0} has events but no events added to list because of instance flags. NOTE: scenes can not handle any instance flags.", spell.GetSpellInfo().Id);
         }
 
         void GetScript()
@@ -3685,9 +3702,14 @@ namespace Game.AI
                 e = Global.SmartAIMgr.GetScript((int)sceneTemplate.SceneId, mScriptType);
                 FillScript(e, null, null, sceneTemplate);
             }
+            else if (spellTemplate != null)
+            {
+                e = Global.SmartAIMgr.GetScript((int)spellTemplate.GetSpellInfo().Id, mScriptType);
+                FillScript(e, null, null, null, spellTemplate);
+            }
         }
 
-        public void OnInitialize(WorldObject obj, AreaTriggerRecord at = null, SceneTemplate scene = null)
+        public void OnInitialize(WorldObject obj)
         {
             if (obj != null)
             {
@@ -3708,21 +3730,9 @@ namespace Game.AI
                         return;
                 }
             }
-            else if (at != null)
-            {
-                mScriptType = SmartScriptType.AreaTrigger;
-                trigger = at;
-                Log.outDebug(LogFilter.ScriptsAi, "SmartScript.OnInitialize: source is AreaTrigger {0}", trigger.Id);
-            }
-            else if (scene != null)
-            {
-                mScriptType = SmartScriptType.Scene;
-                sceneTemplate = scene;
-                Log.outDebug(LogFilter.ScriptsAi, "SmartScript.OnInitialize: source is Scene with id {0}", scene.SceneId);
-            }
             else
             {
-                Log.outError(LogFilter.ScriptsAi, "SmartScript.OnInitialize: !WARNING! Initialized objects are Null.");
+                Log.outError(LogFilter.ScriptsAi, "SmartScript.OnInitialize: !WARNING! Initialized WorldObject is Null.");
                 return;
             }
 
@@ -3734,6 +3744,72 @@ namespace Game.AI
             ProcessEventsFor(SmartEvents.AiInit);
             InstallEvents();
             ProcessEventsFor(SmartEvents.JustCreated);
+        }
+
+        public void OnInitialize(AreaTriggerRecord at)
+        {
+            if (at != null)
+            {
+                mScriptType = SmartScriptType.AreaTrigger;
+                trigger = at;
+                Log.outDebug(LogFilter.ScriptsAi, "SmartScript.OnInitialize: AreaTrigger {0}", trigger.Id);
+            }
+            else
+            {
+                Log.outError(LogFilter.ScriptsAi, "SmartScript.OnInitialize: !WARNING! Initialized AreaTrigger is Null.");
+                return;
+            }
+
+            GetScript();//load copy of script
+
+            foreach (var holder in mEvents)
+                InitTimer(holder);//calculate timers for first time use
+
+            InstallEvents();
+        }
+
+        public void OnInitialize(SceneTemplate scene)
+        {
+            if (scene != null)
+            {
+                mScriptType = SmartScriptType.Scene;
+                sceneTemplate = scene;
+                Log.outDebug(LogFilter.ScriptsAi, "SmartScript.OnInitialize: Scene with id {0}", scene.SceneId);
+            }
+            else
+            {
+                Log.outError(LogFilter.ScriptsAi, "SmartScript.OnInitialize: !WARNING! Initialized Scene is Null.");
+                return;
+            }
+
+            GetScript();//load copy of script
+
+            foreach (var holder in mEvents)
+                InitTimer(holder);//calculate timers for first time use
+
+            InstallEvents();
+        }
+
+        public void OnInitialize(Spell spell)
+        {
+            if (spell != null)
+            {
+                mScriptType = SmartScriptType.Spell;
+                spellTemplate = spell;
+                Log.outDebug(LogFilter.ScriptsAi, "SmartScript.OnInitialize: Spell id {0}", spell.GetSpellInfo().Id);
+            }
+            else
+            {
+                Log.outError(LogFilter.ScriptsAi, "SmartScript.OnInitialize: !WARNING! Initialized Spell is Null.");
+                return;
+            }
+
+            GetScript();//load copy of script
+
+            foreach (var holder in mEvents)
+                InitTimer(holder);//calculate timers for first time use
+
+            InstallEvents();
         }
 
         public void OnMoveInLineOfSight(Unit who)
@@ -4039,6 +4115,7 @@ namespace Game.AI
         ObjectGuid goOrigGUID;
         AreaTriggerRecord trigger;
         SceneTemplate sceneTemplate;
+        Spell spellTemplate;
         SmartScriptType mScriptType;
         uint mEventPhase;
 

@@ -785,7 +785,7 @@ namespace Game
             LoadAutobroadcasts();
 
             // Load and initialize scripts
-            Global.ObjectMgr.LoadSpellScripts();                              // must be after load Creature/Gameobject(Template/Data)
+            //Global.ObjectMgr.LoadSpellScripts();                              // must be after load Creature/Gameobject(Template/Data)
             Global.ObjectMgr.LoadEventScripts();                              // must be after load Creature/Gameobject(Template/Data)
             Global.ObjectMgr.LoadWaypointScripts();
 

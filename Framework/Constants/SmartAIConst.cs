@@ -195,7 +195,11 @@ namespace Framework.Constants
         SceneCancel = 80,      // none
         SceneComplete = 81,      // none
 
-        End = 82
+        //New
+        SpellEffectHit = 82,
+        SpellEffectHitTarget = 83,
+
+        End = 84
     }
 
     public enum SmartActions
@@ -358,7 +362,8 @@ namespace Framework.Constants
         LootRecipients = 27,   // all players that have tagged this creature (for kill credit)
         Farthest = 28,   // maxDist, playerOnly, isInLos
         VehicleAccessory = 29,   // seat number (vehicle can target it's own accessory)
+        Caster = 30,
 
-        End = 30
+        End = 31
     }
 }

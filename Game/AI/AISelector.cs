@@ -19,6 +19,8 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Movement;
 using System.Collections.Generic;
+using Game.Scripting;
+using Game.Spells;
 
 namespace Game.AI
 {
@@ -125,6 +127,25 @@ namespace Game.AI
                     return new SmartGameObjectAI(go);
             }
             return new NullGameObjectAI(go);
+        }
+
+        public static SpellScript SelectSpellScript(Spell spell)
+        {
+            var holder = Global.SmartAIMgr.GetScript((int)spell.GetSpellInfo().Id, SmartScriptType.Spell);
+            if (holder.Empty())
+                return null;
+
+            var script = new SmartSpell();
+
+            script._Init("", spell.GetSpellInfo().Id);
+            if (!script._Load(spell))
+                return null;
+
+            script._Register();
+            if (!script._Validate(spell.GetSpellInfo()))
+                return null;
+
+            return script;
         }
     }
 }

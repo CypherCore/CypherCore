@@ -93,6 +93,15 @@ namespace Game.AI
                                 }
                                 break;
                             }
+                        case SmartScriptType.Spell:
+                            {
+                                if (!Global.SpellMgr.HasSpellInfo((uint)temp.entryOrGuid))
+                                {
+                                    Log.outError(LogFilter.Sql, "SmartAIMgr.LoadSmartAIFromDB: Scene id ({0}) does not exist, skipped loading.", temp.entryOrGuid);
+                                    continue;
+                                }
+                                break;
+                            }
                         case SmartScriptType.TimedActionlist:
                             break;//nothing to check, really
                         default:
@@ -318,6 +327,7 @@ namespace Game.AI
                 case SmartTargets.Stored:
                 case SmartTargets.LootRecipients:
                 case SmartTargets.VehicleAccessory:
+                case SmartTargets.Caster:
                     break;
                 default:
                     Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Not handled target_type({0}), Entry {1} SourceType {2} Event {3} Action {4}, skipped.", e.GetTargetType(), e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType());
@@ -689,6 +699,7 @@ namespace Game.AI
                     case SmartEvents.SceneCancel:
                     case SmartEvents.SceneComplete:
                     case SmartEvents.SceneTrigger:
+                    case SmartEvents.SpellEffectHit:
                         break;
                     default:
                         Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Not handled event_type({0}), Entry {1} SourceType {2} Event {3} Action {4}, skipped.", e.GetEventType(), e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType());
@@ -1512,7 +1523,8 @@ namespace Game.AI
             { SmartEvents.SceneStart,               SmartScriptTypeMaskId.Scene },
             { SmartEvents.SceneTrigger,             SmartScriptTypeMaskId.Scene },
             { SmartEvents.SceneCancel,              SmartScriptTypeMaskId.Scene },
-            { SmartEvents.SceneComplete,            SmartScriptTypeMaskId.Scene }
+            { SmartEvents.SceneComplete,            SmartScriptTypeMaskId.Scene },
+            { SmartEvents.SpellEffectHit,          SmartScriptTypeMaskId.Spell }
         };
     }
 
@@ -1690,6 +1702,9 @@ namespace Game.AI
 
         [FieldOffset(16)]
         public Scene scene;
+
+        [FieldOffset(16)]
+        public Spell spell;
 
         [FieldOffset(16)]
         public Raw raw;
@@ -1896,6 +1911,10 @@ namespace Game.AI
         public struct Scene
         {
             public uint sceneId;
+        }
+        public struct Spell
+        {
+            public uint effIndex;
         }
         public struct Raw
         {
