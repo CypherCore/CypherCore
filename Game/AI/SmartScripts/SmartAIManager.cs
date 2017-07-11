@@ -28,11 +28,18 @@ namespace Game.AI
 {
     public class SmartAIManager : Singleton<SmartAIManager>
     {
-        SmartAIManager() { }
+        SmartAIManager()
+        {
+            for (byte i = 0; i < (int)SmartScriptType.Max; i++)
+                mEventMap[i] = new MultiMap<int, SmartScriptHolder>();
+        }
 
         public void LoadFromDB()
         {
             uint oldMSTime = Time.GetMSTime();
+
+            for (byte i = 0; i < (int)SmartScriptType.Max; i++)
+                mEventMap[i].Clear();  //Drop Existing SmartAI List
 
             PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_SMART_SCRIPTS);
             SQLResult result = DB.World.Query(stmt);
@@ -158,15 +165,13 @@ namespace Game.AI
                     continue;
 
                 // creature entry / guid not found in storage, create empty event list for it and increase counters
-                if (mEventMap[(int)source_type] == null)
-                    mEventMap[(int)source_type] = new MultiMap<int, SmartScriptHolder>();
-
                 if (!mEventMap[(int)source_type].ContainsKey(temp.entryOrGuid))
                     ++count;
 
                 // store the new event
-                mEventMap[(uint)source_type].Add(temp.entryOrGuid, temp);
-            } while (result.NextRow());
+                mEventMap[(int)source_type].Add(temp.entryOrGuid, temp);
+            }
+            while (result.NextRow());
 
             // Post Loading Validation
             for (byte i = 0; i < (int)SmartScriptType.Max; ++i)
@@ -327,7 +332,7 @@ namespace Game.AI
                 case SmartTargets.Stored:
                 case SmartTargets.LootRecipients:
                 case SmartTargets.VehicleAccessory:
-                case SmartTargets.Caster:
+                case SmartTargets.SpellTarget:
                     break;
                 default:
                     Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Not handled target_type({0}), Entry {1} SourceType {2} Event {3} Action {4}, skipped.", e.GetTargetType(), e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType());
@@ -1524,7 +1529,8 @@ namespace Game.AI
             { SmartEvents.SceneTrigger,             SmartScriptTypeMaskId.Scene },
             { SmartEvents.SceneCancel,              SmartScriptTypeMaskId.Scene },
             { SmartEvents.SceneComplete,            SmartScriptTypeMaskId.Scene },
-            { SmartEvents.SpellEffectHit,          SmartScriptTypeMaskId.Spell }
+            { SmartEvents.SpellEffectHit,           SmartScriptTypeMaskId.Spell },
+            { SmartEvents.SpellEffectHitTarget,     SmartScriptTypeMaskId.Spell }
         };
     }
 

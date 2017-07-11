@@ -528,10 +528,8 @@ namespace Game.AI
                                 }
                                 else if (go)
                                     go.CastSpell(obj.ToUnit(), e.Action.cast.spell, triggerFlag);
-                                else if (spellTemplate != null)
-                                {
-                                    spellTemplate.GetCaster().CastSpell(obj.ToUnit(), e.Action.cast.spell, triggerFlag);
-                                }
+                                else if (obj != null)
+                                    obj.ToUnit().CastSpell(obj.ToUnit(), e.Action.cast.spell);
 
                                 //Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_CAST. Creature {0} casts spell {1} on target {2} with castflags {3}",
                                    // me.GetGUID().ToString(), e.Action.cast.spell, obj.GetGUID().ToString(), e.Action.cast.castFlags);
@@ -2854,10 +2852,10 @@ namespace Game.AI
                         }
                         break;
                     }
-                case SmartTargets.Caster:
+                case SmartTargets.SpellTarget:
                     {
                         if (spellTemplate != null)
-                            l.Add(spellTemplate.GetCaster());
+                            l.Add(spellTemplate.m_targets.GetUnitTarget());
                         break;
                     }
                 case SmartTargets.Position:
@@ -3439,7 +3437,7 @@ namespace Game.AI
                         break;
                     }
                 case SmartEvents.SpellEffectHit:
-                    ProcessAction(e, null, var0);
+                    ProcessAction(e, unit, var0);
                     break;
                 default:
                     Log.outError(LogFilter.Sql, "SmartScript.ProcessEvent: Unhandled Event type {0}", e.GetEventType());
@@ -3923,7 +3921,7 @@ namespace Game.AI
             return summoner;
         }
 
-        bool IsUnit(WorldObject obj) { return obj != null && obj.IsTypeId(TypeId.Unit) || obj.IsTypeId(TypeId.Player); }
+        bool IsUnit(WorldObject obj) { return obj != null && (obj.IsTypeId(TypeId.Unit) || obj.IsTypeId(TypeId.Player)); }
         public bool IsPlayer(WorldObject obj) { return obj != null && obj.IsTypeId(TypeId.Player); }
         bool IsCreature(WorldObject obj) { return obj != null && obj.IsTypeId(TypeId.Unit); }
         static bool IsCreatureInControlOfSelf(WorldObject obj)

@@ -1059,7 +1059,7 @@ namespace Game.AI
 
         void HandleEffectHit(uint effIndex)
         {
-            mScript.ProcessEventsFor(SmartEvents.SpellEffectHit);
+            mScript.ProcessEventsFor(SmartEvents.SpellEffectHit, GetCaster());
         }
 
         void HandleEffectHitTarget(uint effIndex)
