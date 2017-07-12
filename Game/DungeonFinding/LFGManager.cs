@@ -495,6 +495,7 @@ namespace Game.DungeonFinding
             }
 
             RideTicket ticket = new RideTicket(guid, GetQueueId(gguid), RideType.Lfg, (int)Time.UnixTime);
+
             string debugNames = "";
             if (grp)                                               // Begin rolecheck
             {
@@ -1333,6 +1334,7 @@ namespace Game.DungeonFinding
                 if (reward == null)
                     continue;
 
+                bool done = false;
                 Quest quest = Global.ObjectMgr.GetQuestTemplate(reward.firstQuest);
                 if (quest == null)
                     continue;
@@ -1342,6 +1344,7 @@ namespace Game.DungeonFinding
                     player.RewardQuest(quest, 0, null, false);
                 else
                 {
+                    done = true;
                     quest = Global.ObjectMgr.GetQuestTemplate(reward.otherQuest);
                     if (quest == null)
                         continue;
