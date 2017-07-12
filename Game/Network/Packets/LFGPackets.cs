@@ -22,99 +22,6 @@ using System.Collections.Generic;
 
 namespace Game.Network.Packets
 {
-    class LfgDisabled : ServerPacket
-    {
-        public LfgDisabled() : base(ServerOpcodes.LfgDisabled, ConnectionType.Instance) { }
-
-        public override void Write() { }
-    }
-
-    class LfgOfferContinue : ServerPacket
-    {
-        public LfgOfferContinue() : base(ServerOpcodes.LfgOfferContinue, ConnectionType.Instance) { }
-
-        public override void Write()
-        {
-            _worldPacket.WriteUInt32(Slot);
-        }
-
-        public uint Slot;
-    }
-
-    class LfgTeleportDenied : ServerPacket
-    {
-        public LfgTeleportDenied() : base(ServerOpcodes.LfgTeleportDenied, ConnectionType.Instance) { }
-
-        public override void Write()
-        {
-            _worldPacket.WriteUInt32(Reason);
-        }
-
-        public LfgTeleportResult Reason;
-    }
-
-    class LfgBootPlayer : ServerPacket
-    {
-        public LfgBootPlayer() : base(ServerOpcodes.LfgBootPlayer, ConnectionType.Instance) { }
-
-        public override void Write()
-        {
-            _worldPacket.WriteBit(Info.VoteInProgress);
-            _worldPacket.WriteBit(Info.VotePassed);
-            _worldPacket.WriteBit(Info.MyVoteCompleted);
-            _worldPacket.WriteBit(Info.MyVote);
-            _worldPacket.WriteBits(Info.Reason.Length, 8);
-            _worldPacket.FlushBits();
-
-            _worldPacket.WritePackedGuid(Info.Target);
-            _worldPacket.WriteUInt32(Info.TotalVotes);
-            _worldPacket.WriteUInt32(Info.BootVotes);
-            _worldPacket.WriteUInt32(Info.TimeLeft);
-            _worldPacket.WriteUInt32(Info.VotesNeeded);
-            _worldPacket.WriteString(Info.Reason);
-        }
-
-        public LfgBootInfo Info = new LfgBootInfo();
-    }
-
-    class RoleChosen : ServerPacket
-    {
-        public RoleChosen() : base(ServerOpcodes.RoleChosen) { }
-
-        public override void Write()
-        {
-            _worldPacket.WritePackedGuid(Player);
-            _worldPacket.WriteUInt32(RoleMask);
-            _worldPacket.WriteBit(Accepted);
-            _worldPacket.FlushBits();
-        }
-
-        public bool Accepted;
-        public LfgRoles RoleMask;
-        public ObjectGuid Player;
-    }
-
-    class DFGetSystemInfo : ClientPacket
-    {
-        public DFGetSystemInfo(WorldPacket packet) : base(packet) { }
-
-        public override void Read()
-        {
-            Player = _worldPacket.HasBit();
-            PartyIndex = _worldPacket.ReadUInt8();
-        }
-
-        public bool Player;
-        public byte PartyIndex;
-    }
-
-    class DFGetJoinStatus : ClientPacket
-    {
-        public DFGetJoinStatus(WorldPacket packet) : base(packet) { }
-
-        public override void Read() { }
-    }
-
     class DFJoin : ClientPacket
     {
         public DFJoin(WorldPacket packet) : base(packet) { }
@@ -122,27 +29,20 @@ namespace Game.Network.Packets
         public override void Read()
         {
             QueueAsGroup = _worldPacket.HasBit();
-            var commentLength = _worldPacket.ReadBits<uint>(8);
-
+            Unknown = _worldPacket.HasBit();
             PartyIndex = _worldPacket.ReadUInt8();
             Roles = (LfgRoles)_worldPacket.ReadUInt32();
+
             var slotsCount = _worldPacket.ReadInt32();
-
-            for (var i = 0; i < 3; ++i) // Needs
-                Needs[i] = _worldPacket.ReadUInt32();
-
-            Comment = _worldPacket.ReadString(commentLength);
-
             for (var i = 0; i < slotsCount; ++i) // Slots
                 Slots.Add(_worldPacket.ReadUInt32());
         }
 
         public bool QueueAsGroup;
-        public LfgRoles Roles;
+        bool Unknown;       // Always false in 7.2.5
         public byte PartyIndex;
-        public string Comment = "";
+        public LfgRoles Roles;
         public List<uint> Slots = new List<uint>();
-        public uint[] Needs = new uint[3];
     }
 
     class DFLeave : ClientPacket
@@ -155,90 +55,6 @@ namespace Game.Network.Packets
         }
 
         public RideTicket Ticket;
-    }
-
-    class LFGJoinResult : ServerPacket
-    {
-        public LFGJoinResult() : base(ServerOpcodes.LfgJoinResult) { }
-
-        public override void Write()
-        {
-            Ticket.Write(_worldPacket);
-
-            _worldPacket.WriteUInt8(Result);
-            _worldPacket.WriteUInt8(ResultDetail);
-
-            _worldPacket.WriteUInt32(BlackList.Count);
-            foreach (var blackList in BlackList)
-            {
-                _worldPacket.WritePackedGuid(blackList.PlayerGuid.Value);
-
-                _worldPacket.WriteUInt32(blackList.BlackListSlots.Count);
-                foreach (var blackListSlot in blackList.BlackListSlots)
-                {
-                    _worldPacket.WriteUInt32(blackListSlot.Slot);
-                    _worldPacket.WriteUInt32(blackListSlot.Reason);
-                    _worldPacket.WriteInt32(blackListSlot.SubReason1);
-                    _worldPacket.WriteInt32(blackListSlot.SubReason2);
-                }
-            }
-        }
-
-        public byte Result;
-        public List<LFGBlackList> BlackList = new List<LFGBlackList>();
-        public byte ResultDetail;
-        public RideTicket Ticket;
-    }
-
-    class LFGUpdateStatus : ServerPacket
-    {
-        public LFGUpdateStatus() : base(ServerOpcodes.LfgUpdateStatus) { }
-
-        public override void Write()
-        {
-            Ticket.Write(_worldPacket);
-
-            _worldPacket.WriteUInt8(SubType);
-            _worldPacket.WriteUInt8(Reason);
-
-            for (int i = 0; i < 3; i++)
-                _worldPacket.WriteUInt8(Needs[i]);
-
-            _worldPacket.WriteUInt32(Slots.Count);
-            _worldPacket.WriteUInt32(RequestedRoles);
-            _worldPacket.WriteUInt32(SuspendedPlayers.Count);
-
-            foreach (var slot in Slots)
-                _worldPacket.WriteUInt32(slot);
-
-            foreach (var player in SuspendedPlayers)
-                _worldPacket.WritePackedGuid(player);
-
-            _worldPacket.WriteBit(IsParty);
-            _worldPacket.WriteBit(NotifyUI);
-            _worldPacket.WriteBit(Joined);
-            _worldPacket.WriteBit(LfgJoined);
-            _worldPacket.WriteBit(Queued);
-
-            _worldPacket.WriteBits(Comment.Length, 8);
-            _worldPacket.WriteString(Comment);
-        }
-
-        public RideTicket Ticket;
-        public byte SubType;
-        public byte Reason;
-        public byte[] Needs = new byte[3];
-        public uint RequestedRoles;
-
-        public List<uint> Slots = new List<uint>();
-        public List<ObjectGuid> SuspendedPlayers = new List<ObjectGuid>();
-
-        public bool IsParty;
-        public bool NotifyUI;
-        public bool Joined;
-        public bool LfgJoined;
-        public bool Queued;
-        public string Comment = "";
     }
 
     class DFProposalResponse : ClientPacket
@@ -257,230 +73,6 @@ namespace Game.Network.Packets
         public ulong InstanceID;
         public uint ProposalID;
         public bool Accepted;
-    }
-
-    class LFGProposalUpdate : ServerPacket
-    {
-        public LFGProposalUpdate() : base(ServerOpcodes.LfgProposalUpdate) { }
-
-        public override void Write()
-        {
-            Ticket.Write(_worldPacket);
-
-            _worldPacket.WriteUInt64(InstanceID);
-            _worldPacket.WriteUInt32(ProposalID);
-            _worldPacket.WriteUInt32(Slot);
-            _worldPacket.WriteUInt8(State);
-            _worldPacket.WriteUInt32(CompletedMask);
-
-            _worldPacket.WriteUInt32(Players.Count);
-            foreach (var player in Players)
-            {
-                _worldPacket.WriteUInt32(player.Roles);
-
-                _worldPacket.WriteBit(player.Me);
-                _worldPacket.WriteBit(player.SameParty);
-                _worldPacket.WriteBit(player.MyParty);
-                _worldPacket.WriteBit(player.Responded);
-                _worldPacket.WriteBit(player.Accepted);
-                _worldPacket.FlushBits();
-            }
-
-            _worldPacket.WriteBit(ValidCompletedMask);
-            _worldPacket.WriteBit(ProposalSilent);
-            _worldPacket.FlushBits();
-        }
-
-        public RideTicket Ticket;
-        public ulong InstanceID;
-        public uint ProposalID;
-        public uint Slot;
-        public byte State;
-        public uint CompletedMask;
-        public List<LFGProposalUpdatePlayer> Players = new List<LFGProposalUpdatePlayer>();
-        public bool ValidCompletedMask;
-        public bool ProposalSilent;
-
-        public struct LFGProposalUpdatePlayer
-        {
-            public uint Roles;
-            public bool Me;
-            public bool SameParty;
-            public bool MyParty;
-            public bool Responded;
-            public bool Accepted;
-        }
-    }
-
-    class LFGQueueStatus : ServerPacket
-    {
-        public LFGQueueStatus() : base(ServerOpcodes.LfgQueueStatus) { }
-
-        public override void Write()
-        {
-            Ticket.Write(_worldPacket);
-
-            _worldPacket.WriteUInt32(Slot);
-            _worldPacket.WriteUInt32(AvgWaitTime);
-            _worldPacket.WriteUInt32(QueuedTime);
-
-            for (int i = 0; i < 3; i++)
-            {
-                _worldPacket.WriteUInt32(AvgWaitTimeByRole[i]);
-                _worldPacket.WriteUInt8(LastNeeded[i]);
-            }
-
-            _worldPacket.WriteUInt32(AvgWaitTimeMe);
-        }
-
-        public RideTicket Ticket;
-        public uint Slot;
-        public uint AvgWaitTime;
-        public uint QueuedTime;
-        public byte[] LastNeeded = new byte[3];
-        public uint[] AvgWaitTimeByRole = new uint[3];
-        public uint AvgWaitTimeMe;
-    }
-
-    class LfgPlayerInfo : ServerPacket
-    {
-        public LfgPlayerInfo() : base(ServerOpcodes.LfgPlayerInfo) { }
-
-        public override void Write()
-        {
-            _worldPacket.WriteUInt32(Dungeons.Count);
-
-            _worldPacket.WriteBit(BlackList.PlayerGuid.HasValue);
-            _worldPacket.WriteUInt32(BlackList.BlackListSlots.Count);
-
-            if (BlackList.PlayerGuid.HasValue)
-                _worldPacket.WritePackedGuid(BlackList.PlayerGuid.Value);
-
-            foreach (var blackListSlot in BlackList.BlackListSlots)
-            {
-                _worldPacket.WriteUInt32(blackListSlot.Slot);
-                _worldPacket.WriteUInt32(blackListSlot.Reason);
-                _worldPacket.WriteInt32(blackListSlot.SubReason1);
-                _worldPacket.WriteInt32(blackListSlot.SubReason2);
-            }
-
-            foreach (var dungeonInfo in Dungeons)
-            {
-                dungeonInfo.Write(_worldPacket);
-            }
-        }
-
-        public LFGBlackList BlackList;
-        public List<LfgPlayerDungeonInfo> Dungeons = new List<LfgPlayerDungeonInfo>();
-    }
-
-    class LfgPartyInfo : ServerPacket
-    {
-        public LfgPartyInfo() : base(ServerOpcodes.LfgPartyInfo) { }
-
-        public override void Write()
-        {
-            _worldPacket.WriteUInt32(Players.Count);
-            foreach (var blackList in Players)
-            {
-                _worldPacket.WriteBit(blackList.PlayerGuid.HasValue);
-                _worldPacket.WriteUInt32(blackList.BlackListSlots.Count);
-
-                if (blackList.PlayerGuid.HasValue)
-                    _worldPacket.WritePackedGuid(blackList.PlayerGuid.Value);
-
-                foreach (var blackListSlot in blackList.BlackListSlots)
-                {
-                    _worldPacket.WriteUInt32(blackListSlot.Slot);
-                    _worldPacket.WriteUInt32(blackListSlot.Reason);
-                    _worldPacket.WriteInt32(blackListSlot.SubReason1);
-                    _worldPacket.WriteInt32(blackListSlot.SubReason2);
-                }
-            }
-        }
-
-        public List<LFGBlackList> Players = new List<LFGBlackList>();
-    }
-
-    class LFGPlayerReward : ServerPacket
-    {
-        public LFGPlayerReward() : base(ServerOpcodes.LfgPlayerReward) { }
-
-        public override void Write()
-        {
-            _worldPacket.WriteUInt32(ActualSlot); // unconfirmed order
-            _worldPacket.WriteUInt32(QueuedSlot); // unconfirmed order
-            _worldPacket.WriteUInt32(RewardMoney);
-            _worldPacket.WriteUInt32(AddedXP);
-
-            _worldPacket.WriteUInt32(Rewards.Count);
-            foreach (var reward in Rewards)
-            {
-                _worldPacket.WriteUInt32(reward.RewardItem);
-                _worldPacket.WriteUInt32(reward.RewardItemQuantity);
-                _worldPacket.WriteUInt32(reward.BonusCurrency);
-                _worldPacket.WriteBit(reward.IsCurrency);
-                _worldPacket.FlushBits();
-            }
-        }
-
-        public uint ActualSlot;
-        public uint QueuedSlot;
-        public uint RewardMoney;
-        public uint AddedXP;
-        public List<LFGPlayerRewards> Rewards = new List<LFGPlayerRewards>();
-
-        public struct LFGPlayerRewards
-        {
-            public uint RewardItem;
-            public uint RewardItemQuantity;
-            public int BonusCurrency;
-            public bool IsCurrency;
-        }
-    }
-
-    class LFGRoleCheckUpdate : ServerPacket
-    {
-        public LFGRoleCheckUpdate() : base(ServerOpcodes.LfgRoleCheckUpdate) { }
-
-        public override void Write()
-        {
-            _worldPacket.WriteUInt8(PartyIndex);
-            _worldPacket.WriteUInt8(RoleCheckStatus);
-            _worldPacket.WriteUInt32(JoinSlots.Count);
-            _worldPacket.WriteUInt64(BgQueueID);
-            _worldPacket.WriteUInt32(0);// ActivityID);//Not in jam
-            _worldPacket.WriteUInt32(Members.Count);
-
-            foreach (var slot in JoinSlots)
-                _worldPacket.WriteUInt32(slot);
-
-            foreach (var member in Members)
-            {
-                _worldPacket.WritePackedGuid(member.Guid);
-                _worldPacket.WriteUInt32(member.RolesDesired);
-                _worldPacket.WriteUInt8(member.Level);
-                _worldPacket.WriteBit(member.RoleCheckComplete);
-            }
-
-            _worldPacket.WriteBit(IsBeginning);
-            _worldPacket.WriteBit(true);// ShowRoleCheck);//Not in jam
-        }
-
-        public byte PartyIndex;
-        public byte RoleCheckStatus;
-        public ulong BgQueueID;
-        public List<uint> JoinSlots = new List<uint>();
-        public List<LFGRoleCheckUpdateMember> Members = new List<LFGRoleCheckUpdateMember>();
-        public bool IsBeginning;
-
-        public class LFGRoleCheckUpdateMember
-        {
-            public ObjectGuid Guid;
-            public bool RoleCheckComplete;
-            public uint RolesDesired;
-            public byte Level;
-        }
     }
 
     class DFSetRoles : ClientPacket
@@ -521,79 +113,438 @@ namespace Game.Network.Packets
         public bool TeleportOut;
     }
 
-    //Structs
-    public class LfgBootInfo
+    class DFGetSystemInfo : ClientPacket
     {
-        public bool VoteInProgress;
-        public bool VotePassed;
-        public bool MyVoteCompleted;
-        public bool MyVote;
-        public ObjectGuid Target;
-        public uint TotalVotes;
-        public uint BootVotes;
-        public uint TimeLeft;
-        public uint VotesNeeded;
-        public string Reason;
+        public DFGetSystemInfo(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Player = _worldPacket.HasBit();
+            PartyIndex = _worldPacket.ReadUInt8();
+        }
+
+        public byte PartyIndex;
+        public bool Player;
     }
 
-    public struct RideTicket
+    class DFGetJoinStatus : ClientPacket
     {
-        public RideTicket(ObjectGuid requesterGuid, uint id, int type, uint time)
+        public DFGetJoinStatus(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
+    }
+
+    class LfgPlayerInfo : ServerPacket
+    {
+        public LfgPlayerInfo() : base(ServerOpcodes.LfgPlayerInfo, ConnectionType.Instance) { }
+
+        public override void Write()
         {
-            RequesterGuid = requesterGuid;
-            Id = id;
-            Type = type;
-            Time = time;
+            _worldPacket.WriteUInt32(Dungeons.Count);
+            BlackList.Write(_worldPacket);
+
+            foreach (var dungeonInfo in Dungeons)
+                dungeonInfo.Write(_worldPacket);
         }
 
-        public void Read(WorldPacket data)
+        public LFGBlackList BlackList = new LFGBlackList();
+        public List<LfgPlayerDungeonInfo> Dungeons = new List<LfgPlayerDungeonInfo>();
+    }
+
+    class LfgPartyInfo : ServerPacket
+    {
+        public LfgPartyInfo() : base(ServerOpcodes.LfgPartyInfo, ConnectionType.Instance) { }
+
+        public override void Write()
         {
-            RequesterGuid = data.ReadPackedGuid();
-            Id = data.ReadUInt32();
-            Type = data.ReadInt32();
-            Time = data.ReadUInt32();
+            _worldPacket.WriteUInt32(Player.Count);
+            foreach (var blackList in Player)
+                blackList.Write(_worldPacket);
         }
 
-        public void Write(WorldPacket data)
+        public List<LFGBlackList> Player = new List<LFGBlackList>();
+    }
+
+    class LFGUpdateStatus : ServerPacket
+    {
+        public LFGUpdateStatus() : base(ServerOpcodes.LfgUpdateStatus) { }
+
+        public override void Write()
         {
-            data.WritePackedGuid(RequesterGuid);
-            data.WriteUInt32(Id);
-            data.WriteInt32(Type);
-            data.WriteUInt32(Time);
+            Ticket.Write(_worldPacket);
+
+            _worldPacket.WriteUInt8(SubType);
+            _worldPacket.WriteUInt8(Reason);
+            _worldPacket.WriteUInt32(Slots.Count);
+            _worldPacket.WriteUInt32(RequestedRoles);
+            _worldPacket.WriteUInt32(SuspendedPlayers.Count);
+
+            foreach (var slot in Slots)
+                _worldPacket.WriteUInt32(slot);
+
+            foreach (var player in SuspendedPlayers)
+                _worldPacket.WritePackedGuid(player);
+
+            _worldPacket.WriteBit(IsParty);
+            _worldPacket.WriteBit(NotifyUI);
+            _worldPacket.WriteBit(Joined);
+            _worldPacket.WriteBit(LfgJoined);
+            _worldPacket.WriteBit(Queued);
+            _worldPacket.WriteBit(Unused);
+            _worldPacket.FlushBits();
         }
 
-        public ObjectGuid RequesterGuid;
-        public uint Id;
-        public int Type;
-        public uint Time;
+        public RideTicket Ticket;
+        public byte SubType;
+        public byte Reason;
+        public List<uint> Slots = new List<uint>();
+        public uint RequestedRoles;
+        public List<ObjectGuid> SuspendedPlayers = new List<ObjectGuid>();
+        public bool NotifyUI;
+        public bool IsParty;
+        public bool Joined;
+        public bool LfgJoined;
+        public bool Queued;
+        public bool Unused;
+    }
+
+    class RoleChosen : ServerPacket
+    {
+        public RoleChosen() : base(ServerOpcodes.RoleChosen) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(Player);
+            _worldPacket.WriteUInt32(RoleMask);
+            _worldPacket.WriteBit(Accepted);
+            _worldPacket.FlushBits();
+        }
+
+        public ObjectGuid Player;
+        public LfgRoles RoleMask;
+        public bool Accepted;
+    }
+
+    class LFGRoleCheckUpdate : ServerPacket
+    {
+        public LFGRoleCheckUpdate() : base(ServerOpcodes.LfgRoleCheckUpdate) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt8(PartyIndex);
+            _worldPacket.WriteUInt8(RoleCheckStatus);
+            _worldPacket.WriteUInt32(JoinSlots.Count);
+            _worldPacket.WriteUInt64(BgQueueID);
+            _worldPacket.WriteUInt32(GroupFinderActivityID);
+            _worldPacket.WriteUInt32(Members.Count);
+
+            foreach (var slot in JoinSlots)
+                _worldPacket.WriteUInt32(slot);
+
+            _worldPacket.WriteBit(IsBeginning);
+            _worldPacket.WriteBit(IsRequeue);
+            _worldPacket.FlushBits();
+
+            foreach (var member in Members)
+                member.Write(_worldPacket);
+        }
+
+        public byte PartyIndex;
+        public byte RoleCheckStatus;
+        public List<uint> JoinSlots = new List<uint>();
+        public ulong BgQueueID;
+        public int GroupFinderActivityID = 0;
+        public List<LFGRoleCheckUpdateMember> Members = new List<LFGRoleCheckUpdateMember>();
+        public bool IsBeginning;
+        public bool IsRequeue;
+    }
+
+    class LFGJoinResult : ServerPacket
+    {
+        public LFGJoinResult() : base(ServerOpcodes.LfgJoinResult) { }
+
+        public override void Write()
+        {
+            Ticket.Write(_worldPacket);
+
+            _worldPacket.WriteUInt8(Result);
+            _worldPacket.WriteUInt8(ResultDetail);
+            _worldPacket.WriteUInt32(BlackList.Count);
+
+            foreach (LFGJoinBlackList blackList in BlackList)
+                blackList.Write(_worldPacket);
+        }
+
+        public RideTicket Ticket;
+        public byte Result;
+        public byte ResultDetail;
+        public List<LFGJoinBlackList> BlackList = new List<LFGJoinBlackList>();
+    }
+
+    class LFGQueueStatus : ServerPacket
+    {
+        public LFGQueueStatus() : base(ServerOpcodes.LfgQueueStatus) { }
+
+        public override void Write()
+        {
+            Ticket.Write(_worldPacket);
+
+            _worldPacket.WriteUInt32(Slot);
+            _worldPacket.WriteUInt32(AvgWaitTimeMe);
+            _worldPacket.WriteUInt32(AvgWaitTime);
+
+            for (int i = 0; i < 3; i++)
+            {
+                _worldPacket.WriteUInt32(AvgWaitTimeByRole[i]);
+                _worldPacket.WriteUInt8(LastNeeded[i]);
+            }
+
+            _worldPacket.WriteUInt32(QueuedTime);
+        }
+
+        public RideTicket Ticket;
+        public uint Slot;
+        public uint AvgWaitTimeMe;
+        public uint AvgWaitTime;
+        public uint[] AvgWaitTimeByRole = new uint[3];
+        public byte[] LastNeeded = new byte[3];
+        public uint QueuedTime;
+    }
+
+    class LFGPlayerReward : ServerPacket
+    {
+        public LFGPlayerReward() : base(ServerOpcodes.LfgPlayerReward) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(QueuedSlot);
+            _worldPacket.WriteUInt32(ActualSlot);
+            _worldPacket.WriteUInt32(RewardMoney);
+            _worldPacket.WriteUInt32(AddedXP);
+            _worldPacket.WriteUInt32(Rewards.Count);
+
+            foreach (var reward in Rewards)
+                reward.Write(_worldPacket);
+        }
+
+        public uint QueuedSlot;
+        public uint ActualSlot;
+        public uint RewardMoney;
+        public uint AddedXP;
+        public List<LFGPlayerRewards> Rewards = new List<LFGPlayerRewards>();
+    }
+
+    class LfgBootPlayer : ServerPacket
+    {
+        public LfgBootPlayer() : base(ServerOpcodes.LfgBootPlayer, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            Info.Write(_worldPacket);
+        }
+
+        public LfgBootInfo Info = new LfgBootInfo();
+    }
+
+    class LFGProposalUpdate : ServerPacket
+    {
+        public LFGProposalUpdate() : base(ServerOpcodes.LfgProposalUpdate) { }
+
+        public override void Write()
+        {
+            Ticket.Write(_worldPacket);
+
+            _worldPacket.WriteUInt64(InstanceID);
+            _worldPacket.WriteUInt32(ProposalID);
+            _worldPacket.WriteUInt32(Slot);
+            _worldPacket.WriteUInt8(State);
+            _worldPacket.WriteUInt32(CompletedMask);
+            _worldPacket.WriteUInt32(Players.Count);
+            _worldPacket.WriteUInt8(Unused);
+            _worldPacket.WriteBit(ValidCompletedMask);
+            _worldPacket.WriteBit(ProposalSilent);
+            _worldPacket.WriteBit(IsRequeue);
+            _worldPacket.FlushBits();
+
+            foreach (var player in Players)
+                player.Write(_worldPacket);
+        }
+
+        public RideTicket Ticket;
+        public ulong InstanceID;
+        public uint ProposalID;
+        public uint Slot;
+        public byte State;
+        public uint CompletedMask;
+        public byte Unused;
+        public bool ValidCompletedMask;
+        public bool ProposalSilent;
+        public bool IsRequeue;
+        public List<LFGProposalUpdatePlayer> Players = new List<LFGProposalUpdatePlayer>();
+    }
+
+    class LfgDisabled : ServerPacket
+    {
+        public LfgDisabled() : base(ServerOpcodes.LfgDisabled, ConnectionType.Instance) { }
+
+        public override void Write() { }
+    }
+
+    class LfgOfferContinue : ServerPacket
+    {
+        public LfgOfferContinue(uint slot) : base(ServerOpcodes.LfgOfferContinue, ConnectionType.Instance)
+        {
+            Slot = slot;
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(Slot);
+        }
+
+        public uint Slot;
+    }
+
+    class LfgTeleportDenied : ServerPacket
+    {
+        public LfgTeleportDenied(LfgTeleportResult reason) : base(ServerOpcodes.LfgTeleportDenied, ConnectionType.Instance)
+        {
+            Reason = reason;
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBits(Reason, 4);
+            _worldPacket.FlushBits();
+        }
+
+        public LfgTeleportResult Reason;
+    }
+
+    //Structs
+    public class LFGBlackListSlot
+    {
+        public LFGBlackListSlot(uint slot, uint reason, int subReason1, int subReason2)
+        {
+            Slot = slot;
+            Reason = reason;
+            SubReason1 = subReason1;
+            SubReason2 = subReason2;
+        }
+
+        public uint Slot { get; set; }
+        public uint Reason { get; set; }
+        public int SubReason1 { get; set; }
+        public int SubReason2 { get; set; }
     }
 
     public class LFGBlackList
     {
-        public LFGBlackList(Dictionary<uint, Game.DungeonFinding.LfgLockInfoData> lockInfoData)
+        public void Write(WorldPacket data)
         {
-            foreach (var lockInfo in lockInfoData)
-            {
-                var blackListSlot = new LFGBlackList.LFGBlackListSlot();
-                blackListSlot.Slot = lockInfo.Key; // Dungeon entry (id + type)
-                blackListSlot.Reason = (uint)lockInfo.Value.lockStatus;
-                blackListSlot.SubReason1 = lockInfo.Value.requiredItemLevel;
-                blackListSlot.SubReason2 = (int)lockInfo.Value.currentItemLevel;
+            data.WriteBit(PlayerGuid.HasValue);
+            data.WriteUInt32(Slot.Count);
+            if (PlayerGuid.HasValue)
+                data.WritePackedGuid(PlayerGuid.Value);
 
-                BlackListSlots.Add(blackListSlot);
+            foreach (LFGBlackListSlot lfgBlackListSlot in Slot)
+            {
+                data.WriteUInt32(lfgBlackListSlot.Slot);
+                data.WriteUInt32(lfgBlackListSlot.Reason);
+                data.WriteInt32(lfgBlackListSlot.SubReason1);
+                data.WriteInt32(lfgBlackListSlot.SubReason2);
             }
         }
 
         public Optional<ObjectGuid> PlayerGuid;
-        public List<LFGBlackListSlot> BlackListSlots = new List<LFGBlackListSlot>();
+        public List<LFGBlackListSlot> Slot = new List<LFGBlackListSlot>();
+    }
 
-        public class LFGBlackListSlot
+    public struct LfgPlayerQuestRewardItem
+    {
+        public LfgPlayerQuestRewardItem(uint itemId, uint quantity)
         {
-            public uint Slot { get; set; }
-            public uint Reason { get; set; }
-            public int SubReason1 { get; set; }
-            public int SubReason2 { get; set; }
+            ItemID = itemId;
+            Quantity = quantity;
         }
+
+        public uint ItemID;
+        public uint Quantity;
+    }
+
+    public struct LfgPlayerQuestRewardCurrency
+    {
+        public LfgPlayerQuestRewardCurrency(uint currencyId, uint quantity)
+        {
+            CurrencyID = currencyId;
+            Quantity = quantity;
+        }
+
+        public uint CurrencyID;
+        public uint Quantity;
+    }
+
+    public class LfgPlayerQuestReward
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(Mask);
+            data.WriteUInt32(RewardMoney);
+            data.WriteUInt32(RewardXP);
+            data.WriteInt32(Item.Count);
+            data.WriteInt32(Currency.Count);
+            data.WriteInt32(BonusCurrency.Count);
+
+            // Item
+            foreach (var item in Item)
+            {
+                data.WriteUInt32(item.ItemID);
+                data.WriteUInt32(item.Quantity);
+            }
+
+            // Currency
+            foreach (var currency in Currency)
+            {
+                data.WriteUInt32(currency.CurrencyID);
+                data.WriteUInt32(currency.Quantity);
+            }
+
+            // BonusCurrency
+            foreach (var bonusCurrency in BonusCurrency)
+            {
+                data.WriteUInt32(bonusCurrency.CurrencyID);
+                data.WriteUInt32(bonusCurrency.Quantity);
+            }
+
+            data.WriteBit(RewardSpellID.HasValue);
+            data.WriteBit(Unused1.HasValue);
+            data.WriteBit(Unused2.HasValue);
+            data.WriteBit(Honor.HasValue);
+            data.FlushBits();
+
+            if (RewardSpellID.HasValue)
+                data.WriteInt32(RewardSpellID.Value);
+
+            if (Unused1.HasValue)
+                data.WriteInt32(Unused1.Value);
+
+            if (Unused2.HasValue)
+                data.WriteUInt64(Unused2.Value);
+
+            if (Honor.HasValue)
+                data.WriteInt32(Honor.Value);
+        }
+
+        public uint Mask;
+        public uint RewardMoney;
+        public uint RewardXP;
+        public List<LfgPlayerQuestRewardItem> Item = new List<LfgPlayerQuestRewardItem>();
+        public List<LfgPlayerQuestRewardCurrency> Currency = new List<LfgPlayerQuestRewardCurrency>();
+        public List<LfgPlayerQuestRewardCurrency> BonusCurrency = new List<LfgPlayerQuestRewardCurrency>();
+        public Optional<int> RewardSpellID;                              // Only used by SMSG_LFG_PLAYER_INFO
+        public Optional<int> Unused1;
+        public Optional<ulong> Unused2;
+        public Optional<int> Honor;                                      // Only used by SMSG_REQUEST_PVP_REWARDS_RESPONSE
     }
 
     public class LfgPlayerDungeonInfo
@@ -614,22 +565,18 @@ namespace Game.Network.Packets
             data.WriteInt32(PurseLimit);
             data.WriteInt32(Quantity);
             data.WriteInt32(CompletedMask);
-
+            data.WriteUInt32(EncounterMask);
             data.WriteInt32(ShortageReward.Count);
-
-            Rewards.Write(data);
-
-            // ShortageReward
-            foreach (var shortage in ShortageReward)
-                shortage.Write(data);
-
             data.WriteBit(FirstReward);
             data.WriteBit(ShortageEligible);
             data.FlushBits();
+
+            Rewards.Write(data);
+            foreach (var shortageReward in ShortageReward)
+                shortageReward.Write(data);
         }
 
         public uint Slot;
-        public bool FirstReward;
         public int CompletionQuantity;
         public int CompletionLimit;
         public int CompletionCurrencyID;
@@ -643,68 +590,185 @@ namespace Game.Network.Packets
         public int PurseLimit;
         public int Quantity;
         public uint CompletedMask;
+        public uint EncounterMask;
+        public bool FirstReward;
         public bool ShortageEligible;
-        public List<LfgPlayerQuestReward> ShortageReward = new List<LfgPlayerQuestReward>();
         public LfgPlayerQuestReward Rewards = new LfgPlayerQuestReward();
+        public List<LfgPlayerQuestReward> ShortageReward = new List<LfgPlayerQuestReward>();
     }
 
-    public class LfgPlayerQuestReward
+    public class LFGRoleCheckUpdateMember
     {
+        public LFGRoleCheckUpdateMember(ObjectGuid guid, uint rolesDesired, byte level, bool roleCheckComplete)
+        {
+            Guid = guid;
+            RolesDesired = rolesDesired;
+            Level = level;
+            RoleCheckComplete = roleCheckComplete;
+        }
+
         public void Write(WorldPacket data)
         {
-            data.WriteInt32(Mask);
-            data.WriteUInt32(RewardMoney);
-            data.WriteUInt32(RewardXP);
-
-            data.WriteInt32(Items.Count);
-            data.WriteInt32(Currency.Count);
-            data.WriteInt32(BonusCurrency.Count);
-
-            // Item
-            foreach (var item in Items)
-            {
-                data.WriteUInt32(item.ItemID);
-                data.WriteUInt32(item.Quantity);
-            }
-
-            // Currency
-            foreach (var currency in Currency)
-            {
-                data.WriteUInt32(currency.CurrencyID);
-                data.WriteUInt32(currency.Quantity);
-            }
-
-            // BonusCurrency
-            foreach (var currency in BonusCurrency)
-            {
-                data.WriteUInt32(currency.CurrencyID);
-                data.WriteUInt32(currency.Quantity);
-            }
-
-            var bit30 = data.WriteBit(false);
-            if (bit30)
-                data.WriteUInt32(0);
-
+            data.WritePackedGuid(Guid);
+            data.WriteUInt32(RolesDesired);
+            data.WriteUInt8(Level);
+            data.WriteBit(RoleCheckComplete);
             data.FlushBits();
         }
 
-        public uint Mask;
-        public uint RewardMoney;
-        public uint RewardXP;
-        public List<LfgPlayerQuestRewardItem> Items = new List<LfgPlayerQuestRewardItem>();
-        public List<LfgPlayerQuestRewardCurrency> Currency = new List<LfgPlayerQuestRewardCurrency>();
-        public List<LfgPlayerQuestRewardCurrency> BonusCurrency = new List<LfgPlayerQuestRewardCurrency>();
+        public ObjectGuid Guid;
+        public uint RolesDesired;
+        public byte Level;
+        public bool RoleCheckComplete;
+    }
 
-        public struct LfgPlayerQuestRewardItem
+    public struct LFGJoinBlackListSlot
+    {
+        public LFGJoinBlackListSlot(int slot, int reason, int subReason1, int subReason2)
         {
-            public uint ItemID;
-            public uint Quantity;
+            Slot = slot;
+            Reason = reason;
+            SubReason1 = subReason1;
+            SubReason2 = subReason2;
         }
 
-        public struct LfgPlayerQuestRewardCurrency
+        public int Slot { get; set; }
+        public int Reason { get; set; }
+        public int SubReason1 { get; set; }
+        public int SubReason2 { get; set; }
+    }
+
+    public class LFGJoinBlackList
+    {
+        public void Write(WorldPacket data)
         {
-            public uint CurrencyID;
-            public uint Quantity;
+            data.WritePackedGuid(PlayerGuid);
+            data.WriteUInt32(Slots.Count);
+
+            foreach (LFGJoinBlackListSlot lfgBlackListSlot in Slots)
+            {
+                data.WriteInt32(lfgBlackListSlot.Slot);
+                data.WriteInt32(lfgBlackListSlot.Reason);
+                data.WriteInt32(lfgBlackListSlot.SubReason1);
+                data.WriteInt32(lfgBlackListSlot.SubReason2);
+            }
         }
+
+        public ObjectGuid PlayerGuid;
+        public List<LFGJoinBlackListSlot> Slots = new List<LFGJoinBlackListSlot>();
+    }
+
+    public struct LFGPlayerRewards
+    {
+        public LFGPlayerRewards(uint rewardItem, uint rewardItemQuantity, int bonusCurrency, bool isCurrency)
+        {
+            RewardItem = rewardItem;
+            RewardItemQuantity = rewardItemQuantity;
+            BonusCurrency = bonusCurrency;
+            IsCurrency = isCurrency;
+        }
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(RewardItem);
+            data.WriteUInt32(RewardItemQuantity);
+            data.WriteInt32(BonusCurrency);
+            data.WriteBit(IsCurrency);
+            data.FlushBits();
+        }
+
+        public uint RewardItem;
+        public uint RewardItemQuantity;
+        public int BonusCurrency;
+        public bool IsCurrency;
+    }
+
+    public class LfgBootInfo
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteBit(VoteInProgress);
+            data.WriteBit(VotePassed);
+            data.WriteBit(MyVoteCompleted);
+            data.WriteBit(MyVote);
+            data.WriteBits(Reason.Length, 8);
+            data.WritePackedGuid(Target);
+            data.WriteUInt32(TotalVotes);
+            data.WriteUInt32(BootVotes);
+            data.WriteInt32(TimeLeft);
+            data.WriteUInt32(VotesNeeded);
+            data.WriteString(Reason);
+        }
+
+        public bool VoteInProgress;
+        public bool VotePassed;
+        public bool MyVoteCompleted;
+        public bool MyVote;
+        public ObjectGuid Target;
+        public uint TotalVotes;
+        public uint BootVotes;
+        public uint TimeLeft;
+        public uint VotesNeeded;
+        public string Reason = "";
+    }
+
+    public struct LFGProposalUpdatePlayer
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(Roles);
+            data.WriteBit(Me);
+            data.WriteBit(SameParty);
+            data.WriteBit(MyParty);
+            data.WriteBit(Responded);
+            data.WriteBit(Accepted);
+            data.FlushBits();
+        }
+
+        public uint Roles;
+        public bool Me;
+        public bool SameParty;
+        public bool MyParty;
+        public bool Responded;
+        public bool Accepted;
+    }
+
+    public class RideTicket
+    {
+        public RideTicket(ObjectGuid requesterGuid, uint id, RideType type, int time)
+        {
+            RequesterGuid = requesterGuid;
+            Id = id;
+            Type = type;
+            Time = time;
+        }
+
+        public void Read(WorldPacket data)
+        {
+            RequesterGuid = data.ReadPackedGuid();
+            Id = data.ReadUInt32();
+            Type = (RideType)data.ReadUInt32();
+            Time = data.ReadInt32();
+        }
+
+        public void Write(WorldPacket data)
+        {
+            data.WritePackedGuid(RequesterGuid);
+            data.WriteUInt32(Id);
+            data.WriteUInt32(Type);
+            data.WriteInt32(Time);
+        }
+
+        public ObjectGuid RequesterGuid;
+        public uint Id;
+        public RideType Type;
+        public int Time;
+    }
+
+    public enum RideType
+    {
+        None = 0,
+        Battlegrounds = 1,
+        Lfg = 2
     }
 }

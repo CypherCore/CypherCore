@@ -616,7 +616,7 @@ namespace Game.DungeonFinding
                 if (string.IsNullOrEmpty(queueinfo.bestCompatible))
                     FindBestCompatibleInQueue(itQueue.Key, itQueue.Value);
 
-                LfgQueueStatusData queueData = new LfgQueueStatusData(queueId, dungeonId, queueinfo.joinTime, waitTime, wtAvg, wtTank, wtHealer, wtDps, queuedTime, queueinfo.tanks, queueinfo.healers, queueinfo.dps);
+                LfgQueueStatusData queueData = new LfgQueueStatusData(queueId, dungeonId, waitTime, wtAvg, wtTank, wtHealer, wtDps, queuedTime, queueinfo.tanks, queueinfo.healers, queueinfo.dps);
                 foreach (var itPlayer in queueinfo.roles)
                 {
                     ObjectGuid pguid = itPlayer.Key;

@@ -127,8 +127,8 @@ namespace Game.BattleGrounds
         {
             header.Ticket.RequesterGuid = player.GetGUID();
             header.Ticket.Id = ticketId;
-            header.Ticket.Type = bg.isArena() ? (int)arenaType : 1;
-            header.Ticket.Time = joinTime;
+            header.Ticket.Type = RideType.Battlegrounds;
+            header.Ticket.Time = (int)joinTime;
             header.QueueID = bg.GetQueueId();
             header.RangeMin = (byte)bg.GetMinLevel();
             header.RangeMax = (byte)bg.GetMaxLevel();
@@ -138,13 +138,13 @@ namespace Game.BattleGrounds
             header.TournamentRules = false;
         }
 
-        public void BuildBattlegroundStatusNone(out BattlefieldStatusNone battlefieldStatus, Player player, uint ticketId, uint joinTime, ArenaTypes arenaType)
+        public void BuildBattlegroundStatusNone(out BattlefieldStatusNone battlefieldStatus, Player player, uint ticketId, uint joinTime)
         {
             battlefieldStatus = new BattlefieldStatusNone();
             battlefieldStatus.Ticket.RequesterGuid = player.GetGUID();
             battlefieldStatus.Ticket.Id = ticketId;
-            battlefieldStatus.Ticket.Type = (int)arenaType;
-            battlefieldStatus.Ticket.Time = joinTime;
+            battlefieldStatus.Ticket.Type = RideType.Battlegrounds;
+            battlefieldStatus.Ticket.Time = (int)joinTime;
         }
 
         public void BuildBattlegroundStatusNeedConfirmation(out BattlefieldStatusNeedConfirmation battlefieldStatus, Battleground bg, Player player, uint ticketId, uint joinTime, uint timeout, ArenaTypes arenaType)
@@ -183,8 +183,8 @@ namespace Game.BattleGrounds
             battlefieldStatus = new BattlefieldStatusFailed();
             battlefieldStatus.Ticket.RequesterGuid = pPlayer.GetGUID();
             battlefieldStatus.Ticket.Id = ticketId;
-            battlefieldStatus.Ticket.Type = (int)arenaType;
-            battlefieldStatus.Ticket.Time = pPlayer.GetBattlegroundQueueJoinTime(BGQueueTypeId(bg.GetTypeID(), arenaType));
+            battlefieldStatus.Ticket.Type = RideType.Battlegrounds;
+            battlefieldStatus.Ticket.Time = (int)pPlayer.GetBattlegroundQueueJoinTime(BGQueueTypeId(bg.GetTypeID(), arenaType));
             battlefieldStatus.QueueID = bg.GetQueueId();
             battlefieldStatus.Reason = (int)result;
             if (!errorGuid.IsEmpty() && (result == GroupJoinBattlegroundResult.NotInBattleground || result == GroupJoinBattlegroundResult.JoinTimedOut))

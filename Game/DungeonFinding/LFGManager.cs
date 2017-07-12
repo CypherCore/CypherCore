@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
+using Game.Network.Packets;
 
 namespace Game.DungeonFinding
 {
@@ -382,21 +383,21 @@ namespace Game.DungeonFinding
 
             // Check player or group member restrictions
             if (!player.GetSession().HasPermission(RBACPermissions.JoinDungeonFinder))
-                joinData.result = LfgJoinResult.NotMeetReqs;
+                joinData.result = LfgJoinResult.NoSlotsPlayer;
             else if (player.InBattleground() || player.InArena() || player.InBattlegroundQueue())
-                joinData.result = LfgJoinResult.UsingBgSystem;
+                joinData.result = LfgJoinResult.CantUseDungeons;
             else if (player.HasAura(SharedConst.LFGSpellDungeonDeserter))
-                joinData.result = LfgJoinResult.Deserter;
+                joinData.result = LfgJoinResult.DeserterPlayer;
             else if (player.HasAura(SharedConst.LFGSpellDungeonCooldown))
-                joinData.result = LfgJoinResult.RandomCooldown;
+                joinData.result = LfgJoinResult.RandomCooldownPlayer;
             else if (dungeons.Empty())
-                joinData.result = LfgJoinResult.NotMeetReqs;
+                joinData.result = LfgJoinResult.NoSlotsPlayer;
             else if (player.HasAura(9454)) // check Freeze debuff
-                joinData.result = LfgJoinResult.NotMeetReqs;
+                joinData.result = LfgJoinResult.NoSlotsPlayer;
             else if (grp)
             {
                 if (grp.GetMembersCount() > MapConst.MaxGroupSize)
-                    joinData.result = LfgJoinResult.TooMuchMembers;
+                    joinData.result = LfgJoinResult.TooManyMembers;
                 else
                 {
                     byte memberCount = 0;
@@ -406,13 +407,13 @@ namespace Game.DungeonFinding
                         if (plrg)
                         {
                             if (!plrg.GetSession().HasPermission(RBACPermissions.JoinDungeonFinder))
-                                joinData.result = LfgJoinResult.InternalError;
+                                joinData.result = LfgJoinResult.NoLfgObject;
                             if (plrg.HasAura(SharedConst.LFGSpellDungeonDeserter))
-                                joinData.result = LfgJoinResult.PartyDeserter;
+                                joinData.result = LfgJoinResult.DeserterParty;
                             else if (plrg.HasAura(SharedConst.LFGSpellDungeonCooldown))
-                                joinData.result = LfgJoinResult.PartyRandomCooldown;
+                                joinData.result = LfgJoinResult.RandomCooldownParty;
                             else if (plrg.InBattleground() || plrg.InArena() || plrg.InBattlegroundQueue())
-                                joinData.result = LfgJoinResult.UsingBgSystem;
+                                joinData.result = LfgJoinResult.CantUseDungeons;
                             else if (plrg.HasAura(9454)) // check Freeze debuff
                                 joinData.result = LfgJoinResult.PartyNotMeetReqs;
                             ++memberCount;
@@ -421,7 +422,7 @@ namespace Game.DungeonFinding
                     }
 
                     if (joinData.result == LfgJoinResult.Ok && memberCount != grp.GetMembersCount())
-                        joinData.result = LfgJoinResult.Disconnected;
+                        joinData.result = LfgJoinResult.MembersNotPresent;
                 }
             }
             else
@@ -442,23 +443,23 @@ namespace Game.DungeonFinding
                     {
                         case LfgType.RandomDungeon:
                             if (dungeons.Count > 1)               // Only allow 1 random dungeon
-                                joinData.result = LfgJoinResult.DungeonInvalid;
+                                joinData.result = LfgJoinResult.InvalidSlot;
                             else
                                 rDungeonId = dungeons.First();
                             goto case LfgType.Dungeon;
                         case LfgType.Dungeon:
                             if (isRaid)
-                                joinData.result = LfgJoinResult.MixedRaidDungeon;
+                                joinData.result = LfgJoinResult.MismatchedSlots;
                             isDungeon = true;
                             break;
                         case LfgType.Raid:
                             if (isDungeon)
-                                joinData.result = LfgJoinResult.MixedRaidDungeon;
+                                joinData.result = LfgJoinResult.MismatchedSlots;
                             isRaid = true;
                             break;
                         default:
                             Log.outError(LogFilter.Lfg, "Wrong dungeon type {0} for dungeon {1}", type, it);
-                            joinData.result = LfgJoinResult.DungeonInvalid;
+                            joinData.result = LfgJoinResult.InvalidSlot;
                             break;
                     }
                 }
@@ -473,7 +474,7 @@ namespace Game.DungeonFinding
                     // if we have lockmap then there are no compatible dungeons
                     GetCompatibleDungeons(dungeons, players, joinData.lockmap, isContinue);
                     if (dungeons.Empty())
-                        joinData.result = grp ? LfgJoinResult.InternalError : LfgJoinResult.NotMeetReqs;
+                        joinData.result = grp ? LfgJoinResult.NoLfgObject : LfgJoinResult.NoSlotsPlayer;
                 }
             }
 
@@ -493,6 +494,7 @@ namespace Game.DungeonFinding
                 return;
             }
 
+            RideTicket ticket = new RideTicket(guid, GetQueueId(gguid), RideType.Lfg, (int)Time.UnixTime);
             string debugNames = "";
             if (grp)                                               // Begin rolecheck
             {
@@ -523,6 +525,7 @@ namespace Game.DungeonFinding
                         ObjectGuid pguid = plrg.GetGUID();
                         plrg.GetSession().SendLfgUpdateStatus(updateData, true);
                         SetState(pguid, LfgState.Rolecheck);
+                        SetTicket(pguid, ticket);
                         if (!isContinue)
                             SetSelectedDungeons(pguid, dungeons);
                         roleCheck.roles[pguid] = 0;
@@ -551,10 +554,12 @@ namespace Game.DungeonFinding
                     SetSelectedDungeons(guid, dungeons);
                 }
                 // Send update to player
+                SetTicket(guid, ticket);
                 SetRoles(guid, roles);
-                player.GetSession().SendLfgUpdateStatus(new LfgUpdateData(LfgUpdateType.JoinQueue, dungeons), false);
-                player.GetSession().SendLfgJoinResult(joinData);
+                player.GetSession().SendLfgUpdateStatus(new LfgUpdateData(LfgUpdateType.JoinQueueInitial, dungeons), false);
                 SetState(gguid, LfgState.Queued);
+                player.GetSession().SendLfgUpdateStatus(new LfgUpdateData(LfgUpdateType.AddedToQueue, dungeons), false);
+                player.GetSession().SendLfgJoinResult(joinData);
                 debugNames += player.GetName();
             }
             StringBuilder o = new StringBuilder();
@@ -628,6 +633,15 @@ namespace Game.DungeonFinding
             }
         }
 
+        public RideTicket GetTicket(ObjectGuid guid)
+        {
+            var palyerData = PlayersStore.LookupByKey(guid);
+            if (palyerData != null)
+                return palyerData.GetTicket();
+
+            return null;
+        }
+
         public void UpdateRoleCheck(ObjectGuid gguid, ObjectGuid guid = default(ObjectGuid), LfgRoles roles = LfgRoles.None)
         {
             if (gguid.IsEmpty())
@@ -671,11 +685,7 @@ namespace Game.DungeonFinding
             else
                 dungeons = roleCheck.dungeons;
 
-            LfgJoinResult joinResult = LfgJoinResult.Failed;
-            if (roleCheck.state == LfgRoleCheckState.MissingRole || roleCheck.state == LfgRoleCheckState.WrongRoles)
-                joinResult = LfgJoinResult.RoleCheckFailed;
-
-            LfgJoinResultData joinData = new LfgJoinResultData(joinResult, roleCheck.state);
+            LfgJoinResultData joinData = new LfgJoinResultData(LfgJoinResult.RoleCheckFailed, roleCheck.state);
             foreach (var it in roleCheck.roles)
             {
                 ObjectGuid pguid = it.Key;
@@ -1184,7 +1194,7 @@ namespace Game.DungeonFinding
             if (dungeon == null)
             {
                 Log.outDebug(LogFilter.Lfg, "TeleportPlayer: Player {0} not in group/lfggroup or dungeon not found!", player.GetName());
-                player.GetSession().SendLfgTeleportError(LfgTeleportResult.InvalidLocation);
+                player.GetSession().SendLfgTeleportError(LfgTeleportResult.NoReturnLocation);
                 return;
             }
 
@@ -1197,19 +1207,19 @@ namespace Game.DungeonFinding
                 return;
             }
 
-            LfgTeleportResult error = LfgTeleportResult.Ok;
+            LfgTeleportResult error = LfgTeleportResult.None;
             if (!player.IsAlive())
-                error = LfgTeleportResult.PlayerDead;
+                error = LfgTeleportResult.Dead;
             else if (player.IsFalling() || player.HasUnitState(UnitState.Jumping))
                 error = LfgTeleportResult.Falling;
             else if (player.IsMirrorTimerActive(MirrorTimerType.Fatigue))
-                error = LfgTeleportResult.Fatigue;
+                error = LfgTeleportResult.Exhaustion;
             else if (player.GetVehicle())
-                error = LfgTeleportResult.InVehicle;
+                error = LfgTeleportResult.OnTransport;
             else if (!player.GetCharmGUID().IsEmpty())
-                error = LfgTeleportResult.Charming;
+                error = LfgTeleportResult.ImmuneToSummons;
             else if (player.HasAura(9454)) // check Freeze debuff
-                error = LfgTeleportResult.InvalidLocation;
+                error = LfgTeleportResult.NoReturnLocation;
             else if (player.GetMapId() != dungeon.map)  // Do not teleport players in dungeon to the entrance
             {
                 uint mapid = dungeon.map;
@@ -1246,12 +1256,12 @@ namespace Game.DungeonFinding
                 }
 
                 if (!player.TeleportTo(mapid, x, y, z, orientation))
-                    error = LfgTeleportResult.InvalidLocation;
+                    error = LfgTeleportResult.NoReturnLocation;
             }
             else
-                error = LfgTeleportResult.InvalidLocation;
+                error = LfgTeleportResult.NoReturnLocation;
 
-            if (error != LfgTeleportResult.Ok)
+            if (error != LfgTeleportResult.None)
                 player.GetSession().SendLfgTeleportError(error);
 
             Log.outDebug(LogFilter.Lfg, "TeleportPlayer: Player {0} is being teleported in to map {1} (x: {2}, y: {3}, z: {4}) Result: {5}", player.GetName(), dungeon.map, dungeon.x, dungeon.y, dungeon.z, error);
@@ -1323,7 +1333,6 @@ namespace Game.DungeonFinding
                 if (reward == null)
                     continue;
 
-                bool done = false;
                 Quest quest = Global.ObjectMgr.GetQuestTemplate(reward.firstQuest);
                 if (quest == null)
                     continue;
@@ -1333,7 +1342,6 @@ namespace Game.DungeonFinding
                     player.RewardQuest(quest, 0, null, false);
                 else
                 {
-                    done = true;
                     quest = Global.ObjectMgr.GetQuestTemplate(reward.otherQuest);
                     if (quest == null)
                         continue;
@@ -1615,6 +1623,11 @@ namespace Game.DungeonFinding
                 return;
 
             PlayersStore[guid] = new LFGPlayerData();
+        }
+
+        void SetTicket(ObjectGuid guid, RideTicket ticket)
+        {
+            PlayersStore[guid].SetTicket(ticket);
         }
 
         void RemovePlayerData(ObjectGuid guid)
@@ -2003,12 +2016,11 @@ namespace Game.DungeonFinding
 
     public class LfgQueueStatusData
     {
-        public LfgQueueStatusData(byte _queueId = 0, uint _dungeonId = 0, long _joinTime = 0, int _waitTime = -1, int _waitTimeAvg = -1, int _waitTimeTank = -1, int _waitTimeHealer = -1,
+        public LfgQueueStatusData(byte _queueId = 0, uint _dungeonId = 0, int _waitTime = -1, int _waitTimeAvg = -1, int _waitTimeTank = -1, int _waitTimeHealer = -1,
             int _waitTimeDps = -1, uint _queuedTime = 0, byte _tanks = 0, byte _healers = 0, byte _dps = 0)
         {
             queueId = _queueId;
             dungeonId = _dungeonId;
-            joinTime = _joinTime;
             waitTime = _waitTime;
             waitTimeAvg = _waitTimeAvg;
             waitTimeTank = _waitTimeTank;
@@ -2022,7 +2034,6 @@ namespace Game.DungeonFinding
 
         public byte queueId;
         public uint dungeonId;
-        public long joinTime;
         public int waitTime;
         public int waitTimeAvg;
         public int waitTimeTank;

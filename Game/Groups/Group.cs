@@ -1391,7 +1391,7 @@ namespace Game.Groups
             {
                 partyUpdate.LfgInfos.HasValue = true;
 
-                partyUpdate.LfgInfos.Value.Slot = Global.LFGMgr.GetDungeon(m_guid);
+                partyUpdate.LfgInfos.Value.Slot = Global.LFGMgr.GetLFGDungeonEntry(Global.LFGMgr.GetDungeon(m_guid));
                 partyUpdate.LfgInfos.Value.BootCount = 0;
                 partyUpdate.LfgInfos.Value.Aborted = false;
 

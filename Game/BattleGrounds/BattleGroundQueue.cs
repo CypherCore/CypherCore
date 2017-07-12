@@ -336,7 +336,7 @@ namespace Game.BattleGrounds
                                                                    // queue.removeplayer, it causes bugs
 
                     BattlefieldStatusNone battlefieldStatus;
-                    Global.BattlegroundMgr.BuildBattlegroundStatusNone(out battlefieldStatus, plr2, queueSlot, plr2.GetBattlegroundQueueJoinTime(bgQueueTypeId), group.ArenaType);
+                    Global.BattlegroundMgr.BuildBattlegroundStatusNone(out battlefieldStatus, plr2, queueSlot, plr2.GetBattlegroundQueueJoinTime(bgQueueTypeId));
                     plr2.SendPacket(battlefieldStatus);
                 }
                 // then actually delete, this may delete the group as well!
@@ -411,7 +411,7 @@ namespace Game.BattleGrounds
                     BGQueueInviteEvent inviteEvent = new BGQueueInviteEvent(player.GetGUID(), ginfo.IsInvitedToBGInstanceGUID, bgTypeId, ginfo.ArenaType, ginfo.RemoveInviteTime);
                     m_events.AddEvent(inviteEvent, m_events.CalculateTime(BattlegroundConst.InvitationRemindTime));
                     // create automatic remove events
-                    BGQueueRemoveEvent removeEvent = new BGQueueRemoveEvent(player.GetGUID(), ginfo.IsInvitedToBGInstanceGUID, bgTypeId, ginfo.ArenaType, bgQueueTypeId, ginfo.RemoveInviteTime);
+                    BGQueueRemoveEvent removeEvent = new BGQueueRemoveEvent(player.GetGUID(), ginfo.IsInvitedToBGInstanceGUID, bgTypeId, bgQueueTypeId, ginfo.RemoveInviteTime);
                     m_events.AddEvent(removeEvent, m_events.CalculateTime(BattlegroundConst.InviteAcceptWaitTime));
 
                     uint queueSlot = player.GetBattlegroundQueueIndex(bgQueueTypeId);
@@ -1134,12 +1134,11 @@ namespace Game.BattleGrounds
     /// </summary>
     class BGQueueRemoveEvent : BasicEvent
     {
-        public BGQueueRemoveEvent(ObjectGuid pl_guid, uint bgInstanceGUID, BattlegroundTypeId BgTypeId, ArenaTypes arenaType, BattlegroundQueueTypeId bgQueueTypeId, uint removeTime)
+        public BGQueueRemoveEvent(ObjectGuid pl_guid, uint bgInstanceGUID, BattlegroundTypeId BgTypeId, BattlegroundQueueTypeId bgQueueTypeId, uint removeTime)
         {
             m_PlayerGuid = pl_guid;
             m_BgInstanceGUID = bgInstanceGUID;
             m_RemoveTime = removeTime;
-            m_ArenaType = arenaType;
             m_BgTypeId = BgTypeId;
             m_BgQueueTypeId = bgQueueTypeId;
         }
@@ -1171,7 +1170,7 @@ namespace Game.BattleGrounds
                         Global.BattlegroundMgr.ScheduleQueueUpdate(0, 0, m_BgQueueTypeId, m_BgTypeId, bg.GetBracketId());
 
                     BattlefieldStatusNone battlefieldStatus;
-                    Global.BattlegroundMgr.BuildBattlegroundStatusNone(out battlefieldStatus, player, queueSlot, player.GetBattlegroundQueueJoinTime(m_BgQueueTypeId), m_ArenaType);
+                    Global.BattlegroundMgr.BuildBattlegroundStatusNone(out battlefieldStatus, player, queueSlot, player.GetBattlegroundQueueJoinTime(m_BgQueueTypeId));
                     player.SendPacket(battlefieldStatus);
                 }
             }
@@ -1186,7 +1185,6 @@ namespace Game.BattleGrounds
         uint m_BgInstanceGUID;
         uint m_RemoveTime;
         BattlegroundTypeId m_BgTypeId;
-        ArenaTypes m_ArenaType;
         BattlegroundQueueTypeId m_BgQueueTypeId;
     }
 }

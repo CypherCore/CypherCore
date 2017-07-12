@@ -857,7 +857,7 @@ namespace Game.BattleGrounds
                     if (SendPacket)
                     {
                         BattlefieldStatusNone battlefieldStatus;
-                        Global.BattlegroundMgr.BuildBattlegroundStatusNone(out battlefieldStatus, player, player.GetBattlegroundQueueIndex(bgQueueTypeId), player.GetBattlegroundQueueJoinTime(bgQueueTypeId), m_ArenaType);
+                        Global.BattlegroundMgr.BuildBattlegroundStatusNone(out battlefieldStatus, player, player.GetBattlegroundQueueIndex(bgQueueTypeId), player.GetBattlegroundQueueJoinTime(bgQueueTypeId));
                         player.SendPacket(battlefieldStatus);
                     }
 

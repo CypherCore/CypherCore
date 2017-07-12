@@ -34,10 +34,7 @@ namespace Game.DungeonFinding
                 return;
 
             if (!player.GetGroup())
-            {
-                player.GetSession().SendLfgLfrList(false);
                 Global.LFGMgr.LeaveLfg(player.GetGUID());
-            }
             else if (player.GetSession().PlayerDisconnected())
                 Global.LFGMgr.LeaveLfg(player.GetGUID(), true);
         }

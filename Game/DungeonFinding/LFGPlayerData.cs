@@ -18,6 +18,7 @@
 using Framework.Constants;
 using Game.Entities;
 using System.Collections.Generic;
+using Game.Network.Packets;
 
 namespace Game.DungeonFinding
 {
@@ -27,6 +28,11 @@ namespace Game.DungeonFinding
         {
             m_State = LfgState.None;
             m_OldState = LfgState.None;
+        }
+
+        public void SetTicket(RideTicket ticket)
+        {
+            m_Ticket = ticket;
         }
 
         public void SetState(LfgState state)
@@ -75,6 +81,11 @@ namespace Game.DungeonFinding
             m_SelectedDungeons = dungeons;
         }
 
+        public RideTicket GetTicket()
+        {
+            return m_Ticket;
+        }
+
         public LfgState GetState()
         {
             return m_State;
@@ -106,6 +117,7 @@ namespace Game.DungeonFinding
         }
 
         // General
+        RideTicket m_Ticket;
         LfgState m_State;
         LfgState m_OldState;
         // Player
