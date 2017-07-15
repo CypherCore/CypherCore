@@ -131,7 +131,6 @@
     <Compile Include="Cryptography\SARC4.cs" />
     <Compile Include="Cryptography\SessionKeyGeneration.cs" />
     <Compile Include="Cryptography\ShaHmac.cs" />
-    <Compile Include="Database\ConnectionObject.cs" />
     <Compile Include="Database\DatabaseLoader.cs" />
     <Compile Include="Database\Databases\CharacterDatabase.cs" />
     <Compile Include="Database\DatabaseUpdater.cs" />

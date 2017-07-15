@@ -28,26 +28,19 @@ namespace Framework.Database
 {
     public class MySqlConnectionInfo
     {
-        public MySqlConnectionInfo(ConnectionObject connectionObject, int poolSize = 10)
+        public MySqlConnectionInfo(int poolSize = 10)
         {
-            Host = connectionObject.Host;
-            Port = connectionObject.Port;
-            Username = connectionObject.Username;
-            Password = connectionObject.Password;
-            Database = connectionObject.Database;
             Poolsize = poolSize;
         }
 
         public MySqlConnection GetConnection()
         {
-            return new MySqlConnection(string.Format("Server={0};Port={1};User Id={2};Password={3};Database={4};Allow Zero Datetime=True;Allow User Variables=True;Pooling=true;MaximumPoolSize={5};",
-                Host, Port, Username, Password, Database, Poolsize));
+            return new MySqlConnection($"Server={Host};Port={Port};User Id={Username};Password={Password};Database={Database};Allow Zero Datetime=True;Allow User Variables=True;Pooling=true;MaximumPoolSize={Poolsize};");
         }
 
         public MySqlConnection GetConnectionNoDatabase()
         {
-            return new MySqlConnection(string.Format("Server={0};Port={1};User Id={2};Password={3};Allow Zero Datetime=True;Allow User Variables=True;Pooling=true;MaximumPoolSize={4};",
-                Host, Port, Username, Password, Poolsize));
+            return new MySqlConnection($"Server={Host};Port={Port};User Id={Username};Password={Password};Allow Zero Datetime=True;Allow User Variables=True;Pooling=true;MaximumPoolSize={Poolsize};");
         }
 
         public string Host;
@@ -60,9 +53,9 @@ namespace Framework.Database
 
     public abstract class MySqlBase<T>
     {
-        public MySqlErrorCode Initialize(ConnectionObject connectionObject)
+        public MySqlErrorCode Initialize(MySqlConnectionInfo connectionInfo)
         {
-            _connectionInfo = new MySqlConnectionInfo(connectionObject);
+            _connectionInfo = connectionInfo;
             _updater = new DatabaseUpdater<T>(this);
 
             try
@@ -70,7 +63,7 @@ namespace Framework.Database
                 using (var connection = _connectionInfo.GetConnection())
                 {
                     connection.Open();
-                    Log.outInfo(LogFilter.SqlDriver, "Connected to MySQL(ver: {0}) Database: {1}", connection.ServerVersion, _connectionInfo.Database);
+                    Log.outInfo(LogFilter.SqlDriver, $"Connected to MySQL(ver: {connection.ServerVersion}) Database: {_connectionInfo.Database}");
                     return MySqlErrorCode.None;
                 }
             }
@@ -385,7 +378,7 @@ namespace Framework.Database
                     break;
             }
 
-            Log.outError(LogFilter.Sql, "SqlException: {0} SqlQuery: {1}", ex.Message, query);
+            Log.outError(LogFilter.Sql, $"SqlException: {ex.Message} SqlQuery: {query}");
             return code;
         }
 
