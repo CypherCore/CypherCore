@@ -2442,9 +2442,9 @@ namespace Game
                 if (displayEntry == null)
                 {
                     Log.outError(LogFilter.Sql, "Creature (Entry: {0}) lists non-existing Modelid1 id ({1}), this can crash the client.", cInfo.Entry, cInfo.ModelId1);
-                    //cInfo.ModelId1 = 0;
+                    cInfo.ModelId1 = 0;
                 }
-                else if (displayScaleEntry == null)
+                else
                     displayScaleEntry = displayEntry;
 
                 CreatureModelInfo modelInfo = GetCreatureModelInfo(cInfo.ModelId1);

@@ -392,10 +392,10 @@ namespace Game.Movement
             {
                 init.SetFly();
                 init.SetUncompressed();
+                init.SetSmooth();
             }
 
             init.MovebyPath(pathPoints);
-            init.SetSmooth();
             init.SetWalk(walk);
             init.Launch();
 

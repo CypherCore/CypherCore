@@ -1266,8 +1266,7 @@ namespace Game.Groups
 
                 // remove is_blocked so that the item is lootable by all players
                 LootItem item = roll.itemSlot >= roll.getLoot().items.Count ? roll.getLoot().quest_items[roll.itemSlot - roll.getLoot().items.Count] : roll.getLoot().items[roll.itemSlot];
-                if (item != null)
-                    item.is_blocked = false;
+                item.is_blocked = false;
             }
 
             SendLootRollsComplete(roll);

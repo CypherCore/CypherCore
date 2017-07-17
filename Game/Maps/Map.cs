@@ -808,7 +808,7 @@ namespace Game.Maps
 
         public void PlayerRelocation(Player player, float x, float y, float z, float orientation)
         {
-            var oldcell = new Cell(player.GetPositionX(), player.GetPositionY());
+            var oldcell = player.GetCurrentCell();
             var newcell = new Cell(x, y);
 
             //! If hovering, always increase our server-side Z position
@@ -823,8 +823,7 @@ namespace Game.Maps
 
             if (oldcell.DiffGrid(newcell) || oldcell.DiffCell(newcell))
             {
-                Log.outDebug(LogFilter.Maps,
-                    "Player {0} relocation grid[{1}, {2}]cell[{3}, {4}].grid[{5}, {6}]cell[{7}, {8}]",
+                Log.outDebug(LogFilter.Maps, "Player {0} relocation grid[{1}, {2}]cell[{3}, {4}].grid[{5}, {6}]cell[{7}, {8}]",
                     player.GetName(), oldcell.GetGridX(), oldcell.GetGridY(), oldcell.GetCellX(), oldcell.GetCellY(),
                     newcell.GetGridX(), newcell.GetGridY(), newcell.GetCellX(), newcell.GetCellY());
 

@@ -278,11 +278,11 @@ namespace Game.BattleGrounds
                         {
                             //point was uncontrolled and player is from team which captured point
                             if (m_PointState[point] == EotSPointState.Uncontrolled && (uint)player.GetTeam() == pointOwnerTeamId)
-                                EventTeamCapturedPo(player, point);
+                                EventTeamCapturedPoint(player, point);
 
                             //point was under control and player isn't from team which controlled it
                             if (m_PointState[point] == EotSPointState.UnderControl && player.GetTeam() != m_PointOwnedByTeam[point])
-                                EventTeamLostPo(player, point);
+                                EventTeamLostPoint(player, point);
                         }
 
                         /// @workaround The original AreaTrigger is covered by a bigger one and not triggered on client side.
@@ -524,8 +524,7 @@ namespace Game.BattleGrounds
                     Log.outError(LogFilter.Battleground, "BattlegroundEY: Could not spawn Speedbuff Fel Reaver.");
             }
 
-            WorldSafeLocsRecord sg = null;
-            sg = CliDB.WorldSafeLocsStorage.LookupByKey(EotSGaveyardIds.MainAlliance);
+            WorldSafeLocsRecord sg = CliDB.WorldSafeLocsStorage.LookupByKey(EotSGaveyardIds.MainAlliance);
             if (sg == null || !AddSpiritGuide(EotSGaveyardIds.MainAlliance, sg.Loc.X, sg.Loc.Y, sg.Loc.Z, 3.124139f, TeamId.Alliance))
             {
                 Log.outError(LogFilter.Sql, "BatteGroundEY: Failed to spawn spirit guide. The battleground was not created.");
@@ -682,7 +681,7 @@ namespace Game.BattleGrounds
                 SendMessageToAll(CypherStrings.BgEyHasTakenFlag, ChatMsg.BgSystemHorde, null, player.GetName());
         }
 
-        void EventTeamLostPo(Player player, int Point)
+        void EventTeamLostPoint(Player player, int Point)
         {
             if (GetStatus() != BattlegroundStatus.InProgress)
                 return;
@@ -730,7 +729,7 @@ namespace Game.BattleGrounds
                 DelCreature(Point + 6);//null checks are in DelCreature! 0-5 spirit guides
         }
 
-        void EventTeamCapturedPo(Player player, int Point)
+        void EventTeamCapturedPoint(Player player, int Point)
         {
             if (GetStatus() != BattlegroundStatus.InProgress)
                 return;
@@ -769,8 +768,7 @@ namespace Game.BattleGrounds
             if (BgCreatures.ContainsKey(Point) && !BgCreatures[Point].IsEmpty())
                 DelCreature(Point);
 
-            WorldSafeLocsRecord sg = null;
-            sg = CliDB.WorldSafeLocsStorage.LookupByKey(EotSMisc.m_CapturingPointTypes[Point].GraveYardId);
+            WorldSafeLocsRecord sg = CliDB.WorldSafeLocsStorage.LookupByKey(EotSMisc.m_CapturingPointTypes[Point].GraveYardId);
             if (sg == null || !AddSpiritGuide(Point, sg.Loc.X, sg.Loc.Y, sg.Loc.Z, 3.124139f, GetTeamIndexByTeamId(Team)))
                 Log.outError(LogFilter.Battleground, "BatteGroundEY: Failed to spawn spirit guide. point: {0}, team: {1}, graveyard_id: {2}",
                     Point, Team, EotSMisc.m_CapturingPointTypes[Point].GraveYardId);
