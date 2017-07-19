@@ -1126,7 +1126,7 @@ namespace Framework.Constants
     public enum SpellFamilyNames
     {
         Generic = 0,
-        Unk1 = 1,                            // Events, Holidays
+        Events = 1,                            // Events, Holidays
         // 2 - Unused
         Mage = 3,
         Warrior = 4,
@@ -1137,15 +1137,21 @@ namespace Framework.Constants
         Hunter = 9,
         Paladin = 10,
         Shaman = 11,
-        Unk2 = 12,                           // 2 Spells (Silence Resistance)
+        Unk12 = 12,                           // 2 Spells (Silence Resistance)
         Potion = 13,
         // 14 - Unused
         Deathknight = 15,
         // 16 - Unused
         Pet = 17,
-        Unk3 = 50,
+        Totems = 50,
         Monk = 53,
-        WarlockPet = 57
+        WarlockPet = 57,
+        Unk66 = 66,
+        Unk71 = 71,
+        Unk78 = 78,
+        Unk91 = 91,
+        Unk100 = 100,
+        DemonHunter = 107
     }
 
     public enum TriggerCastFlags : uint
@@ -2311,7 +2317,7 @@ namespace Framework.Constants
         DestChannelCaster = 106,
         UnkDestAreaUnk107 = 107, // Not Enough Info - Only Generic Spells Avalible
         GameobjectCone = 108,
-        DestUnk110 = 110, // 1 Spell
+        UnitConeEntry110 = 110,
         Unk111 = 111,
         Unk112 = 112,
         Unk113 = 113,
