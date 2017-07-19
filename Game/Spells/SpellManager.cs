@@ -2646,9 +2646,6 @@ namespace Game.Entities
                 if (!spellInfo._IsPositiveEffect(2, false))
                     spellInfo.AttributesCu |= SpellCustomAttributes.NegativeEff2;
 
-                if (spellInfo.GetSpellVisual() == 3879)
-                    spellInfo.AttributesCu |= SpellCustomAttributes.ConeBack;
-
                 if (talentSpells.Contains(spellInfo.Id))
                     spellInfo.AttributesCu |= SpellCustomAttributes.IsTalent;
 
@@ -2680,6 +2677,10 @@ namespace Game.Entities
                                 spellInfo.Speed = MotionMaster.SPEED_CHARGE;
                             break;
                     }
+
+                    if (effect.TargetA.GetSelectionCategory() == SpellTargetSelectionCategories.Cone || effect.TargetB.GetSelectionCategory() == SpellTargetSelectionCategories.Cone)
+                        if (MathFunctions.fuzzyEq(spellInfo.ConeAngle, 0.0f))
+                            spellInfo.ConeAngle = 90.0f;
                 }
 
                 if (spellInfo.ActiveIconFileDataId == 135754)  // flight

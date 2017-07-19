@@ -228,6 +228,8 @@ namespace Game.Spells
             if (_target != null)
             {
                 targets = (SpellCastTargetFlags)_target.Targets;
+                ConeAngle = _target.ConeAngle;
+                Width = _target.Width;
                 TargetCreatureType = _target.TargetCreatureType;
                 MaxAffectedTargets = _target.MaxAffectedTargets;
                 MaxTargetLevel = _target.MaxTargetLevel;
@@ -2629,6 +2631,8 @@ namespace Game.Spells
         public uint IconFileDataId { get; set; }
         public uint ActiveIconFileDataId { get; set; }
         public LocalizedString SpellName { get; set; }
+        public float ConeAngle { get; set; }
+        public float Width { get; set; }
         public uint MaxTargetLevel { get; set; }
         public uint MaxAffectedTargets { get; set; }
         public SpellFamilyNames SpellFamilyName { get; set; }
@@ -3640,7 +3644,7 @@ namespace Game.Spells
             new StaticData(SpellTargetObjectTypes.None, SpellTargetReferenceTypes.Dest,   SpellTargetSelectionCategories.Nyi,     SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 107 TARGET_UNK_DEST_AREA_UNK_107
             new StaticData(SpellTargetObjectTypes.Gobj, SpellTargetReferenceTypes.Caster, SpellTargetSelectionCategories.Cone,    SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.Front),       // 108 TARGET_GAMEOBJECT_CONE
             new StaticData(SpellTargetObjectTypes.None, SpellTargetReferenceTypes.None,   SpellTargetSelectionCategories.Nyi,     SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 109
-            new StaticData(SpellTargetObjectTypes.Unit, SpellTargetReferenceTypes.Caster, SpellTargetSelectionCategories.Cone,    SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.Front),       // 110 TARGET_DEST_UNK_110
+            new StaticData(SpellTargetObjectTypes.Unit, SpellTargetReferenceTypes.Caster, SpellTargetSelectionCategories.Cone,    SpellTargetCheckTypes.Entry  ,  SpellTargetDirectionTypes.Front),       // 110 TARGET_DEST_UNK_110
             new StaticData(SpellTargetObjectTypes.None, SpellTargetReferenceTypes.None,   SpellTargetSelectionCategories.Nyi,     SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 111
             new StaticData(SpellTargetObjectTypes.Dest, SpellTargetReferenceTypes.Caster, SpellTargetSelectionCategories.Default, SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 112
             new StaticData(SpellTargetObjectTypes.None, SpellTargetReferenceTypes.None,   SpellTargetSelectionCategories.Nyi,     SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 113

@@ -952,10 +952,6 @@ namespace Game.Spells
                 if (GetSpellInfo().IsSingleTarget())
                     return false;
 
-            // Can't be saved - aura handler relies on calculated amount and changes it
-            if (HasEffectType(AuraType.ConvertRune))
-                return false;
-
             // No point in saving this, since the stable dialog can't be open on aura load anyway.
             if (HasEffectType(AuraType.OpenStable))
                 return false;

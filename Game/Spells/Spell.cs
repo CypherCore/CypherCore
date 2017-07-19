@@ -478,8 +478,9 @@ namespace Game.Spells
                             WorldObject target = Global.ObjAccessor.GetUnit(m_caster, channelTarget);
                             CallScriptObjectTargetSelectHandlers(ref target, effIndex, targetType);
                             // unit target may be no longer avalible - teleported out of map for example
-                            if (target && target.IsTypeId(TypeId.Unit))
-                                AddUnitTarget(target.ToUnit(), 1u << (int)effIndex);
+                            Unit unitTarget = target ? target.ToUnit() : null;
+                            if (unitTarget)
+                                AddUnitTarget(unitTarget, 1u << (int)effIndex);
                             else
                                 Log.outDebug(LogFilter.Spells, "SPELL: cannot find channel spell target for spell ID {0}, effect {1}", m_spellInfo.Id, effIndex);
                         }
@@ -636,13 +637,12 @@ namespace Game.Spells
                 return;
 
             var condList = effect.ImplicitTargetConditions;
-            float coneAngle = MathFunctions.PiOver2;
             float radius = effect.CalcRadius(m_caster) * m_spellValue.RadiusMod;
 
             GridMapTypeMask containerTypeMask = GetSearcherTypeMask(objectType, condList);
             if (containerTypeMask != 0)
             {
-                var spellCone = new WorldObjectSpellConeTargetCheck(coneAngle, radius, m_caster, m_spellInfo, selectionType, condList);
+                var spellCone = new WorldObjectSpellConeTargetCheck(MathFunctions.DegToRad(m_spellInfo.ConeAngle), radius, m_caster, m_spellInfo, selectionType, condList);
                 var searcher = new WorldObjectListSearcher(m_caster, targets, spellCone, containerTypeMask);
                 SearchTargets(searcher, containerTypeMask, m_caster, m_caster.GetPosition(), radius);
 
@@ -7637,7 +7637,9 @@ namespace Game.Spells
             else
             {
                 if (!_caster.IsWithinBoundaryRadius(target.ToUnit()))
-                    if (!_caster.isInFront(target, _coneAngle))
+                    // ConeAngle > 0 -> select targets in front
+                    // ConeAngle < 0 -> select targets in back
+                    if (_caster.HasInArc(_coneAngle, target) != MathFunctions.fuzzyGe(_coneAngle, 0.0f))
                         return false;
             }
             return base.Invoke(target);

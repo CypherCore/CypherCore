@@ -92,6 +92,11 @@ public static class MathFunctions
         return a + (b - a) * f;
     }
 
+    public static float DegToRad(float degrees)
+    {
+        return degrees * (2.0f * PI / 360.0f);
+    }
+
     #region Fuzzy
     public static bool fuzzyEq(double a, double b)
     {
@@ -109,13 +114,14 @@ public static class MathFunctions
     {
         return !fuzzyEq(a, b);
     }
-
     public static bool fuzzyLe(double a, double b)
     {
         return a < b + eps(a, b);
     }
-
-
+    public static bool fuzzyGe(double a, double b)
+    {
+        return a > b - eps(a, b);
+    }
     #endregion
 
     public static int ApplyPct(ref int Base, float pct)
