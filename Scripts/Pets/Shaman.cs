@@ -23,111 +23,91 @@ using Game.Scripting;
 namespace Scripts.Pets
 {
     [Script]
-    class npc_pet_shaman_earth_elemental : CreatureScript
+    class npc_pet_shaman_earth_elemental : ScriptedAI
     {
-        public npc_pet_shaman_earth_elemental() : base("npc_pet_shaman_earth_elemental") { }
+        public npc_pet_shaman_earth_elemental(Creature creature) : base(creature) { }
 
-        class npc_pet_shaman_earth_elementalAI : ScriptedAI
+        public override void Reset()
         {
-            public npc_pet_shaman_earth_elementalAI(Creature creature) : base(creature) { }
-
-            public override void Reset()
-            {
-                _events.Reset();
-                _events.ScheduleEvent(EventAngeredEarth, 0);
-                me.ApplySpellImmune(0, SpellImmunity.School, SpellSchoolMask.Nature, true);
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _events.Update(diff);
-
-                if (_events.ExecuteEvent() == EventAngeredEarth)
-                {
-                    DoCastVictim(SpellAngeredEarth);
-                    _events.ScheduleEvent(EventAngeredEarth, RandomHelper.URand(5000, 20000));
-                }
-
-                DoMeleeAttackIfReady();
-            }
-
-            const int EventAngeredEarth = 1;
-            const uint SpellAngeredEarth = 36213;
+            _events.Reset();
+            _events.ScheduleEvent(EventAngeredEarth, 0);
+            me.ApplySpellImmune(0, SpellImmunity.School, SpellSchoolMask.Nature, true);
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void UpdateAI(uint diff)
         {
-            return new npc_pet_shaman_earth_elementalAI(creature);
+            if (!UpdateVictim())
+                return;
+
+            _events.Update(diff);
+
+            if (_events.ExecuteEvent() == EventAngeredEarth)
+            {
+                DoCastVictim(SpellAngeredEarth);
+                _events.ScheduleEvent(EventAngeredEarth, RandomHelper.URand(5000, 20000));
+            }
+
+            DoMeleeAttackIfReady();
         }
+
+        const int EventAngeredEarth = 1;
+        const uint SpellAngeredEarth = 36213;
     }
 
     [Script]
-    class npc_pet_shaman_fire_elemental : CreatureScript
+    public class npc_pet_shaman_fire_elemental : ScriptedAI
     {
-        public npc_pet_shaman_fire_elemental() : base("npc_pet_shaman_fire_elemental") { }
+        public npc_pet_shaman_fire_elemental(Creature creature) : base(creature) { }
 
-        public class npc_pet_shaman_fire_elementalAI : ScriptedAI
+        public override void Reset()
         {
-            public npc_pet_shaman_fire_elementalAI(Creature creature) : base(creature) { }
+            _events.Reset();
+            _events.ScheduleEvent(EventFireNova, RandomHelper.URand(5000, 20000));
+            _events.ScheduleEvent(EventFireBlast, RandomHelper.URand(5000, 20000));
+            _events.ScheduleEvent(EventFireShield, 0);
+            me.ApplySpellImmune(0, SpellImmunity.School, SpellSchoolMask.Fire, true);
+        }
 
-            public override void Reset()
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            _events.Update(diff);
+
+            _events.ExecuteEvents(eventId =>
             {
-                _events.Reset();
-                _events.ScheduleEvent(EventFireNova, RandomHelper.URand(5000, 20000));
-                _events.ScheduleEvent(EventFireBlast, RandomHelper.URand(5000, 20000));
-                _events.ScheduleEvent(EventFireShield, 0);
-                me.ApplySpellImmune(0, SpellImmunity.School, SpellSchoolMask.Fire, true);
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-
-                _events.Update(diff);
-
-                _events.ExecuteEvents(eventId =>
+                switch (eventId)
                 {
-                    switch (eventId)
-                    {
-                        case EventFireNova:
-                            DoCastVictim(SpellFireNova);
-                            _events.ScheduleEvent(EventFireNova, RandomHelper.URand(5000, 20000));
-                            break;
-                        case EventFireShield:
-                            DoCastVictim(SpellFireShield);
-                            _events.ScheduleEvent(EventFireShield, 2000);
-                            break;
-                        case EventFireBlast:
-                            DoCastVictim(SpellFireBlast);
-                            _events.ScheduleEvent(EventFireBlast, RandomHelper.URand(5000, 20000));
-                            break;
-                        default:
-                            break;
-                    }
-                });
+                    case EventFireNova:
+                        DoCastVictim(SpellFireNova);
+                        _events.ScheduleEvent(EventFireNova, RandomHelper.URand(5000, 20000));
+                        break;
+                    case EventFireShield:
+                        DoCastVictim(SpellFireShield);
+                        _events.ScheduleEvent(EventFireShield, 2000);
+                        break;
+                    case EventFireBlast:
+                        DoCastVictim(SpellFireBlast);
+                        _events.ScheduleEvent(EventFireBlast, RandomHelper.URand(5000, 20000));
+                        break;
+                    default:
+                        break;
+                }
+            });
 
-                DoMeleeAttackIfReady();
-            }
-
-            const int EventFireNova = 1;
-            const int EventFireShield = 2;
-            const int EventFireBlast = 3;
-
-            const uint SpellFireBlast = 57984;
-            const uint SpellFireNova = 12470;
-            const uint SpellFireShield = 13376;
+            DoMeleeAttackIfReady();
         }
 
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return new npc_pet_shaman_fire_elementalAI(creature);
-        }
+        const int EventFireNova = 1;
+        const int EventFireShield = 2;
+        const int EventFireBlast = 3;
+
+        const uint SpellFireBlast = 57984;
+        const uint SpellFireNova = 12470;
+        const uint SpellFireShield = 13376;
     }
 }

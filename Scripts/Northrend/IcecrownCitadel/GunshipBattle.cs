@@ -235,7 +235,7 @@ namespace Scripts.Northrend.IcecrownCitadel
 
             new SlotInfo(CreatureIds.SkybreakerMarine, SkybreakerTeleportPortal, 0 ),
             new SlotInfo(CreatureIds.SkybreakerMarine, SkybreakerTeleportPortal, 0 ),
-            
+
             new SlotInfo(CreatureIds.SkybreakerSergeant, SkybreakerTeleportPortal, 0 ),
 
             new SlotInfo(CreatureIds.SkybreakerSergeant, SkybreakerTeleportPortal, 0 )
@@ -246,7 +246,7 @@ namespace Scripts.Northrend.IcecrownCitadel
 
             new SlotInfo(CreatureIds.KorKronBattleMage, 47.29290f, -4.308941f, 37.55550f, 1.570796f, 0 ),
             new SlotInfo(CreatureIds.KorKronBattleMage, 47.34621f,  4.032004f, 37.70952f, 4.817109f, 0 ),
-        
+
             new SlotInfo(CreatureIds.KorKronAxeThrower, -12.09280f, 27.65942f, 33.58557f, 1.53589f, 30 ),
             new SlotInfo(CreatureIds.KorKronAxeThrower, -3.170555f, 28.30652f, 34.21082f, 1.53589f, 30 ),
             new SlotInfo(CreatureIds.KorKronAxeThrower, 14.928040f, 26.18018f, 35.47803f, 1.53589f, 30 ),
@@ -268,7 +268,7 @@ namespace Scripts.Northrend.IcecrownCitadel
 
             new SlotInfo(CreatureIds.KorKronReaver, OrgrimsHammerTeleportPortal, 0 ),
             new SlotInfo(CreatureIds.KorKronReaver, OrgrimsHammerTeleportPortal, 0 ),
-        
+
             new SlotInfo(CreatureIds.KorKronSergeant, OrgrimsHammerTeleportPortal, 0 ),
 
             new SlotInfo(CreatureIds.KorKronSergeant, OrgrimsHammerTeleportPortal, 0 )
@@ -293,7 +293,7 @@ namespace Scripts.Northrend.IcecrownCitadel
         public static Vector3[] SaurfangExitPath =
         {
             new Vector3(30.43987f, 0.1475817f, 36.10674f ),
-            new Vector3(21.36141f, -3.056458f, 35.42970f ),  
+            new Vector3(21.36141f, -3.056458f, 35.42970f ),
             new Vector3(19.11141f, -3.806458f, 35.42970f ),
             new Vector3(19.01736f, -3.299440f, 35.39428f ),
             new Vector3(18.6747f, -5.862823f, 35.66611f ),
@@ -547,8 +547,7 @@ namespace Scripts.Northrend.IcecrownCitadel
 
     class gunship_npc_AI : ScriptedAI
     {
-        public gunship_npc_AI(Creature creature)
-            : base(creature)
+        public gunship_npc_AI(Creature creature) : base(creature)
         {
             Instance = creature.GetInstanceScript();
             Slot = null;
@@ -673,744 +672,701 @@ namespace Scripts.Northrend.IcecrownCitadel
     }
 
     [Script]
-    class npc_gunship : CreatureScript
+    class npc_gunship : NullCreatureAI
     {
-        public npc_gunship() : base("npc_gunship") { }
-
-        class npc_gunshipAI : NullCreatureAI
+        public npc_gunship(Creature creature) : base(creature)
         {
-            public npc_gunshipAI(Creature creature) : base(creature)
-            {
-                _teamInInstance = (Team)creature.GetInstanceScript().GetData(DataTypes.TeamInInstance);
-                _summonedFirstMage = false;
-                _died = false;
+            _teamInInstance = (Team)creature.GetInstanceScript().GetData(DataTypes.TeamInInstance);
+            _summonedFirstMage = false;
+            _died = false;
 
-                me.setRegeneratingHealth(false);
+            me.setRegeneratingHealth(false);
+        }
+
+        public override void DamageTaken(Unit source, ref uint damage)
+        {
+            if (damage >= me.GetHealth())
+            {
+                JustDied(null);
+                damage = (uint)me.GetHealth() - 1;
+                return;
             }
 
-            public override void DamageTaken(Unit source, ref uint damage)
+            if (_summonedFirstMage)
+                return;
+
+            if (me.GetTransport().GetEntry() != (_teamInInstance == Team.Horde ? GameObjectIds.TheSkybreaker_H : GameObjectIds.OrgrimsHammer_A))
+                return;
+
+            if (!me.HealthBelowPctDamaged(90, damage))
+                return;
+
+            _summonedFirstMage = true;
+            Creature captain = me.FindNearestCreature(_teamInInstance == Team.Horde ? CreatureIds.IGBMuradinBrozebeard : CreatureIds.IGBHighOverlordSaurfang, 100.0f);
+            if (captain)
+                captain.GetAI().DoAction(EncounterActions.SpawnMage);
+        }
+
+        public override void JustDied(Unit killer)
+        {
+            if (_died)
+                return;
+
+            _died = true;
+
+            bool isVictory = me.GetTransport().GetEntry() == GameObjectIds.TheSkybreaker_H || me.GetTransport().GetEntry() == GameObjectIds.OrgrimsHammer_A;
+            InstanceScript instance = me.GetInstanceScript();
+            instance.SetBossState(Bosses.GunshipBattle, isVictory ? EncounterState.Done : EncounterState.Fail);
+            Creature creature = me.FindNearestCreature(me.GetEntry() == CreatureIds.OrgrimsHammer ? CreatureIds.TheSkybreaker : CreatureIds.OrgrimsHammer, 200.0f);
+            if (creature)
             {
-                if (damage >= me.GetHealth())
-                {
-                    JustDied(null);
-                    damage = (uint)me.GetHealth() - 1;
-                    return;
-                }
-
-                if (_summonedFirstMage)
-                    return;
-
-                if (me.GetTransport().GetEntry() != (_teamInInstance == Team.Horde ? GameObjectIds.TheSkybreaker_H : GameObjectIds.OrgrimsHammer_A))
-                    return;
-
-                if (!me.HealthBelowPctDamaged(90, damage))
-                    return;
-
-                _summonedFirstMage = true;
-                Creature captain = me.FindNearestCreature(_teamInInstance == Team.Horde ? CreatureIds.IGBMuradinBrozebeard : CreatureIds.IGBHighOverlordSaurfang, 100.0f);
-                if (captain)
-                    captain.GetAI().DoAction(EncounterActions.SpawnMage);
+                instance.SendEncounterUnit(EncounterFrameType.Disengage, creature);
+                creature.RemoveAurasDueToSpell(GunshipSpells.CheckForPlayers);
             }
 
-            public override void JustDied(Unit killer)
+            instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
+            me.RemoveAurasDueToSpell(GunshipSpells.CheckForPlayers);
+
+            me.GetMap().SetZoneMusic(AreaIds.IcecrownCitadel, 0);
+            List<Creature> creatures = new List<Creature>();
+            me.GetCreatureListWithEntryInGrid(creatures, CreatureIds.MartyrStalkerIGBSaurfang, MapConst.SizeofGrids);
+            foreach (var stalker in creatures)
             {
-                if (_died)
-                    return;
-
-                _died = true;
-
-                bool isVictory = me.GetTransport().GetEntry() == GameObjectIds.TheSkybreaker_H || me.GetTransport().GetEntry() == GameObjectIds.OrgrimsHammer_A;
-                InstanceScript instance = me.GetInstanceScript();
-                instance.SetBossState(Bosses.GunshipBattle, isVictory ? EncounterState.Done : EncounterState.Fail);
-                Creature creature = me.FindNearestCreature(me.GetEntry() == CreatureIds.OrgrimsHammer ? CreatureIds.TheSkybreaker : CreatureIds.OrgrimsHammer, 200.0f);
-                if (creature)
-                {
-                    instance.SendEncounterUnit(EncounterFrameType.Disengage, creature);
-                    creature.RemoveAurasDueToSpell(GunshipSpells.CheckForPlayers);
-                }
-
-                instance.SendEncounterUnit(EncounterFrameType.Disengage, me);
-                me.RemoveAurasDueToSpell(GunshipSpells.CheckForPlayers);
-
-                me.GetMap().SetZoneMusic(AreaIds.IcecrownCitadel, 0);
-                List<Creature> creatures = new List<Creature>();
-                me.GetCreatureListWithEntryInGrid(creatures, CreatureIds.MartyrStalkerIGBSaurfang, MapConst.SizeofGrids);
-                foreach (var stalker in creatures)
-                {
-                    stalker.RemoveAllAuras();
-                    stalker.DeleteThreatList();
-                    stalker.CombatStop(true);
-                }
+                stalker.RemoveAllAuras();
+                stalker.DeleteThreatList();
+                stalker.CombatStop(true);
+            }
 
 
-                uint explosionSpell = isVictory ? GunshipSpells.ExplosionVictory : GunshipSpells.ExplosionWipe;
-                creatures.Clear();
-                me.GetCreatureListWithEntryInGrid(creatures, CreatureIds.GunshipHull, 200.0f);
-                foreach (var hull in creatures)
-                {
-                    if (hull.GetTransport() != me.GetTransport())
-                        continue;
+            uint explosionSpell = isVictory ? GunshipSpells.ExplosionVictory : GunshipSpells.ExplosionWipe;
+            creatures.Clear();
+            me.GetCreatureListWithEntryInGrid(creatures, CreatureIds.GunshipHull, 200.0f);
+            foreach (var hull in creatures)
+            {
+                if (hull.GetTransport() != me.GetTransport())
+                    continue;
 
-                    hull.CastSpell(hull, explosionSpell, TriggerCastFlags.FullMask);
-                }
+                hull.CastSpell(hull, explosionSpell, TriggerCastFlags.FullMask);
+            }
 
-                creatures.Clear();
-                me.GetCreatureListWithEntryInGrid(creatures, _teamInInstance == Team.Horde ? CreatureIds.HordeGunshipCannon : CreatureIds.AllianceGunshipCannon, 200.0f);
-                foreach (var cannon in creatures)
-                {
-                    if (isVictory)
-                    {
-                        cannon.CastSpell(cannon, GunshipSpells.EjectAllPassengersBelowZero, TriggerCastFlags.FullMask);
-                        cannon.RemoveVehicleKit();
-                    }
-                    else
-                        cannon.CastSpell(cannon, GunshipSpells.EjectAllPassengersWipe, TriggerCastFlags.FullMask);
-                }
-
-                uint creatureEntry = CreatureIds.IGBMuradinBrozebeard;
-                byte textId = isVictory ? GunshipTexts.SayMuradinVictory : GunshipTexts.SayMuradinWipe;
-                if (_teamInInstance == Team.Horde)
-                {
-                    creatureEntry = CreatureIds.IGBHighOverlordSaurfang;
-                    textId = isVictory ? GunshipTexts.SaySaurfangVictory : GunshipTexts.SaySaurfangWipe;
-                }
-                creature = me.FindNearestCreature(creatureEntry, 100.0f);
-                if (creature)
-                    creature.GetAI().Talk(textId);
-
+            creatures.Clear();
+            me.GetCreatureListWithEntryInGrid(creatures, _teamInInstance == Team.Horde ? CreatureIds.HordeGunshipCannon : CreatureIds.AllianceGunshipCannon, 200.0f);
+            foreach (var cannon in creatures)
+            {
                 if (isVictory)
                 {
-                    Transport go = Global.ObjAccessor.FindTransport(instance.GetGuidData(Bosses.GunshipBattle));
-                    if (go)
-                        go.EnableMovement(true);
-
-                    me.GetTransport().EnableMovement(true);
-                    Creature ship = me.FindNearestCreature(_teamInInstance == Team.Horde ? CreatureIds.OrgrimsHammer : CreatureIds.TheSkybreaker, 200.0f);
-                    if (ship)
-                    {
-                        ship.CastSpell(ship, GunshipSpells.TeleportPlayersOnVictory, TriggerCastFlags.FullMask);
-                        ship.CastSpell(ship, GunshipSpells.Achievement, TriggerCastFlags.FullMask);
-                        ship.CastSpell(ship, GunshipSpells.AwardReputationBossKill, TriggerCastFlags.FullMask);
-                    }
-
-                    creatures.Clear();
-                    me.GetCreatureListWithEntryInGrid(creatures, CreatureIds.SkybreakerMarine, 200.0f);
-                    me.GetCreatureListWithEntryInGrid(creatures, CreatureIds.SkybreakerSergeant, 200.0f);
-                    me.GetCreatureListWithEntryInGrid(creatures, CreatureIds.KorKronReaver, 200.0f);
-                    me.GetCreatureListWithEntryInGrid(creatures, CreatureIds.KorKronSergeant, 200.0f);
-                    foreach (var obj in creatures)
-                        obj.DespawnOrUnsummon(1);
+                    cannon.CastSpell(cannon, GunshipSpells.EjectAllPassengersBelowZero, TriggerCastFlags.FullMask);
+                    cannon.RemoveVehicleKit();
                 }
                 else
-                {
-                    uint teleportSpellId = _teamInInstance == Team.Horde ? GunshipSpells.TeleportPlayersOnResetH : GunshipSpells.TeleportPlayersOnResetA;
-                    me.m_Events.AddEvent(new ResetEncounterEvent(me, teleportSpellId, me.GetInstanceScript().GetGuidData(DataTypes.EnemyGunship)),
-                        me.m_Events.CalculateTime(8000));
-                }
-
-                instance.SetBossState(Bosses.GunshipBattle, isVictory ? EncounterState.Done : EncounterState.Fail);
+                    cannon.CastSpell(cannon, GunshipSpells.EjectAllPassengersWipe, TriggerCastFlags.FullMask);
             }
 
-            public override void SetGUID(ObjectGuid guid, int id = 0)
+            uint creatureEntry = CreatureIds.IGBMuradinBrozebeard;
+            byte textId = isVictory ? GunshipTexts.SayMuradinVictory : GunshipTexts.SayMuradinWipe;
+            if (_teamInInstance == Team.Horde)
             {
-                if (id != EncounterActions.ShipVisits)
-                    return;
+                creatureEntry = CreatureIds.IGBHighOverlordSaurfang;
+                textId = isVictory ? GunshipTexts.SaySaurfangVictory : GunshipTexts.SaySaurfangWipe;
+            }
+            creature = me.FindNearestCreature(creatureEntry, 100.0f);
+            if (creature)
+                creature.GetAI().Talk(textId);
 
-                if (!_shipVisits.ContainsKey(guid))
-                    _shipVisits[guid] = 1;
+            if (isVictory)
+            {
+                Transport go = Global.ObjAccessor.FindTransport(instance.GetGuidData(Bosses.GunshipBattle));
+                if (go)
+                    go.EnableMovement(true);
+
+                me.GetTransport().EnableMovement(true);
+                Creature ship = me.FindNearestCreature(_teamInInstance == Team.Horde ? CreatureIds.OrgrimsHammer : CreatureIds.TheSkybreaker, 200.0f);
+                if (ship)
+                {
+                    ship.CastSpell(ship, GunshipSpells.TeleportPlayersOnVictory, TriggerCastFlags.FullMask);
+                    ship.CastSpell(ship, GunshipSpells.Achievement, TriggerCastFlags.FullMask);
+                    ship.CastSpell(ship, GunshipSpells.AwardReputationBossKill, TriggerCastFlags.FullMask);
+                }
+
+                creatures.Clear();
+                me.GetCreatureListWithEntryInGrid(creatures, CreatureIds.SkybreakerMarine, 200.0f);
+                me.GetCreatureListWithEntryInGrid(creatures, CreatureIds.SkybreakerSergeant, 200.0f);
+                me.GetCreatureListWithEntryInGrid(creatures, CreatureIds.KorKronReaver, 200.0f);
+                me.GetCreatureListWithEntryInGrid(creatures, CreatureIds.KorKronSergeant, 200.0f);
+                foreach (var obj in creatures)
+                    obj.DespawnOrUnsummon(1);
+            }
+            else
+            {
+                uint teleportSpellId = _teamInInstance == Team.Horde ? GunshipSpells.TeleportPlayersOnResetH : GunshipSpells.TeleportPlayersOnResetA;
+                me.m_Events.AddEvent(new ResetEncounterEvent(me, teleportSpellId, me.GetInstanceScript().GetGuidData(DataTypes.EnemyGunship)),
+                    me.m_Events.CalculateTime(8000));
+            }
+
+            instance.SetBossState(Bosses.GunshipBattle, isVictory ? EncounterState.Done : EncounterState.Fail);
+        }
+
+        public override void SetGUID(ObjectGuid guid, int id = 0)
+        {
+            if (id != EncounterActions.ShipVisits)
+                return;
+
+            if (!_shipVisits.ContainsKey(guid))
+                _shipVisits[guid] = 1;
+            else
+                ++_shipVisits[guid];
+        }
+
+        public override uint GetData(uint id)
+        {
+            if (id != EncounterActions.ShipVisits)
+                return 0;
+
+            uint max = 0;
+            foreach (var count in _shipVisits.Values)
+                max = Math.Max(max, count);
+
+            return max;
+        }
+
+        Team _teamInInstance;
+        Dictionary<ObjectGuid, uint> _shipVisits = new Dictionary<ObjectGuid, uint>();
+        bool _summonedFirstMage;
+        bool _died;
+    }
+
+    [Script]
+    class npc_high_overlord_saurfang_igb : ScriptedAI
+    {
+        public npc_high_overlord_saurfang_igb(Creature creature)
+            : base(creature)
+        {
+            _instance = creature.GetInstanceScript();
+
+            _controller.ResetSlots(Team.Horde);
+            _controller.SetTransport(creature.GetTransport());
+            me.setRegeneratingHealth(false);
+            me.m_CombatDistance = 70.0f;
+        }
+
+        public override void InitializeAI()
+        {
+            base.InitializeAI();
+
+            _events.Reset();
+            _firstMageCooldown = Time.UnixTime + 60;
+            _axethrowersYellCooldown = 0L;
+            _rocketeersYellCooldown = 0L;
+        }
+
+        public override void EnterCombat(Unit target)
+        {
+            _events.SetPhase(GunshipMiscData.PhaseCombat);
+            DoCast(me, _instance.GetData(DataTypes.TeamInInstance) == (uint)Team.Horde ? GunshipSpells.FriendlyBossDamageMod : GunshipSpells.MeleeTargetingOnOrgrimsHammer, true);
+            DoCast(me, GunshipSpells.BattleFury, true);
+            _events.ScheduleEvent(GunshipEvents.Cleave, RandomHelper.URand(2000, 10000));
+        }
+
+        public override void EnterEvadeMode(EvadeReason why)
+        {
+            if (!me.IsAlive())
+                return;
+
+            me.DeleteThreatList();
+            me.CombatStop(true);
+            me.GetMotionMaster().MoveTargetedHome();
+
+            Reset();
+        }
+
+        public override void DoAction(int action)
+        {
+            if (action == Actions.EnemyGunshipTalk)
+            {
+                Creature muradin = me.FindNearestCreature(CreatureIds.IGBMuradinBrozebeard, 100.0f);
+                if (muradin)
+                    muradin.GetAI().DoAction(EncounterActions.SpawnAllAdds);
+
+                Talk(GunshipTexts.SaySaurfangIntro5);
+                _events.ScheduleEvent(GunshipEvents.IntroH5, 4000);
+                _events.ScheduleEvent(GunshipEvents.IntroH6, 11000);
+                _events.ScheduleEvent(GunshipEvents.KeepPlayerInCombat, 1);
+
+                _instance.SetBossState(Bosses.GunshipBattle, EncounterState.InProgress);
+                // Combat starts now
+                Creature skybreaker = me.FindNearestCreature(CreatureIds.TheSkybreaker, 100.0f);
+                if (skybreaker)
+                    _instance.SendEncounterUnit(EncounterFrameType.Engage, skybreaker, 1);
+
+                Creature orgrimsHammer = me.FindNearestCreature(CreatureIds.OrgrimsHammer, 100.0f);
+                if (orgrimsHammer)
+                {
+                    _instance.SendEncounterUnit(EncounterFrameType.Engage, orgrimsHammer, 2);
+                    orgrimsHammer.CastSpell(orgrimsHammer, GunshipSpells.CheckForPlayers, TriggerCastFlags.FullMask);
+                }
+
+                me.GetMap().SetZoneMusic(AreaIds.IcecrownCitadel, GunshipMiscData.MusicEncounter);
+            }
+            else if (action == EncounterActions.SpawnMage)
+            {
+                long now = Time.UnixTime;
+                if (_firstMageCooldown > now)
+                    _events.ScheduleEvent(GunshipEvents.SummonMage, (uint)(_firstMageCooldown - now) * Time.InMilliseconds);
                 else
-                    ++_shipVisits[guid];
+                    _events.ScheduleEvent(GunshipEvents.SummonMage, 1);
             }
-
-            public override uint GetData(uint id)
+            else if (action == EncounterActions.SpawnAllAdds)
             {
-                if (id != EncounterActions.ShipVisits)
-                    return 0;
-
-                uint max = 0;
-                foreach (var count in _shipVisits.Values)
-                    max = Math.Max(max, count);
-
-                return max;
+                _events.ScheduleEvent(GunshipEvents.Adds, 12000);
+                _events.ScheduleEvent(GunshipEvents.CheckRifleman, 13000);
+                _events.ScheduleEvent(GunshipEvents.CheckMortar, 13000);
+                if (Is25ManRaid())
+                    _controller.SummonCreatures(PassengerSlots.Mage1, PassengerSlots.Mortar4);
+                else
+                {
+                    _controller.SummonCreatures(PassengerSlots.Mage1, PassengerSlots.Mage2);
+                    _controller.SummonCreatures(PassengerSlots.Mortar1, PassengerSlots.Mortar2);
+                    _controller.SummonCreatures(PassengerSlots.Rifleman1, PassengerSlots.Rifleman4);
+                }
             }
+            else if (action == Actions.ExitShip)
+            {
+                Position pos = new Position(GunshipMiscData.SaurfangExitPath[GunshipMiscData.SaurfangExitPathSize - 1].X, GunshipMiscData.SaurfangExitPath[GunshipMiscData.SaurfangExitPathSize - 1].Y, GunshipMiscData.SaurfangExitPath[GunshipMiscData.SaurfangExitPathSize - 1].Z);
+                me.GetMotionMaster().MovePoint(EventId.ChargePrepath, pos, false);
 
-            Team _teamInInstance;
-            Dictionary<ObjectGuid, uint> _shipVisits = new Dictionary<ObjectGuid, uint>();
-            bool _summonedFirstMage;
-            bool _died;
+                var path = GunshipMiscData.SaurfangExitPath;//, SaurfangExitPath + SaurfangExitPathSize);
+
+                MoveSplineInit init = new MoveSplineInit(me);
+                init.DisableTransportPathTransformations();
+                init.MovebyPath(path, 0);
+                init.Launch();
+
+                me.DespawnOrUnsummon(18000);
+            }
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void SetData(uint type, uint data)
         {
-            if (!creature.GetTransport())
-                return null;
-
-            return InstanceIcecrownCitadel.GetInstanceAI<npc_gunshipAI>(creature);
+            if (type == EncounterActions.ClearSlot)
+            {
+                _controller.ClearSlot((PassengerSlots)data);
+                if (data == (uint)PassengerSlots.FreezeMage)
+                    _events.ScheduleEvent(GunshipEvents.SummonMage, RandomHelper.URand(30000, 33500));
+            }
         }
-    }
 
-    [Script]
-    class npc_high_overlord_saurfang_igb : CreatureScript
-    {
-        public npc_high_overlord_saurfang_igb() : base("npc_high_overlord_saurfang_igb") { }
-
-        class npc_high_overlord_saurfang_igbAI : ScriptedAI
+        public override void sGossipSelect(Player player, uint menuId, uint gossipListId)
         {
-            public npc_high_overlord_saurfang_igbAI(Creature creature)
-                : base(creature)
+            me.RemoveFlag64(UnitFields.NpcFlags, NPCFlags.Gossip);
+            me.GetTransport().EnableMovement(true);
+            _events.SetPhase(GunshipMiscData.PhaseIntro);
+            _events.ScheduleEvent(GunshipEvents.IntroH1, 5000, 0, GunshipMiscData.PhaseIntro);
+            _events.ScheduleEvent(GunshipEvents.IntroH2, 16000, 0, GunshipMiscData.PhaseIntro);
+            _events.ScheduleEvent(GunshipEvents.IntroSummonSkybreaker, 24600, 0, GunshipMiscData.PhaseIntro);
+            _events.ScheduleEvent(GunshipEvents.IntroH3, 29600, 0, GunshipMiscData.PhaseIntro);
+            _events.ScheduleEvent(GunshipEvents.IntroH4, 39200, 0, GunshipMiscData.PhaseIntro);
+        }
+
+        public override void DamageTaken(Unit u, ref uint damage)
+        {
+            if (me.HealthBelowPctDamaged(65, damage) && !me.HasAura(GunshipSpells.TasteOfBlood))
+                DoCast(me, GunshipSpells.TasteOfBlood, true);
+
+            if (damage > me.GetHealth())
+                damage = (uint)me.GetHealth() - 1;
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim() && !_events.IsInPhase(GunshipMiscData.PhaseIntro) && _instance.GetBossState(Bosses.GunshipBattle) != EncounterState.InProgress)
+                return;
+
+            _events.Update(diff);
+
+            _events.ExecuteEvents(eventId =>
             {
-                _instance = creature.GetInstanceScript();
-
-                _controller.ResetSlots(Team.Horde);
-                _controller.SetTransport(creature.GetTransport());
-                me.setRegeneratingHealth(false);
-                me.m_CombatDistance = 70.0f;
-            }
-
-            public override void InitializeAI()
-            {
-                base.InitializeAI();
-
-                _events.Reset();
-                _firstMageCooldown = Time.UnixTime + 60;
-                _axethrowersYellCooldown = 0L;
-                _rocketeersYellCooldown = 0L;
-            }
-
-            public override void EnterCombat(Unit target)
-            {
-                _events.SetPhase(GunshipMiscData.PhaseCombat);
-                DoCast(me, _instance.GetData(DataTypes.TeamInInstance) == (uint)Team.Horde ? GunshipSpells.FriendlyBossDamageMod : GunshipSpells.MeleeTargetingOnOrgrimsHammer, true);
-                DoCast(me, GunshipSpells.BattleFury, true);
-                _events.ScheduleEvent(GunshipEvents.Cleave, RandomHelper.URand(2000, 10000));
-            }
-
-            public override void EnterEvadeMode(EvadeReason why)
-            {
-                if (!me.IsAlive())
-                    return;
-
-                me.DeleteThreatList();
-                me.CombatStop(true);
-                me.GetMotionMaster().MoveTargetedHome();
-
-                Reset();
-            }
-
-            public override void DoAction(int action)
-            {
-                if (action == Actions.EnemyGunshipTalk)
+                switch (eventId)
                 {
-                    Creature muradin = me.FindNearestCreature(CreatureIds.IGBMuradinBrozebeard, 100.0f);
-                    if (muradin)
-                        muradin.GetAI().DoAction(EncounterActions.SpawnAllAdds);
-
-                    Talk(GunshipTexts.SaySaurfangIntro5);
-                    _events.ScheduleEvent(GunshipEvents.IntroH5, 4000);
-                    _events.ScheduleEvent(GunshipEvents.IntroH6, 11000);
-                    _events.ScheduleEvent(GunshipEvents.KeepPlayerInCombat, 1);
-
-                    _instance.SetBossState(Bosses.GunshipBattle, EncounterState.InProgress);
-                    // Combat starts now
-                    Creature skybreaker = me.FindNearestCreature(CreatureIds.TheSkybreaker, 100.0f);
-                    if (skybreaker)
-                        _instance.SendEncounterUnit(EncounterFrameType.Engage, skybreaker, 1);
-
-                    Creature orgrimsHammer = me.FindNearestCreature(CreatureIds.OrgrimsHammer, 100.0f);
-                    if (orgrimsHammer)
-                    {
-                        _instance.SendEncounterUnit(EncounterFrameType.Engage, orgrimsHammer, 2);
-                        orgrimsHammer.CastSpell(orgrimsHammer, GunshipSpells.CheckForPlayers, TriggerCastFlags.FullMask);
-                    }
-
-                    me.GetMap().SetZoneMusic(AreaIds.IcecrownCitadel, GunshipMiscData.MusicEncounter);
-                }
-                else if (action == EncounterActions.SpawnMage)
-                {
-                    long now = Time.UnixTime;
-                    if (_firstMageCooldown > now)
-                        _events.ScheduleEvent(GunshipEvents.SummonMage, (uint)(_firstMageCooldown - now) * Time.InMilliseconds);
-                    else
-                        _events.ScheduleEvent(GunshipEvents.SummonMage, 1);
-                }
-                else if (action == EncounterActions.SpawnAllAdds)
-                {
-                    _events.ScheduleEvent(GunshipEvents.Adds, 12000);
-                    _events.ScheduleEvent(GunshipEvents.CheckRifleman, 13000);
-                    _events.ScheduleEvent(GunshipEvents.CheckMortar, 13000);
-                    if (Is25ManRaid())
-                        _controller.SummonCreatures(PassengerSlots.Mage1, PassengerSlots.Mortar4);
-                    else
-                    {
+                    case GunshipEvents.IntroH1:
+                        Talk(GunshipTexts.SaySaurfangIntro1);
+                        break;
+                    case GunshipEvents.IntroH2:
+                        Talk(GunshipTexts.SaySaurfangIntro2);
+                        break;
+                    case GunshipEvents.IntroSummonSkybreaker:
+                        Global.TransportMgr.CreateTransport(GameObjectIds.TheSkybreaker_H, 0, me.GetMap());
+                        break;
+                    case GunshipEvents.IntroH3:
+                        Talk(GunshipTexts.SaySaurfangIntro3);
+                        break;
+                    case GunshipEvents.IntroH4:
+                        Talk(GunshipTexts.SaySaurfangIntro4);
+                        break;
+                    case GunshipEvents.IntroH5:
+                        Creature muradin = me.FindNearestCreature(CreatureIds.IGBMuradinBrozebeard, 100.0f);
+                        if (muradin)
+                            muradin.GetAI().Talk(GunshipTexts.SayMuradinIntroH);
+                        break;
+                    case GunshipEvents.IntroH6:
+                        Talk(GunshipTexts.SaySaurfangIntro6);
+                        break;
+                    case GunshipEvents.KeepPlayerInCombat:
+                        if (_instance.GetBossState(Bosses.GunshipBattle) == EncounterState.InProgress)
+                        {
+                            _instance.DoCastSpellOnPlayers(GunshipSpells.LockPlayersAndTapChest);
+                            _events.ScheduleEvent(GunshipEvents.KeepPlayerInCombat, RandomHelper.URand(5000, 8000));
+                        }
+                        break;
+                    case GunshipEvents.SummonMage:
+                        Talk(GunshipTexts.SaySaurfangMages);
+                        _controller.SummonCreatures(PassengerSlots.FreezeMage, PassengerSlots.FreezeMage);
+                        break;
+                    case GunshipEvents.Adds:
+                        Talk(GunshipTexts.SaySaurfangEnterSkybreaker);
                         _controller.SummonCreatures(PassengerSlots.Mage1, PassengerSlots.Mage2);
-                        _controller.SummonCreatures(PassengerSlots.Mortar1, PassengerSlots.Mortar2);
-                        _controller.SummonCreatures(PassengerSlots.Rifleman1, PassengerSlots.Rifleman4);
-                    }
-                }
-                else if (action == Actions.ExitShip)
-                {
-                    Position pos = new Position(GunshipMiscData.SaurfangExitPath[GunshipMiscData.SaurfangExitPathSize - 1].X, GunshipMiscData.SaurfangExitPath[GunshipMiscData.SaurfangExitPathSize - 1].Y, GunshipMiscData.SaurfangExitPath[GunshipMiscData.SaurfangExitPathSize - 1].Z);
-                    me.GetMotionMaster().MovePoint(EventId.ChargePrepath, pos, false);
+                        _controller.SummonCreatures(PassengerSlots.Marine1, Is25ManRaid() ? PassengerSlots.Marine4 : PassengerSlots.Marine2);
+                        _controller.SummonCreatures(PassengerSlots.Sergeant1, Is25ManRaid() ? PassengerSlots.Sergeant2 : PassengerSlots.Sergeant1);
+                        Transport orgrimsHammer = me.GetTransport();
+                        if (orgrimsHammer)
+                            orgrimsHammer.SummonPassenger(CreatureIds.TeleportPortal, GunshipMiscData.OrgrimsHammerTeleportPortal, TempSummonType.TimedDespawn, null, 21000);
 
-                    var path = GunshipMiscData.SaurfangExitPath;//, SaurfangExitPath + SaurfangExitPathSize);
+                        Transport skybreaker = Global.ObjAccessor.FindTransport(_instance.GetGuidData(Bosses.GunshipBattle));
+                        if (skybreaker)
+                            skybreaker.SummonPassenger(CreatureIds.TeleportExit, GunshipMiscData.SkybreakerTeleportExit, TempSummonType.TimedDespawn, null, 23000);
 
-                    MoveSplineInit init = new MoveSplineInit(me);
-                    init.DisableTransportPathTransformations();
-                    init.MovebyPath(path, 0);
-                    init.Launch();
-
-                    me.DespawnOrUnsummon(18000);
-                }
-            }
-
-            public override void SetData(uint type, uint data)
-            {
-                if (type == EncounterActions.ClearSlot)
-                {
-                    _controller.ClearSlot((PassengerSlots)data);
-                    if (data == (uint)PassengerSlots.FreezeMage)
-                        _events.ScheduleEvent(GunshipEvents.SummonMage, RandomHelper.URand(30000, 33500));
-                }
-            }
-
-            public override void sGossipSelect(Player player, uint menuId, uint gossipListId)
-            {
-                me.RemoveFlag64(UnitFields.NpcFlags, NPCFlags.Gossip);
-                me.GetTransport().EnableMovement(true);
-                _events.SetPhase(GunshipMiscData.PhaseIntro);
-                _events.ScheduleEvent(GunshipEvents.IntroH1, 5000, 0, GunshipMiscData.PhaseIntro);
-                _events.ScheduleEvent(GunshipEvents.IntroH2, 16000, 0, GunshipMiscData.PhaseIntro);
-                _events.ScheduleEvent(GunshipEvents.IntroSummonSkybreaker, 24600, 0, GunshipMiscData.PhaseIntro);
-                _events.ScheduleEvent(GunshipEvents.IntroH3, 29600, 0, GunshipMiscData.PhaseIntro);
-                _events.ScheduleEvent(GunshipEvents.IntroH4, 39200, 0, GunshipMiscData.PhaseIntro);
-            }
-
-            public override void DamageTaken(Unit u, ref uint damage)
-            {
-                if (me.HealthBelowPctDamaged(65, damage) && !me.HasAura(GunshipSpells.TasteOfBlood))
-                    DoCast(me, GunshipSpells.TasteOfBlood, true);
-
-                if (damage > me.GetHealth())
-                    damage = (uint)me.GetHealth() - 1;
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim() && !_events.IsInPhase(GunshipMiscData.PhaseIntro) && _instance.GetBossState(Bosses.GunshipBattle) != EncounterState.InProgress)
-                    return;
-
-                _events.Update(diff);
-
-                _events.ExecuteEvents(eventId =>
-                {
-                    switch (eventId)
-                    {
-                        case GunshipEvents.IntroH1:
-                            Talk(GunshipTexts.SaySaurfangIntro1);
-                            break;
-                        case GunshipEvents.IntroH2:
-                            Talk(GunshipTexts.SaySaurfangIntro2);
-                            break;
-                        case GunshipEvents.IntroSummonSkybreaker:
-                            Global.TransportMgr.CreateTransport(GameObjectIds.TheSkybreaker_H, 0, me.GetMap());
-                            break;
-                        case GunshipEvents.IntroH3:
-                            Talk(GunshipTexts.SaySaurfangIntro3);
-                            break;
-                        case GunshipEvents.IntroH4:
-                            Talk(GunshipTexts.SaySaurfangIntro4);
-                            break;
-                        case GunshipEvents.IntroH5:
-                            Creature muradin = me.FindNearestCreature(CreatureIds.IGBMuradinBrozebeard, 100.0f);
-                            if (muradin)
-                                muradin.GetAI().Talk(GunshipTexts.SayMuradinIntroH);
-                            break;
-                        case GunshipEvents.IntroH6:
-                            Talk(GunshipTexts.SaySaurfangIntro6);
-                            break;
-                        case GunshipEvents.KeepPlayerInCombat:
-                            if (_instance.GetBossState(Bosses.GunshipBattle) == EncounterState.InProgress)
+                        _events.ScheduleEvent(GunshipEvents.AddsBoardYell, 6000);
+                        _events.ScheduleEvent(GunshipEvents.Adds, 60000);
+                        break;
+                    case GunshipEvents.AddsBoardYell:
+                        muradin = me.FindNearestCreature(CreatureIds.IGBMuradinBrozebeard, 200.0f);
+                        if (muradin)
+                            muradin.GetAI().Talk(GunshipTexts.SayMuradinBoard);
+                        break;
+                    case GunshipEvents.CheckRifleman:
+                        if (_controller.SummonCreatures(PassengerSlots.Rifleman1, Is25ManRaid() ? PassengerSlots.Rifleman8 : PassengerSlots.Rifleman4))
+                        {
+                            if (_axethrowersYellCooldown < Time.UnixTime)
                             {
-                                _instance.DoCastSpellOnPlayers(GunshipSpells.LockPlayersAndTapChest);
-                                _events.ScheduleEvent(GunshipEvents.KeepPlayerInCombat, RandomHelper.URand(5000, 8000));
+                                Talk(GunshipTexts.SaySaurfangAxethrowers);
+                                _axethrowersYellCooldown = Time.UnixTime + 5;
                             }
-                            break;
-                        case GunshipEvents.SummonMage:
-                            Talk(GunshipTexts.SaySaurfangMages);
-                            _controller.SummonCreatures(PassengerSlots.FreezeMage, PassengerSlots.FreezeMage);
-                            break;
-                        case GunshipEvents.Adds:
-                            Talk(GunshipTexts.SaySaurfangEnterSkybreaker);
-                            _controller.SummonCreatures(PassengerSlots.Mage1, PassengerSlots.Mage2);
-                            _controller.SummonCreatures(PassengerSlots.Marine1, Is25ManRaid() ? PassengerSlots.Marine4 : PassengerSlots.Marine2);
-                            _controller.SummonCreatures(PassengerSlots.Sergeant1, Is25ManRaid() ? PassengerSlots.Sergeant2 : PassengerSlots.Sergeant1);
-                            Transport orgrimsHammer = me.GetTransport();
-                            if (orgrimsHammer)
-                                orgrimsHammer.SummonPassenger(CreatureIds.TeleportPortal, GunshipMiscData.OrgrimsHammerTeleportPortal, TempSummonType.TimedDespawn, null, 21000);
-
-                            Transport skybreaker = Global.ObjAccessor.FindTransport(_instance.GetGuidData(Bosses.GunshipBattle));
-                            if (skybreaker)
-                                skybreaker.SummonPassenger(CreatureIds.TeleportExit, GunshipMiscData.SkybreakerTeleportExit, TempSummonType.TimedDespawn, null, 23000);
-
-                            _events.ScheduleEvent(GunshipEvents.AddsBoardYell, 6000);
-                            _events.ScheduleEvent(GunshipEvents.Adds, 60000);
-                            break;
-                        case GunshipEvents.AddsBoardYell:
-                            muradin = me.FindNearestCreature(CreatureIds.IGBMuradinBrozebeard, 200.0f);
-                            if (muradin)
-                                muradin.GetAI().Talk(GunshipTexts.SayMuradinBoard);
-                            break;
-                        case GunshipEvents.CheckRifleman:
-                            if (_controller.SummonCreatures(PassengerSlots.Rifleman1, Is25ManRaid() ? PassengerSlots.Rifleman8 : PassengerSlots.Rifleman4))
+                        }
+                        _events.ScheduleEvent(GunshipEvents.CheckRifleman, 1000);
+                        break;
+                    case GunshipEvents.CheckMortar:
+                        if (_controller.SummonCreatures(PassengerSlots.Mortar1, Is25ManRaid() ? PassengerSlots.Mortar4 : PassengerSlots.Mortar2))
+                        {
+                            if (_rocketeersYellCooldown < Time.UnixTime)
                             {
-                                if (_axethrowersYellCooldown < Time.UnixTime)
-                                {
-                                    Talk(GunshipTexts.SaySaurfangAxethrowers);
-                                    _axethrowersYellCooldown = Time.UnixTime + 5;
-                                }
+                                Talk(GunshipTexts.SaySaurfangRocketeers);
+                                _rocketeersYellCooldown = Time.UnixTime + 5;
                             }
-                            _events.ScheduleEvent(GunshipEvents.CheckRifleman, 1000);
-                            break;
-                        case GunshipEvents.CheckMortar:
-                            if (_controller.SummonCreatures(PassengerSlots.Mortar1, Is25ManRaid() ? PassengerSlots.Mortar4 : PassengerSlots.Mortar2))
-                            {
-                                if (_rocketeersYellCooldown < Time.UnixTime)
-                                {
-                                    Talk(GunshipTexts.SaySaurfangRocketeers);
-                                    _rocketeersYellCooldown = Time.UnixTime + 5;
-                                }
-                            }
-                            _events.ScheduleEvent(GunshipEvents.CheckMortar, 1000);
-                            break;
-                        case GunshipEvents.Cleave:
-                            DoCastVictim(GunshipSpells.Cleave);
-                            _events.ScheduleEvent(GunshipEvents.Cleave, RandomHelper.URand(2000, 10000));
-                            break;
-                        default:
-                            break;
-                    }
-                });
-
-                if (me.IsWithinMeleeRange(me.GetVictim()))
-                    DoMeleeAttackIfReady();
-                else if (me.isAttackReady())
-                {
-                    DoCastVictim(GunshipSpells.RendingThrow);
-                    me.resetAttackTimer();
+                        }
+                        _events.ScheduleEvent(GunshipEvents.CheckMortar, 1000);
+                        break;
+                    case GunshipEvents.Cleave:
+                        DoCastVictim(GunshipSpells.Cleave);
+                        _events.ScheduleEvent(GunshipEvents.Cleave, RandomHelper.URand(2000, 10000));
+                        break;
+                    default:
+                        break;
                 }
-            }
+            });
 
-            public override bool CanAIAttack(Unit target)
+            if (me.IsWithinMeleeRange(me.GetVictim()))
+                DoMeleeAttackIfReady();
+            else if (me.isAttackReady())
             {
-                return target.HasAura(GunshipSpells.OnOrgrimsHammerDeck) || !target.IsControlledByPlayer();
+                DoCastVictim(GunshipSpells.RendingThrow);
+                me.resetAttackTimer();
             }
-
-            PassengerController _controller = new PassengerController();
-            InstanceScript _instance;
-            long _firstMageCooldown;
-            long _axethrowersYellCooldown;
-            long _rocketeersYellCooldown;
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override bool CanAIAttack(Unit target)
         {
-            return InstanceIcecrownCitadel.GetInstanceAI<npc_high_overlord_saurfang_igbAI>(creature);
+            return target.HasAura(GunshipSpells.OnOrgrimsHammerDeck) || !target.IsControlledByPlayer();
         }
+
+        PassengerController _controller = new PassengerController();
+        InstanceScript _instance;
+        long _firstMageCooldown;
+        long _axethrowersYellCooldown;
+        long _rocketeersYellCooldown;
     }
 
     [Script]
-    class npc_muradin_bronzebeard_igb : CreatureScript
+    class npc_muradin_bronzebeard_igb : ScriptedAI
     {
-        public npc_muradin_bronzebeard_igb() : base("npc_muradin_bronzebeard_igb") { }
-
-        class npc_muradin_bronzebeard_igbAI : ScriptedAI
+        public npc_muradin_bronzebeard_igb(Creature creature)
+            : base(creature)
         {
-            public npc_muradin_bronzebeard_igbAI(Creature creature)
-                : base(creature)
+            _instance = creature.GetInstanceScript();
+
+            _controller.ResetSlots(Team.Alliance);
+            _controller.SetTransport(creature.GetTransport());
+            me.setRegeneratingHealth(false);
+            me.m_CombatDistance = 70.0f;
+        }
+
+        public override void InitializeAI()
+        {
+            base.InitializeAI();
+
+            _events.Reset();
+            _firstMageCooldown = Time.UnixTime + 60;
+            _riflemanYellCooldown = 0L;
+            _mortarYellCooldown = 0L;
+        }
+
+        public override void EnterCombat(Unit target)
+        {
+            _events.SetPhase(GunshipMiscData.PhaseCombat);
+            DoCast(me, _instance.GetData(DataTypes.TeamInInstance) == (uint)Team.Alliance ? GunshipSpells.FriendlyBossDamageMod : GunshipSpells.MeleeTargetingOnSkybreaker, true);
+            DoCast(me, GunshipSpells.BattleFury, true);
+            _events.ScheduleEvent(GunshipEvents.Cleave, RandomHelper.URand(2000, 10000));
+        }
+
+        public override void EnterEvadeMode(EvadeReason why)
+        {
+            if (!me.IsAlive())
+                return;
+
+            me.DeleteThreatList();
+            me.CombatStop(true);
+            me.GetMotionMaster().MoveTargetedHome();
+
+            Reset();
+        }
+
+        public override void DoAction(int action)
+        {
+            if (action == Actions.EnemyGunshipTalk)
             {
-                _instance = creature.GetInstanceScript();
+                Creature muradin = me.FindNearestCreature(CreatureIds.IGBHighOverlordSaurfang, 100.0f);
+                if (muradin)
+                    muradin.GetAI().DoAction(EncounterActions.SpawnAllAdds);
 
-                _controller.ResetSlots(Team.Alliance);
-                _controller.SetTransport(creature.GetTransport());
-                me.setRegeneratingHealth(false);
-                me.m_CombatDistance = 70.0f;
-            }
+                Talk(GunshipTexts.SayMuradinIntro6);
+                _events.ScheduleEvent(GunshipEvents.IntroA6, 5000);
+                _events.ScheduleEvent(GunshipEvents.IntroA7, 11000);
+                _events.ScheduleEvent(GunshipEvents.KeepPlayerInCombat, 1);
 
-            public override void InitializeAI()
-            {
-                base.InitializeAI();
+                _instance.SetBossState(Bosses.GunshipBattle, EncounterState.InProgress);
+                // Combat starts now
+                Creature orgrimsHammer = me.FindNearestCreature(CreatureIds.OrgrimsHammer, 100.0f);
+                if (orgrimsHammer)
+                    _instance.SendEncounterUnit(EncounterFrameType.Engage, orgrimsHammer, 1);
 
-                _events.Reset();
-                _firstMageCooldown = Time.UnixTime + 60;
-                _riflemanYellCooldown = 0L;
-                _mortarYellCooldown = 0L;
-            }
-
-            public override void EnterCombat(Unit target)
-            {
-                _events.SetPhase(GunshipMiscData.PhaseCombat);
-                DoCast(me, _instance.GetData(DataTypes.TeamInInstance) == (uint)Team.Alliance ? GunshipSpells.FriendlyBossDamageMod : GunshipSpells.MeleeTargetingOnSkybreaker, true);
-                DoCast(me, GunshipSpells.BattleFury, true);
-                _events.ScheduleEvent(GunshipEvents.Cleave, RandomHelper.URand(2000, 10000));
-            }
-
-            public override void EnterEvadeMode(EvadeReason why)
-            {
-                if (!me.IsAlive())
-                    return;
-
-                me.DeleteThreatList();
-                me.CombatStop(true);
-                me.GetMotionMaster().MoveTargetedHome();
-
-                Reset();
-            }
-
-            public override void DoAction(int action)
-            {
-                if (action == Actions.EnemyGunshipTalk)
+                Creature skybreaker = me.FindNearestCreature(CreatureIds.TheSkybreaker, 100.0f);
+                if (skybreaker)
                 {
-                    Creature muradin = me.FindNearestCreature(CreatureIds.IGBHighOverlordSaurfang, 100.0f);
-                    if (muradin)
-                        muradin.GetAI().DoAction(EncounterActions.SpawnAllAdds);
-
-                    Talk(GunshipTexts.SayMuradinIntro6);
-                    _events.ScheduleEvent(GunshipEvents.IntroA6, 5000);
-                    _events.ScheduleEvent(GunshipEvents.IntroA7, 11000);
-                    _events.ScheduleEvent(GunshipEvents.KeepPlayerInCombat, 1);
-
-                    _instance.SetBossState(Bosses.GunshipBattle, EncounterState.InProgress);
-                    // Combat starts now
-                    Creature orgrimsHammer = me.FindNearestCreature(CreatureIds.OrgrimsHammer, 100.0f);
-                    if (orgrimsHammer)
-                        _instance.SendEncounterUnit(EncounterFrameType.Engage, orgrimsHammer, 1);
-
-                    Creature skybreaker = me.FindNearestCreature(CreatureIds.TheSkybreaker, 100.0f);
-                    if (skybreaker)
-                    {
-                        _instance.SendEncounterUnit(EncounterFrameType.Engage, skybreaker, 2);
-                        skybreaker.CastSpell(skybreaker, GunshipSpells.CheckForPlayers, TriggerCastFlags.FullMask);
-                    }
-
-                    me.GetMap().SetZoneMusic(AreaIds.IcecrownCitadel, GunshipMiscData.MusicEncounter);
+                    _instance.SendEncounterUnit(EncounterFrameType.Engage, skybreaker, 2);
+                    skybreaker.CastSpell(skybreaker, GunshipSpells.CheckForPlayers, TriggerCastFlags.FullMask);
                 }
-                else if (action == EncounterActions.SpawnMage)
+
+                me.GetMap().SetZoneMusic(AreaIds.IcecrownCitadel, GunshipMiscData.MusicEncounter);
+            }
+            else if (action == EncounterActions.SpawnMage)
+            {
+                long now = Time.UnixTime;
+                if (_firstMageCooldown < now)
+                    _events.ScheduleEvent(GunshipEvents.SummonMage, (uint)(now - _firstMageCooldown) * Time.InMilliseconds);
+                else
+                    _events.ScheduleEvent(GunshipEvents.SummonMage, 1);
+            }
+            else if (action == EncounterActions.SpawnAllAdds)
+            {
+                _events.ScheduleEvent(GunshipEvents.Adds, 12000);
+                _events.ScheduleEvent(GunshipEvents.CheckRifleman, 13000);
+                _events.ScheduleEvent(GunshipEvents.CheckMortar, 13000);
+                if (Is25ManRaid())
+                    _controller.SummonCreatures(PassengerSlots.Mage1, PassengerSlots.Mortar4);
+                else
                 {
-                    long now = Time.UnixTime;
-                    if (_firstMageCooldown < now)
-                        _events.ScheduleEvent(GunshipEvents.SummonMage, (uint)(now - _firstMageCooldown) * Time.InMilliseconds);
-                    else
-                        _events.ScheduleEvent(GunshipEvents.SummonMage, 1);
+                    _controller.SummonCreatures(PassengerSlots.Mage1, PassengerSlots.Mage2);
+                    _controller.SummonCreatures(PassengerSlots.Mortar1, PassengerSlots.Mortar2);
+                    _controller.SummonCreatures(PassengerSlots.Rifleman1, PassengerSlots.Rifleman4);
                 }
-                else if (action == EncounterActions.SpawnAllAdds)
+            }
+        }
+
+        public override void SetData(uint type, uint data)
+        {
+            if (type == EncounterActions.ClearSlot)
+            {
+                _controller.ClearSlot((PassengerSlots)data);
+                if (data == (uint)PassengerSlots.FreezeMage)
+                    _events.ScheduleEvent(GunshipEvents.SummonMage, RandomHelper.URand(30000, 33500));
+            }
+        }
+
+        public override void sGossipSelect(Player player, uint menuId, uint gossipListId)
+        {
+            me.RemoveFlag64(UnitFields.NpcFlags, NPCFlags.Gossip);
+            me.GetTransport().EnableMovement(true);
+            _events.SetPhase(GunshipMiscData.PhaseIntro);
+            _events.ScheduleEvent(GunshipEvents.IntroA1, 5000);
+            _events.ScheduleEvent(GunshipEvents.IntroA2, 10000, 0, GunshipMiscData.PhaseIntro);
+            _events.ScheduleEvent(GunshipEvents.IntroSummonOrgrimsHammer, 28000, 0, GunshipMiscData.PhaseIntro);
+            _events.ScheduleEvent(GunshipEvents.IntroA3, 33000, 0, GunshipMiscData.PhaseIntro);
+            _events.ScheduleEvent(GunshipEvents.IntroA4, 39000, 0, GunshipMiscData.PhaseIntro);
+            _events.ScheduleEvent(GunshipEvents.IntroA5, 45000, 0, GunshipMiscData.PhaseIntro);
+        }
+
+        public override void DamageTaken(Unit u, ref uint damage)
+        {
+            if (me.HealthBelowPctDamaged(65, damage) && me.HasAura(GunshipSpells.TasteOfBlood))
+                DoCast(me, GunshipSpells.TasteOfBlood, true);
+
+            if (damage >= me.GetHealth())
+                damage = (uint)me.GetHealth() - 1;
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim() && !_events.IsInPhase(GunshipMiscData.PhaseIntro) && _instance.GetBossState(Bosses.GunshipBattle) != EncounterState.InProgress)
+                return;
+
+            _events.Update(diff);
+
+            _events.ExecuteEvents(eventId =>
+            {
+                switch (eventId)
                 {
-                    _events.ScheduleEvent(GunshipEvents.Adds, 12000);
-                    _events.ScheduleEvent(GunshipEvents.CheckRifleman, 13000);
-                    _events.ScheduleEvent(GunshipEvents.CheckMortar, 13000);
-                    if (Is25ManRaid())
-                        _controller.SummonCreatures(PassengerSlots.Mage1, PassengerSlots.Mortar4);
-                    else
-                    {
+                    case GunshipEvents.IntroA1:
+                        Talk(GunshipTexts.SayMuradinIntro1);
+                        break;
+                    case GunshipEvents.IntroA2:
+                        Talk(GunshipTexts.SayMuradinIntro2);
+                        break;
+                    case GunshipEvents.IntroSummonOrgrimsHammer:
+                        Global.TransportMgr.CreateTransport(GameObjectIds.OrgrimsHammer_A, 0, me.GetMap());
+                        break;
+                    case GunshipEvents.IntroA3:
+                        Talk(GunshipTexts.SayMuradinIntro3);
+                        break;
+                    case GunshipEvents.IntroA4:
+                        Talk(GunshipTexts.SayMuradinIntro4);
+                        break;
+                    case GunshipEvents.IntroA5:
+                        Talk(GunshipTexts.SayMuradinIntro5);
+                        break;
+                    case GunshipEvents.IntroA6:
+                        Creature saurfang = me.FindNearestCreature(CreatureIds.IGBHighOverlordSaurfang, 100.0f);
+                        if (saurfang)
+                            saurfang.GetAI().Talk(GunshipTexts.SaySaurfangIntroA);
+                        break;
+                    case GunshipEvents.IntroA7:
+                        Talk(GunshipTexts.SayMuradinIntro7);
+                        break;
+                    case GunshipEvents.KeepPlayerInCombat:
+                        if (_instance.GetBossState(Bosses.GunshipBattle) == EncounterState.InProgress)
+                        {
+                            _instance.DoCastSpellOnPlayers(GunshipSpells.LockPlayersAndTapChest);
+                            _events.ScheduleEvent(GunshipEvents.KeepPlayerInCombat, RandomHelper.URand(5000, 8000));
+                        }
+                        break;
+                    case GunshipEvents.SummonMage:
+                        Talk(GunshipTexts.SayMuradinSorcerers);
+                        _controller.SummonCreatures(PassengerSlots.FreezeMage, PassengerSlots.FreezeMage);
+                        break;
+                    case GunshipEvents.Adds:
+                        Talk(GunshipTexts.SayMuradinEnterOrgrimmsHammer);
                         _controller.SummonCreatures(PassengerSlots.Mage1, PassengerSlots.Mage2);
-                        _controller.SummonCreatures(PassengerSlots.Mortar1, PassengerSlots.Mortar2);
-                        _controller.SummonCreatures(PassengerSlots.Rifleman1, PassengerSlots.Rifleman4);
-                    }
-                }
-            }
+                        _controller.SummonCreatures(PassengerSlots.Marine1, Is25ManRaid() ? PassengerSlots.Marine4 : PassengerSlots.Marine2);
+                        _controller.SummonCreatures(PassengerSlots.Sergeant1, Is25ManRaid() ? PassengerSlots.Sergeant2 : PassengerSlots.Sergeant1);
 
-            public override void SetData(uint type, uint data)
-            {
-                if (type == EncounterActions.ClearSlot)
-                {
-                    _controller.ClearSlot((PassengerSlots)data);
-                    if (data == (uint)PassengerSlots.FreezeMage)
-                        _events.ScheduleEvent(GunshipEvents.SummonMage, RandomHelper.URand(30000, 33500));
-                }
-            }
+                        Transport skybreaker = me.GetTransport();
+                        if (skybreaker)
+                            skybreaker.SummonPassenger(CreatureIds.TeleportPortal, GunshipMiscData.SkybreakerTeleportPortal, TempSummonType.TimedDespawn, null, 21000);
 
-            public override void sGossipSelect(Player player, uint menuId, uint gossipListId)
-            {
-                me.RemoveFlag64(UnitFields.NpcFlags, NPCFlags.Gossip);
-                me.GetTransport().EnableMovement(true);
-                _events.SetPhase(GunshipMiscData.PhaseIntro);
-                _events.ScheduleEvent(GunshipEvents.IntroA1, 5000);
-                _events.ScheduleEvent(GunshipEvents.IntroA2, 10000, 0, GunshipMiscData.PhaseIntro);
-                _events.ScheduleEvent(GunshipEvents.IntroSummonOrgrimsHammer, 28000, 0, GunshipMiscData.PhaseIntro);
-                _events.ScheduleEvent(GunshipEvents.IntroA3, 33000, 0, GunshipMiscData.PhaseIntro);
-                _events.ScheduleEvent(GunshipEvents.IntroA4, 39000, 0, GunshipMiscData.PhaseIntro);
-                _events.ScheduleEvent(GunshipEvents.IntroA5, 45000, 0, GunshipMiscData.PhaseIntro);
-            }
+                        Transport go = Global.ObjAccessor.FindTransport(_instance.GetGuidData(Bosses.GunshipBattle));
+                        if (go)
+                            go.SummonPassenger(CreatureIds.TeleportExit, GunshipMiscData.OrgrimsHammerTeleportExit, TempSummonType.TimedDespawn, null, 23000);
 
-            public override void DamageTaken(Unit u, ref uint damage)
-            {
-                if (me.HealthBelowPctDamaged(65, damage) && me.HasAura(GunshipSpells.TasteOfBlood))
-                    DoCast(me, GunshipSpells.TasteOfBlood, true);
-
-                if (damage >= me.GetHealth())
-                    damage = (uint)me.GetHealth() - 1;
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim() && !_events.IsInPhase(GunshipMiscData.PhaseIntro) && _instance.GetBossState(Bosses.GunshipBattle) != EncounterState.InProgress)
-                    return;
-
-                _events.Update(diff);
-
-                _events.ExecuteEvents(eventId =>
-                {
-                    switch (eventId)
-                    {
-                        case GunshipEvents.IntroA1:
-                            Talk(GunshipTexts.SayMuradinIntro1);
-                            break;
-                        case GunshipEvents.IntroA2:
-                            Talk(GunshipTexts.SayMuradinIntro2);
-                            break;
-                        case GunshipEvents.IntroSummonOrgrimsHammer:
-                            Global.TransportMgr.CreateTransport(GameObjectIds.OrgrimsHammer_A, 0, me.GetMap());
-                            break;
-                        case GunshipEvents.IntroA3:
-                            Talk(GunshipTexts.SayMuradinIntro3);
-                            break;
-                        case GunshipEvents.IntroA4:
-                            Talk(GunshipTexts.SayMuradinIntro4);
-                            break;
-                        case GunshipEvents.IntroA5:
-                            Talk(GunshipTexts.SayMuradinIntro5);
-                            break;
-                        case GunshipEvents.IntroA6:
-                            Creature saurfang = me.FindNearestCreature(CreatureIds.IGBHighOverlordSaurfang, 100.0f);
-                            if (saurfang)
-                                saurfang.GetAI().Talk(GunshipTexts.SaySaurfangIntroA);
-                            break;
-                        case GunshipEvents.IntroA7:
-                            Talk(GunshipTexts.SayMuradinIntro7);
-                            break;
-                        case GunshipEvents.KeepPlayerInCombat:
-                            if (_instance.GetBossState(Bosses.GunshipBattle) == EncounterState.InProgress)
+                        _events.ScheduleEvent(GunshipEvents.AddsBoardYell, 6000);
+                        _events.ScheduleEvent(GunshipEvents.Adds, 60000);
+                        break;
+                    case GunshipEvents.AddsBoardYell:
+                        saurfang = me.FindNearestCreature(CreatureIds.IGBHighOverlordSaurfang, 200.0f);
+                        if (saurfang)
+                            saurfang.GetAI().Talk(GunshipTexts.SaySaurfangBoard);
+                        break;
+                    case GunshipEvents.CheckRifleman:
+                        if (_controller.SummonCreatures(PassengerSlots.Rifleman1, Is25ManRaid() ? PassengerSlots.Rifleman8 : PassengerSlots.Rifleman4))
+                        {
+                            if (_riflemanYellCooldown < Time.UnixTime)
                             {
-                                _instance.DoCastSpellOnPlayers(GunshipSpells.LockPlayersAndTapChest);
-                                _events.ScheduleEvent(GunshipEvents.KeepPlayerInCombat, RandomHelper.URand(5000, 8000));
+                                Talk(GunshipTexts.SayMuradinRifleman);
+                                _riflemanYellCooldown = Time.UnixTime + 5;
                             }
-                            break;
-                        case GunshipEvents.SummonMage:
-                            Talk(GunshipTexts.SayMuradinSorcerers);
-                            _controller.SummonCreatures(PassengerSlots.FreezeMage, PassengerSlots.FreezeMage);
-                            break;
-                        case GunshipEvents.Adds:
-                            Talk(GunshipTexts.SayMuradinEnterOrgrimmsHammer);
-                            _controller.SummonCreatures(PassengerSlots.Mage1, PassengerSlots.Mage2);
-                            _controller.SummonCreatures(PassengerSlots.Marine1, Is25ManRaid() ? PassengerSlots.Marine4 : PassengerSlots.Marine2);
-                            _controller.SummonCreatures(PassengerSlots.Sergeant1, Is25ManRaid() ? PassengerSlots.Sergeant2 : PassengerSlots.Sergeant1);
-
-                            Transport skybreaker = me.GetTransport();
-                            if (skybreaker)
-                                skybreaker.SummonPassenger(CreatureIds.TeleportPortal, GunshipMiscData.SkybreakerTeleportPortal, TempSummonType.TimedDespawn, null, 21000);
-
-                            Transport go = Global.ObjAccessor.FindTransport(_instance.GetGuidData(Bosses.GunshipBattle));
-                            if (go)
-                                go.SummonPassenger(CreatureIds.TeleportExit, GunshipMiscData.OrgrimsHammerTeleportExit, TempSummonType.TimedDespawn, null, 23000);
-
-                            _events.ScheduleEvent(GunshipEvents.AddsBoardYell, 6000);
-                            _events.ScheduleEvent(GunshipEvents.Adds, 60000);
-                            break;
-                        case GunshipEvents.AddsBoardYell:
-                            saurfang = me.FindNearestCreature(CreatureIds.IGBHighOverlordSaurfang, 200.0f);
-                            if (saurfang)
-                                saurfang.GetAI().Talk(GunshipTexts.SaySaurfangBoard);
-                            break;
-                        case GunshipEvents.CheckRifleman:
-                            if (_controller.SummonCreatures(PassengerSlots.Rifleman1, Is25ManRaid() ? PassengerSlots.Rifleman8 : PassengerSlots.Rifleman4))
+                        }
+                        _events.ScheduleEvent(GunshipEvents.CheckRifleman, 1000);
+                        break;
+                    case GunshipEvents.CheckMortar:
+                        if (_controller.SummonCreatures(PassengerSlots.Mortar1, Is25ManRaid() ? PassengerSlots.Mortar4 : PassengerSlots.Mortar2))
+                        {
+                            if (_mortarYellCooldown < Time.UnixTime)
                             {
-                                if (_riflemanYellCooldown < Time.UnixTime)
-                                {
-                                    Talk(GunshipTexts.SayMuradinRifleman);
-                                    _riflemanYellCooldown = Time.UnixTime + 5;
-                                }
+                                Talk(GunshipTexts.SayMuradinMortar);
+                                _mortarYellCooldown = Time.UnixTime + 5;
                             }
-                            _events.ScheduleEvent(GunshipEvents.CheckRifleman, 1000);
-                            break;
-                        case GunshipEvents.CheckMortar:
-                            if (_controller.SummonCreatures(PassengerSlots.Mortar1, Is25ManRaid() ? PassengerSlots.Mortar4 : PassengerSlots.Mortar2))
-                            {
-                                if (_mortarYellCooldown < Time.UnixTime)
-                                {
-                                    Talk(GunshipTexts.SayMuradinMortar);
-                                    _mortarYellCooldown = Time.UnixTime + 5;
-                                }
-                            }
-                            _events.ScheduleEvent(GunshipEvents.CheckMortar, 1000);
-                            break;
-                        case GunshipEvents.Cleave:
-                            DoCastVictim(GunshipSpells.Cleave);
-                            _events.ScheduleEvent(GunshipEvents.Cleave, RandomHelper.URand(2000, 10000));
-                            break;
-                        default:
-                            break;
-                    }
-                });
-
-                if (me.IsWithinMeleeRange(me.GetVictim()))
-                    DoMeleeAttackIfReady();
-                else if (me.isAttackReady())
-                {
-                    DoCastVictim(GunshipSpells.RendingThrow);
-                    me.resetAttackTimer();
+                        }
+                        _events.ScheduleEvent(GunshipEvents.CheckMortar, 1000);
+                        break;
+                    case GunshipEvents.Cleave:
+                        DoCastVictim(GunshipSpells.Cleave);
+                        _events.ScheduleEvent(GunshipEvents.Cleave, RandomHelper.URand(2000, 10000));
+                        break;
+                    default:
+                        break;
                 }
-            }
+            });
 
-            public override bool CanAIAttack(Unit target)
+            if (me.IsWithinMeleeRange(me.GetVictim()))
+                DoMeleeAttackIfReady();
+            else if (me.isAttackReady())
             {
-                if (_instance.GetBossState(Bosses.GunshipBattle) != EncounterState.InProgress)
-                    return false;
-
-                return target.HasAura(GunshipSpells.OnSkybreakerDeck) || !target.IsControlledByPlayer();
+                DoCastVictim(GunshipSpells.RendingThrow);
+                me.resetAttackTimer();
             }
-
-            PassengerController _controller = new PassengerController();
-            InstanceScript _instance;
-            long _firstMageCooldown;
-            long _riflemanYellCooldown;
-            long _mortarYellCooldown;
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override bool CanAIAttack(Unit target)
         {
-            return InstanceIcecrownCitadel.GetInstanceAI<npc_muradin_bronzebeard_igbAI>(creature);
+            if (_instance.GetBossState(Bosses.GunshipBattle) != EncounterState.InProgress)
+                return false;
+
+            return target.HasAura(GunshipSpells.OnSkybreakerDeck) || !target.IsControlledByPlayer();
         }
+
+        PassengerController _controller = new PassengerController();
+        InstanceScript _instance;
+        long _firstMageCooldown;
+        long _riflemanYellCooldown;
+        long _mortarYellCooldown;
     }
 
     [Script]
-    class npc_zafod_boombox : CreatureScript
+    class npc_zafod_boombox : gunship_npc_AI
     {
-        public npc_zafod_boombox() : base("npc_zafod_boombox") { }
+        public npc_zafod_boombox(Creature creature)
+            : base(creature) { }
 
-        class npc_zafod_boomboxAI : gunship_npc_AI
+        public override void Reset()
         {
-            public npc_zafod_boomboxAI(Creature creature)
-                : base(creature) { }
-
-            public override void Reset()
-            {
-                me.SetReactState(ReactStates.Passive);
-            }
-
-            public override void sGossipSelect(Player player, uint menuId, uint gossipListId)
-            {
-                player.AddItem(GunshipMiscData.ItemGoblinRocketPack, 1);
-                player.PlayerTalkClass.SendCloseGossip();
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                UpdateVictim();
-            }
+            me.SetReactState(ReactStates.Passive);
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void sGossipSelect(Player player, uint menuId, uint gossipListId)
         {
-            return InstanceIcecrownCitadel.GetInstanceAI<npc_zafod_boomboxAI>(creature);
+            player.AddItem(GunshipMiscData.ItemGoblinRocketPack, 1);
+            player.PlayerTalkClass.SendCloseGossip();
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            UpdateVictim();
         }
     }
 
@@ -1546,899 +1502,667 @@ namespace Scripts.Northrend.IcecrownCitadel
     }
 
     [Script]
-    class npc_gunship_boarding_leader : CreatureScript
+    class npc_gunship_boarding_leader : npc_gunship_boarding_addAI
     {
-        public npc_gunship_boarding_leader() : base("npc_gunship_boarding_leader") { }
+        public npc_gunship_boarding_leader(Creature creature)
+            : base(creature) { }
 
-        class npc_gunship_boarding_leaderAI : npc_gunship_boarding_addAI
+        public override void EnterCombat(Unit target)
         {
-            public npc_gunship_boarding_leaderAI(Creature creature)
-                : base(creature) { }
+            base.EnterCombat(target);
+            _events.ScheduleEvent(GunshipEvents.Bladestorm, RandomHelper.URand(13000, 18000));
+            _events.ScheduleEvent(GunshipEvents.WoundingStrike, RandomHelper.URand(8000, 10000));
+        }
 
-            public override void EnterCombat(Unit target)
+        public override void UpdateAI(uint diff)
+        {
+            if (!SelectVictim())
             {
-                base.EnterCombat(target);
-                _events.ScheduleEvent(GunshipEvents.Bladestorm, RandomHelper.URand(13000, 18000));
-                _events.ScheduleEvent(GunshipEvents.WoundingStrike, RandomHelper.URand(8000, 10000));
+                TriggerBurningPitch();
+                return;
             }
 
-            public override void UpdateAI(uint diff)
+            _events.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting) || me.HasAura(GunshipSpells.Bladestorm))
+                return;
+
+            if (!HasAttackablePlayerNearby())
+                TriggerBurningPitch();
+
+            _events.ExecuteEvents(eventId =>
             {
-                if (!SelectVictim())
+                switch (eventId)
                 {
-                    TriggerBurningPitch();
-                    return;
+                    case GunshipEvents.Bladestorm:
+                        DoCastAOE(GunshipSpells.Bladestorm);
+                        _events.ScheduleEvent(GunshipEvents.Bladestorm, RandomHelper.URand(25000, 30000));
+                        break;
+                    case GunshipEvents.WoundingStrike:
+                        DoCastVictim(GunshipSpells.WoundingStrike);
+                        _events.ScheduleEvent(GunshipEvents.WoundingStrike, RandomHelper.URand(9000, 13000));
+                        break;
+                    default:
+                        break;
+                }
+            });
+
+            DoMeleeAttackIfReady();
+        }
+    }
+
+    [Script]
+    [Script]
+    class npc_gunship_gunner : gunship_npc_AI
+    {
+        public npc_gunship_gunner(Creature creature)
+            : base(creature)
+        {
+            creature.m_CombatDistance = 200.0f;
+        }
+
+        public override void AttackStart(Unit target)
+        {
+            me.Attack(target, false);
+        }
+
+        public override void MovementInform(MovementGeneratorType type, uint id)
+        {
+            base.MovementInform(type, id);
+            if (type == MovementGeneratorType.Point && id == EventId.ChargePrepath)
+                me.SetControlled(true, UnitState.Root);
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!SelectVictim())
+            {
+                TriggerBurningPitch();
+                return;
+            }
+
+            DoSpellAttackIfReady(me.GetEntry() == CreatureIds.SkybreakerRifleman ? GunshipSpells.Shoot : GunshipSpells.HurlAxe);
+        }
+    }
+
+    [Script]
+    class npc_gunship_rocketeer : gunship_npc_AI
+    {
+        public npc_gunship_rocketeer(Creature creature) : base(creature)
+        {
+            creature.m_CombatDistance = 200.0f;
+        }
+
+        public override void MovementInform(MovementGeneratorType type, uint id)
+        {
+            base.MovementInform(type, id);
+            if (type == MovementGeneratorType.Point && id == EventId.ChargePrepath)
+                me.SetControlled(true, UnitState.Root);
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!SelectVictim())
+                return;
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            uint spellId = me.GetEntry() == CreatureIds.SkybreakerMortarSoldier ? GunshipSpells.RocketArtilleryA : GunshipSpells.RocketArtilleryH;
+            if (me.GetSpellHistory().HasCooldown(spellId))
+                return;
+
+            DoCastAOE(spellId, true);
+            me.GetSpellHistory().AddCooldown(spellId, 0, TimeSpan.FromSeconds(9));
+        }
+    }
+
+    [Script]
+    class npc_gunship_mage : gunship_npc_AI
+    {
+        public npc_gunship_mage(Creature creature) : base(creature)
+        {
+            me.SetReactState(ReactStates.Passive);
+        }
+
+        public override void EnterEvadeMode(EvadeReason why) { }
+
+        public override void MovementInform(MovementGeneratorType type, uint id)
+        {
+            if (type != MovementGeneratorType.Point)
+                return;
+
+            if (id == EventId.ChargePrepath && Slot != null)
+            {
+                SlotInfo[] slots = Instance.GetData(DataTypes.TeamInInstance) == (uint)Team.Horde ? GunshipMiscData.SkybreakerSlotInfo : GunshipMiscData.OrgrimsHammerSlotInfo;
+                me.SetFacingTo(slots[Index].TargetPosition.GetOrientation());
+                switch ((PassengerSlots)Index)
+                {
+                    case PassengerSlots.FreezeMage:
+                        DoCastAOE(GunshipSpells.BelowZero);
+                        break;
+                    case PassengerSlots.Mage1:
+                    case PassengerSlots.Mage2:
+                        DoCastAOE(GunshipSpells.ShadowChanneling);
+                        break;
+                    default:
+                        break;
                 }
 
-                _events.Update(diff);
-
-                if (me.HasUnitState(UnitState.Casting) || me.HasAura(GunshipSpells.Bladestorm))
-                    return;
-
-                if (!HasAttackablePlayerNearby())
-                    TriggerBurningPitch();
-
-                _events.ExecuteEvents(eventId =>
-                {
-                    switch (eventId)
-                    {
-                        case GunshipEvents.Bladestorm:
-                            DoCastAOE(GunshipSpells.Bladestorm);
-                            _events.ScheduleEvent(GunshipEvents.Bladestorm, RandomHelper.URand(25000, 30000));
-                            break;
-                        case GunshipEvents.WoundingStrike:
-                            DoCastVictim(GunshipSpells.WoundingStrike);
-                            _events.ScheduleEvent(GunshipEvents.WoundingStrike, RandomHelper.URand(9000, 13000));
-                            break;
-                        default:
-                            break;
-                    }
-                });
-
-                DoMeleeAttackIfReady();
+                me.SetControlled(true, UnitState.Root);
             }
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void UpdateAI(uint diff)
         {
-            return InstanceIcecrownCitadel.GetInstanceAI<npc_gunship_boarding_leaderAI>(creature);
-        }
-    }
-
-    [Script]
-    class npc_gunship_boarding_add : CreatureScript
-    {
-        public npc_gunship_boarding_add() : base("npc_gunship_boarding_add") { }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return InstanceIcecrownCitadel.GetInstanceAI<npc_gunship_boarding_addAI>(creature);
-        }
-    }
-
-    [Script]
-    class npc_gunship_gunner : CreatureScript
-    {
-        public npc_gunship_gunner() : base("npc_gunship_gunner") { }
-
-        class npc_gunship_gunnerAI : gunship_npc_AI
-        {
-            public npc_gunship_gunnerAI(Creature creature)
-                : base(creature)
-            {
-                creature.m_CombatDistance = 200.0f;
-            }
-
-            public override void AttackStart(Unit target)
-            {
-                me.Attack(target, false);
-            }
-
-            public override void MovementInform(MovementGeneratorType type, uint id)
-            {
-                base.MovementInform(type, id);
-                if (type == MovementGeneratorType.Point && id == EventId.ChargePrepath)
-                    me.SetControlled(true, UnitState.Root);
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!SelectVictim())
-                {
-                    TriggerBurningPitch();
-                    return;
-                }
-
-                DoSpellAttackIfReady(me.GetEntry() == CreatureIds.SkybreakerRifleman ? GunshipSpells.Shoot : GunshipSpells.HurlAxe);
-            }
+            UpdateVictim();
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override bool CanAIAttack(Unit target)
         {
-            return InstanceIcecrownCitadel.GetInstanceAI<npc_gunship_gunnerAI>(creature);
-        }
-    }
-
-    [Script]
-    class npc_gunship_rocketeer : CreatureScript
-    {
-        public npc_gunship_rocketeer() : base("npc_gunship_rocketeer") { }
-
-        class npc_gunship_rocketeerAI : gunship_npc_AI
-        {
-            public npc_gunship_rocketeerAI(Creature creature)
-                : base(creature)
-            {
-                creature.m_CombatDistance = 200.0f;
-            }
-
-            public override void MovementInform(MovementGeneratorType type, uint id)
-            {
-                base.MovementInform(type, id);
-                if (type == MovementGeneratorType.Point && id == EventId.ChargePrepath)
-                    me.SetControlled(true, UnitState.Root);
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!SelectVictim())
-                    return;
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-
-                uint spellId = me.GetEntry() == CreatureIds.SkybreakerMortarSoldier ? GunshipSpells.RocketArtilleryA : GunshipSpells.RocketArtilleryH;
-                if (me.GetSpellHistory().HasCooldown(spellId))
-                    return;
-
-                DoCastAOE(spellId, true);
-                me.GetSpellHistory().AddCooldown(spellId, 0, TimeSpan.FromSeconds(9));
-            }
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return InstanceIcecrownCitadel.GetInstanceAI<npc_gunship_rocketeerAI>(creature);
-        }
-    }
-
-    [Script]
-    class npc_gunship_mage : CreatureScript
-    {
-        public npc_gunship_mage() : base("npc_gunship_mage") { }
-
-        class npc_gunship_mageAI : gunship_npc_AI
-        {
-            public npc_gunship_mageAI(Creature creature) : base(creature)
-            {
-                me.SetReactState(ReactStates.Passive);
-            }
-
-            public override void EnterEvadeMode(EvadeReason why) { }
-
-            public override void MovementInform(MovementGeneratorType type, uint id)
-            {
-                if (type != MovementGeneratorType.Point)
-                    return;
-
-                if (id == EventId.ChargePrepath && Slot != null)
-                {
-                    SlotInfo[] slots = Instance.GetData(DataTypes.TeamInInstance) == (uint)Team.Horde ? GunshipMiscData.SkybreakerSlotInfo : GunshipMiscData.OrgrimsHammerSlotInfo;
-                    me.SetFacingTo(slots[Index].TargetPosition.GetOrientation());
-                    switch ((PassengerSlots)Index)
-                    {
-                        case PassengerSlots.FreezeMage:
-                            DoCastAOE(GunshipSpells.BelowZero);
-                            break;
-                        case PassengerSlots.Mage1:
-                        case PassengerSlots.Mage2:
-                            DoCastAOE(GunshipSpells.ShadowChanneling);
-                            break;
-                        default:
-                            break;
-                    }
-
-                    me.SetControlled(true, UnitState.Root);
-                }
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                UpdateVictim();
-            }
-
-            public override bool CanAIAttack(Unit target)
-            {
-                return true;
-            }
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return InstanceIcecrownCitadel.GetInstanceAI<npc_gunship_mageAI>(creature);
+            return true;
         }
     }
 
     /** @HACK This AI only resets MOVEMENTFLAG_ROOT on the vehicle.
-              Currently the core always removes MOVEMENTFLAG_ROOT sent from client packets to prevent cheaters from freezing clients of other players
-              but it actually is a valid flag - needs more research to fix both freezes and keep the flag as is (see WorldSession.ReadMovementInfo)
+          Currently the core always removes MOVEMENTFLAG_ROOT sent from client packets to prevent cheaters from freezing clients of other players
+          but it actually is a valid flag - needs more research to fix both freezes and keep the flag as is (see WorldSession.ReadMovementInfo)
 
-    Example packet:
-    ClientToServer: CMSG_FORCE_MOVE_ROOT_ACK (0x00E9) Length: 67 ConnectionIndex: 0 Time: 03/04/2010 03:57:55.000 Number: 471326
-    Guid:
-    Movement Counter: 80
-    Movement Flags: OnTransport, Root (2560)
-    Extra Movement Flags: None (0)
-    Time: 52291611
-    Position: X: -396.0302 Y: 2482.906 Z: 249.86
-    Orientation: 1.468665
-    Transport GUID: Full: 0x1FC0000000000460 Type: MOTransport Low: 1120
-    Transport Position: X: -6.152398 Y: -23.49037 Z: 21.64464 O: 4.827727
-    Transport Time: 9926
-    Transport Seat: 255
-    Fall Time: 824
-    */
+Example packet:
+ClientToServer: CMSG_FORCE_MOVE_ROOT_ACK (0x00E9) Length: 67 ConnectionIndex: 0 Time: 03/04/2010 03:57:55.000 Number: 471326
+Guid:
+Movement Counter: 80
+Movement Flags: OnTransport, Root (2560)
+Extra Movement Flags: None (0)
+Time: 52291611
+Position: X: -396.0302 Y: 2482.906 Z: 249.86
+Orientation: 1.468665
+Transport GUID: Full: 0x1FC0000000000460 Type: MOTransport Low: 1120
+Transport Position: X: -6.152398 Y: -23.49037 Z: 21.64464 O: 4.827727
+Transport Time: 9926
+Transport Seat: 255
+Fall Time: 824
+*/
     [Script]
-    class npc_gunship_cannon : CreatureScript
+    class npc_gunship_cannon : PassiveAI
     {
-        public npc_gunship_cannon() : base("npc_gunship_cannon") { }
+        public npc_gunship_cannon(Creature creature)
+            : base(creature) { }
 
-        class npc_gunship_cannonAI : PassiveAI
+        public override void OnCharmed(bool apply) { }
+
+        public override void PassengerBoarded(Unit passenger, sbyte seat, bool apply)
         {
-            public npc_gunship_cannonAI(Creature creature)
-                : base(creature) { }
-
-            public override void OnCharmed(bool apply) { }
-
-            public override void PassengerBoarded(Unit passenger, sbyte seat, bool apply)
+            if (!apply)
             {
-                if (!apply)
-                {
-                    me.SetControlled(false, UnitState.Root);
-                    me.SetControlled(true, UnitState.Root);
-                }
+                me.SetControlled(false, UnitState.Root);
+                me.SetControlled(true, UnitState.Root);
             }
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return new npc_gunship_cannonAI(creature);
         }
     }
 
     [Script]
-    class spell_igb_rocket_pack : SpellScriptLoader
+    class spell_igb_rocket_pack : AuraScript
     {
-        public spell_igb_rocket_pack() : base("spell_igb_rocket_pack") { }
-
-        class spell_igb_rocket_pack_AuraScript : AuraScript
+        public override bool Validate(SpellInfo spellInfo)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(GunshipSpells.RocketPackDamage, GunshipSpells.RocketBurst);
-            }
-
-            void HandlePeriodic(AuraEffect aurEff)
-            {
-                if (GetTarget().moveSpline.Finalized())
-                    Remove(AuraRemoveMode.Expire);
-            }
-
-            void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-            {
-                SpellInfo damageInfo = Global.SpellMgr.GetSpellInfo(GunshipSpells.RocketPackDamage);
-                GetTarget().CastCustomSpell(GunshipSpells.RocketPackDamage, SpellValueMod.BasePoint0, (int)(2 * (damageInfo.GetEffect(0).CalcValue() + aurEff.GetTickNumber() * aurEff.GetPeriod())), null, TriggerCastFlags.FullMask);
-                GetTarget().CastSpell(null, GunshipSpells.RocketBurst, TriggerCastFlags.FullMask);
-            }
-
-            public override void Register()
-            {
-                OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodic, 0, AuraType.PeriodicDummy));
-                OnEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real));
-            }
+            return ValidateSpellInfo(GunshipSpells.RocketPackDamage, GunshipSpells.RocketBurst);
         }
 
-        public override AuraScript GetAuraScript()
+        void HandlePeriodic(AuraEffect aurEff)
         {
-            return new spell_igb_rocket_pack_AuraScript();
+            if (GetTarget().moveSpline.Finalized())
+                Remove(AuraRemoveMode.Expire);
+        }
+
+        void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            SpellInfo damageInfo = Global.SpellMgr.GetSpellInfo(GunshipSpells.RocketPackDamage);
+            GetTarget().CastCustomSpell(GunshipSpells.RocketPackDamage, SpellValueMod.BasePoint0, (int)(2 * (damageInfo.GetEffect(0).CalcValue() + aurEff.GetTickNumber() * aurEff.GetPeriod())), null, TriggerCastFlags.FullMask);
+            GetTarget().CastSpell(null, GunshipSpells.RocketBurst, TriggerCastFlags.FullMask);
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodic, 0, AuraType.PeriodicDummy));
+            OnEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real));
         }
     }
 
     [Script]
-    class spell_igb_rocket_pack_useable : SpellScriptLoader
+    class spell_igb_rocket_pack_useable : AuraScript
     {
-        public spell_igb_rocket_pack_useable() : base("spell_igb_rocket_pack_useable") { }
-
-        class spell_igb_rocket_pack_useable_AuraScript : AuraScript
+        public override bool Load()
         {
-            public override bool Load()
-            {
-                return GetOwner().GetInstanceScript() != null;
-            }
+            return GetOwner().GetInstanceScript() != null;
+        }
 
-            bool CheckAreaTarget(Unit target)
-            {
-                return target.IsTypeId(TypeId.Player) && GetOwner().GetInstanceScript().GetBossState(Bosses.GunshipBattle) != EncounterState.Done;
-            }
+        bool CheckAreaTarget(Unit target)
+        {
+            return target.IsTypeId(TypeId.Player) && GetOwner().GetInstanceScript().GetBossState(Bosses.GunshipBattle) != EncounterState.Done;
+        }
 
-            void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Creature owner = GetOwner().ToCreature();
+            if (owner)
             {
-                Creature owner = GetOwner().ToCreature();
-                if (owner)
-                {
-                    Player target = GetTarget().ToPlayer();
-                    if (target)
-                        if (target.HasItemCount(GunshipMiscData.ItemGoblinRocketPack, 1))
-                            Global.CreatureTextMgr.SendChat(owner, GunshipTexts.SayZafodRocketPackActive, target, ChatMsg.Addon, Language.Addon, CreatureTextRange.Normal, 0, Team.Other, false, target);
-                }
-            }
-
-            void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-            {
-                Creature owner = GetOwner().ToCreature();
-                if (owner)
-                {
-                    Player target = GetTarget().ToPlayer();
-                    if (target)
-                        if (target.HasItemCount(GunshipMiscData.ItemGoblinRocketPack, 1))
-                            Global.CreatureTextMgr.SendChat(owner, GunshipTexts.SayZafodRocketPackDisabled, target, ChatMsg.Addon, Language.Addon, CreatureTextRange.Normal, 0, Team.Other, false, target);
-                }
-            }
-
-            public override void Register()
-            {
-                DoCheckAreaTarget.Add(new CheckAreaTargetHandler(CheckAreaTarget));
-                AfterEffectApply.Add(new EffectApplyHandler(HandleApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
-                AfterEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+                Player target = GetTarget().ToPlayer();
+                if (target)
+                    if (target.HasItemCount(GunshipMiscData.ItemGoblinRocketPack, 1))
+                        Global.CreatureTextMgr.SendChat(owner, GunshipTexts.SayZafodRocketPackActive, target, ChatMsg.Addon, Language.Addon, CreatureTextRange.Normal, 0, Team.Other, false, target);
             }
         }
 
-        public override AuraScript GetAuraScript()
+        void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            return new spell_igb_rocket_pack_useable_AuraScript();
+            Creature owner = GetOwner().ToCreature();
+            if (owner)
+            {
+                Player target = GetTarget().ToPlayer();
+                if (target)
+                    if (target.HasItemCount(GunshipMiscData.ItemGoblinRocketPack, 1))
+                        Global.CreatureTextMgr.SendChat(owner, GunshipTexts.SayZafodRocketPackDisabled, target, ChatMsg.Addon, Language.Addon, CreatureTextRange.Normal, 0, Team.Other, false, target);
+            }
+        }
+
+        public override void Register()
+        {
+            DoCheckAreaTarget.Add(new CheckAreaTargetHandler(CheckAreaTarget));
+            AfterEffectApply.Add(new EffectApplyHandler(HandleApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
 
     [Script]
-    class spell_igb_on_gunship_deck : SpellScriptLoader
+    class spell_igb_on_gunship_deck : AuraScript
     {
-        public spell_igb_on_gunship_deck() : base("spell_igb_on_gunship_deck") { }
-
-        class spell_igb_on_gunship_deck_AuraScript : AuraScript
+        public override bool Load()
         {
-            public override bool Load()
-            {
-                InstanceScript instance = GetOwner().GetInstanceScript();
-                if (instance != null)
-                    _teamInInstance = (Team)instance.GetData(DataTypes.TeamInInstance);
-                else
-                    _teamInInstance = 0;
-                return true;
-            }
-
-            bool CheckAreaTarget(Unit unit)
-            {
-                return unit.IsTypeId(TypeId.Player);
-            }
-
-            void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
-            {
-                if (GetSpellInfo().Id == (_teamInInstance == Team.Horde ? GunshipSpells.OnSkybreakerDeck : GunshipSpells.OnOrgrimsHammerDeck))
-                {
-                    Creature gunship = GetOwner().FindNearestCreature(_teamInInstance == Team.Horde ? CreatureIds.OrgrimsHammer : CreatureIds.TheSkybreaker, 200.0f);
-                    if (gunship)
-                        gunship.GetAI().SetGUID(GetTarget().GetGUID(), EncounterActions.ShipVisits);
-                }
-            }
-
-            public override void Register()
-            {
-                DoCheckAreaTarget.Add(new CheckAreaTargetHandler(CheckAreaTarget));
-                AfterEffectApply.Add(new EffectApplyHandler(HandleApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
-            }
-
-            Team _teamInInstance;
+            InstanceScript instance = GetOwner().GetInstanceScript();
+            if (instance != null)
+                _teamInInstance = (Team)instance.GetData(DataTypes.TeamInInstance);
+            else
+                _teamInInstance = 0;
+            return true;
         }
 
-        public override AuraScript GetAuraScript()
+        bool CheckAreaTarget(Unit unit)
         {
-            return new spell_igb_on_gunship_deck_AuraScript();
+            return unit.IsTypeId(TypeId.Player);
+        }
+
+        void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            if (GetSpellInfo().Id == (_teamInInstance == Team.Horde ? GunshipSpells.OnSkybreakerDeck : GunshipSpells.OnOrgrimsHammerDeck))
+            {
+                Creature gunship = GetOwner().FindNearestCreature(_teamInInstance == Team.Horde ? CreatureIds.OrgrimsHammer : CreatureIds.TheSkybreaker, 200.0f);
+                if (gunship)
+                    gunship.GetAI().SetGUID(GetTarget().GetGUID(), EncounterActions.ShipVisits);
+            }
+        }
+
+        public override void Register()
+        {
+            DoCheckAreaTarget.Add(new CheckAreaTargetHandler(CheckAreaTarget));
+            AfterEffectApply.Add(new EffectApplyHandler(HandleApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+
+        Team _teamInInstance;
+    }
+
+    [Script]
+    class spell_igb_periodic_trigger_with_power_cost : AuraScript
+    {
+        void HandlePeriodicTick(AuraEffect aurEff)
+        {
+            PreventDefaultAction();
+            GetTarget().CastSpell(GetTarget(), GetSpellInfo().GetEffect(0).TriggerSpell, (TriggerCastFlags.FullMask & ~TriggerCastFlags.IgnorePowerAndReagentCost));
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodicTick, 0, AuraType.PeriodicTriggerSpell));
         }
     }
 
     [Script]
-    class spell_igb_periodic_trigger_with_power_cost : SpellScriptLoader
+    class spell_igb_cannon_blast : SpellScript
     {
-        public spell_igb_periodic_trigger_with_power_cost() : base("spell_igb_periodic_trigger_with_power_cost") { }
-
-        class spell_igb_periodic_trigger_with_power_cost_AuraScript : AuraScript
+        public override bool Load()
         {
-            void HandlePeriodicTick(AuraEffect aurEff)
-            {
-                PreventDefaultAction();
-                GetTarget().CastSpell(GetTarget(), GetSpellInfo().GetEffect(0).TriggerSpell, (TriggerCastFlags.FullMask & ~TriggerCastFlags.IgnorePowerAndReagentCost));
-            }
-
-            public override void Register()
-            {
-                OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodicTick, 0, AuraType.PeriodicTriggerSpell));
-            }
+            return GetCaster().IsTypeId(TypeId.Unit);
         }
 
-        public override AuraScript GetAuraScript()
+        void CheckEnergy()
         {
-            return new spell_igb_periodic_trigger_with_power_cost_AuraScript();
-        }
-    }
-
-    [Script]
-    class spell_igb_cannon_blast : SpellScriptLoader
-    {
-        public spell_igb_cannon_blast() : base("spell_igb_cannon_blast") { }
-
-        class spell_igb_cannon_blast_SpellScript : SpellScript
-        {
-            public override bool Load()
+            if (GetCaster().GetPower(PowerType.Energy) >= 100)
             {
-                return GetCaster().IsTypeId(TypeId.Unit);
-            }
-
-            void CheckEnergy()
-            {
-                if (GetCaster().GetPower(PowerType.Energy) >= 100)
-                {
-                    GetCaster().CastSpell(GetCaster(), GunshipSpells.Overheat, TriggerCastFlags.FullMask);
-                    Vehicle vehicle = GetCaster().GetVehicleKit();
-                    if (vehicle)
-                    {
-                        Unit passenger = vehicle.GetPassenger(0);
-                        if (passenger)
-                            Global.CreatureTextMgr.SendChat(GetCaster().ToCreature(), GunshipTexts.SayOverheat, passenger);
-                    }
-                }
-            }
-
-            public override void Register()
-            {
-                AfterHit.Add(new HitHandler(CheckEnergy));
-            }
-        }
-
-        public override SpellScript GetSpellScript()
-        {
-            return new spell_igb_cannon_blast_SpellScript();
-        }
-    }
-
-    [Script]
-    class spell_igb_incinerating_blast : SpellScriptLoader
-    {
-        public spell_igb_incinerating_blast() : base("spell_igb_incinerating_blast") { }
-
-        class spell_igb_incinerating_blast_SpellScript : SpellScript
-        {
-            void StoreEnergy()
-            {
-                _energyLeft = (uint)GetCaster().GetPower(PowerType.Energy) - 10;
-            }
-
-            void RemoveEnergy()
-            {
-                GetCaster().SetPower(PowerType.Energy, 0);
-            }
-
-            void CalculateDamage(uint effIndex)
-            {
-                SetEffectValue((int)(GetEffectValue() + _energyLeft * _energyLeft * 8));
-            }
-
-            public override void Register()
-            {
-                OnCast.Add(new CastHandler(StoreEnergy));
-                AfterCast.Add(new CastHandler(RemoveEnergy));
-                OnEffectLaunchTarget.Add(new EffectHandler(CalculateDamage, 1, SpellEffectName.SchoolDamage));
-            }
-
-            uint _energyLeft;
-        }
-
-        public override SpellScript GetSpellScript()
-        {
-            return new spell_igb_incinerating_blast_SpellScript();
-        }
-    }
-
-    [Script]
-    class spell_igb_overheat : SpellScriptLoader
-    {
-        public spell_igb_overheat() : base("spell_igb_overheat") { }
-
-        class spell_igb_overheat_AuraScript : AuraScript
-        {
-            public override bool Load()
-            {
-                if (GetAura().GetAuraType() != AuraObjectType.Unit)
-                    return false;
-                return GetUnitOwner().IsVehicle();
-            }
-
-            void SendClientControl(bool value)
-            {
-                Vehicle vehicle = GetUnitOwner().GetVehicleKit();
+                GetCaster().CastSpell(GetCaster(), GunshipSpells.Overheat, TriggerCastFlags.FullMask);
+                Vehicle vehicle = GetCaster().GetVehicleKit();
                 if (vehicle)
                 {
                     Unit passenger = vehicle.GetPassenger(0);
                     if (passenger)
+                        Global.CreatureTextMgr.SendChat(GetCaster().ToCreature(), GunshipTexts.SayOverheat, passenger);
+                }
+            }
+        }
+
+        public override void Register()
+        {
+            AfterHit.Add(new HitHandler(CheckEnergy));
+        }
+    }
+
+    [Script]
+    class spell_igb_incinerating_blast : SpellScript
+    {
+        void StoreEnergy()
+        {
+            _energyLeft = (uint)GetCaster().GetPower(PowerType.Energy) - 10;
+        }
+
+        void RemoveEnergy()
+        {
+            GetCaster().SetPower(PowerType.Energy, 0);
+        }
+
+        void CalculateDamage(uint effIndex)
+        {
+            SetEffectValue((int)(GetEffectValue() + _energyLeft * _energyLeft * 8));
+        }
+
+        public override void Register()
+        {
+            OnCast.Add(new CastHandler(StoreEnergy));
+            AfterCast.Add(new CastHandler(RemoveEnergy));
+            OnEffectLaunchTarget.Add(new EffectHandler(CalculateDamage, 1, SpellEffectName.SchoolDamage));
+        }
+
+        uint _energyLeft;
+    }
+
+    [Script]
+    class spell_igb_overheat : AuraScript
+    {
+        public override bool Load()
+        {
+            if (GetAura().GetAuraType() != AuraObjectType.Unit)
+                return false;
+            return GetUnitOwner().IsVehicle();
+        }
+
+        void SendClientControl(bool value)
+        {
+            Vehicle vehicle = GetUnitOwner().GetVehicleKit();
+            if (vehicle)
+            {
+                Unit passenger = vehicle.GetPassenger(0);
+                if (passenger)
+                {
+                    Player player = passenger.ToPlayer();
+                    if (player)
                     {
-                        Player player = passenger.ToPlayer();
-                        if (player)
-                        {
-                            ControlUpdate data = new ControlUpdate();
-                            data.Guid = GetUnitOwner().GetGUID();
-                            data.On = value;
-                            player.SendPacket(data);
-                        }
+                        ControlUpdate data = new ControlUpdate();
+                        data.Guid = GetUnitOwner().GetGUID();
+                        data.On = value;
+                        player.SendPacket(data);
                     }
                 }
             }
-
-            void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
-            {
-                SendClientControl(false);
-            }
-
-            void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-            {
-                SendClientControl(true);
-            }
-
-            public override void Register()
-            {
-                AfterEffectApply.Add(new EffectApplyHandler(HandleApply, 0, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real));
-                AfterEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real));
-            }
         }
 
-        public override AuraScript GetAuraScript()
+        void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            return new spell_igb_overheat_AuraScript();
+            SendClientControl(false);
+        }
+
+        void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            SendClientControl(true);
+        }
+
+        public override void Register()
+        {
+            AfterEffectApply.Add(new EffectApplyHandler(HandleApply, 0, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real));
         }
     }
 
     [Script]
-    class spell_igb_below_zero : SpellScriptLoader
+    class spell_igb_below_zero : SpellScript
     {
-        public spell_igb_below_zero() : base("spell_igb_below_zero") { }
-
-        class spell_igb_below_zero_SpellScript : SpellScript
+        void RemovePassengers(SpellMissInfo missInfo)
         {
-            void RemovePassengers(SpellMissInfo missInfo)
-            {
-                if (missInfo != SpellMissInfo.None)
-                    return;
+            if (missInfo != SpellMissInfo.None)
+                return;
 
-                GetHitUnit().CastSpell(GetHitUnit(), GunshipSpells.EjectAllPassengersBelowZero, TriggerCastFlags.FullMask);
-            }
-
-            public override void Register()
-            {
-                BeforeHit.Add(new BeforeHitHandler(RemovePassengers));
-            }
+            GetHitUnit().CastSpell(GetHitUnit(), GunshipSpells.EjectAllPassengersBelowZero, TriggerCastFlags.FullMask);
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_igb_below_zero_SpellScript();
+            BeforeHit.Add(new BeforeHitHandler(RemovePassengers));
         }
     }
 
     [Script]
-    class spell_igb_teleport_to_enemy_ship : SpellScriptLoader
+    class spell_igb_teleport_to_enemy_ship : SpellScript
     {
-        public spell_igb_teleport_to_enemy_ship() : base("spell_igb_teleport_to_enemy_ship") { }
-
-        class spell_igb_teleport_to_enemy_ship_SpellScript : SpellScript
+        void RelocateTransportOffset(uint effIndex)
         {
-            void RelocateTransportOffset(uint effIndex)
-            {
-                Position dest = GetHitDest();
-                Unit target = GetHitUnit();
-                if (dest == null || !target || !target.GetTransport())
-                    return;
+            Position dest = GetHitDest();
+            Unit target = GetHitUnit();
+            if (dest == null || !target || !target.GetTransport())
+                return;
 
-                float x, y, z, o;
-                dest.GetPosition(out x, out y, out z, out o);
-                target.GetTransport().CalculatePassengerOffset(ref x, ref y, ref z, ref o);
-                target.m_movementInfo.transport.pos.Relocate(x, y, z, o);
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(RelocateTransportOffset, 0, SpellEffectName.TeleportUnitsOld));
-            }
+            float x, y, z, o;
+            dest.GetPosition(out x, out y, out z, out o);
+            target.GetTransport().CalculatePassengerOffset(ref x, ref y, ref z, ref o);
+            target.m_movementInfo.transport.pos.Relocate(x, y, z, o);
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_igb_teleport_to_enemy_ship_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(RelocateTransportOffset, 0, SpellEffectName.TeleportUnitsOld));
         }
     }
 
     [Script]
-    class spell_igb_burning_pitch_selector : SpellScriptLoader
+    class spell_igb_burning_pitch_selector : SpellScript
     {
-        public spell_igb_burning_pitch_selector() : base("spell_igb_burning_pitch_selector") { }
-
-        class spell_igb_burning_pitch_selector_SpellScript : SpellScript
+        void FilterTargets(List<WorldObject> targets)
         {
-            void FilterTargets(List<WorldObject> targets)
+            Team team = Team.Horde;
+            InstanceScript instance = GetCaster().GetInstanceScript();
+            if (instance != null)
+                team = (Team)instance.GetData(DataTypes.TeamInInstance);
+
+            targets.RemoveAll(target =>
             {
-                Team team = Team.Horde;
-                InstanceScript instance = GetCaster().GetInstanceScript();
-                if (instance != null)
-                    team = (Team)instance.GetData(DataTypes.TeamInInstance);
+                Transport transport = target.GetTransport();
+                if (transport)
+                    return transport.GetEntry() != (team == Team.Horde ? GameObjectIds.OrgrimsHammer_H : GameObjectIds.TheSkybreaker_A);
+                return true;
+            });
 
-                targets.RemoveAll(target =>
-                {
-                    Transport transport = target.GetTransport();
-                    if (transport)
-                        return transport.GetEntry() != (team == Team.Horde ? GameObjectIds.OrgrimsHammer_H : GameObjectIds.TheSkybreaker_A);
-                    return true;
-                });
-
-                if (!targets.Empty())
-                {
-                    WorldObject target = targets.SelectRandom();
-                    targets.Clear();
-                    targets.Add(target);
-                }
-            }
-
-            void HandleDummy(uint effIndex)
+            if (!targets.Empty())
             {
-                PreventHitDefaultEffect(effIndex);
-                GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue(), TriggerCastFlags.None);
-            }
-
-            public override void Register()
-            {
-                OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEntry));
-                OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+                WorldObject target = targets.SelectRandom();
+                targets.Clear();
+                targets.Add(target);
             }
         }
 
-        public override SpellScript GetSpellScript()
+        void HandleDummy(uint effIndex)
         {
-            return new spell_igb_burning_pitch_selector_SpellScript();
+            PreventHitDefaultEffect(effIndex);
+            GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue(), TriggerCastFlags.None);
+        }
+
+        public override void Register()
+        {
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEntry));
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     [Script]
-    class spell_igb_burning_pitch : SpellScriptLoader
+    class spell_igb_burning_pitch : SpellScript
     {
-        public spell_igb_burning_pitch() : base("spell_igb_burning_pitch") { }
-
-        class spell_igb_burning_pitch_SpellScript : SpellScript
+        void HandleDummy(uint effIndex)
         {
-            void HandleDummy(uint effIndex)
-            {
-                PreventHitDefaultEffect(effIndex);
-                GetCaster().CastCustomSpell((uint)GetEffectValue(), SpellValueMod.BasePoint0, 8000, null, TriggerCastFlags.FullMask);
-                GetHitUnit().CastSpell(GetHitUnit(), GunshipSpells.BurningPitch, TriggerCastFlags.FullMask);
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-            }
+            PreventHitDefaultEffect(effIndex);
+            GetCaster().CastCustomSpell((uint)GetEffectValue(), SpellValueMod.BasePoint0, 8000, null, TriggerCastFlags.FullMask);
+            GetHitUnit().CastSpell(GetHitUnit(), GunshipSpells.BurningPitch, TriggerCastFlags.FullMask);
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_igb_burning_pitch_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     [Script]
-    class spell_igb_rocket_artillery : SpellScriptLoader
+    class spell_igb_rocket_artillery : SpellScript
     {
-        public spell_igb_rocket_artillery() : base("spell_igb_rocket_artillery") { }
-
-        class spell_igb_rocket_artillery_SpellScript : SpellScript
+        void SelectRandomTarget(List<WorldObject> targets)
         {
-            void SelectRandomTarget(List<WorldObject> targets)
+            if (!targets.Empty())
             {
-                if (!targets.Empty())
-                {
-                    WorldObject target = targets.SelectRandom();
-                    targets.Clear();
-                    targets.Add(target);
-                }
-            }
-
-            void HandleScript(uint effIndex)
-            {
-                PreventHitDefaultEffect(effIndex);
-                GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue(), TriggerCastFlags.None);
-            }
-
-            public override void Register()
-            {
-                OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(SelectRandomTarget, 0, Targets.UnitSrcAreaEntry));
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+                WorldObject target = targets.SelectRandom();
+                targets.Clear();
+                targets.Add(target);
             }
         }
 
-        public override SpellScript GetSpellScript()
+        void HandleScript(uint effIndex)
         {
-            return new spell_igb_rocket_artillery_SpellScript();
+            PreventHitDefaultEffect(effIndex);
+            GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue(), TriggerCastFlags.None);
+        }
+
+        public override void Register()
+        {
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(SelectRandomTarget, 0, Targets.UnitSrcAreaEntry));
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
     [Script]
-    class spell_igb_rocket_artillery_explosion : SpellScriptLoader
+    class spell_igb_rocket_artillery_explosion : SpellScript
     {
-        public spell_igb_rocket_artillery_explosion() : base("spell_igb_rocket_artillery_explosion") { }
-
-        class spell_igb_rocket_artillery_explosion_SpellScript : SpellScript
+        void DamageGunship(uint effIndex)
         {
-            void DamageGunship(uint effIndex)
-            {
-                InstanceScript instance = GetCaster().GetInstanceScript();
-                if (instance != null)
-                    GetCaster().CastCustomSpell(instance.GetData(DataTypes.TeamInInstance) == (uint)Team.Horde ? GunshipSpells.BurningPitchDamageH : GunshipSpells.BurningPitchDamageA, SpellValueMod.BasePoint0, 5000, null, TriggerCastFlags.FullMask);
-            }
-
-            public override void Register()
-            {
-                OnEffectHit.Add(new EffectHandler(DamageGunship, 0, SpellEffectName.TriggerMissile));
-            }
+            InstanceScript instance = GetCaster().GetInstanceScript();
+            if (instance != null)
+                GetCaster().CastCustomSpell(instance.GetData(DataTypes.TeamInInstance) == (uint)Team.Horde ? GunshipSpells.BurningPitchDamageH : GunshipSpells.BurningPitchDamageA, SpellValueMod.BasePoint0, 5000, null, TriggerCastFlags.FullMask);
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_igb_rocket_artillery_explosion_SpellScript();
+            OnEffectHit.Add(new EffectHandler(DamageGunship, 0, SpellEffectName.TriggerMissile));
         }
     }
 
     [Script]
-    class spell_igb_gunship_fall_teleport : SpellScriptLoader
+    class spell_igb_gunship_fall_teleport : SpellScript
     {
-        public spell_igb_gunship_fall_teleport() : base("spell_igb_gunship_fall_teleport") { }
-
-        class spell_igb_gunship_fall_teleport_SpellScript : SpellScript
+        public override bool Load()
         {
-            public override bool Load()
-            {
-                return GetCaster().GetInstanceScript() != null;
-            }
-
-            void SelectTransport(ref WorldObject target)
-            {
-                InstanceScript instance = target.GetInstanceScript();
-                if (instance != null)
-                    target = Global.ObjAccessor.FindTransport(instance.GetGuidData(Bosses.GunshipBattle));
-            }
-
-            void RelocateDest(uint effIndex)
-            {
-                if (GetCaster().GetInstanceScript().GetData(DataTypes.TeamInInstance) == (uint)Team.Horde)
-                    GetHitDest().RelocateOffset(new Position(0.0f, 0.0f, 36.0f, 0.0f));
-                else
-                    GetHitDest().RelocateOffset(new Position(0.0f, 0.0f, 21.0f, 0.0f));
-            }
-
-            public override void Register()
-            {
-                OnObjectTargetSelect.Add(new ObjectTargetSelectHandler(SelectTransport, 0, Targets.DestNearbyEntry));
-                OnEffectLaunch.Add(new EffectHandler(RelocateDest, 0, SpellEffectName.TeleportUnitsOld));
-            }
+            return GetCaster().GetInstanceScript() != null;
         }
 
-        public override SpellScript GetSpellScript()
+        void SelectTransport(ref WorldObject target)
         {
-            return new spell_igb_gunship_fall_teleport_SpellScript();
+            InstanceScript instance = target.GetInstanceScript();
+            if (instance != null)
+                target = Global.ObjAccessor.FindTransport(instance.GetGuidData(Bosses.GunshipBattle));
+        }
+
+        void RelocateDest(uint effIndex)
+        {
+            if (GetCaster().GetInstanceScript().GetData(DataTypes.TeamInInstance) == (uint)Team.Horde)
+                GetHitDest().RelocateOffset(new Position(0.0f, 0.0f, 36.0f, 0.0f));
+            else
+                GetHitDest().RelocateOffset(new Position(0.0f, 0.0f, 21.0f, 0.0f));
+        }
+
+        public override void Register()
+        {
+            OnObjectTargetSelect.Add(new ObjectTargetSelectHandler(SelectTransport, 0, Targets.DestNearbyEntry));
+            OnEffectLaunch.Add(new EffectHandler(RelocateDest, 0, SpellEffectName.TeleportUnitsOld));
         }
     }
 
     [Script]
-    class spell_igb_check_for_players : SpellScriptLoader
+    class spell_igb_check_for_players : SpellScript
     {
-        public spell_igb_check_for_players() : base("spell_igb_check_for_players") { }
-
-        class spell_igb_check_for_players_SpellScript : SpellScript
+        public override bool Load()
         {
-            public override bool Load()
-            {
-                _playerCount = 0;
-                return GetCaster().IsTypeId(TypeId.Unit);
-            }
-
-            void CountTargets(List<WorldObject> targets)
-            {
-                _playerCount = (uint)targets.Count;
-            }
-
-            void TriggerWipe()
-            {
-                if (_playerCount == 0)
-                    GetCaster().ToCreature().GetAI().JustDied(null);
-            }
-
-            void TeleportPlayer(uint effIndex)
-            {
-                if (GetHitUnit().GetPositionZ() < GetCaster().GetPositionZ() - 10.0f)
-                    GetHitUnit().CastSpell(GetHitUnit(), GunshipSpells.GunshipFallTeleport, TriggerCastFlags.FullMask);
-            }
-
-            public override void Register()
-            {
-                OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(CountTargets, 0, Targets.UnitSrcAreaEntry));
-                AfterCast.Add(new CastHandler(TriggerWipe));
-                OnEffectHitTarget.Add(new EffectHandler(TeleportPlayer, 0, SpellEffectName.Dummy));
-            }
-
-            uint _playerCount;
+            _playerCount = 0;
+            return GetCaster().IsTypeId(TypeId.Unit);
         }
 
-        public override SpellScript GetSpellScript()
+        void CountTargets(List<WorldObject> targets)
         {
-            return new spell_igb_check_for_players_SpellScript();
+            _playerCount = (uint)targets.Count;
         }
+
+        void TriggerWipe()
+        {
+            if (_playerCount == 0)
+                GetCaster().ToCreature().GetAI().JustDied(null);
+        }
+
+        void TeleportPlayer(uint effIndex)
+        {
+            if (GetHitUnit().GetPositionZ() < GetCaster().GetPositionZ() - 10.0f)
+                GetHitUnit().CastSpell(GetHitUnit(), GunshipSpells.GunshipFallTeleport, TriggerCastFlags.FullMask);
+        }
+
+        public override void Register()
+        {
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(CountTargets, 0, Targets.UnitSrcAreaEntry));
+            AfterCast.Add(new CastHandler(TriggerWipe));
+            OnEffectHitTarget.Add(new EffectHandler(TeleportPlayer, 0, SpellEffectName.Dummy));
+        }
+
+        uint _playerCount;
     }
 
     [Script]
-    class spell_igb_teleport_players_on_victory : SpellScriptLoader
+    class spell_igb_teleport_players_on_victory : SpellScript
     {
-        public spell_igb_teleport_players_on_victory() : base("spell_igb_teleport_players_on_victory") { }
-
-        class spell_igb_teleport_players_on_victory_SpellScript : SpellScript
+        public override bool Load()
         {
-            public override bool Load()
-            {
-                return GetCaster().GetInstanceScript() != null;
-            }
-
-            void FilterTargets(List<WorldObject> targets)
-            {
-                InstanceScript instance = GetCaster().GetInstanceScript();
-                targets.RemoveAll(target => target.GetTransGUID() != instance.GetGuidData(DataTypes.EnemyGunship));
-            }
-
-            public override void Register()
-            {
-                OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitDestAreaEntry));
-            }
+            return GetCaster().GetInstanceScript() != null;
         }
 
-        public override SpellScript GetSpellScript()
+        void FilterTargets(List<WorldObject> targets)
         {
-            return new spell_igb_teleport_players_on_victory_SpellScript();
+            InstanceScript instance = GetCaster().GetInstanceScript();
+            targets.RemoveAll(target => target.GetTransGUID() != instance.GetGuidData(DataTypes.EnemyGunship));
+        }
+
+        public override void Register()
+        {
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitDestAreaEntry));
         }
     }
 
     [Script] // 71201 - Battle Experience - proc should never happen, handled in script
-    class spell_igb_battle_experience_check : SpellScriptLoader
+    class spell_igb_battle_experience_check : AuraScript
     {
-        public spell_igb_battle_experience_check() : base("spell_igb_battle_experience_check") { }
-
-        class spell_igb_battle_experience_check_AuraScript : AuraScript
+        bool CheckProc(ProcEventInfo eventInfo)
         {
-
-            bool CheckProc(ProcEventInfo eventInfo)
-            {
-                return false;
-            }
-
-            public override void Register()
-            {
-                DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            }
+            return false;
         }
 
-        public override AuraScript GetAuraScript()
+        public override void Register()
         {
-            return new spell_igb_battle_experience_check_AuraScript();
+            DoCheckProc.Add(new CheckProcHandler(CheckProc));
         }
     }
 

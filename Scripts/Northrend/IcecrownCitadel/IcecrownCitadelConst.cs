@@ -38,7 +38,7 @@ namespace Scripts.Northrend.IcecrownCitadel
         public const uint Sindragosa = 11;
         public const uint TheLichKing = 12;
 
-       public const uint MaxEncounters = 13;
+        public const uint MaxEncounters = 13;
     }
 
     struct Texts

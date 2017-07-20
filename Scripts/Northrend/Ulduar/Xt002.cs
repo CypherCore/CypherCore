@@ -122,407 +122,367 @@ namespace Scripts.Northrend.Ulduar.Xt002
     }
 
     [Script]
-    class boss_xt002 : CreatureScript
+    class boss_xt002_ : BossAI
     {
-        public boss_xt002() : base("boss_xt002") { }
-
-        class boss_xt002_AI : BossAI
+        public boss_xt002_(Creature creature) : base(creature, BossIds.Xt002)
         {
-            public boss_xt002_AI(Creature creature) : base(creature, BossIds.Xt002)
-            {
-                Initialize();
-                _transferHealth = 0;
-            }
-
-            void Initialize()
-            {
-                _healthRecovered = false;
-                _gravityBombCasualty = false;
-                _hardMode = false;
-
-                _heartExposed = 0;
-            }
-
-            public override void Reset()
-            {
-                _Reset();
-
-                me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
-                me.SetReactState(ReactStates.Aggressive);
-                DoCastSelf(SpellIds.Stand);
-
-                Initialize();
-
-                instance.DoStopCriteriaTimer(CriteriaTimedTypes.Event, Misc.AchievMustDeconstructFaster);
-            }
-
-            public override void EnterCombat(Unit who)
-            {
-                Talk(Texts.Aggro);
-                _EnterCombat();
-
-                //Enrage
-                _scheduler.Schedule(TimeSpan.FromMinutes(10), task =>
-                {
-                    Talk(Texts.Berserk);
-                    DoCastSelf(SpellIds.Enrage);
-                });
-
-                //Gavity Bomb
-                _scheduler.Schedule(TimeSpan.FromSeconds(20), Misc.PhaseOneGroup, task =>
-                {
-                    Unit target = SelectTarget(SelectAggroTarget.Random, 0);
-                    if (target)
-                        DoCast(target, SpellIds.GravityBomb);
-
-                    task.Repeat(TimeSpan.FromSeconds(20));
-                });
-
-                //Searing Light
-                _scheduler.Schedule(TimeSpan.FromSeconds(20), Misc.PhaseOneGroup, task =>
-                {
-                    Unit target = SelectTarget(SelectAggroTarget.Random, 0);
-                    if (target)
-                        DoCast(target, SpellIds.SearingLight);
-
-                    task.Repeat(TimeSpan.FromSeconds(20));
-                });
-
-                //Tympanic Tantrum
-                _scheduler.Schedule(TimeSpan.FromSeconds(30), Misc.PhaseOneGroup, task =>
-                {
-                    Talk(Texts.TympanicTantrum);
-                    Talk(Texts.EmoteTympanicTantrum);
-                    DoCast(SpellIds.TympanicTantrum);
-                    task.Repeat(TimeSpan.FromSeconds(30));
-                });
-
-                instance.DoStartCriteriaTimer(CriteriaTimedTypes.Event, Misc.AchievMustDeconstructFaster);
-            }
-
-            public override void DoAction(int action)
-            {
-                switch (action)
-                {
-                    case Misc.ActionHardMode:
-                        _scheduler.Schedule(TimeSpan.FromMilliseconds(1), task =>
-                        {
-                            SetPhaseOne(true);
-                        });
-                        break;
-                }
-            }
-
-            public override void KilledUnit(Unit who)
-            {
-                if (who.GetTypeId() == TypeId.Player)
-                    Talk(Texts.Slay);
-            }
-
-            public override void JustDied(Unit killer)
-            {
-                Talk(Texts.Death);
-                _JustDied();
-                me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
-            }
-
-            public override void DamageTaken(Unit attacker, ref uint damage)
-            {
-                if (!_hardMode && !me.HasReactState(ReactStates.Passive) && !HealthAbovePct(100 - 25 * (_heartExposed + 1)))
-                    ExposeHeart();
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _scheduler.Update(diff);
-
-                if (!me.HasReactState(ReactStates.Passive))
-                    DoMeleeAttackIfReady();
-            }
-
-            public override void PassengerBoarded(Unit who, sbyte seatId, bool apply)
-            {
-                if (apply && who.GetEntry() == InstanceCreatureIds.XS013Scrapbot)
-                {
-                    // Need this so we can properly determine when to expose heart again in damagetaken hook
-                    if (me.GetHealthPct() > (25 * (4 - _heartExposed)))
-                        ++_heartExposed;
-
-                    Talk(Texts.EmoteScrapbot);
-                    DoCast(who, SpellIds.ScrapRepair, true);
-                    _healthRecovered = true;
-                }
-
-                if (apply && seatId == Misc.SeatHeartExposed)
-                    who.CastSpell(who, SpellIds.ExposedHeart);   // Channeled
-            }
-
-            public override uint GetData(uint type)
-            {
-                switch (type)
-                {
-                    case XT002Data.HardMode:
-                        return _hardMode ? 1 : 0u;
-                    case XT002Data.HealthRecovered:
-                        return _healthRecovered ? 1 : 0u;
-                    case XT002Data.GravityBombCasualty:
-                        return _gravityBombCasualty ? 1 : 0u;
-                }
-
-                return 0;
-            }
-
-            public override void SetData(uint type, uint data)
-            {
-                switch (type)
-                {
-                    case XT002Data.TransferedHealth:
-                        _transferHealth = data;
-                        break;
-                    case XT002Data.GravityBombCasualty:
-                        _gravityBombCasualty = (data > 0) ? true : false;
-                        break;
-                }
-            }
-
-            void ExposeHeart()
-            {
-                Talk(Texts.HeartOpened);
-                Talk(Texts.EmoteHeartOpened);
-
-                DoCastSelf(SpellIds.Submerge);  // WIll make creature untargetable
-                me.AttackStop();
-                me.SetReactState(ReactStates.Passive);
-
-                Unit heart = me.GetVehicleKit() ? me.GetVehicleKit().GetPassenger(Misc.SeatHeartNormal) : null;
-                if (heart)
-                {
-                    heart.CastSpell(heart, SpellIds.HeartOverload);
-                    heart.CastSpell(me, SpellIds.HeartLightningTether);
-                    heart.CastSpell(heart, SpellIds.HeartHealToFull, true);
-                    heart.CastSpell(me, SpellIds.RideVehicleExposed, true);
-                    heart.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
-                    heart.SetFlag(UnitFields.Flags, UnitFlags.Unk29);
-                }
-                _scheduler.DelayGroup(Misc.PhaseOneGroup, TimeSpan.FromSeconds(30));
-
-                // Start "end of phase 2 timer"
-                _scheduler.Schedule(TimeSpan.FromSeconds(30), task => { SetPhaseOne(false); });
-
-                _heartExposed++;
-            }
-
-            void SetPhaseOne(bool isHardMode)
-            {
-                if (isHardMode)
-                {
-                    me.SetFullHealth();
-                    DoCastSelf(SpellIds.Heartbreak, true);
-                    me.AddLootMode(LootModes.HardMode1);
-                    _hardMode = true;
-                }
-
-                Talk(Texts.HeartClosed);
-                Talk(Texts.EmoteHeartClosed);
-
-                me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
-                me.SetReactState(ReactStates.Aggressive);
-                DoCastSelf(SpellIds.Stand);
-
-                //_events.RescheduleEvent(EVENT_SEARING_LIGHT, TIMER_SEARING_LIGHT / 2);
-                //_events.RescheduleEvent(EVENT_GRAVITY_BOMB, TIMER_GRAVITY_BOMB);
-                //_events.RescheduleEvent(EVENT_TYMPANIC_TANTRUM, RandomHelper.URand(TIMER_TYMPANIC_TANTRUM_MIN, TIMER_TYMPANIC_TANTRUM_MAX));
-
-                Unit heart = me.GetVehicleKit() ? me.GetVehicleKit().GetPassenger(Misc.SeatHeartExposed) : null;
-                if (!heart)
-                    return;
-
-                heart.CastSpell(me, SpellIds.HeartRideVehicle, true);
-                heart.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable);
-                heart.RemoveFlag(UnitFields.Flags, UnitFlags.Unk29);
-                heart.RemoveAurasDueToSpell(SpellIds.ExposedHeart);
-
-                if (!_hardMode)
-                {
-                    if (_transferHealth == 0)
-                        _transferHealth = (uint)(heart.GetMaxHealth() - heart.GetHealth());
-
-                    if (_transferHealth >= me.GetHealth())
-                        _transferHealth = (uint)me.GetHealth() - 1;
-
-                    me.ModifyHealth(-(int)_transferHealth);
-                    me.LowerPlayerDamageReq(_transferHealth);
-                }
-            }
-
-            // Achievement related
-            bool _healthRecovered;       // Did a scrapbot recover XT-002's health during the encounter?
-            bool _hardMode;              // Are we in hard mode? Or: was the heart killed during phase 2?
-            bool _gravityBombCasualty;   // Did someone die because of Gravity Bomb damage?
-
-            byte _heartExposed;
-            uint _transferHealth;
+            Initialize();
+            _transferHealth = 0;
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        void Initialize()
         {
-            return instance_ulduar.GetUlduarInstanceAI<boss_xt002_AI>(creature);
-        }
-    }
+            _healthRecovered = false;
+            _gravityBombCasualty = false;
+            _hardMode = false;
 
-    [Script]
-    class npc_xt002_heart : CreatureScript
-    {
-        public npc_xt002_heart() : base("npc_xt002_heart") { }
-
-        class npc_xt002_heartAI : ScriptedAI
-        {
-            public npc_xt002_heartAI(Creature creature) : base(creature)
-            {
-                _instance = creature.GetInstanceScript();
-
-                SetCombatMovement(false);
-            }
-
-            public override void UpdateAI(uint diff) { }
-
-            public override void JustDied(Unit killer)
-            {
-                Creature xt002 = _instance != null ? ObjectAccessor.GetCreature(me, _instance.GetGuidData(BossIds.Xt002)) : null;
-                if (!xt002 || xt002.GetAI() == null)
-                    return;
-
-                xt002.GetAI().SetData(XT002Data.TransferedHealth, (uint)me.GetHealth());
-                xt002.GetAI().DoAction(Misc.ActionHardMode);
-            }
-
-            InstanceScript _instance;
+            _heartExposed = 0;
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void Reset()
         {
-            return GetInstanceAI<npc_xt002_heartAI>(creature);
+            _Reset();
+
+            me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+            me.SetReactState(ReactStates.Aggressive);
+            DoCastSelf(SpellIds.Stand);
+
+            Initialize();
+
+            instance.DoStopCriteriaTimer(CriteriaTimedTypes.Event, Misc.AchievMustDeconstructFaster);
         }
-    }
 
-    [Script]
-    class npc_scrapbot : CreatureScript
-    {
-        public npc_scrapbot() : base("npc_scrapbot") { }
-
-        class npc_scrapbotAI : ScriptedAI
+        public override void EnterCombat(Unit who)
         {
-            public npc_scrapbotAI(Creature creature) : base(creature)
-            {
-                _instance = me.GetInstanceScript();
-            }
+            Talk(Texts.Aggro);
+            _EnterCombat();
 
-            public override void Reset()
+            //Enrage
+            _scheduler.Schedule(TimeSpan.FromMinutes(10), task =>
             {
-                me.SetReactState(ReactStates.Passive);
-                Creature pXT002 = ObjectAccessor.GetCreature(me, _instance.GetGuidData(BossIds.Xt002));
-                if (pXT002)
-                    me.GetMotionMaster().MoveFollow(pXT002, 0.0f, 0.0f);
-            }
+                Talk(Texts.Berserk);
+                DoCastSelf(SpellIds.Enrage);
+            });
 
-            public override void MovementInform(MovementGeneratorType type, uint id)
+            //Gavity Bomb
+            _scheduler.Schedule(TimeSpan.FromSeconds(20), Misc.PhaseOneGroup, task =>
             {
-                ObjectGuid guid = _instance.GetGuidData(BossIds.Xt002);
-                if (type == MovementGeneratorType.Follow && id == guid.GetCounter())
-                {
-                    Creature xt002 = ObjectAccessor.GetCreature(me, guid);
-                    if (xt002)
+                Unit target = SelectTarget(SelectAggroTarget.Random, 0);
+                if (target)
+                    DoCast(target, SpellIds.GravityBomb);
+
+                task.Repeat(TimeSpan.FromSeconds(20));
+            });
+
+            //Searing Light
+            _scheduler.Schedule(TimeSpan.FromSeconds(20), Misc.PhaseOneGroup, task =>
+            {
+                Unit target = SelectTarget(SelectAggroTarget.Random, 0);
+                if (target)
+                    DoCast(target, SpellIds.SearingLight);
+
+                task.Repeat(TimeSpan.FromSeconds(20));
+            });
+
+            //Tympanic Tantrum
+            _scheduler.Schedule(TimeSpan.FromSeconds(30), Misc.PhaseOneGroup, task =>
+            {
+                Talk(Texts.TympanicTantrum);
+                Talk(Texts.EmoteTympanicTantrum);
+                DoCast(SpellIds.TympanicTantrum);
+                task.Repeat(TimeSpan.FromSeconds(30));
+            });
+
+            instance.DoStartCriteriaTimer(CriteriaTimedTypes.Event, Misc.AchievMustDeconstructFaster);
+        }
+
+        public override void DoAction(int action)
+        {
+            switch (action)
+            {
+                case Misc.ActionHardMode:
+                    _scheduler.Schedule(TimeSpan.FromMilliseconds(1), task =>
                     {
-                        if (me.IsWithinMeleeRange(xt002))
-                        {
-                            DoCast(xt002, SpellIds.ScrapbotRideVehicle);
-                            // Unapply vehicle aura again
-                            xt002.RemoveAurasDueToSpell(SpellIds.ScrapbotRideVehicle);
-                            me.DespawnOrUnsummon();
-                        }
+                        SetPhaseOne(true);
+                    });
+                    break;
+            }
+        }
+
+        public override void KilledUnit(Unit who)
+        {
+            if (who.GetTypeId() == TypeId.Player)
+                Talk(Texts.Slay);
+        }
+
+        public override void JustDied(Unit killer)
+        {
+            Talk(Texts.Death);
+            _JustDied();
+            me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+        }
+
+        public override void DamageTaken(Unit attacker, ref uint damage)
+        {
+            if (!_hardMode && !me.HasReactState(ReactStates.Passive) && !HealthAbovePct(100 - 25 * (_heartExposed + 1)))
+                ExposeHeart();
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _scheduler.Update(diff);
+
+            if (!me.HasReactState(ReactStates.Passive))
+                DoMeleeAttackIfReady();
+        }
+
+        public override void PassengerBoarded(Unit who, sbyte seatId, bool apply)
+        {
+            if (apply && who.GetEntry() == InstanceCreatureIds.XS013Scrapbot)
+            {
+                // Need this so we can properly determine when to expose heart again in damagetaken hook
+                if (me.GetHealthPct() > (25 * (4 - _heartExposed)))
+                    ++_heartExposed;
+
+                Talk(Texts.EmoteScrapbot);
+                DoCast(who, SpellIds.ScrapRepair, true);
+                _healthRecovered = true;
+            }
+
+            if (apply && seatId == Misc.SeatHeartExposed)
+                who.CastSpell(who, SpellIds.ExposedHeart);   // Channeled
+        }
+
+        public override uint GetData(uint type)
+        {
+            switch (type)
+            {
+                case XT002Data.HardMode:
+                    return _hardMode ? 1 : 0u;
+                case XT002Data.HealthRecovered:
+                    return _healthRecovered ? 1 : 0u;
+                case XT002Data.GravityBombCasualty:
+                    return _gravityBombCasualty ? 1 : 0u;
+            }
+
+            return 0;
+        }
+
+        public override void SetData(uint type, uint data)
+        {
+            switch (type)
+            {
+                case XT002Data.TransferedHealth:
+                    _transferHealth = data;
+                    break;
+                case XT002Data.GravityBombCasualty:
+                    _gravityBombCasualty = (data > 0) ? true : false;
+                    break;
+            }
+        }
+
+        void ExposeHeart()
+        {
+            Talk(Texts.HeartOpened);
+            Talk(Texts.EmoteHeartOpened);
+
+            DoCastSelf(SpellIds.Submerge);  // WIll make creature untargetable
+            me.AttackStop();
+            me.SetReactState(ReactStates.Passive);
+
+            Unit heart = me.GetVehicleKit() ? me.GetVehicleKit().GetPassenger(Misc.SeatHeartNormal) : null;
+            if (heart)
+            {
+                heart.CastSpell(heart, SpellIds.HeartOverload);
+                heart.CastSpell(me, SpellIds.HeartLightningTether);
+                heart.CastSpell(heart, SpellIds.HeartHealToFull, true);
+                heart.CastSpell(me, SpellIds.RideVehicleExposed, true);
+                heart.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+                heart.SetFlag(UnitFields.Flags, UnitFlags.Unk29);
+            }
+            _scheduler.DelayGroup(Misc.PhaseOneGroup, TimeSpan.FromSeconds(30));
+
+            // Start "end of phase 2 timer"
+            _scheduler.Schedule(TimeSpan.FromSeconds(30), task => { SetPhaseOne(false); });
+
+            _heartExposed++;
+        }
+
+        void SetPhaseOne(bool isHardMode)
+        {
+            if (isHardMode)
+            {
+                me.SetFullHealth();
+                DoCastSelf(SpellIds.Heartbreak, true);
+                me.AddLootMode(LootModes.HardMode1);
+                _hardMode = true;
+            }
+
+            Talk(Texts.HeartClosed);
+            Talk(Texts.EmoteHeartClosed);
+
+            me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+            me.SetReactState(ReactStates.Aggressive);
+            DoCastSelf(SpellIds.Stand);
+
+            //_events.RescheduleEvent(EVENT_SEARING_LIGHT, TIMER_SEARING_LIGHT / 2);
+            //_events.RescheduleEvent(EVENT_GRAVITY_BOMB, TIMER_GRAVITY_BOMB);
+            //_events.RescheduleEvent(EVENT_TYMPANIC_TANTRUM, RandomHelper.URand(TIMER_TYMPANIC_TANTRUM_MIN, TIMER_TYMPANIC_TANTRUM_MAX));
+
+            Unit heart = me.GetVehicleKit() ? me.GetVehicleKit().GetPassenger(Misc.SeatHeartExposed) : null;
+            if (!heart)
+                return;
+
+            heart.CastSpell(me, SpellIds.HeartRideVehicle, true);
+            heart.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+            heart.RemoveFlag(UnitFields.Flags, UnitFlags.Unk29);
+            heart.RemoveAurasDueToSpell(SpellIds.ExposedHeart);
+
+            if (!_hardMode)
+            {
+                if (_transferHealth == 0)
+                    _transferHealth = (uint)(heart.GetMaxHealth() - heart.GetHealth());
+
+                if (_transferHealth >= me.GetHealth())
+                    _transferHealth = (uint)me.GetHealth() - 1;
+
+                me.ModifyHealth(-(int)_transferHealth);
+                me.LowerPlayerDamageReq(_transferHealth);
+            }
+        }
+
+        // Achievement related
+        bool _healthRecovered;       // Did a scrapbot recover XT-002's health during the encounter?
+        bool _hardMode;              // Are we in hard mode? Or: was the heart killed during phase 2?
+        bool _gravityBombCasualty;   // Did someone die because of Gravity Bomb damage?
+
+        byte _heartExposed;
+        uint _transferHealth;
+    }
+
+    [Script]
+    class npc_xt002_heart : ScriptedAI
+    {
+        public npc_xt002_heart(Creature creature) : base(creature)
+        {
+            _instance = creature.GetInstanceScript();
+
+            SetCombatMovement(false);
+        }
+
+        public override void UpdateAI(uint diff) { }
+
+        public override void JustDied(Unit killer)
+        {
+            Creature xt002 = _instance != null ? ObjectAccessor.GetCreature(me, _instance.GetGuidData(BossIds.Xt002)) : null;
+            if (!xt002 || xt002.GetAI() == null)
+                return;
+
+            xt002.GetAI().SetData(XT002Data.TransferedHealth, (uint)me.GetHealth());
+            xt002.GetAI().DoAction(Misc.ActionHardMode);
+        }
+
+        InstanceScript _instance;
+    }
+
+    [Script]
+    class npc_scrapbot : ScriptedAI
+    {
+        public npc_scrapbot(Creature creature) : base(creature)
+        {
+            _instance = me.GetInstanceScript();
+        }
+
+        public override void Reset()
+        {
+            me.SetReactState(ReactStates.Passive);
+            Creature pXT002 = ObjectAccessor.GetCreature(me, _instance.GetGuidData(BossIds.Xt002));
+            if (pXT002)
+                me.GetMotionMaster().MoveFollow(pXT002, 0.0f, 0.0f);
+        }
+
+        public override void MovementInform(MovementGeneratorType type, uint id)
+        {
+            ObjectGuid guid = _instance.GetGuidData(BossIds.Xt002);
+            if (type == MovementGeneratorType.Follow && id == guid.GetCounter())
+            {
+                Creature xt002 = ObjectAccessor.GetCreature(me, guid);
+                if (xt002)
+                {
+                    if (me.IsWithinMeleeRange(xt002))
+                    {
+                        DoCast(xt002, SpellIds.ScrapbotRideVehicle);
+                        // Unapply vehicle aura again
+                        xt002.RemoveAurasDueToSpell(SpellIds.ScrapbotRideVehicle);
+                        me.DespawnOrUnsummon();
                     }
                 }
             }
-
-            InstanceScript _instance;
         }
 
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<npc_scrapbotAI>(creature);
-        }
+        InstanceScript _instance;
     }
 
     [Script]
-    class npc_pummeller : CreatureScript
+    class npc_pummeller : ScriptedAI
     {
-        public npc_pummeller() : base("npc_pummeller") { }
-
-        class npc_pummellerAI : ScriptedAI
+        public npc_pummeller(Creature creature) : base(creature)
         {
-            public npc_pummellerAI(Creature creature) : base(creature)
-            {
-                Initialize();
-                _instance = creature.GetInstanceScript();
-            }
-
-            void Initialize()
-            {
-                _scheduler.SetValidator(() => me.IsWithinMeleeRange(me.GetVictim()));
-
-                //Arcing Smash
-                _scheduler.Schedule(TimeSpan.FromSeconds(27), task =>
-                {
-                    DoCastVictim(SpellIds.ArcingSmash);
-                    task.Repeat(TimeSpan.FromSeconds(27));
-                });
-
-                //Trample
-                _scheduler.Schedule(TimeSpan.FromSeconds(22), task =>
-                {
-                    DoCastVictim(SpellIds.Trample);
-                    task.Repeat(TimeSpan.FromSeconds(22));
-                });
-
-                //Uppercut
-                _scheduler.Schedule(TimeSpan.FromSeconds(17), task =>
-                {
-                    DoCastVictim(SpellIds.Uppercut);
-                    task.Repeat(TimeSpan.FromSeconds(17));
-                });
-            }
-
-            public override void Reset()
-            {
-                Initialize();
-                Creature xt002 = ObjectAccessor.GetCreature(me, _instance.GetGuidData(BossIds.Xt002));
-                if (xt002)
-                {
-                    Position pos = xt002.GetPosition();
-                    me.GetMotionMaster().MovePoint(0, pos);
-                }
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _scheduler.Update(diff);
-
-                DoMeleeAttackIfReady();
-            }
-
-            InstanceScript _instance;
+            Initialize();
+            _instance = creature.GetInstanceScript();
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        void Initialize()
         {
-            return GetInstanceAI<npc_pummellerAI>(creature);
+            _scheduler.SetValidator(() => me.IsWithinMeleeRange(me.GetVictim()));
+
+            //Arcing Smash
+            _scheduler.Schedule(TimeSpan.FromSeconds(27), task =>
+            {
+                DoCastVictim(SpellIds.ArcingSmash);
+                task.Repeat(TimeSpan.FromSeconds(27));
+            });
+
+            //Trample
+            _scheduler.Schedule(TimeSpan.FromSeconds(22), task =>
+            {
+                DoCastVictim(SpellIds.Trample);
+                task.Repeat(TimeSpan.FromSeconds(22));
+            });
+
+            //Uppercut
+            _scheduler.Schedule(TimeSpan.FromSeconds(17), task =>
+            {
+                DoCastVictim(SpellIds.Uppercut);
+                task.Repeat(TimeSpan.FromSeconds(17));
+            });
         }
+
+        public override void Reset()
+        {
+            Initialize();
+            Creature xt002 = ObjectAccessor.GetCreature(me, _instance.GetGuidData(BossIds.Xt002));
+            if (xt002)
+            {
+                Position pos = xt002.GetPosition();
+                me.GetMotionMaster().MovePoint(0, pos);
+            }
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _scheduler.Update(diff);
+
+            DoMeleeAttackIfReady();
+        }
+
+        InstanceScript _instance;
     }
 
     class BoomEvent : BasicEvent
@@ -548,435 +508,335 @@ namespace Scripts.Northrend.Ulduar.Xt002
     }
 
     [Script]
-    class npc_boombot : CreatureScript
+    class npc_boombot : ScriptedAI
     {
-        public npc_boombot() : base("npc_boombot") { }
-
-        class npc_boombotAI : ScriptedAI
+        public npc_boombot(Creature creature) : base(creature)
         {
-            public npc_boombotAI(Creature creature) : base(creature)
-            {
-                Initialize();
-                _instance = creature.GetInstanceScript();
-            }
-
-            void Initialize()
-            {
-                _boomed = false;
-            }
-
-            public override void Reset()
-            {
-                Initialize();
-
-                DoCast(SpellIds.AuraBoombot); // For achievement
-
-                // HACK/workaround:
-                // these values aren't confirmed - lack of data - and the values in DB are incorrect
-                // these values are needed for correct damage of Boom spell
-                me.SetFloatValue(UnitFields.MinDamage, 15000.0f);
-                me.SetFloatValue(UnitFields.MaxDamage, 18000.0f);
-
-                // @todo proper waypoints?
-                Creature pXT002 = ObjectAccessor.GetCreature(me, _instance.GetGuidData(BossIds.Xt002));
-                if (pXT002)
-                    me.GetMotionMaster().MoveFollow(pXT002, 0.0f, 0.0f);
-            }
-
-            public override void DamageTaken(Unit who, ref uint damage)
-            {
-                if (damage >= (me.GetHealth() - me.GetMaxHealth() * 0.5f) && !_boomed)
-                {
-                    _boomed = true; // Prevent recursive calls
-
-                    //me.SendSpellInstakillLog(Spells.Boom, me);
-
-                    //me.DealDamage(me, me.GetHealth(), null, DamageEffectType.NoDamage, SpellSchoolMask.Normal, null, false);
-
-                    damage = 0;
-
-                    me.CastSpell(me, SpellIds.Boom, false);
-
-                    // Visual only seems to work if the instant kill event is delayed or the spell itself is delayed
-                    // Casting done from player and caster source has the same targetinfo flags,
-                    // so that can't be the issue
-                    // See BoomEvent class
-                    // Schedule 1s delayed
-                    //me.m_Events.AddEvent(new BoomEvent(me), me.m_Events.CalculateTime(1 * Time.InMilliseconds));
-                }
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                // No melee attack
-            }
-
-            InstanceScript _instance;
-            bool _boomed;
+            Initialize();
+            _instance = creature.GetInstanceScript();
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        void Initialize()
         {
-            return GetInstanceAI<npc_boombotAI>(creature);
+            _boomed = false;
+        }
+
+        public override void Reset()
+        {
+            Initialize();
+
+            DoCast(SpellIds.AuraBoombot); // For achievement
+
+            // HACK/workaround:
+            // these values aren't confirmed - lack of data - and the values in DB are incorrect
+            // these values are needed for correct damage of Boom spell
+            me.SetFloatValue(UnitFields.MinDamage, 15000.0f);
+            me.SetFloatValue(UnitFields.MaxDamage, 18000.0f);
+
+            // @todo proper waypoints?
+            Creature pXT002 = ObjectAccessor.GetCreature(me, _instance.GetGuidData(BossIds.Xt002));
+            if (pXT002)
+                me.GetMotionMaster().MoveFollow(pXT002, 0.0f, 0.0f);
+        }
+
+        public override void DamageTaken(Unit who, ref uint damage)
+        {
+            if (damage >= (me.GetHealth() - me.GetMaxHealth() * 0.5f) && !_boomed)
+            {
+                _boomed = true; // Prevent recursive calls
+
+                //me.SendSpellInstakillLog(Spells.Boom, me);
+
+                //me.DealDamage(me, me.GetHealth(), null, DamageEffectType.NoDamage, SpellSchoolMask.Normal, null, false);
+
+                damage = 0;
+
+                me.CastSpell(me, SpellIds.Boom, false);
+
+                // Visual only seems to work if the instant kill event is delayed or the spell itself is delayed
+                // Casting done from player and caster source has the same targetinfo flags,
+                // so that can't be the issue
+                // See BoomEvent class
+                // Schedule 1s delayed
+                //me.m_Events.AddEvent(new BoomEvent(me), me.m_Events.CalculateTime(1 * Time.InMilliseconds));
+            }
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            // No melee attack
+        }
+
+        InstanceScript _instance;
+        bool _boomed;
+    }
+
+    [Script]
+    class npc_life_spark : ScriptedAI
+    {
+        public npc_life_spark(Creature creature) : base(creature) { }
+
+        void Initialize()
+        {
+            _scheduler.Schedule(TimeSpan.FromMilliseconds(1), task =>
+            {
+                DoCastVictim(SpellIds.Shock);
+                task.Repeat(TimeSpan.FromSeconds(12));
+            });
+        }
+
+        public override void Reset()
+        {
+            DoCastSelf(SpellIds.ArcanePowerState);
+            _scheduler.CancelAll();
+        }
+
+        public override void EnterCombat(Unit victim)
+        {
+            DoCastSelf(SpellIds.StaticCharged);
+            _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
+            {
+                DoCastVictim(SpellIds.Shock);
+                task.Repeat();
+            });
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            _scheduler.Update(diff, DoMeleeAttackIfReady);
         }
     }
 
     [Script]
-    class npc_life_spark : CreatureScript
+    class npc_xt_void_zone : PassiveAI
     {
-        public npc_life_spark() : base("npc_life_spark") { }
+        public npc_xt_void_zone(Creature creature) : base(creature) { }
 
-        class npc_life_sparkAI : ScriptedAI
+        public override void Reset()
         {
-            public npc_life_sparkAI(Creature creature) : base(creature) { }
-
-            void Initialize()
+            _scheduler.Schedule(TimeSpan.FromSeconds(1), consumption =>
             {
-                _scheduler.Schedule(TimeSpan.FromMilliseconds(1), task =>
-                {
-                    DoCastVictim(SpellIds.Shock);
-                    task.Repeat(TimeSpan.FromSeconds(12));
-                });
-            }
-
-            public override void Reset()
-            {
-                DoCastSelf(SpellIds.ArcanePowerState);
-                _scheduler.CancelAll();
-            }
-
-            public override void EnterCombat(Unit victim)
-            {
-                DoCastSelf(SpellIds.StaticCharged);
-                _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
-                {
-                    DoCastVictim(SpellIds.Shock);
-                    task.Repeat();
-                });
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-
-                _scheduler.Update(diff, DoMeleeAttackIfReady);
-            }
+                DoCastSelf(SpellIds.Consumption);
+                consumption.Repeat();
+            });
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void UpdateAI(uint diff)
         {
-            return new npc_life_sparkAI(creature);
+            _scheduler.Update(diff);
         }
     }
 
     [Script]
-    class npc_xt_void_zone : CreatureScript
+    class spell_xt002_searing_light_spawn_life_spark : AuraScript
     {
-        public npc_xt_void_zone() : base("npc_xt_void_zone") { }
-
-        class npc_xt_void_zoneAI : PassiveAI
+        public override bool Validate(SpellInfo spell)
         {
-            public npc_xt_void_zoneAI(Creature creature) : base(creature) { }
-
-            public override void Reset()
-            {
-                _scheduler.Schedule(TimeSpan.FromSeconds(1), consumption =>
-                {
-                    DoCastSelf(SpellIds.Consumption);
-                    consumption.Repeat();
-                });
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                _scheduler.Update(diff);
-            }
+            return ValidateSpellInfo(SpellIds.SummonLifeSpark);
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            return new npc_xt_void_zoneAI(creature);
-        }
-    }
-
-    [Script]
-    class spell_xt002_searing_light_spawn_life_spark : SpellScriptLoader
-    {
-        public spell_xt002_searing_light_spawn_life_spark() : base("spell_xt002_searing_light_spawn_life_spark") { }
-
-        class spell_xt002_searing_light_spawn_life_spark_AuraScript : AuraScript
-        {
-            public override bool Validate(SpellInfo spell)
-            {
-                return ValidateSpellInfo(SpellIds.SummonLifeSpark);
-            }
-
-            void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-            {
-                Player player = GetOwner().ToPlayer();
-                if (player)
-                {
-                    Unit xt002 = GetCaster();
-                    if (xt002)
-                        if (xt002.HasAura((uint)aurEff.GetAmount()))   // Heartbreak aura indicating hard mode
-                            xt002.CastSpell(player, SpellIds.SummonLifeSpark, true);
-                }
-            }
-
-            public override void Register()
-            {
-                AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real));
-            }
-        }
-
-        public override AuraScript GetAuraScript()
-        {
-            return new spell_xt002_searing_light_spawn_life_spark_AuraScript();
-        }
-    }
-
-    [Script]
-    class spell_xt002_gravity_bomb_aura : SpellScriptLoader
-    {
-        public spell_xt002_gravity_bomb_aura() : base("spell_xt002_gravity_bomb_aura") { }
-
-        class spell_xt002_gravity_bomb_aura_AuraScript : AuraScript
-        {
-            public override bool Validate(SpellInfo spell)
-            {
-                return ValidateSpellInfo(SpellIds.SummonVoidZone);
-            }
-
-            void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-            {
-                Player player = GetOwner().ToPlayer();
-                if (player)
-                {
-                    Unit xt002 = GetCaster();
-                    if (xt002)
-                        if (xt002.HasAura((uint)aurEff.GetAmount()))   // Heartbreak aura indicating hard mode
-                            xt002.CastSpell(player, SpellIds.SummonVoidZone, true);
-                }
-            }
-
-            void OnPeriodic(AuraEffect aurEff)
+            Player player = GetOwner().ToPlayer();
+            if (player)
             {
                 Unit xt002 = GetCaster();
-                if (!xt002)
-                    return;
-
-                Unit owner = GetOwner().ToUnit();
-                if (!owner)
-                    return;
-
-                if ((uint)aurEff.GetAmount() >= owner.GetHealth())
-                    if (xt002.GetAI() != null)
-                        xt002.GetAI().SetData(XT002Data.GravityBombCasualty, 1);
-            }
-
-            public override void Register()
-            {
-                OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 2, AuraType.PeriodicDamage));
-                AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real));
+                if (xt002)
+                    if (xt002.HasAura((uint)aurEff.GetAmount()))   // Heartbreak aura indicating hard mode
+                        xt002.CastSpell(player, SpellIds.SummonLifeSpark, true);
             }
         }
 
-        public override AuraScript GetAuraScript()
+        public override void Register()
         {
-            return new spell_xt002_gravity_bomb_aura_AuraScript();
+            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real));
         }
     }
 
     [Script]
-    class spell_xt002_gravity_bomb_damage : SpellScriptLoader
+    class spell_xt002_gravity_bomb_aura : AuraScript
     {
-        public spell_xt002_gravity_bomb_damage() : base("spell_xt002_gravity_bomb_damage") { }
-
-        class spell_xt002_gravity_bomb_damage_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spell)
         {
-            void HandleScript(uint eff)
-            {
-                Unit caster = GetCaster();
-                if (!caster)
-                    return;
+            return ValidateSpellInfo(SpellIds.SummonVoidZone);
+        }
 
-                if ((uint)GetHitDamage() >= GetHitUnit().GetHealth())
-                    if (caster.GetAI() != null)
-                        caster.GetAI().SetData(XT002Data.GravityBombCasualty, 1);
-            }
-
-            public override void Register()
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Player player = GetOwner().ToPlayer();
+            if (player)
             {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.SchoolDamage));
+                Unit xt002 = GetCaster();
+                if (xt002)
+                    if (xt002.HasAura((uint)aurEff.GetAmount()))   // Heartbreak aura indicating hard mode
+                        xt002.CastSpell(player, SpellIds.SummonVoidZone, true);
             }
         }
 
-        public override SpellScript GetSpellScript()
+        void OnPeriodic(AuraEffect aurEff)
         {
-            return new spell_xt002_gravity_bomb_damage_SpellScript();
+            Unit xt002 = GetCaster();
+            if (!xt002)
+                return;
+
+            Unit owner = GetOwner().ToUnit();
+            if (!owner)
+                return;
+
+            if ((uint)aurEff.GetAmount() >= owner.GetHealth())
+                if (xt002.GetAI() != null)
+                    xt002.GetAI().SetData(XT002Data.GravityBombCasualty, 1);
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 2, AuraType.PeriodicDamage));
+            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real));
         }
     }
 
     [Script]
-    class spell_xt002_heart_overload_periodic : SpellScriptLoader
+    class spell_xt002_gravity_bomb_damage : SpellScript
     {
-        public spell_xt002_heart_overload_periodic() : base("spell_xt002_heart_overload_periodic") { }
-
-        class spell_xt002_heart_overload_periodic_SpellScript : SpellScript
+        void HandleScript(uint eff)
         {
-            public override bool Validate(SpellInfo spell)
-            {
-                return ValidateSpellInfo(SpellIds.EnergyOrb, SpellIds.RechargeBoombot, SpellIds.RechargePummeler, SpellIds.RechargeScrapbot);
-            }
+            Unit caster = GetCaster();
+            if (!caster)
+                return;
 
-            void HandleScript(uint effIndex)
+            if ((uint)GetHitDamage() >= GetHitUnit().GetHealth())
+                if (caster.GetAI() != null)
+                    caster.GetAI().SetData(XT002Data.GravityBombCasualty, 1);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.SchoolDamage));
+        }
+    }
+
+    [Script]
+    class spell_xt002_heart_overload_periodic : SpellScript
+    {
+        public override bool Validate(SpellInfo spell)
+        {
+            return ValidateSpellInfo(SpellIds.EnergyOrb, SpellIds.RechargeBoombot, SpellIds.RechargePummeler, SpellIds.RechargeScrapbot);
+        }
+
+        void HandleScript(uint effIndex)
+        {
+            Unit caster = GetCaster();
+            if (caster)
             {
-                Unit caster = GetCaster();
-                if (caster)
+                InstanceScript instance = caster.GetInstanceScript();
+                if (instance != null)
                 {
-                    InstanceScript instance = caster.GetInstanceScript();
-                    if (instance != null)
+                    Unit toyPile = Global.ObjAccessor.GetUnit(caster, instance.GetGuidData(InstanceData.ToyPile0 + RandomHelper.URand(0, 3)));
+                    if (toyPile)
                     {
-                        Unit toyPile = Global.ObjAccessor.GetUnit(caster, instance.GetGuidData(InstanceData.ToyPile0 + RandomHelper.URand(0, 3)));
-                        if (toyPile)
+                        caster.CastSpell(toyPile, SpellIds.EnergyOrb, true);
+
+                        // This should probably be incorporated in a dummy effect handler, but I've had trouble getting the correct target
+                        // Weighed randomization (approximation)
+                        uint[] spells = { SpellIds.RechargeScrapbot, SpellIds.RechargeScrapbot, SpellIds.RechargeScrapbot, SpellIds.RechargePummeler, SpellIds.RechargeBoombot };
+
+                        for (byte i = 0; i < 5; ++i)
                         {
-                            caster.CastSpell(toyPile, SpellIds.EnergyOrb, true);
-
-                            // This should probably be incorporated in a dummy effect handler, but I've had trouble getting the correct target
-                            // Weighed randomization (approximation)
-                            uint[] spells = { SpellIds.RechargeScrapbot, SpellIds.RechargeScrapbot, SpellIds.RechargeScrapbot, SpellIds.RechargePummeler, SpellIds.RechargeBoombot };
-
-                            for (byte i = 0; i < 5; ++i)
-                            {
-                                uint spellId = spells[RandomHelper.IRand(0, 4)];
-                                toyPile.CastSpell(toyPile, spellId, true, null, null, instance.GetGuidData(BossIds.Xt002));
-                            }
+                            uint spellId = spells[RandomHelper.IRand(0, 4)];
+                            toyPile.CastSpell(toyPile, spellId, true, null, null, instance.GetGuidData(BossIds.Xt002));
                         }
                     }
-
-                    Creature creatureBase = caster.GetVehicleCreatureBase();
-                    if (creatureBase)
-                        creatureBase.GetAI().Talk(Texts.Summon);
                 }
-            }
 
-            public override void Register()
-            {
-                OnEffectHit.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy));
-            }
-        }
-
-        public override SpellScript GetSpellScript()
-        {
-            return new spell_xt002_heart_overload_periodic_SpellScript();
-        }
-    }
-
-    [Script]
-    class spell_xt002_tympanic_tantrum : SpellScriptLoader
-    {
-        public spell_xt002_tympanic_tantrum() : base("spell_xt002_tympanic_tantrum") { }
-
-        class spell_xt002_tympanic_tantrum_SpellScript : SpellScript
-        {
-            void FilterTargets(List<WorldObject> targets)
-            {
-                targets.RemoveAll(new PlayerOrPetCheck());
-            }
-
-            void RecalculateDamage()
-            {
-                SetHitDamage((int)GetHitUnit().CountPctFromMaxHealth(GetHitDamage()));
-            }
-
-            public override void Register()
-            {
-                OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
-                OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitSrcAreaEnemy));
-                OnHit.Add(new HitHandler(RecalculateDamage));
+                Creature creatureBase = caster.GetVehicleCreatureBase();
+                if (creatureBase)
+                    creatureBase.GetAI().Talk(Texts.Summon);
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_xt002_tympanic_tantrum_SpellScript();
+            OnEffectHit.Add(new EffectHandler(HandleScript, 0, SpellEffectName.Dummy));
         }
     }
 
     [Script]
-    class spell_xt002_submerged : SpellScriptLoader
+    class spell_xt002_tympanic_tantrum : SpellScript
     {
-        public spell_xt002_submerged() : base("spell_xt002_submerged") { }
-
-        class spell_xt002_submerged_SpellScript : SpellScript
+        void FilterTargets(List<WorldObject> targets)
         {
-            void HandleScript(uint eff)
-            {
-                Creature target = GetHitCreature();
-                if (!target)
-                    return;
-
-                target.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable);
-                target.SetStandState(UnitStandStateType.Submerged);
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
-            }
+            targets.RemoveAll(new PlayerOrPetCheck());
         }
 
-        public override SpellScript GetSpellScript()
+        void RecalculateDamage()
         {
-            return new spell_xt002_submerged_SpellScript();
+            SetHitDamage((int)GetHitUnit().CountPctFromMaxHealth(GetHitDamage()));
+        }
+
+        public override void Register()
+        {
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitSrcAreaEnemy));
+            OnHit.Add(new HitHandler(RecalculateDamage));
         }
     }
 
     [Script]
-    class spell_xt002_321_boombot_aura : SpellScriptLoader
+    class spell_xt002_submerged : SpellScript
     {
-        public spell_xt002_321_boombot_aura() : base("spell_xt002_321_boombot_aura") { }
-
-        class spell_xt002_321_boombot_aura_AuraScript : AuraScript
+        void HandleScript(uint eff)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(SpellIds.AchievementCreditNerfScrapbots);
-            }
+            Creature target = GetHitCreature();
+            if (!target)
+                return;
 
-            bool CheckProc(ProcEventInfo eventInfo)
-            {
-                if (eventInfo.GetActionTarget().GetEntry() != InstanceCreatureIds.XS013Scrapbot)
-                    return false;
-                return true;
-            }
-
-            void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-            {
-                InstanceScript instance = eventInfo.GetActor().GetInstanceScript();
-                if (instance == null)
-                    return;
-
-                instance.DoCastSpellOnPlayers(SpellIds.AchievementCreditNerfScrapbots);
-            }
-
-            public override void Register()
-            {
-                DoCheckProc.Add(new CheckProcHandler(CheckProc));
-                OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
-            }
+            target.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+            target.SetStandState(UnitStandStateType.Submerged);
         }
 
-        public override AuraScript GetAuraScript()
+        public override void Register()
         {
-            return new spell_xt002_321_boombot_aura_AuraScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+
+    [Script]
+    class spell_xt002_321_boombot_aura : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.AchievementCreditNerfScrapbots);
+        }
+
+        bool CheckProc(ProcEventInfo eventInfo)
+        {
+            if (eventInfo.GetActionTarget().GetEntry() != InstanceCreatureIds.XS013Scrapbot)
+                return false;
+            return true;
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            InstanceScript instance = eventInfo.GetActor().GetInstanceScript();
+            if (instance == null)
+                return;
+
+            instance.DoCastSpellOnPlayers(SpellIds.AchievementCreditNerfScrapbots);
+        }
+
+        public override void Register()
+        {
+            DoCheckProc.Add(new CheckProcHandler(CheckProc));
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
         }
     }
 

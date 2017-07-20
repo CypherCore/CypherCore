@@ -212,874 +212,804 @@ namespace Scripts.Northrend.IcecrownCitadel
     }
 
     [Script]
-    class boss_lady_deathwhisper : CreatureScript
+    public class boss_lady_deathwhisper : BossAI
     {
-        public boss_lady_deathwhisper() : base("boss_lady_deathwhisper") { }
-
-        public class boss_lady_deathwhisperAI : BossAI
+        public boss_lady_deathwhisper(Creature creature)
+            : base(creature, Bosses.LadyDeathwhisper)
         {
-            public boss_lady_deathwhisperAI(Creature creature)
-                : base(creature, Bosses.LadyDeathwhisper)
-            {
-                _dominateMindCount = RaidMode<byte>(0, 1, 1, 3);
-                _introDone = false;
+            _dominateMindCount = RaidMode<byte>(0, 1, 1, 3);
+            _introDone = false;
 
+        }
+
+        public override void Reset()
+        {
+            _Reset();
+            me.SetPower(PowerType.Mana, me.GetMaxPower(PowerType.Mana));
+            _events.SetPhase(LadyConst.PhaseOne);
+            _waveCounter = 0;
+            _nextVengefulShadeTargetGUID.Clear();
+            _darnavanGUID.Clear();
+            DoCast(me, LadySpells.SHADOW_CHANNELING);
+            me.RemoveAurasDueToSpell(InstanceSpells.Berserk);
+            me.RemoveAurasDueToSpell(LadySpells.MANA_BARRIER);
+            me.ApplySpellImmune(0, SpellImmunity.State, AuraType.ModTaunt, false);
+            me.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.AttackMe, false);
+        }
+
+        public override void MoveInLineOfSight(Unit who)
+        {
+            if (!_introDone && me.IsWithinDistInMap(who, 110.0f))
+            {
+                _introDone = true;
+                Talk(LadyTexts.SAY_INTRO_1);
+                _events.SetPhase(LadyConst.PhaseIntro);
+                _events.ScheduleEvent(LadyEventTypes.INTRO_2, 11000, 0, LadyConst.PhaseIntro);
+                _events.ScheduleEvent(LadyEventTypes.INTRO_3, 21000, 0, LadyConst.PhaseIntro);
+                _events.ScheduleEvent(LadyEventTypes.INTRO_4, 31500, 0, LadyConst.PhaseIntro);
+                _events.ScheduleEvent(LadyEventTypes.INTRO_5, 39500, 0, LadyConst.PhaseIntro);
+                _events.ScheduleEvent(LadyEventTypes.INTRO_6, 48500, 0, LadyConst.PhaseIntro);
+                _events.ScheduleEvent(LadyEventTypes.INTRO_7, 58000, 0, LadyConst.PhaseIntro);
+            }
+        }
+
+        public override void AttackStart(Unit victim)
+        {
+            if (me.HasFlag(UnitFields.Flags, UnitFlags.NonAttackable))
+                return;
+
+            if (victim && me.Attack(victim, true) && !_events.IsInPhase(LadyConst.PhaseOne))
+                me.GetMotionMaster().MoveChase(victim);
+        }
+
+        public override void EnterCombat(Unit who)
+        {
+            if (!instance.CheckRequiredBosses(Bosses.LadyDeathwhisper, who.ToPlayer()))
+            {
+                EnterEvadeMode();
+                instance.DoCastSpellOnPlayers(TeleporterSpells.LIGHT_S_HAMMER_TELEPORT);
+                return;
             }
 
-            public override void Reset()
+            me.setActive(true);
+            DoZoneInCombat();
+
+            _events.Reset();
+            _events.SetPhase(LadyConst.PhaseOne);
+            // phase-independent events
+            _events.ScheduleEvent(LadyEventTypes.BERSERK, 600000);
+            _events.ScheduleEvent(LadyEventTypes.DEATH_AND_DECAY, 10000);
+            // phase one only
+            _events.ScheduleEvent(LadyEventTypes.P1_SUMMON_WAVE, 5000, 0, LadyConst.PhaseOne);
+            _events.ScheduleEvent(LadyEventTypes.P1_SHADOW_BOLT, RandomHelper.URand(5500, 6000), 0, LadyConst.PhaseOne);
+            _events.ScheduleEvent(LadyEventTypes.P1_EMPOWER_CULTIST, RandomHelper.URand(20000, 30000), 0, LadyConst.PhaseOne);
+            _events.ScheduleEvent(LadyEventTypes.P1_REANIMATE_CULTIST, RandomHelper.URand(10000, 20000), 0, LadyConst.PhaseOne);
+            if (GetDifficulty() != Difficulty.Raid10N)
+                _events.ScheduleEvent(LadyEventTypes.DOMINATE_MIND_H, 27000);
+
+            Talk(LadyTexts.SAY_AGGRO);
+            DoStartNoMovement(who);
+            me.RemoveAurasDueToSpell(LadySpells.SHADOW_CHANNELING);
+            DoCast(me, LadySpells.MANA_BARRIER, true);
+
+            instance.SetBossState(Bosses.LadyDeathwhisper, EncounterState.InProgress);
+        }
+
+        public override void JustDied(Unit killer)
+        {
+            Talk(LadyTexts.SAY_DEATH);
+
+            List<uint> livingAddEntries = new List<uint>();
+            // Full House achievement
+            foreach (var guid in summons)
             {
-                _Reset();
-                me.SetPower(PowerType.Mana, me.GetMaxPower(PowerType.Mana));
-                _events.SetPhase(LadyConst.PhaseOne);
-                _waveCounter = 0;
-                _nextVengefulShadeTargetGUID.Clear();
-                _darnavanGUID.Clear();
-                DoCast(me, LadySpells.SHADOW_CHANNELING);
-                me.RemoveAurasDueToSpell(InstanceSpells.Berserk);
-                me.RemoveAurasDueToSpell(LadySpells.MANA_BARRIER);
-                me.ApplySpellImmune(0, SpellImmunity.State, AuraType.ModTaunt, false);
-                me.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.AttackMe, false);
+                Unit unit = Global.ObjAccessor.GetUnit(me, guid);
+                if (unit)
+                    if (unit.IsAlive() && unit.GetEntry() != CreatureIds.VengefulShade)
+                        livingAddEntries.Add(unit.GetEntry());
             }
 
-            public override void MoveInLineOfSight(Unit who)
+            if (livingAddEntries.Count >= 5)
+                instance.DoUpdateCriteria(CriteriaTypes.BeSpellTarget, LadySpells.FULL_HOUSE, 0, me);
+
+            Creature darnavan = ObjectAccessor.GetCreature(me, _darnavanGUID);
+            if (darnavan)
             {
-                if (!_introDone && me.IsWithinDistInMap(who, 110.0f))
+                if (darnavan.IsAlive())
                 {
-                    _introDone = true;
-                    Talk(LadyTexts.SAY_INTRO_1);
-                    _events.SetPhase(LadyConst.PhaseIntro);
-                    _events.ScheduleEvent(LadyEventTypes.INTRO_2, 11000, 0, LadyConst.PhaseIntro);
-                    _events.ScheduleEvent(LadyEventTypes.INTRO_3, 21000, 0, LadyConst.PhaseIntro);
-                    _events.ScheduleEvent(LadyEventTypes.INTRO_4, 31500, 0, LadyConst.PhaseIntro);
-                    _events.ScheduleEvent(LadyEventTypes.INTRO_5, 39500, 0, LadyConst.PhaseIntro);
-                    _events.ScheduleEvent(LadyEventTypes.INTRO_6, 48500, 0, LadyConst.PhaseIntro);
-                    _events.ScheduleEvent(LadyEventTypes.INTRO_7, 58000, 0, LadyConst.PhaseIntro);
-                }
-            }
-
-            public override void AttackStart(Unit victim)
-            {
-                if (me.HasFlag(UnitFields.Flags, UnitFlags.NonAttackable))
-                    return;
-
-                if (victim && me.Attack(victim, true) && !_events.IsInPhase(LadyConst.PhaseOne))
-                    me.GetMotionMaster().MoveChase(victim);
-            }
-
-            public override void EnterCombat(Unit who)
-            {
-                if (!instance.CheckRequiredBosses(Bosses.LadyDeathwhisper, who.ToPlayer()))
-                {
-                    EnterEvadeMode();
-                    instance.DoCastSpellOnPlayers(TeleporterSpells.LIGHT_S_HAMMER_TELEPORT);
-                    return;
-                }
-
-                me.setActive(true);
-                DoZoneInCombat();
-
-                _events.Reset();
-                _events.SetPhase(LadyConst.PhaseOne);
-                // phase-independent events
-                _events.ScheduleEvent(LadyEventTypes.BERSERK, 600000);
-                _events.ScheduleEvent(LadyEventTypes.DEATH_AND_DECAY, 10000);
-                // phase one only
-                _events.ScheduleEvent(LadyEventTypes.P1_SUMMON_WAVE, 5000, 0, LadyConst.PhaseOne);
-                _events.ScheduleEvent(LadyEventTypes.P1_SHADOW_BOLT, RandomHelper.URand(5500, 6000), 0, LadyConst.PhaseOne);
-                _events.ScheduleEvent(LadyEventTypes.P1_EMPOWER_CULTIST, RandomHelper.URand(20000, 30000), 0, LadyConst.PhaseOne);
-                _events.ScheduleEvent(LadyEventTypes.P1_REANIMATE_CULTIST, RandomHelper.URand(10000, 20000), 0, LadyConst.PhaseOne);
-                if (GetDifficulty() != Difficulty.Raid10N)
-                    _events.ScheduleEvent(LadyEventTypes.DOMINATE_MIND_H, 27000);
-
-                Talk(LadyTexts.SAY_AGGRO);
-                DoStartNoMovement(who);
-                me.RemoveAurasDueToSpell(LadySpells.SHADOW_CHANNELING);
-                DoCast(me, LadySpells.MANA_BARRIER, true);
-
-                instance.SetBossState(Bosses.LadyDeathwhisper, EncounterState.InProgress);
-            }
-
-            public override void JustDied(Unit killer)
-            {
-                Talk(LadyTexts.SAY_DEATH);
-
-                List<uint> livingAddEntries = new List<uint>();
-                // Full House achievement
-                foreach (var guid in summons)
-                {
-                    Unit unit = Global.ObjAccessor.GetUnit(me, guid);
-                    if (unit)
-                        if (unit.IsAlive() && unit.GetEntry() != CreatureIds.VengefulShade)
-                            livingAddEntries.Add(unit.GetEntry());
-                }
-
-                if (livingAddEntries.Count >= 5)
-                    instance.DoUpdateCriteria(CriteriaTypes.BeSpellTarget, LadySpells.FULL_HOUSE, 0, me);
-
-                Creature darnavan = ObjectAccessor.GetCreature(me, _darnavanGUID);
-                if (darnavan)
-                {
-                    if (darnavan.IsAlive())
+                    darnavan.SetFaction(35);
+                    darnavan.CombatStop(true);
+                    darnavan.GetMotionMaster().MoveIdle();
+                    darnavan.SetReactState(ReactStates.Passive);
+                    darnavan.m_Events.AddEvent(new DaranavanMoveEvent(darnavan), darnavan.m_Events.CalculateTime(10000));
+                    darnavan.GetAI().Talk(LadyTexts.SAY_DARNAVAN_RESCUED);
+                    Player owner = killer.GetCharmerOrOwnerPlayerOrPlayerItself();
+                    if (owner)
                     {
-                        darnavan.SetFaction(35);
-                        darnavan.CombatStop(true);
-                        darnavan.GetMotionMaster().MoveIdle();
-                        darnavan.SetReactState(ReactStates.Passive);
-                        darnavan.m_Events.AddEvent(new DaranavanMoveEvent(darnavan), darnavan.m_Events.CalculateTime(10000));
-                        darnavan.GetAI().Talk(LadyTexts.SAY_DARNAVAN_RESCUED);
-                        Player owner = killer.GetCharmerOrOwnerPlayerOrPlayerItself();
-                        if (owner)
+                        Group group = owner.GetGroup();
+                        if (group)
                         {
-                            Group group = owner.GetGroup();
-                            if (group)
+                            for (GroupReference groupRefe = group.GetFirstMember(); groupRefe != null; groupRefe = groupRefe.next())
                             {
-                                for (GroupReference groupRefe = group.GetFirstMember(); groupRefe != null; groupRefe = groupRefe.next())
-                                {
-                                    Player member = groupRefe.GetSource();
-                                    if (member)
-                                        member.KilledMonsterCredit(NPC_DARNAVAN_CREDIT, ObjectGuid.Empty);
-                                }
+                                Player member = groupRefe.GetSource();
+                                if (member)
+                                    member.KilledMonsterCredit(NPC_DARNAVAN_CREDIT, ObjectGuid.Empty);
                             }
-                            else
-                                owner.KilledMonsterCredit(NPC_DARNAVAN_CREDIT, ObjectGuid.Empty);
                         }
+                        else
+                            owner.KilledMonsterCredit(NPC_DARNAVAN_CREDIT, ObjectGuid.Empty);
                     }
                 }
-
-                _JustDied();
             }
 
-            public override void JustReachedHome()
-            {
-                _JustReachedHome();
-                instance.SetBossState(Bosses.LadyDeathwhisper, EncounterState.Fail);
+            _JustDied();
+        }
 
-                summons.DespawnAll();
-                Creature darnavan = ObjectAccessor.GetCreature(me, _darnavanGUID);
-                if (darnavan)
+        public override void JustReachedHome()
+        {
+            _JustReachedHome();
+            instance.SetBossState(Bosses.LadyDeathwhisper, EncounterState.Fail);
+
+            summons.DespawnAll();
+            Creature darnavan = ObjectAccessor.GetCreature(me, _darnavanGUID);
+            if (darnavan)
+            {
+                darnavan.DespawnOrUnsummon();
+                _darnavanGUID.Clear();
+            }
+        }
+
+        public override void KilledUnit(Unit victim)
+        {
+            if (victim.IsTypeId(TypeId.Player))
+                Talk(LadyTexts.SAY_KILL);
+        }
+
+        public override void DamageTaken(Unit damageDealer, ref uint damage)
+        {
+            // phase transition
+            if (_events.IsInPhase(LadyConst.PhaseOne) && damage > (uint)me.GetPower(PowerType.Mana))
+            {
+                Talk(LadyTexts.SAY_PHASE_2);
+                Talk(LadyTexts.EMOTE_PHASE_2);
+                DoStartMovement(me.GetVictim());
+                damage -= (uint)me.GetPower(PowerType.Mana);
+                me.SetPower(PowerType.Mana, 0);
+                me.RemoveAurasDueToSpell(LadySpells.MANA_BARRIER);
+                _events.SetPhase(LadyConst.PhaseTwo);
+                _events.ScheduleEvent(LadyEventTypes.P2_FROSTBOLT, RandomHelper.URand(10000, 12000), 0, LadyConst.PhaseTwo);
+                _events.ScheduleEvent(LadyEventTypes.P2_FROSTBOLT_VOLLEY, RandomHelper.URand(19000, 21000), 0, LadyConst.PhaseTwo);
+                _events.ScheduleEvent(LadyEventTypes.P2_TOUCH_OF_INSIGNIFICANCE, RandomHelper.URand(6000, 9000), 0, LadyConst.PhaseTwo);
+                _events.ScheduleEvent(LadyEventTypes.P2_SUMMON_SHADE, RandomHelper.URand(12000, 15000), 0, LadyConst.PhaseTwo);
+                // on heroic mode Lady Deathwhisper is immune to taunt effects in phase 2 and continues summoning adds
+                if (IsHeroic())
                 {
-                    darnavan.DespawnOrUnsummon();
-                    _darnavanGUID.Clear();
+                    me.ApplySpellImmune(0, SpellImmunity.State, AuraType.ModTaunt, true);
+                    me.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.AttackMe, true);
+                    _events.ScheduleEvent(LadyEventTypes.P2_SUMMON_WAVE, 45000, 0, LadyConst.PhaseTwo);
                 }
             }
+        }
 
-            public override void KilledUnit(Unit victim)
+        public override void JustSummoned(Creature summon)
+        {
+            if (summon.GetEntry() == NPC_DARNAVAN)
+                _darnavanGUID = summon.GetGUID();
+            else
+                summons.Summon(summon);
+
+            Unit target = null;
+            if (summon.GetEntry() == CreatureIds.VengefulShade)
             {
-                if (victim.IsTypeId(TypeId.Player))
-                    Talk(LadyTexts.SAY_KILL);
+                target = Global.ObjAccessor.GetUnit(me, _nextVengefulShadeTargetGUID);   // Vengeful Shade
+                _nextVengefulShadeTargetGUID.Clear();
             }
+            else
+                target = SelectTarget(SelectAggroTarget.Random);                        // Wave adds
 
-            public override void DamageTaken(Unit damageDealer, ref uint damage)
+            summon.GetAI().AttackStart(target);                                      // CAN be NULL
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if ((!UpdateVictim() && !_events.IsInPhase(LadyConst.PhaseIntro)))
+                return;
+
+            _events.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting) && !_events.IsInPhase(LadyConst.PhaseIntro))
+                return;
+
+            Unit target;
+
+            _events.ExecuteEvents(eventId =>
             {
-                // phase transition
-                if (_events.IsInPhase(LadyConst.PhaseOne) && damage > (uint)me.GetPower(PowerType.Mana))
+
+                switch (eventId)
                 {
-                    Talk(LadyTexts.SAY_PHASE_2);
-                    Talk(LadyTexts.EMOTE_PHASE_2);
-                    DoStartMovement(me.GetVictim());
-                    damage -= (uint)me.GetPower(PowerType.Mana);
-                    me.SetPower(PowerType.Mana, 0);
-                    me.RemoveAurasDueToSpell(LadySpells.MANA_BARRIER);
-                    _events.SetPhase(LadyConst.PhaseTwo);
-                    _events.ScheduleEvent(LadyEventTypes.P2_FROSTBOLT, RandomHelper.URand(10000, 12000), 0, LadyConst.PhaseTwo);
-                    _events.ScheduleEvent(LadyEventTypes.P2_FROSTBOLT_VOLLEY, RandomHelper.URand(19000, 21000), 0, LadyConst.PhaseTwo);
-                    _events.ScheduleEvent(LadyEventTypes.P2_TOUCH_OF_INSIGNIFICANCE, RandomHelper.URand(6000, 9000), 0, LadyConst.PhaseTwo);
-                    _events.ScheduleEvent(LadyEventTypes.P2_SUMMON_SHADE, RandomHelper.URand(12000, 15000), 0, LadyConst.PhaseTwo);
-                    // on heroic mode Lady Deathwhisper is immune to taunt effects in phase 2 and continues summoning adds
-                    if (IsHeroic())
-                    {
-                        me.ApplySpellImmune(0, SpellImmunity.State, AuraType.ModTaunt, true);
-                        me.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.AttackMe, true);
+                    case LadyEventTypes.INTRO_2:
+                        Talk(LadyTexts.SAY_INTRO_2);
+                        break;
+                    case LadyEventTypes.INTRO_3:
+                        Talk(LadyTexts.SAY_INTRO_3);
+                        break;
+                    case LadyEventTypes.INTRO_4:
+                        Talk(LadyTexts.SAY_INTRO_4);
+                        break;
+                    case LadyEventTypes.INTRO_5:
+                        Talk(LadyTexts.SAY_INTRO_5);
+                        break;
+                    case LadyEventTypes.INTRO_6:
+                        Talk(LadyTexts.SAY_INTRO_6);
+                        break;
+                    case LadyEventTypes.INTRO_7:
+                        Talk(LadyTexts.SAY_INTRO_7);
+                        break;
+                    case LadyEventTypes.DEATH_AND_DECAY:
+                        target = SelectTarget(SelectAggroTarget.Random);
+                        if (target)
+                            DoCast(target, LadySpells.DEATH_AND_DECAY);
+                        _events.ScheduleEvent(LadyEventTypes.DEATH_AND_DECAY, RandomHelper.URand(22000, 30000));
+                        break;
+                    case LadyEventTypes.DOMINATE_MIND_H:
+                        Talk(LadyTexts.SAY_DOMINATE_MIND);
+                        for (byte i = 0; i < _dominateMindCount; i++)
+                        {
+                            target = SelectTarget(SelectAggroTarget.Random, 1, 0.0f, true, -(int)LadySpells.DOMINATE_MIND_H);
+                            if (target)
+                                DoCast(target, LadySpells.DOMINATE_MIND_H);
+                        }
+                        _events.ScheduleEvent(LadyEventTypes.DOMINATE_MIND_H, RandomHelper.URand(40000, 45000));
+                        break;
+                    case LadyEventTypes.P1_SUMMON_WAVE:
+                        SummonWaveP1();
+                        _events.ScheduleEvent(LadyEventTypes.P1_SUMMON_WAVE, (uint)(IsHeroic() ? 45000 : 60000), 0, LadyConst.PhaseOne);
+                        break;
+                    case LadyEventTypes.P1_SHADOW_BOLT:
+                        target = SelectTarget(SelectAggroTarget.Random);
+                        if (target)
+                            DoCast(target, LadySpells.SHADOW_BOLT);
+                        _events.ScheduleEvent(LadyEventTypes.P1_SHADOW_BOLT, RandomHelper.URand(5000, 8000), 0, LadyConst.PhaseOne);
+                        break;
+                    case LadyEventTypes.P1_REANIMATE_CULTIST:
+                        ReanimateCultist();
+                        _events.ScheduleEvent(LadyEventTypes.P1_REANIMATE_CULTIST, RandomHelper.URand(6000, 25000), 0, LadyConst.PhaseOne);
+                        break;
+                    case LadyEventTypes.P1_EMPOWER_CULTIST:
+                        EmpowerCultist();
+                        _events.ScheduleEvent(LadyEventTypes.P1_EMPOWER_CULTIST, RandomHelper.URand(18000, 25000), 0, LadyConst.PhaseOne);
+                        break;
+                    case LadyEventTypes.P2_FROSTBOLT:
+                        DoCastVictim(LadySpells.FROSTBOLT);
+                        _events.ScheduleEvent(LadyEventTypes.P2_FROSTBOLT, RandomHelper.URand(10000, 11000), 0, LadyConst.PhaseTwo);
+                        break;
+                    case LadyEventTypes.P2_FROSTBOLT_VOLLEY:
+                        DoCastAOE(LadySpells.FROSTBOLT_VOLLEY);
+                        _events.ScheduleEvent(LadyEventTypes.P2_FROSTBOLT_VOLLEY, RandomHelper.URand(13000, 15000), 0, LadyConst.PhaseTwo);
+                        break;
+                    case LadyEventTypes.P2_TOUCH_OF_INSIGNIFICANCE:
+                        DoCastVictim(LadySpells.TOUCH_OF_INSIGNIFICANCE);
+                        _events.ScheduleEvent(LadyEventTypes.P2_TOUCH_OF_INSIGNIFICANCE, RandomHelper.URand(9000, 13000), 0, LadyConst.PhaseTwo);
+                        break;
+                    case LadyEventTypes.P2_SUMMON_SHADE:
+                        Unit shadeTarget = SelectTarget(SelectAggroTarget.Random, 1);
+                        if (shadeTarget)
+                        {
+                            _nextVengefulShadeTargetGUID = shadeTarget.GetGUID();
+                            DoCast(shadeTarget, LadySpells.SUMMON_SHADE);
+                        }
+                        _events.ScheduleEvent(LadyEventTypes.P2_SUMMON_SHADE, RandomHelper.URand(18000, 23000), 0, LadyConst.PhaseTwo);
+                        break;
+                    case LadyEventTypes.P2_SUMMON_WAVE:
+                        SummonWaveP2();
                         _events.ScheduleEvent(LadyEventTypes.P2_SUMMON_WAVE, 45000, 0, LadyConst.PhaseTwo);
-                    }
+                        break;
+                    case LadyEventTypes.BERSERK:
+                        DoCast(me, InstanceSpells.Berserk);
+                        Talk(LadyTexts.SAY_BERSERK);
+                        break;
                 }
-            }
+            });
 
-            public override void JustSummoned(Creature summon)
+            // We should not melee attack when barrier is up
+            if (me.HasAura(LadySpells.MANA_BARRIER))
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+
+        // summoning function for first phase
+        void SummonWaveP1()
+        {
+            byte addIndex = (byte)(_waveCounter & 1);
+            byte addIndexOther = (byte)(addIndex ^ 1);
+
+            // Summon first add, replace it with Darnavan if weekly quest is active
+            if (_waveCounter != 0 || !Global.PoolMgr.IsSpawnedObject<Quest>(QUEST_DEPROGRAMMING))
+                Summon(LadyConst.SummonEntries[addIndex], LadyConst.SummonPositions[addIndex * 3]);
+            else
+                Summon(NPC_DARNAVAN, LadyConst.SummonPositions[addIndex * 3]);
+
+            Summon(LadyConst.SummonEntries[addIndexOther], LadyConst.SummonPositions[addIndex * 3 + 1]);
+            Summon(LadyConst.SummonEntries[addIndex], LadyConst.SummonPositions[addIndex * 3 + 2]);
+            if (Is25ManRaid())
             {
-                if (summon.GetEntry() == NPC_DARNAVAN)
-                    _darnavanGUID = summon.GetGUID();
-                else
-                    summons.Summon(summon);
-
-                Unit target = null;
-                if (summon.GetEntry() == CreatureIds.VengefulShade)
-                {
-                    target = Global.ObjAccessor.GetUnit(me, _nextVengefulShadeTargetGUID);   // Vengeful Shade
-                    _nextVengefulShadeTargetGUID.Clear();
-                }
-                else
-                    target = SelectTarget(SelectAggroTarget.Random);                        // Wave adds
-
-                summon.GetAI().AttackStart(target);                                      // CAN be NULL
+                Summon(LadyConst.SummonEntries[addIndexOther], LadyConst.SummonPositions[addIndexOther * 3]);
+                Summon(LadyConst.SummonEntries[addIndex], LadyConst.SummonPositions[addIndexOther * 3 + 1]);
+                Summon(LadyConst.SummonEntries[addIndexOther], LadyConst.SummonPositions[addIndexOther * 3 + 2]);
+                Summon(LadyConst.SummonEntries[RandomHelper.IRand(0, 1)], LadyConst.SummonPositions[6]);
             }
 
-            public override void UpdateAI(uint diff)
-            {
-                if ((!UpdateVictim() && !_events.IsInPhase(LadyConst.PhaseIntro)))
-                    return;
+            ++_waveCounter;
+        }
 
-                _events.Update(diff);
-
-                if (me.HasUnitState(UnitState.Casting) && !_events.IsInPhase(LadyConst.PhaseIntro))
-                    return;
-
-                Unit target;
-
-                _events.ExecuteEvents(eventId =>
-                {
-
-                    switch (eventId)
-                    {
-                        case LadyEventTypes.INTRO_2:
-                            Talk(LadyTexts.SAY_INTRO_2);
-                            break;
-                        case LadyEventTypes.INTRO_3:
-                            Talk(LadyTexts.SAY_INTRO_3);
-                            break;
-                        case LadyEventTypes.INTRO_4:
-                            Talk(LadyTexts.SAY_INTRO_4);
-                            break;
-                        case LadyEventTypes.INTRO_5:
-                            Talk(LadyTexts.SAY_INTRO_5);
-                            break;
-                        case LadyEventTypes.INTRO_6:
-                            Talk(LadyTexts.SAY_INTRO_6);
-                            break;
-                        case LadyEventTypes.INTRO_7:
-                            Talk(LadyTexts.SAY_INTRO_7);
-                            break;
-                        case LadyEventTypes.DEATH_AND_DECAY:
-                            target = SelectTarget(SelectAggroTarget.Random);
-                            if (target)
-                                DoCast(target, LadySpells.DEATH_AND_DECAY);
-                            _events.ScheduleEvent(LadyEventTypes.DEATH_AND_DECAY, RandomHelper.URand(22000, 30000));
-                            break;
-                        case LadyEventTypes.DOMINATE_MIND_H:
-                            Talk(LadyTexts.SAY_DOMINATE_MIND);
-                            for (byte i = 0; i < _dominateMindCount; i++)
-                            {
-                                target = SelectTarget(SelectAggroTarget.Random, 1, 0.0f, true, -(int)LadySpells.DOMINATE_MIND_H);
-                                if (target)
-                                    DoCast(target, LadySpells.DOMINATE_MIND_H);
-                            }
-                            _events.ScheduleEvent(LadyEventTypes.DOMINATE_MIND_H, RandomHelper.URand(40000, 45000));
-                            break;
-                        case LadyEventTypes.P1_SUMMON_WAVE:
-                            SummonWaveP1();
-                            _events.ScheduleEvent(LadyEventTypes.P1_SUMMON_WAVE, (uint)(IsHeroic() ? 45000 : 60000), 0, LadyConst.PhaseOne);
-                            break;
-                        case LadyEventTypes.P1_SHADOW_BOLT:
-                            target = SelectTarget(SelectAggroTarget.Random);
-                            if (target)
-                                DoCast(target, LadySpells.SHADOW_BOLT);
-                            _events.ScheduleEvent(LadyEventTypes.P1_SHADOW_BOLT, RandomHelper.URand(5000, 8000), 0, LadyConst.PhaseOne);
-                            break;
-                        case LadyEventTypes.P1_REANIMATE_CULTIST:
-                            ReanimateCultist();
-                            _events.ScheduleEvent(LadyEventTypes.P1_REANIMATE_CULTIST, RandomHelper.URand(6000, 25000), 0, LadyConst.PhaseOne);
-                            break;
-                        case LadyEventTypes.P1_EMPOWER_CULTIST:
-                            EmpowerCultist();
-                            _events.ScheduleEvent(LadyEventTypes.P1_EMPOWER_CULTIST, RandomHelper.URand(18000, 25000), 0, LadyConst.PhaseOne);
-                            break;
-                        case LadyEventTypes.P2_FROSTBOLT:
-                            DoCastVictim(LadySpells.FROSTBOLT);
-                            _events.ScheduleEvent(LadyEventTypes.P2_FROSTBOLT, RandomHelper.URand(10000, 11000), 0, LadyConst.PhaseTwo);
-                            break;
-                        case LadyEventTypes.P2_FROSTBOLT_VOLLEY:
-                            DoCastAOE(LadySpells.FROSTBOLT_VOLLEY);
-                            _events.ScheduleEvent(LadyEventTypes.P2_FROSTBOLT_VOLLEY, RandomHelper.URand(13000, 15000), 0, LadyConst.PhaseTwo);
-                            break;
-                        case LadyEventTypes.P2_TOUCH_OF_INSIGNIFICANCE:
-                            DoCastVictim(LadySpells.TOUCH_OF_INSIGNIFICANCE);
-                            _events.ScheduleEvent(LadyEventTypes.P2_TOUCH_OF_INSIGNIFICANCE, RandomHelper.URand(9000, 13000), 0, LadyConst.PhaseTwo);
-                            break;
-                        case LadyEventTypes.P2_SUMMON_SHADE:
-                            Unit shadeTarget = SelectTarget(SelectAggroTarget.Random, 1);
-                            if (shadeTarget)
-                            {
-                                _nextVengefulShadeTargetGUID = shadeTarget.GetGUID();
-                                DoCast(shadeTarget, LadySpells.SUMMON_SHADE);
-                            }
-                            _events.ScheduleEvent(LadyEventTypes.P2_SUMMON_SHADE, RandomHelper.URand(18000, 23000), 0, LadyConst.PhaseTwo);
-                            break;
-                        case LadyEventTypes.P2_SUMMON_WAVE:
-                            SummonWaveP2();
-                            _events.ScheduleEvent(LadyEventTypes.P2_SUMMON_WAVE, 45000, 0, LadyConst.PhaseTwo);
-                            break;
-                        case LadyEventTypes.BERSERK:
-                            DoCast(me, InstanceSpells.Berserk);
-                            Talk(LadyTexts.SAY_BERSERK);
-                            break;
-                    }
-                });
-
-                // We should not melee attack when barrier is up
-                if (me.HasAura(LadySpells.MANA_BARRIER))
-                    return;
-
-                DoMeleeAttackIfReady();
-            }
-
-            // summoning function for first phase
-            void SummonWaveP1()
+        // summoning function for second phase
+        void SummonWaveP2()
+        {
+            if (Is25ManRaid())
             {
                 byte addIndex = (byte)(_waveCounter & 1);
-                byte addIndexOther = (byte)(addIndex ^ 1);
-
-                // Summon first add, replace it with Darnavan if weekly quest is active
-                if (_waveCounter != 0 || !Global.PoolMgr.IsSpawnedObject<Quest>(QUEST_DEPROGRAMMING))
-                    Summon(LadyConst.SummonEntries[addIndex], LadyConst.SummonPositions[addIndex * 3]);
-                else
-                    Summon(NPC_DARNAVAN, LadyConst.SummonPositions[addIndex * 3]);
-
-                Summon(LadyConst.SummonEntries[addIndexOther], LadyConst.SummonPositions[addIndex * 3 + 1]);
+                Summon(LadyConst.SummonEntries[addIndex], LadyConst.SummonPositions[addIndex * 3]);
+                Summon(LadyConst.SummonEntries[addIndex ^ 1], LadyConst.SummonPositions[addIndex * 3 + 1]);
                 Summon(LadyConst.SummonEntries[addIndex], LadyConst.SummonPositions[addIndex * 3 + 2]);
-                if (Is25ManRaid())
-                {
-                    Summon(LadyConst.SummonEntries[addIndexOther], LadyConst.SummonPositions[addIndexOther * 3]);
-                    Summon(LadyConst.SummonEntries[addIndex], LadyConst.SummonPositions[addIndexOther * 3 + 1]);
-                    Summon(LadyConst.SummonEntries[addIndexOther], LadyConst.SummonPositions[addIndexOther * 3 + 2]);
-                    Summon(LadyConst.SummonEntries[RandomHelper.IRand(0, 1)], LadyConst.SummonPositions[6]);
-                }
+            }
+            else
+                Summon(LadyConst.SummonEntries[RandomHelper.IRand(0, 1)], LadyConst.SummonPositions[6]);
 
-                ++_waveCounter;
+            ++_waveCounter;
+        }
+
+        // helper for summoning wave mobs
+        void Summon(uint entry, Position pos)
+        {
+            TempSummon summon = me.SummonCreature(entry, pos, TempSummonType.CorpseTimedDespawn, 10000);
+            if (summon)
+                summon.GetAI().DoCast(summon, LadySpells.TELEPORT_VISUAL);
+        }
+
+        void ReanimateCultist()
+        {
+            if (summons.Empty())
+                return;
+
+            List<Creature> temp = new List<Creature>();
+            foreach (var guid in summons.ToList())
+            {
+                Creature cre = ObjectAccessor.GetCreature(me, guid);
+                if (cre)
+                    if (cre.IsAlive() && (cre.GetEntry() == CreatureIds.CultFanatic || cre.GetEntry() == CreatureIds.CultAdherent))
+                        temp.Add(cre);
             }
 
-            // summoning function for second phase
-            void SummonWaveP2()
+            if (temp.Empty())
+                return;
+
+            Creature cultist = temp.SelectRandom();
+            DoCast(cultist, LadySpells.DARK_MARTYRDOM_T, true);
+        }
+
+        void EmpowerCultist()
+        {
+            if (summons.Empty())
+                return;
+
+            List<Creature> temp = new List<Creature>();
+            foreach (var guid in summons)
             {
-                if (Is25ManRaid())
+                Creature cre = ObjectAccessor.GetCreature(me, guid);
+                if (cre)
+                    if (cre.IsAlive() && (cre.GetEntry() == CreatureIds.CultFanatic || cre.GetEntry() == CreatureIds.CultAdherent))
+                        temp.Add(cre);
+            }
+
+            // noone to empower
+            if (temp.Empty())
+                return;
+
+            // select random cultist
+            Creature cultist = temp.SelectRandom();
+            DoCast(cultist, cultist.GetEntry() == CreatureIds.CultFanatic ? LadySpells.DARK_TRANSFORMATION_T : LadySpells.DARK_EMPOWERMENT_T, true);
+            Talk(cultist.GetEntry() == CreatureIds.CultFanatic ? LadyTexts.SAY_DARK_TRANSFORMATION : LadyTexts.SAY_DARK_EMPOWERMENT);
+        }
+
+        ObjectGuid _nextVengefulShadeTargetGUID;
+        ObjectGuid _darnavanGUID;
+        uint _waveCounter;
+        byte _dominateMindCount;
+        bool _introDone;
+
+        uint NPC_DARNAVAN { get { return RaidMode<uint>(DeprogrammingData.NPC_DARNAVAN_10, DeprogrammingData.NPC_DARNAVAN_25, DeprogrammingData.NPC_DARNAVAN_10, DeprogrammingData.NPC_DARNAVAN_25); } }
+        uint NPC_DARNAVAN_CREDIT { get { return RaidMode<uint>(DeprogrammingData.NPC_DARNAVAN_CREDIT_10, DeprogrammingData.NPC_DARNAVAN_CREDIT_25, DeprogrammingData.NPC_DARNAVAN_CREDIT_10, DeprogrammingData.NPC_DARNAVAN_CREDIT_25); } }
+        uint QUEST_DEPROGRAMMING { get { return RaidMode<uint>(WeeklyQuestIds.Deprogramming10, WeeklyQuestIds.Deprogramming25, WeeklyQuestIds.Deprogramming10, WeeklyQuestIds.Deprogramming25); } }
+    }
+
+    [Script]
+    class npc_cult_fanatic : ScriptedAI
+    {
+        public npc_cult_fanatic(Creature creature) : base(creature) { }
+
+        public override void Reset()
+        {
+            _events.Reset();
+            _events.ScheduleEvent(LadyEventTypes.FANATIC_NECROTIC_STRIKE, RandomHelper.URand(10000, 12000));
+            _events.ScheduleEvent(LadyEventTypes.FANATIC_SHADOW_CLEAVE, RandomHelper.URand(14000, 16000));
+            _events.ScheduleEvent(LadyEventTypes.FANATIC_VAMPIRIC_MIGHT, RandomHelper.URand(20000, 27000));
+        }
+
+        public override void SpellHit(Unit caster, SpellInfo spell)
+        {
+            switch (spell.Id)
+            {
+                case LadySpells.DARK_TRANSFORMATION:
+                    me.UpdateEntry(CreatureIds.DeformedFanatic);
+                    break;
+                case LadySpells.DARK_TRANSFORMATION_T:
+                    if (me.HasFlag(ObjectFields.DynamicFlags, UnitDynFlags.Dead))
+                        break;
+                    me.InterruptNonMeleeSpells(true);
+                    DoCast(me, LadySpells.DARK_TRANSFORMATION);
+                    break;
+                case LadySpells.DARK_MARTYRDOM_T:
+                    me.InterruptNonMeleeSpells(true);
+                    DoCast(me, LadySpells.DARK_MARTYRDOM_FANATIC);
+                    break;
+                case LadySpells.DARK_MARTYRDOM_FANATIC: // 10nm
+                case 72495: // 25nm
+                case 72496: // 10hc
+                case 72497: // 25hc
+                    me.SetFlag(UnitFields.Flags, UnitFlags.RemoveClientControl | UnitFlags.Pacified | UnitFlags.NonAttackable | UnitFlags.Unk29);
+                    me.SetFlag(ObjectFields.DynamicFlags, UnitDynFlags.Dead);
+                    me.SetFlag(UnitFields.Flags2, UnitFlags2.FeignDeath);
+                    me.SetReactState(ReactStates.Passive);
+                    me.AttackStop();
+                    _events.ScheduleEvent(LadyEventTypes.CULTIST_DARK_MARTYRDOM, 4000);
+                    break;
+                default:
+                    break;
+
+            }
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _events.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            _events.ExecuteEvents(eventId =>
+            {
+                switch (eventId)
                 {
-                    byte addIndex = (byte)(_waveCounter & 1);
-                    Summon(LadyConst.SummonEntries[addIndex], LadyConst.SummonPositions[addIndex * 3]);
-                    Summon(LadyConst.SummonEntries[addIndex ^ 1], LadyConst.SummonPositions[addIndex * 3 + 1]);
-                    Summon(LadyConst.SummonEntries[addIndex], LadyConst.SummonPositions[addIndex * 3 + 2]);
+                    case LadyEventTypes.FANATIC_NECROTIC_STRIKE:
+                        DoCastVictim(LadySpells.NECROTIC_STRIKE);
+                        _events.ScheduleEvent(LadyEventTypes.FANATIC_NECROTIC_STRIKE, RandomHelper.URand(11000, 13000));
+                        break;
+                    case LadyEventTypes.FANATIC_SHADOW_CLEAVE:
+                        DoCastVictim(LadySpells.SHADOW_CLEAVE);
+                        _events.ScheduleEvent(LadyEventTypes.FANATIC_SHADOW_CLEAVE, RandomHelper.URand(9500, 11000));
+                        break;
+                    case LadyEventTypes.FANATIC_VAMPIRIC_MIGHT:
+                        DoCast(me, LadySpells.VAMPIRIC_MIGHT);
+                        _events.ScheduleEvent(LadyEventTypes.FANATIC_VAMPIRIC_MIGHT, RandomHelper.URand(20000, 27000));
+                        break;
+                    case LadyEventTypes.CULTIST_DARK_MARTYRDOM:
+                        if (me.IsSummon())
+                        {
+                            Unit owner = me.ToTempSummon().GetSummoner();
+                            if (owner)
+                                if (owner.ToCreature())
+                                    owner.ToCreature().GetAI().Talk(LadyTexts.SAY_ANIMATE_DEAD);
+                        }
+                        me.UpdateEntry(CreatureIds.ReanimatedFanatic);
+                        me.RemoveFlag(UnitFields.Flags, UnitFlags.RemoveClientControl | UnitFlags.Pacified | UnitFlags.NonAttackable | UnitFlags.Unk29);
+                        me.RemoveFlag(ObjectFields.DynamicFlags, UnitDynFlags.Dead);
+                        me.RemoveFlag(UnitFields.Flags2, UnitFlags2.FeignDeath);
+                        DoCast(me, LadySpells.FANATIC_S_DETERMINATION);
+                        me.SetReactState(ReactStates.Aggressive);
+                        AttackStart(SelectTarget(SelectAggroTarget.Random));
+                        break;
+                }
+            });
+
+            DoMeleeAttackIfReady();
+        }
+    }
+
+    [Script]
+    class npc_cult_adherent : ScriptedAI
+    {
+        public npc_cult_adherent(Creature creature) : base(creature) { }
+
+        public override void Reset()
+        {
+            _events.Reset();
+            _events.ScheduleEvent(LadyEventTypes.ADHERENT_FROST_FEVER, RandomHelper.URand(10000, 12000));
+            _events.ScheduleEvent(LadyEventTypes.ADHERENT_DEATHCHILL, RandomHelper.URand(14000, 16000));
+            _events.ScheduleEvent(LadyEventTypes.ADHERENT_CURSE_OF_TORPOR, RandomHelper.URand(14000, 16000));
+            _events.ScheduleEvent(LadyEventTypes.ADHERENT_SHORUD_OF_THE_OCCULT, RandomHelper.URand(32000, 39000));
+        }
+
+        public override void SpellHit(Unit caster, SpellInfo spell)
+        {
+            switch (spell.Id)
+            {
+                case LadySpells.DARK_EMPOWERMENT:
+                    me.UpdateEntry(CreatureIds.EmpoweredAdherent);
+                    break;
+                case LadySpells.DARK_EMPOWERMENT_T:
+                    if (me.HasFlag(ObjectFields.DynamicFlags, UnitDynFlags.Dead))
+                        break;
+                    me.InterruptNonMeleeSpells(true);
+                    DoCast(me, LadySpells.DARK_EMPOWERMENT);
+                    break;
+                case LadySpells.DARK_MARTYRDOM_T:
+                    me.InterruptNonMeleeSpells(true);
+                    DoCast(me, LadySpells.DARK_MARTYRDOM_ADHERENT);
+                    break;
+                case LadySpells.DARK_MARTYRDOM_ADHERENT: // 10nm
+                case 72498: // 25nm
+                case 72499: // 10hc
+                case 72500: // 25hc
+                    me.SetFlag(UnitFields.Flags, UnitFlags.RemoveClientControl | UnitFlags.Pacified | UnitFlags.NonAttackable | UnitFlags.Unk29);
+                    me.SetFlag(ObjectFields.DynamicFlags, UnitDynFlags.Dead);
+                    me.SetFlag(UnitFields.Flags2, UnitFlags2.FeignDeath);
+                    me.SetReactState(ReactStates.Passive);
+                    me.AttackStop();
+                    _events.ScheduleEvent(LadyEventTypes.CULTIST_DARK_MARTYRDOM, 4000);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _events.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            _events.ExecuteEvents(eventId =>
+            {
+                switch (eventId)
+                {
+                    case LadyEventTypes.ADHERENT_FROST_FEVER:
+                        DoCastVictim(LadySpells.FROST_FEVER);
+                        _events.ScheduleEvent(LadyEventTypes.ADHERENT_FROST_FEVER, RandomHelper.URand(9000, 13000));
+                        break;
+                    case LadyEventTypes.ADHERENT_DEATHCHILL:
+                        if (me.GetEntry() == CreatureIds.EmpoweredAdherent)
+                            DoCastVictim(LadySpells.DEATHCHILL_BLAST);
+                        else
+                            DoCastVictim(LadySpells.DEATHCHILL_BOLT);
+                        _events.ScheduleEvent(LadyEventTypes.ADHERENT_DEATHCHILL, RandomHelper.URand(9000, 13000));
+                        break;
+                    case LadyEventTypes.ADHERENT_CURSE_OF_TORPOR:
+                        Unit target = SelectTarget(SelectAggroTarget.Random, 1);
+                        if (target)
+                            DoCast(target, LadySpells.CURSE_OF_TORPOR);
+                        _events.ScheduleEvent(LadyEventTypes.ADHERENT_CURSE_OF_TORPOR, RandomHelper.URand(9000, 13000));
+                        break;
+                    case LadyEventTypes.ADHERENT_SHORUD_OF_THE_OCCULT:
+                        DoCast(me, LadySpells.SHORUD_OF_THE_OCCULT);
+                        _events.ScheduleEvent(LadyEventTypes.ADHERENT_SHORUD_OF_THE_OCCULT, RandomHelper.URand(27000, 32000));
+                        break;
+                    case LadyEventTypes.CULTIST_DARK_MARTYRDOM:
+                        if (me.IsSummon())
+                        {
+                            Unit owner = me.ToTempSummon().GetSummoner();
+                            if (owner)
+                                if (owner.ToCreature())
+                                    owner.ToCreature().GetAI().Talk(LadyTexts.SAY_ANIMATE_DEAD);
+                        }
+                        me.UpdateEntry(CreatureIds.ReanimatedAdherent);
+                        me.RemoveFlag(UnitFields.Flags, UnitFlags.RemoveClientControl | UnitFlags.Pacified | UnitFlags.NonAttackable | UnitFlags.Unk29);
+                        me.RemoveFlag(ObjectFields.DynamicFlags, UnitDynFlags.Dead);
+                        me.RemoveFlag(UnitFields.Flags2, UnitFlags2.FeignDeath);
+                        DoCast(me, LadySpells.FANATIC_S_DETERMINATION);
+                        me.SetReactState(ReactStates.Aggressive);
+                        AttackStart(SelectTarget(SelectAggroTarget.Random));
+                        break;
+                }
+            });
+
+            DoMeleeAttackIfReady();
+        }
+    }
+
+    [Script]
+    class npc_vengeful_shade : ScriptedAI
+    {
+        public npc_vengeful_shade(Creature creature) : base(creature)
+        {
+            me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+        }
+
+        public override void Reset()
+        {
+            me.AddAura(LadySpells.VENGEFUL_BLAST_PASSIVE, me);
+        }
+
+        public override void SpellHitTarget(Unit target, SpellInfo spell)
+        {
+            switch (spell.Id)
+            {
+                case LadySpells.VENGEFUL_BLAST:
+                case LadySpells.VENGEFUL_BLAST_25N:
+                case LadySpells.VENGEFUL_BLAST_10H:
+                case LadySpells.VENGEFUL_BLAST_25H:
+                    me.KillSelf();
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    [Script]
+    class npc_darnavan : ScriptedAI
+    {
+        public npc_darnavan(Creature creature)
+            : base(creature)
+        {
+        }
+
+        public override void Reset()
+        {
+            _events.Reset();
+            _events.ScheduleEvent(LadyEventTypes.DARNAVAN_BLADESTORM, 10000);
+            _events.ScheduleEvent(LadyEventTypes.DARNAVAN_INTIMIDATING_SHOUT, RandomHelper.URand(20000, 25000));
+            _events.ScheduleEvent(LadyEventTypes.DARNAVAN_MORTAL_STRIKE, RandomHelper.URand(25000, 30000));
+            _events.ScheduleEvent(LadyEventTypes.DARNAVAN_SUNDER_ARMOR, RandomHelper.URand(5000, 8000));
+            _canCharge = true;
+            _canShatter = true;
+        }
+
+        public override void JustDied(Unit killer)
+        {
+            _events.Reset();
+            Player owner = killer.GetCharmerOrOwnerPlayerOrPlayerItself();
+            if (owner)
+            {
+                Group group = owner.GetGroup();
+                if (group)
+                {
+                    for (GroupReference groupRefe = group.GetFirstMember(); groupRefe != null; groupRefe = groupRefe.next())
+                    {
+                        Player member = groupRefe.GetSource();
+                        if (member)
+                            member.FailQuest(QUEST_DEPROGRAMMING);
+                    }
                 }
                 else
-                    Summon(LadyConst.SummonEntries[RandomHelper.IRand(0, 1)], LadyConst.SummonPositions[6]);
-
-                ++_waveCounter;
+                    owner.FailQuest(QUEST_DEPROGRAMMING);
             }
-
-            // helper for summoning wave mobs
-            void Summon(uint entry, Position pos)
-            {
-                TempSummon summon = me.SummonCreature(entry, pos, TempSummonType.CorpseTimedDespawn, 10000);
-                if (summon)
-                    summon.GetAI().DoCast(summon, LadySpells.TELEPORT_VISUAL);
-            }
-
-            void ReanimateCultist()
-            {
-                if (summons.Empty())
-                    return;
-
-                List<Creature> temp = new List<Creature>();
-                foreach (var guid in summons.ToList())
-                {
-                    Creature cre = ObjectAccessor.GetCreature(me, guid);
-                    if (cre)
-                        if (cre.IsAlive() && (cre.GetEntry() == CreatureIds.CultFanatic || cre.GetEntry() == CreatureIds.CultAdherent))
-                            temp.Add(cre);
-                }
-
-                if (temp.Empty())
-                    return;
-
-                Creature cultist = temp.SelectRandom();
-                DoCast(cultist, LadySpells.DARK_MARTYRDOM_T, true);
-            }
-
-            void EmpowerCultist()
-            {
-                if (summons.Empty())
-                    return;
-
-                List<Creature> temp = new List<Creature>();
-                foreach (var guid in summons)
-                {
-                    Creature cre = ObjectAccessor.GetCreature(me, guid);
-                    if (cre)
-                        if (cre.IsAlive() && (cre.GetEntry() == CreatureIds.CultFanatic || cre.GetEntry() == CreatureIds.CultAdherent))
-                            temp.Add(cre);
-                }
-
-                // noone to empower
-                if (temp.Empty())
-                    return;
-
-                // select random cultist
-                Creature cultist = temp.SelectRandom();
-                DoCast(cultist, cultist.GetEntry() == CreatureIds.CultFanatic ? LadySpells.DARK_TRANSFORMATION_T : LadySpells.DARK_EMPOWERMENT_T, true);
-                Talk(cultist.GetEntry() == CreatureIds.CultFanatic ? LadyTexts.SAY_DARK_TRANSFORMATION : LadyTexts.SAY_DARK_EMPOWERMENT);
-            }
-
-            ObjectGuid _nextVengefulShadeTargetGUID;
-            ObjectGuid _darnavanGUID;
-            uint _waveCounter;
-            byte _dominateMindCount;
-            bool _introDone;
-
-            uint NPC_DARNAVAN { get { return RaidMode<uint>(DeprogrammingData.NPC_DARNAVAN_10, DeprogrammingData.NPC_DARNAVAN_25, DeprogrammingData.NPC_DARNAVAN_10, DeprogrammingData.NPC_DARNAVAN_25); } }
-            uint NPC_DARNAVAN_CREDIT { get { return RaidMode<uint>(DeprogrammingData.NPC_DARNAVAN_CREDIT_10, DeprogrammingData.NPC_DARNAVAN_CREDIT_25, DeprogrammingData.NPC_DARNAVAN_CREDIT_10, DeprogrammingData.NPC_DARNAVAN_CREDIT_25); } }
-            uint QUEST_DEPROGRAMMING { get { return RaidMode<uint>(WeeklyQuestIds.Deprogramming10, WeeklyQuestIds.Deprogramming25, WeeklyQuestIds.Deprogramming10, WeeklyQuestIds.Deprogramming25); } }
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void MovementInform(MovementGeneratorType type, uint id)
         {
-            return InstanceIcecrownCitadel.GetInstanceAI<boss_lady_deathwhisperAI>(creature);
+            if (type != MovementGeneratorType.Point || id != DeprogrammingData.POINT_DESPAWN)
+                return;
+
+            me.DespawnOrUnsummon();
+        }
+
+        public override void EnterCombat(Unit victim)
+        {
+            Talk(LadyTexts.SAY_DARNAVAN_AGGRO);
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _events.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            if (_canShatter && me.GetVictim() && me.GetVictim().IsImmunedToDamage(SpellSchoolMask.Normal))
+            {
+                DoCastVictim(LadySpells.SHATTERING_THROW);
+                _canShatter = false;
+                _events.ScheduleEvent(LadyEventTypes.DARNAVAN_SHATTERING_THROW, 30000);
+                return;
+            }
+
+            if (_canCharge && !me.IsWithinMeleeRange(me.GetVictim()))
+            {
+                DoCastVictim(LadySpells.CHARGE);
+                _canCharge = false;
+                _events.ScheduleEvent(LadyEventTypes.DARNAVAN_CHARGE, 20000);
+                return;
+            }
+
+            _events.ExecuteEvents(eventId =>
+            {
+                switch (eventId)
+                {
+                    case LadyEventTypes.DARNAVAN_BLADESTORM:
+                        DoCast(LadySpells.BLADESTORM);
+                        _events.ScheduleEvent(LadyEventTypes.DARNAVAN_BLADESTORM, RandomHelper.URand(90000, 100000));
+                        break;
+                    case LadyEventTypes.DARNAVAN_CHARGE:
+                        _canCharge = true;
+                        break;
+                    case LadyEventTypes.DARNAVAN_INTIMIDATING_SHOUT:
+                        DoCast(LadySpells.INTIMIDATING_SHOUT);
+                        _events.ScheduleEvent(LadyEventTypes.DARNAVAN_INTIMIDATING_SHOUT, RandomHelper.URand(90000, 120000));
+                        break;
+                    case LadyEventTypes.DARNAVAN_MORTAL_STRIKE:
+                        DoCastVictim(LadySpells.MORTAL_STRIKE);
+                        _events.ScheduleEvent(LadyEventTypes.DARNAVAN_MORTAL_STRIKE, RandomHelper.URand(15000, 30000));
+                        break;
+                    case LadyEventTypes.DARNAVAN_SHATTERING_THROW:
+                        _canShatter = true;
+                        break;
+                    case LadyEventTypes.DARNAVAN_SUNDER_ARMOR:
+                        DoCastVictim(LadySpells.SUNDER_ARMOR);
+                        _events.ScheduleEvent(LadyEventTypes.DARNAVAN_SUNDER_ARMOR, RandomHelper.URand(3000, 7000));
+                        break;
+                }
+            });
+
+            DoMeleeAttackIfReady();
+        }
+
+        uint QUEST_DEPROGRAMMING { get { return RaidMode<uint>(WeeklyQuestIds.Deprogramming10, WeeklyQuestIds.Deprogramming25, WeeklyQuestIds.Deprogramming10, WeeklyQuestIds.Deprogramming25); } }
+
+        bool _canCharge;
+        bool _canShatter;
+    }
+
+    [Script]
+    class spell_deathwhisper_mana_barrier : AuraScript
+    {
+        void HandlePeriodicTick(AuraEffect aurEff)
+        {
+            PreventDefaultAction();
+            Unit caster = GetCaster();
+            if (caster)
+            {
+                int missingHealth = (int)(caster.GetMaxHealth() - caster.GetHealth());
+                caster.ModifyHealth(missingHealth);
+                caster.ModifyPower(PowerType.Mana, -missingHealth);
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodicTick, 0, AuraType.PeriodicTriggerSpell));
         }
     }
 
     [Script]
-    class npc_cult_fanatic : CreatureScript
+    class spell_cultist_dark_martyrdom : SpellScript
     {
-        public npc_cult_fanatic() : base("npc_cult_fanatic") { }
-
-        class npc_cult_fanaticAI : ScriptedAI
+        void HandleEffect(uint effIndex)
         {
-            public npc_cult_fanaticAI(Creature creature) : base(creature) { }
-
-            public override void Reset()
+            if (GetCaster().IsSummon())
             {
-                _events.Reset();
-                _events.ScheduleEvent(LadyEventTypes.FANATIC_NECROTIC_STRIKE, RandomHelper.URand(10000, 12000));
-                _events.ScheduleEvent(LadyEventTypes.FANATIC_SHADOW_CLEAVE, RandomHelper.URand(14000, 16000));
-                _events.ScheduleEvent(LadyEventTypes.FANATIC_VAMPIRIC_MIGHT, RandomHelper.URand(20000, 27000));
-            }
-
-            public override void SpellHit(Unit caster, SpellInfo spell)
-            {
-                switch (spell.Id)
-                {
-                    case LadySpells.DARK_TRANSFORMATION:
-                        me.UpdateEntry(CreatureIds.DeformedFanatic);
-                        break;
-                    case LadySpells.DARK_TRANSFORMATION_T:
-                        if (me.HasFlag(ObjectFields.DynamicFlags, UnitDynFlags.Dead))
-                            break;
-                        me.InterruptNonMeleeSpells(true);
-                        DoCast(me, LadySpells.DARK_TRANSFORMATION);
-                        break;
-                    case LadySpells.DARK_MARTYRDOM_T:
-                        me.InterruptNonMeleeSpells(true);
-                        DoCast(me, LadySpells.DARK_MARTYRDOM_FANATIC);
-                        break;
-                    case LadySpells.DARK_MARTYRDOM_FANATIC: // 10nm
-                    case 72495: // 25nm
-                    case 72496: // 10hc
-                    case 72497: // 25hc
-                        me.SetFlag(UnitFields.Flags, UnitFlags.RemoveClientControl | UnitFlags.Pacified | UnitFlags.NonAttackable | UnitFlags.Unk29);
-                        me.SetFlag(ObjectFields.DynamicFlags, UnitDynFlags.Dead);
-                        me.SetFlag(UnitFields.Flags2, UnitFlags2.FeignDeath);
-                        me.SetReactState(ReactStates.Passive);
-                        me.AttackStop();
-                        _events.ScheduleEvent(LadyEventTypes.CULTIST_DARK_MARTYRDOM, 4000);
-                        break;
-                    default:
-                        break;
-
-                }
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _events.Update(diff);
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-
-                _events.ExecuteEvents(eventId =>
-                {
-                    switch (eventId)
-                    {
-                        case LadyEventTypes.FANATIC_NECROTIC_STRIKE:
-                            DoCastVictim(LadySpells.NECROTIC_STRIKE);
-                            _events.ScheduleEvent(LadyEventTypes.FANATIC_NECROTIC_STRIKE, RandomHelper.URand(11000, 13000));
-                            break;
-                        case LadyEventTypes.FANATIC_SHADOW_CLEAVE:
-                            DoCastVictim(LadySpells.SHADOW_CLEAVE);
-                            _events.ScheduleEvent(LadyEventTypes.FANATIC_SHADOW_CLEAVE, RandomHelper.URand(9500, 11000));
-                            break;
-                        case LadyEventTypes.FANATIC_VAMPIRIC_MIGHT:
-                            DoCast(me, LadySpells.VAMPIRIC_MIGHT);
-                            _events.ScheduleEvent(LadyEventTypes.FANATIC_VAMPIRIC_MIGHT, RandomHelper.URand(20000, 27000));
-                            break;
-                        case LadyEventTypes.CULTIST_DARK_MARTYRDOM:
-                            if (me.IsSummon())
-                            {
-                                Unit owner = me.ToTempSummon().GetSummoner();
-                                if (owner)
-                                    if (owner.ToCreature())
-                                        owner.ToCreature().GetAI().Talk(LadyTexts.SAY_ANIMATE_DEAD);
-                            }
-                            me.UpdateEntry(CreatureIds.ReanimatedFanatic);
-                            me.RemoveFlag(UnitFields.Flags, UnitFlags.RemoveClientControl | UnitFlags.Pacified | UnitFlags.NonAttackable | UnitFlags.Unk29);
-                            me.RemoveFlag(ObjectFields.DynamicFlags, UnitDynFlags.Dead);
-                            me.RemoveFlag(UnitFields.Flags2, UnitFlags2.FeignDeath);
-                            DoCast(me, LadySpells.FANATIC_S_DETERMINATION);
-                            me.SetReactState(ReactStates.Aggressive);
-                            AttackStart(SelectTarget(SelectAggroTarget.Random));
-                            break;
-                    }
-                });
-
-                DoMeleeAttackIfReady();
-            }
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return InstanceIcecrownCitadel.GetInstanceAI<npc_cult_fanaticAI>(creature);
-        }
-    }
-
-    [Script]
-    class npc_cult_adherent : CreatureScript
-    {
-        public npc_cult_adherent() : base("npc_cult_adherent") { }
-
-        class npc_cult_adherentAI : ScriptedAI
-        {
-            public npc_cult_adherentAI(Creature creature) : base(creature) { }
-
-            public override void Reset()
-            {
-                _events.Reset();
-                _events.ScheduleEvent(LadyEventTypes.ADHERENT_FROST_FEVER, RandomHelper.URand(10000, 12000));
-                _events.ScheduleEvent(LadyEventTypes.ADHERENT_DEATHCHILL, RandomHelper.URand(14000, 16000));
-                _events.ScheduleEvent(LadyEventTypes.ADHERENT_CURSE_OF_TORPOR, RandomHelper.URand(14000, 16000));
-                _events.ScheduleEvent(LadyEventTypes.ADHERENT_SHORUD_OF_THE_OCCULT, RandomHelper.URand(32000, 39000));
-            }
-
-            public override void SpellHit(Unit caster, SpellInfo spell)
-            {
-                switch (spell.Id)
-                {
-                    case LadySpells.DARK_EMPOWERMENT:
-                        me.UpdateEntry(CreatureIds.EmpoweredAdherent);
-                        break;
-                    case LadySpells.DARK_EMPOWERMENT_T:
-                        if (me.HasFlag(ObjectFields.DynamicFlags, UnitDynFlags.Dead))
-                            break;
-                        me.InterruptNonMeleeSpells(true);
-                        DoCast(me, LadySpells.DARK_EMPOWERMENT);
-                        break;
-                    case LadySpells.DARK_MARTYRDOM_T:
-                        me.InterruptNonMeleeSpells(true);
-                        DoCast(me, LadySpells.DARK_MARTYRDOM_ADHERENT);
-                        break;
-                    case LadySpells.DARK_MARTYRDOM_ADHERENT: // 10nm
-                    case 72498: // 25nm
-                    case 72499: // 10hc
-                    case 72500: // 25hc
-                        me.SetFlag(UnitFields.Flags, UnitFlags.RemoveClientControl | UnitFlags.Pacified | UnitFlags.NonAttackable | UnitFlags.Unk29);
-                        me.SetFlag(ObjectFields.DynamicFlags, UnitDynFlags.Dead);
-                        me.SetFlag(UnitFields.Flags2, UnitFlags2.FeignDeath);
-                        me.SetReactState(ReactStates.Passive);
-                        me.AttackStop();
-                        _events.ScheduleEvent(LadyEventTypes.CULTIST_DARK_MARTYRDOM, 4000);
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _events.Update(diff);
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-
-                _events.ExecuteEvents(eventId =>
-                {
-                    switch (eventId)
-                    {
-                        case LadyEventTypes.ADHERENT_FROST_FEVER:
-                            DoCastVictim(LadySpells.FROST_FEVER);
-                            _events.ScheduleEvent(LadyEventTypes.ADHERENT_FROST_FEVER, RandomHelper.URand(9000, 13000));
-                            break;
-                        case LadyEventTypes.ADHERENT_DEATHCHILL:
-                            if (me.GetEntry() == CreatureIds.EmpoweredAdherent)
-                                DoCastVictim(LadySpells.DEATHCHILL_BLAST);
-                            else
-                                DoCastVictim(LadySpells.DEATHCHILL_BOLT);
-                            _events.ScheduleEvent(LadyEventTypes.ADHERENT_DEATHCHILL, RandomHelper.URand(9000, 13000));
-                            break;
-                        case LadyEventTypes.ADHERENT_CURSE_OF_TORPOR:
-                            Unit target = SelectTarget(SelectAggroTarget.Random, 1);
-                            if (target)
-                                DoCast(target, LadySpells.CURSE_OF_TORPOR);
-                            _events.ScheduleEvent(LadyEventTypes.ADHERENT_CURSE_OF_TORPOR, RandomHelper.URand(9000, 13000));
-                            break;
-                        case LadyEventTypes.ADHERENT_SHORUD_OF_THE_OCCULT:
-                            DoCast(me, LadySpells.SHORUD_OF_THE_OCCULT);
-                            _events.ScheduleEvent(LadyEventTypes.ADHERENT_SHORUD_OF_THE_OCCULT, RandomHelper.URand(27000, 32000));
-                            break;
-                        case LadyEventTypes.CULTIST_DARK_MARTYRDOM:
-                            if (me.IsSummon())
-                            {
-                                Unit owner = me.ToTempSummon().GetSummoner();
-                                if (owner)
-                                    if (owner.ToCreature())
-                                        owner.ToCreature().GetAI().Talk(LadyTexts.SAY_ANIMATE_DEAD);
-                            }
-                            me.UpdateEntry(CreatureIds.ReanimatedAdherent);
-                            me.RemoveFlag(UnitFields.Flags, UnitFlags.RemoveClientControl | UnitFlags.Pacified | UnitFlags.NonAttackable | UnitFlags.Unk29);
-                            me.RemoveFlag(ObjectFields.DynamicFlags, UnitDynFlags.Dead);
-                            me.RemoveFlag(UnitFields.Flags2, UnitFlags2.FeignDeath);
-                            DoCast(me, LadySpells.FANATIC_S_DETERMINATION);
-                            me.SetReactState(ReactStates.Aggressive);
-                            AttackStart(SelectTarget(SelectAggroTarget.Random));
-                            break;
-                    }
-                });
-
-                DoMeleeAttackIfReady();
-            }
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return InstanceIcecrownCitadel.GetInstanceAI<npc_cult_adherentAI>(creature);
-        }
-    }
-
-    [Script]
-    class npc_vengeful_shade : CreatureScript
-    {
-        public npc_vengeful_shade() : base("npc_vengeful_shade") { }
-
-        class npc_vengeful_shadeAI : ScriptedAI
-        {
-            public npc_vengeful_shadeAI(Creature creature) : base(creature)
-            {
-                me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
-            }
-
-            public override void Reset()
-            {
-                me.AddAura(LadySpells.VENGEFUL_BLAST_PASSIVE, me);
-            }
-
-            public override void SpellHitTarget(Unit target, SpellInfo spell)
-            {
-                switch (spell.Id)
-                {
-                    case LadySpells.VENGEFUL_BLAST:
-                    case LadySpells.VENGEFUL_BLAST_25N:
-                    case LadySpells.VENGEFUL_BLAST_10H:
-                    case LadySpells.VENGEFUL_BLAST_25H:
-                        me.KillSelf();
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return InstanceIcecrownCitadel.GetInstanceAI<npc_vengeful_shadeAI>(creature);
-        }
-    }
-
-    [Script]
-    class npc_darnavan : CreatureScript
-    {
-        public npc_darnavan() : base("npc_darnavan") { }
-
-        class npc_darnavanAI : ScriptedAI
-        {
-            public npc_darnavanAI(Creature creature)
-                : base(creature)
-            {
-            }
-
-            public override void Reset()
-            {
-                _events.Reset();
-                _events.ScheduleEvent(LadyEventTypes.DARNAVAN_BLADESTORM, 10000);
-                _events.ScheduleEvent(LadyEventTypes.DARNAVAN_INTIMIDATING_SHOUT, RandomHelper.URand(20000, 25000));
-                _events.ScheduleEvent(LadyEventTypes.DARNAVAN_MORTAL_STRIKE, RandomHelper.URand(25000, 30000));
-                _events.ScheduleEvent(LadyEventTypes.DARNAVAN_SUNDER_ARMOR, RandomHelper.URand(5000, 8000));
-                _canCharge = true;
-                _canShatter = true;
-            }
-
-            public override void JustDied(Unit killer)
-            {
-                _events.Reset();
-                Player owner = killer.GetCharmerOrOwnerPlayerOrPlayerItself();
+                Unit owner = GetCaster().ToTempSummon().GetSummoner();
                 if (owner)
-                {
-                    Group group = owner.GetGroup();
-                    if (group)
-                    {
-                        for (GroupReference groupRefe = group.GetFirstMember(); groupRefe != null; groupRefe = groupRefe.next())
-                        {
-                            Player member = groupRefe.GetSource();
-                            if (member)
-                                member.FailQuest(QUEST_DEPROGRAMMING);
-                        }
-                    }
-                    else
-                        owner.FailQuest(QUEST_DEPROGRAMMING);
-                }
+                    owner.GetAI().SetGUID(GetCaster().GetGUID(), (int)LadyConst.GUIDCultist);
             }
 
-            public override void MovementInform(MovementGeneratorType type, uint id)
-            {
-                if (type != MovementGeneratorType.Point || id != DeprogrammingData.POINT_DESPAWN)
-                    return;
-
-                me.DespawnOrUnsummon();
-            }
-
-            public override void EnterCombat(Unit victim)
-            {
-                Talk(LadyTexts.SAY_DARNAVAN_AGGRO);
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _events.Update(diff);
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-
-                if (_canShatter && me.GetVictim() && me.GetVictim().IsImmunedToDamage(SpellSchoolMask.Normal))
-                {
-                    DoCastVictim(LadySpells.SHATTERING_THROW);
-                    _canShatter = false;
-                    _events.ScheduleEvent(LadyEventTypes.DARNAVAN_SHATTERING_THROW, 30000);
-                    return;
-                }
-
-                if (_canCharge && !me.IsWithinMeleeRange(me.GetVictim()))
-                {
-                    DoCastVictim(LadySpells.CHARGE);
-                    _canCharge = false;
-                    _events.ScheduleEvent(LadyEventTypes.DARNAVAN_CHARGE, 20000);
-                    return;
-                }
-
-                _events.ExecuteEvents(eventId =>
-                {
-                    switch (eventId)
-                    {
-                        case LadyEventTypes.DARNAVAN_BLADESTORM:
-                            DoCast(LadySpells.BLADESTORM);
-                            _events.ScheduleEvent(LadyEventTypes.DARNAVAN_BLADESTORM, RandomHelper.URand(90000, 100000));
-                            break;
-                        case LadyEventTypes.DARNAVAN_CHARGE:
-                            _canCharge = true;
-                            break;
-                        case LadyEventTypes.DARNAVAN_INTIMIDATING_SHOUT:
-                            DoCast(LadySpells.INTIMIDATING_SHOUT);
-                            _events.ScheduleEvent(LadyEventTypes.DARNAVAN_INTIMIDATING_SHOUT, RandomHelper.URand(90000, 120000));
-                            break;
-                        case LadyEventTypes.DARNAVAN_MORTAL_STRIKE:
-                            DoCastVictim(LadySpells.MORTAL_STRIKE);
-                            _events.ScheduleEvent(LadyEventTypes.DARNAVAN_MORTAL_STRIKE, RandomHelper.URand(15000, 30000));
-                            break;
-                        case LadyEventTypes.DARNAVAN_SHATTERING_THROW:
-                            _canShatter = true;
-                            break;
-                        case LadyEventTypes.DARNAVAN_SUNDER_ARMOR:
-                            DoCastVictim(LadySpells.SUNDER_ARMOR);
-                            _events.ScheduleEvent(LadyEventTypes.DARNAVAN_SUNDER_ARMOR, RandomHelper.URand(3000, 7000));
-                            break;
-                    }
-                });
-
-                DoMeleeAttackIfReady();
-            }
-
-            uint QUEST_DEPROGRAMMING { get { return RaidMode<uint>(WeeklyQuestIds.Deprogramming10, WeeklyQuestIds.Deprogramming25, WeeklyQuestIds.Deprogramming10, WeeklyQuestIds.Deprogramming25); } }
-
-            bool _canCharge;
-            bool _canShatter;
+            GetCaster().KillSelf();
+            GetCaster().SetDisplayId(GetCaster().GetEntry() == CreatureIds.CultFanatic ? 38009 : 38010u);
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void Register()
         {
-            return InstanceIcecrownCitadel.GetInstanceAI<npc_darnavanAI>(creature);
-        }
-    }
-
-    [Script]
-    class spell_deathwhisper_mana_barrier : SpellScriptLoader
-    {
-        public spell_deathwhisper_mana_barrier() : base("spell_deathwhisper_mana_barrier") { }
-
-        class spell_deathwhisper_mana_barrier_AuraScript : AuraScript
-        {
-            void HandlePeriodicTick(AuraEffect aurEff)
-            {
-                PreventDefaultAction();
-                Unit caster = GetCaster();
-                if (caster)
-                {
-                    int missingHealth = (int)(caster.GetMaxHealth() - caster.GetHealth());
-                    caster.ModifyHealth(missingHealth);
-                    caster.ModifyPower(PowerType.Mana, -missingHealth);
-                }
-            }
-
-            public override void Register()
-            {
-                OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodicTick, 0, AuraType.PeriodicTriggerSpell));
-            }
-        }
-
-        public override AuraScript GetAuraScript()
-        {
-            return new spell_deathwhisper_mana_barrier_AuraScript();
-        }
-    }
-
-    [Script]
-    class spell_cultist_dark_martyrdom : SpellScriptLoader
-    {
-        public spell_cultist_dark_martyrdom() : base("spell_cultist_dark_martyrdom") { }
-
-        class spell_cultist_dark_martyrdom_SpellScript : SpellScript
-        {
-            void HandleEffect(uint effIndex)
-            {
-                if (GetCaster().IsSummon())
-                {
-                    Unit owner = GetCaster().ToTempSummon().GetSummoner();
-                    if (owner)
-                        owner.GetAI().SetGUID(GetCaster().GetGUID(), (int)LadyConst.GUIDCultist);
-                }
-
-                GetCaster().KillSelf();
-                GetCaster().SetDisplayId(GetCaster().GetEntry() == CreatureIds.CultFanatic ? 38009 : 38010u);
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleEffect, 2, SpellEffectName.ForceDeselect));
-            }
-        }
-
-        public override SpellScript GetSpellScript()
-        {
-            return new spell_cultist_dark_martyrdom_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleEffect, 2, SpellEffectName.ForceDeselect));
         }
     }
 

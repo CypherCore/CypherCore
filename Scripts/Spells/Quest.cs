@@ -278,12 +278,21 @@ namespace Scripts.Spells.Quest
         public const uint QuestIdBurstAtTheSeams = 12690;
     }
 
-    class spell_generic_quest_update_entry_SpellScript : SpellScript
+    // http://www.wowhead.com/quest=55 Morbent Fel
+    // 8913 Sacred Cleansing
+    // http://www.wowhead.com/quest=10255 Testing the Antidote
+    // 34665 Administer Antidote
+    // http://www.wowhead.com/quest=11515 Blood for Blood
+    // 44936 Quest - Fel Siphon Dummy
+    [Script("spell_q55_sacred_cleansing", SpellEffectName.Dummy, 1u, CreatureIds.Morbent, CreatureIds.WeakenedMorbent, true)]
+    [Script("spell_q10255_administer_antidote", SpellEffectName.Dummy, 0u, CreatureIds.Helboar, CreatureIds.Dreadtusk, true)]
+    [Script("spell_q11515_fel_siphon_dummy", SpellEffectName.Dummy, 0u, CreatureIds.FelbloodInitiate, CreatureIds.EmaciatedFelblood, true)]
+    class spell_generic_quest_update_entry : SpellScript
     {
-        public spell_generic_quest_update_entry_SpellScript(SpellEffectName spellEffect, byte effIndex, uint originalEntry, uint newEntry, bool shouldAttack, uint despawnTime = 0)
+        public spell_generic_quest_update_entry(SpellEffectName spellEffect, uint effIndex, uint originalEntry, uint newEntry, bool shouldAttack, uint despawnTime = 0)
         {
             _spellEffect = spellEffect;
-            _effIndex = effIndex;
+            _effIndex = (byte)effIndex;
             _originalEntry = originalEntry;
             _newEntry = newEntry;
             _shouldAttack = shouldAttack;
@@ -320,87 +329,54 @@ namespace Scripts.Spells.Quest
         uint _despawnTime;
     }
 
-    // http://www.wowhead.com/quest=55 Morbent Fel
-    // 8913 Sacred Cleansing
-    [Script]
-    class spell_q55_sacred_cleansing : SpellScriptLoader
-    {
-        public spell_q55_sacred_cleansing() : base("spell_q55_sacred_cleansing") { }
-
-        public override SpellScript GetSpellScript()
-        {
-            return new spell_generic_quest_update_entry_SpellScript(SpellEffectName.Dummy, 1, CreatureIds.Morbent, CreatureIds.WeakenedMorbent, true);
-        }
-    }
-
     // 9712 - Thaumaturgy Channel
     [Script]
-    class spell_q2203_thaumaturgy_channel : SpellScriptLoader
+    class spell_q2203_thaumaturgy_channel : AuraScript
     {
-        public spell_q2203_thaumaturgy_channel() : base("spell_q2203_thaumaturgy_channel") { }
-
-        class spell_q2203_thaumaturgy_channel_AuraScript : AuraScript
+        public override bool Validate(SpellInfo spellInfo)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(SpellIds.ThaumaturgyChannel);
-            }
-
-            void HandleEffectPeriodic(AuraEffect aurEff)
-            {
-                PreventDefaultAction();
-                Unit caster = GetCaster();
-                if (caster)
-                    caster.CastSpell(caster, SpellIds.ThaumaturgyChannel, false);
-            }
-
-            public override void Register()
-            {
-                OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicTriggerSpell));
-            }
+            return ValidateSpellInfo(SpellIds.ThaumaturgyChannel);
         }
 
-        public override AuraScript GetAuraScript()
+        void HandleEffectPeriodic(AuraEffect aurEff)
         {
-            return new spell_q2203_thaumaturgy_channel_AuraScript();
+            PreventDefaultAction();
+            Unit caster = GetCaster();
+            if (caster)
+                caster.CastSpell(caster, SpellIds.ThaumaturgyChannel, false);
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicTriggerSpell));
         }
     }
 
     // http://www.wowhead.com/quest=5206 Marauders of Darrowshire
     // 17271 Test Fetid Skull
     [Script]
-    class spell_q5206_test_fetid_skull : SpellScriptLoader
+    class spell_q5206_test_fetid_skull : SpellScript
     {
-        public spell_q5206_test_fetid_skull() : base("spell_q5206_test_fetid_skull") { }
-
-        class spell_q5206_test_fetid_skull_SpellScript : SpellScript
+        public override bool Load()
         {
-            public override bool Load()
-            {
-                return GetCaster().IsTypeId(TypeId.Player);
-            }
-
-            public override bool Validate(SpellInfo spellEntry)
-            {
-                return ValidateSpellInfo(SpellIds.CreateResonatingSkull, SpellIds.CreateBoneDust);
-            }
-
-            void HandleDummy(uint effIndex)
-            {
-                Unit caster = GetCaster();
-                uint spellId = RandomHelper.randChance(50) ? SpellIds.CreateResonatingSkull : SpellIds.CreateBoneDust;
-                caster.CastSpell(caster, spellId, true, null);
-            }
-
-            public override void Register()
-            {
-                OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-            }
+            return GetCaster().IsTypeId(TypeId.Player);
         }
 
-        public override SpellScript GetSpellScript()
+        public override bool Validate(SpellInfo spellEntry)
         {
-            return new spell_q5206_test_fetid_skull_SpellScript();
+            return ValidateSpellInfo(SpellIds.CreateResonatingSkull, SpellIds.CreateBoneDust);
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            Unit caster = GetCaster();
+            uint spellId = RandomHelper.randChance(50) ? SpellIds.CreateResonatingSkull : SpellIds.CreateBoneDust;
+            caster.CastSpell(caster, spellId, true, null);
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
@@ -408,2028 +384,1438 @@ namespace Scripts.Spells.Quest
     // http://www.wowhead.com/quest=6129 Curing the Sick (H)
     // 19512 Apply Salve
     [Script]
-    class spell_q6124_6129_apply_salve : SpellScriptLoader
+    class spell_q6124_6129_apply_salve : SpellScript
     {
-        public spell_q6124_6129_apply_salve() : base("spell_q6124_6129_apply_salve") { }
-
-        class spell_q6124_6129_apply_salve_SpellScript : SpellScript
+        public override bool Load()
         {
-            public override bool Load()
-            {
-                return GetCaster().IsTypeId(TypeId.Player);
-            }
+            return GetCaster().IsTypeId(TypeId.Player);
+        }
 
-            void HandleDummy(uint effIndex)
+        void HandleDummy(uint effIndex)
+        {
+            Player caster = GetCaster().ToPlayer();
+            if (GetCastItem())
             {
-                Player caster = GetCaster().ToPlayer();
-                if (GetCastItem())
+                Creature creatureTarget = GetHitCreature();
+                if (creatureTarget)
                 {
-                    Creature creatureTarget = GetHitCreature();
-                    if (creatureTarget)
+                    uint newEntry = 0;
+                    switch (caster.GetTeam())
                     {
-                        uint newEntry = 0;
-                        switch (caster.GetTeam())
-                        {
-                            case Team.Horde:
-                                if (creatureTarget.GetEntry() == CreatureIds.SicklyGazelle)
-                                    newEntry = CreatureIds.CuredGazelle;
-                                break;
-                            case Team.Alliance:
-                                if (creatureTarget.GetEntry() == CreatureIds.SicklyDeer)
-                                    newEntry = CreatureIds.CuredDeer;
-                                break;
-                        }
-                        if (newEntry != 0)
-                        {
-                            creatureTarget.UpdateEntry(newEntry);
-                            creatureTarget.DespawnOrUnsummon(Misc.DespawnTime);
-                            caster.KilledMonsterCredit(newEntry);
-                        }
+                        case Team.Horde:
+                            if (creatureTarget.GetEntry() == CreatureIds.SicklyGazelle)
+                                newEntry = CreatureIds.CuredGazelle;
+                            break;
+                        case Team.Alliance:
+                            if (creatureTarget.GetEntry() == CreatureIds.SicklyDeer)
+                                newEntry = CreatureIds.CuredDeer;
+                            break;
+                    }
+                    if (newEntry != 0)
+                    {
+                        creatureTarget.UpdateEntry(newEntry);
+                        creatureTarget.DespawnOrUnsummon(Misc.DespawnTime);
+                        caster.KilledMonsterCredit(newEntry);
                     }
                 }
             }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-            }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q6124_6129_apply_salve_SpellScript();
-        }
-    }
-
-    // http://www.wowhead.com/quest=10255 Testing the Antidote
-    // 34665 Administer Antidote
-    [Script]
-    class spell_q10255_administer_antidote : SpellScriptLoader
-    {
-        public spell_q10255_administer_antidote() : base("spell_q10255_administer_antidote") { }
-
-        public override SpellScript GetSpellScript()
-        {
-            return new spell_generic_quest_update_entry_SpellScript(SpellEffectName.Dummy, 0, CreatureIds.Helboar, CreatureIds.Dreadtusk, true);
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     // 43874 Scourge Mur'gul Camp: Force Shield Arcane Purple x3
     [Script]
-    class spell_q11396_11399_force_shield_arcane_purple_x3 : SpellScriptLoader
+    class spell_q11396_11399_force_shield_arcane_purple_x3 : AuraScript
     {
-        public spell_q11396_11399_force_shield_arcane_purple_x3() : base("spell_q11396_11399_force_shield_arcane_purple_x3") { }
-
-        class spell_q11396_11399_force_shield_arcane_purple_x3_AuraScript : AuraScript
+        void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
-            {
-                Unit target = GetTarget();
-                target.SetFlag(UnitFields.Flags, UnitFlags.ImmuneToPc);
-                target.AddUnitState(UnitState.Root);
-            }
-
-            void HandleEffectRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-            {
-                GetTarget().RemoveFlag(UnitFields.Flags, UnitFlags.ImmuneToPc);
-            }
-
-            public override void Register()
-            {
-                OnEffectApply.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
-                OnEffectRemove.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
-            }
+            Unit target = GetTarget();
+            target.SetFlag(UnitFields.Flags, UnitFlags.ImmuneToPc);
+            target.AddUnitState(UnitState.Root);
         }
 
-        public override AuraScript GetAuraScript()
+        void HandleEffectRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            return new spell_q11396_11399_force_shield_arcane_purple_x3_AuraScript();
+            GetTarget().RemoveFlag(UnitFields.Flags, UnitFlags.ImmuneToPc);
+        }
+
+        public override void Register()
+        {
+            OnEffectApply.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            OnEffectRemove.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
 
     // 50133 Scourging Crystal Controller
     [Script]
-    class spell_q11396_11399_scourging_crystal_controller : SpellScriptLoader
+    class spell_q11396_11399_scourging_crystal_controller : SpellScript
     {
-        public spell_q11396_11399_scourging_crystal_controller() : base("spell_q11396_11399_scourging_crystal_controller") { }
-
-        class spell_q11396_11399_scourging_crystal_controller_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spellEntry)
         {
-            public override bool Validate(SpellInfo spellEntry)
-            {
-                return ValidateSpellInfo(SpellIds.ForceShieldArcanePurpleX3, SpellIds.ScourgingCrystalController);
-            }
-
-            void HandleDummy(uint effIndex)
-            {
-                Unit target = GetExplTargetUnit();
-                if (target)
-                    if (target.IsTypeId(TypeId.Unit) && target.HasAura(SpellIds.ForceShieldArcanePurpleX3))
-                        // Make sure nobody else is channeling the same target
-                        if (!target.HasAura(SpellIds.ScourgingCrystalController))
-                            GetCaster().CastSpell(target, SpellIds.ScourgingCrystalController, true, GetCastItem());
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-            }
+            return ValidateSpellInfo(SpellIds.ForceShieldArcanePurpleX3, SpellIds.ScourgingCrystalController);
         }
 
-        public override SpellScript GetSpellScript()
+        void HandleDummy(uint effIndex)
         {
-            return new spell_q11396_11399_scourging_crystal_controller_SpellScript();
+            Unit target = GetExplTargetUnit();
+            if (target)
+                if (target.IsTypeId(TypeId.Unit) && target.HasAura(SpellIds.ForceShieldArcanePurpleX3))
+                    // Make sure nobody else is channeling the same target
+                    if (!target.HasAura(SpellIds.ScourgingCrystalController))
+                        GetCaster().CastSpell(target, SpellIds.ScourgingCrystalController, true, GetCastItem());
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     // 43882 Scourging Crystal Controller Dummy
     [Script]
-    class spell_q11396_11399_scourging_crystal_controller_dummy : SpellScriptLoader
+    class spell_q11396_11399_scourging_crystal_controller_dummy : SpellScript
     {
-        public spell_q11396_11399_scourging_crystal_controller_dummy() : base("spell_q11396_11399_scourging_crystal_controller_dummy") { }
-
-        class spell_q11396_11399_scourging_crystal_controller_dummy_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spellEntry)
         {
-            public override bool Validate(SpellInfo spellEntry)
-            {
-                return ValidateSpellInfo(SpellIds.ForceShieldArcanePurpleX3);
-            }
-
-            void HandleDummy(uint effIndex)
-            {
-                Unit target = GetHitUnit();
-                if (target)
-                    if (target.IsTypeId(TypeId.Unit))
-                        target.RemoveAurasDueToSpell(SpellIds.ForceShieldArcanePurpleX3);
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-            }
+            return ValidateSpellInfo(SpellIds.ForceShieldArcanePurpleX3);
         }
 
-        public override SpellScript GetSpellScript()
+        void HandleDummy(uint effIndex)
         {
-            return new spell_q11396_11399_scourging_crystal_controller_dummy_SpellScript();
+            Unit target = GetHitUnit();
+            if (target)
+                if (target.IsTypeId(TypeId.Unit))
+                    target.RemoveAurasDueToSpell(SpellIds.ForceShieldArcanePurpleX3);
         }
-    }
 
-    // http://www.wowhead.com/quest=11515 Blood for Blood
-    // 44936 Quest - Fel Siphon Dummy
-    [Script]
-    class spell_q11515_fel_siphon_dummy : SpellScriptLoader
-    {
-        public spell_q11515_fel_siphon_dummy() : base("spell_q11515_fel_siphon_dummy") { }
-
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_generic_quest_update_entry_SpellScript(SpellEffectName.Dummy, 0, CreatureIds.FelbloodInitiate, CreatureIds.EmaciatedFelblood, true);
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     // http://www.wowhead.com/quest=11587 Prison Break
     // 45449 Arcane Prisoner Rescue
     [Script]
-    class spell_q11587_arcane_prisoner_rescue : SpellScriptLoader
+    class spell_q11587_arcane_prisoner_rescue : SpellScript
     {
-        public spell_q11587_arcane_prisoner_rescue() : base("spell_q11587_arcane_prisoner_rescue") { }
-
-        class spell_q11587_arcane_prisoner_rescue_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spellEntry)
         {
-            public override bool Validate(SpellInfo spellEntry)
-            {
-                return ValidateSpellInfo(SpellIds.SummonArcanePrisonerMale, SpellIds.SummonArcanePrisonerFemale, SpellIds.ArcanePrisonerKillCredit);
-            }
+            return ValidateSpellInfo(SpellIds.SummonArcanePrisonerMale, SpellIds.SummonArcanePrisonerFemale, SpellIds.ArcanePrisonerKillCredit);
+        }
 
-            void HandleDummy(uint effIndex)
-            {
-                Unit caster = GetCaster();
+        void HandleDummy(uint effIndex)
+        {
+            Unit caster = GetCaster();
 
-                Unit unitTarget = GetHitUnit();
-                if (unitTarget)
-                {
-                    uint spellId = SpellIds.SummonArcanePrisonerMale;
-                    if (Convert.ToBoolean(RandomHelper.Rand32() % 2))
-                        spellId = SpellIds.SummonArcanePrisonerFemale;
-                    caster.CastSpell(caster, spellId, true);
-                    unitTarget.CastSpell(caster, SpellIds.ArcanePrisonerKillCredit, true);
-                }
-            }
-
-            public override void Register()
+            Unit unitTarget = GetHitUnit();
+            if (unitTarget)
             {
-                OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+                uint spellId = SpellIds.SummonArcanePrisonerMale;
+                if (Convert.ToBoolean(RandomHelper.Rand32() % 2))
+                    spellId = SpellIds.SummonArcanePrisonerFemale;
+                caster.CastSpell(caster, spellId, true);
+                unitTarget.CastSpell(caster, SpellIds.ArcanePrisonerKillCredit, true);
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q11587_arcane_prisoner_rescue_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     // http://www.wowhead.com/quest=11730 Master and Servant
     // 46023 The Ultrasonic Screwdriver
     [Script]
-    class spell_q11730_ultrasonic_screwdriver : SpellScriptLoader
+    class spell_q11730_ultrasonic_screwdriver : SpellScript
     {
-        public spell_q11730_ultrasonic_screwdriver() : base("spell_q11730_ultrasonic_screwdriver") { }
-
-        class spell_q11730_ultrasonic_screwdriver_SpellScript : SpellScript
+        public override bool Load()
         {
-            public override bool Load()
-            {
-                return GetCaster().IsTypeId(TypeId.Player) && GetCastItem();
-            }
+            return GetCaster().IsTypeId(TypeId.Player) && GetCastItem();
+        }
 
-            public override bool Validate(SpellInfo spellEntry)
-            {
-                return ValidateSpellInfo(SpellIds.SummonScavengebot004a8, SpellIds.SummonSentrybot57k, SpellIds.SummonDefendotank66d,
-                    SpellIds.SummonScavengebot005b6, SpellIds.Summon55dCollectatron, SpellIds.RobotKillCredit);
-            }
+        public override bool Validate(SpellInfo spellEntry)
+        {
+            return ValidateSpellInfo(SpellIds.SummonScavengebot004a8, SpellIds.SummonSentrybot57k, SpellIds.SummonDefendotank66d,
+                SpellIds.SummonScavengebot005b6, SpellIds.Summon55dCollectatron, SpellIds.RobotKillCredit);
+        }
 
-            void HandleDummy(uint effIndex)
-            {
-                Item castItem = GetCastItem();
-                Unit caster = GetCaster();
+        void HandleDummy(uint effIndex)
+        {
+            Item castItem = GetCastItem();
+            Unit caster = GetCaster();
 
-                Creature target = GetHitCreature();
-                if (target)
+            Creature target = GetHitCreature();
+            if (target)
+            {
+                uint spellId = 0;
+                switch (target.GetEntry())
                 {
-                    uint spellId = 0;
-                    switch (target.GetEntry())
-                    {
-                        case CreatureIds.Scavengebot004a8:
-                            spellId = SpellIds.SummonScavengebot004a8;
-                            break;
-                        case CreatureIds.Sentrybot57k:
-                            spellId = SpellIds.SummonSentrybot57k;
-                            break;
-                        case CreatureIds.Defendotank66d:
-                            spellId = SpellIds.SummonDefendotank66d;
-                            break;
-                        case CreatureIds.Scavengebot005b6:
-                            spellId = SpellIds.SummonScavengebot005b6;
-                            break;
-                        case CreatureIds.Npc55dCollectatron:
-                            spellId = SpellIds.Summon55dCollectatron;
-                            break;
-                        default:
-                            return;
-                    }
-                    caster.CastSpell(caster, spellId, true, castItem);
-                    caster.CastSpell(caster, SpellIds.RobotKillCredit, true);
-                    target.DespawnOrUnsummon();
+                    case CreatureIds.Scavengebot004a8:
+                        spellId = SpellIds.SummonScavengebot004a8;
+                        break;
+                    case CreatureIds.Sentrybot57k:
+                        spellId = SpellIds.SummonSentrybot57k;
+                        break;
+                    case CreatureIds.Defendotank66d:
+                        spellId = SpellIds.SummonDefendotank66d;
+                        break;
+                    case CreatureIds.Scavengebot005b6:
+                        spellId = SpellIds.SummonScavengebot005b6;
+                        break;
+                    case CreatureIds.Npc55dCollectatron:
+                        spellId = SpellIds.Summon55dCollectatron;
+                        break;
+                    default:
+                        return;
                 }
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+                caster.CastSpell(caster, spellId, true, castItem);
+                caster.CastSpell(caster, SpellIds.RobotKillCredit, true);
+                target.DespawnOrUnsummon();
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q11730_ultrasonic_screwdriver_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     // http://www.wowhead.com/quest=12459 That Which Creates Can Also Destroy
     // 49587 Seeds of Nature's Wrath
     [Script]
-    class spell_q12459_seeds_of_natures_wrath : SpellScriptLoader
+    class spell_q12459_seeds_of_natures_wrath : SpellScript
     {
-        public spell_q12459_seeds_of_natures_wrath() : base("spell_q12459_seeds_of_natures_wrath") { }
-
-        class spell_q12459_seeds_of_natures_wrath_SpellScript : SpellScript
+        void HandleDummy(uint effIndex)
         {
-            void HandleDummy(uint effIndex)
+            Creature creatureTarget = GetHitCreature();
+            if (creatureTarget)
             {
-                Creature creatureTarget = GetHitCreature();
-                if (creatureTarget)
+                uint uiNewEntry = 0;
+                switch (creatureTarget.GetEntry())
                 {
-                    uint uiNewEntry = 0;
-                    switch (creatureTarget.GetEntry())
-                    {
-                        case CreatureIds.ReanimatedFrostwyrm:
-                            uiNewEntry = CreatureIds.WeakReanimatedFrostwyrm;
-                            break;
-                        case CreatureIds.Turgid:
-                            uiNewEntry = CreatureIds.WeakTurgid;
-                            break;
-                        case CreatureIds.Deathgaze:
-                            uiNewEntry = CreatureIds.WeakDeathgaze;
-                            break;
-                    }
-                    if (uiNewEntry != 0)
-                        creatureTarget.UpdateEntry(uiNewEntry);
+                    case CreatureIds.ReanimatedFrostwyrm:
+                        uiNewEntry = CreatureIds.WeakReanimatedFrostwyrm;
+                        break;
+                    case CreatureIds.Turgid:
+                        uiNewEntry = CreatureIds.WeakTurgid;
+                        break;
+                    case CreatureIds.Deathgaze:
+                        uiNewEntry = CreatureIds.WeakDeathgaze;
+                        break;
                 }
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+                if (uiNewEntry != 0)
+                    creatureTarget.UpdateEntry(uiNewEntry);
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q12459_seeds_of_natures_wrath_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     // http://www.wowhead.com/quest=12634 Some Make Lemonade, Some Make Liquor
     // 51840 Despawn Fruit Tosser
     [Script]
-    class spell_q12634_despawn_fruit_tosser : SpellScriptLoader
+    class spell_q12634_despawn_fruit_tosser : SpellScript
     {
-        public spell_q12634_despawn_fruit_tosser() : base("spell_q12634_despawn_fruit_tosser") { }
-
-        class spell_q12634_despawn_fruit_tosser_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spellEntry)
         {
-            public override bool Validate(SpellInfo spellEntry)
-            {
-                return ValidateSpellInfo(SpellIds.BananasFallToGround, SpellIds.OrangeFallsToGround, SpellIds.PapayaFallsToGround, SpellIds.SummonAdventurousDwarf);
-            }
-
-            void HandleDummy(uint effIndex)
-            {
-                uint spellId = SpellIds.BananasFallToGround;
-                switch (RandomHelper.URand(0, 3))
-                {
-                    case 1:
-                        spellId = SpellIds.OrangeFallsToGround;
-                        break;
-                    case 2:
-                        spellId = SpellIds.PapayaFallsToGround;
-                        break;
-                }
-                // sometimes, if you're lucky, you get a dwarf
-                if (RandomHelper.randChance(5))
-                    spellId = SpellIds.SummonAdventurousDwarf;
-                GetCaster().CastSpell(GetCaster(), spellId, true, null);
-            }
-
-            public override void Register()
-            {
-                OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-            }
+            return ValidateSpellInfo(SpellIds.BananasFallToGround, SpellIds.OrangeFallsToGround, SpellIds.PapayaFallsToGround, SpellIds.SummonAdventurousDwarf);
         }
 
-        public override SpellScript GetSpellScript()
+        void HandleDummy(uint effIndex)
         {
-            return new spell_q12634_despawn_fruit_tosser_SpellScript();
+            uint spellId = SpellIds.BananasFallToGround;
+            switch (RandomHelper.URand(0, 3))
+            {
+                case 1:
+                    spellId = SpellIds.OrangeFallsToGround;
+                    break;
+                case 2:
+                    spellId = SpellIds.PapayaFallsToGround;
+                    break;
+            }
+            // sometimes, if you're lucky, you get a dwarf
+            if (RandomHelper.randChance(5))
+                spellId = SpellIds.SummonAdventurousDwarf;
+            GetCaster().CastSpell(GetCaster(), spellId, true, null);
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     // http://www.wowhead.com/quest=12683 Burning to Help
     // 52308 Take Sputum Sample
     [Script]
-    class spell_q12683_take_sputum_sample : SpellScriptLoader
+    class spell_q12683_take_sputum_sample : SpellScript
     {
-        public spell_q12683_take_sputum_sample() : base("spell_q12683_take_sputum_sample") { }
-
-        class spell_q12683_take_sputum_sample_SpellScript : SpellScript
+        void HandleDummy(uint effIndex)
         {
-            void HandleDummy(uint effIndex)
-            {
-                uint reqAuraId = (uint)GetSpellInfo().GetEffect(1).CalcValue();
+            uint reqAuraId = (uint)GetSpellInfo().GetEffect(1).CalcValue();
 
-                Unit caster = GetCaster();
-                if (caster.HasAuraEffect(reqAuraId, 0))
-                {
-                    uint spellId = (uint)GetSpellInfo().GetEffect(0).CalcValue();
-                    caster.CastSpell(caster, spellId, true, null);
-                }
-            }
-
-            public override void Register()
+            Unit caster = GetCaster();
+            if (caster.HasAuraEffect(reqAuraId, 0))
             {
-                OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+                uint spellId = (uint)GetSpellInfo().GetEffect(0).CalcValue();
+                caster.CastSpell(caster, spellId, true, null);
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q12683_take_sputum_sample_SpellScript();
+            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     // http://www.wowhead.com/quest=12851 Going Bearback
     // 54798 FLAMING Arrow Triggered Effect
     [Script]
-    class spell_q12851_going_bearback : SpellScriptLoader
+    class spell_q12851_going_bearback : AuraScript
     {
-        public spell_q12851_going_bearback() : base("spell_q12851_going_bearback") { }
-
-        class spell_q12851_going_bearback_AuraScript : AuraScript
+        void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+            Unit caster = GetCaster();
+            if (caster)
             {
-                Unit caster = GetCaster();
-                if (caster)
+                Unit target = GetTarget();
+                // Already in fire
+                if (target.HasAura(SpellIds.Ablaze))
+                    return;
+                Player player = caster.GetCharmerOrOwnerPlayerOrPlayerItself();
+                if (player)
                 {
-                    Unit target = GetTarget();
-                    // Already in fire
-                    if (target.HasAura(SpellIds.Ablaze))
-                        return;
-                    Player player = caster.GetCharmerOrOwnerPlayerOrPlayerItself();
-                    if (player)
+                    switch (target.GetEntry())
                     {
-                        switch (target.GetEntry())
-                        {
-                            case CreatureIds.Frostworg:
-                                target.CastSpell(player, SpellIds.FrostworgCredit, true);
-                                target.CastSpell(target, SpellIds.Immolation, true);
-                                target.CastSpell(target, SpellIds.Ablaze, true);
-                                break;
-                            case CreatureIds.Frostgiant:
-                                target.CastSpell(player, SpellIds.FrostgiantCredit, true);
-                                target.CastSpell(target, SpellIds.Immolation, true);
-                                target.CastSpell(target, SpellIds.Ablaze, true);
-                                break;
-                        }
+                        case CreatureIds.Frostworg:
+                            target.CastSpell(player, SpellIds.FrostworgCredit, true);
+                            target.CastSpell(target, SpellIds.Immolation, true);
+                            target.CastSpell(target, SpellIds.Ablaze, true);
+                            break;
+                        case CreatureIds.Frostgiant:
+                            target.CastSpell(player, SpellIds.FrostgiantCredit, true);
+                            target.CastSpell(target, SpellIds.Immolation, true);
+                            target.CastSpell(target, SpellIds.Ablaze, true);
+                            break;
                     }
                 }
             }
-
-            public override void Register()
-            {
-                AfterEffectApply.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.RealOrReapplyMask));
-            }
         }
 
-        public override AuraScript GetAuraScript()
+        public override void Register()
         {
-            return new spell_q12851_going_bearback_AuraScript();
+            AfterEffectApply.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.RealOrReapplyMask));
         }
     }
 
     // http://www.wowhead.com/quest=12937 Relief for the Fallen
     // 55804 Healing Finished
     [Script]
-    class spell_q12937_relief_for_the_fallen : SpellScriptLoader
+    class spell_q12937_relief_for_the_fallen : SpellScript
     {
-        public spell_q12937_relief_for_the_fallen() : base("spell_q12937_relief_for_the_fallen") { }
-
-        class spell_q12937_relief_for_the_fallen_SpellScript : SpellScript
+        public override bool Load()
         {
-            public override bool Load()
-            {
-                return GetCaster().IsTypeId(TypeId.Player);
-            }
+            return GetCaster().IsTypeId(TypeId.Player);
+        }
 
-            public override bool Validate(SpellInfo spellEntry)
-            {
-                return ValidateSpellInfo(SpellIds.TriggerAidOfTheEarthen);
-            }
+        public override bool Validate(SpellInfo spellEntry)
+        {
+            return ValidateSpellInfo(SpellIds.TriggerAidOfTheEarthen);
+        }
 
-            void HandleDummy(uint effIndex)
-            {
-                Player caster = GetCaster().ToPlayer();
+        void HandleDummy(uint effIndex)
+        {
+            Player caster = GetCaster().ToPlayer();
 
-                Creature target = GetHitCreature();
-                if (target)
-                {
-                    caster.CastSpell(caster, SpellIds.TriggerAidOfTheEarthen, true, null);
-                    caster.KilledMonsterCredit(CreatureIds.FallenEarthenDefender);
-                    target.DespawnOrUnsummon();
-                }
-            }
-
-            public override void Register()
+            Creature target = GetHitCreature();
+            if (target)
             {
-                OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+                caster.CastSpell(caster, SpellIds.TriggerAidOfTheEarthen, true, null);
+                caster.KilledMonsterCredit(CreatureIds.FallenEarthenDefender);
+                target.DespawnOrUnsummon();
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q12937_relief_for_the_fallen_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     [Script]
-    class spell_q10041_q10040_who_are_they : SpellScriptLoader
+    class spell_q10041_q10040_who_are_they : SpellScript
     {
-        public spell_q10041_q10040_who_are_they() : base("spell_q10041_q10040_who_are_they") { }
-
-        class spell_q10041_q10040_who_are_they_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spellEntry)
         {
-            public override bool Validate(SpellInfo spellEntry)
-            {
-                return ValidateSpellInfo(SpellIds.MaleDisguise, SpellIds.FemaleDisguise, SpellIds.GenericDisguise);
-            }
+            return ValidateSpellInfo(SpellIds.MaleDisguise, SpellIds.FemaleDisguise, SpellIds.GenericDisguise);
+        }
 
-            void HandleScript(uint effIndex)
+        void HandleScript(uint effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+            Player target = GetHitPlayer();
+            if (target)
             {
-                PreventHitDefaultEffect(effIndex);
-                Player target = GetHitPlayer();
-                if (target)
-                {
-                    target.CastSpell(target, target.GetGender() == Gender.Male ? SpellIds.MaleDisguise : SpellIds.FemaleDisguise, true);
-                    target.CastSpell(target, SpellIds.GenericDisguise, true);
-                }
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+                target.CastSpell(target, target.GetGender() == Gender.Male ? SpellIds.MaleDisguise : SpellIds.FemaleDisguise, true);
+                target.CastSpell(target, SpellIds.GenericDisguise, true);
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q10041_q10040_who_are_they_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
     // 8593 Symbol of life dummy
     [Script]
-    class spell_symbol_of_life_dummy : SpellScriptLoader
+    class spell_symbol_of_life_dummy : SpellScript
     {
-        public spell_symbol_of_life_dummy() : base("spell_symbol_of_life_dummy") { }
-
-        class spell_symbol_of_life_dummy_SpellScript : SpellScript
+        void HandleDummy(uint effIndex)
         {
-            void HandleDummy(uint effIndex)
+            Creature target = GetHitCreature();
+            if (target)
             {
-                Creature target = GetHitCreature();
-                if (target)
+                if (target.HasAura(SpellIds.PermanentFeignDeath))
                 {
-                    if (target.HasAura(SpellIds.PermanentFeignDeath))
-                    {
-                        target.RemoveAurasDueToSpell(SpellIds.PermanentFeignDeath);
-                        target.SetUInt32Value(ObjectFields.DynamicFlags, 0);
-                        target.SetUInt32Value(UnitFields.Flags2, 0);
-                        target.SetHealth(target.GetMaxHealth() / 2);
-                        target.SetPower(PowerType.Mana, (int)(target.GetMaxPower(PowerType.Mana) * 0.75f));
-                    }
+                    target.RemoveAurasDueToSpell(SpellIds.PermanentFeignDeath);
+                    target.SetUInt32Value(ObjectFields.DynamicFlags, 0);
+                    target.SetUInt32Value(UnitFields.Flags2, 0);
+                    target.SetHealth(target.GetMaxHealth() / 2);
+                    target.SetPower(PowerType.Mana, (int)(target.GetMaxPower(PowerType.Mana) * 0.75f));
                 }
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_symbol_of_life_dummy_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     // http://www.wowhead.com/quest=12659 Scalps!
     // 52090 Ahunae's Knife
     [Script]
-    class spell_q12659_ahunaes_knife : SpellScriptLoader
+    class spell_q12659_ahunaes_knife : SpellScript
     {
-        public spell_q12659_ahunaes_knife() : base("spell_q12659_ahunaes_knife") { }
-
-        class spell_q12659_ahunaes_knife_SpellScript : SpellScript
+        public override bool Load()
         {
-            public override bool Load()
-            {
-                return GetCaster().IsTypeId(TypeId.Player);
-            }
+            return GetCaster().IsTypeId(TypeId.Player);
+        }
 
-            void HandleDummy(uint effIndex)
-            {
-                Player caster = GetCaster().ToPlayer();
+        void HandleDummy(uint effIndex)
+        {
+            Player caster = GetCaster().ToPlayer();
 
-                Creature target = GetHitCreature();
-                if (target)
-                {
-                    target.DespawnOrUnsummon();
-                    caster.KilledMonsterCredit(CreatureIds.ScalpsKcBunny);
-                }
-            }
-
-            public override void Register()
+            Creature target = GetHitCreature();
+            if (target)
             {
-                OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+                target.DespawnOrUnsummon();
+                caster.KilledMonsterCredit(CreatureIds.ScalpsKcBunny);
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q12659_ahunaes_knife_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     [Script]
-    class spell_q9874_liquid_fire : SpellScriptLoader
+    class spell_q9874_liquid_fire : SpellScript
     {
-        public spell_q9874_liquid_fire() : base("spell_q9874_liquid_fire")
+        public override bool Load()
         {
+            return GetCaster().IsTypeId(TypeId.Player);
         }
 
-        class spell_q9874_liquid_fire_SpellScript : SpellScript
+        void HandleDummy(uint effIndex)
         {
-            public override bool Load()
-            {
-                return GetCaster().IsTypeId(TypeId.Player);
-            }
+            Player caster = GetCaster().ToPlayer();
 
-            void HandleDummy(uint effIndex)
+            Creature target = GetHitCreature();
+            if (target)
             {
-                Player caster = GetCaster().ToPlayer();
-
-                Creature target = GetHitCreature();
-                if (target)
+                if (target && !target.HasAura(SpellIds.Flames))
                 {
-                    if (target && !target.HasAura(SpellIds.Flames))
-                    {
-                        caster.KilledMonsterCredit(CreatureIds.VillagerKillCredit);
-                        target.CastSpell(target, SpellIds.Flames, true);
-                        target.DespawnOrUnsummon(60000);
-                    }
+                    caster.KilledMonsterCredit(CreatureIds.VillagerKillCredit);
+                    target.CastSpell(target, SpellIds.Flames, true);
+                    target.DespawnOrUnsummon(60000);
                 }
             }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-            }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q9874_liquid_fire_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     [Script]
-    class spell_q12805_lifeblood_dummy : SpellScriptLoader
+    class spell_q12805_lifeblood_dummy : SpellScript
     {
-        public spell_q12805_lifeblood_dummy() : base("spell_q12805_lifeblood_dummy")
+        public override bool Load()
         {
+            return GetCaster().IsTypeId(TypeId.Player);
         }
 
-        class spell_q12805_lifeblood_dummy_SpellScript : SpellScript
+        void HandleScript(uint effIndex)
         {
-            public override bool Load()
-            {
-                return GetCaster().IsTypeId(TypeId.Player);
-            }
+            Player caster = GetCaster().ToPlayer();
 
-            void HandleScript(uint effIndex)
+            Creature target = GetHitCreature();
+            if (target)
             {
-                Player caster = GetCaster().ToPlayer();
-
-                Creature target = GetHitCreature();
-                if (target)
-                {
-                    caster.KilledMonsterCredit(CreatureIds.ShardKillCredit);
-                    target.CastSpell(target, (uint)GetEffectValue(), true);
-                    target.DespawnOrUnsummon(2000);
-                }
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+                caster.KilledMonsterCredit(CreatureIds.ShardKillCredit);
+                target.CastSpell(target, (uint)GetEffectValue(), true);
+                target.DespawnOrUnsummon(2000);
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q12805_lifeblood_dummy_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
     /*
-     http://www.wowhead.com/quest=13283 King of the Mountain
-     http://www.wowhead.com/quest=13280 King of the Mountain
-     59643 Plant Horde Battle Standard
-     4338 Plant Alliance Battle Standard
-     */
+ http://www.wowhead.com/quest=13283 King of the Mountain
+ http://www.wowhead.com/quest=13280 King of the Mountain
+ 59643 Plant Horde Battle Standard
+ 4338 Plant Alliance Battle Standard
+ */
     [Script]
-    class spell_q13280_13283_plant_battle_standard : SpellScriptLoader
+    class spell_q13280_13283_plant_battle_standard : SpellScript
     {
-        public spell_q13280_13283_plant_battle_standard() : base("spell_q13280_13283_plant_battle_standard") { }
-
-        class spell_q13280_13283_plant_battle_standard_SpellScript : SpellScript
+        void HandleDummy(uint effIndex)
         {
-            void HandleDummy(uint effIndex)
+            Unit caster = GetCaster();
+            if (caster.IsVehicle())
             {
-                Unit caster = GetCaster();
-                if (caster.IsVehicle())
-                {
-                    Unit player = caster.GetVehicleKit().GetPassenger(0);
-                    if (player)
-                        player.ToPlayer().KilledMonsterCredit(CreatureIds.KingOfTheMountaintKc);
-                }
-            }
-
-            public override void Register()
-            {
-                OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+                Unit player = caster.GetVehicleKit().GetPassenger(0);
+                if (player)
+                    player.ToPlayer().KilledMonsterCredit(CreatureIds.KingOfTheMountaintKc);
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q13280_13283_plant_battle_standard_SpellScript();
+            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     [Script]
-    class spell_q14112_14145_chum_the_water : SpellScriptLoader
+    class spell_q14112_14145_chum_the_water : SpellScript
     {
-        public spell_q14112_14145_chum_the_water() : base("spell_q14112_14145_chum_the_water") { }
-
-        class spell_q14112_14145_chum_the_water_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spellEntry)
         {
-            public override bool Validate(SpellInfo spellEntry)
-            {
-                return ValidateSpellInfo(SpellIds.SummonAngryKvaldir, SpellIds.SummonNorthSeaMako, SpellIds.SummonNorthSeaThresher, SpellIds.SummonNorthSeaBlueShark);
-            }
-
-            void HandleScriptEffect(uint effIndex)
-            {
-                Unit caster = GetCaster();
-                caster.CastSpell(caster, RandomHelper.RAND(SpellIds.SummonAngryKvaldir, SpellIds.SummonNorthSeaMako, SpellIds.SummonNorthSeaThresher, SpellIds.SummonNorthSeaBlueShark));
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
-            }
+            return ValidateSpellInfo(SpellIds.SummonAngryKvaldir, SpellIds.SummonNorthSeaMako, SpellIds.SummonNorthSeaThresher, SpellIds.SummonNorthSeaBlueShark);
         }
 
-        public override SpellScript GetSpellScript()
+        void HandleScriptEffect(uint effIndex)
         {
-            return new spell_q14112_14145_chum_the_water_SpellScript();
+            Unit caster = GetCaster();
+            caster.CastSpell(caster, RandomHelper.RAND(SpellIds.SummonAngryKvaldir, SpellIds.SummonNorthSeaMako, SpellIds.SummonNorthSeaThresher, SpellIds.SummonNorthSeaBlueShark));
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
         }
     }
 
     // http://old01.wowhead.com/quest=9452 - Red Snapper - Very Tasty!
     [Script]
-    class spell_q9452_cast_net : SpellScriptLoader
+    class spell_q9452_cast_net : SpellScript
     {
-        public spell_q9452_cast_net() : base("spell_q9452_cast_net") { }
-
-        class spell_q9452_cast_net_SpellScript : SpellScript
+        public override bool Load()
         {
-            public override bool Load()
-            {
-                return GetCaster().IsTypeId(TypeId.Player);
-            }
-
-            void HandleDummy(uint effIndex)
-            {
-                Player caster = GetCaster().ToPlayer();
-                if (RandomHelper.randChance(66))
-                    caster.AddItem(Misc.ItemIdRedSnapper, 1);
-                else
-                    caster.CastSpell(caster, SpellIds.FishedUpMurloc, true);
-            }
-
-            void HandleActiveObject(uint effIndex)
-            {
-                PreventHitDefaultEffect(effIndex);
-                GetHitGObj().SetRespawnTime(RandomHelper.randChance(50) ? 2 * Time.Minute : 3 * Time.Minute);
-                GetHitGObj().Use(GetCaster());
-                GetHitGObj().SetLootState(LootState.JustDeactivated);
-            }
-
-            public override void Register()
-            {
-                OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-                OnEffectHitTarget.Add(new EffectHandler(HandleActiveObject, 1, SpellEffectName.ActivateObject));
-            }
+            return GetCaster().IsTypeId(TypeId.Player);
         }
 
-        public override SpellScript GetSpellScript()
+        void HandleDummy(uint effIndex)
         {
-            return new spell_q9452_cast_net_SpellScript();
+            Player caster = GetCaster().ToPlayer();
+            if (RandomHelper.randChance(66))
+                caster.AddItem(Misc.ItemIdRedSnapper, 1);
+            else
+                caster.CastSpell(caster, SpellIds.FishedUpMurloc, true);
+        }
+
+        void HandleActiveObject(uint effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+            GetHitGObj().SetRespawnTime(RandomHelper.randChance(50) ? 2 * Time.Minute : 3 * Time.Minute);
+            GetHitGObj().Use(GetCaster());
+            GetHitGObj().SetLootState(LootState.JustDeactivated);
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new EffectHandler(HandleActiveObject, 1, SpellEffectName.ActivateObject));
         }
     }
 
     [Script]
-    class spell_q14076_14092_pound_drum : SpellScriptLoader
+    class spell_q14076_14092_pound_drum : SpellScript
     {
-        public spell_q14076_14092_pound_drum() : base("spell_q14076_14092_pound_drum") { }
-
-        class spell_q14076_14092_pound_drum_SpellScript : SpellScript
+        void HandleSummon()
         {
-            void HandleSummon()
-            {
-                Unit caster = GetCaster();
+            Unit caster = GetCaster();
 
-                if (RandomHelper.randChance(80))
-                    caster.CastSpell(caster, SpellIds.SummonDeepJormungar, true);
-                else
-                    caster.CastSpell(caster, SpellIds.StormforgedMoleMachine, true);
-            }
-
-            void HandleActiveObject(uint effIndex)
-            {
-                GetHitGObj().SetLootState(LootState.JustDeactivated);
-            }
-
-            public override void Register()
-            {
-                OnCast.Add(new CastHandler(HandleSummon));
-                OnEffectHitTarget.Add(new EffectHandler(HandleActiveObject, 0, SpellEffectName.ActivateObject));
-            }
+            if (RandomHelper.randChance(80))
+                caster.CastSpell(caster, SpellIds.SummonDeepJormungar, true);
+            else
+                caster.CastSpell(caster, SpellIds.StormforgedMoleMachine, true);
         }
 
-        public override SpellScript GetSpellScript()
+        void HandleActiveObject(uint effIndex)
         {
-            return new spell_q14076_14092_pound_drum_SpellScript();
+            GetHitGObj().SetLootState(LootState.JustDeactivated);
+        }
+
+        public override void Register()
+        {
+            OnCast.Add(new CastHandler(HandleSummon));
+            OnEffectHitTarget.Add(new EffectHandler(HandleActiveObject, 0, SpellEffectName.ActivateObject));
         }
     }
 
     [Script]
-    class spell_q12279_cast_net : SpellScriptLoader
+    class spell_q12279_cast_net : SpellScript
     {
-        public spell_q12279_cast_net() : base("spell_q12279_cast_net") { }
-
-        class spell_q12279_cast_net_SpellScript : SpellScript
+        void HandleActiveObject(uint effIndex)
         {
-            void HandleActiveObject(uint effIndex)
-            {
-                GetHitGObj().SetLootState(LootState.JustDeactivated);
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleActiveObject, 1, SpellEffectName.ActivateObject));
-            }
+            GetHitGObj().SetLootState(LootState.JustDeactivated);
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q12279_cast_net_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleActiveObject, 1, SpellEffectName.ActivateObject));
         }
     }
 
     [Script]
-    class spell_q12987_read_pronouncement : SpellScriptLoader
+    class spell_q12987_read_pronouncement : AuraScript
     {
-        public spell_q12987_read_pronouncement() : base("spell_q12987_read_pronouncement") { }
-
-        class spell_q12987_read_pronouncement_AuraScript : AuraScript
+        void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+            // player must cast kill credit and do emote text, according to sniff
+            Player target = GetTarget().ToPlayer();
+            if (target)
             {
-                // player must cast kill credit and do emote text, according to sniff
-                Player target = GetTarget().ToPlayer();
-                if (target)
+                Creature trigger = target.FindNearestCreature(CreatureIds.IceSpikeBunny, 25.0f);
+                if (trigger)
                 {
-                    Creature trigger = target.FindNearestCreature(CreatureIds.IceSpikeBunny, 25.0f);
-                    if (trigger)
-                    {
-                        Global.CreatureTextMgr.SendChat(trigger, Misc.Say1, target, ChatMsg.Addon, Language.Addon, Game.CreatureTextRange.Normal, 0, Team.Other, false, target);
-                        target.KilledMonsterCredit(CreatureIds.Killcredit);
-                        Global.CreatureTextMgr.SendChat(trigger, Misc.Say2, target, ChatMsg.Addon, Language.Addon, Game.CreatureTextRange.Normal, 0, Team.Other, false, target);
-                    }
+                    Global.CreatureTextMgr.SendChat(trigger, Misc.Say1, target, ChatMsg.Addon, Language.Addon, Game.CreatureTextRange.Normal, 0, Team.Other, false, target);
+                    target.KilledMonsterCredit(CreatureIds.Killcredit);
+                    Global.CreatureTextMgr.SendChat(trigger, Misc.Say2, target, ChatMsg.Addon, Language.Addon, Game.CreatureTextRange.Normal, 0, Team.Other, false, target);
                 }
             }
-
-            public override void Register()
-            {
-                AfterEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.None, AuraEffectHandleModes.Real));
-            }
         }
 
-        public override AuraScript GetAuraScript()
+        public override void Register()
         {
-            return new spell_q12987_read_pronouncement_AuraScript();
+            AfterEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.None, AuraEffectHandleModes.Real));
         }
     }
 
     [Script]
-    class spell_q12277_wintergarde_mine_explosion : SpellScriptLoader
+    class spell_q12277_wintergarde_mine_explosion : SpellScript
     {
-        public spell_q12277_wintergarde_mine_explosion() : base("spell_q12277_wintergarde_mine_explosion") { }
-
-        class spell_q12277_wintergarde_mine_explosion_SpellScript : SpellScript
+        void HandleDummy(uint effIndex)
         {
-            void HandleDummy(uint effIndex)
+            Creature unitTarget = GetHitCreature();
+            if (unitTarget)
             {
-                Creature unitTarget = GetHitCreature();
-                if (unitTarget)
+                Unit caster = GetCaster();
+                if (caster)
                 {
-                    Unit caster = GetCaster();
-                    if (caster)
+                    if (caster.IsTypeId(TypeId.Unit))
                     {
-                        if (caster.IsTypeId(TypeId.Unit))
+                        Unit owner = caster.GetOwner();
+                        if (owner)
                         {
-                            Unit owner = caster.GetOwner();
-                            if (owner)
+                            switch (unitTarget.GetEntry())
                             {
-                                switch (unitTarget.GetEntry())
-                                {
-                                    case CreatureIds.UpperMineShaft:
-                                        caster.CastSpell(owner, SpellIds.UpperMineShaftCredit, true);
-                                        break;
-                                    case CreatureIds.LowerMineShaft:
-                                        caster.CastSpell(owner, SpellIds.LowerMineShaftCredit, true);
-                                        break;
-                                    default:
-                                        break;
-                                }
+                                case CreatureIds.UpperMineShaft:
+                                    caster.CastSpell(owner, SpellIds.UpperMineShaftCredit, true);
+                                    break;
+                                case CreatureIds.LowerMineShaft:
+                                    caster.CastSpell(owner, SpellIds.LowerMineShaftCredit, true);
+                                    break;
+                                default:
+                                    break;
                             }
                         }
                     }
                 }
             }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-            }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q12277_wintergarde_mine_explosion_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     [Script]
-    class spell_q12066_bunny_kill_credit : SpellScriptLoader
+    class spell_q12066_bunny_kill_credit : SpellScript
     {
-        public spell_q12066_bunny_kill_credit() : base("spell_q12066_bunny_kill_credit") { }
-
-        class spell_q12066_bunny_kill_credit_SpellScript : SpellScript
+        void HandleDummy(uint effIndex)
         {
-            void HandleDummy(uint effIndex)
-            {
-                Creature target = GetHitCreature();
-                if (target)
-                    target.CastSpell(GetCaster(), SpellIds.BunnyCreditBeam, false);
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-            }
+            Creature target = GetHitCreature();
+            if (target)
+                target.CastSpell(GetCaster(), SpellIds.BunnyCreditBeam, false);
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q12066_bunny_kill_credit_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     [Script]
-    class spell_q12735_song_of_cleansing : SpellScriptLoader
+    class spell_q12735_song_of_cleansing : SpellScript
     {
-        public spell_q12735_song_of_cleansing() : base("spell_q12735_song_of_cleansing") { }
-
-        class spell_q12735_song_of_cleansing_SpellScript : SpellScript
+        void HandleScript(uint effIndex)
         {
-            void HandleScript(uint effIndex)
+            Unit caster = GetCaster();
+            switch (caster.GetAreaId())
             {
-                Unit caster = GetCaster();
-                switch (caster.GetAreaId())
-                {
-                    case Misc.AreaIdBittertidelake:
-                        caster.CastSpell(caster, SpellIds.SummonSpiritAtah);
-                        break;
-                    case Misc.AreaIdRiversheart:
-                        caster.CastSpell(caster, SpellIds.SummonSpiritHakhalan);
-                        break;
-                    case Misc.AreaIdWintergraspriver:
-                        caster.CastSpell(caster, SpellIds.SummonSpiritKoosu);
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+                case Misc.AreaIdBittertidelake:
+                    caster.CastSpell(caster, SpellIds.SummonSpiritAtah);
+                    break;
+                case Misc.AreaIdRiversheart:
+                    caster.CastSpell(caster, SpellIds.SummonSpiritHakhalan);
+                    break;
+                case Misc.AreaIdWintergraspriver:
+                    caster.CastSpell(caster, SpellIds.SummonSpiritKoosu);
+                    break;
+                default:
+                    break;
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q12735_song_of_cleansing_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
     [Script]
-    class spell_q12372_cast_from_gossip_trigger : SpellScriptLoader
+    class spell_q12372_cast_from_gossip_trigger : SpellScript
     {
-        public spell_q12372_cast_from_gossip_trigger() : base("spell_q12372_cast_from_gossip_trigger") { }
-
-        class spell_q12372_cast_from_gossip_trigger_SpellScript : SpellScript
+        void HandleScript(uint effIndex)
         {
-            void HandleScript(uint effIndex)
-            {
-                GetCaster().CastSpell(GetCaster(), SpellIds.SummonWyrmrestDefender, true);
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
-            }
+            GetCaster().CastSpell(GetCaster(), SpellIds.SummonWyrmrestDefender, true);
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q12372_cast_from_gossip_trigger_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
     // http://www.wowhead.com/quest=12372 Defending Wyrmrest Temple
     // 49370 - Wyrmrest Defender: Destabilize Azure Dragonshrine Effect
     [Script]
-    class spell_q12372_destabilize_azure_dragonshrine_dummy : SpellScriptLoader
+    class spell_q12372_destabilize_azure_dragonshrine_dummy : SpellScript
     {
-        public spell_q12372_destabilize_azure_dragonshrine_dummy() : base("spell_q12372_destabilize_azure_dragonshrine_dummy") { }
-
-        class spell_q12372_destabilize_azure_dragonshrine_dummy_SpellScript : SpellScript
+        void HandleDummy(uint effIndex)
         {
-            void HandleDummy(uint effIndex)
+            if (GetHitCreature())
             {
-                if (GetHitCreature())
+                Unit caster = GetOriginalCaster();
+                if (caster)
                 {
-                    Unit caster = GetOriginalCaster();
-                    if (caster)
+                    Vehicle vehicle = caster.GetVehicleKit();
+                    if (vehicle)
                     {
-                        Vehicle vehicle = caster.GetVehicleKit();
-                        if (vehicle)
+                        Unit passenger = vehicle.GetPassenger(0);
+                        if (passenger)
                         {
-                            Unit passenger = vehicle.GetPassenger(0);
-                            if (passenger)
-                            {
-                                Player player = passenger.ToPlayer();
-                                if (player)
-                                    player.KilledMonsterCredit(CreatureIds.WyrmrestTempleCredit);
-                            }
+                            Player player = passenger.ToPlayer();
+                            if (player)
+                                player.KilledMonsterCredit(CreatureIds.WyrmrestTempleCredit);
                         }
                     }
                 }
             }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-            }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q12372_destabilize_azure_dragonshrine_dummy_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     // ID - 50287 Azure Dragon: On Death Force Cast Wyrmrest Defender to Whisper to Controller - Random (cast from Azure Dragons and Azure Drakes on death)
     [Script]
-    class spell_q12372_azure_on_death_force_whisper : SpellScriptLoader
+    class spell_q12372_azure_on_death_force_whisper : SpellScript
     {
-        public spell_q12372_azure_on_death_force_whisper() : base("spell_q12372_azure_on_death_force_whisper") { }
-
-        class spell_q12372_azure_on_death_force_whisper_SpellScript : SpellScript
+        void HandleScript(uint effIndex)
         {
-            void HandleScript(uint effIndex)
-            {
-                Creature defender = GetHitCreature();
-                if (defender)
-                    defender.GetAI().Talk(Misc.WhisperOnHitByForceWhisper, defender.GetCharmerOrOwner());
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
-            }
+            Creature defender = GetHitCreature();
+            if (defender)
+                defender.GetAI().Talk(Misc.WhisperOnHitByForceWhisper, defender.GetCharmerOrOwner());
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q12372_azure_on_death_force_whisper_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
     // 40113 Knockdown Fel Cannon: The Aggro Check Aura
     [Script]
-    class spell_q11010_q11102_q11023_aggro_check_aura : SpellScriptLoader
+    class spell_q11010_q11102_q11023_aggro_check_aura : AuraScript
     {
-        public spell_q11010_q11102_q11023_aggro_check_aura() : base("spell_q11010_q11102_q11023_aggro_check_aura") { }
-
-        class spell_q11010_q11102_q11023_aggro_check_aura_AuraScript : AuraScript
+        void HandleTriggerSpell(AuraEffect aurEff)
         {
-            void HandleTriggerSpell(AuraEffect aurEff)
-            {
-                Unit target = GetTarget();
-                if (target)
-                    // On trigger proccing
-                    target.CastSpell(target, SpellIds.AggroCheck);
-            }
-
-            public override void Register()
-            {
-                OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleTriggerSpell, 0, AuraType.PeriodicTriggerSpell));
-            }
+            Unit target = GetTarget();
+            if (target)
+                // On trigger proccing
+                target.CastSpell(target, SpellIds.AggroCheck);
         }
 
-        public override AuraScript GetAuraScript()
+        public override void Register()
         {
-            return new spell_q11010_q11102_q11023_aggro_check_aura_AuraScript();
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleTriggerSpell, 0, AuraType.PeriodicTriggerSpell));
         }
     }
 
     // 40112 Knockdown Fel Cannon: The Aggro Check
     [Script]
-    class spell_q11010_q11102_q11023_aggro_check : SpellScriptLoader
+    class spell_q11010_q11102_q11023_aggro_check : SpellScript
     {
-        public spell_q11010_q11102_q11023_aggro_check() : base("spell_q11010_q11102_q11023_aggro_check") { }
-
-        class spell_q11010_q11102_q11023_aggro_check_SpellScript : SpellScript
+        void HandleDummy(uint effIndex)
         {
-            void HandleDummy(uint effIndex)
-            {
-                Player playerTarget = GetHitPlayer();
-                if (playerTarget)
-                    // Check if found player target is on fly mount or using flying form
-                    if (playerTarget.HasAuraType(AuraType.Fly) || playerTarget.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed))
-                        playerTarget.CastSpell(playerTarget, SpellIds.FlakCannonTrigger, TriggerCastFlags.IgnoreCasterMountedOrOnVehicle);
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-            }
+            Player playerTarget = GetHitPlayer();
+            if (playerTarget)
+                // Check if found player target is on fly mount or using flying form
+                if (playerTarget.HasAuraType(AuraType.Fly) || playerTarget.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed))
+                    playerTarget.CastSpell(playerTarget, SpellIds.FlakCannonTrigger, TriggerCastFlags.IgnoreCasterMountedOrOnVehicle);
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q11010_q11102_q11023_aggro_check_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     // 40119 Knockdown Fel Cannon: The Aggro Burst
     [Script]
-    class spell_q11010_q11102_q11023_aggro_burst : SpellScriptLoader
+    class spell_q11010_q11102_q11023_aggro_burst : AuraScript
     {
-        public spell_q11010_q11102_q11023_aggro_burst() : base("spell_q11010_q11102_q11023_aggro_burst") { }
-
-        class spell_q11010_q11102_q11023_aggro_burst_AuraScript : AuraScript
+        void HandleEffectPeriodic(AuraEffect aurEff)
         {
-            void HandleEffectPeriodic(AuraEffect aurEff)
-            {
-                Unit target = GetTarget();
-                if (target)
-                    // On each tick cast Choose Loc to trigger summon
-                    target.CastSpell(target, SpellIds.ChooseLoc);
-            }
-
-            public override void Register()
-            {
-                OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
-            }
+            Unit target = GetTarget();
+            if (target)
+                // On each tick cast Choose Loc to trigger summon
+                target.CastSpell(target, SpellIds.ChooseLoc);
         }
 
-        public override AuraScript GetAuraScript()
+        public override void Register()
         {
-            return new spell_q11010_q11102_q11023_aggro_burst_AuraScript();
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
         }
     }
 
     // 40056 Knockdown Fel Cannon: Choose Loc
     [Script]
-    class spell_q11010_q11102_q11023_choose_loc : SpellScriptLoader
+    class spell_q11010_q11102_q11023_choose_loc : SpellScript
     {
-        public spell_q11010_q11102_q11023_choose_loc() : base("spell_q11010_q11102_q11023_choose_loc") { }
-
-        class spell_q11010_q11102_q11023_choose_loc_SpellScript : SpellScript
+        void HandleDummy(uint effIndex)
         {
-            void HandleDummy(uint effIndex)
+            Unit caster = GetCaster();
+            // Check for player that is in 65 y range
+            List<Player> playerList = new List<Player>();
+            AnyPlayerInObjectRangeCheck checker = new AnyPlayerInObjectRangeCheck(caster, 65.0f);
+            PlayerListSearcher searcher = new PlayerListSearcher(caster, playerList, checker);
+            Cell.VisitWorldObjects(caster, searcher, 65.0f);
+            foreach (var player in playerList)
             {
-                Unit caster = GetCaster();
-                // Check for player that is in 65 y range
-                List<Player> playerList = new List<Player>();
-                AnyPlayerInObjectRangeCheck checker = new AnyPlayerInObjectRangeCheck(caster, 65.0f);
-                PlayerListSearcher searcher = new PlayerListSearcher(caster, playerList, checker);
-                Cell.VisitWorldObjects(caster, searcher, 65.0f);
-                foreach (var player in playerList)
-                {
-                    // Check if found player target is on fly mount or using flying form
-                    if (player.HasAuraType(AuraType.Fly) || player.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed))
-                        // Summom Fel Cannon (bunny version) at found player
-                        caster.SummonCreature(CreatureIds.FelCannon2, player.GetPositionX(), player.GetPositionY(), player.GetPositionZ());
-                }
-            }
-
-            public override void Register()
-            {
-                OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+                // Check if found player target is on fly mount or using flying form
+                if (player.HasAuraType(AuraType.Fly) || player.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed))
+                    // Summom Fel Cannon (bunny version) at found player
+                    caster.SummonCreature(CreatureIds.FelCannon2, player.GetPositionX(), player.GetPositionY(), player.GetPositionZ());
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q11010_q11102_q11023_choose_loc_SpellScript();
+            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     // 39844 - Skyguard Blasting Charge
     // 40160 - Throw Bomb
     [Script]
-    class spell_q11010_q11102_q11023_q11008_check_fly_mount : SpellScriptLoader
+    class spell_q11010_q11102_q11023_q11008_check_fly_mount : SpellScript
     {
-        public spell_q11010_q11102_q11023_q11008_check_fly_mount() : base("spell_q11010_q11102_q11023_q11008_check_fly_mount") { }
-
-        class spell_q11010_q11102_q11023_q11008_check_fly_mount_SpellScript : SpellScript
+        SpellCastResult CheckRequirement()
         {
-            SpellCastResult CheckRequirement()
-            {
-                Unit caster = GetCaster();
-                // This spell will be cast only if caster has one of these auras
-                if (!(caster.HasAuraType(AuraType.Fly) || caster.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed)))
-                    return SpellCastResult.CantDoThatRightNow;
-                return SpellCastResult.SpellCastOk;
-            }
-
-            public override void Register()
-            {
-                OnCheckCast.Add(new CheckCastHandler(CheckRequirement));
-            }
+            Unit caster = GetCaster();
+            // This spell will be cast only if caster has one of these auras
+            if (!(caster.HasAuraType(AuraType.Fly) || caster.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed)))
+                return SpellCastResult.CantDoThatRightNow;
+            return SpellCastResult.SpellCastOk;
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q11010_q11102_q11023_q11008_check_fly_mount_SpellScript();
+            OnCheckCast.Add(new CheckCastHandler(CheckRequirement));
         }
     }
 
     [Script]
-    class spell_q12527_zuldrak_rat : SpellScriptLoader
+    class spell_q12527_zuldrak_rat : SpellScript
     {
-        public spell_q12527_zuldrak_rat() : base("spell_q12527_zuldrak_rat") { }
-
-        class spell_q12527_zuldrak_rat_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spell)
         {
-            public override bool Validate(SpellInfo spell)
-            {
-                return ValidateSpellInfo(SpellIds.SummonGorgedLurkingBasilisk);
-            }
+            return ValidateSpellInfo(SpellIds.SummonGorgedLurkingBasilisk);
+        }
 
-            void HandleScriptEffect(uint effIndex)
+        void HandleScriptEffect(uint effIndex)
+        {
+            if (GetHitAura() != null && GetHitAura().GetStackAmount() >= GetSpellInfo().StackAmount)
             {
-                if (GetHitAura() != null && GetHitAura().GetStackAmount() >= GetSpellInfo().StackAmount)
-                {
-                    GetHitUnit().CastSpell((Unit)null, SpellIds.SummonGorgedLurkingBasilisk, true);
-                    Creature basilisk = GetHitUnit().ToCreature();
-                    if (basilisk)
-                        basilisk.DespawnOrUnsummon();
-                }
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 1, SpellEffectName.ScriptEffect));
+                GetHitUnit().CastSpell((Unit)null, SpellIds.SummonGorgedLurkingBasilisk, true);
+                Creature basilisk = GetHitUnit().ToCreature();
+                if (basilisk)
+                    basilisk.DespawnOrUnsummon();
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q12527_zuldrak_rat_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 1, SpellEffectName.ScriptEffect));
         }
     }
 
     // 55368 - Summon Stefan
     [Script]
-    class spell_q12661_q12669_q12676_q12677_q12713_summon_stefan : SpellScriptLoader
+    class spell_q12661_q12669_q12676_q12677_q12713_summon_stefan : SpellScript
     {
-        public spell_q12661_q12669_q12676_q12677_q12713_summon_stefan() : base("spell_q12661_q12669_q12676_q12677_q12713_summon_stefan") { }
-
-        class spell_q12661_q12669_q12676_q12677_q12713_summon_stefan_SpellScript : SpellScript
+        void SetDest(ref SpellDestination dest)
         {
-            void SetDest(ref SpellDestination dest)
-            {
-                // Adjust effect summon position
-                Position offset = new Position(0.0f, 0.0f, 20.0f, 0.0f);
-                dest.RelocateOffset(offset);
-            }
-
-            public override void Register()
-            {
-                OnDestinationTargetSelect.Add(new DestinationTargetSelectHandler(SetDest, 0, Targets.DestCasterBack));
-            }
+            // Adjust effect summon position
+            Position offset = new Position(0.0f, 0.0f, 20.0f, 0.0f);
+            dest.RelocateOffset(offset);
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q12661_q12669_q12676_q12677_q12713_summon_stefan_SpellScript();
+            OnDestinationTargetSelect.Add(new DestinationTargetSelectHandler(SetDest, 0, Targets.DestCasterBack));
         }
     }
 
     [Script]
-    class spell_q12730_quenching_mist : SpellScriptLoader
+    class spell_q12730_quenching_mist : AuraScript
     {
-        public spell_q12730_quenching_mist() : base("spell_q12730_quenching_mist") { }
-
-        class spell_q12730_quenching_mist_AuraScript : AuraScript
+        public override bool Validate(SpellInfo spellInfo)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(SpellIds.FlickeringFlames);
-            }
-
-            void HandleEffectPeriodic(AuraEffect aurEff)
-            {
-                GetTarget().RemoveAurasDueToSpell(SpellIds.FlickeringFlames);
-            }
-
-            public override void Register()
-            {
-                OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicHeal));
-            }
+            return ValidateSpellInfo(SpellIds.FlickeringFlames);
         }
 
-        public override AuraScript GetAuraScript()
+        void HandleEffectPeriodic(AuraEffect aurEff)
         {
-            return new spell_q12730_quenching_mist_AuraScript();
+            GetTarget().RemoveAurasDueToSpell(SpellIds.FlickeringFlames);
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicHeal));
         }
     }
 
     // 13291 - Borrowed Technology/13292 - The Solution Solution /Daily//13239 - Volatility/13261 - Volatiliy /Daily//
     [Script]
-    class spell_q13291_q13292_q13239_q13261_frostbrood_skytalon_grab_decoy : SpellScriptLoader
+    class spell_q13291_q13292_q13239_q13261_frostbrood_skytalon_grab_decoy : SpellScript
     {
-        public spell_q13291_q13292_q13239_q13261_frostbrood_skytalon_grab_decoy() : base("spell_q13291_q13292_q13239_q13261_frostbrood_skytalon_grab_decoy") { }
-
-        class spell_q13291_q13292_q13239_q13261_frostbrood_skytalon_grab_decoy_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spell)
         {
-            public override bool Validate(SpellInfo spell)
-            {
-                return ValidateSpellInfo(SpellIds.Ride);
-            }
-
-            void HandleDummy(uint effIndex)
-            {
-                if (!GetHitCreature())
-                    return;
-                // TO DO: Being triggered is hack, but in checkcast it doesn't pass aurastate requirements.
-                // Beside that the decoy won't keep it's freeze animation state when enter.
-                GetHitCreature().CastSpell(GetCaster(), SpellIds.Ride, true);
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-            }
+            return ValidateSpellInfo(SpellIds.Ride);
         }
 
-        public override SpellScript GetSpellScript()
+        void HandleDummy(uint effIndex)
         {
-            return new spell_q13291_q13292_q13239_q13261_frostbrood_skytalon_grab_decoy_SpellScript();
+            if (!GetHitCreature())
+                return;
+            // TO DO: Being triggered is hack, but in checkcast it doesn't pass aurastate requirements.
+            // Beside that the decoy won't keep it's freeze animation state when enter.
+            GetHitCreature().CastSpell(GetCaster(), SpellIds.Ride, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     // 59303 - Summon Frost Wyrm
     [Script]
-    class spell_q13291_q13292_q13239_q13261_armored_decoy_summon_skytalon : SpellScriptLoader
+    class spell_q13291_q13292_q13239_q13261_armored_decoy_summon_skytalon : SpellScript
     {
-        public spell_q13291_q13292_q13239_q13261_armored_decoy_summon_skytalon() : base("spell_q13291_q13292_q13239_q13261_armored_decoy_summon_skytalon") { }
-
-        class spell_q13291_q13292_q13239_q13261_armored_decoy_summon_skytalon_SpellScript : SpellScript
+        void SetDest(ref SpellDestination dest)
         {
-            void SetDest(ref SpellDestination dest)
-            {
-                // Adjust effect summon position
-                Position offset = new Position(0.0f, 0.0f, 20.0f, 0.0f);
-                dest.RelocateOffset(offset);
-            }
-
-            public override void Register()
-            {
-                OnDestinationTargetSelect.Add(new DestinationTargetSelectHandler(SetDest, 0, Targets.DestCasterBack));
-            }
+            // Adjust effect summon position
+            Position offset = new Position(0.0f, 0.0f, 20.0f, 0.0f);
+            dest.RelocateOffset(offset);
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q13291_q13292_q13239_q13261_armored_decoy_summon_skytalon_SpellScript();
+            OnDestinationTargetSelect.Add(new DestinationTargetSelectHandler(SetDest, 0, Targets.DestCasterBack));
         }
     }
 
     // 12601 - Second Chances: Summon Landgren's Soul Moveto Target Bunny
     [Script]
-    class spell_q12847_summon_soul_moveto_bunny : SpellScriptLoader
+    class spell_q12847_summon_soul_moveto_bunny : SpellScript
     {
-        public spell_q12847_summon_soul_moveto_bunny() : base("spell_q12847_summon_soul_moveto_bunny") { }
-
-        class spell_q12847_summon_soul_moveto_bunny_SpellScript : SpellScript
+        void SetDest(ref SpellDestination dest)
         {
-            void SetDest(ref SpellDestination dest)
-            {
-                // Adjust effect summon position
-                Position offset = new Position(0.0f, 0.0f, 2.5f, 0.0f);
-                dest.RelocateOffset(offset);
-            }
-
-            public override void Register()
-            {
-                OnDestinationTargetSelect.Add(new DestinationTargetSelectHandler(SetDest, 0, Targets.DestCaster));
-            }
+            // Adjust effect summon position
+            Position offset = new Position(0.0f, 0.0f, 2.5f, 0.0f);
+            dest.RelocateOffset(offset);
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q12847_summon_soul_moveto_bunny_SpellScript();
+            OnDestinationTargetSelect.Add(new DestinationTargetSelectHandler(SetDest, 0, Targets.DestCaster));
         }
     }
 
     [Script]
-    class spell_q13011_bear_flank_master : SpellScriptLoader
+    class spell_q13011_bear_flank_master : SpellScript
     {
-        public spell_q13011_bear_flank_master() : base("spell_q13011_bear_flank_master") { }
-
-        class spell_q13011_bear_flank_master_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spellInfo)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(SpellIds.BearFlankMaster, SpellIds.CreateBearFlank);
-            }
+            return ValidateSpellInfo(SpellIds.BearFlankMaster, SpellIds.CreateBearFlank);
+        }
 
-            public override bool Load()
-            {
-                return GetCaster().IsTypeId(TypeId.Unit);
-            }
+        public override bool Load()
+        {
+            return GetCaster().IsTypeId(TypeId.Unit);
+        }
 
-            void HandleScript(uint effIndex)
+        void HandleScript(uint effIndex)
+        {
+            Player player = GetHitPlayer();
+            if (player)
             {
-                Player player = GetHitPlayer();
-                if (player)
+                if (RandomHelper.randChance(50))
                 {
-                    if (RandomHelper.randChance(50))
-                    {
-                        Creature creature = GetCaster().ToCreature();
-                        player.CastSpell(creature, SpellIds.BearFlankFail);
-                        creature.GetAI().Talk(0, player);
-                    }
-                    else
-                        player.CastSpell(player, SpellIds.CreateBearFlank);
+                    Creature creature = GetCaster().ToCreature();
+                    player.CastSpell(creature, SpellIds.BearFlankFail);
+                    creature.GetAI().Talk(0, player);
                 }
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+                else
+                    player.CastSpell(player, SpellIds.CreateBearFlank);
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q13011_bear_flank_master_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
     [Script]
-    class spell_q13086_cannons_target : SpellScriptLoader
+    class spell_q13086_cannons_target : SpellScript
     {
-        public spell_q13086_cannons_target() : base("spell_q13086_cannons_target") { }
-
-        class spell_q13086_cannons_target_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spellInfo)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
-            }
-
-            void HandleEffectDummy(uint effIndex)
-            {
-                WorldLocation pos = GetExplTargetDest();
-                if (pos != null)
-                    GetCaster().CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), (uint)GetEffectValue(), true);
-            }
-
-            public override void Register()
-            {
-                OnEffectHit.Add(new EffectHandler(HandleEffectDummy, 0, SpellEffectName.Dummy));
-            }
+            return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
         }
 
-        public override SpellScript GetSpellScript()
+        void HandleEffectDummy(uint effIndex)
         {
-            return new spell_q13086_cannons_target_SpellScript();
+            WorldLocation pos = GetExplTargetDest();
+            if (pos != null)
+                GetCaster().CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), (uint)GetEffectValue(), true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new EffectHandler(HandleEffectDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     [Script]
-    class spell_q12690_burst_at_the_seams : SpellScriptLoader
+    class spell_q12690_burst_at_the_seams : SpellScript
     {
-        public spell_q12690_burst_at_the_seams() : base("spell_q12690_burst_at_the_seams") { }
-
-        class spell_q12690_burst_at_the_seams_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spellInfo)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(SpellIds.BurstAtTheSeams, SpellIds.BurstAtTheSeamsDmg, SpellIds.BurstAtTheSeamsDmg2,
-                    SpellIds.BurstAtTheSeamsBone, SpellIds.BurstAtTheSeamsMeat, SpellIds.BurstAtTheSeamsBmeat);
-            }
+            return ValidateSpellInfo(SpellIds.BurstAtTheSeams, SpellIds.BurstAtTheSeamsDmg, SpellIds.BurstAtTheSeamsDmg2,
+                SpellIds.BurstAtTheSeamsBone, SpellIds.BurstAtTheSeamsMeat, SpellIds.BurstAtTheSeamsBmeat);
+        }
 
-            public override bool Load()
-            {
-                return GetCaster().IsTypeId(TypeId.Unit);
-            }
+        public override bool Load()
+        {
+            return GetCaster().IsTypeId(TypeId.Unit);
+        }
 
-            void HandleKnockBack(uint effIndex)
+        void HandleKnockBack(uint effIndex)
+        {
+            Unit creature = GetHitCreature();
+            if (creature)
             {
-                Unit creature = GetHitCreature();
-                if (creature)
+                Unit charmer = GetCaster().GetCharmerOrOwner();
+                if (charmer)
                 {
-                    Unit charmer = GetCaster().GetCharmerOrOwner();
-                    if (charmer)
+                    Player player = charmer.ToPlayer();
+                    if (player)
                     {
-                        Player player = charmer.ToPlayer();
-                        if (player)
+                        if (player.GetQuestStatus(Misc.QuestIdBurstAtTheSeams) == QuestStatus.Incomplete)
                         {
-                            if (player.GetQuestStatus(Misc.QuestIdBurstAtTheSeams) == QuestStatus.Incomplete)
-                            {
-                                creature.CastSpell(creature, SpellIds.BurstAtTheSeamsBone, true);
-                                creature.CastSpell(creature, SpellIds.BurstAtTheSeamsMeat, true);
-                                creature.CastSpell(creature, SpellIds.BurstAtTheSeamsBmeat, true);
-                                creature.CastSpell(creature, SpellIds.BurstAtTheSeamsDmg, true);
-                                creature.CastSpell(creature, SpellIds.BurstAtTheSeamsDmg2, true);
+                            creature.CastSpell(creature, SpellIds.BurstAtTheSeamsBone, true);
+                            creature.CastSpell(creature, SpellIds.BurstAtTheSeamsMeat, true);
+                            creature.CastSpell(creature, SpellIds.BurstAtTheSeamsBmeat, true);
+                            creature.CastSpell(creature, SpellIds.BurstAtTheSeamsDmg, true);
+                            creature.CastSpell(creature, SpellIds.BurstAtTheSeamsDmg2, true);
 
-                                player.CastSpell(player, SpellIds.DrakkariSkullcrusherCredit, true);
-                                ushort count = player.GetReqKillOrCastCurrentCount(Misc.QuestIdBurstAtTheSeams, (int)CreatureIds.DrakkariChieftaink);
-                                if ((count % 20) == 0)
-                                    player.CastSpell(player, SpellIds.SummonDrakkariChieftain, true);
-                            }
+                            player.CastSpell(player, SpellIds.DrakkariSkullcrusherCredit, true);
+                            ushort count = player.GetReqKillOrCastCurrentCount(Misc.QuestIdBurstAtTheSeams, (int)CreatureIds.DrakkariChieftaink);
+                            if ((count % 20) == 0)
+                                player.CastSpell(player, SpellIds.SummonDrakkariChieftain, true);
                         }
                     }
                 }
             }
-
-            void HandleScript(uint effIndex)
-            {
-                GetCaster().ToCreature().DespawnOrUnsummon(2 * Time.InMilliseconds);
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleKnockBack, 1, SpellEffectName.KnockBack));
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
-            }
         }
 
-        public override SpellScript GetSpellScript()
+        void HandleScript(uint effIndex)
         {
-            return new spell_q12690_burst_at_the_seams_SpellScript();
+            GetCaster().ToCreature().DespawnOrUnsummon(2 * Time.InMilliseconds);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleKnockBack, 1, SpellEffectName.KnockBack));
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
     // 48682 - Escape from Silverbrook - Periodic Dummy
     [Script]
-    class spell_q12308_escape_from_silverbrook : SpellScriptLoader
+    class spell_q12308_escape_from_silverbrook : SpellScript
     {
-        public spell_q12308_escape_from_silverbrook() : base("spell_q12308_escape_from_silverbrook") { }
-
-        class spell_q12308_escape_from_silverbrook_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spellInfo)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(SpellIds.SummonWorgen);
-            }
-
-            void HandleDummy(uint effIndex)
-            {
-                GetCaster().CastSpell(GetCaster(), SpellIds.SummonWorgen, true);
-            }
-
-            public override void Register()
-            {
-                OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-            }
+            return ValidateSpellInfo(SpellIds.SummonWorgen);
         }
 
-        public override SpellScript GetSpellScript()
+        void HandleDummy(uint effIndex)
         {
-            return new spell_q12308_escape_from_silverbrook_SpellScript();
+            GetCaster().CastSpell(GetCaster(), SpellIds.SummonWorgen, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     // 48681 - Summon Silverbrook Worgen
     [Script]
-    class spell_q12308_escape_from_silverbrook_summon_worgen : SpellScriptLoader
+    class spell_q12308_escape_from_silverbrook_summon_worgen : SpellScript
     {
-        public spell_q12308_escape_from_silverbrook_summon_worgen() : base("spell_q12308_escape_from_silverbrook_summon_worgen") { }
-
-        class spell_q12308_escape_from_silverbrook_summon_worgen_SpellScript : SpellScript
+        void ModDest(ref SpellDestination dest)
         {
-            void ModDest(ref SpellDestination dest)
-            {
-                float dist = GetSpellInfo().GetEffect(0).CalcRadius(GetCaster());
-                float angle = RandomHelper.FRand(0.75f, 1.25f) * MathFunctions.PI;
+            float dist = GetSpellInfo().GetEffect(0).CalcRadius(GetCaster());
+            float angle = RandomHelper.FRand(0.75f, 1.25f) * MathFunctions.PI;
 
-                Position pos = GetCaster().GetNearPosition(dist, angle);
-                dest.Relocate(pos);
-            }
-
-            public override void Register()
-            {
-                OnDestinationTargetSelect.Add(new DestinationTargetSelectHandler(ModDest, 0, Targets.DestCasterSummon));
-            }
+            Position pos = GetCaster().GetNearPosition(dist, angle);
+            dest.Relocate(pos);
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q12308_escape_from_silverbrook_summon_worgen_SpellScript();
+            OnDestinationTargetSelect.Add(new DestinationTargetSelectHandler(ModDest, 0, Targets.DestCasterSummon));
         }
     }
 
     // 51858 - Siphon of Acherus
     [Script]
-    class spell_q12641_death_comes_from_on_high : SpellScriptLoader
+    class spell_q12641_death_comes_from_on_high : SpellScript
     {
-        public spell_q12641_death_comes_from_on_high() : base("spell_q12641_death_comes_from_on_high") { }
-
-        class spell_q12641_death_comes_from_on_high_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spellInfo)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(SpellIds.ForgeCredit, SpellIds.TownHallCredit, SpellIds.ScarletHoldCredit, SpellIds.ChapelCredit);
-            }
-
-            void HandleDummy(uint effIndex)
-            {
-                uint spellId = 0;
-
-                switch (GetHitCreature().GetEntry())
-                {
-                    case CreatureIds.NewAvalonForge:
-                        spellId = SpellIds.ForgeCredit;
-                        break;
-                    case CreatureIds.NewAvalonTownHall:
-                        spellId = SpellIds.TownHallCredit;
-                        break;
-                    case CreatureIds.ScarletHold:
-                        spellId = SpellIds.ScarletHoldCredit;
-                        break;
-                    case CreatureIds.ChapelOfTheCrimsonFlame:
-                        spellId = SpellIds.ChapelCredit;
-                        break;
-                    default:
-                        return;
-                }
-
-                GetCaster().CastSpell((Unit)null, spellId, true);
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-            }
+            return ValidateSpellInfo(SpellIds.ForgeCredit, SpellIds.TownHallCredit, SpellIds.ScarletHoldCredit, SpellIds.ChapelCredit);
         }
 
-        public override SpellScript GetSpellScript()
+        void HandleDummy(uint effIndex)
         {
-            return new spell_q12641_death_comes_from_on_high_SpellScript();
+            uint spellId = 0;
+
+            switch (GetHitCreature().GetEntry())
+            {
+                case CreatureIds.NewAvalonForge:
+                    spellId = SpellIds.ForgeCredit;
+                    break;
+                case CreatureIds.NewAvalonTownHall:
+                    spellId = SpellIds.TownHallCredit;
+                    break;
+                case CreatureIds.ScarletHold:
+                    spellId = SpellIds.ScarletHoldCredit;
+                    break;
+                case CreatureIds.ChapelOfTheCrimsonFlame:
+                    spellId = SpellIds.ChapelCredit;
+                    break;
+                default:
+                    return;
+            }
+
+            GetCaster().CastSpell((Unit)null, spellId, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     // 52694 - Recall Eye of Acherus
     [Script]
-    class spell_q12641_recall_eye_of_acherus : SpellScriptLoader
+    class spell_q12641_recall_eye_of_acherus : SpellScript
     {
-        public spell_q12641_recall_eye_of_acherus() : base("spell_q12641_recall_eye_of_acherus") { }
-
-        class spell_q12641_recall_eye_of_acherus_SpellScript : SpellScript
+        void HandleDummy(uint effIndex)
         {
-            void HandleDummy(uint effIndex)
+            Player player = GetCaster().GetCharmerOrOwner().ToPlayer();
+            if (player)
             {
-                Player player = GetCaster().GetCharmerOrOwner().ToPlayer();
-                if (player)
-                {
-                    player.StopCastingCharm();
-                    player.StopCastingBindSight();
-                    player.RemoveAura(SpellIds.TheEyeOfAcherus);
-                }
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ScriptEffect));
+                player.StopCastingCharm();
+                player.StopCastingBindSight();
+                player.RemoveAura(SpellIds.TheEyeOfAcherus);
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q12641_recall_eye_of_acherus_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ScriptEffect));
         }
     }
 
     // 51769 - Emblazon Runeblade
     [Script]
-    class spell_q12619_emblazon_runeblade : SpellScriptLoader
+    class spell_q12619_emblazon_runeblade : AuraScript
     {
-        public spell_q12619_emblazon_runeblade() : base("spell_q12619_emblazon_runeblade") { }
-
-        class spell_q12619_emblazon_runeblade_AuraScript : AuraScript
+        void HandleEffectPeriodic(AuraEffect aurEff)
         {
-            void HandleEffectPeriodic(AuraEffect aurEff)
-            {
-                PreventDefaultAction();
-                Unit caster = GetCaster();
-                if (caster)
-                    caster.CastSpell(caster, GetSpellInfo().GetEffect(aurEff.GetEffIndex()).TriggerSpell, true, null, aurEff);
-            }
-
-            public override void Register()
-            {
-                OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicTriggerSpell));
-            }
+            PreventDefaultAction();
+            Unit caster = GetCaster();
+            if (caster)
+                caster.CastSpell(caster, GetSpellInfo().GetEffect(aurEff.GetEffIndex()).TriggerSpell, true, null, aurEff);
         }
 
-        public override AuraScript GetAuraScript()
+        public override void Register()
         {
-            return new spell_q12619_emblazon_runeblade_AuraScript();
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicTriggerSpell));
         }
     }
 
     // 51770 - Emblazon Runeblade
     [Script]
-    class spell_q12619_emblazon_runeblade_effect : SpellScriptLoader
+    class spell_q12619_emblazon_runeblade_effect : SpellScript
     {
-        public spell_q12619_emblazon_runeblade_effect() : base("spell_q12619_emblazon_runeblade_effect") { }
-
-        class spell_q12619_emblazon_runeblade_effect_SpellScript : SpellScript
+        void HandleScript(uint effIndex)
         {
-            void HandleScript(uint effIndex)
-            {
-                GetCaster().CastSpell(GetCaster(), (uint)GetEffectValue(), false);
-            }
-
-            public override void Register()
-            {
-                OnEffectHit.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
-            }
+            GetCaster().CastSpell(GetCaster(), (uint)GetEffectValue(), false);
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q12619_emblazon_runeblade_effect_SpellScript();
+            OnEffectHit.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
     [Script]
-    class spell_q12919_gymers_grab : SpellScriptLoader
+    class spell_q12919_gymers_grab : SpellScript
     {
-        public spell_q12919_gymers_grab() : base("spell_q12919_gymers_grab") { }
-
-        class spell_q12919_gymers_grab_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spell)
         {
-            public override bool Validate(SpellInfo spell)
-            {
-                return ValidateSpellInfo(SpellIds.RideGymer);
-            }
-
-            void HandleScript(uint effIndex)
-            {
-                sbyte seatId = 2;
-                if (!GetHitCreature())
-                    return;
-                GetHitCreature().CastCustomSpell(SpellIds.RideGymer, SpellValueMod.BasePoint0, seatId, GetCaster(), true);
-                GetHitCreature().CastSpell(GetHitCreature(), SpellIds.Grabbed, true);
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
-            }
+            return ValidateSpellInfo(SpellIds.RideGymer);
         }
 
-        public override SpellScript GetSpellScript()
+        void HandleScript(uint effIndex)
         {
-            return new spell_q12919_gymers_grab_SpellScript();
+            sbyte seatId = 2;
+            if (!GetHitCreature())
+                return;
+            GetHitCreature().CastCustomSpell(SpellIds.RideGymer, SpellValueMod.BasePoint0, seatId, GetCaster(), true);
+            GetHitCreature().CastSpell(GetHitCreature(), SpellIds.Grabbed, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
     [Script]
-    class spell_q12919_gymers_throw : SpellScriptLoader
+    class spell_q12919_gymers_throw : SpellScript
     {
-        public spell_q12919_gymers_throw() : base("spell_q12919_gymers_throw") { }
-
-        class spell_q12919_gymers_throw_SpellScript : SpellScript
+        void HandleScript(uint effIndex)
         {
-            void HandleScript(uint effIndex)
+            Unit caster = GetCaster();
+            if (caster.IsVehicle())
             {
-                Unit caster = GetCaster();
-                if (caster.IsVehicle())
+                Unit passenger = caster.GetVehicleKit().GetPassenger(1);
+                if (passenger)
                 {
-                    Unit passenger = caster.GetVehicleKit().GetPassenger(1);
-                    if (passenger)
-                    {
-                        passenger.ExitVehicle();
-                        caster.CastSpell(passenger, SpellIds.VargulExplosion, true);
-                    }
+                    passenger.ExitVehicle();
+                    caster.CastSpell(passenger, SpellIds.VargulExplosion, true);
                 }
             }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
-            }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q12919_gymers_throw_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
     [Script]
-    class spell_q13400_illidan_kill_master : SpellScriptLoader
+    class spell_q13400_illidan_kill_master : SpellScript
     {
-        public spell_q13400_illidan_kill_master() : base("spell_q13400_illidan_kill_master") { }
-
-        class spell_q13400_illidan_kill_master_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spellInfo)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(SpellIds.IllidanKillCredit);
-            }
+            return ValidateSpellInfo(SpellIds.IllidanKillCredit);
+        }
 
-            void HandleDummy(uint effIndex)
+        void HandleDummy(uint effIndex)
+        {
+            Unit caster = GetCaster();
+            if (caster.IsVehicle())
             {
-                Unit caster = GetCaster();
-                if (caster.IsVehicle())
-                {
-                    Unit passenger = caster.GetVehicleKit().GetPassenger(0);
-                    if (passenger)
-                        passenger.CastSpell(passenger, SpellIds.IllidanKillCredit, true);
-                }
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+                Unit passenger = caster.GetVehicleKit().GetPassenger(0);
+                if (passenger)
+                    passenger.CastSpell(passenger, SpellIds.IllidanKillCredit, true);
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q13400_illidan_kill_master_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     // 66744 - Make Player Destroy Totems
     [Script]
-    class spell_q14100_q14111_make_player_destroy_totems : SpellScriptLoader
+    class spell_q14100_q14111_make_player_destroy_totems : SpellScript
     {
-        public spell_q14100_q14111_make_player_destroy_totems() : base("spell_q14100_q14111_make_player_destroy_totems") { }
-
-        class spell_q14100_q14111_make_player_destroy_totems_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spellInfo)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(SpellIds.TotemOfTheEarthenRing);
-            }
-
-            void HandleScriptEffect(uint effIndex)
-            {
-                Player player = GetHitPlayer();
-                if (player)
-                    player.CastSpell(player, SpellIds.TotemOfTheEarthenRing, TriggerCastFlags.FullMask); // ignore reagent cost, consumed by quest
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
-            }
+            return ValidateSpellInfo(SpellIds.TotemOfTheEarthenRing);
         }
 
-        public override SpellScript GetSpellScript()
+        void HandleScriptEffect(uint effIndex)
         {
-            return new spell_q14100_q14111_make_player_destroy_totems_SpellScript();
+            Player player = GetHitPlayer();
+            if (player)
+                player.CastSpell(player, SpellIds.TotemOfTheEarthenRing, TriggerCastFlags.FullMask); // ignore reagent cost, consumed by quest
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
         }
     }
 
     // 39238 - Fumping
     [Script]
-    class spell_q10929_fumping : SpellScriptLoader
+    class spell_q10929_fumpingAuraScript : AuraScript
     {
-        public spell_q10929_fumping() : base("spell_q10929_fumping") { }
-
-        class spell_q10929_fumpingAuraScript : AuraScript
+        public override bool Validate(SpellInfo spell)
         {
-            public override bool Validate(SpellInfo spell)
-            {
-                return ValidateSpellInfo(SpellIds.SummonSandGnome, SpellIds.SummonBoneSlicer);
-            }
-
-            void HandleEffectRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-            {
-                if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
-                    return;
-
-                Unit caster = GetCaster();
-                if (caster)
-                    caster.CastSpell(caster, RandomHelper.URand(SpellIds.SummonSandGnome, SpellIds.SummonBoneSlicer), true);
-            }
-
-            public override void Register()
-            {
-                OnEffectRemove.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
-            }
+            return ValidateSpellInfo(SpellIds.SummonSandGnome, SpellIds.SummonBoneSlicer);
         }
 
-        public override AuraScript GetAuraScript()
+        void HandleEffectRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            return new spell_q10929_fumpingAuraScript();
+            if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
+                return;
+
+            Unit caster = GetCaster();
+            if (caster)
+                caster.CastSpell(caster, RandomHelper.URand(SpellIds.SummonSandGnome, SpellIds.SummonBoneSlicer), true);
+        }
+
+        public override void Register()
+        {
+            OnEffectRemove.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
 
     // 93072 - Get Our Boys Back Dummy
     [Script]
-    class spell_q28813_get_our_boys_back_dummy : SpellScriptLoader
+    class spell_q28813_get_our_boys_back_dummy : SpellScript
     {
-        public spell_q28813_get_our_boys_back_dummy() : base("spell_q28813_get_our_boys_back_dummy") { }
-
-        class spell_q28813_get_our_boys_back_dummy_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spellInfo)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(SpellIds.RenewedLife);
-            }
+            return ValidateSpellInfo(SpellIds.RenewedLife);
+        }
 
-            void HandleDummyEffect()
+        void HandleDummyEffect()
+        {
+            Unit caster = GetCaster();
+            Creature injuredStormwindInfantry = caster.FindNearestCreature(CreatureIds.InjuredStormwindInfantry, 5.0f, true);
+            if (injuredStormwindInfantry)
             {
-                Unit caster = GetCaster();
-                Creature injuredStormwindInfantry = caster.FindNearestCreature(CreatureIds.InjuredStormwindInfantry, 5.0f, true);
-                if (injuredStormwindInfantry)
-                {
-                    injuredStormwindInfantry.SetCreatorGUID(caster.GetGUID());
-                    injuredStormwindInfantry.CastSpell(injuredStormwindInfantry, SpellIds.RenewedLife, true);
-                }
-            }
-
-            public override void Register()
-            {
-                OnCast.Add(new CastHandler(HandleDummyEffect));
+                injuredStormwindInfantry.SetCreatorGUID(caster.GetGUID());
+                injuredStormwindInfantry.CastSpell(injuredStormwindInfantry, SpellIds.RenewedLife, true);
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q28813_get_our_boys_back_dummy_SpellScript();
+            OnCast.Add(new CastHandler(HandleDummyEffect));
         }
     }
 
     [Script]
-    class spell_q28813_set_health_random : SpellScriptLoader
+    class spell_q28813_set_health_random : SpellScript
     {
-        public spell_q28813_set_health_random() : base("spell_q28813_set_health_random") { }
-
-        class spell_q28813_set_health_random_SpellScript : SpellScript
+        void HandleDummyEffect()
         {
-            void HandleDummyEffect()
-            {
-                Unit caster = GetCaster();
-                caster.SetHealth(caster.CountPctFromMaxHealth(RandomHelper.IRand(3, 5) * 10));
-            }
-
-            public override void Register()
-            {
-                OnCast.Add(new CastHandler(HandleDummyEffect));
-            }
+            Unit caster = GetCaster();
+            caster.SetHealth(caster.CountPctFromMaxHealth(RandomHelper.IRand(3, 5) * 10));
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q28813_set_health_random_SpellScript();
+            OnCast.Add(new CastHandler(HandleDummyEffect));
         }
     }
 
     [Script]
-    class spell_q12414_hand_over_reins : SpellScriptLoader
+    class spell_q12414_hand_over_reins : SpellScript
     {
-        public spell_q12414_hand_over_reins() : base("spell_q12414_hand_over_reins") { }
-
-        class spell_q12414_hand_over_reins_SpellScript : SpellScript
+        void HandleScript(uint effIndex)
         {
-            void HandleScript(uint effIndex)
-            {
-                Creature caster = GetCaster().ToCreature();
-                GetHitUnit().ExitVehicle();
+            Creature caster = GetCaster().ToCreature();
+            GetHitUnit().ExitVehicle();
 
-                if (caster)
-                    caster.DespawnOrUnsummon();
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect));
-            }
+            if (caster)
+                caster.DespawnOrUnsummon();
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_q12414_hand_over_reins_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect));
         }
     }
 }

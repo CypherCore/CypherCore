@@ -359,10 +359,5 @@ namespace Scripts.Northrend.Nexus.Oculus
             EventMap events = new EventMap();
         }
 
-        public override InstanceScript GetInstanceScript(InstanceMap map)
-        {
-            return new instance_oculus_InstanceMapScript(map);
-        }
-    }
-    */
+        */
 }

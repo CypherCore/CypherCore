@@ -98,303 +98,283 @@ namespace Scripts.Northrend.DraktharonKeep.Novos
     }
 
     [Script]
-    class boss_novos : CreatureScript
+    class boss_novos : BossAI
     {
-        public boss_novos() : base("boss_novos") { }
-
-        class boss_novosAI : BossAI
+        public boss_novos(Creature creature) : base(creature, DTKDataTypes.Novos)
         {
-            public boss_novosAI(Creature creature) : base(creature, DTKDataTypes.Novos)
+            Initialize();
+            _bubbled = false;
+        }
+
+        void Initialize()
+        {
+            _ohNovos = true;
+        }
+
+        public override void Reset()
+        {
+            _Reset();
+
+            Initialize();
+            SetCrystalsStatus(false);
+            SetSummonerStatus(false);
+            SetBubbled(false);
+        }
+
+        public override void EnterCombat(Unit victim)
+        {
+            _EnterCombat();
+            Talk(TextIds.SayAggro);
+
+            SetCrystalsStatus(true);
+            SetSummonerStatus(true);
+            SetBubbled(true);
+        }
+
+        public override void AttackStart(Unit target)
+        {
+            if (!target)
+                return;
+
+            if (me.Attack(target, true))
+                DoStartNoMovement(target);
+        }
+
+        public override void KilledUnit(Unit who)
+        {
+            if (who.IsTypeId(TypeId.Player))
+                Talk(TextIds.SayKill);
+        }
+
+        public override void JustDied(Unit killer)
+        {
+            _JustDied();
+            Talk(TextIds.SayDeath);
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim() || _bubbled)
+                return;
+
+            _events.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            _events.ExecuteEvents(eventId =>
             {
-                Initialize();
-                _bubbled = false;
-            }
-
-            void Initialize()
-            {
-                _ohNovos = true;              
-            }
-
-            public override void Reset()
-            {
-                _Reset();
-
-                Initialize();
-                SetCrystalsStatus(false);
-                SetSummonerStatus(false);
-                SetBubbled(false);
-            }
-
-            public override void EnterCombat(Unit victim)
-            {
-                _EnterCombat();
-                Talk(TextIds.SayAggro);
-
-                SetCrystalsStatus(true);
-                SetSummonerStatus(true);
-                SetBubbled(true);
-            }
-
-            public override void AttackStart(Unit target)
-            {
-                if (!target)
-                    return;
-
-                if (me.Attack(target, true))
-                    DoStartNoMovement(target);
-            }
-
-            public override void KilledUnit(Unit who)
-            {
-                if (who.IsTypeId(TypeId.Player))
-                    Talk(TextIds.SayKill);
-            }
-
-            public override void JustDied(Unit killer)
-            {
-                _JustDied();
-                Talk(TextIds.SayDeath);
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim() || _bubbled)
-                    return;
-
-                _events.Update(diff);
+                switch (eventId)
+                {
+                    case Misc.EventSummonMinions:
+                        DoCast(SpellIds.SummonMinions);
+                        _events.ScheduleEvent(Misc.EventSummonMinions, 15000);
+                        break;
+                    case Misc.EventAttack:
+                        Unit victim = SelectTarget(SelectAggroTarget.Random);
+                        if (victim)
+                            DoCast(victim, RandomHelper.RAND(SpellIds.ArcaneBlast, SpellIds.Blizzard, SpellIds.Frostbolt, SpellIds.WrathOfMisery));
+                        _events.ScheduleEvent(Misc.EventAttack, 3000);
+                        break;
+                    default:
+                        break;
+                }
 
                 if (me.HasUnitState(UnitState.Casting))
                     return;
-
-                _events.ExecuteEvents(eventId =>
-                {
-                    switch (eventId)
-                    {
-                        case Misc.EventSummonMinions:
-                            DoCast(SpellIds.SummonMinions);
-                            _events.ScheduleEvent(Misc.EventSummonMinions, 15000);
-                            break;
-                        case Misc.EventAttack:
-                            Unit victim = SelectTarget(SelectAggroTarget.Random);
-                            if (victim)
-                                DoCast(victim, RandomHelper.RAND(SpellIds.ArcaneBlast, SpellIds.Blizzard, SpellIds.Frostbolt, SpellIds.WrathOfMisery));
-                            _events.ScheduleEvent(Misc.EventAttack, 3000);
-                            break;
-                        default:
-                            break;
-                    }
-
-                    if (me.HasUnitState(UnitState.Casting))
-                        return;
-                });
-            }
-
-            public override void DoAction(int action)
-            {
-                if (action == DTKDataTypes.ActionCrystalHandlerDied)
-                {
-                    Talk(TextIds.SayArcaneField);
-                    SetSummonerStatus(false);
-                    SetBubbled(false);
-                    _events.ScheduleEvent(Misc.EventAttack, 3000);
-                    if (IsHeroic())
-                        _events.ScheduleEvent(Misc.EventSummonMinions, 15000);
-                }
-            }
-
-            public override void MoveInLineOfSight(Unit who)
-            {
-                base.MoveInLineOfSight(who);
-
-                if (!_ohNovos || !who || !who.IsTypeId(TypeId.Player) || who.GetPositionY() > Misc.MaxYCoordOhNovosMAX)
-                    return;
-
-                uint entry = who.GetEntry();
-                if (entry == DTKCreatureIds.HulkingCorpse || entry == DTKCreatureIds.RisenShadowcaster || entry == DTKCreatureIds.FetidTrollCorpse)
-                    _ohNovos = false;
-            }
-
-            public override uint GetData(uint type)
-            {
-                return type == Misc.DataNovosAchiev && _ohNovos ? 1 : 0u;
-            }
-
-            public override void JustSummoned(Creature summon)
-            {
-                me.Yell(TextIds.SaySummoningAdds, summon);
-                me.TextEmote(TextIds.EmoteSummoningAdds, summon);
-
-                summon.SelectNearestTargetInAttackDistance(50f);
-                summons.Summon(summon);
-            }
-
-            void SetBubbled(bool state)
-            {
-                _bubbled = state;
-                if (!state)
-                {
-                    if (me.HasFlag(UnitFields.Flags, UnitFlags.NonAttackable))
-                        me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable);
-                    if (me.HasUnitState(UnitState.Casting))
-                        me.CastStop();
-                }
-                else
-                {
-                    if (!me.HasFlag(UnitFields.Flags, UnitFlags.NonAttackable))
-                        me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable);
-                    DoCast(SpellIds.ArcaneField);
-                }
-            }
-
-            void SetSummonerStatus(bool active)
-            {
-                for (byte i = 0; i < 4; i++)
-                {
-                    ObjectGuid guid = instance.GetGuidData(DTKDataTypes.NovosSummoner1 + i);
-                    if (!guid.IsEmpty())
-                    {
-                        Creature crystalChannelTarget = ObjectAccessor.GetCreature(me, guid);
-                        if (crystalChannelTarget)
-                        {
-                            if (active)
-                                crystalChannelTarget.GetAI().SetData(Misc.summoners[i].eventId, Misc.summoners[i].timer);
-                            else
-                                crystalChannelTarget.GetAI().Reset();
-                        }
-                    }
-                }
-            }
-
-            void SetCrystalsStatus(bool active)
-            {
-                for (byte i = 0; i < 4; i++)
-                {
-                    ObjectGuid guid = instance.GetGuidData(DTKDataTypes.NovosCrystal1 + i);
-                    if (!guid.IsEmpty())
-                    {
-                        GameObject crystal = ObjectAccessor.GetGameObject(me, guid);
-                        if (crystal)
-                            SetCrystalStatus(crystal, active);
-                    }
-                }
-            }
-
-            void SetCrystalStatus(GameObject crystal, bool active)
-            {
-                crystal.SetGoState(active ? GameObjectState.Active : GameObjectState.Ready);
-
-                Creature crystalChannelTarget = crystal.FindNearestCreature(DTKCreatureIds.CrystalChannelTarget, 5.0f);
-                if (crystalChannelTarget)
-                {
-                    if (active)
-                        crystalChannelTarget.CastSpell(null, SpellIds.BeamChannel);
-                    else if (crystalChannelTarget.HasUnitState(UnitState.Casting))
-                        crystalChannelTarget.CastStop();
-                }
-            }
-
-            bool _ohNovos;
-            bool _bubbled;
+            });
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void DoAction(int action)
         {
-            return GetInstanceAI<boss_novosAI>(creature);
+            if (action == DTKDataTypes.ActionCrystalHandlerDied)
+            {
+                Talk(TextIds.SayArcaneField);
+                SetSummonerStatus(false);
+                SetBubbled(false);
+                _events.ScheduleEvent(Misc.EventAttack, 3000);
+                if (IsHeroic())
+                    _events.ScheduleEvent(Misc.EventSummonMinions, 15000);
+            }
         }
+
+        public override void MoveInLineOfSight(Unit who)
+        {
+            base.MoveInLineOfSight(who);
+
+            if (!_ohNovos || !who || !who.IsTypeId(TypeId.Player) || who.GetPositionY() > Misc.MaxYCoordOhNovosMAX)
+                return;
+
+            uint entry = who.GetEntry();
+            if (entry == DTKCreatureIds.HulkingCorpse || entry == DTKCreatureIds.RisenShadowcaster || entry == DTKCreatureIds.FetidTrollCorpse)
+                _ohNovos = false;
+        }
+
+        public override uint GetData(uint type)
+        {
+            return type == Misc.DataNovosAchiev && _ohNovos ? 1 : 0u;
+        }
+
+        public override void JustSummoned(Creature summon)
+        {
+            me.Yell(TextIds.SaySummoningAdds, summon);
+            me.TextEmote(TextIds.EmoteSummoningAdds, summon);
+
+            summon.SelectNearestTargetInAttackDistance(50f);
+            summons.Summon(summon);
+        }
+
+        void SetBubbled(bool state)
+        {
+            _bubbled = state;
+            if (!state)
+            {
+                if (me.HasFlag(UnitFields.Flags, UnitFlags.NonAttackable))
+                    me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+                if (me.HasUnitState(UnitState.Casting))
+                    me.CastStop();
+            }
+            else
+            {
+                if (!me.HasFlag(UnitFields.Flags, UnitFlags.NonAttackable))
+                    me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+                DoCast(SpellIds.ArcaneField);
+            }
+        }
+
+        void SetSummonerStatus(bool active)
+        {
+            for (byte i = 0; i < 4; i++)
+            {
+                ObjectGuid guid = instance.GetGuidData(DTKDataTypes.NovosSummoner1 + i);
+                if (!guid.IsEmpty())
+                {
+                    Creature crystalChannelTarget = ObjectAccessor.GetCreature(me, guid);
+                    if (crystalChannelTarget)
+                    {
+                        if (active)
+                            crystalChannelTarget.GetAI().SetData(Misc.summoners[i].eventId, Misc.summoners[i].timer);
+                        else
+                            crystalChannelTarget.GetAI().Reset();
+                    }
+                }
+            }
+        }
+
+        void SetCrystalsStatus(bool active)
+        {
+            for (byte i = 0; i < 4; i++)
+            {
+                ObjectGuid guid = instance.GetGuidData(DTKDataTypes.NovosCrystal1 + i);
+                if (!guid.IsEmpty())
+                {
+                    GameObject crystal = ObjectAccessor.GetGameObject(me, guid);
+                    if (crystal)
+                        SetCrystalStatus(crystal, active);
+                }
+            }
+        }
+
+        void SetCrystalStatus(GameObject crystal, bool active)
+        {
+            crystal.SetGoState(active ? GameObjectState.Active : GameObjectState.Ready);
+
+            Creature crystalChannelTarget = crystal.FindNearestCreature(DTKCreatureIds.CrystalChannelTarget, 5.0f);
+            if (crystalChannelTarget)
+            {
+                if (active)
+                    crystalChannelTarget.CastSpell(null, SpellIds.BeamChannel);
+                else if (crystalChannelTarget.HasUnitState(UnitState.Casting))
+                    crystalChannelTarget.CastStop();
+            }
+        }
+
+        bool _ohNovos;
+        bool _bubbled;
     }
 
     [Script]
-    class npc_crystal_channel_target : CreatureScript
+    class npc_crystal_channel_target : ScriptedAI
     {
-        public npc_crystal_channel_target() : base("npc_crystal_channel_target") { }
+        public npc_crystal_channel_target(Creature creature) : base(creature) { }
 
-        class npc_crystal_channel_targetAI : ScriptedAI
+        public override void Reset()
         {
-            public npc_crystal_channel_targetAI(Creature creature) : base(creature) { }
+            _events.Reset();
+            _crystalHandlerCount = 0;
+        }
 
-            public override void Reset()
+        public override void UpdateAI(uint diff)
+        {
+            _events.Update(diff);
+
+            _events.ExecuteEvents(eventId =>
             {
-                _events.Reset();
-                _crystalHandlerCount = 0;
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                _events.Update(diff);
-
-                _events.ExecuteEvents(eventId =>
+                switch (eventId)
                 {
-                    switch (eventId)
-                    {
-                        case Misc.EventSummonCrystalHandler:
-                            me.SummonCreature(DTKCreatureIds.CrystalHandler, Misc.SummonPositions[_crystalHandlerCount++]);
-                            if (_crystalHandlerCount < 4)
-                                _events.Repeat(TimeSpan.FromSeconds(15));
-                            break;
-                        case Misc.EventSummonRisenShadowcaster:
-                            DoCast(SpellIds.SummonRisenShadowcaster);
-                            _events.Repeat(TimeSpan.FromSeconds(7));
-                            break;
-                        case Misc.EventSummonFetidTrollCorpse:
-                            DoCast(SpellIds.SummonFetidTrollCorpse);
-                            _events.Repeat(TimeSpan.FromSeconds(3));
-                            break;
-                        case Misc.EventSummonHulkingCorpse:
-                            DoCast(SpellIds.SummonHulkingCorpse);
-                            _events.Repeat(TimeSpan.FromSeconds(30));
-                            break;
-                    }
-                });
-            }
+                    case Misc.EventSummonCrystalHandler:
+                        me.SummonCreature(DTKCreatureIds.CrystalHandler, Misc.SummonPositions[_crystalHandlerCount++]);
+                        if (_crystalHandlerCount < 4)
+                            _events.Repeat(TimeSpan.FromSeconds(15));
+                        break;
+                    case Misc.EventSummonRisenShadowcaster:
+                        DoCast(SpellIds.SummonRisenShadowcaster);
+                        _events.Repeat(TimeSpan.FromSeconds(7));
+                        break;
+                    case Misc.EventSummonFetidTrollCorpse:
+                        DoCast(SpellIds.SummonFetidTrollCorpse);
+                        _events.Repeat(TimeSpan.FromSeconds(3));
+                        break;
+                    case Misc.EventSummonHulkingCorpse:
+                        DoCast(SpellIds.SummonHulkingCorpse);
+                        _events.Repeat(TimeSpan.FromSeconds(30));
+                        break;
+                }
+            });
+        }
 
-            public override void SetData(uint id, uint value)
+        public override void SetData(uint id, uint value)
+        {
+            _events.ScheduleEvent(id, TimeSpan.FromSeconds(value));
+        }
+
+        public override void SummonedCreatureDies(Creature summon, Unit killer)
+        {
+            if (_crystalHandlerCount < 4)
+                return;
+
+            InstanceScript instance = me.GetInstanceScript();
+            if (instance != null)
             {
-                _events.ScheduleEvent(id, TimeSpan.FromSeconds(value));
-            }
-
-            public override void SummonedCreatureDies(Creature summon, Unit killer)
-            {
-                if (_crystalHandlerCount < 4)
-                    return;
-
-                InstanceScript instance = me.GetInstanceScript();
-                if (instance != null)
+                ObjectGuid guid = instance.GetGuidData(DTKDataTypes.Novos);
+                if (!guid.IsEmpty())
                 {
-                    ObjectGuid guid = instance.GetGuidData(DTKDataTypes.Novos);
-                    if (!guid.IsEmpty())
-                    {
-                        Creature novos = ObjectAccessor.GetCreature(me, guid);
-                        if (novos)
-                            novos.GetAI().DoAction(DTKDataTypes.ActionCrystalHandlerDied);
-                    }
+                    Creature novos = ObjectAccessor.GetCreature(me, guid);
+                    if (novos)
+                        novos.GetAI().DoAction(DTKDataTypes.ActionCrystalHandlerDied);
+                }
+            }
+        }
+
+        public override void JustSummoned(Creature summon)
+        {
+            InstanceScript instance = me.GetInstanceScript();
+            if (instance != null)
+            {
+                ObjectGuid guid = instance.GetGuidData(DTKDataTypes.Novos);
+                if (!guid.IsEmpty())
+                {
+                    Creature novos = ObjectAccessor.GetCreature(me, guid);
+                    if (novos)
+                        novos.GetAI().JustSummoned(summon);
                 }
             }
 
-            public override void JustSummoned(Creature summon)
-            {
-                InstanceScript instance = me.GetInstanceScript();
-                if (instance != null)
-                {
-                    ObjectGuid guid = instance.GetGuidData(DTKDataTypes.Novos);
-                    if (!guid.IsEmpty())
-                    {
-                        Creature novos = ObjectAccessor.GetCreature(me, guid);
-                        if (novos)
-                            novos.GetAI().JustSummoned(summon);
-                    }
-                }
-
-                if (summon)
-                    summon.GetMotionMaster().MovePath(summon.GetEntry() * 100, false);
-            }
-
-            uint _crystalHandlerCount;
+            if (summon)
+                summon.GetMotionMaster().MovePath(summon.GetEntry() * 100, false);
         }
 
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<npc_crystal_channel_targetAI>(creature);
-        }
+        uint _crystalHandlerCount;
     }
 
     [Script]
@@ -409,32 +389,22 @@ namespace Scripts.Northrend.DraktharonKeep.Novos
     }
 
     [Script]
-    class spell_novos_summon_minions : SpellScriptLoader
+    class spell_novos_summon_minions : SpellScript
     {
-        public spell_novos_summon_minions() : base("spell_novos_summon_minions") { }
-
-        class spell_novos_summon_minions_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spellInfo)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(SpellIds.SummonCopyOfMinions);
-            }
-
-            void HandleScript(uint effIndex)
-            {
-                for (byte i = 0; i < 2; ++i)
-                    GetCaster().CastSpell((Unit)null, SpellIds.SummonCopyOfMinions, true);
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
-            }
+            return ValidateSpellInfo(SpellIds.SummonCopyOfMinions);
         }
 
-        public override SpellScript GetSpellScript()
+        void HandleScript(uint effIndex)
         {
-            return new spell_novos_summon_minions_SpellScript();
+            for (byte i = 0; i < 2; ++i)
+                GetCaster().CastSpell((Unit)null, SpellIds.SummonCopyOfMinions, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 }

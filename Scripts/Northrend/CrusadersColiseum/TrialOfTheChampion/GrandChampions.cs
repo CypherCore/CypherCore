@@ -71,237 +71,160 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
         public const uint POISON_BOTTLE = 67701;
     }
 
-    /*
-    struct Point
-    {
-        float x, y, z;
-    }
-
-    const Point MovementPoint[] =
-    {
-      {746.84f, 623.15f, 411.41f},
-      {747.96f, 620.29f, 411.09f},
-      {750.23f, 618.35f, 411.09f}
-    }
-    */
-
-    /*
-    * Generic AI for vehicles used by npcs in ToC, it needs more improvements.  *
-    * Script Complete: 25%.                                                     *
-    */
-
     [Script]
-    class generic_vehicleAI_toc5 : CreatureScript
+    class generic_vehicleAI_toc5 : npc_escortAI
     {
-        public generic_vehicleAI_toc5() : base("generic_vehicleAI_toc5") { }
-
-        class generic_vehicleAI_toc5AI : npc_escortAI
+        public generic_vehicleAI_toc5(Creature creature) : base(creature)
         {
-            public generic_vehicleAI_toc5AI(Creature creature) : base(creature)
-            {
-                Initialize();
-                SetDespawnAtEnd(false);
-                uiWaypointPath = 0;
+            Initialize();
+            SetDespawnAtEnd(false);
+            uiWaypointPath = 0;
 
-                instance = creature.GetInstanceScript();
+            instance = creature.GetInstanceScript();
+        }
+
+        void Initialize()
+        {
+            uiChargeTimer = 5000;
+            uiShieldBreakerTimer = 8000;
+            uiBuffTimer = RandomHelper.URand(30000, 60000);
+        }
+
+        public override void Reset()
+        {
+            Initialize();
+        }
+
+        public override void SetData(uint uiType, uint uiData)
+        {
+            switch (uiType)
+            {
+                case 1:
+                    AddWaypoint(0, 747.36f, 634.07f, 411.572f);
+                    AddWaypoint(1, 780.43f, 607.15f, 411.82f);
+                    AddWaypoint(2, 785.99f, 599.41f, 411.92f);
+                    AddWaypoint(3, 778.44f, 601.64f, 411.79f);
+                    uiWaypointPath = 1;
+                    break;
+                case 2:
+                    AddWaypoint(0, 747.35f, 634.07f, 411.57f);
+                    AddWaypoint(1, 768.72f, 581.01f, 411.92f);
+                    AddWaypoint(2, 763.55f, 590.52f, 411.71f);
+                    uiWaypointPath = 2;
+                    break;
+                case 3:
+                    AddWaypoint(0, 747.35f, 634.07f, 411.57f);
+                    AddWaypoint(1, 784.02f, 645.33f, 412.39f);
+                    AddWaypoint(2, 775.67f, 641.91f, 411.91f);
+                    uiWaypointPath = 3;
+                    break;
             }
 
-            void Initialize()
-            {
-                uiChargeTimer = 5000;
-                uiShieldBreakerTimer = 8000;
-                uiBuffTimer = RandomHelper.URand(30000, 60000);
-            }
+            if (uiType <= 3)
+                Start(false, true);
+        }
 
-            public override void Reset()
+        public override void WaypointReached(uint waypointId)
+        {
+            switch (waypointId)
             {
-                Initialize();
-            }
-
-            public override void SetData(uint uiType, uint uiData)
-            {
-                switch (uiType)
-                {
-                    case 1:
-                        AddWaypoint(0, 747.36f, 634.07f, 411.572f);
-                        AddWaypoint(1, 780.43f, 607.15f, 411.82f);
-                        AddWaypoint(2, 785.99f, 599.41f, 411.92f);
-                        AddWaypoint(3, 778.44f, 601.64f, 411.79f);
-                        uiWaypointPath = 1;
-                        break;
-                    case 2:
-                        AddWaypoint(0, 747.35f, 634.07f, 411.57f);
-                        AddWaypoint(1, 768.72f, 581.01f, 411.92f);
-                        AddWaypoint(2, 763.55f, 590.52f, 411.71f);
-                        uiWaypointPath = 2;
-                        break;
-                    case 3:
-                        AddWaypoint(0, 747.35f, 634.07f, 411.57f);
-                        AddWaypoint(1, 784.02f, 645.33f, 412.39f);
-                        AddWaypoint(2, 775.67f, 641.91f, 411.91f);
-                        uiWaypointPath = 3;
-                        break;
-                }
-
-                if (uiType <= 3)
-                    Start(false, true);
-            }
-
-            public override void WaypointReached(uint waypointId)
-            {
-                switch (waypointId)
-                {
-                    case 2:
-                        if (uiWaypointPath == 3 || uiWaypointPath == 2)
-                            instance.SetData((uint)Data.DATA_MOVEMENT_DONE, instance.GetData((uint)Data.DATA_MOVEMENT_DONE) + 1);
-                        break;
-                    case 3:
+                case 2:
+                    if (uiWaypointPath == 3 || uiWaypointPath == 2)
                         instance.SetData((uint)Data.DATA_MOVEMENT_DONE, instance.GetData((uint)Data.DATA_MOVEMENT_DONE) + 1);
-                        break;
+                    break;
+                case 3:
+                    instance.SetData((uint)Data.DATA_MOVEMENT_DONE, instance.GetData((uint)Data.DATA_MOVEMENT_DONE) + 1);
+                    break;
+            }
+        }
+
+        public override void EnterCombat(Unit who)
+        {
+            DoCastSpellShield();
+        }
+
+        void DoCastSpellShield()
+        {
+            for (byte i = 0; i < 3; ++i)
+                DoCast(me, TrialOfChampionSpells.SHIELD, true);
+        }
+
+        public override void UpdateAI(uint uiDiff)
+        {
+            base.UpdateAI(uiDiff);
+
+            if (!UpdateVictim())
+                return;
+
+            if (uiBuffTimer <= uiDiff)
+            {
+                if (!me.HasAura(TrialOfChampionSpells.SHIELD))
+                    DoCastSpellShield();
+
+                uiBuffTimer = RandomHelper.URand(30000, 45000);
+            }
+            else
+                uiBuffTimer -= uiDiff;
+
+            if (uiChargeTimer <= uiDiff)
+            {
+                var players = me.GetMap().GetPlayers();
+                if (!players.Empty())
+                {
+                    foreach (var player in players)
+                    {
+                        if (player && !player.IsGameMaster() && me.IsInRange(player, 8.0f, 25.0f, false))
+                        {
+                            DoResetThreat();
+                            me.AddThreat(player, 1.0f);
+                            DoCast(player, TrialOfChampionSpells.CHARGE);
+                            break;
+                        }
+                    }
                 }
+                uiChargeTimer = 5000;
             }
+            else
+                uiChargeTimer -= uiDiff;
 
-            public override void EnterCombat(Unit who)
+            //dosen't work at all
+            if (uiShieldBreakerTimer <= uiDiff)
             {
-                DoCastSpellShield();
-            }
-
-            void DoCastSpellShield()
-            {
-                for (byte i = 0; i < 3; ++i)
-                    DoCast(me, TrialOfChampionSpells.SHIELD, true);
-            }
-
-            public override void UpdateAI(uint uiDiff)
-            {
-                base.UpdateAI(uiDiff);
-
-                if (!UpdateVictim())
+                Vehicle pVehicle = me.GetVehicleKit();
+                if (!pVehicle)
                     return;
 
-                if (uiBuffTimer <= uiDiff)
-                {
-                    if (!me.HasAura(TrialOfChampionSpells.SHIELD))
-                        DoCastSpellShield();
-
-                    uiBuffTimer = RandomHelper.URand(30000, 45000);
-                }
-                else
-                    uiBuffTimer -= uiDiff;
-
-                if (uiChargeTimer <= uiDiff)
+                Unit pPassenger = pVehicle.GetPassenger(0);
+                if (pPassenger)
                 {
                     var players = me.GetMap().GetPlayers();
                     if (!players.Empty())
                     {
                         foreach (var player in players)
                         {
-                            if (player && !player.IsGameMaster() && me.IsInRange(player, 8.0f, 25.0f, false))
+                            if (player && !player.IsGameMaster() && me.IsInRange(player, 10.0f, 30.0f, false))
                             {
-                                DoResetThreat();
-                                me.AddThreat(player, 1.0f);
-                                DoCast(player, TrialOfChampionSpells.CHARGE);
+                                pPassenger.CastSpell(player, TrialOfChampionSpells.SHIELD_BREAKER, true);
                                 break;
                             }
                         }
                     }
-                    uiChargeTimer = 5000;
                 }
-                else
-                    uiChargeTimer -= uiDiff;
-
-                //dosen't work at all
-                if (uiShieldBreakerTimer <= uiDiff)
-                {
-                    Vehicle pVehicle = me.GetVehicleKit();
-                    if (!pVehicle)
-                        return;
-
-                    Unit pPassenger = pVehicle.GetPassenger(0);
-                    if (pPassenger)
-                    {
-                        var players = me.GetMap().GetPlayers();
-                        if (!players.Empty())
-                        {
-                            foreach (var player in players)
-                            {
-                                if (player && !player.IsGameMaster() && me.IsInRange(player, 10.0f, 30.0f, false))
-                                {
-                                    pPassenger.CastSpell(player, TrialOfChampionSpells.SHIELD_BREAKER, true);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    uiShieldBreakerTimer = 7000;
-                }
-                else
-                    uiShieldBreakerTimer -= uiDiff;
-
-                DoMeleeAttackIfReady();
+                uiShieldBreakerTimer = 7000;
             }
+            else
+                uiShieldBreakerTimer -= uiDiff;
 
-            InstanceScript instance;
-
-            uint uiChargeTimer;
-            uint uiShieldBreakerTimer;
-            uint uiBuffTimer;
-
-            uint uiWaypointPath;
+            DoMeleeAttackIfReady();
         }
 
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<generic_vehicleAI_toc5AI>(creature);
-        }
+        InstanceScript instance;
 
-        public static void AggroAllPlayers(Creature temp)
-        {
-            var PlList = temp.GetMap().GetPlayers();
+        uint uiChargeTimer;
+        uint uiShieldBreakerTimer;
+        uint uiBuffTimer;
 
-            if (PlList.Empty())
-                return;
-
-            foreach (var player in PlList)
-            {
-                if (player)
-                {
-                    if (player.IsGameMaster())
-                        continue;
-
-                    if (player.IsAlive())
-                    {
-                        temp.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.ImmuneToPc);
-                        temp.SetReactState(ReactStates.Aggressive);
-                        temp.SetInCombatWith(player);
-                        player.SetInCombatWith(temp);
-                        temp.AddThreat(player, 0.0f);
-                    }
-                }
-            }
-        }
-
-        public static bool GrandChampionsOutVehicle(Creature me)
-        {
-            InstanceScript instance = me.GetInstanceScript();
-
-            if (instance == null)
-                return false;
-
-            Creature pGrandChampion1 = ObjectAccessor.GetCreature(me, instance.GetGuidData((uint)Data64.DATA_GRAND_CHAMPION_1));
-            Creature pGrandChampion2 = ObjectAccessor.GetCreature(me, instance.GetGuidData((uint)Data64.DATA_GRAND_CHAMPION_2));
-            Creature pGrandChampion3 = ObjectAccessor.GetCreature(me, instance.GetGuidData((uint)Data64.DATA_GRAND_CHAMPION_3));
-
-            if (pGrandChampion1 && pGrandChampion2 && pGrandChampion3)
-            {
-                if (pGrandChampion1.m_movementInfo.transport.guid.IsEmpty() &&
-                    pGrandChampion2.m_movementInfo.transport.guid.IsEmpty() &&
-                    pGrandChampion3.m_movementInfo.transport.guid.IsEmpty())
-                    return true;
-            }
-
-            return false;
-        }
+        uint uiWaypointPath;
     }
 
     abstract class boss_basic_toc5AI : ScriptedAI
@@ -349,7 +272,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
 
         public override void UpdateAI(uint diff)
         {
-            if (!bDone && generic_vehicleAI_toc5.GrandChampionsOutVehicle(me))
+            if (!bDone && GrandChampionsOutVehicle(me))
             {
                 bDone = true;
 
@@ -368,7 +291,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
             {
                 if (uiPhase == 1)
                 {
-                    generic_vehicleAI_toc5.AggroAllPlayers(me);
+                    AggroAllPlayers(me);
                     uiPhase = 0;
                 }
             }
@@ -379,6 +302,54 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
         public bool InVehicle()
         {
             return !me.m_movementInfo.transport.guid.IsEmpty();
+        }
+
+        void AggroAllPlayers(Creature temp)
+        {
+            var PlList = temp.GetMap().GetPlayers();
+
+            if (PlList.Empty())
+                return;
+
+            foreach (var player in PlList)
+            {
+                if (player)
+                {
+                    if (player.IsGameMaster())
+                        continue;
+
+                    if (player.IsAlive())
+                    {
+                        temp.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.ImmuneToPc);
+                        temp.SetReactState(ReactStates.Aggressive);
+                        temp.SetInCombatWith(player);
+                        player.SetInCombatWith(temp);
+                        temp.AddThreat(player, 0.0f);
+                    }
+                }
+            }
+        }
+
+        bool GrandChampionsOutVehicle(Creature me)
+        {
+            InstanceScript instance = me.GetInstanceScript();
+
+            if (instance == null)
+                return false;
+
+            Creature pGrandChampion1 = ObjectAccessor.GetCreature(me, instance.GetGuidData((uint)Data64.DATA_GRAND_CHAMPION_1));
+            Creature pGrandChampion2 = ObjectAccessor.GetCreature(me, instance.GetGuidData((uint)Data64.DATA_GRAND_CHAMPION_2));
+            Creature pGrandChampion3 = ObjectAccessor.GetCreature(me, instance.GetGuidData((uint)Data64.DATA_GRAND_CHAMPION_3));
+
+            if (pGrandChampion1 && pGrandChampion2 && pGrandChampion3)
+            {
+                if (pGrandChampion1.m_movementInfo.transport.guid.IsEmpty() &&
+                    pGrandChampion2.m_movementInfo.transport.guid.IsEmpty() &&
+                    pGrandChampion3.m_movementInfo.transport.guid.IsEmpty())
+                    return true;
+            }
+
+            return false;
         }
 
         public TaskScheduler NonCombatEvents = new TaskScheduler();
@@ -393,337 +364,287 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
     }
 
     [Script]
-    class boss_warrior_toc5 : CreatureScript
+    // Marshal Jacob Alerius && Mokra the Skullcrusher || Warrior
+    class boss_warrior_toc5 : boss_basic_toc5AI
     {
-        public boss_warrior_toc5() : base("boss_warrior_toc5") { }
+        public boss_warrior_toc5(Creature creature) : base(creature) { }
 
-        // Marshal Jacob Alerius && Mokra the Skullcrusher || Warrior
-        class boss_warrior_toc5AI : boss_basic_toc5AI
+        public override void Initialize()
         {
-            public boss_warrior_toc5AI(Creature creature) : base(creature) { }
-
-            public override void Initialize()
+            _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(20), task =>
             {
-                _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(20), task =>
-                {
-                    DoCastVictim(TrialOfChampionSpells.BLADESTORM);
-                    task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(20));
-                });
+                DoCastVictim(TrialOfChampionSpells.BLADESTORM);
+                task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(20));
+            });
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(7), task =>
+            _scheduler.Schedule(TimeSpan.FromSeconds(7), task =>
+            {
+                var players = me.GetMap().GetPlayers();
+                if (!players.Empty())
                 {
-                    var players = me.GetMap().GetPlayers();
-                    if (!players.Empty())
+                    foreach (var player in players)
                     {
-                        foreach (var player in players)
+                        if (player && !player.IsGameMaster() && me.IsInRange(player, 8.0f, 25.0f, false))
                         {
-                            if (player && !player.IsGameMaster() && me.IsInRange(player, 8.0f, 25.0f, false))
-                            {
-                                DoResetThreat();
-                                me.AddThreat(player, 5.0f);
-                                DoCast(player, TrialOfChampionSpells.INTERCEPT);
-                                break;
-                            }
+                            DoResetThreat();
+                            me.AddThreat(player, 5.0f);
+                            DoCast(player, TrialOfChampionSpells.INTERCEPT);
+                            break;
                         }
                     }
-                    task.Repeat(TimeSpan.FromSeconds(7));
-                });
+                }
+                task.Repeat(TimeSpan.FromSeconds(7));
+            });
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(12), task =>
-                {
-                    DoCastVictim(TrialOfChampionSpells.MORTAL_STRIKE);
-                    task.Repeat(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(12));
-                });
-            }
-
-            public override void UpdateAI(uint diff)
+            _scheduler.Schedule(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(12), task =>
             {
-                base.UpdateAI(diff);
-
-                if (!UpdateVictim() || InVehicle())
-                    return;
-
-                _scheduler.Update(diff);
-
-                DoMeleeAttackIfReady();
-            }
-
+                DoCastVictim(TrialOfChampionSpells.MORTAL_STRIKE);
+                task.Repeat(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(12));
+            });
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void UpdateAI(uint diff)
         {
-            return GetInstanceAI<boss_warrior_toc5AI>(creature);
+            base.UpdateAI(diff);
+
+            if (!UpdateVictim() || InVehicle())
+                return;
+
+            _scheduler.Update(diff);
+
+            DoMeleeAttackIfReady();
+        }
+
+    }
+
+    [Script]
+    // Ambrose Boltspark && Eressea Dawnsinger || Mage
+    class boss_mage_toc5 : boss_basic_toc5AI
+    {
+        public boss_mage_toc5(Creature creature) : base(creature) { }
+
+        public override void Initialize()
+        {
+            _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
+            {
+                DoCastVictim(TrialOfChampionSpells.FIREBALL);
+                task.Repeat(TimeSpan.FromSeconds(5));
+            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
+            {
+                Unit target = SelectTarget(SelectAggroTarget.Random, 0);
+                if (target)
+                    DoCast(target, TrialOfChampionSpells.POLYMORPH);
+                task.Repeat(TimeSpan.FromSeconds(8));
+            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
+            {
+                DoCastAOE(TrialOfChampionSpells.BLAST_WAVE, false);
+                task.Repeat(TimeSpan.FromSeconds(13));
+            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(22), task =>
+            {
+                me.InterruptNonMeleeSpells(true);
+
+                DoCast(me, TrialOfChampionSpells.HASTE);
+                task.Repeat(TimeSpan.FromSeconds(22));
+            });
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            base.UpdateAI(diff);
+
+            if (!UpdateVictim() || InVehicle())
+                return;
+
+            _scheduler.Update(diff);
+
+            DoMeleeAttackIfReady();
         }
     }
 
     [Script]
-    class boss_mage_toc5 : CreatureScript
+    // Colosos && Runok Wildmane || Shaman
+    class boss_shaman_toc5 : boss_basic_toc5AI
     {
-        public boss_mage_toc5() : base("boss_mage_toc5") { }
+        public boss_shaman_toc5(Creature creature) : base(creature) { }
 
-        // Ambrose Boltspark && Eressea Dawnsinger || Mage
-        class boss_mage_toc5AI : boss_basic_toc5AI
+        public override void Initialize()
         {
-            public boss_mage_toc5AI(Creature creature) : base(creature) { }
-
-            public override void Initialize()
+            _scheduler.Schedule(TimeSpan.FromSeconds(16), task =>
             {
-                _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
-                {
-                    DoCastVictim(TrialOfChampionSpells.FIREBALL);
-                    task.Repeat(TimeSpan.FromSeconds(5));
-                });
+                Unit target = SelectTarget(SelectAggroTarget.Random, 0);
+                if (target)
+                    DoCast(target, TrialOfChampionSpells.CHAIN_LIGHTNING);
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
-                {
-                    Unit target = SelectTarget(SelectAggroTarget.Random, 0);
-                    if (target)
-                        DoCast(target, TrialOfChampionSpells.POLYMORPH);
-                    task.Repeat(TimeSpan.FromSeconds(8));
-                });
+                task.Repeat(TimeSpan.FromSeconds(16));
+            });
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
-                {
-                    DoCastAOE(TrialOfChampionSpells.BLAST_WAVE, false);
-                    task.Repeat(TimeSpan.FromSeconds(13));
-                });
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(22), task =>
-                {
-                    me.InterruptNonMeleeSpells(true);
-
-                    DoCast(me, TrialOfChampionSpells.HASTE);
-                    task.Repeat(TimeSpan.FromSeconds(22));
-                });
-            }
-
-            public override void UpdateAI(uint diff)
+            _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
             {
-                base.UpdateAI(diff);
+                bool bChance = RandomHelper.randChance(50);
 
-                if (!UpdateVictim() || InVehicle())
-                    return;
-
-                _scheduler.Update(diff);
-
-                DoMeleeAttackIfReady();
-            }
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<boss_mage_toc5AI>(creature);
-        }
-    }
-
-    [Script]
-    class boss_shaman_toc5 : CreatureScript
-    {
-        public boss_shaman_toc5() : base("boss_shaman_toc5") { }
-
-        // Colosos && Runok Wildmane || Shaman
-        class boss_shaman_toc5AI : boss_basic_toc5AI
-        {
-            public boss_shaman_toc5AI(Creature creature) : base(creature) { }
-
-            public override void Initialize()
-            {
-                _scheduler.Schedule(TimeSpan.FromSeconds(16), task =>
+                if (!bChance)
                 {
-                    Unit target = SelectTarget(SelectAggroTarget.Random, 0);
-                    if (target)
-                        DoCast(target, TrialOfChampionSpells.CHAIN_LIGHTNING);
+                    Unit pFriend = DoSelectLowestHpFriendly(40);
+                    if (pFriend)
+                        DoCast(pFriend, TrialOfChampionSpells.HEALING_WAVE);
+                }
+                else
+                    DoCast(me, TrialOfChampionSpells.HEALING_WAVE);
 
-                    task.Repeat(TimeSpan.FromSeconds(16));
-                });
+                task.Repeat(TimeSpan.FromSeconds(12));
+            });
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
-                {
-                    bool bChance = RandomHelper.randChance(50);
-
-                    if (!bChance)
-                    {
-                        Unit pFriend = DoSelectLowestHpFriendly(40);
-                        if (pFriend)
-                            DoCast(pFriend, TrialOfChampionSpells.HEALING_WAVE);
-                    }
-                    else
-                        DoCast(me, TrialOfChampionSpells.HEALING_WAVE);
-
-                    task.Repeat(TimeSpan.FromSeconds(12));
-                });
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(35), task =>
-                {
-                    DoCast(me, TrialOfChampionSpells.EARTH_SHIELD);
-                    task.Repeat(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(35));
-                });
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(25), task =>
-                {
-                    DoCastVictim(TrialOfChampionSpells.HEX_OF_MENDING, true);
-                    task.Repeat(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(25));
-                });
-            }
-
-            public override void EnterCombat(Unit who)
+            _scheduler.Schedule(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(35), task =>
             {
                 DoCast(me, TrialOfChampionSpells.EARTH_SHIELD);
-                DoCast(who, TrialOfChampionSpells.HEX_OF_MENDING);
-            }
+                task.Repeat(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(35));
+            });
 
-            public override void UpdateAI(uint diff)
+            _scheduler.Schedule(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(25), task =>
             {
-                base.UpdateAI(diff);
-
-                if (!UpdateVictim() || InVehicle())
-                    return;
-
-                _scheduler.Update(diff);
-
-                DoMeleeAttackIfReady();
-            }
+                DoCastVictim(TrialOfChampionSpells.HEX_OF_MENDING, true);
+                task.Repeat(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(25));
+            });
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void EnterCombat(Unit who)
         {
-            return GetInstanceAI<boss_shaman_toc5AI>(creature);
+            DoCast(me, TrialOfChampionSpells.EARTH_SHIELD);
+            DoCast(who, TrialOfChampionSpells.HEX_OF_MENDING);
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            base.UpdateAI(diff);
+
+            if (!UpdateVictim() || InVehicle())
+                return;
+
+            _scheduler.Update(diff);
+
+            DoMeleeAttackIfReady();
         }
     }
 
     [Script]
-    class boss_hunter_toc5 : CreatureScript
+    // Jaelyne Evensong && Zul'tore || Hunter
+    class boss_hunter_toc5 : boss_basic_toc5AI
     {
-        public boss_hunter_toc5() : base("boss_hunter_toc5") { }
+        public boss_hunter_toc5(Creature creature) : base(creature) { }
 
-        // Jaelyne Evensong && Zul'tore || Hunter
-        class boss_hunter_toc5AI : boss_basic_toc5AI
+        public override void Initialize()
         {
-            public boss_hunter_toc5AI(Creature creature) : base(creature) { }
-
-            public override void Initialize()
+            _scheduler.Schedule(TimeSpan.FromSeconds(7), task =>
             {
-                _scheduler.Schedule(TimeSpan.FromSeconds(7), task =>
-                {
-                    DoCastAOE(TrialOfChampionSpells.LIGHTNING_ARROWS, false);
-                    task.Repeat(TimeSpan.FromSeconds(7));
-                });
+                DoCastAOE(TrialOfChampionSpells.LIGHTNING_ARROWS, false);
+                task.Repeat(TimeSpan.FromSeconds(7));
+            });
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
+            _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
+            {
+                ObjectGuid uiTargetGUID = ObjectGuid.Empty;
+                Unit target = SelectTarget(SelectAggroTarget.Farthest, 0, 30.0f);
+                if (target)
                 {
-                    ObjectGuid uiTargetGUID = ObjectGuid.Empty;
-                    Unit target = SelectTarget(SelectAggroTarget.Farthest, 0, 30.0f);
-                    if (target)
-                    {
-                        uiTargetGUID = target.GetGUID();
-                        DoCast(target, TrialOfChampionSpells.SHOOT);
-                    }
+                    uiTargetGUID = target.GetGUID();
+                    DoCast(target, TrialOfChampionSpells.SHOOT);
+                }
 
-                    bool bShoot = true;
-                    task.Repeat(TimeSpan.FromSeconds(12));
-                    task.Schedule(TimeSpan.FromSeconds(3), task1 =>
+                bool bShoot = true;
+                task.Repeat(TimeSpan.FromSeconds(12));
+                task.Schedule(TimeSpan.FromSeconds(3), task1 =>
+                {
+                    if (bShoot)
                     {
-                        if (bShoot)
+                        me.InterruptNonMeleeSpells(true);
+
+                        Unit target1 = Global.ObjAccessor.GetUnit(me, uiTargetGUID);
+                        if (target1 && me.IsInRange(target1, 5.0f, 30.0f, false))
                         {
-                            me.InterruptNonMeleeSpells(true);
-
-                            Unit target1 = Global.ObjAccessor.GetUnit(me, uiTargetGUID);
-                            if (target1 && me.IsInRange(target1, 5.0f, 30.0f, false))
+                            DoCast(target1, TrialOfChampionSpells.MULTI_SHOT);
+                        }
+                        else
+                        {
+                            var players = me.GetMap().GetPlayers();
+                            if (!players.Empty())
                             {
-                                DoCast(target1, TrialOfChampionSpells.MULTI_SHOT);
-                            }
-                            else
-                            {
-                                var players = me.GetMap().GetPlayers();
-                                if (!players.Empty())
+                                foreach (var player in players)
                                 {
-                                    foreach (var player in players)
+                                    if (player && !player.IsGameMaster() && me.IsInRange(player, 5.0f, 30.0f, false))
                                     {
-                                        if (player && !player.IsGameMaster() && me.IsInRange(player, 5.0f, 30.0f, false))
-                                        {
-                                            DoCast(player, TrialOfChampionSpells.MULTI_SHOT);
-                                            break;
-                                        }
+                                        DoCast(player, TrialOfChampionSpells.MULTI_SHOT);
+                                        break;
                                     }
                                 }
                             }
-                            bShoot = false;
                         }
-                    });
+                        bShoot = false;
+                    }
                 });
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                base.UpdateAI(diff);
-
-                if (!UpdateVictim() || InVehicle())
-                    return;
-
-                _scheduler.Update(diff);
-
-                DoMeleeAttackIfReady();
-            }
+            });
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void UpdateAI(uint diff)
         {
-            return GetInstanceAI<boss_hunter_toc5AI>(creature);
+            base.UpdateAI(diff);
+
+            if (!UpdateVictim() || InVehicle())
+                return;
+
+            _scheduler.Update(diff);
+
+            DoMeleeAttackIfReady();
         }
     }
 
     [Script]
-    class boss_rouge_toc5 : CreatureScript
+    // Lana Stouthammer Evensong && Deathstalker Visceri || Rouge
+    class boss_rouge_toc5 : boss_basic_toc5AI
     {
-        public boss_rouge_toc5() : base("boss_rouge_toc5") { }
+        public boss_rouge_toc5(Creature creature) : base(creature) { }
 
-        // Lana Stouthammer Evensong && Deathstalker Visceri || Rouge
-        class boss_rouge_toc5AI : boss_basic_toc5AI
+        public override void Initialize()
         {
-            public boss_rouge_toc5AI(Creature creature) : base(creature) { }
-
-            public override void Initialize()
+            _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
             {
-                _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
-                {
-                    DoCastVictim(TrialOfChampionSpells.EVISCERATE);
+                DoCastVictim(TrialOfChampionSpells.EVISCERATE);
 
-                    task.Repeat(TimeSpan.FromSeconds(8));
-                });
+                task.Repeat(TimeSpan.FromSeconds(8));
+            });
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(14), task =>
-                {
-                    DoCastAOE(TrialOfChampionSpells.FAN_OF_KNIVES, false);
-
-                    task.Repeat(TimeSpan.FromSeconds(14));
-                });
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(19), task =>
-                {
-                    Unit target = SelectTarget(SelectAggroTarget.Random, 0);
-                    if (target)
-                        DoCast(target, TrialOfChampionSpells.POISON_BOTTLE);
-
-                    task.Repeat(TimeSpan.FromSeconds(19));
-                });
-            }
-
-            public override void UpdateAI(uint diff)
+            _scheduler.Schedule(TimeSpan.FromSeconds(14), task =>
             {
-                base.UpdateAI(diff);
+                DoCastAOE(TrialOfChampionSpells.FAN_OF_KNIVES, false);
 
-                if (!UpdateVictim() || !me.m_movementInfo.transport.guid.IsEmpty())
-                    return;
+                task.Repeat(TimeSpan.FromSeconds(14));
+            });
 
-                _scheduler.Update(diff);
+            _scheduler.Schedule(TimeSpan.FromSeconds(19), task =>
+            {
+                Unit target = SelectTarget(SelectAggroTarget.Random, 0);
+                if (target)
+                    DoCast(target, TrialOfChampionSpells.POISON_BOTTLE);
 
-                DoMeleeAttackIfReady();
-            }
+                task.Repeat(TimeSpan.FromSeconds(19));
+            });
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void UpdateAI(uint diff)
         {
-            return GetInstanceAI<boss_rouge_toc5AI>(creature);
+            base.UpdateAI(diff);
+
+            if (!UpdateVictim() || !me.m_movementInfo.transport.guid.IsEmpty())
+                return;
+
+            _scheduler.Update(diff);
+
+            DoMeleeAttackIfReady();
         }
     }
 }

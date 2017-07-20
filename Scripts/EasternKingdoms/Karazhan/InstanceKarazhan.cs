@@ -20,6 +20,7 @@ using Framework.IO;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
+using Game.AI;
 
 namespace Scripts.EasternKingdoms.Karazhan
 {
@@ -457,6 +458,11 @@ namespace Scripts.EasternKingdoms.Karazhan
         public override InstanceScript GetInstanceScript(InstanceMap map)
         {
             return new instance_karazhan_InstanceMapScript(map);
+        }
+
+        public static T GetKarazhanAI<T>(Creature creature) where T : CreatureAI
+        {
+            return GetInstanceAI<T>(creature, "instance_karazhan");
         }
     }
 }

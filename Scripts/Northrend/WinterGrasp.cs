@@ -24,65 +24,45 @@ using Game.Scripting;
 namespace Scripts.Northrend
 {
     [Script]
-    class spell_wintergrasp_defender_teleport : SpellScriptLoader
+    class spell_wintergrasp_defender_teleport : SpellScript
     {
-        public spell_wintergrasp_defender_teleport() : base("spell_wintergrasp_defender_teleport") { }
-
-        class spell_wintergrasp_defender_teleport_SpellScript : SpellScript
+        SpellCastResult CheckCast()
         {
-            SpellCastResult CheckCast()
+            BattleField wg = Global.BattleFieldMgr.GetBattlefieldByBattleId(1);
+            if (wg != null)
             {
-                BattleField wg = Global.BattleFieldMgr.GetBattlefieldByBattleId(1);
-                if (wg != null)
-                {
-                    Player target = GetExplTargetUnit().ToPlayer();
-                    if (target)
-                        // check if we are in Wintergrasp at all, SotA uses same teleport spells
-                        if ((target.GetZoneId() == 4197 && target.GetTeamId() != wg.GetDefenderTeam()) || target.HasAura(54643))
-                            return SpellCastResult.BadTargets;
-                }
-
-                return SpellCastResult.SpellCastOk;
+                Player target = GetExplTargetUnit().ToPlayer();
+                if (target)
+                    // check if we are in Wintergrasp at all, SotA uses same teleport spells
+                    if ((target.GetZoneId() == 4197 && target.GetTeamId() != wg.GetDefenderTeam()) || target.HasAura(54643))
+                        return SpellCastResult.BadTargets;
             }
 
-            public override void Register()
-            {
-                OnCheckCast.Add(new CheckCastHandler(CheckCast));
-            }
+            return SpellCastResult.SpellCastOk;
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_wintergrasp_defender_teleport_SpellScript();
+            OnCheckCast.Add(new CheckCastHandler(CheckCast));
         }
     }
 
     [Script]
-    class spell_wintergrasp_defender_teleport_trigger : SpellScriptLoader
+    class spell_wintergrasp_defender_teleport_trigger : SpellScript
     {
-        public spell_wintergrasp_defender_teleport_trigger() : base("spell_wintergrasp_defender_teleport_trigger") { }
-
-        class spell_wintergrasp_defender_teleport_trigger_SpellScript : SpellScript
+        void HandleDummy(uint effindex)
         {
-            void HandleDummy(uint effindex)
+            Unit target = GetHitUnit();
+            if (target)
             {
-                Unit target = GetHitUnit();
-                if (target)
-                {
-                    WorldLocation loc = target.GetWorldLocation();
-                    SetExplTargetDest(loc);
-                }
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+                WorldLocation loc = target.GetWorldLocation();
+                SetExplTargetDest(loc);
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_wintergrasp_defender_teleport_trigger_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 

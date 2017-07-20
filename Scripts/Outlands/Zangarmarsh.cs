@@ -140,8 +140,7 @@ namespace Scripts.Outlands
 
         class npc_cooshcooshAI : ScriptedAI
         {
-            public npc_cooshcooshAI(Creature creature)
-                : base(creature)
+            public npc_cooshcooshAI(Creature creature) : base(creature)
             {
                 m_uiNormFaction = creature.getFaction();
             }
@@ -264,32 +263,6 @@ namespace Scripts.Outlands
     }
 
     [Script]
-    class npc_mortog_steamhead : CreatureScript
-    {
-        public npc_mortog_steamhead() : base("npc_mortog_steamhead") { }
-
-        public override bool OnGossipHello(Player player, Creature creature)
-        {
-            if (creature.IsVendor() && player.GetReputationRank(942) == ReputationRank.Exalted)
-                player.ADD_GOSSIP_ITEM(GossipOptionIcon.Vendor, GOSSIP_TEXT_BROWSE_GOODS, eTradeskill.GossipSenderMain, eTradeskill.GossipActionTrade);
-
-            player.SEND_GOSSIP_MENU(player.GetGossipTextId(creature), creature.GetGUID());
-
-            return true;
-        }
-
-        public override bool OnGossipSelect(Player player, Creature creature, uint sender, uint action)
-        {
-            player.PlayerTalkClass.ClearMenus();
-            if (action == eTradeskill.GossipActionTrade)
-                player.GetSession().SendListInventory(creature.GetGUID());
-            return true;
-        }
-
-        const string GOSSIP_TEXT_BROWSE_GOODS = "I'd like to browse your goods.";
-    }
-
-    [Script]
     class npc_kayra_longmane : CreatureScript
     {
         public npc_kayra_longmane() : base("npc_kayra_longmane") { }
@@ -359,44 +332,5 @@ namespace Scripts.Outlands
 
         const uint QUEST_ESCAPE_FROM = 9752;
         const uint NPC_SLAVEBINDER = 18042;
-    }
-
-    [Script]
-    class npc_timothy_daniels : CreatureScript
-    {
-        public npc_timothy_daniels() : base("npc_timothy_daniels") { }
-
-        public override bool OnGossipHello(Player player, Creature creature)
-        {
-            if (creature.IsQuestGiver())
-                player.PrepareQuestMenu(creature.GetGUID());
-
-            if (creature.IsVendor())
-                player.ADD_GOSSIP_ITEM(GossipOptionIcon.Vendor, GOSSIP_TEXT_BROWSE_POISONS, eTradeskill.GossipSenderMain, eTradeskill.GossipActionTrade);
-
-            player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, GOSSIP_TIMOTHY_DANIELS_ITEM1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
-            player.SEND_GOSSIP_MENU(player.GetGossipTextId(creature), creature.GetGUID());
-            return true;
-        }
-
-        public override bool OnGossipSelect(Player player, Creature creature, uint sender, uint action)
-        {
-            player.PlayerTalkClass.ClearMenus();
-            switch (action)
-            {
-                case eTradeskill.GossipActionInfoDef + 1:
-                    player.SEND_GOSSIP_MENU(GOSSIP_TEXTID_TIMOTHY_DANIELS1, creature.GetGUID());
-                    break;
-                case eTradeskill.GossipActionTrade:
-                    player.GetSession().SendListInventory(creature.GetGUID());
-                    break;
-            }
-
-            return true;
-        }
-
-        const string GOSSIP_TIMOTHY_DANIELS_ITEM1 = "Specialist, eh? Just what kind of specialist are you, anyway?";
-        const string GOSSIP_TEXT_BROWSE_POISONS = "Let me browse your reagents and poison supplies.";
-        const uint GOSSIP_TEXTID_TIMOTHY_DANIELS1 = 9239;
     }
 }

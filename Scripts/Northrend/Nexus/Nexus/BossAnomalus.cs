@@ -25,7 +25,7 @@ using System;
 namespace Scripts.Northrend.Nexus.Nexus
 {
     struct AnomalusConst
-    { 
+    {
         //Spells
         public const uint SpellSpark = 47751;
         public const uint SpellSparkHeroic = 57062;
@@ -64,208 +64,188 @@ namespace Scripts.Northrend.Nexus.Nexus
     }
 
     [Script]
-    class boss_anomalus : CreatureScript
+    class boss_anomalus : ScriptedAI
     {
-        public boss_anomalus() : base("boss_anomalus") { }
-
-        class boss_anomalusAI : ScriptedAI
+        public boss_anomalus(Creature creature) : base(creature)
         {
-            public boss_anomalusAI(Creature creature) : base(creature)
+            instance = me.GetInstanceScript();
+        }
+
+        void Initialize()
+        {
+            _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
             {
-                instance = me.GetInstanceScript();
+                Unit target = SelectTarget(SelectAggroTarget.Random, 0);
+                if (target)
+                    DoCast(target, AnomalusConst.SpellSpark);
+
+                task.Repeat(TimeSpan.FromSeconds(5));
+            });
+
+            Phase = 0;
+            uiChaoticRiftGUID.Clear();
+            chaosTheory = true;
+        }
+
+        public override void Reset()
+        {
+            Initialize();
+
+            instance.SetBossState(DataTypes.Anomalus, EncounterState.NotStarted);
+        }
+
+        public override void EnterCombat(Unit who)
+        {
+            Talk(AnomalusConst.SayAggro);
+
+            instance.SetBossState(DataTypes.Anomalus, EncounterState.InProgress);
+        }
+
+        public override void JustDied(Unit killer)
+        {
+            Talk(AnomalusConst.SayDeath);
+
+            instance.SetBossState(DataTypes.Anomalus, EncounterState.Done);
+        }
+
+        public override uint GetData(uint type)
+        {
+            if (type == AnomalusConst.DataChaosTheory)
+                return chaosTheory ? 1 : 0u;
+
+            return 0;
+        }
+
+        public override void SummonedCreatureDies(Creature summoned, Unit who)
+        {
+            if (summoned.GetEntry() == AnomalusConst.NpcChaoticRift)
+                chaosTheory = false;
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (me.GetDistance(me.GetHomePosition()) > 60.0f)
+            {
+                // Not blizzlike, hack to avoid an exploit
+                EnterEvadeMode();
+                return;
             }
 
-            void Initialize()
+            if (me.HasAura(AnomalusConst.SpellRiftShield))
             {
-                _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
+                if (!uiChaoticRiftGUID.IsEmpty())
                 {
+                    Creature Rift = ObjectAccessor.GetCreature(me, uiChaoticRiftGUID);
+                    if (Rift && Rift.IsDead())
+                    {
+                        me.RemoveAurasDueToSpell(AnomalusConst.SpellRiftShield);
+                        uiChaoticRiftGUID.Clear();
+                    }
+                    return;
+                }
+            }
+            else
+                uiChaoticRiftGUID.Clear();
+
+            if ((Phase == 0) && HealthBelowPct(50))
+            {
+                Phase = 1;
+                Talk(AnomalusConst.SayShield);
+                DoCast(me, AnomalusConst.SpellRiftShield);
+                Creature Rift = me.SummonCreature(AnomalusConst.NpcChaoticRift, AnomalusConst.RiftLocation[RandomHelper.IRand(0, 5)], TempSummonType.TimedDespawnOOC, 1000);
+                if (Rift)
+                {
+                    //DoCast(Rift, SPELL_CHARGE_RIFT);
                     Unit target = SelectTarget(SelectAggroTarget.Random, 0);
                     if (target)
-                        DoCast(target, AnomalusConst.SpellSpark);
-
-                    task.Repeat(TimeSpan.FromSeconds(5));
-                });
-
-                Phase = 0;
-                uiChaoticRiftGUID.Clear();
-                chaosTheory = true;
-            }
-
-            public override void Reset()
-            {
-                Initialize();
-
-                instance.SetBossState(DataTypes.Anomalus, EncounterState.NotStarted);
-            }
-
-            public override void EnterCombat(Unit who)
-            {
-                Talk(AnomalusConst.SayAggro);
-
-                instance.SetBossState(DataTypes.Anomalus, EncounterState.InProgress);
-            }
-
-            public override void JustDied(Unit killer)
-            {
-                Talk(AnomalusConst.SayDeath);
-
-                instance.SetBossState(DataTypes.Anomalus, EncounterState.Done);
-            }
-
-            public override uint GetData(uint type)
-            {
-                if (type == AnomalusConst.DataChaosTheory)
-                    return chaosTheory ? 1 : 0u;
-
-                return 0;
-            }
-
-            public override void SummonedCreatureDies(Creature summoned, Unit who)
-            {
-                if (summoned.GetEntry() == AnomalusConst.NpcChaoticRift)
-                    chaosTheory = false;
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                if (me.GetDistance(me.GetHomePosition()) > 60.0f)
-                {
-                    // Not blizzlike, hack to avoid an exploit
-                    EnterEvadeMode();
-                    return;
+                        Rift.GetAI().AttackStart(target);
+                    uiChaoticRiftGUID = Rift.GetGUID();
+                    Talk(AnomalusConst.SayRift);
                 }
-
-                if (me.HasAura(AnomalusConst.SpellRiftShield))
-                {
-                    if (!uiChaoticRiftGUID.IsEmpty())
-                    {
-                        Creature Rift = ObjectAccessor.GetCreature(me, uiChaoticRiftGUID);
-                        if (Rift && Rift.IsDead())
-                        {
-                            me.RemoveAurasDueToSpell(AnomalusConst.SpellRiftShield);
-                            uiChaoticRiftGUID.Clear();
-                        }
-                        return;
-                    }
-                }
-                else
-                    uiChaoticRiftGUID.Clear();
-
-                if ((Phase == 0) && HealthBelowPct(50))
-                {
-                    Phase = 1;
-                    Talk(AnomalusConst.SayShield);
-                    DoCast(me, AnomalusConst.SpellRiftShield);
-                    Creature Rift = me.SummonCreature(AnomalusConst.NpcChaoticRift, AnomalusConst.RiftLocation[RandomHelper.IRand(0, 5)], TempSummonType.TimedDespawnOOC, 1000);
-                    if (Rift)
-                    {
-                        //DoCast(Rift, SPELL_CHARGE_RIFT);
-                        Unit target = SelectTarget(SelectAggroTarget.Random, 0);
-                        if (target)
-                            Rift.GetAI().AttackStart(target);
-                        uiChaoticRiftGUID = Rift.GetGUID();
-                        Talk(AnomalusConst.SayRift);
-                    }
-                }
-
-                _scheduler.Update(diff);
-
-                DoMeleeAttackIfReady();
             }
 
-            InstanceScript instance;
+            _scheduler.Update(diff);
 
-            byte Phase;
-            ObjectGuid uiChaoticRiftGUID;
-            bool chaosTheory;
+            DoMeleeAttackIfReady();
         }
 
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<boss_anomalusAI>(creature);
-        }
+        InstanceScript instance;
+
+        byte Phase;
+        ObjectGuid uiChaoticRiftGUID;
+        bool chaosTheory;
     }
 
     [Script]
-    class npc_chaotic_rift : CreatureScript
+    class npc_chaotic_rift : ScriptedAI
     {
-        public npc_chaotic_rift() : base("npc_chaotic_rift") { }
-
-        class npc_chaotic_riftAI : ScriptedAI
+        public npc_chaotic_rift(Creature creature) : base(creature)
         {
-            public npc_chaotic_riftAI(Creature creature) : base(creature)
-            {
-                Initialize();
-                instance = me.GetInstanceScript();
-                SetCombatMovement(false);
-            }
+            Initialize();
+            instance = me.GetInstanceScript();
+            SetCombatMovement(false);
+        }
 
-            void Initialize()
-            {
-                uiChaoticEnergyBurstTimer = 1000;
-                uiSummonCrazedManaWraithTimer = 5000;
-            }
+        void Initialize()
+        {
+            uiChaoticEnergyBurstTimer = 1000;
+            uiSummonCrazedManaWraithTimer = 5000;
+        }
 
-            public override void Reset()
-            {
-                Initialize();
-                me.SetDisplayId(me.GetCreatureTemplate().ModelId2);
-                DoCast(me, AnomalusConst.SpellArcaneform, false);
-            }
+        public override void Reset()
+        {
+            Initialize();
+            me.SetDisplayId(me.GetCreatureTemplate().ModelId2);
+            DoCast(me, AnomalusConst.SpellArcaneform, false);
+        }
 
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
 
-                if (uiChaoticEnergyBurstTimer <= diff)
+            if (uiChaoticEnergyBurstTimer <= diff)
+            {
+                Creature Anomalus = ObjectAccessor.GetCreature(me, instance.GetGuidData(DataTypes.Anomalus));
+                Unit target = SelectTarget(SelectAggroTarget.Random, 0);
+                if (target)
                 {
-                    Creature Anomalus = ObjectAccessor.GetCreature(me, instance.GetGuidData(DataTypes.Anomalus));
+                    if (Anomalus && Anomalus.HasAura(AnomalusConst.SpellRiftShield))
+                        DoCast(target, AnomalusConst.SpellChargedChaoticEnergyBurst);
+                    else
+                        DoCast(target, AnomalusConst.SpellChaoticEnergyBurst);
+                }
+                uiChaoticEnergyBurstTimer = 1000;
+            }
+            else
+                uiChaoticEnergyBurstTimer -= diff;
+
+            if (uiSummonCrazedManaWraithTimer <= diff)
+            {
+                Creature Wraith = me.SummonCreature(AnomalusConst.NpcCrazedManaWraith, me.GetPositionX() + 1, me.GetPositionY() + 1, me.GetPositionZ(), 0, TempSummonType.TimedDespawnOOC, 1000);
+                if (Wraith)
+                {
                     Unit target = SelectTarget(SelectAggroTarget.Random, 0);
                     if (target)
-                    {
-                        if (Anomalus && Anomalus.HasAura(AnomalusConst.SpellRiftShield))
-                            DoCast(target, AnomalusConst.SpellChargedChaoticEnergyBurst);
-                        else
-                            DoCast(target, AnomalusConst.SpellChaoticEnergyBurst);
-                    }
-                    uiChaoticEnergyBurstTimer = 1000;
+                        Wraith.GetAI().AttackStart(target);
                 }
+                Creature Anomalus = ObjectAccessor.GetCreature(me, instance.GetGuidData(DataTypes.Anomalus));
+                if (Anomalus && Anomalus.HasAura(AnomalusConst.SpellRiftShield))
+                    uiSummonCrazedManaWraithTimer = 5000;
                 else
-                    uiChaoticEnergyBurstTimer -= diff;
-
-                if (uiSummonCrazedManaWraithTimer <= diff)
-                {
-                    Creature Wraith = me.SummonCreature(AnomalusConst.NpcCrazedManaWraith, me.GetPositionX() + 1, me.GetPositionY() + 1, me.GetPositionZ(), 0, TempSummonType.TimedDespawnOOC, 1000);
-                    if (Wraith)
-                    {
-                        Unit target = SelectTarget(SelectAggroTarget.Random, 0);
-                        if (target)
-                            Wraith.GetAI().AttackStart(target);
-                    }
-                    Creature Anomalus = ObjectAccessor.GetCreature(me, instance.GetGuidData(DataTypes.Anomalus));
-                    if (Anomalus && Anomalus.HasAura(AnomalusConst.SpellRiftShield))
-                        uiSummonCrazedManaWraithTimer = 5000;
-                    else
-                        uiSummonCrazedManaWraithTimer = 10000;
-                }
-                else
-                    uiSummonCrazedManaWraithTimer -= diff;
+                    uiSummonCrazedManaWraithTimer = 10000;
             }
-
-            InstanceScript instance;
-
-            uint uiChaoticEnergyBurstTimer;
-            uint uiSummonCrazedManaWraithTimer;
+            else
+                uiSummonCrazedManaWraithTimer -= diff;
         }
 
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<npc_chaotic_riftAI>(creature);
-        }
+        InstanceScript instance;
+
+        uint uiChaoticEnergyBurstTimer;
+        uint uiSummonCrazedManaWraithTimer;
     }
 
     [Script]

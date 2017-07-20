@@ -30,13 +30,9 @@ namespace Scripts.Northrend.Ulduar
 {
     namespace Razorscale
     {
-        /*class boss_razorscale_controller : CreatureScript
-        {
-            public boss_razorscale_controller() : base("boss_razorscale_controller") { }
-
-            class boss_razorscale_controllerAI : BossAI
+        /*class boss_razorscale_controller : BossAI
             {
-                public boss_razorscale_controllerAI(Creature creature) : base(creature, InstanceData.RazorscaleControl)
+                public boss_razorscale_controller(Creature creature) : base(creature, InstanceData.RazorscaleControl)
                 {
                     me.SetDisplayId(me.GetCreatureTemplate().ModelId2);
                 }
@@ -152,7 +148,7 @@ namespace Scripts.Northrend.Ulduar
                 }
             }
 
-            public override CreatureAI GetAI(Creature creature)
+            public override CreatureAI Get(Creature creature)
             {
                 return GetInstanceAI<boss_razorscale_controllerAI>(creature);
             }

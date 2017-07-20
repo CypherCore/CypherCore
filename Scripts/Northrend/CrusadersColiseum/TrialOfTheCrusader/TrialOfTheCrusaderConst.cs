@@ -270,7 +270,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
 
         public const uint DisplayIdDestroyedFloor = 9060;
 
-        public static BossBoundaryEntry[] boundaries = 
+        public static BossBoundaryEntry[] boundaries =
         {
             new BossBoundaryEntry(DataTypes.BossBeasts, new CircleBoundary(new Position(563.26f, 139.6f), 75.0)),
             new BossBoundaryEntry(DataTypes.BossJaraxxus, new CircleBoundary(new Position(563.26f, 139.6f), 75.0)),

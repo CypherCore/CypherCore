@@ -38,91 +38,81 @@ namespace Scripts.Northrend.Gundrak.EckTheFerocious
     }
 
     [Script]
-    class boss_eck : CreatureScript
+    class boss_eck : BossAI
     {
-        public boss_eck() : base("boss_eck") { }
-
-        class boss_eckAI : BossAI
+        public boss_eck(Creature creature) : base(creature, GDDataTypes.EckTheFerocious)
         {
-            public boss_eckAI(Creature creature) : base(creature, GDDataTypes.EckTheFerocious)
-            {
-                Initialize();
-                Talk(TextIds.EmoteSpawn);
-            }
-
-            void Initialize()
-            {
-                _berserk = false;
-            }
-
-            public override void Reset()
-            {
-                _Reset();
-                Initialize();
-            }
-
-            public override void EnterCombat(Unit who)
-            {
-                _EnterCombat();
-
-                _scheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting));
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
-                {
-                    DoCastVictim(SpellIds.Bite);
-                    task.Repeat(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(12));
-                });
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
-                {
-                    DoCastVictim(SpellIds.Spit);
-                    task.Repeat(TimeSpan.FromSeconds(6), TimeSpan.FromSeconds(14));
-                });
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
-                {
-                    Unit target = SelectTarget(SelectAggroTarget.Random, 1, 35.0f, true);
-                    if (target)
-                        DoCast(target, RandomHelper.RAND(SpellIds.Spring1, SpellIds.Spring2));
-                    task.Repeat(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(10));
-                });
-                
-                // 60-90 secs according to wowwiki
-                _scheduler.Schedule(TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(90), 1, task =>
-                {
-                    DoCast(me, SpellIds.Berserk);
-                    _berserk = true;
-                });
-            }
-
-            public override void DamageTaken(Unit attacker, ref uint damage)
-            {
-                if (!_berserk && me.HealthBelowPctDamaged(20, damage))
-                {
-                    _scheduler.RescheduleGroup(1, TimeSpan.FromSeconds(1));
-                    _berserk = true;
-                }
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _scheduler.Update(diff);
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-
-                DoMeleeAttackIfReady();
-            }
-
-            bool _berserk;
+            Initialize();
+            Talk(TextIds.EmoteSpawn);
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        void Initialize()
         {
-            return GetInstanceAI<boss_eckAI>(creature);
+            _berserk = false;
         }
+
+        public override void Reset()
+        {
+            _Reset();
+            Initialize();
+        }
+
+        public override void EnterCombat(Unit who)
+        {
+            _EnterCombat();
+
+            _scheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting));
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
+            {
+                DoCastVictim(SpellIds.Bite);
+                task.Repeat(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(12));
+            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
+            {
+                DoCastVictim(SpellIds.Spit);
+                task.Repeat(TimeSpan.FromSeconds(6), TimeSpan.FromSeconds(14));
+            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(8), task =>
+            {
+                Unit target = SelectTarget(SelectAggroTarget.Random, 1, 35.0f, true);
+                if (target)
+                    DoCast(target, RandomHelper.RAND(SpellIds.Spring1, SpellIds.Spring2));
+                task.Repeat(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(10));
+            });
+
+            // 60-90 secs according to wowwiki
+            _scheduler.Schedule(TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(90), 1, task =>
+            {
+                DoCast(me, SpellIds.Berserk);
+                _berserk = true;
+            });
+        }
+
+        public override void DamageTaken(Unit attacker, ref uint damage)
+        {
+            if (!_berserk && me.HealthBelowPctDamaged(20, damage))
+            {
+                _scheduler.RescheduleGroup(1, TimeSpan.FromSeconds(1));
+                _berserk = true;
+            }
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _scheduler.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+
+        bool _berserk;
     }
 }

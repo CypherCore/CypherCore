@@ -45,165 +45,145 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.Amanitar
     }
 
     [Script]
-    class boss_amanitar : CreatureScript
+    class boss_amanitar : BossAI
     {
-        public boss_amanitar() : base("boss_amanitar") { }
+        public boss_amanitar(Creature creature) : base(creature, DataTypes.Amanitar) { }
 
-        class boss_amanitarAI : BossAI
+        public override void Reset()
         {
-            public boss_amanitarAI(Creature creature) : base(creature, DataTypes.Amanitar) { }
+            _Reset();
+            me.SetMeleeDamageSchool(SpellSchools.Nature);
+            me.ApplySpellImmune(0, SpellImmunity.School, SpellSchoolMask.Nature, true);
+        }
 
-            public override void Reset()
+        public override void EnterCombat(Unit who)
+        {
+            _EnterCombat();
+
+            _scheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting));
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
             {
-                _Reset();
-                me.SetMeleeDamageSchool(SpellSchools.Nature);
-                me.ApplySpellImmune(0, SpellImmunity.School, SpellSchoolMask.Nature, true);
-            }
-
-            public override void EnterCombat(Unit who)
+                SpawnAdds();
+                task.Repeat(TimeSpan.FromSeconds(20));
+            });
+            _scheduler.Schedule(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(9), task =>
             {
-                _EnterCombat();
-
-                _scheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting));
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
-                {
-                    SpawnAdds();
-                    task.Repeat(TimeSpan.FromSeconds(20));
-                });
-                _scheduler.Schedule(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(9), task =>
-                {
-                    DoCast(SelectTarget(SelectAggroTarget.Random, 0, 100, true), SpellIds.EntanglingRoots, true);
-                    task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15));
-                });
-                _scheduler.Schedule(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(14), task =>
-                {
-                    DoCastVictim(SpellIds.Bash);
-                    task.Repeat(TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(12));
-                });
-                _scheduler.Schedule(TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(18), task =>
-                {
-                    DoCast(SpellIds.Mini);
-                    task.Repeat(TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(30));
-                });
-                _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(20), task =>
-                {
-                    DoCast(SelectTarget(SelectAggroTarget.Random, 0, 100, true), SpellIds.VenomBoltVolley, true);
-                    task.Repeat(TimeSpan.FromSeconds(18), TimeSpan.FromSeconds(22));
-                });
-            }
-
-            public override void JustDied(Unit killer)
+                DoCast(SelectTarget(SelectAggroTarget.Random, 0, 100, true), SpellIds.EntanglingRoots, true);
+                task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15));
+            });
+            _scheduler.Schedule(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(14), task =>
             {
-                _JustDied();
-                instance.DoRemoveAurasDueToSpellOnPlayers(SpellIds.Mini);
-            }
-
-            void SpawnAdds()
+                DoCastVictim(SpellIds.Bash);
+                task.Repeat(TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(12));
+            });
+            _scheduler.Schedule(TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(18), task =>
             {
-                int u = 0;
+                DoCast(SpellIds.Mini);
+                task.Repeat(TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(30));
+            });
+            _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(20), task =>
+            {
+                DoCast(SelectTarget(SelectAggroTarget.Random, 0, 100, true), SpellIds.VenomBoltVolley, true);
+                task.Repeat(TimeSpan.FromSeconds(18), TimeSpan.FromSeconds(22));
+            });
+        }
 
-                for (byte i = 0; i < 30; ++i)
+        public override void JustDied(Unit killer)
+        {
+            _JustDied();
+            instance.DoRemoveAurasDueToSpellOnPlayers(SpellIds.Mini);
+        }
+
+        void SpawnAdds()
+        {
+            int u = 0;
+
+            for (byte i = 0; i < 30; ++i)
+            {
+                Position pos = me.GetRandomNearPosition(30.0f);
+                pos.posZ = me.GetMap().GetHeight(pos.GetPositionX(), pos.GetPositionY(), MapConst.MaxHeight) + 2.0f;
+
+                Creature trigger = me.SummonCreature(CreatureIds.Trigger, pos);
+                if (trigger)
                 {
-                    Position pos = me.GetRandomNearPosition(30.0f);
-                    pos.posZ = me.GetMap().GetHeight(pos.GetPositionX(), pos.GetPositionY(), MapConst.MaxHeight) + 2.0f;
-
-                    Creature trigger = me.SummonCreature(CreatureIds.Trigger, pos);
-                    if (trigger)
+                    Creature temp1 = trigger.FindNearestCreature(CreatureIds.HealthyMushroom, 4.0f, true);
+                    Creature temp2 = trigger.FindNearestCreature(CreatureIds.PoisonousMushroom, 4.0f, true);
+                    if (temp1 || temp2)
                     {
-                        Creature temp1 = trigger.FindNearestCreature(CreatureIds.HealthyMushroom, 4.0f, true);
-                        Creature temp2 = trigger.FindNearestCreature(CreatureIds.PoisonousMushroom, 4.0f, true);
-                        if (temp1 || temp2)
-                        {
-                            trigger.DisappearAndDie();
-                        }
-                        else
-                        {
-                            u = 1 - u;
-                            trigger.DisappearAndDie();
-                            me.SummonCreature(u > 0 ? CreatureIds.PoisonousMushroom : CreatureIds.HealthyMushroom, pos, TempSummonType.TimedOrCorpseDespawn, 60 * Time.InMilliseconds);
-                        }
+                        trigger.DisappearAndDie();
+                    }
+                    else
+                    {
+                        u = 1 - u;
+                        trigger.DisappearAndDie();
+                        me.SummonCreature(u > 0 ? CreatureIds.PoisonousMushroom : CreatureIds.HealthyMushroom, pos, TempSummonType.TimedOrCorpseDespawn, 60 * Time.InMilliseconds);
                     }
                 }
             }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _scheduler.Update(diff);
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-
-                DoMeleeAttackIfReady();
-            }
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void UpdateAI(uint diff)
         {
-            return GetInstanceAI<boss_amanitarAI>(creature);
+            if (!UpdateVictim())
+                return;
+
+            _scheduler.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            DoMeleeAttackIfReady();
         }
     }
 
     [Script]
-    class npc_amanitar_mushrooms : CreatureScript
+    class npc_amanitar_mushrooms : ScriptedAI
     {
-        public npc_amanitar_mushrooms() : base("npc_amanitar_mushrooms") { }
+        public npc_amanitar_mushrooms(Creature creature) : base(creature) { }
 
-        class npc_amanitar_mushroomsAI : ScriptedAI
+        public override void Reset()
         {
-            public npc_amanitar_mushroomsAI(Creature creature) : base(creature) { }
+            _scheduler.CancelAll();
+            _scheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting));
 
-            public override void Reset()
+            _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
             {
-                _scheduler.CancelAll();
-                _scheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting));
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
-                {
-                    if (me.GetEntry() == CreatureIds.PoisonousMushroom)
-                    {
-                        DoCast(me, SpellIds.PoisonousMushroomVisualArea, true);
-                        DoCast(me, SpellIds.PoisonousMushroomPoisonCloud);
-                    }
-                    task.Repeat(TimeSpan.FromSeconds(7));
-                });
-
-                me.SetDisplayId(me.GetCreatureTemplate().ModelId2);
-                DoCast(SpellIds.PutridMushroom);
-
                 if (me.GetEntry() == CreatureIds.PoisonousMushroom)
-                    DoCast(SpellIds.PoisonousMushroomVisualAura);
-                else
-                    DoCast(SpellIds.PowerMushroomVisualAura);
-            }
+                {
+                    DoCast(me, SpellIds.PoisonousMushroomVisualArea, true);
+                    DoCast(me, SpellIds.PoisonousMushroomPoisonCloud);
+                }
+                task.Repeat(TimeSpan.FromSeconds(7));
+            });
 
-            public override void DamageTaken(Unit attacker, ref uint damage)
-            {
-                if (damage >= me.GetHealth() && me.GetEntry() == CreatureIds.HealthyMushroom)
-                    DoCast(me, SpellIds.HealthyMushroomPotentFungus, true);
-            }
+            me.SetDisplayId(me.GetCreatureTemplate().ModelId2);
+            DoCast(SpellIds.PutridMushroom);
 
-            public override void EnterCombat(Unit who) { }
-            public override void AttackStart(Unit victim) { }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _scheduler.Update(diff);
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-            }
+            if (me.GetEntry() == CreatureIds.PoisonousMushroom)
+                DoCast(SpellIds.PoisonousMushroomVisualAura);
+            else
+                DoCast(SpellIds.PowerMushroomVisualAura);
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void DamageTaken(Unit attacker, ref uint damage)
         {
-            return new npc_amanitar_mushroomsAI(creature);
+            if (damage >= me.GetHealth() && me.GetEntry() == CreatureIds.HealthyMushroom)
+                DoCast(me, SpellIds.HealthyMushroomPotentFungus, true);
+        }
+
+        public override void EnterCombat(Unit who) { }
+        public override void AttackStart(Unit victim) { }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _scheduler.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
         }
     }
 }

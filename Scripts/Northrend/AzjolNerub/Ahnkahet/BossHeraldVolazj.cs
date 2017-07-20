@@ -56,240 +56,233 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.HeraldVolazj
     }
 
     [Script]
-    class boss_volazj : CreatureScript
+    class boss_volazj : ScriptedAI
     {
-        public boss_volazj() : base("boss_volazj") { }
-
-        class boss_volazjAI : ScriptedAI
+        public boss_volazj(Creature creature) : base(creature)
         {
-            public boss_volazjAI(Creature creature) : base(creature)
-            {
-                Summons = new SummonList(me);
+            Summons = new SummonList(me);
 
-                Initialize();
-                instance = creature.GetInstanceScript();
+            Initialize();
+            instance = creature.GetInstanceScript();
+        }
+
+        void Initialize()
+        {
+            uiMindFlayTimer = 8 * Time.InMilliseconds;
+            uiShadowBoltVolleyTimer = 5 * Time.InMilliseconds;
+            uiShiverTimer = 15 * Time.InMilliseconds;
+            // Used for Insanity handling
+            insanityHandled = 0;
+        }
+
+        // returns the percentage of health after taking the given damage.
+        uint GetHealthPct(uint damage)
+        {
+            if (damage > me.GetHealth())
+                return 0;
+            return (uint)(100 * (me.GetHealth() - damage) / me.GetMaxHealth());
+        }
+
+        public override void DamageTaken(Unit pAttacker, ref uint damage)
+        {
+            if (me.HasFlag(UnitFields.Flags, UnitFlags.NotSelectable))
+                damage = 0;
+
+            if ((GetHealthPct(0) >= 66 && GetHealthPct(damage) < 66) ||
+                (GetHealthPct(0) >= 33 && GetHealthPct(damage) < 33))
+            {
+                me.InterruptNonMeleeSpells(false);
+                DoCast(me, SpellIds.Insanity, false);
             }
+        }
 
-            void Initialize()
+        public override void SpellHitTarget(Unit target, SpellInfo spell)
+        {
+            if (spell.Id == SpellIds.Insanity)
             {
-                uiMindFlayTimer = 8 * Time.InMilliseconds;
-                uiShadowBoltVolleyTimer = 5 * Time.InMilliseconds;
-                uiShiverTimer = 15 * Time.InMilliseconds;
-                // Used for Insanity handling
-                insanityHandled = 0;
-            }
-
-            // returns the percentage of health after taking the given damage.
-            uint GetHealthPct(uint damage)
-            {
-                if (damage > me.GetHealth())
-                    return 0;
-                return (uint)(100 * (me.GetHealth() - damage) / me.GetMaxHealth());
-            }
-
-            public override void DamageTaken(Unit pAttacker, ref uint damage)
-            {
-                if (me.HasFlag(UnitFields.Flags, UnitFlags.NotSelectable))
-                    damage = 0;
-
-                if ((GetHealthPct(0) >= 66 && GetHealthPct(damage) < 66) ||
-                    (GetHealthPct(0) >= 33 && GetHealthPct(damage) < 33))
+                // Not good target or too many players
+                if (target.GetTypeId() != TypeId.Player || insanityHandled > 4)
+                    return;
+                // First target - start channel visual and set self as unnattackable
+                if (insanityHandled == 0)
                 {
-                    me.InterruptNonMeleeSpells(false);
-                    DoCast(me, SpellIds.Insanity, false);
+                    // Channel visual
+                    DoCast(me, SpellIds.InsanityVisual, true);
+                    // Unattackable
+                    me.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+                    me.SetControlled(true, UnitState.Stunned);
                 }
-            }
 
-            public override void SpellHitTarget(Unit target, SpellInfo spell)
-            {
-                if (spell.Id == SpellIds.Insanity)
-                {
-                    // Not good target or too many players
-                    if (target.GetTypeId() != TypeId.Player || insanityHandled > 4)
-                        return;
-                    // First target - start channel visual and set self as unnattackable
-                    if (insanityHandled == 0)
-                    {
-                        // Channel visual
-                        DoCast(me, SpellIds.InsanityVisual, true);
-                        // Unattackable
-                        me.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable);
-                        me.SetControlled(true, UnitState.Stunned);
-                    }
+                // phase the player
+                target.CastSpell(target, SpellIds.InsanityTarget + insanityHandled, true);
 
-                    // phase the player
-                    target.CastSpell(target, SpellIds.InsanityTarget + insanityHandled, true);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.InsanityTarget + insanityHandled);
+                if (spellInfo == null)
+                    return;
 
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.InsanityTarget + insanityHandled);
-                    if (spellInfo == null)
-                        return;
-
-                    // summon twisted party members for this target
-                    var players = me.GetMap().GetPlayers();
-                    foreach (var player in players)
-                    {
-                        if (!player || !player.IsAlive())
-                            continue;
-                        // Summon clone
-                        Unit summon = me.SummonCreature(AKCreatureIds.TwistedVisage, me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), me.GetOrientation(), TempSummonType.CorpseDespawn, 0);
-                        if (summon)
-                        {
-                            // clone
-                            player.CastSpell(summon, SpellIds.ClonePlayer, true);
-                            // phase the summon
-                            summon.SetInPhase((uint)spellInfo.GetEffect(0).MiscValueB, true, true);
-                        }
-                    }
-                    ++insanityHandled;
-                }
-            }
-
-            void ResetPlayersPhase()
-            {
+                // summon twisted party members for this target
                 var players = me.GetMap().GetPlayers();
                 foreach (var player in players)
+                {
+                    if (!player || !player.IsAlive())
+                        continue;
+                    // Summon clone
+                    Unit summon = me.SummonCreature(AKCreatureIds.TwistedVisage, me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), me.GetOrientation(), TempSummonType.CorpseDespawn, 0);
+                    if (summon)
+                    {
+                        // clone
+                        player.CastSpell(summon, SpellIds.ClonePlayer, true);
+                        // phase the summon
+                        summon.SetInPhase((uint)spellInfo.GetEffect(0).MiscValueB, true, true);
+                    }
+                }
+                ++insanityHandled;
+            }
+        }
+
+        void ResetPlayersPhase()
+        {
+            var players = me.GetMap().GetPlayers();
+            foreach (var player in players)
+            {
+                for (uint index = 0; index <= 4; ++index)
+                    player.RemoveAurasDueToSpell(SpellIds.InsanityTarget + index);
+            }
+        }
+
+        public override void Reset()
+        {
+            Initialize();
+
+            instance.SetBossState(DataTypes.HeraldVolazj, EncounterState.NotStarted);
+            instance.DoStopCriteriaTimer(CriteriaTimedTypes.Event, Misc.AchievQuickDemiseStartEvent);
+
+            // Visible for all players in insanity
+            me.SetInPhase(169, true, true);
+            for (uint i = 173; i <= 177; ++i)
+                me.SetInPhase(i, true, true);
+
+            ResetPlayersPhase();
+
+            // Cleanup
+            Summons.DespawnAll();
+            me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+            me.SetControlled(false, UnitState.Stunned);
+        }
+
+        public override void EnterCombat(Unit who)
+        {
+            Talk(TextIds.SayAggro);
+
+            instance.SetBossState(DataTypes.HeraldVolazj, EncounterState.InProgress);
+            instance.DoStartCriteriaTimer(CriteriaTimedTypes.Event, Misc.AchievQuickDemiseStartEvent);
+        }
+
+        public override void JustSummoned(Creature summon)
+        {
+            Summons.Summon(summon);
+        }
+
+        public override void SummonedCreatureDespawn(Creature summon)
+        {
+            uint nextPhase = 0;
+            Summons.Despawn(summon);
+
+            // Check if all summons in this phase killed
+            foreach (var guid in Summons)
+            {
+                Creature visage = ObjectAccessor.GetCreature(me, guid);
+                if (visage)
+                {
+                    // Not all are dead
+                    if (visage.IsInPhase(summon))
+                        return;
+                    else
+                    {
+                        nextPhase = visage.GetPhases().First();
+                        break;
+                    }
+                }
+            }
+
+            // Roll Insanity
+            var players = me.GetMap().GetPlayers();
+            foreach (var player in players)
+            {
+                if (player)
                 {
                     for (uint index = 0; index <= 4; ++index)
                         player.RemoveAurasDueToSpell(SpellIds.InsanityTarget + index);
+                    player.CastSpell(player, SpellIds.InsanityTarget + nextPhase - 173, true);
                 }
             }
+        }
 
-            public override void Reset()
+        public override void UpdateAI(uint diff)
+        {
+            //Return since we have no target
+            if (!UpdateVictim())
+                return;
+
+            if (insanityHandled != 0)
             {
-                Initialize();
-
-                instance.SetBossState(DataTypes.HeraldVolazj, EncounterState.NotStarted);
-                instance.DoStopCriteriaTimer(CriteriaTimedTypes.Event, Misc.AchievQuickDemiseStartEvent);
-
-                // Visible for all players in insanity
-                me.SetInPhase(169, true, true);
-                for (uint i = 173; i <= 177; ++i)
-                    me.SetInPhase(i, true, true);
-
-                ResetPlayersPhase();
-
-                // Cleanup
-                Summons.DespawnAll();
-                me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
-                me.SetControlled(false, UnitState.Stunned);
-            }
-
-            public override void EnterCombat(Unit who)
-            {
-                Talk(TextIds.SayAggro);
-
-                instance.SetBossState(DataTypes.HeraldVolazj, EncounterState.InProgress);
-                instance.DoStartCriteriaTimer(CriteriaTimedTypes.Event, Misc.AchievQuickDemiseStartEvent);
-            }
-
-            public override void JustSummoned(Creature summon)
-            {
-                Summons.Summon(summon);
-            }
-
-            public override void SummonedCreatureDespawn(Creature summon)
-            {
-                uint nextPhase = 0;
-                Summons.Despawn(summon);
-
-                // Check if all summons in this phase killed
-                foreach (var guid in Summons)
-                {
-                    Creature visage = ObjectAccessor.GetCreature(me, guid);
-                    if (visage)
-                    {
-                        // Not all are dead
-                        if (visage.IsInPhase(summon))
-                            return;
-                        else
-                        {
-                            nextPhase = visage.GetPhases().First();
-                            break;
-                        }
-                    }
-                }
-
-                // Roll Insanity
-                var players = me.GetMap().GetPlayers();
-                foreach (var player in players)
-                {
-                    if (player)
-                    {
-                        for (uint index = 0; index <= 4; ++index)
-                            player.RemoveAurasDueToSpell(SpellIds.InsanityTarget + index);
-                        player.CastSpell(player, SpellIds.InsanityTarget + nextPhase - 173, true);
-                    }
-                }
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                //Return since we have no target
-                if (!UpdateVictim())
+                if (!Summons.Empty())
                     return;
 
-                if (insanityHandled != 0)
-                {
-                    if (!Summons.Empty())
-                        return;
-
-                    insanityHandled = 0;
-                    me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
-                    me.SetControlled(false, UnitState.Stunned);
-                    me.RemoveAurasDueToSpell(SpellIds.InsanityVisual);
-                }
-
-                if (uiMindFlayTimer <= diff)
-                {
-                    DoCastVictim(SpellIds.MindFlay);
-                    uiMindFlayTimer = 20 * Time.InMilliseconds;
-                } else uiMindFlayTimer -= diff;
-
-                if (uiShadowBoltVolleyTimer <= diff)
-                {
-                    DoCastVictim(SpellIds.ShadowBoltVolley);
-                    uiShadowBoltVolleyTimer = 5 * Time.InMilliseconds;
-                } else uiShadowBoltVolleyTimer -= diff;
-
-                if (uiShiverTimer <= diff)
-                {
-                    Unit target = SelectTarget(SelectAggroTarget.Random, 0);
-                    if (target)
-                        DoCast(target, SpellIds.Shiver);
-                    uiShiverTimer = 15 * Time.InMilliseconds;
-                } else uiShiverTimer -= diff;
-
-                DoMeleeAttackIfReady();
+                insanityHandled = 0;
+                me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+                me.SetControlled(false, UnitState.Stunned);
+                me.RemoveAurasDueToSpell(SpellIds.InsanityVisual);
             }
 
-            public override void JustDied(Unit killer)
+            if (uiMindFlayTimer <= diff)
             {
-                Talk(TextIds.SayDeath);
-
-                instance.SetBossState(DataTypes.HeraldVolazj, EncounterState.Done);
-
-                Summons.DespawnAll();
-                ResetPlayersPhase();
+                DoCastVictim(SpellIds.MindFlay);
+                uiMindFlayTimer = 20 * Time.InMilliseconds;
             }
+            else uiMindFlayTimer -= diff;
 
-            public override void KilledUnit(Unit who)
+            if (uiShadowBoltVolleyTimer <= diff)
             {
-                if (who.IsTypeId(TypeId.Player))
-                    Talk(TextIds.SaySlay);
+                DoCastVictim(SpellIds.ShadowBoltVolley);
+                uiShadowBoltVolleyTimer = 5 * Time.InMilliseconds;
             }
+            else uiShadowBoltVolleyTimer -= diff;
 
-            InstanceScript instance;
+            if (uiShiverTimer <= diff)
+            {
+                Unit target = SelectTarget(SelectAggroTarget.Random, 0);
+                if (target)
+                    DoCast(target, SpellIds.Shiver);
+                uiShiverTimer = 15 * Time.InMilliseconds;
+            }
+            else uiShiverTimer -= diff;
 
-            uint uiMindFlayTimer;
-            uint uiShadowBoltVolleyTimer;
-            uint uiShiverTimer;
-            uint insanityHandled;
-            SummonList Summons;
+            DoMeleeAttackIfReady();
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void JustDied(Unit killer)
         {
-            return GetInstanceAI<boss_volazjAI>(creature);
+            Talk(TextIds.SayDeath);
+
+            instance.SetBossState(DataTypes.HeraldVolazj, EncounterState.Done);
+
+            Summons.DespawnAll();
+            ResetPlayersPhase();
         }
+
+        public override void KilledUnit(Unit who)
+        {
+            if (who.IsTypeId(TypeId.Player))
+                Talk(TextIds.SaySlay);
+        }
+
+        InstanceScript instance;
+
+        uint uiMindFlayTimer;
+        uint uiShadowBoltVolleyTimer;
+        uint uiShiverTimer;
+        uint insanityHandled;
+        SummonList Summons;
     }
 }

@@ -37,133 +37,103 @@ namespace Scripts.Spells.Monk
     }
 
     [Script] // 117952 - Crackling Jade Lightning
-    class spell_monk_crackling_jade_lightning : SpellScriptLoader
+    class spell_monk_crackling_jade_lightning : AuraScript
     {
-        public spell_monk_crackling_jade_lightning() : base("spell_monk_crackling_jade_lightning") { }
-
-        class spell_monk_crackling_jade_lightning_AuraScript : AuraScript
+        public override bool Validate(SpellInfo spellInfo)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(SpellIds.CracklingJadeLightningChiProc);
-            }
-
-            void OnTick(AuraEffect aurEff)
-            {
-                Unit caster = GetCaster();
-                if (caster)
-                    if (caster.HasAura(SpellIds.StanceOfTheSpiritedCrane))
-                        caster.CastSpell(caster, SpellIds.CracklingJadeLightningChiProc, TriggerCastFlags.FullMask);
-            }
-
-            public override void Register()
-            {
-                OnEffectPeriodic.Add(new EffectPeriodicHandler(OnTick, 0, Framework.Constants.AuraType.PeriodicDamage));
-            }
+            return ValidateSpellInfo(SpellIds.CracklingJadeLightningChiProc);
         }
 
-        public override AuraScript GetAuraScript()
+        void OnTick(AuraEffect aurEff)
         {
-            return new spell_monk_crackling_jade_lightning_AuraScript();
+            Unit caster = GetCaster();
+            if (caster)
+                if (caster.HasAura(SpellIds.StanceOfTheSpiritedCrane))
+                    caster.CastSpell(caster, SpellIds.CracklingJadeLightningChiProc, TriggerCastFlags.FullMask);
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnTick, 0, Framework.Constants.AuraType.PeriodicDamage));
         }
     }
 
     [Script] // 117959 - Crackling Jade Lightning
-    class spell_monk_crackling_jade_lightning_knockback_proc_aura : SpellScriptLoader
+    class spell_monk_crackling_jade_lightning_aura : AuraScript
     {
-        public spell_monk_crackling_jade_lightning_knockback_proc_aura() : base("spell_monk_crackling_jade_lightning_knockback_proc_aura") { }
-
-        class spell_monk_crackling_jade_lightning_aura_AuraScript : AuraScript
+        public override bool Validate(SpellInfo spellInfo)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(SpellIds.CracklingJadeLightningKnockback, SpellIds.CracklingJadeLightningKnockbackCd);
-            }
-
-            bool CheckProc(ProcEventInfo eventInfo)
-            {
-                if (GetTarget().HasAura(SpellIds.CracklingJadeLightningKnockbackCd))
-                    return false;
-
-                if (eventInfo.GetActor().HasAura(SpellIds.CracklingJadeLightningChannel, GetTarget().GetGUID()))
-                    return false;
-
-                Spell currentChanneledSpell = GetTarget().GetCurrentSpell(CurrentSpellTypes.Channeled);
-                if (!currentChanneledSpell || currentChanneledSpell.GetSpellInfo().Id != SpellIds.CracklingJadeLightningChannel)
-                    return false;
-
-                return true;
-            }
-
-            void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-            {
-                GetTarget().CastSpell(eventInfo.GetActor(), SpellIds.CracklingJadeLightningKnockback, TriggerCastFlags.FullMask);
-                GetTarget().CastSpell(GetTarget(), SpellIds.CracklingJadeLightningKnockbackCd, TriggerCastFlags.FullMask);
-            }
-
-            public override void Register()
-            {
-                DoCheckProc.Add(new CheckProcHandler(CheckProc));
-                OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, Framework.Constants.AuraType.Dummy));
-            }
+            return ValidateSpellInfo(SpellIds.CracklingJadeLightningKnockback, SpellIds.CracklingJadeLightningKnockbackCd);
         }
 
-        public override AuraScript GetAuraScript()
+        bool CheckProc(ProcEventInfo eventInfo)
         {
-            return new spell_monk_crackling_jade_lightning_aura_AuraScript();
+            if (GetTarget().HasAura(SpellIds.CracklingJadeLightningKnockbackCd))
+                return false;
+
+            if (eventInfo.GetActor().HasAura(SpellIds.CracklingJadeLightningChannel, GetTarget().GetGUID()))
+                return false;
+
+            Spell currentChanneledSpell = GetTarget().GetCurrentSpell(CurrentSpellTypes.Channeled);
+            if (!currentChanneledSpell || currentChanneledSpell.GetSpellInfo().Id != SpellIds.CracklingJadeLightningChannel)
+                return false;
+
+            return true;
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            GetTarget().CastSpell(eventInfo.GetActor(), SpellIds.CracklingJadeLightningKnockback, TriggerCastFlags.FullMask);
+            GetTarget().CastSpell(GetTarget(), SpellIds.CracklingJadeLightningKnockbackCd, TriggerCastFlags.FullMask);
+        }
+
+        public override void Register()
+        {
+            DoCheckProc.Add(new CheckProcHandler(CheckProc));
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, Framework.Constants.AuraType.Dummy));
         }
     }
 
     [Script] // 115546 - Provoke
-    class spell_monk_provoke : SpellScriptLoader
+    class spell_monk_provoke : SpellScript
     {
-        public spell_monk_provoke() : base("spell_monk_provoke") { }
+        const uint BlackOxStatusEntry = 61146;
 
-        class spell_monk_provoke_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spellInfo)
         {
-            const uint BlackOxStatusEntry = 61146;
-
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                if (!spellInfo.GetExplicitTargetMask().HasAnyFlag(SpellCastTargetFlags.UnitMask)) // ensure GetExplTargetUnit() will return something meaningful during CheckCast
-                    return false;
-                return ValidateSpellInfo(SpellIds.ProvokeSingleTarget, SpellIds.ProvokeAoe);
-            }
-
-            SpellCastResult CheckExplicitTarget()
-            {
-                if (GetExplTargetUnit().GetEntry() != BlackOxStatusEntry)
-                {
-                    SpellInfo singleTarget = Global.SpellMgr.GetSpellInfo(SpellIds.ProvokeSingleTarget);
-                    SpellCastResult singleTargetExplicitResult = singleTarget.CheckExplicitTarget(GetCaster(), GetExplTargetUnit());
-                    if (singleTargetExplicitResult != SpellCastResult.SpellCastOk)
-                        return singleTargetExplicitResult;
-                }
-                else if (GetExplTargetUnit().GetOwnerGUID() != GetCaster().GetGUID())
-                    return SpellCastResult.BadTargets;
-
-                return SpellCastResult.SpellCastOk;
-            }
-
-            void HandleDummy(uint effIndex)
-            {
-                PreventHitDefaultEffect(effIndex);
-                if (GetHitUnit().GetEntry() != BlackOxStatusEntry)
-                    GetCaster().CastSpell(GetHitUnit(), SpellIds.ProvokeSingleTarget, true);
-                else
-                    GetCaster().CastSpell(GetHitUnit(), SpellIds.ProvokeAoe, true);
-            }
-
-            public override void Register()
-            {
-                OnCheckCast.Add(new CheckCastHandler(CheckExplicitTarget));
-                OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-            }
+            if (!spellInfo.GetExplicitTargetMask().HasAnyFlag(SpellCastTargetFlags.UnitMask)) // ensure GetExplTargetUnit() will return something meaningful during CheckCast
+                return false;
+            return ValidateSpellInfo(SpellIds.ProvokeSingleTarget, SpellIds.ProvokeAoe);
         }
 
-        public override SpellScript GetSpellScript()
+        SpellCastResult CheckExplicitTarget()
         {
-            return new spell_monk_provoke_SpellScript();
+            if (GetExplTargetUnit().GetEntry() != BlackOxStatusEntry)
+            {
+                SpellInfo singleTarget = Global.SpellMgr.GetSpellInfo(SpellIds.ProvokeSingleTarget);
+                SpellCastResult singleTargetExplicitResult = singleTarget.CheckExplicitTarget(GetCaster(), GetExplTargetUnit());
+                if (singleTargetExplicitResult != SpellCastResult.SpellCastOk)
+                    return singleTargetExplicitResult;
+            }
+            else if (GetExplTargetUnit().GetOwnerGUID() != GetCaster().GetGUID())
+                return SpellCastResult.BadTargets;
+
+            return SpellCastResult.SpellCastOk;
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+            if (GetHitUnit().GetEntry() != BlackOxStatusEntry)
+                GetCaster().CastSpell(GetHitUnit(), SpellIds.ProvokeSingleTarget, true);
+            else
+                GetCaster().CastSpell(GetHitUnit(), SpellIds.ProvokeAoe, true);
+        }
+
+        public override void Register()
+        {
+            OnCheckCast.Add(new CheckCastHandler(CheckExplicitTarget));
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 }

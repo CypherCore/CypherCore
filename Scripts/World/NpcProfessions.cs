@@ -53,87 +53,77 @@ namespace Scripts.World
     }
 
     [Script] //start menu multi profession trainer
-    class npc_multi_profession_trainer : CreatureScript
+    class npc_multi_profession_trainer : ScriptedAI
     {
-        public npc_multi_profession_trainer() : base("npc_multi_profession_trainer") { }
+        public npc_multi_profession_trainer(Creature creature) : base(creature) { }
 
-        class npc_multi_profession_trainerAI : ScriptedAI
+        public override void sGossipSelect(Player player, uint menuId, uint gossipListId)
         {
-            public npc_multi_profession_trainerAI(Creature creature) : base(creature) { }
-
-            public override void sGossipSelect(Player player, uint menuId, uint gossipListId)
+            switch ((GossipOptionIds)gossipListId)
             {
-                switch ((GossipOptionIds)gossipListId)
-                {
-                    case GossipOptionIds.Alchemy:
-                    case GossipOptionIds.Blacksmithing:
-                    case GossipOptionIds.Enchanting:
-                    case GossipOptionIds.Engineering:
-                    case GossipOptionIds.Herbalism:
-                    case GossipOptionIds.Inscription:
-                    case GossipOptionIds.Jewelcrafting:
-                    case GossipOptionIds.Leatherworking:
-                    case GossipOptionIds.Mining:
-                    case GossipOptionIds.Skinning:
-                    case GossipOptionIds.Tailoring:
-                        SendTrainerList(player, (GossipOptionIds)gossipListId);
-                        break;
-                    case GossipOptionIds.Multi:
+                case GossipOptionIds.Alchemy:
+                case GossipOptionIds.Blacksmithing:
+                case GossipOptionIds.Enchanting:
+                case GossipOptionIds.Engineering:
+                case GossipOptionIds.Herbalism:
+                case GossipOptionIds.Inscription:
+                case GossipOptionIds.Jewelcrafting:
+                case GossipOptionIds.Leatherworking:
+                case GossipOptionIds.Mining:
+                case GossipOptionIds.Skinning:
+                case GossipOptionIds.Tailoring:
+                    SendTrainerList(player, (GossipOptionIds)gossipListId);
+                    break;
+                case GossipOptionIds.Multi:
+                    {
+                        switch ((GossipMenuIds)menuId)
                         {
-                            switch ((GossipMenuIds)menuId)
-                            {
-                                case GossipMenuIds.Herbalism:
-                                    SendTrainerList(player, GossipOptionIds.Herbalism);
-                                    break;
-                                case GossipMenuIds.Mining:
-                                    SendTrainerList(player, GossipOptionIds.Mining);
-                                    break;
-                                case GossipMenuIds.Skinning:
-                                    SendTrainerList(player, GossipOptionIds.Skinning);
-                                    break;
-                                case GossipMenuIds.Alchemy:
-                                    SendTrainerList(player, GossipOptionIds.Alchemy);
-                                    break;
-                                case GossipMenuIds.Blacksmithing:
-                                    SendTrainerList(player, GossipOptionIds.Blacksmithing);
-                                    break;
-                                case GossipMenuIds.Enchanting:
-                                    SendTrainerList(player, GossipOptionIds.Enchanting);
-                                    break;
-                                case GossipMenuIds.Engineering:
-                                    SendTrainerList(player, GossipOptionIds.Engineering);
-                                    break;
-                                case GossipMenuIds.Inscription:
-                                    SendTrainerList(player, GossipOptionIds.Inscription);
-                                    break;
-                                case GossipMenuIds.Jewelcrafting:
-                                    SendTrainerList(player, GossipOptionIds.Jewelcrafting);
-                                    break;
-                                case GossipMenuIds.Leatherworking:
-                                    SendTrainerList(player, GossipOptionIds.Leatherworking);
-                                    break;
-                                case GossipMenuIds.Tailoring:
-                                    SendTrainerList(player, GossipOptionIds.Tailoring);
-                                    break;
-                                default:
-                                    break;
-                            }
+                            case GossipMenuIds.Herbalism:
+                                SendTrainerList(player, GossipOptionIds.Herbalism);
+                                break;
+                            case GossipMenuIds.Mining:
+                                SendTrainerList(player, GossipOptionIds.Mining);
+                                break;
+                            case GossipMenuIds.Skinning:
+                                SendTrainerList(player, GossipOptionIds.Skinning);
+                                break;
+                            case GossipMenuIds.Alchemy:
+                                SendTrainerList(player, GossipOptionIds.Alchemy);
+                                break;
+                            case GossipMenuIds.Blacksmithing:
+                                SendTrainerList(player, GossipOptionIds.Blacksmithing);
+                                break;
+                            case GossipMenuIds.Enchanting:
+                                SendTrainerList(player, GossipOptionIds.Enchanting);
+                                break;
+                            case GossipMenuIds.Engineering:
+                                SendTrainerList(player, GossipOptionIds.Engineering);
+                                break;
+                            case GossipMenuIds.Inscription:
+                                SendTrainerList(player, GossipOptionIds.Inscription);
+                                break;
+                            case GossipMenuIds.Jewelcrafting:
+                                SendTrainerList(player, GossipOptionIds.Jewelcrafting);
+                                break;
+                            case GossipMenuIds.Leatherworking:
+                                SendTrainerList(player, GossipOptionIds.Leatherworking);
+                                break;
+                            case GossipMenuIds.Tailoring:
+                                SendTrainerList(player, GossipOptionIds.Tailoring);
+                                break;
+                            default:
+                                break;
                         }
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            void SendTrainerList(Player player, GossipOptionIds Index)
-            {
-                player.GetSession().SendTrainerList(me.GetGUID(), (uint)Index + 1);
+                    }
+                    break;
+                default:
+                    break;
             }
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        void SendTrainerList(Player player, GossipOptionIds Index)
         {
-            return new npc_multi_profession_trainerAI(creature);
+            player.GetSession().SendTrainerList(me.GetGUID(), (uint)Index + 1);
         }
     }
 }

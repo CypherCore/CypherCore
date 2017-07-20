@@ -35,7 +35,7 @@ namespace Scripts.Kalimdor.ZoneAshenvale
         public const uint Cage = 178147;
 
         //Muglash
-          public const uint NagaBrazier = 178247;
+        public const uint NagaBrazier = 178247;
 
         //KingoftheFoulweald
         public const uint Banner = 178205;
@@ -46,7 +46,7 @@ namespace Scripts.Kalimdor.ZoneAshenvale
         //RuulSnowhoof
         public const uint FreedomToRuul = 6482;
 
-                        //Muglash
+        //Muglash
         public const uint Vorsha = 6641;
     }
 
@@ -98,232 +98,212 @@ namespace Scripts.Kalimdor.ZoneAshenvale
 
 
     [Script]
-    class npc_ruul_snowhoof : CreatureScript
+    class npc_ruul_snowhoof : npc_escortAI
     {
-        public npc_ruul_snowhoof() : base("npc_ruul_snowhoof") { }
+        public npc_ruul_snowhoof(Creature creature) : base(creature) { }
 
-        class npc_ruul_snowhoofAI : npc_escortAI
+        public override void Reset()
         {
-            public npc_ruul_snowhoofAI(Creature creature) : base(creature) { }
+            GameObject cage = me.FindNearestGameObject(GameObjectIds.Cage, 20);
+            if (cage)
+                cage.SetGoState(GameObjectState.Ready);
+        }
 
-            public override void Reset()
+        public override void EnterCombat(Unit who) { }
+
+        public override void JustSummoned(Creature summoned)
+        {
+            summoned.GetAI().AttackStart(me);
+        }
+
+        public override void sQuestAccept(Player player, Quest quest)
+        {
+            if (quest.Id == QuestIds.FreedomToRuul)
             {
-                GameObject cage = me.FindNearestGameObject(GameObjectIds.Cage, 20);
-                if (cage)
-                    cage.SetGoState(GameObjectState.Ready);
-            }
-
-            public override void EnterCombat(Unit who) { }
-
-            public override void JustSummoned(Creature summoned)
-            {
-                summoned.GetAI().AttackStart(me);
-            }
-
-            public override void sQuestAccept(Player player, Quest quest)
-            {
-                if (quest.Id == QuestIds.FreedomToRuul)
-                {
-                    me.SetFaction(Misc.FactionQuest);
-                    base.Start(true, false, player.GetGUID());
-                }
-            }
-
-            public override void WaypointReached(uint waypointId)
-            {
-                Player player = GetPlayerForEscort();
-                if (!player)
-                    return;
-
-                switch (waypointId)
-                {
-                    case 0:
-                        me.SetUInt32Value(UnitFields.Bytes1, 0);
-                        GameObject cage = me.FindNearestGameObject(GameObjectIds.Cage, 20);
-                        if (cage)
-                            cage.SetGoState(GameObjectState.Active);
-                        break;
-                    case 13:
-                        me.SummonCreature(CreatureIds.ThistlefurTotemic, Misc.RuulSnowhoofSummonsCoord[0], TempSummonType.DeadDespawn, 60000);
-                        me.SummonCreature(CreatureIds.ThistlefurUrsa, Misc.RuulSnowhoofSummonsCoord[1], TempSummonType.DeadDespawn, 60000);
-                        me.SummonCreature(CreatureIds.ThistlefurPathfinder, Misc.RuulSnowhoofSummonsCoord[2], TempSummonType.DeadDespawn, 60000);
-                        break;
-                    case 19:
-                        me.SummonCreature(CreatureIds.ThistlefurTotemic, Misc.RuulSnowhoofSummonsCoord[3], TempSummonType.DeadDespawn, 60000);
-                        me.SummonCreature(CreatureIds.ThistlefurUrsa, Misc.RuulSnowhoofSummonsCoord[4], TempSummonType.DeadDespawn, 60000);
-                        me.SummonCreature(CreatureIds.ThistlefurPathfinder, Misc.RuulSnowhoofSummonsCoord[5], TempSummonType.DeadDespawn, 60000);
-                        break;
-                    case 21:
-                        player.GroupEventHappens(QuestIds.FreedomToRuul, me);
-                        break;
-                }
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                base.UpdateAI(diff);
+                me.SetFaction(Misc.FactionQuest);
+                base.Start(true, false, player.GetGUID());
             }
         }
 
-       public override CreatureAI GetAI(Creature creature)
+        public override void WaypointReached(uint waypointId)
         {
-            return new npc_ruul_snowhoofAI(creature);
+            Player player = GetPlayerForEscort();
+            if (!player)
+                return;
+
+            switch (waypointId)
+            {
+                case 0:
+                    me.SetUInt32Value(UnitFields.Bytes1, 0);
+                    GameObject cage = me.FindNearestGameObject(GameObjectIds.Cage, 20);
+                    if (cage)
+                        cage.SetGoState(GameObjectState.Active);
+                    break;
+                case 13:
+                    me.SummonCreature(CreatureIds.ThistlefurTotemic, Misc.RuulSnowhoofSummonsCoord[0], TempSummonType.DeadDespawn, 60000);
+                    me.SummonCreature(CreatureIds.ThistlefurUrsa, Misc.RuulSnowhoofSummonsCoord[1], TempSummonType.DeadDespawn, 60000);
+                    me.SummonCreature(CreatureIds.ThistlefurPathfinder, Misc.RuulSnowhoofSummonsCoord[2], TempSummonType.DeadDespawn, 60000);
+                    break;
+                case 19:
+                    me.SummonCreature(CreatureIds.ThistlefurTotemic, Misc.RuulSnowhoofSummonsCoord[3], TempSummonType.DeadDespawn, 60000);
+                    me.SummonCreature(CreatureIds.ThistlefurUrsa, Misc.RuulSnowhoofSummonsCoord[4], TempSummonType.DeadDespawn, 60000);
+                    me.SummonCreature(CreatureIds.ThistlefurPathfinder, Misc.RuulSnowhoofSummonsCoord[5], TempSummonType.DeadDespawn, 60000);
+                    break;
+                case 21:
+                    player.GroupEventHappens(QuestIds.FreedomToRuul, me);
+                    break;
+            }
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            base.UpdateAI(diff);
         }
     }
 
     [Script]
-    class npc_muglash : CreatureScript
+    public class npc_muglash : npc_escortAI
     {
-        public npc_muglash() : base("npc_muglash") { }
-
-        public class npc_muglashAI : npc_escortAI
+        public npc_muglash(Creature creature) : base(creature)
         {
-            public npc_muglashAI(Creature creature) : base(creature)
-            {
-                Initialize();
-            }
+            Initialize();
+        }
 
-            void Initialize()
-            {
-                eventTimer = 10000;
-                waveId = 0;
-                _isBrazierExtinguished = false;
-            }
+        void Initialize()
+        {
+            eventTimer = 10000;
+            waveId = 0;
+            _isBrazierExtinguished = false;
+        }
 
-            public override void Reset()
-            {
-                Initialize();
-            }
+        public override void Reset()
+        {
+            Initialize();
+        }
 
-            public override void EnterCombat(Unit who)
+        public override void EnterCombat(Unit who)
+        {
+            Player player = GetPlayerForEscort();
+            if (player)
             {
-                Player player = GetPlayerForEscort();
-                if (player)
+                if (HasEscortState(eEscortState.Paused))
                 {
-                    if (HasEscortState(eEscortState.Paused))
-                    {
-                        if (Convert.ToBoolean(RandomHelper.URand(0, 1)))
-                            Talk(TextIds.SayMugOnGuard, player);
-                        return;
-                    }
-                }
-            }
-
-            public override void JustDied(Unit killer)
-            {
-                if (HasEscortState(eEscortState.Escorting))
-                {
-                    Player player = GetPlayerForEscort();
-                    if (player)
-                        player.FailQuest(QuestIds.Vorsha);
-                }
-            }
-
-            public override void JustSummoned(Creature summoned)
-            {
-                summoned.GetAI().AttackStart(me);
-            }
-
-            public override void sQuestAccept(Player player, Quest quest)
-            {
-                if (quest.Id == QuestIds.Vorsha)
-                {
-                    Talk(TextIds.SayMugStart1);
-                    me.SetFaction(Misc.FactionQuest);
-                    base.Start(true, false, player.GetGUID());
-                }
-            }
-
-            public override void WaypointReached(uint waypointId)
-            {
-                Player player = GetPlayerForEscort();
-                if (player)
-                {
-                    switch (waypointId)
-                    {
-                        case 0:
-                            Talk(TextIds.SayMugStart2, player);
-                            break;
-                        case 24:
-                            Talk(TextIds.SayMugBrazier, player);
-
-                            GameObject go = GetClosestGameObjectWithEntry(me, GameObjectIds.NagaBrazier, SharedConst.InteractionDistance * 2);
-                            if (go)
-                            {
-                                go.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
-                                SetEscortPaused(true);
-                            }
-                            break;
-                        case 25:
-                            Talk(TextIds.SayMugGratitude);
-                            player.GroupEventHappens(QuestIds.Vorsha, me);
-                            break;
-                        case 26:
-                            Talk(TextIds.SayMugPatrol);
-                            break;
-                        case 27:
-                            Talk(TextIds.SayMugReturn);
-                            break;
-                    }
-                }
-            }
-
-            void DoWaveSummon()
-            {
-                switch (waveId)
-                {
-                    case 1:
-                        me.SummonCreature(CreatureIds.WrathRider, Misc.FirstNagaCoord[0], TempSummonType.TimedDespawnOOC, 60000);
-                        me.SummonCreature(CreatureIds.WrathSorceress, Misc.FirstNagaCoord[1], TempSummonType.TimedDespawnOOC, 60000);
-                        me.SummonCreature(CreatureIds.WrathRazortail, Misc.FirstNagaCoord[2], TempSummonType.TimedDespawnOOC, 60000);
-                        break;
-                    case 2:
-                        me.SummonCreature(CreatureIds.WrathPriestess, Misc.SecondNagaCoord[0], TempSummonType.TimedDespawnOOC, 60000);
-                        me.SummonCreature(CreatureIds.WrathMyrmidon, Misc.SecondNagaCoord[1], TempSummonType.TimedDespawnOOC, 60000);
-                        me.SummonCreature(CreatureIds.WrathSeawitch, Misc.SecondNagaCoord[2], TempSummonType.TimedDespawnOOC, 60000);
-                        break;
-                    case 3:
-                        me.SummonCreature(CreatureIds.Vorsha, Misc.VorshaCoord, TempSummonType.TimedDespawnOOC, 60000);
-                        break;
-                    case 4:
-                        SetEscortPaused(false);
-                        Talk(TextIds.SayMugDone);
-                        break;
-                }
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                base.UpdateAI(diff);
-
-                if (!me.GetVictim())
-                {
-                    if (HasEscortState(eEscortState.Paused) && _isBrazierExtinguished)
-                    {
-                        if (eventTimer < diff)
-                        {
-                            ++waveId;
-                            DoWaveSummon();
-                            eventTimer = 10000;
-                        }
-                        else
-                            eventTimer -= diff;
-                    }
+                    if (Convert.ToBoolean(RandomHelper.URand(0, 1)))
+                        Talk(TextIds.SayMugOnGuard, player);
                     return;
                 }
-                DoMeleeAttackIfReady();
             }
-
-            uint eventTimer;
-            byte waveId;
-
-            public bool _isBrazierExtinguished { get; set; }
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void JustDied(Unit killer)
         {
-            return new npc_muglashAI(creature);
+            if (HasEscortState(eEscortState.Escorting))
+            {
+                Player player = GetPlayerForEscort();
+                if (player)
+                    player.FailQuest(QuestIds.Vorsha);
+            }
         }
+
+        public override void JustSummoned(Creature summoned)
+        {
+            summoned.GetAI().AttackStart(me);
+        }
+
+        public override void sQuestAccept(Player player, Quest quest)
+        {
+            if (quest.Id == QuestIds.Vorsha)
+            {
+                Talk(TextIds.SayMugStart1);
+                me.SetFaction(Misc.FactionQuest);
+                base.Start(true, false, player.GetGUID());
+            }
+        }
+
+        public override void WaypointReached(uint waypointId)
+        {
+            Player player = GetPlayerForEscort();
+            if (player)
+            {
+                switch (waypointId)
+                {
+                    case 0:
+                        Talk(TextIds.SayMugStart2, player);
+                        break;
+                    case 24:
+                        Talk(TextIds.SayMugBrazier, player);
+
+                        GameObject go = GetClosestGameObjectWithEntry(me, GameObjectIds.NagaBrazier, SharedConst.InteractionDistance * 2);
+                        if (go)
+                        {
+                            go.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                            SetEscortPaused(true);
+                        }
+                        break;
+                    case 25:
+                        Talk(TextIds.SayMugGratitude);
+                        player.GroupEventHappens(QuestIds.Vorsha, me);
+                        break;
+                    case 26:
+                        Talk(TextIds.SayMugPatrol);
+                        break;
+                    case 27:
+                        Talk(TextIds.SayMugReturn);
+                        break;
+                }
+            }
+        }
+
+        void DoWaveSummon()
+        {
+            switch (waveId)
+            {
+                case 1:
+                    me.SummonCreature(CreatureIds.WrathRider, Misc.FirstNagaCoord[0], TempSummonType.TimedDespawnOOC, 60000);
+                    me.SummonCreature(CreatureIds.WrathSorceress, Misc.FirstNagaCoord[1], TempSummonType.TimedDespawnOOC, 60000);
+                    me.SummonCreature(CreatureIds.WrathRazortail, Misc.FirstNagaCoord[2], TempSummonType.TimedDespawnOOC, 60000);
+                    break;
+                case 2:
+                    me.SummonCreature(CreatureIds.WrathPriestess, Misc.SecondNagaCoord[0], TempSummonType.TimedDespawnOOC, 60000);
+                    me.SummonCreature(CreatureIds.WrathMyrmidon, Misc.SecondNagaCoord[1], TempSummonType.TimedDespawnOOC, 60000);
+                    me.SummonCreature(CreatureIds.WrathSeawitch, Misc.SecondNagaCoord[2], TempSummonType.TimedDespawnOOC, 60000);
+                    break;
+                case 3:
+                    me.SummonCreature(CreatureIds.Vorsha, Misc.VorshaCoord, TempSummonType.TimedDespawnOOC, 60000);
+                    break;
+                case 4:
+                    SetEscortPaused(false);
+                    Talk(TextIds.SayMugDone);
+                    break;
+            }
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            base.UpdateAI(diff);
+
+            if (!me.GetVictim())
+            {
+                if (HasEscortState(eEscortState.Paused) && _isBrazierExtinguished)
+                {
+                    if (eventTimer < diff)
+                    {
+                        ++waveId;
+                        DoWaveSummon();
+                        eventTimer = 10000;
+                    }
+                    else
+                        eventTimer -= diff;
+                }
+                return;
+            }
+            DoMeleeAttackIfReady();
+        }
+
+        uint eventTimer;
+        byte waveId;
+
+        public bool _isBrazierExtinguished { get; set; }
     }
 
     [Script]
@@ -336,7 +316,7 @@ namespace Scripts.Kalimdor.ZoneAshenvale
             Creature creature = ScriptedAI.GetClosestCreatureWithEntry(go, CreatureIds.Muglash, SharedConst.InteractionDistance * 2);
             if (creature)
             {
-                npc_muglash.npc_muglashAI pEscortAI = creature.GetAI<npc_muglash.npc_muglashAI>();
+                npc_muglash pEscortAI = creature.GetAI<npc_muglash>();
                 if (pEscortAI != null)
                 {
                     creature.GetAI().Talk(TextIds.SayMugBrazierWait);
@@ -351,28 +331,18 @@ namespace Scripts.Kalimdor.ZoneAshenvale
     }
 
     [Script]
-    class spell_destroy_karangs_banner : SpellScriptLoader
+    class spell_destroy_karangs_banner : SpellScript
     {
-        public spell_destroy_karangs_banner() : base("spell_destroy_karangs_banner") { }
-
-        class spell_destroy_karangs_banner_SpellScript : SpellScript
+        void HandleAfterCast()
         {
-            void HandleAfterCast()
-            {
-                GameObject banner = GetCaster().FindNearestGameObject(GameObjectIds.Banner, GetSpellInfo().GetMaxRange(true));
-                if (banner)
-                    banner.Delete();
-            }
-
-            public override void Register()
-            {
-                AfterCast.Add(new CastHandler(HandleAfterCast));
-            }
+            GameObject banner = GetCaster().FindNearestGameObject(GameObjectIds.Banner, GetSpellInfo().GetMaxRange(true));
+            if (banner)
+                banner.Delete();
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_destroy_karangs_banner_SpellScript();
+            AfterCast.Add(new CastHandler(HandleAfterCast));
         }
     }
 }

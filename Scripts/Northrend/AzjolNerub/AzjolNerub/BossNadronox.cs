@@ -176,255 +176,245 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.Nadronox
     }
 
     [Script]
-    class boss_hadronox : CreatureScript
+    class boss_hadronox : BossAI
     {
-        public boss_hadronox() : base("boss_hadronox") { }
+        public boss_hadronox(Creature creature) : base(creature, ANDataTypes.Hadronox) { }
 
-        class boss_hadronoxAI : BossAI
+        bool IsInCombatWithPlayer()
         {
-            public boss_hadronoxAI(Creature creature) : base(creature, ANDataTypes.Hadronox) { }
-
-            bool IsInCombatWithPlayer()
+            List<HostileReference> refs = me.GetThreatManager().getThreatList();
+            foreach (HostileReference hostileRef in refs)
             {
-                List<HostileReference> refs = me.GetThreatManager().getThreatList();
-                foreach (HostileReference hostileRef in refs)
-                {
-                    Unit target = hostileRef.getTarget();
-                    if (target)
-                        if (target.IsControlledByPlayer())
-                            return true;
-                }
+                Unit target = hostileRef.getTarget();
+                if (target)
+                    if (target.IsControlledByPlayer())
+                        return true;
+            }
+            return false;
+        }
+
+        void SetStep(byte step)
+        {
+            if (_lastPlayerCombatState)
+                return;
+
+            _step = step;
+            me.SetHomePosition(Misc.hadronoxStep[step]);
+            me.GetMotionMaster().Clear();
+            me.AttackStop();
+            SetCombatMovement(false);
+            me.GetMotionMaster().MovePoint(0, Misc.hadronoxStep[step]);
+        }
+
+        void SummonCrusherPack(SummonGroups group)
+        {
+            List<TempSummon> summoned;
+            me.SummonCreatureGroup((byte)group, out summoned);
+            foreach (TempSummon summon in summoned)
+            {
+                summon.GetAI().SetData(Data.CrusherPackId, (uint)group);
+                summon.GetAI().DoAction(ActionIds.PackWalk);
+            }
+        }
+
+        public override void MovementInform(MovementGeneratorType type, uint id)
+        {
+            if (type != MovementGeneratorType.Point)
+                return;
+            SetCombatMovement(true);
+            AttackStart(me.GetVictim());
+            if (_step < Misc.hadronoxStep.Length - 1)
+                return;
+            DoCastAOE(SpellIds.WebFrontDoors);
+            DoCastAOE(SpellIds.WebSideDoors);
+            _doorsWebbed = true;
+            DoZoneInCombat();
+        }
+
+        public override uint GetData(uint data)
+        {
+            if (data == Data.HadronoxEnteredCombat)
+                return _enteredCombat ? 1 : 0u;
+            if (data == Data.HadronoxWebbedDoors)
+                return _doorsWebbed ? 1 : 0u;
+            return 0;
+        }
+
+        public override bool CanAIAttack(Unit target)
+        {
+            // Prevent Hadronox from going too far from her current home position
+            if (!target.IsControlledByPlayer() && target.GetDistance(me.GetHomePosition()) > 20.0f)
                 return false;
-            }
-
-            void SetStep(byte step)
-            {
-                if (_lastPlayerCombatState)
-                    return;
-
-                _step = step;
-                me.SetHomePosition(Misc.hadronoxStep[step]);
-                me.GetMotionMaster().Clear();
-                me.AttackStop();
-                SetCombatMovement(false);
-                me.GetMotionMaster().MovePoint(0, Misc.hadronoxStep[step]);
-            }
-
-            void SummonCrusherPack(SummonGroups group)
-            {
-                List<TempSummon> summoned;
-                me.SummonCreatureGroup((byte)group, out summoned);
-                foreach (TempSummon summon in summoned)
-                {
-                    summon.GetAI().SetData(Data.CrusherPackId, (uint)group);
-                    summon.GetAI().DoAction(ActionIds.PackWalk);
-                }
-            }
-
-            public override void MovementInform(MovementGeneratorType type, uint id)
-            {
-                if (type != MovementGeneratorType.Point)
-                    return;
-                SetCombatMovement(true);
-                AttackStart(me.GetVictim());
-                if (_step < Misc.hadronoxStep.Length - 1)
-                    return;
-                DoCastAOE(SpellIds.WebFrontDoors);
-                DoCastAOE(SpellIds.WebSideDoors);
-                _doorsWebbed = true;
-                DoZoneInCombat();
-            }
-
-            public override uint GetData(uint data)
-            {
-                if (data == Data.HadronoxEnteredCombat)
-                    return _enteredCombat ? 1 : 0u;
-                if (data == Data.HadronoxWebbedDoors)
-                    return _doorsWebbed ? 1 : 0u;
-                return 0;
-            }
-
-            public override bool CanAIAttack(Unit target)
-            {
-                // Prevent Hadronox from going too far from her current home position
-                if (!target.IsControlledByPlayer() && target.GetDistance(me.GetHomePosition()) > 20.0f)
-                    return false;
-                return base.CanAIAttack(target);
-            }
-
-            public override void EnterCombat(Unit who)
-            {
-                _scheduler.CancelAll();
-                _scheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting));
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(7), task =>
-                {
-                    DoCastAOE(SpellIds.LeechPoison);
-                    task.Repeat(TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(9));
-                });
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(13), task =>
-                {
-                    Unit target = SelectTarget(SelectAggroTarget.Random, 0, 100.0f);
-                    if (target)
-                        DoCast(target, SpellIds.AcidCloud);
-                    task.Repeat(TimeSpan.FromSeconds(16), TimeSpan.FromSeconds(23));
-                });
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(13), TimeSpan.FromSeconds(19), task =>
-                {
-                    DoCastAOE(SpellIds.WebGrab);
-                    task.Repeat(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(25));
-                });
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(7), task =>
-                {
-                    DoCastVictim(SpellIds.PierceArmor);
-                    task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15));
-                });
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
-                {
-                    if (IsInCombatWithPlayer() != _lastPlayerCombatState)
-                    {
-                        _lastPlayerCombatState = !_lastPlayerCombatState;
-                        if (_lastPlayerCombatState) // we are now in combat with players
-                        {
-                            if (!instance.CheckRequiredBosses(ANDataTypes.Hadronox))
-                            {
-                                EnterEvadeMode(EvadeReason.SequenceBreak);
-                                return;
-                            }
-                            // cancel current point movement if engaged by players
-                            if (me.GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Point)
-                            {
-                                me.GetMotionMaster().Clear();
-                                SetCombatMovement(true);
-                                AttackStart(me.GetVictim());
-                            }
-                        }
-                        else // we are no longer in combat with players - reset the encounter
-                            EnterEvadeMode(EvadeReason.NoHostiles);
-                    }
-                    task.Repeat(TimeSpan.FromSeconds(1));
-                });
-
-                me.setActive(true);
-            }
-
-            public override void DoAction(int action)
-            {
-                switch (action)
-                {
-                    case ActionIds.CrusherEngaged:
-                        if (_enteredCombat)
-                            break;
-                        instance.SetBossState(ANDataTypes.Hadronox, EncounterState.InProgress);
-                        _enteredCombat = true;
-                        SummonCrusherPack(SummonGroups.Crusher2);
-                        SummonCrusherPack(SummonGroups.Crusher3);
-                        break;
-                    case ActionIds.HadronoxMove:
-                        if (_step < Misc.hadronoxStep.Length - 1)
-                        {
-                            SetStep((byte)(_step + 1));
-                            Talk(TextIds.EmoteHadronoxMove);
-                        }
-                        break;
-                }
-            }
-
-            public override void EnterEvadeMode(EvadeReason why)
-            {
-                List<Creature> triggers = new List<Creature>();
-                me.GetCreatureListWithEntryInGrid(triggers, CreatureIds.WorldtriggerLarge);
-                foreach (Creature trigger in triggers)
-                {
-                    if (trigger.HasAura(SpellIds.SummonChampionPeriodic) || trigger.HasAura(SpellIds.WebFrontDoors) || trigger.HasAura(SpellIds.WebSideDoors))
-                        _DespawnAtEvade(25, trigger);
-                }
-                _DespawnAtEvade(25);
-                summons.DespawnAll();
-                foreach (ObjectGuid gNerubian in _anubar)
-                {
-                    Creature nerubian = ObjectAccessor.GetCreature(me, gNerubian);
-                    if (nerubian)
-                        nerubian.DespawnOrUnsummon();
-                }
-            }
-
-            public override void SetGUID(ObjectGuid guid, int what)
-            {
-                _anubar.Add(guid);
-            }
-
-            public void Initialize()
-            {
-                me.SetFloatValue(UnitFields.BoundingRadius, 9.0f);
-                me.SetFloatValue(UnitFields.CombatReach, 9.0f);
-                _enteredCombat = false;
-                _doorsWebbed = false;
-                _lastPlayerCombatState = false;
-                SetStep(0);
-                SetCombatMovement(true);
-                SummonCrusherPack(SummonGroups.Crusher1);
-            }
-
-            public override void InitializeAI()
-            {
-                base.InitializeAI();
-                if (me.IsAlive())
-                    Initialize();
-            }
-
-            public override void JustRespawned()
-            {
-                base.JustRespawned();
-                Initialize();
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _scheduler.Update(diff);
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-
-                DoMeleeAttackIfReady();
-            }
-
-            // Safeguard to prevent Hadronox dying to NPCs
-            public override void DamageTaken(Unit who, ref uint damage)
-            {
-                if (!who.IsControlledByPlayer() && me.HealthBelowPct(70))
-                {
-                    if (me.HealthBelowPctDamaged(5, damage))
-                        damage = 0;
-                    else
-                        damage *= (uint)((me.GetHealthPct() - 5.0f) / 65.0f);
-                }
-            }
-
-            public override void JustSummoned(Creature summon)
-            {
-                summons.Summon(summon);
-                // Do not enter combat with zone
-            }
-
-            bool _enteredCombat; // has a player entered combat with the first crusher pack? (talk and spawn two more packs)
-            bool _doorsWebbed;   // obvious - have we reached the top and webbed the doors shut? (trigger for hadronox denied achievement)
-            bool _lastPlayerCombatState; // was there a player in our threat list the last time we checked (we check every second)
-            byte _step;
-            List<ObjectGuid> _anubar = new List<ObjectGuid>();
+            return base.CanAIAttack(target);
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void EnterCombat(Unit who)
         {
-            return GetInstanceAI<boss_hadronoxAI>(creature);
+            _scheduler.CancelAll();
+            _scheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting));
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(7), task =>
+            {
+                DoCastAOE(SpellIds.LeechPoison);
+                task.Repeat(TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(9));
+            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(13), task =>
+            {
+                Unit target = SelectTarget(SelectAggroTarget.Random, 0, 100.0f);
+                if (target)
+                    DoCast(target, SpellIds.AcidCloud);
+                task.Repeat(TimeSpan.FromSeconds(16), TimeSpan.FromSeconds(23));
+            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(13), TimeSpan.FromSeconds(19), task =>
+            {
+                DoCastAOE(SpellIds.WebGrab);
+                task.Repeat(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(25));
+            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(7), task =>
+            {
+                DoCastVictim(SpellIds.PierceArmor);
+                task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15));
+            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+            {
+                if (IsInCombatWithPlayer() != _lastPlayerCombatState)
+                {
+                    _lastPlayerCombatState = !_lastPlayerCombatState;
+                    if (_lastPlayerCombatState) // we are now in combat with players
+                    {
+                        if (!instance.CheckRequiredBosses(ANDataTypes.Hadronox))
+                        {
+                            EnterEvadeMode(EvadeReason.SequenceBreak);
+                            return;
+                        }
+                        // cancel current point movement if engaged by players
+                        if (me.GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Point)
+                        {
+                            me.GetMotionMaster().Clear();
+                            SetCombatMovement(true);
+                            AttackStart(me.GetVictim());
+                        }
+                    }
+                    else // we are no longer in combat with players - reset the encounter
+                        EnterEvadeMode(EvadeReason.NoHostiles);
+                }
+                task.Repeat(TimeSpan.FromSeconds(1));
+            });
+
+            me.setActive(true);
         }
+
+        public override void DoAction(int action)
+        {
+            switch (action)
+            {
+                case ActionIds.CrusherEngaged:
+                    if (_enteredCombat)
+                        break;
+                    instance.SetBossState(ANDataTypes.Hadronox, EncounterState.InProgress);
+                    _enteredCombat = true;
+                    SummonCrusherPack(SummonGroups.Crusher2);
+                    SummonCrusherPack(SummonGroups.Crusher3);
+                    break;
+                case ActionIds.HadronoxMove:
+                    if (_step < Misc.hadronoxStep.Length - 1)
+                    {
+                        SetStep((byte)(_step + 1));
+                        Talk(TextIds.EmoteHadronoxMove);
+                    }
+                    break;
+            }
+        }
+
+        public override void EnterEvadeMode(EvadeReason why)
+        {
+            List<Creature> triggers = new List<Creature>();
+            me.GetCreatureListWithEntryInGrid(triggers, CreatureIds.WorldtriggerLarge);
+            foreach (Creature trigger in triggers)
+            {
+                if (trigger.HasAura(SpellIds.SummonChampionPeriodic) || trigger.HasAura(SpellIds.WebFrontDoors) || trigger.HasAura(SpellIds.WebSideDoors))
+                    _DespawnAtEvade(25, trigger);
+            }
+            _DespawnAtEvade(25);
+            summons.DespawnAll();
+            foreach (ObjectGuid gNerubian in _anubar)
+            {
+                Creature nerubian = ObjectAccessor.GetCreature(me, gNerubian);
+                if (nerubian)
+                    nerubian.DespawnOrUnsummon();
+            }
+        }
+
+        public override void SetGUID(ObjectGuid guid, int what)
+        {
+            _anubar.Add(guid);
+        }
+
+        public void Initialize()
+        {
+            me.SetFloatValue(UnitFields.BoundingRadius, 9.0f);
+            me.SetFloatValue(UnitFields.CombatReach, 9.0f);
+            _enteredCombat = false;
+            _doorsWebbed = false;
+            _lastPlayerCombatState = false;
+            SetStep(0);
+            SetCombatMovement(true);
+            SummonCrusherPack(SummonGroups.Crusher1);
+        }
+
+        public override void InitializeAI()
+        {
+            base.InitializeAI();
+            if (me.IsAlive())
+                Initialize();
+        }
+
+        public override void JustRespawned()
+        {
+            base.JustRespawned();
+            Initialize();
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _scheduler.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+
+        // Safeguard to prevent Hadronox dying to NPCs
+        public override void DamageTaken(Unit who, ref uint damage)
+        {
+            if (!who.IsControlledByPlayer() && me.HealthBelowPct(70))
+            {
+                if (me.HealthBelowPctDamaged(5, damage))
+                    damage = 0;
+                else
+                    damage *= (uint)((me.GetHealthPct() - 5.0f) / 65.0f);
+            }
+        }
+
+        public override void JustSummoned(Creature summon)
+        {
+            summons.Summon(summon);
+            // Do not enter combat with zone
+        }
+
+        bool _enteredCombat; // has a player entered combat with the first crusher pack? (talk and spawn two more packs)
+        bool _doorsWebbed;   // obvious - have we reached the top and webbed the doors shut? (trigger for hadronox denied achievement)
+        bool _lastPlayerCombatState; // was there a player in our threat list the last time we checked (we check every second)
+        byte _step;
+        List<ObjectGuid> _anubar = new List<ObjectGuid>();
     }
 
     class npc_hadronox_crusherPackAI : ScriptedAI
@@ -539,152 +529,112 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.Nadronox
     }
 
     [Script]
-    class npc_anub_ar_crusher : CreatureScript
+    class npc_anub_ar_crusher : npc_hadronox_crusherPackAI
     {
-        public npc_anub_ar_crusher() : base("npc_anub_ar_crusher") { }
+        public npc_anub_ar_crusher(Creature creature) : base(creature, Misc.crusherWaypoints) { }
 
-        class npc_anub_ar_crusherAI : npc_hadronox_crusherPackAI
+        public override void _EnterCombat()
         {
-            public npc_anub_ar_crusherAI(Creature creature) : base(creature, Misc.crusherWaypoints) { }
-
-            public override void _EnterCombat()
+            _scheduler.Schedule(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(12), task =>
             {
-                _scheduler.Schedule(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(12), task =>
-                {
-                    DoCastVictim(SpellIds.Smash);
-                    task.Repeat(TimeSpan.FromSeconds(13), TimeSpan.FromSeconds(21));
-                });
+                DoCastVictim(SpellIds.Smash);
+                task.Repeat(TimeSpan.FromSeconds(13), TimeSpan.FromSeconds(21));
+            });
 
-                if (_myPack != SummonGroups.Crusher1)
+            if (_myPack != SummonGroups.Crusher1)
+                return;
+
+            Creature hadronox = _instance.GetCreature(ANDataTypes.Hadronox);
+            if (hadronox)
+            {
+                if (hadronox.GetAI().GetData(Data.HadronoxEnteredCombat) != 0)
                     return;
-
-                Creature hadronox = _instance.GetCreature(ANDataTypes.Hadronox);
-                if (hadronox)
-                {
-                    if (hadronox.GetAI().GetData(Data.HadronoxEnteredCombat) != 0)
-                        return;
-                    hadronox.GetAI().DoAction(ActionIds.CrusherEngaged);
-                }
-
-                Talk(TextIds.SayCrusherAggro);
+                hadronox.GetAI().DoAction(ActionIds.CrusherEngaged);
             }
 
-            public override void DamageTaken(Unit source, ref uint damage)
-            {
-                if (_hadFrenzy || !me.HealthBelowPctDamaged(25, damage))
-                    return;
-                _hadFrenzy = true;
-                Talk(TextIds.EmoteCrusherFrenzy);
-                DoCastSelf(SpellIds.Frenzy);
-            }
-
-            public override void JustDied(Unit killer)
-            {
-                Creature hadronox = _instance.GetCreature(ANDataTypes.Hadronox);
-                if (hadronox)
-                    hadronox.GetAI().DoAction(ActionIds.HadronoxMove);
-                base.JustDied(killer);
-            }
-
-            bool _hadFrenzy;
+            Talk(TextIds.SayCrusherAggro);
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void DamageTaken(Unit source, ref uint damage)
         {
-            return GetInstanceAI<npc_anub_ar_crusherAI>(creature);
+            if (_hadFrenzy || !me.HealthBelowPctDamaged(25, damage))
+                return;
+            _hadFrenzy = true;
+            Talk(TextIds.EmoteCrusherFrenzy);
+            DoCastSelf(SpellIds.Frenzy);
+        }
+
+        public override void JustDied(Unit killer)
+        {
+            Creature hadronox = _instance.GetCreature(ANDataTypes.Hadronox);
+            if (hadronox)
+                hadronox.GetAI().DoAction(ActionIds.HadronoxMove);
+            base.JustDied(killer);
+        }
+
+        bool _hadFrenzy;
+    }
+
+    [Script]
+    class npc_anub_ar_crusher_champion : npc_hadronox_crusherPackAI
+    {
+        public npc_anub_ar_crusher_champion(Creature creature) : base(creature, Misc.championWaypoints) { }
+
+        public override void _EnterCombat()
+        {
+            _scheduler.Schedule(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(8), task =>
+            {
+                DoCastVictim(SpellIds.Rend);
+                task.Repeat(TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(16));
+            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(19), task =>
+            {
+                DoCastVictim(SpellIds.Pummel);
+                task.Repeat(TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(17));
+            });
         }
     }
 
     [Script]
-    class npc_anub_ar_crusher_champion : CreatureScript
+    class npc_anub_ar_crusher_crypt_fiend : npc_hadronox_crusherPackAI
     {
-        public npc_anub_ar_crusher_champion() : base("npc_anub_ar_crusher_champion") { }
+        public npc_anub_ar_crusher_crypt_fiend(Creature creature) : base(creature, Misc.cryptFiendWaypoints) { }
 
-        class npc_anub_ar_crusher_championAI : npc_hadronox_crusherPackAI
+        public override void _EnterCombat()
         {
-            public npc_anub_ar_crusher_championAI(Creature creature) : base(creature, Misc.championWaypoints) { }
-
-            public override void _EnterCombat()
+            _scheduler.Schedule(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(8), task =>
             {
-                _scheduler.Schedule(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(8), task =>
-                {
-                    DoCastVictim(SpellIds.Rend);
-                    task.Repeat(TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(16));
-                });
+                DoCastVictim(SpellIds.CrushingWebs);
+                task.Repeat(TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(16));
+            });
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(19), task =>
-                {
-                    DoCastVictim(SpellIds.Pummel);
-                    task.Repeat(TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(17));
-                });
-            }
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<npc_anub_ar_crusher_championAI>(creature);
+            _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(19), task =>
+            {
+                DoCastVictim(SpellIds.InfectedWound);
+                task.Repeat(TimeSpan.FromSeconds(16), TimeSpan.FromSeconds(25));
+            });
         }
     }
 
     [Script]
-    class npc_anub_ar_crusher_crypt_fiend : CreatureScript
+    class npc_anub_ar_crusher_necromancer : npc_hadronox_crusherPackAI
     {
-        public npc_anub_ar_crusher_crypt_fiend() : base("npc_anub_ar_crusher_crypt_fiend") { }
+        public npc_anub_ar_crusher_necromancer(Creature creature) : base(creature, Misc.necromancerWaypoints) { }
 
-        class npc_anub_ar_crusher_crypt_fiendAI : npc_hadronox_crusherPackAI
+        public override void _EnterCombat()
         {
-            public npc_anub_ar_crusher_crypt_fiendAI(Creature creature) : base(creature, Misc.cryptFiendWaypoints) { }
-
-            public override void _EnterCombat()
+            _scheduler.Schedule(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(4), task =>
             {
-                _scheduler.Schedule(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(8), task =>
-                {
-                    DoCastVictim(SpellIds.CrushingWebs);
-                    task.Repeat(TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(16));
-                });
+                DoCastVictim(SpellIds.ShadowBolt);
+                task.Repeat(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(5));
+            });
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(19), task =>
-                {
-                    DoCastVictim(SpellIds.InfectedWound);
-                    task.Repeat(TimeSpan.FromSeconds(16), TimeSpan.FromSeconds(25));
-                });
-            }
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<npc_anub_ar_crusher_crypt_fiendAI>(creature);
-        }
-    }
-
-    [Script]
-    class npc_anub_ar_crusher_necromancer : CreatureScript
-    {
-        public npc_anub_ar_crusher_necromancer() : base("npc_anub_ar_crusher_necromancer") { }
-
-        class npc_anub_ar_crusher_necromancerAI : npc_hadronox_crusherPackAI
-        {
-            public npc_anub_ar_crusher_necromancerAI(Creature creature) : base(creature, Misc.necromancerWaypoints) { }
-
-            public override void _EnterCombat()
+            _scheduler.Schedule(TimeSpan.FromSeconds(37), TimeSpan.FromSeconds(45), task =>
             {
-                _scheduler.Schedule(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(4), task =>
-                {
-                    DoCastVictim(SpellIds.ShadowBolt);
-                    task.Repeat(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(5));
-                });
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(37), TimeSpan.FromSeconds(45), task =>
-                {
-                    DoCastVictim(RandomHelper.URand(0, 1) != 0 ? SpellIds.AnimateBones2 : SpellIds.AnimateBones1);
-                    task.Repeat(TimeSpan.FromSeconds(35), TimeSpan.FromSeconds(50));
-                });
-            }
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<npc_anub_ar_crusher_necromancerAI>(creature);
+                DoCastVictim(RandomHelper.URand(0, 1) != 0 ? SpellIds.AnimateBones2 : SpellIds.AnimateBones1);
+                task.Repeat(TimeSpan.FromSeconds(35), TimeSpan.FromSeconds(50));
+            });
         }
     }
 
@@ -786,119 +736,92 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.Nadronox
     }
 
     [Script]
-    class npc_anub_ar_champion : CreatureScript
+    class npc_anub_ar_champion : npc_hadronox_foeAI
     {
-        public npc_anub_ar_champion() : base("npc_anub_ar_champion") { }
+        public npc_anub_ar_champion(Creature creature) : base(creature) { }
 
-        class npc_anub_ar_championAI : npc_hadronox_foeAI
+        public override void EnterCombat(Unit who)
         {
-            public npc_anub_ar_championAI(Creature creature) : base(creature) { }
-
-            public override void EnterCombat(Unit who)
+            _scheduler.Schedule(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(8), task =>
             {
-                _scheduler.Schedule(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(8), task =>
-                {
-                    DoCastVictim(SpellIds.Rend);
-                    task.Repeat(TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(16));
-                });
+                DoCastVictim(SpellIds.Rend);
+                task.Repeat(TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(16));
+            });
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(19), task =>
-                {
-                    DoCastVictim(SpellIds.Pummel);
-                    task.Repeat(TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(17));
-                });
+            _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(19), task =>
+            {
+                DoCastVictim(SpellIds.Pummel);
+                task.Repeat(TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(17));
+            });
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(50), task =>
-                {
-                    DoCastVictim(SpellIds.Taunt);
-                    task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(50));
-                });
-            }
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<npc_anub_ar_championAI>(creature);
+            _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(50), task =>
+            {
+                DoCastVictim(SpellIds.Taunt);
+                task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(50));
+            });
         }
     }
 
     [Script]
-    class npc_anub_ar_crypt_fiend : CreatureScript
+    class npc_anub_ar_crypt_fiend : npc_hadronox_foeAI
     {
-        public npc_anub_ar_crypt_fiend() : base("npc_anub_ar_crypt_fiend") { }
+        public npc_anub_ar_crypt_fiend(Creature creature) : base(creature) { }
 
-        class npc_anub_ar_crypt_fiendAI : npc_hadronox_foeAI
+        public override void EnterCombat(Unit who)
         {
-            public npc_anub_ar_crypt_fiendAI(Creature creature) : base(creature) { }
-
-            public override void EnterCombat(Unit who)
+            _scheduler.Schedule(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(8), task =>
             {
-                _scheduler.Schedule(TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(8), task =>
-                {
-                    DoCastVictim(SpellIds.CrushingWebs);
-                    task.Repeat(TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(16));
-                });
+                DoCastVictim(SpellIds.CrushingWebs);
+                task.Repeat(TimeSpan.FromSeconds(12), TimeSpan.FromSeconds(16));
+            });
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(19), task =>
-                {
-                    DoCastVictim(SpellIds.InfectedWound);
-                    task.Repeat(TimeSpan.FromSeconds(16), TimeSpan.FromSeconds(25));
-                });
+            _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(19), task =>
+            {
+                DoCastVictim(SpellIds.InfectedWound);
+                task.Repeat(TimeSpan.FromSeconds(16), TimeSpan.FromSeconds(25));
+            });
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(50), task =>
-                {
-                    DoCastVictim(SpellIds.Taunt);
-                    task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(50));
-                });
-            }
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<npc_anub_ar_crypt_fiendAI>(creature);
+            _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(50), task =>
+            {
+                DoCastVictim(SpellIds.Taunt);
+                task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(50));
+            });
         }
     }
 
     [Script]
-    class npc_anub_ar_necromancer : CreatureScript
+    class npc_anub_ar_necromancer : npc_hadronox_foeAI
     {
-        public npc_anub_ar_necromancer() : base("npc_anub_ar_necromancer") { }
+        public npc_anub_ar_necromancer(Creature creature) : base(creature) { }
 
-        class npc_anub_ar_necromancerAI : npc_hadronox_foeAI
+        public override void EnterCombat(Unit who)
         {
-            public npc_anub_ar_necromancerAI(Creature creature) : base(creature) { }
-
-            public override void EnterCombat(Unit who)
+            _scheduler.Schedule(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(4), task =>
             {
-                _scheduler.Schedule(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(4), task =>
-                {
-                    DoCastVictim(SpellIds.ShadowBolt);
-                    task.Repeat(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(5));
-                });
+                DoCastVictim(SpellIds.ShadowBolt);
+                task.Repeat(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(5));
+            });
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(37), TimeSpan.FromSeconds(45), task =>
-                {
-                    DoCastVictim(RandomHelper.URand(0, 1) != 0 ? SpellIds.AnimateBones2 : SpellIds.AnimateBones1);
-                    task.Repeat(TimeSpan.FromSeconds(35), TimeSpan.FromSeconds(50));
-                });
+            _scheduler.Schedule(TimeSpan.FromSeconds(37), TimeSpan.FromSeconds(45), task =>
+            {
+                DoCastVictim(RandomHelper.URand(0, 1) != 0 ? SpellIds.AnimateBones2 : SpellIds.AnimateBones1);
+                task.Repeat(TimeSpan.FromSeconds(35), TimeSpan.FromSeconds(50));
+            });
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(50), task =>
-                {
-                    DoCastVictim(SpellIds.Taunt);
-                    task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(50));
-                });
-            }
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<npc_anub_ar_necromancerAI>(creature);
+            _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(50), task =>
+            {
+                DoCastVictim(SpellIds.Taunt);
+                task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(50));
+            });
         }
     }
 
-    class spell_hadronox_periodic_summon_template_AuraScript : AuraScript
+    [Script("spell_hadronox_periodic_summon_champion", SpellIds.SummonChampionTop, SpellIds.SummonChampionBottom)]
+    [Script("spell_hadronox_periodic_summon_crypt_fiend", SpellIds.SummonCryptFiendTop, SpellIds.SummonCryptFiendBottom)]
+    [Script("spell_hadronox_periodic_summon_necromancer", SpellIds.SummonNecromancerTop, SpellIds.SummonNecromancerBottom)]
+    class spell_hadronox_periodic_summon_template : AuraScript
     {
-        public spell_hadronox_periodic_summon_template_AuraScript(uint topSpellId, uint bottomSpellId) : base()
+        public spell_hadronox_periodic_summon_template(uint topSpellId, uint bottomSpellId) : base()
         {
             _topSpellId = topSpellId;
             _bottomSpellId = bottomSpellId;
@@ -946,122 +869,54 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.Nadronox
     }
 
     [Script]
-    class spell_hadronox_periodic_summon_champion : SpellScriptLoader
+    class spell_hadronox_leeching_poison : AuraScript
     {
-        public spell_hadronox_periodic_summon_champion() : base("spell_hadronox_periodic_summon_champion") { }
-
-        class spell_hadronox_periodic_summon_champion_AuraScript : spell_hadronox_periodic_summon_template_AuraScript
+        public override bool Validate(SpellInfo spell)
         {
-            public spell_hadronox_periodic_summon_champion_AuraScript() : base(SpellIds.SummonChampionTop, SpellIds.SummonChampionBottom) { }
+            return ValidateSpellInfo(SpellIds.LeechPoisonHeal);
         }
 
-        public override AuraScript GetAuraScript()
+        void HandleEffectRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            return new spell_hadronox_periodic_summon_champion_AuraScript();
+            if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.ByDeath)
+                return;
+
+            if (GetTarget().IsGuardian())
+                return;
+
+            Unit caster = GetCaster();
+            if (caster)
+                caster.CastSpell(caster, SpellIds.LeechPoisonHeal, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectRemove.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.PeriodicLeech, AuraEffectHandleModes.Real));
         }
     }
 
     [Script]
-    class spell_hadronox_periodic_summon_crypt_fiend : SpellScriptLoader
+    class spell_hadronox_web_doors : SpellScript
     {
-        public spell_hadronox_periodic_summon_crypt_fiend() : base("spell_hadronox_periodic_summon_crypt_fiend") { }
-
-        class spell_hadronox_periodic_summon_crypt_fiend_AuraScript : spell_hadronox_periodic_summon_template_AuraScript
+        public override bool Validate(SpellInfo spell)
         {
-            public spell_hadronox_periodic_summon_crypt_fiend_AuraScript() : base(SpellIds.SummonCryptFiendTop, SpellIds.SummonCryptFiendBottom) { }
+            return ValidateSpellInfo(SpellIds.SummonChampionPeriodic, SpellIds.SummonCryptFiendPeriodic, SpellIds.SummonNecromancerPeriodic);
         }
 
-        public override AuraScript GetAuraScript()
+        void HandleDummy(uint effIndex)
         {
-            return new spell_hadronox_periodic_summon_crypt_fiend_AuraScript();
-        }
-    }
-
-    [Script]
-    class spell_hadronox_periodic_summon_necromancer : SpellScriptLoader
-    {
-        public spell_hadronox_periodic_summon_necromancer() : base("spell_hadronox_periodic_summon_necromancer") { }
-
-        class spell_hadronox_periodic_summon_necromancer_AuraScript : spell_hadronox_periodic_summon_template_AuraScript
-        {
-            public spell_hadronox_periodic_summon_necromancer_AuraScript() : base(SpellIds.SummonNecromancerTop, SpellIds.SummonNecromancerBottom) { }
-        }
-
-        public override AuraScript GetAuraScript()
-        {
-            return new spell_hadronox_periodic_summon_necromancer_AuraScript();
-        }
-    }
-
-    [Script]
-    class spell_hadronox_leeching_poison : SpellScriptLoader
-    {
-        public spell_hadronox_leeching_poison() : base("spell_hadronox_leeching_poison") { }
-
-        class spell_hadronox_leeching_poison_AuraScript : AuraScript
-        {
-            public override bool Validate(SpellInfo spell)
+            Unit target = GetHitUnit();
+            if (target)
             {
-                return ValidateSpellInfo(SpellIds.LeechPoisonHeal);
-            }
-
-            void HandleEffectRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-            {
-                if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.ByDeath)
-                    return;
-
-                if (GetTarget().IsGuardian())
-                    return;
-
-                Unit caster = GetCaster();
-                if (caster)
-                    caster.CastSpell(caster, SpellIds.LeechPoisonHeal, true);
-            }
-
-            public override void Register()
-            {
-                OnEffectRemove.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.PeriodicLeech, AuraEffectHandleModes.Real));
+                target.RemoveAurasDueToSpell(SpellIds.SummonChampionPeriodic);
+                target.RemoveAurasDueToSpell(SpellIds.SummonCryptFiendPeriodic);
+                target.RemoveAurasDueToSpell(SpellIds.SummonNecromancerPeriodic);
             }
         }
 
-        public override AuraScript GetAuraScript()
+        public override void Register()
         {
-            return new spell_hadronox_leeching_poison_AuraScript();
-        }
-    }
-
-    [Script]
-    class spell_hadronox_web_doors : SpellScriptLoader
-    {
-        public spell_hadronox_web_doors() : base("spell_hadronox_web_doors") { }
-
-        class spell_hadronox_web_doors_SpellScript : SpellScript
-        {
-            public override bool Validate(SpellInfo spell)
-            {
-                return ValidateSpellInfo(SpellIds.SummonChampionPeriodic, SpellIds.SummonCryptFiendPeriodic, SpellIds.SummonNecromancerPeriodic);
-            }
-
-            void HandleDummy(uint effIndex)
-            {
-                Unit target = GetHitUnit();
-                if (target)
-                {
-                    target.RemoveAurasDueToSpell(SpellIds.SummonChampionPeriodic);
-                    target.RemoveAurasDueToSpell(SpellIds.SummonCryptFiendPeriodic);
-                    target.RemoveAurasDueToSpell(SpellIds.SummonNecromancerPeriodic);
-                }
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ApplyAura));
-            }
-        }
-
-        public override SpellScript GetSpellScript()
-        {
-            return new spell_hadronox_web_doors_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ApplyAura));
         }
     }
 

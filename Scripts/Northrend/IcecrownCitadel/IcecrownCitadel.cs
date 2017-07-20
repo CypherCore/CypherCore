@@ -123,347 +123,317 @@ namespace Scripts.Northrend.IcecrownCitadel
 
     // at Light's Hammer
     [Script]
-    class npc_highlord_tirion_fordring_lh : CreatureScript
+    class npc_highlord_tirion_fordring : ScriptedAI
     {
-        public npc_highlord_tirion_fordring_lh() : base("npc_highlord_tirion_fordring_lh") { }
-
-        class npc_highlord_tirion_fordringAI : ScriptedAI
+        public npc_highlord_tirion_fordring(Creature creature)
+            : base(creature)
         {
-            public npc_highlord_tirion_fordringAI(Creature creature)
-                : base(creature)
-            {
-                _instance = creature.GetInstanceScript();
-            }
+            _instance = creature.GetInstanceScript();
+        }
 
-            public override void Reset()
-            {
-                _events.Reset();
-                _theLichKing.Clear();
-                _bolvarFordragon.Clear();
-                _factionNPC.Clear();
-                _damnedKills = 0;
-            }
+        public override void Reset()
+        {
+            _events.Reset();
+            _theLichKing.Clear();
+            _bolvarFordragon.Clear();
+            _factionNPC.Clear();
+            _damnedKills = 0;
+        }
 
-            // IMPORTANT NOTE: This is triggered from per-GUID scripts
-            // of The Damned SAI
-            public override void SetData(uint type, uint data)
+        // IMPORTANT NOTE: This is triggered from per-GUID scripts
+        // of The Damned SAI
+        public override void SetData(uint type, uint data)
+        {
+            if (type == 1 && data == 1)
             {
-                if (type == 1 && data == 1)
+                if (++_damnedKills == 2)
                 {
-                    if (++_damnedKills == 2)
+                    Creature theLichKing = me.FindNearestCreature(CreatureIds.TheLichKingLh, 150.0f);
+                    if (theLichKing)
                     {
-                        Creature theLichKing = me.FindNearestCreature(CreatureIds.TheLichKingLh, 150.0f);
-                        if (theLichKing)
+                        Creature bolvarFordragon = me.FindNearestCreature(CreatureIds.HighlordBolvarFordragonLh, 150.0f);
+                        if (bolvarFordragon)
                         {
-                            Creature bolvarFordragon = me.FindNearestCreature(CreatureIds.HighlordBolvarFordragonLh, 150.0f);
-                            if (bolvarFordragon)
+                            Creature factionNPC = me.FindNearestCreature(_instance.GetData(DataTypes.TeamInInstance) == (uint)Team.Horde ? CreatureIds.SeHighOverlordSaurfang : CreatureIds.SeMuradinBronzebeard, 50.0f);
+                            if (factionNPC)
                             {
-                                Creature factionNPC = me.FindNearestCreature(_instance.GetData(DataTypes.TeamInInstance) == (uint)Team.Horde ? CreatureIds.SeHighOverlordSaurfang : CreatureIds.SeMuradinBronzebeard, 50.0f);
-                                if (factionNPC)
-                                {
-                                    me.setActive(true);
-                                    _theLichKing = theLichKing.GetGUID();
-                                    theLichKing.setActive(true);
-                                    _bolvarFordragon = bolvarFordragon.GetGUID();
-                                    bolvarFordragon.setActive(true);
-                                    _factionNPC = factionNPC.GetGUID();
-                                    factionNPC.setActive(true);
-                                }
+                                me.setActive(true);
+                                _theLichKing = theLichKing.GetGUID();
+                                theLichKing.setActive(true);
+                                _bolvarFordragon = bolvarFordragon.GetGUID();
+                                bolvarFordragon.setActive(true);
+                                _factionNPC = factionNPC.GetGUID();
+                                factionNPC.setActive(true);
                             }
                         }
+                    }
 
-                        if (_bolvarFordragon.IsEmpty() || _theLichKing.IsEmpty() || _factionNPC.IsEmpty())
-                            return;
+                    if (_bolvarFordragon.IsEmpty() || _theLichKing.IsEmpty() || _factionNPC.IsEmpty())
+                        return;
 
-                        Talk(Texts.SayTirionIntro1);
-                        _events.ScheduleEvent(EventTypes.TirionIntro2, 4000);
-                        _events.ScheduleEvent(EventTypes.TirionIntro3, 14000);
-                        _events.ScheduleEvent(EventTypes.TirionIntro4, 18000);
-                        _events.ScheduleEvent(EventTypes.TirionIntro5, 31000);
-                        _events.ScheduleEvent(EventTypes.LkIntro1, 35000);
-                        _events.ScheduleEvent(EventTypes.TirionIntro6, 51000);
-                        _events.ScheduleEvent(EventTypes.LkIntro2, 58000);
-                        _events.ScheduleEvent(EventTypes.LkIntro3, 74000);
-                        _events.ScheduleEvent(EventTypes.LkIntro4, 86000);
-                        _events.ScheduleEvent(EventTypes.BolvarIntro1, 100000);
-                        _events.ScheduleEvent(EventTypes.LkIntro5, 108000);
+                    Talk(Texts.SayTirionIntro1);
+                    _events.ScheduleEvent(EventTypes.TirionIntro2, 4000);
+                    _events.ScheduleEvent(EventTypes.TirionIntro3, 14000);
+                    _events.ScheduleEvent(EventTypes.TirionIntro4, 18000);
+                    _events.ScheduleEvent(EventTypes.TirionIntro5, 31000);
+                    _events.ScheduleEvent(EventTypes.LkIntro1, 35000);
+                    _events.ScheduleEvent(EventTypes.TirionIntro6, 51000);
+                    _events.ScheduleEvent(EventTypes.LkIntro2, 58000);
+                    _events.ScheduleEvent(EventTypes.LkIntro3, 74000);
+                    _events.ScheduleEvent(EventTypes.LkIntro4, 86000);
+                    _events.ScheduleEvent(EventTypes.BolvarIntro1, 100000);
+                    _events.ScheduleEvent(EventTypes.LkIntro5, 108000);
 
-                        if (_instance.GetData(DataTypes.TeamInInstance) == (uint)Team.Horde)
-                        {
-                            _events.ScheduleEvent(EventTypes.SaurfangIntro1, 120000);
-                            _events.ScheduleEvent(EventTypes.TirionIntroH7, 129000);
-                            _events.ScheduleEvent(EventTypes.SaurfangIntro2, 139000);
-                            _events.ScheduleEvent(EventTypes.SaurfangIntro3, 150000);
-                            _events.ScheduleEvent(EventTypes.SaurfangIntro4, 162000);
-                            _events.ScheduleEvent(EventTypes.SaurfangRun, 170000);
-                        }
-                        else
-                        {
-                            _events.ScheduleEvent(EventTypes.MuradinIntro1, 120000);
-                            _events.ScheduleEvent(EventTypes.MuradinIntro2, 124000);
-                            _events.ScheduleEvent(EventTypes.MuradinIntro3, 127000);
-                            _events.ScheduleEvent(EventTypes.TirionIntroA7, 136000);
-                            _events.ScheduleEvent(EventTypes.MuradinIntro4, 144000);
-                            _events.ScheduleEvent(EventTypes.MuradinIntro5, 151000);
-                            _events.ScheduleEvent(EventTypes.MuradinRun, 157000);
-                        }
+                    if (_instance.GetData(DataTypes.TeamInInstance) == (uint)Team.Horde)
+                    {
+                        _events.ScheduleEvent(EventTypes.SaurfangIntro1, 120000);
+                        _events.ScheduleEvent(EventTypes.TirionIntroH7, 129000);
+                        _events.ScheduleEvent(EventTypes.SaurfangIntro2, 139000);
+                        _events.ScheduleEvent(EventTypes.SaurfangIntro3, 150000);
+                        _events.ScheduleEvent(EventTypes.SaurfangIntro4, 162000);
+                        _events.ScheduleEvent(EventTypes.SaurfangRun, 170000);
+                    }
+                    else
+                    {
+                        _events.ScheduleEvent(EventTypes.MuradinIntro1, 120000);
+                        _events.ScheduleEvent(EventTypes.MuradinIntro2, 124000);
+                        _events.ScheduleEvent(EventTypes.MuradinIntro3, 127000);
+                        _events.ScheduleEvent(EventTypes.TirionIntroA7, 136000);
+                        _events.ScheduleEvent(EventTypes.MuradinIntro4, 144000);
+                        _events.ScheduleEvent(EventTypes.MuradinIntro5, 151000);
+                        _events.ScheduleEvent(EventTypes.MuradinRun, 157000);
                     }
                 }
             }
+        }
 
-            public override void UpdateAI(uint diff)
+        public override void UpdateAI(uint diff)
+        {
+            if (_damnedKills != 2)
+                return;
+
+            _events.Update(diff);
+
+            _events.ExecuteEvents(eventId =>
             {
-                if (_damnedKills != 2)
-                    return;
+                Creature temp;
 
-                _events.Update(diff);
-
-                _events.ExecuteEvents(eventId =>
+                switch (eventId)
                 {
-                    Creature temp;
-
-                    switch (eventId)
-                    {
-                        case EventTypes.TirionIntro2:
-                            me.HandleEmoteCommand(Emote.OneshotExclamation);
-                            break;
-                        case EventTypes.TirionIntro3:
-                            Talk(Texts.SayTirionIntro2);
-                            break;
-                        case EventTypes.TirionIntro4:
-                            me.HandleEmoteCommand(Emote.OneshotExclamation);
-                            break;
-                        case EventTypes.TirionIntro5:
-                            Talk(Texts.SayTirionIntro3);
-                            break;
-                        case EventTypes.LkIntro1:
-                            me.HandleEmoteCommand(Emote.StateDanceNosheathe);
-                            temp = ObjectAccessor.GetCreature(me, _theLichKing);
-                            if (temp)
-                                temp.GetAI().Talk(Texts.SayLkIntro1);
-                            break;
-                        case EventTypes.TirionIntro6:
-                            Talk(Texts.SayTirionIntro4);
-                            break;
-                        case EventTypes.LkIntro2:
-                            temp = ObjectAccessor.GetCreature(me, _theLichKing);
-                            if (temp)
-                                temp.GetAI().Talk(Texts.SayLkIntro2);
-                            break;
-                        case EventTypes.LkIntro3:
-                            temp = ObjectAccessor.GetCreature(me, _theLichKing);
-                            if (temp)
-                                temp.GetAI().Talk(Texts.SayLkIntro3);
-                            break;
-                        case EventTypes.LkIntro4:
-                            temp = ObjectAccessor.GetCreature(me, _theLichKing);
-                            if (temp)
-                                temp.GetAI().Talk(Texts.SayLkIntro4);
-                            break;
-                        case EventTypes.BolvarIntro1:
-                            temp = ObjectAccessor.GetCreature(me, _bolvarFordragon);
-                            if (temp)
-                            {
-                                temp.GetAI().Talk(Texts.SayBolvarIntro1);
-                                temp.setActive(false);
-                            }
-                            break;
-                        case EventTypes.LkIntro5:
-                            temp = ObjectAccessor.GetCreature(me, _theLichKing);
-                            if (temp)
-                            {
-                                temp.GetAI().Talk(Texts.SayLkIntro5);
-                                temp.setActive(false);
-                            }
-                            break;
-                        case EventTypes.SaurfangIntro1:
-                            temp = ObjectAccessor.GetCreature(me, _factionNPC);
-                            if (temp)
-                                temp.GetAI().Talk(Texts.SaySaurfangIntro1);
-                            break;
-                        case EventTypes.TirionIntroH7:
-                            Talk(Texts.SayTirionIntroH5);
-                            break;
-                        case EventTypes.SaurfangIntro2:
-                            temp = ObjectAccessor.GetCreature(me, _factionNPC);
-                            if (temp)
-                                temp.GetAI().Talk(Texts.SaySaurfangIntro2);
-                            break;
-                        case EventTypes.SaurfangIntro3:
-                            temp = ObjectAccessor.GetCreature(me, _factionNPC);
-                            if (temp)
-                                temp.GetAI().Talk(Texts.SaySaurfangIntro3);
-                            break;
-                        case EventTypes.SaurfangIntro4:
-                            temp = ObjectAccessor.GetCreature(me, _factionNPC);
-                            if (temp)
-                                temp.GetAI().Talk(Texts.SaySaurfangIntro4);
-                            break;
-                        case EventTypes.MuradinRun:
-                        case EventTypes.SaurfangRun:
-                            Creature factionNPC = ObjectAccessor.GetCreature(me, _factionNPC);
-                            if (factionNPC)
-                                factionNPC.GetMotionMaster().MovePath((uint)(factionNPC.GetSpawnId() * 10), false);
-                            me.setActive(false);
-                            _damnedKills = 3;
-                            break;
-                        case EventTypes.MuradinIntro1:
-                            temp = ObjectAccessor.GetCreature(me, _factionNPC);
-                            if (temp)
-                                temp.GetAI().Talk(Texts.SayMuradinIntro1);
-                            break;
-                        case EventTypes.MuradinIntro2:
-                            temp = ObjectAccessor.GetCreature(me, _factionNPC);
-                            if (temp)
-                                temp.HandleEmoteCommand(Emote.OneshotTalk);
-                            break;
-                        case EventTypes.MuradinIntro3:
-                            temp = ObjectAccessor.GetCreature(me, _factionNPC);
-                            if (temp)
-                                temp.HandleEmoteCommand(Emote.OneshotExclamation);
-                            break;
-                        case EventTypes.TirionIntroA7:
-                            Talk(Texts.SayTirionIntroA5);
-                            break;
-                        case EventTypes.MuradinIntro4:
-                            temp = ObjectAccessor.GetCreature(me, _factionNPC);
-                            if (temp)
-                                temp.GetAI().Talk(Texts.SayMuradinIntro2);
-                            break;
-                        case EventTypes.MuradinIntro5:
-                            temp = ObjectAccessor.GetCreature(me, _factionNPC);
-                            if (temp)
-                                temp.GetAI().Talk(Texts.SayMuradinIntro3);
-                            break;
-                        default:
-                            break;
-                    }
-                });
-            }
-
-            InstanceScript _instance;
-            ObjectGuid _theLichKing;
-            ObjectGuid _bolvarFordragon;
-            ObjectGuid _factionNPC;
-            ushort _damnedKills;
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return InstanceIcecrownCitadel.GetInstanceAI<npc_highlord_tirion_fordringAI>(creature);
-        }
-    }
-
-    [Script]
-    class npc_rotting_frost_giant : CreatureScript
-    {
-        public npc_rotting_frost_giant() : base("npc_rotting_frost_giant") { }
-
-        class npc_rotting_frost_giantAI : ScriptedAI
-        {
-            public npc_rotting_frost_giantAI(Creature creature)
-                : base(creature) { }
-
-            public override void Reset()
-            {
-                _events.Reset();
-                _events.ScheduleEvent(EventTypes.DeathPlague, 15000);
-                _events.ScheduleEvent(EventTypes.Stomp, RandomHelper.URand(5000, 8000));
-                _events.ScheduleEvent(EventTypes.ArcticBreath, RandomHelper.URand(10000, 15000));
-            }
-
-            public override void JustDied(Unit killer)
-            {
-                _events.Reset();
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _events.Update(diff);
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-
-                _events.ExecuteEvents(eventId =>
-                {
-                    switch (eventId)
-                    {
-                        case EventTypes.DeathPlague:
-                            Unit target = SelectTarget(SelectAggroTarget.Random, 1, 0.0f, true);
-                            if (target)
-                            {
-                                Talk(Texts.EmoteDeathPlagueWarning, target);
-                                DoCast(target, InstanceSpells.DeathPlague);
-                            }
-                            _events.ScheduleEvent(EventTypes.DeathPlague, 15000);
-                            break;
-                        case EventTypes.Stomp:
-                            DoCastVictim(InstanceSpells.Stomp);
-                            _events.ScheduleEvent(EventTypes.Stomp, RandomHelper.URand(15000, 18000));
-                            break;
-                        case EventTypes.ArcticBreath:
-                            DoCastVictim(InstanceSpells.ArcticBreath);
-                            _events.ScheduleEvent(EventTypes.ArcticBreath, RandomHelper.URand(26000, 33000));
-                            break;
-                        default:
-                            break;
-                    }
-                });
-
-                DoMeleeAttackIfReady();
-            }
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return InstanceIcecrownCitadel.GetInstanceAI<npc_rotting_frost_giantAI>(creature);
-        }
-    }
-
-    [Script]
-    class npc_frost_freeze_trap : CreatureScript
-    {
-        public npc_frost_freeze_trap() : base("npc_frost_freeze_trap") { }
-
-        class npc_frost_freeze_trapAI : ScriptedAI
-        {
-            public npc_frost_freeze_trapAI(Creature creature)
-                : base(creature)
-            {
-                SetCombatMovement(false);
-            }
-
-            public override void DoAction(int action)
-            {
-                switch (action)
-                {
-                    case 1000:
-                    case 11000:
-                        _events.ScheduleEvent(EventTypes.ActivateTrap, (uint)action);
+                    case EventTypes.TirionIntro2:
+                        me.HandleEmoteCommand(Emote.OneshotExclamation);
+                        break;
+                    case EventTypes.TirionIntro3:
+                        Talk(Texts.SayTirionIntro2);
+                        break;
+                    case EventTypes.TirionIntro4:
+                        me.HandleEmoteCommand(Emote.OneshotExclamation);
+                        break;
+                    case EventTypes.TirionIntro5:
+                        Talk(Texts.SayTirionIntro3);
+                        break;
+                    case EventTypes.LkIntro1:
+                        me.HandleEmoteCommand(Emote.StateDanceNosheathe);
+                        temp = ObjectAccessor.GetCreature(me, _theLichKing);
+                        if (temp)
+                            temp.GetAI().Talk(Texts.SayLkIntro1);
+                        break;
+                    case EventTypes.TirionIntro6:
+                        Talk(Texts.SayTirionIntro4);
+                        break;
+                    case EventTypes.LkIntro2:
+                        temp = ObjectAccessor.GetCreature(me, _theLichKing);
+                        if (temp)
+                            temp.GetAI().Talk(Texts.SayLkIntro2);
+                        break;
+                    case EventTypes.LkIntro3:
+                        temp = ObjectAccessor.GetCreature(me, _theLichKing);
+                        if (temp)
+                            temp.GetAI().Talk(Texts.SayLkIntro3);
+                        break;
+                    case EventTypes.LkIntro4:
+                        temp = ObjectAccessor.GetCreature(me, _theLichKing);
+                        if (temp)
+                            temp.GetAI().Talk(Texts.SayLkIntro4);
+                        break;
+                    case EventTypes.BolvarIntro1:
+                        temp = ObjectAccessor.GetCreature(me, _bolvarFordragon);
+                        if (temp)
+                        {
+                            temp.GetAI().Talk(Texts.SayBolvarIntro1);
+                            temp.setActive(false);
+                        }
+                        break;
+                    case EventTypes.LkIntro5:
+                        temp = ObjectAccessor.GetCreature(me, _theLichKing);
+                        if (temp)
+                        {
+                            temp.GetAI().Talk(Texts.SayLkIntro5);
+                            temp.setActive(false);
+                        }
+                        break;
+                    case EventTypes.SaurfangIntro1:
+                        temp = ObjectAccessor.GetCreature(me, _factionNPC);
+                        if (temp)
+                            temp.GetAI().Talk(Texts.SaySaurfangIntro1);
+                        break;
+                    case EventTypes.TirionIntroH7:
+                        Talk(Texts.SayTirionIntroH5);
+                        break;
+                    case EventTypes.SaurfangIntro2:
+                        temp = ObjectAccessor.GetCreature(me, _factionNPC);
+                        if (temp)
+                            temp.GetAI().Talk(Texts.SaySaurfangIntro2);
+                        break;
+                    case EventTypes.SaurfangIntro3:
+                        temp = ObjectAccessor.GetCreature(me, _factionNPC);
+                        if (temp)
+                            temp.GetAI().Talk(Texts.SaySaurfangIntro3);
+                        break;
+                    case EventTypes.SaurfangIntro4:
+                        temp = ObjectAccessor.GetCreature(me, _factionNPC);
+                        if (temp)
+                            temp.GetAI().Talk(Texts.SaySaurfangIntro4);
+                        break;
+                    case EventTypes.MuradinRun:
+                    case EventTypes.SaurfangRun:
+                        Creature factionNPC = ObjectAccessor.GetCreature(me, _factionNPC);
+                        if (factionNPC)
+                            factionNPC.GetMotionMaster().MovePath((uint)(factionNPC.GetSpawnId() * 10), false);
+                        me.setActive(false);
+                        _damnedKills = 3;
+                        break;
+                    case EventTypes.MuradinIntro1:
+                        temp = ObjectAccessor.GetCreature(me, _factionNPC);
+                        if (temp)
+                            temp.GetAI().Talk(Texts.SayMuradinIntro1);
+                        break;
+                    case EventTypes.MuradinIntro2:
+                        temp = ObjectAccessor.GetCreature(me, _factionNPC);
+                        if (temp)
+                            temp.HandleEmoteCommand(Emote.OneshotTalk);
+                        break;
+                    case EventTypes.MuradinIntro3:
+                        temp = ObjectAccessor.GetCreature(me, _factionNPC);
+                        if (temp)
+                            temp.HandleEmoteCommand(Emote.OneshotExclamation);
+                        break;
+                    case EventTypes.TirionIntroA7:
+                        Talk(Texts.SayTirionIntroA5);
+                        break;
+                    case EventTypes.MuradinIntro4:
+                        temp = ObjectAccessor.GetCreature(me, _factionNPC);
+                        if (temp)
+                            temp.GetAI().Talk(Texts.SayMuradinIntro2);
+                        break;
+                    case EventTypes.MuradinIntro5:
+                        temp = ObjectAccessor.GetCreature(me, _factionNPC);
+                        if (temp)
+                            temp.GetAI().Talk(Texts.SayMuradinIntro3);
                         break;
                     default:
                         break;
                 }
-            }
+            });
+        }
 
-            public override void UpdateAI(uint diff)
+        InstanceScript _instance;
+        ObjectGuid _theLichKing;
+        ObjectGuid _bolvarFordragon;
+        ObjectGuid _factionNPC;
+        ushort _damnedKills;
+    }
+
+    [Script]
+    class npc_rotting_frost_giant : ScriptedAI
+    {
+        public npc_rotting_frost_giant(Creature creature)
+            : base(creature) { }
+
+        public override void Reset()
+        {
+            _events.Reset();
+            _events.ScheduleEvent(EventTypes.DeathPlague, 15000);
+            _events.ScheduleEvent(EventTypes.Stomp, RandomHelper.URand(5000, 8000));
+            _events.ScheduleEvent(EventTypes.ArcticBreath, RandomHelper.URand(10000, 15000));
+        }
+
+        public override void JustDied(Unit killer)
+        {
+            _events.Reset();
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _events.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            _events.ExecuteEvents(eventId =>
             {
-                _events.Update(diff);
-
-                if (_events.ExecuteEvent() == EventTypes.ActivateTrap)
+                switch (eventId)
                 {
-                    DoCast(me, InstanceSpells.ColdflameJets);
-                    _events.ScheduleEvent(EventTypes.ActivateTrap, 22000);
+                    case EventTypes.DeathPlague:
+                        Unit target = SelectTarget(SelectAggroTarget.Random, 1, 0.0f, true);
+                        if (target)
+                        {
+                            Talk(Texts.EmoteDeathPlagueWarning, target);
+                            DoCast(target, InstanceSpells.DeathPlague);
+                        }
+                        _events.ScheduleEvent(EventTypes.DeathPlague, 15000);
+                        break;
+                    case EventTypes.Stomp:
+                        DoCastVictim(InstanceSpells.Stomp);
+                        _events.ScheduleEvent(EventTypes.Stomp, RandomHelper.URand(15000, 18000));
+                        break;
+                    case EventTypes.ArcticBreath:
+                        DoCastVictim(InstanceSpells.ArcticBreath);
+                        _events.ScheduleEvent(EventTypes.ArcticBreath, RandomHelper.URand(26000, 33000));
+                        break;
+                    default:
+                        break;
                 }
+            });
+
+            DoMeleeAttackIfReady();
+        }
+    }
+
+    [Script]
+    class npc_frost_freeze_trap : ScriptedAI
+    {
+        public npc_frost_freeze_trap(Creature creature)
+            : base(creature)
+        {
+            SetCombatMovement(false);
+        }
+
+        public override void DoAction(int action)
+        {
+            switch (action)
+            {
+                case 1000:
+                case 11000:
+                    _events.ScheduleEvent(EventTypes.ActivateTrap, (uint)action);
+                    break;
+                default:
+                    break;
             }
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void UpdateAI(uint diff)
         {
-            return InstanceIcecrownCitadel.GetInstanceAI<npc_frost_freeze_trapAI>(creature);
+            _events.Update(diff);
+
+            if (_events.ExecuteEvent() == EventTypes.ActivateTrap)
+            {
+                DoCast(me, InstanceSpells.ColdflameJets);
+                _events.ScheduleEvent(EventTypes.ActivateTrap, 22000);
+            }
         }
     }
 
@@ -482,509 +452,489 @@ namespace Scripts.Northrend.IcecrownCitadel
     }
 
     [Script]
-    class boss_sister_svalna : CreatureScript
+    class boss_sister_svalna : BossAI
     {
-        public boss_sister_svalna() : base("boss_sister_svalna") { }
-
-        class boss_sister_svalnaAI : BossAI
+        public boss_sister_svalna(Creature creature)
+            : base(creature, Bosses.SisterSvalna)
         {
-            public boss_sister_svalnaAI(Creature creature)
-                : base(creature, Bosses.SisterSvalna)
+            _isEventInProgress = false;
+
+        }
+
+        public override void InitializeAI()
+        {
+            if (!me.IsDead())
+                Reset();
+
+            me.SetReactState(ReactStates.Passive);
+        }
+
+        public override void Reset()
+        {
+            _Reset();
+            me.SetReactState(ReactStates.Defensive);
+            _isEventInProgress = false;
+        }
+
+        public override void JustDied(Unit killer)
+        {
+            _JustDied();
+            Talk(Texts.SaySvalnaDeath);
+
+            ulong delay = 1;
+            for (uint i = 0; i < 4; ++i)
             {
-                _isEventInProgress = false;
-
-            }
-
-            public override void InitializeAI()
-            {
-                if (!me.IsDead())
-                    Reset();
-
-                me.SetReactState(ReactStates.Passive);
-            }
-
-            public override void Reset()
-            {
-                _Reset();
-                me.SetReactState(ReactStates.Defensive);
-                _isEventInProgress = false;
-            }
-
-            public override void JustDied(Unit killer)
-            {
-                _JustDied();
-                Talk(Texts.SaySvalnaDeath);
-
-                ulong delay = 1;
-                for (uint i = 0; i < 4; ++i)
+                Creature crusader = ObjectAccessor.GetCreature(me, instance.GetGuidData(DataTypes.CaptainArnath + i));
+                if (crusader)
                 {
-                    Creature crusader = ObjectAccessor.GetCreature(me, instance.GetGuidData(DataTypes.CaptainArnath + i));
-                    if (crusader)
+                    if (crusader.IsAlive() && crusader.GetEntry() == crusader.GetCreatureData().id)
                     {
-                        if (crusader.IsAlive() && crusader.GetEntry() == crusader.GetCreatureData().id)
-                        {
-                            crusader.m_Events.AddEvent(new CaptainSurviveTalk(crusader), crusader.m_Events.CalculateTime(delay));
-                            delay += 6000;
-                        }
+                        crusader.m_Events.AddEvent(new CaptainSurviveTalk(crusader), crusader.m_Events.CalculateTime(delay));
+                        delay += 6000;
                     }
                 }
             }
+        }
 
-            public override void EnterCombat(Unit attacker)
+        public override void EnterCombat(Unit attacker)
+        {
+            _EnterCombat();
+            Creature crok = ObjectAccessor.GetCreature(me, instance.GetGuidData(DataTypes.CrokScourgebane));
+            if (crok)
+                crok.GetAI().Talk(Texts.SayCrokCombatSvalna);
+            _events.ScheduleEvent(EventTypes.SvalnaCombat, 9000);
+            _events.ScheduleEvent(EventTypes.ImpalingSpear, RandomHelper.URand(40000, 50000));
+            _events.ScheduleEvent(EventTypes.AetherShield, RandomHelper.URand(100000, 110000));
+        }
+
+        public override void KilledUnit(Unit victim)
+        {
+            switch (victim.GetTypeId())
             {
-                _EnterCombat();
-                Creature crok = ObjectAccessor.GetCreature(me, instance.GetGuidData(DataTypes.CrokScourgebane));
-                if (crok)
-                    crok.GetAI().Talk(Texts.SayCrokCombatSvalna);
-                _events.ScheduleEvent(EventTypes.SvalnaCombat, 9000);
-                _events.ScheduleEvent(EventTypes.ImpalingSpear, RandomHelper.URand(40000, 50000));
-                _events.ScheduleEvent(EventTypes.AetherShield, RandomHelper.URand(100000, 110000));
-            }
-
-            public override void KilledUnit(Unit victim)
-            {
-                switch (victim.GetTypeId())
-                {
-                    case TypeId.Player:
-                        Talk(Texts.SaySvalnaKill);
-                        break;
-                    case TypeId.Unit:
-                        switch (victim.GetEntry())
-                        {
-                            case CreatureIds.CaptainArnath:
-                            case CreatureIds.CaptainBrandon:
-                            case CreatureIds.CaptainGrondel:
-                            case CreatureIds.CaptainRupert:
-                                Talk(Texts.SaySvalnaKillCaptain);
-                                break;
-                            default:
-                                break;
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            public override void JustReachedHome()
-            {
-                _JustReachedHome();
-                me.SetReactState(ReactStates.Passive);
-                me.SetDisableGravity(false);
-                me.SetHover(false);
-            }
-
-            public override void DoAction(int action)
-            {
-                switch (action)
-                {
-                    case Actions.KillCaptain:
-                        me.CastCustomSpell(InstanceSpells.CaressOfDeath, SpellValueMod.MaxTargets, 1, me, true);
-                        break;
-                    case Actions.StartGauntlet:
-                        me.setActive(true);
-                        _isEventInProgress = true;
-                        me.SetFlag(UnitFields.Flags, UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc);
-                        _events.ScheduleEvent(EventTypes.SvalnaStart, 25000);
-                        break;
-                    case Actions.ResurrectCaptains:
-                        _events.ScheduleEvent(EventTypes.SvalnaResurrect, 7000);
-                        break;
-                    case Actions.CaptainDies:
-                        Talk(Texts.SaySvalnaCaptainDeath);
-                        break;
-                    case Actions.ResetEvent:
-                        me.setActive(false);
-                        Reset();
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            public override void SpellHit(Unit caster, SpellInfo spell)
-            {
-                if (spell.Id == InstanceSpells.HurlSpear && me.HasAura(InstanceSpells.AetherShield))
-                {
-                    me.RemoveAurasDueToSpell(InstanceSpells.AetherShield);
-                    Talk(Texts.EmoteSvalnaBrokenShield, caster);
-                }
-            }
-
-            public override void MovementInform(MovementGeneratorType type, uint id)
-            {
-                if (type != MovementGeneratorType.Effect || id != 1)
-                    return;
-
-                _isEventInProgress = false;
-                me.setActive(false);
-                me.RemoveFlag(UnitFields.Flags, UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc);
-                me.SetDisableGravity(false);
-                me.SetHover(false);
-            }
-
-            public override void SpellHitTarget(Unit target, SpellInfo spell)
-            {
-                switch (spell.Id)
-                {
-                    case InstanceSpells.ImpalingSpearKill:
-                        me.Kill(target);
-                        break;
-                    case InstanceSpells.ImpalingSpear:
-                        TempSummon summon = target.SummonCreature(CreatureIds.ImpalingSpear, target);
-                        if (summon)
-                        {
-                            Talk(Texts.EmoteSvalnaImpale, target);
-                            summon.CastCustomSpell(SharedConst.VehicleSpellRideHardcoded, SpellValueMod.BasePoint0, 1, target, false);
-                            summon.SetFlag(UnitFields.Flags2, UnitFlags2.Unk1 | UnitFlags2.AllowEnemyInteract);
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim() && !_isEventInProgress)
-                    return;
-
-                _events.Update(diff);
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-
-                _events.ExecuteEvents(eventId =>
-                {
-                    switch (eventId)
+                case TypeId.Player:
+                    Talk(Texts.SaySvalnaKill);
+                    break;
+                case TypeId.Unit:
+                    switch (victim.GetEntry())
                     {
-                        case EventTypes.SvalnaStart:
-                            Talk(Texts.SaySvalnaEventStart);
-                            break;
-                        case EventTypes.SvalnaResurrect:
-                            Talk(Texts.SaySvalnaResurrectCaptains);
-                            me.CastSpell(me, InstanceSpells.ReviveChampion, false);
-                            break;
-                        case EventTypes.SvalnaCombat:
-                            me.SetReactState(ReactStates.Defensive);
-                            Talk(Texts.SaySvalnaAggro);
-                            break;
-                        case EventTypes.ImpalingSpear:
-                            Unit target = SelectTarget(SelectAggroTarget.Random, 1, 0.0f, true, -(int)InstanceSpells.ImpalingSpear);
-                            if (target)
-                            {
-                                DoCast(me, InstanceSpells.AetherShield);
-                                DoCast(target, InstanceSpells.ImpalingSpear);
-                            }
-                            _events.ScheduleEvent(EventTypes.ImpalingSpear, RandomHelper.URand(20000, 25000));
+                        case CreatureIds.CaptainArnath:
+                        case CreatureIds.CaptainBrandon:
+                        case CreatureIds.CaptainGrondel:
+                        case CreatureIds.CaptainRupert:
+                            Talk(Texts.SaySvalnaKillCaptain);
                             break;
                         default:
                             break;
                     }
-                });
-
-                DoMeleeAttackIfReady();
+                    break;
+                default:
+                    break;
             }
-
-            bool _isEventInProgress;
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void JustReachedHome()
         {
-            return InstanceIcecrownCitadel.GetInstanceAI<boss_sister_svalnaAI>(creature);
+            _JustReachedHome();
+            me.SetReactState(ReactStates.Passive);
+            me.SetDisableGravity(false);
+            me.SetHover(false);
         }
+
+        public override void DoAction(int action)
+        {
+            switch (action)
+            {
+                case Actions.KillCaptain:
+                    me.CastCustomSpell(InstanceSpells.CaressOfDeath, SpellValueMod.MaxTargets, 1, me, true);
+                    break;
+                case Actions.StartGauntlet:
+                    me.setActive(true);
+                    _isEventInProgress = true;
+                    me.SetFlag(UnitFields.Flags, UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc);
+                    _events.ScheduleEvent(EventTypes.SvalnaStart, 25000);
+                    break;
+                case Actions.ResurrectCaptains:
+                    _events.ScheduleEvent(EventTypes.SvalnaResurrect, 7000);
+                    break;
+                case Actions.CaptainDies:
+                    Talk(Texts.SaySvalnaCaptainDeath);
+                    break;
+                case Actions.ResetEvent:
+                    me.setActive(false);
+                    Reset();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public override void SpellHit(Unit caster, SpellInfo spell)
+        {
+            if (spell.Id == InstanceSpells.HurlSpear && me.HasAura(InstanceSpells.AetherShield))
+            {
+                me.RemoveAurasDueToSpell(InstanceSpells.AetherShield);
+                Talk(Texts.EmoteSvalnaBrokenShield, caster);
+            }
+        }
+
+        public override void MovementInform(MovementGeneratorType type, uint id)
+        {
+            if (type != MovementGeneratorType.Effect || id != 1)
+                return;
+
+            _isEventInProgress = false;
+            me.setActive(false);
+            me.RemoveFlag(UnitFields.Flags, UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc);
+            me.SetDisableGravity(false);
+            me.SetHover(false);
+        }
+
+        public override void SpellHitTarget(Unit target, SpellInfo spell)
+        {
+            switch (spell.Id)
+            {
+                case InstanceSpells.ImpalingSpearKill:
+                    me.Kill(target);
+                    break;
+                case InstanceSpells.ImpalingSpear:
+                    TempSummon summon = target.SummonCreature(CreatureIds.ImpalingSpear, target);
+                    if (summon)
+                    {
+                        Talk(Texts.EmoteSvalnaImpale, target);
+                        summon.CastCustomSpell(SharedConst.VehicleSpellRideHardcoded, SpellValueMod.BasePoint0, 1, target, false);
+                        summon.SetFlag(UnitFields.Flags2, UnitFlags2.Unk1 | UnitFlags2.AllowEnemyInteract);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim() && !_isEventInProgress)
+                return;
+
+            _events.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            _events.ExecuteEvents(eventId =>
+            {
+                switch (eventId)
+                {
+                    case EventTypes.SvalnaStart:
+                        Talk(Texts.SaySvalnaEventStart);
+                        break;
+                    case EventTypes.SvalnaResurrect:
+                        Talk(Texts.SaySvalnaResurrectCaptains);
+                        me.CastSpell(me, InstanceSpells.ReviveChampion, false);
+                        break;
+                    case EventTypes.SvalnaCombat:
+                        me.SetReactState(ReactStates.Defensive);
+                        Talk(Texts.SaySvalnaAggro);
+                        break;
+                    case EventTypes.ImpalingSpear:
+                        Unit target = SelectTarget(SelectAggroTarget.Random, 1, 0.0f, true, -(int)InstanceSpells.ImpalingSpear);
+                        if (target)
+                        {
+                            DoCast(me, InstanceSpells.AetherShield);
+                            DoCast(target, InstanceSpells.ImpalingSpear);
+                        }
+                        _events.ScheduleEvent(EventTypes.ImpalingSpear, RandomHelper.URand(20000, 25000));
+                        break;
+                    default:
+                        break;
+                }
+            });
+
+            DoMeleeAttackIfReady();
+        }
+
+        bool _isEventInProgress;
     }
 
     [Script]
-    class npc_crok_scourgebane : CreatureScript
+    class npc_crok_scourgebane : npc_escortAI
     {
-        public npc_crok_scourgebane() : base("npc_crok_scourgebane") { }
-
-        class npc_crok_scourgebaneAI : npc_escortAI
+        public npc_crok_scourgebane(Creature creature) : base(creature)
         {
-            public npc_crok_scourgebaneAI(Creature creature) : base(creature)
-            {
-                _instance = creature.GetInstanceScript();
-                _respawnTime = creature.GetRespawnDelay();
-                _corpseDelay = creature.GetCorpseDelay();
+            _instance = creature.GetInstanceScript();
+            _respawnTime = creature.GetRespawnDelay();
+            _corpseDelay = creature.GetCorpseDelay();
 
-                SetDespawnAtEnd(false);
-                SetDespawnAtFar(false);
+            SetDespawnAtEnd(false);
+            SetDespawnAtFar(false);
+            _isEventActive = false;
+            _isEventDone = _instance.GetBossState(Bosses.SisterSvalna) == EncounterState.Done;
+            _didUnderTenPercentText = false;
+        }
+
+        public override void Reset()
+        {
+            _events.Reset();
+            _events.ScheduleEvent(EventTypes.ScourgeStrike, RandomHelper.URand(7500, 12500));
+            _events.ScheduleEvent(EventTypes.DeathStrike, RandomHelper.URand(25000, 30000));
+            me.SetReactState(ReactStates.Defensive);
+            _didUnderTenPercentText = false;
+            _wipeCheckTimer = 1000;
+        }
+
+        public override void DoAction(int action)
+        {
+            if (action == Actions.StartGauntlet)
+            {
+                if (_isEventDone || !me.IsAlive())
+                    return;
+
+                _isEventActive = true;
+                _isEventDone = true;
+                // Load Grid with Sister Svalna
+                me.GetMap().LoadGrid(4356.71f, 2484.33f);
+                Creature svalna = ObjectAccessor.GetCreature(me, _instance.GetGuidData(Bosses.SisterSvalna));
+                if (svalna)
+                    svalna.GetAI().DoAction(Actions.StartGauntlet);
+                Talk(Texts.SayCrokIntro1);
+                _events.ScheduleEvent(EventTypes.ArnathIntro2, 7000);
+                _events.ScheduleEvent(EventTypes.CrokIntro3, 14000);
+                _events.ScheduleEvent(EventTypes.StartPathing, 37000);
+                me.setActive(true);
+                for (uint i = 0; i < 4; ++i)
+                {
+                    Creature crusader = ObjectAccessor.GetCreature(me, _instance.GetGuidData(DataTypes.CaptainArnath + i));
+                    if (crusader)
+                        crusader.GetAI().DoAction(Actions.StartGauntlet);
+                }
+            }
+            else if (action == Actions.ResetEvent)
+            {
                 _isEventActive = false;
                 _isEventDone = _instance.GetBossState(Bosses.SisterSvalna) == EncounterState.Done;
-                _didUnderTenPercentText = false;
+                me.setActive(false);
+                _aliveTrash.Clear();
+                _currentWPid = 0;
             }
-
-            public override void Reset()
-            {
-                _events.Reset();
-                _events.ScheduleEvent(EventTypes.ScourgeStrike, RandomHelper.URand(7500, 12500));
-                _events.ScheduleEvent(EventTypes.DeathStrike, RandomHelper.URand(25000, 30000));
-                me.SetReactState(ReactStates.Defensive);
-                _didUnderTenPercentText = false;
-                _wipeCheckTimer = 1000;
-            }
-
-            public override void DoAction(int action)
-            {
-                if (action == Actions.StartGauntlet)
-                {
-                    if (_isEventDone || !me.IsAlive())
-                        return;
-
-                    _isEventActive = true;
-                    _isEventDone = true;
-                    // Load Grid with Sister Svalna
-                    me.GetMap().LoadGrid(4356.71f, 2484.33f);
-                    Creature svalna = ObjectAccessor.GetCreature(me, _instance.GetGuidData(Bosses.SisterSvalna));
-                    if (svalna)
-                        svalna.GetAI().DoAction(Actions.StartGauntlet);
-                    Talk(Texts.SayCrokIntro1);
-                    _events.ScheduleEvent(EventTypes.ArnathIntro2, 7000);
-                    _events.ScheduleEvent(EventTypes.CrokIntro3, 14000);
-                    _events.ScheduleEvent(EventTypes.StartPathing, 37000);
-                    me.setActive(true);
-                    for (uint i = 0; i < 4; ++i)
-                    {
-                        Creature crusader = ObjectAccessor.GetCreature(me, _instance.GetGuidData(DataTypes.CaptainArnath + i));
-                        if (crusader)
-                            crusader.GetAI().DoAction(Actions.StartGauntlet);
-                    }
-                }
-                else if (action == Actions.ResetEvent)
-                {
-                    _isEventActive = false;
-                    _isEventDone = _instance.GetBossState(Bosses.SisterSvalna) == EncounterState.Done;
-                    me.setActive(false);
-                    _aliveTrash.Clear();
-                    _currentWPid = 0;
-                }
-            }
-
-            public override void SetGUID(ObjectGuid guid, int type = 0)
-            {
-                if (type == Actions.VrykulDeath)
-                {
-                    _aliveTrash.Remove(guid);
-                    if (_aliveTrash.Empty())
-                    {
-                        SetEscortPaused(false);
-                        if (_currentWPid == 4 && _isEventActive)
-                        {
-                            _isEventActive = false;
-                            me.setActive(false);
-                            Talk(Texts.SayCrokFinalWp);
-                            Creature svalna = ObjectAccessor.GetCreature(me, _instance.GetGuidData(Bosses.SisterSvalna));
-                            if (svalna)
-                                svalna.GetAI().DoAction(Actions.ResurrectCaptains);
-                        }
-                    }
-                }
-            }
-
-            public override void WaypointReached(uint waypointId)
-            {
-                switch (waypointId)
-                {
-                    // pause pathing until trash pack is cleared
-                    case 0:
-                        Talk(Texts.SayCrokCombatWp0);
-                        if (!_aliveTrash.Empty())
-                            SetEscortPaused(true);
-                        break;
-                    case 1:
-                        Talk(Texts.SayCrokCombatWp1);
-                        if (!_aliveTrash.Empty())
-                            SetEscortPaused(true);
-                        break;
-                    case 4:
-                        if (_aliveTrash.Empty() && _isEventActive)
-                        {
-                            _isEventActive = false;
-                            me.setActive(false);
-                            Talk(Texts.SayCrokFinalWp);
-                            Creature svalna = ObjectAccessor.GetCreature(me, _instance.GetGuidData(Bosses.SisterSvalna));
-                            if (svalna)
-                                svalna.GetAI().DoAction(Actions.ResurrectCaptains);
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            public override void WaypointStart(uint waypointId)
-            {
-                _currentWPid = waypointId;
-                switch (waypointId)
-                {
-                    case 0:
-                    case 1:
-                    case 4:
-                        {
-                            // get spawns by home position
-                            float minY = 2600.0f;
-                            float maxY = 2650.0f;
-                            if (waypointId == 1)
-                            {
-                                minY -= 50.0f;
-                                maxY -= 50.0f;
-                                // at waypoints 1 and 2 she kills one captain
-                                Creature svalna = ObjectAccessor.GetCreature(me, _instance.GetGuidData(Bosses.SisterSvalna));
-                                if (svalna)
-                                    svalna.GetAI().DoAction(Actions.KillCaptain);
-                            }
-                            else if (waypointId == 4)
-                            {
-                                minY -= 100.0f;
-                                maxY -= 100.0f;
-                            }
-
-                            // get all nearby vrykul
-                            List<Creature> temp = new List<Creature>();
-                            var check = new FrostwingVrykulSearcher<Creature>(me, 80.0f);
-                            var searcher = new CreatureListSearcher(me, temp, check);
-                            Cell.VisitGridObjects(me, searcher, 80.0f);
-
-                            _aliveTrash.Clear();
-                            foreach (var creature in temp)
-                                if (creature.GetHomePosition().GetPositionY() < maxY && creature.GetHomePosition().GetPositionY() > minY)
-                                    _aliveTrash.Add(creature.GetGUID());
-                            break;
-                        }
-                    // at waypoints 1 and 2 she kills one captain
-                    case 2:
-                        Creature svalna1 = ObjectAccessor.GetCreature(me, _instance.GetGuidData(Bosses.SisterSvalna));
-                        if (svalna1)
-                            svalna1.GetAI().DoAction(Actions.KillCaptain);
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            public override void DamageTaken(Unit attacker, ref uint damage)
-            {
-                // check wipe
-                if (_wipeCheckTimer == 0)
-                {
-                    _wipeCheckTimer = 1000;
-                    var check = new AnyPlayerInObjectRangeCheck(me, 60.0f);
-                    var searcher = new PlayerSearcher(me, check);
-                    Cell.VisitWorldObjects(me, searcher, 60.0f);
-                    // wipe
-                    if (!searcher.GetTarget())
-                    {
-                        damage *= 100;
-                        if (damage >= me.GetHealth())
-                        {
-                            FrostwingGauntletRespawner respawner = new FrostwingGauntletRespawner();
-                            var worker = new CreatureWorker(me, respawner);
-                            Cell.VisitGridObjects(me, worker, 333.0f);
-                            Talk(Texts.SayCrokDeath);
-                        }
-                        return;
-                    }
-                }
-
-                if (HealthBelowPct(10))
-                {
-                    if (!_didUnderTenPercentText)
-                    {
-                        _didUnderTenPercentText = true;
-                        if (_isEventActive)
-                            Talk(Texts.SayCrokWeakeningGauntlet);
-                        else
-                            Talk(Texts.SayCrokWeakeningSvalna);
-                    }
-
-                    damage = 0;
-                    DoCast(me, InstanceSpells.IceboundArmor);
-                    _events.ScheduleEvent(EventTypes.HealthCheck, 1000);
-                }
-            }
-
-            void UpdateEscortAI(uint diff)
-            {
-                if (_wipeCheckTimer <= diff)
-                    _wipeCheckTimer = 0;
-                else
-                    _wipeCheckTimer -= diff;
-
-                if (!UpdateVictim() && !_isEventActive)
-                    return;
-
-                _events.Update(diff);
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-
-                _events.ExecuteEvents(eventId =>
-                {
-                    switch (eventId)
-                    {
-                        case EventTypes.ArnathIntro2:
-                            Creature arnath = ObjectAccessor.GetCreature(me, _instance.GetGuidData(DataTypes.CaptainArnath));
-                            if (arnath)
-                                arnath.GetAI().Talk(Texts.SayArnathIntro2);
-                            break;
-                        case EventTypes.CrokIntro3:
-                            Talk(Texts.SayCrokIntro3);
-                            break;
-                        case EventTypes.StartPathing:
-                            Start(true, true);
-                            break;
-                        case EventTypes.ScourgeStrike:
-                            DoCastVictim(InstanceSpells.ScourgeStrike);
-                            _events.ScheduleEvent(EventTypes.ScourgeStrike, RandomHelper.URand(10000, 14000));
-                            break;
-                        case EventTypes.DeathStrike:
-                            if (HealthBelowPct(20))
-                                DoCastVictim(InstanceSpells.DeathStrike);
-                            _events.ScheduleEvent(EventTypes.DeathStrike, RandomHelper.URand(5000, 10000));
-                            break;
-                        case EventTypes.HealthCheck:
-                            if (HealthAbovePct(15))
-                            {
-                                me.RemoveAurasDueToSpell(InstanceSpells.IceboundArmor);
-                                _didUnderTenPercentText = false;
-                            }
-                            else
-                            {
-                                // looks totally hacky to me
-                                me.ModifyHealth((long)me.CountPctFromMaxHealth(5));
-                                _events.ScheduleEvent(EventTypes.HealthCheck, 1000);
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-                });
-
-                DoMeleeAttackIfReady();
-            }
-
-            public override bool CanAIAttack(Unit target)
-            {
-                // do not see targets inside Frostwing Halls when we are not there
-                return (me.GetPositionY() > 2660.0f) == (target.GetPositionY() > 2660.0f);
-            }
-
-            List<ObjectGuid> _aliveTrash = new List<ObjectGuid>();
-            InstanceScript _instance;
-            uint _currentWPid;
-            uint _wipeCheckTimer;
-            uint _respawnTime;
-            uint _corpseDelay;
-            bool _isEventActive;
-            bool _isEventDone;
-            bool _didUnderTenPercentText;
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void SetGUID(ObjectGuid guid, int type = 0)
         {
-            return InstanceIcecrownCitadel.GetInstanceAI<npc_crok_scourgebaneAI>(creature);
+            if (type == Actions.VrykulDeath)
+            {
+                _aliveTrash.Remove(guid);
+                if (_aliveTrash.Empty())
+                {
+                    SetEscortPaused(false);
+                    if (_currentWPid == 4 && _isEventActive)
+                    {
+                        _isEventActive = false;
+                        me.setActive(false);
+                        Talk(Texts.SayCrokFinalWp);
+                        Creature svalna = ObjectAccessor.GetCreature(me, _instance.GetGuidData(Bosses.SisterSvalna));
+                        if (svalna)
+                            svalna.GetAI().DoAction(Actions.ResurrectCaptains);
+                    }
+                }
+            }
         }
+
+        public override void WaypointReached(uint waypointId)
+        {
+            switch (waypointId)
+            {
+                // pause pathing until trash pack is cleared
+                case 0:
+                    Talk(Texts.SayCrokCombatWp0);
+                    if (!_aliveTrash.Empty())
+                        SetEscortPaused(true);
+                    break;
+                case 1:
+                    Talk(Texts.SayCrokCombatWp1);
+                    if (!_aliveTrash.Empty())
+                        SetEscortPaused(true);
+                    break;
+                case 4:
+                    if (_aliveTrash.Empty() && _isEventActive)
+                    {
+                        _isEventActive = false;
+                        me.setActive(false);
+                        Talk(Texts.SayCrokFinalWp);
+                        Creature svalna = ObjectAccessor.GetCreature(me, _instance.GetGuidData(Bosses.SisterSvalna));
+                        if (svalna)
+                            svalna.GetAI().DoAction(Actions.ResurrectCaptains);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public override void WaypointStart(uint waypointId)
+        {
+            _currentWPid = waypointId;
+            switch (waypointId)
+            {
+                case 0:
+                case 1:
+                case 4:
+                    {
+                        // get spawns by home position
+                        float minY = 2600.0f;
+                        float maxY = 2650.0f;
+                        if (waypointId == 1)
+                        {
+                            minY -= 50.0f;
+                            maxY -= 50.0f;
+                            // at waypoints 1 and 2 she kills one captain
+                            Creature svalna = ObjectAccessor.GetCreature(me, _instance.GetGuidData(Bosses.SisterSvalna));
+                            if (svalna)
+                                svalna.GetAI().DoAction(Actions.KillCaptain);
+                        }
+                        else if (waypointId == 4)
+                        {
+                            minY -= 100.0f;
+                            maxY -= 100.0f;
+                        }
+
+                        // get all nearby vrykul
+                        List<Creature> temp = new List<Creature>();
+                        var check = new FrostwingVrykulSearcher<Creature>(me, 80.0f);
+                        var searcher = new CreatureListSearcher(me, temp, check);
+                        Cell.VisitGridObjects(me, searcher, 80.0f);
+
+                        _aliveTrash.Clear();
+                        foreach (var creature in temp)
+                            if (creature.GetHomePosition().GetPositionY() < maxY && creature.GetHomePosition().GetPositionY() > minY)
+                                _aliveTrash.Add(creature.GetGUID());
+                        break;
+                    }
+                // at waypoints 1 and 2 she kills one captain
+                case 2:
+                    Creature svalna1 = ObjectAccessor.GetCreature(me, _instance.GetGuidData(Bosses.SisterSvalna));
+                    if (svalna1)
+                        svalna1.GetAI().DoAction(Actions.KillCaptain);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public override void DamageTaken(Unit attacker, ref uint damage)
+        {
+            // check wipe
+            if (_wipeCheckTimer == 0)
+            {
+                _wipeCheckTimer = 1000;
+                var check = new AnyPlayerInObjectRangeCheck(me, 60.0f);
+                var searcher = new PlayerSearcher(me, check);
+                Cell.VisitWorldObjects(me, searcher, 60.0f);
+                // wipe
+                if (!searcher.GetTarget())
+                {
+                    damage *= 100;
+                    if (damage >= me.GetHealth())
+                    {
+                        FrostwingGauntletRespawner respawner = new FrostwingGauntletRespawner();
+                        var worker = new CreatureWorker(me, respawner);
+                        Cell.VisitGridObjects(me, worker, 333.0f);
+                        Talk(Texts.SayCrokDeath);
+                    }
+                    return;
+                }
+            }
+
+            if (HealthBelowPct(10))
+            {
+                if (!_didUnderTenPercentText)
+                {
+                    _didUnderTenPercentText = true;
+                    if (_isEventActive)
+                        Talk(Texts.SayCrokWeakeningGauntlet);
+                    else
+                        Talk(Texts.SayCrokWeakeningSvalna);
+                }
+
+                damage = 0;
+                DoCast(me, InstanceSpells.IceboundArmor);
+                _events.ScheduleEvent(EventTypes.HealthCheck, 1000);
+            }
+        }
+
+        void UpdateEscortAI(uint diff)
+        {
+            if (_wipeCheckTimer <= diff)
+                _wipeCheckTimer = 0;
+            else
+                _wipeCheckTimer -= diff;
+
+            if (!UpdateVictim() && !_isEventActive)
+                return;
+
+            _events.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            _events.ExecuteEvents(eventId =>
+            {
+                switch (eventId)
+                {
+                    case EventTypes.ArnathIntro2:
+                        Creature arnath = ObjectAccessor.GetCreature(me, _instance.GetGuidData(DataTypes.CaptainArnath));
+                        if (arnath)
+                            arnath.GetAI().Talk(Texts.SayArnathIntro2);
+                        break;
+                    case EventTypes.CrokIntro3:
+                        Talk(Texts.SayCrokIntro3);
+                        break;
+                    case EventTypes.StartPathing:
+                        Start(true, true);
+                        break;
+                    case EventTypes.ScourgeStrike:
+                        DoCastVictim(InstanceSpells.ScourgeStrike);
+                        _events.ScheduleEvent(EventTypes.ScourgeStrike, RandomHelper.URand(10000, 14000));
+                        break;
+                    case EventTypes.DeathStrike:
+                        if (HealthBelowPct(20))
+                            DoCastVictim(InstanceSpells.DeathStrike);
+                        _events.ScheduleEvent(EventTypes.DeathStrike, RandomHelper.URand(5000, 10000));
+                        break;
+                    case EventTypes.HealthCheck:
+                        if (HealthAbovePct(15))
+                        {
+                            me.RemoveAurasDueToSpell(InstanceSpells.IceboundArmor);
+                            _didUnderTenPercentText = false;
+                        }
+                        else
+                        {
+                            // looks totally hacky to me
+                            me.ModifyHealth((long)me.CountPctFromMaxHealth(5));
+                            _events.ScheduleEvent(EventTypes.HealthCheck, 1000);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            });
+
+            DoMeleeAttackIfReady();
+        }
+
+        public override bool CanAIAttack(Unit target)
+        {
+            // do not see targets inside Frostwing Halls when we are not there
+            return (me.GetPositionY() > 2660.0f) == (target.GetPositionY() > 2660.0f);
+        }
+
+        List<ObjectGuid> _aliveTrash = new List<ObjectGuid>();
+        InstanceScript _instance;
+        uint _currentWPid;
+        uint _wipeCheckTimer;
+        uint _respawnTime;
+        uint _corpseDelay;
+        bool _isEventActive;
+        bool _isEventDone;
+        bool _didUnderTenPercentText;
     }
 
     class npc_argent_captainAI : ScriptedAI
@@ -1112,713 +1062,567 @@ namespace Scripts.Northrend.IcecrownCitadel
     }
 
     [Script]
-    class npc_captain_arnath : CreatureScript
+    class npc_captain_arnath : npc_argent_captainAI
     {
-        public npc_captain_arnath() : base("CreatureIds.CaptainArnath") { }
+        public npc_captain_arnath(Creature creature)
+            : base(creature) { }
 
-        class npc_captain_arnathAI : npc_argent_captainAI
+        public override void Reset()
         {
-            public npc_captain_arnathAI(Creature creature)
-                : base(creature) { }
+            _events.Reset();
+            _events.ScheduleEvent(EventTypes.ArnathFlashHeal, RandomHelper.URand(4000, 7000));
+            _events.ScheduleEvent(EventTypes.ArnathPwShield, RandomHelper.URand(8000, 14000));
+            _events.ScheduleEvent(EventTypes.ArnathSmite, RandomHelper.URand(3000, 6000));
+            if (Is25ManRaid() && IsUndead)
+                _events.ScheduleEvent(EventTypes.ArnathDominateMind, RandomHelper.URand(22000, 27000));
+        }
 
-            public override void Reset()
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _events.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            _events.ExecuteEvents(eventId =>
             {
-                _events.Reset();
-                _events.ScheduleEvent(EventTypes.ArnathFlashHeal, RandomHelper.URand(4000, 7000));
-                _events.ScheduleEvent(EventTypes.ArnathPwShield, RandomHelper.URand(8000, 14000));
-                _events.ScheduleEvent(EventTypes.ArnathSmite, RandomHelper.URand(3000, 6000));
-                if (Is25ManRaid() && IsUndead)
-                    _events.ScheduleEvent(EventTypes.ArnathDominateMind, RandomHelper.URand(22000, 27000));
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _events.Update(diff);
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-
-                _events.ExecuteEvents(eventId =>
+                switch (eventId)
                 {
-                    switch (eventId)
-                    {
-                        case EventTypes.ArnathFlashHeal:
-                            Creature target = FindFriendlyCreature();
-                            if (target)
-                                DoCast(target, InstanceSpells.SpellFlashHeal(IsUndead));
-                            _events.ScheduleEvent(EventTypes.ArnathFlashHeal, RandomHelper.URand(6000, 9000));
-                            break;
-                        case EventTypes.ArnathPwShield:
-                            {
-                                List<Creature> targets = DoFindFriendlyMissingBuff(40.0f, InstanceSpells.SpellPowerWordShield(IsUndead));
-                                DoCast(targets.SelectRandom(), InstanceSpells.SpellPowerWordShield(IsUndead));
-                                _events.ScheduleEvent(EventTypes.ArnathPwShield, RandomHelper.URand(15000, 20000));
-                                break;
-                            }
-                        case EventTypes.ArnathSmite:
-                            DoCastVictim(InstanceSpells.SpellSmite(IsUndead));
-                            _events.ScheduleEvent(EventTypes.ArnathSmite, RandomHelper.URand(4000, 7000));
-                            break;
-                        case EventTypes.ArnathDominateMind:
-                            Unit target1 = SelectTarget(SelectAggroTarget.Random, 1, 0.0f, true);
-                            if (target1)
-                                DoCast(target1, InstanceSpells.DominateMind);
-                            _events.ScheduleEvent(EventTypes.ArnathDominateMind, RandomHelper.URand(28000, 37000));
-                            break;
-                        default:
-                            break;
-                    }
-                });
-
-                DoMeleeAttackIfReady();
-            }
-
-            Creature FindFriendlyCreature()
-            {
-                var u_check = new MostHPMissingInRange<Creature>(me, 60.0f, 0);
-                var searcher = new CreatureLastSearcher(me, u_check);
-                Cell.VisitGridObjects(me, searcher, 60.0f);
-                return searcher.GetTarget();
-            }
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return InstanceIcecrownCitadel.GetInstanceAI<npc_captain_arnathAI>(creature);
-        }
-    }
-
-    [Script]
-    class npc_captain_brandon : CreatureScript
-    {
-        public npc_captain_brandon() : base("CreatureIds.CaptainBrandon") { }
-
-        class npc_captain_brandonAI : npc_argent_captainAI
-        {
-            public npc_captain_brandonAI(Creature creature)
-                : base(creature) { }
-
-            public override void Reset()
-            {
-                _events.Reset();
-                _events.ScheduleEvent(EventTypes.BrandonCrusaderStrike, RandomHelper.URand(6000, 10000));
-                _events.ScheduleEvent(EventTypes.BrandonDivineShield, 500);
-                _events.ScheduleEvent(EventTypes.BrandonJudgementOfCommand, RandomHelper.URand(8000, 13000));
-                if (IsUndead)
-                    _events.ScheduleEvent(EventTypes.BrandonHammerOfBetrayal, RandomHelper.URand(25000, 30000));
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _events.Update(diff);
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-
-                _events.ExecuteEvents(eventId =>
-                {
-                    switch (eventId)
-                    {
-                        case EventTypes.BrandonCrusaderStrike:
-                            DoCastVictim(InstanceSpells.CrusaderStrike);
-                            _events.ScheduleEvent(EventTypes.BrandonCrusaderStrike, RandomHelper.URand(6000, 12000));
-                            break;
-                        case EventTypes.BrandonDivineShield:
-                            if (HealthBelowPct(20))
-                                DoCast(me, InstanceSpells.DivineShield);
-                            _events.ScheduleEvent(EventTypes.BrandonDivineShield, 500);
-                            break;
-                        case EventTypes.BrandonJudgementOfCommand:
-                            DoCastVictim(InstanceSpells.JudgementOfCommand);
-                            _events.ScheduleEvent(EventTypes.BrandonJudgementOfCommand, RandomHelper.URand(8000, 13000));
-                            break;
-                        case EventTypes.BrandonHammerOfBetrayal:
-                            Unit target = SelectTarget(SelectAggroTarget.Random, 1, 0.0f, true);
-                            if (target)
-                                DoCast(target, InstanceSpells.HammerOfBetrayal);
-                            _events.ScheduleEvent(EventTypes.BrandonHammerOfBetrayal, RandomHelper.URand(45000, 60000));
-                            break;
-                        default:
-                            break;
-                    }
-                });
-
-                DoMeleeAttackIfReady();
-            }
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return InstanceIcecrownCitadel.GetInstanceAI<npc_captain_brandonAI>(creature);
-        }
-    }
-
-    [Script]
-    class npc_captain_grondel : CreatureScript
-    {
-        public npc_captain_grondel() : base("CreatureIds.CaptainGrondel") { }
-
-        class npc_captain_grondelAI : npc_argent_captainAI
-        {
-            public npc_captain_grondelAI(Creature creature)
-                : base(creature) { }
-
-            public override void Reset()
-            {
-                _events.Reset();
-                _events.ScheduleEvent(EventTypes.GrondelChargeCheck, 500);
-                _events.ScheduleEvent(EventTypes.GrondelMortalStrike, RandomHelper.URand(8000, 14000));
-                _events.ScheduleEvent(EventTypes.GrondelSunderArmor, RandomHelper.URand(3000, 12000));
-                if (IsUndead)
-                    _events.ScheduleEvent(EventTypes.GrondelConflagration, RandomHelper.URand(12000, 17000));
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _events.Update(diff);
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-
-                _events.ExecuteEvents(eventId =>
-                {
-                    switch (eventId)
-                    {
-                        case EventTypes.GrondelChargeCheck:
-                            DoCastVictim(InstanceSpells.Charge);
-                            _events.ScheduleEvent(EventTypes.GrondelChargeCheck, 500);
-                            break;
-                        case EventTypes.GrondelMortalStrike:
-                            DoCastVictim(InstanceSpells.MortalStrike);
-                            _events.ScheduleEvent(EventTypes.GrondelMortalStrike, RandomHelper.URand(10000, 15000));
-                            break;
-                        case EventTypes.GrondelSunderArmor:
-                            DoCastVictim(InstanceSpells.SunderArmor);
-                            _events.ScheduleEvent(EventTypes.GrondelSunderArmor, RandomHelper.URand(5000, 17000));
-                            break;
-                        case EventTypes.GrondelConflagration:
-                            Unit target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true);
-                            if (target)
-                                DoCast(target, InstanceSpells.Conflagration);
-                            _events.ScheduleEvent(EventTypes.GrondelConflagration, RandomHelper.URand(10000, 15000));
-                            break;
-                        default:
-                            break;
-                    }
-                });
-
-                DoMeleeAttackIfReady();
-            }
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return InstanceIcecrownCitadel.GetInstanceAI<npc_captain_grondelAI>(creature);
-        }
-    }
-
-    [Script]
-    class npc_captain_rupert : CreatureScript
-    {
-        public npc_captain_rupert() : base("CreatureIds.CaptainRupert") { }
-
-        class npc_captain_rupertAI : npc_argent_captainAI
-        {
-            public npc_captain_rupertAI(Creature creature)
-                : base(creature)
-            {
-            }
-
-            public override void Reset()
-            {
-                _events.Reset();
-                _events.ScheduleEvent(EventTypes.RupertFelIronBomb, RandomHelper.URand(15000, 20000));
-                _events.ScheduleEvent(EventTypes.RupertMachineGun, RandomHelper.URand(25000, 30000));
-                _events.ScheduleEvent(EventTypes.RupertRocketLaunch, RandomHelper.URand(10000, 15000));
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _events.Update(diff);
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-
-                _events.ExecuteEvents(eventId =>
-                {
-                    Unit target;
-                    switch (eventId)
-                    {
-                        case EventTypes.RupertFelIronBomb:
-                            target = SelectTarget(SelectAggroTarget.Random, 0);
-                            if (target)
-                                DoCast(target, InstanceSpells.SpellFelIronBomb(IsUndead));
-                            _events.ScheduleEvent(EventTypes.RupertFelIronBomb, RandomHelper.URand(15000, 20000));
-                            break;
-                        case EventTypes.RupertMachineGun:
-                            target = SelectTarget(SelectAggroTarget.Random, 1);
-                            if (target)
-                                DoCast(target, InstanceSpells.SpellMachineGun(IsUndead));
-                            _events.ScheduleEvent(EventTypes.RupertMachineGun, RandomHelper.URand(25000, 30000));
-                            break;
-                        case EventTypes.RupertRocketLaunch:
-                            target = SelectTarget(SelectAggroTarget.Random, 1);
-                            if (target)
-                                DoCast(target, InstanceSpells.SpellRocketLaunch(IsUndead));
-                            _events.ScheduleEvent(EventTypes.RupertRocketLaunch, RandomHelper.URand(10000, 15000));
-                            break;
-                        default:
-                            break;
-                    }
-                });
-
-                DoMeleeAttackIfReady();
-            }
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return InstanceIcecrownCitadel.GetInstanceAI<npc_captain_rupertAI>(creature);
-        }
-    }
-
-    [Script]
-    class npc_frostwing_vrykul : CreatureScript
-    {
-        public npc_frostwing_vrykul() : base("npc_frostwing_vrykul") { }
-
-        class npc_frostwing_vrykulAI : SmartAI
-        {
-            public npc_frostwing_vrykulAI(Creature creature)
-                : base(creature) { }
-
-            public override bool CanAIAttack(Unit target)
-            {
-                // do not see targets inside Frostwing Halls when we are not there
-                return (me.GetPositionY() > 2660.0f) == (target.GetPositionY() > 2660.0f) && base.CanAIAttack(target);
-            }
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return new npc_frostwing_vrykulAI(creature);
-        }
-    }
-
-    [Script]
-    class npc_impaling_spear : CreatureScript
-    {
-        public npc_impaling_spear() : base("npc_impaling_spear") { }
-
-        class npc_impaling_spearAI : CreatureAI
-        {
-            public npc_impaling_spearAI(Creature creature)
-                : base(creature)
-            {
-            }
-
-            public override void Reset()
-            {
-                me.SetReactState(ReactStates.Passive);
-                _vehicleCheckTimer = 500;
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (_vehicleCheckTimer <= diff)
-                {
-                    _vehicleCheckTimer = 500;
-                    if (!me.GetVehicle())
-                        me.DespawnOrUnsummon(100);
-                }
-                else
-                    _vehicleCheckTimer -= diff;
-            }
-
-            uint _vehicleCheckTimer;
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return new npc_impaling_spearAI(creature);
-        }
-    }
-
-    [Script]
-    class npc_arthas_teleport_visual : CreatureScript
-    {
-        public npc_arthas_teleport_visual() : base("npc_arthas_teleport_visual") { }
-
-        class npc_arthas_teleport_visualAI : NullCreatureAI
-        {
-            public npc_arthas_teleport_visualAI(Creature creature)
-                : base(creature)
-            {
-                _instance = creature.GetInstanceScript();
-            }
-
-            public override void Reset()
-            {
-                _events.Reset();
-                if (_instance.GetBossState(Bosses.ProfessorPutricide) == EncounterState.Done &&
-                    _instance.GetBossState(Bosses.BloodQueenLanaThel) == EncounterState.Done &&
-                    _instance.GetBossState(Bosses.Sindragosa) == EncounterState.Done)
-                    _events.ScheduleEvent(EventTypes.SoulMissile, RandomHelper.URand(1000, 6000));
-            }
-
-            void Update(uint diff)
-            {
-                if (_events.Empty())
-                    return;
-
-                _events.Update(diff);
-
-                if (_events.ExecuteEvent() == EventTypes.SoulMissile)
-                {
-                    DoCastAOE(InstanceSpells.SoulMissile);
-                    _events.ScheduleEvent(EventTypes.SoulMissile, RandomHelper.URand(5000, 7000));
-                }
-            }
-            
-            InstanceScript _instance;
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            // Distance from the center of the spire
-            if (creature.GetExactDist2d(4357.052f, 2769.421f) < 100.0f && creature.GetHomePosition().GetPositionZ() < 315.0f)
-                return InstanceIcecrownCitadel.GetInstanceAI<npc_arthas_teleport_visualAI>(creature);
-
-            // Default to no script
-            return null;
-        }
-    }
-
-    [Script]
-    class spell_icc_stoneform : SpellScriptLoader
-    {
-        public spell_icc_stoneform() : base("spell_icc_stoneform") { }
-
-        class spell_icc_stoneform_AuraScript : AuraScript
-        {
-            void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
-            {
-                Creature target = GetTarget().ToCreature();
-                if (target)
-                {
-                    target.SetReactState(ReactStates.Passive);
-                    target.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.ImmuneToPc);
-                    target.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotCustomSpell02);
-                }
-            }
-
-            void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-            {
-                Creature target = GetTarget().ToCreature();
-                if (target)
-                {
-                    target.SetReactState(ReactStates.Aggressive);
-                    target.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.ImmuneToPc);
-                    target.SetUInt32Value(UnitFields.NpcEmotestate, 0);
-                }
-            }
-
-            public override void Register()
-            {
-                OnEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
-                OnEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
-            }
-        }
-
-        public override AuraScript GetAuraScript()
-        {
-            return new spell_icc_stoneform_AuraScript();
-        }
-    }
-
-    [Script]
-    class spell_icc_sprit_alarm : SpellScriptLoader
-    {
-        public spell_icc_sprit_alarm() : base("spell_icc_sprit_alarm") { }
-
-        class spell_icc_sprit_alarm_SpellScript : SpellScript
-        {
-            public const int AwakenWard1 = 22900;
-            public const int AwakenWard2 = 22907;
-            public const int AwakenWard3 = 22908;
-            public const int AwakenWard4 = 22909;
-
-            void HandleEvent(uint effIndex)
-            {
-                PreventHitDefaultEffect(effIndex);
-                uint trapId = 0;
-                switch (GetSpellInfo().GetEffect(effIndex).MiscValue)
-                {
-                    case AwakenWard1:
-                        trapId = GameObjectIds.SpiritAlarm1;
+                    case EventTypes.ArnathFlashHeal:
+                        Creature target = FindFriendlyCreature();
+                        if (target)
+                            DoCast(target, InstanceSpells.SpellFlashHeal(IsUndead));
+                        _events.ScheduleEvent(EventTypes.ArnathFlashHeal, RandomHelper.URand(6000, 9000));
                         break;
-                    case AwakenWard2:
-                        trapId = GameObjectIds.SpiritAlarm2;
+                    case EventTypes.ArnathPwShield:
+                        {
+                            List<Creature> targets = DoFindFriendlyMissingBuff(40.0f, InstanceSpells.SpellPowerWordShield(IsUndead));
+                            DoCast(targets.SelectRandom(), InstanceSpells.SpellPowerWordShield(IsUndead));
+                            _events.ScheduleEvent(EventTypes.ArnathPwShield, RandomHelper.URand(15000, 20000));
+                            break;
+                        }
+                    case EventTypes.ArnathSmite:
+                        DoCastVictim(InstanceSpells.SpellSmite(IsUndead));
+                        _events.ScheduleEvent(EventTypes.ArnathSmite, RandomHelper.URand(4000, 7000));
                         break;
-                    case AwakenWard3:
-                        trapId = GameObjectIds.SpiritAlarm3;
-                        break;
-                    case AwakenWard4:
-                        trapId = GameObjectIds.SpiritAlarm4;
+                    case EventTypes.ArnathDominateMind:
+                        Unit target1 = SelectTarget(SelectAggroTarget.Random, 1, 0.0f, true);
+                        if (target1)
+                            DoCast(target1, InstanceSpells.DominateMind);
+                        _events.ScheduleEvent(EventTypes.ArnathDominateMind, RandomHelper.URand(28000, 37000));
                         break;
                     default:
-                        return;
-                }
-
-                GameObject trap = GetCaster().FindNearestGameObject(trapId, 5.0f);
-                if (trap)
-                    trap.SetRespawnTime((int)trap.GetGoInfo().GetAutoCloseTime());
-
-                List<Creature> wards = new List<Creature>();
-                GetCaster().GetCreatureListWithEntryInGrid(wards, CreatureIds.DeathboundWard, 150.0f);
-                wards.Sort(new ObjectDistanceOrderPred(GetCaster()));
-                foreach (var creature in wards)
-                {
-                    if (creature.IsAlive() && creature.HasAura(InstanceSpells.StoneForm))
-                    {
-                        creature.GetAI().Talk(Texts.SayTrapActivate);
-                        creature.RemoveAurasDueToSpell(InstanceSpells.StoneForm);
-                        Unit target = creature.SelectNearestTarget(150.0f);
-                        if (target)
-                            creature.GetAI().AttackStart(target);
-
                         break;
-                    }
                 }
-            }
+            });
 
-            public override void Register()
-            {
-                OnEffectHit.Add(new EffectHandler(HandleEvent, 2, SpellEffectName.SendEvent));
-            }
+            DoMeleeAttackIfReady();
         }
 
-        public override SpellScript GetSpellScript()
+        Creature FindFriendlyCreature()
         {
-            return new spell_icc_sprit_alarm_SpellScript();
+            var u_check = new MostHPMissingInRange<Creature>(me, 60.0f, 0);
+            var searcher = new CreatureLastSearcher(me, u_check);
+            Cell.VisitGridObjects(me, searcher, 60.0f);
+            return searcher.GetTarget();
         }
     }
 
     [Script]
-    class spell_frost_giant_death_plague : SpellScriptLoader
+    class npc_captain_brandon : npc_argent_captainAI
     {
-        public spell_frost_giant_death_plague() : base("spell_frost_giant_death_plague") { }
+        public npc_captain_brandon(Creature creature)
+            : base(creature) { }
 
-        class spell_frost_giant_death_plague_SpellScript : SpellScript
+        public override void Reset()
         {
-            public override bool Load()
-            {
-                _failed = false;
-                return true;
-            }
+            _events.Reset();
+            _events.ScheduleEvent(EventTypes.BrandonCrusaderStrike, RandomHelper.URand(6000, 10000));
+            _events.ScheduleEvent(EventTypes.BrandonDivineShield, 500);
+            _events.ScheduleEvent(EventTypes.BrandonJudgementOfCommand, RandomHelper.URand(8000, 13000));
+            if (IsUndead)
+                _events.ScheduleEvent(EventTypes.BrandonHammerOfBetrayal, RandomHelper.URand(25000, 30000));
+        }
 
-            // First effect
-            void CountTargets(List<WorldObject> targets)
-            {
-                targets.Remove(GetCaster());
-                _failed = targets.Empty();
-            }
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
 
-            // Second effect
-            void FilterTargets(List<WorldObject> targets)
+            _events.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            _events.ExecuteEvents(eventId =>
             {
-                // Select valid targets for jump
-                targets.RemoveAll(obj =>
+                switch (eventId)
                 {
-                    if (obj == GetCaster())
-                        return true;
-
-                    if (!obj.IsTypeId(TypeId.Player))
-                        return true;
-
-                    if (obj.ToUnit().HasAura(InstanceSpells.RecentlyInfected) || obj.ToUnit().HasAura(InstanceSpells.DeathPlagueAura))
-                        return true;
-
-                    return false;
-                });
-
-                if (!targets.Empty())
-                {
-                    WorldObject target = targets.SelectRandom();
-                    targets.Clear();
-                    targets.Add(target);
+                    case EventTypes.BrandonCrusaderStrike:
+                        DoCastVictim(InstanceSpells.CrusaderStrike);
+                        _events.ScheduleEvent(EventTypes.BrandonCrusaderStrike, RandomHelper.URand(6000, 12000));
+                        break;
+                    case EventTypes.BrandonDivineShield:
+                        if (HealthBelowPct(20))
+                            DoCast(me, InstanceSpells.DivineShield);
+                        _events.ScheduleEvent(EventTypes.BrandonDivineShield, 500);
+                        break;
+                    case EventTypes.BrandonJudgementOfCommand:
+                        DoCastVictim(InstanceSpells.JudgementOfCommand);
+                        _events.ScheduleEvent(EventTypes.BrandonJudgementOfCommand, RandomHelper.URand(8000, 13000));
+                        break;
+                    case EventTypes.BrandonHammerOfBetrayal:
+                        Unit target = SelectTarget(SelectAggroTarget.Random, 1, 0.0f, true);
+                        if (target)
+                            DoCast(target, InstanceSpells.HammerOfBetrayal);
+                        _events.ScheduleEvent(EventTypes.BrandonHammerOfBetrayal, RandomHelper.URand(45000, 60000));
+                        break;
+                    default:
+                        break;
                 }
+            });
 
-                targets.Add(GetCaster());
-            }
-
-            void HandleScript(uint effIndex)
-            {
-                PreventHitDefaultEffect(effIndex);
-                if (GetHitUnit() != GetCaster())
-                    GetCaster().CastSpell(GetHitUnit(), InstanceSpells.DeathPlagueAura, true);
-                else if (_failed)
-                    GetCaster().CastSpell(GetCaster(), InstanceSpells.DeathPlagueKill, true);
-            }
-
-            public override void Register()
-            {
-                OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(CountTargets, 0, Targets.UnitSrcAreaAlly));
-                OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitSrcAreaAlly));
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect));
-            }
-
-            bool _failed;
-        }
-
-        public override SpellScript GetSpellScript()
-        {
-            return new spell_frost_giant_death_plague_SpellScript();
+            DoMeleeAttackIfReady();
         }
     }
 
     [Script]
-    class spell_icc_harvest_blight_specimen : SpellScriptLoader
+    class npc_captain_grondel : npc_argent_captainAI
     {
-        public spell_icc_harvest_blight_specimen() : base("spell_icc_harvest_blight_specimen") { }
+        public npc_captain_grondel(Creature creature) : base(creature) { }
 
-        class spell_icc_harvest_blight_specimen_SpellScript : SpellScript
+        public override void Reset()
         {
-            void HandleScript(uint effIndex)
-            {
-                PreventHitDefaultEffect(effIndex);
-                GetHitUnit().RemoveAurasDueToSpell((uint)GetEffectValue());
-            }
-
-            void HandleQuestComplete(uint effIndex)
-            {
-                GetHitUnit().RemoveAurasDueToSpell((uint)GetEffectValue());
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
-                OnEffectHitTarget.Add(new EffectHandler(HandleQuestComplete, 1, SpellEffectName.QuestComplete));
-            }
+            _events.Reset();
+            _events.ScheduleEvent(EventTypes.GrondelChargeCheck, 500);
+            _events.ScheduleEvent(EventTypes.GrondelMortalStrike, RandomHelper.URand(8000, 14000));
+            _events.ScheduleEvent(EventTypes.GrondelSunderArmor, RandomHelper.URand(3000, 12000));
+            if (IsUndead)
+                _events.ScheduleEvent(EventTypes.GrondelConflagration, RandomHelper.URand(12000, 17000));
         }
 
-        public override SpellScript GetSpellScript()
+        public override void UpdateAI(uint diff)
         {
-            return new spell_icc_harvest_blight_specimen_SpellScript();
-        }
-    }
+            if (!UpdateVictim())
+                return;
 
-    [Script]
-    class spell_svalna_revive_champion : SpellScriptLoader
-    {
-        public spell_svalna_revive_champion() : base("spell_svalna_revive_champion") { }
+            _events.Update(diff);
 
-        class spell_svalna_revive_champion_SpellScript : SpellScript
-        {
-            void RemoveAliveTarget(List<WorldObject> targets)
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            _events.ExecuteEvents(eventId =>
             {
-                targets.RemoveAll(obj =>
+                switch (eventId)
                 {
-                    Unit unit = obj.ToUnit();
-                    if (unit)
-                        return unit.IsAlive();
+                    case EventTypes.GrondelChargeCheck:
+                        DoCastVictim(InstanceSpells.Charge);
+                        _events.ScheduleEvent(EventTypes.GrondelChargeCheck, 500);
+                        break;
+                    case EventTypes.GrondelMortalStrike:
+                        DoCastVictim(InstanceSpells.MortalStrike);
+                        _events.ScheduleEvent(EventTypes.GrondelMortalStrike, RandomHelper.URand(10000, 15000));
+                        break;
+                    case EventTypes.GrondelSunderArmor:
+                        DoCastVictim(InstanceSpells.SunderArmor);
+                        _events.ScheduleEvent(EventTypes.GrondelSunderArmor, RandomHelper.URand(5000, 17000));
+                        break;
+                    case EventTypes.GrondelConflagration:
+                        Unit target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true);
+                        if (target)
+                            DoCast(target, InstanceSpells.Conflagration);
+                        _events.ScheduleEvent(EventTypes.GrondelConflagration, RandomHelper.URand(10000, 15000));
+                        break;
+                    default:
+                        break;
+                }
+            });
 
-                    return true;
-                });
-                targets = targets.SelectRandom(2).ToList();
-            }
+            DoMeleeAttackIfReady();
+        }
+    }
 
-            void Land(uint effIndex)
+    [Script]
+    class npc_captain_rupert : npc_argent_captainAI
+    {
+        public npc_captain_rupert(Creature creature)
+            : base(creature)
+        {
+        }
+
+        public override void Reset()
+        {
+            _events.Reset();
+            _events.ScheduleEvent(EventTypes.RupertFelIronBomb, RandomHelper.URand(15000, 20000));
+            _events.ScheduleEvent(EventTypes.RupertMachineGun, RandomHelper.URand(25000, 30000));
+            _events.ScheduleEvent(EventTypes.RupertRocketLaunch, RandomHelper.URand(10000, 15000));
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _events.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            _events.ExecuteEvents(eventId =>
             {
-                Creature caster = GetCaster().ToCreature();
-                if (!caster)
+                Unit target;
+                switch (eventId)
+                {
+                    case EventTypes.RupertFelIronBomb:
+                        target = SelectTarget(SelectAggroTarget.Random, 0);
+                        if (target)
+                            DoCast(target, InstanceSpells.SpellFelIronBomb(IsUndead));
+                        _events.ScheduleEvent(EventTypes.RupertFelIronBomb, RandomHelper.URand(15000, 20000));
+                        break;
+                    case EventTypes.RupertMachineGun:
+                        target = SelectTarget(SelectAggroTarget.Random, 1);
+                        if (target)
+                            DoCast(target, InstanceSpells.SpellMachineGun(IsUndead));
+                        _events.ScheduleEvent(EventTypes.RupertMachineGun, RandomHelper.URand(25000, 30000));
+                        break;
+                    case EventTypes.RupertRocketLaunch:
+                        target = SelectTarget(SelectAggroTarget.Random, 1);
+                        if (target)
+                            DoCast(target, InstanceSpells.SpellRocketLaunch(IsUndead));
+                        _events.ScheduleEvent(EventTypes.RupertRocketLaunch, RandomHelper.URand(10000, 15000));
+                        break;
+                    default:
+                        break;
+                }
+            });
+
+            DoMeleeAttackIfReady();
+        }
+    }
+
+    [Script]
+    class npc_frostwing_vrykul : SmartAI
+    {
+        public npc_frostwing_vrykul(Creature creature)
+            : base(creature) { }
+
+        public override bool CanAIAttack(Unit target)
+        {
+            // do not see targets inside Frostwing Halls when we are not there
+            return (me.GetPositionY() > 2660.0f) == (target.GetPositionY() > 2660.0f) && base.CanAIAttack(target);
+        }
+    }
+
+    [Script]
+    class npc_impaling_spear : CreatureAI
+    {
+        public npc_impaling_spear(Creature creature)
+            : base(creature)
+        {
+        }
+
+        public override void Reset()
+        {
+            me.SetReactState(ReactStates.Passive);
+            _vehicleCheckTimer = 500;
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (_vehicleCheckTimer <= diff)
+            {
+                _vehicleCheckTimer = 500;
+                if (!me.GetVehicle())
+                    me.DespawnOrUnsummon(100);
+            }
+            else
+                _vehicleCheckTimer -= diff;
+        }
+
+        uint _vehicleCheckTimer;
+    }
+
+    [Script]
+    class npc_arthas_teleport_visual : NullCreatureAI
+    {
+        public npc_arthas_teleport_visual(Creature creature)
+            : base(creature)
+        {
+            _instance = creature.GetInstanceScript();
+        }
+
+        public override void Reset()
+        {
+            _events.Reset();
+            if (_instance.GetBossState(Bosses.ProfessorPutricide) == EncounterState.Done &&
+                _instance.GetBossState(Bosses.BloodQueenLanaThel) == EncounterState.Done &&
+                _instance.GetBossState(Bosses.Sindragosa) == EncounterState.Done)
+                _events.ScheduleEvent(EventTypes.SoulMissile, RandomHelper.URand(1000, 6000));
+        }
+
+        void Update(uint diff)
+        {
+            if (_events.Empty())
+                return;
+
+            _events.Update(diff);
+
+            if (_events.ExecuteEvent() == EventTypes.SoulMissile)
+            {
+                DoCastAOE(InstanceSpells.SoulMissile);
+                _events.ScheduleEvent(EventTypes.SoulMissile, RandomHelper.URand(5000, 7000));
+            }
+        }
+
+        InstanceScript _instance;
+    }
+
+    [Script]
+    class spell_icc_stoneform : AuraScript
+    {
+        void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Creature target = GetTarget().ToCreature();
+            if (target)
+            {
+                target.SetReactState(ReactStates.Passive);
+                target.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.ImmuneToPc);
+                target.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotCustomSpell02);
+            }
+        }
+
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Creature target = GetTarget().ToCreature();
+            if (target)
+            {
+                target.SetReactState(ReactStates.Aggressive);
+                target.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.ImmuneToPc);
+                target.SetUInt32Value(UnitFields.NpcEmotestate, 0);
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            OnEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+
+    [Script]
+    class spell_icc_sprit_alarm : SpellScript
+    {
+        public const int AwakenWard1 = 22900;
+        public const int AwakenWard2 = 22907;
+        public const int AwakenWard3 = 22908;
+        public const int AwakenWard4 = 22909;
+
+        void HandleEvent(uint effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+            uint trapId = 0;
+            switch (GetSpellInfo().GetEffect(effIndex).MiscValue)
+            {
+                case AwakenWard1:
+                    trapId = GameObjectIds.SpiritAlarm1;
+                    break;
+                case AwakenWard2:
+                    trapId = GameObjectIds.SpiritAlarm2;
+                    break;
+                case AwakenWard3:
+                    trapId = GameObjectIds.SpiritAlarm3;
+                    break;
+                case AwakenWard4:
+                    trapId = GameObjectIds.SpiritAlarm4;
+                    break;
+                default:
                     return;
-
-                Position pos = caster.GetNearPosition(5.0f, 0.0f);
-                caster.SetHomePosition(pos);
-                caster.GetMotionMaster().MoveLand(1, pos);
             }
 
-            public override void Register()
+            GameObject trap = GetCaster().FindNearestGameObject(trapId, 5.0f);
+            if (trap)
+                trap.SetRespawnTime((int)trap.GetGoInfo().GetAutoCloseTime());
+
+            List<Creature> wards = new List<Creature>();
+            GetCaster().GetCreatureListWithEntryInGrid(wards, CreatureIds.DeathboundWard, 150.0f);
+            wards.Sort(new ObjectDistanceOrderPred(GetCaster()));
+            foreach (var creature in wards)
             {
-                OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(RemoveAliveTarget, 0, Targets.UnitDestAreaEntry));
-                OnEffectHit.Add(new EffectHandler(Land, 0, SpellEffectName.ScriptEffect));
+                if (creature.IsAlive() && creature.HasAura(InstanceSpells.StoneForm))
+                {
+                    creature.GetAI().Talk(Texts.SayTrapActivate);
+                    creature.RemoveAurasDueToSpell(InstanceSpells.StoneForm);
+                    Unit target = creature.SelectNearestTarget(150.0f);
+                    if (target)
+                        creature.GetAI().AttackStart(target);
+
+                    break;
+                }
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_svalna_revive_champion_SpellScript();
+            OnEffectHit.Add(new EffectHandler(HandleEvent, 2, SpellEffectName.SendEvent));
         }
     }
 
     [Script]
-    class spell_svalna_remove_spear : SpellScriptLoader
+    class spell_frost_giant_death_plague : SpellScript
     {
-        public spell_svalna_remove_spear() : base("spell_svalna_remove_spear") { }
-
-        class spell_svalna_remove_spear_SpellScript : SpellScript
+        public override bool Load()
         {
-            void HandleScript(uint effIndex)
+            _failed = false;
+            return true;
+        }
+
+        // First effect
+        void CountTargets(List<WorldObject> targets)
+        {
+            targets.Remove(GetCaster());
+            _failed = targets.Empty();
+        }
+
+        // Second effect
+        void FilterTargets(List<WorldObject> targets)
+        {
+            // Select valid targets for jump
+            targets.RemoveAll(obj =>
             {
-                PreventHitDefaultEffect(effIndex);
-                Creature target = GetHitCreature();
-                if (target)
-                {
-                    Unit vehicle = target.GetVehicleBase();
-                    if (vehicle)
-                        vehicle.RemoveAurasDueToSpell(InstanceSpells.ImpalingSpear);
-                    target.DespawnOrUnsummon(1);
-                }
+                if (obj == GetCaster())
+                    return true;
+
+                if (!obj.IsTypeId(TypeId.Player))
+                    return true;
+
+                if (obj.ToUnit().HasAura(InstanceSpells.RecentlyInfected) || obj.ToUnit().HasAura(InstanceSpells.DeathPlagueAura))
+                    return true;
+
+                return false;
+            });
+
+            if (!targets.Empty())
+            {
+                WorldObject target = targets.SelectRandom();
+                targets.Clear();
+                targets.Add(target);
             }
 
-            public override void Register()
+            targets.Add(GetCaster());
+        }
+
+        void HandleScript(uint effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+            if (GetHitUnit() != GetCaster())
+                GetCaster().CastSpell(GetHitUnit(), InstanceSpells.DeathPlagueAura, true);
+            else if (_failed)
+                GetCaster().CastSpell(GetCaster(), InstanceSpells.DeathPlagueKill, true);
+        }
+
+        public override void Register()
+        {
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(CountTargets, 0, Targets.UnitSrcAreaAlly));
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 1, Targets.UnitSrcAreaAlly));
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect));
+        }
+
+        bool _failed;
+    }
+
+    [Script]
+    class spell_icc_harvest_blight_specimen : SpellScript
+    {
+        void HandleScript(uint effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+            GetHitUnit().RemoveAurasDueToSpell((uint)GetEffectValue());
+        }
+
+        void HandleQuestComplete(uint effIndex)
+        {
+            GetHitUnit().RemoveAurasDueToSpell((uint)GetEffectValue());
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new EffectHandler(HandleQuestComplete, 1, SpellEffectName.QuestComplete));
+        }
+    }
+
+    [Script]
+    class spell_svalna_revive_champion : SpellScript
+    {
+        void RemoveAliveTarget(List<WorldObject> targets)
+        {
+            targets.RemoveAll(obj =>
             {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+                Unit unit = obj.ToUnit();
+                if (unit)
+                    return unit.IsAlive();
+
+                return true;
+            });
+            targets = targets.SelectRandom(2).ToList();
+        }
+
+        void Land(uint effIndex)
+        {
+            Creature caster = GetCaster().ToCreature();
+            if (!caster)
+                return;
+
+            Position pos = caster.GetNearPosition(5.0f, 0.0f);
+            caster.SetHomePosition(pos);
+            caster.GetMotionMaster().MoveLand(1, pos);
+        }
+
+        public override void Register()
+        {
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(RemoveAliveTarget, 0, Targets.UnitDestAreaEntry));
+            OnEffectHit.Add(new EffectHandler(Land, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+
+    [Script]
+    class spell_svalna_remove_spear : SpellScript
+    {
+        void HandleScript(uint effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+            Creature target = GetHitCreature();
+            if (target)
+            {
+                Unit vehicle = target.GetVehicleBase();
+                if (vehicle)
+                    vehicle.RemoveAurasDueToSpell(InstanceSpells.ImpalingSpear);
+                target.DespawnOrUnsummon(1);
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_svalna_remove_spear_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
     // 72585 - Soul Missile
     [Script]
-    class spell_icc_soul_missile : SpellScriptLoader
+    class spell_icc_soul_missile : SpellScript
     {
-        public spell_icc_soul_missile() : base("spell_icc_soul_missile") { }
-
-        class spell_icc_soul_missile_SpellScript : SpellScript
+        void RelocateDest(ref SpellDestination dest)
         {
-            void RelocateDest(ref SpellDestination dest)
-            {
-                Position offset = new Position(0.0f, 0.0f, 200.0f, 0.0f);
-                dest.RelocateOffset(offset);
-            }
-
-            public override void Register()
-            {
-                OnDestinationTargetSelect.Add(new DestinationTargetSelectHandler(RelocateDest, 0, Targets.DestCaster));
-            }
+            Position offset = new Position(0.0f, 0.0f, 200.0f, 0.0f);
+            dest.RelocateOffset(offset);
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_icc_soul_missile_SpellScript();
+            OnDestinationTargetSelect.Add(new DestinationTargetSelectHandler(RelocateDest, 0, Targets.DestCaster));
         }
     }
 
@@ -1905,43 +1709,27 @@ namespace Scripts.Northrend.IcecrownCitadel
     }
 
     [Script("spell_svalna_caress_of_death", 70196u)]
-    class spell_trigger_spell_from_caster : SpellScriptLoader
+    class spell_trigger_spell_from_caster : SpellScript
     {
-        public spell_trigger_spell_from_caster(string scriptName, uint triggerId) : base(scriptName)
+        public spell_trigger_spell_from_caster(uint triggerId)
         {
             _triggerId = triggerId;
         }
 
-        class spell_trigger_spell_from_caster_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spell)
         {
-            public spell_trigger_spell_from_caster_SpellScript(uint triggerId)
-            {
-                _triggerId = triggerId;
-            }
-
-            public override bool Validate(SpellInfo spell)
-            {
-                return ValidateSpellInfo(_triggerId);
-            }
-
-            void HandleTrigger()
-            {
-                GetCaster().CastSpell(GetHitUnit(), _triggerId, true);
-            }
-
-            public override void Register()
-            {
-                AfterHit.Add(new HitHandler(HandleTrigger));
-            }
-
-            uint _triggerId;
+            return ValidateSpellInfo(_triggerId);
         }
 
-        public override SpellScript GetSpellScript()
+        void HandleTrigger()
         {
-            return new spell_trigger_spell_from_caster_SpellScript(_triggerId);
+            GetCaster().CastSpell(GetHitUnit(), _triggerId, true);
         }
 
+        public override void Register()
+        {
+            AfterHit.Add(new HitHandler(HandleTrigger));
+        }
 
         uint _triggerId;
     }

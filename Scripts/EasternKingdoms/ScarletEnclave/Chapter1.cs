@@ -33,240 +33,220 @@ namespace Scripts.EasternKingdoms
     }
 
     [Script]
-    class npc_unworthy_initiate : CreatureScript
+    public class npc_unworthy_initiate : ScriptedAI
     {
-        public npc_unworthy_initiate() : base("npc_unworthy_initiate") { }
-
-        public class npc_unworthy_initiateAI : ScriptedAI
+        public npc_unworthy_initiate(Creature creature) : base(creature)
         {
-            public npc_unworthy_initiateAI(Creature creature) : base(creature)
-            {
-                me.SetReactState(ReactStates.Passive);
-                if (me.GetCurrentEquipmentId() == 0)
-                    me.SetCurrentEquipmentId((byte)me.GetOriginalEquipmentId());
-            }
+            me.SetReactState(ReactStates.Passive);
+            if (me.GetCurrentEquipmentId() == 0)
+                me.SetCurrentEquipmentId((byte)me.GetOriginalEquipmentId());
+        }
 
-            public override void Reset()
-            {
-                anchorGUID.Clear();
-                phase = UnworthyInitiatePhase.Chained;
-                _events.Reset();
-                me.SetFaction(7);
-                me.SetFlag(UnitFields.Flags, UnitFlags.ImmuneToPc);
-                me.SetStandState(UnitStandStateType.Kneel);
-                me.LoadEquipment(0, true);
-            }
+        public override void Reset()
+        {
+            anchorGUID.Clear();
+            phase = UnworthyInitiatePhase.Chained;
+            _events.Reset();
+            me.SetFaction(7);
+            me.SetFlag(UnitFields.Flags, UnitFlags.ImmuneToPc);
+            me.SetStandState(UnitStandStateType.Kneel);
+            me.LoadEquipment(0, true);
+        }
 
-            public override void EnterCombat(Unit who)
-            {
-                _events.ScheduleEvent(EventIcyTouch, 1000, 1);
-                _events.ScheduleEvent(EventPlagueStrike, 3000, 1);
-                _events.ScheduleEvent(EventBloodStrike, 2000, 1);
-                _events.ScheduleEvent(EventDeathCoil, 5000, 1);
-            }
+        public override void EnterCombat(Unit who)
+        {
+            _events.ScheduleEvent(EventIcyTouch, 1000, 1);
+            _events.ScheduleEvent(EventPlagueStrike, 3000, 1);
+            _events.ScheduleEvent(EventBloodStrike, 2000, 1);
+            _events.ScheduleEvent(EventDeathCoil, 5000, 1);
+        }
 
-            public override void MovementInform(MovementGeneratorType type, uint id)
-            {
-                if (type != MovementGeneratorType.Point)
-                    return;
+        public override void MovementInform(MovementGeneratorType type, uint id)
+        {
+            if (type != MovementGeneratorType.Point)
+                return;
 
-                if (id == 1)
-                {
-                    wait_timer = 5000;
-                    me.CastSpell(me, SpellDKInitateVisual, true);
-
-                    Player starter = Global.ObjAccessor.GetPlayer(me, playerGUID);
-                    if (starter)
-                        Global.CreatureTextMgr.SendChat(me, (byte)SayEventAttack, null, ChatMsg.Addon, Language.Addon, CreatureTextRange.Normal, 0, Team.Other, false, starter);
-
-                    phase = UnworthyInitiatePhase.ToAttack;
-                }
-            }
-
-            public void EventStart(Creature anchor, Player target)
+            if (id == 1)
             {
                 wait_timer = 5000;
-                phase = UnworthyInitiatePhase.ToEquip;
+                me.CastSpell(me, SpellDKInitateVisual, true);
 
-                me.SetStandState(UnitStandStateType.Stand);
-                me.RemoveAurasDueToSpell(SpellSoulPrisonChainSelf);
-                me.RemoveAurasDueToSpell(SpellSoulPrisonChain);
+                Player starter = Global.ObjAccessor.GetPlayer(me, playerGUID);
+                if (starter)
+                    Global.CreatureTextMgr.SendChat(me, (byte)SayEventAttack, null, ChatMsg.Addon, Language.Addon, CreatureTextRange.Normal, 0, Team.Other, false, starter);
 
-                float z;
-                anchor.GetContactPoint(me, out anchorX, out anchorY, out z, 1.0f);
-
-                playerGUID = target.GetGUID();
-                Talk(SayEventStart);
+                phase = UnworthyInitiatePhase.ToAttack;
             }
+        }
 
-            public override void UpdateAI(uint diff)
+        public void EventStart(Creature anchor, Player target)
+        {
+            wait_timer = 5000;
+            phase = UnworthyInitiatePhase.ToEquip;
+
+            me.SetStandState(UnitStandStateType.Stand);
+            me.RemoveAurasDueToSpell(SpellSoulPrisonChainSelf);
+            me.RemoveAurasDueToSpell(SpellSoulPrisonChain);
+
+            float z;
+            anchor.GetContactPoint(me, out anchorX, out anchorY, out z, 1.0f);
+
+            playerGUID = target.GetGUID();
+            Talk(SayEventStart);
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            switch (phase)
             {
-                switch (phase)
-                {
-                    case UnworthyInitiatePhase.Chained:
-                        if (anchorGUID.IsEmpty())
+                case UnworthyInitiatePhase.Chained:
+                    if (anchorGUID.IsEmpty())
+                    {
+                        Creature anchor = me.FindNearestCreature(29521, 30);
+                        if (anchor)
                         {
-                            Creature anchor = me.FindNearestCreature(29521, 30);
-                            if (anchor)
-                            {
-                                anchor.GetAI().SetGUID(me.GetGUID());
-                                anchor.CastSpell(me, SpellSoulPrisonChain, true);
-                                anchorGUID = anchor.GetGUID();
-                            }
-                            else
-                                Log.outError(LogFilter.Scripts, "npc_unworthy_initiateAI: unable to find anchor!");
+                            anchor.GetAI().SetGUID(me.GetGUID());
+                            anchor.CastSpell(me, SpellSoulPrisonChain, true);
+                            anchorGUID = anchor.GetGUID();
+                        }
+                        else
+                            Log.outError(LogFilter.Scripts, "npc_unworthy_initiateAI: unable to find anchor!");
 
-                            float dist = 99.0f;
-                            GameObject prison = null;
+                        float dist = 99.0f;
+                        GameObject prison = null;
 
-                            for (byte i = 0; i < 12; ++i)
+                        for (byte i = 0; i < 12; ++i)
+                        {
+                            GameObject temp_prison = me.FindNearestGameObject(acherus_soul_prison[i], 30);
+                            if (temp_prison)
                             {
-                                GameObject temp_prison = me.FindNearestGameObject(acherus_soul_prison[i], 30);
-                                if (temp_prison)
+                                if (me.IsWithinDist(temp_prison, dist, false))
                                 {
-                                    if (me.IsWithinDist(temp_prison, dist, false))
-                                    {
-                                        dist = me.GetDistance2d(temp_prison);
-                                        prison = temp_prison;
-                                    }
+                                    dist = me.GetDistance2d(temp_prison);
+                                    prison = temp_prison;
                                 }
                             }
-
-                            if (prison)
-                                prison.ResetDoorOrButton();
-                            else
-                                Log.outError(LogFilter.Scripts, "npc_unworthy_initiateAI: unable to find prison!");
                         }
-                        break;
-                    case UnworthyInitiatePhase.ToEquip:
-                        if (wait_timer != 0)
+
+                        if (prison)
+                            prison.ResetDoorOrButton();
+                        else
+                            Log.outError(LogFilter.Scripts, "npc_unworthy_initiateAI: unable to find prison!");
+                    }
+                    break;
+                case UnworthyInitiatePhase.ToEquip:
+                    if (wait_timer != 0)
+                    {
+                        if (wait_timer > diff)
+                            wait_timer -= diff;
+                        else
                         {
-                            if (wait_timer > diff)
-                                wait_timer -= diff;
-                            else
-                            {
-                                me.GetMotionMaster().MovePoint(1, anchorX, anchorY, me.GetPositionZ());
-                                phase = UnworthyInitiatePhase.Equiping;
-                                wait_timer = 0;
-                            }
+                            me.GetMotionMaster().MovePoint(1, anchorX, anchorY, me.GetPositionZ());
+                            phase = UnworthyInitiatePhase.Equiping;
+                            wait_timer = 0;
                         }
-                        break;
-                    case UnworthyInitiatePhase.ToAttack:
-                        if (wait_timer != 0)
+                    }
+                    break;
+                case UnworthyInitiatePhase.ToAttack:
+                    if (wait_timer != 0)
+                    {
+                        if (wait_timer > diff)
+                            wait_timer -= diff;
+                        else
                         {
-                            if (wait_timer > diff)
-                                wait_timer -= diff;
-                            else
-                            {
-                                me.SetFaction(14);
-                                me.RemoveFlag(UnitFields.Flags, UnitFlags.ImmuneToPc);
-                                phase = UnworthyInitiatePhase.Attacking;
+                            me.SetFaction(14);
+                            me.RemoveFlag(UnitFields.Flags, UnitFlags.ImmuneToPc);
+                            phase = UnworthyInitiatePhase.Attacking;
 
-                                Player target = Global.ObjAccessor.GetPlayer(me, playerGUID);
-                                if (target)
-                                    AttackStart(target);
-                                wait_timer = 0;
-                            }
+                            Player target = Global.ObjAccessor.GetPlayer(me, playerGUID);
+                            if (target)
+                                AttackStart(target);
+                            wait_timer = 0;
                         }
-                        break;
-                    case UnworthyInitiatePhase.Attacking:
-                        if (!UpdateVictim())
-                            return;
+                    }
+                    break;
+                case UnworthyInitiatePhase.Attacking:
+                    if (!UpdateVictim())
+                        return;
 
-                        _events.Update(diff);
-                        _events.ExecuteEvents(eventId =>
+                    _events.Update(diff);
+                    _events.ExecuteEvents(eventId =>
+                    {
+                        switch (eventId)
                         {
-                            switch (eventId)
-                            {
-                                case EventIcyTouch:
-                                    DoCastVictim(SpellIcyTouch);
-                                    _events.DelayEvents(1000, 1);
-                                    _events.ScheduleEvent(EventIcyTouch, 5000, 1);
-                                    break;
-                                case EventPlagueStrike:
-                                    DoCastVictim(SpellPlagueStrike);
-                                    _events.DelayEvents(1000, 1);
-                                    _events.ScheduleEvent(EventPlagueStrike, 5000, 1);
-                                    break;
-                                case EventBloodStrike:
-                                    DoCastVictim(SpellBloodStrike);
-                                    _events.DelayEvents(1000, 1);
-                                    _events.ScheduleEvent(EventBloodStrike, 5000, 1);
-                                    break;
-                                case EventDeathCoil:
-                                    DoCastVictim(SpellDeathCoil);
-                                    _events.DelayEvents(1000, 1);
-                                    _events.ScheduleEvent(EventDeathCoil, 5000, 1);
-                                    break;
-                            }
-                        });
+                            case EventIcyTouch:
+                                DoCastVictim(SpellIcyTouch);
+                                _events.DelayEvents(1000, 1);
+                                _events.ScheduleEvent(EventIcyTouch, 5000, 1);
+                                break;
+                            case EventPlagueStrike:
+                                DoCastVictim(SpellPlagueStrike);
+                                _events.DelayEvents(1000, 1);
+                                _events.ScheduleEvent(EventPlagueStrike, 5000, 1);
+                                break;
+                            case EventBloodStrike:
+                                DoCastVictim(SpellBloodStrike);
+                                _events.DelayEvents(1000, 1);
+                                _events.ScheduleEvent(EventBloodStrike, 5000, 1);
+                                break;
+                            case EventDeathCoil:
+                                DoCastVictim(SpellDeathCoil);
+                                _events.DelayEvents(1000, 1);
+                                _events.ScheduleEvent(EventDeathCoil, 5000, 1);
+                                break;
+                        }
+                    });
 
-                        DoMeleeAttackIfReady();
-                        break;
-                    default:
-                        break;
-                }
+                    DoMeleeAttackIfReady();
+                    break;
+                default:
+                    break;
             }
-
-            ObjectGuid playerGUID;
-            UnworthyInitiatePhase phase;
-            uint wait_timer;
-            float anchorX, anchorY;
-            ObjectGuid anchorGUID;
         }
 
-        public const uint SpellSoulPrisonChainSelf = 54612;
-        public const uint SpellSoulPrisonChain = 54613;
-        public const uint SpellDKInitateVisual = 51519;
+        ObjectGuid playerGUID;
+        UnworthyInitiatePhase phase;
+        uint wait_timer;
+        float anchorX, anchorY;
+        ObjectGuid anchorGUID;
 
-        public const uint SpellIcyTouch = 52372;
-        public const uint SpellPlagueStrike = 52373;
-        public const uint SpellBloodStrike = 52374;
-        public const uint SpellDeathCoil = 52375;
+        const uint SpellSoulPrisonChainSelf = 54612;
+        const uint SpellSoulPrisonChain = 54613;
+        const uint SpellDKInitateVisual = 51519;
 
-        public const uint SayEventStart = 0;
-        public const uint SayEventAttack = 1;
+        const uint SpellIcyTouch = 52372;
+        const uint SpellPlagueStrike = 52373;
+        const uint SpellBloodStrike = 52374;
+        const uint SpellDeathCoil = 52375;
 
-        public const uint EventIcyTouch = 1;
-        public const uint EventPlagueStrike = 2;
-        public const uint EventBloodStrike = 3;
-        public const uint EventDeathCoil = 4;
+        const uint SayEventStart = 0;
+        const uint SayEventAttack = 1;
 
-        public static uint[] acherus_soul_prison = { 191577, 191580, 191581, 191582, 191583, 191584, 191585, 191586, 191587, 191588, 191589, 191590 };
+        const uint EventIcyTouch = 1;
+        const uint EventPlagueStrike = 2;
+        const uint EventBloodStrike = 3;
+        const uint EventDeathCoil = 4;
 
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return new npc_unworthy_initiateAI(creature);
-        }
+        static uint[] acherus_soul_prison = { 191577, 191580, 191581, 191582, 191583, 191584, 191585, 191586, 191587, 191588, 191589, 191590 };
     }
 
     [Script]
-    class npc_unworthy_initiate_anchor : CreatureScript
+    class npc_unworthy_initiate_anchor : PassiveAI
     {
-        public npc_unworthy_initiate_anchor() : base("npc_unworthy_initiate_anchor") { }
+        public npc_unworthy_initiate_anchor(Creature creature) : base(creature) { }
 
-        class npc_unworthy_initiate_anchorAI : PassiveAI
+        public override void SetGUID(ObjectGuid guid, int id)
         {
-            public npc_unworthy_initiate_anchorAI(Creature creature) : base(creature) { }
-
-            public override void SetGUID(ObjectGuid guid, int id)
-            {
-                if (prisonerGUID.IsEmpty())
-                    prisonerGUID = guid;
-            }
-
-            public override ObjectGuid GetGUID(int id)
-            {
-                return prisonerGUID;
-            }
-
-            ObjectGuid prisonerGUID;
+            if (prisonerGUID.IsEmpty())
+                prisonerGUID = guid;
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override ObjectGuid GetGUID(int id)
         {
-            return new npc_unworthy_initiate_anchorAI(creature);
+            return prisonerGUID;
         }
+
+        ObjectGuid prisonerGUID;
     }
 
     [Script]
@@ -284,13 +264,12 @@ namespace Scripts.EasternKingdoms
                 {
                     Creature prisoner = ObjectAccessor.GetCreature(player, prisonerGUID);
                     if (prisoner)
-                        ((npc_unworthy_initiate.npc_unworthy_initiateAI)prisoner.GetAI()).EventStart(anchor, player);
+                        ((npc_unworthy_initiate)prisoner.GetAI()).EventStart(anchor, player);
                 }
             }
 
             return false;
         }
-
     }
 
     struct EyeOfAcherus
@@ -311,74 +290,64 @@ namespace Scripts.EasternKingdoms
     }
 
     [Script]
-    class npc_eye_of_acherus : CreatureScript
+    class npc_eye_of_acherus : ScriptedAI
     {
-        public npc_eye_of_acherus() : base("npc_eye_of_acherus") { }
-
-        class npc_eye_of_acherusAI : ScriptedAI
+        public npc_eye_of_acherus(Creature creature) : base(creature)
         {
-            public npc_eye_of_acherusAI(Creature creature) : base(creature)
-            {
-                Reset();
-            }
-
-            uint startTimer;
-
-            public override void Reset()
-            {
-                startTimer = 2000;
-            }
-
-            public override void AttackStart(Unit u) { }
-
-            public override void MoveInLineOfSight(Unit u) { }
-
-            public override void JustDied(Unit killer)
-            {
-                Unit charmer = me.GetCharmer();
-                if (charmer)
-                    charmer.RemoveAurasDueToSpell(EyeOfAcherus.SpellEyeControl);
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (me.IsCharmed())
-                {
-                    if (startTimer <= diff)    // fly to start point
-                    {
-                        me.CastSpell(me, EyeOfAcherus.SpellEyePhasemask, true);
-                        me.CastSpell(me, EyeOfAcherus.SpellEyeVisual, true);
-                        me.CastSpell(me, EyeOfAcherus.SpellEyeFlightBoost, true);
-                        me.SetSpeedRate(UnitMoveType.Flight, 4f);
-
-                        me.GetMotionMaster().MovePoint(0, EyeOfAcherus.EyeDestination[0], EyeOfAcherus.EyeDestination[1], EyeOfAcherus.EyeDestination[2]);
-                        return;
-                    }
-                    else
-                        startTimer -= diff;
-                }
-                else
-                    me.ForcedDespawn();
-            }
-
-            public override void MovementInform(MovementGeneratorType type, uint id)
-            {
-                if (type != MovementGeneratorType.Point || id != 0)
-                    return;
-
-                me.SetDisplayId(EyeOfAcherus.EyeSmallDisplayId);
-
-                me.CastSpell(me, EyeOfAcherus.SpellEyeFlight, true);
-                me.Say(EyeOfAcherus.SayEyeUnderControl, Language.Universal);
-
-                if (me.GetCharmer() && me.GetCharmer().IsTypeId(TypeId.Player))
-                    me.GetCharmer().ToPlayer().SetClientControl(me, true);
-            }
+            Reset();
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        uint startTimer;
+
+        public override void Reset()
         {
-            return new npc_eye_of_acherusAI(creature);
+            startTimer = 2000;
+        }
+
+        public override void AttackStart(Unit u) { }
+
+        public override void MoveInLineOfSight(Unit u) { }
+
+        public override void JustDied(Unit killer)
+        {
+            Unit charmer = me.GetCharmer();
+            if (charmer)
+                charmer.RemoveAurasDueToSpell(EyeOfAcherus.SpellEyeControl);
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (me.IsCharmed())
+            {
+                if (startTimer <= diff)    // fly to start point
+                {
+                    me.CastSpell(me, EyeOfAcherus.SpellEyePhasemask, true);
+                    me.CastSpell(me, EyeOfAcherus.SpellEyeVisual, true);
+                    me.CastSpell(me, EyeOfAcherus.SpellEyeFlightBoost, true);
+                    me.SetSpeedRate(UnitMoveType.Flight, 4f);
+
+                    me.GetMotionMaster().MovePoint(0, EyeOfAcherus.EyeDestination[0], EyeOfAcherus.EyeDestination[1], EyeOfAcherus.EyeDestination[2]);
+                    return;
+                }
+                else
+                    startTimer -= diff;
+            }
+            else
+                me.ForcedDespawn();
+        }
+
+        public override void MovementInform(MovementGeneratorType type, uint id)
+        {
+            if (type != MovementGeneratorType.Point || id != 0)
+                return;
+
+            me.SetDisplayId(EyeOfAcherus.EyeSmallDisplayId);
+
+            me.CastSpell(me, EyeOfAcherus.SpellEyeFlight, true);
+            me.Say(EyeOfAcherus.SayEyeUnderControl, Language.Universal);
+
+            if (me.GetCharmer() && me.GetCharmer().IsTypeId(TypeId.Player))
+                me.GetCharmer().ToPlayer().SetClientControl(me, true);
         }
     }
 }

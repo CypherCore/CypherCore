@@ -59,256 +59,206 @@ namespace Scripts.Northrend.DraktharonKeep.Trollgore
     }
 
     [Script]
-    class boss_trollgore : CreatureScript
+    class boss_trollgore : BossAI
     {
-        public boss_trollgore() : base("boss_trollgore") { }
-
-        class boss_trollgoreAI : BossAI
+        public boss_trollgore(Creature creature) : base(creature, DTKDataTypes.Trollgore)
         {
-            public boss_trollgoreAI(Creature creature) : base(creature, DTKDataTypes.Trollgore)
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            _consumptionJunction = true;
+        }
+
+        public override void Reset()
+        {
+            _Reset();
+            Initialize();
+        }
+
+        public override void EnterCombat(Unit who)
+        {
+            _EnterCombat();
+            Talk(TextIds.SayAggro);
+
+            _scheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting));
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(15), task =>
+             {
+                 Talk(TextIds.SayConsume);
+                 DoCastAOE(SpellIds.Consume);
+                 task.Repeat();
+             });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(5), task =>
             {
-                Initialize();
-            }
+                DoCastVictim(SpellIds.Crush);
+                task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15));
+            });
 
-            void Initialize()
+            _scheduler.Schedule(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(60), task =>
             {
-                _consumptionJunction = true;
-            }
+                DoCastVictim(SpellIds.InfectedWound);
+                task.Repeat(TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(35));
+            });
 
-            public override void Reset()
+            _scheduler.Schedule(TimeSpan.FromSeconds(3), task =>
             {
-                _Reset();
-                Initialize();
-            }
+                Talk(TextIds.SayExplode);
+                DoCastAOE(SpellIds.CorpseExplode);
+                task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(19));
+            });
 
-            public override void EnterCombat(Unit who)
+            _scheduler.Schedule(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(40), task =>
             {
-                _EnterCombat();
-                Talk(TextIds.SayAggro);
-
-                _scheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting));
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(15), task =>
-                 {
-                     Talk(TextIds.SayConsume);
-                     DoCastAOE(SpellIds.Consume);
-                     task.Repeat();
-                 });
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(5), task =>
+                for (byte i = 0; i < 3; ++i)
                 {
-                    DoCastVictim(SpellIds.Crush);
-                    task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15));
-                });
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(60), task =>
-                {
-                    DoCastVictim(SpellIds.InfectedWound);
-                    task.Repeat(TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(35));
-                });
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(3), task =>
-                {
-                    Talk(TextIds.SayExplode);
-                    DoCastAOE(SpellIds.CorpseExplode);
-                    task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(19));
-                });
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(40), task =>
-                {
-                    for (byte i = 0; i < 3; ++i)
-                    {
-                        Creature trigger = ObjectAccessor.GetCreature(me, instance.GetGuidData(DTKDataTypes.TrollgoreInvaderSummoner1 + i));
-                        if (trigger)
-                            trigger.CastSpell(trigger, RandomHelper.RAND(SpellIds.SummonInvaderA, SpellIds.SummonInvaderB, SpellIds.SummonInvaderC), true, null, null, me.GetGUID());
-                    }
-
-                    task.Repeat();
-                });
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _scheduler.Update(diff);
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-
-                if (_consumptionJunction)
-                {
-                    Aura ConsumeAura = me.GetAura(DungeonMode(SpellIds.ConsumeBuff, SpellIds.ConsumeBuffH));
-                    if (ConsumeAura != null && ConsumeAura.GetStackAmount() > 9)
-                        _consumptionJunction = false;
+                    Creature trigger = ObjectAccessor.GetCreature(me, instance.GetGuidData(DTKDataTypes.TrollgoreInvaderSummoner1 + i));
+                    if (trigger)
+                        trigger.CastSpell(trigger, RandomHelper.RAND(SpellIds.SummonInvaderA, SpellIds.SummonInvaderB, SpellIds.SummonInvaderC), true, null, null, me.GetGUID());
                 }
 
-                DoMeleeAttackIfReady();
-            }
-
-            public override void JustDied(Unit killer)
-            {
-                _JustDied();
-                Talk(TextIds.SayDeath);
-            }
-
-            public override uint GetData(uint type)
-            {
-                if (type == Misc.DataConsumptionJunction)
-                    return _consumptionJunction ? 1 : 0u;
-
-                return 0;
-            }
-
-            public override void KilledUnit(Unit victim)
-            {
-                if (victim.IsTypeId(TypeId.Player))
-                    Talk(TextIds.SayKill);
-            }
-
-            public override void JustSummoned(Creature summon)
-            {
-                summon.GetMotionMaster().MovePoint(Misc.PointLanding, Misc.Landing);
-                summons.Summon(summon);
-            }
-
-            bool _consumptionJunction;
+                task.Repeat();
+            });
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void UpdateAI(uint diff)
         {
-            return GetInstanceAI<boss_trollgoreAI>(creature);
+            if (!UpdateVictim())
+                return;
+
+            _scheduler.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            if (_consumptionJunction)
+            {
+                Aura ConsumeAura = me.GetAura(DungeonMode(SpellIds.ConsumeBuff, SpellIds.ConsumeBuffH));
+                if (ConsumeAura != null && ConsumeAura.GetStackAmount() > 9)
+                    _consumptionJunction = false;
+            }
+
+            DoMeleeAttackIfReady();
         }
+
+        public override void JustDied(Unit killer)
+        {
+            _JustDied();
+            Talk(TextIds.SayDeath);
+        }
+
+        public override uint GetData(uint type)
+        {
+            if (type == Misc.DataConsumptionJunction)
+                return _consumptionJunction ? 1 : 0u;
+
+            return 0;
+        }
+
+        public override void KilledUnit(Unit victim)
+        {
+            if (victim.IsTypeId(TypeId.Player))
+                Talk(TextIds.SayKill);
+        }
+
+        public override void JustSummoned(Creature summon)
+        {
+            summon.GetMotionMaster().MovePoint(Misc.PointLanding, Misc.Landing);
+            summons.Summon(summon);
+        }
+
+        bool _consumptionJunction;
     }
 
     [Script]
-    class npc_drakkari_invader : CreatureScript
+    class npc_drakkari_invader : ScriptedAI
     {
-        public npc_drakkari_invader() : base("npc_drakkari_invader") { }
+        public npc_drakkari_invader(Creature creature) : base(creature) { }
 
-        class npc_drakkari_invaderAI : ScriptedAI
+        public override void MovementInform(MovementGeneratorType type, uint pointId)
         {
-            public npc_drakkari_invaderAI(Creature creature) : base(creature) { }
-
-            public override void MovementInform(MovementGeneratorType type, uint pointId)
+            if (type == MovementGeneratorType.Point && pointId == Misc.PointLanding)
             {
-                if (type == MovementGeneratorType.Point && pointId == Misc.PointLanding)
-                {
-                    me.Dismount();
-                    me.RemoveFlag(UnitFields.Flags, UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc);
-                    DoCastAOE(SpellIds.InvaderTaunt);
-                }
+                me.Dismount();
+                me.RemoveFlag(UnitFields.Flags, UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc);
+                DoCastAOE(SpellIds.InvaderTaunt);
             }
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<npc_drakkari_invaderAI>(creature);
         }
     }
 
     [Script] // 49380, 59803 - Consume
-    class spell_trollgore_consume : SpellScriptLoader
+    class spell_trollgore_consume : SpellScript
     {
-        public spell_trollgore_consume() : base("spell_trollgore_consume") { }
-
-        class spell_trollgore_consume_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spellInfo)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(SpellIds.ConsumeBuff);
-            }
-
-            void HandleConsume(uint effIndex)
-            {
-                Unit target = GetHitUnit();
-                if (target)
-                    target.CastSpell(GetCaster(), SpellIds.ConsumeBuff, true);
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleConsume, 1, SpellEffectName.ScriptEffect));
-            }
+            return ValidateSpellInfo(SpellIds.ConsumeBuff);
         }
 
-        public override SpellScript GetSpellScript()
+        void HandleConsume(uint effIndex)
         {
-            return new spell_trollgore_consume_SpellScript();
+            Unit target = GetHitUnit();
+            if (target)
+                target.CastSpell(GetCaster(), SpellIds.ConsumeBuff, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleConsume, 1, SpellEffectName.ScriptEffect));
         }
     }
 
     [Script] // 49555, 59807 - Corpse Explode
-    class spell_trollgore_corpse_explode : SpellScriptLoader
+    class spell_trollgore_corpse_explode : AuraScript
     {
-        public spell_trollgore_corpse_explode() : base("spell_trollgore_corpse_explode") { }
-
-        class spell_trollgore_corpse_explode_AuraScript : AuraScript
+        public override bool Validate(SpellInfo spellInfo)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(SpellIds.CorpseExplodeDamage);
-            }
+            return ValidateSpellInfo(SpellIds.CorpseExplodeDamage);
+        }
 
-            void PeriodicTick(AuraEffect aurEff)
+        void PeriodicTick(AuraEffect aurEff)
+        {
+            if (aurEff.GetTickNumber() == 2)
             {
-                if (aurEff.GetTickNumber() == 2)
-                {
-                    Unit caster = GetCaster();
-                    if (caster)
-                        caster.CastSpell(GetTarget(), SpellIds.CorpseExplodeDamage, true, null, aurEff);
-                }
-            }
-
-            void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-            {
-                Creature target = GetTarget().ToCreature();
-                if (target)
-                    target.DespawnOrUnsummon();
-            }
-
-            public override void Register()
-            {
-                OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.Dummy));
-                AfterEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real));
+                Unit caster = GetCaster();
+                if (caster)
+                    caster.CastSpell(GetTarget(), SpellIds.CorpseExplodeDamage, true, null, aurEff);
             }
         }
 
-        public override AuraScript GetAuraScript()
+        void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            return new spell_trollgore_corpse_explode_AuraScript();
+            Creature target = GetTarget().ToCreature();
+            if (target)
+                target.DespawnOrUnsummon();
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.Dummy));
+            AfterEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real));
         }
     }
 
     [Script] // 49405 - Invader Taunt Trigger
-    class spell_trollgore_invader_taunt : SpellScriptLoader
+    class spell_trollgore_invader_taunt : SpellScript
     {
-        public spell_trollgore_invader_taunt() : base("spell_trollgore_invader_taunt") { }
-
-        class spell_trollgore_invader_taunt_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spellInfo)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
-            }
-
-            void HandleTaunt(uint effIndex)
-            {
-                Unit target = GetHitUnit();
-                if (target)
-                    target.CastSpell(GetCaster(), (uint)GetEffectValue(), true);
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleTaunt, 0, SpellEffectName.ScriptEffect));
-            }
+            return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
         }
 
-        public override SpellScript GetSpellScript()
+        void HandleTaunt(uint effIndex)
         {
-            return new spell_trollgore_invader_taunt_SpellScript();
+            Unit target = GetHitUnit();
+            if (target)
+                target.CastSpell(GetCaster(), (uint)GetEffectValue(), true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleTaunt, 0, SpellEffectName.ScriptEffect));
         }
     }
 
@@ -327,7 +277,7 @@ namespace Scripts.Northrend.DraktharonKeep.Trollgore
             Creature Trollgore = target.ToCreature();
             if (Trollgore)
                 if (Trollgore.GetAI().GetData(Misc.DataConsumptionJunction) != 0)
-                return true;
+                    return true;
 
             return false;
         }

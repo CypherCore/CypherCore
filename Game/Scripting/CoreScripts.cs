@@ -49,11 +49,12 @@ namespace Game.Scripting
         {
             InstanceMap instance = obj.GetMap().ToInstanceMap();
             if (instance != null && instance.GetInstanceScript() != null)
-                if (instance.GetScriptId() == Global.ObjectMgr.GetScriptId(scriptName))
+                if (instance.GetScriptName() == scriptName)
                     return (T)Activator.CreateInstance(typeof(T), new object[] { obj });
 
             return null;
         }
+
         public static T GetInstanceAI<T>(WorldObject obj) where T : class
         {
             InstanceMap instance = obj.GetMap().ToInstanceMap();
@@ -66,23 +67,57 @@ namespace Game.Scripting
         string _name;
     }
 
+    class GenericSpellScriptLoader<S> : SpellScriptLoader where S : SpellScript
+    {
+        public GenericSpellScriptLoader(string name, object[] args) : base(name)
+        {
+            _args = args;
+        }
+
+        public override SpellScript GetSpellScript() { return (S)Activator.CreateInstance(typeof(S), _args); }
+
+        object[] _args;
+    }
+
+    class GenericAuraScriptLoader<A> : AuraScriptLoader where A : AuraScript
+    {
+        public GenericAuraScriptLoader(string name, object[] args) : base(name)
+        {
+            _args = args;
+        }
+
+        public override AuraScript GetAuraScript() { return (A)Activator.CreateInstance(typeof(A), _args); }
+
+        object[] _args;
+    }
+
     public class SpellScriptLoader : ScriptObject
     {
         public SpellScriptLoader(string name) : base(name)
         {
-            Global.ScriptMgr.AddScript(this);
+            Global.ScriptMgr.AddScript<SpellScriptLoader>(this);
         }
 
         public override bool IsDatabaseBound() { return true; }
 
         // Should return a fully valid SpellScript.
         public virtual SpellScript GetSpellScript() { return null; }
+    }
+
+    public class AuraScriptLoader : ScriptObject
+    {
+        public AuraScriptLoader(string name) : base(name)
+        {
+            Global.ScriptMgr.AddScript<AuraScriptLoader>(this);
+        }
+
+        public override bool IsDatabaseBound() { return true; }
 
         // Should return a fully valid AuraScript.
         public virtual AuraScript GetAuraScript() { return null; }
     }
 
-    class WorldScript : ScriptObject
+    public class WorldScript : ScriptObject
     {
         protected WorldScript(string name) : base(name)
         {
@@ -113,7 +148,7 @@ namespace Game.Scripting
         // Called when the world is actually shut down.
         public virtual void OnShutdown() { }
     }
-    
+
     public class FormulaScript : ScriptObject
     {
         public FormulaScript(string name) : base(name) { }
@@ -258,11 +293,29 @@ namespace Game.Scripting
         public virtual void ModifySpellDamageTaken(Unit target, Unit attacker, ref int damage) { }
     }
 
+    public class GenericCreatureScript<AI> : CreatureScript where AI : CreatureAI
+    {
+        public GenericCreatureScript(string name, object[] args) : base(name)
+        {
+            _args = args;
+        }
+
+        public override CreatureAI GetAI(Creature me)
+        {
+            if (me.GetInstanceScript() != null)
+                return GetInstanceAI<AI>(me);
+            else
+                return (AI)Activator.CreateInstance(typeof(AI), me, _args);
+        }
+
+        object[] _args;
+    }
+
     public class CreatureScript : UnitScript
     {
         public CreatureScript(string name) : base(name, false)
         {
-            Global.ScriptMgr.AddScript(this);
+            Global.ScriptMgr.AddScript<CreatureScript>(this);
         }
 
         public override bool IsDatabaseBound() { return true; }

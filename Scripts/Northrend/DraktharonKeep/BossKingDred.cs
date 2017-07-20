@@ -43,221 +43,191 @@ namespace Scripts.Northrend.DraktharonKeep.KingDred
     }
 
     [Script]
-    class boss_king_dred : CreatureScript
+    class boss_king_dred : BossAI
     {
-        public boss_king_dred() : base("boss_king_dred") { }
-
-        class boss_king_dredAI : BossAI
+        public boss_king_dred(Creature creature) : base(creature, DTKDataTypes.KingDred)
         {
-            public boss_king_dredAI(Creature creature) : base(creature, DTKDataTypes.KingDred)
-            {
-                Initialize();
-            }
-
-            void Initialize()
-            {
-                raptorsKilled = 0;
-            }
-
-            public override void Reset()
-            {
-                Initialize();
-                _Reset();
-            }
-
-            public override void EnterCombat(Unit who)
-            {
-                _EnterCombat();
-
-                _scheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting));
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(33), task =>
-                {
-                    DoCastAOE(SpellIds.BellowingRoar);
-                    task.Repeat();
-                });
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(20), task =>
-                {
-                    DoCastVictim(SpellIds.GrievousBite);
-                    task.Repeat();
-                });
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(18.5), task =>
-                {
-                    DoCastVictim(SpellIds.ManglingSlash);
-                    task.Repeat();
-                });
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(20), task =>
-                {
-                    DoCastAOE(SpellIds.FearsomeRoar);
-                    task.Repeat();
-                });
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(17), task =>
-                {
-                    DoCastVictim(SpellIds.PiercingSlash);
-                    task.Repeat();
-                });
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(25), task =>
-                {
-                    DoCastVictim(SpellIds.RaptorCall);
-
-                    float x, y, z;
-                    me.GetClosePoint(out x, out y, out z, me.GetObjectSize() / 3, 10.0f);
-                    me.SummonCreature(RandomHelper.RAND(DTKCreatureIds.DrakkariGutripper, DTKCreatureIds.DrakkariScytheclaw), x, y, z, 0, TempSummonType.DeadDespawn, 1000);
-                    task.Repeat();
-                });
-            }
-
-            public override void DoAction(int action)
-            {
-                if (action == Misc.ActionRaptorKilled)
-                    ++raptorsKilled;
-            }
-
-            public override uint GetData(uint type)
-            {
-                if (type == Misc.DataRaptorsKilled)
-                    return raptorsKilled;
-
-                return 0;
-            }
-
-            public override void JustDied(Unit killer)
-            {
-                _JustDied();
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _scheduler.Update(diff);
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-
-                DoMeleeAttackIfReady();
-            }
-
-            byte raptorsKilled;
+            Initialize();
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        void Initialize()
         {
-            return GetInstanceAI<boss_king_dredAI>(creature);
+            raptorsKilled = 0;
         }
+
+        public override void Reset()
+        {
+            Initialize();
+            _Reset();
+        }
+
+        public override void EnterCombat(Unit who)
+        {
+            _EnterCombat();
+
+            _scheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting));
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(33), task =>
+            {
+                DoCastAOE(SpellIds.BellowingRoar);
+                task.Repeat();
+            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(20), task =>
+            {
+                DoCastVictim(SpellIds.GrievousBite);
+                task.Repeat();
+            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(18.5), task =>
+            {
+                DoCastVictim(SpellIds.ManglingSlash);
+                task.Repeat();
+            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(20), task =>
+            {
+                DoCastAOE(SpellIds.FearsomeRoar);
+                task.Repeat();
+            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(17), task =>
+            {
+                DoCastVictim(SpellIds.PiercingSlash);
+                task.Repeat();
+            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(25), task =>
+            {
+                DoCastVictim(SpellIds.RaptorCall);
+
+                float x, y, z;
+                me.GetClosePoint(out x, out y, out z, me.GetObjectSize() / 3, 10.0f);
+                me.SummonCreature(RandomHelper.RAND(DTKCreatureIds.DrakkariGutripper, DTKCreatureIds.DrakkariScytheclaw), x, y, z, 0, TempSummonType.DeadDespawn, 1000);
+                task.Repeat();
+            });
+        }
+
+        public override void DoAction(int action)
+        {
+            if (action == Misc.ActionRaptorKilled)
+                ++raptorsKilled;
+        }
+
+        public override uint GetData(uint type)
+        {
+            if (type == Misc.DataRaptorsKilled)
+                return raptorsKilled;
+
+            return 0;
+        }
+
+        public override void JustDied(Unit killer)
+        {
+            _JustDied();
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _scheduler.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+
+        byte raptorsKilled;
     }
 
     [Script]
-    class npc_drakkari_gutripper : CreatureScript
+    class npc_drakkari_gutripper : ScriptedAI
     {
-        public npc_drakkari_gutripper() : base("npc_drakkari_gutripper") { }
-
-        class npc_drakkari_gutripperAI : ScriptedAI
+        public npc_drakkari_gutripper(Creature creature) : base(creature)
         {
-            public npc_drakkari_gutripperAI(Creature creature) : base(creature)
-            {
-                Initialize();
-                instance = me.GetInstanceScript();
-            }
-
-            void Initialize()
-            {
-                _scheduler.Schedule(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15), task =>
-                {
-                    DoCastVictim(SpellIds.GutRip, false);
-                    task.Repeat();
-                });
-            }
-            
-            public override void Reset()
-            {
-                Initialize();
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _scheduler.Update(diff);
-
-                DoMeleeAttackIfReady();
-            }
-
-            public override void JustDied(Unit killer)
-            {
-                Creature dred = ObjectAccessor.GetCreature(me, instance.GetGuidData(DTKDataTypes.KingDred));
-                if (dred)
-                    dred.GetAI().DoAction(Misc.ActionRaptorKilled);
-            }
-
-            InstanceScript instance;
+            Initialize();
+            instance = me.GetInstanceScript();
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        void Initialize()
         {
-            return GetInstanceAI<npc_drakkari_gutripperAI>(creature);
+            _scheduler.Schedule(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15), task =>
+            {
+                DoCastVictim(SpellIds.GutRip, false);
+                task.Repeat();
+            });
         }
+
+        public override void Reset()
+        {
+            Initialize();
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _scheduler.Update(diff);
+
+            DoMeleeAttackIfReady();
+        }
+
+        public override void JustDied(Unit killer)
+        {
+            Creature dred = ObjectAccessor.GetCreature(me, instance.GetGuidData(DTKDataTypes.KingDred));
+            if (dred)
+                dred.GetAI().DoAction(Misc.ActionRaptorKilled);
+        }
+
+        InstanceScript instance;
     }
 
     [Script]
-    class npc_drakkari_scytheclaw : CreatureScript
+    class npc_drakkari_scytheclaw : ScriptedAI
     {
-        public npc_drakkari_scytheclaw() : base("npc_drakkari_scytheclaw") { }
-
-        class npc_drakkari_scytheclawAI : ScriptedAI
+        public npc_drakkari_scytheclaw(Creature creature) : base(creature)
         {
-            public npc_drakkari_scytheclawAI(Creature creature) : base(creature)
-            {
-                Initialize();
-                instance = me.GetInstanceScript();
-            }
-
-            void Initialize()
-            {
-                _scheduler.Schedule(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15), task =>
-                {
-                    DoCastVictim(SpellIds.Rend, false);
-                    task.Repeat();
-                });
-            }
-
-            public override void Reset()
-            {
-                _scheduler.CancelAll();
-                Initialize();
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _scheduler.Update(diff);
-
-                DoMeleeAttackIfReady();
-            }
-
-            public override void JustDied(Unit killer)
-            {
-                Creature dred = ObjectAccessor.GetCreature(me, instance.GetGuidData(DTKDataTypes.KingDred));
-                if (dred)
-                    dred.GetAI().DoAction(Misc.ActionRaptorKilled);
-            }
-
-            InstanceScript instance;
+            Initialize();
+            instance = me.GetInstanceScript();
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        void Initialize()
         {
-            return GetInstanceAI<npc_drakkari_scytheclawAI>(creature);
+            _scheduler.Schedule(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15), task =>
+            {
+                DoCastVictim(SpellIds.Rend, false);
+                task.Repeat();
+            });
         }
+
+        public override void Reset()
+        {
+            _scheduler.CancelAll();
+            Initialize();
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _scheduler.Update(diff);
+
+            DoMeleeAttackIfReady();
+        }
+
+        public override void JustDied(Unit killer)
+        {
+            Creature dred = ObjectAccessor.GetCreature(me, instance.GetGuidData(DTKDataTypes.KingDred));
+            if (dred)
+                dred.GetAI().DoAction(Misc.ActionRaptorKilled);
+        }
+
+        InstanceScript instance;
     }
 
     [Script]

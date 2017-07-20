@@ -23,63 +23,53 @@ using Game.Scripting;
 namespace Scripts.Pets
 {
     [Script]
-    class npc_pet_gen_mojo : CreatureScript
+    class npc_pet_gen_mojo : ScriptedAI
     {
-        public npc_pet_gen_mojo() : base("npc_pet_gen_mojo") { }
+        public npc_pet_gen_mojo(Creature creature) : base(creature) { }
 
-        class npc_pet_gen_mojoAI : ScriptedAI
+        public override void Reset()
         {
-            public npc_pet_gen_mojoAI(Creature creature) : base(creature) { }
+            _victimGUID.Clear();
 
-            public override void Reset()
-            {
-                _victimGUID.Clear();
-
-                Unit owner = me.GetOwner();
-                if (owner)
-                    me.GetMotionMaster().MoveFollow(owner, 0.0f, 0.0f);
-            }
-
-            public override void EnterCombat(Unit who) { }
-
-            public override void UpdateAI(uint diff) { }
-
-            public override void ReceiveEmote(Player player, TextEmotes emote)
-            {
-                me.HandleEmoteCommand((Emote)emote);
-                Unit owner = me.GetOwner();
-                if (emote != TextEmotes.Kiss || !owner || !owner.IsTypeId(TypeId.Player) ||
-                    owner.ToPlayer().GetTeam() != player.GetTeam())
-                {
-                    return;
-                }
-
-                Talk(SayMojo, player);
-
-                if (!_victimGUID.IsEmpty())
-                {
-                    Player victim = Global.ObjAccessor.GetPlayer(me, _victimGUID);
-                    if (victim)
-                        victim.RemoveAura(SpellFeelingFroggy);
-                }
-
-                _victimGUID = player.GetGUID();
-
-                DoCast(player, SpellFeelingFroggy, true);
-                DoCast(me, SpellSeductionVisual, true);
-                me.GetMotionMaster().MoveFollow(player, 0.0f, 0.0f);
-            }
-
-            ObjectGuid _victimGUID;
-
-            const uint SayMojo = 0;
-            const uint SpellFeelingFroggy = 43906;
-            const uint SpellSeductionVisual = 43919;
+            Unit owner = me.GetOwner();
+            if (owner)
+                me.GetMotionMaster().MoveFollow(owner, 0.0f, 0.0f);
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void EnterCombat(Unit who) { }
+
+        public override void UpdateAI(uint diff) { }
+
+        public override void ReceiveEmote(Player player, TextEmotes emote)
         {
-            return new npc_pet_gen_mojoAI(creature);
+            me.HandleEmoteCommand((Emote)emote);
+            Unit owner = me.GetOwner();
+            if (emote != TextEmotes.Kiss || !owner || !owner.IsTypeId(TypeId.Player) ||
+                owner.ToPlayer().GetTeam() != player.GetTeam())
+            {
+                return;
+            }
+
+            Talk(SayMojo, player);
+
+            if (!_victimGUID.IsEmpty())
+            {
+                Player victim = Global.ObjAccessor.GetPlayer(me, _victimGUID);
+                if (victim)
+                    victim.RemoveAura(SpellFeelingFroggy);
+            }
+
+            _victimGUID = player.GetGUID();
+
+            DoCast(player, SpellFeelingFroggy, true);
+            DoCast(me, SpellSeductionVisual, true);
+            me.GetMotionMaster().MoveFollow(player, 0.0f, 0.0f);
         }
+
+        ObjectGuid _victimGUID;
+
+        const uint SayMojo = 0;
+        const uint SpellFeelingFroggy = 43906;
+        const uint SpellSeductionVisual = 43919;
     }
 }

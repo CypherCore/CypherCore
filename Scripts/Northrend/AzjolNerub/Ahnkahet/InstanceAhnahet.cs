@@ -23,6 +23,59 @@ using System.Collections.Generic;
 
 namespace Scripts.Northrend.AzjolNerub.Ahnkahet
 {
+    struct DataTypes
+    {
+        // Encounter States/Boss GUIDs
+        public const uint ElderNadox = 0;
+        public const uint PrinceTaldaram = 1;
+        public const uint JedogaShadowseeker = 2;
+        public const uint Amanitar = 3;
+        public const uint HeraldVolazj = 4;
+
+        // Additional Data
+        public const uint Sphere1 = 5;
+        public const uint Sphere2 = 6;
+        public const uint PrinceTaldaramPlatform = 7;
+        public const uint PlJedogaTarget = 8;
+        public const uint AddJedogaVictim = 9;
+        public const uint AddJedogaInitiand = 10;
+        public const uint JedogaTriggerSwitch = 11;
+        public const uint JedogaResetInitiands = 12;
+        public const uint AllInitiandDead = 13;
+    }
+
+    struct AKCreatureIds
+    {
+        public const uint ElderNadox = 29309;
+        public const uint PrinceTaldaram = 29308;
+        public const uint JedogaShadowseeker = 29310;
+        public const uint Amanitar = 30258;
+        public const uint HeraldVolazj = 29311;
+
+        // Elder Nadox
+        public const uint AhnkaharGuardian = 30176;
+        public const uint AhnkaharSwarmer = 30178;
+
+        // Jedoga Shadowseeker
+        public const uint Initiand = 30114;
+        public const uint JedogaController = 30181;
+
+        // Herald Volazj
+        //public const uint TwistedVisage1          = 30621,
+        //public const uint TwistedVisage2          = 30622,
+        //public const uint TwistedVisage3          = 30623,
+        //public const uint TwistedVisage4          = 30624,
+        public const uint TwistedVisage = 30625;
+    }
+
+    struct GameObjectIds
+    {
+        public const uint PrinceTaldaramGate = 192236;
+        public const uint PrinceTaldaramPlatform = 193564;
+        public const uint Sphere1 = 193093;
+        public const uint Sphere2 = 193094;
+    }
+
     [Script]
     class instance_ahnkahet : InstanceMapScript
     {
@@ -151,7 +204,7 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet
                     case DataTypes.Sphere1:
                     case DataTypes.Sphere2:
                         return SpheresState[type - DataTypes.Sphere1];
-                        case DataTypes.AllInitiandDead:
+                    case DataTypes.AllInitiandDead:
                         foreach (ObjectGuid guid in InitiandGUIDs)
                         {
                             Creature cr = instance.GetCreature(guid);
@@ -277,58 +330,5 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet
         {
             return new instance_ahnkahet_InstanceScript(map);
         }
-    }
-
-    struct DataTypes
-    {
-        // Encounter States/Boss GUIDs
-        public const uint ElderNadox = 0;
-        public const uint PrinceTaldaram = 1;
-        public const uint JedogaShadowseeker = 2;
-        public const uint Amanitar = 3;
-        public const uint HeraldVolazj = 4;
-
-        // Additional Data
-        public const uint Sphere1 = 5;
-        public const uint Sphere2 = 6;
-        public const uint PrinceTaldaramPlatform = 7;
-        public const uint PlJedogaTarget = 8;
-        public const uint AddJedogaVictim = 9;
-        public const uint AddJedogaInitiand = 10;
-        public const uint JedogaTriggerSwitch = 11;
-        public const uint JedogaResetInitiands = 12;
-        public const uint AllInitiandDead = 13;
-    }
-
-    struct AKCreatureIds
-    {
-        public const uint ElderNadox = 29309;
-        public const uint PrinceTaldaram = 29308;
-        public const uint JedogaShadowseeker = 29310;
-        public const uint Amanitar = 30258;
-        public const uint HeraldVolazj = 29311;
-
-        // Elder Nadox
-        public const uint AhnkaharGuardian = 30176;
-        public const uint AhnkaharSwarmer = 30178;
-
-        // Jedoga Shadowseeker
-        public const uint Initiand = 30114;
-        public const uint JedogaController = 30181;
-
-        // Herald Volazj
-        //public const uint TwistedVisage1          = 30621,
-        //public const uint TwistedVisage2          = 30622,
-        //public const uint TwistedVisage3          = 30623,
-        //public const uint TwistedVisage4          = 30624,
-        public const uint TwistedVisage = 30625;
-    }
-
-    struct GameObjectIds
-    {
-        public const uint PrinceTaldaramGate = 192236;
-        public const uint PrinceTaldaramPlatform = 193564;
-        public const uint Sphere1 = 193093;
-        public const uint Sphere2 = 193094;
     }
 }

@@ -54,213 +54,184 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.ElderNadox
     }
 
     [Script]
-    class boss_elder_nadox : CreatureScript
+    class boss_elder_nadox : BossAI
     {
-        public boss_elder_nadox() : base("boss_elder_nadox") { }
-
-        class boss_elder_nadoxAI : BossAI
+        public boss_elder_nadox(Creature creature) : base(creature, DataTypes.ElderNadox)
         {
-            public boss_elder_nadoxAI(Creature creature) : base(creature, DataTypes.ElderNadox)
-            {
-                Initialize();
-            }
+            Initialize();
+        }
 
-            void Initialize()
-            {
-                GuardianSummoned = false;
-                GuardianDied = false;
-            }
+        void Initialize()
+        {
+            GuardianSummoned = false;
+            GuardianDied = false;
+        }
 
-            public override void Reset()
-            {
-                _Reset();
-                Initialize();
-            }
+        public override void Reset()
+        {
+            _Reset();
+            Initialize();
+        }
 
-            public override void EnterCombat(Unit who)
-            {
-                _EnterCombat();
-                Talk(TextIds.SayAggro);
+        public override void EnterCombat(Unit who)
+        {
+            _EnterCombat();
+            Talk(TextIds.SayAggro);
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(13), task =>
+            _scheduler.Schedule(TimeSpan.FromSeconds(13), task =>
+            {
+                DoCast(SelectTarget(SelectAggroTarget.Random, 0, 100, true), SpellIds.BroodPlague, true);
+                task.Repeat(TimeSpan.FromSeconds(15));
+            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
+            {
+                /// @todo: summoned by egg
+                DoCast(me, SpellIds.SummonSwarmers);
+                if (RandomHelper.URand(1, 3) == 3) // 33% chance of dialog
+                    Talk(TextIds.SayEggSac);
+                task.Repeat();
+            });
+
+            if (IsHeroic())
+            {
+                _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
                 {
-                    DoCast(SelectTarget(SelectAggroTarget.Random, 0, 100, true), SpellIds.BroodPlague, true);
-                    task.Repeat(TimeSpan.FromSeconds(15));
+                    DoCast(SpellIds.HBroodRage);
+                    task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(50));
                 });
 
-                _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
+                _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
                 {
-                    /// @todo: summoned by egg
-                    DoCast(me, SpellIds.SummonSwarmers);
-                    if (RandomHelper.URand(1, 3) == 3) // 33% chance of dialog
-                        Talk(TextIds.SayEggSac);
+                    if (me.HasAura(SpellIds.Enrage))
+                        return;
+                    if (me.GetPositionZ() < 24.0f)
+                        DoCast(me, SpellIds.Enrage, true);
                     task.Repeat();
                 });
-
-                if (IsHeroic())
-                {
-                    _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
-                    {
-                        DoCast(SpellIds.HBroodRage);
-                        task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(50));
-                    });
-
-                    _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
-                    {
-                        if (me.HasAura(SpellIds.Enrage))
-                            return;
-                        if (me.GetPositionZ() < 24.0f)
-                            DoCast(me, SpellIds.Enrage, true);
-                        task.Repeat();
-                    });
-                }
             }
-
-            public override void SummonedCreatureDies(Creature summon, Unit killer)
-            {
-                if (summon.GetEntry() == AKCreatureIds.AhnkaharGuardian)
-                    GuardianDied = true;
-            }
-
-            public override uint GetData(uint type)
-            {
-                if (type == Misc.DataRespectYourElders)
-                    return !GuardianDied ? 1 : 0u;
-
-                return 0;
-            }
-
-            public override void KilledUnit(Unit who)
-            {
-                if (who.IsTypeId(TypeId.Player))
-                    Talk(TextIds.SaySlay);
-            }
-
-            public override void JustDied(Unit killer)
-            {
-                _JustDied();
-                Talk(TextIds.SayDeath);
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _scheduler.Update(diff);
-
-                if (!GuardianSummoned && me.HealthBelowPct(50))
-                {
-                    /// @todo: summoned by egg
-                    Talk(TextIds.EmoteHatches, me);
-                    DoCast(me, SpellIds.SummonSwarmGuard);
-                    GuardianSummoned = true;
-                }
-
-                DoMeleeAttackIfReady();
-            }
-
-            bool GuardianSummoned;
-            bool GuardianDied;
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void SummonedCreatureDies(Creature summon, Unit killer)
         {
-            return GetInstanceAI<boss_elder_nadoxAI>(creature, "instance_ahnkahet");
+            if (summon.GetEntry() == AKCreatureIds.AhnkaharGuardian)
+                GuardianDied = true;
         }
+
+        public override uint GetData(uint type)
+        {
+            if (type == Misc.DataRespectYourElders)
+                return !GuardianDied ? 1 : 0u;
+
+            return 0;
+        }
+
+        public override void KilledUnit(Unit who)
+        {
+            if (who.IsTypeId(TypeId.Player))
+                Talk(TextIds.SaySlay);
+        }
+
+        public override void JustDied(Unit killer)
+        {
+            _JustDied();
+            Talk(TextIds.SayDeath);
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _scheduler.Update(diff);
+
+            if (!GuardianSummoned && me.HealthBelowPct(50))
+            {
+                /// @todo: summoned by egg
+                Talk(TextIds.EmoteHatches, me);
+                DoCast(me, SpellIds.SummonSwarmGuard);
+                GuardianSummoned = true;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+        bool GuardianSummoned;
+        bool GuardianDied;
     }
 
     [Script]
-    class npc_ahnkahar_nerubian : CreatureScript
+    class npc_ahnkahar_nerubian : ScriptedAI
     {
-        public npc_ahnkahar_nerubian() : base("npc_ahnkahar_nerubian") { }
+        public npc_ahnkahar_nerubian(Creature creature) : base(creature) { }
 
-        class npc_ahnkahar_nerubianAI : ScriptedAI
+        public override void Reset()
         {
-            public npc_ahnkahar_nerubianAI(Creature creature) : base(creature) { }
-
-            public override void Reset()
+            _scheduler.CancelAll();
+            _scheduler.Schedule(TimeSpan.FromSeconds(13), task =>
             {
-                _scheduler.CancelAll();
-                _scheduler.Schedule(TimeSpan.FromSeconds(13), task =>
-                {
-                    DoCast(me, SpellIds.Sprint);
-                    task.Repeat(TimeSpan.FromSeconds(20));
-                });
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-
-                _scheduler.Update(diff);
-
-                DoMeleeAttackIfReady();
-            }
+                DoCast(me, SpellIds.Sprint);
+                task.Repeat(TimeSpan.FromSeconds(20));
+            });
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void UpdateAI(uint diff)
         {
-            return new npc_ahnkahar_nerubianAI(creature);
+            if (!UpdateVictim())
+                return;
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            _scheduler.Update(diff);
+
+            DoMeleeAttackIfReady();
         }
     }
 
     // 56159 - Swarm
     [Script]
-    class spell_ahn_kahet_swarm : SpellScriptLoader
+    class spell_ahn_kahet_swarm : SpellScript
     {
-        public spell_ahn_kahet_swarm() : base("spell_ahn_kahet_swarm") { }
-
-        class spell_ahn_kahet_swarm_SpellScript : SpellScript
+        public spell_ahn_kahet_swarm()
         {
-            public spell_ahn_kahet_swarm_SpellScript()
-            {
-                _targetCount = 0;
-            }
+            _targetCount = 0;
+        }
 
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(SpellIds.SwarmBuff);
-            }
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.SwarmBuff);
+        }
 
-            void CountTargets(List<WorldObject> targets)
-            {
-                _targetCount = targets.Count;
-            }
+        void CountTargets(List<WorldObject> targets)
+        {
+            _targetCount = targets.Count;
+        }
 
-            void HandleDummy(uint effIndex)
+        void HandleDummy(uint effIndex)
+        {
+            if (_targetCount != 0)
             {
-                if (_targetCount != 0)
-                { Aura aura = GetCaster().GetAura(SpellIds.SwarmBuff);
-                    if (aura != null)
-                    {
-                        aura.SetStackAmount((byte)_targetCount);
-                        aura.RefreshDuration();
-                    }
-                    else
-                        GetCaster().CastCustomSpell(SpellIds.SwarmBuff, SpellValueMod.AuraStack, _targetCount, GetCaster(), TriggerCastFlags.FullMask);
+                Aura aura = GetCaster().GetAura(SpellIds.SwarmBuff);
+                if (aura != null)
+                {
+                    aura.SetStackAmount((byte)_targetCount);
+                    aura.RefreshDuration();
                 }
                 else
-                    GetCaster().RemoveAurasDueToSpell(SpellIds.SwarmBuff);
+                    GetCaster().CastCustomSpell(SpellIds.SwarmBuff, SpellValueMod.AuraStack, _targetCount, GetCaster(), TriggerCastFlags.FullMask);
             }
-
-            public override void Register()
-            {
-                OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(CountTargets, 0, Targets.UnitSrcAreaAlly));
-                OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-            }
-
-            int _targetCount;
+            else
+                GetCaster().RemoveAurasDueToSpell(SpellIds.SwarmBuff);
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_ahn_kahet_swarm_SpellScript();
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(CountTargets, 0, Targets.UnitSrcAreaAlly));
+            OnEffectHit.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
+
+        int _targetCount;
     }
 
     [Script]

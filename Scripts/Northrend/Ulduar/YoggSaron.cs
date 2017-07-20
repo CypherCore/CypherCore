@@ -29,7 +29,7 @@ namespace Scripts.Northrend.Ulduar
             new Position(2028.766f,  17.42014f, 411.4446f, 3.857178f),  // Mimiron
         };
         public static Position[] YSKeepersPos =
-        {    
+        {
             new Position(2036.873f,  25.42513f, 338.4984f, 3.909538f),  // Freya            
             new Position(1939.045f, -90.87457f, 338.5426f, 0.994837f),  // Hodir
             new Position(1939.148f,  42.49035f, 338.5427f, 5.235988f),  // Thorim

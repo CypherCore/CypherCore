@@ -155,63 +155,53 @@ namespace Scripts.World.BossEmeraldDragons
     }
 
     [Script]
-    class npc_dream_fog : CreatureScript
+    class npc_dream_fog : ScriptedAI
     {
-        public npc_dream_fog() : base("npc_dream_fog") { }
-
-        class npc_dream_fogAI : ScriptedAI
+        public npc_dream_fog(Creature creature) : base(creature)
         {
-            public npc_dream_fogAI(Creature creature) : base(creature)
-            {
-                Initialize();
-            }
+            Initialize();
+        }
 
-            void Initialize()
-            {
-                _roamTimer = 0;
-            }
+        void Initialize()
+        {
+            _roamTimer = 0;
+        }
 
-            public override void Reset()
-            {
-                Initialize();
-            }
+        public override void Reset()
+        {
+            Initialize();
+        }
 
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
 
-                if (_roamTimer == 0)
+            if (_roamTimer == 0)
+            {
+                // Chase target, but don't attack - otherwise just roam around
+                Unit target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true);
+                if (target)
                 {
-                    // Chase target, but don't attack - otherwise just roam around
-                    Unit target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true);
-                    if (target)
-                    {
-                        _roamTimer = RandomHelper.URand(15000, 30000);
-                        me.GetMotionMaster().Clear(false);
-                        me.GetMotionMaster().MoveChase(target, 0.2f);
-                    }
-                    else
-                    {
-                        _roamTimer = 2500;
-                        me.GetMotionMaster().Clear(false);
-                        me.GetMotionMaster().MoveRandom(25.0f);
-                    }
-                    // Seeping fog movement is slow enough for a player to be able to walk backwards and still outpace it
-                    me.SetWalk(true);
-                    me.SetSpeedRate(UnitMoveType.Walk, 0.75f);
+                    _roamTimer = RandomHelper.URand(15000, 30000);
+                    me.GetMotionMaster().Clear(false);
+                    me.GetMotionMaster().MoveChase(target, 0.2f);
                 }
                 else
-                    _roamTimer -= diff;
+                {
+                    _roamTimer = 2500;
+                    me.GetMotionMaster().Clear(false);
+                    me.GetMotionMaster().MoveRandom(25.0f);
+                }
+                // Seeping fog movement is slow enough for a player to be able to walk backwards and still outpace it
+                me.SetWalk(true);
+                me.SetSpeedRate(UnitMoveType.Walk, 0.75f);
             }
-
-            uint _roamTimer;
+            else
+                _roamTimer -= diff;
         }
 
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return new npc_dream_fogAI(creature);
-        }
+        uint _roamTimer;
     }
 
     [Script]
@@ -334,36 +324,26 @@ namespace Scripts.World.BossEmeraldDragons
     }
 
     [Script]
-    class npc_spirit_shade : CreatureScript
+    class npc_spirit_shade : PassiveAI
     {
-        public npc_spirit_shade() : base("npc_spirit_shade") { }
+        public npc_spirit_shade(Creature creature) : base(creature) { }
 
-        class npc_spirit_shadeAI : PassiveAI
+        public override void IsSummonedBy(Unit summoner)
         {
-            public npc_spirit_shadeAI(Creature creature) : base(creature) { }
-
-            public override void IsSummonedBy(Unit summoner)
-            {
-                _summonerGuid = summoner.GetGUID();
-                me.GetMotionMaster().MoveFollow(summoner, 0.0f, 0.0f);
-            }
-
-            public override void MovementInform(MovementGeneratorType moveType, uint data)
-            {
-                if (moveType == MovementGeneratorType.Follow && data == _summonerGuid.GetCounter())
-                {
-                    me.CastSpell((Unit)null, Spells.DarkOffering, false);
-                    me.DespawnOrUnsummon(1000);
-                }
-            }
-
-            ObjectGuid _summonerGuid;
+            _summonerGuid = summoner.GetGUID();
+            me.GetMotionMaster().MoveFollow(summoner, 0.0f, 0.0f);
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void MovementInform(MovementGeneratorType moveType, uint data)
         {
-            return new npc_spirit_shadeAI(creature);
+            if (moveType == MovementGeneratorType.Follow && data == _summonerGuid.GetCounter())
+            {
+                me.CastSpell((Unit)null, Spells.DarkOffering, false);
+                me.DespawnOrUnsummon(1000);
+            }
         }
+
+        ObjectGuid _summonerGuid;
     }
 
     [Script]
@@ -547,75 +527,55 @@ namespace Scripts.World.BossEmeraldDragons
     }
 
     [Script]
-    class spell_dream_fog_sleep : SpellScriptLoader
+    class spell_dream_fog_sleep : SpellScript
     {
-        public spell_dream_fog_sleep() : base("spell_dream_fog_sleep") { }
-
-        class spell_dream_fog_sleep_SpellScript : SpellScript
+        void FilterTargets(List<WorldObject> targets)
         {
-            void FilterTargets(List<WorldObject> targets)
+            targets.RemoveAll(obj =>
             {
-                targets.RemoveAll(obj =>
-                {
-                    Unit unit = obj.ToUnit();
-                    if (unit)
-                        return unit.HasAura(Spells.Sleep);
-                    return true;
-                });
-            }
-
-            public override void Register()
-            {
-                OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaEnemy));
-            }
+                Unit unit = obj.ToUnit();
+                if (unit)
+                    return unit.HasAura(Spells.Sleep);
+                return true;
+            });
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_dream_fog_sleep_SpellScript();
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaEnemy));
         }
     }
 
     [Script]
-    class spell_mark_of_nature : SpellScriptLoader
+    class spell_mark_of_nature : SpellScript
     {
-        public spell_mark_of_nature() : base("spell_mark_of_nature") { }
-
-        class spell_mark_of_nature_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spellInfo)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(Spells.MarkOfNature, Spells.AuraOfNature);
-            }
-
-            void FilterTargets(List<WorldObject> targets)
-            {
-                targets.RemoveAll(obj =>
-                {
-                    // return those not tagged or already under the influence of Aura of Nature
-                    Unit unit = obj.ToUnit();
-                    if (unit)
-                        return !(unit.HasAura(Spells.MarkOfNature) && !unit.HasAura(Spells.AuraOfNature));
-                    return true;
-                });
-            }
-
-            void HandleEffect(uint effIndex)
-            {
-                PreventHitDefaultEffect(effIndex);
-                GetHitUnit().CastSpell(GetHitUnit(), Spells.AuraOfNature, true);
-            }
-
-            public override void Register()
-            {
-                OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
-                OnEffectHitTarget.Add(new EffectHandler(HandleEffect, 0, SpellEffectName.ApplyAura));
-            }
+            return ValidateSpellInfo(Spells.MarkOfNature, Spells.AuraOfNature);
         }
 
-        public override SpellScript GetSpellScript()
+        void FilterTargets(List<WorldObject> targets)
         {
-            return new spell_mark_of_nature_SpellScript();
+            targets.RemoveAll(obj =>
+            {
+                // return those not tagged or already under the influence of Aura of Nature
+                Unit unit = obj.ToUnit();
+                if (unit)
+                    return !(unit.HasAura(Spells.MarkOfNature) && !unit.HasAura(Spells.AuraOfNature));
+                return true;
+            });
+        }
+
+        void HandleEffect(uint effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+            GetHitUnit().CastSpell(GetHitUnit(), Spells.AuraOfNature, true);
+        }
+
+        public override void Register()
+        {
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
+            OnEffectHitTarget.Add(new EffectHandler(HandleEffect, 0, SpellEffectName.ApplyAura));
         }
     }
 }

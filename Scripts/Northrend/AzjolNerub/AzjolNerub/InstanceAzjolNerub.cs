@@ -22,41 +22,6 @@ using Game.Scripting;
 
 namespace Scripts.Northrend.AzjolNerub.AzjolNerub
 {
-    [Script]
-    class instance_azjol_nerub : InstanceMapScript
-    {
-        public instance_azjol_nerub() : base(nameof(instance_azjol_nerub), 601) { }
-
-        class instance_azjol_nerub_InstanceScript : InstanceScript
-        {
-            public instance_azjol_nerub_InstanceScript(Map map) : base(map)
-            {
-                SetHeaders(ANInstanceMisc.DataHeader);
-                SetBossNumber(ANInstanceMisc.EncounterCount);
-                LoadBossBoundaries(ANInstanceMisc.boundaries);
-                LoadDoorData(ANInstanceMisc.doorData);
-                LoadObjectData(ANInstanceMisc.creatureData, ANInstanceMisc.gameobjectData);
-            }
-
-            public override void OnUnitDeath(Unit who)
-            {
-                base.OnUnitDeath(who);
-                Creature creature = who.ToCreature();
-                if (!creature || creature.IsCritter() || creature.IsControlledByPlayer())
-                    return;
-
-                Creature gatewatcher = GetCreature(ANDataTypes.KrikthirTheGatewatcher);
-                if (gatewatcher)
-                    gatewatcher.GetAI().DoAction(-ANInstanceMisc.ActionGatewatcherGreet);
-            }
-        }
-
-        public override InstanceScript GetInstanceScript(InstanceMap map)
-        {
-            return new instance_azjol_nerub_InstanceScript(map);
-        }
-    }
-
     struct ANDataTypes
     {
         // Encounter States/Boss Guids
@@ -127,5 +92,40 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub
             new BossBoundaryEntry(ANDataTypes.Hadronox, new ZRangeBoundary(666.0f, 776.0f)),
             new BossBoundaryEntry(ANDataTypes.Anubarak, new CircleBoundary(new Position(550.6178f, 253.5917f), 26.0f))
         };
+    }
+
+    [Script]
+    class instance_azjol_nerub : InstanceMapScript
+    {
+        public instance_azjol_nerub() : base(nameof(instance_azjol_nerub), 601) { }
+
+        class instance_azjol_nerub_InstanceScript : InstanceScript
+        {
+            public instance_azjol_nerub_InstanceScript(Map map) : base(map)
+            {
+                SetHeaders(ANInstanceMisc.DataHeader);
+                SetBossNumber(ANInstanceMisc.EncounterCount);
+                LoadBossBoundaries(ANInstanceMisc.boundaries);
+                LoadDoorData(ANInstanceMisc.doorData);
+                LoadObjectData(ANInstanceMisc.creatureData, ANInstanceMisc.gameobjectData);
+            }
+
+            public override void OnUnitDeath(Unit who)
+            {
+                base.OnUnitDeath(who);
+                Creature creature = who.ToCreature();
+                if (!creature || creature.IsCritter() || creature.IsControlledByPlayer())
+                    return;
+
+                Creature gatewatcher = GetCreature(ANDataTypes.KrikthirTheGatewatcher);
+                if (gatewatcher)
+                    gatewatcher.GetAI().DoAction(-ANInstanceMisc.ActionGatewatcherGreet);
+            }
+        }
+
+        public override InstanceScript GetInstanceScript(InstanceMap map)
+        {
+            return new instance_azjol_nerub_InstanceScript(map);
+        }
     }
 }

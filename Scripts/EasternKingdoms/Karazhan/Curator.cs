@@ -34,7 +34,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Curator
     }
 
     struct SpellIds
-    { 
+    {
         //Flare spell info
         public const uint AstralFlarePassive = 30234;               //Visual effect + Flare damage
 
@@ -46,123 +46,113 @@ namespace Scripts.EasternKingdoms.Karazhan.Curator
     }
 
     [Script]
-    class boss_curator : CreatureScript
+    class boss_curator : ScriptedAI
     {
-        public boss_curator() : base("boss_curator") { }
-
-        class boss_curatorAI : ScriptedAI
+        public boss_curator(Creature creature) : base(creature)
         {
-            public boss_curatorAI(Creature creature) : base(creature)
-            {
-                Initialize();
-            }
+            Initialize();
+        }
 
-            void Initialize()
+        void Initialize()
+        {
+            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
             {
-                _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
-                {
                     //Summon Astral Flare
                     Creature AstralFlare = DoSpawnCreature(17096, RandomHelper.Rand32() % 37, RandomHelper.Rand32() % 37, 0, 0, TempSummonType.TimedDespawnOOC, 5000);
-                    Unit target = SelectTarget(SelectAggroTarget.Random, 0);
+                Unit target = SelectTarget(SelectAggroTarget.Random, 0);
 
-                    if (AstralFlare && target)
-                    {
-                        AstralFlare.CastSpell(AstralFlare, SpellIds.AstralFlarePassive, false);
-                        AstralFlare.GetAI().AttackStart(target);
-                    }
+                if (AstralFlare && target)
+                {
+                    AstralFlare.CastSpell(AstralFlare, SpellIds.AstralFlarePassive, false);
+                    AstralFlare.GetAI().AttackStart(target);
+                }
 
                     //Reduce Mana by 10% of max health
                     int mana = me.GetMaxPower(PowerType.Mana);
-                    if (mana != 0)
-                    {
-                        mana /= 10;
-                        me.ModifyPower(PowerType.Mana, -mana);
+                if (mana != 0)
+                {
+                    mana /= 10;
+                    me.ModifyPower(PowerType.Mana, -mana);
 
                         //if this get's us below 10%, then we evocate (the 10th should be summoned now)
                         if (me.GetPower(PowerType.Mana) * 100 / me.GetMaxPower(PowerType.Mana) < 10)
-                        {
-                            Talk(TextIds.SayEvocate);
-                            me.InterruptNonMeleeSpells(false);
-                            DoCast(me, SpellIds.Evocation);
-                            _scheduler.DelayAll(TimeSpan.FromSeconds(20));
+                    {
+                        Talk(TextIds.SayEvocate);
+                        me.InterruptNonMeleeSpells(false);
+                        DoCast(me, SpellIds.Evocation);
+                        _scheduler.DelayAll(TimeSpan.FromSeconds(20));
                             //Evocating = true;
                             //no AddTimer cooldown, this will make first flare appear instantly after evocate end, like expected
                             return;
-                        }
-                        else
-                        {
-                            if (RandomHelper.URand(0, 1) == 0)
-                            {
-                                Talk(TextIds.SaySummon);
-                            }
-                        }
                     }
-
-                    task.Repeat();
-                });
-
-                _scheduler.Schedule(TimeSpan.FromSeconds(15), task =>
-                {
-                    if (Enraged)
-                        task.Repeat(TimeSpan.FromSeconds(7));
                     else
-                        task.Repeat();
-
-                    Unit target = SelectTarget(SelectAggroTarget.TopAggro, 1);
-                    if (target)
-                        DoCast(target, SpellIds.HatefulBolt);
-                });
-
-                Enraged = false;
-            }
-
-            public override void Reset()
-            {
-                Initialize();
-
-                me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Arcane, true);
-            }
-
-            public override void KilledUnit(Unit victim)
-            {
-                Talk(TextIds.SayKill);
-            }
-
-            public override void JustDied(Unit killer)
-            {
-                Talk(TextIds.SayDeath);
-            }
-
-            public override void EnterCombat(Unit victim)
-            {
-                Talk(TextIds.SayAggro);
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _scheduler.Update(diff);
-
-                if (!Enraged)
-                {
-                    if (!HealthAbovePct(15))
                     {
-                        Enraged = true;
-                        DoCast(me, SpellIds.Enrage);
-                        Talk(TextIds.SayEnrage);
+                        if (RandomHelper.URand(0, 1) == 0)
+                        {
+                            Talk(TextIds.SaySummon);
+                        }
                     }
                 }
 
+                task.Repeat();
+            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(15), task =>
+            {
+                if (Enraged)
+                    task.Repeat(TimeSpan.FromSeconds(7));
+                else
+                    task.Repeat();
+
+                Unit target = SelectTarget(SelectAggroTarget.TopAggro, 1);
+                if (target)
+                    DoCast(target, SpellIds.HatefulBolt);
+            });
+
+            Enraged = false;
+        }
+
+        public override void Reset()
+        {
+            Initialize();
+
+            me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Arcane, true);
+        }
+
+        public override void KilledUnit(Unit victim)
+        {
+            Talk(TextIds.SayKill);
+        }
+
+        public override void JustDied(Unit killer)
+        {
+            Talk(TextIds.SayDeath);
+        }
+
+        public override void EnterCombat(Unit victim)
+        {
+            Talk(TextIds.SayAggro);
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _scheduler.Update(diff);
+
+            if (!Enraged)
+            {
+                if (!HealthAbovePct(15))
+                {
+                    Enraged = true;
+                    DoCast(me, SpellIds.Enrage);
+                    Talk(TextIds.SayEnrage);
+                }
             }
 
-            bool Enraged;
         }
 
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return new boss_curatorAI(creature);
-        }
+        bool Enraged;
     }
 }

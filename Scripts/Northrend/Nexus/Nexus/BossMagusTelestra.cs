@@ -55,252 +55,242 @@ namespace Scripts.Northrend.Nexus.Nexus
     }
 
     [Script]
-    class boss_magus_telestra : CreatureScript
+    class boss_magus_telestra : ScriptedAI
     {
-        public boss_magus_telestra() : base("boss_magus_telestra") { }
-
-        class boss_magus_telestraAI : ScriptedAI
+        public boss_magus_telestra(Creature creature) : base(creature)
         {
-            public boss_magus_telestraAI(Creature creature) : base(creature)
+            instance = creature.GetInstanceScript();
+            bFireMagusDead = false;
+            bFrostMagusDead = false;
+            bArcaneMagusDead = false;
+            uiIsWaitingToAppearTimer = 0;
+        }
+
+        void Initialize()
+        {
+            Phase = 0;
+
+            uiIceNovaTimer = 7 * Time.InMilliseconds;
+            uiFireBombTimer = 0;
+            uiGravityWellTimer = 15 * Time.InMilliseconds;
+            uiCooldown = 0;
+
+            for (byte n = 0; n < 3; ++n)
+                time[n] = 0;
+
+            splitPersonality = 0;
+            bIsWaitingToAppear = false;
+        }
+
+        public override void Reset()
+        {
+            Initialize();
+
+            me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+
+            instance.SetBossState(DataTypes.MagusTelestra, EncounterState.NotStarted);
+
+            if (IsHeroic() && Global.GameEventMgr.IsActiveEvent(MagusTelestraConst.GameEventWinterVeil) && !me.HasAura(MagusTelestraConst.SpellWearChristmasHat))
+                me.AddAura(MagusTelestraConst.SpellWearChristmasHat, me);
+        }
+
+        public override void EnterCombat(Unit who)
+        {
+            Talk(MagusTelestraConst.SayAggro);
+
+            instance.SetBossState(DataTypes.MagusTelestra, EncounterState.InProgress);
+        }
+
+        public override void JustDied(Unit killer)
+        {
+            Talk(MagusTelestraConst.SayDeath);
+
+            instance.SetBossState(DataTypes.MagusTelestra, EncounterState.Done);
+        }
+
+        public override void KilledUnit(Unit who)
+        {
+            if (who.IsTypeId(TypeId.Player))
+                Talk(MagusTelestraConst.SayKill);
+        }
+
+        public override uint GetData(uint type)
+        {
+            if (type == MagusTelestraConst.DataSplitPersonality)
+                return splitPersonality;
+
+            return 0;
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            //Return since we have no target
+            if (!UpdateVictim())
+                return;
+
+            if (bIsWaitingToAppear)
             {
-                instance = creature.GetInstanceScript();
+                me.StopMoving();
+                me.AttackStop();
+                if (uiIsWaitingToAppearTimer <= diff)
+                {
+                    me.CastSpell(me, 47714, true);
+                    me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+                    bIsWaitingToAppear = false;
+                    InVanish = false;
+                    me.SendAIReaction(AiReaction.Hostile);
+                }
+                else
+                    uiIsWaitingToAppearTimer -= diff;
+
+                return;
+            }
+
+            if ((Phase == 1) || (Phase == 3))
+            {
+                if (bFireMagusDead && bFrostMagusDead && bArcaneMagusDead)
+                {
+                    for (byte n = 0; n < 3; ++n)
+                        time[n] = 0;
+
+                    me.GetMotionMaster().Clear();
+                    DoCast(me, MagusTelestraConst.SpellTelestraBack);
+                    if (Phase == 1)
+                        Phase = 2;
+                    if (Phase == 3)
+                        Phase = 4;
+                    bIsWaitingToAppear = true;
+                    uiIsWaitingToAppearTimer = 4 * Time.InMilliseconds;
+                    Talk(MagusTelestraConst.SayMerge);
+                }
+                else
+                    return;
+            }
+
+            if ((Phase == 0) && HealthBelowPct(50))
+            {
+                InVanish = true;
+                Phase = 1;
+                me.CastStop();
+                me.RemoveAllAuras();
+                me.CastSpell(me, 47710, false);
+                me.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable);
                 bFireMagusDead = false;
                 bFrostMagusDead = false;
                 bArcaneMagusDead = false;
-                uiIsWaitingToAppearTimer = 0;
+                Talk(MagusTelestraConst.SaySplit);
+                return;
             }
 
-            void Initialize()
+            if (IsHeroic() && (Phase == 2) && HealthBelowPct(10))
             {
-                Phase = 0;
+                InVanish = true;
+                Phase = 3;
+                me.CastStop();
+                me.RemoveAllAuras();
+                me.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+                bFireMagusDead = false;
+                bFrostMagusDead = false;
+                bArcaneMagusDead = false;
+                Talk(MagusTelestraConst.SaySplit);
+                return;
+            }
 
-                uiIceNovaTimer = 7 * Time.InMilliseconds;
-                uiFireBombTimer = 0;
+            if (uiCooldown != 0)
+            {
+                if (uiCooldown <= diff)
+                    uiCooldown = 0;
+                else
+                {
+                    uiCooldown -= diff;
+                    return;
+                }
+            }
+
+            if (uiIceNovaTimer <= diff)
+            {
+                Unit target = SelectTarget(SelectAggroTarget.Random, 0);
+                if (target)
+                {
+                    DoCast(target, MagusTelestraConst.SpellIceNova, false);
+                    uiCooldown = 1500;
+                }
+                uiIceNovaTimer = 15 * Time.InMilliseconds;
+            }
+            else uiIceNovaTimer -= diff;
+
+            if (uiGravityWellTimer <= diff)
+            {
+                Unit target = me.GetVictim();
+                if (target)
+                {
+                    DoCast(target, MagusTelestraConst.SpellGravityWell);
+                    uiCooldown = 6 * Time.InMilliseconds;
+                }
                 uiGravityWellTimer = 15 * Time.InMilliseconds;
-                uiCooldown = 0;
-
-                for (byte n = 0; n < 3; ++n)
-                    time[n] = 0;
-
-                splitPersonality = 0;
-                bIsWaitingToAppear = false;
             }
+            else uiGravityWellTimer -= diff;
 
-            public override void Reset()
+            if (uiFireBombTimer <= diff)
             {
-                Initialize();
-
-                me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
-
-                instance.SetBossState(DataTypes.MagusTelestra, EncounterState.NotStarted);
-
-                if (IsHeroic() && Global.GameEventMgr.IsActiveEvent(MagusTelestraConst.GameEventWinterVeil) && !me.HasAura(MagusTelestraConst.SpellWearChristmasHat))
-                    me.AddAura(MagusTelestraConst.SpellWearChristmasHat, me);
+                Unit target = SelectTarget(SelectAggroTarget.Random, 0);
+                if (target)
+                {
+                    DoCast(target, MagusTelestraConst.SpellFirebomb, false);
+                    uiCooldown = 2 * Time.InMilliseconds;
+                }
+                uiFireBombTimer = 2 * Time.InMilliseconds;
             }
+            else uiFireBombTimer -= diff;
 
-            public override void EnterCombat(Unit who)
-            {
-                Talk(MagusTelestraConst.SayAggro);
-
-                instance.SetBossState(DataTypes.MagusTelestra, EncounterState.InProgress);
-            }
-
-            public override void JustDied(Unit killer)
-            {
-                Talk(MagusTelestraConst.SayDeath);
-
-                instance.SetBossState(DataTypes.MagusTelestra, EncounterState.Done);
-            }
-
-            public override void KilledUnit(Unit who)
-            {
-                if (who.IsTypeId(TypeId.Player))
-                    Talk(MagusTelestraConst.SayKill);
-            }
-
-            public override uint GetData(uint type)
-            {
-                if (type == MagusTelestraConst.DataSplitPersonality)
-                    return splitPersonality;
-
-                return 0;
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                //Return since we have no target
-                if (!UpdateVictim())
-                    return;
-
-                if (bIsWaitingToAppear)
-                {
-                    me.StopMoving();
-                    me.AttackStop();
-                    if (uiIsWaitingToAppearTimer <= diff)
-                    {
-                        me.CastSpell(me, 47714, true);
-                        me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
-                        bIsWaitingToAppear = false;
-                        InVanish = false;
-                        me.SendAIReaction(AiReaction.Hostile);
-                    }
-                    else
-                        uiIsWaitingToAppearTimer -= diff;
-
-                    return;
-                }
-
-                if ((Phase == 1) || (Phase == 3))
-                {
-                    if (bFireMagusDead && bFrostMagusDead && bArcaneMagusDead)
-                    {
-                        for (byte n = 0; n < 3; ++n)
-                            time[n] = 0;
-
-                        me.GetMotionMaster().Clear();
-                        DoCast(me, MagusTelestraConst.SpellTelestraBack);
-                        if (Phase == 1)
-                            Phase = 2;
-                        if (Phase == 3)
-                            Phase = 4;
-                        bIsWaitingToAppear = true;
-                        uiIsWaitingToAppearTimer = 4 * Time.InMilliseconds;
-                        Talk(MagusTelestraConst.SayMerge);
-                    }
-                    else
-                        return;
-                }
-
-                if ((Phase == 0) && HealthBelowPct(50))
-                {
-                    InVanish = true;
-                    Phase = 1;
-                    me.CastStop();
-                    me.RemoveAllAuras();
-                    me.CastSpell(me, 47710, false);
-                    me.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable);
-                    bFireMagusDead = false;
-                    bFrostMagusDead = false;
-                    bArcaneMagusDead = false;
-                    Talk(MagusTelestraConst.SaySplit);
-                    return;
-                }
-
-                if (IsHeroic() && (Phase == 2) && HealthBelowPct(10))
-                {
-                    InVanish = true;
-                    Phase = 3;
-                    me.CastStop();
-                    me.RemoveAllAuras();
-                    me.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable);
-                    bFireMagusDead = false;
-                    bFrostMagusDead = false;
-                    bArcaneMagusDead = false;
-                    Talk(MagusTelestraConst.SaySplit);
-                    return;
-                }
-
-                if (uiCooldown != 0)
-                {
-                    if (uiCooldown <= diff)
-                        uiCooldown = 0;
-                    else
-                    {
-                        uiCooldown -= diff;
-                        return;
-                    }
-                }
-
-                if (uiIceNovaTimer <= diff)
-                {
-                    Unit target = SelectTarget(SelectAggroTarget.Random, 0);
-                    if (target)
-                    {
-                        DoCast(target, MagusTelestraConst.SpellIceNova, false);
-                        uiCooldown = 1500;
-                    }
-                    uiIceNovaTimer = 15 * Time.InMilliseconds;
-                }
-                else uiIceNovaTimer -= diff;
-
-                if (uiGravityWellTimer <= diff)
-                {
-                    Unit target = me.GetVictim();
-                    if (target)
-                    {
-                        DoCast(target, MagusTelestraConst.SpellGravityWell);
-                        uiCooldown = 6 * Time.InMilliseconds;
-                    }
-                    uiGravityWellTimer = 15 * Time.InMilliseconds;
-                }
-                else uiGravityWellTimer -= diff;
-
-                if (uiFireBombTimer <= diff)
-                {
-                    Unit target = SelectTarget(SelectAggroTarget.Random, 0);
-                    if (target)
-                    {
-                        DoCast(target, MagusTelestraConst.SpellFirebomb, false);
-                        uiCooldown = 2 * Time.InMilliseconds;
-                    }
-                    uiFireBombTimer = 2 * Time.InMilliseconds;
-                }
-                else uiFireBombTimer -= diff;
-
-                if (!InVanish)
-                    DoMeleeAttackIfReady();
-            }
-
-            public override void SummonedCreatureDies(Creature summon, Unit killer)
-            {
-                if (summon.IsAlive())
-                    return;
-
-                switch (summon.GetEntry())
-                {
-                    case MagusTelestraConst.NpcFireMagus:
-                        bFireMagusDead = true;
-                        break;
-                    case MagusTelestraConst.NpcFrostMagus:
-                        bFrostMagusDead = true;
-                        break;
-                    case MagusTelestraConst.NpcArcaneMagus:
-                        bArcaneMagusDead = true;
-                        break;
-                }
-
-                byte i = 0;
-                while (time[i] != 0)
-                    ++i;
-
-                time[i] = Global.WorldMgr.GetGameTime();
-                if (i == 2 && (time[2] - time[1] < 5) && (time[1] - time[0] < 5))
-                    ++splitPersonality;
-            }
-
-            InstanceScript instance;
-
-            bool bFireMagusDead;
-            bool bFrostMagusDead;
-            bool bArcaneMagusDead;
-            bool bIsWaitingToAppear;
-            bool InVanish;
-
-            uint uiIsWaitingToAppearTimer;
-            uint uiIceNovaTimer;
-            uint uiFireBombTimer;
-            uint uiGravityWellTimer;
-            uint uiCooldown;
-
-            byte Phase;
-            byte splitPersonality;
-            long[] time = new long[3];
+            if (!InVanish)
+                DoMeleeAttackIfReady();
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void SummonedCreatureDies(Creature summon, Unit killer)
         {
-            return GetInstanceAI<boss_magus_telestraAI>(creature);
+            if (summon.IsAlive())
+                return;
+
+            switch (summon.GetEntry())
+            {
+                case MagusTelestraConst.NpcFireMagus:
+                    bFireMagusDead = true;
+                    break;
+                case MagusTelestraConst.NpcFrostMagus:
+                    bFrostMagusDead = true;
+                    break;
+                case MagusTelestraConst.NpcArcaneMagus:
+                    bArcaneMagusDead = true;
+                    break;
+            }
+
+            byte i = 0;
+            while (time[i] != 0)
+                ++i;
+
+            time[i] = Global.WorldMgr.GetGameTime();
+            if (i == 2 && (time[2] - time[1] < 5) && (time[1] - time[0] < 5))
+                ++splitPersonality;
         }
+
+        InstanceScript instance;
+
+        bool bFireMagusDead;
+        bool bFrostMagusDead;
+        bool bArcaneMagusDead;
+        bool bIsWaitingToAppear;
+        bool InVanish;
+
+        uint uiIsWaitingToAppearTimer;
+        uint uiIceNovaTimer;
+        uint uiFireBombTimer;
+        uint uiGravityWellTimer;
+        uint uiCooldown;
+
+        byte Phase;
+        byte splitPersonality;
+        long[] time = new long[3];
     }
 
     [Script]
@@ -325,25 +315,15 @@ namespace Scripts.Northrend.Nexus.Nexus
     }
 
     [Script]
-    class spell_gravity_well_effect : SpellScriptLoader
+    class spell_gravity_well_effect : SpellScript
     {
-        public spell_gravity_well_effect() : base("spell_gravity_well_effect") { }
-
-        class spell_gravity_well_effect_SpellScript : SpellScript
+        void HandleDummy(uint index)
         {
-            void HandleDummy(uint index)
-            {
 
-            }
-
-            public override void Register()
-            {
-            }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_gravity_well_effect_SpellScript();
         }
     }
 }

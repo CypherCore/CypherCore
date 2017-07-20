@@ -223,7 +223,8 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
                                     if (summon)
                                         AggroAllPlayers(summon);
                                 }
-                            } else if (uiLesserChampions == 9)
+                            }
+                            else if (uiLesserChampions == 9)
                                 StartGrandChampionsAttack();
 
                             break;
@@ -542,11 +543,6 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
             Position SpawnPosition = new Position(746.261f, 657.401f, 411.681f, 4.65f);
         }
 
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<npc_announcer_toc5AI>(creature);
-        }
-
         public override bool OnGossipHello(Player player, Creature creature)
         {
             InstanceScript instance = creature.GetInstanceScript();
@@ -582,6 +578,11 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
             }
 
             return true;
+        }
+
+        public override CreatureAI GetAI(Creature creature)
+        {
+            return instance_trial_of_the_champion.GetTrialOfTheChampionAI<npc_announcer_toc5AI>(creature);
         }
     }
 }

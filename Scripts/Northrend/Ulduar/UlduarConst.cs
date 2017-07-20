@@ -377,6 +377,12 @@ namespace Scripts.Northrend.Ulduar
         public const uint UniverseGlobe = 55;
         public const uint AlgalonTrapdoor = 56;
         public const uint BrannBronzebeardAlg = 57;
+
+        // Misc
+        public const uint BrannBronzebeardIntro = 58;
+        public const uint LoreKeeperOfNorgannon = 59;
+        public const uint Dellorah = 60;
+        public const uint BronzebeardRadio = 61;
     }
 
     struct InstanceWorldStates

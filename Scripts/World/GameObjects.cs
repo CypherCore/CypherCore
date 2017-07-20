@@ -313,7 +313,7 @@ namespace Scripts.World
                 {
                     FactionTemplateRecord pFaction = creature.GetFactionTemplateEntry();
                     if (pFaction != null)
-                {
+                    {
                         uint Spell = 0;
 
                         switch (pFaction.Faction)
@@ -736,11 +736,6 @@ namespace Scripts.World
                     return true;
                 return false;
             }
-        }
-
-        public override GameObjectAI GetAI(GameObject go)
-        {
-            return new go_soulwellAI(go);
         }
     }
 

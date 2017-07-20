@@ -54,7 +54,7 @@ namespace Game.Scripting
 
             Log.outInfo(LogFilter.ServerLoading, "Loading C# scripts");
 
-            FillSpellSummary();
+            //FillSpellSummary();
 
             if (LoadScripts())
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} C# scripts in {1} ms", GetScriptCount(), Time.GetMSTimeDiffToNow(oldMSTime));
@@ -103,12 +103,62 @@ namespace Game.Scripting
 
                     foreach (var attribute in attributes)
                     {
-                        if (!constructors.Any(p => p.GetParameters().Length == attribute.Args.Length))
+                        var genericType = type;
+                        string name = type.Name;
+
+                        switch (type.BaseType.Name)
                         {
-                            Log.outError(LogFilter.Scripts, "Type: {0} has ScriptAttribute that does not match paramter count: {1} Can't load script.", type.Name, attribute.Args.Length);
-                            continue;
+                            case "SpellScript":
+                                genericType = typeof(GenericSpellScriptLoader<>).MakeGenericType(type);
+                                name = name.Replace("_SpellScript", "");
+                                break;
+                            case "AuraScript":
+                                genericType = typeof(GenericAuraScriptLoader<>).MakeGenericType(type);
+                                name = name.Replace("_AuraScript", "");
+                                break;
+                            case "SpellScriptLoader":
+                            case "AuraScriptLoader":
+                            case "WorldScript":
+                            case "FormulaScript":
+                            case "WorldMapScript":
+                            case "InstanceMapScript":
+                            case "BattlegroundMapScript":
+                            case "ItemScript":
+                            case "UnitScript":
+                            case "CreatureScript":
+                            case "GameObjectScript":
+                            case "AreaTriggerScript":
+                            case "OutdoorPvPScript":
+                            case "WeatherScript":
+                            case "AuctionHouseScript":
+                            case "ConditionScript":
+                            case "VehicleScript":
+                            case "DynamicObjectScript":
+                            case "TransportScript":
+                            case "AchievementCriteriaScript":
+                            case "PlayerScript":
+                            case "GuildScript":
+                            case "GroupScript":
+                            case "AreaTriggerEntityScript":
+                            case "SceneScript":
+                                if (!attribute.Name.IsEmpty())
+                                    name = attribute.Name;
+
+                                if (attribute.Args.Empty())
+                                    Activator.CreateInstance(genericType);
+                                else
+                                    Activator.CreateInstance(genericType, new object[] { name }.Combine(attribute.Args));
+
+                                continue;
+                            default:
+                                genericType = typeof(GenericCreatureScript<>).MakeGenericType(type);
+                                break;
                         }
-                        Activator.CreateInstance(type, attribute.Args);
+
+                        if (!attribute.Name.IsEmpty())
+                            name = attribute.Name;
+
+                        Activator.CreateInstance(genericType, name, attribute.Args);
                     }
                 }
             }
@@ -389,7 +439,7 @@ namespace Game.Scripting
             var scriptList = new List<AuraScript>();
             var bounds = Global.ObjectMgr.GetSpellScriptsBounds(spellId);
 
-            var reg = GetScriptRegistry<SpellScriptLoader>();
+            var reg = GetScriptRegistry<AuraScriptLoader>();
             if (reg == null)
                 return scriptList;
 
@@ -418,6 +468,26 @@ namespace Game.Scripting
             var bounds = Global.ObjectMgr.GetSpellScriptsBounds(spellId);
 
             var reg = GetScriptRegistry<SpellScriptLoader>();
+            if (reg == null)
+                return scriptDic;
+
+            foreach (var id in bounds)
+            {
+                var tmpscript = reg.GetScriptById(id);
+                if (tmpscript == null)
+                    continue;
+
+                scriptDic.Add(tmpscript, id);
+            }
+
+            return scriptDic;
+        }
+        public Dictionary<AuraScriptLoader, uint> CreateAuraScriptLoaders(uint spellId)
+        {
+            var scriptDic = new Dictionary<AuraScriptLoader, uint>();
+            var bounds = Global.ObjectMgr.GetSpellScriptsBounds(spellId);
+
+            var reg = GetScriptRegistry<AuraScriptLoader>();
             if (reg == null)
                 return scriptDic;
 
@@ -1299,7 +1369,7 @@ namespace Game.Scripting
             return m_mPointMoveMap.LookupByKey(creatureEntry);
         }
 
-        ScriptRegistry<T> GetScriptRegistry<T>() where T : ScriptObject
+        public ScriptRegistry<T> GetScriptRegistry<T>() where T : ScriptObject
         {
             if (ScriptStorage.ContainsKey(typeof(T)))
                 return (ScriptRegistry<T>)ScriptStorage[typeof(T)];
@@ -1312,8 +1382,8 @@ namespace Game.Scripting
         Hashtable ScriptStorage = new Hashtable();
 
         MultiMap<uint, ScriptPointMove> m_mPointMoveMap = new MultiMap<uint, ScriptPointMove>();
-
-             // creature entry + chain ID
+        
+        // creature entry + chain ID
         MultiMap<Tuple<uint, ushort>, SplineChainLink> m_mSplineChainsMap = new MultiMap<Tuple<uint, ushort>, SplineChainLink>(); // spline chains
     }
 
@@ -1415,11 +1485,15 @@ namespace Game.Scripting
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class ScriptAttribute : Attribute
     {
-        public ScriptAttribute(params object[] args)
+        //public ScriptAttribute() { }
+
+        public ScriptAttribute(string name="", params object[] args)
         {
+            Name = name;
             Args = args;
         }
 
+        public string Name { get; private set; }
         public object[] Args { get; private set; }
     }
 }

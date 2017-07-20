@@ -770,6 +770,12 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
         {
             return new instance_trial_of_the_crusader_InstanceMapScript(map);
         }
+
+        public static T GetTrialOfTheCrusaderAI<T>(Creature creature) where T : CreatureAI
+        {
+            return GetInstanceAI<T>(creature, "instance_trial_of_the_crusader");
+        }
+
     }
 
     [Script]
@@ -779,9 +785,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
 
         class npc_announcer_toc10AI : ScriptedAI
         {
-            public npc_announcer_toc10AI(Creature creature) : base(creature)
-            {
-            }
+            public npc_announcer_toc10AI(Creature creature) : base(creature) { }
 
             public override void Reset()
             {
@@ -895,825 +899,775 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
 
         public override CreatureAI GetAI(Creature creature)
         {
-            return new npc_announcer_toc10AI(creature);
+            return instance_trial_of_the_crusader.GetTrialOfTheCrusaderAI<npc_announcer_toc10AI>(creature);
         }
     }
 
     [Script]
-    class boss_lich_king_toc : CreatureScript
+    class boss_lich_king_toc : ScriptedAI
     {
-        public boss_lich_king_toc() : base("boss_lich_king_toc") { }
-
-        class boss_lich_king_tocAI : ScriptedAI
+        public boss_lich_king_toc(Creature creature) : base(creature)
         {
-            public boss_lich_king_tocAI(Creature creature) : base(creature)
+            _instance = creature.GetInstanceScript();
+        }
+
+        public override void Reset()
+        {
+            _updateTimer = 0;
+            me.SetReactState(ReactStates.Passive);
+            Creature summoned = me.SummonCreature(CreatureIds.Trigger, MiscData.ToCCommonLoc[2].GetPositionX(), MiscData.ToCCommonLoc[2].GetPositionY(), MiscData.ToCCommonLoc[2].GetPositionZ(), 5, TempSummonType.TimedDespawn, 1 * Time.Minute * Time.InMilliseconds);
+            if (summoned)
             {
-                _instance = creature.GetInstanceScript();
+                summoned.CastSpell(summoned, 51807, false);
+                summoned.SetDisplayId(summoned.GetCreatureTemplate().ModelId2);
             }
 
-            public override void Reset()
-            {
-                _updateTimer = 0;
-                me.SetReactState(ReactStates.Passive);
-                Creature summoned = me.SummonCreature(CreatureIds.Trigger, MiscData.ToCCommonLoc[2].GetPositionX(), MiscData.ToCCommonLoc[2].GetPositionY(), MiscData.ToCCommonLoc[2].GetPositionZ(), 5, TempSummonType.TimedDespawn, 1 * Time.Minute * Time.InMilliseconds);
-                if (summoned)
-                {
-                    summoned.CastSpell(summoned, 51807, false);
-                    summoned.SetDisplayId(summoned.GetCreatureTemplate().ModelId2);
-                }
+            _instance.SetBossState(DataTypes.BossLichKing, EncounterState.InProgress);
+            me.SetWalk(true);
+        }
 
-                _instance.SetBossState(DataTypes.BossLichKing, EncounterState.InProgress);
-                me.SetWalk(true);
+        public override void MovementInform(MovementGeneratorType type, uint id)
+        {
+            if (type != MovementGeneratorType.Point || _instance == null)
+                return;
+
+            switch (id)
+            {
+                case 0:
+                    _instance.SetData(DataTypes.TypeEvent, 5030);
+                    break;
+                case 1:
+                    _instance.SetData(DataTypes.TypeEvent, 5050);
+                    break;
+                default:
+                    break;
             }
+        }
 
-            public override void MovementInform(MovementGeneratorType type, uint id)
+        public override void UpdateAI(uint uiDiff)
+        {
+            if (_instance == null)
+                return;
+
+            if (_instance.GetData(DataTypes.TypeEventNpc) != CreatureIds.LichKing)
+                return;
+
+            _updateTimer = _instance.GetData(DataTypes.TypeEventTimer);
+            if (_updateTimer <= uiDiff)
             {
-                if (type != MovementGeneratorType.Point || _instance == null)
-                    return;
-
-                switch (id)
+                switch (_instance.GetData(DataTypes.TypeEvent))
                 {
-                    case 0:
-                        _instance.SetData(DataTypes.TypeEvent, 5030);
+                    case 5010:
+                        Talk(Texts.Stage_4_02);
+                        _updateTimer = 3 * Time.InMilliseconds;
+                        me.GetMotionMaster().MovePoint(0, MiscData.LichKingLoc[0]);
+                        _instance.SetData(DataTypes.TypeEvent, 5020);
                         break;
-                    case 1:
-                        _instance.SetData(DataTypes.TypeEvent, 5050);
+                    case 5030:
+                        Talk(Texts.Stage_4_04);
+                        me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.StateTalk);
+                        _updateTimer = 10 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 5040);
                         break;
+                    case 5040:
+                        me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotNone);
+                        me.GetMotionMaster().MovePoint(1, MiscData.LichKingLoc[1]);
+                        _updateTimer = 1 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 0);
+                        break;
+                    case 5050:
+                        me.HandleEmoteCommand(Emote.OneshotExclamation);
+                        _updateTimer = 3 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 5060);
+                        break;
+                    case 5060:
+                        Talk(Texts.Stage_4_05);
+                        me.HandleEmoteCommand(Emote.OneshotKneel);
+                        _updateTimer = (uint)(2.5 * Time.InMilliseconds);
+                        _instance.SetData(DataTypes.TypeEvent, 5070);
+                        break;
+                    case 5070:
+                        me.CastSpell(me, 68198, false);
+                        _updateTimer = (uint)(1.5 * Time.InMilliseconds);
+                        _instance.SetData(DataTypes.TypeEvent, 5080);
+                        break;
+                    case 5080:
+                        {
+                            GameObject go = ObjectAccessor.GetGameObject(me, _instance.GetGuidData(GameObjectIds.ArgentColiseumFloor));
+                            if (go)
+                            {
+                                go.SetDisplayId(MiscData.DisplayIdDestroyedFloor);
+                                go.SetFlag(GameObjectFields.Flags, GameObjectFlags.Damaged | GameObjectFlags.NoDespawn);
+                                go.SetGoState(GameObjectState.Active);
+                            }
+
+                            me.CastSpell(me, Spells.CorpseTeleport, false);
+                            me.CastSpell(me, Spells.DestroyFloorKnockup, false);
+
+                            _instance.SetBossState(DataTypes.BossLichKing, EncounterState.Done);
+                            Creature temp = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.Anubarak));
+                            if (!temp || !temp.IsAlive())
+                                temp = me.SummonCreature(CreatureIds.Anubarak, MiscData.AnubarakLoc[0].GetPositionX(), MiscData.AnubarakLoc[0].GetPositionY(), MiscData.AnubarakLoc[0].GetPositionZ(), 3, TempSummonType.CorpseTimedDespawn, MiscData.DespawnTime);
+
+                            _instance.SetData(DataTypes.TypeEvent, 0);
+
+                            me.DespawnOrUnsummon();
+                            _updateTimer = 20 * Time.InMilliseconds;
+                            break;
+                        }
                     default:
                         break;
                 }
             }
+            else
+                _updateTimer -= uiDiff;
 
-            public override void UpdateAI(uint uiDiff)
-            {
-                if (_instance == null)
-                    return;
-
-                if (_instance.GetData(DataTypes.TypeEventNpc) != CreatureIds.LichKing)
-                    return;
-
-                _updateTimer = _instance.GetData(DataTypes.TypeEventTimer);
-                if (_updateTimer <= uiDiff)
-                {
-                    switch (_instance.GetData(DataTypes.TypeEvent))
-                    {
-                        case 5010:
-                            Talk(Texts.Stage_4_02);
-                            _updateTimer = 3 * Time.InMilliseconds;
-                            me.GetMotionMaster().MovePoint(0, MiscData.LichKingLoc[0]);
-                            _instance.SetData(DataTypes.TypeEvent, 5020);
-                            break;
-                        case 5030:
-                            Talk(Texts.Stage_4_04);
-                            me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.StateTalk);
-                            _updateTimer = 10 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 5040);
-                            break;
-                        case 5040:
-                            me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotNone);
-                            me.GetMotionMaster().MovePoint(1, MiscData.LichKingLoc[1]);
-                            _updateTimer = 1 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 0);
-                            break;
-                        case 5050:
-                            me.HandleEmoteCommand(Emote.OneshotExclamation);
-                            _updateTimer = 3 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 5060);
-                            break;
-                        case 5060:
-                            Talk(Texts.Stage_4_05);
-                            me.HandleEmoteCommand(Emote.OneshotKneel);
-                            _updateTimer = (uint)(2.5 * Time.InMilliseconds);
-                            _instance.SetData(DataTypes.TypeEvent, 5070);
-                            break;
-                        case 5070:
-                            me.CastSpell(me, 68198, false);
-                            _updateTimer = (uint)(1.5 * Time.InMilliseconds);
-                            _instance.SetData(DataTypes.TypeEvent, 5080);
-                            break;
-                        case 5080:
-                            {
-                                GameObject go = ObjectAccessor.GetGameObject(me, _instance.GetGuidData(GameObjectIds.ArgentColiseumFloor));
-                                if (go)
-                                {
-                                    go.SetDisplayId(MiscData.DisplayIdDestroyedFloor);
-                                    go.SetFlag(GameObjectFields.Flags, GameObjectFlags.Damaged | GameObjectFlags.NoDespawn);
-                                    go.SetGoState(GameObjectState.Active);
-                                }
-
-                                me.CastSpell(me, Spells.CorpseTeleport, false);
-                                me.CastSpell(me, Spells.DestroyFloorKnockup, false);
-
-                                _instance.SetBossState(DataTypes.BossLichKing, EncounterState.Done);
-                                Creature temp = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.Anubarak));
-                                if (!temp || !temp.IsAlive())
-                                    temp = me.SummonCreature(CreatureIds.Anubarak, MiscData.AnubarakLoc[0].GetPositionX(), MiscData.AnubarakLoc[0].GetPositionY(), MiscData.AnubarakLoc[0].GetPositionZ(), 3, TempSummonType.CorpseTimedDespawn, MiscData.DespawnTime);
-
-                                _instance.SetData(DataTypes.TypeEvent, 0);
-
-                                me.DespawnOrUnsummon();
-                                _updateTimer = 20 * Time.InMilliseconds;
-                                break;
-                            }
-                        default:
-                            break;
-                    }
-                }
-                else
-                    _updateTimer -= uiDiff;
-
-                _instance.SetData(DataTypes.TypeEventTimer, _updateTimer);
-            }
-
-            InstanceScript _instance;
-            uint _updateTimer;
+            _instance.SetData(DataTypes.TypeEventTimer, _updateTimer);
         }
 
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<boss_lich_king_tocAI>(creature);
-        }
+        InstanceScript _instance;
+        uint _updateTimer;
     }
 
     [Script]
-    class npc_fizzlebang_toc : CreatureScript
+    class npc_fizzlebang_toc : ScriptedAI
     {
-        public npc_fizzlebang_toc() : base("npc_fizzlebang_toc") { }
-
-        class npc_fizzlebang_tocAI : ScriptedAI
+        public npc_fizzlebang_toc(Creature creature) : base(creature)
         {
-            public npc_fizzlebang_tocAI(Creature creature) : base(creature)
-            {
-                _summons = new SummonList(me);
-                _instance = me.GetInstanceScript();
-            }
+            _summons = new SummonList(me);
+            _instance = me.GetInstanceScript();
+        }
 
-            public override void JustDied(Unit killer)
+        public override void JustDied(Unit killer)
+        {
+            Talk(Texts.Stage_1_06, killer);
+            _instance.SetData(DataTypes.TypeEvent, 1180);
+            Creature temp = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.Jaraxxus));
+            if (temp)
             {
-                Talk(Texts.Stage_1_06, killer);
-                _instance.SetData(DataTypes.TypeEvent, 1180);
-                Creature temp = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.Jaraxxus));
-                if (temp)
+                temp.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+                temp.SetReactState(ReactStates.Aggressive);
+                temp.SetInCombatWithZone();
+            }
+        }
+
+        public override void Reset()
+        {
+            me.SetWalk(true);
+            _portalGUID.Clear();
+            me.GetMotionMaster().MovePoint(1, MiscData.ToCCommonLoc[10].GetPositionX(), MiscData.ToCCommonLoc[10].GetPositionY() - 60, MiscData.ToCCommonLoc[10].GetPositionZ());
+        }
+
+        public override void MovementInform(MovementGeneratorType type, uint id)
+        {
+            if (type != MovementGeneratorType.Point)
+                return;
+
+            switch (id)
+            {
+                case 1:
+                    me.SetWalk(false);
+                    _instance.DoUseDoorOrButton(_instance.GetGuidData(GameObjectIds.MainGateDoor));
+                    _instance.SetData(DataTypes.TypeEvent, 1120);
+                    _instance.SetData(DataTypes.TypeEventTimer, 1 * Time.InMilliseconds);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public override void JustSummoned(Creature summoned)
+        {
+            _summons.Summon(summoned);
+        }
+
+        public override void UpdateAI(uint uiDiff)
+        {
+            if (_instance == null)
+                return;
+
+            if (_instance.GetData(DataTypes.TypeEventNpc) != CreatureIds.Fizzlebang)
+                return;
+
+            _updateTimer = _instance.GetData(DataTypes.TypeEventTimer);
+            if (_updateTimer <= uiDiff)
+            {
+                switch (_instance.GetData(DataTypes.TypeEvent))
                 {
-                    temp.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable);
-                    temp.SetReactState(ReactStates.Aggressive);
-                    temp.SetInCombatWithZone();
-                }
-            }
-
-            public override void Reset()
-            {
-                me.SetWalk(true);
-                _portalGUID.Clear();
-                me.GetMotionMaster().MovePoint(1, MiscData.ToCCommonLoc[10].GetPositionX(), MiscData.ToCCommonLoc[10].GetPositionY() - 60, MiscData.ToCCommonLoc[10].GetPositionZ());
-            }
-
-            public override void MovementInform(MovementGeneratorType type, uint id)
-            {
-                if (type != MovementGeneratorType.Point)
-                    return;
-
-                switch (id)
-                {
-                    case 1:
-                        me.SetWalk(false);
-                        _instance.DoUseDoorOrButton(_instance.GetGuidData(GameObjectIds.MainGateDoor));
+                    case 1110:
                         _instance.SetData(DataTypes.TypeEvent, 1120);
-                        _instance.SetData(DataTypes.TypeEventTimer, 1 * Time.InMilliseconds);
+                        _updateTimer = 4 * Time.InMilliseconds;
                         break;
-                    default:
+                    case 1120:
+                        Talk(Texts.Stage_1_02);
+                        _instance.SetData(DataTypes.TypeEvent, 1130);
+                        _updateTimer = 12 * Time.InMilliseconds;
                         break;
-                }
-            }
-
-            public override void JustSummoned(Creature summoned)
-            {
-                _summons.Summon(summoned);
-            }
-
-            public override void UpdateAI(uint uiDiff)
-            {
-                if (_instance == null)
-                    return;
-
-                if (_instance.GetData(DataTypes.TypeEventNpc) != CreatureIds.Fizzlebang)
-                    return;
-
-                _updateTimer = _instance.GetData(DataTypes.TypeEventTimer);
-                if (_updateTimer <= uiDiff)
-                {
-                    switch (_instance.GetData(DataTypes.TypeEvent))
-                    {
-                        case 1110:
-                            _instance.SetData(DataTypes.TypeEvent, 1120);
-                            _updateTimer = 4 * Time.InMilliseconds;
-                            break;
-                        case 1120:
-                            Talk(Texts.Stage_1_02);
-                            _instance.SetData(DataTypes.TypeEvent, 1130);
-                            _updateTimer = 12 * Time.InMilliseconds;
-                            break;
-                        case 1130:
-                            {
-                                me.GetMotionMaster().MovementExpired();
-                                Talk(Texts.Stage_1_03);
-                                me.HandleEmoteCommand(Emote.OneshotSpellCastOmni);
-                                Unit pTrigger = me.SummonCreature(CreatureIds.Trigger, MiscData.ToCCommonLoc[1].GetPositionX(), MiscData.ToCCommonLoc[1].GetPositionY(), MiscData.ToCCommonLoc[1].GetPositionZ(), 4.69494f, TempSummonType.ManualDespawn);
-                                if (pTrigger)
-                                {
-                                    _triggerGUID = pTrigger.GetGUID();
-                                    pTrigger.SetObjectScale(2.0f);
-                                    pTrigger.SetDisplayId(pTrigger.ToCreature().GetCreatureTemplate().ModelId1);
-                                    pTrigger.CastSpell(pTrigger, Spells.WilfredPortal, false);
-                                }
-                                _instance.SetData(DataTypes.TypeEvent, 1132);
-                                _updateTimer = 4 * Time.InMilliseconds;
-                                break;
-                            }
-                        case 1132:
+                    case 1130:
+                        {
                             me.GetMotionMaster().MovementExpired();
-                            _instance.SetData(DataTypes.TypeEvent, 1134);
+                            Talk(Texts.Stage_1_03);
+                            me.HandleEmoteCommand(Emote.OneshotSpellCastOmni);
+                            Unit pTrigger = me.SummonCreature(CreatureIds.Trigger, MiscData.ToCCommonLoc[1].GetPositionX(), MiscData.ToCCommonLoc[1].GetPositionY(), MiscData.ToCCommonLoc[1].GetPositionZ(), 4.69494f, TempSummonType.ManualDespawn);
+                            if (pTrigger)
+                            {
+                                _triggerGUID = pTrigger.GetGUID();
+                                pTrigger.SetObjectScale(2.0f);
+                                pTrigger.SetDisplayId(pTrigger.ToCreature().GetCreatureTemplate().ModelId1);
+                                pTrigger.CastSpell(pTrigger, Spells.WilfredPortal, false);
+                            }
+                            _instance.SetData(DataTypes.TypeEvent, 1132);
                             _updateTimer = 4 * Time.InMilliseconds;
                             break;
-                        case 1134:
+                        }
+                    case 1132:
+                        me.GetMotionMaster().MovementExpired();
+                        _instance.SetData(DataTypes.TypeEvent, 1134);
+                        _updateTimer = 4 * Time.InMilliseconds;
+                        break;
+                    case 1134:
+                        {
+                            me.HandleEmoteCommand(Emote.OneshotSpellCastOmni);
+                            Creature pPortal = me.SummonCreature(CreatureIds.WilfredPortal, MiscData.ToCCommonLoc[1].GetPositionX(), MiscData.ToCCommonLoc[1].GetPositionY(), MiscData.ToCCommonLoc[1].GetPositionZ(), 4.71239f, TempSummonType.ManualDespawn);
+                            if (pPortal)
                             {
-                                me.HandleEmoteCommand(Emote.OneshotSpellCastOmni);
-                                Creature pPortal = me.SummonCreature(CreatureIds.WilfredPortal, MiscData.ToCCommonLoc[1].GetPositionX(), MiscData.ToCCommonLoc[1].GetPositionY(), MiscData.ToCCommonLoc[1].GetPositionZ(), 4.71239f, TempSummonType.ManualDespawn);
-                                if (pPortal)
-                                {
-                                    pPortal.SetReactState(ReactStates.Passive);
-                                    pPortal.SetObjectScale(2.0f);
-                                    pPortal.CastSpell(pPortal, Spells.WilfredPortal, false);
-                                    _portalGUID = pPortal.GetGUID();
-                                }
-                                _updateTimer = 4 * Time.InMilliseconds;
-                                _instance.SetData(DataTypes.TypeEvent, 1135);
-                                break;
+                                pPortal.SetReactState(ReactStates.Passive);
+                                pPortal.SetObjectScale(2.0f);
+                                pPortal.CastSpell(pPortal, Spells.WilfredPortal, false);
+                                _portalGUID = pPortal.GetGUID();
                             }
-                        case 1135:
-                            _instance.SetData(DataTypes.TypeEvent, 1140);
+                            _updateTimer = 4 * Time.InMilliseconds;
+                            _instance.SetData(DataTypes.TypeEvent, 1135);
+                            break;
+                        }
+                    case 1135:
+                        _instance.SetData(DataTypes.TypeEvent, 1140);
+                        _updateTimer = 3 * Time.InMilliseconds;
+                        break;
+                    case 1140:
+                        {
+                            Talk(Texts.Stage_1_04);
+                            Creature temp = me.SummonCreature(CreatureIds.Jaraxxus, MiscData.ToCCommonLoc[1].GetPositionX(), MiscData.ToCCommonLoc[1].GetPositionY(), MiscData.ToCCommonLoc[1].GetPositionZ(), 5.0f, TempSummonType.CorpseTimedDespawn, MiscData.DespawnTime);
+                            if (temp)
+                            {
+                                temp.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+                                temp.SetReactState(ReactStates.Passive);
+                                temp.GetMotionMaster().MovePoint(0, MiscData.ToCCommonLoc[1].GetPositionX(), MiscData.ToCCommonLoc[1].GetPositionY() - 10, MiscData.ToCCommonLoc[1].GetPositionZ());
+                            }
+                            _instance.SetData(DataTypes.TypeEvent, 1142);
+                            _updateTimer = 5 * Time.InMilliseconds;
+                            break;
+                        }
+                    case 1142:
+                        {
+                            Creature temp = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.Jaraxxus));
+                            if (temp)
+                                temp.SetTarget(me.GetGUID());
+
+                            Creature pTrigger = ObjectAccessor.GetCreature(me, _triggerGUID);
+                            if (pTrigger)
+                                pTrigger.DespawnOrUnsummon();
+
+                            Creature pPortal = ObjectAccessor.GetCreature(me, _portalGUID);
+                            if (pPortal)
+                                pPortal.DespawnOrUnsummon();
+                            _instance.SetData(DataTypes.TypeEvent, 1144);
+                            _updateTimer = 10 * Time.InMilliseconds;
+                            break;
+                        }
+                    case 1144:
+                        {
+                            Creature temp = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.Jaraxxus));
+                            if (temp)
+                                temp.GetAI().Talk(Texts.Stage_1_05);
+                            _instance.SetData(DataTypes.TypeEvent, 1150);
+                            _updateTimer = 5 * Time.InMilliseconds;
+                            break;
+                        }
+                    case 1150:
+                        {
+                            Creature temp = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.Jaraxxus));
+                            if (temp)
+                            {
+                                //1-shot Fizzlebang
+                                temp.CastSpell(me, 67888, false);
+                                me.SetInCombatWith(temp);
+                                temp.AddThreat(me, 1000.0f);
+                                temp.GetAI().AttackStart(me);
+                            }
+                            _instance.SetData(DataTypes.TypeEvent, 1160);
                             _updateTimer = 3 * Time.InMilliseconds;
                             break;
-                        case 1140:
-                            {
-                                Talk(Texts.Stage_1_04);
-                                Creature temp = me.SummonCreature(CreatureIds.Jaraxxus, MiscData.ToCCommonLoc[1].GetPositionX(), MiscData.ToCCommonLoc[1].GetPositionY(), MiscData.ToCCommonLoc[1].GetPositionZ(), 5.0f, TempSummonType.CorpseTimedDespawn, MiscData.DespawnTime);
-                                if (temp)
-                                {
-                                    temp.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable);
-                                    temp.SetReactState(ReactStates.Passive);
-                                    temp.GetMotionMaster().MovePoint(0, MiscData.ToCCommonLoc[1].GetPositionX(), MiscData.ToCCommonLoc[1].GetPositionY() - 10, MiscData.ToCCommonLoc[1].GetPositionZ());
-                                }
-                                _instance.SetData(DataTypes.TypeEvent, 1142);
-                                _updateTimer = 5 * Time.InMilliseconds;
-                                break;
-                            }
-                        case 1142:
-                            {
-                                Creature temp = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.Jaraxxus));
-                                if (temp)
-                                    temp.SetTarget(me.GetGUID());
-
-                                Creature pTrigger = ObjectAccessor.GetCreature(me, _triggerGUID);
-                                if (pTrigger)
-                                    pTrigger.DespawnOrUnsummon();
-
-                                Creature pPortal = ObjectAccessor.GetCreature(me, _portalGUID);
-                                if (pPortal)
-                                    pPortal.DespawnOrUnsummon();
-                                _instance.SetData(DataTypes.TypeEvent, 1144);
-                                _updateTimer = 10 * Time.InMilliseconds;
-                                break;
-                            }
-                        case 1144:
-                            {
-                                Creature temp = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.Jaraxxus));
-                                if (temp)
-                                    temp.GetAI().Talk(Texts.Stage_1_05);
-                                _instance.SetData(DataTypes.TypeEvent, 1150);
-                                _updateTimer = 5 * Time.InMilliseconds;
-                                break;
-                            }
-                        case 1150:
-                            {
-                                Creature temp = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.Jaraxxus));
-                                if (temp)
-                                {
-                                    //1-shot Fizzlebang
-                                    temp.CastSpell(me, 67888, false);
-                                    me.SetInCombatWith(temp);
-                                    temp.AddThreat(me, 1000.0f);
-                                    temp.GetAI().AttackStart(me);
-                                }
-                                _instance.SetData(DataTypes.TypeEvent, 1160);
-                                _updateTimer = 3 * Time.InMilliseconds;
-                                break;
-                            }
-                    }
+                        }
                 }
-                else
-                    _updateTimer -= uiDiff;
-                _instance.SetData(DataTypes.TypeEventTimer, _updateTimer);
             }
-
-            InstanceScript _instance;
-            SummonList _summons;
-            uint _updateTimer;
-            ObjectGuid _portalGUID;
-            ObjectGuid _triggerGUID;
+            else
+                _updateTimer -= uiDiff;
+            _instance.SetData(DataTypes.TypeEventTimer, _updateTimer);
         }
 
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<npc_fizzlebang_tocAI>(creature);
-        }
+        InstanceScript _instance;
+        SummonList _summons;
+        uint _updateTimer;
+        ObjectGuid _portalGUID;
+        ObjectGuid _triggerGUID;
     }
 
     [Script]
-    class npc_tirion_toc : CreatureScript
+    class npc_tirion_toc : ScriptedAI
     {
-        public npc_tirion_toc() : base("npc_tirion_toc") { }
-
-        class npc_tirion_tocAI : ScriptedAI
+        public npc_tirion_toc(Creature creature) : base(creature)
         {
-            public npc_tirion_tocAI(Creature creature) : base(creature)
+            _instance = me.GetInstanceScript();
+        }
+
+        public override void Reset() { }
+
+        public override void AttackStart(Unit who) { }
+
+        public override void UpdateAI(uint uiDiff)
+        {
+            if (_instance == null)
+                return;
+
+            if (_instance.GetData(DataTypes.TypeEventNpc) != CreatureIds.Tirion)
+                return;
+
+            _updateTimer = _instance.GetData(DataTypes.TypeEventTimer);
+            if (_updateTimer <= uiDiff)
             {
-                _instance = me.GetInstanceScript();
-            }
-
-            public override void Reset() { }
-
-            public override void AttackStart(Unit who) { }
-
-            public override void UpdateAI(uint uiDiff)
-            {
-                if (_instance == null)
-                    return;
-
-                if (_instance.GetData(DataTypes.TypeEventNpc) != CreatureIds.Tirion)
-                    return;
-
-                _updateTimer = _instance.GetData(DataTypes.TypeEventTimer);
-                if (_updateTimer <= uiDiff)
+                switch (_instance.GetData(DataTypes.TypeEvent))
                 {
-                    switch (_instance.GetData(DataTypes.TypeEvent))
-                    {
-                        case 110:
-                            me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotTalk);
-                            Talk(Texts.Stage_0_01);
-                            _updateTimer = 22 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 120);
-                            break;
-                        case 140:
-                            me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotTalk);
-                            Talk(Texts.Stage_0_02);
-                            _updateTimer = 5 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 150);
-                            break;
-                        case 150:
-                            {
-                                me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotNone);
-                                if (_instance.GetBossState(DataTypes.BossBeasts) != EncounterState.Done)
-                                {
-                                    _instance.DoUseDoorOrButton(_instance.GetGuidData(GameObjectIds.MainGateDoor));
-
-                                    Creature temp = me.SummonCreature(CreatureIds.Gormok, MiscData.ToCSpawnLoc[0].GetPositionX(), MiscData.ToCSpawnLoc[0].GetPositionY(), MiscData.ToCSpawnLoc[0].GetPositionZ(), 5, TempSummonType.CorpseTimedDespawn, 30 * Time.InMilliseconds);
-                                    if (temp)
-                                    {
-                                        temp.GetMotionMaster().MovePoint(0, MiscData.ToCCommonLoc[5].GetPositionX(), MiscData.ToCCommonLoc[5].GetPositionY(), MiscData.ToCCommonLoc[5].GetPositionZ());
-                                        temp.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
-                                        temp.SetReactState(ReactStates.Passive);
-                                    }
-                                }
-                                _updateTimer = 3 * Time.InMilliseconds;
-                                _instance.SetData(DataTypes.TypeEvent, 155);
-                                break;
-                            }
-                        case 155:
-                            // keep the raid in combat for the whole encounter, pauses included
-                            me.SetInCombatWithZone();
-                            _updateTimer = 5 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 160);
-                            break;
-                        case 200:
-                            {
-                                Talk(Texts.Stage_0_04);
-                                if (_instance.GetBossState(DataTypes.BossBeasts) != EncounterState.Done)
-                                {
-                                    _instance.DoUseDoorOrButton(_instance.GetGuidData(GameObjectIds.MainGateDoor));
-                                    Creature temp = me.SummonCreature(CreatureIds.Dreadscale, MiscData.ToCSpawnLoc[1].GetPositionX(), MiscData.ToCSpawnLoc[1].GetPositionY(), MiscData.ToCSpawnLoc[1].GetPositionZ(), 5, TempSummonType.ManualDespawn);
-                                    if (temp)
-                                    {
-                                        temp.GetMotionMaster().MovePoint(0, MiscData.ToCCommonLoc[5].GetPositionX(), MiscData.ToCCommonLoc[5].GetPositionY(), MiscData.ToCCommonLoc[5].GetPositionZ());
-                                        temp.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
-                                        temp.SetReactState(ReactStates.Passive);
-                                    }
-                                }
-                                _updateTimer = 5 * Time.InMilliseconds;
-                                _instance.SetData(DataTypes.TypeEvent, 220);
-                                break;
-                            }
-                        case 220:
-                            _instance.SetData(DataTypes.TypeEvent, 230);
-                            break;
-                        case 300:
-                            {
-                                Talk(Texts.Stage_0_05);
-                                if (_instance.GetBossState(DataTypes.BossBeasts) != EncounterState.Done)
-                                {
-                                    _instance.DoUseDoorOrButton(_instance.GetGuidData(GameObjectIds.MainGateDoor));
-                                    Creature temp = me.SummonCreature(CreatureIds.Icehowl, MiscData.ToCSpawnLoc[0].GetPositionX(), MiscData.ToCSpawnLoc[0].GetPositionY(), MiscData.ToCSpawnLoc[0].GetPositionZ(), 5, TempSummonType.DeadDespawn);
-                                    if (temp)
-                                    {
-                                        temp.GetMotionMaster().MovePoint(2, MiscData.ToCCommonLoc[5].GetPositionX(), MiscData.ToCCommonLoc[5].GetPositionY(), MiscData.ToCCommonLoc[5].GetPositionZ());
-                                        me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
-                                        me.SetReactState(ReactStates.Passive);
-                                    }
-                                }
-                                _updateTimer = 5 * Time.InMilliseconds;
-                                _instance.SetData(DataTypes.TypeEvent, 315);
-                                break;
-                            }
-                        case 315:
-                            _instance.SetData(DataTypes.TypeEvent, 320);
-                            break;
-                        case 400:
-                            Talk(Texts.Stage_0_06);
-                            me.GetThreatManager().clearReferences();
-                            _updateTimer = 5 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 0);
-                            break;
-                        case 666:
-                            Talk(Texts.Stage_0_Wipe);
-                            _updateTimer = 5 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 0);
-                            break;
-                        case 1010:
-                            Talk(Texts.Stage_1_01);
-                            _updateTimer = 7 * Time.InMilliseconds;
-                            _instance.DoUseDoorOrButton(_instance.GetGuidData(GameObjectIds.MainGateDoor));
-                            me.SummonCreature(CreatureIds.Fizzlebang, MiscData.ToCSpawnLoc[0].GetPositionX(), MiscData.ToCSpawnLoc[0].GetPositionY(), MiscData.ToCSpawnLoc[0].GetPositionZ(), 2, TempSummonType.CorpseTimedDespawn, MiscData.DespawnTime);
-                            _instance.SetData(DataTypes.TypeEvent, 0);
-                            break;
-                        case 1180:
-                            Talk(Texts.Stage_1_07);
-                            _updateTimer = 3 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 0);
-                            break;
-                        case 2000:
-                            Talk(Texts.Stage_1_08);
-                            _updateTimer = 18 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 2010);
-                            break;
-                        case 2030:
-                            Talk(Texts.Stage_1_11);
-                            _updateTimer = 5 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 0);
-                            break;
-                        case 3000:
-                            Talk(Texts.Stage_2_01);
-                            _updateTimer = 12 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 3050);
-                            break;
-                        case 3001:
-                            Talk(Texts.Stage_2_01);
-                            _updateTimer = 10 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 3051);
-                            break;
-                        case 3060:
-                            Talk(Texts.Stage_2_03);
-                            _updateTimer = 5 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 3070);
-                            break;
-                        case 3061:
-                            Talk(Texts.Stage_2_03);
-                            _updateTimer = 5 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 3071);
-                            break;
-                        //Summoning crusaders
-                        case 3091:
-                            {
-                                Creature pChampionController = me.SummonCreature(CreatureIds.ChampionsController, MiscData.ToCCommonLoc[1]);
-                                if (pChampionController)
-                                    pChampionController.GetAI().SetData(0, (uint)Team.Horde);
-                                _updateTimer = 3 * Time.InMilliseconds;
-                                _instance.SetData(DataTypes.TypeEvent, 3092);
-                                break;
-                            }
-                        //Summoning crusaders
-                        case 3090:
-                            {
-                                Creature pChampionController = me.SummonCreature(CreatureIds.ChampionsController, MiscData.ToCCommonLoc[1]);
-                                if (pChampionController)
-                                    pChampionController.GetAI().SetData(0, (uint)Team.Alliance);
-                                _updateTimer = 3 * Time.InMilliseconds;
-                                _instance.SetData(DataTypes.TypeEvent, 3092);
-                                break;
-                            }
-                        case 3092:
-                            {
-                                Creature pChampionController = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.ChampionsController));
-                                if (pChampionController)
-                                    pChampionController.GetAI().SetData(1, (uint)EncounterState.NotStarted);
-                                _instance.SetData(DataTypes.TypeEvent, 3095);
-                                break;
-                            }
-                        //Crusaders battle end
-                        case 3100:
-                            Talk(Texts.Stage_2_06);
-                            _updateTimer = 5 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 0);
-                            break;
-                        case 4000:
-                            Talk(Texts.Stage_3_01);
-                            _updateTimer = 13 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 4010);
-                            break;
-                        case 4010:
-                            {
-                                Talk(Texts.Stage_3_02);
-                                Creature temp = me.SummonCreature(CreatureIds.Lightbane, MiscData.ToCSpawnLoc[1].GetPositionX(), MiscData.ToCSpawnLoc[1].GetPositionY(), MiscData.ToCSpawnLoc[1].GetPositionZ(), 5, TempSummonType.CorpseTimedDespawn, MiscData.DespawnTime);
-                                if (temp)
-                                {
-                                    temp.SetVisible(false);
-                                    temp.SetReactState(ReactStates.Passive);
-                                    temp.SummonCreature(CreatureIds.LightEssence, MiscData.TwinValkyrsLoc[0].GetPositionX(), MiscData.TwinValkyrsLoc[0].GetPositionY(), MiscData.TwinValkyrsLoc[0].GetPositionZ());
-                                    temp.SummonCreature(CreatureIds.LightEssence, MiscData.TwinValkyrsLoc[1].GetPositionX(), MiscData.TwinValkyrsLoc[1].GetPositionY(), MiscData.TwinValkyrsLoc[1].GetPositionZ());
-                                }
-
-                                temp = me.SummonCreature(CreatureIds.Darkbane, MiscData.ToCSpawnLoc[2].GetPositionX(), MiscData.ToCSpawnLoc[2].GetPositionY(), MiscData.ToCSpawnLoc[2].GetPositionZ(), 5, TempSummonType.CorpseTimedDespawn, MiscData.DespawnTime);
-                                if (temp)
-                                {
-                                    temp.SetVisible(false);
-                                    temp.SetReactState(ReactStates.Passive);
-                                    temp.SummonCreature(CreatureIds.DarkEssence, MiscData.TwinValkyrsLoc[2].GetPositionX(), MiscData.TwinValkyrsLoc[2].GetPositionY(), MiscData.TwinValkyrsLoc[2].GetPositionZ());
-                                    temp.SummonCreature(CreatureIds.DarkEssence, MiscData.TwinValkyrsLoc[3].GetPositionX(), MiscData.TwinValkyrsLoc[3].GetPositionY(), MiscData.TwinValkyrsLoc[3].GetPositionZ());
-                                }
-                                _updateTimer = 3 * Time.InMilliseconds;
-                                _instance.SetData(DataTypes.TypeEvent, 4015);
-                                break;
-                            }
-                        case 4015:
+                    case 110:
+                        me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotTalk);
+                        Talk(Texts.Stage_0_01);
+                        _updateTimer = 22 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 120);
+                        break;
+                    case 140:
+                        me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotTalk);
+                        Talk(Texts.Stage_0_02);
+                        _updateTimer = 5 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 150);
+                        break;
+                    case 150:
+                        {
+                            me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotNone);
+                            if (_instance.GetBossState(DataTypes.BossBeasts) != EncounterState.Done)
                             {
                                 _instance.DoUseDoorOrButton(_instance.GetGuidData(GameObjectIds.MainGateDoor));
-                                Creature temp = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.Lightbane));
-                                if (temp)
-                                {
-                                    temp.GetMotionMaster().MovePoint(1, MiscData.ToCCommonLoc[8].GetPositionX(), MiscData.ToCCommonLoc[8].GetPositionY(), MiscData.ToCCommonLoc[8].GetPositionZ());
-                                    temp.SetVisible(true);
-                                }
 
-                                temp = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.Darkbane));
+                                Creature temp = me.SummonCreature(CreatureIds.Gormok, MiscData.ToCSpawnLoc[0].GetPositionX(), MiscData.ToCSpawnLoc[0].GetPositionY(), MiscData.ToCSpawnLoc[0].GetPositionZ(), 5, TempSummonType.CorpseTimedDespawn, 30 * Time.InMilliseconds);
                                 if (temp)
                                 {
-                                    temp.GetMotionMaster().MovePoint(1, MiscData.ToCCommonLoc[9].GetPositionX(), MiscData.ToCCommonLoc[9].GetPositionY(), MiscData.ToCCommonLoc[9].GetPositionZ());
-                                    temp.SetVisible(true);
+                                    temp.GetMotionMaster().MovePoint(0, MiscData.ToCCommonLoc[5].GetPositionX(), MiscData.ToCCommonLoc[5].GetPositionY(), MiscData.ToCCommonLoc[5].GetPositionZ());
+                                    temp.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                                    temp.SetReactState(ReactStates.Passive);
                                 }
-                                _updateTimer = 10 * Time.InMilliseconds;
-                                _instance.SetData(DataTypes.TypeEvent, 4016);
-                                break;
                             }
-                        case 4016:
+                            _updateTimer = 3 * Time.InMilliseconds;
+                            _instance.SetData(DataTypes.TypeEvent, 155);
+                            break;
+                        }
+                    case 155:
+                        // keep the raid in combat for the whole encounter, pauses included
+                        me.SetInCombatWithZone();
+                        _updateTimer = 5 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 160);
+                        break;
+                    case 200:
+                        {
+                            Talk(Texts.Stage_0_04);
+                            if (_instance.GetBossState(DataTypes.BossBeasts) != EncounterState.Done)
+                            {
+                                _instance.DoUseDoorOrButton(_instance.GetGuidData(GameObjectIds.MainGateDoor));
+                                Creature temp = me.SummonCreature(CreatureIds.Dreadscale, MiscData.ToCSpawnLoc[1].GetPositionX(), MiscData.ToCSpawnLoc[1].GetPositionY(), MiscData.ToCSpawnLoc[1].GetPositionZ(), 5, TempSummonType.ManualDespawn);
+                                if (temp)
+                                {
+                                    temp.GetMotionMaster().MovePoint(0, MiscData.ToCCommonLoc[5].GetPositionX(), MiscData.ToCCommonLoc[5].GetPositionY(), MiscData.ToCCommonLoc[5].GetPositionZ());
+                                    temp.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                                    temp.SetReactState(ReactStates.Passive);
+                                }
+                            }
+                            _updateTimer = 5 * Time.InMilliseconds;
+                            _instance.SetData(DataTypes.TypeEvent, 220);
+                            break;
+                        }
+                    case 220:
+                        _instance.SetData(DataTypes.TypeEvent, 230);
+                        break;
+                    case 300:
+                        {
+                            Talk(Texts.Stage_0_05);
+                            if (_instance.GetBossState(DataTypes.BossBeasts) != EncounterState.Done)
+                            {
+                                _instance.DoUseDoorOrButton(_instance.GetGuidData(GameObjectIds.MainGateDoor));
+                                Creature temp = me.SummonCreature(CreatureIds.Icehowl, MiscData.ToCSpawnLoc[0].GetPositionX(), MiscData.ToCSpawnLoc[0].GetPositionY(), MiscData.ToCSpawnLoc[0].GetPositionZ(), 5, TempSummonType.DeadDespawn);
+                                if (temp)
+                                {
+                                    temp.GetMotionMaster().MovePoint(2, MiscData.ToCCommonLoc[5].GetPositionX(), MiscData.ToCCommonLoc[5].GetPositionY(), MiscData.ToCCommonLoc[5].GetPositionZ());
+                                    me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                                    me.SetReactState(ReactStates.Passive);
+                                }
+                            }
+                            _updateTimer = 5 * Time.InMilliseconds;
+                            _instance.SetData(DataTypes.TypeEvent, 315);
+                            break;
+                        }
+                    case 315:
+                        _instance.SetData(DataTypes.TypeEvent, 320);
+                        break;
+                    case 400:
+                        Talk(Texts.Stage_0_06);
+                        me.GetThreatManager().clearReferences();
+                        _updateTimer = 5 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 0);
+                        break;
+                    case 666:
+                        Talk(Texts.Stage_0_Wipe);
+                        _updateTimer = 5 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 0);
+                        break;
+                    case 1010:
+                        Talk(Texts.Stage_1_01);
+                        _updateTimer = 7 * Time.InMilliseconds;
+                        _instance.DoUseDoorOrButton(_instance.GetGuidData(GameObjectIds.MainGateDoor));
+                        me.SummonCreature(CreatureIds.Fizzlebang, MiscData.ToCSpawnLoc[0].GetPositionX(), MiscData.ToCSpawnLoc[0].GetPositionY(), MiscData.ToCSpawnLoc[0].GetPositionZ(), 2, TempSummonType.CorpseTimedDespawn, MiscData.DespawnTime);
+                        _instance.SetData(DataTypes.TypeEvent, 0);
+                        break;
+                    case 1180:
+                        Talk(Texts.Stage_1_07);
+                        _updateTimer = 3 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 0);
+                        break;
+                    case 2000:
+                        Talk(Texts.Stage_1_08);
+                        _updateTimer = 18 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 2010);
+                        break;
+                    case 2030:
+                        Talk(Texts.Stage_1_11);
+                        _updateTimer = 5 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 0);
+                        break;
+                    case 3000:
+                        Talk(Texts.Stage_2_01);
+                        _updateTimer = 12 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 3050);
+                        break;
+                    case 3001:
+                        Talk(Texts.Stage_2_01);
+                        _updateTimer = 10 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 3051);
+                        break;
+                    case 3060:
+                        Talk(Texts.Stage_2_03);
+                        _updateTimer = 5 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 3070);
+                        break;
+                    case 3061:
+                        Talk(Texts.Stage_2_03);
+                        _updateTimer = 5 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 3071);
+                        break;
+                    //Summoning crusaders
+                    case 3091:
+                        {
+                            Creature pChampionController = me.SummonCreature(CreatureIds.ChampionsController, MiscData.ToCCommonLoc[1]);
+                            if (pChampionController)
+                                pChampionController.GetAI().SetData(0, (uint)Team.Horde);
+                            _updateTimer = 3 * Time.InMilliseconds;
+                            _instance.SetData(DataTypes.TypeEvent, 3092);
+                            break;
+                        }
+                    //Summoning crusaders
+                    case 3090:
+                        {
+                            Creature pChampionController = me.SummonCreature(CreatureIds.ChampionsController, MiscData.ToCCommonLoc[1]);
+                            if (pChampionController)
+                                pChampionController.GetAI().SetData(0, (uint)Team.Alliance);
+                            _updateTimer = 3 * Time.InMilliseconds;
+                            _instance.SetData(DataTypes.TypeEvent, 3092);
+                            break;
+                        }
+                    case 3092:
+                        {
+                            Creature pChampionController = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.ChampionsController));
+                            if (pChampionController)
+                                pChampionController.GetAI().SetData(1, (uint)EncounterState.NotStarted);
+                            _instance.SetData(DataTypes.TypeEvent, 3095);
+                            break;
+                        }
+                    //Crusaders battle end
+                    case 3100:
+                        Talk(Texts.Stage_2_06);
+                        _updateTimer = 5 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 0);
+                        break;
+                    case 4000:
+                        Talk(Texts.Stage_3_01);
+                        _updateTimer = 13 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 4010);
+                        break;
+                    case 4010:
+                        {
+                            Talk(Texts.Stage_3_02);
+                            Creature temp = me.SummonCreature(CreatureIds.Lightbane, MiscData.ToCSpawnLoc[1].GetPositionX(), MiscData.ToCSpawnLoc[1].GetPositionY(), MiscData.ToCSpawnLoc[1].GetPositionZ(), 5, TempSummonType.CorpseTimedDespawn, MiscData.DespawnTime);
+                            if (temp)
+                            {
+                                temp.SetVisible(false);
+                                temp.SetReactState(ReactStates.Passive);
+                                temp.SummonCreature(CreatureIds.LightEssence, MiscData.TwinValkyrsLoc[0].GetPositionX(), MiscData.TwinValkyrsLoc[0].GetPositionY(), MiscData.TwinValkyrsLoc[0].GetPositionZ());
+                                temp.SummonCreature(CreatureIds.LightEssence, MiscData.TwinValkyrsLoc[1].GetPositionX(), MiscData.TwinValkyrsLoc[1].GetPositionY(), MiscData.TwinValkyrsLoc[1].GetPositionZ());
+                            }
+
+                            temp = me.SummonCreature(CreatureIds.Darkbane, MiscData.ToCSpawnLoc[2].GetPositionX(), MiscData.ToCSpawnLoc[2].GetPositionY(), MiscData.ToCSpawnLoc[2].GetPositionZ(), 5, TempSummonType.CorpseTimedDespawn, MiscData.DespawnTime);
+                            if (temp)
+                            {
+                                temp.SetVisible(false);
+                                temp.SetReactState(ReactStates.Passive);
+                                temp.SummonCreature(CreatureIds.DarkEssence, MiscData.TwinValkyrsLoc[2].GetPositionX(), MiscData.TwinValkyrsLoc[2].GetPositionY(), MiscData.TwinValkyrsLoc[2].GetPositionZ());
+                                temp.SummonCreature(CreatureIds.DarkEssence, MiscData.TwinValkyrsLoc[3].GetPositionX(), MiscData.TwinValkyrsLoc[3].GetPositionY(), MiscData.TwinValkyrsLoc[3].GetPositionZ());
+                            }
+                            _updateTimer = 3 * Time.InMilliseconds;
+                            _instance.SetData(DataTypes.TypeEvent, 4015);
+                            break;
+                        }
+                    case 4015:
+                        {
                             _instance.DoUseDoorOrButton(_instance.GetGuidData(GameObjectIds.MainGateDoor));
-                            _instance.SetData(DataTypes.TypeEvent, 4017);
-                            break;
-                        case 4040:
-                            _updateTimer = 1 * Time.Minute * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 5000);
-                            break;
-                        case 5000:
-                            Talk(Texts.Stage_4_01);
+                            Creature temp = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.Lightbane));
+                            if (temp)
+                            {
+                                temp.GetMotionMaster().MovePoint(1, MiscData.ToCCommonLoc[8].GetPositionX(), MiscData.ToCCommonLoc[8].GetPositionY(), MiscData.ToCCommonLoc[8].GetPositionZ());
+                                temp.SetVisible(true);
+                            }
+
+                            temp = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.Darkbane));
+                            if (temp)
+                            {
+                                temp.GetMotionMaster().MovePoint(1, MiscData.ToCCommonLoc[9].GetPositionX(), MiscData.ToCCommonLoc[9].GetPositionY(), MiscData.ToCCommonLoc[9].GetPositionZ());
+                                temp.SetVisible(true);
+                            }
                             _updateTimer = 10 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 5005);
+                            _instance.SetData(DataTypes.TypeEvent, 4016);
                             break;
-                        case 5005:
-                            _updateTimer = 8 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 5010);
-                            me.SummonCreature(CreatureIds.LichKing, MiscData.ToCCommonLoc[2].GetPositionX(), MiscData.ToCCommonLoc[2].GetPositionY(), MiscData.ToCCommonLoc[2].GetPositionZ(), 5);
-                            break;
-                        case 5020:
-                            Talk(Texts.Stage_4_03);
-                            _updateTimer = 1 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 0);
-                            break;
-                        case 6000:
-                            me.SummonCreature(CreatureIds.TirionFordring, MiscData.EndSpawnLoc[0]);
-                            me.SummonCreature(CreatureIds.ArgentMage, MiscData.EndSpawnLoc[1]);
-                            me.SummonGameObject(GameObjectIds.PortalToDalaran, MiscData.EndSpawnLoc[2], Quaternion.WAxis, 0);
+                        }
+                    case 4016:
+                        _instance.DoUseDoorOrButton(_instance.GetGuidData(GameObjectIds.MainGateDoor));
+                        _instance.SetData(DataTypes.TypeEvent, 4017);
+                        break;
+                    case 4040:
+                        _updateTimer = 1 * Time.Minute * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 5000);
+                        break;
+                    case 5000:
+                        Talk(Texts.Stage_4_01);
+                        _updateTimer = 10 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 5005);
+                        break;
+                    case 5005:
+                        _updateTimer = 8 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 5010);
+                        me.SummonCreature(CreatureIds.LichKing, MiscData.ToCCommonLoc[2].GetPositionX(), MiscData.ToCCommonLoc[2].GetPositionY(), MiscData.ToCCommonLoc[2].GetPositionZ(), 5);
+                        break;
+                    case 5020:
+                        Talk(Texts.Stage_4_03);
+                        _updateTimer = 1 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 0);
+                        break;
+                    case 6000:
+                        me.SummonCreature(CreatureIds.TirionFordring, MiscData.EndSpawnLoc[0]);
+                        me.SummonCreature(CreatureIds.ArgentMage, MiscData.EndSpawnLoc[1]);
+                        me.SummonGameObject(GameObjectIds.PortalToDalaran, MiscData.EndSpawnLoc[2], Quaternion.WAxis, 0);
+                        _updateTimer = 20 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 6005);
+                        break;
+                    case 6005:
+                        {
+                            Creature tirionFordring = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.TirionFordring));
+                            if (tirionFordring)
+                                tirionFordring.GetAI().Talk(Texts.Stage_4_06);
                             _updateTimer = 20 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 6005);
+                            _instance.SetData(DataTypes.TypeEvent, 6010);
                             break;
-                        case 6005:
-                            {
-                                Creature tirionFordring = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.TirionFordring));
-                                if (tirionFordring)
-                                    tirionFordring.GetAI().Talk(Texts.Stage_4_06);
-                                _updateTimer = 20 * Time.InMilliseconds;
-                                _instance.SetData(DataTypes.TypeEvent, 6010);
-                                break;
-                            }
-                        case 6010:
-                            if (IsHeroic())
-                            {
-                                Creature tirionFordring = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.TirionFordring));
-                                if (tirionFordring)
-                                    tirionFordring.GetAI().Talk(Texts.Stage_4_07);
-                                _updateTimer = 1 * Time.Minute * Time.InMilliseconds;
-                                _instance.SetBossState(DataTypes.BossAnubarak, EncounterState.Special);
-                                _instance.SetData(DataTypes.TypeEvent, 6020);
-                            }
-                            else
-                                _instance.SetData(DataTypes.TypeEvent, 6030);
-                            break;
-                        case 6020:
-                            me.DespawnOrUnsummon();
-                            _updateTimer = 5 * Time.InMilliseconds;
+                        }
+                    case 6010:
+                        if (IsHeroic())
+                        {
+                            Creature tirionFordring = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.TirionFordring));
+                            if (tirionFordring)
+                                tirionFordring.GetAI().Talk(Texts.Stage_4_07);
+                            _updateTimer = 1 * Time.Minute * Time.InMilliseconds;
+                            _instance.SetBossState(DataTypes.BossAnubarak, EncounterState.Special);
+                            _instance.SetData(DataTypes.TypeEvent, 6020);
+                        }
+                        else
                             _instance.SetData(DataTypes.TypeEvent, 6030);
-                            break;
-                        default:
-                            break;
-                    }
+                        break;
+                    case 6020:
+                        me.DespawnOrUnsummon();
+                        _updateTimer = 5 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 6030);
+                        break;
+                    default:
+                        break;
                 }
-                else
-                    _updateTimer -= uiDiff;
-                _instance.SetData(DataTypes.TypeEventTimer, _updateTimer);
             }
-
-            InstanceScript _instance;
-            uint _updateTimer;
+            else
+                _updateTimer -= uiDiff;
+            _instance.SetData(DataTypes.TypeEventTimer, _updateTimer);
         }
 
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<npc_tirion_tocAI>(creature);
-        }
+        InstanceScript _instance;
+        uint _updateTimer;
     }
 
     [Script]
-    class npc_garrosh_toc : CreatureScript
+    class npc_garrosh_toc : ScriptedAI
     {
-        public npc_garrosh_toc() : base("npc_garrosh_toc") { }
-
-        class npc_garrosh_tocAI : ScriptedAI
+        public npc_garrosh_toc(Creature creature) : base(creature)
         {
-            public npc_garrosh_tocAI(Creature creature) : base(creature)
+            _instance = me.GetInstanceScript();
+        }
+
+        public override void Reset() { }
+
+        public override void AttackStart(Unit who) { }
+
+        public override void UpdateAI(uint uiDiff)
+        {
+            if (_instance == null)
+                return;
+
+            if (_instance.GetData(DataTypes.TypeEventNpc) != CreatureIds.Garrosh)
+                return;
+
+            _updateTimer = _instance.GetData(DataTypes.TypeEventTimer);
+            if (_updateTimer <= uiDiff)
             {
-                _instance = me.GetInstanceScript();
-            }
-
-            public override void Reset() { }
-
-            public override void AttackStart(Unit who) { }
-
-            public override void UpdateAI(uint uiDiff)
-            {
-                if (_instance == null)
-                    return;
-
-                if (_instance.GetData(DataTypes.TypeEventNpc) != CreatureIds.Garrosh)
-                    return;
-
-                _updateTimer = _instance.GetData(DataTypes.TypeEventTimer);
-                if (_updateTimer <= uiDiff)
+                switch (_instance.GetData(DataTypes.TypeEvent))
                 {
-                    switch (_instance.GetData(DataTypes.TypeEvent))
-                    {
-                        case 130:
-                            me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotTalk);
-                            Talk(Texts.Stage_0_03h);
-                            _updateTimer = 3 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 132);
-                            break;
-                        case 132:
-                            me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotNone);
-                            _updateTimer = 5 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 140);
-                            break;
-                        case 2010:
-                            Talk(Texts.Stage_1_09);
-                            _updateTimer = 9 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 2020);
-                            break;
-                        case 3050:
-                            Talk(Texts.Stage_2_02h);
-                            _updateTimer = 15 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 3060);
-                            break;
-                        case 3070:
-                            Talk(Texts.Stage_2_04h);
-                            _updateTimer = 6 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 3080);
-                            break;
-                        case 3081:
-                            Talk(Texts.Stage_2_05h);
-                            _updateTimer = 3 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 3091);
-                            break;
-                        case 4030:
-                            Talk(Texts.Stage_3_03h);
-                            _updateTimer = 5 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 4040);
-                            break;
-                        default:
-                            break;
-                    }
+                    case 130:
+                        me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotTalk);
+                        Talk(Texts.Stage_0_03h);
+                        _updateTimer = 3 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 132);
+                        break;
+                    case 132:
+                        me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotNone);
+                        _updateTimer = 5 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 140);
+                        break;
+                    case 2010:
+                        Talk(Texts.Stage_1_09);
+                        _updateTimer = 9 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 2020);
+                        break;
+                    case 3050:
+                        Talk(Texts.Stage_2_02h);
+                        _updateTimer = 15 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 3060);
+                        break;
+                    case 3070:
+                        Talk(Texts.Stage_2_04h);
+                        _updateTimer = 6 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 3080);
+                        break;
+                    case 3081:
+                        Talk(Texts.Stage_2_05h);
+                        _updateTimer = 3 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 3091);
+                        break;
+                    case 4030:
+                        Talk(Texts.Stage_3_03h);
+                        _updateTimer = 5 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 4040);
+                        break;
+                    default:
+                        break;
                 }
-                else
-                    _updateTimer -= uiDiff;
-                _instance.SetData(DataTypes.TypeEventTimer, _updateTimer);
             }
-
-            InstanceScript _instance;
-            uint _updateTimer;
+            else
+                _updateTimer -= uiDiff;
+            _instance.SetData(DataTypes.TypeEventTimer, _updateTimer);
         }
 
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<npc_garrosh_tocAI>(creature);
-        }
+        InstanceScript _instance;
+        uint _updateTimer;
     }
 
     [Script]
-    class npc_varian_toc : CreatureScript
+    class npc_varian_toc : ScriptedAI
     {
-        public npc_varian_toc() : base("npc_varian_toc") { }
-
-        class npc_varian_tocAI : ScriptedAI
+        public npc_varian_toc(Creature creature) : base(creature)
         {
-            public npc_varian_tocAI(Creature creature) : base(creature)
+            _instance = me.GetInstanceScript();
+        }
+
+        public override void Reset() { }
+
+        public override void AttackStart(Unit who) { }
+
+        public override void UpdateAI(uint uiDiff)
+        {
+            if (_instance == null)
+                return;
+
+            if (_instance.GetData(DataTypes.TypeEventNpc) != CreatureIds.Varian)
+                return;
+
+            _updateTimer = _instance.GetData(DataTypes.TypeEventTimer);
+            if (_updateTimer <= uiDiff)
             {
-                _instance = me.GetInstanceScript();
-            }
-
-            public override void Reset() { }
-
-            public override void AttackStart(Unit who) { }
-
-            public override void UpdateAI(uint uiDiff)
-            {
-                if (_instance == null)
-                    return;
-
-                if (_instance.GetData(DataTypes.TypeEventNpc) != CreatureIds.Varian)
-                    return;
-
-                _updateTimer = _instance.GetData(DataTypes.TypeEventTimer);
-                if (_updateTimer <= uiDiff)
+                switch (_instance.GetData(DataTypes.TypeEvent))
                 {
-                    switch (_instance.GetData(DataTypes.TypeEvent))
-                    {
-                        case 120:
-                            me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotTalk);
-                            Talk(Texts.Stage_0_03a);
-                            _updateTimer = 2 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 122);
-                            break;
-                        case 122:
-                            me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotNone);
-                            _updateTimer = 3 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 130);
-                            break;
-                        case 2020:
-                            Talk(Texts.Stage_1_10);
-                            _updateTimer = 5 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 2030);
-                            break;
-                        case 3051:
-                            Talk(Texts.Stage_2_02a);
-                            _updateTimer = 17 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 3061);
-                            break;
-                        case 3071:
-                            Talk(Texts.Stage_2_04a);
-                            _updateTimer = 5 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 3081);
-                            break;
-                        case 3080:
-                            Talk(Texts.Stage_2_05a);
-                            _updateTimer = 3 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 3090);
-                            break;
-                        case 4020:
-                            Talk(Texts.Stage_3_03a);
-                            _updateTimer = 5 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 4040);
-                            break;
-                        default:
-                            break;
-                    }
+                    case 120:
+                        me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotTalk);
+                        Talk(Texts.Stage_0_03a);
+                        _updateTimer = 2 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 122);
+                        break;
+                    case 122:
+                        me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotNone);
+                        _updateTimer = 3 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 130);
+                        break;
+                    case 2020:
+                        Talk(Texts.Stage_1_10);
+                        _updateTimer = 5 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 2030);
+                        break;
+                    case 3051:
+                        Talk(Texts.Stage_2_02a);
+                        _updateTimer = 17 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 3061);
+                        break;
+                    case 3071:
+                        Talk(Texts.Stage_2_04a);
+                        _updateTimer = 5 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 3081);
+                        break;
+                    case 3080:
+                        Talk(Texts.Stage_2_05a);
+                        _updateTimer = 3 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 3090);
+                        break;
+                    case 4020:
+                        Talk(Texts.Stage_3_03a);
+                        _updateTimer = 5 * Time.InMilliseconds;
+                        _instance.SetData(DataTypes.TypeEvent, 4040);
+                        break;
+                    default:
+                        break;
                 }
-                else
-                    _updateTimer -= uiDiff;
-                _instance.SetData(DataTypes.TypeEventTimer, _updateTimer);
             }
-
-            InstanceScript _instance;
-            uint _updateTimer;
+            else
+                _updateTimer -= uiDiff;
+            _instance.SetData(DataTypes.TypeEventTimer, _updateTimer);
         }
 
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<npc_varian_tocAI>(creature);
-        }
+        InstanceScript _instance;
+        uint _updateTimer;
     }
 }

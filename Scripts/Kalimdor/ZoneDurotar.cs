@@ -26,118 +26,98 @@ using System;
 namespace Scripts.Kalimdor
 {
     [Script]
-    class npc_lazy_peon : CreatureScript
+    class npc_lazy_peon : NullCreatureAI
     {
-        public npc_lazy_peon() : base("npc_lazy_peon") { }
+        public npc_lazy_peon(Creature creature) : base(creature) { }
 
-        class npc_lazy_peonAI : NullCreatureAI
+        public override void InitializeAI()
         {
-            public npc_lazy_peonAI(Creature creature) : base(creature) { }
+            me.SetWalk(true);
 
-            public override void InitializeAI()
+            scheduler.Schedule(TimeSpan.FromSeconds(1), TimeSpan.FromMilliseconds(120000), task =>
             {
-                me.SetWalk(true);
+                GameObject Lumberpile = me.FindNearestGameObject(GoLumberpile, 20);
+                if (Lumberpile)
+                    me.GetMotionMaster().MovePoint(1, Lumberpile.GetPositionX() - 1, Lumberpile.GetPositionY(), Lumberpile.GetPositionZ());
+                task.Repeat();
+            });
 
-                scheduler.Schedule(TimeSpan.FromSeconds(1), TimeSpan.FromMilliseconds(120000), task =>
-                {
-                    GameObject Lumberpile = me.FindNearestGameObject(GoLumberpile, 20);
-                    if (Lumberpile)
-                        me.GetMotionMaster().MovePoint(1, Lumberpile.GetPositionX() - 1, Lumberpile.GetPositionY(), Lumberpile.GetPositionZ());
-                    task.Repeat();
-                });
-
-                scheduler.Schedule(TimeSpan.FromMilliseconds(300000), task =>
-                {
-                    me.HandleEmoteCommand(Emote.StateNone);
-                    me.GetMotionMaster().MovePoint(2, me.GetHomePosition());
-                    task.Repeat();
-                });
-            }
-
-            public override void MovementInform(MovementGeneratorType type, uint id)
+            scheduler.Schedule(TimeSpan.FromMilliseconds(300000), task =>
             {
-                switch (id)
-                {
-                    case 1:
-                        me.HandleEmoteCommand(Emote.StateWorkChopwood);
-                        break;
-                    case 2:
-                        DoCast(me, SpellBuffSleep);
-                        break;
-                }
-            }
-
-            public override void SpellHit(Unit caster, SpellInfo spell)
-            {
-                if (spell.Id != SpellAwakenPeon)
-                    return;
-
-                Player player = caster.ToPlayer();
-                if (player && player.GetQuestStatus(QuestLazyPeons) == QuestStatus.Incomplete)
-                {
-                    player.KilledMonsterCredit(me.GetEntry(), me.GetGUID());
-                    Talk(SaySpellHit, caster);
-                    me.RemoveAllAuras();
-                    GameObject Lumberpile = me.FindNearestGameObject(GoLumberpile, 20);
-                    if (Lumberpile)
-                        me.GetMotionMaster().MovePoint(1, Lumberpile.GetPositionX() - 1, Lumberpile.GetPositionY(), Lumberpile.GetPositionZ());
-                }
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                scheduler.Update(diff);
-
-                //if (!UpdateVictim())
-                    //return;
-
-                //DoMeleeAttackIfReady();
-            }
-
-            const int QuestLazyPeons = 37446;
-            const int GoLumberpile = 175784;
-            const uint SpellBuffSleep = 17743;
-            const int SpellAwakenPeon = 19938;
-            const int SaySpellHit = 0;
-
-            TaskScheduler scheduler = new TaskScheduler();
+                me.HandleEmoteCommand(Emote.StateNone);
+                me.GetMotionMaster().MovePoint(2, me.GetHomePosition());
+                task.Repeat();
+            });
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void MovementInform(MovementGeneratorType type, uint id)
         {
-            return new npc_lazy_peonAI(creature);
+            switch (id)
+            {
+                case 1:
+                    me.HandleEmoteCommand(Emote.StateWorkChopwood);
+                    break;
+                case 2:
+                    DoCast(me, SpellBuffSleep);
+                    break;
+            }
         }
+
+        public override void SpellHit(Unit caster, SpellInfo spell)
+        {
+            if (spell.Id != SpellAwakenPeon)
+                return;
+
+            Player player = caster.ToPlayer();
+            if (player && player.GetQuestStatus(QuestLazyPeons) == QuestStatus.Incomplete)
+            {
+                player.KilledMonsterCredit(me.GetEntry(), me.GetGUID());
+                Talk(SaySpellHit, caster);
+                me.RemoveAllAuras();
+                GameObject Lumberpile = me.FindNearestGameObject(GoLumberpile, 20);
+                if (Lumberpile)
+                    me.GetMotionMaster().MovePoint(1, Lumberpile.GetPositionX() - 1, Lumberpile.GetPositionY(), Lumberpile.GetPositionZ());
+            }
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            scheduler.Update(diff);
+
+            //if (!UpdateVictim())
+            //return;
+
+            //DoMeleeAttackIfReady();
+        }
+
+        const int QuestLazyPeons = 37446;
+        const int GoLumberpile = 175784;
+        const uint SpellBuffSleep = 17743;
+        const int SpellAwakenPeon = 19938;
+        const int SaySpellHit = 0;
+
+        TaskScheduler scheduler = new TaskScheduler();
     }
 
     [Script]
-    class spell_voodoo : SpellScriptLoader
+    class spell_voodoo : SpellScript
     {
-        public spell_voodoo() : base("spell_voodoo") { }
-
-        class spell_voodoo_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spellInfo)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(SpellBrew, SpellGhostly, SpellHex1, SpellHex2, SpellHex3, SpellGrow, SpellLaunch);
-            }
-
-            void HandleDummy(uint effIndex)
-            {
-                uint spellid = RandomHelper.RAND(SpellBrew, SpellGhostly, RandomHelper.RAND(SpellHex1, SpellHex2, SpellHex3), SpellGrow, SpellLaunch);
-                Unit target = GetHitUnit();
-                if (target)
-                    GetCaster().CastSpell(target, spellid, false);
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
-            }
+            return ValidateSpellInfo(SpellBrew, SpellGhostly, SpellHex1, SpellHex2, SpellHex3, SpellGrow, SpellLaunch);
         }
 
-        public override SpellScript GetSpellScript()
+        void HandleDummy(uint effIndex)
         {
-            return new spell_voodoo_SpellScript();
+            uint spellid = RandomHelper.RAND(SpellBrew, SpellGhostly, RandomHelper.RAND(SpellHex1, SpellHex2, SpellHex3), SpellGrow, SpellLaunch);
+            Unit target = GetHitUnit();
+            if (target)
+                GetCaster().CastSpell(target, spellid, false);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
 
         const uint SpellBrew = 16712; // Special Brew

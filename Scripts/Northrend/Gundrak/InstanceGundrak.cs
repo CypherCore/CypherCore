@@ -322,7 +322,7 @@ namespace Scripts.Northrend.Gundrak
 
             public override void ReadSaveDataMore(StringArguments data)
             {
-                SladRanStatueState =  (GameObjectState)data.NextUInt32();
+                SladRanStatueState = (GameObjectState)data.NextUInt32();
                 DrakkariColossusStatueState = (GameObjectState)data.NextUInt32();
                 MoorabiStatueState = (GameObjectState)data.NextUInt32();
 

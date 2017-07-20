@@ -39,75 +39,65 @@ namespace Scripts.Northrend.Nexus.Nexus
     }
 
     [Script]
-    class boss_nexus_commanders : CreatureScript
+    class boss_nexus_commanders : BossAI
     {
-        public boss_nexus_commanders() : base("boss_nexus_commanders") { }
+        boss_nexus_commanders(Creature creature) : base(creature, DataTypes.Commander) { }
 
-        class boss_nexus_commandersAI : BossAI
+        public override void EnterCombat(Unit who)
         {
-            boss_nexus_commandersAI(Creature creature) : base(creature, DataTypes.Commander) { }
+            _EnterCombat();
+            Talk(NexusCommandersConst.SayAggro);
+            me.RemoveAurasDueToSpell(NexusCommandersConst.SpellFrozenPrison);
+            DoCast(me, NexusCommandersConst.SpellBattleShout);
 
-            public override void EnterCombat(Unit who)
+            //Charge
+            _scheduler.Schedule(TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(4), task =>
             {
-                _EnterCombat();
-                Talk(NexusCommandersConst.SayAggro);
-                me.RemoveAurasDueToSpell(NexusCommandersConst.SpellFrozenPrison);
-                DoCast(me, NexusCommandersConst.SpellBattleShout);
+                Unit target = SelectTarget(SelectAggroTarget.Random, 0, 100.0f, true);
+                if (target)
+                    DoCast(target, NexusCommandersConst.SpellCharge);
 
-                //Charge
-                _scheduler.Schedule(TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(4), task =>
-                {
-                    Unit target = SelectTarget(SelectAggroTarget.Random, 0, 100.0f, true);
-                    if (target)
-                        DoCast(target, NexusCommandersConst.SpellCharge);
+                task.Repeat(TimeSpan.FromSeconds(11), TimeSpan.FromSeconds(15));
+            });
 
-                    task.Repeat(TimeSpan.FromSeconds(11), TimeSpan.FromSeconds(15));
-                });
-
-                //Whirlwind
-                _scheduler.Schedule(TimeSpan.FromSeconds(6), TimeSpan.FromSeconds(8), task =>
-                {
-                    DoCast(me, NexusCommandersConst.SpellWhirlwind);
-                    task.Repeat(TimeSpan.FromSeconds(19.5), TimeSpan.FromSeconds(25));
-                });
-
-                //Frightening Shout
-                _scheduler.Schedule(TimeSpan.FromSeconds(13), TimeSpan.FromSeconds(15), task =>
-                {
-                    DoCastAOE(NexusCommandersConst.SpellFrighteningShout);
-                    task.Repeat(TimeSpan.FromSeconds(45), TimeSpan.FromSeconds(55));
-                });
-            }
-
-            public override void JustDied(Unit killer)
+            //Whirlwind
+            _scheduler.Schedule(TimeSpan.FromSeconds(6), TimeSpan.FromSeconds(8), task =>
             {
-                _JustDied();
-                Talk(NexusCommandersConst.SayDeath);
-            }
+                DoCast(me, NexusCommandersConst.SpellWhirlwind);
+                task.Repeat(TimeSpan.FromSeconds(19.5), TimeSpan.FromSeconds(25));
+            });
 
-            public override void KilledUnit(Unit who)
+            //Frightening Shout
+            _scheduler.Schedule(TimeSpan.FromSeconds(13), TimeSpan.FromSeconds(15), task =>
             {
-                if (who.IsTypeId(TypeId.Player))
-                    Talk(NexusCommandersConst.SayKill);
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _scheduler.Update(diff);
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-
-                DoMeleeAttackIfReady();
-            }
+                DoCastAOE(NexusCommandersConst.SpellFrighteningShout);
+                task.Repeat(TimeSpan.FromSeconds(45), TimeSpan.FromSeconds(55));
+            });
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void JustDied(Unit killer)
         {
-            return GetInstanceAI<boss_nexus_commandersAI>(creature);
+            _JustDied();
+            Talk(NexusCommandersConst.SayDeath);
+        }
+
+        public override void KilledUnit(Unit who)
+        {
+            if (who.IsTypeId(TypeId.Player))
+                Talk(NexusCommandersConst.SayKill);
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _scheduler.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            DoMeleeAttackIfReady();
         }
     }
 }

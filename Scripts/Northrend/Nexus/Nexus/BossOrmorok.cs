@@ -43,113 +43,103 @@ namespace Scripts.Northrend.Nexus.Nexus
     }
 
     [Script]
-    class boss_ormorok : CreatureScript
+    class boss_ormorok : BossAI
     {
-        public boss_ormorok() : base("boss_ormorok") { }
-
-        class boss_ormorokAI : BossAI
+        public boss_ormorok(Creature creature) : base(creature, DataTypes.Ormorok)
         {
-            public boss_ormorokAI(Creature creature) : base(creature, DataTypes.Ormorok)
-            {
-                Initialize();
-            }
-
-            void Initialize()
-            {
-                frenzy = false;
-            }
-
-            public override void Reset()
-            {
-                base.Reset();
-                Initialize();
-            }
-
-            public override void EnterCombat(Unit who)
-            {
-                _EnterCombat();
-
-                //Crystal Spikes
-                _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
-                {
-                    Talk(OrmorokConst.SayCrystalSpikes);
-                    DoCast(OrmorokConst.SpellCrystalSpikes);
-                    task.Repeat(TimeSpan.FromSeconds(12));
-                });
-
-                //Trample
-                _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
-                {
-                    DoCast(me, OrmorokConst.SpellTrample);
-                    task.Repeat(TimeSpan.FromSeconds(10));
-                });
-
-                //Spell Reflection
-                _scheduler.Schedule(TimeSpan.FromSeconds(30), task =>
-                {
-                    Talk(OrmorokConst.SayReflect);
-                    DoCast(me, OrmorokConst.SpellReflection);
-                    task.Repeat(TimeSpan.FromSeconds(30));
-                });
-
-                //Heroic Crystalline Tangler
-                if (IsHeroic())
-                {
-                    _scheduler.Schedule(TimeSpan.FromSeconds(17), task =>
-                    {
-                        Unit target = SelectTarget(SelectAggroTarget.Random, 0, new OrmorokTanglerPredicate(me));
-                        if (target)
-                            DoCast(target, OrmorokConst.SpellSummonCrystallineTangler);
-
-                        task.Repeat(TimeSpan.FromSeconds(17));
-                    });
-                }
-
-                Talk(OrmorokConst.SayAggro);
-            }
-
-            public override void DamageTaken(Unit attacker, ref uint damage)
-            {
-                if (!frenzy && HealthBelowPct(25))
-                {
-                    Talk(OrmorokConst.SayFrenzy);
-                    DoCast(me, OrmorokConst.SpellFrenzy);
-                    frenzy = true;
-                }
-            }
-
-            public override void JustDied(Unit killer)
-            {
-                _JustDied();
-                Talk(OrmorokConst.SayDeath);
-            }
-
-            public override void KilledUnit(Unit who)
-            {
-                if (who.IsTypeId(TypeId.Player))
-                    Talk(OrmorokConst.SayKill);
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _scheduler.Update(diff);
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-
-                DoMeleeAttackIfReady();
-            }
-
-            bool frenzy;
+            Initialize();
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        void Initialize()
         {
-            return GetInstanceAI<boss_ormorokAI>(creature);
+            frenzy = false;
         }
+
+        public override void Reset()
+        {
+            base.Reset();
+            Initialize();
+        }
+
+        public override void EnterCombat(Unit who)
+        {
+            _EnterCombat();
+
+            //Crystal Spikes
+            _scheduler.Schedule(TimeSpan.FromSeconds(12), task =>
+            {
+                Talk(OrmorokConst.SayCrystalSpikes);
+                DoCast(OrmorokConst.SpellCrystalSpikes);
+                task.Repeat(TimeSpan.FromSeconds(12));
+            });
+
+            //Trample
+            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
+            {
+                DoCast(me, OrmorokConst.SpellTrample);
+                task.Repeat(TimeSpan.FromSeconds(10));
+            });
+
+            //Spell Reflection
+            _scheduler.Schedule(TimeSpan.FromSeconds(30), task =>
+            {
+                Talk(OrmorokConst.SayReflect);
+                DoCast(me, OrmorokConst.SpellReflection);
+                task.Repeat(TimeSpan.FromSeconds(30));
+            });
+
+            //Heroic Crystalline Tangler
+            if (IsHeroic())
+            {
+                _scheduler.Schedule(TimeSpan.FromSeconds(17), task =>
+                {
+                    Unit target = SelectTarget(SelectAggroTarget.Random, 0, new OrmorokTanglerPredicate(me));
+                    if (target)
+                        DoCast(target, OrmorokConst.SpellSummonCrystallineTangler);
+
+                    task.Repeat(TimeSpan.FromSeconds(17));
+                });
+            }
+
+            Talk(OrmorokConst.SayAggro);
+        }
+
+        public override void DamageTaken(Unit attacker, ref uint damage)
+        {
+            if (!frenzy && HealthBelowPct(25))
+            {
+                Talk(OrmorokConst.SayFrenzy);
+                DoCast(me, OrmorokConst.SpellFrenzy);
+                frenzy = true;
+            }
+        }
+
+        public override void JustDied(Unit killer)
+        {
+            _JustDied();
+            Talk(OrmorokConst.SayDeath);
+        }
+
+        public override void KilledUnit(Unit who)
+        {
+            if (who.IsTypeId(TypeId.Player))
+                Talk(OrmorokConst.SayKill);
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _scheduler.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+
+        bool frenzy;
     }
 
     class OrmorokTanglerPredicate : ISelector
@@ -189,103 +179,83 @@ namespace Scripts.Northrend.Nexus.Nexus
     }
 
     [Script]
-    class npc_crystal_spike_trigger : CreatureScript
+    class npc_crystal_spike_trigger : ScriptedAI
     {
-        public npc_crystal_spike_trigger() : base("npc_crystal_spike_trigger") { }
+        public npc_crystal_spike_trigger(Creature creature) : base(creature) { }
 
-        class npc_crystal_spike_triggerAI : ScriptedAI
+        public override void IsSummonedBy(Unit owner)
         {
-            public npc_crystal_spike_triggerAI(Creature creature) : base(creature) { }
-
-            public override void IsSummonedBy(Unit owner)
+            switch (me.GetEntry())
             {
-                switch (me.GetEntry())
-                {
-                    case CrystalSpikesConst.NpcCrystalSpikeInitial:
-                        _count = 0;
-                        me.SetFacingToObject(owner);
-                        break;
-                    case CrystalSpikesConst.NpcCrystalSpikeTrigger:
-                        Creature trigger = owner.ToCreature();
-                        if (trigger)
-                            _count = trigger.GetAI().GetData(CrystalSpikesConst.DataCount) + 1;
-                        break;
-                    default:
-                        _count = CrystalSpikesConst.MaxCount;
-                        break;
-                }
+                case CrystalSpikesConst.NpcCrystalSpikeInitial:
+                    _count = 0;
+                    me.SetFacingToObject(owner);
+                    break;
+                case CrystalSpikesConst.NpcCrystalSpikeTrigger:
+                    Creature trigger = owner.ToCreature();
+                    if (trigger)
+                        _count = trigger.GetAI().GetData(CrystalSpikesConst.DataCount) + 1;
+                    break;
+                default:
+                    _count = CrystalSpikesConst.MaxCount;
+                    break;
+            }
 
+            if (me.GetEntry() == CrystalSpikesConst.NpcCrystalSpikeTrigger)
+            {
+                GameObject trap = me.FindNearestGameObject(CrystalSpikesConst.GoCrystalSpikeTrap, 1.0f);
+                if (trap)
+                    trap.Use(me);
+            }
+
+            //Despawn
+            _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
+            {
                 if (me.GetEntry() == CrystalSpikesConst.NpcCrystalSpikeTrigger)
                 {
                     GameObject trap = me.FindNearestGameObject(CrystalSpikesConst.GoCrystalSpikeTrap, 1.0f);
                     if (trap)
-                        trap.Use(me);
+                        trap.Delete();
                 }
 
-                //Despawn
-                _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
-                {
-                    if (me.GetEntry() == CrystalSpikesConst.NpcCrystalSpikeTrigger)
-                    {
-                        GameObject trap = me.FindNearestGameObject(CrystalSpikesConst.GoCrystalSpikeTrap, 1.0f);
-                        if (trap)
-                            trap.Delete();
-                    }
-
-                    me.DespawnOrUnsummon();
-                });
-            }
-
-            public override uint GetData(uint type)
-            {
-                return type == CrystalSpikesConst.DataCount ? _count : 0;
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                _scheduler.Update(diff);
-            }
-
-            uint _count;
+                me.DespawnOrUnsummon();
+            });
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override uint GetData(uint type)
         {
-            return new npc_crystal_spike_triggerAI(creature);
+            return type == CrystalSpikesConst.DataCount ? _count : 0;
         }
+
+        public override void UpdateAI(uint diff)
+        {
+            _scheduler.Update(diff);
+        }
+
+        uint _count;
     }
 
     [Script]
-    class spell_crystal_spike : SpellScriptLoader
+    class spell_crystal_spike : AuraScript
     {
-        public spell_crystal_spike() : base("spell_crystal_spike") { }
-
-        class spell_crystal_spike_AuraScript : AuraScript
+        void HandlePeriodic(AuraEffect aurEff)
         {
-            void HandlePeriodic(AuraEffect aurEff)
+            Unit target = GetTarget();
+            if (target.GetEntry() == CrystalSpikesConst.NpcCrystalSpikeInitial || target.GetEntry() == CrystalSpikesConst.NpcCrystalSpikeTrigger)
             {
-                Unit target = GetTarget();
-                if (target.GetEntry() == CrystalSpikesConst.NpcCrystalSpikeInitial || target.GetEntry() == CrystalSpikesConst.NpcCrystalSpikeTrigger)
+                Creature trigger = target.ToCreature();
+                if (trigger)
                 {
-                    Creature trigger = target.ToCreature();
-                    if (trigger)
-                    {
-                        uint spell = target.GetEntry() == CrystalSpikesConst.NpcCrystalSpikeInitial ? CrystalSpikesConst.CrystalSpikeSummon[0] : CrystalSpikesConst.CrystalSpikeSummon[RandomHelper.IRand(0, 2)];
-                        if (trigger.GetAI().GetData(CrystalSpikesConst.DataCount) < CrystalSpikesConst.MaxCount)
-                            trigger.CastSpell(trigger, spell, true);
-                    }
+                    uint spell = target.GetEntry() == CrystalSpikesConst.NpcCrystalSpikeInitial ? CrystalSpikesConst.CrystalSpikeSummon[0] : CrystalSpikesConst.CrystalSpikeSummon[RandomHelper.IRand(0, 2)];
+                    if (trigger.GetAI().GetData(CrystalSpikesConst.DataCount) < CrystalSpikesConst.MaxCount)
+                        trigger.CastSpell(trigger, spell, true);
                 }
-            }
-
-            public override void Register()
-            {
-                OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodic, 0, AuraType.PeriodicDummy));
             }
         }
 
-        public override AuraScript GetAuraScript()
+        public override void Register()
         {
-            return new spell_crystal_spike_AuraScript();
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodic, 0, AuraType.PeriodicDummy));
         }
     }
 }

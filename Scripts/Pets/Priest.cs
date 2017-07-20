@@ -30,54 +30,33 @@ namespace Scripts.Pets.Priest
     }
 
     [Script]
-    class npc_pet_pri_lightwell : CreatureScript
+    class npc_pet_pri_lightwell : PassiveAI
     {
-        public npc_pet_pri_lightwell() : base("npc_pet_pri_lightwell") { }
-
-        class npc_pet_pri_lightwellAI : PassiveAI
+        public npc_pet_pri_lightwell(Creature creature) : base(creature)
         {
-            public npc_pet_pri_lightwellAI(Creature creature) : base(creature)
-            {
-                DoCast(creature, SpellIds.LightWellCharges, false);
-            }
-
-            public override void EnterEvadeMode(EvadeReason why)
-            {
-                if (!me.IsAlive())
-                    return;
-
-                me.DeleteThreatList();
-                me.CombatStop(true);
-                me.ResetPlayerDamageReq();
-            }
+            DoCast(creature, SpellIds.LightWellCharges, false);
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void EnterEvadeMode(EvadeReason why)
         {
-            return new npc_pet_pri_lightwellAI(creature);
+            if (!me.IsAlive())
+                return;
+
+            me.DeleteThreatList();
+            me.CombatStop(true);
+            me.ResetPlayerDamageReq();
         }
     }
 
     [Script]
-    class npc_pet_pri_shadowfiend : CreatureScript
+    class npc_pet_pri_shadowfiend : PetAI
     {
-        public npc_pet_pri_shadowfiend() : base("npc_pet_pri_shadowfiend") { }
+        public npc_pet_pri_shadowfiend(Creature creature) : base(creature) { }
 
-        class npc_pet_pri_shadowfiendAI : PetAI
+        public override void IsSummonedBy(Unit summoner)
         {
-            public npc_pet_pri_shadowfiendAI(Creature creature) : base(creature) { }
-
-            public override void IsSummonedBy(Unit summoner)
-            {
-                if (summoner.HasAura(SpellIds.GlyphOfShadowFiend))
-                    DoCastAOE(SpellIds.ShadowFiendDeath);
-            }
-
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return new npc_pet_pri_shadowfiendAI(creature);
+            if (summoner.HasAura(SpellIds.GlyphOfShadowFiend))
+                DoCastAOE(SpellIds.ShadowFiendDeath);
         }
     }
 }

@@ -331,9 +331,11 @@ namespace Scripts.World
                 {
                     pLeviroth.GetAI().AttackStart(player);
                     return false;
-                } else
+                }
+                else
                     player.SendEquipError(InventoryResult.OutOfRange, item, null);
-            } else
+            }
+            else
                 player.SendEquipError(InventoryResult.ClientLockedOut, item, null);
             return true;
         }

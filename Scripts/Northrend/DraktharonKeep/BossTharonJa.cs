@@ -74,178 +74,158 @@ namespace Scripts.Northrend.DraktharonKeep.TharonJa
     }
 
     [Script]
-    class boss_tharon_ja : CreatureScript
+    class boss_tharon_ja : BossAI
     {
-        public boss_tharon_ja() : base("boss_tharon_ja") { }
+        public boss_tharon_ja(Creature creature) : base(creature, DTKDataTypes.TharonJa) { }
 
-        class boss_tharon_jaAI : BossAI
+        public override void Reset()
         {
-            public boss_tharon_jaAI(Creature creature) : base(creature, DTKDataTypes.TharonJa) { }
+            _Reset();
+            me.RestoreDisplayId();
+        }
 
-            public override void Reset()
+        public override void EnterCombat(Unit who)
+        {
+            Talk(TextIds.SayAggro);
+            _EnterCombat();
+
+            _events.ScheduleEvent(EventIds.DecayFlesh, TimeSpan.FromSeconds(20));
+            _events.ScheduleEvent(EventIds.CurseOfLife, TimeSpan.FromSeconds(1));
+            _events.ScheduleEvent(EventIds.RainOfFire, TimeSpan.FromSeconds(14), TimeSpan.FromSeconds(18));
+            _events.ScheduleEvent(EventIds.ShadowVolley, TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(10));
+        }
+
+        public override void KilledUnit(Unit who)
+        {
+            if (who.IsTypeId(TypeId.Player))
+                Talk(TextIds.SayKill);
+        }
+
+        public override void JustDied(Unit killer)
+        {
+            _JustDied();
+
+            Talk(TextIds.SayDeath);
+            DoCastAOE(SpellIds.ClearGiftOfTharonJa, true);
+            DoCastAOE(SpellIds.AchievementCheck, true);
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _events.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            _events.ExecuteEvents(eventId =>
             {
-                _Reset();
-                me.RestoreDisplayId();
-            }
+                switch (eventId)
+                {
+                    case EventIds.CurseOfLife:
+                        {
+                            Unit target = SelectTarget(SelectAggroTarget.Random, 0, 100.0f, true);
+                            if (target)
+                                DoCast(target, SpellIds.CurseOfLife);
+                            _events.ScheduleEvent(EventIds.CurseOfLife, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15));
+                        }
+                        return;
+                    case EventIds.ShadowVolley:
+                        DoCastVictim(SpellIds.ShadowVolley);
+                        _events.ScheduleEvent(EventIds.ShadowVolley, TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(10));
+                        return;
+                    case EventIds.RainOfFire:
+                        {
+                            Unit target = SelectTarget(SelectAggroTarget.Random, 0, 100.0f, true);
+                            if (target)
+                                DoCast(target, SpellIds.RainOfFire);
+                            _events.ScheduleEvent(EventIds.RainOfFire, TimeSpan.FromSeconds(14), TimeSpan.FromSeconds(18));
+                        }
+                        return;
+                    case EventIds.LightningBreath:
+                        {
+                            Unit target = SelectTarget(SelectAggroTarget.Random, 0, 100.0f, true);
+                            if (target)
+                                DoCast(target, SpellIds.LightningBreath);
+                            _events.ScheduleEvent(EventIds.LightningBreath, TimeSpan.FromSeconds(6), TimeSpan.FromSeconds(7));
+                        }
+                        return;
+                    case EventIds.EyeBeam:
+                        {
+                            Unit target = SelectTarget(SelectAggroTarget.Random, 0, 100.0f, true);
+                            if (target)
+                                DoCast(target, SpellIds.EyeBeam);
+                            _events.ScheduleEvent(EventIds.EyeBeam, TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(6));
+                        }
+                        return;
+                    case EventIds.PoisonCloud:
+                        DoCastAOE(SpellIds.PoisonCloud);
+                        _events.ScheduleEvent(EventIds.PoisonCloud, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(12));
+                        return;
+                    case EventIds.DecayFlesh:
+                        DoCastAOE(SpellIds.DecayFlesh);
+                        _events.ScheduleEvent(EventIds.GoingFlesh, TimeSpan.FromSeconds(6));
+                        return;
+                    case EventIds.GoingFlesh:
+                        Talk(TextIds.SayFlesh);
+                        me.SetDisplayId(Misc.ModelFlesh);
+                        DoCastAOE(SpellIds.GiftOfTharonJa, true);
+                        DoCast(me, SpellIds.FleshVisual, true);
+                        DoCast(me, SpellIds.Dummy, true);
 
-            public override void EnterCombat(Unit who)
-            {
-                Talk(TextIds.SayAggro);
-                _EnterCombat();
+                        _events.Reset();
+                        _events.ScheduleEvent(EventIds.ReturnFlesh, TimeSpan.FromSeconds(20));
+                        _events.ScheduleEvent(EventIds.LightningBreath, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(4));
+                        _events.ScheduleEvent(EventIds.EyeBeam, TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(8));
+                        _events.ScheduleEvent(EventIds.PoisonCloud, TimeSpan.FromSeconds(6), TimeSpan.FromSeconds(7));
+                        break;
+                    case EventIds.ReturnFlesh:
+                        DoCastAOE(SpellIds.ReturnFlesh);
+                        _events.ScheduleEvent(EventIds.GoingSkeletal, 6000);
+                        return;
+                    case EventIds.GoingSkeletal:
+                        Talk(TextIds.SaySkeleton);
+                        me.RestoreDisplayId();
+                        DoCastAOE(SpellIds.ClearGiftOfTharonJa, true);
 
-                _events.ScheduleEvent(EventIds.DecayFlesh, TimeSpan.FromSeconds(20));
-                _events.ScheduleEvent(EventIds.CurseOfLife, TimeSpan.FromSeconds(1));
-                _events.ScheduleEvent(EventIds.RainOfFire, TimeSpan.FromSeconds(14), TimeSpan.FromSeconds(18));
-                _events.ScheduleEvent(EventIds.ShadowVolley, TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(10));
-            }
-
-            public override void KilledUnit(Unit who)
-            {
-                if (who.IsTypeId(TypeId.Player))
-                    Talk(TextIds.SayKill);
-            }
-
-            public override void JustDied(Unit killer)
-            {
-                _JustDied();
-
-                Talk(TextIds.SayDeath);
-                DoCastAOE(SpellIds.ClearGiftOfTharonJa, true);
-                DoCastAOE(SpellIds.AchievementCheck, true);
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _events.Update(diff);
+                        _events.Reset();
+                        _events.ScheduleEvent(EventIds.DecayFlesh, TimeSpan.FromSeconds(20));
+                        _events.ScheduleEvent(EventIds.CurseOfLife, TimeSpan.FromSeconds(1));
+                        _events.ScheduleEvent(EventIds.RainOfFire, TimeSpan.FromSeconds(14), TimeSpan.FromSeconds(18));
+                        _events.ScheduleEvent(EventIds.ShadowVolley, TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(10));
+                        break;
+                    default:
+                        break;
+                }
 
                 if (me.HasUnitState(UnitState.Casting))
                     return;
+            });
 
-                _events.ExecuteEvents(eventId =>
-                {
-                    switch (eventId)
-                    {
-                        case EventIds.CurseOfLife:
-                            {
-                                Unit target = SelectTarget(SelectAggroTarget.Random, 0, 100.0f, true);
-                                if (target)
-                                    DoCast(target, SpellIds.CurseOfLife);
-                                _events.ScheduleEvent(EventIds.CurseOfLife, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15));
-                            }
-                            return;
-                        case EventIds.ShadowVolley:
-                            DoCastVictim(SpellIds.ShadowVolley);
-                            _events.ScheduleEvent(EventIds.ShadowVolley, TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(10));
-                            return;
-                        case EventIds.RainOfFire:
-                            {
-                                Unit target = SelectTarget(SelectAggroTarget.Random, 0, 100.0f, true);
-                                if (target)
-                                    DoCast(target, SpellIds.RainOfFire);
-                                _events.ScheduleEvent(EventIds.RainOfFire, TimeSpan.FromSeconds(14), TimeSpan.FromSeconds(18));
-                            }
-                            return;
-                        case EventIds.LightningBreath:
-                            {
-                                Unit target = SelectTarget(SelectAggroTarget.Random, 0, 100.0f, true);
-                                if (target)
-                                    DoCast(target, SpellIds.LightningBreath);
-                                _events.ScheduleEvent(EventIds.LightningBreath, TimeSpan.FromSeconds(6), TimeSpan.FromSeconds(7));
-                            }
-                            return;
-                        case EventIds.EyeBeam:
-                            {
-                                Unit target = SelectTarget(SelectAggroTarget.Random, 0, 100.0f, true);
-                                if (target)
-                                    DoCast(target, SpellIds.EyeBeam);
-                                _events.ScheduleEvent(EventIds.EyeBeam, TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(6));
-                            }
-                            return;
-                        case EventIds.PoisonCloud:
-                            DoCastAOE(SpellIds.PoisonCloud);
-                            _events.ScheduleEvent(EventIds.PoisonCloud, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(12));
-                            return;
-                        case EventIds.DecayFlesh:
-                            DoCastAOE(SpellIds.DecayFlesh);
-                            _events.ScheduleEvent(EventIds.GoingFlesh, TimeSpan.FromSeconds(6));
-                            return;
-                        case EventIds.GoingFlesh:
-                            Talk(TextIds.SayFlesh);
-                            me.SetDisplayId(Misc.ModelFlesh);
-                            DoCastAOE(SpellIds.GiftOfTharonJa, true);
-                            DoCast(me, SpellIds.FleshVisual, true);
-                            DoCast(me, SpellIds.Dummy, true);
-
-                            _events.Reset();
-                            _events.ScheduleEvent(EventIds.ReturnFlesh, TimeSpan.FromSeconds(20));
-                            _events.ScheduleEvent(EventIds.LightningBreath, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(4));
-                            _events.ScheduleEvent(EventIds.EyeBeam, TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(8));
-                            _events.ScheduleEvent(EventIds.PoisonCloud, TimeSpan.FromSeconds(6), TimeSpan.FromSeconds(7));
-                            break;
-                        case EventIds.ReturnFlesh:
-                            DoCastAOE(SpellIds.ReturnFlesh);
-                            _events.ScheduleEvent(EventIds.GoingSkeletal, 6000);
-                            return;
-                        case EventIds.GoingSkeletal:
-                            Talk(TextIds.SaySkeleton);
-                            me.RestoreDisplayId();
-                            DoCastAOE(SpellIds.ClearGiftOfTharonJa, true);
-
-                            _events.Reset();
-                            _events.ScheduleEvent(EventIds.DecayFlesh, TimeSpan.FromSeconds(20));
-                            _events.ScheduleEvent(EventIds.CurseOfLife, TimeSpan.FromSeconds(1));
-                            _events.ScheduleEvent(EventIds.RainOfFire, TimeSpan.FromSeconds(14), TimeSpan.FromSeconds(18));
-                            _events.ScheduleEvent(EventIds.ShadowVolley, TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(10));
-                            break;
-                        default:
-                            break;
-                    }
-
-                    if (me.HasUnitState(UnitState.Casting))
-                        return;
-                });
-
-                DoMeleeAttackIfReady();
-            }
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<boss_tharon_jaAI>(creature);
+            DoMeleeAttackIfReady();
         }
     }
 
     [Script]
-    class spell_tharon_ja_clear_gift_of_tharon_ja : SpellScriptLoader
+    class spell_tharon_ja_clear_gift_of_tharon_ja : SpellScript
     {
-        public spell_tharon_ja_clear_gift_of_tharon_ja() : base("spell_tharon_ja_clear_gift_of_tharon_ja") { }
-
-        class spell_tharon_ja_clear_gift_of_tharon_ja_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spellInfo)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(SpellIds.GiftOfTharonJa);
-            }
-
-            void HandleScript(uint effIndex)
-            {
-                Unit target = GetHitUnit();
-                if (target)
-                    target.RemoveAura(SpellIds.GiftOfTharonJa);
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
-            }
+            return ValidateSpellInfo(SpellIds.GiftOfTharonJa);
         }
 
-        public override SpellScript GetSpellScript()
+        void HandleScript(uint effIndex)
         {
-            return new spell_tharon_ja_clear_gift_of_tharon_ja_SpellScript();
+            Unit target = GetHitUnit();
+            if (target)
+                target.RemoveAura(SpellIds.GiftOfTharonJa);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 }

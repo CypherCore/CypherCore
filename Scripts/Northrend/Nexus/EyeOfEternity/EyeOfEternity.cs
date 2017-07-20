@@ -87,7 +87,7 @@ namespace Scripts.Northrend.Nexus.EyeOfEternity
         public const uint IrisOpened = 61012; // Visual When Starting Encounter
         public const uint SummomRedDragonBuddy = 56070;
     }
-    
+
     [Script]
     class instance_eye_of_eternity : InstanceMapScript
     {

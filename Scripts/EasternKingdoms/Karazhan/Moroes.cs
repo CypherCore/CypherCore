@@ -92,130 +92,156 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
     }
 
     [Script]
-    class boss_moroes : CreatureScript
+    public class boss_moroes : ScriptedAI
     {
-        public boss_moroes() : base("boss_moroes") { }
-
-        public override CreatureAI GetAI(Creature creature)
+        public boss_moroes(Creature creature) : base(creature)
         {
-            return GetInstanceAI<boss_moroesAI>(creature);
+            instance = creature.GetInstanceScript();
         }
 
-        public class boss_moroesAI : ScriptedAI
+        public override void Reset()
         {
-            public boss_moroesAI(Creature creature) : base(creature)
+            Vanish_Timer = 30000;
+            Blind_Timer = 35000;
+            Gouge_Timer = 23000;
+            Wait_Timer = 0;
+            CheckAdds_Timer = 5000;
+
+            Enrage = false;
+            InVanish = false;
+            if (me.IsAlive())
+                SpawnAdds();
+
+            instance.SetData(karazhanConst.BossMoroes, (uint)EncounterState.NotStarted);
+        }
+
+        void StartEvent()
+        {
+            instance.SetData(karazhanConst.BossMoroes, (uint)EncounterState.InProgress);
+
+            DoZoneInCombat();
+        }
+
+        public override void EnterCombat(Unit who)
+        {
+            StartEvent();
+
+            Talk(TextIds.Aggro);
+            AddsAttack();
+            DoZoneInCombat();
+        }
+
+        public override void KilledUnit(Unit victim)
+        {
+            Talk(TextIds.Kill);
+        }
+
+        public override void JustDied(Unit killer)
+        {
+            Talk(TextIds.Death);
+
+            instance.SetData(karazhanConst.BossMoroes, (uint)EncounterState.Done);
+
+            DeSpawnAdds();
+
+            //remove aura from spell Garrote when Moroes dies
+            instance.DoRemoveAurasDueToSpellOnPlayers(SpellIds.Garrote);
+        }
+
+        void SpawnAdds()
+        {
+            DeSpawnAdds();
+
+            if (isAddlistEmpty())
             {
-                instance = creature.GetInstanceScript();
-            }
+                List<uint> AddList = new List<uint>();
 
-            public override void Reset()
-            {
-                Vanish_Timer = 30000;
-                Blind_Timer = 35000;
-                Gouge_Timer = 23000;
-                Wait_Timer = 0;
-                CheckAdds_Timer = 5000;
+                for (byte i = 0; i < 6; ++i)
+                    AddList.Add(Misc.Adds[i]);
 
-                Enrage = false;
-                InVanish = false;
-                if (me.IsAlive())
-                    SpawnAdds();
+                AddList.RandomResize(4);
 
-                instance.SetData(karazhanConst.BossMoroes, (uint)EncounterState.NotStarted);
-            }
-
-            void StartEvent()
-            {
-                instance.SetData(karazhanConst.BossMoroes, (uint)EncounterState.InProgress);
-
-                DoZoneInCombat();
-            }
-
-            public override void EnterCombat(Unit who)
-            {
-                StartEvent();
-
-                Talk(TextIds.Aggro);
-                AddsAttack();
-                DoZoneInCombat();
-            }
-
-            public override void KilledUnit(Unit victim)
-            {
-                Talk(TextIds.Kill);
-            }
-
-            public override void JustDied(Unit killer)
-            {
-                Talk(TextIds.Death);
-
-                instance.SetData(karazhanConst.BossMoroes, (uint)EncounterState.Done);
-
-                DeSpawnAdds();
-
-                //remove aura from spell Garrote when Moroes dies
-                instance.DoRemoveAurasDueToSpellOnPlayers(SpellIds.Garrote);
-            }
-
-            void SpawnAdds()
-            {
-                DeSpawnAdds();
-
-                if (isAddlistEmpty())
+                byte c = 0;
+                for (var i = 0; i != AddList.Count && c < 4; ++i, ++c)
                 {
-                    List<uint> AddList = new List<uint>();
-
-                    for (byte i = 0; i < 6; ++i)
-                        AddList.Add(Misc.Adds[i]);
-
-                    AddList.RandomResize(4);
-
-                    byte c = 0;
-                    for (var i = 0; i != AddList.Count && c < 4; ++i, ++c)
+                    uint entry = AddList[i];
+                    Creature creature = me.SummonCreature(entry, Misc.Locations[c], TempSummonType.CorpseTimedDespawn, 10000);
+                    if (creature)
                     {
-                        uint entry = AddList[i];
-                        Creature creature = me.SummonCreature(entry, Misc.Locations[c], TempSummonType.CorpseTimedDespawn, 10000);
-                        if (creature)
-                        {
-                            AddGUID[c] = creature.GetGUID();
-                            AddId[c] = entry;
-                        }
-                    }
-                }
-                else
-                {
-                    for (byte i = 0; i < 4; ++i)
-                    {
-                        Creature creature = me.SummonCreature(AddId[i], Misc.Locations[i], TempSummonType.CorpseTimedDespawn, 10000);
-                        if (creature)
-                            AddGUID[i] = creature.GetGUID();
+                        AddGUID[c] = creature.GetGUID();
+                        AddId[c] = entry;
                     }
                 }
             }
-
-            bool isAddlistEmpty()
-            {
-                for (byte i = 0; i < 4; ++i)
-                    if (AddId[i] == 0)
-                        return true;
-
-                return false;
-            }
-
-            void DeSpawnAdds()
+            else
             {
                 for (byte i = 0; i < 4; ++i)
                 {
-                    if (!AddGUID[i].IsEmpty())
-                    {
-                        Creature temp = ObjectAccessor.GetCreature(me, AddGUID[i]);
-                        if (temp)
-                            temp.DespawnOrUnsummon();
-                    }
+                    Creature creature = me.SummonCreature(AddId[i], Misc.Locations[i], TempSummonType.CorpseTimedDespawn, 10000);
+                    if (creature)
+                        AddGUID[i] = creature.GetGUID();
                 }
             }
+        }
 
-            void AddsAttack()
+        bool isAddlistEmpty()
+        {
+            for (byte i = 0; i < 4; ++i)
+                if (AddId[i] == 0)
+                    return true;
+
+            return false;
+        }
+
+        void DeSpawnAdds()
+        {
+            for (byte i = 0; i < 4; ++i)
+            {
+                if (!AddGUID[i].IsEmpty())
+                {
+                    Creature temp = ObjectAccessor.GetCreature(me, AddGUID[i]);
+                    if (temp)
+                        temp.DespawnOrUnsummon();
+                }
+            }
+        }
+
+        void AddsAttack()
+        {
+            for (byte i = 0; i < 4; ++i)
+            {
+                if (!AddGUID[i].IsEmpty())
+                {
+                    Creature temp = ObjectAccessor.GetCreature((me), AddGUID[i]);
+                    if (temp && temp.IsAlive())
+                    {
+                        temp.GetAI().AttackStart(me.GetVictim());
+                        DoZoneInCombat(temp);
+                    }
+                    else
+                        EnterEvadeMode();
+                }
+            }
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (instance.GetData(karazhanConst.BossMoroes) == 0)
+            {
+                EnterEvadeMode();
+                return;
+            }
+
+            if (!Enrage && HealthBelowPct(30))
+            {
+                DoCast(me, SpellIds.Frenzy);
+                Enrage = true;
+            }
+
+            if (CheckAdds_Timer <= diff)
             {
                 for (byte i = 0; i < 4; ++i)
                 {
@@ -223,117 +249,84 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
                     {
                         Creature temp = ObjectAccessor.GetCreature((me), AddGUID[i]);
                         if (temp && temp.IsAlive())
-                        {
-                            temp.GetAI().AttackStart(me.GetVictim());
-                            DoZoneInCombat(temp);
-                        }
-                        else
-                            EnterEvadeMode();
+                            if (!temp.GetVictim())
+                                temp.GetAI().AttackStart(me.GetVictim());
                     }
                 }
+                CheckAdds_Timer = 5000;
             }
+            else CheckAdds_Timer -= diff;
 
-            public override void UpdateAI(uint diff)
+            if (!Enrage)
             {
-                if (!UpdateVictim())
-                    return;
-
-                if (instance.GetData(karazhanConst.BossMoroes) == 0)
+                //Cast Vanish, then Garrote random victim
+                if (Vanish_Timer <= diff)
                 {
-                    EnterEvadeMode();
-                    return;
+                    DoCast(me, SpellIds.Vanish);
+                    InVanish = true;
+                    Vanish_Timer = 30000;
+                    Wait_Timer = 5000;
                 }
+                else Vanish_Timer -= diff;
 
-                if (!Enrage && HealthBelowPct(30))
+                if (Gouge_Timer <= diff)
                 {
-                    DoCast(me, SpellIds.Frenzy);
-                    Enrage = true;
+                    DoCastVictim(SpellIds.Gouge);
+                    Gouge_Timer = 40000;
                 }
+                else Gouge_Timer -= diff;
 
-                if (CheckAdds_Timer <= diff)
+                if (Blind_Timer <= diff)
                 {
-                    for (byte i = 0; i < 4; ++i)
+                    List<Unit> targets = SelectTargetList(5, SelectAggroTarget.Random, me.GetCombatReach() * 5, true);
+                    foreach (var i in targets)
                     {
-                        if (!AddGUID[i].IsEmpty())
+
+                        if (!me.IsWithinMeleeRange(i))
                         {
-                            Creature temp = ObjectAccessor.GetCreature((me), AddGUID[i]);
-                            if (temp && temp.IsAlive())
-                                if (!temp.GetVictim())
-                                    temp.GetAI().AttackStart(me.GetVictim());
+                            DoCast(i, SpellIds.Blind);
+                            break;
                         }
                     }
-                    CheckAdds_Timer = 5000;
-                } else CheckAdds_Timer -= diff;
-
-                if (!Enrage)
-                {
-                    //Cast Vanish, then Garrote random victim
-                    if (Vanish_Timer <= diff)
-                    {
-                        DoCast(me, SpellIds.Vanish);
-                        InVanish = true;
-                        Vanish_Timer = 30000;
-                        Wait_Timer = 5000;
-                    } else Vanish_Timer -= diff;
-
-                    if (Gouge_Timer <= diff)
-                    {
-                        DoCastVictim(SpellIds.Gouge);
-                        Gouge_Timer = 40000;
-                    } else Gouge_Timer -= diff;
-
-                    if (Blind_Timer <= diff)
-                    {
-                        List<Unit> targets = SelectTargetList(5, SelectAggroTarget.Random, me.GetCombatReach() * 5, true);
-                        foreach (var i in targets)
-                        {
-
-                            if (!me.IsWithinMeleeRange(i))
-                            {
-                                DoCast(i, SpellIds.Blind);
-                                break;
-                            }
-                        }
-                        Blind_Timer = 40000;
-                    }
-                    else
-                        Blind_Timer -= diff;
+                    Blind_Timer = 40000;
                 }
-
-                if (InVanish)
-                {
-                    if (Wait_Timer <= diff)
-                    {
-                        Talk(TextIds.Special);
-
-                        Unit target = SelectTarget(SelectAggroTarget.Random, 0, 100, true);
-                        if (target)
-                            target.CastSpell(target, SpellIds.Garrote, true);
-
-                        InVanish = false;
-                    }
-                    else
-                        Wait_Timer -= diff;
-                }
-
-                if (!InVanish)
-                    DoMeleeAttackIfReady();
+                else
+                    Blind_Timer -= diff;
             }
 
-            InstanceScript instance;
+            if (InVanish)
+            {
+                if (Wait_Timer <= diff)
+                {
+                    Talk(TextIds.Special);
 
-            public ObjectGuid[] AddGUID = new ObjectGuid[4];
+                    Unit target = SelectTarget(SelectAggroTarget.Random, 0, 100, true);
+                    if (target)
+                        target.CastSpell(target, SpellIds.Garrote, true);
 
-            uint Vanish_Timer;
-            uint Blind_Timer;
-            uint Gouge_Timer;
-            uint Wait_Timer;
-            uint CheckAdds_Timer;
-            uint[] AddId = new uint[4];
+                    InVanish = false;
+                }
+                else
+                    Wait_Timer -= diff;
+            }
 
-            bool InVanish;
-            bool Enrage;
+            if (!InVanish)
+                DoMeleeAttackIfReady();
         }
+
+        InstanceScript instance;
+
+        public ObjectGuid[] AddGUID = new ObjectGuid[4];
+
+        uint Vanish_Timer;
+        uint Blind_Timer;
+        uint Gouge_Timer;
+        uint Wait_Timer;
+        uint CheckAdds_Timer;
+        uint[] AddId = new uint[4];
+
+        bool InVanish;
+        bool Enrage;
     }
 
     class boss_moroes_guestAI : ScriptedAI
@@ -355,7 +348,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             {
                 for (byte i = 0; i < 4; ++i)
                 {
-                    ObjectGuid GUID = ((boss_moroes.boss_moroesAI)Moroes.GetAI()).AddGUID[i];
+                    ObjectGuid GUID = ((boss_moroes)Moroes.GetAI()).AddGUID[i];
                     if (!GUID.IsEmpty())
                         GuestGUID[i] = GUID;
                 }
@@ -390,389 +383,350 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
     }
 
     [Script]
-    class boss_baroness_dorothea_millstipe : CreatureScript
+    class boss_baroness_dorothea_millstipe : boss_moroes_guestAI
     {
-        public boss_baroness_dorothea_millstipe() : base("boss_baroness_dorothea_millstipe") { }
+        //Shadow Priest
+        public boss_baroness_dorothea_millstipe(Creature creature) : base(creature) { }
 
-        public override CreatureAI GetAI(Creature creature)
+        uint ManaBurn_Timer;
+        uint MindFlay_Timer;
+        uint ShadowWordPain_Timer;
+
+        public override void Reset()
         {
-            return GetInstanceAI<boss_baroness_dorothea_millstipeAI>(creature);
+            ManaBurn_Timer = 7000;
+            MindFlay_Timer = 1000;
+            ShadowWordPain_Timer = 6000;
+
+            DoCast(me, SpellIds.Shadowform, true);
+
+            base.Reset();
         }
 
-        class boss_baroness_dorothea_millstipeAI : boss_moroes_guestAI
+        public override void UpdateAI(uint diff)
         {
-            //Shadow Priest
-            public boss_baroness_dorothea_millstipeAI(Creature creature) : base(creature) { }
+            if (!UpdateVictim())
+                return;
 
-            uint ManaBurn_Timer;
-            uint MindFlay_Timer;
-            uint ShadowWordPain_Timer;
+            base.UpdateAI(diff);
 
-            public override void Reset()
+            if (MindFlay_Timer <= diff)
             {
-                ManaBurn_Timer = 7000;
-                MindFlay_Timer = 1000;
-                ShadowWordPain_Timer = 6000;
-
-                DoCast(me, SpellIds.Shadowform, true);
-
-                base.Reset();
+                DoCastVictim(SpellIds.Mindfly);
+                MindFlay_Timer = 12000;                         // 3 sec channeled
             }
+            else MindFlay_Timer -= diff;
 
-            public override void UpdateAI(uint diff)
+            if (ManaBurn_Timer <= diff)
             {
-                if (!UpdateVictim())
-                    return;
-
-                base.UpdateAI(diff);
-
-                if (MindFlay_Timer <= diff)
-                {
-                    DoCastVictim(SpellIds.Mindfly);
-                    MindFlay_Timer = 12000;                         // 3 sec channeled
-                } else MindFlay_Timer -= diff;
-
-                if (ManaBurn_Timer <= diff)
-                {
-                    Unit target = SelectTarget(SelectAggroTarget.Random, 0, 100, true);
-                    if (target)
-                        if (target.getPowerType() == PowerType.Mana)
-                            DoCast(target, SpellIds.Manaburn);
-                    ManaBurn_Timer = 5000;                          // 3 sec cast
-                } else ManaBurn_Timer -= diff;
-
-                if (ShadowWordPain_Timer <= diff)
-                {
-                    Unit target = SelectTarget(SelectAggroTarget.Random, 0, 100, true);
-                    if (target)
-                    {
-                        DoCast(target, SpellIds.Swpain);
-                        ShadowWordPain_Timer = 7000;
-                    }
-                } else ShadowWordPain_Timer -= diff;
+                Unit target = SelectTarget(SelectAggroTarget.Random, 0, 100, true);
+                if (target)
+                    if (target.getPowerType() == PowerType.Mana)
+                        DoCast(target, SpellIds.Manaburn);
+                ManaBurn_Timer = 5000;                          // 3 sec cast
             }
+            else ManaBurn_Timer -= diff;
+
+            if (ShadowWordPain_Timer <= diff)
+            {
+                Unit target = SelectTarget(SelectAggroTarget.Random, 0, 100, true);
+                if (target)
+                {
+                    DoCast(target, SpellIds.Swpain);
+                    ShadowWordPain_Timer = 7000;
+                }
+            }
+            else ShadowWordPain_Timer -= diff;
         }
     }
 
     [Script]
-    class boss_baron_rafe_dreuger : CreatureScript
+    class boss_baron_rafe_dreuger : boss_moroes_guestAI
     {
-        public boss_baron_rafe_dreuger() : base("boss_baron_rafe_dreuger") { }
+        //Retr Pally
+        public boss_baron_rafe_dreuger(Creature creature) : base(creature) { }
 
-        public override CreatureAI GetAI(Creature creature)
+        uint HammerOfJustice_Timer;
+        uint SealOfCommand_Timer;
+        uint JudgementOfCommand_Timer;
+
+        public override void Reset()
         {
-            return GetInstanceAI<boss_baron_rafe_dreugerAI>(creature);
+            HammerOfJustice_Timer = 1000;
+            SealOfCommand_Timer = 7000;
+            JudgementOfCommand_Timer = SealOfCommand_Timer + 29000;
+
+            base.Reset();
         }
 
-        class boss_baron_rafe_dreugerAI : boss_moroes_guestAI
+        public override void UpdateAI(uint diff)
         {
-            //Retr Pally
-            public boss_baron_rafe_dreugerAI(Creature creature) : base(creature) { }
+            if (!UpdateVictim())
+                return;
 
-            uint HammerOfJustice_Timer;
-            uint SealOfCommand_Timer;
-            uint JudgementOfCommand_Timer;
+            base.UpdateAI(diff);
 
-            public override void Reset()
+            if (SealOfCommand_Timer <= diff)
             {
-                HammerOfJustice_Timer = 1000;
-                SealOfCommand_Timer = 7000;
+                DoCast(me, SpellIds.Sealofcommand);
+                SealOfCommand_Timer = 32000;
+                JudgementOfCommand_Timer = 29000;
+            }
+            else SealOfCommand_Timer -= diff;
+
+            if (JudgementOfCommand_Timer <= diff)
+            {
+                DoCastVictim(SpellIds.Judgementofcommand);
                 JudgementOfCommand_Timer = SealOfCommand_Timer + 29000;
-
-                base.Reset();
             }
+            else JudgementOfCommand_Timer -= diff;
 
-            public override void UpdateAI(uint diff)
+            if (HammerOfJustice_Timer <= diff)
             {
-                if (!UpdateVictim())
-                    return;
-
-                base.UpdateAI(diff);
-
-                if (SealOfCommand_Timer <= diff)
-                {
-                    DoCast(me, SpellIds.Sealofcommand);
-                    SealOfCommand_Timer = 32000;
-                    JudgementOfCommand_Timer = 29000;
-                } else SealOfCommand_Timer -= diff;
-
-                if (JudgementOfCommand_Timer <= diff)
-                {
-                    DoCastVictim(SpellIds.Judgementofcommand);
-                    JudgementOfCommand_Timer = SealOfCommand_Timer + 29000;
-                } else JudgementOfCommand_Timer -= diff;
-
-                if (HammerOfJustice_Timer <= diff)
-                {
-                    DoCastVictim(SpellIds.Hammerofjustice);
-                    HammerOfJustice_Timer = 12000;
-                } else HammerOfJustice_Timer -= diff;
+                DoCastVictim(SpellIds.Hammerofjustice);
+                HammerOfJustice_Timer = 12000;
             }
+            else HammerOfJustice_Timer -= diff;
         }
     }
 
     [Script]
-    class boss_lady_catriona_von_indi : CreatureScript
+    class boss_lady_catriona_von_indi : boss_moroes_guestAI
     {
-        public boss_lady_catriona_von_indi() : base("boss_lady_catriona_von_indi") { }
+        //Holy Priest
+        public boss_lady_catriona_von_indi(Creature creature) : base(creature) { }
 
-        public override CreatureAI GetAI(Creature creature)
+        uint DispelMagic_Timer;
+        uint GreaterHeal_Timer;
+        uint HolyFire_Timer;
+        uint PowerWordShield_Timer;
+
+        public override void Reset()
         {
-            return GetInstanceAI<boss_lady_catriona_von_indiAI>(creature);
+            DispelMagic_Timer = 11000;
+            GreaterHeal_Timer = 1500;
+            HolyFire_Timer = 5000;
+            PowerWordShield_Timer = 1000;
+
+            AcquireGUID();
+
+            base.Reset();
         }
 
-        class boss_lady_catriona_von_indiAI : boss_moroes_guestAI
+        public override void UpdateAI(uint diff)
         {
-            //Holy Priest
-            public boss_lady_catriona_von_indiAI(Creature creature) : base(creature) { }
+            if (!UpdateVictim())
+                return;
 
-            uint DispelMagic_Timer;
-            uint GreaterHeal_Timer;
-            uint HolyFire_Timer;
-            uint PowerWordShield_Timer;
+            base.UpdateAI(diff);
 
-            public override void Reset()
+            if (PowerWordShield_Timer <= diff)
             {
-                DispelMagic_Timer = 11000;
-                GreaterHeal_Timer = 1500;
-                HolyFire_Timer = 5000;
-                PowerWordShield_Timer = 1000;
-
-                AcquireGUID();
-
-                base.Reset();
+                DoCast(me, SpellIds.Pwshield);
+                PowerWordShield_Timer = 15000;
             }
+            else PowerWordShield_Timer -= diff;
 
-            public override void UpdateAI(uint diff)
+            if (GreaterHeal_Timer <= diff)
             {
-                if (!UpdateVictim())
-                    return;
+                Unit target = SelectGuestTarget();
 
-                base.UpdateAI(diff);
-
-                if (PowerWordShield_Timer <= diff)
-                {
-                    DoCast(me, SpellIds.Pwshield);
-                    PowerWordShield_Timer = 15000;
-                } else PowerWordShield_Timer -= diff;
-
-                if (GreaterHeal_Timer <= diff)
-                {
-                    Unit target = SelectGuestTarget();
-
-                    DoCast(target, SpellIds.Greaterheal);
-                    GreaterHeal_Timer = 17000;
-                } else GreaterHeal_Timer -= diff;
-
-                if (HolyFire_Timer <= diff)
-                {
-                    DoCastVictim(SpellIds.Holyfire);
-                    HolyFire_Timer = 22000;
-                } else HolyFire_Timer -= diff;
-
-                if (DispelMagic_Timer <= diff)
-                {
-                    Unit target = RandomHelper.RAND(SelectGuestTarget(), SelectTarget(SelectAggroTarget.Random, 0, 100, true));
-                    if (target)
-                        DoCast(target, SpellIds.Dispelmagic);
-
-                    DispelMagic_Timer = 25000;
-                } else DispelMagic_Timer -= diff;
+                DoCast(target, SpellIds.Greaterheal);
+                GreaterHeal_Timer = 17000;
             }
+            else GreaterHeal_Timer -= diff;
+
+            if (HolyFire_Timer <= diff)
+            {
+                DoCastVictim(SpellIds.Holyfire);
+                HolyFire_Timer = 22000;
+            }
+            else HolyFire_Timer -= diff;
+
+            if (DispelMagic_Timer <= diff)
+            {
+                Unit target = RandomHelper.RAND(SelectGuestTarget(), SelectTarget(SelectAggroTarget.Random, 0, 100, true));
+                if (target)
+                    DoCast(target, SpellIds.Dispelmagic);
+
+                DispelMagic_Timer = 25000;
+            }
+            else DispelMagic_Timer -= diff;
         }
     }
 
     [Script]
-    class boss_lady_keira_berrybuck : CreatureScript
+    class boss_lady_keira_berrybuck : boss_moroes_guestAI
     {
-        public boss_lady_keira_berrybuck() : base("boss_lady_keira_berrybuck") { }
+        //Holy Pally
+        public boss_lady_keira_berrybuck(Creature creature) : base(creature) { }
 
-        public override CreatureAI GetAI(Creature creature)
+        uint Cleanse_Timer;
+        uint GreaterBless_Timer;
+        uint HolyLight_Timer;
+        uint DivineShield_Timer;
+
+        public override void Reset()
         {
-            return GetInstanceAI<boss_lady_keira_berrybuckAI>(creature);
+            Cleanse_Timer = 13000;
+            GreaterBless_Timer = 1000;
+            HolyLight_Timer = 7000;
+            DivineShield_Timer = 31000;
+
+            AcquireGUID();
+
+            base.Reset();
         }
 
-        class boss_lady_keira_berrybuckAI : boss_moroes_guestAI
+        public override void UpdateAI(uint diff)
         {
-            //Holy Pally
-            public boss_lady_keira_berrybuckAI(Creature creature) : base(creature) { }
+            if (!UpdateVictim())
+                return;
 
-            uint Cleanse_Timer;
-            uint GreaterBless_Timer;
-            uint HolyLight_Timer;
-            uint DivineShield_Timer;
+            base.UpdateAI(diff);
 
-            public override void Reset()
+            if (DivineShield_Timer <= diff)
             {
-                Cleanse_Timer = 13000;
-                GreaterBless_Timer = 1000;
-                HolyLight_Timer = 7000;
+                DoCast(me, SpellIds.Divineshield);
                 DivineShield_Timer = 31000;
-
-                AcquireGUID();
-
-                base.Reset();
             }
+            else DivineShield_Timer -= diff;
 
-            public override void UpdateAI(uint diff)
+            if (HolyLight_Timer <= diff)
             {
-                if (!UpdateVictim())
-                    return;
+                Unit target = SelectGuestTarget();
 
-                base.UpdateAI(diff);
-
-                if (DivineShield_Timer <= diff)
-                {
-                    DoCast(me, SpellIds.Divineshield);
-                    DivineShield_Timer = 31000;
-                } else DivineShield_Timer -= diff;
-
-                if (HolyLight_Timer <= diff)
-                {
-                    Unit target = SelectGuestTarget();
-
-                    DoCast(target, SpellIds.Holylight);
-                    HolyLight_Timer = 10000;
-                } else HolyLight_Timer -= diff;
-
-                if (GreaterBless_Timer <= diff)
-                {
-                    Unit target = SelectGuestTarget();
-
-                    DoCast(target, SpellIds.Greaterblessofmight);
-
-                    GreaterBless_Timer = 50000;
-                } else GreaterBless_Timer -= diff;
-
-                if (Cleanse_Timer <= diff)
-                {
-                    Unit target = SelectGuestTarget();
-
-                    DoCast(target, SpellIds.Cleanse);
-
-                    Cleanse_Timer = 10000;
-                } else Cleanse_Timer -= diff;
+                DoCast(target, SpellIds.Holylight);
+                HolyLight_Timer = 10000;
             }
+            else HolyLight_Timer -= diff;
+
+            if (GreaterBless_Timer <= diff)
+            {
+                Unit target = SelectGuestTarget();
+
+                DoCast(target, SpellIds.Greaterblessofmight);
+
+                GreaterBless_Timer = 50000;
+            }
+            else GreaterBless_Timer -= diff;
+
+            if (Cleanse_Timer <= diff)
+            {
+                Unit target = SelectGuestTarget();
+
+                DoCast(target, SpellIds.Cleanse);
+
+                Cleanse_Timer = 10000;
+            }
+            else Cleanse_Timer -= diff;
         }
     }
 
     [Script]
-    class boss_lord_robin_daris : CreatureScript
+    class boss_lord_robin_daris : boss_moroes_guestAI
     {
-        public boss_lord_robin_daris() : base("boss_lord_robin_daris") { }
+        //Arms Warr
+        public boss_lord_robin_daris(Creature creature) : base(creature) { }
 
-        public override CreatureAI GetAI(Creature creature)
+        uint Hamstring_Timer;
+        uint MortalStrike_Timer;
+        uint WhirlWind_Timer;
+
+        public override void Reset()
         {
-            return GetInstanceAI<boss_lord_robin_darisAI>(creature);
+            Hamstring_Timer = 7000;
+            MortalStrike_Timer = 10000;
+            WhirlWind_Timer = 21000;
+
+            base.Reset();
         }
 
-        class boss_lord_robin_darisAI : boss_moroes_guestAI
+        public override void UpdateAI(uint diff)
         {
-            //Arms Warr
-            public boss_lord_robin_darisAI(Creature creature) : base(creature) { }
+            if (!UpdateVictim())
+                return;
 
-            uint Hamstring_Timer;
-            uint MortalStrike_Timer;
-            uint WhirlWind_Timer;
+            base.UpdateAI(diff);
 
-            public override void Reset()
+            if (Hamstring_Timer <= diff)
             {
-                Hamstring_Timer = 7000;
-                MortalStrike_Timer = 10000;
+                DoCastVictim(SpellIds.Hamstring);
+                Hamstring_Timer = 12000;
+            }
+            else Hamstring_Timer -= diff;
+
+            if (MortalStrike_Timer <= diff)
+            {
+                DoCastVictim(SpellIds.Mortalstrike);
+                MortalStrike_Timer = 18000;
+            }
+            else MortalStrike_Timer -= diff;
+
+            if (WhirlWind_Timer <= diff)
+            {
+                DoCast(me, SpellIds.Whirlwind);
                 WhirlWind_Timer = 21000;
-
-                base.Reset();
             }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                base.UpdateAI(diff);
-
-                if (Hamstring_Timer <= diff)
-                {
-                    DoCastVictim(SpellIds.Hamstring);
-                    Hamstring_Timer = 12000;
-                } else Hamstring_Timer -= diff;
-
-                if (MortalStrike_Timer <= diff)
-                {
-                    DoCastVictim(SpellIds.Mortalstrike);
-                    MortalStrike_Timer = 18000;
-                } else MortalStrike_Timer -= diff;
-
-                if (WhirlWind_Timer <= diff)
-                {
-                    DoCast(me, SpellIds.Whirlwind);
-                    WhirlWind_Timer = 21000;
-                } else WhirlWind_Timer -= diff;
-            }
+            else WhirlWind_Timer -= diff;
         }
     }
 
     [Script]
-    class boss_lord_crispin_ference : CreatureScript
+    class boss_lord_crispin_ference : boss_moroes_guestAI
     {
-        public boss_lord_crispin_ference() : base("boss_lord_crispin_ference") { }
+        //Arms Warr
+        public boss_lord_crispin_ference(Creature creature) : base(creature) { }
 
-        public override CreatureAI GetAI(Creature creature)
+        uint Disarm_Timer;
+        uint HeroicStrike_Timer;
+        uint ShieldBash_Timer;
+        uint ShieldWall_Timer;
+
+        public override void Reset()
         {
-            return GetInstanceAI<boss_lord_crispin_ferenceAI>(creature);
+            Disarm_Timer = 6000;
+            HeroicStrike_Timer = 10000;
+            ShieldBash_Timer = 8000;
+            ShieldWall_Timer = 4000;
+
+            base.Reset();
         }
 
-        class boss_lord_crispin_ferenceAI : boss_moroes_guestAI
+        public override void UpdateAI(uint diff)
         {
-            //Arms Warr
-            public boss_lord_crispin_ferenceAI(Creature creature) : base(creature) { }
+            if (!UpdateVictim())
+                return;
 
-            uint Disarm_Timer;
-            uint HeroicStrike_Timer;
-            uint ShieldBash_Timer;
-            uint ShieldWall_Timer;
+            base.UpdateAI(diff);
 
-            public override void Reset()
+            if (Disarm_Timer <= diff)
             {
-                Disarm_Timer = 6000;
+                DoCastVictim(SpellIds.Disarm);
+                Disarm_Timer = 12000;
+            }
+            else Disarm_Timer -= diff;
+
+            if (HeroicStrike_Timer <= diff)
+            {
+                DoCastVictim(SpellIds.Heroicstrike);
                 HeroicStrike_Timer = 10000;
-                ShieldBash_Timer = 8000;
-                ShieldWall_Timer = 4000;
-
-                base.Reset();
             }
+            else HeroicStrike_Timer -= diff;
 
-            public override void UpdateAI(uint diff)
+            if (ShieldBash_Timer <= diff)
             {
-                if (!UpdateVictim())
-                    return;
-
-                base.UpdateAI(diff);
-
-                if (Disarm_Timer <= diff)
-                {
-                    DoCastVictim(SpellIds.Disarm);
-                    Disarm_Timer = 12000;
-                } else Disarm_Timer -= diff;
-
-                if (HeroicStrike_Timer <= diff)
-                {
-                    DoCastVictim(SpellIds.Heroicstrike);
-                    HeroicStrike_Timer = 10000;
-                } else HeroicStrike_Timer -= diff;
-
-                if (ShieldBash_Timer <= diff)
-                {
-                    DoCastVictim(SpellIds.Shieldbash);
-                    ShieldBash_Timer = 13000;
-                } else ShieldBash_Timer -= diff;
-
-                if (ShieldWall_Timer <= diff)
-                {
-                    DoCast(me, SpellIds.Shieldwall);
-                    ShieldWall_Timer = 21000;
-                } else ShieldWall_Timer -= diff;
+                DoCastVictim(SpellIds.Shieldbash);
+                ShieldBash_Timer = 13000;
             }
+            else ShieldBash_Timer -= diff;
+
+            if (ShieldWall_Timer <= diff)
+            {
+                DoCast(me, SpellIds.Shieldwall);
+                ShieldWall_Timer = 21000;
+            }
+            else ShieldWall_Timer -= diff;
         }
     }
 }

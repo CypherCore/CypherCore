@@ -163,251 +163,201 @@ namespace Scripts.Spells.Holiday
 
 
     [Script] // 45102 Romantic Picnic
-    class spell_love_is_in_the_air_romantic_picnic : SpellScriptLoader
+    class spell_love_is_in_the_air_romantic_picnic : AuraScript
     {
-        public spell_love_is_in_the_air_romantic_picnic() : base("spell_love_is_in_the_air_romantic_picnic") { }
-
-        class spell_love_is_in_the_air_romantic_picnic_AuraScript : AuraScript
+        void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
-            {
-                Unit target = GetTarget();
-                target.SetStandState(UnitStandStateType.Sit);
-                target.CastSpell(target, SpellIds.MealPeriodic, false);
-            }
-
-            void OnPeriodic(AuraEffect aurEff)
-            {
-                // Every 5 seconds
-                Unit target = GetTarget();
-                Unit caster = GetCaster();
-
-                // If our player is no longer sit, remove all auras
-                if (target.GetStandState() != UnitStandStateType.Sit)
-                {
-                    target.RemoveAura(SpellIds.RomanticPicnicAchiev);
-                    target.RemoveAura(GetAura());
-                    return;
-                }
-
-                target.CastSpell(target, SpellIds.BasketCheck, false); // unknown use, it targets Romantic Basket
-                target.CastSpell(target, RandomHelper.RAND(SpellIds.MealEatVisual, SpellIds.DrinkVisual), false);
-
-                bool foundSomeone = false;
-                // For nearby players, check if they have the same aura. If so, cast Romantic Picnic (45123)
-                // required by achievement and "hearts" visual
-                List<Player> playerList = new List<Player>();
-                AnyPlayerInObjectRangeCheck checker = new AnyPlayerInObjectRangeCheck(target, SharedConst.InteractionDistance * 2);
-                var searcher = new PlayerListSearcher(target, playerList, checker);
-                Cell.VisitWorldObjects(target, searcher, SharedConst.InteractionDistance * 2);
-                foreach (var player in playerList)
-                {
-                    if (player != target && player.HasAura(GetId())) // && player.GetStandState() == UNIT_STAND_STATE_SIT)
-                    {
-                        if (caster)
-                        {
-                            caster.CastSpell(player, SpellIds.RomanticPicnicAchiev, true);
-                            caster.CastSpell(target, SpellIds.RomanticPicnicAchiev, true);
-                        }
-                        foundSomeone = true;
-                        // break;
-                    }
-                }
-
-                if (!foundSomeone && target.HasAura(SpellIds.RomanticPicnicAchiev))
-                    target.RemoveAura(SpellIds.RomanticPicnicAchiev);
-            }
-
-            public override void Register()
-            {
-                AfterEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real));
-                OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
-            }
+            Unit target = GetTarget();
+            target.SetStandState(UnitStandStateType.Sit);
+            target.CastSpell(target, SpellIds.MealPeriodic, false);
         }
 
-        public override AuraScript GetAuraScript()
+        void OnPeriodic(AuraEffect aurEff)
         {
-            return new spell_love_is_in_the_air_romantic_picnic_AuraScript();
+            // Every 5 seconds
+            Unit target = GetTarget();
+            Unit caster = GetCaster();
+
+            // If our player is no longer sit, remove all auras
+            if (target.GetStandState() != UnitStandStateType.Sit)
+            {
+                target.RemoveAura(SpellIds.RomanticPicnicAchiev);
+                target.RemoveAura(GetAura());
+                return;
+            }
+
+            target.CastSpell(target, SpellIds.BasketCheck, false); // unknown use, it targets Romantic Basket
+            target.CastSpell(target, RandomHelper.RAND(SpellIds.MealEatVisual, SpellIds.DrinkVisual), false);
+
+            bool foundSomeone = false;
+            // For nearby players, check if they have the same aura. If so, cast Romantic Picnic (45123)
+            // required by achievement and "hearts" visual
+            List<Player> playerList = new List<Player>();
+            AnyPlayerInObjectRangeCheck checker = new AnyPlayerInObjectRangeCheck(target, SharedConst.InteractionDistance * 2);
+            var searcher = new PlayerListSearcher(target, playerList, checker);
+            Cell.VisitWorldObjects(target, searcher, SharedConst.InteractionDistance * 2);
+            foreach (var player in playerList)
+            {
+                if (player != target && player.HasAura(GetId())) // && player.GetStandState() == UNIT_STAND_STATE_SIT)
+                {
+                    if (caster)
+                    {
+                        caster.CastSpell(player, SpellIds.RomanticPicnicAchiev, true);
+                        caster.CastSpell(target, SpellIds.RomanticPicnicAchiev, true);
+                    }
+                    foundSomeone = true;
+                    // break;
+                }
+            }
+
+            if (!foundSomeone && target.HasAura(SpellIds.RomanticPicnicAchiev))
+                target.RemoveAura(SpellIds.RomanticPicnicAchiev);
+        }
+
+        public override void Register()
+        {
+            AfterEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.Real));
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
         }
     }
 
     [Script] // 24750 Trick
-    class spell_hallow_end_trick : SpellScriptLoader
+    class spell_hallow_end_trick : SpellScript
     {
-        public spell_hallow_end_trick() : base("spell_hallow_end_trick") { }
-
-        class spell_hallow_end_trick_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spell)
         {
-            public override bool Validate(SpellInfo spell)
-            {
-                return ValidateSpellInfo(SpellIds.PirateCostumeMale, SpellIds.PirateCostumeFemale, SpellIds.NinjaCostumeMale, SpellIds.NinjaCostumeFemale,
-                    SpellIds.LeperGnomeCostumeMale, SpellIds.LeperGnomeCostumeFemale, SpellIds.SkeletonCostume, SpellIds.GhostCostumeMale, SpellIds.GhostCostumeFemale, SpellIds.TrickBuff);
-            }
+            return ValidateSpellInfo(SpellIds.PirateCostumeMale, SpellIds.PirateCostumeFemale, SpellIds.NinjaCostumeMale, SpellIds.NinjaCostumeFemale,
+                SpellIds.LeperGnomeCostumeMale, SpellIds.LeperGnomeCostumeFemale, SpellIds.SkeletonCostume, SpellIds.GhostCostumeMale, SpellIds.GhostCostumeFemale, SpellIds.TrickBuff);
+        }
 
-            void HandleScript(uint effIndex)
+        void HandleScript(uint effIndex)
+        {
+            Unit caster = GetCaster();
+            Player target = GetHitPlayer();
+            if (target)
             {
-                Unit caster = GetCaster();
-                Player target = GetHitPlayer();
-                if (target)
+                Gender gender = target.GetGender();
+                uint spellId = SpellIds.TrickBuff;
+                switch (RandomHelper.URand(0, 5))
                 {
-                    Gender gender = target.GetGender();
-                    uint spellId = SpellIds.TrickBuff;
-                    switch (RandomHelper.URand(0, 5))
-                    {
-                        case 1:
-                            spellId = gender == Gender.Female ? SpellIds.LeperGnomeCostumeFemale : SpellIds.LeperGnomeCostumeMale;
-                            break;
-                        case 2:
-                            spellId = gender == Gender.Female ? SpellIds.PirateCostumeFemale : SpellIds.PirateCostumeMale;
-                            break;
-                        case 3:
-                            spellId = gender == Gender.Female ? SpellIds.GhostCostumeFemale : SpellIds.GhostCostumeMale;
-                            break;
-                        case 4:
-                            spellId = gender == Gender.Female ? SpellIds.NinjaCostumeFemale : SpellIds.NinjaCostumeMale;
-                            break;
-                        case 5:
-                            spellId = SpellIds.SkeletonCostume;
-                            break;
-                        default:
-                            break;
-                    }
-
-                    caster.CastSpell(target, spellId, true);
+                    case 1:
+                        spellId = gender == Gender.Female ? SpellIds.LeperGnomeCostumeFemale : SpellIds.LeperGnomeCostumeMale;
+                        break;
+                    case 2:
+                        spellId = gender == Gender.Female ? SpellIds.PirateCostumeFemale : SpellIds.PirateCostumeMale;
+                        break;
+                    case 3:
+                        spellId = gender == Gender.Female ? SpellIds.GhostCostumeFemale : SpellIds.GhostCostumeMale;
+                        break;
+                    case 4:
+                        spellId = gender == Gender.Female ? SpellIds.NinjaCostumeFemale : SpellIds.NinjaCostumeMale;
+                        break;
+                    case 5:
+                        spellId = SpellIds.SkeletonCostume;
+                        break;
+                    default:
+                        break;
                 }
-            }
 
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+                caster.CastSpell(target, spellId, true);
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_hallow_end_trick_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
     [Script] // 24751 Trick or Treat
-    class spell_hallow_end_trick_or_treat : SpellScriptLoader
+    class spell_hallow_end_trick_or_treat : SpellScript
     {
-        public spell_hallow_end_trick_or_treat() : base("spell_hallow_end_trick_or_treat") { }
-
-        class spell_hallow_end_trick_or_treat_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spell)
         {
-            public override bool Validate(SpellInfo spell)
-            {
-                return ValidateSpellInfo(SpellIds.Trick, SpellIds.Treat, SpellIds.TrickedOrTreated);
-            }
+            return ValidateSpellInfo(SpellIds.Trick, SpellIds.Treat, SpellIds.TrickedOrTreated);
+        }
 
-            void HandleScript(uint effIndex)
+        void HandleScript(uint effIndex)
+        {
+            Unit caster = GetCaster();
+            Player target = GetHitPlayer();
+            if (target)
             {
-                Unit caster = GetCaster();
-                Player target = GetHitPlayer();
-                if (target)
-                {
-                    caster.CastSpell(target, RandomHelper.randChance(50) ? SpellIds.Trick : SpellIds.Treat, true);
-                    caster.CastSpell(target, SpellIds.TrickedOrTreated, true);
-                }
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+                caster.CastSpell(target, RandomHelper.randChance(50) ? SpellIds.Trick : SpellIds.Treat, true);
+                caster.CastSpell(target, SpellIds.TrickedOrTreated, true);
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_hallow_end_trick_or_treat_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
     [Script]
-    class spell_hallow_end_tricky_treat : SpellScriptLoader
+    class spell_hallow_end_tricky_treat : SpellScript
     {
-        public spell_hallow_end_tricky_treat() : base("spell_hallow_end_tricky_treat") { }
-
-        class spell_hallow_end_tricky_treat_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spell)
         {
-            public override bool Validate(SpellInfo spell)
-            {
-                return ValidateSpellInfo(SpellIds.TrickyTreatSpeed, SpellIds.TrickyTreatTrigger, SpellIds.UpsetTummy);
-            }
-
-            void HandleScript(uint effIndex)
-            {
-                Unit caster = GetCaster();
-                if (caster.HasAura(SpellIds.TrickyTreatTrigger) && caster.GetAuraCount(SpellIds.TrickyTreatSpeed) > 3 && RandomHelper.randChance(33))
-                    caster.CastSpell(caster, SpellIds.UpsetTummy, true);
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
-            }
+            return ValidateSpellInfo(SpellIds.TrickyTreatSpeed, SpellIds.TrickyTreatTrigger, SpellIds.UpsetTummy);
         }
 
-        public override SpellScript GetSpellScript()
+        void HandleScript(uint effIndex)
         {
-            return new spell_hallow_end_tricky_treat_SpellScript();
+            Unit caster = GetCaster();
+            if (caster.HasAura(SpellIds.TrickyTreatTrigger) && caster.GetAuraCount(SpellIds.TrickyTreatSpeed) > 3 && RandomHelper.randChance(33))
+                caster.CastSpell(caster, SpellIds.UpsetTummy, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
     [Script]
-    class spell_hallow_end_wand : SpellScriptLoader
+    class spell_hallow_end_wand : SpellScript
     {
-        public spell_hallow_end_wand() : base("spell_hallow_end_wand") { }
-
-        class spell_hallow_end_wand_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spellEntry)
         {
-            public override bool Validate(SpellInfo spellEntry)
-            {
-                return ValidateSpellInfo(SpellIds.PirateCostumeMale, SpellIds.PirateCostumeFemale, SpellIds.NinjaCostumeMale, SpellIds.NinjaCostumeFemale,
-                    SpellIds.LeperGnomeCostumeMale, SpellIds.LeperGnomeCostumeFemale, SpellIds.GhostCostumeMale, SpellIds.GhostCostumeFemale);
-            }
-
-            void HandleScriptEffect()
-            {
-                Unit caster = GetCaster();
-                Unit target = GetHitUnit();
-
-                uint spellId = 0;
-                bool female = target.GetGender() == Gender.Female;
-
-                switch (GetSpellInfo().Id)
-                {
-                    case SpellIds.HallowedWandLeperGnome:
-                        spellId = female ? SpellIds.LeperGnomeCostumeFemale : SpellIds.LeperGnomeCostumeMale;
-                        break;
-                    case SpellIds.HallowedWandPirate:
-                        spellId = female ? SpellIds.PirateCostumeFemale : SpellIds.PirateCostumeMale;
-                        break;
-                    case SpellIds.HallowedWandGhost:
-                        spellId = female ? SpellIds.GhostCostumeFemale : SpellIds.GhostCostumeMale;
-                        break;
-                    case SpellIds.HallowedWandNinja:
-                        spellId = female ? SpellIds.NinjaCostumeFemale : SpellIds.NinjaCostumeMale;
-                        break;
-                    case SpellIds.HallowedWandRandom:
-                        spellId = RandomHelper.RAND(SpellIds.HallowedWandPirate, SpellIds.HallowedWandNinja, SpellIds.HallowedWandLeperGnome, SpellIds.HallowedWandSkeleton, SpellIds.HallowedWandWisp, SpellIds.HallowedWandGhost, SpellIds.HallowedWandBat);
-                        break;
-                    default:
-                        return;
-                }
-                caster.CastSpell(target, spellId, true);
-            }
-
-            public override void Register()
-            {
-                AfterHit.Add(new HitHandler(HandleScriptEffect));
-            }
+            return ValidateSpellInfo(SpellIds.PirateCostumeMale, SpellIds.PirateCostumeFemale, SpellIds.NinjaCostumeMale, SpellIds.NinjaCostumeFemale,
+                SpellIds.LeperGnomeCostumeMale, SpellIds.LeperGnomeCostumeFemale, SpellIds.GhostCostumeMale, SpellIds.GhostCostumeFemale);
         }
 
-        public override SpellScript GetSpellScript()
+        void HandleScriptEffect()
         {
-            return new spell_hallow_end_wand_SpellScript();
+            Unit caster = GetCaster();
+            Unit target = GetHitUnit();
+
+            uint spellId = 0;
+            bool female = target.GetGender() == Gender.Female;
+
+            switch (GetSpellInfo().Id)
+            {
+                case SpellIds.HallowedWandLeperGnome:
+                    spellId = female ? SpellIds.LeperGnomeCostumeFemale : SpellIds.LeperGnomeCostumeMale;
+                    break;
+                case SpellIds.HallowedWandPirate:
+                    spellId = female ? SpellIds.PirateCostumeFemale : SpellIds.PirateCostumeMale;
+                    break;
+                case SpellIds.HallowedWandGhost:
+                    spellId = female ? SpellIds.GhostCostumeFemale : SpellIds.GhostCostumeMale;
+                    break;
+                case SpellIds.HallowedWandNinja:
+                    spellId = female ? SpellIds.NinjaCostumeFemale : SpellIds.NinjaCostumeMale;
+                    break;
+                case SpellIds.HallowedWandRandom:
+                    spellId = RandomHelper.RAND(SpellIds.HallowedWandPirate, SpellIds.HallowedWandNinja, SpellIds.HallowedWandLeperGnome, SpellIds.HallowedWandSkeleton, SpellIds.HallowedWandWisp, SpellIds.HallowedWandGhost, SpellIds.HallowedWandBat);
+                    break;
+                default:
+                    return;
+            }
+            caster.CastSpell(target, spellId, true);
+        }
+
+        public override void Register()
+        {
+            AfterHit.Add(new HitHandler(HandleScriptEffect));
         }
     }
 
@@ -416,193 +366,148 @@ namespace Scripts.Spells.Holiday
     [Script("spell_gen_spice_bread_stuffing", SpellIds.WellFedHitTrigger)]
     [Script("spell_gen_pumpkin_pie", SpellIds.WellFedSpiritTrigger)]
     [Script("spell_gen_candied_sweet_potato", SpellIds.WellFedHasteTrigger)]
-    class spell_pilgrims_bounty_buff_food : SpellScriptLoader
+    class spell_pilgrims_bounty_buff_food : AuraScript
     {
-        public spell_pilgrims_bounty_buff_food(string name, uint triggeredSpellId) : base(name)
+        public spell_pilgrims_bounty_buff_food(uint triggeredSpellId) : base()
         {
             _triggeredSpellId = triggeredSpellId;
+            _handled = false;
         }
 
-        class spell_pilgrims_bounty_buff_food_AuraScript : AuraScript
+        void HandleTriggerSpell(AuraEffect aurEff)
         {
-            public spell_pilgrims_bounty_buff_food_AuraScript(uint triggeredSpellId) : base()
-            {
-                _triggeredSpellId = triggeredSpellId;
-                _handled = false;
-            }
+            PreventDefaultAction();
+            if (_handled)
+                return;
 
-            void HandleTriggerSpell(AuraEffect aurEff)
-            {
-                PreventDefaultAction();
-                if (_handled)
-                    return;
-
-                _handled = true;
-                GetTarget().CastSpell(GetTarget(), _triggeredSpellId, true);
-            }
-
-            public override void Register()
-            {
-                OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleTriggerSpell, 2, AuraType.PeriodicTriggerSpell));
-            }
-
-            uint _triggeredSpellId;
-
-            bool _handled;
+            _handled = true;
+            GetTarget().CastSpell(GetTarget(), _triggeredSpellId, true);
         }
 
-        public override AuraScript GetAuraScript()
+        public override void Register()
         {
-            return new spell_pilgrims_bounty_buff_food_AuraScript(_triggeredSpellId);
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleTriggerSpell, 2, AuraType.PeriodicTriggerSpell));
         }
 
         uint _triggeredSpellId;
+
+        bool _handled;
     }
 
     [Script]
-    class spell_winter_veil_mistletoe : SpellScriptLoader
+    class spell_winter_veil_mistletoe : SpellScript
     {
-        public spell_winter_veil_mistletoe() : base("spell_winter_veil_mistletoe") { }
-
-        class spell_winter_veil_mistletoe_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spell)
         {
-            public override bool Validate(SpellInfo spell)
-            {
-                return ValidateSpellInfo(SpellIds.CreateMistletoe, SpellIds.CreateHolly, SpellIds.CreateSnowflakes);
-            }
+            return ValidateSpellInfo(SpellIds.CreateMistletoe, SpellIds.CreateHolly, SpellIds.CreateSnowflakes);
+        }
 
-            void HandleScript(uint effIndex)
+        void HandleScript(uint effIndex)
+        {
+            Player target = GetHitPlayer();
+            if (target)
             {
-                Player target = GetHitPlayer();
-                if (target)
-                {
-                    uint spellId = RandomHelper.RAND(SpellIds.CreateHolly, SpellIds.CreateMistletoe, SpellIds.CreateSnowflakes);
-                    GetCaster().CastSpell(target, spellId, true);
-                }
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+                uint spellId = RandomHelper.RAND(SpellIds.CreateHolly, SpellIds.CreateMistletoe, SpellIds.CreateSnowflakes);
+                GetCaster().CastSpell(target, spellId, true);
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_winter_veil_mistletoe_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
     [Script] // 26275 - PX-238 Winter Wondervolt TRAP
-    class spell_winter_veil_px_238_winter_wondervolt : SpellScriptLoader
+    class spell_winter_veil_px_238_winter_wondervolt : SpellScript
     {
-        public spell_winter_veil_px_238_winter_wondervolt() : base("spell_winter_veil_px_238_winter_wondervolt") { }
-
-        class spell_winter_veil_px_238_winter_wondervolt_SpellScript : SpellScript
+        public override bool Validate(SpellInfo spellInfo)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(SpellIds.Px238WinterWondervoltTransform1, SpellIds.Px238WinterWondervoltTransform2,
-                    SpellIds.Px238WinterWondervoltTransform3, SpellIds.Px238WinterWondervoltTransform4);
-            }
+            return ValidateSpellInfo(SpellIds.Px238WinterWondervoltTransform1, SpellIds.Px238WinterWondervoltTransform2,
+                SpellIds.Px238WinterWondervoltTransform3, SpellIds.Px238WinterWondervoltTransform4);
+        }
 
-            void HandleScript(uint effIndex)
-            {
-                PreventHitDefaultEffect(effIndex);
+        void HandleScript(uint effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
 
-                uint[] spells =
-                {
+            uint[] spells =
+            {
                     SpellIds.Px238WinterWondervoltTransform1,
                     SpellIds.Px238WinterWondervoltTransform2,
                     SpellIds.Px238WinterWondervoltTransform3,
                     SpellIds.Px238WinterWondervoltTransform4
                 };
 
-                Unit target = GetHitUnit();
-                if (target)
-                {
-                    for (byte i = 0; i < 4; ++i)
-                        if (target.HasAura(spells[i]))
-                            return;
-
-                    target.CastSpell(target, spells[RandomHelper.URand(0, 3)], true);
-                }
-            }
-
-            public override void Register()
+            Unit target = GetHitUnit();
+            if (target)
             {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+                for (byte i = 0; i < 4; ++i)
+                    if (target.HasAura(spells[i]))
+                        return;
+
+                target.CastSpell(target, spells[RandomHelper.URand(0, 3)], true);
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_winter_veil_px_238_winter_wondervolt_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
     [Script] // 42924 - Giddyup!
-    class spell_brewfest_giddyup : SpellScriptLoader
+    class spell_brewfest_giddyup : AuraScript
     {
-        public spell_brewfest_giddyup() : base("spell_brewfest_giddyup") { }
-
-        class spell_brewfest_giddyup_AuraScript : AuraScript
+        void OnChange(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            void OnChange(AuraEffect aurEff, AuraEffectHandleModes mode)
+            Unit target = GetTarget();
+            if (!target.HasAura(SpellIds.RentalRacingRam) && !target.HasAura(SpellIds.SwiftWorkRam))
             {
-                Unit target = GetTarget();
-                if (!target.HasAura(SpellIds.RentalRacingRam) && !target.HasAura(SpellIds.SwiftWorkRam))
-                {
-                    target.RemoveAura(GetId());
-                    return;
-                }
+                target.RemoveAura(GetId());
+                return;
+            }
 
-                if (target.HasAura(SpellIds.ExhaustedRam))
-                    return;
+            if (target.HasAura(SpellIds.ExhaustedRam))
+                return;
 
-                switch (GetStackAmount())
-                {
-                    case 1: // green
-                        target.RemoveAura(SpellIds.RamLevelNeutral);
-                        target.RemoveAura(SpellIds.RamCanter);
-                        target.CastSpell(target, SpellIds.RamTrot, true);
-                        break;
-                    case 6: // yellow
-                        target.RemoveAura(SpellIds.RamTrot);
-                        target.RemoveAura(SpellIds.RamGallop);
-                        target.CastSpell(target, SpellIds.RamCanter, true);
-                        break;
-                    case 11: // red
-                        target.RemoveAura(SpellIds.RamCanter);
-                        target.CastSpell(target, SpellIds.RamGallop, true);
-                        break;
-                    default:
-                        break;
-                }
-
-                if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Default)
-                {
+            switch (GetStackAmount())
+            {
+                case 1: // green
+                    target.RemoveAura(SpellIds.RamLevelNeutral);
+                    target.RemoveAura(SpellIds.RamCanter);
+                    target.CastSpell(target, SpellIds.RamTrot, true);
+                    break;
+                case 6: // yellow
                     target.RemoveAura(SpellIds.RamTrot);
-                    target.CastSpell(target, SpellIds.RamLevelNeutral, true);
-                }
+                    target.RemoveAura(SpellIds.RamGallop);
+                    target.CastSpell(target, SpellIds.RamCanter, true);
+                    break;
+                case 11: // red
+                    target.RemoveAura(SpellIds.RamCanter);
+                    target.CastSpell(target, SpellIds.RamGallop, true);
+                    break;
+                default:
+                    break;
             }
 
-            void OnPeriodic(AuraEffect aurEff)
+            if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Default)
             {
-                GetTarget().RemoveAuraFromStack(GetId());
-            }
-
-            public override void Register()
-            {
-                AfterEffectApply.Add(new EffectApplyHandler(OnChange, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.ChangeAmountMask));
-                OnEffectRemove.Add(new EffectApplyHandler(OnChange, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.ChangeAmountMask));
-                OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
+                target.RemoveAura(SpellIds.RamTrot);
+                target.CastSpell(target, SpellIds.RamLevelNeutral, true);
             }
         }
 
-        public override AuraScript GetAuraScript()
+        void OnPeriodic(AuraEffect aurEff)
         {
-            return new spell_brewfest_giddyup_AuraScript();
+            GetTarget().RemoveAuraFromStack(GetId());
+        }
+
+        public override void Register()
+        {
+            AfterEffectApply.Add(new EffectApplyHandler(OnChange, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.ChangeAmountMask));
+            OnEffectRemove.Add(new EffectApplyHandler(OnChange, 0, AuraType.PeriodicDummy, AuraEffectHandleModes.ChangeAmountMask));
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
         }
     }
 
@@ -611,227 +516,157 @@ namespace Scripts.Spells.Holiday
     // 42993 - Ram - Canter
     // 42994 - Ram - Gallop
     [Script]
-    class spell_brewfest_ram : SpellScriptLoader
+    class spell_brewfest_ram : AuraScript
     {
-        public spell_brewfest_ram() : base("spell_brewfest_ram") { }
-
-        class spell_brewfest_ram_AuraScript : AuraScript
+        void OnPeriodic(AuraEffect aurEff)
         {
-            void OnPeriodic(AuraEffect aurEff)
+            Unit target = GetTarget();
+            if (target.HasAura(SpellIds.ExhaustedRam))
+                return;
+
+            switch (GetId())
             {
-                Unit target = GetTarget();
-                if (target.HasAura(SpellIds.ExhaustedRam))
-                    return;
-
-                switch (GetId())
-                {
-                    case SpellIds.RamLevelNeutral:
-                        {
-                            Aura aura = target.GetAura(SpellIds.RamFatigue);
-                            if (aura != null)
-                                aura.ModStackAmount(-4);
-                        }
-                        break;
-                    case SpellIds.RamTrot: // green
-                        {
-                            Aura aura = target.GetAura(SpellIds.RamFatigue);
-                            if (aura != null)
-                                aura.ModStackAmount(-2);
-                            if (aurEff.GetTickNumber() == 4)
-                                target.CastSpell(target, QuestIds.BrewfestSpeedBunnyGreen, true);
-                        }
-                        break;
-                    case SpellIds.RamCanter:
-                        target.CastCustomSpell(SpellIds.RamFatigue, SpellValueMod.AuraStack, 1, target, TriggerCastFlags.FullMask);
-                        if (aurEff.GetTickNumber() == 8)
-                            target.CastSpell(target, QuestIds.BrewfestSpeedBunnyYellow, true);
-                        break;
-                    case SpellIds.RamGallop:
-                        target.CastCustomSpell(SpellIds.RamFatigue, SpellValueMod.AuraStack, target.HasAura(SpellIds.RamFatigue) ? 4 : 5 /*Hack*/, target, TriggerCastFlags.FullMask);
-                        if (aurEff.GetTickNumber() == 8)
-                            target.CastSpell(target, QuestIds.BrewfestSpeedBunnyRed, true);
-                        break;
-                    default:
-                        break;
-                }
-
+                case SpellIds.RamLevelNeutral:
+                    {
+                        Aura aura = target.GetAura(SpellIds.RamFatigue);
+                        if (aura != null)
+                            aura.ModStackAmount(-4);
+                    }
+                    break;
+                case SpellIds.RamTrot: // green
+                    {
+                        Aura aura = target.GetAura(SpellIds.RamFatigue);
+                        if (aura != null)
+                            aura.ModStackAmount(-2);
+                        if (aurEff.GetTickNumber() == 4)
+                            target.CastSpell(target, QuestIds.BrewfestSpeedBunnyGreen, true);
+                    }
+                    break;
+                case SpellIds.RamCanter:
+                    target.CastCustomSpell(SpellIds.RamFatigue, SpellValueMod.AuraStack, 1, target, TriggerCastFlags.FullMask);
+                    if (aurEff.GetTickNumber() == 8)
+                        target.CastSpell(target, QuestIds.BrewfestSpeedBunnyYellow, true);
+                    break;
+                case SpellIds.RamGallop:
+                    target.CastCustomSpell(SpellIds.RamFatigue, SpellValueMod.AuraStack, target.HasAura(SpellIds.RamFatigue) ? 4 : 5 /*Hack*/, target, TriggerCastFlags.FullMask);
+                    if (aurEff.GetTickNumber() == 8)
+                        target.CastSpell(target, QuestIds.BrewfestSpeedBunnyRed, true);
+                    break;
+                default:
+                    break;
             }
 
-            public override void Register()
-            {
-                OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 1, AuraType.PeriodicDummy));
-            }
         }
 
-        public override AuraScript GetAuraScript()
+        public override void Register()
         {
-            return new spell_brewfest_ram_AuraScript();
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 1, AuraType.PeriodicDummy));
         }
     }
 
     [Script] // 43052 - Ram Fatigue
-    class spell_brewfest_ram_fatigue : SpellScriptLoader
+    class spell_brewfest_ram_fatigue : AuraScript
     {
-        public spell_brewfest_ram_fatigue() : base("spell_brewfest_ram_fatigue") { }
-
-        class spell_brewfest_ram_fatigue_AuraScript : AuraScript
+        void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+            Unit target = GetTarget();
+
+            if (GetStackAmount() == 101)
             {
-                Unit target = GetTarget();
+                target.RemoveAura(SpellIds.RamLevelNeutral);
+                target.RemoveAura(SpellIds.RamTrot);
+                target.RemoveAura(SpellIds.RamCanter);
+                target.RemoveAura(SpellIds.RamGallop);
+                target.RemoveAura(SpellIds.Giddyup);
 
-                if (GetStackAmount() == 101)
-                {
-                    target.RemoveAura(SpellIds.RamLevelNeutral);
-                    target.RemoveAura(SpellIds.RamTrot);
-                    target.RemoveAura(SpellIds.RamCanter);
-                    target.RemoveAura(SpellIds.RamGallop);
-                    target.RemoveAura(SpellIds.Giddyup);
-
-                    target.CastSpell(target, SpellIds.ExhaustedRam, true);
-                }
-            }
-
-            public override void Register()
-            {
-                AfterEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask));
+                target.CastSpell(target, SpellIds.ExhaustedRam, true);
             }
         }
 
-        public override AuraScript GetAuraScript()
+        public override void Register()
         {
-            return new spell_brewfest_ram_fatigue_AuraScript();
+            AfterEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask));
         }
     }
 
     [Script] // 43450 - Brewfest - apple trap - friendly DND
-    class spell_brewfest_apple_trap : SpellScriptLoader
+    class spell_brewfest_apple_trap : AuraScript
     {
-        public spell_brewfest_apple_trap() : base("spell_brewfest_apple_trap") { }
-
-        class spell_brewfest_apple_trap_AuraScript : AuraScript
+        void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
-            {
-                GetTarget().RemoveAura(SpellIds.RamFatigue);
-            }
-
-            public override void Register()
-            {
-                OnEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.ForceReaction, AuraEffectHandleModes.Real));
-            }
+            GetTarget().RemoveAura(SpellIds.RamFatigue);
         }
 
-        public override AuraScript GetAuraScript()
+        public override void Register()
         {
-            return new spell_brewfest_apple_trap_AuraScript();
+            OnEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.ForceReaction, AuraEffectHandleModes.Real));
         }
     }
 
     [Script] // 43332 - Exhausted Ram
-    class spell_brewfest_exhausted_ram : SpellScriptLoader
+    class spell_brewfest_exhausted_ram : AuraScript
     {
-        public spell_brewfest_exhausted_ram() : base("spell_brewfest_exhausted_ram") { }
-
-        class spell_brewfest_exhausted_ram_AuraScript : AuraScript
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-            {
-                Unit target = GetTarget();
-                target.CastSpell(target, SpellIds.RamLevelNeutral, true);
-            }
-
-            public override void Register()
-            {
-                OnEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModDecreaseSpeed, AuraEffectHandleModes.Real));
-            }
+            Unit target = GetTarget();
+            target.CastSpell(target, SpellIds.RamLevelNeutral, true);
         }
 
-        public override AuraScript GetAuraScript()
+        public override void Register()
         {
-            return new spell_brewfest_exhausted_ram_AuraScript();
+            OnEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModDecreaseSpeed, AuraEffectHandleModes.Real));
         }
     }
 
     [Script] // 43714 - Brewfest - Relay Race - Intro - Force - Player to throw- DND
-    class spell_brewfest_relay_race_intro_force_player_to_throw : SpellScriptLoader
+    class spell_brewfest_relay_race_intro_force_player_to_throw : SpellScript
     {
-        public spell_brewfest_relay_race_intro_force_player_to_throw() : base("spell_brewfest_relay_race_intro_force_player_to_throw") { }
-
-        class spell_brewfest_relay_race_intro_force_player_to_throw_SpellScript : SpellScript
+        void HandleForceCast(uint effIndex)
         {
-            void HandleForceCast(uint effIndex)
-            {
-                PreventHitDefaultEffect(effIndex);
-                // All this spells trigger a spell that requires reagents; if the
-                // triggered spell is cast as "triggered", reagents are not consumed
-                GetHitUnit().CastSpell(null, GetSpellInfo().GetEffect(effIndex).TriggerSpell, TriggerCastFlags.FullMask & ~TriggerCastFlags.IgnorePowerAndReagentCost);
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleForceCast, 0, SpellEffectName.ForceCast));
-            }
+            PreventHitDefaultEffect(effIndex);
+            // All this spells trigger a spell that requires reagents; if the
+            // triggered spell is cast as "triggered", reagents are not consumed
+            GetHitUnit().CastSpell(null, GetSpellInfo().GetEffect(effIndex).TriggerSpell, TriggerCastFlags.FullMask & ~TriggerCastFlags.IgnorePowerAndReagentCost);
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_brewfest_relay_race_intro_force_player_to_throw_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleForceCast, 0, SpellEffectName.ForceCast));
         }
     }
 
     [Script]
-    class spell_brewfest_relay_race_turn_in : SpellScriptLoader
+    class spell_brewfest_relay_race_turn_in : SpellScript
     {
-        public spell_brewfest_relay_race_turn_in() : base("spell_brewfest_relay_race_turn_in") { }
-
-        class spell_brewfest_relay_race_turn_in_SpellScript : SpellScript
+        void HandleDummy(uint effIndex)
         {
-            void HandleDummy(uint effIndex)
-            {
-                PreventHitDefaultEffect(effIndex);
+            PreventHitDefaultEffect(effIndex);
 
-                Aura aura = GetHitUnit().GetAura(SpellIds.SwiftWorkRam);
-                if (aura != null)
-                {
-                    aura.SetDuration(aura.GetDuration() + 30 * Time.InMilliseconds);
-                    GetCaster().CastSpell(GetHitUnit(), SpellIds.RelayRaceTurnIn, TriggerCastFlags.FullMask);
-                }
-            }
-
-            public override void Register()
+            Aura aura = GetHitUnit().GetAura(SpellIds.SwiftWorkRam);
+            if (aura != null)
             {
-                OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+                aura.SetDuration(aura.GetDuration() + 30 * Time.InMilliseconds);
+                GetCaster().CastSpell(GetHitUnit(), SpellIds.RelayRaceTurnIn, TriggerCastFlags.FullMask);
             }
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_brewfest_relay_race_turn_in_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
     [Script] // 43876 - Dismount Ram
-    class spell_brewfest_dismount_ram : SpellScriptLoader
+    class spell_brewfest_dismount_ram : SpellScript
     {
-        public spell_brewfest_dismount_ram() : base("spell_brewfest_dismount_ram") { }
-
-        class spell_brewfest_relay_race_intro_force_player_to_throw_SpellScript : SpellScript
+        void HandleScript(uint effIndex)
         {
-            void HandleScript(uint effIndex)
-            {
-                GetCaster().RemoveAura(SpellIds.RentalRacingRam);
-            }
-
-            public override void Register()
-            {
-                OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
-            }
+            GetCaster().RemoveAura(SpellIds.RentalRacingRam);
         }
 
-        public override SpellScript GetSpellScript()
+        public override void Register()
         {
-            return new spell_brewfest_relay_race_intro_force_player_to_throw_SpellScript();
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
 
@@ -840,145 +675,114 @@ namespace Scripts.Spells.Holiday
     // 43261 Brewfest  - Barker Bunny 3
     // 43262 Brewfest  - Barker Bunny 4
     [Script]
-    class spell_brewfest_barker_bunny : SpellScriptLoader
+    class spell_brewfest_barker_bunny : AuraScript
     {
-        public spell_brewfest_barker_bunny() : base("spell_brewfest_barker_bunny") { }
-
-        class spell_brewfest_barker_bunny_AuraScript : AuraScript
+        public override bool Load()
         {
-            public override bool Load()
-            {
-                return GetUnitOwner().IsTypeId(TypeId.Player);
-            }
-
-            void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
-            {
-                Player target = GetTarget().ToPlayer();
-
-                uint BroadcastTextId = 0;
-
-                if (target.GetQuestStatus(QuestIds.BarkForDrohnsDistillery) == QuestStatus.Incomplete ||
-                    target.GetQuestStatus(QuestIds.BarkForDrohnsDistillery) == QuestStatus.Complete)
-                    BroadcastTextId = RandomHelper.RAND(TextIds.DrohnDistillery1, TextIds.DrohnDistillery2, TextIds.DrohnDistillery3, TextIds.DrohnDistillery4);
-
-                if (target.GetQuestStatus(QuestIds.BarkForTchalisVoodooBrewery) == QuestStatus.Incomplete ||
-                    target.GetQuestStatus(QuestIds.BarkForTchalisVoodooBrewery) == QuestStatus.Complete)
-                    BroadcastTextId = RandomHelper.RAND(TextIds.TChalisVoodoo1, TextIds.TChalisVoodoo2, TextIds.TChalisVoodoo3, TextIds.TChalisVoodoo4);
-
-                if (target.GetQuestStatus(QuestIds.BarkBarleybrew) == QuestStatus.Incomplete ||
-                    target.GetQuestStatus(QuestIds.BarkBarleybrew) == QuestStatus.Complete)
-                    BroadcastTextId = RandomHelper.RAND(TextIds.Barleybrew1, TextIds.Barleybrew2, TextIds.Barleybrew3, TextIds.Barleybrew4);
-
-                if (target.GetQuestStatus(QuestIds.BarkForThunderbrews) == QuestStatus.Incomplete ||
-                    target.GetQuestStatus(QuestIds.BarkForThunderbrews) == QuestStatus.Complete)
-                    BroadcastTextId = RandomHelper.RAND(TextIds.Thunderbrews1, TextIds.Thunderbrews2, TextIds.Thunderbrews3, TextIds.Thunderbrews4);
-
-                if (BroadcastTextId != 0)
-                    target.Talk(BroadcastTextId, ChatMsg.Say, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay), target);
-            }
-
-            public override void Register()
-            {
-                OnEffectApply.Add(new EffectApplyHandler(OnApply, 1, AuraType.Dummy, AuraEffectHandleModes.Real));
-            }
+            return GetUnitOwner().IsTypeId(TypeId.Player);
         }
 
-        public override AuraScript GetAuraScript()
+        void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            return new spell_brewfest_barker_bunny_AuraScript();
+            Player target = GetTarget().ToPlayer();
+
+            uint BroadcastTextId = 0;
+
+            if (target.GetQuestStatus(QuestIds.BarkForDrohnsDistillery) == QuestStatus.Incomplete ||
+                target.GetQuestStatus(QuestIds.BarkForDrohnsDistillery) == QuestStatus.Complete)
+                BroadcastTextId = RandomHelper.RAND(TextIds.DrohnDistillery1, TextIds.DrohnDistillery2, TextIds.DrohnDistillery3, TextIds.DrohnDistillery4);
+
+            if (target.GetQuestStatus(QuestIds.BarkForTchalisVoodooBrewery) == QuestStatus.Incomplete ||
+                target.GetQuestStatus(QuestIds.BarkForTchalisVoodooBrewery) == QuestStatus.Complete)
+                BroadcastTextId = RandomHelper.RAND(TextIds.TChalisVoodoo1, TextIds.TChalisVoodoo2, TextIds.TChalisVoodoo3, TextIds.TChalisVoodoo4);
+
+            if (target.GetQuestStatus(QuestIds.BarkBarleybrew) == QuestStatus.Incomplete ||
+                target.GetQuestStatus(QuestIds.BarkBarleybrew) == QuestStatus.Complete)
+                BroadcastTextId = RandomHelper.RAND(TextIds.Barleybrew1, TextIds.Barleybrew2, TextIds.Barleybrew3, TextIds.Barleybrew4);
+
+            if (target.GetQuestStatus(QuestIds.BarkForThunderbrews) == QuestStatus.Incomplete ||
+                target.GetQuestStatus(QuestIds.BarkForThunderbrews) == QuestStatus.Complete)
+                BroadcastTextId = RandomHelper.RAND(TextIds.Thunderbrews1, TextIds.Thunderbrews2, TextIds.Thunderbrews3, TextIds.Thunderbrews4);
+
+            if (BroadcastTextId != 0)
+                target.Talk(BroadcastTextId, ChatMsg.Say, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay), target);
+        }
+
+        public override void Register()
+        {
+            OnEffectApply.Add(new EffectApplyHandler(OnApply, 1, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
 
-
     [Script] // 45724 - Braziers Hit!
-    class spell_midsummer_braziers_hit : SpellScriptLoader
+    class spell_midsummer_braziers_hit : AuraScript
     {
-        public spell_midsummer_braziers_hit() : base("spell_midsummer_braziers_hit") { }
-
-        class spell_midsummer_braziers_hit_AuraScript : AuraScript
+        public override bool Validate(SpellInfo spellInfo)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(SpellIds.TorchTossingTraining, SpellIds.TorchTossingPractice);
-            }
+            return ValidateSpellInfo(SpellIds.TorchTossingTraining, SpellIds.TorchTossingPractice);
+        }
 
-            void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
-            {
-                Player player = GetTarget().ToPlayer();
-                if (!player)
-                    return;
+        void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Player player = GetTarget().ToPlayer();
+            if (!player)
+                return;
 
-                if ((player.HasAura(SpellIds.TorchTossingTraining) && GetStackAmount() == 8) || (player.HasAura(SpellIds.TorchTossingPractice) && GetStackAmount() == 20))
-                {
-                    if (player.GetTeam() == Team.Alliance)
-                        player.CastSpell(player, SpellIds.TorchTossingTrainingSuccessAlliance, true);
-                    else if (player.GetTeam() == Team.Horde)
-                        player.CastSpell(player, SpellIds.TorchTossingTrainingSuccessHorde, true);
-                    Remove();
-                }
-            }
-
-            public override void Register()
+            if ((player.HasAura(SpellIds.TorchTossingTraining) && GetStackAmount() == 8) || (player.HasAura(SpellIds.TorchTossingPractice) && GetStackAmount() == 20))
             {
-                AfterEffectApply.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Reapply));
+                if (player.GetTeam() == Team.Alliance)
+                    player.CastSpell(player, SpellIds.TorchTossingTrainingSuccessAlliance, true);
+                else if (player.GetTeam() == Team.Horde)
+                    player.CastSpell(player, SpellIds.TorchTossingTrainingSuccessHorde, true);
+                Remove();
             }
         }
 
-        public override AuraScript GetAuraScript()
+        public override void Register()
         {
-            return new spell_midsummer_braziers_hit_AuraScript();
+            AfterEffectApply.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Reapply));
         }
     }
 
     [Script]
-    class spell_gen_ribbon_pole_dancer_check : SpellScriptLoader
+    class spell_gen_ribbon_pole_dancer_check : AuraScript
     {
-        public spell_gen_ribbon_pole_dancer_check() : base("spell_gen_ribbon_pole_dancer_check") { }
-
-        class spell_gen_ribbon_pole_dancer_check_AuraScript : AuraScript
+        public override bool Validate(SpellInfo spellInfo)
         {
-            public override bool Validate(SpellInfo spellInfo)
-            {
-                return ValidateSpellInfo(SpellIds.HasFullMidsummerSet, SpellIds.RibbonDance, SpellIds.BurningHotPoleDance);
-            }
-
-            void PeriodicTick(AuraEffect aurEff)
-            {
-                Unit target = GetTarget();
-
-                // check if aura needs to be removed
-                if (!target.FindNearestGameObject(GameobjectIds.RibbonPole, 8.0f) || !target.HasUnitState(UnitState.Casting))
-                {
-                    target.InterruptNonMeleeSpells(false);
-                    target.RemoveAurasDueToSpell(GetId());
-                    target.RemoveAura(SpellIds.RibbonDanceCosmetic);
-                    return;
-                }
-
-                // set xp buff duration
-                Aura aur = target.GetAura(SpellIds.RibbonDance);
-                if (aur != null)
-                {
-                    aur.SetMaxDuration(Math.Min(3600000, aur.GetMaxDuration() + 180000));
-                    aur.RefreshDuration();
-
-                    // reward achievement criteria
-                    if (aur.GetMaxDuration() == 3600000 && target.HasAura(SpellIds.HasFullMidsummerSet))
-                        target.CastSpell(target, SpellIds.BurningHotPoleDance, true);
-                }
-                else
-                    target.AddAura(SpellIds.RibbonDance, target);
-            }
-
-            public override void Register()
-            {
-                OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicDummy));
-            }
+            return ValidateSpellInfo(SpellIds.HasFullMidsummerSet, SpellIds.RibbonDance, SpellIds.BurningHotPoleDance);
         }
 
-        public override AuraScript GetAuraScript()
+        void PeriodicTick(AuraEffect aurEff)
         {
-            return new spell_gen_ribbon_pole_dancer_check_AuraScript();
+            Unit target = GetTarget();
+
+            // check if aura needs to be removed
+            if (!target.FindNearestGameObject(GameobjectIds.RibbonPole, 8.0f) || !target.HasUnitState(UnitState.Casting))
+            {
+                target.InterruptNonMeleeSpells(false);
+                target.RemoveAurasDueToSpell(GetId());
+                target.RemoveAura(SpellIds.RibbonDanceCosmetic);
+                return;
+            }
+
+            // set xp buff duration
+            Aura aur = target.GetAura(SpellIds.RibbonDance);
+            if (aur != null)
+            {
+                aur.SetMaxDuration(Math.Min(3600000, aur.GetMaxDuration() + 180000));
+                aur.RefreshDuration();
+
+                // reward achievement criteria
+                if (aur.GetMaxDuration() == 3600000 && target.HasAura(SpellIds.HasFullMidsummerSet))
+                    target.CastSpell(target, SpellIds.BurningHotPoleDance, true);
+            }
+            else
+                target.AddAura(SpellIds.RibbonDance, target);
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicDummy));
         }
     }
 }

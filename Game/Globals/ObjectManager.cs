@@ -1585,17 +1585,16 @@ namespace Game
             foreach (var script in spellScriptsStorage.ToList())
             {
                 SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(script.Key);
-                Dictionary<SpellScriptLoader, uint> SpellScriptLoaders = Global.ScriptMgr.CreateSpellScriptLoaders(script.Key);
 
+                Dictionary<SpellScriptLoader, uint> SpellScriptLoaders = Global.ScriptMgr.CreateSpellScriptLoaders(script.Key);
                 foreach (var pair in SpellScriptLoaders)
                 {
                     SpellScript spellScript = pair.Key.GetSpellScript();
-                    AuraScript auraScript = pair.Key.GetAuraScript();
                     bool valid = true;
 
-                    if (spellScript == null && auraScript == null)
+                    if (spellScript == null)
                     {
-                        Log.outError(LogFilter.Scripts, "Functions GetSpellScript() and GetAuraScript() of script `{0}` do not return objects - script skipped", GetScriptName(pair.Value));
+                        Log.outError(LogFilter.Scripts, "Functions GetSpellScript() of script `{0}` do not return object - script skipped", GetScriptName(pair.Value));
                         valid = false;
                     }
 
@@ -1605,6 +1604,22 @@ namespace Game
                         spellScript._Register();
                         if (!spellScript._Validate(spellEntry))
                             valid = false;
+                    }
+
+                    if (!valid)
+                        spellScriptsStorage.Remove(pair.Value);
+                }
+
+                Dictionary<AuraScriptLoader, uint> AuraScriptLoaders = Global.ScriptMgr.CreateAuraScriptLoaders(script.Key);
+                foreach (var pair in AuraScriptLoaders)
+                {
+                    AuraScript auraScript = pair.Key.GetAuraScript();
+                    bool valid = true;
+
+                    if (auraScript == null)
+                    {
+                        Log.outError(LogFilter.Scripts, "Functions GetAuraScript() of script `{0}` do not return object - script skipped", GetScriptName(pair.Value));
+                        valid = false;
                     }
 
                     if (auraScript != null)
@@ -1637,6 +1652,9 @@ namespace Game
             // use binary search to find the script name in the sorted vector
             // assume "" is the first element
             if (string.IsNullOrEmpty(name))
+                return 0;
+
+            if (!scriptNamesStorage.Contains(name))
                 return 0;
 
             return (uint)scriptNamesStorage.IndexOf(name);

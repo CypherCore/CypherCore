@@ -58,527 +58,497 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.JedogaShadowseeker
     }
 
     [Script]
-    class boss_jedoga_shadowseeker : CreatureScript
+    public class boss_jedoga_shadowseeker : ScriptedAI
     {
-        public boss_jedoga_shadowseeker() : base("boss_jedoga_shadowseeker") { }
-
-        public class boss_jedoga_shadowseekerAI : ScriptedAI
+        public boss_jedoga_shadowseeker(Creature creature) : base(creature)
         {
-            public boss_jedoga_shadowseekerAI(Creature creature) : base(creature)
+            instance = creature.GetInstanceScript();
+            bFirstTime = true;
+            bPreDone = false;
+        }
+
+        void Initialize()
+        {
+            uiOpFerTimer = RandomHelper.URand(15 * Time.InMilliseconds, 20 * Time.InMilliseconds);
+
+            uiCycloneTimer = 3 * Time.InMilliseconds;
+            uiBoltTimer = 7 * Time.InMilliseconds;
+            uiThunderTimer = 12 * Time.InMilliseconds;
+
+            bOpFerok = false;
+            bOpFerokFail = false;
+            bOnGround = false;
+            bCanDown = false;
+            volunteerWork = true;
+        }
+
+        public override void Reset()
+        {
+            Initialize();
+
+            DoCast(SpellIds.RandomLightningVisual);
+
+            if (!bFirstTime)
+                instance.SetBossState(DataTypes.JedogaShadowseeker, EncounterState.Fail);
+
+            instance.SetGuidData(DataTypes.PlJedogaTarget, ObjectGuid.Empty);
+            instance.SetGuidData(DataTypes.AddJedogaVictim, ObjectGuid.Empty);
+            instance.SetData(DataTypes.JedogaResetInitiands, 0);
+            MoveUp();
+
+            bFirstTime = false;
+        }
+
+        public override void EnterCombat(Unit who)
+        {
+            if (instance == null || (who.GetTypeId() == TypeId.Unit && who.GetEntry() == AKCreatureIds.JedogaController))
+                return;
+
+            Talk(TextIds.SayAggro);
+            me.SetInCombatWithZone();
+            instance.SetBossState(DataTypes.JedogaShadowseeker, EncounterState.InProgress);
+        }
+
+        public override void AttackStart(Unit who)
+        {
+            if (!who || (who.GetTypeId() == TypeId.Unit && who.GetEntry() == AKCreatureIds.JedogaController))
+                return;
+
+            base.AttackStart(who);
+        }
+
+        public override void KilledUnit(Unit Victim)
+        {
+            if (!Victim || !Victim.IsTypeId(TypeId.Player))
+                return;
+
+            Talk(TextIds.SaySlay);
+        }
+
+        public override void JustDied(Unit killer)
+        {
+            Talk(TextIds.SayDeath);
+            instance.SetBossState(DataTypes.JedogaShadowseeker, EncounterState.Done);
+        }
+
+        public override void DoAction(int action)
+        {
+            if (action == Misc.ActionInitiateKilled)
+                volunteerWork = false;
+        }
+
+        public override uint GetData(uint type)
+        {
+            if (type == Misc.DataVolunteerWork)
+                return volunteerWork ? 1 : 0u;
+
+            return 0;
+        }
+
+        public override void MoveInLineOfSight(Unit who)
+        {
+            if (instance == null || !who || (who.IsTypeId(TypeId.Unit) && who.GetEntry() == AKCreatureIds.JedogaController))
+                return;
+
+            if (!bPreDone && who.IsTypeId(TypeId.Player) && me.GetDistance(who) < 100.0f)
             {
-                instance = creature.GetInstanceScript();
-                bFirstTime = true;
-                bPreDone = false;
+                Talk(TextIds.SayPreaching);
+                bPreDone = true;
             }
 
-            void Initialize()
+            if (instance.GetBossState(DataTypes.JedogaShadowseeker) != EncounterState.InProgress || !bOnGround)
+                return;
+
+            if (!me.GetVictim() && me.CanCreatureAttack(who))
             {
-                uiOpFerTimer = RandomHelper.URand(15 * Time.InMilliseconds, 20 * Time.InMilliseconds);
-
-                uiCycloneTimer = 3 * Time.InMilliseconds;
-                uiBoltTimer = 7 * Time.InMilliseconds;
-                uiThunderTimer = 12 * Time.InMilliseconds;
-
-                bOpFerok = false;
-                bOpFerokFail = false;
-                bOnGround = false;
-                bCanDown = false;
-                volunteerWork = true;
-            }
-
-            public override void Reset()
-            {
-                Initialize();
-
-                DoCast(SpellIds.RandomLightningVisual);
-
-                if (!bFirstTime)
-                    instance.SetBossState(DataTypes.JedogaShadowseeker, EncounterState.Fail);
-
-                instance.SetGuidData(DataTypes.PlJedogaTarget, ObjectGuid.Empty);
-                instance.SetGuidData(DataTypes.AddJedogaVictim, ObjectGuid.Empty);
-                instance.SetData(DataTypes.JedogaResetInitiands, 0);
-                MoveUp();
-
-                bFirstTime = false;
-            }
-
-            public override void EnterCombat(Unit who)
-            {
-                if (instance == null || (who.GetTypeId() == TypeId.Unit && who.GetEntry() == AKCreatureIds.JedogaController))
-                    return;
-
-                Talk(TextIds.SayAggro);
-                me.SetInCombatWithZone();
-                instance.SetBossState(DataTypes.JedogaShadowseeker, EncounterState.InProgress);
-            }
-
-            public override void AttackStart(Unit who)
-            {
-                if (!who || (who.GetTypeId() == TypeId.Unit && who.GetEntry() == AKCreatureIds.JedogaController))
-                    return;
-
-                base.AttackStart(who);
-            }
-
-            public override void KilledUnit(Unit Victim)
-            {
-                if (!Victim || !Victim.IsTypeId(TypeId.Player))
-                    return;
-
-                Talk(TextIds.SaySlay);
-            }
-
-            public override void JustDied(Unit killer)
-            {
-                Talk(TextIds.SayDeath);
-                instance.SetBossState(DataTypes.JedogaShadowseeker, EncounterState.Done);
-            }
-
-            public override void DoAction(int action)
-            {
-                if (action == Misc.ActionInitiateKilled)
-                    volunteerWork = false;
-            }
-
-            public override uint GetData(uint type)
-            {
-                if (type == Misc.DataVolunteerWork)
-                    return volunteerWork ? 1 : 0u;
-
-                return 0;
-            }
-
-            public override void MoveInLineOfSight(Unit who)
-            {
-                if (instance == null || !who || (who.IsTypeId(TypeId.Unit) && who.GetEntry() == AKCreatureIds.JedogaController))
-                    return;
-
-                if (!bPreDone && who.IsTypeId(TypeId.Player) && me.GetDistance(who) < 100.0f)
+                float attackRadius = me.GetAttackDistance(who);
+                if (me.IsWithinDistInMap(who, attackRadius) && me.IsWithinLOSInMap(who))
                 {
-                    Talk(TextIds.SayPreaching);
-                    bPreDone = true;
-                }
-
-                if (instance.GetBossState(DataTypes.JedogaShadowseeker) != EncounterState.InProgress || !bOnGround)
-                    return;
-
-                if (!me.GetVictim() && me.CanCreatureAttack(who))
-                {
-                    float attackRadius = me.GetAttackDistance(who);
-                    if (me.IsWithinDistInMap(who, attackRadius) && me.IsWithinLOSInMap(who))
+                    if (!me.GetVictim())
                     {
-                        if (!me.GetVictim())
-                        {
-                            who.RemoveAurasByType(AuraType.ModStealth);
-                            AttackStart(who);
-                        }
-                        else
-                        {
-                            who.SetInCombatWith(me);
-                            me.AddThreat(who, 0.0f);
-                        }
+                        who.RemoveAurasByType(AuraType.ModStealth);
+                        AttackStart(who);
                     }
-                }
-            }
-
-            void MoveDown()
-            {
-                bOpFerokFail = false;
-
-                instance.SetData(DataTypes.JedogaTriggerSwitch, 0);
-                me.GetMotionMaster().MovePoint(1, Misc.JedogaPosition[1]);
-                me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Normal, false);
-                me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Magic, false);
-                me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.NonAttackable);
-
-                me.RemoveAurasDueToSpell(SpellIds.SphereVisual);
-
-                bOnGround = true;
-
-                if (UpdateVictim())
-                {
-                    AttackStart(me.GetVictim());
-                    me.GetMotionMaster().MoveChase(me.GetVictim());
-                }
-                else
-                {
-                    Unit target = Global.ObjAccessor.GetUnit(me, instance.GetGuidData(DataTypes.PlJedogaTarget));
-                    if (target)
-                    {
-                        AttackStart(target);
-                        instance.SetData(DataTypes.JedogaResetInitiands, 0);
-                        if (instance.GetBossState(DataTypes.JedogaShadowseeker) != EncounterState.InProgress)
-                            EnterCombat(target);
-                    }
-                    else if (!me.IsInCombat())
-                        EnterEvadeMode();
-                }
-            }
-
-            void MoveUp()
-            {
-                me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Normal, true);
-                me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Magic, true);
-                me.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.NonAttackable);
-
-                me.AttackStop();
-                me.RemoveAllAuras();
-                me.LoadCreaturesAddon();
-                me.GetMotionMaster().MovePoint(0, Misc.JedogaPosition[0]);
-
-                instance.SetData(DataTypes.JedogaTriggerSwitch, 1);
-                if (instance.GetBossState(DataTypes.JedogaShadowseeker) == EncounterState.InProgress)
-                    GetVictimForSacrifice();
-
-                bOnGround = false;
-                uiOpFerTimer = RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds);
-            }
-
-            void GetVictimForSacrifice()
-            {
-                ObjectGuid victim = instance.GetGuidData(DataTypes.AddJedogaInitiand);
-                if (!victim.IsEmpty())
-                {
-                    Talk(TextIds.SaySacrifice1);
-                    instance.SetGuidData(DataTypes.AddJedogaVictim, victim);
-                }
-                else
-                    bCanDown = true;
-            }
-
-            void Sacrifice()
-            {
-                Talk(TextIds.SaySacrifice2);
-
-                me.InterruptNonMeleeSpells(false);
-                DoCast(me, SpellIds.GiftOfTheHerald, false);
-
-                bOpFerok = false;
-                bCanDown = true;
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (instance.GetBossState(DataTypes.JedogaShadowseeker) != EncounterState.InProgress && instance.GetData(DataTypes.AllInitiandDead) != 0)
-                    MoveDown();
-
-                if (bOpFerok && !bOnGround && !bCanDown)
-                    Sacrifice();
-
-                if (bOpFerokFail && !bOnGround && !bCanDown)
-                    bCanDown = true;
-
-                if (bCanDown)
-                {
-                    MoveDown();
-                    bCanDown = false;
-                }
-
-                if (bOnGround)
-                {
-                    if (!UpdateVictim())
-                        return;
-
-                    if (uiCycloneTimer <= diff)
-                    {
-                        DoCast(me, SpellIds.CycloneStrike, false);
-                        uiCycloneTimer = RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds);
-                    }
-                    else uiCycloneTimer -= diff;
-
-                    if (uiBoltTimer <= diff)
-                    {
-                        Unit target = SelectTarget(SelectAggroTarget.Random, 0, 100, true);
-                        if (target)
-                            me.CastSpell(target, SpellIds.LightningBolt, false);
-
-                        uiBoltTimer = RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds);
-                    }
-                    else uiBoltTimer -= diff;
-
-                    if (uiThunderTimer <= diff)
-                    {
-                        Unit target = SelectTarget(SelectAggroTarget.Random, 0, 100, true);
-                        if (target)
-                            me.CastSpell(target, SpellIds.Thundershock, false);
-
-                        uiThunderTimer = RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds);
-                    }
-                    else uiThunderTimer -= diff;
-
-                    if (uiOpFerTimer <= diff)
-                        MoveUp();
                     else
-                        uiOpFerTimer -= diff;
-
-                    DoMeleeAttackIfReady();
+                    {
+                        who.SetInCombatWith(me);
+                        me.AddThreat(who, 0.0f);
+                    }
                 }
             }
-
-            InstanceScript instance;
-
-            uint uiOpFerTimer;
-            uint uiCycloneTimer;
-            uint uiBoltTimer;
-            uint uiThunderTimer;
-
-            bool bPreDone;
-            public bool bOpFerok;
-            bool bOnGround;
-            public bool bOpFerokFail;
-            bool bCanDown;
-            bool volunteerWork;
-            bool bFirstTime;
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        void MoveDown()
         {
-            return GetInstanceAI<boss_jedoga_shadowseekerAI>(creature);
+            bOpFerokFail = false;
+
+            instance.SetData(DataTypes.JedogaTriggerSwitch, 0);
+            me.GetMotionMaster().MovePoint(1, Misc.JedogaPosition[1]);
+            me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Normal, false);
+            me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Magic, false);
+            me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.NonAttackable);
+
+            me.RemoveAurasDueToSpell(SpellIds.SphereVisual);
+
+            bOnGround = true;
+
+            if (UpdateVictim())
+            {
+                AttackStart(me.GetVictim());
+                me.GetMotionMaster().MoveChase(me.GetVictim());
+            }
+            else
+            {
+                Unit target = Global.ObjAccessor.GetUnit(me, instance.GetGuidData(DataTypes.PlJedogaTarget));
+                if (target)
+                {
+                    AttackStart(target);
+                    instance.SetData(DataTypes.JedogaResetInitiands, 0);
+                    if (instance.GetBossState(DataTypes.JedogaShadowseeker) != EncounterState.InProgress)
+                        EnterCombat(target);
+                }
+                else if (!me.IsInCombat())
+                    EnterEvadeMode();
+            }
         }
+
+        void MoveUp()
+        {
+            me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Normal, true);
+            me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Magic, true);
+            me.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.NonAttackable);
+
+            me.AttackStop();
+            me.RemoveAllAuras();
+            me.LoadCreaturesAddon();
+            me.GetMotionMaster().MovePoint(0, Misc.JedogaPosition[0]);
+
+            instance.SetData(DataTypes.JedogaTriggerSwitch, 1);
+            if (instance.GetBossState(DataTypes.JedogaShadowseeker) == EncounterState.InProgress)
+                GetVictimForSacrifice();
+
+            bOnGround = false;
+            uiOpFerTimer = RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds);
+        }
+
+        void GetVictimForSacrifice()
+        {
+            ObjectGuid victim = instance.GetGuidData(DataTypes.AddJedogaInitiand);
+            if (!victim.IsEmpty())
+            {
+                Talk(TextIds.SaySacrifice1);
+                instance.SetGuidData(DataTypes.AddJedogaVictim, victim);
+            }
+            else
+                bCanDown = true;
+        }
+
+        void Sacrifice()
+        {
+            Talk(TextIds.SaySacrifice2);
+
+            me.InterruptNonMeleeSpells(false);
+            DoCast(me, SpellIds.GiftOfTheHerald, false);
+
+            bOpFerok = false;
+            bCanDown = true;
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (instance.GetBossState(DataTypes.JedogaShadowseeker) != EncounterState.InProgress && instance.GetData(DataTypes.AllInitiandDead) != 0)
+                MoveDown();
+
+            if (bOpFerok && !bOnGround && !bCanDown)
+                Sacrifice();
+
+            if (bOpFerokFail && !bOnGround && !bCanDown)
+                bCanDown = true;
+
+            if (bCanDown)
+            {
+                MoveDown();
+                bCanDown = false;
+            }
+
+            if (bOnGround)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                if (uiCycloneTimer <= diff)
+                {
+                    DoCast(me, SpellIds.CycloneStrike, false);
+                    uiCycloneTimer = RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds);
+                }
+                else uiCycloneTimer -= diff;
+
+                if (uiBoltTimer <= diff)
+                {
+                    Unit target = SelectTarget(SelectAggroTarget.Random, 0, 100, true);
+                    if (target)
+                        me.CastSpell(target, SpellIds.LightningBolt, false);
+
+                    uiBoltTimer = RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds);
+                }
+                else uiBoltTimer -= diff;
+
+                if (uiThunderTimer <= diff)
+                {
+                    Unit target = SelectTarget(SelectAggroTarget.Random, 0, 100, true);
+                    if (target)
+                        me.CastSpell(target, SpellIds.Thundershock, false);
+
+                    uiThunderTimer = RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds);
+                }
+                else uiThunderTimer -= diff;
+
+                if (uiOpFerTimer <= diff)
+                    MoveUp();
+                else
+                    uiOpFerTimer -= diff;
+
+                DoMeleeAttackIfReady();
+            }
+        }
+
+        InstanceScript instance;
+
+        uint uiOpFerTimer;
+        uint uiCycloneTimer;
+        uint uiBoltTimer;
+        uint uiThunderTimer;
+
+        bool bPreDone;
+        public bool bOpFerok;
+        bool bOnGround;
+        public bool bOpFerokFail;
+        bool bCanDown;
+        bool volunteerWork;
+        bool bFirstTime;
     }
 
     [Script]
-    class npc_jedoga_twilight_volunteer : CreatureScript
+    class npc_jedoga_twilight_volunteer : ScriptedAI
     {
-        public npc_jedoga_twilight_volunteer() : base("npc_jedoga_initiand") { }
-
-        class npc_jedoga_twilight_volunteerAI : ScriptedAI
+        public npc_jedoga_twilight_volunteer(Creature creature) : base(creature)
         {
-            public npc_jedoga_twilight_volunteerAI(Creature creature) : base(creature)
-            {
-                Initialize();
-                instance = creature.GetInstanceScript();
-            }
+            Initialize();
+            instance = creature.GetInstanceScript();
+        }
 
-            void Initialize()
+        void Initialize()
+        {
+            bWalking = false;
+            bCheckTimer = 2 * Time.InMilliseconds;
+        }
+
+        public override void Reset()
+        {
+            Initialize();
+
+            if (instance.GetBossState(DataTypes.JedogaShadowseeker) != EncounterState.InProgress)
             {
+                me.RemoveAurasDueToSpell(SpellIds.SphereVisual);
+                me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Normal, false);
+                me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Magic, false);
+                me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.NonAttackable);
+            }
+            else
+            {
+                DoCast(me, SpellIds.SphereVisual, false);
+                me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Normal, true);
+                me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Magic, true);
+                me.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.NonAttackable);
+            }
+        }
+
+        public override void JustDied(Unit killer)
+        {
+            if (!killer || instance == null)
+                return;
+
+            if (bWalking)
+            {
+                Creature boss = ObjectAccessor.GetCreature(me, instance.GetGuidData(DataTypes.JedogaShadowseeker));
+                if (boss)
+                {
+                    if (!boss.GetAI<boss_jedoga_shadowseeker>().bOpFerok)
+                        boss.GetAI<boss_jedoga_shadowseeker>().bOpFerokFail = true;
+
+                    if (killer.IsTypeId(TypeId.Player))
+                        boss.GetAI().DoAction(Misc.ActionInitiateKilled);
+                }
+
+                instance.SetGuidData(DataTypes.AddJedogaVictim, ObjectGuid.Empty);
+
                 bWalking = false;
-                bCheckTimer = 2 * Time.InMilliseconds;
             }
+            if (killer.IsTypeId(TypeId.Player))
+                instance.SetGuidData(DataTypes.PlJedogaTarget, killer.GetGUID());
+        }
 
-            public override void Reset()
+        public override void EnterCombat(Unit who) { }
+
+        public override void AttackStart(Unit victim)
+        {
+            if ((instance.GetBossState(DataTypes.JedogaShadowseeker) == EncounterState.InProgress) || !victim)
+                return;
+
+            base.AttackStart(victim);
+        }
+
+        public override void MoveInLineOfSight(Unit who)
+        {
+            if ((instance.GetBossState(DataTypes.JedogaShadowseeker) == EncounterState.InProgress) || !who)
+                return;
+
+            base.MoveInLineOfSight(who);
+        }
+
+        public override void MovementInform(MovementGeneratorType uiType, uint uiPointId)
+        {
+            if (uiType != MovementGeneratorType.Point || instance == null)
+                return;
+
+            switch (uiPointId)
             {
-                Initialize();
+                case 1:
+                    {
+                        Creature boss = me.GetMap().GetCreature(instance.GetGuidData(DataTypes.JedogaShadowseeker));
+                        if (boss)
+                        {
+                            boss.GetAI<boss_jedoga_shadowseeker>().bOpFerok = true;
+                            boss.GetAI<boss_jedoga_shadowseeker>().bOpFerokFail = false;
+                            me.KillSelf();
+                        }
+                    }
+                    break;
+            }
+        }
 
-                if (instance.GetBossState(DataTypes.JedogaShadowseeker) != EncounterState.InProgress)
+        public override void UpdateAI(uint diff)
+        {
+            if (bCheckTimer <= diff)
+            {
+                if (me.GetGUID() == instance.GetGuidData(DataTypes.AddJedogaVictim) && !bWalking)
                 {
                     me.RemoveAurasDueToSpell(SpellIds.SphereVisual);
                     me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Normal, false);
                     me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Magic, false);
                     me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.NonAttackable);
+
+                    float distance = me.GetDistance(Misc.JedogaPosition[1]);
+
+                    if (distance < 9.0f)
+                        me.SetSpeedRate(UnitMoveType.Walk, 0.5f);
+                    else if (distance < 15.0f)
+                        me.SetSpeedRate(UnitMoveType.Walk, 0.75f);
+                    else if (distance < 20.0f)
+                        me.SetSpeedRate(UnitMoveType.Walk, 1.0f);
+
+                    me.GetMotionMaster().Clear(false);
+                    me.GetMotionMaster().MovePoint(1, Misc.JedogaPosition[1]);
+                    bWalking = true;
                 }
-                else
+                if (!bWalking)
                 {
-                    DoCast(me, SpellIds.SphereVisual, false);
-                    me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Normal, true);
-                    me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Magic, true);
-                    me.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.NonAttackable);
-                }
-            }
-
-            public override void JustDied(Unit killer)
-            {
-                if (!killer || instance == null)
-                    return;
-
-                if (bWalking)
-                {
-                    Creature boss = ObjectAccessor.GetCreature(me, instance.GetGuidData(DataTypes.JedogaShadowseeker));
-                    if (boss)
-                    {
-                        if (!boss.GetAI<boss_jedoga_shadowseeker.boss_jedoga_shadowseekerAI>().bOpFerok)
-                            boss.GetAI<boss_jedoga_shadowseeker.boss_jedoga_shadowseekerAI>().bOpFerokFail = true;
-
-                        if (killer.IsTypeId(TypeId.Player))
-                            boss.GetAI().DoAction(Misc.ActionInitiateKilled);
-                    }
-
-                    instance.SetGuidData(DataTypes.AddJedogaVictim, ObjectGuid.Empty);
-
-                    bWalking = false;
-                }
-                if (killer.IsTypeId(TypeId.Player))
-                    instance.SetGuidData(DataTypes.PlJedogaTarget, killer.GetGUID());
-            }
-
-            public override void EnterCombat(Unit who) { }
-
-            public override void AttackStart(Unit victim)
-            {
-                if ((instance.GetBossState(DataTypes.JedogaShadowseeker) == EncounterState.InProgress) || !victim)
-                    return;
-
-                base.AttackStart(victim);
-            }
-
-            public override void MoveInLineOfSight(Unit who)
-            {
-                if ((instance.GetBossState(DataTypes.JedogaShadowseeker) == EncounterState.InProgress) || !who)
-                    return;
-
-                base.MoveInLineOfSight(who);
-            }
-
-            public override void MovementInform(MovementGeneratorType uiType, uint uiPointId)
-            {
-                if (uiType != MovementGeneratorType.Point || instance == null)
-                    return;
-
-                switch (uiPointId)
-                {
-                    case 1:
-                        {
-                            Creature boss = me.GetMap().GetCreature(instance.GetGuidData(DataTypes.JedogaShadowseeker));
-                            if (boss)
-                            {
-                                boss.GetAI<boss_jedoga_shadowseeker.boss_jedoga_shadowseekerAI>().bOpFerok = true;
-                                boss.GetAI<boss_jedoga_shadowseeker.boss_jedoga_shadowseekerAI>().bOpFerokFail = false;
-                                me.KillSelf();
-                            }
-                        }
-                        break;
-                }
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (bCheckTimer <= diff)
-                {
-                    if (me.GetGUID() == instance.GetGuidData(DataTypes.AddJedogaVictim) && !bWalking)
+                    if (instance.GetBossState(DataTypes.JedogaShadowseeker) != EncounterState.InProgress && me.HasAura(SpellIds.SphereVisual))
                     {
                         me.RemoveAurasDueToSpell(SpellIds.SphereVisual);
                         me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Normal, false);
                         me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Magic, false);
                         me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.NonAttackable);
-
-                        float distance = me.GetDistance(Misc.JedogaPosition[1]);
-
-                        if (distance < 9.0f)
-                            me.SetSpeedRate(UnitMoveType.Walk, 0.5f);
-                        else if (distance < 15.0f)
-                            me.SetSpeedRate(UnitMoveType.Walk, 0.75f);
-                        else if (distance < 20.0f)
-                            me.SetSpeedRate(UnitMoveType.Walk, 1.0f);
-
-                        me.GetMotionMaster().Clear(false);
-                        me.GetMotionMaster().MovePoint(1, Misc.JedogaPosition[1]);
-                        bWalking = true;
                     }
-                    if (!bWalking)
+                    if (instance.GetBossState(DataTypes.JedogaShadowseeker) == EncounterState.InProgress && !me.HasAura(SpellIds.SphereVisual))
                     {
-                        if (instance.GetBossState(DataTypes.JedogaShadowseeker) != EncounterState.InProgress && me.HasAura(SpellIds.SphereVisual))
-                        {
-                            me.RemoveAurasDueToSpell(SpellIds.SphereVisual);
-                            me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Normal, false);
-                            me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Magic, false);
-                            me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.NonAttackable);
-                        }
-                        if (instance.GetBossState(DataTypes.JedogaShadowseeker) == EncounterState.InProgress && !me.HasAura(SpellIds.SphereVisual))
-                        {
-                            DoCast(me, SpellIds.SphereVisual, false);
-                            me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Normal, true);
-                            me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Magic, true);
-                            me.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.NonAttackable);
-                        }
+                        DoCast(me, SpellIds.SphereVisual, false);
+                        me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Normal, true);
+                        me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Magic, true);
+                        me.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.NonAttackable);
                     }
-                    bCheckTimer = 2 * Time.InMilliseconds;
                 }
-                else bCheckTimer -= diff;
-
-                //Return since we have no target
-                if (!UpdateVictim())
-                    return;
-
-                DoMeleeAttackIfReady();
+                bCheckTimer = 2 * Time.InMilliseconds;
             }
+            else bCheckTimer -= diff;
 
-            InstanceScript instance;
+            //Return since we have no target
+            if (!UpdateVictim())
+                return;
 
-            uint bCheckTimer;
-            bool bWalking;
+            DoMeleeAttackIfReady();
         }
 
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<npc_jedoga_twilight_volunteerAI>(creature);
-        }
+        InstanceScript instance;
+
+        uint bCheckTimer;
+        bool bWalking;
     }
 
     [Script]
-    class npc_jedoga_controller : CreatureScript
+    class npc_jedoga_controller : ScriptedAI
     {
-        public npc_jedoga_controller() : base("npc_jedogas_aufseher_trigger") { }
-
-        class npc_jedoga_controllerAI : ScriptedAI
+        public npc_jedoga_controller(Creature creature) : base(creature)
         {
-            public npc_jedoga_controllerAI(Creature creature) : base(creature)
-            {
-                instance = creature.GetInstanceScript();
-                bRemoved = false;
-                bRemoved2 = false;
-                bCast = false;
-                bCast2 = false;
+            instance = creature.GetInstanceScript();
+            bRemoved = false;
+            bRemoved2 = false;
+            bCast = false;
+            bCast2 = false;
 
-                SetCombatMovement(false);
-            }
-
-            public override void Reset() { }
-
-            public override void EnterCombat(Unit who) { }
-
-            public override void AttackStart(Unit victim) { }
-
-            public override void MoveInLineOfSight(Unit who) { }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!bRemoved && me.GetPositionX() > 440.0f)
-                {
-                    if (instance.GetBossState(DataTypes.PrinceTaldaram) == EncounterState.Done)
-                    {
-                        me.InterruptNonMeleeSpells(true);
-                        bRemoved = true;
-                        return;
-                    }
-                    if (!bCast)
-                    {
-                        //DoCast(me, JedogaShadowseekerConst.SpellBeamVisualJedogasAufseher1, false);
-                        bCast = true;
-                    }
-                }
-                if (!bRemoved2 && me.GetPositionX() < 440.0f)
-                {
-                    if (!bCast2 && instance.GetData(DataTypes.JedogaTriggerSwitch) != 0)
-                    {
-                        //DoCast(me, JedogaShadowseekerConst.SpellBeamVisualJedogasAufseher2, false);
-                        bCast2 = true;
-                    }
-                    if (bCast2 && instance.GetData(DataTypes.JedogaTriggerSwitch) == 0)
-                    {
-                        me.InterruptNonMeleeSpells(true);
-                        bCast2 = false;
-                    }
-                    if (!bRemoved2 && instance.GetBossState(DataTypes.JedogaShadowseeker) == EncounterState.Done)
-                    {
-                        me.InterruptNonMeleeSpells(true);
-                        bRemoved2 = true;
-                    }
-                }
-            }
-
-            InstanceScript instance;
-
-            bool bRemoved;
-            bool bRemoved2;
-            bool bCast;
-            bool bCast2;
+            SetCombatMovement(false);
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void Reset() { }
+
+        public override void EnterCombat(Unit who) { }
+
+        public override void AttackStart(Unit victim) { }
+
+        public override void MoveInLineOfSight(Unit who) { }
+
+        public override void UpdateAI(uint diff)
         {
-            return GetInstanceAI<npc_jedoga_controllerAI>(creature);
+            if (!bRemoved && me.GetPositionX() > 440.0f)
+            {
+                if (instance.GetBossState(DataTypes.PrinceTaldaram) == EncounterState.Done)
+                {
+                    me.InterruptNonMeleeSpells(true);
+                    bRemoved = true;
+                    return;
+                }
+                if (!bCast)
+                {
+                    //DoCast(me, JedogaShadowseekerConst.SpellBeamVisualJedogasAufseher1, false);
+                    bCast = true;
+                }
+            }
+            if (!bRemoved2 && me.GetPositionX() < 440.0f)
+            {
+                if (!bCast2 && instance.GetData(DataTypes.JedogaTriggerSwitch) != 0)
+                {
+                    //DoCast(me, JedogaShadowseekerConst.SpellBeamVisualJedogasAufseher2, false);
+                    bCast2 = true;
+                }
+                if (bCast2 && instance.GetData(DataTypes.JedogaTriggerSwitch) == 0)
+                {
+                    me.InterruptNonMeleeSpells(true);
+                    bCast2 = false;
+                }
+                if (!bRemoved2 && instance.GetBossState(DataTypes.JedogaShadowseeker) == EncounterState.Done)
+                {
+                    me.InterruptNonMeleeSpells(true);
+                    bRemoved2 = true;
+                }
+            }
         }
+
+        InstanceScript instance;
+
+        bool bRemoved;
+        bool bRemoved2;
+        bool bCast;
+        bool bCast2;
     }
 
     [Script]

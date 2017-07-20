@@ -127,798 +127,718 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
     }
 
     [Script]
-    class boss_gormok : CreatureScript
+    class boss_gormok : BossAI
     {
-        public boss_gormok() : base("boss_gormok") { }
+        public boss_gormok(Creature creature) : base(creature, DataTypes.BossBeasts) { }
 
-        class boss_gormokAI : BossAI
+        public override void Reset()
         {
-            public boss_gormokAI(Creature creature) : base(creature, DataTypes.BossBeasts) { }
+            _events.ScheduleEvent(Beasts.EventImpale, RandomHelper.URand(8 * Time.InMilliseconds, 10 * Time.InMilliseconds));
+            _events.ScheduleEvent(Beasts.EventStaggeringStomp, 15 * Time.InMilliseconds);
+            _events.ScheduleEvent(Beasts.EventThrow, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds));
 
-            public override void Reset()
+            summons.DespawnAll();
+        }
+
+        public override void EnterEvadeMode(EvadeReason why)
+        {
+            instance.DoUseDoorOrButton(instance.GetGuidData(GameObjectIds.MainGateDoor));
+            base.EnterEvadeMode(why);
+        }
+
+        public override void MovementInform(MovementGeneratorType type, uint id)
+        {
+            if (type != MovementGeneratorType.Point)
+                return;
+
+            switch (id)
             {
-                _events.ScheduleEvent(Beasts.EventImpale, RandomHelper.URand(8 * Time.InMilliseconds, 10 * Time.InMilliseconds));
-                _events.ScheduleEvent(Beasts.EventStaggeringStomp, 15 * Time.InMilliseconds);
-                _events.ScheduleEvent(Beasts.EventThrow, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds));
-
-                summons.DespawnAll();
+                case 0:
+                    instance.DoUseDoorOrButton(instance.GetGuidData(GameObjectIds.MainGateDoor));
+                    me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                    me.SetReactState(ReactStates.Aggressive);
+                    me.SetInCombatWithZone();
+                    break;
+                default:
+                    break;
             }
+        }
 
-            public override void EnterEvadeMode(EvadeReason why)
+        public override void JustDied(Unit killer)
+        {
+            instance.SetData(DataTypes.TypeNorthrendBeasts, NorthrendBeasts.GormokDone);
+        }
+
+        public override void JustReachedHome()
+        {
+            instance.DoUseDoorOrButton(instance.GetGuidData(GameObjectIds.MainGateDoor));
+            instance.SetData(DataTypes.TypeNorthrendBeasts, (uint)EncounterState.Fail);
+
+            me.DespawnOrUnsummon();
+        }
+
+        public override void EnterCombat(Unit who)
+        {
+            _EnterCombat();
+            me.SetInCombatWithZone();
+            instance.SetData(DataTypes.TypeNorthrendBeasts, NorthrendBeasts.GormokInProgress);
+
+            for (sbyte i = 0; i < Beasts.MaxSnobolds; i++)
             {
-                instance.DoUseDoorOrButton(instance.GetGuidData(GameObjectIds.MainGateDoor));
-                base.EnterEvadeMode(why);
-            }
-
-            public override void MovementInform(MovementGeneratorType type, uint id)
-            {
-                if (type != MovementGeneratorType.Point)
-                    return;
-
-                switch (id)
+                Creature pSnobold = DoSpawnCreature(Beasts.NpcSnoboldVassal, 0, 0, 0, 0, TempSummonType.CorpseDespawn, 0);
+                if (pSnobold)
                 {
-                    case 0:
-                        instance.DoUseDoorOrButton(instance.GetGuidData(GameObjectIds.MainGateDoor));
-                        me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
-                        me.SetReactState(ReactStates.Aggressive);
-                        me.SetInCombatWithZone();
-                        break;
-                    default:
-                        break;
+                    pSnobold.EnterVehicle(me, i);
+                    pSnobold.SetInCombatWithZone();
+                    pSnobold.GetAI().DoAction(Beasts.ActionEnableFireBomb);
                 }
             }
+        }
 
-            public override void JustDied(Unit killer)
+        public override void DamageTaken(Unit who, ref uint damage)
+        {
+            // despawn the remaining passengers on death
+            if (damage >= me.GetHealth())
             {
-                instance.SetData(DataTypes.TypeNorthrendBeasts, NorthrendBeasts.GormokDone);
-            }
-
-            public override void JustReachedHome()
-            {
-                instance.DoUseDoorOrButton(instance.GetGuidData(GameObjectIds.MainGateDoor));
-                instance.SetData(DataTypes.TypeNorthrendBeasts, (uint)EncounterState.Fail);
-
-                me.DespawnOrUnsummon();
-            }
-
-            public override void EnterCombat(Unit who)
-            {
-                _EnterCombat();
-                me.SetInCombatWithZone();
-                instance.SetData(DataTypes.TypeNorthrendBeasts, NorthrendBeasts.GormokInProgress);
-
-                for (sbyte i = 0; i < Beasts.MaxSnobolds; i++)
+                for (sbyte i = 0; i < Beasts.MaxSnobolds; ++i)
                 {
-                    Creature pSnobold = DoSpawnCreature(Beasts.NpcSnoboldVassal, 0, 0, 0, 0, TempSummonType.CorpseDespawn, 0);
+                    Unit pSnobold = me.GetVehicleKit().GetPassenger(i);
                     if (pSnobold)
-                    {
-                        pSnobold.EnterVehicle(me, i);
-                        pSnobold.SetInCombatWithZone();
-                        pSnobold.GetAI().DoAction(Beasts.ActionEnableFireBomb);
-                    }
+                        pSnobold.ToCreature().DespawnOrUnsummon();
                 }
             }
+        }
 
-            public override void DamageTaken(Unit who, ref uint damage)
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _events.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            _events.ExecuteEvents(eventId =>
             {
-                // despawn the remaining passengers on death
-                if (damage >= me.GetHealth())
+                switch (eventId)
                 {
-                    for (sbyte i = 0; i < Beasts.MaxSnobolds; ++i)
-                    {
-                        Unit pSnobold = me.GetVehicleKit().GetPassenger(i);
-                        if (pSnobold)
-                            pSnobold.ToCreature().DespawnOrUnsummon();
-                    }
-                }
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _events.Update(diff);
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-
-                _events.ExecuteEvents(eventId =>
-                {
-                    switch (eventId)
-                    {
-                        case Beasts.EventImpale:
-                            DoCastVictim(Beasts.SpellImpale);
-                            _events.ScheduleEvent(Beasts.EventImpale, RandomHelper.URand(8 * Time.InMilliseconds, 10 * Time.InMilliseconds));
-                            return;
-                        case Beasts.EventStaggeringStomp:
-                            DoCastVictim(Beasts.SpellStaggeringStomp);
-                            _events.ScheduleEvent(Beasts.EventStaggeringStomp, 15 * Time.InMilliseconds);
-                            return;
-                        case Beasts.EventThrow:
-                            for (sbyte i = 0; i < Beasts.MaxSnobolds; ++i)
+                    case Beasts.EventImpale:
+                        DoCastVictim(Beasts.SpellImpale);
+                        _events.ScheduleEvent(Beasts.EventImpale, RandomHelper.URand(8 * Time.InMilliseconds, 10 * Time.InMilliseconds));
+                        return;
+                    case Beasts.EventStaggeringStomp:
+                        DoCastVictim(Beasts.SpellStaggeringStomp);
+                        _events.ScheduleEvent(Beasts.EventStaggeringStomp, 15 * Time.InMilliseconds);
+                        return;
+                    case Beasts.EventThrow:
+                        for (sbyte i = 0; i < Beasts.MaxSnobolds; ++i)
+                        {
+                            Unit pSnobold = me.GetVehicleKit().GetPassenger(i);
+                            if (pSnobold)
                             {
-                                Unit pSnobold = me.GetVehicleKit().GetPassenger(i);
-                                if (pSnobold)
-                                {
-                                    pSnobold.ExitVehicle();
-                                    pSnobold.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
-                                    pSnobold.ToCreature().SetReactState(ReactStates.Aggressive);
-                                    pSnobold.ToCreature().GetAI().DoAction(Beasts.ActionDisableFireBomb);
-                                    pSnobold.CastSpell(me, Beasts.SpellRisingAnger, true);
-                                    Talk(Beasts.EmoteSnobolled);
-                                    break;
-                                }
+                                pSnobold.ExitVehicle();
+                                pSnobold.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                                pSnobold.ToCreature().SetReactState(ReactStates.Aggressive);
+                                pSnobold.ToCreature().GetAI().DoAction(Beasts.ActionDisableFireBomb);
+                                pSnobold.CastSpell(me, Beasts.SpellRisingAnger, true);
+                                Talk(Beasts.EmoteSnobolled);
+                                break;
                             }
-                            _events.ScheduleEvent(Beasts.EventThrow, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds));
-                            return;
-                        default:
-                            return;
-                    }
-                });
+                        }
+                        _events.ScheduleEvent(Beasts.EventThrow, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds));
+                        return;
+                    default:
+                        return;
+                }
+            });
 
+            DoMeleeAttackIfReady();
+        }
+    }
+
+    [Script]
+    class npc_snobold_vassal : ScriptedAI
+    {
+        public npc_snobold_vassal(Creature creature) : base(creature)
+        {
+            _targetDied = false;
+            _instance = creature.GetInstanceScript();
+            _instance.SetData(DataTypes.SnoboldCount, DataTypes.Increase);
+        }
+
+        public override void Reset()
+        {
+            _events.ScheduleEvent(Beasts.EventBatter, 5 * Time.InMilliseconds);
+            _events.ScheduleEvent(Beasts.EventHeadCrack, 25 * Time.InMilliseconds);
+
+            _targetGUID.Clear();
+            _targetDied = false;
+
+            //Workaround for Snobold
+            me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+        }
+
+        public override void EnterCombat(Unit who)
+        {
+            _targetGUID = who.GetGUID();
+            me.TauntApply(who);
+            DoCast(who, Beasts.SpellSnobolled);
+        }
+
+        public override void DamageTaken(Unit pDoneBy, ref uint uiDamage)
+        {
+            if (pDoneBy.GetGUID() == _targetGUID)
+                uiDamage = 0;
+        }
+
+        public override void MovementInform(MovementGeneratorType type, uint id)
+        {
+            if (type != MovementGeneratorType.Point)
+                return;
+
+            switch (id)
+            {
+                case 0:
+                    if (_targetDied)
+                        me.DespawnOrUnsummon();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public override void JustDied(Unit killer)
+        {
+            Unit target = Global.ObjAccessor.GetPlayer(me, _targetGUID);
+            if (target)
+                if (target.IsAlive())
+                    target.RemoveAurasDueToSpell(Beasts.SpellSnobolled);
+            _instance.SetData(DataTypes.SnoboldCount, DataTypes.Decrease);
+        }
+
+        public override void DoAction(int action)
+        {
+            switch (action)
+            {
+                case Beasts.ActionEnableFireBomb:
+                    _events.ScheduleEvent(Beasts.EventFireBomb, RandomHelper.URand(5 * Time.InMilliseconds, 30 * Time.InMilliseconds));
+                    break;
+                case Beasts.ActionDisableFireBomb:
+                    _events.CancelEvent(Beasts.EventFireBomb);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim() || _targetDied)
+                return;
+
+            Unit target = Global.ObjAccessor.GetPlayer(me, _targetGUID);
+            if (target)
+            {
+                if (!target.IsAlive())
+                {
+                    Unit gormok = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.Gormok));
+                    if (gormok && gormok.IsAlive())
+                    {
+                        SetCombatMovement(false);
+                        _targetDied = true;
+
+                        // looping through Gormoks seats
+                        for (sbyte i = 0; i < Beasts.MaxSnobolds; i++)
+                        {
+                            if (!gormok.GetVehicleKit().GetPassenger(i))
+                            {
+                                me.EnterVehicle(gormok, i);
+                                DoAction(Beasts.ActionEnableFireBomb);
+                                break;
+                            }
+                        }
+                    }
+                    else if (target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true))
+                    {
+                        _targetGUID = target.GetGUID();
+                        me.GetMotionMaster().MoveJump(target, 15.0f, 15.0f);
+                    }
+                }
+            }
+
+            _events.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            _events.ExecuteEvents(eventId =>
+            {
+                switch (eventId)
+                {
+                    case Beasts.EventFireBomb:
+                        {
+                            if (me.GetVehicleBase())
+                            {
+                                Unit fireTarget = SelectTarget(SelectAggroTarget.Random, 0, -me.GetVehicleBase().GetCombatReach(), true);
+                                if (fireTarget)
+                                    me.CastSpell(fireTarget.GetPositionX(), fireTarget.GetPositionY(), fireTarget.GetPositionZ(), Beasts.SpellFireBomb, true);
+                            }
+                            _events.ScheduleEvent(Beasts.EventFireBomb, 20 * Time.InMilliseconds);
+                            return;
+                        }
+                    case Beasts.EventHeadCrack:
+                        // commented out while SPELL_SNOBOLLED gets fixed
+                        //if (Unit target = Global.ObjAccessor.GetPlayer(me, m_uiTargetGUID))
+                        DoCastVictim(Beasts.SpellHeadCrack);
+                        _events.ScheduleEvent(Beasts.EventHeadCrack, 30 * Time.InMilliseconds);
+                        return;
+                    case Beasts.EventBatter:
+                        // commented out while SPELL_SNOBOLLED gets fixed
+                        //if (Unit target = Global.ObjAccessor.GetPlayer(me, m_uiTargetGUID))
+                        DoCastVictim(Beasts.SpellBatter);
+                        _events.ScheduleEvent(Beasts.EventBatter, 10 * Time.InMilliseconds);
+                        return;
+                    default:
+                        return;
+                }
+            });
+
+            // do melee attack only when not on Gormoks back
+            if (!me.GetVehicleBase())
                 DoMeleeAttackIfReady();
-            }
         }
 
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<boss_gormokAI>(creature);
-        }
+        InstanceScript _instance;
+        ObjectGuid _targetGUID;
+        bool _targetDied;
     }
 
     [Script]
-    class npc_snobold_vassal : CreatureScript
+    class npc_firebomb : ScriptedAI
     {
-        public npc_snobold_vassal() : base("npc_snobold_vassal") { }
-
-        class npc_snobold_vassalAI : ScriptedAI
+        public npc_firebomb(Creature creature) : base(creature)
         {
-            public npc_snobold_vassalAI(Creature creature) : base(creature)
-            {
-                _targetDied = false;
-                _instance = creature.GetInstanceScript();
-                _instance.SetData(DataTypes.SnoboldCount, DataTypes.Increase);
-            }
-
-            public override void Reset()
-            {
-                _events.ScheduleEvent(Beasts.EventBatter, 5 * Time.InMilliseconds);
-                _events.ScheduleEvent(Beasts.EventHeadCrack, 25 * Time.InMilliseconds);
-
-                _targetGUID.Clear();
-                _targetDied = false;
-
-                //Workaround for Snobold
-                me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
-            }
-
-            public override void EnterCombat(Unit who)
-            {
-                _targetGUID = who.GetGUID();
-                me.TauntApply(who);
-                DoCast(who, Beasts.SpellSnobolled);
-            }
-
-            public override void DamageTaken(Unit pDoneBy, ref uint uiDamage)
-            {
-                if (pDoneBy.GetGUID() == _targetGUID)
-                    uiDamage = 0;
-            }
-
-            public override void MovementInform(MovementGeneratorType type, uint id)
-            {
-                if (type != MovementGeneratorType.Point)
-                    return;
-
-                switch (id)
-                {
-                    case 0:
-                        if (_targetDied)
-                            me.DespawnOrUnsummon();
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            public override void JustDied(Unit killer)
-            {
-                Unit target = Global.ObjAccessor.GetPlayer(me, _targetGUID);
-                if (target)
-                    if (target.IsAlive())
-                        target.RemoveAurasDueToSpell(Beasts.SpellSnobolled);
-                _instance.SetData(DataTypes.SnoboldCount, DataTypes.Decrease);
-            }
-
-            public override void DoAction(int action)
-            {
-                switch (action)
-                {
-                    case Beasts.ActionEnableFireBomb:
-                        _events.ScheduleEvent(Beasts.EventFireBomb, RandomHelper.URand(5 * Time.InMilliseconds, 30 * Time.InMilliseconds));
-                        break;
-                    case Beasts.ActionDisableFireBomb:
-                        _events.CancelEvent(Beasts.EventFireBomb);
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim() || _targetDied)
-                    return;
-
-                Unit target = Global.ObjAccessor.GetPlayer(me, _targetGUID);
-                if (target)
-                {
-                    if (!target.IsAlive())
-                    {
-                        Unit gormok = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.Gormok));
-                        if (gormok && gormok.IsAlive())
-                        {
-                            SetCombatMovement(false);
-                            _targetDied = true;
-
-                            // looping through Gormoks seats
-                            for (sbyte i = 0; i < Beasts.MaxSnobolds; i++)
-                            {
-                                if (!gormok.GetVehicleKit().GetPassenger(i))
-                                {
-                                    me.EnterVehicle(gormok, i);
-                                    DoAction(Beasts.ActionEnableFireBomb);
-                                    break;
-                                }
-                            }
-                        }
-                        else if (target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true))
-                        {
-                            _targetGUID = target.GetGUID();
-                            me.GetMotionMaster().MoveJump(target, 15.0f, 15.0f);
-                        }
-                    }
-                }
-
-                _events.Update(diff);
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-
-                _events.ExecuteEvents(eventId =>
-                {
-                    switch (eventId)
-                    {
-                        case Beasts.EventFireBomb:
-                            {
-                                if (me.GetVehicleBase())
-                                {
-                                    Unit fireTarget = SelectTarget(SelectAggroTarget.Random, 0, -me.GetVehicleBase().GetCombatReach(), true);
-                                    if (fireTarget)
-                                        me.CastSpell(fireTarget.GetPositionX(), fireTarget.GetPositionY(), fireTarget.GetPositionZ(), Beasts.SpellFireBomb, true);
-                                }
-                                _events.ScheduleEvent(Beasts.EventFireBomb, 20 * Time.InMilliseconds);
-                                return;
-                            }
-                        case Beasts.EventHeadCrack:
-                            // commented out while SPELL_SNOBOLLED gets fixed
-                            //if (Unit target = Global.ObjAccessor.GetPlayer(me, m_uiTargetGUID))
-                            DoCastVictim(Beasts.SpellHeadCrack);
-                            _events.ScheduleEvent(Beasts.EventHeadCrack, 30 * Time.InMilliseconds);
-                            return;
-                        case Beasts.EventBatter:
-                            // commented out while SPELL_SNOBOLLED gets fixed
-                            //if (Unit target = Global.ObjAccessor.GetPlayer(me, m_uiTargetGUID))
-                            DoCastVictim(Beasts.SpellBatter);
-                            _events.ScheduleEvent(Beasts.EventBatter, 10 * Time.InMilliseconds);
-                            return;
-                        default:
-                            return;
-                    }
-                });
-
-                // do melee attack only when not on Gormoks back
-                if (!me.GetVehicleBase())
-                    DoMeleeAttackIfReady();
-            }
-
-            InstanceScript _instance;
-            ObjectGuid _targetGUID;
-            bool _targetDied;
+            _instance = creature.GetInstanceScript();
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void Reset()
         {
-            return GetInstanceAI<npc_snobold_vassalAI>(creature);
-        }
-    }
-
-    [Script]
-    class npc_firebomb : CreatureScript
-    {
-        public npc_firebomb() : base("npc_firebomb") { }
-
-        class npc_firebombAI : ScriptedAI
-        {
-            public npc_firebombAI(Creature creature) : base(creature)
-            {
-                _instance = creature.GetInstanceScript();
-            }
-
-            public override void Reset()
-            {
-                DoCast(me, Beasts.SpellFireBombDot, true);
-                SetCombatMovement(false);
-                me.SetReactState(ReactStates.Passive);
-                me.SetDisplayId(me.GetCreatureTemplate().ModelId2);
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (_instance.GetData(DataTypes.TypeNorthrendBeasts) != NorthrendBeasts.GormokInProgress)
-                    me.DespawnOrUnsummon();
-            }
-
-            InstanceScript _instance;
+            DoCast(me, Beasts.SpellFireBombDot, true);
+            SetCombatMovement(false);
+            me.SetReactState(ReactStates.Passive);
+            me.SetDisplayId(me.GetCreatureTemplate().ModelId2);
         }
 
-        public override CreatureAI GetAI(Creature creature)
+        public override void UpdateAI(uint diff)
         {
-            return GetInstanceAI<npc_firebombAI>(creature);
-        }
-    }
-
-    [Script]
-    class boss_acidmaw : CreatureScript
-    {
-        public boss_acidmaw() : base("boss_acidmaw") { }
-
-        public class boss_acidmawAI : boss_jormungarAI
-        {
-            public boss_acidmawAI(Creature creature) : base(creature) { }
-
-            public override void Reset()
-            {
-                base.Reset();
-                BiteSpell = Beasts.SpellParalyticBite;
-                SpewSpell = Beasts.SpellAcidSpew;
-                SpitSpell = Beasts.SpellAcidSpit;
-                SpraySpell = Beasts.SpellParalyticSpray;
-                ModelStationary = Beasts.ModelAcidmawStationary;
-                ModelMobile = Beasts.ModelAcidmawMobile;
-                OtherWormEntry = CreatureIds.Dreadscale;
-
-                WasMobile = true;
-                Emerge();
-            }
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<boss_acidmawAI>(creature);
-        }
-    }
-
-    [Script]
-    class boss_dreadscale : CreatureScript
-    {
-        public boss_dreadscale() : base("boss_dreadscale") { }
-
-        public class boss_dreadscaleAI : boss_jormungarAI
-        {
-            public boss_dreadscaleAI(Creature creature) : base(creature)
-            {
-            }
-
-            public override void Reset()
-            {
-                base.Reset();
-                BiteSpell = Beasts.SpellBurningBite;
-                SpewSpell = Beasts.SpellMoltenSpew;
-                SpitSpell = Beasts.SpellFireSpit;
-                SpraySpell = Beasts.SpellBurningSpray;
-                ModelStationary = Beasts.ModelDreadscaleStationary;
-                ModelMobile = Beasts.ModelDreadscaleMobile;
-                OtherWormEntry = CreatureIds.Acidmaw;
-
-                _events.SetPhase(Beasts.PhaseMobile);
-                _events.ScheduleEvent(Beasts.EventSummonAcidmaw, 3 * Time.InMilliseconds);
-                _events.ScheduleEvent(Beasts.EventSubmerge, 45 * Time.InMilliseconds, 0, Beasts.PhaseMobile);
-                WasMobile = false;
-            }
-
-            public override void MovementInform(MovementGeneratorType type, uint id)
-            {
-                if (type != MovementGeneratorType.Point)
-                    return;
-
-                switch (id)
-                {
-                    case 0:
-                        instance.DoUseDoorOrButton(instance.GetGuidData(GameObjectIds.MainGateDoor));
-                        me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
-                        me.SetReactState(ReactStates.Aggressive);
-                        me.SetInCombatWithZone();
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            public override void EnterEvadeMode(EvadeReason why)
-            {
-                instance.DoUseDoorOrButton(instance.GetGuidData(GameObjectIds.MainGateDoor));
-                base.EnterEvadeMode(why);
-            }
-
-            public override void JustReachedHome()
-            {
-                instance.DoUseDoorOrButton(instance.GetGuidData(GameObjectIds.MainGateDoor));
-
-                base.JustReachedHome();
-            }
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<boss_dreadscaleAI>(creature);
-        }
-    }
-
-    [Script]
-    class npc_slime_pool : CreatureScript
-    {
-        public npc_slime_pool() : base("npc_slime_pool") { }
-
-        class npc_slime_poolAI : ScriptedAI
-        {
-            public npc_slime_poolAI(Creature creature) : base(creature)
-            {
-                _instance = creature.GetInstanceScript();
-            }
-
-            public override void Reset()
-            {
-                _cast = false;
-                me.SetReactState(ReactStates.Passive);
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!_cast)
-                {
-                    _cast = true;
-                    DoCast(me, Beasts.SpellSlimePoolEffect);
-                }
-
-                if (_instance.GetData(DataTypes.TypeNorthrendBeasts) != NorthrendBeasts.SnakesInProgress && _instance.GetData(DataTypes.TypeNorthrendBeasts) != NorthrendBeasts.SnakesSpecial)
-                    me.DespawnOrUnsummon();
-            }
-
-            InstanceScript _instance;
-            bool _cast;
-
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<npc_slime_poolAI>(creature);
-        }
-    }
-
-    [Script]
-    class spell_gormok_fire_bomb : SpellScriptLoader
-    {
-        public spell_gormok_fire_bomb() : base("spell_gormok_fire_bomb") { }
-
-        class spell_gormok_fire_bomb_SpellScript : SpellScript
-        {
-            void TriggerFireBomb(uint effIndex)
-            {
-                Position pos = GetExplTargetDest();
-                if (pos != null)
-                {
-                    Unit caster = GetCaster();
-                    if (caster)
-                        caster.SummonCreature(Beasts.NpcFireBomb, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), 0, TempSummonType.TimedDespawn, 30 * Time.InMilliseconds);
-                }
-            }
-
-            public override void Register()
-            {
-                OnEffectHit.Add(new EffectHandler(TriggerFireBomb, 0, SpellEffectName.TriggerMissile));
-            }
-        }
-
-        public override SpellScript GetSpellScript()
-        {
-            return new spell_gormok_fire_bomb_SpellScript();
-        }
-    }
-
-    [Script]
-    class boss_icehowl : CreatureScript
-    {
-        public boss_icehowl() : base("boss_icehowl") { }
-
-        class boss_icehowlAI : BossAI
-        {
-            public boss_icehowlAI(Creature creature) : base(creature, DataTypes.BossBeasts) { }
-
-            public override void Reset()
-            {
-                _events.ScheduleEvent(Beasts.EventFerociousButt, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds));
-                _events.ScheduleEvent(Beasts.EventArcticBreath, RandomHelper.URand(15 * Time.InMilliseconds, 25 * Time.InMilliseconds));
-                _events.ScheduleEvent(Beasts.EventWhirl, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds));
-                _events.ScheduleEvent(Beasts.EventMassiveCrash, 30 * Time.InMilliseconds);
-                _movementFinish = false;
-                _trampleCast = false;
-                _trampleTargetGUID.Clear();
-                _trampleTargetX = 0;
-                _trampleTargetY = 0;
-                _trampleTargetZ = 0;
-                _stage = 0;
-            }
-
-            public override void JustDied(Unit killer)
-            {
-                _JustDied();
-                instance.SetData(DataTypes.TypeNorthrendBeasts, NorthrendBeasts.IcehowlDone);
-            }
-
-            public override void MovementInform(MovementGeneratorType type, uint id)
-            {
-                if (type != MovementGeneratorType.Point && type != MovementGeneratorType.Effect)
-                    return;
-
-                switch (id)
-                {
-                    case 0:
-                        if (_stage != 0)
-                        {
-                            if (me.GetDistance2d(MiscData.ToCCommonLoc[1].GetPositionX(), MiscData.ToCCommonLoc[1].GetPositionY()) < 6.0f)
-                                // Middle of the room
-                                _stage = 1;
-                            else
-                            {
-                                // Landed from Hop backwards (start trample)
-                                if (Global.ObjAccessor.GetPlayer(me, _trampleTargetGUID))
-                                    _stage = 4;
-                                else
-                                    _stage = 6;
-                            }
-                        }
-                        break;
-                    case 1: // Finish trample
-                        _movementFinish = true;
-                        break;
-                    case 2:
-                        instance.DoUseDoorOrButton(instance.GetGuidData(GameObjectIds.MainGateDoor));
-                        me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
-                        me.SetReactState(ReactStates.Aggressive);
-                        me.SetInCombatWithZone();
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            public override void EnterEvadeMode(EvadeReason why)
-            {
-                instance.DoUseDoorOrButton(instance.GetGuidData(GameObjectIds.MainGateDoor));
-                base.EnterEvadeMode(why);
-            }
-
-            public override void JustReachedHome()
-            {
-                instance.DoUseDoorOrButton(instance.GetGuidData(GameObjectIds.MainGateDoor));
-                instance.SetData(DataTypes.TypeNorthrendBeasts, (uint)EncounterState.Fail);
+            if (_instance.GetData(DataTypes.TypeNorthrendBeasts) != NorthrendBeasts.GormokInProgress)
                 me.DespawnOrUnsummon();
+        }
+
+        InstanceScript _instance;
+    }
+
+    [Script]
+    public class boss_acidmaw : boss_jormungarAI
+    {
+        public boss_acidmaw(Creature creature) : base(creature) { }
+
+        public override void Reset()
+        {
+            base.Reset();
+            BiteSpell = Beasts.SpellParalyticBite;
+            SpewSpell = Beasts.SpellAcidSpew;
+            SpitSpell = Beasts.SpellAcidSpit;
+            SpraySpell = Beasts.SpellParalyticSpray;
+            ModelStationary = Beasts.ModelAcidmawStationary;
+            ModelMobile = Beasts.ModelAcidmawMobile;
+            OtherWormEntry = CreatureIds.Dreadscale;
+
+            WasMobile = true;
+            Emerge();
+        }
+    }
+
+    [Script]
+    public class boss_dreadscale : boss_jormungarAI
+    {
+        public boss_dreadscale(Creature creature) : base(creature)
+        {
+        }
+
+        public override void Reset()
+        {
+            base.Reset();
+            BiteSpell = Beasts.SpellBurningBite;
+            SpewSpell = Beasts.SpellMoltenSpew;
+            SpitSpell = Beasts.SpellFireSpit;
+            SpraySpell = Beasts.SpellBurningSpray;
+            ModelStationary = Beasts.ModelDreadscaleStationary;
+            ModelMobile = Beasts.ModelDreadscaleMobile;
+            OtherWormEntry = CreatureIds.Acidmaw;
+
+            _events.SetPhase(Beasts.PhaseMobile);
+            _events.ScheduleEvent(Beasts.EventSummonAcidmaw, 3 * Time.InMilliseconds);
+            _events.ScheduleEvent(Beasts.EventSubmerge, 45 * Time.InMilliseconds, 0, Beasts.PhaseMobile);
+            WasMobile = false;
+        }
+
+        public override void MovementInform(MovementGeneratorType type, uint id)
+        {
+            if (type != MovementGeneratorType.Point)
+                return;
+
+            switch (id)
+            {
+                case 0:
+                    instance.DoUseDoorOrButton(instance.GetGuidData(GameObjectIds.MainGateDoor));
+                    me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                    me.SetReactState(ReactStates.Aggressive);
+                    me.SetInCombatWithZone();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public override void EnterEvadeMode(EvadeReason why)
+        {
+            instance.DoUseDoorOrButton(instance.GetGuidData(GameObjectIds.MainGateDoor));
+            base.EnterEvadeMode(why);
+        }
+
+        public override void JustReachedHome()
+        {
+            instance.DoUseDoorOrButton(instance.GetGuidData(GameObjectIds.MainGateDoor));
+
+            base.JustReachedHome();
+        }
+    }
+
+    [Script]
+    class npc_slime_pool : ScriptedAI
+    {
+        public npc_slime_pool(Creature creature) : base(creature)
+        {
+            _instance = creature.GetInstanceScript();
+        }
+
+        public override void Reset()
+        {
+            _cast = false;
+            me.SetReactState(ReactStates.Passive);
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!_cast)
+            {
+                _cast = true;
+                DoCast(me, Beasts.SpellSlimePoolEffect);
             }
 
-            public override void KilledUnit(Unit who)
-            {
-                if (who.IsTypeId(TypeId.Player))
-                    instance.SetData(DataTypes.TributeToImmortalityEligible, 0);
-            }
+            if (_instance.GetData(DataTypes.TypeNorthrendBeasts) != NorthrendBeasts.SnakesInProgress && _instance.GetData(DataTypes.TypeNorthrendBeasts) != NorthrendBeasts.SnakesSpecial)
+                me.DespawnOrUnsummon();
+        }
 
-            public override void EnterCombat(Unit who)
-            {
-                _EnterCombat();
-                instance.SetData(DataTypes.TypeNorthrendBeasts, NorthrendBeasts.IcehowlInProgress);
-            }
+        InstanceScript _instance;
+        bool _cast;
 
-            public override void SpellHitTarget(Unit target, SpellInfo spell)
+    }
+
+    [Script]
+    class spell_gormok_fire_bomb : SpellScript
+    {
+        void TriggerFireBomb(uint effIndex)
+        {
+            Position pos = GetExplTargetDest();
+            if (pos != null)
             {
-                if (spell.Id == Beasts.SpellTrample && target.IsTypeId(TypeId.Player))
-                {
-                    if (!_trampleCast)
+                Unit caster = GetCaster();
+                if (caster)
+                    caster.SummonCreature(Beasts.NpcFireBomb, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), 0, TempSummonType.TimedDespawn, 30 * Time.InMilliseconds);
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new EffectHandler(TriggerFireBomb, 0, SpellEffectName.TriggerMissile));
+        }
+    }
+
+    [Script]
+    class boss_icehowl : BossAI
+    {
+        public boss_icehowl(Creature creature) : base(creature, DataTypes.BossBeasts) { }
+
+        public override void Reset()
+        {
+            _events.ScheduleEvent(Beasts.EventFerociousButt, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds));
+            _events.ScheduleEvent(Beasts.EventArcticBreath, RandomHelper.URand(15 * Time.InMilliseconds, 25 * Time.InMilliseconds));
+            _events.ScheduleEvent(Beasts.EventWhirl, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds));
+            _events.ScheduleEvent(Beasts.EventMassiveCrash, 30 * Time.InMilliseconds);
+            _movementFinish = false;
+            _trampleCast = false;
+            _trampleTargetGUID.Clear();
+            _trampleTargetX = 0;
+            _trampleTargetY = 0;
+            _trampleTargetZ = 0;
+            _stage = 0;
+        }
+
+        public override void JustDied(Unit killer)
+        {
+            _JustDied();
+            instance.SetData(DataTypes.TypeNorthrendBeasts, NorthrendBeasts.IcehowlDone);
+        }
+
+        public override void MovementInform(MovementGeneratorType type, uint id)
+        {
+            if (type != MovementGeneratorType.Point && type != MovementGeneratorType.Effect)
+                return;
+
+            switch (id)
+            {
+                case 0:
+                    if (_stage != 0)
                     {
-                        DoCast(me, Beasts.SpellFrothingRage, true);
-                        _trampleCast = true;
-                    }
-                }
-            }
-
-            public override void UpdateAI(uint diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _events.Update(diff);
-
-                if (me.HasUnitState(UnitState.Casting))
-                    return;
-
-                switch (_stage)
-                {
-                    case 0:
+                        if (me.GetDistance2d(MiscData.ToCCommonLoc[1].GetPositionX(), MiscData.ToCCommonLoc[1].GetPositionY()) < 6.0f)
+                            // Middle of the room
+                            _stage = 1;
+                        else
                         {
-                            _events.ExecuteEvents(eventId =>
-                            {
-                                switch (eventId)
-                                {
-                                    case Beasts.EventFerociousButt:
-                                        DoCastVictim(Beasts.SpellFerociousButt);
-                                        _events.ScheduleEvent(Beasts.EventFerociousButt, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds));
-                                        return;
-                                    case Beasts.EventArcticBreath:
-                                        Unit target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true);
-                                        if (target)
-                                            DoCast(target, Beasts.SpellArcticBreath);
-                                        return;
-                                    case Beasts.EventWhirl:
-                                        DoCastAOE(Beasts.SpellWhirl);
-                                        _events.ScheduleEvent(Beasts.EventWhirl, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds));
-                                        return;
-                                    case Beasts.EventMassiveCrash:
-                                        me.GetMotionMaster().MoveJump(MiscData.ToCCommonLoc[1], 20.0f, 20.0f, 0); // 1: Middle of the room
-                                        SetCombatMovement(false);
-                                        me.AttackStop();
-                                        _stage = 7; //Invalid (Do nothing more than move)
-                                        return;
-                                    default:
-                                        break;
-                                }
-                            });
-                            DoMeleeAttackIfReady();
-                            break;
-                        }
-                    case 1:
-                        DoCastAOE(Beasts.SpellMassiveCrash);
-                        me.StopMoving();
-                        me.AttackStop();
-                        _stage = 2;
-                        break;
-                    case 2:
-                        {
-                            Unit target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true);
-                            if (target)
-                            {
-                                me.StopMoving();
-                                me.AttackStop();
-                                _trampleTargetGUID = target.GetGUID();
-                                me.SetTarget(_trampleTargetGUID);
-                                _trampleCast = false;
-                                SetCombatMovement(false);
-                                me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable);
-                                me.SetControlled(true, UnitState.Root);
-                                me.GetMotionMaster().Clear();
-                                me.GetMotionMaster().MoveIdle();
-                                _events.ScheduleEvent(Beasts.EventTrample, 4 * Time.InMilliseconds);
-                                _stage = 3;
-                            }
+                            // Landed from Hop backwards (start trample)
+                            if (Global.ObjAccessor.GetPlayer(me, _trampleTargetGUID))
+                                _stage = 4;
                             else
                                 _stage = 6;
-                            break;
                         }
-                    case 3:
+                    }
+                    break;
+                case 1: // Finish trample
+                    _movementFinish = true;
+                    break;
+                case 2:
+                    instance.DoUseDoorOrButton(instance.GetGuidData(GameObjectIds.MainGateDoor));
+                    me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                    me.SetReactState(ReactStates.Aggressive);
+                    me.SetInCombatWithZone();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public override void EnterEvadeMode(EvadeReason why)
+        {
+            instance.DoUseDoorOrButton(instance.GetGuidData(GameObjectIds.MainGateDoor));
+            base.EnterEvadeMode(why);
+        }
+
+        public override void JustReachedHome()
+        {
+            instance.DoUseDoorOrButton(instance.GetGuidData(GameObjectIds.MainGateDoor));
+            instance.SetData(DataTypes.TypeNorthrendBeasts, (uint)EncounterState.Fail);
+            me.DespawnOrUnsummon();
+        }
+
+        public override void KilledUnit(Unit who)
+        {
+            if (who.IsTypeId(TypeId.Player))
+                instance.SetData(DataTypes.TributeToImmortalityEligible, 0);
+        }
+
+        public override void EnterCombat(Unit who)
+        {
+            _EnterCombat();
+            instance.SetData(DataTypes.TypeNorthrendBeasts, NorthrendBeasts.IcehowlInProgress);
+        }
+
+        public override void SpellHitTarget(Unit target, SpellInfo spell)
+        {
+            if (spell.Id == Beasts.SpellTrample && target.IsTypeId(TypeId.Player))
+            {
+                if (!_trampleCast)
+                {
+                    DoCast(me, Beasts.SpellFrothingRage, true);
+                    _trampleCast = true;
+                }
+            }
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            _events.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            switch (_stage)
+            {
+                case 0:
+                    {
                         _events.ExecuteEvents(eventId =>
                         {
                             switch (eventId)
                             {
-                                case Beasts.EventTrample:
-                                    {
-                                        Unit target = Global.ObjAccessor.GetPlayer(me, _trampleTargetGUID);
-                                        if (target)
-                                        {
-                                            me.StopMoving();
-                                            me.AttackStop();
-                                            _trampleCast = false;
-                                            _trampleTargetX = target.GetPositionX();
-                                            _trampleTargetY = target.GetPositionY();
-                                            _trampleTargetZ = target.GetPositionZ();
-                                            // 2: Hop Backwards
-                                            me.GetMotionMaster().MoveJump(2 * me.GetPositionX() - _trampleTargetX, 2 * me.GetPositionY() - _trampleTargetY, me.GetPositionZ(), me.GetOrientation(), 30.0f, 20.0f, 0);
-                                            me.SetControlled(false, UnitState.Root);
-                                            _stage = 7; //Invalid (Do nothing more than move)
-                                        }
-                                        else
-                                            _stage = 6;
-                                        break;
-                                    }
+                                case Beasts.EventFerociousButt:
+                                    DoCastVictim(Beasts.SpellFerociousButt);
+                                    _events.ScheduleEvent(Beasts.EventFerociousButt, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds));
+                                    return;
+                                case Beasts.EventArcticBreath:
+                                    Unit target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true);
+                                    if (target)
+                                        DoCast(target, Beasts.SpellArcticBreath);
+                                    return;
+                                case Beasts.EventWhirl:
+                                    DoCastAOE(Beasts.SpellWhirl);
+                                    _events.ScheduleEvent(Beasts.EventWhirl, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds));
+                                    return;
+                                case Beasts.EventMassiveCrash:
+                                    me.GetMotionMaster().MoveJump(MiscData.ToCCommonLoc[1], 20.0f, 20.0f, 0); // 1: Middle of the room
+                                    SetCombatMovement(false);
+                                    me.AttackStop();
+                                    _stage = 7; //Invalid (Do nothing more than move)
+                                    return;
                                 default:
                                     break;
                             }
                         });
+                        DoMeleeAttackIfReady();
                         break;
-                    case 4:
+                    }
+                case 1:
+                    DoCastAOE(Beasts.SpellMassiveCrash);
+                    me.StopMoving();
+                    me.AttackStop();
+                    _stage = 2;
+                    break;
+                case 2:
+                    {
+                        Unit target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true);
+                        if (target)
                         {
                             me.StopMoving();
                             me.AttackStop();
-
-                            Player target = Global.ObjAccessor.GetPlayer(me, _trampleTargetGUID);
-                            if (target)
-                                Talk(Beasts.EmoteTrampleStart, target);
-
-                            me.GetMotionMaster().MoveCharge(_trampleTargetX, _trampleTargetY, _trampleTargetZ, 42, 1);
-                            me.SetTarget(ObjectGuid.Empty);
-                            _stage = 5;
-                            break;
-                        }
-                    case 5:
-                        if (_movementFinish)
-                        {
-                            DoCastAOE(Beasts.SpellTrample);
-                            _movementFinish = false;
-                            _stage = 6;
-                            return;
-                        }
-                        if (_events.ExecuteEvent() == Beasts.EventTrample)
-                        {
-                            var lPlayers = me.GetMap().GetPlayers();
-                            foreach (var player in lPlayers)
-                            {
-                                if (player.IsAlive() && player.IsWithinDistInMap(me, 6.0f))
-                                {
-                                    DoCastAOE(Beasts.SpellTrample);
-                                    _events.ScheduleEvent(Beasts.EventTrample, 4 * Time.InMilliseconds);
-                                    break;
-                                }
-                            }
-                        }
-                        break;
-                    case 6:
-                        if (!_trampleCast)
-                        {
-                            DoCast(me, Beasts.SpellStaggeredDaze);
-                            Talk(Beasts.EmoteTrampleCrash);
+                            _trampleTargetGUID = target.GetGUID();
+                            me.SetTarget(_trampleTargetGUID);
+                            _trampleCast = false;
+                            SetCombatMovement(false);
+                            me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+                            me.SetControlled(true, UnitState.Root);
+                            me.GetMotionMaster().Clear();
+                            me.GetMotionMaster().MoveIdle();
+                            _events.ScheduleEvent(Beasts.EventTrample, 4 * Time.InMilliseconds);
+                            _stage = 3;
                         }
                         else
+                            _stage = 6;
+                        break;
+                    }
+                case 3:
+                    _events.ExecuteEvents(eventId =>
+                    {
+                        switch (eventId)
                         {
-                            DoCast(me, Beasts.SpellFrothingRage, true);
-                            Talk(Beasts.EmoteTrampleFail);
+                            case Beasts.EventTrample:
+                                {
+                                    Unit target = Global.ObjAccessor.GetPlayer(me, _trampleTargetGUID);
+                                    if (target)
+                                    {
+                                        me.StopMoving();
+                                        me.AttackStop();
+                                        _trampleCast = false;
+                                        _trampleTargetX = target.GetPositionX();
+                                        _trampleTargetY = target.GetPositionY();
+                                        _trampleTargetZ = target.GetPositionZ();
+                                        // 2: Hop Backwards
+                                        me.GetMotionMaster().MoveJump(2 * me.GetPositionX() - _trampleTargetX, 2 * me.GetPositionY() - _trampleTargetY, me.GetPositionZ(), me.GetOrientation(), 30.0f, 20.0f, 0);
+                                        me.SetControlled(false, UnitState.Root);
+                                        _stage = 7; //Invalid (Do nothing more than move)
+                                    }
+                                    else
+                                        _stage = 6;
+                                    break;
+                                }
+                            default:
+                                break;
                         }
-                        me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable);
-                        SetCombatMovement(true);
-                        me.GetMotionMaster().MovementExpired();
-                        me.GetMotionMaster().Clear();
-                        me.GetMotionMaster().MoveChase(me.GetVictim());
-                        AttackStart(me.GetVictim());
-                        _events.ScheduleEvent(Beasts.EventMassiveCrash, 40 * Time.InMilliseconds);
-                        _events.ScheduleEvent(Beasts.EventArcticBreath, RandomHelper.URand(15 * Time.InMilliseconds, 25 * Time.InMilliseconds));
-                        _stage = 0;
+                    });
+                    break;
+                case 4:
+                    {
+                        me.StopMoving();
+                        me.AttackStop();
+
+                        Player target = Global.ObjAccessor.GetPlayer(me, _trampleTargetGUID);
+                        if (target)
+                            Talk(Beasts.EmoteTrampleStart, target);
+
+                        me.GetMotionMaster().MoveCharge(_trampleTargetX, _trampleTargetY, _trampleTargetZ, 42, 1);
+                        me.SetTarget(ObjectGuid.Empty);
+                        _stage = 5;
                         break;
-                    default:
-                        break;
-                }
+                    }
+                case 5:
+                    if (_movementFinish)
+                    {
+                        DoCastAOE(Beasts.SpellTrample);
+                        _movementFinish = false;
+                        _stage = 6;
+                        return;
+                    }
+                    if (_events.ExecuteEvent() == Beasts.EventTrample)
+                    {
+                        var lPlayers = me.GetMap().GetPlayers();
+                        foreach (var player in lPlayers)
+                        {
+                            if (player.IsAlive() && player.IsWithinDistInMap(me, 6.0f))
+                            {
+                                DoCastAOE(Beasts.SpellTrample);
+                                _events.ScheduleEvent(Beasts.EventTrample, 4 * Time.InMilliseconds);
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                case 6:
+                    if (!_trampleCast)
+                    {
+                        DoCast(me, Beasts.SpellStaggeredDaze);
+                        Talk(Beasts.EmoteTrampleCrash);
+                    }
+                    else
+                    {
+                        DoCast(me, Beasts.SpellFrothingRage, true);
+                        Talk(Beasts.EmoteTrampleFail);
+                    }
+                    me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+                    SetCombatMovement(true);
+                    me.GetMotionMaster().MovementExpired();
+                    me.GetMotionMaster().Clear();
+                    me.GetMotionMaster().MoveChase(me.GetVictim());
+                    AttackStart(me.GetVictim());
+                    _events.ScheduleEvent(Beasts.EventMassiveCrash, 40 * Time.InMilliseconds);
+                    _events.ScheduleEvent(Beasts.EventArcticBreath, RandomHelper.URand(15 * Time.InMilliseconds, 25 * Time.InMilliseconds));
+                    _stage = 0;
+                    break;
+                default:
+                    break;
             }
-
-            float _trampleTargetX, _trampleTargetY, _trampleTargetZ;
-            ObjectGuid _trampleTargetGUID;
-            bool _movementFinish;
-            bool _trampleCast;
-            byte _stage;
         }
 
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return GetInstanceAI<boss_icehowlAI>(creature);
-        }
+        float _trampleTargetX, _trampleTargetY, _trampleTargetZ;
+        ObjectGuid _trampleTargetGUID;
+        bool _movementFinish;
+        bool _trampleCast;
+        byte _stage;
     }
 
-    class boss_jormungarAI : BossAI
+    public class boss_jormungarAI : BossAI
     {
         public boss_jormungarAI(Creature creature) : base(creature, DataTypes.BossBeasts) { }
 

@@ -23,25 +23,21 @@ using System;
 namespace Scripts.World
 {
     [Script]
-    class trigger_periodic : CreatureScript
-    {
-        public trigger_periodic() : base("trigger_periodic") { }
-
-        class trigger_periodicAI : NullCreatureAI
+    class trigger_periodic : NullCreatureAI
         {
-            public trigger_periodicAI(Creature creature) : base(creature)
+        public trigger_periodic(Creature creature) : base(creature)
+        {
+            var interval = me.GetBaseAttackTime(Framework.Constants.WeaponAttackType.BaseAttack);
+            _scheduler.Schedule(TimeSpan.FromMilliseconds(interval), task =>
             {
-                var interval = me.GetBaseAttackTime(Framework.Constants.WeaponAttackType.BaseAttack);
-                _scheduler.Schedule(TimeSpan.FromMilliseconds(interval), task =>
-                {
-                    me.CastSpell(me, me.m_spells[0], true);
-                    task.Repeat(TimeSpan.FromMilliseconds(interval));
-                });
-            }
+                me.CastSpell(me, me.m_spells[0], true);
+                task.Repeat(TimeSpan.FromMilliseconds(interval));
+            });
+        }
 
-            public override void UpdateAI(uint diff)
-            {
-                _scheduler.Update();
+        public override void UpdateAI(uint diff)
+        {
+            _scheduler.Update();
             }
         }
 
