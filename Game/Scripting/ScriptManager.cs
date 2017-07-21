@@ -54,7 +54,7 @@ namespace Game.Scripting
 
             Log.outInfo(LogFilter.ServerLoading, "Loading C# scripts");
 
-            //FillSpellSummary();
+            FillSpellSummary();
 
             if (LoadScripts())
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} C# scripts in {1} ms", GetScriptCount(), Time.GetMSTimeDiffToNow(oldMSTime));
@@ -1369,7 +1369,7 @@ namespace Game.Scripting
             return m_mPointMoveMap.LookupByKey(creatureEntry);
         }
 
-        public ScriptRegistry<T> GetScriptRegistry<T>() where T : ScriptObject
+        ScriptRegistry<T> GetScriptRegistry<T>() where T : ScriptObject
         {
             if (ScriptStorage.ContainsKey(typeof(T)))
                 return (ScriptRegistry<T>)ScriptStorage[typeof(T)];
@@ -1485,8 +1485,6 @@ namespace Game.Scripting
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class ScriptAttribute : Attribute
     {
-        //public ScriptAttribute() { }
-
         public ScriptAttribute(string name="", params object[] args)
         {
             Name = name;

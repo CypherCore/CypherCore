@@ -24,7 +24,7 @@ namespace Scripts.World
 {
     [Script]
     class trigger_periodic : NullCreatureAI
-        {
+    {
         public trigger_periodic(Creature creature) : base(creature)
         {
             var interval = me.GetBaseAttackTime(Framework.Constants.WeaponAttackType.BaseAttack);
@@ -38,12 +38,6 @@ namespace Scripts.World
         public override void UpdateAI(uint diff)
         {
             _scheduler.Update();
-            }
-        }
-
-        public override CreatureAI GetAI(Creature creature)
-        {
-            return new trigger_periodicAI(creature);
         }
     }
 }
