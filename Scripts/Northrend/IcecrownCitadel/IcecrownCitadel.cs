@@ -123,9 +123,9 @@ namespace Scripts.Northrend.IcecrownCitadel
 
     // at Light's Hammer
     [Script]
-    class npc_highlord_tirion_fordring : ScriptedAI
+    class npc_highlord_tirion_fordring_lh : ScriptedAI
     {
-        public npc_highlord_tirion_fordring(Creature creature)
+        public npc_highlord_tirion_fordring_lh(Creature creature)
             : base(creature)
         {
             _instance = creature.GetInstanceScript();

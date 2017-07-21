@@ -296,9 +296,7 @@ namespace Scripts.Northrend.Nexus.Nexus
     [Script]
     class achievement_split_personality : AchievementCriteriaScript
     {
-        public achievement_split_personality() : base("achievement_split_personality")
-        {
-        }
+        public achievement_split_personality() : base("achievement_split_personality") { }
 
         public override bool OnCheck(Player player, Unit target)
         {
@@ -311,19 +309,6 @@ namespace Scripts.Northrend.Nexus.Nexus
                     return true;
 
             return false;
-        }
-    }
-
-    [Script]
-    class spell_gravity_well_effect : SpellScript
-    {
-        void HandleDummy(uint index)
-        {
-
-        }
-
-        public override void Register()
-        {
         }
     }
 }

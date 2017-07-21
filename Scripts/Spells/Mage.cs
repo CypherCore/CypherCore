@@ -550,7 +550,7 @@ namespace Scripts.Spells.Mage
     // @todo move out of here and rename - not a mage spell
     // 32826 - Polymorph (Visual)
     [Script]
-    class spell_mage_polymorph_cast_visual : SpellScript
+    class spell_mage_polymorph_visual : SpellScript
     {
         uint[] PolymorhForms =
         {

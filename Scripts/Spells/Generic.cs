@@ -1671,7 +1671,7 @@ namespace Scripts.Spells.Generic
         }
     }
 
-    [Script] // 28720 - Nightmare Vine
+    // 28720 - Nightmare Vine
     class spell_gen_nightmare_vine : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)

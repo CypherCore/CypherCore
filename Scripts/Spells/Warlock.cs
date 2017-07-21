@@ -148,7 +148,7 @@ namespace Scripts.Spells.Warlock
     }
 
     [Script] // 603 - Bane of Doom
-    class spell_warl_curse_of_doom : AuraScript
+    class spell_warl_bane_of_doom : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
