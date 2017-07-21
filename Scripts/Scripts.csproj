@@ -84,7 +84,6 @@
     <Compile Include="EasternKingdoms\Karazhan\Moroes.cs" />
     <Compile Include="EasternKingdoms\Karazhan\OperaEvent.cs" />
     <Compile Include="EasternKingdoms\ScarletEnclave\Chapter1.cs" />
-    <Compile Include="EasternKingdoms\EversongWoods.cs" />
     <Compile Include="Kalimdor\ZoneDurotar.cs" />
     <Compile Include="Kalimdor\RagefireChasm\InstanceRageFireChasm.cs" />
     <Compile Include="Northrend\AzjolNerub\Ahnkahet\BossAmanitar.cs" />

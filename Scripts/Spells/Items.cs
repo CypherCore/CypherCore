@@ -746,7 +746,7 @@ namespace Scripts.Spells.Items
     }
 
     [Script] // 71564 - Deadly Precision
-    class spell_item_deadly_precision_charm : AuraScript
+    class spell_item_deadly_precision : AuraScript
     {
         void HandleStackDrop(AuraEffect aurEff, ProcEventInfo eventInfo)
         {

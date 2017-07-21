@@ -221,30 +221,6 @@ namespace Scripts.Spells.Warrior
         }
     }
 
-    // 58387 - Glyph of Sunder Armor
-    [Script]
-    class spell_warr_glyph_of_sunder_armor : AuraScript
-    {
-        void HandleEffectCalcSpellMod(AuraEffect aurEff, ref SpellModifier spellMod)
-        {
-            if (spellMod == null)
-            {
-                spellMod = new SpellModifier(aurEff.GetBase());
-                spellMod.op = (SpellModOp)aurEff.GetMiscValue();
-                spellMod.type = SpellModType.Flat;
-                spellMod.spellId = GetId();
-                spellMod.mask = GetSpellInfo().GetEffect(aurEff.GetEffIndex()).SpellClassMask;
-            }
-
-            spellMod.value = aurEff.GetAmount();
-        }
-
-        public override void Register()
-        {
-            DoEffectCalcSpellMod.Add(new EffectCalcSpellModHandler(HandleEffectCalcSpellMod, 0, AuraType.Dummy));
-        }
-    }
-
     [Script] // Heroic leap - 6544
     class spell_warr_heroic_leap : SpellScript
     {

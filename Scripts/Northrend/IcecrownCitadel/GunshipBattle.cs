@@ -1552,7 +1552,6 @@ namespace Scripts.Northrend.IcecrownCitadel
     }
 
     [Script]
-    [Script]
     class npc_gunship_gunner : gunship_npc_AI
     {
         public npc_gunship_gunner(Creature creature)

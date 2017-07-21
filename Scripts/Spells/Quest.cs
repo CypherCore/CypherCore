@@ -1737,7 +1737,7 @@ namespace Scripts.Spells.Quest
 
     // 39238 - Fumping
     [Script]
-    class spell_q10929_fumpingAuraScript : AuraScript
+    class spell_q10929_fumping : AuraScript
     {
         public override bool Validate(SpellInfo spell)
         {

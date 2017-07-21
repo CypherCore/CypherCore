@@ -122,9 +122,9 @@ namespace Scripts.Northrend.Ulduar.Xt002
     }
 
     [Script]
-    class boss_xt002_ : BossAI
+    class boss_xt002 : BossAI
     {
-        public boss_xt002_(Creature creature) : base(creature, BossIds.Xt002)
+        public boss_xt002(Creature creature) : base(creature, BossIds.Xt002)
         {
             Initialize();
             _transferHealth = 0;

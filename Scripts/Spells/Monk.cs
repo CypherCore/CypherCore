@@ -54,12 +54,12 @@ namespace Scripts.Spells.Monk
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnTick, 0, Framework.Constants.AuraType.PeriodicDamage));
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnTick, 0, AuraType.PeriodicDamage));
         }
     }
 
     [Script] // 117959 - Crackling Jade Lightning
-    class spell_monk_crackling_jade_lightning_aura : AuraScript
+    class spell_monk_crackling_jade_lightning_knockback_proc_aura : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {

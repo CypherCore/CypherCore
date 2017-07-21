@@ -153,30 +153,6 @@ namespace Scripts.Spells.Hunter
         }
     }
 
-    // 82926 - Fire!
-    [Script]
-    class spell_hun_fire : AuraScript
-    {
-        void HandleEffectCalcSpellMod(AuraEffect aurEff, ref SpellModifier spellMod)
-        {
-            if (spellMod == null)
-            {
-                spellMod = new SpellModifier(GetAura());
-                spellMod.op = SpellModOp.CastingTime;
-                spellMod.type = SpellModType.Pct;
-                spellMod.spellId = GetId();
-                spellMod.mask = GetSpellInfo().GetEffect(aurEff.GetEffIndex()).SpellClassMask;
-            }
-
-            spellMod.value = -aurEff.GetAmount();
-        }
-
-        public override void Register()
-        {
-            DoEffectCalcSpellMod.Add(new EffectCalcSpellModHandler(HandleEffectCalcSpellMod, 0, AuraType.Dummy));
-        }
-    }
-
     [Script] // 109304 - Exhilaration
     class spell_hun_exhilaration : SpellScript
     {
@@ -242,30 +218,6 @@ namespace Scripts.Spells.Hunter
         {
             DoCheckProc.Add(new CheckProcHandler(CheckProc));
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
-        }
-    }
-
-    // -19464 Improved Serpent Sting
-    [Script]
-    class spell_hun_improved_serpent_sting : AuraScript
-    {
-        void HandleEffectCalcSpellMod(AuraEffect aurEff, ref SpellModifier spellMod)
-        {
-            if (spellMod == null)
-            {
-                spellMod = new SpellModifier(GetAura());
-                spellMod.op = (SpellModOp)aurEff.GetMiscValue();
-                spellMod.type = SpellModType.Pct;
-                spellMod.spellId = GetId();
-                spellMod.mask = GetSpellInfo().GetEffect(aurEff.GetEffIndex()).SpellClassMask;
-            }
-
-            spellMod.value = aurEff.GetAmount();
-        }
-
-        public override void Register()
-        {
-            DoEffectCalcSpellMod.Add(new EffectCalcSpellModHandler(HandleEffectCalcSpellMod, 0, AuraType.Dummy));
         }
     }
 

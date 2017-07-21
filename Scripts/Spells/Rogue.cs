@@ -69,6 +69,7 @@ namespace Scripts.Spells.Rogue
         }
     }
 
+    [Script]
     public class spell_rog_killing_spree_AuraScript : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -116,20 +117,6 @@ namespace Scripts.Spells.Rogue
         }
 
         List<ObjectGuid> _targets = new List<ObjectGuid>();
-    }
-
-    [Script] // 70805 - Rogue T10 2P Bonus -- THIS SHOULD BE REMOVED WITH NEW PROC SYSTEM.
-    class spell_rog_t10_2p_bonus : AuraScript
-    {
-        bool CheckProc(ProcEventInfo eventInfo)
-        {
-            return eventInfo.GetActor() == eventInfo.GetActionTarget();
-        }
-
-        public override void Register()
-        {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
-        }
     }
 
     [Script] // 2098 - Eviscerate

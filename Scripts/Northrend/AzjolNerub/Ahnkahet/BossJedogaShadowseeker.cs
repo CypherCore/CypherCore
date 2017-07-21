@@ -31,9 +31,8 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.JedogaShadowseeker
         public const uint LightningBolt = 56891; // 40y
         public const uint Thundershock = 56926;  // 30y
 
-        public const uint RandomLightningVisual = 56327;
-        public const uint SacrificeBeam = 56150;
-        public const uint SacrificeVisual = 56133;
+        public const uint BeamVisualJedogasAufseher1 = 60342;
+        public const uint BeamVisualJedogasAufseher2 = 56312;
     }
 
     struct TextIds
@@ -62,6 +61,7 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.JedogaShadowseeker
     {
         public boss_jedoga_shadowseeker(Creature creature) : base(creature)
         {
+            Initialize();
             instance = creature.GetInstanceScript();
             bFirstTime = true;
             bPreDone = false;
@@ -85,8 +85,6 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.JedogaShadowseeker
         public override void Reset()
         {
             Initialize();
-
-            DoCast(SpellIds.RandomLightningVisual);
 
             if (!bFirstTime)
                 instance.SetBossState(DataTypes.JedogaShadowseeker, EncounterState.Fail);
@@ -329,9 +327,9 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.JedogaShadowseeker
     }
 
     [Script]
-    class npc_jedoga_twilight_volunteer : ScriptedAI
+    class npc_jedoga_initiand : ScriptedAI
     {
-        public npc_jedoga_twilight_volunteer(Creature creature) : base(creature)
+        public npc_jedoga_initiand(Creature creature) : base(creature)
         {
             Initialize();
             instance = creature.GetInstanceScript();
@@ -485,10 +483,11 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.JedogaShadowseeker
         bool bWalking;
     }
 
+
     [Script]
-    class npc_jedoga_controller : ScriptedAI
+    class npc_jedogas_aufseher_trigger : ScriptedAI
     {
-        public npc_jedoga_controller(Creature creature) : base(creature)
+        public npc_jedogas_aufseher_trigger(Creature creature) : base(creature)
         {
             instance = creature.GetInstanceScript();
             bRemoved = false;
@@ -500,12 +499,10 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.JedogaShadowseeker
         }
 
         public override void Reset() { }
-
         public override void EnterCombat(Unit who) { }
-
         public override void AttackStart(Unit victim) { }
-
         public override void MoveInLineOfSight(Unit who) { }
+
 
         public override void UpdateAI(uint diff)
         {
@@ -519,7 +516,7 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.JedogaShadowseeker
                 }
                 if (!bCast)
                 {
-                    //DoCast(me, JedogaShadowseekerConst.SpellBeamVisualJedogasAufseher1, false);
+                    DoCast(me, SpellIds.BeamVisualJedogasAufseher1, false);
                     bCast = true;
                 }
             }
@@ -527,7 +524,7 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.JedogaShadowseeker
             {
                 if (!bCast2 && instance.GetData(DataTypes.JedogaTriggerSwitch) != 0)
                 {
-                    //DoCast(me, JedogaShadowseekerConst.SpellBeamVisualJedogasAufseher2, false);
+                    DoCast(me, SpellIds.BeamVisualJedogasAufseher2, false);
                     bCast2 = true;
                 }
                 if (bCast2 && instance.GetData(DataTypes.JedogaTriggerSwitch) == 0)
