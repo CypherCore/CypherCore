@@ -229,7 +229,7 @@ namespace Game.Maps
                             instResetTime[instance] = Tuple.Create(pair.Item1, resettime);
                         }
                     }
-                    while (result.NextRow());
+                    while (result2.NextRow());
                 }
 
                 // schedule the reset times

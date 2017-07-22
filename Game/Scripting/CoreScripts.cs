@@ -50,7 +50,7 @@ namespace Game.Scripting
             InstanceMap instance = obj.GetMap().ToInstanceMap();
             if (instance != null && instance.GetInstanceScript() != null)
                 if (instance.GetScriptName() == scriptName)
-                    return (T)Activator.CreateInstance(typeof(T), new object[] { obj });
+                    return (T)Activator.CreateInstance(typeof(T), obj);
 
             return null;
         }
@@ -305,7 +305,7 @@ namespace Game.Scripting
             if (me.GetInstanceScript() != null)
                 return GetInstanceAI<AI>(me);
             else
-                return (AI)Activator.CreateInstance(typeof(AI), me, _args);
+                return (AI)Activator.CreateInstance(typeof(AI), new object[] { me }.Combine(_args));
         }
 
         object[] _args;

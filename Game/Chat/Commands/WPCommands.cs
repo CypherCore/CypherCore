@@ -227,7 +227,7 @@ namespace Game.Chat.Commands
 
                 if (id == 0)
                 {
-                    handler.SendSysMessage("|cffff33ffERROR: No vallid waypoint script id not present.|r");
+                    handler.SendSysMessage("|cffff33ffERROR: No valid waypoint script id not present.|r");
                     return true;
                 }
 
@@ -256,7 +256,7 @@ namespace Game.Chat.Commands
                 if (arg_string == "setid")
                 {
                     uint newid = uint.Parse(arg_3);
-                    handler.SendSysMessage("|cff00ff00Wp Event: Wypoint scipt guid: {0}|r|cff00ffff id changed: |r|cff00ff00{1}|r", newid, id);
+                    handler.SendSysMessage("|cff00ff00Wp Event: Waypoint script guid: {0}|r|cff00ffff id changed: |r|cff00ff00{1}|r", newid, id);
 
                     stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_ID);
                     stmt.AddValue(0, newid);
@@ -774,7 +774,7 @@ namespace Game.Chat.Commands
 
             if (show == "first")
             {
-                handler.SendSysMessage("|cff00ff00DEBUG: wp first, GUID: {0}|r", pathid);
+                handler.SendSysMessage("|cff00ff00DEBUG: wp first, pathid: {0}|r", pathid);
 
                 PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_POS_FIRST_BY_ID);
                 stmt.AddValue(0, pathid);

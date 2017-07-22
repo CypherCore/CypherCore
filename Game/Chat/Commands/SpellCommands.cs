@@ -152,14 +152,14 @@ namespace Game.Chat
 
             string maxPureSkill = args.NextString();
 
-            int skill = int.Parse(skillStr);
-            if (skill <= 0)
+            uint skill = uint.Parse(skillStr);
+            if (skill == 0)
             {
                 handler.SendSysMessage(CypherStrings.InvalidSkillId, skill);
                 return false;
             }
 
-            int level = int.Parse(levelStr);
+            uint level = uint.Parse(levelStr);
             Player target = handler.getSelectedPlayerOrSelf();
             if (!target)
             {
@@ -180,13 +180,13 @@ namespace Game.Chat
             // the max level of the new profession.
             ushort max = !string.IsNullOrEmpty(maxPureSkill) ? ushort.Parse(maxPureSkill) : targetHasSkill ? target.GetPureMaxSkillValue((SkillType)skill) : (ushort)level;
 
-            if (level <= 0 || level > max || max <= 0)
+            if (level == 0 || level > max || max <= 0)
                 return false;
 
             // If the player has the skill, we get the current skill step. If they don't have the skill, we
             // add the skill to the player's book with step 1 (which is the first rank, in most cases something
             // like 'Apprentice <skill>'.
-            target.SetSkill((SkillType)skill, (uint)(targetHasSkill ? target.GetSkillStep((SkillType)skill) : 1), (uint)level, max);
+            target.SetSkill((SkillType)skill, (uint)(targetHasSkill ? target.GetSkillStep((SkillType)skill) : 1), level, max);
             handler.SendSysMessage(CypherStrings.SetSkill, skill, skillLine.DisplayName[handler.GetSessionDbcLocale()], handler.GetNameLink(target), level, max);
             return true;
         }

@@ -499,14 +499,14 @@ namespace Game.Entities
                 UpdatePolygonOrientation();
         }
 
-        bool UnitFitToActionRequirement(Unit unit, Unit caster, AreaTriggerActionUserTypes targetType)
+        bool UnitFitToActionRequirement(Unit unit, Unit caster, AreaTriggerAction action)
         {
-            switch (targetType)
+            switch (action.TargetType)
             {
                 case AreaTriggerActionUserTypes.Friend:
-                        return caster.IsFriendlyTo(unit);
+                        return caster._IsValidAssistTarget(unit, Global.SpellMgr.GetSpellInfo(action.Param));
                 case AreaTriggerActionUserTypes.Enemy:
-                        return !caster.IsFriendlyTo(unit);
+                        return caster._IsValidAttackTarget(unit, Global.SpellMgr.GetSpellInfo(action.Param));
                 case AreaTriggerActionUserTypes.Raid:
                         return caster.IsInRaidWith(unit);
                 case AreaTriggerActionUserTypes.Party:
@@ -528,7 +528,7 @@ namespace Game.Entities
             {
                 foreach (AreaTriggerAction action in GetTemplate().Actions)
         {
-                    if (UnitFitToActionRequirement(unit, caster, action.TargetType))
+                    if (UnitFitToActionRequirement(unit, caster, action))
                     {
                         switch (action.ActionType)
                         {

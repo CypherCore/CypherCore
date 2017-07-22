@@ -829,7 +829,7 @@ namespace Game.Chat
                         string activeStr = target && target.GetUInt32Value(PlayerFields.ChosenTitle) == titleInfo.MaskID
                             ? handler.GetCypherString(CypherStrings.Active) : "";
 
-                        string titleNameStr = name + targetName;
+                        string titleNameStr = string.Format(name.ConvertFormatSyntax(), targetName);
 
                         // send title in "id (idx:idx) - [namedlink locale]" format
                         if (handler.GetSession() != null)
