@@ -32,6 +32,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Game.AI;
 
 namespace Game.Spells
 {
@@ -131,9 +132,8 @@ namespace Game.Spells
         public virtual void Dispose()
         {
             // unload scripts
-            //foreach (var script in m_loadedScripts)
-            //script._Unload();
-            script.Unload();
+            foreach (var script in m_loadedScripts.ToList())
+                script._Unload();
 
             if (m_referencedFromCurrentSpell && m_selfContainer && m_selfContainer == this)
             {
@@ -6648,35 +6648,29 @@ namespace Game.Spells
         {
             m_loadedScripts = Global.ScriptMgr.CreateSpellScripts(m_spellInfo.Id, this);
 
-            if (!m_loadedScripts.Empty())
+            var holder = Global.SmartAIMgr.GetScript((int)GetSpellInfo().Id, SmartScriptType.Spell);
+            if (!holder.Empty())
             {
-                foreach (var script1 in m_loadedScripts)
+                var script = new SmartSpell();
+                script._Init("", GetSpellInfo().Id);
+                if (script._Load(this))
                 {
-                    if (script != null)
-                        Log.outError(LogFilter.Server, "More then one script is trying to load");
-
-                    Log.outDebug(LogFilter.Spells, "Spell.LoadScripts: Script `{0}` for spell `{1}` is loaded now", script1._GetScriptName(), m_spellInfo.Id);
-                    script1.Register();
-                    script = script1;
+                    script._Register();
+                    if (script._Validate(GetSpellInfo()))
+                        m_loadedScripts.Add(script);
                 }
             }
-            else
-                script = AI.AISelector.SelectSpellScript(this);
+
+            foreach (var script in m_loadedScripts)
+            {
+                Log.outDebug(LogFilter.Spells, "Spell.LoadScripts: Script `{0}` for spell `{1}` is loaded now", script._GetScriptName(), m_spellInfo.Id);
+                script.Register();
+            }            
         }
 
         void CallScriptBeforeCastHandlers()
         {
-            if (script == null)
-                return;
-
-            script._PrepareScriptCall(SpellScriptHookType.BeforeCast);
-
-            foreach (var hook in script.BeforeCast)
-                hook.Call();
-
-            script._FinishScriptCall();
-
-            /*foreach (var script in m_loadedScripts)
+            foreach (var script in m_loadedScripts)
             {
                 script._PrepareScriptCall(SpellScriptHookType.BeforeCast);
 
@@ -6684,22 +6678,12 @@ namespace Game.Spells
                     hook.Call();
 
                 script._FinishScriptCall();
-            }*/
+            }
         }
 
         void CallScriptOnCastHandlers()
         {
-            if (script == null)
-                return;
-
-            script._PrepareScriptCall(SpellScriptHookType.OnCast);
-
-            foreach (var hook in script.OnCast)
-                hook.Call();
-
-            script._FinishScriptCall();
-
-            /*foreach (var script in m_loadedScripts)
+            foreach (var script in m_loadedScripts)
             {
                 script._PrepareScriptCall(SpellScriptHookType.OnCast);
 
@@ -6707,22 +6691,12 @@ namespace Game.Spells
                     hook.Call();
 
                 script._FinishScriptCall();
-            }*/
+            }
         }
 
         void CallScriptAfterCastHandlers()
         {
-            if (script == null)
-                return;
-
-            script._PrepareScriptCall(SpellScriptHookType.AfterCast);
-
-            foreach (var hook in script.AfterCast)
-                hook.Call();
-
-            script._FinishScriptCall();
-
-            /*foreach (var script in m_loadedScripts)
+            foreach (var script in m_loadedScripts)
             {
                 script._PrepareScriptCall(SpellScriptHookType.AfterCast);
 
@@ -6730,27 +6704,13 @@ namespace Game.Spells
                     hook.Call();
 
                 script._FinishScriptCall();
-            }*/
+            }
         }
 
         SpellCastResult CallScriptCheckCastHandlers()
         {
             SpellCastResult retVal = SpellCastResult.SpellCastOk;
-            if (script == null)
-                return retVal;
-
-            script._PrepareScriptCall(SpellScriptHookType.CheckCast);
-
-            foreach (var hook in script.OnCheckCast)
-            {
-                SpellCastResult tempResult = hook.Call();
-                if (tempResult != SpellCastResult.SpellCastOk)
-                    retVal = tempResult;
-            }
-
-            script._FinishScriptCall();
-
-            /*foreach (var script in m_loadedScripts)
+            foreach (var script in m_loadedScripts)
             {
                 script._PrepareScriptCall(SpellScriptHookType.CheckCast);
 
@@ -6762,67 +6722,22 @@ namespace Game.Spells
                 }
 
                 script._FinishScriptCall();
-            }*/
+            }
             return retVal;
         }
 
         void PrepareScriptHitHandlers()
         {
-            if (script == null)
-                return;
-
-            script._InitHit();
-
-            //foreach (var script in m_loadedScripts)
-                //script._InitHit();
+            foreach (var script in m_loadedScripts)
+                script._InitHit();
         }
 
         bool CallScriptEffectHandlers(uint effIndex, SpellEffectHandleMode mode)
         {
-            if (script == null)
-                return false;
-
             // execute script effect handler hooks and check if effects was prevented
             bool preventDefault = false;
 
-            SpellScriptHookType hookType;
-            List<SpellScript.EffectHandler> effList;
-            switch (mode)
-            {
-                case SpellEffectHandleMode.Launch:
-                    effList = script.OnEffectLaunch;
-                    hookType = SpellScriptHookType.Launch;
-                    break;
-                case SpellEffectHandleMode.LaunchTarget:
-                    effList = script.OnEffectLaunchTarget;
-                    hookType = SpellScriptHookType.LaunchTarget;
-                    break;
-                case SpellEffectHandleMode.Hit:
-                    effList = script.OnEffectHit;
-                    hookType = SpellScriptHookType.EffectHit;
-                    break;
-                case SpellEffectHandleMode.HitTarget:
-                    effList = script.OnEffectHitTarget;
-                    hookType = SpellScriptHookType.EffectHitTarget;
-                    break;
-                default:
-                    Contract.Assert(false);
-                    return false;
-            }
-            script._PrepareScriptCall(hookType);
-            foreach (var eff in effList)
-            {
-                // effect execution can be prevented
-                if (!script._IsEffectPrevented(effIndex) && eff.IsEffectAffected(m_spellInfo, effIndex))
-                    eff.Call(effIndex);
-            }
-
-            if (!preventDefault)
-                preventDefault = script._IsDefaultEffectPrevented(effIndex);
-
-            script._FinishScriptCall();
-
-            /*foreach (var script in m_loadedScripts)
+            foreach (var script in m_loadedScripts)
             {
                 SpellScriptHookType hookType;
                 List<SpellScript.EffectHandler> effList;
@@ -6860,23 +6775,13 @@ namespace Game.Spells
                     preventDefault = script._IsDefaultEffectPrevented(effIndex);
 
                 script._FinishScriptCall();
-            }*/
+            }
             return preventDefault;
         }
 
         void CallScriptSuccessfulDispel(uint effIndex)
         {
-            if (script == null)
-                return;
-
-            script._PrepareScriptCall(SpellScriptHookType.EffectSuccessfulDispel);
-
-            foreach (var hook in script.OnEffectSuccessfulDispel)
-                hook.Call(effIndex);
-
-            script._FinishScriptCall();
-
-            /*foreach (var script in m_loadedScripts)
+            foreach (var script in m_loadedScripts)
             {
                 script._PrepareScriptCall(SpellScriptHookType.EffectSuccessfulDispel);
 
@@ -6884,22 +6789,12 @@ namespace Game.Spells
                     hook.Call(effIndex);
 
                 script._FinishScriptCall();
-            }*/
+            }
         }
 
         void CallScriptBeforeHitHandlers(SpellMissInfo missInfo)
         {
-            if (script == null)
-                return;
-
-            script._PrepareScriptCall(SpellScriptHookType.BeforeHit);
-
-            foreach (var hook in script.BeforeHit)
-                hook.Call(missInfo);
-
-            script._FinishScriptCall();
-
-            /*foreach (var script in m_loadedScripts)
+            foreach (var script in m_loadedScripts)
             {
                 script._PrepareScriptCall(SpellScriptHookType.BeforeHit);
 
@@ -6907,22 +6802,12 @@ namespace Game.Spells
                     hook.Call(missInfo);
 
                 script._FinishScriptCall();
-            }*/
+            }
         }
 
         void CallScriptOnHitHandlers()
         {
-            if (script == null)
-                return;
-
-            script._PrepareScriptCall(SpellScriptHookType.OnHit);
-
-            foreach (var hook in script.OnHit)
-                hook.Call();
-
-            script._FinishScriptCall();
-
-            /*foreach (var script in m_loadedScripts)
+            foreach (var script in m_loadedScripts)
             {
                 script._PrepareScriptCall(SpellScriptHookType.OnHit);
 
@@ -6930,22 +6815,12 @@ namespace Game.Spells
                     hook.Call();
 
                 script._FinishScriptCall();
-            }*/
+            }
         }
 
         void CallScriptAfterHitHandlers()
         {
-            if (script == null)
-                return;
-
-            script._PrepareScriptCall(SpellScriptHookType.AfterHit);
-
-            foreach (var hook in script.AfterHit)
-                hook.Call();
-
-            script._FinishScriptCall();
-
-            /*foreach (var script in m_loadedScripts)
+            foreach (var script in m_loadedScripts)
             {
                 script._PrepareScriptCall(SpellScriptHookType.AfterHit);
 
@@ -6953,23 +6828,12 @@ namespace Game.Spells
                     hook.Call();
 
                 script._FinishScriptCall();
-            }*/
+            }
         }
 
         void CallScriptObjectAreaTargetSelectHandlers(List<WorldObject> targets, uint effIndex, SpellImplicitTargetInfo targetType)
         {
-            if (script == null)
-                return;
-
-            script._PrepareScriptCall(SpellScriptHookType.ObjectAreaTargetSelect);
-
-            foreach (var hook in script.OnObjectAreaTargetSelect)
-                if (hook.IsEffectAffected(m_spellInfo, effIndex) && targetType.GetTarget() == hook.GetTarget())
-                    hook.Call(targets);
-
-            script._FinishScriptCall();
-
-            /*foreach (var script in m_loadedScripts)
+            foreach (var script in m_loadedScripts)
             {
                 script._PrepareScriptCall(SpellScriptHookType.ObjectAreaTargetSelect);
 
@@ -6978,23 +6842,12 @@ namespace Game.Spells
                         hook.Call(targets);
 
                 script._FinishScriptCall();
-            }*/
+            }
         }
 
         void CallScriptObjectTargetSelectHandlers(ref WorldObject target, uint effIndex, SpellImplicitTargetInfo targetType)
         {
-            if (script == null)
-                return;
-
-            script._PrepareScriptCall(SpellScriptHookType.ObjectTargetSelect);
-
-            foreach (var hook in script.OnObjectTargetSelect)
-                if (hook.IsEffectAffected(m_spellInfo, effIndex) && targetType.GetTarget() == hook.GetTarget())
-                    hook.Call(ref target);
-
-            script._FinishScriptCall();
-
-            /*foreach (var script in m_loadedScripts)
+            foreach (var script in m_loadedScripts)
             {
                 script._PrepareScriptCall(SpellScriptHookType.ObjectTargetSelect);
 
@@ -7003,23 +6856,12 @@ namespace Game.Spells
                         hook.Call(ref target);
 
                 script._FinishScriptCall();
-            }*/
+            }
         }
 
         void CallScriptDestinationTargetSelectHandlers(ref SpellDestination target, uint effIndex, SpellImplicitTargetInfo targetType)
         {
-            if (script == null)
-                return;
-
-            script._PrepareScriptCall(SpellScriptHookType.DestinationTargetSelect);
-
-            foreach (var hook in script.OnDestinationTargetSelect)
-                if (hook.IsEffectAffected(m_spellInfo, effIndex) && targetType.GetTarget() == hook.GetTarget())
-                    hook.Call(ref target);
-
-            script._FinishScriptCall();
-
-            /*foreach (var script in m_loadedScripts)
+            foreach (var script in m_loadedScripts)
             {
                 script._PrepareScriptCall(SpellScriptHookType.DestinationTargetSelect);
 
@@ -7028,29 +6870,16 @@ namespace Game.Spells
                         hook.Call(ref target);
 
                 script._FinishScriptCall();
-            }*/
+            }
         }
 
         bool CheckScriptEffectImplicitTargets(uint effIndex, uint effIndexToCheck)
         {
             // Skip if there are not any script
-            //if (m_loadedScripts.Empty())
-            //return true;
-
-            if (script == null)
+            if (m_loadedScripts.Empty())
                 return true;
 
-            foreach (var hook in script.OnObjectTargetSelect)
-                if ((hook.IsEffectAffected(m_spellInfo, effIndex) && !hook.IsEffectAffected(m_spellInfo, effIndexToCheck)) ||
-                    (!hook.IsEffectAffected(m_spellInfo, effIndex) && hook.IsEffectAffected(m_spellInfo, effIndexToCheck)))
-                    return false;
-
-            foreach (var hook in script.OnObjectAreaTargetSelect)
-                if ((hook.IsEffectAffected(m_spellInfo, effIndex) && !hook.IsEffectAffected(m_spellInfo, effIndexToCheck)) ||
-                    (!hook.IsEffectAffected(m_spellInfo, effIndex) && hook.IsEffectAffected(m_spellInfo, effIndexToCheck)))
-                    return false;
-
-            /*foreach (var script in m_loadedScripts)
+            foreach (var script in m_loadedScripts)
             {
                 foreach (var hook in script.OnObjectTargetSelect)
                     if ((hook.IsEffectAffected(m_spellInfo, effIndex) && !hook.IsEffectAffected(m_spellInfo, effIndexToCheck)) ||
@@ -7061,7 +6890,7 @@ namespace Game.Spells
                     if ((hook.IsEffectAffected(m_spellInfo, effIndex) && !hook.IsEffectAffected(m_spellInfo, effIndexToCheck)) ||
                         (!hook.IsEffectAffected(m_spellInfo, effIndex) && hook.IsEffectAffected(m_spellInfo, effIndexToCheck)))
                         return false;
-            }*/
+            }
             return true;
         }
 
@@ -7199,7 +7028,6 @@ namespace Game.Spells
         }
 
         List<SpellScript> m_loadedScripts = new List<SpellScript>();
-        SpellScript script { get; set; }
 
         int CalculateDamage(uint i, Unit target)
         {
