@@ -2348,6 +2348,7 @@ namespace Game.AI
         public struct ForceDespawn
         {
             public uint delay;
+            public uint respawn;
         }
         public struct InvincHP
         {

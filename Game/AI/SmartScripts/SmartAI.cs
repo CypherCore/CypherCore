@@ -95,7 +95,7 @@ namespace Game.AI
                     mDespawnState++;
                 }
                 else
-                    me.DespawnOrUnsummon();
+                    me.DespawnOrUnsummon(0, TimeSpan.FromSeconds(mRespawnTime));
             }
             else
                 mDespawnTime -= diff;
@@ -549,6 +549,7 @@ namespace Game.AI
         public override void JustRespawned()
         {
             mDespawnTime = 0;
+            mRespawnTime = 0;
             mDespawnState = 0;
             mEscortState = SmartEscortState.None;
             me.SetVisible(true);
@@ -907,9 +908,10 @@ namespace Game.AI
 
         public void SetInvincibilityHpLevel(uint level) { mInvincibilityHpLevel = level; }
 
-        public void SetDespawnTime(uint t)
+        public void SetDespawnTime(uint t, uint r = 0)
         {
             mDespawnTime = t;
+            mRespawnTime = r;
             mDespawnState = (uint)(t != 0 ? 1 : 0);
         }
 
@@ -945,6 +947,7 @@ namespace Game.AI
         uint mInvincibilityHpLevel;
 
         uint mDespawnTime;
+        uint mRespawnTime;
         uint mDespawnState;
 
         public uint mEscortQuestID;
