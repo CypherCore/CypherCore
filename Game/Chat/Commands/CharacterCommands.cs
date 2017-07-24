@@ -55,9 +55,11 @@ namespace Game.Chat
                     string activeStr = target.GetUInt32Value(PlayerFields.ChosenTitle) == titleInfo.MaskID
                     ? handler.GetCypherString(CypherStrings.Active) : "";
 
+                    string titleNameStr = string.Format(name.ConvertFormatSyntax(), targetName);
+
                     // send title in "id (idx:idx) - [namedlink locale]" format
                     if (handler.GetSession() != null)
-                        handler.SendSysMessage(CypherStrings.TitleListChat, titleInfo.Id, titleInfo.MaskID, titleInfo.Id, name, loc, knownStr, activeStr);
+                        handler.SendSysMessage(CypherStrings.TitleListChat, titleInfo.Id, titleInfo.MaskID, titleInfo.Id, titleNameStr, loc, knownStr, activeStr);
                     else
                         handler.SendSysMessage(CypherStrings.TitleListConsole, titleInfo.Id, titleInfo.MaskID, name, loc, knownStr, activeStr);
                 }

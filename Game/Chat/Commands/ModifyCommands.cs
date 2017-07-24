@@ -110,11 +110,8 @@ namespace Game.Chat
         }
 
         [Command("faction", RBACPermissions.CommandModifyFaction)]
-        static bool Faction(StringArguments args, CommandHandler handler)
+        static bool HandleModifyFactionCommand(StringArguments args, CommandHandler handler)
         {
-            if (args.Empty())
-                return false;
-
             string pfactionid = handler.extractKeyFromLink(args, "Hfaction");
 
             Creature target = handler.getSelectedCreature();

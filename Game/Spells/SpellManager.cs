@@ -2741,10 +2741,6 @@ namespace Game.Entities
                     case 59372: // Energize Cores
                         spellInfo.GetEffect(0).TargetA = new SpellImplicitTargetInfo(Targets.UnitSrcAreaEnemy);
                         break;
-                    case 63320: // Glyph of Life Tap
-                        // Entries were not updated after spell effect change, we have to do that manually :/
-                        spellInfo.AttributesEx3 |= SpellAttr3.CanProcWithTriggered;
-                        break;
                     case 5308: // Execute
                         spellInfo.AttributesEx3 |= SpellAttr3.CantTriggerProc;
                         break;
@@ -2834,17 +2830,11 @@ namespace Game.Entities
                     case 34477: // Misdirection
                     case 48108: // Hot Streak
                     case 51124: // Killing Machine
-                    case 57761: // Fireball!
                     case 64823: // Item - Druid T8 Balance 4P Bonus
-                    case 88819: // Daybreak
                         spellInfo.ProcCharges = 1;
                         break;
                     case 44544: // Fingers of Frost
                         spellInfo.GetEffect(0).SpellClassMask = new FlagArray128(685904631, 1151048, 0, 0);
-                        break;
-                    case 53257: // Cobra Strikes
-                        spellInfo.ProcCharges = 2;
-                        spellInfo.StackAmount = 0;
                         break;
                     case 28200: // Ascendance (Talisman of Ascendance trinket)
                         spellInfo.ProcCharges = 6;
@@ -2881,10 +2871,6 @@ namespace Game.Entities
                         break;
                     case 15290: // Vampiric Embrace
                         spellInfo.AttributesEx3 |= SpellAttr3.NoInitialAggro;
-                        break;
-                    case 8145: // Tremor Totem (instant pulse)
-                        spellInfo.AttributesEx2 |= SpellAttr2.CanTargetNotInLos;
-                        spellInfo.AttributesEx5 |= SpellAttr5.StartPeriodicAtApply;
                         break;
                     case 6474: // Earthbind Totem (instant pulse)
                         spellInfo.AttributesEx5 |= SpellAttr5.StartPeriodicAtApply;

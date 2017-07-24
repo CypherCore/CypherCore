@@ -957,7 +957,7 @@ namespace Game.Chat
                 if (args.Empty())
                     return false;
 
-                uint phaseGroupId = args.NextUInt32();
+                int phaseGroupId = args.NextInt32();
 
                 Creature creature = handler.getSelectedCreature();
                 if (!creature || creature.IsPet())
@@ -968,11 +968,11 @@ namespace Game.Chat
 
                 creature.ClearPhases();
 
-                foreach (uint id in Global.DB2Mgr.GetPhasesForGroup(phaseGroupId))
+                foreach (uint id in Global.DB2Mgr.GetPhasesForGroup((uint)phaseGroupId))
                     creature.SetInPhase(id, false, true); // don't send update here for multiple phases, only send it once after adding all phases
 
                 creature.UpdateObjectVisibility();
-                creature.SetDBPhase(-(int)phaseGroupId);
+                creature.SetDBPhase(-phaseGroupId);
 
                 creature.SaveToDB();
 
@@ -1030,28 +1030,20 @@ namespace Game.Chat
                 if (args.Empty())
                     return false;
 
-                int spawnTime = args.NextInt32();
-
-                if (spawnTime < 0)
-                {
-                    handler.SendSysMessage(CypherStrings.BadValue);
-                    return false;
-                }
+                uint spawnTime = args.NextUInt32();
 
                 Creature creature = handler.getSelectedCreature();
-                ulong guidLow = 0;
-
-                if (creature)
-                    guidLow = creature.GetSpawnId();
-                else
+                if (!creature)
                     return false;
+
+                ulong guidLow = creature.GetSpawnId();
 
                 PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_SPAWN_TIME_SECS);
                 stmt.AddValue(0, spawnTime);
                 stmt.AddValue(1, guidLow);
                 DB.World.Execute(stmt);
 
-                creature.SetRespawnDelay((uint)spawnTime);
+                creature.SetRespawnDelay(spawnTime);
                 handler.SendSysMessage(CypherStrings.CommandSpawntime, spawnTime);
 
                 return true;
@@ -1167,11 +1159,10 @@ namespace Game.Chat
                     return false;
                 }
 
-                int item_int = int.Parse(pitem);
-                if (item_int <= 0)
+                uint itemId = uint.Parse(pitem);
+                if (itemId == 0)
                     return false;
 
-                uint itemId = (uint)item_int;
                 uint maxcount = args.NextUInt32();
                 uint incrtime = args.NextUInt32();
                 uint extendedcost = args.NextUInt32();

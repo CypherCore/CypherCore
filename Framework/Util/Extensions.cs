@@ -285,10 +285,8 @@ namespace System
 
         public static string ConvertFormatSyntax(this string str)
         {
-            // @"%(\d+(\.\d+)?)?(d|f|s|u|i|llX|X|ll)"; old working
-            //@"%(\d+(\.\d+)?)?(-\d+[a-z]|[[a-z])"; working somewhat
-            string pattern = @"(%\W*\d*[a-zA-Z]*)"; //Working fully????
-
+            string pattern = @"(%\W*\d*[a-zA-Z]*)";
+            
             int count = 0;
             string result = Regex.Replace(str, pattern, m =>
             {

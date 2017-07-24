@@ -20,6 +20,7 @@ using Framework.IO;
 using Game.DataStorage;
 using Game.Entities;
 using System.Collections.Generic;
+using System;
 
 namespace Game.Chat.Commands
 {
@@ -34,8 +35,8 @@ namespace Game.Chat.Commands
             if (string.IsNullOrEmpty(id_p))
                 return false;
 
-            int id = int.Parse(id_p);
-            if (id <= 0)
+            uint id = uint.Parse(id_p);
+            if (id == 0)
             {
                 handler.SendSysMessage(CypherStrings.InvalidTitleId, id);
                 return false;
@@ -76,8 +77,8 @@ namespace Game.Chat.Commands
             if (string.IsNullOrEmpty(id_p))
                 return false;
 
-            int id = int.Parse(id_p);
-            if (id <= 0)
+            uint id = uint.Parse(id_p);
+            if (id == 0)
             {
                 handler.SendSysMessage(CypherStrings.InvalidTitleId, id);
                 return false;
@@ -103,7 +104,7 @@ namespace Game.Chat.Commands
 
             string tNameLink = handler.GetNameLink(target);
 
-            string titleNameStr = (target.GetGender() == Gender.Male ? titleInfo.NameMale : titleInfo.NameFemale)[handler.GetSessionDbcLocale()] + target.GetName();
+            string titleNameStr = string.Format((target.GetGender() == Gender.Male ? titleInfo.NameMale : titleInfo.NameFemale)[handler.GetSessionDbcLocale()].ConvertFormatSyntax(), target.GetName());
 
             target.SetTitle(titleInfo);
             handler.SendSysMessage(CypherStrings.TitleAddRes, id, titleNameStr, tNameLink);
@@ -119,8 +120,8 @@ namespace Game.Chat.Commands
             if (string.IsNullOrEmpty(id_p))
                 return false;
 
-            int id = int.Parse(id_p);
-            if (id <= 0)
+            uint id = uint.Parse(id_p);
+            if (id == 0)
             {
                 handler.SendSysMessage(CypherStrings.InvalidTitleId, id);
                 return false;
@@ -148,7 +149,7 @@ namespace Game.Chat.Commands
 
             string tNameLink = handler.GetNameLink(target);
 
-            string titleNameStr = (target.GetGender() == Gender.Male ? titleInfo.NameMale : titleInfo.NameFemale)[handler.GetSessionDbcLocale()] + target.GetName();
+            string titleNameStr = string.Format((target.GetGender() == Gender.Male ? titleInfo.NameMale : titleInfo.NameFemale)[handler.GetSessionDbcLocale()].ConvertFormatSyntax(), target.GetName());
 
             handler.SendSysMessage(CypherStrings.TitleRemoveRes, id, titleNameStr, tNameLink);
 

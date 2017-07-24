@@ -278,7 +278,7 @@ namespace Game.Chat.Commands
             Player player = handler.GetSession() != null ? handler.GetSession().GetPlayer() : null;
             if (player && ticket.IsAssignedNotTo(player.GetGUID()))
             {
-                handler.SendSysMessage(CypherStrings.CommandTicketalreadyassigned, ticket.GetId(), target);
+                handler.SendSysMessage(CypherStrings.CommandTicketalreadyassigned, ticket.GetId());
                 return true;
             }
 

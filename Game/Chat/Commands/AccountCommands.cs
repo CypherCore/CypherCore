@@ -494,8 +494,8 @@ namespace Game.Chat
                     handler.HasLowerSecurityAccount(null, accountId, true))
                     return false;
 
-                int expansion = int.Parse(exp); //get int anyway (0 if error)
-                if (expansion < 0 || expansion > WorldConfig.GetIntValue(WorldCfg.Expansion))
+                byte expansion = byte.Parse(exp); //get int anyway (0 if error)
+                if (expansion > WorldConfig.GetIntValue(WorldCfg.Expansion))
                     return false;
 
                 PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_EXPANSION);

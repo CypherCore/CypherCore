@@ -607,10 +607,10 @@ namespace Game.Chat
                 return false;
             }
 
-            int currentValue = (int)handler.GetSession().GetPlayer().GetUInt32Value(opcode);
+            uint currentValue = handler.GetSession().GetPlayer().GetUInt32Value(opcode);
 
-            currentValue += value;
-            handler.GetSession().GetPlayer().SetUInt32Value(opcode, (uint)currentValue);
+            currentValue += (uint)value;
+            handler.GetSession().GetPlayer().SetUInt32Value(opcode, currentValue);
 
             handler.SendSysMessage(CypherStrings.Change32bitField, opcode, currentValue);
 
