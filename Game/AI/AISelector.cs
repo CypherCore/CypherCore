@@ -19,6 +19,8 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Movement;
 using System.Collections.Generic;
+using Game.Scripting;
+using Game.Spells;
 
 namespace Game.AI
 {

@@ -1823,7 +1823,7 @@ namespace Game.Spells
         public void LoadScripts()
         {
             m_loadedScripts = Global.ScriptMgr.CreateAuraScripts(m_spellInfo.Id, this);
-            foreach (var script in m_loadedScripts.ToList())
+            foreach (var script in m_loadedScripts)
             {
                 Log.outDebug(LogFilter.Spells, "Aura.LoadScripts: Script `{0}` for aura `{1}` is loaded now", script._GetScriptName(), m_spellInfo.Id);
                 script.Register();

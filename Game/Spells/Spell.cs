@@ -32,6 +32,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Game.AI;
 
 namespace Game.Spells
 {
@@ -131,7 +132,7 @@ namespace Game.Spells
         public virtual void Dispose()
         {
             // unload scripts
-            foreach (var script in m_loadedScripts)
+            foreach (var script in m_loadedScripts.ToList())
                 script._Unload();
 
             if (m_referencedFromCurrentSpell && m_selfContainer && m_selfContainer == this)
@@ -6646,11 +6647,25 @@ namespace Game.Spells
         void LoadScripts()
         {
             m_loadedScripts = Global.ScriptMgr.CreateSpellScripts(m_spellInfo.Id, this);
+
+            var holder = Global.SmartAIMgr.GetScript((int)GetSpellInfo().Id, SmartScriptType.Spell);
+            if (!holder.Empty())
+            {
+                var script = new SmartSpell();
+                script._Init("", GetSpellInfo().Id);
+                if (script._Load(this))
+                {
+                    script._Register();
+                    if (script._Validate(GetSpellInfo()))
+                        m_loadedScripts.Add(script);
+                }
+            }
+
             foreach (var script in m_loadedScripts)
             {
                 Log.outDebug(LogFilter.Spells, "Spell.LoadScripts: Script `{0}` for spell `{1}` is loaded now", script._GetScriptName(), m_spellInfo.Id);
                 script.Register();
-            }
+            }            
         }
 
         void CallScriptBeforeCastHandlers()
@@ -6721,6 +6736,7 @@ namespace Game.Spells
         {
             // execute script effect handler hooks and check if effects was prevented
             bool preventDefault = false;
+
             foreach (var script in m_loadedScripts)
             {
                 SpellScriptHookType hookType;
