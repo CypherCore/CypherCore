@@ -515,7 +515,13 @@ namespace Game.BattleGrounds
             return player;
         }
 
-        public void SetTeamStartLoc(int teamIndex, Position pos)
+        public BattlegroundMap GetBgMap()
+        {
+            Contract.Assert(m_Map);
+            return m_Map;
+        }
+
+        public void SetTeamStartPosition(int teamIndex, Position pos)
         {
             Contract.Assert(teamIndex < TeamId.Neutral);
             StartPosition[teamIndex] = pos;
@@ -1196,7 +1202,7 @@ namespace Game.BattleGrounds
             return GetPlayersSize() < GetMaxPlayers();
         }
 
-        public void BuildPvPLogDataPacket(out PVPLogData pvpLogData)
+        public virtual void BuildPvPLogDataPacket(out PVPLogData pvpLogData)
         {
             pvpLogData = new PVPLogData();
 
@@ -1205,57 +1211,25 @@ namespace Game.BattleGrounds
 
             foreach (var score in PlayerScores)
             {
-                PVPLogData.PlayerData playerData = new PVPLogData.PlayerData();
+                PVPLogData.PlayerData playerData;
 
-                playerData.PlayerGUID = score.Value.PlayerGuid;
-                playerData.Kills = score.Value.KillingBlows;
-                playerData.Faction = (byte)score.Value.TeamId;
-                if (score.Value.HonorableKills != 0 || score.Value.Deaths != 0 || score.Value.BonusHonor != 0)
-                {
-                    playerData.Honor.HasValue = true;
-                    PVPLogData.HonorData  honorData = playerData.Honor.Value;
-                    honorData.HonorKills = score.Value.HonorableKills;
-                    honorData.Deaths = score.Value.Deaths;
-                    honorData.ContributionPoints = score.Value.BonusHonor;
-                }
-
-                playerData.DamageDone = score.Value.DamageDone;
-                playerData.HealingDone = score.Value.HealingDone;
-                score.Value.BuildObjectivesBlock(playerData.Stats);
+                score.Value.BuildPvPLogPlayerDataPacket(out playerData);
 
                 Player player = Global.ObjAccessor.GetPlayer(GetBgMap(), playerData.PlayerGUID);
                 if (player)
                 {
                     playerData.IsInWorld = true;
                     playerData.PrimaryTalentTree = (int)player.GetUInt32Value(PlayerFields.CurrentSpecId);
+                    playerData.PrimaryTalentTreeNameIndex = 0;
                     playerData.PlayerRace = player.GetRace();
+                    playerData.Prestige = player.GetPrestigeLevel();
                 }
-
-                //if (isRated())
-                //{
-                //    playerData.PreMatchRating;
-                //    playerData.RatingChange;
-                //    playerData.PreMatchMMR;
-                //    playerData.MmrChange;
-                //}
 
                 pvpLogData.Players.Add(playerData);
             }
 
-            if (isRated())
-            {
-                pvpLogData.Ratings.HasValue = true;
-                PVPLogData.RatingData ratingData = pvpLogData.Ratings.Value;
-                for (byte i = 0; i < SharedConst.BGTeamsCount; ++i)
-                {
-                    ratingData.Postmatch[i] = _arenaTeamScores[i].NewRating;
-                    ratingData.Prematch[i] = _arenaTeamScores[i].OldRating;
-                    ratingData.PrematchMMR[i] = (int)_arenaTeamScores[i].MatchmakerRating;
-                }
-            }
-
-            pvpLogData.PlayerCount[0] = (sbyte)GetPlayersCountByTeam(Team.Horde);
-            pvpLogData.PlayerCount[1] = (sbyte)GetPlayersCountByTeam(Team.Alliance);
+            pvpLogData.PlayerCount[(int)BattlegroundTeamId.Horde] = (sbyte)GetPlayersCountByTeam(Team.Horde);
+            pvpLogData.PlayerCount[(int)BattlegroundTeamId.Alliance] = (sbyte)GetPlayersCountByTeam(Team.Alliance);
         }
 
         public virtual bool UpdatePlayerScore(Player player, ScoreType type, uint value, bool doAddHonor = true)
@@ -1907,7 +1881,6 @@ namespace Game.BattleGrounds
         public uint GetMapId() { return m_MapId; }
 
         public void SetBgMap(BattlegroundMap map) { m_Map = map; }
-        public BattlegroundMap GetBgMap() { return m_Map; }
         BattlegroundMap FindBgMap() { return m_Map; }
 
         public Position GetTeamStartPosition(int teamIndex)
@@ -2006,8 +1979,6 @@ namespace Game.BattleGrounds
 
         public BGHonorMode m_HonorMode;
         public uint[] m_TeamScores = new uint[SharedConst.BGTeamsCount];
-
-        public ArenaTeamScore[] _arenaTeamScores = new ArenaTeamScore[SharedConst.BGTeamsCount];
 
         protected Dictionary<int, ObjectGuid> BgObjects = new Dictionary<int, ObjectGuid>();
         protected Dictionary<int, ObjectGuid> BgCreatures = new Dictionary<int, ObjectGuid>();

@@ -108,18 +108,18 @@ namespace Game.Network.Packets
             public void Write(WorldPacket data)
             {
                 foreach (var id in Prematch)
-                    data.WriteInt32(id);
+                    data.WriteUInt32(id);
 
                 foreach (var id in Postmatch)
-                    data.WriteInt32(id);
+                    data.WriteUInt32(id);
 
                 foreach (var id in PrematchMMR)
-                    data.WriteInt32(id);
+                    data.WriteUInt32(id);
             }
 
-            public int[] Prematch = new int[2];
-            public int[] Postmatch = new int[2];
-            public int[] PrematchMMR = new int[2];
+            public uint[] Prematch = new uint[2];
+            public uint[] Postmatch = new uint[2];
+            public uint[] PrematchMMR = new uint[2];
         }
 
         public struct HonorData
@@ -149,7 +149,7 @@ namespace Game.Network.Packets
                 data.WriteInt32(PrimaryTalentTreeNameIndex);
                 data.WriteInt32(PlayerRace);
                 if (!Stats.Empty())
-                    Stats.ForEach(id => data.WriteInt32(id));
+                    Stats.ForEach(id => data.WriteUInt32(id));
 
                 data.WriteBit(Faction);
                 data.WriteBit(IsInWorld);
@@ -187,7 +187,7 @@ namespace Game.Network.Packets
             public Optional<int> RatingChange;
             public Optional<uint> PreMatchMMR;
             public Optional<int> MmrChange;
-            public List<int> Stats = new List<int>();
+            public List<uint> Stats = new List<uint>();
             public int PrimaryTalentTree;
             public int PrimaryTalentTreeNameIndex;  // controls which name field from ChrSpecialization.dbc will be sent to lua
             public Race PlayerRace;

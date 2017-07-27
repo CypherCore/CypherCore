@@ -374,8 +374,8 @@ namespace Game.BattleGrounds
             bg.SetMaxPlayersPerTeam(bgTemplate.MaxPlayersPerTeam);
             bg.SetMinPlayers(bgTemplate.MinPlayersPerTeam * 2);
             bg.SetMaxPlayers(bgTemplate.MaxPlayersPerTeam * 2);
-            bg.SetTeamStartLoc(TeamId.Alliance, bgTemplate.StartLocation[TeamId.Alliance]);
-            bg.SetTeamStartLoc(TeamId.Horde, bgTemplate.StartLocation[TeamId.Horde]);
+            bg.SetTeamStartPosition(TeamId.Alliance, bgTemplate.StartLocation[TeamId.Alliance]);
+            bg.SetTeamStartPosition(TeamId.Horde, bgTemplate.StartLocation[TeamId.Horde]);
             bg.SetStartMaxDist(bgTemplate.StartMaxDist);
             bg.SetLevelRange(bgTemplate.MinLevel, bgTemplate.MaxLevel);
             bg.SetScriptId(bgTemplate.scriptId);

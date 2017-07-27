@@ -863,10 +863,12 @@ namespace Game.BattleGrounds
             }
         }
 
-        public override void BuildObjectivesBlock(List<int> stats)
+        public override void BuildPvPLogPlayerDataPacket(out PVPLogData.PlayerData playerData)
         {
-            stats.Add((int)BasesAssaulted);
-            stats.Add((int)BasesDefended);
+            base.BuildPvPLogPlayerDataPacket(out playerData);
+
+            playerData.Stats.Add(BasesAssaulted);
+            playerData.Stats.Add(BasesDefended);
         }
 
         public override uint GetAttr1() { return BasesAssaulted; }

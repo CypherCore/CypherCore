@@ -19,6 +19,7 @@ using Framework.Constants;
 using Game.Entities;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using Game.Network.Packets;
 
 namespace Game.BattleGrounds
 {
@@ -27,7 +28,7 @@ namespace Game.BattleGrounds
         public BattlegroundScore(ObjectGuid playerGuid, Team team)
         {
             PlayerGuid = playerGuid;
-            TeamId = team == Team.Alliance ? 1 : 0;
+            TeamId = (int)(team == Team.Alliance ? BattlegroundTeamId.Alliance : BattlegroundTeamId.Horde);
         }
 
         public virtual void UpdateScore(ScoreType type, uint value)
@@ -58,7 +59,23 @@ namespace Game.BattleGrounds
             }
         }
 
-        public virtual void BuildObjectivesBlock(List<int> stats) { }
+        public virtual void BuildPvPLogPlayerDataPacket(out PVPLogData.PlayerData playerData)
+        {
+            playerData = new PVPLogData.PlayerData();
+            playerData.PlayerGUID = PlayerGuid;
+            playerData.Kills = KillingBlows;
+            playerData.Faction = (byte)TeamId;
+            if (HonorableKills != 0 || Deaths != 0 || BonusHonor != 0)
+            {
+                playerData.Honor.HasValue = true;
+                playerData.Honor.Value.HonorKills = HonorableKills;
+                playerData.Honor.Value.Deaths = Deaths;
+                playerData.Honor.Value.ContributionPoints = BonusHonor;
+            }
+
+            playerData.DamageDone = DamageDone;
+            playerData.HealingDone = HealingDone;
+        }
 
         public virtual uint GetAttr1() { return 0; }
         public virtual uint GetAttr2() { return 0; }

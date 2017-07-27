@@ -982,10 +982,12 @@ namespace Game.BattleGrounds
             }
         }
 
-        public override void BuildObjectivesBlock(List<int> stats)
+        public override void BuildPvPLogPlayerDataPacket(out PVPLogData.PlayerData playerData)
         {
-            stats.Add((int)FlagCaptures);
-            stats.Add((int)FlagReturns);
+            base.BuildPvPLogPlayerDataPacket(out playerData);
+
+            playerData.Stats.Add(FlagCaptures);
+            playerData.Stats.Add(FlagReturns);
         }
 
         public override uint GetAttr1() { return FlagCaptures; }

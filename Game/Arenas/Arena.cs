@@ -95,6 +95,23 @@ namespace Game.Arenas
             CheckWinConditions();
         }
 
+        public override void BuildPvPLogDataPacket(out PVPLogData pvpLogData)
+        {
+            base.BuildPvPLogDataPacket(out pvpLogData);
+
+            if (isRated())
+            {
+                pvpLogData.Ratings.HasValue = true;
+
+                for (byte i = 0; i < SharedConst.BGTeamsCount; ++i)
+                {
+                    pvpLogData.Ratings.Value.Postmatch[i] = _arenaTeamScores[i].PostMatchRating;
+                    pvpLogData.Ratings.Value.Prematch[i] = _arenaTeamScores[i].PreMatchRating;
+                    pvpLogData.Ratings.Value.PrematchMMR[i] = _arenaTeamScores[i].PreMatchMMR;
+                }
+            }
+        }
+
         public override void RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool SendPacket)
         {
             if (isRated() && GetStatus() == BattlegroundStatus.InProgress)
@@ -177,8 +194,8 @@ namespace Game.Arenas
                         byte winnerTeam = (byte)(winner == Team.Alliance ? BattlegroundTeamId.Alliance : BattlegroundTeamId.Horde);
                         byte loserTeam = (byte)(winner == Team.Alliance ? BattlegroundTeamId.Horde : BattlegroundTeamId.Alliance);
 
-                        _arenaTeamScores[winnerTeam].Assign((int)winnerTeamRating, (int)(winnerTeamRating + winnerChange), winnerMatchmakerRating);
-                        _arenaTeamScores[loserTeam].Assign((int)loserTeamRating, (int)(loserTeamRating + loserChange), loserMatchmakerRating);
+                        _arenaTeamScores[winnerTeam].Assign(winnerTeamRating, (uint)(winnerTeamRating + winnerChange), winnerMatchmakerRating, GetArenaMatchmakerRating(winner));
+                        _arenaTeamScores[loserTeam].Assign(loserTeamRating, (uint)(loserTeamRating + loserChange), loserMatchmakerRating, GetArenaMatchmakerRating(GetOtherTeam(winner)));
 
                         Log.outDebug(LogFilter.Arena, "Arena match Type: {0} for Team1Id: {1} - Team2Id: {2} ended. WinnerTeamId: {3}. Winner rating: +{4}, Loser rating: {5}",
                             GetArenaType(), GetArenaTeamIdByIndex(TeamId.Alliance), GetArenaTeamIdByIndex(TeamId.Horde), winnerArenaTeam.GetId(), winnerChange, loserChange);
@@ -200,9 +217,8 @@ namespace Game.Arenas
                     // Deduct 16 points from each teams arena-rating if there are no winners after 45+2 minutes
                     else
                     {
-                        _arenaTeamScores[(int)BattlegroundTeamId.Alliance].Assign((int)winnerTeamRating, (int)(winnerTeamRating + SharedConst.ArenaTimeLimitPointsLoss), winnerMatchmakerRating);
-                        _arenaTeamScores[(int)BattlegroundTeamId.Horde].Assign((int)loserTeamRating, (int)(loserTeamRating + SharedConst.ArenaTimeLimitPointsLoss), loserMatchmakerRating);
-
+                        _arenaTeamScores[(int)BattlegroundTeamId.Alliance].Assign(winnerTeamRating, (uint)(winnerTeamRating + SharedConst.ArenaTimeLimitPointsLoss), winnerMatchmakerRating, GetArenaMatchmakerRating(Team.Alliance));
+                        _arenaTeamScores[(int)BattlegroundTeamId.Horde].Assign(loserTeamRating, (uint)(loserTeamRating + SharedConst.ArenaTimeLimitPointsLoss), loserMatchmakerRating, GetArenaMatchmakerRating(Team.Horde));
 
                         winnerArenaTeam.FinishGame(SharedConst.ArenaTimeLimitPointsLoss);
                         loserArenaTeam.FinishGame(SharedConst.ArenaTimeLimitPointsLoss);
@@ -283,6 +299,8 @@ namespace Game.Arenas
             // end Battleground
             base.EndBattleground(winner);
         }
+
+        public ArenaTeamScore[] _arenaTeamScores = new ArenaTeamScore[SharedConst.BGTeamsCount];
     }
 
     struct ArenaWorldStates

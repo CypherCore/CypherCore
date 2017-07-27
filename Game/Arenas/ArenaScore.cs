@@ -19,6 +19,7 @@ using Framework.Constants;
 using Game.BattleGrounds;
 using Game.Entities;
 using System.Collections.Generic;
+using Game.Network.Packets;
 
 namespace Game.Arenas
 {
@@ -29,33 +30,47 @@ namespace Game.Arenas
             TeamId = (int)(team == Team.Alliance ? BattlegroundTeamId.Alliance : BattlegroundTeamId.Horde);
         }
 
-        public override void BuildObjectivesBlock(List<int> stats) { }
+        void BuildPvPLogPlayerDataPacket(PVPLogData.PlayerData playerData)
+        {
+            if (PreMatchRating != 0)
+                playerData.PreMatchRating.Set(PreMatchRating);
+
+            if (PostMatchRating != PreMatchRating)
+                playerData.RatingChange.Set((int)(PostMatchRating - PreMatchRating));
+
+            if (PreMatchMMR != 0)
+                playerData.PreMatchMMR.Set(PreMatchMMR);
+
+            if (PostMatchMMR != PreMatchMMR)
+                playerData.MmrChange.Set((int)(PostMatchMMR - PreMatchMMR));
+        }
 
         // For Logging purpose
         public override string ToString()
         {
-            return string.Format("Damage done: {0}, Healing done: {1}, Killing blows: {2}", DamageDone, HealingDone, KillingBlows);
+            return $"Damage done: {DamageDone} Healing done: {HealingDone} Killing blows: {KillingBlows} PreMatchRating: {PreMatchRating} " +
+                $"PreMatchMMR: {PreMatchMMR} PostMatchRating: {PostMatchRating} PostMatchMMR: {PostMatchMMR}";
         }
+
+        uint PreMatchRating;
+        uint PreMatchMMR;
+        uint PostMatchRating;
+        uint PostMatchMMR;
     }
 
     public class ArenaTeamScore
     {
-        void Reset()
+        public void Assign(uint preMatchRating, uint postMatchRating, uint preMatchMMR, uint postMatchMMR)
         {
-            OldRating = 0;
-            NewRating = 0;
-            MatchmakerRating = 0;
+            PreMatchRating = preMatchRating;
+            PostMatchRating = postMatchRating;
+            PreMatchMMR = preMatchMMR;
+            PostMatchMMR = postMatchMMR;
         }
 
-        public void Assign(int oldRating, int newRating, uint matchMakerRating)
-        {
-            OldRating = oldRating;
-            NewRating = newRating;
-            MatchmakerRating = matchMakerRating;
-        }
-
-        public int OldRating;
-        public int NewRating;
-        public uint MatchmakerRating;
+        public uint PreMatchRating;
+        public uint PostMatchRating;
+        public uint PreMatchMMR;
+        public uint PostMatchMMR;
     }
 }
