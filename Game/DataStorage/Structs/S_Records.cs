@@ -408,7 +408,7 @@ namespace Game.DataStorage
     public sealed class SpellPowerRecord
     {
         public uint SpellID;
-        public uint ManaCost;
+        public int ManaCost;
         public float ManaCostPercentage;
         public float ManaCostPercentagePerSecond;
         public uint RequiredAura;
@@ -418,7 +418,7 @@ namespace Game.DataStorage
         public uint Id;
         public int ManaCostPerLevel;
         public int ManaCostPerSecond;
-        public uint ManaCostAdditional;                                      // Spell uses [ManaCost, ManaCost+ManaCostAdditional] power - affects tooltip parsing as multiplier on SpellEffectEntry::EffectPointsPerResource
+        public int ManaCostAdditional;                                      // Spell uses [ManaCost, ManaCost+ManaCostAdditional] power - affects tooltip parsing as multiplier on SpellEffectEntry::EffectPointsPerResource
                                                                         //   only SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, SPELL_EFFECT_WEAPON_DAMAGE, SPELL_EFFECT_NORMALIZED_WEAPON_DMG
         public uint PowerDisplayID;
         public uint UnitPowerBarID;

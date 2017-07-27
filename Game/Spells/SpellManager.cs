@@ -2692,9 +2692,6 @@ namespace Game.Entities
                     case 63137: // Summon Valiant Test (HACK: Target shouldn't be changed; summon position should be untied from spell destination)
                         spellInfo.GetEffect(0).TargetA = new SpellImplicitTargetInfo(Targets.DestDb);
                         break;
-                    case 42436: // Drink! (Brewfest)
-                        spellInfo.GetEffect(0).TargetA = new SpellImplicitTargetInfo(Targets.UnitAny);
-                        break;
                     case 52611: // Summon Skeletons
                     case 52612: // Summon Skeletons
                         spellInfo.GetEffect(0).MiscValueB = 64;
@@ -2730,16 +2727,6 @@ namespace Game.Entities
                         break;
                     case 36350: //They Must Burn Bomb Aura (self)
                         spellInfo.GetEffect(0).TriggerSpell = 36325; // They Must Burn Bomb Drop (DND)
-                        break;
-                    case 61407: // Energize Cores
-                    case 62136: // Energize Cores
-                    case 54069: // Energize Cores
-                    case 56251: // Energize Cores
-                        spellInfo.GetEffect(0).TargetA = new SpellImplicitTargetInfo(Targets.UnitSrcAreaEntry);
-                        break;
-                    case 50785: // Energize Cores
-                    case 59372: // Energize Cores
-                        spellInfo.GetEffect(0).TargetA = new SpellImplicitTargetInfo(Targets.UnitSrcAreaEnemy);
                         break;
                     case 5308: // Execute
                         spellInfo.AttributesEx3 |= SpellAttr3.CantTriggerProc;

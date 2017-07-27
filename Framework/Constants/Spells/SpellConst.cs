@@ -2316,7 +2316,8 @@ namespace Framework.Constants
         UnitUnk105 = 105, // 1 Spell
         DestChannelCaster = 106,
         UnkDestAreaUnk107 = 107, // Not Enough Info - Only Generic Spells Avalible
-        GameobjectCone = 108,
+        GameobjectCone_108 = 108,
+        GameobjectCone_109 = 109,
         UnitConeEntry110 = 110,
         Unk111 = 111,
         Unk112 = 112,
