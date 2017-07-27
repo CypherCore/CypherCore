@@ -29,7 +29,7 @@ namespace Game.Chat
     class ModifyCommand
     {
         [Command("hp", RBACPermissions.CommandModifyHp)]
-        static bool HP(StringArguments args, CommandHandler handler)
+        static bool HandleModifyHPCommand(StringArguments args, CommandHandler handler)
         {
             int hp, hpmax = 0;
             Player target = handler.getSelectedPlayerOrSelf();
@@ -44,7 +44,7 @@ namespace Game.Chat
         }
 
         [Command("mana", RBACPermissions.CommandModifyMana)]
-        static bool Mana(StringArguments args, CommandHandler handler)
+        static bool HandleModifyManaCommand(StringArguments args, CommandHandler handler)
         {
             int mana, manamax;
             Player target = handler.getSelectedPlayerOrSelf();
@@ -61,7 +61,7 @@ namespace Game.Chat
         }
 
         [Command("energy", RBACPermissions.CommandModifyEnergy)]
-        static bool Energy(StringArguments args, CommandHandler handler)
+        static bool HandleModifyEnergyCommand(StringArguments args, CommandHandler handler)
         {
             int energy, energymax;
             Player target = handler.getSelectedPlayerOrSelf();
@@ -78,7 +78,7 @@ namespace Game.Chat
         }
 
         [Command("rage", RBACPermissions.CommandModifyRage)]
-        static bool Rage(StringArguments args, CommandHandler handler)
+        static bool HandleModifyRageCommand(StringArguments args, CommandHandler handler)
         {
             int rage, ragemax;
             Player target = handler.getSelectedPlayerOrSelf();
@@ -94,7 +94,7 @@ namespace Game.Chat
         }
 
         [Command("runicpower", RBACPermissions.CommandModifyRunicpower)]
-        static bool RunicPower(StringArguments args, CommandHandler handler)
+        static bool HandleModifyRunicPowerCommand(StringArguments args, CommandHandler handler)
         {
             int rune, runemax;
             Player target = handler.getSelectedPlayerOrSelf();
@@ -231,7 +231,7 @@ namespace Game.Chat
         static bool HandleModifyTalentCommand(StringArguments args, CommandHandler handler) { return false; }
 
         [Command("scale", RBACPermissions.CommandModifyScale)]
-        static bool Scale(StringArguments args, CommandHandler handler)
+        static bool HandleModifyScaleCommand(StringArguments args, CommandHandler handler)
         {
             float Scale;
             Unit target = handler.getSelectedUnit();
@@ -245,234 +245,28 @@ namespace Game.Chat
         }
 
         [Command("mount", RBACPermissions.CommandModifyMount)]
-        static bool Mount(StringArguments args, CommandHandler handler)
+        static bool HandleModifyMountCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
 
-            ushort mId = 1147;
-            float speed = 15f;
+            string mountStr = args.NextString();
+            if (mountStr.IsEmpty())
+                return false;
 
-            uint num = args.NextUInt32();
-            switch (num)
+            if (uint.TryParse(mountStr, out uint mount))
+                return false;
+
+            if (!CliDB.CreatureDisplayInfoStorage.HasRecord(mount))
             {
-                case 1:
-                    mId = 14340;
-                    break;
-                case 2:
-                    mId = 4806;
-                    break;
-                case 3:
-                    mId = 6471;
-                    break;
-                case 4:
-                    mId = 12345;
-                    break;
-                case 5:
-                    mId = 6472;
-                    break;
-                case 6:
-                    mId = 6473;
-                    break;
-                case 7:
-                    mId = 10670;
-                    break;
-                case 8:
-                    mId = 10719;
-                    break;
-                case 9:
-                    mId = 10671;
-                    break;
-                case 10:
-                    mId = 10672;
-                    break;
-                case 11:
-                    mId = 10720;
-                    break;
-                case 12:
-                    mId = 14349;
-                    break;
-                case 13:
-                    mId = 11641;
-                    break;
-                case 14:
-                    mId = 12244;
-                    break;
-                case 15:
-                    mId = 12242;
-                    break;
-                case 16:
-                    mId = 14578;
-                    break;
-                case 17:
-                    mId = 14579;
-                    break;
-                case 18:
-                    mId = 14349;
-                    break;
-                case 19:
-                    mId = 12245;
-                    break;
-                case 20:
-                    mId = 14335;
-                    break;
-                case 21:
-                    mId = 207;
-                    break;
-                case 22:
-                    mId = 2328;
-                    break;
-                case 23:
-                    mId = 2327;
-                    break;
-                case 24:
-                    mId = 2326;
-                    break;
-                case 25:
-                    mId = 14573;
-                    break;
-                case 26:
-                    mId = 14574;
-                    break;
-                case 27:
-                    mId = 14575;
-                    break;
-                case 28:
-                    mId = 604;
-                    break;
-                case 29:
-                    mId = 1166;
-                    break;
-                case 30:
-                    mId = 2402;
-                    break;
-                case 31:
-                    mId = 2410;
-                    break;
-                case 32:
-                    mId = 2409;
-                    break;
-                case 33:
-                    mId = 2408;
-                    break;
-                case 34:
-                    mId = 2405;
-                    break;
-                case 35:
-                    mId = 14337;
-                    break;
-                case 36:
-                    mId = 6569;
-                    break;
-                case 37:
-                    mId = 10661;
-                    break;
-                case 38:
-                    mId = 10666;
-                    break;
-                case 39:
-                    mId = 9473;
-                    break;
-                case 40:
-                    mId = 9476;
-                    break;
-                case 41:
-                    mId = 9474;
-                    break;
-                case 42:
-                    mId = 14374;
-                    break;
-                case 43:
-                    mId = 14376;
-                    break;
-                case 44:
-                    mId = 14377;
-                    break;
-                case 45:
-                    mId = 2404;
-                    break;
-                case 46:
-                    mId = 2784;
-                    break;
-                case 47:
-                    mId = 2787;
-                    break;
-                case 48:
-                    mId = 2785;
-                    break;
-                case 49:
-                    mId = 2736;
-                    break;
-                case 50:
-                    mId = 2786;
-                    break;
-                case 51:
-                    mId = 14347;
-                    break;
-                case 52:
-                    mId = 14346;
-                    break;
-                case 53:
-                    mId = 14576;
-                    break;
-                case 54:
-                    mId = 9695;
-                    break;
-                case 55:
-                    mId = 9991;
-                    break;
-                case 56:
-                    mId = 6448;
-                    break;
-                case 57:
-                    mId = 6444;
-                    break;
-                case 58:
-                    mId = 6080;
-                    break;
-                case 59:
-                    mId = 6447;
-                    break;
-                case 60:
-                    mId = 4805;
-                    break;
-                case 61:
-                    mId = 9714;
-                    break;
-                case 62:
-                    mId = 6448;
-                    break;
-                case 63:
-                    mId = 6442;
-                    break;
-                case 64:
-                    mId = 14632;
-                    break;
-                case 65:
-                    mId = 14332;
-                    break;
-                case 66:
-                    mId = 14331;
-                    break;
-                case 67:
-                    mId = 8469;
-                    break;
-                case 68:
-                    mId = 2830;
-                    break;
-                case 69:
-                    mId = 2346;
-                    break;
-                default:
-                    handler.SendSysMessage(CypherStrings.NoMount);
-                    return false;
+                handler.SendSysMessage(CypherStrings.NoMount);
+                return false;
             }
 
             Player target = handler.getSelectedPlayerOrSelf();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
-
                 return false;
             }
 
@@ -480,28 +274,19 @@ namespace Game.Chat
             if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                 return false;
 
+            float speed;
+            if (!CheckModifySpeed(args, handler, target, out speed, 0.1f, 50.0f))
+                return false;
+
             NotifyModification(handler, target, CypherStrings.YouGiveMount, CypherStrings.MountGived);
-
-            target.SetUInt32Value(UnitFields.Flags, (uint)UnitFlags.Pvp);
-            target.Mount(mId);
-
-            var packet = new MoveSetSpeed(ServerOpcodes.MoveSetRunSpeed);
-            packet.MoverGUID = target.GetGUID();
-            packet.SequenceIndex = 0;
-            packet.Speed = speed;
-            target.SendMessageToSet(packet, true);
-
-            packet = new MoveSetSpeed(ServerOpcodes.MoveSetSwimSpeed);
-            packet.MoverGUID = target.GetGUID();
-            packet.SequenceIndex = 0;
-            packet.Speed = speed;
-            target.SendMessageToSet(packet, true);
-
+            target.Mount(mount);
+            target.SetSpeedRate(UnitMoveType.Run, speed);
+            target.SetSpeedRate(UnitMoveType.Flight, speed);
             return true;
         }
 
         [Command("money", RBACPermissions.CommandModifyMoney)]
-        static bool Money(StringArguments args, CommandHandler handler)
+        static bool HandleModifyMoneyCommand(StringArguments args, CommandHandler handler)
         {
             Player target = handler.getSelectedPlayerOrSelf();
             if (!target)
@@ -558,7 +343,7 @@ namespace Game.Chat
         }
 
         [Command("bit", RBACPermissions.CommandModifyBit)]
-        static bool Bit(StringArguments args, CommandHandler handler)
+        static bool HandleModifyBitCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -603,7 +388,7 @@ namespace Game.Chat
         }
 
         [Command("honor", RBACPermissions.CommandModifyHonor)]
-        static bool Honor(StringArguments args, CommandHandler handler)
+        static bool HandleModifyHonorCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -629,7 +414,7 @@ namespace Game.Chat
         }
 
         [Command("drunk", RBACPermissions.CommandModifyDrunk)]
-        static bool Drunk(StringArguments args, CommandHandler handler)
+        static bool HandleModifyDrunkCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -646,7 +431,7 @@ namespace Game.Chat
         }
 
         [Command("reputation", RBACPermissions.CommandModifyReputation)]
-        static bool Rep(StringArguments args, CommandHandler handler)
+        static bool HandleModifyRepCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
@@ -919,13 +704,13 @@ namespace Game.Chat
         class ModifySpeed
         {
             [Command("", RBACPermissions.CommandModifySpeed)]
-            static bool HandleSpeed(StringArguments args, CommandHandler handler)
+            static bool HandleModifySpeedCommand(StringArguments args, CommandHandler handler)
             {
-                return All(args, handler);
+                return HandleModifyASpeedCommand(args, handler);
             }
 
             [Command("all", RBACPermissions.CommandModifySpeedAll)]
-            static bool All(StringArguments args, CommandHandler handler)
+            static bool HandleModifyASpeedCommand(StringArguments args, CommandHandler handler)
             {
                 float allSpeed;
                 Player target = handler.getSelectedPlayerOrSelf();
@@ -942,7 +727,7 @@ namespace Game.Chat
             }
 
             [Command("swim", RBACPermissions.CommandModifySpeedSwim)]
-            static bool Swim(StringArguments args, CommandHandler handler)
+            static bool HandleModifySwimCommand(StringArguments args, CommandHandler handler)
             {
                 float swimSpeed;
                 Player target = handler.getSelectedPlayerOrSelf();
@@ -956,7 +741,7 @@ namespace Game.Chat
             }
 
             [Command("backwalk", RBACPermissions.CommandModifySpeedBackwalk)]
-            static bool BackWalk(StringArguments args, CommandHandler handler)
+            static bool HandleModifyBWalkCommand(StringArguments args, CommandHandler handler)
             {
                 float backSpeed;
                 Player target = handler.getSelectedPlayerOrSelf();
@@ -970,7 +755,7 @@ namespace Game.Chat
             }
 
             [Command("fly", RBACPermissions.CommandModifySpeedFly)]
-            static bool Fly(StringArguments args, CommandHandler handler)
+            static bool HandleModifyFlyCommand(StringArguments args, CommandHandler handler)
             {
                 float flySpeed;
                 Player target = handler.getSelectedPlayerOrSelf();
@@ -984,7 +769,7 @@ namespace Game.Chat
             }
 
             [Command("walk", RBACPermissions.CommandModifySpeedWalk)]
-            static bool Walk(StringArguments args, CommandHandler handler)
+            static bool HandleModifyWalkSpeedCommand(StringArguments args, CommandHandler handler)
             {
                 float Speed;
                 Player target = handler.getSelectedPlayerOrSelf();
