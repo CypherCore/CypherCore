@@ -527,15 +527,6 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("npc_trainer", RBACPermissions.CommandReloadNpcTrainer, true)]
-        static bool HandleReloadNpcTrainerCommand(StringArguments args, CommandHandler handler)
-        {
-            Log.outInfo(LogFilter.Server, "Re-Loading `npc_trainer` Table!");
-            Global.ObjectMgr.LoadTrainerSpell();
-            handler.SendGlobalGMSysMessage("DB table `npc_trainer` reloaded.");
-            return true;
-        }
-
         [Command("npc_vendor", RBACPermissions.CommandReloadNpcVendor, true)]
         static bool HandleReloadNpcVendorCommand(StringArguments args, CommandHandler handler)
         {
@@ -885,6 +876,17 @@ namespace Game.Chat
             return true;
         }
 
+        [Command("trainer", RBACPermissions.CommandReloadTrainer, true)]
+        static bool HandleReloadTrainerCommand(StringArguments args, CommandHandler handler)
+        {
+            Log.outInfo(LogFilter.Misc, "Re-Loading `trainer` Table!");
+            Global.ObjectMgr.LoadTrainers();
+            handler.SendGlobalGMSysMessage("DB table `trainer` reloaded.");
+            handler.SendGlobalGMSysMessage("DB table `trainer_locale` reloaded.");
+            handler.SendGlobalGMSysMessage("DB table `trainer_spell` reloaded.");
+            return true;
+        }
+
         [Command("vehicle_accessory", RBACPermissions.CommandReloadVehicleAccesory, true)]
         static bool HandleReloadVehicleAccessoryCommand(StringArguments args, CommandHandler handler)
         {
@@ -1051,7 +1053,7 @@ namespace Game.Chat
             {
                 if (args != null)                                          // will be reloaded from all_gossips
                 {
-                    HandleReloadNpcTrainerCommand(null, handler);
+                    HandleReloadTrainerCommand(null, handler);
                     HandleReloadNpcVendorCommand(null, handler);
                     HandleReloadPointsOfInterestCommand(null, handler);
                     HandleReloadSpellClickSpellsCommand(null, handler);

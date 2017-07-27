@@ -170,11 +170,11 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(Greeting);
         }
 
-        public string Greeting;
-        public int TrainerType = 0;
         public ObjectGuid TrainerGUID;
+        public int TrainerType;
         public int TrainerID = 1;
         public List<TrainerListSpell> Spells = new List<TrainerListSpell>();
+        public string Greeting;
     }
 
     public class ShowBank : ServerPacket
@@ -276,7 +276,7 @@ namespace Game.Network.Packets
 
         public ObjectGuid TrainerGUID;
         public uint SpellID;
-        public uint TrainerFailedReason;
+        public TrainerFailReason TrainerFailedReason;
     }
 
     class RequestStabledPets : ClientPacket
@@ -344,11 +344,11 @@ namespace Game.Network.Packets
 
     public class TrainerListSpell
     {
-        public int SpellID;
-        public int MoneyCost;
-        public int ReqSkillLine;
-        public int ReqSkillRank;
-        public int[] ReqAbility = new int[SharedConst.MaxTrainerspellAbilityReqs];
+        public uint SpellID;
+        public uint MoneyCost;
+        public uint ReqSkillLine;
+        public uint ReqSkillRank;
+        public uint[] ReqAbility = new uint[SharedConst.MaxTrainerspellAbilityReqs];
         public TrainerSpellState Usable;
         public byte ReqLevel;
     }

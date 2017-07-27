@@ -1034,6 +1034,9 @@ namespace Game.Entities
 
         public RestMgr GetRestMgr() { return _restMgr; }
 
+        public uint GetCurrentTrainerId() { return _currentTrainerId; }
+        public void SetCurrentTrainerId(uint trainerId) { _currentTrainerId = trainerId; }
+
         public bool IsAdvancedCombatLoggingEnabled()  { return _advancedCombatLoggingEnabled; }
         public void SetAdvancedCombatLogging(bool enabled) { _advancedCombatLoggingEnabled = enabled; }
 
@@ -1092,26 +1095,6 @@ namespace Game.Entities
             NewPet.LoadPetFromDB(this, 0, m_temporaryUnsummonedPetNumber, true);
 
             m_temporaryUnsummonedPetNumber = 0;
-        }
-        public void ResetPetTalents()
-        {
-            /* ODO: 6.x remove/update pet talents
-            // This needs another gossip option + NPC text as a confirmation.
-            // The confirmation gossip listid has the text: "Yes, please do."
-            Pet pet = GetPet();
-
-            if (!pet || pet.getPetType() != PetType.Hunter || pet.m_usedTalentCount == 0)
-                return;
-
-            CharmInfo charmInfo = pet.GetCharmInfo();
-            if (charmInfo == null)
-            {
-                Log.outError(LogFilter.Player, "Object (GUID: {0} TypeId: {1}) is considered pet-like but doesn't have a charminfo!", pet.GetGUID().ToString(), pet.GetTypeId());
-                return;
-            }
-            pet.resetTalents();
-            SendTalentsInfoData(true);
-            */
         }
 
         public bool IsPetNeedBeTemporaryUnsummoned()
@@ -2352,10 +2335,10 @@ namespace Game.Entities
 
             foreach (var menuItems in menuItemBounds)
             {
-                bool canTalk = true;
                 if (!Global.ConditionMgr.IsObjectMeetToConditions(this, source, menuItems.Conditions))
                     continue;
 
+                bool canTalk = true;
                 GameObject go = source.ToGameObject();
                 Creature creature = source.ToCreature();
                 if (creature)
@@ -2384,11 +2367,7 @@ namespace Game.Entities
                                 canTalk = false;
                             break;
                         case GossipOption.Unlearntalents:
-                            if (!creature.isCanTrainingAndResetTalentsOf(this))
-                                canTalk = false;
-                            break;
-                        case GossipOption.Unlearnpettalents:
-                            if (GetPet() == null || GetPet().getPetType() != PetType.Hunter || GetPet().m_spells.Count <= 1 || creature.GetCreatureTemplate().TrainerType != TrainerType.Pets || creature.GetCreatureTemplate().TrainerClass != Class.Hunter)
+                            if (!creature.CanResetTalents(this))
                                 canTalk = false;
                             break;
                         case GossipOption.Taxivendor:
@@ -2407,11 +2386,6 @@ namespace Game.Entities
                             canTalk = false;
                             break;
                         case GossipOption.Trainer:
-                            if (GetClass() != creature.GetCreatureTemplate().TrainerClass && creature.GetCreatureTemplate().TrainerType == TrainerType.Class)
-                                Log.outError(LogFilter.Sql, "GOSSIP_OPTION_TRAINER. Player {0} (GUID: {1}) request wrong gossip menu: {2} with wrong class: {3} at Creature: {4} (Entry: {5}, Trainer Class: {6})",
-                                GetName(), GetGUID().ToString(), menu.GetGossipMenu().GetMenuId(), GetClass(), creature.GetName(), creature.GetEntry(), creature.GetCreatureTemplate().TrainerClass);
-                            canTalk = false;
-                            break;
                         case GossipOption.Gossip:
                         case GossipOption.Spiritguide:
                         case GossipOption.Innkeeper:
@@ -2482,7 +2456,7 @@ namespace Game.Entities
                     }
 
                     menu.GetGossipMenu().AddMenuItem((int)menuItems.OptionIndex, menuItems.OptionIcon, strOptionText, 0, (uint)menuItems.OptionType, strBoxText, menuItems.BoxMoney, menuItems.BoxCoded);
-                    menu.GetGossipMenu().AddGossipMenuItemData(menuItems.OptionIndex, menuItems.ActionMenuId, menuItems.ActionPoiId);
+                    menu.GetGossipMenu().AddGossipMenuItemData(menuItems.OptionIndex, menuItems.ActionMenuId, menuItems.ActionPoiId, menuItems.TrainerId);
                 }
             }
         }
@@ -2580,17 +2554,13 @@ namespace Game.Entities
                     GetSession().SendStablePet(guid);
                     break;
                 case GossipOption.Trainer:
-                    GetSession().SendTrainerList(guid);
+                    GetSession().SendTrainerList(guid, menuItemData.TrainerId);
                     break;
                 case GossipOption.Learndualspec:
                     break;
                 case GossipOption.Unlearntalents:
                     PlayerTalkClass.SendCloseGossip();
                     SendRespecWipeConfirm(guid, GetNextResetTalentsCost());
-                    break;
-                case GossipOption.Unlearnpettalents:
-                    PlayerTalkClass.SendCloseGossip();
-                    ResetPetTalents();
                     break;
                 case GossipOption.Taxivendor:
                     GetSession().SendTaxiMenu(source.ToCreature());
@@ -5482,76 +5452,6 @@ namespace Game.Entities
             }
 
             return null;
-        }
-
-        public TrainerSpellState GetTrainerSpellState(TrainerSpell trainer_spell)
-        {
-            if (trainer_spell == null)
-                return TrainerSpellState.Red;
-
-            bool hasSpell = true;
-            for (var i = 0; i < SharedConst.MaxTrainerspellAbilityReqs; ++i)
-            {
-                if (trainer_spell.ReqAbility[i] == 0)
-                    continue;
-
-                if (!HasSpell(trainer_spell.ReqAbility[i]))
-                {
-                    hasSpell = false;
-                    break;
-                }
-            }
-            // known spell
-            if (hasSpell)
-                return TrainerSpellState.Gray;
-
-            // check skill requirement
-            if (trainer_spell.ReqSkillLine != 0 && GetBaseSkillValue((SkillType)trainer_spell.ReqSkillLine) < trainer_spell.ReqSkillRank)
-                return TrainerSpellState.Red;
-
-            // check level requirement
-            if (getLevel() < trainer_spell.ReqLevel)
-                return TrainerSpellState.Red;
-
-            for (var i = 0; i < SharedConst.MaxTrainerspellAbilityReqs; ++i)
-            {
-                if (trainer_spell.ReqAbility[i] == 0)
-                    continue;
-
-                // check race/class requirement
-                if (!IsSpellFitByClassAndRace(trainer_spell.ReqAbility[i]))
-                    return TrainerSpellState.Red;
-
-                uint prevSpell = Global.SpellMgr.GetPrevSpellInChain(trainer_spell.ReqAbility[i]);
-                if (prevSpell != 0)
-                {
-                    // check prev.rank requirement
-                    if (!HasSpell(prevSpell))
-                        return TrainerSpellState.Red;
-                }
-
-                var spellsRequired = Global.SpellMgr.GetSpellsRequiredForSpellBounds(trainer_spell.ReqAbility[i]);
-                foreach (var spellId in spellsRequired)
-                {
-                    // check additional spell requirement
-                    if (!HasSpell(spellId))
-                        return TrainerSpellState.Red;
-                }
-            }
-
-            // check primary prof. limit
-            // first rank of primary profession spell when there are no proffesions avalible is disabled
-            for (var i = 0; i < SharedConst.MaxTrainerspellAbilityReqs; ++i)
-            {
-                if (trainer_spell.ReqAbility[i] == 0)
-                    continue;
-
-                SpellInfo learnedSpellInfo = Global.SpellMgr.GetSpellInfo(trainer_spell.ReqAbility[i]);
-                if (learnedSpellInfo != null && learnedSpellInfo.IsPrimaryProfessionFirstRank() && (GetFreePrimaryProfessionPoints() == 0))
-                    return TrainerSpellState.GreenDisabled;
-            }
-
-            return TrainerSpellState.Green;
         }
 
         public void SendInitialPacketsBeforeAddToMap()

@@ -702,17 +702,17 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading GameTeleports...");
             Global.ObjectMgr.LoadGameTele();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading Trainers...");
+            Global.ObjectMgr.LoadTrainers();                                // must be after load CreatureTemplate
+
             Log.outInfo(LogFilter.ServerLoading, "Loading Gossip menu...");
             Global.ObjectMgr.LoadGossipMenu();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Gossip menu options...");
-            Global.ObjectMgr.LoadGossipMenuItems();
+            Global.ObjectMgr.LoadGossipMenuItems();                         // must be after LoadTrainers
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Vendors...");
-            Global.ObjectMgr.LoadVendors();                                   // must be after load CreatureTemplate and ItemTemplate
-
-            Log.outInfo(LogFilter.ServerLoading, "Loading Trainers...");
-            Global.ObjectMgr.LoadTrainerSpell();
+            Global.ObjectMgr.LoadVendors();                                  // must be after load CreatureTemplate and ItemTemplate
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Waypoints...");
             Global.WaypointMgr.Load();

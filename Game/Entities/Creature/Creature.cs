@@ -860,11 +860,9 @@ namespace Game.Entities
             return true;
         }
 
-        public bool isCanTrainingAndResetTalentsOf(Player player)
+        public bool CanResetTalents(Player player)
         {
-            return player.getLevel() >= 10
-                && GetCreatureTemplate().TrainerType == TrainerType.Class
-                && player.GetClass() == GetCreatureTemplate().TrainerClass;
+            return player.getLevel() >= 15 && player.GetClass() == GetCreatureTemplate().TrainerClass;
         }
 
         public void SetTextRepeatId(byte textGroup, byte id)
@@ -2455,11 +2453,6 @@ namespace Game.Entities
             vCount.count = vCount.count > used_count ? vCount.count - used_count : 0;
             vCount.lastIncrementTime = ptime;
             return vCount.count;
-        }
-
-        public TrainerSpellData GetTrainerSpells()
-        {
-            return Global.ObjectMgr.GetNpcTrainerSpells(GetEntry());
         }
 
         public override string GetName(LocaleConstant locale_idx = LocaleConstant.enUS)

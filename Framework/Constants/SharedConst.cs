@@ -571,17 +571,22 @@ namespace Framework.Constants
 
     public enum TrainerType
     {
-        Class = 0,
-        Mounts = 1,
+        None = 0,
+        Talent = 1,
         Tradeskills = 2,
         Pets = 3
     }
     public enum TrainerSpellState
     {
-        Gray = 0,
-        Green = 1,
-        Red = 2,
-        GreenDisabled = 10
+        Known = 0,
+        Available = 1,
+        Unavailable = 2,
+    }
+
+    public enum TrainerFailReason
+    {
+        Unavailable = 0,
+        NotEnoughMoney = 1
     }
 
     public enum ChatMsg : uint

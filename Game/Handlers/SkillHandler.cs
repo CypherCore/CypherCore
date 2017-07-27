@@ -68,6 +68,12 @@ namespace Game
                 return;
             }
 
+            if (!unit.CanResetTalents(_player))
+                return;
+
+            if (!_player.PlayerTalkClass.GetGossipMenu().HasMenuItemType((uint)GossipOption.Unlearntalents))
+                return;
+
             // remove fake death
             if (GetPlayer().HasUnitState(UnitState.Died))
                 GetPlayer().RemoveAurasByType(AuraType.FeignDeath);

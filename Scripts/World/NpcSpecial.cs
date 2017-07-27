@@ -1700,21 +1700,6 @@ namespace Scripts.World.NpcSpecial
     }
 
     [Script]
-    class npc_pet_trainer : ScriptedAI
-    {
-        public npc_pet_trainer(Creature creature) : base(creature) { }
-
-        public override void sGossipSelect(Player player, uint menuId, uint gossipListId)
-        {
-            if (menuId == GossipMenus.MenuIdPetUnlearn && gossipListId == GossipMenus.OptionIdPleaseDo)
-            {
-                player.ResetPetTalents();
-                player.CLOSE_GOSSIP_MENU();
-            }
-        }
-    }
-
-    [Script]
     class npc_experience : CreatureScript
     {
         public npc_experience() : base("npc_experience") { }

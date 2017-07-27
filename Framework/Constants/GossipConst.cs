@@ -36,7 +36,7 @@ namespace Framework.Constants
         Stablepet = 14,                   //Unit_Npc_Flag_Stable              (4194304)
         Armorer = 15,                   //Unit_Npc_Flag_Armorer             (4096)
         Unlearntalents = 16,                   //Unit_Npc_Flag_Trainer             (16) (Bonus Option For Trainer)
-        Unlearnpettalents = 17,                   //Unit_Npc_Flag_Trainer             (16) (Bonus Option For Trainer)
+        Unlearnpettalents_Old = 17,     // deprecated
         Learndualspec = 18,                   //Unit_Npc_Flag_Trainer             (16) (Bonus Option For Trainer)
         Outdoorpvp = 19,                   //Added By Code (Option For Outdoor Pvp Creatures)
         Max

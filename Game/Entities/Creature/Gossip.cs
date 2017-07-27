@@ -30,22 +30,22 @@ namespace Game.Misc
 {
     public class GossipMenu
     {
-        public void AddMenuItem(int menuItemId, GossipOptionIcon icon, string message, uint sender, uint action, string boxMessage, uint boxMoney, bool coded = false)
+        public uint AddMenuItem(int optionIndex, GossipOptionIcon icon, string message, uint sender, uint action, string boxMessage, uint boxMoney, bool coded = false)
         {
             Contract.Assert(_menuItems.Count <= SharedConst.MaxGossipMenuItems);
 
             // Find a free new id - script case
-            if (menuItemId == -1)
+            if (optionIndex == -1)
             {
-                menuItemId = 0;
+                optionIndex = 0;
                 if (!_menuItems.Empty())
                 {
                     foreach (var item in _menuItems)
                     {
-                        if (item.Key > menuItemId)
+                        if (item.Key > optionIndex)
                             break;
 
-                        menuItemId = (int)item.Key + 1;
+                        optionIndex = (int)item.Key + 1;
                     }
                 }
             }
@@ -60,7 +60,8 @@ namespace Game.Misc
             menuItem.BoxMessage = boxMessage;
             menuItem.BoxMoney = boxMoney;
 
-            _menuItems[(uint)menuItemId] = menuItem;
+            _menuItems[(uint)optionIndex] = menuItem;
+            return (uint)optionIndex;
         }
 
         /// <summary>
@@ -124,18 +125,20 @@ namespace Game.Misc
                 }
 
                 // Add menu item with existing method. Menu item id -1 is also used in ADD_GOSSIP_ITEM macro.
-                AddMenuItem(-1, item.OptionIcon, strOptionText, sender, action, strBoxText, item.BoxMoney, item.BoxCoded);
+                uint optionIndex = AddMenuItem(-1, item.OptionIcon, strOptionText, sender, action, strBoxText, item.BoxMoney, item.BoxCoded);
+                AddGossipMenuItemData(optionIndex, item.ActionMenuId, item.ActionPoiId, item.TrainerId);
             }
         }
 
-        public void AddGossipMenuItemData(uint menuItemId, uint gossipActionMenuId, uint gossipActionPoi)
+        public void AddGossipMenuItemData(uint optionIndex, uint gossipActionMenuId, uint gossipActionPoi, uint trainerId)
         {
             GossipMenuItemData itemData = new GossipMenuItemData();
 
             itemData.GossipActionMenuId = gossipActionMenuId;
             itemData.GossipActionPoi = gossipActionPoi;
+            itemData.TrainerId = trainerId;
 
-            _menuItemData[menuItemId] = itemData;
+            _menuItemData[optionIndex] = itemData;
         }
 
         public uint GetMenuItemSender(uint menuItemId)
@@ -160,6 +163,15 @@ namespace Game.Misc
                 return _menuItems.LookupByKey(menuItemId).IsCoded;
             else
                 return false;
+        }
+
+        public bool HasMenuItemType(uint optionType)
+        {
+            foreach (var menuItemPair in _menuItems)
+                if (menuItemPair.Value.OptionType == optionType)
+                    return true;
+
+            return false;
         }
 
         public void ClearMenu()
@@ -796,6 +808,7 @@ namespace Game.Misc
     {
         public uint GossipActionMenuId;  // MenuId of the gossip triggered by this action
         public uint GossipActionPoi;
+        public uint TrainerId;
     }
 
     public struct NpcTextData
@@ -829,6 +842,7 @@ namespace Game.Misc
         public uint BoxMoney;
         public string BoxText;
         public uint BoxBroadcastTextId;
+        public uint TrainerId;
         public List<Condition> Conditions = new List<Condition>();
     }
 

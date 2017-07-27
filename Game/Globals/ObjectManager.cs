@@ -631,11 +631,16 @@ namespace Game
             uint oldMSTime = Time.GetMSTime();
 
             gossipMenuItemsStorage.Clear();
-
-            SQLResult result = DB.World.Query(
-                //      0        1   2            3            4                      5          6                   7               8              9          10         11        12
-                "SELECT menu_id, id, option_icon, option_text, OptionBroadcastTextID, option_id, npc_option_npcflag, action_menu_id, action_poi_id, box_coded, box_money, box_text, BoxBroadcastTextID " +
-                "FROM gossip_menu_option ORDER BY menu_id, id");
+            
+            //                                          0         1              2             3             4                        5             6
+            SQLResult result = DB.World.Query("SELECT o.MenuId, o.OptionIndex, o.OptionIcon, o.OptionText, o.OptionBroadcastTextId, o.OptionType, o.OptionNpcflag, " +
+                //   7                8              9            10           11          12                     13
+                "oa.ActionMenuId, oa.ActionPoiId, ob.BoxCoded, ob.BoxMoney, ob.BoxText, ob.BoxBroadcastTextId, ot.TrainerId " +
+                "FROM gossip_menu_option o " +
+                "LEFT JOIN gossip_menu_option_action oa ON o.MenuId = oa.MenuId AND o.OptionIndex = oa.OptionIndex " +
+                "LEFT JOIN gossip_menu_option_box ob ON o.MenuId = ob.MenuId AND o.OptionIndex = ob.OptionIndex " +
+                "LEFT JOIN gossip_menu_option_trainer ot ON o.MenuId = ot.MenuId AND o.OptionIndex = ot.OptionIndex " +
+                "ORDER BY o.MenuId, o.OptionIndex");
 
             if (result.IsEmpty())
             {
@@ -650,7 +655,7 @@ namespace Game
 
                 gMenuItem.MenuId = result.Read<uint>(0);
                 gMenuItem.OptionIndex = result.Read<uint>(1);
-                gMenuItem.OptionIcon = (GossipOptionIcon)result.Read<uint>(2);
+                gMenuItem.OptionIcon = (GossipOptionIcon)result.Read<byte>(2);
                 gMenuItem.OptionText = result.Read<string>(3);
                 gMenuItem.OptionBroadcastTextId = result.Read<uint>(4);
                 gMenuItem.OptionType = (GossipOption)result.Read<uint>(5);
@@ -661,10 +666,11 @@ namespace Game
                 gMenuItem.BoxMoney = result.Read<uint>(10);
                 gMenuItem.BoxText = result.Read<string>(11);
                 gMenuItem.BoxBroadcastTextId = result.Read<uint>(12);
+                gMenuItem.TrainerId = result.Read<uint>(13);
 
                 if (gMenuItem.OptionIcon >= GossipOptionIcon.Max)
                 {
-                    Log.outError(LogFilter.Sql, "Table gossip_menu_option for menu {0}, id {1} has unknown icon id {2}. Replacing with GOSSIPICONCHAT", gMenuItem.MenuId, gMenuItem.OptionIndex, gMenuItem.OptionIcon);
+                    Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} has unknown icon id {gMenuItem.OptionIcon}. Replacing with GOSSIPICONCHAT");
                     gMenuItem.OptionIcon = GossipOptionIcon.Chat;
                 }
 
@@ -672,17 +678,17 @@ namespace Game
                 {
                     if (!CliDB.BroadcastTextStorage.ContainsKey(gMenuItem.OptionBroadcastTextId))
                     {
-                        Log.outError(LogFilter.Sql, "Table `gossip_menu_option` for menu {0}, id {1} has non-existing or incompatible OptionBroadcastTextId {2}, ignoring.", gMenuItem.MenuId, gMenuItem.OptionIndex, gMenuItem.OptionBroadcastTextId);
+                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} has non-existing or incompatible OptionBroadcastTextId {gMenuItem.OptionBroadcastTextId}, ignoring.");
                         gMenuItem.OptionBroadcastTextId = 0;
                     }
                 }
 
                 if (gMenuItem.OptionType >= GossipOption.Max)
-                    Log.outError(LogFilter.Sql, "Table gossip_menu_option for menu {0}, id {1} has unknown option id {2}. Option will not be used", gMenuItem.MenuId, gMenuItem.OptionIndex, gMenuItem.OptionType);
+                    Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} has unknown option id {gMenuItem.OptionType}. Option will not be used");
 
                 if (gMenuItem.ActionPoiId != 0 && GetPointOfInterest(gMenuItem.ActionPoiId) == null)
                 {
-                    Log.outError(LogFilter.Sql, "Table gossip_menu_option for menu {0}, id {1} use non-existing actionpoiid {2}, ignoring", gMenuItem.MenuId, gMenuItem.OptionIndex, gMenuItem.ActionPoiId);
+                    Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} use non-existing actionpoiid {gMenuItem.ActionPoiId}, ignoring");
                     gMenuItem.ActionPoiId = 0;
                 }
 
@@ -690,9 +696,15 @@ namespace Game
                 {
                     if (!CliDB.BroadcastTextStorage.ContainsKey(gMenuItem.BoxBroadcastTextId))
                     {
-                        Log.outError(LogFilter.Sql, "Table `gossip_menu_option` for menu {0}, id {1} has non-existing or incompatible BoxBroadcastTextId {2}, ignoring.", gMenuItem.MenuId, gMenuItem.OptionIndex, gMenuItem.BoxBroadcastTextId);
+                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} has non-existing or incompatible BoxBroadcastTextId {gMenuItem.BoxBroadcastTextId}, ignoring.");
                         gMenuItem.BoxBroadcastTextId = 0;
                     }
+                }
+
+                if (gMenuItem.TrainerId != 0 && GetTrainer(gMenuItem.TrainerId) == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `gossip_menu_option_trainer` for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} use non-existing TrainerId {gMenuItem.TrainerId}, ignoring");
+                    gMenuItem.TrainerId = 0;
                 }
 
                 gossipMenuItemsStorage.Add(gMenuItem.MenuId, gMenuItem);
@@ -1703,15 +1715,15 @@ namespace Game
                 "modelid4, name, femaleName, subname, IconName, gossip_menu_id, minlevel, maxlevel, HealthScalingExpansion, RequiredExpansion, VignetteID, " +
                 //20       21       22          23         24     25    26         27              28               29            30
                 "faction, npcflag, speed_walk, speed_run, scale, rank, dmgschool, BaseAttackTime, RangeAttackTime, BaseVariance, RangeVariance, " +
-                //31          32          33           34           35            36      37            38             39            40
-                "unit_class, unit_flags, unit_flags2, unit_flags3, dynamicflags, family, trainer_type, trainer_class, trainer_race, type, " +
-                //41          42           43      44              45        46           47           48           49           50           51
+                //31          32          33           34           35            36      37             38
+                "unit_class, unit_flags, unit_flags2, unit_flags3, dynamicflags, family, trainer_class, type, " +
+                //39          40           41      42              43        44           45           46           47           48           49
                 "type_flags, type_flags2, lootid, pickpocketloot, skinloot, resistance1, resistance2, resistance3, resistance4, resistance5, resistance6, " +
-                //52      53      54      55      56      57      58      59      60         61       62       63      64
+                //50      51      52      53      54      55      56      57      58         59       60       61      62
                 "spell1, spell2, spell3, spell4, spell5, spell6, spell7, spell8, VehicleId, mingold, maxgold, AIName, MovementType, " +
-                //65           66           67              68                   69            70                 71             72              73
+                //63           64           65              66                   67            68                 69             70              71
                 "InhabitType, HoverHeight, HealthModifier, HealthModifierExtra, ManaModifier, ManaModifierExtra, ArmorModifier, DamageModifier, ExperienceModifier, " +
-                //74            75          76           77                    78           79
+                //72            73          74           75                    76           77
                 "RacialLeader, movementId, RegenHealth, mechanic_immune_mask, flags_extra, ScriptName FROM creature_template");
 
             if (result.IsEmpty())
@@ -1777,42 +1789,40 @@ namespace Game
             creature.UnitFlags3 = fields.Read<uint>(34);
             creature.DynamicFlags = fields.Read<uint>(35);
             creature.Family = (CreatureFamily)fields.Read<byte>(36);
-            creature.TrainerType = (TrainerType)fields.Read<byte>(37);
-            creature.TrainerClass = (Class)fields.Read<byte>(38);
-            creature.TrainerRace = (Race)fields.Read<byte>(39);
-            creature.CreatureType = (CreatureType)fields.Read<uint>(40);
-            creature.TypeFlags = (CreatureTypeFlags)fields.Read<uint>(41);
-            creature.TypeFlags2 = fields.Read<uint>(42);
-            creature.LootId = fields.Read<uint>(43);
-            creature.PickPocketId = fields.Read<uint>(44);
-            creature.SkinLootId = fields.Read<uint>(45);
+            creature.TrainerClass = (Class)fields.Read<byte>(37);
+            creature.CreatureType = (CreatureType)fields.Read<uint>(38);
+            creature.TypeFlags = (CreatureTypeFlags)fields.Read<uint>(39);
+            creature.TypeFlags2 = fields.Read<uint>(40);
+            creature.LootId = fields.Read<uint>(41);
+            creature.PickPocketId = fields.Read<uint>(42);
+            creature.SkinLootId = fields.Read<uint>(43);
 
             for (var i = (int)SpellSchools.Holy; i < (int)SpellSchools.Max; ++i)
-                creature.Resistance[i] = fields.Read<int>(46 + i - 1);
+                creature.Resistance[i] = fields.Read<int>(44 + i - 1);
 
             for (var i = 0; i < SharedConst.MaxCreatureSpells; ++i)
-                creature.Spells[i] = fields.Read<uint>(52 + i);
+                creature.Spells[i] = fields.Read<uint>(50 + i);
 
-            creature.VehicleId = fields.Read<uint>(60);
-            creature.MinGold = fields.Read<uint>(61);
-            creature.MaxGold = fields.Read<uint>(62);
-            creature.AIName = fields.Read<string>(63);
-            creature.MovementType = fields.Read<uint>(64);
-            creature.InhabitType = (InhabitType)fields.Read<uint>(65);
-            creature.HoverHeight = fields.Read<float>(66);
-            creature.ModHealth = fields.Read<float>(67);
-            creature.ModHealthExtra = fields.Read<float>(68);
-            creature.ModMana = fields.Read<float>(69);
-            creature.ModManaExtra = fields.Read<float>(70);
-            creature.ModArmor = fields.Read<float>(71);
-            creature.ModDamage = fields.Read<float>(72);
-            creature.ModExperience = fields.Read<float>(73);
-            creature.RacialLeader = fields.Read<bool>(74);
-            creature.MovementId = fields.Read<uint>(75);
-            creature.RegenHealth = fields.Read<bool>(76);
-            creature.MechanicImmuneMask = fields.Read<uint>(77);
-            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(78);
-            creature.ScriptID = GetScriptId(fields.Read<string>(79));
+            creature.VehicleId = fields.Read<uint>(58);
+            creature.MinGold = fields.Read<uint>(59);
+            creature.MaxGold = fields.Read<uint>(60);
+            creature.AIName = fields.Read<string>(61);
+            creature.MovementType = fields.Read<uint>(62);
+            creature.InhabitType = (InhabitType)fields.Read<uint>(63);
+            creature.HoverHeight = fields.Read<float>(64);
+            creature.ModHealth = fields.Read<float>(65);
+            creature.ModHealthExtra = fields.Read<float>(66);
+            creature.ModMana = fields.Read<float>(67);
+            creature.ModManaExtra = fields.Read<float>(68);
+            creature.ModArmor = fields.Read<float>(69);
+            creature.ModDamage = fields.Read<float>(70);
+            creature.ModExperience = fields.Read<float>(71);
+            creature.RacialLeader = fields.Read<bool>(72);
+            creature.MovementId = fields.Read<uint>(73);
+            creature.RegenHealth = fields.Read<bool>(74);
+            creature.MechanicImmuneMask = fields.Read<uint>(75);
+            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(76);
+            creature.ScriptID = GetScriptId(fields.Read<string>(77));
 
             creatureTemplateStorage.Add(entry, creature);
         }
@@ -2382,18 +2392,6 @@ namespace Game
                     continue;
                 }
 
-                if (cInfo.TrainerRace != difficultyInfo.TrainerRace)
-                {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has different `trainer_race` in difficulty {1} mode (Entry: {2}).", cInfo.Entry, diff + 1, cInfo.DifficultyEntry[diff]);
-                    continue;
-                }
-
-                if (cInfo.TrainerType != difficultyInfo.TrainerType)
-                {
-                    Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has different `trainer_type` in difficulty {1} mode (Entry: {2}).", cInfo.Entry, diff + 1, cInfo.DifficultyEntry[diff]);
-                    continue;
-                }
-
                 if (cInfo.CreatureType != difficultyInfo.CreatureType)
                 {
                     Log.outError(LogFilter.Sql, "Creature (Entry: {0}, type: {1}) has different `type` in difficulty {2} mode (Entry: {3}, type: {4}).",
@@ -2550,9 +2548,6 @@ namespace Game
 
             if (cInfo.RangeAttackTime == 0)
                 cInfo.RangeAttackTime = SharedConst.BaseAttackTime;
-
-            if (cInfo.Npcflag.HasAnyFlag(NPCFlags.Trainer) && (uint)cInfo.TrainerType >= 4)
-                Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has wrong trainer type {1}.", cInfo.Entry, cInfo.TrainerType);
 
             if (cInfo.SpeedWalk == 0.0f)
             {
@@ -2906,110 +2901,121 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} npc texts in {1} ms", _npcTextStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public void LoadTrainerSpell()
+        public void LoadTrainers()
         {
-            var time = Time.GetMSTime();
-            SQLResult result = DB.World.Query("SELECT b.ID, a.SpellID, a.MoneyCost, a.ReqSkillLine, a.ReqSkillRank, a.Reqlevel, a.Index FROM npc_trainer AS a " +
-                "INNER JOIN npc_trainer AS b ON a.ID = -(b.SpellID) UNION SELECT * FROM npc_trainer WHERE SpellID > 0");
+            uint oldMSTime = Time.GetMSTime();
 
-            if (result.IsEmpty())
+            // For reload case
+            _trainers.Clear();
+
+            MultiMap<uint, TrainerSpell> spellsByTrainer = new MultiMap<uint, TrainerSpell>();
+            SQLResult trainerSpellsResult = DB.World.Query("SELECT TrainerId, SpellId, MoneyCost, ReqSkillLine, ReqSkillRank, ReqAbility1, ReqAbility2, ReqAbility3, ReqLevel FROM trainer_spell");
+            if (!trainerSpellsResult.IsEmpty())
             {
-                Log.outError(LogFilter.ServerLoading, "Loaded 0 Trainers. DB table `npc_trainer` is empty!");
-                return;
-            }
-
-            uint count = 0;
-            do
-            {
-                uint ID = result.Read<uint>(0);
-                uint SpellID = result.Read<uint>(1);
-                uint MoneyCost = result.Read<uint>(2);
-                uint ReqSkillLine = result.Read<ushort>(3);
-                uint ReqSkillRank = result.Read<ushort>(4);
-                uint Reqlevel = result.Read<byte>(5);
-                uint Index = result.Read<byte>(6);
-
-                AddSpellToTrainer(ID, SpellID, MoneyCost, ReqSkillLine, ReqSkillRank, Reqlevel, Index);
-                count++;
-            } while (result.NextRow());
-
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Trainers in {1} ms", count, Time.GetMSTimeDiffToNow(time));
-        }
-        void AddSpellToTrainer(uint ID, uint SpellID, uint MoneyCost, uint ReqSkillLine, uint ReqSkillRank, uint Reqlevel, uint Index)
-        {
-            if (ID >= 200000)
-                return;
-
-            CreatureTemplate cInfo = GetCreatureTemplate(ID);
-            if (cInfo == null)
-            {
-                Log.outError(LogFilter.Sql, "Table `npc_trainer` contains entries for a non-existing creature template (ID: {0}), ignoring", ID);
-                return;
-            }
-
-            if (!cInfo.Npcflag.HasAnyFlag(NPCFlags.Trainer))
-            {
-                Log.outError(LogFilter.Sql, "Table `npc_trainer` contains entries for a creature template (ID: {0}) without trainer flag, ignoring", ID);
-                return;
-            }
-
-            SpellInfo spellinfo = Global.SpellMgr.GetSpellInfo(SpellID);
-            if (spellinfo == null)
-            {
-                Log.outError(LogFilter.Sql, "Table `npc_trainer` contains an ID ({0}) for a non-existing spell (Spell: {1}), ignoring", ID, SpellID);
-                return;
-            }
-
-            if (!Global.SpellMgr.IsSpellValid(spellinfo))
-            {
-                Log.outError(LogFilter.Sql, "Table `npc_trainer` contains an ID ({0}) for a broken spell (Spell: {1}), ignoring", ID, SpellID);
-                return;
-            }
-
-            if (cacheTrainerSpellStorage.LookupByKey(ID) == null)
-                cacheTrainerSpellStorage.Add(ID, new TrainerSpellData());
-
-            TrainerSpellData data = cacheTrainerSpellStorage[ID];
-            TrainerSpell trainerSpell = new TrainerSpell();
-            trainerSpell.SpellID = SpellID;
-            trainerSpell.MoneyCost = MoneyCost;
-            trainerSpell.ReqSkillLine = ReqSkillLine;
-            trainerSpell.ReqSkillRank = ReqSkillRank;
-            trainerSpell.ReqLevel = Reqlevel;
-            trainerSpell.Index = Index;
-
-            if (trainerSpell.ReqLevel == 0)
-                trainerSpell.ReqLevel = spellinfo.SpellLevel;
-
-            // calculate learned spell for profession case when stored cast-spell
-            trainerSpell.ReqAbility[0] = SpellID;
-
-            foreach (SpellEffectInfo effect in spellinfo.GetEffectsForDifficulty(Difficulty.None))
-            {
-                if (effect == null || effect.Effect != SpellEffectName.LearnSpell)
-                    continue;
-
-                if (trainerSpell.ReqAbility[0] == SpellID)
-                    trainerSpell.ReqAbility[0] = 0;
-                // player must be able to cast spell on himself
-                if (effect.TargetA.GetTarget() != 0 && effect.TargetA.GetTarget() != Targets.UnitAlly
-                    && effect.TargetA.GetTarget() != Targets.UnitAny && effect.TargetA.GetTarget() != Targets.UnitCaster)
+                do
                 {
-                    Log.outError(LogFilter.Sql, "Table `npc_trainer` has spell {0} for trainer entry {1} with learn effect which has incorrect target type, ignoring learn effect!", SpellID, ID);
-                    continue;
-                }
+                    TrainerSpell spell = new TrainerSpell();
+                    uint trainerId = trainerSpellsResult.Read<uint>(0);
+                    spell.SpellId = trainerSpellsResult.Read<uint>(1);
+                    spell.MoneyCost = trainerSpellsResult.Read<uint>(2);
+                    spell.ReqSkillLine = trainerSpellsResult.Read<uint>(3);
+                    spell.ReqSkillRank = trainerSpellsResult.Read<uint>(4);
+                    spell.ReqAbility[0] = trainerSpellsResult.Read<uint>(5);
+                    spell.ReqAbility[1] = trainerSpellsResult.Read<uint>(6);
+                    spell.ReqAbility[2] = trainerSpellsResult.Read<uint>(7);
+                    spell.ReqLevel = trainerSpellsResult.Read<byte>(8);
 
-                trainerSpell.ReqAbility[effect.EffectIndex] = effect.TriggerSpell;
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell.SpellId);
+                    if (spellInfo == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `trainer_spell` references non-existing spell (SpellId: {spell.SpellId}) for TrainerId {trainerId}, ignoring");
+                        continue;
+                    }
 
-                if (trainerSpell.ReqAbility[effect.EffectIndex] != 0)
-                {
-                    SpellInfo learnedSpellInfo = Global.SpellMgr.GetSpellInfo(trainerSpell.ReqAbility[effect.EffectIndex]);
-                    if (learnedSpellInfo != null && learnedSpellInfo.IsProfession())
-                        data.trainerType = 2;
-                }
+                    if (spell.ReqSkillLine != 0 && !CliDB.SkillLineStorage.ContainsKey(spell.ReqSkillLine))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `trainer_spell` references non-existing skill (ReqSkillLine: {spell.ReqSkillLine}) for TrainerId {spell.SpellId} and SpellId {trainerId}, ignoring");
+                        continue;
+                    }
+
+                    bool allReqValid = true;
+                    for (var i = 0; i < spell.ReqAbility.Count; ++i)
+                    {
+                        uint requiredSpell = spell.ReqAbility[i];
+                        if (requiredSpell != 0 && !Global.SpellMgr.HasSpellInfo(requiredSpell))
+                        {
+                            Log.outError(LogFilter.Sql, $"Table `trainer_spell` references non-existing spell (ReqAbility {i + 1}: {requiredSpell}) for TrainerId {spell.SpellId} and SpellId {trainerId}, ignoring");
+                            allReqValid = false;
+                        }
+                    }
+
+                    if (!allReqValid)
+                        continue;
+
+                    foreach (SpellEffectInfo spellEffect in spellInfo.GetEffectsForDifficulty(Difficulty.None))
+                    {
+                        if (spellEffect.IsEffect(SpellEffectName.LearnSpell))
+                        {
+                            spell.CastSpellId = spell.SpellId;
+                            spell.SpellId = spellEffect.TriggerSpell;
+                            break;
+                        }
+                    }
+
+                    spellsByTrainer.Add(trainerId, spell);
+
+                } while (trainerSpellsResult.NextRow());
             }
-            data.spellList[SpellID] = trainerSpell;
-            return;
+
+            SQLResult trainersResult = DB.World.Query("SELECT Id, Type, Greeting FROM trainer");
+            if (!trainersResult.IsEmpty())
+            {
+                do
+                {
+                    uint trainerId = trainersResult.Read<uint>(0);
+                    TrainerType trainerType = (TrainerType)trainersResult.Read<byte>(1);
+                    string greeting = trainersResult.Read<string>(2);
+                    List<TrainerSpell> spells = new List<TrainerSpell>();
+                    var spellList = spellsByTrainer.LookupByKey(trainerId);
+                    if (spellList != null)
+                    {
+                        spells = spellList;
+                        spellsByTrainer.Remove(trainerId);
+                    }
+
+                    _trainers.Add(trainerId, new Trainer(trainerId, trainerType, greeting, spells));
+
+                } while (trainersResult.NextRow());
+            }
+
+            foreach (var unusedSpells in spellsByTrainer)
+            {
+                Log.outError(LogFilter.Sql, $"Table `trainer_spell` references non-existing trainer (TrainerId: {unusedSpells.Key}) for SpellId {unusedSpells.Value.SpellId}, ignoring");
+
+            }
+
+            SQLResult trainerLocalesResult = DB.World.Query("SELECT Id, locale, Greeting_lang FROM trainer_locale");
+            if (!trainerLocalesResult.IsEmpty())
+            {
+                do
+                {
+                    uint trainerId = trainerLocalesResult.Read<uint>(0);
+                    string localeName = trainerLocalesResult.Read<string>(1);
+
+                    LocaleConstant locale = Extensions.ToEnum<LocaleConstant>(localeName);
+                    if (locale == LocaleConstant.enUS)
+                        continue;
+
+                    Trainer trainer = _trainers.LookupByKey(trainerId);
+                    if (trainer != null)
+                        trainer.AddGreetingLocale(locale, trainerLocalesResult.Read<String>(2));
+                    else
+                        Log.outError(LogFilter.Sql, $"Table `trainer_locale` references non-existing trainer (TrainerId: {trainerId}) for locale {localeName}, ignoring");
+
+                } while (trainerLocalesResult.NextRow());
+            }
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_trainers.Count} Trainers in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
         public void LoadVendors()
         {
@@ -3487,10 +3493,6 @@ namespace Game
         public CreatureModelInfo GetCreatureModelInfo(uint modelId)
         {
             return creatureModelStorage.LookupByKey(modelId);
-        }
-        public TrainerSpellData GetNpcTrainerSpells(uint entry)
-        {
-            return cacheTrainerSpellStorage.LookupByKey(entry);
         }
         public NpcText GetNpcText(uint textId)
         {
@@ -4584,6 +4586,10 @@ namespace Game
         public Dictionary<uint, ItemTemplate> GetItemTemplates()
         {
             return ItemTemplateStorage;
+        }
+        public Trainer GetTrainer(uint trainerId)
+        {
+            return _trainers.LookupByKey(trainerId);
         }
         public void AddVendorItem(uint entry, uint item, int maxcount, uint incrtime, uint extendedCost, ItemVendorType type, bool persist = true)
         {
@@ -9095,7 +9101,7 @@ namespace Game
         Dictionary<ObjectGuid, ObjectGuid> linkedRespawnStorage = new Dictionary<ObjectGuid, ObjectGuid>();
         Dictionary<uint, CreatureBaseStats> creatureBaseStatsStorage = new Dictionary<uint, CreatureBaseStats>();
         Dictionary<uint, VendorItemData> cacheVendorItemStorage = new Dictionary<uint, VendorItemData>();
-        Dictionary<uint, TrainerSpellData> cacheTrainerSpellStorage = new Dictionary<uint, TrainerSpellData>();
+        Dictionary<uint, Trainer> _trainers = new Dictionary<uint, Trainer>();
         List<uint>[] _difficultyEntries = new List<uint>[SharedConst.MaxCreatureDifficulties]; // already loaded difficulty 1 value in creatures, used in CheckCreatureTemplate
         List<uint>[] _hasDifficultyEntries = new List<uint>[SharedConst.MaxCreatureDifficulties]; // already loaded creatures with difficulty 1 values, used in CheckCreatureTemplate
         Dictionary<uint, NpcText> _npcTextStorage = new Dictionary<uint, NpcText>();

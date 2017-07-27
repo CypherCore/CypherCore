@@ -58,9 +58,7 @@ namespace Game.Entities
         public uint UnitFlags3;
         public uint DynamicFlags;
         public CreatureFamily Family;
-        public TrainerType TrainerType;
         public Class TrainerClass;
-        public Race TrainerRace;
         public CreatureType CreatureType;
         public CreatureTypeFlags TypeFlags;
         public uint TypeFlags2;
@@ -384,40 +382,6 @@ namespace Game.Entities
         public void Clear()
         {
             m_items.Clear();
-        }
-    }
-
-    public class TrainerSpell
-    {
-        public uint SpellID;
-        public uint MoneyCost;
-        public uint ReqSkillLine;
-        public uint ReqSkillRank;
-        public uint ReqLevel;
-        public uint[] ReqAbility = new uint[SharedConst.MaxTrainerspellAbilityReqs];
-        public uint Index;
-
-        // helpers
-        public bool IsCastable()
-        {
-            return ReqAbility[0] != SpellID;
-        }
-    }
-
-    public class TrainerSpellData
-    {
-        public TrainerSpellData()
-        {
-            trainerType = 0;
-        }
-
-        public Dictionary<uint, TrainerSpell> spellList = new Dictionary<uint, TrainerSpell>();
-        public uint trainerType;                                     // trainer type based at trainer spells, can be different from creature_template value.
-        // req. for correct show non-prof. trainers like weaponmaster, allowed values 0 and 2.
-
-        public TrainerSpell Find(uint spell_id)
-        {
-            return spellList.LookupByKey(spell_id);
         }
     }
 }

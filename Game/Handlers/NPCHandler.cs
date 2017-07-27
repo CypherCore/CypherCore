@@ -56,20 +56,15 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.TrainerList)]
         void HandleTrainerList(Hello packet)
         {
-            SendTrainerList(packet.Unit);
+            Log.outInfo(LogFilter.Network, $"{GetPlayerInfo()} sent legacy gossipless trainer hello for unit {packet.Unit.ToString()}, no trainer list available");
         }
 
-        public void SendTrainerList(ObjectGuid guid, uint index = 0)
-        {
-            string str = Global.ObjectMgr.GetCypherString(CypherStrings.NpcTainerHello);
-            SendTrainerList(guid, str, index);
-        }
-        void SendTrainerList(ObjectGuid guid, string title, uint index = 0)
+        public void SendTrainerList(ObjectGuid guid, uint trainerId)
         {
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(guid, NPCFlags.Trainer);
             if (unit == null)
             {
-                Log.outDebug(LogFilter.Network, "WORLD: SendTrainerList - {0} not found or you can not interact with him.", guid.ToString());
+                Log.outDebug(LogFilter.Network, $"WORLD: SendTrainerList - {guid.ToString()} not found or you can not interact with him.");
                 return;
             }
 
@@ -77,92 +72,24 @@ namespace Game
             if (GetPlayer().HasUnitState(UnitState.Died))
                 GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
 
-            TrainerSpellData trainer_spells = unit.GetTrainerSpells();
-            if (trainer_spells == null)
+            Trainer trainer = Global.ObjectMgr.GetTrainer(trainerId);
+            if (trainer == null)
             {
-                Log.outDebug(LogFilter.Network, "WORLD: SendTrainerList - Training spells not found for {0}", guid.ToString());
+                Log.outDebug(LogFilter.Network, $"WORLD: SendTrainerList - trainer spells not found for trainer {guid.ToString()} id {trainerId}");
                 return;
             }
 
-            TrainerList packet = new TrainerList();
-            packet.TrainerGUID = guid;
-            packet.TrainerType = (int)trainer_spells.trainerType;
-            packet.Greeting = title;
-
-            // reputation discount
-            float fDiscountMod = GetPlayer().GetReputationPriceDiscount(unit);
-
-            foreach (var tSpell in trainer_spells.spellList.Values)
-            {
-                if (index != 0 && tSpell.Index != index)
-                    continue;
-
-                bool valid = true;
-                for (var i = 0; i < SharedConst.MaxTrainerspellAbilityReqs; i++)
-                {
-                    if (tSpell.ReqAbility[i] == 0)
-                        continue;
-
-                    if (!GetPlayer().IsSpellFitByClassAndRace(tSpell.ReqAbility[i]))
-                    {
-                        valid = false;
-                        break;
-                    }
-                }
-
-                if (!valid)
-                    continue;
-
-                TrainerSpellState state = GetPlayer().GetTrainerSpellState(tSpell);
-
-                TrainerListSpell spell = new TrainerListSpell();
-                spell.SpellID = (int)tSpell.SpellID;
-                spell.MoneyCost = (int)Math.Floor(tSpell.MoneyCost * fDiscountMod);
-                spell.ReqSkillLine = (int)tSpell.ReqSkillLine;
-                spell.ReqSkillRank = (int)tSpell.ReqSkillRank;
-                spell.ReqLevel = (byte)tSpell.ReqLevel;
-                spell.Usable = (state == TrainerSpellState.GreenDisabled ? TrainerSpellState.Green : state);
-
-                byte maxReq = 0;
-                for (var i = 0; i < SharedConst.MaxTrainerspellAbilityReqs; ++i)
-                {
-                    if (tSpell.ReqAbility[i] == 0)
-                        continue;
-
-                    uint prevSpellId = Global.SpellMgr.GetPrevSpellInChain(tSpell.ReqAbility[i]);
-                    if (prevSpellId != 0)
-                    {
-                        spell.ReqAbility[maxReq] = (int)prevSpellId;
-                        ++maxReq;
-                    }
-
-                    if (maxReq == 2)
-                        break;
-
-                    var spellsRequired = Global.SpellMgr.GetSpellsRequiredForSpellBounds(tSpell.ReqAbility[i]);
-                    for (var c = 0; c < spellsRequired.Count && maxReq < SharedConst.MaxTrainerspellAbilityReqs; ++c)
-                    {
-                        spell.ReqAbility[maxReq] = (int)spellsRequired[c];
-                        ++maxReq;
-                    }
-
-                    if (maxReq == 2)
-                        break;
-                }
-
-                packet.Spells.Add(spell);
-            }
-
-            SendPacket(packet);
+            _player.SetCurrentTrainerId(trainerId);
+            trainer.SendSpells(unit, _player, GetSessionDbLocaleIndex());
         }
 
         [WorldPacketHandler(ClientOpcodes.TrainerBuySpell)]
         void HandleTrainerBuySpell(TrainerBuySpell packet)
         {
-            Creature trainer = _player.GetNPCIfCanInteractWith(packet.TrainerGUID, NPCFlags.Trainer);
-            if (trainer == null)
+            Creature npc = _player.GetNPCIfCanInteractWith(packet.TrainerGUID, NPCFlags.Trainer);
+            if (npc == null)
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleTrainerBuySpell - {0} not found or you can not interact with him.", packet.TrainerGUID.ToString());
+                Log.outDebug(LogFilter.Network, $"WORLD: HandleTrainerBuySpell - {packet.TrainerGUID.ToString()} not found or you can not interact with him.");
                 return;
             }
 
@@ -170,64 +97,18 @@ namespace Game
             if (_player.HasUnitState(UnitState.Died))
                 _player.RemoveAurasByType(AuraType.FeignDeath);
 
-            // check race for mount trainers
-            if (trainer.GetCreatureTemplate().TrainerType == TrainerType.Mounts)
-            {
-                Race trainerRace = trainer.GetCreatureTemplate().TrainerRace;
-                if (trainerRace != 0)
-                    if (_player.GetRace() != trainerRace)
-                        return;
-            }
-
-            // check class for class trainers
-            if (_player.GetClass() != trainer.GetCreatureTemplate().TrainerClass && trainer.GetCreatureTemplate().TrainerType == TrainerType.Class)
+            if (_player.GetCurrentTrainerId() != packet.TrainerID)
                 return;
 
             // check present spell in trainer spell list
-            var trainerSpells = trainer.GetTrainerSpells();
-            if (trainerSpells == null)
-            {
-                SendTrainerBuyFailed(packet.TrainerGUID, packet.SpellID, 0);
+            Trainer trainer = Global.ObjectMgr.GetTrainer(packet.TrainerID);
+            if (trainer == null)
                 return;
-            }
 
-            var trainerSpell = trainerSpells.spellList.LookupByKey(packet.SpellID);
-            if (trainerSpell == null)
-            {
-                SendTrainerBuyFailed(packet.TrainerGUID, packet.SpellID, 0);
-                return;
-            }
-
-            // can't be learn, cheat? Or double learn with lags...
-            if (_player.GetTrainerSpellState(trainerSpell) != TrainerSpellState.Green)
-            {
-                SendTrainerBuyFailed(packet.TrainerGUID, packet.SpellID, 0);
-                return;
-            }
-
-            // apply reputation discount
-            uint nSpellCost = (uint)(Math.Floor((double)trainerSpell.MoneyCost) * _player.GetReputationPriceDiscount(trainer));
-
-            // check money requirement
-            if (!_player.HasEnoughMoney(nSpellCost))
-            {
-                SendTrainerBuyFailed(packet.TrainerGUID, packet.SpellID, 1);
-                return;
-            }
-
-            _player.ModifyMoney(-nSpellCost);
-
-            trainer.SendPlaySpellVisualKit(179, 0, 0);       // 53 SpellCastDirected
-            _player.SendPlaySpellVisualKit(362, 1, 0);    // 113 EmoteSalute
-
-            // learn explicitly or cast explicitly
-            if (trainerSpell.IsCastable())
-                _player.CastSpell(GetPlayer(), trainerSpell.SpellID, true);
-            else
-                _player.LearnSpell(packet.SpellID, false);
+            trainer.TeachSpell(npc, _player, packet.SpellID);
         }
 
-        void SendTrainerBuyFailed(ObjectGuid trainerGUID, uint spellID, uint trainerFailedReason)
+        void SendTrainerBuyFailed(ObjectGuid trainerGUID, uint spellID, TrainerFailReason trainerFailedReason)
         {
             TrainerBuyFailed trainerBuyFailed = new TrainerBuyFailed();
             trainerBuyFailed.TrainerGUID = trainerGUID;

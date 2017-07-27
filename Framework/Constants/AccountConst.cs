@@ -578,7 +578,7 @@ namespace Framework.Constants
         CommandReloadMailLootTemplate = 669,
         CommandReloadMillingLootTemplate = 670,
         CommandReloadNpcSpellclickSpells = 671,
-        CommandReloadNpcTrainer = 672,
+        CommandReloadTrainer = 672,
         CommandReloadNpcVendor = 673,
         CommandReloadPageText = 674,
         CommandReloadPickpocketingLootTemplate = 675,

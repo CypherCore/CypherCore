@@ -148,6 +148,7 @@
     <Compile Include="Entities\AreaTrigger\AreaTriggerTemplate.cs" />
     <Compile Include="Entities\Conversation.cs" />
     <Compile Include="Entities\Creature\CreatureData.cs" />
+    <Compile Include="Entities\Creature\Trainer.cs" />
     <Compile Include="Entities\GameObject\GameObjectData.cs" />
     <Compile Include="Entities\Player\CinematicManager.cs" />
     <Compile Include="Entities\Player\CollectionManager.cs" />
