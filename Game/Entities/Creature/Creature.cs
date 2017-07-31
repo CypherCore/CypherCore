@@ -288,8 +288,8 @@ namespace Game.Entities
 
             if (updateLevel)
                 SelectLevel();
-
-            UpdateLevelDependantStats();
+            else
+                UpdateLevelDependantStats(); // We still re-initialize level dependant stats on entry update
 
             SetMeleeDamageSchool((SpellSchools)cInfo.DmgSchool);
             SetModifierValue(UnitMods.ResistanceHoly, UnitModifierType.BaseValue, cInfo.Resistance[(int)SpellSchools.Holy]);
@@ -1090,11 +1090,23 @@ namespace Game.Entities
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
 
-            // level
-            byte minlevel = (byte)Math.Min(cInfo.Maxlevel, cInfo.Minlevel);
-            byte maxlevel = (byte)Math.Max(cInfo.Maxlevel, cInfo.Minlevel);
-            byte level = (byte)(minlevel == maxlevel ? minlevel : RandomHelper.URand(minlevel, maxlevel));
-            SetLevel(level);
+            if (!HasScalableLevels())
+            {
+                // level
+                byte minlevel = (byte)Math.Min(cInfo.Maxlevel, cInfo.Minlevel);
+                byte maxlevel = (byte)Math.Max(cInfo.Maxlevel, cInfo.Minlevel);
+                byte level = (byte)(minlevel == maxlevel ? minlevel : RandomHelper.URand(minlevel, maxlevel));
+                SetLevel(level);
+            }
+            else
+            {
+                SetLevel(cInfo.levelScaling.Value.MaxLevel);
+                SetUInt32Value(UnitFields.ScalingLevelMin, cInfo.levelScaling.Value.MinLevel);
+                SetUInt32Value(UnitFields.ScalingLevelMax, cInfo.levelScaling.Value.MaxLevel);
+                SetUInt32Value(UnitFields.ScalingLevelDelta, (uint)cInfo.levelScaling.Value.DeltaLevel);
+            }
+
+            UpdateLevelDependantStats();
         }
 
         void UpdateLevelDependantStats()
@@ -1663,8 +1675,8 @@ namespace Game.Entities
 
                 if (m_originalEntry != GetEntry())
                     UpdateEntry(m_originalEntry);
-
-                SelectLevel();
+                else
+                    SelectLevel();
 
                 setDeathState(DeathState.JustRespawned);
 
@@ -2344,17 +2356,91 @@ namespace Game.Entities
             m_respawnTime = m_corpseRemoveTime + m_respawnDelay;
         }
 
+        public bool HasScalableLevels()
+        {
+            CreatureTemplate cinfo = GetCreatureTemplate();
+            return cinfo.levelScaling.HasValue;
+        }
+
+        ulong GetMaxHealthByLevel(uint level)
+        {
+            CreatureTemplate cInfo = GetCreatureTemplate();
+            CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(level, cInfo.UnitClass);
+            return stats.GenerateHealth(cInfo);
+        }
+
+        float GetHealthMultiplierForTarget(WorldObject target)
+        {
+            if (!HasScalableLevels())
+                return 1.0f;
+
+            uint levelForTarget = GetLevelForTarget(target);
+            if (getLevel() < levelForTarget)
+                return 1.0f;
+
+            return GetMaxHealthByLevel(levelForTarget) / GetCreateHealth();
+        }
+
+        float GetBaseDamageForLevel(uint level)
+        {
+            CreatureTemplate cInfo = GetCreatureTemplate();
+            CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(level, cInfo.UnitClass);
+            return stats.GenerateBaseDamage(cInfo);
+        }
+
+        float GetDamageMultiplierForTarget(WorldObject target)
+        {
+            if (!HasScalableLevels())
+                return 1.0f;
+
+            uint levelForTarget = GetLevelForTarget(target);
+
+            return GetBaseDamageForLevel(levelForTarget) / GetBaseDamageForLevel(getLevel());
+        }
+
+        float GetBaseArmorForLevel(uint level)
+        {
+            CreatureTemplate cInfo = GetCreatureTemplate();
+            CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(level, cInfo.UnitClass);
+            return stats.GenerateArmor(cInfo);
+        }
+
+        float GetArmorMultiplierForTarget(WorldObject target)
+        {
+            if (!HasScalableLevels())
+                return 1.0f;
+
+            uint levelForTarget = GetLevelForTarget(target);
+
+            return GetBaseArmorForLevel(levelForTarget) / GetBaseArmorForLevel(getLevel());
+        }
+
         public override uint GetLevelForTarget(WorldObject target)
         {
-            if (!isWorldBoss() || !target.IsTypeId(TypeId.Unit))
-                return base.GetLevelForTarget(target);
+            Unit unitTarget = target.ToUnit();
+            if (unitTarget)
+            {
+                if (isWorldBoss())
+                {
+                    int level = (int)(unitTarget.getLevel() + WorldConfig.GetIntValue(WorldCfg.WorldBossLevelDiff));
+                    return (uint)MathFunctions.RoundToInterval(ref level, 1u, 255u);
+                }
 
-            uint level = target.ToUnit().getLevel() + WorldConfig.GetUIntValue(WorldCfg.WorldBossLevelDiff);
-            if (level < 1)
-                return 1;
-            if (level > 255)
-                return 255;
-            return level;
+                // If this creature should scale level, adapt level depending of target level
+                // between UNIT_FIELD_SCALING_LEVEL_MIN and UNIT_FIELD_SCALING_LEVEL_MAX
+                if (HasScalableLevels())
+                {
+                    uint targetLevelWithDelta = (uint)(unitTarget.getLevel() + GetCreatureTemplate().levelScaling.Value.DeltaLevel);
+
+                    if (target.IsPlayer())
+                        targetLevelWithDelta += target.GetUInt32Value(PlayerFields.ScalingLevelDelta);
+
+                    return MathFunctions.RoundToInterval(ref targetLevelWithDelta, GetUInt32Value(UnitFields.ScalingLevelMin), GetUInt32Value(UnitFields.ScalingLevelMax));
+                }
+
+            }
+
+            return base.GetLevelForTarget(target);
         }
 
         public string GetAIName()

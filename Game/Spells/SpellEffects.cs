@@ -2464,7 +2464,7 @@ namespace Game.Spells
             // "kill" original creature
             creatureTarget.DespawnOrUnsummon();
 
-            uint level = (creatureTarget.getLevel() < (m_caster.getLevel() - 5)) ? (m_caster.getLevel() - 5) : creatureTarget.getLevel();
+            uint level = (creatureTarget.GetLevelForTarget(m_caster) < (m_caster.GetLevelForTarget(creatureTarget) - 5)) ? (m_caster.GetLevelForTarget(creatureTarget) - 5) : creatureTarget.GetLevelForTarget(m_caster);
 
             // prepare visual effect for levelup
             pet.SetUInt32Value(UnitFields.Level, level - 1);
@@ -4169,7 +4169,7 @@ namespace Game.Spells
                 return;
 
             Creature creature = unitTarget.ToCreature();
-            int targetLevel = (int)creature.getLevel();
+            int targetLevel = (int)creature.GetLevelForTarget(m_caster);
 
             SkillType skill = creature.GetCreatureTemplate().GetRequiredLootSkill();
 
@@ -5376,35 +5376,27 @@ namespace Game.Spells
             }
         }
 
-        [SpellEffectHandler(SpellEffectName.CreateManaGem)]
-        void EffectRechargeManaGem(uint effIndex)
+        [SpellEffectHandler(SpellEffectName.RechargeItem)]
+        void EffectRechargeItem(uint effIndex)
         {
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
-            if (unitTarget == null || !unitTarget.IsTypeId(TypeId.Player))
+            if (unitTarget == null)
                 return;
 
-            Player player = m_caster.ToPlayer();
-
+            Player player = unitTarget.ToPlayer();
             if (player == null)
                 return;
 
-            uint item_id = GetEffect(0).ItemType;
-
-            ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(item_id);
-            if (proto == null)
+            Item item = player.GetItemByEntry(effectInfo.ItemType);
+            if (item != null)
             {
-                player.SendEquipError(InventoryResult.ItemNotFound);
-                return;
-            }
-
-            Item pItem = player.GetItemByEntry(item_id);
-            if (pItem != null)
-            {
+                ItemTemplate proto = item.GetTemplate();
                 for (int x = 0; x < proto.Effects.Count && x < 5; ++x)
-                    pItem.SetSpellCharges(x, proto.Effects[x].Charges);
-                pItem.SetState(ItemUpdateState.Changed, player);
+                    item.SetSpellCharges(x, proto.Effects[x].Charges);
+
+                item.SetState(ItemUpdateState.Changed, player);
             }
         }
 

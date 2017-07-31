@@ -1625,7 +1625,7 @@ namespace Game.Spells
                     if (m_auraScaleMask != 0 && ihit.effectMask == m_auraScaleMask && m_caster != target)
                     {
                         SpellInfo auraSpell = Global.SpellMgr.GetSpellInfo(Global.SpellMgr.GetFirstSpellInChain(m_spellInfo.Id));
-                        if (target.getLevel() + 10 >= auraSpell.SpellLevel)
+                        if (target.GetLevelForTarget(m_caster) + 10 >= auraSpell.SpellLevel)
                             ihit.scaleAura = true;
                     }
                     return;
@@ -1646,7 +1646,7 @@ namespace Game.Spells
             if (m_auraScaleMask != 0 && targetInfo.effectMask == m_auraScaleMask && m_caster != target)
             {
                 SpellInfo auraSpell = Global.SpellMgr.GetSpellInfo(Global.SpellMgr.GetFirstSpellInChain(m_spellInfo.Id));
-                if (target.getLevel() + 10 >= auraSpell.SpellLevel)
+                if (target.GetLevelForTarget(m_caster) + 10 >= auraSpell.SpellLevel)
                     targetInfo.scaleAura = true;
             }
 
@@ -4874,7 +4874,7 @@ namespace Game.Spells
                             SkillType skill = creature.GetCreatureTemplate().GetRequiredLootSkill();
 
                             ushort skillValue = m_caster.ToPlayer().GetSkillValue(skill);
-                            uint TargetLevel = m_targets.GetUnitTarget().getLevel();
+                            uint TargetLevel = m_targets.GetUnitTarget().GetLevelForTarget(m_caster);
                             int ReqValue = (int)(skillValue < 100 ? (TargetLevel - 10) * 10 : TargetLevel * 5);
                             if (ReqValue > skillValue)
                                 return SpellCastResult.LowCastlevel;
@@ -5199,7 +5199,7 @@ namespace Game.Spells
                                     return SpellCastResult.TargetIsPlayerControlled;
 
                                 int damage = CalculateDamage(effect.EffectIndex, target1);
-                                if (damage != 0 && target1.getLevel() > damage)
+                                if (damage != 0 && target1.GetLevelForTarget(m_caster) > damage)
                                     return SpellCastResult.Highlevel;
                             }
 
@@ -6118,19 +6118,19 @@ namespace Game.Spells
                                 return SpellCastResult.EquippedItem;
                             break;
                         }
-                    case SpellEffectName.CreateManaGem:
+                    case SpellEffectName.RechargeItem:
                         {
-                            uint item_id = effect.ItemType;
-                            ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(item_id);
+                            uint itemId = effect.ItemType;
 
+                            ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(itemId);
                             if (proto == null)
                                 return SpellCastResult.ItemAtMaxCharges;
 
-                            Item pitem = player.GetItemByEntry(item_id);
-                            if (pitem != null)
+                            Item item = player.GetItemByEntry(itemId);
+                            if (item != null)
                             {
                                 for (int x = 0; x < proto.Effects.Count && x < 5; ++x)
-                                    if (proto.Effects[x].Charges != 0 && pitem.GetSpellCharges(x) == proto.Effects[x].Charges)
+                                    if (proto.Effects[x].Charges != 0 && item.GetSpellCharges(x) == proto.Effects[x].Charges)
                                         return SpellCastResult.ItemAtMaxCharges;
                             }
                             break;
@@ -6343,7 +6343,7 @@ namespace Game.Spells
                         return false;
                     int damage = CalculateDamage(effect.EffectIndex, target);
                     if (damage != 0)
-                        if (target.getLevel() > damage)
+                        if (target.GetLevelForTarget(m_caster) > damage)
                             return false;
                     break;
                 default:

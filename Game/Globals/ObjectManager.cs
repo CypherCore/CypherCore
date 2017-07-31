@@ -2280,6 +2280,41 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creature model based info in {1} ms", count, Time.GetMSTimeDiffToNow(time));
         }
+        public void LoadCreatureScalingData()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            //                                        0            1          2                 3
+            SQLResult result = DB.World.Query("SELECT Entry, LevelScalingMin, LevelScalingMax, LevelScalingDelta FROM creature_template_scaling");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature template scaling definitions. DB table `creature_template_scaling` is empty.");
+                return;
+            }
+
+            uint count = 0;
+            do
+            {
+                uint entry = result.Read<uint>(0);
+
+                var template = creatureTemplateStorage.LookupByKey(entry);
+                if (template == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Creature template (Entry: {entry}) does not exist but has a record in `creature_template_scaling`");
+                    continue;
+                }
+
+                CreatureLevelScaling creatureLevelScaling;
+                creatureLevelScaling.MinLevel = result.Read<ushort>(1);
+                creatureLevelScaling.MaxLevel = result.Read<ushort>(2);
+                creatureLevelScaling.DeltaLevel = result.Read<short>(3);
+                template.levelScaling.Set(creatureLevelScaling);
+
+                ++count;
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} creature template scaling data in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
         public void CheckCreatureTemplate(CreatureTemplate cInfo)
         {
             if (cInfo == null)
@@ -2952,12 +2987,13 @@ namespace Game
                     if (!allReqValid)
                         continue;
 
+                    spell.LearnedSpellId = spell.SpellId;
                     foreach (SpellEffectInfo spellEffect in spellInfo.GetEffectsForDifficulty(Difficulty.None))
                     {
-                        if (spellEffect.IsEffect(SpellEffectName.LearnSpell))
+                        if (spellEffect != null && spellEffect.IsEffect(SpellEffectName.LearnSpell))
                         {
-                            spell.CastSpellId = spell.SpellId;
-                            spell.SpellId = spellEffect.TriggerSpell;
+                            Contract.Assert(spell.LearnedSpellId == spell.SpellId, $"Only one learned spell is currently supported - spell {spell.SpellId} already teaches {spell.LearnedSpellId} but it tried to overwrite it with {spellEffect.TriggerSpell}");
+                            spell.LearnedSpellId = spellEffect.TriggerSpell;
                             break;
                         }
                     }

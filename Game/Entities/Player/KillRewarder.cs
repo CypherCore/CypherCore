@@ -117,7 +117,7 @@ namespace Game.Entities
                             // 2.4. _maxNotGrayMember - maximum level of alive group member within reward distance,
                             //      for whom victim is not gray;
                             uint grayLevel = Formulas.GetGrayLevel(lvl);
-                            if (_victim.getLevel() > grayLevel && (!_maxNotGrayMember || _maxNotGrayMember.getLevel() < lvl))
+                            if (_victim.GetLevelForTarget(member) > grayLevel && (!_maxNotGrayMember || _maxNotGrayMember.getLevel() < lvl))
                                 _maxNotGrayMember = member;
                         }
                     }

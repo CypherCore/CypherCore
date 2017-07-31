@@ -1263,7 +1263,7 @@ namespace Game.Achievements
                         return false;
                     break;
                 case CriteriaAdditionalCondition.TargetLevel: // 40
-                    if (unit == null || unit.getLevel() != reqValue)
+                    if (unit == null || unit.GetLevelForTarget(referencePlayer) != reqValue)
                         return false;
                     break;
                 case CriteriaAdditionalCondition.TargetZone: // 41
@@ -2035,7 +2035,7 @@ namespace Game.Achievements
                 case CriteriaDataType.TLevel:
                     if (target == null)
                         return false;
-                    return target.getLevel() >= Level.Min;
+                    return target.GetLevelForTarget(source) >= Level.Min;
                 case CriteriaDataType.TGender:
                     if (target == null)
                         return false;

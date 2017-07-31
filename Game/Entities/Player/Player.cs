@@ -1646,7 +1646,7 @@ namespace Game.Entities
 
             if (Rep.RepFaction1 != 0 && (!Rep.TeamDependent || team == Team.Alliance))
             {
-                int donerep1 = CalculateReputationGain(ReputationSource.Kill, victim.getLevel(), Rep.RepValue1, (int)(ChampioningFaction != 0 ? ChampioningFaction : Rep.RepFaction1));
+                int donerep1 = CalculateReputationGain(ReputationSource.Kill, victim.GetLevelForTarget(this), Rep.RepValue1, (int)(ChampioningFaction != 0 ? ChampioningFaction : Rep.RepFaction1));
                 donerep1 = (int)(donerep1 * rate);
 
                 FactionRecord factionEntry1 = CliDB.FactionStorage.LookupByKey(ChampioningFaction != 0 ? ChampioningFaction : Rep.RepFaction1);
@@ -1657,7 +1657,7 @@ namespace Game.Entities
 
             if (Rep.RepFaction2 != 0 && (!Rep.TeamDependent || team == Team.Horde))
             {
-                int donerep2 = CalculateReputationGain(ReputationSource.Kill, victim.getLevel(), Rep.RepValue2, (int)(ChampioningFaction != 0 ? ChampioningFaction : Rep.RepFaction2));
+                int donerep2 = CalculateReputationGain(ReputationSource.Kill, victim.GetLevelForTarget(this), Rep.RepValue2, (int)(ChampioningFaction != 0 ? ChampioningFaction : Rep.RepFaction2));
                 donerep2 = (int)(donerep2 * rate);
 
                 FactionRecord factionEntry2 = CliDB.FactionStorage.LookupByKey(ChampioningFaction != 0 ? ChampioningFaction : Rep.RepFaction2);
@@ -4116,9 +4116,12 @@ namespace Game.Entities
             if (!IsSectionFlagValid(hair, class_, create))
                 return false;
 
-            CharSectionsRecord facialHair = Global.DB2Mgr.GetCharSectionEntry(race, CharSectionType.Hair, gender, facialHairId, hairColor);
-            if (facialHair == null)
-                return false;
+            if (facialHairId != 0)
+            {
+                CharSectionsRecord facialHair = Global.DB2Mgr.GetCharSectionEntry(race, CharSectionType.FacialHair, gender, facialHairId, hairColor);
+                if (facialHair == null)
+                    return false;
+            }
 
             for (int i = 0; i < PlayerConst.CustomDisplaySize; ++i)
             {
@@ -5064,7 +5067,7 @@ namespace Game.Entities
         // Used in triggers for check "Only to targets that grant experience or honor" req
         public bool isHonorOrXPTarget(Unit victim)
         {
-            uint v_level = victim.getLevel();
+            uint v_level = victim.GetLevelForTarget(this);
             uint k_grey = Formulas.GetGrayLevel(getLevel());
 
             // Victim level less gray level
@@ -6412,6 +6415,19 @@ namespace Game.Entities
                 SendMovementSetCollisionHeight(scale * GetCollisionHeight(IsMounted()));
         }
 
+        void SetXP(uint xp)
+        {
+            SetUInt32Value(PlayerFields.Xp, xp);
+
+            int playerLevelDelta = 0;
+
+            // If XP < 50%, player should see scaling creature with -1 level except for level max
+            if (getLevel() < SharedConst.MaxLevel && xp < (GetUInt32Value(PlayerFields.NextLevelXp) / 2))
+                playerLevelDelta = -1;
+
+            SetInt32Value(PlayerFields.ScalingLevelDelta, playerLevelDelta);
+        }
+
         public void GiveXP(uint xp, Unit victim, float group_rate = 1.0f)
         {
             if (xp < 1)
@@ -6467,7 +6483,7 @@ namespace Game.Entities
                 nextLvlXP = GetUInt32Value(PlayerFields.NextLevelXp);
             }
 
-            SetUInt32Value(PlayerFields.Xp, newXP);
+            SetXP(newXP);
         }
 
         public void HandleBaseModValue(BaseModGroup modGroup, BaseModType modType, float amount, bool apply)

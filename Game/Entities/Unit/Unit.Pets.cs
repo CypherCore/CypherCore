@@ -745,7 +745,7 @@ namespace Game.Entities
             if (!pet.CreateBaseAtCreature(creatureTarget))
                 return null;
 
-            uint level = creatureTarget.getLevel() + 5 < getLevel() ? (getLevel() - 5) : creatureTarget.getLevel();
+            uint level = creatureTarget.GetLevelForTarget(this) + 5 < getLevel() ? (getLevel() - 5) : creatureTarget.GetLevelForTarget(this);
 
             InitTamedPet(pet, level, spell_id);
 

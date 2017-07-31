@@ -292,7 +292,7 @@ namespace Game
             // auto-selection buff level base at target level (in spellInfo)
             if (targets.GetUnitTarget() != null)
             {
-                SpellInfo actualSpellInfo = spellInfo.GetAuraRankForLevel(targets.GetUnitTarget().getLevel());
+                SpellInfo actualSpellInfo = spellInfo.GetAuraRankForLevel(targets.GetUnitTarget().GetLevelForTarget(caster));
 
                 // if rank not found then function return NULL but in explicit cast case original spell can be casted and later failed with appropriate error message
                 if (actualSpellInfo != null)

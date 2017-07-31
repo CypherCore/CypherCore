@@ -3124,7 +3124,7 @@ namespace Game.Spells
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 63 SPELL_EFFECT_THREAT
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 64 SPELL_EFFECT_TRIGGER_SPELL
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID
-            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 66 SPELL_EFFECT_CREATE_MANA_GEM
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 66 SPELL_EFFECT_RECHARGE_ITEM
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 67 SPELL_EFFECT_HEAL_MAX_HEALTH
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 68 SPELL_EFFECT_INTERRUPT_CAST
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.UnitAndDest), // 69 SPELL_EFFECT_DISTRACT

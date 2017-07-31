@@ -1146,6 +1146,86 @@ namespace Game.Network.Packets
 
     class SandboxScalingData
     {
+        public bool GenerateDataForUnits(Creature attacker, Player target)
+        {
+            CreatureTemplate creatureTemplate = attacker.GetCreatureTemplate();
+
+            Type = SandboxScalingDataType.CreatureToPlayerDamage;
+            PlayerLevelDelta = (short)target.GetInt32Value(PlayerFields.ScalingLevelDelta);
+            PlayerItemLevel = (ushort)target.GetAverageItemLevel();
+            TargetLevel = (byte)target.getLevel();
+            Expansion = (byte)creatureTemplate.RequiredExpansion;
+            Class = (byte)creatureTemplate.UnitClass;
+            TargetMinScalingLevel = (byte)creatureTemplate.levelScaling.Value.MinLevel;
+            TargetMaxScalingLevel = (byte)creatureTemplate.levelScaling.Value.MaxLevel;
+            TargetScalingLevelDelta = (sbyte)creatureTemplate.levelScaling.Value.DeltaLevel;
+            return true;
+        }
+
+        public bool GenerateDataForUnits(Player attacker, Creature target)
+        {
+            CreatureTemplate creatureTemplate = target.GetCreatureTemplate();
+
+            Type = SandboxScalingDataType.PlayerToCreatureDamage;
+            PlayerLevelDelta = (short)attacker.GetInt32Value(PlayerFields.ScalingLevelDelta);
+            PlayerItemLevel = (ushort)attacker.GetAverageItemLevel();
+            TargetLevel = (byte)target.getLevel();
+            Expansion = (byte)creatureTemplate.RequiredExpansion;
+            Class = (byte)creatureTemplate.UnitClass;
+            TargetMinScalingLevel = (byte)creatureTemplate.levelScaling.Value.MinLevel;
+            TargetMaxScalingLevel = (byte)creatureTemplate.levelScaling.Value.MaxLevel;
+            TargetScalingLevelDelta = (sbyte)creatureTemplate.levelScaling.Value.DeltaLevel;
+            return true;
+        }
+
+        public bool GenerateDataForUnits(Creature attacker, Creature target)
+        {
+            CreatureTemplate creatureTemplate = target.HasScalableLevels() ? target.GetCreatureTemplate() : attacker.GetCreatureTemplate();
+
+            Type = SandboxScalingDataType.CreatureToCreatureDamage;
+            PlayerLevelDelta = 0;
+            PlayerItemLevel = 0;
+            TargetLevel = (byte)target.getLevel();
+            Expansion = (byte)creatureTemplate.RequiredExpansion;
+            Class = (byte)creatureTemplate.UnitClass;
+            TargetMinScalingLevel = (byte)creatureTemplate.levelScaling.Value.MinLevel;
+            TargetMaxScalingLevel = (byte)creatureTemplate.levelScaling.Value.MaxLevel;
+            TargetScalingLevelDelta = (sbyte)creatureTemplate.levelScaling.Value.DeltaLevel;
+            return true;
+        }
+
+        public bool GenerateDataForUnits(Unit attacker, Unit target)
+        {
+            Player playerAttacker = attacker.ToPlayer();
+            Creature creatureAttacker = attacker.ToCreature();
+            if (playerAttacker)
+            {
+                Player playerTarget = target.ToPlayer();
+                Creature creatureTarget = target.ToCreature();
+                if (playerTarget)
+                    return GenerateDataForUnits(playerAttacker, playerTarget);
+                else if (creatureTarget)
+                {
+                    if (creatureTarget.HasScalableLevels())
+                        return GenerateDataForUnits(playerAttacker, creatureTarget);
+                }
+            }
+            else if (creatureAttacker)
+            {
+                Player playerTarget = target.ToPlayer();
+                Creature creatureTarget = target.ToCreature();
+                if (playerTarget)
+                    return GenerateDataForUnits(creatureAttacker, playerTarget);
+                else if (creatureTarget)
+                {
+                    if (creatureAttacker.HasScalableLevels() || creatureTarget.HasScalableLevels())
+                        return GenerateDataForUnits(creatureAttacker, creatureTarget);
+                }
+            }
+
+            return false;
+        }
+
         public void Write(WorldPacket data)
         {
             data.WriteBits(Type, 3);
@@ -1159,15 +1239,23 @@ namespace Game.Network.Packets
             data.WriteInt8(TargetScalingLevelDelta);
         }
 
-        public uint Type;
+        public SandboxScalingDataType Type;
         public short PlayerLevelDelta;
         public ushort PlayerItemLevel;
         public byte TargetLevel;
         public byte Expansion;
-        public byte Class = 1;
-        public byte TargetMinScalingLevel = 1;
-        public byte TargetMaxScalingLevel = 1;
-        public sbyte TargetScalingLevelDelta = 1;
+        public byte Class;
+        public byte TargetMinScalingLevel;
+        public byte TargetMaxScalingLevel;
+        public sbyte TargetScalingLevelDelta;
+
+        public enum SandboxScalingDataType
+        {
+            PlayerToPlayer = 1, // NYI
+            CreatureToPlayerDamage = 2,
+            PlayerToCreatureDamage = 3,
+            CreatureToCreatureDamage = 4
+        }
     }
 
     public class AuraDataInfo

@@ -850,7 +850,7 @@ namespace Game.Entities
                     DynamicUpdateMask arrayMask = new DynamicUpdateMask((uint)values.Length);
                     arrayMask.EncodeDynamicFieldChangeType(_dynamicChangesMask[index], updateType);
                     if (updateType == UpdateType.Values && _dynamicChangesMask[index] == DynamicFieldChangeType.ValueAndSizeChanged)
-                         arrayMask.SetCount(values.Length);
+                        arrayMask.SetCount(values.Length);
 
                     for (var v = 0; v < values.Length; ++v)
                     {
@@ -2029,7 +2029,7 @@ namespace Game.Entities
 
             Map map = GetMap();
             GameObject go = new GameObject();
-            if (!go.Create(entry, map, GetPhaseMask(), pos,  rotation, 255, GameObjectState.Ready))
+            if (!go.Create(entry, map, GetPhaseMask(), pos, rotation, 255, GameObjectState.Ready))
                 return null;
 
             go.CopyPhaseFrom(this);
@@ -2498,14 +2498,23 @@ namespace Game.Entities
         public void SetFieldNotifyFlag(uint flag) { _fieldNotifyFlags |= flag; }
         public void RemoveFieldNotifyFlag(uint flag) { _fieldNotifyFlags &= ~flag; }
 
-        public Creature ToCreature() { return IsTypeId(TypeId.Unit) ? (this as Creature) : null; }
-        public Player ToPlayer() { return IsTypeId(TypeId.Player) ? (this as Player) : null; }
-        public GameObject ToGameObject() { return IsTypeId(TypeId.GameObject) ? (this as GameObject) : null; }
-        public Unit ToUnit() { return IsTypeId(TypeId.Unit) || IsTypeId(TypeId.Player) ? (this as Unit) : null; }
-        public Corpse ToCorpse() { return IsTypeId(TypeId.Corpse) ? (this as Corpse) : null; }
-        public DynamicObject ToDynamicObject() { return IsTypeId(TypeId.DynamicObject) ? (this as DynamicObject) : null; }
-        public AreaTrigger ToAreaTrigger() { return IsTypeId(TypeId.AreaTrigger) ? (this as AreaTrigger) : null; }
-        public Conversation ToConversation() { return IsTypeId(TypeId.Conversation) ? (this as Conversation) : null; }
+        bool IsCreature() { return GetTypeId() == TypeId.Unit; }
+        public bool IsPlayer() { return GetTypeId() == TypeId.Player; }
+        bool IsGameObject() { return GetTypeId() == TypeId.GameObject; }
+        bool IsUnit() { return isTypeMask(TypeMask.Unit); }
+        bool IsCorpse() { return GetTypeId() == TypeId.Corpse; }
+        bool IsDynObject() { return GetTypeId() == TypeId.DynamicObject; }
+        bool IsAreaTrigger() { return GetTypeId() == TypeId.AreaTrigger; }
+        bool IsConversation() { return GetTypeId() == TypeId.Conversation; }
+
+        public Creature ToCreature() { return IsCreature() ? (this as Creature) : null; }
+        public Player ToPlayer() { return IsPlayer() ? (this as Player) : null; }
+        public GameObject ToGameObject() { return IsGameObject() ? (this as GameObject) : null; }
+        public Unit ToUnit() { return IsUnit() ? (this as Unit) : null; }
+        public Corpse ToCorpse() { return IsCorpse() ? (this as Corpse) : null; }
+        public DynamicObject ToDynamicObject() { return IsDynObject() ? (this as DynamicObject) : null; }
+        public AreaTrigger ToAreaTrigger() { return IsAreaTrigger() ? (this as AreaTrigger) : null; }
+        public Conversation ToConversation() { return IsConversation() ? (this as Conversation) : null; }
 
         public virtual void Update(uint diff) { }
 

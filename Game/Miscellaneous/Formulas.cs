@@ -149,7 +149,7 @@ namespace Game
             {
                 float xpMod = 1.0f;
 
-                gain = BaseGain(player.getLevel(), u.getLevel());
+                gain = BaseGain(player.getLevel(), u.GetLevelForTarget(player));
 
                 if (gain != 0 && creature)
                 {

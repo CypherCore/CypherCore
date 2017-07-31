@@ -99,7 +99,7 @@ namespace Game.Network.Packets
         public int Absorbed;
         public int Flags;
         // Optional<SpellNonMeleeDamageLogDebugInfo> DebugInfo;
-        Optional<SandboxScalingData> SandboxScaling = new Optional<SandboxScalingData>();
+        public Optional<SandboxScalingData> SandboxScaling = new Optional<SandboxScalingData>();
     }
 
     class EnvironmentalDamageLog : CombatLogServerPacket
@@ -310,7 +310,7 @@ namespace Game.Network.Packets
             public uint Resisted;
             public bool Crit;
             public Optional<PeriodicalAuraLogEffectDebugInfo> DebugInfo;
-            Optional<SandboxScalingData> SandboxScaling = new Optional<SandboxScalingData>();
+            public Optional<SandboxScalingData> SandboxScaling = new Optional<SandboxScalingData>();
         }
     }
 
@@ -593,7 +593,7 @@ namespace Game.Network.Packets
         public int RageGained;
         public UnkAttackerState UnkState;
         public float Unk;
-        SandboxScalingData SandboxScaling = new SandboxScalingData();
+        public SandboxScalingData SandboxScaling = new SandboxScalingData();
     }
 
     //Structs

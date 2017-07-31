@@ -2127,6 +2127,7 @@ namespace Game.Entities
         {
             return GetUInt32Value(UnitFields.Level);
         }
+
         public override uint GetLevelForTarget(WorldObject target)
         {
             return getLevel();

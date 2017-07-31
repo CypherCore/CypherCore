@@ -104,7 +104,7 @@ namespace Game.Entities
 
                     byte k_level = (byte)getLevel();
                     byte k_grey = (byte)Formulas.GetGrayLevel(k_level);
-                    byte v_level = (byte)victim.getLevel();
+                    byte v_level = (byte)victim.GetLevelForTarget(this);
 
                     if (v_level <= k_grey)
                         return false;

@@ -724,7 +724,10 @@ namespace Game.Entities
             {
                 absorb += damage;
                 damage = 0;
+                return;
             }
+
+            damage *= (uint)GetDamageMultiplierForTarget(victim);
         }
         void DealMeleeDamage(CalcDamageInfo damageInfo, bool durabilityLoss)
         {
@@ -787,7 +790,7 @@ namespace Game.Entities
 
                 // there is a newbie protection, at level 10 just 7% base chance; assuming linear function
                 if (victim.getLevel() < 30)
-                    Probability = 0.65f * victim.getLevel() + 0.5f;
+                    Probability = 0.65f * victim.GetLevelForTarget(this) + 0.5f;
 
                 uint VictimDefense = victim.GetMaxSkillValueForLevel(this);
                 uint AttackerMeleeSkill = GetMaxSkillValueForLevel();
@@ -1018,6 +1021,8 @@ namespace Game.Entities
                     victim.ToCreature().LowerPlayerDamageReq(health < damage ? health : damage);
             }
 
+            damage /= (uint)victim.GetHealthMultiplierForTarget(this);
+
             if (health <= damage)
             {
                 Log.outDebug(LogFilter.Unit, "DealDamage: victim just died");
@@ -1220,6 +1225,10 @@ namespace Game.Entities
             packet.VictimState = (byte)damageInfo.TargetState;
             packet.BlockAmount = (int)damageInfo.blocked_amount;
             packet.LogData.Initialize(damageInfo.attacker);
+
+            SandboxScalingData sandboxScalingData = new SandboxScalingData();
+            if (sandboxScalingData.GenerateDataForUnits(damageInfo.attacker, damageInfo.target))
+                packet.SandboxScaling = sandboxScalingData;
 
             SendCombatLogMessage(packet);
         }
@@ -2289,7 +2298,7 @@ namespace Game.Entities
             byte bossLevel = 83;
             uint bossResistanceConstant = 510;
             uint resistanceConstant = 0;
-            uint level = victim.getLevel();
+            uint level = victim.GetLevelForTarget(this);
 
             if (level == bossLevel)
                 resistanceConstant = bossResistanceConstant;
@@ -2626,6 +2635,8 @@ namespace Game.Entities
         {
             float armor = victim.GetArmor();
 
+            armor *= victim.GetArmorMultiplierForTarget(attacker);
+
             // bypass enemy armor by SPELL_AURA_BYPASS_ARMOR_FOR_CASTER
             int armorBypassPct = 0;
             var reductionAuras = victim.GetAuraEffectsByType(AuraType.BypassArmorForCaster);
@@ -2655,10 +2666,10 @@ namespace Game.Entities
             if (IsTypeId(TypeId.Player))
             {
                 float maxArmorPen = 0;
-                if (victim.getLevel() < 60)
-                    maxArmorPen = 400 + 85 * victim.getLevel();
+                if (victim.GetLevelForTarget(attacker) < 60)
+                    maxArmorPen = 400 + 85 * victim.GetLevelForTarget(attacker);
                 else
-                    maxArmorPen = 400 + 85 * victim.getLevel() + 4.5f * 85 * (victim.getLevel() - 59);
+                    maxArmorPen = 400 + 85 * victim.GetLevelForTarget(attacker) + 4.5f * 85 * (victim.GetLevelForTarget(attacker) - 59);
 
                 // Cap armor penetration to this number
                 maxArmorPen = Math.Min((armor + maxArmorPen) / 3, armor);
@@ -2671,7 +2682,7 @@ namespace Game.Entities
             if (MathFunctions.fuzzyLe(armor, 0.0f))
                 return damage;
 
-            uint attackerLevel = attacker.getLevel();
+            uint attackerLevel = attacker.GetLevelForTarget(victim);
             if (attackerLevel > CliDB.ArmorMitigationByLvlGameTable.GetTableRowCount())
                 attackerLevel = (uint)CliDB.ArmorMitigationByLvlGameTable.GetTableRowCount();
 

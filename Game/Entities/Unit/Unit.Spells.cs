@@ -3079,6 +3079,11 @@ namespace Game.Entities
             packet.Absorbed = (int)log.absorb;
             packet.Periodic = log.periodicLog;
             packet.Flags = (int)log.HitInfo;
+
+            SandboxScalingData sandboxScalingData = new SandboxScalingData();
+            if (sandboxScalingData.GenerateDataForUnits(log.attacker, log.target))
+                packet.SandboxScaling.Set(sandboxScalingData);
+
             SendCombatLogMessage(packet);
         }
 
@@ -3101,6 +3106,12 @@ namespace Game.Entities
             spellLogEffect.Resisted = info.resist;
             spellLogEffect.Crit = info.critical;
             /// @todo: implement debug info
+
+            SandboxScalingData sandboxScalingData = new SandboxScalingData();
+            Unit caster = Global.ObjAccessor.GetUnit(this, aura.GetCasterGUID());
+            if (caster)
+                if (sandboxScalingData.GenerateDataForUnits(caster, this))
+                    spellLogEffect.SandboxScaling.Set(sandboxScalingData);
 
             data.Effects.Add(spellLogEffect);
 

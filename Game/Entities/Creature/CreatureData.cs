@@ -19,6 +19,7 @@ using Framework.Collections;
 using Framework.Constants;
 using System;
 using System.Collections.Generic;
+using Framework.Dynamic;
 
 namespace Game.Entities
 {
@@ -37,6 +38,7 @@ namespace Game.Entities
         public string IconName;
         public uint GossipMenuId;
         public short Minlevel;
+        public Optional<CreatureLevelScaling> levelScaling;
         public short Maxlevel;
         public int HealthScalingExpansion;
         public uint RequiredExpansion;
@@ -383,5 +385,12 @@ namespace Game.Entities
         {
             m_items.Clear();
         }
+    }
+
+    public struct CreatureLevelScaling
+    {
+        public ushort MinLevel;
+        public ushort MaxLevel;
+        public short DeltaLevel;
     }
 }

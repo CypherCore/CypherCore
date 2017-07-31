@@ -2363,7 +2363,7 @@ namespace Game.Entities
             }
 
             SetUInt32Value(UnitFields.Level, result.Read<uint>(6));
-            SetUInt32Value(PlayerFields.Xp, result.Read<uint>(7));
+            SetXP(result.Read<uint>(7));
 
             _LoadIntoDataField(result.Read<string>(65), (int)PlayerFields.ExploredZones1, PlayerConst.ExploredZonesSize);
             _LoadIntoDataField(result.Read<string>(66), (int)PlayerFields.KnownTitles, PlayerConst.KnowTitlesSize * 2);

@@ -52,7 +52,7 @@ namespace Framework.Constants
         /// <summary>
         /// Lfg Const
         /// </summary>
-        public const uint LFGTimeRolecheck = 45 * Time.InMilliseconds;
+        public const uint LFGTimeRolecheck = 45;
         public const uint LFGTimeBoot = 120;
         public const uint LFGTimeProposal = 45;
         public const uint LFGQueueUpdateInterval = 15 * Time.InMilliseconds;

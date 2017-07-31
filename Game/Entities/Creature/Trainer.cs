@@ -18,7 +18,8 @@ namespace Game.Entities
         public Array<uint> ReqAbility = new Array<uint>(3);
         public byte ReqLevel;
 
-        public uint CastSpellId;
+        public uint LearnedSpellId;
+        public bool IsCastable() { return LearnedSpellId != SpellId; }
     }
 
     public class Trainer
@@ -84,8 +85,8 @@ namespace Game.Entities
             player.SendPlaySpellVisualKit(362, 1, 0);  // 113 EmoteSalute
 
             // learn explicitly or cast explicitly
-            if (trainerSpell.CastSpellId != 0)
-                player.CastSpell(player, trainerSpell.CastSpellId, true);
+            if (trainerSpell.IsCastable())
+                player.CastSpell(player, trainerSpell.SpellId, true);
             else
                 player.LearnSpell(trainerSpell.SpellId, false);
         }
@@ -128,6 +129,12 @@ namespace Game.Entities
             // check level requirement
             if (player.getLevel() < trainerSpell.ReqLevel)
                 return TrainerSpellState.Unavailable;
+
+            // check ranks
+            uint previousRankSpellId = Global.SpellMgr.GetPrevSpellInChain(trainerSpell.LearnedSpellId);
+            if (previousRankSpellId != 0)
+                if (!player.HasSpell(previousRankSpellId))
+                    return TrainerSpellState.Unavailable;
 
             // check additional spell requirement
             foreach (var spellId in Global.SpellMgr.GetSpellsRequiredForSpellBounds(trainerSpell.SpellId))

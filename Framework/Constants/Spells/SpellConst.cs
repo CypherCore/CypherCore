@@ -1840,7 +1840,7 @@ namespace Framework.Constants
         Threat = 63,
         TriggerSpell = 64,
         ApplyAreaAuraRaid = 65,
-        CreateManaGem = 66,
+        RechargeItem = 66,
         HealMaxHealth = 67,
         InterruptCast = 68,
         Distract = 69,
