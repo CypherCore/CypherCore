@@ -481,7 +481,6 @@ namespace Game.Entities
             return TotalCost;
         }
 
-
         //Store Item
         public InventoryResult CanStoreItem(byte bag, byte slot, List<ItemPosCount> dest, Item pItem, bool swap = false)
         {
@@ -3844,7 +3843,7 @@ namespace Game.Entities
                 m_items[slot] = null;
 
                 int eslot = (int)slot - InventorySlots.BuyBackStart;
-                SetGuidValue(PlayerFields.InvSlotHead + (eslot * 4), ObjectGuid.Empty);
+                SetGuidValue(PlayerFields.InvSlotHead + (int)(slot * 4), ObjectGuid.Empty);
                 SetUInt32Value(PlayerFields.BuyBackPrice1 + eslot, 0);
                 SetUInt32Value(PlayerFields.BuyBackTimestamp1 + eslot, 0);
 
@@ -5635,7 +5634,7 @@ namespace Game.Entities
                     pItem.DestroyForPlayer(this);
                 }
 
-                pItem.SetOwnerGUID(ObjectGuid.Empty);
+                //pItem.SetOwnerGUID(ObjectGuid.Empty);
                 pItem.SetGuidValue(ItemFields.Contained, ObjectGuid.Empty);
                 pItem.SetSlot(ItemConst.NullSlot);
                 pItem.SetState(ItemUpdateState.Removed, this);

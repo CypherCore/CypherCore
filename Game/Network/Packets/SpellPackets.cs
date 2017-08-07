@@ -1138,15 +1138,20 @@ namespace Game.Network.Packets
             }
         }
 
-        public long Health;
-        public int AttackPower;
-        public int SpellPower;
+        long Health;
+        int AttackPower;
+        int SpellPower;
         List<SpellLogPowerData> PowerData = new List<SpellLogPowerData>();
     }
 
     class SandboxScalingData
     {
-        public bool GenerateDataForUnits(Creature attacker, Player target)
+        bool GenerateDataPlayerToPlayer(Player attacker, Player target)
+        {
+            return false;
+        }
+
+        bool GenerateDataCreatureToPlayer(Creature attacker, Player target)
         {
             CreatureTemplate creatureTemplate = attacker.GetCreatureTemplate();
 
@@ -1162,7 +1167,7 @@ namespace Game.Network.Packets
             return true;
         }
 
-        public bool GenerateDataForUnits(Player attacker, Creature target)
+        bool GenerateDataPlayerToCreature(Player attacker, Creature target)
         {
             CreatureTemplate creatureTemplate = target.GetCreatureTemplate();
 
@@ -1178,7 +1183,7 @@ namespace Game.Network.Packets
             return true;
         }
 
-        public bool GenerateDataForUnits(Creature attacker, Creature target)
+        bool GenerateDataCreatureToCreature(Creature attacker, Creature target)
         {
             CreatureTemplate creatureTemplate = target.HasScalableLevels() ? target.GetCreatureTemplate() : attacker.GetCreatureTemplate();
 
@@ -1203,11 +1208,11 @@ namespace Game.Network.Packets
                 Player playerTarget = target.ToPlayer();
                 Creature creatureTarget = target.ToCreature();
                 if (playerTarget)
-                    return GenerateDataForUnits(playerAttacker, playerTarget);
+                    return GenerateDataPlayerToPlayer(playerAttacker, playerTarget);
                 else if (creatureTarget)
                 {
                     if (creatureTarget.HasScalableLevels())
-                        return GenerateDataForUnits(playerAttacker, creatureTarget);
+                        return GenerateDataPlayerToCreature(playerAttacker, creatureTarget);
                 }
             }
             else if (creatureAttacker)
@@ -1215,11 +1220,14 @@ namespace Game.Network.Packets
                 Player playerTarget = target.ToPlayer();
                 Creature creatureTarget = target.ToCreature();
                 if (playerTarget)
-                    return GenerateDataForUnits(creatureAttacker, playerTarget);
+                {
+                    if (creatureAttacker.HasScalableLevels())
+                        return GenerateDataCreatureToPlayer(creatureAttacker, playerTarget);
+                }
                 else if (creatureTarget)
                 {
                     if (creatureAttacker.HasScalableLevels() || creatureTarget.HasScalableLevels())
-                        return GenerateDataForUnits(creatureAttacker, creatureTarget);
+                        return GenerateDataCreatureToCreature(creatureAttacker, creatureTarget);
                 }
             }
 

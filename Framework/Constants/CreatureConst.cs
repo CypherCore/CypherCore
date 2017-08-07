@@ -236,7 +236,6 @@ namespace Framework.Constants
         MaskDemonOrUnDead = (1 << (Demon - 1)) | (1 << (Undead - 1)),
         MaskHumanoidOrUndead = (1 << (Humanoid - 1)) | (1 << (Undead - 1)),
         MaskMechanicalOrElemental = (1 << (Mechanical - 1)) | (1 << (Elemental - 1))
-
     }
 
     public enum CreatureFamily

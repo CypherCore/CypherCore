@@ -151,6 +151,9 @@ namespace Game
             if (guild.GetLeaderGUID() == player.GetGUID())
             {
                 LFGuildSettings settings = Global.GuildFinderMgr.GetGuildSettings(guild.GetGUID());
+                if (settings == null)
+                    return;
+
                 lfGuildPost.Post.HasValue = true;
                 lfGuildPost.Post.Value.Active = settings.IsListed();
                 lfGuildPost.Post.Value.PlayStyle = settings.GetInterests();

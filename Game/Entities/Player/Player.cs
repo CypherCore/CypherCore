@@ -4116,12 +4116,9 @@ namespace Game.Entities
             if (!IsSectionFlagValid(hair, class_, create))
                 return false;
 
-            if (facialHairId != 0)
-            {
-                CharSectionsRecord facialHair = Global.DB2Mgr.GetCharSectionEntry(race, CharSectionType.FacialHair, gender, facialHairId, hairColor);
-                if (facialHair == null)
-                    return false;
-            }
+            CharSectionsRecord facialHair = Global.DB2Mgr.GetCharSectionEntry(race, CharSectionType.Hair, gender, facialHairId, hairColor);
+            if (facialHair == null)
+                return false;
 
             for (int i = 0; i < PlayerConst.CustomDisplaySize; ++i)
             {
@@ -5902,9 +5899,6 @@ namespace Game.Entities
         {
             return reputationMgr;
         }
-
-
-
 
         #region Sends / Updates
         void BeforeVisibilityDestroy(WorldObject obj, Player p)

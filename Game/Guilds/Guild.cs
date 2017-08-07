@@ -948,9 +948,9 @@ namespace Game.Guilds
 
         public void SendNewsUpdate(WorldSession session)
         {
-            var logs = m_eventLog.GetGuildLog();
+            var logs = m_newsLog.GetGuildLog();
 
-            if (logs == null)
+            if (logs.Empty())
                 return;
 
             GuildNewsPkt packet = new GuildNewsPkt();
@@ -3026,6 +3026,7 @@ namespace Game.Guilds
                 stmt.AddValue(1, m_rankId);
                 stmt.AddValue(2, m_name);
                 stmt.AddValue(3, m_rights);
+                stmt.AddValue(4, m_bankMoneyPerDay);
                 DB.Characters.ExecuteOrAppend(trans, stmt);
             }
 

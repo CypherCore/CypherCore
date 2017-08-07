@@ -969,7 +969,7 @@ namespace Game.Achievements
             guildCriteriaProgress.PlayerGUID = progress.PlayerGUID;
             guildCriteriaProgress.Flags = 0;
 
-            guildCriteriaUpdate.Progress[0] = guildCriteriaProgress;
+            guildCriteriaUpdate.Progress.Add(guildCriteriaProgress);
 
             _owner.BroadcastPacketIfTrackingAchievement(guildCriteriaUpdate, entry.ID);
         }

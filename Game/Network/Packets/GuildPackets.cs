@@ -74,7 +74,7 @@ namespace Game.Network.Packets
         }
 
         public ObjectGuid GuildGUID;
-        public GuildInfo Info;
+        public GuildInfo Info = new GuildInfo();
         public bool HasGuildInfo;
 
         public class GuildInfo
@@ -453,7 +453,7 @@ namespace Game.Network.Packets
         public string NewLeaderName;
         public uint NewLeaderVirtualRealmAddress;
         public ObjectGuid OldLeaderGUID;
-        public string OldLeaderName;
+        public string OldLeaderName = "";
         public uint OldLeaderVirtualRealmAddress;
         public bool SelfPromoted;
     }
@@ -587,11 +587,11 @@ namespace Game.Network.Packets
 
         public override void Read()
         {
-            _worldPacket.WriteBits(Name.Length, 7);
-            _worldPacket.FlushBits();
+            uint nameLen = _worldPacket.ReadBits<uint>(7);
+            _worldPacket.ResetBitPos();
 
             RankOrder = _worldPacket.ReadInt32();
-            _worldPacket.WriteString(Name);
+            Name = _worldPacket.ReadString(nameLen);
         }
 
         public string Name;
@@ -874,10 +874,11 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket .WriteUInt32( Version);
+            _worldPacket.WriteUInt32(Version);
             _worldPacket.WriteUInt32(RewardItems.Count);
 
-            RewardItems.ForEach(p => p.Write(_worldPacket));
+            foreach (var item in RewardItems)
+                item.Write(_worldPacket);
         }
 
         public List<GuildRewardItem> RewardItems;
@@ -1468,9 +1469,10 @@ namespace Game.Network.Packets
             data.WriteUInt32(RaceMask);
             data.WriteUInt32(MinGuildLevel);
             data.WriteUInt32(MinGuildRep);
-            data.WriteUInt32(Cost);
+            data.WriteUInt64(Cost);
 
-            AchievementsRequired.ForEach(p => data.WriteUInt32(p));
+            foreach (var achievementId in AchievementsRequired)
+                data.WriteUInt32(achievementId);
         }
 
         public uint ItemID;

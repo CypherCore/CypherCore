@@ -522,7 +522,7 @@ namespace Game.DataStorage
 
         public CharSectionsRecord GetCharSectionEntry(Race race, CharSectionType genType, Gender gender, byte type, byte color)
         {
-            var list = _charSections.LookupByKey((uint)genType | (uint)((int)gender << 8) | (uint)((int)race << 16));
+            var list = _charSections.LookupByKey((byte)genType | ((byte)gender << 8) | ((byte)race << 16));
             foreach (var charSection in list)
                 if (charSection.Type == type && charSection.Color == color)
                     return charSection;

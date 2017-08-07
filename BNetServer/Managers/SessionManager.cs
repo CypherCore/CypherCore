@@ -127,7 +127,7 @@ namespace BNetServer
                 }
             }
 
-            return new AccountInfo();
+            return null;
         }
 
         public void CleanupLoginTickets(object state)

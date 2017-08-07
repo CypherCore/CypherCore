@@ -626,14 +626,14 @@ namespace Game
 
             Unit unit = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Target);
 
-            GetPlayer().UpdateCriteria(CriteriaTypes.DoEmote, (uint)packet.SoundIndex, 0, 0, unit);
+            GetPlayer().UpdateCriteria(CriteriaTypes.DoEmote, (uint)packet.EmoteID, 0, 0, unit);
 
             // Send scripted event call
             if (unit)
             {
                 Creature creature = unit.ToCreature();
                 if (creature)
-                    creature.GetAI().ReceiveEmote(GetPlayer(), (TextEmotes)packet.SoundIndex);
+                    creature.GetAI().ReceiveEmote(GetPlayer(), (TextEmotes)packet.EmoteID);
             }
         }
 

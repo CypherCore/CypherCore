@@ -30,8 +30,10 @@ namespace Game.Arenas
             TeamId = (int)(team == Team.Alliance ? BattlegroundTeamId.Alliance : BattlegroundTeamId.Horde);
         }
 
-        void BuildPvPLogPlayerDataPacket(PVPLogData.PlayerData playerData)
+        public override void BuildPvPLogPlayerDataPacket(out PVPLogData.PlayerData playerData)
         {
+            base.BuildPvPLogPlayerDataPacket(out playerData);
+
             if (PreMatchRating != 0)
                 playerData.PreMatchRating.Set(PreMatchRating);
 

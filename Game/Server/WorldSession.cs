@@ -160,10 +160,9 @@ namespace Game
                 // some save parts only correctly work in case player present in map/player_lists (pets, etc)
                 if (save)
                 {
-                    int eslot;
                     for (int j = InventorySlots.BuyBackStart; j < InventorySlots.BuyBackEnd; ++j)
                     {
-                        eslot = j - InventorySlots.BuyBackStart;
+                        int eslot = j - InventorySlots.BuyBackStart;
                         _player.SetGuidValue(PlayerFields.InvSlotHead + (j * 4), ObjectGuid.Empty);
                         _player.SetUInt32Value(PlayerFields.BuyBackPrice1 + eslot, 0);
                         _player.SetUInt32Value(PlayerFields.BuyBackTimestamp1 + eslot, 0);
