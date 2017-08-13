@@ -179,7 +179,7 @@ namespace Framework.Constants
         ModWaterBreathing = 155,  //    Mod Water Breathing
         ModReputationGain = 156,  //    Mod Reputation Gain
         PetDamageMulti = 157,  //    Mod Pet Damage
-        ModShieldBlockvalue = 158,
+        AllowTalentSwapping = 158,
         NoPvpCredit = 159,
         Unk160 = 160,  // Old ModAoeAvoidance. Unused 4.3.4
         ModHealthRegenInCombat = 161,

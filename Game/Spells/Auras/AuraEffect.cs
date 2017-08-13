@@ -4165,20 +4165,15 @@ namespace Game.Spells
             target.HandleStatModifier(UnitMods.DamageOffHand, UnitModifierType.TotalPCT, GetAmount(), apply);
         }
 
-        [AuraEffectHandler(AuraType.ModShieldBlockvalue)]
+        [AuraEffectHandler(AuraType.ModShieldBlockvaluePct)]
         void HandleShieldBlockValue(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
                 return;
 
-            Unit target = aurApp.GetTarget();
-
-            BaseModType modType = BaseModType.FlatMod;
-            if (GetAuraType() == AuraType.ModShieldBlockvaluePct)
-                modType = BaseModType.PCTmod;
-
-            if (target.IsTypeId(TypeId.Player))
-                target.ToPlayer().HandleBaseModValue(BaseModGroup.ShieldBlockValue, modType, GetAmount(), apply);
+            Player player = aurApp.GetTarget().ToPlayer();
+            if (player)
+                player.HandleBaseModValue(BaseModGroup.ShieldBlockValue, BaseModType.PCTmod, GetAmount(), apply);
         }
 
         /********************************/
