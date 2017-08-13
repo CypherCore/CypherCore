@@ -307,7 +307,9 @@ namespace Game.Network.Packets
         {
             public void Read(WorldPacket data)
             {
+                RideTicket = new RideTicket();
                 RideTicket.Read(data);
+
                 GroupFinderActivityID = data.ReadUInt32();
                 LastTitleAuthorGuid = data.ReadPackedGuid();
                 LastDescriptionAuthorGuid = data.ReadPackedGuid();
@@ -336,6 +338,7 @@ namespace Game.Network.Packets
         {
             public void Read(WorldPacket data)
             {
+                RideTicket = new RideTicket();
                 RideTicket.Read(data);
 
                 Comment = data.ReadString(data.ReadBits<uint>(9));

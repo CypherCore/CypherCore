@@ -54,7 +54,7 @@ namespace Game.Network.Packets
             Ticket.Read(_worldPacket);
         }
 
-        public RideTicket Ticket;
+        public RideTicket Ticket = new RideTicket();
     }
 
     class DFProposalResponse : ClientPacket
@@ -69,7 +69,7 @@ namespace Game.Network.Packets
             Accepted = _worldPacket.HasBit();
         }
 
-        public RideTicket Ticket;
+        public RideTicket Ticket = new RideTicket();
         public ulong InstanceID;
         public uint ProposalID;
         public bool Accepted;
@@ -194,7 +194,7 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public RideTicket Ticket;
+        public RideTicket Ticket = new RideTicket();
         public byte SubType;
         public byte Reason;
         public List<uint> Slots = new List<uint>();
@@ -735,14 +735,6 @@ namespace Game.Network.Packets
 
     public class RideTicket
     {
-        public RideTicket(ObjectGuid requesterGuid, uint id, RideType type, int time)
-        {
-            RequesterGuid = requesterGuid;
-            Id = id;
-            Type = type;
-            Time = time;
-        }
-
         public void Read(WorldPacket data)
         {
             RequesterGuid = data.ReadPackedGuid();

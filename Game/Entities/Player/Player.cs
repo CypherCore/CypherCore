@@ -5493,7 +5493,6 @@ namespace Game.Entities
             SendPacket(sendSpellCharges);
 
             ActiveGlyphs activeGlyphs = new ActiveGlyphs();
-            //activeGlyphs.Glyphs.reserve(GetGlyphs(GetActiveTalentGroup()).size());
             foreach (uint glyphId in GetGlyphs(GetActiveTalentGroup()))
             {
                 List<uint> bindableSpells = Global.DB2Mgr.GetGlyphBindableSpells(glyphId);

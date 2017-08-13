@@ -567,10 +567,8 @@ namespace Game.BattleGrounds
                 m_PointState[i] = EotSPointState.Uncontrolled;
                 m_PointBarStatus[i] = EotSProgressBarConsts.ProgressBarStateMiddle;
                 m_PlayersNearPoint[i].Clear();
-                //m_PlayersNearPoint[i].reserve(15);                  //tip size
             }
             m_PlayersNearPoint[EotSPoints.PlayersOutOfPoints].Clear();
-            //m_PlayersNearPoint[EotSPoints.PlayersOutOfPoints].reserve(30);
         }
 
         void RespawnFlag(bool send_message)

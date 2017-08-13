@@ -1559,7 +1559,7 @@ namespace Game.BattleGrounds
 
         public void SendMessage2ToAll(CypherStrings entry, ChatMsg type, Player source, CypherStrings arg1 = 0, CypherStrings arg2 = 0)
         {
-            var bg_builder = new BattlegroundChatBuilder(type, entry, source, arg1, arg2);
+            var bg_builder = new Battleground2ChatBuilder(type, entry, source, arg1, arg2);
             var bg_do = new LocalizedPacketDo(bg_builder);
             BroadcastWorker(bg_do);
         }

@@ -494,7 +494,11 @@ namespace Game.DungeonFinding
                 return;
             }
 
-            RideTicket ticket = new RideTicket(guid, GetQueueId(gguid), RideType.Lfg, (int)Time.UnixTime);
+            RideTicket ticket = new RideTicket();
+            ticket.RequesterGuid = guid;
+            ticket.Id = GetQueueId(gguid);
+            ticket.Type = RideType.Lfg;
+            ticket.Time = (int)Time.UnixTime;
 
             string debugNames = "";
             if (grp)                                               // Begin rolecheck

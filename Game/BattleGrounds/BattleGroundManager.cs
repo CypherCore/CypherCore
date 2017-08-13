@@ -125,6 +125,7 @@ namespace Game.BattleGrounds
 
         void BuildBattlegroundStatusHeader(ref BattlefieldStatusHeader header, Battleground bg, Player player, uint ticketId, uint joinTime, ArenaTypes arenaType)
         {
+            header.Ticket = new RideTicket();
             header.Ticket.RequesterGuid = player.GetGUID();
             header.Ticket.Id = ticketId;
             header.Ticket.Type = RideType.Battlegrounds;

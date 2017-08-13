@@ -204,7 +204,7 @@ namespace Game.Network.Packets
             Ticket.Write(_worldPacket);
         }
 
-        public RideTicket Ticket;
+        public RideTicket Ticket = new RideTicket();
     }
 
     public class BattlefieldStatusNeedConfirmation : ServerPacket
@@ -286,7 +286,7 @@ namespace Game.Network.Packets
         public ulong QueueID;
         public ObjectGuid ClientID;
         public int Reason;
-        public RideTicket Ticket;
+        public RideTicket Ticket = new RideTicket();
     }
 
     class BattlemasterJoin : ClientPacket
@@ -339,7 +339,7 @@ namespace Game.Network.Packets
             AcceptedInvite = _worldPacket.HasBit();
         }
 
-        public RideTicket Ticket;
+        public RideTicket Ticket = new RideTicket();
         public bool AcceptedInvite;
     }
 
