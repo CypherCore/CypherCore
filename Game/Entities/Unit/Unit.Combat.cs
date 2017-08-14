@@ -595,7 +595,8 @@ namespace Game.Entities
                 DealDamageMods(victim, ref damageInfo.damage, ref damageInfo.absorb);
                 SendAttackStateUpdate(damageInfo);
 
-                ProcDamageAndSpell(damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, damageInfo.procEx, damageInfo.damage, damageInfo.attackType);
+                DamageInfo dmgInfo = new DamageInfo(damageInfo);
+                ProcSkillsAndAuras(damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, ProcFlagsSpellType.None, ProcFlagsSpellPhase.None, dmgInfo.GetHitMask(), null, dmgInfo, null);
 
                 DealMeleeDamage(damageInfo, true);
 
@@ -646,7 +647,6 @@ namespace Game.Entities
 
             damageInfo.procAttacker = ProcFlags.None;
             damageInfo.procVictim = ProcFlags.None;
-            damageInfo.procEx = ProcFlagsExLegacy.None;
             damageInfo.hitOutCome = MeleeHitOutcome.Normal;
 
             SendAttackStateUpdate(damageInfo);
@@ -808,7 +808,10 @@ namespace Game.Entities
             }
 
             if (IsTypeId(TypeId.Player))
-                ToPlayer().CastItemCombatSpell(victim, damageInfo.attackType, damageInfo.procVictim, damageInfo.procEx);
+            {
+                DamageInfo dmgInfo = new DamageInfo(damageInfo);
+                ToPlayer().CastItemCombatSpell(dmgInfo);
+            }
 
             // Do effect if any damage done to target
             if (damageInfo.damage != 0)
@@ -1431,16 +1434,17 @@ namespace Game.Entities
             // Do KILL and KILLED procs. KILL proc is called only for the unit who landed the killing blow (and its owner - for pets and totems) regardless of who tapped the victim
             if (IsPet() || IsTotem())
             {
+                // proc only once for victim
                 Unit owner = GetOwner();
                 if (owner != null)
-                    owner.ProcDamageAndSpell(victim, ProcFlags.Kill, ProcFlags.None, ProcFlagsExLegacy.None, 0);
+                    owner.ProcSkillsAndAuras(victim, ProcFlags.Kill, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
             }
 
             if (!victim.IsCritter())
-                ProcDamageAndSpell(victim, ProcFlags.Kill, ProcFlags.Killed, ProcFlagsExLegacy.None, 0);
+                ProcSkillsAndAuras(victim, ProcFlags.Kill, ProcFlags.Killed, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
 
             // Proc auras on death - must be before aura/combat remove
-            victim.ProcDamageAndSpell(null, ProcFlags.Death, ProcFlags.None, ProcFlagsExLegacy.None, 0, WeaponAttackType.BaseAttack, null);
+            victim.ProcSkillsAndAuras(victim, ProcFlags.None, ProcFlags.Death, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
 
             // update get killing blow achievements, must be done before setDeathState to be able to require auras on target
             // and before Spirit of Redemption as it also removes auras
@@ -1808,7 +1812,6 @@ namespace Game.Entities
             damageInfo.HitInfo = 0;
             damageInfo.procAttacker = ProcFlags.None;
             damageInfo.procVictim = ProcFlags.None;
-            damageInfo.procEx = ProcFlagsExLegacy.None;
             damageInfo.hitOutCome = MeleeHitOutcome.Evade;
 
             if (victim == null)
@@ -1839,7 +1842,6 @@ namespace Game.Entities
                 damageInfo.HitInfo |= HitInfo.NormalSwing;
                 damageInfo.TargetState = VictimState.Immune;
 
-                damageInfo.procEx |= ProcFlagsExLegacy.Immune;
                 damageInfo.damage = 0;
                 damageInfo.cleanDamage = 0;
                 return;
@@ -1869,25 +1871,22 @@ namespace Game.Entities
                 case MeleeHitOutcome.Evade:
                     damageInfo.HitInfo |= HitInfo.Miss | HitInfo.SwingNoHitSound;
                     damageInfo.TargetState = VictimState.Evades;
-                    damageInfo.procEx |= ProcFlagsExLegacy.Evade;
+
                     damageInfo.damage = 0;
                     damageInfo.cleanDamage = 0;
                     return;
                 case MeleeHitOutcome.Miss:
                     damageInfo.HitInfo |= HitInfo.Miss;
                     damageInfo.TargetState = VictimState.Intact;
-                    damageInfo.procEx |= ProcFlagsExLegacy.Miss;
                     damageInfo.damage = 0;
                     damageInfo.cleanDamage = 0;
                     break;
                 case MeleeHitOutcome.Normal:
                     damageInfo.TargetState = VictimState.Hit;
-                    damageInfo.procEx |= ProcFlagsExLegacy.NormalHit;
                     break;
                 case MeleeHitOutcome.Crit:
                     damageInfo.HitInfo |= HitInfo.CriticalHit;
                     damageInfo.TargetState = VictimState.Hit;
-                    damageInfo.procEx |= ProcFlagsExLegacy.CriticalHit;
                     // Crit bonus calc
                     damageInfo.damage += damageInfo.damage;
                     float mod = 0.0f;
@@ -1905,19 +1904,16 @@ namespace Game.Entities
                     break;
                 case MeleeHitOutcome.Parry:
                     damageInfo.TargetState = VictimState.Parry;
-                    damageInfo.procEx |= ProcFlagsExLegacy.Parry;
                     damageInfo.cleanDamage += damageInfo.damage;
                     damageInfo.damage = 0;
                     break;
                 case MeleeHitOutcome.Dodge:
                     damageInfo.TargetState = VictimState.Dodge;
-                    damageInfo.procEx |= ProcFlagsExLegacy.Dodge;
                     damageInfo.cleanDamage += damageInfo.damage;
                     damageInfo.damage = 0;
                     break;
                 case MeleeHitOutcome.Block:
                     damageInfo.TargetState = VictimState.Hit;
-                    damageInfo.procEx |= ProcFlagsExLegacy.Block | ProcFlagsExLegacy.NormalHit;
                     // 30% damage blocked, double blocked amount if block is critical
                     damageInfo.blocked_amount = MathFunctions.CalculatePct(damageInfo.damage, damageInfo.target.isBlockCritical() ? damageInfo.target.GetBlockPercent() * 2 : damageInfo.target.GetBlockPercent());
                     damageInfo.damage -= damageInfo.blocked_amount;
@@ -1926,7 +1922,6 @@ namespace Game.Entities
                 case MeleeHitOutcome.Glancing:
                     damageInfo.HitInfo |= HitInfo.Glancing;
                     damageInfo.TargetState = VictimState.Hit;
-                    damageInfo.procEx |= ProcFlagsExLegacy.NormalHit;
                     int leveldif = (int)victim.getLevel() - (int)getLevel();
                     if (leveldif > 3)
                         leveldif = 3;
@@ -1938,7 +1933,6 @@ namespace Game.Entities
                 case MeleeHitOutcome.Crushing:
                     damageInfo.HitInfo |= HitInfo.Crushing;
                     damageInfo.TargetState = VictimState.Hit;
-                    damageInfo.procEx |= ProcFlagsExLegacy.NormalHit;
                     // 150% normal damage
                     damageInfo.damage += (damageInfo.damage / 2);
                     break;
@@ -1965,10 +1959,7 @@ namespace Game.Entities
                 CalcAbsorbResist(damageInfo.target, (SpellSchoolMask)damageInfo.damageSchoolMask, DamageEffectType.Direct, damageInfo.damage, ref damageInfo.absorb, ref damageInfo.resist);
 
                 if (damageInfo.absorb != 0)
-                {
                     damageInfo.HitInfo |= (damageInfo.damage - damageInfo.absorb == 0 ? HitInfo.FullAbsorb : HitInfo.PartialAbsorb);
-                    damageInfo.procEx |= ProcFlagsExLegacy.Absorb;
-                }
 
                 if (damageInfo.resist != 0)
                     damageInfo.HitInfo |= (damageInfo.damage - damageInfo.resist == 0 ? HitInfo.FullResist : HitInfo.PartialResist);
@@ -2437,7 +2428,7 @@ namespace Game.Entities
                 if (eff.GetAmount() >= 0)
                 {
                     // Reduce shield amount
-                    eff.SetAmount(eff.GetAmount() - currentAbsorb);
+                    eff.ChangeAmount(eff.GetAmount() - currentAbsorb);
                     // Aura cannot absorb anything more - remove it
                     if (eff.GetAmount() <= 0)
                         eff.GetBase().Remove(AuraRemoveMode.EnemySpell);
@@ -2498,7 +2489,7 @@ namespace Game.Entities
                 // Check if our aura is using amount to count damage
                 if (absorbAurEff.GetAmount() >= 0)
                 {
-                    absorbAurEff.SetAmount(absorbAurEff.GetAmount() - currentAbsorb);
+                    absorbAurEff.ChangeAmount(absorbAurEff.GetAmount() - currentAbsorb);
                     if ((absorbAurEff.GetAmount() <= 0))
                         absorbAurEff.GetBase().Remove(AuraRemoveMode.EnemySpell);
                 }
@@ -2558,7 +2549,8 @@ namespace Game.Entities
                     SendSpellNonMeleeDamageLog(log);
 
                     // break 'Fear' and similar auras
-                    caster.ProcDamageAndSpellFor(true, this, ProcFlags.TakenSpellMagicDmgClassNeg, ProcFlagsExLegacy.NormalHit, WeaponAttackType.BaseAttack, eff.GetSpellInfo(), splitDamage);
+                    DamageInfo damageInfo = new DamageInfo(caster, this, splitDamage, eff.GetSpellInfo(), schoolMask, DamageEffectType.Direct, WeaponAttackType.BaseAttack);
+                    ProcSkillsAndAuras(caster, ProcFlags.None, ProcFlags.TakenSpellMagicDmgClassNeg, ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.Hit, ProcFlagsHit.None, null, damageInfo, null);
                 }
             }
 
@@ -2566,24 +2558,22 @@ namespace Game.Entities
             absorb = dmgInfo.GetAbsorb();
         }
 
-        public void CalcHealAbsorb(Unit victim, SpellInfo healSpell, ref uint healAmount, ref uint absorb)
+        public void CalcHealAbsorb(HealInfo healInfo)
         {
-            if (healAmount == 0)
+            if (healInfo.GetHeal() == 0)
                 return;
-
-            int RemainingHeal = (int)healAmount;
 
             // Need remove expired auras after
             bool existExpired = false;
 
             // absorb without mana cost
-            var vHealAbsorb = victim.GetAuraEffectsByType(AuraType.SchoolHealAbsorb);
+            var vHealAbsorb = healInfo.GetTarget().GetAuraEffectsByType(AuraType.SchoolHealAbsorb);
             foreach (var eff in vHealAbsorb)
             {
-                if (RemainingHeal <= 0)
+                if (healInfo.GetHeal() <= 0)
                     break;
 
-                if (!Convert.ToBoolean(eff.GetMiscValue() & (int)healSpell.SchoolMask))
+                if (!Convert.ToBoolean(eff.GetMiscValue() & (int)healInfo.GetSpellInfo().SchoolMask))
                     continue;
 
                 // Max Amount can be absorbed by this aura
@@ -2598,13 +2588,12 @@ namespace Game.Entities
 
                 // currentAbsorb - damage can be absorbed by shield
                 // If need absorb less damage
-                if (RemainingHeal < currentAbsorb)
-                    currentAbsorb = RemainingHeal;
+                currentAbsorb = (int)Math.Min(healInfo.GetHeal(), currentAbsorb);
 
-                RemainingHeal -= currentAbsorb;
+                healInfo.AbsorbHeal((uint)currentAbsorb);
 
                 // Reduce shield amount
-                eff.SetAmount(eff.GetAmount() - currentAbsorb);
+                eff.ChangeAmount(eff.GetAmount() - currentAbsorb);
                 // Need remove it later
                 if (eff.GetAmount() <= 0)
                     existExpired = true;
@@ -2619,16 +2608,13 @@ namespace Game.Entities
                     ++i;
                     if (auraEff.GetAmount() <= 0)
                     {
-                        uint removedAuras = victim.m_removedAurasCount;
+                        uint removedAuras = healInfo.GetTarget().m_removedAurasCount;
                         auraEff.GetBase().Remove(AuraRemoveMode.EnemySpell);
-                        if (removedAuras + 1 < victim.m_removedAurasCount)
+                        if (removedAuras + 1 < healInfo.GetTarget().m_removedAurasCount)
                             i = 0;
                     }
                 }
             }
-
-            absorb = (uint)(RemainingHeal > 0 ? (healAmount - RemainingHeal) : healAmount);
-            healAmount = (uint)RemainingHeal;
         }
 
         public uint CalcArmorReducedDamage(Unit attacker, Unit victim, uint damage, SpellInfo spellInfo, WeaponAttackType attackType = WeaponAttackType.Max)

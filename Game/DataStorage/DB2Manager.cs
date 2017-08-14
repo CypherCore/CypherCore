@@ -332,6 +332,9 @@ namespace Game.DataStorage
             foreach (var specSpells in CliDB.SpecializationSpellsStorage.Values)
                 _specializationSpellsBySpec.Add(specSpells.SpecID, specSpells);
 
+            foreach (SpellClassOptionsRecord classOption in CliDB.SpellClassOptionsStorage.Values)
+                _spellFamilyNames.Add(classOption.SpellClassSet);
+
             foreach (var power in CliDB.SpellPowerStorage.Values)
             {
                 SpellPowerDifficultyRecord powerDifficulty = CliDB.SpellPowerDifficultyStorage.LookupByKey(power.Id);
@@ -1109,6 +1112,11 @@ namespace Game.DataStorage
             return _specializationSpellsBySpec.LookupByKey(specId);
         }
 
+        bool IsValidSpellFamiliyName(SpellFamilyNames family)
+        {
+            return _spellFamilyNames.Contains((byte)family);
+        }
+
         public List<SpellPowerRecord> GetSpellPowers(uint spellId, Difficulty difficulty = Difficulty.None)
         {
             bool notUsed;
@@ -1334,6 +1342,7 @@ namespace Game.DataStorage
         Dictionary<uint, uint> _rulesetItemUpgrade = new Dictionary<uint, uint>();
         MultiMap<uint, SkillRaceClassInfoRecord> _skillRaceClassInfoBySkill = new MultiMap<uint, SkillRaceClassInfoRecord>();
         MultiMap<uint, SpecializationSpellsRecord> _specializationSpellsBySpec = new MultiMap<uint, SpecializationSpellsRecord>();
+        List<byte> _spellFamilyNames = new List<byte>();
         Dictionary<uint, List<SpellPowerRecord>> _spellPowers = new Dictionary<uint, List<SpellPowerRecord>>();
         Dictionary<uint, Dictionary<uint, List<SpellPowerRecord>>> _spellPowerDifficulties = new Dictionary<uint, Dictionary<uint, List<SpellPowerRecord>>>();
         MultiMap<uint, SpellProcsPerMinuteModRecord> _spellProcsPerMinuteMods = new MultiMap<uint, SpellProcsPerMinuteModRecord>();

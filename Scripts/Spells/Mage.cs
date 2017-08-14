@@ -417,14 +417,14 @@ namespace Scripts.Spells.Mage
 
         bool CheckProc(ProcEventInfo eventInfo)
         {
-            return eventInfo.GetDamageInfo().GetSpellInfo() != null; // eventInfo.GetSpellInfo()
+            return eventInfo.GetProcSpell() != null;
         }
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
 
-            var costs = eventInfo.GetDamageInfo().GetSpellInfo().CalcPowerCost(GetTarget(), eventInfo.GetDamageInfo().GetSchoolMask());
+            var costs = eventInfo.GetProcSpell().GetPowerCost();
             var m = costs.Find(cost => cost.Power == PowerType.Mana);
             if (m != null)
             {

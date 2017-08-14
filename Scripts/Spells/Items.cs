@@ -1444,10 +1444,10 @@ namespace Scripts.Spells.Items
     {
         bool CheckProc(ProcEventInfo eventInfo)
         {
-            SpellInfo spellInfo = eventInfo.GetSpellInfo();
-            if (spellInfo != null)
+            Spell spell = eventInfo.GetProcSpell();
+            if (spell != null)
             {
-                var costs = spellInfo.CalcPowerCost(GetTarget(), spellInfo.GetSchoolMask());
+                var costs = spell.GetPowerCost();
                 var m = costs.FirstOrDefault(cost => { return cost.Power == PowerType.Mana && cost.Amount > 0; });
                 if (m != null)
                     return true;

@@ -2536,30 +2536,51 @@ namespace Scripts.Spells.Generic
         }
     }
 
-    [Script]
+    [Script("spell_pvp_trinket_shared_cd", SpellIds.WillOfTheForsakenCooldownTrigger)]
+    [Script("spell_wotf_shared_cd", SpellIds.WillOfTheForsakenCooldownTriggerWotf)]
     class spell_pvp_trinket_wotf_shared_cd : SpellScript
     {
-        public override bool Load()
+        public spell_pvp_trinket_wotf_shared_cd(uint triggered)
         {
-            return GetCaster().IsTypeId(TypeId.Player);
+            _triggered = triggered;
         }
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.WillOfTheForsakenCooldownTrigger, SpellIds.WillOfTheForsakenCooldownTriggerWotf);
+            return ValidateSpellInfo(_triggered);
         }
 
         void HandleScript()
         {
-            // This is only needed because spells cast from spell_linked_spell are triggered by default
-            // Spell.SendSpellCooldown() skips all spells with TRIGGERED_IGNORE_SPELL_AND_CATEGORY_CD
-            GetCaster().GetSpellHistory().StartCooldown(GetSpellInfo(), 0, GetSpell());
+            /*
+             * @workaround: PendingCast flag normally means 'triggered' spell, however
+             * if the spell is cast triggered, the core won't send SMSG_SPELL_GO packet
+             * so client never registers the cooldown (see Spell::IsNeedSendToClient)
+             *
+             * ServerToClient: SMSG_SPELL_GO (0x0132) Length: 42 ConnIdx: 0 Time: 07/19/2010 02:32:35.000 Number: 362675
+             * Caster GUID: Full: Player
+             * Caster Unit GUID: Full: Player
+             * Cast Count: 0
+             * Spell ID: 72752 (72752)
+             * Cast Flags: PendingCast, Unknown3, Unknown7 (265)
+             * Time: 3901468825
+             * Hit Count: 1
+             * [0] Hit GUID: Player
+             * Miss Count: 0
+             * Target Flags: Unit (2)
+             * Target GUID: 0x0
+            */
+
+            // Spell flags need further research, until then just cast not triggered
+            GetCaster().CastSpell((Unit)null, _triggered, false);
         }
 
         public override void Register()
         {
             AfterCast.Add(new CastHandler(HandleScript));
         }
+
+        uint _triggered;
     }
 
     [Script]

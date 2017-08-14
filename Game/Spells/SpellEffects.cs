@@ -1089,7 +1089,8 @@ namespace Game.Spells
                 healthGain = m_caster.SpellHealingBonusDone(m_caster, m_spellInfo, healthGain, DamageEffectType.Heal, effectInfo);
                 healthGain = m_caster.SpellHealingBonusTaken(m_caster, m_spellInfo, healthGain, DamageEffectType.Heal, effectInfo);
 
-                m_caster.HealBySpell(m_caster, m_spellInfo, healthGain);
+                HealInfo healInfo = new HealInfo(m_caster, m_caster, healthGain, m_spellInfo, m_spellSchoolMask);
+                m_caster.HealBySpell(healInfo);
             }
         }
 
@@ -2877,7 +2878,7 @@ namespace Game.Spells
         [SpellEffectHandler(SpellEffectName.InterruptCast)]
         void EffectInterruptCast(uint effIndex)
         {
-            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+            if (effectHandleMode != SpellEffectHandleMode.LaunchTarget)
                 return;
 
             if (unitTarget == null || !unitTarget.IsAlive())

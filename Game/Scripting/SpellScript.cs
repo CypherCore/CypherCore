@@ -775,6 +775,7 @@ namespace Game.Scripting
         public delegate void AuraEffectAbsorbDelegate(AuraEffect aura, DamageInfo damageInfo, ref uint absorbAmount);
         public delegate void AuraEffectSplitDelegate(AuraEffect aura, DamageInfo damageInfo, uint splitAmount);
         public delegate bool AuraCheckProcDelegate(ProcEventInfo info);
+        public delegate bool AuraCheckEffectProcDelegate(AuraEffect aura , ProcEventInfo info);
         public delegate void AuraProcDelegate(ProcEventInfo info);
         public delegate void AuraEffectProcDelegate(AuraEffect aura, ProcEventInfo info);
 
@@ -961,12 +962,28 @@ namespace Game.Scripting
 
             AuraCheckProcDelegate _HandlerScript;
         }
+        public class CheckEffectProcHandler : EffectBase
+        {
+            public CheckEffectProcHandler(AuraCheckEffectProcDelegate handlerScript, uint effIndex, AuraType effName) : base(effIndex, effName)
+            {
+                _HandlerScript = handlerScript;
+            }
+
+            public bool Call(AuraEffect aurEff, ProcEventInfo eventInfo)
+            {
+                return _HandlerScript(aurEff, eventInfo);
+            }
+
+            AuraCheckEffectProcDelegate _HandlerScript;
+        }
+
         public class AuraProcHandler
         {
             public AuraProcHandler(AuraProcDelegate handlerScript)
             {
                 _HandlerScript = handlerScript;
             }
+
             public void Call(ProcEventInfo eventInfo)
             {
                 _HandlerScript(eventInfo);
@@ -1068,6 +1085,10 @@ namespace Game.Scripting
             foreach (var eff in DoCheckProc)
                 if (!entry.HasEffect(SpellEffectName.ApplyAura) && !entry.HasAreaAuraEffect())
                     Log.outError(LogFilter.Scripts, "Spell `{0}` of script `{1}` does not have apply aura effect - handler bound to hook `DoCheckProc` of AuraScript won't be executed", entry.Id, m_scriptName);
+
+            foreach (var eff in DoCheckEffectProc)
+                if (eff.GetAffectedEffectsMask(entry) == 0)
+                    Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `DoCheckEffectProc` of AuraScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
 
             foreach (var eff in DoPrepareProc)
                 if (!entry.HasEffect(SpellEffectName.ApplyAura) && !entry.HasAreaAuraEffect())
@@ -1246,6 +1267,11 @@ namespace Game.Scripting
         // where function is: bool function (ProcEventInfo& eventInfo);
         public List<CheckProcHandler> DoCheckProc = new List<CheckProcHandler>();
 
+        // executed when aura effect checks if it can proc the aura
+        // example: DoCheckEffectProc += AuraCheckEffectProcFn(class::function, EffectIndexSpecifier, EffectAuraNameSpecifier);
+        // where function is bool function (AuraEffect const* aurEff, ProcEventInfo& eventInfo);
+        public List<CheckEffectProcHandler> DoCheckEffectProc = new List<CheckEffectProcHandler>();
+
         // executed before aura procs (possibility to prevent charge drop/cooldown)
         // example: DoPrepareProc += AuraProcFn(class.function);
         // where function is: void function (ProcEventInfo& eventInfo);
@@ -1383,6 +1409,7 @@ namespace Game.Scripting
                 case AuraScriptHookType.EffectAfterManaShield:
                 case AuraScriptHookType.EffectSplit:
                 case AuraScriptHookType.CheckProc:
+                case AuraScriptHookType.CheckEffectProc:
                 case AuraScriptHookType.PrepareProc:
                 case AuraScriptHookType.Proc:
                 case AuraScriptHookType.AfterProc:

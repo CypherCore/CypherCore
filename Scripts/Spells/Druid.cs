@@ -643,12 +643,12 @@ namespace Scripts.Spells.Druid
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            SpellInfo spellInfo = eventInfo.GetSpellInfo();
-            if (spellInfo == null)
+            Spell spell = eventInfo.GetProcSpell();
+            if (spell == null)
                 return;
 
             Unit caster = eventInfo.GetActor();
-            var costs = spellInfo.CalcPowerCost(caster, spellInfo.GetSchoolMask());
+            var costs = spell.GetPowerCost();
             var m = costs.First(cost => { return cost.Power == PowerType.Mana; });
             if (m == null)
                 return;

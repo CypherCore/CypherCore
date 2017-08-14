@@ -604,7 +604,7 @@ namespace Framework.Constants
         CommandReloadSpellLootTemplate = 695,
         CommandReloadSpellLinkedSpell = 696,
         CommandReloadSpellPetAuras = 697,
-        CommandReloadSpellProcEvent = 698,
+        // 698 - reuse
         CommandReloadSpellProc = 699,
         CommandReloadSpellScripts = 700,
         CommandReloadSpellTargetPosition = 701,

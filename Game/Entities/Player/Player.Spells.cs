@@ -1797,19 +1797,18 @@ namespace Game.Entities
                 return;
 
            List<Aura> aurasQueue = new List<Aura>();
-
             for (var i = 0; i < (int)SpellModOp.Max; ++i)
             {
                 for (var j = 0; j < (int)SpellModType.End; ++j)
                 {
                     foreach (var mod in m_spellMods[i][j])
                     {
-                        // spellmods without aura set cannot be charged
-                        if (mod.ownerAura == null || !mod.ownerAura.IsUsingCharges())
+                        // Spellmods without charged aura set cannot be charged
+                        if (!mod.ownerAura.IsUsingCharges())
                             continue;
 
                         // Restore only specific owner aura mods
-                        if (ownerAuraId != 0 && (ownerAuraId != mod.ownerAura.GetSpellInfo().Id))
+                        if (ownerAuraId != 0 && mod.spellId != ownerAuraId)
                             continue;
 
                         if (aura != null && mod.ownerAura != aura)
@@ -1831,70 +1830,37 @@ namespace Game.Entities
                         // only see the first of its modifier restored)
                         aurasQueue.Add(mod.ownerAura);
 
-                        // add mod charges back to mod
-                        if (mod.charges == -1)
-                            mod.charges = 1;
-                        else
-                            mod.charges++;
-
-                        // Do not set more spellmods than avalible
-                        if (mod.ownerAura.GetCharges() < mod.charges)
-                            mod.charges = mod.ownerAura.GetCharges();
-
-                        // Skip this check for now - aura charges may change due to various reason
-                        /// @todo track these changes correctly
-                        //ASSERT (mod->ownerAura->GetCharges() <= mod->charges);
+                        // add charges back to aura
+                        mod.ownerAura.ModCharges(1);
                     }
                 }
             }
 
             foreach (var removeAura in aurasQueue)
+                spell.m_appliedMods.Remove(aura);
+        }
+
+        public void RestoreAllSpellMods(uint ownerAuraId = 0, Aura aura = null)
+        {
+            for (CurrentSpellTypes i = 0; i < CurrentSpellTypes.Max; ++i)
             {
-                var appliedMod = spell.m_appliedMods.Find(p => p == removeAura);
-                if (appliedMod != null)
-                    spell.m_appliedMods.Remove(appliedMod);
+                Spell spell = m_currentSpells[i];
+                if (spell != null)
+                    RestoreSpellMods(spell, ownerAuraId, aura);
             }
         }
 
-        public void RestoreAllSpellMods(uint ownerAuraId, Aura aura)
-        {
-            for (CurrentSpellTypes i = 0; i < CurrentSpellTypes.Max; ++i)
-                if (GetCurrentSpell(i) != null)
-                    RestoreSpellMods(m_currentSpells[i], ownerAuraId, aura);
-        }
-
-        public void RemoveSpellMods(Spell spell)
+        public void ApplyModToSpell(SpellModifier mod, Spell spell)
         {
             if (spell == null)
                 return;
 
-            if (spell.m_appliedMods.Empty())
+            // don't do anything with no charges
+            if (mod.ownerAura.IsUsingCharges() && mod.ownerAura.GetCharges() == 0)
                 return;
 
-            for (var i = 0; i < (int)SpellModOp.Max; ++i)
-            {
-                for (var j = 0; j < (int)SpellModType.End; ++j)
-                {
-                    for (var c = 0; c < m_spellMods[i][j].Count; c++)
-                    {
-                        SpellModifier mod = m_spellMods[i][j][c];
-                        // spellmods without aura set cannot be charged
-                        if (mod.ownerAura == null || !mod.ownerAura.IsUsingCharges())
-                            continue;
-
-                        // check if mod affected this spell
-                        var iterMod = spell.m_appliedMods.Find(p => p == mod.ownerAura);
-                        if (iterMod == null)
-                            continue;
-
-                        // remove from list
-                        spell.m_appliedMods.Remove(iterMod);
-
-                        if (mod.ownerAura.DropCharge(AuraRemoveMode.Expire))
-                            c = 0;
-                    }
-                }
-            }
+            // register inside spell, proc system uses this to drop charges
+            spell.m_appliedMods.Add(mod.ownerAura);
         }
 
         public void LearnCustomSpells()
@@ -2643,25 +2609,71 @@ namespace Game.Entities
             if (m_spellModTakingSpell != null)
                 spell = m_spellModTakingSpell;
 
+            switch (op)
+            {
+                // special case, if a mod makes spell instant, only consume that mod
+                case SpellModOp.CastingTime:
+                    {
+                        SpellModifier modInstantSpell = null;
+                        foreach (SpellModifier mod in m_spellMods[(int)op][(int)SpellModType.Pct])
+                        {
+                            if (!IsAffectedBySpellmod(spellInfo, mod, spell))
+                                continue;
+
+                            if (Convert.ToInt64(basevalue) < 10000 && mod.value <= -100)
+                            {
+                                modInstantSpell = mod;
+                                break;
+                            }
+                        }
+
+                        if (modInstantSpell != null)
+                        {
+                            ApplyModToSpell(modInstantSpell, spell);
+                            basevalue = default(T);
+                            return;
+                        }
+                        break;
+                    }
+                // special case if two mods apply 100% critical chance, only consume one
+                case SpellModOp.CriticalChance:
+                    {
+                        SpellModifier modCritical = null;
+                        foreach (SpellModifier mod in m_spellMods[(int)op][(int)SpellModType.Flat])
+                        {
+                            if (!IsAffectedBySpellmod(spellInfo, mod, spell))
+                                continue;
+
+                            if (mod.value >= 100)
+                            {
+                                modCritical = mod;
+                                break;
+                            }
+                        }
+
+                        if (modCritical != null)
+                        {
+                            ApplyModToSpell(modCritical, spell);
+                            basevalue = (T)Convert.ChangeType(100, typeof(T));
+                            return;
+                        }
+                        break;
+                    }
+                default:
+                    break;
+            }
+
             foreach (var mod in m_spellMods[(int)op][(int)SpellModType.Flat])
             {
-                // Charges can be set only for mods with auras
-                if (mod.ownerAura == null)
-                    Contract.Assert(mod.charges == 0);
-
                 if (!IsAffectedBySpellmod(spellInfo, mod, spell))
                     continue;
 
                 totalflat += mod.value;
-                DropModCharge(mod, spell);
+                ApplyModToSpell(mod, spell);
             }
 
             foreach (var mod in m_spellMods[(int)op][(int)SpellModType.Pct])
             {
-                // Charges can be set only for mods with auras
-                if (mod.ownerAura == null)
-                    Contract.Assert(mod.charges == 0);
-
                 if (!IsAffectedBySpellmod(spellInfo, mod, spell))
                     continue;
 
@@ -2670,22 +2682,26 @@ namespace Game.Entities
                     continue;
 
                 // special case (skip > 10sec spell casts for instant cast setting)
-                if (mod.op == SpellModOp.CastingTime && Convert.ToInt64(basevalue) >= 10000 && mod.value <= -100)
-                    continue;
+                if (op == SpellModOp.CastingTime)
+                {
+                    if (Convert.ToInt32(basevalue) >= 10000 && mod.value <= -100)
+                        continue;
+                }
 
                 totalmul *= 1.0f + MathFunctions.CalculatePct(1.0f, mod.value);
-                DropModCharge(mod, spell);
+                ApplyModToSpell(mod, spell);
             }
 
             basevalue = (T)Convert.ChangeType(((Convert.ToSingle(basevalue) + totalflat) * totalmul), typeof(T));
         }
+
         bool IsAffectedBySpellmod(SpellInfo spellInfo, SpellModifier mod, Spell spell)
         {
             if (mod == null || spellInfo == null)
                 return false;
 
-            // Mod out of charges
-            if (spell != null && mod.charges == -1 && !spell.m_appliedMods.Contains(mod.ownerAura))
+            // First time this aura applies a mod to us and is out of charges
+            if (spell && mod.ownerAura.IsUsingCharges() && mod.ownerAura.GetCharges() == 0 && !spell.m_appliedMods.Contains(mod.ownerAura))
                 return false;
 
             // +duration to infinite duration spells making them limited
@@ -2693,21 +2709,6 @@ namespace Game.Entities
                 return false;
 
             return spellInfo.IsAffectedBySpellMod(mod);
-        }
-        void DropModCharge(SpellModifier mod, Spell spell)
-        {
-            // don't handle spells with proc_event entry defined
-            // this is a temporary workaround, because all spellmods should be handled like that
-            if (Global.SpellMgr.GetSpellProcEvent(mod.spellId) != null)
-                return;
-
-            if (spell != null && mod.ownerAura != null && mod.charges > 0)
-            {
-                if (--mod.charges == 0)
-                    mod.charges = -1;
-
-                spell.m_appliedMods.Add(mod.ownerAura);
-            }
         }
 
         public void SetSpellModTakingSpell(Spell spell, bool apply)
@@ -2992,10 +2993,62 @@ namespace Game.Entities
             return false;
         }
 
-        public void CastItemCombatSpell(Unit target, WeaponAttackType attType, ProcFlags procVictim, ProcFlagsExLegacy procEx, Item item, ItemTemplate proto)
+        public void CastItemCombatSpell(DamageInfo damageInfo)
+        {
+            Unit target = damageInfo.GetVictim();
+            if (target == null || !target.IsAlive() || target == this)
+                return;
+
+            for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
+            {
+                // If usable, try to cast item spell
+                Item item = GetItemByPos(InventorySlots.Bag0, i);
+                if (item != null)
+                {
+                    if (!item.IsBroken() && CanUseAttackType(damageInfo.GetAttackType()))
+                    {
+                        ItemTemplate proto = item.GetTemplate();
+                        if (proto != null)
+                        {
+                            // Additional check for weapons
+                            if (proto.GetClass() == ItemClass.Weapon)
+                            {
+                                // offhand item cannot proc from main hand hit etc
+                                byte slot;
+                                switch (damageInfo.GetAttackType())
+                                {
+                                    case WeaponAttackType.BaseAttack:
+                                    case WeaponAttackType.RangedAttack:
+                                        slot = EquipmentSlot.MainHand;
+                                        break;
+                                    case WeaponAttackType.OffAttack:
+                                        slot = EquipmentSlot.OffHand;
+                                        break;
+                                    default:
+                                        slot = EquipmentSlot.End;
+                                        break;
+                                }
+                                if (slot != i)
+                                    continue;
+                                // Check if item is useable (forms or disarm)
+                                if (damageInfo.GetAttackType() == WeaponAttackType.BaseAttack)
+                                    if (!IsUseEquipedWeapon(true) && !IsInFeralForm())
+                                        continue;
+                            }
+
+                            CastItemCombatSpell(damageInfo, item, proto);
+                        }
+                    }
+                }
+            }
+        }
+
+        public void CastItemCombatSpell(DamageInfo damageInfo, Item item, ItemTemplate proto)
         {
             // Can do effect if any damage done to target
-            if (procVictim.HasAnyFlag(ProcFlags.TakenDamage))
+            // for done procs allow normal + critical + absorbs by default
+            bool canTrigger = damageInfo.GetHitMask().HasAnyFlag(ProcFlagsHit.Normal | ProcFlagsHit.Critical | ProcFlagsHit.Absorb);
+            if (canTrigger)
             {
                 for (byte i = 0; i < proto.Effects.Count; ++i)
                 {
@@ -3024,14 +3077,14 @@ namespace Game.Entities
 
                     if (proto.SpellPPMRate != 0)
                     {
-                        uint WeaponSpeed = GetBaseAttackTime(attType);
+                        uint WeaponSpeed = GetBaseAttackTime(damageInfo.GetAttackType());
                         chance = GetPPMProcChance(WeaponSpeed, proto.SpellPPMRate, spellInfo);
                     }
                     else if (chance > 100.0f)
                         chance = GetWeaponProcChance();
 
                     if (RandomHelper.randChance(chance))
-                        CastSpell(target, spellInfo.Id, true, item);
+                        CastSpell(damageInfo.GetVictim(), spellInfo.Id, true, item);
                 }
             }
 
@@ -3053,13 +3106,13 @@ namespace Game.Entities
                     if (entry != null && entry.procEx != 0)
                     {
                         // Check hit/crit/dodge/parry requirement
-                        if ((entry.procEx & procEx) == 0)
+                        if (((uint)entry.procEx & (uint)damageInfo.GetHitMask()) == 0)
                             continue;
                     }
                     else
                     {
-                        // Can do effect if any damage done to target
-                        if (!Convert.ToBoolean(procVictim & ProcFlags.TakenDamage))
+                        // for done procs allow normal + critical + absorbs by default
+                        if (!canTrigger)
                             continue;
                     }
 
@@ -3093,55 +3146,9 @@ namespace Game.Entities
                         if (spellInfo.IsPositive())
                             CastSpell(this, spellInfo, true, item);
                         else
-                            CastSpell(target, spellInfo, true, item);
+                            CastSpell(damageInfo.GetVictim(), spellInfo, true, item);
                     }
                 }
-            }
-        }
-
-        public void CastItemCombatSpell(Unit target, WeaponAttackType attType, ProcFlags procVictim, ProcFlagsExLegacy procEx)
-        {
-            if (target == null || !target.IsAlive() || target == this)
-                return;
-
-            for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
-            {
-                // If usable, try to cast item spell
-                Item item = GetItemByPos(InventorySlots.Bag0, i);
-                if (item != null)
-                    if (!item.IsBroken() && CanUseAttackType(attType))
-                    {
-                        ItemTemplate proto = item.GetTemplate();
-                        if (proto != null)
-                        {
-                            // Additional check for weapons
-                            if (proto.GetClass() == ItemClass.Weapon)
-                            {
-                                // offhand item cannot proc from main hand hit etc
-                                byte slot;
-                                switch (attType)
-                                {
-                                    case WeaponAttackType.BaseAttack:
-                                    case WeaponAttackType.RangedAttack:
-                                        slot = EquipmentSlot.MainHand;
-                                        break;
-                                    case WeaponAttackType.OffAttack:
-                                        slot = EquipmentSlot.OffHand;
-                                        break;
-                                    default:
-                                        slot = EquipmentSlot.End;
-                                        break;
-                                }
-                                if (slot != i)
-                                    continue;
-                                // Check if item is useable (forms or disarm)
-                                if (attType == WeaponAttackType.BaseAttack)
-                                    if (!IsUseEquipedWeapon(true) && !IsInFeralForm())
-                                        continue;
-                            }
-                            CastItemCombatSpell(target, attType, procVictim, procEx, item, proto);
-                        }
-                    }
             }
         }
 

@@ -433,9 +433,6 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Spell Learn Spells...");
             Global.SpellMgr.LoadSpellLearnSpells();
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading Spell Proc Event conditions...");
-            Global.SpellMgr.LoadSpellProcEvents();
-
             Log.outInfo(LogFilter.ServerLoading, "Loading Spell Proc conditions and data...");
             Global.SpellMgr.LoadSpellProcs();
 

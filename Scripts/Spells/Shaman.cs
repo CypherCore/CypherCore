@@ -442,17 +442,14 @@ namespace Scripts.Spells.Shaman
 
         bool CheckProc(ProcEventInfo eventInfo)
         {
-            return eventInfo.GetSpellInfo() != null;
+            return eventInfo.GetProcSpell() != null;
         }
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            SpellInfo spellInfo = eventInfo.GetSpellInfo();
-            if (spellInfo == null)
-                return;
 
-            var costs = eventInfo.GetDamageInfo().GetSpellInfo().CalcPowerCost(GetTarget(), eventInfo.GetDamageInfo().GetSchoolMask());
+            var costs = eventInfo.GetProcSpell().GetPowerCost();
             var m = costs.Find(cost => cost.Power == PowerType.Mana);
             if (m != null)
             {

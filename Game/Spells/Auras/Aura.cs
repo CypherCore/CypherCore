@@ -742,10 +742,9 @@ namespace Game.Spells
                 m_timeCla = 1 * Time.InMilliseconds;
         }
 
-        void RefreshTimers()
+        void RefreshTimers(bool resetPeriodicTimer)
         {
             m_maxDuration = CalcMaxDuration();
-            bool resetPeriodic = true;
             if (m_spellInfo.HasAttribute(SpellAttr8.DontResetPeriodicTimer))
             {
                 int minPeriod = m_maxDuration;
@@ -764,15 +763,18 @@ namespace Game.Spells
                 if (GetDuration() <= minPeriod)
                 {
                     m_maxDuration += GetDuration();
-                    resetPeriodic = false;
+                    resetPeriodicTimer = false;
                 }
             }
 
             RefreshDuration();
             Unit caster = GetCaster();
             for (byte i = 0; i < SpellConst.MaxEffects; ++i)
-                if (HasEffect(i))
-                    GetEffect(i).CalculatePeriodic(caster, resetPeriodic, false);
+            {
+                AuraEffect aurEff = GetEffect(i);
+                if (aurEff != null)
+                    aurEff.CalculatePeriodic(caster, resetPeriodicTimer, false);
+            }
         }
 
         public void SetCharges(int charges)
@@ -853,7 +855,7 @@ namespace Game.Spells
             SetNeedClientUpdateForTargets();
         }
 
-        public bool ModStackAmount(int num, AuraRemoveMode removeMode = AuraRemoveMode.Default)
+        public bool ModStackAmount(int num, AuraRemoveMode removeMode = AuraRemoveMode.Default, bool resetPeriodicTimer = true)
         {
             int stackAmount = m_stackAmount + num;
 
@@ -881,22 +883,10 @@ namespace Game.Spells
             if (refresh)
             {
                 RefreshSpellMods();
-                RefreshTimers();
+                RefreshTimers(resetPeriodicTimer);
 
                 // reset charges
                 SetCharges(CalcMaxCharges());
-                // FIXME: not a best way to synchronize charges, but works
-                for (byte i = 0; i < SpellConst.MaxEffects; ++i)
-                {
-                    AuraEffect aurEff = GetEffect(i);
-                    if (aurEff != null)
-                        if (aurEff.GetAuraType() == AuraType.AddFlatModifier || aurEff.GetAuraType() == AuraType.AddPctModifier)
-                        {
-                            SpellModifier mod = aurEff.GetSpellModifier();
-                            if (mod != null)
-                                mod.charges = GetCharges();
-                        }
-                }
             }
             SetNeedClientUpdateForTargets();
             return false;
@@ -1668,7 +1658,7 @@ namespace Game.Spells
             m_procCooldown = cooldownEnd;
         }
 
-        void PrepareProcToTrigger(AuraApplication aurApp, ProcEventInfo eventInfo, DateTime now)
+        public void PrepareProcToTrigger(AuraApplication aurApp, ProcEventInfo eventInfo, DateTime now)
         {
             bool prepare = CallScriptPrepareProcHandlers(aurApp, eventInfo);
             if (!prepare)
@@ -1687,43 +1677,80 @@ namespace Game.Spells
 
             // cooldowns should be added to the whole aura (see 51698 area aura)
             AddProcCooldown(now + TimeSpan.FromMilliseconds(procEntry.Cooldown));
+
+            SetLastProcSuccessTime(now);
         }
 
-        bool IsProcTriggeredOnEvent(AuraApplication aurApp, ProcEventInfo eventInfo, DateTime now)
+        public uint IsProcTriggeredOnEvent(AuraApplication aurApp, ProcEventInfo eventInfo, DateTime now)
         {
             SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry(GetId());
             // only auras with spell proc entry can trigger proc
             if (procEntry == null)
-                return false;
+                return 0;
 
             // check if we have charges to proc with
-            if (IsUsingCharges() && GetCharges() == 0)
-                return false;
+            if (IsUsingCharges())
+            {
+                if (GetCharges() == 0)
+                    return 0;
+
+                if (procEntry.AttributesMask.HasAnyFlag(ProcAttributes.ReqSpellmod))
+                {
+                    Spell spell = eventInfo.GetProcSpell();
+                    if (spell != null)
+                        if (!spell.m_appliedMods.Contains(this))
+                            return 0;
+                }
+            }
 
             // check proc cooldown
             if (IsProcOnCooldown(now))
-                return false;
-
-            /// @todo
-            // something about triggered spells triggering, and add extra attack effect
+                return 0;
 
             // do checks against db data
             if (!Global.SpellMgr.CanSpellTriggerProcOnEvent(procEntry, eventInfo))
-                return false;
+                return 0;
+
+            // check if aura can proc when spell is triggered
+            if (!procEntry.AttributesMask.HasAnyFlag(ProcAttributes.TriggeredCanProc))
+            {
+                Spell spell = eventInfo.GetProcSpell();
+                if (spell)
+                    if (spell.IsTriggered())
+                        if (!GetSpellInfo().HasAttribute(SpellAttr3.CanProcWithTriggered))
+                            return 0;
+            }
 
             // do checks using conditions table
             if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.SpellProc, GetId(), eventInfo.GetActor(), eventInfo.GetActionTarget()))
-                return false;
+                return 0;
 
             // AuraScript Hook
             bool check = CallScriptCheckProcHandlers(aurApp, eventInfo);
             if (!check)
-                return false;
+                return 0;
+
+            // At least one effect has to pass checks to proc aura
+            uint procEffectMask = 0;
+            for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+                if (aurApp.HasEffect(i))
+                    if (GetEffect(i).CheckEffectProc(aurApp, eventInfo))
+                        procEffectMask |= (1u << i);
+
+            if (procEffectMask == 0)
+                return 0;
 
             /// @todo
             // do allow additional requirements for procs
             // this is needed because this is the last moment in which you can prevent aura charge drop on proc
             // and possibly a way to prevent default checks (if there're going to be any)
+
+            // Aura added by spell can't trigger from self (prevent drop charges/do triggers)
+            // But except periodic and kill triggers (can triggered from self)
+            SpellInfo spellInfo = eventInfo.GetSpellInfo();
+            if (spellInfo != null)
+                if (spellInfo.Id == GetId() && !eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.TakenPeriodic | ProcFlags.Kill))
+                    return 0;
 
             // Check if current equipment meets aura requirements
             // do that only for passive spells
@@ -1734,11 +1761,12 @@ namespace Game.Spells
                 if (GetSpellInfo().EquippedItemClass == ItemClass.Weapon)
                 {
                     if (target.ToPlayer().IsInFeralForm())
-                        return false;
+                        return 0;
 
-                    if (eventInfo.GetDamageInfo() != null)
+                    DamageInfo damageInfo = eventInfo.GetDamageInfo();
+                    if (damageInfo != null)
                     {
-                        WeaponAttackType attType = eventInfo.GetDamageInfo().GetAttackType();
+                        WeaponAttackType attType = damageInfo.GetAttackType();
                         Item item = null;
                         if (attType == WeaponAttackType.BaseAttack || attType == WeaponAttackType.RangedAttack)
                             item = target.ToPlayer().GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
@@ -1746,7 +1774,7 @@ namespace Game.Spells
                             item = target.ToPlayer().GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
 
                         if (item == null || item.IsBroken() || item.GetTemplate().GetClass() != ItemClass.Weapon || !Convert.ToBoolean((1 << (int)item.GetTemplate().GetSubClass()) & GetSpellInfo().EquippedItemSubClassMask))
-                            return false;
+                            return 0;
                     }
                 }
                 else if (GetSpellInfo().EquippedItemClass == ItemClass.Armor)
@@ -1754,11 +1782,16 @@ namespace Game.Spells
                     // Check if player is wearing shield
                     Item item = target.ToPlayer().GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
                     if (item == null || item.IsBroken() || item.GetTemplate().GetClass() != ItemClass.Armor || !Convert.ToBoolean((1 << (int)item.GetTemplate().GetSubClass()) & GetSpellInfo().EquippedItemSubClassMask))
-                        return false;
+                        return 0;
                 }
             }
 
-            return RandomHelper.randChance(CalcProcChance(procEntry, eventInfo));
+            SetLastProcAttemptTime(now);
+
+            if (RandomHelper.randChance(CalcProcChance(procEntry, eventInfo)))
+                return procEffectMask;
+
+            return 0;
         }
 
         float CalcProcChance(SpellProcEntry procEntry, ProcEventInfo eventInfo)
@@ -1775,6 +1808,10 @@ namespace Game.Spells
                     uint WeaponSpeed = caster.GetBaseAttackTime(eventInfo.GetDamageInfo().GetAttackType());
                     chance = caster.GetPPMProcChance(WeaponSpeed, procEntry.ProcsPerMinute, GetSpellInfo());
                 }
+
+                if (GetSpellInfo().ProcBasePPM > 0.0f)
+                    chance = CalcPPMProcChance(caster);
+
                 // apply chance modifer aura, applies also to ppm chance (see improved judgement of light spell)
                 Player modOwner = caster.GetSpellModOwner();
                 if (modOwner != null)
@@ -1783,18 +1820,23 @@ namespace Game.Spells
             return chance;
         }
 
-        void TriggerProcOnEvent(AuraApplication aurApp, ProcEventInfo eventInfo)
+        public void TriggerProcOnEvent(uint procEffectMask, AuraApplication aurApp, ProcEventInfo eventInfo)
         {
-            CallScriptProcHandlers(aurApp, eventInfo);
-
-            for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+            bool prevented = CallScriptProcHandlers(aurApp, eventInfo);
+            if (!prevented)
             {
-                if (aurApp.HasEffect(i))
-                    // OnEffectProc / AfterEffectProc hooks handled in AuraEffect.HandleProc()
-                    GetEffect(i).HandleProc(aurApp, eventInfo);
-            }
+                for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+                {
+                    if (!Convert.ToBoolean(procEffectMask & (1 << i)))
+                        continue;
 
-            CallScriptAfterProcHandlers(aurApp, eventInfo);
+                    // OnEffectProc / AfterEffectProc hooks handled in AuraEffect.HandleProc()
+                    if (aurApp.HasEffect(i))
+                        GetEffect(i).HandleProc(aurApp, eventInfo);
+                }
+
+                CallScriptAfterProcHandlers(aurApp, eventInfo);
+            }
 
             // Remove aura if we've used last charge to proc
             if (IsUsingCharges() && GetCharges() == 0)
@@ -2157,6 +2199,23 @@ namespace Game.Spells
             }
         }
 
+        public bool CallScriptCheckEffectProcHandlers(AuraEffect aurEff, AuraApplication aurApp, ProcEventInfo eventInfo)
+        {
+            bool result = true;
+            foreach (var auraScript in m_loadedScripts)
+            {
+                auraScript._PrepareScriptCall(AuraScriptHookType.CheckEffectProc, aurApp);
+
+                foreach (var hook in auraScript.DoCheckEffectProc)
+                    if (hook.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
+                        result &= hook.Call(aurEff, eventInfo);
+
+                auraScript._FinishScriptCall();
+            }
+
+            return result;
+        }
+
         public bool CallScriptEffectProcHandlers(AuraEffect aurEff, AuraApplication aurApp, ProcEventInfo eventInfo)
         {
             bool preventDefault = false;
@@ -2308,7 +2367,7 @@ namespace Game.Spells
         public void SetLastProcSuccessTime(DateTime lastProcSuccessTime) { m_lastProcSuccessTime = lastProcSuccessTime; }
 
         //Static Methods
-        public static uint BuildEffectMaskForOwner(SpellInfo spellProto, uint avalibleEffectMask, WorldObject owner)
+        public static uint BuildEffectMaskForOwner(SpellInfo spellProto, uint availableEffectMask, WorldObject owner)
         {
             Contract.Assert(spellProto != null);
             Contract.Assert(owner != null);
@@ -2333,24 +2392,25 @@ namespace Game.Spells
                 default:
                     break;
             }
-            return (effMask & avalibleEffectMask);
+            return (effMask & availableEffectMask);
         }
-        public static Aura TryRefreshStackOrCreate(SpellInfo spellproto, ObjectGuid castId, uint tryEffMask, WorldObject owner, Unit caster, int[] baseAmount = null, Item castItem = null, ObjectGuid casterGUID = default(ObjectGuid), int castItemLevel = -1)
+        public static Aura TryRefreshStackOrCreate(SpellInfo spellproto, ObjectGuid castId, uint tryEffMask, WorldObject owner, Unit caster, int[] baseAmount = null, Item castItem = null, ObjectGuid casterGUID = default(ObjectGuid), bool resetPeriodicTimer = true, int castItemLevel = -1)
         {
             bool throwway;
-            return TryRefreshStackOrCreate(spellproto, castId, tryEffMask, owner, caster, out throwway, baseAmount, castItem, casterGUID);
+            return TryRefreshStackOrCreate(spellproto, castId, tryEffMask, owner, caster, out throwway, baseAmount, castItem, casterGUID, resetPeriodicTimer, castItemLevel);
         }
-        public static Aura TryRefreshStackOrCreate(SpellInfo spellproto, ObjectGuid castId, uint tryEffMask, WorldObject owner, Unit caster, out bool refresh, int[] baseAmount, Item castItem = null, ObjectGuid casterGUID = default(ObjectGuid), int castItemLevel = -1)
+        public static Aura TryRefreshStackOrCreate(SpellInfo spellproto, ObjectGuid castId, uint tryEffMask, WorldObject owner, Unit caster, out bool refresh, int[] baseAmount, Item castItem = null, ObjectGuid casterGUID = default(ObjectGuid), bool resetPeriodicTimer = true, int castItemLevel = -1)
         {
             Contract.Assert(spellproto != null);
             Contract.Assert(owner != null);
             Contract.Assert(caster || !casterGUID.IsEmpty());
             Contract.Assert(tryEffMask <= SpellConst.MaxEffectMask);
             refresh = false;
+
             uint effMask = BuildEffectMaskForOwner(spellproto, tryEffMask, owner);
             if (effMask == 0)
                 return null;
-            Aura foundAura = owner.ToUnit()._TryStackingOrRefreshingExistingAura(spellproto, effMask, caster, baseAmount, castItem, casterGUID, castItemLevel);
+            Aura foundAura = owner.ToUnit()._TryStackingOrRefreshingExistingAura(spellproto, effMask, caster, baseAmount, castItem, casterGUID, resetPeriodicTimer, castItemLevel);
             if (foundAura != null)
             {
                 // we've here aura, which script triggered removal after modding stack amount

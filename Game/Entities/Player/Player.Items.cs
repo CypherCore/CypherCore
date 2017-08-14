@@ -4289,9 +4289,23 @@ namespace Game.Entities
             if (proto.GetFlags().HasAnyFlag(ItemFlags.NoEquipCooldown))
                 return;
 
+            DateTime now = DateTime.Now;
             for (byte i = 0; i < proto.Effects.Count; ++i)
             {
                 var effectData = proto.Effects[i];
+
+                // apply proc cooldown to equip auras if we have any
+                if (effectData.Trigger == ItemSpelltriggerType.OnEquip)
+                {
+                    SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry(effectData.SpellID);
+                    if (procEntry == null)
+                        continue;
+
+                    Aura itemAura = GetAura(effectData.SpellID, GetGUID(), pItem.GetGUID());
+                    if (itemAura != null)
+                        itemAura.AddProcCooldown(now + TimeSpan.FromMilliseconds(procEntry.Cooldown));
+                    continue;
+                }
 
                 // no spell
                 if (effectData.SpellID == 0)

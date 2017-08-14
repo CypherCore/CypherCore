@@ -43,6 +43,7 @@ namespace Framework.Constants
         AfterDispel,
         // Spell Proc Hooks
         CheckProc,
+        CheckEffectProc,
         PrepareProc,
         Proc,
         EffectProc,

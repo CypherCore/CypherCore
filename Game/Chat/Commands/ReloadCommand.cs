@@ -800,15 +800,6 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("spell_proc_event", RBACPermissions.CommandReloadSpellLinkedSpell, true)]
-        static bool HandleReloadSpellProcEventCommand(StringArguments args, CommandHandler handler)
-        {
-            Log.outInfo(LogFilter.Server, "Re-Loading Spell Proc Event conditions...");
-            Global.SpellMgr.LoadSpellProcEvents();
-            handler.SendGlobalGMSysMessage("DB table `spell_proc_event` (spell proc trigger requirements) reloaded.");
-            return true;
-        }
-
         [Command("spell_proc", RBACPermissions.CommandReloadSpellProc, true)]
         static bool HandleReloadSpellProcsCommand(StringArguments args, CommandHandler handler)
         {
@@ -1103,7 +1094,6 @@ namespace Game.Chat
                 HandleReloadSpellGroupsCommand(null, handler);
                 HandleReloadSpellLearnSpellCommand(null, handler);
                 HandleReloadSpellLinkedSpellCommand(null, handler);
-                HandleReloadSpellProcEventCommand(null, handler);
                 HandleReloadSpellProcsCommand(null, handler);
                 HandleReloadSpellTargetPositionCommand(null, handler);
                 HandleReloadSpellThreatsCommand(null, handler);

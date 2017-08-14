@@ -154,23 +154,10 @@ namespace Game.Entities
         public DiminishingLevels hitCount;
     }
 
-    public class ProcTriggeredData
-    {
-        public ProcTriggeredData(Aura _aura)
-        {
-            aura = _aura;
-            effMask = 0;
-            spellProcEvent = null;
-        }
-        public SpellProcEventEntry spellProcEvent;
-        public Aura aura;
-        public uint effMask;
-    }
-
     public class ProcEventInfo
     {
-        public ProcEventInfo(Unit actor, Unit actionTarget, Unit procTarget, uint typeMask, uint spellTypeMask,
-            uint spellPhaseMask, uint hitMask, Spell spell, DamageInfo damageInfo, HealInfo healInfo)
+        public ProcEventInfo(Unit actor, Unit actionTarget, Unit procTarget, ProcFlags typeMask, ProcFlagsSpellType spellTypeMask,
+            ProcFlagsSpellPhase spellPhaseMask, ProcFlagsHit hitMask, Spell spell, DamageInfo damageInfo, HealInfo healInfo)
         {
             _actor = actor;
             _actionTarget = actionTarget;
@@ -188,10 +175,10 @@ namespace Game.Entities
         public Unit GetActionTarget() { return _actionTarget; }
         public Unit GetProcTarget() { return _procTarget; }
 
-        public ProcFlags GetTypeMask() { return (ProcFlags)_typeMask; }
-        public ProcFlagsSpellType GetSpellTypeMask() { return (ProcFlagsSpellType)_spellTypeMask; }
-        public ProcFlagsSpellPhase GetSpellPhaseMask() { return (ProcFlagsSpellPhase)_spellPhaseMask; }
-        public ProcFlagsHit GetHitMask() { return (ProcFlagsHit)_hitMask; }
+        public ProcFlags GetTypeMask() { return _typeMask; }
+        public ProcFlagsSpellType GetSpellTypeMask() { return _spellTypeMask; }
+        public ProcFlagsSpellPhase GetSpellPhaseMask() { return _spellPhaseMask; }
+        public ProcFlagsHit GetHitMask() { return _hitMask; }
 
         public SpellInfo GetSpellInfo()
         {
@@ -221,13 +208,15 @@ namespace Game.Entities
         public DamageInfo GetDamageInfo() { return _damageInfo; }
         public HealInfo GetHealInfo() { return _healInfo; }
 
+        public Spell GetProcSpell() { return _spell; }
+
         Unit _actor;
         Unit _actionTarget;
         Unit _procTarget;
-        uint _typeMask;
-        uint _spellTypeMask;
-        uint _spellPhaseMask;
-        uint _hitMask;
+        ProcFlags _typeMask;
+        ProcFlagsSpellType _spellTypeMask;
+        ProcFlagsSpellPhase _spellPhaseMask;
+        ProcFlagsHit _hitMask;
         Spell _spell;
         DamageInfo _damageInfo;
         HealInfo _healInfo;
@@ -245,6 +234,7 @@ namespace Game.Entities
             m_damageType = damageType;
             m_attackType = attackType;
         }
+
         public DamageInfo(CalcDamageInfo dmgInfo)
         {
             m_attacker = dmgInfo.attacker;
@@ -291,11 +281,20 @@ namespace Game.Entities
                 case MeleeHitOutcome.Evade:
                     m_hitMask |= ProcFlagsHit.Evade;
                     break;
+                case MeleeHitOutcome.Crushing:
+                case MeleeHitOutcome.Glancing:
+                case MeleeHitOutcome.Normal:
+                    m_hitMask |= ProcFlagsHit.Normal;
+                    break;
+                case MeleeHitOutcome.Crit:
+                    m_hitMask |= ProcFlagsHit.Critical;
+                    break;
                 default:
                     break;
             }
         }
-        public DamageInfo(SpellNonMeleeDamage spellNonMeleeDamage, DamageEffectType damageType, WeaponAttackType attackType)
+
+        public DamageInfo(SpellNonMeleeDamage spellNonMeleeDamage, DamageEffectType damageType, WeaponAttackType attackType, ProcFlagsHit hitMask)
         {
             m_attacker = spellNonMeleeDamage.attacker;
             m_victim = spellNonMeleeDamage.target;
@@ -307,6 +306,7 @@ namespace Game.Entities
             m_absorb = spellNonMeleeDamage.absorb;
             m_resist = spellNonMeleeDamage.resist;
             m_block = spellNonMeleeDamage.blocked;
+            m_hitMask = hitMask;
 
             if (spellNonMeleeDamage.blocked != 0)
                 m_hitMask |= ProcFlagsHit.Block;
@@ -354,7 +354,7 @@ namespace Game.Entities
         public uint GetAbsorb() { return m_absorb; }
         public uint GetResist() { return m_resist; }
         uint GetBlock() { return m_block; }
-        ProcFlagsHit GetHitMask() { return m_hitMask; }
+        public ProcFlagsHit GetHitMask() { return m_hitMask; }
 
         Unit m_attacker;
         Unit m_victim;
@@ -380,7 +380,7 @@ namespace Game.Entities
             _schoolMask = schoolMask;
         }
 
-        void AbsorbHeal(uint amount)
+        public void AbsorbHeal(uint amount)
         {
             amount = Math.Min(amount, GetHeal());
             _absorb += amount;
@@ -425,7 +425,6 @@ namespace Game.Entities
         public WeaponAttackType attackType { get; set; }
         public ProcFlags procAttacker { get; set; }
         public ProcFlags procVictim { get; set; }
-        public ProcFlagsExLegacy procEx { get; set; }
         public uint cleanDamage { get; set; }        // Used only for rage calculation
         public MeleeHitOutcome hitOutCome { get; set; }  // TODO: remove this field (need use TargetState)
     }

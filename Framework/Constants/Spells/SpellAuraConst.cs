@@ -244,9 +244,9 @@ namespace Framework.Constants
         ModRatingFromStat = 220,
         ModDetaunt = 221,
         Unk222 = 222,
-        RaidProcFromCharge = 223,
+        Unk223 = 223,
         Unk224 = 224,
-        RaidProcFromChargeWithValue = 225,
+        ModVisibilityRange = 225,
         PeriodicDummy = 226,
         PeriodicTriggerSpellWithValue = 227,
         DetectStealth = 228,
@@ -349,7 +349,7 @@ namespace Framework.Constants
         Unk325 = 325,  // Not Used In 4.3.4
         PhaseGroup = 326,  // Phase Related
         Unk327 = 327,  // Not Used In 4.3.4
-        ProcOnPowerAmount = 328,
+        TriggerSpellOnPowerPct = 328,
         ModPowerGainPct = 329,  // Nyi
         CastWhileWalking = 330,
         ForceWeather = 331,
@@ -417,7 +417,7 @@ namespace Framework.Constants
         Unk393 = 393,
         ShowConfirmationPrompt = 394,
         AreaTrigger = 395, // NYI
-        ProcOnPowerAmount2 = 396,
+        TriggerSpellOnPowerAmount = 396,
         Unk397 = 397,
         Unk398 = 398,
         Unk399 = 399,
@@ -489,7 +489,7 @@ namespace Framework.Constants
         ModBonusArmor = 465, // NYI
         ModBonusArmorPct = 466,
         ModStatBonusPct = 467,
-        TriggerSpellOnHealthBelowPct = 468,
+        TriggerSpellOnHealthPct = 468,
         ShowConfirmationPromptWithDifficulty = 469,
         Unk470 = 470,
         ModVersatility = 471, // NYI

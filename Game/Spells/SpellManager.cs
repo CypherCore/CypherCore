@@ -445,142 +445,6 @@ namespace Game.Entities
             return SpellGroupStackRule.Default;
         }
 
-        public SpellProcEventEntry GetSpellProcEvent(uint spellId)
-        {
-            return mSpellProcEventMap.LookupByKey(spellId);
-        }
-
-        public bool IsSpellProcEventCanTriggeredBy(SpellInfo spellProto, SpellProcEventEntry spellProcEvent, ProcFlags EventProcFlag, SpellInfo procSpell, ProcFlags procFlags, ProcFlagsExLegacy procExtra, bool active)
-        {
-            // No extra req need
-            ProcFlagsExLegacy procEvent_procEx = ProcFlagsExLegacy.None;
-
-            // check prockFlags for condition
-            if (!procFlags.HasAnyFlag(EventProcFlag))
-                return false;
-
-            bool hasFamilyMask = false;
-
-            // Quick Check - If PROC_FLAG_TAKEN_DAMAGE is set for aura and procSpell dealt damage, proc no matter what kind of spell that deals the damage.
-            if (procFlags.HasAnyFlag(ProcFlags.TakenDamage) && EventProcFlag.HasAnyFlag(ProcFlags.TakenDamage))
-                return true;
-
-            if (procFlags.HasAnyFlag(ProcFlags.DonePeriodic) && EventProcFlag.HasAnyFlag(ProcFlags.DonePeriodic))
-            {
-                if (procExtra.HasAnyFlag(ProcFlagsExLegacy.InternalHot))
-                {
-                    if (EventProcFlag == ProcFlags.DonePeriodic)
-                    {
-                        // no aura with only PROC_FLAG_DONE_PERIODIC and spellFamilyName == 0 can proc from a HOT.
-                        if (spellProto.SpellFamilyName == 0)
-                            return false;
-                    }
-                    // Aura must have positive procflags for a HOT to proc
-                    else if (!EventProcFlag.HasAnyFlag(ProcFlags.DoneSpellMagicDmgClassPos | ProcFlags.DoneSpellNoneDmgClassPos))
-                        return false;
-                }
-                // Aura must have negative or neutral(PROC_FLAG_DONE_PERIODIC only) procflags for a DOT to proc
-                else if (EventProcFlag != ProcFlags.DonePeriodic)
-                    if (!EventProcFlag.HasAnyFlag(ProcFlags.DoneSpellMagicDmgClassNeg | ProcFlags.DoneSpellNoneDmgClassNeg))
-                        return false;
-            }
-
-            if (procFlags.HasAnyFlag(ProcFlags.TakenPeriodic) && EventProcFlag.HasAnyFlag(ProcFlags.TakenPeriodic))
-            {
-                if (procExtra.HasAnyFlag(ProcFlagsExLegacy.InternalHot))
-                {
-                    // No aura that only has PROC_FLAG_TAKEN_PERIODIC can proc from a HOT.
-                    if (EventProcFlag == ProcFlags.TakenPeriodic)
-                        return false;
-                    // Aura must have positive procflags for a HOT to proc
-                    if (!EventProcFlag.HasAnyFlag(ProcFlags.TakenSpellMagicDmgClassPos | ProcFlags.TakenSpellNoneDmgClassPos))
-                        return false;
-                }
-                // Aura must have negative or neutral(PROC_FLAG_TAKEN_PERIODIC only) procflags for a DOT to proc
-                else if (EventProcFlag != ProcFlags.TakenPeriodic)
-                    if (!EventProcFlag.HasAnyFlag(ProcFlags.TakenSpellMagicDmgClassNeg | ProcFlags.TakenSpellNoneDmgClassNeg))
-                        return false;
-            }
-            // Trap casts are active by default
-            if (procFlags.HasAnyFlag(ProcFlags.DoneTrapActivation))
-                active = true;
-
-            // Always trigger for this
-            if (procFlags.HasAnyFlag(ProcFlags.Killed | ProcFlags.Kill | ProcFlags.Death))
-                return true;
-
-            if (spellProcEvent != null)     // Exist event data
-            {
-                // Store extra req
-                procEvent_procEx = (ProcFlagsExLegacy)spellProcEvent.procEx;
-
-                // For melee triggers
-                if (procSpell == null)
-                {
-                    // Check (if set) for school (melee attack have Normal school)
-                    if (spellProcEvent.schoolMask != 0 && (spellProcEvent.schoolMask & SpellSchoolMask.Normal) == 0)
-                        return false;
-                }
-                else // For spells need check school/spell family/family mask
-                {
-                    // Check (if set) for school
-                    if (spellProcEvent.schoolMask != 0 && (spellProcEvent.schoolMask & procSpell.SchoolMask) == 0)
-                        return false;
-
-                    // Check (if set) for spellFamilyName
-                    if (spellProcEvent.spellFamilyName != 0 && (spellProcEvent.spellFamilyName != procSpell.SpellFamilyName))
-                        return false;
-
-                    // spellFamilyName is Ok need check for spellFamilyMask if present
-                    if (spellProcEvent.spellFamilyMask != null)
-                    {
-                        if (!(spellProcEvent.spellFamilyMask & procSpell.SpellFamilyFlags))
-                            return false;
-                        hasFamilyMask = true;
-                        // Some spells are not considered as active even with have spellfamilyflags
-                        if (!procEvent_procEx.HasAnyFlag(ProcFlagsExLegacy.OnlyActiveSpell))
-                            active = true;
-                    }
-                }
-            }
-
-            if (procExtra.HasAnyFlag(ProcFlagsExLegacy.InternalReqFamily))
-            {
-                if (!hasFamilyMask)
-                    return false;
-            }
-
-            // Check for extra req (if none) and hit/crit
-            if (procEvent_procEx == ProcFlagsExLegacy.None)
-            {
-                // No extra req, so can trigger only for hit/crit - spell has to be active
-                if (procExtra.HasAnyFlag(ProcFlagsExLegacy.NormalHit | ProcFlagsExLegacy.CriticalHit) && active)
-                    return true;
-            }
-            else // Passive spells hits here only if resist/reflect/immune/evade
-            {
-                if (procExtra.HasAnyFlag(ProcFlagsExLegacy.AuraProcMask))
-                {
-                    // if spell marked as procing only from not active spells
-                    if (active && procEvent_procEx.HasAnyFlag(ProcFlagsExLegacy.NotActiveSpell))
-                        return false;
-                    // if spell marked as procing only from active spells
-                    if (!active && procEvent_procEx.HasAnyFlag(ProcFlagsExLegacy.OnlyActiveSpell))
-                        return false;
-                    // Exist req for PROC_EX_EX_TRIGGER_ALWAYS
-                    if (procEvent_procEx.HasAnyFlag(ProcFlagsExLegacy.ExTriggerAlways))
-                        return true;
-                    // PROC_EX_NOT_ACTIVE_SPELL and PROC_EX_ONLY_ACTIVE_SPELL flags handle: if passed checks before
-                    if ((procExtra.HasAnyFlag(ProcFlagsExLegacy.NormalHit | ProcFlagsExLegacy.CriticalHit) && (procEvent_procEx & ProcFlagsExLegacy.AuraProcMask) == 0))
-                        return true;
-                }
-                // Check Extra Requirement like (hit/crit/miss/resist/parry/dodge/block/immune/reflect/absorb and other)
-                if (procEvent_procEx.HasAnyFlag(procExtra))
-                    return true;
-            }
-            return false;
-        }
-
         public SpellProcEntry GetSpellProcEntry(uint spellId)
         {
             return mSpellProcMap.LookupByKey(spellId);
@@ -593,7 +457,7 @@ namespace Game.Entities
                 return false;
 
             // check XP or honor target requirement
-            if ((procEntry.AttributesMask & 0x0000010) != 0)
+            if (((uint)procEntry.AttributesMask & 0x0000010) != 0)
             {
                 Player actor = eventInfo.GetActor().ToPlayer();
                 if (actor)
@@ -601,9 +465,37 @@ namespace Game.Entities
                         return false;
             }
 
+            // check power requirement
+            if (procEntry.AttributesMask.HasAnyFlag(ProcAttributes.ReqPowerCost))
+            {
+                if (!eventInfo.GetProcSpell())
+                    return false;
+
+                var costs = eventInfo.GetProcSpell().GetPowerCost();
+                var m = costs.Find(cost => { return cost.Amount > 0; });
+                if (m == null)
+                    return false;
+            }
+
             // always trigger for these types
             if ((eventInfo.GetTypeMask() & (ProcFlags.Killed | ProcFlags.Kill | ProcFlags.Death)) != 0)
                 return true;
+
+            // do triggered cast checks
+            if (!procEntry.AttributesMask.HasAnyFlag(ProcAttributes.TriggeredCanProc))
+            {
+                Spell spell = eventInfo.GetProcSpell();
+                if (spell)
+                {
+                    if (spell.IsTriggered())
+                    {
+                        SpellInfo spellInfo = spell.GetSpellInfo();
+                        if (!spellInfo.HasAttribute(SpellAttr3.TriggeredCanTriggerProc2) &&
+                            !spellInfo.HasAttribute(SpellAttr2.TriggeredCanTriggerProc))
+                            return false;
+                    }
+                }
+            }
 
             // check school mask (if set) for other trigger types
             if (procEntry.SchoolMask != 0 && !Convert.ToBoolean(eventInfo.GetSchoolMask() & procEntry.SchoolMask))
@@ -1631,87 +1523,6 @@ namespace Game.Entities
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell group stack rules in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public void LoadSpellProcEvents()
-        {
-            uint oldMSTime = Time.GetMSTime();
-
-            mSpellProcEventMap.Clear();                             // need for reload case
-
-            //                                            0      1           2                3                 4                 5                 6                 7          8       9        10            11
-            SQLResult result = DB.World.Query("SELECT entry, SchoolMask, SpellFamilyName, SpellFamilyMask0, SpellFamilyMask1, SpellFamilyMask2, SpellFamilyMask3, procFlags, procEx, ppmRate, CustomChance, Cooldown FROM spell_proc_event");
-            if (result.IsEmpty())
-            {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell proc event conditions. DB table `spell_proc_event` is empty.");
-                return;
-            }
-
-            uint count = 0;
-            do
-            {
-                int spellId = result.Read<int>(0);
-
-                bool allRanks = false;
-                if (spellId < 0)
-                {
-                    allRanks = true;
-                    spellId = -spellId;
-                }
-
-                SpellInfo spellInfo = GetSpellInfo((uint)spellId);
-                if (spellInfo == null)
-                {
-                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_proc_event` does not exist", spellId);
-                    continue;
-                }
-
-                if (allRanks)
-                {
-                    if (!spellInfo.IsRanked())
-                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_proc_event` with all ranks, but spell has no ranks.", spellId);
-
-                    if (spellInfo.GetFirstRankSpell().Id != spellId)
-                    {
-                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_proc_event` is not first rank of spell.", spellId);
-                        continue;
-                    }
-                }
-
-                SpellProcEventEntry spellProcEvent = new SpellProcEventEntry();
-
-                spellProcEvent.schoolMask = (SpellSchoolMask)result.Read<uint>(1);
-                spellProcEvent.spellFamilyName = (SpellFamilyNames)result.Read<uint>(2);
-                spellProcEvent.spellFamilyMask = new FlagArray128(result.Read<uint>(3), result.Read<uint>(4), result.Read<uint>(5), result.Read<uint>(6));
-                spellProcEvent.procFlags = result.Read<uint>(7);
-                spellProcEvent.procEx = result.Read<uint>(8);
-                spellProcEvent.ppmRate = result.Read<float>(9);
-                spellProcEvent.customChance = result.Read<float>(10);
-                spellProcEvent.cooldown = result.Read<uint>(11);
-
-                while (spellInfo != null)
-                {
-                    if (mSpellProcEventMap.ContainsKey(spellInfo.Id))
-                    {
-                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_proc_event` already has its first rank in table.", spellInfo.Id);
-                        break;
-                    }
-
-                    if (spellInfo.ProcFlags == 0 && spellProcEvent.procFlags == 0)
-                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_proc_event` probably not triggered spell", spellInfo.Id);
-
-                    mSpellProcEventMap[spellInfo.Id] = spellProcEvent;
-
-                    if (allRanks)
-                        spellInfo = spellInfo.GetNextRankSpell();
-                    else
-                        break;
-                }
-
-                ++count;
-            } while (result.NextRow());
-
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} extra spell proc event conditions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
-        }
-
         public void LoadSpellProcs()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -1722,117 +1533,195 @@ namespace Game.Entities
             SQLResult result = DB.World.Query("SELECT SpellId, SchoolMask, SpellFamilyName, SpellFamilyMask0, SpellFamilyMask1, SpellFamilyMask2, SpellFamilyMask3, " +
             //           7              8               9       10              11              12      13        14      15
                 "ProcFlags, SpellTypeMask, SpellPhaseMask, HitMask, AttributesMask, ProcsPerMinute, Chance, Cooldown, Charges FROM spell_proc");
-            if (result.IsEmpty())
-            {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell proc conditions and data. DB table `spell_proc` is empty.");
-                return;
-            }
 
             uint count = 0;
-            do
+            if (!result.IsEmpty())
             {
-                int spellId = result.Read<int>(0);
-
-                bool allRanks = false;
-                if (spellId < 0)
+                do
                 {
-                    allRanks = true;
-                    spellId = -spellId;
-                }
+                    int spellId = result.Read<int>(0);
 
-                SpellInfo spellInfo = GetSpellInfo((uint)spellId);
-                if (spellInfo == null)
-                {
-                    Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_proc` does not exist", spellId);
-                    continue;
-                }
-
-                if (allRanks)
-                {
-                    if (spellInfo.GetFirstRankSpell().Id != (uint)spellId)
+                    bool allRanks = false;
+                    if (spellId < 0)
                     {
-                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_proc` is not first rank of spell.", spellId);
+                        allRanks = true;
+                        spellId = -spellId;
+                    }
+
+                    SpellInfo spellInfo = GetSpellInfo((uint)spellId);
+                    if (spellInfo == null)
+                    {
+                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_proc` does not exist", spellId);
                         continue;
                     }
-                }
-
-                SpellProcEntry baseProcEntry = new SpellProcEntry();
-
-                baseProcEntry.SchoolMask = (SpellSchoolMask)result.Read<uint>(1);
-                baseProcEntry.SpellFamilyName = (SpellFamilyNames)result.Read<uint>(2);
-                baseProcEntry.SpellFamilyMask = new FlagArray128(result.Read<uint>(3), result.Read<uint>(4), result.Read<uint>(5), result.Read<uint>(6));
-                baseProcEntry.ProcFlags = (ProcFlags)result.Read<uint>(7);
-                baseProcEntry.SpellTypeMask = (ProcFlagsSpellType)result.Read<uint>(8);
-                baseProcEntry.SpellPhaseMask = (ProcFlagsSpellPhase)result.Read<uint>(9);
-                baseProcEntry.HitMask = (ProcFlagsHit)result.Read<uint>(10);
-                baseProcEntry.AttributesMask = result.Read<uint>(11);
-                baseProcEntry.ProcsPerMinute = result.Read<float>(12);
-                baseProcEntry.Chance = result.Read<float>(13);
-                baseProcEntry.Cooldown = result.Read<uint>(14);
-                baseProcEntry.Charges = result.Read<uint>(15);
-
-                while (spellInfo != null)
-                {
-                    if (mSpellProcMap.ContainsKey(spellInfo.Id))
-                    {
-                        Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_proc` has duplicate entry in the table", spellInfo.Id);
-                        break;
-                    }
-                    SpellProcEntry procEntry = baseProcEntry;
-
-                    // take defaults from dbcs
-                    if (procEntry.ProcFlags == 0)
-                        procEntry.ProcFlags = spellInfo.ProcFlags;
-                    if (procEntry.Charges == 0)
-                        procEntry.Charges = spellInfo.ProcCharges;
-                    if (procEntry.Chance == 0 && procEntry.ProcsPerMinute == 0)
-                        procEntry.Chance = spellInfo.ProcChance;
-
-                    // validate data
-                    if (Convert.ToBoolean(procEntry.SchoolMask & ~SpellSchoolMask.All))
-                        Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `SchoolMask` set: {1}", spellInfo.Id, procEntry.SchoolMask);
-                    if (procEntry.SpellFamilyName != 0 && ((int)procEntry.SpellFamilyName < 3 || (int)procEntry.SpellFamilyName > 17 || (int)procEntry.SpellFamilyName == 14 || (int)procEntry.SpellFamilyName == 16))
-                        Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `SpellFamilyName` set: {1}", spellInfo.Id, procEntry.SpellFamilyName);
-                    if (procEntry.Chance < 0)
-                    {
-                        Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has negative value in `Chance` field", spellInfo.Id);
-                        procEntry.Chance = 0;
-                    }
-                    if (procEntry.ProcsPerMinute < 0)
-                    {
-                        Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has negative value in `ProcsPerMinute` field", spellInfo.Id);
-                        procEntry.ProcsPerMinute = 0;
-                    }
-                    if (procEntry.Chance == 0 && procEntry.ProcsPerMinute == 0)
-                        Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} doesn't have `Chance` and `ProcsPerMinute` values defined, proc will not be triggered", spellInfo.Id);
-                    if (procEntry.ProcFlags == 0)
-                        Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} doesn't have `ProcFlags` value defined, proc will not be triggered", spellInfo.Id);
-                    if (Convert.ToBoolean(procEntry.SpellTypeMask & ~ProcFlagsSpellType.MaskAll))
-                        Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `SpellTypeMask` set: {1}", spellInfo.Id, procEntry.SpellTypeMask);
-                    if (procEntry.SpellTypeMask != 0 && !Convert.ToBoolean(procEntry.ProcFlags & (ProcFlags.SpellMask | ProcFlags.PeriodicMask)))
-                        Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has `SpellTypeMask` value defined, but it won't be used for defined `ProcFlags` value", spellInfo.Id);
-                    if (procEntry.SpellPhaseMask == 0 && Convert.ToBoolean(procEntry.ProcFlags & ProcFlags.ReqSpellPhaseMask))
-                        Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} doesn't have `SpellPhaseMask` value defined, but it's required for defined `ProcFlags` value, proc will not be triggered", spellInfo.Id);
-                    if (Convert.ToBoolean(procEntry.SpellPhaseMask & ~ProcFlagsSpellPhase.MaskAll))
-                        Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `SpellPhaseMask` set: {1}", spellInfo.Id, procEntry.SpellPhaseMask);
-                    if (procEntry.SpellPhaseMask != 0 && !Convert.ToBoolean(procEntry.ProcFlags & ProcFlags.ReqSpellPhaseMask))
-                        Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has `SpellPhaseMask` value defined, but it won't be used for defined `ProcFlags` value", spellInfo.Id);
-                    if (Convert.ToBoolean(procEntry.HitMask & ~ProcFlagsHit.MaskAll))
-                        Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `HitMask` set: {1}", spellInfo.Id, procEntry.HitMask);
-                    if (procEntry.HitMask != 0 && !(Convert.ToBoolean(procEntry.ProcFlags & ProcFlags.TakenHitMask) || (Convert.ToBoolean(procEntry.ProcFlags & ProcFlags.DoneHitMask) && (procEntry.SpellPhaseMask == 0 || Convert.ToBoolean(procEntry.SpellPhaseMask & (ProcFlagsSpellPhase.Hit | ProcFlagsSpellPhase.Finish))))))
-                        Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has `HitMask` value defined, but it won't be used for defined `ProcFlags` and `SpellPhaseMask` values", spellInfo.Id);
-
-                    mSpellProcMap.Add(spellInfo.Id, procEntry);
-                    ++count;
 
                     if (allRanks)
-                        spellInfo = spellInfo.GetNextRankSpell();
-                    else
-                        break;
-                }
-            } while (result.NextRow());
+                    {
+                        if (spellInfo.GetFirstRankSpell().Id != (uint)spellId)
+                        {
+                            Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_proc` is not first rank of spell.", spellId);
+                            continue;
+                        }
+                    }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell proc conditions and data in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+                    SpellProcEntry baseProcEntry = new SpellProcEntry();
+
+                    baseProcEntry.SchoolMask = (SpellSchoolMask)result.Read<uint>(1);
+                    baseProcEntry.SpellFamilyName = (SpellFamilyNames)result.Read<uint>(2);
+                    baseProcEntry.SpellFamilyMask = new FlagArray128(result.Read<uint>(3), result.Read<uint>(4), result.Read<uint>(5), result.Read<uint>(6));
+                    baseProcEntry.ProcFlags = (ProcFlags)result.Read<uint>(7);
+                    baseProcEntry.SpellTypeMask = (ProcFlagsSpellType)result.Read<uint>(8);
+                    baseProcEntry.SpellPhaseMask = (ProcFlagsSpellPhase)result.Read<uint>(9);
+                    baseProcEntry.HitMask = (ProcFlagsHit)result.Read<uint>(10);
+                    baseProcEntry.AttributesMask = (ProcAttributes)result.Read<uint>(11);
+                    baseProcEntry.ProcsPerMinute = result.Read<float>(12);
+                    baseProcEntry.Chance = result.Read<float>(13);
+                    baseProcEntry.Cooldown = result.Read<uint>(14);
+                    baseProcEntry.Charges = result.Read<uint>(15);
+
+                    while (spellInfo != null)
+                    {
+                        if (mSpellProcMap.ContainsKey(spellInfo.Id))
+                        {
+                            Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_proc` has duplicate entry in the table", spellInfo.Id);
+                            break;
+                        }
+                        SpellProcEntry procEntry = baseProcEntry;
+
+                        // take defaults from dbcs
+                        if (procEntry.ProcFlags == 0)
+                            procEntry.ProcFlags = spellInfo.ProcFlags;
+                        if (procEntry.Charges == 0)
+                            procEntry.Charges = spellInfo.ProcCharges;
+                        if (procEntry.Chance == 0 && procEntry.ProcsPerMinute == 0)
+                            procEntry.Chance = spellInfo.ProcChance;
+
+                        // validate data
+                        if (Convert.ToBoolean(procEntry.SchoolMask & ~SpellSchoolMask.All))
+                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `SchoolMask` set: {1}", spellInfo.Id, procEntry.SchoolMask);
+                        if (procEntry.SpellFamilyName != 0 && ((int)procEntry.SpellFamilyName < 3 || (int)procEntry.SpellFamilyName > 17 || (int)procEntry.SpellFamilyName == 14 || (int)procEntry.SpellFamilyName == 16))
+                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `SpellFamilyName` set: {1}", spellInfo.Id, procEntry.SpellFamilyName);
+                        if (procEntry.Chance < 0)
+                        {
+                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has negative value in `Chance` field", spellInfo.Id);
+                            procEntry.Chance = 0;
+                        }
+                        if (procEntry.ProcsPerMinute < 0)
+                        {
+                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has negative value in `ProcsPerMinute` field", spellInfo.Id);
+                            procEntry.ProcsPerMinute = 0;
+                        }
+                        if (procEntry.Chance == 0 && procEntry.ProcsPerMinute == 0)
+                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} doesn't have `Chance` and `ProcsPerMinute` values defined, proc will not be triggered", spellInfo.Id);
+                        if (procEntry.ProcFlags == 0)
+                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} doesn't have `ProcFlags` value defined, proc will not be triggered", spellInfo.Id);
+                        if (Convert.ToBoolean(procEntry.SpellTypeMask & ~ProcFlagsSpellType.MaskAll))
+                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `SpellTypeMask` set: {1}", spellInfo.Id, procEntry.SpellTypeMask);
+                        if (procEntry.SpellTypeMask != 0 && !Convert.ToBoolean(procEntry.ProcFlags & (ProcFlags.SpellMask | ProcFlags.PeriodicMask)))
+                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has `SpellTypeMask` value defined, but it won't be used for defined `ProcFlags` value", spellInfo.Id);
+                        if (procEntry.SpellPhaseMask == 0 && Convert.ToBoolean(procEntry.ProcFlags & ProcFlags.ReqSpellPhaseMask))
+                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} doesn't have `SpellPhaseMask` value defined, but it's required for defined `ProcFlags` value, proc will not be triggered", spellInfo.Id);
+                        if (Convert.ToBoolean(procEntry.SpellPhaseMask & ~ProcFlagsSpellPhase.MaskAll))
+                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `SpellPhaseMask` set: {1}", spellInfo.Id, procEntry.SpellPhaseMask);
+                        if (procEntry.SpellPhaseMask != 0 && !Convert.ToBoolean(procEntry.ProcFlags & ProcFlags.ReqSpellPhaseMask))
+                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has `SpellPhaseMask` value defined, but it won't be used for defined `ProcFlags` value", spellInfo.Id);
+                        if (Convert.ToBoolean(procEntry.HitMask & ~ProcFlagsHit.MaskAll))
+                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `HitMask` set: {1}", spellInfo.Id, procEntry.HitMask);
+                        if (procEntry.HitMask != 0 && !(Convert.ToBoolean(procEntry.ProcFlags & ProcFlags.TakenHitMask) || (Convert.ToBoolean(procEntry.ProcFlags & ProcFlags.DoneHitMask) && (procEntry.SpellPhaseMask == 0 || Convert.ToBoolean(procEntry.SpellPhaseMask & (ProcFlagsSpellPhase.Hit | ProcFlagsSpellPhase.Finish))))))
+                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has `HitMask` value defined, but it won't be used for defined `ProcFlags` and `SpellPhaseMask` values", spellInfo.Id);
+
+                        mSpellProcMap.Add(spellInfo.Id, procEntry);
+                        ++count;
+
+                        if (allRanks)
+                            spellInfo = spellInfo.GetNextRankSpell();
+                        else
+                            break;
+                    }
+                } while (result.NextRow());
+
+                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell proc conditions and data in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            }
+            else
+                Log.outInfo(LogFilter.ServerLoading, ">> Loaded 0 spell proc conditions and data. DB table `spell_proc` is empty.");
+
+            // This generates default procs to retain compatibility with previous proc system
+            Log.outInfo(LogFilter.ServerLoading, "Generating spell proc data from SpellMap...");
+            count = 0;
+            oldMSTime = Time.GetMSTime();
+
+            foreach (SpellInfo spellInfo in mSpellInfoMap.Values)
+            {
+                if (spellInfo == null)
+                    continue;
+
+                if (mSpellProcMap.ContainsKey(spellInfo.Id))
+                    continue;
+
+                bool found = false, addTriggerFlag = false;
+                foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(Difficulty.None))
+                {
+                    if (effect == null || !effect.IsEffect())
+                        continue;
+
+                    AuraType auraName = effect.ApplyAuraName;
+                    if (auraName == 0)
+                        continue;
+
+                    if (!isTriggerAura(auraName))
+                        continue;
+
+                    found = true;
+
+                    if (!addTriggerFlag && isAlwaysTriggeredAura(auraName))
+                        addTriggerFlag = true;
+                    break;
+                }
+
+                if (!found)
+                    continue;
+
+                if (spellInfo.ProcFlags == 0)
+                    continue;
+
+                SpellProcEntry procEntry = new SpellProcEntry();
+                procEntry.SchoolMask = 0;
+                procEntry.SpellFamilyName = spellInfo.SpellFamilyName;
+                procEntry.ProcFlags = spellInfo.ProcFlags;
+                foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(Difficulty.None))
+                    if (effect != null && effect.IsEffect() && isTriggerAura(effect.ApplyAuraName))
+                        procEntry.SpellFamilyMask |= effect.SpellClassMask;
+
+                procEntry.SpellTypeMask = ProcFlagsSpellType.MaskAll;
+                procEntry.SpellPhaseMask = ProcFlagsSpellPhase.Hit;
+                procEntry.HitMask = ProcFlagsHit.None; // uses default proc @see SpellMgr::CanSpellTriggerProcOnEvent
+
+                // Reflect auras should only proc off reflects
+                foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(Difficulty.None))
+                {
+                    if (effect != null && (effect.IsAura(AuraType.ReflectSpells) || effect.IsAura(AuraType.ReflectSpellsSchool)))
+                    {
+                        procEntry.HitMask = ProcFlagsHit.Reflect;
+                        break;
+                    }
+                }
+
+                procEntry.AttributesMask = 0;
+                if (spellInfo.ProcFlags.HasAnyFlag(ProcFlags.Kill))
+                    procEntry.AttributesMask |= ProcAttributes.ReqExpOrHonor;
+                if (addTriggerFlag)
+                    procEntry.AttributesMask |= ProcAttributes.TriggeredCanProc;
+
+                procEntry.ProcsPerMinute = 0;
+                procEntry.Chance = spellInfo.ProcChance;
+                procEntry.Cooldown = 0;
+                procEntry.Charges = spellInfo.ProcCharges;
+
+                mSpellProcMap[spellInfo.Id] = procEntry;
+                ++count;
+            }
+
+            Log.outInfo(LogFilter.ServerLoading, "Generated spell proc data for {0} spells in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
         public void LoadSpellThreats()
@@ -2004,7 +1893,7 @@ namespace Game.Entities
                 SpellEnchantProcEntry spe = new SpellEnchantProcEntry();
                 spe.customChance = result.Read<uint>(1);
                 spe.PPMChance = result.Read<float>(2);
-                spe.procEx = (ProcFlagsExLegacy)result.Read<uint>(3);
+                spe.procEx = result.Read<uint>(3);
 
                 mSpellEnchantProcEventMap[enchantId] = spe;
 
@@ -2153,6 +2042,7 @@ namespace Game.Entities
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} summonable creature templates in {1} ms", countCreature, Time.GetMSTimeDiffToNow(oldMSTime));
         }
+
         bool LoadPetDefaultSpells_helper(CreatureTemplate cInfo, PetDefaultSpellsEntry petDefSpells)
         {
             // skip empty list;
@@ -2812,19 +2702,8 @@ namespace Game.Entities
                         spellInfo.MaxAffectedTargets = 1;
                         spellInfo.GetEffect(0).TriggerSpell = 33760;
                         break;
-                    case 17941: // Shadow Trance
-                    case 22008: // Netherwind Focus
-                    case 34477: // Misdirection
-                    case 48108: // Hot Streak
-                    case 51124: // Killing Machine
-                    case 64823: // Item - Druid T8 Balance 4P Bonus
-                        spellInfo.ProcCharges = 1;
-                        break;
                     case 44544: // Fingers of Frost
                         spellInfo.GetEffect(0).SpellClassMask = new FlagArray128(685904631, 1151048, 0, 0);
-                        break;
-                    case 28200: // Ascendance (Talisman of Ascendance trinket)
-                        spellInfo.ProcCharges = 6;
                         break;
                     case 37408: // Oscillation Field
                         spellInfo.AttributesEx3 |= SpellAttr3.StackForDiffCasters;
@@ -3172,10 +3051,6 @@ namespace Game.Entities
                                 // Little hack, Increase the radius so it can hit the Cave In Stalkers in the platform.
                         spellInfo.GetEffect(0).MaxRadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards45);
                         break;
-                    case 75323: // Reverberating Hymn
-                                // Aura is refreshed at 3 seconds, and the tick should happen at the fourth.
-                        spellInfo.AttributesEx8 |= SpellAttr8.DontResetPeriodicTimer;
-                        break;
                     case 24314: // Threatening Gaze
                         spellInfo.AuraInterruptFlags |= SpellAuraInterruptFlags.Cast | SpellAuraInterruptFlags.Move | SpellAuraInterruptFlags.Jump;
                         break;
@@ -3253,6 +3128,68 @@ namespace Game.Entities
             }
         }
         #endregion
+
+        public bool isTriggerAura(AuraType type)
+        {
+            switch (type)
+            {
+                case AuraType.Dummy:
+                case AuraType.ModConfuse:
+                case AuraType.ModThreat:
+                case AuraType.ModStun:
+                case AuraType.ModDamageDone:
+                case AuraType.ModDamageTaken:
+                case AuraType.ModResistance:
+                case AuraType.ModStealth:
+                case AuraType.ModFear:
+                case AuraType.ModRoot:
+                case AuraType.Transform:
+                case AuraType.ReflectSpells:
+                case AuraType.DamageImmunity:
+                case AuraType.ProcTriggerSpell:
+                case AuraType.ProcTriggerDamage:
+                case AuraType.ModCastingSpeedNotStack:
+                case AuraType.SchoolAbsorb:
+                case AuraType.ModPowerCostSchoolPct:
+                case AuraType.ModPowerCostSchool:
+                case AuraType.ReflectSpellsSchool:
+                case AuraType.MechanicImmunity:
+                case AuraType.ModDamagePercentTaken:
+                case AuraType.SpellMagnet:
+                case AuraType.ModAttackPower:
+                case AuraType.ModPowerRegenPercent:
+                case AuraType.AddCasterHitTrigger:
+                case AuraType.OverrideClassScripts:
+                case AuraType.ModMechanicResistance:
+                case AuraType.MeleeAttackPowerAttackerBonus:
+                case AuraType.ModMeleeHaste:
+                case AuraType.ModMeleeHaste3:
+                case AuraType.ModAttackerMeleeHitChance:
+                case AuraType.ProcTriggerSpellWithValue:
+                case AuraType.ModSpellDamageFromCaster:
+                case AuraType.AbilityIgnoreAurastate:
+                case AuraType.ModRoot2:
+                    return true;
+            }
+            return false;
+        }
+        public bool isAlwaysTriggeredAura(AuraType type)
+        {
+            switch (type)
+            {
+                case AuraType.OverrideClassScripts:
+                case AuraType.ModFear:
+                case AuraType.ModRoot:
+                case AuraType.ModStun:
+                case AuraType.Transform:
+                case AuraType.SpellMagnet:
+                case AuraType.SchoolAbsorb:
+                case AuraType.ModStealth:
+                case AuraType.ModRoot2:
+                    return true;
+            }
+            return false;
+        }
 
         // SpellInfo object management
         public SpellInfo GetSpellInfo(uint spellId)
@@ -3368,7 +3305,6 @@ namespace Game.Entities
         MultiMap<uint, SpellGroup> mSpellSpellGroup = new MultiMap<uint, SpellGroup>();
         MultiMap<SpellGroup, int> mSpellGroupSpell = new MultiMap<SpellGroup, int>();
         Dictionary<SpellGroup, SpellGroupStackRule> mSpellGroupStack = new Dictionary<SpellGroup, SpellGroupStackRule>();
-        Dictionary<uint, SpellProcEventEntry> mSpellProcEventMap = new Dictionary<uint, SpellProcEventEntry>();
         Dictionary<uint, SpellProcEntry> mSpellProcMap = new Dictionary<uint, SpellProcEntry>();
         Dictionary<uint, SpellThreatEntry> mSpellThreatMap = new Dictionary<uint, SpellThreatEntry>();
         Dictionary<uint, PetAura> mSpellPetAuraMap = new Dictionary<uint, PetAura>();
@@ -3454,23 +3390,11 @@ namespace Game.Entities
         public ProcFlagsSpellType SpellTypeMask { get; set; }                              // if nonzero - bitmask for matching proc condition based on candidate spell's damage/heal effects, see enum ProcFlagsSpellType
         public ProcFlagsSpellPhase SpellPhaseMask { get; set; }                             // if nonzero - bitmask for matching phase of a spellcast on which proc occurs, see enum ProcFlagsSpellPhase
         public ProcFlagsHit HitMask { get; set; }                                    // if nonzero - bitmask for matching proc condition based on hit result, see enum ProcFlagsHit
-        public uint AttributesMask { get; set; }                             // bitmask, see ProcAttributes
+        public ProcAttributes AttributesMask { get; set; }                             // bitmask, see ProcAttributes
         public float ProcsPerMinute { get; set; }                              // if nonzero - chance to proc is equal to value * aura caster's weapon speed / 60
         public float Chance { get; set; }                                     // if nonzero - owerwrite procChance field for given Spell.dbc entry, defines chance of proc to occur, not used if ProcsPerMinute set
         public uint Cooldown { get; set; }                                   // if nonzero - cooldown in secs for aura proc, applied to aura
         public uint Charges { get; set; }                                   // if nonzero - owerwrite procCharges field for given Spell.dbc entry, defines how many times proc can occur before aura remove, 0 - infinite
-    }
-
-    public class SpellProcEventEntry
-    {
-        public SpellSchoolMask schoolMask;                                 // if nonzero - bit mask for matching proc condition based on spell candidate's school: Fire=2, Mask=1<<(2-1)=2
-        public SpellFamilyNames spellFamilyName;                            // if nonzero - for matching proc condition based on candidate spell's SpellFamilyNamer value
-        public FlagArray128 spellFamilyMask;                            // if nonzero - for matching proc condition based on candidate spell's SpellFamilyFlags  (like auras 107 and 108 do)
-        public uint procFlags;                                  // bitmask for matching proc event
-        public uint procEx;                                     // proc Extend info (see ProcFlagsEx)
-        public float ppmRate;                                    // for melee (ranged?) damage spells - proc rate per minute. if zero, falls back to flat chance from Spell.dbc
-        public float customChance;                               // Owerride chance (in most cases for debug only)
-        public uint cooldown;                                   // hidden cooldown used for some spell proc events, applied to _triggered_spell_
     }
 
     public class PetDefaultSpellsEntry
@@ -3637,7 +3561,7 @@ namespace Game.Entities
     {
         public uint customChance;
         public float PPMChance;
-        public ProcFlagsExLegacy procEx;
+        public uint procEx;
     }
 
     public class SpellTargetPosition

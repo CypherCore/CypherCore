@@ -116,9 +116,9 @@ namespace Game.Entities
             // For totems get damage bonus from owner
             if (IsTypeId(TypeId.Unit) && IsTotem())
             {
-                Unit owner1 = GetOwner();
-                if (owner1 != null)
-                    return owner1.SpellDamageBonusDone(victim, spellProto, pdamage, damagetype, effect, stack);
+                Unit owner = GetOwner();
+                if (owner != null)
+                    return owner.SpellDamageBonusDone(victim, spellProto, pdamage, damagetype, effect, stack);
             }
 
             int DoneTotal = 0;
@@ -168,7 +168,12 @@ namespace Game.Entities
             // apply spellmod to Done damage (flat and pct)
             Player _modOwner = GetSpellModOwner();
             if (_modOwner)
-                _modOwner.ApplySpellMod(spellProto.Id, damagetype == DamageEffectType.DOT ? SpellModOp.Dot : SpellModOp.Damage, ref tmpDamage);
+            {
+                if (damagetype == DamageEffectType.DOT)
+                    _modOwner.ApplySpellMod(spellProto.Id, SpellModOp.Dot, ref tmpDamage);
+                else
+                    _modOwner.ApplySpellMod(spellProto.Id, SpellModOp.Damage, ref tmpDamage);
+            }
 
             return (uint)Math.Max(tmpDamage, 0.0f);
         }
@@ -435,9 +440,9 @@ namespace Game.Entities
             // For totems get healing bonus from owner (statue isn't totem in fact)
             if (IsTypeId(TypeId.Unit) && IsTotem())
             {
-                Unit owner1 = GetOwner();
-                if (owner1)
-                    return owner1.SpellHealingBonusDone(victim, spellProto, healamount, damagetype, effect, stack);
+                Unit owner = GetOwner();
+                if (owner)
+                    return owner.SpellHealingBonusDone(victim, spellProto, healamount, damagetype, effect, stack);
             }
 
             // No bonus healing for potion spells
@@ -447,8 +452,8 @@ namespace Game.Entities
             int DoneTotal = 0;
 
             // done scripted mod (take it from owner)
-            Unit owner = GetOwner() ?? this;
-            var mOverrideClassScript = owner.GetAuraEffectsByType(AuraType.OverrideClassScripts);
+            Unit owner1 = GetOwner() ?? this;
+            var mOverrideClassScript = owner1.GetAuraEffectsByType(AuraType.OverrideClassScripts);
             foreach (var eff in mOverrideClassScript)
             {
                 if (!eff.IsAffectingSpell(spellProto))
@@ -519,7 +524,12 @@ namespace Game.Entities
             // apply spellmod to Done amount
             Player _modOwner = GetSpellModOwner();
             if (_modOwner)
-                _modOwner.ApplySpellMod(spellProto.Id, damagetype == DamageEffectType.DOT ? SpellModOp.Dot : SpellModOp.Damage, ref heal);
+            {
+                if (damagetype == DamageEffectType.DOT)
+                    _modOwner.ApplySpellMod(spellProto.Id, SpellModOp.Dot, ref heal);
+                else
+                    _modOwner.ApplySpellMod(spellProto.Id, SpellModOp.Damage, ref heal);
+            }
 
             return (uint)Math.Max(heal, 0.0f);
         }
@@ -807,12 +817,9 @@ namespace Game.Entities
                 foreach (var eff in mReflectSpellsSchool)
                     if (Convert.ToBoolean(eff.GetMiscValue() & (int)spell.GetSchoolMask()))
                         reflectchance += eff.GetAmount();
+
                 if (reflectchance > 0 && RandomHelper.randChance(reflectchance))
-                {
-                    // Start triggers for remove charges if need (trigger only for victim, and mark as active spell)
-                    ProcDamageAndSpell(victim, ProcFlags.None, ProcFlags.TakenSpellMagicDmgClassNeg, ProcFlagsExLegacy.Reflect, 1, WeaponAttackType.BaseAttack, spell);
                     return SpellMissInfo.Reflect;
-                }
             }
 
             switch (spell.DmgClass)
@@ -1329,61 +1336,62 @@ namespace Game.Entities
 
         public SpellHistory GetSpellHistory() { return _spellHistory; }
 
-        public static ProcFlagsExLegacy createProcExtendMask(SpellNonMeleeDamage damageInfo, SpellMissInfo missCondition)
+        public static ProcFlagsHit createProcHitMask(SpellNonMeleeDamage damageInfo, SpellMissInfo missCondition)
         {
-            ProcFlagsExLegacy procEx = ProcFlagsExLegacy.None;
+            ProcFlagsHit hitMask = ProcFlagsHit.None;
             // Check victim state
             if (missCondition != SpellMissInfo.None)
+            {
                 switch (missCondition)
                 {
                     case SpellMissInfo.Miss:
-                        procEx |= ProcFlagsExLegacy.Miss;
-                        break;
-                    case SpellMissInfo.Resist:
-                        procEx |= ProcFlagsExLegacy.Resist;
+                        hitMask |= ProcFlagsHit.Miss;
                         break;
                     case SpellMissInfo.Dodge:
-                        procEx |= ProcFlagsExLegacy.Dodge;
+                        hitMask |= ProcFlagsHit.Dodge;
                         break;
                     case SpellMissInfo.Parry:
-                        procEx |= ProcFlagsExLegacy.Parry;
+                        hitMask |= ProcFlagsHit.Parry;
                         break;
                     case SpellMissInfo.Block:
-                        procEx |= ProcFlagsExLegacy.Block;
+                        hitMask |= ProcFlagsHit.Block;
                         break;
                     case SpellMissInfo.Evade:
-                        procEx |= ProcFlagsExLegacy.Evade;
+                        hitMask |= ProcFlagsHit.Evade;
                         break;
                     case SpellMissInfo.Immune:
-                        procEx |= ProcFlagsExLegacy.Immune;
+                    case SpellMissInfo.Immune2:
+                        hitMask |= ProcFlagsHit.Immune;
                         break;
                     case SpellMissInfo.Deflect:
-                        procEx |= ProcFlagsExLegacy.Deflect;
+                        hitMask |= ProcFlagsHit.Deflect;
                         break;
                     case SpellMissInfo.Absorb:
-                        procEx |= ProcFlagsExLegacy.Absorb;
+                        hitMask |= ProcFlagsHit.Absorb;
                         break;
                     case SpellMissInfo.Reflect:
-                        procEx |= ProcFlagsExLegacy.Reflect;
+                        hitMask |= ProcFlagsHit.Reflect;
                         break;
                     default:
                         break;
                 }
+            }
             else
             {
                 // On block
                 if (damageInfo.blocked != 0)
-                    procEx |= ProcFlagsExLegacy.Block;
+                    hitMask |= ProcFlagsHit.Block;
                 // On absorb
                 if (damageInfo.absorb != 0)
-                    procEx |= ProcFlagsExLegacy.Absorb;
+                    hitMask |= ProcFlagsHit.Absorb;
                 // On crit
                 if (damageInfo.HitInfo.HasAnyFlag(SpellHitType.Crit))
-                    procEx |= ProcFlagsExLegacy.CriticalHit;
+                    hitMask |= ProcFlagsHit.Critical;
                 else
-                    procEx |= ProcFlagsExLegacy.NormalHit;
+                    hitMask |= ProcFlagsHit.Normal;
             }
-            return procEx;
+
+            return hitMask;
         }
 
         public void SetAuraStack(uint spellId, Unit target, uint stack)
@@ -1728,32 +1736,35 @@ namespace Game.Entities
             return false;
         }
 
-        public void ProcDamageAndSpell(Unit victim, ProcFlags procAttacker, ProcFlags procVictim, ProcFlagsExLegacy procExtra, uint amount, WeaponAttackType attType = WeaponAttackType.BaseAttack, SpellInfo procSpell = null, SpellInfo procAura = null)
+        public void ProcSkillsAndAuras(Unit actionTarget, ProcFlags typeMaskActor, ProcFlags typeMaskActionTarget, ProcFlagsSpellType spellTypeMask, ProcFlagsSpellPhase spellPhaseMask, ProcFlagsHit hitMask, Spell spell, DamageInfo damageInfo, HealInfo healInfo)
         {
-            // Not much to do if no flags are set.
-            if (procAttacker != 0)
-                ProcDamageAndSpellFor(false, victim, procAttacker, procExtra, attType, procSpell, amount, procAura);
-            // Now go on with a victim's events'n'auras
-            // Not much to do if no flags are set or there is no victim
-            if (victim != null && victim.IsAlive() && procVictim != 0)
-                victim.ProcDamageAndSpellFor(true, this, procVictim, procExtra, attType, procSpell, amount, procAura);
+            WeaponAttackType attType = damageInfo != null ? damageInfo.GetAttackType() : WeaponAttackType.BaseAttack;
+            if (typeMaskActor != 0 && CanProc())
+                ProcSkillsAndReactives(false, actionTarget, typeMaskActor, hitMask, attType);
+
+            if (typeMaskActionTarget != 0 && actionTarget && actionTarget.CanProc())
+                actionTarget.ProcSkillsAndReactives(true, this, typeMaskActionTarget, hitMask, attType);
+
+            TriggerAurasProcOnEvent(null, null, actionTarget, typeMaskActor, typeMaskActionTarget, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
         }
-        void ProcDamageAndSpellFor(bool isVictim, Unit target, ProcFlags procFlag, ProcFlagsExLegacy procExtra, WeaponAttackType attType, SpellInfo procSpell, uint damage, SpellInfo procAura = null)
+
+        void ProcSkillsAndReactives(bool isVictim, Unit procTarget, ProcFlags typeMask, ProcFlagsHit hitMask, WeaponAttackType attType)
         {
             // Player is loaded now - do not allow passive spell casts to proc
-            if (IsTypeId(TypeId.Player) && ToPlayer().GetSession().PlayerLoading())
+            if (IsPlayer() && ToPlayer().GetSession().PlayerLoading())
                 return;
+
             // For melee/ranged based attack need update skills and set some Aura states if victim present
-            if (Convert.ToBoolean(procFlag & ProcFlags.MeleeBasedTriggerMask) && target != null)
+            if (typeMask.HasAnyFlag(ProcFlags.MeleeBasedTriggerMask) && procTarget)
             {
                 // If exist crit/parry/dodge/block need update aura state (for victim and attacker)
-                if (Convert.ToBoolean(procExtra & (ProcFlagsExLegacy.CriticalHit | ProcFlagsExLegacy.Parry | ProcFlagsExLegacy.Dodge | ProcFlagsExLegacy.Block)))
+                if (hitMask.HasAnyFlag(ProcFlagsHit.Critical | ProcFlagsHit.Parry | ProcFlagsHit.Dodge | ProcFlagsHit.Block))
                 {
                     // for victim
                     if (isVictim)
                     {
                         // if victim and dodge attack
-                        if (Convert.ToBoolean(procExtra & ProcFlagsExLegacy.Dodge))
+                        if (hitMask.HasAnyFlag(ProcFlagsHit.Dodge))
                         {
                             // Update AURA_STATE on dodge
                             if (GetClass() != Class.Rogue) // skip Rogue Riposte
@@ -1763,9 +1774,9 @@ namespace Game.Entities
                             }
                         }
                         // if victim and parry attack
-                        if (Convert.ToBoolean(procExtra & ProcFlagsExLegacy.Parry))
+                        if (hitMask.HasAnyFlag(ProcFlagsHit.Parry))
                         {
-                            // For Hunters only Counterattack
+                            // For Hunters only Counterattack (skip Mongoose bite)
                             if (GetClass() == Class.Hunter)
                             {
                                 ModifyAuraState(AuraStateType.HunterParry, true);
@@ -1778,7 +1789,7 @@ namespace Game.Entities
                             }
                         }
                         // if and victim block attack
-                        if (Convert.ToBoolean(procExtra & ProcFlagsExLegacy.Block))
+                        if (hitMask.HasAnyFlag(ProcFlagsHit.Block))
                         {
                             ModifyAuraState(AuraStateType.Defense, true);
                             StartReactiveTimer(ReactiveType.Defense);
@@ -1787,7 +1798,7 @@ namespace Game.Entities
                     else // For attacker
                     {
                         // Overpower on victim dodge
-                        if (Convert.ToBoolean(procExtra & ProcFlagsExLegacy.Dodge) && IsTypeId(TypeId.Player) && GetClass() == Class.Warrior)
+                        if (hitMask.HasAnyFlag(ProcFlagsHit.Dodge) && IsPlayer() && GetClass() == Class.Warrior)
                         {
                             ToPlayer().AddComboPoints(1);
                             StartReactiveTimer(ReactiveType.OverPower);
@@ -1795,342 +1806,86 @@ namespace Game.Entities
                     }
                 }
             }
+        }
 
-            Unit actor = isVictim ? target : this;
-            Unit actionTarget = !isVictim ? target : this;
+        void GetProcAurasTriggeredOnEvent(List<Tuple<uint, AuraApplication>> aurasTriggeringProc, List<AuraApplication> procAuras, ProcEventInfo eventInfo)
+        {
+            DateTime now = DateTime.Now;
 
-            DamageInfo damageInfo = new DamageInfo(actor, actionTarget, damage, procSpell, (procSpell != null ? procSpell.SchoolMask : SpellSchoolMask.Normal), DamageEffectType.Direct, attType);
-            HealInfo healInfo = new HealInfo(actor, actionTarget, damage, procSpell, (procSpell != null ? procSpell.SchoolMask : SpellSchoolMask.Normal));
-            ProcEventInfo eventInfo = new ProcEventInfo(actor, actionTarget, target, (uint)procFlag, 0, 0, (uint)procExtra, null, damageInfo, healInfo);
-
-            var now = DateTime.Now;
-            List<ProcTriggeredData> procTriggered = new List<ProcTriggeredData>();
-            // Fill procTriggered list
-            foreach (var pair in GetAppliedAuras())
+            // use provided list of auras which can proc
+            if (!procAuras.Empty())
             {
-                // Do not allow auras to proc from effect triggered by itself
-                if (procAura != null && procAura.Id == pair.Key || pair.Value == null)
-                    continue;
-
-                if (pair.Value.GetBase().IsProcOnCooldown(now))
-                    continue;
-
-                ProcTriggeredData triggerData = new ProcTriggeredData(pair.Value.GetBase());
-                // Defensive procs are active on absorbs (so absorption effects are not a hindrance)
-                bool active = damage != 0 || (Convert.ToBoolean(procExtra & ProcFlagsExLegacy.Block) && isVictim);
-                if (isVictim)
-                    procExtra &= ~ProcFlagsExLegacy.InternalReqFamily;
-
-                SpellInfo spellProto = pair.Value.GetBase().GetSpellInfo();
-
-                // only auras that has triggered spell should proc from fully absorbed damage
-                if (procExtra.HasAnyFlag(ProcFlagsExLegacy.Absorb) && isVictim && damage != 0)
+                foreach (AuraApplication aurApp in procAuras)
                 {
-                    foreach (SpellEffectInfo effect in pair.Value.GetBase().GetSpellEffectInfos())
+                    Contract.Assert(aurApp.GetTarget() == this);
+                    uint procEffectMask = aurApp.GetBase().IsProcTriggeredOnEvent(aurApp, eventInfo, now);
+                    if (procEffectMask != 0)
                     {
-                        if (effect != null && effect.TriggerSpell != 0)
-                        {
-                            active = true;
-                            break;
-                        }
+                        aurApp.GetBase().PrepareProcToTrigger(aurApp, eventInfo, now);
+                        aurasTriggeringProc.Add(Tuple.Create(procEffectMask, aurApp));
                     }
                 }
-
-                if (!IsTriggeredAtSpellProcEvent(target, triggerData.aura, procSpell, procFlag, procExtra, attType, isVictim, active, ref triggerData.spellProcEvent))
-                    continue;
-
-                // do checks using conditions table
-                if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.SpellProc, spellProto.Id, eventInfo.GetActor(), eventInfo.GetActionTarget()))
-                    continue;
-
-                // AuraScript Hook
-                if (!triggerData.aura.CallScriptCheckProcHandlers(pair.Value, eventInfo))
-                    continue;
-
-                bool procSuccess = RollProcResult(target, triggerData.aura, attType, isVictim, triggerData.spellProcEvent);
-                triggerData.aura.SetLastProcAttemptTime(now);
-                if (!procSuccess)
-                    continue;
-
-                bool triggeredCanProcAura = true;
-                // Additional checks for triggered spells (ignore trap casts)
-                if (procExtra.HasAnyFlag(ProcFlagsExLegacy.InternalTriggered) && !procFlag.HasAnyFlag(ProcFlags.DoneTrapActivation))
-                {
-                    if (!spellProto.HasAttribute(SpellAttr3.CanProcWithTriggered))
-                        triggeredCanProcAura = false;
-                }
-
-                foreach (AuraEffect aurEff in pair.Value.GetBase().GetAuraEffects())
-                {
-                    if (aurEff != null)
-                    {
-                        // Skip this auras
-                        if (isNonTriggerAura(aurEff.GetAuraType()))
-                            continue;
-                        // If not trigger by default and spellProcEvent == null - skip
-                        if (!isTriggerAura(aurEff.GetAuraType()) && triggerData.spellProcEvent == null)
-                            continue;
-                        // Some spells must always trigger
-                        if (triggeredCanProcAura || isAlwaysTriggeredAura(aurEff.GetAuraType()))
-                            triggerData.effMask |= (uint)(1 << aurEff.GetEffIndex());
-                    }
-                }
-                if (triggerData.effMask != 0)
-                    procTriggered.Add(triggerData);
             }
-
-            // Nothing found
-            if (procTriggered.Empty())
-                return;
-
-            // Note: must SetCantProc(false) before return
-            if (procExtra.HasAnyFlag(ProcFlagsExLegacy.InternalTriggered | ProcFlagsExLegacy.InternalCantProc))
-                SetCantProc(true);
-
-            // Handle effects proceed this time
-            foreach (var proc in procTriggered)
+            // or generate one on our own
+            else
             {
-                // look for aura in auras list, it may be removed while proc event processing
-                if (proc.aura.IsRemoved())
-                    continue;
-
-                bool useCharges = proc.aura.IsUsingCharges();
-                // no more charges to use, prevent proc
-                if (useCharges && proc.aura.GetCharges() == 0)
-                    continue;
-
-                bool takeCharges = false;
-                SpellInfo spellInfo = proc.aura.GetSpellInfo();
-                uint Id = proc.aura.GetId();
-
-                AuraApplication aurApp = proc.aura.GetApplicationOfTarget(GetGUID());
-
-                bool prepare = proc.aura.CallScriptPrepareProcHandlers(aurApp, eventInfo);
-
-                TimeSpan cooldown = TimeSpan.Zero;
-                if (prepare)
+                foreach (var pair in GetAppliedAuras())
                 {
-                    cooldown = TimeSpan.FromMilliseconds(spellInfo.ProcCooldown);
-                    if (proc.spellProcEvent != null && proc.spellProcEvent.cooldown != 0)
-                        cooldown = TimeSpan.FromSeconds(proc.spellProcEvent.cooldown);
+                    uint procEffectMask = pair.Value.GetBase().IsProcTriggeredOnEvent(pair.Value, eventInfo, now);
+                    if (procEffectMask != 0)
+                    {
+                        pair.Value.GetBase().PrepareProcToTrigger(pair.Value, eventInfo, now);
+                        aurasTriggeringProc.Add(Tuple.Create(procEffectMask, pair.Value));
+                    }
                 }
+            }
+        }
 
-                proc.aura.SetLastProcSuccessTime(now);
+        void TriggerAurasProcOnEvent(CalcDamageInfo damageInfo)
+        {
+            DamageInfo dmgInfo = new DamageInfo(damageInfo);
+            TriggerAurasProcOnEvent(null, null, damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, ProcFlagsSpellType.None, ProcFlagsSpellPhase.None, dmgInfo.GetHitMask(), null, dmgInfo, null);
+        }
 
-                // Note: must SetCantProc(false) before return
+        void TriggerAurasProcOnEvent(List<AuraApplication> myProcAuras, List<AuraApplication> targetProcAuras, Unit actionTarget, ProcFlags typeMaskActor, ProcFlags typeMaskActionTarget, ProcFlagsSpellType spellTypeMask, ProcFlagsSpellPhase spellPhaseMask, ProcFlagsHit hitMask, Spell spell, DamageInfo damageInfo, HealInfo healInfo)
+        {
+            // prepare data for self trigger
+            ProcEventInfo myProcEventInfo = new ProcEventInfo(this, actionTarget, actionTarget, typeMaskActor, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
+            List<Tuple<uint, AuraApplication>> myAurasTriggeringProc = new List<Tuple<uint, AuraApplication>>();
+            if (typeMaskActor != 0 && CanProc())
+                GetProcAurasTriggeredOnEvent(myAurasTriggeringProc, myProcAuras, myProcEventInfo);
+
+            // prepare data for target trigger
+            ProcEventInfo targetProcEventInfo = new ProcEventInfo(this, actionTarget, this, typeMaskActionTarget, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
+            List<Tuple<uint, AuraApplication>> targetAurasTriggeringProc = new List<Tuple<uint, AuraApplication>>();
+            if (typeMaskActionTarget != 0 && actionTarget && actionTarget.CanProc())
+                actionTarget.GetProcAurasTriggeredOnEvent(targetAurasTriggeringProc, targetProcAuras, targetProcEventInfo);
+
+            TriggerAurasProcOnEvent(myProcEventInfo, myAurasTriggeringProc);
+
+            if (typeMaskActionTarget != 0 && actionTarget)
+                actionTarget.TriggerAurasProcOnEvent(targetProcEventInfo, targetAurasTriggeringProc);
+        }
+
+        void TriggerAurasProcOnEvent(ProcEventInfo eventInfo, List<Tuple<uint, AuraApplication>> aurasTriggeringProc)
+        {
+            foreach (var aurAppProc in aurasTriggeringProc)
+            {
+                AuraApplication aurApp = aurAppProc.Item2;
+                uint procEffectMask = aurAppProc.Item1;
+
+                if (aurApp.GetRemoveMode() != 0)
+                    continue;
+
+                SpellInfo spellInfo = aurApp.GetBase().GetSpellInfo();
                 if (spellInfo.HasAttribute(SpellAttr3.DisableProc))
                     SetCantProc(true);
 
-                bool handled = proc.aura.CallScriptProcHandlers(aurApp, eventInfo);
-
-                // "handled" is needed as long as proc can be handled in multiple places
-                if (!handled)
-                {
-                    Log.outDebug(LogFilter.Spells, "ProcDamageAndSpell: casting spell {0} (triggered with value by {1} aura of spell {2})", spellInfo.Id, (isVictim ? "a victim's" : "an attacker's"), Id);
-                    takeCharges = true;
-                }
-
-                if (!handled)
-                {
-                    for (byte effIndex = 0; effIndex < SpellConst.MaxEffects; ++effIndex)
-                    {
-                        if (!Convert.ToBoolean(proc.effMask & (1 << effIndex)))
-                            continue;
-
-                        AuraEffect triggeredByAura = proc.aura.GetEffect(effIndex);
-                        Contract.Assert(triggeredByAura != null);
-
-                        bool prevented = proc.aura.CallScriptEffectProcHandlers(triggeredByAura, aurApp, eventInfo);
-                        if (prevented)
-                        {
-                            takeCharges = true;
-                            continue;
-                        }
-
-                        switch (triggeredByAura.GetAuraType())
-                        {
-                            case AuraType.ProcTriggerSpell:
-                                {
-                                    Log.outDebug(LogFilter.Spells, "ProcDamageAndSpell: casting spell {0} (triggered by {1} aura of spell {2})", spellInfo.Id, (isVictim ? "a victim's" : "an attacker's"), triggeredByAura.GetId());
-                                    // Don`t drop charge or add cooldown for not started trigger
-                                    if (HandleProcTriggerSpell(target, damage, triggeredByAura, procSpell, procFlag, procExtra))
-                                        takeCharges = true;
-                                    break;
-                                }
-                            case AuraType.ProcTriggerDamage:
-                                {
-                                    // target has to be valid
-                                    if (eventInfo.GetProcTarget() == null)
-                                        break;
-
-                                    triggeredByAura.HandleProcTriggerDamageAuraProc(aurApp, eventInfo); // this function is part of the new proc system
-                                    takeCharges = true;
-                                    break;
-                                }
-                            case AuraType.ManaShield:
-                            case AuraType.Dummy:
-                                {
-                                    Log.outDebug(LogFilter.Spells, "ProcDamageAndSpell: casting spell id {0} (triggered by {1} dummy aura of spell {2})", spellInfo.Id, (isVictim ? "a victim's" : "an attacker's"), triggeredByAura.GetId());
-                                    if (HandleDummyAuraProc(target, damage, triggeredByAura, procSpell, procFlag, procExtra))
-                                        takeCharges = true;
-                                    break;
-                                }
-                            case AuraType.ProcOnPowerAmount2:
-                            case AuraType.ProcOnPowerAmount:
-                                {
-                                    triggeredByAura.HandleProcTriggerSpellOnPowerAmountAuraProc(aurApp, eventInfo);
-                                    takeCharges = true;
-                                    break;
-                                }
-                            case AuraType.ObsModPower:
-                            case AuraType.ModSpellCritChance:
-                            case AuraType.ModDamagePercentTaken:
-                            case AuraType.ModMeleeHaste:
-                            case AuraType.ModMeleeHaste3:
-                                Log.outDebug(LogFilter.Spells, "ProcDamageAndSpell: casting spell id {0} (triggered by {1} aura of spell {2})", spellInfo.Id, isVictim ? "a victim's" : "an attacker's", triggeredByAura.GetId());
-                                takeCharges = true;
-                                break;
-                            case AuraType.OverrideClassScripts:
-                                {
-                                    Log.outDebug(LogFilter.Spells, "ProcDamageAndSpell: casting spell id {0} (triggered by {1} aura of spell {2})", spellInfo.Id, (isVictim ? "a victim's" : "an attacker's"), triggeredByAura.GetId());
-                                    if (HandleOverrideClassScriptAuraProc(target, damage, triggeredByAura, procSpell))
-                                        takeCharges = true;
-                                    break;
-                                }
-                            case AuraType.RaidProcFromChargeWithValue:
-                                {
-                                    Log.outDebug(LogFilter.Spells, "ProcDamageAndSpell: casting mending (triggered by {0} dummy aura of spell {1})",
-                                        (isVictim ? "a victim's" : "an attacker's"), triggeredByAura.GetId());
-
-                                    HandleAuraRaidProcFromChargeWithValue(triggeredByAura);
-                                    takeCharges = true;
-                                    break;
-                                }
-                            case AuraType.RaidProcFromCharge:
-                                {
-                                    Log.outDebug(LogFilter.Spells, "ProcDamageAndSpell: casting mending (triggered by {0} dummy aura of spell {1})",
-                                        (isVictim ? "a victim's" : "an attacker's"), triggeredByAura.GetId());
-
-                                    HandleAuraRaidProcFromCharge(triggeredByAura);
-                                    takeCharges = true;
-                                    break;
-                                }
-                            case AuraType.ProcTriggerSpellWithValue:
-                                {
-                                    Log.outDebug(LogFilter.Spells, "ProcDamageAndSpell: casting spell {0} (triggered with value by {1} aura of spell {2})", spellInfo.Id, (isVictim ? "a victim's" : "an attacker's"), triggeredByAura.GetId());
-
-                                    if (HandleProcTriggerSpell(target, damage, triggeredByAura, procSpell, procFlag, procExtra))
-                                        takeCharges = true;
-                                    break;
-                                }
-                            case AuraType.ModCastingSpeedNotStack:
-                                // Skip melee hits or instant cast spells
-                                if (procSpell != null && procSpell.CalcCastTime() != 0)
-                                    takeCharges = true;
-                                break;
-                            case AuraType.ReflectSpellsSchool:
-                                // Skip Melee hits and spells ws wrong school
-                                if (procSpell != null && Convert.ToBoolean(triggeredByAura.GetMiscValue() & (int)procSpell.SchoolMask))         // School check
-                                    takeCharges = true;
-                                break;
-                            case AuraType.SpellMagnet:
-                                // Skip Melee hits and targets with magnet aura
-                                if (procSpell != null && (triggeredByAura.GetBase().GetUnitOwner().ToUnit() == ToUnit()))         // Magnet
-                                    takeCharges = true;
-                                break;
-                            case AuraType.ModPowerCostSchoolPct:
-                            case AuraType.ModPowerCostSchool:
-                                // Skip melee hits and spells ws wrong school or zero cost
-                                if (procSpell != null && Convert.ToBoolean(triggeredByAura.GetMiscValue() & (int)procSpell.SchoolMask)) // School check
-                                {
-                                    var costs = procSpell.CalcPowerCost(this, procSpell.GetSchoolMask());
-                                    var m = costs.Find(cost => cost.Amount > 0);
-                                    if (m != null)
-                                        takeCharges = true;
-                                }
-                                break;
-                            case AuraType.MechanicImmunity:
-                                // Compare mechanic
-                                if (procSpell != null && procSpell.Mechanic == (Mechanics)triggeredByAura.GetMiscValue())
-                                    takeCharges = true;
-                                break;
-                            case AuraType.ModMechanicResistance:
-                                // Compare mechanic
-                                if (procSpell != null && procSpell.Mechanic == (Mechanics)triggeredByAura.GetMiscValue())
-                                    takeCharges = true;
-                                break;
-                            case AuraType.ModSpellDamageFromCaster:
-                                // Compare casters
-                                if (triggeredByAura.GetCasterGUID() == target.GetGUID())
-                                    takeCharges = true;
-                                break;
-                            // CC Auras which use their amount amount to drop
-                            // Are there any more auras which need this?
-                            case AuraType.ModConfuse:
-                            case AuraType.ModFear:
-                            case AuraType.ModStun:
-                            case AuraType.ModRoot:
-                            case AuraType.Transform:
-                            case AuraType.ModRoot2:
-                                {
-                                    // chargeable mods are breaking on hit
-                                    if (useCharges)
-                                        takeCharges = true;
-                                    else
-                                    {
-                                        // Spell own direct damage at apply wont break the CC
-                                        if (procSpell != null && (procSpell.Id == triggeredByAura.GetId()))
-                                        {
-                                            Aura aura = triggeredByAura.GetBase();
-                                            // called from spellcast, should not have ticked yet
-                                            if (aura.GetDuration() == aura.GetMaxDuration())
-                                                break;
-                                        }
-                                        int damageLeft = triggeredByAura.GetAmount();
-                                        // No damage left
-                                        if (damageLeft < damage)
-                                            proc.aura.Remove();
-                                        else
-                                            triggeredByAura.SetAmount((int)(damageLeft - damage));
-                                    }
-                                    break;
-                                }
-                            default:
-                                // nothing do, just charges counter
-                                takeCharges = true;
-                                break;
-                        }
-                        proc.aura.CallScriptAfterEffectProcHandlers(triggeredByAura, aurApp, eventInfo);
-                    }
-                }
-
-                if (prepare && takeCharges && cooldown != TimeSpan.Zero)
-                    proc.aura.AddProcCooldown(now + cooldown);
-
-                // Remove charge (aura can be removed by triggers)
-                if (prepare && useCharges && takeCharges)
-                {
-                    // Set charge drop delay (only for missiles)
-                    if (procExtra.HasAnyFlag(ProcFlagsExLegacy.Reflect) && target && procSpell != null && procSpell.Speed > 0.0f)
-                    {
-                        // Set up missile speed based delay (from Spell.cpp: Spell.AddUnitTarget().L2237)
-                        uint delay = (uint)Math.Floor(Math.Max(target.GetDistance(this), 5.0f) / procSpell.Speed * 1000.0f);
-                        // Schedule charge drop
-                        proc.aura.DropChargeDelayed(delay);
-                    }
-                    else
-                        proc.aura.DropCharge();
-                }
-
-                proc.aura.CallScriptAfterProcHandlers(aurApp, eventInfo);
+                aurApp.GetBase().TriggerProcOnEvent(procEffectMask, aurApp, eventInfo);
 
                 if (spellInfo.HasAttribute(SpellAttr3.DisableProc))
                     SetCantProc(false);
             }
-
-            // Cleanup proc requirements
-            if (procExtra.HasAnyFlag(ProcFlagsExLegacy.InternalTriggered | ProcFlagsExLegacy.InternalCantProc))
-                SetCantProc(false);
         }
 
         void SetCantProc(bool apply)
@@ -2415,114 +2170,6 @@ namespace Game.Entities
             }
         }
 
-        bool IsTriggeredAtSpellProcEvent(Unit victim, Aura aura, SpellInfo procSpell, ProcFlags procFlag, ProcFlagsExLegacy procExtra, WeaponAttackType attType, bool isVictim, bool active, ref SpellProcEventEntry spellProcEvent)
-        {
-            SpellInfo spellInfo = aura.GetSpellInfo();
-
-            // let the aura be handled by new proc system if it has new entry
-            if (Global.SpellMgr.GetSpellProcEntry(spellInfo.Id) != null)
-                return false;
-
-            // Get proc Event Entry
-            spellProcEvent = Global.SpellMgr.GetSpellProcEvent(spellInfo.Id);
-
-            // Get EventProcFlag
-            ProcFlags EventProcFlag;
-            if (spellProcEvent != null && spellProcEvent.procFlags != 0) // if exist get custom spellProcEvent.procFlags
-                EventProcFlag = (ProcFlags)spellProcEvent.procFlags;
-            else
-                EventProcFlag = spellInfo.ProcFlags;       // else get from spell proto
-            // Continue if no trigger exist
-            if (EventProcFlag == 0)
-                return false;
-
-            // Check spellProcEvent data requirements
-            if (!Global.SpellMgr.IsSpellProcEventCanTriggeredBy(spellInfo, spellProcEvent, EventProcFlag, procSpell, procFlag, procExtra, active))
-                return false;
-            // In most cases req get honor or XP from kill
-            if (EventProcFlag.HasAnyFlag(ProcFlags.Kill) && IsTypeId(TypeId.Player))
-            {
-                bool allow = false;
-
-                if (victim != null)
-                    allow = ToPlayer().isHonorOrXPTarget(victim);
-
-                // Shadow Word: Death - can trigger from every kill
-                if (aura.GetId() == 32409)
-                    allow = true;
-                if (!allow)
-                    return false;
-            }
-            // Aura added by spell can`t trigger from self (prevent drop charges/do triggers)
-            // But except periodic and kill triggers (can triggered from self)
-            if (procSpell != null && procSpell.Id == spellInfo.Id
-                && !spellInfo.ProcFlags.HasAnyFlag(ProcFlags.TakenPeriodic | ProcFlags.Kill))
-                return false;
-
-            // Check if current equipment allows aura to proc
-            if (!isVictim && IsTypeId(TypeId.Player))
-            {
-                Player player = ToPlayer();
-                if (spellInfo.EquippedItemClass == ItemClass.Weapon)
-                {
-                    Item item = null;
-                    if (attType == WeaponAttackType.BaseAttack || attType == WeaponAttackType.RangedAttack)
-                        item = player.GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
-                    else if (attType == WeaponAttackType.OffAttack)
-                        item = player.GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
-
-                    if (player.IsInFeralForm())
-                        return false;
-
-                    if (item == null || item.IsBroken() || item.GetTemplate().GetClass() != ItemClass.Weapon || !Convert.ToBoolean((1 << (int)item.GetTemplate().GetSubClass()) & spellInfo.EquippedItemSubClassMask))
-                        return false;
-                }
-                else if (spellInfo.EquippedItemClass == ItemClass.Armor)
-                {
-                    // Check if player is wearing shield
-                    Item item = player.GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
-                    if (item == null || item.IsBroken() || item.GetTemplate().GetClass() != ItemClass.Armor || !Convert.ToBoolean((1 << (int)item.GetTemplate().GetSubClass()) & spellInfo.EquippedItemSubClassMask))
-                        return false;
-                }
-            }
-
-            return true;
-        }
-
-        bool RollProcResult(Unit victim, Aura aura, WeaponAttackType attType, bool isVictim, SpellProcEventEntry spellProcEvent)
-        {
-            SpellInfo spellInfo = aura.GetSpellInfo();
-            // Get chance from spell
-            float chance = spellInfo.ProcChance;
-            // If in spellProcEvent exist custom chance, chance = spellProcEvent.customChance;
-            if (spellProcEvent != null && spellProcEvent.customChance != 0.0f)
-                chance = spellProcEvent.customChance;
-            // If PPM exist calculate chance from PPM
-            if (spellProcEvent != null && spellProcEvent.ppmRate != 0)
-            {
-                if (!isVictim)
-                {
-                    uint WeaponSpeed = GetBaseAttackTime(attType);
-                    chance = GetPPMProcChance(WeaponSpeed, spellProcEvent.ppmRate, spellInfo);
-                }
-                else
-                {
-                    uint WeaponSpeed = victim.GetBaseAttackTime(attType);
-                    chance = victim.GetPPMProcChance(WeaponSpeed, spellProcEvent.ppmRate, spellInfo);
-                }
-            }
-
-            if (spellInfo.ProcBasePPM > 0.0f)
-                chance = aura.CalcPPMProcChance(isVictim ? victim : this);
-
-            // Apply chance modifer aura
-            Player modOwner = GetSpellModOwner();
-            if (modOwner != null)
-                modOwner.ApplySpellMod(spellInfo.Id, SpellModOp.ChanceOfSuccess, ref chance);
-
-            return RandomHelper.randChance(chance);
-        }
-
         uint getTransForm() { return m_transform; }
 
         public bool HasStealthAura() { return HasAuraType(AuraType.ModStealth); }
@@ -2542,19 +2189,11 @@ namespace Game.Entities
             return spellInfo.GetSpellSpecific() == SpellSpecificType.MagePolymorph;
         }
 
-        public int HealBySpell(Unit victim, SpellInfo spellInfo, uint addHealth, bool critical = false)
-        {
-            uint absorb = 0;
-            // calculate heal absorb and reduce healing
-            CalcHealAbsorb(victim, spellInfo, ref addHealth, ref absorb);
-
-            int gain = DealHeal(victim, addHealth);
-            SendHealSpellLog(victim, spellInfo.Id, addHealth, (uint)(addHealth - gain), absorb, critical);
-            return gain;
-        }
-        public int DealHeal(Unit victim, uint addhealth)
+        public void DealHeal(HealInfo healInfo)
         {
             int gain = 0;
+            Unit victim = healInfo.GetTarget();
+            uint addhealth = healInfo.GetHeal();
 
             if (victim.IsAIEnabled)
                 victim.GetAI().HealReceived(this, addhealth);
@@ -2595,27 +2234,26 @@ namespace Game.Entities
                 player.UpdateCriteria(CriteriaTypes.HighestHealingReceived, addhealth);
             }
 
-            return gain;
+            if (gain != 0)
+                healInfo.SetEffectiveHeal(gain > 0 ? (uint)gain : 0u);
         }
 
-        void SendHealSpellLog(Unit victim, uint spellID, uint health, uint overHeal, uint absorbed, bool crit)
+        void SendHealSpellLog(HealInfo healInfo, bool critical = false)
         {
             SpellHealLog spellHealLog = new SpellHealLog();
 
-            spellHealLog.TargetGUID = victim.GetGUID();
+            spellHealLog.TargetGUID = healInfo.GetTarget().GetGUID();
             spellHealLog.CasterGUID = GetGUID();
 
-            spellHealLog.SpellID = spellID;
-            spellHealLog.Health = health;
-            spellHealLog.OverHeal = overHeal;
-            spellHealLog.Absorbed = absorbed;
+            spellHealLog.SpellID = healInfo.GetSpellInfo().Id;
+            spellHealLog.Health = healInfo.GetHeal();
+            spellHealLog.OverHeal = healInfo.GetHeal() - healInfo.GetEffectiveHeal();
+            spellHealLog.Absorbed = healInfo.GetAbsorb();
 
-            spellHealLog.Crit = crit;
+            spellHealLog.Crit = critical;
 
             /// @todo: 6.x Has to be implemented
             /*
-            spellHealLog.WriteBit("Multistrike");
-
             var hasCritRollMade = spellHealLog.WriteBit("HasCritRollMade");
             var hasCritRollNeeded = spellHealLog.WriteBit("HasCritRollNeeded");
             var hasLogData = spellHealLog.WriteBit("HasLogData");
@@ -2629,237 +2267,18 @@ namespace Game.Entities
             if (hasLogData)
                 SpellParsers.ReadSpellCastLogData(packet);
             */
-            spellHealLog.LogData.Initialize(victim);
+            spellHealLog.LogData.Initialize(healInfo.GetTarget());
             SendCombatLogMessage(spellHealLog);
         }
 
-        bool HandleDummyAuraProc(Unit victim, uint damage, AuraEffect triggeredByAura, SpellInfo procSpell, ProcFlags procFlag, ProcFlagsExLegacy procEx)
+        public uint HealBySpell(HealInfo healInfo, bool critical = false)
         {
-            SpellInfo dummySpell = triggeredByAura.GetSpellInfo();
-            int triggerAmount = triggeredByAura.GetAmount();
+            // calculate heal absorb and reduce healing
+            CalcHealAbsorb(healInfo);
 
-            Item castItem = !triggeredByAura.GetBase().GetCastItemGUID().IsEmpty() && IsTypeId(TypeId.Player)
-                ? ToPlayer().GetItemByGuid(triggeredByAura.GetBase().GetCastItemGUID()) : null;
-
-            Unit target = victim;
-            uint triggered_spell_id = triggeredByAura.GetSpellEffectInfo().TriggerSpell;
-
-            // processed charge only counting case
-            if (triggered_spell_id == 0)
-                return true;
-
-            SpellInfo triggerEntry = Global.SpellMgr.GetSpellInfo(triggered_spell_id);
-            if (triggerEntry == null)
-            {
-                Log.outError(LogFilter.Unit, "Unit.HandleDummyAuraProc: Spell {0} has non-existing triggered spell {1}", dummySpell.Id, triggered_spell_id);
-                return false;
-            }
-
-            CastSpell(target, triggered_spell_id, true, castItem, triggeredByAura);
-
-            return true;
-        }
-
-        bool HandleProcTriggerSpell(Unit victim, uint damage, AuraEffect triggeredByAura, SpellInfo procSpell, ProcFlags procFlags, ProcFlagsExLegacy procEx)
-        {
-            // Get triggered aura spell info
-            SpellInfo auraSpellInfo = triggeredByAura.GetSpellInfo();
-
-            // Basepoints of trigger aura
-            int triggerAmount = triggeredByAura.GetAmount();
-
-            // Set trigger spell id, target, custom basepoints
-            uint trigger_spell_id = triggeredByAura.GetSpellEffectInfo().TriggerSpell;
-
-            Unit target = null;
-            int basepoints0 = 0;
-
-            if (triggeredByAura.GetAuraType() == AuraType.ProcTriggerSpellWithValue)
-                basepoints0 = triggerAmount;
-
-            Item castItem = !triggeredByAura.GetBase().GetCastItemGUID().IsEmpty() && IsTypeId(TypeId.Player) ? ToPlayer().GetItemByGuid(triggeredByAura.GetBase().GetCastItemGUID()) : null;
-
-            // All ok. Check current trigger spell
-            SpellInfo triggerEntry = Global.SpellMgr.GetSpellInfo(trigger_spell_id);
-            if (triggerEntry == null)
-            {
-                // Don't cast unknown spell
-                Log.outError(LogFilter.Unit, "Unit.HandleProcTriggerSpell: Spell {0} has 0 in EffectTriggered[{1}]. Unhandled custom case?", auraSpellInfo.Id, triggeredByAura.GetEffIndex());
-                return false;
-            }
-
-            // not allow proc extra attack spell at extra attack
-            if (m_extraAttacks != 0 && triggerEntry.HasEffect(SpellEffectName.AddExtraAttacks))
-                return false;
-
-            // Custom basepoints/target for exist spell
-            // dummy basepoints or other customs
-            switch (trigger_spell_id)
-            {
-                // Maelstrom Weapon
-                case 53817:
-                    {
-                        // Item - Shaman T10 Enhancement 4P Bonus
-                        AuraEffect aurEff = GetAuraEffect(70832, 0);
-                        if (aurEff != null)
-                        {
-                            Aura maelstrom = GetAura(53817);
-                            if (maelstrom != null)
-                                if ((maelstrom.GetStackAmount() == maelstrom.GetSpellInfo().StackAmount) && RandomHelper.randChance(aurEff.GetAmount()))
-                                    CastSpell(this, 70831, true, castItem, triggeredByAura);
-                        }
-                        break;
-                    }
-            }
-
-            // extra attack should hit same target
-            if (triggerEntry.HasEffect(SpellEffectName.AddExtraAttacks))
-                target = victim;
-
-            // try detect target manually if not set
-            if (target == null)
-                target = !procFlags.HasAnyFlag(ProcFlags.DoneSpellMagicDmgClassPos | ProcFlags.DoneSpellNoneDmgClassPos) && triggerEntry.IsPositive() ? this : victim;
-
-            if (basepoints0 != 0)
-                CastCustomSpell(target, trigger_spell_id, basepoints0, 0, 0, true, castItem, triggeredByAura);
-            else
-                CastSpell(target, trigger_spell_id, true, castItem, triggeredByAura);
-
-            return true;
-        }
-        bool HandleOverrideClassScriptAuraProc(Unit victim, uint damage, AuraEffect triggeredByAura, SpellInfo procSpell)
-        {
-            int scriptId = triggeredByAura.GetMiscValue();
-
-            if (victim == null || !victim.IsAlive())
-                return false;
-
-            Item castItem = !triggeredByAura.GetBase().GetCastItemGUID().IsEmpty() && IsTypeId(TypeId.Player) ? ToPlayer().GetItemByGuid(triggeredByAura.GetBase().GetCastItemGUID()) : null;
-
-            uint triggered_spell_id = 0;
-
-            switch (scriptId)
-            {
-                case 4537:                                          // Dreamwalker Raiment 6 pieces bonus
-                    triggered_spell_id = 28750;                     // Blessing of the Claw
-                    break;
-                default:
-                    break;
-            }
-
-            // not processed
-            if (triggered_spell_id == 0)
-                return false;
-
-            // standard non-dummy case
-            SpellInfo triggerEntry = Global.SpellMgr.GetSpellInfo(triggered_spell_id);
-
-            if (triggerEntry == null)
-            {
-                Log.outError(LogFilter.Unit, "Unit.HandleOverrideClassScriptAuraProc: Spell {0} triggering for class script id {1}", triggered_spell_id, scriptId);
-                return false;
-            }
-
-            CastSpell(victim, triggered_spell_id, true, castItem, triggeredByAura); //Do not allow auras to proc from ef
-
-            return true;
-        }
-        bool HandleAuraRaidProcFromChargeWithValue(AuraEffect triggeredByAura)
-        {
-            // aura can be deleted at casts
-            SpellInfo spellProto = triggeredByAura.GetSpellInfo();
-            uint triggered_spell_id = 0;
-            int heal = triggeredByAura.GetAmount();
-            ObjectGuid caster_guid = triggeredByAura.GetCasterGUID();
-
-            // Currently only Prayer of Mending
-            if (triggered_spell_id == 0)
-            {
-                Log.outDebug(LogFilter.Spells, "Unit.HandleAuraRaidProcFromChargeWithValue, received not handled spell: {0}", spellProto.Id);
-                return false;
-            }
-
-            // jumps
-            int jumps = triggeredByAura.GetBase().GetCharges() - 1;
-
-            // current aura expire
-            triggeredByAura.GetBase().SetCharges(1);             // will removed at next charges decrease
-
-            // next target selection
-            if (jumps > 0)
-            {
-                Unit caster = triggeredByAura.GetCaster();
-                if (caster != null)
-                {
-                    SpellEffectInfo effect = triggeredByAura.GetSpellEffectInfo();
-                    float radius = effect.CalcRadius(caster);
-                    Unit target = GetNextRandomRaidMemberOrPet(radius);
-                    if (target != null)
-                    {
-                        CastCustomSpell(target, spellProto.Id, heal, 0, 0, true, null, triggeredByAura, caster_guid);
-                        Aura aura = target.GetAura(spellProto.Id, caster.GetGUID());
-                        if (aura != null)
-                            aura.SetCharges(jumps);
-                    }
-                }
-            }
-
-            // heal
-            CastSpell(this, triggered_spell_id, true, null, triggeredByAura, caster_guid);
-            return true;
-        }
-        bool HandleAuraRaidProcFromCharge(AuraEffect triggeredByAura)
-        {
-            // aura can be deleted at casts
-            SpellInfo spellProto = triggeredByAura.GetSpellInfo();
-
-            uint damageSpellId;
-            switch (spellProto.Id)
-            {
-                case 57949:            // shiver
-                    damageSpellId = 57952;
-                    break;
-                case 59978:            // shiver
-                    damageSpellId = 59979;
-                    break;
-                case 43593:            // Cold Stare
-                    damageSpellId = 43594;
-                    break;
-                default:
-                    Log.outError(LogFilter.Unit, "Unit.HandleAuraRaidProcFromCharge, received unhandled spell: {0}", spellProto.Id);
-                    return false;
-            }
-
-            ObjectGuid caster_guid = triggeredByAura.GetCasterGUID();
-
-            // jumps
-            int jumps = triggeredByAura.GetBase().GetCharges() - 1;
-
-            // current aura expire
-            triggeredByAura.GetBase().SetCharges(1);             // will removed at next charges decrease
-
-            // next target selection
-            if (jumps > 0)
-            {
-                Unit caster = triggeredByAura.GetCaster();
-                if (caster != null)
-                {
-                    SpellEffectInfo effect = triggeredByAura.GetSpellEffectInfo();
-                    float radius = effect.CalcRadius(caster);
-                    Unit target = GetNextRandomRaidMemberOrPet(radius);
-                    if (target != null)
-                    {
-                        CastSpell(target, spellProto, true, null, triggeredByAura, caster_guid);
-                        Aura aura = target.GetAura(spellProto.Id, caster.GetGUID());
-                        if (aura != null)
-                            aura.SetCharges(jumps);
-                    }
-                }
-            }
-
-            CastSpell(this, damageSpellId, true, null, triggeredByAura, caster_guid);
-
-            return true;
+            DealHeal(healInfo);
+            SendHealSpellLog(healInfo, critical);
+            return healInfo.GetEffectiveHeal();
         }
 
         public int GetMaxPositiveAuraModifier(AuraType auratype)
@@ -3240,82 +2659,6 @@ namespace Game.Entities
                     }
                 }
             }
-        }
-
-        public bool isNonTriggerAura(AuraType type)
-        {
-            switch (type)
-            {
-                case AuraType.ModPowerRegen:
-                case AuraType.ReducePushback:
-                    return true;
-            }
-            return false;
-        }
-        public bool isTriggerAura(AuraType type)
-        {
-            switch (type)
-            {
-                case AuraType.ProcOnPowerAmount:
-                case AuraType.ProcOnPowerAmount2:
-                case AuraType.Dummy:
-                case AuraType.ModConfuse:
-                case AuraType.ModThreat:
-                case AuraType.ModStun:
-                case AuraType.ModDamageDone:
-                case AuraType.ModDamageTaken:
-                case AuraType.ModResistance:
-                case AuraType.ModStealth:
-                case AuraType.ModFear:
-                case AuraType.ModRoot:
-                case AuraType.Transform:
-                case AuraType.ReflectSpells:
-                case AuraType.DamageImmunity:
-                case AuraType.ProcTriggerSpell:
-                case AuraType.ProcTriggerDamage:
-                case AuraType.ModCastingSpeedNotStack:
-                case AuraType.SchoolAbsorb:
-                case AuraType.ModPowerCostSchoolPct:
-                case AuraType.ModPowerCostSchool:
-                case AuraType.ReflectSpellsSchool:
-                case AuraType.MechanicImmunity:
-                case AuraType.ModDamagePercentTaken:
-                case AuraType.SpellMagnet:
-                case AuraType.ModAttackPower:
-                case AuraType.ModPowerRegenPercent:
-                case AuraType.AddCasterHitTrigger:
-                case AuraType.OverrideClassScripts:
-                case AuraType.ModMechanicResistance:
-                case AuraType.MeleeAttackPowerAttackerBonus:
-                case AuraType.ModMeleeHaste:
-                case AuraType.ModMeleeHaste3:
-                case AuraType.ModAttackerMeleeHitChance:
-                case AuraType.RaidProcFromCharge:
-                case AuraType.RaidProcFromChargeWithValue:
-                case AuraType.ProcTriggerSpellWithValue:
-                case AuraType.ModSpellDamageFromCaster:
-                case AuraType.AbilityIgnoreAurastate:
-                case AuraType.ModRoot2:
-                    return true;
-            }
-            return false;
-        }
-        public bool isAlwaysTriggeredAura(AuraType type)
-        {
-            switch (type)
-            {
-                case AuraType.OverrideClassScripts:
-                case AuraType.ModFear:
-                case AuraType.ModRoot:
-                case AuraType.ModStun:
-                case AuraType.Transform:
-                case AuraType.SpellMagnet:
-                case AuraType.SchoolAbsorb:
-                case AuraType.ModStealth:
-                case AuraType.ModRoot2:
-                    return true;
-            }
-            return false;
         }
 
         public DiminishingLevels GetDiminishing(DiminishingGroup group)
@@ -4810,7 +4153,7 @@ namespace Game.Entities
                 }
             }
         }
-        public Aura _TryStackingOrRefreshingExistingAura(SpellInfo newAura, uint effMask, Unit caster, int[] baseAmount = null, Item castItem = null, ObjectGuid casterGUID = default(ObjectGuid), int castItemLevel = -1)
+        public Aura _TryStackingOrRefreshingExistingAura(SpellInfo newAura, uint effMask, Unit caster, int[] baseAmount = null, Item castItem = null, ObjectGuid casterGUID = default(ObjectGuid), bool resetPeriodicTimer = true, int castItemLevel = -1)
         {
             Contract.Assert(!casterGUID.IsEmpty() || caster);
 
@@ -4867,7 +4210,7 @@ namespace Game.Entities
                     }
 
                     // try to increase stack amount
-                    foundAura.ModStackAmount(1);
+                    foundAura.ModStackAmount(1, AuraRemoveMode.Default, resetPeriodicTimer);
                     return foundAura;
                 }
             }

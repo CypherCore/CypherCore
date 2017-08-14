@@ -341,7 +341,9 @@ namespace Framework.Constants
         Effect5 = 33,
         SpellCost2 = 34, // Used when SpellPowerEntry.PowerIndex == 1
         JumpDistance = 35,
+        // spellmod 36
         StackAmount2 = 37,  // same as SPELLMOD_STACK_AMOUNT but affects tooltips
+        // spellmod 38
 
         Max = 39
     }
@@ -1171,7 +1173,7 @@ namespace Framework.Constants
         IgnoreCasterAurastate = 0x800,   //! Will Ignore Caster Aura States Including Combat Requirements And Death State
         IgnoreCasterMountedOrOnVehicle = 0x2000,   //! Will Ignore Mounted/On Vehicle Restrictions
         IgnoreCasterAuras = 0x10000,   //! Will Ignore Caster Aura Restrictions Or Requirements
-        DisallowProcEvents = 0x20000,   //! Disallows Proc Events From Triggered Spell (Default)
+        DontResetPeriodicTimer = 0x20000,   //! Will allow periodic aura timers to keep ticking (instead of resetting)
         DontReportCastError = 0x40000,   //! Will Return SpellFailedDontReport In Checkcast Functions
         IgnoreEquippedItemRequirement = 0x80000,
         IgnoreTargetCheck = 0x100000,
@@ -2116,39 +2118,6 @@ namespace Framework.Constants
         MeleeBasedTriggerMask = (DoneMeleeAutoAttack | TakenMeleeAutoAttack | DoneSpellMeleeDmgClass | TakenSpellMeleeDmgClass |
                                   DoneRangedAutoAttack | TakenRangedAutoAttack | DoneSpellRangedDmgClass | TakenSpellRangedDmgClass)
     }
-    public enum ProcFlagsExLegacy
-    {
-        None = 0x0,                 // If none can tigger on Hit/Crit only (passive spells MUST defined by SpellFamily flag)
-        NormalHit = 0x01,                 // If set only from normal hit (only damage spells)
-        CriticalHit = 0x02,
-        Miss = 0x04,
-        Resist = 0x08,
-        Dodge = 0x10,
-        Parry = 0x20,
-        Block = 0x40,
-        Evade = 0x80,
-        Immune = 0x100,
-        Deflect = 0x200,
-        Absorb = 0x400,
-        Reflect = 0x800,
-        Interrupt = 0x1000,                 // Melee hit result can be Interrupt (not used)
-        FullBlock = 0x2000,                 // block al attack damage
-        Reserved2 = 0x4000,
-        NotActiveSpell = 0x8000,                 // Spell mustn't do damage/heal to proc
-        ExTriggerAlways = 0x10000,                 // If set trigger always no matter of hit result
-        ExOneTimeTrigger = 0x20000,                 // If set trigger always but only one time (not implemented yet)
-        OnlyActiveSpell = 0x40000,                 // Spell has to do damage/heal to proc
-
-        // Flags for internal use - do not use these in db!
-        InternalCantProc = 0x800000,
-        InternalDot = 0x1000000,
-        InternalHot = 0x2000000,
-        InternalTriggered = 0x4000000,
-        InternalReqFamily = 0x8000000,
-
-        AuraProcMask = (NormalHit | CriticalHit | Miss | Resist | Dodge | Parry
-            | Block | Evade | Immune | Deflect | Absorb | Reflect | Interrupt)
-    }
     public enum ProcFlagsSpellPhase
     {
         None = 0x0,
@@ -2175,6 +2144,14 @@ namespace Framework.Constants
         Interrupt = 0x1000, // (Not Used Atm)
         FullBlock = 0x2000,
         MaskAll = 0x0003FFF
+    }
+
+    public enum ProcAttributes
+    {
+        ReqExpOrHonor = 0x01, // requires proc target to give exp or honor for aura proc
+        TriggeredCanProc = 0x02, // aura can proc even with triggered spells
+        ReqPowerCost = 0x04, // requires triggering spell to have a power cost for aura proc
+        ReqSpellmod = 0x08  // requires triggering spell to be affected by proccing aura to drop charges
     }
 
     // Spell aura states

@@ -1504,12 +1504,11 @@ namespace Game.Spells
             return searcher.GetTarget();
         }
 
-        void prepareDataForTriggerSystem(AuraEffect triggeredByAura)
+        void prepareDataForTriggerSystem()
         {
             //==========================================================================================
             // Now fill data for trigger system, need know:
-            // can spell trigger another or not (m_canTrigger)
-            // Create base triggers flags for Attacker and Victim (m_procAttacker, m_procVictim and m_procEx)
+            // Create base triggers flags for Attacker and Victim (m_procAttacker, m_procVictim and m_hitMask)
             //==========================================================================================
 
             m_procVictim = m_procAttacker = 0;
@@ -1549,7 +1548,7 @@ namespace Game.Spells
                     // For other spells trigger procflags are set in Spell.DoAllEffectOnTarget
                     // Because spell positivity is dependant on target
             }
-            m_procEx = ProcFlagsExLegacy.None;
+            m_hitMask = ProcFlagsHit.None;
 
             // Hunter trap spells - activation proc for Lock and Load, Entrapment and Misdirection
             if (m_spellInfo.SpellFamilyName == SpellFamilyNames.Hunter &&
@@ -1559,28 +1558,12 @@ namespace Game.Spells
 
                 m_procAttacker |= ProcFlags.DoneTrapActivation;
 
-            //Effects which are result of aura proc from triggered spell cannot proc to prevent chain proc of these spells
-
             // Hellfire Effect - trigger as DOT
             if (m_spellInfo.SpellFamilyName == SpellFamilyNames.Warlock && m_spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x00000040u))
             {
                 m_procAttacker = ProcFlags.DonePeriodic;
                 m_procVictim = ProcFlags.TakenPeriodic;
             }
-
-            // Ranged autorepeat attack is set as triggered spell - ignore it
-            if (!Convert.ToBoolean(m_procAttacker & ProcFlags.DoneRangedAutoAttack))
-            {
-                if (_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.DisallowProcEvents) &&
-                    (m_spellInfo.HasAttribute(SpellAttr2.TriggeredCanTriggerProc) ||
-                    m_spellInfo.HasAttribute(SpellAttr3.TriggeredCanTriggerProc2)))
-                    m_procEx |= ProcFlagsExLegacy.InternalCantProc;
-                else if (_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.DisallowProcEvents))
-                    m_procEx |= ProcFlagsExLegacy.InternalTriggered;
-            }
-            // Totem casts require spellfamilymask defined in spell_proc_event to proc
-            if (m_originalCaster != null && m_caster != m_originalCaster && m_caster.IsTypeId(TypeId.Unit) && m_caster.IsTotem() && m_caster.IsControlledByPlayer())
-                m_procEx |= ProcFlagsExLegacy.InternalReqFamily;
         }
 
         public void CleanupTargetList()
@@ -1687,10 +1670,10 @@ namespace Game.Spells
             if (targetInfo.missCondition == SpellMissInfo.Reflect)
             {
                 // Calculate reflected spell result on caster
-                targetInfo.reflectResult = m_caster.SpellHitResult(m_caster, m_spellInfo, m_canReflect);
+                targetInfo.reflectResult = m_caster.SpellHitResult(m_caster, m_spellInfo, false);
 
-                if (targetInfo.reflectResult == SpellMissInfo.Reflect)     // Impossible reflect again, so simply deflect spell
-                    targetInfo.reflectResult = SpellMissInfo.Parry;
+                // Proc spell reflect aura when missile hits the original target
+                target.m_Events.AddEvent(new ProcReflectDelayed(target, m_originalCasterGUID), target.m_Events.CalculateTime(targetInfo.timeDelay));
 
                 // Increase time interval for reflected spells by 1.5
                 targetInfo.timeDelay += targetInfo.timeDelay >> 1;
@@ -1858,13 +1841,12 @@ namespace Game.Spells
             // Fill base trigger info
             ProcFlags procAttacker = m_procAttacker;
             ProcFlags procVictim = m_procVictim;
-            ProcFlagsExLegacy procEx = m_procEx;
+            ProcFlagsHit hitMask = m_hitMask;
 
             m_spellAura = null;
 
             //Spells with this flag cannot trigger if effect is cast on self
-            bool canEffectTrigger = !m_spellInfo.HasAttribute(SpellAttr3.CantTriggerProc) && unitTarget.CanProc()
-                && (CanExecuteTriggersOnHit(mask) || missInfo == SpellMissInfo.Immune || missInfo == SpellMissInfo.Immune2);
+            bool canEffectTrigger = !m_spellInfo.HasAttribute(SpellAttr3.CantTriggerProc) && (CanExecuteTriggersOnHit(mask) || missInfo == SpellMissInfo.Immune || missInfo == SpellMissInfo.Immune2);
 
             Unit spellHitTarget = null;
 
@@ -1901,16 +1883,8 @@ namespace Game.Spells
             }
 
             // Do not take combo points on dodge and miss
-            if (missInfo != SpellMissInfo.None && m_needComboPoints &&
-                    m_targets.GetUnitTargetGUID() == target.targetGUID)
-            {
+            if (missInfo != SpellMissInfo.None && m_needComboPoints && m_targets.GetUnitTargetGUID() == target.targetGUID)
                 m_needComboPoints = false;
-                // Restore spell mods for a miss/dodge/parry Cold Blood
-                /// @todo check how broad this rule should be
-                if (m_caster.IsTypeId(TypeId.Player) && (missInfo == SpellMissInfo.Miss ||
-                        missInfo == SpellMissInfo.Dodge || missInfo == SpellMissInfo.Parry))
-                    m_caster.ToPlayer().RestoreSpellMods(this, 14177);
-            }
 
             // Trigger info was not filled in spell.preparedatafortriggersystem - we do it now
             if (canEffectTrigger && procAttacker == 0 && procVictim == 0)
@@ -1959,19 +1933,20 @@ namespace Game.Spells
                 uint addhealth = (uint)m_healing;
                 if (crit)
                 {
-                    procEx |= ProcFlagsExLegacy.CriticalHit;
+                    hitMask |= ProcFlagsHit.Critical;
                     addhealth = (uint)caster.SpellCriticalHealingBonus(m_spellInfo, (int)addhealth, null);
                 }
                 else
-                    procEx |= ProcFlagsExLegacy.NormalHit;
+                    hitMask |= ProcFlagsHit.Normal;
 
-                int gain = caster.HealBySpell(unitTarget, m_spellInfo, addhealth, crit);
-                unitTarget.getHostileRefManager().threatAssist(caster, gain * 0.5f, m_spellInfo);
-                m_healing = gain;
+                HealInfo healInfo = new HealInfo(caster, unitTarget, addhealth, m_spellInfo, m_spellInfo.GetSchoolMask());
+                caster.HealBySpell(healInfo, crit);
+                unitTarget.getHostileRefManager().threatAssist(caster, healInfo.GetEffectiveHeal() * 0.5f, m_spellInfo);
+                m_healing = (int)healInfo.GetEffectiveHeal();
 
-                // Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
-                if (canEffectTrigger && missInfo != SpellMissInfo.Reflect)
-                    caster.ProcDamageAndSpell(unitTarget, procAttacker, procVictim, procEx, addhealth, m_attackType, m_spellInfo, m_triggeredByAuraSpell);
+                // Do triggers for unit
+                if (canEffectTrigger)
+                    caster.ProcSkillsAndAuras(unitTarget, procAttacker, procVictim, ProcFlagsSpellType.Heal, ProcFlagsSpellPhase.Hit, hitMask, this, null, healInfo);
             }
             // Do damage and triggers
             else if (m_damage > 0)
@@ -1983,16 +1958,18 @@ namespace Game.Spells
                 caster.CalculateSpellDamageTaken(damageInfo, m_damage, m_spellInfo, m_attackType, target.crit);
                 caster.DealDamageMods(damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
 
-                procEx |= Unit.createProcExtendMask(damageInfo, missInfo);
+                hitMask |= Unit.createProcHitMask(damageInfo, missInfo);
                 procVictim |= ProcFlags.TakenDamage;
 
-                // Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
-                if (canEffectTrigger && missInfo != SpellMissInfo.Reflect)
+                // Do triggers for unit
+                if (canEffectTrigger)
                 {
-                    caster.ProcDamageAndSpell(unitTarget, procAttacker, procVictim, procEx, damageInfo.damage, m_attackType, m_spellInfo, m_triggeredByAuraSpell);
-                    if (caster.IsTypeId(TypeId.Player) && !m_spellInfo.HasAttribute(SpellAttr0.StopAttackTarget) &&
-                       (m_spellInfo.DmgClass == SpellDmgClass.Melee || m_spellInfo.DmgClass == SpellDmgClass.Ranged))
-                        caster.ToPlayer().CastItemCombatSpell(unitTarget, m_attackType, procVictim, procEx);
+                    DamageInfo spellDamageInfo = new DamageInfo(damageInfo, DamageEffectType.SpellDirect, m_attackType, hitMask);
+                    caster.ProcSkillsAndAuras(unitTarget, procAttacker, procVictim, ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.Hit, hitMask, this, spellDamageInfo, null);
+
+                    if (caster.IsPlayer() && !m_spellInfo.HasAttribute(SpellAttr0.StopAttackTarget) &&
+                        (m_spellInfo.DmgClass == SpellDmgClass.Melee || m_spellInfo.DmgClass == SpellDmgClass.Ranged))
+                        caster.ToPlayer().CastItemCombatSpell(spellDamageInfo);
                 }
 
                 m_damage = (int)damageInfo.damage;
@@ -2007,10 +1984,17 @@ namespace Game.Spells
             {
                 // Fill base damage struct (unitTarget - is real spell target)
                 SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(caster, unitTarget, m_spellInfo.Id, m_SpellVisual, m_spellSchoolMask);
-                procEx |= Unit.createProcExtendMask(damageInfo, missInfo);
-                // Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
-                if (canEffectTrigger && missInfo != SpellMissInfo.Reflect)
-                    caster.ProcDamageAndSpell(unit, procAttacker, procVictim, procEx, 0, m_attackType, m_spellInfo, m_triggeredByAuraSpell);
+                hitMask |= Unit.createProcHitMask(damageInfo, missInfo);
+                // Do triggers for unit
+                if (canEffectTrigger)
+                {
+                    DamageInfo spellNoDamageInfo = new DamageInfo(damageInfo, DamageEffectType.NoDamage, m_attackType, hitMask);
+                    caster.ProcSkillsAndAuras(unitTarget, procAttacker, procVictim, ProcFlagsSpellType.NoDmgHeal, ProcFlagsSpellPhase.Hit, hitMask, this, spellNoDamageInfo, null);
+
+                    if (caster.IsPlayer() && !m_spellInfo.HasAttribute(SpellAttr0.StopAttackTarget) &&
+                        (m_spellInfo.DmgClass == SpellDmgClass.Melee || m_spellInfo.DmgClass == SpellDmgClass.Ranged))
+                        caster.ToPlayer().CastItemCombatSpell(spellNoDamageInfo);
+                }
 
                 // Failed Pickpocket, reveal rogue
                 if (missInfo == SpellMissInfo.Resist && m_spellInfo.HasAttribute(SpellCustomAttributes.PickPocket) && unitTarget.IsTypeId(TypeId.Unit))
@@ -2168,8 +2152,9 @@ namespace Game.Spells
                 if (m_originalCaster != null)
                 {
                     bool refresh = false;
+                    bool resetPeriodicTimer = !_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.DontResetPeriodicTimer);
                     m_spellAura = Aura.TryRefreshStackOrCreate(aurSpellInfo, m_castId, (byte)effectMask, unit,
-                        m_originalCaster, out refresh, (aurSpellInfo == m_spellInfo) ? m_spellValue.EffectBasePoints : basePoints, m_CastItem, ObjectGuid.Empty, m_castItemLevel);
+                        m_originalCaster, out refresh, (aurSpellInfo == m_spellInfo) ? m_spellValue.EffectBasePoints : basePoints, m_CastItem, ObjectGuid.Empty, resetPeriodicTimer, m_castItemLevel);
                     if (m_spellAura != null)
                     {
                         // Set aura stack amount to desired value
@@ -2548,7 +2533,7 @@ namespace Game.Spells
             }
 
             // Prepare data for triggers
-            prepareDataForTriggerSystem(triggeredByAura);
+            prepareDataForTriggerSystem();
 
             if (m_caster.IsTypeId(TypeId.Player))
             {
@@ -2666,10 +2651,6 @@ namespace Game.Spells
                     SendChannelUpdate(0);
                     SendInterrupted(0);
                     SendCastResult(SpellCastResult.Interrupted);
-
-                    // spell is canceled-take mods and clear list
-                    if (m_caster.IsTypeId(TypeId.Player))
-                        m_caster.ToPlayer().RemoveSpellMods(this);
 
                     m_appliedMods.Clear();
                     break;
@@ -2923,6 +2904,25 @@ namespace Game.Spells
             Creature creatureCaster = m_caster.ToCreature();
             if (creatureCaster)
                 creatureCaster.ReleaseFocus(this);
+
+            if (!m_originalCaster)
+                return;
+
+            // Handle procs on cast
+            ProcFlags procAttacker = m_procAttacker;
+            if (procAttacker == 0)
+            {
+                if (m_spellInfo.DmgClass == SpellDmgClass.Magic)
+                    procAttacker = m_spellInfo.IsPositive() ? ProcFlags.DoneSpellMagicDmgClassPos : ProcFlags.DoneSpellMagicDmgClassNeg;
+                else
+                    procAttacker = m_spellInfo.IsPositive() ? ProcFlags.DoneSpellNoneDmgClassPos : ProcFlags.DoneSpellNoneDmgClassNeg;
+            }
+
+            ProcFlagsHit hitMask = m_hitMask;
+            if (!hitMask.HasAnyFlag(ProcFlagsHit.Critical))
+                hitMask |= ProcFlagsHit.Normal;
+
+            m_originalCaster.ProcSkillsAndAuras(null, procAttacker, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Cast, hitMask, this, null, null);
         }
 
         void handle_immediate()
@@ -3076,20 +3076,6 @@ namespace Game.Spells
             // process items
             foreach (var ihit in m_UniqueItemInfo)
                 DoAllEffectOnTarget(ihit);
-
-            if (m_originalCaster == null)
-                return;
-            // Handle procs on cast
-            // @todo finish new proc system:P
-            if (m_UniqueTargetInfo.Empty() && m_targets.HasDst())
-            {
-                var procAttacker = m_procAttacker;
-                if (procAttacker == 0)
-                    procAttacker |= ProcFlags.DoneSpellMagicDmgClassPos;
-
-                // Proc the spells that have DEST target
-                m_originalCaster.ProcDamageAndSpell(null, procAttacker, 0, m_procEx | ProcFlagsExLegacy.NormalHit, 0, WeaponAttackType.BaseAttack, m_spellInfo, m_triggeredByAuraSpell);
-            }
         }
 
         void _handle_finish_phase()
@@ -3113,7 +3099,25 @@ namespace Game.Spells
                 else
                     m_caster.m_extraAttacks = 0;
             }
-            // @todo trigger proc phase finish here
+
+            // Handle procs on finish
+            if (!m_originalCaster)
+                return;
+
+            ProcFlags procAttacker = m_procAttacker;
+            if (procAttacker == 0)
+            {
+                if (m_spellInfo.DmgClass == SpellDmgClass.Magic)
+                    procAttacker = m_spellInfo.IsPositive() ? ProcFlags.DoneSpellMagicDmgClassPos : ProcFlags.DoneSpellMagicDmgClassNeg;
+                else
+                    procAttacker = m_spellInfo.IsPositive() ? ProcFlags.DoneSpellNoneDmgClassPos : ProcFlags.DoneSpellNoneDmgClassNeg;
+            }
+
+            ProcFlagsHit hitMask = m_hitMask;
+            if (!hitMask.HasAnyFlag(ProcFlagsHit.Critical))
+                hitMask |= ProcFlagsHit.Normal;
+
+            m_originalCaster.ProcSkillsAndAuras(null, procAttacker, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Finish, hitMask, this, null, null);
         }
 
         void SendSpellCooldown()
@@ -3279,19 +3283,6 @@ namespace Game.Spells
             {
                 if (m_triggeredByAuraSpell == null)
                     m_caster.ToPlayer().UpdatePotionCooldown(this);
-            }
-
-            Player modOwner = m_caster.GetSpellModOwner();
-            if (modOwner)
-            {
-                // triggered spell pointer can be not set in some cases
-                // this is needed for proper apply of triggered spell mods
-                modOwner.SetSpellModTakingSpell(this, true);
-
-                // Take mods after trigger spell (needed for 14177 to affect 48664)
-                // mods are taken only on succesfull cast and independantly from targets of the spell
-                modOwner.RemoveSpellMods(this);
-                modOwner.SetSpellModTakingSpell(this, false);
             }
 
             // Stop Attack for some spells
@@ -6470,7 +6461,7 @@ namespace Game.Spells
                 if (effect != null && Convert.ToBoolean(m_applyMultiplierMask & (1 << (int)effect.EffectIndex)))
                     multiplier[effect.EffectIndex] = effect.CalcDamageMultiplier(m_originalCaster, this);
 
-            bool usesAmmo = m_spellInfo.HasAttribute(SpellCustomAttributes.DirectDamage);
+            PrepareTargetProcessing();
 
             foreach (var ihit in m_UniqueTargetInfo)
             {
@@ -6482,6 +6473,8 @@ namespace Game.Spells
 
                 DoAllEffectOnLaunchTarget(target, multiplier);
             }
+
+            FinishTargetProcessing();
         }
 
         void DoAllEffectOnLaunchTarget(TargetInfo targetInfo, float[] multiplier)
@@ -6994,18 +6987,25 @@ namespace Game.Spells
             if (m_spellInfo.StartRecoveryTime >= 750 && m_spellInfo.StartRecoveryTime <= 1500)
             {
                 // gcd modifier auras are applied only to own spells and only players have such mods
-                if (m_caster.IsTypeId(TypeId.Player))
-                    m_caster.ToPlayer().ApplySpellMod(m_spellInfo.Id, SpellModOp.GlobalCooldown, ref gcd, this);
+                Player modOwner = m_caster.GetSpellModOwner();
+                if (modOwner)
+                    modOwner.ApplySpellMod(m_spellInfo.Id, SpellModOp.GlobalCooldown, ref gcd, this);
 
                 bool isMeleeOrRangedSpell = m_spellInfo.DmgClass == SpellDmgClass.Melee || m_spellInfo.DmgClass == SpellDmgClass.Ranged ||
                     m_spellInfo.HasAttribute(SpellAttr0.ReqAmmo) || m_spellInfo.HasAttribute(SpellAttr0.Ability);
 
                 // Apply haste rating
                 if (gcd > 750 && ((m_spellInfo.StartRecoveryCategory == 133 && !isMeleeOrRangedSpell) || m_caster.HasAuraTypeWithAffectMask(AuraType.ModGlobalCooldownByHaste, m_spellInfo)))
-                    gcd = Math.Min(Math.Max((int)(gcd * m_caster.GetFloatValue(UnitFields.ModCastHaste)), 750), 1500);
+                {
+                    gcd = (int)(gcd * m_caster.GetFloatValue(UnitFields.ModCastHaste));
+                    MathFunctions.RoundToInterval(ref gcd, 750, 1500);
+                }
 
                 if (gcd > 750 && m_caster.HasAuraTypeWithAffectMask(AuraType.ModGlobalCooldownByHasteRegen, m_spellInfo))
-                    gcd = Math.Min(Math.Max((int)(gcd * m_caster.GetFloatValue(UnitFields.ModHasteRegen)), 750), 1500);
+                {
+                    gcd = (int)(gcd * m_caster.GetFloatValue(UnitFields.ModHasteRegen));
+                    MathFunctions.RoundToInterval(ref gcd, 750, 1500);
+                }
             }
 
             m_caster.GetSpellHistory().AddGlobalCooldown(m_spellInfo, (uint)gcd);
@@ -7246,7 +7246,7 @@ namespace Game.Spells
         // ******************************************
         ProcFlags m_procAttacker;                // Attacker trigger flags
         ProcFlags m_procVictim;                  // Victim   trigger flags
-        ProcFlagsExLegacy m_procEx;
+        ProcFlagsHit m_hitMask;
 
         // *****************************************
         // Spell target subsystem
@@ -7442,6 +7442,7 @@ namespace Game.Spells
         public bool scaleAura;
         public int damage;
     }
+
     public class GOTargetInfo
     {
         public ObjectGuid targetGUID;
@@ -7480,11 +7481,10 @@ namespace Game.Spells
     // Spell modifier (used for modify other spells)
     public class SpellModifier
     {
-        public SpellModifier(Aura _ownerAura = null)
+        public SpellModifier(Aura _ownerAura)
         {
             op = SpellModOp.Damage;
             type = SpellModType.Flat;
-            charges = 0;
             value = 0;
             mask = new FlagArray128();
             spellId = 0;
@@ -7493,7 +7493,6 @@ namespace Game.Spells
 
         public SpellModOp op { get; set; }
         public SpellModType type { get; set; }
-        public short charges { get; set; }
         public int value { get; set; }
         public FlagArray128 mask { get; set; }
         public uint spellId { get; set; }
@@ -7762,5 +7761,33 @@ namespace Game.Spells
         }
 
         Spell m_Spell;
+    }
+
+    class ProcReflectDelayed : BasicEvent
+    {
+        public ProcReflectDelayed(Unit owner, ObjectGuid casterGuid)
+        {
+            _victim = owner;
+            _casterGuid = casterGuid;
+        }
+
+        public override bool Execute(ulong e_time, uint p_time)
+        {
+            Unit caster = Global.ObjAccessor.GetUnit(_victim, _casterGuid);
+            if (!caster)
+                return true;
+
+            ProcFlags typeMaskActor = ProcFlags.None;
+            ProcFlags typeMaskActionTarget = ProcFlags.TakenSpellMagicDmgClassNeg | ProcFlags.TakenSpellNoneDmgClassNeg;
+            ProcFlagsSpellType spellTypeMask = ProcFlagsSpellType.Damage | ProcFlagsSpellType.NoDmgHeal;
+            ProcFlagsSpellPhase spellPhaseMask = ProcFlagsSpellPhase.None;
+            ProcFlagsHit hitMask = ProcFlagsHit.Reflect;
+
+            caster.ProcSkillsAndAuras(_victim, typeMaskActor, typeMaskActionTarget, spellTypeMask, spellPhaseMask, hitMask, null, null, null);
+            return true;
+        }
+
+        Unit _victim;
+        ObjectGuid _casterGuid;
     }
 }
