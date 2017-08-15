@@ -1034,9 +1034,6 @@ namespace Game.Entities
 
         public RestMgr GetRestMgr() { return _restMgr; }
 
-        public uint GetCurrentTrainerId() { return _currentTrainerId; }
-        public void SetCurrentTrainerId(uint trainerId) { _currentTrainerId = trainerId; }
-
         public bool IsAdvancedCombatLoggingEnabled()  { return _advancedCombatLoggingEnabled; }
         public void SetAdvancedCombatLogging(bool enabled) { _advancedCombatLoggingEnabled = enabled; }
 

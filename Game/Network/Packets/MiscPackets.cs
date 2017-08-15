@@ -1287,4 +1287,16 @@ namespace Game.Network.Packets
 
         public override void Read() { }
     }
+
+    class CloseInteraction : ClientPacket
+    {
+        public CloseInteraction(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            SourceGuid = _worldPacket.ReadPackedGuid();
+        }
+
+        public ObjectGuid SourceGuid;
+    }
 }

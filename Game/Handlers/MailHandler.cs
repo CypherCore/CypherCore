@@ -367,6 +367,9 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MailReturnToSender)]
         void HandleMailReturnToSender(MailReturnToSender packet)
         {
+            if (!CanOpenMailBox(_player.PlayerTalkClass.GetInteractionData().SourceGuid))
+                return;
+
             Player player = GetPlayer();
             Mail m = player.GetMail(packet.MailID);
             if (m == null || m.state == MailState.Deleted || m.deliver_time > Time.UnixTime || m.sender != packet.SenderGUID.GetCounter())
@@ -576,6 +579,8 @@ namespace Game
                     response.Mails.Add(new MailListEntry(m, player));
             }
 
+            player.PlayerTalkClass.GetInteractionData().Reset();
+            player.PlayerTalkClass.GetInteractionData().SourceGuid = packet.Mailbox;
             SendPacket(response);
 
             // recalculate m_nextMailDelivereTime and unReadMails

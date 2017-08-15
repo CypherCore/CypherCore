@@ -140,8 +140,6 @@ namespace Game.Entities
 
         RestMgr _restMgr;
 
-        uint _currentTrainerId;
-
         //Combat 
         int[] baseRatingValue = new int[(int)CombatRating.Max];
         public float[][] m_auraBaseMod = new float[(int)BaseModGroup.End][];

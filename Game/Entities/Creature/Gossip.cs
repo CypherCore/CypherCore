@@ -182,8 +182,6 @@ namespace Game.Misc
 
         public void SetMenuId(uint menu_id) { _menuId = menu_id; }
         public uint GetMenuId() { return _menuId; }
-        public void SetSenderGUID(ObjectGuid guid) { _senderGUID = guid; }
-        public ObjectGuid GetSenderGUID() { return _senderGUID; }
         public void SetLocale(LocaleConstant locale) { _locale = locale; }
         LocaleConstant GetLocale() { return _locale; }
 
@@ -215,8 +213,19 @@ namespace Game.Misc
         Dictionary<uint, GossipMenuItem> _menuItems = new Dictionary<uint, GossipMenuItem>();
         Dictionary<uint, GossipMenuItemData> _menuItemData = new Dictionary<uint, GossipMenuItemData>();
         uint _menuId;
-        ObjectGuid _senderGUID;
         LocaleConstant _locale;
+    }
+
+    public class InteractionData
+    {
+        public void Reset()
+        {
+            SourceGuid.Clear();
+            TrainerId = 0;
+        }
+
+        public ObjectGuid SourceGuid;
+        public uint TrainerId;
     }
 
     public class PlayerMenu
@@ -236,7 +245,8 @@ namespace Game.Misc
 
         public void SendGossipMenu(uint titleTextId, ObjectGuid objectGUID)
         {
-            _gossipMenu.SetSenderGUID(objectGUID);
+            _interactionData.Reset();
+            _interactionData.SourceGuid = objectGUID;
 
             GossipMessagePkt packet = new GossipMessagePkt();
             packet.GossipGUID = objectGUID;
@@ -294,7 +304,7 @@ namespace Game.Misc
 
         public void SendCloseGossip()
         {
-            _gossipMenu.SetSenderGUID(ObjectGuid.Empty);
+            _interactionData.Reset();
 
             _session.SendPacket(new GossipComplete());
         }
@@ -726,6 +736,7 @@ namespace Game.Misc
 
         public GossipMenu GetGossipMenu() { return _gossipMenu; }
         public QuestMenu GetQuestMenu() { return _questMenu; }
+        public InteractionData GetInteractionData() { return _interactionData; }
 
         bool IsEmpty() { return _gossipMenu.IsEmpty() && _questMenu.IsEmpty(); }
 
@@ -736,6 +747,7 @@ namespace Game.Misc
         GossipMenu _gossipMenu = new GossipMenu();
         QuestMenu _questMenu = new QuestMenu();
         WorldSession _session;
+        InteractionData _interactionData = new InteractionData();
     }
 
     public class QuestMenu

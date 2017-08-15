@@ -432,6 +432,12 @@ namespace Game
                 _player.Prestige();
         }
 
+        [WorldPacketHandler(ClientOpcodes.CloseInteraction, Processing = PacketProcessing.ThreadSafe)]
+        void HandleCloseInteraction(CloseInteraction packet)
+        {
+            _player.PlayerTalkClass.GetInteractionData().Reset();
+        }
+
         [WorldPacketHandler(ClientOpcodes.ChatUnregisterAllAddonPrefixes)]
         void HandleUnregisterAllAddonPrefixes(ChatUnregisterAllAddonPrefixes packet)
         {

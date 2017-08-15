@@ -79,7 +79,9 @@ namespace Game
                 return;
             }
 
-            _player.SetCurrentTrainerId(trainerId);
+            _player.PlayerTalkClass.GetInteractionData().Reset();
+            _player.PlayerTalkClass.GetInteractionData().SourceGuid = guid;
+            _player.PlayerTalkClass.GetInteractionData().TrainerId = trainerId;
             trainer.SendSpells(unit, _player, GetSessionDbLocaleIndex());
         }
 
@@ -97,7 +99,10 @@ namespace Game
             if (_player.HasUnitState(UnitState.Died))
                 _player.RemoveAurasByType(AuraType.FeignDeath);
 
-            if (_player.GetCurrentTrainerId() != packet.TrainerID)
+            if (_player.PlayerTalkClass.GetInteractionData().SourceGuid != packet.TrainerGUID)
+                return;
+
+            if (_player.PlayerTalkClass.GetInteractionData().TrainerId != packet.TrainerID)
                 return;
 
             // check present spell in trainer spell list
@@ -164,7 +169,7 @@ namespace Game
                 return;
 
             // Prevent cheating on C# scripted menus
-            if (GetPlayer().PlayerTalkClass.GetGossipMenu().GetSenderGUID() != packet.GossipUnit)
+            if (GetPlayer().PlayerTalkClass.GetInteractionData().SourceGuid != packet.GossipUnit)
                 return;
 
             Creature unit = null;
