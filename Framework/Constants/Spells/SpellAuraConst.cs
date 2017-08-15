@@ -224,8 +224,8 @@ namespace Framework.Constants
         ModXpPct = 200,
         Fly = 201,
         IgnoreCombatResult = 202,
-        ModAttackerMeleeCritDamage = 203,
-        ModAttackerRangedCritDamage = 204,
+        PreventInterrupt = 203, // NYI
+        PreventCorpseRelease = 204, // NYI
         ModChargeCooldown = 205, // NYI
         ModIncreaseVehicleFlightSpeed = 206,
         ModIncreaseMountedFlightSpeed = 207,

@@ -1889,15 +1889,9 @@ namespace Game.Entities
                     damageInfo.TargetState = VictimState.Hit;
                     // Crit bonus calc
                     damageInfo.damage += damageInfo.damage;
-                    float mod = 0.0f;
-                    // Apply SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_DAMAGE or SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_DAMAGE
-                    if (damageInfo.attackType == WeaponAttackType.RangedAttack)
-                        mod += damageInfo.target.GetTotalAuraModifier(AuraType.ModAttackerRangedCritDamage);
-                    else
-                        mod += damageInfo.target.GetTotalAuraModifier(AuraType.ModAttackerMeleeCritDamage);
 
                     // Increase crit damage from SPELL_AURA_MOD_CRIT_DAMAGE_BONUS
-                    mod += (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, damageInfo.damageSchoolMask) - 1.0f) * 100;
+                    float mod = (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, damageInfo.damageSchoolMask) - 1.0f) * 100;
 
                     if (mod != 0)
                         MathFunctions.AddPct(ref damageInfo.damage, mod);

@@ -2393,15 +2393,8 @@ namespace Game.Entities
                                 modOwner.ApplySpellMod(spellInfo.Id, SpellModOp.CritDamageBonus, ref crit_bonus);
                             damage += (int)crit_bonus;
 
-                            // Apply SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_DAMAGE or SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_DAMAGE
-                            float critPctDamageMod = 0.0f;
-                            if (attackType == WeaponAttackType.RangedAttack)
-                                critPctDamageMod += victim.GetTotalAuraModifier(AuraType.ModAttackerRangedCritDamage);
-                            else
-                                critPctDamageMod += victim.GetTotalAuraModifier(AuraType.ModAttackerMeleeCritDamage);
-
                             // Increase crit damage from SPELL_AURA_MOD_CRIT_DAMAGE_BONUS
-                            critPctDamageMod += (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, (uint)spellInfo.GetSchoolMask()) - 1.0f) * 100;
+                            float critPctDamageMod = (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, (uint)spellInfo.GetSchoolMask()) - 1.0f) * 100;
 
                             if (critPctDamageMod != 0)
                                 MathFunctions.AddPct(ref damage, (int)critPctDamageMod);
