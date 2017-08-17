@@ -268,10 +268,10 @@ namespace Game.Network.Packets
 
         public override void Read()
         {
-            movementInfo = MovementExtensions.ReadMovementInfo(_worldPacket);
+            Status = MovementExtensions.ReadMovementInfo(_worldPacket);
         }
 
-        public MovementInfo movementInfo;
+        public MovementInfo Status;
     }
 
     public class MoveUpdate : ServerPacket
@@ -280,10 +280,10 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            MovementExtensions.WriteMovementInfo(_worldPacket, movementInfo);
+            MovementExtensions.WriteMovementInfo(_worldPacket, Status);
         }
 
-        public MovementInfo movementInfo;
+        public MovementInfo Status;
     }
 
     public class MonsterMove : ServerPacket
@@ -417,11 +417,11 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            MovementExtensions.WriteMovementInfo(_worldPacket, movementInfo);
+            MovementExtensions.WriteMovementInfo(_worldPacket, Status);
             _worldPacket.WriteFloat(Speed);
         }
 
-        public MovementInfo movementInfo;
+        public MovementInfo Status;
         public float Speed = 1.0f;
     }
 
@@ -574,7 +574,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            MovementExtensions.WriteMovementInfo(_worldPacket, movementInfo);
+            MovementExtensions.WriteMovementInfo(_worldPacket, Status);
 
             _worldPacket.WriteInt32(MovementForces.Count);
             _worldPacket.WriteBit(WalkSpeed.HasValue);
@@ -619,7 +619,7 @@ namespace Game.Network.Packets
                 _worldPacket.WriteFloat(PitchRate.Value);
         }
 
-        public MovementInfo movementInfo;
+        public MovementInfo Status;
         public List<MovementForce> MovementForces = new List<MovementForce>();
         public Optional<float> SwimBackSpeed;
         public Optional<float> FlightSpeed;
@@ -750,10 +750,10 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            MovementExtensions.WriteMovementInfo(_worldPacket, movementInfo);
+            MovementExtensions.WriteMovementInfo(_worldPacket, Status);
         }
 
-        public MovementInfo movementInfo;
+        public MovementInfo Status;
     }
 
     class MoveKnockBackAck : ClientPacket
@@ -805,12 +805,12 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            MovementExtensions.WriteMovementInfo(_worldPacket, movementInfo);
+            MovementExtensions.WriteMovementInfo(_worldPacket, Status);
             _worldPacket.WriteFloat(Height);
             _worldPacket.WriteFloat(Scale);
         }
 
-        public MovementInfo movementInfo;
+        public MovementInfo Status;
         public float Scale = 1.0f;
         public float Height = 1.0f;
     }
@@ -882,11 +882,11 @@ namespace Game.Network.Packets
 
         public override void Read()
         {
-            movementInfo = MovementExtensions.ReadMovementInfo(_worldPacket);
+            Status = MovementExtensions.ReadMovementInfo(_worldPacket);
             SplineID = _worldPacket.ReadInt32();
         }
 
-        public MovementInfo movementInfo;
+        public MovementInfo Status;
         public int SplineID;
     }
 
@@ -1226,11 +1226,11 @@ namespace Game.Network.Packets
     {
         public void Read(WorldPacket data)
         {
-            movementInfo = MovementExtensions.ReadMovementInfo(data);
+            Status = MovementExtensions.ReadMovementInfo(data);
             AckIndex = data.ReadInt32();
         }
 
-        public MovementInfo movementInfo;
+        public MovementInfo Status;
         public int AckIndex;
     }
 

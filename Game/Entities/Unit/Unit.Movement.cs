@@ -133,7 +133,7 @@ namespace Game.Entities
 
                 // Send notification to other players
                 MoveUpdateSpeed packet = new MoveUpdateSpeed(moveTypeToOpcode[(int)mtype, 2]);
-                packet.movementInfo = m_movementInfo;
+                packet.Status = m_movementInfo;
                 packet.Speed = GetSpeed(mtype);
                 playerMover.SendMessageToSet(packet, false);
             }
@@ -249,7 +249,7 @@ namespace Game.Entities
                 playerMover.SendPacket(packet);
 
                 MoveUpdate moveUpdate = new MoveUpdate();
-                moveUpdate.movementInfo = m_movementInfo;
+                moveUpdate.Status = m_movementInfo;
                 SendMessageToSet(moveUpdate, playerMover);
             }
             else
@@ -284,7 +284,7 @@ namespace Game.Entities
                 playerMover.SendPacket(packet);
 
                 MoveUpdate moveUpdate = new MoveUpdate();
-                moveUpdate.movementInfo = m_movementInfo;
+                moveUpdate.Status = m_movementInfo;
                 SendMessageToSet(moveUpdate, playerMover);
             }
 
@@ -310,7 +310,7 @@ namespace Game.Entities
                 playerMover.SendPacket(packet);
 
                 MoveUpdate moveUpdate = new MoveUpdate();
-                moveUpdate.movementInfo = m_movementInfo;
+                moveUpdate.Status = m_movementInfo;
                 SendMessageToSet(moveUpdate, playerMover);
             }
 
@@ -336,7 +336,7 @@ namespace Game.Entities
                 playerMover.SendPacket(packet);
 
                 MoveUpdate moveUpdate = new MoveUpdate();
-                moveUpdate.movementInfo = m_movementInfo;
+                moveUpdate.Status = m_movementInfo;
                 SendMessageToSet(moveUpdate, playerMover);
             }
 
@@ -628,7 +628,7 @@ namespace Game.Entities
                 playerMover.SendPacket(packet);
 
                 MoveUpdate moveUpdate = new MoveUpdate();
-                moveUpdate.movementInfo = m_movementInfo;
+                moveUpdate.Status = m_movementInfo;
                 SendMessageToSet(moveUpdate, playerMover);
             }
             else
@@ -818,7 +818,7 @@ namespace Game.Entities
                 playerMover.SendPacket(packet);
 
                 MoveUpdate moveUpdate = new MoveUpdate();
-                moveUpdate.movementInfo = m_movementInfo;
+                moveUpdate.Status = m_movementInfo;
                 SendMessageToSet(moveUpdate, playerMover);
             }
             else
@@ -851,7 +851,7 @@ namespace Game.Entities
                 playerMover.SendPacket(packet);
 
                 MoveUpdate moveUpdate = new MoveUpdate();
-                moveUpdate.movementInfo = m_movementInfo;
+                moveUpdate.Status = m_movementInfo;
                 SendMessageToSet(moveUpdate, playerMover);
             }
             else
@@ -883,7 +883,7 @@ namespace Game.Entities
                 playerMover.SendPacket(packet);
 
                 MoveUpdate moveUpdate = new MoveUpdate();
-                moveUpdate.movementInfo = m_movementInfo;
+                moveUpdate.Status = m_movementInfo;
                 SendMessageToSet(moveUpdate, playerMover);
             }
             else
@@ -929,7 +929,7 @@ namespace Game.Entities
                 playerMover.SendPacket(packet);
 
                 MoveUpdate moveUpdate = new MoveUpdate();
-                moveUpdate.movementInfo = m_movementInfo;
+                moveUpdate.Status = m_movementInfo;
                 SendMessageToSet(moveUpdate, playerMover);
             }
             else
@@ -1141,7 +1141,7 @@ namespace Game.Entities
                 playerMover.SendPacket(packet);
 
                 MoveUpdate moveUpdate = new MoveUpdate();
-                moveUpdate.movementInfo = m_movementInfo;
+                moveUpdate.Status = m_movementInfo;
                 SendMessageToSet(moveUpdate, playerMover);
             }
             else
@@ -1492,7 +1492,7 @@ namespace Game.Entities
             // SMSG_MOVE_TELEPORT is sent to self in order to trigger CMSG_MOVE_TELEPORT_ACK and update the position server side
 
             MoveUpdateTeleport moveUpdateTeleport = new MoveUpdateTeleport();
-            moveUpdateTeleport.movementInfo = m_movementInfo;
+            moveUpdateTeleport.Status = m_movementInfo;
             Unit broadcastSource = this;
 
             Player playerMover = GetPlayerBeingMoved();
@@ -1519,9 +1519,9 @@ namespace Game.Entities
             {
                 // This is the only packet sent for creatures which contains MovementInfo structure
                 // we do not update m_movementInfo for creatures so it needs to be done manually here
-                moveUpdateTeleport.movementInfo.Guid = GetGUID();
-                moveUpdateTeleport.movementInfo.Pos.Relocate(pos);
-                moveUpdateTeleport.movementInfo.Time = Time.GetMSTime();
+                moveUpdateTeleport.Status.Guid = GetGUID();
+                moveUpdateTeleport.Status.Pos.Relocate(pos);
+                moveUpdateTeleport.Status.Time = Time.GetMSTime();
             }
 
             // Broadcast the packet to everyone except self.

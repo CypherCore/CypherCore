@@ -210,7 +210,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveSetVehicleRecIdAck)]
         void HandleMoveSetVehicleRecAck(MoveSetVehicleRecIdAck setVehicleRecIdAck)
         {
-            GetPlayer().ValidateMovementInfo(setVehicleRecIdAck.Data.movementInfo);
+            GetPlayer().ValidateMovementInfo(setVehicleRecIdAck.Data.Status);
         }
     }
 }

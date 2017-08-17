@@ -5019,7 +5019,7 @@ namespace Game.Entities
             SendPacket(setCollisionHeight);
 
             MoveUpdateCollisionHeight updateCollisionHeight = new MoveUpdateCollisionHeight();
-            updateCollisionHeight.movementInfo = m_movementInfo;
+            updateCollisionHeight.Status = m_movementInfo;
             updateCollisionHeight.Height = height;
             updateCollisionHeight.Scale = GetObjectScale();
             SendMessageToSet(updateCollisionHeight, false);

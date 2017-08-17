@@ -58,7 +58,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveDoubleJump, Processing = PacketProcessing.ThreadSafe)]
         void HandleMovement(ClientPlayerMovement packet)
         {
-            HandleMovementOpcode(packet.GetOpcode(), packet.movementInfo);
+            HandleMovementOpcode(packet.GetOpcode(), packet.Status);
         }
 
         void HandleMovementOpcode(ClientOpcodes opcode, MovementInfo movementInfo)
@@ -167,7 +167,7 @@ namespace Game
             mover.UpdatePosition(movementInfo.Pos);
 
             MoveUpdate moveUpdate = new MoveUpdate();
-            moveUpdate.movementInfo = mover.m_movementInfo;
+            moveUpdate.Status = mover.m_movementInfo;
             mover.SendMessageToSet(moveUpdate, GetPlayer());
 
             if (plrMover)                                            // nothing is charmed, or player charmed
@@ -469,10 +469,10 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveForceWalkSpeedChangeAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleForceSpeedChangeAck(MovementSpeedAck packet)
         {
-            GetPlayer().ValidateMovementInfo(packet.Ack.movementInfo);
+            GetPlayer().ValidateMovementInfo(packet.Ack.Status);
 
             // now can skip not our packet
-            if (GetPlayer().GetGUID() != packet.Ack.movementInfo.Guid)
+            if (GetPlayer().GetGUID() != packet.Ack.Status.Guid)
                 return;
 
             /*----------------*/
@@ -554,15 +554,15 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveKnockBackAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveKnockBackAck(MoveKnockBackAck movementAck)
         {
-            GetPlayer().ValidateMovementInfo(movementAck.Ack.movementInfo);
+            GetPlayer().ValidateMovementInfo(movementAck.Ack.Status);
 
-            if (GetPlayer().m_unitMovedByMe.GetGUID() != movementAck.Ack.movementInfo.Guid)
+            if (GetPlayer().m_unitMovedByMe.GetGUID() != movementAck.Ack.Status.Guid)
                 return;
 
-            GetPlayer().m_movementInfo = movementAck.Ack.movementInfo;
+            GetPlayer().m_movementInfo = movementAck.Ack.Status;
 
             MoveUpdateKnockBack updateKnockBack = new MoveUpdateKnockBack();
-            updateKnockBack.movementInfo = GetPlayer().m_movementInfo;
+            updateKnockBack.Status = GetPlayer().m_movementInfo;
             GetPlayer().SendMessageToSet(updateKnockBack, false);
         }
 
@@ -580,7 +580,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveEnableDoubleJumpAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMovementAckMessage(MovementAckMessage movementAck)
         {
-            GetPlayer().ValidateMovementInfo(movementAck.Ack.movementInfo);
+            GetPlayer().ValidateMovementInfo(movementAck.Ack.Status);
         }
 
         [WorldPacketHandler(ClientOpcodes.SummonResponse)]
@@ -595,7 +595,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveSetCollisionHeightAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleSetCollisionHeightAck(MoveSetCollisionHeightAck packet)
         {
-            GetPlayer().ValidateMovementInfo(packet.Data.movementInfo);
+            GetPlayer().ValidateMovementInfo(packet.Data.Status);
         }
 
         [WorldPacketHandler(ClientOpcodes.MoveTimeSkipped, Processing = PacketProcessing.Inplace)]
@@ -606,7 +606,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveSplineDone, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveSplineDoneOpcode(MoveSplineDone moveSplineDone)
         {
-            MovementInfo movementInfo = moveSplineDone.movementInfo;
+            MovementInfo movementInfo = moveSplineDone.Status;
             _player.ValidateMovementInfo(movementInfo);
 
             // in taxi flight packet received in 2 case:

@@ -653,7 +653,7 @@ namespace Game.Chat
                 else
                 {
                     MoveUpdate moveUpdate = new MoveUpdate();
-                    moveUpdate.movementInfo = target.m_movementInfo;
+                    moveUpdate.Status = target.m_movementInfo;
                     target.SendMessageToSet(moveUpdate, true);
                 }
 
