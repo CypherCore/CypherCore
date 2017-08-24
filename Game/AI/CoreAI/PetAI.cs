@@ -218,8 +218,7 @@ namespace Game.AI
                     int index = RandomHelper.IRand(0, targetSpellStore.Count - 1);
                     var tss = targetSpellStore[index];
 
-                    Spell spell = tss.Item2;
-                    Unit target = tss.Item1;
+                    (Unit target, Spell spell) = tss;
 
                     targetSpellStore.RemoveAt(index);
 

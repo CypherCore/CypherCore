@@ -60,6 +60,8 @@ namespace Game.DataStorage
             BattlePetSpeciesStateStorage = DB6Reader.Read<BattlePetSpeciesStateRecord>("BattlePetSpeciesState.db2", DB6Metas.BattlePetSpeciesStateMeta, HotfixStatements.SEL_BATTLE_PET_SPECIES_STATE);
             BattlemasterListStorage = DB6Reader.Read<BattlemasterListRecord>("BattlemasterList.db2", DB6Metas.BattlemasterListMeta, HotfixStatements.SEL_BATTLEMASTER_LIST, HotfixStatements.SEL_BATTLEMASTER_LIST_LOCALE);
             BroadcastTextStorage = DB6Reader.Read<BroadcastTextRecord>("BroadcastText.db2", DB6Metas.BroadcastTextMeta, HotfixStatements.SEL_BROADCAST_TEXT, HotfixStatements.SEL_BROADCAST_TEXT_LOCALE);
+            CharacterFacialHairStylesStorage = DB6Reader.Read<CharacterFacialHairStylesRecord>("CharacterFacialHairStyles.db2", DB6Metas.CharacterFacialHairStylesMeta, HotfixStatements.SEL_CHARACTER_FACIAL_HAIR_STYLES);
+            CharBaseSectionStorage = DB6Reader.Read<CharBaseSectionRecord>("CharBaseSection.db2", DB6Metas.CharBaseSectionMeta, HotfixStatements.SEL_CHAR_BASE_SECTION);
             CharSectionsStorage = DB6Reader.Read<CharSectionsRecord>("CharSections.db2", DB6Metas.CharSectionsMeta, HotfixStatements.SEL_CHAR_SECTIONS);
             CharStartOutfitStorage = DB6Reader.Read<CharStartOutfitRecord>("CharStartOutfit.db2", DB6Metas.CharStartOutfitMeta, HotfixStatements.SEL_CHAR_START_OUTFIT);
             CharTitlesStorage = DB6Reader.Read<CharTitlesRecord>("CharTitles.db2", DB6Metas.CharTitlesMeta, HotfixStatements.SEL_CHAR_TITLES, HotfixStatements.SEL_CHAR_TITLES_LOCALE);
@@ -239,6 +241,10 @@ namespace Game.DataStorage
             TaxiPathNodeStorage = DB6Reader.Read<TaxiPathNodeRecord>("TaxiPathNode.db2", DB6Metas.TaxiPathNodeMeta, HotfixStatements.SEL_TAXI_PATH_NODE);
             TotemCategoryStorage = DB6Reader.Read<TotemCategoryRecord>("TotemCategory.db2", DB6Metas.TotemCategoryMeta, HotfixStatements.SEL_TOTEM_CATEGORY, HotfixStatements.SEL_TOTEM_CATEGORY_LOCALE);
             ToyStorage = DB6Reader.Read<ToyRecord>("Toy.db2", DB6Metas.ToyMeta, HotfixStatements.SEL_TOY, HotfixStatements.SEL_TOY_LOCALE);
+            TransmogHolidayStorage = DB6Reader.Read<TransmogHolidayRecord>("TransmogHoliday.db2", DB6Metas.TransmogHolidayMeta, HotfixStatements.SEL_TRANSMOG_HOLIDAY);
+            TransmogSetStorage = DB6Reader.Read<TransmogSetRecord>("TransmogSet.db2", DB6Metas.TransmogSetMeta, HotfixStatements.SEL_TRANSMOG_SET, HotfixStatements.SEL_TRANSMOG_SET_LOCALE);
+            TransmogSetGroupStorage = DB6Reader.Read<TransmogSetGroupRecord>("TransmogSetGroup.db2", DB6Metas.TransmogSetGroupMeta, HotfixStatements.SEL_TRANSMOG_SET_GROUP, HotfixStatements.SEL_TRANSMOG_SET_GROUP_LOCALE);
+            TransmogSetItemStorage = DB6Reader.Read<TransmogSetItemRecord>("TransmogSetItem.db2", DB6Metas.TransmogSetItemMeta, HotfixStatements.SEL_TRANSMOG_SET_ITEM);
             TransportAnimationStorage = DB6Reader.Read<TransportAnimationRecord>("TransportAnimation.db2", DB6Metas.TransportAnimationMeta, HotfixStatements.SEL_TRANSPORT_ANIMATION);
             TransportRotationStorage = DB6Reader.Read<TransportRotationRecord>("TransportRotation.db2", DB6Metas.TransportRotationMeta, HotfixStatements.SEL_TRANSPORT_ROTATION);
             UnitPowerBarStorage = DB6Reader.Read<UnitPowerBarRecord>("UnitPowerBar.db2", DB6Metas.UnitPowerBarMeta, HotfixStatements.SEL_UNIT_POWER_BAR, HotfixStatements.SEL_UNIT_POWER_BAR_LOCALE);
@@ -378,6 +384,8 @@ namespace Game.DataStorage
         public static DB6Storage<BattlePetSpeciesStateRecord> BattlePetSpeciesStateStorage;
         public static DB6Storage<BattlemasterListRecord> BattlemasterListStorage;
         public static DB6Storage<BroadcastTextRecord> BroadcastTextStorage;
+        public static DB6Storage<CharacterFacialHairStylesRecord> CharacterFacialHairStylesStorage;
+        public static DB6Storage<CharBaseSectionRecord> CharBaseSectionStorage;
         public static DB6Storage<CharSectionsRecord> CharSectionsStorage;
         public static DB6Storage<CharStartOutfitRecord> CharStartOutfitStorage;
         public static DB6Storage<CharTitlesRecord> CharTitlesStorage;
@@ -557,6 +565,10 @@ namespace Game.DataStorage
         public static DB6Storage<TaxiPathNodeRecord> TaxiPathNodeStorage;
         public static DB6Storage<TotemCategoryRecord> TotemCategoryStorage;
         public static DB6Storage<ToyRecord> ToyStorage;
+        public static DB6Storage<TransmogHolidayRecord> TransmogHolidayStorage;
+        public static DB6Storage<TransmogSetRecord> TransmogSetStorage;
+        public static DB6Storage<TransmogSetGroupRecord> TransmogSetGroupStorage;
+        public static DB6Storage<TransmogSetItemRecord> TransmogSetItemStorage;
         public static DB6Storage<TransportAnimationRecord> TransportAnimationStorage;
         public static DB6Storage<TransportRotationRecord> TransportRotationStorage;
         public static DB6Storage<UnitPowerBarRecord> UnitPowerBarStorage;

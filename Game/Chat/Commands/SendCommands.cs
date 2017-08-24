@@ -195,7 +195,7 @@ namespace Game.Chat.Commands
                 return false;
 
             string moneyStr = args.NextString("");
-            int money = !string.IsNullOrEmpty(moneyStr) ? int.Parse(moneyStr) : 0;
+            long money = !string.IsNullOrEmpty(moneyStr) ? long.Parse(moneyStr) : 0;
             if (money <= 0)
                 return false;
 

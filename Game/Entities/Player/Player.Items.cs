@@ -101,7 +101,7 @@ namespace Game.Entities
 
             SendItemRefundResult(item, iece, 0);
 
-            uint moneyRefund = item.GetPaidMoney();  // item. will be invalidated in DestroyItem
+            ulong moneyRefund = item.GetPaidMoney();  // item. will be invalidated in DestroyItem
 
             // Save all relevant data to DB to prevent desynchronisation exploits
             SQLTransaction trans = new SQLTransaction();
@@ -142,7 +142,7 @@ namespace Game.Entities
 
             // Grant back money
             if (moneyRefund != 0)
-                ModifyMoney(moneyRefund); // Saved in SaveInventoryAndGoldToDB
+                ModifyMoney((long)moneyRefund); // Saved in SaveInventoryAndGoldToDB
 
             SaveInventoryAndGoldToDB(trans);
 
@@ -2483,7 +2483,7 @@ namespace Game.Entities
             }
             AutoUnequipOffhandIfNeed();
         }
-        bool _StoreOrEquipNewItem(uint vendorslot, uint item, byte count, byte bag, byte slot, int price, ItemTemplate pProto, Creature pVendor, VendorItem crItem, bool bStore)
+        bool _StoreOrEquipNewItem(uint vendorslot, uint item, byte count, byte bag, byte slot, long price, ItemTemplate pProto, Creature pVendor, VendorItem crItem, bool bStore)
         {
             uint stacks = count / pProto.GetBuyCount();
             List<ItemPosCount> vDest = new List<ItemPosCount>();
@@ -3632,7 +3632,7 @@ namespace Game.Entities
             // check current item amount if it limited
             if (crItem.maxcount != 0)
             {
-                if (creature.GetVendorItemCurrentCount(crItem) < pProto.GetBuyCount() * count)
+                if (creature.GetVendorItemCurrentCount(crItem) < count)
                 {
                     SendBuyError(BuyResult.ItemAlreadySold, creature, item);
                     return false;
@@ -3722,19 +3722,20 @@ namespace Game.Entities
                 }
             }
 
-            uint price = 0;
+            ulong price = 0;
             if (crItem.IsGoldRequired(pProto) && pProto.GetBuyPrice() > 0) //Assume price cannot be negative (do not know why it is int32)
             {
-                uint maxCount = (uint)(Int64.MaxValue / pProto.GetBuyPrice());
+                float buyPricePerItem = pProto.GetBuyPrice() / pProto.GetBuyCount();
+                ulong maxCount = (ulong)(PlayerConst.MaxMoneyAmount / buyPricePerItem);
                 if (count > maxCount)
                 {
                     Log.outError(LogFilter.Player, "Player {0} tried to buy {1} item id {2}, causing overflow", GetName(), count, pProto.GetId());
                     count = (byte)maxCount;
                 }
-                price = pProto.GetBuyPrice() * count; //it should not exceed MAX_MONEY_AMOUNT
+                price = (ulong)(buyPricePerItem * count); //it should not exceed MAX_MONEY_AMOUNT
 
                 // reputation discount
-                price = (uint)Math.Floor(price * GetReputationPriceDiscount(creature));
+                price = (ulong)Math.Floor(price * GetReputationPriceDiscount(creature));
 
                 int priceMod = GetTotalAuraModifier(AuraType.ModVendorItemsPrices);
                 if (priceMod != 0)

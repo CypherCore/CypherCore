@@ -261,7 +261,7 @@ namespace Game.Entities
                             if (!result.IsEmpty())
                             {
                                 item.SetRefundRecipient(GetGUID());
-                                item.SetPaidMoney(result.Read<uint>(0));
+                                item.SetPaidMoney(result.Read<ulong>(0));
                                 item.SetPaidExtendedCost(result.Read<ushort>(1));
                                 AddRefundReference(item.GetGUID());
                             }
@@ -2373,6 +2373,7 @@ namespace Game.Entities
 
             // load achievements before anything else to prevent multiple gains for the same achievement/criteria on every loading (as loading does call UpdateAchievementCriteria)
             m_achievementSys.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.Achievements), holder.GetResult(PlayerLoginQueryLoad.CriteriaProgress));
+            m_questObjectiveCriteriaMgr.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.QuestStatusObjectivesCriteria), holder.GetResult(PlayerLoginQueryLoad.QuestStatusObjectivesCriteriaProgress));
 
             ulong money = result.Read<ulong>(8);
             if (money > PlayerConst.MaxMoneyAmount)
@@ -3035,7 +3036,7 @@ namespace Game.Entities
             }
 
             m_achievementSys.CheckAllAchievementCriteria(this);
-
+            m_questObjectiveCriteriaMgr.CheckAllQuestObjectiveCriteria(this);
             return true;
         }
         public void SaveToDB(bool create = false)
@@ -3383,6 +3384,7 @@ namespace Game.Entities
             _SaveSkills(trans);
             m_achievementSys.SaveToDB(trans);
             reputationMgr.SaveToDB(trans);
+            m_questObjectiveCriteriaMgr.SaveToDB(trans);
             _SaveEquipmentSets(trans);
             GetSession().SaveTutorialsData(trans);                 // changed only while character in game
             _SaveInstanceTimeRestrictions(trans);

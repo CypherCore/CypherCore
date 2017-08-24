@@ -59,44 +59,25 @@ namespace Game.DataStorage
             foreach (ArtifactPowerRankRecord artifactPowerRank in CliDB.ArtifactPowerRankStorage.Values)
                 _artifactPowerRanks[Tuple.Create((uint)artifactPowerRank.ArtifactPowerID, artifactPowerRank.Rank)] = artifactPowerRank;
 
-            MultiMap<uint, Tuple<byte, byte>> addedSections = new MultiMap<uint, Tuple<byte, byte>>();
+            foreach (CharacterFacialHairStylesRecord characterFacialStyle in CliDB.CharacterFacialHairStylesStorage.Values)
+                _characterFacialHairStyles.Add(Tuple.Create(characterFacialStyle.RaceID, characterFacialStyle.SexID, (uint)characterFacialStyle.VariationID));
+
+            CharBaseSectionVariation[] sectionToBase = new CharBaseSectionVariation[(int)CharSectionType.Max];
+            foreach (CharBaseSectionRecord charBaseSection in CliDB.CharBaseSectionStorage.Values)
+            {
+                Contract.Assert(charBaseSection.ResolutionVariation < (byte)CharSectionType.Max, $"SECTION_TYPE_MAX ({(byte)CharSectionType.Max}) must be equal to or greater than {charBaseSection.ResolutionVariation + 1}");
+                Contract.Assert(charBaseSection.Variation < CharBaseSectionVariation.Max, $"CharBaseSectionVariation.Max {(byte)CharBaseSectionVariation.Max} must be equal to or greater than {charBaseSection.Variation + 1}");
+
+                sectionToBase[charBaseSection.ResolutionVariation] = (CharBaseSectionVariation)charBaseSection.Variation;
+            }
+
+            MultiMap<Tuple<byte, byte, CharBaseSectionVariation>, Tuple<byte, byte>> addedSections = new MultiMap<Tuple<byte, byte, CharBaseSectionVariation>, Tuple<byte, byte>>();
             foreach (CharSectionsRecord charSection in CliDB.CharSectionsStorage.Values)
             {
-                if (charSection.Race == 0 || !Convert.ToBoolean((1 << (charSection.Race - 1)) & (int)Race.RaceMaskAllPlayable)) //ignore Nonplayable races
-                    continue;
+                Contract.Assert(charSection.BaseSection < (byte)CharSectionType.Max, $"SECTION_TYPE_MAX ({(byte)CharSectionType.Max}) must be equal to or greater than {charSection.BaseSection + 1}");
 
-                // Not all sections are used for low-res models but we need to get all sections for validation since its viewer dependent
-                byte baseSection = charSection.GenType;
-                switch ((CharSectionType)baseSection)
-                {
-                    case CharSectionType.SkinLowRes:
-                    case CharSectionType.FaceLowRes:
-                    case CharSectionType.FacialHairLowRes:
-                    case CharSectionType.HairLowRes:
-                    case CharSectionType.UnderwearLowRes:
-                        baseSection = (byte)(baseSection + (byte)CharSectionType.Skin);
-                        break;
-                    case CharSectionType.Skin:
-                    case CharSectionType.Face:
-                    case CharSectionType.FacialHair:
-                    case CharSectionType.Hair:
-                    case CharSectionType.Underwear:
-                        break;
-                    case CharSectionType.CustomDisplay1LowRes:
-                    case CharSectionType.CustomDisplay2LowRes:
-                    case CharSectionType.CustomDisplay3LowRes:
-                        ++baseSection;
-                        break;
-                    case CharSectionType.CustomDisplay1:
-                    case CharSectionType.CustomDisplay2:
-                    case CharSectionType.CustomDisplay3:
-                        break;
-                    default:
-                        break;
-                }
-
-                uint sectionKey = (uint)(baseSection | (charSection.Gender << 8) | (charSection.Race << 16));
-                Tuple<byte, byte> sectionCombination = Tuple.Create(charSection.Type, charSection.Color);
+                Tuple<byte, byte, CharBaseSectionVariation> sectionKey = Tuple.Create(charSection.RaceID, charSection.SexID, sectionToBase[charSection.BaseSection]);
+                Tuple<byte, byte> sectionCombination = Tuple.Create(charSection.VariationIndex, charSection.ColorIndex);
                 if (addedSections.Contains(sectionKey, sectionCombination))
                     continue;
 
@@ -382,6 +363,16 @@ namespace Game.DataStorage
             foreach (ToyRecord toy in CliDB.ToyStorage.Values)
                 _toys.Add(toy.ItemID);
 
+            foreach (TransmogSetItemRecord transmogSetItem in CliDB.TransmogSetItemStorage.Values)
+            {
+                TransmogSetRecord set = CliDB.TransmogSetStorage.LookupByKey(transmogSetItem.TransmogSetID);
+                if (set == null)
+                    continue;
+
+                _transmogSetsByItemModifiedAppearance.Add(transmogSetItem.ItemModifiedAppearanceID, set);
+                _transmogSetItemsByTransmogSet.Add(transmogSetItem.TransmogSetID, transmogSetItem);
+            }
+
             foreach (WMOAreaTableRecord entry in CliDB.WMOAreaTableStorage.Values)
                 _wmoAreaTableLookup[Tuple.Create(entry.WMOID, entry.NameSet, entry.WMOGroupID)] = entry;
 
@@ -523,11 +514,21 @@ namespace Game.DataStorage
             return broadcastText.MaleText[SharedConst.DefaultLocale];
         }
 
-        public CharSectionsRecord GetCharSectionEntry(Race race, CharSectionType genType, Gender gender, byte type, byte color)
+        public bool HasCharacterFacialHairStyle(Race race, Gender gender, uint variationId)
         {
-            var list = _charSections.LookupByKey((byte)genType | ((byte)gender << 8) | ((byte)race << 16));
+            return _characterFacialHairStyles.Contains(Tuple.Create((byte)race, (byte)gender, variationId));
+        }
+
+        public bool HasCharSections(Race race, Gender gender, CharBaseSectionVariation variation)
+        {
+            return _charSections.ContainsKey(Tuple.Create(race, gender, variation));
+        }
+
+        public CharSectionsRecord GetCharSectionEntry(Race race, Gender gender, CharBaseSectionVariation variation, byte variationIndex, byte colorIndex)
+        {
+            var list = _charSections.LookupByKey(Tuple.Create(race, gender, variation));
             foreach (var charSection in list)
-                if (charSection.Type == type && charSection.Color == color)
+                if (charSection.VariationIndex == variationIndex && charSection.ColorIndex == colorIndex)
                     return charSection;
 
             return null;
@@ -1200,6 +1201,16 @@ namespace Game.DataStorage
             return _toys.Contains(toy);
         }
 
+        public List<TransmogSetRecord> GetTransmogSetsForItemModifiedAppearance(uint itemModifiedAppearanceId)
+        {
+            return _transmogSetsByItemModifiedAppearance.LookupByKey(itemModifiedAppearanceId);
+        }
+
+        public List<TransmogSetItemRecord> GetTransmogSetItems(uint transmogSetId)
+        {
+            return _transmogSetItemsByTransmogSet.LookupByKey(transmogSetId);
+        }
+
         public WMOAreaTableRecord GetWMOAreaTable(int rootId, int adtId, int groupId)
         {
             var wmoAreaTable = _wmoAreaTableLookup.LookupByKey(Tuple.Create((short)rootId, (sbyte)adtId, groupId));
@@ -1307,7 +1318,8 @@ namespace Game.DataStorage
         MultiMap<uint, ArtifactPowerRecord> _artifactPowers = new MultiMap<uint, ArtifactPowerRecord>();
         MultiMap<uint, uint> _artifactPowerLinks = new MultiMap<uint, uint>();
         Dictionary<Tuple<uint, byte>, ArtifactPowerRankRecord> _artifactPowerRanks = new Dictionary<Tuple<uint, byte>, ArtifactPowerRankRecord>();
-        MultiMap<uint, CharSectionsRecord> _charSections = new MultiMap<uint, CharSectionsRecord>();
+        List<Tuple<byte, byte, uint>> _characterFacialHairStyles = new List<Tuple<byte, byte, uint>>();
+        MultiMap<Tuple<byte, byte, CharBaseSectionVariation>, CharSectionsRecord> _charSections = new MultiMap<Tuple<byte, byte, CharBaseSectionVariation>, CharSectionsRecord>();
         Dictionary<uint, CharStartOutfitRecord> _charStartOutfits = new Dictionary<uint, CharStartOutfitRecord>();
         uint[][] _powersByClass = new uint[(int)Class.Max][];
         ChrSpecializationRecord[][] _chrSpecializationsByIndex = new ChrSpecializationRecord[(int)Class.Max + 1][];
@@ -1348,6 +1360,8 @@ namespace Game.DataStorage
         MultiMap<uint, SpellProcsPerMinuteModRecord> _spellProcsPerMinuteMods = new MultiMap<uint, SpellProcsPerMinuteModRecord>();
         List<TalentRecord>[][][] _talentsByPosition = new List<TalentRecord>[(int)Class.Max][][];
         List<uint> _toys = new List<uint>();
+        MultiMap<uint, TransmogSetRecord> _transmogSetsByItemModifiedAppearance = new MultiMap<uint, TransmogSetRecord>();
+        MultiMap<uint, TransmogSetItemRecord> _transmogSetItemsByTransmogSet = new MultiMap<uint, TransmogSetItemRecord>();
         Dictionary<Tuple<short, sbyte, int>, WMOAreaTableRecord> _wmoAreaTableLookup = new Dictionary<Tuple<short, sbyte, int>, WMOAreaTableRecord>();
         Dictionary<uint, WorldMapAreaRecord> _worldMapAreaByAreaID = new Dictionary<uint, WorldMapAreaRecord>();
     }

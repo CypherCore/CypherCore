@@ -38,13 +38,13 @@ namespace Framework.Collections
 
         public void delink()
         {
-            if (isInList())
-            {
-                iNext.iPrev = iPrev;
-                iPrev.iNext = iNext;
-                iNext = null;
-                iPrev = null;
-            }
+            if (!isInList())
+                return;
+
+            iNext.iPrev = iPrev;
+            iPrev.iNext = iNext;
+            iNext = null;
+            iPrev = null;
         }
 
         public void insertBefore(LinkedListElement pElem)

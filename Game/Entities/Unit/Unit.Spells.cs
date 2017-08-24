@@ -752,6 +752,13 @@ namespace Game.Entities
                                     }
                                     break;
                             }
+
+                            // Spell crit suppression
+                            if (victim.GetTypeId() == TypeId.Unit)
+                            {
+                                int levelDiff = (int)(victim.GetLevelForTarget(this) - getLevel());
+                                crit_chance -= levelDiff * 1.0f;
+                            }
                         }
                         break;
                     }
@@ -776,7 +783,7 @@ namespace Game.Entities
                 if (aurEff.GetCasterGUID() == GetGUID() && aurEff.IsAffectingSpell(spellProto))
                     crit_chance += aurEff.GetAmount();
 
-            return crit_chance > 0.0f ? crit_chance : 0.0f;
+            return Math.Max(crit_chance, 0.0f);
         }
 
         // Calculate spell hit result can be:
@@ -1813,7 +1820,7 @@ namespace Game.Entities
             DateTime now = DateTime.Now;
 
             // use provided list of auras which can proc
-            if (!procAuras.Empty())
+            if (procAuras != null)
             {
                 foreach (AuraApplication aurApp in procAuras)
                 {

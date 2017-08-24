@@ -91,6 +91,40 @@ namespace Game.DataStorage
         public uint Id;
     }
 
+    public sealed class TransmogHolidayRecord
+    {
+        public uint Id;
+        public int HolidayID;
+    }
+
+    public sealed class TransmogSetRecord
+    {
+        public LocalizedString Name;
+        public ushort BaseSetID;
+        public ushort UIOrder;
+        public byte ExpansionID;
+        public uint Id;
+        public int Flags;
+        public int QuestID;
+        public int ClassMask;
+        public int ItemNameDescriptionID;
+        public uint TransmogSetGroupID;
+    }
+
+    public sealed class TransmogSetGroupRecord
+    {
+        public LocalizedString Label;
+        public uint Id;
+    }
+
+    public sealed class TransmogSetItemRecord
+    {
+        public uint Id;
+        public uint TransmogSetID;
+        public uint ItemModifiedAppearanceID;
+        public int Flags;
+    }
+
     public sealed class TransportAnimationRecord
     {
         public uint Id;

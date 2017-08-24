@@ -26,6 +26,7 @@ namespace Game.AI
         {
             go = g;
             _scheduler = new TaskScheduler();
+            _events = new EventMap();
         }
 
         public virtual void UpdateAI(uint diff) { }
@@ -56,6 +57,7 @@ namespace Game.AI
         public virtual void EventInform(uint eventId) { }
 
         protected TaskScheduler _scheduler;
+        protected EventMap _events;
 
         public GameObject go;
     }

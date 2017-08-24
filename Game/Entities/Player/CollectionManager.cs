@@ -675,6 +675,19 @@ namespace Game.Entities
                 _owner.GetPlayer().RemoveDynamicValue(PlayerDynamicFields.ConditionalTransmog, itemModifiedAppearance.Id);
                 _temporaryAppearances.Remove(itemModifiedAppearance.Id);
             }
+
+            ItemRecord item = CliDB.ItemStorage.LookupByKey(itemModifiedAppearance.ItemID);
+            if (item != null)
+            {
+                int transmogSlot = Item.ItemTransmogrificationSlots[(int)item.inventoryType];
+                if (transmogSlot >= 0)
+                    _owner.GetPlayer().UpdateCriteria(CriteriaTypes.AppearanceUnlockedBySlot, (ulong)transmogSlot, 1);
+            }
+
+            var sets = Global.DB2Mgr.GetTransmogSetsForItemModifiedAppearance(itemModifiedAppearance.Id);
+            foreach (TransmogSetRecord set in sets)
+                if (IsSetCompleted(set.Id))
+                    _owner.GetPlayer().UpdateCriteria(CriteriaTypes.TransmogSetUnlocked, set.TransmogSetGroupID);
         }
 
         void AddTemporaryAppearance(ObjectGuid itemGuid, ItemModifiedAppearanceRecord itemModifiedAppearance)
@@ -761,6 +774,54 @@ namespace Game.Entities
                     transmogCollectionUpdate.FavoriteAppearances.Add(pair.Key);
 
             _owner.SendPacket(transmogCollectionUpdate);
+        }
+
+        public void AddTransmogSet(uint transmogSetId)
+        {
+            var items = Global.DB2Mgr.GetTransmogSetItems(transmogSetId);
+            if (items.Empty())
+                return;
+
+            foreach (TransmogSetItemRecord item in items)
+            {
+                ItemModifiedAppearanceRecord itemModifiedAppearance = CliDB.ItemModifiedAppearanceStorage.LookupByKey(item.ItemModifiedAppearanceID);
+                if (itemModifiedAppearance == null)
+                    continue;
+
+                AddItemAppearance(itemModifiedAppearance);
+            }
+        }
+
+        bool IsSetCompleted(uint transmogSetId)
+        {
+            var transmogSetItems = Global.DB2Mgr.GetTransmogSetItems(transmogSetId);
+            if (transmogSetItems.Empty())
+                return false;
+
+            int[] knownPieces = new int[EquipmentSlot.End];
+            for (var i = 0; i < EquipmentSlot.End; ++i)
+                knownPieces[i] = -1;
+
+            foreach (TransmogSetItemRecord transmogSetItem in transmogSetItems)
+            {
+                ItemModifiedAppearanceRecord itemModifiedAppearance = CliDB.ItemModifiedAppearanceStorage.LookupByKey(transmogSetItem.ItemModifiedAppearanceID);
+                if (itemModifiedAppearance == null)
+                    continue;
+
+                ItemRecord item = CliDB.ItemStorage.LookupByKey(itemModifiedAppearance.ItemID);
+                if (item == null)
+                    continue;
+
+                int transmogSlot = Item.ItemTransmogrificationSlots[(int)item.inventoryType];
+                if (transmogSlot < 0 || knownPieces[transmogSlot] == 1)
+                    continue;
+
+                (var hasAppearance, var isTemporary) = HasItemAppearance(transmogSetItem.ItemModifiedAppearanceID);
+
+                knownPieces[transmogSlot] = (hasAppearance && !isTemporary) ? 1 : 0;
+            }
+
+            return !knownPieces.Contains(0);
         }
 
         public bool HasToy(uint itemId) { return _toys.ContainsKey(itemId); }

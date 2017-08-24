@@ -437,6 +437,16 @@ namespace Game
                 {
                     if (pProto.GetSellPrice() > 0)
                     {
+                        ulong money = pProto.GetSellPrice() * packet.Amount;
+
+                        if (!_player.ModifyMoney((long)money)) // ensure player doesn't exceed gold limit
+                        {
+                            _player.SendSellError(SellResult.CantSellItem, creature, packet.ItemGUID);
+                            return;
+                        }
+
+                        _player.UpdateCriteria(CriteriaTypes.MoneyFromVendors, money);
+
                         if (packet.Amount < pItem.GetCount())               // need split items
                         {
                             Item pNewItem = pItem.CloneItem(packet.Amount, pl);
@@ -464,10 +474,6 @@ namespace Game
                             Item.RemoveItemFromUpdateQueueOf(pItem, pl);
                             pl.AddItemToBuyBackSlot(pItem);
                         }
-
-                        uint money = pProto.GetSellPrice() * packet.Amount;
-                        pl.ModifyMoney(money);
-                        pl.UpdateCriteria(CriteriaTypes.MoneyFromVendors, money);
                     }
                     else
                         pl.SendSellError(SellResult.CantSellItem, creature, packet.ItemGUID);

@@ -343,7 +343,7 @@ namespace Game.Maps
                     }
                 }
 
-                foreach (var guid in bossInfo.minion)
+                foreach (var guid in bossInfo.minion.ToArray())
                 {
                     Creature minion = instance.GetCreature(guid);
                     if (minion)
@@ -608,7 +608,7 @@ namespace Game.Maps
             return false;
         }
 
-        void SetEntranceLocation(uint worldSafeLocationId)
+        public void SetEntranceLocation(uint worldSafeLocationId)
         {
             _entranceId = worldSafeLocationId;
             if (_temporaryEntranceId != 0)

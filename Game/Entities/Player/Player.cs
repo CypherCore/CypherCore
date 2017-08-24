@@ -117,6 +117,7 @@ namespace Game.Entities
 
             m_achievementSys = new PlayerAchievementMgr(this);
             reputationMgr = new ReputationMgr(this);
+            m_questObjectiveCriteriaMgr = new QuestObjectiveCriteriaManager(this);
             m_sceneMgr = new SceneMgr(this);
 
             m_bgBattlegroundQueueID[0] = new BgBattlegroundQueueID_Rec();
@@ -283,7 +284,7 @@ namespace Game.Entities
 
             InitRunes();
 
-            SetUInt32Value(PlayerFields.Coinage, WorldConfig.GetUIntValue(WorldCfg.StartPlayerMoney));
+            SetUInt64Value(PlayerFields.Coinage, WorldConfig.GetUIntValue(WorldCfg.StartPlayerMoney));
             SetCurrency(CurrencyTypes.ApexisCrystals, WorldConfig.GetUIntValue(WorldCfg.CurrencyStartApexisCrystals));
             SetCurrency(CurrencyTypes.JusticePoints, WorldConfig.GetUIntValue(WorldCfg.CurrencyStartJusticePoints));
 
@@ -2551,7 +2552,7 @@ namespace Game.Entities
                     GetSession().SendStablePet(guid);
                     break;
                 case GossipOption.Trainer:
-                    GetSession().SendTrainerList(guid, menuItemData.TrainerId);
+                    GetSession().SendTrainerList(source.ToCreature(), menuItemData.TrainerId);
                     break;
                 case GossipOption.Learndualspec:
                     break;
@@ -4086,44 +4087,41 @@ namespace Game.Entities
 
             return ComponentFlagsMatch(entry, GetSelectionFromContext(2, class_));
         }
+        static bool IsSectionValid(Race race, Class class_, Gender gender, CharBaseSectionVariation variation, byte variationIndex, byte colorIndex, bool create)
+        {
+            CharSectionsRecord section = Global.DB2Mgr.GetCharSectionEntry(race, gender, variation, variationIndex, colorIndex);
+            if (section != null)
+                return IsSectionFlagValid(section, class_, create);
 
+            return false;
+        }
         public static bool IsValidGender(Gender _gender) { return _gender <= Gender.Female; }
         public static bool IsValidClass(Class _class) { return Convert.ToBoolean((1 << ((int)_class - 1)) & (int)Class.ClassMaskAllPlayable); }
         public static bool IsValidRace(Race _race) { return Convert.ToBoolean((1 << ((int)_race - 1)) & (int)Race.RaceMaskAllPlayable); }
+
         public static bool ValidateAppearance(Race race, Class class_, Gender gender, byte hairID, byte hairColor, byte faceID, byte facialHairId, byte skinColor, Array<byte> customDisplay, bool create = false)
         {
-            CharSectionsRecord skin = Global.DB2Mgr.GetCharSectionEntry(race, CharSectionType.Skin, gender, 0, skinColor);
-            if (skin == null)
+            if (!IsSectionValid(race, class_, gender, CharBaseSectionVariation.Skin, 0, skinColor, create))
                 return false;
 
-            if (!IsSectionFlagValid(skin, class_, create))
+            if (!IsSectionValid(race, class_, gender, CharBaseSectionVariation.Face, faceID, skinColor, create))
                 return false;
 
-            CharSectionsRecord face = Global.DB2Mgr.GetCharSectionEntry(race, CharSectionType.Face, gender, faceID, skinColor);
-            if (face == null)
+            if (!IsSectionValid(race, class_, gender, CharBaseSectionVariation.Hair, hairID, hairColor, create))
                 return false;
 
-            if (!IsSectionFlagValid(face, class_, create))
+            if (!IsSectionValid(race, class_, gender, CharBaseSectionVariation.FacialHair, facialHairId, hairColor, create))
+                if (Global.DB2Mgr.HasCharSections(race, gender, CharBaseSectionVariation.FacialHair) || !Global.DB2Mgr.HasCharacterFacialHairStyle(race, gender, facialHairId))
+                    return false;
+
+            if (!IsSectionValid(race, class_, gender, CharBaseSectionVariation.CustomDisplay1, customDisplay[0], 0, create))
                 return false;
 
-            CharSectionsRecord hair = Global.DB2Mgr.GetCharSectionEntry(race, CharSectionType.Hair, gender, hairID, hairColor);
-            if (hair == null)
+            if (!IsSectionValid(race, class_, gender, CharBaseSectionVariation.CustomDisplay2, customDisplay[1], 0, create))
                 return false;
 
-            if (!IsSectionFlagValid(hair, class_, create))
+            if (!IsSectionValid(race, class_, gender, CharBaseSectionVariation.CustomDisplay3, customDisplay[2], 0, create))
                 return false;
-
-            CharSectionsRecord facialHair = Global.DB2Mgr.GetCharSectionEntry(race, CharSectionType.Hair, gender, facialHairId, hairColor);
-            if (facialHair == null)
-                return false;
-
-            for (int i = 0; i < PlayerConst.CustomDisplaySize; ++i)
-            {
-                CharSectionsRecord entry = Global.DB2Mgr.GetCharSectionEntry(race, (CharSectionType.CustomDisplay1 + i * 2), gender, customDisplay[i], 0);
-                if (entry != null)
-                    if (!IsSectionFlagValid(entry, class_, create))
-                        return false;
-            }
 
             return true;
         }
@@ -5125,8 +5123,8 @@ namespace Game.Entities
                 SetMoney((ulong)(GetMoney() > (ulong)-amount ? (long)GetMoney() + amount : 0));
             else
             {
-                if (GetMoney() < (ulong)(PlayerConst.MaxMoneyAmount - amount))
-                    SetMoney((ulong)((long)GetMoney() + amount));
+                if (GetMoney() <= (PlayerConst.MaxMoneyAmount - (ulong)amount))
+                    SetMoney((ulong)(GetMoney() + (ulong)amount));
                 else
                 {
                     if (sendError)
@@ -5514,6 +5512,7 @@ namespace Game.Entities
             SendEquipmentSetList();
 
             m_achievementSys.SendAllData(this);
+            m_questObjectiveCriteriaMgr.SendAllData(this);
 
             // SMSG_LOGIN_SETTIMESPEED
             float TimeSpeed = 0.01666667f;

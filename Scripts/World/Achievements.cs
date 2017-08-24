@@ -37,6 +37,9 @@ namespace Scripts.World
         public const uint AuraPerfumeForever = 70235;
         public const uint AuraPerfumeEnchantress = 70234;
         public const uint AuraPerfumeVictory = 70233;
+
+        //BgSA Artillery
+        public const uint AntiPersonnalCannon = 27894;
     }
 
     [Script]
@@ -144,7 +147,7 @@ namespace Scripts.World
             Creature vehicle = source.GetVehicleCreatureBase();
             if (vehicle)
             {
-                if (vehicle.GetEntry() == SACreatureIds.AntiPersonnalCannon)
+                if (vehicle.GetEntry() == AchievementConst.AntiPersonnalCannon)
                     return true;
             }
 

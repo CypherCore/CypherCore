@@ -688,19 +688,18 @@ namespace Game.Entities
         }
         public Unit GetMeleeHitRedirectTarget(Unit victim, SpellInfo spellInfo = null)
         {
-            var hitTriggerAuras = victim.GetAuraEffectsByType(AuraType.AddCasterHitTrigger);
-            foreach (var i in hitTriggerAuras)
+            var interceptAuras = victim.GetAuraEffectsByType(AuraType.InterceptMeleeRangedAttacks);
+            foreach (var i in interceptAuras)
             {
                 Unit magnet = i.GetCaster();
                 if (magnet != null)
                     if (_IsValidAttackTarget(magnet, spellInfo) && magnet.IsWithinLOSInMap(this)
                        && (spellInfo == null || (spellInfo.CheckExplicitTarget(this, magnet) == SpellCastResult.SpellCastOk
                        && spellInfo.CheckTarget(this, magnet, false) == SpellCastResult.SpellCastOk)))
-                        if (RandomHelper.randChance(i.GetAmount()))
-                        {
-                            i.GetBase().DropCharge(AuraRemoveMode.Expire);
-                            return magnet;
-                        }
+                    {
+                        i.GetBase().DropCharge(AuraRemoveMode.Expire);
+                        return magnet;
+                    }
             }
             return victim;
         }
@@ -2053,10 +2052,7 @@ namespace Game.Entities
             // 6.CRIT
             tmp = crit_chance;
             if (tmp > 0 && roll < (sum += tmp))
-            {
-                if (GetTypeId() != TypeId.Unit || !(ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoCrit)))
-                    return MeleeHitOutcome.Crit;
-            }
+                return MeleeHitOutcome.Crit;
 
             // 7. CRUSHING
             // mobs can score crushing blows if they're 4 or more levels above victim

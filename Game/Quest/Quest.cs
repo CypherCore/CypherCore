@@ -397,12 +397,12 @@ namespace Game
         }
 
         public bool HasFlag(QuestFlags flag) { return (Flags & flag) != 0; }
-
         public void SetFlag(QuestFlags flag) { Flags |= flag; }
 
         public bool HasSpecialFlag(QuestSpecialFlags flag) { return (SpecialFlags & flag) != 0; }
-
         public void SetSpecialFlag(QuestSpecialFlags flag) { SpecialFlags |= flag; }
+
+        public bool HasFlagEx(QuestFlagsEx flag) { return (FlagsEx & flag) != 0; }
 
         // table data accessors:
         public bool IsRepeatable() { return SpecialFlags.HasAnyFlag(QuestSpecialFlags.Repeatable); }

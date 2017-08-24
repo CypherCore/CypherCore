@@ -332,6 +332,16 @@ namespace Game.Achievements
                     case CriteriaTypes.ReachGuildLevel:
                         SetCriteriaProgress(criteria, miscValue1, referencePlayer);
                         break;
+                    case CriteriaTypes.TransmogSetUnlocked:
+                        if (miscValue1 != criteria.Entry.Asset)
+                            continue;
+                        SetCriteriaProgress(criteria, 1, referencePlayer, ProgressType.Accumulate);
+                        break;
+                    case CriteriaTypes.AppearanceUnlockedBySlot:
+                        if (miscValue2 == 0 /*login case*/ || miscValue1 != criteria.Entry.Asset)
+                            continue;
+                        SetCriteriaProgress(criteria, 1, referencePlayer, ProgressType.Accumulate);
+                        break;
                     // FIXME: not triggered in code as result, need to implement
                     case CriteriaTypes.CompleteRaid:
                     case CriteriaTypes.PlayArena:
@@ -749,6 +759,7 @@ namespace Game.Achievements
                 case CriteriaTypes.Currency:
                 case CriteriaTypes.PlaceGarrisonBuilding:
                 case CriteriaTypes.OwnBattlePetCount:
+                case CriteriaTypes.AppearanceUnlockedBySlot:
                     return progress.Counter >= requiredAmount;
                 case CriteriaTypes.CompleteAchievement:
                 case CriteriaTypes.CompleteQuest:
@@ -758,6 +769,7 @@ namespace Game.Achievements
                 case CriteriaTypes.OwnBattlePet:
                 case CriteriaTypes.HonorLevelReached:
                 case CriteriaTypes.PrestigeReached:
+                case CriteriaTypes.TransmogSetUnlocked:
                     return progress.Counter >= 1;
                 case CriteriaTypes.LearnSkillLevel:
                     return progress.Counter >= (requiredAmount * 75);
@@ -1444,19 +1456,34 @@ namespace Game.Achievements
                     scenarioCriteriaTreeIds[scenarioStep.CriteriaTreeID] = scenarioStep;
             }
 
+            Dictionary<uint /*criteriaTreeID*/, QuestObjective> questObjectiveCriteriaTreeIds = new Dictionary<uint, QuestObjective>();
+            foreach (var pair in Global.ObjectMgr.GetQuestTemplates())
+            {
+                foreach (QuestObjective objective in pair.Value.Objectives)
+                {
+                    if (objective.Type != QuestObjectiveType.CriteriaTree)
+                        continue;
+
+                    if (objective.ObjectID != 0)
+                        questObjectiveCriteriaTreeIds[(uint)objective.ObjectID] = objective;
+                }
+            }
+
             // Load criteria tree nodes
             foreach (CriteriaTreeRecord tree in CliDB.CriteriaTreeStorage.Values)
             {
                 // Find linked achievement
                 AchievementRecord achievement = GetEntry(achievementCriteriaTreeIds, tree);
                 ScenarioStepRecord scenarioStep = GetEntry(scenarioCriteriaTreeIds, tree);
-                if (achievement == null && scenarioStep == null)
+                QuestObjective questObjective = GetEntry(questObjectiveCriteriaTreeIds, tree);
+                if (achievement == null && scenarioStep == null && questObjective == null)
                     continue;
 
                 CriteriaTree criteriaTree = new CriteriaTree();
                 criteriaTree.ID = tree.Id;
                 criteriaTree.Achievement = achievement;
                 criteriaTree.ScenarioStep = scenarioStep;
+                criteriaTree.QuestObjective = questObjective;
                 criteriaTree.Entry = tree;
 
                 _criteriaTrees[criteriaTree.Entry.Id] = criteriaTree;
@@ -1491,6 +1518,7 @@ namespace Game.Achievements
             uint criterias = 0;
             uint guildCriterias = 0;
             uint scenarioCriterias = 0;
+            uint questObjectiveCriterias = 0;
             foreach (CriteriaRecord criteriaEntry in CliDB.CriteriaStorage.Values)
             {
                 Contract.Assert(criteriaEntry.Type < CriteriaTypes.TotalTypes, string.Format("CRITERIA_TYPE_TOTAL must be greater than or equal to {0} but is currently equal to {1}", criteriaEntry.Type + 1, CriteriaTypes.TotalTypes));
@@ -1522,6 +1550,8 @@ namespace Game.Achievements
                     }
                     else if (tree.ScenarioStep != null)
                         criteria.FlagsCu |= CriteriaFlagsCu.Scenario;
+                    else if (tree.QuestObjective != null)
+                        criteria.FlagsCu |= CriteriaFlagsCu.QuestObjective;
                 }
 
                 if (criteria.FlagsCu.HasAnyFlag(CriteriaFlagsCu.Player | CriteriaFlagsCu.Account))
@@ -1542,6 +1572,12 @@ namespace Game.Achievements
                     _scenarioCriteriasByType.Add(criteriaEntry.Type, criteria);
                 }
 
+                if (criteria.FlagsCu.HasAnyFlag(CriteriaFlagsCu.QuestObjective))
+                {
+                    ++questObjectiveCriterias;
+                    _questObjectiveCriteriasByType.Add(criteriaEntry.Type, criteria);
+                }
+
                 if (criteriaEntry.StartTimer != 0)
                     _criteriasByTimedType.Add(criteriaEntry.StartEvent, criteria);
             }
@@ -1549,7 +1585,7 @@ namespace Game.Achievements
             foreach (var p in _criteriaTrees)
                 p.Value.Criteria = GetCriteria(p.Value.Entry.CriteriaID);
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} criteria, {1} guild criteria and {2} scenario criteria in {3} ms.", criterias, guildCriterias, scenarioCriterias, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, "Loaded {criterias} criteria, {guildCriterias} guild criteria, {scenarioCriterias} scenario criteria and {questObjectiveCriterias} quest objective criteria in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadCriteriaData()
@@ -1640,6 +1676,11 @@ namespace Game.Achievements
             return _scenarioCriteriasByType.LookupByKey(type);
         }
 
+        public List<Criteria> GetQuestObjectiveCriteriaByType(CriteriaTypes type)
+        {
+            return _questObjectiveCriteriasByType[type];
+        }
+
         public List<CriteriaTree> GetCriteriaTreesByCriteria(uint criteriaId)
         {
             return _criteriaTreeByCriteria.LookupByKey(criteriaId);
@@ -1693,6 +1734,7 @@ namespace Game.Achievements
         MultiMap<CriteriaTypes, Criteria> _criteriasByType = new MultiMap<CriteriaTypes, Criteria>();
         MultiMap<CriteriaTypes, Criteria> _guildCriteriasByType = new MultiMap<CriteriaTypes, Criteria>();
         MultiMap<CriteriaTypes, Criteria> _scenarioCriteriasByType = new MultiMap<CriteriaTypes, Criteria>();
+        MultiMap<CriteriaTypes, Criteria> _questObjectiveCriteriasByType = new MultiMap<CriteriaTypes, Criteria>();
 
         MultiMap<CriteriaTimedTypes, Criteria> _criteriasByTimedType = new MultiMap<CriteriaTimedTypes, Criteria>();
     }
@@ -1717,6 +1759,7 @@ namespace Game.Achievements
         public CriteriaTreeRecord Entry;
         public AchievementRecord Achievement;
         public ScenarioStepRecord ScenarioStep;
+        public QuestObjective QuestObjective;
         public Criteria Criteria;
         public List<CriteriaTree> Children = new List<CriteriaTree>();
     }

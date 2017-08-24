@@ -2451,6 +2451,14 @@ namespace Game
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.QuestStatusObjectives, stmt);
 
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS_OBJECTIVES_CRITERIA);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.QuestStatusObjectivesCriteria, stmt);
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS_OBJECTIVES_CRITERIA_PROGRESS);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.QuestStatusObjectivesCriteriaProgress, stmt);
+
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS_DAILY);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.DailyQuestStatus, stmt);
@@ -2631,6 +2639,8 @@ namespace Game
         Spells,
         QuestStatus,
         QuestStatusObjectives,
+        QuestStatusObjectivesCriteria,
+        QuestStatusObjectivesCriteriaProgress,
         DailyQuestStatus,
         Reputation,
         Inventory,

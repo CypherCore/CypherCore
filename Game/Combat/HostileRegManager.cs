@@ -33,14 +33,15 @@ namespace Game.Combat
 
         Unit getOwner() { return Owner; }
 
-        // send threat to all my hateres for the victim
-        // The victim is hated than by them as well
+        // send threat to all my haters for the victim
+        // The victim is then hated by them as well
         // use for buffs and healing threat functionality
         public void threatAssist(Unit victim, float baseThreat, SpellInfo threatSpell = null)
         {
-            HostileReference refe = getFirst();
             float threat = ThreatManager.calcThreat(victim, Owner, baseThreat, (threatSpell != null ? threatSpell.GetSchoolMask() : SpellSchoolMask.Normal), threatSpell);
             threat /= getSize();
+
+            HostileReference refe = getFirst();
             while (refe != null)
             {
                 if (ThreatManager.isValidProcess(victim, refe.GetSource().GetOwner(), threatSpell))
@@ -53,7 +54,6 @@ namespace Game.Combat
         public void addTempThreat(float threat, bool apply)
         {
             HostileReference refe = getFirst();
-
             while (refe != null)
             {
                 if (apply)
@@ -209,18 +209,20 @@ namespace Game.Combat
 
         public void addThreat(float modThreat)
         {
+            if (modThreat == 0.0f)
+                return;
+
             iThreat += modThreat;
+
             // the threat is changed. Source and target unit have to be available
             // if the link was cut before relink it again
             if (!isOnline())
                 updateOnlineStatus();
-            if (modThreat != 0.0f)
-            {
-                ThreatRefStatusChangeEvent Event = new ThreatRefStatusChangeEvent(UnitEventTypes.ThreatRefThreatChange, this, modThreat);
-                fireStatusChanged(Event);
-            }
 
-            if (modThreat >= 0.0f)
+            ThreatRefStatusChangeEvent Event = new ThreatRefStatusChangeEvent(UnitEventTypes.ThreatRefThreatChange, this, modThreat);
+            fireStatusChanged(Event);
+
+            if (isValid() && modThreat > 0.0f)
             {
                 Unit victimOwner = getTarget().GetCharmerOrOwner();
                 if (victimOwner != null && victimOwner.IsAlive())
@@ -230,9 +232,7 @@ namespace Game.Combat
 
         public void addThreatPercent(int percent)
         {
-            float tmpThreat = iThreat;
-            MathFunctions.AddPct(ref tmpThreat, percent);
-            addThreat(tmpThreat - iThreat);
+            addThreat(MathFunctions.CalculatePct(iThreat, percent));
         }
 
         // check, if source can reach target and set the status
@@ -292,7 +292,7 @@ namespace Game.Combat
             {
                 iAccessible = isAccessible;
 
-                ThreatRefStatusChangeEvent Event = new ThreatRefStatusChangeEvent(UnitEventTypes.ThreatRefAsseccibleStatus, this);
+                ThreatRefStatusChangeEvent Event = new ThreatRefStatusChangeEvent(UnitEventTypes.ThreatRefAccessibleStatus, this);
                 fireStatusChanged(Event);
             }
         }
@@ -313,12 +313,12 @@ namespace Game.Combat
 
         public void setThreat(float threat)
         {
-            addThreat(threat - getThreat());
+            addThreat(threat - iThreat);
         }
 
         public float getThreat()
         {
-            return iThreat;
+            return iThreat + iTempThreatModifier;
         }
 
         public bool isOnline()
@@ -333,27 +333,27 @@ namespace Game.Combat
             return iAccessible;
         }
 
-        // used for temporary setting a threat and reducting it later again.
+        // used for temporary setting a threat and reducing it later again.
         // the threat modification is stored
         public void setTempThreat(float threat)
         {
-            addTempThreat(threat - getThreat());
+            addTempThreat(threat - iTempThreatModifier);
         }
 
         public void addTempThreat(float threat)
         {
-            iTempThreatModifier = threat;
-            if (iTempThreatModifier != 0.0f)
-                addThreat(iTempThreatModifier);
+            if (threat == 0.0f)
+                return;
+
+            iTempThreatModifier += threat;
+
+            ThreatRefStatusChangeEvent Event = new ThreatRefStatusChangeEvent(UnitEventTypes.ThreatRefThreatChange, this, threat);
+            fireStatusChanged(Event);
         }
 
         public void resetTempThreat()
         {
-            if (iTempThreatModifier != 0.0f)
-            {
-                addThreat(-iTempThreatModifier);
-                iTempThreatModifier = 0.0f;
-            }
+            addTempThreat(-iTempThreatModifier);
         }
 
         public float getTempThreatModifier()
@@ -369,7 +369,7 @@ namespace Game.Combat
         public new HostileReference next() { return (HostileReference)base.next(); }
 
         float iThreat;
-        float iTempThreatModifier;                          // used for taunt
+        float iTempThreatModifier;                          // used for SPELL_AURA_MOD_TOTAL_THREAT
         ObjectGuid iUnitGuid;
         bool iOnline;
         bool iAccessible;

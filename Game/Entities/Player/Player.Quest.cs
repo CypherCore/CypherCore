@@ -540,6 +540,11 @@ namespace Game.Entities
         {
             AddQuest(quest, questGiver);
 
+            foreach (QuestObjective obj in quest.Objectives)
+                if (obj.Type == QuestObjectiveType.CriteriaTree)
+                    if (m_questObjectiveCriteriaMgr.HasCompletedObjective(obj))
+                        KillCreditCriteriaTreeObjective(obj);
+
             if (CanCompleteQuest(quest.Id))
                 CompleteQuest(quest.Id);
 
@@ -700,11 +705,20 @@ namespace Game.Entities
 
             foreach (QuestObjective obj in quest.Objectives)
             {
-                if (obj.Type == QuestObjectiveType.MinReputation || obj.Type == QuestObjectiveType.MaxReputation)
+                switch (obj.Type)
                 {
-                    FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(obj.ObjectID);
-                    if (factionEntry != null)
-                        GetReputationMgr().SetVisible(factionEntry);
+                    case QuestObjectiveType.MinReputation:
+                    case QuestObjectiveType.MaxReputation:
+                        FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(obj.ObjectID);
+                        if (factionEntry != null)
+                            GetReputationMgr().SetVisible(factionEntry);
+                        break;
+                    case QuestObjectiveType.CriteriaTree:
+                        if (quest.HasFlagEx(QuestFlagsEx.ClearProgressOfCriteriaTreeObjectivesOnAccept))
+                            m_questObjectiveCriteriaMgr.ResetCriteriaTree((uint)obj.ObjectID);
+                        break;
+                    default:
+                        break;
                 }
             }
 
@@ -1423,7 +1437,7 @@ namespace Game.Entities
 
         public bool SatisfyQuestConditions(Quest qInfo, bool msg)
         {
-            if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.QuestAccept, qInfo.Id, this))
+            if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.QuestAvailable, qInfo.Id, this))
             {
                 if (msg)
                 {
@@ -1818,7 +1832,7 @@ namespace Game.Entities
                 if (quest == null)
                     continue;
 
-                if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.QuestAccept, quest.Id, this))
+                if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.QuestAvailable, quest.Id, this))
                     continue;
 
                 QuestStatus status = GetQuestStatus(questId);
@@ -1844,7 +1858,7 @@ namespace Game.Entities
                 if (quest == null)
                     continue;
 
-                if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.QuestAccept, quest.Id, this))
+                if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.QuestAvailable, quest.Id, this))
                     continue;
 
                 QuestStatus status = GetQuestStatus(questId);
@@ -2273,6 +2287,21 @@ namespace Game.Entities
             }
         }
 
+        public void KillCreditCriteriaTreeObjective(QuestObjective questObjective)
+        {
+            if (questObjective.Type != QuestObjectiveType.CriteriaTree)
+                return;
+
+            if (GetQuestStatus(questObjective.QuestID) == QuestStatus.Incomplete)
+            {
+                SetQuestObjectiveData(questObjective, 1);
+                SendQuestUpdateAddCreditSimple(questObjective);
+
+                if (CanCompleteQuest(questObjective.QuestID))
+                    CompleteQuest(questObjective.QuestID);
+            }
+        }
+
         public void TalkedToCreature(uint entry, ObjectGuid guid)
         {
             ushort addTalkCount = 1;
@@ -2579,6 +2608,7 @@ namespace Game.Entities
                         return false;
                     break;
                 case QuestObjectiveType.AreaTrigger:
+                case QuestObjectiveType.CriteriaTree:
                     if (GetQuestObjectiveData(quest, objective.StorageIndex) == 0)
                         return false;
                     break;

@@ -2417,6 +2417,14 @@ namespace Game.Entities
                 SendMessageToSet(sound, true);
         }
 
+        public void PlayDirectMusic(uint musicId, Player target = null)
+        {
+            if (target)
+                target.SendPacket(new PlayMusic(musicId));
+            else
+                SendMessageToSet(new PlayMusic(musicId), true);
+        }
+
         public void DestroyForNearbyPlayers()
         {
             if (!IsInWorld)

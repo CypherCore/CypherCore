@@ -5575,9 +5575,7 @@ namespace Game.Spells
             if (!strict && m_casttime == 0)
                 return SpellCastResult.SpellCastOk;
 
-            var pair = GetMinMaxRange(strict);
-            float minRange = pair.Item1;
-            float maxRange = pair.Item2;
+            (float minRange, float maxRange) = GetMinMaxRange(strict);
 
             // get square values for sqr distance checks
             minRange *= minRange;

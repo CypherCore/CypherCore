@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using Game.Network.Packets;
 using Game.DataStorage;
 
-namespace Game.BattleGrounds
+namespace Game.BattleGrounds.Zones
 {
     class BgEyeofStorm : Battleground
     {
@@ -763,7 +763,7 @@ namespace Game.BattleGrounds
             else
                 SendMessageToAll(EotSMisc.m_CapturingPointTypes[Point].MessageIdHorde, ChatMsg.BgSystemHorde, player);
 
-            if (BgCreatures.ContainsKey(Point) && !BgCreatures[Point].IsEmpty())
+            if (!BgCreatures[Point].IsEmpty())
                 DelCreature(Point);
 
             WorldSafeLocsRecord sg = CliDB.WorldSafeLocsStorage.LookupByKey(EotSMisc.m_CapturingPointTypes[Point].GraveYardId);

@@ -509,7 +509,7 @@ namespace Game.Entities
                 if (procEntry.SpellFamilyName != 0 && eventSpellInfo != null && (procEntry.SpellFamilyName != eventSpellInfo.SpellFamilyName))
                     return false;
 
-                if (procEntry.SpellFamilyMask != null && eventSpellInfo != null && !(procEntry.SpellFamilyMask & eventSpellInfo.SpellFamilyFlags))
+                if (eventSpellInfo != null && !(procEntry.SpellFamilyMask & eventSpellInfo.SpellFamilyFlags))
                     return false;
             }
 
@@ -3158,7 +3158,7 @@ namespace Game.Entities
                 case AuraType.SpellMagnet:
                 case AuraType.ModAttackPower:
                 case AuraType.ModPowerRegenPercent:
-                case AuraType.AddCasterHitTrigger:
+                case AuraType.InterceptMeleeRangedAttacks:
                 case AuraType.OverrideClassScripts:
                 case AuraType.ModMechanicResistance:
                 case AuraType.MeleeAttackPowerAttackerBonus:
@@ -3385,7 +3385,7 @@ namespace Game.Entities
     {
         public SpellSchoolMask SchoolMask { get; set; }                                 // if nonzero - bitmask for matching proc condition based on spell's school
         public SpellFamilyNames SpellFamilyName { get; set; }                            // if nonzero - for matching proc condition based on candidate spell's SpellFamilyName
-        public FlagArray128 SpellFamilyMask { get; set; }                            // if nonzero - bitmask for matching proc condition based on candidate spell's SpellFamilyFlags
+        public FlagArray128 SpellFamilyMask { get; set; } = new FlagArray128();    // if nonzero - bitmask for matching proc condition based on candidate spell's SpellFamilyFlags
         public ProcFlags ProcFlags { get; set; }                                   // if nonzero - owerwrite procFlags field for given Spell.dbc entry, bitmask for matching proc condition, see enum ProcFlags
         public ProcFlagsSpellType SpellTypeMask { get; set; }                              // if nonzero - bitmask for matching proc condition based on candidate spell's damage/heal effects, see enum ProcFlagsSpellType
         public ProcFlagsSpellPhase SpellPhaseMask { get; set; }                             // if nonzero - bitmask for matching phase of a spellcast on which proc occurs, see enum ProcFlagsSpellPhase

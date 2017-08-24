@@ -269,7 +269,7 @@ namespace Scripts.Northrend.DraktharonKeep.Trollgore
         {
         }
 
-        public override bool OnCheck(Player player, Unit target)
+        public override bool OnCheck(Player source, Unit target)
         {
             if (!target)
                 return false;

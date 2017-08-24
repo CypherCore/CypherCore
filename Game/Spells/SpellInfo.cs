@@ -3313,7 +3313,7 @@ namespace Game.Spells
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 252 SPELL_EFFECT_252
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 253 SPELL_EFFECT_GIVE_HONOR
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 254 SPELL_EFFECT_254
-            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None)  // 255 SPELL_EFFECT_255
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit)  // 255 SPELL_EFFECT_LEARN_TRANSMOG_SET
         };
 
         #region Fields

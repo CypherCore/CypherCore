@@ -2369,7 +2369,7 @@ namespace Game.Entities
             return stats.GenerateHealth(cInfo);
         }
 
-        float GetHealthMultiplierForTarget(WorldObject target)
+        public override float GetHealthMultiplierForTarget(WorldObject target)
         {
             if (!HasScalableLevels())
                 return 1.0f;
@@ -2388,7 +2388,7 @@ namespace Game.Entities
             return stats.GenerateBaseDamage(cInfo);
         }
 
-        float GetDamageMultiplierForTarget(WorldObject target)
+        public override float GetDamageMultiplierForTarget(WorldObject target)
         {
             if (!HasScalableLevels())
                 return 1.0f;
@@ -2405,7 +2405,7 @@ namespace Game.Entities
             return stats.GenerateArmor(cInfo);
         }
 
-        float GetArmorMultiplierForTarget(WorldObject target)
+        public override float GetArmorMultiplierForTarget(WorldObject target)
         {
             if (!HasScalableLevels())
                 return 1.0f;

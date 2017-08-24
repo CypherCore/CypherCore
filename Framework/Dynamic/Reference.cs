@@ -94,12 +94,9 @@ namespace Framework.Dynamic
 
         public void clearReferences()
         {
-            LinkedListElement curr;
-            while ((curr = base.GetFirstElement()) != null)
-            {
-                ((Reference<TO, FROM>)curr).invalidate();
-                curr.delink();                              // the delink might be already done by invalidate(), but doing it here again does not hurt and insures an empty list
-            }
+            Reference<TO, FROM> refe;
+            while ((refe = getFirst()) != null)
+                refe.invalidate();
         }
     }
 }

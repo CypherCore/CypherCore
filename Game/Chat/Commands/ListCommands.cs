@@ -399,11 +399,11 @@ namespace Game.Chat.Commands
                         string subject = result1.Read<string>(5);
                         long deliverTime = result1.Read<uint>(6);
                         long expireTime = result1.Read<uint>(7);
-                        uint money = result1.Read<uint>(8);
+                        ulong money = result1.Read<ulong>(8);
                         byte hasItem = result1.Read<byte>(9);
-                        uint gold = money / MoneyConstants.Gold;
-                        uint silv = (money % MoneyConstants.Gold) / MoneyConstants.Silver;
-                        uint copp = (money % MoneyConstants.Gold) % MoneyConstants.Silver;
+                        uint gold = (uint)(money / MoneyConstants.Gold);
+                        uint silv = (uint)(money % MoneyConstants.Gold) / MoneyConstants.Silver;
+                        uint copp = (uint)(money % MoneyConstants.Gold) % MoneyConstants.Silver;
                         string receiverStr = handler.playerLink(receiver);
                         string senderStr = handler.playerLink(sender);
                         handler.SendSysMessage(CypherStrings.ListMailInfo1, messageId, subject, gold, silv, copp);

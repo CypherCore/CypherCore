@@ -288,8 +288,6 @@ namespace Game
 
             Values[WorldCfg.GroupXpDistance] = GetDefaultValue("MaxGroupXPDistance", 74.0f);
             Values[WorldCfg.MaxRecruitAFriendDistance] = GetDefaultValue("MaxRecruitAFriendBonusDistance", 100.0f);
-
-            /// @todo Add MonsterSight (with meaning) in worldserver.conf or put them as define
             Values[WorldCfg.SightMonster] = GetDefaultValue("MonsterSight", 50.0f);
 
             if (reload)

@@ -299,14 +299,14 @@ namespace Game.Chat
             if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                 return false;
 
-            long addmoney = args.NextInt64();
-            long moneyuser = (long)target.GetMoney();
+            long moneyToAdd = args.NextInt64();
+            ulong targetMoney = target.GetMoney();
 
-            if (addmoney < 0)
+            if (moneyToAdd < 0)
             {
-                ulong newmoney = (ulong)(moneyuser + addmoney);
+                ulong newmoney = (targetMoney + (ulong)moneyToAdd);
 
-                Log.outDebug(LogFilter.ChatSystem, Global.ObjectMgr.GetCypherString(CypherStrings.CurrentMoney), moneyuser, addmoney, newmoney);
+                Log.outDebug(LogFilter.ChatSystem, Global.ObjectMgr.GetCypherString(CypherStrings.CurrentMoney), targetMoney, moneyToAdd, newmoney);
                 if (newmoney <= 0)
                 {
                     handler.SendSysMessage(CypherStrings.YouTakeAllMoney, handler.GetNameLink(target));
@@ -317,28 +317,31 @@ namespace Game.Chat
                 }
                 else
                 {
+                    ulong moneyToAddMsg = (ulong)(moneyToAdd * -1);
                     if (newmoney > PlayerConst.MaxMoneyAmount)
                         newmoney = PlayerConst.MaxMoneyAmount;
 
-                    handler.SendSysMessage(CypherStrings.YouTakeMoney, Math.Abs(addmoney), handler.GetNameLink(target));
+                    handler.SendSysMessage(CypherStrings.YouTakeMoney, Math.Abs(moneyToAdd), handler.GetNameLink(target));
                     if (handler.needReportToTarget(target))
-                        target.SendSysMessage(CypherStrings.YoursMoneyTaken, handler.GetNameLink(), Math.Abs(addmoney));
+                        target.SendSysMessage(CypherStrings.YoursMoneyTaken, handler.GetNameLink(), Math.Abs(moneyToAdd));
                     target.SetMoney(newmoney);
                 }
             }
             else
             {
-                handler.SendSysMessage(CypherStrings.YouGiveMoney, addmoney, handler.GetNameLink(target));
+                handler.SendSysMessage(CypherStrings.YouGiveMoney, moneyToAdd, handler.GetNameLink(target));
                 if (handler.needReportToTarget(target))
-                    target.SendSysMessage(CypherStrings.YoursMoneyGiven, handler.GetNameLink(), addmoney);
+                    target.SendSysMessage(CypherStrings.YoursMoneyGiven, handler.GetNameLink(), moneyToAdd);
 
-                if (addmoney >= PlayerConst.MaxMoneyAmount)
-                    target.SetMoney(PlayerConst.MaxMoneyAmount);
-                else
-                    target.ModifyMoney(addmoney);
+                if ((ulong)moneyToAdd >= PlayerConst.MaxMoneyAmount)
+                    moneyToAdd = Convert.ToInt64(PlayerConst.MaxMoneyAmount);
+
+                moneyToAdd = Math.Min(moneyToAdd, (long)(PlayerConst.MaxMoneyAmount - targetMoney));
+
+                target.ModifyMoney(moneyToAdd);
             }
 
-            Log.outDebug(LogFilter.ChatSystem, Global.ObjectMgr.GetCypherString(CypherStrings.NewMoney), moneyuser, addmoney, target.GetMoney());
+            Log.outDebug(LogFilter.ChatSystem, Global.ObjectMgr.GetCypherString(CypherStrings.NewMoney), targetMoney, moneyToAdd, target.GetMoney());
             return true;
         }
 

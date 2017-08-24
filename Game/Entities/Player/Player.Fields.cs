@@ -202,6 +202,7 @@ namespace Game.Entities
         public uint m_timeSyncClient;
         public uint m_timeSyncServer;
         ReputationMgr reputationMgr;
+        QuestObjectiveCriteriaManager m_questObjectiveCriteriaMgr;
         public AtLoginFlags atLoginFlags;
         public bool m_itemUpdateQueueBlocked;
 

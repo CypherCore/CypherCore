@@ -216,7 +216,7 @@ namespace Game
             uint auctionTime = (uint)(packet.RunTime * WorldConfig.GetFloatValue(WorldCfg.RateAuctionTime));
             AuctionHouseObject auctionHouse = Global.AuctionMgr.GetAuctionsMap(creature.getFaction());
 
-            uint deposit = Global.AuctionMgr.GetAuctionDeposit(auctionHouseEntry, packet.RunTime, item, finalCount);
+            ulong deposit = Global.AuctionMgr.GetAuctionDeposit(auctionHouseEntry, packet.RunTime, item, finalCount);
             if (!GetPlayer().HasEnoughMoney(deposit))
             {
                 SendAuctionCommandResult(null, AuctionAction.SellItem, AuctionError.NotEnoughtMoney);
@@ -345,7 +345,7 @@ namespace Game
                 GetPlayer().UpdateCriteria(CriteriaTypes.CreateAuction, 1);
             }
 
-            GetPlayer().ModifyMoney(-deposit);
+            GetPlayer().ModifyMoney(-(long)deposit);
         }
 
         [WorldPacketHandler(ClientOpcodes.AuctionPlaceBid)]
@@ -445,10 +445,10 @@ namespace Game
             {
                 //buyout:
                 if (player.GetGUID().GetCounter() == auction.bidder)
-                    player.ModifyMoney(-auction.buyout - auction.bid);
+                    player.ModifyMoney(-(long)(auction.buyout - auction.bid));
                 else
                 {
-                    player.ModifyMoney(-auction.buyout);
+                    player.ModifyMoney(-(long)auction.buyout);
                     if (auction.bidder != 0)                          //buyout for bidded auction ..
                         Global.AuctionMgr.SendAuctionOutbiddedMail(auction, auction.buyout, GetPlayer(), trans);
                 }
@@ -500,11 +500,11 @@ namespace Game
                 {
                     if (auction.bidder > 0)                        // If we have a bidder, we have to send him the money he paid
                     {
-                        uint auctionCut = auction.GetAuctionCut();
+                        ulong auctionCut = auction.GetAuctionCut();
                         if (!player.HasEnoughMoney(auctionCut))          //player doesn't have enough money, maybe message needed
                             return;
                         Global.AuctionMgr.SendAuctionCancelledToBidderMail(auction, trans);
-                        player.ModifyMoney(-auctionCut);
+                        player.ModifyMoney(-(long)auctionCut);
                     }
 
                     // item will deleted or added to received mail list

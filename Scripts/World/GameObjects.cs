@@ -189,6 +189,40 @@ namespace Scripts.World
 
         //Toy Train Set
         public const uint SpellToyTrainPulse = 61551;
+
+        //BrewfestMusic
+        public const uint EventBrewfestdwarf01 = 11810; // 1.35 Min
+        public const uint EventBrewfestdwarf02 = 11812; // 1.55 Min 
+        public const uint EventBrewfestdwarf03 = 11813; // 0.23 Min
+        public const uint EventBrewfestgoblin01 = 11811; // 1.08 Min
+        public const uint EventBrewfestgoblin02 = 11814; // 1.33 Min
+        public const uint EventBrewfestgoblin03 = 11815; // 0.28 Min
+
+        // These Are In Seconds
+        //Brewfestmusictime
+        public const uint EventBrewfestdwarf01Time = 95000;
+        public const uint EventBrewfestdwarf02Time = 155000;
+        public const uint EventBrewfestdwarf03Time = 23000;
+        public const uint EventBrewfestgoblin01Time = 68000;
+        public const uint EventBrewfestgoblin02Time = 93000;
+        public const uint EventBrewfestgoblin03Time = 28000;
+
+        //Brewfestmusicareas
+        public const uint Silvermoon = 3430; // Horde
+        public const uint Undercity = 1497;
+        public const uint Orgrimmar1 = 1296;
+        public const uint Orgrimmar2 = 14;
+        public const uint Thunderbluff = 1638;
+        public const uint Ironforge1 = 809; // Alliance
+        public const uint Ironforge2 = 1;
+        public const uint Stormwind = 12;
+        public const uint Exodar = 3557;
+        public const uint Darnassus = 1657;
+        public const uint Shattrath = 3703; // General
+
+        //Brewfestmusicevents
+        public const uint EventBmSelectMusic = 1;
+        public const uint EventBmStartMusic = 2;
     }
 
     [Script]
@@ -969,6 +1003,91 @@ namespace Scripts.World
         public override GameObjectAI GetAI(GameObject go)
         {
             return new go_toy_train_setAI(go);
+        }
+    }
+
+    [Script]
+    class go_brewfest_music : GameObjectScript
+    {
+        public go_brewfest_music() : base("go_brewfest_music") { }
+
+        class go_brewfest_musicAI : GameObjectAI
+        {
+            public go_brewfest_musicAI(GameObject go) : base(go)
+            {
+                _events.ScheduleEvent(GameobjectConst.EventBmSelectMusic, 1000);
+                _events.ScheduleEvent(GameobjectConst.EventBmStartMusic, 2000);
+            }
+
+            public override void UpdateAI(uint diff)
+            {                
+                _events.Update(diff);
+
+                _events.ExecuteEvents(eventId =>
+                {
+                    switch (eventId)
+                    {
+                        case GameobjectConst.EventBmSelectMusic:
+                            if (!Global.GameEventMgr.IsHolidayActive(HolidayIds.Brewfest)) // Check if Brewfest is active
+                                break;
+                            rnd = RandomHelper.URand(0, 2); // Select random music sample
+                            _events.ScheduleEvent(GameobjectConst.EventBmSelectMusic, musicTime); // Select new song music after play time is over
+                            break;
+                        case GameobjectConst.EventBmStartMusic:
+                            if (!Global.GameEventMgr.IsHolidayActive(HolidayIds.Brewfest)) // Check if Brewfest is active
+                                break;
+                            // Check if gob is correct area, play music, set time of music
+                            if (go.GetAreaId() == GameobjectConst.Silvermoon || go.GetAreaId() == GameobjectConst.Undercity || go.GetAreaId() == GameobjectConst.Orgrimmar1 || go.GetAreaId() == GameobjectConst.Orgrimmar2 || go.GetAreaId() == GameobjectConst.Thunderbluff || go.GetAreaId() == GameobjectConst.Shattrath)
+                            {
+                                if (rnd == 0)
+                                {
+                                    go.PlayDirectMusic(GameobjectConst.EventBrewfestgoblin01);
+                                    musicTime = GameobjectConst.EventBrewfestgoblin01Time;
+                                }
+                                else if (rnd == 1)
+                                {
+                                    go.PlayDirectMusic(GameobjectConst.EventBrewfestgoblin02);
+                                    musicTime = GameobjectConst.EventBrewfestgoblin02Time;
+                                }
+                                else
+                                {
+                                    go.PlayDirectMusic(GameobjectConst.EventBrewfestgoblin03);
+                                    musicTime = GameobjectConst.EventBrewfestgoblin03Time;
+                                }
+                            }
+                            if (go.GetAreaId() == GameobjectConst.Ironforge1 || go.GetAreaId() == GameobjectConst.Ironforge2 || go.GetAreaId() == GameobjectConst.Stormwind || go.GetAreaId() == GameobjectConst.Exodar || go.GetAreaId() == GameobjectConst.Darnassus || go.GetAreaId() == GameobjectConst.Shattrath)
+                            {
+                                if (rnd == 0)
+                                {
+                                    go.PlayDirectMusic(GameobjectConst.EventBrewfestdwarf01);
+                                    musicTime = GameobjectConst.EventBrewfestdwarf01Time;
+                                }
+                                else if (rnd == 1)
+                                {
+                                    go.PlayDirectMusic(GameobjectConst.EventBrewfestdwarf02);
+                                    musicTime = GameobjectConst.EventBrewfestdwarf02Time;
+                                }
+                                else
+                                {
+                                    go.PlayDirectMusic(GameobjectConst.EventBrewfestdwarf03);
+                                    musicTime = GameobjectConst.EventBrewfestdwarf03Time;
+                                }
+                            }
+                            _events.ScheduleEvent(GameobjectConst.EventBmStartMusic, 5000); // Every 5 second's SMSG_PLAY_MUSIC packet (PlayDirectMusic) is pushed to the client
+                            break;
+                        default:
+                            break;
+                    }
+                });
+            }
+
+            uint rnd = 0;
+            uint musicTime = 1000;
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_brewfest_musicAI(go);
         }
     }
 }

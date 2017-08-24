@@ -23,7 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 
-namespace Game.BattleGrounds
+namespace Game.BattleGrounds.Zones
 {
     class BgArathiBasin : Battleground
     {
@@ -75,7 +75,7 @@ namespace Game.BattleGrounds
                         else
                         {
                             m_BannerTimers[node].timer = 0;
-                            _CreateBanner(node, (NodeStatus)m_BannerTimers[node].type, m_BannerTimers[node].teamIndex, false);
+                            _CreateBanner(node, (ABNodeStatus)m_BannerTimers[node].type, m_BannerTimers[node].teamIndex, false);
                         }
                     }
 
@@ -92,9 +92,9 @@ namespace Game.BattleGrounds
                             m_prevNodes[node] = m_Nodes[node];
                             m_Nodes[node] += 2;
                             // burn current contested banner
-                            _DelBanner(node, NodeStatus.Contested, (byte)teamIndex);
+                            _DelBanner(node, ABNodeStatus.Contested, (byte)teamIndex);
                             // create new occupied banner
-                            _CreateBanner(node, NodeStatus.Occupied, teamIndex, true);
+                            _CreateBanner(node, ABNodeStatus.Occupied, teamIndex, true);
                             _SendNodeUpdate(node);
                             _NodeOccupied(node, (teamIndex == 0) ? Team.Alliance : Team.Horde);
                             // Message to chatlog
@@ -115,7 +115,7 @@ namespace Game.BattleGrounds
                     }
 
                     for (int team = 0; team < SharedConst.BGTeamsCount; ++team)
-                        if (m_Nodes[node] == team + NodeStatus.Occupied)
+                        if (m_Nodes[node] == team + ABNodeStatus.Occupied)
                             ++team_points[team];
                 }
 
@@ -165,9 +165,9 @@ namespace Game.BattleGrounds
                             m_TeamScores[team] = MaxTeamScore;
 
                         if (team == TeamId.Alliance)
-                            UpdateWorldState(WorldStates.ResourcesAlly, m_TeamScores[team]);
+                            UpdateWorldState(ABWorldStates.ResourcesAlly, m_TeamScores[team]);
                         else if (team == TeamId.Horde)
-                            UpdateWorldState(WorldStates.ResourcesHorde, m_TeamScores[team]);
+                            UpdateWorldState(ABWorldStates.ResourcesHorde, m_TeamScores[team]);
                         // update achievement flags
                         // we increased m_TeamScores[team] so we just need to check if it is 500 more than other teams resources
                         int otherTeam = (team + 1) % SharedConst.BGTeamsCount;
@@ -187,16 +187,16 @@ namespace Game.BattleGrounds
         public override void StartingEventCloseDoors()
         {
             // despawn banners, auras and buffs
-            for (int obj = ObjectType.BannerNeutral; obj < BattlegroundNodes.DynamicNodesCount * 8; ++obj)
+            for (int obj = ABObjectTypes.BannerNeutral; obj < BattlegroundNodes.DynamicNodesCount * 8; ++obj)
                 SpawnBGObject(obj, BattlegroundConst.RespawnOneDay);
             for (int i = 0; i < BattlegroundNodes.DynamicNodesCount * 3; ++i)
-                SpawnBGObject(ObjectType.SpeedbuffStables + i, BattlegroundConst.RespawnOneDay);
+                SpawnBGObject(ABObjectTypes.SpeedbuffStables + i, BattlegroundConst.RespawnOneDay);
 
             // Starting doors
-            DoorClose(ObjectType.GateA);
-            DoorClose(ObjectType.GateH);
-            SpawnBGObject(ObjectType.GateA, BattlegroundConst.RespawnImmediately);
-            SpawnBGObject(ObjectType.GateH, BattlegroundConst.RespawnImmediately);
+            DoorClose(ABObjectTypes.GateA);
+            DoorClose(ABObjectTypes.GateH);
+            SpawnBGObject(ABObjectTypes.GateA, BattlegroundConst.RespawnImmediately);
+            SpawnBGObject(ABObjectTypes.GateH, BattlegroundConst.RespawnImmediately);
 
             // Starting base spirit guides
             _NodeOccupied(BattlegroundNodes.SpiritAliance, Team.Alliance);
@@ -206,16 +206,16 @@ namespace Game.BattleGrounds
         public override void StartingEventOpenDoors()
         {
             // spawn neutral banners
-            for (int banner = ObjectType.BannerNeutral, i = 0; i < 5; banner += 8, ++i)
+            for (int banner = ABObjectTypes.BannerNeutral, i = 0; i < 5; banner += 8, ++i)
                 SpawnBGObject(banner, BattlegroundConst.RespawnImmediately);
             for (int i = 0; i < BattlegroundNodes.DynamicNodesCount; ++i)
             {
                 //randomly select buff to spawn
                 int buff = RandomHelper.IRand(0, 2);
-                SpawnBGObject(ObjectType.SpeedbuffStables + buff + i * 3, BattlegroundConst.RespawnImmediately);
+                SpawnBGObject(ABObjectTypes.SpeedbuffStables + buff + i * 3, BattlegroundConst.RespawnImmediately);
             }
-            DoorOpen(ObjectType.GateA);
-            DoorOpen(ObjectType.GateH);
+            DoorOpen(ABObjectTypes.GateA);
+            DoorOpen(ABObjectTypes.GateH);
 
             // Achievement: Let's Get This Done
             StartCriteriaTimer(CriteriaTimedTypes.Event, EventStartBattle);
@@ -267,7 +267,7 @@ namespace Game.BattleGrounds
             }
         }
 
-        void _CreateBanner(byte node, NodeStatus type, int teamIndex, bool delay)
+        void _CreateBanner(byte node, ABNodeStatus type, int teamIndex, bool delay)
         {
             // Just put it into the queue
             if (delay)
@@ -285,11 +285,11 @@ namespace Game.BattleGrounds
             // handle aura with banner
             if (type == 0)
                 return;
-            obj = node * 8 + ((type == NodeStatus.Occupied) ? (5 + teamIndex) : 7);
+            obj = node * 8 + ((type == ABNodeStatus.Occupied) ? (5 + teamIndex) : 7);
             SpawnBGObject(obj, BattlegroundConst.RespawnImmediately);
         }
 
-        void _DelBanner(byte node, NodeStatus type, byte teamIndex)
+        void _DelBanner(byte node, ABNodeStatus type, byte teamIndex)
         {
             int obj = node * 8 + (byte)type + teamIndex;
             SpawnBGObject(obj, BattlegroundConst.RespawnOneDay);
@@ -297,7 +297,7 @@ namespace Game.BattleGrounds
             // handle aura with banner
             if (type == 0)
                 return;
-            obj = node * 8 + ((type == NodeStatus.Occupied) ? (5 + teamIndex) : 7);
+            obj = node * 8 + ((type == ABNodeStatus.Occupied) ? (5 + teamIndex) : 7);
             SpawnBGObject(obj, BattlegroundConst.RespawnOneDay);
         }
 
@@ -338,19 +338,19 @@ namespace Game.BattleGrounds
             // How many bases each team owns
             byte ally = 0, horde = 0;
             for (byte node = 0; node < BattlegroundNodes.DynamicNodesCount; ++node)
-                if (m_Nodes[node] == NodeStatus.AllyOccupied)
+                if (m_Nodes[node] == ABNodeStatus.AllyOccupied)
                     ++ally;
-                else if (m_Nodes[node] == NodeStatus.HordeOccupied)
+                else if (m_Nodes[node] == ABNodeStatus.HordeOccupied)
                     ++horde;
 
-            packet.AddState(WorldStates.OccupiedBasesAlly, ally);
-            packet.AddState(WorldStates.OccupiedBasesHorde, horde);
+            packet.AddState(ABWorldStates.OccupiedBasesAlly, ally);
+            packet.AddState(ABWorldStates.OccupiedBasesHorde, horde);
 
             // Team scores
-            packet.AddState(WorldStates.ResourcesMax, MaxTeamScore);
-            packet.AddState(WorldStates.ResourcesWarning, WarningNearVictoryScore);
-            packet.AddState(WorldStates.ResourcesAlly, (int)m_TeamScores[TeamId.Alliance]);
-            packet.AddState(WorldStates.ResourcesHorde, (int)m_TeamScores[TeamId.Horde]);
+            packet.AddState(ABWorldStates.ResourcesMax, MaxTeamScore);
+            packet.AddState(ABWorldStates.ResourcesWarning, WarningNearVictoryScore);
+            packet.AddState(ABWorldStates.ResourcesAlly, (int)m_TeamScores[TeamId.Alliance]);
+            packet.AddState(ABWorldStates.ResourcesHorde, (int)m_TeamScores[TeamId.Horde]);
 
             // other unknown
             packet.AddState(0x745, 0x2);
@@ -371,13 +371,13 @@ namespace Game.BattleGrounds
             // How many bases each team owns
             byte ally = 0, horde = 0;
             for (byte i = 0; i < BattlegroundNodes.DynamicNodesCount; ++i)
-                if (m_Nodes[i] == NodeStatus.AllyOccupied)
+                if (m_Nodes[i] == ABNodeStatus.AllyOccupied)
                     ++ally;
-                else if (m_Nodes[i] == NodeStatus.HordeOccupied)
+                else if (m_Nodes[i] == ABNodeStatus.HordeOccupied)
                     ++horde;
 
-            UpdateWorldState(WorldStates.OccupiedBasesAlly, ally);
-            UpdateWorldState(WorldStates.OccupiedBasesHorde, horde);
+            UpdateWorldState(ABWorldStates.OccupiedBasesAlly, ally);
+            UpdateWorldState(ABWorldStates.OccupiedBasesHorde, horde);
         }
 
         void _NodeOccupied(byte node, Team team)
@@ -390,7 +390,7 @@ namespace Game.BattleGrounds
 
             byte capturedNodes = 0;
             for (byte i = 0; i < BattlegroundNodes.DynamicNodesCount; ++i)
-                if (m_Nodes[i] == NodeStatus.Occupied + GetTeamIndexByTeamId(team) && m_NodeTimers[i] == 0)
+                if (m_Nodes[i] == ABNodeStatus.Occupied + GetTeamIndexByTeamId(team) && m_NodeTimers[i] == 0)
                     ++capturedNodes;
 
             if (capturedNodes >= 5)
@@ -398,7 +398,7 @@ namespace Game.BattleGrounds
             if (capturedNodes >= 4)
                 CastSpellOnTeam(BattlegroundConst.AbQuestReward4Bases, team);
 
-            Creature trigger = BgCreatures.ContainsKey(node + 7) ? GetBGCreature(node + 7) : null; // 0-6 spirit guides
+            Creature trigger = !BgCreatures[node + 7].IsEmpty() ? GetBGCreature(node + 7) : null; // 0-6 spirit guides
             if (!trigger)
                 trigger = AddCreature(SharedConst.WorldTrigger, node + 7, NodePositions[node], GetTeamIndexByTeamId(team));
 
@@ -439,7 +439,7 @@ namespace Game.BattleGrounds
             while ((node < BattlegroundNodes.DynamicNodesCount) && ((!obj) || (!source.IsWithinDistInMap(obj, 10))))
             {
                 ++node;
-                obj = GetBgMap().GetGameObject(BgObjects[node * 8 + ObjectType.AuraContested]);
+                obj = GetBgMap().GetGameObject(BgObjects[node * 8 + ABObjectTypes.AuraContested]);
             }
 
             if (node == BattlegroundNodes.DynamicNodesCount)
@@ -457,15 +457,15 @@ namespace Game.BattleGrounds
             source.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.EnterPvpCombat);
             uint sound = 0;
             // If node is neutral, change to contested
-            if (m_Nodes[node] == NodeStatus.Neutral)
+            if (m_Nodes[node] == ABNodeStatus.Neutral)
             {
                 UpdatePlayerScore(source, ScoreType.BasesAssaulted, 1);
                 m_prevNodes[node] = m_Nodes[node];
-                m_Nodes[node] = (NodeStatus)(teamIndex + 1);
+                m_Nodes[node] = (ABNodeStatus)(teamIndex + 1);
                 // burn current neutral banner
-                _DelBanner(node, NodeStatus.Neutral, 0);
+                _DelBanner(node, ABNodeStatus.Neutral, 0);
                 // create new contested banner
-                _CreateBanner(node, NodeStatus.Contested, (byte)teamIndex, true);
+                _CreateBanner(node, ABNodeStatus.Contested, (byte)teamIndex, true);
                 _SendNodeUpdate(node);
                 m_NodeTimers[node] = FlagCapturingTime;
 
@@ -478,18 +478,18 @@ namespace Game.BattleGrounds
                 sound = SoundClaimed;
             }
             // If node is contested
-            else if ((m_Nodes[node] == NodeStatus.AllyContested) || (m_Nodes[node] == NodeStatus.HordeContested))
+            else if ((m_Nodes[node] == ABNodeStatus.AllyContested) || (m_Nodes[node] == ABNodeStatus.HordeContested))
             {
                 // If last state is NOT occupied, change node to enemy-contested
-                if (m_prevNodes[node] < NodeStatus.Occupied)
+                if (m_prevNodes[node] < ABNodeStatus.Occupied)
                 {
                     UpdatePlayerScore(source, ScoreType.BasesAssaulted, 1);
                     m_prevNodes[node] = m_Nodes[node];
-                    m_Nodes[node] = (NodeStatus.Contested + (int)teamIndex);
+                    m_Nodes[node] = (ABNodeStatus.Contested + (int)teamIndex);
                     // burn current contested banner
-                    _DelBanner(node, NodeStatus.Contested, (byte)teamIndex);
+                    _DelBanner(node, ABNodeStatus.Contested, (byte)teamIndex);
                     // create new contested banner
-                    _CreateBanner(node, NodeStatus.Contested, (byte)teamIndex, true);
+                    _CreateBanner(node, ABNodeStatus.Contested, (byte)teamIndex, true);
                     _SendNodeUpdate(node);
                     m_NodeTimers[node] = FlagCapturingTime;
 
@@ -504,11 +504,11 @@ namespace Game.BattleGrounds
                 {
                     UpdatePlayerScore(source, ScoreType.BasesDefended, 1);
                     m_prevNodes[node] = m_Nodes[node];
-                    m_Nodes[node] = (NodeStatus.Occupied + (int)teamIndex);
+                    m_Nodes[node] = (ABNodeStatus.Occupied + (int)teamIndex);
                     // burn current contested banner
-                    _DelBanner(node, NodeStatus.Contested, (byte)teamIndex);
+                    _DelBanner(node, ABNodeStatus.Contested, (byte)teamIndex);
                     // create new occupied banner
-                    _CreateBanner(node, NodeStatus.Occupied, (byte)teamIndex, true);
+                    _CreateBanner(node, ABNodeStatus.Occupied, (byte)teamIndex, true);
                     _SendNodeUpdate(node);
                     m_NodeTimers[node] = 0;
                     _NodeOccupied(node, (teamIndex == TeamId.Alliance) ? Team.Alliance : Team.Horde);
@@ -526,11 +526,11 @@ namespace Game.BattleGrounds
             {
                 UpdatePlayerScore(source, ScoreType.BasesAssaulted, 1);
                 m_prevNodes[node] = m_Nodes[node];
-                m_Nodes[node] = (NodeStatus.Contested + (int)teamIndex);
+                m_Nodes[node] = (ABNodeStatus.Contested + (int)teamIndex);
                 // burn current occupied banner
-                _DelBanner(node, NodeStatus.Occupied, (byte)teamIndex);
+                _DelBanner(node, ABNodeStatus.Occupied, (byte)teamIndex);
                 // create new contested banner
-                _CreateBanner(node, NodeStatus.Contested, (byte)teamIndex, true);
+                _CreateBanner(node, ABNodeStatus.Contested, (byte)teamIndex, true);
                 _SendNodeUpdate(node);
                 _NodeDeOccupied(node);
                 m_NodeTimers[node] = FlagCapturingTime;
@@ -545,7 +545,7 @@ namespace Game.BattleGrounds
             }
 
             // If node is occupied again, send "X has taken the Y" msg.
-            if (m_Nodes[node] >= NodeStatus.Occupied)
+            if (m_Nodes[node] >= ABNodeStatus.Occupied)
             {
                 // FIXME: team and node names not localized
                 if (teamIndex == TeamId.Alliance)
@@ -561,9 +561,9 @@ namespace Game.BattleGrounds
             // How many bases each team owns
             byte ally = 0, horde = 0;
             for (byte i = 0; i < BattlegroundNodes.DynamicNodesCount; ++i)
-                if (m_Nodes[i] == NodeStatus.AllyOccupied)
+                if (m_Nodes[i] == ABNodeStatus.AllyOccupied)
                     ++ally;
-                else if (m_Nodes[i] == NodeStatus.HordeOccupied)
+                else if (m_Nodes[i] == ABNodeStatus.HordeOccupied)
                     ++horde;
 
             if (ally > horde)
@@ -580,14 +580,14 @@ namespace Game.BattleGrounds
             bool result = true;
             for (int i = 0; i < BattlegroundNodes.DynamicNodesCount; ++i)
             {
-                result &= AddObject(ObjectType.BannerNeutral + 8 * i, (uint)(NodeObjectId.Banner0 + i), NodePositions[i], 0, 0, (float)Math.Sin(NodePositions[i].GetOrientation() / 2), (float)Math.Cos(NodePositions[i].GetOrientation() / 2), BattlegroundConst.RespawnOneDay);
-                result &= AddObject(ObjectType.BannerContA + 8 * i, ObjectIds.BannerContA, NodePositions[i], 0, 0, (float)Math.Sin(NodePositions[i].GetOrientation() / 2), (float)Math.Cos(NodePositions[i].GetOrientation() / 2), BattlegroundConst.RespawnOneDay);
-                result &= AddObject(ObjectType.BannerContH + 8 * i, ObjectIds.BannerContH, NodePositions[i], 0, 0, (float)Math.Sin(NodePositions[i].GetOrientation() / 2), (float)Math.Cos(NodePositions[i].GetOrientation() / 2), BattlegroundConst.RespawnOneDay);
-                result &= AddObject(ObjectType.BannerAlly + 8 * i, ObjectIds.BannerA, NodePositions[i], 0, 0, (float)Math.Sin(NodePositions[i].GetOrientation() / 2), (float)Math.Cos(NodePositions[i].GetOrientation() / 2), BattlegroundConst.RespawnOneDay);
-                result &= AddObject(ObjectType.BannerHorde + 8 * i, ObjectIds.BannerH, NodePositions[i], 0, 0, (float)Math.Sin(NodePositions[i].GetOrientation() / 2), (float)Math.Cos(NodePositions[i].GetOrientation() / 2), BattlegroundConst.RespawnOneDay);
-                result &= AddObject(ObjectType.AuraAlly + 8 * i, ObjectIds.AuraA, NodePositions[i], 0, 0, (float)Math.Sin(NodePositions[i].GetOrientation() / 2), (float)Math.Cos(NodePositions[i].GetOrientation() / 2), BattlegroundConst.RespawnOneDay);
-                result &= AddObject(ObjectType.AuraHorde + 8 * i, ObjectIds.AuraH, NodePositions[i], 0, 0, (float)Math.Sin(NodePositions[i].GetOrientation() / 2), (float)Math.Cos(NodePositions[i].GetOrientation() / 2), BattlegroundConst.RespawnOneDay);
-                result &= AddObject(ObjectType.AuraContested + 8 * i, ObjectIds.AuraC, NodePositions[i], 0, 0, (float)Math.Sin(NodePositions[i].GetOrientation() / 2), (float)Math.Cos(NodePositions[i].GetOrientation() / 2), BattlegroundConst.RespawnOneDay);
+                result &= AddObject(ABObjectTypes.BannerNeutral + 8 * i, (uint)(NodeObjectId.Banner0 + i), NodePositions[i], 0, 0, (float)Math.Sin(NodePositions[i].GetOrientation() / 2), (float)Math.Cos(NodePositions[i].GetOrientation() / 2), BattlegroundConst.RespawnOneDay);
+                result &= AddObject(ABObjectTypes.BannerContA + 8 * i, ABObjectIds.BannerContA, NodePositions[i], 0, 0, (float)Math.Sin(NodePositions[i].GetOrientation() / 2), (float)Math.Cos(NodePositions[i].GetOrientation() / 2), BattlegroundConst.RespawnOneDay);
+                result &= AddObject(ABObjectTypes.BannerContH + 8 * i, ABObjectIds.BannerContH, NodePositions[i], 0, 0, (float)Math.Sin(NodePositions[i].GetOrientation() / 2), (float)Math.Cos(NodePositions[i].GetOrientation() / 2), BattlegroundConst.RespawnOneDay);
+                result &= AddObject(ABObjectTypes.BannerAlly + 8 * i, ABObjectIds.BannerA, NodePositions[i], 0, 0, (float)Math.Sin(NodePositions[i].GetOrientation() / 2), (float)Math.Cos(NodePositions[i].GetOrientation() / 2), BattlegroundConst.RespawnOneDay);
+                result &= AddObject(ABObjectTypes.BannerHorde + 8 * i, ABObjectIds.BannerH, NodePositions[i], 0, 0, (float)Math.Sin(NodePositions[i].GetOrientation() / 2), (float)Math.Cos(NodePositions[i].GetOrientation() / 2), BattlegroundConst.RespawnOneDay);
+                result &= AddObject(ABObjectTypes.AuraAlly + 8 * i, ABObjectIds.AuraA, NodePositions[i], 0, 0, (float)Math.Sin(NodePositions[i].GetOrientation() / 2), (float)Math.Cos(NodePositions[i].GetOrientation() / 2), BattlegroundConst.RespawnOneDay);
+                result &= AddObject(ABObjectTypes.AuraHorde + 8 * i, ABObjectIds.AuraH, NodePositions[i], 0, 0, (float)Math.Sin(NodePositions[i].GetOrientation() / 2), (float)Math.Cos(NodePositions[i].GetOrientation() / 2), BattlegroundConst.RespawnOneDay);
+                result &= AddObject(ABObjectTypes.AuraContested + 8 * i, ABObjectIds.AuraC, NodePositions[i], 0, 0, (float)Math.Sin(NodePositions[i].GetOrientation() / 2), (float)Math.Cos(NodePositions[i].GetOrientation() / 2), BattlegroundConst.RespawnOneDay);
                 if (!result)
                 {
                     Log.outError(LogFilter.Sql, "BatteGroundAB: Failed to spawn some object Battleground not created!");
@@ -595,8 +595,8 @@ namespace Game.BattleGrounds
                 }
             }
 
-            result &= AddObject(ObjectType.GateA, ObjectIds.GateA, DoorPositions[0][0], DoorPositions[0][1], DoorPositions[0][2], DoorPositions[0][3], DoorPositions[0][4], DoorPositions[0][5], DoorPositions[0][6], DoorPositions[0][7], BattlegroundConst.RespawnImmediately);
-            result &= AddObject(ObjectType.GateH, ObjectIds.GateH, DoorPositions[1][0], DoorPositions[1][1], DoorPositions[1][2], DoorPositions[1][3], DoorPositions[1][4], DoorPositions[1][5], DoorPositions[1][6], DoorPositions[1][7], BattlegroundConst.RespawnImmediately);
+            result &= AddObject(ABObjectTypes.GateA, ABObjectIds.GateA, DoorPositions[0][0], DoorPositions[0][1], DoorPositions[0][2], DoorPositions[0][3], DoorPositions[0][4], DoorPositions[0][5], DoorPositions[0][6], DoorPositions[0][7], BattlegroundConst.RespawnImmediately);
+            result &= AddObject(ABObjectTypes.GateH, ABObjectIds.GateH, DoorPositions[1][0], DoorPositions[1][1], DoorPositions[1][2], DoorPositions[1][3], DoorPositions[1][4], DoorPositions[1][5], DoorPositions[1][6], DoorPositions[1][7], BattlegroundConst.RespawnImmediately);
             if (!result)
             {
                 Log.outError(LogFilter.Sql, "BatteGroundAB: Failed to spawn door object Battleground not created!");
@@ -606,9 +606,9 @@ namespace Game.BattleGrounds
             //buffs
             for (int i = 0; i < BattlegroundNodes.DynamicNodesCount; ++i)
             {
-                result &= AddObject(ObjectType.SpeedbuffStables + 3 * i, Buff_Entries[0], BuffPositions[i][0], BuffPositions[i][1], BuffPositions[i][2], BuffPositions[i][3], 0, 0, (float)Math.Sin(BuffPositions[i][3] / 2), (float)Math.Cos(BuffPositions[i][3] / 2), BattlegroundConst.RespawnOneDay);
-                result &= AddObject(ObjectType.SpeedbuffStables + 3 * i + 1, Buff_Entries[1], BuffPositions[i][0], BuffPositions[i][1], BuffPositions[i][2], BuffPositions[i][3], 0, 0, (float)Math.Sin(BuffPositions[i][3] / 2), (float)Math.Cos(BuffPositions[i][3] / 2), BattlegroundConst.RespawnOneDay);
-                result &= AddObject(ObjectType.SpeedbuffStables + 3 * i + 2, Buff_Entries[2], BuffPositions[i][0], BuffPositions[i][1], BuffPositions[i][2], BuffPositions[i][3], 0, 0, (float)Math.Sin(BuffPositions[i][3] / 2), (float)Math.Cos(BuffPositions[i][3] / 2), BattlegroundConst.RespawnOneDay);
+                result &= AddObject(ABObjectTypes.SpeedbuffStables + 3 * i, Buff_Entries[0], BuffPositions[i][0], BuffPositions[i][1], BuffPositions[i][2], BuffPositions[i][3], 0, 0, (float)Math.Sin(BuffPositions[i][3] / 2), (float)Math.Cos(BuffPositions[i][3] / 2), BattlegroundConst.RespawnOneDay);
+                result &= AddObject(ABObjectTypes.SpeedbuffStables + 3 * i + 1, Buff_Entries[1], BuffPositions[i][0], BuffPositions[i][1], BuffPositions[i][2], BuffPositions[i][3], 0, 0, (float)Math.Sin(BuffPositions[i][3] / 2), (float)Math.Cos(BuffPositions[i][3] / 2), BattlegroundConst.RespawnOneDay);
+                result &= AddObject(ABObjectTypes.SpeedbuffStables + 3 * i + 2, Buff_Entries[2], BuffPositions[i][0], BuffPositions[i][1], BuffPositions[i][2], BuffPositions[i][3], 0, 0, (float)Math.Sin(BuffPositions[i][3] / 2), (float)Math.Cos(BuffPositions[i][3] / 2), BattlegroundConst.RespawnOneDay);
                 if (!result)
                 {
                     Log.outError(LogFilter.Sql, "BatteGroundAB: Failed to spawn buff object!");
@@ -668,7 +668,7 @@ namespace Game.BattleGrounds
             // Is there any occupied node for this team?
             List<byte> nodes = new List<byte>();
             for (byte i = 0; i < BattlegroundNodes.DynamicNodesCount; ++i)
-                if (m_Nodes[i] == NodeStatus.Occupied + (int)teamIndex)
+                if (m_Nodes[i] == ABNodeStatus.Occupied + (int)teamIndex)
                     nodes.Add(i);
 
             WorldSafeLocsRecord good_entry = null;
@@ -713,10 +713,10 @@ namespace Game.BattleGrounds
             switch (type)
             {
                 case ScoreType.BasesAssaulted:
-                    player.UpdateCriteria(CriteriaTypes.BgObjectiveCapture, (uint)Objectives.AssaultBase);
+                    player.UpdateCriteria(CriteriaTypes.BgObjectiveCapture, (uint)ABObjectives.AssaultBase);
                     break;
                 case ScoreType.BasesDefended:
-                    player.UpdateCriteria(CriteriaTypes.BgObjectiveCapture, (uint)Objectives.DefendBase);
+                    player.UpdateCriteria(CriteriaTypes.BgObjectiveCapture, (uint)ABObjectives.DefendBase);
                     break;
                 default:
                     break;
@@ -728,8 +728,8 @@ namespace Game.BattleGrounds
         {
             uint count = 0;
             for (int i = 0; i < BattlegroundNodes.DynamicNodesCount; ++i)
-                if ((team == Team.Alliance && m_Nodes[i] == NodeStatus.AllyOccupied) ||
-                    (team == Team.Horde && m_Nodes[i] == NodeStatus.HordeOccupied))
+                if ((team == Team.Alliance && m_Nodes[i] == ABNodeStatus.AllyOccupied) ||
+                    (team == Team.Horde && m_Nodes[i] == ABNodeStatus.HordeOccupied))
                     ++count;
 
             return count == BattlegroundNodes.DynamicNodesCount;
@@ -754,8 +754,8 @@ namespace Game.BattleGrounds
         ///    3: ally occupied
         ///    4: horde occupied
         /// </summary>
-        NodeStatus[] m_Nodes = new NodeStatus[BattlegroundNodes.DynamicNodesCount];
-        NodeStatus[] m_prevNodes = new NodeStatus[BattlegroundNodes.DynamicNodesCount];
+        ABNodeStatus[] m_Nodes = new ABNodeStatus[BattlegroundNodes.DynamicNodesCount];
+        ABNodeStatus[] m_prevNodes = new ABNodeStatus[BattlegroundNodes.DynamicNodesCount];
         BannerTimer[] m_BannerTimers = new BannerTimer[BattlegroundNodes.DynamicNodesCount];
         uint[] m_NodeTimers = new uint[BattlegroundNodes.DynamicNodesCount];
         uint[] m_lastTick = new uint[SharedConst.BGTeamsCount];
@@ -886,7 +886,7 @@ namespace Game.BattleGrounds
     }
 
     #region Consts
-    struct WorldStates
+    struct ABWorldStates
     {
         public const uint OccupiedBasesHorde = 1778;
         public const uint OccupiedBasesAlly = 1779;
@@ -934,7 +934,7 @@ namespace Game.BattleGrounds
         public const uint Banner4 = 180091;        // Gold Mine Banner
     }
 
-    struct ObjectType
+    struct ABObjectTypes
     {
         // for all 5 node points 8*5=40 objects
         public const int BannerNeutral = 0;
@@ -968,7 +968,7 @@ namespace Game.BattleGrounds
     }
 
     // Object id templates from DB
-    struct ObjectIds
+    struct ABObjectIds
     {
         public const uint BannerA = 180058;
         public const uint BannerContA = 180059;
@@ -999,7 +999,7 @@ namespace Game.BattleGrounds
         public const int AllNodesCount = 7;                         // All Nodes (Dynamic And Static)
     }
 
-    enum NodeStatus
+    enum ABNodeStatus
     {
         Neutral = 0,
         Contested = 1,
@@ -1010,7 +1010,7 @@ namespace Game.BattleGrounds
         HordeOccupied = 4
     }
 
-    enum Objectives
+    enum ABObjectives
     {
         AssaultBase = 122,
         DefendBase = 123

@@ -23,8 +23,8 @@ namespace Framework.Constants
         public const int MaxBankSlots = 98;
         public const int BankMoneyLogsTab = 100;
 
-        public const int WithdrawMoneyUnlimited = -1;
-        public const int WithdrawSlotUnlimited = -1;
+        public const uint WithdrawMoneyUnlimited = 0xFFFFFFFF;
+        public const uint WithdrawSlotUnlimited = 0xFFFFFFFF;
         public const uint EventLogGuidUndefined = 0xFFFFFFFF;
 
         public const uint ChallengesTypes = 6;

@@ -51,7 +51,7 @@ namespace Game
                 return mNeutralAuctions;
         }
 
-        public uint GetAuctionDeposit(AuctionHouseRecord entry, uint time, Item pItem, uint count)
+        public ulong GetAuctionDeposit(AuctionHouseRecord entry, uint time, Item pItem, uint count)
         {
             uint MSV = pItem.GetTemplate().GetSellPrice();
 
@@ -60,12 +60,12 @@ namespace Game
 
             float multiplier = MathFunctions.CalculatePct((float)entry.DepositRate, 3);
             uint timeHr = (((time / 60) / 60) / 12);
-            uint deposit = (uint)(((multiplier * MSV * count / 3) * timeHr * 3) * WorldConfig.GetFloatValue(WorldCfg.RateAuctionDeposit));
+            ulong deposit = (ulong)(((multiplier * MSV * count / 3) * timeHr * 3) * WorldConfig.GetFloatValue(WorldCfg.RateAuctionDeposit));
 
-            Log.outDebug(LogFilter.Auctionhouse, "MSV:        {0}", MSV);
-            Log.outDebug(LogFilter.Auctionhouse, "Items:      {0}", count);
-            Log.outDebug(LogFilter.Auctionhouse, "Multiplier: {0}", multiplier);
-            Log.outDebug(LogFilter.Auctionhouse, "Deposit:    {0}", deposit);
+            Log.outDebug(LogFilter.Auctionhouse, $"MSV:        {MSV}");
+            Log.outDebug(LogFilter.Auctionhouse, $"Items:      {count}");
+            Log.outDebug(LogFilter.Auctionhouse, $"Multiplier: {multiplier}");
+            Log.outDebug(LogFilter.Auctionhouse, $"Deposit:    {deposit}");
 
             if (deposit < AH_MINIMUM_DEPOSIT * WorldConfig.GetFloatValue(WorldCfg.RateAuctionDeposit))
                 return AH_MINIMUM_DEPOSIT * (uint)WorldConfig.GetFloatValue(WorldCfg.RateAuctionDeposit);
@@ -110,8 +110,7 @@ namespace Game
 
                 uint ownerAccId = ObjectManager.GetPlayerAccountIdByGUID(ownerGuid);
 
-                Log.outCommand(bidderAccId, "GM {0} (Account: {1}) won item in auction: {2} (Entry: {3} Count: {4}) and pay money: {5}. Original owner {6} (Account: {7})",
-                    bidderName, bidderAccId, item.GetTemplate().GetName(), item.GetEntry(), item.GetCount(), auction.bid, ownerName, ownerAccId);
+                Log.outCommand(bidderAccId, $"GM {bidderName} (Account: {bidderAccId}) won item in auction: {item.GetTemplate().GetName()} (Entry: {item.GetEntry()} Count: {item.GetCount()}) and pay money: {auction.bid}. Original owner {ownerName} (Account: {ownerAccId})");
             }
 
             // receiver exist
@@ -164,7 +163,7 @@ namespace Game
             // owner exist
             if (owner || owner_accId != 0)
             {
-                uint profit = auction.bid + auction.deposit - auction.GetAuctionCut();
+                ulong profit = auction.bid + auction.deposit - auction.GetAuctionCut();
 
                 //FIXME: what do if owner offline
                 if (owner && item)
@@ -662,19 +661,19 @@ namespace Game
             items.Add(auctionItem);
         }
 
-        public uint GetAuctionCut()
+        public ulong GetAuctionCut()
         {
-            int cut = (int)(MathFunctions.CalculatePct(bid, auctionHouseEntry.ConsignmentRate) * WorldConfig.GetFloatValue(WorldCfg.RateAuctionCut));
-            return (uint)Math.Max(cut, 0);
+            long cut = (long)(MathFunctions.CalculatePct(bid, auctionHouseEntry.ConsignmentRate) * WorldConfig.GetFloatValue(WorldCfg.RateAuctionCut));
+            return (ulong)Math.Max(cut, 0);
         }
 
         /// <summary>
         /// the sum of outbid is (1% from current bid)*5, if bid is very small, it is 1c
         /// </summary>
         /// <returns></returns>
-        public uint GetAuctionOutBid()
+        public ulong GetAuctionOutBid()
         {
-            uint outbid = MathFunctions.CalculatePct(bid, 5);
+            ulong outbid = MathFunctions.CalculatePct(bid, 5);
             return outbid != 0 ? outbid : 1;
         }
 
@@ -709,12 +708,12 @@ namespace Game
             itemEntry = fields.Read<uint>(3);
             itemCount = fields.Read<uint>(4);
             owner = fields.Read<ulong>(5);
-            buyout = fields.Read<uint>(6);
+            buyout = fields.Read<ulong>(6);
             expire_time = fields.Read<uint>(7);
             bidder = fields.Read<ulong>(8);
-            bid = fields.Read<uint>(9);
-            startbid = fields.Read<uint>(10);
-            deposit = fields.Read<uint>(11);
+            bid = fields.Read<ulong>(9);
+            startbid = fields.Read<ulong>(10);
+            deposit = fields.Read<ulong>(11);
 
             CreatureData auctioneerData = Global.ObjectMgr.GetCreatureData(auctioneer);
             if (auctioneerData == null)
@@ -798,9 +797,9 @@ namespace Game
             return string.Format("{0}:0:{1}:{2}:{3}", itemEntry, response, Id, itemCount);
         }
 
-        public static string BuildAuctionMailBody(ulong lowGuid, uint bid, uint buyout, uint deposit, uint cut)
+        public static string BuildAuctionMailBody(ulong lowGuid, ulong bid, ulong buyout, ulong deposit, ulong cut)
         {
-            return string.Format("{0}:{1}:{2}:{3}:{4}", lowGuid, bid, buyout, deposit, cut);
+            return string.Format($"{lowGuid}:{bid}:{buyout}:{deposit}:{cut}");
         }
 
         // helpers
@@ -813,12 +812,12 @@ namespace Game
         public uint itemEntry;
         public uint itemCount;
         public ulong owner;
-        public uint startbid;                                        //maybe useless
-        public uint bid;
-        public uint buyout;
+        public ulong startbid;                                        //maybe useless
+        public ulong bid;
+        public ulong buyout;
         public long expire_time;
         public ulong bidder;
-        public uint deposit;                                         //deposit can be calculated only when creating auction
+        public ulong deposit;                                         //deposit can be calculated only when creating auction
         public uint etime;
         uint houseId;
         public AuctionHouseRecord auctionHouseEntry;             // in AuctionHouse.dbc

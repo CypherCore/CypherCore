@@ -92,6 +92,8 @@ namespace Framework.Database
             PrepareStatement(CharStatements.SEL_CHARACTER_SPELL, "SELECT spell, active, disabled FROM character_spell WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS, "SELECT quest, status, timer FROM character_queststatus WHERE guid = ? AND status <> 0");
             PrepareStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS_OBJECTIVES, "SELECT quest, objective, data FROM character_queststatus_objectives WHERE guid = ?");
+            PrepareStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS_OBJECTIVES_CRITERIA, "SELECT questObjectiveId FROM character_queststatus_objectives_criteria WHERE guid = ?");
+            PrepareStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS_OBJECTIVES_CRITERIA_PROGRESS, "SELECT criteriaId, counter, date FROM character_queststatus_objectives_criteria_progress WHERE guid = ?");
 
             PrepareStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS_DAILY, "SELECT quest, time FROM character_queststatus_daily WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS_WEEKLY, "SELECT quest FROM character_queststatus_weekly WHERE guid = ?");
@@ -249,8 +251,9 @@ namespace Framework.Database
             PrepareStatement(CharStatements.UPD_GUILD_RANK_BANK_MONEY, "UPDATE guild_rank SET BankMoneyPerDay = ? WHERE rid = ? AND guildid = ?"); // 0: uint32, 1: uint8, 2: uint32
             PrepareStatement(CharStatements.UPD_GUILD_BANK_TAB_TEXT, "UPDATE guild_bank_tab SET TabText = ? WHERE guildid = ? AND TabId = ?"); // 0: string, 1: uint32, 2: uint8
 
-            PrepareStatement(CharStatements.INS_GUILD_MEMBER_WITHDRAW, "INSERT INTO guild_member_withdraw (guid, tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, money) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
-                "ON DUPLICATE KEY UPDATE tab0 = VALUES (tab0), tab1 = VALUES (tab1), tab2 = VALUES (tab2), tab3 = VALUES (tab3), tab4 = VALUES (tab4), tab5 = VALUES (tab5), tab6 = VALUES (tab6), tab7 = VALUES (tab7), money = VALUES (money)");
+            PrepareStatement(CharStatements.INS_GUILD_MEMBER_WITHDRAW_TABS, "INSERT INTO guild_member_withdraw (guid, tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) " +
+                "ON DUPLICATE KEY UPDATE tab0 = VALUES (tab0), tab1 = VALUES (tab1), tab2 = VALUES (tab2), tab3 = VALUES (tab3), tab4 = VALUES (tab4), tab5 = VALUES (tab5), tab6 = VALUES (tab6), tab7 = VALUES (tab7)");
+            PrepareStatement(CharStatements.INS_GUILD_MEMBER_WITHDRAW_MONEY, "INSERT INTO guild_member_withdraw (guid, money) VALUES (?, ?) ON DUPLICATE KEY UPDATE money = VALUES (money)");
             PrepareStatement(CharStatements.DEL_GUILD_MEMBER_WITHDRAW, "TRUNCATE guild_member_withdraw");
 
             // 0: uint32, 1: uint32, 2: uint32
@@ -543,6 +546,9 @@ namespace Framework.Database
             PrepareStatement(CharStatements.UPD_CHAR_TAXIMASK, "UPDATE characters SET taximask = ? WHERE guid = ?");
             PrepareStatement(CharStatements.DEL_CHAR_QUESTSTATUS, "DELETE FROM character_queststatus WHERE guid = ?");
             PrepareStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES, "DELETE FROM character_queststatus_objectives WHERE guid = ?");
+            PrepareStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA, "DELETE FROM character_queststatus_objectives_criteria WHERE guid = ?");
+            PrepareStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA_PROGRESS, "DELETE FROM character_queststatus_objectives_criteria_progress WHERE guid = ?");
+            PrepareStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA_PROGRESS_BY_CRITERIA, "DELETE FROM character_queststatus_objectives_criteria_progress WHERE guid = ? AND criteriaId = ?");
             PrepareStatement(CharStatements.DEL_CHAR_SOCIAL_BY_GUID, "DELETE FROM character_social WHERE guid = ?");
             PrepareStatement(CharStatements.DEL_CHAR_SOCIAL_BY_FRIEND, "DELETE FROM character_social WHERE friend = ?");
             PrepareStatement(CharStatements.DEL_CHAR_ACHIEVEMENT_BY_ACHIEVEMENT, "DELETE FROM character_achievement WHERE achievement = ? AND guid = ?");
@@ -590,11 +596,14 @@ namespace Framework.Database
             PrepareStatement(CharStatements.DEL_CHAR_QUESTSTATUS_BY_QUEST, "DELETE FROM character_queststatus WHERE guid = ? AND quest = ?");
             PrepareStatement(CharStatements.REP_CHAR_QUESTSTATUS_OBJECTIVES, "REPLACE INTO character_queststatus_objectives (guid, quest, objective, data) VALUES (?, ?, ?, ?)");
             PrepareStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES_BY_QUEST, "DELETE FROM character_queststatus_objectives WHERE guid = ? AND quest = ?");
+            PrepareStatement(CharStatements.INS_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA, "INSERT INTO character_queststatus_objectives_criteria (guid, questObjectiveId) VALUES (?, ?)");
+            PrepareStatement(CharStatements.INS_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA_PROGRESS, "INSERT INTO character_queststatus_objectives_criteria_progress (guid, criteriaId, counter, date) VALUES (?, ?, ?, ?)");
             PrepareStatement(CharStatements.INS_CHAR_QUESTSTATUS_REWARDED, "INSERT IGNORE INTO character_queststatus_rewarded (guid, quest, active) VALUES (?, ?, 1)");
             PrepareStatement(CharStatements.DEL_CHAR_QUESTSTATUS_REWARDED_BY_QUEST, "DELETE FROM character_queststatus_rewarded WHERE guid = ? AND quest = ?");
             PrepareStatement(CharStatements.UPD_CHAR_QUESTSTATUS_REWARDED_FACTION_CHANGE, "UPDATE character_queststatus_rewarded SET quest = ? WHERE quest = ? AND guid = ?");
             PrepareStatement(CharStatements.UPD_CHAR_QUESTSTATUS_REWARDED_ACTIVE, "UPDATE character_queststatus_rewarded SET active = 1 WHERE guid = ?");
             PrepareStatement(CharStatements.UPD_CHAR_QUESTSTATUS_REWARDED_ACTIVE_BY_QUEST, "UPDATE character_queststatus_rewarded SET active = 0 WHERE quest = ? AND guid = ?");
+            PrepareStatement(CharStatements.DEL_INVALID_QUEST_PROGRESS_CRITERIA, "DELETE FROM character_queststatus_objectives_criteria WHERE questObjectiveId = ?");
             PrepareStatement(CharStatements.DEL_CHAR_SKILL_BY_SKILL, "DELETE FROM character_skills WHERE guid = ? AND skill = ?");
             PrepareStatement(CharStatements.INS_CHAR_SKILLS, "INSERT INTO character_skills (guid, skill, value, max) VALUES (?, ?, ?, ?)");
             PrepareStatement(CharStatements.UPD_CHAR_SKILLS, "UPDATE character_skills SET value = ?, max = ? WHERE guid = ? AND skill = ?");
@@ -778,6 +787,8 @@ namespace Framework.Database
 
         SEL_CHARACTER_QUESTSTATUS,
         SEL_CHARACTER_QUESTSTATUS_OBJECTIVES,
+        SEL_CHARACTER_QUESTSTATUS_OBJECTIVES_CRITERIA,
+        SEL_CHARACTER_QUESTSTATUS_OBJECTIVES_CRITERIA_PROGRESS,
         SEL_CHARACTER_QUESTSTATUS_DAILY,
         SEL_CHARACTER_QUESTSTATUS_WEEKLY,
         SEL_CHARACTER_QUESTSTATUS_MONTHLY,
@@ -913,7 +924,8 @@ namespace Framework.Database
         UPD_GUILD_BANK_MONEY,
         UPD_GUILD_RANK_BANK_MONEY,
         UPD_GUILD_BANK_TAB_TEXT,
-        INS_GUILD_MEMBER_WITHDRAW,
+        INS_GUILD_MEMBER_WITHDRAW_TABS,
+        INS_GUILD_MEMBER_WITHDRAW_MONEY,
         DEL_GUILD_MEMBER_WITHDRAW,
         SEL_CHAR_DATA_FOR_GUILD,
         DEL_GUILD_ACHIEVEMENT,
@@ -1157,6 +1169,9 @@ namespace Framework.Database
         UPD_CHAR_TAXIMASK,
         DEL_CHAR_QUESTSTATUS,
         DEL_CHAR_QUESTSTATUS_OBJECTIVES,
+        DEL_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA,
+        DEL_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA_PROGRESS,
+        DEL_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA_PROGRESS_BY_CRITERIA,
         DEL_CHAR_SOCIAL_BY_GUID,
         DEL_CHAR_SOCIAL_BY_FRIEND,
         DEL_CHAR_ACHIEVEMENT_BY_ACHIEVEMENT,
@@ -1204,11 +1219,14 @@ namespace Framework.Database
         DEL_CHAR_QUESTSTATUS_BY_QUEST,
         REP_CHAR_QUESTSTATUS_OBJECTIVES,
         DEL_CHAR_QUESTSTATUS_OBJECTIVES_BY_QUEST,
+        INS_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA,
+        INS_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA_PROGRESS,
         INS_CHAR_QUESTSTATUS_REWARDED,
         DEL_CHAR_QUESTSTATUS_REWARDED_BY_QUEST,
         UPD_CHAR_QUESTSTATUS_REWARDED_FACTION_CHANGE,
         UPD_CHAR_QUESTSTATUS_REWARDED_ACTIVE,
         UPD_CHAR_QUESTSTATUS_REWARDED_ACTIVE_BY_QUEST,
+        DEL_INVALID_QUEST_PROGRESS_CRITERIA,
         DEL_CHAR_SKILL_BY_SKILL,
         INS_CHAR_SKILLS,
         UPD_CHAR_SKILLS,

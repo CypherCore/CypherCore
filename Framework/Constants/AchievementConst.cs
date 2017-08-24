@@ -76,7 +76,8 @@ namespace Framework.Constants
         Player = 0x1,
         Account = 0x2,
         Guild = 0x4,
-        Scenario = 0x8
+        Scenario = 0x8,
+        QuestObjective = 0x10
     }
 
     public enum CriteriaCondition
@@ -398,6 +399,7 @@ namespace Framework.Constants
         // 202 - 0 criterias (Legion - 23420)
         CompleteWorldQuest = 203,
         // 204 - Special criteria type to award players for some external events? Comes with what looks like an identifier, so guessing it's not unique.
+        TransmogSetUnlocked = 205,
         TotalTypes = 208
     }
 

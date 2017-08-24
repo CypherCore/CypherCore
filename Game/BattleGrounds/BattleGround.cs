@@ -63,11 +63,11 @@ namespace Game.BattleGrounds
         {
             // remove objects and creatures
             // (this is done automatically in mapmanager update, when the instance is reset after the reset time)
-            foreach (var type in BgCreatures.Keys)
-                DelCreature(type);
+            for (var i = 0; i < BgCreatures.Length; ++i)
+                DelCreature(i);
 
-            foreach (var type in BgObjects.Keys)
-                DelObject(type);
+            for (var i = 0; i < BgObjects.Length; ++i)
+                DelObject(i);
 
             Global.BattlegroundMgr.RemoveBattleground(GetTypeID(), GetInstanceID());
             // unload map
@@ -550,7 +550,7 @@ namespace Game.BattleGrounds
             }
         }
 
-        void SendChatMessage(Creature source, byte textId, WorldObject target = null)
+        public void SendChatMessage(Creature source, byte textId, WorldObject target = null)
         {
             Global.CreatureTextMgr.SendChat(source, textId, target);
         }
@@ -624,6 +624,15 @@ namespace Game.BattleGrounds
             UpdateWorldState worldstate = new UpdateWorldState();
             worldstate.VariableID = variable;
             worldstate.Value = (int)value;
+            worldstate.Hidden = hidden;
+            SendPacketToAll(worldstate);
+        }
+
+        public void UpdateWorldState(uint variable, bool value, bool hidden = false)
+        {
+            UpdateWorldState worldstate = new UpdateWorldState();
+            worldstate.VariableID = variable;
+            worldstate.Value = value ? 1 : 0;
             worldstate.Hidden = hidden;
             SendPacketToAll(worldstate);
         }
@@ -1369,7 +1378,7 @@ namespace Game.BattleGrounds
 
         public GameObject GetBGObject(int type)
         {
-            if (!BgObjects.ContainsKey(type))
+            if (BgObjects[type].IsEmpty())
                 return null;
 
             GameObject obj = GetBgMap().GetGameObject(BgObjects[type]);
@@ -1381,7 +1390,7 @@ namespace Game.BattleGrounds
 
         public Creature GetBGCreature(int type)
         {
-            if (!BgCreatures.ContainsKey(type))
+            if (BgCreatures[type].IsEmpty())
                 return null;
 
             Creature creature = GetBgMap().GetCreature(BgCreatures[type]);
@@ -1470,7 +1479,7 @@ namespace Game.BattleGrounds
 
         public bool DelCreature(int type)
         {
-            if (!BgCreatures.ContainsKey(type) || BgCreatures[type].IsEmpty())
+            if (BgCreatures[type].IsEmpty())
                 return true;
 
             Creature creature = GetBgMap().GetCreature(BgCreatures[type]);
@@ -1487,7 +1496,7 @@ namespace Game.BattleGrounds
             return false;
         }
 
-        bool DelObject(int type)
+        public bool DelObject(int type)
         {
             if (BgObjects[type].IsEmpty())
                 return true;
@@ -1500,8 +1509,7 @@ namespace Game.BattleGrounds
                 BgObjects[type].Clear();
                 return true;
             }
-            Log.outError(LogFilter.Battleground, "Battleground.DelObject: gameobject (type: {0}, {1}) not found for BG (map: {2}, instance id: {3})!",
-                type, BgObjects[type].ToString(), m_MapId, m_InstanceID);
+            Log.outError(LogFilter.Battleground, "Battleground.DelObject: gameobject (type: {0}, {1}) not found for BG (map: {2}, instance id: {3})!", type, BgObjects[type].ToString(), m_MapId, m_InstanceID);
             BgObjects[type].Clear();
             return false;
         }
@@ -1581,7 +1589,7 @@ namespace Game.BattleGrounds
                 return;
 
             // Change buff type, when buff is used:
-            int index = BgObjects.Count - 1;
+            int index = BgObjects.Length - 1;
             while (index >= 0 && BgObjects[index] != goGuid)
                 index--;
             if (index < 0)
@@ -1716,7 +1724,7 @@ namespace Game.BattleGrounds
 
         int GetObjectType(ObjectGuid guid)
         {
-            for (int i = 0; i < BgObjects.Count; ++i)
+            for (int i = 0; i < BgObjects.Length; ++i)
                 if (BgObjects[i] == guid)
                     return i;
             Log.outError(LogFilter.Battleground, "Battleground.GetObjectType: player used gameobject ({0}) which is not in internal data for BG (map: {1}, instance id: {2}), cheating?",
@@ -1980,8 +1988,8 @@ namespace Game.BattleGrounds
         public BGHonorMode m_HonorMode;
         public uint[] m_TeamScores = new uint[SharedConst.BGTeamsCount];
 
-        protected Dictionary<int, ObjectGuid> BgObjects = new Dictionary<int, ObjectGuid>();
-        protected Dictionary<int, ObjectGuid> BgCreatures = new Dictionary<int, ObjectGuid>();
+        protected ObjectGuid[] BgObjects;// = new Dictionary<int, ObjectGuid>();
+        protected ObjectGuid[] BgCreatures;// = new Dictionary<int, ObjectGuid>();
 
         public uint[] Buff_Entries = { BattlegroundConst.SpeedBuff, BattlegroundConst.RegenBuff, BattlegroundConst.BerserkerBuff };
 

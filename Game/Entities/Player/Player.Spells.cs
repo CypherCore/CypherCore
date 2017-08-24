@@ -1844,7 +1844,7 @@ namespace Game.Entities
         {
             for (CurrentSpellTypes i = 0; i < CurrentSpellTypes.Max; ++i)
             {
-                Spell spell = m_currentSpells[i];
+                Spell spell = GetCurrentSpell(i);
                 if (spell != null)
                     RestoreSpellMods(spell, ownerAuraId, aura);
             }

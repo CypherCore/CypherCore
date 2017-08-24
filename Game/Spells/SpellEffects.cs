@@ -5846,6 +5846,18 @@ namespace Game.Spells
             playerTarget.AddHonorXP((uint)damage);
             playerTarget.SendPacket(packet);
         }
+
+        [SpellEffectHandler(SpellEffectName.LearnTransmogSet)]
+        void EffectLearnTransmogSet(uint effIndex)
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            if (!unitTarget || !unitTarget.IsPlayer())
+                return;
+
+            unitTarget.ToPlayer().GetSession().GetCollectionMgr().AddTransmogSet((uint)effectInfo.MiscValue);
+        }
     }
 
     public class DispelCharges

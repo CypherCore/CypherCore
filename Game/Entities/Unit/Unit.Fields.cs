@@ -182,7 +182,6 @@ namespace Game.Entities
 
         public SpellInfo GetSpellInfo()
         {
-            /// WORKAROUND: unfinished new proc system
             if (_spell)
                 return _spell.GetSpellInfo();
             if (_damageInfo != null)
@@ -194,7 +193,6 @@ namespace Game.Entities
         }
         public SpellSchoolMask GetSchoolMask()
         {
-            /// WORKAROUND: unfinished new proc system
             if (_spell)
                 return _spell.GetSpellInfo().GetSchoolMask();
             if (_damageInfo != null)

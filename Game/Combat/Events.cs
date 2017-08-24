@@ -103,32 +103,6 @@ namespace Game.Combat
         ThreatManager iThreatManager;
     }
 
-    public class ThreatManagerEvent : ThreatRefStatusChangeEvent
-    {
-        ThreatManagerEvent(UnitEventTypes pType)
-            : base(pType)
-        {
-            iThreatContainer = null;
-        }
-        ThreatManagerEvent(UnitEventTypes pType, HostileReference pHostileReference)
-            : base(pType, pHostileReference)
-        {
-            iThreatContainer = null;
-        }
-
-        void setThreatContainer(ThreatContainer pThreatContainer)
-        {
-            iThreatContainer = pThreatContainer;
-        }
-
-        ThreatContainer getThreatContainer()
-        {
-            return iThreatContainer;
-        }
-        
-        ThreatContainer iThreatContainer;
-    }
-
     public enum UnitEventTypes
     {
         // Player/Pet Changed On/Offline Status
@@ -141,7 +115,7 @@ namespace Game.Combat
         ThreatRefRemoveFromList = 1 << 2,
 
         // Player/Pet Entered/Left  Water Or Some Other Place Where It Is/Was Not Accessible For The Creature
-        ThreatRefAsseccibleStatus = 1 << 3,
+        ThreatRefAccessibleStatus = 1 << 3,
 
         // Threat List Is Going To Be Sorted (If Dirty Flag Is Set)
         ThreatSortList = 1 << 4,

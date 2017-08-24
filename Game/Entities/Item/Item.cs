@@ -1497,11 +1497,11 @@ namespace Game.Entities
             return ItemTransmogrificationWeaponCategory.Invalid;
         }
 
-        static int[] ItemTransmogrificationSlots =
+        public static int[] ItemTransmogrificationSlots =
         {
             -1,                                                     // INVTYPE_NON_EQUIP
             EquipmentSlot.Head,                                    // INVTYPE_HEAD
-            EquipmentSlot.Neck,                                    // INVTYPE_NECK
+            -1,                                                    // INVTYPE_NECK
             EquipmentSlot.Shoulders,                               // INVTYPE_SHOULDERS
             EquipmentSlot.Shirt,                                    // INVTYPE_BODY
             EquipmentSlot.Chest,                                   // INVTYPE_CHEST
@@ -1516,15 +1516,15 @@ namespace Game.Entities
             EquipmentSlot.OffHand,                                 // INVTYPE_SHIELD
             EquipmentSlot.MainHand,                                // INVTYPE_RANGED
             EquipmentSlot.Cloak,                                    // INVTYPE_CLOAK
-            -1,                                                     // INVTYPE_2HWEAPON
+            EquipmentSlot.MainHand,                                 // INVTYPE_2HWEAPON
             -1,                                                     // INVTYPE_BAG
             EquipmentSlot.Tabard,                                  // INVTYPE_TABARD
             EquipmentSlot.Chest,                                   // INVTYPE_ROBE
             EquipmentSlot.MainHand,                                // INVTYPE_WEAPONMAINHAND
-            EquipmentSlot.OffHand,                                 // INVTYPE_WEAPONOFFHAND
+            EquipmentSlot.MainHand,                                 // INVTYPE_WEAPONOFFHAND
             EquipmentSlot.OffHand,                                 // INVTYPE_HOLDABLE
             -1,                                                     // INVTYPE_AMMO
-            EquipmentSlot.MainHand,                                // INVTYPE_THROWN
+            -1,                                                     // INVTYPE_THROWN
             EquipmentSlot.MainHand,                                // INVTYPE_RANGEDRIGHT
             -1,                                                     // INVTYPE_QUIVER
             -1                                                      // INVTYPE_RELIC
@@ -1566,20 +1566,13 @@ namespace Game.Entities
                     case ItemClass.Armor:
                         if ((ItemSubClassArmor)source.GetSubClass() != ItemSubClassArmor.Cosmetic)
                             return false;
+                        if (source.GetInventoryType() != target.GetInventoryType())
+                            if (ItemTransmogrificationSlots[(int)source.GetInventoryType()] != ItemTransmogrificationSlots[(int)target.GetInventoryType()])
+                                return false;
                         break;
                     default:
                         return false;
                 }
-            }
-
-            if (source.GetInventoryType() != target.GetInventoryType())
-            {
-                int sourceSlot = ItemTransmogrificationSlots[(int)source.GetInventoryType()];
-                if (sourceSlot == -1 && source.GetInventoryType() == InventoryType.Weapon && (target.GetInventoryType() == InventoryType.WeaponMainhand || target.GetInventoryType() == InventoryType.WeaponOffhand))
-                    sourceSlot = ItemTransmogrificationSlots[(int)target.GetInventoryType()];
-
-                if (sourceSlot != ItemTransmogrificationSlots[(int)target.GetInventoryType()])
-                    return false;
             }
 
             return true;
@@ -2531,11 +2524,11 @@ namespace Game.Entities
         public uint GetScalingStatDistribution() { return _bonusData.ScalingStatDistribution; }
 
         public void SetRefundRecipient(ObjectGuid guid) { m_refundRecipient = guid; }
-        public void SetPaidMoney(uint money) { m_paidMoney = money; }
+        public void SetPaidMoney(ulong money) { m_paidMoney = money; }
         public void SetPaidExtendedCost(uint iece) { m_paidExtendedCost = iece; }
 
         public ObjectGuid GetRefundRecipient() { return m_refundRecipient; }
-        public uint GetPaidMoney() { return m_paidMoney; }
+        public ulong GetPaidMoney() { return m_paidMoney; }
         public uint GetPaidExtendedCost() { return m_paidExtendedCost; }
 
         public uint GetScriptId() { return GetTemplate().ScriptId; }
@@ -2637,7 +2630,7 @@ namespace Game.Entities
 
         ItemUpdateState uState;
         uint m_paidExtendedCost;
-        uint m_paidMoney;
+        ulong m_paidMoney;
         ObjectGuid m_refundRecipient;
         byte m_slot;
         Bag m_container;

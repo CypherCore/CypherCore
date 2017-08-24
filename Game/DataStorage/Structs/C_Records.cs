@@ -20,16 +20,33 @@ using Framework.GameMath;
 
 namespace Game.DataStorage
 {
+    public sealed class CharacterFacialHairStylesRecord
+    {
+        public uint ID;
+        public uint[] Geoset = new uint[5];
+        public byte RaceID;
+        public byte SexID;
+        public byte VariationID;
+    }
+
+    public sealed class CharBaseSectionRecord
+    {
+        public uint ID;
+        public CharBaseSectionVariation Variation;
+        public byte ResolutionVariation;
+        public byte Resolution;
+    }
+
     public sealed class CharSectionsRecord
     {
         public uint Id;
         public uint[] TextureFileDataID = new uint[3];
         public ushort Flags;
-        public byte Race;
-        public byte Gender;
-        public byte GenType;
-        public byte Type;
-        public byte Color;
+        public byte RaceID;
+        public byte SexID;
+        public byte BaseSection;
+        public byte VariationIndex;
+        public byte ColorIndex;
     }
 
     public sealed class CharStartOutfitRecord

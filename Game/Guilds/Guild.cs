@@ -294,7 +294,7 @@ namespace Game.Guilds
                 rankData.RankID = rankInfo.GetId();
                 rankData.RankOrder = i;
                 rankData.Flags = (uint)rankInfo.GetRights();
-                rankData.WithdrawGoldLimit = (uint)rankInfo.GetBankMoneyPerDay();
+                rankData.WithdrawGoldLimit = rankInfo.GetBankMoneyPerDay();
                 rankData.RankName = rankInfo.GetName();
 
                 for (byte j = 0; j < GuildConst.MaxBankTabs; ++j)
@@ -800,6 +800,11 @@ namespace Game.Guilds
 
         public void HandleMemberDepositMoney(WorldSession session, ulong amount, bool cashFlow = false)
         {
+            // guild bank cannot have more than MAX_MONEY_AMOUNT
+            amount = Math.Min(amount, PlayerConst.MaxMoneyAmount - m_bankMoney);
+            if (amount == 0)
+                return;
+
             Player player = session.GetPlayer();
 
             // Call script after validation and before money transfer.
@@ -839,7 +844,10 @@ namespace Game.Guilds
             if (member == null)
                 return false;
 
-            if ((ulong)_GetMemberRemainingMoney(member) < amount)   // Check if we have enough slot/money today
+            if (!_HasRankRight(player, repair ? GuildRankRights.WithdrawRepair : GuildRankRights.WithdrawGold))
+                return false;
+
+            if (_GetMemberRemainingMoney(member) < (long)amount)   // Check if we have enough slot/money today
                 return false;
 
             // Call script after validation and before money transfer.
@@ -856,7 +864,7 @@ namespace Game.Guilds
             }
 
             // Update remaining money amount
-            member.UpdateBankWithdrawValue(trans, GuildConst.MaxBankTabs, (uint)amount);
+            member.UpdateBankMoneyWithdrawValue(trans, amount);
             // Remove money from bank
             _ModifyBankMoney(trans, amount, false);
 
@@ -1006,7 +1014,7 @@ namespace Game.Guilds
 
             GuildPermissionsQueryResults queryResult = new GuildPermissionsQueryResults();
             queryResult.RankID = rankId;
-            queryResult.WithdrawGoldLimit = _GetMemberRemainingMoney(member);
+            queryResult.WithdrawGoldLimit = (int)_GetMemberRemainingMoney(member);
             queryResult.Flags = (int)_GetRankRights(rankId);
             queryResult.NumTabs = _GetPurchasedTabsSize();
 
@@ -1027,7 +1035,7 @@ namespace Game.Guilds
             if (member == null)
                 return;
 
-            int amount = _GetMemberRemainingMoney(member);
+            long amount = _GetMemberRemainingMoney(member);
 
             GuildBankRemainingWithdrawMoney packet = new GuildBankRemainingWithdrawMoney();
             packet.RemainingWithdrawMoney = amount;
@@ -1829,7 +1837,7 @@ namespace Game.Guilds
             return 0;
         }
 
-        int _GetRankBankMoneyPerDay(byte rankId)
+        uint _GetRankBankMoneyPerDay(byte rankId)
         {
             RankInfo rankInfo = GetRankInfo(rankId);
             if (rankInfo != null)
@@ -1862,10 +1870,10 @@ namespace Game.Guilds
             {
                 byte rankId = member.GetRankId();
                 if (rankId == GuildDefaultRanks.Master)
-                    return GuildConst.WithdrawSlotUnlimited;
+                    return Convert.ToInt32(GuildConst.WithdrawSlotUnlimited);
                 if ((_GetRankBankTabRights(rankId, tabId) & GuildBankRights.ViewTab) != 0)
                 {
-                    int remaining = _GetRankBankTabSlotsPerDay(rankId, tabId) - member.GetBankWithdrawValue(tabId);
+                    int remaining = _GetRankBankTabSlotsPerDay(rankId, tabId) - (int)member.GetBankTabWithdrawValue(tabId);
                     if (remaining > 0)
                         return remaining;
                 }
@@ -1873,17 +1881,17 @@ namespace Game.Guilds
             return 0;
         }
 
-        int _GetMemberRemainingMoney(Member member)
+        long _GetMemberRemainingMoney(Member member)
         {
             if (member != null)
             {
                 byte rankId = member.GetRankId();
                 if (rankId == GuildDefaultRanks.Master)
-                    return GuildConst.WithdrawMoneyUnlimited;
+                    return long.MaxValue;
 
                 if ((_GetRankRights(rankId) & (GuildRankRights.WithdrawRepair | GuildRankRights.WithdrawGold)) != 0)
                 {
-                    int remaining = _GetRankBankMoneyPerDay(rankId) - member.GetBankWithdrawValue(GuildConst.MaxBankTabs);
+                    long remaining = (long)((_GetRankBankMoneyPerDay(rankId) * MoneyConstants.Gold) - member.GetBankMoneyWithdrawValue());
                     if (remaining > 0)
                         return remaining;
                 }
@@ -1895,12 +1903,7 @@ namespace Game.Guilds
         {
             Member member = GetMember(guid);
             if (member != null)
-            {
-                byte rankId = member.GetRankId();
-                if (rankId != GuildDefaultRanks.Master
-                    && member.GetBankWithdrawValue(tabId) < _GetRankBankTabSlotsPerDay(rankId, tabId))
-                    member.UpdateBankWithdrawValue(trans, tabId, 1);
-            }
+                member.UpdateBankTabWithdrawValue(trans, tabId, 1);
         }
 
         bool _MemberHasTabRights(ObjectGuid guid, byte tabId, GuildBankRights rights)
@@ -2523,8 +2526,10 @@ namespace Game.Guilds
                 m_publicNote = field.Read<string>(3);
                 m_officerNote = field.Read<string>(4);
 
-                for (byte i = 0; i <= GuildConst.MaxBankTabs; ++i)
-                    m_bankWithdraw[i] = field.Read<int>(5 + i);
+                for (byte i = 0; i < GuildConst.MaxBankTabs; ++i)
+                    m_bankWithdraw[i] = field.Read<uint>(5 + i);
+
+                m_bankWithdrawMoney = field.Read<ulong>(13);
 
                 SetStats(field.Read<string>(14),
                          field.Read<byte>(15),                          // characters.level
@@ -2566,40 +2571,45 @@ namespace Game.Guilds
                 return true;
             }
 
-            public void UpdateBankWithdrawValue(SQLTransaction trans, byte tabId, uint amount)
+            // Decreases amount of slots left for today.
+            public void UpdateBankTabWithdrawValue(SQLTransaction trans, byte tabId, uint amount)
             {
-                m_bankWithdraw[tabId] += (int)amount;
+                m_bankWithdraw[tabId] += amount;
 
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_GUILD_MEMBER_WITHDRAW);
+                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_GUILD_MEMBER_WITHDRAW_TABS);
                 stmt.AddValue(0, m_guid.GetCounter());
-                for (byte i = 0; i <= GuildConst.MaxBankTabs; )
+                for (byte i = 0; i < GuildConst.MaxBankTabs; )
                 {
-                    int withdraw = m_bankWithdraw[i++];
+                    uint withdraw = m_bankWithdraw[i++];
                     stmt.AddValue(i, withdraw);
                 }
 
                 DB.Characters.ExecuteOrAppend(trans, stmt);
             }
 
+            // Decreases amount of money left for today.
+            public void UpdateBankMoneyWithdrawValue(SQLTransaction trans, ulong amount)
+            {
+                m_bankWithdrawMoney += amount;
+
+                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_GUILD_MEMBER_WITHDRAW_MONEY);
+                stmt.AddValue(0, m_guid.GetCounter());
+                stmt.AddValue(1, m_bankWithdrawMoney);
+                DB.Characters.ExecuteOrAppend(trans, stmt);
+            }
+
             public void ResetValues(bool weekly = false)
             {
-                for (byte tabId = 0; tabId <= GuildConst.MaxBankTabs; ++tabId)
+                for (byte tabId = 0; tabId < GuildConst.MaxBankTabs; ++tabId)
                     m_bankWithdraw[tabId] = 0;
+
+                m_bankWithdrawMoney = 0;
 
                 if (weekly)
                 {
                     m_weekActivity = 0;
                     m_weekReputation = 0;
                 }
-            }
-
-            public int GetBankWithdrawValue(byte tabId)
-            {
-                // Guild master has unlimited amount.
-                if (IsRank(GuildDefaultRanks.Master))
-                    return tabId == GuildConst.MaxBankTabs ? GuildConst.WithdrawMoneyUnlimited : GuildConst.WithdrawSlotUnlimited;
-
-                return m_bankWithdraw[tabId];
             }
 
             public void SetZoneId(uint id) { m_zoneId = id; }
@@ -2642,6 +2652,9 @@ namespace Game.Guilds
             public bool IsRankNotLower(uint rankId) { return m_rankId <= rankId; }
             public bool IsSamePlayer(ObjectGuid guid) { return m_guid == guid; }
 
+            public uint GetBankTabWithdrawValue(byte tabId) { return m_bankWithdraw[tabId]; }
+            public ulong GetBankMoneyWithdrawValue() { return m_bankWithdrawMoney; }
+
             public Player FindPlayer() { return Global.ObjAccessor.FindPlayer(m_guid); }
 
             #region Fields
@@ -2661,7 +2674,8 @@ namespace Game.Guilds
 
             List<uint> m_trackedCriteriaIds = new List<uint>();
 
-            int[] m_bankWithdraw = new int[GuildConst.MaxBankTabs + 1];
+            uint[] m_bankWithdraw = new uint[GuildConst.MaxBankTabs];
+            ulong m_bankWithdrawMoney;
             uint m_achievementPoints;
             ulong m_totalActivity;
             ulong m_weekActivity;
@@ -3088,9 +3102,6 @@ namespace Game.Guilds
 
             public void SetBankMoneyPerDay(uint money)
             {
-                if (m_rankId == GuildDefaultRanks.Master)                     // Prevent loss of leader rights
-                    money = Convert.ToUInt32(GuildConst.WithdrawMoneyUnlimited);
-
                 if (m_bankMoneyPerDay == money)
                     return;
 
@@ -3129,7 +3140,10 @@ namespace Game.Guilds
 
             public GuildRankRights GetRights() { return m_rights; }
 
-            public int GetBankMoneyPerDay() { return (int)m_bankMoneyPerDay; }
+            public uint GetBankMoneyPerDay()
+            {
+                return m_rankId != GuildDefaultRanks.Master ? m_bankMoneyPerDay : GuildConst.WithdrawMoneyUnlimited;
+            }
 
             public GuildBankRights GetBankTabRights(byte tabId)
             {
@@ -3323,7 +3337,7 @@ namespace Game.Guilds
             public void SetGuildMasterValues()
             {
                 rights = GuildBankRights.Full;
-                slots = GuildConst.WithdrawSlotUnlimited;
+                slots = Convert.ToInt32(GuildConst.WithdrawSlotUnlimited);
             }
 
             public void SetTabId(byte _tabId) { tabId = _tabId; }

@@ -1014,7 +1014,7 @@ namespace Game
                         }
                         break;
                     }
-                case ConditionSourceType.QuestAccept:
+                case ConditionSourceType.QuestAvailable:
                     if (Global.ObjectMgr.GetQuestTemplate((uint)cond.SourceEntry) == null)
                     {
                         Log.outError(LogFilter.Sql, "{0} SourceEntry specifies non-existing quest, skipped.", cond.ToString());

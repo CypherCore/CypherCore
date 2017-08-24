@@ -123,9 +123,16 @@ namespace Framework.Database
                 "EmoteDelay3, UnkEmoteID, Language, Type, SoundID1, SoundID2, PlayerConditionID FROM broadcast_text ORDER BY ID DESC");
             PrepareStatement(HotfixStatements.SEL_BROADCAST_TEXT_LOCALE, "SELECT ID, MaleText_lang, FemaleText_lang FROM broadcast_text_locale WHERE locale = ?");
 
+            // CharacterFacialHairStyles.db2
+            PrepareStatement(HotfixStatements.SEL_CHARACTER_FACIAL_HAIR_STYLES, "SELECT ID, Geoset1, Geoset2, Geoset3, Geoset4, Geoset5, RaceID, SexID, VariationID" +
+                " FROM character_facial_hair_styles ORDER BY ID DESC");
+
+            // CharBaseSection.db2
+            PrepareStatement(HotfixStatements.SEL_CHAR_BASE_SECTION, "SELECT ID, Variation, ResolutionVariation, Resolution FROM char_base_section ORDER BY ID DESC");
+
             // CharSections.db2
-            PrepareStatement(HotfixStatements.SEL_CHAR_SECTIONS, "SELECT ID, TextureFileDataID1, TextureFileDataID2, TextureFileDataID3, Flags, Race, Gender, GenType, " +
-                "Type, Color FROM char_sections ORDER BY ID DESC");
+            PrepareStatement(HotfixStatements.SEL_CHAR_SECTIONS, "SELECT ID, TextureFileDataID1, TextureFileDataID2, TextureFileDataID3, Flags, RaceID, SexID, " +
+                "BaseSection, VariationIndex, ColorIndex FROM char_sections ORDER BY ID DESC");
 
             // CharStartOutfit.db2
             PrepareStatement(HotfixStatements.SEL_CHAR_START_OUTFIT, "SELECT ID, ItemID1, ItemID2, ItemID3, ItemID4, ItemID5, ItemID6, ItemID7, ItemID8, ItemID9, " +
@@ -926,6 +933,21 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_TOY, "SELECT ItemID, Description, Flags, CategoryFilter, ID FROM toy ORDER BY ID DESC");
             PrepareStatement(HotfixStatements.SEL_TOY_LOCALE, "SELECT ID, Description_lang FROM toy_locale WHERE locale = ?");
 
+            // TransmogHoliday.db2
+            PrepareStatement(HotfixStatements.SEL_TRANSMOG_HOLIDAY, "SELECT ID, HolidayID FROM transmog_holiday ORDER BY ID DESC");
+
+            // TransmogSet.db2
+            PrepareStatement(HotfixStatements.SEL_TRANSMOG_SET, "SELECT Name, BaseSetID, UIOrder, ExpansionID, ID, Flags, QuestID, ClassMask, ItemNameDescriptionID, " +
+                "TransmogSetGroupID FROM transmog_set ORDER BY ID DESC");
+            PrepareStatement(HotfixStatements.SEL_TRANSMOG_SET_LOCALE, "SELECT ID, Name_lang FROM transmog_set_locale WHERE locale = ?");
+
+            // TransmogSetGroup.db2
+            PrepareStatement(HotfixStatements.SEL_TRANSMOG_SET_GROUP, "SELECT Label, ID FROM transmog_set_group ORDER BY ID DESC");
+            PrepareStatement(HotfixStatements.SEL_TRANSMOG_SET_GROUP_LOCALE, "SELECT ID, Label_lang FROM transmog_set_group_locale WHERE locale = ?");
+
+            // TransmogSetItem.db2
+            PrepareStatement(HotfixStatements.SEL_TRANSMOG_SET_ITEM, "SELECT ID, TransmogSetID, ItemModifiedAppearanceID, Flags FROM transmog_set_item ORDER BY ID DESC");
+
             // TransportAnimation.db2
             PrepareStatement(HotfixStatements.SEL_TRANSPORT_ANIMATION, "SELECT ID, TransportID, TimeIndex, PosX, PosY, PosZ, SequenceID FROM transport_animation" +
                 " ORDER BY ID DESC");
@@ -1049,6 +1071,10 @@ namespace Framework.Database
 
         SEL_BROADCAST_TEXT,
         SEL_BROADCAST_TEXT_LOCALE,
+
+        SEL_CHARACTER_FACIAL_HAIR_STYLES,
+
+        SEL_CHAR_BASE_SECTION,
 
         SEL_CHAR_SECTIONS,
 
@@ -1461,6 +1487,16 @@ namespace Framework.Database
 
         SEL_TOY,
         SEL_TOY_LOCALE,
+
+        SEL_TRANSMOG_HOLIDAY,
+
+        SEL_TRANSMOG_SET,
+        SEL_TRANSMOG_SET_LOCALE,
+
+        SEL_TRANSMOG_SET_GROUP,
+        SEL_TRANSMOG_SET_GROUP_LOCALE,
+
+        SEL_TRANSMOG_SET_ITEM,
 
         SEL_TRANSPORT_ANIMATION,
 

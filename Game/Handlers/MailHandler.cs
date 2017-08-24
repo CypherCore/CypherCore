@@ -288,6 +288,7 @@ namespace Game
 
                         item.DeleteFromInventoryDB(trans);     // deletes item from character's inventory
                         item.SetOwnerGUID(receiverGuid);
+                        item.SetState(ItemUpdateState.Changed);
                         item.SaveToDB(trans);                  // recursive and not have transaction guard into self, item not in inventory and can be save standalone
 
                         draft.AddItem(item);
@@ -494,7 +495,7 @@ namespace Game
                             .SendMailTo(trans, new MailReceiver(receiver, m.sender), new MailSender( MailMessageType.Normal, m.receiver), MailCheckMask.CodPayment);
                     }
 
-                    player.ModifyMoney(-(int)m.COD);
+                    player.ModifyMoney(-(long)m.COD);
                 }
                 m.COD = 0;
                 m.state = MailState.Changed;

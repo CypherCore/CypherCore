@@ -92,7 +92,7 @@ namespace Framework.Constants
         CreatureTemplateVehicle = 16,
         Spell = 17,
         SpellClickEvent = 18,
-        QuestAccept = 19,
+        QuestAvailable = 19,
         // Condition source type 20 unused
         VehicleSpell = 21,
         SmartEvent = 22,

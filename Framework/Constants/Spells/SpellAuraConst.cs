@@ -132,7 +132,7 @@ namespace Framework.Constants
         AddPctModifier = 108,
         AddTargetTrigger = 109,
         ModPowerRegenPercent = 110,
-        AddCasterHitTrigger = 111,
+        InterceptMeleeRangedAttacks = 111,
         OverrideClassScripts = 112,
         ModRangedDamageTaken = 113,
         ModRangedDamageTakenPct = 114,

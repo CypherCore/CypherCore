@@ -21,7 +21,7 @@ using Game.Entities;
 using Game.Network.Packets;
 using System.Collections.Generic;
 
-namespace Game.BattleGrounds
+namespace Game.BattleGrounds.Zones
 {
     class BgWarsongGluch : Battleground
     {

@@ -24,6 +24,7 @@ using Game.Network.Packets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Game.BattleGrounds.Zones;
 
 namespace Game.BattleGrounds
 {
@@ -334,9 +335,9 @@ namespace Game.BattleGrounds
                     case BattlegroundTypeId.RL:
                         bg = new RuinsofLordaeronArena();
                         break;
-                    //case BattlegroundTypeId.SA:
-                       //bg = new BattlegroundSA();
-                        //break;
+                    case BattlegroundTypeId.SA:
+                        bg = new BgStrandOfAncients();
+                        break;
                     case BattlegroundTypeId.DS:
                         bg = new DalaranSewersArena();
                         break;                        

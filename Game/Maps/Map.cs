@@ -2701,6 +2701,22 @@ namespace Game.Maps
             }
         }
 
+        public void UpdateAreaDependentAuras()
+        {
+            var players = GetPlayers();
+            foreach (var player in players)
+            {
+                if (player)
+                {
+                    if (player.IsInWorld)
+                    {
+                        player.UpdateAreaDependentAuras(player.GetAreaId());
+                        player.UpdateZoneDependentAuras(player.GetZoneId());
+                    }
+                }
+            }
+        }
+
         public MapRecord GetEntry()
         {
             return i_mapRecord;
@@ -4391,6 +4407,7 @@ namespace Game.Maps
                 {
                     var data = result.Read<string>(0);
                     i_data.SetCompletedEncountersMask(result.Read<uint>(1));
+                    i_data.SetEntranceLocation(result.Read<uint>(2));
                     if (data != "")
                     {
                         Log.outDebug(LogFilter.Maps, "Loading instance data for `{0}` with id {1}",

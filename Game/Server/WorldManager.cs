@@ -705,6 +705,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Trainers...");
             Global.ObjectMgr.LoadTrainers();                                // must be after load CreatureTemplate
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading Creature default trainers...");
+            Global.ObjectMgr.LoadCreatureDefaultTrainers();
+
             Log.outInfo(LogFilter.ServerLoading, "Loading Gossip menu...");
             Global.ObjectMgr.LoadGossipMenu();
 

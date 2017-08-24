@@ -428,7 +428,7 @@ namespace Game
 
         public void UpdateAccountAccess(RBACData rbac, uint accountId, byte securityLevel, int realmId)
         {
-            if (rbac != null && securityLevel == rbac.GetSecurityLevel())
+            if (rbac != null && securityLevel != rbac.GetSecurityLevel())
                 rbac.SetSecurityLevel(securityLevel);
 
             PreparedStatement stmt;

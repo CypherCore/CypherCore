@@ -3053,6 +3053,38 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {_trainers.Count} Trainers in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
+        public void LoadCreatureDefaultTrainers()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            _creatureDefaultTrainers.Clear();
+
+            SQLResult result = DB.World.Query("SELECT CreatureId, TrainerId FROM creature_default_trainer");
+            if (!result.IsEmpty())
+            {
+                do
+                {
+                    uint creatureId = result.Read<uint>(0);
+                    uint trainerId = result.Read<uint>(1);
+
+                    if (GetCreatureTemplate(creatureId) == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `creature_default_trainer` references non-existing creature template (CreatureId: {creatureId}), ignoring");
+                        continue;
+                    }
+
+                    if (GetTrainer(trainerId) == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `creature_default_trainer` references non-existing trainer (TrainerId: {trainerId}) for CreatureId {creatureId}, ignoring");
+                        continue;
+                    }
+
+                    _creatureDefaultTrainers[creatureId] = trainerId;
+                } while (result.NextRow());
+            }
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_creatureDefaultTrainers.Count} default trainers in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
         public void LoadVendors()
         {
             var time = Time.GetMSTime();
@@ -3324,6 +3356,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creatures in {1} ms", count, Time.GetMSTimeDiffToNow(time));
         }
+
         public void AddCreatureToGrid(ulong guid, CreatureData data)
         {
             uint mask = data.spawnMask;
@@ -3419,7 +3452,10 @@ namespace Game
         {
             return creatureTemplateAddonStorage.LookupByKey(entry);
         }
-
+        public uint GetCreatureDefaultTrainer(uint creatureId)
+        {
+            return _creatureDefaultTrainers.LookupByKey(creatureId);
+        }
         public Dictionary<uint, CreatureTemplate> GetCreatureTemplates()
         {
             return creatureTemplateStorage;
@@ -9138,6 +9174,7 @@ namespace Game
         Dictionary<uint, CreatureBaseStats> creatureBaseStatsStorage = new Dictionary<uint, CreatureBaseStats>();
         Dictionary<uint, VendorItemData> cacheVendorItemStorage = new Dictionary<uint, VendorItemData>();
         Dictionary<uint, Trainer> _trainers = new Dictionary<uint, Trainer>();
+        Dictionary<uint, uint> _creatureDefaultTrainers = new Dictionary<uint, uint>();
         List<uint>[] _difficultyEntries = new List<uint>[SharedConst.MaxCreatureDifficulties]; // already loaded difficulty 1 value in creatures, used in CheckCreatureTemplate
         List<uint>[] _hasDifficultyEntries = new List<uint>[SharedConst.MaxCreatureDifficulties]; // already loaded creatures with difficulty 1 values, used in CheckCreatureTemplate
         Dictionary<uint, NpcText> _npcTextStorage = new Dictionary<uint, NpcText>();

@@ -56,18 +56,22 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.TrainerList)]
         void HandleTrainerList(Hello packet)
         {
-            Log.outInfo(LogFilter.Network, $"{GetPlayerInfo()} sent legacy gossipless trainer hello for unit {packet.Unit.ToString()}, no trainer list available");
-        }
-
-        public void SendTrainerList(ObjectGuid guid, uint trainerId)
-        {
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(guid, NPCFlags.Trainer);
-            if (unit == null)
+            Creature npc = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Trainer);
+            if (!npc)
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: SendTrainerList - {guid.ToString()} not found or you can not interact with him.");
+                Log.outDebug(LogFilter.Network, $"WorldSession.SendTrainerList - {packet.Unit.ToString()} not found or you can not interact with him.");
                 return;
             }
 
+            uint trainerId = Global.ObjectMgr.GetCreatureDefaultTrainer(npc.GetEntry());
+            if (trainerId != 0)
+                SendTrainerList(npc, trainerId);
+            else
+                Log.outDebug(LogFilter.Network, $"WorldSession.SendTrainerList - Creature id {npc.GetEntry()} has no trainer data.");
+        }
+
+        public void SendTrainerList(Creature npc, uint trainerId)
+        {
             // remove fake death
             if (GetPlayer().HasUnitState(UnitState.Died))
                 GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
@@ -75,14 +79,14 @@ namespace Game
             Trainer trainer = Global.ObjectMgr.GetTrainer(trainerId);
             if (trainer == null)
             {
-                Log.outDebug(LogFilter.Network, $"WORLD: SendTrainerList - trainer spells not found for trainer {guid.ToString()} id {trainerId}");
+                Log.outDebug(LogFilter.Network, $"WORLD: SendTrainerList - trainer spells not found for trainer {npc.GetGUID().ToString()} id {trainerId}");
                 return;
             }
 
             _player.PlayerTalkClass.GetInteractionData().Reset();
-            _player.PlayerTalkClass.GetInteractionData().SourceGuid = guid;
+            _player.PlayerTalkClass.GetInteractionData().SourceGuid = npc.GetGUID();
             _player.PlayerTalkClass.GetInteractionData().TrainerId = trainerId;
-            trainer.SendSpells(unit, _player, GetSessionDbLocaleIndex());
+            trainer.SendSpells(npc, _player, GetSessionDbLocaleIndex());
         }
 
         [WorldPacketHandler(ClientOpcodes.TrainerBuySpell)]

@@ -56,11 +56,13 @@ namespace Game.Entities
         public void ResetCriteria(CriteriaTypes type, ulong miscValue1 = 0, ulong miscValue2 = 0, bool evenIfCriteriaComplete = false)
         {
             m_achievementSys.ResetCriteria(type, miscValue1, miscValue2, evenIfCriteriaComplete);
+            m_questObjectiveCriteriaMgr.ResetCriteria(type, miscValue1, miscValue2, evenIfCriteriaComplete);
         }
 
         public void UpdateCriteria(CriteriaTypes type, ulong miscValue1 = 0, ulong miscValue2 = 0, ulong miscValue3 = 0, Unit unit = null)
         {
             m_achievementSys.UpdateCriteria(type, miscValue1, miscValue2, miscValue3, unit, this);
+            m_questObjectiveCriteriaMgr.UpdateCriteria(type, miscValue1, miscValue2, miscValue3, unit, this);
 
             // Update only individual achievement criteria here, otherwise we may get multiple updates
             // from a single boss kill

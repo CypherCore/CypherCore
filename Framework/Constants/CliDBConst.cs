@@ -899,6 +899,20 @@ namespace Framework.Constants
         Max
     }
 
+    public enum CharBaseSectionVariation : byte
+    {
+        Skin = 0,
+        Face = 1,
+        FacialHair = 2,
+        Hair = 3,
+        Underwear = 4,
+        CustomDisplay1 = 5,
+        CustomDisplay2 = 6,
+        CustomDisplay3 = 7,
+
+        Max
+    }
+
     public enum CharSectionFlags
     {
         Player = 0x01,
@@ -923,7 +937,9 @@ namespace Framework.Constants
         CustomDisplay2LowRes = 12,
         CustomDisplay2 = 13,
         CustomDisplay3LowRes = 14,
-        CustomDisplay3 = 15
+        CustomDisplay3 = 15,
+
+        Max
     }
 
     public enum ChrSpecializationFlag

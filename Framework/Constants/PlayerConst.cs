@@ -30,7 +30,7 @@ namespace Framework.Constants
 
         public const int ReqPrimaryTreeTalents = 31;
         public const int ExploredZonesSize = 256;
-        public const long MaxMoneyAmount = long.MaxValue;
+        public const ulong MaxMoneyAmount = ulong.MaxValue;
         public const int MaxActionButtons = 132;
         public const int MaxActionButtonActionValue = 0x00FFFFFF + 1;
 

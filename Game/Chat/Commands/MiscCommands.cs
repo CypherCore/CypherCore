@@ -1435,7 +1435,7 @@ namespace Game.Chat
 
                 totalPlayerTime = result.Read<uint>(0);
                 level = result.Read<byte>(1);
-                money = result.Read<uint>(2);
+                money = result.Read<ulong>(2);
                 accId = result.Read<uint>(3);
                 raceid = (Race)result.Read<byte>(4);
                 classid = (Class)result.Read<byte>(5);

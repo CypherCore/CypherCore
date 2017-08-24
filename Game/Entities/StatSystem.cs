@@ -656,38 +656,37 @@ namespace Game.Entities
 
         float GetUnitCriticalChance(WeaponAttackType attackType, Unit victim)
         {
-            float crit;
-
+            float chance = 0.0f;
             if (IsTypeId(TypeId.Player))
             {
                 switch (attackType)
                 {
                     case WeaponAttackType.BaseAttack:
-                        crit = GetFloatValue(PlayerFields.CritPercentage);
+                        chance = GetFloatValue(PlayerFields.CritPercentage);
                         break;
                     case WeaponAttackType.OffAttack:
-                        crit = GetFloatValue(PlayerFields.OffhandCritPercentage);
+                        chance = GetFloatValue(PlayerFields.OffhandCritPercentage);
                         break;
                     case WeaponAttackType.RangedAttack:
-                        crit = GetFloatValue(PlayerFields.RangedCritPercentage);
-                        break;
-                    default:
-                        crit = 0.0f;
+                        chance = GetFloatValue(PlayerFields.RangedCritPercentage);
                         break;
                 }
             }
             else
             {
-                crit = 5.0f;
-                crit += GetTotalAuraModifier(AuraType.ModWeaponCritPercent);
-                crit += GetTotalAuraModifier(AuraType.ModCritPct);
+                if (!ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoCrit))
+                {
+                    chance = 5.0f;
+                    chance += GetTotalAuraModifier(AuraType.ModWeaponCritPercent);
+                    chance += GetTotalAuraModifier(AuraType.ModCritPct);
+                }
             }
 
             // flat aura mods
             if (attackType == WeaponAttackType.RangedAttack)
-                crit += victim.GetTotalAuraModifier(AuraType.ModAttackerRangedCritChance);
+                chance += victim.GetTotalAuraModifier(AuraType.ModAttackerRangedCritChance);
             else
-                crit += victim.GetTotalAuraModifier(AuraType.ModAttackerMeleeCritChance);
+                chance += victim.GetTotalAuraModifier(AuraType.ModAttackerMeleeCritChance);
 
             var critChanceForCaster = victim.GetAuraEffectsByType(AuraType.ModCritChanceForCaster);
             foreach (AuraEffect aurEff in critChanceForCaster)
@@ -695,14 +694,12 @@ namespace Game.Entities
                 if (aurEff.GetCasterGUID() != GetGUID())
                     continue;
 
-                crit += aurEff.GetAmount();
+                chance += aurEff.GetAmount();
             }
 
-            crit += victim.GetTotalAuraModifier(AuraType.ModAttackerSpellAndWeaponCritChance);
+            chance += victim.GetTotalAuraModifier(AuraType.ModAttackerSpellAndWeaponCritChance);
 
-            if (crit < 0.0f)
-                crit = 0.0f;
-            return crit;
+            return Math.Max(chance, 0.0f);
         }
         float GetUnitDodgeChance(WeaponAttackType attType, Unit victim)
         {
