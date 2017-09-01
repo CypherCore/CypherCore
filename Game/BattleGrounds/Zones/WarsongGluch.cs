@@ -27,6 +27,9 @@ namespace Game.BattleGrounds.Zones
     {
         public BgWarsongGluch()
         {
+            BgObjects = new ObjectGuid[WSGObjectTypes.Max];
+            BgCreatures = new ObjectGuid[WSGCreatureTypes.Max];
+
             StartMessageIds[BattlegroundConst.EventIdFirst] = CypherStrings.BgWsStartTwoMinutes;
             StartMessageIds[BattlegroundConst.EventIdSecond] = CypherStrings.BgWsStartOneMinute;
             StartMessageIds[BattlegroundConst.EventIdThird] = CypherStrings.BgWsStartHalfMinute;
@@ -720,14 +723,14 @@ namespace Game.BattleGrounds.Zones
             }
 
             WorldSafeLocsRecord sg = CliDB.WorldSafeLocsStorage.LookupByKey(WSGGraveyards.MainAlliance);
-            if (sg == null || !AddSpiritGuide(0, sg.Loc.X, sg.Loc.Y, sg.Loc.Z, 3.124139f, TeamId.Alliance))
+            if (sg == null || !AddSpiritGuide(WSGCreatureTypes.SpiritMainAlliance, sg.Loc.X, sg.Loc.Y, sg.Loc.Z, 3.124139f, TeamId.Alliance))
             {
                 Log.outError(LogFilter.Sql, "BgWarsongGluch: Failed to spawn Alliance spirit guide! Battleground not created!");
                 return false;
             }
 
             sg = CliDB.WorldSafeLocsStorage.LookupByKey(WSGGraveyards.MainHorde);
-            if (sg == null || !AddSpiritGuide(1, sg.Loc.X, sg.Loc.Y, sg.Loc.Z, 3.193953f, TeamId.Horde))
+            if (sg == null || !AddSpiritGuide(WSGCreatureTypes.SpiritMainHorde, sg.Loc.X, sg.Loc.Y, sg.Loc.Z, 3.193953f, TeamId.Horde))
             {
                 Log.outError(LogFilter.Sql, "BgWarsongGluch: Failed to spawn Horde spirit guide! Battleground not created!");
                 return false;
@@ -1051,6 +1054,14 @@ namespace Game.BattleGrounds.Zones
         public const uint HFlag = 179831;
         public const uint AFlagGround = 179785;
         public const uint HFlagGround = 179786;
+    }
+
+    struct WSGCreatureTypes
+    {
+        public const int SpiritMainAlliance = 0;
+        public const int SpiritMainHorde = 1;
+
+        public const int Max = 2;
     }
 
     struct WSGWorldStates

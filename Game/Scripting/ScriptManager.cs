@@ -56,26 +56,27 @@ namespace Game.Scripting
 
             FillSpellSummary();
 
-            if (LoadScripts())
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} C# scripts in {1} ms", GetScriptCount(), Time.GetMSTimeDiffToNow(oldMSTime));
+            //Load Core Scripts
+            LoadScripts(Assembly.GetExecutingAssembly());
+
+            //Load Scripts.dll
+            if (!File.Exists("Scripts.dll"))
+                Log.outError(LogFilter.ServerLoading, "Cant find file {0}, Only Core Scripts are loaded.");
+            else
+            {
+                Assembly asm = Assembly.LoadFile(Path.GetFullPath("Scripts.dll"));
+                if (asm == null)
+                    Log.outError(LogFilter.ServerLoading, "Error Loading Scripts.dll, Only Core Scripts are loaded.");
+                else
+                    LoadScripts(asm);
+            }
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {GetScriptCount()} C# scripts in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
-        public bool LoadScripts(bool reload = false)
+        public void LoadScripts(Assembly assembly)
         {
-            if (!File.Exists("Scripts.dll"))
-            {
-                Log.outError(LogFilter.ServerLoading, "Cant find file {0}, Scripts will not be loaded.");
-                return false;
-            }
-
-            Assembly asm = Assembly.LoadFile(Path.GetFullPath("Scripts.dll"));
-            if (asm == null)
-            {
-                Log.outError(LogFilter.ServerLoading, "Error Loading Scripts.dll, Scripts will not be loaded.");
-                return false;
-            }
-
-            foreach (var type in asm.GetTypes())
+            foreach (var type in assembly.GetTypes())
             {
                 var attributes = (ScriptAttribute[])type.GetCustomAttributes<ScriptAttribute>();
                 if (attributes.Empty())
@@ -162,8 +163,6 @@ namespace Game.Scripting
                     }
                 }
             }
-
-            return true;
         }
 
         public void LoadDatabase()

@@ -2999,6 +2999,9 @@ namespace Game.Maps
 
         public AreaTrigger GetAreaTrigger(ObjectGuid guid)
         {
+            if (!guid.IsAreaTrigger())
+                return null;
+
             return (AreaTrigger)_objectsStore.LookupByKey(guid);
         }
 
@@ -3009,26 +3012,41 @@ namespace Game.Maps
 
         public Corpse GetCorpse(ObjectGuid guid)
         {
+            if (!guid.IsCorpse())
+                return null;
+
             return (Corpse)_objectsStore.LookupByKey(guid);
         }
 
         public Creature GetCreature(ObjectGuid guid)
         {
+            if (!guid.IsCreature())
+                return null;
+
             return (Creature)_objectsStore.LookupByKey(guid);
         }
 
         public DynamicObject GetDynamicObject(ObjectGuid guid)
         {
+            if (!guid.IsDynamicObject())
+                return null;
+
             return (DynamicObject)_objectsStore.LookupByKey(guid);
         }
 
         public GameObject GetGameObject(ObjectGuid guid)
         {
+            if (!guid.IsGameObject())
+                return null;
+
             return (GameObject)_objectsStore.LookupByKey(guid);
         }
 
         public Pet GetPet(ObjectGuid guid)
         {
+            if (!guid.IsPet())
+                return null;
+
             return (Pet)_objectsStore.LookupByKey(guid);
         }
 

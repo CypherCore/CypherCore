@@ -91,7 +91,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt16(CreatureFamily);
             _worldPacket.WriteUInt16(Specialization);
             _worldPacket.WriteUInt32(TimeLimit);
-            _worldPacket.WriteUInt16(((int)CommandState << 8) + (Flag << 16));
+            _worldPacket.WriteUInt16((ushort)((byte)CommandState | (Flag << 16)));
             _worldPacket.WriteUInt8(ReactState);
 
             foreach (uint actionButton in ActionButtons)

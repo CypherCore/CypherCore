@@ -1585,7 +1585,7 @@ namespace Game.Achievements
             foreach (var p in _criteriaTrees)
                 p.Value.Criteria = GetCriteria(p.Value.Entry.CriteriaID);
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {criterias} criteria, {guildCriterias} guild criteria, {scenarioCriterias} scenario criteria and {questObjectiveCriterias} quest objective criteria in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {criterias} criteria, {guildCriterias} guild criteria, {scenarioCriterias} scenario criteria and {questObjectiveCriterias} quest objective criteria in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
         public void LoadCriteriaData()

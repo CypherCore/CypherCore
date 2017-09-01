@@ -521,12 +521,12 @@ namespace Game.DataStorage
 
         public bool HasCharSections(Race race, Gender gender, CharBaseSectionVariation variation)
         {
-            return _charSections.ContainsKey(Tuple.Create(race, gender, variation));
+            return _charSections.ContainsKey(Tuple.Create((byte)race, (byte)gender, variation));
         }
 
         public CharSectionsRecord GetCharSectionEntry(Race race, Gender gender, CharBaseSectionVariation variation, byte variationIndex, byte colorIndex)
         {
-            var list = _charSections.LookupByKey(Tuple.Create(race, gender, variation));
+            var list = _charSections.LookupByKey(Tuple.Create((byte)race, (byte)gender, variation));
             foreach (var charSection in list)
                 if (charSection.VariationIndex == variationIndex && charSection.ColorIndex == colorIndex)
                     return charSection;

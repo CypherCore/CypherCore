@@ -46,6 +46,7 @@ UnitTestResults.html
 *.pidb
 *.log
 *.scc
+*.vs
 
 # Visual Studio cache files
 *.sln.ide/

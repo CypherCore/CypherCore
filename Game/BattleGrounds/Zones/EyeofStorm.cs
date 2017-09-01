@@ -28,6 +28,8 @@ namespace Game.BattleGrounds.Zones
         public BgEyeofStorm()
         {
             m_BuffChange = true;
+            BgObjects = new ObjectGuid[ABObjectTypes.Max];
+            BgCreatures= new ObjectGuid[EotSCreaturesTypes.Max];
             m_Points_Trigger[EotSPoints.FelReaver] = EotSPointsTrigger.FelReaverBuff;
             m_Points_Trigger[EotSPoints.BloodElf] = EotSPointsTrigger.BloodElfBuff;
             m_Points_Trigger[EotSPoints.DraeneiRuins] = EotSPointsTrigger.DraeneiRuinsBuff;
@@ -525,14 +527,14 @@ namespace Game.BattleGrounds.Zones
             }
 
             WorldSafeLocsRecord sg = CliDB.WorldSafeLocsStorage.LookupByKey(EotSGaveyardIds.MainAlliance);
-            if (sg == null || !AddSpiritGuide(EotSGaveyardIds.MainAlliance, sg.Loc.X, sg.Loc.Y, sg.Loc.Z, 3.124139f, TeamId.Alliance))
+            if (sg == null || !AddSpiritGuide(EotSCreaturesTypes.SpiritMainAlliance, sg.Loc.X, sg.Loc.Y, sg.Loc.Z, 3.124139f, TeamId.Alliance))
             {
                 Log.outError(LogFilter.Sql, "BatteGroundEY: Failed to spawn spirit guide. The battleground was not created.");
                 return false;
             }
 
             sg = CliDB.WorldSafeLocsStorage.LookupByKey(EotSGaveyardIds.MainHorde);
-            if (sg == null || !AddSpiritGuide((int)EotSCreaturesTypes.SpiritMainHorde, sg.Loc.X, sg.Loc.Y, sg.Loc.Z, 3.193953f, TeamId.Horde))
+            if (sg == null || !AddSpiritGuide(EotSCreaturesTypes.SpiritMainHorde, sg.Loc.X, sg.Loc.Y, sg.Loc.Z, 3.193953f, TeamId.Horde))
             {
                 Log.outError(LogFilter.Sql, "BatteGroundEY: Failed to spawn spirit guide. The battleground was not created.");
                 return false;
@@ -1235,21 +1237,21 @@ namespace Game.BattleGrounds.Zones
         public const int PointsMax = 4;
     }
 
-    enum EotSCreaturesTypes
+    struct EotSCreaturesTypes
     {
-        SpiritFelReaver = 0,
-        SpiritBloodElf = 1,
-        SpiritDraeneiRuins = 2,
-        SpiritMageTower = 3,
-        SpiritMainAlliance = 4,
-        SpiritMainHorde = 5,
+        public const uint SpiritFelReaver = 0;
+        public const uint SpiritBloodElf = 1;
+        public const uint SpiritDraeneiRuins = 2;
+        public const uint SpiritMageTower = 3;
+        public const int SpiritMainAlliance = 4;
+        public const int SpiritMainHorde = 5;
 
-        TriggerFelReaver = 6,
-        TriggerBloodElf = 7,
-        TriggerDraeneiRuins = 8,
-        TriggerMageTower = 9,
+        public const uint TriggerFelReaver = 6;
+        public const uint TriggerBloodElf = 7;
+        public const uint TriggerDraeneiRuins = 8;
+        public const uint TriggerMageTower = 9;
 
-        BgCreaturesMax = 10
+       public const uint Max = 10;
     }
 
     struct EotSObjectTypes

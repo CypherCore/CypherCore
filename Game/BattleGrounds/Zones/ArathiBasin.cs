@@ -31,8 +31,10 @@ namespace Game.BattleGrounds.Zones
         {
             m_IsInformedNearVictory = false;
             m_BuffChange = true;
+            BgObjects = new ObjectGuid[ABObjectTypes.Max];
+            BgCreatures = new ObjectGuid[ABBattlegroundNodes.AllCount + 5];//+5 for aura triggers
 
-            for (byte i = 0; i < BattlegroundNodes.DynamicNodesCount; ++i)
+            for (byte i = 0; i < ABBattlegroundNodes.DynamicNodesCount; ++i)
             {
                 m_Nodes[i] = 0;
                 m_prevNodes[i] = 0;
@@ -65,7 +67,7 @@ namespace Game.BattleGrounds.Zones
             {
                 int[] team_points = { 0, 0 };
 
-                for (byte node = 0; node < BattlegroundNodes.DynamicNodesCount; ++node)
+                for (byte node = 0; node < ABBattlegroundNodes.DynamicNodesCount; ++node)
                 {
                     // 3 sec delay to spawn new banner instead previous despawned one
                     if (m_BannerTimers[node].timer != 0)
@@ -187,9 +189,9 @@ namespace Game.BattleGrounds.Zones
         public override void StartingEventCloseDoors()
         {
             // despawn banners, auras and buffs
-            for (int obj = ABObjectTypes.BannerNeutral; obj < BattlegroundNodes.DynamicNodesCount * 8; ++obj)
+            for (int obj = ABObjectTypes.BannerNeutral; obj < ABBattlegroundNodes.DynamicNodesCount * 8; ++obj)
                 SpawnBGObject(obj, BattlegroundConst.RespawnOneDay);
-            for (int i = 0; i < BattlegroundNodes.DynamicNodesCount * 3; ++i)
+            for (int i = 0; i < ABBattlegroundNodes.DynamicNodesCount * 3; ++i)
                 SpawnBGObject(ABObjectTypes.SpeedbuffStables + i, BattlegroundConst.RespawnOneDay);
 
             // Starting doors
@@ -199,8 +201,8 @@ namespace Game.BattleGrounds.Zones
             SpawnBGObject(ABObjectTypes.GateH, BattlegroundConst.RespawnImmediately);
 
             // Starting base spirit guides
-            _NodeOccupied(BattlegroundNodes.SpiritAliance, Team.Alliance);
-            _NodeOccupied(BattlegroundNodes.SpiritHorde, Team.Horde);
+            _NodeOccupied(ABBattlegroundNodes.SpiritAliance, Team.Alliance);
+            _NodeOccupied(ABBattlegroundNodes.SpiritHorde, Team.Horde);
         }
 
         public override void StartingEventOpenDoors()
@@ -208,7 +210,7 @@ namespace Game.BattleGrounds.Zones
             // spawn neutral banners
             for (int banner = ABObjectTypes.BannerNeutral, i = 0; i < 5; banner += 8, ++i)
                 SpawnBGObject(banner, BattlegroundConst.RespawnImmediately);
-            for (int i = 0; i < BattlegroundNodes.DynamicNodesCount; ++i)
+            for (int i = 0; i < ABBattlegroundNodes.DynamicNodesCount; ++i)
             {
                 //randomly select buff to spawn
                 int buff = RandomHelper.IRand(0, 2);
@@ -305,15 +307,15 @@ namespace Game.BattleGrounds.Zones
         {
             switch (node)
             {
-                case BattlegroundNodes.NodeStables:
+                case ABBattlegroundNodes.NodeStables:
                     return CypherStrings.BgAbNodeStables;
-                case BattlegroundNodes.NodeBlacksmith:
+                case ABBattlegroundNodes.NodeBlacksmith:
                     return CypherStrings.BgAbNodeBlacksmith;
-                case BattlegroundNodes.NodeFarm:
+                case ABBattlegroundNodes.NodeFarm:
                     return CypherStrings.BgAbNodeFarm;
-                case BattlegroundNodes.NodeLumberMill:
+                case ABBattlegroundNodes.NodeLumberMill:
                     return CypherStrings.BgAbNodeLumberMill;
-                case BattlegroundNodes.NodeGoldMine:
+                case ABBattlegroundNodes.NodeGoldMine:
                     return CypherStrings.BgAbNodeGoldMine;
                 default:
                     Contract.Assert(false);
@@ -327,17 +329,17 @@ namespace Game.BattleGrounds.Zones
             byte[] plusArray = { 0, 2, 3, 0, 1 };
 
             // Node icons
-            for (byte node = 0; node < BattlegroundNodes.DynamicNodesCount; ++node)
+            for (byte node = 0; node < ABBattlegroundNodes.DynamicNodesCount; ++node)
                 packet.AddState(NodeIcons[node], (m_Nodes[node] == 0));
 
             // Node occupied states
-            for (byte node = 0; node < BattlegroundNodes.DynamicNodesCount; ++node)
-                for (byte i = 1; i < BattlegroundNodes.DynamicNodesCount; ++i)
+            for (byte node = 0; node < ABBattlegroundNodes.DynamicNodesCount; ++node)
+                for (byte i = 1; i < ABBattlegroundNodes.DynamicNodesCount; ++i)
                     packet.AddState(NodeStates[node] + plusArray[i], ((int)m_Nodes[node] == i));
 
             // How many bases each team owns
             byte ally = 0, horde = 0;
-            for (byte node = 0; node < BattlegroundNodes.DynamicNodesCount; ++node)
+            for (byte node = 0; node < ABBattlegroundNodes.DynamicNodesCount; ++node)
                 if (m_Nodes[node] == ABNodeStatus.AllyOccupied)
                     ++ally;
                 else if (m_Nodes[node] == ABNodeStatus.HordeOccupied)
@@ -370,7 +372,7 @@ namespace Game.BattleGrounds.Zones
 
             // How many bases each team owns
             byte ally = 0, horde = 0;
-            for (byte i = 0; i < BattlegroundNodes.DynamicNodesCount; ++i)
+            for (byte i = 0; i < ABBattlegroundNodes.DynamicNodesCount; ++i)
                 if (m_Nodes[i] == ABNodeStatus.AllyOccupied)
                     ++ally;
                 else if (m_Nodes[i] == ABNodeStatus.HordeOccupied)
@@ -385,11 +387,11 @@ namespace Game.BattleGrounds.Zones
             if (!AddSpiritGuide(node, SpiritGuidePos[node], GetTeamIndexByTeamId(team)))
                 Log.outError(LogFilter.Battleground, "Failed to spawn spirit guide! point: {0}, team: {1}, ", node, team);
 
-            if (node >= BattlegroundNodes.DynamicNodesCount)//only dynamic nodes, no start points
+            if (node >= ABBattlegroundNodes.DynamicNodesCount)//only dynamic nodes, no start points
                 return;
 
             byte capturedNodes = 0;
-            for (byte i = 0; i < BattlegroundNodes.DynamicNodesCount; ++i)
+            for (byte i = 0; i < ABBattlegroundNodes.DynamicNodesCount; ++i)
                 if (m_Nodes[i] == ABNodeStatus.Occupied + GetTeamIndexByTeamId(team) && m_NodeTimers[i] == 0)
                     ++capturedNodes;
 
@@ -414,11 +416,11 @@ namespace Game.BattleGrounds.Zones
 
         void _NodeDeOccupied(byte node)
         {
-            if (node >= BattlegroundNodes.DynamicNodesCount)
+            if (node >= ABBattlegroundNodes.DynamicNodesCount)
                 return;
 
             //remove bonus honor aura trigger creature when node is lost
-            if (node < BattlegroundNodes.DynamicNodesCount)//only dynamic nodes, no start points
+            if (node < ABBattlegroundNodes.DynamicNodesCount)//only dynamic nodes, no start points
                 DelCreature(node + 7);//null checks are in DelCreature! 0-6 spirit guides
 
             RelocateDeadPlayers(BgCreatures[node]);
@@ -434,15 +436,15 @@ namespace Game.BattleGrounds.Zones
             if (GetStatus() != BattlegroundStatus.InProgress)
                 return;
 
-            byte node = BattlegroundNodes.NodeStables;
+            byte node = ABBattlegroundNodes.NodeStables;
             GameObject obj = GetBgMap().GetGameObject(BgObjects[node * 8 + 7]);
-            while ((node < BattlegroundNodes.DynamicNodesCount) && ((!obj) || (!source.IsWithinDistInMap(obj, 10))))
+            while ((node < ABBattlegroundNodes.DynamicNodesCount) && ((!obj) || (!source.IsWithinDistInMap(obj, 10))))
             {
                 ++node;
                 obj = GetBgMap().GetGameObject(BgObjects[node * 8 + ABObjectTypes.AuraContested]);
             }
 
-            if (node == BattlegroundNodes.DynamicNodesCount)
+            if (node == ABBattlegroundNodes.DynamicNodesCount)
             {
                 // this means our player isn't close to any of banners - maybe cheater ??
                 return;
@@ -560,7 +562,7 @@ namespace Game.BattleGrounds.Zones
         {
             // How many bases each team owns
             byte ally = 0, horde = 0;
-            for (byte i = 0; i < BattlegroundNodes.DynamicNodesCount; ++i)
+            for (byte i = 0; i < ABBattlegroundNodes.DynamicNodesCount; ++i)
                 if (m_Nodes[i] == ABNodeStatus.AllyOccupied)
                     ++ally;
                 else if (m_Nodes[i] == ABNodeStatus.HordeOccupied)
@@ -578,7 +580,7 @@ namespace Game.BattleGrounds.Zones
         public override bool SetupBattleground()
         {
             bool result = true;
-            for (int i = 0; i < BattlegroundNodes.DynamicNodesCount; ++i)
+            for (int i = 0; i < ABBattlegroundNodes.DynamicNodesCount; ++i)
             {
                 result &= AddObject(ABObjectTypes.BannerNeutral + 8 * i, (uint)(NodeObjectId.Banner0 + i), NodePositions[i], 0, 0, (float)Math.Sin(NodePositions[i].GetOrientation() / 2), (float)Math.Cos(NodePositions[i].GetOrientation() / 2), BattlegroundConst.RespawnOneDay);
                 result &= AddObject(ABObjectTypes.BannerContA + 8 * i, ABObjectIds.BannerContA, NodePositions[i], 0, 0, (float)Math.Sin(NodePositions[i].GetOrientation() / 2), (float)Math.Cos(NodePositions[i].GetOrientation() / 2), BattlegroundConst.RespawnOneDay);
@@ -604,7 +606,7 @@ namespace Game.BattleGrounds.Zones
             }
 
             //buffs
-            for (int i = 0; i < BattlegroundNodes.DynamicNodesCount; ++i)
+            for (int i = 0; i < ABBattlegroundNodes.DynamicNodesCount; ++i)
             {
                 result &= AddObject(ABObjectTypes.SpeedbuffStables + 3 * i, Buff_Entries[0], BuffPositions[i][0], BuffPositions[i][1], BuffPositions[i][2], BuffPositions[i][3], 0, 0, (float)Math.Sin(BuffPositions[i][3] / 2), (float)Math.Cos(BuffPositions[i][3] / 2), BattlegroundConst.RespawnOneDay);
                 result &= AddObject(ABObjectTypes.SpeedbuffStables + 3 * i + 1, Buff_Entries[1], BuffPositions[i][0], BuffPositions[i][1], BuffPositions[i][2], BuffPositions[i][3], 0, 0, (float)Math.Sin(BuffPositions[i][3] / 2), (float)Math.Cos(BuffPositions[i][3] / 2), BattlegroundConst.RespawnOneDay);
@@ -638,7 +640,7 @@ namespace Game.BattleGrounds.Zones
             m_HonorTics = (isBGWeekend) ? ABBGWeekendHonorTicks : NotABBGWeekendHonorTicks;
             m_ReputationTics = (isBGWeekend) ? ABBGWeekendReputationTicks : NotABBGWeekendReputationTicks;
 
-            for (byte i = 0; i < BattlegroundNodes.DynamicNodesCount; ++i)
+            for (byte i = 0; i < ABBattlegroundNodes.DynamicNodesCount; ++i)
             {
                 m_Nodes[i] = 0;
                 m_prevNodes[i] = 0;
@@ -667,7 +669,7 @@ namespace Game.BattleGrounds.Zones
 
             // Is there any occupied node for this team?
             List<byte> nodes = new List<byte>();
-            for (byte i = 0; i < BattlegroundNodes.DynamicNodesCount; ++i)
+            for (byte i = 0; i < ABBattlegroundNodes.DynamicNodesCount; ++i)
                 if (m_Nodes[i] == ABNodeStatus.Occupied + (int)teamIndex)
                     nodes.Add(i);
 
@@ -727,12 +729,12 @@ namespace Game.BattleGrounds.Zones
         public override bool IsAllNodesControlledByTeam(Team team)
         {
             uint count = 0;
-            for (int i = 0; i < BattlegroundNodes.DynamicNodesCount; ++i)
+            for (int i = 0; i < ABBattlegroundNodes.DynamicNodesCount; ++i)
                 if ((team == Team.Alliance && m_Nodes[i] == ABNodeStatus.AllyOccupied) ||
                     (team == Team.Horde && m_Nodes[i] == ABNodeStatus.HordeOccupied))
                     ++count;
 
-            return count == BattlegroundNodes.DynamicNodesCount;
+            return count == ABBattlegroundNodes.DynamicNodesCount;
         }
 
         public override bool CheckAchievementCriteriaMeet(uint criteriaId, Player player, Unit target, uint miscvalue)
@@ -754,10 +756,10 @@ namespace Game.BattleGrounds.Zones
         ///    3: ally occupied
         ///    4: horde occupied
         /// </summary>
-        ABNodeStatus[] m_Nodes = new ABNodeStatus[BattlegroundNodes.DynamicNodesCount];
-        ABNodeStatus[] m_prevNodes = new ABNodeStatus[BattlegroundNodes.DynamicNodesCount];
-        BannerTimer[] m_BannerTimers = new BannerTimer[BattlegroundNodes.DynamicNodesCount];
-        uint[] m_NodeTimers = new uint[BattlegroundNodes.DynamicNodesCount];
+        ABNodeStatus[] m_Nodes = new ABNodeStatus[ABBattlegroundNodes.DynamicNodesCount];
+        ABNodeStatus[] m_prevNodes = new ABNodeStatus[ABBattlegroundNodes.DynamicNodesCount];
+        BannerTimer[] m_BannerTimers = new BannerTimer[ABBattlegroundNodes.DynamicNodesCount];
+        uint[] m_NodeTimers = new uint[ABBattlegroundNodes.DynamicNodesCount];
         uint[] m_lastTick = new uint[SharedConst.BGTeamsCount];
         uint[] m_HonorScoreTics = new uint[SharedConst.BGTeamsCount];
         uint[] m_ReputationScoreTics = new uint[SharedConst.BGTeamsCount];
@@ -983,7 +985,7 @@ namespace Game.BattleGrounds.Zones
         public const uint GateH = 180256;
     }
 
-    struct BattlegroundNodes
+    struct ABBattlegroundNodes
     {
         public const int NodeStables = 0;
         public const int NodeBlacksmith = 1;
@@ -996,7 +998,7 @@ namespace Game.BattleGrounds.Zones
         public const int SpiritAliance = 5;
         public const int SpiritHorde = 6;
 
-        public const int AllNodesCount = 7;                         // All Nodes (Dynamic And Static)
+        public const int AllCount = 7;                         // All Nodes (Dynamic And Static)
     }
 
     enum ABNodeStatus
