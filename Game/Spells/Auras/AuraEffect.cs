@@ -666,7 +666,7 @@ namespace Game.Spells
                 case AuraType.MechanicImmunity:
                 case AuraType.ModMechanicResistance:
                     // compare mechanic
-                    if (spellInfo == null || !Convert.ToBoolean(spellInfo.GetAllEffectsMechanicMask() &  (1 << GetMiscValue())))
+                    if (spellInfo == null || !Convert.ToBoolean(spellInfo.GetAllEffectsMechanicMask() & (1 << GetMiscValue())))
                         result = false;
                     break;
                 case AuraType.ModCastingSpeedNotStack:
@@ -796,6 +796,7 @@ namespace Game.Spells
                 case ShapeShiftForm.SpiritOfRedemption:
                     spellId = 27792;
                     spellId2 = 27795;
+                    spellId3 = 62371;
                     break;
                 case ShapeShiftForm.Shadowform:
                     if (target.HasAura(107906)) // Glyph of Shadow
@@ -1225,8 +1226,6 @@ namespace Game.Spells
                     if (!target.IsStandState())
                         target.SetStandState(UnitStandStateType.Stand);
                 }
-
-                target.SetHealth(1);
             }
             // die at aura end
             else if (target.IsAlive())
@@ -6234,5 +6233,48 @@ namespace Game.Spells
             }
         }
         #endregion
+    }
+
+    class AbsorbAuraOrderPred : Comparer<AuraEffect>
+    {
+        public AbsorbAuraOrderPred() { }
+
+        public override int Compare(AuraEffect aurEffA, AuraEffect aurEffB)
+        {
+            SpellInfo spellProtoA = aurEffA.GetSpellInfo();
+            SpellInfo spellProtoB = aurEffB.GetSpellInfo();
+
+            // Fel Blossom
+            if (spellProtoA.Id == 28527)
+                return 1;
+            if (spellProtoB.Id == 28527)
+                return 0;
+
+            // Ice Barrier
+            if (spellProtoA.GetCategory() == 471)
+                return 1;
+            if (spellProtoB.GetCategory() == 471)
+                return 0;
+
+            // Sacrifice
+            if (spellProtoA.Id == 7812)
+                return 1;
+            if (spellProtoB.Id == 7812)
+                return 0;
+
+            // Cauterize (must be last)
+            if (spellProtoA.Id == 86949)
+                return 0;
+            if (spellProtoB.Id == 86949)
+                return 1;
+
+            // Spirit of Redemption (must be last)
+            if (spellProtoA.Id == 20711)
+                return 0;
+            if (spellProtoB.Id == 20711)
+                return 1;
+
+            return 0;
+        }
     }
 }

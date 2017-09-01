@@ -1636,10 +1636,6 @@ namespace Game.Spells
             if (DotDuration == 0)
                 return 1;
 
-            // 200% limit
-            if (DotDuration > 30000)
-                DotDuration = 30000;
-
             foreach (SpellEffectInfo effect in GetEffectsForDifficulty(difficulty))
             {
                 if (effect != null && effect.Effect == SpellEffectName.ApplyAura)

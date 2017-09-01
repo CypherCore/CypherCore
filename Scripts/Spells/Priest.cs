@@ -71,6 +71,7 @@ namespace Scripts.Spells.Priest
         public const uint ShadowformVisualWithoutGlyph = 107903;
         public const uint ShieldDisciplineEnergize = 47755;
         public const uint ShieldDisciplinePassive = 197045;
+        public const uint SpiritOfRedemption = 27827;
         public const uint StrengthOfSoul = 197535;
         public const uint StrengthOfSoulEffect = 197548;
         public const uint T9Healing2p = 67201;
@@ -894,6 +895,33 @@ namespace Scripts.Spells.Priest
         {
             AfterEffectApply.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.ModShapeshift, AuraEffectHandleModes.RealOrReapplyMask));
             AfterEffectRemove.Add(new EffectApplyHandler(HandleEffectRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.RealOrReapplyMask));
+        }
+    }
+
+    [Script] // 20711 - Spirit of Redemption
+    class spell_priest_spirit_of_redemption : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.SpiritOfRedemption);
+        }
+
+        void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+        {
+            Unit target = GetTarget();
+            if (dmgInfo.GetDamage() >= target.GetHealth())
+            {
+                target.CastSpell(target, SpellIds.SpiritOfRedemption, TriggerCastFlags.FullMask, null, aurEff);
+                target.SetFullHealth();
+                return;
+            }
+
+            PreventDefaultAction();
+        }
+
+        public override void Register()
+        {
+            OnEffectAbsorb.Add(new EffectAbsorbHandler(HandleAbsorb, 0));
         }
     }
 

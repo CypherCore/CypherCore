@@ -1450,33 +1450,8 @@ namespace Game.Entities
             if (player != null)
                 player.UpdateCriteria(CriteriaTypes.GetKillingBlows, 1, 0, 0, victim);
 
-            // if talent known but not triggered (check priest class for speedup check)
-            bool spiritOfRedemption = false;
-            if (victim.IsTypeId(TypeId.Player) && victim.GetClass() == Class.Priest)
-            {
-                AuraEffect spiritOfRedemptionEffect = GetAuraEffect(20711, 0);
-                if (spiritOfRedemptionEffect != null)
-                {
-                    // save value before aura remove
-                    uint ressSpellId = victim.GetUInt32Value(PlayerFields.SelfResSpell);
-                    if (ressSpellId == 0)
-                        ressSpellId = victim.ToPlayer().GetResurrectionSpellId();
-                    // Remove all expected to remove at death auras (most important negative case like DoT or periodic triggers)
-                    victim.RemoveAllAurasOnDeath();
-                    // restore for use at real death
-                    victim.SetUInt32Value(PlayerFields.SelfResSpell, ressSpellId);
-
-                    // FORM_SPIRIT_OF_REDEMPTION and related auras
-                    victim.CastSpell(victim, 27827, true, null, spiritOfRedemptionEffect);
-                    spiritOfRedemption = true;
-                }
-            }
-
-            if (!spiritOfRedemption)
-            {
-                Log.outDebug(LogFilter.Unit, "SET JUST_DIED");
-                victim.setDeathState(DeathState.JustDied);
-            }
+            Log.outDebug(LogFilter.Unit, "SET JUST_DIED");
+            victim.setDeathState(DeathState.JustDied);
 
             // Inform pets (if any) when player kills target)
             // MUST come after victim.setDeathState(JUST_DIED); or pet next target
@@ -2378,7 +2353,7 @@ namespace Game.Entities
             // We're going to call functions which can modify content of the list during iteration over it's elements
             // Let's copy the list so we can prevent iterator invalidation
             var vSchoolAbsorbCopy = victim.GetAuraEffectsByType(AuraType.SchoolAbsorb);
-            vSchoolAbsorbCopy.Sort();//new AbsorbAuraOrderPred());todo fix me
+            vSchoolAbsorbCopy.Sort(new AbsorbAuraOrderPred());
 
             // absorb without mana cost
             foreach (var eff in vSchoolAbsorbCopy)

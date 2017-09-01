@@ -1710,7 +1710,7 @@ namespace Game.BattleGrounds
                 if (pair.Value.Team == Team)
                 {
                     Player player = Global.ObjAccessor.FindPlayer(pair.Key);
-                    if (player && player.IsAlive() && player.GetShapeshiftForm() != ShapeShiftForm.SpiritOfRedemption)
+                    if (player && player.IsAlive())
                         ++count;
                 }
             }
