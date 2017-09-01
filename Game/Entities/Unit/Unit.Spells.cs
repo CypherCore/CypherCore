@@ -3922,7 +3922,7 @@ namespace Game.Entities
             }
 
             bool auraStateFound = false;
-            AuraStateType auraState = aura.GetSpellInfo().GetAuraState(GetMap().GetDifficultyID());
+            AuraStateType auraState = aura.GetSpellInfo().GetAuraState();
             if (auraState != 0)
             {
                 bool canBreak = false;
@@ -4095,7 +4095,7 @@ namespace Game.Entities
                 return;
 
             // Update target aura state flag
-            AuraStateType aState = aura.GetSpellInfo().GetAuraState(GetMap().GetDifficultyID());
+            AuraStateType aState = aura.GetSpellInfo().GetAuraState();
             if (aState != 0)
                 ModifyAuraState(aState, true);
 

@@ -244,6 +244,9 @@ namespace Game.Spells
             }
             ChainEntry = null;
             ExplicitTargetMask = 0;
+
+            _spellSpecific = SpellSpecificType.Normal;
+            _auraState = AuraStateType.None;
         }
 
         public bool HasEffect(Difficulty difficulty, SpellEffectName effect)
@@ -1272,11 +1275,18 @@ namespace Game.Spells
             return (SpellCastTargetFlags)ExplicitTargetMask;
         }
 
-        public AuraStateType GetAuraState(Difficulty difficulty)
+        public AuraStateType GetAuraState()
         {
+            return _auraState;
+        }
+
+        public void _LoadAuraState()
+        {
+            _auraState = AuraStateType.None;
+
             // Seals
             if (GetSpellSpecific() == SpellSpecificType.Seal)
-                return AuraStateType.Judgement;
+                _auraState = AuraStateType.Judgement;
 
             // Conflagrate aura state on Immolate and Shadowflame
             if (SpellFamilyName == SpellFamilyNames.Warlock &&
@@ -1284,58 +1294,64 @@ namespace Game.Spells
                 (SpellFamilyFlags[0].HasAnyFlag(4u) ||
                 // Shadowflame
                 SpellFamilyFlags[2].HasAnyFlag(2u)))
-                return AuraStateType.Conflagrate;
+                _auraState = AuraStateType.Conflagrate;
 
             // Faerie Fire (druid versions)
             if (SpellFamilyName == SpellFamilyNames.Druid && SpellFamilyFlags[0].HasAnyFlag(0x400u))
-                return AuraStateType.FaerieFire;
+                _auraState = AuraStateType.FaerieFire;
 
             // Sting (hunter's pet ability)
             if (GetCategory() == 1133)
-                return AuraStateType.FaerieFire;
+                _auraState = AuraStateType.FaerieFire;
 
             // Victorious
             if (SpellFamilyName == SpellFamilyNames.Warrior && SpellFamilyFlags[1].HasAnyFlag(0x40000u))
-                return AuraStateType.WarriorVictoryRush;
+                _auraState = AuraStateType.WarriorVictoryRush;
 
             // Swiftmend state on Regrowth & Rejuvenation
             if (SpellFamilyName == SpellFamilyNames.Druid && SpellFamilyFlags[0].HasAnyFlag(0x50u))
-                return AuraStateType.Swiftmend;
+                _auraState = AuraStateType.Swiftmend;
 
             // Deadly poison aura state
             if (SpellFamilyName == SpellFamilyNames.Rogue && SpellFamilyFlags[0].HasAnyFlag(0x10000u))
-                return AuraStateType.DeadlyPoison;
+                _auraState = AuraStateType.DeadlyPoison;
 
             // Enrage aura state
             if (Dispel == DispelType.Enrage)
-                return AuraStateType.Enrage;
+                _auraState = AuraStateType.Enrage;
 
             // Bleeding aura state
             if (Convert.ToBoolean(GetAllEffectsMechanicMask() & 1 << (int)Mechanics.Bleed))
-                return AuraStateType.Bleeding;
+                _auraState = AuraStateType.Bleeding;
 
             if (Convert.ToBoolean(GetSchoolMask() & SpellSchoolMask.Frost))
             {
-                foreach (SpellEffectInfo effect in GetEffectsForDifficulty(difficulty))
-                    if (effect != null && effect.IsAura() && (effect.ApplyAuraName == AuraType.ModStun
-                        || effect.ApplyAuraName == AuraType.ModRoot))
-                        return AuraStateType.Frozen;
+                foreach (var pair in _effects)
+                    foreach (SpellEffectInfo effect in pair.Value)
+                        if (effect != null && (effect.IsAura(AuraType.ModStun) || effect.IsAura(AuraType.ModRoot)))
+                            _auraState = AuraStateType.Frozen;
             }
 
             switch (Id)
             {
                 case 71465: // Divine Surge
                 case 50241: // Evasive Charges
-                    return AuraStateType.Unk22;
+                    _auraState = AuraStateType.Unk22;
+                    break;
                 default:
                     break;
             }
-
-            return AuraStateType.None;
         }
 
         public SpellSpecificType GetSpellSpecific()
         {
+            return _spellSpecific;
+        }
+
+        public void _LoadSpellSpecific()
+        {
+            _spellSpecific = SpellSpecificType.Normal;
+
             switch (SpellFamilyName)
             {
                 case SpellFamilyNames.Generic:
@@ -1370,11 +1386,11 @@ namespace Game.Spells
                             }
 
                             if (food && drink)
-                                return SpellSpecificType.FoodAndDrink;
+                                _spellSpecific = SpellSpecificType.FoodAndDrink;
                             else if (food)
-                                return SpellSpecificType.Food;
+                                _spellSpecific = SpellSpecificType.Food;
                             else if (drink)
-                                return SpellSpecificType.Drink;
+                                _spellSpecific = SpellSpecificType.Drink;
                         }
                         // scrolls effects
                         else
@@ -1388,10 +1404,12 @@ namespace Game.Spells
                                 case 8096: // Intellect
                                 case 8115: // Agility
                                 case 8091: // Armor
-                                    return SpellSpecificType.Scroll;
+                                    _spellSpecific = SpellSpecificType.Scroll;
+                                    break;
                                 case 12880: // Enrage (Enrage)
                                 case 57518: // Enrage (Wrecking Crew)
-                                    return SpellSpecificType.WarriorEnrage;
+                                    _spellSpecific = SpellSpecificType.WarriorEnrage;
+                                    break;
                             }
                         }
                         break;
@@ -1400,21 +1418,21 @@ namespace Game.Spells
                     {
                         // family flags 18(Molten), 25(Frost/Ice), 28(Mage)
                         if (SpellFamilyFlags[0].HasAnyFlag(0x12040000u))
-                            return SpellSpecificType.MageArmor;
+                            _spellSpecific = SpellSpecificType.MageArmor;
 
                         // Arcane brillance and Arcane intelect (normal check fails because of flags difference)
                         if (SpellFamilyFlags[0].HasAnyFlag(0x400u))
-                            return SpellSpecificType.MageArcaneBrillance;
+                            _spellSpecific = SpellSpecificType.MageArcaneBrillance;
                         SpellEffectInfo effect = GetEffect(Difficulty.None, 0);
-                        if (effect != null && SpellFamilyFlags[0].HasAnyFlag(0x1000000u) && effect.ApplyAuraName == AuraType.ModConfuse)
-                            return SpellSpecificType.MagePolymorph;
+                        if (effect != null && SpellFamilyFlags[0].HasAnyFlag(0x1000000u) && effect.IsAura(AuraType.ModConfuse))
+                            _spellSpecific = SpellSpecificType.MagePolymorph;
 
                         break;
                     }
                 case SpellFamilyNames.Warrior:
                     {
                         if (Id == 12292) // Death Wish
-                            return SpellSpecificType.WarriorEnrage;
+                            _spellSpecific = SpellSpecificType.WarriorEnrage;
 
                         break;
                     }
@@ -1422,26 +1440,26 @@ namespace Game.Spells
                     {
                         // Warlock (Bane of Doom | Bane of Agony | Bane of Havoc)
                         if (Id == 603 || Id == 980 || Id == 80240)
-                            return SpellSpecificType.Bane;
+                            _spellSpecific = SpellSpecificType.Bane;
 
                         // only warlock curses have this
                         if (Dispel == DispelType.Curse)
-                            return SpellSpecificType.Curse;
+                            _spellSpecific = SpellSpecificType.Curse;
 
                         // Warlock (Demon Armor | Demon Skin | Fel Armor)
                         if (SpellFamilyFlags[1].HasAnyFlag(0x20000020u) || SpellFamilyFlags[2].HasAnyFlag(0x00000010u))
-                            return SpellSpecificType.WarlockArmor;
+                            _spellSpecific = SpellSpecificType.WarlockArmor;
 
                         //seed of corruption and corruption
                         if (SpellFamilyFlags[1].HasAnyFlag(0x10u) || SpellFamilyFlags[0].HasAnyFlag(0x2u))
-                            return SpellSpecificType.WarlockCorruption;
+                            _spellSpecific = SpellSpecificType.WarlockCorruption;
                         break;
                     }
                 case SpellFamilyNames.Priest:
                     {
                         // Divine Spirit and Prayer of Spirit
                         if (SpellFamilyFlags[0].HasAnyFlag(0x20u))
-                            return SpellSpecificType.PriestDivineSpirit;
+                            _spellSpecific = SpellSpecificType.PriestDivineSpirit;
 
                         break;
                     }
@@ -1449,30 +1467,30 @@ namespace Game.Spells
                     {
                         // only hunter stings have this
                         if (Dispel == DispelType.Poison)
-                            return SpellSpecificType.Sting;
+                            _spellSpecific = SpellSpecificType.Sting;
 
                         // only hunter aspects have this (but not all aspects in hunter family)
-                        if (SpellFamilyFlags & new FlagArray128(0x00380000, 0x00440000, 0x00001010))
-                            return SpellSpecificType.Aspect;
+                        if (SpellFamilyFlags & new FlagArray128(0x00200000, 0x00000000, 0x00001010, 0x00000000))
+                            _spellSpecific = SpellSpecificType.Aspect;
 
                         break;
                     }
                 case SpellFamilyNames.Paladin:
                     {
                         // Collection of all the seal family flags. No other paladin spell has any of those.
-                        if (SpellFamilyFlags[1].HasAnyFlag(0x26000C00u))
-                            return SpellSpecificType.Seal;
+                        if (SpellFamilyFlags[1].HasAnyFlag(0xA2000800))
+                            _spellSpecific = SpellSpecificType.Seal;
 
                         if (SpellFamilyFlags[0].HasAnyFlag(0x00002190u))
-                            return SpellSpecificType.Hand;
+                            _spellSpecific = SpellSpecificType.Hand;
 
                         // Judgement
                         if (Id == 20271)
-                            return SpellSpecificType.Judgement;
+                            _spellSpecific = SpellSpecificType.Judgement;
 
                         // only paladin auras have this (for palaldin class family)
                         if (SpellFamilyFlags[2].HasAnyFlag(0x00000020u))
-                            return SpellSpecificType.Aura;
+                            _spellSpecific = SpellSpecificType.Aura;
 
                         break;
                     }
@@ -1480,13 +1498,13 @@ namespace Game.Spells
                     {
                         // family flags 10 (Lightning), 42 (Earth), 37 (Water), proc shield from T2 8 pieces bonus
                         if (SpellFamilyFlags[1].HasAnyFlag(0x420u) || SpellFamilyFlags[0].HasAnyFlag(0x00000400u) || Id == 23552)
-                            return SpellSpecificType.ElementalShield;
+                            _spellSpecific = SpellSpecificType.ElementalShield;
 
                         break;
                     }
                 case SpellFamilyNames.Deathknight:
                     if (Id == 48266 || Id == 48263 || Id == 48265)
-                        return SpellSpecificType.Presence;
+                        _spellSpecific = SpellSpecificType.Presence;
                     break;
             }
 
@@ -1502,21 +1520,21 @@ namespace Game.Spells
                             case AuraType.ModPossessPet:
                             case AuraType.ModPossess:
                             case AuraType.AoeCharm:
-                                return SpellSpecificType.Charm;
+                                _spellSpecific = SpellSpecificType.Charm;
+                                break;
                             case AuraType.TrackCreatures:
                                 // @workaround For non-stacking tracking spells (We need generic solution)
                                 if (Id == 30645) // Gas Cloud Tracking
-                                    return SpellSpecificType.Normal;
+                                    _spellSpecific = SpellSpecificType.Normal;
                                 break;
                             case AuraType.TrackResources:
                             case AuraType.TrackStealthed:
-                                return SpellSpecificType.Tracker;
+                                _spellSpecific = SpellSpecificType.Tracker;
+                                break;
                         }
                     }
                 }
             }
-
-            return SpellSpecificType.Normal;
         }
 
         public float GetMinRange(bool positive = false)
@@ -2650,6 +2668,8 @@ namespace Game.Spells
         internal Dictionary<uint, SpellEffectInfo[]> _effects;
         MultiMap<uint, SpellXSpellVisualRecord> _visuals = new MultiMap<uint, SpellXSpellVisualRecord>();
         bool _hasPowerDifficultyData;
+        SpellSpecificType _spellSpecific;
+        AuraStateType _auraState;
         #endregion
 
         public struct ScalingInfo

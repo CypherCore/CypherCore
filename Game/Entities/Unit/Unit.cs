@@ -1881,7 +1881,7 @@ namespace Game.Entities
                 AddInterruptMask((uint)aurSpellInfo.AuraInterruptFlags);
             }
 
-            AuraStateType aState = aura.GetSpellInfo().GetAuraState(GetMap().GetDifficultyID());
+            AuraStateType aState = aura.GetSpellInfo().GetAuraState();
             if (aState != 0)
                 m_auraStateAuras.Add(aState, aurApp);
 

@@ -496,7 +496,7 @@ namespace Game.Scripting
         public Unit GetCaster() { return m_spell.GetCaster(); }
         public Unit GetOriginalCaster() { return m_spell.GetOriginalCaster(); }
         public SpellInfo GetSpellInfo() { return m_spell.GetSpellInfo(); }
-        SpellValue GetSpellValue() { return m_spell.m_spellValue; }
+        public SpellValue GetSpellValue() { return m_spell.m_spellValue; }
 
         public SpellEffectInfo GetEffectInfo(uint effIndex)
         {

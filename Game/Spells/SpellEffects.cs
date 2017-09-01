@@ -903,14 +903,6 @@ namespace Game.Spells
             if (unitTarget == null || !unitTarget.IsAlive() || unitTarget.getPowerType() != powerType || damage < 0)
                 return;
 
-            // burn x% of target's mana, up to maximum of 2x% of caster's mana (Mana Burn)
-            if (m_spellInfo.Id == 8129)
-            {
-                int maxDamage = MathFunctions.CalculatePct(m_caster.GetMaxPower(powerType), damage * 2);
-                damage = MathFunctions.CalculatePct(unitTarget.GetMaxPower(powerType), damage);
-                damage = Math.Min(damage, maxDamage);
-            }
-
             int newDamage = -(unitTarget.ModifyPower(powerType, -damage));
 
             // NO - Not a typo - EffectPowerBurn uses effect value multiplier - not effect damage multiplier
@@ -962,48 +954,6 @@ namespace Game.Spells
                     if (player != null)
                         if (player.HasSkill(SkillType.Engineering))
                             MathFunctions.AddPct(ref addhealth, 25);
-                }
-                // Swiftmend - consumes Regrowth or Rejuvenation
-                else if (m_spellInfo.TargetAuraState == AuraStateType.Swiftmend && unitTarget.HasAuraState(AuraStateType.Swiftmend, m_spellInfo, m_caster))
-                {
-                    var RejorRegr = unitTarget.GetAuraEffectsByType(AuraType.PeriodicHeal);
-                    // find most short by duration
-                    AuraEffect targetAura = null;
-                    foreach (var eff in RejorRegr)
-                    {
-                        if (eff.GetSpellInfo().SpellFamilyName == SpellFamilyNames.Druid
-                            && eff.GetSpellInfo().SpellFamilyFlags[0].HasAnyFlag(0x50u))
-                        {
-                            if (targetAura == null || eff.GetBase().GetDuration() < targetAura.GetBase().GetDuration())
-                                targetAura = eff;
-                        }
-                    }
-
-                    if (targetAura == null)
-                    {
-                        Log.outError(LogFilter.Spells, "Target(GUID: {0}) has aurastate AURA_STATE_SWIFTMEND but no matching aura.", unitTarget.GetGUID());
-                        return;
-                    }
-
-                    int tickheal = targetAura.GetAmount();
-                    Unit auraCaster = targetAura.GetCaster();
-                    if (auraCaster != null)
-                        tickheal = (int)auraCaster.SpellHealingBonusDone(unitTarget, targetAura.GetSpellInfo(), (uint)tickheal, DamageEffectType.DOT, effectInfo);
-                    //It is said that talent bonus should not be included
-
-                    int tickcount = 0;
-                    // Rejuvenation
-                    if (targetAura.GetSpellInfo().SpellFamilyFlags[0].HasAnyFlag(0x10u))
-                        tickcount = 4;
-                    // Regrowth
-                    else
-                        tickcount = 6;
-
-                    addhealth += tickheal * tickcount;
-
-                    // Glyph of Swiftmend
-                    if (!caster.HasAura(54824))
-                        unitTarget.RemoveAura(targetAura.GetId(), targetAura.GetCasterGUID());
                 }
                 // Death Pact - return pct of max health to caster
                 else if (m_spellInfo.SpellFamilyName == SpellFamilyNames.Deathknight && m_spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x00080000u))
@@ -1833,10 +1783,6 @@ namespace Game.Spells
                                 summon = m_caster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, m_originalCaster, m_spellInfo.Id);
                                 if (summon == null || !summon.IsTotem())
                                     return;
-
-                                // Mana Tide Totem
-                                if (m_spellInfo.Id == 16190)
-                                    damage = (int)m_caster.CountPctFromMaxHealth(10);
 
                                 if (damage != 0)                                            // if not spell info, DB values used
                                 {
@@ -4945,12 +4891,6 @@ namespace Game.Spells
                 return;
 
             int creatureEntry = effectInfo.MiscValue;
-            if (creatureEntry == 0)
-            {
-                if (m_spellInfo.Id == 42793) // Burn Body
-                    creatureEntry = 24008; // Fallen Combatant
-            }
-
             if (creatureEntry != 0)
                 unitTarget.ToPlayer().RewardPlayerAndGroupAtEvent((uint)creatureEntry, unitTarget);
         }

@@ -666,12 +666,12 @@ namespace Game.Spells
                 case AuraType.MechanicImmunity:
                 case AuraType.ModMechanicResistance:
                     // compare mechanic
-                    if (spellInfo == null || (int)spellInfo.Mechanic != GetMiscValue())
+                    if (spellInfo == null || !Convert.ToBoolean(spellInfo.GetAllEffectsMechanicMask() &  (1 << GetMiscValue())))
                         result = false;
                     break;
                 case AuraType.ModCastingSpeedNotStack:
                     // skip melee hits and instant cast spells
-                    if (spellInfo == null || spellInfo.CalcCastTime() == 0)
+                    if (!eventInfo.GetProcSpell() || eventInfo.GetProcSpell().GetCastTime() == 0)
                         result = false;
                     break;
                 case AuraType.ModSpellDamageFromCaster:
@@ -702,6 +702,17 @@ namespace Game.Spells
                     if (spellInfo == null || !Convert.ToBoolean((int)spellInfo.GetSchoolMask() & GetMiscValue()))
                         result = false;
                     break;
+                case AuraType.ProcTriggerSpell:
+                case AuraType.ProcTriggerSpellWithValue:
+                    {
+                        // Don't proc extra attacks while already processing extra attack spell
+                        uint triggerSpellId = GetSpellEffectInfo().TriggerSpell;
+                        SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId);
+                        if (triggeredSpellInfo != null)
+                            if (aurApp.GetTarget().m_extraAttacks != 0 && triggeredSpellInfo.HasEffect(SpellEffectName.AddExtraAttacks))
+                                result = false;
+                        break;
+                    }
                 default:
                     break;
             }

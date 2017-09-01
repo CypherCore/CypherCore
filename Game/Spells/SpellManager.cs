@@ -2790,6 +2790,9 @@ namespace Game.Entities
                     case 42767: // Sic'em
                         spellInfo.GetEffect(0).TargetA = new SpellImplicitTargetInfo(Targets.UnitNearbyEntry);
                         break;
+                    case 42793: // Burn Body
+                        spellInfo.GetEffect(2).MiscValue = 24008; // Fallen Combatant
+                        break;
                     // VIOLET HOLD SPELLS
                     //
                     case 54258: // Water Globule (Ichoron)
@@ -3093,6 +3096,20 @@ namespace Game.Entities
                 properties.Category = SummonCategory.Pet;
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded SpellInfo corrections in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
+        }
+
+        public void LoadSpellInfoSpellSpecificAndAuraState()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            foreach (SpellInfo spellInfo in mSpellInfoMap.Values)
+            {
+                // AuraState depends on SpellSpecific
+                spellInfo._LoadSpellSpecific();
+                spellInfo._LoadAuraState();
+            }
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded SpellInfo SpellSpecific and AuraState in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         public void LoadPetFamilySpellsStore()
