@@ -1468,8 +1468,6 @@ namespace Scripts.Spells.Generic
     [Script("spell_dru_mark_of_the_wild")]
     [Script("spell_pri_power_word_fortitude")]
     [Script("spell_pri_shadow_protection")]
-    [Script("spell_mage_arcane_brilliance")]
-    [Script("spell_mage_dalaran_brilliance")]
     class spell_gen_increase_stats_buff : SpellScript
     {
         void HandleDummy(uint effIndex)
