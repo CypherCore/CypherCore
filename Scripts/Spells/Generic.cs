@@ -391,7 +391,7 @@ namespace Scripts.Spells.Generic
 
         bool CheckProc(ProcEventInfo eventInfo)
         {
-            if (eventInfo.GetDamageInfo().GetSpellInfo() != null) // eventInfo.GetSpellInfo()
+            if (eventInfo.GetSpellInfo() == null)
                 return false;
 
             // find Mage Armor
@@ -1705,7 +1705,7 @@ namespace Scripts.Spells.Generic
 
         bool CheckProc(ProcEventInfo eventInfo)
         {
-            if (eventInfo.GetDamageInfo().GetSpellInfo() != null) // eventInfo.GetSpellInfo()
+            if (eventInfo.GetSpellInfo() == null)
                 return false;
 
             if (SharedConst.GetFirstSchoolInMask(eventInfo.GetSchoolMask()) == SpellSchools.Normal)

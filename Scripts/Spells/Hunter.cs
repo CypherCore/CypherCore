@@ -483,9 +483,16 @@ namespace Scripts.Spells.Hunter
             return ValidateSpellInfo(SpellIds.RoarOfSacrificeTriggered);
         }
 
-        bool CheckProc(ProcEventInfo eventInfo)
+        bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            return GetCaster() && ((uint)eventInfo.GetDamageInfo().GetSchoolMask() & GetEffect(1).GetMiscValue()) != 0;
+            DamageInfo damageInfo = eventInfo.GetDamageInfo();
+            if (damageInfo == null || !Convert.ToBoolean((int)damageInfo.GetSchoolMask() & aurEff.GetMiscValue()))
+                return false;
+
+            if (!GetCaster())
+                return false;
+
+            return true;
         }
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -498,7 +505,7 @@ namespace Scripts.Spells.Hunter
 
         public override void Register()
         {
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckProc, 1, AuraType.Dummy));
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy));
         }
     }

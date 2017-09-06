@@ -258,7 +258,11 @@ namespace Scripts.Spells.Paladin
         void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            int damage = (int)MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount());
+            DamageInfo damageInfo = eventInfo.GetDamageInfo();
+            if (damageInfo == null || damageInfo.GetDamage() == 0)
+                return;
+
+            int damage = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
             GetTarget().CastCustomSpell(SpellIds.EyeForAnEyeDamage, SpellValueMod.BasePoint0, damage, eventInfo.GetProcTarget(), true, null, aurEff);
         }
 

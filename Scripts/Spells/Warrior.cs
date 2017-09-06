@@ -28,6 +28,7 @@ namespace Scripts.Spells.Warrior
 {
     struct SpellIds
     {
+        public const uint BladestormPeriodicWhirlwind = 50622;
         public const uint BloodthirstHeal = 117313;
         public const uint Charge = 34846;
         public const uint ChargeEffect = 218104;
@@ -61,7 +62,8 @@ namespace Scripts.Spells.Warrior
         public const uint Slam = 50782;
         public const uint Stoicism = 70845;
         public const uint StormBoltStun = 132169;
-        public const uint SweepingStrikesExtraAttack = 26654;
+        public const uint SweepingStrikesExtraAttack1 = 12723;
+        public const uint SweepingStrikesExtraAttack2 = 26654;
         public const uint Taunt = 355;
         public const uint TraumaEffect = 215537;
         public const uint UnrelentingAssaultRank1 = 46859;
@@ -703,13 +705,7 @@ namespace Scripts.Spells.Warrior
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.SweepingStrikesExtraAttack);
-        }
-
-        public override bool Load()
-        {
-            _procTarget = null;
-            return true;
+            return ValidateSpellInfo(SpellIds.SweepingStrikesExtraAttack1, SpellIds.SweepingStrikesExtraAttack2);
         }
 
         bool CheckProc(ProcEventInfo eventInfo)
@@ -721,7 +717,21 @@ namespace Scripts.Spells.Warrior
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            GetTarget().CastSpell(_procTarget, SpellIds.SweepingStrikesExtraAttack, true, null, aurEff);
+            DamageInfo damageInfo = eventInfo.GetDamageInfo();
+            if (damageInfo != null)
+            {
+                SpellInfo spellInfo = damageInfo.GetSpellInfo();
+                if (spellInfo != null && (spellInfo.Id == SpellIds.BladestormPeriodicWhirlwind || (spellInfo.Id == SpellIds.Execute && !_procTarget.HasAuraState(AuraStateType.HealthLess20Percent))))
+                {
+                    // If triggered by Execute (while target is not under 20% hp) or Bladestorm deals normalized weapon damage
+                    GetTarget().CastSpell(_procTarget, SpellIds.SweepingStrikesExtraAttack2, true, null, aurEff);
+                }
+                else
+                {
+                    int damage = (int)damageInfo.GetDamage();
+                    GetTarget().CastCustomSpell(SpellIds.SweepingStrikesExtraAttack1, SpellValueMod.BasePoint0, damage, _procTarget, true, null, aurEff);
+                }
+            }
         }
 
         public override void Register()

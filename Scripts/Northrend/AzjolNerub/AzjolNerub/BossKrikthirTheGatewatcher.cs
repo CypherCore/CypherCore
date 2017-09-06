@@ -393,7 +393,6 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.KrikthirTheGatewatcher
     {
         public npc_watcher_gashra(Creature creature) : base(creature, true)
         {
-            _instance = creature.GetInstanceScript();
             me.SetReactState(ReactStates.Passive);
         }
 
@@ -451,10 +450,7 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.KrikthirTheGatewatcher
     [Script]
     class npc_watcher_narjil : npc_gatewatcher_petAI
     {
-        public npc_watcher_narjil(Creature creature) : base(creature, true)
-        {
-            _instance = creature.GetInstanceScript();
-        }
+        public npc_watcher_narjil(Creature creature) : base(creature, true) { }
 
         public override void Reset()
         {
@@ -510,10 +506,7 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.KrikthirTheGatewatcher
     [Script]
     class npc_watcher_silthik : npc_gatewatcher_petAI
     {
-        public npc_watcher_silthik(Creature creature) : base(creature, true)
-        {
-            _instance = creature.GetInstanceScript();
-        }
+        public npc_watcher_silthik(Creature creature) : base(creature, true) { }
 
         public override void Reset()
         {

@@ -2801,7 +2801,7 @@ namespace Game.Spells
                 else if (caster)
                     level = caster.getLevel();
 
-                if (!_spellInfo.HasAttribute(SpellAttr11.ScalesWithItemLevel) && _spellInfo.HasAttribute(SpellAttr10.UseSpellBaseLevelForScaling))
+                if (_spellInfo.BaseLevel != 0 && !_spellInfo.HasAttribute(SpellAttr11.ScalesWithItemLevel) && _spellInfo.HasAttribute(SpellAttr10.UseSpellBaseLevelForScaling))
                     level = _spellInfo.BaseLevel;
 
                 if (_spellInfo.Scaling.MinScalingLevel != 0 && _spellInfo.Scaling.MinScalingLevel > level)

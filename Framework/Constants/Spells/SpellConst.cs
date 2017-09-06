@@ -1657,7 +1657,7 @@ namespace Framework.Constants
         ScalesWithItemLevel = 0x04, //  2
         Unk3 = 0x08, //  3
         Unk4 = 0x10, //  4
-        AbsorbFallDamage = 0x20, //  5
+        AbsorbEnvironmentalDamage = 0x20, //  5
         Unk6 = 0x40, //  6
         RankIgnoresCasterLevel = 0x80, //  7 Spell_C_GetSpellRank returns SpellLevels->MaxLevel * 5 instead of std::min(SpellLevels->MaxLevel, caster->Level) * 5
         Unk8 = 0x100, //  8

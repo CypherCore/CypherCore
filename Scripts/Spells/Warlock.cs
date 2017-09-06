@@ -123,6 +123,32 @@ namespace Scripts.Spells.Warlock
         }
     }
 
+    [Script] // 77220 - Mastery: Chaotic Energies
+    class spell_warl_chaotic_energies : AuraScript
+    {
+        void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+        {
+            AuraEffect effect1 = GetEffect(1);
+            if (effect1 == null || !GetTargetApplication().HasEffect(1))
+            {
+                PreventDefaultAction();
+                return;
+            }
+
+            // You take ${$s2/3}% reduced damage
+            float damageReductionPct = effect1.GetAmount() / 3;
+            // plus a random amount of up to ${$s2/3}% additional reduced damage
+            damageReductionPct += RandomHelper.FRand(0.0f, damageReductionPct);
+
+            absorbAmount = MathFunctions.CalculatePct(dmgInfo.GetDamage(), damageReductionPct);
+        }
+
+        public override void Register()
+        {
+            OnEffectAbsorb.Add(new EffectAbsorbHandler(HandleAbsorb, 2));
+        }
+    }
+
     [Script] // 6201 - Create Healthstone
     class spell_warl_create_healthstone : SpellScript
     {
@@ -409,7 +435,11 @@ namespace Scripts.Spells.Warlock
 
         bool CheckProc(ProcEventInfo eventInfo)
         {
-            return GetTarget().GetGuardianPet() && eventInfo.GetDamageInfo().GetDamage() != 0;
+            DamageInfo damageInfo = eventInfo.GetDamageInfo();
+            if (damageInfo == null || damageInfo.GetDamage() == 0)
+                return false;
+
+            return GetTarget().GetGuardianPet();
         }
 
         void onProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -656,7 +686,7 @@ namespace Scripts.Spells.Warlock
         {
             PreventDefaultAction();
             DamageInfo damageInfo = eventInfo.GetDamageInfo();
-            if (damageInfo == null)
+            if (damageInfo == null || damageInfo.GetDamage() == 0)
                 return;
 
             int amount = (int)(aurEff.GetAmount() - damageInfo.GetDamage());
@@ -700,7 +730,7 @@ namespace Scripts.Spells.Warlock
         {
             PreventDefaultAction();
             DamageInfo damageInfo = eventInfo.GetDamageInfo();
-            if (damageInfo == null)
+            if (damageInfo == null || damageInfo.GetDamage() == 0)
                 return;
 
             int amount = aurEff.GetAmount() - (int)damageInfo.GetDamage();

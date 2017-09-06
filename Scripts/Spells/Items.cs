@@ -1360,7 +1360,11 @@ namespace Scripts.Spells.Items
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            int bp = (int)MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount());
+            DamageInfo damageInfo = eventInfo.GetDamageInfo();
+            if (damageInfo == null || damageInfo.GetDamage() == 0)
+                return;
+
+            int bp = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
             GetTarget().CastCustomSpell(SpellIds.ItemNecroticTouchProc, SpellValueMod.BasePoint0, bp, eventInfo.GetProcTarget(), true, null, aurEff);
         }
 
