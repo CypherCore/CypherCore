@@ -1020,7 +1020,7 @@ namespace Scripts.World
             }
 
             public override void UpdateAI(uint diff)
-            {                
+            {
                 _events.Update(diff);
 
                 _events.ExecuteEvents(eventId =>
@@ -1088,6 +1088,110 @@ namespace Scripts.World
         public override GameObjectAI GetAI(GameObject go)
         {
             return new go_brewfest_musicAI(go);
+        }
+    }
+
+    [Script]
+    class go_midsummer_music : GameObjectScript
+    {
+        public go_midsummer_music() : base("go_midsummer_music") { }
+
+        class go_midsummer_musicAI : GameObjectAI
+        {
+            public go_midsummer_musicAI(GameObject go) : base(go)
+            {
+                _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+                {
+                    if (!Global.GameEventMgr.IsHolidayActive(HolidayIds.FireFestival))
+                        return;
+
+                    var players = go.GetMap().GetPlayers();
+                    foreach (var player in players)
+                    {
+                        if (player.GetTeam() == Team.Horde)
+                        {
+                            go.PlayDirectMusic(12325, player);
+                        }
+                        else
+                        {
+                            go.PlayDirectMusic(12319, player);
+                        }
+                    }
+
+                    task.Repeat(TimeSpan.FromSeconds(5)); // Every 5 second's SMSG_PLAY_MUSIC packet (PlayDirectMusic) is pushed to the client (sniffed value)
+                });
+            }
+
+            public override void UpdateAI(uint diff)
+            {
+                _scheduler.Update(diff);
+            }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_midsummer_musicAI(go);
+        }
+    }
+
+    [Script]
+    class go_darkmoon_faire_music : GameObjectScript
+    {
+        public go_darkmoon_faire_music() : base("go_darkmoon_faire_music") { }
+
+        class go_darkmoon_faire_musicAI : GameObjectAI
+        {
+            public go_darkmoon_faire_musicAI(GameObject go) : base(go)
+            {
+                _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+                {
+                    if (Global.GameEventMgr.IsHolidayActive(HolidayIds.DarkmoonFaireElwynn) || !Global.GameEventMgr.IsHolidayActive(HolidayIds.DarkmoonFaireThunder) || !Global.GameEventMgr.IsHolidayActive(HolidayIds.DarkmoonFaireShattrath))
+                    {
+                        go.PlayDirectMusic(8440);
+                        task.Repeat(TimeSpan.FromSeconds(5));  // Every 5 second's SMSG_PLAY_MUSIC packet (PlayDirectMusic) is pushed to the client (sniffed value)
+                    }
+                });
+            }
+
+            public override void UpdateAI(uint diff)
+            {
+                _scheduler.Update(diff);
+            }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_darkmoon_faire_musicAI(go);
+        }
+    }
+
+    [Script]
+    class go_pirate_day_music : GameObjectScript
+    {
+        public go_pirate_day_music() : base("go_pirate_day_music") { }
+
+        class go_pirate_day_musicAI : GameObjectAI
+        {
+            public go_pirate_day_musicAI(GameObject go) : base(go)
+            {
+                _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
+                {
+                    if (!Global.GameEventMgr.IsHolidayActive(HolidayIds.PiratesDay))
+                        return;
+                    go.PlayDirectMusic(12845);
+                    task.Repeat(TimeSpan.FromSeconds(5));  // Every 5 second's SMSG_PLAY_MUSIC packet (PlayDirectMusic) is pushed to the client (sniffed value)
+                });
+            }
+
+            public override void UpdateAI(uint diff)
+            {
+                _scheduler.Update(diff);
+            }
+        }
+
+        public override GameObjectAI GetAI(GameObject go)
+        {
+            return new go_pirate_day_musicAI(go);
         }
     }
 }
