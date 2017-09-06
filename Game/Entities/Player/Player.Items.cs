@@ -5315,7 +5315,9 @@ namespace Game.Entities
                     return InventoryResult.ItemMaxLimitCategoryEquippedExceededIs;
 
                 // there is an equip limit on this item
-                if (HasItemOrGemWithLimitCategoryEquipped(itemProto.GetItemLimitCategory(), limitEntry.Quantity - limit_count + 1, except_slot))
+                if (HasItemWithLimitCategoryEquipped(itemProto.GetItemLimitCategory(), limitEntry.Quantity - limit_count + 1, except_slot))
+                    return InventoryResult.ItemMaxLimitCategoryEquippedExceededIs;
+                else if (HasGemWithLimitCategoryEquipped(itemProto.GetItemLimitCategory(), limitEntry.Quantity - limit_count + 1, except_slot))
                     return InventoryResult.ItemMaxCountEquippedSocketed;
             }
 
@@ -5484,7 +5486,7 @@ namespace Game.Entities
 
             return false;
         }
-        bool HasItemOrGemWithLimitCategoryEquipped(uint limitCategory, uint count, byte except_slot)
+        bool HasItemWithLimitCategoryEquipped(uint limitCategory, uint count, byte except_slot)
         {
             uint tempcount = 0;
             for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
@@ -5506,6 +5508,26 @@ namespace Game.Entities
                     if (tempcount >= count)
                         return true;
                 }
+            }
+
+            return false;
+        }
+
+        bool HasGemWithLimitCategoryEquipped(uint limitCategory, uint count, byte except_slot)
+        {
+            uint tempcount = 0;
+            for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
+            {
+                if (i == except_slot)
+                    continue;
+
+                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
+                if (!pItem)
+                    continue;
+
+                ItemTemplate pProto = pItem.GetTemplate();
+                if (pProto == null)
+                    continue;
 
                 if (pItem.GetSocketColor(0) != 0 || pItem.GetEnchantmentId(EnchantmentSlot.Prismatic) != 0)
                 {

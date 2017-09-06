@@ -481,8 +481,8 @@ namespace Game.Entities
             if ((eventInfo.GetTypeMask() & (ProcFlags.Killed | ProcFlags.Kill | ProcFlags.Death)) != 0)
                 return true;
 
-            // do triggered cast checks
-            if (!procEntry.AttributesMask.HasAnyFlag(ProcAttributes.TriggeredCanProc))
+            // Do not consider autoattacks as triggered spells
+            if (!procEntry.AttributesMask.HasAnyFlag(ProcAttributes.TriggeredCanProc) && !eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.AutoAttackMask))
             {
                 Spell spell = eventInfo.GetProcSpell();
                 if (spell)
@@ -1686,11 +1686,14 @@ namespace Game.Entities
 
                 SpellProcEntry procEntry = new SpellProcEntry();
                 procEntry.SchoolMask = 0;
-                procEntry.SpellFamilyName = spellInfo.SpellFamilyName;
                 procEntry.ProcFlags = spellInfo.ProcFlags;
+                procEntry.SpellFamilyName = 0;
                 foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(Difficulty.None))
                     if (effect != null && effect.IsEffect() && isTriggerAura(effect.ApplyAuraName))
                         procEntry.SpellFamilyMask |= effect.SpellClassMask;
+
+                if (procEntry.SpellFamilyMask)
+                    procEntry.SpellFamilyName = spellInfo.SpellFamilyName;
 
                 procEntry.SpellTypeMask = ProcFlagsSpellType.MaskAll;
                 procEntry.SpellPhaseMask = ProcFlagsSpellPhase.Hit;
@@ -2792,6 +2795,10 @@ namespace Game.Entities
                         break;
                     case 42793: // Burn Body
                         spellInfo.GetEffect(2).MiscValue = 24008; // Fallen Combatant
+                        break;
+                    case 59544:// Gift of the Naaru (priest and monk variants)
+                    case 121093:
+                        spellInfo.SpellFamilyFlags[2] = 0x80000000;
                         break;
                     // VIOLET HOLD SPELLS
                     //

@@ -129,73 +129,6 @@ namespace Game.BattleFields
             new Position(5147.98f, 2861.93f, 421.63f,  3.18792f),
         };
 
-        // Here there is all npc keeper spawn point
-        public static WintergraspObjectPositionData[] WGKeepNPC =
-        {
-            // North East
-            new WintergraspObjectPositionData(5326.203125f, 2660.026367f, 409.100891f, 2.543383f, WGNpcs.GuardH, WGNpcs.GuardA),       // Roaming Guard
-            new WintergraspObjectPositionData(5298.430176f, 2738.760010f, 409.316010f, 3.971740f, WGNpcs.VieronBlazefeather, WGNpcs.BowyerRandolph), // Vieron Blazefeather
-            new WintergraspObjectPositionData(5335.310059f, 2764.110107f, 409.274994f, 4.834560f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5349.810059f, 2763.629883f, 409.333008f, 4.660030f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            // North
-            new WintergraspObjectPositionData(5373.470215f, 2789.060059f, 409.322998f, 2.600540f, WGNpcs.StoneGuardMukar, WGNpcs.KnightDameron), // Stone Guard Mukar
-            new WintergraspObjectPositionData(5296.560059f, 2789.870117f, 409.274994f, 0.733038f, WGNpcs.HoodooMasterFuJin, WGNpcs.SorceressKaylana), // Voodoo Master Fu'jin
-            new WintergraspObjectPositionData(5372.670000f, 2786.740000f, 409.442000f, 2.809980f, WGNpcs.ChampionRosSlai, WGNpcs.MarshalMagruder), // Wintergrasp Quartermaster
-            new WintergraspObjectPositionData(5368.709961f, 2856.360107f, 409.322998f, 2.949610f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5367.910156f, 2826.520020f, 409.322998f, 3.333580f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5389.270020f, 2847.370117f, 418.759003f, 3.106690f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5388.560059f, 2834.770020f, 418.759003f, 3.071780f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5359.129883f, 2837.989990f, 409.364014f, 4.698930f, WGNpcs.CommanderDardosh, WGNpcs.CommanderZanneth), // Commander Dardosh
-            new WintergraspObjectPositionData(5366.129883f, 2833.399902f, 409.322998f, 3.141590f, WGNpcs.TacticalOfficerKilrath, WGNpcs.TacticalOfficerAhbramis), // Tactical Officer Kilrath
-            // North West
-            new WintergraspObjectPositionData(5350.680176f, 2917.010010f, 409.274994f, 1.466080f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5335.120117f, 2916.800049f, 409.444000f, 1.500980f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5295.560059f, 2926.669922f, 409.274994f, 0.872665f, WGNpcs.SiegesmithStronghoof, WGNpcs.SiegeMasterStouthandle), // Stronghoof
-            new WintergraspObjectPositionData(5371.399902f, 3026.510010f, 409.205994f, 3.250030f, WGNpcs.PrimalistMulfort, WGNpcs.AnchoriteTessa), // Primalist Mulfort
-            new WintergraspObjectPositionData(5392.123535f, 3031.110352f, 409.187683f, 3.677212f, WGNpcs.GuardH, WGNpcs.GuardA),       // Roaming Guard
-            // South
-            new WintergraspObjectPositionData(5270.060059f, 2847.550049f, 409.274994f, 3.071780f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5270.160156f, 2833.479980f, 409.274994f, 3.124140f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5179.109863f, 2837.129883f, 409.274994f, 3.211410f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5179.669922f, 2846.600098f, 409.274994f, 3.089230f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5234.970215f, 2883.399902f, 409.274994f, 4.293510f, WGNpcs.LieutenantMurp, WGNpcs.SeniorDemolitionistLegoso), // Lieutenant Murp
-            // Portal guards (from around the fortress)
-            new WintergraspObjectPositionData(5319.209473f, 3055.947754f, 409.176636f, 1.020201f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5311.612305f, 3061.207275f, 408.734161f, 0.965223f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5264.713379f, 3017.283447f, 408.479706f, 3.482424f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5269.096191f, 3008.315918f, 408.826294f, 3.843706f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5201.414551f, 2945.096924f, 409.190735f, 0.945592f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5193.386230f, 2949.617188f, 409.190735f, 1.145859f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5148.116211f, 2904.761963f, 409.193756f, 3.368532f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5153.355957f, 2895.501465f, 409.199310f, 3.549174f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5154.353027f, 2787.349365f, 409.250183f, 2.555644f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5150.066406f, 2777.876953f, 409.343903f, 2.708797f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5193.706543f, 2732.882812f, 409.189514f, 4.845073f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5202.126953f, 2737.570557f, 409.189514f, 5.375215f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5269.181152f, 2671.174072f, 409.098999f, 2.457459f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5264.960938f, 2662.332520f, 409.098999f, 2.598828f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5307.111816f, 2616.006836f, 409.095734f, 5.355575f, WGNpcs.GuardH, WGNpcs.GuardA),       // Standing Guard
-            new WintergraspObjectPositionData(5316.770996f, 2619.430176f, 409.027740f, 5.363431f, WGNpcs.GuardH, WGNpcs.GuardA)        // Standing Guard
-        };
-
-        public static WintergraspObjectPositionData[] WGOutsideNPC =
-            {
-            new WintergraspObjectPositionData(5032.04f, 3681.79f, 362.980f, 4.210f, WGNpcs.VieronBlazefeather, 0),
-            new WintergraspObjectPositionData(5020.71f, 3626.19f, 360.150f, 4.640f, WGNpcs.HoodooMasterFuJin, 0),
-            new WintergraspObjectPositionData(4994.85f, 3660.51f, 359.150f, 2.260f, WGNpcs.CommanderDardosh, 0),
-            new WintergraspObjectPositionData(5015.46f, 3677.11f, 362.970f, 6.009f, WGNpcs.TacticalOfficerKilrath, 0),
-            new WintergraspObjectPositionData(5031.12f, 3663.77f, 363.500f, 3.110f, WGNpcs.SiegesmithStronghoof, 0),
-            new WintergraspObjectPositionData(5042.74f, 3675.82f, 363.060f, 3.358f, WGNpcs.PrimalistMulfort, 0),
-            new WintergraspObjectPositionData(5014.45f, 3640.87f, 361.390f, 3.280f, WGNpcs.LieutenantMurp, 0),
-            new WintergraspObjectPositionData(5100.07f, 2168.89f, 365.779f, 1.972f, 0, WGNpcs.BowyerRandolph),
-            new WintergraspObjectPositionData(5081.70f, 2173.73f, 365.878f, 0.855f, 0, WGNpcs.SorceressKaylana),
-            new WintergraspObjectPositionData(5078.28f, 2183.70f, 365.029f, 1.466f, 0, WGNpcs.CommanderZanneth),
-            new WintergraspObjectPositionData(5088.49f, 2188.18f, 365.647f, 5.253f, 0, WGNpcs.TacticalOfficerAhbramis),
-            new WintergraspObjectPositionData(5095.67f, 2193.28f, 365.924f, 4.939f, 0, WGNpcs.SiegeMasterStouthandle),
-            new WintergraspObjectPositionData(5088.61f, 2167.66f, 365.689f, 0.680f, 0, WGNpcs.AnchoriteTessa),
-            new WintergraspObjectPositionData(5080.40f, 2199.00f, 359.489f, 2.967f, 0, WGNpcs.SeniorDemolitionistLegoso),
-        };
-
         public static WintergraspGameObjectData[] WGPortalDefenderData =
         {
             // Player teleporter
@@ -514,26 +447,6 @@ namespace Game.BattleFields
         public const uint GuardA = 30740;
         public const uint Stalker = 15214;
 
-        public const uint VieronBlazefeather = 31102;
-        public const uint StoneGuardMukar = 32296; // <Wintergrasp Quartermaster>
-        public const uint HoodooMasterFuJin = 31101; // <Master Hexxer>
-        public const uint ChampionRosSlai = 39173; // <Wintergrasp Quartermaster>
-        public const uint CommanderDardosh = 31091;
-        public const uint TacticalOfficerKilrath = 31151;
-        public const uint SiegesmithStronghoof = 31106;
-        public const uint PrimalistMulfort = 31053;
-        public const uint LieutenantMurp = 31107;
-
-        public const uint BowyerRandolph = 31052;
-        public const uint KnightDameron = 32294; // <Wintergrasp Quartermaster>
-        public const uint SorceressKaylana = 31051; // <Enchantress>
-        public const uint MarshalMagruder = 39172; // <Wintergrasp Quartermaster>
-        public const uint CommanderZanneth = 31036;
-        public const uint TacticalOfficerAhbramis = 31153;
-        public const uint SiegeMasterStouthandle = 31108;
-        public const uint AnchoriteTessa = 31054;
-        public const uint SeniorDemolitionistLegoso = 31109;
-
         public const uint TaunkaSpiritGuide = 31841; // Horde Spirit Guide For Wintergrasp
         public const uint DwarvenSpiritGuide = 31842; // Alliance Spirit Guide For Wintergrasp
 
@@ -581,10 +494,10 @@ namespace Game.BattleFields
 
     struct WGWorkshopIds
     {
-        public const byte Ne = 0;
-        public const byte Nw = 1;
-        public const byte Se = 2;
-        public const byte Sw = 3;
+        public const byte Se = 0;
+        public const byte Sw = 1;
+        public const byte Ne = 2;
+        public const byte Nw = 3;
         public const byte KeepWest = 4;
         public const byte KeepEast = 5;
     }
@@ -651,6 +564,7 @@ namespace Game.BattleFields
         public const uint VictoryAlliance = 13181;
         public const uint VictoryHorde = 13183;
         public const uint CreditTowersDestroyed = 35074;
+        public const uint CreditDefendSiege = 31284;
     }
 
     struct WintergraspText

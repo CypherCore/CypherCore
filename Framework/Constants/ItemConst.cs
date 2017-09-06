@@ -772,7 +772,7 @@ namespace Framework.Constants
         HeroicTooltip = 0x08, // Makes Green "Heroic" Text Appear On Item
         Deprecated = 0x10, // Cannot Equip Or Use
         NoUserDestroy = 0x20, // Item Can Not Be Destroyed, Except By Using Spell (Item Can Be Reagent For Spell)
-        Playercast = 0x40,
+        Playercast = 0x40, // Item's spells are castable by players
         NoEquipCooldown = 0x80, // No Default 30 Seconds Cooldown When Equipped
         MultiLootQuest = 0x100,
         IsWrapper = 0x200, // Item Can Wrap Other Items
@@ -780,7 +780,7 @@ namespace Framework.Constants
         MultiDrop = 0x800, // Looting This Item Does Not Remove It From Available Loot
         ItemPurchaseRecord = 0x1000, // Item Can Be Returned To Vendor For Its Original Cost (Extended Cost)
         Petition = 0x2000, // Item Is Guild Or Arena Charter
-        HasText = 0x4000,
+        HasText = 0x4000, // Only readable items have this (but not all)
         NoDisenchant = 0x8000,
         RealDuration = 0x10000,
         NoCreator = 0x20000,
@@ -788,7 +788,7 @@ namespace Framework.Constants
         UniqueEquippable = 0x80000, // You Can Only Equip One Of These
         IgnoreForAuras = 0x100000,
         IgnoreDefaultArenaRestrictions = 0x200000, // Item Can Be Used During Arena Match
-        NoDurabilityLoss = 0x400000,
+        NoDurabilityLoss = 0x400000, // Some Thrown weapons have it (and only Thrown) but not all
         UseWhenShapeshifted = 0x800000, // Item Can Be Used In Shapeshift Forms
         HasQuestGlow = 0x1000000,
         HideUnusableRecipe = 0x2000000, // Profession Recipes: Can Only Be Looted If You Meet Requirements And Don'T Already Know It

@@ -74,11 +74,7 @@ namespace Game.AI
 
         bool IsAIControlled()
         {
-            if (me.IsControlledByPlayer())
-                return false;
-            if (mIsCharmed)
-                return false;
-            return true;
+            return !mIsCharmed;
         }
 
         void UpdateDespawn(uint diff)

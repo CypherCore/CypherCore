@@ -755,13 +755,16 @@ namespace Game.Entities
                         chance = playerVictim.GetFloatValue(PlayerFields.ParryPercentage);
                 }
             }
-            else if (victim.IsTypeId(TypeId.Unit) && !(victim.ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoParry)))
+            else
             {
-                chance = 6.0f;
-                chance += victim.GetTotalAuraModifier(AuraType.ModParryPercent);
+                if (!victim.IsTotem() && !victim.ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoParry))
+                {
+                    chance = 6.0f;
+                    chance += victim.GetTotalAuraModifier(AuraType.ModParryPercent);
 
-                if (levelDiff > 0)
-                    levelBonus = 1.5f * levelDiff;
+                    if (levelDiff > 0)
+                        levelBonus = 1.5f * levelDiff;
+                }
             }
 
             chance += levelBonus;

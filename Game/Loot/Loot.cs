@@ -77,10 +77,6 @@ namespace Game.Loots
                 && ((needs_quest || (pProto.GetStartQuest() != 0 && player.GetQuestStatus(pProto.GetStartQuest()) != QuestStatus.None)) && !player.HasQuestForItem(itemid)))
                 return false;
 
-            // Don't show bind-when-picked-up unique items if player already has the maximum allowed quantity.
-            if (pProto.GetBonding() == ItemBondingType.OnAcquire && pProto.GetMaxCount() != 0 && player.GetItemCount(itemid, true) >= pProto.GetMaxCount())
-                return false;
-
             return true;
         }
 

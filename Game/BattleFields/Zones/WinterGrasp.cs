@@ -54,8 +54,6 @@ namespace Game.BattleFields
 
             for (var team = 0; team < SharedConst.BGTeamsCount; ++team)
             {
-                KeepCreature[team] = new List<ObjectGuid>();
-                OutsideCreature[team] = new List<ObjectGuid>();
                 DefenderPortalList[team] = new List<ObjectGuid>();
                 m_vehicles[team] = new List<ObjectGuid>();
             }
@@ -104,60 +102,13 @@ namespace Game.BattleFields
             for (byte i = 0; i < WGConst.MaxWorkshops; i++)
             {
                 WGWorkshop workshop = new WGWorkshop(this, i);
-                if (i < WGWorkshopIds.KeepWest)
+                if (i < WGWorkshopIds.Ne)
                     workshop.GiveControlTo(GetAttackerTeam(), true);
                 else
                     workshop.GiveControlTo(GetDefenderTeam(), true);
 
                 // Note: Capture point is added once the gameobject is created.
                 Workshops.Add(workshop);
-            }
-
-            // Spawn NPCs in the defender's keep, both Horde and Alliance
-            foreach (var npc in WGConst.WGKeepNPC)
-            {
-                // Horde npc
-                Creature creature = SpawnCreature(npc.HordeEntry, npc.Pos);
-                if (creature)
-                    KeepCreature[TeamId.Horde].Add(creature.GetGUID());
-                // Alliance npc
-                creature = SpawnCreature(npc.AllianceEntry, npc.Pos);
-                if (creature)
-                    KeepCreature[TeamId.Alliance].Add(creature.GetGUID());
-            }
-
-            // Hide NPCs from the Attacker's team in the keep
-            foreach (var guid in KeepCreature[GetAttackerTeam()])
-            {
-                Creature creature = GetCreature(guid);
-                if (creature)
-                    HideNpc(creature);
-            }
-
-            // Spawn Horde NPCs outside the keep
-            for (var i = 0; i < WGConst.OutsideAllianceNpc; i++)
-            {
-                var npc = WGConst.WGOutsideNPC[i];
-                Creature creature = SpawnCreature(npc.HordeEntry, npc.Pos);
-                if (creature)
-                    OutsideCreature[TeamId.Horde].Add(creature.GetGUID());
-            }
-
-            // Spawn Alliance NPCs outside the keep
-            for (var i = WGConst.OutsideAllianceNpc; i < WGConst.MaxOutsideNpcs; i++)
-            {
-                var npc = WGConst.WGOutsideNPC[i];
-                Creature creature = SpawnCreature(npc.AllianceEntry, npc.Pos);
-                if (creature)
-                    OutsideCreature[TeamId.Alliance].Add(creature.GetGUID());
-            }
-
-            // Hide units outside the keep that are defenders
-            foreach (var guid in OutsideCreature[GetDefenderTeam()])
-            {
-                Creature creature = GetCreature(guid);
-                if (creature)
-                    HideNpc(creature);
             }
 
             // Spawn turrets and hide them per default
@@ -347,39 +298,6 @@ namespace Game.BattleFields
                         creature.SetFaction(WGConst.WintergraspFaction[GetDefenderTeam()]);
                     HideNpc(creature);
                 }
-            }
-
-            if (!endByTimer) // One player triggered the relic
-            {
-                // Change all npc in keep
-                foreach (var guid in KeepCreature[GetAttackerTeam()])
-                {
-                    Creature creature = GetCreature(guid);
-                    if (creature)
-                        HideNpc(creature);
-                }
-
-                foreach (var guid in KeepCreature[GetDefenderTeam()])
-                {
-                    Creature creature = GetCreature(guid);
-                    if (creature)
-                        ShowNpc(creature, true);
-                }
-
-                // Change all npc out of keep
-                foreach (var guid in OutsideCreature[GetDefenderTeam()])
-                {
-                    Creature creature = GetCreature(guid);
-                    if (creature)
-                        HideNpc(creature);
-                }
-
-                foreach (var guid in OutsideCreature[GetAttackerTeam()])
-                {
-                    Creature creature = GetCreature(guid);
-                    if (creature)
-                        ShowNpc(creature, true);
-                };
             }
 
             // Update all graveyard, control is to defender when no wartime
@@ -648,38 +566,9 @@ namespace Game.BattleFields
             if (killer == victim)
                 return;
 
-            bool again = false;
-            int killerTeam = killer.GetTeamId();
             if (victim.IsTypeId(TypeId.Player))
-            {
-                foreach (var guid in m_PlayersInWar[killerTeam])
-                {
-                    Player player = Global.ObjAccessor.FindPlayer(guid);
-                    if (player)
-                        if (player.GetDistance2d(killer) < 40)
-                            PromotePlayer(player);
-                }
-                return;
-            }
+                HandlePromotion(killer, victim);
 
-            foreach (var guid in KeepCreature[GetOtherTeam(killerTeam)])
-            {
-                Creature creature = GetCreature(guid);
-                if (creature)
-                {
-                    if (victim.GetEntry() == creature.GetEntry() && !again)
-                    {
-                        again = true;
-                        foreach (var guid2 in m_PlayersInWar[killerTeam])
-                        {
-                            Player player = Global.ObjAccessor.FindPlayer(guid2);
-                            if (player)
-                                if (player.GetDistance2d(killer) < 40.0f)
-                                    PromotePlayer(player);
-                        }
-                    }
-                }
-            }
             // @todo Recent PvP activity worldstate
         }
 
@@ -706,6 +595,19 @@ namespace Game.BattleFields
                 if (unit.IsVehicle())
                     if (FindAndRemoveVehicleFromList(unit))
                         UpdateVehicleCountWG();
+        }
+
+        void HandlePromotion(Player playerKiller, Unit unitKilled)
+        {
+            int teamId = playerKiller.GetTeamId();
+
+            foreach (var guid in m_PlayersInWar[teamId])
+            {
+                Player player = Global.ObjAccessor.FindPlayer(guid);
+                if (player)
+                    if (player.GetDistance2d(unitKilled) < 40.0f)
+                        PromotePlayer(player);
+            }
         }
 
         // Update rank for player
@@ -898,7 +800,19 @@ namespace Game.BattleFields
             }
         }
 
-        public void BrokenWallOrTower(uint team) { }
+        public void BrokenWallOrTower(uint team, BfWGGameObjectBuilding building)
+        {
+            if (team == GetDefenderTeam())
+            {
+                foreach (var guid in m_PlayersInWar[GetAttackerTeam()])
+                {
+                    Player player = Global.ObjAccessor.FindPlayer(guid);
+                    if (player)
+                        if (player.GetDistance2d(GetGameObject(building.GetGUID())) < 50.0f)
+                            player.KilledMonsterCredit(WintergraspQuests.CreditDefendSiege);
+                }
+            }
+        }
 
         // Called when a tower is broke
         public void UpdatedDestroyedTowerCount(uint team)
@@ -1120,8 +1034,6 @@ namespace Game.BattleFields
 
         List<ObjectGuid>[] m_vehicles = new List<ObjectGuid>[SharedConst.BGTeamsCount];
         List<ObjectGuid> CanonList = new List<ObjectGuid>();
-        List<ObjectGuid>[] KeepCreature = new List<ObjectGuid>[SharedConst.BGTeamsCount];
-        List<ObjectGuid>[] OutsideCreature = new List<ObjectGuid>[SharedConst.BGTeamsCount];
 
         uint m_tenacityStack;
         uint m_saveTimer;
@@ -1253,7 +1165,7 @@ namespace Game.BattleFields
                     break;
             }
 
-            _wg.BrokenWallOrTower(_teamControl);
+            _wg.BrokenWallOrTower(_teamControl, this);
         }
 
         public void Init(GameObject go)
@@ -1641,8 +1553,8 @@ namespace Game.BattleFields
 
         public void UpdateGraveyardAndWorkshop()
         {
-            if (_staticInfo.WorkshopId < WGWorkshopIds.KeepWest)
-                _wg.GetGraveyardById(_staticInfo.WorkshopId).GiveControlTo(_teamControl);
+            if (_staticInfo.WorkshopId < WGWorkshopIds.Ne)
+                GiveControlTo(_wg.GetAttackerTeam(), true);
             else
                 GiveControlTo(_wg.GetDefenderTeam(), true);
         }

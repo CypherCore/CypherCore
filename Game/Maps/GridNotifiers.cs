@@ -1515,16 +1515,20 @@ namespace Game.Maps
 
     public class AnyGroupedUnitInObjectRangeCheck : ICheck<Unit>
     {
-        public AnyGroupedUnitInObjectRangeCheck(WorldObject obj, Unit funit, float range, bool raid)
+        public AnyGroupedUnitInObjectRangeCheck(WorldObject obj, Unit funit, float range, bool raid, bool playerOnly = false)
         {
             _source = obj;
             _refUnit = funit;
             _range = range;
             _raid = raid;
+            _playerOnly = playerOnly;
         }
 
         public bool Invoke(Unit u)
         {
+            if (_playerOnly && !u.IsPlayer())
+                    return false;
+
             if (_raid)
             {
                 if (!_refUnit.IsInRaidWith(u))
@@ -1540,6 +1544,7 @@ namespace Game.Maps
         Unit _refUnit;
         float _range;
         bool _raid;
+        bool _playerOnly;
     }
 
     public class AnyUnitInObjectRangeCheck : ICheck<Unit>
@@ -1593,19 +1598,14 @@ namespace Game.Maps
 
     public class AnyAoETargetUnitInObjectRangeCheck : ICheck<Unit>
     {
-        public AnyAoETargetUnitInObjectRangeCheck(WorldObject obj, Unit funit, float range)
+        public AnyAoETargetUnitInObjectRangeCheck(WorldObject obj, Unit funit, float range, SpellInfo spellInfo = null)
         {
             i_obj = obj;
             i_funit = funit;
-            _spellInfo = null;
+            _spellInfo = spellInfo;
             i_range = range;
 
-            Unit check = i_funit;
-            Unit owner = i_funit.GetOwner();
-            if (owner)
-                check = owner;
-            i_targetForPlayer = (check.IsTypeId(TypeId.Player));
-            if (i_obj.IsTypeId(TypeId.DynamicObject))
+            if (_spellInfo == null)
                 _spellInfo = i_obj.ToDynamicObject().GetSpellInfo();
         }
 
@@ -1615,13 +1615,12 @@ namespace Game.Maps
             if (u.IsTypeId(TypeId.Unit) && u.IsTotem())
                 return false;
 
-            if (i_funit._IsValidAttackTarget(u, _spellInfo, i_obj.IsTypeId(TypeId.DynamicObject) ? i_obj : null) && i_obj.IsWithinDistInMap(u, i_range))
-                return true;
+            if (_spellInfo != null && _spellInfo.HasAttribute(SpellAttr3.OnlyTargetPlayers) && !u.IsPlayer())
+                return false;
 
-            return false;
+            return i_funit._IsValidAttackTarget(u, _spellInfo, i_obj.IsTypeId(TypeId.DynamicObject) ? i_obj : null) && i_obj.IsWithinDistInMap(u, i_range);
         }
 
-        bool i_targetForPlayer;
         WorldObject i_obj;
         Unit i_funit;
         SpellInfo _spellInfo;

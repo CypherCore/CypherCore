@@ -1105,17 +1105,13 @@ namespace Scripts.World
                     if (!Global.GameEventMgr.IsHolidayActive(HolidayIds.FireFestival))
                         return;
 
-                    var players = go.GetMap().GetPlayers();
-                    foreach (var player in players)
+                    var playersNearby = go.GetPlayerListInGrid(go.GetMap().GetVisibilityRange());
+                    foreach (var player in playersNearby)
                     {
                         if (player.GetTeam() == Team.Horde)
-                        {
                             go.PlayDirectMusic(12325, player);
-                        }
                         else
-                        {
                             go.PlayDirectMusic(12319, player);
-                        }
                     }
 
                     task.Repeat(TimeSpan.FromSeconds(5)); // Every 5 second's SMSG_PLAY_MUSIC packet (PlayDirectMusic) is pushed to the client (sniffed value)

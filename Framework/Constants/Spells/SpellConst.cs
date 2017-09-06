@@ -2097,11 +2097,11 @@ namespace Framework.Constants
 
         RangedMask = DoneRangedAutoAttack | TakenRangedAutoAttack | DoneSpellRangedDmgClass | TakenSpellRangedDmgClass,
 
-        SpellMask = DoneSpellMeleeDmgClass | TakenSpellMeleeDmgClass | DoneSpellRangedDmgClass | TakenSpellRangedDmgClass
+        SpellMask = DoneSpellMeleeDmgClass | TakenSpellMeleeDmgClass | DoneRangedAutoAttack | TakenRangedAutoAttack| DoneSpellRangedDmgClass | TakenSpellRangedDmgClass
             | DoneSpellNoneDmgClassPos | TakenSpellNoneDmgClassPos | DoneSpellNoneDmgClassNeg | TakenSpellNoneDmgClassNeg
             | DoneSpellMagicDmgClassPos | TakenSpellMagicDmgClassPos | DoneSpellMagicDmgClassNeg | TakenSpellMagicDmgClassNeg,
 
-        SpellCastMask = SpellMask | DoneTrapActivation | RangedMask,
+        SpellCastMask = SpellMask | DoneTrapActivation,
 
         PeriodicMask = DonePeriodic | TakenPeriodic,
 

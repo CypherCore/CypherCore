@@ -1389,23 +1389,22 @@ namespace Game.Entities
 
         public void SetSpawnHealth()
         {
+            if (m_creatureData == null)
+                return;
+
             ulong curhealth;
 
             if (!m_regenHealth)
             {
-                if (m_creatureData != null)
+                curhealth = m_creatureData.curhealth;
+                if (curhealth != 0)
                 {
-                    curhealth = m_creatureData.curhealth;
-                    if (curhealth != 0)
-                    {
-                        curhealth = (uint)(curhealth * _GetHealthMod(GetCreatureTemplate().Rank));
-                        if (curhealth < 1)
-                            curhealth = 1;
-                    }
-                    SetPower(PowerType.Mana, (int)m_creatureData.curmana);
+                    curhealth = (uint)(curhealth * _GetHealthMod(GetCreatureTemplate().Rank));
+                    if (curhealth < 1)
+                        curhealth = 1;
                 }
-                else
-                    curhealth = GetHealth();
+
+                SetPower(PowerType.Mana, (int)m_creatureData.curmana);
             }
             else
             {

@@ -35,8 +35,8 @@ namespace Game.AI
                 owner.ClearUnitState(UnitState.Evade);
                 owner.SetWalk(true);
                 owner.LoadCreaturesAddon();
-                owner.SetSpawnHealth();
                 owner.GetAI().JustReachedHome();
+                owner.SetSpawnHealth();
             }
         }
 

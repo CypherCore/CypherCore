@@ -663,21 +663,44 @@ namespace Game.Spells
             SpellInfo spellInfo = eventInfo.GetSpellInfo();
             switch (GetAuraType())
             {
+                case AuraType.ModConfuse:
+                case AuraType.ModFear:
+                case AuraType.ModStun:
+                case AuraType.ModRoot:
+                case AuraType.Transform:
+                    {
+                        DamageInfo damageInfo = eventInfo.GetDamageInfo();
+                        if (damageInfo == null || damageInfo.GetDamage() == 0)
+                            return false;
+
+                        // Spell own damage at apply won't break CC
+                        if (spellInfo != null)
+                        {
+                            if (spellInfo == GetSpellInfo())
+                            {
+                                Aura aura = GetBase();
+                                // called from spellcast, should not have ticked yet
+                                if (aura.GetDuration() == aura.GetMaxDuration())
+                                    return false;
+                            }
+                        }
+                        break;
+                    }
                 case AuraType.MechanicImmunity:
                 case AuraType.ModMechanicResistance:
                     // compare mechanic
                     if (spellInfo == null || !Convert.ToBoolean(spellInfo.GetAllEffectsMechanicMask() & (1 << GetMiscValue())))
-                        result = false;
+                        return false;
                     break;
                 case AuraType.ModCastingSpeedNotStack:
                     // skip melee hits and instant cast spells
                     if (!eventInfo.GetProcSpell() || eventInfo.GetProcSpell().GetCastTime() == 0)
-                        result = false;
+                        return false;
                     break;
                 case AuraType.ModSpellDamageFromCaster:
                     // Compare casters
                     if (GetCasterGUID() != eventInfo.GetActor().GetGUID())
-                        result = false;
+                        return false;
                     break;
                 case AuraType.ModPowerCostSchool:
                 case AuraType.ModPowerCostSchoolPct:
@@ -685,22 +708,19 @@ namespace Game.Spells
                         // Skip melee hits and spells with wrong school or zero cost
                         if (spellInfo == null || !Convert.ToBoolean((int)spellInfo.GetSchoolMask() & GetMiscValue()) // School Check
                             || !eventInfo.GetProcSpell())
-                        {
-                            result = false;
-                            break;
-                        }
+                            return false;
 
                         // Costs Check
                         var costs = eventInfo.GetProcSpell().GetPowerCost();
                         var m = costs.Find(cost => { return cost.Amount > 0; });
                         if (m == null)
-                            result = false;
+                            return false;
                         break;
                     }
                 case AuraType.ReflectSpellsSchool:
                     // Skip melee hits and spells with wrong school
                     if (spellInfo == null || !Convert.ToBoolean((int)spellInfo.GetSchoolMask() & GetMiscValue()))
-                        result = false;
+                        return false;
                     break;
                 case AuraType.ProcTriggerSpell:
                 case AuraType.ProcTriggerSpellWithValue:
@@ -710,7 +730,7 @@ namespace Game.Spells
                         SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId);
                         if (triggeredSpellInfo != null)
                             if (aurApp.GetTarget().m_extraAttacks != 0 && triggeredSpellInfo.HasEffect(SpellEffectName.AddExtraAttacks))
-                                result = false;
+                                return false;
                         break;
                     }
                 default:
@@ -6007,24 +6027,12 @@ namespace Game.Spells
 
         void HandleBreakableCCAuraProc(AuraApplication aurApp, ProcEventInfo eventInfo)
         {
-            DamageInfo damageInfo = eventInfo.GetDamageInfo();
-            if (damageInfo == null)
-                return;
+            int damageLeft = (int)(GetAmount() - eventInfo.GetDamageInfo().GetDamage());
 
-            // aura own damage at apply won't break CC
-            if (eventInfo.GetSpellPhaseMask().HasAnyFlag(ProcFlagsSpellPhase.Cast))
-            {
-                SpellInfo spellInfo = eventInfo.GetSpellInfo();
-                if (spellInfo != null)
-                    if (spellInfo == GetSpellInfo())
-                        return;
-            }
-
-            int damageLeft = GetAmount();
-            if (damageLeft < damageInfo.GetDamage())
+            if (damageLeft <= 0)
                 aurApp.GetTarget().RemoveAura(aurApp);
             else
-                ChangeAmount((int)(damageLeft - damageInfo.GetDamage()));
+                ChangeAmount(damageLeft);
         }
 
         void HandleProcTriggerSpellAuraProc(AuraApplication aurApp, ProcEventInfo eventInfo)

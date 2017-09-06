@@ -54,7 +54,6 @@ namespace Game.AI
 
         public void OnReset()
         {
-            SetPhase(0);
             ResetBaseObject();
             foreach (var holder in mEvents)
             {
@@ -87,8 +86,7 @@ namespace Game.AI
             //calc random
             if (e.GetEventType() != SmartEvents.Link && e.Event.event_chance < 100 && e.Event.event_chance != 0)
             {
-                uint rnd = RandomHelper.URand(1, 100);
-                if (e.Event.event_chance <= rnd)
+                if (RandomHelper.randChance(e.Event.event_chance))
                     return;
             }
             e.runOnce = true;//used for repeat check
@@ -1190,7 +1188,7 @@ namespace Game.AI
                                 if (!IsCreature(obj))
                                     continue;
 
-                                if (!e.Event.event_flags.HasAnyFlag(SmartEventFlags.WhileCharmed) && !IsCreatureInControlOfSelf(obj))
+                                if (!e.Event.event_flags.HasAnyFlag(SmartEventFlags.WhileCharmed) && IsCharmedCreature(obj))
                                     continue;
 
                                 Position pos = obj.GetPosition();
@@ -2887,7 +2885,7 @@ namespace Game.AI
             if ((e.Event.event_phase_mask != 0 && !IsInPhase(e.Event.event_phase_mask)) || (e.Event.event_flags.HasAnyFlag(SmartEventFlags.NotRepeatable) && e.runOnce))
                 return;
 
-            if (!e.Event.event_flags.HasAnyFlag(SmartEventFlags.WhileCharmed) && IsCreature(me) && !IsCreatureInControlOfSelf(me))
+            if (!e.Event.event_flags.HasAnyFlag(SmartEventFlags.WhileCharmed) && IsCharmedCreature(me))
                 return;
 
             switch (e.GetEventType())
@@ -3924,13 +3922,16 @@ namespace Game.AI
         bool IsUnit(WorldObject obj) { return obj != null && (obj.IsTypeId(TypeId.Unit) || obj.IsTypeId(TypeId.Player)); }
         public bool IsPlayer(WorldObject obj) { return obj != null && obj.IsTypeId(TypeId.Player); }
         bool IsCreature(WorldObject obj) { return obj != null && obj.IsTypeId(TypeId.Unit); }
-        static bool IsCreatureInControlOfSelf(WorldObject obj)
+        static bool IsCharmedCreature(WorldObject obj)
         {
-            Creature creatureObj = obj?.ToCreature();
-            if (creatureObj)
-                return !creatureObj.IsCharmed() && !creatureObj.IsControlledByPlayer();
-            else
+            if (!obj)
                 return false;
+
+            Creature creatureObj = obj.ToCreature();
+            if (creatureObj)
+                return creatureObj.IsCharmed();
+
+            return false;
         }
         bool IsGameObject(WorldObject obj) { return obj != null && obj.IsTypeId(TypeId.GameObject); }
 

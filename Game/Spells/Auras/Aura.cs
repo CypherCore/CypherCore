@@ -1711,8 +1711,8 @@ namespace Game.Spells
             if (!Global.SpellMgr.CanSpellTriggerProcOnEvent(procEntry, eventInfo))
                 return 0;
 
-            // check if aura can proc when spell is triggered
-            if (!procEntry.AttributesMask.HasAnyFlag(ProcAttributes.TriggeredCanProc))
+            // check if aura can proc when spell is triggered (exception for hunter auto shot & wands)
+            if (!procEntry.AttributesMask.HasAnyFlag(ProcAttributes.TriggeredCanProc) && !eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.AutoAttackMask))
             {
                 Spell spell = eventInfo.GetProcSpell();
                 if (spell)
@@ -2665,7 +2665,7 @@ namespace Game.Spells
                 List<Unit> targetList = new List<Unit>();
                 if (effect.TargetB.GetTarget() == Targets.DestDynobjAlly || effect.TargetB.GetTarget() == Targets.UnitDestAreaAlly)
                 {
-                    var u_check = new AnyFriendlyUnitInObjectRangeCheck(GetDynobjOwner(), dynObjOwnerCaster, radius);
+                    var u_check = new AnyFriendlyUnitInObjectRangeCheck(GetDynobjOwner(), dynObjOwnerCaster, radius, GetSpellInfo().HasAttribute(SpellAttr3.OnlyTargetPlayers));
                     var searcher = new UnitListSearcher(GetDynobjOwner(), targetList, u_check);
                     Cell.VisitAllObjects(GetDynobjOwner(), searcher, radius);
                 }

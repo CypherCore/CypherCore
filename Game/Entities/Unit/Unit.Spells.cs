@@ -894,7 +894,7 @@ namespace Game.Entities
                 canDodge = false;
 
                 // only if in front
-                if (victim.HasInArc(MathFunctions.PI, this) || victim.HasAuraType(AuraType.IgnoreHitDirection))
+                if (!victim.HasUnitState(UnitState.Controlled) && (victim.HasInArc(MathFunctions.PI, this) || victim.HasAuraType(AuraType.IgnoreHitDirection)))
                 {
                     int deflect_chance = victim.GetTotalAuraModifier(AuraType.DeflectSpells) * 100;
                     tmp += deflect_chance;
@@ -1043,8 +1043,7 @@ namespace Game.Entities
 
             int tmp = 10000 - HitChance;
 
-            int rand = RandomHelper.IRand(0, 10000);
-
+            int rand = RandomHelper.IRand(0, 9999);
             if (rand < tmp)
                 return SpellMissInfo.Miss;
 
@@ -2157,13 +2156,8 @@ namespace Game.Entities
 
             if (victim.HasAuraType(AuraType.IgnoreHitDirection) || victim.HasInArc(MathFunctions.PI, this))
             {
-                // Check creatures flags_extra for disable block
-                if (victim.IsTypeId(TypeId.Unit) &&
-                    victim.ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoBlock))
-                    return false;
-
                 float blockChance = GetUnitBlockChance(attackType, victim);
-                if (RandomHelper.randChance(blockChance))
+                if (blockChance != 0 && RandomHelper.randChance(blockChance))
                     return true;
             }
             return false;
