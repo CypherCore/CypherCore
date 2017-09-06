@@ -23,7 +23,7 @@ using Game.Scripting;
 
 namespace Game.PvP
 {
-    class HellfirePeninsulaPvP : OutdoorPvP
+    public class HellfirePeninsulaPvP : OutdoorPvP
     {
         public HellfirePeninsulaPvP()
         {
@@ -308,17 +308,6 @@ namespace Game.PvP
         }
 
         uint m_TowerType;
-    }
-
-    [Script]
-    class HellfirePeninsulaPvPScript : OutdoorPvPScript
-    {
-        public HellfirePeninsulaPvPScript() : base("outdoorpvp_hp") { }
-
-        public override OutdoorPvP GetOutdoorPvP()
-        {
-            return new HellfirePeninsulaPvP();
-        }
     }
 
     struct HPConst

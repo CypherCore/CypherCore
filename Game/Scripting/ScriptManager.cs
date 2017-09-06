@@ -56,26 +56,27 @@ namespace Game.Scripting
 
             FillSpellSummary();
 
-            //Load Core Scripts
-            LoadScripts(Assembly.GetExecutingAssembly());
-
             //Load Scripts.dll
-            if (!File.Exists("Scripts.dll"))
-                Log.outError(LogFilter.ServerLoading, "Cant find file {0}, Only Core Scripts are loaded.");
-            else
-            {
-                Assembly asm = Assembly.LoadFile(Path.GetFullPath("Scripts.dll"));
-                if (asm == null)
-                    Log.outError(LogFilter.ServerLoading, "Error Loading Scripts.dll, Only Core Scripts are loaded.");
-                else
-                    LoadScripts(asm);
-            }
+            LoadScripts();
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {GetScriptCount()} C# scripts in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
-        public void LoadScripts(Assembly assembly)
+        public void LoadScripts()
         {
+            if (!File.Exists("Scripts.dll"))
+            {
+                Log.outError(LogFilter.ServerLoading, "Cant find file {0}, Only Core Scripts are loaded.");
+                return;
+            }
+
+            Assembly assembly = Assembly.LoadFile(Path.GetFullPath("Scripts.dll"));
+            if (assembly == null)
+            {
+                Log.outError(LogFilter.ServerLoading, "Error Loading Scripts.dll, Only Core Scripts are loaded.");
+                return;
+            }
+
             foreach (var type in assembly.GetTypes())
             {
                 var attributes = (ScriptAttribute[])type.GetCustomAttributes<ScriptAttribute>();

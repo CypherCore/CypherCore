@@ -20,6 +20,7 @@ using Game;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
+using Game.PvP;
 
 namespace Scripts.Outlands
 {
@@ -296,6 +297,17 @@ namespace Scripts.Outlands
 
         const uint SPELL_SUMMON_POO = 37688;
         const uint NPC_DERANGED_HELBOAR = 16863;
+    }
+
+    [Script]
+    class HellfirePeninsulaPvPScript : OutdoorPvPScript
+    {
+        public HellfirePeninsulaPvPScript() : base("outdoorpvp_hp") { }
+
+        public override OutdoorPvP GetOutdoorPvP()
+        {
+            return new HellfirePeninsulaPvP();
+        }
     }
 }
 

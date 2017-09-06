@@ -1089,58 +1089,6 @@ namespace Game.AI
         SmartScript mScript = new SmartScript();
     }
 
-    [Script]
-    class SmartTrigger : AreaTriggerScript
-    {
-        public SmartTrigger() : base("SmartTrigger") { }
-
-        public override bool OnTrigger(Player player, AreaTriggerRecord trigger, bool entered)
-        {
-            if (!player.IsAlive())
-                return false;
-
-            Log.outDebug(LogFilter.ScriptsAi, "AreaTrigger {0} is using SmartTrigger script", trigger.Id);
-            SmartScript script = new SmartScript();
-            script.OnInitialize(trigger);
-            script.ProcessEventsFor(SmartEvents.AreatriggerOntrigger, player, trigger.Id);
-            return true;
-        }
-    }
-
-    [Script]
-    class SmartScene : SceneScript
-    {
-        public SmartScene() : base("SmartScene") { }
-
-        public override void OnSceneStart(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
-        {
-            SmartScript smartScript = new SmartScript();
-            smartScript.OnInitialize(sceneTemplate);
-            smartScript.ProcessEventsFor(SmartEvents.SceneStart, player);
-        }
-
-        public override void OnSceneTriggerEvent(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
-        {
-            SmartScript smartScript = new SmartScript();
-            smartScript.OnInitialize(sceneTemplate);
-            smartScript.ProcessEventsFor(SmartEvents.SceneTrigger, player, 0, 0, false, null, null, triggerName);
-        }
-
-        public override void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
-        {
-            SmartScript smartScript = new SmartScript();
-            smartScript.OnInitialize(sceneTemplate);
-            smartScript.ProcessEventsFor(SmartEvents.SceneCancel, player);
-        }
-
-        public override void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
-        {
-            SmartScript smartScript = new SmartScript();
-            smartScript.OnInitialize(sceneTemplate);
-            smartScript.ProcessEventsFor(SmartEvents.SceneComplete, player);
-        }
-    }
-
     public enum SmartEscortState
     {
         None = 0x00,                        //nothing in progress

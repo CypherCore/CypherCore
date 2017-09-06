@@ -74,6 +74,7 @@
     <Compile Include="Northrend\Gundrak\BossEck.cs" />
     <Compile Include="Northrend\Gundrak\InstanceGundrak.cs" />
     <Compile Include="Northrend\Naxxramas\BossAnubrekhan.cs" />
+    <Compile Include="Smart\SmartAI.cs" />
     <Compile Include="Spells\DemonHunter.cs" />
     <Compile Include="Spells\Warlock.cs" />
     <Compile Include="World\BossEmeraldDragons.cs" />
