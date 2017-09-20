@@ -64,6 +64,8 @@ namespace Game.Maps
 
             //lets initialize visibility distance for map
             InitVisibilityDistance();
+            _weatherUpdateTimer = new IntervalTimer();
+            _weatherUpdateTimer.SetInterval(1 * Time.InMilliseconds);
 
             GetGuidSequenceGenerator(HighGuid.Transport).Set(Global.ObjectMgr.GetGenerator(HighGuid.Transport).GetNextAfterMaxUsed());
 
@@ -407,7 +409,6 @@ namespace Game.Maps
                 SendInitSelf(player);
 
             SendInitTransports(player);
-            SendZoneDynamicInfo(player);
 
             if (initPlayer)
                 player.m_clientGUIDs.Clear();
@@ -634,7 +635,18 @@ namespace Game.Maps
                 ScriptsProcess();
                 i_scriptLock = false;
             }
-            
+
+            if (_weatherUpdateTimer.Passed())
+            {
+                foreach (var zoneInfo in _zoneDynamicInfo)
+                {
+                    if (zoneInfo.Value.DefaultWeather != null && !zoneInfo.Value.DefaultWeather.Update((uint)_weatherUpdateTimer.GetInterval()))
+                        zoneInfo.Value.DefaultWeather = null;
+                }
+
+                _weatherUpdateTimer.Reset();
+            }
+
             MoveAllCreaturesInMoveList();
             MoveAllGameObjectsInMoveList();
             MoveAllAreaTriggersInMoveList();
@@ -2611,9 +2623,8 @@ namespace Game.Maps
             }
         }
 
-        void SendZoneDynamicInfo(Player player)
+        public void SendZoneDynamicInfo(uint zoneId, Player player)
         {
-            uint zoneId = GetZoneId(player.GetPositionX(), player.GetPositionY(), player.GetPositionZ());
             var zoneInfo = _zoneDynamicInfo.LookupByKey(zoneId);
             if (zoneInfo == null)
                 return;
@@ -2622,12 +2633,7 @@ namespace Game.Maps
             if (music != 0)
                 player.SendPacket(new PlayMusic(music));
 
-            WeatherState weatherId = zoneInfo.WeatherId;
-            if (weatherId != 0)
-            {
-                WeatherPkt weather = new WeatherPkt(weatherId, zoneInfo.WeatherGrade);
-                player.SendPacket(weather);
-            }
+            SendZoneWeather(zoneInfo, player);
 
             uint overrideLightId = zoneInfo.OverrideLightId;
             if (overrideLightId != 0)
@@ -2640,6 +2646,34 @@ namespace Game.Maps
             }
         }
 
+        public void SendZoneWeather(uint zoneId, Player player)
+        {
+            if (!player.HasAuraType(AuraType.ForceWeather))
+            {
+                var zoneInfo = _zoneDynamicInfo.LookupByKey(zoneId);
+                if (zoneInfo == null)
+                    return;
+
+                SendZoneWeather(zoneInfo, player);
+            }
+        }
+
+        void SendZoneWeather(ZoneDynamicInfo zoneDynamicInfo, Player player)
+        {
+            WeatherState weatherId = zoneDynamicInfo.WeatherId;
+            if (weatherId != 0)
+            {
+                WeatherPkt weather = new WeatherPkt(weatherId, zoneDynamicInfo.WeatherGrade);
+                player.SendPacket(weather);
+            }
+            else if (zoneDynamicInfo.DefaultWeather != null)
+            {
+                zoneDynamicInfo.DefaultWeather.SendWeatherUpdateToPlayer(player);
+            }
+            else
+                Weather.SendFineWeatherUpdateToPlayer(player);
+        }
+
         public void SetZoneMusic(uint zoneId, uint musicId)
         {
             if (!_zoneDynamicInfo.ContainsKey(zoneId))
@@ -2650,12 +2684,32 @@ namespace Game.Maps
             var players = GetPlayers();
             if (!players.Empty())
             {
-                PlayMusic data = new PlayMusic(musicId);
+                PlayMusic playMusic = new PlayMusic(musicId);
 
                 foreach (var player in players)
-                    if (player.GetZoneId() == zoneId)
-                        player.SendPacket(data);
+                    if (player.GetZoneId() == zoneId && !player.HasAuraType(AuraType.ForceWeather))
+                        player.SendPacket(playMusic);
             }
+        }
+
+        public Weather GetOrGenerateZoneDefaultWeather(uint zoneId)
+        {
+            WeatherData weatherData = Global.WeatherMgr.GetWeatherData(zoneId);
+            if (weatherData == null)
+                return null;
+
+            if (!_zoneDynamicInfo.ContainsKey(zoneId))
+                _zoneDynamicInfo[zoneId] = new ZoneDynamicInfo();
+
+            ZoneDynamicInfo info = _zoneDynamicInfo[zoneId];
+            if (info.DefaultWeather == null)
+            {
+                info.DefaultWeather = new Weather(zoneId, weatherData);
+                info.DefaultWeather.ReGenerate();
+                info.DefaultWeather.UpdateWeather();
+            }
+
+            return info.DefaultWeather;
         }
 
         void SetZoneWeather(uint zoneId, WeatherState weatherId, float weatherGrade)
@@ -2666,15 +2720,17 @@ namespace Game.Maps
             ZoneDynamicInfo info = _zoneDynamicInfo[zoneId];
             info.WeatherId = weatherId;
             info.WeatherGrade = weatherGrade;
-            var players = GetPlayers();
 
+            var players = GetPlayers();
             if (!players.Empty())
             {
                 WeatherPkt weather = new WeatherPkt(weatherId, weatherGrade);
 
                 foreach (var player in players)
+                {
                     if (player.GetZoneId() == zoneId)
                         player.SendPacket(weather);
+                }
             }
         }
 
@@ -4157,6 +4213,7 @@ namespace Game.Maps
         internal uint m_unloadTimer;
 
         Dictionary<uint, ZoneDynamicInfo> _zoneDynamicInfo = new Dictionary<uint, ZoneDynamicInfo>();
+        IntervalTimer _weatherUpdateTimer;
         uint _defaultLight;
         Dictionary<HighGuid, ObjectGuidGenerator> _guidGenerators = new Dictionary<HighGuid, ObjectGuidGenerator>();
         Dictionary<ObjectGuid, WorldObject> _objectsStore = new Dictionary<ObjectGuid, WorldObject>();
@@ -4698,7 +4755,8 @@ namespace Game.Maps
     public class ZoneDynamicInfo
     {
         public uint MusicId;
-        public WeatherState WeatherId = WeatherState.Fine;
+        public Weather DefaultWeather;
+        public WeatherState WeatherId;
         public float WeatherGrade;
         public uint OverrideLightId;
         public uint LightFadeInTime;

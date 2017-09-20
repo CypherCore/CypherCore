@@ -27,32 +27,6 @@ namespace Game
     {
         WeatherManager() { }
 
-        /// Find a Weather object by the given zoneid
-        public Weather FindWeather(uint id)
-        {
-            return m_weathers.LookupByKey(id);
-        }
-
-        void RemoveWeather(uint id)
-        {
-            m_weathers.Remove(id);
-        }
-
-        public Weather AddWeather(uint zone_id)
-        {
-            WeatherData weatherChances = GetWeatherData(zone_id);
-
-            // zone does not have weather, ignore
-            if (weatherChances == null)
-                return null;
-
-            Weather w = new Weather(zone_id, weatherChances);
-            w.ReGenerate();
-            w.UpdateWeather();
-
-            return w;
-        }
-
         public void LoadWeatherData()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -101,7 +75,7 @@ namespace Game
                 }
 
                 wzc.ScriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(13));
-                mWeatherZoneMap[zone_id] = wzc;
+                _weatherData[zone_id] = wzc;
                 ++count;
             }
             while (result.NextRow());
@@ -109,28 +83,12 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} weather definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public void SendFineWeatherUpdateToPlayer(Player player)
+        public WeatherData GetWeatherData(uint zone_id)
         {
-            WeatherPkt weather = new WeatherPkt(WeatherState.Fine);
-            player.SendPacket(weather);
+            return _weatherData.LookupByKey(zone_id);
         }
 
-        public void Update(uint diff)
-        {
-            foreach (var pair in m_weathers.ToList())
-            {
-                if (!pair.Value.Update(diff))
-                    m_weathers.Remove(pair.Key);
-            }
-        }
-
-        WeatherData GetWeatherData(uint zone_id)
-        {
-            return mWeatherZoneMap.LookupByKey(zone_id);
-        }
-
-        Dictionary<uint, Weather> m_weathers = new Dictionary<uint, Weather>();
-        Dictionary<uint, WeatherData> mWeatherZoneMap = new Dictionary<uint, WeatherData>();
+        Dictionary<uint, WeatherData> _weatherData = new Dictionary<uint, WeatherData>();
     }
 
     public class Weather
@@ -294,6 +252,11 @@ namespace Game
         {
             WeatherPkt weather = new WeatherPkt(GetWeatherState(), m_grade);
             player.SendPacket(weather);
+        }
+
+        public static void SendFineWeatherUpdateToPlayer(Player player)
+        {
+            player.SendPacket(new WeatherPkt(WeatherState.Fine));
         }
 
         public bool UpdateWeather()

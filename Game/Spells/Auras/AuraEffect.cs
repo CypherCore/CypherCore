@@ -6093,25 +6093,9 @@ namespace Game.Spells
                 return;
 
             if (apply)
-            {
-                WeatherPkt weather = new WeatherPkt((WeatherState)GetMiscValue(), 1.0f);
-                target.SendPacket(weather);
-            }
+                target.SendPacket(new WeatherPkt((WeatherState)GetMiscValue(), 1.0f));
             else
-            {
-                // send weather for current zone
-                Weather weather = Global.WeatherMgr.FindWeather(target.GetZoneId());
-                if (weather != null)
-                    weather.SendWeatherUpdateToPlayer(target);
-                else
-                {
-                    if (Global.WeatherMgr.AddWeather(target.GetZoneId()) == null)
-                    {
-                        // send fine weather packet to remove old weather
-                        Global.WeatherMgr.SendFineWeatherUpdateToPlayer(target);
-                    }
-                }
-            }
+                target.GetMap().SendZoneWeather(target.GetZoneId(), target);
         }
 
         [AuraEffectHandler(AuraType.EnableAltPower)]

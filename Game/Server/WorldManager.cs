@@ -824,7 +824,6 @@ namespace Game
 
             DB.Login.Execute("INSERT INTO uptime (realmid, starttime, uptime, revision) VALUES({0}, {1}, 0, '{2}')", _realm.Id.Realm, m_startTime, "");       // One-time query
 
-            m_timers[WorldTimers.Weathers].SetInterval(1 * Time.InMilliseconds);
             m_timers[WorldTimers.Auctions].SetInterval(Time.Minute * Time.InMilliseconds);
             m_timers[WorldTimers.AuctionsPending].SetInterval(250);
 
@@ -1221,13 +1220,6 @@ namespace Game
             ResetTimeDiffRecord();
             UpdateSessions(diff);
             RecordTimeDiff("UpdateSessions");
-
-            //Handle weather updates when the timer has passed
-            if (m_timers[WorldTimers.Weathers].Passed())
-            {
-                m_timers[WorldTimers.Weathers].Reset();
-                Global.WeatherMgr.Update((uint)m_timers[WorldTimers.Weathers].GetInterval());
-            }
 
             /// <li> Update uptime table
             if (m_timers[WorldTimers.UpTime].Passed())
@@ -2446,7 +2438,6 @@ namespace Game
     {
         Auctions,
         AuctionsPending,
-        Weathers,
         UpTime,
         Corpses,
         Events,

@@ -1276,10 +1276,7 @@ namespace Game.Chat
             Player player = handler.GetSession().GetPlayer();
             uint zoneid = player.GetZoneId();
 
-            Weather weather = Global.WeatherMgr.FindWeather(zoneid);
-
-            if (weather == null)
-                weather = Global.WeatherMgr.AddWeather(zoneid);
+            Weather weather = player.GetMap().GetOrGenerateZoneDefaultWeather(zoneid);
             if (weather == null)
             {
                 handler.SendSysMessage(CypherStrings.NoWeather);

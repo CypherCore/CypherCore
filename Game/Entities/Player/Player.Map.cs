@@ -175,18 +175,10 @@ namespace Game.Entities
             if (zone == null)
                 return;
 
-            if (WorldConfig.GetBoolValue(WorldCfg.Weather) && !HasAuraType(AuraType.ForceWeather))
-            {
-                Weather weather = Global.WeatherMgr.FindWeather(newZone);
-                if (weather != null)
-                    weather.SendWeatherUpdateToPlayer(this);
-                else if (Global.WeatherMgr.AddWeather(newZone) == null)
-                {
-                    // send fine weather packet to remove old zone's weather
-                    Global.WeatherMgr.SendFineWeatherUpdateToPlayer(this);                    
-                }
-            }
+            if (WorldConfig.GetBoolValue(WorldCfg.Weather))
+                GetMap().GetOrGenerateZoneDefaultWeather(newZone);
 
+            GetMap().SendZoneDynamicInfo(newZone, this);
 
             Global.ScriptMgr.OnPlayerUpdateZone(this, newZone, newArea);
 
