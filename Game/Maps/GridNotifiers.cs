@@ -1582,7 +1582,7 @@ namespace Game.Maps
         public bool Invoke(Unit u)
         {
             if (u.isTargetableForAttack() && i_obj.IsWithinDistInMap(u, i_range) &&
-                !i_funit.IsFriendlyTo(u) && i_funit.CanSeeOrDetect(u))
+                (i_funit.IsInCombatWith(u) || i_funit.IsHostileTo(u)) && i_obj.CanSeeOrDetect(u))
             {
                 i_range = i_obj.GetDistance(u);        // use found unit range as new range limit for next check
                 return true;
@@ -1606,7 +1606,11 @@ namespace Game.Maps
             i_range = range;
 
             if (_spellInfo == null)
-                _spellInfo = i_obj.ToDynamicObject().GetSpellInfo();
+            {
+                DynamicObject dynObj = i_obj.ToDynamicObject();
+                if (dynObj)
+                    _spellInfo = dynObj.GetSpellInfo();
+            }
         }
 
         public bool Invoke(Unit u)
