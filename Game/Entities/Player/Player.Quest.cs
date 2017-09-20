@@ -337,7 +337,7 @@ namespace Game.Entities
             switch (guid.GetHigh())
             {
                 case HighGuid.Player:
-                    Contract.Assert(quest.HasFlag(QuestFlags.Unk1));
+                    Contract.Assert(quest.HasFlag(QuestFlags.AutoComplete));
                     return Global.ObjectMgr.GetQuestTemplate(nextQuestID);
                 case HighGuid.Creature:
                 case HighGuid.Pet:

@@ -246,7 +246,7 @@ namespace Framework.Constants
     }
 
     [Flags]
-    public enum QuestFlags
+    public enum QuestFlags : uint
     {
         None = 0x00,
         StayAlive = 0x01,               // Not Used Currently
@@ -268,13 +268,19 @@ namespace Framework.Constants
         AutoComplete = 0x10000,         // Quests with this flag player submit automatically by special button in player gui
         DisplayItemInTracker = 0x20000, // Displays Usable Item In Quest Tracker
         ObjText = 0x40000,              // Use Objective Text As Complete Text
-        AutoAccept = 0x80000,           // The client recognizes this flag as auto-accept. However, NONE of the current quests (3.3.5a) have this flag. Maybe blizz used to use it, or will use it in the future.
-        Unk1 = 0x100000,                //
-        AutoTake = 0x200000,            // Automatically Suggestion Of Accepting Quest. Not From Npc.
-        //Unk2                = 0x400000,
-        //Unk3                = 0x800000, // Found In Quest 14069
-        //Unk4                = 0x1000000,
-        // ... 4.X Added Flags Up To 0x80000000 - All Unknown For Now
+        AutoAccept = 0x80000,           // The client recognizes this flag as auto-accept.
+        PlayerCastOnAccept = 0x100000,
+        PlayerCastOnComplete = 0x200000,
+        UpdatePhaseShift = 0x400000,
+        SorWhitelist = 0x800000,
+        LaunchGossipComplete = 0x1000000,
+        RemoveExtraGetItems = 0x2000000,
+        HideUntilDiscovered = 0x4000000,
+        PortraitInQuestLog = 0x8000000,
+        ShowItemWhenCompleted = 0x10000000,
+        LaunchGossipAccept = 0x20000000,
+        ItemsGlowWhenDone = 0x40000000,
+        FailOnLogout = 0x80000000
     }
 
     // last checked in 19802
