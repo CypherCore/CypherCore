@@ -692,6 +692,18 @@ namespace Game.Network.Packets
         public override void Write() { }
     }
 
+    class RemoveNewItem : ClientPacket
+    {
+        public RemoveNewItem(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            ItemGuid = _worldPacket.ReadPackedGuid();
+        }
+
+        public ObjectGuid ItemGuid { get; set; }
+    }
+
     //Structs
     public class ItemBonusInstanceData
     {

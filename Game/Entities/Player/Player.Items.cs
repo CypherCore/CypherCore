@@ -1271,6 +1271,7 @@ namespace Game.Entities
                 UpdateCriteria(CriteriaTypes.ReceiveEpicItem, itemId, count);
                 UpdateCriteria(CriteriaTypes.OwnItem, itemId, 1);
 
+                item.SetFlag(ItemFields.Flags, ItemFieldFlags.NewItem);
                 item.SetItemRandomProperties(randomPropertyId);
 
                 uint upgradeID = Global.DB2Mgr.GetRulesetItemUpgrade(itemId);

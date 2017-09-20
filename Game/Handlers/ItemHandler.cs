@@ -1152,5 +1152,22 @@ namespace Game
             // Placeholder to prevent completely locking out bags clientside
             SendPacket(new SortBagsResult());
         }
+
+        [WorldPacketHandler(ClientOpcodes.RemoveNewItem)]
+        void HandleRemoveNewItem(RemoveNewItem removeNewItem)
+        {
+            Item item = _player.GetItemByGuid(removeNewItem.ItemGuid);
+            if (!item)
+            {
+                Log.outDebug(LogFilter.Network, $"WorldSession.HandleRemoveNewItem: Item ({removeNewItem.ItemGuid.ToString()}) not found for {GetPlayerInfo()}!");
+                return;
+            }
+
+            if (item.HasFlag(ItemFields.Flags, ItemFieldFlags.NewItem))
+            {
+                item.RemoveFlag(ItemFields.Flags, ItemFieldFlags.NewItem);
+                item.SetState(ItemUpdateState.Changed, _player);
+            }
+        }
     }
 }

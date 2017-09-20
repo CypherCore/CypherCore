@@ -339,8 +339,8 @@ namespace Framework.Constants
         ScalingStatDistribution = 11,
         DisenchantLootId = 12,
         ScalingStatDistribution2 = 13,
-        ItemLevelOverride = 14,
-        RandomEnchantment = 15,                 // Responsible for showing "<Random additional stats>" or "+%d Rank Random Minor Trait" in the tooltip before item is obtained
+        ItemLevelCanIncrease = 14, // Displays a + next to item level indicating it can warforge
+        RandomEnchantment = 15, // Responsible for showing "<Random additional stats>" or "+%d Rank Random Minor Trait" in the tooltip before item is obtained
         Bounding = 16,
         RelicType = 17
     }
@@ -751,7 +751,7 @@ namespace Framework.Constants
         Unk13 = 0x00040000, // ?
         Child = 0x00080000,
         Unk15 = 0x00100000, // ?
-        Unk16 = 0x00200000, // ?
+        NewItem = 0x00200000, // Item glows in inventory
         Unk17 = 0x00400000, // ?
         Unk18 = 0x00800000, // ?
         Unk19 = 0x01000000, // ?

@@ -140,6 +140,7 @@ namespace Game.DataStorage
             ItemEffectStorage = DB6Reader.Read<ItemEffectRecord>("ItemEffect.db2", DB6Metas.ItemEffectMeta, HotfixStatements.SEL_ITEM_EFFECT);
             ItemStorage = DB6Reader.Read<ItemRecord>("Item.db2", DB6Metas.ItemMeta, HotfixStatements.SEL_ITEM);
             ItemExtendedCostStorage = DB6Reader.Read<ItemExtendedCostRecord>("ItemExtendedCost.db2", DB6Metas.ItemExtendedCostMeta, HotfixStatements.SEL_ITEM_EXTENDED_COST);
+            ItemLevelSelectorStorage = DB6Reader.Read<ItemLevelSelectorRecord>("ItemLevelSelector.db2", DB6Metas.ItemLevelSelectorMeta, HotfixStatements.SEL_ITEM_LEVEL_SELECTOR);
             ItemLimitCategoryStorage = DB6Reader.Read<ItemLimitCategoryRecord>("ItemLimitCategory.db2", DB6Metas.ItemLimitCategoryMeta, HotfixStatements.SEL_ITEM_LIMIT_CATEGORY, HotfixStatements.SEL_ITEM_LIMIT_CATEGORY_LOCALE);
             ItemModifiedAppearanceStorage = DB6Reader.Read<ItemModifiedAppearanceRecord>("ItemModifiedAppearance.db2", DB6Metas.ItemModifiedAppearanceMeta, HotfixStatements.SEL_ITEM_MODIFIED_APPEARANCE);
             ItemPriceBaseStorage = DB6Reader.Read<ItemPriceBaseRecord>("ItemPriceBase.db2", DB6Metas.ItemPriceBaseMeta, HotfixStatements.SEL_ITEM_PRICE_BASE);
@@ -464,6 +465,7 @@ namespace Game.DataStorage
         public static DB6Storage<ItemEffectRecord> ItemEffectStorage;
         public static DB6Storage<ItemRecord> ItemStorage;
         public static DB6Storage<ItemExtendedCostRecord> ItemExtendedCostStorage;
+        public static DB6Storage<ItemLevelSelectorRecord> ItemLevelSelectorStorage;
         public static DB6Storage<ItemLimitCategoryRecord> ItemLimitCategoryStorage;
         public static DB6Storage<ItemModifiedAppearanceRecord> ItemModifiedAppearanceStorage;
         public static DB6Storage<ItemPriceBaseRecord> ItemPriceBaseStorage;

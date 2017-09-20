@@ -199,6 +199,12 @@ namespace Game.DataStorage
         public byte RequiredAchievement;
     }
 
+    public sealed class ItemLevelSelectorRecord
+    {
+        public uint ID;
+        public ushort ItemLevel;
+    }
+
     public sealed class ItemLimitCategoryRecord
     {
         public uint Id;

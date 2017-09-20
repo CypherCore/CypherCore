@@ -777,6 +777,11 @@ namespace Game.DataStorage
         public List<uint> GetItemBonusTree(uint itemId, uint itemBonusTreeMod)
         {
             List<uint> bonusListIDs = new List<uint>();
+
+            ItemSparseRecord proto = CliDB.ItemSparseStorage.LookupByKey(itemId);
+            if (proto == null)
+                return bonusListIDs;
+
             var itemIdRange = _itemToBonusTree.LookupByKey(itemId);
             if (itemIdRange.Empty())
                 return bonusListIDs;
@@ -788,8 +793,27 @@ namespace Game.DataStorage
                     continue;
 
                 foreach (ItemBonusTreeNodeRecord bonusTreeNode in treeList)
-                    if (bonusTreeNode.BonusTreeModID == itemBonusTreeMod)
+                {
+                    if (bonusTreeNode.BonusTreeModID != itemBonusTreeMod)
+                        continue;
+
+                    if (bonusTreeNode.BonusListID != 0)
+                    {
                         bonusListIDs.Add(bonusTreeNode.BonusListID);
+                    }
+                    else if (bonusTreeNode.ItemLevelSelectorID != 0)
+                    {
+                        ItemLevelSelectorRecord selector = CliDB.ItemLevelSelectorStorage.LookupByKey(bonusTreeNode.ItemLevelSelectorID);
+                        if (selector == null)
+                            continue;
+
+                        short delta = (short)(selector.ItemLevel - proto.ItemLevel);
+
+                        uint bonus = GetItemBonusListForItemLevelDelta(delta);
+                        if (bonus != 0)
+                            bonusListIDs.Add(bonus);
+                    }
+                }
             }
 
             return bonusListIDs;

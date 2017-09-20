@@ -476,6 +476,9 @@ namespace Framework.Database
                 "RequiredCurrency2, RequiredCurrency3, RequiredCurrency4, RequiredCurrency5, RequiredArenaSlot, RequiredFactionId, RequiredFactionStanding, " +
                 "RequirementFlags, RequiredAchievement FROM item_extended_cost ORDER BY ID DESC");
 
+            // ItemLevelSelector.db2
+            PrepareStatement(HotfixStatements.SEL_ITEM_LEVEL_SELECTOR, "SELECT ID, ItemLevel FROM item_level_selector ORDER BY ID DESC");
+
             // ItemLimitCategory.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_LIMIT_CATEGORY, "SELECT ID, Name, Quantity, Flags FROM item_limit_category ORDER BY ID DESC");
             PrepareStatement(HotfixStatements.SEL_ITEM_LIMIT_CATEGORY_LOCALE, "SELECT ID, Name_lang FROM item_limit_category_locale WHERE locale = ?");
@@ -1254,6 +1257,8 @@ namespace Framework.Database
         SEL_ITEM_EFFECT,
 
         SEL_ITEM_EXTENDED_COST,
+
+        SEL_ITEM_LEVEL_SELECTOR,
 
         SEL_ITEM_LIMIT_CATEGORY,
         SEL_ITEM_LIMIT_CATEGORY_LOCALE,

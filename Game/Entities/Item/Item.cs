@@ -1969,24 +1969,23 @@ namespace Game.Entities
                 return 1;
 
             uint itemLevel = stats.GetBaseItemLevel();
-            if (_bonusData.HasItemLevelBonus || _bonusData.ItemLevelOverride == 0)
+            ScalingStatDistributionRecord ssd = CliDB.ScalingStatDistributionStorage.LookupByKey(GetScalingStatDistribution());
+            if (ssd != null)
             {
-                ScalingStatDistributionRecord ssd = CliDB.ScalingStatDistributionStorage.LookupByKey(GetScalingStatDistribution());
-                if (ssd != null)
-                {
-                    uint level = owner.getLevel();
-                    uint fixedLevel = GetModifier(ItemModifier.ScalingStatDistributionFixedLevel);
-                    if (fixedLevel != 0)
-                        level = fixedLevel;
-                    uint heirloomIlvl = (uint)Global.DB2Mgr.GetCurveValueAt(ssd.ItemLevelCurveID, level);
-                    if (heirloomIlvl != 0)
-                        itemLevel = heirloomIlvl;
-                }
+                uint level = owner.getLevel();
 
-                itemLevel += (uint)_bonusData.ItemLevelBonus;
+                uint fixedLevel = GetModifier(ItemModifier.ScalingStatDistributionFixedLevel);
+                if (fixedLevel != 0)
+                    level = fixedLevel;
+                else
+                    level = Math.Min(Math.Max(level, ssd.MinLevel), ssd.MaxLevel);
+
+                uint heirloomIlvl = (uint)Global.DB2Mgr.GetCurveValueAt(ssd.ItemLevelCurveID, level);
+                if (heirloomIlvl != 0)
+                    itemLevel = heirloomIlvl;
             }
-            else
-                itemLevel = _bonusData.ItemLevelOverride;
+
+            itemLevel += (uint)_bonusData.ItemLevelBonus;
 
             ItemUpgradeRecord upgrade = CliDB.ItemUpgradeStorage.LookupByKey(GetModifier(ItemModifier.UpgradeId));
             if (upgrade != null)
@@ -2716,13 +2715,11 @@ namespace Game.Entities
             AppearanceModID = 0;
             RepairCostMultiplier = 1.0f;
             ScalingStatDistribution = proto.GetScalingStatDistribution();
-            ItemLevelOverride = 0;
             RelicType = -1;
             HasItemLevelBonus = false;
 
             _state.AppearanceModPriority = int.MaxValue;
             _state.ScalingStatDistributionPriority = int.MaxValue;
-            _state.ItemLevelOverridePriority = int.MaxValue;
             _state.HasQualityBonus = false;
         }
 
@@ -2807,13 +2804,6 @@ namespace Game.Entities
                         _state.ScalingStatDistributionPriority = values[1];
                     }
                     break;
-                case ItemBonusType.ItemLevelOverride:
-                    if (values[1] < _state.ItemLevelOverridePriority)
-                    {
-                        ItemLevelOverride = (uint)values[0];
-                        _state.ItemLevelOverridePriority = values[1];
-                    }
-                    break;
                 case ItemBonusType.Bounding:
                     Bonding = (ItemBondingType)values[0];
                     break;
@@ -2835,7 +2825,6 @@ namespace Game.Entities
         public uint AppearanceModID;
         public float RepairCostMultiplier;
         public uint ScalingStatDistribution;
-        public uint ItemLevelOverride;
         public uint[] GemItemLevelBonus = new uint[ItemConst.MaxGemSockets];
         public int[] GemRelicType = new int[ItemConst.MaxGemSockets];
         public ushort[] GemRelicRankBonus = new ushort[ItemConst.MaxGemSockets];
@@ -2847,7 +2836,6 @@ namespace Game.Entities
         {
             public int AppearanceModPriority;
             public int ScalingStatDistributionPriority;
-            public int ItemLevelOverridePriority;
             public bool HasQualityBonus;
         }
     }
