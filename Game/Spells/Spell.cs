@@ -6395,7 +6395,7 @@ namespace Game.Spells
 
         bool IsNextMeleeSwingSpell()
         {
-            return m_spellInfo.HasAttribute(SpellAttr0.OnNextSwing);
+            return m_spellInfo.HasAttribute(SpellAttr0.OnNextSwing | SpellAttr0.OnNextSwing2);
         }
 
         bool IsAutoActionResetSpell()

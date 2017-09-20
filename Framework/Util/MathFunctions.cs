@@ -173,7 +173,7 @@ public static class MathFunctions
 
     public static int RoundToInterval(ref int num, dynamic floor, dynamic ceil)
     {
-        return num = Math.Min(Math.Max(num, floor), ceil);
+        return num = (int)Math.Min(Math.Max(num, floor), ceil);
     }
     public static uint RoundToInterval(ref uint num, dynamic floor, dynamic ceil)
     {
