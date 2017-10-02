@@ -21,7 +21,7 @@ namespace Framework.Database
     {
         public override void PreparedStatements()
         {
-            const string BnetAccountInfo = "ba.id, ba.email, ba.locked, ba.lock_country, ba.last_ip, ba.failed_logins, bab.unbandate > UNIX_TIMESTAMP() OR bab.unbandate = bab.bandate, bab.unbandate = bab.bandate";
+            const string BnetAccountInfo = "ba.id, ba.email, ba.locked, ba.lock_country, ba.last_ip, ba.LoginTicketExpiry, bab.unbandate > UNIX_TIMESTAMP() OR bab.unbandate = bab.bandate, bab.unbandate = bab.bandate";
             const string BnetGameAccountInfo = "a.id, a.username, ab.unbandate > UNIX_TIMESTAMP() OR ab.unbandate = ab.bandate, ab.unbandate = ab.bandate, aa.gmlevel";
 
             PrepareStatement(LoginStatements.SEL_REALMLIST, "SELECT id, name, address, localAddress, localSubnetMask, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild, Region, Battlegroup FROM realmlist WHERE flag <> 3 ORDER BY name");
@@ -117,9 +117,11 @@ namespace Framework.Database
             PrepareStatement(LoginStatements.SEL_ACCOUNT_MUTE_INFO, "SELECT mutedate, mutetime, mutereason, mutedby FROM account_muted WHERE guid = ? ORDER BY mutedate ASC");
             PrepareStatement(LoginStatements.DEL_ACCOUNT_MUTED, "DELETE FROM account_muted WHERE guid = ?");
 
-            PrepareStatement(LoginStatements.SEL_BNET_ACCOUNT_INFO, "SELECT " + BnetAccountInfo + ", " + BnetGameAccountInfo + ", ba.sha_pass_hash" +
+            PrepareStatement(LoginStatements.SEL_BNET_AUTHENTICATION, "SELECT ba.id, ba.sha_pass_hash, ba.failed_logins, ba.LoginTicket, ba.LoginTicketExpiry, bab.unbandate > UNIX_TIMESTAMP() OR bab.unbandate = bab.bandate FROM battlenet_accounts ba LEFT JOIN battlenet_account_bans bab ON ba.id = bab.id WHERE email = ?");
+            PrepareStatement(LoginStatements.UPD_BNET_AUTHENTICATION, "UPDATE battlenet_accounts SET LoginTicket = ?, LoginTicketExpiry = ? WHERE id = ?");
+            PrepareStatement(LoginStatements.SEL_BNET_ACCOUNT_INFO, "SELECT " + BnetAccountInfo + ", " + BnetGameAccountInfo +
                 " FROM battlenet_accounts ba LEFT JOIN battlenet_account_bans bab ON ba.id = bab.id LEFT JOIN account a ON ba.id = a.battlenet_account" +
-                " LEFT JOIN account_banned ab ON a.id = ab.id AND ab.active = 1 LEFT JOIN account_access aa ON a.id = aa.id AND aa.RealmID = -1 WHERE ba.email = ? ORDER BY a.id");
+                " LEFT JOIN account_banned ab ON a.id = ab.id AND ab.active = 1 LEFT JOIN account_access aa ON a.id = aa.id AND aa.RealmID = -1 WHERE ba.LoginTicket = ? ORDER BY a.id");
             PrepareStatement(LoginStatements.UPD_BNET_LAST_LOGIN_INFO, "UPDATE battlenet_accounts SET last_ip = ?, last_login = NOW(), locale = ?, failed_logins = 0, os = ? WHERE id = ?");
             PrepareStatement(LoginStatements.UPD_BNET_GAME_ACCOUNT_LOGIN_INFO, "UPDATE account SET sessionkey = ?, last_ip = ?, last_login = NOW(), locale = ?, failed_logins = 0, os = ? WHERE username = ?");
             PrepareStatement(LoginStatements.SEL_BNET_CHARACTER_COUNTS_BY_ACCOUNT_ID, "SELECT rc.acctid, rc.numchars, r.id, r.Region, r.Battlegroup FROM realmcharacters rc INNER JOIN realmlist r ON rc.realmid = r.id WHERE rc.acctid = ?");
@@ -263,6 +265,8 @@ namespace Framework.Database
         SEL_ACCOUNT_MUTE_INFO,
         DEL_ACCOUNT_MUTED,
 
+        SEL_BNET_AUTHENTICATION,
+        UPD_BNET_AUTHENTICATION,
         SEL_BNET_ACCOUNT_INFO,
         UPD_BNET_LAST_LOGIN_INFO,
         UPD_BNET_GAME_ACCOUNT_LOGIN_INFO,

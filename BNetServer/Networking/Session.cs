@@ -214,6 +214,7 @@ namespace BNetServer.Networking
 
             _locale = logonRequest.Locale;
             _os = logonRequest.Platform;
+            _build = (uint)logonRequest.ApplicationVersion;
 
             var endpoint = Global.SessionMgr.GetAddressForClient(GetRemoteIpAddress());
 
@@ -227,11 +228,53 @@ namespace BNetServer.Networking
 
         public BattlenetRpcErrorCode HandleVerifyWebCredentials(Bgs.Protocol.Authentication.V1.VerifyWebCredentialsRequest verifyWebCredentialsRequest)
         {
-            Bgs.Protocol.Authentication.V1.LogonResult logonResult = new Bgs.Protocol.Authentication.V1.LogonResult();
-            logonResult.ErrorCode = 0;
-            _accountInfo = Global.SessionMgr.VerifyLoginTicket(verifyWebCredentialsRequest.WebCredentials.ToStringUtf8());
-            if (_accountInfo == null)
+            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_ACCOUNT_INFO);
+            stmt.AddValue(0, verifyWebCredentialsRequest.WebCredentials.ToStringUtf8());
+
+            SQLResult result = DB.Login.Query(stmt);
+            if (result.IsEmpty())
                 return BattlenetRpcErrorCode.Denied;
+
+            _accountInfo = new AccountInfo();
+            _accountInfo.LoadResult(result);
+
+            if (_accountInfo.LoginTicketExpiry < Time.UnixTime)
+                return BattlenetRpcErrorCode.TimedOut;
+
+            stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_CHARACTER_COUNTS_BY_BNET_ID);
+            stmt.AddValue(0, _accountInfo.Id);
+
+            SQLResult characterCountsResult = DB.Login.Query(stmt);
+            if (!characterCountsResult.IsEmpty())
+            {
+                do
+                {
+                    RealmHandle realmId = new RealmHandle(characterCountsResult.Read<byte>(3), characterCountsResult.Read<byte>(4), characterCountsResult.Read<uint>(2));
+                    _accountInfo.GameAccounts[characterCountsResult.Read<uint>(0)].CharacterCounts[realmId.GetAddress()] = characterCountsResult.Read<byte>(1);
+
+                } while (characterCountsResult.NextRow());
+            }
+
+            stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_LAST_PLAYER_CHARACTERS);
+            stmt.AddValue(0, _accountInfo.Id);
+
+            SQLResult lastPlayerCharactersResult = DB.Login.Query(stmt);
+            if (!lastPlayerCharactersResult.IsEmpty())
+            {
+                do
+                {
+                    RealmHandle realmId = new RealmHandle(lastPlayerCharactersResult.Read<byte>(1), lastPlayerCharactersResult.Read<byte>(2), lastPlayerCharactersResult.Read<uint>(3));
+
+                    LastPlayedCharacterInfo lastPlayedCharacter = new LastPlayedCharacterInfo();
+                    lastPlayedCharacter.RealmId = realmId;
+                    lastPlayedCharacter.CharacterName = lastPlayerCharactersResult.Read<string>(4);
+                    lastPlayedCharacter.CharacterGUID = lastPlayerCharactersResult.Read<ulong>(5);
+                    lastPlayedCharacter.LastPlayedTime = lastPlayerCharactersResult.Read<uint>(6);
+
+                    _accountInfo.GameAccounts[lastPlayerCharactersResult.Read<uint>(0)].LastPlayedCharacters[realmId.GetSubRegionAddress()] = lastPlayedCharacter;
+
+                } while (lastPlayerCharactersResult.NextRow());
+            }
 
             string ip_address = GetRemoteIpAddress().ToString();
 
@@ -274,6 +317,8 @@ namespace BNetServer.Networking
                 }
             }
 
+            Bgs.Protocol.Authentication.V1.LogonResult logonResult = new Bgs.Protocol.Authentication.V1.LogonResult();
+            logonResult.ErrorCode = 0;
             logonResult.AccountId = new EntityId();
             logonResult.AccountId.Low = _accountInfo.Id;
             logonResult.AccountId.High = 0x100000000000000;
@@ -412,15 +457,16 @@ namespace BNetServer.Networking
             if (_gameAccountInfo == null)
                 return BattlenetRpcErrorCode.UtilServerInvalidIdentityArgs;
 
+            bool clientInfoOk = false;
             Variant clientInfo = GetParam(Params, "Param_ClientInfo");
             if (clientInfo != null)
             {
                 var realmListTicketClientInformation = Json.CreateObject<RealmListTicketClientInformation>(clientInfo.BlobValue.ToStringUtf8(), true);
-                _build = (uint)realmListTicketClientInformation.Info.ClientVersion.Build;
+                clientInfoOk = true;
                 _clientSecret.AddRange(realmListTicketClientInformation.Info.Secret.Select(x => Convert.ToByte(x)).ToArray());
             }
 
-            if (_build == 0)
+            if (!clientInfoOk)
                 return BattlenetRpcErrorCode.WowServicesDeniedRealmListTicket;
 
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_BNET_LAST_LOGIN_INFO);
@@ -592,7 +638,7 @@ namespace BNetServer.Networking
             IsLockedToIP = result.Read<bool>(2);
             LockCountry = result.Read<string>(3);
             LastIP = result.Read<string>(4);
-            FailedLogins = result.Read<uint>(5);
+            LoginTicketExpiry = result.Read<uint>(5);
             IsBanned = result.Read<ulong>(6) != 0;
             IsPermanenetlyBanned = result.Read<ulong>(7) != 0;
             PasswordVerifier = result.Read<string>(9);
@@ -614,7 +660,7 @@ namespace BNetServer.Networking
         public bool IsLockedToIP;
         public string LockCountry;
         public string LastIP;
-        public uint FailedLogins;
+        public uint LoginTicketExpiry;
         public bool IsBanned;
         public bool IsPermanenetlyBanned;
         public string PasswordVerifier;

@@ -84,9 +84,6 @@ namespace BNetServer
             input.Label = "Log In";
             _formInputs.Inputs.Add(input);
 
-            _loginTicketCleanupTimer = new Timer(CleanupLoginTickets);
-            _loginTicketCleanupTimer.Change(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
-
             _certificate = new X509Certificate2("BNetServer.pfx");
 
             return true;
@@ -110,50 +107,10 @@ namespace BNetServer
             return _certificate;
         }
 
-        public void AddLoginTicket(string id, AccountInfo accountInfo)
-        {
-            _validLoginTickets[id] = new LoginTicket() { Id = id, Account = accountInfo, ExpiryTime = Time.UnixTime + 10 };
-        }
-
-        public AccountInfo VerifyLoginTicket(string id)
-        {
-            var accountInfo = _validLoginTickets.LookupByKey(id);
-            if (accountInfo != null)
-            {
-                if (accountInfo.ExpiryTime > Time.UnixTime)
-                {
-                    _validLoginTickets.Remove(id);
-                    return accountInfo.Account;
-                }
-            }
-
-            return null;
-        }
-
-        public void CleanupLoginTickets(object state)
-        {
-            long now = Time.UnixTime;
-
-            foreach (var pair in _validLoginTickets.ToList())
-            {
-                if (pair.Value.ExpiryTime < now)
-                    _validLoginTickets.Remove(pair.Key);
-            }
-        }
-
         FormInputs _formInputs;
         IPEndPoint _externalAddress;
         IPEndPoint _localAddress;
-        Dictionary<string, LoginTicket> _validLoginTickets = new Dictionary<string, LoginTicket>();
-        Timer _loginTicketCleanupTimer;
         X509Certificate2 _certificate;
-    }
-
-    class LoginTicket
-    {
-        public string Id;
-        public AccountInfo Account;
-        public long ExpiryTime;
     }
 
     public enum BanMode
