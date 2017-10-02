@@ -70,6 +70,11 @@
     <Compile Include="Northrend\DraktharonKeep\BossTharonJa.cs" />
     <Compile Include="Northrend\DraktharonKeep\BossTrollgore.cs" />
     <Compile Include="Northrend\DraktharonKeep\InstanceDrakTharonKeep.cs" />
+    <Compile Include="Northrend\FrozenHalls\ForgeOfSouls\BossBronjahm.cs" />
+    <Compile Include="Northrend\FrozenHalls\ForgeOfSouls\BossDevourerOfSouls.cs" />
+    <Compile Include="Northrend\FrozenHalls\ForgeOfSouls\InstanceForgeOfSouls.cs" />
+    <Compile Include="Northrend\FrozenHalls\PitOfSaron\InstancePitOfSaron.cs" />
+    <Compile Include="Northrend\FrozenHalls\PitOfSaron\PitOfSaron.cs" />
     <Compile Include="Northrend\Gundrak\BossDrakkariColossus.cs" />
     <Compile Include="Northrend\Gundrak\BossEck.cs" />
     <Compile Include="Northrend\Gundrak\InstanceGundrak.cs" />
@@ -175,9 +180,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Custom\" />
-    <Folder Include="Northrend\FrozenHalls\ForgeOfSouls\" />
     <Folder Include="Northrend\FrozenHalls\HallsOfReflection\" />
-    <Folder Include="Northrend\FrozenHalls\PitOfSaron\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

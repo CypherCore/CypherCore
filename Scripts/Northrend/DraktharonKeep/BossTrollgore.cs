@@ -265,9 +265,7 @@ namespace Scripts.Northrend.DraktharonKeep.Trollgore
     [Script]
     class achievement_consumption_junction : AchievementCriteriaScript
     {
-        public achievement_consumption_junction() : base("achievement_consumption_junction")
-        {
-        }
+        public achievement_consumption_junction() : base("achievement_consumption_junction") { }
 
         public override bool OnCheck(Player source, Unit target)
         {

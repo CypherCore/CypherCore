@@ -41,7 +41,7 @@ namespace Scripts.Spells.Monk
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.CracklingJadeLightningChiProc);
+            return ValidateSpellInfo(SpellIds.StanceOfTheSpiritedCrane, SpellIds.CracklingJadeLightningChiProc);
         }
 
         void OnTick(AuraEffect aurEff)
@@ -90,7 +90,7 @@ namespace Scripts.Spells.Monk
         public override void Register()
         {
             DoCheckProc.Add(new CheckProcHandler(CheckProc));
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, Framework.Constants.AuraType.Dummy));
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
         }
     }
 
