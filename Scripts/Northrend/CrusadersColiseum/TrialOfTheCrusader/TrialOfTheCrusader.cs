@@ -67,7 +67,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                 if (instance.IsHeroic())
                 {
                     player.SendUpdateWorldState(WorldStateIds.Show, 1);
-                    player.SendUpdateWorldState(WorldStateIds.Count, GetData(DataTypes.TypeCounter));
+                    player.SendUpdateWorldState(WorldStateIds.Count, GetData(DataTypes.Counter));
                 }
                 else
                     player.SendUpdateWorldState(WorldStateIds.Show, 0);
@@ -409,25 +409,25 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             {
                 switch (type)
                 {
-                    case DataTypes.TypeCounter:
+                    case DataTypes.Counter:
                         TrialCounter = data;
                         data = (uint)EncounterState.Done;
                         break;
-                    case DataTypes.TypeEvent:
+                    case DataTypes.Event:
                         EventStage = data;
                         data = (uint)EncounterState.NotStarted;
                         break;
-                    case DataTypes.TypeEventTimer:
+                    case DataTypes.EventTimer:
                         EventTimer = data;
                         data = (uint)EncounterState.NotStarted;
                         break;
-                    case DataTypes.TypeNorthrendBeasts:
+                    case DataTypes.NorthrendBeasts:
                         northrendBeasts = (EncounterState)data;
                         switch (data)
                         {
                             case NorthrendBeasts.GormokDone:
                                 EventStage = 200;
-                                SetData(DataTypes.TypeNorthrendBeasts, (uint)EncounterState.InProgress);
+                                SetData(DataTypes.NorthrendBeasts, (uint)EncounterState.InProgress);
                                 break;
                             case NorthrendBeasts.SnakesInProgress:
                                 NotOneButTwoJormungarsTimer = 0;
@@ -439,11 +439,11 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                                 if (NotOneButTwoJormungarsTimer > 0)
                                     DoUpdateCriteria(CriteriaTypes.BeSpellTarget, AchievementData.SpellWormsKilledIn10Seconds);
                                 EventStage = 300;
-                                SetData(DataTypes.TypeNorthrendBeasts, (uint)EncounterState.InProgress);
+                                SetData(DataTypes.NorthrendBeasts, (uint)EncounterState.InProgress);
                                 break;
                             case NorthrendBeasts.IcehowlDone:
                                 EventStage = 400;
-                                SetData(DataTypes.TypeNorthrendBeasts, (uint)EncounterState.Done);
+                                SetData(DataTypes.NorthrendBeasts, (uint)EncounterState.Done);
                                 SetBossState(DataTypes.BossBeasts, EncounterState.Done);
                                 break;
                             case (uint)EncounterState.Fail:
@@ -527,15 +527,15 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             {
                 switch (type)
                 {
-                    case DataTypes.TypeCounter:
+                    case DataTypes.Counter:
                         return TrialCounter;
-                    case DataTypes.TypeEvent:
+                    case DataTypes.Event:
                         return EventStage;
-                    case DataTypes.TypeNorthrendBeasts:
+                    case DataTypes.NorthrendBeasts:
                         return (uint)northrendBeasts;
-                    case DataTypes.TypeEventTimer:
+                    case DataTypes.EventTimer:
                         return EventTimer;
-                    case DataTypes.TypeEventNpc:
+                    case DataTypes.EventNpc:
                         switch (EventStage)
                         {
                             case 110:
@@ -625,7 +625,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
 
             public override void Update(uint diff)
             {
-                if (GetData(DataTypes.TypeNorthrendBeasts) == NorthrendBeasts.SnakesSpecial && NotOneButTwoJormungarsTimer != 0)
+                if (GetData(DataTypes.NorthrendBeasts) == NorthrendBeasts.SnakesSpecial && NotOneButTwoJormungarsTimer != 0)
                 {
                     if (NotOneButTwoJormungarsTimer <= diff)
                         NotOneButTwoJormungarsTimer = 0;
@@ -810,7 +810,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
 
             string _message = "We are ready!";
 
-            if (player.IsInCombat() || instance.IsEncounterInProgress() || instance.GetData(DataTypes.TypeEvent) != 0)
+            if (player.IsInCombat() || instance.IsEncounterInProgress() || instance.GetData(DataTypes.Event) != 0)
                 return true;
 
             byte i = 0;
@@ -841,8 +841,8 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
 
             if (instance.GetBossState(DataTypes.BossBeasts) != EncounterState.Done)
             {
-                instance.SetData(DataTypes.TypeEvent, 110);
-                instance.SetData(DataTypes.TypeNorthrendBeasts, (uint)EncounterState.NotStarted);
+                instance.SetData(DataTypes.Event, 110);
+                instance.SetData(DataTypes.NorthrendBeasts, (uint)EncounterState.NotStarted);
                 instance.SetBossState(DataTypes.BossBeasts, EncounterState.NotStarted);
             }
             else if (instance.GetBossState(DataTypes.BossJaraxxus) != EncounterState.Done)
@@ -858,21 +858,21 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                 }
                 else
                 {
-                    instance.SetData(DataTypes.TypeEvent, 1010);
+                    instance.SetData(DataTypes.Event, 1010);
                     instance.SetBossState(DataTypes.BossJaraxxus, EncounterState.NotStarted);
                 }
             }
             else if (instance.GetBossState(DataTypes.BossCrusaders) != EncounterState.Done)
             {
                 if (player.GetTeam() == Team.Alliance)
-                    instance.SetData(DataTypes.TypeEvent, 3000);
+                    instance.SetData(DataTypes.Event, 3000);
                 else
-                    instance.SetData(DataTypes.TypeEvent, 3001);
+                    instance.SetData(DataTypes.Event, 3001);
                 instance.SetBossState(DataTypes.BossCrusaders, EncounterState.NotStarted);
             }
             else if (instance.GetBossState(DataTypes.BossValkiries) != EncounterState.Done)
             {
-                instance.SetData(DataTypes.TypeEvent, 4000);
+                instance.SetData(DataTypes.Event, 4000);
                 instance.SetBossState(DataTypes.BossValkiries, EncounterState.NotStarted);
             }
             else if (instance.GetBossState(DataTypes.BossLichKing) != EncounterState.Done)
@@ -934,10 +934,10 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             switch (id)
             {
                 case 0:
-                    _instance.SetData(DataTypes.TypeEvent, 5030);
+                    _instance.SetData(DataTypes.Event, 5030);
                     break;
                 case 1:
-                    _instance.SetData(DataTypes.TypeEvent, 5050);
+                    _instance.SetData(DataTypes.Event, 5050);
                     break;
                 default:
                     break;
@@ -949,47 +949,47 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             if (_instance == null)
                 return;
 
-            if (_instance.GetData(DataTypes.TypeEventNpc) != CreatureIds.LichKing)
+            if (_instance.GetData(DataTypes.EventNpc) != CreatureIds.LichKing)
                 return;
 
-            _updateTimer = _instance.GetData(DataTypes.TypeEventTimer);
+            _updateTimer = _instance.GetData(DataTypes.EventTimer);
             if (_updateTimer <= uiDiff)
             {
-                switch (_instance.GetData(DataTypes.TypeEvent))
+                switch (_instance.GetData(DataTypes.Event))
                 {
                     case 5010:
                         Talk(Texts.Stage_4_02);
                         _updateTimer = 3 * Time.InMilliseconds;
                         me.GetMotionMaster().MovePoint(0, MiscData.LichKingLoc[0]);
-                        _instance.SetData(DataTypes.TypeEvent, 5020);
+                        _instance.SetData(DataTypes.Event, 5020);
                         break;
                     case 5030:
                         Talk(Texts.Stage_4_04);
                         me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.StateTalk);
                         _updateTimer = 10 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 5040);
+                        _instance.SetData(DataTypes.Event, 5040);
                         break;
                     case 5040:
                         me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotNone);
                         me.GetMotionMaster().MovePoint(1, MiscData.LichKingLoc[1]);
                         _updateTimer = 1 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 0);
+                        _instance.SetData(DataTypes.Event, 0);
                         break;
                     case 5050:
                         me.HandleEmoteCommand(Emote.OneshotExclamation);
                         _updateTimer = 3 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 5060);
+                        _instance.SetData(DataTypes.Event, 5060);
                         break;
                     case 5060:
                         Talk(Texts.Stage_4_05);
                         me.HandleEmoteCommand(Emote.OneshotKneel);
                         _updateTimer = (uint)(2.5 * Time.InMilliseconds);
-                        _instance.SetData(DataTypes.TypeEvent, 5070);
+                        _instance.SetData(DataTypes.Event, 5070);
                         break;
                     case 5070:
                         me.CastSpell(me, 68198, false);
                         _updateTimer = (uint)(1.5 * Time.InMilliseconds);
-                        _instance.SetData(DataTypes.TypeEvent, 5080);
+                        _instance.SetData(DataTypes.Event, 5080);
                         break;
                     case 5080:
                         {
@@ -1009,7 +1009,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                             if (!temp || !temp.IsAlive())
                                 temp = me.SummonCreature(CreatureIds.Anubarak, MiscData.AnubarakLoc[0].GetPositionX(), MiscData.AnubarakLoc[0].GetPositionY(), MiscData.AnubarakLoc[0].GetPositionZ(), 3, TempSummonType.CorpseTimedDespawn, MiscData.DespawnTime);
 
-                            _instance.SetData(DataTypes.TypeEvent, 0);
+                            _instance.SetData(DataTypes.Event, 0);
 
                             me.DespawnOrUnsummon();
                             _updateTimer = 20 * Time.InMilliseconds;
@@ -1022,7 +1022,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             else
                 _updateTimer -= uiDiff;
 
-            _instance.SetData(DataTypes.TypeEventTimer, _updateTimer);
+            _instance.SetData(DataTypes.EventTimer, _updateTimer);
         }
 
         InstanceScript _instance;
@@ -1041,7 +1041,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
         public override void JustDied(Unit killer)
         {
             Talk(Texts.Stage_1_06, killer);
-            _instance.SetData(DataTypes.TypeEvent, 1180);
+            _instance.SetData(DataTypes.Event, 1180);
             Creature temp = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.Jaraxxus));
             if (temp)
             {
@@ -1068,8 +1068,8 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                 case 1:
                     me.SetWalk(false);
                     _instance.DoUseDoorOrButton(_instance.GetGuidData(GameObjectIds.MainGateDoor));
-                    _instance.SetData(DataTypes.TypeEvent, 1120);
-                    _instance.SetData(DataTypes.TypeEventTimer, 1 * Time.InMilliseconds);
+                    _instance.SetData(DataTypes.Event, 1120);
+                    _instance.SetData(DataTypes.EventTimer, 1 * Time.InMilliseconds);
                     break;
                 default:
                     break;
@@ -1086,21 +1086,21 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             if (_instance == null)
                 return;
 
-            if (_instance.GetData(DataTypes.TypeEventNpc) != CreatureIds.Fizzlebang)
+            if (_instance.GetData(DataTypes.EventNpc) != CreatureIds.Fizzlebang)
                 return;
 
-            _updateTimer = _instance.GetData(DataTypes.TypeEventTimer);
+            _updateTimer = _instance.GetData(DataTypes.EventTimer);
             if (_updateTimer <= uiDiff)
             {
-                switch (_instance.GetData(DataTypes.TypeEvent))
+                switch (_instance.GetData(DataTypes.Event))
                 {
                     case 1110:
-                        _instance.SetData(DataTypes.TypeEvent, 1120);
+                        _instance.SetData(DataTypes.Event, 1120);
                         _updateTimer = 4 * Time.InMilliseconds;
                         break;
                     case 1120:
                         Talk(Texts.Stage_1_02);
-                        _instance.SetData(DataTypes.TypeEvent, 1130);
+                        _instance.SetData(DataTypes.Event, 1130);
                         _updateTimer = 12 * Time.InMilliseconds;
                         break;
                     case 1130:
@@ -1116,13 +1116,13 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                                 pTrigger.SetDisplayId(pTrigger.ToCreature().GetCreatureTemplate().ModelId1);
                                 pTrigger.CastSpell(pTrigger, Spells.WilfredPortal, false);
                             }
-                            _instance.SetData(DataTypes.TypeEvent, 1132);
+                            _instance.SetData(DataTypes.Event, 1132);
                             _updateTimer = 4 * Time.InMilliseconds;
                             break;
                         }
                     case 1132:
                         me.GetMotionMaster().MovementExpired();
-                        _instance.SetData(DataTypes.TypeEvent, 1134);
+                        _instance.SetData(DataTypes.Event, 1134);
                         _updateTimer = 4 * Time.InMilliseconds;
                         break;
                     case 1134:
@@ -1137,11 +1137,11 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                                 _portalGUID = pPortal.GetGUID();
                             }
                             _updateTimer = 4 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 1135);
+                            _instance.SetData(DataTypes.Event, 1135);
                             break;
                         }
                     case 1135:
-                        _instance.SetData(DataTypes.TypeEvent, 1140);
+                        _instance.SetData(DataTypes.Event, 1140);
                         _updateTimer = 3 * Time.InMilliseconds;
                         break;
                     case 1140:
@@ -1154,7 +1154,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                                 temp.SetReactState(ReactStates.Passive);
                                 temp.GetMotionMaster().MovePoint(0, MiscData.ToCCommonLoc[1].GetPositionX(), MiscData.ToCCommonLoc[1].GetPositionY() - 10, MiscData.ToCCommonLoc[1].GetPositionZ());
                             }
-                            _instance.SetData(DataTypes.TypeEvent, 1142);
+                            _instance.SetData(DataTypes.Event, 1142);
                             _updateTimer = 5 * Time.InMilliseconds;
                             break;
                         }
@@ -1171,7 +1171,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                             Creature pPortal = ObjectAccessor.GetCreature(me, _portalGUID);
                             if (pPortal)
                                 pPortal.DespawnOrUnsummon();
-                            _instance.SetData(DataTypes.TypeEvent, 1144);
+                            _instance.SetData(DataTypes.Event, 1144);
                             _updateTimer = 10 * Time.InMilliseconds;
                             break;
                         }
@@ -1180,7 +1180,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                             Creature temp = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.Jaraxxus));
                             if (temp)
                                 temp.GetAI().Talk(Texts.Stage_1_05);
-                            _instance.SetData(DataTypes.TypeEvent, 1150);
+                            _instance.SetData(DataTypes.Event, 1150);
                             _updateTimer = 5 * Time.InMilliseconds;
                             break;
                         }
@@ -1195,7 +1195,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                                 temp.AddThreat(me, 1000.0f);
                                 temp.GetAI().AttackStart(me);
                             }
-                            _instance.SetData(DataTypes.TypeEvent, 1160);
+                            _instance.SetData(DataTypes.Event, 1160);
                             _updateTimer = 3 * Time.InMilliseconds;
                             break;
                         }
@@ -1203,7 +1203,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             }
             else
                 _updateTimer -= uiDiff;
-            _instance.SetData(DataTypes.TypeEventTimer, _updateTimer);
+            _instance.SetData(DataTypes.EventTimer, _updateTimer);
         }
 
         InstanceScript _instance;
@@ -1230,25 +1230,25 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             if (_instance == null)
                 return;
 
-            if (_instance.GetData(DataTypes.TypeEventNpc) != CreatureIds.Tirion)
+            if (_instance.GetData(DataTypes.EventNpc) != CreatureIds.Tirion)
                 return;
 
-            _updateTimer = _instance.GetData(DataTypes.TypeEventTimer);
+            _updateTimer = _instance.GetData(DataTypes.EventTimer);
             if (_updateTimer <= uiDiff)
             {
-                switch (_instance.GetData(DataTypes.TypeEvent))
+                switch (_instance.GetData(DataTypes.Event))
                 {
                     case 110:
                         me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotTalk);
                         Talk(Texts.Stage_0_01);
                         _updateTimer = 22 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 120);
+                        _instance.SetData(DataTypes.Event, 120);
                         break;
                     case 140:
                         me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotTalk);
                         Talk(Texts.Stage_0_02);
                         _updateTimer = 5 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 150);
+                        _instance.SetData(DataTypes.Event, 150);
                         break;
                     case 150:
                         {
@@ -1266,14 +1266,14 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                                 }
                             }
                             _updateTimer = 3 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 155);
+                            _instance.SetData(DataTypes.Event, 155);
                             break;
                         }
                     case 155:
                         // keep the raid in combat for the whole encounter, pauses included
                         me.SetInCombatWithZone();
                         _updateTimer = 5 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 160);
+                        _instance.SetData(DataTypes.Event, 160);
                         break;
                     case 200:
                         {
@@ -1290,11 +1290,11 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                                 }
                             }
                             _updateTimer = 5 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 220);
+                            _instance.SetData(DataTypes.Event, 220);
                             break;
                         }
                     case 220:
-                        _instance.SetData(DataTypes.TypeEvent, 230);
+                        _instance.SetData(DataTypes.Event, 230);
                         break;
                     case 300:
                         {
@@ -1311,64 +1311,64 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                                 }
                             }
                             _updateTimer = 5 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 315);
+                            _instance.SetData(DataTypes.Event, 315);
                             break;
                         }
                     case 315:
-                        _instance.SetData(DataTypes.TypeEvent, 320);
+                        _instance.SetData(DataTypes.Event, 320);
                         break;
                     case 400:
                         Talk(Texts.Stage_0_06);
                         me.GetThreatManager().clearReferences();
                         _updateTimer = 5 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 0);
+                        _instance.SetData(DataTypes.Event, 0);
                         break;
                     case 666:
                         Talk(Texts.Stage_0_Wipe);
                         _updateTimer = 5 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 0);
+                        _instance.SetData(DataTypes.Event, 0);
                         break;
                     case 1010:
                         Talk(Texts.Stage_1_01);
                         _updateTimer = 7 * Time.InMilliseconds;
                         _instance.DoUseDoorOrButton(_instance.GetGuidData(GameObjectIds.MainGateDoor));
                         me.SummonCreature(CreatureIds.Fizzlebang, MiscData.ToCSpawnLoc[0].GetPositionX(), MiscData.ToCSpawnLoc[0].GetPositionY(), MiscData.ToCSpawnLoc[0].GetPositionZ(), 2, TempSummonType.CorpseTimedDespawn, MiscData.DespawnTime);
-                        _instance.SetData(DataTypes.TypeEvent, 0);
+                        _instance.SetData(DataTypes.Event, 0);
                         break;
                     case 1180:
                         Talk(Texts.Stage_1_07);
                         _updateTimer = 3 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 0);
+                        _instance.SetData(DataTypes.Event, 0);
                         break;
                     case 2000:
                         Talk(Texts.Stage_1_08);
                         _updateTimer = 18 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 2010);
+                        _instance.SetData(DataTypes.Event, 2010);
                         break;
                     case 2030:
                         Talk(Texts.Stage_1_11);
                         _updateTimer = 5 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 0);
+                        _instance.SetData(DataTypes.Event, 0);
                         break;
                     case 3000:
                         Talk(Texts.Stage_2_01);
                         _updateTimer = 12 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 3050);
+                        _instance.SetData(DataTypes.Event, 3050);
                         break;
                     case 3001:
                         Talk(Texts.Stage_2_01);
                         _updateTimer = 10 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 3051);
+                        _instance.SetData(DataTypes.Event, 3051);
                         break;
                     case 3060:
                         Talk(Texts.Stage_2_03);
                         _updateTimer = 5 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 3070);
+                        _instance.SetData(DataTypes.Event, 3070);
                         break;
                     case 3061:
                         Talk(Texts.Stage_2_03);
                         _updateTimer = 5 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 3071);
+                        _instance.SetData(DataTypes.Event, 3071);
                         break;
                     //Summoning crusaders
                     case 3091:
@@ -1377,7 +1377,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                             if (pChampionController)
                                 pChampionController.GetAI().SetData(0, (uint)Team.Horde);
                             _updateTimer = 3 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 3092);
+                            _instance.SetData(DataTypes.Event, 3092);
                             break;
                         }
                     //Summoning crusaders
@@ -1387,7 +1387,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                             if (pChampionController)
                                 pChampionController.GetAI().SetData(0, (uint)Team.Alliance);
                             _updateTimer = 3 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 3092);
+                            _instance.SetData(DataTypes.Event, 3092);
                             break;
                         }
                     case 3092:
@@ -1395,19 +1395,19 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                             Creature pChampionController = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.ChampionsController));
                             if (pChampionController)
                                 pChampionController.GetAI().SetData(1, (uint)EncounterState.NotStarted);
-                            _instance.SetData(DataTypes.TypeEvent, 3095);
+                            _instance.SetData(DataTypes.Event, 3095);
                             break;
                         }
                     //Crusaders battle end
                     case 3100:
                         Talk(Texts.Stage_2_06);
                         _updateTimer = 5 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 0);
+                        _instance.SetData(DataTypes.Event, 0);
                         break;
                     case 4000:
                         Talk(Texts.Stage_3_01);
                         _updateTimer = 13 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 4010);
+                        _instance.SetData(DataTypes.Event, 4010);
                         break;
                     case 4010:
                         {
@@ -1430,7 +1430,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                                 temp.SummonCreature(CreatureIds.DarkEssence, MiscData.TwinValkyrsLoc[3].GetPositionX(), MiscData.TwinValkyrsLoc[3].GetPositionY(), MiscData.TwinValkyrsLoc[3].GetPositionZ());
                             }
                             _updateTimer = 3 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 4015);
+                            _instance.SetData(DataTypes.Event, 4015);
                             break;
                         }
                     case 4015:
@@ -1450,38 +1450,38 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                                 temp.SetVisible(true);
                             }
                             _updateTimer = 10 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 4016);
+                            _instance.SetData(DataTypes.Event, 4016);
                             break;
                         }
                     case 4016:
                         _instance.DoUseDoorOrButton(_instance.GetGuidData(GameObjectIds.MainGateDoor));
-                        _instance.SetData(DataTypes.TypeEvent, 4017);
+                        _instance.SetData(DataTypes.Event, 4017);
                         break;
                     case 4040:
                         _updateTimer = 1 * Time.Minute * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 5000);
+                        _instance.SetData(DataTypes.Event, 5000);
                         break;
                     case 5000:
                         Talk(Texts.Stage_4_01);
                         _updateTimer = 10 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 5005);
+                        _instance.SetData(DataTypes.Event, 5005);
                         break;
                     case 5005:
                         _updateTimer = 8 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 5010);
+                        _instance.SetData(DataTypes.Event, 5010);
                         me.SummonCreature(CreatureIds.LichKing, MiscData.ToCCommonLoc[2].GetPositionX(), MiscData.ToCCommonLoc[2].GetPositionY(), MiscData.ToCCommonLoc[2].GetPositionZ(), 5);
                         break;
                     case 5020:
                         Talk(Texts.Stage_4_03);
                         _updateTimer = 1 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 0);
+                        _instance.SetData(DataTypes.Event, 0);
                         break;
                     case 6000:
                         me.SummonCreature(CreatureIds.TirionFordring, MiscData.EndSpawnLoc[0]);
                         me.SummonCreature(CreatureIds.ArgentMage, MiscData.EndSpawnLoc[1]);
                         me.SummonGameObject(GameObjectIds.PortalToDalaran, MiscData.EndSpawnLoc[2], Quaternion.WAxis, 0);
                         _updateTimer = 20 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 6005);
+                        _instance.SetData(DataTypes.Event, 6005);
                         break;
                     case 6005:
                         {
@@ -1489,7 +1489,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                             if (tirionFordring)
                                 tirionFordring.GetAI().Talk(Texts.Stage_4_06);
                             _updateTimer = 20 * Time.InMilliseconds;
-                            _instance.SetData(DataTypes.TypeEvent, 6010);
+                            _instance.SetData(DataTypes.Event, 6010);
                             break;
                         }
                     case 6010:
@@ -1500,15 +1500,15 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                                 tirionFordring.GetAI().Talk(Texts.Stage_4_07);
                             _updateTimer = 1 * Time.Minute * Time.InMilliseconds;
                             _instance.SetBossState(DataTypes.BossAnubarak, EncounterState.Special);
-                            _instance.SetData(DataTypes.TypeEvent, 6020);
+                            _instance.SetData(DataTypes.Event, 6020);
                         }
                         else
-                            _instance.SetData(DataTypes.TypeEvent, 6030);
+                            _instance.SetData(DataTypes.Event, 6030);
                         break;
                     case 6020:
                         me.DespawnOrUnsummon();
                         _updateTimer = 5 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 6030);
+                        _instance.SetData(DataTypes.Event, 6030);
                         break;
                     default:
                         break;
@@ -1516,7 +1516,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             }
             else
                 _updateTimer -= uiDiff;
-            _instance.SetData(DataTypes.TypeEventTimer, _updateTimer);
+            _instance.SetData(DataTypes.EventTimer, _updateTimer);
         }
 
         InstanceScript _instance;
@@ -1540,49 +1540,49 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             if (_instance == null)
                 return;
 
-            if (_instance.GetData(DataTypes.TypeEventNpc) != CreatureIds.Garrosh)
+            if (_instance.GetData(DataTypes.EventNpc) != CreatureIds.Garrosh)
                 return;
 
-            _updateTimer = _instance.GetData(DataTypes.TypeEventTimer);
+            _updateTimer = _instance.GetData(DataTypes.EventTimer);
             if (_updateTimer <= uiDiff)
             {
-                switch (_instance.GetData(DataTypes.TypeEvent))
+                switch (_instance.GetData(DataTypes.Event))
                 {
                     case 130:
                         me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotTalk);
                         Talk(Texts.Stage_0_03h);
                         _updateTimer = 3 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 132);
+                        _instance.SetData(DataTypes.Event, 132);
                         break;
                     case 132:
                         me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotNone);
                         _updateTimer = 5 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 140);
+                        _instance.SetData(DataTypes.Event, 140);
                         break;
                     case 2010:
                         Talk(Texts.Stage_1_09);
                         _updateTimer = 9 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 2020);
+                        _instance.SetData(DataTypes.Event, 2020);
                         break;
                     case 3050:
                         Talk(Texts.Stage_2_02h);
                         _updateTimer = 15 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 3060);
+                        _instance.SetData(DataTypes.Event, 3060);
                         break;
                     case 3070:
                         Talk(Texts.Stage_2_04h);
                         _updateTimer = 6 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 3080);
+                        _instance.SetData(DataTypes.Event, 3080);
                         break;
                     case 3081:
                         Talk(Texts.Stage_2_05h);
                         _updateTimer = 3 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 3091);
+                        _instance.SetData(DataTypes.Event, 3091);
                         break;
                     case 4030:
                         Talk(Texts.Stage_3_03h);
                         _updateTimer = 5 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 4040);
+                        _instance.SetData(DataTypes.Event, 4040);
                         break;
                     default:
                         break;
@@ -1590,7 +1590,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             }
             else
                 _updateTimer -= uiDiff;
-            _instance.SetData(DataTypes.TypeEventTimer, _updateTimer);
+            _instance.SetData(DataTypes.EventTimer, _updateTimer);
         }
 
         InstanceScript _instance;
@@ -1614,49 +1614,49 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             if (_instance == null)
                 return;
 
-            if (_instance.GetData(DataTypes.TypeEventNpc) != CreatureIds.Varian)
+            if (_instance.GetData(DataTypes.EventNpc) != CreatureIds.Varian)
                 return;
 
-            _updateTimer = _instance.GetData(DataTypes.TypeEventTimer);
+            _updateTimer = _instance.GetData(DataTypes.EventTimer);
             if (_updateTimer <= uiDiff)
             {
-                switch (_instance.GetData(DataTypes.TypeEvent))
+                switch (_instance.GetData(DataTypes.Event))
                 {
                     case 120:
                         me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotTalk);
                         Talk(Texts.Stage_0_03a);
                         _updateTimer = 2 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 122);
+                        _instance.SetData(DataTypes.Event, 122);
                         break;
                     case 122:
                         me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotNone);
                         _updateTimer = 3 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 130);
+                        _instance.SetData(DataTypes.Event, 130);
                         break;
                     case 2020:
                         Talk(Texts.Stage_1_10);
                         _updateTimer = 5 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 2030);
+                        _instance.SetData(DataTypes.Event, 2030);
                         break;
                     case 3051:
                         Talk(Texts.Stage_2_02a);
                         _updateTimer = 17 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 3061);
+                        _instance.SetData(DataTypes.Event, 3061);
                         break;
                     case 3071:
                         Talk(Texts.Stage_2_04a);
                         _updateTimer = 5 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 3081);
+                        _instance.SetData(DataTypes.Event, 3081);
                         break;
                     case 3080:
                         Talk(Texts.Stage_2_05a);
                         _updateTimer = 3 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 3090);
+                        _instance.SetData(DataTypes.Event, 3090);
                         break;
                     case 4020:
                         Talk(Texts.Stage_3_03a);
                         _updateTimer = 5 * Time.InMilliseconds;
-                        _instance.SetData(DataTypes.TypeEvent, 4040);
+                        _instance.SetData(DataTypes.Event, 4040);
                         break;
                     default:
                         break;
@@ -1664,7 +1664,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             }
             else
                 _updateTimer -= uiDiff;
-            _instance.SetData(DataTypes.TypeEventTimer, _updateTimer);
+            _instance.SetData(DataTypes.EventTimer, _updateTimer);
         }
 
         InstanceScript _instance;

@@ -31,12 +31,12 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
         public const uint BossAnubarak = 5;
         public const uint MaxEncounters = 6;
 
-        public const uint TypeCounter = 8;
-        public const uint TypeEvent = 9;
+        public const uint Counter = 8;
+        public const uint Event = 9;
 
-        public const uint TypeEventTimer = 101;
-        public const uint TypeEventNpc = 102;
-        public const uint TypeNorthrendBeasts = 103;
+        public const uint EventTimer = 101;
+        public const uint EventNpc = 102;
+        public const uint NorthrendBeasts = 103;
 
         public const uint SnoboldCount = 301;
         public const uint MistressOfPainCount = 302;
@@ -70,7 +70,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
         Anubarak = 724006
     }
 
-    struct CreatureIds
+    public struct CreatureIds
     {
         public const uint Barrent = 34816;
         public const uint Tirion = 34996;
@@ -132,7 +132,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
         public const uint LightEssence = 34568;
 
         public const uint Anubarak = 34564;
-    };
+    }
 
     struct GameObjectIds
     {

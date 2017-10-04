@@ -21,22 +21,113 @@ using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
 using Game.Spells;
+using System;
 
 namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
 {
-    public struct Beasts
+    struct TextIds
     {
         // Gormok
         public const uint EmoteSnobolled = 0;
 
         // Acidmaw & Dreadscale
         public const uint EmoteEnrage = 0;
+        public const uint SaySpecial = 1;
 
         // Icehowl
         public const uint EmoteTrampleStart = 0;
         public const uint EmoteTrampleCrash = 1;
         public const uint EmoteTrampleFail = 2;
+    }
 
+    struct SpellIds
+    {
+        //Gormok
+        public const uint Impale = 66331;
+        public const uint StaggeringStomp = 67648;
+
+        //Snobold
+        public const uint RisingAnger = 66636;
+        public const uint Snobolled = 66406;
+        public const uint Batter = 66408;
+        public const uint FireBomb = 66313;
+        public const uint FireBomb1 = 66317;
+        public const uint FireBombDot = 66318;
+        public const uint HeadCrack = 66407;
+        public const uint JumpToHand = 66342;
+        public const uint RidePlayer = 66245;
+
+        //Acidmaw & Dreadscale
+        public const uint Sweep = 66794;
+        public const uint SummonSlimepool = 66883;
+        public const uint Emerge = 66947;
+        public const uint Submerge = 66948;
+        public const uint Enrage = 68335;
+        public const uint SlimePoolEffect = 66882; //In 60s It Diameter Grows From 10y To 40y (R=R+0.25 Per Second)
+        public const uint GroundVisual0 = 66969;
+        public const uint GroundVisual1 = 68302;
+        public const uint HateToZero = 63984;
+        //Acidmaw
+        public const uint AcidSpit = 66880;
+        public const uint ParalyticSpray = 66901;
+        public const uint ParalyticBite = 66824;
+        public const uint AcidSpew = 66819;
+        public const uint Paralysis = 66830;
+        public const uint ParalyticToxin = 66823;
+        //Dreadscale
+        public const uint BurningBite = 66879;
+        public const uint MoltenSpew = 66821;
+        public const uint FireSpit = 66796;
+        public const uint BurningSpray = 66902;
+        public const uint BurningBile = 66869;
+
+        //Icehowl
+        public const uint FerociousButt = 66770;
+        public const uint MassiveCrash = 66683;
+        public const uint Whirl = 67345;
+        public const uint ArcticBreath = 66689;
+        public const uint Trample = 66734;
+        public const uint FrothingRage = 66759;
+        public const uint StaggeredDaze = 66758;
+    }
+
+    struct Actions
+    {
+        public const int EnableFireBomb = 1;
+        public const int DisableFireBomb = 2;
+        public const int ActiveSnobold = 3;
+    }
+
+    struct Events
+    {
+        // Snobold
+        public const uint FireBomb = 1;
+        public const uint Batter = 2;
+        public const uint HeadCrack = 3;
+        public const uint Snobolled = 4;
+        public const uint CheckMount = 5;
+
+        // Acidmaw & Dreadscale
+        public const uint Bite = 6;
+        public const uint Spew = 7;
+        public const uint SlimePool = 8;
+        public const uint Spit = 9;
+        public const uint Spray = 10;
+        public const uint Sweep = 11;
+        public const uint Submerge = 12;
+        public const uint Emerge = 13;
+        public const uint SummonAcidmaw = 14;
+
+        // Icehowl
+        public const uint FerociousButt = 15;
+        public const uint MassiveCrash = 16;
+        public const uint Whirl = 17;
+        public const uint ArcticBreath = 18;
+        public const uint Trample = 19;
+    }
+
+    public struct Misc
+    {
         public const uint EquipMain = 50760;
         public const uint EquipOffhand = 48040;
         public const uint EquipRanged = 47267;
@@ -47,83 +138,19 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
         public const uint ModelDreadscaleStationary = 26935;
         public const uint ModelDreadscaleMobile = 24564;
 
-        public const uint NpcSnoboldVassal = 34800;
-        public const uint NpcFireBomb = 34854;
-        public const uint NpcSlimePool = 35176;
         public const uint MaxSnobolds = 4;
-
-        //Gormok
-        public const uint SpellImpale = 66331;
-        public const uint SpellStaggeringStomp = 67648;
-        public const uint SpellRisingAnger = 66636;
-        //Snobold
-        public const uint SpellSnobolled = 66406;
-        public const uint SpellBatter = 66408;
-        public const uint SpellFireBomb = 66313;
-        public const uint SpellFireBomb1 = 66317;
-        public const uint SpellFireBombDot = 66318;
-        public const uint SpellHeadCrack = 66407;
-
-        //Acidmaw & Dreadscale
-        public const uint SpellAcidSpit = 66880;
-        public const uint SpellParalyticSpray = 66901;
-        public const uint SpellAcidSpew = 66819;
-        public const uint SpellParalyticBite = 66824;
-        public const uint SpellSweep0 = 66794;
-        public const uint SpellSummonSlimepool = 66883;
-        public const uint SpellFireSpit = 66796;
-        public const uint SpellMoltenSpew = 66821;
-        public const uint SpellBurningBite = 66879;
-        public const uint SpellBurningSpray = 66902;
-        public const uint SpellSweep1 = 67646;
-        public const uint SpellEmerge0 = 66947;
-        public const uint SpellSubmerge0 = 66948;
-        public const uint SpellEnrage = 68335;
-        public const uint SpellSlimePoolEffect = 66882; //In 60s It Diameter Grows From 10y To 40y (R=R+0.25 Per Second)
-
-        //Icehowl
-        public const uint SpellFerociousButt = 66770;
-        public const uint SpellMassiveCrash = 66683;
-        public const uint SpellWhirl = 67345;
-        public const uint SpellArcticBreath = 66689;
-        public const uint SpellTrample = 66734;
-        public const uint SpellFrothingRage = 66759;
-        public const uint SpellStaggeredDaze = 66758;
-
-        public const int ActionEnableFireBomb = 1;
-        public const int ActionDisableFireBomb = 2;
-
-        // Gormok
-        public const uint EventImpale = 1;
-        public const uint EventStaggeringStomp = 2;
-        public const uint EventThrow = 3;
-
-        // Snobold
-        public const uint EventFireBomb = 4;
-        public const uint EventBatter = 5;
-        public const uint EventHeadCrack = 6;
-
-        // Acidmaw & Dreadscale
-        public const uint EventBite = 7;
-        public const uint EventSpew = 8;
-        public const uint EventSlimePool = 9;
-        public const uint EventSpit = 10;
-        public const uint EventSpray = 11;
-        public const uint EventSweep = 12;
-        public const uint EventSubmerge = 13;
-        public const uint EventEmerge = 14;
-        public const uint EventSummonAcidmaw = 15;
-
-        // Icehowl
-        public const uint EventFerociousButt = 16;
-        public const uint EventMassiveCrash = 17;
-        public const uint EventWhirl = 18;
-        public const uint EventArcticBreath = 19;
-        public const uint EventTrample = 20;
 
         public const byte PhaseMobile = 1;
         public const byte PhaseStationary = 2;
         public const byte PhaseSubmerged = 3;
+
+        public const int DataNewTarget = 1;
+        public const uint GormokHandSeat = 4;
+        public const uint PlayerVehicleId = 444;
+
+        public const uint NpcSnoboldVassal = 34800;
+        public const uint NpcFireBomb = 34854;
+        public const uint NpcSlimePool = 35176;
     }
 
     [Script]
@@ -133,9 +160,36 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
 
         public override void Reset()
         {
-            _events.ScheduleEvent(Beasts.EventImpale, RandomHelper.URand(8 * Time.InMilliseconds, 10 * Time.InMilliseconds));
-            _events.ScheduleEvent(Beasts.EventStaggeringStomp, 15 * Time.InMilliseconds);
-            _events.ScheduleEvent(Beasts.EventThrow, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds));
+            _scheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting));
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(10), task =>
+            {
+                DoCastVictim(SpellIds.Impale);
+                task.Repeat(TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(10));
+            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(15), task =>
+            {
+                DoCastVictim(SpellIds.StaggeringStomp);
+                task.Repeat(TimeSpan.FromSeconds(15));
+            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30), task =>
+            {
+                for (sbyte i = 0; i < Misc.MaxSnobolds; ++i)
+                {
+                    Unit snobold = me.GetVehicleKit().GetPassenger(i);
+                    if (snobold)
+                    {
+                        snobold.ExitVehicle();
+                        snobold.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                        snobold.ToCreature().GetAI().DoAction(Actions.DisableFireBomb);
+                        snobold.CastSpell(me, SpellIds.JumpToHand, true);
+                        break;
+                    }
+                }
+                task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30));
+            });
 
             summons.DespawnAll();
         }
@@ -166,13 +220,13 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
 
         public override void JustDied(Unit killer)
         {
-            instance.SetData(DataTypes.TypeNorthrendBeasts, NorthrendBeasts.GormokDone);
+            instance.SetData(DataTypes.NorthrendBeasts, NorthrendBeasts.GormokDone);
         }
 
         public override void JustReachedHome()
         {
             instance.DoUseDoorOrButton(instance.GetGuidData(GameObjectIds.MainGateDoor));
-            instance.SetData(DataTypes.TypeNorthrendBeasts, (uint)EncounterState.Fail);
+            instance.SetData(DataTypes.NorthrendBeasts, (uint)EncounterState.Fail);
 
             me.DespawnOrUnsummon();
         }
@@ -180,19 +234,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
         public override void EnterCombat(Unit who)
         {
             _EnterCombat();
-            me.SetInCombatWithZone();
-            instance.SetData(DataTypes.TypeNorthrendBeasts, NorthrendBeasts.GormokInProgress);
-
-            for (sbyte i = 0; i < Beasts.MaxSnobolds; i++)
-            {
-                Creature pSnobold = DoSpawnCreature(Beasts.NpcSnoboldVassal, 0, 0, 0, 0, TempSummonType.CorpseDespawn, 0);
-                if (pSnobold)
-                {
-                    pSnobold.EnterVehicle(me, i);
-                    pSnobold.SetInCombatWithZone();
-                    pSnobold.GetAI().DoAction(Beasts.ActionEnableFireBomb);
-                }
-            }
+            instance.SetData(DataTypes.NorthrendBeasts, NorthrendBeasts.GormokInProgress);
         }
 
         public override void DamageTaken(Unit who, ref uint damage)
@@ -200,13 +242,19 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             // despawn the remaining passengers on death
             if (damage >= me.GetHealth())
             {
-                for (sbyte i = 0; i < Beasts.MaxSnobolds; ++i)
+                for (sbyte i = 0; i < Misc.MaxSnobolds; ++i)
                 {
-                    Unit pSnobold = me.GetVehicleKit().GetPassenger(i);
-                    if (pSnobold)
-                        pSnobold.ToCreature().DespawnOrUnsummon();
+                    Unit snobold = me.GetVehicleKit().GetPassenger(i);
+                    if (snobold)
+                        snobold.ToCreature().DespawnOrUnsummon();
                 }
             }
+        }
+
+        public override void PassengerBoarded(Unit passenger, sbyte seatId, bool apply)
+        {
+            if (apply && seatId == Misc.GormokHandSeat)
+                passenger.CastSpell(me, SpellIds.RisingAnger, true);
         }
 
         public override void UpdateAI(uint diff)
@@ -214,46 +262,28 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             if (!UpdateVictim())
                 return;
 
-            _events.Update(diff);
+            _scheduler.Update(diff);
 
             if (me.HasUnitState(UnitState.Casting))
                 return;
 
-            _events.ExecuteEvents(eventId =>
-            {
-                switch (eventId)
-                {
-                    case Beasts.EventImpale:
-                        DoCastVictim(Beasts.SpellImpale);
-                        _events.ScheduleEvent(Beasts.EventImpale, RandomHelper.URand(8 * Time.InMilliseconds, 10 * Time.InMilliseconds));
-                        return;
-                    case Beasts.EventStaggeringStomp:
-                        DoCastVictim(Beasts.SpellStaggeringStomp);
-                        _events.ScheduleEvent(Beasts.EventStaggeringStomp, 15 * Time.InMilliseconds);
-                        return;
-                    case Beasts.EventThrow:
-                        for (sbyte i = 0; i < Beasts.MaxSnobolds; ++i)
-                        {
-                            Unit pSnobold = me.GetVehicleKit().GetPassenger(i);
-                            if (pSnobold)
-                            {
-                                pSnobold.ExitVehicle();
-                                pSnobold.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
-                                pSnobold.ToCreature().SetReactState(ReactStates.Aggressive);
-                                pSnobold.ToCreature().GetAI().DoAction(Beasts.ActionDisableFireBomb);
-                                pSnobold.CastSpell(me, Beasts.SpellRisingAnger, true);
-                                Talk(Beasts.EmoteSnobolled);
-                                break;
-                            }
-                        }
-                        _events.ScheduleEvent(Beasts.EventThrow, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds));
-                        return;
-                    default:
-                        return;
-                }
-            });
-
             DoMeleeAttackIfReady();
+        }
+    }
+
+    class SnobolledTargetSelector : ISelector
+    {
+        public SnobolledTargetSelector(Unit unit) { }
+
+        public bool Check(Unit unit)
+        {
+            if (unit.GetTypeId() != TypeId.Player)
+                return false;
+
+            if (unit.HasAura(SpellIds.RidePlayer) || unit.HasAura(SpellIds.Snobolled))
+                return false;
+
+            return true;
         }
     }
 
@@ -262,58 +292,25 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
     {
         public npc_snobold_vassal(Creature creature) : base(creature)
         {
-            _targetDied = false;
             _instance = creature.GetInstanceScript();
+            _isActive = false;
             _instance.SetData(DataTypes.SnoboldCount, DataTypes.Increase);
+            SetCombatMovement(false);
         }
 
         public override void Reset()
         {
-            _events.ScheduleEvent(Beasts.EventBatter, 5 * Time.InMilliseconds);
-            _events.ScheduleEvent(Beasts.EventHeadCrack, 25 * Time.InMilliseconds);
-
-            _targetGUID.Clear();
-            _targetDied = false;
-
-            //Workaround for Snobold
             me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
-        }
-
-        public override void EnterCombat(Unit who)
-        {
-            _targetGUID = who.GetGUID();
-            me.TauntApply(who);
-            DoCast(who, Beasts.SpellSnobolled);
-        }
-
-        public override void DamageTaken(Unit pDoneBy, ref uint uiDamage)
-        {
-            if (pDoneBy.GetGUID() == _targetGUID)
-                uiDamage = 0;
-        }
-
-        public override void MovementInform(MovementGeneratorType type, uint id)
-        {
-            if (type != MovementGeneratorType.Point)
-                return;
-
-            switch (id)
-            {
-                case 0:
-                    if (_targetDied)
-                        me.DespawnOrUnsummon();
-                    break;
-                default:
-                    break;
-            }
+            me.SetInCombatWithZone();
+            _events.ScheduleEvent(Events.CheckMount, TimeSpan.FromSeconds(1));
+            _events.ScheduleEvent(Events.FireBomb, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(30));
         }
 
         public override void JustDied(Unit killer)
         {
             Unit target = Global.ObjAccessor.GetPlayer(me, _targetGUID);
             if (target)
-                if (target.IsAlive())
-                    target.RemoveAurasDueToSpell(Beasts.SpellSnobolled);
+                target.RemoveAurasDueToSpell(SpellIds.Snobolled);
             _instance.SetData(DataTypes.SnoboldCount, DataTypes.Decrease);
         }
 
@@ -321,52 +318,77 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
         {
             switch (action)
             {
-                case Beasts.ActionEnableFireBomb:
-                    _events.ScheduleEvent(Beasts.EventFireBomb, RandomHelper.URand(5 * Time.InMilliseconds, 30 * Time.InMilliseconds));
+                case Actions.EnableFireBomb:
+                    _events.ScheduleEvent(Events.FireBomb, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(30));
                     break;
-                case Beasts.ActionDisableFireBomb:
-                    _events.CancelEvent(Beasts.EventFireBomb);
+                case Actions.DisableFireBomb:
+                    _events.CancelEvent(Events.FireBomb);
+                    break;
+                case Actions.ActiveSnobold:
+                    _isActive = true;
                     break;
                 default:
                     break;
             }
         }
 
-        public override void UpdateAI(uint diff)
+        public override void SetGUID(ObjectGuid guid, int id = 0)
         {
-            if (!UpdateVictim() || _targetDied)
+            if (id == Misc.DataNewTarget)
+            {
+                Unit target = Global.ObjAccessor.GetPlayer(me, guid);
+                if (target)
+                {
+                    _targetGUID = guid;
+                    AttackStart(target);
+                    _events.ScheduleEvent(Events.Batter, TimeSpan.FromSeconds(5));
+                    _events.ScheduleEvent(Events.HeadCrack, TimeSpan.FromSeconds(25));
+                    _events.ScheduleEvent(Events.Snobolled, TimeSpan.FromMilliseconds(500));
+                }
+            }
+        }
+
+        public override void AttackStart(Unit target)
+        {
+            //Snobold only melee attack players that is your vehicle
+            if (!_isActive || target.GetGUID() != _targetGUID)
                 return;
 
-            Unit target = Global.ObjAccessor.GetPlayer(me, _targetGUID);
-            if (target)
-            {
-                if (!target.IsAlive())
-                {
-                    Unit gormok = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.Gormok));
-                    if (gormok && gormok.IsAlive())
-                    {
-                        SetCombatMovement(false);
-                        _targetDied = true;
+            base.AttackStart(target);
+        }
 
-                        // looping through Gormoks seats
-                        for (sbyte i = 0; i < Beasts.MaxSnobolds; i++)
-                        {
-                            if (!gormok.GetVehicleKit().GetPassenger(i))
-                            {
-                                me.EnterVehicle(gormok, i);
-                                DoAction(Beasts.ActionEnableFireBomb);
-                                break;
-                            }
-                        }
-                    }
-                    else if (target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true))
+        void MountOnBoss()
+        {
+            Unit gormok = ObjectAccessor.GetCreature(me, _instance.GetGuidData(CreatureIds.Gormok));
+            if (gormok && gormok.IsAlive())
+            {
+                me.AttackStop();
+                _targetGUID.Clear();
+                _isActive = false;
+                _events.CancelEvent(Events.Batter);
+                _events.CancelEvent(Events.HeadCrack);
+
+                for (sbyte i = 0; i < Misc.MaxSnobolds; i++)
+                {
+                    if (!gormok.GetVehicleKit().GetPassenger(i))
                     {
-                        _targetGUID = target.GetGUID();
-                        me.GetMotionMaster().MoveJump(target, 15.0f, 15.0f);
+                        me.EnterVehicle(gormok, i);
+                        DoAction(Actions.EnableFireBomb);
+                        break;
                     }
                 }
             }
+            //Without Boss, snobolds should jump in another players
+            else
+            {
+                Unit target = SelectTarget(SelectAggroTarget.Random, 0, new SnobolledTargetSelector(me));
+                if (target)
+                    me.CastSpell(target, SpellIds.RidePlayer, true);
+            }
+        }
 
+        public override void UpdateAI(uint diff)
+        {
             _events.Update(diff);
 
             if (me.HasUnitState(UnitState.Casting))
@@ -376,42 +398,48 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             {
                 switch (eventId)
                 {
-                    case Beasts.EventFireBomb:
-                        {
-                            if (me.GetVehicleBase())
-                            {
-                                Unit fireTarget = SelectTarget(SelectAggroTarget.Random, 0, -me.GetVehicleBase().GetCombatReach(), true);
-                                if (fireTarget)
-                                    me.CastSpell(fireTarget.GetPositionX(), fireTarget.GetPositionY(), fireTarget.GetPositionZ(), Beasts.SpellFireBomb, true);
-                            }
-                            _events.ScheduleEvent(Beasts.EventFireBomb, 20 * Time.InMilliseconds);
-                            return;
-                        }
-                    case Beasts.EventHeadCrack:
-                        // commented out while SPELL_SNOBOLLED gets fixed
-                        //if (Unit target = Global.ObjAccessor.GetPlayer(me, m_uiTargetGUID))
-                        DoCastVictim(Beasts.SpellHeadCrack);
-                        _events.ScheduleEvent(Beasts.EventHeadCrack, 30 * Time.InMilliseconds);
-                        return;
-                    case Beasts.EventBatter:
-                        // commented out while SPELL_SNOBOLLED gets fixed
-                        //if (Unit target = Global.ObjAccessor.GetPlayer(me, m_uiTargetGUID))
-                        DoCastVictim(Beasts.SpellBatter);
-                        _events.ScheduleEvent(Beasts.EventBatter, 10 * Time.InMilliseconds);
-                        return;
+                    case Events.FireBomb:
+                        Unit target = SelectTarget(SelectAggroTarget.Random, 0, -me.GetVehicleBase().GetCombatReach(), true);
+                        if (target)
+                            me.CastSpell(target, SpellIds.FireBomb);
+                        _events.Repeat(TimeSpan.FromSeconds(20));
+                        break;
+                    case Events.HeadCrack:
+                        DoCast(me.GetVehicleBase(), SpellIds.HeadCrack);
+                        _events.Repeat(TimeSpan.FromSeconds(30));
+                        break;
+                    case Events.Batter:
+                        DoCast(me.GetVehicleBase(), SpellIds.Batter);
+                        _events.Repeat(TimeSpan.FromSeconds(10));
+                        break;
+                    case Events.Snobolled:
+                        DoCastAOE(SpellIds.Snobolled);
+                        break;
+                    case Events.CheckMount:
+                        if (!me.GetVehicleBase())
+                            MountOnBoss();
+                        _events.Repeat(TimeSpan.FromSeconds(1));
+                        break;
                     default:
-                        return;
+                        break;
                 }
+
+                if (me.HasUnitState(UnitState.Casting))
+                    return;
             });
 
+
+            if (!UpdateVictim())
+                return;
+
             // do melee attack only when not on Gormoks back
-            if (!me.GetVehicleBase())
+            if (_isActive)
                 DoMeleeAttackIfReady();
         }
 
         InstanceScript _instance;
         ObjectGuid _targetGUID;
-        bool _targetDied;
+        bool _isActive;
     }
 
     [Script]
@@ -424,7 +452,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
 
         public override void Reset()
         {
-            DoCast(me, Beasts.SpellFireBombDot, true);
+            DoCast(me, SpellIds.FireBombDot, true);
             SetCombatMovement(false);
             me.SetReactState(ReactStates.Passive);
             me.SetDisplayId(me.GetCreatureTemplate().ModelId2);
@@ -432,27 +460,215 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
 
         public override void UpdateAI(uint diff)
         {
-            if (_instance.GetData(DataTypes.TypeNorthrendBeasts) != NorthrendBeasts.GormokInProgress)
+            if (_instance.GetData(DataTypes.NorthrendBeasts) != NorthrendBeasts.GormokInProgress)
                 me.DespawnOrUnsummon();
         }
 
         InstanceScript _instance;
     }
 
+    class boss_jormungarAI : BossAI
+    {
+        public boss_jormungarAI(Creature creature) : base(creature, DataTypes.BossBeasts)
+        {
+            Phase = Misc.PhaseMobile;
+        }
+
+        public override void Reset()
+        {
+            Enraged = false;
+
+            _events.ScheduleEvent(Events.Spit, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30), 0, Misc.PhaseStationary);
+            _events.ScheduleEvent(Events.Spray, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30), 0, Misc.PhaseStationary);
+            _events.ScheduleEvent(Events.Sweep, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30), 0, Misc.PhaseStationary);
+            _events.ScheduleEvent(Events.Bite, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30), 0, Misc.PhaseMobile);
+            _events.ScheduleEvent(Events.Spew, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30), 0, Misc.PhaseMobile);
+            _events.ScheduleEvent(Events.SlimePool, TimeSpan.FromSeconds(15), 0, Misc.PhaseMobile);
+        }
+
+        public override void JustDied(Unit killer)
+        {
+            Creature otherWorm = ObjectAccessor.GetCreature(me, instance.GetGuidData(OtherWormEntry));
+            if (otherWorm)
+            {
+                if (!otherWorm.IsAlive())
+                {
+                    instance.SetData(DataTypes.NorthrendBeasts, NorthrendBeasts.SnakesDone);
+
+                    me.DespawnOrUnsummon();
+                    otherWorm.DespawnOrUnsummon();
+                }
+                else
+                    instance.SetData(DataTypes.NorthrendBeasts, NorthrendBeasts.SnakesSpecial);
+            }
+        }
+
+        public override void JustReachedHome()
+        {
+            // prevent losing 2 attempts at once on heroics
+            if (instance.GetData(DataTypes.NorthrendBeasts) != (uint)EncounterState.Fail)
+                instance.SetData(DataTypes.NorthrendBeasts, (uint)EncounterState.Fail);
+
+            me.DespawnOrUnsummon();
+        }
+
+        public override void EnterCombat(Unit who)
+        {
+            _EnterCombat();
+            me.SetInCombatWithZone();
+            instance.SetData(DataTypes.NorthrendBeasts, NorthrendBeasts.SnakesInProgress);
+        }
+
+        public override void UpdateAI(uint diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (!Enraged && instance.GetData(DataTypes.NorthrendBeasts) == NorthrendBeasts.SnakesSpecial)
+            {
+                me.RemoveAurasDueToSpell(SpellIds.Submerge);
+                me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                DoCast(SpellIds.Enrage);
+                Enraged = true;
+                Talk(TextIds.EmoteEnrage);
+            }
+
+            _events.Update(diff);
+
+            if (me.HasUnitState(UnitState.Casting))
+                return;
+
+            _events.ExecuteEvents(eventId =>
+            {
+                switch (eventId)
+                {
+                    case Events.Emerge:
+                        Emerge();
+                        return;
+                    case Events.Submerge:
+                        Submerge();
+                        return;
+                    case Events.Bite:
+                        DoCastVictim(BiteSpell);
+                        _events.ScheduleEvent(Events.Bite, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30), 0, Misc.PhaseMobile);
+                        return;
+                    case Events.Spew:
+                        DoCastAOE(SpewSpell);
+                        _events.ScheduleEvent(Events.Spew, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30), 0, Misc.PhaseMobile);
+                        return;
+                    case Events.SlimePool:
+                        DoCast(me, SpellIds.SummonSlimepool);
+                        _events.ScheduleEvent(Events.SlimePool, TimeSpan.FromSeconds(30), 0, Misc.PhaseMobile);
+                        return;
+                    case Events.SummonAcidmaw:
+                        Creature acidmaw = me.SummonCreature(CreatureIds.Acidmaw, MiscData.ToCCommonLoc[9].GetPositionX(), MiscData.ToCCommonLoc[9].GetPositionY(), MiscData.ToCCommonLoc[9].GetPositionZ(), 5, TempSummonType.ManualDespawn);
+                        if (acidmaw)
+                        {
+                            acidmaw.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                            acidmaw.SetReactState(ReactStates.Aggressive);
+                            acidmaw.SetInCombatWithZone();
+                            acidmaw.CastSpell(acidmaw, SpellIds.Emerge);
+                            acidmaw.CastSpell(acidmaw, SpellIds.GroundVisual1, true);
+                        }
+                        return;
+                    case Events.Spray:
+                        Unit target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true);
+                        if (target)
+                            DoCast(target, SpraySpell);
+                        _events.ScheduleEvent(Events.Spray, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30), 0, Misc.PhaseStationary);
+                        return;
+                    case Events.Sweep:
+                        DoCastAOE(SpellIds.Sweep);
+                        _events.ScheduleEvent(Events.Sweep, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30), 0, Misc.PhaseStationary);
+                        return;
+                    default:
+                        return;
+                }
+            });
+
+            if (_events.IsInPhase(Misc.PhaseMobile))
+                DoMeleeAttackIfReady();
+            if (_events.IsInPhase(Misc.PhaseStationary))
+                DoCastVictim(SpitSpell);
+        }
+
+        void Submerge()
+        {
+            DoCast(me, SpellIds.Submerge);
+            DoCast(me, SpellIds.GroundVisual0, true);
+            me.RemoveAurasDueToSpell(SpellIds.Emerge);
+            me.SetInCombatWithZone();
+            _events.SetPhase(Misc.PhaseSubmerged);
+            _events.ScheduleEvent(Events.Emerge, TimeSpan.FromSeconds(5), 0, Misc.PhaseSubmerged);
+            me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+            me.GetMotionMaster().MovePoint(0, MiscData.ToCCommonLoc[1].GetPositionX() + RandomHelper.FRand(-40.0f, 40.0f), MiscData.ToCCommonLoc[1].GetPositionY() + RandomHelper.FRand(-40.0f, 40.0f), MiscData.ToCCommonLoc[1].GetPositionZ());
+            WasMobile = !WasMobile;
+        }
+
+        public void Emerge()
+        {
+            DoCast(me, SpellIds.Emerge);
+            DoCastAOE(SpellIds.HateToZero, true);
+            me.SetDisplayId(ModelMobile);
+            me.RemoveAurasDueToSpell(SpellIds.Submerge);
+            me.RemoveAurasDueToSpell(SpellIds.GroundVisual0);
+            me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+
+            // if the worm was mobile before submerging, make him stationary now
+            if (WasMobile)
+            {
+                me.SetControlled(true, UnitState.Root);
+                SetCombatMovement(false);
+                me.SetDisplayId(ModelStationary);
+                me.CastSpell(me, SpellIds.GroundVisual1, true);
+                _events.SetPhase(Misc.PhaseStationary);
+                _events.ScheduleEvent(Events.Submerge, TimeSpan.FromSeconds(45), 0, Misc.PhaseStationary);
+                _events.ScheduleEvent(Events.Spit, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30), 0, Misc.PhaseStationary);
+                _events.ScheduleEvent(Events.Spray, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30), 0, Misc.PhaseStationary);
+                _events.ScheduleEvent(Events.Sweep, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30), 0, Misc.PhaseStationary);
+            }
+            else
+            {
+                me.SetControlled(false, UnitState.Root);
+                SetCombatMovement(true);
+                me.GetMotionMaster().MoveChase(me.GetVictim());
+                me.SetDisplayId(ModelMobile);
+                _events.SetPhase(Misc.PhaseMobile);
+                _events.ScheduleEvent(Events.Submerge, TimeSpan.FromSeconds(45), 0, Misc.PhaseMobile);
+                _events.ScheduleEvent(Events.Bite, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30), 0, Misc.PhaseMobile);
+                _events.ScheduleEvent(Events.Spew, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30), 0, Misc.PhaseMobile);
+                _events.ScheduleEvent(Events.SlimePool, TimeSpan.FromSeconds(15), 0, Misc.PhaseMobile);
+            }
+        }
+
+        protected uint OtherWormEntry;
+        protected uint ModelStationary;
+        protected uint ModelMobile;
+
+        protected uint BiteSpell;
+        protected uint SpewSpell;
+        protected uint SpitSpell;
+        protected uint SpraySpell;
+
+        protected uint Phase;
+        protected bool Enraged;
+        protected bool WasMobile;
+    }
+
     [Script]
-    public class boss_acidmaw : boss_jormungarAI
+    class boss_acidmaw : boss_jormungarAI
     {
         public boss_acidmaw(Creature creature) : base(creature) { }
 
         public override void Reset()
         {
             base.Reset();
-            BiteSpell = Beasts.SpellParalyticBite;
-            SpewSpell = Beasts.SpellAcidSpew;
-            SpitSpell = Beasts.SpellAcidSpit;
-            SpraySpell = Beasts.SpellParalyticSpray;
-            ModelStationary = Beasts.ModelAcidmawStationary;
-            ModelMobile = Beasts.ModelAcidmawMobile;
+            BiteSpell = SpellIds.ParalyticBite;
+            SpewSpell = SpellIds.AcidSpew;
+            SpitSpell = SpellIds.AcidSpit;
+            SpraySpell = SpellIds.ParalyticSpray;
+            ModelStationary = Misc.ModelAcidmawStationary;
+            ModelMobile = Misc.ModelAcidmawMobile;
             OtherWormEntry = CreatureIds.Dreadscale;
 
             WasMobile = true;
@@ -461,26 +677,24 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
     }
 
     [Script]
-    public class boss_dreadscale : boss_jormungarAI
+    class boss_dreadscale : boss_jormungarAI
     {
-        public boss_dreadscale(Creature creature) : base(creature)
-        {
-        }
+        public boss_dreadscale(Creature creature) : base(creature) { }
 
         public override void Reset()
         {
             base.Reset();
-            BiteSpell = Beasts.SpellBurningBite;
-            SpewSpell = Beasts.SpellMoltenSpew;
-            SpitSpell = Beasts.SpellFireSpit;
-            SpraySpell = Beasts.SpellBurningSpray;
-            ModelStationary = Beasts.ModelDreadscaleStationary;
-            ModelMobile = Beasts.ModelDreadscaleMobile;
+            BiteSpell = SpellIds.BurningBite;
+            SpewSpell = SpellIds.MoltenSpew;
+            SpitSpell = SpellIds.FireSpit;
+            SpraySpell = SpellIds.BurningSpray;
+            ModelStationary = Misc.ModelDreadscaleStationary;
+            ModelMobile = Misc.ModelDreadscaleMobile;
             OtherWormEntry = CreatureIds.Acidmaw;
 
-            _events.SetPhase(Beasts.PhaseMobile);
-            _events.ScheduleEvent(Beasts.EventSummonAcidmaw, 3 * Time.InMilliseconds);
-            _events.ScheduleEvent(Beasts.EventSubmerge, 45 * Time.InMilliseconds, 0, Beasts.PhaseMobile);
+            _events.SetPhase(Misc.PhaseMobile);
+            _events.ScheduleEvent(Events.SummonAcidmaw, TimeSpan.FromSeconds(3));
+            _events.ScheduleEvent(Events.Submerge, TimeSpan.FromSeconds(45), 0, Misc.PhaseMobile);
             WasMobile = false;
         }
 
@@ -535,10 +749,10 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             if (!_cast)
             {
                 _cast = true;
-                DoCast(me, Beasts.SpellSlimePoolEffect);
+                DoCast(me, SpellIds.SlimePoolEffect);
             }
 
-            if (_instance.GetData(DataTypes.TypeNorthrendBeasts) != NorthrendBeasts.SnakesInProgress && _instance.GetData(DataTypes.TypeNorthrendBeasts) != NorthrendBeasts.SnakesSpecial)
+            if (_instance.GetData(DataTypes.NorthrendBeasts) != NorthrendBeasts.SnakesInProgress && _instance.GetData(DataTypes.NorthrendBeasts) != NorthrendBeasts.SnakesSpecial)
                 me.DespawnOrUnsummon();
         }
 
@@ -557,7 +771,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             {
                 Unit caster = GetCaster();
                 if (caster)
-                    caster.SummonCreature(Beasts.NpcFireBomb, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), 0, TempSummonType.TimedDespawn, 30 * Time.InMilliseconds);
+                    caster.SummonCreature(Misc.NpcFireBomb, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), 0, TempSummonType.TimedDespawn, 30 * Time.InMilliseconds);
             }
         }
 
@@ -574,10 +788,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
 
         public override void Reset()
         {
-            _events.ScheduleEvent(Beasts.EventFerociousButt, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds));
-            _events.ScheduleEvent(Beasts.EventArcticBreath, RandomHelper.URand(15 * Time.InMilliseconds, 25 * Time.InMilliseconds));
-            _events.ScheduleEvent(Beasts.EventWhirl, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds));
-            _events.ScheduleEvent(Beasts.EventMassiveCrash, 30 * Time.InMilliseconds);
+            _movementStarted = false;
             _movementFinish = false;
             _trampleCast = false;
             _trampleTargetGUID.Clear();
@@ -585,12 +796,17 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             _trampleTargetY = 0;
             _trampleTargetZ = 0;
             _stage = 0;
+
+            _events.ScheduleEvent(Events.FerociousButt, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30));
+            _events.ScheduleEvent(Events.ArcticBreath, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(25));
+            _events.ScheduleEvent(Events.Whirl, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30));
+            _events.ScheduleEvent(Events.MassiveCrash, TimeSpan.FromSeconds(30));
         }
 
         public override void JustDied(Unit killer)
         {
             _JustDied();
-            instance.SetData(DataTypes.TypeNorthrendBeasts, NorthrendBeasts.IcehowlDone);
+            instance.SetData(DataTypes.NorthrendBeasts, NorthrendBeasts.IcehowlDone);
         }
 
         public override void MovementInform(MovementGeneratorType type, uint id)
@@ -639,29 +855,23 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
         public override void JustReachedHome()
         {
             instance.DoUseDoorOrButton(instance.GetGuidData(GameObjectIds.MainGateDoor));
-            instance.SetData(DataTypes.TypeNorthrendBeasts, (uint)EncounterState.Fail);
+            instance.SetData(DataTypes.NorthrendBeasts, (uint)EncounterState.Fail);
             me.DespawnOrUnsummon();
-        }
-
-        public override void KilledUnit(Unit who)
-        {
-            if (who.IsTypeId(TypeId.Player))
-                instance.SetData(DataTypes.TributeToImmortalityEligible, 0);
         }
 
         public override void EnterCombat(Unit who)
         {
             _EnterCombat();
-            instance.SetData(DataTypes.TypeNorthrendBeasts, NorthrendBeasts.IcehowlInProgress);
+            instance.SetData(DataTypes.NorthrendBeasts, NorthrendBeasts.IcehowlInProgress);
         }
 
         public override void SpellHitTarget(Unit target, SpellInfo spell)
         {
-            if (spell.Id == Beasts.SpellTrample && target.IsTypeId(TypeId.Player))
+            if (spell.Id == SpellIds.Trample && target.IsTypeId(TypeId.Player))
             {
                 if (!_trampleCast)
                 {
-                    DoCast(me, Beasts.SpellFrothingRage, true);
+                    DoCast(me, SpellIds.FrothingRage, true);
                     _trampleCast = true;
                 }
             }
@@ -685,20 +895,20 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                         {
                             switch (eventId)
                             {
-                                case Beasts.EventFerociousButt:
-                                    DoCastVictim(Beasts.SpellFerociousButt);
-                                    _events.ScheduleEvent(Beasts.EventFerociousButt, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds));
+                                case Events.FerociousButt:
+                                    DoCastVictim(SpellIds.FerociousButt);
+                                    _events.ScheduleEvent(Events.FerociousButt, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds));
                                     return;
-                                case Beasts.EventArcticBreath:
+                                case Events.ArcticBreath:
                                     Unit target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true);
                                     if (target)
-                                        DoCast(target, Beasts.SpellArcticBreath);
+                                        DoCast(target, SpellIds.ArcticBreath);
                                     return;
-                                case Beasts.EventWhirl:
-                                    DoCastAOE(Beasts.SpellWhirl);
-                                    _events.ScheduleEvent(Beasts.EventWhirl, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds));
+                                case Events.Whirl:
+                                    DoCastAOE(SpellIds.Whirl);
+                                    _events.ScheduleEvent(Events.Whirl, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds));
                                     return;
-                                case Beasts.EventMassiveCrash:
+                                case Events.MassiveCrash:
                                     me.GetMotionMaster().MoveJump(MiscData.ToCCommonLoc[1], 20.0f, 20.0f, 0); // 1: Middle of the room
                                     SetCombatMovement(false);
                                     me.AttackStop();
@@ -707,12 +917,15 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                                 default:
                                     break;
                             }
+
+                            if (me.HasUnitState(UnitState.Casting))
+                                return;
                         });
                         DoMeleeAttackIfReady();
                         break;
                     }
                 case 1:
-                    DoCastAOE(Beasts.SpellMassiveCrash);
+                    DoCastAOE(SpellIds.MassiveCrash);
                     me.StopMoving();
                     me.AttackStop();
                     _stage = 2;
@@ -732,7 +945,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                             me.SetControlled(true, UnitState.Root);
                             me.GetMotionMaster().Clear();
                             me.GetMotionMaster().MoveIdle();
-                            _events.ScheduleEvent(Beasts.EventTrample, 4 * Time.InMilliseconds);
+                            _events.ScheduleEvent(Events.Trample, TimeSpan.FromSeconds(4));
                             _stage = 3;
                         }
                         else
@@ -744,7 +957,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                     {
                         switch (eventId)
                         {
-                            case Beasts.EventTrample:
+                            case Events.Trample:
                                 {
                                     Unit target = Global.ObjAccessor.GetPlayer(me, _trampleTargetGUID);
                                     if (target)
@@ -776,7 +989,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
 
                         Player target = Global.ObjAccessor.GetPlayer(me, _trampleTargetGUID);
                         if (target)
-                            Talk(Beasts.EmoteTrampleStart, target);
+                            Talk(TextIds.EmoteTrampleStart, target);
 
                         me.GetMotionMaster().MoveCharge(_trampleTargetX, _trampleTargetY, _trampleTargetZ, 42, 1);
                         me.SetTarget(ObjectGuid.Empty);
@@ -786,20 +999,20 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                 case 5:
                     if (_movementFinish)
                     {
-                        DoCastAOE(Beasts.SpellTrample);
+                        DoCastAOE(SpellIds.Trample);
                         _movementFinish = false;
                         _stage = 6;
                         return;
                     }
-                    if (_events.ExecuteEvent() == Beasts.EventTrample)
+                    if (_events.ExecuteEvent() == Events.Trample)
                     {
                         var lPlayers = me.GetMap().GetPlayers();
                         foreach (var player in lPlayers)
                         {
                             if (player.IsAlive() && player.IsWithinDistInMap(me, 6.0f))
                             {
-                                DoCastAOE(Beasts.SpellTrample);
-                                _events.ScheduleEvent(Beasts.EventTrample, 4 * Time.InMilliseconds);
+                                DoCastAOE(SpellIds.Trample);
+                                _events.ScheduleEvent(Events.Trample, TimeSpan.FromSeconds(4));
                                 break;
                             }
                         }
@@ -808,22 +1021,23 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                 case 6:
                     if (!_trampleCast)
                     {
-                        DoCast(me, Beasts.SpellStaggeredDaze);
-                        Talk(Beasts.EmoteTrampleCrash);
+                        DoCast(me, SpellIds.StaggeredDaze);
+                        Talk(TextIds.EmoteTrampleCrash);
                     }
                     else
                     {
-                        DoCast(me, Beasts.SpellFrothingRage, true);
-                        Talk(Beasts.EmoteTrampleFail);
+                        DoCast(me, SpellIds.FrothingRage, true);
+                        Talk(TextIds.EmoteTrampleFail);
                     }
+                    _movementStarted = false;
                     me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable);
                     SetCombatMovement(true);
                     me.GetMotionMaster().MovementExpired();
                     me.GetMotionMaster().Clear();
                     me.GetMotionMaster().MoveChase(me.GetVictim());
                     AttackStart(me.GetVictim());
-                    _events.ScheduleEvent(Beasts.EventMassiveCrash, 40 * Time.InMilliseconds);
-                    _events.ScheduleEvent(Beasts.EventArcticBreath, RandomHelper.URand(15 * Time.InMilliseconds, 25 * Time.InMilliseconds));
+                    _events.ScheduleEvent(Events.MassiveCrash, TimeSpan.FromSeconds(40));
+                    _events.ScheduleEvent(Events.ArcticBreath, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(25));
                     _stage = 0;
                     break;
                 default:
@@ -833,194 +1047,213 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
 
         float _trampleTargetX, _trampleTargetY, _trampleTargetZ;
         ObjectGuid _trampleTargetGUID;
+        bool _movementStarted;
         bool _movementFinish;
         bool _trampleCast;
         byte _stage;
     }
 
-    public class boss_jormungarAI : BossAI
+    [Script]
+    class spell_gormok_jump_to_hand : AuraScript
     {
-        public boss_jormungarAI(Creature creature) : base(creature, DataTypes.BossBeasts) { }
-
-        public override void Reset()
+        public override bool Validate(SpellInfo spellInfo)
         {
-            Enraged = false;
-
-            _events.ScheduleEvent(Beasts.EventSpit, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds), 0, Beasts.PhaseStationary);
-            _events.ScheduleEvent(Beasts.EventSpray, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds), 0, Beasts.PhaseStationary);
-            _events.ScheduleEvent(Beasts.EventSweep, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds), 0, Beasts.PhaseStationary);
-            _events.ScheduleEvent(Beasts.EventBite, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds), 0, Beasts.PhaseMobile);
-            _events.ScheduleEvent(Beasts.EventSpew, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds), 0, Beasts.PhaseMobile);
-            _events.ScheduleEvent(Beasts.EventSlimePool, 15 * Time.InMilliseconds, 0, Beasts.PhaseMobile);
+            return ValidateSpellInfo(SpellIds.RidePlayer);
         }
 
-        public override void JustDied(Unit killer)
+        public override bool Load()
         {
-            Creature otherWorm = ObjectAccessor.GetCreature(me, instance.GetGuidData(OtherWormEntry));
-            if (otherWorm)
-            {
-                if (!otherWorm.IsAlive())
-                {
-                    instance.SetData(DataTypes.TypeNorthrendBeasts, NorthrendBeasts.SnakesDone);
+            if (GetCaster() && GetCaster().GetEntry() == Misc.NpcSnoboldVassal)
+                return true;
+            return false;
+        }
 
-                    me.DespawnOrUnsummon();
-                    otherWorm.DespawnOrUnsummon();
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit caster = GetCaster();
+            if (caster)
+            {
+                CreatureAI gormokAI = GetTarget().ToCreature().GetAI();
+                if (gormokAI != null)
+                {
+                    Unit target = gormokAI.SelectTarget(SelectAggroTarget.Random, 0, new SnobolledTargetSelector(GetTarget()));
+                    if (target)
+                    {
+                        gormokAI.Talk(TextIds.EmoteSnobolled);
+                        caster.GetAI().DoAction(Actions.ActiveSnobold);
+                        caster.CastSpell(target, SpellIds.RidePlayer, true);
+                    }
                 }
-                else
-                    instance.SetData(DataTypes.TypeNorthrendBeasts, NorthrendBeasts.SnakesSpecial);
             }
         }
 
-        public override void JustReachedHome()
+        public override void Register()
         {
-            // prevent losing 2 attempts at once on heroics
-            if (instance.GetData(DataTypes.TypeNorthrendBeasts) != (uint)EncounterState.Fail)
-                instance.SetData(DataTypes.TypeNorthrendBeasts, (uint)EncounterState.Fail);
+            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ControlVehicle, AuraEffectHandleModes.Real));
+        }
+    }
 
-            me.DespawnOrUnsummon();
+    [Script]
+    class spell_gormok_ride_player : AuraScript
+    {
+        public override bool Load()
+        {
+            if (GetCaster() && GetCaster().GetEntry() == Misc.NpcSnoboldVassal)
+                return true;
+            return false;
         }
 
-        public override void KilledUnit(Unit who)
+        void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            if (who.IsTypeId(TypeId.Player))
-                instance.SetData(DataTypes.TributeToImmortalityEligible, 0);
-        }
-
-        public override void EnterCombat(Unit who)
-        {
-            _EnterCombat();
-            me.SetInCombatWithZone();
-            instance.SetData(DataTypes.TypeNorthrendBeasts, NorthrendBeasts.SnakesInProgress);
-        }
-
-        public override void UpdateAI(uint diff)
-        {
-            if (!UpdateVictim())
+            Unit target = GetTarget();
+            if (target.GetTypeId() != TypeId.Player || !target.IsInWorld)
                 return;
 
-            if (!Enraged && instance.GetData(DataTypes.TypeNorthrendBeasts) == NorthrendBeasts.SnakesSpecial)
-            {
-                me.RemoveAurasDueToSpell(Beasts.SpellSubmerge0);
-                me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
-                DoCast(Beasts.SpellEnrage);
-                Enraged = true;
-                Talk(Beasts.EmoteEnrage);
-            }
-
-            _events.Update(diff);
-
-            if (me.HasUnitState(UnitState.Casting))
+            if (!target.CreateVehicleKit(Misc.PlayerVehicleId, 0))
                 return;
 
-            _events.ExecuteEvents(eventId =>
-            {
-                switch (eventId)
-                {
-                    case Beasts.EventEmerge:
-                        Emerge();
-                        return;
-                    case Beasts.EventSubmerge:
-                        Submerge();
-                        return;
-                    case Beasts.EventBite:
-                        DoCastVictim(BiteSpell);
-                        _events.ScheduleEvent(Beasts.EventBite, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds), 0, Beasts.PhaseMobile);
-                        return;
-                    case Beasts.EventSpew:
-                        DoCastAOE(SpewSpell);
-                        _events.ScheduleEvent(Beasts.EventSpew, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds), 0, Beasts.PhaseMobile);
-                        return;
-                    case Beasts.EventSlimePool:
-                        DoCast(me, Beasts.SpellSummonSlimepool);
-                        _events.ScheduleEvent(Beasts.EventSlimePool, 30 * Time.InMilliseconds, 0, Beasts.PhaseMobile);
-                        return;
-                    case Beasts.EventSummonAcidmaw:
-                        Creature acidmaw = me.SummonCreature(CreatureIds.Acidmaw, MiscData.ToCCommonLoc[9].GetPositionX(), MiscData.ToCCommonLoc[9].GetPositionY(), MiscData.ToCCommonLoc[9].GetPositionZ(), 5, TempSummonType.ManualDespawn);
-                        if (acidmaw)
-                        {
-                            acidmaw.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
-                            acidmaw.SetReactState(ReactStates.Aggressive);
-                            acidmaw.SetInCombatWithZone();
-                            acidmaw.CastSpell(acidmaw, Beasts.SpellEmerge0);
-                        }
-                        return;
-                    case Beasts.EventSpray:
-                        Unit target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true);
-                        if (target)
-                            DoCast(target, SpraySpell);
-                        _events.ScheduleEvent(Beasts.EventSpray, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds), 0, Beasts.PhaseStationary);
-                        return;
-                    case Beasts.EventSweep:
-                        DoCastAOE(Beasts.SpellSweep0);
-                        _events.ScheduleEvent(Beasts.EventSweep, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds), 0, Beasts.PhaseStationary);
-                        return;
-                    default:
-                        return;
-                }
-            });
-            if (_events.IsInPhase(Beasts.PhaseMobile))
-                DoMeleeAttackIfReady();
-            if (_events.IsInPhase(Beasts.PhaseStationary))
-                DoSpellAttackIfReady(SpitSpell);
+            Unit caster = GetCaster();
+            if (caster)
+                caster.GetAI().SetGUID(target.GetGUID(), Misc.DataNewTarget);
         }
 
-        void Submerge()
+        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            DoCast(me, Beasts.SpellSubmerge0);
-            me.RemoveAurasDueToSpell(Beasts.SpellEmerge0);
-            me.SetInCombatWithZone();
-            _events.SetPhase(Beasts.PhaseSubmerged);
-            _events.ScheduleEvent(Beasts.EventEmerge, 5 * Time.InMilliseconds, 0, Beasts.PhaseSubmerged);
-            me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
-            me.GetMotionMaster().MovePoint(0, MiscData.ToCCommonLoc[1].GetPositionX() + RandomHelper.FRand(-40.0f, 40.0f), MiscData.ToCCommonLoc[1].GetPositionY() + RandomHelper.FRand(-40.0f, 40.0f), MiscData.ToCCommonLoc[1].GetPositionZ());
-            WasMobile = !WasMobile;
+            GetTarget().RemoveVehicleKit();
         }
 
-        public void Emerge()
+        public override void Register()
         {
-            DoCast(me, Beasts.SpellEmerge0);
-            me.SetDisplayId(ModelMobile);
-            me.RemoveAurasDueToSpell(Beasts.SpellSubmerge0);
-            me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
-            me.GetMotionMaster().Clear();
+            OnEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.ControlVehicle, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.ControlVehicle, AuraEffectHandleModes.Real));
+        }
+    }
 
-            // if the worm was mobile before submerging, make him stationary now
-            if (WasMobile)
+    [Script]
+    class spell_gormok_snobolled : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.RidePlayer);
+        }
+
+        void OnPeriodic(AuraEffect aurEff)
+        {
+            if (!GetTarget().HasAura(SpellIds.RidePlayer))
+                Remove();
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicDummy));
+        }
+    }
+
+    [Script]
+    class spell_jormungars_paralytic_toxin : AuraScript
+    {
+        public override bool Validate(SpellInfo spell)
+        {
+            return ValidateSpellInfo(SpellIds.Paralysis);
+        }
+
+        void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit caster = GetCaster();
+            if (caster && caster.GetEntry() == CreatureIds.Acidmaw)
             {
-                me.SetControlled(true, UnitState.Root);
-                SetCombatMovement(false);
-                me.SetDisplayId(ModelStationary);
-                _events.SetPhase(Beasts.PhaseStationary);
-                _events.ScheduleEvent(Beasts.EventSubmerge, 45 * Time.InMilliseconds, 0, Beasts.PhaseStationary);
-                _events.ScheduleEvent(Beasts.EventSpit, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds), 0, Beasts.PhaseStationary);
-                _events.ScheduleEvent(Beasts.EventSpray, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds), 0, Beasts.PhaseStationary);
-                _events.ScheduleEvent(Beasts.EventSweep, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds), 0, Beasts.PhaseStationary);
-            }
-            else
-            {
-                me.SetControlled(false, UnitState.Root);
-                SetCombatMovement(true);
-                me.GetMotionMaster().MoveChase(me.GetVictim());
-                me.SetDisplayId(ModelMobile);
-                _events.SetPhase(Beasts.PhaseMobile);
-                _events.ScheduleEvent(Beasts.EventSubmerge, 45 * Time.InMilliseconds, 0, Beasts.PhaseMobile);
-                _events.ScheduleEvent(Beasts.EventBite, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds), 0, Beasts.PhaseMobile);
-                _events.ScheduleEvent(Beasts.EventSpew, RandomHelper.URand(15 * Time.InMilliseconds, 30 * Time.InMilliseconds), 0, Beasts.PhaseMobile);
-                _events.ScheduleEvent(Beasts.EventSlimePool, 15 * Time.InMilliseconds, 0, Beasts.PhaseMobile);
+                Creature acidMaw = caster.ToCreature();
+                if (acidMaw)
+                    acidMaw.GetAI().Talk(TextIds.SaySpecial, GetTarget());
             }
         }
 
-        protected uint OtherWormEntry;
-        protected uint ModelStationary;
-        protected uint ModelMobile;
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAurasDueToSpell(SpellIds.Paralysis);
+        }
 
-        protected uint BiteSpell;
-        protected uint SpewSpell;
-        protected uint SpitSpell;
-        protected uint SpraySpell;
+        void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        {
+            if (!canBeRecalculated)
+                amount = aurEff.GetAmount();
 
-        //protected uint Phase;
-        protected bool Enraged;
-        protected bool WasMobile;
+            canBeRecalculated = false;
+        }
+
+        void HandleDummy(AuraEffect aurEff)
+        {
+            AuraEffect slowEff = GetEffect(0);
+            if (slowEff != null)
+            {
+                int newAmount = slowEff.GetAmount() - 10;
+                if (newAmount < -100)
+                    newAmount = -100;
+                slowEff.ChangeAmount(newAmount);
+
+                if (newAmount <= -100 && !GetTarget().HasAura(SpellIds.Paralysis))
+                    GetTarget().CastSpell(GetTarget(), SpellIds.Paralysis, true, null, slowEff, GetCasterGUID());
+            }
+        }
+
+        public override void Register()
+        {
+            AfterEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.ModDecreaseSpeed, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModDecreaseSpeed, AuraEffectHandleModes.Real));
+            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModDecreaseSpeed));
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleDummy, 2, AuraType.PeriodicDummy));
+        }
+    }
+
+    [Script("spell_jormungars_burning_spray", SpellIds.BurningBile)]
+    [Script("spell_jormungars_paralytic_spray", SpellIds.ParalyticToxin)]
+    class spell_jormungars_snakes_spray : SpellScript
+    {
+        public spell_jormungars_snakes_spray(uint spellId)
+        {
+            _spellId = spellId;
+        }
+
+        public override bool Validate(SpellInfo spell)
+        {
+            return ValidateSpellInfo(_spellId);
+        }
+
+        void HandleScript(uint effIndex)
+        {
+            Player target = GetHitPlayer();
+            if (target)
+                GetCaster().CastSpell(target, _spellId, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.SchoolDamage));
+        }
+
+        uint _spellId;
+    }
+
+    [Script]
+    class spell_jormungars_paralysis : AuraScript
+    {
+        void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit caster = GetCaster();
+            if (caster)
+            {
+                InstanceScript instance = caster.GetInstanceScript();
+                if (instance != null)
+                    if (instance.GetData(DataTypes.NorthrendBeasts) == NorthrendBeasts.SnakesInProgress || instance.GetData(DataTypes.NorthrendBeasts) == NorthrendBeasts.SnakesSpecial)
+                        return;
+            }
+
+            Remove();
+        }
+
+        public override void Register()
+        {
+            AfterEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.ModStun, AuraEffectHandleModes.Real));
+        }
     }
 }
