@@ -2506,14 +2506,14 @@ namespace Game.Entities
         public void SetFieldNotifyFlag(uint flag) { _fieldNotifyFlags |= flag; }
         public void RemoveFieldNotifyFlag(uint flag) { _fieldNotifyFlags &= ~flag; }
 
-        bool IsCreature() { return GetTypeId() == TypeId.Unit; }
+        public bool IsCreature() { return GetTypeId() == TypeId.Unit; }
         public bool IsPlayer() { return GetTypeId() == TypeId.Player; }
-        bool IsGameObject() { return GetTypeId() == TypeId.GameObject; }
-        bool IsUnit() { return isTypeMask(TypeMask.Unit); }
-        bool IsCorpse() { return GetTypeId() == TypeId.Corpse; }
-        bool IsDynObject() { return GetTypeId() == TypeId.DynamicObject; }
-        bool IsAreaTrigger() { return GetTypeId() == TypeId.AreaTrigger; }
-        bool IsConversation() { return GetTypeId() == TypeId.Conversation; }
+        public bool IsGameObject() { return GetTypeId() == TypeId.GameObject; }
+        public bool IsUnit() { return isTypeMask(TypeMask.Unit); }
+        public bool IsCorpse() { return GetTypeId() == TypeId.Corpse; }
+        public bool IsDynObject() { return GetTypeId() == TypeId.DynamicObject; }
+        public bool IsAreaTrigger() { return GetTypeId() == TypeId.AreaTrigger; }
+        public bool IsConversation() { return GetTypeId() == TypeId.Conversation; }
 
         public Creature ToCreature() { return IsCreature() ? (this as Creature) : null; }
         public Player ToPlayer() { return IsPlayer() ? (this as Player) : null; }

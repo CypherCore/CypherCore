@@ -1537,6 +1537,415 @@ namespace Game.Spells
             }
         }
 
+        public void _LoadSpellDiminishInfo()
+        {
+            SpellDiminishInfo diminishInfo = new SpellDiminishInfo();
+            diminishInfo.DiminishGroup = diminishingGroupCompute();
+            diminishInfo.DiminishReturnType = diminishingTypeCompute(diminishInfo.DiminishGroup);
+            diminishInfo.DiminishMaxLevel = diminishingMaxLevelCompute(diminishInfo.DiminishGroup);
+            diminishInfo.DiminishDurationLimit = diminishingLimitDurationCompute();
+
+            _diminishInfo = diminishInfo;
+        }
+
+        public DiminishingGroup GetDiminishingReturnsGroupForSpell()
+        {
+            return _diminishInfo.DiminishGroup;
+        }
+
+        public DiminishingReturnsType GetDiminishingReturnsGroupType()
+        {
+            return _diminishInfo.DiminishReturnType;
+        }
+
+        public DiminishingLevels GetDiminishingReturnsMaxLevel(bool triggered)
+        {
+            return _diminishInfo.DiminishMaxLevel;
+        }
+
+        public int GetDiminishingReturnsLimitDuration(bool triggered)
+        {
+            return _diminishInfo.DiminishDurationLimit;
+        }
+
+        DiminishingGroup diminishingGroupCompute()
+        {
+            if (IsPositive())
+                return DiminishingGroup.None;
+
+            if (HasAura(Difficulty.None, AuraType.ModTaunt))
+                return DiminishingGroup.Taunt;
+
+            switch (Id)
+            {
+                case 64803:     // Entrapment
+                case 135373:    // Entrapment
+                    return DiminishingGroup.Root;
+                case 24394:     // Intimidation
+                    return DiminishingGroup.Stun;
+                case 118345:    // Pulverize (Primal Earth Elemental)
+                    return DiminishingGroup.Stun;
+                case 118905:    // Static Charge (Capacitor Totem)
+                    return DiminishingGroup.Stun;
+                case 108199:    // Gorefiend's Grasp
+                    return DiminishingGroup.AOEKnockback;
+                default:
+                    break;
+            }
+
+            // Explicit Diminishing Groups
+            switch (SpellFamilyName)
+            {
+                case SpellFamilyNames.Generic:
+                    break;
+                case SpellFamilyNames.Mage:
+                    {
+                        // Frostjaw -- 102051
+                        if (SpellFamilyFlags[2].HasAnyFlag(0x40000u))
+                            return DiminishingGroup.Silence;
+
+                        // Frost Nova -- 122
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x40u))
+                            return DiminishingGroup.Root;
+                        // Ice Ward -- 111340
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x80000u) && SpellFamilyFlags[2].HasAnyFlag(0x2000u))
+                            return DiminishingGroup.Root;
+                        // Freeze (Water Elemental) -- 33395
+                        if (SpellFamilyFlags[2].HasAnyFlag(0x200u))
+                            return DiminishingGroup.Root;
+
+                        // Deep Freeze -- 44572
+                        if (SpellFamilyFlags[1].HasAnyFlag(0x100000u))
+                            return DiminishingGroup.Stun;
+
+                        // Dragon's Breath -- 31661
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x800000u))
+                            return DiminishingGroup.Incapacitate;
+                        // Polymorph -- 118
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x1000000u))
+                            return DiminishingGroup.Incapacitate;
+                        // Ring of Frost -- 82691
+                        if (SpellFamilyFlags[2].HasAnyFlag(0x40u))
+                            return DiminishingGroup.Incapacitate;
+                        // Ice Nova -- 157997
+                        if (SpellFamilyFlags[2].HasAnyFlag(0x800000u))
+                            return DiminishingGroup.Incapacitate;
+                        break;
+                    }
+                case SpellFamilyNames.Warrior:
+                    {
+                        // Shockwave -- 132168
+                        if (SpellFamilyFlags[1].HasAnyFlag(0x8000u))
+                            return DiminishingGroup.Stun;
+                        // Storm Bolt -- 132169
+                        if (SpellFamilyFlags[2].HasAnyFlag(0x1000u))
+                            return DiminishingGroup.Stun;
+
+                        // Intimidating Shout -- 5246
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x40000u))
+                            return DiminishingGroup.Disorient;
+
+                        // Hamstring -- 1715, 8 seconds in PvP (6.0)
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x2u))
+                            return DiminishingGroup.LimitOnly;
+                        break;
+                    }
+                case SpellFamilyNames.Warlock:
+                    {
+                        // Mortal Coil -- 6789
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x80000u))
+                            return DiminishingGroup.Incapacitate;
+                        // Banish -- 710
+                        if (SpellFamilyFlags[1].HasAnyFlag(0x8000000u))
+                            return DiminishingGroup.Incapacitate;
+
+                        // Fear -- 118699
+                        if (SpellFamilyFlags[1].HasAnyFlag(0x400u))
+                            return DiminishingGroup.Disorient;
+                        // Howl of Terror -- 5484
+                        if (SpellFamilyFlags[1].HasAnyFlag(0x8u))
+                            return DiminishingGroup.Disorient;
+
+                        // Shadowfury -- 30283
+                        if (SpellFamilyFlags[1].HasAnyFlag(0x1000u))
+                            return DiminishingGroup.Stun;
+                        // Summon Infernal -- 22703
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x1000u))
+                            return DiminishingGroup.Stun;
+                        break;
+                    }
+                case SpellFamilyNames.WarlockPet:
+                    {
+                        // Fellash -- 115770
+                        // Whiplash -- 6360
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x8000000u))
+                            return DiminishingGroup.AOEKnockback;
+
+                        // Mesmerize (Shivarra pet) -- 115268
+                        // Seduction (Succubus pet) -- 6358
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x2000000u))
+                            return DiminishingGroup.Disorient;
+
+                        // Axe Toss (Felguard pet) -- 89766
+                        if (SpellFamilyFlags[1].HasAnyFlag(0x4u))
+                            return DiminishingGroup.Stun;
+                        break;
+                    }
+                case SpellFamilyNames.Druid:
+                    {
+                        // Maim -- 22570
+                        if (SpellFamilyFlags[1].HasAnyFlag(0x80u))
+                            return DiminishingGroup.Stun;
+                        // Mighty Bash -- 5211
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x2000u))
+                            return DiminishingGroup.Stun;
+                        // Rake -- 163505 -- no flags on the stun
+                        if (Id == 163505)
+                            return DiminishingGroup.Stun;
+
+                        // Incapacitating Roar -- 99, no flags on the stun, 14
+                        if (SpellFamilyFlags[1].HasAnyFlag(0x1u))
+                            return DiminishingGroup.Incapacitate;
+
+                        // Cyclone -- 33786
+                        if (SpellFamilyFlags[1].HasAnyFlag(0x20u))
+                            return DiminishingGroup.Disorient;
+
+                        // Typhoon -- 61391
+                        if (SpellFamilyFlags[1].HasAnyFlag(0x1000000u))
+                            return DiminishingGroup.AOEKnockback;
+                        // Ursol's Vortex -- 118283, no family flags
+                        if (Id == 118283)
+                            return DiminishingGroup.AOEKnockback;
+
+                        // Entangling Roots -- 339
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x200u))
+                            return DiminishingGroup.Root;
+                        // Mass Entanglement -- 102359
+                        if (SpellFamilyFlags[2].HasAnyFlag(0x4u))
+                            return DiminishingGroup.Root;
+
+                        // Faerie Fire -- 770, 20 seconds in PvP (6.0)
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x400u))
+                            return DiminishingGroup.LimitOnly;
+                        break;
+                    }
+                case SpellFamilyNames.Rogue:
+                    {
+                        // Cheap Shot -- 1833
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x400u))
+                            return DiminishingGroup.Stun;
+                        // Kidney Shot -- 408
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x200000u))
+                            return DiminishingGroup.Stun;
+
+                        // Gouge -- 1776
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x8u))
+                            return DiminishingGroup.Incapacitate;
+                        // Sap -- 6770
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x80u))
+                            return DiminishingGroup.Incapacitate;
+
+                        // Blind -- 2094
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x1000000u))
+                            return DiminishingGroup.Disorient;
+
+                        // Garrote -- 1330
+                        if (SpellFamilyFlags[1].HasAnyFlag(0x20000000u))
+                            return DiminishingGroup.Silence;
+                        break;
+                    }
+                case SpellFamilyNames.Hunter:
+                    {
+                        // Charge (Tenacity pet) -- 53148, no flags
+                        if (Id == 53148)
+                            return DiminishingGroup.Root;
+                        // Narrow Escape -- 136634, no flags
+                        if (Id == 136634)
+                            return DiminishingGroup.Root;
+
+                        // Binding Shot -- 117526, no flags
+                        if (Id == 117526)
+                            return DiminishingGroup.Stun;
+
+                        // Freezing Trap -- 3355
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x8u))
+                            return DiminishingGroup.Incapacitate;
+                        // Wyvern Sting -- 19386
+                        if (SpellFamilyFlags[1].HasAnyFlag(0x1000u))
+                            return DiminishingGroup.Incapacitate;
+                        break;
+                    }
+                case SpellFamilyNames.Paladin:
+                    {
+                        // Repentance -- 20066
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x4u))
+                            return DiminishingGroup.Incapacitate;
+
+                        // Turn Evil -- 10326
+                        if (SpellFamilyFlags[1].HasAnyFlag(0x800000u))
+                            return DiminishingGroup.Disorient;
+
+                        // Avenger's Shield -- 31935
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x4000u))
+                            return DiminishingGroup.Silence;
+
+                        // Fist of Justice -- 105593
+                        // Hammer of Justice -- 853
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x800u))
+                            return DiminishingGroup.Stun;
+                        // Holy Wrath -- 119072
+                        if (SpellFamilyFlags[1].HasAnyFlag(0x200000u))
+                            return DiminishingGroup.Stun;
+                        break;
+                    }
+                case SpellFamilyNames.Shaman:
+                    {
+                        // Hex -- 51514
+                        if (SpellFamilyFlags[1].HasAnyFlag(0x8000u))
+                            return DiminishingGroup.Incapacitate;
+
+                        // Thunderstorm -- 51490
+                        if (SpellFamilyFlags[1].HasAnyFlag(0x2000u))
+                            return DiminishingGroup.AOEKnockback;
+                        // Earthgrab Totem -- 64695
+                        if (SpellFamilyFlags[2].HasAnyFlag(0x4000u))
+                            return DiminishingGroup.Root;
+                        break;
+                    }
+                case SpellFamilyNames.Deathknight:
+                    {
+                        // Strangulate -- 47476
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x200u))
+                            return DiminishingGroup.Silence;
+
+                        // Asphyxiate -- 108194
+                        if (SpellFamilyFlags[2].HasAnyFlag(0x100000u))
+                            return DiminishingGroup.Stun;
+                        // Gnaw (Ghoul) -- 91800, no flags
+                        if (Id == 91800)
+                            return DiminishingGroup.Stun;
+                        // Monstrous Blow (Ghoul w/ Dark Transformation active) -- 91797
+                        if (Id == 91797)
+                            return DiminishingGroup.Stun;
+                        break;
+                    }
+                case SpellFamilyNames.Priest:
+                    {
+                        // Dominate Mind -- 605
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x20000u) && GetSpellVisual() == 39068)
+                            return DiminishingGroup.Incapacitate;
+                        // Holy Word: Chastise -- 88625
+                        if (SpellFamilyFlags[2].HasAnyFlag(0x20u))
+                            return DiminishingGroup.Incapacitate;
+                        // Psychic Horror -- 64044
+                        if (SpellFamilyFlags[2].HasAnyFlag(0x2000u))
+                            return DiminishingGroup.Incapacitate;
+
+                        // Psychic Scream -- 8122
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x10000u))
+                            return DiminishingGroup.Disorient;
+
+                        // Silence -- 15487
+                        if (SpellFamilyFlags[1].HasAnyFlag(0x200000u) && SchoolMask == (SpellSchoolMask)32)
+                            return DiminishingGroup.Silence;
+                        break;
+                    }
+                case SpellFamilyNames.Monk:
+                    {
+                        // Disable -- 116706, no flags
+                        if (Id == 116706)
+                            return DiminishingGroup.Root;
+
+                        // Charging Ox Wave -- 119392
+                        if (SpellFamilyFlags[1].HasAnyFlag(0x10000u))
+                            return DiminishingGroup.Stun;
+                        // Fists of Fury -- 120086
+                        if (SpellFamilyFlags[1].HasAnyFlag(0x800000u) && !SpellFamilyFlags[2].HasAnyFlag(0x8u))
+                            return DiminishingGroup.Stun;
+                        // Leg Sweep -- 119381
+                        if (SpellFamilyFlags[1].HasAnyFlag(0x200u))
+                            return DiminishingGroup.Stun;
+
+                        // Incendiary Breath (honor talent) -- 202274, no flags
+                        if (Id == 202274)
+                            return DiminishingGroup.Incapacitate;
+                        // Paralysis -- 115078
+                        if (SpellFamilyFlags[2].HasAnyFlag(0x800000u))
+                            return DiminishingGroup.Incapacitate;
+                        break;
+                    }
+                default:
+                    break;
+            }
+
+            return DiminishingGroup.None;
+        }
+
+        DiminishingReturnsType diminishingTypeCompute(DiminishingGroup group)
+        {
+            switch (group)
+            {
+                case DiminishingGroup.Taunt:
+                case DiminishingGroup.Stun:
+                    return DiminishingReturnsType.All;
+                case DiminishingGroup.LimitOnly:
+                case DiminishingGroup.None:
+                    return DiminishingReturnsType.None;
+                default:
+                    return DiminishingReturnsType.Player;
+            }
+        }
+
+        DiminishingLevels diminishingMaxLevelCompute(DiminishingGroup group)
+        {
+            switch (group)
+            {
+                case DiminishingGroup.Taunt:
+                    return DiminishingLevels.TauntImmune;
+                case DiminishingGroup.AOEKnockback:
+                    return DiminishingLevels.Level2;
+                default:
+                    return DiminishingLevels.Immune;
+            }
+        }
+
+        int diminishingLimitDurationCompute()
+        {
+            // Explicit diminishing duration
+            switch (SpellFamilyName)
+            {
+                case SpellFamilyNames.Druid:
+                    {
+                        // Faerie Fire - 20 seconds in PvP (6.0)
+                        if (SpellFamilyFlags[0].HasAnyFlag(0x400u))
+                            return 20 * Time.InMilliseconds;
+                        break;
+                    }
+                case SpellFamilyNames.Hunter:
+                    {
+                        // Binding Shot - 3 seconds in PvP (6.0)
+                        if (Id == 117526)
+                            return 3 * Time.InMilliseconds;
+                        // Wyvern Sting - 6 seconds in PvP (6.0)
+                        if (SpellFamilyFlags[1].HasAnyFlag(0x1000u))
+                            return 6 * Time.InMilliseconds;
+                        break;
+                    }
+                case SpellFamilyNames.Monk:
+                    {
+                        // Paralysis - 4 seconds in PvP regardless of if they are facing you (6.0)
+                        if (SpellFamilyFlags[2].HasAnyFlag(0x800000u))
+                            return 4 * Time.InMilliseconds;
+                        break;
+                    }
+                default:
+                    break;
+            }
+
+            return 8 * Time.InMilliseconds;
+        }
+
         public float GetMinRange(bool positive = false)
         {
             if (RangeEntry == null)
@@ -2666,6 +3075,8 @@ namespace Game.Spells
         bool _hasPowerDifficultyData;
         SpellSpecificType _spellSpecific;
         AuraStateType _auraState;
+
+        SpellDiminishInfo _diminishInfo;
         #endregion
 
         public struct ScalingInfo
@@ -3706,6 +4117,14 @@ namespace Game.Spells
     {
         public PowerType Power;
         public int Amount;
+    }
+
+    class SpellDiminishInfo
+    {
+        public DiminishingGroup DiminishGroup = DiminishingGroup.None;
+        public DiminishingReturnsType DiminishReturnType = DiminishingReturnsType.None;
+        public DiminishingLevels DiminishMaxLevel = DiminishingLevels.Immune;
+        public int DiminishDurationLimit;
     }
 }
 

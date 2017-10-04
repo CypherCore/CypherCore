@@ -551,6 +551,8 @@ namespace Framework.Constants
         AOEKnockback = 6,
         Taunt = 7,
         LimitOnly = 8,
+
+        Max
     }
 
     public enum DiminishingLevels

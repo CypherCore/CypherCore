@@ -107,8 +107,6 @@ namespace Game.Spells
                 _triggeredCastFlags = _triggeredCastFlags | TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.CastDirectly;
 
             effectHandleMode = SpellEffectHandleMode.Launch;
-            m_diminishLevel = DiminishingLevels.Level1;
-            m_diminishGroup = DiminishingGroup.None;
 
             //Auto Shot & Shoot (wand)
             m_autoRepeat = m_spellInfo.IsAutoRepeatRangedSpell();
@@ -2113,15 +2111,19 @@ namespace Game.Spells
                     aura_effmask |= (1u << (int)effect.EffectIndex);
 
             // Get Data Needed for Diminishing Returns, some effects may have multiple auras, so this must be done on spell hit, not aura add
-            m_diminishGroup = Global.SpellMgr.GetDiminishingReturnsGroupForSpell(m_spellInfo);
-            if (m_diminishGroup != 0 && aura_effmask != 0)
-            {
+            bool triggered = m_triggeredByAuraSpell != null;
+            DiminishingGroup diminishGroup = m_spellInfo.GetDiminishingReturnsGroupForSpell(triggered);
 
-                m_diminishLevel = unit.GetDiminishing(m_diminishGroup);
-                DiminishingReturnsType type = Global.SpellMgr.GetDiminishingReturnsGroupType(m_diminishGroup);
+            DiminishingLevels diminishLevel = DiminishingLevels.Level1;
+            if (diminishGroup != 0 && aura_effmask != 0)
+            {
+                diminishLevel = unit.GetDiminishing(diminishGroup);
+                DiminishingReturnsType type = m_spellInfo.GetDiminishingReturnsGroupType(triggered);
                 // Increase Diminishing on unit, current informations for actually casts will use values above
-                if ((type == DiminishingReturnsType.Player && unit.GetCharmerOrOwnerPlayerOrPlayerItself() != null) || type == DiminishingReturnsType.All)
-                    unit.IncrDiminishing(m_diminishGroup);
+                if ((type == DiminishingReturnsType.Player && (unit.GetCharmerOrOwnerPlayerOrPlayerItself()
+                    || (unit.IsCreature() && unit.ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.AllDiminish))))
+                    || type == DiminishingReturnsType.All)
+                    unit.IncrDiminishing(m_spellInfo, triggered);
             }
 
             if (aura_effmask != 0)
@@ -2168,8 +2170,7 @@ namespace Game.Spells
 
                         // Now Reduce spell duration using data received at spell hit
                         int duration = m_spellAura.GetMaxDuration();
-                        int limitduration = m_diminishGroup != 0 ? Global.SpellMgr.GetDiminishingReturnsLimitDuration(aurSpellInfo) : 0;
-                        float diminishMod = unit.ApplyDiminishingToDuration(m_diminishGroup, duration, m_originalCaster, m_diminishLevel, limitduration);
+                        float diminishMod = unit.ApplyDiminishingToDuration(aurSpellInfo, triggered, ref duration, m_originalCaster, diminishLevel);
 
                         // unit is immune to aura if it was diminished to 0 duration
                         if (diminishMod == 0.0f)
@@ -2184,7 +2185,7 @@ namespace Game.Spells
                         }
                         else
                         {
-                            ((UnitAura)m_spellAura).SetDiminishGroup(m_diminishGroup);
+                            ((UnitAura)m_spellAura).SetDiminishGroup(diminishGroup);
 
                             bool positive = m_spellAura.GetSpellInfo().IsPositive();
                             AuraApplication aurApp = m_spellAura.GetApplicationOfTarget(m_originalCaster.GetGUID());
@@ -3053,9 +3054,6 @@ namespace Game.Spells
         void _handle_immediate_phase()
         {
             m_spellAura = null;
-            // initialize Diminishing Returns Data
-            m_diminishLevel = DiminishingLevels.Level1;
-            m_diminishGroup = DiminishingGroup.None;
 
             // handle some immediate features of the spell here
             HandleThreatSpells();
@@ -4262,7 +4260,7 @@ namespace Game.Spells
                     continue;
 
                 // positive spells distribute threat among all units that are in combat with target, like healing
-                if (m_spellInfo._IsPositiveSpell())
+                if (m_spellInfo.IsPositive())
                     target.getHostileRefManager().threatAssist(m_caster, threatToAdd, m_spellInfo);
                 // for negative spells threat gets distributed among affected targets
                 else
@@ -4273,7 +4271,7 @@ namespace Game.Spells
                     target.AddThreat(m_caster, threatToAdd, m_spellInfo.GetSchoolMask(), m_spellInfo);
                 }
             }
-            Log.outDebug(LogFilter.Spells, "Spell {0}, added an additional {1} threat for {2} {3} target(s)", m_spellInfo.Id, threat, m_spellInfo._IsPositiveSpell() ? "assisting" : "harming", m_UniqueTargetInfo.Count);
+            Log.outDebug(LogFilter.Spells, "Spell {0}, added an additional {1} threat for {2} {3} target(s)", m_spellInfo.Id, threat, m_spellInfo.IsPositive() ? "assisting" : "harming", m_UniqueTargetInfo.Count);
         }
 
         void HandleEffects(Unit pUnitTarget, Item pItemTarget, GameObject pGOTarget, uint i, SpellEffectHandleMode mode)
@@ -7227,10 +7225,6 @@ namespace Game.Spells
         public SpellEffectInfo effectInfo;
         // used in effects handlers
         public Aura m_spellAura;
-
-        // this is set in Spell Hit, but used in Apply Aura handler
-        DiminishingLevels m_diminishLevel;
-        DiminishingGroup m_diminishGroup;
 
         // -------------------------------------------
         GameObject focusObject;

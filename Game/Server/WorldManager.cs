@@ -374,6 +374,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading SpellInfo SpellSpecific and AuraState...");
             Global.SpellMgr.LoadSpellInfoSpellSpecificAndAuraState();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading SpellInfo diminishing infos...");
+            Global.SpellMgr.LoadSpellInfoDiminishing();
+
             Log.outInfo(LogFilter.ServerLoading, "Loading PetFamilySpellsStore Data...");
             Global.SpellMgr.LoadPetFamilySpellsStore();
 

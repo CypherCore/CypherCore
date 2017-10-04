@@ -107,7 +107,7 @@ namespace Game.Entities
         uint m_removedAurasCount;
 
         //General  
-        List<DiminishingReturn> m_Diminishing = new List<DiminishingReturn>();
+        Array<DiminishingReturn> m_Diminishing = new Array<DiminishingReturn>((int)DiminishingGroup.Max);
         protected List<GameObject> m_gameObj = new List<GameObject>();
         List<AreaTrigger> m_areaTrigger = new List<AreaTrigger>();
         protected List<DynamicObject> m_dynObj = new List<DynamicObject>();
@@ -140,18 +140,23 @@ namespace Game.Entities
 
     public class DiminishingReturn
     {
-        public DiminishingReturn(DiminishingGroup group, uint t, DiminishingLevels count)
+        public DiminishingReturn(uint hitTime, DiminishingLevels hitCount)
         {
-            DRGroup = group;
-            stack = 0;
-            hitTime = t;
-            hitCount = count;
+            Stack = 0;
+            HitTime = hitTime;
+            HitCount = hitCount;
         }
 
-        public DiminishingGroup DRGroup;
-        public uint stack;
-        public uint hitTime;
-        public DiminishingLevels hitCount;
+        public void Clear()
+        {
+            Stack = 0;
+            HitTime = 0;
+            HitCount = DiminishingLevels.Level1;
+        }
+
+        public uint Stack;
+        public uint HitTime;
+        public DiminishingLevels HitCount;
     }
 
     public class ProcEventInfo
