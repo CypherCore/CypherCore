@@ -73,16 +73,25 @@ namespace Game.AI
             if (!me.IsWithinMeleeRange(victim))
                 return;
 
+            bool sparAttack = me.GetFactionTemplateEntry().ShouldSparAttack() && victim.GetFactionTemplateEntry().ShouldSparAttack();
             //Make sure our attack is ready and we aren't currently casting before checking distance
             if (me.isAttackReady())
             {
-                me.AttackerStateUpdate(victim);
+                if (sparAttack)
+                    me.FakeAttackerStateUpdate(victim);
+                else
+                    me.AttackerStateUpdate(victim);
+
                 me.resetAttackTimer();
             }
 
             if (me.haveOffhandWeapon() && me.isAttackReady(WeaponAttackType.OffAttack))
             {
-                me.AttackerStateUpdate(victim, WeaponAttackType.OffAttack);
+                if (sparAttack)
+                    me.FakeAttackerStateUpdate(victim, WeaponAttackType.OffAttack);
+                else
+                    me.AttackerStateUpdate(victim, WeaponAttackType.OffAttack);
+
                 me.resetAttackTimer(WeaponAttackType.OffAttack);
             }
         }

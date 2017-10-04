@@ -499,7 +499,7 @@ namespace Game.DataStorage
 
         public string GetBroadcastTextValue(BroadcastTextRecord broadcastText, LocaleConstant locale = LocaleConstant.enUS, Gender gender = Gender.Male, bool forceGender = false)
         {
-            if (gender == Gender.Female && (forceGender || broadcastText.FemaleText.HasString(SharedConst.DefaultLocale)))
+            if ((gender == Gender.Female || gender == Gender.None) && (forceGender || broadcastText.FemaleText.HasString(SharedConst.DefaultLocale)))
             {
                 if (broadcastText.FemaleText.HasString(locale))
                     return broadcastText.FemaleText[locale];

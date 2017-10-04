@@ -594,6 +594,7 @@ namespace Game.AI
 
             if (!who)
                 who = me;
+
             TempSummon whoSummon = who.ToTempSummon();
             if (whoSummon)
             {
@@ -602,7 +603,7 @@ namespace Game.AI
                 return;
             }
 
-            me.DespawnOrUnsummon(0, TimeSpan.FromSeconds(delayToRespawn));
+            who.DespawnOrUnsummon(0, TimeSpan.FromSeconds(delayToRespawn));
 
             if (instance != null && who == me)
                 instance.SetBossState(_bossId, EncounterState.Fail);

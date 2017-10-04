@@ -98,5 +98,6 @@ namespace Game.DataStorage
             return EnemyMask == 0 && FriendMask == 0;
         }
         public bool IsContestedGuardFaction() { return Flags.HasAnyFlag((ushort)FactionTemplateFlags.ContestedGuard); }
+        public bool ShouldSparAttack() { return Flags.HasAnyFlag((ushort)FactionTemplateFlags.EnemySpar); }
     }
 }

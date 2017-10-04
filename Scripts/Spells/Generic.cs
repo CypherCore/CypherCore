@@ -1063,9 +1063,17 @@ namespace Scripts.Spells.Generic
                 target.ToCreature().SetReactState(ReactStates.Passive);
         }
 
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit target = GetTarget();
+            target.RemoveFlag(ObjectFields.DynamicFlags, UnitDynFlags.Dead);
+            target.RemoveFlag(UnitFields.Flags2, UnitFlags2.FeignDeath);
+        }
+
         public override void Register()
         {
             OnEffectApply.Add(new EffectApplyHandler(HandleEffectApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            OnEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
 

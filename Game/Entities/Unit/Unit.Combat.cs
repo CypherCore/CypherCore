@@ -2921,11 +2921,6 @@ namespace Game.Entities
                 || (target.IsTypeId(TypeId.Player) && target.ToPlayer().IsGameMaster()))
                 return false;
 
-            // can't attack own vehicle or passenger
-            if (m_vehicle != null)
-                if (IsOnVehicle(target) || m_vehicle.GetBase().IsOnVehicle(target))
-                    return false;
-
             // can't attack invisible (ignore stealth for aoe spells) also if the area being looked at is from a spell use the dynamic object created instead of the casting unit. Ignore stealth if target is player and unit in combat with same player
             if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetInvisible)) && (obj ? !obj.CanSeeOrDetect(target, bySpell != null && bySpell.IsAffectingArea(GetMap().GetDifficultyID())) : !CanSeeOrDetect(target, (bySpell != null && bySpell.IsAffectingArea(GetMap().GetDifficultyID())) || (target.IsTypeId(TypeId.Player) && target.HasStealthAura() && target.IsInCombat() && IsInCombatWith(target)))))
                 return false;

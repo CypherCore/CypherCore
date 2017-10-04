@@ -1069,12 +1069,7 @@ namespace Game.AI
                             if (obj.IsTypeId(TypeId.Unit))
                             {
                                 Creature target = obj.ToCreature();
-                                if (target.IsAlive() && IsSmart(target))
-                                {
-                                    ((SmartAI)target.GetAI()).SetDespawnTime(e.Action.forceDespawn.delay + 1, e.Action.forceDespawn.respawn); // Next tick
-                                    ((SmartAI)target.GetAI()).StartDespawn();
-                                }
-                                else
+                                if (target)
                                     target.DespawnOrUnsummon(e.Action.forceDespawn.delay, TimeSpan.FromSeconds(e.Action.forceDespawn.respawn));
                             }
                             else if (obj.IsTypeId(TypeId.GameObject))
