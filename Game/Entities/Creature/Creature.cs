@@ -1581,6 +1581,7 @@ namespace Game.Entities
                     SaveRespawnTime();
 
                 ReleaseFocus(null, false);               // remove spellcast focus
+                DoNotReacquireTarget(); // cancel delayed re-target
                 SetTarget(ObjectGuid.Empty); // drop target - dead mobs shouldn't ever target things
 
                 SetUInt64Value(UnitFields.NpcFlags, (ulong)NPCFlags.None);
@@ -1689,6 +1690,8 @@ namespace Game.Entities
                 }
 
                 GetMotionMaster().InitDefault();
+                //Re-initialize reactstate that could be altered by movementgenerators
+                InitializeReactState();
 
                 //Call AI respawn virtual function
                 if (IsAIEnabled)
@@ -1700,9 +1703,6 @@ namespace Game.Entities
                 uint poolid = GetSpawnId() != 0 ? Global.PoolMgr.IsPartOfAPool<Creature>(GetSpawnId()) : 0;
                 if (poolid != 0)
                     Global.PoolMgr.UpdatePool<Creature>(poolid, GetSpawnId());
-
-                //Re-initialize reactstate that could be altered by movementgenerators
-                InitializeReactState();
             }
 
             UpdateObjectVisibility();
@@ -2832,6 +2832,13 @@ namespace Game.Entities
         }
 
         public void MustReacquireTarget() { m_shouldReacquireTarget = true; } // flags the Creature for forced (client displayed) target reacquisition in the next Update call
+
+        public void DoNotReacquireTarget()
+        {
+            m_shouldReacquireTarget = false;
+            m_suppressedTarget = ObjectGuid.Empty;
+            m_suppressedOrientation = 0.0f;
+        }
 
         public ulong GetSpawnId() { return m_spawnId; }
 

@@ -706,12 +706,14 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.Nadronox
                             if (hadronox && hadronox.IsAlive())
                             {
                                 if (_nextMovement != MovementIds.HadronoxReal)
+                                {
                                     if (hadronox.GetPositionZ() < zCutoff)
                                     {
                                         me.GetMotionMaster().MovePoint((uint)MovementIds.Hadronox, Misc.hadronoxStep[2]);
                                         break;
                                     }
-                                me.GetMotionMaster().MoveChase(hadronox);
+                                }
+                                AttackStart(hadronox);
                             }
                             break;
                         }

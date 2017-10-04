@@ -111,6 +111,8 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.Anubarak
             _petCount = 0;
         }
 
+        public override bool CanAIAttack(Unit victim) { return true; } // do not check boundary here
+
         public override void EnterCombat(Unit who)
         {
             base.EnterCombat(who);
@@ -118,6 +120,9 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.Anubarak
             GameObject door = instance.GetGameObject(ANDataTypes.AnubarakWall);
             if (door)
                 door.SetGoState(GameObjectState.Active); // open door for now
+            GameObject door2 = instance.GetGameObject(ANDataTypes.AnubarakWall2);
+            if (door2)
+                door2.SetGoState(GameObjectState.Active);
 
             Talk(TextIds.SayAggro);
             instance.DoStartCriteriaTimer(CriteriaTimedTypes.Event, Misc.AchievGottaGoStartEvent);
@@ -172,6 +177,9 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.Anubarak
                         GameObject door = instance.GetGameObject(ANDataTypes.AnubarakWall);
                         if (door)
                             door.SetGoState(GameObjectState.Ready);
+                        GameObject door2 = instance.GetGameObject(ANDataTypes.AnubarakWall2);
+                        if (door2)
+                            door2.SetGoState(GameObjectState.Ready);
                         break;
                     case EventIds.Pound:
                         DoCastVictim(SpellIds.Pound);

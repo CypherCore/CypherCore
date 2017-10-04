@@ -34,6 +34,7 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub
         public const uint WatcherGashra = 4;
         public const uint WatcherSilthik = 5;
         public const uint AnubarakWall = 6;
+        public const uint AnubarakWall2 = 7;
     }
 
     struct ANCreatureIds
@@ -83,7 +84,8 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub
 
         public static ObjectData[] gameobjectData =
         {
-            new ObjectData(ANGameObjectIds.AnubarakDoor3, ANDataTypes.AnubarakWall)
+            new ObjectData(ANGameObjectIds.AnubarakDoor1, ANDataTypes.AnubarakWall),
+            new ObjectData(ANGameObjectIds.AnubarakDoor3, ANDataTypes.AnubarakWall2)
         };
 
         public static BossBoundaryEntry[] boundaries =
@@ -121,7 +123,18 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub
                 if (gatewatcher)
                     gatewatcher.GetAI().DoAction(-ANInstanceMisc.ActionGatewatcherGreet);
             }
-        }
+
+            public override bool CheckRequiredBosses(uint bossId, Player player)
+            {
+                if (_SkipCheckRequiredBosses(player))
+                    return true;
+
+                if (bossId > ANDataTypes.KrikthirTheGatewatcher && GetBossState(ANDataTypes.KrikthirTheGatewatcher) != EncounterState.Done)
+                    return false;
+
+                return true;
+            }
+    }
 
         public override InstanceScript GetInstanceScript(InstanceMap map)
         {
