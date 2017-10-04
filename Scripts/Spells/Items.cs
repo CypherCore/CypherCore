@@ -354,6 +354,15 @@ namespace Scripts.Spells.Items
         //Tauntflag
         public const uint TauntFlag = 51657;
 
+        //MindControlCap
+        public const uint GnomishMindControlCap = 13181;
+        public const uint Dullard = 67809;
+
+        //UniversalRemote
+        public const uint ControlMachine = 8345;
+        public const uint MobilityMalfunction = 8346;
+        public const uint TargetLock = 8347;
+
         //Zandalariancharms
         public const uint UnstablePowerAuraStack = 24659;
         public const uint RestlessStrengthAuraStack = 24662;
@@ -3056,6 +3065,76 @@ namespace Scripts.Spells.Items
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.CorpseSrcAreaEnemy));
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    [Script] // 13180 - Gnomish Mind Control Cap
+    class spell_item_mind_control_cap_SpellScript : SpellScript
+    {
+        public override bool Load()
+        {
+            if (!GetCastItem())
+                return false;
+            return true;
+        }
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.GnomishMindControlCap, SpellIds.Dullard);
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            Unit caster = GetCaster();
+            Unit target = GetHitUnit();
+            if (target)
+            {
+                if (RandomHelper.randChance(95))
+                    caster.CastSpell(target, RandomHelper.randChance(32) ? SpellIds.Dullard : SpellIds.GnomishMindControlCap, true, GetCastItem());
+                else
+                    target.CastSpell(caster, SpellIds.GnomishMindControlCap, true); // backfire - 5% chance
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    [Script] // 8344 - Universal Remote (Gnomish Universal Remote)
+    class spell_item_universal_remote_SpellScript : SpellScript
+    {
+        public override bool Load()
+        {
+            if (!GetCastItem())
+                return false;
+            return true;
+        }
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ControlMachine, SpellIds.MobilityMalfunction, SpellIds.TargetLock);
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            Unit target = GetHitUnit();
+            if (target)
+            {
+                uint chance = RandomHelper.URand(0, 99);
+                if (chance < 15)
+                    GetCaster().CastSpell(target, SpellIds.TargetLock, true, GetCastItem());
+                else if (chance < 25)
+                    GetCaster().CastSpell(target, SpellIds.MobilityMalfunction, true, GetCastItem());
+                else
+                    GetCaster().CastSpell(target, SpellIds.ControlMachine, true, GetCastItem());
+            }
+        }
+
+        public override void Register()
+        {
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
