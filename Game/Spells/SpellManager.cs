@@ -1280,7 +1280,8 @@ namespace Game.Entities
                 if (mSpellProcMap.ContainsKey(spellInfo.Id))
                     continue;
 
-                bool found = false, addTriggerFlag = false;
+                bool addTriggerFlag = false;
+                ProcFlagsSpellType procSpellTypeMask = ProcFlagsSpellType.None;
                 foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(Difficulty.None))
                 {
                     if (effect == null || !effect.IsEffect())
@@ -1293,14 +1294,13 @@ namespace Game.Entities
                     if (!isTriggerAura(auraName))
                         continue;
 
-                    found = true;
-
-                    if (!addTriggerFlag && isAlwaysTriggeredAura(auraName))
+                    procSpellTypeMask |= getSpellTypeMask(auraName);
+                    if (isAlwaysTriggeredAura(auraName))
                         addTriggerFlag = true;
                     break;
                 }
 
-                if (!found)
+                if (procSpellTypeMask == 0)
                     continue;
 
                 if (spellInfo.ProcFlags == 0)
@@ -1317,7 +1317,7 @@ namespace Game.Entities
                 if (procEntry.SpellFamilyMask)
                     procEntry.SpellFamilyName = spellInfo.SpellFamilyName;
 
-                procEntry.SpellTypeMask = ProcFlagsSpellType.MaskAll;
+                procEntry.SpellTypeMask = procSpellTypeMask;
                 procEntry.SpellPhaseMask = ProcFlagsSpellPhase.Hit;
                 procEntry.HitMask = ProcFlagsHit.None; // uses default proc @see SpellMgr::CanSpellTriggerProcOnEvent
 
@@ -2790,7 +2790,7 @@ namespace Game.Entities
         }
         #endregion
 
-        public bool isTriggerAura(AuraType type)
+        bool isTriggerAura(AuraType type)
         {
             switch (type)
             {
@@ -2834,7 +2834,7 @@ namespace Game.Entities
             }
             return false;
         }
-        public bool isAlwaysTriggeredAura(AuraType type)
+        bool isAlwaysTriggeredAura(AuraType type)
         {
             switch (type)
             {
@@ -2851,6 +2851,24 @@ namespace Game.Entities
             }
             return false;
         }
+        ProcFlagsSpellType getSpellTypeMask(AuraType type)
+        {
+            switch (type)
+            {
+                case AuraType.ModStealth:
+                    return ProcFlagsSpellType.Damage | ProcFlagsSpellType.NoDmgHeal;
+                case AuraType.ModConfuse:
+                case AuraType.ModFear:
+                case AuraType.ModRoot:
+                case AuraType.ModRoot2:
+                case AuraType.ModStun:
+                case AuraType.Transform:
+                    return ProcFlagsSpellType.Damage;
+                default:
+                    return ProcFlagsSpellType.MaskAll;
+            }
+        }
+
 
         // SpellInfo object management
         public SpellInfo GetSpellInfo(uint spellId)

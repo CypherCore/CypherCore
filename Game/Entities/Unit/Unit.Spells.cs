@@ -2677,10 +2677,10 @@ namespace Game.Entities
             return diminish.HitCount;
         }
 
-        public void IncrDiminishing(SpellInfo auraSpellInfo, bool triggered)
+        public void IncrDiminishing(SpellInfo auraSpellInfo)
         {
-            DiminishingGroup group = auraSpellInfo.GetDiminishingReturnsGroupForSpell(triggered);
-            DiminishingLevels maxLevel = auraSpellInfo.GetDiminishingReturnsMaxLevel(triggered);
+            DiminishingGroup group = auraSpellInfo.GetDiminishingReturnsGroupForSpell();
+            DiminishingLevels maxLevel = auraSpellInfo.GetDiminishingReturnsMaxLevel();
 
             // Checking for existing in the table
             DiminishingReturn diminish = m_Diminishing[(int)group];
@@ -2688,13 +2688,13 @@ namespace Game.Entities
                 ++diminish.HitCount;
         }
 
-        public float ApplyDiminishingToDuration(SpellInfo auraSpellInfo, bool triggered, ref int duration, Unit caster, DiminishingLevels previousLevel)
+        public float ApplyDiminishingToDuration(SpellInfo auraSpellInfo, ref int duration, Unit caster, DiminishingLevels previousLevel)
         {
-            DiminishingGroup group = auraSpellInfo.GetDiminishingReturnsGroupForSpell(triggered);
+            DiminishingGroup group = auraSpellInfo.GetDiminishingReturnsGroupForSpell();
             if (duration == -1 || group == DiminishingGroup.None)
                 return 1.0f;
 
-            int limitDuration = auraSpellInfo.GetDiminishingReturnsLimitDuration(triggered);
+            int limitDuration = auraSpellInfo.GetDiminishingReturnsLimitDuration();
 
             // test pet/charm masters instead pets/charmeds
             Unit targetOwner = GetCharmerOrOwner();
@@ -2740,9 +2740,9 @@ namespace Game.Entities
                     }
                     break;
                 case DiminishingGroup.AOEKnockback:
-                    if ((auraSpellInfo.GetDiminishingReturnsGroupType(triggered) == DiminishingReturnsType.Player && (((targetOwner ? targetOwner : this).ToPlayer())
+                    if ((auraSpellInfo.GetDiminishingReturnsGroupType() == DiminishingReturnsType.Player && (((targetOwner ? targetOwner : this).ToPlayer())
                         || IsCreature() && ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.AllDiminish)))
-                        || auraSpellInfo.GetDiminishingReturnsGroupType(triggered) == DiminishingReturnsType.All)
+                        || auraSpellInfo.GetDiminishingReturnsGroupType() == DiminishingReturnsType.All)
                     {
                         DiminishingLevels diminish = previousLevel;
                         switch (diminish)
@@ -2758,9 +2758,9 @@ namespace Game.Entities
                     }
                     break;
                 default:
-                    if ((auraSpellInfo.GetDiminishingReturnsGroupType(triggered) == DiminishingReturnsType.Player && (((targetOwner ? targetOwner : this).ToPlayer())
+                    if ((auraSpellInfo.GetDiminishingReturnsGroupType() == DiminishingReturnsType.Player && (((targetOwner ? targetOwner : this).ToPlayer())
                         || IsCreature() && ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.AllDiminish)))
-                        || auraSpellInfo.GetDiminishingReturnsGroupType(triggered) == DiminishingReturnsType.All)
+                        || auraSpellInfo.GetDiminishingReturnsGroupType() == DiminishingReturnsType.All)
                     {
                         DiminishingLevels diminish = previousLevel;
                         switch (diminish)

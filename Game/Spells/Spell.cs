@@ -2111,19 +2111,18 @@ namespace Game.Spells
                     aura_effmask |= (1u << (int)effect.EffectIndex);
 
             // Get Data Needed for Diminishing Returns, some effects may have multiple auras, so this must be done on spell hit, not aura add
-            bool triggered = m_triggeredByAuraSpell != null;
-            DiminishingGroup diminishGroup = m_spellInfo.GetDiminishingReturnsGroupForSpell(triggered);
+            DiminishingGroup diminishGroup = m_spellInfo.GetDiminishingReturnsGroupForSpell();
 
             DiminishingLevels diminishLevel = DiminishingLevels.Level1;
             if (diminishGroup != 0 && aura_effmask != 0)
             {
                 diminishLevel = unit.GetDiminishing(diminishGroup);
-                DiminishingReturnsType type = m_spellInfo.GetDiminishingReturnsGroupType(triggered);
+                DiminishingReturnsType type = m_spellInfo.GetDiminishingReturnsGroupType();
                 // Increase Diminishing on unit, current informations for actually casts will use values above
                 if ((type == DiminishingReturnsType.Player && (unit.GetCharmerOrOwnerPlayerOrPlayerItself()
                     || (unit.IsCreature() && unit.ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.AllDiminish))))
                     || type == DiminishingReturnsType.All)
-                    unit.IncrDiminishing(m_spellInfo, triggered);
+                    unit.IncrDiminishing(m_spellInfo);
             }
 
             if (aura_effmask != 0)
@@ -2170,7 +2169,7 @@ namespace Game.Spells
 
                         // Now Reduce spell duration using data received at spell hit
                         int duration = m_spellAura.GetMaxDuration();
-                        float diminishMod = unit.ApplyDiminishingToDuration(aurSpellInfo, triggered, ref duration, m_originalCaster, diminishLevel);
+                        float diminishMod = unit.ApplyDiminishingToDuration(aurSpellInfo, ref duration, m_originalCaster, diminishLevel);
 
                         // unit is immune to aura if it was diminished to 0 duration
                         if (diminishMod == 0.0f)

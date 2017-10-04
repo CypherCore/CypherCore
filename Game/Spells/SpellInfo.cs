@@ -1558,12 +1558,12 @@ namespace Game.Spells
             return _diminishInfo.DiminishReturnType;
         }
 
-        public DiminishingLevels GetDiminishingReturnsMaxLevel(bool triggered)
+        public DiminishingLevels GetDiminishingReturnsMaxLevel()
         {
             return _diminishInfo.DiminishMaxLevel;
         }
 
-        public int GetDiminishingReturnsLimitDuration(bool triggered)
+        public int GetDiminishingReturnsLimitDuration()
         {
             return _diminishInfo.DiminishDurationLimit;
         }
