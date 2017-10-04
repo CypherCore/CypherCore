@@ -4046,8 +4046,8 @@ namespace Game.Spells
                 ushort logSlot = player.FindQuestSlot(questId);
                 if (logSlot < SharedConst.MaxQuestLogSize)
                     player.AreaExploredOrEventHappens(questId);
-                else if (player.CanTakeQuest(quest, false))    // Check if the quest has already been turned in.
-                    player.SetRewardedQuest(questId);          // If not, set status to rewarded without broadcasting it to client.
+                else if (quest.HasFlag(QuestFlags.Tracking))  // Check if the quest is used as a serverside flag.
+                    player.SetRewardedQuest(questId);          // If so, set status to rewarded without broadcasting it to client.
             }
         }
 
