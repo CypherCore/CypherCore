@@ -2592,6 +2592,11 @@ namespace Game.Spells
                             return true;
                     }
                     break;
+                case SpellFamilyNames.Mage:
+                    // Arcane Missiles
+                    if (SpellFamilyFlags[0] == 0x00000800)
+                        return false;
+                    break;
                 case SpellFamilyNames.Priest:
                     switch (Id)
                     {

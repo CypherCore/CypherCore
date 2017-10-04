@@ -3185,8 +3185,15 @@ namespace Game.Spells
                             if (!UpdateChanneledTargetList())
                             {
                                 Log.outDebug(LogFilter.Spells, "Channeled spell {0} is removed due to lack of targets", m_spellInfo.Id);
-                                SendChannelUpdate(0);
-                                finish();
+                                m_timer = 0;
+
+                                // Also remove applied auras
+                                foreach (TargetInfo target in m_UniqueTargetInfo)
+                                {
+                                    Unit unit = m_caster.GetGUID() == target.targetGUID ? m_caster : Global.ObjAccessor.GetUnit(m_caster, target.targetGUID);
+                                    if (unit)
+                                        unit.RemoveOwnedAura(m_spellInfo.Id, m_originalCasterGUID, 0, AuraRemoveMode.Cancel);
+                                }
                             }
 
                             if (m_timer > 0)
