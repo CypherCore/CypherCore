@@ -153,17 +153,11 @@ namespace Game.AI
                     {
                         Player member = groupRef.GetSource();
                         if (member)
-                        {
-                            if (member.GetQuestStatus(m_pQuestForFollow.Id) == QuestStatus.Incomplete)
-                                member.FailQuest(m_pQuestForFollow.Id);
-                        }
+                            member.FailQuest(m_pQuestForFollow.Id);
                     }
                 }
                 else
-                {
-                    if (player.GetQuestStatus(m_pQuestForFollow.Id) == QuestStatus.Incomplete)
-                        player.FailQuest(m_pQuestForFollow.Id);
-                }
+                    player.FailQuest(m_pQuestForFollow.Id);
             }
         }
 

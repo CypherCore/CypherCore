@@ -235,7 +235,7 @@ namespace Game.AI
                     if (!fail && player.IsAtGroupRewardDistance(me) && player.GetCorpse() == null)
                         player.GroupEventHappens(mEscortQuestID, me);
 
-                    if (fail && player.GetQuestStatus(mEscortQuestID) == QuestStatus.Incomplete)
+                    if (fail)
                         player.FailQuest(mEscortQuestID);
 
                     Group group = player.GetGroup();
@@ -247,7 +247,7 @@ namespace Game.AI
 
                             if (!fail && groupGuy.IsAtGroupRewardDistance(me) && !groupGuy.GetCorpse())
                                 groupGuy.AreaExploredOrEventHappens(mEscortQuestID);
-                            if (fail && groupGuy.GetQuestStatus(mEscortQuestID) == QuestStatus.Incomplete)
+                            else if (fail)
                                 groupGuy.FailQuest(mEscortQuestID);
                         }
                     }
@@ -261,7 +261,7 @@ namespace Game.AI
                             Player player = obj.ToPlayer();
                             if (!fail && player.IsAtGroupRewardDistance(me) && player.GetCorpse() == null)
                                 player.AreaExploredOrEventHappens(mEscortQuestID);
-                            if (fail && player.GetQuestStatus(mEscortQuestID) == QuestStatus.Incomplete)
+                            else if (fail)
                                 player.FailQuest(mEscortQuestID);
                         }
                     }

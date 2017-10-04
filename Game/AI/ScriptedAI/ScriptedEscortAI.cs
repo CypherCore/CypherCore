@@ -148,15 +148,11 @@ namespace Game.AI
                     {
                         Player member = groupRef.GetSource();
                         if (member)
-                            if (member.GetQuestStatus(m_pQuestForEscort.Id) == QuestStatus.Incomplete)
-                                member.FailQuest(m_pQuestForEscort.Id);
+                            member.FailQuest(m_pQuestForEscort.Id);
                     }
                 }
                 else
-                {
-                    if (player.GetQuestStatus(m_pQuestForEscort.Id) == QuestStatus.Incomplete)
-                        player.FailQuest(m_pQuestForEscort.Id);
-                }
+                    player.FailQuest(m_pQuestForEscort.Id);
             }
         }
 
