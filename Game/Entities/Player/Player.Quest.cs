@@ -604,7 +604,9 @@ namespace Game.Entities
                         InventoryResult res = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, quest.RewardChoiceItemId[i], quest.RewardChoiceItemCount[i]);
                         if (res != InventoryResult.Ok)
                         {
-                            SendEquipError(res, null, null, quest.RewardChoiceItemId[i]);
+                            if (msg)
+                                SendQuestFailed(quest.Id, res);
+
                             return false;
                         }
                     }
@@ -620,7 +622,9 @@ namespace Game.Entities
                         InventoryResult res = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, quest.RewardItemId[i], quest.RewardItemCount[i]);
                         if (res != InventoryResult.Ok)
                         {
-                            SendEquipError(res, null, null, quest.RewardItemId[i]);
+                            if (msg)
+                                SendQuestFailed(quest.Id, res);
+
                             return false;
                         }
                     }
@@ -1107,6 +1111,10 @@ namespace Game.Entities
             {
                 // Already complete quests shouldn't turn failed.
                 if (GetQuestStatus(questId) == QuestStatus.Complete && !quest.HasSpecialFlag(QuestSpecialFlags.Timed))
+                    return;
+
+                // You can't fail a quest if you don't have it, or if it's already rewarded.
+                if (GetQuestStatus(questId) == QuestStatus.None || GetQuestStatus(questId) == QuestStatus.Rewarded)
                     return;
 
                 SetQuestStatus(questId, QuestStatus.Failed);
@@ -1836,16 +1844,13 @@ namespace Game.Entities
                     continue;
 
                 QuestStatus status = GetQuestStatus(questId);
-                if ((status == QuestStatus.Complete && !GetQuestRewardStatus(questId)) ||
-                    (quest.IsAutoComplete() && CanTakeQuest(quest, false)))
-                {
-                    if (quest.IsAutoComplete() && quest.IsRepeatable() && !quest.IsDailyOrWeekly())
-                        result2 = QuestGiverStatus.RewardRep;
-                    else
-                        result2 = QuestGiverStatus.Reward;
-                }
+                if (status == QuestStatus.Complete && !GetQuestRewardStatus(questId))
+                    result2 = QuestGiverStatus.Reward;
                 else if (status == QuestStatus.Incomplete)
                     result2 = QuestGiverStatus.Incomplete;
+
+                if (quest.IsAutoComplete() && CanTakeQuest(quest, false) && quest.IsRepeatable() && !quest.IsDailyOrWeekly())
+                    result2 = QuestGiverStatus.RewardRep;
 
                 if (result2 > result)
                     result = result2;
@@ -1868,9 +1873,7 @@ namespace Game.Entities
                     {
                         if (SatisfyQuestLevel(quest, false))
                         {
-                            if (quest.IsAutoComplete())
-                                result2 = QuestGiverStatus.RewardRep;
-                            else if (getLevel() <= (GetQuestLevel(quest) + WorldConfig.GetIntValue(WorldCfg.QuestLowLevelHideDiff)))
+                            if (getLevel() <= (GetQuestLevel(quest) + WorldConfig.GetIntValue(WorldCfg.QuestLowLevelHideDiff)))
                             {
                                 if (quest.IsDaily())
                                     result2 = QuestGiverStatus.AvailableRep;
