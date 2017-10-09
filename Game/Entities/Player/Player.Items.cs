@@ -2517,7 +2517,7 @@ namespace Game.Entities
                 }
             }
 
-            Item it = bStore ? StoreNewItem(vDest, item, true, ItemEnchantment.GenerateItemRandomPropertyId(item), null, 0, null, false) : EquipNewItem(uiDest, item, true);
+            Item it = bStore ? StoreNewItem(vDest, item, true, ItemEnchantment.GenerateItemRandomPropertyId(item), null, 0, crItem.BonusListIDs, false) : EquipNewItem(uiDest, item, true);
             if (it != null)
             {
                 uint new_count = pVendor.UpdateVendorItemCurrentCount(crItem, count);
@@ -3628,6 +3628,16 @@ namespace Game.Entities
             {
                 SendBuyError(BuyResult.CantFindItem, creature, item);
                 return false;
+            }
+
+            PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(crItem.PlayerConditionId);
+            if (playerCondition != null)
+            {
+                if (!ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
+                {
+                    SendEquipError(InventoryResult.ItemLocked);
+                    return false;
+                }
             }
 
             // check current item amount if it limited

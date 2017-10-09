@@ -939,8 +939,7 @@ namespace Scripts.Northrend.IcecrownCitadel
 
     class npc_argent_captainAI : ScriptedAI
     {
-        public npc_argent_captainAI(Creature creature)
-            : base(creature)
+        public npc_argent_captainAI(Creature creature) : base(creature)
         {
             instance = creature.GetInstanceScript();
             _firstDeath = true;

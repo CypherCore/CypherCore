@@ -25,6 +25,7 @@ using Game.Movement;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Framework.Collections;
 
 namespace Game.Chat
 {
@@ -1166,6 +1167,7 @@ namespace Game.Chat
                 uint maxcount = args.NextUInt32();
                 uint incrtime = args.NextUInt32();
                 uint extendedcost = args.NextUInt32();
+                string fbonuslist = args.NextString();
 
                 Creature vendor = handler.getSelectedCreature();
                 if (!vendor)
@@ -1176,10 +1178,24 @@ namespace Game.Chat
 
                 uint vendor_entry = vendor.GetEntry();
 
-                if (!Global.ObjectMgr.IsVendorItemValid(vendor_entry, itemId, (int)maxcount, incrtime, extendedcost, (ItemVendorType)type, handler.GetSession().GetPlayer()))
+                VendorItem vItem = new VendorItem();
+                vItem.item = itemId;
+                vItem.maxcount = maxcount;
+                vItem.incrtime = incrtime;
+                vItem.ExtendedCost = extendedcost;
+                vItem.Type = (ItemVendorType)type;
+
+                if (fbonuslist.IsEmpty())
+                {
+                    var bonusListIDsTok = new StringArray(fbonuslist, ';');
+                    foreach (string token in bonusListIDsTok)
+                        vItem.BonusListIDs.Add(uint.Parse(token));
+                }
+
+                if (!Global.ObjectMgr.IsVendorItemValid(vendor_entry, vItem, handler.GetSession().GetPlayer()))
                     return false;
 
-                Global.ObjectMgr.AddVendorItem(vendor_entry, itemId, (int)maxcount, incrtime, extendedcost, (ItemVendorType)type);
+                Global.ObjectMgr.AddVendorItem(vendor_entry, vItem);
 
                 ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
 

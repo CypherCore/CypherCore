@@ -626,7 +626,7 @@ namespace Game.Scripting
             }
             m_spell.m_damage = damage;
         }
-        void PreventHitDamage() { SetHitDamage(0); }
+        public void PreventHitDamage() { SetHitDamage(0); }
         // setter/getter for for heal done by spell to target of spell hit
         // returns healing calculated before hit, and real dmg done after hit
         public int GetHitHeal()
@@ -664,7 +664,7 @@ namespace Game.Scripting
             return m_spell.m_spellAura;
         }
         // prevents applying aura on current spell hit target
-        void PreventHitAura()
+        public void PreventHitAura()
         {
             if (!IsInTargetHook())
             {

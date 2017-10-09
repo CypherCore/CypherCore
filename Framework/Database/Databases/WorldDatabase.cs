@@ -35,7 +35,7 @@ namespace Framework.Database
             PrepareStatement(WorldStatements.DEL_GAME_TELE, "DELETE FROM game_tele WHERE name = ?");
             PrepareStatement(WorldStatements.INS_NPC_VENDOR, "INSERT INTO npc_vendor (entry, item, maxcount, incrtime, extendedcost, type) VALUES(?, ?, ?, ?, ?, ?)");
             PrepareStatement(WorldStatements.DEL_NPC_VENDOR, "DELETE FROM npc_vendor WHERE entry = ? AND item = ? AND type = ?");
-            PrepareStatement(WorldStatements.SEL_NPC_VENDOR_REF, "SELECT item, maxcount, incrtime, ExtendedCost, type FROM npc_vendor WHERE entry = ? AND type = ? ORDER BY slot ASC");
+            PrepareStatement(WorldStatements.SEL_NPC_VENDOR_REF, "SELECT item, maxcount, incrtime, ExtendedCost, type, BonusListIDs, PlayerConditionID, IgnoreFiltering FROM npc_vendor WHERE entry = ? ORDER BY slot ASC");
             PrepareStatement(WorldStatements.UPD_CREATURE_MOVEMENT_TYPE, "UPDATE creature SET MovementType = ? WHERE guid = ?");
             PrepareStatement(WorldStatements.UPD_CREATURE_FACTION, "UPDATE creature_template SET faction = ? WHERE entry = ?");
             PrepareStatement(WorldStatements.UPD_CREATURE_NPCFLAG, "UPDATE creature_template SET npcflag = ? WHERE entry = ?");

@@ -3093,7 +3093,7 @@ namespace Game
 
             List<uint> skipvendors = new List<uint>();
 
-            SQLResult result = DB.World.Query("SELECT entry, item, maxcount, incrtime, ExtendedCost, type FROM npc_vendor ORDER BY entry, slot ASC");
+            SQLResult result = DB.World.Query("SELECT entry, item, maxcount, incrtime, ExtendedCost, type, BonusListIDs, PlayerConditionID, IgnoreFiltering FROM npc_vendor ORDER BY entry, slot ASC");
             if (result.IsEmpty())
             {
                 Log.outError(LogFilter.ServerLoading, "Loaded 0 Vendors. DB table `npc_vendor` is empty!");
@@ -3109,33 +3109,40 @@ namespace Game
 
                 // if item is a negative, its a reference
                 if (itemid < 0)
-                    count += LoadReferenceVendor((int)entry, -itemid, 0, skipvendors);
+                    count += LoadReferenceVendor((int)entry, -itemid, skipvendors);
                 else
                 {
-                    int maxcount = result.Read<int>(2);
-                    uint incrtime = result.Read<uint>(3);
-                    uint ExtendedCost = result.Read<uint>(4);
-                    ItemVendorType type = (ItemVendorType)result.Read<byte>(5);
+                    VendorItem vItem = new VendorItem();
+                    vItem.item = (uint)itemid;
+                    vItem.maxcount = result.Read<uint>(2);
+                    vItem.incrtime = result.Read<uint>(3);
+                    vItem.ExtendedCost = result.Read<uint>(4);
+                    vItem.Type = (ItemVendorType)result.Read<byte>(5);
+                    vItem.PlayerConditionId = result.Read<uint>(7);
+                    vItem.IgnoreFiltering = result.Read<bool>(8);
 
-                    if (!IsVendorItemValid(entry, (uint)itemid, maxcount, incrtime, ExtendedCost, type, null, skipvendors))
+                    var bonusListIDsTok = new StringArray(result.Read<string>(6), ' ');
+                    foreach (string token in bonusListIDsTok)
+                        vItem.BonusListIDs.Add(uint.Parse(token));
+
+                    if (!IsVendorItemValid(entry, vItem, null, skipvendors))
                         continue;
 
                     if (cacheVendorItemStorage.LookupByKey(entry) == null)
                         cacheVendorItemStorage.Add(entry, new VendorItemData());
 
-                    cacheVendorItemStorage[entry].AddItem((uint)itemid, maxcount, incrtime, ExtendedCost, type);
+                    cacheVendorItemStorage[entry].AddItem(vItem);
                     ++count;
                 }
             } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Vendors in {1} ms", count, Time.GetMSTimeDiffToNow(time));
         }
-        uint LoadReferenceVendor(int vendor, int item, byte type, List<uint> skip_vendors)
+        uint LoadReferenceVendor(int vendor, int item, List<uint> skip_vendors)
         {
             // find all items from the reference vendor
             PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_NPC_VENDOR_REF);
             stmt.AddValue(0, item);
-            stmt.AddValue(1, type);
             SQLResult result = DB.World.Query(stmt);
 
             if (result.IsEmpty())
@@ -3148,20 +3155,28 @@ namespace Game
 
                 // if item is a negative, its a reference
                 if (item_id < 0)
-                    count += LoadReferenceVendor(vendor, -item_id, type, skip_vendors);
+                    count += LoadReferenceVendor(vendor, -item_id, skip_vendors);
                 else
                 {
-                    int maxcount = result.Read<int>(1);
-                    uint incrtime = result.Read<uint>(2);
-                    uint ExtendedCost = result.Read<uint>(3);
-                    ItemVendorType _type = (ItemVendorType)result.Read<byte>(4);
+                    VendorItem vItem = new VendorItem();
+                    vItem.item = (uint)item_id;
+                    vItem.maxcount = result.Read<uint>(1);
+                    vItem.incrtime = result.Read<uint>(2);
+                    vItem.ExtendedCost = result.Read<uint>(3);
+                    vItem.Type = (ItemVendorType)result.Read<byte>(4);
+                    vItem.PlayerConditionId = result.Read<uint>(6);
+                    vItem.IgnoreFiltering = result.Read<bool>(7);
 
-                    if (!IsVendorItemValid((uint)vendor, (uint)item_id, maxcount, incrtime, ExtendedCost, _type, null, skip_vendors))
+                    var bonusListIDsTok = new StringArray(result.Read<string>(5), ' ');
+                    foreach (string token in bonusListIDsTok)
+                        vItem.BonusListIDs.Add(uint.Parse(token));
+
+                    if (!IsVendorItemValid((uint)vendor, vItem, null, skip_vendors))
                         continue;
 
                     VendorItemData vList = cacheVendorItemStorage[(uint)vendor];
 
-                    vList.AddItem((uint)item_id, maxcount, incrtime, ExtendedCost, _type);
+                    vList.AddItem(vItem);
                     ++count;
                 }
             } while (result.NextRow());
@@ -4663,21 +4678,21 @@ namespace Game
         {
             return _trainers.LookupByKey(trainerId);
         }
-        public void AddVendorItem(uint entry, uint item, int maxcount, uint incrtime, uint extendedCost, ItemVendorType type, bool persist = true)
+        public void AddVendorItem(uint entry, VendorItem vItem, bool persist = true)
         {
             VendorItemData vList = cacheVendorItemStorage[entry];
-            vList.AddItem(item, maxcount, incrtime, extendedCost, type);
+            vList.AddItem(vItem);
 
             if (persist)
             {
                 PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.INS_NPC_VENDOR);
 
                 stmt.AddValue(0, entry);
-                stmt.AddValue(1, item);
-                stmt.AddValue(2, maxcount);
-                stmt.AddValue(3, incrtime);
-                stmt.AddValue(4, extendedCost);
-                stmt.AddValue(5, (byte)type);
+                stmt.AddValue(1, vItem.item);
+                stmt.AddValue(2, vItem.maxcount);
+                stmt.AddValue(3, vItem.incrtime);
+                stmt.AddValue(4, vItem.ExtendedCost);
+                stmt.AddValue(5, vItem.Type);
 
                 DB.World.Execute(stmt);
             }
@@ -4704,7 +4719,7 @@ namespace Game
 
             return true;
         }
-        public bool IsVendorItemValid(uint vendorentry, uint id, int maxcount, uint incrtime, uint ExtendedCost, ItemVendorType type, Player player = null, List<uint> skipvendors = null, ulong ORnpcflag = 0)
+        public bool IsVendorItemValid(uint vendorentry, VendorItem vItem, Player player = null, List<uint> skipvendors = null, ulong ORnpcflag = 0)
         {
             CreatureTemplate cInfo = GetCreatureTemplate(vendorentry);
             if (cInfo == null)
@@ -4731,42 +4746,57 @@ namespace Game
                 return false;
             }
 
-            if ((type == ItemVendorType.Item && GetItemTemplate(id) == null) ||
-                (type == ItemVendorType.Currency && CliDB.CurrencyTypesStorage.LookupByKey(id) == null))
+            if ((vItem.Type == ItemVendorType.Item && GetItemTemplate(vItem.item) == null) ||
+                (vItem.Type == ItemVendorType.Currency && CliDB.CurrencyTypesStorage.LookupByKey(vItem.item) == null))
             {
                 if (player != null)
-                    player.SendSysMessage(CypherStrings.ItemNotFound, id, type);
+                    player.SendSysMessage(CypherStrings.ItemNotFound, vItem.item, vItem.Type);
                 else
-                    Log.outError(LogFilter.Sql, "Table `(gameevent)npcvendor` for Vendor (Entry: {0}) have in item list non-existed item ({1}, type {2}), ignore", vendorentry, id, type);
+                    Log.outError(LogFilter.Sql, "Table `(gameevent)npcvendor` for Vendor (Entry: {0}) have in item list non-existed item ({1}, type {2}), ignore", vendorentry, vItem.item, vItem.Type);
                 return false;
             }
 
-            if (ExtendedCost != 0 && !CliDB.ItemExtendedCostStorage.ContainsKey(ExtendedCost))
+            if (vItem.PlayerConditionId != 0 && !CliDB.PlayerConditionStorage.ContainsKey(vItem.PlayerConditionId))
             {
-                if (player != null)
-                    player.SendSysMessage(CypherStrings.ExtendedCostNotExist, ExtendedCost);
-                else
-                    Log.outError(LogFilter.Sql, "Table `(gameevent)npcvendor` have Item (Entry: {0}) with wrong ExtendedCost ({1}) for vendor ({2}), ignore", id, ExtendedCost, vendorentry);
+                Log.outError(LogFilter.Sql, "Table `(game_event_)npc_vendor` has Item (Entry: {0}) with invalid PlayerConditionId ({1}) for vendor ({2}), ignore", vItem.item, vItem.PlayerConditionId, vendorentry);
                 return false;
             }
 
-            if (type == ItemVendorType.Item) // not applicable to currencies
+            if (vItem.ExtendedCost != 0 && !CliDB.ItemExtendedCostStorage.ContainsKey(vItem.ExtendedCost))
             {
-                if (maxcount > 0 && incrtime == 0)
+                if (player != null)
+                    player.SendSysMessage(CypherStrings.ExtendedCostNotExist, vItem.ExtendedCost);
+                else
+                    Log.outError(LogFilter.Sql, "Table `(gameevent)npcvendor` have Item (Entry: {0}) with wrong ExtendedCost ({1}) for vendor ({2}), ignore", vItem.item, vItem.ExtendedCost, vendorentry);
+                return false;
+            }
+
+            if (vItem.Type == ItemVendorType.Item) // not applicable to currencies
+            {
+                if (vItem.maxcount > 0 && vItem.incrtime == 0)
                 {
                     if (player != null)
-                        player.SendSysMessage("MaxCount != 0 ({0}) but IncrTime == 0", maxcount);
+                        player.SendSysMessage("MaxCount != 0 ({0}) but IncrTime == 0", vItem.maxcount);
                     else
-                        Log.outError(LogFilter.Sql, "Table `(gameevent)npcvendor` has `maxcount` ({0}) for item {1} of vendor (Entry: {2}) but `incrtime`=0, ignore", maxcount, id, vendorentry);
+                        Log.outError(LogFilter.Sql, "Table `(gameevent)npcvendor` has `maxcount` ({0}) for item {1} of vendor (Entry: {2}) but `incrtime`=0, ignore", vItem.maxcount, vItem.item, vendorentry);
                     return false;
                 }
-                else if (maxcount == 0 && incrtime > 0)
+                else if (vItem.maxcount == 0 && vItem.incrtime > 0)
                 {
                     if (player != null)
                         player.SendSysMessage("MaxCount == 0 but IncrTime<>= 0");
                     else
-                        Log.outError(LogFilter.Sql, "Table `(gameevent)npcvendor` has `maxcount`=0 for item {0} of vendor (Entry: {0}) but `incrtime`<>0, ignore", id, vendorentry);
+                        Log.outError(LogFilter.Sql, "Table `(gameevent)npcvendor` has `maxcount`=0 for item {0} of vendor (Entry: {0}) but `incrtime`<>0, ignore", vItem.item, vendorentry);
                     return false;
+                }
+
+                foreach (uint bonusList in vItem.BonusListIDs)
+                {
+                    if (Global.DB2Mgr.GetItemBonusList(bonusList) == null)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `(game_event_)npc_vendor` have Item (Entry: {0}) with invalid bonus {1} for vendor ({2}), ignore", vItem.item, bonusList, vendorentry);
+                        return false;
+                    }
                 }
             }
 
@@ -4774,12 +4804,18 @@ namespace Game
             if (vItems == null)
                 return true;                                        // later checks for non-empty lists
 
-            if (vItems.FindItemCostPair(id, ExtendedCost, type) != null)
+            if (vItems.FindItemCostPair(vItem.item, vItem.ExtendedCost, vItem.Type) != null)
             {
                 if (player != null)
-                    player.SendSysMessage(CypherStrings.ItemAlreadyInList, id, ExtendedCost, type);
+                    player.SendSysMessage(CypherStrings.ItemAlreadyInList, vItem.item, vItem.ExtendedCost, vItem.Type);
                 else
-                    Log.outError(LogFilter.Sql, "Table `npcvendor` has duplicate items {0} (with extended cost {1}, type {2}) for vendor (Entry: {3}), ignoring", id, ExtendedCost, type, vendorentry);
+                    Log.outError(LogFilter.Sql, "Table `npcvendor` has duplicate items {0} (with extended cost {1}, type {2}) for vendor (Entry: {3}), ignoring", vItem.item, vItem.ExtendedCost, vItem.Type, vendorentry);
+                return false;
+            }
+
+            if (vItem.Type == ItemVendorType.Currency && vItem.maxcount == 0)
+            {
+                Log.outError(LogFilter.Sql, "Table `(game_event_)npc_vendor` have Item (Entry: {0}, type: {1}) with missing maxcount for vendor ({2}), ignore", vItem.item, vItem.Type, vendorentry);
                 return false;
             }
 
@@ -8541,6 +8577,10 @@ namespace Game
                             stmt.AddValue(0, itemInfo.item_guid);
                             DB.Characters.Execute(stmt);
                         }
+
+                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_MAIL_ITEM_BY_ID);
+                        stmt.AddValue(0, m.messageID);
+                        DB.Characters.Execute(stmt);
                     }
                     else
                     {

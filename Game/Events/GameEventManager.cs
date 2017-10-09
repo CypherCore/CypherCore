@@ -23,6 +23,7 @@ using Game.Maps;
 using Game.Network.Packets;
 using System;
 using System.Collections.Generic;
+using Framework.Collections;
 
 namespace Game
 {
@@ -752,8 +753,8 @@ namespace Game
             {
                 uint oldMSTime = Time.GetMSTime();
 
-                //                                               0           1     2     3         4         5             6
-                SQLResult result = DB.World.Query("SELECT eventEntry, guid, item, maxcount, incrtime, ExtendedCost, type FROM game_event_npc_vendor ORDER BY guid, slot ASC");
+                //                                        0           1     2     3         4         5             6     7             8                  9
+                SQLResult result = DB.World.Query("SELECT eventEntry, guid, item, maxcount, incrtime, ExtendedCost, type, BonusListIDs, PlayerConditionId, IgnoreFiltering FROM game_event_npc_vendor ORDER BY guid, slot ASC");
 
                 if (result.IsEmpty())
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 vendor additions in game events. DB table `game_event_npc_vendor` is empty.");
@@ -763,6 +764,7 @@ namespace Game
                     do
                     {
                         byte event_id = result.Read<byte>(0);
+                        ulong guid = result.Read<ulong>(1);
 
                         if (event_id >= mGameEventVendors.Length)
                         {
@@ -770,13 +772,6 @@ namespace Game
                             continue;
                         }
 
-                        NPCVendorEntry newEntry = new NPCVendorEntry();
-                        ulong guid = result.Read<ulong>(1);
-                        newEntry.item = result.Read<uint>(2);
-                        newEntry.maxcount = result.Read<int>(3);
-                        newEntry.incrtime = result.Read<uint>(4);
-                        newEntry.ExtendedCost = result.Read<uint>(5);
-                        newEntry.Type = result.Read<byte>(6);
                         // get the event npc flag for checking if the npc will be vendor during the event or not
                         ulong event_npc_flag = 0;
                         var flist = mGameEventNPCFlags[event_id];
@@ -789,16 +784,29 @@ namespace Game
                             }
                         }
                         // get creature entry
-                        newEntry.entry = 0;
+                        uint entry = 0;
                         CreatureData data = Global.ObjectMgr.GetCreatureData(guid);
                         if (data != null)
-                            newEntry.entry = data.id;
+                            entry = data.id;
+
+                        VendorItem vItem = new VendorItem();
+                        vItem.item = result.Read<uint>(2);
+                        vItem.maxcount = result.Read<uint>(3);
+                        vItem.incrtime = result.Read<uint>(4);
+                        vItem.ExtendedCost = result.Read<uint>(5);
+                        vItem.Type = (ItemVendorType)result.Read<byte>(6);
+                        vItem.PlayerConditionId = result.Read<uint>(8);
+                        vItem.IgnoreFiltering = result.Read<bool>(9);
+
+                        var bonusListIDsTok = new StringArray(result.Read<string>(7), ' ');
+                        foreach (uint token in bonusListIDsTok)
+                            vItem.BonusListIDs.Add(token);
 
                         // check validity with event's npcflag
-                        if (!Global.ObjectMgr.IsVendorItemValid(newEntry.entry, newEntry.item, newEntry.maxcount, newEntry.incrtime, newEntry.ExtendedCost, (ItemVendorType)newEntry.Type, null, null, event_npc_flag))
+                        if (!Global.ObjectMgr.IsVendorItemValid(entry, vItem, null, null, event_npc_flag))
                             continue;
 
-                        mGameEventVendors[event_id].Add(newEntry);
+                        mGameEventVendors[event_id].Add(entry, vItem);
 
                         ++count;
                     }
@@ -922,7 +930,7 @@ namespace Game
 
                 mGameEventCreatureQuests = new List<Tuple<uint, uint>>[maxEventId];
                 mGameEventGameObjectQuests = new List<Tuple<uint, uint>>[maxEventId];
-                mGameEventVendors = new List<NPCVendorEntry>[maxEventId];
+                mGameEventVendors = new Dictionary<uint, VendorItem>[maxEventId];
                 mGameEventBattlegroundHolidays = new uint[maxEventId];
                 mGameEventNPCFlags = new List<Tuple<ulong, ulong>>[maxEventId];
                 mGameEventModelEquip = new List<Tuple<ulong, ModelEquip>>[maxEventId];
@@ -931,7 +939,7 @@ namespace Game
                     mGameEvent[i] = new GameEventData();
                     mGameEventCreatureQuests[i] = new List<Tuple<uint, uint>>();
                     mGameEventGameObjectQuests[i] = new List<Tuple<uint, uint>>();
-                    mGameEventVendors[i] = new List<NPCVendorEntry>();
+                    mGameEventVendors[i] = new Dictionary<uint, VendorItem>();
                     mGameEventNPCFlags[i] = new List<Tuple<ulong, ulong>>();
                     mGameEventModelEquip[i] = new List<Tuple<ulong, ModelEquip>>();
                 }
@@ -1152,9 +1160,9 @@ namespace Game
             foreach (var npcEventVendor in mGameEventVendors[eventId])
             {
                 if (activate)
-                    Global.ObjectMgr.AddVendorItem(npcEventVendor.entry, npcEventVendor.item, npcEventVendor.maxcount, npcEventVendor.incrtime, npcEventVendor.ExtendedCost, (ItemVendorType)npcEventVendor.Type, false);
+                    Global.ObjectMgr.AddVendorItem(npcEventVendor.Key, npcEventVendor.Value, false);
                 else
-                    Global.ObjectMgr.RemoveVendorItem(npcEventVendor.entry, npcEventVendor.item, (ItemVendorType)npcEventVendor.Type, false);
+                    Global.ObjectMgr.RemoveVendorItem(npcEventVendor.Key, npcEventVendor.Value.item, npcEventVendor.Value.Type, false);
             }
         }
 
@@ -1615,7 +1623,7 @@ namespace Game
 
         List<Tuple<uint, uint>>[] mGameEventCreatureQuests;
         List<Tuple<uint, uint>>[] mGameEventGameObjectQuests;
-        List<NPCVendorEntry>[] mGameEventVendors;
+        Dictionary<uint, VendorItem>[] mGameEventVendors;
         List<Tuple<ulong, ModelEquip>>[] mGameEventModelEquip;
         List<uint>[] mGameEventPoolIds;
         GameEventData[] mGameEvent;
@@ -1673,16 +1681,6 @@ namespace Game
         public uint modelid_prev;
         public byte equipment_id;
         public byte equipement_id_prev;
-    }
-
-    public struct NPCVendorEntry
-    {
-        public uint entry;                                           // creature entry
-        public uint item;                                            // item id
-        public int maxcount;                                        // 0 for infinite
-        public uint incrtime;                                        // time for restore items amount if maxcount != 0
-        public uint ExtendedCost;
-        public byte Type;                                             // 1 item, 2 currency
     }
 
     class GameEventAIHookWorker : Notifier

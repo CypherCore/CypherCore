@@ -2790,7 +2790,7 @@ namespace Game.Entities
             return distsq < maxdist * maxdist;
         }
 
-        bool IsInBetween(WorldObject obj1, WorldObject obj2, float size = 0) { return obj1 && obj2 && IsInBetween(obj1.GetPosition(), obj2.GetPosition(), size); }
+        public bool IsInBetween(WorldObject obj1, WorldObject obj2, float size = 0) { return obj1 && obj2 && IsInBetween(obj1.GetPosition(), obj2.GetPosition(), size); }
         bool IsInBetween(Position pos1, Position pos2, float size)
         {
             float dist = GetExactDist2d(pos1);

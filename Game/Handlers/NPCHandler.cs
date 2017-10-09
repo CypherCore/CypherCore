@@ -491,6 +491,11 @@ namespace Game
 
                 VendorItemPkt item = new VendorItemPkt();
 
+                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(vendorItem.PlayerConditionId);
+                if (playerCondition != null)
+                    if (!ConditionManager.IsPlayerMeetingCondition(_player, playerCondition))
+                        item.PlayerConditionFailed = (int)playerCondition.Id;
+
                 if (vendorItem.Type == ItemVendorType.Item)
                 {
                     ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(vendorItem.item);
@@ -530,8 +535,14 @@ namespace Game
                     item.Quantity = leftInStock;
                     item.StackCount = (int)itemTemplate.GetBuyCount();
                     item.Price = (ulong)price;
+                    item.DoNotFilterOnVendor = vendorItem.IgnoreFiltering;
 
                     item.Item.ItemID = vendorItem.item;
+                    if (!vendorItem.BonusListIDs.Empty())
+                    {
+                        item.Item.ItemBonus.HasValue = true;
+                        item.Item.ItemBonus.Value.BonusListIDs = vendorItem.BonusListIDs;
+                    }
 
                     packet.Items.Add(item);
                 }
@@ -549,6 +560,7 @@ namespace Game
                     item.Item.ItemID = vendorItem.item;
                     item.Type = (int)vendorItem.Type;
                     item.StackCount = (int)vendorItem.maxcount;
+                    item.DoNotFilterOnVendor = vendorItem.IgnoreFiltering;
 
                     packet.Items.Add(item);
                 }

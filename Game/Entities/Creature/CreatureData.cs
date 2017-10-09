@@ -327,6 +327,7 @@ namespace Game.Entities
 
     public class VendorItem
     {
+        public VendorItem() { }
         public VendorItem(uint _item, int _maxcount, uint _incrtime, uint _ExtendedCost, ItemVendorType _Type)
         {
             item = _item;
@@ -341,6 +342,9 @@ namespace Game.Entities
         public uint incrtime;                                        // time for restore items amount if maxcount != 0
         public uint ExtendedCost;
         public ItemVendorType Type;
+        public List<uint> BonusListIDs = new List<uint>();
+        public uint PlayerConditionId;
+        public bool IgnoreFiltering;
 
         //helpers
         public bool IsGoldRequired(ItemTemplate pProto) { return Convert.ToBoolean(pProto.GetFlags2() & ItemFlags2.DontIgnoreBuyPrice) || ExtendedCost == 0; }
@@ -365,9 +369,9 @@ namespace Game.Entities
         {
             return m_items.Count;
         }
-        public void AddItem(uint item, int maxcount, uint ptime, uint ExtendedCost, ItemVendorType type)
+        public void AddItem(VendorItem vItem)
         {
-            m_items.Add(new VendorItem(item, maxcount, ptime, ExtendedCost, type));
+            m_items.Add(vItem);
         }
         public bool RemoveItem(uint item_id, ItemVendorType type)
         {

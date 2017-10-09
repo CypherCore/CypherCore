@@ -661,7 +661,7 @@ namespace Game.Entities
             }
         }
 
-        void RemoveAllGameObjects()
+        public void RemoveAllGameObjects()
         {
             // remove references to unit
             while (!m_gameObj.Empty())
