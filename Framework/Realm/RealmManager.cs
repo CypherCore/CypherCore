@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Timers;
+using System.Collections.Concurrent;
 
 public class RealmManager : Singleton<RealmManager>
 {
@@ -48,14 +49,8 @@ public class RealmManager : Singleton<RealmManager>
     void UpdateRealm(Realm realm)
     {
         var oldRealm = _realms.LookupByKey(realm.Id);
-        if (oldRealm == null)
-        {
-            _realms[realm.Id] = realm;
-            return;
-        }
-
-        if (oldRealm == realm)
-            return;
+        if (oldRealm != null && oldRealm == realm)
+                return;
 
         _realms[realm.Id] = realm;
     }
@@ -323,7 +318,7 @@ public class RealmManager : Singleton<RealmManager>
     public List<Realm> GetRealms() { return _realms.Values.ToList(); }
     List<string> GetSubRegions() { return _subRegions; }
 
-    Dictionary<RealmHandle, Realm> _realms = new Dictionary<RealmHandle, Realm>();
+    ConcurrentDictionary<RealmHandle, Realm> _realms = new ConcurrentDictionary<RealmHandle, Realm>();
     List<string> _subRegions = new List<string>();
     Timer _updateTimer;
 }

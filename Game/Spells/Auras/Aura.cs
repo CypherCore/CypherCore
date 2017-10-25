@@ -1711,6 +1711,15 @@ namespace Game.Spells
             if (!Global.SpellMgr.CanSpellTriggerProcOnEvent(procEntry, eventInfo))
                 return 0;
 
+            // check don't break stealth attr present
+            if (m_spellInfo.HasAura(Difficulty.None, AuraType.ModStealth))
+            {
+                SpellInfo spell = eventInfo.GetSpellInfo();
+                if (spell != null)
+                    if (spell.HasAttribute(SpellCustomAttributes.DontBreakStealth))
+                        return 0;
+            }
+
             // check if aura can proc when spell is triggered (exception for hunter auto shot & wands)
             if (!procEntry.AttributesMask.HasAnyFlag(ProcAttributes.TriggeredCanProc) && !eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.AutoAttackMask))
             {

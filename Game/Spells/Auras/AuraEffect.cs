@@ -674,15 +674,12 @@ namespace Game.Spells
                             return false;
 
                         // Spell own damage at apply won't break CC
-                        if (spellInfo != null)
+                        if (spellInfo != null && spellInfo == GetSpellInfo())
                         {
-                            if (spellInfo == GetSpellInfo())
-                            {
-                                Aura aura = GetBase();
-                                // called from spellcast, should not have ticked yet
-                                if (aura.GetDuration() == aura.GetMaxDuration())
-                                    return false;
-                            }
+                            Aura aura = GetBase();
+                            // called from spellcast, should not have ticked yet
+                            if (aura.GetDuration() == aura.GetMaxDuration())
+                                return false;
                         }
                         break;
                     }
@@ -5544,8 +5541,6 @@ namespace Game.Spells
                 }
             }
 
-            uint absorb = 0;
-            uint resist = 0;
             CleanDamage cleanDamage = new CleanDamage(0, 0, WeaponAttackType.BaseAttack, MeleeHitOutcome.Normal);
 
             // AOE spells are not affected by the new periodic system.
@@ -5615,14 +5610,21 @@ namespace Game.Spells
             if (!GetSpellInfo().HasAttribute(SpellAttr4.FixedDamage))
                 caster.ApplyResilience(target, ref damage);
 
-            caster.CalcAbsorbResist(target, GetSpellInfo().GetSchoolMask(), DamageEffectType.DOT, damage, ref absorb, ref resist, GetSpellInfo());
+            DamageInfo damageInfo = new DamageInfo(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetSchoolMask(), DamageEffectType.DOT, WeaponAttackType.BaseAttack);
+            caster.CalcAbsorbResist(damageInfo);
+            damage = damageInfo.GetDamage();
+
+            uint absorb = damageInfo.GetAbsorb();
+            uint resist = damageInfo.GetResist();
             caster.DealDamageMods(target, ref damage, ref absorb);
 
             // Set trigger flag
             ProcFlags procAttacker = ProcFlags.DonePeriodic;
             ProcFlags procVictim = ProcFlags.TakenPeriodic;
-            ProcFlagsHit hitMask = crit ? ProcFlagsHit.Critical : ProcFlagsHit.Normal;
-            damage = (damage <= absorb + resist) ? 0 : (damage - absorb - resist);
+            ProcFlagsHit hitMask = damageInfo.GetHitMask();
+            if (hitMask == 0)
+                hitMask = crit ? ProcFlagsHit.Critical : ProcFlagsHit.Normal;
+
             if (damage != 0)
                 procVictim |= ProcFlags.TakenDamage;
 
@@ -5632,7 +5634,6 @@ namespace Game.Spells
 
             SpellPeriodicAuraLogInfo pInfo = new SpellPeriodicAuraLogInfo(this, damage, overkill, absorb, resist, 0.0f, crit);
 
-            DamageInfo damageInfo = new DamageInfo(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetSchoolMask(), DamageEffectType.DOT, WeaponAttackType.BaseAttack);
             caster.ProcSkillsAndAuras(target, procAttacker, procVictim, ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.None, hitMask, null, damageInfo, null);
 
             caster.DealDamage(target, damage, cleanDamage, DamageEffectType.DOT, GetSpellInfo().GetSchoolMask(), GetSpellInfo(), true);
@@ -5654,8 +5655,6 @@ namespace Game.Spells
                 caster.SpellHitResult(target, GetSpellInfo(), false) != SpellMissInfo.None)
                 return;
 
-            uint absorb = 0;
-            uint resist = 0;
             CleanDamage cleanDamage = new CleanDamage(0, 0, WeaponAttackType.BaseAttack, MeleeHitOutcome.Normal);
 
             bool isAreaAura = GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura);
@@ -5698,10 +5697,15 @@ namespace Game.Spells
             if (!GetSpellInfo().HasAttribute(SpellAttr4.FixedDamage))
                 caster.ApplyResilience(target, ref damage);
 
-            caster.CalcAbsorbResist(target, GetSpellInfo().GetSchoolMask(), DamageEffectType.DOT, damage, ref absorb, ref resist, m_spellInfo);
+            DamageInfo damageInfo = new DamageInfo(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetSchoolMask(), DamageEffectType.DOT, WeaponAttackType.BaseAttack);
+            caster.CalcAbsorbResist(damageInfo);
 
+            uint absorb = damageInfo.GetAbsorb();
+            uint resist = damageInfo.GetResist();
+
+            // SendSpellNonMeleeDamageLog expects non-absorbed/non-resisted damage
             SpellNonMeleeDamage log = new SpellNonMeleeDamage(caster, target, GetId(), GetBase().GetSpellXSpellVisualId(), GetSpellInfo().GetSchoolMask(), GetBase().GetCastGUID());
-            log.damage = damage - absorb - resist;
+            log.damage = damage;
             log.absorb = absorb;
             log.resist = resist;
             log.periodicLog = true;
@@ -5711,16 +5715,15 @@ namespace Game.Spells
             // Set trigger flag
             ProcFlags procAttacker = ProcFlags.DonePeriodic;
             ProcFlags procVictim = ProcFlags.TakenPeriodic;
-            ProcFlagsHit hitMask = crit ? ProcFlagsHit.Critical : ProcFlagsHit.Normal;
-            damage = (damage <= absorb + resist) ? 0 : (damage - absorb - resist);
+            ProcFlagsHit hitMask = damageInfo.GetHitMask();
+            if (hitMask == 0)
+                hitMask = crit ? ProcFlagsHit.Critical : ProcFlagsHit.Normal;
+
             if (damage != 0)
                 procVictim |= ProcFlags.TakenDamage;
 
             if (caster.IsAlive())
-            {
-                DamageInfo damageInfo = new DamageInfo(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetSchoolMask(), DamageEffectType.DOT, WeaponAttackType.BaseAttack);
                 caster.ProcSkillsAndAuras(target, procAttacker, procVictim, ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.None, hitMask, null, damageInfo, null);
-            }
 
             int new_damage = (int)caster.DealDamage(target, damage, cleanDamage, DamageEffectType.DOT, GetSpellInfo().GetSchoolMask(), GetSpellInfo(), false);
             if (caster.IsAlive())

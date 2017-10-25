@@ -718,6 +718,10 @@ namespace Game.Arenas
 
             foreach (var member in Members)
             {
+                // Save the effort and go
+                if (member.WeekGames == 0)
+                    continue;
+
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ARENA_TEAM_MEMBER);
                 stmt.AddValue(0, member.PersonalRating);
                 stmt.AddValue(1, member.WeekGames);
@@ -738,8 +742,12 @@ namespace Game.Arenas
             DB.Characters.CommitTransaction(trans);
         }
 
-        public void FinishWeek()
+        public bool FinishWeek()
         {
+            // No need to go further than this
+            if (stats.WeekGames == 0)
+                return false;
+
             // Reset team stats
             stats.WeekGames = 0;
             stats.WeekWins = 0;
@@ -750,6 +758,8 @@ namespace Game.Arenas
                 member.WeekGames = 0;
                 member.WeekWins = 0;
             }
+
+            return true;
         }
 
         public bool IsFighting()

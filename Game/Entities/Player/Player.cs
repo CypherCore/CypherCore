@@ -4157,12 +4157,17 @@ namespace Game.Entities
             // Absorb, resist some environmental damage type
             uint absorb = 0;
             uint resist = 0;
-            if (type == EnviromentalDamage.Lava)
-                CalcAbsorbResist(this, SpellSchoolMask.Fire, DamageEffectType.Direct, damage, ref absorb, ref resist);
-            else if (type == EnviromentalDamage.Slime)
-                CalcAbsorbResist(this, SpellSchoolMask.Nature, DamageEffectType.Direct, damage, ref absorb, ref resist);
-
-            damage -= absorb + resist;
+            switch (type)
+            {
+                case EnviromentalDamage.Lava:
+                case EnviromentalDamage.Slime:
+                    DamageInfo dmgInfo = new DamageInfo(this, this, damage, null, type == EnviromentalDamage.Lava ? SpellSchoolMask.Fire : SpellSchoolMask.Nature, DamageEffectType.Direct, WeaponAttackType.BaseAttack);
+                    CalcAbsorbResist(dmgInfo);
+                    absorb = dmgInfo.GetAbsorb();
+                    resist = dmgInfo.GetResist();
+                    damage = dmgInfo.GetDamage();
+                    break;
+            }
 
             DealDamageMods(this, ref damage, ref absorb);
 

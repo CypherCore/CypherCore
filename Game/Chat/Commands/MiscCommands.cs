@@ -2055,19 +2055,20 @@ namespace Game.Chat
             // melee damage by specific school
             if (string.IsNullOrEmpty(spellStr))
             {
-                uint absorb = 0;
-                uint resist = 0;
+                Player attacker = handler.GetSession().GetPlayer();
+                DamageInfo dmgInfo = new DamageInfo(attacker, target, damage_, null, schoolmask, DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
+                attacker.CalcAbsorbResist(dmgInfo);
 
-                handler.GetSession().GetPlayer().CalcAbsorbResist(target, schoolmask, DamageEffectType.SpellDirect, damage_, ref absorb, ref resist);
-
-                if (damage_ <= absorb + resist)
+                if (dmgInfo.GetDamage() == 0)
                     return true;
 
-                damage_ -= absorb + resist;
+                damage_ = dmgInfo.GetDamage();
 
-                handler.GetSession().GetPlayer().DealDamageMods(target, ref damage_, ref absorb);
-                handler.GetSession().GetPlayer().DealDamage(target, damage_, null, DamageEffectType.Direct, schoolmask, null, false);
-                handler.GetSession().GetPlayer().SendAttackStateUpdate(HitInfo.AffectsVictim, target, schoolmask, damage_, absorb, resist, VictimState.Hit, 0);
+                uint absorb = dmgInfo.GetAbsorb();
+                uint resist = dmgInfo.GetResist();
+                attacker.DealDamageMods(target, ref damage_, ref absorb);
+                attacker.DealDamage(target, damage_, null, DamageEffectType.Direct, schoolmask, null, false);
+                attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, schoolmask, damage_, absorb, resist, VictimState.Hit, 0);
                 return true;
             }
 

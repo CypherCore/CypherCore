@@ -126,19 +126,21 @@ namespace Game.Spells
             if (unitTarget == null || !unitTarget.IsAlive())
                 return;
 
-            uint absorb = 0;
-            uint resist = 0;
-
-            m_caster.CalcAbsorbResist(unitTarget, m_spellInfo.GetSchoolMask(), DamageEffectType.SpellDirect, (uint)damage, ref absorb, ref resist, m_spellInfo);
-
-            SpellNonMeleeDamage log = new SpellNonMeleeDamage(m_caster, unitTarget, m_spellInfo.Id, m_SpellVisual, m_spellInfo.GetSchoolMask(), m_castId);
-            log.damage = (uint)(damage - absorb - resist);
-            log.absorb = absorb;
-            log.resist = resist;
+            // CalcAbsorbResist already in Player::EnvironmentalDamage
             if (unitTarget.IsTypeId(TypeId.Player))
                 unitTarget.ToPlayer().EnvironmentalDamage(EnviromentalDamage.Fire, (uint)damage);
+            else
+            {
+                DamageInfo damageInfo = new DamageInfo(m_caster, unitTarget, (uint)damage, m_spellInfo, m_spellInfo.GetSchoolMask(), DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
+                m_caster.CalcAbsorbResist(damageInfo);
 
-            m_caster.SendSpellNonMeleeDamageLog(log);
+                SpellNonMeleeDamage log = new SpellNonMeleeDamage(m_caster, unitTarget, m_spellInfo.Id, m_SpellVisual, m_spellInfo.GetSchoolMask(), m_castId);
+                log.damage = (uint)damage;
+                log.absorb = damageInfo.GetAbsorb();
+                log.resist = damageInfo.GetResist();
+
+                m_caster.SendSpellNonMeleeDamageLog(log);
+            }
         }
 
         [SpellEffectHandler(SpellEffectName.SchoolDamage)]

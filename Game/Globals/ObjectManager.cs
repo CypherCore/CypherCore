@@ -2482,11 +2482,13 @@ namespace Game
             }
 
             if (!CliDB.FactionTemplateStorage.ContainsKey(cInfo.Faction))
-                Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has non-existing faction template ({1}).", cInfo.Entry, cInfo.Faction);
+            {
+                Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has non-existing faction template ({1}). This can lead to crashes, set to faction 35", cInfo.Entry, cInfo.Faction);
+                cInfo.Faction = 35;
+            }
 
             // used later for scale
             CreatureDisplayInfoRecord displayScaleEntry = null;
-
             if (cInfo.ModelId1 != 0)
             {
                 CreatureDisplayInfoRecord displayEntry = CliDB.CreatureDisplayInfoStorage.LookupByKey(cInfo.ModelId1);

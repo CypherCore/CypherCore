@@ -844,9 +844,9 @@ namespace Game.Entities
                         damage = SpellDamageBonusTaken(caster, i_spellProto, damage, DamageEffectType.SpellDirect, dmgShield.GetSpellEffectInfo());
                     }
 
-                    uint absorb = 0;
-                    uint resist = 0;
-                    victim.CalcAbsorbResist(this, i_spellProto.SchoolMask, DamageEffectType.SpellDirect, damage, ref absorb, ref resist, i_spellProto);
+                    DamageInfo damageInfo1 = new DamageInfo(this, victim, damage, i_spellProto, i_spellProto.GetSchoolMask(), DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
+                    victim.CalcAbsorbResist(damageInfo1);
+                    damage = damageInfo1.GetDamage();
                     // No Unit.CalcAbsorbResist here - opcode doesn't send that data - this damage is probably not affected by that
                     victim.DealDamageMods(this, ref damage);
 
@@ -857,7 +857,7 @@ namespace Game.Entities
                     damageShield.TotalDamage = damage;
                     damageShield.OverKill = (uint)Math.Max(damage - GetHealth(), 0);
                     damageShield.SchoolMask = (uint)i_spellProto.SchoolMask;
-                    damageShield.LogAbsorbed = absorb;
+                    damageShield.LogAbsorbed = damageInfo1.GetAbsorb();
 
                     victim.DealDamage(this, damage, null, DamageEffectType.SpellDirect, i_spellProto.GetSchoolMask(), i_spellProto, true);
                     damageShield.LogData.Initialize(this);
@@ -1924,15 +1924,17 @@ namespace Game.Entities
             {
                 damageInfo.procVictim |= ProcFlags.TakenDamage;
                 // Calculate absorb & resists
-                CalcAbsorbResist(damageInfo.target, (SpellSchoolMask)damageInfo.damageSchoolMask, DamageEffectType.Direct, damageInfo.damage, ref damageInfo.absorb, ref damageInfo.resist);
+                DamageInfo dmgInfo = new DamageInfo(damageInfo);
+                CalcAbsorbResist(dmgInfo);
+                damageInfo.absorb = dmgInfo.GetAbsorb();
+                damageInfo.resist = dmgInfo.GetResist();
+                damageInfo.damage = dmgInfo.GetDamage();
 
                 if (damageInfo.absorb != 0)
                     damageInfo.HitInfo |= (damageInfo.damage - damageInfo.absorb == 0 ? HitInfo.FullAbsorb : HitInfo.PartialAbsorb);
 
                 if (damageInfo.resist != 0)
                     damageInfo.HitInfo |= (damageInfo.damage - damageInfo.resist == 0 ? HitInfo.FullResist : HitInfo.PartialResist);
-
-                damageInfo.damage -= damageInfo.absorb + damageInfo.resist;
             }
             else // Impossible get negative result but....
                 damageInfo.damage = 0;
@@ -2314,105 +2316,51 @@ namespace Game.Entities
             return resistance * 10;
         }
 
-        public void CalcAbsorbResist(Unit victim, SpellSchoolMask schoolMask, DamageEffectType damagetype, uint damage, ref uint absorb, ref uint resist, SpellInfo spellInfo = null)
+        public void CalcAbsorbResist(DamageInfo damageInfo)
         {
-            if (victim == null || !victim.IsAlive() || damage == 0)
+            if (!damageInfo.GetVictim() || !damageInfo.GetVictim().IsAlive() || damageInfo.GetDamage() == 0)
                 return;
 
-            DamageInfo dmgInfo = new DamageInfo(this, victim, damage, spellInfo, schoolMask, damagetype, WeaponAttackType.BaseAttack);
-
-            uint spellResistance = CalcSpellResistance(victim, schoolMask, spellInfo);
-            dmgInfo.ResistDamage(MathFunctions.CalculatePct(damage, spellResistance));
+            uint spellResistance = CalcSpellResistance(damageInfo.GetVictim(), damageInfo.GetSchoolMask(), damageInfo.GetSpellInfo());
+            damageInfo.ResistDamage(MathFunctions.CalculatePct(damageInfo.GetDamage(), spellResistance));
 
             // Ignore Absorption Auras
-            float auraAbsorbMod = 0;
-            var AbsIgnoreAurasA = GetAuraEffectsByType(AuraType.ModTargetAbsorbSchool);
-            foreach (var eff in AbsIgnoreAurasA)
+            float auraAbsorbMod = GetMaxPositiveAuraModifierByMiscMask(AuraType.ModTargetAbsorbSchool, (uint)damageInfo.GetSchoolMask());
+
+            var abilityAbsorbAuras = GetAuraEffectsByType(AuraType.ModTargetAbilityAbsorbSchool);
+            foreach (AuraEffect aurEff in abilityAbsorbAuras)
             {
-                if (!Convert.ToBoolean(eff.GetMiscValue() & (int)schoolMask))
+                if (!Convert.ToBoolean(aurEff.GetMiscValue() & (int)damageInfo.GetSchoolMask()))
                     continue;
 
-                if (eff.GetAmount() > auraAbsorbMod)
-                    auraAbsorbMod = eff.GetAmount();
-            }
-
-            var AbsIgnoreAurasB = GetAuraEffectsByType(AuraType.ModTargetAbilityAbsorbSchool);
-            foreach (var eff in AbsIgnoreAurasB)
-            {
-                if (!Convert.ToBoolean(eff.GetMiscValue() & (int)schoolMask))
+                if (!aurEff.IsAffectingSpell(damageInfo.GetSpellInfo()))
                     continue;
 
-                if ((eff.GetAmount() > auraAbsorbMod) && eff.IsAffectingSpell(spellInfo))
-                    auraAbsorbMod = eff.GetAmount();
+                if ((aurEff.GetAmount() > auraAbsorbMod))
+                    auraAbsorbMod = aurEff.GetAmount();
             }
+
             MathFunctions.RoundToInterval(ref auraAbsorbMod, 0.0f, 100.0f);
 
-            int absorbIgnoringDamage = (int)MathFunctions.CalculatePct(dmgInfo.GetDamage(), auraAbsorbMod);
-            dmgInfo.ModifyDamage(-absorbIgnoringDamage);
+            int absorbIgnoringDamage = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), auraAbsorbMod);
+            damageInfo.ModifyDamage(-absorbIgnoringDamage);
 
             // We're going to call functions which can modify content of the list during iteration over it's elements
             // Let's copy the list so we can prevent iterator invalidation
-            var vSchoolAbsorbCopy = victim.GetAuraEffectsByType(AuraType.SchoolAbsorb);
+            var vSchoolAbsorbCopy = damageInfo.GetVictim().GetAuraEffectsByType(AuraType.SchoolAbsorb);
             vSchoolAbsorbCopy.Sort(new AbsorbAuraOrderPred());
 
             // absorb without mana cost
-            foreach (var eff in vSchoolAbsorbCopy)
+            foreach (var absorbAurEff in vSchoolAbsorbCopy)
             {
-                // Check if aura was removed during iteration - we don't need to work on such auras
-                AuraApplication aurApp = eff.GetBase().GetApplicationOfTarget(victim.GetGUID());
-                if (aurApp == null)
-                    continue;
-                if (!Convert.ToBoolean(eff.GetMiscValue() & (int)schoolMask))
-                    continue;
-
-                // get amount which can be still absorbed by the aura
-                int currentAbsorb = eff.GetAmount();
-                // aura with infinite absorb amount - let the scripts handle absorbtion amount, set here to 0 for safety
-                if (currentAbsorb < 0)
-                    currentAbsorb = 0;
-
-                uint tempAbsorb = (uint)currentAbsorb;
-
-                bool defaultPrevented = false;
-
-                eff.GetBase().CallScriptEffectAbsorbHandlers(eff, aurApp, dmgInfo, ref tempAbsorb, ref defaultPrevented);
-                currentAbsorb = (int)tempAbsorb;
-
-                if (defaultPrevented)
-                    continue;
-
-                // absorb must be smaller than the damage itself
-                MathFunctions.RoundToInterval(ref currentAbsorb, 0, dmgInfo.GetDamage());
-
-                dmgInfo.AbsorbDamage((uint)currentAbsorb);
-
-                tempAbsorb = (uint)currentAbsorb;
-                eff.GetBase().CallScriptEffectAfterAbsorbHandlers(eff, aurApp, dmgInfo, ref tempAbsorb);
-
-                // Check if our aura is using amount to count damage
-                if (eff.GetAmount() >= 0)
-                {
-                    // Reduce shield amount
-                    eff.ChangeAmount(eff.GetAmount() - currentAbsorb);
-                    // Aura cannot absorb anything more - remove it
-                    if (eff.GetAmount() <= 0)
-                        eff.GetBase().Remove(AuraRemoveMode.EnemySpell);
-                }
-            }
-
-            // absorb by mana cost
-            var vManaShieldCopy = victim.GetAuraEffectsByType(AuraType.ManaShield);
-            foreach (var absorbAurEff in vManaShieldCopy)
-            {
-                if (dmgInfo.GetDamage() <= 0)
+                if (damageInfo.GetDamage() == 0)
                     break;
 
                 // Check if aura was removed during iteration - we don't need to work on such auras
-                AuraApplication aurApp = absorbAurEff.GetBase().GetApplicationOfTarget(victim.GetGUID());
+                AuraApplication aurApp = absorbAurEff.GetBase().GetApplicationOfTarget(damageInfo.GetVictim().GetGUID());
                 if (aurApp == null)
                     continue;
-                // check damage school mask
-                if (!Convert.ToBoolean(absorbAurEff.GetMiscValue() & (int)schoolMask))
+                if (!Convert.ToBoolean(absorbAurEff.GetMiscValue() & (int)damageInfo.GetSchoolMask()))
                     continue;
 
                 // get amount which can be still absorbed by the aura
@@ -2425,14 +2373,64 @@ namespace Game.Entities
 
                 bool defaultPrevented = false;
 
-                absorbAurEff.GetBase().CallScriptEffectManaShieldHandlers(absorbAurEff, aurApp, dmgInfo, ref tempAbsorb, defaultPrevented);
+                absorbAurEff.GetBase().CallScriptEffectAbsorbHandlers(absorbAurEff, aurApp, damageInfo, ref tempAbsorb, ref defaultPrevented);
                 currentAbsorb = (int)tempAbsorb;
 
                 if (defaultPrevented)
                     continue;
 
                 // absorb must be smaller than the damage itself
-                MathFunctions.RoundToInterval(ref currentAbsorb, 0, dmgInfo.GetDamage());
+                currentAbsorb = MathFunctions.RoundToInterval(ref currentAbsorb, 0, damageInfo.GetDamage());
+
+                damageInfo.AbsorbDamage((uint)currentAbsorb);
+
+                tempAbsorb = (uint)currentAbsorb;
+                absorbAurEff.GetBase().CallScriptEffectAfterAbsorbHandlers(absorbAurEff, aurApp, damageInfo, ref tempAbsorb);
+
+                // Check if our aura is using amount to count damage
+                if (absorbAurEff.GetAmount() >= 0)
+                {
+                    // Reduce shield amount
+                    absorbAurEff.ChangeAmount(absorbAurEff.GetAmount() - currentAbsorb);
+                    // Aura cannot absorb anything more - remove it
+                    if (absorbAurEff.GetAmount() <= 0)
+                        absorbAurEff.GetBase().Remove(AuraRemoveMode.EnemySpell);
+                }
+            }
+
+            // absorb by mana cost
+            var vManaShieldCopy = damageInfo.GetVictim().GetAuraEffectsByType(AuraType.ManaShield);
+            foreach (var absorbAurEff in vManaShieldCopy)
+            {
+                if (damageInfo.GetDamage() == 0)
+                    break;
+
+                // Check if aura was removed during iteration - we don't need to work on such auras
+                AuraApplication aurApp = absorbAurEff.GetBase().GetApplicationOfTarget(damageInfo.GetVictim().GetGUID());
+                if (aurApp == null)
+                    continue;
+                // check damage school mask
+                if (!Convert.ToBoolean(absorbAurEff.GetMiscValue() & (int)damageInfo.GetSchoolMask()))
+                    continue;
+
+                // get amount which can be still absorbed by the aura
+                int currentAbsorb = absorbAurEff.GetAmount();
+                // aura with infinite absorb amount - let the scripts handle absorbtion amount, set here to 0 for safety
+                if (currentAbsorb < 0)
+                    currentAbsorb = 0;
+
+                uint tempAbsorb = (uint)currentAbsorb;
+
+                bool defaultPrevented = false;
+
+                absorbAurEff.GetBase().CallScriptEffectManaShieldHandlers(absorbAurEff, aurApp, damageInfo, ref tempAbsorb, defaultPrevented);
+                currentAbsorb = (int)tempAbsorb;
+
+                if (defaultPrevented)
+                    continue;
+
+                // absorb must be smaller than the damage itself
+                currentAbsorb = MathFunctions.RoundToInterval(ref currentAbsorb, 0, damageInfo.GetDamage());
 
                 int manaReduction = currentAbsorb;
 
@@ -2441,15 +2439,15 @@ namespace Game.Entities
                 if (manaMultiplier != 0)
                     manaReduction = (int)(manaReduction * manaMultiplier);
 
-                int manaTaken = -victim.ModifyPower(PowerType.Mana, -manaReduction);
+                int manaTaken = -damageInfo.GetVictim().ModifyPower(PowerType.Mana, -manaReduction);
 
                 // take case when mana has ended up into account
-                currentAbsorb = currentAbsorb != 0 ? currentAbsorb * manaTaken / manaReduction : 0;
+                currentAbsorb = currentAbsorb != 0 ? (currentAbsorb * (manaTaken / manaReduction)) : 0;
 
-                dmgInfo.AbsorbDamage((uint)currentAbsorb);
+                damageInfo.AbsorbDamage((uint)currentAbsorb);
 
                 tempAbsorb = (uint)currentAbsorb;
-                absorbAurEff.GetBase().CallScriptEffectAfterManaShieldHandlers(absorbAurEff, aurApp, dmgInfo, ref tempAbsorb);
+                absorbAurEff.GetBase().CallScriptEffectAfterManaShieldHandlers(absorbAurEff, aurApp, damageInfo, ref tempAbsorb);
 
                 // Check if our aura is using amount to count damage
                 if (absorbAurEff.GetAmount() >= 0)
@@ -2460,67 +2458,63 @@ namespace Game.Entities
                 }
             }
 
-            dmgInfo.ModifyDamage(absorbIgnoringDamage);
+            damageInfo.ModifyDamage(absorbIgnoringDamage);
 
             // split damage auras - only when not damaging self
-            if (victim != this)
+            if (damageInfo.GetVictim() != this)
             {
                 // We're going to call functions which can modify content of the list during iteration over it's elements
                 // Let's copy the list so we can prevent iterator invalidation
-                var vSplitDamagePctCopy = victim.GetAuraEffectsByType(AuraType.SplitDamagePct);
-                foreach (var eff in vSplitDamagePctCopy)
+                var vSplitDamagePctCopy = damageInfo.GetVictim().GetAuraEffectsByType(AuraType.SplitDamagePct);
+                foreach (var itr in vSplitDamagePctCopy)
                 {
-                    if (dmgInfo.GetDamage() <= 0)
+                    if (damageInfo.GetDamage() == 0)
                         break;
 
                     // Check if aura was removed during iteration - we don't need to work on such auras
-                    AuraApplication aurApp = eff.GetBase().GetApplicationOfTarget(victim.GetGUID());
+                    AuraApplication aurApp = itr.GetBase().GetApplicationOfTarget(damageInfo.GetVictim().GetGUID());
                     if (aurApp == null)
                         continue;
 
                     // check damage school mask
-                    if (!Convert.ToBoolean(eff.GetMiscValue() & (int)schoolMask))
+                    if (!Convert.ToBoolean(itr.GetMiscValue() & (int)damageInfo.GetSchoolMask()))
                         continue;
 
                     // Damage can be splitted only if aura has an alive caster
-                    Unit caster = eff.GetCaster();
-                    if (caster == null || (caster == victim) || !caster.IsInWorld || !caster.IsAlive())
+                    Unit caster = itr.GetCaster();
+                    if (!caster || (caster == damageInfo.GetVictim()) || !caster.IsInWorld || !caster.IsAlive())
                         continue;
 
-                    uint splitDamage = MathFunctions.CalculatePct(dmgInfo.GetDamage(), eff.GetAmount());
+                    uint splitDamage = MathFunctions.CalculatePct(damageInfo.GetDamage(), itr.GetAmount());
 
-                    eff.GetBase().CallScriptEffectSplitHandlers(eff, aurApp, dmgInfo, splitDamage);
+                    itr.GetBase().CallScriptEffectSplitHandlers(itr, aurApp, damageInfo, splitDamage);
 
                     // absorb must be smaller than the damage itself
-                    MathFunctions.RoundToInterval(ref splitDamage, 0, dmgInfo.GetDamage());
+                    splitDamage = MathFunctions.RoundToInterval(ref splitDamage, 0, damageInfo.GetDamage());
 
-                    dmgInfo.AbsorbDamage(splitDamage);
+                    damageInfo.AbsorbDamage(splitDamage);
 
                     // check if caster is immune to damage
-                    if (caster.IsImmunedToDamage(schoolMask))
+                    if (caster.IsImmunedToDamage(damageInfo.GetSchoolMask()))
                     {
-                        victim.SendSpellMiss(caster, eff.GetSpellInfo().Id, SpellMissInfo.Immune);
+                        damageInfo.GetVictim().SendSpellMiss(caster, itr.GetSpellInfo().Id, SpellMissInfo.Immune);
                         continue;
                     }
 
                     uint split_absorb = 0;
                     DealDamageMods(caster, ref splitDamage, ref split_absorb);
 
-                    SpellNonMeleeDamage log = new SpellNonMeleeDamage(this, caster, eff.GetSpellInfo().Id, eff.GetBase().GetSpellXSpellVisualId(), schoolMask, eff.GetBase().GetCastGUID());
+                    SpellNonMeleeDamage log = new SpellNonMeleeDamage(this, caster, itr.GetSpellInfo().Id, itr.GetBase().GetSpellXSpellVisualId(), damageInfo.GetSchoolMask(), itr.GetBase().GetCastGUID());
                     CleanDamage cleanDamage = new CleanDamage(splitDamage, 0, WeaponAttackType.BaseAttack, MeleeHitOutcome.Normal);
-                    DealDamage(caster, splitDamage, cleanDamage, DamageEffectType.Direct, schoolMask, eff.GetSpellInfo(), false);
+                    DealDamage(caster, splitDamage, cleanDamage, DamageEffectType.Direct, damageInfo.GetSchoolMask(), itr.GetSpellInfo(), false);
                     log.damage = splitDamage;
                     log.absorb = split_absorb;
                     SendSpellNonMeleeDamageLog(log);
 
                     // break 'Fear' and similar auras
-                    DamageInfo damageInfo = new DamageInfo(caster, this, splitDamage, eff.GetSpellInfo(), schoolMask, DamageEffectType.Direct, WeaponAttackType.BaseAttack);
                     ProcSkillsAndAuras(caster, ProcFlags.None, ProcFlags.TakenSpellMagicDmgClassNeg, ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.Hit, ProcFlagsHit.None, null, damageInfo, null);
                 }
             }
-
-            resist = dmgInfo.GetResist();
-            absorb = dmgInfo.GetAbsorb();
         }
 
         public void CalcHealAbsorb(HealInfo healInfo)

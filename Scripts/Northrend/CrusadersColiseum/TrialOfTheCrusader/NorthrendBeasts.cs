@@ -399,9 +399,12 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                 switch (eventId)
                 {
                     case Events.FireBomb:
-                        Unit target = SelectTarget(SelectAggroTarget.Random, 0, -me.GetVehicleBase().GetCombatReach(), true);
-                        if (target)
-                            me.CastSpell(target, SpellIds.FireBomb);
+                        if (me.GetVehicleBase())
+                        {
+                            Unit target = SelectTarget(SelectAggroTarget.Random, 0, -me.GetVehicleBase().GetCombatReach(), true);
+                            if (target)
+                                me.CastSpell(target, SpellIds.FireBomb);
+                        }
                         _events.Repeat(TimeSpan.FromSeconds(20));
                         break;
                     case Events.HeadCrack:

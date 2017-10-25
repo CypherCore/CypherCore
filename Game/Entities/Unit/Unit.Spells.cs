@@ -2439,15 +2439,13 @@ namespace Game.Entities
             Global.ScriptMgr.ModifySpellDamageTaken(damageInfo.target, damageInfo.attacker, ref damage);
 
             // Calculate absorb resist
-            if (damage > 0)
-            {
-                CalcAbsorbResist(victim, damageSchoolMask, DamageEffectType.SpellDirect, (uint)damage, ref damageInfo.absorb, ref damageInfo.resist, spellInfo);
-                damage -= (int)(damageInfo.absorb + damageInfo.resist);
-            }
-            else
+            if (damage < 0)
                 damage = 0;
 
             damageInfo.damage = (uint)damage;
+            DamageInfo dmgInfo = new DamageInfo(damageInfo, DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack, ProcFlagsHit.None);
+            CalcAbsorbResist(dmgInfo);
+            damageInfo.damage = dmgInfo.GetDamage();
         }
         public void DealSpellDamage(SpellNonMeleeDamage damageInfo, bool durabilityLoss)
         {
@@ -2664,9 +2662,6 @@ namespace Game.Entities
             if (diminish.HitCount == 0)
                 return DiminishingLevels.Level1;
 
-            if (diminish.HitTime == 0)
-                return DiminishingLevels.Level1;
-
             // If last spell was cast more than 18 seconds ago - reset the count.
             if (diminish.Stack == 0 && Time.GetMSTimeDiffToNow(diminish.HitTime) > 18 * Time.InMilliseconds)
             {
@@ -2860,6 +2855,9 @@ namespace Game.Entities
 
                 if (spell.getState() != SpellState.Finished)
                     spell.cancel();
+
+                if (IsCreature() && IsAIEnabled)
+                    ToCreature().GetAI().OnSpellCastInterrupt(spell.GetSpellInfo());
 
                 m_currentSpells[spellType] = null;
                 spell.SetReferencedFromCurrent(false);

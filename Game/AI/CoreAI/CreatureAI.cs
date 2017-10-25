@@ -432,6 +432,9 @@ namespace Game.AI
 
         public virtual void MovementInform(MovementGeneratorType type, uint id) { }
 
+        // Called when a spell cast gets interrupted
+        public virtual void OnSpellCastInterrupt(SpellInfo spell) { }
+
         // Called at reaching home after evade
         public virtual void JustReachedHome() { }
         

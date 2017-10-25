@@ -1891,7 +1891,19 @@ namespace Game.Spells
                 if (m_damage > 0)
                     positive = false;
                 else if (m_healing == 0)
-                    positive = m_spellInfo.IsPositive();
+                {
+                    for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+                    {
+                        if (!Convert.ToBoolean(target.effectMask & (1 << i)))
+                            continue;
+
+                        if (!m_spellInfo.IsPositiveEffect(i))
+                        {
+                            positive = false;
+                            break;
+                        }
+                    }
+                }
 
                 switch (m_spellInfo.DmgClass)
                 {
@@ -2077,11 +2089,7 @@ namespace Game.Spells
                     return SpellMissInfo.Evade;
 
                 if (m_caster._IsValidAttackTarget(unit, m_spellInfo))
-                {
                     unit.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Hitbyspell);
-                    if (!m_spellInfo.HasAttribute(SpellCustomAttributes.DontBreakStealth))
-                        unit.RemoveAurasByType(AuraType.ModStealth);
-                }
                 else if (m_caster.IsFriendlyTo(unit))
                 {
                     // for delayed spells ignore negative spells (after duel end) for friendly targets

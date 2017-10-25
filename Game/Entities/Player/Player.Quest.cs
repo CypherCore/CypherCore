@@ -1045,7 +1045,10 @@ namespace Game.Entities
             if (quest.RewardSpell > 0)
             {
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.RewardSpell);
-                if (questGiver.isTypeMask(TypeMask.Unit) && !spellInfo.HasEffect(Difficulty.None, SpellEffectName.LearnSpell) && !spellInfo.HasEffect(Difficulty.None, SpellEffectName.CreateItem) && !spellInfo.HasEffect(Difficulty.None, SpellEffectName.ApplyAura))
+                if (questGiver && questGiver.isTypeMask(TypeMask.Unit) 
+                    && !spellInfo.HasEffect(Difficulty.None, SpellEffectName.LearnSpell) 
+                    && !spellInfo.HasEffect(Difficulty.None, SpellEffectName.CreateItem) 
+                    && !spellInfo.HasEffect(Difficulty.None, SpellEffectName.ApplyAura))
                 {
                     Unit unit = questGiver.ToUnit();
                     if (unit)
@@ -1061,7 +1064,9 @@ namespace Game.Entities
                     if (quest.RewardDisplaySpell[i] > 0)
                     {
                         SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.RewardDisplaySpell[i]);
-                        if (questGiver.IsTypeId(TypeId.Unit) && !spellInfo.HasEffect(Difficulty.None, SpellEffectName.LearnSpell) && !spellInfo.HasEffect(Difficulty.None, SpellEffectName.CreateItem))
+                        if (questGiver && questGiver.IsTypeId(TypeId.Unit)
+                            && !spellInfo.HasEffect(Difficulty.None, SpellEffectName.LearnSpell)
+                            && !spellInfo.HasEffect(Difficulty.None, SpellEffectName.CreateItem))
                         {
                             Unit unit = questGiver.ToUnit();
                             if (unit)
@@ -2639,7 +2644,10 @@ namespace Game.Entities
         public void SetQuestObjectiveData(QuestObjective objective, int data)
         {
             if (objective.StorageIndex < 0)
+            {
                 Log.outError(LogFilter.Player, "SetQuestObjectiveData: called for quest {0} with invalid StorageIndex {1} (objective data is not tracked)", objective.QuestID, objective.StorageIndex);
+                return;
+            }
 
             var status = m_QuestStatus.LookupByKey(objective.QuestID);
             if (status == null)
