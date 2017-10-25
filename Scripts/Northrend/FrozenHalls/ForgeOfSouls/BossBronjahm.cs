@@ -224,9 +224,9 @@ namespace Scripts.Northrend.FrozenHalls.ForgeOfSouls.Bronjahm
     }
 
     [Script]
-    class npc_corrupted_soul_fragmentAI : ScriptedAI
+    class npc_corrupted_soul_fragment : ScriptedAI
     {
-        public npc_corrupted_soul_fragmentAI(Creature creature) : base(creature)
+        public npc_corrupted_soul_fragment(Creature creature) : base(creature)
         {
             instance = me.GetInstanceScript();
         }

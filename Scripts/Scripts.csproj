@@ -60,6 +60,7 @@
     <Compile Include="EasternKingdoms\Deadmines\InstanceDeadmines.cs" />
     <Compile Include="EasternKingdoms\TheStockade\BossHogger.cs" />
     <Compile Include="EasternKingdoms\TheStockade\InstanceTheStockade.cs" />
+    <Compile Include="Events\HallowsEnd.cs" />
     <Compile Include="Kalimdor\ZoneAshenvale.cs" />
     <Compile Include="Northrend\AzjolNerub\AzjolNerub\BossAnubarak.cs" />
     <Compile Include="Northrend\AzjolNerub\AzjolNerub\BossKrikthirTheGatewatcher.cs" />
@@ -73,6 +74,8 @@
     <Compile Include="Northrend\FrozenHalls\ForgeOfSouls\BossBronjahm.cs" />
     <Compile Include="Northrend\FrozenHalls\ForgeOfSouls\BossDevourerOfSouls.cs" />
     <Compile Include="Northrend\FrozenHalls\ForgeOfSouls\InstanceForgeOfSouls.cs" />
+    <Compile Include="Northrend\FrozenHalls\PitOfSaron\BossForgemasterGarfrost.cs" />
+    <Compile Include="Northrend\FrozenHalls\PitOfSaron\BossKrickAndIck.cs" />
     <Compile Include="Northrend\FrozenHalls\PitOfSaron\InstancePitOfSaron.cs" />
     <Compile Include="Northrend\FrozenHalls\PitOfSaron\PitOfSaron.cs" />
     <Compile Include="Northrend\Gundrak\BossDrakkariColossus.cs" />
