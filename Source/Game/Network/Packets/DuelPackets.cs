@@ -29,7 +29,7 @@ namespace Game.Network.Packets
             TargetGUID = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid TargetGUID;
+        public ObjectGuid TargetGUID { get; set; }
     }
 
     public class CanDuelResult : ServerPacket
@@ -43,8 +43,8 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public ObjectGuid TargetGUID;
-        public bool Result;
+        public ObjectGuid TargetGUID { get; set; }
+        public bool Result { get; set; }
     }
 
     public class DuelComplete : ServerPacket
@@ -57,7 +57,7 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public bool Started;
+        public bool Started { get; set; }
     }
 
     public class DuelCountdown : ServerPacket
@@ -100,9 +100,9 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(RequestedByWowAccount);
         }
 
-        public ObjectGuid ArbiterGUID;
-        public ObjectGuid RequestedByGUID;
-        public ObjectGuid RequestedByWowAccount;
+        public ObjectGuid ArbiterGUID { get; set; }
+        public ObjectGuid RequestedByGUID { get; set; }
+        public ObjectGuid RequestedByWowAccount { get; set; }
     }
 
     public class DuelResponse : ClientPacket
@@ -115,8 +115,8 @@ namespace Game.Network.Packets
             Accepted = _worldPacket.HasBit();
         }
 
-        public ObjectGuid ArbiterGUID;
-        public bool Accepted;
+        public ObjectGuid ArbiterGUID { get; set; }
+        public bool Accepted { get; set; }
     }
 
     public class DuelWinner : ServerPacket
@@ -134,10 +134,10 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(WinnerName);
         }
 
-        public string BeatenName;
-        public string WinnerName;
-        public uint BeatenVirtualRealmAddress;
-        public uint WinnerVirtualRealmAddress;
-        public bool Fled;
+        public string BeatenName { get; set; }
+        public string WinnerName { get; set; }
+        public uint BeatenVirtualRealmAddress { get; set; }
+        public uint WinnerVirtualRealmAddress { get; set; }
+        public bool Fled { get; set; }
     }
 }

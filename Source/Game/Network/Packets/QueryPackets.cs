@@ -35,7 +35,7 @@ namespace Game.Network.Packets
             Player = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Player;
+        public ObjectGuid Player { get; set; }
     }
 
     public class QueryPlayerNameResponse : ServerPacket
@@ -54,9 +54,9 @@ namespace Game.Network.Packets
                 Data.Write(_worldPacket);
         }
 
-        public ObjectGuid Player;
+        public ObjectGuid Player { get; set; }
         public ResponseCodes Result; // 0 - full packet, != 0 - only guid
-        public PlayerGuidLookupData Data;
+        public PlayerGuidLookupData Data { get; set; }
     }
 
     public class QueryCreature : ClientPacket
@@ -68,7 +68,7 @@ namespace Game.Network.Packets
             CreatureID = _worldPacket.ReadUInt32();
         }
 
-        public uint CreatureID;
+        public uint CreatureID { get; set; }
     }
 
     public class QueryCreatureResponse : ServerPacket
@@ -138,9 +138,9 @@ namespace Game.Network.Packets
             }
         }
 
-        public bool Allow;
-        public CreatureStats Stats;
-        public uint CreatureID;
+        public bool Allow { get; set; }
+        public CreatureStats Stats { get; set; }
+        public uint CreatureID { get; set; }
     }
 
     public class QueryPageText : ClientPacket
@@ -153,8 +153,8 @@ namespace Game.Network.Packets
             ItemGUID = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid ItemGUID;
-        public uint PageTextID;
+        public ObjectGuid ItemGUID { get; set; }
+        public uint PageTextID { get; set; }
     }
 
     public class QueryPageTextResponse : ServerPacket
@@ -175,9 +175,9 @@ namespace Game.Network.Packets
             }
         }
 
-        public uint PageTextID;
-        public bool Allow;
-        public List<PageTextInfo> Pages = new List<PageTextInfo>();
+        public uint PageTextID { get; set; }
+        public bool Allow { get; set; }
+        public List<PageTextInfo> Pages { get; set; } = new List<PageTextInfo>();
 
         public struct PageTextInfo
         {
@@ -193,10 +193,10 @@ namespace Game.Network.Packets
                 data.WriteString(Text);
             }
 
-            public uint ID;
-            public uint NextPageID;
-            public int PlayerConditionID;
-            public byte Flags;
+            public uint ID { get; set; }
+            public uint NextPageID { get; set; }
+            public int PlayerConditionID { get; set; }
+            public byte Flags { get; set; }
             public string Text;
         }
     }
@@ -211,8 +211,8 @@ namespace Game.Network.Packets
             Guid = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Guid;
-        public uint TextID;
+        public ObjectGuid Guid { get; set; }
+        public uint TextID { get; set; }
     }
 
     public class QueryNPCTextResponse : ServerPacket
@@ -235,10 +235,10 @@ namespace Game.Network.Packets
             }
         }
 
-        public uint TextID;
-        public bool Allow;
-        public float[] Probabilities = new float[SharedConst.MaxNpcTextOptions];
-        public uint[] BroadcastTextID = new uint[SharedConst.MaxNpcTextOptions];
+        public uint TextID { get; set; }
+        public bool Allow { get; set; }
+        public float[] Probabilities { get; set; } = new float[SharedConst.MaxNpcTextOptions];
+        public uint[] BroadcastTextID { get; set; } = new uint[SharedConst.MaxNpcTextOptions];
     }
 
     public class QueryGameObject : ClientPacket
@@ -251,8 +251,8 @@ namespace Game.Network.Packets
             Guid = _worldPacket.ReadPackedGuid();
         }
 
-        public uint GameObjectID;
-        public ObjectGuid Guid;
+        public uint GameObjectID { get; set; }
+        public ObjectGuid Guid { get; set; }
     }
 
     public class QueryGameObjectResponse : ServerPacket
@@ -294,9 +294,9 @@ namespace Game.Network.Packets
                 _worldPacket.WriteBytes(statsData);
         }
 
-        public uint GameObjectID;
-        public bool Allow;
-        public GameObjectStats Stats;
+        public uint GameObjectID { get; set; }
+        public bool Allow { get; set; }
+        public GameObjectStats Stats { get; set; }
     }
 
     public class QueryCorpseLocationFromClient : ClientPacket
@@ -308,7 +308,7 @@ namespace Game.Network.Packets
             Player = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Player;
+        public ObjectGuid Player { get; set; }
     }
 
     public class CorpseLocation : ServerPacket
@@ -327,12 +327,12 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(Transport);
         }
 
-        public ObjectGuid Player;
-        public ObjectGuid Transport;
-        public Vector3 Position;
-        public int ActualMapID;
-        public int MapID;
-        public bool Valid;
+        public ObjectGuid Player { get; set; }
+        public ObjectGuid Transport { get; set; }
+        public Vector3 Position { get; set; }
+        public int ActualMapID { get; set; }
+        public int MapID { get; set; }
+        public bool Valid { get; set; }
     }
 
     public class QueryCorpseTransport : ClientPacket
@@ -345,8 +345,8 @@ namespace Game.Network.Packets
             Transport = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Player;
-        public ObjectGuid Transport;
+        public ObjectGuid Player { get; set; }
+        public ObjectGuid Transport { get; set; }
     }
 
     public class CorpseTransportQuery : ServerPacket
@@ -360,9 +360,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteFloat(Facing);
         }
 
-        public ObjectGuid Player;
-        public Vector3 Position;
-        public float Facing;
+        public ObjectGuid Player { get; set; }
+        public Vector3 Position { get; set; }
+        public float Facing { get; set; }
     }
 
     public class QueryTime : ClientPacket
@@ -381,7 +381,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(CurrentTime);
         }
 
-        public long CurrentTime;
+        public long CurrentTime { get; set; }
     }
 
     public class QuestPOIQuery : ClientPacket
@@ -396,8 +396,8 @@ namespace Game.Network.Packets
                 MissingQuestPOIs[i] = _worldPacket.ReadUInt32();
         }
 
-        public int MissingQuestCount;
-        public uint[] MissingQuestPOIs = new uint[50];
+        public int MissingQuestCount { get; set; }
+        public uint[] MissingQuestPOIs { get; set; } = new uint[50];
     }
 
     public class QuestPOIQueryResponse : ServerPacket
@@ -440,7 +440,7 @@ namespace Game.Network.Packets
             }
         }
 
-        public List<QuestPOIData> QuestPOIDataStats = new List<QuestPOIData>();
+        public List<QuestPOIData> QuestPOIDataStats { get; set; } = new List<QuestPOIData>();
     }
 
     class QueryQuestCompletionNPCs : ClientPacket
@@ -456,7 +456,7 @@ namespace Game.Network.Packets
                 QuestCompletionNPCs[i] = _worldPacket.ReadUInt32();
         }
 
-        public uint[] QuestCompletionNPCs;
+        public uint[] QuestCompletionNPCs { get; set; }
     }
 
     class QuestCompletionNPCResponse : ServerPacket
@@ -476,7 +476,7 @@ namespace Game.Network.Packets
             }
         }
 
-        public List<QuestCompletionNPC> QuestCompletionNPCs = new List<QuestCompletionNPC>();
+        public List<QuestCompletionNPC> QuestCompletionNPCs { get; set; } = new List<QuestCompletionNPC>();
     }
 
     class QueryPetName : ClientPacket
@@ -488,7 +488,7 @@ namespace Game.Network.Packets
             UnitGUID = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid UnitGUID;
+        public ObjectGuid UnitGUID { get; set; }
     }
 
     class QueryPetNameResponse : ServerPacket
@@ -518,13 +518,13 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public ObjectGuid UnitGUID;
-        public bool Allow;
+        public ObjectGuid UnitGUID { get; set; }
+        public bool Allow { get; set; }
 
-        public bool HasDeclined;
-        public DeclinedName DeclinedNames = new DeclinedName();
-        public uint Timestamp;
-        public string Name = "";
+        public bool HasDeclined { get; set; }
+        public DeclinedName DeclinedNames { get; set; } = new DeclinedName();
+        public uint Timestamp { get; set; }
+        public string Name { get; set; } = "";
     }
 
     class ItemTextQuery : ClientPacket
@@ -536,7 +536,7 @@ namespace Game.Network.Packets
             Id = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Id;
+        public ObjectGuid Id { get; set; }
     }
 
     class QueryItemTextResponse : ServerPacket
@@ -553,9 +553,9 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(Id);
         }
 
-        public ObjectGuid Id;
-        public bool Valid;
-        public string Text;
+        public ObjectGuid Id { get; set; }
+        public bool Valid { get; set; }
+        public string Text { get; set; }
     }
 
     class QueryRealmName : ClientPacket
@@ -567,7 +567,7 @@ namespace Game.Network.Packets
             VirtualRealmAddress = _worldPacket.ReadUInt32();
         }
 
-        public uint VirtualRealmAddress;
+        public uint VirtualRealmAddress { get; set; }
     }
 
     class RealmQueryResponse : ServerPacket
@@ -582,8 +582,8 @@ namespace Game.Network.Packets
                 NameInfo.Write(_worldPacket);
         }
 
-        public uint VirtualRealmAddress;
-        public byte LookupState;
+        public uint VirtualRealmAddress { get; set; }
+        public byte LookupState { get; set; }
         public VirtualRealmNameInfo NameInfo;
     }
 
@@ -603,8 +603,8 @@ namespace Game.Network.Packets
                 data.WriteUInt32(NativeRealmAddress.Value);
         }
 
-        public Optional<uint> VirtualRealmAddress = new Optional<uint>(); // current realm (?) (identifier made from the Index, BattleGroup and Region)
-        public Optional<uint> NativeRealmAddress = new Optional<uint>(); // original realm (?) (identifier made from the Index, BattleGroup and Region)
+        public Optional<uint> VirtualRealmAddress { get; set; } = new Optional<uint>(); // current realm (?) (identifier made from the Index, BattleGroup and Region)
+        public Optional<uint> NativeRealmAddress { get; set; } = new Optional<uint>(); // original realm (?) (identifier made from the Index, BattleGroup and Region)
     }
 
     public class PlayerGuidLookupData
@@ -675,17 +675,17 @@ namespace Game.Network.Packets
             data.WriteString(Name);
         }
 
-        public bool IsDeleted;
-        public ObjectGuid AccountID;
-        public ObjectGuid BnetAccountID;
-        public ObjectGuid GuidActual;
-        public string Name = "";
-        public uint VirtualRealmAddress;
-        public Race RaceID = Race.None;
-        public Gender Sex = Gender.None;
-        public Class ClassID = Class.None;
-        public byte Level;
-        public DeclinedName DeclinedNames = new DeclinedName();
+        public bool IsDeleted { get; set; }
+        public ObjectGuid AccountID { get; set; }
+        public ObjectGuid BnetAccountID { get; set; }
+        public ObjectGuid GuidActual { get; set; }
+        public string Name { get; set; } = "";
+        public uint VirtualRealmAddress { get; set; }
+        public Race RaceID { get; set; } = Race.None;
+        public Gender Sex { get; set; } = Gender.None;
+        public Class ClassID { get; set; } = Class.None;
+        public byte Level { get; set; }
+        public DeclinedName DeclinedNames { get; set; } = new DeclinedName();
     }
 
     public class CreatureStats
@@ -693,42 +693,42 @@ namespace Game.Network.Packets
         public string Title = "";
         public string TitleAlt = "";
         public string CursorName = "";
-        public int CreatureType;
-        public int CreatureFamily;
-        public int Classification;
-        public float HpMulti;
-        public float EnergyMulti;
-        public bool Leader;
-        public List<uint> QuestItems = new List<uint>();
-        public uint CreatureMovementInfoID;
-        public int HealthScalingExpansion;
-        public uint RequiredExpansion;
-        public uint VignetteID;
-        public uint[] Flags = new uint[2];
-        public uint[] ProxyCreatureID = new uint[SharedConst.MaxCreatureKillCredit];
-        public uint[] CreatureDisplayID = new uint[SharedConst.MaxCreatureModelIds];
-        public StringArray Name = new StringArray(SharedConst.MaxCreatureNames);
-        public StringArray NameAlt = new StringArray(SharedConst.MaxCreatureNames);
+        public int CreatureType { get; set; }
+        public int CreatureFamily { get; set; }
+        public int Classification { get; set; }
+        public float HpMulti { get; set; }
+        public float EnergyMulti { get; set; }
+        public bool Leader { get; set; }
+        public List<uint> QuestItems { get; set; } = new List<uint>();
+        public uint CreatureMovementInfoID { get; set; }
+        public int HealthScalingExpansion { get; set; }
+        public uint RequiredExpansion { get; set; }
+        public uint VignetteID { get; set; }
+        public uint[] Flags { get; set; } = new uint[2];
+        public uint[] ProxyCreatureID { get; set; } = new uint[SharedConst.MaxCreatureKillCredit];
+        public uint[] CreatureDisplayID { get; set; } = new uint[SharedConst.MaxCreatureModelIds];
+        public StringArray Name { get; set; } = new StringArray(SharedConst.MaxCreatureNames);
+        public StringArray NameAlt { get; set; } = new StringArray(SharedConst.MaxCreatureNames);
     }
 
     public struct DBQueryRecord
     {
-        public ObjectGuid GUID;
-        public uint RecordID;
+        public ObjectGuid GUID { get; set; }
+        public uint RecordID { get; set; }
     }
 
     public class GameObjectStats
     {
-        public string[] Name = new string[4];
+        public string[] Name { get; set; } = new string[4];
         public string IconName;
         public string CastBarCaption;
         public string UnkString;
-        public uint Type;
-        public uint DisplayID;
-        public int[] Data = new int[33];
-        public float Size;
-        public List<int> QuestItems = new List<int>();
-        public uint RequiredLevel;
+        public uint Type { get; set; }
+        public uint DisplayID { get; set; }
+        public int[] Data { get; set; } = new int[33];
+        public float Size { get; set; }
+        public List<int> QuestItems { get; set; } = new List<int>();
+        public uint RequiredLevel { get; set; }
     }
 
     public struct QuestPOIBlobPoint
@@ -739,36 +739,36 @@ namespace Game.Network.Packets
             Y = y;
         }
 
-        public int X;
-        public int Y;
+        public int X { get; set; }
+        public int Y { get; set; }
     }
 
     public class QuestPOIBlobData
     {
-        public int BlobIndex;
-        public int ObjectiveIndex;
-        public int QuestObjectiveID;
-        public int QuestObjectID;
-        public int MapID;
-        public int WorldMapAreaID;
-        public int Floor;
-        public int Priority;
-        public int Flags;
-        public int WorldEffectID;
-        public int PlayerConditionID;
-        public int UnkWoD1;
-        public List<QuestPOIBlobPoint> QuestPOIBlobPointStats = new List<QuestPOIBlobPoint>();
+        public int BlobIndex { get; set; }
+        public int ObjectiveIndex { get; set; }
+        public int QuestObjectiveID { get; set; }
+        public int QuestObjectID { get; set; }
+        public int MapID { get; set; }
+        public int WorldMapAreaID { get; set; }
+        public int Floor { get; set; }
+        public int Priority { get; set; }
+        public int Flags { get; set; }
+        public int WorldEffectID { get; set; }
+        public int PlayerConditionID { get; set; }
+        public int UnkWoD1 { get; set; }
+        public List<QuestPOIBlobPoint> QuestPOIBlobPointStats { get; set; } = new List<QuestPOIBlobPoint>();
     }
 
     public class QuestPOIData
     {
-        public uint QuestID;
-        public List<QuestPOIBlobData> QuestPOIBlobDataStats = new List<QuestPOIBlobData>();
+        public uint QuestID { get; set; }
+        public List<QuestPOIBlobData> QuestPOIBlobDataStats { get; set; } = new List<QuestPOIBlobData>();
     }
 
     class QuestCompletionNPC
     {
-        public uint QuestID;
-        public List<uint> NPCs = new List<uint>();
+        public uint QuestID { get; set; }
+        public List<uint> NPCs { get; set; } = new List<uint>();
     }
 }

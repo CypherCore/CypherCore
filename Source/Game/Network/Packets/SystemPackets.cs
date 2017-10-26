@@ -123,92 +123,92 @@ namespace Game.Network.Packets
             }
         }
 
-        public bool VoiceEnabled;
-        public bool BrowserEnabled;
-        public bool BpayStoreAvailable;
-        public bool RecruitAFriendSendingEnabled;
-        public bool BpayStoreEnabled;
-        public Optional<SessionAlertConfig> SessionAlert;
-        public uint ScrollOfResurrectionMaxRequestsPerDay;
-        public bool ScrollOfResurrectionEnabled;
+        public bool VoiceEnabled { get; set; }
+        public bool BrowserEnabled { get; set; }
+        public bool BpayStoreAvailable { get; set; }
+        public bool RecruitAFriendSendingEnabled { get; set; }
+        public bool BpayStoreEnabled { get; set; }
+        public Optional<SessionAlertConfig> SessionAlert { get; set; }
+        public uint ScrollOfResurrectionMaxRequestsPerDay { get; set; }
+        public bool ScrollOfResurrectionEnabled { get; set; }
         public Optional<EuropaTicketConfig> EuropaTicketSystemStatus;
-        public uint ScrollOfResurrectionRequestsRemaining;
-        public uint CfgRealmID;
-        public byte ComplaintStatus;
-        public int CfgRealmRecID;
-        public uint TwitterPostThrottleLimit;
-        public uint TwitterPostThrottleCooldown;
-        public uint TokenPollTimeSeconds;
-        public uint TokenRedeemIndex;
-        public long TokenBalanceAmount;
-        public bool ItemRestorationButtonEnabled;
+        public uint ScrollOfResurrectionRequestsRemaining { get; set; }
+        public uint CfgRealmID { get; set; }
+        public byte ComplaintStatus { get; set; }
+        public int CfgRealmRecID { get; set; }
+        public uint TwitterPostThrottleLimit { get; set; }
+        public uint TwitterPostThrottleCooldown { get; set; }
+        public uint TokenPollTimeSeconds { get; set; }
+        public uint TokenRedeemIndex { get; set; }
+        public long TokenBalanceAmount { get; set; }
+        public bool ItemRestorationButtonEnabled { get; set; }
         public bool CharUndeleteEnabled; // Implemented
-        public bool BpayStoreDisabledByParentalControls;
-        public bool TwitterEnabled;
-        public bool CommerceSystemEnabled;
-        public bool Unk67;
-        public bool WillKickFromWorld;
+        public bool BpayStoreDisabledByParentalControls { get; set; }
+        public bool TwitterEnabled { get; set; }
+        public bool CommerceSystemEnabled { get; set; }
+        public bool Unk67 { get; set; }
+        public bool WillKickFromWorld { get; set; }
 
-        public bool RestrictedAccount;
-        public bool TutorialsEnabled;
-        public bool NPETutorialsEnabled;
-        public bool KioskModeEnabled;
-        public bool CompetitiveModeEnabled;
-        public bool TokenBalanceEnabled;
+        public bool RestrictedAccount { get; set; }
+        public bool TutorialsEnabled { get; set; }
+        public bool NPETutorialsEnabled { get; set; }
+        public bool KioskModeEnabled { get; set; }
+        public bool CompetitiveModeEnabled { get; set; }
+        public bool TokenBalanceEnabled { get; set; }
 
-        public Optional<List<byte>> RaceClassExpansionLevels;
-        public SocialQueueConfig QuickJoinConfig;
+        public Optional<List<byte>> RaceClassExpansionLevels { get; set; }
+        public SocialQueueConfig QuickJoinConfig { get; set; }
 
         public struct SavedThrottleObjectState
         {
-            public uint MaxTries;
-            public uint PerMilliseconds;
-            public uint TryCount;
-            public uint LastResetTimeBeforeNow;
+            public uint MaxTries { get; set; }
+            public uint PerMilliseconds { get; set; }
+            public uint TryCount { get; set; }
+            public uint LastResetTimeBeforeNow { get; set; }
         }
 
         public struct EuropaTicketConfig
         {
-            public bool TicketsEnabled;
-            public bool BugsEnabled;
-            public bool ComplaintsEnabled;
-            public bool SuggestionsEnabled;
+            public bool TicketsEnabled { get; set; }
+            public bool BugsEnabled { get; set; }
+            public bool ComplaintsEnabled { get; set; }
+            public bool SuggestionsEnabled { get; set; }
 
             public SavedThrottleObjectState ThrottleState;
         }
 
         public struct SessionAlertConfig
         {
-            public int Delay;
-            public int Period;
-            public int DisplayTime;
+            public int Delay { get; set; }
+            public int Period { get; set; }
+            public int DisplayTime { get; set; }
         }
 
         public struct SocialQueueConfig
         {
-            public bool ToastsDisabled;
-            public float ToastDuration;
-            public float DelayDuration;
-            public float QueueMultiplier;
-            public float PlayerMultiplier;
-            public float PlayerFriendValue;
-            public float PlayerGuildValue;
-            public float ThrottleInitialThreshold;
-            public float ThrottleDecayTime;
-            public float ThrottlePrioritySpike;
-            public float ThrottleMinThreshold;
-            public float ThrottlePvPPriorityNormal;
-            public float ThrottlePvPPriorityLow;
-            public float ThrottlePvPHonorThreshold;
-            public float ThrottleLfgListPriorityDefault;
-            public float ThrottleLfgListPriorityAbove;
-            public float ThrottleLfgListPriorityBelow;
-            public float ThrottleLfgListIlvlScalingAbove;
-            public float ThrottleLfgListIlvlScalingBelow;
-            public float ThrottleRfPriorityAbove;
-            public float ThrottleRfIlvlScalingAbove;
-            public float ThrottleDfMaxItemLevel;
-            public float ThrottleDfBestPriority;
+            public bool ToastsDisabled { get; set; }
+            public float ToastDuration { get; set; }
+            public float DelayDuration { get; set; }
+            public float QueueMultiplier { get; set; }
+            public float PlayerMultiplier { get; set; }
+            public float PlayerFriendValue { get; set; }
+            public float PlayerGuildValue { get; set; }
+            public float ThrottleInitialThreshold { get; set; }
+            public float ThrottleDecayTime { get; set; }
+            public float ThrottlePrioritySpike { get; set; }
+            public float ThrottleMinThreshold { get; set; }
+            public float ThrottlePvPPriorityNormal { get; set; }
+            public float ThrottlePvPPriorityLow { get; set; }
+            public float ThrottlePvPHonorThreshold { get; set; }
+            public float ThrottleLfgListPriorityDefault { get; set; }
+            public float ThrottleLfgListPriorityAbove { get; set; }
+            public float ThrottleLfgListPriorityBelow { get; set; }
+            public float ThrottleLfgListIlvlScalingAbove { get; set; }
+            public float ThrottleLfgListIlvlScalingBelow { get; set; }
+            public float ThrottleRfPriorityAbove { get; set; }
+            public float ThrottleRfIlvlScalingAbove { get; set; }
+            public float ThrottleDfMaxItemLevel { get; set; }
+            public float ThrottleDfBestPriority { get; set; }
         }
     }
 
@@ -240,7 +240,7 @@ namespace Game.Network.Packets
 
         public bool BpayStoreAvailable; // NYI
         public bool BpayStoreDisabledByParentalControls; // NYI
-        public bool CharUndeleteEnabled;
+        public bool CharUndeleteEnabled { get; set; }
         public bool BpayStoreEnabled; // NYI
         public bool CommerceSystemEnabled; // NYI
         public bool Unk14; // NYI
@@ -272,7 +272,7 @@ namespace Game.Network.Packets
             }
         }
 
-        public List<string> Text;
+        public List<string> Text { get; set; }
     }
 
     public class SetTimeZoneInformation : ServerPacket
@@ -287,7 +287,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(GameTimeTZ);
         }
 
-        public string ServerTimeTZ;
-        public string GameTimeTZ;
+        public string ServerTimeTZ { get; set; }
+        public string GameTimeTZ { get; set; }
     }
 }

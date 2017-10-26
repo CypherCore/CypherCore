@@ -31,7 +31,7 @@ namespace Game.Network.Packets
             Data.Write(_worldPacket);
         }
 
-        public AllAchievements Data = new AllAchievements();
+        public AllAchievements Data { get; set; } = new AllAchievements();
     }
 
     public class RespondInspectAchievements : ServerPacket
@@ -44,8 +44,8 @@ namespace Game.Network.Packets
             Data.Write(_worldPacket);
         }
 
-        public ObjectGuid Player;
-        public AllAchievements Data = new AllAchievements();
+        public ObjectGuid Player { get; set; }
+        public AllAchievements Data { get; set; } = new AllAchievements();
     }
 
     public class CriteriaUpdate : ServerPacket
@@ -63,13 +63,13 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(CreationTime);
         }
 
-        public uint CriteriaID;
-        public ulong Quantity;
-        public ObjectGuid PlayerGUID;
-        public uint Flags;
-        public long CurrentTime;
-        public uint ElapsedTime;
-        public uint CreationTime;
+        public uint CriteriaID { get; set; }
+        public ulong Quantity { get; set; }
+        public ObjectGuid PlayerGUID { get; set; }
+        public uint Flags { get; set; }
+        public long CurrentTime { get; set; }
+        public uint ElapsedTime { get; set; }
+        public uint CreationTime { get; set; }
     }
 
     public class CriteriaDeleted : ServerPacket
@@ -81,7 +81,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(CriteriaID);
         }
 
-        public uint CriteriaID;
+        public uint CriteriaID { get; set; }
     }
 
     public class AchievementDeleted : ServerPacket
@@ -94,7 +94,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(Immunities);
         }
 
-        public uint AchievementID;
+        public uint AchievementID { get; set; }
         public uint Immunities; // this is just garbage, not used by client
     }
 
@@ -114,13 +114,13 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public ObjectGuid Earner;
-        public uint EarnerNativeRealm;
-        public uint EarnerVirtualRealm;
-        public uint AchievementID;
-        public long Time;
-        public bool Initial;
-        public ObjectGuid Sender;
+        public ObjectGuid Earner { get; set; }
+        public uint EarnerNativeRealm { get; set; }
+        public uint EarnerVirtualRealm { get; set; }
+        public uint AchievementID { get; set; }
+        public long Time { get; set; }
+        public bool Initial { get; set; }
+        public ObjectGuid Sender { get; set; }
     }
 
     public class ServerFirstAchievement : ServerPacket
@@ -136,10 +136,10 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(Name);
         }
 
-        public ObjectGuid PlayerGUID;
-        public string Name = "";
-        public uint AchievementID;
-        public bool GuildAchievement;
+        public ObjectGuid PlayerGUID { get; set; }
+        public string Name { get; set; } = "";
+        public uint AchievementID { get; set; }
+        public bool GuildAchievement { get; set; }
     }
 
     public class GuildCriteriaUpdate : ServerPacket
@@ -162,7 +162,7 @@ namespace Game.Network.Packets
             }
         }
 
-        public List<GuildCriteriaProgress> Progress = new List<GuildCriteriaProgress>();
+        public List<GuildCriteriaProgress> Progress { get; set; } = new List<GuildCriteriaProgress>();
     }
 
     public class GuildCriteriaDeleted : ServerPacket
@@ -175,8 +175,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(CriteriaID);
         }
 
-        public ObjectGuid GuildGUID;
-        public uint CriteriaID;
+        public ObjectGuid GuildGUID { get; set; }
+        public uint CriteriaID { get; set; }
     }
 
     public class GuildSetFocusedAchievement : ClientPacket
@@ -188,7 +188,7 @@ namespace Game.Network.Packets
             AchievementID = _worldPacket.ReadUInt32();
         }
 
-        public uint AchievementID;
+        public uint AchievementID { get; set; }
     }
 
     public class GuildAchievementDeleted : ServerPacket
@@ -202,9 +202,9 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedTime(TimeDeleted);
         }
 
-        public ObjectGuid GuildGUID;
-        public uint AchievementID;
-        public long TimeDeleted;
+        public ObjectGuid GuildGUID { get; set; }
+        public uint AchievementID { get; set; }
+        public long TimeDeleted { get; set; }
     }
 
     public class GuildAchievementEarned : ServerPacket
@@ -218,9 +218,9 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedTime(TimeEarned);
         }
 
-        public uint AchievementID;
-        public ObjectGuid GuildGUID;
-        public long TimeEarned;
+        public uint AchievementID { get; set; }
+        public ObjectGuid GuildGUID { get; set; }
+        public long TimeEarned { get; set; }
     }
 
     public class AllGuildAchievements : ServerPacket
@@ -235,7 +235,7 @@ namespace Game.Network.Packets
                 earned.Write(_worldPacket);
         }
 
-        public List<EarnedAchievement> Earned = new List<EarnedAchievement>();
+        public List<EarnedAchievement> Earned { get; set; } = new List<EarnedAchievement>();
     }
 
     class GuildGetAchievementMembers : ClientPacket
@@ -249,9 +249,9 @@ namespace Game.Network.Packets
             AchievementID = _worldPacket.ReadUInt32();
         }
 
-        public ObjectGuid PlayerGUID;
-        public ObjectGuid GuildGUID;
-        public uint AchievementID;
+        public ObjectGuid PlayerGUID { get; set; }
+        public ObjectGuid GuildGUID { get; set; }
+        public uint AchievementID { get; set; }
     }
 
     class GuildAchievementMembers : ServerPacket
@@ -267,9 +267,9 @@ namespace Game.Network.Packets
                 _worldPacket.WritePackedGuid(guid);
         }
 
-        public ObjectGuid GuildGUID;
-        public uint AchievementID;
-        public List<ObjectGuid> Member = new List<ObjectGuid>();
+        public ObjectGuid GuildGUID { get; set; }
+        public uint AchievementID { get; set; }
+        public List<ObjectGuid> Member { get; set; } = new List<ObjectGuid>();
     }
 
     //Structs
@@ -284,11 +284,11 @@ namespace Game.Network.Packets
             data.WriteUInt32(NativeRealmAddress);
         }
 
-        public uint Id;
-        public long Date;
-        public ObjectGuid Owner;
-        public uint VirtualRealmAddress;
-        public uint NativeRealmAddress;
+        public uint Id { get; set; }
+        public long Date { get; set; }
+        public ObjectGuid Owner { get; set; }
+        public uint VirtualRealmAddress { get; set; }
+        public uint NativeRealmAddress { get; set; }
     }
 
     public struct CriteriaProgressPkt
@@ -305,24 +305,24 @@ namespace Game.Network.Packets
             data.FlushBits();
         }
 
-        public uint Id;
-        public ulong Quantity;
-        public ObjectGuid Player;
-        public uint Flags;
-        public long Date;
-        public uint TimeFromStart;
-        public uint TimeFromCreate;
+        public uint Id { get; set; }
+        public ulong Quantity { get; set; }
+        public ObjectGuid Player { get; set; }
+        public uint Flags { get; set; }
+        public long Date { get; set; }
+        public uint TimeFromStart { get; set; }
+        public uint TimeFromCreate { get; set; }
     }
 
     public struct GuildCriteriaProgress
     {
-        public uint CriteriaID;
-        public uint DateCreated;
-        public uint DateStarted;
-        public long DateUpdated;
-        public ulong Quantity;
-        public ObjectGuid PlayerGUID;
-        public int Flags;
+        public uint CriteriaID { get; set; }
+        public uint DateCreated { get; set; }
+        public uint DateStarted { get; set; }
+        public long DateUpdated { get; set; }
+        public ulong Quantity { get; set; }
+        public ObjectGuid PlayerGUID { get; set; }
+        public int Flags { get; set; }
     }
 
     public class AllAchievements
@@ -339,7 +339,7 @@ namespace Game.Network.Packets
                 progress.Write(data);
         }
 
-        public List<EarnedAchievement> Earned = new List<EarnedAchievement>();
-        public List<CriteriaProgressPkt> Progress = new List<CriteriaProgressPkt>();
+        public List<EarnedAchievement> Earned { get; set; } = new List<EarnedAchievement>();
+        public List<CriteriaProgressPkt> Progress { get; set; } = new List<CriteriaProgressPkt>();
     }
 }

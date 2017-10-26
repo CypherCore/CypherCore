@@ -33,9 +33,9 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt32(AccountTimes[i]);
         }
 
-        public ObjectGuid PlayerGuid;
-        public uint ServerTime = 0;
-        public uint[] AccountTimes = new uint[(int)AccountDataTypes.Max];
+        public ObjectGuid PlayerGuid { get; set; }
+        public uint ServerTime { get; set; } = 0;
+        public uint[] AccountTimes { get; set; } = new uint[(int)AccountDataTypes.Max];
     }
 
     public class ClientCacheVersion : ServerPacket
@@ -47,7 +47,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(CacheVersion);
         }
 
-        public uint CacheVersion = 0;
+        public uint CacheVersion { get; set; } = 0;
     }
 
     public class RequestAccountData : ClientPacket
@@ -60,8 +60,8 @@ namespace Game.Network.Packets
             DataType = (AccountDataTypes)_worldPacket.ReadBits<uint>(3);
         }
 
-        public ObjectGuid PlayerGuid;
-        public AccountDataTypes DataType = 0;
+        public ObjectGuid PlayerGuid { get; set; }
+        public AccountDataTypes DataType { get; set; } = 0;
     }
 
     public class UpdateAccountData : ServerPacket
@@ -80,11 +80,11 @@ namespace Game.Network.Packets
             _worldPacket.WriteBytes(bytes);
         }
 
-        public ObjectGuid Player;
-        public uint Time = 0; // UnixTime
-        public uint Size = 0; // decompressed size
-        public AccountDataTypes DataType = 0;
-        public ByteBuffer CompressedData;
+        public ObjectGuid Player { get; set; }
+        public uint Time { get; set; } = 0; // UnixTime
+        public uint Size { get; set; } = 0; // decompressed size
+        public AccountDataTypes DataType { get; set; } = 0;
+        public ByteBuffer CompressedData { get; set; }
     }
 
     public class UserClientUpdateAccountData : ClientPacket
@@ -105,11 +105,11 @@ namespace Game.Network.Packets
             }
         }
 
-        public ObjectGuid PlayerGuid;
-        public uint Time = 0; // UnixTime
-        public uint Size = 0; // decompressed size
-        public AccountDataTypes DataType = 0;
-        public ByteBuffer CompressedData;
+        public ObjectGuid PlayerGuid { get; set; }
+        public uint Time { get; set; } = 0; // UnixTime
+        public uint Size { get; set; } = 0; // decompressed size
+        public AccountDataTypes DataType { get; set; } = 0;
+        public ByteBuffer CompressedData { get; set; }
     }
 
     class SetAdvancedCombatLogging : ClientPacket
@@ -121,6 +121,6 @@ namespace Game.Network.Packets
             Enable = _worldPacket.HasBit();
         }
 
-        public bool Enable;
+        public bool Enable { get; set; }
     }
 }

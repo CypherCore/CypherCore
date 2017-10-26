@@ -30,7 +30,7 @@ namespace Game.Network.Packets
             Guid = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Guid;
+        public ObjectGuid Guid { get; set; }
     }
 
     class AuctionHelloResponse : ServerPacket
@@ -44,8 +44,8 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public ObjectGuid Guid;
-        public bool OpenForBusiness = true;
+        public ObjectGuid Guid { get; set; }
+        public bool OpenForBusiness { get; set; } = true;
     }
 
     class AuctionCommandResult : ServerPacket
@@ -75,10 +75,10 @@ namespace Game.Network.Packets
         }
 
         public uint AuctionItemID; // the id of the auction that triggered this notification
-        public AuctionAction Command;
-        public AuctionError ErrorCode;
+        public AuctionAction Command { get; set; }
+        public AuctionError ErrorCode { get; set; }
         public ulong Money; // the amount of money that the player bid in copper
-        public AuctionError BagResult;
+        public AuctionError BagResult { get; set; }
         public ObjectGuid Guid; // the GUID of the bidder for this auction.
         public ulong MinIncrement; // the sum of outbid is (1% of current bid) * 5, if the bid is too small, then this value is 1 copper.
     }
@@ -99,23 +99,23 @@ namespace Game.Network.Packets
 
             for (byte i = 0; i < ItemsCount; i++)
             {
-                AuctionItemForSale item;
+                AuctionItemForSale item = new AuctionItemForSale();
                 item.Guid = _worldPacket.ReadPackedGuid();
                 item.UseCount = _worldPacket.ReadUInt32();
                 Items.Add(item);
             }
         }
 
-        public ulong BuyoutPrice;
-        public ObjectGuid Auctioneer;
-        public ulong MinBid;
-        public uint RunTime;
-        public Array<AuctionItemForSale> Items = new Array<AuctionItemForSale>(32);
+        public ulong BuyoutPrice { get; set; }
+        public ObjectGuid Auctioneer { get; set; }
+        public ulong MinBid { get; set; }
+        public uint RunTime { get; set; }
+        public Array<AuctionItemForSale> Items { get; set; } = new Array<AuctionItemForSale>(32);
 
         public struct AuctionItemForSale
         {
-            public ObjectGuid Guid;
-            public uint UseCount;
+            public ObjectGuid Guid { get; set; }
+            public uint UseCount { get; set; }
         }
     }
 
@@ -130,9 +130,9 @@ namespace Game.Network.Packets
             BidAmount = _worldPacket.ReadUInt64();
         }
 
-        public ObjectGuid Auctioneer;
-        public ulong BidAmount;
-        public uint AuctionItemID;
+        public ObjectGuid Auctioneer { get; set; }
+        public ulong BidAmount { get; set; }
+        public uint AuctionItemID { get; set; }
     }
 
     class AuctionListBidderItems : ClientPacket
@@ -153,9 +153,9 @@ namespace Game.Network.Packets
             }
         }
 
-        public uint Offset;
-        public List<uint> AuctionItemIDs = new List<uint>();
-        public ObjectGuid Auctioneer;
+        public uint Offset { get; set; }
+        public List<uint> AuctionItemIDs { get; set; } = new List<uint>();
+        public ObjectGuid Auctioneer { get; set; }
     }
 
     class AuctionRemoveItem : ClientPacket
@@ -168,8 +168,8 @@ namespace Game.Network.Packets
             AuctionItemID = _worldPacket.ReadInt32();
         }
 
-        public ObjectGuid Auctioneer;
-        public int AuctionItemID;
+        public ObjectGuid Auctioneer { get; set; }
+        public int AuctionItemID { get; set; }
     }
 
     class AuctionReplicateItems : ClientPacket
@@ -185,11 +185,11 @@ namespace Game.Network.Packets
             ChangeNumberTombstone = _worldPacket.ReadUInt32();
         }
 
-        public ObjectGuid Auctioneer;
-        public uint Count;
-        public uint ChangeNumberGlobal;
-        public uint ChangeNumberCursor;
-        public uint ChangeNumberTombstone;
+        public ObjectGuid Auctioneer { get; set; }
+        public uint Count { get; set; }
+        public uint ChangeNumberGlobal { get; set; }
+        public uint ChangeNumberCursor { get; set; }
+        public uint ChangeNumberTombstone { get; set; }
     }
 
     class AuctionListPendingSales : ClientPacket
@@ -215,10 +215,10 @@ namespace Game.Network.Packets
                 item.Write(_worldPacket);
         }
 
-        public uint DesiredDelay;
-        public List<AuctionItem> Items = new List<AuctionItem>();
-        public bool OnlyUsable = true;
-        public uint TotalCount;
+        public uint DesiredDelay { get; set; }
+        public List<AuctionItem> Items { get; set; } = new List<AuctionItem>();
+        public bool OnlyUsable { get; set; } = true;
+        public uint TotalCount { get; set; }
     }
 
     public class AuctionListOwnerItemsResult : ServerPacket
@@ -235,9 +235,9 @@ namespace Game.Network.Packets
                 item.Write(_worldPacket);
         }
 
-        public uint DesiredDelay;
+        public uint DesiredDelay { get; set; }
         public uint TotalCount;
-        public List<AuctionItem> Items = new List<AuctionItem>();
+        public List<AuctionItem> Items { get; set; } = new List<AuctionItem>();
     }
 
     public class AuctionListBidderItemsResult : ServerPacket
@@ -254,9 +254,9 @@ namespace Game.Network.Packets
                 item.Write(_worldPacket);
         }
 
-        public uint DesiredDelay;
+        public uint DesiredDelay { get; set; }
         public uint TotalCount;
-        public List<AuctionItem> Items = new List<AuctionItem>();
+        public List<AuctionItem> Items { get; set; } = new List<AuctionItem>();
     }
 
     class AuctionListOwnerItems : ClientPacket
@@ -269,8 +269,8 @@ namespace Game.Network.Packets
             Offset = _worldPacket.ReadUInt32();
         }
 
-        public ObjectGuid Auctioneer;
-        public uint Offset;
+        public ObjectGuid Auctioneer { get; set; }
+        public uint Offset { get; set; }
     }
 
     class AuctionListItems : ClientPacket
@@ -301,7 +301,7 @@ namespace Game.Network.Packets
                 classFilter.SubClassFilters = new Array<ClassFilter.SubClassFilter>(_worldPacket.ReadBits<int>(5));
                 for (int x = 0; x < classFilter.SubClassFilters.Capacity; ++x)
                 {
-                    ClassFilter.SubClassFilter subClassFilter;
+                    ClassFilter.SubClassFilter subClassFilter = new ClassFilter.SubClassFilter();
                     subClassFilter.ItemSubclass = _worldPacket.ReadInt32();
                     subClassFilter.InvTypeMask = _worldPacket.ReadUInt32();
                     classFilter.SubClassFilters.Add(subClassFilter);
@@ -312,43 +312,43 @@ namespace Game.Network.Packets
             _worldPacket.Skip(4); // DataSize = (SortCount * 2)
             for (int i = 0; i < SortCount; i++)
             {
-                AuctionListItems.Sort sort;
+                AuctionListItems.Sort sort = new Sort();
                 sort.Type = _worldPacket.ReadUInt8();
                 sort.Direction = _worldPacket.ReadUInt8();
                 DataSort.Add(sort);
             }
         }
 
-        public uint Offset;
-        public ObjectGuid Auctioneer;
-        public byte MinLevel = 1;
-        public byte MaxLevel = 100;
-        public uint Quality;
-        public byte SortCount;
-        public Array<byte> KnownPets;
-        public sbyte MaxPetLevel;
-        public string Name = "";
-        public Array<ClassFilter> ClassFilters = new Array<ClassFilter>(7);
-        public bool ExactMatch = true;
-        public bool OnlyUsable;
-        public List<Sort> DataSort = new List<Sort>();
+        public uint Offset { get; set; }
+        public ObjectGuid Auctioneer { get; set; }
+        public byte MinLevel { get; set; } = 1;
+        public byte MaxLevel { get; set; } = 100;
+        public uint Quality { get; set; }
+        public byte SortCount { get; set; }
+        public Array<byte> KnownPets { get; set; }
+        public sbyte MaxPetLevel { get; set; }
+        public string Name { get; set; } = "";
+        public Array<ClassFilter> ClassFilters { get; set; } = new Array<ClassFilter>(7);
+        public bool ExactMatch { get; set; } = true;
+        public bool OnlyUsable { get; set; }
+        public List<Sort> DataSort { get; set; } = new List<Sort>();
 
         public struct Sort
         {
-            public byte Type;
-            public byte Direction;
+            public byte Type { get; set; }
+            public byte Direction { get; set; }
         }
 
         public class ClassFilter
         {
             public struct SubClassFilter
             {
-                public int ItemSubclass;
-                public uint InvTypeMask;
+                public int ItemSubclass { get; set; }
+                public uint InvTypeMask { get; set; }
             }
 
-            public int ItemClass;
-            public Array<SubClassFilter> SubClassFilters = new Array<SubClassFilter>(31);
+            public int ItemClass { get; set; }
+            public Array<SubClassFilter> SubClassFilters { get; set; } = new Array<SubClassFilter>(31);
         }
     }
 
@@ -365,8 +365,8 @@ namespace Game.Network.Packets
                 mail.Write(_worldPacket);
         }
 
-        public List<MailListEntry> Mails = new List<MailListEntry>();
-        public int TotalNumRecords;
+        public List<MailListEntry> Mails { get; set; } = new List<MailListEntry>();
+        public int TotalNumRecords { get; set; }
     }
 
     class AuctionClosedNotification : ServerPacket
@@ -381,9 +381,9 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public AuctionOwnerNotification Info;
-        public float ProceedsMailDelay;
-        public bool Sold = true;
+        public AuctionOwnerNotification Info { get; set; }
+        public float ProceedsMailDelay { get; set; }
+        public bool Sold { get; set; } = true;
     }
 
     class AuctionOwnerBidNotification : ServerPacket
@@ -397,9 +397,9 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(Bidder);
         }
 
-        public AuctionOwnerNotification Info;
-        public ObjectGuid Bidder;
-        public ulong MinIncrement;
+        public AuctionOwnerNotification Info { get; set; }
+        public ObjectGuid Bidder { get; set; }
+        public ulong MinIncrement { get; set; }
     }
 
     class AuctionWonNotification : ServerPacket
@@ -411,7 +411,7 @@ namespace Game.Network.Packets
             Info.Write(_worldPacket);
         }
 
-        public AuctionBidderNotification Info;
+        public AuctionBidderNotification Info { get; set; }
     }
 
     class AuctionOutBidNotification : ServerPacket
@@ -425,9 +425,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt64(MinIncrement);
         }
 
-        public AuctionBidderNotification Info;
-        public ulong BidAmount;
-        public ulong MinIncrement;
+        public AuctionBidderNotification Info { get; set; }
+        public ulong BidAmount { get; set; }
+        public ulong MinIncrement { get; set; }
     }
 
     class AuctionReplicateResponse : ServerPacket
@@ -447,12 +447,12 @@ namespace Game.Network.Packets
                 item.Write(_worldPacket);
         }
 
-        public uint ChangeNumberCursor;
-        public uint ChangeNumberGlobal;
-        public uint DesiredDelay;
-        public uint ChangeNumberTombstone;
-        public uint Result;
-        public List<AuctionItem> Items = new List<AuctionItem>();
+        public uint ChangeNumberCursor { get; set; }
+        public uint ChangeNumberGlobal { get; set; }
+        public uint DesiredDelay { get; set; }
+        public uint ChangeNumberTombstone { get; set; }
+        public uint Result { get; set; }
+        public List<AuctionItem> Items { get; set; } = new List<AuctionItem>();
     }
 
     public class AuctionItem
@@ -496,26 +496,26 @@ namespace Game.Network.Packets
             }
         }
 
-        public ItemInstance Item;
-        public int Count;
-        public int Charges;
-        public List<ItemEnchantData> Enchantments = new List<ItemEnchantData>();
-        public int Flags;
-        public int AuctionItemID;
-        public ObjectGuid Owner;
-        public ulong MinBid;
-        public ulong MinIncrement;
-        public ulong BuyoutPrice;
-        public int DurationLeft;
-        public byte DeleteReason;
-        public bool CensorServerSideInfo;
-        public bool CensorBidInfo;
-        public ObjectGuid ItemGuid;
-        public ObjectGuid OwnerAccountID;
-        public uint EndTime;
-        public ObjectGuid Bidder;
-        public ulong BidAmount;
-        public List<ItemGemData> Gems = new List<ItemGemData>();
+        public ItemInstance Item { get; set; }
+        public int Count { get; set; }
+        public int Charges { get; set; }
+        public List<ItemEnchantData> Enchantments { get; set; } = new List<ItemEnchantData>();
+        public int Flags { get; set; }
+        public int AuctionItemID { get; set; }
+        public ObjectGuid Owner { get; set; }
+        public ulong MinBid { get; set; }
+        public ulong MinIncrement { get; set; }
+        public ulong BuyoutPrice { get; set; }
+        public int DurationLeft { get; set; }
+        public byte DeleteReason { get; set; }
+        public bool CensorServerSideInfo { get; set; }
+        public bool CensorBidInfo { get; set; }
+        public ObjectGuid ItemGuid { get; set; }
+        public ObjectGuid OwnerAccountID { get; set; }
+        public uint EndTime { get; set; }
+        public ObjectGuid Bidder { get; set; }
+        public ulong BidAmount { get; set; }
+        public List<ItemGemData> Gems { get; set; } = new List<ItemGemData>();
     }
 
     struct AuctionOwnerNotification
@@ -534,9 +534,9 @@ namespace Game.Network.Packets
             Item.Write(data);
         }
 
-        public int AuctionItemID;
-        public ulong BidAmount;
-        public ItemInstance Item;
+        public int AuctionItemID { get; set; }
+        public ulong BidAmount { get; set; }
+        public ItemInstance Item { get; set; }
     }
 
     struct AuctionBidderNotification
@@ -555,8 +555,8 @@ namespace Game.Network.Packets
             Item.Write(data);
         }
 
-        public int AuctionItemID;
-        public ObjectGuid Bidder;
-        public ItemInstance Item;
+        public int AuctionItemID { get; set; }
+        public ObjectGuid Bidder { get; set; }
+        public ItemInstance Item { get; set; }
     }
 }

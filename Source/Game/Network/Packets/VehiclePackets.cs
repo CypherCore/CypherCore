@@ -31,9 +31,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(VehicleRecID);
         }
 
-        public ObjectGuid MoverGUID;
-        public uint SequenceIndex;
-        public uint VehicleRecID;
+        public ObjectGuid MoverGUID { get; set; }
+        public uint SequenceIndex { get; set; }
+        public uint VehicleRecID { get; set; }
     }
 
     public class MoveSetVehicleRecIdAck : ClientPacket
@@ -46,8 +46,8 @@ namespace Game.Network.Packets
             VehicleRecID = _worldPacket.ReadInt32(); ;
         }
 
-        public MovementAck Data;
-        public int VehicleRecID;
+        public MovementAck Data { get; set; }
+        public int VehicleRecID { get; set; }
     }
 
     public class SetVehicleRecID : ServerPacket
@@ -60,8 +60,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(VehicleRecID);
         }
 
-        public ObjectGuid VehicleGUID;
-        public uint VehicleRecID;
+        public ObjectGuid VehicleGUID { get; set; }
+        public uint VehicleRecID { get; set; }
     }
 
     public class OnCancelExpectedRideVehicleAura : ServerPacket
@@ -80,7 +80,7 @@ namespace Game.Network.Packets
             Status = MovementExtensions.ReadMovementInfo(_worldPacket);
         }
 
-        public MovementInfo Status;
+        public MovementInfo Status { get; set; }
     }
 
     public class RequestVehiclePrevSeat : ClientPacket
@@ -108,9 +108,9 @@ namespace Game.Network.Packets
             DstSeatIndex = _worldPacket.ReadUInt8();
         }
 
-        public ObjectGuid DstVehicle;
-        public MovementInfo Status;
-        public byte DstSeatIndex = 255;
+        public ObjectGuid DstVehicle { get; set; }
+        public MovementInfo Status { get; set; }
+        public byte DstSeatIndex { get; set; } = 255;
     }
 
     public class RequestVehicleSwitchSeat : ClientPacket
@@ -123,8 +123,8 @@ namespace Game.Network.Packets
             SeatIndex = _worldPacket.ReadUInt8();
         }
 
-        public ObjectGuid Vehicle;
-        public byte SeatIndex = 255;
+        public ObjectGuid Vehicle { get; set; }
+        public byte SeatIndex { get; set; } = 255;
     }
 
     public class RideVehicleInteract : ClientPacket
@@ -136,7 +136,7 @@ namespace Game.Network.Packets
             Vehicle = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Vehicle;
+        public ObjectGuid Vehicle { get; set; }
     }
 
     public class EjectPassenger : ClientPacket
@@ -148,7 +148,7 @@ namespace Game.Network.Packets
             Passenger = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Passenger;
+        public ObjectGuid Passenger { get; set; }
     }
 
     public class RequestVehicleExit : ClientPacket

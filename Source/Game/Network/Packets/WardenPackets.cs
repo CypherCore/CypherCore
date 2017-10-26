@@ -51,7 +51,7 @@ namespace Game.Network.Packets
                 Data = new ByteBuffer(_worldPacket.ReadBytes(size));
         }
 
-        public ByteBuffer Data;
+        public ByteBuffer Data { get; set; }
     }
 
     class WardenDataServer : ServerPacket
@@ -63,7 +63,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteBytes(Data);
         }
 
-        public ByteBuffer Data;
+        public ByteBuffer Data { get; set; }
     }
 
     class WardenModuleTransfer : ByteBuffer
@@ -77,9 +77,9 @@ namespace Game.Network.Packets
             return GetData();
         }
 
-        public WardenOpcodes Command;
-        public ushort DataSize;
-        public byte[] Data = new byte[500];
+        public WardenOpcodes Command { get; set; }
+        public ushort DataSize { get; set; }
+        public byte[] Data { get; set; } = new byte[500];
     }
 
     class WardenModuleUse : ByteBuffer
@@ -94,10 +94,10 @@ namespace Game.Network.Packets
             return GetData();
         }
 
-        public WardenOpcodes Command;
-        public byte[] ModuleId = new byte[16];
-        public byte[] ModuleKey = new byte[16];
-        public uint Size;
+        public WardenOpcodes Command { get; set; }
+        public byte[] ModuleId { get; set; } = new byte[16];
+        public byte[] ModuleKey { get; set; } = new byte[16];
+        public uint Size { get; set; }
     }
 
     class WardenHashRequest : ByteBuffer
@@ -110,8 +110,8 @@ namespace Game.Network.Packets
             return GetData();
         }
 
-        public WardenOpcodes Command;
-        public byte[] Seed = new byte[16];
+        public WardenOpcodes Command { get; set; }
+        public byte[] Seed { get; set; } = new byte[16];
     }
 
     class WardenInitModuleRequest : ByteBuffer
@@ -149,31 +149,31 @@ namespace Game.Network.Packets
             return GetData();
         }
 
-        public WardenOpcodes Command1;
-        public ushort Size1;
-        public uint CheckSumm1;
-        public byte Unk1;
-        public byte Unk2;
-        public byte Type;
-        public byte String_library1;
-        public uint[] Function1 = new uint[4];
+        public WardenOpcodes Command1 { get; set; }
+        public ushort Size1 { get; set; }
+        public uint CheckSumm1 { get; set; }
+        public byte Unk1 { get; set; }
+        public byte Unk2 { get; set; }
+        public byte Type { get; set; }
+        public byte String_library1 { get; set; }
+        public uint[] Function1 { get; set; } = new uint[4];
 
-        public WardenOpcodes Command2;
-        public ushort Size2;
-        public uint CheckSumm2;
-        public byte Unk3;
-        public byte Unk4;
-        public byte String_library2;
-        public uint Function2;
-        public byte Function2_set;
+        public WardenOpcodes Command2 { get; set; }
+        public ushort Size2 { get; set; }
+        public uint CheckSumm2 { get; set; }
+        public byte Unk3 { get; set; }
+        public byte Unk4 { get; set; }
+        public byte String_library2 { get; set; }
+        public uint Function2 { get; set; }
+        public byte Function2_set { get; set; }
 
-        public WardenOpcodes Command3;
-        public ushort Size3;
-        public uint CheckSumm3;
-        public byte Unk5;
-        public byte Unk6;
-        public byte String_library3;
-        public uint Function3;
-        public byte Function3_set;
+        public WardenOpcodes Command3 { get; set; }
+        public ushort Size3 { get; set; }
+        public uint CheckSumm3 { get; set; }
+        public byte Unk5 { get; set; }
+        public byte Unk6 { get; set; }
+        public byte String_library3 { get; set; }
+        public uint Function3 { get; set; }
+        public byte Function3_set { get; set; }
     }
 }

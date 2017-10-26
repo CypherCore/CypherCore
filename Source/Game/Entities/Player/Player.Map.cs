@@ -418,7 +418,7 @@ namespace Game.Entities
                     {
                         InstanceSave save = pair.Value.save;
 
-                        InstanceLockInfos lockInfos;
+                        InstanceLockInfos lockInfos = new InstanceLockInfos();
 
                         lockInfos.InstanceID = save.GetInstanceId();
                         lockInfos.MapID = save.GetMapId();

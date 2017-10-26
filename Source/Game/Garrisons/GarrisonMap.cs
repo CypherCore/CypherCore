@@ -138,5 +138,7 @@ namespace Game.Garrisons
         Garrison i_garrison;
         uint i_gameObjects;
         uint i_creatures;
+
+        public uint I_creatures { get => i_creatures; set => i_creatures = value; }
     }
 }

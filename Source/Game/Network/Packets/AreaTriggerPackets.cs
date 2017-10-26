@@ -35,9 +35,9 @@ namespace Game.Network.Packets
             FromClient = _worldPacket.HasBit();
         }
 
-        public uint AreaTriggerID;
-        public bool Entered;
-        public bool FromClient;
+        public uint AreaTriggerID { get; set; }
+        public bool Entered { get; set; }
+        public bool FromClient { get; set; }
     }
 
     class AreaTriggerDenied : ServerPacket
@@ -51,8 +51,8 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public int AreaTriggerID;
-        public bool Entered;
+        public int AreaTriggerID { get; set; }
+        public bool Entered { get; set; }
     }
 
     class AreaTriggerNoCorpse : ServerPacket
@@ -72,8 +72,8 @@ namespace Game.Network.Packets
             AreaTriggerSpline.Write(_worldPacket);
         }
 
-        public AreaTriggerSplineInfo AreaTriggerSpline = new AreaTriggerSplineInfo();
-        public ObjectGuid TriggerGUID;
+        public AreaTriggerSplineInfo AreaTriggerSpline { get; set; } = new AreaTriggerSplineInfo();
+        public ObjectGuid TriggerGUID { get; set; }
     }
 
     class AreaTriggerReShape : ServerPacket
@@ -97,7 +97,7 @@ namespace Game.Network.Packets
 
         public Optional<AreaTriggerSplineInfo> AreaTriggerSpline;
         public Optional<AreaTriggerUnkTypeInfo> AreaTriggerUnkType;
-        public ObjectGuid TriggerGUID;
+        public ObjectGuid TriggerGUID { get; set; }
     }
 
     //Structs
@@ -115,9 +115,9 @@ namespace Game.Network.Packets
                 data.WriteVector3(point);
         }
 
-        public uint TimeToTarget;
-        public uint ElapsedTimeForMovement;
-        public List<Vector3> Points = new List<Vector3>();
+        public uint TimeToTarget { get; set; }
+        public uint ElapsedTimeForMovement { get; set; }
+        public List<Vector3> Points { get; set; } = new List<Vector3>();
     }
 
     struct AreaTriggerUnkTypeInfo
@@ -144,16 +144,16 @@ namespace Game.Network.Packets
                 data.WriteVector3(Center.Value);
         }
 
-        public Optional<ObjectGuid> AreaTriggerUnkGUID;
-        public Optional<Vector3> Center;
-        public bool UnkBit1;
-        public bool UnkBit2;
-        public uint UnkUInt1;
-        public int UnkInt1;
-        public uint UnkUInt2;
-        public float Radius;
-        public float BlendFromRadius;
-        public float InitialAngel;
-        public float ZOffset;
+        public Optional<ObjectGuid> AreaTriggerUnkGUID { get; set; }
+        public Optional<Vector3> Center { get; set; }
+        public bool UnkBit1 { get; set; }
+        public bool UnkBit2 { get; set; }
+        public uint UnkUInt1 { get; set; }
+        public int UnkInt1 { get; set; }
+        public uint UnkUInt2 { get; set; }
+        public float Radius { get; set; }
+        public float BlendFromRadius { get; set; }
+        public float InitialAngel { get; set; }
+        public float ZOffset { get; set; }
     }
 }

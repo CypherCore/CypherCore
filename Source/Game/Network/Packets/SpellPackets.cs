@@ -35,8 +35,8 @@ namespace Game.Network.Packets
             CasterGUID = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid CasterGUID;
-        public uint SpellID;
+        public ObjectGuid CasterGUID { get; set; }
+        public uint SpellID { get; set; }
     }
 
     class CancelAutoRepeatSpell : ClientPacket
@@ -81,7 +81,7 @@ namespace Game.Network.Packets
 
     public class SpellCategoryCooldown : ServerPacket
     {
-        public List<CategoryCooldownInfo> CategoryCooldowns = new List<CategoryCooldownInfo>();
+        public List<CategoryCooldownInfo> CategoryCooldowns { get; set; } = new List<CategoryCooldownInfo>();
 
         public SpellCategoryCooldown() : base(ServerOpcodes.CategoryCooldown, ConnectionType.Instance) { }
 
@@ -104,8 +104,8 @@ namespace Game.Network.Packets
                 ModCooldown = cooldown;
             }
 
-            public uint Category = 0; // SpellCategory Id
-            public int ModCooldown = 0; // Reduced Cooldown in ms
+            public uint Category { get; set; } = 0; // SpellCategory Id
+            public int ModCooldown { get; set; } = 0; // Reduced Cooldown in ms
         }
     }
 
@@ -126,15 +126,15 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt32(spellId);
         }
 
-        public bool InitialLogin;
-        public List<uint> KnownSpells = new List<uint>();
-        public List<uint> FavoriteSpells = new List<uint>(); // tradeskill recipes
+        public bool InitialLogin { get; set; }
+        public List<uint> KnownSpells { get; set; } = new List<uint>();
+        public List<uint> FavoriteSpells { get; set; } = new List<uint>(); // tradeskill recipes
     }
 
     public class UpdateActionButtons : ServerPacket
     {
-        public ulong[] ActionButtons = new ulong[PlayerConst.MaxActionButtons];
-        public byte Reason;
+        public ulong[] ActionButtons { get; set; } = new ulong[PlayerConst.MaxActionButtons];
+        public byte Reason { get; set; }
 
         public UpdateActionButtons() : base(ServerOpcodes.UpdateActionButtons, ConnectionType.Instance) { }
 
@@ -157,11 +157,11 @@ namespace Game.Network.Packets
             Index = _worldPacket.ReadUInt8();
         }
 
-        public uint GetButtonAction() { return (uint)(Action & 0x00000000FFFFFFFF); }
-        public uint GetButtonType() { return (uint)((Action & 0xFFFFFFFF00000000) >> 56); }
+        public uint GetButtonAction() => (uint)(Action & 0x00000000FFFFFFFF);
+        public uint GetButtonType() => (uint)((Action & 0xFFFFFFFF00000000) >> 56);
 
         public ulong Action; // two packed public uint (action and type)
-        public byte Index;
+        public byte Index { get; set; }
     }
 
     public class SendUnlearnSpells : ServerPacket
@@ -192,14 +192,14 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(UnitGUID);
         }
 
-        public bool UpdateAll;
-        public ObjectGuid UnitGUID;
-        public List<AuraInfo> Auras = new List<AuraInfo>();
+        public bool UpdateAll { get; set; }
+        public ObjectGuid UnitGUID { get; set; }
+        public List<AuraInfo> Auras { get; set; } = new List<AuraInfo>();
     }
 
     public class CastSpell : ClientPacket
     {
-        public SpellCastRequest Cast;
+        public SpellCastRequest Cast { get; set; }
 
         public CastSpell(WorldPacket packet) : base(packet)
         {
@@ -214,8 +214,8 @@ namespace Game.Network.Packets
 
     public class PetCastSpell : ClientPacket
     {
-        public ObjectGuid PetGUID;
-        public SpellCastRequest Cast;
+        public ObjectGuid PetGUID { get; set; }
+        public SpellCastRequest Cast { get; set; }
 
         public PetCastSpell(WorldPacket packet) : base(packet)
         {
@@ -231,10 +231,10 @@ namespace Game.Network.Packets
 
     public class UseItem : ClientPacket
     {
-        public byte PackSlot;
-        public byte Slot;
-        public ObjectGuid CastItem;
-        public SpellCastRequest Cast;
+        public byte PackSlot { get; set; }
+        public byte Slot { get; set; }
+        public ObjectGuid CastItem { get; set; }
+        public SpellCastRequest Cast { get; set; }
 
         public UseItem(WorldPacket packet) : base(packet)
         {
@@ -260,8 +260,8 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(ServerCastID);
         }
 
-        public ObjectGuid ClientCastID;
-        public ObjectGuid ServerCastID;
+        public ObjectGuid ClientCastID { get; set; }
+        public ObjectGuid ServerCastID { get; set; }
     }
 
     class SpellGo : CombatLogServerPacket
@@ -278,12 +278,12 @@ namespace Game.Network.Packets
             WriteLogData();
         }
 
-        public SpellCastData Cast = new SpellCastData();
+        public SpellCastData Cast { get; set; } = new SpellCastData();
     }
 
     public class SpellStart : ServerPacket
     {
-        public SpellCastData Cast;
+        public SpellCastData Cast { get; set; }
 
         public SpellStart() : base(ServerOpcodes.SpellStart, ConnectionType.Instance)
         {
@@ -316,9 +316,9 @@ namespace Game.Network.Packets
                 _worldPacket.WriteInt32(spellId);
         }
 
-        public List<uint> SpellID = new List<uint>();
-        public List<uint> Superceded = new List<uint>();
-        public List<int> FavoriteSpellID = new List<int>();
+        public List<uint> SpellID { get; set; } = new List<uint>();
+        public List<uint> Superceded { get; set; } = new List<uint>();
+        public List<int> FavoriteSpellID { get; set; } = new List<int>();
     }
 
     public class LearnedSpells : ServerPacket
@@ -340,9 +340,9 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public List<uint> SpellID = new List<uint>();
-        public List<int> FavoriteSpellID = new List<int>();
-        public bool SuppressMessaging;
+        public List<uint> SpellID { get; set; } = new List<uint>();
+        public List<int> FavoriteSpellID { get; set; } = new List<int>();
+        public bool SuppressMessaging { get; set; }
     }
 
     public class SpellFailure : ServerPacket
@@ -358,11 +358,11 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt16(Reason);
         }
 
-        public ObjectGuid CasterUnit;
-        public uint SpellID;
-        public uint SpellXSpellVisualID;
-        public ushort Reason;
-        public ObjectGuid CastID;
+        public ObjectGuid CasterUnit { get; set; }
+        public uint SpellID { get; set; }
+        public uint SpellXSpellVisualID { get; set; }
+        public ushort Reason { get; set; }
+        public ObjectGuid CastID { get; set; }
     }
 
     public class SpellFailedOther : ServerPacket
@@ -378,11 +378,11 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt16(Reason);
         }
 
-        public ObjectGuid CasterUnit;
-        public uint SpellID;
-        public uint SpellXSpellVisualID;
-        public ushort Reason;
-        public ObjectGuid CastID;
+        public ObjectGuid CasterUnit { get; set; }
+        public uint SpellID { get; set; }
+        public uint SpellXSpellVisualID { get; set; }
+        public ushort Reason { get; set; }
+        public ObjectGuid CastID { get; set; }
     }
 
     class CastFailedBase : ServerPacket
@@ -391,11 +391,11 @@ namespace Game.Network.Packets
 
         public override void Write() { throw new NotImplementedException(); }
 
-        public ObjectGuid CastID;
-        public int SpellID;
-        public SpellCastResult Reason;
-        public int FailedArg1 = -1;
-        public int FailedArg2 = -1;
+        public ObjectGuid CastID { get; set; }
+        public int SpellID { get; set; }
+        public SpellCastResult Reason { get; set; }
+        public int FailedArg1 { get; set; } = -1;
+        public int FailedArg2 { get; set; } = -1;
     }
 
     class CastFailed : CastFailedBase
@@ -412,7 +412,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(FailedArg2);
         }
 
-        public int SpellXSpellVisualID;
+        public int SpellXSpellVisualID { get; set; }
     }
 
     class PetCastFailed : CastFailedBase
@@ -440,7 +440,7 @@ namespace Game.Network.Packets
                 spellMod.Write(_worldPacket);
         }
 
-        public List<SpellModifierInfo> Modifiers = new List<SpellModifierInfo>();
+        public List<SpellModifierInfo> Modifiers { get; set; } = new List<SpellModifierInfo>();
     }
 
     public class UnlearnedSpells : ServerPacket
@@ -457,8 +457,8 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public List<uint> SpellID = new List<uint>();
-        public bool SuppressMessaging;
+        public List<uint> SpellID { get; set; } = new List<uint>();
+        public bool SuppressMessaging { get; set; }
     }
 
     public class CooldownEvent : ServerPacket
@@ -476,8 +476,8 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public bool IsPet;
-        public uint SpellID;
+        public bool IsPet { get; set; }
+        public uint SpellID { get; set; }
     }
 
     public class ClearCooldowns : ServerPacket
@@ -494,8 +494,8 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public List<uint> SpellID = new List<uint>();
-        public bool IsPet;
+        public List<uint> SpellID { get; set; } = new List<uint>();
+        public bool IsPet { get; set; }
     }
 
     public class ClearCooldown : ServerPacket
@@ -510,9 +510,9 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public bool IsPet;
-        public uint SpellID;
-        public bool ClearOnHold;
+        public bool IsPet { get; set; }
+        public uint SpellID { get; set; }
+        public bool ClearOnHold { get; set; }
     }
 
     public class ModifyCooldown : ServerPacket
@@ -527,9 +527,9 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public bool IsPet;
-        public int DeltaTime;
-        public uint SpellID;
+        public bool IsPet { get; set; }
+        public int DeltaTime { get; set; }
+        public uint SpellID { get; set; }
     }
 
     public class SpellCooldownPkt : ServerPacket
@@ -544,9 +544,9 @@ namespace Game.Network.Packets
             SpellCooldowns.ForEach(p => p.Write(_worldPacket));
         }
 
-        public List<SpellCooldownStruct> SpellCooldowns = new List<SpellCooldownStruct>();
-        public ObjectGuid Caster;
-        public SpellCooldownFlags Flags;
+        public List<SpellCooldownStruct> SpellCooldowns { get; set; } = new List<SpellCooldownStruct>();
+        public ObjectGuid Caster { get; set; }
+        public SpellCooldownFlags Flags { get; set; }
     }
 
     public class SendSpellHistory : ServerPacket
@@ -559,7 +559,7 @@ namespace Game.Network.Packets
             Entries.ForEach(p => p.Write(_worldPacket));
         }
 
-        public List<SpellHistoryEntry> Entries = new List<SpellHistoryEntry>();
+        public List<SpellHistoryEntry> Entries { get; set; } = new List<SpellHistoryEntry>();
     }
 
     public class ClearAllSpellCharges : ServerPacket
@@ -572,7 +572,7 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public bool IsPet;
+        public bool IsPet { get; set; }
     }
 
     public class ClearSpellCharges : ServerPacket
@@ -586,8 +586,8 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public bool IsPet;
-        public uint Category;
+        public bool IsPet { get; set; }
+        public uint Category { get; set; }
     }
 
     public class SetSpellCharges : ServerPacket
@@ -604,11 +604,11 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public bool IsPet;
-        public uint Category;
-        public uint NextRecoveryTime;
-        public byte ConsumedCharges;
-        public float ChargeModRate = 1.0f;
+        public bool IsPet { get; set; }
+        public uint Category { get; set; }
+        public uint NextRecoveryTime { get; set; }
+        public byte ConsumedCharges { get; set; }
+        public float ChargeModRate { get; set; } = 1.0f;
     }
 
     public class SendSpellCharges : ServerPacket
@@ -621,7 +621,7 @@ namespace Game.Network.Packets
             Entries.ForEach(p => p.Write(_worldPacket));
         }
 
-        public List<SpellChargeEntry> Entries = new List<SpellChargeEntry>();
+        public List<SpellChargeEntry> Entries { get; set; } = new List<SpellChargeEntry>();
     }
 
     public class ClearTarget : ServerPacket
@@ -633,7 +633,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(Guid);
         }
 
-        public ObjectGuid Guid;
+        public ObjectGuid Guid { get; set; }
     }
 
     public class CancelOrphanSpellVisual : ServerPacket
@@ -645,7 +645,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(SpellVisualID);
         }
 
-        public uint SpellVisualID;
+        public uint SpellVisualID { get; set; }
     }
 
     public class CancelSpellVisual : ServerPacket
@@ -658,8 +658,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(SpellVisualID);
         }
 
-        public ObjectGuid Source;
-        public uint SpellVisualID;
+        public ObjectGuid Source { get; set; }
+        public uint SpellVisualID { get; set; }
     }
 
     class CancelSpellVisualKit : ServerPacket
@@ -672,8 +672,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(SpellVisualKitID);
         }
 
-        public ObjectGuid Source;
-        public uint SpellVisualKitID;
+        public ObjectGuid Source { get; set; }
+        public uint SpellVisualKitID { get; set; }
     }
 
     class PlayOrphanSpellVisual : ServerPacket
@@ -694,10 +694,10 @@ namespace Game.Network.Packets
         }
 
         public ObjectGuid Target; // Exclusive with TargetLocation
-        public Position SourceLocation;
-        public uint SpellVisualID;
-        public bool SpeedAsTime;
-        public float TravelSpeed;
+        public Position SourceLocation { get; set; }
+        public uint SpellVisualID { get; set; }
+        public bool SpeedAsTime { get; set; }
+        public float TravelSpeed { get; set; }
         public float UnkZero; // Always zero
         public Vector3 SourceRotation; // Vector of rotations, Orientation is z
         public Vector3 TargetLocation; // Exclusive with Target
@@ -721,15 +721,15 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public ObjectGuid Source;
+        public ObjectGuid Source { get; set; }
         public ObjectGuid Target; // Exclusive with TargetPosition
-        public ushort MissReason;
-        public uint SpellVisualID;
-        public bool SpeedAsTime;
-        public ushort ReflectStatus;
-        public float TravelSpeed;
+        public ushort MissReason { get; set; }
+        public uint SpellVisualID { get; set; }
+        public bool SpeedAsTime { get; set; }
+        public ushort ReflectStatus { get; set; }
+        public float TravelSpeed { get; set; }
         public Vector3 TargetPosition; // Exclusive with Target
-        public float Orientation;
+        public float Orientation { get; set; }
     }
 
     class PlaySpellVisualKit : ServerPacket
@@ -744,10 +744,10 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(Duration);
         }
 
-        public ObjectGuid Unit;
-        public uint KitRecID;
-        public uint KitType;
-        public uint Duration;
+        public ObjectGuid Unit { get; set; }
+        public uint KitRecID { get; set; }
+        public uint KitType { get; set; }
+        public uint Duration { get; set; }
     }
 
     public class CancelCast : ClientPacket
@@ -760,8 +760,8 @@ namespace Game.Network.Packets
             SpellID = _worldPacket.ReadUInt32();
         }
 
-        public uint SpellID;
-        public ObjectGuid CastID;
+        public uint SpellID { get; set; }
+        public ObjectGuid CastID { get; set; }
     }
 
     public class OpenItem : ClientPacket
@@ -774,8 +774,8 @@ namespace Game.Network.Packets
             PackSlot = _worldPacket.ReadUInt8();
         }
 
-        public byte Slot;
-        public byte PackSlot;
+        public byte Slot { get; set; }
+        public byte PackSlot { get; set; }
     }
 
     public class SpellChannelStart : ServerPacket
@@ -799,12 +799,12 @@ namespace Game.Network.Packets
                 HealPrediction.Value.Write(_worldPacket);
         }
 
-        public int SpellID;
-        public int SpellXSpellVisualID;
+        public int SpellID { get; set; }
+        public int SpellXSpellVisualID { get; set; }
         public Optional<SpellChannelStartInterruptImmunities> InterruptImmunities;
-        public ObjectGuid CasterGUID;
-        public Optional<SpellTargetedHealPrediction> HealPrediction;
-        public uint ChannelDuration;
+        public ObjectGuid CasterGUID { get; set; }
+        public Optional<SpellTargetedHealPrediction> HealPrediction { get; set; }
+        public uint ChannelDuration { get; set; }
     }
 
     public class SpellChannelUpdate : ServerPacket
@@ -817,8 +817,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(TimeRemaining);
         }
 
-        public ObjectGuid CasterGUID;
-        public int TimeRemaining;
+        public ObjectGuid CasterGUID { get; set; }
+        public int TimeRemaining { get; set; }
     }
 
     class ResurrectRequest : ServerPacket
@@ -839,13 +839,13 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(Name);
         }
 
-        public ObjectGuid ResurrectOffererGUID;
-        public uint ResurrectOffererVirtualRealmAddress;
-        public uint PetNumber;
-        public uint SpellID;
-        public bool UseTimer;
-        public bool Sickness;
-        public string Name;
+        public ObjectGuid ResurrectOffererGUID { get; set; }
+        public uint ResurrectOffererVirtualRealmAddress { get; set; }
+        public uint PetNumber { get; set; }
+        public uint SpellID { get; set; }
+        public bool UseTimer { get; set; }
+        public bool Sickness { get; set; }
+        public string Name { get; set; }
     }
 
     class UnlearnSkill : ClientPacket
@@ -857,7 +857,7 @@ namespace Game.Network.Packets
             SkillLine = _worldPacket.ReadUInt32();
         }
 
-        public uint SkillLine;
+        public uint SkillLine { get; set; }
     }
 
     class SelfRes : ClientPacket
@@ -877,8 +877,8 @@ namespace Game.Network.Packets
             DisplayID = _worldPacket.ReadUInt32();
         }
 
-        public ObjectGuid UnitGUID;
-        public uint DisplayID;
+        public ObjectGuid UnitGUID { get; set; }
+        public uint DisplayID { get; set; }
     }
 
     class MirrorImageComponentedData : ServerPacket
@@ -907,20 +907,20 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt32(itemDisplayId);
         }
 
-        public ObjectGuid UnitGUID;
-        public int DisplayID;
-        public byte RaceID;
-        public byte Gender;
-        public byte ClassID;
-        public byte SkinColor;
-        public byte FaceVariation;
-        public byte HairVariation;
-        public byte HairColor;
-        public byte BeardVariation;
-        public Array<byte> CustomDisplay = new Array<byte>(PlayerConst.CustomDisplaySize);
-        public ObjectGuid GuildGUID;
+        public ObjectGuid UnitGUID { get; set; }
+        public int DisplayID { get; set; }
+        public byte RaceID { get; set; }
+        public byte Gender { get; set; }
+        public byte ClassID { get; set; }
+        public byte SkinColor { get; set; }
+        public byte FaceVariation { get; set; }
+        public byte HairVariation { get; set; }
+        public byte HairColor { get; set; }
+        public byte BeardVariation { get; set; }
+        public Array<byte> CustomDisplay { get; set; } = new Array<byte>(PlayerConst.CustomDisplaySize);
+        public ObjectGuid GuildGUID { get; set; }
 
-        public List<int> ItemDisplayID = new List<int>();
+        public List<int> ItemDisplayID { get; set; } = new List<int>();
     }
 
     class MirrorImageCreatureData : ServerPacket
@@ -933,8 +933,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(DisplayID);
         }
 
-        public ObjectGuid UnitGUID;
-        public int DisplayID;
+        public ObjectGuid UnitGUID { get; set; }
+        public int DisplayID { get; set; }
     }
 
     class SpellClick : ClientPacket
@@ -947,8 +947,8 @@ namespace Game.Network.Packets
             TryAutoDismount = _worldPacket.HasBit();
         }
 
-        public ObjectGuid SpellClickUnitGuid;
-        public bool TryAutoDismount;
+        public ObjectGuid SpellClickUnitGuid { get; set; }
+        public bool TryAutoDismount { get; set; }
     }
 
     class ResyncRunes : ServerPacket
@@ -960,7 +960,7 @@ namespace Game.Network.Packets
             Runes.Write(_worldPacket);
         }
 
-        public RuneData Runes = new RuneData();
+        public RuneData Runes { get; set; } = new RuneData();
     }
 
     class MissileTrajectoryCollision : ClientPacket
@@ -975,10 +975,10 @@ namespace Game.Network.Packets
             CollisionPos = _worldPacket.ReadVector3();
         }
 
-        public ObjectGuid Target;
-        public uint SpellID;
-        public ObjectGuid CastID;
-        public Vector3 CollisionPos;
+        public ObjectGuid Target { get; set; }
+        public uint SpellID { get; set; }
+        public ObjectGuid CastID { get; set; }
+        public Vector3 CollisionPos { get; set; }
     }
 
     class NotifyMissileTrajectoryCollision : ServerPacket
@@ -992,9 +992,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteVector3(CollisionPos);
         }
 
-        public ObjectGuid Caster;
-        public ObjectGuid CastID;
-        public Vector3 CollisionPos;
+        public ObjectGuid Caster { get; set; }
+        public ObjectGuid CastID { get; set; }
+        public Vector3 CollisionPos { get; set; }
     }
 
     class UpdateMissileTrajectory : ClientPacket
@@ -1017,14 +1017,14 @@ namespace Game.Network.Packets
                 Status.Set(MovementExtensions.ReadMovementInfo(_worldPacket));
         }
 
-        public ObjectGuid Guid;
-        public ushort MoveMsgID;
-        public uint SpellID;
-        public float Pitch;
-        public float Speed;
-        public Vector3 FirePos;
-        public Vector3 ImpactPos;
-        public Optional<MovementInfo> Status;
+        public ObjectGuid Guid { get; set; }
+        public ushort MoveMsgID { get; set; }
+        public uint SpellID { get; set; }
+        public float Pitch { get; set; }
+        public float Speed { get; set; }
+        public Vector3 FirePos { get; set; }
+        public Vector3 ImpactPos { get; set; }
+        public Optional<MovementInfo> Status { get; set; }
     }
 
     public class SpellDelayed : ServerPacket
@@ -1037,8 +1037,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(ActualDelay);
         }
 
-        public ObjectGuid Caster;
-        public int ActualDelay;
+        public ObjectGuid Caster { get; set; }
+        public int ActualDelay { get; set; }
     }
 
     class DispelFailed : ServerPacket
@@ -1055,10 +1055,10 @@ namespace Game.Network.Packets
             FailedSpells.ForEach(FailedSpellID => _worldPacket.WriteUInt32(FailedSpellID));
         }
 
-        public ObjectGuid CasterGUID;
-        public ObjectGuid VictimGUID;
-        public uint SpellID;
-        public List<uint> FailedSpells = new List<uint>();
+        public ObjectGuid CasterGUID { get; set; }
+        public ObjectGuid VictimGUID { get; set; }
+        public uint SpellID { get; set; }
+        public List<uint> FailedSpells { get; set; } = new List<uint>();
     }
 
     class CustomLoadScreen : ServerPacket
@@ -1089,9 +1089,9 @@ namespace Game.Network.Packets
             Cost = cost;
         }
 
-        public int PowerType;
-        public int Amount;
-        public int Cost;
+        public int PowerType { get; set; }
+        public int Amount { get; set; }
+        public int Cost { get; set; }
     }
 
     public class SpellCastLogData
@@ -1247,15 +1247,15 @@ namespace Game.Network.Packets
             data.WriteInt8(TargetScalingLevelDelta);
         }
 
-        public SandboxScalingDataType Type;
-        public short PlayerLevelDelta;
-        public ushort PlayerItemLevel;
-        public byte TargetLevel;
-        public byte Expansion;
-        public byte Class;
-        public byte TargetMinScalingLevel;
-        public byte TargetMaxScalingLevel;
-        public sbyte TargetScalingLevelDelta;
+        public SandboxScalingDataType Type { get; set; }
+        public short PlayerLevelDelta { get; set; }
+        public ushort PlayerItemLevel { get; set; }
+        public byte TargetLevel { get; set; }
+        public byte Expansion { get; set; }
+        public byte Class { get; set; }
+        public byte TargetMinScalingLevel { get; set; }
+        public byte TargetMaxScalingLevel { get; set; }
+        public sbyte TargetScalingLevelDelta { get; set; }
 
         public enum SandboxScalingDataType
         {
@@ -1307,20 +1307,20 @@ namespace Game.Network.Packets
                 data.WriteFloat(point);
         }
 
-        public ObjectGuid CastID;
-        public int SpellID;
-        public int SpellXSpellVisualID;
-        public AuraFlags Flags;
-        public uint ActiveFlags;
-        public ushort CastLevel = 1;
-        public byte Applications = 1;
+        public ObjectGuid CastID { get; set; }
+        public int SpellID { get; set; }
+        public int SpellXSpellVisualID { get; set; }
+        public AuraFlags Flags { get; set; }
+        public uint ActiveFlags { get; set; }
+        public ushort CastLevel { get; set; } = 1;
+        public byte Applications { get; set; } = 1;
         Optional<SandboxScalingData> SandboxScaling;
-        public Optional<ObjectGuid> CastUnit;
-        public Optional<int> Duration;
-        public Optional<int> Remaining;
+        public Optional<ObjectGuid> CastUnit { get; set; }
+        public Optional<int> Duration { get; set; }
+        public Optional<int> Remaining { get; set; }
         Optional<float> TimeMod;
-        public float[] Points = new float[0];
-        public List<float> EstimatedPoints = new List<float>();
+        public float[] Points { get; set; } = new float[0];
+        public List<float> EstimatedPoints { get; set; } = new List<float>();
     }
 
     public struct AuraInfo
@@ -1335,14 +1335,14 @@ namespace Game.Network.Packets
                 AuraData.Value.Write(data);
         }
 
-        public byte Slot;
+        public byte Slot { get; set; }
         public Optional<AuraDataInfo> AuraData;
     }
 
     public struct TargetLocation
     {
-        public ObjectGuid Transport;
-        public Position Location;
+        public ObjectGuid Transport { get; set; }
+        public Position Location { get; set; }
 
         public void Read(WorldPacket data)
         {
@@ -1419,9 +1419,9 @@ namespace Game.Network.Packets
             data.WriteString(Name);
         }
 
-        public SpellCastTargetFlags Flags;
-        public ObjectGuid Unit;
-        public ObjectGuid Item;
+        public SpellCastTargetFlags Flags { get; set; }
+        public ObjectGuid Unit { get; set; }
+        public ObjectGuid Item { get; set; }
         public Optional<TargetLocation> SrcLocation;
         public Optional<TargetLocation> DstLocation;
         public Optional<float> Orientation;
@@ -1431,8 +1431,8 @@ namespace Game.Network.Packets
 
     public struct MissileTrajectoryRequest
     {
-        public float Pitch;
-        public float Speed;
+        public float Pitch { get; set; }
+        public float Speed { get; set; }
 
         public void Read(WorldPacket data)
         {
@@ -1443,9 +1443,9 @@ namespace Game.Network.Packets
 
     public struct SpellWeight
     {
-        public uint Type;
-        public int ID;
-        public uint Quantity;
+        public uint Type { get; set; }
+        public int ID { get; set; }
+        public uint Quantity { get; set; }
     }
 
     public class SpellCastRequest
@@ -1470,7 +1470,7 @@ namespace Game.Network.Packets
             for (var i = 0; i < weightCount; ++i)
             {
                 data.ResetBitPos();
-                SpellWeight weight;
+                SpellWeight weight = new SpellWeight();
                 weight.Type = data.ReadBits<uint>(2);
                 weight.ID = data.ReadInt32();
                 weight.Quantity = data.ReadUInt32();
@@ -1478,16 +1478,16 @@ namespace Game.Network.Packets
             }
         }
 
-        public ObjectGuid CastID;
-        public uint SpellID;
-        public uint SpellXSpellVisualID;
-        public uint SendCastFlags;
-        public SpellTargetData Target = new SpellTargetData();
-        public MissileTrajectoryRequest MissileTrajectory;
+        public ObjectGuid CastID { get; set; }
+        public uint SpellID { get; set; }
+        public uint SpellXSpellVisualID { get; set; }
+        public uint SendCastFlags { get; set; }
+        public SpellTargetData Target { get; set; } = new SpellTargetData();
+        public MissileTrajectoryRequest MissileTrajectory { get; set; }
         public Optional<MovementInfo> MoveUpdate;
-        public List<SpellWeight> Weight = new List<SpellWeight>();
-        public ObjectGuid Charmer;
-        public uint[] Misc = new uint[2];
+        public List<SpellWeight> Weight { get; set; } = new List<SpellWeight>();
+        public ObjectGuid Charmer { get; set; }
+        public uint[] Misc { get; set; } = new uint[2];
     }
 
     public struct SpellMissStatus
@@ -1501,14 +1501,14 @@ namespace Game.Network.Packets
             data.FlushBits();
         }
 
-        public byte Reason;
-        public byte ReflectStatus;
+        public byte Reason { get; set; }
+        public byte ReflectStatus { get; set; }
     }
 
     public struct SpellPowerData
     {
-        public int Cost;
-        public PowerType Type;
+        public int Cost { get; set; }
+        public PowerType Type { get; set; }
 
         public void Write(WorldPacket data)
         {
@@ -1529,15 +1529,15 @@ namespace Game.Network.Packets
                 data.WriteUInt8(cd);
         }
 
-        public byte Start;
-        public byte Count;
-        public List<byte> Cooldowns = new List<byte>();
+        public byte Start { get; set; }
+        public byte Count { get; set; }
+        public List<byte> Cooldowns { get; set; } = new List<byte>();
     }
 
     public struct MissileTrajectoryResult
     {
-        public uint TravelTime;
-        public float Pitch;
+        public uint TravelTime { get; set; }
+        public float Pitch { get; set; }
 
         public void Write(WorldPacket data)
         {
@@ -1548,8 +1548,8 @@ namespace Game.Network.Packets
 
     public struct SpellAmmo
     {
-        public int DisplayID;
-        public sbyte InventoryType;
+        public int DisplayID { get; set; }
+        public sbyte InventoryType { get; set; }
 
         public void Write(WorldPacket data)
         {
@@ -1560,8 +1560,8 @@ namespace Game.Network.Packets
 
     public struct CreatureImmunities
     {
-        public uint School;
-        public uint Value;
+        public uint School { get; set; }
+        public uint Value { get; set; }
 
         public void Write(WorldPacket data)
         {
@@ -1572,9 +1572,9 @@ namespace Game.Network.Packets
 
     public struct SpellHealPrediction
     {
-        public ObjectGuid BeaconGUID;
-        public uint Points;
-        public byte Type;
+        public ObjectGuid BeaconGUID { get; set; }
+        public uint Points { get; set; }
+        public byte Type { get; set; }
 
         public void Write(WorldPacket data)
         {
@@ -1635,33 +1635,33 @@ namespace Game.Network.Packets
                 targetLoc.Write(data);
         }
 
-        public ObjectGuid CasterGUID;
-        public ObjectGuid CasterUnit;
-        public ObjectGuid CastID;
-        public ObjectGuid OriginalCastID;
-        public int SpellID;
-        public uint SpellXSpellVisualID;
-        public SpellCastFlags CastFlags;
-        public SpellCastFlagsEx CastFlagsEx;
-        public uint CastTime;
-        public List<ObjectGuid> HitTargets = new List<ObjectGuid>();
-        public List<ObjectGuid> MissTargets = new List<ObjectGuid>();
-        public List<SpellMissStatus> MissStatus = new List<SpellMissStatus>();
-        public SpellTargetData Target = new SpellTargetData();
-        public List<SpellPowerData> RemainingPower = new List<SpellPowerData>();
+        public ObjectGuid CasterGUID { get; set; }
+        public ObjectGuid CasterUnit { get; set; }
+        public ObjectGuid CastID { get; set; }
+        public ObjectGuid OriginalCastID { get; set; }
+        public int SpellID { get; set; }
+        public uint SpellXSpellVisualID { get; set; }
+        public SpellCastFlags CastFlags { get; set; }
+        public SpellCastFlagsEx CastFlagsEx { get; set; }
+        public uint CastTime { get; set; }
+        public List<ObjectGuid> HitTargets { get; set; } = new List<ObjectGuid>();
+        public List<ObjectGuid> MissTargets { get; set; } = new List<ObjectGuid>();
+        public List<SpellMissStatus> MissStatus { get; set; } = new List<SpellMissStatus>();
+        public SpellTargetData Target { get; set; } = new SpellTargetData();
+        public List<SpellPowerData> RemainingPower { get; set; } = new List<SpellPowerData>();
         public Optional<RuneData> RemainingRunes;
         public MissileTrajectoryResult MissileTrajectory;
-        public SpellAmmo Ammo;
-        public byte DestLocSpellCastIndex;
-        public List<TargetLocation> TargetPoints = new List<TargetLocation>();
+        public SpellAmmo Ammo { get; set; }
+        public byte DestLocSpellCastIndex { get; set; }
+        public List<TargetLocation> TargetPoints { get; set; } = new List<TargetLocation>();
         public CreatureImmunities Immunities;
-        public SpellHealPrediction Predict;
+        public SpellHealPrediction Predict { get; set; }
     }
 
     public struct SpellModifierData
     {
-        public float ModifierValue;
-        public byte ClassIndex;
+        public float ModifierValue { get; set; }
+        public byte ClassIndex { get; set; }
 
         public void Write(WorldPacket data)
         {
@@ -1672,8 +1672,8 @@ namespace Game.Network.Packets
 
     public class SpellModifierInfo
     {
-        public byte ModIndex;
-        public List<SpellModifierData> ModifierData = new List<SpellModifierData>();
+        public byte ModIndex { get; set; }
+        public List<SpellModifierData> ModifierData { get; set; } = new List<SpellModifierData>();
 
         public void Write(WorldPacket data)
         {
@@ -1699,9 +1699,9 @@ namespace Game.Network.Packets
             data.WriteFloat(ModRate);
         }
 
-        public uint SrecID;
-        public uint ForcedCooldown;
-        public float ModRate = 1.0f;
+        public uint SrecID { get; set; }
+        public uint ForcedCooldown { get; set; }
+        public float ModRate { get; set; } = 1.0f;
     }
 
     public class SpellHistoryEntry
@@ -1725,13 +1725,13 @@ namespace Game.Network.Packets
                 data.WriteUInt32(unused622_2.Value);
         }
 
-        public uint SpellID;
-        public uint ItemID;
-        public uint Category;
-        public int RecoveryTime;
-        public int CategoryRecoveryTime;
-        public float ModRate = 1.0f;
-        public bool OnHold;
+        public uint SpellID { get; set; }
+        public uint ItemID { get; set; }
+        public uint Category { get; set; }
+        public int RecoveryTime { get; set; }
+        public int CategoryRecoveryTime { get; set; }
+        public float ModRate { get; set; } = 1.0f;
+        public bool OnHold { get; set; }
         Optional<uint> unused622_1;   // This field is not used for anything in the client in 6.2.2.20444
         Optional<uint> unused622_2;   // This field is not used for anything in the client in 6.2.2.20444
     }
@@ -1746,10 +1746,10 @@ namespace Game.Network.Packets
             data.WriteUInt8(ConsumedCharges);
         }
 
-        public uint Category;
-        public uint NextRecoveryTime;
-        public float ChargeModRate = 1.0f;
-        public byte ConsumedCharges;
+        public uint Category { get; set; }
+        public uint NextRecoveryTime { get; set; }
+        public float ChargeModRate { get; set; } = 1.0f;
+        public byte ConsumedCharges { get; set; }
     }
 
     public struct SpellChannelStartInterruptImmunities
@@ -1760,8 +1760,8 @@ namespace Game.Network.Packets
             data.WriteInt32(Immunities);
         }
 
-        public int SchoolImmunities;
-        public int Immunities;
+        public int SchoolImmunities { get; set; }
+        public int Immunities { get; set; }
     }
 
     public struct SpellTargetedHealPrediction
@@ -1772,7 +1772,7 @@ namespace Game.Network.Packets
             Predict.Write(data);
         }
 
-        public ObjectGuid TargetGUID;
-        public SpellHealPrediction Predict;
+        public ObjectGuid TargetGUID { get; set; }
+        public SpellHealPrediction Predict { get; set; }
     }
 }

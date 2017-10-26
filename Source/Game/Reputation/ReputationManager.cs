@@ -169,7 +169,7 @@ namespace Game
 
             foreach (var pair in _forcedReactions)
             {
-                ForcedReaction forcedReaction;
+                ForcedReaction forcedReaction = new ForcedReaction();
                 forcedReaction.Faction = (int)pair.Key;
                 forcedReaction.Reaction = (int)pair.Value;
 

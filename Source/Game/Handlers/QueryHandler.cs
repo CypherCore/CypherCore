@@ -224,7 +224,7 @@ namespace Game
                 if (pageText == null)
                     break;
 
-                QueryPageTextResponse.PageTextInfo page;
+                QueryPageTextResponse.PageTextInfo page = new QueryPageTextResponse.PageTextInfo();
                 page.ID = pageID;
                 page.NextPageID = pageText.NextPageID;
                 page.Text = pageText.Text;
