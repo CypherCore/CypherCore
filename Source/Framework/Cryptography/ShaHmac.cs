@@ -24,10 +24,9 @@ namespace Framework.Cryptography
 {
     public class Sha256
     {
-        public byte[] Digest { get; private set; }
-
         public Sha256()
         {
+            sha = new SHA256Managed();
             sha.Initialize();
         }
 
@@ -65,12 +64,11 @@ namespace Framework.Cryptography
         }
 
         SHA256 sha;
+        public byte[] Digest { get; private set; }
     }
 
     public class HmacHash : HMACSHA1
     {
-        public byte[] Digest { get; private set; }
-
         public HmacHash(byte[] key) : base(key, true)
         {
             Initialize();
@@ -110,6 +108,8 @@ namespace Framework.Cryptography
 
             Digest = Hash;
         }
+
+        public byte[] Digest { get; private set; }
     }
 
     public class HmacSha256 : HMACSHA256
