@@ -31,7 +31,7 @@ namespace Game.Network.Packets
             Target = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Target;
+        public ObjectGuid Target { get; set; }
     }
 
     public class InspectResult : ServerPacket
@@ -67,15 +67,15 @@ namespace Game.Network.Packets
                 GuildData.Value.Write(_worldPacket);
         }
 
-        public ObjectGuid InspecteeGUID;
-        public List<InspectItemData> Items = new List<InspectItemData>();
-        public List<ushort> Glyphs = new List<ushort>();
-        public List<ushort> Talents = new List<ushort>();
-        public List<ushort> PvpTalents = new List<ushort>();
-        public Class ClassID = Class.None;
-        public Gender GenderID = Gender.None;
+        public ObjectGuid InspecteeGUID { get; set; }
+        public List<InspectItemData> Items { get; set; } = new List<InspectItemData>();
+        public List<ushort> Glyphs { get; set; } = new List<ushort>();
+        public List<ushort> Talents { get; set; } = new List<ushort>();
+        public List<ushort> PvpTalents { get; set; } = new List<ushort>();
+        public Class ClassID { get; set; } = Class.None;
+        public Gender GenderID { get; set; } = Gender.None;
         public Optional<InspectGuildData> GuildData = new Optional<InspectGuildData>();
-        public int SpecializationID;
+        public int SpecializationID { get; set; }
     }
 
     public class RequestHonorStats : ClientPacket
@@ -87,7 +87,7 @@ namespace Game.Network.Packets
             TargetGUID = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid TargetGUID;
+        public ObjectGuid TargetGUID { get; set; }
     }
 
     public class InspectHonorStats : ServerPacket
@@ -103,11 +103,11 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(LifetimeHK);
         }
 
-        public ObjectGuid PlayerGUID;
-        public uint LifetimeHK;
-        public ushort YesterdayHK;
-        public ushort TodayHK;
-        public byte LifetimeMaxRank;
+        public ObjectGuid PlayerGUID { get; set; }
+        public uint LifetimeHK { get; set; }
+        public ushort YesterdayHK { get; set; }
+        public ushort TodayHK { get; set; }
+        public byte LifetimeMaxRank { get; set; }
     }
 
     public class InspectPVPRequest : ClientPacket
@@ -120,8 +120,8 @@ namespace Game.Network.Packets
             InspectRealmAddress = _worldPacket.ReadUInt32();
         }
 
-        public ObjectGuid InspectTarget;
-        public uint InspectRealmAddress;
+        public ObjectGuid InspectTarget { get; set; }
+        public uint InspectRealmAddress { get; set; }
     }
 
     public class InspectPVPResponse : ServerPacket
@@ -138,8 +138,8 @@ namespace Game.Network.Packets
             Bracket.ForEach(p => p.Write(_worldPacket));
         }
 
-        public List<PVPBracketData> Bracket;
-        public ObjectGuid ClientGUID;
+        public List<PVPBracketData> Bracket { get; set; }
+        public ObjectGuid ClientGUID { get; set; }
     }
 
     public class QueryInspectAchievements : ClientPacket
@@ -151,7 +151,7 @@ namespace Game.Network.Packets
             Guid = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Guid;
+        public ObjectGuid Guid { get; set; }
     }
 
     /// RespondInspectAchievements in AchievementPackets
@@ -172,8 +172,8 @@ namespace Game.Network.Packets
             data.WriteUInt8(Index);
         }
 
-        public uint Id;
-        public byte Index;
+        public uint Id { get; set; }
+        public byte Index { get; set; }
     }
 
     public class InspectItemData
@@ -224,12 +224,12 @@ namespace Game.Network.Packets
                 Enchants[i].Write(data);
         }
 
-        public ObjectGuid CreatorGUID;
-        public ItemInstance Item;
-        public byte Index;
-        public bool Usable;
-        public List<InspectEnchantData> Enchants = new List<InspectEnchantData>();
-        public List<ItemGemData> Gems = new List<ItemGemData>();
+        public ObjectGuid CreatorGUID { get; set; }
+        public ItemInstance Item { get; set; }
+        public byte Index { get; set; }
+        public bool Usable { get; set; }
+        public List<InspectEnchantData> Enchants { get; set; } = new List<InspectEnchantData>();
+        public List<ItemGemData> Gems { get; set; } = new List<ItemGemData>();
     }
 
     public struct InspectGuildData
@@ -241,9 +241,9 @@ namespace Game.Network.Packets
             data.WriteInt32(AchievementPoints);
         }
 
-        public ObjectGuid GuildGUID;
-        public int NumGuildMembers;
-        public int AchievementPoints;
+        public ObjectGuid GuildGUID { get; set; }
+        public int NumGuildMembers { get; set; }
+        public int AchievementPoints { get; set; }
     }
 
     public struct PVPBracketData
@@ -261,15 +261,15 @@ namespace Game.Network.Packets
             data.WriteUInt8(Bracket);
         }
 
-        public int Rating;
-        public int Rank;
-        public int WeeklyPlayed;
-        public int WeeklyWon;
-        public int SeasonPlayed;
-        public int SeasonWon;
-        public int WeeklyBestRating;
-        public int Unk710;
-        public byte Bracket;
+        public int Rating { get; set; }
+        public int Rank { get; set; }
+        public int WeeklyPlayed { get; set; }
+        public int WeeklyWon { get; set; }
+        public int SeasonPlayed { get; set; }
+        public int SeasonWon { get; set; }
+        public int WeeklyBestRating { get; set; }
+        public int Unk710 { get; set; }
+        public byte Bracket { get; set; }
     }
 }
 

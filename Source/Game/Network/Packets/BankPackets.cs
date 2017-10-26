@@ -21,9 +21,9 @@ namespace Game.Network.Packets
 {
     public class AutoBankItem : ClientPacket
     {
-        public InvUpdate Inv;
-        public byte Bag;
-        public byte Slot;
+        public InvUpdate Inv { get; set; }
+        public byte Bag { get; set; }
+        public byte Slot { get; set; }
 
         public AutoBankItem(WorldPacket packet) : base(packet) { }
 
@@ -37,9 +37,9 @@ namespace Game.Network.Packets
 
     public class AutoStoreBankItem : ClientPacket
     {
-        public InvUpdate Inv;
-        public byte Bag;
-        public byte Slot;
+        public InvUpdate Inv { get; set; }
+        public byte Bag { get; set; }
+        public byte Slot { get; set; }
 
         public AutoStoreBankItem(WorldPacket packet) : base(packet) { }
 
@@ -60,6 +60,6 @@ namespace Game.Network.Packets
             Guid = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Guid;
+        public ObjectGuid Guid { get; set; }
     }
 }

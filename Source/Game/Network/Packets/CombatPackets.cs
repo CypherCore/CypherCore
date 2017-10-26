@@ -30,7 +30,7 @@ namespace Game.Network.Packets
             Victim = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Victim;
+        public ObjectGuid Victim { get; set; }
     }
 
     public class AttackSwingError : ServerPacket
@@ -66,8 +66,8 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(Victim);
         }
 
-        public ObjectGuid Attacker;
-        public ObjectGuid Victim;
+        public ObjectGuid Attacker { get; set; }
+        public ObjectGuid Victim { get; set; }
     }
 
     public class SAttackStop : ServerPacket
@@ -90,9 +90,9 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public ObjectGuid Attacker;
-        public ObjectGuid Victim;
-        public bool NowDead = false;
+        public ObjectGuid Attacker { get; set; }
+        public ObjectGuid Victim { get; set; }
+        public bool NowDead { get; set; } = false;
     }
 
     public class ThreatUpdate : ServerPacket
@@ -110,8 +110,8 @@ namespace Game.Network.Packets
             }
         }
 
-        public ObjectGuid UnitGUID;
-        public List<ThreatInfo> ThreatList = new List<ThreatInfo>();
+        public ObjectGuid UnitGUID { get; set; }
+        public List<ThreatInfo> ThreatList { get; set; } = new List<ThreatInfo>();
     }
 
     public class HighestThreatUpdate : ServerPacket
@@ -130,9 +130,9 @@ namespace Game.Network.Packets
             }
         }
 
-        public ObjectGuid UnitGUID;
-        public List<ThreatInfo> ThreatList = new List<ThreatInfo>();
-        public ObjectGuid HighestThreatGUID;
+        public ObjectGuid UnitGUID { get; set; }
+        public List<ThreatInfo> ThreatList { get; set; } = new List<ThreatInfo>();
+        public ObjectGuid HighestThreatGUID { get; set; }
     }
 
     public class ThreatRemove : ServerPacket
@@ -159,8 +159,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(Reaction);
         }
 
-        public ObjectGuid UnitGUID;
-        public AiReaction Reaction;
+        public ObjectGuid UnitGUID { get; set; }
+        public AiReaction Reaction { get; set; }
     }
 
     public class CancelCombat : ServerPacket
@@ -188,8 +188,8 @@ namespace Game.Network.Packets
             }
         }
 
-        public ObjectGuid Guid;
-        public List<PowerUpdatePower> Powers;
+        public ObjectGuid Guid { get; set; }
+        public List<PowerUpdatePower> Powers { get; set; }
     }
 
     public class SetSheathed : ClientPacket
@@ -202,8 +202,8 @@ namespace Game.Network.Packets
             Animate = _worldPacket.HasBit();
         }
 
-        public int CurrentSheathState;
-        public bool Animate = true;
+        public int CurrentSheathState { get; set; }
+        public bool Animate { get; set; } = true;
     }
 
     public class CancelAutoRepeat : ServerPacket
@@ -215,7 +215,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(Guid);
         }
 
-        public ObjectGuid Guid;
+        public ObjectGuid Guid { get; set; }
     }
 
     public class HealthUpdate : ServerPacket
@@ -228,8 +228,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt64(Health);
         }
 
-        public ObjectGuid Guid;
-        public long Health;
+        public ObjectGuid Guid { get; set; }
+        public long Health { get; set; }
     }
 
     public class ThreatClear : ServerPacket
@@ -241,7 +241,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(UnitGUID);
         }
 
-        public ObjectGuid UnitGUID;
+        public ObjectGuid UnitGUID { get; set; }
     }
 
     class PvPCredit : ServerPacket
@@ -256,10 +256,10 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(Rank);
         }
 
-        public int OriginalHonor;
-        public int Honor;
-        public ObjectGuid Target;
-        public uint Rank;
+        public int OriginalHonor { get; set; }
+        public int Honor { get; set; }
+        public ObjectGuid Target { get; set; }
+        public uint Rank { get; set; }
     }
 
     class BreakTarget : ServerPacket
@@ -271,14 +271,14 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(UnitGUID);
         }
 
-        public ObjectGuid UnitGUID;
+        public ObjectGuid UnitGUID { get; set; }
     }
 
     //Structs
     public struct ThreatInfo
     {
-        public ObjectGuid UnitGUID;
-        public long Threat;
+        public ObjectGuid UnitGUID { get; set; }
+        public long Threat { get; set; }
     }
 
     public struct PowerUpdatePower
@@ -289,7 +289,7 @@ namespace Game.Network.Packets
             PowerType = powerType;
         }
 
-        public int Power;
-        public byte PowerType;
+        public int Power { get; set; }
+        public byte PowerType { get; set; }
     }
 }

@@ -29,7 +29,7 @@ namespace Game.Network.Packets
             Granter = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Granter;
+        public ObjectGuid Granter { get; set; }
     }
 
     public class GrantLevel : ClientPacket
@@ -41,7 +41,7 @@ namespace Game.Network.Packets
             Target = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Target;
+        public ObjectGuid Target { get; set; }
     }
 
     public class ProposeLevelGrant : ServerPacket
@@ -53,7 +53,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(Sender);
         }
 
-        public ObjectGuid Sender;
+        public ObjectGuid Sender { get; set; }
     }
 
     public class ReferAFriendFailure : ServerPacket
@@ -69,7 +69,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(Str);
         }
 
-        public string Str;
-        public ReferAFriendError Reason;
+        public string Str { get; set; }
+        public ReferAFriendError Reason { get; set; }
     }
 }

@@ -1020,7 +1020,7 @@ namespace Game.Guilds
 
             for (byte tabId = 0; tabId < GuildConst.MaxBankTabs; ++tabId)
             {
-                GuildPermissionsQueryResults.GuildRankTabPermissions tabPerm;
+                GuildPermissionsQueryResults.GuildRankTabPermissions tabPerm = new GuildPermissionsQueryResults.GuildRankTabPermissions();
                 tabPerm.Flags = (int)_GetRankBankTabRights(rankId, tabId);
                 tabPerm.WithdrawItemLimit = _GetMemberRemainingSlots(member, tabId);
                 queryResult.Tab.Add(tabPerm);
@@ -2169,7 +2169,7 @@ namespace Game.Guilds
             {
                 for (byte i = 0; i < _GetPurchasedTabsSize(); ++i)
                 {
-                    GuildBankTabInfo tabInfo;
+                    GuildBankTabInfo tabInfo = new GuildBankTabInfo();
                     tabInfo.TabIndex = i;
                     tabInfo.Name = m_bankTabs[i].GetName();
                     tabInfo.Icon = m_bankTabs[i].GetIcon();
@@ -2754,7 +2754,7 @@ namespace Game.Guilds
                 ObjectGuid playerGUID = ObjectGuid.Create(HighGuid.Player, m_playerGuid1);
                 ObjectGuid otherGUID = ObjectGuid.Create(HighGuid.Player, m_playerGuid2);
 
-                GuildEventEntry eventEntry;
+                GuildEventEntry eventEntry = new GuildEventEntry();
                 eventEntry.PlayerGUID = playerGUID;
                 eventEntry.OtherGUID = otherGUID;
                 eventEntry.TransactionType = (byte)m_eventType;

@@ -32,8 +32,8 @@ namespace Game.Network.Packets
             ItemGUID = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid ItemGUID;
-        public uint PetitionID = 0;
+        public ObjectGuid ItemGUID { get; set; }
+        public uint PetitionID { get; set; } = 0;
     }
 
     public class QueryPetitionResponse : ServerPacket
@@ -50,9 +50,9 @@ namespace Game.Network.Packets
                 Info.Write(_worldPacket);
         }
 
-        public uint PetitionID = 0;
-        public bool Allow = false;
-        public PetitionInfo Info;
+        public uint PetitionID { get; set; } = 0;
+        public bool Allow { get; set; } = false;
+        public PetitionInfo Info { get; set; }
     }
 
     public class PetitionShowList : ClientPacket
@@ -64,7 +64,7 @@ namespace Game.Network.Packets
             PetitionUnit = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid PetitionUnit;
+        public ObjectGuid PetitionUnit { get; set; }
     }
 
     public class ServerPetitionShowList : ServerPacket
@@ -77,8 +77,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(Price);
         }
 
-        public ObjectGuid Unit;
-        public uint Price = 0;
+        public ObjectGuid Unit { get; set; }
+        public uint Price { get; set; } = 0;
     }
 
     public class PetitionBuy : ClientPacket
@@ -93,8 +93,8 @@ namespace Game.Network.Packets
             Title = _worldPacket.ReadString(titleLen);
         }
 
-        public ObjectGuid Unit;
-        public string Title;
+        public ObjectGuid Unit { get; set; }
+        public string Title { get; set; }
     }
 
     public class PetitionShowSignatures : ClientPacket
@@ -106,7 +106,7 @@ namespace Game.Network.Packets
             Item = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Item;
+        public ObjectGuid Item { get; set; }
     }
 
     public class ServerPetitionShowSignatures : ServerPacket
@@ -131,16 +131,16 @@ namespace Game.Network.Packets
             }
         }
 
-        public ObjectGuid Item;
-        public ObjectGuid Owner;
-        public ObjectGuid OwnerAccountID;
-        public int PetitionID = 0;
-        public List<PetitionSignature> Signatures;
+        public ObjectGuid Item { get; set; }
+        public ObjectGuid Owner { get; set; }
+        public ObjectGuid OwnerAccountID { get; set; }
+        public int PetitionID { get; set; } = 0;
+        public List<PetitionSignature> Signatures { get; set; }
 
         public struct PetitionSignature
         {
-            public ObjectGuid Signer;
-            public int Choice;
+            public ObjectGuid Signer { get; set; }
+            public int Choice { get; set; }
         }
     }
 
@@ -154,8 +154,8 @@ namespace Game.Network.Packets
             Choice = _worldPacket.ReadUInt8();
         }
 
-        public ObjectGuid PetitionGUID;
-        public byte Choice = 0;
+        public ObjectGuid PetitionGUID { get; set; }
+        public byte Choice { get; set; } = 0;
     }
 
     public class PetitionSignResults : ServerPacket
@@ -171,9 +171,9 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public ObjectGuid Item;
-        public ObjectGuid Player;
-        public PetitionSigns Error = 0;
+        public ObjectGuid Item { get; set; }
+        public ObjectGuid Player { get; set; }
+        public PetitionSigns Error { get; set; } = 0;
     }
 
     public class PetitionAlreadySigned : ServerPacket
@@ -185,7 +185,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(SignerGUID);
         }
 
-        public ObjectGuid SignerGUID;
+        public ObjectGuid SignerGUID { get; set; }
     }
 
     public class DeclinePetition : ClientPacket
@@ -197,7 +197,7 @@ namespace Game.Network.Packets
             PetitionGUID = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid PetitionGUID;
+        public ObjectGuid PetitionGUID { get; set; }
     }
 
     public class TurnInPetition : ClientPacket
@@ -209,7 +209,7 @@ namespace Game.Network.Packets
             Item = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Item;
+        public ObjectGuid Item { get; set; }
     }
 
     public class TurnInPetitionResult : ServerPacket
@@ -222,7 +222,7 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public PetitionTurns Result = 0; // PetitionError
+        public PetitionTurns Result { get; set; } = 0; // PetitionError
     }
 
     public class OfferPetition : ClientPacket
@@ -235,8 +235,8 @@ namespace Game.Network.Packets
             TargetPlayer = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid TargetPlayer;
-        public ObjectGuid ItemGUID;
+        public ObjectGuid TargetPlayer { get; set; }
+        public ObjectGuid ItemGUID { get; set; }
     }
 
     public class OfferPetitionError : ServerPacket
@@ -248,7 +248,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(PlayerGUID);
         }
 
-        public ObjectGuid PlayerGUID;
+        public ObjectGuid PlayerGUID { get; set; }
     }
 
     public class PetitionRenameGuild : ClientPacket
@@ -265,8 +265,8 @@ namespace Game.Network.Packets
             NewGuildName = _worldPacket.ReadString(nameLen);
         }
 
-        public ObjectGuid PetitionGuid;
-        public string NewGuildName;
+        public ObjectGuid PetitionGuid { get; set; }
+        public string NewGuildName { get; set; }
     }
 
     public class PetitionRenameGuildResponse : ServerPacket
@@ -283,8 +283,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(NewGuildName);
         }
 
-        public ObjectGuid PetitionGuid;
-        public string NewGuildName;
+        public ObjectGuid PetitionGuid { get; set; }
+        public string NewGuildName { get; set; }
     }
 
     public class PetitionInfo
@@ -323,23 +323,23 @@ namespace Game.Network.Packets
             data.WriteString(BodyText);
         }
 
-        public int PetitionID;
-        public ObjectGuid Petitioner;
-        public string Title;
-        public string BodyText;
-        public int MinSignatures;
-        public int MaxSignatures;
-        public int DeadLine;
-        public int IssueDate;
-        public int AllowedGuildID;
-        public int AllowedClasses;
-        public int AllowedRaces;
-        public short AllowedGender;
-        public int AllowedMinLevel;
-        public int AllowedMaxLevel;
-        public int NumChoices;
-        public int StaticType;
-        public uint Muid = 0;
-        public StringArray Choicetext = new StringArray(10);
+        public int PetitionID { get; set; }
+        public ObjectGuid Petitioner { get; set; }
+        public string Title { get; set; }
+        public string BodyText { get; set; }
+        public int MinSignatures { get; set; }
+        public int MaxSignatures { get; set; }
+        public int DeadLine { get; set; }
+        public int IssueDate { get; set; }
+        public int AllowedGuildID { get; set; }
+        public int AllowedClasses { get; set; }
+        public int AllowedRaces { get; set; }
+        public short AllowedGender { get; set; }
+        public int AllowedMinLevel { get; set; }
+        public int AllowedMaxLevel { get; set; }
+        public int NumChoices { get; set; }
+        public int StaticType { get; set; }
+        public uint Muid { get; set; } = 0;
+        public StringArray Choicetext { get; set; } = new StringArray(10);
     }
 }

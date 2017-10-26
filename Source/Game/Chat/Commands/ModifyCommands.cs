@@ -217,7 +217,7 @@ namespace Game.Chat
             SetSpellModifier packet = new SetSpellModifier(ServerOpcodes.SetFlatSpellModifier);
             SpellModifierInfo spellMod = new SpellModifierInfo();
             spellMod.ModIndex = op;
-            SpellModifierData modData;
+            SpellModifierData modData = new SpellModifierData();
             modData.ClassIndex = spellflatid;
             modData.ModifierValue = val;
             spellMod.ModifierData.Add(modData);

@@ -29,7 +29,7 @@ namespace Game.Network.Packets
             UnkInt = _worldPacket.ReadUInt32();
         }
 
-        public uint UnkInt;
+        public uint UnkInt { get; set; }
     }
 
     class UpdateListedAuctionableTokensResponse : ServerPacket
@@ -53,16 +53,16 @@ namespace Game.Network.Packets
         }
 
         public uint UnkInt; // send CMSG_UPDATE_WOW_TOKEN_AUCTIONABLE_LIST
-        public TokenResult Result;
+        public TokenResult Result { get; set; }
         List<AuctionableTokenAuctionable> AuctionableTokenAuctionableList =new List<AuctionableTokenAuctionable>();
 
         struct AuctionableTokenAuctionable
         {
-            public ulong UnkInt1;
-            public uint UnkInt2;
-            public uint Owner;
-            public ulong BuyoutPrice;
-            public uint EndTime;
+            public ulong UnkInt1 { get; set; }
+            public uint UnkInt2 { get; set; }
+            public uint Owner { get; set; }
+            public ulong BuyoutPrice { get; set; }
+            public uint EndTime { get; set; }
         }
     }
 
@@ -75,7 +75,7 @@ namespace Game.Network.Packets
             UnkInt = _worldPacket.ReadUInt32();
         }
 
-        public uint UnkInt;
+        public uint UnkInt { get; set; }
     }
 
     class WowTokenMarketPriceResponse : ServerPacket
@@ -90,9 +90,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(UnkInt2);
         }
 
-        public ulong CurrentMarketPrice;
+        public ulong CurrentMarketPrice { get; set; }
         public uint UnkInt; // send CMSG_REQUEST_WOW_TOKEN_MARKET_PRICE
-        public TokenResult Result;
-        public uint UnkInt2 = 0;
+        public TokenResult Result { get; set; }
+        public uint UnkInt2 { get; set; } = 0;
     }
 }

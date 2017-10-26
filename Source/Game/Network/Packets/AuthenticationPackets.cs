@@ -36,8 +36,8 @@ namespace Game.Network.Packets
             Latency = _worldPacket.ReadUInt32();
         }
         
-        public uint Serial;
-        public uint Latency;
+        public uint Serial { get; set; }
+        public uint Latency { get; set; }
     }
 
     class Pong : ServerPacket
@@ -66,9 +66,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(DosZeroBits);
         }
 
-        public byte[] Challenge = new byte[16];
-        public byte[] DosChallenge = new byte[32]; // Encryption seeds
-        public byte DosZeroBits;
+        public byte[] Challenge { get; set; } = new byte[16];
+        public byte[] DosChallenge { get; set; } = new byte[32]; // Encryption seeds
+        public byte DosZeroBits { get; set; }
     }
 
     class AuthSession : ClientPacket
@@ -97,16 +97,16 @@ namespace Game.Network.Packets
                 RealmJoinTicket = _worldPacket.ReadString(realmJoinTicketSize);
         }
 
-        public ushort Build;
-        public sbyte BuildType;
-        public uint RegionID;
-        public uint BattlegroupID;
-        public uint RealmID;
-        public Array<byte> LocalChallenge = new Array<byte>(16);
-        public byte[] Digest = new byte[24];
-        public ulong DosResponse;
-        public string RealmJoinTicket;
-        public bool UseIPv6;
+        public ushort Build { get; set; }
+        public sbyte BuildType { get; set; }
+        public uint RegionID { get; set; }
+        public uint BattlegroupID { get; set; }
+        public uint RealmID { get; set; }
+        public Array<byte> LocalChallenge { get; set; } = new Array<byte>(16);
+        public byte[] Digest { get; set; } = new byte[24];
+        public ulong DosResponse { get; set; }
+        public string RealmJoinTicket { get; set; }
+        public bool UseIPv6 { get; set; }
     }
 
     class AuthResponse : ServerPacket
@@ -200,37 +200,37 @@ namespace Game.Network.Packets
 
         public Optional<AuthSuccessInfo> SuccessInfo; // contains the packet data in case that it has account information (It is never set when WaitInfo is set), otherwise its contents are undefined.
         public Optional<AuthWaitInfo> WaitInfo; // contains the queue wait information in case the account is in the login queue.
-        public BattlenetRpcErrorCode Result; // the result of the authentication process, possible values are @ref BattlenetRpcErrorCode
+        public BattlenetRpcErrorCode Result { get; set; } // the result of the authentication process, possible values are @ref BattlenetRpcErrorCode.
 
         public class AuthSuccessInfo
         {
-            public byte AccountExpansionLevel; // the current expansion of this account, the possible values are in @ref Expansions
-            public byte ActiveExpansionLevel; // the current server expansion, the possible values are in @ref Expansions
-            public uint TimeRested; // affects the return value of the GetBillingTimeRested() client API call, it is the number of seconds you have left until the experience points and loot you receive from creatures and quests is reduced. It is only used in the Asia region in retail, it's not implemented in TC and will probably never be.
+            public byte AccountExpansionLevel { get; set; } // the current expansion of this account, the possible values are in @ref Expansion.
+            public byte ActiveExpansionLevel { get; set; } // the current server expansion, the possible values are in @ref Expansion.
+            public uint TimeRested { get; set; } // affects the return value of the GetBillingTimeRested() client API call, it is the number of seconds you have left until the experience points and loot you receive from creatures and quests is reduced. It is only used in the Asia region in retail, it's not implemented in TC and will probably never be.
 
-            public uint VirtualRealmAddress; // a special identifier made from the Index, BattleGroup and Region. @todo implement
-            public uint TimeSecondsUntilPCKick; // @todo research
-            public uint CurrencyID; // this is probably used for the ingame shop. @todo implement
-            public uint Time;
+            public uint VirtualRealmAddress { get; set; } // a special identifier made from the Index, BattleGroup and Region. @todo implement
+            public uint TimeSecondsUntilPCKick { get; set; } // @todo research
+            public uint CurrencyID { get; set; } // this is probably used for the ingame shop. @todo implement
+            public uint Time { get; set; }
 
-            public BillingInfo Billing;
+            public BillingInfo Billing { get; set; }
 
-            public List<VirtualRealmInfo> VirtualRealms = new List<VirtualRealmInfo>();     // list of realms connected to this one (inclusive) @todo implement
-            public List<CharacterTemplate> Templates = new List<CharacterTemplate>(); // list of pre-made character templates. @todo implement
+            public List<VirtualRealmInfo> VirtualRealms { get; set; } = new List<VirtualRealmInfo>();     // list of realms connected to this one (inclusive) @todo implement
+            public List<CharacterTemplate> Templates { get; set; } = new List<CharacterTemplate>(); // list of pre-made character templates. @todo implement
 
             public Dictionary<byte, byte> AvailableClasses; // the minimum AccountExpansion required to select the classes
             public Dictionary<byte, byte> AvailableRaces; // the minimum AccountExpansion required to select the races
 
-            public bool IsExpansionTrial;
-            public bool ForceCharacterTemplate; // forces the client to always use a character template when creating a new character. @see Templates. @todo implement
-            public Optional<ushort> NumPlayersHorde; // number of horde players in this realm. @todo implement
-            public Optional<ushort> NumPlayersAlliance; // number of alliance players in this realm. @todo implement
+            public bool IsExpansionTrial { get; set; }
+            public bool ForceCharacterTemplate { get; set; } // forces the client to always use a character template when creating a new character. @see Templates. @todo implement
+            public Optional<ushort> NumPlayersHorde { get; set; } // number of horde players in this realm. @todo implemet
+            public Optional<ushort> NumPlayersAlliance { get; set; } // number of alliance players in this realm. @todo implement
 
             public struct BillingInfo
             {
-                public uint BillingPlan;
-                public uint TimeRemain;
-                public bool InGameRoom;
+                public uint BillingPlan { get; set; }
+                public uint TimeRemain { get; set; }
+                public bool InGameRoom { get; set; }
             }
         }
     }
@@ -308,12 +308,12 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(Con);
         }
 
-        public ulong Key;
-        public ConnectToSerial Serial;
-        public ConnectPayload Payload;
-        public byte Con;
+        public ulong Key { get; set; }
+        public ConnectToSerial Serial { get; set; }
+        public ConnectPayload Payload { get; set; }
+        public byte Con { get; set; }
 
-        public string Haiku = "An island of peace\nCorruption is brought ashore\nPandarens will rise\n\0\0\0";
+        public string Haiku { get; set; } = "An island of peace\nCorruption is brought ashore\nPandarens will rise\n\0\0\0";
         public byte[] PiDigits = { 0x31, 0x41, 0x59, 0x26, 0x53, 0x58, 0x97, 0x93, 0x23, 0x84, 0x62, 0x64, 0x33, 0x83, 0x27, 0x95, 0x02, 0x88, 0x41, 0x97,
             0x16, 0x93, 0x99, 0x37, 0x51, 0x05, 0x82, 0x09, 0x74, 0x94, 0x45, 0x92, 0x30, 0x78, 0x16, 0x40, 0x62, 0x86, 0x20, 0x89,
             0x98, 0x62, 0x80, 0x34, 0x82, 0x53, 0x42, 0x11, 0x70, 0x67, 0x98, 0x21, 0x48, 0x08, 0x65, 0x13, 0x28, 0x23, 0x06, 0x64,
@@ -324,10 +324,10 @@ namespace Game.Network.Packets
 
         public class ConnectPayload
         {
-            public IPEndPoint Where;
-            public uint Adler32;
-            public byte XorMagic = 0x2A;
-            public byte[] PanamaKey = new byte[32];
+            public IPEndPoint Where { get; set; }
+            public uint Adler32 { get; set; }
+            public byte XorMagic { get; set; } = 0x2A;
+            public byte[] PanamaKey { get; set; } = new byte[32];
         }
 
         RsaCrypt Crypt;
@@ -345,10 +345,10 @@ namespace Game.Network.Packets
             Digest = _worldPacket.ReadBytes(24);
         }
 
-        public ulong DosResponse;
-        public ulong Key;
-        public byte[] LocalChallenge = new byte[16];
-        public byte[] Digest = new byte[24];
+        public ulong DosResponse { get; set; }
+        public ulong Key { get; set; }
+        public byte[] LocalChallenge { get; set; } = new byte[16];
+        public byte[] Digest { get; set; } = new byte[24];
     }
 
     class ResumeComms : ServerPacket
@@ -368,7 +368,7 @@ namespace Game.Network.Packets
             Con = _worldPacket.ReadUInt8();
         }
 
-        public ConnectToSerial Serial;
+        public ConnectToSerial Serial { get; set; }
         byte Con;
     }
 
@@ -417,8 +417,8 @@ namespace Game.Network.Packets
             data.WriteString(RealmNameNormalized);
         }
 
-        public bool IsLocal;                    // true if the realm is the same as the account's home realm
-        public bool IsInternalRealm;            // @todo research
+        public bool IsLocal;               // true if the realm is the same as the account's home realm
+        public bool IsInternalRealm;       // @todo research
         public string RealmNameActual;     // the name of the realm
         public string RealmNameNormalized; // the name of the realm without spaces
     }
@@ -439,6 +439,6 @@ namespace Game.Network.Packets
         }
 
         public uint RealmAddress;             // the virtual address of this realm, constructed as RealmHandle::Region << 24 | RealmHandle::Battlegroup << 16 | RealmHandle::Index
-        public VirtualRealmNameInfo RealmNameInfo;
+        public VirtualRealmNameInfo RealmNameInfo { get; set; }
     }
 }

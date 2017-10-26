@@ -431,7 +431,7 @@ namespace Game.BattlePets
         public List<BattlePetSlot> GetSlots() { return _slots; }
 
         WorldSession _owner;
-        ushort _trapLevel;
+        private ushort _trapLevel;
         Dictionary<ulong, BattlePet> _pets = new Dictionary<ulong, BattlePet>();
         List<BattlePetSlot> _slots = new List<BattlePetSlot>();
 
@@ -439,6 +439,8 @@ namespace Game.BattlePets
         static Dictionary<uint, Dictionary<BattlePetState, int>> _battlePetSpeciesStates = new Dictionary<uint, Dictionary<BattlePetState, int>>();
         static MultiMap<uint, byte> _availableBreedsPerSpecies = new MultiMap<uint, byte>();
         static Dictionary<uint, byte> _defaultQualityPerSpecies = new Dictionary<uint, byte>();
+
+        public ushort TrapLevel { get => _trapLevel; set => _trapLevel = value; }
 
         public class BattlePet
         {

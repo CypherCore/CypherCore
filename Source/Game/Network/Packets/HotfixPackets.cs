@@ -38,8 +38,8 @@ namespace Game.Network.Packets
             }
         }
 
-        public uint TableHash;
-        public List<DBQueryRecord> Queries = new List<DBQueryRecord>();
+        public uint TableHash { get; set; }
+        public List<DBQueryRecord> Queries { get; set; } = new List<DBQueryRecord>();
 
         public struct DBQueryRecord
         {
@@ -49,8 +49,8 @@ namespace Game.Network.Packets
                 RecordID = recordId;
             }
 
-            public ObjectGuid GUID;
-            public uint RecordID;
+            public ObjectGuid GUID { get; set; }
+            public uint RecordID { get; set; }
         }
     }
 
@@ -68,12 +68,12 @@ namespace Game.Network.Packets
             _worldPacket.WriteBytes(Data.GetData());
         }
 
-        public uint TableHash;
-        public uint Timestamp;
-        public uint RecordID;
-        public bool Allow;
+        public uint TableHash { get; set; }
+        public uint Timestamp { get; set; }
+        public uint RecordID { get; set; }
+        public bool Allow { get; set; }
 
-        public ByteBuffer Data = new ByteBuffer();
+        public ByteBuffer Data { get; set; } = new ByteBuffer();
     }
 
     class HotfixList : ServerPacket
@@ -93,8 +93,8 @@ namespace Game.Network.Packets
                 _worldPacket.WriteInt64(hotfixEntry.Key);
         }
 
-        public int HotfixCacheVersion;
-        public Dictionary<ulong, int> Hotfixes = new Dictionary<ulong, int>();
+        public int HotfixCacheVersion { get; set; }
+        public Dictionary<ulong, int> Hotfixes { get; set; } = new Dictionary<ulong, int>();
     }
 
     class HotfixQuery : ClientPacket
@@ -111,7 +111,7 @@ namespace Game.Network.Packets
                 Hotfixes.Add(_worldPacket.ReadUInt64());
         }
 
-        public List<ulong> Hotfixes = new List<ulong>();
+        public List<ulong> Hotfixes { get; set; } = new List<ulong>();
     }
 
     class HotfixQueryResponse : ServerPacket
@@ -125,7 +125,7 @@ namespace Game.Network.Packets
                 hotfix.Write(_worldPacket);
         }
 
-        public List<HotfixData> Hotfixes = new List<HotfixData>();
+        public List<HotfixData> Hotfixes { get; set; } = new List<HotfixData>();
 
         public class HotfixData
         {
@@ -141,8 +141,8 @@ namespace Game.Network.Packets
                 }
             }
 
-            public ulong ID;
-            public int RecordID;
+            public ulong ID { get; set; }
+            public int RecordID { get; set; }
             public Optional<ByteBuffer> Data;
         }
     }

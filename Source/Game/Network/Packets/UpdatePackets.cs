@@ -30,8 +30,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteBytes(Data);
         }
 
-        public uint NumObjUpdates;
-        public ushort MapID;
-        public byte[] Data;
+        public uint NumObjUpdates { get; set; }
+        public ushort MapID { get; set; }
+        public byte[] Data { get; set; }
     }
 }

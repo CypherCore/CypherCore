@@ -2735,8 +2735,8 @@ namespace Game.Entities
                     FlagArray128 mask = new FlagArray128();
                     mask[j / 32] = 1u << (j % 32);
 
-                    SpellModifierData flatData;
-                    SpellModifierData pctData;
+                    SpellModifierData flatData = new SpellModifierData();
+                    SpellModifierData pctData = new SpellModifierData();
 
                     flatData.ClassIndex = j;
                     flatData.ModifierValue = 0.0f;

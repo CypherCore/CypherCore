@@ -33,7 +33,7 @@ namespace Game.Network.Packets
         }
 
         public MethodCall Method;
-        public ByteBuffer Data = new ByteBuffer();
+        public ByteBuffer Data { get; set; } = new ByteBuffer();
     }
 
     class Response : ServerPacket
@@ -48,9 +48,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteBytes(Data);
         }
 
-        public BattlenetRpcErrorCode BnetStatus = BattlenetRpcErrorCode.Ok;
+        public BattlenetRpcErrorCode BnetStatus { get; set; } = BattlenetRpcErrorCode.Ok;
         public MethodCall Method;
-        public ByteBuffer Data = new ByteBuffer();
+        public ByteBuffer Data { get; set; } = new ByteBuffer();
     }
 
     class SetSessionState : ServerPacket
@@ -63,7 +63,7 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public byte State;
+        public byte State { get; set; }
     }
 
     class RealmListTicket : ServerPacket
@@ -78,9 +78,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteBytes(Ticket);
         }
 
-        public uint Token;
-        public bool Allow = true;
-        public ByteBuffer Ticket;
+        public uint Token { get; set; }
+        public bool Allow { get; set; } = true;
+        public ByteBuffer Ticket { get; set; }
     }
 
     class BattlenetRequest : ClientPacket
@@ -95,8 +95,8 @@ namespace Game.Network.Packets
             Data = _worldPacket.ReadBytes(protoSize);
         }
 
-        public MethodCall Method;
-        public byte[] Data;
+        public MethodCall Method { get; set; }
+        public byte[] Data { get; set; }
     }
 
     class RequestRealmListTicket : ClientPacket
@@ -109,14 +109,14 @@ namespace Game.Network.Packets
             Secret.AddRange(_worldPacket.ReadBytes((uint)Secret.Capacity));
         }
 
-        public uint Token;
-        public Array<byte> Secret = new Array<byte>(32);
+        public uint Token { get; set; }
+        public Array<byte> Secret { get; set; } = new Array<byte>(32);
     }
 
     struct MethodCall
     {
-        public uint GetServiceHash() { return (uint)(Type >> 32); }
-        public uint GetMethodId() { return (uint)(Type & 0xFFFFFFFF); }
+        public uint GetServiceHash() => (uint)(Type >> 32);
+        public uint GetMethodId() => (uint)(Type & 0xFFFFFFFF);
 
         public void Read(ByteBuffer data)
         {
@@ -132,8 +132,8 @@ namespace Game.Network.Packets
             data.WriteUInt32(Token);
         }
 
-        public ulong Type;
-        public ulong ObjectId;
-        public uint Token;
+        public ulong Type { get; set; }
+        public ulong ObjectId { get; set; }
+        public uint Token { get; set; }
     }
 }

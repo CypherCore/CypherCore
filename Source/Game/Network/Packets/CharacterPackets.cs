@@ -106,17 +106,17 @@ namespace Game.Network.Packets
             }
         }
 
-        public bool Success;
+        public bool Success { get; set; }
         public bool IsDeletedCharacters; // used for character undelete list
-        public bool IsDemonHunterCreationAllowed = false; ///< used for demon hunter early access
-        public bool HasDemonHunterOnRealm = false;
-        public bool HasLevel70OnRealm = false;
-        public bool Unknown7x = false;
+        public bool IsDemonHunterCreationAllowed { get; set; } = false; ///< used for demon hunter early access
+        public bool HasDemonHunterOnRealm { get; set; } = false;
+        public bool HasLevel70OnRealm { get; set; } = false;
+        public bool Unknown7x { get; set; } = false;
 
-        public Optional<uint> DisabledClassesMask = new Optional<uint>();
+        public Optional<uint> DisabledClassesMask { get; set; } = new Optional<uint>();
 
-        public List<CharacterInfo> Characters = new List<CharacterInfo>(); // all characters on the list
-        public List<RestrictedFactionChangeRuleInfo> FactionChangeRestrictions = new List<RestrictedFactionChangeRuleInfo>(); // @todo: research
+        public List<CharacterInfo> Characters { get; set; } = new List<CharacterInfo>(); // all characters on the list
+        public List<RestrictedFactionChangeRuleInfo> FactionChangeRestrictions { get; set; } = new List<RestrictedFactionChangeRuleInfo>(); // @todo: research
 
         public class CharacterInfo
         {
@@ -222,48 +222,48 @@ namespace Game.Network.Packets
                 }
             }
 
-            public ObjectGuid Guid;
-            public string Name;
+            public ObjectGuid Guid { get; set; }
+            public string Name { get; set; }
             public byte ListPosition; // Order of the characters in list
-            public byte RaceId;
-            public Class ClassId;
-            public byte Sex;
-            public byte Skin;
-            public byte Face;
-            public byte HairStyle;
-            public byte HairColor;
-            public byte FacialHair;
-            public Array<byte> CustomDisplay = new Array<byte>(PlayerConst.CustomDisplaySize);
-            public byte Level;
-            public uint ZoneId;
-            public uint MapId;
-            public Vector3 PreLoadPosition;
-            public ObjectGuid GuildGuid;
+            public byte RaceId { get; set; }
+            public Class ClassId { get; set; }
+            public byte Sex { get; set; }
+            public byte Skin { get; set; }
+            public byte Face { get; set; }
+            public byte HairStyle { get; set; }
+            public byte HairColor { get; set; }
+            public byte FacialHair { get; set; }
+            public Array<byte> CustomDisplay { get; set; } = new Array<byte>(PlayerConst.CustomDisplaySize);
+            public byte Level { get; set; }
+            public uint ZoneId { get; set; }
+            public uint MapId { get; set; }
+            public Vector3 PreLoadPosition { get; set; }
+            public ObjectGuid GuildGuid { get; set; }
             public CharacterFlags Flags; // Character flag @see enum CharacterFlags
             public CharacterCustomizeFlags CustomizationFlag; // Character customization flags @see enum CharacterCustomizeFlags
             public uint Flags3; // Character flags 3 @todo research
-            public uint Flags4;
-            public bool FirstLogin;
-            public byte unkWod61x;
-            public uint LastPlayedTime;
-            public ushort SpecID;
-            public uint Unknown703;
+            public uint Flags4 { get; set; }
+            public bool FirstLogin { get; set; }
+            public byte unkWod61x { get; set; }
+            public uint LastPlayedTime { get; set; }
+            public ushort SpecID { get; set; }
+            public uint Unknown703 { get; set; }
             public PetInfo Pet = new PetInfo();
             public bool BoostInProgress; // @todo
-            public uint[] ProfessionIds = new uint[2];      // @todo
-            public VisualItemInfo[] VisualItems = new VisualItemInfo[InventorySlots.BagEnd];
+            public uint[] ProfessionIds { get; set; } = new uint[2];      // @todo
+            public VisualItemInfo[] VisualItems { get; set; } = new VisualItemInfo[InventorySlots.BagEnd];
 
             public struct VisualItemInfo
             {
-                public uint DisplayId;
-                public uint DisplayEnchantId;
-                public byte InventoryType;
+                public uint DisplayId { get; set; }
+                public uint DisplayEnchantId { get; set; }
+                public byte InventoryType { get; set; }
             }
             public struct PetInfo
             {
-                public uint CreatureDisplayId; // PetCreatureDisplayID
+                public uint CreatureDisplayId; // PetCreatureDisplayId
                 public uint Level; // PetExperienceLevel
-                public uint CreatureFamily; // PetCreatureFamilyID
+                public uint CreatureFamily; // PetCreatureFamilyId
             }
         }
 
@@ -275,8 +275,8 @@ namespace Game.Network.Packets
                 Race = race;
             }
 
-            public uint Mask;
-            public byte Race;
+            public uint Mask { get; set; }
+            public byte Race { get; set; }
         }
     }
 
@@ -319,7 +319,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(Code);
         }
 
-        public ResponseCodes Code;
+        public ResponseCodes Code { get; set; }
     }
 
     public class CharDelete : ClientPacket
@@ -343,7 +343,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(Code);
         }
 
-        public ResponseCodes Code;
+        public ResponseCodes Code { get; set; }
     }
 
     public class CharacterRenameRequest : ClientPacket
@@ -357,7 +357,7 @@ namespace Game.Network.Packets
             RenameInfo.NewName = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(6));
         }
 
-        public CharacterRenameInfo RenameInfo;
+        public CharacterRenameInfo RenameInfo { get; set; }
     }
 
     public class CharacterRenameResult : ServerPacket
@@ -380,9 +380,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(Name);
         }
 
-        public string Name;
-        public ResponseCodes Result = 0;
-        public Optional<ObjectGuid> Guid;
+        public string Name { get; set; }
+        public ResponseCodes Result { get; set; } = 0;
+        public Optional<ObjectGuid> Guid { get; set; }
     }
 
     public class CharCustomize : ClientPacket
@@ -406,7 +406,7 @@ namespace Game.Network.Packets
             CustomizeInfo.CharName = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(6));
         }
 
-        public CharCustomizeInfo CustomizeInfo;
+        public CharCustomizeInfo CustomizeInfo { get; set; }
     }
 
     // @todo: CharCustomizeResult
@@ -439,7 +439,7 @@ namespace Game.Network.Packets
             RaceOrFactionChangeInfo.Name = _worldPacket.ReadString(nameLength);
         }
 
-        public CharRaceOrFactionChangeInfo RaceOrFactionChangeInfo;
+        public CharRaceOrFactionChangeInfo RaceOrFactionChangeInfo { get; set; }
     }
 
     public class CharFactionChangeResult : ServerPacket
@@ -471,21 +471,21 @@ namespace Game.Network.Packets
             }
         }
 
-        public ResponseCodes Result = 0;
-        public ObjectGuid Guid;
+        public ResponseCodes Result { get; set; } = 0;
+        public ObjectGuid Guid { get; set; }
         public Optional<CharFactionChangeDisplayInfo> Display;
 
         public class CharFactionChangeDisplayInfo
         {
-            public string Name;
-            public byte SexID;
-            public byte SkinID;
-            public byte HairColorID;
-            public byte HairStyleID;
-            public byte FacialHairStyleID;
-            public byte FaceID;
-            public byte RaceID;
-            public Array<byte> CustomDisplay = new Array<byte>(PlayerConst.CustomDisplaySize);
+            public string Name { get; set; }
+            public byte SexID { get; set; }
+            public byte SkinID { get; set; }
+            public byte HairColorID { get; set; }
+            public byte HairStyleID { get; set; }
+            public byte FacialHairStyleID { get; set; }
+            public byte FaceID { get; set; }
+            public byte RaceID { get; set; }
+            public Array<byte> CustomDisplay { get; set; } = new Array<byte>(PlayerConst.CustomDisplaySize);
         }
     }
 
@@ -499,8 +499,8 @@ namespace Game.Network.Packets
             Sex = _worldPacket.ReadUInt8();
         }
 
-        public byte Sex;
-        public byte Race;
+        public byte Sex { get; set; }
+        public byte Race { get; set; }
     }
 
     public class GenerateRandomCharacterNameResult : ServerPacket
@@ -515,8 +515,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(Name);
         }
 
-        public string Name;
-        public bool Success;
+        public string Name { get; set; }
+        public bool Success { get; set; }
     }
 
     public class ReorderCharacters : ClientPacket
@@ -528,19 +528,19 @@ namespace Game.Network.Packets
             uint count = _worldPacket.ReadBits<uint>(9);
             for (var i = 0; i < count && i < WorldConfig.GetIntValue(WorldCfg.CharactersPerRealm); ++i)
             {
-                ReorderInfo reorderInfo;
+                ReorderInfo reorderInfo = new ReorderInfo();
                 reorderInfo.PlayerGUID = _worldPacket.ReadPackedGuid();
                 reorderInfo.NewPosition = _worldPacket.ReadUInt8();
                 Entries[i] = reorderInfo;
             }
         }
 
-        public ReorderInfo[] Entries = new ReorderInfo[WorldConfig.GetIntValue(WorldCfg.CharactersPerRealm)];
+        public ReorderInfo[] Entries { get; set; } = new ReorderInfo[WorldConfig.GetIntValue(WorldCfg.CharactersPerRealm)];
 
         public struct ReorderInfo
         {
-            public ObjectGuid PlayerGUID;
-            public byte NewPosition;
+            public ObjectGuid PlayerGUID { get; set; }
+            public byte NewPosition { get; set; }
         }
     }
 
@@ -555,7 +555,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(UndeleteInfo.CharacterGuid);
         }
 
-        public CharacterUndeleteInfo UndeleteInfo;
+        public CharacterUndeleteInfo UndeleteInfo { get; set; }
     }
 
     public class UndeleteCharacterResponse : ServerPacket
@@ -570,8 +570,8 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(UndeleteInfo.CharacterGuid);
         }
 
-        public CharacterUndeleteInfo UndeleteInfo;
-        public CharacterUndeleteResult Result;
+        public CharacterUndeleteInfo UndeleteInfo { get; set; }
+        public CharacterUndeleteResult Result { get; set; }
     }
 
     public class GetUndeleteCharacterCooldownStatus : ClientPacket
@@ -592,9 +592,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(CurrentCooldown);
         }
 
-        public bool OnCooldown; //
-        public uint MaxCooldown; // Max. cooldown until next free character restoration. Displayed in undelete confirm message. (in sec)
-        public uint CurrentCooldown; // Current cooldown until next free character restoration. (in sec)
+        public bool OnCooldown { get; set; }
+        public uint MaxCooldown { get; set; }     // Max. cooldown until next free character restoration. Displayed in undelete confirm message. (in sec)
+        public uint CurrentCooldown { get; set; } // Current cooldown until next free character restoration. (in sec)
     }
 
     public class PlayerLogin : ClientPacket
@@ -607,8 +607,8 @@ namespace Game.Network.Packets
             FarClip = _worldPacket.ReadFloat();
         }
 
-        public ObjectGuid Guid;      // Guid of the player that is logging in
-        float FarClip = 0.0f; // Visibility distance (for terrain)
+        public ObjectGuid Guid; // Guid of the player that is logging in
+        float FarClip = 0.0f;   // Visibility distance (for terrain)
     }
 
     public class LoginVerifyWorld : ServerPacket
@@ -625,9 +625,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(Reason);
         }
 
-        public int MapID = -1;
-        public Position Pos;
-        public uint Reason = 0;
+        public int MapID { get; set; } = -1;
+        public Position Pos { get; set; }
+        public uint Reason { get; set; } = 0;
     }
 
     public class CharacterLoginFailed : ServerPacket
@@ -668,8 +668,8 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public int LogoutResult;
-        public bool Instant = false;
+        public int LogoutResult { get; set; }
+        public bool Instant { get; set; } = false;
     }
 
     public class LogoutComplete : ServerPacket
@@ -717,8 +717,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(ServerExpansionTier);
         }
 
-        public byte ServerExpansionTier;
-        public byte ServerExpansionLevel;
+        public byte ServerExpansionTier { get; set; }
+        public byte ServerExpansionLevel { get; set; }
     }
 
     public class SetActionBarToggles : ClientPacket
@@ -730,7 +730,7 @@ namespace Game.Network.Packets
             Mask = _worldPacket.ReadUInt8();
         }
 
-        public byte Mask;
+        public byte Mask { get; set; }
     }
 
     public class RequestPlayedTime : ClientPacket
@@ -742,7 +742,7 @@ namespace Game.Network.Packets
             TriggerScriptEvent = _worldPacket.HasBit();
         }
 
-        public bool TriggerScriptEvent;
+        public bool TriggerScriptEvent { get; set; }
     }
 
     public class PlayedTime : ServerPacket
@@ -757,14 +757,14 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public uint TotalTime;
-        public uint LevelTime;
-        public bool TriggerEvent;
+        public uint TotalTime { get; set; }
+        public uint LevelTime { get; set; }
+        public bool TriggerEvent { get; set; }
     }
 
     public class SetTitle : ClientPacket
     {
-        public int TitleID;
+        public int TitleID { get; set; }
 
         public SetTitle(WorldPacket packet) : base(packet) { }
 
@@ -790,12 +790,12 @@ namespace Game.Network.Packets
                 NewCustomDisplay.Add(_worldPacket.ReadUInt32());
         }
 
-        public uint NewHairStyle;
-        public uint NewHairColor;
-        public uint NewFacialHair;
-        public uint NewSkinColor;
-        public uint NewFace;
-        public Array<uint> NewCustomDisplay = new Array<uint>(PlayerConst.CustomDisplaySize);
+        public uint NewHairStyle { get; set; }
+        public uint NewHairColor { get; set; }
+        public uint NewFacialHair { get; set; }
+        public uint NewSkinColor { get; set; }
+        public uint NewFace { get; set; }
+        public Array<uint> NewCustomDisplay { get; set; } = new Array<uint>(PlayerConst.CustomDisplaySize);
     }
 
     public class BarberShopResult : ServerPacket
@@ -810,7 +810,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(Result);
         }
 
-        public ResultEnum Result;
+        public ResultEnum Result { get; set; }
 
         public enum ResultEnum
         {
@@ -836,12 +836,12 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public ObjectGuid Victim;
-        public int Original;
-        public PlayerLogXPReason Reason;
-        public int Amount;
-        public float GroupBonus;
-        public bool ReferAFriend;
+        public ObjectGuid Victim { get; set; }
+        public int Original { get; set; }
+        public PlayerLogXPReason Reason { get; set; }
+        public int Amount { get; set; }
+        public float GroupBonus { get; set; }
+        public bool ReferAFriend { get; set; }
     }
 
     class TitleEarned : ServerPacket
@@ -853,7 +853,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(Index);
         }
 
-        public uint Index;
+        public uint Index { get; set; }
     }
 
     class SetFactionAtWar : ClientPacket
@@ -865,7 +865,7 @@ namespace Game.Network.Packets
             FactionIndex = _worldPacket.ReadUInt8();
         }
 
-        public byte FactionIndex;
+        public byte FactionIndex { get; set; }
     }
 
     class SetFactionNotAtWar : ClientPacket
@@ -877,7 +877,7 @@ namespace Game.Network.Packets
             FactionIndex = _worldPacket.ReadUInt8();
         }
 
-        public byte FactionIndex;
+        public byte FactionIndex { get; set; }
     }
 
     class SetFactionInactive : ClientPacket
@@ -890,8 +890,8 @@ namespace Game.Network.Packets
             State = _worldPacket.HasBit();
         }
 
-        public uint Index;
-        public bool State;
+        public uint Index { get; set; }
+        public bool State { get; set; }
     }
 
     class SetWatchedFaction : ClientPacket
@@ -903,7 +903,7 @@ namespace Game.Network.Packets
             FactionIndex = _worldPacket.ReadUInt32();
         }
 
-        public uint FactionIndex;
+        public uint FactionIndex { get; set; }
     }
 
     class SetFactionVisible : ServerPacket
@@ -915,7 +915,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(FactionIndex);
         }
 
-        public uint FactionIndex;
+        public uint FactionIndex { get; set; }
     }
 
     class CharCustomizeResponse : ServerPacket
@@ -956,7 +956,7 @@ namespace Game.Network.Packets
         byte HairStyleID;
         byte FacialHairStyleID;
         byte FaceID;
-        public Array<byte> CustomDisplay = new Array<byte>(PlayerConst.CustomDisplaySize);
+        public Array<byte> CustomDisplay { get; set; } = new Array<byte>(PlayerConst.CustomDisplaySize);
     }
 
     class CharCustomizeFailed : ServerPacket
@@ -969,8 +969,8 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(CharGUID);
         }
 
-        public byte Result;
-        public ObjectGuid CharGUID;
+        public byte Result { get; set; }
+        public ObjectGuid CharGUID { get; set; }
     }
 
     class SetPlayerDeclinedNames : ClientPacket
@@ -993,8 +993,8 @@ namespace Game.Network.Packets
                 DeclinedNames.name[i] = _worldPacket.ReadString(stringLengths[i]);
         }
 
-        public ObjectGuid Player;
-        public DeclinedName DeclinedNames;
+        public ObjectGuid Player { get; set; }
+        public DeclinedName DeclinedNames { get; set; }
     }
 
     class SetPlayerDeclinedNamesResult : ServerPacket
@@ -1007,71 +1007,71 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(Player);
         }
 
-        public ObjectGuid Player;
-        public DeclinedNameResult ResultCode;
+        public ObjectGuid Player { get; set; }
+        public DeclinedNameResult ResultCode { get; set; }
     }
 
     //Structs
     public class CharacterCreateInfo
     {
         // User specified variables
-        public Race RaceId = Race.None;
-        public Class ClassId = Class.None;
-        public Gender Sex = Gender.None;
-        public byte Skin = 0;
-        public byte Face = 0;
-        public byte HairStyle = 0;
-        public byte HairColor = 0;
-        public byte FacialHairStyle = 0;
-        public Array<byte> CustomDisplay = new Array<byte>(PlayerConst.CustomDisplaySize);
-        public byte OutfitId = 0;
+        public Race RaceId { get; set; } = Race.None;
+        public Class ClassId { get; set; } = Class.None;
+        public Gender Sex { get; set; } = Gender.None;
+        public byte Skin { get; set; } = 0;
+        public byte Face { get; set; } = 0;
+        public byte HairStyle { get; set; } = 0;
+        public byte HairColor { get; set; } = 0;
+        public byte FacialHairStyle { get; set; } = 0;
+        public Array<byte> CustomDisplay { get; set; } = new Array<byte>(PlayerConst.CustomDisplaySize);
+        public byte OutfitId { get; set; } = 0;
         public Optional<uint> TemplateSet = new Optional<uint>();
         public string Name;
 
         // Server side data
-        public byte CharCount = 0;
+        public byte CharCount { get; set; } = 0;
     }
 
     public class CharacterRenameInfo
     {
         public string NewName;
-        public ObjectGuid Guid;
+        public ObjectGuid Guid { get; set; }
     }
 
     public class CharCustomizeInfo
     {
-        public byte HairStyleID = 0;
-        public byte FaceID = 0;
-        public ObjectGuid CharGUID;
-        public Gender SexID = Gender.None;
+        public byte HairStyleID { get; set; } = 0;
+        public byte FaceID { get; set; } = 0;
+        public ObjectGuid CharGUID { get; set; }
+        public Gender SexID { get; set; } = Gender.None;
         public string CharName;
-        public byte HairColorID = 0;
-        public byte FacialHairStyleID = 0;
-        public byte SkinID = 0;
-        public Array<byte> CustomDisplay = new Array<byte>(PlayerConst.CustomDisplaySize);
+        public byte HairColorID { get; set; } = 0;
+        public byte FacialHairStyleID { get; set; } = 0;
+        public byte SkinID { get; set; } = 0;
+        public Array<byte> CustomDisplay { get; set; } = new Array<byte>(PlayerConst.CustomDisplaySize);
     }
 
     public class CharRaceOrFactionChangeInfo
     {
-        public byte HairColorID;
-        public Race RaceID = Race.None;
-        public Gender SexID = Gender.None;
-        public byte SkinID;
-        public byte FacialHairStyleID;
-        public ObjectGuid Guid;
-        public bool FactionChange = false;
+        public byte HairColorID { get; set; }
+        public Race RaceID { get; set; } = Race.None;
+        public Gender SexID { get; set; } = Gender.None;
+        public byte SkinID { get; set; }
+        public byte FacialHairStyleID { get; set; }
+        public ObjectGuid Guid { get; set; }
+        public bool FactionChange { get; set; } = false;
         public string Name;
-        public byte FaceID;
-        public byte HairStyleID;
-        public Array<byte> CustomDisplay = new Array<byte>(PlayerConst.CustomDisplaySize);
+        public byte FaceID { get; set; }
+        public byte HairStyleID { get; set; }
+        public Array<byte> CustomDisplay { get; set; } = new Array<byte>(PlayerConst.CustomDisplaySize);
     }
 
     public class CharacterUndeleteInfo
     {            // User specified variables
         public ObjectGuid CharacterGuid; // Guid of the character to restore
-        public int ClientToken = 0; // @todo: research
+        public int ClientToken { get; set; } = 0; // @todo: research
 
         // Server side data
-        public string Name;
+        public string Name { get; set; }
     }
 }

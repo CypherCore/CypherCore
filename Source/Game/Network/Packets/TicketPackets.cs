@@ -39,7 +39,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(Status);
         }
 
-        public int Status;
+        public int Status { get; set; }
     }
 
     public class GMTicketGetCaseStatus : ClientPacket
@@ -74,18 +74,18 @@ namespace Game.Network.Packets
             }
         }
 
-        public List<GMTicketCase> Cases = new List<GMTicketCase>();
+        public List<GMTicketCase> Cases { get; set; } = new List<GMTicketCase>();
 
         public struct GMTicketCase
         {
-            public int CaseID;
-            public int CaseOpened;
-            public int CaseStatus;
-            public short CfgRealmID;
-            public long CharacterID;
-            public int WaitTimeOverrideMinutes;
-            public string Url;
-            public string WaitTimeOverrideMessage;
+            public int CaseID { get; set; }
+            public int CaseOpened { get; set; }
+            public int CaseStatus { get; set; }
+            public short CfgRealmID { get; set; }
+            public long CharacterID { get; set; }
+            public int WaitTimeOverrideMinutes { get; set; }
+            public string Url { get; set; }
+            public string WaitTimeOverrideMessage { get; set; }
         }
     }
 
@@ -103,8 +103,8 @@ namespace Game.Network.Packets
 
     public class SupportTicketSubmitBug : ClientPacket
     {
-        public SupportTicketHeader Header;
-        public string Note;
+        public SupportTicketHeader Header { get; set; }
+        public string Note { get; set; }
 
         public SupportTicketSubmitBug(WorldPacket packet) : base(packet) { }
 
@@ -117,8 +117,8 @@ namespace Game.Network.Packets
 
     public class SupportTicketSubmitSuggestion : ClientPacket
     {
-        public SupportTicketHeader Header;
-        public string Note;
+        public SupportTicketHeader Header { get; set; }
+        public string Note { get; set; }
 
         public SupportTicketSubmitSuggestion(WorldPacket packet) : base(packet) { }
 
@@ -189,11 +189,11 @@ namespace Game.Network.Packets
             }
         }
 
-        public SupportTicketHeader Header;
-        public SupportTicketChatLog ChatLog;
-        public ObjectGuid TargetCharacterGUID;
-        public byte ComplaintType;
-        public string Note;
+        public SupportTicketHeader Header { get; set; }
+        public SupportTicketChatLog ChatLog { get; set; }
+        public ObjectGuid TargetCharacterGUID { get; set; }
+        public byte ComplaintType { get; set; }
+        public string Note { get; set; }
         public Optional<SupportTicketMailInfo> MailInfo;
         public Optional<SupportTicketCalendarEventInfo> CalenderInfo;
         public Optional<SupportTicketPetInfo> PetInfo;
@@ -203,8 +203,8 @@ namespace Game.Network.Packets
 
         public struct SupportTicketChatLine
         {
-            public uint Timestamp;
-            public string Text;
+            public uint Timestamp { get; set; }
+            public string Text { get; set; }
 
             public SupportTicketChatLine(WorldPacket data)
             {
@@ -240,7 +240,7 @@ namespace Game.Network.Packets
                     ReportLineIndex.Value = data.ReadUInt32();
             }
 
-            public List<SupportTicketChatLine> Lines = new List<SupportTicketChatLine>();
+            public List<SupportTicketChatLine> Lines { get; set; } = new List<SupportTicketChatLine>();
             public Optional<uint> ReportLineIndex;
         }
 
@@ -373,7 +373,7 @@ namespace Game.Network.Packets
             }
         }
 
-        public SupportSpamType ComplaintType;
+        public SupportSpamType ComplaintType { get; set; }
         ComplaintOffender Offender;
         uint MailID;
         ComplaintChat Chat;
@@ -390,9 +390,9 @@ namespace Game.Network.Packets
                 TimeSinceOffence = data.ReadUInt32();
             }
 
-            public ObjectGuid PlayerGuid;
-            public uint RealmAddress;
-            public uint TimeSinceOffence;
+            public ObjectGuid PlayerGuid { get; set; }
+            public uint RealmAddress { get; set; }
+            public uint TimeSinceOffence { get; set; }
         }
 
         struct ComplaintChat
@@ -404,9 +404,9 @@ namespace Game.Network.Packets
                 MessageLog = data.ReadString(data.ReadBits<uint>(12));
             }
 
-            public uint Command;
-            public uint ChannelID;
-            public string MessageLog;
+            public uint Command { get; set; }
+            public uint ChannelID { get; set; }
+            public string MessageLog { get; set; }
         }
     }
 
@@ -420,8 +420,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(Result);
         }
 
-        public SupportSpamType ComplaintType;
-        public byte Result;
+        public SupportSpamType ComplaintType { get; set; }
+        public byte Result { get; set; }
     }
 
     class BugReport : ClientPacket
@@ -437,9 +437,9 @@ namespace Game.Network.Packets
             Text = _worldPacket.ReadString(textLen);
         }
 
-        public uint Type;
-        public string Text;
-        public string DiagInfo;
+        public uint Type { get; set; }
+        public string Text { get; set; }
+        public string DiagInfo { get; set; }
     }
 
     //Structs
@@ -452,8 +452,8 @@ namespace Game.Network.Packets
             Facing = packet.ReadFloat();
         }
 
-        public uint MapID;
-        public Vector3 Position;
-        public float Facing;
+        public uint MapID { get; set; }
+        public Vector3 Position { get; set; }
+        public float Facing { get; set; }
     }
 }

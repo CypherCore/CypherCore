@@ -31,7 +31,7 @@ namespace Game.Network.Packets
             Unit = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Unit;
+        public ObjectGuid Unit { get; set; }
     }
 
     public class LootResponse : ServerPacket
@@ -66,17 +66,17 @@ namespace Game.Network.Packets
             }
         }
 
-        public ObjectGuid LootObj;
-        public ObjectGuid Owner;
-        public byte Threshold = 2; // Most common value, 2 = Uncommon
-        public LootMethod LootMethod;
-        public byte AcquireReason;
-        public LootError FailureReason = LootError.NoLoot; // Most common value
-        public uint Coins;
-        public List<LootItemData> Items = new List<LootItemData>();
-        public List<LootCurrency> Currencies = new List<LootCurrency>();
-        public bool Acquired;
-        public bool AELooting;
+        public ObjectGuid LootObj { get; set; }
+        public ObjectGuid Owner { get; set; }
+        public byte Threshold { get; set; } = 2; // Most common value, 2 = Uncommon
+        public LootMethod LootMethod { get; set; }
+        public byte AcquireReason { get; set; }
+        public LootError FailureReason { get; set; } = LootError.NoLoot; // Most common value
+        public uint Coins { get; set; }
+        public List<LootItemData> Items { get; set; } = new List<LootItemData>();
+        public List<LootCurrency> Currencies { get; set; } = new List<LootCurrency>();
+        public bool Acquired { get; set; }
+        public bool AELooting { get; set; }
     }
 
     class LootItemPkt : ClientPacket
@@ -99,7 +99,7 @@ namespace Game.Network.Packets
             }
         }
 
-        public List<LootRequest> Loot = new List<LootRequest>();
+        public List<LootRequest> Loot { get; set; } = new List<LootRequest>();
     }
 
     class LootRemoved : ServerPacket
@@ -113,9 +113,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(LootListID);
         }
 
-        public ObjectGuid LootObj;
-        public ObjectGuid Owner;
-        public byte LootListID;
+        public ObjectGuid LootObj { get; set; }
+        public ObjectGuid Owner { get; set; }
+        public byte LootListID { get; set; }
     }
 
     class LootRelease : ClientPacket
@@ -127,7 +127,7 @@ namespace Game.Network.Packets
             Unit = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Unit;
+        public ObjectGuid Unit { get; set; }
     }
 
     class LootMoney : ClientPacket
@@ -148,8 +148,8 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public uint Money;
-        public bool SoleLooter;
+        public uint Money { get; set; }
+        public bool SoleLooter { get; set; }
     }
 
     class CoinRemoved : ServerPacket
@@ -161,7 +161,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(LootObj);
         }
 
-        public ObjectGuid LootObj;
+        public ObjectGuid LootObj { get; set; }
     }
 
     class LootRoll : ClientPacket
@@ -175,9 +175,9 @@ namespace Game.Network.Packets
             RollType = (RollType)_worldPacket.ReadUInt8();
         }
 
-        public ObjectGuid LootObj;
-        public byte LootListID;
-        public RollType RollType;
+        public ObjectGuid LootObj { get; set; }
+        public byte LootListID { get; set; }
+        public RollType RollType { get; set; }
     }
 
     class LootReleaseResponse : ServerPacket
@@ -190,8 +190,8 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(Owner);
         }
 
-        public ObjectGuid LootObj;
-        public ObjectGuid Owner;
+        public ObjectGuid LootObj { get; set; }
+        public ObjectGuid Owner { get; set; }
     }
 
     class LootReleaseAll : ServerPacket
@@ -221,10 +221,10 @@ namespace Game.Network.Packets
                 _worldPacket.WritePackedGuid(RoundRobinWinner.Value);
         }
 
-        public ObjectGuid Owner;
-        public ObjectGuid LootObj;
-        public Optional<ObjectGuid> Master;
-        public Optional<ObjectGuid> RoundRobinWinner;
+        public ObjectGuid Owner { get; set; }
+        public ObjectGuid LootObj { get; set; }
+        public Optional<ObjectGuid> Master { get; set; }
+        public Optional<ObjectGuid> RoundRobinWinner { get; set; }
     }
 
     class SetLootSpecialization : ClientPacket
@@ -236,7 +236,7 @@ namespace Game.Network.Packets
             SpecID = _worldPacket.ReadUInt32();
         }
 
-        public uint SpecID;
+        public uint SpecID { get; set; }
     }
 
     class StartLootRoll : ServerPacket
@@ -253,12 +253,12 @@ namespace Game.Network.Packets
             Item.Write(_worldPacket);
         }
 
-        public ObjectGuid LootObj;
-        public int MapID;
-        public uint RollTime;
-        public LootMethod Method;
-        public RollMask ValidRolls;
-        public LootItemData Item = new LootItemData();
+        public ObjectGuid LootObj { get; set; }
+        public int MapID { get; set; }
+        public uint RollTime { get; set; }
+        public LootMethod Method { get; set; }
+        public RollMask ValidRolls { get; set; }
+        public LootItemData Item { get; set; } = new LootItemData();
     }
 
     class LootRollBroadcast : ServerPacket
@@ -276,12 +276,12 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public ObjectGuid LootObj;
-        public ObjectGuid Player;
+        public ObjectGuid LootObj { get; set; }
+        public ObjectGuid Player { get; set; }
         public int Roll;             // Roll value can be negative, it means that it is an "offspec" roll but only during roll selection broadcast (not when sending the result)
-        public RollType RollType;
-        public LootItemData Item = new LootItemData();
-        public bool Autopassed;    // Triggers message |HlootHistory:%d|h[Loot]|h: You automatically passed on: %s because you cannot loot that item.
+        public RollType RollType { get; set; }
+        public LootItemData Item { get; set; } = new LootItemData();
+        public bool Autopassed { get; set; }   // Triggers message |HlootHistory:%d|h[Loot]|h: You automatically passed on: %s because you cannot loot that item.
     }
 
     class LootRollWon : ServerPacket
@@ -299,12 +299,12 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public ObjectGuid LootObj;
-        public ObjectGuid Winner;
-        public int Roll;
-        public RollType RollType;
-        public LootItemData Item = new LootItemData();
-        public bool MainSpec;
+        public ObjectGuid LootObj { get; set; }
+        public ObjectGuid Winner { get; set; }
+        public int Roll { get; set; }
+        public RollType RollType { get; set; }
+        public LootItemData Item { get; set; } = new LootItemData();
+        public bool MainSpec { get; set; }
     }
 
     class LootAllPassed : ServerPacket
@@ -317,8 +317,8 @@ namespace Game.Network.Packets
             Item.Write(_worldPacket);
         }
 
-        public ObjectGuid LootObj;
-        public LootItemData Item = new LootItemData();
+        public ObjectGuid LootObj { get; set; }
+        public LootItemData Item { get; set; } = new LootItemData();
     }
 
     class LootRollsComplete : ServerPacket
@@ -331,8 +331,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(LootListID);
         }
 
-        public ObjectGuid LootObj;
-        public byte LootListID;
+        public ObjectGuid LootObj { get; set; }
+        public byte LootListID { get; set; }
     }
 
     class AELootTargets : ServerPacket
@@ -368,8 +368,8 @@ namespace Game.Network.Packets
             Players.ForEach(guid => _worldPacket.WritePackedGuid(guid));
         }
 
-        public List<ObjectGuid> Players = new List<ObjectGuid>();
-        public ObjectGuid LootObj;
+        public List<ObjectGuid> Players { get; set; } = new List<ObjectGuid>();
+        public ObjectGuid LootObj { get; set; }
     }
 
     //Structs
@@ -387,26 +387,26 @@ namespace Game.Network.Packets
             data.WriteUInt8(LootListID);
         }
 
-        public byte Type;
-        public LootSlotType UIType;
-        public uint Quantity;
-        public byte LootItemType;
-        public byte LootListID;
-        public bool CanTradeToTapList;
-        public ItemInstance Loot;
+        public byte Type { get; set; }
+        public LootSlotType UIType { get; set; }
+        public uint Quantity { get; set; }
+        public byte LootItemType { get; set; }
+        public byte LootListID { get; set; }
+        public bool CanTradeToTapList { get; set; }
+        public ItemInstance Loot { get; set; }
     }
 
     public struct LootCurrency
     {
-        public uint CurrencyID;
-        public uint Quantity;
-        public byte LootListID;
-        public byte UIType;
+        public uint CurrencyID { get; set; }
+        public uint Quantity { get; set; }
+        public byte LootListID { get; set; }
+        public byte UIType { get; set; }
     }
 
     public struct LootRequest
     {
-        public ObjectGuid Object;
-        public byte LootListID;
+        public ObjectGuid Object { get; set; }
+        public byte LootListID { get; set; }
     }
 }

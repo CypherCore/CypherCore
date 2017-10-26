@@ -33,8 +33,8 @@ namespace Game.Network.Packets
             Slot = _worldPacket.ReadUInt32();
         }
 
-        public ObjectGuid VendorGUID;
-        public uint Slot;
+        public ObjectGuid VendorGUID { get; set; }
+        public uint Slot { get; set; }
     }
 
     public class BuyItem : ClientPacket
@@ -55,13 +55,13 @@ namespace Game.Network.Packets
             ItemType = (ItemVendorType)_worldPacket.ReadBits<int>(2);
         }
 
-        public ObjectGuid VendorGUID;
-        public ItemInstance Item;
-        public uint Muid;
-        public uint Slot;
-        public ItemVendorType ItemType;
-        public int Quantity;
-        public ObjectGuid ContainerGUID;
+        public ObjectGuid VendorGUID { get; set; }
+        public ItemInstance Item { get; set; }
+        public uint Muid { get; set; }
+        public uint Slot { get; set; }
+        public ItemVendorType ItemType { get; set; }
+        public int Quantity { get; set; }
+        public ObjectGuid ContainerGUID { get; set; }
     }
 
     public class BuySucceeded : ServerPacket
@@ -76,10 +76,10 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(QuantityBought);
         }
 
-        public ObjectGuid VendorGUID;
-        public uint Muid;
-        public uint QuantityBought;
-        public uint NewQuantity;
+        public ObjectGuid VendorGUID { get; set; }
+        public uint Muid { get; set; }
+        public uint QuantityBought { get; set; }
+        public uint NewQuantity { get; set; }
     }
 
     public class BuyFailed : ServerPacket
@@ -93,9 +93,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(Reason);
         }
 
-        public ObjectGuid VendorGUID;
-        public uint Muid;
-        public BuyResult Reason = BuyResult.CantFindItem;
+        public ObjectGuid VendorGUID { get; set; }
+        public uint Muid { get; set; }
+        public BuyResult Reason { get; set; } = BuyResult.CantFindItem;
     }
 
     public class GetItemPurchaseData : ClientPacket
@@ -107,7 +107,7 @@ namespace Game.Network.Packets
             ItemGUID = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid ItemGUID;
+        public ObjectGuid ItemGUID { get; set; }
     }
 
     class SetItemPurchaseData : ServerPacket
@@ -122,10 +122,10 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(PurchaseTime);
         }
 
-        public uint PurchaseTime;
-        public uint Flags;
-        public ItemPurchaseContents Contents = new ItemPurchaseContents();
-        public ObjectGuid ItemGUID;
+        public uint PurchaseTime { get; set; }
+        public uint Flags { get; set; }
+        public ItemPurchaseContents Contents { get; set; } = new ItemPurchaseContents();
+        public ObjectGuid ItemGUID { get; set; }
     }
 
     class ItemPurchaseRefund : ClientPacket
@@ -137,7 +137,7 @@ namespace Game.Network.Packets
             ItemGUID = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid ItemGUID;
+        public ObjectGuid ItemGUID { get; set; }
     }
 
     class ItemPurchaseRefundResult : ServerPacket
@@ -154,8 +154,8 @@ namespace Game.Network.Packets
                 Contents.Value.Write(_worldPacket);
         }
 
-        public byte Result;
-        public ObjectGuid ItemGUID;
+        public byte Result { get; set; }
+        public ObjectGuid ItemGUID { get; set; }
         public Optional<ItemPurchaseContents> Contents;
     }
 
@@ -168,7 +168,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(ItemGUID);
         }
 
-        public ObjectGuid ItemGUID;
+        public ObjectGuid ItemGUID { get; set; }
     }
 
     public class RepairItem : ClientPacket
@@ -182,9 +182,9 @@ namespace Game.Network.Packets
             UseGuildBank = _worldPacket.HasBit();
         }
 
-        public ObjectGuid NpcGUID;
-        public ObjectGuid ItemGUID;
-        public bool UseGuildBank;
+        public ObjectGuid NpcGUID { get; set; }
+        public ObjectGuid ItemGUID { get; set; }
+        public bool UseGuildBank { get; set; }
     }
 
     public class SellItem : ClientPacket
@@ -198,9 +198,9 @@ namespace Game.Network.Packets
             Amount = _worldPacket.ReadUInt32();
         }
 
-        public ObjectGuid VendorGUID;
-        public ObjectGuid ItemGUID;
-        public uint Amount;
+        public ObjectGuid VendorGUID { get; set; }
+        public ObjectGuid ItemGUID { get; set; }
+        public uint Amount { get; set; }
     }
 
     public class ItemTimeUpdate : ServerPacket
@@ -213,8 +213,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(DurationLeft);
         }
 
-        public ObjectGuid ItemGuid;
-        public uint DurationLeft;
+        public ObjectGuid ItemGuid { get; set; }
+        public uint DurationLeft { get; set; }
     }
 
     public class SetProficiency : ServerPacket
@@ -227,8 +227,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(ProficiencyClass);
         }
 
-        public uint ProficiencyMask;
-        public byte ProficiencyClass;
+        public uint ProficiencyMask { get; set; }
+        public byte ProficiencyClass { get; set; }
     }
 
     public class InventoryChangeFailure : ServerPacket
@@ -261,14 +261,14 @@ namespace Game.Network.Packets
             }
         }
 
-        public InventoryResult BagResult;
-        public byte ContainerBSlot;
-        public ObjectGuid SrcContainer;
-        public ObjectGuid DstContainer;
-        public int SrcSlot;
-        public int LimitCategory;
-        public int Level;
-        public ObjectGuid[] Item = new ObjectGuid[2];
+        public InventoryResult BagResult { get; set; }
+        public byte ContainerBSlot { get; set; }
+        public ObjectGuid SrcContainer { get; set; }
+        public ObjectGuid DstContainer { get; set; }
+        public int SrcSlot { get; set; }
+        public int LimitCategory { get; set; }
+        public int Level { get; set; }
+        public ObjectGuid[] Item { get; set; } = new ObjectGuid[2];
     }
 
     public class SplitItem : ClientPacket
@@ -285,12 +285,12 @@ namespace Game.Network.Packets
             Quantity = _worldPacket.ReadInt32();
         }
 
-        public byte ToSlot;
-        public byte ToPackSlot;
-        public byte FromPackSlot;
-        public int Quantity;
-        public InvUpdate Inv;
-        public byte FromSlot;
+        public byte ToSlot { get; set; }
+        public byte ToPackSlot { get; set; }
+        public byte FromPackSlot { get; set; }
+        public int Quantity { get; set; }
+        public InvUpdate Inv { get; set; }
+        public byte FromSlot { get; set; }
     }
 
     public class SwapInvItem : ClientPacket
@@ -304,7 +304,7 @@ namespace Game.Network.Packets
             Slot1 = _worldPacket.ReadUInt8();
         }
 
-        public InvUpdate Inv;
+        public InvUpdate Inv { get; set; }
         public byte Slot1; /// Source Slot
         public byte Slot2; /// Destination Slot
     }
@@ -322,11 +322,11 @@ namespace Game.Network.Packets
             SlotA = _worldPacket.ReadUInt8();
         }
 
-        public InvUpdate Inv;
-        public byte SlotA;
-        public byte ContainerSlotB;
-        public byte SlotB;
-        public byte ContainerSlotA;
+        public InvUpdate Inv { get; set; }
+        public byte SlotA { get; set; }
+        public byte ContainerSlotB { get; set; }
+        public byte SlotB { get; set; }
+        public byte ContainerSlotA { get; set; }
     }
 
     public class AutoEquipItem : ClientPacket
@@ -340,9 +340,9 @@ namespace Game.Network.Packets
             Slot = _worldPacket.ReadUInt8();
         }
 
-        public byte Slot;
-        public InvUpdate Inv;
-        public byte PackSlot;
+        public byte Slot { get; set; }
+        public InvUpdate Inv { get; set; }
+        public byte PackSlot { get; set; }
     }
 
     class AutoEquipItemSlot : ClientPacket
@@ -356,9 +356,9 @@ namespace Game.Network.Packets
             ItemDstSlot = _worldPacket.ReadUInt8();
         }
 
-        public ObjectGuid Item;
-        public byte ItemDstSlot;
-        public InvUpdate Inv;
+        public ObjectGuid Item { get; set; }
+        public byte ItemDstSlot { get; set; }
+        public InvUpdate Inv { get; set; }
     }
 
     public class AutoStoreBagItem : ClientPacket
@@ -373,10 +373,10 @@ namespace Game.Network.Packets
             SlotA = _worldPacket.ReadUInt8();
         }
 
-        public byte ContainerSlotB;
-        public InvUpdate Inv;
-        public byte ContainerSlotA;
-        public byte SlotA;
+        public byte ContainerSlotB { get; set; }
+        public InvUpdate Inv { get; set; }
+        public byte ContainerSlotA { get; set; }
+        public byte SlotA { get; set; }
     }
 
     public class DestroyItem : ClientPacket
@@ -390,9 +390,9 @@ namespace Game.Network.Packets
             SlotNum = _worldPacket.ReadUInt8();
         }
 
-        public uint Count;
-        public byte SlotNum;
-        public byte ContainerId;
+        public uint Count { get; set; }
+        public byte SlotNum { get; set; }
+        public byte ContainerId { get; set; }
     }
 
     public class SellResponse : ServerPacket
@@ -406,9 +406,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(Reason);
         }
 
-        public ObjectGuid VendorGUID;
-        public ObjectGuid ItemGUID;
-        public SellResult Reason = SellResult.Unk;
+        public ObjectGuid VendorGUID { get; set; }
+        public ObjectGuid ItemGUID { get; set; }
+        public SellResult Reason { get; set; } = SellResult.Unk;
     }
 
     class ItemPushResult : ServerPacket
@@ -439,25 +439,25 @@ namespace Game.Network.Packets
             Item.Write(_worldPacket);            
         }
 
-        public ObjectGuid PlayerGUID;
-        public byte Slot;
-        public int SlotInBag;
-        public ItemInstance Item;
-        public int QuestLogItemID;// Item ID used for updating quest progress
-                                   // only set if different than real ID (similar to CreatureTemplate.KillCredit)
-        public uint Quantity;
-        public uint QuantityInInventory;
-        public int DungeonEncounterID;
-        public int BattlePetBreedID;
-        public uint BattlePetBreedQuality;
-        public int BattlePetSpeciesID;
-        public int BattlePetLevel;
-        public ObjectGuid ItemGUID;
-        public bool Pushed;
-        public DisplayType DisplayText;
-        public bool Created;
-        public bool IsBonusRoll;
-        public bool IsEncounterLoot;
+        public ObjectGuid PlayerGUID { get; set; }
+        public byte Slot { get; set; }
+        public int SlotInBag { get; set; }
+        public ItemInstance Item { get; set; }
+        public int QuestLogItemID { get; set; } // Item ID used for updating quest progress
+                                                // only set if different than real ID (similar to CreatureTemplate.KillCredit)
+        public uint Quantity { get; set; }
+        public uint QuantityInInventory { get; set; }
+        public int DungeonEncounterID { get; set; }
+        public int BattlePetBreedID { get; set; }
+        public uint BattlePetBreedQuality { get; set; }
+        public int BattlePetSpeciesID { get; set; }
+        public int BattlePetLevel { get; set; }
+        public ObjectGuid ItemGUID { get; set; }
+        public bool Pushed { get; set; }
+        public DisplayType DisplayText { get; set; }
+        public bool Created { get; set; }
+        public bool IsBonusRoll { get; set; }
+        public bool IsEncounterLoot { get; set; }
 
 
         public enum DisplayType
@@ -478,8 +478,8 @@ namespace Game.Network.Packets
             Slot = _worldPacket.ReadUInt8();
         }
 
-        public byte PackSlot;
-        public byte Slot;
+        public byte PackSlot { get; set; }
+        public byte Slot { get; set; }
     }
 
     class ReadItemResultFailed : ServerPacket
@@ -494,9 +494,9 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public ObjectGuid Item;
-        public byte Subcode;
-        public uint Delay;
+        public ObjectGuid Item { get; set; }
+        public byte Subcode { get; set; }
+        public uint Delay { get; set; }
     }
 
     class ReadItemResultOK : ServerPacket
@@ -508,7 +508,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(Item);
         }
 
-        public ObjectGuid Item;
+        public ObjectGuid Item { get; set; }
     }
 
     class WrapItem : ClientPacket
@@ -520,7 +520,7 @@ namespace Game.Network.Packets
             Inv = new InvUpdate(_worldPacket);
         }
 
-        public InvUpdate Inv;
+        public InvUpdate Inv { get; set; }
     }
 
     class EnchantmentLog : ServerPacket
@@ -537,12 +537,12 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(EnchantSlot);
         }
 
-        public ObjectGuid Caster;
-        public ObjectGuid Owner;
-        public ObjectGuid ItemGUID;
-        public uint ItemID;
-        public uint EnchantSlot;
-        public uint Enchantment;
+        public ObjectGuid Caster { get; set; }
+        public ObjectGuid Owner { get; set; }
+        public ObjectGuid ItemGUID { get; set; }
+        public uint ItemID { get; set; }
+        public uint EnchantSlot { get; set; }
+        public uint Enchantment { get; set; }
     }
 
     class CancelTempEnchantment : ClientPacket
@@ -554,7 +554,7 @@ namespace Game.Network.Packets
             Slot = _worldPacket.ReadInt32();
         }
 
-        public int Slot;
+        public int Slot { get; set; }
     }
 
     class ItemCooldown : ServerPacket
@@ -568,9 +568,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(Cooldown);
         }
 
-        public ObjectGuid ItemGuid;
-        public uint SpellID;
-        public uint Cooldown;
+        public ObjectGuid ItemGuid { get; set; }
+        public uint SpellID { get; set; }
+        public uint Cooldown { get; set; }
     }
 
     class ItemEnchantTimeUpdate : ServerPacket
@@ -585,10 +585,10 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(OwnerGuid);
         }
 
-        public ObjectGuid OwnerGuid;
-        public ObjectGuid ItemGuid;
-        public uint DurationLeft;
-        public uint Slot;
+        public ObjectGuid OwnerGuid { get; set; }
+        public ObjectGuid ItemGuid { get; set; }
+        public uint DurationLeft { get; set; }
+        public uint Slot { get; set; }
     }
 
     class UseCritterItem : ClientPacket
@@ -600,7 +600,7 @@ namespace Game.Network.Packets
             ItemGuid = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid ItemGuid;
+        public ObjectGuid ItemGuid { get; set; }
     }
 
     class UpgradeItem : ClientPacket
@@ -616,11 +616,11 @@ namespace Game.Network.Packets
             Slot = _worldPacket.ReadInt32();
         }
 
-        public ObjectGuid ItemMaster;
-        public ObjectGuid ItemGUID;
-        public int ContainerSlot;
-        public int UpgradeID;
-        public int Slot;
+        public ObjectGuid ItemMaster { get; set; }
+        public ObjectGuid ItemGUID { get; set; }
+        public int ContainerSlot { get; set; }
+        public int UpgradeID { get; set; }
+        public int Slot { get; set; }
     }
 
     class ItemUpgradeResult : ServerPacket
@@ -633,7 +633,7 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public bool Success;
+        public bool Success { get; set; }
     }
 
     class SocketGems : ClientPacket
@@ -647,8 +647,8 @@ namespace Game.Network.Packets
                 GemItem[i] = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid ItemGuid;
-        public ObjectGuid[] GemItem = new ObjectGuid[ItemConst.MaxGemSockets];
+        public ObjectGuid ItemGuid { get; set; }
+        public ObjectGuid[] GemItem { get; set; } = new ObjectGuid[ItemConst.MaxGemSockets];
     }
 
     class SocketGemsResult : ServerPacket
@@ -660,7 +660,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(Item);
         }
 
-        public ObjectGuid Item;
+        public ObjectGuid Item { get; set; }
     }
 
     class SortBags : ClientPacket
@@ -756,8 +756,8 @@ namespace Game.Network.Packets
             return !(left == right);
         }
 
-        public byte Context;
-        public List<uint> BonusListIDs = new List<uint>();
+        public byte Context { get; set; }
+        public List<uint> BonusListIDs { get; set; } = new List<uint>();
     }
 
     public class ItemInstance
@@ -921,9 +921,9 @@ namespace Game.Network.Packets
             return !(left == right);
         }
 
-        public uint ItemID;
-        public uint RandomPropertiesSeed;
-        public uint RandomPropertiesID;
+        public uint ItemID { get; set; }
+        public uint RandomPropertiesSeed { get; set; }
+        public uint RandomPropertiesID { get; set; }
         public Optional<ItemBonusInstanceData> ItemBonus;
         public Optional<CompactArray> Modifications;
     }
@@ -946,10 +946,10 @@ namespace Game.Network.Packets
             data.WriteUInt8(Slot);
         }
 
-        public int ID;
-        public uint Expiration;
-        public int Charges;
-        public byte Slot;
+        public int ID { get; set; }
+        public uint Expiration { get; set; }
+        public int Charges { get; set; }
+        public byte Slot { get; set; }
     }
 
     public class ItemGemData
@@ -966,8 +966,8 @@ namespace Game.Network.Packets
             Item.Read(data);
         }
 
-        public byte Slot;
-        public ItemInstance Item = new ItemInstance();
+        public byte Slot { get; set; }
+        public ItemInstance Item { get; set; } = new ItemInstance();
     }
 
     public struct InvUpdate
@@ -987,12 +987,12 @@ namespace Game.Network.Packets
             }
         }
 
-        public List<InvItem> Items;
+        public List<InvItem> Items { get; set; }
 
         public struct InvItem
         {
-            public byte ContainerSlot;
-            public byte Slot;
+            public byte ContainerSlot { get; set; }
+            public byte Slot { get; set; }
         }
     }
 
@@ -1004,8 +1004,8 @@ namespace Game.Network.Packets
             data.WriteUInt32(ItemCount);
         }
 
-        public uint ItemID;
-        public uint ItemCount;
+        public uint ItemID { get; set; }
+        public uint ItemCount { get; set; }
     }
 
     struct ItemPurchaseRefundCurrency
@@ -1016,8 +1016,8 @@ namespace Game.Network.Packets
             data.WriteUInt32(CurrencyCount);
         }
 
-        public uint CurrencyID;
-        public uint CurrencyCount;
+        public uint CurrencyID { get; set; }
+        public uint CurrencyCount { get; set; }
     }
 
     class ItemPurchaseContents
@@ -1032,8 +1032,8 @@ namespace Game.Network.Packets
                 Currencies[i].Write(data);
         }
 
-        public ulong Money;
-        public ItemPurchaseRefundItem[] Items = new ItemPurchaseRefundItem[5];
-        public ItemPurchaseRefundCurrency[] Currencies = new ItemPurchaseRefundCurrency[5];
+        public ulong Money { get; set; }
+        public ItemPurchaseRefundItem[] Items { get; set; } = new ItemPurchaseRefundItem[5];
+        public ItemPurchaseRefundCurrency[] Currencies { get; set; } = new ItemPurchaseRefundCurrency[5];
     }
 }

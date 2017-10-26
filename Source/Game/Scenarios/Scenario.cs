@@ -289,7 +289,7 @@ namespace Game.Scenarios
 
                 if (Global.CriteriaMgr.GetCriteriaTree(step.CriteriaTreeID) != null)
                 {
-                    BonusObjectiveData bonusObjectiveData;
+                    BonusObjectiveData bonusObjectiveData = new BonusObjectiveData();
                     bonusObjectiveData.BonusObjectiveID = (int)step.Id;
                     bonusObjectiveData.ObjectiveComplete = GetStepState(step) == ScenarioStepState.Done;
                     bonusObjectivesData.Add(bonusObjectiveData);

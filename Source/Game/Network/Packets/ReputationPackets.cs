@@ -40,9 +40,9 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public int[] FactionStandings = new int[FactionCount];
-        public bool[] FactionHasBonus = new bool[FactionCount]; ///< @todo: implement faction bonus
-        public FactionFlags[] FactionFlags = new FactionFlags[FactionCount];
+        public int[] FactionStandings { get; set; } = new int[FactionCount];
+        public bool[] FactionHasBonus { get; set; } = new bool[FactionCount]; ///< @todo: implement faction bonus
+        public FactionFlags[] FactionFlags { get; set; } = new FactionFlags[FactionCount];
     }
 
     class RequestForcedReactions : ClientPacket
@@ -65,7 +65,7 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public List<ForcedReaction> Reactions = new List<ForcedReaction>();
+        public List<ForcedReaction> Reactions { get; set; } = new List<ForcedReaction>();
     }
 
     class SetFactionStanding : ServerPacket
@@ -85,10 +85,10 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public float ReferAFriendBonus;
-        public float BonusFromAchievementSystem;
-        public List<FactionStandingData> Faction = new List<FactionStandingData>();
-        public bool ShowVisual;
+        public float ReferAFriendBonus { get; set; }
+        public float BonusFromAchievementSystem { get; set; }
+        public List<FactionStandingData> Faction { get; set; } = new List<FactionStandingData>();
+        public bool ShowVisual { get; set; }
     }
 
     struct ForcedReaction
@@ -99,8 +99,8 @@ namespace Game.Network.Packets
             data.WriteInt32(Reaction);
         }
 
-        public int Faction;
-        public int Reaction;
+        public int Faction { get; set; }
+        public int Reaction { get; set; }
     }
 
     struct FactionStandingData

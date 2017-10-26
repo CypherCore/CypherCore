@@ -30,7 +30,7 @@ namespace Game.Network.Packets
             Guid = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Guid;
+        public ObjectGuid Guid { get; set; }
     }
 
     class UseToy : ClientPacket
@@ -43,8 +43,8 @@ namespace Game.Network.Packets
             Cast.Read(_worldPacket);
         }
 
-        public SpellCastRequest Cast = new SpellCastRequest();
-        public uint ItemID;
+        public SpellCastRequest Cast { get; set; } = new SpellCastRequest();
+        public uint ItemID { get; set; }
     }
 
     class AccountToysUpdate : ServerPacket
@@ -69,7 +69,7 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public bool IsFullUpdate = false;
-        public Dictionary<uint, bool> Toys = new Dictionary<uint, bool>();
+        public bool IsFullUpdate { get; set; } = false;
+        public Dictionary<uint, bool> Toys { get; set; } = new Dictionary<uint, bool>();
     }
 }
