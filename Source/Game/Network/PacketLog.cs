@@ -29,7 +29,7 @@ public class PacketLog
 
     static PacketLog()
     {
-        string logsDir = ConfigMgr.GetDefaultValue("LogsDir", "");
+        string logsDir = AppContext.BaseDirectory + ConfigMgr.GetDefaultValue("LogsDir", "");
         string logname = ConfigMgr.GetDefaultValue("PacketLogFile", "");
         if (!string.IsNullOrEmpty(logname))
         {
