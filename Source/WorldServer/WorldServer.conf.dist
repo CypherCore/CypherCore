@@ -19,16 +19,16 @@ RealmID = 1
 #        Example:     "@prefix@/share/cyphercore"
 #        Default:     "./Data"
 
-DataDir = "."
+DataDir = "./Data"
 
 #
 #    LogsDir
 #        Description: Logs directory setting.
 #        Important:   LogsDir needs to be quoted, as the string might contain space characters.
 #                     Logs directory must exists, or log file creation will be disabled.
-#        Default:     "./Logs" - (Log files will be stored in the current path)
+#        Default:     "Logs" - (Log files will be stored in the current path)
 
-LogsDir = "./Logs"
+LogsDir = "Logs"
 
 #
 #    LoginDatabaseInfo

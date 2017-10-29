@@ -27,7 +27,7 @@ public class Log
 {
     static Log()
     {
-        m_logsDir = ConfigMgr.GetDefaultValue("LogsDir", "");
+        m_logsDir = AppContext.BaseDirectory + ConfigMgr.GetDefaultValue("LogsDir", "");
 
         foreach (var appenderName in ConfigMgr.GetKeysByString("Appender."))
         {
