@@ -61,11 +61,12 @@ namespace Framework.Networking
 
                 socketEventargs.SetBuffer(_receiveBuffer, 0, _receiveBuffer.Length);
 
-                socketEventargs.Completed += ReadHandlerInternal;
-                socketEventargs.UserToken = _socket;
+                socketEventargs.Completed += (sender, args) => ReadHandlerInternal(args);
                 socketEventargs.SocketFlags = SocketFlags.None;
+                socketEventargs.RemoteEndPoint = _socket.RemoteEndPoint;
 
-                _socket.ReceiveAsync(socketEventargs);
+                if (!_socket.ReceiveAsync(socketEventargs))
+                    ReadHandlerInternal(socketEventargs);
             }
             catch (Exception ex)
             {
@@ -73,7 +74,7 @@ namespace Framework.Networking
             }
         }
 
-        public delegate void SocketReadCallback(object sender, SocketAsyncEventArgs args);
+        public delegate void SocketReadCallback(SocketAsyncEventArgs args);
         public void AsyncReadWithCallback(SocketReadCallback callback)
         {
             if (!IsOpen())
@@ -85,11 +86,11 @@ namespace Framework.Networking
 
                 socketEventargs.SetBuffer(_receiveBuffer, 0, _receiveBuffer.Length);
 
-                socketEventargs.Completed += new EventHandler<SocketAsyncEventArgs>(callback);
+                socketEventargs.Completed += (sender, args) => callback(args);
                 socketEventargs.UserToken = _socket;
                 socketEventargs.SocketFlags = SocketFlags.None;
-
-                _socket.ReceiveAsync(socketEventargs);
+                if (!_socket.ReceiveAsync(socketEventargs))
+                    callback(socketEventargs);
             }
             catch (Exception ex)
             {
@@ -97,9 +98,8 @@ namespace Framework.Networking
             }
         }
 
-        void ReadHandlerInternal(object sender, SocketAsyncEventArgs args)
+        void ReadHandlerInternal(SocketAsyncEventArgs args)
         {
-            args.Completed -= ReadHandlerInternal;
             if (args.SocketError != SocketError.Success)
             {
                 CloseSocket();
@@ -126,6 +126,7 @@ namespace Framework.Networking
             socketEventargs.SetBuffer(data, 0, data.Length);
             socketEventargs.Completed += WriteHandlerInternal;
             socketEventargs.RemoteEndPoint = _socket.RemoteEndPoint;
+            socketEventargs.UserToken = _socket;
             socketEventargs.SocketFlags = SocketFlags.None;
 
             _socket.SendAsync(socketEventargs);

@@ -84,9 +84,8 @@ namespace Game.Network
             AsyncReadWithCallback(InitializeHandler);
         }
 
-        public void InitializeHandler(object sender, SocketAsyncEventArgs args)
+        public void InitializeHandler(SocketAsyncEventArgs args)
         {
-            args.Completed -= InitializeHandler;
             if (args.SocketError != SocketError.Success)
             {
                 CloseSocket();
