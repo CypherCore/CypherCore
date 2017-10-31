@@ -6771,7 +6771,14 @@ namespace Game.Entities
 
             ulong money = GetMoney();
             if (npc != null)
-                totalcost = (uint)Math.Ceiling(totalcost * GetReputationPriceDiscount(npc));
+            {
+                float discount = GetReputationPriceDiscount(npc);
+                totalcost = (uint)Math.Ceiling(totalcost * discount);
+                firstcost = (uint)Math.Ceiling(firstcost * discount);
+                m_taxi.SetFlightMasterFactionTemplateId(npc.getFaction());
+            }
+            else
+                m_taxi.SetFlightMasterFactionTemplateId(0);
 
             if (money < totalcost)
             {
@@ -6985,11 +6992,15 @@ namespace Game.Entities
 
         public float GetReputationPriceDiscount(Creature creature)
         {
-            var vendor_faction = creature.GetFactionTemplateEntry();
-            if (vendor_faction == null || vendor_faction.Faction == 0)
+            return GetReputationPriceDiscount(creature.GetFactionTemplateEntry());
+        }
+
+        public float GetReputationPriceDiscount(FactionTemplateRecord factionTemplate)
+        {
+            if (factionTemplate == null || factionTemplate.Faction == 0)
                 return 1.0f;
 
-            ReputationRank rank = GetReputationRank(vendor_faction.Faction);
+            ReputationRank rank = GetReputationRank(factionTemplate.Faction);
             if (rank <= ReputationRank.Neutral)
                 return 1.0f;
 

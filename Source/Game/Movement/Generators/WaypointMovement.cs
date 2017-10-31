@@ -269,6 +269,8 @@ namespace Game.Movement
             i_currentNode = (int)startNode;
             _pointsForPathSwitch.Clear();
             var taxi = player.m_taxi.GetPath();
+            float discount = player.GetReputationPriceDiscount(player.m_taxi.GetFlightMasterFactionTemplate());
+
             for (int src = 0, dst = 1; dst < taxi.Count; src = dst++)
             {
                 uint path, cost;
@@ -301,7 +303,7 @@ namespace Game.Movement
                     }
                 }
 
-                _pointsForPathSwitch.Add(new TaxiNodeChangeInfo((uint)(i_path.Count - 1), (int)cost));
+                _pointsForPathSwitch.Add(new TaxiNodeChangeInfo((uint)(i_path.Count - 1), (long)Math.Ceiling(cost * discount)));
             }
         }
 
@@ -490,14 +492,14 @@ namespace Game.Movement
 
         class TaxiNodeChangeInfo
         {
-            public TaxiNodeChangeInfo(uint pathIndex, int cost)
+            public TaxiNodeChangeInfo(uint pathIndex, long cost)
             {
                 PathIndex = pathIndex;
                 Cost = cost;
             }
 
             public uint PathIndex;
-            public int Cost;
+            public long Cost;
         }
     }
 }

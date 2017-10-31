@@ -125,10 +125,13 @@ namespace Game.Entities
         {
             ClearTaxiDestinations();
 
-            var split = new StringArray(values, ' ');
-            for (var i = 0; i < split.Length; ++i)
+            var stringArray = new StringArray(values, ' ');
+            if (stringArray.Length > 0)
+                m_flightMasterFactionId = uint.Parse(stringArray[0]);
+
+            for (var i = 1; i < stringArray.Length; ++i)
             {
-                uint node = uint.Parse(split[i]);
+                uint node = uint.Parse(stringArray[i]);
                 AddTaxiDestination(node);
             }
 
@@ -161,9 +164,10 @@ namespace Game.Entities
                 return "";
 
             StringBuilder ss = new StringBuilder();
+            ss.Append($"{m_flightMasterFactionId} ");
 
             for (int i = 0; i < m_TaxiDestinations.Count; ++i)
-                ss.AppendFormat("{0} ", m_TaxiDestinations[i]);
+                ss.Append($"{m_TaxiDestinations[i]} ");
 
             return ss.ToString();
         }
@@ -200,6 +204,16 @@ namespace Game.Entities
             }
 
             return false;
+        }
+
+        public FactionTemplateRecord GetFlightMasterFactionTemplate()
+        {
+            return CliDB.FactionTemplateStorage.LookupByKey(m_flightMasterFactionId);
+        }
+
+        public void SetFlightMasterFactionTemplateId(uint factionTemplateId)
+        {
+            m_flightMasterFactionId = factionTemplateId;
         }
 
         public bool IsTaximaskNodeKnown(uint nodeidx)
@@ -240,5 +254,6 @@ namespace Game.Entities
 
         public byte[] m_taximask = new byte[PlayerConst.TaxiMaskSize];
         List<uint> m_TaxiDestinations = new List<uint>();
+        uint m_flightMasterFactionId;
     }
 }
