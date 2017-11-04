@@ -25,6 +25,7 @@ using Game.Groups;
 using Game.Maps;
 using Game.Network;
 using Game.Network.Packets;
+using System;
 using System.Collections.Generic;
 
 namespace Game
@@ -56,8 +57,8 @@ namespace Game
             {
                 CreatureTextEntry temp = new CreatureTextEntry();
 
-                temp.entry = result.Read<uint>(0);
-                temp.group = result.Read<byte>(1);
+                temp.creatureId = result.Read<uint>(0);
+                temp.groupId = result.Read<byte>(1);
                 temp.id = result.Read<byte>(2);
                 temp.text = result.Read<string>(3);
                 temp.type = (ChatMsg)result.Read<byte>(4);
@@ -73,25 +74,25 @@ namespace Game
                 {
                     if (!CliDB.SoundKitStorage.ContainsKey(temp.sound))
                     {
-                        Log.outError(LogFilter.Sql, "GossipManager:  Entry {0}, Group {1} in table `creature_texts` has Sound {2} but sound does not exist.", temp.entry, temp.group, temp.sound);
+                        Log.outError(LogFilter.Sql, "GossipManager:  Entry {0}, Group {1} in table `creature_texts` has Sound {2} but sound does not exist.", temp.creatureId, temp.groupId, temp.sound);
                         temp.sound = 0;
                     }
                 }
                 if (ObjectManager.GetLanguageDescByID(temp.lang) == null)
                 {
-                    Log.outError(LogFilter.Sql, "GossipManager:  Entry {0}, Group {1} in table `creature_texts` using Language {2} but Language does not exist.", temp.entry, temp.group, temp.lang);
+                    Log.outError(LogFilter.Sql, "GossipManager:  Entry {0}, Group {1} in table `creature_texts` using Language {2} but Language does not exist.", temp.creatureId, temp.groupId, temp.lang);
                     temp.lang = Language.Universal;
                 }
                 if (temp.type >= ChatMsg.Max)
                 {
-                    Log.outError(LogFilter.Sql, "GossipManager:  Entry {0}, Group {1} in table `creature_texts` has Type {2} but this Chat Type does not exist.", temp.entry, temp.group, temp.type);
+                    Log.outError(LogFilter.Sql, "GossipManager:  Entry {0}, Group {1} in table `creature_texts` has Type {2} but this Chat Type does not exist.", temp.creatureId, temp.groupId, temp.type);
                     temp.type = ChatMsg.Say;
                 }
                 if (temp.emote != 0)
                 {
                     if (!CliDB.EmotesStorage.ContainsKey((uint)temp.emote))
                     {
-                        Log.outError(LogFilter.Sql, "GossipManager:  Entry {0}, Group {1} in table `creature_texts` has Emote {2} but emote does not exist.", temp.entry, temp.group, temp.emote);
+                        Log.outError(LogFilter.Sql, "GossipManager:  Entry {0}, Group {1} in table `creature_texts` has Emote {2} but emote does not exist.", temp.creatureId, temp.groupId, temp.emote);
                         temp.emote = Emote.OneshotNone;
                     }
                 }
@@ -100,24 +101,24 @@ namespace Game
                 {
                     if (!CliDB.BroadcastTextStorage.ContainsKey(temp.BroadcastTextId))
                     {
-                        Log.outError(LogFilter.Sql, "CreatureTextMgr: Entry {0}, Group {1}, Id {2} in table `creature_texts` has non-existing or incompatible BroadcastTextId {3}.", temp.entry, temp.group, temp.id, temp.BroadcastTextId);
+                        Log.outError(LogFilter.Sql, "CreatureTextMgr: Entry {0}, Group {1}, Id {2} in table `creature_texts` has non-existing or incompatible BroadcastTextId {3}.", temp.creatureId, temp.groupId, temp.id, temp.BroadcastTextId);
                         temp.BroadcastTextId = 0;
                     }
                 }
 
                 if (temp.TextRange > CreatureTextRange.World)
                 {
-                    Log.outError(LogFilter.Sql, "CreatureTextMgr: Entry {0}, Group {1}, Id {2} in table `creature_text` has incorrect TextRange {3}.", temp.entry, temp.group, temp.id, temp.TextRange);
+                    Log.outError(LogFilter.Sql, "CreatureTextMgr: Entry {0}, Group {1}, Id {2} in table `creature_text` has incorrect TextRange {3}.", temp.creatureId, temp.groupId, temp.id, temp.TextRange);
                     temp.TextRange = CreatureTextRange.Normal;
                 }
 
-                if (!mTextMap.ContainsKey(temp.entry))
+                if (!mTextMap.ContainsKey(temp.creatureId))
                 {
-                    mTextMap[temp.entry] = new MultiMap<byte,CreatureTextEntry>();
+                    mTextMap[temp.creatureId] = new MultiMap<byte,CreatureTextEntry>();
                     ++creatureCount;
                 }
 
-                mTextMap[temp.entry].Add(temp.group, temp);
+                mTextMap[temp.creatureId].Add(temp.groupId, temp);
                 ++textCount;
             } while (result.NextRow());
 
@@ -130,26 +131,33 @@ namespace Game
 
             mLocaleTextMap.Clear(); // for reload case
 
-            SQLResult result = DB.World.Query("SELECT entry, groupid, id, text_loc1, text_loc2, text_loc3, text_loc4, text_loc5, text_loc6, text_loc7, text_loc8 FROM locales_creature_text");
+            SQLResult result = DB.World.Query("SELECT CreatureId, GroupId, ID, Locale, Text FROM creature_text_locale");
 
             if (result.IsEmpty())
                 return;
 
-            uint textCount = 0;
-
             do
             {
-                CreatureTextLocale loc = new CreatureTextLocale();
-                for (byte locale = 1; locale < (int)LocaleConstant.OldTotal; ++locale)
-                {
-                    ObjectManager.AddLocaleString(result.Read<string>(3 + locale - 1), (LocaleConstant)locale, loc.Text);
-                }
+                uint creatureId = result.Read<uint>(0);
+                uint groupId = result.Read<byte>(1);
+                uint id = result.Read<byte>(2);
+                string localeName = result.Read<string>(3);
+                string text = result.Read<string>(4);
 
-                mLocaleTextMap[new CreatureTextId(result.Read<uint>(0), result.Read<byte>(1), result.Read<byte>(2))] = loc;
-                ++textCount;
+                var key = new CreatureTextId(creatureId, groupId, id);
+                if (!mLocaleTextMap.ContainsKey(key))
+                    mLocaleTextMap[key] = new CreatureTextLocale();
+
+                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
+                if (locale == LocaleConstant.enUS)
+                    continue;
+
+                CreatureTextLocale data = mLocaleTextMap[key];
+                ObjectManager.AddLocaleString(text, locale, data.Text);
+
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creature localized texts in {1} ms", textCount, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creature localized texts in {1} ms", mLocaleTextMap.Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
         public uint SendChat(Creature source, byte textGroup, WorldObject whisperTarget = null, ChatMsg msgType = ChatMsg.Addon, Language language = Language.Addon,
@@ -218,12 +226,12 @@ namespace Game
 
             if (srcPlr)
             {
-                PlayerTextBuilder builder = new PlayerTextBuilder(source, finalSource, finalSource.GetGender(), finalType, textEntry.group, textEntry.id, finalLang, whisperTarget);
+                PlayerTextBuilder builder = new PlayerTextBuilder(source, finalSource, finalSource.GetGender(), finalType, textEntry.groupId, textEntry.id, finalLang, whisperTarget);
                 SendChatPacket(finalSource, builder, finalType, whisperTarget, range, team, gmOnly);
             }
             else
             {
-                CreatureTextBuilder builder = new CreatureTextBuilder(finalSource, finalSource.GetGender(), finalType, textEntry.group, textEntry.id, finalLang, whisperTarget);
+                CreatureTextBuilder builder = new CreatureTextBuilder(finalSource, finalSource.GetGender(), finalType, textEntry.groupId, textEntry.id, finalLang, whisperTarget);
                 SendChatPacket(finalSource, builder, finalType, whisperTarget, range, team, gmOnly);
             }
 
@@ -539,8 +547,8 @@ namespace Game
 
     public class CreatureTextEntry
     {
-        public uint entry;
-        public byte group;
+        public uint creatureId;
+        public byte groupId;
         public byte id;
         public string text;
         public ChatMsg type;
