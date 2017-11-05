@@ -39,7 +39,10 @@ namespace Game.BlackMarket
             var bonusListIDsTok = new StringArray(fields.Read<string>(7), ' ');
             List<uint> bonusListIDs = new List<uint>();
             foreach (string token in bonusListIDsTok)
-                bonusListIDs.Add(uint.Parse(token));
+            {
+                if (uint.TryParse(token, out uint id))
+                    bonusListIDs.Add(id);
+            }
 
             if (!bonusListIDs.Empty())
             {

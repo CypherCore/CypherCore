@@ -133,7 +133,8 @@ namespace Game.Chat
                 if (string.IsNullOrEmpty(cId))
                     return false;
 
-                lowguid = uint.Parse(cId);
+                if (!ulong.TryParse(cId, out lowguid))
+                    return false;
 
                 // Attempting creature load from DB data
                 CreatureData data = Global.ObjectMgr.GetCreatureData(lowguid);
@@ -330,7 +331,10 @@ namespace Game.Chat
                 return false;
             }
 
-            ObjectGuid receiver_guid = ObjectGuid.Create(HighGuid.Player, ulong.Parse(receiver_str));
+            if (!ulong.TryParse(receiver_str, out ulong guid))
+                return false;
+
+            ObjectGuid receiver_guid = ObjectGuid.Create(HighGuid.Player, guid);
 
             // check online security
             Player receiver = Global.ObjAccessor.FindPlayer(receiver_guid);
@@ -541,11 +545,10 @@ namespace Game.Chat
                     if (string.IsNullOrEmpty(cId))
                         return false;
 
-                    ulong lowguid = ulong.Parse(cId);
-                    if (lowguid == 0)
+                    if (!ulong.TryParse(cId, out ulong guidLow) || guidLow == 0)
                         return false;
 
-                    unit = handler.GetCreatureFromPlayerMapByDbGuid(lowguid);
+                    unit = handler.GetCreatureFromPlayerMapByDbGuid(guidLow);
                 }
                 else
                     unit = handler.getSelectedCreature();
@@ -585,7 +588,9 @@ namespace Game.Chat
                     handler.SendSysMessage(CypherStrings.CommandNeeditemsend);
                     return false;
                 }
-                uint itemId = uint.Parse(pitem);
+
+                if (!uint.TryParse(pitem, out uint itemId))
+                    return false;
 
                 ItemVendorType type = ItemVendorType.Item; // FIXME: make type (1 item, 2 currency) an argument
 
@@ -596,7 +601,6 @@ namespace Game.Chat
                 }
 
                 ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
-
                 handler.SendSysMessage(CypherStrings.ItemDeletedFromList, itemId, itemTemplate.GetName());
                 return true;
             }
@@ -752,20 +756,13 @@ namespace Game.Chat
                 if (args.Empty())
                     return false;
 
-                string arg1 = args.NextString();
-                string arg2 = args.NextString();
-
-                if (string.IsNullOrEmpty(arg1) || string.IsNullOrEmpty(arg2))
-                    return false;
-
-                uint data_1 = uint.Parse(arg1);
-                uint data_2 = uint.Parse(arg2);
+                uint data_1 = args.NextUInt32();
+                uint data_2 = args.NextUInt32();
 
                 if (data_1 == 0 || data_2 == 0)
                     return false;
 
                 Creature creature = handler.getSelectedCreature();
-
                 if (!creature)
                 {
                     handler.SendSysMessage(CypherStrings.SelectCreature);
@@ -862,9 +859,7 @@ namespace Game.Chat
                 }
                 else                                                    // case .setmovetype #creature_guid $move_type (with selected creature)
                 {
-                    lowguid = uint.Parse(guid_str);
-
-                    if (lowguid != 0)
+                    if (!ulong.TryParse(guid_str, out lowguid) || lowguid != 0)
                         creature = handler.GetCreatureFromPlayerMapByDbGuid(lowguid);
 
                     // attempt check creature existence by DB data
@@ -1095,8 +1090,7 @@ namespace Game.Chat
                 if (string.IsNullOrEmpty(charID))
                     return false;
 
-                uint id = uint.Parse(charID);
-                if (Global.ObjectMgr.GetCreatureTemplate(id) == null)
+                if (!uint.TryParse(charID, out uint id) || Global.ObjectMgr.GetCreatureTemplate(id) == null)
                     return false;
 
                 Player chr = handler.GetSession().GetPlayer();
@@ -1160,8 +1154,7 @@ namespace Game.Chat
                     return false;
                 }
 
-                uint itemId = uint.Parse(pitem);
-                if (itemId == 0)
+                if (!uint.TryParse(pitem, out uint itemId) || itemId == 0)
                     return false;
 
                 uint maxcount = args.NextUInt32();
@@ -1189,7 +1182,10 @@ namespace Game.Chat
                 {
                     var bonusListIDsTok = new StringArray(fbonuslist, ';');
                     foreach (string token in bonusListIDsTok)
-                        vItem.BonusListIDs.Add(uint.Parse(token));
+                    {
+                        if (uint.TryParse(token, out uint id))
+                            vItem.BonusListIDs.Add(id);
+                    }
                 }
 
                 if (!Global.ObjectMgr.IsVendorItemValid(vendor_entry, vItem, handler.GetSession().GetPlayer()))
@@ -1220,8 +1216,7 @@ namespace Game.Chat
                     return false;
                 }
 
-                int wait = !string.IsNullOrEmpty(waitStr) ? int.Parse(waitStr) : 0;
-                if (wait < 0)
+                if (!int.TryParse(waitStr, out int wait) || wait < 0)
                     wait = 0;
 
                 // Update movement type
@@ -1301,15 +1296,13 @@ namespace Game.Chat
                 if (string.IsNullOrEmpty(charID))
                     return false;
 
-                Player chr = handler.GetSession().GetPlayer();
-
-                uint id = uint.Parse(charID);
-                if (id == 0)
+                if (!uint.TryParse(charID, out uint id) || id == 0)
                     return false;
 
                 if (Global.ObjectMgr.GetCreatureTemplate(id) == null)
                     return false;
 
+                Player chr = handler.GetSession().GetPlayer();
                 chr.SummonCreature(id, chr, loot ? TempSummonType.CorpseTimedDespawn : TempSummonType.CorpseDespawn, 30 * Time.InMilliseconds);
 
                 return true;

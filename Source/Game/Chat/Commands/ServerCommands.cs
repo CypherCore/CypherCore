@@ -100,7 +100,9 @@ namespace Game.Chat
                         Global.WorldMgr.LoadDBAllowedSecurityLevel();
                         break;
                     default:
-                        int value = int.Parse(paramStr);
+                        if (!int.TryParse(paramStr, out int value))
+                            return false;
+
                         if (value < 0)
                             Global.WorldMgr.SetPlayerSecurityLimit((AccountTypes)(-value));
                         else
@@ -148,7 +150,8 @@ namespace Game.Chat
 
         static bool ParseExitCode(string exitCodeStr, out int exitCode)
         {
-            exitCode = int.Parse(exitCodeStr);
+            if (!int.TryParse(exitCodeStr, out exitCode))
+                return false;
 
             // Handle atoi() errors
             if (exitCode == 0 && (exitCodeStr[0] != '0' || (exitCodeStr.Length > 1 && exitCodeStr[1] != '\0')))
@@ -317,8 +320,7 @@ namespace Game.Chat
                 if (newTimeStr.IsEmpty())
                     return false;
 
-                int newTime = int.Parse(newTimeStr);
-                if (newTime < 0)
+                if (!int.TryParse(newTimeStr, out int newTime) || newTime < 0)
                     return false;
 
                 //Global.WorldMgr.SetRecordDiffInterval(newTime);

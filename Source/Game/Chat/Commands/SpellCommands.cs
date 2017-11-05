@@ -146,20 +146,16 @@ namespace Game.Chat
             if (string.IsNullOrEmpty(skillStr))
                 return false;
 
-            string levelStr = args.NextString();
-            if (string.IsNullOrEmpty(levelStr))
-                return false;
-
-            string maxPureSkill = args.NextString();
-
-            uint skill = uint.Parse(skillStr);
-            if (skill == 0)
+            if (!uint.TryParse(skillStr, out uint skill) || skill == 0)
             {
                 handler.SendSysMessage(CypherStrings.InvalidSkillId, skill);
                 return false;
             }
 
-            uint level = uint.Parse(levelStr);
+            uint level = args.NextUInt32();
+            if (level == 0)
+                return false;
+
             Player target = handler.getSelectedPlayerOrSelf();
             if (!target)
             {
@@ -176,9 +172,10 @@ namespace Game.Chat
 
             bool targetHasSkill = target.GetSkillValue((SkillType)skill) != 0;
 
+            ushort maxPureSkill = args.NextUInt16();
             // If our target does not yet have the skill they are trying to add to them, the chosen level also becomes
             // the max level of the new profession.
-            ushort max = !string.IsNullOrEmpty(maxPureSkill) ? ushort.Parse(maxPureSkill) : targetHasSkill ? target.GetPureMaxSkillValue((SkillType)skill) : (ushort)level;
+            ushort max = maxPureSkill != 0 ? maxPureSkill : targetHasSkill ? target.GetPureMaxSkillValue((SkillType)skill) : (ushort)level;
 
             if (level == 0 || level > max || max <= 0)
                 return false;

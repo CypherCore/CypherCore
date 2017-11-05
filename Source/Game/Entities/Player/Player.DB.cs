@@ -284,8 +284,10 @@ namespace Game.Entities
                             var GUIDlist = new StringArray(strGUID, ' ');
                             List<ObjectGuid> looters = new List<ObjectGuid>();
                             for (var i = 0; i < GUIDlist.Length; ++i)
-                                looters.Add(ObjectGuid.Create(HighGuid.Item, ulong.Parse(GUIDlist[i])));
-
+                            {
+                                if (ulong.TryParse(GUIDlist[i], out ulong guid))
+                                    looters.Add(ObjectGuid.Create(HighGuid.Item, guid));
+                            }
 
                             if (looters.Count > 1 && item.GetTemplate().GetMaxStackSize() == 1 && item.IsSoulBound())
                             {
@@ -1083,7 +1085,10 @@ namespace Game.Entities
                 List<uint> bonusListIDs = new List<uint>();
                 var bonusListIdTokens = new StringArray(result.Read<string>(11), ' ');
                 for (var i = 0; i < bonusListIdTokens.Length; ++i)
-                    bonusListIDs.Add(uint.Parse(bonusListIdTokens[i]));
+                {
+                    if (uint.TryParse(bonusListIdTokens[i], out uint id))
+                        bonusListIDs.Add(id);
+                }
 
                 if (itemId == 0)
                 {

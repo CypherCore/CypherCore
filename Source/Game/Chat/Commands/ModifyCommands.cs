@@ -121,7 +121,7 @@ namespace Game.Chat
                 return false;
             }
 
-            if (string.IsNullOrEmpty(pfactionid))
+            if (!uint.TryParse(pfactionid, out uint factionid))
             {
                 uint _factionid = target.getFaction();
                 uint _flag = target.GetUInt32Value(UnitFields.Flags);
@@ -131,35 +131,18 @@ namespace Game.Chat
                 return true;
             }
 
-            uint factionid = uint.Parse(pfactionid);
-            uint flag;
-
-            string pflag = args.NextString();
-            if (string.IsNullOrEmpty(pflag))
+            if (!uint.TryParse(args.NextString(), out uint flag))
                 flag = target.GetUInt32Value(UnitFields.Flags);
-            else
-                flag = uint.Parse(pflag);
 
-            string pnpcflag = args.NextString();
-
-            ulong npcflag;
-            if (string.IsNullOrEmpty(pnpcflag))
+            if (!ulong.TryParse(args.NextString(), out ulong npcflag))
                 npcflag = target.GetUInt64Value(UnitFields.NpcFlags);
-            else
-                npcflag = ulong.Parse(pnpcflag);
 
-            string pdyflag = args.NextString();
-
-            uint dyflag;
-            if (string.IsNullOrEmpty(pdyflag))
+            if (!uint.TryParse(args.NextString(), out uint dyflag))
                 dyflag = target.GetUInt32Value(ObjectFields.DynamicFlags);
-            else
-                dyflag = uint.Parse(pdyflag);
 
             if (!CliDB.FactionTemplateStorage.ContainsKey(factionid))
             {
                 handler.SendSysMessage(CypherStrings.WrongFaction, factionid);
-
                 return false;
             }
 
@@ -191,13 +174,8 @@ namespace Game.Chat
             if (val == 0)
                 return false;
 
-            ushort mark;
-
-            string pmark = args.NextString();
-            if (string.IsNullOrEmpty(pmark))
+            if (!ushort.TryParse(args.NextString(), out ushort mark))
                 mark = 65535;
-            else
-                mark = ushort.Parse(pmark);
 
             Player target = handler.getSelectedPlayerOrSelf();
             if (!target)
@@ -250,11 +228,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string mountStr = args.NextString();
-            if (mountStr.IsEmpty())
-                return false;
-
-            if (uint.TryParse(mountStr, out uint mount))
+            if (!uint.TryParse(args.NextString(), out uint mount))
                 return false;
 
             if (!CliDB.CreatureDisplayInfoStorage.HasRecord(mount))
@@ -336,7 +310,7 @@ namespace Game.Chat
                 if ((ulong)moneyToAdd >= PlayerConst.MaxMoneyAmount)
                     moneyToAdd = Convert.ToInt64(PlayerConst.MaxMoneyAmount);
 
-                moneyToAdd = Math.Min(moneyToAdd, (long)(PlayerConst.MaxMoneyAmount - targetMoney));
+                moneyToAdd = (long)Math.Min((ulong)moneyToAdd, (PlayerConst.MaxMoneyAmount - targetMoney));
 
                 target.ModifyMoney(moneyToAdd);
             }
@@ -454,14 +428,14 @@ namespace Game.Chat
             if (string.IsNullOrEmpty(factionTxt))
                 return false;
 
-            uint factionId = uint.Parse(factionTxt);
+            if (!uint.TryParse(factionTxt, out uint factionId))
+                return false;
 
             int amount = 0;
             string rankTxt = args.NextString();
-            if (factionId == 0 || rankTxt.IsEmpty())
+            if (factionId == 0 || !int.TryParse(rankTxt, out amount))
                 return false;
 
-            amount = int.Parse(rankTxt);
             if ((amount == 0) && !(amount < 0) && !rankTxt.IsNumber())
             {
                 string rankStr = rankTxt.ToLower();
@@ -479,8 +453,7 @@ namespace Game.Chat
                         string deltaTxt = args.NextString();
                         if (!string.IsNullOrEmpty(deltaTxt))
                         {
-                            int delta = int.Parse(deltaTxt);
-                            if ((delta < 0) || (delta > ReputationMgr.PointsInRank[r] - 1))
+                            if (!int.TryParse(deltaTxt, out int delta) || delta < 0 || (delta > ReputationMgr.PointsInRank[r] - 1))
                             {
                                 handler.SendSysMessage(CypherStrings.CommandFactionDelta, (ReputationMgr.PointsInRank[r] - 1));
                                 return false;

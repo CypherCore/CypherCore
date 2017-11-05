@@ -85,8 +85,7 @@ namespace Game.Chat.Commands
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            uint creatureId = uint.Parse(id);
-            if (creatureId == 0)
+            if (!uint.TryParse(id, out uint creatureId) || creatureId == 0)
             {
                 handler.SendSysMessage(CypherStrings.CommandInvalidcreatureid, creatureId);
                 return false;
@@ -100,7 +99,8 @@ namespace Game.Chat.Commands
             }
 
             string countStr = args.NextString();
-            uint count = !string.IsNullOrEmpty(countStr) ? uint.Parse(countStr) : 10;
+            if (!uint.TryParse(args.NextString(), out uint count))
+                count = 10;
 
             if (count == 0)
                 return false;
@@ -153,8 +153,7 @@ namespace Game.Chat.Commands
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            uint itemId = uint.Parse(id);
-            if (itemId == 0)
+            if (!uint.TryParse(id, out uint itemId) || itemId == 0)
             {
                 handler.SendSysMessage(CypherStrings.CommandItemidinvalid, itemId);
                 return false;
@@ -167,8 +166,8 @@ namespace Game.Chat.Commands
                 return false;
             }
 
-            string countStr = args.NextString();
-            uint count = !string.IsNullOrEmpty(countStr) ? uint.Parse(countStr) : 10;
+            if (!uint.TryParse(args.NextString(), out uint count))
+                count = 10;
 
             if (count == 0)
                 return false;
@@ -470,8 +469,7 @@ namespace Game.Chat.Commands
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            uint gameObjectId = uint.Parse(id);
-            if (gameObjectId == 0)
+            if (!uint.TryParse(id, out uint gameObjectId) || gameObjectId == 0)
             {
                 handler.SendSysMessage(CypherStrings.CommandListobjinvalidid, gameObjectId);
                 return false;
@@ -484,8 +482,8 @@ namespace Game.Chat.Commands
                 return false;
             }
 
-            string countStr = args.NextString();
-            uint count = !string.IsNullOrEmpty(countStr) ? uint.Parse(countStr) : 10;
+            if (!uint.TryParse(args.NextString(), out uint count))
+                count = 10;
 
             if (count == 0)
                 return false;

@@ -422,7 +422,10 @@ namespace Game.Entities
             var tokens = new StringArray(fields.Read<string>(6), ' ');
             if (tokens.Length == ItemConst.MaxProtoSpells)
                 for (byte i = 0; i < ItemConst.MaxProtoSpells; ++i)
-                    SetSpellCharges(i, int.Parse(tokens[i]));
+                {
+                    if (int.TryParse(tokens[i], out int value))
+                        SetSpellCharges(i, value);
+                }
 
             SetUInt32Value(ItemFields.Flags, itemFlags);
 
@@ -477,8 +480,8 @@ namespace Game.Entities
             var bonusListIDs = new StringArray(fields.Read<string>(20), ' ');
             for (var i = 0; i < bonusListIDs.Length; ++i)
             {
-                uint bonusListID = uint.Parse(tokens[i]);
-                AddBonuses(bonusListID);
+                if (uint.TryParse(tokens[i], out uint bonusListID))
+                    AddBonuses(bonusListID);
             }
 
             SetModifier(ItemModifier.TransmogAppearanceAllSpecs, fields.Read<uint>(21));
@@ -503,8 +506,7 @@ namespace Game.Entities
                 uint b = 0;
                 foreach (string token in gemBonusListIDs)
                 {
-                    uint bonusListID = uint.Parse(token);
-                    if (bonusListID != 0)
+                    if (uint.TryParse(token, out uint bonusListID) && bonusListID != 0)
                         gemData[i].BonusListIDs[b++] = (ushort)bonusListID;
                 }
 
@@ -1904,7 +1906,8 @@ namespace Game.Entities
                         StringArray bonusLists = new StringArray(item_result.Read<string>(12), ' ');
                         foreach (string line in bonusLists)
                         {
-                            loot_item.BonusListIDs.Add(uint.Parse(line));
+                            if (uint.TryParse(line, out uint id))
+                                loot_item.BonusListIDs.Add(id);
                         }
 
                         // Copy the extra loot conditions from the item in the loot template

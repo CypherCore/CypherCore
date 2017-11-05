@@ -41,8 +41,7 @@ namespace Game.Chat
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            ulong guidLow = ulong.Parse(id);
-            if (guidLow == 0)
+            if (!ulong.TryParse(id, out ulong guidLow) || guidLow == 0)
                 return false;
 
             GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
@@ -68,8 +67,7 @@ namespace Game.Chat
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            ulong guidLow = ulong.Parse(id);
-            if (guidLow == 0)
+            if (!ulong.TryParse(id, out ulong guidLow) || guidLow == 0)
                 return false;
 
             GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
@@ -109,8 +107,7 @@ namespace Game.Chat
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            ulong guidLow = ulong.Parse(id);
-            if (guidLow == 0)
+            if (!ulong.TryParse(id, out ulong guidLow) || guidLow == 0)
                 return false;
 
             GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
@@ -132,12 +129,14 @@ namespace Game.Chat
             }
             else
             {
-                if (string.IsNullOrEmpty(toY) || string.IsNullOrEmpty(toZ))
+                if (!float.TryParse(toX, out x))
                     return false;
 
-                x = float.Parse(toX);
-                y = float.Parse(toY);
-                z = float.Parse(toZ);
+                if (!float.TryParse(toY, out y))
+                    return false;
+
+                if (!float.TryParse(toZ, out z))
+                    return false;
 
                 if (!GridDefines.IsValidMapCoord(obj.GetMapId(), x, y, z))
                 {
@@ -215,8 +214,7 @@ namespace Game.Chat
                 if (string.IsNullOrEmpty(idStr))
                     return false;
 
-                uint objectId = uint.Parse(idStr);
-                if (objectId != 0)
+                if (!uint.TryParse(idStr, out uint objectId) || objectId != 0)
                     result = DB.World.Query("SELECT guid, id, position_x, position_y, position_z, orientation, map, PhaseId, PhaseGroup, (POW(position_x - '{0}', 2) + POW(position_y - '{1}', 2) + POW(position_z - '{2}', 2)) AS order_ FROM gameobject WHERE map = '{3}' AND id = '{4}' ORDER BY order_ ASC LIMIT 1",
                     player.GetPositionX(), player.GetPositionY(), player.GetPositionZ(), player.GetMapId(), objectId);
                 else
@@ -325,8 +323,7 @@ namespace Game.Chat
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            ulong guidLow = ulong.Parse(id);
-            if (guidLow == 0)
+            if (!ulong.TryParse(id, out ulong guidLow) || guidLow == 0)
                 return false;
 
             GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
@@ -340,15 +337,21 @@ namespace Game.Chat
             float oz = 0.0f, oy = 0.0f, ox = 0.0f;
             if (!orientation.IsEmpty())
             {
-                oz = float.Parse(orientation);
+                if (!float.TryParse(orientation, out oz))
+                    return false;
 
                 orientation = args.NextString();
                 if (!orientation.IsEmpty())
                 {
-                    oy = float.Parse(orientation);
+                    if (!float.TryParse(orientation, out oy))
+                        return false;
+
                     orientation = args.NextString();
                     if (!orientation.IsEmpty())
-                        ox = float.Parse(orientation);
+                    {
+                        if (!float.TryParse(orientation, out ox))
+                            return false;
+                    }
                 }
             }
             else
@@ -392,14 +395,19 @@ namespace Game.Chat
                 if (cValue.IsEmpty())
                     return false;
 
-                ulong guidLow = ulong.Parse(cValue);
+                if (!ulong.TryParse(cValue, out ulong guidLow))
+                    return false;
+
                 GameObjectData data = Global.ObjectMgr.GetGOData(guidLow);
                 if (data == null)
                     return false;
                 entry = data.id;
             }
             else
-                entry = uint.Parse(param1);
+            {
+                if (!uint.TryParse(param1, out entry))
+                    return false;
+            }
 
             GameObjectTemplate gameObjectInfo = Global.ObjectMgr.GetGameObjectTemplate(entry);
             if (gameObjectInfo == null)
@@ -438,12 +446,11 @@ namespace Game.Chat
                     return false;
 
                 // number or [name] Shift-click form |color|Hgameobject_entry:go_id|h[name]|h|r
-                string id = handler.extractKeyFromLink(args, "Hgameobject_entry");
-                if (string.IsNullOrEmpty(id))
+                string idStr = handler.extractKeyFromLink(args, "Hgameobject_entry");
+                if (string.IsNullOrEmpty(idStr))
                     return false;
 
-                uint objectId = uint.Parse(id);
-                if (objectId == 0)
+                if (!uint.TryParse(idStr, out uint objectId) || objectId == 0)
                     return false;
 
                 uint spawntimeSecs = args.NextUInt32();
@@ -573,8 +580,7 @@ namespace Game.Chat
                 if (string.IsNullOrEmpty(id))
                     return false;
 
-                ulong guidLow = ulong.Parse(id);
-                if (guidLow == 0)
+                if (!ulong.TryParse(id, out ulong guidLow) || guidLow == 0)
                     return false;
 
                 GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
@@ -588,7 +594,9 @@ namespace Game.Chat
                 if (string.IsNullOrEmpty(type))
                     return false;
 
-                int objectType = int.Parse(type);
+                if (!int.TryParse(type, out int objectType))
+                    return false;
+
                 if (objectType < 0)
                 {
                     if (objectType == -1)
@@ -602,7 +610,8 @@ namespace Game.Chat
                 if (string.IsNullOrEmpty(state))
                     return false;
 
-                uint objectState = uint.Parse(state);
+                if (!uint.TryParse(state, out uint objectState))
+                    return false;
 
                 if (objectType < 4)
                     obj.SetByteValue(GameObjectFields.Bytes1, (byte)objectType, (byte)objectState);

@@ -252,7 +252,7 @@ namespace Game.Entities
             for (byte i = 0; i < tokens.Length && index < SharedConst.ActionBarIndexEnd; ++i, ++index)
             {
                 ActiveStates type = tokens[i++].ToEnum<ActiveStates>();
-                uint action = uint.Parse(tokens[i]);
+                uint.TryParse(tokens[i], out uint action);
 
                 PetActionBar[index].SetActionAndType(action, type);
 

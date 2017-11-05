@@ -35,8 +35,7 @@ namespace Game.Chat.Commands
             if (string.IsNullOrEmpty(id_p))
                 return false;
 
-            uint id = uint.Parse(id_p);
-            if (id == 0)
+            if (!uint.TryParse(id_p, out uint id) || id == 0)
             {
                 handler.SendSysMessage(CypherStrings.InvalidTitleId, id);
                 return false;
@@ -77,8 +76,7 @@ namespace Game.Chat.Commands
             if (string.IsNullOrEmpty(id_p))
                 return false;
 
-            uint id = uint.Parse(id_p);
-            if (id == 0)
+            if (!uint.TryParse(id_p, out uint id) || id == 0)
             {
                 handler.SendSysMessage(CypherStrings.InvalidTitleId, id);
                 return false;
@@ -120,8 +118,7 @@ namespace Game.Chat.Commands
             if (string.IsNullOrEmpty(id_p))
                 return false;
 
-            uint id = uint.Parse(id_p);
-            if (id == 0)
+            if (!uint.TryParse(id_p, out uint id) || id == 0)
             {
                 handler.SendSysMessage(CypherStrings.InvalidTitleId, id);
                 return false;

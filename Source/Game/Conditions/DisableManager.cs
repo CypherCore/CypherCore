@@ -86,18 +86,25 @@ namespace Game
                             continue;
                         }
 
-                        if (flags.HasAnyFlag<byte>(DisableFlags.SpellMap))
+                        if (flags.HasAnyFlag(DisableFlags.SpellMap))
                         {
                             var array = new StringArray(params_0, ',');
                             for (byte i = 0; i < array.Length;)
-                                data.param0.Add(uint.Parse(array[i++]));
+                            {
+                                if (uint.TryParse(array[i++], out uint id))
+                                    data.param0.Add(id);
+                            }
                         }
 
-                        if (flags.HasAnyFlag<byte>(DisableFlags.SpellArea))
+                        if (flags.HasAnyFlag(DisableFlags.SpellArea))
                         {
                             var array = new StringArray(params_1, ',');
                             for (byte i = 0; i < array.Length;)
-                                data.param1.Add(uint.Parse(array[i++]));
+                            {
+                                if (uint.TryParse(array[i++], out uint id))
+                                    data.param1.Add(id);
+                            }
+                                
                         }
 
                         break;
@@ -121,11 +128,11 @@ namespace Game
                                     break;
                                 case MapTypes.Instance:
                                 case MapTypes.Raid:
-                                    if (flags.HasAnyFlag<byte>(DisableFlags.DungeonStatusHeroic) && Global.DB2Mgr.GetMapDifficultyData(entry, Difficulty.Heroic) == null)
+                                    if (flags.HasAnyFlag(DisableFlags.DungeonStatusHeroic) && Global.DB2Mgr.GetMapDifficultyData(entry, Difficulty.Heroic) == null)
                                         flags -= DisableFlags.DungeonStatusHeroic;
-                                    if (flags.HasAnyFlag<byte>(DisableFlags.DungeonStatusHeroic10Man) && Global.DB2Mgr.GetMapDifficultyData(entry, Difficulty.Raid10HC) == null)
+                                    if (flags.HasAnyFlag(DisableFlags.DungeonStatusHeroic10Man) && Global.DB2Mgr.GetMapDifficultyData(entry, Difficulty.Raid10HC) == null)
                                         flags -= DisableFlags.DungeonStatusHeroic10Man;
-                                    if (flags.HasAnyFlag<byte>(DisableFlags.DungeonStatusHeroic25Man) && Global.DB2Mgr.GetMapDifficultyData(entry, Difficulty.Raid25HC) == null)
+                                    if (flags.HasAnyFlag(DisableFlags.DungeonStatusHeroic25Man) && Global.DB2Mgr.GetMapDifficultyData(entry, Difficulty.Raid25HC) == null)
                                         flags -= DisableFlags.DungeonStatusHeroic25Man;
                                     if (flags == 0)
                                         isFlagInvalid = true;

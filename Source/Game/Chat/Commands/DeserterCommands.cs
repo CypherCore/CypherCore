@@ -74,15 +74,8 @@ namespace Game.Chat.Commands
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
             }
-            string timeStr = args.NextString();
-            if (string.IsNullOrEmpty(timeStr))
-            {
-                handler.SendSysMessage(CypherStrings.BadValue);
-                return false;
-            }
 
-            uint time = uint.Parse(timeStr);
-            if (time == 0)
+            if (!uint.TryParse(args.NextString(), out uint time) || time == 0)
             {
                 handler.SendSysMessage(CypherStrings.BadValue);
                 return false;

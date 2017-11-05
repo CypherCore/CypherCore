@@ -949,7 +949,8 @@ namespace Game.Chat
                 {
                     ip = args.NextString();
                     limitStr = args.NextString();
-                    limit = string.IsNullOrEmpty(limitStr) ? -1 : int.Parse(limitStr);
+                    if (!int.TryParse(limitStr, out limit))
+                        limit = -1;
                 }
 
                 PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BY_IP);
@@ -965,7 +966,8 @@ namespace Game.Chat
 
                 string account = args.NextString();
                 string limitStr = args.NextString();
-                int limit = string.IsNullOrEmpty(limitStr) ? -1 : int.Parse(limitStr);
+                if (!int.TryParse(limitStr, out int limit))
+                    limit = -1;
 
                 PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_LIST_BY_NAME);
                 stmt.AddValue(0, account);
@@ -980,7 +982,8 @@ namespace Game.Chat
 
                 string email = args.NextString();
                 string limitStr = args.NextString();
-                int limit = string.IsNullOrEmpty(limitStr) ? -1 : int.Parse(limitStr);
+                if (!int.TryParse(limitStr, out int limit))
+                    limit = -1;
 
                 PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_LIST_BY_EMAIL);
                 stmt.AddValue(0, email);

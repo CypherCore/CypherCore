@@ -108,8 +108,7 @@ namespace Game.Chat.Commands
                 string itemIdStr = itemStr.NextString(":");
                 string itemCountStr = itemStr.NextString(" ");
 
-                uint itemId = uint.Parse(itemIdStr);
-                if (itemId == 0)
+                if (!uint.TryParse(itemIdStr, out uint itemId) || itemId == 0)
                     return false;
 
                 ItemTemplate item_proto = Global.ObjectMgr.GetItemTemplate(itemId);
@@ -119,7 +118,10 @@ namespace Game.Chat.Commands
                     return false;
                 }
 
-                uint itemCount = !string.IsNullOrEmpty(itemCountStr) ? uint.Parse(itemCountStr) : 1;
+                uint itemCount = 0;
+                if (string.IsNullOrEmpty(itemCountStr) || !uint.TryParse(itemCountStr, out itemCount))
+                    itemCount = 1;
+
                 if (itemCount < 1 || (item_proto.GetMaxCount() > 0 && itemCount > item_proto.GetMaxCount()))
                 {
                     handler.SendSysMessage(CypherStrings.CommandInvalidItemCount, itemCount, itemId);
@@ -194,8 +196,9 @@ namespace Game.Chat.Commands
             if (string.IsNullOrEmpty(text))
                 return false;
 
-            string moneyStr = args.NextString("");
-            long money = !string.IsNullOrEmpty(moneyStr) ? long.Parse(moneyStr) : 0;
+            if (!long.TryParse(args.NextString(""), out long money))
+                money = 0;
+
             if (money <= 0)
                 return false;
 

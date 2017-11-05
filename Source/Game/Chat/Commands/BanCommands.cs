@@ -47,7 +47,8 @@ namespace Game.Chat.Commands
             if (string.IsNullOrEmpty(durationStr))
                 return false;
 
-            uint duration = uint.Parse(durationStr);
+            if (!uint.TryParse(durationStr, out uint duration))
+                return false;
 
             string reasonStr = args.NextString("");
             if (string.IsNullOrEmpty(reasonStr))
@@ -115,9 +116,8 @@ namespace Game.Chat.Commands
             if (string.IsNullOrEmpty(nameOrIP))
                 return false;
 
-            uint duration;
             string durationStr = args.NextString();
-            if (string.IsNullOrEmpty(durationStr) || !uint.TryParse(durationStr, out duration))
+            if (!uint.TryParse(durationStr, out uint duration))
                 return false;
 
             string reasonStr = args.NextString("");
@@ -144,7 +144,7 @@ namespace Game.Chat.Commands
             switch (Global.WorldMgr.BanAccount(mode, nameOrIP, durationStr, reasonStr, author))
             {
                 case BanReturn.Success:
-                    if (uint.Parse(durationStr) > 0)
+                    if (!uint.TryParse(durationStr, out uint tempValue) || tempValue > 0)
                     {
                         if (WorldConfig.GetBoolValue(WorldCfg.ShowBanInWorld))
                             Global.WorldMgr.SendWorldText(CypherStrings.BanAccountYoubannedmessageWorld, author, nameOrIP, Time.secsToTimeString(Time.TimeStringToSecs(durationStr)).ToString(), reasonStr);

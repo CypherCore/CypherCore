@@ -55,18 +55,15 @@ namespace Game.Chat.Commands
                 if (string.IsNullOrEmpty(idStr))
                     return false;
 
-                int entry = int.Parse(idStr);
-                if (entry == 0)
+                if (!int.TryParse(idStr, out int entry) || entry == 0)
                     return false;
 
                 whereClause += "WHERE id = '" + entry + '\'';
             }
             else
             {
-                ulong guidLow = ulong.Parse(param1);
-
                 // Number is invalid - maybe the user specified the mob's name
-                if (guidLow == 0)
+                if (!ulong.TryParse(param1, out ulong guidLow) || guidLow == 0)
                 {
                     string name = param1;
                     whereClause += ", creature_template WHERE creature.id = creature_template.entry AND creature_template.name LIKE '" + name + '\'';
@@ -159,18 +156,18 @@ namespace Game.Chat.Commands
 
             Player player = handler.GetSession().GetPlayer();
 
-            string gridX = args.NextString();
-            string gridY = args.NextString();
-            string id = args.NextString();
-
-            if (string.IsNullOrEmpty(gridX) || string.IsNullOrEmpty(gridY))
+            if (!float.TryParse(args.NextString(), out float gridX))
                 return false;
 
-            uint mapId = !string.IsNullOrEmpty(id) ? uint.Parse(id) : player.GetMapId();
+            if (!float.TryParse(args.NextString(), out float gridY))
+                return false;
+
+            if (!uint.TryParse(args.NextString(), out uint mapId))
+                mapId = player.GetMapId();
 
             // center of grid
-            float x = (float.Parse(gridX) - MapConst.CenterGridId + 0.5f) * MapConst.SizeofGrids;
-            float y = (float.Parse(gridY) - MapConst.CenterGridId + 0.5f) * MapConst.SizeofGrids;
+            float x = (gridX - MapConst.CenterGridId + 0.5f) * MapConst.SizeofGrids;
+            float y = (gridY - MapConst.CenterGridId + 0.5f) * MapConst.SizeofGrids;
 
             if (!GridDefines.IsValidMapCoord(mapId, x, y))
             {
@@ -209,8 +206,7 @@ namespace Game.Chat.Commands
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            ulong guidLow = ulong.Parse(id);
-            if (guidLow == 0)
+            if (!ulong.TryParse(id, out ulong guidLow) || guidLow == 0)
                 return false;
 
             float x, y, z, o;
@@ -264,8 +260,7 @@ namespace Game.Chat.Commands
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            uint questID = uint.Parse(id);
-            if (questID == 0)
+            if (!uint.TryParse(id, out uint questID) || questID == 0)
                 return false;
 
             if (Global.ObjectMgr.GetQuestTemplate(questID) == null)
@@ -328,8 +323,7 @@ namespace Game.Chat.Commands
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            uint nodeId = uint.Parse(id);
-            if (nodeId == 0)
+            if (!uint.TryParse(id, out uint nodeId) || nodeId == 0)
                 return false;
 
             TaxiNodesRecord node = CliDB.TaxiNodesStorage.LookupByKey(nodeId);
@@ -408,25 +402,21 @@ namespace Game.Chat.Commands
 
             Player player = handler.GetSession().GetPlayer();
 
-            string zoneX = args.NextString();
-            string zoneY = args.NextString();
-
-            string id = handler.extractKeyFromLink(args, "Harea");       // string or [name] Shift-click form |color|Harea:area_id|h[name]|h|r
-
-            if (string.IsNullOrEmpty(zoneX) || string.IsNullOrEmpty(zoneY))
+            if (!float.TryParse(args.NextString(), out float x))
                 return false;
 
-            float x = float.Parse(zoneX);
-            float y = float.Parse(zoneY);
+            if (!float.TryParse(args.NextString(),out float y))
+                return false;
 
             // prevent accept wrong numeric args
-            if ((x == 0.0f && zoneX[0] != '0') || (y == 0.0f && zoneY[0] != '0'))
+            if (x == 0.0f || y == 0.0f)
                 return false;
 
-            uint areaId = !string.IsNullOrEmpty(id) ? uint.Parse(id) : player.GetZoneId();
+            string idStr = handler.extractKeyFromLink(args, "Harea");       // string or [name] Shift-click form |color|Harea:area_id|h[name]|h|r
+            if (!uint.TryParse(idStr, out uint areaId))
+                areaId = player.GetZoneId();
 
             AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(areaId);
-
             if (x < 0 || x > 100 || y < 0 || y > 100 || areaEntry == null)
             {
                 handler.SendSysMessage(CypherStrings.InvalidZoneCoord, x, y, areaId);
@@ -478,24 +468,26 @@ namespace Game.Chat.Commands
 
             Player player = handler.GetSession().GetPlayer();
 
-            string goX = args.NextString();
-            string goY = args.NextString();
-            string goZ = args.NextString();
-            string id = args.NextString();
-            string port = args.NextString();
-
-            if (goX.IsEmpty() || goY.IsEmpty())
+            if (!float.TryParse(args.NextString(), out float x))
                 return false;
 
-            float x = float.Parse(goX);
-            float y = float.Parse(goY);
-            float z;
-            float ort = !port.IsEmpty() ? float.Parse(port) : player.GetOrientation();
-            uint mapId = !id.IsEmpty() ? uint.Parse(id) : player.GetMapId();
+            if (!float.TryParse(args.NextString(), out float y))
+                return false;
 
+            string goZ = args.NextString();
+
+            if (!uint.TryParse(args.NextString(), out uint mapId))
+                mapId = player.GetMapId();
+
+            if (!float.TryParse(args.NextString(), out float ort))
+                ort =  player.GetOrientation();
+
+            float z;
             if (!goZ.IsEmpty())
             {
-                z = float.Parse(goZ);
+                if (!float.TryParse(goZ, out z))
+                    return false;
+
                 if (!GridDefines.IsValidMapCoord(mapId, x, y, z))
                 {
                     handler.SendSysMessage(CypherStrings.InvalidTargetCoord, x, y, mapId);

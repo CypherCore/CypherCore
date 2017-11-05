@@ -3125,7 +3125,10 @@ namespace Game
 
                     var bonusListIDsTok = new StringArray(result.Read<string>(6), ' ');
                     foreach (string token in bonusListIDsTok)
-                        vItem.BonusListIDs.Add(uint.Parse(token));
+                    {
+                        if (uint.TryParse(token, out uint id))
+                            vItem.BonusListIDs.Add(id);
+                    }
 
                     if (!IsVendorItemValid(entry, vItem, null, skipvendors))
                         continue;
@@ -3171,7 +3174,10 @@ namespace Game
 
                     var bonusListIDsTok = new StringArray(result.Read<string>(5), ' ');
                     foreach (string token in bonusListIDsTok)
-                        vItem.BonusListIDs.Add(uint.Parse(token));
+                    {
+                        if (uint.TryParse(token, out uint id))
+                            vItem.BonusListIDs.Add(id);
+                    }
 
                     if (!IsVendorItemValid((uint)vendor, vItem, null, skip_vendors))
                         continue;

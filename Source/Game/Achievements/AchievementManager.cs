@@ -720,7 +720,10 @@ namespace Game.Achievements
                     ca.Date = achievementResult.Read<uint>(1);
                     var guids = new StringArray(achievementResult.Read<string>(2), ' ');
                     for (int i = 0; i < guids.Length; ++i)
-                        ca.CompletingPlayers.Add(ObjectGuid.Create(HighGuid.Player, ulong.Parse(guids[i])));
+                    {
+                        if (ulong.TryParse(guids[i], out ulong guid))
+                            ca.CompletingPlayers.Add(ObjectGuid.Create(HighGuid.Player, guid));
+                    }
 
                     ca.Changed = false;
 

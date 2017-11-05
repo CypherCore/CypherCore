@@ -67,11 +67,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string sceneIdStr = args.NextString();
-            if (sceneIdStr.IsEmpty())
-                return false;
-
-            uint sceneId = uint.Parse(sceneIdStr);
+            uint sceneId = args.NextUInt32();
             Player target = handler.getSelectedPlayerOrSelf();
             if (!target)
             {
@@ -92,16 +88,11 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string scenePackageIdStr = args.NextString();
-            string flagsStr = args.NextString("");
+            uint scenePackageId = args.NextUInt32();
+            if (!uint.TryParse(args.NextString(""), out uint flags))
+                flags = (uint)SceneFlags.Unk16;
 
-            if (scenePackageIdStr.IsEmpty())
-                return false;
-
-            uint scenePackageId = uint.Parse(scenePackageIdStr);
-            uint flags = !flagsStr.IsEmpty() ? uint.Parse(flagsStr) : (uint)SceneFlags.Unk16;
             Player target = handler.getSelectedPlayerOrSelf();
-
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);

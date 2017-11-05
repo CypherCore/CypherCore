@@ -1054,8 +1054,11 @@ namespace Game.Entities
 
             for (var index = 0; index < count; ++index)
             {
-                UpdateData[(int)startOffset + index] = uint.Parse(lines[index]);
-                _changesMask.Set((int)(startOffset + index), true);
+                if (uint.TryParse(lines[index], out uint value))
+                {
+                    UpdateData[(int)startOffset + index] = value;
+                    _changesMask.Set((int)(startOffset + index), true);
+                }
             }
         }
 

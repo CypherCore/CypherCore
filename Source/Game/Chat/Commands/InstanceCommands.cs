@@ -81,17 +81,15 @@ namespace Game.Chat
                 player = handler.GetSession().GetPlayer();
 
             string map = args.NextString();
-            string pDiff = args.NextString();
-            sbyte diff = -1;
-            if (string.IsNullOrEmpty(pDiff))
-                diff = sbyte.Parse(pDiff);
+            if (!sbyte.TryParse(args.NextString(), out sbyte diff))
+                diff = -1;
+
             ushort counter = 0;
             ushort MapId = 0;
 
             if (map != "all")
             {
-                MapId = ushort.Parse(map);
-                if (MapId == 0)
+                if (!ushort.TryParse(map, out MapId) || MapId == 0)
                     return false;
             }
 
@@ -159,8 +157,6 @@ namespace Game.Chat
             string param1 = args.NextString();
             string param2 = args.NextString();
             string param3 = args.NextString();
-            uint encounterId = 0;
-            EncounterState state = 0;
             Player player = null;
 
             // Character name must be provided when using this from console.
@@ -197,8 +193,12 @@ namespace Game.Chat
                 return false;
             }
 
-            encounterId = uint.Parse(param1);
-            state = (EncounterState)int.Parse(param2);
+            if (!uint.TryParse(param1, out uint encounterId))
+                return false;
+
+            EncounterState state = EncounterState.NotStarted;
+            if (int.TryParse(param2, out int param2Value))
+                state = (EncounterState)param2Value;
 
             // Reject improper values.
             if (state > EncounterState.ToBeDecided || encounterId > map.GetInstanceScript().GetEncounterCount())
@@ -257,7 +257,8 @@ namespace Game.Chat
                 return false;
             }
 
-            encounterId = uint.Parse(param1);
+            if (!uint.TryParse(param1, out encounterId))
+                return false;
 
             if (encounterId > map.GetInstanceScript().GetEncounterCount())
             {

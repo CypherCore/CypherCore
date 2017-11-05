@@ -216,7 +216,9 @@ namespace Game.Chat
                 return false;
 
             int oldlevel = (int)(target ? target.getLevel() : Player.GetLevelFromDB(targetGuid));
-            int newlevel = !string.IsNullOrEmpty(levelStr) ? int.Parse(levelStr) : oldlevel;
+
+            if (!int.TryParse(levelStr, out int newlevel))
+                newlevel = oldlevel;
 
             if (newlevel < 1)
                 return false;                                       // invalid level
@@ -520,8 +522,7 @@ namespace Game.Chat
                     if (!daysStr.IsNumber())
                         return false;
 
-                    keepDays = int.Parse(daysStr);
-                    if (keepDays < 0)
+                    if (!int.TryParse(daysStr, out keepDays) || keepDays < 0)
                         return false;
                 }
                 // config option value 0 -> disabled and can't be used
@@ -542,8 +543,11 @@ namespace Game.Chat
                     // search by GUID
                     if (searchString.IsNumber())
                     {
+                        if (!ulong.TryParse(searchString, out ulong guid))
+                            return false;
+
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_DEL_INFO_BY_GUID);
-                        stmt.AddValue(0, ulong.Parse(searchString));
+                        stmt.AddValue(0, guid);
                         result = DB.Characters.Query(stmt);
                     }
                     // search by name
@@ -671,9 +675,10 @@ namespace Game.Chat
                 return false;
 
             int oldlevel = (int)(target ? target.getLevel() : Player.GetLevelFromDB(targetGuid));
-            int addlevel = !string.IsNullOrEmpty(levelStr) ? int.Parse(levelStr) : 1;
-            int newlevel = oldlevel + addlevel;
+            if (!int.TryParse(levelStr, out int addlevel))
+                addlevel = 1;
 
+            int newlevel = oldlevel + addlevel;
             if (newlevel < 1)
                 newlevel = 1;
 

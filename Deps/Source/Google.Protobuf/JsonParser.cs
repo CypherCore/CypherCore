@@ -884,8 +884,8 @@ namespace Google.Protobuf
                 if (subseconds != "")
                 {
                     // This should always work, as we've got 1-9 digits.
-                    int parsedFraction = int.Parse(subseconds.Substring(1));
-                    nanos = parsedFraction * SubsecondScalingFactors[subseconds.Length] * multiplier;
+                    if (int.TryParse(subseconds.Substring(1), out int parsedFraction))
+                        nanos = parsedFraction * SubsecondScalingFactors[subseconds.Length] * multiplier;
                 }
                 if (!Duration.IsNormalized(seconds, nanos))
                 {

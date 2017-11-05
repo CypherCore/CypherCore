@@ -30,18 +30,16 @@ namespace Game.Chat.Commands
         {
             static bool HandleAddDisables(StringArguments args, CommandHandler handler, DisableType disableType)
             {
-                string entryStr = args.NextString();
-                if (string.IsNullOrEmpty(entryStr) || int.Parse(entryStr) == 0)
+                uint entry = args.NextUInt32();
+                if (entry == 0)
                     return false;
 
                 string flagsStr = args.NextString();
-                uint flags = !string.IsNullOrEmpty(flagsStr) ? byte.Parse(flagsStr) : 0u;
+                uint flags = args.NextUInt32();
 
                 string disableComment = args.NextString("");
                 if (string.IsNullOrEmpty(disableComment))
                     return false;
-
-                uint entry = uint.Parse(entryStr);
 
                 string disableTypeStr = "";
                 switch (disableType)
@@ -230,11 +228,8 @@ namespace Game.Chat.Commands
         {
             static bool HandleRemoveDisables(StringArguments args, CommandHandler handler, DisableType disableType)
             {
-                string entryStr = args.NextString();
-                if (string.IsNullOrEmpty(entryStr) || uint.Parse(entryStr) == 0)
+                if (!uint.TryParse(args.NextString(), out uint entry) || entry == 0)
                     return false;
-
-                uint entry = uint.Parse(entryStr);
 
                 string disableTypeStr = "";
                 switch (disableType)

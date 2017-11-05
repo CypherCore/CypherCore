@@ -180,8 +180,7 @@ namespace Game.Chat
             if (string.IsNullOrEmpty(idStr))
                 return false;
 
-            uint teamId = uint.Parse(idStr);
-            if (teamId == 0)
+            if (!uint.TryParse(idStr, out uint teamId) || teamId == 0)
                 return false;
 
             Player target;

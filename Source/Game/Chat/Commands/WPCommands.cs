@@ -57,7 +57,10 @@ namespace Game.Chat.Commands
                 }
             }
             else
-                pathid = uint.Parse(path_number);
+            {
+                if (!uint.TryParse(path_number, out pathid))
+                    return false;
+            }
 
             // path_id . ID of the Path
             // point   . number of the waypoint (if not 0)
@@ -107,8 +110,8 @@ namespace Game.Chat.Commands
             uint id = 0;
             if (show == "add")
             {
-                if (!string.IsNullOrEmpty(arg_id))
-                    id = uint.Parse(arg_id);
+                if (!uint.TryParse(arg_id, out id))
+                    id = 0;
 
                 if (id != 0)
                 {
@@ -151,7 +154,8 @@ namespace Game.Chat.Commands
                     return true;
                 }
 
-                id = uint.Parse(arg_id);
+                if (!uint.TryParse(arg_id, out id))
+                    return false;
 
                 uint a2, a3, a4, a5, a6;
                 float a8, a9, a10, a11;
@@ -195,7 +199,8 @@ namespace Game.Chat.Commands
                     return true;
                 }
 
-                id = uint.Parse(arg_id);
+                if (!uint.TryParse(arg_id, out id))
+                    return false;
 
                 stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_SCRIPT_ID_BY_GUID);
                 stmt.AddValue(0, id);
@@ -223,9 +228,7 @@ namespace Game.Chat.Commands
                     return true;
                 }
 
-                id = uint.Parse(arg_id);
-
-                if (id == 0)
+                if (!uint.TryParse(arg_id, out id) || id == 0)
                 {
                     handler.SendSysMessage("|cffff33ffERROR: No valid waypoint script id not present.|r");
                     return true;
@@ -255,7 +258,8 @@ namespace Game.Chat.Commands
 
                 if (arg_string == "setid")
                 {
-                    uint newid = uint.Parse(arg_3);
+                    if (!uint.TryParse(arg_3, out uint newid))
+                        return false;
                     handler.SendSysMessage("|cff00ff00Wp Event: Waypoint script guid: {0}|r|cff00ffff id changed: |r|cff00ff00{1}|r", newid, id);
 
                     stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_ID);
@@ -280,8 +284,11 @@ namespace Game.Chat.Commands
 
                     if (arg_string == "posx")
                     {
+                        if (!float.TryParse(arg_3, out float arg3))
+                            return false;
+
                         stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_X);
-                        stmt.AddValue(0, float.Parse(arg_3));
+                        stmt.AddValue(0, arg3);
                         stmt.AddValue(1, id);
                         DB.World.Execute(stmt);
 
@@ -290,8 +297,11 @@ namespace Game.Chat.Commands
                     }
                     else if (arg_string == "posy")
                     {
+                        if (!float.TryParse(arg_3, out float arg3))
+                            return false;
+
                         stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_Y);
-                        stmt.AddValue(0, float.Parse(arg_3));
+                        stmt.AddValue(0, arg3);
                         stmt.AddValue(1, id);
                         DB.World.Execute(stmt);
 
@@ -300,8 +310,11 @@ namespace Game.Chat.Commands
                     }
                     else if (arg_string == "posz")
                     {
+                        if (!float.TryParse(arg_3, out float arg3))
+                            return false;
+
                         stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_Z);
-                        stmt.AddValue(0, float.Parse(arg_3));
+                        stmt.AddValue(0, args);
                         stmt.AddValue(1, id);
                         DB.World.Execute(stmt);
 
@@ -310,8 +323,11 @@ namespace Game.Chat.Commands
                     }
                     else if (arg_string == "orientation")
                     {
+                        if (!float.TryParse(arg_3, out float arg3))
+                            return false;
+
                         stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_O);
-                        stmt.AddValue(0, float.Parse(arg_3));
+                        stmt.AddValue(0, arg3);
                         stmt.AddValue(1, id);
                         DB.World.Execute(stmt);
 
@@ -320,7 +336,10 @@ namespace Game.Chat.Commands
                     }
                     else if (arg_string == "dataint")
                     {
-                        DB.World.Execute("UPDATE waypoint_scripts SET {0}='{1}' WHERE guid='{2}'", arg_string, uint.Parse(arg_3), id); // Query can't be a prepared statement
+                        if (!uint.TryParse(arg_3, out uint arg3))
+                            return false;
+
+                        DB.World.Execute("UPDATE waypoint_scripts SET {0}='{1}' WHERE guid='{2}'", arg_string, arg3, id); // Query can't be a prepared statement
 
                         handler.SendSysMessage("|cff00ff00Waypoint script: |r|cff00ffff{0}|r|cff00ff00 dataint updated.|r", id);
                         return true;
@@ -364,8 +383,7 @@ namespace Game.Chat.Commands
                 return false;
             }
 
-            pathid = uint.Parse(path_number);
-            if (pathid == 0)
+            if (!uint.TryParse(path_number, out pathid) || pathid == 0)
             {
                 handler.SendSysMessage("|cffff33ffNo valid path number provided.|r");
                 return true;
@@ -624,7 +642,8 @@ namespace Game.Chat.Commands
                 if (target)
                     handler.SendSysMessage(CypherStrings.WaypointCreatselected);
 
-                pathid = uint.Parse(guid_str);
+                if (!uint.TryParse(guid_str, out pathid))
+                    return false;
             }
 
             // Show info for the selected waypoint

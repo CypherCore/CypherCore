@@ -494,7 +494,9 @@ namespace Game.Chat
                     handler.HasLowerSecurityAccount(null, accountId, true))
                     return false;
 
-                byte expansion = byte.Parse(exp); //get int anyway (0 if error)
+                if (!byte.TryParse(exp, out byte expansion))
+                    return false;
+
                 if (expansion > WorldConfig.GetIntValue(WorldCfg.Expansion))
                     return false;
 
@@ -548,7 +550,9 @@ namespace Game.Chat
                 }
 
                 // Check for invalid specified GM level.
-                gm = isAccountNameGiven ? uint.Parse(arg2) : uint.Parse(arg1);
+                if (!uint.TryParse(isAccountNameGiven ? arg2 : arg1, out gm))
+                    return false;
+
                 if (gm > (uint)AccountTypes.Console)
                 {
                     handler.SendSysMessage(CypherStrings.BadValue);
@@ -557,7 +561,9 @@ namespace Game.Chat
 
                 // command.getSession() == NULL only for console
                 targetAccountId = (isAccountNameGiven) ? Global.AccountMgr.GetId(targetAccountName) : handler.getSelectedPlayer().GetSession().GetAccountId();
-                int gmRealmID = (isAccountNameGiven) ? int.Parse(arg3) : int.Parse(arg2);
+                if (int.TryParse(isAccountNameGiven ? arg3 : arg2, out int gmRealmID))
+                    return false;
+
                 AccountTypes playerSecurity;
                 if (handler.GetSession() != null)
                     playerSecurity = Global.AccountMgr.GetSecurity(handler.GetSession().GetAccountId(), gmRealmID);

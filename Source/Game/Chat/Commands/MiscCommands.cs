@@ -294,11 +294,11 @@ namespace Game.Chat
             }
             else                                                    // item_id or [name] Shift-click form |color|Hitem:item_id:0:0:0|h[name]|h|r
             {
-                string id = handler.extractKeyFromLink(args, "Hitem");
-                if (string.IsNullOrEmpty(id))
+                string idStr = handler.extractKeyFromLink(args, "Hitem");
+                if (string.IsNullOrEmpty(idStr))
                     return false;
 
-                if (!uint.TryParse(id, out itemId))
+                if (!uint.TryParse(idStr, out itemId))
                     return false;
             }
 
@@ -314,7 +314,11 @@ namespace Game.Chat
             {
                 var tokens = new StringArray(bonuses, ';');
                 for (var i = 0; i < tokens.Length; ++i)
-                    bonusListIDs.Add(uint.Parse(tokens[i]));
+                {
+                    if (uint.TryParse(tokens[i], out uint id))
+                        bonusListIDs.Add(id);
+                }
+
             }
 
             Player player = handler.GetSession().GetPlayer();
@@ -386,14 +390,12 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string id = handler.extractKeyFromLink(args, "Hitemset"); // number or [name] Shift-click form |color|Hitemset:itemset_id|h[name]|h|r
-            if (string.IsNullOrEmpty(id))
+            string idStr = handler.extractKeyFromLink(args, "Hitemset"); // number or [name] Shift-click form |color|Hitemset:itemset_id|h[name]|h|r
+            if (string.IsNullOrEmpty(idStr))
                 return false;
 
-            uint itemSetId = uint.Parse(id);
-
             // prevent generation all items with itemset field value '0'
-            if (itemSetId == 0)
+            if (!uint.TryParse(idStr, out uint itemSetId) || itemSetId == 0)
             {
                 handler.SendSysMessage(CypherStrings.NoItemsFromItemsetFound, itemSetId);
                 return false;
@@ -407,7 +409,10 @@ namespace Game.Chat
             {
                 var tokens = new StringArray(bonuses, ';');
                 for (var i = 0; i < tokens.Length; ++i)
-                    bonusListIDs.Add(uint.Parse(tokens[i]));
+                {
+                    if (uint.TryParse(tokens[i], out uint id))
+                        bonusListIDs.Add(id);
+                }
             }
 
             Player player = handler.GetSession().GetPlayer();
@@ -1263,15 +1268,14 @@ namespace Game.Chat
                 return false;
             }
 
-            // *Change the weather of a cell
-            string px = args.NextString();
-            string py = args.NextString();
-
-            if (string.IsNullOrEmpty(px) || string.IsNullOrEmpty(py))
-                return false;
-
-            uint type = uint.Parse(px);                         //0 to 3, 0: fine, 1: rain, 2: snow, 3: sand
-            float grade = float.Parse(py);                          //0 to 1, sending -1 is instand good weather
+            // *Change the weather of a cell            
+            //0 to 3, 0: fine, 1: rain, 2: snow, 3: sand
+            if (!uint.TryParse(args.NextString(), out uint type))
+                return false; 
+            
+            //0 to 1, sending -1 is instand good weather
+            if (!float.TryParse(args.NextString(), out float grade))
+                return false;                       
 
             Player player = handler.GetSession().GetPlayer();
             uint zoneid = player.GetZoneId();
@@ -1694,7 +1698,8 @@ namespace Game.Chat
                     target = session.GetPlayer();
             }
 
-            uint notSpeakTime = uint.Parse(delayStr);
+            if (!uint.TryParse(delayStr, out uint notSpeakTime))
+                return false;
 
             // must have strong lesser security level
             if (handler.HasLowerSecurity(target, targetGuid, true))
@@ -2024,7 +2029,9 @@ namespace Game.Chat
             if (!target.IsAlive())
                 return true;
 
-            int damage_int = int.Parse(str);
+            if (!int.TryParse(str, out int damage_int))
+                return false;
+            
             if (damage_int <= 0)
                 return true;
 
@@ -2041,8 +2048,7 @@ namespace Game.Chat
                 return true;
             }
 
-            int school = int.Parse(schoolStr);
-            if (school >= (int)SpellSchools.Max)
+            if (!int.TryParse(schoolStr, out int school) || school >= (int)SpellSchools.Max)
                 return false;
 
             SpellSchoolMask schoolmask = (SpellSchoolMask)(1 << school);
@@ -2165,7 +2171,8 @@ namespace Game.Chat
                     {
                         // case 2: .freeze duration
                         // We have a selected player. We'll check him later
-                        freezeDuration = int.Parse(arg1);
+                        if (!int.TryParse(arg1, out freezeDuration))
+                            return false;
                         canApplyFreeze = true;
                     }
                     else
@@ -2178,7 +2185,8 @@ namespace Game.Chat
                         // Check if we have duration set
                         if (!arg2.IsEmpty() && arg2.IsNumber())
                         {
-                            freezeDuration = int.Parse(arg2);
+                            if (!int.TryParse(arg2, out freezeDuration))
+                                return false;
                             canApplyFreeze = true;
                         }
                         else
@@ -2441,8 +2449,7 @@ namespace Game.Chat
             if (string.IsNullOrEmpty(idStr))
                 return false;
 
-            uint achievementId = uint.Parse(idStr);
-            if (achievementId == 0)
+            if (!uint.TryParse(idStr, out uint achievementId) || achievementId == 0)
                 return false;
 
             Player target = handler.getSelectedPlayer();

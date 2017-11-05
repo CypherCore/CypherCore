@@ -138,7 +138,9 @@ namespace Game.Chat
             if (!targetGuild)
                 return false;
 
-            byte newRank = byte.Parse(rankStr);
+            if (!byte.TryParse(rankStr, out byte newRank))
+                return false;
+
             return targetGuild.ChangeMemberRank(targetGuid, newRank);
         }
 

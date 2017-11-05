@@ -1977,7 +1977,10 @@ namespace Game
                         }
 
                         for (int index = 0; index < ktcount; ++index)
-                            knownTitles[index] = uint.Parse(tokens[index]);
+                        {
+                            if (uint.TryParse(tokens[index], out uint id))
+                                knownTitles[index] = id;
+                        }
 
                         foreach (var it in Global.ObjectMgr.FactionChangeTitles)
                         {

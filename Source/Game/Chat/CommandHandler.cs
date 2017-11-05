@@ -73,12 +73,14 @@ namespace Game.Chat
 
         public bool ExecuteCommandInTable(List<ChatCommand> table, string text, string fullcmd)
         {
-            string oldtext = text;
             StringArguments args = new StringArguments(text);
             string cmd = args.NextString();
 
             foreach (var command in table)
             {
+                //if (!command.Name.Equals(cmd))
+                    //continue;
+
                 if (!hasStringAbbr(command.Name, cmd))
                     continue;
 
@@ -102,9 +104,9 @@ namespace Game.Chat
 
                 if (!command.ChildCommands.Empty())
                 {
-                    if (!ExecuteCommandInTable(command.ChildCommands, args.NextString(""), fullcmd))
+                    string arg = args.NextString("");
+                    if (!ExecuteCommandInTable(command.ChildCommands, arg, fullcmd))
                     {
-                        string arg = args.NextString("");
                         if (!arg.IsEmpty())
                             SendSysMessage(CypherStrings.NoSubcmd);
                         else
@@ -121,7 +123,7 @@ namespace Game.Chat
                     continue;
 
                 _sentErrorMessage = false;
-                if (command.Handler(new StringArguments(!command.Name.IsEmpty() ? args.NextString("") : oldtext), this))
+                if (command.Handler(new StringArguments(!command.Name.IsEmpty() ? args.NextString("") : text), this))
                 {
                     if (GetSession() == null) // ignore console
                         return true;
@@ -343,8 +345,7 @@ namespace Game.Chat
             if (string.IsNullOrEmpty(cId))
                 return null;
 
-            uint id;
-            if (!uint.TryParse(cId, out id))
+            if (!uint.TryParse(cId, out uint id))
                 return null;
 
             return Global.ObjectMgr.GetGameTele(id);
@@ -460,13 +461,15 @@ namespace Game.Chat
                 case 1:
                     {
                         guidHigh = HighGuid.Creature;
-                        ulong lowguid = ulong.Parse(idS);
+                        if (!ulong.TryParse(idS, out ulong lowguid))
+                            return 0;
                         return lowguid;
                     }
                 case 2:
                     {
                         guidHigh = HighGuid.GameObject;
-                        ulong lowguid = ulong.Parse(idS);
+                        if (!ulong.TryParse(idS, out ulong lowguid))
+                            return 0;
                         return lowguid;
                     }
             }
@@ -491,12 +494,13 @@ namespace Game.Chat
             // number or [name] Shift-click form |color|Htalent:talent_id, rank|h[name]|h|r
             // number or [name] Shift-click form |color|Htrade:spell_id, skill_id, max_value, cur_value|h[name]|h|r
             int type = 0;
-            string param1_str = null;
-            string idS = extractKeyFromLink(args, spellKeys, out type, out param1_str);
+            string param1Str = null;
+            string idS = extractKeyFromLink(args, spellKeys, out type, out param1Str);
             if (string.IsNullOrEmpty(idS))
                 return 0;
 
-            uint id = uint.Parse(idS);
+            if (!uint.TryParse(idS, out uint id))
+                return 0;               
 
             switch (type)
             {
@@ -516,7 +520,8 @@ namespace Game.Chat
                     return id;
                 case 4:
                     {
-                        uint glyph_prop_id = !string.IsNullOrEmpty(param1_str) ? uint.Parse(param1_str) : 0;
+                        if (!uint.TryParse(param1Str, out uint glyph_prop_id))
+                            glyph_prop_id = 0;
 
                         GlyphPropertiesRecord glyphPropEntry = CliDB.GlyphPropertiesStorage.LookupByKey(glyph_prop_id);
                         if (glyphPropEntry == null)

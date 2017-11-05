@@ -44,10 +44,8 @@ namespace Game.Chat.Commands
                 return false;
             }
 
-            string createGameAccountParam = args.NextString();
-            bool createGameAccount = true;
-            if (!string.IsNullOrEmpty(createGameAccountParam))
-                createGameAccount = bool.Parse(createGameAccountParam);
+            if (!bool.TryParse(args.NextString(), out bool createGameAccount))
+                createGameAccount = true;
 
             string gameAccountName;
             switch (Global.BNetAccountMgr.CreateBattlenetAccount(accountName, password, createGameAccount, out gameAccountName))

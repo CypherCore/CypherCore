@@ -91,7 +91,8 @@ namespace Game.Chat
             string fill_str = args.NextString();
             string duration_str = args.NextString();
 
-            int duration = duration_str.IsEmpty() ? int.Parse(duration_str) : -1;
+            if (!int.TryParse(duration_str, out int duration))
+                duration = -1;
             if (duration <= 0 || duration >= 30 * Time.Minute) // arbitary upper limit
                 duration = 3 * Time.Minute;
 
@@ -110,14 +111,11 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string conversationEntryStr = args.NextString();
-
-            if (conversationEntryStr.IsEmpty())
+            uint conversationEntry = args.NextUInt32();
+            if (conversationEntry == 0)
                 return false;
 
-            uint conversationEntry = uint.Parse(conversationEntryStr);
             Player target = handler.getSelectedPlayerOrSelf();
-
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
@@ -137,14 +135,9 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string i = args.NextString();
-            if (string.IsNullOrEmpty(i))
-                return false;
-
-            string j = args.NextString();
-
-            uint entry = uint.Parse(i);
-            sbyte seatId = !string.IsNullOrEmpty(j) ? sbyte.Parse(j) : (sbyte)-1;
+            uint entry = args.NextUInt32();
+            if (!sbyte.TryParse(args.NextString(), out sbyte seatId))
+                seatId = -1;
 
             if (entry == 0)
                 handler.GetSession().GetPlayer().EnterVehicle(target, seatId);
@@ -448,24 +441,20 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string e = args.NextString();
-            string f = args.NextString();
-
-            if (string.IsNullOrEmpty(e) || string.IsNullOrEmpty(f))
+            if (!ulong.TryParse(args.NextString(), out ulong guid))
                 return false;
 
-            ulong guid = ulong.Parse(e);
-            uint index = uint.Parse(f);
-
-            Item i = handler.GetSession().GetPlayer().GetItemByGuid(ObjectGuid.Create(HighGuid.Item, guid));
-
-            if (!i)
+            if (!uint.TryParse(args.NextString(), out uint index))
                 return false;
 
-            if (index >= i.valuesCount)
+            Item item = handler.GetSession().GetPlayer().GetItemByGuid(ObjectGuid.Create(HighGuid.Item, guid));
+            if (!item)
                 return false;
 
-            uint value = i.GetUInt32Value(index);
+            if (index >= item.valuesCount)
+                return false;
+
+            uint value = item.GetUInt32Value(index);
 
             handler.SendSysMessage("Item {0}: value at {1} is {2}", guid, index, value);
 
@@ -478,42 +467,41 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string x = args.NextString();
-            string z = args.NextString();
+            string fieldStr = args.NextString();
+            string valueStr = args.NextString();
 
-            if (string.IsNullOrEmpty(x))
+            if (string.IsNullOrEmpty(fieldStr))
                 return false;
 
             Unit target = handler.getSelectedUnit();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
-
                 return false;
             }
+
+            if (!uint.TryParse(fieldStr, out uint field))
+                return false;
 
             ObjectGuid guid = target.GetGUID();
-
-            uint opcode = uint.Parse(x);
-            if (opcode >= target.valuesCount)
+            if (field >= target.valuesCount)
             {
-                handler.SendSysMessage(CypherStrings.TooBigIndex, opcode, guid.ToString(), target.valuesCount);
+                handler.SendSysMessage(CypherStrings.TooBigIndex, field, guid.ToString(), target.valuesCount);
                 return false;
             }
 
-            bool isInt32 = true;
-            if (!string.IsNullOrEmpty(z))
-                isInt32 = bool.Parse(z);
+            if (!bool.TryParse(valueStr, out bool isInt32))
+                isInt32 = true;
 
             if (isInt32)
             {
-                uint value = target.GetUInt32Value(opcode);
-                handler.SendSysMessage(CypherStrings.GetUintField, guid.ToString(), opcode, value);
+                uint value = target.GetUInt32Value(field);
+                handler.SendSysMessage(CypherStrings.GetUintField, guid.ToString(), field, value);
             }
             else
             {
-                float value = target.GetFloatValue(opcode);
-                handler.SendSysMessage(CypherStrings.GetFloatField, guid.ToString(), opcode, value);
+                float value = target.GetFloatValue(field);
+                handler.SendSysMessage(CypherStrings.GetFloatField, guid.ToString(), field, value);
             }
 
             return true;
@@ -548,19 +536,15 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string e = args.NextString();
-            if (string.IsNullOrEmpty(e))
+            if (!ulong.TryParse(args.NextString(), out ulong guid))
                 return false;
 
-            ulong guid = ulong.Parse(e);
-
-            Item i = handler.GetSession().GetPlayer().GetItemByGuid(ObjectGuid.Create(HighGuid.Item, guid));
-
-            if (!i)
+            Item item = handler.GetSession().GetPlayer().GetItemByGuid(ObjectGuid.Create(HighGuid.Item, guid));
+            if (!item)
                 return false;
 
-            handler.GetSession().GetPlayer().DestroyItem(i.GetBagSlot(), i.GetSlot(), true);
-            Global.ScriptMgr.OnItemExpire(handler.GetSession().GetPlayer(), i.GetTemplate());
+            handler.GetSession().GetPlayer().DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
+            Global.ScriptMgr.OnItemExpire(handler.GetSession().GetPlayer(), item.GetTemplate());
 
             return true;
         }
@@ -592,27 +576,21 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string x = args.NextString();
-            string y = args.NextString();
+            uint field = args.NextUInt32();
+            int value = args.NextInt32();
 
-            if (string.IsNullOrEmpty(x) || string.IsNullOrEmpty(y))
-                return false;
-
-            uint opcode = uint.Parse(x);
-            int value = int.Parse(y);
-
-            if (opcode >= handler.GetSession().GetPlayer().valuesCount)
+            if (field >= handler.GetSession().GetPlayer().valuesCount)
             {
-                handler.SendSysMessage(CypherStrings.TooBigIndex, opcode, handler.GetSession().GetPlayer().GetGUID().ToString(), handler.GetSession().GetPlayer().valuesCount);
+                handler.SendSysMessage(CypherStrings.TooBigIndex, field, handler.GetSession().GetPlayer().GetGUID().ToString(), handler.GetSession().GetPlayer().valuesCount);
                 return false;
             }
 
-            uint currentValue = handler.GetSession().GetPlayer().GetUInt32Value(opcode);
+            uint currentValue = handler.GetSession().GetPlayer().GetUInt32Value(field);
 
             currentValue += (uint)value;
-            handler.GetSession().GetPlayer().SetUInt32Value(opcode, currentValue);
+            handler.GetSession().GetPlayer().SetUInt32Value(field, currentValue);
 
-            handler.SendSysMessage(CypherStrings.Change32bitField, opcode, currentValue);
+            handler.SendSysMessage(CypherStrings.Change32bitField, field, currentValue);
 
             return true;
         }
@@ -637,14 +615,16 @@ namespace Game.Chat
 
                 string mask2 = args.NextString(" \n");
 
-                uint moveFlags = uint.Parse(mask1);
+                if (!uint.TryParse(mask1, out uint moveFlags))
+                    return false;
                 target.SetUnitMovementFlags((MovementFlag)moveFlags);
 
                 /// @fixme: port master's HandleDebugMoveflagsCommand; flags need different handling
 
                 if (!string.IsNullOrEmpty(mask2))
                 {
-                    uint moveFlagsExtra = uint.Parse(mask2);
+                    if (!uint.TryParse(mask2, out uint moveFlagsExtra))
+                        return false;
                     target.SetUnitMovementFlags2((MovementFlag2)moveFlagsExtra);
                 }
 
@@ -771,15 +751,15 @@ namespace Game.Chat
            string map_str = args.NextString();
             string difficulty_str = args.NextString();
 
-            int map = !map_str.IsEmpty() ? int.Parse(map_str) : -1;
-            if (map <= 0)
+            if (!int.TryParse(map_str, out int map) || map <= 0)
                 return false;
 
             MapRecord mEntry = CliDB.MapStorage.LookupByKey(map);
             if (mEntry == null || !mEntry.IsRaid())
                 return false;
 
-            int difficulty = !difficulty_str.IsEmpty() ? int.Parse(difficulty_str) : -1;
+            if (!int.TryParse(difficulty_str, out int difficulty))
+                difficulty = -1;
             if (difficulty >= (int)Difficulty.Max || difficulty < -1)
                 return false;
 
@@ -838,21 +818,15 @@ namespace Game.Chat
                 return false;
             }
 
-            string x = args.NextString();
-            string y = args.NextString();
-
-            if (string.IsNullOrEmpty(x) || string.IsNullOrEmpty(y))
-                return false;
-
-            uint opcode = uint.Parse(x);
-            uint val = uint.Parse(y);
+            uint field = args.NextUInt32();
+            uint val = args.NextUInt32();
             if (val > 32)                                         //uint = 32 bits
                 return false;
 
             uint value = (uint)(val != 0 ? 1 << ((int)val - 1) : 0);
-            target.SetUInt32Value(opcode, value);
+            target.SetUInt32Value(field, value);
 
-            handler.SendSysMessage(CypherStrings.Set32bitField, opcode, value);
+            handler.SendSysMessage(CypherStrings.Set32bitField, field, value);
             return true;
         }
 
@@ -862,27 +836,23 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string e = args.NextString();
-            string f = args.NextString();
-            string g = args.NextString();
-
-            if (string.IsNullOrEmpty(e) || string.IsNullOrEmpty(f) || string.IsNullOrEmpty(g))
+            if (!ulong.TryParse(args.NextString(), out ulong guid))
                 return false;
 
-            ulong guid = ulong.Parse(e);
-            uint index = uint.Parse(f);
-            uint value = uint.Parse(g);
-
-            Item i = handler.GetSession().GetPlayer().GetItemByGuid(ObjectGuid.Create(HighGuid.Item, guid));
-
-            if (!i)
+            if (!uint.TryParse(args.NextString(), out uint index))
                 return false;
 
-            if (index >= i.valuesCount)
+            if (!uint.TryParse(args.NextString(), out uint value))
+             return false;
+
+            Item item = handler.GetSession().GetPlayer().GetItemByGuid(ObjectGuid.Create(HighGuid.Item, guid));
+            if (!item)
                 return false;
 
-            i.SetUInt32Value(index, value);
+            if (index >= item.valuesCount)
+                return false;
 
+            item.SetUInt32Value(index, value);
             return true;
         }
 
@@ -890,13 +860,6 @@ namespace Game.Chat
         static bool HandleDebugSetValueCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
-                return false;
-
-            string x = args.NextString();
-            string y = args.NextString();
-            string z = args.NextString();
-
-            if (string.IsNullOrEmpty(x) || string.IsNullOrEmpty(y))
                 return false;
 
             WorldObject target = handler.GetSelectedObject();
@@ -908,28 +871,32 @@ namespace Game.Chat
 
             ObjectGuid guid = target.GetGUID();
 
-            uint opcode = uint.Parse(x);
-            if (opcode >= target.valuesCount)
+            uint field = args.NextUInt32();
+            if (field >= target.valuesCount)
             {
-                handler.SendSysMessage(CypherStrings.TooBigIndex, opcode, guid.ToString(), target.valuesCount);
+                handler.SendSysMessage(CypherStrings.TooBigIndex, field, guid.ToString(), target.valuesCount);
                 return false;
             }
 
-            bool isInt32 = true;
-            if (!string.IsNullOrEmpty(z))
-                isInt32 = bool.Parse(z);
+            string valueStr = args.NextString();
+            if (!bool.TryParse(args.NextString(), out bool isInt32))
+                isInt32 = true;
 
             if (isInt32)
             {
-                uint value = uint.Parse(y);
-                target.SetUInt32Value(opcode, value);
-                handler.SendSysMessage(CypherStrings.SetUintField, guid.ToString(), opcode, value);
+                if (!uint.TryParse(valueStr, out uint value))
+                    return false;
+
+                target.SetUInt32Value(field, value);
+                handler.SendSysMessage(CypherStrings.SetUintField, guid.ToString(), field, value);
             }
             else
             {
-                float value = float.Parse(y);
-                target.SetFloatValue(opcode, value);
-                handler.SendSysMessage(CypherStrings.SetFloatField, guid.ToString(), opcode, value);
+                if (!float.TryParse(valueStr, out float value))
+                    return false;
+
+                target.SetFloatValue(field, value);
+                handler.SendSysMessage(CypherStrings.SetFloatField, guid.ToString(), field, value);
             }
 
             return true;
@@ -945,11 +912,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string i = args.NextString();
-            if (string.IsNullOrEmpty(i))
-                return false;
-
-            uint id = uint.Parse(i);
+            uint id = args.NextUInt32();
             handler.SendSysMessage("Vehicle id set to {0}", id);
             return true;
         }
@@ -960,40 +923,32 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string e = args.NextString();
-            string i = args.NextString();
-
-            if (string.IsNullOrEmpty(e))
+            uint entry = args.NextUInt32();
+            if (entry == 0)
                 return false;
-
-            uint entry = uint.Parse(e);
 
             float x, y, z, o = handler.GetSession().GetPlayer().GetOrientation();
             handler.GetSession().GetPlayer().GetClosePoint(out x, out y, out z, handler.GetSession().GetPlayer().GetObjectSize());
 
-            if (string.IsNullOrEmpty(i))
+            uint id = args.NextUInt32();
+            if (id == 0)
                 return handler.GetSession().GetPlayer().SummonCreature(entry, x, y, z, o);
 
-            uint id = uint.Parse(i);
-
-            CreatureTemplate ci = Global.ObjectMgr.GetCreatureTemplate(entry);
-
-            if (ci == null)
+            CreatureTemplate creatureTemplate = Global.ObjectMgr.GetCreatureTemplate(entry);
+            if (creatureTemplate == null)
                 return false;
 
-            VehicleRecord ve = CliDB.VehicleStorage.LookupByKey(id);
-            if (ve == null)
+            VehicleRecord vehicleRecord = CliDB.VehicleStorage.LookupByKey(id);
+            if (vehicleRecord == null)
                 return false;
 
-            Creature v = new Creature();
+            Creature creature = new Creature();
 
             Map map = handler.GetSession().GetPlayer().GetMap();
-
-            if (!v.Create(map.GenerateLowGuid(HighGuid.Vehicle), map, handler.GetSession().GetPlayer().GetPhaseMask(), entry, x, y, z, o, null, id))
+            if (!creature.Create(map.GenerateLowGuid(HighGuid.Vehicle), map, handler.GetSession().GetPlayer().GetPhaseMask(), entry, x, y, z, o, null, id))
                 return false;
 
-            map.AddToMap(v.ToCreature());
-
+            map.AddToMap(creature.ToCreature());
             return true;
         }
 
@@ -1053,11 +1008,6 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            uint updateIndex;
-            uint value;
-
-            string index = args.NextString();
-
             Unit unit = handler.getSelectedUnit();
             if (!unit)
             {
@@ -1065,10 +1015,8 @@ namespace Game.Chat
                 return false;
             }
 
-            if (string.IsNullOrEmpty(index))
-                return true;
+            uint updateIndex = args.NextUInt32();
 
-            updateIndex = uint.Parse(index);
             //check updateIndex
             if (unit.IsTypeId(TypeId.Player))
             {
@@ -1078,8 +1026,9 @@ namespace Game.Chat
             else if (updateIndex >= (int)UnitFields.End)
                 return true;
 
-            string val = args.NextString();
-            if (string.IsNullOrEmpty(val))
+            uint value;
+            string valueStr = args.NextString();
+            if (string.IsNullOrEmpty(valueStr))
             {
                 value = unit.GetUInt32Value(updateIndex);
 
@@ -1087,10 +1036,10 @@ namespace Game.Chat
                 return true;
             }
 
-            value = uint.Parse(val);
+            if (!uint.TryParse(valueStr, out value))
+                return false;
 
             handler.SendSysMessage(CypherStrings.UpdateChange, unit.GetGUID().ToString(), updateIndex, value);
-
             unit.SetUInt32Value(updateIndex, value);
 
             return true;
@@ -1099,15 +1048,11 @@ namespace Game.Chat
         [Command("uws", RBACPermissions.CommandDebugUws)]
         static bool HandleDebugUpdateWorldStateCommand(StringArguments args, CommandHandler handler)
         {
-            string w = args.NextString();
-            string s = args.NextString();
-
-            if (string.IsNullOrEmpty(w) || string.IsNullOrEmpty(s))
+            if (!uint.TryParse(args.NextString(), out uint variable) || variable == 0)
                 return false;
 
-            uint world = uint.Parse(w);
-            uint state = uint.Parse(s);
-            handler.GetSession().GetPlayer().SendUpdateWorldState(world, state);
+            uint state = args.NextUInt32();
+            handler.GetSession().GetPlayer().SendUpdateWorldState(variable, state);
             return true;
         }
 
@@ -1216,20 +1161,15 @@ namespace Game.Chat
                 if (args.Empty())
                     return false;
 
-                string t = args.NextString();
-                string p = args.NextString();
-
-                if (string.IsNullOrEmpty(t))
-                    return false;
-
                 List<uint> terrainswap = new List<uint>();
                 List<uint> phaseId = new List<uint>();
                 List<uint> worldMapSwap = new List<uint>();
 
-                terrainswap.Add(uint.Parse(t));
+                if (uint.TryParse(args.NextString(), out uint terrain))
+                    terrainswap.Add(terrain);
 
-                if (!string.IsNullOrEmpty(p))
-                    phaseId.Add(uint.Parse(p));
+                if (uint.TryParse(args.NextString(), out uint phase))
+                    phaseId.Add(phase);
 
                 handler.GetSession().SendSetPhaseShift(phaseId, terrainswap, worldMapSwap);
                 return true;
@@ -1241,19 +1181,11 @@ namespace Game.Chat
                 if (args.Empty())
                     return false;
 
-                string result = args.NextString();
-                if (string.IsNullOrEmpty(result))
+                if (!byte.TryParse(args.NextString(), out byte failNum) ||failNum == 0)
                     return false;
 
-                byte failNum = byte.Parse(result);
-                if (failNum == 0)
-                    return false;
-
-                string fail1 = args.NextString();
-                int failArg1 = !string.IsNullOrEmpty(fail1) ? int.Parse(fail1) : 0;
-
-                string fail2 = args.NextString();
-                int failArg2 = !string.IsNullOrEmpty(fail2) ? int.Parse(fail2) : 0;
+                int failArg1 = args.NextInt32();
+                int failArg2 = args.NextInt32();
 
                 CastFailed castFailed = new CastFailed();
                 castFailed.CastID = ObjectGuid.Empty;

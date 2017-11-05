@@ -95,13 +95,12 @@ namespace Game.Chat
         [Command("options", RBACPermissions.CommandLfgOptions, true)]
         static bool HandleLfgOptionsCommand(StringArguments args, CommandHandler handler)
         {
-            int options = -1;
             string str = args.NextString();
+            int options = -1;
             if (!string.IsNullOrEmpty(str))
             {
-                int tmp = int.Parse(str);
-                if (tmp > -1)
-                    options = tmp;
+                if (!int.TryParse(str, out options) || options < -1)
+                    return false;
             }
 
             if (options != -1)

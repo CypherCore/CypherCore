@@ -109,7 +109,8 @@ namespace Game.Entities
             for (var i = 0; index < PlayerConst.TaxiMaskSize && i != split.Length; ++i, ++index)
             {
                 // load and set bits only for existing taxi nodes
-                m_taximask[index] = (byte)(CliDB.TaxiNodesMask[index] & uint.Parse(split[i]));
+                if (uint.TryParse(split[i], out uint id))
+                    m_taximask[index] = (byte)(CliDB.TaxiNodesMask[index] & id);
             }
         }
 
@@ -127,12 +128,12 @@ namespace Game.Entities
 
             var stringArray = new StringArray(values, ' ');
             if (stringArray.Length > 0)
-                m_flightMasterFactionId = uint.Parse(stringArray[0]);
+                uint.TryParse(stringArray[0], out m_flightMasterFactionId);
 
             for (var i = 1; i < stringArray.Length; ++i)
             {
-                uint node = uint.Parse(stringArray[i]);
-                AddTaxiDestination(node);
+                if (uint.TryParse(stringArray[i], out uint node))
+                    AddTaxiDestination(node);
             }
 
             if (m_TaxiDestinations.Empty())

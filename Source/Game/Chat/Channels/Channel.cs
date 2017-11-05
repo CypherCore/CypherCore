@@ -80,7 +80,9 @@ namespace Game.Chat
                         for (var i = 0; i < tokens.Length; ++i)
                         {
                             ObjectGuid bannedGuid = new ObjectGuid();
-                            bannedGuid.SetRawValue(ulong.Parse(tokens[i].Substring(0, 16)), ulong.Parse(tokens[i].Substring(16)));
+                            if (ulong.TryParse(tokens[i].Substring(0, 16), out ulong highguid) && ulong.TryParse(tokens[i].Substring(16), out ulong lowguid))
+                                bannedGuid.SetRawValue(highguid, lowguid);
+
                             if (!bannedGuid.IsEmpty())
                             {
                                 Log.outDebug(LogFilter.ChatSystem, "Channel({0}) loaded bannedStore guid:{1}", _channelName, bannedGuid);

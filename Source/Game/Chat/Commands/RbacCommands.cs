@@ -236,18 +236,21 @@ namespace Game.Chat.Commands
             {
                 if (string.IsNullOrEmpty(param3))
                 {
-                    if (!string.IsNullOrEmpty(param2))
-                        realmId = int.Parse(param2);
+                    if (!int.TryParse(param2, out realmId))
+                        return null;
 
-                    if (!string.IsNullOrEmpty(param1))
-                        id = uint.Parse(param1);
+                    if (!uint.TryParse(param1, out id))
+                        return null;
 
                     useSelectedPlayer = true;
                 }
                 else
                 {
-                    id = uint.Parse(param2);
-                    realmId = int.Parse(param3);
+                    if (!uint.TryParse(param2, out id))
+                        return null;
+
+                    if (!int.TryParse(param3, out realmId))
+                        return null;
                 }
 
                 if (id == 0)

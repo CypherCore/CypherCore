@@ -34,10 +34,10 @@ namespace Game.Chat
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            ushort eventId = ushort.Parse(id);
+            if (!ushort.TryParse(id, out ushort eventId))
+                return false;
 
             var events = Global.GameEventMgr.GetEventMap();
-
             if (eventId >= events.Length)
             {
                 handler.SendSysMessage(CypherStrings.EventNotExist);
@@ -109,10 +109,10 @@ namespace Game.Chat
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            ushort eventId = ushort.Parse(id);
+            if (!ushort.TryParse(id, out ushort eventId))
+                return false;
 
             var events = Global.GameEventMgr.GetEventMap();
-
             if (eventId < 1 || eventId >= events.Length)
             {
                 handler.SendSysMessage(CypherStrings.EventNotExist);
@@ -148,10 +148,10 @@ namespace Game.Chat
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            ushort eventId = ushort.Parse(id);
+            if (!ushort.TryParse(id, out ushort eventId))
+                return false;
 
             var events = Global.GameEventMgr.GetEventMap();
-
             if (eventId < 1 || eventId >= events.Length)
             {
                 handler.SendSysMessage(CypherStrings.EventNotExist);
