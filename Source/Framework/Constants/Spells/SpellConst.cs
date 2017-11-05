@@ -2097,17 +2097,16 @@ namespace Framework.Constants
 
         RangedMask = DoneRangedAutoAttack | TakenRangedAutoAttack | DoneSpellRangedDmgClass | TakenSpellRangedDmgClass,
 
-        SpellMask = DoneSpellMeleeDmgClass | TakenSpellMeleeDmgClass | DoneRangedAutoAttack | TakenRangedAutoAttack| DoneSpellRangedDmgClass | TakenSpellRangedDmgClass
-            | DoneSpellNoneDmgClassPos | TakenSpellNoneDmgClassPos | DoneSpellNoneDmgClassNeg | TakenSpellNoneDmgClassNeg
-            | DoneSpellMagicDmgClassPos | TakenSpellMagicDmgClassPos | DoneSpellMagicDmgClassNeg | TakenSpellMagicDmgClassNeg,
-
-        SpellCastMask = SpellMask | DoneTrapActivation,
+        SpellMask = DoneSpellMeleeDmgClass | TakenSpellMeleeDmgClass |  DoneRangedAutoAttack | TakenRangedAutoAttack
+            | DoneSpellRangedDmgClass | TakenSpellRangedDmgClass | DoneSpellNoneDmgClassPos | TakenSpellNoneDmgClassPos
+            | DoneSpellNoneDmgClassNeg | TakenSpellNoneDmgClassNeg | DoneSpellMagicDmgClassPos | TakenSpellMagicDmgClassPos
+            | DoneSpellMagicDmgClassNeg | TakenSpellMagicDmgClassNeg | DoneTrapActivation,
 
         PeriodicMask = DonePeriodic | TakenPeriodic,
 
         DoneHitMask = DoneMeleeAutoAttack | DoneRangedAutoAttack | DoneSpellMeleeDmgClass | DoneSpellRangedDmgClass
             | DoneSpellNoneDmgClassPos | DoneSpellNoneDmgClassNeg | DoneSpellMagicDmgClassPos | DoneSpellMagicDmgClassNeg
-            | DonePeriodic | DoneMainHandAttack | DoneOffHandAttack,
+            | DonePeriodic | DoneTrapActivation | DoneMainHandAttack | DoneOffHandAttack,
 
         TakenHitMask = TakenMeleeAutoAttack | TakenRangedAutoAttack | TakenSpellMeleeDmgClass | TakenSpellRangedDmgClass
             | TakenSpellNoneDmgClassPos | TakenSpellNoneDmgClassNeg | TakenSpellMagicDmgClassPos | TakenSpellMagicDmgClassNeg

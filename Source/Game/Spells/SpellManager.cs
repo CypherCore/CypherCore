@@ -502,7 +502,7 @@ namespace Game.Entities
                 return false;
 
             // check spell family name/flags (if set) for spells
-            if (eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.PeriodicMask | ProcFlags.SpellMask | ProcFlags.DoneTrapActivation))
+            if (eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.PeriodicMask | ProcFlags.SpellMask))
             {
                 SpellInfo eventSpellInfo = eventInfo.GetSpellInfo();
 
