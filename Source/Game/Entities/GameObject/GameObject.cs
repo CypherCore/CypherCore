@@ -229,7 +229,7 @@ namespace Game.Entities
                 SetUInt32Value(GameObjectFields.Faction, m_goTemplateAddon.faction);
                 SetUInt32Value(GameObjectFields.Flags, m_goTemplateAddon.flags);
 
-                if (m_goTemplateAddon.WorldEffectID)
+                if (m_goTemplateAddon.WorldEffectID != 0)
                 {
                     m_updateFlag |= UpdateFlag.Gameobject;
                     SetWorldEffectID(m_goTemplateAddon.WorldEffectID);
@@ -324,7 +324,7 @@ namespace Game.Entities
                 m_invisibility.AddValue(gameObjectAddon.invisibilityType, gameObjectAddon.invisibilityValue);
             }
 
-            if (gameObjectAddon != null && gameObjectAddon.WorldEffectID)
+            if (gameObjectAddon != null && gameObjectAddon.WorldEffectID != 0)
             {
                 m_updateFlag |= UpdateFlag.Gameobject;
                 SetWorldEffectID(gameObjectAddon.WorldEffectID);
