@@ -394,6 +394,7 @@ public enum LogFilter
     Cheat,
     Commands,
     Condition,
+    Conversation,
     Garrison,
     Gameevent,
     Guild,

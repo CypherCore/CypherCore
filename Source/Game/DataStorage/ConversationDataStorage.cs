@@ -19,6 +19,7 @@ using Framework.Database;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Game.Entities;
 
 namespace Game.DataStorage
 {
@@ -33,6 +34,7 @@ namespace Game.DataStorage
             _conversationTemplateStorage.Clear();
 
             Dictionary<uint, ConversationActorTemplate[]> actorsByConversation = new Dictionary<uint, ConversationActorTemplate[]>();
+            Dictionary<uint, ulong[]> actorGuidsByConversation = new Dictionary<uint, ulong[]>();
 
             SQLResult actorTemplates = DB.World.Query("SELECT Id, CreatureId, CreatureModelId FROM conversation_actor_template");
             if (!actorTemplates.IsEmpty())
@@ -91,7 +93,7 @@ namespace Game.DataStorage
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Conversation line templates. DB table `conversation_line_template` is empty.");
             }
 
-            SQLResult actorResult = DB.World.Query("SELECT ConversationId, ConversationActorId, Idx FROM conversation_actors");
+            SQLResult actorResult = DB.World.Query("SELECT ConversationId, ConversationActorId, ConversationActorGuid, Idx FROM conversation_actors");
             if (!actorResult.IsEmpty())
             {
                 uint oldMSTime = Time.GetMSTime();
@@ -101,23 +103,51 @@ namespace Game.DataStorage
                 {
                     uint conversationId = actorResult.Read<uint>(0);
                     uint actorId = actorResult.Read<uint>(1);
-                    ushort idx = actorResult.Read<ushort>(2);
+                    ulong actorGuid = actorResult.Read<ulong>(2);
+                    ushort idx = actorResult.Read<ushort>(3);
 
-                    ConversationActorTemplate conversationActorTemplate = _conversationActorTemplateStorage.LookupByKey(actorId);
-                    if (conversationActorTemplate != null)
+                    if (actorId != 0 && actorGuid != 0)
                     {
-                        if (!actorsByConversation.ContainsKey(conversationId))
-                            actorsByConversation[conversationId] = new ConversationActorTemplate[idx + 1];
-
-                        ConversationActorTemplate[] actors = actorsByConversation[conversationId];
-                        if (actors.Length <= idx)
-                            Array.Resize(ref actors, idx + 1);
-
-                        actors[idx] = conversationActorTemplate;
-                        ++count;
+                        Log.outError(LogFilter.Sql, $"Table `conversation_actors` references both actor (ID: {actorId}) and actorGuid (GUID: {actorGuid}) for Conversation {conversationId}, skipped.");
+                        continue;
                     }
-                    else
-                        Log.outError(LogFilter.Sql, "Table `conversation_actors` references an invalid actor (ID: {0}) for Conversation {1}, skipped", actorId, conversationId);
+                    if (actorId != 0)
+                    {
+                        ConversationActorTemplate conversationActorTemplate = _conversationActorTemplateStorage.LookupByKey(actorId);
+                        if (conversationActorTemplate != null)
+                        {
+                            if (!actorsByConversation.ContainsKey(conversationId))
+                                actorsByConversation[conversationId] = new ConversationActorTemplate[idx + 1];
+
+                            ConversationActorTemplate[] actors = actorsByConversation[conversationId];
+                            if (actors.Length <= idx)
+                                Array.Resize(ref actors, idx + 1);
+
+                            actors[idx] = conversationActorTemplate;
+                            ++count;
+                        }
+                        else
+                            Log.outError(LogFilter.Sql, "Table `conversation_actors` references an invalid actor (ID: {0}) for Conversation {1}, skipped", actorId, conversationId);
+                    }
+                    else if (actorGuid != 0)
+                    {
+                        CreatureData creData = Global.ObjectMgr.GetCreatureData(actorGuid);
+                        if (creData != null)
+                        {
+                            if (!actorGuidsByConversation.ContainsKey(conversationId))
+                                actorGuidsByConversation[conversationId] = new ulong[idx + 1];
+
+                            var guids = actorGuidsByConversation[conversationId];
+                            if (guids.Length <= idx)
+                                Array.Resize(ref guids, idx + 1);
+
+                            guids[idx] = actorGuid;
+                            ++count;
+                        }
+                        else
+                            Log.outError(LogFilter.Sql, $"Table `conversation_actors` references an invalid creature guid (GUID: {actorGuid}) for Conversation {conversationId}, skipped");
+                    }
+
                 }
                 while (actorResult.NextRow());
 
@@ -141,6 +171,7 @@ namespace Game.DataStorage
                     conversationTemplate.LastLineEndTime = templateResult.Read<uint>(2);
 
                     conversationTemplate.Actors = actorsByConversation[conversationTemplate.Id].ToList();
+                    conversationTemplate.ActorGuids = actorGuidsByConversation[conversationTemplate.Id].ToList();
 
                     ConversationLineRecord currentConversationLine = CliDB.ConversationLineStorage.LookupByKey(conversationTemplate.FirstLineId);
                     if (currentConversationLine == null)
@@ -205,6 +236,7 @@ namespace Game.DataStorage
         public uint LastLineEndTime; // Time in ms after conversation creation the last line fades out
 
         public List<ConversationActorTemplate> Actors = new List<ConversationActorTemplate>();
+        public List<ulong> ActorGuids = new List<ulong>();
         public List<ConversationLineTemplate> Lines = new List<ConversationLineTemplate>();
     }
 

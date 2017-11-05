@@ -120,23 +120,48 @@ namespace Game.Entities
             SetUInt32Value(ConversationFields.LastLineEndTime, conversationTemplate.LastLineEndTime);
             _duration = conversationTemplate.LastLineEndTime;
 
-            ushort actorsIndex = 0;
-            foreach (ConversationActorTemplate actor in conversationTemplate.Actors)
+            for (ushort actorIndex = 0; actorIndex < conversationTemplate.Actors.Count; ++actorIndex)
             {
+                ConversationActorTemplate actor = conversationTemplate.Actors[actorIndex];
                 if (actor != null)
                 {
                     ConversationDynamicFieldActor actorField = new ConversationDynamicFieldActor();
                     actorField.ActorTemplate = actor;
                     actorField.Type = ConversationDynamicFieldActor.ActorType.CreatureActor;
-                    SetDynamicStructuredValue(ConversationDynamicFields.Actors, actorsIndex++, actorField);
+                    SetDynamicStructuredValue(ConversationDynamicFields.Actors, actorIndex, actorField);
                 }
-                else
-                    ++actorsIndex;
             }
 
-            ushort linesIndex = 0;
+            for (ushort actorIndex = 0; actorIndex < conversationTemplate.ActorGuids.Count; ++actorIndex)
+            {
+                ulong actorGuid = conversationTemplate.ActorGuids[actorIndex];
+                if (actorGuid == 0)
+                    continue;
+
+                foreach (var creature in map.GetCreatureBySpawnIdStore().LookupByKey(actorGuid))
+                {
+                    // we just need the last one, overriding is legit
+                    AddActor(creature.GetGUID(), actorIndex);
+                }
+            }
+
+            List<ushort> actorIndices = new List<ushort>();
             foreach (ConversationLineTemplate line in conversationTemplate.Lines)
-                SetDynamicStructuredValue(ConversationDynamicFields.Lines, linesIndex++, line);
+            {
+                actorIndices.Add(line.ActorIdx);
+                AddDynamicStructuredValue(ConversationDynamicFields.Lines, line);
+            }
+
+            // All actors need to be set
+            foreach (ushort actorIndex in actorIndices)
+            {
+                ConversationDynamicFieldActor actor = GetDynamicStructuredValue<ConversationDynamicFieldActor>(ConversationDynamicFields.Actors, actorIndex);
+                if (actor == null || actor.IsEmpty())
+                {
+                    Log.outError(LogFilter.Conversation, $"Failed to create conversation (Id: {conversationEntry}) due to missing actor (Idx: {actorIndex}).");
+                    return false;
+                }
+            }
 
             if (!GetMap().AddToMap(this))
                 return false;
@@ -179,6 +204,11 @@ namespace Game.Entities
         {
             WorldObjectActor = 0,
             CreatureActor = 1
+        }
+
+        public bool IsEmpty()
+        {
+            return ActorGuid.IsEmpty(); // this one is good enough
         }
 
         public ObjectGuid ActorGuid;
