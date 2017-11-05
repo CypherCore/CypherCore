@@ -319,7 +319,7 @@ namespace Game.Entities
 
         public void ModifyDamage(int amount)
         {
-            amount = Math.Min(amount, (int)GetDamage());
+            amount = Math.Max(amount, -((int)GetDamage()));
             m_damage += (uint)amount;
         }
         public void AbsorbDamage(uint amount)
