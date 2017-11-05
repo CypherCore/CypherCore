@@ -1859,7 +1859,25 @@ namespace Game.Entities
             ProcEventInfo myProcEventInfo = new ProcEventInfo(this, actionTarget, actionTarget, typeMaskActor, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
             List<Tuple<uint, AuraApplication>> myAurasTriggeringProc = new List<Tuple<uint, AuraApplication>>();
             if (typeMaskActor != 0 && CanProc())
+            {
                 GetProcAurasTriggeredOnEvent(myAurasTriggeringProc, myProcAuras, myProcEventInfo);
+
+                // needed for example for Cobra Strikes, pet does the attack, but aura is on owner
+                Player modOwner = GetSpellModOwner();
+                if (modOwner)
+                {
+                    if (modOwner != this && spell)
+                    {
+                        List<AuraApplication> modAuras = new List<AuraApplication>();
+                        foreach (var itr in modOwner.GetAppliedAuras())
+                        {
+                            if (spell.m_appliedMods.Contains(itr.Value.GetBase()))
+                                modAuras.Add(itr.Value);
+                        }
+                        modOwner.GetProcAurasTriggeredOnEvent(myAurasTriggeringProc, modAuras, myProcEventInfo);
+                    }
+                }
+            }
 
             // prepare data for target trigger
             ProcEventInfo targetProcEventInfo = new ProcEventInfo(this, actionTarget, this, typeMaskActionTarget, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
