@@ -5622,11 +5622,12 @@ namespace Game.Spells
             ProcFlags procAttacker = ProcFlags.DonePeriodic;
             ProcFlags procVictim = ProcFlags.TakenPeriodic;
             ProcFlagsHit hitMask = damageInfo.GetHitMask();
-            if (hitMask == 0)
-                hitMask = crit ? ProcFlagsHit.Critical : ProcFlagsHit.Normal;
 
             if (damage != 0)
+            {
+                hitMask |= crit ? ProcFlagsHit.Critical : ProcFlagsHit.Normal;
                 procVictim |= ProcFlags.TakenDamage;
+            }
 
             int overkill = (int)(damage - target.GetHealth());
             if (overkill < 0)
@@ -5716,11 +5717,12 @@ namespace Game.Spells
             ProcFlags procAttacker = ProcFlags.DonePeriodic;
             ProcFlags procVictim = ProcFlags.TakenPeriodic;
             ProcFlagsHit hitMask = damageInfo.GetHitMask();
-            if (hitMask == 0)
-                hitMask = crit ? ProcFlagsHit.Critical : ProcFlagsHit.Normal;
 
             if (damage != 0)
+            {
+                hitMask |= crit ? ProcFlagsHit.Critical : ProcFlagsHit.Normal;
                 procVictim |= ProcFlags.TakenDamage;
+            }
 
             if (caster.IsAlive())
                 caster.ProcSkillsAndAuras(target, procAttacker, procVictim, ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.None, hitMask, null, damageInfo, null);
