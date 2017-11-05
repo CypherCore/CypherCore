@@ -271,6 +271,14 @@ namespace Game.Entities
             ExitVehicle();
             RemoveAllControlled();
 
+            // remove single target auras at other targets
+            var scAuras = GetSingleCastAuras();
+            foreach (var aura in scAuras)
+            {
+                if (aura.GetUnitOwner() != this)
+                    aura.Remove();
+            }
+
             // Let client clear his current Actions
             SendActionButtons(2);
             foreach (var talentInfo in CliDB.TalentStorage.Values)
