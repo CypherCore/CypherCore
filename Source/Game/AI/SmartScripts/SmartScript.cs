@@ -3638,7 +3638,7 @@ namespace Game.AI
                 if (scene != null)
                     Log.outDebug(LogFilter.ScriptsAi, "SmartScript: EventMap for SceneId {0} is empty but is using SmartScript.", scene.SceneId);
                 if (spell != null)
-                    Log.outDebug(LogFilter.ScriptsAi, "SmartScript: EventMap for SceneId {0} is empty but is using SmartScript.", scene.SceneId);
+                    Log.outDebug(LogFilter.ScriptsAi, "SmartScript: EventMap for SpellId {0} is empty but is using SmartScript.", spell.GetSpellInfo().Id);
                 return;
             }
             foreach (var holder in e)
@@ -3656,14 +3656,6 @@ namespace Game.AI
                 }
                 mEvents.Add(holder);//NOTE: 'world(0)' events still get processed in ANY instance mode
             }
-            if (mEvents.Empty() && obj != null)
-                Log.outError(LogFilter.Sql, "SmartScript: Entry {0} has events but no events added to list because of instance flags.", obj.GetEntry());
-            if (mEvents.Empty() && at != null)
-                Log.outError(LogFilter.Sql, "SmartScript: AreaTrigger {0} has events but no events added to list because of instance flags. NOTE: triggers can not handle any instance flags.", at.Id);
-            if (mEvents.Empty() && scene != null)
-                Log.outError(LogFilter.Sql, "SmartScript: SceneId {0} has events but no events added to list because of instance flags. NOTE: scenes can not handle any instance flags.", scene.SceneId);
-            if (mEvents.Empty() && spell != null)
-                Log.outError(LogFilter.Sql, "SmartScript: Spell {0} has events but no events added to list because of instance flags. NOTE: scenes can not handle any instance flags.", spell.GetSpellInfo().Id);
         }
 
         void GetScript()

@@ -561,7 +561,7 @@ namespace Game.Chat
 
                 // command.getSession() == NULL only for console
                 targetAccountId = (isAccountNameGiven) ? Global.AccountMgr.GetId(targetAccountName) : handler.getSelectedPlayer().GetSession().GetAccountId();
-                if (int.TryParse(isAccountNameGiven ? arg3 : arg2, out int gmRealmID))
+                if (!int.TryParse(isAccountNameGiven ? arg3 : arg2, out int gmRealmID))
                     return false;
 
                 AccountTypes playerSecurity;

@@ -725,12 +725,6 @@ namespace Game
 
         bool isSourceTypeValid(Condition cond)
         {
-            if (cond.SourceType == ConditionSourceType.None || cond.SourceType >= ConditionSourceType.Max)
-            {
-                Log.outError(LogFilter.Sql, "{0} Invalid ConditionSourceType in `condition` table, ignoring.", cond.ToString());
-                return false;
-            }
-
             switch (cond.SourceType)
             {
                 case ConditionSourceType.CreatureLootTemplate:
@@ -1079,8 +1073,9 @@ namespace Game
                 case ConditionSourceType.GossipMenu:
                 case ConditionSourceType.GossipMenuOption:
                 case ConditionSourceType.SmartEvent:
-                case ConditionSourceType.None:
+                    break;
                 default:
+                    Log.outError(LogFilter.Sql, $"{cond.ToString()} Invalid ConditionSourceType in `condition` table, ignoring.");
                     break;
             }
 
@@ -1089,18 +1084,6 @@ namespace Game
 
         bool isConditionTypeValid(Condition cond)
         {
-            if (cond.ConditionType == ConditionTypes.None || cond.ConditionType >= ConditionTypes.Max)
-            {
-                Log.outError(LogFilter.Sql, "{0} Invalid ConditionType in `condition` table, ignoring.", cond.ToString());
-                return false;
-            }
-
-            if (cond.ConditionTarget >= cond.GetMaxAvailableConditionTargets())
-            {
-                Log.outError(LogFilter.Sql, "{0} in `condition` table, has incorrect ConditionTarget set, ignoring.", cond.ToString());
-                return false;
-            }
-
             switch (cond.ConditionType)
             {
                 case ConditionTypes.Aura:
@@ -1584,11 +1567,20 @@ namespace Game
                 case ConditionTypes.Alive:
                 case ConditionTypes.Areaid:
                 case ConditionTypes.InstanceInfo:
+                case ConditionTypes.TerrainSwap:
                 case ConditionTypes.InWater:
                 case ConditionTypes.Charmed:
                 case ConditionTypes.Taxi:
-                default:
                     break;
+                default:
+                    Log.outError(LogFilter.Sql, $"{cond.ToString()} Invalid ConditionType in `condition` table, ignoring.");
+                    return false;
+            }
+
+            if (cond.ConditionTarget >= cond.GetMaxAvailableConditionTargets())
+            {
+                Log.outError(LogFilter.Sql, $"{cond.ToString(true)} in `condition` table, has incorrect ConditionTarget set, ignoring.");
+                return false;
             }
 
             if (cond.ConditionValue1 != 0 && !StaticConditionTypeData[(int)cond.ConditionType].HasConditionValue1)
