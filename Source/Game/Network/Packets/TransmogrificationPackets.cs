@@ -40,9 +40,9 @@ namespace Game.Network.Packets
             CurrentSpecOnly = _worldPacket.HasBit();
         }
 
-        public ObjectGuid Npc { get; set; }
-        public Array<TransmogrifyItem> Items { get; set; } = new Array<TransmogrifyItem>(13);
-        public bool CurrentSpecOnly { get; set; }
+        public ObjectGuid Npc;
+        public Array<TransmogrifyItem> Items = new Array<TransmogrifyItem>(13);
+        public bool CurrentSpecOnly;
     }
 
     class TransmogCollectionUpdate : ServerPacket
@@ -59,9 +59,9 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt32(itemModifiedAppearanceId);
         }
 
-        public bool IsFullUpdate { get; set; }
-        public bool IsSetFavorite { get; set; }
-        public List<uint> FavoriteAppearances { get; set; } = new List<uint>();
+        public bool IsFullUpdate;
+        public bool IsSetFavorite;
+        public List<uint> FavoriteAppearances = new List<uint>();
     }
 
     struct TransmogrifyItem
@@ -73,8 +73,8 @@ namespace Game.Network.Packets
             SpellItemEnchantmentID = data.ReadInt32();
         }
 
-        public int ItemModifiedAppearanceID { get; set; }
-        public uint Slot { get; set; }
-        public int SpellItemEnchantmentID { get; set; }
+        public int ItemModifiedAppearanceID;
+        public uint Slot;
+        public int SpellItemEnchantmentID;
     }
 }

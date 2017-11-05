@@ -34,8 +34,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(PreviousSeason);
         }
 
-        public uint PreviousSeason { get; set; } = 0;
-        public uint CurrentSeason { get; set; } = 0;
+        public uint PreviousSeason = 0;
+        public uint CurrentSeason = 0;
     }
 
     public class AreaSpiritHealerQuery : ClientPacket
@@ -47,7 +47,7 @@ namespace Game.Network.Packets
             HealerGuid = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid HealerGuid { get; set; }
+        public ObjectGuid HealerGuid;
     }
 
     public class AreaSpiritHealerQueue : ClientPacket
@@ -59,7 +59,7 @@ namespace Game.Network.Packets
             HealerGuid = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid HealerGuid { get; set; }
+        public ObjectGuid HealerGuid;
     }
 
     public class HearthAndResurrect : ClientPacket
@@ -98,10 +98,10 @@ namespace Game.Network.Packets
                 player.Write(_worldPacket);
         }
 
-        public Optional<byte> Winner { get; set; }
-        public List<PlayerData> Players { get; set; } = new List<PlayerData>();
+        public Optional<byte> Winner;
+        public List<PlayerData> Players = new List<PlayerData>();
         public Optional<RatingData> Ratings;
-        public sbyte[] PlayerCount { get; set; } = new sbyte[2];
+        public sbyte[] PlayerCount = new sbyte[2];
 
         public class RatingData
         {
@@ -117,9 +117,9 @@ namespace Game.Network.Packets
                     data.WriteUInt32(id);
             }
 
-            public uint[] Prematch { get; set; } = new uint[2];
-            public uint[] Postmatch { get; set; } = new uint[2];
-            public uint[] PrematchMMR { get; set; } = new uint[2];
+            public uint[] Prematch = new uint[2];
+            public uint[] Postmatch = new uint[2];
+            public uint[] PrematchMMR = new uint[2];
         }
 
         public struct HonorData
@@ -131,9 +131,9 @@ namespace Game.Network.Packets
                 data.WriteUInt32(ContributionPoints);
             }
 
-            public uint HonorKills { get; set; }
-            public uint Deaths { get; set; }
-            public uint ContributionPoints { get; set; }
+            public uint HonorKills;
+            public uint Deaths;
+            public uint ContributionPoints;
         }
 
         public class PlayerData
@@ -176,22 +176,22 @@ namespace Game.Network.Packets
                     data.WriteInt32(MmrChange.Value);
             }
 
-            public ObjectGuid PlayerGUID { get; set; }
-            public uint Kills { get; set; }
-            public byte Faction { get; set; }
-            public bool IsInWorld { get; set; }
+            public ObjectGuid PlayerGUID;
+            public uint Kills;
+            public byte Faction;
+            public bool IsInWorld;
             public Optional<HonorData> Honor;
-            public uint DamageDone { get; set; }
-            public uint HealingDone { get; set; }
-            public Optional<uint> PreMatchRating { get; set; }
-            public Optional<int> RatingChange { get; set; }
-            public Optional<uint> PreMatchMMR { get; set; }
-            public Optional<int> MmrChange { get; set; }
-            public List<uint> Stats { get; set; } = new List<uint>();
-            public int PrimaryTalentTree { get; set; }
+            public uint DamageDone;
+            public uint HealingDone;
+            public Optional<uint> PreMatchRating;
+            public Optional<int> RatingChange;
+            public Optional<uint> PreMatchMMR;
+            public Optional<int> MmrChange;
+            public List<uint> Stats = new List<uint>();
+            public int PrimaryTalentTree;
             public int PrimaryTalentTreeNameIndex;  // controls which name field from ChrSpecialization.dbc will be sent to lua
-            public Race PlayerRace { get; set; }
-            public uint Prestige { get; set; }
+            public Race PlayerRace;
+            public uint Prestige;
         }
     }
 
@@ -204,7 +204,7 @@ namespace Game.Network.Packets
             Ticket.Write(_worldPacket);
         }
 
-        public RideTicket Ticket { get; set; } = new RideTicket();
+        public RideTicket Ticket = new RideTicket();
     }
 
     public class BattlefieldStatusNeedConfirmation : ServerPacket
@@ -219,10 +219,10 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(Role);
         }
 
-        public uint Timeout { get; set; }
-        public uint Mapid { get; set; }
+        public uint Timeout;
+        public uint Mapid;
         public BattlefieldStatusHeader Hdr;
-        public byte Role { get; set; }
+        public byte Role;
     }
 
     public class BattlefieldStatusActive : ServerPacket
@@ -241,11 +241,11 @@ namespace Game.Network.Packets
         }
 
         public BattlefieldStatusHeader Hdr;
-        public uint ShutdownTimer { get; set; }
-        public byte ArenaFaction { get; set; }
-        public bool LeftEarly { get; set; }
-        public uint StartTimer { get; set; }
-        public uint Mapid { get; set; }
+        public uint ShutdownTimer;
+        public byte ArenaFaction;
+        public bool LeftEarly;
+        public uint StartTimer;
+        public uint Mapid;
     }
 
     public class BattlefieldStatusQueued : ServerPacket
@@ -263,12 +263,12 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public uint AverageWaitTime { get; set; }
+        public uint AverageWaitTime;
         public BattlefieldStatusHeader Hdr;
-        public bool AsGroup { get; set; }
-        public bool SuspendedQueue { get; set; }
-        public bool EligibleForMatchmaking { get; set; }
-        public uint WaitTime { get; set; }
+        public bool AsGroup;
+        public bool SuspendedQueue;
+        public bool EligibleForMatchmaking;
+        public uint WaitTime;
     }
 
     public class BattlefieldStatusFailed : ServerPacket
@@ -283,10 +283,10 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(ClientID);
         }
 
-        public ulong QueueID { get; set; }
-        public ObjectGuid ClientID { get; set; }
-        public int Reason { get; set; }
-        public RideTicket Ticket { get; set; } = new RideTicket();
+        public ulong QueueID;
+        public ObjectGuid ClientID;
+        public int Reason;
+        public RideTicket Ticket = new RideTicket();
     }
 
     class BattlemasterJoin : ClientPacket
@@ -302,10 +302,10 @@ namespace Game.Network.Packets
             JoinAsGroup = _worldPacket.HasBit();
         }
 
-        public bool JoinAsGroup { get; set; } = false;
-        public byte Roles { get; set; } = 0;
-        public ulong QueueID { get; set; } = 0;
-        public int[] BlacklistMap { get; set; } = new int[2];
+        public bool JoinAsGroup = false;
+        public byte Roles = 0;
+        public ulong QueueID = 0;
+        public int[] BlacklistMap = new int[2];
     }
 
     class BattlemasterJoinArena : ClientPacket
@@ -318,8 +318,8 @@ namespace Game.Network.Packets
             Roles = _worldPacket.ReadUInt8();
         }
 
-        public byte TeamSizeIndex { get; set; }
-        public byte Roles { get; set; }
+        public byte TeamSizeIndex;
+        public byte Roles;
     }
 
     class BattlefieldLeave : ClientPacket
@@ -339,8 +339,8 @@ namespace Game.Network.Packets
             AcceptedInvite = _worldPacket.HasBit();
         }
 
-        public RideTicket Ticket { get; set; } = new RideTicket();
-        public bool AcceptedInvite { get; set; }
+        public RideTicket Ticket = new RideTicket();
+        public bool AcceptedInvite;
     }
 
     class BattlefieldListRequest : ClientPacket
@@ -352,7 +352,7 @@ namespace Game.Network.Packets
             ListID = _worldPacket.ReadInt32();
         }
 
-        public int ListID { get; set; }
+        public int ListID;
     }
 
     class BattlefieldList : ServerPacket
@@ -374,13 +374,13 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public ObjectGuid BattlemasterGuid { get; set; }
-        public int BattlemasterListID { get; set; }
-        public byte MinLevel { get; set; }
-        public byte MaxLevel { get; set; }
-        public List<int> Battlefields { get; set; } = new List<int>();    // Players cannot join a specific Battleground instance anymore - this is always empty
-        public bool PvpAnywhere { get; set; }
-        public bool HasRandomWinToday { get; set; }
+        public ObjectGuid BattlemasterGuid;
+        public int BattlemasterListID;
+        public byte MinLevel;
+        public byte MaxLevel;
+        public List<int> Battlefields = new List<int>();    // Players cannot join a specific Battleground instance anymore - this is always empty
+        public bool PvpAnywhere;
+        public bool HasRandomWinToday;
     }
 
     class GetPVPOptionsEnabled : ClientPacket
@@ -405,12 +405,12 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public bool WargameArenas { get; set; }
-        public bool RatedArenas { get; set; }
-        public bool WargameBattlegrounds { get; set; }
-        public bool ArenaSkirmish { get; set; }
-        public bool PugBattlegrounds { get; set; }
-        public bool RatedBattlegrounds { get; set; }
+        public bool WargameArenas;
+        public bool RatedArenas;
+        public bool WargameBattlegrounds;
+        public bool ArenaSkirmish;
+        public bool PugBattlegrounds;
+        public bool RatedBattlegrounds;
     }
 
     class RequestBattlefieldStatus : ClientPacket
@@ -429,7 +429,7 @@ namespace Game.Network.Packets
             Offender = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Offender { get; set; }
+        public ObjectGuid Offender;
     }
 
     class ReportPvPPlayerAFKResult : ServerPacket
@@ -444,10 +444,10 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(NumPlayersIHaveReported);
         }
 
-        public ObjectGuid Offender { get; set; }
-        public byte NumPlayersIHaveReported { get; set; } = 0;
-        public byte NumBlackMarksOnOffender { get; set; } = 0;
-        public ResultCode Result { get; set; } = ResultCode.GenericFailure;
+        public ObjectGuid Offender;
+        public byte NumPlayersIHaveReported = 0;
+        public byte NumBlackMarksOnOffender = 0;
+        public ResultCode Result = ResultCode.GenericFailure;
 
         public enum ResultCode
         {
@@ -468,7 +468,7 @@ namespace Game.Network.Packets
             FlagCarriers.ForEach(pos => pos.Write(_worldPacket));
         }
 
-        public List<BattlegroundPlayerPosition> FlagCarriers { get; set; } = new List<BattlegroundPlayerPosition>();
+        public List<BattlegroundPlayerPosition> FlagCarriers = new List<BattlegroundPlayerPosition>();
     }
 
     class BattlegroundPlayerJoined : ServerPacket
@@ -480,7 +480,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(Guid);
         }
 
-        public ObjectGuid Guid { get; set; }
+        public ObjectGuid Guid;
     }
 
     class BattlegroundPlayerLeft : ServerPacket
@@ -492,7 +492,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(Guid);
         }
 
-        public ObjectGuid Guid { get; set; }
+        public ObjectGuid Guid;
     }
 
     class DestroyArenaUnit : ServerPacket
@@ -504,7 +504,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(Guid);
         }
 
-        public ObjectGuid Guid { get; set; }
+        public ObjectGuid Guid;
     }
 
     class RequestPVPRewards : ClientPacket
@@ -523,16 +523,16 @@ namespace Game.Network.Packets
             throw new NotImplementedException();
         }
 
-        public uint RatedRewardPointsThisWeek { get; set; }
-        public uint ArenaRewardPointsThisWeek { get; set; }
-        public uint RatedMaxRewardPointsThisWeek { get; set; }
-        public uint ArenaRewardPoints { get; set; }
-        public uint RandomRewardPointsThisWeek { get; set; }
-        public uint ArenaMaxRewardPointsThisWeek { get; set; }
-        public uint RatedRewardPoints { get; set; }
-        public uint MaxRewardPointsThisWeek { get; set; }
-        public uint RewardPointsThisWeek { get; set; }
-        public uint RandomMaxRewardPointsThisWeek { get; set; }
+        public uint RatedRewardPointsThisWeek;
+        public uint ArenaRewardPointsThisWeek;
+        public uint RatedMaxRewardPointsThisWeek;
+        public uint ArenaRewardPoints;
+        public uint RandomRewardPointsThisWeek;
+        public uint ArenaMaxRewardPointsThisWeek;
+        public uint RatedRewardPoints;
+        public uint MaxRewardPointsThisWeek;
+        public uint RewardPointsThisWeek;
+        public uint RandomMaxRewardPointsThisWeek;
     }
 
     class RequestRatedBattlefieldInfo : ClientPacket
@@ -553,8 +553,8 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt8(TeamSize);
         }
 
-        public ArenaErrorType ErrorType { get; set; }
-        public byte TeamSize { get; set; }
+        public ArenaErrorType ErrorType;
+        public byte TeamSize;
     }
 
     //Structs
@@ -573,14 +573,14 @@ namespace Game.Network.Packets
             data.FlushBits();
         }
 
-        public RideTicket Ticket { get; set; }
-        public ulong QueueID { get; set; }
-        public byte RangeMin { get; set; }
-        public byte RangeMax { get; set; }
-        public byte TeamSize { get; set; }
-        public uint InstanceID { get; set; }
-        public bool RegisteredMatch { get; set; }
-        public bool TournamentRules { get; set; }
+        public RideTicket Ticket;
+        public ulong QueueID;
+        public byte RangeMin;
+        public byte RangeMax;
+        public byte TeamSize;
+        public uint InstanceID;
+        public bool RegisteredMatch;
+        public bool TournamentRules;
     }
 
     public struct BattlegroundPlayerPosition
@@ -593,9 +593,9 @@ namespace Game.Network.Packets
             data.WriteInt8(ArenaSlot);
         }
 
-        public ObjectGuid Guid { get; set; }
+        public ObjectGuid Guid;
         public Vector2 Pos;
-        public sbyte IconID { get; set; }
-        public sbyte ArenaSlot { get; set; }
+        public sbyte IconID;
+        public sbyte ArenaSlot;
     }
 }

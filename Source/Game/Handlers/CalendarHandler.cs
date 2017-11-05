@@ -57,7 +57,7 @@ namespace Game
             var playerEvents = Global.CalendarMgr.GetPlayerEvents(guid);
             foreach (var calendarEvent in playerEvents)
             {
-                CalendarSendCalendarEventInfo eventInfo = new CalendarSendCalendarEventInfo();
+                CalendarSendCalendarEventInfo eventInfo;
                 eventInfo.EventID = calendarEvent.EventId;
                 eventInfo.Date = calendarEvent.Date;
                 Guild guild = Global.GuildMgr.GetGuildById(calendarEvent.GuildId);
@@ -78,7 +78,7 @@ namespace Game
                 {
                     if (pair.Value.perm)
                     {
-                        CalendarSendCalendarRaidLockoutInfo lockoutInfo = new CalendarSendCalendarRaidLockoutInfo();
+                        CalendarSendCalendarRaidLockoutInfo lockoutInfo;
 
                         InstanceSave save = pair.Value.save;
                         lockoutInfo.MapID = (int)save.GetMapId();

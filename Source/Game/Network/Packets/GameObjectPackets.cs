@@ -29,7 +29,7 @@ namespace Game.Network.Packets
             Guid = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Guid { get; set; }
+        public ObjectGuid Guid;
     }
 
     public class GameObjReportUse : ClientPacket
@@ -41,7 +41,7 @@ namespace Game.Network.Packets
             Guid = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Guid { get; set; }
+        public ObjectGuid Guid;
     }
 
     class GameObjectDespawn : ServerPacket
@@ -53,7 +53,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(ObjectGUID);
         }
 
-        public ObjectGuid ObjectGUID { get; set; }
+        public ObjectGuid ObjectGUID;
     }
 
     class PageTextPkt : ServerPacket
@@ -65,7 +65,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(GameObjectGUID);
         }
 
-        public ObjectGuid GameObjectGUID { get; set; }
+        public ObjectGuid GameObjectGUID;
     }
 
     class GameObjectActivateAnimKit : ServerPacket
@@ -80,9 +80,9 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public ObjectGuid ObjectGUID { get; set; }
-        public int AnimKitID { get; set; }
-        public bool Maintain { get; set; }
+        public ObjectGuid ObjectGUID;
+        public int AnimKitID;
+        public bool Maintain;
     }
 
     class DestructibleBuildingDamage : ServerPacket
@@ -98,11 +98,11 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(SpellID);
         }
 
-        public ObjectGuid Target { get; set; }
-        public ObjectGuid Caster { get; set; }
-        public ObjectGuid Owner { get; set; }
-        public int Damage { get; set; }
-        public uint SpellID { get; set; }
+        public ObjectGuid Target;
+        public ObjectGuid Caster;
+        public ObjectGuid Owner;
+        public int Damage;
+        public uint SpellID;
     }
 
     class FishNotHooked : ServerPacket
@@ -131,8 +131,8 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public ObjectGuid ObjectGUID { get; set; }
-        public uint CustomAnim { get; set; }
-        public bool PlayAsDespawn { get; set; }
+        public ObjectGuid ObjectGUID;
+        public uint CustomAnim;
+        public bool PlayAsDespawn;
     }
 }

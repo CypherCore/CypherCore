@@ -45,20 +45,20 @@ namespace Game.Network.Packets
             }
         }
 
-        public TalentInfoUpdate Info { get; set; } = new TalentInfoUpdate();
+        public TalentInfoUpdate Info = new TalentInfoUpdate();
 
         public class TalentGroupInfo
         {
-            public uint SpecID { get; set; }
-            public List<ushort> TalentIDs { get; set; } = new List<ushort>();
-            public List<ushort> PvPTalentIDs { get; set; } = new List<ushort>();
+            public uint SpecID;
+            public List<ushort> TalentIDs = new List<ushort>();
+            public List<ushort> PvPTalentIDs = new List<ushort>();
         }
 
         public class TalentInfoUpdate
         {
-            public byte ActiveGroup { get; set; }
-            public uint PrimarySpecialization { get; set; }
-            public List<TalentGroupInfo> TalentGroups { get; set; } = new List<TalentGroupInfo>();
+            public byte ActiveGroup;
+            public uint PrimarySpecialization;
+            public List<TalentGroupInfo> TalentGroups = new List<TalentGroupInfo>();
         }
     }
 
@@ -74,7 +74,7 @@ namespace Game.Network.Packets
                 Talents.Add(_worldPacket.ReadUInt16());
         }
 
-        public Array<ushort> Talents { get; set; } = new Array<ushort>(PlayerConst.MaxTalentTiers);
+        public Array<ushort> Talents = new Array<ushort>(PlayerConst.MaxTalentTiers);
     }
 
     class RespecWipeConfirm : ServerPacket
@@ -88,9 +88,9 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(RespecMaster);
         }
 
-        public ObjectGuid RespecMaster { get; set; }
-        public uint Cost { get; set; }
-        public SpecResetType RespecType { get; set; }
+        public ObjectGuid RespecMaster;
+        public uint Cost;
+        public SpecResetType RespecType;
     }
 
     class ConfirmRespecWipe : ClientPacket
@@ -103,8 +103,8 @@ namespace Game.Network.Packets
             RespecType = (SpecResetType)_worldPacket.ReadUInt8();
         }
 
-        public ObjectGuid RespecMaster { get; set; }
-        public SpecResetType RespecType { get; set; }
+        public ObjectGuid RespecMaster;
+        public SpecResetType RespecType;
     }
 
     class LearnTalentsFailed : ServerPacket
@@ -121,9 +121,9 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt16(talent);
         }
 
-        public uint Reason { get; set; }
+        public uint Reason;
         public int SpellID;
-        public List<ushort> Talents { get; set; } = new List<ushort>();
+        public List<ushort> Talents = new List<ushort>();
     }
 
     class ActiveGlyphs : ServerPacket
@@ -140,8 +140,8 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public List<GlyphBinding> Glyphs { get; set; } = new List<GlyphBinding>();
-        public bool IsFullUpdate { get; set; }
+        public List<GlyphBinding> Glyphs = new List<GlyphBinding>();
+        public bool IsFullUpdate;
     }
 
     //Structs

@@ -30,7 +30,7 @@ namespace Game.Network.Packets
             UnitGUID = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid UnitGUID { get; set; }
+        public ObjectGuid UnitGUID;
     }
 
     class TaxiNodeStatusPkt : ServerPacket
@@ -45,7 +45,7 @@ namespace Game.Network.Packets
         }
 
         public TaxiNodeStatus Status; // replace with TaxiStatus enum
-        public ObjectGuid Unit { get; set; }
+        public ObjectGuid Unit;
     }
 
     public class ShowTaxiNodes : ServerPacket
@@ -70,7 +70,7 @@ namespace Game.Network.Packets
         }
 
         public Optional<ShowTaxiNodesWindowInfo> WindowInfo;
-        public byte[] Nodes { get; set; } = null;
+        public byte[] Nodes = null;
     }
 
     class EnableTaxiNode : ClientPacket
@@ -82,7 +82,7 @@ namespace Game.Network.Packets
             Unit = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Unit { get; set; }
+        public ObjectGuid Unit;
     }
 
     class TaxiQueryAvailableNodes : ClientPacket
@@ -94,7 +94,7 @@ namespace Game.Network.Packets
             Unit = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Unit { get; set; }
+        public ObjectGuid Unit;
     }
 
     class ActivateTaxi : ClientPacket
@@ -109,10 +109,10 @@ namespace Game.Network.Packets
             FlyingMountID = _worldPacket.ReadUInt32();
         }
 
-        public ObjectGuid Vendor { get; set; }
-        public uint Node { get; set; }
-        public uint GroundMountID { get; set; } = 0;
-        public uint FlyingMountID { get; set; } = 0;
+        public ObjectGuid Vendor;
+        public uint Node;
+        public uint GroundMountID = 0;
+        public uint FlyingMountID = 0;
     }
 
     class NewTaxiPath : ServerPacket
@@ -132,7 +132,7 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public ActivateTaxiReply Reply { get; set; }
+        public ActivateTaxiReply Reply;
     }
 
     class TaxiRequestEarlyLanding : ClientPacket
@@ -144,7 +144,7 @@ namespace Game.Network.Packets
 
     public struct ShowTaxiNodesWindowInfo
     {
-        public ObjectGuid UnitGUID { get; set; }
-        public int CurrentNode { get; set; }
+        public ObjectGuid UnitGUID;
+        public int CurrentNode;
     }
 }

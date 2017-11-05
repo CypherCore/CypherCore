@@ -34,9 +34,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(BindAreaID);
         }
 
-        public uint BindMapID { get; set; } = 0xFFFFFFFF;
+        public uint BindMapID = 0xFFFFFFFF;
         public Vector3 BindPosition;
-        public uint BindAreaID { get; set; }
+        public uint BindAreaID;
     }
 
     public class PlayerBound : ServerPacket
@@ -81,7 +81,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(Guid);
         }
 
-        public ObjectGuid Guid { get; set; }
+        public ObjectGuid Guid;
     }
 
     public class LoginSetTimeSpeed : ServerPacket
@@ -97,11 +97,11 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(GameTimeHolidayOffset);
         }
 
-        public float NewSpeed { get; set; }
-        public int ServerTimeHolidayOffset { get; set; }
-        public uint GameTime { get; set; }
-        public uint ServerTime { get; set; }
-        public int GameTimeHolidayOffset { get; set; }
+        public float NewSpeed;
+        public int ServerTimeHolidayOffset;
+        public uint GameTime;
+        public uint ServerTime;
+        public int GameTimeHolidayOffset;
     }
 
     public class SetCurrency : ServerPacket
@@ -129,13 +129,13 @@ namespace Game.Network.Packets
                 _worldPacket.WriteInt32(MaxQuantity.Value);
         }
 
-        public uint Type { get; set; }
-        public int Quantity { get; set; }
-        public uint Flags { get; set; }
-        public Optional<int> WeeklyQuantity { get; set; }
-        public Optional<int> TrackedQuantity { get; set; }
-        public Optional<int> MaxQuantity { get; set; }
-        public bool SuppressChatLog { get; set; }
+        public uint Type;
+        public int Quantity;
+        public uint Flags;
+        public Optional<int> WeeklyQuantity;
+        public Optional<int> TrackedQuantity;
+        public Optional<int> MaxQuantity;
+        public bool SuppressChatLog;
     }
 
     public class SetMaxWeeklyQuantity : ServerPacket
@@ -148,8 +148,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32("MaxWeeklyQuantity");
         }
 
-        public uint MaxWeeklyQuantity { get; set; }
-        public uint Type { get; set; }
+        public uint MaxWeeklyQuantity;
+        public uint Type;
     }
 
     public class ResetWeeklyCurrency : ServerPacket
@@ -202,17 +202,17 @@ namespace Game.Network.Packets
             }
         }
 
-        public List<Record> Data { get; set; } = new List<Record>();
+        public List<Record> Data = new List<Record>();
 
         public struct Record
         {
-            public uint Type { get; set; }
-            public uint Quantity { get; set; }
-            public Optional<uint> WeeklyQuantity;       // Currency count obtained this Week.
+            public uint Type;
+            public uint Quantity;
+            public Optional<uint> WeeklyQuantity;       // Currency count obtained this Week.  
             public Optional<uint> MaxWeeklyQuantity;    // Weekly Currency cap.
-            public Optional<uint> TrackedQuantity { get; set; }
-            public Optional<int> MaxQuantity { get; set; }
-            public byte Flags;                      // 0 = none
+            public Optional<uint> TrackedQuantity;
+            public Optional<int> MaxQuantity;
+            public byte Flags;                      // 0 = none, 
         }
     }
 
@@ -237,7 +237,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(SequenceIndex);
         }
 
-        public uint SequenceIndex { get; set; }
+        public uint SequenceIndex;
     }
 
     public class TimeSyncResponse : ClientPacket
@@ -263,7 +263,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(CinematicID);
         }
 
-        public uint CinematicID { get; set; }
+        public uint CinematicID;
     }
 
     public class TriggerMovie : ServerPacket
@@ -275,7 +275,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(MovieID);
         }
 
-        public uint MovieID { get; set; }
+        public uint MovieID;
     }
 
     public class UITimeRequest : ClientPacket
@@ -294,7 +294,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(Time);
         }
 
-        public uint Time { get; set; }
+        public uint Time;
     }
 
     public class TutorialFlags : ServerPacket
@@ -307,7 +307,7 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt32(TutorialData[i]);
         }
 
-        public uint[] TutorialData { get; set; } = new uint[(int)Tutorials.Max];
+        public uint[] TutorialData = new uint[(int)Tutorials.Max];
     }
 
     public class TutorialSetFlag : ClientPacket
@@ -321,8 +321,8 @@ namespace Game.Network.Packets
                 TutorialBit = _worldPacket.ReadUInt32();
         }
 
-        public TutorialAction Action { get; set; }
-        public uint TutorialBit { get; set; }
+        public TutorialAction Action;
+        public uint TutorialBit;
     }
 
     public class WorldServerInfo : ServerPacket
@@ -355,12 +355,12 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt32(InstanceGroupSize.Value);
         }
 
-        public uint DifficultyID { get; set; }
-        public byte IsTournamentRealm { get; set; }
-        public bool XRealmPvpAlert { get; set; }
-        public Optional<uint> RestrictedAccountMaxLevel { get; set; }
-        public Optional<uint> RestrictedAccountMaxMoney { get; set; }
-        public Optional<uint> InstanceGroupSize { get; set; }
+        public uint DifficultyID;
+        public byte IsTournamentRealm;
+        public bool XRealmPvpAlert;
+        public Optional<uint> RestrictedAccountMaxLevel;
+        public Optional<uint> RestrictedAccountMaxMoney;
+        public Optional<uint> InstanceGroupSize;
     }
 
     public class SetDungeonDifficulty : ClientPacket
@@ -372,7 +372,7 @@ namespace Game.Network.Packets
             DifficultyID = _worldPacket.ReadInt32();
         }
 
-        public int DifficultyID { get; set; }
+        public int DifficultyID;
     }
 
     public class SetRaidDifficulty : ClientPacket
@@ -385,8 +385,8 @@ namespace Game.Network.Packets
             Legacy = _worldPacket.ReadUInt8();
         }
 
-        public int DifficultyID { get; set; }
-        public byte Legacy { get; set; }
+        public int DifficultyID;
+        public byte Legacy;
     }
 
     public class DungeonDifficultySet : ServerPacket
@@ -398,7 +398,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(DifficultyID);
         }
 
-        public int DifficultyID { get; set; }
+        public int DifficultyID;
     }
 
     public class RaidDifficultySet : ServerPacket
@@ -411,8 +411,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(Legacy);
         }
 
-        public int DifficultyID { get; set; }
-        public bool Legacy { get; set; }
+        public int DifficultyID;
+        public bool Legacy;
     }
 
     public class CorpseReclaimDelay : ServerPacket
@@ -424,7 +424,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(Remaining);
         }
 
-        public uint Remaining { get; set; }
+        public uint Remaining;
     }
 
     public class DeathReleaseLoc : ServerPacket
@@ -437,8 +437,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteVector3(Loc);
         }
 
-        public int MapID { get; set; }
-        public Vector3 Loc { get; set; }
+        public int MapID;
+        public Vector3 Loc;
     }
 
     public class PortGraveyard : ClientPacket
@@ -457,7 +457,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(PlayerGUID);
         }
 
-        public ObjectGuid PlayerGUID { get; set; }
+        public ObjectGuid PlayerGUID;
     }
 
     public class ReclaimCorpse : ClientPacket
@@ -469,7 +469,7 @@ namespace Game.Network.Packets
             CorpseGUID = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid CorpseGUID { get; set; }
+        public ObjectGuid CorpseGUID;
     }
 
     public class RepopRequest : ClientPacket
@@ -481,7 +481,7 @@ namespace Game.Network.Packets
             CheckInstance = _worldPacket.HasBit();
         }
 
-        public bool CheckInstance { get; set; }
+        public bool CheckInstance;
     }
 
     public class RequestCemeteryList : ClientPacket
@@ -505,8 +505,8 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt32(cemetery);
         }
 
-        public bool IsGossipTriggered { get; set; }
-        public List<uint> CemeteryID { get; set; } = new List<uint>();
+        public bool IsGossipTriggered;
+        public List<uint> CemeteryID = new List<uint>();
     }
 
     public class ResurrectResponse : ClientPacket
@@ -519,8 +519,8 @@ namespace Game.Network.Packets
             Response = _worldPacket.ReadUInt32();
         }
 
-        public ObjectGuid Resurrecter { get; set; }
-        public uint Response { get; set; }
+        public ObjectGuid Resurrecter;
+        public uint Response;
     }
 
     public class WeatherPkt : ServerPacket
@@ -555,7 +555,7 @@ namespace Game.Network.Packets
             StandState = (UnitStandStateType)_worldPacket.ReadUInt32();
         }
 
-        public UnitStandStateType StandState { get; set; }
+        public UnitStandStateType StandState;
     }
 
     public class StandStateUpdate : ServerPacket
@@ -599,12 +599,12 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public int Scale { get; set; }
-        public int MaxValue { get; set; }
-        public MirrorTimerType Timer { get; set; }
-        public int SpellID { get; set; }
-        public int Value { get; set; }
-        public bool Paused { get; set; }
+        public int Scale;
+        public int MaxValue;
+        public MirrorTimerType Timer;
+        public int SpellID;
+        public int Value;
+        public bool Paused;
     }
 
     public class PauseMirrorTimer : ServerPacket
@@ -622,8 +622,8 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public bool Paused { get; set; } = true;
-        public MirrorTimerType Timer { get; set; }
+        public bool Paused = true;
+        public MirrorTimerType Timer;
     }
 
     public class StopMirrorTimer : ServerPacket
@@ -638,7 +638,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(Timer);
         }
 
-        public MirrorTimerType Timer { get; set; }
+        public MirrorTimerType Timer;
     }
 
     public class ExplorationExperience : ServerPacket
@@ -655,8 +655,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(Experience);
         }
 
-        public uint Experience { get; set; }
-        public uint AreaID { get; set; }
+        public uint Experience;
+        public uint AreaID;
     }
 
     public class LevelUpInfo : ServerPacket
@@ -677,11 +677,11 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(Cp);
         }
 
-        public uint Level { get; set; } = 0;
-        public uint HealthDelta { get; set; } = 0;
-        public uint[] PowerDelta { get; set; } = new uint[6];
-        public uint[] StatDelta { get; set; } = new uint[(int)Stats.Max];
-        public int Cp { get; set; } = 0;
+        public uint Level = 0;
+        public uint HealthDelta = 0;
+        public uint[] PowerDelta = new uint[6];
+        public uint[] StatDelta = new uint[(int)Stats.Max];
+        public int Cp = 0;
     }
 
     public class PlayMusic : ServerPacket
@@ -710,18 +710,18 @@ namespace Game.Network.Packets
             PartyIndex = _worldPacket.ReadUInt8();
         }
 
-        public uint Min { get; set; }
-        public uint Max { get; set; }
-        public byte PartyIndex { get; set; }
+        public uint Min;
+        public uint Max;
+        public byte PartyIndex;
     }
 
     public class RandomRoll : ServerPacket
     {
-        public ObjectGuid Roller { get; set; }
-        public ObjectGuid RollerWowAccount { get; set; }
-        public int Min { get; set; }
-        public int Max { get; set; }
-        public int Result { get; set; }
+        public ObjectGuid Roller;
+        public ObjectGuid RollerWowAccount;
+        public int Min;
+        public int Max;
+        public int Result;
 
         public RandomRoll() : base(ServerOpcodes.RandomRoll) { }
 
@@ -771,12 +771,12 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt16(map);                            // UI map id, WorldMapArea.dbc, controls map display
         }
 
-        public ObjectGuid ClientGUID { get; set; }
-        public ObjectGuid PersonalGUID { get; set; }
-        public List<uint> PhaseShifts { get; set; } = new List<uint>();
-        public List<uint> PreloadMapIDs { get; set; } = new List<uint>();
-        public List<uint> UiWorldMapAreaIDSwaps { get; set; } = new List<uint>();
-        public List<uint> VisibleMapIDs { get; set; } = new List<uint>();
+        public ObjectGuid ClientGUID;
+        public ObjectGuid PersonalGUID;
+        public List<uint> PhaseShifts = new List<uint>();
+        public List<uint> PreloadMapIDs = new List<uint>();
+        public List<uint> UiWorldMapAreaIDSwaps = new List<uint>();
+        public List<uint> VisibleMapIDs = new List<uint>();
     }
 
     public class ZoneUnderAttack : ServerPacket
@@ -788,7 +788,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(AreaID);
         }
 
-        public int AreaID { get; set; }
+        public int AreaID;
     }
 
     class DurabilityDamageDeath : ServerPacket
@@ -800,7 +800,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(Percent);
         }
 
-        public uint Percent { get; set; }
+        public uint Percent;
     }
 
     class ObjectUpdateFailed : ClientPacket
@@ -812,7 +812,7 @@ namespace Game.Network.Packets
             ObjectGUID = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid ObjectGUID { get; set; }
+        public ObjectGuid ObjectGUID;
     }
 
     class ObjectUpdateRescued : ClientPacket
@@ -824,7 +824,7 @@ namespace Game.Network.Packets
             ObjectGUID = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid ObjectGUID { get; set; }
+        public ObjectGuid ObjectGUID;
     }
 
     class PlayObjectSound : ServerPacket
@@ -839,10 +839,10 @@ namespace Game.Network.Packets
             _worldPacket.WriteVector3(Position);
         }
 
-        public ObjectGuid TargetObjectGUID { get; set; }
-        public ObjectGuid SourceObjectGUID { get; set; }
-        public uint SoundKitID { get; set; }
-        public Vector3 Position { get; set; }
+        ObjectGuid TargetObjectGUID;
+        ObjectGuid SourceObjectGUID;
+        uint SoundKitID;
+        Vector3 Position;
     }
 
     class PlaySound : ServerPacket
@@ -877,8 +877,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(SoundKitID);
         }
 
-        public ObjectGuid SourceObjectGUID { get; set; }
-        public uint SoundKitID { get; set; }
+        public ObjectGuid SourceObjectGUID;
+        public uint SoundKitID;
     }
 
     class OpeningCinematic : ClientPacket
@@ -918,7 +918,7 @@ namespace Game.Network.Packets
             Enable = _worldPacket.HasBit();
         }
 
-        public bool Enable { get; set; }
+        public bool Enable;
     }
 
     class Dismount : ServerPacket
@@ -930,7 +930,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(Guid);
         }
 
-        public ObjectGuid Guid { get; set; }
+        public ObjectGuid Guid;
     }
 
     class SaveCUFProfiles : ClientPacket
@@ -971,7 +971,7 @@ namespace Game.Network.Packets
             }
         }
 
-        public List<CUFProfile> CUFProfiles { get; set; } = new List<CUFProfile>();
+        public List<CUFProfile> CUFProfiles = new List<CUFProfile>();
     }
 
     class LoadCUFProfiles : ServerPacket
@@ -1009,7 +1009,7 @@ namespace Game.Network.Packets
             }
         }
 
-        public List<CUFProfile> CUFProfiles { get; set; } = new List<CUFProfile>();
+        public List<CUFProfile> CUFProfiles = new List<CUFProfile>();
     }
 
     class PlayOneShotAnimKit : ServerPacket
@@ -1022,8 +1022,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt16(AnimKitID);
         }
 
-        public ObjectGuid Unit { get; set; }
-        public ushort AnimKitID { get; set; }
+        public ObjectGuid Unit;
+        public ushort AnimKitID;
     }
 
     class SetAIAnimKit : ServerPacket
@@ -1036,8 +1036,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt16(AnimKitID);
         }
 
-        public ObjectGuid Unit { get; set; }
-        public ushort AnimKitID { get; set; }
+        public ObjectGuid Unit;
+        public ushort AnimKitID;
     }
 
     class SetMeleeAnimKit : ServerPacket
@@ -1050,8 +1050,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt16(AnimKitID);
         }
 
-        public ObjectGuid Unit { get; set; }
-        public ushort AnimKitID { get; set; }
+        public ObjectGuid Unit;
+        public ushort AnimKitID;
     }
 
     class SetMovementAnimKit : ServerPacket
@@ -1064,8 +1064,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt16(AnimKitID);
         }
 
-        public ObjectGuid Unit { get; set; }
-        public ushort AnimKitID { get; set; }
+        public ObjectGuid Unit;
+        public ushort AnimKitID;
     }
 
     class SetPlayHoverAnim : ServerPacket
@@ -1079,8 +1079,8 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public ObjectGuid UnitGUID { get; set; }
-        public bool PlayHoverAnim { get; set; }
+        public ObjectGuid UnitGUID;
+        public bool PlayHoverAnim;
     }
 
     class TogglePvP : ClientPacket
@@ -1099,7 +1099,7 @@ namespace Game.Network.Packets
             EnablePVP = _worldPacket.HasBit();
         }
 
-        public bool EnablePVP { get; set; }
+        public bool EnablePVP;
     }
 
     class AccountHeirloomUpdate : ServerPacket
@@ -1124,9 +1124,9 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt32(flags.Value.flags);
         }
 
-        public bool IsFullUpdate { get; set; }
-        public Dictionary<uint, HeirloomData> Heirlooms { get; set; } = new Dictionary<uint, HeirloomData>();
-        public int Unk { get; set; }
+        public bool IsFullUpdate;
+        public Dictionary<uint, HeirloomData> Heirlooms = new Dictionary<uint, HeirloomData>();
+        int Unk;
     }
 
     class MountSpecial : ClientPacket
@@ -1145,7 +1145,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(UnitGUID);
         }
 
-        public ObjectGuid UnitGUID { get; set; }
+        public ObjectGuid UnitGUID;
     }
 
     class CrossedInebriationThreshold : ServerPacket
@@ -1159,9 +1159,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(ItemID);
         }
 
-        public ObjectGuid Guid { get; set; }
-        public uint ItemID { get; set; }
-        public uint Threshold { get; set; }
+        public ObjectGuid Guid;
+        public uint ItemID;
+        public uint Threshold;
     }
 
     class SetTaxiBenchmarkMode : ClientPacket
@@ -1173,7 +1173,7 @@ namespace Game.Network.Packets
             Enable = _worldPacket.HasBit();
         }
 
-        public bool Enable { get; set; }
+        public bool Enable;
     }
 
     class OverrideLight : ServerPacket
@@ -1187,9 +1187,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(TransitionMilliseconds);
         }
 
-        public uint AreaLightID { get; set; }
-        public uint TransitionMilliseconds { get; set; }
-        public uint OverrideLightID { get; set; }
+        public uint AreaLightID;
+        public uint TransitionMilliseconds;
+        public uint OverrideLightID;
     }
 
     public class StartTimer : ServerPacket
@@ -1203,9 +1203,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(TotalTime);
         }
 
-        public uint TimeRemaining { get; set; }
-        public uint TotalTime { get; set; }
-        public TimerType Type { get; set; }
+        public uint TimeRemaining;
+        public uint TotalTime;
+        public TimerType Type;
     }
 
     class DisplayGameError : ServerPacket
@@ -1262,8 +1262,8 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public bool IsFullUpdate { get; set; } = false;
-        public Dictionary<uint, MountStatusFlags> Mounts { get; set; } = new Dictionary<uint, MountStatusFlags>();
+        public bool IsFullUpdate = false;
+        public Dictionary<uint, MountStatusFlags> Mounts = new Dictionary<uint, MountStatusFlags>();
     }
 
     class MountSetFavorite : ClientPacket
@@ -1276,8 +1276,8 @@ namespace Game.Network.Packets
             IsFavorite = _worldPacket.HasBit();
         }
 
-        public uint MountSpellID { get; set; }
-        public bool IsFavorite { get; set; }
+        public uint MountSpellID;
+        public bool IsFavorite;
     }
 
     class PvpPrestigeRankUp : ClientPacket
@@ -1296,6 +1296,6 @@ namespace Game.Network.Packets
             SourceGuid = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid SourceGuid { get; set; }
+        public ObjectGuid SourceGuid;
     }
 }

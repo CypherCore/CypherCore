@@ -32,8 +32,8 @@ namespace Game.Network.Packets
             Text = _worldPacket.ReadString(len);
         }
 
-        public string Text { get; set; }
-        public Language Language { get; set; } = Language.Universal;
+        public string Text;
+        public Language Language = Language.Universal;
     }
 
     public class ChatMessageWhisper : ClientPacket
@@ -49,9 +49,9 @@ namespace Game.Network.Packets
             Text = _worldPacket.ReadString(textLen);
         }
 
-        public Language Language { get; set; } = Language.Universal;
-        public string Text { get; set; }
-        public string Target { get; set; }
+        public Language Language = Language.Universal;
+        public string Text;
+        public string Target;
     }
 
     public class ChatMessageChannel : ClientPacket
@@ -67,9 +67,9 @@ namespace Game.Network.Packets
             Text = _worldPacket.ReadString(textLen);
         }
 
-        public Language Language { get; set; } = Language.Universal;
-        public string Text { get; set; }
-        public string Target { get; set; }
+        public Language Language = Language.Universal;
+        public string Text;
+        public string Target;
     }
 
     public class ChatAddonMessage : ClientPacket
@@ -84,8 +84,8 @@ namespace Game.Network.Packets
             Text = _worldPacket.ReadString(textLen);
         }
 
-        public string Prefix { get; set; }
-        public string Text { get; set; }
+        public string Prefix;
+        public string Text;
     }
 
     public class ChatAddonMessageWhisper : ClientPacket
@@ -102,9 +102,9 @@ namespace Game.Network.Packets
             Text = _worldPacket.ReadString(textLen);
         }
 
-        public string Prefix { get; set; }
-        public string Target { get; set; }
-        public string Text { get; set; }
+        public string Prefix;
+        public string Target;
+        public string Text;
     }
 
     class ChatAddonMessageChannel : ClientPacket
@@ -121,9 +121,9 @@ namespace Game.Network.Packets
             Text = _worldPacket.ReadString(textLen);
         }
 
-        public string Text { get; set; }
-        public string Target { get; set; }
-        public string Prefix { get; set; }
+        public string Text;
+        public string Target;
+        public string Prefix;
     }
 
     public class ChatMessageDND : ClientPacket
@@ -136,7 +136,7 @@ namespace Game.Network.Packets
             Text = _worldPacket.ReadString(len);
         }
 
-        public string Text { get; set; }
+        public string Text;
     }
 
     public class ChatMessageAFK : ClientPacket
@@ -149,7 +149,7 @@ namespace Game.Network.Packets
             Text = _worldPacket.ReadString(len);
         }
 
-        public string Text { get; set; }
+        public string Text;
     }
 
     public class ChatMessageEmote : ClientPacket
@@ -162,7 +162,7 @@ namespace Game.Network.Packets
             Text = _worldPacket.ReadString(len);
         }
 
-        public string Text { get; set; }
+        public string Text;
     }
 
     public class ChatPkt : ServerPacket
@@ -260,25 +260,25 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(ChatText);
         }
 
-        public ChatMsg SlashCmd { get; set; } = 0;
-        public Language _Language { get; set; } = Language.Universal;
-        public ObjectGuid SenderGUID { get; set; }
-        public ObjectGuid SenderGuildGUID { get; set; }
-        public ObjectGuid SenderAccountGUID { get; set; }
-        public ObjectGuid TargetGUID { get; set; }
-        public ObjectGuid PartyGUID { get; set; }
-        public uint SenderVirtualAddress { get; set; }
-        public uint TargetVirtualAddress { get; set; }
-        public string SenderName { get; set; } = "";
-        public string TargetName { get; set; } = "";
-        public string Prefix { get; set; } = "";
-        public string Channel { get; set; } = "";
-        public string ChatText { get; set; } = "";
-        public uint AchievementID { get; set; } = 0;
-        public ChatFlags _ChatFlags { get; set; } = 0;
-        public float DisplayTime { get; set; } = 0.0f;
-        public bool HideChatLog { get; set; } = false;
-        public bool FakeSenderName { get; set; } = false;
+        public ChatMsg SlashCmd = 0;
+        public Language _Language = Language.Universal;
+        public ObjectGuid SenderGUID;
+        public ObjectGuid SenderGuildGUID;
+        public ObjectGuid SenderAccountGUID;
+        public ObjectGuid TargetGUID;
+        public ObjectGuid PartyGUID;
+        public uint SenderVirtualAddress;
+        public uint TargetVirtualAddress;
+        public string SenderName = "";
+        public string TargetName = "";
+        public string Prefix = "";
+        public string Channel = "";
+        public string ChatText = "";
+        public uint AchievementID = 0;
+        public ChatFlags _ChatFlags = 0;
+        public float DisplayTime = 0.0f;
+        public bool HideChatLog = false;
+        public bool FakeSenderName = false;
     }
 
     public class EmoteMessage : ServerPacket
@@ -291,8 +291,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(EmoteID);
         }
 
-        public ObjectGuid Guid { get; set; }
-        public int EmoteID { get; set; }
+        public ObjectGuid Guid;
+        public int EmoteID;
     }
 
     public class CTextEmote : ClientPacket
@@ -306,9 +306,9 @@ namespace Game.Network.Packets
             SoundIndex = _worldPacket.ReadInt32();
         }
 
-        public ObjectGuid Target { get; set; }
-        public int EmoteID { get; set; }
-        public int SoundIndex { get; set; }
+        public ObjectGuid Target;
+        public int EmoteID;
+        public int SoundIndex;
     }
 
     public class STextEmote : ServerPacket
@@ -324,11 +324,11 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(TargetGUID);
         }
 
-        public ObjectGuid SourceGUID { get; set; }
-        public ObjectGuid SourceAccountGUID { get; set; }
-        public ObjectGuid TargetGUID { get; set; }
-        public int SoundIndex { get; set; } = -1;
-        public int EmoteID { get; set; }
+        public ObjectGuid SourceGUID;
+        public ObjectGuid SourceAccountGUID;
+        public ObjectGuid TargetGUID;
+        public int SoundIndex = -1;
+        public int EmoteID;
     }
 
     public class PrintNotification : ServerPacket
@@ -344,7 +344,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(NotifyText);
         }
 
-        public string NotifyText { get; set; }
+        public string NotifyText;
     }
 
     public class EmoteClient : ClientPacket
@@ -413,8 +413,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(StringParam);
         }
 
-        public int MessageID { get; set; }
-        public string StringParam { get; set; } = "";
+        public int MessageID;
+        public string StringParam = "";
     }
 
     class ChatRegisterAddonPrefixes : ClientPacket
@@ -429,7 +429,7 @@ namespace Game.Network.Packets
                 Prefixes[i] = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(5));
         }
 
-        public string[] Prefixes { get; set; } = new string[64];
+        public string[] Prefixes = new string[64];
     }
 
     class ChatUnregisterAllAddonPrefixes : ClientPacket
@@ -451,8 +451,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(MessageText);
         }
 
-        public uint ZoneID { get; set; }
-        public string MessageText { get; set; } = "";
+        public uint ZoneID;
+        public string MessageText = "";
     }
 
     class ChatReportIgnored : ClientPacket
@@ -465,7 +465,7 @@ namespace Game.Network.Packets
             Reason = _worldPacket.ReadUInt8();
         }
 
-        public ObjectGuid IgnoredGUID { get; set; }
-        public byte Reason { get; set; }
+        public ObjectGuid IgnoredGUID;
+        public byte Reason;
     }
 }

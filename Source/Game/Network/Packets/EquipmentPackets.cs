@@ -33,7 +33,7 @@ namespace Game.Network.Packets
         }
 
         public ulong GUID; // Set Identifier
-        public int Type { get; set; }
+        public int Type;
         public uint SetID; // Index
     }
 
@@ -73,7 +73,7 @@ namespace Game.Network.Packets
             }
         }
 
-        public List<EquipmentSetInfo.EquipmentSetData> SetData { get; set; } = new List<EquipmentSetInfo.EquipmentSetData>();
+        public List<EquipmentSetInfo.EquipmentSetData> SetData = new List<EquipmentSetInfo.EquipmentSetData>();
     }
 
     public class SaveEquipmentSet : ClientPacket
@@ -111,7 +111,7 @@ namespace Game.Network.Packets
             Set.SetIcon = _worldPacket.ReadString(setIconLength);
         }
 
-        public EquipmentSetInfo.EquipmentSetData Set { get; set; }
+        public EquipmentSetInfo.EquipmentSetData Set;
     }
 
     class DeleteEquipmentSet : ClientPacket
@@ -123,7 +123,7 @@ namespace Game.Network.Packets
             ID = _worldPacket.ReadUInt64();
         }
 
-        public ulong ID { get; set; }
+        public ulong ID;
     }
 
     class UseEquipmentSet : ClientPacket
@@ -144,15 +144,15 @@ namespace Game.Network.Packets
             GUID = _worldPacket.ReadUInt64();
         }
 
-        public InvUpdate Inv { get; set; }
-        public EquipmentSetItem[] Items { get; set; } = new EquipmentSetItem[EquipmentSlot.End];
+        public InvUpdate Inv;
+        public EquipmentSetItem[] Items = new EquipmentSetItem[EquipmentSlot.End];
         public ulong GUID; //Set Identifier
 
         public struct EquipmentSetItem
         {
-            public ObjectGuid Item { get; set; }
-            public byte ContainerSlot { get; set; }
-            public byte Slot { get; set; }
+            public ObjectGuid Item;
+            public byte ContainerSlot;
+            public byte Slot;
         }
     }
 
@@ -167,6 +167,6 @@ namespace Game.Network.Packets
         }
 
         public ulong GUID; //Set Identifier
-        public byte Reason { get; set; }
+        public byte Reason;
     }
 }

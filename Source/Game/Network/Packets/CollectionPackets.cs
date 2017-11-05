@@ -36,8 +36,8 @@ namespace Game.Network.Packets
             IsFavorite = _worldPacket.HasBit();
         }
 
-        public CollectionType Type { get; set; }
-        public uint ID { get; set; }
-        public bool IsFavorite { get; set; }
+        public CollectionType Type;
+        public uint ID;
+        public bool IsFavorite;
     }
 }

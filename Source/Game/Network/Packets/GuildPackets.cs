@@ -32,8 +32,8 @@ namespace Game.Network.Packets
             PlayerGuid = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid GuildGuid { get; set; }
-        public ObjectGuid PlayerGuid { get; set; }
+        public ObjectGuid GuildGuid;
+        public ObjectGuid PlayerGuid;
     }
 
     public class QueryGuildInfoResponse : ServerPacket
@@ -73,23 +73,23 @@ namespace Game.Network.Packets
 
         }
 
-        public ObjectGuid GuildGUID { get; set; }
-        public GuildInfo Info { get; set; } = new GuildInfo();
-        public bool HasGuildInfo { get; set; }
+        public ObjectGuid GuildGUID;
+        public GuildInfo Info = new GuildInfo();
+        public bool HasGuildInfo;
 
         public class GuildInfo
         {
-            public ObjectGuid GuildGuid { get; set; }
+            public ObjectGuid GuildGuid;
 
             public uint VirtualRealmAddress; // a special identifier made from the Index, BattleGroup and Region.
 
-            public uint EmblemStyle { get; set; }
-            public uint EmblemColor { get; set; }
-            public uint BorderStyle { get; set; }
-            public uint BorderColor { get; set; }
-            public uint BackgroundColor { get; set; }
-            public List<RankInfo> Ranks { get; set; } = new List<RankInfo>();
-            public string GuildName { get; set; } = "";
+            public uint EmblemStyle;
+            public uint EmblemColor;
+            public uint BorderStyle;
+            public uint BorderColor;
+            public uint BackgroundColor;
+            public List<RankInfo> Ranks = new List<RankInfo>();
+            public string GuildName = "";
 
             public struct RankInfo
             {
@@ -100,9 +100,9 @@ namespace Game.Network.Packets
                     RankName = name;
                 }
 
-                public uint RankID { get; set; }
-                public uint RankOrder { get; set; }
-                public string RankName { get; set; }
+                public uint RankID;
+                public uint RankOrder;
+                public string RankName;
             }
         }
     }
@@ -137,12 +137,12 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(InfoText);
         }
 
-        public List<GuildRosterMemberData> MemberData { get; set; }
-        public string WelcomeText { get; set; }
-        public string InfoText { get; set; }
-        public uint CreateDate { get; set; }
-        public int NumAccounts { get; set; }
-        public int GuildFlags { get; set; }
+        public List<GuildRosterMemberData> MemberData;
+        public string WelcomeText;
+        public string InfoText;
+        public uint CreateDate;
+        public int NumAccounts;
+        public int GuildFlags;
     }
 
     public class GuildRosterUpdate : ServerPacket
@@ -159,7 +159,7 @@ namespace Game.Network.Packets
             MemberData.ForEach(p => p.Write(_worldPacket));
         }
 
-        public List<GuildRosterMemberData> MemberData { get; set; }
+        public List<GuildRosterMemberData> MemberData;
     }
 
     public class GuildUpdateMotdText : ClientPacket
@@ -172,7 +172,7 @@ namespace Game.Network.Packets
             MotdText = _worldPacket.ReadString(textLen);
         }
 
-        public string MotdText { get; set; }
+        public string MotdText;
     }
 
     public class GuildCommandResult : ServerPacket
@@ -188,9 +188,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(Name);
         }
 
-        public string Name { get; set; }
-        public GuildCommandError Result { get; set; }
-        public GuildCommandType Command { get; set; }
+        public string Name;
+        public GuildCommandError Result;
+        public GuildCommandType Command;
     }
 
     public class AcceptGuildInvite : ClientPacket
@@ -216,7 +216,7 @@ namespace Game.Network.Packets
             Allow = _worldPacket.HasBit();
         }
 
-        public bool Allow { get; set; }
+        public bool Allow;
     }
 
     public class GuildInviteByName : ClientPacket
@@ -259,20 +259,20 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(OldGuildName);
         }
 
-        public ObjectGuid GuildGUID { get; set; }
-        public ObjectGuid OldGuildGUID { get; set; }
-        public int AchievementPoints { get; set; }
-        public uint EmblemColor { get; set; }
-        public uint EmblemStyle { get; set; }
-        public uint BorderStyle { get; set; }
-        public uint BorderColor { get; set; }
-        public uint Background { get; set; }
-        public uint GuildVirtualRealmAddress { get; set; }
-        public uint OldGuildVirtualRealmAddress { get; set; }
-        public uint InviterVirtualRealmAddress { get; set; }
-        public string InviterName { get; set; }
-        public string GuildName { get; set; }
-        public string OldGuildName { get; set; }
+        public ObjectGuid GuildGUID;
+        public ObjectGuid OldGuildGUID;
+        public int AchievementPoints;
+        public uint EmblemColor;
+        public uint EmblemStyle;
+        public uint BorderStyle;
+        public uint BorderColor;
+        public uint Background;
+        public uint GuildVirtualRealmAddress;
+        public uint OldGuildVirtualRealmAddress;
+        public uint InviterVirtualRealmAddress;
+        public string InviterName;
+        public string GuildName;
+        public string OldGuildName;
     }
 
     public class GuildEventPresenceChange : ServerPacket
@@ -291,11 +291,11 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(Name);
         }
 
-        public ObjectGuid Guid { get; set; }
-        public uint VirtualRealmAddress { get; set; }
-        public string Name { get; set; }
-        public bool Mobile { get; set; }
-        public bool LoggedOn { get; set; }
+        public ObjectGuid Guid;
+        public uint VirtualRealmAddress;
+        public string Name;
+        public bool Mobile;
+        public bool LoggedOn;
     }
 
     public class GuildEventMotd : ServerPacket
@@ -308,7 +308,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(MotdText);
         }
 
-        public string MotdText { get; set; }
+        public string MotdText;
     }
 
     public class GuildEventPlayerJoined : ServerPacket
@@ -324,9 +324,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(Name);
         }
 
-        public ObjectGuid Guid { get; set; }
-        public string Name { get; set; }
-        public uint VirtualRealmAddress { get; set; }
+        public ObjectGuid Guid;
+        public string Name;
+        public uint VirtualRealmAddress;
     }
 
     public class GuildEventRankChanged : ServerPacket
@@ -338,7 +338,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(RankID);
         }
 
-        public uint RankID { get; set; }
+        public uint RankID;
     }
 
     public class GuildEventRanksUpdated : ServerPacket
@@ -357,7 +357,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt64(Money);
         }
 
-        public ulong Money { get; set; }
+        public ulong Money;
     }
 
     public class GuildEventDisbanded : ServerPacket
@@ -395,7 +395,7 @@ namespace Game.Network.Packets
             }
         }
 
-        public List<GuildEventEntry> Entry { get; set; }
+        public List<GuildEventEntry> Entry;
     }
 
     public class GuildEventPlayerLeft : ServerPacket
@@ -421,13 +421,13 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(LeaverName);
         }
 
-        public ObjectGuid LeaverGUID { get; set; }
-        public string LeaverName { get; set; }
-        public uint LeaverVirtualRealmAddress { get; set; }
-        public ObjectGuid RemoverGUID { get; set; }
-        public string RemoverName { get; set; }
-        public uint RemoverVirtualRealmAddress { get; set; }
-        public bool Removed { get; set; }
+        public ObjectGuid LeaverGUID;
+        public string LeaverName;
+        public uint LeaverVirtualRealmAddress;
+        public ObjectGuid RemoverGUID;
+        public string RemoverName;
+        public uint RemoverVirtualRealmAddress;
+        public bool Removed;
     }
 
     public class GuildEventNewLeader : ServerPacket
@@ -449,13 +449,13 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(OldLeaderName);
         }
 
-        public ObjectGuid NewLeaderGUID { get; set; }
-        public string NewLeaderName { get; set; }
-        public uint NewLeaderVirtualRealmAddress { get; set; }
-        public ObjectGuid OldLeaderGUID { get; set; }
-        public string OldLeaderName { get; set; } = "";
-        public uint OldLeaderVirtualRealmAddress { get; set; }
-        public bool SelfPromoted { get; set; }
+        public ObjectGuid NewLeaderGUID;
+        public string NewLeaderName;
+        public uint NewLeaderVirtualRealmAddress;
+        public ObjectGuid OldLeaderGUID;
+        public string OldLeaderName = "";
+        public uint OldLeaderVirtualRealmAddress;
+        public bool SelfPromoted;
     }
 
     public class GuildEventTabAdded : ServerPacket
@@ -481,9 +481,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(Icon);
         }
 
-        public string Icon { get; set; }
-        public string Name { get; set; }
-        public int Tab { get; set; }
+        public string Icon;
+        public string Name;
+        public int Tab;
     }
 
     public class GuildEventTabTextChanged : ServerPacket
@@ -495,7 +495,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(Tab);
         }
 
-        public int Tab { get; set; }
+        public int Tab;
     }
 
     public class GuildEventBankContentsChanged : ServerPacket
@@ -534,16 +534,16 @@ namespace Game.Network.Packets
             }
         }
 
-        public int NumTabs { get; set; }
-        public int WithdrawGoldLimit { get; set; }
-        public int Flags { get; set; }
-        public uint RankID { get; set; }
-        public List<GuildRankTabPermissions> Tab { get; set; }
+        public int NumTabs;
+        public int WithdrawGoldLimit;
+        public int Flags;
+        public uint RankID;
+        public List<GuildRankTabPermissions> Tab;
 
         public struct GuildRankTabPermissions
         {
-            public int Flags { get; set; }
-            public int WithdrawItemLimit { get; set; }
+            public int Flags;
+            public int WithdrawItemLimit;
         }
     }
 
@@ -571,14 +571,14 @@ namespace Game.Network.Packets
             RankName = _worldPacket.ReadString(rankNameLen);
         }
 
-        public int RankID { get; set; }
-        public int RankOrder { get; set; }
-        public int WithdrawGoldLimit { get; set; }
-        public uint Flags { get; set; }
-        public uint OldFlags { get; set; }
-        public int[] TabFlags { get; set; } = new int[GuildConst.MaxBankTabs];
-        public int[] TabWithdrawItemLimit { get; set; } = new int[GuildConst.MaxBankTabs];
-        public string RankName { get; set; }
+        public int RankID;
+        public int RankOrder;
+        public int WithdrawGoldLimit;
+        public uint Flags;
+        public uint OldFlags;
+        public int[] TabFlags = new int[GuildConst.MaxBankTabs];
+        public int[] TabWithdrawItemLimit = new int[GuildConst.MaxBankTabs];
+        public string RankName;
     }
 
     public class GuildAddRank : ClientPacket
@@ -594,8 +594,8 @@ namespace Game.Network.Packets
             Name = _worldPacket.ReadString(nameLen);
         }
 
-        public string Name { get; set; }
-        public int RankOrder { get; set; }
+        public string Name;
+        public int RankOrder;
     }
 
     public class GuildAssignMemberRank : ClientPacket
@@ -608,8 +608,8 @@ namespace Game.Network.Packets
             RankOrder = _worldPacket.ReadInt32();
         }
 
-        public ObjectGuid Member { get; set; }
-        public int RankOrder { get; set; }
+        public ObjectGuid Member;
+        public int RankOrder;
     }
 
     public class GuildDeleteRank : ClientPacket
@@ -621,7 +621,7 @@ namespace Game.Network.Packets
             RankOrder = _worldPacket.ReadInt32();
         }
 
-        public int RankOrder { get; set; }
+        public int RankOrder;
     }
 
     public class GuildGetRanks : ClientPacket
@@ -633,7 +633,7 @@ namespace Game.Network.Packets
             GuildGUID = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid GuildGUID { get; set; }
+        public ObjectGuid GuildGUID;
     }
 
     public class GuildRanks : ServerPacket
@@ -650,7 +650,7 @@ namespace Game.Network.Packets
             Ranks.ForEach(p => p.Write(_worldPacket));
         }
 
-        public List<GuildRankData> Ranks { get; set; }
+        public List<GuildRankData> Ranks;
     }
 
     public class GuildSendRankChange : ServerPacket
@@ -667,10 +667,10 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public ObjectGuid Other { get; set; }
-        public ObjectGuid Officer { get; set; }
-        public bool Promote { get; set; }
-        public uint RankID { get; set; }
+        public ObjectGuid Other;
+        public ObjectGuid Officer;
+        public bool Promote;
+        public uint RankID;
     }
 
     public class GuildShiftRank : ClientPacket
@@ -683,8 +683,8 @@ namespace Game.Network.Packets
             ShiftUp = _worldPacket.HasBit();
         }
 
-        public bool ShiftUp { get; set; }
-        public int RankOrder { get; set; }
+        public bool ShiftUp;
+        public int RankOrder;
     }
 
     public class GuildUpdateInfoText : ClientPacket
@@ -697,7 +697,7 @@ namespace Game.Network.Packets
             InfoText = _worldPacket.ReadString(textLen);
         }
 
-        public string InfoText { get; set; }
+        public string InfoText;
     }
 
     public class GuildSetMemberNote : ClientPacket
@@ -714,9 +714,9 @@ namespace Game.Network.Packets
             Note = _worldPacket.ReadString(noteLen);
         }
 
-        public ObjectGuid NoteeGUID { get; set; }
-        public bool IsPublic { get; set; }          ///< 0 == Officer, 1 == Public
-        public string Note { get; set; }
+        public ObjectGuid NoteeGUID;
+        public bool IsPublic;          ///< 0 == Officer, 1 == Public
+        public string Note;
     }
 
     public class GuildMemberUpdateNote : ServerPacket
@@ -734,9 +734,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(Note);
         }
 
-        public ObjectGuid Member { get; set; }
+        public ObjectGuid Member;
         public bool IsPublic;          ///< 0 == Officer, 1 == Public
-        public string Note { get; set; }
+        public string Note;
     }
 
     public class GuildMemberDailyReset : ServerPacket
@@ -762,7 +762,7 @@ namespace Game.Network.Packets
             Demotee = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Demotee { get; set; }
+        public ObjectGuid Demotee;
     }
 
     public class GuildPromoteMember : ClientPacket
@@ -774,7 +774,7 @@ namespace Game.Network.Packets
             Promotee = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Promotee { get; set; }
+        public ObjectGuid Promotee;
     }
 
     public class GuildOfficerRemoveMember : ClientPacket
@@ -786,7 +786,7 @@ namespace Game.Network.Packets
             Removee = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Removee { get; set; }
+        public ObjectGuid Removee;
     }
 
     public class GuildLeave : ClientPacket
@@ -806,7 +806,7 @@ namespace Game.Network.Packets
             NewName = _worldPacket.ReadString(nameLen);
         }
 
-        public string NewName { get; set; }
+        public string NewName;
     }
 
     public class GuildFlaggedForRename : ServerPacket
@@ -818,7 +818,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteBit(FlagSet);
         }
 
-        public bool FlagSet { get; set; }
+        public bool FlagSet;
     }
 
     public class RequestGuildPartyState : ClientPacket
@@ -830,7 +830,7 @@ namespace Game.Network.Packets
             GuildGUID = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid GuildGUID { get; set; }
+        public ObjectGuid GuildGUID;
     }
 
     public class GuildPartyState : ServerPacket
@@ -847,10 +847,10 @@ namespace Game.Network.Packets
             _worldPacket.WriteFloat(GuildXPEarnedMult);
         }
 
-        public float GuildXPEarnedMult { get; set; } = 0.0f;
-        public int NumMembers { get; set; }
-        public int NumRequired { get; set; }
-        public bool InGuildParty { get; set; }
+        public float GuildXPEarnedMult = 0.0f;
+        public int NumMembers;
+        public int NumRequired;
+        public bool InGuildParty;
     }
 
     public class RequestGuildRewardsList : ClientPacket
@@ -862,7 +862,7 @@ namespace Game.Network.Packets
             CurrentVersion = _worldPacket.ReadUInt32();
         }
 
-        public uint CurrentVersion { get; set; }
+        public uint CurrentVersion;
     }
 
     public class GuildRewardList : ServerPacket
@@ -881,8 +881,8 @@ namespace Game.Network.Packets
                 item.Write(_worldPacket);
         }
 
-        public List<GuildRewardItem> RewardItems { get; set; }
-        public uint Version { get; set; }
+        public List<GuildRewardItem> RewardItems;
+        public uint Version;
     }
 
     public class GuildBankActivate : ClientPacket
@@ -895,8 +895,8 @@ namespace Game.Network.Packets
             FullUpdate = _worldPacket.HasBit();
         }
 
-        public ObjectGuid Banker { get; set; }
-        public bool FullUpdate { get; set; }
+        public ObjectGuid Banker;
+        public bool FullUpdate;
     }
 
     public class GuildBankBuyTab : ClientPacket
@@ -909,8 +909,8 @@ namespace Game.Network.Packets
             BankTab = _worldPacket.ReadUInt8();
         }
 
-        public ObjectGuid Banker { get; set; }
-        public byte BankTab { get; set; }
+        public ObjectGuid Banker;
+        public byte BankTab;
     }
 
     public class GuildBankUpdateTab : ClientPacket
@@ -930,10 +930,10 @@ namespace Game.Network.Packets
             Icon = _worldPacket.ReadString(iconLen);
         }
 
-        public ObjectGuid Banker { get; set; }
-        public byte BankTab { get; set; }
-        public string Name { get; set; }
-        public string Icon { get; set; }
+        public ObjectGuid Banker;
+        public byte BankTab;
+        public string Name;
+        public string Icon;
     }
 
     public class GuildBankDepositMoney : ClientPacket
@@ -946,8 +946,8 @@ namespace Game.Network.Packets
             Money = _worldPacket.ReadUInt64();
         }
 
-        public ObjectGuid Banker { get; set; }
-        public ulong Money { get; set; }
+        public ObjectGuid Banker;
+        public ulong Money;
     }
 
     public class GuildBankQueryTab : ClientPacket
@@ -962,9 +962,9 @@ namespace Game.Network.Packets
             FullUpdate = _worldPacket.HasBit();
         }
 
-        public ObjectGuid Banker { get; set; }
-        public byte Tab { get; set; }
-        public bool FullUpdate { get; set; }
+        public ObjectGuid Banker;
+        public byte Tab;
+        public bool FullUpdate;
     }
 
     public class GuildBankRemainingWithdrawMoneyQuery : ClientPacket
@@ -983,7 +983,7 @@ namespace Game.Network.Packets
             _worldPacket .WriteInt64( RemainingWithdrawMoney);
         }
 
-        public long RemainingWithdrawMoney { get; set; }
+        public long RemainingWithdrawMoney;
     }
 
     public class GuildBankWithdrawMoney : ClientPacket
@@ -996,8 +996,8 @@ namespace Game.Network.Packets
             Money = _worldPacket.ReadUInt64();
         }
 
-        public ObjectGuid Banker { get; set; }
-        public ulong Money { get; set; }
+        public ObjectGuid Banker;
+        public ulong Money;
     }
 
     public class GuildBankQueryResults : ServerPacket
@@ -1048,12 +1048,12 @@ namespace Game.Network.Packets
             }
         }
 
-        public List<GuildBankItemInfo> ItemInfo { get; set; }
-        public List<GuildBankTabInfo> TabInfo { get; set; }
-        public int WithdrawalsRemaining { get; set; }
-        public int Tab { get; set; }
-        public ulong Money { get; set; }
-        public bool FullUpdate { get; set; }
+        public List<GuildBankItemInfo> ItemInfo;
+        public List<GuildBankTabInfo> TabInfo;
+        public int WithdrawalsRemaining;
+        public int Tab;
+        public ulong Money;
+        public bool FullUpdate;
     }
 
     public class GuildBankSwapItems : ClientPacket
@@ -1080,20 +1080,20 @@ namespace Game.Network.Packets
             AutoStore = _worldPacket.HasBit();
         }
 
-        public ObjectGuid Banker { get; set; }
-        public int StackCount { get; set; }
-        public int BankItemCount { get; set; }
-        public uint ItemID { get; set; }
-        public uint ItemID1 { get; set; }
-        public byte ToSlot { get; set; }
-        public byte BankSlot { get; set; }
-        public byte BankSlot1 { get; set; }
-        public byte BankTab { get; set; }
-        public byte BankTab1 { get; set; }
-        public byte ContainerSlot { get; set; }
-        public byte ContainerItemSlot { get; set; }
-        public bool AutoStore { get; set; }
-        public bool BankOnly { get; set; }
+        public ObjectGuid Banker;
+        public int StackCount;
+        public int BankItemCount;
+        public uint ItemID;
+        public uint ItemID1;
+        public byte ToSlot;
+        public byte BankSlot;
+        public byte BankSlot1;
+        public byte BankTab;
+        public byte BankTab1;
+        public byte ContainerSlot;
+        public byte ContainerItemSlot;
+        public bool AutoStore;
+        public bool BankOnly;
     }
 
     public class GuildBankLogQuery : ClientPacket
@@ -1105,7 +1105,7 @@ namespace Game.Network.Packets
             Tab = _worldPacket.ReadInt32();
         }
 
-        public int Tab { get; set; }
+        public int Tab;
     }
 
     public class GuildBankLogQueryResults : ServerPacket
@@ -1151,9 +1151,9 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt64(WeeklyBonusMoney.Value);
         }
 
-        public int Tab { get; set; }
-        public List<GuildBankLogEntry> Entry { get; set; }
-        public Optional<ulong> WeeklyBonusMoney { get; set; }
+        public int Tab;
+        public List<GuildBankLogEntry> Entry;
+        public Optional<ulong> WeeklyBonusMoney;
     }
 
     public class GuildBankTextQuery : ClientPacket
@@ -1165,7 +1165,7 @@ namespace Game.Network.Packets
             Tab = _worldPacket.ReadInt32();
         }
 
-        public int Tab { get; set; }
+        public int Tab;
     }
 
     public class GuildBankTextQueryResult : ServerPacket
@@ -1180,8 +1180,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(Text);
         }
 
-        public int Tab { get; set; }
-        public string Text { get; set; }
+        public int Tab;
+        public string Text;
     }
 
     public class GuildBankSetTabText : ClientPacket
@@ -1194,8 +1194,8 @@ namespace Game.Network.Packets
             TabText = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(14));
         }
 
-        public int Tab { get; set; }
-        public string TabText { get; set; }
+        public int Tab;
+        public string TabText;
     }
 
     public class GuildQueryNews : ClientPacket
@@ -1207,7 +1207,7 @@ namespace Game.Network.Packets
             GuildGUID = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid GuildGUID { get; set; }
+        public ObjectGuid GuildGUID;
     }
 
     public class GuildNewsPkt : ServerPacket
@@ -1224,7 +1224,7 @@ namespace Game.Network.Packets
                 newsEvent.Write(_worldPacket);
         }
 
-        public List<GuildNewsEvent> NewsEvents { get; set; }
+        public List<GuildNewsEvent> NewsEvents;
     }
 
     public class GuildNewsUpdateSticky : ClientPacket
@@ -1239,9 +1239,9 @@ namespace Game.Network.Packets
             Sticky = _worldPacket.HasBit();
         }
 
-        public int NewsID { get; set; }
-        public ObjectGuid GuildGUID { get; set; }
-        public bool Sticky { get; set; }
+        public int NewsID;
+        public ObjectGuid GuildGUID;
+        public bool Sticky;
     }
 
     public class GuildSetGuildMaster : ClientPacket
@@ -1254,7 +1254,7 @@ namespace Game.Network.Packets
             NewMasterName = _worldPacket.ReadString(nameLen);
         }
 
-        public string NewMasterName { get; set; }
+        public string NewMasterName;
     }
 
     public class GuildChallengeUpdateRequest : ClientPacket
@@ -1283,10 +1283,10 @@ namespace Game.Network.Packets
                 _worldPacket.WriteInt32(Gold[i]);
         }
 
-        public int[] CurrentCount { get; set; } = new int[GuildConst.ChallengesTypes];
-        public int[] MaxCount { get; set; } = new int[GuildConst.ChallengesTypes];
-        public int[] Gold { get; set; } = new int[GuildConst.ChallengesTypes];
-        public int[] MaxLevelGold { get; set; } = new int[GuildConst.ChallengesTypes];
+        public int[] CurrentCount = new int[GuildConst.ChallengesTypes];
+        public int[] MaxCount = new int[GuildConst.ChallengesTypes];
+        public int[] Gold = new int[GuildConst.ChallengesTypes];
+        public int[] MaxLevelGold = new int[GuildConst.ChallengesTypes];
     }
 
     public class SaveGuildEmblem : ClientPacket
@@ -1303,12 +1303,12 @@ namespace Game.Network.Packets
             Bg = _worldPacket.ReadUInt32();
         }
 
-        public ObjectGuid Vendor { get; set; }
-        public uint BStyle { get; set; }
-        public uint EStyle { get; set; }
-        public uint BColor { get; set; }
-        public uint EColor { get; set; }
-        public uint Bg { get; set; }
+        public ObjectGuid Vendor;
+        public uint BStyle;
+        public uint EStyle;
+        public uint BColor;
+        public uint EColor;
+        public uint Bg;
     }
 
     public class PlayerSaveGuildEmblem : ServerPacket
@@ -1320,7 +1320,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(Error);
         }
 
-        public GuildEmblemError Error { get; set; }
+        public GuildEmblemError Error;
     }
 
     class GuildSetAchievementTracking : ClientPacket
@@ -1335,7 +1335,7 @@ namespace Game.Network.Packets
                 AchievementIDs.Add(_worldPacket.ReadUInt32());
         }
 
-        public List<uint> AchievementIDs { get; set; } = new List<uint>();
+        public List<uint> AchievementIDs = new List<uint>();
     }
 
     class GuildNameChanged : ServerPacket
@@ -1350,8 +1350,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(GuildName);
         }
 
-        public ObjectGuid GuildGUID { get; set; }
-        public string GuildName { get; set; }
+        public ObjectGuid GuildGUID;
+        public string GuildName;
     }
 
     //Structs
@@ -1364,9 +1364,9 @@ namespace Game.Network.Packets
             data.WriteInt32(Step);
         }
 
-        public int DbID { get; set; }
-        public int Rank { get; set; }
-        public int Step { get; set; }
+        public int DbID;
+        public int Rank;
+        public int Step;
     }
 
     public class GuildRosterMemberData
@@ -1400,35 +1400,35 @@ namespace Game.Network.Packets
             data.WriteString(OfficerNote);
         }
 
-        public ObjectGuid Guid { get; set; }
-        public long WeeklyXP { get; set; }
-        public long TotalXP { get; set; }
-        public int RankID { get; set; }
-        public int AreaID { get; set; }
-        public int PersonalAchievementPoints { get; set; }
-        public int GuildReputation { get; set; }
-        public int GuildRepToCap { get; set; }
-        public float LastSave { get; set; }
-        public string Name { get; set; }
-        public uint VirtualRealmAddress { get; set; }
-        public string Note { get; set; }
-        public string OfficerNote { get; set; }
-        public byte Status { get; set; }
-        public byte Level { get; set; }
-        public byte ClassID { get; set; }
-        public byte Gender { get; set; }
-        public bool Authenticated { get; set; }
-        public bool SorEligible { get; set; }
-        public GuildRosterProfessionData[] Profession { get; set; } = new GuildRosterProfessionData[2];
+        public ObjectGuid Guid;
+        public long WeeklyXP;
+        public long TotalXP;
+        public int RankID;
+        public int AreaID;
+        public int PersonalAchievementPoints;
+        public int GuildReputation;
+        public int GuildRepToCap;
+        public float LastSave;
+        public string Name;
+        public uint VirtualRealmAddress;
+        public string Note;
+        public string OfficerNote;
+        public byte Status;
+        public byte Level;
+        public byte ClassID;
+        public byte Gender;
+        public bool Authenticated;
+        public bool SorEligible;
+        public GuildRosterProfessionData[] Profession = new GuildRosterProfessionData[2];
     }
 
     public struct GuildEventEntry
     {
-        public ObjectGuid PlayerGUID { get; set; }
-        public ObjectGuid OtherGUID { get; set; }
-        public byte TransactionType { get; set; }
-        public byte RankID { get; set; }
-        public uint TransactionDate { get; set; }
+        public ObjectGuid PlayerGUID;
+        public ObjectGuid OtherGUID;
+        public byte TransactionType;
+        public byte RankID;
+        public uint TransactionDate;
     }
 
     public class GuildRankData
@@ -1450,13 +1450,13 @@ namespace Game.Network.Packets
             data.WriteString(RankName);
         }
 
-        public uint RankID { get; set; }
-        public uint RankOrder { get; set; }
-        public uint Flags { get; set; }
-        public uint WithdrawGoldLimit { get; set; }
-        public string RankName { get; set; }
-        public uint[] TabFlags { get; set; } = new uint[GuildConst.MaxBankTabs];
-        public uint[] TabWithdrawItemLimit { get; set; } = new uint[GuildConst.MaxBankTabs];
+        public uint RankID;
+        public uint RankOrder;
+        public uint Flags;
+        public uint WithdrawGoldLimit;
+        public string RankName;
+        public uint[] TabFlags = new uint[GuildConst.MaxBankTabs];
+        public uint[] TabWithdrawItemLimit = new uint[GuildConst.MaxBankTabs];
     }
 
     public class GuildRewardItem
@@ -1475,44 +1475,44 @@ namespace Game.Network.Packets
                 data.WriteUInt32(achievementId);
         }
 
-        public uint ItemID { get; set; }
-        public uint Unk4 { get; set; }
-        public List<uint> AchievementsRequired { get; set; } = new List<uint>();
-        public uint RaceMask { get; set; }
-        public int MinGuildLevel { get; set; }
-        public int MinGuildRep { get; set; }
-        public ulong Cost { get; set; }
+        public uint ItemID;
+        public uint Unk4;
+        public List<uint> AchievementsRequired = new List<uint>();
+        public uint RaceMask;
+        public int MinGuildLevel;
+        public int MinGuildRep;
+        public ulong Cost;
     }
 
     public class GuildBankItemInfo
     {
-        public ItemInstance Item { get; set; }
-        public int Slot { get; set; }
-        public int Count { get; set; }
-        public int EnchantmentID { get; set; }
-        public int Charges { get; set; }
-        public int OnUseEnchantmentID { get; set; }
-        public int Flags { get; set; }
-        public bool Locked { get; set; }
-        public List<ItemGemData> SocketEnchant { get; set; } = new List<ItemGemData>();
+        public ItemInstance Item;
+        public int Slot;
+        public int Count;
+        public int EnchantmentID;
+        public int Charges;
+        public int OnUseEnchantmentID;
+        public int Flags;
+        public bool Locked;
+        public List<ItemGemData> SocketEnchant = new List<ItemGemData>();
     }
 
     public struct GuildBankTabInfo
     {
-        public int TabIndex { get; set; }
-        public string Name { get; set; }
-        public string Icon { get; set; }
+        public int TabIndex;
+        public string Name;
+        public string Icon;
     }
 
     public struct GuildBankLogEntry
     {
-        public ObjectGuid PlayerGUID { get; set; }
-        public uint TimeOffset { get; set; }
-        public sbyte EntryType { get; set; }
-        public Optional<ulong> Money { get; set; }
-        public Optional<int> ItemID { get; set; }
-        public Optional<int> Count { get; set; }
-        public Optional<sbyte> OtherTab { get; set; }
+        public ObjectGuid PlayerGUID;
+        public uint TimeOffset;
+        public sbyte EntryType;
+        public Optional<ulong> Money;
+        public Optional<int> ItemID;
+        public Optional<int> Count;
+        public Optional<sbyte> OtherTab;
     }
 
     public class GuildNewsEvent
@@ -1540,13 +1540,13 @@ namespace Game.Network.Packets
                 Item.Value.Write(data);
         }
 
-        public int Id { get; set; }
-        public uint CompletedDate { get; set; }
-        public int Type { get; set; }
-        public int Flags { get; set; }
-        public int[] Data { get; set; } = new int[2];
-        public ObjectGuid MemberGuid { get; set; }
-        public List<ObjectGuid> MemberList { get; set; } = new List<ObjectGuid>();
-        public Optional<ItemInstance> Item { get; set; }
+        public int Id;
+        public uint CompletedDate;
+        public int Type;
+        public int Flags;
+        public int[] Data = new int[2];
+        public ObjectGuid MemberGuid;
+        public List<ObjectGuid> MemberList = new List<ObjectGuid>();
+        public Optional<ItemInstance> Item;
     }
 }

@@ -31,9 +31,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(ExpireTime);
         }
 
-        public ulong QueueID { get; set; }
-        public int AreaID { get; set; }
-        public long ExpireTime { get; set; }
+        public ulong QueueID;
+        public int AreaID;
+        public long ExpireTime;
     }
 
     class BFMgrEntryInviteResponse : ClientPacket
@@ -46,8 +46,8 @@ namespace Game.Network.Packets
             AcceptedInvite = _worldPacket.HasBit();
         }
 
-        public ulong QueueID { get; set; }
-        public bool AcceptedInvite { get; set; }
+        public ulong QueueID;
+        public bool AcceptedInvite;
     }
 
     class BFMgrQueueInvite : ServerPacket
@@ -67,14 +67,14 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public ulong QueueID { get; set; }
-        public BattlefieldState BattleState { get; set; }
-        public uint Timeout { get; set; } = uint.MaxValue;    // unused in client
-        public int MinLevel { get; set; }                     // unused in client
-        public int MaxLevel { get; set; }                     // unused in client
-        public int MapID { get; set; }                        // unused in client
-        public uint InstanceID { get; set; }                  // unused in client
-        public sbyte Index { get; set; }                      // unused in client
+        public ulong QueueID;
+        public BattlefieldState BattleState;
+        public uint Timeout = uint.MaxValue;    // unused in client
+        public int MinLevel;                                     // unused in client
+        public int MaxLevel;                                     // unused in client
+        public int MapID;                                        // unused in client
+        public uint InstanceID;                                  // unused in client
+        public sbyte Index;                                         // unused in client
     }
 
     class BFMgrQueueInviteResponse : ClientPacket
@@ -87,8 +87,8 @@ namespace Game.Network.Packets
             AcceptedInvite = _worldPacket.HasBit();
         }
 
-        public ulong QueueID { get; set; }
-        public bool AcceptedInvite { get; set; }
+        public ulong QueueID;
+        public bool AcceptedInvite;
     }
 
     class BFMgrQueueRequestResponse : ServerPacket
@@ -106,12 +106,12 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public ulong QueueID { get; set; }
-        public int AreaID { get; set; }
-        public sbyte Result { get; set; }
-        public ObjectGuid FailedPlayerGUID { get; set; }
-        public BattlefieldState BattleState { get; set; }
-        public bool LoggingIn { get; set; }
+        public ulong QueueID;
+        public int AreaID;
+        public sbyte Result;
+        public ObjectGuid FailedPlayerGUID;
+        public BattlefieldState BattleState;
+        public bool LoggingIn;
     }
 
     class BFMgrQueueExitRequest : ClientPacket
@@ -123,7 +123,7 @@ namespace Game.Network.Packets
             QueueID = _worldPacket.ReadUInt64();
         }
 
-        public ulong QueueID { get; set; }
+        public ulong QueueID;
     }
 
     class BFMgrEntering : ServerPacket
@@ -138,10 +138,10 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt64(QueueID);
         }
 
-        public bool ClearedAFK { get; set; }
-        public bool Relocated { get; set; }
-        public bool OnOffense { get; set; }
-        public ulong QueueID { get; set; }
+        public bool ClearedAFK;
+        public bool Relocated;
+        public bool OnOffense;
+        public ulong QueueID;
     }
 
     class BFMgrEjected : ServerPacket
@@ -157,10 +157,10 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public ulong QueueID { get; set; }
-        public BFLeaveReason Reason { get; set; }
-        public BattlefieldState BattleState { get; set; }
-        public bool Relocated { get; set; }
+        public ulong QueueID;
+        public BFLeaveReason Reason;
+        public BattlefieldState BattleState;
+        public bool Relocated;
     }
 
     public class AreaSpiritHealerTime : ServerPacket
@@ -173,7 +173,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(TimeLeft);
         }
 
-        public ObjectGuid HealerGuid { get; set; }
-        public uint TimeLeft { get; set; }
+        public ObjectGuid HealerGuid;
+        public uint TimeLeft;
     }
 }

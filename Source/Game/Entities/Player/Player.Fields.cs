@@ -315,9 +315,9 @@ namespace Game.Entities
 
     struct PlayerDynamicFieldSpellModByLabel
     {
-        public uint Mod { get; set; }
-        public float Value { get; set; }
-        public uint Label { get; set; }
+        public uint Mod;
+        public float Value;
+        public uint Label;
     }
 
     public class SpecializationInfo

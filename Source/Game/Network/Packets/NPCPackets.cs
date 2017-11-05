@@ -38,7 +38,7 @@ namespace Game.Network.Packets
             Unit = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Unit { get; set; }
+        public ObjectGuid Unit;
     }
 
     public class GossipMessagePkt : ServerPacket
@@ -86,12 +86,12 @@ namespace Game.Network.Packets
             }
         }
 
-        public List<ClientGossipOptions> GossipOptions { get; set; } = new List<ClientGossipOptions>();
-        public int FriendshipFactionID { get; set; } = 0;
-        public ObjectGuid GossipGUID { get; set; }
-        public List<ClientGossipText> GossipText { get; set; } = new List<ClientGossipText>();
-        public int TextID { get; set; } = 0;
-        public int GossipID { get; set; } = 0;
+        public List<ClientGossipOptions> GossipOptions = new List<ClientGossipOptions>();
+        public int FriendshipFactionID = 0;
+        public ObjectGuid GossipGUID;
+        public List<ClientGossipText> GossipText = new List<ClientGossipText>();
+        public int TextID = 0;
+        public int GossipID = 0;
     }
 
     public class GossipSelectOption : ClientPacket
@@ -108,10 +108,10 @@ namespace Game.Network.Packets
             PromotionCode = _worldPacket.ReadString(length);
         }
 
-        public ObjectGuid GossipUnit { get; set; }
-        public uint GossipIndex { get; set; }
-        public uint GossipID { get; set; }
-        public string PromotionCode { get; set; }
+        public ObjectGuid GossipUnit;
+        public uint GossipIndex;
+        public uint GossipID;
+        public string PromotionCode;
     }
 
     public class GossipComplete : ServerPacket
@@ -135,9 +135,9 @@ namespace Game.Network.Packets
                 item.Write(_worldPacket);
         }
 
-        public byte Reason { get; set; } = 0;
-        public List<VendorItemPkt> Items { get; set; } = new List<VendorItemPkt>();
-        public ObjectGuid Vendor { get; set; }
+        public byte Reason = 0;
+        public List<VendorItemPkt> Items = new List<VendorItemPkt>();
+        public ObjectGuid Vendor;
     }
 
     public class TrainerList : ServerPacket
@@ -170,11 +170,11 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(Greeting);
         }
 
-        public ObjectGuid TrainerGUID { get; set; }
-        public int TrainerType { get; set; }
-        public int TrainerID { get; set; } = 1;
-        public List<TrainerListSpell> Spells { get; set; } = new List<TrainerListSpell>();
-        public string Greeting { get; set; }
+        public ObjectGuid TrainerGUID;
+        public int TrainerType;
+        public int TrainerID = 1;
+        public List<TrainerListSpell> Spells = new List<TrainerListSpell>();
+        public string Greeting;
     }
 
     public class ShowBank : ServerPacket
@@ -186,7 +186,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(Guid);
         }
 
-        public ObjectGuid Guid { get; set; }
+        public ObjectGuid Guid;
     }
 
     public class PlayerTabardVendorActivate : ServerPacket
@@ -198,7 +198,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(Vendor);
         }
 
-        public ObjectGuid Vendor { get; set; }
+        public ObjectGuid Vendor;
     }
 
     class GossipPOI : ServerPacket
@@ -216,10 +216,10 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(Name);
         }
 
-        public uint Flags { get; set; }
-        public Vector2 Pos { get; set; }
-        public uint Icon { get; set; }
-        public uint Importance { get; set; }
+        public uint Flags;
+        public Vector2 Pos;
+        public uint Icon;
+        public uint Importance;
         public string Name;
     }
 
@@ -232,7 +232,7 @@ namespace Game.Network.Packets
             Healer = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Healer { get; set; }
+        public ObjectGuid Healer;
     }
 
     public class SpiritHealerConfirm : ServerPacket
@@ -244,7 +244,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(Unit);
         }
 
-        public ObjectGuid Unit { get; set; }
+        public ObjectGuid Unit;
     }
 
     class TrainerBuySpell : ClientPacket
@@ -258,9 +258,9 @@ namespace Game.Network.Packets
             SpellID= _worldPacket.ReadUInt32();
         }
 
-        public ObjectGuid TrainerGUID { get; set; }
-        public uint TrainerID { get; set; }
-        public uint SpellID { get; set; }
+        public ObjectGuid TrainerGUID;
+        public uint TrainerID;
+        public uint SpellID;
     }
 
     class TrainerBuyFailed : ServerPacket
@@ -274,9 +274,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(TrainerFailedReason);
         }
 
-        public ObjectGuid TrainerGUID { get; set; }
-        public uint SpellID { get; set; }
-        public TrainerFailReason TrainerFailedReason { get; set; }
+        public ObjectGuid TrainerGUID;
+        public uint SpellID;
+        public TrainerFailReason TrainerFailedReason;
     }
 
     class RequestStabledPets : ClientPacket
@@ -288,29 +288,29 @@ namespace Game.Network.Packets
             StableMaster = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid StableMaster { get; set; }
+        public ObjectGuid StableMaster;
     }
 
     //Structs
     public struct ClientGossipOptions
     {
-        public int ClientOption { get; set; }
-        public byte OptionNPC { get; set; }
-        public byte OptionFlags { get; set; }
-        public int OptionCost { get; set; }
-        public string Text { get; set; }
-        public string Confirm { get; set; }
+        public int ClientOption;
+        public byte OptionNPC;
+        public byte OptionFlags;
+        public int OptionCost;
+        public string Text;
+        public string Confirm;
     }
 
     public class ClientGossipText
     {
-        public int QuestID { get; set; }
-        public int QuestType { get; set; }
-        public int QuestLevel { get; set; }
-        public bool Repeatable { get; set; }
+        public int QuestID;
+        public int QuestType;
+        public int QuestLevel;
+        public bool Repeatable;
         public string QuestTitle;
-        public int QuestFlags { get; set; }
-        public int QuestFlagsEx { get; set; }
+        public int QuestFlags;
+        public int QuestFlagsEx;
     }
 
     public class VendorItemPkt
@@ -330,26 +330,26 @@ namespace Game.Network.Packets
             data.FlushBits();
         }
 
-        public int MuID { get; set; }
-        public int Type { get; set; }
-        public ItemInstance Item { get; set; } = new ItemInstance();
-        public int Quantity { get; set; } = -1;
-        public ulong Price { get; set; }
-        public int Durability { get; set; }
-        public int StackCount { get; set; }
-        public int ExtendedCostID { get; set; }
-        public int PlayerConditionFailed { get; set; }
-        public bool DoNotFilterOnVendor { get; set; }
+        public int MuID;
+        public int Type;
+        public ItemInstance Item = new ItemInstance();
+        public int Quantity = -1;
+        public ulong Price;
+        public int Durability;
+        public int StackCount;
+        public int ExtendedCostID;
+        public int PlayerConditionFailed;
+        public bool DoNotFilterOnVendor;
     }
 
     public class TrainerListSpell
     {
-        public uint SpellID { get; set; }
-        public uint MoneyCost { get; set; }
-        public uint ReqSkillLine { get; set; }
-        public uint ReqSkillRank { get; set; }
-        public uint[] ReqAbility { get; set; } = new uint[SharedConst.MaxTrainerspellAbilityReqs];
-        public TrainerSpellState Usable { get; set; }
-        public byte ReqLevel { get; set; }
+        public uint SpellID;
+        public uint MoneyCost;
+        public uint ReqSkillLine;
+        public uint ReqSkillRank;
+        public uint[] ReqAbility = new uint[SharedConst.MaxTrainerspellAbilityReqs];
+        public TrainerSpellState Usable;
+        public byte ReqLevel;
     }
 }

@@ -33,7 +33,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(Result);
         }
 
-        public VoidTransferError Result { get; set; }
+        public VoidTransferError Result;
     }
 
     class UnlockVoidStorage : ClientPacket
@@ -45,7 +45,7 @@ namespace Game.Network.Packets
             Npc = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Npc { get; set; }
+        public ObjectGuid Npc;
     }
 
     class QueryVoidStorage : ClientPacket
@@ -57,7 +57,7 @@ namespace Game.Network.Packets
             Npc = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Npc { get; set; }
+        public ObjectGuid Npc;
     }
 
     class VoidStorageFailed : ServerPacket
@@ -69,7 +69,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(Reason);
         }
 
-        public byte Reason { get; set; } = 0;
+        public byte Reason = 0;
     }
 
     class VoidStorageContents : ServerPacket
@@ -85,7 +85,7 @@ namespace Game.Network.Packets
                 voidItem.Write(_worldPacket);
         }
 
-        public List<VoidItem> Items { get; set; } = new List<VoidItem>();
+        public List<VoidItem> Items = new List<VoidItem>();
     }
 
     class VoidStorageTransfer : ClientPacket
@@ -105,9 +105,9 @@ namespace Game.Network.Packets
                 Withdrawals[i] = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid[] Withdrawals { get; set; } = new ObjectGuid[(int)SharedConst.VoidStorageMaxWithdraw];
-        public ObjectGuid[] Deposits { get; set; } = new ObjectGuid[(int)SharedConst.VoidStorageMaxDeposit];
-        public ObjectGuid Npc { get; set; }
+        public ObjectGuid[] Withdrawals = new ObjectGuid[(int)SharedConst.VoidStorageMaxWithdraw];
+        public ObjectGuid[] Deposits = new ObjectGuid[(int)SharedConst.VoidStorageMaxDeposit];
+        public ObjectGuid Npc;
     }
 
     class VoidStorageTransferChanges : ServerPacket
@@ -127,8 +127,8 @@ namespace Game.Network.Packets
                 _worldPacket.WritePackedGuid(removedItem);
         }
 
-        public List<ObjectGuid> RemovedItems { get; set; } = new List<ObjectGuid>();
-        public List<VoidItem> AddedItems { get; set; } = new List<VoidItem>();
+        public List<ObjectGuid> RemovedItems = new List<ObjectGuid>();
+        public List<VoidItem> AddedItems = new List<VoidItem>();
     }
 
     class SwapVoidItem : ClientPacket
@@ -142,9 +142,9 @@ namespace Game.Network.Packets
             DstSlot = _worldPacket.ReadUInt32();
         }
 
-        public ObjectGuid Npc { get; set; }
-        public ObjectGuid VoidItemGuid { get; set; }
-        public uint DstSlot { get; set; }
+        public ObjectGuid Npc;
+        public ObjectGuid VoidItemGuid;
+        public uint DstSlot;
     }
 
     class VoidItemSwapResponse : ServerPacket
@@ -159,10 +159,10 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(VoidItemSlotB);
         }
 
-        public ObjectGuid VoidItemA { get; set; }
-        public ObjectGuid VoidItemB { get; set; }
-        public uint VoidItemSlotA { get; set; }
-        public uint VoidItemSlotB { get; set; }
+        public ObjectGuid VoidItemA;
+        public ObjectGuid VoidItemB;
+        public uint VoidItemSlotA;
+        public uint VoidItemSlotB;
     }
 
     struct VoidItem
@@ -175,9 +175,9 @@ namespace Game.Network.Packets
             Item.Write(data);
         }
 
-        public ObjectGuid Guid { get; set; }
-        public ObjectGuid Creator { get; set; }
-        public uint Slot { get; set; }
-        public ItemInstance Item { get; set; }
+        public ObjectGuid Guid;
+        public ObjectGuid Creator;
+        public uint Slot;
+        public ItemInstance Item;
     }
 }

@@ -32,7 +32,7 @@ namespace Game.Network.Packets
             Mailbox = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Mailbox { get; set; }
+        public ObjectGuid Mailbox;
     }
 
     public class MailListResult : ServerPacket
@@ -47,8 +47,8 @@ namespace Game.Network.Packets
             Mails.ForEach(p => p.Write(_worldPacket));
         }
 
-        public int TotalNumRecords { get; set; }
-        public List<MailListEntry> Mails { get; set; } = new List<MailListEntry>();
+        public int TotalNumRecords;
+        public List<MailListEntry> Mails = new List<MailListEntry>();
     }
 
     public class MailCreateTextItem : ClientPacket
@@ -61,8 +61,8 @@ namespace Game.Network.Packets
             MailID = _worldPacket.ReadUInt32();
         }
 
-        public ObjectGuid Mailbox { get; set; }
-        public uint MailID { get; set; }
+        public ObjectGuid Mailbox;
+        public uint MailID;
     }
 
     public class SendMail : ClientPacket
@@ -101,23 +101,23 @@ namespace Game.Network.Packets
             }
         }
 
-        public StructSendMail Info { get; set; }
+        public StructSendMail Info;
 
         public class StructSendMail
         {
-            public ObjectGuid Mailbox { get; set; }
-            public int StationeryID { get; set; }
-            public long SendMoney { get; set; }
-            public long Cod { get; set; }
+            public ObjectGuid Mailbox;
+            public int StationeryID;
+            public long SendMoney;
+            public long Cod;
             public string Target;
-            public string Subject { get; set; }
-            public string Body { get; set; }
-            public List<MailAttachment> Attachments { get; set; } = new List<MailAttachment>();
+            public string Subject;
+            public string Body;
+            public List<MailAttachment> Attachments = new List<MailAttachment>();
 
             public struct MailAttachment
             {
-                public byte AttachPosition { get; set; }
-                public ObjectGuid ItemGUID { get; set; }
+                public byte AttachPosition;
+                public ObjectGuid ItemGUID;
             }
         }
     }
@@ -136,12 +136,12 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(QtyInInventory);
         }
 
-        public uint MailID { get; set; }
-        public uint Command { get; set; }
-        public uint ErrorCode { get; set; }
-        public uint BagResult { get; set; }
-        public uint AttachID { get; set; }
-        public uint QtyInInventory { get; set; }
+        public uint MailID;
+        public uint Command;
+        public uint ErrorCode;
+        public uint BagResult;
+        public uint AttachID;
+        public uint QtyInInventory;
     }
 
     public class MailReturnToSender : ClientPacket
@@ -154,8 +154,8 @@ namespace Game.Network.Packets
             SenderGUID = _worldPacket.ReadPackedGuid();
         }
 
-        public uint MailID { get; set; }
-        public ObjectGuid SenderGUID { get; set; }
+        public uint MailID;
+        public ObjectGuid SenderGUID;
     }
 
     public class MailMarkAsRead : ClientPacket
@@ -169,9 +169,9 @@ namespace Game.Network.Packets
             BiReceipt = _worldPacket.HasBit();
         }
 
-        public ObjectGuid Mailbox { get; set; }
-        public uint MailID { get; set; }
-        public bool BiReceipt { get; set; }
+        public ObjectGuid Mailbox;
+        public uint MailID;
+        public bool BiReceipt;
     }
 
     public class MailDelete : ClientPacket
@@ -184,8 +184,8 @@ namespace Game.Network.Packets
             DeleteReason = _worldPacket.ReadInt32();
         }
 
-        public uint MailID { get; set; }
-        public int DeleteReason { get; set; }
+        public uint MailID;
+        public int DeleteReason;
     }
 
     public class MailTakeItem : ClientPacket
@@ -199,9 +199,9 @@ namespace Game.Network.Packets
             AttachID = _worldPacket.ReadUInt32();
         }
 
-        public ObjectGuid Mailbox { get; set; }
-        public uint MailID { get; set; }
-        public uint AttachID { get; set; }
+        public ObjectGuid Mailbox;
+        public uint MailID;
+        public uint AttachID;
     }
 
     public class MailTakeMoney : ClientPacket
@@ -215,9 +215,9 @@ namespace Game.Network.Packets
             Money = _worldPacket.ReadInt64();
         }
 
-        public ObjectGuid Mailbox { get; set; }
-        public uint MailID { get; set; }
-        public long Money { get; set; }
+        public ObjectGuid Mailbox;
+        public uint MailID;
+        public long Money;
     }
 
     public class MailQueryNextMailTime : ClientPacket
@@ -249,8 +249,8 @@ namespace Game.Network.Packets
             }
         }
 
-        public float NextMailTime { get; set; }
-        public List<MailNextTimeEntry> Next { get; set; }
+        public float NextMailTime;
+        public List<MailNextTimeEntry> Next;
 
         public class MailNextTimeEntry
         {
@@ -274,11 +274,11 @@ namespace Game.Network.Packets
                 StationeryID = (int)mail.stationery;
             }
 
-            public ObjectGuid SenderGuid { get; set; }
-            public float TimeLeft { get; set; }
-            public int AltSenderID { get; set; }
-            public sbyte AltSenderType { get; set; }
-            public int StationeryID { get; set; }
+            public ObjectGuid SenderGuid;
+            public float TimeLeft;
+            public int AltSenderID;
+            public sbyte AltSenderType;
+            public int StationeryID;
         }
     }
 
@@ -291,7 +291,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteFloat(Delay);
         }
 
-        public float Delay { get; set; } = 0.0f;
+        public float Delay = 0.0f;
     }
 
     class ShowMailbox : ServerPacket
@@ -303,7 +303,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(PostmasterGUID);
         }
 
-        public ObjectGuid PostmasterGUID { get; set; }
+        public ObjectGuid PostmasterGUID;
     }
 
     //Structs
@@ -363,14 +363,14 @@ namespace Game.Network.Packets
                 en.Write(data);
         }
 
-        public byte Position { get; set; }
-        public int AttachID { get; set; }
-        public ItemInstance Item { get; set; }
-        public uint Count { get; set; }
-        public int Charges { get; set; }
-        public uint MaxDurability { get; set; }
-        public uint Durability { get; set; }
-        public bool Unlocked { get; set; }
+        public byte Position;
+        public int AttachID;
+        public ItemInstance Item;
+        public uint Count;
+        public int Charges;
+        public uint MaxDurability;
+        public uint Durability;
+        public bool Unlocked;
         List<ItemEnchantData> Enchants = new List<ItemEnchantData>();
         List<ItemGemData> Gems= new List<ItemGemData>();
     }
@@ -442,18 +442,18 @@ namespace Game.Network.Packets
             data.WriteString(Body);
         }
 
-        public int MailID { get; set; }
-        public byte SenderType { get; set; }
-        public Optional<ObjectGuid> SenderCharacter { get; set; }
-        public Optional<uint> AltSenderID { get; set; }
-        public ulong Cod { get; set; }
-        public int StationeryID { get; set; }
-        public ulong SentMoney { get; set; }
-        public int Flags { get; set; }
-        public float DaysLeft { get; set; }
-        public int MailTemplateID { get; set; }
-        public string Subject { get; set; }
-        public string Body { get; set; }
-        public List<MailAttachedItem> Attachments { get; set; } = new List<MailAttachedItem>();
+        public int MailID;
+        public byte SenderType;
+        public Optional<ObjectGuid> SenderCharacter;
+        public Optional<uint> AltSenderID;
+        public ulong Cod;
+        public int StationeryID;
+        public ulong SentMoney;
+        public int Flags;
+        public float DaysLeft;
+        public int MailTemplateID;
+        public string Subject;
+        public string Body;
+        public List<MailAttachedItem> Attachments = new List<MailAttachedItem>();
     }
 }

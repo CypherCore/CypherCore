@@ -375,7 +375,7 @@ namespace Game
             // not let move dead pet in slot
             if (pet && pet.IsAlive() && pet.getPetType() == PetType.Hunter)
             {
-                PetStableInfo stableEntry = new PetStableInfo();
+                PetStableInfo stableEntry;// = new PetStableInfo();
                 stableEntry.PetSlot = petSlot;
                 stableEntry.PetNumber = pet.GetCharmInfo().GetPetNumber();
                 stableEntry.CreatureID = pet.GetEntry();
@@ -392,7 +392,7 @@ namespace Game
             {
                 do
                 {
-                    PetStableInfo stableEntry = new PetStableInfo();
+                    PetStableInfo stableEntry;// = new PetStableInfo();
 
                     stableEntry.PetSlot = petSlot;
                     stableEntry.PetNumber = result.Read<uint>(1);          // petnumber

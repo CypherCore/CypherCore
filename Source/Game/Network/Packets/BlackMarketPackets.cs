@@ -30,7 +30,7 @@ namespace Game.Network.Packets
             Guid = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Guid { get; set; }
+        public ObjectGuid Guid;
     }
 
     class BlackMarketOpenResult : ServerPacket
@@ -44,8 +44,8 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public ObjectGuid Guid { get; set; }
-        public bool Enable { get; set; } = true;
+        public ObjectGuid Guid;
+        public bool Enable = true;
     }
 
     class BlackMarketRequestItems : ClientPacket
@@ -58,8 +58,8 @@ namespace Game.Network.Packets
             LastUpdateID = _worldPacket.ReadUInt32();
         }
 
-        public ObjectGuid Guid { get; set; }
-        public uint LastUpdateID { get; set; }
+        public ObjectGuid Guid;
+        public uint LastUpdateID;
     }
 
     public class BlackMarketRequestItemsResult : ServerPacket
@@ -75,8 +75,8 @@ namespace Game.Network.Packets
                 item.Write(_worldPacket);
         }
 
-        public int LastUpdateID { get; set; }
-        public List<BlackMarketItem> Items { get; set; } = new List<BlackMarketItem>();
+        public int LastUpdateID;
+        public List<BlackMarketItem> Items = new List<BlackMarketItem>();
     }
 
     class BlackMarketBidOnItem : ClientPacket
@@ -91,10 +91,10 @@ namespace Game.Network.Packets
             Item.Read(_worldPacket);
         }
 
-        public ObjectGuid Guid { get; set; }
-        public uint MarketID { get; set; }
-        public ItemInstance Item { get; set; } = new ItemInstance();
-        public ulong BidAmount { get; set; }
+        public ObjectGuid Guid;
+        public uint MarketID;
+        public ItemInstance Item = new ItemInstance();
+        public ulong BidAmount;
     }
 
     class BlackMarketBidOnItemResult : ServerPacket
@@ -108,9 +108,9 @@ namespace Game.Network.Packets
             Item.Write(_worldPacket);
         }
 
-        public uint MarketID { get; set; }
-        public ItemInstance Item { get; set; }
-        public BlackMarketError Result { get; set; }
+        public uint MarketID;
+        public ItemInstance Item;
+        public BlackMarketError Result;
     }
 
     class BlackMarketOutbid : ServerPacket
@@ -124,9 +124,9 @@ namespace Game.Network.Packets
             Item.Write(_worldPacket);
         }
 
-        public uint MarketID { get; set; }
-        public ItemInstance Item { get; set; }
-        public uint RandomPropertiesID { get; set; }
+        public uint MarketID;
+        public ItemInstance Item;
+        public uint RandomPropertiesID;
     }
 
     class BlackMarketWon : ServerPacket
@@ -140,9 +140,9 @@ namespace Game.Network.Packets
             Item.Write(_worldPacket);
         }
 
-        public uint MarketID { get; set; }
-        public ItemInstance Item { get; set; }
-        public int RandomPropertiesID { get; set; }
+        public uint MarketID;
+        public ItemInstance Item;
+        public int RandomPropertiesID;
     }
 
     public struct BlackMarketItem
@@ -176,15 +176,15 @@ namespace Game.Network.Packets
             data.FlushBits();
         }
 
-        public uint MarketID { get; set; }
-        public uint SellerNPC { get; set; }
-        public ItemInstance Item { get; set; }
-        public uint Quantity { get; set; }
-        public ulong MinBid { get; set; }
-        public ulong MinIncrement { get; set; }
-        public ulong CurrentBid { get; set; }
-        public uint SecondsRemaining { get; set; }
-        public uint NumBids { get; set; }
-        public bool HighBid { get; set; }
+        public uint MarketID;
+        public uint SellerNPC;
+        public ItemInstance Item;
+        public uint Quantity;
+        public ulong MinBid;
+        public ulong MinIncrement;
+        public ulong CurrentBid;
+        public uint SecondsRemaining;
+        public uint NumBids;
+        public bool HighBid;
     }
 }

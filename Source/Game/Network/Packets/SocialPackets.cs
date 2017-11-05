@@ -30,7 +30,7 @@ namespace Game.Network.Packets
             Flags = (SocialFlag)_worldPacket.ReadUInt32();
         }
 
-        public SocialFlag Flags { get; set; }
+        public SocialFlag Flags;
     }
 
     public class ContactList : ServerPacket
@@ -49,8 +49,8 @@ namespace Game.Network.Packets
             Contacts.ForEach(p => p.Write(_worldPacket));
         }
 
-        public List<ContactInfo> Contacts { get; set; }
-        public SocialFlag Flags { get; set; }
+        public List<ContactInfo> Contacts;
+        public SocialFlag Flags;
     }
 
     public class FriendStatusPkt : ServerPacket
@@ -85,15 +85,15 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(Notes);
         }
 
-        public uint VirtualRealmAddress { get; set; }
-        public string Notes { get; set; }
-        public Class ClassID { get; set; } = Class.None;
-        public FriendStatus Status { get; set; }
-        public ObjectGuid Guid { get; set; }
-        public ObjectGuid WowAccountGuid { get; set; }
-        public uint Level { get; set; }
-        public uint AreaID { get; set; }
-        public FriendsResult FriendResult { get; set; }
+        public uint VirtualRealmAddress;
+        public string Notes;
+        public Class ClassID = Class.None;
+        public FriendStatus Status;
+        public ObjectGuid Guid;
+        public ObjectGuid WowAccountGuid;
+        public uint Level;
+        public uint AreaID;
+        public FriendsResult FriendResult;
     }
 
     public class AddFriend : ClientPacket
@@ -108,7 +108,7 @@ namespace Game.Network.Packets
             Notes = _worldPacket.ReadString(noteslength);
         }
 
-        public string Notes { get; set; }
+        public string Notes;
         public string Name;
     }
 
@@ -121,7 +121,7 @@ namespace Game.Network.Packets
             Player.Read(_worldPacket);
         }
 
-        public QualifiedGUID Player { get; set; }
+        public QualifiedGUID Player;
     }
 
     public class SetContactNotes : ClientPacket
@@ -134,8 +134,8 @@ namespace Game.Network.Packets
             Notes = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(10));
         }
 
-        public QualifiedGUID Player { get; set; }
-        public string Notes { get; set; }
+        public QualifiedGUID Player;
+        public string Notes;
     }
 
     public class AddIgnore : ClientPacket
@@ -159,7 +159,7 @@ namespace Game.Network.Packets
             Player.Read(_worldPacket);
         }
 
-        public QualifiedGUID Player { get; set; }
+        public QualifiedGUID Player;
     }
 
     //Structs
@@ -215,7 +215,7 @@ namespace Game.Network.Packets
             Guid = data.ReadPackedGuid();
         }
 
-        public ObjectGuid Guid { get; set; }
-        public uint VirtualRealmAddress { get; set; }
+        public ObjectGuid Guid;
+        public uint VirtualRealmAddress;
     }
 }

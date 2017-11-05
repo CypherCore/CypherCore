@@ -766,8 +766,5 @@ namespace Game.Entities
         List<ObjectGuid> _insideUnits = new List<ObjectGuid>();
 
         AreaTriggerAI _ai;
-
-        public Vector3 RollPitchYaw { get => _rollPitchYaw; set => _rollPitchYaw = value; }
-        public Vector3 TargetRollPitchYaw { get => _targetRollPitchYaw; set => _targetRollPitchYaw = value; }
     }
 }

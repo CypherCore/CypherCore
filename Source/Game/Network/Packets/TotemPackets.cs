@@ -30,8 +30,8 @@ namespace Game.Network.Packets
             TotemGUID = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid TotemGUID { get; set; }
-        public byte Slot { get; set; }
+        public ObjectGuid TotemGUID;
+        public byte Slot;
     }
 
     class TotemCreated : ServerPacket
@@ -49,12 +49,12 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public ObjectGuid Totem { get; set; }
-        public uint SpellID { get; set; }
-        public uint Duration { get; set; }
-        public byte Slot { get; set; }
-        public float TimeMod { get; set; } = 1.0f;
-        public bool CannotDismiss { get; set; }
+        public ObjectGuid Totem;
+        public uint SpellID;
+        public uint Duration;
+        public byte Slot;
+        public float TimeMod = 1.0f;
+        public bool CannotDismiss;
     }
 
     class TotemMoved : ServerPacket
@@ -68,8 +68,8 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(Totem);
         }
 
-        public ObjectGuid Totem { get; set; }
-        public byte Slot { get; set; }
-        public byte NewSlot { get; set; }
+        public ObjectGuid Totem;
+        public byte Slot;
+        public byte NewSlot;
     }
 }

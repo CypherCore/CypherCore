@@ -34,12 +34,12 @@ namespace Game.Network.Packets
             _worldPacket.WriteXYZO(Location);
         }
 
-        public uint SceneID { get; set; }
-        public uint PlaybackFlags { get; set; }
-        public uint SceneInstanceID { get; set; }
-        public uint SceneScriptPackageID { get; set; }
-        public ObjectGuid TransportGUID { get; set; }
-        public Position Location { get; set; }
+        public uint SceneID;
+        public uint PlaybackFlags;
+        public uint SceneInstanceID;
+        public uint SceneScriptPackageID;
+        public ObjectGuid TransportGUID;
+        public Position Location;
     }
 
     class CancelScene : ServerPacket
@@ -51,7 +51,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(SceneInstanceID);
         }
 
-        public uint SceneInstanceID { get; set; }
+        public uint SceneInstanceID;
     }
 
     class SceneTriggerEvent : ClientPacket
@@ -65,8 +65,8 @@ namespace Game.Network.Packets
             _Event = _worldPacket.ReadString(len);
         }
 
-        public uint SceneInstanceID { get; set; }
-        public string _Event { get; set; }
+        public uint SceneInstanceID;
+        public string _Event;
     }
 
     class ScenePlaybackComplete : ClientPacket
@@ -78,7 +78,7 @@ namespace Game.Network.Packets
             SceneInstanceID = _worldPacket.ReadUInt32();
         }
 
-        public uint SceneInstanceID { get; set; }
+        public uint SceneInstanceID;
     }
 
     class ScenePlaybackCanceled : ClientPacket
@@ -90,6 +90,6 @@ namespace Game.Network.Packets
             SceneInstanceID = _worldPacket.ReadUInt32();
         }
 
-        public uint SceneInstanceID { get; set; }
+        public uint SceneInstanceID;
     }
 }

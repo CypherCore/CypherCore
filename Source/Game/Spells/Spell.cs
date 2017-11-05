@@ -3519,7 +3519,7 @@ namespace Game.Spells
             {
                 foreach (SpellPowerCost cost in m_powerCost)
                 {
-                    SpellPowerData powerData = new SpellPowerData();
+                    SpellPowerData powerData;
                     powerData.Type = cost.Power;
                     powerData.Cost = m_caster.GetPower(cost.Power);
                     castData.RemainingPower.Add(powerData);
@@ -3637,7 +3637,7 @@ namespace Game.Spells
                 castData.RemainingPower = new List<SpellPowerData>();
                 foreach (SpellPowerCost cost in m_powerCost)
                 {
-                    SpellPowerData powerData = new SpellPowerData();
+                    SpellPowerData powerData;
                     powerData.Type = cost.Power;
                     powerData.Cost = m_caster.GetPower(cost.Power);
                     castData.RemainingPower.Add(powerData);
@@ -3827,7 +3827,7 @@ namespace Game.Spells
 
         void ExecuteLogEffectTakeTargetPower(uint effIndex, Unit target, PowerType powerType, uint points, float amplitude)
         {
-            SpellLogEffectPowerDrainParams spellLogEffectPowerDrainParams = new SpellLogEffectPowerDrainParams();
+            SpellLogEffectPowerDrainParams spellLogEffectPowerDrainParams;
 
             spellLogEffectPowerDrainParams.Victim = target.GetGUID();
             spellLogEffectPowerDrainParams.Points = points;
@@ -3839,7 +3839,7 @@ namespace Game.Spells
 
         void ExecuteLogEffectExtraAttacks(uint effIndex, Unit victim, uint numAttacks)
         {
-            SpellLogEffectExtraAttacksParams spellLogEffectExtraAttacksParams = new SpellLogEffectExtraAttacksParams();
+            SpellLogEffectExtraAttacksParams spellLogEffectExtraAttacksParams;
             spellLogEffectExtraAttacksParams.Victim = victim.GetGUID();
             spellLogEffectExtraAttacksParams.NumAttacks = numAttacks;
 
@@ -3859,7 +3859,7 @@ namespace Game.Spells
 
         void ExecuteLogEffectDurabilityDamage(uint effIndex, Unit victim, int itemId, int amount)
         {
-            SpellLogEffectDurabilityDamageParams spellLogEffectDurabilityDamageParams = new SpellLogEffectDurabilityDamageParams();
+            SpellLogEffectDurabilityDamageParams spellLogEffectDurabilityDamageParams;
             spellLogEffectDurabilityDamageParams.Victim = victim.GetGUID();
             spellLogEffectDurabilityDamageParams.ItemID = itemId;
             spellLogEffectDurabilityDamageParams.Amount = amount;
@@ -3869,7 +3869,7 @@ namespace Game.Spells
 
         void ExecuteLogEffectOpenLock(uint effIndex, WorldObject obj)
         {
-            SpellLogEffectGenericVictimParams spellLogEffectGenericVictimParams = new SpellLogEffectGenericVictimParams();
+            SpellLogEffectGenericVictimParams spellLogEffectGenericVictimParams;
             spellLogEffectGenericVictimParams.Victim = obj.GetGUID();
 
             _genericVictimTargets.Add(effIndex, spellLogEffectGenericVictimParams);
@@ -3877,7 +3877,7 @@ namespace Game.Spells
 
         void ExecuteLogEffectCreateItem(uint effIndex, uint entry)
         {
-            SpellLogEffectTradeSkillItemParams spellLogEffectTradeSkillItemParams = new SpellLogEffectTradeSkillItemParams();
+            SpellLogEffectTradeSkillItemParams spellLogEffectTradeSkillItemParams;
             spellLogEffectTradeSkillItemParams.ItemID = (int)entry;
 
             _tradeSkillTargets.Add(effIndex, spellLogEffectTradeSkillItemParams);
@@ -3885,7 +3885,7 @@ namespace Game.Spells
 
         void ExecuteLogEffectDestroyItem(uint effIndex, uint entry)
         {
-            SpellLogEffectFeedPetParams spellLogEffectFeedPetParams = new SpellLogEffectFeedPetParams();
+            SpellLogEffectFeedPetParams spellLogEffectFeedPetParams;
             spellLogEffectFeedPetParams.ItemID = (int)entry;
 
             _feedPetTargets.Add(effIndex, spellLogEffectFeedPetParams);
@@ -3893,7 +3893,7 @@ namespace Game.Spells
 
         void ExecuteLogEffectSummonObject(uint effIndex, WorldObject obj)
         {
-            SpellLogEffectGenericVictimParams spellLogEffectGenericVictimParams = new SpellLogEffectGenericVictimParams();
+            SpellLogEffectGenericVictimParams spellLogEffectGenericVictimParams;
             spellLogEffectGenericVictimParams.Victim = obj.GetGUID();
 
             _genericVictimTargets.Add(effIndex, spellLogEffectGenericVictimParams);
@@ -3901,7 +3901,7 @@ namespace Game.Spells
 
         void ExecuteLogEffectUnsummonObject(uint effIndex, WorldObject obj)
         {
-            SpellLogEffectGenericVictimParams spellLogEffectGenericVictimParams = new SpellLogEffectGenericVictimParams();
+            SpellLogEffectGenericVictimParams spellLogEffectGenericVictimParams;
             spellLogEffectGenericVictimParams.Victim = obj.GetGUID();
 
             _genericVictimTargets.Add(effIndex, spellLogEffectGenericVictimParams);
@@ -3909,7 +3909,7 @@ namespace Game.Spells
 
         void ExecuteLogEffectResurrect(uint effIndex, Unit target)
         {
-            SpellLogEffectGenericVictimParams spellLogEffectGenericVictimParams = new SpellLogEffectGenericVictimParams();
+            SpellLogEffectGenericVictimParams spellLogEffectGenericVictimParams;
             spellLogEffectGenericVictimParams.Victim = target.GetGUID();
 
             _genericVictimTargets.Add(effIndex, spellLogEffectGenericVictimParams);

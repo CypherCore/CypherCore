@@ -30,7 +30,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(MapID);
         }
 
-        public uint MapID { get; set; }
+        public uint MapID;
     }
 
     class InstanceInfoPkt : ServerPacket
@@ -45,7 +45,7 @@ namespace Game.Network.Packets
                 lockInfos.Write(_worldPacket);
         }
 
-        public List<InstanceLockInfos> LockList { get; set; } = new List<InstanceLockInfos>();
+        public List<InstanceLockInfos> LockList = new List<InstanceLockInfos>();
     }
 
     class ResetInstances : ClientPacket
@@ -64,7 +64,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(MapID);
         }
 
-        public uint MapID { get; set; }
+        public uint MapID;
     }
 
     class InstanceResetFailed : ServerPacket
@@ -78,8 +78,8 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public uint MapID { get; set; }
-        public ResetFailedReason ResetFailedReason { get; set; }
+        public uint MapID;
+        public ResetFailedReason ResetFailedReason;
     }
 
     class ResetFailedNotify : ServerPacket
@@ -99,7 +99,7 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public bool Gm { get; set; }
+        public bool Gm;
     }
 
     class InstanceLockResponse : ClientPacket
@@ -111,7 +111,7 @@ namespace Game.Network.Packets
             AcceptLock = _worldPacket.HasBit();
         }
 
-        public bool AcceptLock { get; set; }
+        public bool AcceptLock;
     }
 
     class RaidGroupOnly : ServerPacket
@@ -124,8 +124,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(Reason);
         }
 
-        public int Delay { get; set; }
-        public RaidGroupReason Reason { get; set; }
+        public int Delay;
+        public RaidGroupReason Reason;
     }
 
     class PendingRaidLock : ServerPacket
@@ -141,10 +141,10 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public int TimeUntilLock { get; set; }
-        public uint CompletedMask { get; set; }
-        public bool Extending { get; set; }
-        public bool WarningOnly { get; set; }
+        public int TimeUntilLock;
+        public uint CompletedMask;
+        public bool Extending;
+        public bool WarningOnly;
     }
 
     class RaidInstanceMessage : ServerPacket
@@ -161,11 +161,11 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public InstanceResetWarningType Type { get; set; }
-        public uint MapID { get; set; }
-        public Difficulty DifficultyID { get; set; }
-        public bool Locked { get; set; }
-        public bool Extended { get; set; }
+        public InstanceResetWarningType Type;
+        public uint MapID;
+        public Difficulty DifficultyID;
+        public bool Locked;
+        public bool Extended;
     }
 
     class InstanceEncounterEngageUnit : ServerPacket
@@ -178,7 +178,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(TargetFramePriority);
         }
 
-        public ObjectGuid Unit { get; set; }
+        public ObjectGuid Unit;
         public byte TargetFramePriority; // used to set the initial position of the frame if multiple frames are sent
     }
 
@@ -191,7 +191,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(Unit);
         }
 
-        public ObjectGuid Unit { get; set; }
+        public ObjectGuid Unit;
     }
 
     class InstanceEncounterChangePriority : ServerPacket
@@ -204,7 +204,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(TargetFramePriority);
         }
 
-        public ObjectGuid Unit { get; set; }
+        public ObjectGuid Unit;
         public byte TargetFramePriority; // used to update the position of the unit's current frame
     }
 
@@ -220,10 +220,10 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(NextCombatResChargeTime);
         }
 
-        public uint InCombatResCount; // amount of usable battle ressurection.
-        public uint MaxInCombatResCount { get; set; }
-        public uint CombatResChargeRecovery { get; set; }
-        public uint NextCombatResChargeTime { get; set; }
+        public uint InCombatResCount; // amount of usable battle ressurections
+        public uint MaxInCombatResCount;
+        public uint CombatResChargeRecovery;
+        public uint NextCombatResChargeTime;
     }
 
     class InstanceEncounterEnd : ServerPacket
@@ -250,8 +250,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(CombatResChargeRecovery);
         }
 
-        public int InCombatResCount { get; set; }
-        public uint CombatResChargeRecovery { get; set; }
+        public int InCombatResCount;
+        public uint CombatResChargeRecovery;
     }
 
     class BossKillCredit : ServerPacket
@@ -263,7 +263,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(DungeonEncounterID);
         }
 
-        public uint DungeonEncounterID { get; set; }
+        public uint DungeonEncounterID;
     }
 
     //Structs
@@ -282,13 +282,13 @@ namespace Game.Network.Packets
             data.FlushBits();
         }
 
-        public ulong InstanceID { get; set; }
-        public uint MapID { get; set; }
-        public uint DifficultyID { get; set; }
-        public int TimeRemaining { get; set; }
-        public uint CompletedMask { get; set; }
+        public ulong InstanceID;
+        public uint MapID;
+        public uint DifficultyID;
+        public int TimeRemaining;
+        public uint CompletedMask;
 
-        public bool Locked { get; set; }
-        public bool Extended { get; set; }
+        public bool Locked;
+        public bool Extended;
     }
 }

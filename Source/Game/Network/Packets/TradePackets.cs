@@ -31,7 +31,7 @@ namespace Game.Network.Packets
             StateIndex = _worldPacket.ReadUInt32();
         }
 
-        public uint StateIndex { get; set; }
+        public uint StateIndex;
     }
 
     public class BeginTrade : ClientPacket
@@ -64,7 +64,7 @@ namespace Game.Network.Packets
             TradeSlot = _worldPacket.ReadUInt8();
         }
 
-        public byte TradeSlot { get; set; }
+        public byte TradeSlot;
     }
 
     public class IgnoreTrade : ClientPacket
@@ -83,7 +83,7 @@ namespace Game.Network.Packets
             Guid = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Guid { get; set; }
+        public ObjectGuid Guid;
     }
 
     public class SetTradeCurrency : ClientPacket
@@ -96,8 +96,8 @@ namespace Game.Network.Packets
             Quantity = _worldPacket.ReadUInt32();
         }
 
-        public uint Type { get; set; }
-        public uint Quantity { get; set; }
+        public uint Type;
+        public uint Quantity;
     }
 
     public class SetTradeGold : ClientPacket
@@ -109,7 +109,7 @@ namespace Game.Network.Packets
             Coinage = _worldPacket.ReadUInt64();
         }
 
-        public ulong Coinage { get; set; }
+        public ulong Coinage;
     }
 
     public class SetTradeItem : ClientPacket
@@ -123,9 +123,9 @@ namespace Game.Network.Packets
             ItemSlotInPack = _worldPacket.ReadUInt8();
         }
 
-        public byte TradeSlot { get; set; }
-        public byte PackSlot { get; set; }
-        public byte ItemSlotInPack { get; set; }
+        public byte TradeSlot;
+        public byte PackSlot;
+        public byte ItemSlotInPack;
     }
 
     public class UnacceptTrade : ClientPacket
@@ -172,17 +172,17 @@ namespace Game.Network.Packets
             }
         }
 
-        public TradeStatus Status { get; set; } = TradeStatus.Initiated;
-        public byte TradeSlot { get; set; }
-        public ObjectGuid PartnerAccount { get; set; }
-        public ObjectGuid Partner { get; set; }
-        public int CurrencyType { get; set; }
-        public int CurrencyQuantity { get; set; }
-        public bool FailureForYou { get; set; }
-        public InventoryResult BagResult { get; set; }
+        public TradeStatus Status = TradeStatus.Initiated;
+        public byte TradeSlot;
+        public ObjectGuid PartnerAccount;
+        public ObjectGuid Partner;
+        public int CurrencyType;
+        public int CurrencyQuantity;
+        public bool FailureForYou;
+        public InventoryResult BagResult;
         public uint ItemID;
-        public uint ID { get; set; }
-        public bool PartnerIsSameBnetAccount { get; set; }
+        public uint ID;
+        public bool PartnerIsSameBnetAccount;
     }
 
     public class TradeUpdated : ServerPacket
@@ -222,15 +222,15 @@ namespace Game.Network.Packets
                     gem.Write(data);
             }
 
-            public ItemInstance Item { get; set; }
-            public int EnchantID { get; set; }
-            public int OnUseEnchantmentID { get; set; }
-            public ObjectGuid Creator { get; set; }
-            public int Charges { get; set; }
-            public bool Lock { get; set; }
-            public uint MaxDurability { get; set; }
-            public uint Durability { get; set; }
-            public List<ItemGemData> Gems { get; set; } = new List<ItemGemData>();
+            public ItemInstance Item;
+            public int EnchantID;
+            public int OnUseEnchantmentID;
+            public ObjectGuid Creator;
+            public int Charges;
+            public bool Lock;
+            public uint MaxDurability;
+            public uint Durability;
+            public List<ItemGemData> Gems = new List<ItemGemData>();
         }
 
         public class TradeItem
@@ -248,21 +248,21 @@ namespace Game.Network.Packets
                     Unwrapped.Value.Write(data);
             }
 
-            public byte Slot { get; set; }
-            public ItemInstance Item { get; set; } = new ItemInstance();
-            public int StackCount { get; set; }
-            public ObjectGuid GiftCreator { get; set; }
+            public byte Slot;
+            public ItemInstance Item = new ItemInstance();
+            public int StackCount;
+            public ObjectGuid GiftCreator;
             public Optional<UnwrappedTradeItem> Unwrapped;
         }
 
-        public ulong Gold { get; set; }
-        public uint CurrentStateIndex { get; set; }
-        public byte WhichPlayer { get; set; }
-        public uint ClientStateIndex { get; set; }
-        public List<TradeItem> Items { get; set; } = new List<TradeItem>();
-        public int CurrencyType { get; set; }
-        public uint ID { get; set; }
-        public int ProposedEnchantment { get; set; }
-        public int CurrencyQuantity { get; set; }
+        public ulong Gold;
+        public uint CurrentStateIndex;
+        public byte WhichPlayer;
+        public uint ClientStateIndex;
+        public List<TradeItem> Items = new List<TradeItem>();
+        public int CurrencyType;
+        public uint ID;
+        public int ProposedEnchantment;
+        public int CurrencyQuantity;
     }
 }

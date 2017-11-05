@@ -164,7 +164,7 @@ namespace Game
                     item.GetModifier(ItemModifier.ScalingStatDistributionFixedLevel), item.GetModifier(ItemModifier.ArtifactKnowledgeLevel), 
                     (byte)item.GetUInt32Value(ItemFields.Context), item.GetDynamicValues(ItemDynamicFields.BonusListIds));
 
-                VoidItem voidItem = new VoidItem();
+                VoidItem voidItem;
                 voidItem.Guid = ObjectGuid.Create(HighGuid.Item, itemVS.ItemId);
                 voidItem.Creator = item.GetGuidValue(ItemFields.Creator);
                 voidItem.Item = new ItemInstance(itemVS);

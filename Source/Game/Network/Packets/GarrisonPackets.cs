@@ -32,8 +32,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(GarrSiteLevelID);
         }
 
-        public uint GarrSiteLevelID { get; set; }
-        public uint Result { get; set; }
+        public uint GarrSiteLevelID;
+        public uint Result;
     }
 
     class GarrisonDeleteResult : ServerPacket
@@ -46,8 +46,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(GarrSiteID);
         }
 
-        public GarrisonError Result { get; set; }
-        public  uint GarrSiteID { get; set; }
+        public GarrisonError Result;
+        public  uint GarrSiteID;
     }
 
     class GetGarrisonInfo : ClientPacket
@@ -74,9 +74,9 @@ namespace Game.Network.Packets
                 garrison.Write(_worldPacket);
         }
 
-        public uint FactionIndex { get; set; }
-        public List<GarrisonInfo> Garrisons { get; set; } = new List<GarrisonInfo>();
-        public List<FollowerSoftCapInfo> FollowerSoftCaps { get; set; } = new List<FollowerSoftCapInfo>();
+        public uint FactionIndex;
+        public List<GarrisonInfo> Garrisons = new List<GarrisonInfo>();
+        public List<FollowerSoftCapInfo> FollowerSoftCaps = new List<FollowerSoftCapInfo>();
     }
 
     class GarrisonRemoteInfo : ServerPacket
@@ -90,7 +90,7 @@ namespace Game.Network.Packets
                 site.Write(_worldPacket);
         }
 
-        public List<GarrisonRemoteSiteInfo> Sites { get; set; } = new List<GarrisonRemoteSiteInfo>();
+        public List<GarrisonRemoteSiteInfo> Sites = new List<GarrisonRemoteSiteInfo>();
     }
 
     class GarrisonPurchaseBuilding : ClientPacket
@@ -104,9 +104,9 @@ namespace Game.Network.Packets
             BuildingID = _worldPacket.ReadUInt32();
         }
 
-        public ObjectGuid NpcGUID { get; set; }
-        public uint BuildingID { get; set; }
-        public uint PlotInstanceID { get; set; }
+        public ObjectGuid NpcGUID;
+        public uint BuildingID;
+        public uint PlotInstanceID;
     }
 
     class GarrisonPlaceBuildingResult : ServerPacket
@@ -122,10 +122,10 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public GarrisonType GarrTypeID { get; set; }
-        public GarrisonError Result { get; set; }
-        public GarrisonBuildingInfo BuildingInfo { get; set; } = new GarrisonBuildingInfo();
-        public bool PlayActivationCinematic { get; set; }
+        public GarrisonType GarrTypeID;
+        public GarrisonError Result;
+        public GarrisonBuildingInfo BuildingInfo = new GarrisonBuildingInfo();
+        public bool PlayActivationCinematic;
     }
 
     class GarrisonCancelConstruction : ClientPacket
@@ -138,8 +138,8 @@ namespace Game.Network.Packets
             PlotInstanceID = _worldPacket.ReadUInt32();
         }
 
-        public ObjectGuid NpcGUID { get; set; }
-        public uint PlotInstanceID { get; set; }
+        public ObjectGuid NpcGUID;
+        public uint PlotInstanceID;
     }
 
     class GarrisonBuildingRemoved : ServerPacket
@@ -154,10 +154,10 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(GarrBuildingID);
         }
 
-        public GarrisonType GarrTypeID { get; set; }
-        public GarrisonError Result { get; set; }
-        public uint GarrPlotInstanceID { get; set; }
-        public uint GarrBuildingID { get; set; }
+        public GarrisonType GarrTypeID;
+        public GarrisonError Result;
+        public uint GarrPlotInstanceID;
+        public uint GarrBuildingID;
     }
 
     class GarrisonLearnBlueprintResult : ServerPacket
@@ -171,9 +171,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(BuildingID);
         }
 
-        public GarrisonType GarrTypeID { get; set; }
-        public uint BuildingID { get; set; }
-        public GarrisonError Result { get; set; }
+        public GarrisonType GarrTypeID;
+        public uint BuildingID;
+        public GarrisonError Result;
     }
 
     class GarrisonUnlearnBlueprintResult : ServerPacket
@@ -187,9 +187,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(BuildingID);
         }
 
-        public GarrisonType GarrTypeID { get; set; }
-        public uint BuildingID { get; set; }
-        public GarrisonError Result { get; set; }
+        public GarrisonType GarrTypeID;
+        public uint BuildingID;
+        public GarrisonError Result;
     }
 
     class GarrisonRequestBlueprintAndSpecializationData : ClientPacket
@@ -217,9 +217,9 @@ namespace Game.Network.Packets
                     _worldPacket.WriteUInt32(specialization);
         }
 
-        public GarrisonType GarrTypeID { get; set; }
-        public List<uint> SpecializationsKnown { get; set; } = null;
-        public List<uint> BlueprintsKnown { get; set; } = null;
+        public GarrisonType GarrTypeID;
+        public List<uint> SpecializationsKnown = null;
+        public List<uint> BlueprintsKnown = null;
     }
 
     class GarrisonGetBuildingLandmarks : ClientPacket
@@ -240,7 +240,7 @@ namespace Game.Network.Packets
                 landmark.Write(_worldPacket);
         }
 
-        public List<GarrisonBuildingLandmark> Landmarks { get; set; } = new List<GarrisonBuildingLandmark>();
+        public List<GarrisonBuildingLandmark> Landmarks = new List<GarrisonBuildingLandmark>();
     }
 
     class GarrisonPlotPlaced : ServerPacket
@@ -253,8 +253,8 @@ namespace Game.Network.Packets
             PlotInfo.Write(_worldPacket);
         }
 
-        public GarrisonType GarrTypeID { get; set; }
-        public GarrisonPlotInfo PlotInfo { get; set; }
+        public GarrisonType GarrTypeID;
+        public GarrisonPlotInfo PlotInfo;
     }
 
     class GarrisonPlotRemoved : ServerPacket
@@ -266,7 +266,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(GarrPlotInstanceID);
         }
 
-        public uint GarrPlotInstanceID { get; set; }
+        public uint GarrPlotInstanceID;
     }
 
     class GarrisonAddFollowerResult : ServerPacket
@@ -280,9 +280,9 @@ namespace Game.Network.Packets
             Follower.Write(_worldPacket);
         }
 
-        public GarrisonType GarrTypeID { get; set; }
-        public GarrisonFollower Follower { get; set; }
-        public GarrisonError Result { get; set; }
+        public GarrisonType GarrTypeID;
+        public GarrisonFollower Follower;
+        public GarrisonError Result;
     }
 
     class GarrisonRemoveFollowerResult : ServerPacket
@@ -297,10 +297,10 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(Destroyed);
         }
 
-        public ulong FollowerDBID { get; set; }
-        public int GarrTypeID { get; set; }
-        public uint Result { get; set; }
-        public uint Destroyed { get; set; }
+        public ulong FollowerDBID;
+        public int GarrTypeID;
+        public uint Result;
+        public uint Destroyed;
     }
 
     class GarrisonBuildingActivated : ServerPacket
@@ -312,7 +312,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(GarrPlotInstanceID);
         }
 
-        public uint GarrPlotInstanceID { get; set; }
+        public uint GarrPlotInstanceID;
     }
 
     //Structs
@@ -325,9 +325,9 @@ namespace Game.Network.Packets
             data.WriteUInt32(PlotType);
         }
 
-        public uint GarrPlotInstanceID { get; set; }
-        public Position PlotPos { get; set; }
-        public uint PlotType { get; set; }
+        public uint GarrPlotInstanceID;
+        public Position PlotPos;
+        public uint PlotType;
     }
 
     public class GarrisonBuildingInfo
@@ -343,12 +343,12 @@ namespace Game.Network.Packets
             data.FlushBits();
         }
 
-        public uint GarrPlotInstanceID { get; set; }
-        public uint GarrBuildingID { get; set; }
-        public long TimeBuilt { get; set; }
-        public uint CurrentGarSpecID { get; set; }
-        public long TimeSpecCooldown { get; set; } = 2288912640;   // 06/07/1906 18:35:44 - another in the series of magic blizz dates
-        public bool Active { get; set; }
+        public uint GarrPlotInstanceID;
+        public uint GarrBuildingID;
+        public long TimeBuilt;
+        public uint CurrentGarSpecID;
+        public long TimeSpecCooldown = 2288912640;   // 06/07/1906 18:35:44 - another in the series of magic blizz dates
+        public bool Active;
     }
 
     public class GarrisonFollower
@@ -376,20 +376,20 @@ namespace Game.Network.Packets
             data.WriteString(CustomName);
         }
 
-        public ulong DbID { get; set; }
-        public uint GarrFollowerID { get; set; }
-        public uint Quality { get; set; }
-        public uint FollowerLevel { get; set; }
-        public uint ItemLevelWeapon { get; set; }
-        public uint ItemLevelArmor { get; set; }
-        public uint Xp { get; set; }
-        public uint Durability { get; set; }
-        public uint CurrentBuildingID { get; set; }
-        public uint CurrentMissionID { get; set; }
-        public List<GarrAbilityRecord> AbilityID { get; set; } = new List<GarrAbilityRecord>();
-        public uint ZoneSupportSpellID { get; set; }
-        public uint FollowerStatus { get; set; }
-        public string CustomName { get; set; } = "";
+        public ulong DbID;
+        public uint GarrFollowerID;
+        public uint Quality;
+        public uint FollowerLevel;
+        public uint ItemLevelWeapon;
+        public uint ItemLevelArmor;
+        public uint Xp;
+        public uint Durability;
+        public uint CurrentBuildingID;
+        public uint CurrentMissionID;
+        public List<GarrAbilityRecord> AbilityID = new List<GarrAbilityRecord>();
+        public uint ZoneSupportSpellID;
+        public uint FollowerStatus;
+        public string CustomName = "";
     }
 
     class GarrisonMission
@@ -408,16 +408,16 @@ namespace Game.Network.Packets
             data.WriteUInt32(Unknown2);
         }
 
-        public ulong DbID { get; set; }
-        public uint MissionRecID { get; set; }
-        public long OfferTime { get; set; }
-        public uint OfferDuration { get; set; }
-        public long StartTime { get; set; } = 2288912640;
-        public uint TravelDuration { get; set; }
-        public uint MissionDuration { get; set; }
-        public uint MissionState { get; set; }
-        public uint Unknown1 { get; set; } = 0;
-        public uint Unknown2 { get; set; } = 0;
+        public ulong DbID;
+        public uint MissionRecID;
+        public long OfferTime;
+        public uint OfferDuration;
+        public long StartTime = 2288912640;
+        public uint TravelDuration;
+        public uint MissionDuration;
+        public uint MissionState;
+        public uint Unknown1 = 0;
+        public uint Unknown2 = 0;
     }
 
     struct GarrisonMissionReward
@@ -433,13 +433,13 @@ namespace Game.Network.Packets
             data.WriteInt32(Unknown);
         }
 
-        public int ItemID { get; set; }
-        public uint Quantity { get; set; }
-        public int CurrencyID { get; set; }
-        public uint CurrencyQuantity { get; set; }
-        public uint FollowerXP { get; set; }
-        public uint BonusAbilityID { get; set; }
-        public int Unknown { get; set; }
+        public int ItemID;
+        public uint Quantity;
+        public int CurrencyID;
+        public uint CurrencyQuantity;
+        public uint FollowerXP;
+        public uint BonusAbilityID;
+        public int Unknown;
     }
 
     struct GarrisonMissionAreaBonus
@@ -450,8 +450,8 @@ namespace Game.Network.Packets
             data.WriteUInt32(StartTime);
         }
 
-        public uint GarrMssnBonusAbilityID { get; set; }
-        public long StartTime { get; set; }
+        public uint GarrMssnBonusAbilityID;
+        public long StartTime;
     }
 
     struct GarrisonTalent
@@ -463,9 +463,9 @@ namespace Game.Network.Packets
             data.WriteInt32(Flags);
         }
 
-        public int GarrTalentID { get; set; }
-        public long ResearchStartTime { get; set; }
-        public int Flags { get; set; }
+        public int GarrTalentID;
+        public long ResearchStartTime;
+        public int Flags;
     }
 
     class GarrisonInfo
@@ -529,21 +529,21 @@ namespace Game.Network.Packets
                 follower.Write(data);
         }
 
-        public GarrisonType GarrTypeID { get; set; }
-        public uint GarrSiteID { get; set; }
-        public uint GarrSiteLevelID { get; set; }
-        public uint NumFollowerActivationsRemaining { get; set; }
-        public uint NumMissionsStartedToday { get; set; }   // might mean something else, but sending 0 here enables follower abilities "Increase success chance of the first mission of the day by %.
-        public List<GarrisonPlotInfo> Plots { get; set; } = new List<GarrisonPlotInfo>();
-        public List<GarrisonBuildingInfo> Buildings { get; set; } = new List<GarrisonBuildingInfo>();
-        public List<GarrisonFollower> Followers { get; set; } = new List<GarrisonFollower>();
-        public List<GarrisonMission> Missions { get; set; } = new List<GarrisonMission>();
-        public List<List<GarrisonMissionReward>> MissionRewards { get; set; } = new List<List<GarrisonMissionReward>>();
-        public List<List<GarrisonMissionReward>> MissionOvermaxRewards { get; set; } = new List<List<GarrisonMissionReward>>();
-        public List<GarrisonMissionAreaBonus> MissionAreaBonuses { get; set; } = new List<GarrisonMissionAreaBonus>();
-        public List<GarrisonTalent> Talents { get; set; } = new List<GarrisonTalent>();
-        public List<bool> CanStartMission { get; set; } = new List<bool>();
-        public List<int> ArchivedMissions { get; set; } = new List<int>();
+        public GarrisonType GarrTypeID;
+        public uint GarrSiteID;
+        public uint GarrSiteLevelID;
+        public uint NumFollowerActivationsRemaining;
+        public uint NumMissionsStartedToday;   // might mean something else, but sending 0 here enables follower abilities "Increase success chance of the first mission of the day by %."
+        public List<GarrisonPlotInfo> Plots = new List<GarrisonPlotInfo>();
+        public List<GarrisonBuildingInfo> Buildings = new List<GarrisonBuildingInfo>();
+        public List<GarrisonFollower> Followers = new List<GarrisonFollower>();
+        public List<GarrisonMission> Missions = new List<GarrisonMission>();
+        public List<List<GarrisonMissionReward>> MissionRewards = new List<List<GarrisonMissionReward>>();
+        public List<List<GarrisonMissionReward>> MissionOvermaxRewards = new List<List<GarrisonMissionReward>>();
+        public List<GarrisonMissionAreaBonus> MissionAreaBonuses = new List<GarrisonMissionAreaBonus>();
+        public List<GarrisonTalent> Talents = new List<GarrisonTalent>();
+        public List<bool> CanStartMission = new List<bool>();
+        public List<int> ArchivedMissions = new List<int>();
     }
 
     struct FollowerSoftCapInfo
@@ -554,8 +554,8 @@ namespace Game.Network.Packets
             data.WriteUInt32(Count);
         }
 
-        public int GarrFollowerTypeID { get; set; }
-        public uint Count { get; set; }
+        public int GarrFollowerTypeID;
+        public uint Count;
     }
 
     struct GarrisonRemoteBuildingInfo
@@ -572,8 +572,8 @@ namespace Game.Network.Packets
             data.WriteUInt32(GarrBuildingID);
         }
 
-        public uint GarrPlotInstanceID { get; set; }
-        public uint GarrBuildingID { get; set; }
+        public uint GarrPlotInstanceID;
+        public uint GarrBuildingID;
     }
 
     class GarrisonRemoteSiteInfo
@@ -586,8 +586,8 @@ namespace Game.Network.Packets
                 building.Write(data);
         }
 
-        public uint GarrSiteLevelID { get; set; }
-        public List<GarrisonRemoteBuildingInfo> Buildings { get; set; } = new List<GarrisonRemoteBuildingInfo>();
+        public uint GarrSiteLevelID;
+        public List<GarrisonRemoteBuildingInfo> Buildings = new List<GarrisonRemoteBuildingInfo>();
     }
 
     struct GarrisonBuildingLandmark
@@ -604,7 +604,7 @@ namespace Game.Network.Packets
             data.WriteXYZ(Pos);
         }
 
-        public uint GarrBuildingPlotInstID { get; set; }
-        public Position Pos { get; set; }
+        public uint GarrBuildingPlotInstID;
+        public Position Pos;
     }
 }

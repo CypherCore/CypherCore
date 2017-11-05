@@ -33,21 +33,21 @@ namespace Game.Network.Packets
             var powerCount = _worldPacket.ReadUInt32();
             for (var i = 0; i < powerCount; ++i)
             {
-                ArtifactPowerChoice artifactPowerChoice = new ArtifactPowerChoice();
+                ArtifactPowerChoice artifactPowerChoice;
                 artifactPowerChoice.ArtifactPowerID = _worldPacket.ReadUInt32();
                 artifactPowerChoice.Rank = _worldPacket.ReadUInt8();
                 PowerChoices.Add(artifactPowerChoice);
             }
         }
 
-        public ObjectGuid ArtifactGUID { get; set; }
-        public ObjectGuid ForgeGUID { get; set; }
-        public Array<ArtifactPowerChoice> PowerChoices { get; set; } = new Array<ArtifactPowerChoice>(1);
+        public ObjectGuid ArtifactGUID;
+        public ObjectGuid ForgeGUID;
+        public Array<ArtifactPowerChoice> PowerChoices = new Array<ArtifactPowerChoice>(1);
 
         public struct ArtifactPowerChoice
         {
-            public uint ArtifactPowerID { get; set; }
-            public byte Rank { get; set; }
+            public uint ArtifactPowerID;
+            public byte Rank;
         }
     }
 
@@ -62,9 +62,9 @@ namespace Game.Network.Packets
             ArtifactAppearanceID = _worldPacket.ReadInt32();
         }
 
-        public ObjectGuid ArtifactGUID { get; set; }
-        public ObjectGuid ForgeGUID { get; set; }
-        public int ArtifactAppearanceID { get; set; }
+        public ObjectGuid ArtifactGUID;
+        public ObjectGuid ForgeGUID;
+        public int ArtifactAppearanceID;
     }
 
     class ConfirmArtifactRespec : ClientPacket
@@ -77,8 +77,8 @@ namespace Game.Network.Packets
             NpcGUID = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid ArtifactGUID { get; set; }
-        public ObjectGuid NpcGUID { get; set; }
+        public ObjectGuid ArtifactGUID;
+        public ObjectGuid NpcGUID;
     }
 
     class ArtifactForgeOpened : ServerPacket
@@ -91,8 +91,8 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(ForgeGUID);
         }
 
-        public ObjectGuid ArtifactGUID { get; set; }
-        public ObjectGuid ForgeGUID { get; set; }
+        public ObjectGuid ArtifactGUID;
+        public ObjectGuid ForgeGUID;
     }
 
     class ArtifactRespecConfirm : ServerPacket
@@ -105,8 +105,8 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(NpcGUID);
         }
 
-        public ObjectGuid ArtifactGUID { get; set; }
-        public ObjectGuid NpcGUID { get; set; }
+        public ObjectGuid ArtifactGUID;
+        public ObjectGuid NpcGUID;
     }
 
     class ArtifactXpGain : ServerPacket
@@ -119,7 +119,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt64(Amount);
         }
 
-        public ObjectGuid ArtifactGUID { get; set; }
-        public ulong Amount { get; set; }
+        public ObjectGuid ArtifactGUID;
+        public ulong Amount;
     }
 }

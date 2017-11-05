@@ -35,11 +35,11 @@ namespace Game.Network.Packets
             Comment = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(10));
         }
 
-        public ObjectGuid GuildGUID { get; set; }
-        public uint Availability { get; set; }
-        public uint ClassRoles { get; set; }
-        public uint PlayStyle { get; set; }
-        public string Comment { get; set; }
+        public ObjectGuid GuildGUID;
+        public uint Availability;
+        public uint ClassRoles;
+        public uint PlayStyle;
+        public string Comment;
     }
 
     class LFGuildApplicationsListChanged : ServerPacket
@@ -68,10 +68,10 @@ namespace Game.Network.Packets
             CharacterLevel = _worldPacket.ReadUInt32();
         }
 
-        public uint CharacterLevel { get; set; }
-        public uint Availability { get; set; }
-        public uint ClassRoles { get; set; }
-        public uint PlayStyle { get; set; }
+        public uint CharacterLevel;
+        public uint Availability;
+        public uint ClassRoles;
+        public uint PlayStyle;
     }
 
     class LFGuildBrowseResult : ServerPacket
@@ -85,7 +85,7 @@ namespace Game.Network.Packets
                 guildData.Write(_worldPacket);
         }
 
-        public List<LFGuildBrowseData> Post { get; set; } = new List<LFGuildBrowseData>();
+        public List<LFGuildBrowseData> Post = new List<LFGuildBrowseData>();
     }
 
     class LFGuildDeclineRecruit : ClientPacket
@@ -97,7 +97,7 @@ namespace Game.Network.Packets
             RecruitGUID = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid RecruitGUID { get; set; }
+        public ObjectGuid RecruitGUID;
     }
 
     class LFGuildGetApplications : ClientPacket
@@ -119,8 +119,8 @@ namespace Game.Network.Packets
                 application.Write(_worldPacket);
         }
 
-        public List<LFGuildApplicationData> Application { get; set; } = new List<LFGuildApplicationData>();
-        public int NumRemaining { get; set; }
+        public List<LFGuildApplicationData> Application = new List<LFGuildApplicationData>();
+        public int NumRemaining;
     }
 
     class LFGuildGetGuildPost : ClientPacket
@@ -154,7 +154,7 @@ namespace Game.Network.Packets
             LastUpdate = _worldPacket.ReadUInt32();
         }
 
-        public uint LastUpdate { get; set; }
+        public uint LastUpdate;
     }
 
     class LFGuildRecruits : ServerPacket
@@ -169,8 +169,8 @@ namespace Game.Network.Packets
                 recruit.Write(_worldPacket);
         }
 
-        public List<LFGuildRecruitData> Recruits { get; set; } = new List<LFGuildRecruitData>();
-        public long UpdateTime { get; set; }
+        public List<LFGuildRecruitData> Recruits = new List<LFGuildRecruitData>();
+        public long UpdateTime;
     }
 
     class LFGuildRemoveRecruit : ClientPacket
@@ -182,7 +182,7 @@ namespace Game.Network.Packets
             GuildGUID = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid GuildGUID { get; set; }
+        public ObjectGuid GuildGUID;
     }
 
     class LFGuildSetGuildPost : ClientPacket
@@ -199,12 +199,12 @@ namespace Game.Network.Packets
             Comment = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(10));
         }
 
-        public uint Availability { get; set; }
-        public uint PlayStyle { get; set; }
-        public uint ClassRoles { get; set; }
-        public uint LevelRange { get; set; }
-        public bool Active { get; set; }
-        public string Comment { get; set; }
+        public uint Availability;
+        public uint PlayStyle;
+        public uint ClassRoles;
+        public uint LevelRange;
+        public bool Active;
+        public string Comment;
     }
 
     //Structs
@@ -234,23 +234,23 @@ namespace Game.Network.Packets
             data.WriteString(Comment);
         }
 
-        public string GuildName { get; set; } = "";
-        public ObjectGuid GuildGUID { get; set; }
-        public uint GuildVirtualRealm { get; set; }
-        public int GuildMembers { get; set; }
-        public uint GuildAchievementPoints { get; set; }
-        public int PlayStyle { get; set; }
-        public int Availability { get; set; }
-        public int ClassRoles { get; set; }
-        public int LevelRange { get; set; }
-        public uint EmblemStyle { get; set; }
-        public uint EmblemColor { get; set; }
-        public uint BorderStyle { get; set; }
-        public uint BorderColor { get; set; }
-        public uint Background { get; set; }
-        public string Comment { get; set; } = "";
-        public sbyte Cached { get; set; }
-        public sbyte MembershipRequested { get; set; }
+        public string GuildName = "";
+        public ObjectGuid GuildGUID;
+        public uint GuildVirtualRealm;
+        public int GuildMembers;
+        public uint GuildAchievementPoints;
+        public int PlayStyle;
+        public int Availability;
+        public int ClassRoles;
+        public int LevelRange;
+        public uint EmblemStyle;
+        public uint EmblemColor;
+        public uint BorderStyle;
+        public uint BorderColor;
+        public uint Background;
+        public string Comment = "";
+        public sbyte Cached;
+        public sbyte MembershipRequested;
     }
 
     class LFGuildApplicationData
@@ -271,15 +271,15 @@ namespace Game.Network.Packets
             data.WriteString(Comment);
         }
 
-        public ObjectGuid GuildGUID { get; set; }
-        public uint GuildVirtualRealm { get; set; }
-        public string GuildName { get; set; } = "";
-        public int ClassRoles { get; set; }
-        public int PlayStyle { get; set; }
-        public int Availability { get; set; }
-        public uint SecondsSinceCreated { get; set; }
-        public uint SecondsUntilExpiration { get; set; }
-        public string Comment { get; set; } = "";
+        public ObjectGuid GuildGUID;
+        public uint GuildVirtualRealm;
+        public string GuildName = "";
+        public int ClassRoles;
+        public int PlayStyle;
+        public int Availability;
+        public uint SecondsSinceCreated;
+        public uint SecondsUntilExpiration;
+        public string Comment = "";
     }
 
     class GuildPostData
@@ -296,13 +296,13 @@ namespace Game.Network.Packets
             data.WriteString(Comment);
         }
 
-        public bool Active { get; set; }
-        public int PlayStyle { get; set; }
-        public int Availability { get; set; }
-        public int ClassRoles { get; set; }
-        public int LevelRange { get; set; }
-        public long SecondsRemaining { get; set; }
-        public string Comment { get; set; } = "";
+        public bool Active;
+        public int PlayStyle;
+        public int Availability;
+        public int ClassRoles;
+        public int LevelRange;
+        public long SecondsRemaining;
+        public string Comment = "";
     }
 
     class LFGuildRecruitData
@@ -326,17 +326,17 @@ namespace Game.Network.Packets
             data.WriteString(Comment);
         }
 
-        public ObjectGuid RecruitGUID { get; set; }
-        public string Name { get; set; } = "";
-        public uint RecruitVirtualRealm { get; set; }
-        public string Comment { get; set; } = "";
-        public int CharacterClass { get; set; }
-        public int CharacterGender { get; set; }
-        public int CharacterLevel { get; set; }
-        public int ClassRoles { get; set; }
-        public int PlayStyle { get; set; }
-        public int Availability { get; set; }
-        public uint SecondsSinceCreated { get; set; }
-        public uint SecondsUntilExpiration { get; set; }
+        public ObjectGuid RecruitGUID;
+        public string Name = "";
+        public uint RecruitVirtualRealm;
+        public string Comment = "";
+        public int CharacterClass;
+        public int CharacterGender;
+        public int CharacterLevel;
+        public int ClassRoles;
+        public int PlayStyle;
+        public int Availability;
+        public uint SecondsSinceCreated;
+        public uint SecondsUntilExpiration;
     }
 }

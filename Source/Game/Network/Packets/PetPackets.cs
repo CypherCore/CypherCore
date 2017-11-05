@@ -31,7 +31,7 @@ namespace Game.Network.Packets
             CritterGUID = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid CritterGUID { get; set; }
+        public ObjectGuid CritterGUID;
     }
 
     class RequestPetInfo : ClientPacket
@@ -50,7 +50,7 @@ namespace Game.Network.Packets
             Pet = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid Pet { get; set; }
+        public ObjectGuid Pet;
     }
 
     class PetStopAttack : ClientPacket
@@ -62,7 +62,7 @@ namespace Game.Network.Packets
             PetGUID = _worldPacket.ReadPackedGuid();
         }
 
-        public ObjectGuid PetGUID { get; set; }
+        public ObjectGuid PetGUID;
     }
 
     class PetSpellAutocast : ClientPacket
@@ -76,9 +76,9 @@ namespace Game.Network.Packets
             AutocastEnabled = _worldPacket.HasBit();
         }
 
-        public ObjectGuid PetGUID { get; set; }
-        public uint SpellID { get; set; }
-        public bool AutocastEnabled { get; set; }
+        public ObjectGuid PetGUID;
+        public uint SpellID;
+        public bool AutocastEnabled;
     }
 
     public class PetSpells : ServerPacket
@@ -122,19 +122,19 @@ namespace Game.Network.Packets
             }
         }
 
-        public ObjectGuid PetGUID { get; set; }
-        public ushort CreatureFamily { get; set; }
-        public ushort Specialization { get; set; }
-        public uint TimeLimit { get; set; }
-        public ReactStates ReactState { get; set; }
-        public CommandStates CommandState { get; set; }
-        public byte Flag { get; set; }
+        public ObjectGuid PetGUID;
+        public ushort CreatureFamily;
+        public ushort Specialization;
+        public uint TimeLimit;
+        public ReactStates ReactState;
+        public CommandStates CommandState;
+        public byte Flag;
 
-        public uint[] ActionButtons { get; set; } = new uint[10];
+        public uint[] ActionButtons = new uint[10];
 
-        public List<uint> Actions { get; set; } = new List<uint>();
-        public List<PetSpellCooldown> Cooldowns { get; set; } = new List<PetSpellCooldown>();
-        public List<PetSpellHistory> SpellHistory { get; set; } = new List<PetSpellHistory>();
+        public List<uint> Actions = new List<uint>();
+        public List<PetSpellCooldown> Cooldowns = new List<PetSpellCooldown>();
+        public List<PetSpellHistory> SpellHistory = new List<PetSpellHistory>();
     }
 
     class PetStableList : ServerPacket
@@ -160,8 +160,8 @@ namespace Game.Network.Packets
             }
         }
 
-        public ObjectGuid StableMaster { get; set; }
-        public List<PetStableInfo> Pets { get; set; } = new List<PetStableInfo>();
+        public ObjectGuid StableMaster;
+        public List<PetStableInfo> Pets = new List<PetStableInfo>();
     }
 
     class PetLearnedSpells : ServerPacket
@@ -175,7 +175,7 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt32(spell);
         }
 
-        public List<uint> Spells { get; set; } = new List<uint>();
+        public List<uint> Spells = new List<uint>();
     }
 
     class PetUnlearnedSpells : ServerPacket
@@ -189,7 +189,7 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt32(spell);
         }
 
-        public List<uint> Spells { get; set; } = new List<uint>();
+        public List<uint> Spells = new List<uint>();
     }
 
     class PetNameInvalid : ServerPacket
@@ -222,7 +222,7 @@ namespace Game.Network.Packets
         }
 
         public PetRenameData RenameData;
-        public PetNameInvalidReason Result { get; set; }
+        public PetNameInvalidReason Result;
     }
 
     class PetRename : ClientPacket
@@ -268,10 +268,10 @@ namespace Game.Network.Packets
             ActionPosition = _worldPacket.ReadVector3();
         }
 
-        public ObjectGuid PetGUID { get; set; }
-        public uint Action { get; set; }
-        public ObjectGuid TargetGUID { get; set; }
-        public Vector3 ActionPosition { get; set; }
+        public ObjectGuid PetGUID;
+        public uint Action;
+        public ObjectGuid TargetGUID;
+        public Vector3 ActionPosition;
     }
 
     class PetSetAction : ClientPacket
@@ -286,9 +286,9 @@ namespace Game.Network.Packets
             Action = _worldPacket.ReadUInt32();
         }
 
-        public ObjectGuid PetGUID { get; set; }
-        public uint Index { get; set; }
-        public uint Action { get; set; }
+        public ObjectGuid PetGUID;
+        public uint Index;
+        public uint Action;
     }
 
     class PetActionSound : ServerPacket
@@ -301,8 +301,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(Action);
         }
 
-        public ObjectGuid UnitGUID { get; set; }
-        public PetTalk Action { get; set; }
+        public ObjectGuid UnitGUID;
+        public PetTalk Action;
     }
 
     class PetActionFeedback : ServerPacket
@@ -315,8 +315,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(Response);
         }
 
-        public uint SpellID { get; set; }
-        public ActionFeedback Response { get; set; }
+        public uint SpellID;
+        public ActionFeedback Response;
     }
 
     class PetCancelAura : ClientPacket
@@ -329,8 +329,8 @@ namespace Game.Network.Packets
             SpellID = _worldPacket.ReadUInt32();
         }
 
-        public ObjectGuid PetGUID { get; set; }
-        public uint SpellID { get; set; }
+        public ObjectGuid PetGUID;
+        public uint SpellID;
     }
 
 
@@ -346,7 +346,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(Result);
         }
 
-        public byte Result { get; set; }
+        public byte Result;
     }
 
     class SetPetSpecialization : ServerPacket
@@ -358,44 +358,44 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt16(SpecID);
         }
 
-        public ushort SpecID { get; set; }
+        public ushort SpecID;
     }
 
     //Structs
     public class PetSpellCooldown
     {
-        public uint SpellID { get; set; }
-        public uint Duration { get; set; }
-        public uint CategoryDuration { get; set; }
-        public float ModRate { get; set; } = 1.0f;
-        public ushort Category { get; set; }
+        public uint SpellID;
+        public uint Duration;
+        public uint CategoryDuration;
+        public float ModRate = 1.0f;
+        public ushort Category;
     }
 
     public class PetSpellHistory
     {
-        public uint CategoryID { get; set; }
-        public uint RecoveryTime { get; set; }
-        public float ChargeModRate { get; set; } = 1.0f;
-        public sbyte ConsumedCharges { get; set; }
+        public uint CategoryID;
+        public uint RecoveryTime;
+        public float ChargeModRate = 1.0f;
+        public sbyte ConsumedCharges;
     }
 
     struct PetStableInfo
     {
-        public uint PetSlot { get; set; }
-        public uint PetNumber { get; set; }
-        public uint CreatureID { get; set; }
-        public uint DisplayID { get; set; }
-        public uint ExperienceLevel { get; set; }
-        public PetStableinfo PetFlags { get; set; }
-        public string PetName { get; set; }
+        public uint PetSlot;
+        public uint PetNumber;
+        public uint CreatureID;
+        public uint DisplayID;
+        public uint ExperienceLevel;
+        public PetStableinfo PetFlags;
+        public string PetName;
     }
 
     struct PetRenameData
     {
-        public ObjectGuid PetGUID { get; set; }
-        public int PetNumber { get; set; }
-        public string NewName { get; set; }
-        public bool HasDeclinedNames { get; set; }
-        public DeclinedName DeclinedNames { get; set; }
+        public ObjectGuid PetGUID;
+        public int PetNumber;
+        public string NewName;
+        public bool HasDeclinedNames;
+        public DeclinedName DeclinedNames;
     }
 }

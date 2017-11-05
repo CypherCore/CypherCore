@@ -48,9 +48,9 @@ namespace Game.Network.Packets
             Worldstates.Add(new WorldStateInfo(variableID, value ? 1 : 0));
         }
 
-        public uint AreaID { get; set; }
-        public uint SubareaID { get; set; }
-        public uint MapID { get; set; }
+        public uint AreaID;
+        public uint SubareaID;
+        public uint MapID;
 
         List<WorldStateInfo> Worldstates = new List<WorldStateInfo>();
 
@@ -62,8 +62,8 @@ namespace Game.Network.Packets
                 Value = value;
             }
 
-            public uint VariableID { get; set; }
-            public int Value { get; set; }
+            public uint VariableID;
+            public int Value;
         }
     }
 
@@ -79,8 +79,8 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public int Value { get; set; }
-        public bool Hidden; // @todo: researh
-        public uint VariableID { get; set; }
+        public int Value;
+        public bool Hidden; // @todo: research
+        public uint VariableID;
     }
 }

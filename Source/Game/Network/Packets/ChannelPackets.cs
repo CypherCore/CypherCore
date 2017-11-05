@@ -44,10 +44,10 @@ namespace Game.Network.Packets
             }
         }
 
-        public List<ChannelPlayer> Members { get; set; }
+        public List<ChannelPlayer> Members;
         public string Channel; // Channel Name
-        public ChannelFlags ChannelFlags { get; set; }
-        public bool Display { get; set; }
+        public ChannelFlags ChannelFlags;
+        public bool Display;
 
         public struct ChannelPlayer
         {
@@ -59,8 +59,8 @@ namespace Game.Network.Packets
             }
 
             public ObjectGuid Guid; // Player Guid
-            public uint VirtualRealmAddress { get; set; }
-            public ChannelMemberFlags Flags { get; set; }
+            public uint VirtualRealmAddress;
+            public ChannelMemberFlags Flags;
         }
     }
 
@@ -91,17 +91,17 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(Sender);
         }
 
-        public string Sender { get; set; } = "";
-        public ObjectGuid SenderGuid { get; set; }
-        public ObjectGuid SenderAccountID { get; set; }
-        public ChatNotify Type { get; set; }
-        public ChannelMemberFlags OldFlags { get; set; }
-        public ChannelMemberFlags NewFlags { get; set; }
-        public string Channel { get; set; }
-        public uint SenderVirtualRealm { get; set; }
-        public ObjectGuid TargetGuid { get; set; }
-        public uint TargetVirtualRealm { get; set; }
-        public int ChatChannelID { get; set; }
+        public string Sender = "";
+        public ObjectGuid SenderGuid;
+        public ObjectGuid SenderAccountID;
+        public ChatNotify Type;
+        public ChannelMemberFlags OldFlags;
+        public ChannelMemberFlags NewFlags;
+        public string Channel;
+        public uint SenderVirtualRealm;
+        public ObjectGuid TargetGuid;
+        public uint TargetVirtualRealm;
+        public int ChatChannelID;
     }
 
     public class ChannelNotifyJoined : ServerPacket
@@ -119,11 +119,11 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(ChannelWelcomeMsg);
         }
 
-        public string ChannelWelcomeMsg { get; set; } = "";
-        public int ChatChannelID { get; set; }
-        public int InstanceID { get; set; }
-        public ChannelFlags ChannelFlags { get; set; }
-        public string Channel { get; set; } = "";
+        public string ChannelWelcomeMsg = "";
+        public int ChatChannelID;
+        public int InstanceID;
+        public ChannelFlags ChannelFlags;
+        public string Channel = "";
     }
 
     public class ChannelNotifyLeft : ServerPacket
@@ -138,9 +138,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(Channel);
         }
 
-        public string Channel { get; set; }
-        public uint ChatChannelID { get; set; }
-        public bool Suspended { get; set; }
+        public string Channel;
+        public uint ChatChannelID;
+        public bool Suspended;
     }
 
     class UserlistAdd : ServerPacket
@@ -159,11 +159,11 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(ChannelName);
         }
 
-        public ObjectGuid AddedUserGUID { get; set; }
-        public ChannelFlags ChannelFlags { get; set; }
-        public ChannelMemberFlags UserFlags { get; set; }
-        public uint ChannelID { get; set; }
-        public string ChannelName { get; set; }
+        public ObjectGuid AddedUserGUID;
+        public ChannelFlags ChannelFlags;
+        public ChannelMemberFlags UserFlags;
+        public uint ChannelID;
+        public string ChannelName;
     }
 
     class UserlistRemove : ServerPacket
@@ -181,10 +181,10 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(ChannelName);
         }
 
-        public ObjectGuid RemovedUserGUID { get; set; }
-        public ChannelFlags ChannelFlags { get; set; }
-        public uint ChannelID { get; set; }
-        public string ChannelName { get; set; }
+        public ObjectGuid RemovedUserGUID;
+        public ChannelFlags ChannelFlags;
+        public uint ChannelID;
+        public string ChannelName;
     }
 
     class UserlistUpdate : ServerPacket
@@ -203,11 +203,11 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(ChannelName);
         }
 
-        public ObjectGuid UpdatedUserGUID { get; set; }
-        public ChannelFlags ChannelFlags { get; set; }
-        public ChannelMemberFlags UserFlags { get; set; }
-        public uint ChannelID { get; set; }
-        public string ChannelName { get; set; }
+        public ObjectGuid UpdatedUserGUID;
+        public ChannelFlags ChannelFlags;
+        public ChannelMemberFlags UserFlags;
+        public uint ChannelID;
+        public string ChannelName;
     }
 
     class ChannelCommand : ClientPacket
@@ -234,7 +234,7 @@ namespace Game.Network.Packets
             ChannelName = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(7));
         }
 
-        public string ChannelName { get; set; }
+        public string ChannelName;
     }
 
     class ChannelPlayerCommand : ClientPacket
@@ -269,7 +269,7 @@ namespace Game.Network.Packets
             Name = _worldPacket.ReadString(nameLength);
         }
 
-        public string ChannelName { get; set; }
+        public string ChannelName;
         public string Name;
     }
 
@@ -285,8 +285,8 @@ namespace Game.Network.Packets
             Password = _worldPacket.ReadString(passwordLength);
         }
 
-        public string ChannelName { get; set; }
-        public string Password { get; set; }
+        public string ChannelName;
+        public string Password;
     }
 
     public class JoinChannel : ClientPacket
@@ -304,11 +304,11 @@ namespace Game.Network.Packets
             Password = _worldPacket.ReadString(passwordLength);
         }
 
-        public string Password { get; set; }
-        public string ChannelName { get; set; }
-        public bool CreateVoiceSession { get; set; }
-        public int ChatChannelId { get; set; }
-        public bool Internal { get; set; }
+        public string Password;
+        public string ChannelName;
+        public bool CreateVoiceSession;
+        public int ChatChannelId;
+        public bool Internal;
     }
 
     public class LeaveChannel : ClientPacket
@@ -321,7 +321,7 @@ namespace Game.Network.Packets
             ChannelName = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(7));
         }
 
-        public int ZoneChannelID { get; set; }
-        public string ChannelName { get; set; }
+        public int ZoneChannelID;
+        public string ChannelName;
     }
 }

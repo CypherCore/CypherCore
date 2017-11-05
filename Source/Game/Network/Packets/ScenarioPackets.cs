@@ -54,17 +54,17 @@ namespace Game.Network.Packets
                 spell.Write(_worldPacket);
         }
 
-        public int ScenarioID { get; set; }
-        public int CurrentStep { get; set; } = -1;
-        public uint DifficultyID { get; set; }
-        public uint WaveCurrent { get; set; }
-        public uint WaveMax { get; set; }
-        public uint TimerDuration { get; set; }
-        public List<CriteriaProgressPkt> CriteriaProgress { get; set; } = new List<CriteriaProgressPkt>();
-        public List<BonusObjectiveData> BonusObjectives { get; set; } = new List<BonusObjectiveData>();
-        public List<uint> PickedSteps { get; set; } = new List<uint>();
-        public List<ScenarioSpellUpdate> Spells { get; set; } = new List<ScenarioSpellUpdate>();
-        public bool ScenarioComplete { get; set; } = false;
+        public int ScenarioID;
+        public int CurrentStep = -1;
+        public uint DifficultyID;
+        public uint WaveCurrent;
+        public uint WaveMax;
+        public uint TimerDuration;
+        public List<CriteriaProgressPkt> CriteriaProgress = new List<CriteriaProgressPkt>();
+        public List<BonusObjectiveData> BonusObjectives = new List<BonusObjectiveData>();
+        public List<uint> PickedSteps = new List<uint>();
+        public List<ScenarioSpellUpdate> Spells = new List<ScenarioSpellUpdate>();
+        public bool ScenarioComplete = false;
     }
 
     class ScenarioProgressUpdate : ServerPacket
@@ -91,7 +91,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(ScenarioID);
         }
 
-        public uint ScenarioID { get; set; }
+        public uint ScenarioID;
     }
 
     class ScenarioBoot : ServerPacket
@@ -106,9 +106,9 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public int ScenarioID { get; set; }
-        public int Unk1 { get; set; }
-        public byte Unk2 { get; set; }
+        public int ScenarioID;
+        public int Unk1;
+        public byte Unk2;
     }
 
     class QueryScenarioPOI : ClientPacket
@@ -122,7 +122,7 @@ namespace Game.Network.Packets
                 MissingScenarioPOIs.Add(_worldPacket.ReadInt32());
         }
 
-        public Array<int> MissingScenarioPOIs { get; set; } = new Array<int>(35);
+        public Array<int> MissingScenarioPOIs = new Array<int>(35);
     }
 
     class ScenarioPOIs : ServerPacket
@@ -159,7 +159,7 @@ namespace Game.Network.Packets
             }
         }
 
-        public List<ScenarioPOIData> ScenarioPOIDataStats { get; set; } = new List<ScenarioPOIData>();
+        public List<ScenarioPOIData> ScenarioPOIDataStats = new List<ScenarioPOIData>();
     }
 
     struct BonusObjectiveData
@@ -171,8 +171,8 @@ namespace Game.Network.Packets
             data.FlushBits();
         }
 
-        public int BonusObjectiveID { get; set; }
-        public bool ObjectiveComplete { get; set; }
+        public int BonusObjectiveID;
+        public bool ObjectiveComplete;
     }
 
     class ScenarioSpellUpdate
@@ -184,13 +184,13 @@ namespace Game.Network.Packets
             data.FlushBits();
         }
 
-        public uint SpellID { get; set; }
-        public bool Usable { get; set; } = true;
+        public uint SpellID;
+        public bool Usable = true;
     }
 
     struct ScenarioPOIData
     {
-        public int CriteriaTreeID { get; set; }
-        public List<ScenarioPOI> ScenarioPOIs { get; set; }
+        public int CriteriaTreeID;
+        public List<ScenarioPOI> ScenarioPOIs;
     }
 }

@@ -85,21 +85,21 @@ namespace Game.Network.Packets
                 SandboxScaling.Value.Write(_worldPacket);
         }
 
-        public ObjectGuid Me { get; set; }
-        public ObjectGuid CasterGUID { get; set; }
-        public ObjectGuid CastID { get; set; }
-        public int SpellID { get; set; }
-        public int SpellXSpellVisualID { get; set; }
-        public int Damage { get; set; }
-        public int Overkill { get; set; }
-        public byte SchoolMask { get; set; }
-        public int ShieldBlock { get; set; }
-        public int Resisted { get; set; }
-        public bool Periodic { get; set; }
-        public int Absorbed { get; set; }
-        public int Flags { get; set; }
+        public ObjectGuid Me;
+        public ObjectGuid CasterGUID;
+        public ObjectGuid CastID;
+        public int SpellID;
+        public int SpellXSpellVisualID;
+        public int Damage;
+        public int Overkill;
+        public byte SchoolMask;
+        public int ShieldBlock;
+        public int Resisted;
+        public bool Periodic;
+        public int Absorbed;
+        public int Flags;
         // Optional<SpellNonMeleeDamageLogDebugInfo> DebugInfo;
-        public Optional<SandboxScalingData> SandboxScaling { get; set; } = new Optional<SandboxScalingData>();
+        public Optional<SandboxScalingData> SandboxScaling = new Optional<SandboxScalingData>();
     }
 
     class EnvironmentalDamageLog : CombatLogServerPacket
@@ -119,11 +119,11 @@ namespace Game.Network.Packets
             WriteLogData();
         }
 
-        public ObjectGuid Victim { get; set; }
-        public EnviromentalDamage Type { get; set; }
-        public int Amount { get; set; }
-        public int Resisted { get; set; }
-        public int Absorbed { get; set; }
+        public ObjectGuid Victim;
+        public EnviromentalDamage Type;
+        public int Amount;
+        public int Resisted;
+        public int Absorbed;
     }
 
     class SpellExecuteLog : CombatLogServerPacket
@@ -184,20 +184,20 @@ namespace Game.Network.Packets
             WriteLogData();
         }
 
-        public ObjectGuid Caster { get; set; }
-        public uint SpellID { get; set; }
-        public List<SpellLogEffect> Effects { get; set; } = new List<SpellLogEffect>();
+        public ObjectGuid Caster;
+        public uint SpellID;
+        public List<SpellLogEffect> Effects = new List<SpellLogEffect>();
 
         public class SpellLogEffect
         {
-            public int Effect { get; set; }
+            public int Effect;
 
-            public List<SpellLogEffectPowerDrainParams> PowerDrainTargets { get; set; } = new List<SpellLogEffectPowerDrainParams>();
-            public List<SpellLogEffectExtraAttacksParams> ExtraAttacksTargets { get; set; } = new List<SpellLogEffectExtraAttacksParams>();
-            public List<SpellLogEffectDurabilityDamageParams> DurabilityDamageTargets { get; set; } = new List<SpellLogEffectDurabilityDamageParams>();
-            public List<SpellLogEffectGenericVictimParams> GenericVictimTargets { get; set; } = new List<SpellLogEffectGenericVictimParams>();
-            public List<SpellLogEffectTradeSkillItemParams> TradeSkillTargets { get; set; } = new List<SpellLogEffectTradeSkillItemParams>();
-            public List<SpellLogEffectFeedPetParams> FeedPetTargets { get; set; } = new List<SpellLogEffectFeedPetParams>();
+            public List<SpellLogEffectPowerDrainParams> PowerDrainTargets = new List<SpellLogEffectPowerDrainParams>();
+            public List<SpellLogEffectExtraAttacksParams> ExtraAttacksTargets = new List<SpellLogEffectExtraAttacksParams>();
+            public List<SpellLogEffectDurabilityDamageParams> DurabilityDamageTargets = new List<SpellLogEffectDurabilityDamageParams>();
+            public List<SpellLogEffectGenericVictimParams> GenericVictimTargets = new List<SpellLogEffectGenericVictimParams>();
+            public List<SpellLogEffectTradeSkillItemParams> TradeSkillTargets = new List<SpellLogEffectTradeSkillItemParams>();
+            public List<SpellLogEffectFeedPetParams> FeedPetTargets = new List<SpellLogEffectFeedPetParams>();
         }
     }
 
@@ -235,15 +235,15 @@ namespace Game.Network.Packets
                 SandboxScaling.Value.Write(_worldPacket);
         }
 
-        public ObjectGuid CasterGUID { get; set; }
-        public ObjectGuid TargetGUID { get; set; }
-        public uint SpellID { get; set; }
-        public uint Health { get; set; }
-        public uint OverHeal { get; set; }
-        public uint Absorbed { get; set; }
-        public bool Crit { get; set; }
-        public Optional<float> CritRollMade { get; set; }
-        public Optional<float> CritRollNeeded { get; set; }
+        public ObjectGuid CasterGUID;
+        public ObjectGuid TargetGUID;
+        public uint SpellID;
+        public uint Health;
+        public uint OverHeal;
+        public uint Absorbed;
+        public bool Crit;
+        public Optional<float> CritRollMade;
+        public Optional<float> CritRollNeeded;
         Optional<SandboxScalingData> SandboxScaling = new Optional<SandboxScalingData>();
     }
 
@@ -265,15 +265,15 @@ namespace Game.Network.Packets
             WriteLogData();
         }
 
-        public ObjectGuid TargetGUID { get; set; }
-        public ObjectGuid CasterGUID { get; set; }
-        public uint SpellID { get; set; }
-        public List<SpellLogEffect> Effects { get; set; } = new List<SpellLogEffect>();
+        public ObjectGuid TargetGUID;
+        public ObjectGuid CasterGUID;
+        public uint SpellID;
+        public List<SpellLogEffect> Effects = new List<SpellLogEffect>();
 
         public struct PeriodicalAuraLogEffectDebugInfo
         {
-            public float CritRollMade { get; set; }
-            public float CritRollNeeded { get; set; }
+            public float CritRollMade;
+            public float CritRollNeeded;
         }
 
         public class SpellLogEffect
@@ -302,15 +302,15 @@ namespace Game.Network.Packets
                 }
             }
 
-            public uint Effect { get; set; }
-            public uint Amount { get; set; }
-            public uint OverHealOrKill { get; set; }
-            public uint SchoolMaskOrPower { get; set; }
-            public uint AbsorbedOrAmplitude { get; set; }
-            public uint Resisted { get; set; }
-            public bool Crit { get; set; }
-            public Optional<PeriodicalAuraLogEffectDebugInfo> DebugInfo { get; set; }
-            public Optional<SandboxScalingData> SandboxScaling { get; set; } = new Optional<SandboxScalingData>();
+            public uint Effect;
+            public uint Amount;
+            public uint OverHealOrKill;
+            public uint SchoolMaskOrPower;
+            public uint AbsorbedOrAmplitude;
+            public uint Resisted;
+            public bool Crit;
+            public Optional<PeriodicalAuraLogEffectDebugInfo> DebugInfo;
+            public Optional<SandboxScalingData> SandboxScaling = new Optional<SandboxScalingData>();
         }
     }
 
@@ -326,10 +326,10 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(SpellID);
         }
 
-        public ObjectGuid Caster { get; set; }
-        public ObjectGuid Victim { get; set; }
-        public uint InterruptedSpellID { get; set; }
-        public uint SpellID { get; set; }
+        public ObjectGuid Caster;
+        public ObjectGuid Victim;
+        public uint InterruptedSpellID;
+        public uint SpellID;
     }
 
     class SpellDispellLog : ServerPacket
@@ -360,12 +360,12 @@ namespace Game.Network.Packets
             }
         }
 
-        public List<SpellDispellData> DispellData { get; set; } = new List<SpellDispellData>();
-        public ObjectGuid CasterGUID { get; set; }
-        public ObjectGuid TargetGUID { get; set; }
-        public uint DispelledBySpellID { get; set; }
-        public bool IsBreak { get; set; }
-        public bool IsSteal { get; set; }
+        public List<SpellDispellData> DispellData = new List<SpellDispellData>();
+        public ObjectGuid CasterGUID;
+        public ObjectGuid TargetGUID;
+        public uint DispelledBySpellID;
+        public bool IsBreak;
+        public bool IsSteal;
     }
 
 
@@ -388,12 +388,12 @@ namespace Game.Network.Packets
             WriteLogData();
         }
 
-        public ObjectGuid TargetGUID { get; set; }
-        public ObjectGuid CasterGUID { get; set; }
-        public uint SpellID { get; set; }
-        public PowerType Type { get; set; }
-        public int Amount { get; set; }
-        public int OverEnergize { get; set; }
+        public ObjectGuid TargetGUID;
+        public ObjectGuid CasterGUID;
+        public uint SpellID;
+        public PowerType Type;
+        public int Amount;
+        public int OverEnergize;
     }
 
     class SpellInstakillLog : ServerPacket
@@ -407,9 +407,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(SpellID);
         }
 
-        public ObjectGuid Target { get; set; }
-        public ObjectGuid Caster { get; set; }
-        public uint SpellID { get; set; }
+        public ObjectGuid Target;
+        public ObjectGuid Caster;
+        public uint SpellID;
     }
 
     class SpellMissLog : ServerPacket
@@ -426,9 +426,9 @@ namespace Game.Network.Packets
                 missEntry.Write(_worldPacket);
         }
 
-        public uint SpellID { get; set; }
-        public ObjectGuid Caster { get; set; }
-        public List<SpellLogMissEntry> Entries { get; set; } = new List<SpellLogMissEntry>();
+        public uint SpellID;
+        public ObjectGuid Caster;
+        public List<SpellLogMissEntry> Entries = new List<SpellLogMissEntry>();
     }
 
     class ProcResist : ServerPacket
@@ -451,11 +451,11 @@ namespace Game.Network.Packets
                 _worldPacket.WriteFloat(Needed.Value);
         }
 
-        public ObjectGuid Caster { get; set; }
-        public ObjectGuid Target { get; set; }
-        public uint SpellID { get; set; }
-        public Optional<float> Rolled { get; set; }
-        public Optional<float> Needed { get; set; }
+        public ObjectGuid Caster;
+        public ObjectGuid Target;
+        public uint SpellID;
+        public Optional<float> Rolled;
+        public Optional<float> Needed;
     }
 
     class SpellOrDamageImmune : ServerPacket
@@ -471,10 +471,10 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
         }
 
-        public ObjectGuid CasterGUID { get; set; }
-        public ObjectGuid VictimGUID { get; set; }
-        public uint SpellID { get; set; }
-        public bool IsPeriodic { get; set; }
+        public ObjectGuid CasterGUID;
+        public ObjectGuid VictimGUID;
+        public uint SpellID;
+        public bool IsPeriodic;
     }
 
     class SpellDamageShield : CombatLogServerPacket
@@ -496,13 +496,13 @@ namespace Game.Network.Packets
             WriteLogData();
         }
 
-        public ObjectGuid Attacker { get; set; }
-        public ObjectGuid Defender { get; set; }
-        public uint SpellID { get; set; }
-        public uint TotalDamage { get; set; }
-        public uint OverKill { get; set; }
-        public uint SchoolMask { get; set; }
-        public uint LogAbsorbed { get; set; }
+        public ObjectGuid Attacker;
+        public ObjectGuid Defender;
+        public uint SpellID;
+        public uint TotalDamage;
+        public uint OverKill;
+        public uint SchoolMask;
+        public uint LogAbsorbed;
     }
 
     class AttackerStateUpdate : CombatLogServerPacket
@@ -581,56 +581,56 @@ namespace Game.Network.Packets
         }
 
         public HitInfo hitInfo; // Flags
-        public ObjectGuid AttackerGUID { get; set; }
-        public ObjectGuid VictimGUID { get; set; }
-        public int Damage { get; set; }
-        public int OverDamage { get; set; } = -1; // (damage - health) or -1 if unit is still alive
-        public Optional<SubDamage> SubDmg { get; set; }
-        public byte VictimState { get; set; }
-        public uint AttackerState { get; set; }
-        public uint MeleeSpellID { get; set; }
-        public int BlockAmount { get; set; }
-        public int RageGained { get; set; }
-        public UnkAttackerState UnkState { get; set; }
-        public float Unk { get; set; }
-        public SandboxScalingData SandboxScaling { get; set; } = new SandboxScalingData();
+        public ObjectGuid AttackerGUID;
+        public ObjectGuid VictimGUID;
+        public int Damage;
+        public int OverDamage = -1; // (damage - health) or -1 if unit is still alive
+        public Optional<SubDamage> SubDmg;
+        public byte VictimState;
+        public uint AttackerState;
+        public uint MeleeSpellID;
+        public int BlockAmount;
+        public int RageGained;
+        public UnkAttackerState UnkState;
+        public float Unk;
+        public SandboxScalingData SandboxScaling = new SandboxScalingData();
     }
 
     //Structs
     struct SpellLogEffectPowerDrainParams
     {
-        public ObjectGuid Victim { get; set; }
-        public uint Points { get; set; }
-        public uint PowerType { get; set; }
-        public float Amplitude { get; set; }
+        public ObjectGuid Victim;
+        public uint Points;
+        public uint PowerType;
+        public float Amplitude;
     }
 
     struct SpellLogEffectExtraAttacksParams
     {
-        public ObjectGuid Victim { get; set; }
-        public uint NumAttacks { get; set; }
+        public ObjectGuid Victim;
+        public uint NumAttacks;
     }
 
     struct SpellLogEffectDurabilityDamageParams
     {
-        public ObjectGuid Victim { get; set; }
-        public int ItemID { get; set; }
-        public int Amount { get; set; }
+        public ObjectGuid Victim;
+        public int ItemID;
+        public int Amount;
     }
 
     struct SpellLogEffectGenericVictimParams
     {
-        public ObjectGuid Victim { get; set; }
+        public ObjectGuid Victim;
     }
 
     struct SpellLogEffectTradeSkillItemParams
     {
-        public int ItemID { get; set; }
+        public int ItemID;
     }
 
     struct SpellLogEffectFeedPetParams
     {
-        public int ItemID { get; set; }
+        public int ItemID;
     }
 
     struct SpellLogMissDebug
@@ -641,8 +641,8 @@ namespace Game.Network.Packets
             data.WriteFloat(HitRollNeeded);
         }
 
-        public float HitRoll { get; set; }
-        public float HitRollNeeded { get; set; }
+        public float HitRoll;
+        public float HitRollNeeded;
     }
 
     public struct SpellLogMissEntry
@@ -664,41 +664,41 @@ namespace Game.Network.Packets
             data.FlushBits();
         }
 
-        public ObjectGuid Victim { get; set; }
-        public byte MissReason { get; set; }
+        public ObjectGuid Victim;
+        public byte MissReason;
         Optional<SpellLogMissDebug> Debug;
     }
 
     struct SpellDispellData
     {
-        public uint SpellID { get; set; }
-        public bool Harmful { get; set; }
-        public Optional<int> Rolled { get; set; }
-        public Optional<int> Needed { get; set; }
+        public uint SpellID;
+        public bool Harmful;
+        public Optional<int> Rolled;
+        public Optional<int> Needed;
     }
 
     public struct SubDamage
     {
-        public int SchoolMask { get; set; }
+        public int SchoolMask;
         public float FDamage; // Float damage (Most of the time equals to Damage)
-        public int Damage { get; set; }
-        public int Absorbed { get; set; }
-        public int Resisted { get; set; }
+        public int Damage;
+        public int Absorbed;
+        public int Resisted;
     }
 
     public struct UnkAttackerState
     {
-        public uint State1 { get; set; }
-        public float State2 { get; set; }
-        public float State3 { get; set; }
-        public float State4 { get; set; }
-        public float State5 { get; set; }
-        public float State6 { get; set; }
-        public float State7 { get; set; }
-        public float State8 { get; set; }
-        public float State9 { get; set; }
-        public float State10 { get; set; }
-        public float State11 { get; set; }
-        public uint State12 { get; set; }
+        public uint State1;
+        public float State2;
+        public float State3;
+        public float State4;
+        public float State5;
+        public float State6;
+        public float State7;
+        public float State8;
+        public float State9;
+        public float State10;
+        public float State11;
+        public uint State12;
     }
 }

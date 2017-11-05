@@ -44,7 +44,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteString(AccountName);
         }
 
-        public string AccountName { get; set; }
+        public string AccountName;
     }
 
     public class WhoRequestPkt : ClientPacket
@@ -61,8 +61,8 @@ namespace Game.Network.Packets
                 Areas.Add(_worldPacket.ReadInt32());
         }
 
-        public WhoRequest Request { get; set; } = new WhoRequest();
-        public List<int> Areas{ get; set; } = new List<int>();
+        public WhoRequest Request = new WhoRequest();
+        public List<int> Areas= new List<int>();
     }
 
     public class WhoResponsePkt : ServerPacket
@@ -77,7 +77,7 @@ namespace Game.Network.Packets
             Response.ForEach(p => p.Write(_worldPacket));
         }
 
-        public List<WhoEntry> Response { get; set; } = new List<WhoEntry>();
+        public List<WhoEntry> Response = new List<WhoEntry>();
     }
 
     public struct WhoRequestServerInfo
@@ -89,9 +89,9 @@ namespace Game.Network.Packets
             RequesterVirtualRealmAddress = data.ReadUInt32();
         }
 
-        public int FactionGroup { get; set; }
-        public int Locale { get; set; }
-        public uint RequesterVirtualRealmAddress { get; set; }
+        public int FactionGroup;
+        public int Locale;
+        public uint RequesterVirtualRealmAddress;
     }
 
     public class WhoRequest
@@ -130,18 +130,18 @@ namespace Game.Network.Packets
                 ServerInfo.Value.Read(data);
         }
 
-        public int MinLevel { get; set; }
-        public int MaxLevel { get; set; }
-        public string Name { get; set; }
-        public string VirtualRealmName { get; set; }
-        public string Guild { get; set; }
-        public string GuildVirtualRealmName { get; set; }
-        public int RaceFilter { get; set; } = -1;
-        public int ClassFilter { get; set; } = -1;
-        public List<string> Words { get; set; } = new List<string>();
-        public bool ShowEnemies { get; set; }
-        public bool ShowArenaPlayers { get; set; }
-        public bool ExactName { get; set; }
+        public int MinLevel;
+        public int MaxLevel;
+        public string Name;
+        public string VirtualRealmName;
+        public string Guild;
+        public string GuildVirtualRealmName;
+        public int RaceFilter = -1;
+        public int ClassFilter = -1;
+        public List<string> Words = new List<string>();
+        public bool ShowEnemies;
+        public bool ShowArenaPlayers;
+        public bool ExactName;
         public Optional<WhoRequestServerInfo> ServerInfo;
     }
 
@@ -162,11 +162,11 @@ namespace Game.Network.Packets
             data.FlushBits();
         }
 
-        public PlayerGuidLookupData PlayerData { get; set; } = new PlayerGuidLookupData();
-        public ObjectGuid GuildGUID { get; set; }
-        public uint GuildVirtualRealmAddress { get; set; }
-        public string GuildName { get; set; } = "";
-        public int AreaID { get; set; }
-        public bool IsGM { get; set; }
+        public PlayerGuidLookupData PlayerData = new PlayerGuidLookupData();
+        public ObjectGuid GuildGUID;
+        public uint GuildVirtualRealmAddress;
+        public string GuildName = "";
+        public int AreaID;
+        public bool IsGM;
     }
 }
