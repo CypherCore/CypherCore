@@ -325,7 +325,7 @@ namespace Game.Entities
             bool AnimKitCreate = flags.HasAnyFlag(UpdateFlag.AnimKits);
             bool Rotation = flags.HasAnyFlag(UpdateFlag.Rotation);
             bool HasAreaTrigger = flags.HasAnyFlag(UpdateFlag.Areatrigger);
-            bool HasGameObject = false;
+            bool HasGameObject = flags.HasAnyFlag(UpdateFlag.Gameobject);
             bool ThisIsYou = flags.HasAnyFlag(UpdateFlag.Self);
             bool SmoothPhasing = false;
             bool SceneObjCreate = false;
@@ -653,14 +653,20 @@ namespace Game.Entities
                 }
             }
 
-            //if (HasGameObject)
-            //{
-            //    *data << uint32(WorldEffectID);
+            if (HasGameObject)
+            {
+                bool bit8 = false;
+                uint Int1 = 0;
 
-            //    data.WriteBit(bit8);
-            //    if (bit8)
-            //        *data << uint32(Int1);
-            //}
+                GameObject gameObject = ToGameObject();
+
+                data.WriteUInt32(gameObject.GetWorldEffectID());
+
+                data.WriteBit(bit8);
+                data.FlushBits();
+                if (bit8)
+                    data.WriteUInt32(Int1);
+            }
 
             //if (SmoothPhasing)
             //{

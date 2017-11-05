@@ -39,6 +39,17 @@ namespace Game.DataStorage
         public uint UWZoneMusic;
     }
 
+    public sealed class WorldEffectRecord
+    {
+        public uint ID;
+        public uint TargetAsset;
+        public ushort CombatConditionID;
+        public byte TargetType;
+        public byte WhenToDisplay;
+        public uint QuestFeedbackEffectID;
+        public uint PlayerConditionID;
+    }
+
     public sealed class WorldMapAreaRecord
     {
         public string AreaName;

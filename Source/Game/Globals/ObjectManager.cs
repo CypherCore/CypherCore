@@ -3803,8 +3803,8 @@ namespace Game
         {
             uint oldMSTime = Time.GetMSTime();
 
-            //                                         0       1       2      3        4
-            SQLResult result = DB.World.Query("SELECT entry, faction, flags, mingold, maxgold FROM gameobject_template_addon");
+            //                                         0       1       2      3        4        5
+            SQLResult result = DB.World.Query("SELECT entry, faction, flags, mingold, maxgold, WorldEffectID FROM gameobject_template_addon");
 
             if (result.IsEmpty())
             {
@@ -3820,7 +3820,7 @@ namespace Game
                 GameObjectTemplate got = Global.ObjectMgr.GetGameObjectTemplate(entry);
                 if (got == null)
                 {
-                    Log.outError(LogFilter.Sql, "GameObject template (Entry: {0}) does not exist but has a record in `gameobject_template_addon`", entry);
+                    Log.outError(LogFilter.Sql, $"GameObject template (Entry: {entry}) does not exist but has a record in `gameobject_template_addon`");
                     continue;
                 }
 
@@ -3829,10 +3829,11 @@ namespace Game
                 gameObjectAddon.flags = result.Read<uint>(2);
                 gameObjectAddon.mingold = result.Read<uint>(3);
                 gameObjectAddon.maxgold = result.Read<uint>(4);
+                gameObjectAddon.WorldEffectID = result.Read<uint>(5);
 
                 // checks
                 if (gameObjectAddon.faction != 0 && !CliDB.FactionTemplateStorage.ContainsKey(gameObjectAddon.faction))
-                    Log.outError(LogFilter.Sql, "GameObject (Entry: {0}) has invalid faction ({1}) defined in `gameobject_template_addon`.", entry, gameObjectAddon.faction);
+                    Log.outError(LogFilter.Sql, $"GameObject (Entry: {entry}) has invalid faction ({gameObjectAddon.faction}) defined in `gameobject_template_addon`.");
 
                 if (gameObjectAddon.maxgold > 0)
                 {
@@ -3842,13 +3843,18 @@ namespace Game
                         case GameObjectTypes.FishingHole:
                             break;
                         default:
-                            Log.outError(LogFilter.Sql, "GameObject (Entry {0} GoType: {1}) cannot be looted but has maxgold set in `gameobject_template_addon`.", entry, got.type);
+                            Log.outError(LogFilter.Sql, $"GameObject (Entry {entry} GoType: {got.type}) cannot be looted but has maxgold set in `gameobject_template_addon`.");
                             break;
                     }
                 }
 
-                _gameObjectTemplateAddonStore[entry] = gameObjectAddon;
+                if (gameObjectAddon.WorldEffectID != 0 && !CliDB.WorldEffectStorage.ContainsKey(gameObjectAddon.WorldEffectID))
+                {
+                    Log.outError(LogFilter.Sql, $"GameObject (Entry: {entry}) has invalid WorldEffectID ({gameObjectAddon.WorldEffectID}) defined in `gameobject_template_addon`, set to 0.");
+                    gameObjectAddon.WorldEffectID = 0;
+                }
 
+                _gameObjectTemplateAddonStore[entry] = gameObjectAddon;
                 ++count;
             }
             while (result.NextRow());
@@ -4062,8 +4068,8 @@ namespace Game
 
             _gameObjectAddonStorage.Clear();
 
-            //                                         0     1                 2                 3                 4                 5                 6
-            SQLResult result = DB.World.Query("SELECT guid, parent_rotation0, parent_rotation1, parent_rotation2, parent_rotation3, invisibilityType, invisibilityValue FROM gameobject_addon");
+            //                                         0     1                 2                 3                 4                 5                 6                  7
+            SQLResult result = DB.World.Query("SELECT guid, parent_rotation0, parent_rotation1, parent_rotation2, parent_rotation3, invisibilityType, invisibilityValue, WorldEffectID FROM gameobject_addon");
 
             if (result.IsEmpty())
             {
@@ -4079,7 +4085,7 @@ namespace Game
                 GameObjectData goData = GetGOData(guid);
                 if (goData == null)
                 {
-                    Log.outError(LogFilter.Sql, "GameObject (GUID: {0}) does not exist but has a record in `gameobject_addon`", guid);
+                    Log.outError(LogFilter.Sql, $"GameObject (GUID: {guid}) does not exist but has a record in `gameobject_addon`");
                     continue;
                 }
 
@@ -4087,24 +4093,31 @@ namespace Game
                 gameObjectAddon.ParentRotation = new Quaternion(result.Read<float>(1), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4));
                 gameObjectAddon.invisibilityType = (InvisibilityType)result.Read<byte>(5);
                 gameObjectAddon.invisibilityValue = result.Read<uint>(6);
+                gameObjectAddon.WorldEffectID = result.Read<uint>(7);
 
                 if (gameObjectAddon.invisibilityType >= InvisibilityType.Max)
                 {
-                    Log.outError(LogFilter.Sql, "GameObject (GUID: {0}) has invalid InvisibilityType in `gameobject_addon`, disabled invisibility", guid);
+                    Log.outError(LogFilter.Sql, $"GameObject (GUID: {guid}) has invalid InvisibilityType in `gameobject_addon`, disabled invisibility");
                     gameObjectAddon.invisibilityType = InvisibilityType.General;
                     gameObjectAddon.invisibilityValue = 0;
                 }
 
                 if (gameObjectAddon.invisibilityType != 0 && gameObjectAddon.invisibilityValue == 0)
                 {
-                    Log.outError(LogFilter.Sql, "GameObject (GUID: {0}) has InvisibilityType set but has no InvisibilityValue in `gameobject_addon`, set to 1", guid);
+                    Log.outError(LogFilter.Sql, $"GameObject (GUID: {guid}) has InvisibilityType set but has no InvisibilityValue in `gameobject_addon`, set to 1");
                     gameObjectAddon.invisibilityValue = 1;
                 }
 
                 if (!gameObjectAddon.ParentRotation.isUnit())
                 {
-                    Log.outError(LogFilter.Sql, "GameObject (GUID: {0}) has invalid parent rotation in `gameobject_addon`, set to default", guid);
+                    Log.outError(LogFilter.Sql, $"GameObject (GUID: {guid}) has invalid parent rotation in `gameobject_addon`, set to default");
                     gameObjectAddon.ParentRotation = Quaternion.WAxis;
+                }
+
+                if (gameObjectAddon.WorldEffectID != 0 && !CliDB.WorldEffectStorage.ContainsKey(gameObjectAddon.WorldEffectID))
+                {
+                    Log.outError(LogFilter.Sql, $"GameObject (GUID: {guid}) has invalid WorldEffectID ({gameObjectAddon.WorldEffectID}) in `gameobject_addon`, set to 0.");
+                    gameObjectAddon.WorldEffectID = 0;
                 }
 
                 _gameObjectAddonStorage[guid] = gameObjectAddon;
@@ -4112,7 +4125,7 @@ namespace Game
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} gameobject addons in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} gameobject addons in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
         public void LoadGameObjectQuestItems()
         {

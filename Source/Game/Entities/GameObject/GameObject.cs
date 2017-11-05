@@ -228,6 +228,12 @@ namespace Game.Entities
             {
                 SetUInt32Value(GameObjectFields.Faction, m_goTemplateAddon.faction);
                 SetUInt32Value(GameObjectFields.Flags, m_goTemplateAddon.flags);
+
+                if (m_goTemplateAddon.WorldEffectID)
+                {
+                    m_updateFlag |= UpdateFlag.Gameobject;
+                    SetWorldEffectID(m_goTemplateAddon.WorldEffectID);
+                }
             }
 
             SetEntry(goinfo.entry);
@@ -316,6 +322,12 @@ namespace Game.Entities
             {
                 m_invisibility.AddFlag(gameObjectAddon.invisibilityType);
                 m_invisibility.AddValue(gameObjectAddon.invisibilityType, gameObjectAddon.invisibilityValue);
+            }
+
+            if (gameObjectAddon != null && gameObjectAddon.WorldEffectID)
+            {
+                m_updateFlag |= UpdateFlag.Gameobject;
+                SetWorldEffectID(gameObjectAddon.WorldEffectID);
             }
 
             LastUsedScriptID = GetGoInfo().ScriptId;
@@ -2498,6 +2510,9 @@ namespace Game.Entities
 
         public override ushort GetAIAnimKitId() { return _animKitId; }
 
+        public uint GetWorldEffectID() { return _worldEffectID; }
+        public void SetWorldEffectID(uint worldEffectID) { _worldEffectID = worldEffectID; }
+
         public GameObjectTemplate GetGoInfo() { return m_goInfo; }
         public GameObjectTemplateAddon GetTemplateAddon() { return m_goTemplateAddon; }
         GameObjectData GetGoData() { return m_goData; }
@@ -2663,6 +2678,7 @@ namespace Game.Entities
 
         GameObjectAI m_AI;
         ushort _animKitId;
+        uint _worldEffectID;
 
         GameObjectState m_prevGoState;                          // What state to set whenever resetting
 

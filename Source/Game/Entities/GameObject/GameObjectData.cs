@@ -1030,6 +1030,7 @@ namespace Game.Entities
         public uint flags;
         public uint mingold;
         public uint maxgold;
+        public uint WorldEffectID;
     }
 
     public class GameObjectLocale
@@ -1044,6 +1045,7 @@ namespace Game.Entities
         public Quaternion ParentRotation;
         public InvisibilityType invisibilityType;
         public uint invisibilityValue;
+        public uint WorldEffectID;
     }
 
     public class GameObjectData

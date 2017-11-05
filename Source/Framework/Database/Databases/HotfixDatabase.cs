@@ -990,6 +990,10 @@ namespace Framework.Database
                 "UWAmbience, NameSet, SoundProviderPref, SoundProviderPrefUnderwater, Flags, ID, UWZoneMusic FROM wmo_area_table ORDER BY ID DESC");
             PrepareStatement(HotfixStatements.SEL_WMO_AREA_TABLE_LOCALE, "SELECT ID, AreaName_lang FROM wmo_area_table_locale WHERE locale = ?");
 
+            // WorldEffect.db2
+            PrepareStatement(HotfixStatements.SEL_WORLD_EFFECT, "SELECT ID, TargetAsset, CombatConditionID, TargetType, WhenToDisplay, QuestFeedbackEffectID, " +
+                "PlayerConditionID FROM world_effect ORDER BY ID DESC");
+
             // WorldMapArea.db2
             PrepareStatement(HotfixStatements.SEL_WORLD_MAP_AREA, "SELECT AreaName, LocLeft, LocRight, LocTop, LocBottom, MapID, AreaID, DisplayMapID, " +
                 "DefaultDungeonFloor, ParentWorldMapID, Flags, LevelRangeMin, LevelRangeMax, BountySetID, BountyBoardLocation, ID, PlayerConditionID" +
@@ -1516,6 +1520,8 @@ namespace Framework.Database
 
         SEL_WMO_AREA_TABLE,
         SEL_WMO_AREA_TABLE_LOCALE,
+
+        SEL_WORLD_EFFECT,
 
         SEL_WORLD_MAP_AREA,
 

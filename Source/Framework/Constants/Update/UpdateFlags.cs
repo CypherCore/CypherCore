@@ -33,7 +33,7 @@ namespace Framework.Constants
         Rotation            = 0x80,
         AnimKits            = 0x100,
         Areatrigger         = 0x0200,
-        //UPDATEFLAG_GAMEOBJECT            = 0x0400,
+        Gameobject          = 0x0400,
         //UPDATEFLAG_REPLACE_ACTIVE        = 0x0800,
         //UPDATEFLAG_NO_BIRTH_ANIM         = 0x1000,
         //UPDATEFLAG_ENABLE_PORTALS        = 0x2000,

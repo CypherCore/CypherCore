@@ -252,6 +252,7 @@ namespace Game.DataStorage
             VehicleStorage = DB6Reader.Read<VehicleRecord>("Vehicle.db2", DB6Metas.VehicleMeta, HotfixStatements.SEL_VEHICLE);
             VehicleSeatStorage = DB6Reader.Read<VehicleSeatRecord>("VehicleSeat.db2", DB6Metas.VehicleSeatMeta, HotfixStatements.SEL_VEHICLE_SEAT);
             WMOAreaTableStorage = DB6Reader.Read<WMOAreaTableRecord>("WMOAreaTable.db2", DB6Metas.WMOAreaTableMeta, HotfixStatements.SEL_WMO_AREA_TABLE, HotfixStatements.SEL_WMO_AREA_TABLE_LOCALE);
+            WorldEffectStorage = DB6Reader.Read<WorldEffectRecord>("WorldEffect.db2", DB6Metas.WorldEffectMeta, HotfixStatements.SEL_WORLD_EFFECT);
             WorldMapAreaStorage = DB6Reader.Read<WorldMapAreaRecord>("WorldMapArea.db2", DB6Metas.WorldMapAreaMeta, HotfixStatements.SEL_WORLD_MAP_AREA);
             WorldMapOverlayStorage = DB6Reader.Read<WorldMapOverlayRecord>("WorldMapOverlay.db2", DB6Metas.WorldMapOverlayMeta, HotfixStatements.SEL_WORLD_MAP_OVERLAY);
             WorldMapTransformsStorage = DB6Reader.Read<WorldMapTransformsRecord>("WorldMapTransforms.db2", DB6Metas.WorldMapTransformsMeta, HotfixStatements.SEL_WORLD_MAP_TRANSFORMS);
@@ -577,6 +578,7 @@ namespace Game.DataStorage
         public static DB6Storage<VehicleRecord> VehicleStorage;
         public static DB6Storage<VehicleSeatRecord> VehicleSeatStorage;
         public static DB6Storage<WMOAreaTableRecord> WMOAreaTableStorage;
+        public static DB6Storage<WorldEffectRecord> WorldEffectStorage;
         public static DB6Storage<WorldMapAreaRecord> WorldMapAreaStorage;
         public static DB6Storage<WorldMapOverlayRecord> WorldMapOverlayStorage;
         public static DB6Storage<WorldMapTransformsRecord> WorldMapTransformsStorage;
