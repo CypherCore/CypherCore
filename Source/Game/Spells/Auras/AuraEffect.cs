@@ -1392,7 +1392,12 @@ namespace Game.Spells
                 if (aurApp.HasRemoveMode())
                     return;
 
+                ShapeShiftForm prevForm = target.GetShapeshiftForm();
                 target.SetShapeshiftForm(form);
+                // add the shapeshift aura's boosts
+                if (prevForm != form)
+                    HandleShapeshiftBoosts(target, true);
+
                 if (modelid > 0)
                 {
                     SpellInfo transformSpellInfo = Global.SpellMgr.GetSpellInfo(target.GetTransForm());
@@ -1435,11 +1440,10 @@ namespace Game.Spells
                     default:
                         break;
                 }
-            }
 
-            // adding/removing linked auras
-            // add/remove the shapeshift aura's boosts
-            HandleShapeshiftBoosts(target, apply);
+                // remove the shapeshift aura's boosts
+                HandleShapeshiftBoosts(target, apply);
+            }
 
             if (target.IsTypeId(TypeId.Player))
                 target.ToPlayer().InitDataForForm();
