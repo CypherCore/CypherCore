@@ -29,18 +29,32 @@ namespace Game.Network
 {
     public class WorldSocket : SocketBase
     {
-        string ClientConnectionInitialize = "WORLD OF WARCRAFT CONNECTION - CLIENT TO SERVER";
-        string ServerConnectionInitialize = "WORLD OF WARCRAFT CONNECTION - SERVER TO CLIENT";
+        static string ClientConnectionInitialize = "WORLD OF WARCRAFT CONNECTION - CLIENT TO SERVER";
+        static string ServerConnectionInitialize = "WORLD OF WARCRAFT CONNECTION - SERVER TO CLIENT";
 
-        byte[] AuthCheckSeed = { 0xC5, 0xC6, 0x98, 0x95, 0x76, 0x3F, 0x1D, 0xCD, 0xB6, 0xA1, 0x37, 0x28, 0xB3, 0x12, 0xFF, 0x8A };
-        byte[] SessionKeySeed = { 0x58, 0xCB, 0xCF, 0x40, 0xFE, 0x2E, 0xCE, 0xA6, 0x5A, 0x90, 0xB8, 0x01, 0x68, 0x6C, 0x28, 0x0B };
-        byte[] ContinuedSessionSeed = { 0x16, 0xAD, 0x0C, 0xD4, 0x46, 0xF9, 0x4F, 0xB2, 0xEF, 0x7D, 0xEA, 0x2A, 0x17, 0x66, 0x4D, 0x2F };
+        static byte[] AuthCheckSeed = { 0xC5, 0xC6, 0x98, 0x95, 0x76, 0x3F, 0x1D, 0xCD, 0xB6, 0xA1, 0x37, 0x28, 0xB3, 0x12, 0xFF, 0x8A };
+        static byte[] SessionKeySeed = { 0x58, 0xCB, 0xCF, 0x40, 0xFE, 0x2E, 0xCE, 0xA6, 0x5A, 0x90, 0xB8, 0x01, 0x68, 0x6C, 0x28, 0x0B };
+        static byte[] ContinuedSessionSeed = { 0x16, 0xAD, 0x0C, 0xD4, 0x46, 0xF9, 0x4F, 0xB2, 0xEF, 0x7D, 0xEA, 0x2A, 0x17, 0x66, 0x4D, 0x2F };
 
         public WorldSocket(Socket socket) : base(socket)
         {
             _connectType = ConnectionType.Realm;
             _serverChallenge = new byte[0].GenerateRandomKey(16);
             worldCrypt = new WorldCrypt();
+        }
+
+        public override void Dispose()
+        {
+            _worldSession = null;
+            _queryProcessor = null;
+            _serverChallenge = null;
+            worldCrypt = null;
+            _encryptSeed = null;
+            _decryptSeed = null;
+            _sessionKey = null;
+            _compressionStream = null;
+
+            base.Dispose();
         }
 
         public override void Start()
@@ -315,11 +329,6 @@ namespace Game.Network
             uint compressedSize = bufferSize - _compressionStream.avail_out;
             Buffer.BlockCopy(outPrt, 0, data, 0, (int)compressedSize);
             return compressedSize;
-        }
-
-        public override void OnClose()
-        {
-            _worldSession = null;
         }
 
         public override bool Update()

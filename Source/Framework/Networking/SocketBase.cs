@@ -31,7 +31,10 @@ namespace Framework.Networking
             _receiveBuffer = new byte[ushort.MaxValue];
         }
 
-        public virtual void Dispose() { }
+        public virtual void Dispose()
+        {
+            _receiveBuffer = null;
+        }
 
         public abstract void Start();
 
@@ -57,16 +60,16 @@ namespace Framework.Networking
 
             try
             {
-                var socketEventargs = new SocketAsyncEventArgs();
+                using (var socketEventargs = new SocketAsyncEventArgs())
+                {
+                    socketEventargs.SetBuffer(_receiveBuffer, 0, _receiveBuffer.Length);
+                    socketEventargs.Completed += (sender, args) => ReadHandlerInternal(args);
+                    socketEventargs.SocketFlags = SocketFlags.None;
+                    socketEventargs.RemoteEndPoint = _socket.RemoteEndPoint;
 
-                socketEventargs.SetBuffer(_receiveBuffer, 0, _receiveBuffer.Length);
-
-                socketEventargs.Completed += (sender, args) => ReadHandlerInternal(args);
-                socketEventargs.SocketFlags = SocketFlags.None;
-                socketEventargs.RemoteEndPoint = _socket.RemoteEndPoint;
-
-                if (!_socket.ReceiveAsync(socketEventargs))
-                    ReadHandlerInternal(socketEventargs);
+                    if (!_socket.ReceiveAsync(socketEventargs))
+                        ReadHandlerInternal(socketEventargs);
+                }
             }
             catch (Exception ex)
             {
@@ -82,15 +85,15 @@ namespace Framework.Networking
 
             try
             {
-                var socketEventargs = new SocketAsyncEventArgs();
-
-                socketEventargs.SetBuffer(_receiveBuffer, 0, _receiveBuffer.Length);
-
-                socketEventargs.Completed += (sender, args) => callback(args);
-                socketEventargs.UserToken = _socket;
-                socketEventargs.SocketFlags = SocketFlags.None;
-                if (!_socket.ReceiveAsync(socketEventargs))
-                    callback(socketEventargs);
+                using (var socketEventargs = new SocketAsyncEventArgs())
+                {
+                    socketEventargs.SetBuffer(_receiveBuffer, 0, _receiveBuffer.Length);
+                    socketEventargs.Completed += (sender, args) => callback(args);
+                    socketEventargs.UserToken = _socket;
+                    socketEventargs.SocketFlags = SocketFlags.None;
+                    if (!_socket.ReceiveAsync(socketEventargs))
+                        callback(socketEventargs);
+                }
             }
             catch (Exception ex)
             {
@@ -122,14 +125,16 @@ namespace Framework.Networking
             if (!IsOpen())
                 return;
 
-            var socketEventargs = new SocketAsyncEventArgs();
-            socketEventargs.SetBuffer(data, 0, data.Length);
-            socketEventargs.Completed += WriteHandlerInternal;
-            socketEventargs.RemoteEndPoint = _socket.RemoteEndPoint;
-            socketEventargs.UserToken = _socket;
-            socketEventargs.SocketFlags = SocketFlags.None;
+            using (var socketEventargs = new SocketAsyncEventArgs())
+            {
+                socketEventargs.SetBuffer(data, 0, data.Length);
+                socketEventargs.Completed += WriteHandlerInternal;
+                socketEventargs.RemoteEndPoint = _socket.RemoteEndPoint;
+                socketEventargs.UserToken = _socket;
+                socketEventargs.SocketFlags = SocketFlags.None;
 
-            _socket.SendAsync(socketEventargs);
+                _socket.SendAsync(socketEventargs);
+            }
         }
 
         void WriteHandlerInternal(object sender, SocketAsyncEventArgs args)
@@ -158,7 +163,7 @@ namespace Framework.Networking
             _socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, enable);
         }
 
-        public virtual void OnClose() { }
+        public virtual void OnClose() { Dispose(); }
 
         public bool IsOpen() { return !_closed; }
 

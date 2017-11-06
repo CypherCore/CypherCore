@@ -58,7 +58,7 @@ namespace Framework.Networking
             if (_newSockets.Empty())
                 return;
 
-            foreach (var socket in _newSockets)
+            foreach (var socket in _newSockets.ToArray())
             {
                 if (!socket.IsOpen())
                 {
