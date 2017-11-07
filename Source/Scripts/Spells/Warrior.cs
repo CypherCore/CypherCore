@@ -36,7 +36,8 @@ namespace Scripts.Spells.Warrior
         public const uint ChargePauseRageDecay = 109128;
         public const uint ChargeRootEffect = 105771;
         public const uint ChargeSlowEffect = 236027;
-        public const uint ColossusSmash = 86346;
+        public const uint ColossusSmash = 167105;
+        public const uint ColossusSmashEffect = 208086;
         public const uint Execute = 20647;
         public const uint GlyphOfTheBlazingTrail = 123779;
         public const uint GlyphOfHeroicLeap = 159708;
@@ -49,6 +50,7 @@ namespace Scripts.Spells.Warrior
         public const uint JuggernautCritBonusTalent = 64976;
         public const uint LastStandTriggered = 12976;
         public const uint MortalStrike = 12294;
+        public const uint MortalWounds = 213667;
         public const uint RallyingCry = 97463;
         public const uint Rend = 94009;
         public const uint RetaliationDamage = 22858;
@@ -166,6 +168,27 @@ namespace Scripts.Spells.Warrior
         public override void Register()
         {
             OnEffectLaunchTarget.Add(new EffectHandler(HandleCharge, 0, SpellEffectName.Charge));
+        }
+    }
+
+    [Script] // 167105 - Colossus Smash 7.1.5
+    class spell_warr_colossus_smash_SpellScript : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ColossusSmashEffect);
+        }
+
+        void HandleOnHit()
+        {
+            Unit target = GetHitUnit();
+            if (target)
+                GetCaster().CastSpell(target, SpellIds.ColossusSmashEffect, true);
+        }
+
+        public override void Register()
+        {
+            OnHit.Add(new HitHandler(HandleOnHit));
         }
     }
 
@@ -414,8 +437,28 @@ namespace Scripts.Spells.Warrior
         }
     }
 
-    // 7384 - Overpower
-    [Script]
+    [Script] // 12294 - Mortal Strike 7.1.5
+    class spell_warr_mortal_strike_SpellScript : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.MortalWounds);
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            Unit target = GetHitUnit();
+            if (target)
+                GetCaster().CastSpell(target, SpellIds.MortalWounds, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    [Script] // 7384 - Overpower
     class spell_warr_overpower : SpellScript
     {
         void HandleEffect(uint effIndex)
@@ -441,8 +484,8 @@ namespace Scripts.Spells.Warrior
         }
     }
 
-    // 97462 - Rallying Cry
-    [Script]
+
+    [Script] // 97462 - Rallying Cry
     class spell_warr_rallying_cry : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
