@@ -516,6 +516,53 @@ namespace Game.Chat
             return true;
         }
 
+        [Command("power", RBACPermissions.ModifyPower)]
+        static bool HandleModifyPowerCommand(StringArguments args, CommandHandler handler)
+        {
+            if (args.Empty())
+                return false;
+
+            Player target = handler.getSelectedPlayerOrSelf();
+            if (!target)
+            {
+                handler.SendSysMessage(CypherStrings.NoCharSelected);
+                return false;
+            }
+
+            if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
+                return false;
+
+            string powerTypeToken = args.NextString();
+            if (powerTypeToken.IsEmpty())
+                return false;
+
+            PowerTypeRecord powerType = Global.DB2Mgr.GetPowerTypeByName(powerTypeToken);
+            if (powerType == null)
+            {
+                handler.SendSysMessage(CypherStrings.InvalidPowerName);
+                return false;
+            }
+
+            if (target.GetPowerIndex(powerType.PowerTypeEnum) == (int)PowerType.Max)
+            {
+                handler.SendSysMessage(CypherStrings.InvalidPowerName);
+                return false;
+            }
+
+            int powerAmount = args.NextInt32();
+            if (powerAmount < 1)
+            {
+                handler.SendSysMessage(CypherStrings.BadValue);
+                return false;
+            }
+
+            NotifyModification(handler, target, CypherStrings.YouChangePower, CypherStrings.YourPowerChanged, powerType.PowerTypeToken, powerAmount, powerAmount);
+            powerAmount *= powerType.UIModifier;
+            target.SetMaxPower(powerType.PowerTypeEnum, powerAmount);
+            target.SetPower(powerType.PowerTypeEnum, powerAmount);
+            return true;
+        }
+
         [Command("standstate", RBACPermissions.CommandModifyStandstate)]
         static bool HandleModifyStandStateCommand(StringArguments args, CommandHandler handler)
         {
