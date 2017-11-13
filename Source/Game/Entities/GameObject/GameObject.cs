@@ -554,10 +554,8 @@ namespace Game.Entities
                                     // Hunter trap: Search units which are unfriendly to the trap's owner
                                     var checker = new NearestUnfriendlyNoTotemUnitInObjectRangeCheck(this, owner, radius);
                                     var searcher = new UnitSearcher(this, checker);
-                                    Cell.VisitGridObjects(this, searcher, radius);
+                                    Cell.VisitAllObjects(this, searcher, radius);
                                     target = searcher.GetTarget();
-                                    if (target == null)
-                                        Cell.VisitWorldObjects(this, searcher, radius);
                                 }
                                 else
                                 {

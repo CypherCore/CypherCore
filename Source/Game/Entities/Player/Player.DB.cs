@@ -2950,7 +2950,7 @@ namespace Game.Entities
                 uint runeCooldown = GetRuneBaseCooldown();
                 while (runes < maxRunes)
                 {
-                    SetRuneCooldown((byte)runes, runeCooldown, false);
+                    SetRuneCooldown((byte)runes, runeCooldown);
                     ++runes;
                 }
             }

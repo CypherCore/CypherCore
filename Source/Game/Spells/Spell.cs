@@ -4183,7 +4183,7 @@ namespace Game.Spells
             {
                 if (player.GetRuneCooldown(i) == 0 && runeCost > 0)
                 {
-                    player.SetRuneCooldown(i, didHit ? player.GetRuneBaseCooldown() : RuneCooldowns.Miss, true);
+                    player.SetRuneCooldown(i, didHit ? player.GetRuneBaseCooldown() : RuneCooldowns.Miss);
                     --runeCost;
                 }
             }

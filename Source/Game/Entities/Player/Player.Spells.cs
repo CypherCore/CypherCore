@@ -2850,7 +2850,7 @@ namespace Game.Entities
         /**********************************/
         /*************Runes****************/
         /**********************************/
-        public void SetRuneCooldown(byte index, uint cooldown, bool casted = false)
+        public void SetRuneCooldown(byte index, uint cooldown)
         {
             m_runes.Cooldown[index] = cooldown;
             m_runes.SetRuneState(index, (cooldown == 0) ? true : false);
@@ -2890,7 +2890,7 @@ namespace Game.Entities
         {
             int maxRunes = GetMaxPower(PowerType.Runes);
 
-            ResyncRunes data = new ResyncRunes(maxRunes);
+            ResyncRunes data = new ResyncRunes();
             data.Runes.Start = (byte)((1 << maxRunes) - 1);
             data.Runes.Count = GetRunesState();
 
