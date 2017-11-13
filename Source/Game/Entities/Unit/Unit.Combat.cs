@@ -2916,7 +2916,8 @@ namespace Game.Entities
                 return false;
 
             // can't attack invisible (ignore stealth for aoe spells) also if the area being looked at is from a spell use the dynamic object created instead of the casting unit. Ignore stealth if target is player and unit in combat with same player
-            if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetInvisible)) && (obj ? !obj.CanSeeOrDetect(target, bySpell != null && bySpell.IsAffectingArea(GetMap().GetDifficultyID())) : !CanSeeOrDetect(target, (bySpell != null && bySpell.IsAffectingArea(GetMap().GetDifficultyID())) || (target.IsTypeId(TypeId.Player) && target.HasStealthAura() && target.IsInCombat() && IsInCombatWith(target)))))
+            // skip visibility check for GO casts, needs removal when go cast is implemented
+            if (GetEntry() != SharedConst.WorldTrigger && (bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetInvisible)) && (obj ? !obj.CanSeeOrDetect(target, bySpell != null && bySpell.IsAffectingArea(GetMap().GetDifficultyID())) : !CanSeeOrDetect(target, (bySpell != null && bySpell.IsAffectingArea(GetMap().GetDifficultyID())) || (target.GetTypeId() == TypeId.Player && target.HasStealthAura() && target.IsInCombat() && IsInCombatWith(target)))))
                 return false;
 
             // can't attack dead
