@@ -2341,7 +2341,7 @@ namespace Game.Entities
                 Creature creature = source.ToCreature();
                 if (creature)
                 {
-                    if (!menuItems.OptionNpcflag.HasAnyFlag(npcflags))
+                    if (!menuItems.OptionNpcFlag.HasAnyFlag(npcflags))
                         continue;
 
                     switch (menuItems.OptionType)
@@ -2439,7 +2439,7 @@ namespace Game.Entities
                         if (optionBroadcastText == null)
                         {
                             // Find localizations from database.
-                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItems.OptionIndex);
+                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItems.OptionId);
                             if (gossipMenuLocale != null)
                                 ObjectManager.GetLocaleString(gossipMenuLocale.OptionText, locale, ref strOptionText);
                         }
@@ -2447,14 +2447,14 @@ namespace Game.Entities
                         if (boxBroadcastText == null)
                         {
                             // Find localizations from database.
-                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItems.OptionIndex);
+                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItems.OptionId);
                             if (gossipMenuLocale != null)
                                 ObjectManager.GetLocaleString(gossipMenuLocale.BoxText, locale, ref strBoxText);
                         }
                     }
 
-                    menu.GetGossipMenu().AddMenuItem((int)menuItems.OptionIndex, menuItems.OptionIcon, strOptionText, 0, (uint)menuItems.OptionType, strBoxText, menuItems.BoxMoney, menuItems.BoxCoded);
-                    menu.GetGossipMenu().AddGossipMenuItemData(menuItems.OptionIndex, menuItems.ActionMenuId, menuItems.ActionPoiId, menuItems.TrainerId);
+                    menu.GetGossipMenu().AddMenuItem((int)menuItems.OptionId, menuItems.OptionIcon, strOptionText, 0, (uint)menuItems.OptionType, strBoxText, menuItems.BoxMoney, menuItems.BoxCoded);
+                    menu.GetGossipMenu().AddGossipMenuItemData(menuItems.OptionId, menuItems.ActionMenuId, menuItems.ActionPoiId, menuItems.TrainerId);
                 }
             }
         }
@@ -2620,8 +2620,8 @@ namespace Game.Entities
 
             foreach (var menu in menuBounds)
             {
-                if (Global.ConditionMgr.IsObjectMeetToConditions(this, source, menu.conditions))
-                    textId = menu.text_id;
+                if (Global.ConditionMgr.IsObjectMeetToConditions(this, source, menu.Conditions))
+                    textId = menu.TextId;
             }
 
             return textId;

@@ -83,7 +83,7 @@ namespace Game.Misc
             foreach (var item in bounds)
             {
                 // Find the one with the given menu item id.
-                if (item.OptionIndex != menuItemId)
+                if (item.OptionId != menuItemId)
                     continue;
 
                 /// Store texts for localization.
@@ -842,12 +842,12 @@ namespace Game.Misc
     public class GossipMenuItems
     {
         public uint MenuId;
-        public uint OptionIndex;
+        public uint OptionId;
         public GossipOptionIcon OptionIcon;
         public string OptionText;
         public uint OptionBroadcastTextId;
         public GossipOption OptionType;
-        public NPCFlags OptionNpcflag;
+        public NPCFlags OptionNpcFlag;
         public uint ActionMenuId;
         public uint ActionPoiId;
         public bool BoxCoded;
@@ -875,8 +875,8 @@ namespace Game.Misc
 
     public class GossipMenus
     {
-        public uint entry;
-        public uint text_id;
-        public List<Condition> conditions = new List<Condition>();
+        public uint MenuId;
+        public uint TextId;
+        public List<Condition> Conditions = new List<Condition>();
     }
 }

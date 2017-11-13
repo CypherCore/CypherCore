@@ -558,9 +558,9 @@ namespace Game
 
             foreach (var menu in pMenuBounds)
             {
-                if (menu.entry == cond.SourceGroup && menu.text_id == cond.SourceEntry)
+                if (menu.MenuId == cond.SourceGroup && menu.TextId == cond.SourceEntry)
                 {
-                    menu.conditions.Add(cond);
+                    menu.Conditions.Add(cond);
                     return true;
                 }
             }
@@ -574,7 +574,7 @@ namespace Game
             var pMenuItemBounds = Global.ObjectMgr.GetGossipMenuItemsMapBounds(cond.SourceGroup);
             foreach (var menuItems in pMenuItemBounds)
             {
-                if (menuItems.MenuId == cond.SourceGroup && menuItems.OptionIndex == cond.SourceEntry)
+                if (menuItems.MenuId == cond.SourceGroup && menuItems.OptionId == cond.SourceEntry)
                 {
                     menuItems.Conditions.Add(cond);
                     return true;
