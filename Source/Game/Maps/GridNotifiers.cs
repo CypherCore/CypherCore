@@ -1458,9 +1458,9 @@ namespace Game.Maps
         float i_range;
     }
 
-    public class AnyUnfriendlyNoTotemUnitInObjectRangeCheck : ICheck<Unit>
+    public class NearestUnfriendlyNoTotemUnitInObjectRangeCheck : ICheck<Unit>
     {
-        public AnyUnfriendlyNoTotemUnitInObjectRangeCheck(WorldObject obj, Unit funit, float range)
+        public NearestUnfriendlyNoTotemUnitInObjectRangeCheck(WorldObject obj, Unit funit, float range)
         {
             i_obj = obj;
             i_funit = funit;
@@ -1481,7 +1481,11 @@ namespace Game.Maps
             if (!u.isTargetableForAttack(false))
                 return false;
 
-            return i_obj.IsWithinDistInMap(u, i_range) && !i_funit.IsFriendlyTo(u);
+            if (!i_obj.IsWithinDistInMap(u, i_range) || i_funit.IsFriendlyTo(u))
+                return false;
+
+            i_range = i_obj.GetDistance(u);
+            return true;
         }
 
         WorldObject i_obj;
