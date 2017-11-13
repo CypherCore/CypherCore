@@ -164,6 +164,7 @@ namespace Game.Entities
                 m_goValue.Transport.PathProgress += diff;
 
             uint timer = m_goValue.Transport.PathProgress % GetTransportPeriod();
+            bool justStopped = false;
 
             // Set current waypoint
             // Desired outcome: _currentFrame.DepartureTime < timer < _nextFrame.ArriveTime
@@ -182,6 +183,7 @@ namespace Game.Entities
                     if (timer < _currentFrame.DepartureTime)
                     {
                         SetMoving(false);
+                        justStopped = true;
                         if (_pendingStop && GetGoState() != GameObjectState.Ready)
                         {
                             SetGoState(GameObjectState.Ready);
@@ -238,12 +240,14 @@ namespace Game.Entities
                 _positionChangeTimer.Reset(positionUpdateDelay);
                 if (IsMoving())
                 {
-                    float t = CalculateSegmentPos(timer * 0.001f);
+                    float t = !justStopped ? CalculateSegmentPos(timer * 0.001f) : 1.0f;
                     Vector3 pos, dir;
                     _currentFrame.Spline.Evaluate_Percent((int)_currentFrame.Index, t, out pos);
                     _currentFrame.Spline.Evaluate_Derivative((int)_currentFrame.Index, t, out dir);
                     UpdatePosition(pos.X, pos.Y, pos.Z, (float)Math.Atan2(dir.Y, dir.X) + MathFunctions.PI);
                 }
+                else if (justStopped)
+                    UpdatePosition(_currentFrame.Node.Loc.X, _currentFrame.Node.Loc.Y, _currentFrame.Node.Loc.Z, _currentFrame.InitialOrientation);
                 else
                 {
                     /* There are four possible scenarios that trigger loading/unloading passengers:
