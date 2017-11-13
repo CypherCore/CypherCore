@@ -3543,7 +3543,7 @@ namespace Game.Spells
                 {
                     runeData.Start = m_runesState; // runes state before
                     runeData.Count = player.GetRunesState(); // runes state after
-                    for (byte i = 0; i < PlayerConst.MaxRunes; ++i)
+                    for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
                     {
                         // float casts ensure the division is performed on floats as we need float result
                         float baseCd = player.GetRuneBaseCooldown();
@@ -3554,7 +3554,7 @@ namespace Game.Spells
                 {
                     runeData.Start = 0;
                     runeData.Count = 0;
-                    for (byte i = 0; i < PlayerConst.MaxRunes; ++i)
+                    for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
                         runeData.Cooldowns.Add(0);
                 }
             }
@@ -3659,7 +3659,7 @@ namespace Game.Spells
                 {
                     runeData.Start = m_runesState; // runes state before
                     runeData.Count = player.GetRunesState(); // runes state after
-                    for (byte i = 0; i < PlayerConst.MaxRunes; ++i)
+                    for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
                     {
                         // float casts ensure the division is performed on floats as we need float result
                         float baseCd = player.GetRuneBaseCooldown();
@@ -3670,7 +3670,7 @@ namespace Game.Spells
                 {
                     runeData.Start = 0;
                     runeData.Count = 0;
-                    for (byte i = 0; i < PlayerConst.MaxRunes; ++i)
+                    for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
                         runeData.Cooldowns.Add(0);
                 }
             }
@@ -4148,8 +4148,8 @@ namespace Game.Spells
 
         SpellCastResult CheckRuneCost()
         {
-            var runeCost = m_powerCost.Find(cost => cost.Power == PowerType.Runes);
-            if (runeCost == null)
+            int runeCost = m_powerCost.Sum(cost => cost.Power == PowerType.Runes ? cost.Amount : 0);
+            if (runeCost == 0)
                 return SpellCastResult.SpellCastOk;
 
             Player player = m_caster.ToPlayer();
@@ -4164,7 +4164,7 @@ namespace Game.Spells
                 if (player.GetRuneCooldown(i) == 0)
                     ++readyRunes;
 
-            if (readyRunes < runeCost.Amount)
+            if (readyRunes < runeCost)
                 return SpellCastResult.NoPower;                       // not sure if result code is correct
 
             return SpellCastResult.SpellCastOk;
@@ -4178,8 +4178,7 @@ namespace Game.Spells
             Player player = m_caster.ToPlayer();
             m_runesState = player.GetRunesState();                 // store previous state
 
-            int runeCost = m_powerCost.Find(cost => cost.Power == PowerType.Runes).Amount;
-
+            int runeCost = m_powerCost.Sum(cost => cost.Power == PowerType.Runes ? cost.Amount : 0);
             for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
             {
                 if (player.GetRuneCooldown(i) == 0 && runeCost > 0)

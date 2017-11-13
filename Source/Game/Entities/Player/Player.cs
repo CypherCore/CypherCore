@@ -66,13 +66,6 @@ namespace Game.Entities
             PlayerTalkClass = new PlayerMenu(session);
             m_currentBuybackSlot = InventorySlots.BuyBackStart;
 
-            // Init rune flags
-            for (byte i = 0; i < PlayerConst.MaxRunes; ++i)
-            {
-                SetRuneTimer(i, 0xFFFFFFFF);
-                SetLastRuneGraceTimer(i, 0);
-            }
-
             for (byte i = 0; i < (int)MirrorTimerType.Max; i++)
                 m_MirrorTimer[i] = -1;
 
@@ -741,26 +734,6 @@ namespace Game.Entities
                 {
                     if (instance.Value < now)
                         _instanceResetTimes.Remove(instance.Key);
-                }
-            }
-
-            if (GetClass() == Class.Deathknight)
-            {
-                // Update rune timers
-                for (byte i = 0; i < PlayerConst.MaxRunes; ++i)
-                {
-                    uint timer = GetRuneTimer(i);
-
-                    // Don't update timer if rune is disabled
-                    if (GetRuneCooldown(i) != 0)
-                        continue;
-
-                    // Timer has began
-                    if (timer < 0xFFFFFFFF)
-                    {
-                        timer += diff;
-                        SetRuneTimer(i, Math.Min(2500, timer));
-                    }
                 }
             }
 
@@ -3745,9 +3718,9 @@ namespace Game.Entities
             {
                 uint regeneratedRunes = 0;
                 int regenIndex = 0;
-                while (regeneratedRunes < PlayerConst.MaxRechargingRunes && !m_runes.CooldownOrder.Empty())
+                while (regeneratedRunes < PlayerConst.MaxRechargingRunes && m_runes.CooldownOrder.Count > regenIndex)
                 {
-                    byte runeToRegen = m_runes.CooldownOrder[regenIndex++];
+                    byte runeToRegen = m_runes.CooldownOrder[regenIndex];
                     uint runeCooldown = GetRuneCooldown(runeToRegen);
                     if (runeCooldown > m_regenTimer)
                     {
@@ -3755,7 +3728,7 @@ namespace Game.Entities
                         ++regenIndex;
                     }
                     else
-                        SetRuneCooldown((byte)runeCooldown, 0);
+                        SetRuneCooldown(runeToRegen, 0);
 
                     ++regeneratedRunes;
                 }

@@ -88,11 +88,12 @@ namespace Scripts.Spells.DeathKnight
             Unit caster = eventInfo.GetActor();
             if (caster)
             {
-                if (!caster.IsTypeId(TypeId.Player) || caster.GetClass() != Class.Deathknight)
+                Player player = caster.ToPlayer();
+                if (!player || caster.GetClass() != Class.Deathknight)
                     return false;
 
-                for (byte i = 0; i < PlayerConst.MaxRunes; ++i)
-                    if (caster.ToPlayer().GetRuneCooldown(i) == 0)
+                for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
+                    if (player.GetRuneCooldown(i) == 0)
                         return false;
 
                 return true;

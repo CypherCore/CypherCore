@@ -251,16 +251,6 @@ namespace Game.Entities
             m_CombatTimer = 0;
             RemoveFlag(UnitFields.Flags, UnitFlags.InCombat);
 
-            // Reset rune flags after combat
-            if (IsTypeId(TypeId.Player) && GetClass() == Class.Deathknight)
-            {
-                for (byte i = 0; i < PlayerConst.MaxRunes; ++i)
-                {
-                    ToPlayer().SetRuneTimer(i, 0xFFFFFFFF);
-                    ToPlayer().SetLastRuneGraceTimer(i, 0);
-                }
-            }
-
             // Player's state will be cleared in Player.UpdateContestedPvP
             Creature creature = ToCreature();
             if (creature != null)
