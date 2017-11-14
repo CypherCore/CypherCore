@@ -348,14 +348,6 @@ namespace Game.Entities
             if (getPowerType() == PowerType.Mana)
                 SetPower(PowerType.Mana, GetMaxPower(PowerType.Mana));
 
-            if (getPowerType() == PowerType.RunicPower)
-            {
-                SetPower(PowerType.Runes, 8);
-                SetMaxPower(PowerType.Runes, 8);
-                SetPower(PowerType.RunicPower, 0);
-                SetMaxPower(PowerType.RunicPower, 1000);
-            }
-
             // original spells
             LearnDefaultSkills();
             LearnCustomSpells();
