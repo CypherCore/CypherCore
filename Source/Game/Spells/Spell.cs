@@ -1549,12 +1549,16 @@ namespace Game.Spells
             m_hitMask = ProcFlagsHit.None;
 
             // Hunter trap spells - activation proc for Lock and Load, Entrapment and Misdirection
-            if (m_spellInfo.SpellFamilyName == SpellFamilyNames.Hunter &&
-                (m_spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x18u) ||     // Freezing and Frost Trap, Freezing Arrow
-                m_spellInfo.Id == 57879 ||                     // Snake Trap - done this way to avoid double proc
+            if (m_spellInfo.SpellFamilyName == SpellFamilyNames.Hunter && (m_spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x18u) ||     // Freezing and Frost Trap, Freezing Arrow
+                m_spellInfo.Id == 57879 || // Snake Trap - done this way to avoid double proc
                 m_spellInfo.SpellFamilyFlags[2].HasAnyFlag(0x00024000u))) // Explosive and Immolation Trap
-
+            {
                 m_procAttacker |= ProcFlags.DoneTrapActivation;
+
+                // also fill up other flags (DoAllEffectOnTarget only fills up flag if both are not set)
+                m_procAttacker |= ProcFlags.DoneSpellMagicDmgClassNeg;
+                m_procVictim |= ProcFlags.TakenSpellMagicDmgClassNeg;
+            }
 
             // Hellfire Effect - trigger as DOT
             if (m_spellInfo.SpellFamilyName == SpellFamilyNames.Warlock && m_spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x00000040u))
@@ -1586,7 +1590,7 @@ namespace Game.Spells
                 return;
 
             if (checkIfValid)
-                if (m_spellInfo.CheckTarget(m_caster, target, Implicit) != SpellCastResult.SpellCastOk)
+                if (m_spellInfo.CheckTarget(m_caster, target, Implicit || m_caster.GetEntry() == SharedConst.WorldTrigger) != SpellCastResult.SpellCastOk) // skip stealth checks for GO casts
                     return;
 
             // Check for effect immune skip if immuned
@@ -3539,7 +3543,7 @@ namespace Game.Spells
                 {
                     runeData.Start = m_runesState; // runes state before
                     runeData.Count = player.GetRunesState(); // runes state after
-                    for (byte i = 0; i < PlayerConst.MaxRunes; ++i)
+                    for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
                     {
                         // float casts ensure the division is performed on floats as we need float result
                         float baseCd = player.GetRuneBaseCooldown();
@@ -3550,7 +3554,7 @@ namespace Game.Spells
                 {
                     runeData.Start = 0;
                     runeData.Count = 0;
-                    for (byte i = 0; i < PlayerConst.MaxRunes; ++i)
+                    for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
                         runeData.Cooldowns.Add(0);
                 }
             }
@@ -3655,7 +3659,7 @@ namespace Game.Spells
                 {
                     runeData.Start = m_runesState; // runes state before
                     runeData.Count = player.GetRunesState(); // runes state after
-                    for (byte i = 0; i < PlayerConst.MaxRunes; ++i)
+                    for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
                     {
                         // float casts ensure the division is performed on floats as we need float result
                         float baseCd = player.GetRuneBaseCooldown();
@@ -3666,7 +3670,7 @@ namespace Game.Spells
                 {
                     runeData.Start = 0;
                     runeData.Count = 0;
-                    for (byte i = 0; i < PlayerConst.MaxRunes; ++i)
+                    for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
                         runeData.Cooldowns.Add(0);
                 }
             }
@@ -4144,8 +4148,8 @@ namespace Game.Spells
 
         SpellCastResult CheckRuneCost()
         {
-            var runeCost = m_powerCost.Find(cost => cost.Power == PowerType.Runes);
-            if (runeCost == null)
+            int runeCost = m_powerCost.Sum(cost => cost.Power == PowerType.Runes ? cost.Amount : 0);
+            if (runeCost == 0)
                 return SpellCastResult.SpellCastOk;
 
             Player player = m_caster.ToPlayer();
@@ -4160,7 +4164,7 @@ namespace Game.Spells
                 if (player.GetRuneCooldown(i) == 0)
                     ++readyRunes;
 
-            if (readyRunes < runeCost.Amount)
+            if (readyRunes < runeCost)
                 return SpellCastResult.NoPower;                       // not sure if result code is correct
 
             return SpellCastResult.SpellCastOk;
@@ -4174,13 +4178,12 @@ namespace Game.Spells
             Player player = m_caster.ToPlayer();
             m_runesState = player.GetRunesState();                 // store previous state
 
-            int runeCost = m_powerCost.Find(cost => cost.Power == PowerType.Runes).Amount;
-
+            int runeCost = m_powerCost.Sum(cost => cost.Power == PowerType.Runes ? cost.Amount : 0);
             for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
             {
                 if (player.GetRuneCooldown(i) == 0 && runeCost > 0)
                 {
-                    player.SetRuneCooldown(i, didHit ? player.GetRuneBaseCooldown() : RuneCooldowns.Miss, true);
+                    player.SetRuneCooldown(i, didHit ? player.GetRuneBaseCooldown() : RuneCooldowns.Miss);
                     --runeCost;
                 }
             }
@@ -4485,7 +4488,11 @@ namespace Game.Spells
             if (!(m_spellInfo.IsPassive() && (m_targets.GetUnitTarget() == null || m_targets.GetUnitTarget() == m_caster)))
             {
                 // Check explicit target for m_originalCaster - todo: get rid of such workarounds
-                castResult = m_spellInfo.CheckExplicitTarget(m_originalCaster ?? m_caster, m_targets.GetObjectTarget(), m_targets.GetItemTarget());
+                Unit caster = m_caster;
+                if (m_originalCaster && m_caster.GetEntry() != SharedConst.WorldTrigger) // Do a simplified check for gameobject casts
+                    caster = m_originalCaster;
+
+                castResult = m_spellInfo.CheckExplicitTarget(caster, m_targets.GetObjectTarget(), m_targets.GetItemTarget());
                 if (castResult != SpellCastResult.SpellCastOk)
                     return castResult;
             }
@@ -4493,7 +4500,7 @@ namespace Game.Spells
             Unit unitTarget = m_targets.GetUnitTarget();
             if (unitTarget != null)
             {
-                castResult = m_spellInfo.CheckTarget(m_caster, unitTarget, false);
+                castResult = m_spellInfo.CheckTarget(m_caster, unitTarget, m_caster.GetEntry() == SharedConst.WorldTrigger); // skip stealth checks for GO casts
                 if (castResult != SpellCastResult.SpellCastOk)
                     return castResult;
 

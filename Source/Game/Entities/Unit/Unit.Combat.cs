@@ -251,16 +251,6 @@ namespace Game.Entities
             m_CombatTimer = 0;
             RemoveFlag(UnitFields.Flags, UnitFlags.InCombat);
 
-            // Reset rune flags after combat
-            if (IsTypeId(TypeId.Player) && GetClass() == Class.Deathknight)
-            {
-                for (byte i = 0; i < PlayerConst.MaxRunes; ++i)
-                {
-                    ToPlayer().SetRuneTimer(i, 0xFFFFFFFF);
-                    ToPlayer().SetLastRuneGraceTimer(i, 0);
-                }
-            }
-
             // Player's state will be cleared in Player.UpdateContestedPvP
             Creature creature = ToCreature();
             if (creature != null)
@@ -2916,7 +2906,8 @@ namespace Game.Entities
                 return false;
 
             // can't attack invisible (ignore stealth for aoe spells) also if the area being looked at is from a spell use the dynamic object created instead of the casting unit. Ignore stealth if target is player and unit in combat with same player
-            if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetInvisible)) && (obj ? !obj.CanSeeOrDetect(target, bySpell != null && bySpell.IsAffectingArea(GetMap().GetDifficultyID())) : !CanSeeOrDetect(target, (bySpell != null && bySpell.IsAffectingArea(GetMap().GetDifficultyID())) || (target.IsTypeId(TypeId.Player) && target.HasStealthAura() && target.IsInCombat() && IsInCombatWith(target)))))
+            // skip visibility check for GO casts, needs removal when go cast is implemented
+            if (GetEntry() != SharedConst.WorldTrigger && (bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetInvisible)) && (obj ? !obj.CanSeeOrDetect(target, bySpell != null && bySpell.IsAffectingArea(GetMap().GetDifficultyID())) : !CanSeeOrDetect(target, (bySpell != null && bySpell.IsAffectingArea(GetMap().GetDifficultyID())) || (target.GetTypeId() == TypeId.Player && target.HasStealthAura() && target.IsInCombat() && IsInCombatWith(target)))))
                 return false;
 
             // can't attack dead

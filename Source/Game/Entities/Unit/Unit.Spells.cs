@@ -2262,7 +2262,7 @@ namespace Game.Entities
             SpellHealLog spellHealLog = new SpellHealLog();
 
             spellHealLog.TargetGUID = healInfo.GetTarget().GetGUID();
-            spellHealLog.CasterGUID = GetGUID();
+            spellHealLog.CasterGUID = healInfo.GetHealer().GetGUID();
 
             spellHealLog.SpellID = healInfo.GetSpellInfo().Id;
             spellHealLog.Health = healInfo.GetHeal();

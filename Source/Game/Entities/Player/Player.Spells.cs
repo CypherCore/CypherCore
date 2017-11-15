@@ -2850,24 +2850,18 @@ namespace Game.Entities
         /**********************************/
         /*************Runes****************/
         /**********************************/
-        public void SetRuneCooldown(byte index, uint cooldown, bool casted = false)
+        public void SetRuneCooldown(byte index, uint cooldown)
         {
-            uint gracePeriod = GetRuneTimer(index);
-
-            if (casted && IsInCombat())
-            {
-                if (gracePeriod < 0xFFFFFFFF && cooldown > 0)
-                {
-                    uint lessCd = Math.Min(2500, gracePeriod);
-                    cooldown = (cooldown > lessCd) ? (cooldown - lessCd) : 0;
-                    SetLastRuneGraceTimer(index, lessCd);
-                }
-
-                SetRuneTimer(index, 0);
-            }
-
             m_runes.Cooldown[index] = cooldown;
             m_runes.SetRuneState(index, (cooldown == 0) ? true : false);
+            uint activeRunes = m_runes.Cooldown[Math.Min(GetMaxPower(PowerType.Runes), (int)PowerType.Max)];
+            if (activeRunes != GetPower(PowerType.Runes))
+                SetPower(PowerType.Runes, (int)activeRunes);
+        }
+
+        public byte GetRunesState()
+        {
+            return (byte)(m_runes.RuneState & ((1 << GetMaxPower(PowerType.Runes)) - 1));
         }
 
         public uint GetRuneBaseCooldown()
@@ -2894,28 +2888,15 @@ namespace Game.Entities
 
         public void ResyncRunes()
         {
+            int maxRunes = GetMaxPower(PowerType.Runes);
+
             ResyncRunes data = new ResyncRunes();
-            data.Runes.Start = 0;
+            data.Runes.Start = (byte)((1 << maxRunes) - 1);
             data.Runes.Count = GetRunesState();
 
-            for (byte i = 0; i < PlayerConst.MaxRunes; ++i)
-                data.Runes.Cooldowns.Add((byte)(255 - (GetRuneCooldown(i) * 51)));
-
-            // calculate mask of recharging runes
-            uint regeneratedRunes = 0;
-            int regenIndex = 0;
-            while (regeneratedRunes < PlayerConst.MaxRechargingRunes && !m_runes.CooldownOrder.Empty())
-            {
-                byte runeToRegen = m_runes.CooldownOrder[regenIndex++];
-                uint runeCooldown = GetRuneCooldown(runeToRegen);
-                if (runeCooldown > m_regenTimer)
-                {
-                    data.Runes.Start |= (byte)(1 << runeToRegen);
-                    ++regenIndex;
-                }
-
-                ++regeneratedRunes;
-            }
+            float baseCd = GetRuneBaseCooldown();
+            for (byte i = 0; i < maxRunes; ++i)
+                data.Runes.Cooldowns.Add((byte)((baseCd - GetRuneCooldown(i)) / baseCd * 255));
 
             SendPacket(data);
         }
@@ -2940,15 +2921,11 @@ namespace Game.Entities
             m_runes.RuneState = 0;
 
             for (byte i = 0; i < PlayerConst.MaxRunes; ++i)
-            {
                 SetRuneCooldown(i, 0);                                          // reset cooldowns
-                SetRuneTimer(i, 0xFFFFFFFF);                                    // Reset rune flags
-                SetLastRuneGraceTimer(i, 0);
-            }
 
             // set a base regen timer equal to 10 sec
-            SetStatFloatValue(UnitFields.PowerRegenFlatModifier + runeIndex, 0.1f);
-            SetStatFloatValue(UnitFields.PowerRegenInterruptedFlatModifier + runeIndex, 0.1f);
+            SetStatFloatValue(UnitFields.PowerRegenFlatModifier + runeIndex, 0.0f);
+            SetStatFloatValue(UnitFields.PowerRegenInterruptedFlatModifier + runeIndex, 0.0f);
         }
 
         public void UpdateAllRunesRegen()
@@ -2960,18 +2937,14 @@ namespace Game.Entities
             if (runeIndex == (int)PowerType.Max)
                 return;
 
+            PowerTypeRecord runeEntry = Global.DB2Mgr.GetPowerTypeEntry(PowerType.Runes);
+
             uint cooldown = GetRuneBaseCooldown();
-            SetStatFloatValue(UnitFields.PowerRegenFlatModifier + runeIndex, (float)(1 * Time.InMilliseconds) / cooldown);
-            SetStatFloatValue(UnitFields.PowerRegenInterruptedFlatModifier + runeIndex, (float)(1 * Time.InMilliseconds) / cooldown);
+            SetStatFloatValue(UnitFields.PowerRegenFlatModifier + runeIndex, (float)(1 * Time.InMilliseconds) / (float)cooldown - runeEntry.RegenerationPeace);
+            SetStatFloatValue(UnitFields.PowerRegenInterruptedFlatModifier + runeIndex, (float)(1 * Time.InMilliseconds) / (float)cooldown - runeEntry.RegenerationCombat);
         }
 
-        public byte GetRunesState() { return m_runes.RuneState; }
         public uint GetRuneCooldown(byte index) { return m_runes.Cooldown[index]; }
-
-        public uint GetRuneTimer(byte index) { return m_runeGraceCooldown[index]; }
-        public void SetRuneTimer(byte index, uint timer) { m_runeGraceCooldown[index] = timer; }
-        public uint GetLastRuneGraceTimer(byte index) { return m_lastRuneGraceTimers[index]; }
-        public void SetLastRuneGraceTimer(byte index, uint timer) { m_lastRuneGraceTimers[index] = timer; }
 
         public bool CanNoReagentCast(SpellInfo spellInfo)
         {

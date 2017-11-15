@@ -117,9 +117,6 @@ namespace Game.Entities
         MultiMap<uint, uint> m_overrideSpells = new MultiMap<uint, uint>();
         public Spell m_spellModTakingSpell;
         uint m_oldpetspell;
-        // Rune type / Rune timer
-        uint[] m_runeGraceCooldown = new uint[PlayerConst.MaxRunes];
-        uint[] m_lastRuneGraceTimers = new uint[PlayerConst.MaxRunes];
 
         //Mail
         List<Mail> m_mail = new List<Mail>();
@@ -347,14 +344,14 @@ namespace Game.Entities
             if (set)
             {
                 RuneState |= (byte)(1 << index);                      // usable
-                if (id == 0)
-                    CooldownOrder.Add(index);
+                if (id != 0)
+                    CooldownOrder.RemoveAt(index);
             }
             else
             {
                 RuneState &= (byte)~(1 << index);                     // on cooldown
-                if (id != 0)
-                    CooldownOrder.Remove(id);
+                if (id == 0)
+                    CooldownOrder.Add(index);
             }
         }
 

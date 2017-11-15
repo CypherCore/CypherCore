@@ -66,13 +66,6 @@ namespace Game.Entities
             PlayerTalkClass = new PlayerMenu(session);
             m_currentBuybackSlot = InventorySlots.BuyBackStart;
 
-            // Init rune flags
-            for (byte i = 0; i < PlayerConst.MaxRunes; ++i)
-            {
-                SetRuneTimer(i, 0xFFFFFFFF);
-                SetLastRuneGraceTimer(i, 0);
-            }
-
             for (byte i = 0; i < (int)MirrorTimerType.Max; i++)
                 m_MirrorTimer[i] = -1;
 
@@ -354,14 +347,6 @@ namespace Game.Entities
             SetFullHealth();
             if (getPowerType() == PowerType.Mana)
                 SetPower(PowerType.Mana, GetMaxPower(PowerType.Mana));
-
-            if (getPowerType() == PowerType.RunicPower)
-            {
-                SetPower(PowerType.Runes, 8);
-                SetMaxPower(PowerType.Runes, 8);
-                SetPower(PowerType.RunicPower, 0);
-                SetMaxPower(PowerType.RunicPower, 1000);
-            }
 
             // original spells
             LearnDefaultSkills();
@@ -741,26 +726,6 @@ namespace Game.Entities
                 {
                     if (instance.Value < now)
                         _instanceResetTimes.Remove(instance.Key);
-                }
-            }
-
-            if (GetClass() == Class.Deathknight)
-            {
-                // Update rune timers
-                for (byte i = 0; i < PlayerConst.MaxRunes; ++i)
-                {
-                    uint timer = GetRuneTimer(i);
-
-                    // Don't update timer if rune is disabled
-                    if (GetRuneCooldown(i) != 0)
-                        continue;
-
-                    // Timer has began
-                    if (timer < 0xFFFFFFFF)
-                    {
-                        timer += diff;
-                        SetRuneTimer(i, Math.Min(2500, timer));
-                    }
                 }
             }
 
@@ -2341,7 +2306,7 @@ namespace Game.Entities
                 Creature creature = source.ToCreature();
                 if (creature)
                 {
-                    if (!menuItems.OptionNpcflag.HasAnyFlag(npcflags))
+                    if (!menuItems.OptionNpcFlag.HasAnyFlag(npcflags))
                         continue;
 
                     switch (menuItems.OptionType)
@@ -2439,7 +2404,7 @@ namespace Game.Entities
                         if (optionBroadcastText == null)
                         {
                             // Find localizations from database.
-                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItems.OptionIndex);
+                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItems.OptionId);
                             if (gossipMenuLocale != null)
                                 ObjectManager.GetLocaleString(gossipMenuLocale.OptionText, locale, ref strOptionText);
                         }
@@ -2447,14 +2412,14 @@ namespace Game.Entities
                         if (boxBroadcastText == null)
                         {
                             // Find localizations from database.
-                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItems.OptionIndex);
+                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItems.OptionId);
                             if (gossipMenuLocale != null)
                                 ObjectManager.GetLocaleString(gossipMenuLocale.BoxText, locale, ref strBoxText);
                         }
                     }
 
-                    menu.GetGossipMenu().AddMenuItem((int)menuItems.OptionIndex, menuItems.OptionIcon, strOptionText, 0, (uint)menuItems.OptionType, strBoxText, menuItems.BoxMoney, menuItems.BoxCoded);
-                    menu.GetGossipMenu().AddGossipMenuItemData(menuItems.OptionIndex, menuItems.ActionMenuId, menuItems.ActionPoiId, menuItems.TrainerId);
+                    menu.GetGossipMenu().AddMenuItem((int)menuItems.OptionId, menuItems.OptionIcon, strOptionText, 0, (uint)menuItems.OptionType, strBoxText, menuItems.BoxMoney, menuItems.BoxCoded);
+                    menu.GetGossipMenu().AddGossipMenuItemData(menuItems.OptionId, menuItems.ActionMenuId, menuItems.ActionPoiId, menuItems.TrainerId);
                 }
             }
         }
@@ -2620,8 +2585,8 @@ namespace Game.Entities
 
             foreach (var menu in menuBounds)
             {
-                if (Global.ConditionMgr.IsObjectMeetToConditions(this, source, menu.conditions))
-                    textId = menu.text_id;
+                if (Global.ConditionMgr.IsObjectMeetToConditions(this, source, menu.Conditions))
+                    textId = menu.TextId;
             }
 
             return textId;
@@ -3745,9 +3710,9 @@ namespace Game.Entities
             {
                 uint regeneratedRunes = 0;
                 int regenIndex = 0;
-                while (regeneratedRunes < PlayerConst.MaxRechargingRunes && !m_runes.CooldownOrder.Empty())
+                while (regeneratedRunes < PlayerConst.MaxRechargingRunes && m_runes.CooldownOrder.Count > regenIndex)
                 {
-                    byte runeToRegen = m_runes.CooldownOrder[regenIndex++];
+                    byte runeToRegen = m_runes.CooldownOrder[regenIndex];
                     uint runeCooldown = GetRuneCooldown(runeToRegen);
                     if (runeCooldown > m_regenTimer)
                     {
@@ -3755,7 +3720,7 @@ namespace Game.Entities
                         ++regenIndex;
                     }
                     else
-                        SetRuneCooldown((byte)runeCooldown, 0);
+                        SetRuneCooldown(runeToRegen, 0);
 
                     ++regeneratedRunes;
                 }

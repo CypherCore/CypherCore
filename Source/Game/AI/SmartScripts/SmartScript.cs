@@ -1684,6 +1684,7 @@ namespace Game.AI
                     ResetBaseObject();
                     break;
                 case SmartActions.CallScriptReset:
+                    SetPhase(0);
                     OnReset();
                     break;
                 case SmartActions.SetRangedMovement:
