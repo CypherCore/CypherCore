@@ -1531,40 +1531,43 @@ namespace Game.Entities
 
         public float GetAttackDistance(Unit player)
         {
+            // WoW Wiki: the minimum radius seems to be 5 yards, while the maximum range is 45 yards
+            float maxRadius = (45.0f * WorldConfig.GetFloatValue(WorldCfg.RateCreatureAggro));
+            float minRadius = (5.0f * WorldConfig.GetFloatValue(WorldCfg.RateCreatureAggro));
             float aggroRate = WorldConfig.GetFloatValue(WorldCfg.RateCreatureAggro);
-            if (aggroRate == 0)
+            byte expansionMaxLevel = (byte)Global.ObjectMgr.GetMaxLevelForExpansion((Expansion)GetCreatureTemplate().RequiredExpansion);
+            int levelDifference = (int)(getLevel() - player.getLevel());
+
+            if (aggroRate == 0.0f)
                 return 0.0f;
 
-            uint playerlevel = player.GetLevelForTarget(this);
-            uint creaturelevel = GetLevelForTarget(player);
+            // The aggro radius for creatures with equal level as the player is 20 yards.
+            // The combatreach should not get taken into account for the distance so we drop it from the range (see Supremus as expample)
+            float baseAggroDistance = 20.0f - GetFloatValue(UnitFields.CombatReach);
 
-            int leveldif = (int)(playerlevel - creaturelevel);
+            // + - 1 yard for each level difference between player and creature
+            float aggroRadius = baseAggroDistance + levelDifference;
 
-            // "The maximum Aggro Radius has a cap of 25 levels under. Example: A level 30 char has the same Aggro Radius of a level 5 char on a level 60 mob."
-            if (leveldif < -25)
-                leveldif = -25;
-
-            // "The aggro radius of a mob having the same level as the player is roughly 20 yards"
-            float RetDistance = 20;
-
-            // "Aggro Radius varies with level difference at a rate of roughly 1 yard/level"
-            // radius grow if playlevel < creaturelevel
-            RetDistance -= leveldif;
-
-            if (creaturelevel + 5 <= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+            // detect range auras
+            if ((float)(getLevel() + 5) <= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
             {
-                // detect range auras
-                RetDistance += GetTotalAuraModifier(AuraType.ModDetectRange);
-
-                // detected range auras
-                RetDistance += player.GetTotalAuraModifier(AuraType.ModDetectedRange);
+                aggroRadius += GetTotalAuraModifier(AuraType.ModDetectRange);
+                aggroRadius += GetTotalAuraModifier(AuraType.ModDetectedRange);
             }
 
-            // "Minimum Aggro Radius for a mob seems to be combat range (5 yards)"
-            if (RetDistance < 5)
-                RetDistance = 5;
+            // The aggro range of creatures with higher levels than the total player level for the expansion should get the maxlevel treatment
+            // This makes sure that creatures such as bosses wont have a bigger aggro range than the rest of the npc's
+            // The following code is used for blizzlike behaivior such as skipable bosses (e.g. Commander Springvale at level 85)
+            if (getLevel() > expansionMaxLevel)
+                aggroRadius = baseAggroDistance + (expansionMaxLevel - player.getLevel());
 
-            return (RetDistance * aggroRate);
+            // Make sure that we wont go over the total range limits
+            if (aggroRadius > maxRadius)
+                aggroRadius = maxRadius;
+            else if (aggroRadius < minRadius)
+                aggroRadius = minRadius;
+
+            return (aggroRadius * aggroRate);
         }
 
         public override void setDeathState(DeathState s)
