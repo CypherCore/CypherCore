@@ -521,8 +521,10 @@ namespace Scripts.Northrend.IcecrownCitadel
                 if (target.HasAura(Spells.Impaled))
                     return false;
 
-                if (target.GetExactDist2d(GetOwner()) > GetSpellInfo().GetEffect(target.GetMap().GetDifficultyID(), 0).CalcRadius())
-                    return false;
+                SpellEffectInfo effect = GetSpellInfo().GetEffect(target.GetMap().GetDifficultyID(), 0);
+                if (effect != null)
+                    if (target.GetExactDist2d(GetOwner()) > effect.CalcRadius())
+                        return false;
 
                 Aura aur = target.GetAura(GetId());
                 if (aur != null)
