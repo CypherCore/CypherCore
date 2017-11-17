@@ -78,6 +78,7 @@ namespace Framework.Constants
         //Spells
         public const uint SpellWaitingForResurrect = 2584;                 // Waiting To Resurrect
         public const uint SpellSpiritHealChannel = 22011;                // Spirit Heal Channel
+        public const uint SpellSpiritHealChannelVisual = 3060;
         public const uint SpellSpiritHeal = 22012;                // Spirit Heal
         public const uint SpellResurrectionVisual = 24171;                // Resurrection Impact Visual
         public const uint SpellArenaPreparation = 32727;                // Use This One, 32728 Not Correct
