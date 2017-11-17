@@ -117,9 +117,15 @@ namespace Game.Entities
         public void AppendTaximaskTo(ShowTaxiNodes data, bool all)
         {
             if (all)
-                data.Nodes = CliDB.TaxiNodesMask;              // all existed nodes
+            {
+                data.CanLandNodes = CliDB.TaxiNodesMask;              // all existed nodes
+                data.CanUseNodes = CliDB.TaxiNodesMask;
+            }
             else
-                data.Nodes = m_taximask;                  // known nodes
+            {
+                data.CanLandNodes = m_taximask;                  // known nodes
+                data.CanUseNodes = m_taximask;
+            }
         }
 
         public bool LoadTaxiDestinationsFromString(string values, Team team)

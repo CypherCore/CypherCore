@@ -76,9 +76,9 @@ namespace Game.Network.Packets
         public ByteBuffer Data = new ByteBuffer();
     }
 
-    class HotfixList : ServerPacket
+    class AvailableHotfixes : ServerPacket
     {
-        public HotfixList(int hotfixCacheVersion, Dictionary<ulong, int> hotfixes) : base(ServerOpcodes.HotfixList)
+        public AvailableHotfixes(int hotfixCacheVersion, Dictionary<ulong, int> hotfixes) : base(ServerOpcodes.AvailableHotfixes)
         {
             HotfixCacheVersion = hotfixCacheVersion;
             Hotfixes = hotfixes;
@@ -97,9 +97,9 @@ namespace Game.Network.Packets
         public Dictionary<ulong, int> Hotfixes = new Dictionary<ulong, int>();
     }
 
-    class HotfixQuery : ClientPacket
+    class HotfixRequest : ClientPacket
     {
-        public HotfixQuery(WorldPacket packet) : base(packet) { }
+        public HotfixRequest(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -114,9 +114,9 @@ namespace Game.Network.Packets
         public List<ulong> Hotfixes = new List<ulong>();
     }
 
-    class HotfixQueryResponse : ServerPacket
+    class HotfixResponse : ServerPacket
     {
-        public HotfixQueryResponse() : base(ServerOpcodes.HotfixQueryResponse) { }
+        public HotfixResponse() : base(ServerOpcodes.HotfixResponse) { }
 
         public override void Write()
         {

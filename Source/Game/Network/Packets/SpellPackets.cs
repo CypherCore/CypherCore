@@ -1605,7 +1605,7 @@ namespace Game.Network.Packets
             Immunities.Write(data);
             Predict.Write(data);
 
-            data.WriteBits(CastFlagsEx, 22);
+            data.WriteBits(CastFlagsEx, 23);
             data.WriteBits(HitTargets.Count, 16);
             data.WriteBits(MissTargets.Count, 16);
             data.WriteBits(MissStatus.Count, 16);

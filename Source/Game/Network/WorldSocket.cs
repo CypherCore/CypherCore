@@ -36,6 +36,10 @@ namespace Game.Network
         static byte[] SessionKeySeed = { 0x58, 0xCB, 0xCF, 0x40, 0xFE, 0x2E, 0xCE, 0xA6, 0x5A, 0x90, 0xB8, 0x01, 0x68, 0x6C, 0x28, 0x0B };
         static byte[] ContinuedSessionSeed = { 0x16, 0xAD, 0x0C, 0xD4, 0x46, 0xF9, 0x4F, 0xB2, 0xEF, 0x7D, 0xEA, 0x2A, 0x17, 0x66, 0x4D, 0x2F };
 
+        static uint[] ClientTypeSeed_Win = { 0x15E29B46, 0xD030E52E, 0x8BB823BD, 0x2EE440F4 };
+        static uint[] ClientTypeSeed_Wn64 = { 0xA4DEB5FC, 0x2F09587E, 0x86C96622, 0x98162415 };
+        static uint[] ClientTypeSeed_Mc64 = { 0xA69C3979, 0x92260A02, 0x75F80969, 0xBA56132D };
+
         public WorldSocket(Socket socket) : base(socket)
         {
             _connectType = ConnectionType.Realm;
@@ -379,7 +383,19 @@ namespace Game.Network
             // For hook purposes, we get Remoteaddress at this point.
             string address = GetRemoteIpAddress().ToString();
 
-            HmacSha256 hmac = new HmacSha256(account.game.SessionKey);
+            Sha256 digestKeyHash = new Sha256();
+            digestKeyHash.Process(account.game.SessionKey, account.game.SessionKey.Length);
+
+            uint[] clientSeed = ClientTypeSeed_Win;
+            if (account.game.OS == "Wn64")
+                clientSeed = ClientTypeSeed_Wn64;
+            else if (account.game.OS == "Mc64")
+                clientSeed = ClientTypeSeed_Mc64;
+
+            byte[] byteArray = new byte[clientSeed.Length * 4];
+            Buffer.BlockCopy(clientSeed, 0, byteArray, 0, clientSeed.Length * 4);
+
+            HmacSha256 hmac = new HmacSha256(digestKeyHash.Digest);
             hmac.Process(authSession.LocalChallenge, authSession.LocalChallenge.Count);
             hmac.Process(_serverChallenge, 16);
             hmac.Finish(AuthCheckSeed, 16);
@@ -392,7 +408,10 @@ namespace Game.Network
                 return;
             }
 
-            HmacSha256 sessionKeyHmac = new HmacSha256(account.game.SessionKey);
+            Sha256 keyData = new Sha256();
+            keyData.Finish(account.game.SessionKey, account.game.SessionKey.Length);
+
+            HmacSha256 sessionKeyHmac = new HmacSha256(keyData.Digest);
             sessionKeyHmac.Process(_serverChallenge, 16);
             sessionKeyHmac.Process(authSession.LocalChallenge, authSession.LocalChallenge.Count);
             sessionKeyHmac.Finish(SessionKeySeed, 16);
