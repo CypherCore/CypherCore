@@ -2942,6 +2942,18 @@ namespace Game.Entities
                 SetUInt32Value(UnitFields.Power + loadedPowers, 0);
 
             SetPower(PowerType.LunarPower, 0);
+            // Init rune recharge
+            if (GetPowerIndex(PowerType.Runes) != (int)PowerType.Max)
+            {
+                int runes = GetPower(PowerType.Runes);
+                int maxRunes = GetMaxPower(PowerType.Runes);
+                uint runeCooldown = GetRuneBaseCooldown();
+                while (runes < maxRunes)
+                {
+                    SetRuneCooldown((byte)runes, runeCooldown);
+                    ++runes;
+                }
+            }
 
             Log.outDebug(LogFilter.Player, "The value of player {0} after load item and aura is: ", GetName());
 

@@ -2308,8 +2308,6 @@ namespace Game.Spells
             else
                 collector(Global.DB2Mgr.GetSpellPowers(Id, caster.GetMap().GetDifficultyID()));
 
-            // POWER_RUNES is handled by SpellRuneCost.db2, and cost.Amount is always 0 (see Spell.TakeRunePower)
-            costs.RemoveAll(cost => cost.Power != PowerType.Runes && cost.Amount <= 0);
             return costs;
         }
 

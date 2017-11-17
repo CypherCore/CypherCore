@@ -1266,7 +1266,10 @@ namespace Framework.Constants
         CreatureNotAiEnabled = 11015,
         SelectPlayerOrPet = 11016,
         ShutdownDelayed = 11017,
-        ShutdownCancelled = 11018
+        ShutdownCancelled = 11018,
+        YouChangePower = 11019,
+        YourPowerChanged = 11020,
+        InvalidPowerName = 11021
     }
 
     public enum BroadcastTextIds

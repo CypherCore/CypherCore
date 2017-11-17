@@ -2914,6 +2914,8 @@ namespace Game.Spells
                 GameObject linkedGO = new GameObject();
                 if (linkedGO.Create(linkedEntry, map, m_caster.GetPhaseMask(), new Position(x, y, z, target.GetOrientation()), rotation, 255, GameObjectState.Ready))
                 {
+                    pGameObj.SetLinkedTrap(linkedGO);
+
                     linkedGO.CopyPhaseFrom(m_caster);
 
                     linkedGO.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
@@ -4656,6 +4658,8 @@ namespace Game.Spells
                 GameObject linkedGO = new GameObject();
                 if (linkedGO.Create(linkedEntry, cMap, m_caster.GetPhaseMask(), pos, rotation, 255, GameObjectState.Ready))
                 {
+                    pGameObj.SetLinkedTrap(linkedGO);
+
                     linkedGO.CopyPhaseFrom(m_caster);
 
                     linkedGO.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);

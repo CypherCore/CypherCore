@@ -2330,6 +2330,9 @@ namespace Game.Entities
                     case 44544: // Fingers of Frost
                         spellInfo.GetEffect(0).SpellClassMask = new FlagArray128(685904631, 1151048, 0, 0);
                         break;
+                    case 52212: // Death and Decay
+                        spellInfo.AttributesEx6 |= SpellAttr6.CanTargetInvisible;
+                        break;
                     case 37408: // Oscillation Field
                         spellInfo.AttributesEx3 |= SpellAttr3.StackForDiffCasters;
                         break;
@@ -2839,13 +2842,14 @@ namespace Game.Entities
             switch (type)
             {
                 case AuraType.OverrideClassScripts:
+                case AuraType.ModStealth:
+                case AuraType.ModConfuse:
                 case AuraType.ModFear:
                 case AuraType.ModRoot:
                 case AuraType.ModStun:
                 case AuraType.Transform:
                 case AuraType.SpellMagnet:
                 case AuraType.SchoolAbsorb:
-                case AuraType.ModStealth:
                 case AuraType.ModRoot2:
                     return true;
             }

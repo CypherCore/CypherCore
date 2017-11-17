@@ -468,6 +468,11 @@ namespace Game.Entities
                                 m_SkillupList.Clear();
                                 m_usetimes = 0;
 
+                                // If nearby linked trap exists, respawn it
+                                GameObject linkedTrap = GetLinkedTrap();
+                                if (linkedTrap)
+                                    linkedTrap.SetLootState(LootState.Ready);
+
                                 switch (GetGoType())
                                 {
                                     case GameObjectTypes.FishingNode:   //  can't fish now
@@ -547,12 +552,10 @@ namespace Game.Entities
                                 if (owner)
                                 {
                                     // Hunter trap: Search units which are unfriendly to the trap's owner
-                                    var checker = new AnyUnfriendlyNoTotemUnitInObjectRangeCheck(this, owner, radius);
+                                    var checker = new NearestUnfriendlyNoTotemUnitInObjectRangeCheck(this, owner, radius);
                                     var searcher = new UnitSearcher(this, checker);
-                                    Cell.VisitGridObjects(this, searcher, radius);
+                                    Cell.VisitAllObjects(this, searcher, radius);
                                     target = searcher.GetTarget();
-                                    if (target == null)
-                                        Cell.VisitWorldObjects(this, searcher, radius);
                                 }
                                 else
                                 {
@@ -657,6 +660,11 @@ namespace Game.Entities
                     }
                 case LootState.JustDeactivated:
                     {
+                        // If nearby linked trap exists, despawn it
+                        GameObject linkedTrap = GetLinkedTrap();
+                        if (linkedTrap)
+                            linkedTrap.SetLootState(LootState.JustDeactivated);
+
                         //if Gameobject should cast spell, then this, but some GOs (type = 10) should be destroyed
                         if (GetGoType() == GameObjectTypes.Goober)
                         {
@@ -2338,6 +2346,12 @@ namespace Game.Entities
             return true;
         }
 
+        public void SetLinkedTrap(GameObject linkedTrap) { m_linkedTrap = linkedTrap.GetGUID(); }
+        GameObject GetLinkedTrap()
+        {
+            return ObjectAccessor.GetGameObject(this, m_linkedTrap);
+        }
+
         public override void BuildValuesUpdate(UpdateType updateType, ByteBuffer data, Player target)
         {
             if (!target)
@@ -2688,6 +2702,8 @@ namespace Game.Entities
         public Loot loot = new Loot();
 
         public GameObjectModel m_model;
+
+        ObjectGuid m_linkedTrap;
         #endregion
     }
 

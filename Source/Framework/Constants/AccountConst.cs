@@ -748,6 +748,7 @@ namespace Framework.Constants
         CommandGoOffset = 852,
         CommandReloadConversationTemplate = 853,
         CommandDebugConversation = 854,
+        ModifyPower = 867,
 
         // Custom Permissions 1000+
         Max

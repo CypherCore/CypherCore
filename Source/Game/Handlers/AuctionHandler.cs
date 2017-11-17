@@ -155,24 +155,25 @@ namespace Game
                 GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
 
             uint finalCount = 0;
-            foreach (var packetItem in packet.Items)
+            Item[] items = new Item[packet.Items.Count];
+            for (var i = 0; i < packet.Items.Count; ++i)
             {
-                Item aitem = GetPlayer().GetItemByGuid(packetItem.Guid);
-                if (!aitem)
+                items[i] = GetPlayer().GetItemByGuid(packet.Items[i].Guid);
+                if (!items[i])
                 {
                     SendAuctionCommandResult(null, AuctionAction.SellItem, AuctionError.ItemNotFound);
                     return;
                 }
 
-                if (Global.AuctionMgr.GetAItem(aitem.GetGUID().GetCounter()) || !aitem.CanBeTraded() || aitem.IsNotEmptyBag() ||
-                    aitem.GetTemplate().GetFlags().HasAnyFlag(ItemFlags.Conjured) || aitem.GetUInt32Value(ItemFields.Duration) != 0 ||
-                    aitem.GetCount() < packetItem.UseCount)
+                if (Global.AuctionMgr.GetAItem(items[i].GetGUID().GetCounter()) || !items[i].CanBeTraded() || items[i].IsNotEmptyBag() ||
+                    items[i].GetTemplate().GetFlags().HasAnyFlag(ItemFlags.Conjured) || items[i].GetUInt32Value(ItemFields.Duration) != 0 ||
+                    items[i].GetCount() < packet.Items[i].UseCount)
                 {
                     SendAuctionCommandResult(null, AuctionAction.SellItem, AuctionError.DatabaseError);
                     return;
                 }
 
-                finalCount += packetItem.UseCount;
+                finalCount += packet.Items[i].UseCount;
             }
 
             if (packet.Items.Empty())
@@ -197,21 +198,24 @@ namespace Game
                         SendAuctionCommandResult(null, AuctionAction.SellItem, AuctionError.DatabaseError);
                         return;
                     }
+                    if (items[i].GetEntry() != items[j].GetEntry())
+                    {
+                        SendAuctionCommandResult(null, AuctionAction.SellItem, AuctionError.ItemNotFound);
+                        return;
+                    }
                 }
             }
 
-            foreach (var packetItem in packet.Items)
+            for (var i = 0; i < packet.Items.Count; ++i)
             {
-                Item aitem = GetPlayer().GetItemByGuid(packetItem.Guid);
-
-                if (aitem.GetMaxStackCount() < finalCount)
+                if (items[i].GetMaxStackCount() < finalCount)
                 {
                     SendAuctionCommandResult(null, AuctionAction.SellItem, AuctionError.DatabaseError);
                     return;
                 }
             }
 
-            Item item = GetPlayer().GetItemByGuid(packet.Items[0].Guid);
+            Item item = items[0];
 
             uint auctionTime = (uint)(packet.RunTime * WorldConfig.GetFloatValue(WorldCfg.RateAuctionTime));
             AuctionHouseObject auctionHouse = Global.AuctionMgr.GetAuctionsMap(creature.getFaction());
@@ -307,12 +311,12 @@ namespace Game
                 Global.AuctionMgr.AddAItem(newItem);
                 auctionHouse.AddAuction(AH);
 
-                foreach (var packetItem in packet.Items)
+                for (var i = 0; i < packet.Items.Count; ++i)
                 {
-                    Item item2 = GetPlayer().GetItemByGuid(packetItem.Guid);
+                    Item item2 = items[i];
 
                     // Item stack count equals required count, ready to delete item - cloned item will be used for auction
-                    if (item2.GetCount() == packetItem.UseCount)
+                    if (item2.GetCount() == packet.Items[i].UseCount)
                     {
                         GetPlayer().MoveItemFromInventory(item2.GetBagSlot(), item2.GetSlot(), true);
 
@@ -323,9 +327,9 @@ namespace Game
                     }
                     else // Item stack count is bigger than required count, update item stack count and save to database - cloned item will be used for auction
                     {
-                        item2.SetCount(item2.GetCount() - packetItem.UseCount);
+                        item2.SetCount(item2.GetCount() - packet.Items[i].UseCount);
                         item2.SetState(ItemUpdateState.Changed, GetPlayer());
-                        GetPlayer().ItemRemovedQuestCheck(item2.GetEntry(), packetItem.UseCount);
+                        GetPlayer().ItemRemovedQuestCheck(item2.GetEntry(), packet.Items[i].UseCount);
                         item2.SendUpdateToPlayer(GetPlayer());
 
                         trans = new SQLTransaction();

@@ -329,7 +329,7 @@ namespace Game.Entities
             bool ThisIsYou = flags.HasAnyFlag(UpdateFlag.Self);
             bool SmoothPhasing = false;
             bool SceneObjCreate = false;
-            bool PlayerCreateData = false;
+            bool PlayerCreateData = GetTypeId() == TypeId.Player && ToUnit().GetPowerIndex(PowerType.Runes) != (int)PowerType.Max;
             int PauseTimesCount = 0;
 
             GameObject go = ToGameObject();
@@ -787,26 +787,33 @@ namespace Game.Entities
             //    }
             //}
 
-            //if (PlayerCreateData)
-            //{
-            //    data.WriteBit(HasSceneInstanceIDs);
-            //    data.WriteBit(HasRuneState);
-            //    data.FlushBits();
-            //    if (HasSceneInstanceIDs)
-            //    {
-            //        *data << uint32(SceneInstanceIDs.size());
-            //        for (std::size_t i = 0; i < SceneInstanceIDs.size(); ++i)
-            //            *data << uint32(SceneInstanceIDs[i]);
-            //    }
-            //    if (HasRuneState)
-            //    {
-            //        *data << uint8(RechargingRuneMask);
-            //        *data << uint8(UsableRuneMask);
-            //        *data << uint32(ToUnit().GetMaxPower(POWER_RUNES));
-            //        for (uint32 i = 0; i < ToUnit().GetMaxPower(POWER_RUNES); ++i)
-            //            *data << uint8(255 - (ToUnit().ToPlayer().GetRuneCooldown(i) * 51));
-            //    }
-            //}
+            if (PlayerCreateData)
+            {
+                bool HasSceneInstanceIDs = false;
+                bool HasRuneState = ToUnit().GetPowerIndex(PowerType.Runes) != (int)PowerType.Max;
+
+                data.WriteBit(HasSceneInstanceIDs);
+                data.WriteBit(HasRuneState);
+                data.FlushBits();
+                //if (HasSceneInstanceIDs)
+                //{
+                //    *data << uint32(SceneInstanceIDs.size());
+                //    for (std::size_t i = 0; i < SceneInstanceIDs.size(); ++i)
+                //        *data << uint32(SceneInstanceIDs[i]);
+                //}
+                if (HasRuneState)
+                {
+                    Player player = ToPlayer();
+                    float baseCd = player.GetRuneBaseCooldown();
+                    uint maxRunes = (uint)player.GetMaxPower(PowerType.Runes);
+
+                    data.WriteUInt8((1 << (int)maxRunes) - 1u);
+                    data.WriteUInt8(player.GetRunesState());
+                    data.WriteUInt32(maxRunes);
+                    for (byte i = 0; i < maxRunes; ++i)
+                        data.WriteUInt8((baseCd - (float)player.GetRuneCooldown(i)) / baseCd * 255);
+                }
+            }
         }
 
         public virtual void BuildValuesUpdate(UpdateType updatetype, ByteBuffer data, Player target)

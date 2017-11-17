@@ -1106,6 +1106,22 @@ namespace Game.DataStorage
             return _powerTypes[power];
         }
 
+        public PowerTypeRecord GetPowerTypeByName(string name)
+        {
+            foreach (PowerTypeRecord powerType in CliDB.PowerTypeStorage.Values)
+            {
+                string powerName = powerType.PowerTypeToken;
+                if (powerName.ToLower() == name)
+                    return powerType;
+
+                powerName = powerName.Replace("_", "");
+                if (powerName == name)
+                    return powerType;
+            }
+
+            return null;
+        }
+
         public List<RewardPackXItemRecord> GetRewardPackItemsByRewardID(uint rewardPackID)
         {
             return _rewardPackItems.LookupByKey(rewardPackID);
