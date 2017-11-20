@@ -394,7 +394,7 @@ namespace Framework.Constants
         // 197 - Order Hall Advancement related
         OrderHallTalentLearned = 198,
         AppearanceUnlockedBySlot = 199,
-        OrderHallRecruitTyoop = 200,
+        OrderHallRecruitTroop = 200,
         // 201 - 0 criterias (Legion - 23420)
         // 202 - 0 criterias (Legion - 23420)
         CompleteWorldQuest = 203,

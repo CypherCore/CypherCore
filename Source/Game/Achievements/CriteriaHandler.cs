@@ -391,6 +391,36 @@ namespace Game.Achievements
                     case CriteriaTypes.OwnToy:
                     case CriteriaTypes.OwnToyCount:
                     case CriteriaTypes.OwnHeirlooms:
+                    case CriteriaTypes.SurveyGameobject:
+                    case CriteriaTypes.ClearDigsite:
+                    case CriteriaTypes.ManualCompleteCriteria:
+                    case CriteriaTypes.CompleteChallengeModeGuild:
+                    case CriteriaTypes.DefeatCreatureGroup:
+                    case CriteriaTypes.CompleteChallengeMode:
+                    case CriteriaTypes.SendEvent:
+                    case CriteriaTypes.CookRecipesGuild:
+                    case CriteriaTypes.EarnPetBattleAchievementPoints:
+                    case CriteriaTypes.SendEventScenario:
+                    case CriteriaTypes.ReleaseSpirit:
+                    case CriteriaTypes.OwnPet:
+                    case CriteriaTypes.GarrisonCompleteDungeonEncounter:
+                    case CriteriaTypes.CompleteLfgDungeon:
+                    case CriteriaTypes.LfgVoteKicksInitiatedByPlayer:
+                    case CriteriaTypes.LfgVoteKicksNotInitByPlayer:
+                    case CriteriaTypes.BeKickedFromLfg:
+                    case CriteriaTypes.LfgLeaves:
+                    case CriteriaTypes.CountOfLfgQueueBoostsByTank:
+                    case CriteriaTypes.ReachAreatriggerWithActionset:
+                    case CriteriaTypes.StartOrderHallMission:
+                    case CriteriaTypes.RecruitGarrisonFollowerWithQuality:
+                    case CriteriaTypes.ArtifactPowerEarned:
+                    case CriteriaTypes.ArtifactTraitsUnlocked:
+                    case CriteriaTypes.OrderHallTalentLearned:
+                    case CriteriaTypes.OrderHallRecruitTroop:
+                    case CriteriaTypes.CompleteWorldQuest:
+                    case CriteriaTypes.GainParagonReputation:
+                    case CriteriaTypes.EarnHonorXp:
+                    case CriteriaTypes.RelicTalentUnlocked:
                         break;                                   // Not implemented yet :(
                 }
 
@@ -760,6 +790,9 @@ namespace Game.Achievements
                 case CriteriaTypes.PlaceGarrisonBuilding:
                 case CriteriaTypes.OwnBattlePetCount:
                 case CriteriaTypes.AppearanceUnlockedBySlot:
+                case CriteriaTypes.GainParagonReputation:
+                case CriteriaTypes.EarnHonorXp:
+                case CriteriaTypes.RelicTalentUnlocked:
                     return progress.Counter >= requiredAmount;
                 case CriteriaTypes.CompleteAchievement:
                 case CriteriaTypes.CompleteQuest:
