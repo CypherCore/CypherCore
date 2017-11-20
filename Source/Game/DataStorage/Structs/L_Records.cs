@@ -20,7 +20,7 @@ using Framework.GameMath;
 
 namespace Game.DataStorage
 {
-    public sealed class LfgDungeonsRecord
+    public sealed class LFGDungeonsRecord
     {
         public uint Id;
         public LocalizedString Name;

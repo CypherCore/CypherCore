@@ -191,6 +191,9 @@ namespace Game.DataStorage
             foreach (ItemCurrencyCostRecord itemCurrencyCost in CliDB.ItemCurrencyCostStorage.Values)
                 _itemsWithCurrencyCost.Add(itemCurrencyCost.ItemId);
 
+            foreach (ItemLevelSelectorQualityRecord itemLevelSelectorQuality in CliDB.ItemLevelSelectorQualityStorage.Values)
+                _itemLevelQualitySelectorQualities.Add(itemLevelSelectorQuality.ItemLevelSelectorQualitySetID, itemLevelSelectorQuality);
+            
             foreach (var appearanceMod in CliDB.ItemModifiedAppearanceStorage.Values)
             {
                 //ASSERT(appearanceMod.ItemID <= 0xFFFFFF);
@@ -812,6 +815,25 @@ namespace Game.DataStorage
                         uint bonus = GetItemBonusListForItemLevelDelta(delta);
                         if (bonus != 0)
                             bonusListIDs.Add(bonus);
+
+                        ItemLevelSelectorQualitySetRecord selectorQualitySet = CliDB.ItemLevelSelectorQualitySetStorage.LookupByKey(selector.ItemLevelSelectorQualitySetID);
+                        if (selectorQualitySet != null)
+                        {
+                            var itemSelectorQualities = _itemLevelQualitySelectorQualities.LookupByKey(selector.ItemLevelSelectorQualitySetID);
+                            if (itemSelectorQualities != null)
+                            {
+                                ItemQuality quality = ItemQuality.Uncommon;
+                                if (selector.ItemLevel >= selectorQualitySet.ItemLevelMax)
+                                    quality = ItemQuality.Epic;
+                                else if (selector.ItemLevel >= selectorQualitySet.ItemLevelMin)
+                                    quality = ItemQuality.Rare;
+
+                                var itemSelectorQuality = itemSelectorQualities.FirstOrDefault(p => p.Quality < (byte)quality);
+
+                                if (itemSelectorQuality != null)
+                                    bonusListIDs.Add(itemSelectorQuality.ItemBonusListID);
+                            }
+                        }
                     }
                 }
             }
@@ -874,9 +896,9 @@ namespace Game.DataStorage
             return _itemSpecOverrides.LookupByKey(itemId);
         }
 
-        public LfgDungeonsRecord GetLfgDungeon(uint mapId, Difficulty difficulty)
+        public LFGDungeonsRecord GetLfgDungeon(uint mapId, Difficulty difficulty)
         {
-            foreach (LfgDungeonsRecord dungeon in CliDB.LfgDungeonsStorage.Values)
+            foreach (LFGDungeonsRecord dungeon in CliDB.LFGDungeonsStorage.Values)
                 if (dungeon.MapID == mapId && (Difficulty)dungeon.DifficultyID == difficulty)
                     return dungeon;
 
@@ -1032,10 +1054,10 @@ namespace Game.DataStorage
             return max;
         }
 
-        public PvpDifficultyRecord GetBattlegroundBracketByLevel(uint mapid, uint level)
+        public PVPDifficultyRecord GetBattlegroundBracketByLevel(uint mapid, uint level)
         {
-            PvpDifficultyRecord maxEntry = null;              // used for level > max listed level case
-            foreach (var entry in CliDB.PvpDifficultyStorage.Values)
+            PVPDifficultyRecord maxEntry = null;              // used for level > max listed level case
+            foreach (var entry in CliDB.PVPDifficultyStorage.Values)
             {
                 // skip unrelated and too-high brackets
                 if (entry.MapID != mapid || entry.MinLevel > level)
@@ -1053,9 +1075,9 @@ namespace Game.DataStorage
             return maxEntry;
         }
 
-        public PvpDifficultyRecord GetBattlegroundBracketById(uint mapid, BattlegroundBracketId id)
+        public PVPDifficultyRecord GetBattlegroundBracketById(uint mapid, BattlegroundBracketId id)
         {
-            foreach (var entry in CliDB.PvpDifficultyStorage.Values)
+            foreach (var entry in CliDB.PVPDifficultyStorage.Values)
                 if (entry.MapID == mapid && entry.GetBracketId() == id)
                     return entry;
 
@@ -1309,7 +1331,10 @@ namespace Game.DataStorage
             {
                 if (transform.MapID != mapId)
                     continue;
-
+                if (transform.AreaID != 0)
+                    continue;
+                if (Convert.ToBoolean(transform.Flags & (byte)WorldMapTransformsFlags.Dundeon))
+                    continue;
                 if (transform.RegionMin.X > x || transform.RegionMax.X < x)
                     continue;
                 if (transform.RegionMin.Y > y || transform.RegionMax.Y < y)
@@ -1317,8 +1342,8 @@ namespace Game.DataStorage
                 if (transform.RegionMin.Z > z || transform.RegionMax.Z < z)
                     continue;
 
-                transformation = transform;
-                break;
+                if (transformation == null || transformation.Priority < transform.Priority)
+                    transformation = transform;
             }
 
             if (transformation == null)
@@ -1332,7 +1357,7 @@ namespace Game.DataStorage
 
             newMapId = transformation.NewMapID;
 
-            if (transformation.RegionScale > 0.0f && transformation.RegionScale < 1.0f)
+            if (Math.Abs(transformation.RegionScale - 1.0f) > 0.001f)
             {
                 x = (x - transformation.RegionMin.X) * transformation.RegionScale + transformation.RegionMin.X;
                 y = (y - transformation.RegionMin.Y) * transformation.RegionScale + transformation.RegionMin.Y;
@@ -1376,6 +1401,7 @@ namespace Game.DataStorage
         Dictionary<uint, ItemChildEquipmentRecord> _itemChildEquipment = new Dictionary<uint, ItemChildEquipmentRecord>();
         Array<ItemClassRecord> _itemClassByOldEnum = new Array<ItemClassRecord>(19);
         List<uint> _itemsWithCurrencyCost = new List<uint>();
+        MultiMap<uint, ItemLevelSelectorQualityRecord> _itemLevelQualitySelectorQualities = new MultiMap<uint, ItemLevelSelectorQualityRecord>();
         Dictionary<uint, ItemModifiedAppearanceRecord> _itemModifiedAppearancesByItem = new Dictionary<uint, ItemModifiedAppearanceRecord>();
         MultiMap<uint, uint> _itemToBonusTree = new MultiMap<uint, uint>();
         MultiMap<uint, ItemSetSpellRecord> _itemSetSpells = new MultiMap<uint, ItemSetSpellRecord>();
@@ -1423,6 +1449,19 @@ namespace Game.DataStorage
             if (left.MountTypeID == right.MountTypeID)
                 return left.OrderIndex.CompareTo(right.OrderIndex);
             return left.Id.CompareTo(right.Id);
+        }
+    }
+
+    struct ItemLevelSelectorQualityEntryComparator : IComparer<ItemLevelSelectorQualityRecord>
+    {
+        public bool Compare(ItemLevelSelectorQualityRecord left, ItemQuality quality)
+        {
+            return left.Quality < (byte)quality;
+        }
+
+        public int Compare(ItemLevelSelectorQualityRecord left, ItemLevelSelectorQualityRecord right)
+        {
+            return left.Quality.CompareTo(right.Quality);
         }
     }
 

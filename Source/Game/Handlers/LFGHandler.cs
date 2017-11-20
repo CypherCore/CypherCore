@@ -47,7 +47,7 @@ namespace Game
             foreach (uint slot in dfJoin.Slots)
             {
                 uint dungeon = slot & 0x00FFFFFF;
-                if (CliDB.LfgDungeonsStorage.ContainsKey(dungeon))
+                if (CliDB.LFGDungeonsStorage.ContainsKey(dungeon))
                     newDungeons.Add(dungeon);
             }
 

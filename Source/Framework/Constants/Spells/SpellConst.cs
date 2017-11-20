@@ -2333,7 +2333,8 @@ namespace Framework.Constants
         Unk146 = 146,
         Unk147 = 147,
         Unk148 = 148,
-        TotalSpellTargets = 149
+        Unk149 = 149,
+        TotalSpellTargets
     }
     public enum SpellTargetSelectionCategories
     {

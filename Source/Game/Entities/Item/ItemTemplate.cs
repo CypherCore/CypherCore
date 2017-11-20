@@ -231,6 +231,7 @@ namespace Game.Entities
         public ItemFlags GetFlags() { return (ItemFlags)ExtendedData.Flags[0]; }
         public ItemFlags2 GetFlags2() { return (ItemFlags2)ExtendedData.Flags[1]; }
         public ItemFlags3 GetFlags3() { return (ItemFlags3)ExtendedData.Flags[2]; }
+        public uint GetFlags4() { return ExtendedData.Flags[3]; }
         public float GetUnk1() { return ExtendedData.Unk1; }
         public float GetUnk2() { return ExtendedData.Unk2; }
         public uint GetBuyCount() { return Math.Max(ExtendedData.BuyCount, 1u); }

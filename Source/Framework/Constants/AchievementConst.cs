@@ -400,7 +400,10 @@ namespace Framework.Constants
         CompleteWorldQuest = 203,
         // 204 - Special criteria type to award players for some external events? Comes with what looks like an identifier, so guessing it's not unique.
         TransmogSetUnlocked = 205,
-        TotalTypes = 208
+        GainParagonReputation = 206,
+        EarnHonorXp = 207,
+        RelicTalentUnlocked = 211,
+        TotalTypes = 212
     }
 
     public enum CriteriaDataType

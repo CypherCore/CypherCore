@@ -1598,7 +1598,7 @@ namespace Game.Entities
                 Map map = GetMap();
                 if (map.IsNonRaidDungeon())
                 {
-                    LfgDungeonsRecord dungeon = Global.DB2Mgr.GetLfgDungeon(map.GetId(), map.GetDifficultyID());
+                    LFGDungeonsRecord dungeon = Global.DB2Mgr.GetLfgDungeon(map.GetId(), map.GetDifficultyID());
                     if (dungeon != null)
                         if (dungeon.TargetLevel == 80)
                             ChampioningFaction = GetChampioningFaction();

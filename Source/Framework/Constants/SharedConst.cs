@@ -703,6 +703,7 @@ namespace Framework.Constants
         EventScenario6 = 30,
         WorldPvPScenario2 = 32,
         TimewalkingRaid = 33,
+        Pvp = 34,
 
         Max
     }
@@ -2318,5 +2319,10 @@ namespace Framework.Constants
         Unk8 = 0x08,
         Unk16 = 0x10, // 16, most common value
         Unk32 = 0x20
+    }
+
+    public enum WorldMapTransformsFlags
+    {
+        Dundeon = 0x04
     }
 }

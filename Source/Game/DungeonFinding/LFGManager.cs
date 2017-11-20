@@ -175,7 +175,7 @@ namespace Game.DungeonFinding
             LfgDungeonStore.Clear();
 
             // Initialize Dungeon map with data from dbcs
-            foreach (var dungeon in CliDB.LfgDungeonsStorage.Values)
+            foreach (var dungeon in CliDB.LFGDungeonsStorage.Values)
             {
                 switch (dungeon.Type)
                 {
@@ -2144,7 +2144,7 @@ namespace Game.DungeonFinding
 
     public class LFGDungeonData
     {
-        public LFGDungeonData(LfgDungeonsRecord dbc)
+        public LFGDungeonData(LFGDungeonsRecord dbc)
         {
             id = dbc.Id;
             name = dbc.Name[Global.WorldMgr.GetDefaultDbcLocale()];

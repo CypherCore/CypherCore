@@ -44,7 +44,7 @@ namespace Framework.Constants
         public const uint infinityCooldownDelayCheck = Time.Month / 2;
         public const int MaxPlayerSummonDelay = 2 * Time.Minute;
 
-        public const int TaxiMaskSize = 243;
+        public const int TaxiMaskSize = 253;
 
         // corpse reclaim times
         public const int DeathExpireStep = (5 * Time.Minute);
@@ -97,7 +97,7 @@ namespace Framework.Constants
         public const byte FieldBytesOffsetRafGrantableLevel = 0;
         public const byte FieldBytesOffsetActionBarToggles = 1;
         public const byte FieldBytesOffsetLifetimeMaxPvpRank = 2;
-        public const byte FieldBytesOffsetMaxArtifactPowerRanks = 3;
+        public const byte FieldBytesOffsetNumRespecs = 3;
 
         public const byte FieldBytes2OffsetIgnorePowerRegenPredictionMask = 0;
         public const byte FieldBytes2OffsetAuraVision = 1;
