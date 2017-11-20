@@ -48,7 +48,7 @@ namespace Framework.Constants
         Context = ObjectFields.End + 0x045, // Size: 1, Flags: Public
         ArtifactXp = ObjectFields.End + 0x046, // Size: 2, Flags: OWNER
         AppearanceModId = ObjectFields.End + 0x048, // Size: 1, Flags: OWNER
-        End = ObjectFields.End + 0x049,
+        End = ObjectFields.End + 0x049
     }
 
     public enum ItemDynamicFields
@@ -57,14 +57,15 @@ namespace Framework.Constants
         BonusListIds = 0x001, //  Flags: Owner, 0x100
         ArtifactPowers = 0x002, // Flags: OWNER
         Gems = 0x003, // Flags: OWNER
-        End = 0x004,
+        RelicTalentData = 0x004, // Flags: OWNER
+        End = 0x005
     }
 
     public enum ContainerFields
     {
         Slot1 = ItemFields.End + 0x000, // Size: 144, Flags: Public
         NumSlots = ItemFields.End + 0x090, // Size: 1, Flags: Public
-        End = ItemFields.End + 0x091,
+        End = ItemFields.End + 0x091
     }
 
     public enum UnitFields
@@ -79,8 +80,7 @@ namespace Framework.Constants
         Target = ObjectFields.End + 0x01c, // Size: 4, Flags: Public
         BattlePetCompanionGuid = ObjectFields.End + 0x020, // Size: 4, Flags: Public
         BattlePetDbId = ObjectFields.End + 0x024, // Size: 2, Flags: Public
-        ChannelSpell = ObjectFields.End + 0x026, // Size: 1, Flags: Public, Urgent
-        ChannelSpellXSpellVisual = ObjectFields.End + 0x027, // Size: 1, Flags: Public, Urgent
+        ChannelData = ObjectFields.End + 0x026, // Size: 2, Flags: PUBLIC, URGENT
         SummonedByHomeRealm = ObjectFields.End + 0x028, // Size: 1, Flags: Public
         Bytes0 = ObjectFields.End + 0x029, // Size: 1, Flags: Public
         DisplayPower = ObjectFields.End + 0x02a, // Size: 1, Flags: Public
@@ -167,7 +167,7 @@ namespace Framework.Constants
         LooksLikeCreatureId = ObjectFields.End + 0x0c2, // Size: 1, Flags: Public
         LookAtControllerId = ObjectFields.End + 0x0c3, // Size: 1, Flags: Public
         LookAtControllerTarget = ObjectFields.End + 0x0c4, // Size: 4, Flags: Public
-        End = ObjectFields.End + 0x0c8,
+        End = ObjectFields.End + 0x0c8
     }
 
     public enum UnitDynamicFields
@@ -175,7 +175,7 @@ namespace Framework.Constants
         PassiveSpells = 0x000, //  Flags: Public, Urgent
         WorldEffects = 0x001, //  Flags: Public, Urgent
         ChannelObjects = 0x002, // Flags: PUBLIC, URGENT
-        End = 0x003,
+        End = 0x003
     }
 
     public enum PlayerFields
@@ -249,57 +249,57 @@ namespace Framework.Constants
         VersatilityBonus = UnitFields.End + 0x846, // Size: 1, Flags: Private
         FieldPvpPowerDamage = UnitFields.End + 0x847, // Size: 1, Flags: Private
         FieldPvpPowerHealing = UnitFields.End + 0x848, // Size: 1, Flags: Private
-        ExploredZones1 = UnitFields.End + 0x849, // Size: 256, Flags: Private
-        RestInfo = UnitFields.End + 0x949, // Size: 4, Flags: Private
-        ModDamageDonePos = UnitFields.End + 0x94d, // Size: 7, Flags: Private
-        ModDamageDoneNeg = UnitFields.End + 0x954, // Size: 7, Flags: Private
-        ModDamageDonePct = UnitFields.End + 0x95b, // Size: 7, Flags: Private
-        ModHealingDonePos = UnitFields.End + 0x962, // Size: 1, Flags: Private
-        ModHealingPct = UnitFields.End + 0x963, // Size: 1, Flags: Private
-        ModHealingDonePct = UnitFields.End + 0x964, // Size: 1, Flags: Private
-        ModPeriodicHealingDonePercent = UnitFields.End + 0x965, // Size: 1, Flags: Private
-        WeaponDmgMultipliers = UnitFields.End + 0x966, // Size: 3, Flags: Private
-        WeaponAtkSpeedMultipliers = UnitFields.End + 0x969, // Size: 3, Flags: Private
-        ModSpellPowerPct = UnitFields.End + 0x96c, // Size: 1, Flags: Private
-        ModResiliencePercent = UnitFields.End + 0x96d, // Size: 1, Flags: Private
-        OverrideSpellPowerByApPct = UnitFields.End + 0x96e, // Size: 1, Flags: Private
-        OverrideApBySpellPowerPercent = UnitFields.End + 0x96f, // Size: 1, Flags: Private
-        ModTargetResistance = UnitFields.End + 0x970, // Size: 1, Flags: Private
-        ModTargetPhysicalResistance = UnitFields.End + 0x971, // Size: 1, Flags: Private
-        LocalFlags = UnitFields.End + 0x972, // Size: 1, Flags: Private
-        FieldBytes = UnitFields.End + 0x973, // Size: 1, Flags: Private
-        SelfResSpell = UnitFields.End + 0x974, // Size: 1, Flags: Private
-        PvpMedals = UnitFields.End + 0x975, // Size: 1, Flags: Private
-        BuyBackPrice1 = UnitFields.End + 0x976, // Size: 12, Flags: Private
-        BuyBackTimestamp1 = UnitFields.End + 0x982, // Size: 12, Flags: Private
-        Kills = UnitFields.End + 0x98e, // Size: 1, Flags: Private
-        LifetimeHonorableKills = UnitFields.End + 0x98f, // Size: 1, Flags: Private
-        WatchedFactionIndex = UnitFields.End + 0x990, // Size: 1, Flags: Private
-        CombatRating1 = UnitFields.End + 0x991, // Size: 32, Flags: Private
-        ArenaTeamInfo11 = UnitFields.End + 0x9b1, // Size: 42, Flags: Private
-        MaxLevel = UnitFields.End + 0x9db, // Size: 1, Flags: Private
-        ScalingLevelDelta = UnitFields.End + 0x9dc, // Size: 1, Flags: Private
-        MaxCreatureScalingLevel = UnitFields.End + 0x9dd, // Size: 1, Flags: Private
-        NoReagentCost1 = UnitFields.End + 0x9de, // Size: 4, Flags: Private
-        PetSpellPower = UnitFields.End + 0x9e2, // Size: 1, Flags: Private
-        Researching1 = UnitFields.End + 0x9e3, // Size: 10, Flags: Private
-        ProfessionSkillLine1 = UnitFields.End + 0x9ed, // Size: 2, Flags: Private
-        UiHitModifier = UnitFields.End + 0x9ef, // Size: 1, Flags: Private
-        UiSpellHitModifier = UnitFields.End + 0x9f0, // Size: 1, Flags: Private
-        HomeRealmTimeOffset = UnitFields.End + 0x9f1, // Size: 1, Flags: Private
-        ModPetHaste = UnitFields.End + 0x9f2, // Size: 1, Flags: Private
-        FieldBytes2 = UnitFields.End + 0x9f3, // Size: 1, Flags: Private
-        FieldBytes3 = UnitFields.End + 0x9f4, // Size: 1, Flags: Private, UrgentSelfOnly
-        LfgBonusFactionId = UnitFields.End + 0x9f5, // Size: 1, Flags: Private
-        LootSpecId = UnitFields.End + 0x9f6, // Size: 1, Flags: Private
-        OverrideZonePvpType = UnitFields.End + 0x9f7, // Size: 1, Flags: Private, UrgentSelfOnly
-        BagSlotFlags = UnitFields.End + 0x9f8, // Size: 4, Flags: Private
-        BankBagSlotFlags = UnitFields.End + 0x9fc, // Size: 7, Flags: Private
-        InsertItemsLeftToRight = UnitFields.End + 0xa03, // Size: 1, Flags: Private
-        QuestCompleted = UnitFields.End + 0xa04, // Size: 1750, Flags: Private
-        Honor = UnitFields.End + 0x10DA, // Size: 1, Flags: Private
-        HonorNextLevel = UnitFields.End + 0x10DB, // Size: 1, Flags: Private
-        End = UnitFields.End + 0x10DC,
+        ExploredZones1 = UnitFields.End + 0x849, // Size: 320, Flags: PRIVATE
+        RestInfo = UnitFields.End + 0x989, // Size: 4, Flags: Private
+        ModDamageDonePos = UnitFields.End + 0x98d, // Size: 7, Flags: Private
+        ModDamageDoneNeg = UnitFields.End + 0x994, // Size: 7, Flags: Private
+        ModDamageDonePct = UnitFields.End + 0x99b, // Size: 7, Flags: Private
+        ModHealingDonePos = UnitFields.End + 0x9a2, // Size: 1, Flags: Private
+        ModHealingPct = UnitFields.End + 0x9a3, // Size: 1, Flags: Private
+        ModHealingDonePct = UnitFields.End + 0x9a4, // Size: 1, Flags: Private
+        ModPeriodicHealingDonePercent = UnitFields.End + 0x9a5, // Size: 1, Flags: Private
+        WeaponDmgMultipliers = UnitFields.End + 0x9a6, // Size: 3, Flags: Private
+        WeaponAtkSpeedMultipliers = UnitFields.End + 0x9a9, // Size: 3, Flags: Private
+        ModSpellPowerPct = UnitFields.End + 0x9ac, // Size: 1, Flags: Private
+        ModResiliencePercent = UnitFields.End + 0x9ad, // Size: 1, Flags: Private
+        OverrideSpellPowerByApPct = UnitFields.End + 0x9ae, // Size: 1, Flags: Private
+        OverrideApBySpellPowerPercent = UnitFields.End + 0x9af, // Size: 1, Flags: Private
+        ModTargetResistance = UnitFields.End + 0x9b0, // Size: 1, Flags: Private
+        ModTargetPhysicalResistance = UnitFields.End + 0x9b1, // Size: 1, Flags: Private
+        LocalFlags = UnitFields.End + 0x9b2, // Size: 1, Flags: Private
+        FieldBytes = UnitFields.End + 0x9b3, // Size: 1, Flags: Private
+        SelfResSpell = UnitFields.End + 0x9b4, // Size: 1, Flags: Private
+        PvpMedals = UnitFields.End + 0x9b5, // Size: 1, Flags: Private
+        BuyBackPrice1 = UnitFields.End + 0x9b6, // Size: 12, Flags: Private
+        BuyBackTimestamp1 = UnitFields.End + 0x9c2, // Size: 12, Flags: Private
+        Kills = UnitFields.End + 0x9ce, // Size: 1, Flags: Private
+        LifetimeHonorableKills = UnitFields.End + 0x9cf, // Size: 1, Flags: Private
+        WatchedFactionIndex = UnitFields.End + 0x9d0, // Size: 1, Flags: Private
+        CombatRating1 = UnitFields.End + 0x9d1, // Size: 32, Flags: Private
+        ArenaTeamInfo11 = UnitFields.End + 0x9f1, // Size: 42, Flags: Private
+        MaxLevel = UnitFields.End + 0xa1b, // Size: 1, Flags: Private
+        ScalingLevelDelta = UnitFields.End + 0xa1c, // Size: 1, Flags: Private
+        MaxCreatureScalingLevel = UnitFields.End + 0xa1d, // Size: 1, Flags: Private
+        NoReagentCost1 = UnitFields.End + 0xa1e, // Size: 4, Flags: Private
+        PetSpellPower = UnitFields.End + 0xa22, // Size: 1, Flags: Private
+        Researching1 = UnitFields.End + 0xa23, // Size: 10, Flags: Private
+        ProfessionSkillLine1 = UnitFields.End + 0xa2d, // Size: 2, Flags: Private
+        UiHitModifier = UnitFields.End + 0xa2f, // Size: 1, Flags: Private
+        UiSpellHitModifier = UnitFields.End + 0xa30, // Size: 1, Flags: Private
+        HomeRealmTimeOffset = UnitFields.End + 0xa31, // Size: 1, Flags: Private
+        ModPetHaste = UnitFields.End + 0xa32, // Size: 1, Flags: Private
+        FieldBytes2 = UnitFields.End + 0xa33, // Size: 1, Flags: Private
+        FieldBytes3 = UnitFields.End + 0xa34, // Size: 1, Flags: Private, UrgentSelfOnly
+        LfgBonusFactionId = UnitFields.End + 0xa35, // Size: 1, Flags: Private
+        LootSpecId = UnitFields.End + 0xa36, // Size: 1, Flags: Private
+        OverrideZonePvpType = UnitFields.End + 0xa37, // Size: 1, Flags: Private, UrgentSelfOnly
+        BagSlotFlags = UnitFields.End + 0xa38, // Size: 4, Flags: Private
+        BankBagSlotFlags = UnitFields.End + 0xa3c, // Size: 7, Flags: Private
+        InsertItemsLeftToRight = UnitFields.End + 0xa43, // Size: 1, Flags: Private
+        QuestCompleted = UnitFields.End + 0xa44, // Size: 1750, Flags: Private
+        Honor = UnitFields.End + 0x111a, // Size: 1, Flags: Private
+        HonorNextLevel = UnitFields.End + 0x111b, // Size: 1, Flags: Private
+        End = UnitFields.End + 0x111C
     }
 
     public enum PlayerDynamicFields
@@ -317,7 +317,7 @@ namespace Framework.Constants
         SpellPctModByLabel = UnitDynamicFields.End + 0x00A, // Flags: PRIVATE
         SpellFlatModByLabel = UnitDynamicFields.End + 0x00B, // Flags: PRIVATE
         ArenaCooldowns = UnitDynamicFields.End + 0x00C, // Flags: PUBLIC
-        End = UnitDynamicFields.End + 0x00D,
+        End = UnitDynamicFields.End + 0x00D
     }
 
     public enum GameObjectFields
@@ -334,13 +334,13 @@ namespace Framework.Constants
         StateAnumId = ObjectFields.End + 0x00f, // Size: 1, Flags: Dynamic, Urgent
         StateAnimKitId = ObjectFields.End + 0x010, // Size: 1, Flags: Dynamic, Urgent
         StateWorldEffectId = ObjectFields.End + 0x011, // Size: 4, Flags: Dynamic, Urgent
-        End = ObjectFields.End + 0x015,
+        End = ObjectFields.End + 0x015
     }
 
     public enum GameObjectDynamicFields
     {
         EnableDoodadSets = 0x000, // Flags: PUBLIC
-        End = 0x001,
+        End = 0x001
     }
 
     public enum DynamicObjectFields
@@ -351,7 +351,7 @@ namespace Framework.Constants
         SpellId = ObjectFields.End + 0x006, // Size: 1, Flags: Public
         Radius = ObjectFields.End + 0x007, // Size: 1, Flags: Public
         CastTime = ObjectFields.End + 0x008, // Size: 1, Flags: Public
-        End = ObjectFields.End + 0x009,
+        End = ObjectFields.End + 0x009
     }
 
     public enum CorpseFields
@@ -366,7 +366,7 @@ namespace Framework.Constants
         DynamicFlags = ObjectFields.End + 0x01f, // Size: 1, Flags: Dynamic
         FactionTemplate = ObjectFields.End + 0x020, // Size: 1, Flags: Public
         CustomDisplayOption = ObjectFields.End + 0x021, // Size: 1, Flags: PUBLIC
-        End = ObjectFields.End + 0x022,
+        End = ObjectFields.End + 0x022
     }
 
     public enum AreaTriggerFields
@@ -384,7 +384,7 @@ namespace Framework.Constants
         BoundsRadius2d = ObjectFields.End + 0x019, // Size: 1, Flags: Dynamic, Urgent
         DecalPropertiesId = ObjectFields.End + 0x01A, // Size: 1, Flags: Public
         CreatingEffectGuid = ObjectFields.End + 0x01B, // Size: 4, Flags: PUBLIC
-        End = ObjectFields.End + 0x01F,
+        End = ObjectFields.End + 0x01F
     }
 
     public enum SceneObjectFields
@@ -393,19 +393,19 @@ namespace Framework.Constants
         RndSeedVal = ObjectFields.End + 0x001, // Size: 1, Flags: Public
         Createdby = ObjectFields.End + 0x002, // Size: 4, Flags: Public
         SceneType = ObjectFields.End + 0x006, // Size: 1, Flags: Public
-        End = ObjectFields.End + 0x007,
+        End = ObjectFields.End + 0x007
     }
 
     public enum ConversationFields
     {
         LastLineEndTime = ObjectFields.End + 0x000, // Size: 1, Flags: DYNAMIC
-        End = ObjectFields.End + 0x001,
+        End = ObjectFields.End + 0x001
     }
 
     public enum ConversationDynamicFields
     {
         Actors = 0x000, //  Flags: Public
         Lines = 0x001, //  Flags: 0x100
-        End = 0x002,
+        End = 0x002
     }
 }

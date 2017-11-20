@@ -477,6 +477,7 @@ namespace Game.Network.Packets
         }
 
         public int MapID = -1;
+        public Position OldMapPosition;
         public Optional<ShipTransferPending> Ship;
         public Optional<int> TransferSpellID;
 

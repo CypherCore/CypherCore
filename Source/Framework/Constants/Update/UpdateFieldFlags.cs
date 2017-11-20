@@ -272,6 +272,7 @@ namespace Framework.Constants
             Owner | Unknownx100,                            // ITEM_DYNAMIC_FIELD_BONUSLIST_IDS
             Owner,                                          // ITEM_DYNAMIC_FIELD_ARTIFACT_POWERS
             Owner,                                          // ITEM_DYNAMIC_FIELD_GEMS
+            Owner,                                          // ITEM_DYNAMIC_FIELD_RELIC_TALENT_DATA
         };
 
         public static uint[] UnitUpdateFieldFlags = new uint[(int)PlayerFields.End]
@@ -326,8 +327,8 @@ namespace Framework.Constants
             Public,                                         // UNIT_FIELD_BATTLE_PET_COMPANION_GUID+3
             Public,                                         // UNIT_FIELD_BATTLE_PET_DB_ID
             Public,                                         // UNIT_FIELD_BATTLE_PET_DB_ID+1
-            Public | Urgent,                                // UNIT_CHANNEL_SPELL
-            Public | Urgent,                                // UNIT_CHANNEL_SPELL_X_SPELL_VISUAL
+            Public | Urgent,                                // UNIT_FIELD_CHANNEL_DATA
+            Public | Urgent,                                // UNIT_FIELD_CHANNEL_DATA+1
             Public,                                         // UNIT_FIELD_SUMMONED_BY_HOME_REALM
             Public,                                         // UNIT_FIELD_BYTES_0
             Public,                                         // UNIT_FIELD_DISPLAY_POWER
@@ -2865,6 +2866,70 @@ namespace Framework.Constants
             Private,                                        // PLAYER_EXPLORED_ZONES_1+253
             Private,                                        // PLAYER_EXPLORED_ZONES_1+254
             Private,                                        // PLAYER_EXPLORED_ZONES_1+255
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+256
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+257
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+258
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+259
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+260
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+261
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+262
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+263
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+264
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+265
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+266
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+267
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+268
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+269
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+270
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+271
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+272
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+273
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+274
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+275
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+276
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+277
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+278
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+279
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+280
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+281
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+282
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+283
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+284
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+285
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+286
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+287
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+288
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+289
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+290
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+291
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+292
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+293
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+294
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+295
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+296
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+297
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+298
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+299
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+300
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+301
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+302
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+303
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+304
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+305
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+306
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+307
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+308
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+309
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+310
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+311
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+312
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+313
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+314
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+315
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+316
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+317
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+318
+            Private,                                        // PLAYER_EXPLORED_ZONES_1+319
             Private,                                        // PLAYER_FIELD_REST_INFO
             Private,                                        // PLAYER_FIELD_REST_INFO+1
             Private,                                        // PLAYER_FIELD_REST_INFO+2

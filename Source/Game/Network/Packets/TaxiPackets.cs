@@ -57,7 +57,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteBit(WindowInfo.HasValue);
             _worldPacket.FlushBits();
 
-            _worldPacket.WriteInt32(Nodes.Length);
+            _worldPacket.WriteUInt32(CanLandNodes.Length);
+            _worldPacket.WriteUInt32(CanUseNodes.Length);
 
             if (WindowInfo.HasValue)
             {
@@ -65,12 +66,16 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt32(WindowInfo.Value.CurrentNode);
             }
 
-            foreach (var node in Nodes)
+            foreach (var node in CanLandNodes)
+                _worldPacket.WriteUInt8(node);
+
+            foreach (var node in CanUseNodes)
                 _worldPacket.WriteUInt8(node);
         }
 
         public Optional<ShowTaxiNodesWindowInfo> WindowInfo;
-        public byte[] Nodes = null;
+        public byte[] CanLandNodes = null; // Nodes known by player
+        public byte[] CanUseNodes = null; // Nodes available for use - this can temporarily disable a known node
     }
 
     class EnableTaxiNode : ClientPacket

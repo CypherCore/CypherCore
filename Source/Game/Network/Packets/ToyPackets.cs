@@ -39,12 +39,10 @@ namespace Game.Network.Packets
 
         public override void Read()
         {
-            ItemID = _worldPacket.ReadUInt32();
             Cast.Read(_worldPacket);
         }
 
         public SpellCastRequest Cast = new SpellCastRequest();
-        public uint ItemID;
     }
 
     class AccountToysUpdate : ServerPacket

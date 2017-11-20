@@ -1526,7 +1526,8 @@ namespace Game.BattleGrounds
                 //todo Fix display here
                 // creature.SetVisibleAura(0, SPELL_SPIRIT_HEAL_CHANNEL);
                 // casting visual effect
-                creature.SetUInt32Value(UnitFields.ChannelSpell, BattlegroundConst.SpellSpiritHealChannel);
+                creature.SetChannelSpellId(BattlegroundConst.SpellSpiritHealChannel);
+                creature.SetChannelSpellXSpellVisualId(BattlegroundConst.SpellSpiritHealChannelVisual);
                 // correct cast speed
                 creature.SetFloatValue(UnitFields.ModCastSpeed, 1.0f);
                 creature.SetFloatValue(UnitFields.ModCastHaste, 1.0f);

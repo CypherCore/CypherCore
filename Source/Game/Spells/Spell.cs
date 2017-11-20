@@ -3942,7 +3942,8 @@ namespace Game.Spells
             if (time == 0)
             {
                 m_caster.ClearDynamicValue(UnitDynamicFields.ChannelObjects);
-                m_caster.SetUInt32Value(UnitFields.ChannelSpell, 0);
+                m_caster.SetChannelSpellId(0);
+                m_caster.SetChannelSpellXSpellVisualId(0);
             }
 
             SpellChannelUpdate spellChannelUpdate = new SpellChannelUpdate();
@@ -3977,8 +3978,8 @@ namespace Game.Spells
             foreach (GOTargetInfo target in m_UniqueGOTargetInfo)
                 m_caster.AddChannelObject(target.targetGUID);
 
-            m_caster.SetUInt32Value(UnitFields.ChannelSpell, m_spellInfo.Id);
-            m_caster.SetUInt32Value(UnitFields.ChannelSpellXSpellVisual, m_SpellVisual);
+            m_caster.SetChannelSpellId(m_spellInfo.Id);
+            m_caster.SetChannelSpellXSpellVisualId(m_SpellVisual);
         }
 
         void SendResurrectRequest(Player target)
@@ -7091,7 +7092,7 @@ namespace Game.Spells
 
         public bool IsTriggered() { return _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.FullMask); }
         public bool IsIgnoringCooldowns() { return _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreSpellAndCategoryCD); }
-        public bool IsChannelActive() { return m_caster.GetUInt32Value(UnitFields.ChannelSpell) != 0; }
+        public bool IsChannelActive() { return m_caster.GetChannelSpellId() != 0; }
 
         public bool IsDeletable()
         {
