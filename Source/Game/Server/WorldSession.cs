@@ -712,7 +712,7 @@ namespace Game
             SendSetTimeZoneInformation();
             SendFeatureSystemStatusGlueScreen();
             SendClientCacheVersion(WorldConfig.GetUIntValue(WorldCfg.ClientCacheVersion));
-            SendHotfixList(WorldConfig.GetIntValue(WorldCfg.HotfixCacheVersion));
+            SendAvailableHotfixes(WorldConfig.GetIntValue(WorldCfg.HotfixCacheVersion));
             SendTutorialsData();
 
             SQLResult result = holder.GetResult(AccountInfoQueryLoad.GlobalRealmCharacterCounts);

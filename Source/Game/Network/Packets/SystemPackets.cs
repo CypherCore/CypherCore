@@ -46,6 +46,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(TokenRedeemIndex);
             _worldPacket.WriteInt64(TokenBalanceAmount);
 
+            _worldPacket.WriteUInt32(BpayStoreProductDeliveryDelay);
+
             _worldPacket.WriteBit(VoiceEnabled);
             _worldPacket.WriteBit(EuropaTicketSystemStatus.HasValue);
             _worldPacket.WriteBit(ScrollOfResurrectionEnabled);
@@ -141,6 +143,7 @@ namespace Game.Network.Packets
         public uint TokenPollTimeSeconds;
         public uint TokenRedeemIndex;
         public long TokenBalanceAmount;
+        public uint BpayStoreProductDeliveryDelay;
         public bool ItemRestorationButtonEnabled;
         public bool CharUndeleteEnabled; // Implemented
         public bool BpayStoreDisabledByParentalControls;
@@ -231,11 +234,15 @@ namespace Game.Network.Packets
             _worldPacket.WriteBit(false); // not accessed in handler
             _worldPacket.WriteBit(TrialBoostEnabled);
             _worldPacket.WriteBit(TokenBalanceEnabled);
+            _worldPacket.WriteBit(LiveRegionCharacterListEnabled);
+            _worldPacket.WriteBit(LiveRegionCharacterCopyEnabled);
+            _worldPacket.WriteBit(LiveRegionAccountCopyEnabled);
             _worldPacket.FlushBits();
 
             _worldPacket.WriteInt32(TokenPollTimeSeconds);
             _worldPacket.WriteInt32(TokenRedeemIndex);
             _worldPacket.WriteInt64(TokenBalanceAmount);
+            _worldPacket.WriteUInt32(BpayStoreProductDeliveryDelay);
         }
 
         public bool BpayStoreAvailable; // NYI
@@ -250,9 +257,13 @@ namespace Game.Network.Packets
         public bool CompetitiveModeEnabled; // NYI
         public bool TrialBoostEnabled; // NYI
         public bool TokenBalanceEnabled; // NYI
+        public bool LiveRegionCharacterListEnabled; // NYI
+        public bool LiveRegionCharacterCopyEnabled; // NYI
+        public bool LiveRegionAccountCopyEnabled; // NYI
         public int TokenPollTimeSeconds;     // NYI
         public int TokenRedeemIndex;     // NYI
         public long TokenBalanceAmount;     // NYI
+        public uint BpayStoreProductDeliveryDelay;     // NYI
     }
 
     public class MOTD : ServerPacket

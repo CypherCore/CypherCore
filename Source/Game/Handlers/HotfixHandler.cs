@@ -57,17 +57,17 @@ namespace Game
             }
         }
 
-        void SendHotfixList(int version)
+        void SendAvailableHotfixes(int version)
         {
-            SendPacket(new HotfixList(version, Global.DB2Mgr.GetHotfixData()));
+            SendPacket(new AvailableHotfixes(version, Global.DB2Mgr.GetHotfixData()));
         }
 
-        [WorldPacketHandler(ClientOpcodes.HotfixQuery, Status = SessionStatus.Authed)]
-        void HandleHotfixQuery(HotfixQuery hotfixQuery)
+        [WorldPacketHandler(ClientOpcodes.HotfixRequest, Status = SessionStatus.Authed)]
+        void HandleHotfixRequest(HotfixRequest hotfixQuery)
         {
             Dictionary<ulong, int> hotfixes = Global.DB2Mgr.GetHotfixData();
 
-            HotfixQueryResponse hotfixQueryResponse = new HotfixQueryResponse();
+            HotfixResponse hotfixQueryResponse = new HotfixResponse();
             foreach (ulong hotfixId in hotfixQuery.Hotfixes)
             {
                 int hotfix = hotfixes.LookupByKey(hotfixId);
@@ -75,7 +75,7 @@ namespace Game
                 {
                     var storage = Global.DB2Mgr.GetStorage(MathFunctions.Pair64_HiPart(hotfixId));
 
-                    HotfixQueryResponse.HotfixData hotfixData = new HotfixQueryResponse.HotfixData();
+                    HotfixResponse.HotfixData hotfixData = new HotfixResponse.HotfixData();
                     hotfixData.ID = hotfixId;
                     hotfixData.RecordID = hotfix;
                     if (storage.HasRecord((uint)hotfixData.RecordID))

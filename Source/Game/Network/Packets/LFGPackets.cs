@@ -359,6 +359,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(Slot);
             _worldPacket.WriteUInt8(State);
             _worldPacket.WriteUInt32(CompletedMask);
+            _worldPacket.WriteUInt32(EncounterMask);
             _worldPacket.WriteUInt32(Players.Count);
             _worldPacket.WriteUInt8(Unused);
             _worldPacket.WriteBit(ValidCompletedMask);
@@ -376,6 +377,7 @@ namespace Game.Network.Packets
         public uint Slot;
         public byte State;
         public uint CompletedMask;
+        public uint EncounterMask;
         public byte Unused;
         public bool ValidCompletedMask;
         public bool ProposalSilent;

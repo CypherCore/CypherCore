@@ -1879,6 +1879,7 @@ namespace Game.Entities
                     // send transfer packets
                     TransferPending transferPending = new TransferPending();
                     transferPending.MapID = (int)mapid;
+                    transferPending.OldMapPosition = GetPosition();
 
                     transport = GetTransport();
                     if (transport)

@@ -55,11 +55,12 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.UseToy)]
         void HandleUseToy(UseToy packet)
         {
-            ItemTemplate item = Global.ObjectMgr.GetItemTemplate(packet.ItemID);
+            uint itemId = packet.Cast.Misc[0];
+            ItemTemplate item = Global.ObjectMgr.GetItemTemplate(itemId);
             if (item == null)
                 return;
 
-            if (!_collectionMgr.HasToy(packet.ItemID))
+            if (!_collectionMgr.HasToy(itemId))
                 return;
 
             var effect = item.Effects.Find(eff => { return packet.Cast.SpellID == eff.SpellID; });
@@ -69,7 +70,7 @@ namespace Game
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(packet.Cast.SpellID);
             if (spellInfo == null)
             {
-                Log.outError(LogFilter.Network, "HandleUseToy: unknown spell id: {0} used by Toy Item entry {1}", packet.Cast.SpellID, packet.ItemID);
+                Log.outError(LogFilter.Network, "HandleUseToy: unknown spell id: {0} used by Toy Item entry {1}", packet.Cast.SpellID, itemId);
                 return;
             }
 
@@ -86,7 +87,7 @@ namespace Game
             SendPacket(spellPrepare);
 
             spell.m_fromClient = true;
-            spell.m_castItemEntry = packet.ItemID;
+            spell.m_castItemEntry = itemId;
             spell.m_misc.Data0 = packet.Cast.Misc[0];
             spell.m_misc.Data1 = packet.Cast.Misc[1];
             spell.m_castFlagsEx |= SpellCastFlagsEx.UseToySpell;

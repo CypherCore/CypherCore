@@ -2228,6 +2228,11 @@ namespace Game.Entities
             return !GetCharmerGUID().IsEmpty() ? GetCharmer() : GetOwner();
         }
 
+        public uint GetChannelSpellId() { return GetUInt32Value(UnitFields.ChannelData);    }
+        public void SetChannelSpellId(uint channelSpellId) { SetUInt32Value(UnitFields.ChannelData, channelSpellId); }
+        public uint GetChannelSpellXSpellVisualId() { return GetUInt32Value(UnitFields.ChannelData + 1);}
+        public void SetChannelSpellXSpellVisualId(uint channelSpellXSpellVisualId) { SetUInt32Value(UnitFields.ChannelData + 1, channelSpellXSpellVisualId); }
+
         public List<ObjectGuid> GetChannelObjects() { return GetDynamicStructuredValues<ObjectGuid>(UnitDynamicFields.ChannelObjects); }
         public void AddChannelObject(ObjectGuid guid) { AddDynamicStructuredValue(UnitDynamicFields.ChannelObjects, guid); }
 
