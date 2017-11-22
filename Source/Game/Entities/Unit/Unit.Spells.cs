@@ -4161,7 +4161,7 @@ namespace Game.Entities
                 }
             }
         }
-        public Aura _TryStackingOrRefreshingExistingAura(SpellInfo newAura, uint effMask, Unit caster, int[] baseAmount = null, Item castItem = null, ObjectGuid casterGUID = default(ObjectGuid), bool resetPeriodicTimer = true, int castItemLevel = -1)
+        public Aura _TryStackingOrRefreshingExistingAura(SpellInfo newAura, uint effMask, Unit caster, int[] baseAmount = null, Item castItem = null, ObjectGuid casterGUID = default(ObjectGuid), bool resetPeriodicTimer = true, ObjectGuid castItemGuid = default(ObjectGuid), int castItemLevel = -1)
         {
             Contract.Assert(!casterGUID.IsEmpty() || caster);
 
@@ -4173,15 +4173,14 @@ namespace Game.Entities
             if (!newAura.IsMultiSlotAura())
             {
                 // check if cast item changed
-                ObjectGuid castItemGUID = ObjectGuid.Empty;
                 if (castItem != null)
                 {
-                    castItemGUID = castItem.GetGUID();
+                    castItemGuid = castItem.GetGUID();
                     castItemLevel = (int)castItem.GetItemLevel(castItem.GetOwner());
                 }
 
                 // find current aura from spell and change it's stackamount, or refresh it's duration
-                Aura foundAura = GetOwnedAura(newAura.Id, casterGUID, (newAura.HasAttribute(SpellCustomAttributes.EnchantProc) ? castItemGUID : ObjectGuid.Empty), 0);
+                Aura foundAura = GetOwnedAura(newAura.Id, casterGUID, (newAura.HasAttribute(SpellCustomAttributes.EnchantProc) ? castItemGuid : ObjectGuid.Empty), 0);
                 if (foundAura != null)
                 {
                     // effect masks do not match
@@ -4211,10 +4210,10 @@ namespace Game.Entities
                     }
 
                     // correct cast item guid if needed
-                    if (castItemGUID != foundAura.GetCastItemGUID())
+                    if (castItemGuid != foundAura.GetCastItemGUID())
                     {
-                        castItemGUID = foundAura.GetCasterGUID();
-                        castItemLevel = foundAura.GetCastItemLevel();
+                        foundAura.SetCastItemGUID(castItemGuid);
+                        foundAura.SetCastItemLevel(castItemLevel);
                     }
 
                     // try to increase stack amount

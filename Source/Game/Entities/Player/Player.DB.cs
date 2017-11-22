@@ -534,7 +534,7 @@ namespace Game.Entities
 
                     AuraLoadEffectInfo info = effectInfo[key];
                     ObjectGuid castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, GetMapId(), spellInfo.Id, GetMap().GenerateLowGuid(HighGuid.Cast));
-                    Aura aura = Aura.TryCreate(spellInfo, castId, key.EffectMask, this, null, info.BaseAmounts, null, casterGuid, castItemLevel);
+                    Aura aura = Aura.TryCreate(spellInfo, castId, key.EffectMask, this, null, info.BaseAmounts, null, casterGuid, itemGuid, castItemLevel);
                     if (aura != null)
                     {
                         if (!aura.CanBeSaved())
