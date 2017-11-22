@@ -383,9 +383,6 @@ namespace Game.Network
             // For hook purposes, we get Remoteaddress at this point.
             string address = GetRemoteIpAddress().ToString();
 
-            Sha256 digestKeyHash = new Sha256();
-            digestKeyHash.Process(account.game.SessionKey, account.game.SessionKey.Length);
-
             uint[] clientSeed = ClientTypeSeed_Win;
             if (account.game.OS == "Wn64")
                 clientSeed = ClientTypeSeed_Wn64;
@@ -394,6 +391,10 @@ namespace Game.Network
 
             byte[] byteArray = new byte[clientSeed.Length * 4];
             Buffer.BlockCopy(clientSeed, 0, byteArray, 0, clientSeed.Length * 4);
+
+            Sha256 digestKeyHash = new Sha256();
+            digestKeyHash.Process(account.game.SessionKey, account.game.SessionKey.Length);
+            digestKeyHash.Finish(byteArray, byteArray.Length);
 
             HmacSha256 hmac = new HmacSha256(digestKeyHash.Digest);
             hmac.Process(authSession.LocalChallenge, authSession.LocalChallenge.Count);
