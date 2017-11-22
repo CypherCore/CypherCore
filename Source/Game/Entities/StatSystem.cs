@@ -75,9 +75,22 @@ namespace Game.Entities
                 case UnitMods.Rage:
                 case UnitMods.Focus:
                 case UnitMods.Energy:
-                case UnitMods.Rune:
+                case UnitMods.ComboPoints:
+                case UnitMods.Runes:
                 case UnitMods.RunicPower:
-                    UpdateMaxPower(GetPowerTypeByAuraGroup(unitMod));
+                case UnitMods.SoulShards:
+                case UnitMods.Eclipse:
+                case UnitMods.HolyPower:
+                case UnitMods.Alternative:
+                case UnitMods.Maelstrom:
+                case UnitMods.Chi:
+                case UnitMods.Insanity:
+                case UnitMods.BurningEmbers:
+                case UnitMods.DemonicFury:
+                case UnitMods.ArcaneCharges:
+                case UnitMods.Fury:
+                case UnitMods.Pain:
+                    UpdateMaxPower((PowerType)(unitMod - UnitMods.PowerStart));
                     break;
                 case UnitMods.ResistanceHoly:
                 case UnitMods.ResistanceFire:
@@ -172,25 +185,6 @@ namespace Game.Entities
             }
 
             return stat;
-        }
-        PowerType GetPowerTypeByAuraGroup(UnitMods unitMod)
-        {
-            switch (unitMod)
-            {
-                case UnitMods.Rage:
-                    return PowerType.Rage;
-                case UnitMods.Focus:
-                    return PowerType.Focus;
-                case UnitMods.Energy:
-                    return PowerType.Energy;
-                case UnitMods.Rune:
-                    return PowerType.Runes;
-                case UnitMods.RunicPower:
-                    return PowerType.RunicPower;
-                default:
-                case UnitMods.Mana:
-                    return PowerType.Mana;
-            }
         }
 
         public void ApplyStatBuffMod(Stats stat, float val, bool apply)

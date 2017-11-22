@@ -3587,6 +3587,20 @@ namespace Game.Spells
             target.UpdateAttackPowerAndDamage(true);
         }
 
+        [AuraEffectHandler(AuraType.ModMaxPower)]
+        void HandleAuraModMaxPower(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
+                return;
+
+            Unit target = aurApp.GetTarget();
+
+            PowerType power = (PowerType)GetMiscValue();
+            UnitMods unitMod = (UnitMods)(UnitMods.PowerStart + (int)power);
+
+            target.HandleStatModifier(unitMod, UnitModifierType.TotalValue, GetAmount(), apply);
+        }
+
         /********************************/
         /***      HEAL & ENERGIZE     ***/
         /********************************/
