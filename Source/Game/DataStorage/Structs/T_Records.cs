@@ -42,15 +42,19 @@ namespace Game.DataStorage
 
     public sealed class TaxiNodesRecord
     {
+        public uint Id;
         public Vector3 Pos;
         public LocalizedString Name;
         public uint[] MountCreatureID = new uint[2];
         public Vector2 MapOffset;
+        public float Unk730;
+        public Vector2 FlightMapOffset;
         public ushort MapID;
         public ushort ConditionID;
         public ushort LearnableIndex;
         public TaxiNodeFlags Flags;
-        public uint Id;
+        public int UiTextureKitPrefixID;
+        public uint SpecialAtlasIconPlayerConditionID;
     }
 
     public sealed class TaxiPathRecord
@@ -64,14 +68,14 @@ namespace Game.DataStorage
     public sealed class TaxiPathNodeRecord
     {
         public Vector3 Loc;
-        public uint Delay;
         public ushort PathID;
         public ushort MapID;
+        public byte NodeIndex;
+        public uint Id;
+        public TaxiPathNodeFlags Flags;
+        public uint Delay;
         public ushort ArrivalEventID;
         public ushort DepartureEventID;
-        public byte NodeIndex;
-        public TaxiPathNodeFlags Flags;
-        public uint Id;
     }
 
     public sealed class TotemCategoryRecord

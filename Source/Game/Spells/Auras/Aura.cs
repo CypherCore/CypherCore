@@ -282,12 +282,12 @@ namespace Game.Spells
     {
         const int UPDATE_TARGET_MAP_INTERVAL = 500;
 
-        public Aura(SpellInfo spellproto, ObjectGuid castId, WorldObject owner, Unit caster, Item castItem, ObjectGuid casterGUID, int castItemLevel)
+        public Aura(SpellInfo spellproto, ObjectGuid castId, WorldObject owner, Unit caster, Item castItem, ObjectGuid casterGUID, ObjectGuid castItemGuid, int castItemLevel)
         {
             m_spellInfo = spellproto;
             m_castGuid = castId;
             m_casterGuid = !casterGUID.IsEmpty() ? casterGUID : caster.GetGUID();
-            m_castItemGuid = castItem != null ? castItem.GetGUID() : ObjectGuid.Empty;
+            m_castItemGuid = castItem != null ? castItem.GetGUID() : castItemGuid;
             m_castItemLevel = castItemLevel;
             m_spellXSpellVisualId = caster ? caster.GetCastSpellXSpellVisualId(spellproto) : spellproto.GetSpellXSpellVisualId();
             m_applyTime = Time.UnixTime;
@@ -969,6 +969,10 @@ namespace Game.Spells
 
             // don't save auras removed by proc system
             if (IsUsingCharges() && GetCharges() == 0)
+                return false;
+
+            // don't save permanent auras triggered by items, they'll be recasted on login if necessary
+            if (!GetCastItemGUID().IsEmpty() && IsPermanent())
                 return false;
 
             return true;
@@ -2279,6 +2283,16 @@ namespace Game.Spells
             return m_owner.ToDynamicObject();
         }
 
+        public void SetCastItemGUID(ObjectGuid guid)
+        {
+            m_castItemGuid = guid;
+        }
+
+        public void SetCastItemLevel(int level)
+        {
+            m_castItemLevel = level;
+        }
+
         public void _RegisterForTargets()
         {
             Unit caster = GetCaster();
@@ -2403,12 +2417,12 @@ namespace Game.Spells
             }
             return (effMask & availableEffectMask);
         }
-        public static Aura TryRefreshStackOrCreate(SpellInfo spellproto, ObjectGuid castId, uint tryEffMask, WorldObject owner, Unit caster, int[] baseAmount = null, Item castItem = null, ObjectGuid casterGUID = default(ObjectGuid), bool resetPeriodicTimer = true, int castItemLevel = -1)
+        public static Aura TryRefreshStackOrCreate(SpellInfo spellproto, ObjectGuid castId, uint tryEffMask, WorldObject owner, Unit caster, int[] baseAmount = null, Item castItem = null, ObjectGuid casterGUID = default(ObjectGuid), bool resetPeriodicTimer = true, ObjectGuid castItemGuid = default(ObjectGuid), int castItemLevel = -1)
         {
             bool throwway;
-            return TryRefreshStackOrCreate(spellproto, castId, tryEffMask, owner, caster, out throwway, baseAmount, castItem, casterGUID, resetPeriodicTimer, castItemLevel);
+            return TryRefreshStackOrCreate(spellproto, castId, tryEffMask, owner, caster, out throwway, baseAmount, castItem, casterGUID, resetPeriodicTimer, castItemGuid, castItemLevel);
         }
-        public static Aura TryRefreshStackOrCreate(SpellInfo spellproto, ObjectGuid castId, uint tryEffMask, WorldObject owner, Unit caster, out bool refresh, int[] baseAmount, Item castItem = null, ObjectGuid casterGUID = default(ObjectGuid), bool resetPeriodicTimer = true, int castItemLevel = -1)
+        public static Aura TryRefreshStackOrCreate(SpellInfo spellproto, ObjectGuid castId, uint tryEffMask, WorldObject owner, Unit caster, out bool refresh, int[] baseAmount, Item castItem = null, ObjectGuid casterGUID = default(ObjectGuid), bool resetPeriodicTimer = true, ObjectGuid castItemGuid = default(ObjectGuid), int castItemLevel = -1)
         {
             Contract.Assert(spellproto != null);
             Contract.Assert(owner != null);
@@ -2419,7 +2433,7 @@ namespace Game.Spells
             uint effMask = BuildEffectMaskForOwner(spellproto, tryEffMask, owner);
             if (effMask == 0)
                 return null;
-            Aura foundAura = owner.ToUnit()._TryStackingOrRefreshingExistingAura(spellproto, effMask, caster, baseAmount, castItem, casterGUID, resetPeriodicTimer, castItemLevel);
+            Aura foundAura = owner.ToUnit()._TryStackingOrRefreshingExistingAura(spellproto, effMask, caster, baseAmount, castItem, casterGUID, resetPeriodicTimer, castItemGuid, castItemLevel);
             if (foundAura != null)
             {
                 // we've here aura, which script triggered removal after modding stack amount
@@ -2431,9 +2445,9 @@ namespace Game.Spells
                 return foundAura;
             }
             else
-                return Create(spellproto, castId, effMask, owner, caster, baseAmount, castItem, casterGUID, castItemLevel);
+                return Create(spellproto, castId, effMask, owner, caster, baseAmount, castItem, casterGUID, castItemGuid, castItemLevel);
         }
-        public static Aura TryCreate(SpellInfo spellproto, ObjectGuid castId, uint tryEffMask, WorldObject owner, Unit caster, int[] baseAmount, Item castItem = null, ObjectGuid casterGUID = default(ObjectGuid), int castItemLevel = -1)
+        public static Aura TryCreate(SpellInfo spellproto, ObjectGuid castId, uint tryEffMask, WorldObject owner, Unit caster, int[] baseAmount, Item castItem = null, ObjectGuid casterGUID = default(ObjectGuid), ObjectGuid castItemGuid = default(ObjectGuid), int castItemLevel = -1)
         {
             Contract.Assert(spellproto != null);
             Contract.Assert(owner != null);
@@ -2442,9 +2456,9 @@ namespace Game.Spells
             uint effMask = BuildEffectMaskForOwner(spellproto, tryEffMask, owner);
             if (effMask == 0)
                 return null;
-            return Create(spellproto, castId, effMask, owner, caster, baseAmount, castItem, casterGUID, castItemLevel);
+            return Create(spellproto, castId, effMask, owner, caster, baseAmount, castItem, casterGUID, castItemGuid, castItemLevel);
         }
-        public static Aura Create(SpellInfo spellproto, ObjectGuid castId, uint effMask, WorldObject owner, Unit caster, int[] baseAmount, Item castItem, ObjectGuid casterGUID, int castItemLevel)
+        public static Aura Create(SpellInfo spellproto, ObjectGuid castId, uint effMask, WorldObject owner, Unit caster, int[] baseAmount, Item castItem, ObjectGuid casterGUID, ObjectGuid castItemGuid, int castItemLevel)
         {
             Contract.Assert(effMask != 0);
             Contract.Assert(spellproto != null);
@@ -2474,10 +2488,10 @@ namespace Game.Spells
             {
                 case TypeId.Unit:
                 case TypeId.Player:
-                    aura = new UnitAura(spellproto, castId, effMask, owner, caster, baseAmount, castItem, casterGUID, castItemLevel);
+                    aura = new UnitAura(spellproto, castId, effMask, owner, caster, baseAmount, castItem, casterGUID, castItemGuid, castItemLevel);
                     break;
                 case TypeId.DynamicObject:
-                    aura = new DynObjAura(spellproto, castId, effMask, owner, caster, baseAmount, castItem, casterGUID, castItemLevel);
+                    aura = new DynObjAura(spellproto, castId, effMask, owner, caster, baseAmount, castItem, casterGUID, castItemGuid, castItemLevel);
                     break;
                 default:
                     Contract.Assert(false);
@@ -2531,8 +2545,8 @@ namespace Game.Spells
 
     public class UnitAura : Aura
     {
-        public UnitAura(SpellInfo spellproto, ObjectGuid castId, uint effMask, WorldObject owner, Unit caster, int[] baseAmount, Item castItem, ObjectGuid casterGUID, int castItemLevel)
-            : base(spellproto, castId, owner, caster, castItem, casterGUID, castItemLevel)
+        public UnitAura(SpellInfo spellproto, ObjectGuid castId, uint effMask, WorldObject owner, Unit caster, int[] baseAmount, Item castItem, ObjectGuid casterGUID, ObjectGuid castItemGuid, int castItemLevel)
+            : base(spellproto, castId, owner, caster, castItem, casterGUID, castItemGuid, castItemLevel)
         {
             m_AuraDRGroup = DiminishingGroup.None;
             LoadScripts();
@@ -2642,8 +2656,8 @@ namespace Game.Spells
 
     public class DynObjAura : Aura
     {
-        public DynObjAura(SpellInfo spellproto, ObjectGuid castId, uint effMask, WorldObject owner, Unit caster, int[] baseAmount, Item castItem, ObjectGuid casterGUID, int castItemLevel)
-            : base(spellproto, castId, owner, caster, castItem, casterGUID, castItemLevel)
+        public DynObjAura(SpellInfo spellproto, ObjectGuid castId, uint effMask, WorldObject owner, Unit caster, int[] baseAmount, Item castItem, ObjectGuid casterGUID, ObjectGuid castItemGuid, int castItemLevel)
+            : base(spellproto, castId, owner, caster, castItem, casterGUID, castItemGuid, castItemLevel)
         {
             LoadScripts();
             Contract.Assert(GetDynobjOwner() != null);

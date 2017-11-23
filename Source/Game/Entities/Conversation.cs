@@ -145,6 +145,8 @@ namespace Game.Entities
                 }
             }
 
+            Global.ScriptMgr.OnConversationCreate(this, creator);
+
             List<ushort> actorIndices = new List<ushort>();
             foreach (ConversationLineTemplate line in conversationTemplate.Lines)
             {
@@ -180,6 +182,11 @@ namespace Game.Entities
         void AddParticipant(ObjectGuid participantGuid)
         {
             _participants.Add(participantGuid);
+        }
+
+        public uint GetScriptId()
+        {
+            return Global.ConversationDataStorage.GetConversationTemplate(GetEntry()).ScriptId;
         }
 
         uint GetDuration() { return _duration; }

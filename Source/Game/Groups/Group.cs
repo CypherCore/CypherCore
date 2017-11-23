@@ -1400,7 +1400,7 @@ namespace Game.Groups
                 var selectedDungeons = Global.LFGMgr.GetSelectedDungeons(player.GetGUID());
                 if (selectedDungeons.Count == 1)
                 {
-                    LfgDungeonsRecord dungeon = CliDB.LfgDungeonsStorage.LookupByKey(selectedDungeons.First());
+                    LFGDungeonsRecord dungeon = CliDB.LFGDungeonsStorage.LookupByKey(selectedDungeons.First());
                     if (dungeon != null)
                         if (dungeon.Type == LfgType.RandomDungeon)
                             randomSlot= dungeon.Id;
@@ -1701,7 +1701,7 @@ namespace Game.Groups
             if (!reference)
                 return GroupJoinBattlegroundResult.JoinFailed;
 
-            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bgOrTemplate.GetMapId(), reference.getLevel());
+            PVPDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bgOrTemplate.GetMapId(), reference.getLevel());
             if (bracketEntry == null)
                 return GroupJoinBattlegroundResult.JoinFailed;
 
@@ -1725,7 +1725,7 @@ namespace Game.Groups
                     return GroupJoinBattlegroundResult.JoinTimedOut;
                 }
                 // not in the same Battleground level braket, don't let join
-                PvpDifficultyRecord memberBracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bracketEntry.MapID, member.getLevel());
+                PVPDifficultyRecord memberBracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bracketEntry.MapID, member.getLevel());
                 if (memberBracketEntry != bracketEntry)
                     return GroupJoinBattlegroundResult.JoinRangeIndex;
                 // don't let join rated matches if the arena team id doesn't match

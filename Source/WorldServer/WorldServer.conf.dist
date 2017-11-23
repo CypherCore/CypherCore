@@ -1269,9 +1269,9 @@ Updates.EnableDatabases = 15
 
 #    Updates.SourcePath
 #        Description: The path to your SQL Files directory.
-#        Example:     "../CypherCore"
+#        Example:     "../../"
 
-Updates.SourcePath  = "."
+Updates.SourcePath  = "../../"
 
 #
 #    Updates.AutoSetup

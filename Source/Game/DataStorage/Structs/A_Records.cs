@@ -32,12 +32,12 @@ namespace Game.DataStorage
         public ushort Category;
         public ushort UiOrder;
         public ushort SharesCriteria;
-        public ushort CriteriaTree;
         public AchievementFaction Faction;
         public byte Points;
         public byte MinimumCriteria;
         public uint Id;
         public uint IconFileDataID;
+        public uint CriteriaTree;
     }
 
     public sealed class AnimKitRecord

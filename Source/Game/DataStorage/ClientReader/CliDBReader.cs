@@ -503,9 +503,11 @@ namespace Game.DataStorage
                         {
                             case 1: // 2 bytes
                                 _commandData[i].Add(id, reader.ReadBytes(2));
+                                reader.BaseStream.Position += 2;
                                 break;
                             case 2: // 1 bytes
                                 _commandData[i].Add(id, reader.ReadBytes(1));
+                                reader.BaseStream.Position += 3;
                                 break;
                             case 3: // 4 bytes
                             case 4:

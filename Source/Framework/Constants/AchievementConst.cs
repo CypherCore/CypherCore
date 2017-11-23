@@ -394,13 +394,16 @@ namespace Framework.Constants
         // 197 - Order Hall Advancement related
         OrderHallTalentLearned = 198,
         AppearanceUnlockedBySlot = 199,
-        OrderHallRecruitTyoop = 200,
+        OrderHallRecruitTroop = 200,
         // 201 - 0 criterias (Legion - 23420)
         // 202 - 0 criterias (Legion - 23420)
         CompleteWorldQuest = 203,
         // 204 - Special criteria type to award players for some external events? Comes with what looks like an identifier, so guessing it's not unique.
         TransmogSetUnlocked = 205,
-        TotalTypes = 208
+        GainParagonReputation = 206,
+        EarnHonorXp = 207,
+        RelicTalentUnlocked = 211,
+        TotalTypes = 212
     }
 
     public enum CriteriaDataType

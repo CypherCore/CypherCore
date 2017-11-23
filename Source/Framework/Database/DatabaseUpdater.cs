@@ -51,10 +51,10 @@ namespace Framework.Database
                     fileName = @"\sql\base\characters_database.sql";
                     break;
                 case "WorldDatabase":
-                    fileName = @"\sql\base\TDB_world_703.00_2016_10_17.sql";
+                    fileName = @"\TDB_world_703.00_2016_10_17.sql";
                     break;
                 case "HotfixDatabase":
-                    fileName = @"\sql\base\TDB_hotfixes_703.00_2016_10_17.sql";
+                    fileName = @"\TDB_hotfixes_703.00_2016_10_17.sql";
                     break;     
             }
 
@@ -246,11 +246,7 @@ namespace Framework.Database
 
         string GetSourceDirectory()
         {
-            string entry = ConfigMgr.GetDefaultValue("Updates.SourcePath", Environment.CurrentDirectory);
-            if (!string.IsNullOrEmpty(entry))
-                return entry;
-            else
-                return Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName;
+            return ConfigMgr.GetDefaultValue("Updates.SourcePath", "../../");
         }
 
         uint ApplyTimedFile(string path)

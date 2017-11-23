@@ -1536,30 +1536,33 @@ namespace Game.Entities
             float minRadius = (5.0f * WorldConfig.GetFloatValue(WorldCfg.RateCreatureAggro));
             float aggroRate = WorldConfig.GetFloatValue(WorldCfg.RateCreatureAggro);
             byte expansionMaxLevel = (byte)Global.ObjectMgr.GetMaxLevelForExpansion((Expansion)GetCreatureTemplate().RequiredExpansion);
-            int levelDifference = (int)(getLevel() - player.getLevel());
+
+            uint playerLevel = player.GetLevelForTarget(this);
+            uint creatureLevel = GetLevelForTarget(player);
 
             if (aggroRate == 0.0f)
                 return 0.0f;
 
             // The aggro radius for creatures with equal level as the player is 20 yards.
             // The combatreach should not get taken into account for the distance so we drop it from the range (see Supremus as expample)
-            float baseAggroDistance = 20.0f - GetFloatValue(UnitFields.CombatReach);
-
-            // + - 1 yard for each level difference between player and creature
-            float aggroRadius = baseAggroDistance + levelDifference;
+            float baseAggroDistance = 20.0f - GetCombatReach();
+            float aggroRadius = baseAggroDistance;
 
             // detect range auras
-            if ((float)(getLevel() + 5) <= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+            if ((creatureLevel + 5) <= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
             {
                 aggroRadius += GetTotalAuraModifier(AuraType.ModDetectRange);
-                aggroRadius += GetTotalAuraModifier(AuraType.ModDetectedRange);
+                aggroRadius += player.GetTotalAuraModifier(AuraType.ModDetectedRange);
             }
 
             // The aggro range of creatures with higher levels than the total player level for the expansion should get the maxlevel treatment
             // This makes sure that creatures such as bosses wont have a bigger aggro range than the rest of the npc's
-            // The following code is used for blizzlike behaivior such as skipable bosses (e.g. Commander Springvale at level 85)
-            if (getLevel() > expansionMaxLevel)
-                aggroRadius = baseAggroDistance + (expansionMaxLevel - player.getLevel());
+            // The following code is used for blizzlike behavior such as skipable bosses (e.g. Commander Springvale at level 85)
+            if (creatureLevel > expansionMaxLevel)
+                aggroRadius += expansionMaxLevel - playerLevel;
+            // + - 1 yard for each level difference between player and creature
+            else
+                aggroRadius += creatureLevel - playerLevel;
 
             // Make sure that we wont go over the total range limits
             if (aggroRadius > maxRadius)

@@ -43,12 +43,12 @@ namespace Game.DataStorage
         public uint Id;
         public LocalizedString Description;
         public LocalizedString Name;
-        public ushort CriteriaTreeID;
         public ushort ScenarioID;
         public ushort PreviousStepID;                                          // Used in conjunction with Proving Grounds scenarios, when sequencing steps (Not using step order?)
         public ushort QuestRewardID;
         public byte Step;
         public ScenarioStepFlags Flags;
+        public uint CriteriaTreeID;
         public uint BonusRequiredStepID;                                     // Bonus step can only be completed if scenario is in the step specified in this field
 
         // helpers
@@ -118,23 +118,22 @@ namespace Game.DataStorage
 
     public sealed class SoundKitRecord
     {
-        public LocalizedString Name;
+        public uint Id;
         public float VolumeFloat;
         public float MinDistance;
         public float DistanceCutoff;
+        public ushort Flags;
+        public ushort SoundEntriesAdvancedID;
+        public byte SoundType;
+        public byte DialogType;
+        public byte EAXDef;
         public float VolumeVariationPlus;
         public float VolumeVariationMinus;
         public float PitchVariationPlus;
         public float PitchVariationMinus;
         public float PitchAdjust;
-        public ushort Flags;
-        public ushort SoundEntriesAdvancedID;
         public ushort BusOverwriteID;
-        public byte SoundType;
-        public byte EAXDef;
-        public byte DialogType;
         public byte Unk700;
-        public uint Id;
     }
 
     public sealed class SpecializationSpellsRecord
@@ -166,9 +165,9 @@ namespace Game.DataStorage
         public uint ProcTypeMask;
         public uint ProcCategoryRecovery;
         public ushort CumulativeAura;
+        public byte SpellProcsPerMinuteID;
         public byte DifficultyID;
         public byte ProcChance;
-        public byte SpellProcsPerMinuteID;
     }
 
     public sealed class SpellAuraRestrictionsRecord
@@ -443,8 +442,8 @@ namespace Game.DataStorage
         public uint Id;
         public float Coeff;
         public ushort Param;
-        public SpellProcsPerMinuteModType Type;
         public byte SpellProcsPerMinuteID;
+        public SpellProcsPerMinuteModType Type;
     }
 
     public sealed class SpellRadiusRecord

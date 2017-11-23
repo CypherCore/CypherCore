@@ -257,7 +257,7 @@ namespace Game.Scripting
                     if (!m_mSplineChainsMap.ContainsKey(key))
                         m_mSplineChainsMap[key] = new List<SplineChainLink>();
 
-                    var chain = m_mSplineChainsMap[Tuple.Create(entry,chainId)];
+                    var chain = m_mSplineChainsMap[Tuple.Create(entry, chainId)];
                     if (splineId != chain.Count)
                     {
                         Log.outWarn(LogFilter.ServerLoading, "Creature #{0}: Chain {1} has orphaned spline {2}, skipped.", entry, chainId, splineId);
@@ -281,7 +281,7 @@ namespace Game.Scripting
                     float posX = resultWP.Read<float>(4);
                     float posY = resultWP.Read<float>(5);
                     float posZ = resultWP.Read<float>(6);
-                    var chain = m_mSplineChainsMap.LookupByKey(Tuple.Create(entry,chainId));
+                    var chain = m_mSplineChainsMap.LookupByKey(Tuple.Create(entry, chainId));
                     if (chain == null)
                     {
                         Log.outWarn(LogFilter.ServerLoading, "Creature #{0} has waypoint data for spline chain {1}. No such chain exists - entry skipped.", entry, chainId);
@@ -1287,6 +1287,14 @@ namespace Game.Scripting
             Contract.Assert(areaTrigger);
 
             return RunScriptRet<AreaTriggerEntityScript, AreaTriggerAI>(p => p.GetAI(areaTrigger), areaTrigger.GetScriptId(), null);
+        }
+
+        // ConversationScript
+        public void OnConversationCreate(Conversation conversation, Unit creator)
+        {
+            Contract.Assert(conversation != null);
+
+            RunScript<ConversationScript>(script => script.OnConversationCreate(conversation, creator), conversation.GetScriptId());
         }
 
         //SceneScript
