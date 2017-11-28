@@ -119,8 +119,8 @@ namespace Framework.Database
                 " FROM battlemaster_list_locale WHERE locale = ?");
 
             // BroadcastText.db2
-            PrepareStatement(HotfixStatements.SEL_BROADCAST_TEXT, "SELECT ID, MaleText, FemaleText, EmoteID1, EmoteID2, EmoteID3, EmoteDelay1, EmoteDelay2, " +
-                "EmoteDelay3, UnkEmoteID, Language, Type, SoundID1, SoundID2, PlayerConditionID FROM broadcast_text ORDER BY ID DESC");
+            PrepareStatement(HotfixStatements.SEL_BROADCAST_TEXT, "SELECT ID, MaleText, FemaleText, EmoteID0, EmoteID1, EmoteID2, EmoteDelay0, EmoteDelay1, " +
+                "EmoteDelay2, UnkEmoteID, Language, Type, SoundID1, SoundID2, PlayerConditionID FROM broadcast_text ORDER BY ID DESC");
             PrepareStatement(HotfixStatements.SEL_BROADCAST_TEXT_LOCALE, "SELECT ID, MaleText_lang, FemaleText_lang FROM broadcast_text_locale WHERE locale = ?");
 
             // CharacterFacialHairStyles.db2
