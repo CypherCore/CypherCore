@@ -1799,9 +1799,11 @@ namespace Game.Spells
                 }
             }
 
+            bool success = RandomHelper.randChance(CalcProcChance(procEntry, eventInfo));
+
             SetLastProcAttemptTime(now);
 
-            if (RandomHelper.randChance(CalcProcChance(procEntry, eventInfo)))
+            if (success)
                 return procEffectMask;
 
             return 0;
