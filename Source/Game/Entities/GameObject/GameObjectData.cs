@@ -409,6 +409,7 @@ namespace Game.Entities
             public uint DoorisOpaque;                            // 8 Door is Opaque (Disable portal on close), enum { false, true, }; Default: true
             public uint GiganticAOI;                             // 9 Gigantic AOI, enum { false, true, }; Default: false
             public uint InfiniteAOI;                             // 10 Infinite AOI, enum { false, true, }; Default: false
+            public uint NotLOSBlocking;                          // 11 Not LOS Blocking, enum { false, true, }; Default: false
         }
 
 
@@ -938,6 +939,7 @@ namespace Game.Entities
             public uint SpellVisual3;                            // 19 Spell Visual 3, References: SpellVisual, NoValue = 0
             public uint SpellVisual4;                            // 20 Spell Visual 4, References: SpellVisual, NoValue = 0
             public uint SpellVisual5;                            // 21 Spell Visual 5, References: SpellVisual, NoValue = 0
+            public uint SpawnVignette;                           // 22 Spawn Vignette, References: vignette, NoValue = 0
         }
 
 
@@ -977,6 +979,7 @@ namespace Game.Entities
             public uint IgnoreBoundingBox;                       // 2 Ignore Bounding Box, enum { false, true, }; Default: false
             public uint CameraMode;                              // 3 Camera Mode, References: CameraMode, NoValue = 0
             public uint FadeRegionRadius;                        // 4 Fade Region Radius, int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint ForgeType;                               // 5 Forge Type, enum { Artifact Forge, Relic Forge, }; Default: Relic Forge
         }
 
         public struct uilink

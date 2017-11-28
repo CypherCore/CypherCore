@@ -736,6 +736,19 @@ namespace Game.Scripting
         public virtual AreaTriggerAI GetAI(AreaTrigger at) { return null; }
     }
 
+    class ConversationScript : ScriptObject
+    {
+        public ConversationScript(string name) : base(name)
+        {
+            Global.ScriptMgr.AddScript(this);
+        }
+
+        public override bool IsDatabaseBound() { return true; }
+
+        // Called when Conversation is created but not added to Map yet.
+        public virtual void OnConversationCreate(Conversation conversation, Unit creator) { }
+    }
+
     public class SceneScript : ScriptObject
     {
         public SceneScript(string name) : base(name)

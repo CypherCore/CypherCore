@@ -2167,7 +2167,7 @@ namespace Game.Spells
                     bool refresh = false;
                     bool resetPeriodicTimer = !_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.DontResetPeriodicTimer);
                     m_spellAura = Aura.TryRefreshStackOrCreate(aurSpellInfo, m_castId, (byte)effectMask, unit,
-                        m_originalCaster, out refresh, (aurSpellInfo == m_spellInfo) ? m_spellValue.EffectBasePoints : basePoints, m_CastItem, ObjectGuid.Empty, resetPeriodicTimer, m_castItemLevel);
+                        m_originalCaster, out refresh, (aurSpellInfo == m_spellInfo) ? m_spellValue.EffectBasePoints : basePoints, m_CastItem, ObjectGuid.Empty, resetPeriodicTimer, ObjectGuid.Empty, m_castItemLevel);
                     if (m_spellAura != null)
                     {
                         // Set aura stack amount to desired value

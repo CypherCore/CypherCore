@@ -4163,7 +4163,8 @@ namespace Game.Spells
             new StaticData(SpellTargetObjectTypes.None, SpellTargetReferenceTypes.None,   SpellTargetSelectionCategories.Nyi,     SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 145
             new StaticData(SpellTargetObjectTypes.None, SpellTargetReferenceTypes.None,   SpellTargetSelectionCategories.Nyi,     SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 146
             new StaticData(SpellTargetObjectTypes.None, SpellTargetReferenceTypes.None,   SpellTargetSelectionCategories.Nyi,     SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 147
-            new StaticData(SpellTargetObjectTypes.None, SpellTargetReferenceTypes.None,   SpellTargetSelectionCategories.Nyi,     SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None)         // 148)
+            new StaticData(SpellTargetObjectTypes.None, SpellTargetReferenceTypes.None,   SpellTargetSelectionCategories.Nyi,     SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 148)
+            new StaticData(SpellTargetObjectTypes.Dest, SpellTargetReferenceTypes.Caster, SpellTargetSelectionCategories.Default, SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.Random),      // 149)
         };
     }
 

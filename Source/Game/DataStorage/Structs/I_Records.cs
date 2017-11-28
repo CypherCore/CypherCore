@@ -203,6 +203,22 @@ namespace Game.DataStorage
     {
         public uint ID;
         public ushort ItemLevel;
+        public ushort ItemLevelSelectorQualitySetID;
+    }
+
+    public sealed class ItemLevelSelectorQualityRecord
+    {
+        public uint ID;
+        public uint ItemBonusListID;
+        public ushort ItemLevelSelectorQualitySetID;
+        public byte Quality;
+    }
+
+    public sealed class ItemLevelSelectorQualitySetRecord
+    {
+        public uint ID;
+        public ushort ItemLevelMin;
+        public ushort ItemLevelMax;
     }
 
     public sealed class ItemLimitCategoryRecord
@@ -252,16 +268,16 @@ namespace Game.DataStorage
         public LocalizedString Name;
         public uint[] Flags = new uint[3];
         public uint AllowableRace;
-        public uint RequiredSpell;
-        public ushort RequiredReputationFaction;
-        public ushort RequiredSkill;
-        public ushort RequiredSkillRank;
         public ushort ItemLevel;
         public byte Quality;
         public byte RequiredExpansion;
-        public byte RequiredReputationRank;
         public byte RequiredLevel;
         public int AllowableClass;
+        public ushort RequiredReputationFaction;
+        public byte RequiredReputationRank;
+        public ushort RequiredSkill;
+        public ushort RequiredSkillRank;
+        public uint RequiredSpell;
     }
 
     public sealed class ItemSetRecord
@@ -286,7 +302,7 @@ namespace Game.DataStorage
     public sealed class ItemSparseRecord
     {
         public uint Id;
-        public uint[] Flags = new uint[3];
+        public uint[] Flags = new uint[4];
         public float Unk1;
         public float Unk2;
         public uint BuyCount;

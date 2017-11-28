@@ -279,13 +279,10 @@ public class RealmManager : Singleton<RealmManager>
             byte[] compressed = Json.Deflate("JSONRealmListServerIPAddresses", serverAddresses);
 
             byte[] serverSecret = new byte[0].GenerateRandomKey(32);
-
-            Sha256 sha256 = new Sha256();
-            sha256.Process(clientSecret.ToArray(), clientSecret.Count);
-            sha256.Finish(serverSecret, 32);
+            byte[] keyData = clientSecret.ToArray().Combine(serverSecret);
 
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_BNET_GAME_ACCOUNT_LOGIN_INFO);
-            stmt.AddValue(0, sha256.Digest.ToHexString());
+            stmt.AddValue(0, keyData.ToHexString());
             stmt.AddValue(1, clientAddress.ToString());
             stmt.AddValue(2, locale);
             stmt.AddValue(3, os);

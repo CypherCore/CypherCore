@@ -113,6 +113,8 @@ namespace Game.DataStorage
     {
         public uint Id;
         public uint Flags;
+        public uint MaleDisplayID;
+        public uint FemaleDisplayID;
         public uint ClientPrefix;
         public uint ClientFileString;
         public LocalizedString Name;
@@ -124,10 +126,8 @@ namespace Game.DataStorage
         public uint SelectScreenFileDataID;
         public uint[] MaleCustomizeOffset = new uint[3];
         public uint[] FemaleCustomizeOffset = new uint[3];
-        public uint LowResScreenFileDataID;        
+        public uint LowResScreenFileDataID;
         public ushort FactionID;
-        public ushort MaleDisplayID;
-        public ushort FemaleDisplayID;
         public ushort ResSicknessSpellID;
         public ushort SplashSoundID;
         public ushort CinematicSequenceID;
@@ -143,7 +143,8 @@ namespace Game.DataStorage
         public byte CharComponentTexLayoutHiResID;
         public uint HighResMaleDisplayID;
         public uint HighResFemaleDisplayID;
-        public uint[] Unk = new uint[3];
+        public uint[] AlteredFormTransitionSpellVisualID = new uint[3];
+        public uint[] AlteredFormTransitionSpellVisualKitID = new uint[3];
     }
 
     public sealed class ChrSpecializationRecord
@@ -302,8 +303,8 @@ namespace Game.DataStorage
         public uint Asset;
         public uint StartAsset;
         public uint FailAsset;
+        public uint ModifierTreeId;
         public ushort StartTimer;
-        public ushort ModifierTreeId;
         public ushort EligibilityWorldStateID;
         public CriteriaTypes Type;
         public CriteriaTimedTypes StartEvent;
@@ -317,10 +318,10 @@ namespace Game.DataStorage
         public uint Id;
         public uint Amount;
         public LocalizedString Description;
-        public ushort Parent;
         public CriteriaTreeFlags Flags;
         public byte Operator;
         public uint CriteriaID;
+        public uint Parent;
         public int OrderIndex;
     }
 

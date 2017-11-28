@@ -15,10 +15,36 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Framework.Constants;
+using Game.Entities;
+using Game.Scripting;
+using Game.Spells;
+using System.Collections.Generic;
 
-namespace Scripts.Spells
+namespace Scripts.Spells.DemonHunter
 {
-    class DemonHunter
+    struct SpellIds
     {
+        public const uint ChaosStrikeEnergize = 193840;
+    }
+
+    [Script] // 197125 - Chaos Strike
+    class spell_dh_chaos_strike_AuraScript : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ChaosStrikeEnergize);
+        }
+
+        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            PreventDefaultAction();
+            GetTarget().CastCustomSpell(SpellIds.ChaosStrikeEnergize, SpellValueMod.BasePoint0, aurEff.GetAmount(), GetTarget(), true, null, aurEff);
+        }
+
+        public override void Register()
+        {
+            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell));
+        }
     }
 }

@@ -139,17 +139,17 @@ namespace Framework.Constants
     }
     public enum UnitMods
     {
-        StatStrength,                                 // STAT_STRENGTH..UNIT_MOD_STAT_INTELLECT must be in existed order, it's accessed by index values of Stats enum.
+        StatStrength, // STAT_STRENGTH..UNIT_MOD_STAT_INTELLECT must be in existed order, it's accessed by index values of Stats enum.
         StatAgility,
         StatStamina,
         StatIntellect,
         Health,
-        Mana,                                          // MANA..RUNIC_POWER must be in existed order, it's accessed by index values of Powers enum.
+        Mana, // UNIT_MOD_MANA..UNIT_MOD_PAIN must be listed in existing order, it is accessed by index values of Powers enum.
         Rage,
         Focus,
         Energy,
-        Unused,                                        // Old HAPPINESS
-        Rune,
+        ComboPoints,
+        Runes,
         RunicPower,
         SoulShards,
         Eclipse,
@@ -163,7 +163,7 @@ namespace Framework.Constants
         ArcaneCharges,
         Fury,
         Pain,
-        Armor,                                         // ARMOR..RESISTANCE_ARCANE must be in existed order, it's accessed by index values of SpellSchools enum.
+        Armor, // ARMOR..RESISTANCE_ARCANE must be in existed order, it's accessed by index values of SpellSchools enum.
         ResistanceHoly,
         ResistanceFire,
         ResistanceNature,

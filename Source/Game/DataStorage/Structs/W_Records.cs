@@ -57,12 +57,12 @@ namespace Game.DataStorage
         public float LocRight;
         public float LocTop;
         public float LocBottom;
+        public uint Flags;
         public ushort MapID;
         public ushort AreaID;
         public short DisplayMapID;
         public short DefaultDungeonFloor;
         public ushort ParentWorldMapID;
-        public ushort Flags;
         public byte LevelRangeMin;
         public byte LevelRangeMax;
         public byte BountySetID;
@@ -102,6 +102,7 @@ namespace Game.DataStorage
         public ushort NewDungeonMapID;
         public ushort NewAreaID;
         public byte Flags;
+        public int Priority;
     }
 
     public sealed class WorldSafeLocsRecord

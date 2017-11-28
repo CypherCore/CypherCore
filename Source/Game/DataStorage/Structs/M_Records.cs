@@ -118,7 +118,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public uint[] Asset = new uint[2];
-        public ushort Parent;
+        public uint Parent;
         public byte Type;
         public byte Unk700;
         public byte Operator;

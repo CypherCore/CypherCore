@@ -1757,7 +1757,7 @@ namespace Game.BattleGrounds
             }
         }
 
-        public void SetBracket(PvpDifficultyRecord bracketEntry)
+        public void SetBracket(PVPDifficultyRecord bracketEntry)
         {
             m_BracketId = bracketEntry.GetBracketId();
             SetLevelRange(bracketEntry.MinLevel, bracketEntry.MaxLevel);

@@ -35,24 +35,13 @@ namespace Game.DataStorage
         public float CameraPitchOffset;
         public float FacingLimitRight;
         public float FacingLimitLeft;
-        public float MsslTrgtTurnLingering;
-        public float MsslTrgtPitchLingering;
-        public float MsslTrgtMouseLingering;
-        public float MsslTrgtEndOpacity;
-        public float MsslTrgtArcSpeed;
-        public float MsslTrgtArcRepeat;
-        public float MsslTrgtArcWidth;
-        public float[] MsslTrgtImpactRadius = new float[2];
-        public string MsslTrgtArcTexture;
-        public string MsslTrgtImpactTexture;
-        public string[] MsslTrgtImpactModel = new string[2];
         public float CameraYawOffset;
-        public float MsslTrgtImpactTexRadius;
         public ushort[] SeatID = new ushort[SharedConst.MaxVehicleSeats];
         public ushort VehicleUIIndicatorID;
         public ushort[] PowerDisplayID = new ushort[3];
         public byte FlagsB;
         public byte UILocomotionType;
+        public int MissileTargetingID;
     }
 
     public sealed class VehicleSeatRecord

@@ -35,6 +35,7 @@ namespace Scripts.Spells.Paladin
         public const uint BlessingOfLowerCityPaladin = 37879;
         public const uint BlessingOfLowerCityPriest = 37880;
         public const uint BlessingOfLowerCityShaman = 37881;
+        public const uint BlindingLightEffect = 105421;
         public const uint ConcentractionAura = 19746;
         public const uint DivinePurposeProc = 90174;
         public const uint DivineSteedHuman = 221883;
@@ -150,6 +151,27 @@ namespace Scripts.Spells.Paladin
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    [Script] // 115750 - Blinding Light
+    class spell_pal_blinding_light : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.BlindingLightEffect);
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            Unit target = GetHitUnit();
+            if (target)
+                GetCaster().CastSpell(target, SpellIds.BlindingLightEffect, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ApplyAura));
         }
     }
 
