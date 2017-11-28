@@ -110,10 +110,9 @@ namespace Game.DataStorage
         public LocalizedString FemaleText;
         public ushort[] EmoteID = new ushort[3];
         public ushort[] EmoteDelay = new ushort[3];
-        public ushort UnkEmoteID;
+		public uint SoundID;
+		public uint UnkMoP1;
+		public uint UnkMoP2;
         public byte Language;
-        public byte Type;
-        public uint[] SoundID = new uint[2];
-        public uint PlayerConditionID;
     }
 }
