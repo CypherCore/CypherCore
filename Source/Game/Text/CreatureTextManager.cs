@@ -205,7 +205,7 @@ namespace Game
                 BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(textEntry.BroadcastTextId);
                 if (bct != null)
                 {
-                    uint broadcastTextSoundId = bct.SoundID[source.GetGender() == Gender.Female ? 1 : 0];
+                    uint broadcastTextSoundId = bct.SoundID;
                     if (broadcastTextSoundId != 0)
                         finalSound = broadcastTextSoundId;
                 }
