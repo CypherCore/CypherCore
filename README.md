@@ -2,12 +2,10 @@
 
 CypherCore is an open source server project for World of Warcraft written in C#.
 
-The current support game version is: 7.2.5.24461
-
-Credit for the great work goes to TrinityCore Team and hondacrx for the porting.
+The current support game version is: 7.3.2.25480
 
 # How to use
-
 - Simply compile the solution as you do with TC c++ version.
-- Install TC's TDB and use the updates that you can find in this repo.
+- Download full TC's DB and place into folder. Use the updates that you can find in this repo.
 - Edit BnetServer and WorldServer config files giving at least your Database Informations
+- Must use Arctium WoW Client Launcher [Download](https://arctium.io/files/?f=15a1828a531289)
