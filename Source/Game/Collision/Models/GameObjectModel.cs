@@ -155,7 +155,7 @@ namespace Game.Collision
             var filename = Global.WorldMgr.GetDataPath() + "/vmaps/GameObjectModels.dtree";
             if (!File.Exists(filename))
             {
-                Log.outError(LogFilter.Server, "Unable to open '{0}' file.", filename);
+                Log.outWarn(LogFilter.Server, "Unable to open '{0}' file.", filename);
                 return;
             }
             try
