@@ -51,10 +51,10 @@ namespace Framework.Database
                     fileName = @"\sql\base\characters_database.sql";
                     break;
                 case "WorldDatabase":
-                    fileName = @"\TDB_world_703.00_2016_10_17.sql";
+                    fileName = @"\TDB_world_720.00_2017_04_18.sql";
                     break;
                 case "HotfixDatabase":
-                    fileName = @"\TDB_hotfixes_703.00_2016_10_17.sql";
+                    fileName = @"\TDB_hotfixes_720.00_2017_04_18.sql";
                     break;     
             }
 
@@ -171,7 +171,7 @@ namespace Framework.Database
                 else
                 {
                     // If the hash of the files differs from the one stored in our database reapply the update (because it was changed).
-                    if (applied.Hash != hash)
+                    if (applied.Hash != hash && applied.State != State.ARCHIVED)
                     {
                         Log.outInfo(LogFilter.SqlUpdates, $"Reapplying update \"{availableQuery.GetFileName()}\" \'{applied.Hash.Substring(0, 7)}\' . \'{hash.Substring(0, 7)}\' (it changed)...");
                     }
