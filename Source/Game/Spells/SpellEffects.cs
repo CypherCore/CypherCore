@@ -4904,16 +4904,19 @@ namespace Game.Spells
             if (!player)
                 return;
 
-            Quest qInfo = Global.ObjectMgr.GetQuestTemplate((uint)effectInfo.MiscValue);
-            if (qInfo != null)
+            Quest quest = Global.ObjectMgr.GetQuestTemplate((uint)effectInfo.MiscValue);
+            if (quest != null)
             {
-                if (!player.CanTakeQuest(qInfo, false))
+                if (!player.CanTakeQuest(quest, false))
                     return;
 
-                if (qInfo.IsAutoAccept() && player.CanAddQuest(qInfo, false))
-                    player.AddQuestAndCheckCompletion(qInfo, null);
-
-                player.PlayerTalkClass.SendQuestGiverQuestDetails(qInfo, player.GetGUID(), true);
+                if (quest.IsAutoAccept() && player.CanAddQuest(quest, false))
+                {
+                    player.AddQuestAndCheckCompletion(quest, null);
+                    player.PlayerTalkClass.SendQuestGiverQuestDetails(quest, player.GetGUID(), true, true);
+                }
+                else
+                    player.PlayerTalkClass.SendQuestGiverQuestDetails(quest, player.GetGUID(), true, false);
             }
         }
 

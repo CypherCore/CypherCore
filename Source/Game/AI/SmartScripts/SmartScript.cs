@@ -319,7 +319,7 @@ namespace Game.AI
                                             if (session)
                                             {
                                                 PlayerMenu menu = new PlayerMenu(session);
-                                                menu.SendQuestGiverQuestDetails(q, me.GetGUID(), true);
+                                                menu.SendQuestGiverQuestDetails(q, me.GetGUID(), true, false);
                                                 Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction:: SMART_ACTION_OFFER_QUEST: Player {0} - offering quest {1}", pTarget.GetGUID().ToString(), e.Action.questOffer.questId);
                                             }
                                         }

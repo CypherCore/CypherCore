@@ -217,7 +217,7 @@ namespace Game
                 if (quest.IsAutoComplete())
                     GetPlayer().PlayerTalkClass.SendQuestGiverRequestItems(quest, obj.GetGUID(), GetPlayer().CanCompleteQuest(quest.Id), true);
                 else
-                    GetPlayer().PlayerTalkClass.SendQuestGiverQuestDetails(quest, obj.GetGUID(), true);
+                    GetPlayer().PlayerTalkClass.SendQuestGiverQuestDetails(quest, obj.GetGUID(), true, false);
             }
         }
 
@@ -347,7 +347,7 @@ namespace Game
                                         if (nextQuest.IsAutoAccept() && GetPlayer().CanAddQuest(nextQuest, true))
                                             GetPlayer().AddQuestAndCheckCompletion(nextQuest, obj);
 
-                                        GetPlayer().PlayerTalkClass.SendQuestGiverQuestDetails(nextQuest, packet.QuestGiverGUID, true);
+                                        GetPlayer().PlayerTalkClass.SendQuestGiverQuestDetails(nextQuest, packet.QuestGiverGUID, true, false);
                                     }
                                 }
 
@@ -370,7 +370,7 @@ namespace Game
                                     if (nextQuest.IsAutoAccept() && GetPlayer().CanAddQuest(nextQuest, true))
                                         GetPlayer().AddQuestAndCheckCompletion(nextQuest, obj);
 
-                                    GetPlayer().PlayerTalkClass.SendQuestGiverQuestDetails(nextQuest, packet.QuestGiverGUID, true);
+                                    GetPlayer().PlayerTalkClass.SendQuestGiverQuestDetails(nextQuest, packet.QuestGiverGUID, true, false);
                                 }
                             }
 
@@ -606,7 +606,7 @@ namespace Game
                 else
                 {
                     receiver.SetDivider(sender.GetGUID());
-                    receiver.PlayerTalkClass.SendQuestGiverQuestDetails(quest, receiver.GetGUID(), true);
+                    receiver.PlayerTalkClass.SendQuestGiverQuestDetails(quest, receiver.GetGUID(), true, false);
                 }
             }
         }
