@@ -1542,7 +1542,10 @@ namespace Game.Spells
             if (gameObjTarget != null)
                 SendLoot(guid, LootType.Skinning);
             else if (itemTarget != null)
+            {
                 itemTarget.SetFlag(ItemFields.Flags, ItemFieldFlags.Unlocked);
+                itemTarget.SetState(ItemUpdateState.Changed, itemTarget.GetOwner());
+            }
 
             // not allow use skill grow at item base open
             if (m_CastItem == null && skillId != SkillType.None)
