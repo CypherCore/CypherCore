@@ -2904,30 +2904,18 @@ namespace Game.Spells
                 {
                     Battleground bg = player.GetBattleground();
                     if (bg)
-                        bg.SetDroppedFlagGUID(pGameObj.GetGUID(), (int)(player.GetTeam() == Team.Alliance ? TeamId.Horde : TeamId.Alliance));
+                        bg.SetDroppedFlagGUID(pGameObj.GetGUID(), (player.GetTeam() == Team.Alliance ? TeamId.Horde : TeamId.Alliance));
                 }
             }
 
-            uint linkedEntry = pGameObj.GetGoInfo().GetLinkedGameObjectEntry();
-            if (linkedEntry != 0)
+            GameObject linkedTrap = pGameObj.GetLinkedTrap();
+            if (linkedTrap)
             {
-                GameObject linkedGO = new GameObject();
-                if (linkedGO.Create(linkedEntry, map, m_caster.GetPhaseMask(), new Position(x, y, z, target.GetOrientation()), rotation, 255, GameObjectState.Ready))
-                {
-                    pGameObj.SetLinkedTrap(linkedGO);
+                linkedTrap.CopyPhaseFrom(m_caster);
+                linkedTrap.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
+                linkedTrap.SetSpellId(m_spellInfo.Id);
 
-                    linkedGO.CopyPhaseFrom(m_caster);
-
-                    linkedGO.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
-                    linkedGO.SetSpellId(m_spellInfo.Id);
-
-                    ExecuteLogEffectSummonObject(effIndex, linkedGO);
-
-                    // Wild object not have owner and check clickable by players
-                    map.AddToMap(linkedGO);
-                }
-                else
-                    linkedGO.Dispose();
+                ExecuteLogEffectSummonObject(effIndex, linkedTrap);
             }
         }
 
@@ -4652,28 +4640,15 @@ namespace Game.Spells
             Log.outDebug(LogFilter.Spells, "AddObject at SpellEfects.cpp EffectTransmitted");
 
             cMap.AddToMap(pGameObj);
-            uint linkedEntry = pGameObj.GetGoInfo().GetLinkedGameObjectEntry();
-            if (linkedEntry != 0)
+            GameObject linkedTrap = pGameObj.GetLinkedTrap();
+            if (linkedTrap != null)
             {
-                GameObject linkedGO = new GameObject();
-                if (linkedGO.Create(linkedEntry, cMap, m_caster.GetPhaseMask(), pos, rotation, 255, GameObjectState.Ready))
-                {
-                    pGameObj.SetLinkedTrap(linkedGO);
+                linkedTrap.CopyPhaseFrom(m_caster);
+                linkedTrap.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
+                linkedTrap.SetSpellId(m_spellInfo.Id);
+                linkedTrap.SetOwnerGUID(m_caster.GetGUID());
 
-                    linkedGO.CopyPhaseFrom(m_caster);
-
-                    linkedGO.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
-                    linkedGO.SetSpellId(m_spellInfo.Id);
-                    linkedGO.SetOwnerGUID(m_caster.GetGUID());
-                    ExecuteLogEffectSummonObject(effIndex, linkedGO);
-
-                    linkedGO.GetMap().AddToMap(linkedGO);
-                }
-                else
-                {
-                    linkedGO = null;
-                    return;
-                }
+                ExecuteLogEffectSummonObject(effIndex, linkedTrap);
             }
         }
 
