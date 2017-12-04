@@ -693,6 +693,7 @@ namespace Game.Entities
                 m_QuestStatus[quest_id] = new QuestStatusData();
 
             QuestStatusData questStatusData = m_QuestStatus.LookupByKey(quest_id);
+            QuestStatus oldStatus = questStatusData.Status;
 
             // check for repeatable quests status reset
             questStatusData.Status = QuestStatus.Incomplete;
@@ -757,6 +758,7 @@ namespace Game.Entities
             SendQuestUpdate(quest_id);
 
             Global.ScriptMgr.OnQuestStatusChange(this, quest_id);
+            Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, questStatusData.Status);
         }
 
         public void CompleteQuest(uint quest_id)
@@ -843,6 +845,7 @@ namespace Game.Entities
             SetCanDelayTeleport(true);
 
             uint quest_id = quest.Id;
+            QuestStatus oldStatus = GetQuestStatus(quest_id);
 
             foreach (QuestObjective obj in quest.Objectives)
             {
@@ -1101,6 +1104,7 @@ namespace Game.Entities
             SetCanDelayTeleport(false);
 
             Global.ScriptMgr.OnQuestStatusChange(this, quest_id);
+            Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, QuestStatus.Rewarded);
         }
 
         public void SetRewardedQuest(uint quest_id)
@@ -1741,18 +1745,20 @@ namespace Game.Entities
             Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
             if (quest != null)
             {
+                QuestStatus oldStatus = m_QuestStatus[questId].Status;
                 if (!m_QuestStatus.ContainsKey(questId))
                     m_QuestStatus[questId] = new QuestStatusData();
 
                 m_QuestStatus[questId].Status = status;
                 if (!quest.IsAutoComplete())
                     m_QuestStatusSave[questId] = QuestSaveType.Default;
+
+                Global.ScriptMgr.OnQuestStatusChange(this, questId);
+                Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, status);
             }
 
             if (update)
                 SendQuestUpdate(questId);
-
-            Global.ScriptMgr.OnQuestStatusChange(this, questId);
         }
 
         public void RemoveActiveQuest(uint quest_id, bool update = true)
@@ -2663,8 +2669,13 @@ namespace Game.Entities
             }
 
             // No change
-            if (status.ObjectiveData[objective.StorageIndex] == data)
+            int oldData = status.ObjectiveData[objective.StorageIndex];
+            if (oldData == data)
                 return;
+
+            Quest quest = Global.ObjectMgr.GetQuestTemplate(objective.QuestID);
+            if (quest != null)
+                Global.ScriptMgr.OnQuestObjectiveChange(this, quest, objective, oldData, data);
 
             // Set data
             status.ObjectiveData[objective.StorageIndex] = data;

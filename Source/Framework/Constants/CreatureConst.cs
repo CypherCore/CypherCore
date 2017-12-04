@@ -142,6 +142,7 @@ namespace Framework.Constants
         ArtifactPowerRespec = 0x8000000,
         Transmogrifier = 0x10000000,
         VaultKeeper = 0x20000000,
+        WildBattlePet = 0x0040000000,
         BlackMarket = 0x80000000,
         ItemUpgradeMaster = 0x100000000,
         GarrisonArchitect = 0x200000000,

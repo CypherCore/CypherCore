@@ -4264,8 +4264,10 @@ namespace Game.Spells
             if (quest == null)
                 return;
 
+            QuestStatus oldStatus = player.GetQuestStatus(quest_id);
+
             // Player has never done this quest
-            if (player.GetQuestStatus(quest_id) == QuestStatus.None)
+            if (oldStatus == QuestStatus.None)
                 return;
 
             // remove all quest entries for 'entry' from quest log
@@ -4291,6 +4293,7 @@ namespace Game.Spells
             player.RemoveRewardedQuest(quest_id);
 
             Global.ScriptMgr.OnQuestStatusChange(player, quest_id);
+            Global.ScriptMgr.OnQuestStatusChange(player, quest, oldStatus, QuestStatus.None);
         }
 
         [SpellEffectHandler(SpellEffectName.SendTaxi)]

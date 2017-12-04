@@ -1327,6 +1327,23 @@ namespace Game.Scripting
             RunScript<SceneScript>(script => script.OnSceneComplete(player, sceneInstanceID, sceneTemplate), sceneTemplate.ScriptId);
         }
 
+        //QuestScript
+        public void OnQuestStatusChange(Player player, Quest quest, QuestStatus oldStatus, QuestStatus newStatus)
+        {
+            Contract.Assert(player);
+            Contract.Assert(quest != null);
+
+            RunScript<QuestScript>(script => script.OnQuestStatusChange(player, quest, oldStatus, newStatus), quest.ScriptId);
+        }
+
+        public void OnQuestObjectiveChange(Player player, Quest quest, QuestObjective objective, int oldAmount, int newAmount)
+        {
+            Contract.Assert(player);
+            Contract.Assert(quest != null);
+
+            RunScript<QuestScript>(script => script.OnQuestObjectiveChange(player, quest, objective, oldAmount, newAmount), quest.ScriptId);
+        }
+
         public void ForEach<T>(Action<T> a) where T : ScriptObject
         {
             var reg = GetScriptRegistry<T>();
