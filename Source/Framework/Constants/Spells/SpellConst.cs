@@ -2140,7 +2140,7 @@ namespace Framework.Constants
         Deflect = 0x200,
         Absorb = 0x400, // Partial Or Full Absorb
         Reflect = 0x800,
-        Interrupt = 0x1000, // (Not Used Atm)
+        Interrupt = 0x1000,
         FullBlock = 0x2000,
         MaskAll = 0x0003FFF
     }
