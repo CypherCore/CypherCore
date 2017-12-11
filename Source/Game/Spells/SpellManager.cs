@@ -1274,7 +1274,12 @@ namespace Game.Entities
                 if (spellInfo == null)
                     continue;
 
+                // Data already present in DB, overwrites default proc
                 if (mSpellProcMap.ContainsKey(spellInfo.Id))
+                    continue;
+
+                // Nothing to do if no flags set
+                if (spellInfo.ProcFlags == 0)
                     continue;
 
                 bool addTriggerFlag = false;
@@ -1294,13 +1299,25 @@ namespace Game.Entities
                     procSpellTypeMask |= getSpellTypeMask(auraName);
                     if (isAlwaysTriggeredAura(auraName))
                         addTriggerFlag = true;
+
+                    // many proc auras with taken procFlag mask don't have attribute "can proc with triggered"
+                    // they should proc nevertheless (example mage armor spells with judgement)
+                    if (!addTriggerFlag && spellInfo.ProcFlags.HasAnyFlag(ProcFlags.TakenHitMask))
+                    {
+                        switch (auraName)
+                        {
+                            case AuraType.ProcTriggerSpell:
+                            case AuraType.ProcTriggerDamage:
+                                addTriggerFlag = true;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
                     break;
                 }
 
                 if (procSpellTypeMask == 0)
-                    continue;
-
-                if (spellInfo.ProcFlags == 0)
                     continue;
 
                 SpellProcEntry procEntry = new SpellProcEntry();
