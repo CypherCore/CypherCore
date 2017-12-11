@@ -5975,9 +5975,9 @@ namespace Game.Entities
         public void SetLootGUID(ObjectGuid guid) { SetGuidValue(PlayerFields.LootTargetGuid, guid); }
         public void StoreLootItem(byte lootSlot, Loot loot, AELootResult aeResult = null)
         {
-            QuestItem qitem = null;
-            QuestItem ffaitem = null;
-            QuestItem conditem = null;
+            NotNormalLootItem qitem = null;
+            NotNormalLootItem ffaitem = null;
+            NotNormalLootItem conditem = null;
 
             LootItem item = loot.LootItemInSlot(lootSlot, this, out qitem, out ffaitem, out conditem);
             if (item == null)

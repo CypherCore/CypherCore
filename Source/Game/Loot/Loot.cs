@@ -106,18 +106,18 @@ namespace Game.Loots
         public bool canSave;
     }
 
-    public class QuestItem
+    public class NotNormalLootItem
     {
-        public byte index;                                          // position in quest_items;
+        public byte index;                                          // position in quest_items or items;
         public bool is_looted;
 
-        public QuestItem()
+        public NotNormalLootItem()
         {
             index = 0;
             is_looted = false;
         }
 
-        public QuestItem(byte _index, bool _islooted = false)
+        public NotNormalLootItem(byte _index, bool _islooted = false)
         {
             index = _index;
             is_looted = _islooted;
@@ -294,16 +294,16 @@ namespace Game.Loots
             }
         }
 
-        List<QuestItem> FillFFALoot(Player player)
+        List<NotNormalLootItem> FillFFALoot(Player player)
         {
-            List<QuestItem> ql = new List<QuestItem>();
+            List<NotNormalLootItem> ql = new List<NotNormalLootItem>();
 
             for (byte i = 0; i < items.Count; ++i)
             {
                 LootItem item = items[i];
                 if (!item.is_looted && item.freeforall && item.AllowedForPlayer(player))
                 {
-                    ql.Add(new QuestItem(i));
+                    ql.Add(new NotNormalLootItem(i));
                     ++unlootedCount;
                 }
             }
@@ -315,12 +315,12 @@ namespace Game.Loots
             return ql;
         }
 
-        List<QuestItem> FillQuestLoot(Player player)
+        List<NotNormalLootItem> FillQuestLoot(Player player)
         {
             if (items.Count == SharedConst.MaxNRLootItems)
                 return null;
 
-            List<QuestItem> ql = new List<QuestItem>();
+            List<NotNormalLootItem> ql = new List<NotNormalLootItem>();
 
             for (byte i = 0; i < quest_items.Count; ++i)
             {
@@ -329,7 +329,7 @@ namespace Game.Loots
                 if (!item.is_looted && (item.AllowedForPlayer(player) || (item.follow_loot_rules && player.GetGroup() && ((player.GetGroup().GetLootMethod() == LootMethod.MasterLoot
                     && player.GetGroup().GetMasterLooterGuid() == player.GetGUID()) || player.GetGroup().GetLootMethod() != LootMethod.MasterLoot))))
                 {
-                    ql.Add(new QuestItem(i));
+                    ql.Add(new NotNormalLootItem(i));
 
                     // quest items get blocked when they first appear in a
                     // player's quest vector
@@ -351,21 +351,20 @@ namespace Game.Loots
             return ql;
         }
 
-        List<QuestItem> FillNonQuestNonFFAConditionalLoot(Player player, bool presentAtLooting)
+        List<NotNormalLootItem> FillNonQuestNonFFAConditionalLoot(Player player, bool presentAtLooting)
         {
-            List<QuestItem> ql = new List<QuestItem>();
+            List<NotNormalLootItem> ql = new List<NotNormalLootItem>();
 
             for (byte i = 0; i < items.Count; ++i)
             {
                 LootItem item = items[i];
-                if (!item.is_looted && !item.freeforall && (item.AllowedForPlayer(player) || (item.follow_loot_rules && player.GetGroup() != null
-                    && ((player.GetGroup().GetLootMethod() == LootMethod.MasterLoot && player.GetGroup().GetLooterGuid() == player.GetGUID()) || player.GetGroup().GetLootMethod() != LootMethod.MasterLoot))))
+                if (!item.is_looted && !item.freeforall && item.AllowedForPlayer(player))
                 {
                     if (presentAtLooting)
                         item.AddAllowedLooter(player);
                     if (!item.conditions.Empty())
                     {
-                        ql.Add(new QuestItem(i));
+                        ql.Add(new NotNormalLootItem(i));
                         if (!item.is_counted)
                         {
                             ++unlootedCount;
@@ -478,10 +477,10 @@ namespace Game.Loots
 
         public LootItem LootItemInSlot(uint lootSlot, Player player)
         {
-            QuestItem qitem, ffaitem, conditem;
+            NotNormalLootItem qitem, ffaitem, conditem;
             return LootItemInSlot(lootSlot, player, out qitem, out ffaitem, out conditem);
         }
-        public LootItem LootItemInSlot(uint lootSlot, Player player, out QuestItem qitem, out QuestItem ffaitem, out QuestItem conditem)
+        public LootItem LootItemInSlot(uint lootSlot, Player player, out NotNormalLootItem qitem, out NotNormalLootItem ffaitem, out NotNormalLootItem conditem)
         {
             qitem = null;
             ffaitem = null;
@@ -495,7 +494,7 @@ namespace Game.Loots
                 var questItems = PlayerQuestItems.LookupByKey(player.GetGUID());
                 if (!questItems.Empty())
                 {
-                    QuestItem qitem2 = questItems.Find(p => p.index == questSlot);
+                    NotNormalLootItem qitem2 = questItems.Find(p => p.index == questSlot);
                     if (qitem2 != null)
                     {
                         qitem = qitem2;
@@ -517,7 +516,7 @@ namespace Game.Loots
                         {
                             if (c.index == lootSlot)
                             {
-                                QuestItem ffaitem2 = c;
+                                NotNormalLootItem ffaitem2 = c;
                                 ffaitem = ffaitem2;
                                 is_looted = ffaitem2.is_looted;
                                 break;
@@ -534,7 +533,7 @@ namespace Game.Loots
                         {
                             if (iter.index == lootSlot)
                             {
-                                QuestItem conditem2 = iter;
+                                NotNormalLootItem conditem2 = iter;
                                 conditem = conditem2;
                                 is_looted = conditem2.is_looted;
                                 break;
@@ -716,7 +715,7 @@ namespace Game.Loots
             {
                 for (var i = 0; i < q_list.Count; ++i)
                 {
-                    QuestItem qi = q_list[i];
+                    NotNormalLootItem qi = q_list[i];
                     LootItem item = quest_items[qi.index];
                     if (!qi.is_looted && !item.is_looted)
                     {
@@ -725,29 +724,24 @@ namespace Game.Loots
                         lootItem.Quantity = item.count;
                         lootItem.Loot = new ItemInstance(item);
 
-                        if (item.follow_loot_rules)
+                        switch (permission)
                         {
-                            switch (permission)
-                            {
-                                case PermissionTypes.Master:
-                                    lootItem.UIType = LootSlotType.Master;
-                                    break;
-                                case PermissionTypes.Restricted:
-                                    lootItem.UIType = item.is_blocked ? LootSlotType.Locked : LootSlotType.AllowLoot;
-                                    break;
-                                case PermissionTypes.Group:
-                                    if (!item.is_blocked)
-                                        lootItem.UIType = LootSlotType.AllowLoot;
-                                    else
-                                        lootItem.UIType = LootSlotType.RollOngoing;
-                                    break;
-                                default:
-                                    lootItem.UIType = slotType;
-                                    break;
-                            }
+                            case PermissionTypes.Master:
+                                lootItem.UIType = LootSlotType.Master;
+                                break;
+                            case PermissionTypes.Restricted:
+                                lootItem.UIType = item.is_blocked ? LootSlotType.Locked : LootSlotType.AllowLoot;
+                                break;
+                            case PermissionTypes.Group:
+                                if (!item.is_blocked)
+                                    lootItem.UIType = LootSlotType.AllowLoot;
+                                else
+                                    lootItem.UIType = LootSlotType.RollOngoing;
+                                break;
+                            default:
+                                lootItem.UIType = slotType;
+                                break;
                         }
-                        else
-                            lootItem.UIType = slotType;
 
                         packet.Items.Add(lootItem);
                     }
@@ -849,9 +843,9 @@ namespace Game.Loots
         public ObjectGuid GetGUID() { return _GUID; }
         public void SetGUID(ObjectGuid guid) { _GUID = guid; }
 
-        public MultiMap<ObjectGuid, QuestItem> GetPlayerQuestItems() { return PlayerQuestItems; }
-        public MultiMap<ObjectGuid, QuestItem> GetPlayerFFAItems() { return PlayerFFAItems; }
-        public MultiMap<ObjectGuid, QuestItem> GetPlayerNonQuestNonFFAConditionalItems() { return PlayerNonQuestNonFFAConditionalItems; }
+        public MultiMap<ObjectGuid, NotNormalLootItem> GetPlayerQuestItems() { return PlayerQuestItems; }
+        public MultiMap<ObjectGuid, NotNormalLootItem> GetPlayerFFAItems() { return PlayerFFAItems; }
+        public MultiMap<ObjectGuid, NotNormalLootItem> GetPlayerNonQuestNonFFAConditionalItems() { return PlayerNonQuestNonFFAConditionalItems; }
 
         public List<LootItem> items = new List<LootItem>();
         public List<LootItem> quest_items = new List<LootItem>();
@@ -864,9 +858,9 @@ namespace Game.Loots
         public ObjectGuid containerID;
 
         List<ObjectGuid> PlayersLooting = new List<ObjectGuid>();
-        MultiMap<ObjectGuid, QuestItem> PlayerQuestItems = new MultiMap<ObjectGuid, QuestItem>();
-        MultiMap<ObjectGuid, QuestItem> PlayerFFAItems = new MultiMap<ObjectGuid, QuestItem>();
-        MultiMap<ObjectGuid, QuestItem> PlayerNonQuestNonFFAConditionalItems = new MultiMap<ObjectGuid, QuestItem>();
+        MultiMap<ObjectGuid, NotNormalLootItem> PlayerQuestItems = new MultiMap<ObjectGuid, NotNormalLootItem>();
+        MultiMap<ObjectGuid, NotNormalLootItem> PlayerFFAItems = new MultiMap<ObjectGuid, NotNormalLootItem>();
+        MultiMap<ObjectGuid, NotNormalLootItem> PlayerNonQuestNonFFAConditionalItems = new MultiMap<ObjectGuid, NotNormalLootItem>();
 
         // All rolls are registered here. They need to know, when the loot is not valid anymore
         LootValidatorRefManager i_LootValidatorRefManager = new LootValidatorRefManager();
