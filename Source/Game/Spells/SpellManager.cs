@@ -505,12 +505,9 @@ namespace Game.Entities
             if (eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.PeriodicMask | ProcFlags.SpellMask))
             {
                 SpellInfo eventSpellInfo = eventInfo.GetSpellInfo();
-
-                if (procEntry.SpellFamilyName != 0 && eventSpellInfo != null && (procEntry.SpellFamilyName != eventSpellInfo.SpellFamilyName))
-                    return false;
-
-                if (eventSpellInfo != null && !(procEntry.SpellFamilyMask & eventSpellInfo.SpellFamilyFlags))
-                    return false;
+                if (eventSpellInfo != null)
+                    if (!eventSpellInfo.IsAffected(procEntry.SpellFamilyName, procEntry.SpellFamilyMask))
+                        return false;
             }
 
             // check spell type mask (if set)
