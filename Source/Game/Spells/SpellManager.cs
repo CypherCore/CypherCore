@@ -2348,10 +2348,7 @@ namespace Game.Entities
                     case 27892: // To Anchor 1
                     case 27928: // To Anchor 1
                     case 27935: // To Anchor 1
-                    case 27915: // Anchor to Skulls
-                    case 27931: // Anchor to Skulls
-                    case 27937: // Anchor to Skulls
-                        spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(13);
+                        spellInfo.GetEffect(0).RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards10);
                         break;
                     // target allys instead of enemies, target A is src_caster, spells with effect like that have ally target
                     // this is the only known exception, probably just wrong data
