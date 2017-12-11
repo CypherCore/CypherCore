@@ -1621,6 +1621,7 @@ namespace Game.Entities
                 SetLootRecipient(null);
                 ResetPlayerDamageReq();
 
+                SetCannotReachTarget(false);
                 UpdateMovementFlags();
 
                 ClearUnitState(UnitState.AllState & ~UnitState.IgnorePathfinding);
