@@ -1927,6 +1927,9 @@ namespace Game.Entities
             if (!trigger)
                 return;
 
+            // remove immunity flags, to allow spell to target anything
+            trigger.RemoveFlag(UnitFields.Flags, UnitFlags.ImmuneToNpc | UnitFlags.ImmuneToPc);
+
             Unit owner = GetOwner();
             if (owner)
             {
