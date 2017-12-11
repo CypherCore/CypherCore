@@ -567,6 +567,11 @@ namespace Game.Spells
                         {
                             if (focusObject != null)
                                 AddGOTarget(focusObject, effMask);
+                            else
+                            {
+                                SendCastResult(SpellCastResult.BadImplicitTargets);
+                                finish(false);
+                            }
                             return;
                         }
                         break;
@@ -578,6 +583,11 @@ namespace Game.Spells
                                 SpellDestination dest = new SpellDestination(focusObject);
                                 CallScriptDestinationTargetSelectHandlers(ref dest, effIndex, targetType);
                                 m_targets.SetDst(dest);
+                            }
+                            else
+                            {
+                                SendCastResult(SpellCastResult.BadImplicitTargets);
+                                finish(false);
                             }
                             return;
                         }
@@ -591,10 +601,19 @@ namespace Game.Spells
             if (target == null)
             {
                 Log.outDebug(LogFilter.Spells, "Spell.SelectImplicitNearbyTargets: cannot find nearby target for spell ID {0}, effect {1}", m_spellInfo.Id, effIndex);
+                SendCastResult(SpellCastResult.BadImplicitTargets);
+                finish(false);
                 return;
             }
 
             CallScriptObjectTargetSelectHandlers(ref target, effIndex, targetType);
+            if (!target)
+            {
+                Log.outDebug(LogFilter.Spells, $"Spell.SelectImplicitNearbyTargets: OnObjectTargetSelect script hook for spell Id {m_spellInfo.Id} set NULL target, effect {effIndex}");
+                SendCastResult(SpellCastResult.BadImplicitTargets);
+                finish(false);
+                return;
+            }
 
             switch (targetType.GetObjectType())
             {
@@ -602,11 +621,25 @@ namespace Game.Spells
                     Unit unitTarget = target.ToUnit();
                     if (unitTarget != null)
                         AddUnitTarget(unitTarget, effMask, true, false);
+                    else
+                    {
+                        Log.outDebug(LogFilter.Spells, $"Spell.SelectImplicitNearbyTargets: OnObjectTargetSelect script hook for spell Id {m_spellInfo.Id} set object of wrong type, expected unit, got {target.GetGUID().GetHigh()}, effect {effMask}");
+                        SendCastResult(SpellCastResult.BadImplicitTargets);
+                        finish(false);
+                        return;
+                    }
                     break;
                 case SpellTargetObjectTypes.Gobj:
                     GameObject gobjTarget = target.ToGameObject();
                     if (gobjTarget != null)
                         AddGOTarget(gobjTarget, effMask);
+                    else
+                    {
+                        Log.outDebug(LogFilter.Spells, $"Spell.SelectImplicitNearbyTargets: OnObjectTargetSelect script hook for spell Id {m_spellInfo.Id} set object of wrong type, expected gameobject, got {target.GetGUID().GetHigh()}, effect {effMask}");
+                        SendCastResult(SpellCastResult.BadImplicitTargets);
+                        finish(false);
+                        return;
+                    }
                     break;
                 case SpellTargetObjectTypes.Dest:
                     SpellDestination dest = new SpellDestination(target);

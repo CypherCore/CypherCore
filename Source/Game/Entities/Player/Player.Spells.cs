@@ -2523,7 +2523,7 @@ namespace Game.Entities
 
             // need to add Battle pets automatically into pet journal
             foreach (BattlePetSpeciesRecord entry in CliDB.BattlePetSpeciesStorage.Values)
-    {
+            {
                 if (entry.SummonSpellID == spellId && GetSession().GetBattlePetMgr().GetPetCount(entry.Id) == 0)
                 {
                     GetSession().GetBattlePetMgr().AddPet(entry.Id, entry.CreatureID, BattlePetMgr.RollPetBreed(entry.Id), BattlePetMgr.GetDefaultPetQuality(entry.Id));
