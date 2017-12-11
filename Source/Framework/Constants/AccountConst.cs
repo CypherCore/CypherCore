@@ -69,7 +69,7 @@ namespace Framework.Constants
         SkipCheckCharacterCreationClassmask = 15,
         SkipCheckCharacterCreationRacemask = 16,
         SkipCheckCharacterCreationReservedname = 17,
-        SkipCheckCharacterCreationDeathKnight = 18,
+        SkipCheckCharacterCreationDeathKnight = 18, // deprecated since Draenor DON'T reuse
         SkipCheckChatChannelReq = 19,
         SkipCheckDisableMap = 20,
         SkipCheckMoreTalentsThanAllowed = 21,
