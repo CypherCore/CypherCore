@@ -261,7 +261,7 @@ namespace Game.Entities
                     break;
             }
 
-            if (m_absorb != 0)
+            if (dmgInfo.HitInfo.HasAnyFlag(HitInfo.PartialAbsorb | HitInfo.FullAbsorb))
                 m_hitMask |= ProcFlagsHit.Absorb;
 
             if (dmgInfo.HitInfo.HasAnyFlag(HitInfo.FullResist))
@@ -270,6 +270,7 @@ namespace Game.Entities
             if (m_block != 0)
                 m_hitMask |= ProcFlagsHit.Block;
 
+            bool damageNullified = dmgInfo.HitInfo.HasAnyFlag(HitInfo.FullAbsorb | HitInfo.FullResist) || m_hitMask.HasAnyFlag(ProcFlagsHit.Immune | ProcFlagsHit.FullBlock);
             switch (dmgInfo.hitOutCome)
             {
                 case MeleeHitOutcome.Miss:
@@ -287,10 +288,12 @@ namespace Game.Entities
                 case MeleeHitOutcome.Crushing:
                 case MeleeHitOutcome.Glancing:
                 case MeleeHitOutcome.Normal:
-                    m_hitMask |= ProcFlagsHit.Normal;
+                    if (!damageNullified)
+                        m_hitMask |= ProcFlagsHit.Normal;
                     break;
                 case MeleeHitOutcome.Crit:
-                    m_hitMask |= ProcFlagsHit.Critical;
+                    if (!damageNullified)
+                        m_hitMask |= ProcFlagsHit.Critical;
                     break;
                 default:
                     break;
@@ -335,7 +338,10 @@ namespace Game.Entities
             m_resist += amount;
             m_damage -= amount;
             if (m_damage == 0)
+            { 
                 m_hitMask |= ProcFlagsHit.FullResist;
+                m_hitMask &= ~(ProcFlagsHit.Normal | ProcFlagsHit.Critical);
+            }
         }
         void BlockDamage(uint amount)
         {
@@ -344,7 +350,10 @@ namespace Game.Entities
             m_damage -= amount;
             m_hitMask |= ProcFlagsHit.Block;
             if (m_damage == 0)
+            { 
                 m_hitMask |= ProcFlagsHit.FullBlock;
+                m_hitMask &= ~(ProcFlagsHit.Normal | ProcFlagsHit.Critical);
+            }
         }
 
         public Unit GetAttacker() { return m_attacker; }
