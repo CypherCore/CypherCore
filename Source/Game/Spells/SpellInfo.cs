@@ -896,14 +896,15 @@ namespace Game.Spells
 
                     switch (effect.ApplyAuraName)
                     {
-                        case AuraType.Fly:
+                        case AuraType.ModShapeshift:
                             {
-                                var bounds = Global.SpellMgr.GetSkillLineAbilityMapBounds(Id);
-                                foreach (var skillRecord in bounds)
+                                SpellShapeshiftFormRecord spellShapeshiftForm = CliDB.SpellShapeshiftFormStorage.LookupByKey(effect.MiscValue);
+                                if (spellShapeshiftForm != null)
                                 {
-                                    if (skillRecord.SkillLine == (int)SkillType.Mounts)
-                                        if (!player.CanFlyInZone(map_id, zone_id))
-                                            return SpellCastResult.IncorrectArea;
+                                    uint mountType = spellShapeshiftForm.MountTypeID;
+                                    if (mountType != 0)
+                                        if (player.GetMountCapability(mountType) == null)
+                                            return SpellCastResult.NotHere;
                                 }
                                 break;
                             }

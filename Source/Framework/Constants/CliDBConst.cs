@@ -1333,12 +1333,21 @@ namespace Framework.Constants
         CannotExtend = 0x10
     }
 
+    public enum AreaMountFlags
+    {
+        GroundAllowed = 0x1,
+        FlyingAllowed = 0x2,
+        FloatAllowed = 0x4,
+        UnderwaterAllowed = 0x8
+    }
+
     public enum MountCapabilityFlags : byte
     {
-        Unk1 = 0x1,
-        Unk2 = 0x2,
-        CanPitch = 0x4,                    // client checks MOVEMENTFLAG2_FULL_SPEED_PITCHING
-        CanSwim = 0x8,                    // client checks MOVEMENTFLAG_SWIMMING
+        Ground = 0x1,
+        Flying = 0x2,
+        Float = 0x4,
+        Underwater = 0x8,
+        IgnoreRestrictions = 0x20
     }
 
     public enum MountFlags

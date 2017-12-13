@@ -1025,7 +1025,7 @@ namespace Game.Spells
         [AuraEffectHandler(AuraType.Unk324)]
         [AuraEffectHandler(AuraType.ModBlind)]
         [AuraEffectHandler(AuraType.Unk335)]
-        [AuraEffectHandler(AuraType.ModFlyingRestrictions)]
+        [AuraEffectHandler(AuraType.MountRestrictions)]
         [AuraEffectHandler(AuraType.IncreaseSkillGainChance)]
         [AuraEffectHandler(AuraType.ModResurrectedHealthByGuildMember)]
         [AuraEffectHandler(AuraType.ModAutoattackDamage)]
