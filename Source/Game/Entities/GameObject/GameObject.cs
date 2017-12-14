@@ -337,6 +337,19 @@ namespace Game.Entities
             if (map.Is25ManRaid())
                 loot.maxDuplicates = 3;
 
+            uint linkedEntry = GetGoInfo().GetLinkedGameObjectEntry();
+            if (linkedEntry != 0)
+            {
+                GameObject linkedGO = new GameObject();
+                if (linkedGO.Create(linkedEntry, map, phaseMask, pos, rotation, 255, GameObjectState.Ready))
+                {
+                    SetLinkedTrap(linkedGO);
+                    map.AddToMap(linkedGO);
+                }
+                else
+                    linkedGO.Dispose();
+            }
+
             return true;
         }
 
@@ -1914,6 +1927,9 @@ namespace Game.Entities
             if (!trigger)
                 return;
 
+            // remove immunity flags, to allow spell to target anything
+            trigger.RemoveFlag(UnitFields.Flags, UnitFlags.ImmuneToNpc | UnitFlags.ImmuneToPc);
+
             Unit owner = GetOwner();
             if (owner)
             {
@@ -2347,7 +2363,7 @@ namespace Game.Entities
         }
 
         public void SetLinkedTrap(GameObject linkedTrap) { m_linkedTrap = linkedTrap.GetGUID(); }
-        GameObject GetLinkedTrap()
+        public GameObject GetLinkedTrap()
         {
             return ObjectAccessor.GetGameObject(this, m_linkedTrap);
         }

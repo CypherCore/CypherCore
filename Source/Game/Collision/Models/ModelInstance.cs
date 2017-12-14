@@ -191,7 +191,6 @@ namespace Game.Collision
             return false;
         }
 
-
         public void setUnloaded() { iModel = null; }
 
         Matrix3 iInvRot;

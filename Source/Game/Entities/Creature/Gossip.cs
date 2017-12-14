@@ -394,7 +394,7 @@ namespace Game.Misc
             _session.SendPacket(packet);
         }
 
-        public void SendQuestGiverQuestDetails(Quest quest, ObjectGuid npcGUID, bool activateAccept)
+        public void SendQuestGiverQuestDetails(Quest quest, ObjectGuid npcGUID, bool autoLaunched, bool displayPopup)
         {
             QuestGiverQuestDetails packet = new QuestGiverQuestDetails();
 
@@ -427,7 +427,8 @@ namespace Game.Misc
             packet.QuestID = quest.Id;
             packet.PortraitGiver = quest.QuestGiverPortrait;
             packet.PortraitTurnIn = quest.QuestTurnInPortrait;
-            packet.AutoLaunched = activateAccept;
+            packet.AutoLaunched = autoLaunched;
+            packet.DisplayPopup = displayPopup;
             packet.QuestFlags[0] = (uint)quest.Flags;
             packet.QuestFlags[1] = (uint)quest.FlagsEx;
             packet.SuggestedPartyMembers = quest.SuggestedPlayers;
@@ -596,7 +597,7 @@ namespace Game.Misc
             _session.SendPacket(packet);
         }
 
-        public void SendQuestGiverOfferReward(Quest quest, ObjectGuid npcGUID, bool enableNext)
+        public void SendQuestGiverOfferReward(Quest quest, ObjectGuid npcGUID, bool autoLaunched)
         {
             QuestGiverOfferRewardMessage packet = new QuestGiverOfferRewardMessage();
 
@@ -636,7 +637,7 @@ namespace Game.Misc
                 offer.QuestGiverCreatureID = creature.GetCreatureTemplate().Entry;
 
             offer.QuestID = quest.Id;
-            offer.AutoLaunched = enableNext;
+            offer.AutoLaunched = autoLaunched;
             offer.SuggestedPartyMembers = quest.SuggestedPlayers;
 
             for (uint i = 0; i < SharedConst.QuestEmoteCount && quest.OfferRewardEmote[i] != 0; ++i)
@@ -654,7 +655,7 @@ namespace Game.Misc
             _session.SendPacket(packet);
         }
 
-        public void SendQuestGiverRequestItems(Quest quest, ObjectGuid npcGUID, bool canComplete, bool closeOnCancel)
+        public void SendQuestGiverRequestItems(Quest quest, ObjectGuid npcGUID, bool canComplete, bool autoLaunched)
         {
             // We can always call to RequestItems, but this packet only goes out if there are actually
             // items.  Otherwise, we'll skip straight to the OfferReward
@@ -729,7 +730,7 @@ namespace Game.Misc
                 }
             }
 
-            packet.AutoLaunched = closeOnCancel;
+            packet.AutoLaunched = autoLaunched;
 
             _session.SendPacket(packet);
         }

@@ -246,7 +246,7 @@ namespace Framework.Database
 
         string GetSourceDirectory()
         {
-            return ConfigMgr.GetDefaultValue("Updates.SourcePath", "../../");
+            return ConfigMgr.GetDefaultValue("Updates.SourcePath", "../../../");
         }
 
         uint ApplyTimedFile(string path)

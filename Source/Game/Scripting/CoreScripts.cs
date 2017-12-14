@@ -770,4 +770,20 @@ namespace Game.Scripting
         // Called when a scene is completed
         public virtual void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate) { }
     }
+
+    class QuestScript : ScriptObject
+    {
+        public QuestScript(string name) : base(name)
+        {
+            Global.ScriptMgr.AddScript(this);
+        }
+
+        public override bool IsDatabaseBound() { return true; }
+
+        // Called when a quest status change
+        public virtual void OnQuestStatusChange(Player player, Quest quest, QuestStatus oldStatus, QuestStatus newStatus) { }
+
+        // Called when a quest objective data change
+        public virtual void OnQuestObjectiveChange(Player player, Quest quest, QuestObjective objective, int oldAmount, int newAmount) { }
+    }
 }

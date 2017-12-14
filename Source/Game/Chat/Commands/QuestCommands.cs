@@ -182,6 +182,8 @@ namespace Game.Chat
                 return false;
             }
 
+            QuestStatus oldStatus = player.GetQuestStatus(entry);
+
             // remove all quest entries for 'entry' from quest log
             for (byte slot = 0; slot < SharedConst.MaxQuestLogSize; ++slot)
             {
@@ -205,6 +207,7 @@ namespace Game.Chat
             player.RemoveRewardedQuest(entry);
 
             Global.ScriptMgr.OnQuestStatusChange(player, entry);
+            Global.ScriptMgr.OnQuestStatusChange(player, quest, oldStatus, QuestStatus.None);
 
             handler.SendSysMessage(CypherStrings.CommandQuestRemoved);
             return true;

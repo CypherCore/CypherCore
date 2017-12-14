@@ -357,7 +357,7 @@ namespace Framework.Constants
         OverrideActionbarSpellsTriggered = 333, // Spells cast with this override have no cast time or power cost
         ModBlind = 334,  // Nyi
         Unk335 = 335,
-        ModFlyingRestrictions = 336,  // Nyi
+        MountRestrictions = 336,
         ModVendorItemsPrices = 337,
         ModDurabilityLoss = 338,
         IncreaseSkillGainChance = 339,  // Nyi

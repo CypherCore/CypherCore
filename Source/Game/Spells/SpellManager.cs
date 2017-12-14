@@ -505,12 +505,9 @@ namespace Game.Entities
             if (eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.PeriodicMask | ProcFlags.SpellMask))
             {
                 SpellInfo eventSpellInfo = eventInfo.GetSpellInfo();
-
-                if (procEntry.SpellFamilyName != 0 && eventSpellInfo != null && (procEntry.SpellFamilyName != eventSpellInfo.SpellFamilyName))
-                    return false;
-
-                if (eventSpellInfo != null && !(procEntry.SpellFamilyMask & eventSpellInfo.SpellFamilyFlags))
-                    return false;
+                if (eventSpellInfo != null)
+                    if (!eventSpellInfo.IsAffected(procEntry.SpellFamilyName, procEntry.SpellFamilyMask))
+                        return false;
             }
 
             // check spell type mask (if set)
@@ -1277,7 +1274,12 @@ namespace Game.Entities
                 if (spellInfo == null)
                     continue;
 
+                // Data already present in DB, overwrites default proc
                 if (mSpellProcMap.ContainsKey(spellInfo.Id))
+                    continue;
+
+                // Nothing to do if no flags set
+                if (spellInfo.ProcFlags == 0)
                     continue;
 
                 bool addTriggerFlag = false;
@@ -1297,13 +1299,25 @@ namespace Game.Entities
                     procSpellTypeMask |= getSpellTypeMask(auraName);
                     if (isAlwaysTriggeredAura(auraName))
                         addTriggerFlag = true;
+
+                    // many proc auras with taken procFlag mask don't have attribute "can proc with triggered"
+                    // they should proc nevertheless (example mage armor spells with judgement)
+                    if (!addTriggerFlag && spellInfo.ProcFlags.HasAnyFlag(ProcFlags.TakenHitMask))
+                    {
+                        switch (auraName)
+                        {
+                            case AuraType.ProcTriggerSpell:
+                            case AuraType.ProcTriggerDamage:
+                                addTriggerFlag = true;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
                     break;
                 }
 
                 if (procSpellTypeMask == 0)
-                    continue;
-
-                if (spellInfo.ProcFlags == 0)
                     continue;
 
                 SpellProcEntry procEntry = new SpellProcEntry();
@@ -2351,10 +2365,7 @@ namespace Game.Entities
                     case 27892: // To Anchor 1
                     case 27928: // To Anchor 1
                     case 27935: // To Anchor 1
-                    case 27915: // Anchor to Skulls
-                    case 27931: // Anchor to Skulls
-                    case 27937: // Anchor to Skulls
-                        spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(13);
+                        spellInfo.GetEffect(0).RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards10);
                         break;
                     // target allys instead of enemies, target A is src_caster, spells with effect like that have ally target
                     // this is the only known exception, probably just wrong data

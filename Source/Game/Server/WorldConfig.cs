@@ -363,15 +363,6 @@ namespace Game
                 Values[WorldCfg.CharactersPerAccount] = Values[WorldCfg.CharactersPerRealm];
             }
 
-            Values[WorldCfg.DeathKnightsPerRealm] = GetDefaultValue("DeathKnightsPerRealm", 1);
-            if ((int)Values[WorldCfg.DeathKnightsPerRealm] < 0 || (int)Values[WorldCfg.DeathKnightsPerRealm] > 12)
-            {
-                Log.outError(LogFilter.ServerLoading, "DeathKnightsPerRealm ({0}) must be in range 0..12. Set to 1.", Values[WorldCfg.DeathKnightsPerRealm]);
-                Values[WorldCfg.DeathKnightsPerRealm] = 1;
-            }
-
-            Values[WorldCfg.CharacterCreatingMinLevelForDeathKnight] = GetDefaultValue("CharacterCreating.MinLevelForDeathKnight", 55);
-
             Values[WorldCfg.DemonHuntersPerRealm] = GetDefaultValue("DemonHuntersPerRealm", 1);
             if ((int)Values[WorldCfg.DemonHuntersPerRealm] < 0 || (int)Values[WorldCfg.DemonHuntersPerRealm] > 12)
             {

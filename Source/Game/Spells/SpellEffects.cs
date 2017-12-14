@@ -1542,7 +1542,10 @@ namespace Game.Spells
             if (gameObjTarget != null)
                 SendLoot(guid, LootType.Skinning);
             else if (itemTarget != null)
+            {
                 itemTarget.SetFlag(ItemFields.Flags, ItemFieldFlags.Unlocked);
+                itemTarget.SetState(ItemUpdateState.Changed, itemTarget.GetOwner());
+            }
 
             // not allow use skill grow at item base open
             if (m_CastItem == null && skillId != SkillType.None)
@@ -2852,6 +2855,7 @@ namespace Game.Spells
                         {
                             int duration = m_spellInfo.GetDuration();
                             unitTarget.GetSpellHistory().LockSpellSchool(curSpellInfo.GetSchoolMask(), (uint)unitTarget.ModSpellDuration(m_spellInfo, unitTarget, duration, false, (uint)(1 << (int)effIndex)));
+                            m_originalCaster.ProcSkillsAndAuras(unitTarget, ProcFlags.DoneSpellMagicDmgClassNeg, ProcFlags.TakenSpellMagicDmgClassNeg, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Hit, ProcFlagsHit.Interrupt, null, null, null);
                         }
                         ExecuteLogEffectInterruptCast(effIndex, unitTarget, curSpellInfo.Id);
                         unitTarget.InterruptSpell(i, false);
@@ -2904,30 +2908,18 @@ namespace Game.Spells
                 {
                     Battleground bg = player.GetBattleground();
                     if (bg)
-                        bg.SetDroppedFlagGUID(pGameObj.GetGUID(), (int)(player.GetTeam() == Team.Alliance ? TeamId.Horde : TeamId.Alliance));
+                        bg.SetDroppedFlagGUID(pGameObj.GetGUID(), (player.GetTeam() == Team.Alliance ? TeamId.Horde : TeamId.Alliance));
                 }
             }
 
-            uint linkedEntry = pGameObj.GetGoInfo().GetLinkedGameObjectEntry();
-            if (linkedEntry != 0)
+            GameObject linkedTrap = pGameObj.GetLinkedTrap();
+            if (linkedTrap)
             {
-                GameObject linkedGO = new GameObject();
-                if (linkedGO.Create(linkedEntry, map, m_caster.GetPhaseMask(), new Position(x, y, z, target.GetOrientation()), rotation, 255, GameObjectState.Ready))
-                {
-                    pGameObj.SetLinkedTrap(linkedGO);
+                linkedTrap.CopyPhaseFrom(m_caster);
+                linkedTrap.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
+                linkedTrap.SetSpellId(m_spellInfo.Id);
 
-                    linkedGO.CopyPhaseFrom(m_caster);
-
-                    linkedGO.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
-                    linkedGO.SetSpellId(m_spellInfo.Id);
-
-                    ExecuteLogEffectSummonObject(effIndex, linkedGO);
-
-                    // Wild object not have owner and check clickable by players
-                    map.AddToMap(linkedGO);
-                }
-                else
-                    linkedGO.Dispose();
+                ExecuteLogEffectSummonObject(effIndex, linkedTrap);
             }
         }
 
@@ -4272,8 +4264,10 @@ namespace Game.Spells
             if (quest == null)
                 return;
 
+            QuestStatus oldStatus = player.GetQuestStatus(quest_id);
+
             // Player has never done this quest
-            if (player.GetQuestStatus(quest_id) == QuestStatus.None)
+            if (oldStatus == QuestStatus.None)
                 return;
 
             // remove all quest entries for 'entry' from quest log
@@ -4299,6 +4293,7 @@ namespace Game.Spells
             player.RemoveRewardedQuest(quest_id);
 
             Global.ScriptMgr.OnQuestStatusChange(player, quest_id);
+            Global.ScriptMgr.OnQuestStatusChange(player, quest, oldStatus, QuestStatus.None);
         }
 
         [SpellEffectHandler(SpellEffectName.SendTaxi)]
@@ -4652,28 +4647,15 @@ namespace Game.Spells
             Log.outDebug(LogFilter.Spells, "AddObject at SpellEfects.cpp EffectTransmitted");
 
             cMap.AddToMap(pGameObj);
-            uint linkedEntry = pGameObj.GetGoInfo().GetLinkedGameObjectEntry();
-            if (linkedEntry != 0)
+            GameObject linkedTrap = pGameObj.GetLinkedTrap();
+            if (linkedTrap != null)
             {
-                GameObject linkedGO = new GameObject();
-                if (linkedGO.Create(linkedEntry, cMap, m_caster.GetPhaseMask(), pos, rotation, 255, GameObjectState.Ready))
-                {
-                    pGameObj.SetLinkedTrap(linkedGO);
+                linkedTrap.CopyPhaseFrom(m_caster);
+                linkedTrap.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
+                linkedTrap.SetSpellId(m_spellInfo.Id);
+                linkedTrap.SetOwnerGUID(m_caster.GetGUID());
 
-                    linkedGO.CopyPhaseFrom(m_caster);
-
-                    linkedGO.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
-                    linkedGO.SetSpellId(m_spellInfo.Id);
-                    linkedGO.SetOwnerGUID(m_caster.GetGUID());
-                    ExecuteLogEffectSummonObject(effIndex, linkedGO);
-
-                    linkedGO.GetMap().AddToMap(linkedGO);
-                }
-                else
-                {
-                    linkedGO = null;
-                    return;
-                }
+                ExecuteLogEffectSummonObject(effIndex, linkedTrap);
             }
         }
 
@@ -4926,16 +4908,19 @@ namespace Game.Spells
             if (!player)
                 return;
 
-            Quest qInfo = Global.ObjectMgr.GetQuestTemplate((uint)effectInfo.MiscValue);
-            if (qInfo != null)
+            Quest quest = Global.ObjectMgr.GetQuestTemplate((uint)effectInfo.MiscValue);
+            if (quest != null)
             {
-                if (!player.CanTakeQuest(qInfo, false))
+                if (!player.CanTakeQuest(quest, false))
                     return;
 
-                if (qInfo.IsAutoAccept() && player.CanAddQuest(qInfo, false))
-                    player.AddQuestAndCheckCompletion(qInfo, null);
-
-                player.PlayerTalkClass.SendQuestGiverQuestDetails(qInfo, player.GetGUID(), true);
+                if (quest.IsAutoAccept() && player.CanAddQuest(quest, false))
+                {
+                    player.AddQuestAndCheckCompletion(quest, null);
+                    player.PlayerTalkClass.SendQuestGiverQuestDetails(quest, player.GetGUID(), true, true);
+                }
+                else
+                    player.PlayerTalkClass.SendQuestGiverQuestDetails(quest, player.GetGUID(), true, false);
             }
         }
 

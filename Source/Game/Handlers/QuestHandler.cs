@@ -217,7 +217,7 @@ namespace Game
                 if (quest.IsAutoComplete())
                     GetPlayer().PlayerTalkClass.SendQuestGiverRequestItems(quest, obj.GetGUID(), GetPlayer().CanCompleteQuest(quest.Id), true);
                 else
-                    GetPlayer().PlayerTalkClass.SendQuestGiverQuestDetails(quest, obj.GetGUID(), true);
+                    GetPlayer().PlayerTalkClass.SendQuestGiverQuestDetails(quest, obj.GetGUID(), true, false);
             }
         }
 
@@ -347,7 +347,7 @@ namespace Game
                                         if (nextQuest.IsAutoAccept() && GetPlayer().CanAddQuest(nextQuest, true))
                                             GetPlayer().AddQuestAndCheckCompletion(nextQuest, obj);
 
-                                        GetPlayer().PlayerTalkClass.SendQuestGiverQuestDetails(nextQuest, packet.QuestGiverGUID, true);
+                                        GetPlayer().PlayerTalkClass.SendQuestGiverQuestDetails(nextQuest, packet.QuestGiverGUID, true, false);
                                     }
                                 }
 
@@ -370,7 +370,7 @@ namespace Game
                                     if (nextQuest.IsAutoAccept() && GetPlayer().CanAddQuest(nextQuest, true))
                                         GetPlayer().AddQuestAndCheckCompletion(nextQuest, obj);
 
-                                    GetPlayer().PlayerTalkClass.SendQuestGiverQuestDetails(nextQuest, packet.QuestGiverGUID, true);
+                                    GetPlayer().PlayerTalkClass.SendQuestGiverQuestDetails(nextQuest, packet.QuestGiverGUID, true, false);
                                 }
                             }
 
@@ -419,6 +419,8 @@ namespace Game
                         return;                                     // can't un-equip some items, reject quest cancel
 
                     Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
+                    QuestStatus oldStatus = _player.GetQuestStatus(questId);
+
                     if (quest != null)
                     {
                         if (quest.HasSpecialFlag(QuestSpecialFlags.Timed))
@@ -439,6 +441,9 @@ namespace Game
                     Log.outInfo(LogFilter.Network, "Player {0} abandoned quest {1}", GetPlayer().GetGUID().ToString(), questId);
 
                     Global.ScriptMgr.OnQuestStatusChange(_player, questId);
+
+                    if (quest != null)
+                        Global.ScriptMgr.OnQuestStatusChange(_player, quest, oldStatus, QuestStatus.None);
                 }
 
                 GetPlayer().SetQuestSlot(packet.Entry, 0);
@@ -606,7 +611,7 @@ namespace Game
                 else
                 {
                     receiver.SetDivider(sender.GetGUID());
-                    receiver.PlayerTalkClass.SendQuestGiverQuestDetails(quest, receiver.GetGUID(), true);
+                    receiver.PlayerTalkClass.SendQuestGiverQuestDetails(quest, receiver.GetGUID(), true, false);
                 }
             }
         }

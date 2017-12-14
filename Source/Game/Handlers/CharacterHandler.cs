@@ -271,23 +271,6 @@ namespace Game
                 return;
             }
 
-            if (charCreate.CreateInfo.ClassId == Class.Deathknight && !HasPermission(RBACPermissions.SkipCheckCharacterCreationDeathKnight))
-            {
-                // speedup check for death knight class disabled case
-                if (WorldConfig.GetIntValue(WorldCfg.DeathKnightsPerRealm) == 0)
-                {
-                    SendCharCreate(ResponseCodes.CharCreateUniqueClassLimit);
-                    return;
-                }
-
-                // speedup check for death knight class disabled case
-                if (WorldConfig.GetIntValue(WorldCfg.CharacterCreatingMinLevelForDeathKnight) > WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
-                {
-                    SendCharCreate(ResponseCodes.CharCreateLevelRequirement);
-                    return;
-                }
-            }
-
             CharacterCreateInfo createInfo = charCreate.CreateInfo;
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHECK_NAME);
             stmt.AddValue(0, charCreate.CreateInfo.Name);
@@ -338,43 +321,16 @@ namespace Game
                 Action<SQLResult> finalizeCharacterCreation = result1 =>
                 {
                     bool haveSameRace = false;
-                    int deathKnightReqLevel = WorldConfig.GetIntValue(WorldCfg.CharacterCreatingMinLevelForDeathKnight);
                     int demonHunterReqLevel = WorldConfig.GetIntValue(WorldCfg.CharacterCreatingMinLevelForDemonHunter);
-                    bool hasDeathKnightReqLevel = (deathKnightReqLevel == 0);
                     bool hasDemonHunterReqLevel = (demonHunterReqLevel == 0);
-                    bool checkDeathKnightReqs = createInfo.ClassId == Class.Deathknight && !HasPermission(RBACPermissions.SkipCheckCharacterCreationDeathKnight);
                     bool checkDemonHunterReqs = createInfo.ClassId == Class.DemonHunter && !HasPermission(RBACPermissions.SkipCheckCharacterCreationDemonHunter);
 
                     if (result1 != null && !result1.IsEmpty())
                     {
                         Team team = Player.TeamForRace(createInfo.RaceId);
-                        int freeDeathKnightSlots = WorldConfig.GetIntValue(WorldCfg.DeathKnightsPerRealm);
                         int freeDemonHunterSlots = WorldConfig.GetIntValue(WorldCfg.DemonHuntersPerRealm);
 
                         byte accRace = result1.Read<byte>(1);
-
-                        if (checkDeathKnightReqs)
-                        {
-                            byte accClass = result1.Read<byte>(2);
-                            if (accClass == (byte)Class.Deathknight)
-                            {
-                                if (freeDeathKnightSlots > 0)
-                                    --freeDeathKnightSlots;
-
-                                if (freeDeathKnightSlots == 0)
-                                {
-                                    SendCharCreate(ResponseCodes.CharCreateUniqueClassLimit);
-                                    return;
-                                }
-                            }
-
-                            if (!hasDeathKnightReqLevel)
-                            {
-                                byte accLevel = result1.Read<byte>(0);
-                                if (accLevel >= deathKnightReqLevel)
-                                    hasDeathKnightReqLevel = true;
-                            }
-                        }
 
                         if (checkDemonHunterReqs)
                         {
@@ -416,7 +372,7 @@ namespace Game
 
                         // search same race for cinematic or same class if need
                         // @todo check if cinematic already shown? (already logged in?; cinematic field)
-                        while ((skipCinematics == 1 && !haveSameRace) || createInfo.ClassId == Class.Deathknight || createInfo.ClassId == Class.DemonHunter)
+                        while ((skipCinematics == 1 && !haveSameRace) || createInfo.ClassId == Class.DemonHunter)
                         {
                             if (!result1.NextRow())
                                 break;
@@ -425,29 +381,6 @@ namespace Game
 
                             if (!haveSameRace)
                                 haveSameRace = createInfo.RaceId == (Race)accRace;
-
-                            if (checkDeathKnightReqs)
-                            {
-                                byte acc_class = result1.Read<byte>(2);
-                                if (acc_class == (byte)Class.Deathknight)
-                                {
-                                    if (freeDeathKnightSlots > 0)
-                                        --freeDeathKnightSlots;
-
-                                    if (freeDeathKnightSlots == 0)
-                                    {
-                                        SendCharCreate(ResponseCodes.CharCreateUniqueClassLimit);
-                                        return;
-                                    }
-                                }
-
-                                if (!hasDeathKnightReqLevel)
-                                {
-                                    byte acc_level = result1.Read<byte>(0);
-                                    if (acc_level >= deathKnightReqLevel)
-                                        hasDeathKnightReqLevel = true;
-                                }
-                            }
 
                             if (checkDemonHunterReqs)
                             {
@@ -474,15 +407,9 @@ namespace Game
                         }
                     }
 
-                    if (checkDeathKnightReqs && !hasDeathKnightReqLevel)
-                    {
-                        SendCharCreate(ResponseCodes.CharCreateLevelRequirement);
-                        return;
-                    }
-
                     if (checkDemonHunterReqs && !hasDemonHunterReqLevel)
                     {
-                        SendCharCreate(ResponseCodes.CharCreateLevelRequirement);
+                        SendCharCreate(ResponseCodes.CharCreateFailed);
                         return;
                     }
 
@@ -531,7 +458,7 @@ namespace Game
                     newChar.CleanupsBeforeDelete();
                 };
 
-                if (!allowTwoSideAccounts || skipCinematics == 1 || createInfo.ClassId == Class.Deathknight || createInfo.ClassId == Class.DemonHunter)
+                if (!allowTwoSideAccounts || skipCinematics == 1 || createInfo.ClassId == Class.DemonHunter)
                 {
                     finalizeCharacterCreation(new SQLResult());
                     return;
@@ -539,7 +466,7 @@ namespace Game
 
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_CREATE_INFO);
                 stmt.AddValue(0, GetAccountId());
-                stmt.AddValue(1, (skipCinematics == 1 || createInfo.ClassId == Class.Deathknight || createInfo.ClassId == Class.DemonHunter) ? 12 : 1);
+                stmt.AddValue(1, (skipCinematics == 1 || createInfo.ClassId == Class.DemonHunter) ? 12 : 1);
                 queryCallback.WithCallback(finalizeCharacterCreation).SetNextQuery(DB.Characters.AsyncQuery(stmt));
             }));
         }
