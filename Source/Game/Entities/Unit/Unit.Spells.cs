@@ -1893,6 +1893,11 @@ namespace Game.Entities
 
         void TriggerAurasProcOnEvent(ProcEventInfo eventInfo, List<Tuple<uint, AuraApplication>> aurasTriggeringProc)
         {
+            Spell triggeringSpell = eventInfo.GetProcSpell();
+            bool disableProcs = triggeringSpell && triggeringSpell.IsProcDisabled();
+            if (disableProcs)
+                SetCantProc(true);
+
             foreach (var aurAppProc in aurasTriggeringProc)
             {
                 AuraApplication aurApp = aurAppProc.Item2;
@@ -1910,6 +1915,9 @@ namespace Game.Entities
                 if (spellInfo.HasAttribute(SpellAttr3.DisableProc))
                     SetCantProc(false);
             }
+
+            if (disableProcs)
+                SetCantProc(false);
         }
 
         void SetCantProc(bool apply)

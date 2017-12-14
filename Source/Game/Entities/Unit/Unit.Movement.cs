@@ -24,6 +24,7 @@ using Game.Movement;
 using Game.Network.Packets;
 using System;
 using System.Collections.Generic;
+using Game.Spells;
 
 namespace Game.Entities
 {
@@ -650,11 +651,31 @@ namespace Game.Entities
             if (capabilities == null)
                 return null;
 
-            uint zoneId, areaId;
-            GetZoneAndAreaId(out zoneId, out areaId);
+            uint areaId = GetAreaId();
             uint ridingSkill = 5000;
+            AreaMountFlags mountFlags = 0;
+            bool isSubmerged = false;
+            bool isInWater = false;
+
             if (IsTypeId(TypeId.Player))
                 ridingSkill = ToPlayer().GetSkillValue(SkillType.Riding);
+
+            if (HasAuraType(AuraType.MountRestrictions))
+            {
+                foreach (AuraEffect auraEffect in GetAuraEffectsByType(AuraType.MountRestrictions))
+                    mountFlags |= (AreaMountFlags)auraEffect.GetMiscValue();
+            }
+            else
+            {
+                AreaTableRecord areaTable = CliDB.AreaTableStorage.LookupByKey(areaId);
+                if (areaTable != null)
+                    mountFlags = (AreaMountFlags)areaTable.MountFlags;
+            }
+
+            LiquidData liquid;
+            ZLiquidStatus liquidStatus = GetMap().getLiquidStatus(GetPositionX(), GetPositionY(), GetPositionZ(), MapConst.MapAllLiquidTypes, out liquid);
+            isSubmerged = liquidStatus.HasAnyFlag(ZLiquidStatus.UnderWater) || HasUnitMovementFlag(MovementFlag.Swimming);
+            isInWater = liquidStatus.HasAnyFlag(ZLiquidStatus.InWater | ZLiquidStatus.UnderWater);
 
             foreach (var mountTypeXCapability in capabilities)
             {
@@ -665,32 +686,50 @@ namespace Game.Entities
                 if (ridingSkill < mountCapability.RequiredRidingSkill)
                     continue;
 
-                if (HasUnitMovementFlag2(MovementFlag2.FullSpeedPitching))
+                if (!mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.IgnoreRestrictions))
                 {
-                    if (!mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.CanPitch))
+                    if (mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.Ground) && !mountFlags.HasAnyFlag(AreaMountFlags.GroundAllowed))
                         continue;
-                }
-                else if (HasUnitMovementFlag(MovementFlag.Swimming))
-                {
-                    if (!mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.CanSwim))
+                    if (mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.Flying) && !mountFlags.HasAnyFlag(AreaMountFlags.FlyingAllowed))
                         continue;
-                }
-                else if (!mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.Unk1))   // unknown flags, checked in 4.2.2 14545 client
-                {
-                    if (!mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.Unk2))
+                    if (mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.Float) && !mountFlags.HasAnyFlag(AreaMountFlags.FloatAllowed))
+                        continue;
+                    if (mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.Underwater) && !mountFlags.HasAnyFlag(AreaMountFlags.UnderwaterAllowed))
                         continue;
                 }
 
-                if (mountCapability.RequiredMap != -1 && (GetMapId()) != mountCapability.RequiredMap)
+                if (!isSubmerged)
+                {
+                    if (!isInWater)
+                    {
+                        // player is completely out of water
+                        if (!mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.Ground))
+                            continue;
+                    }
+                    else if (!mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.Underwater))
+                        continue;
+                }
+                else if (isInWater)
+                {
+                    if (!mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.Underwater))
+                        continue;
+                }
+                else if (!mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.Float))
                     continue;
 
-                if (mountCapability.RequiredArea != 0 && (mountCapability.RequiredArea != zoneId && mountCapability.RequiredArea != areaId))
+                if (mountCapability.RequiredMap != -1 &&
+                    GetMapId() != mountCapability.RequiredMap &&
+                    GetMap().GetEntry().CosmeticParentMapID != mountCapability.RequiredMap &&
+                    GetMap().GetEntry().ParentMapID != mountCapability.RequiredMap)
+                    continue;
+
+                if (mountCapability.RequiredArea != 0 && !Global.DB2Mgr.IsInArea(areaId, mountCapability.RequiredArea))
                     continue;
 
                 if (mountCapability.RequiredAura != 0 && !HasAura(mountCapability.RequiredAura))
                     continue;
 
-                if (mountCapability.RequiredSpell != 0 && (!IsTypeId(TypeId.Player) || !ToPlayer().HasSpell(mountCapability.RequiredSpell)))
+                if (mountCapability.RequiredSpell != 0 && !HasSpell(mountCapability.RequiredSpell))
                     continue;
 
                 return mountCapability;

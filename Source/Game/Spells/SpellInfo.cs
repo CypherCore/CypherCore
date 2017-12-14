@@ -597,6 +597,20 @@ namespace Game.Spells
             return !(HasAttribute(SpellAttr1.NoThreat) || HasAttribute(SpellAttr3.NoInitialAggro));
         }
 
+        public bool IsAffected(SpellFamilyNames familyName, FlagArray128 familyFlags)
+        {
+            if (familyName == 0)
+                return true;
+
+            if (familyName != SpellFamilyName)
+                return false;
+
+            if (familyFlags && !(familyFlags & SpellFamilyFlags))
+                return false;
+
+            return true;
+        }
+
         bool IsAffectedBySpellMods()
         {
             return !HasAttribute(SpellAttr3.NoDoneBonus);
@@ -608,15 +622,10 @@ namespace Game.Spells
                 return false;
 
             SpellInfo affectSpell = Global.SpellMgr.GetSpellInfo(mod.spellId);
-            // False if affect_spell == NULL or spellFamily not equal
-            if (affectSpell == null || affectSpell.SpellFamilyName != SpellFamilyName)
+            if (affectSpell == null)
                 return false;
 
-            // true
-            if (mod.mask & SpellFamilyFlags)
-                return true;
-
-            return false;
+            return IsAffected(affectSpell.SpellFamilyName, mod.mask);
         }
 
         public bool CanPierceImmuneAura(SpellInfo aura)
@@ -887,14 +896,15 @@ namespace Game.Spells
 
                     switch (effect.ApplyAuraName)
                     {
-                        case AuraType.Fly:
+                        case AuraType.ModShapeshift:
                             {
-                                var bounds = Global.SpellMgr.GetSkillLineAbilityMapBounds(Id);
-                                foreach (var skillRecord in bounds)
+                                SpellShapeshiftFormRecord spellShapeshiftForm = CliDB.SpellShapeshiftFormStorage.LookupByKey(effect.MiscValue);
+                                if (spellShapeshiftForm != null)
                                 {
-                                    if (skillRecord.SkillLine == (int)SkillType.Mounts)
-                                        if (!player.CanFlyInZone(map_id, zone_id))
-                                            return SpellCastResult.IncorrectArea;
+                                    uint mountType = spellShapeshiftForm.MountTypeID;
+                                    if (mountType != 0)
+                                        if (player.GetMountCapability(mountType) == null)
+                                            return SpellCastResult.NotHere;
                                 }
                                 break;
                             }

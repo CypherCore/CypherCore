@@ -1915,7 +1915,7 @@ namespace Game.Entities
 
                         // If container item is in a bag, add that player as an allowed looter
                         if (GetBagSlot() != 0)
-                            loot_item.allowedGUIDs.Add(GetOwner().GetGUID());
+                            loot_item.AddAllowedLooter(GetOwner());
 
                         // Finally add the LootItem to the container
                         loot.items.Add(loot_item);

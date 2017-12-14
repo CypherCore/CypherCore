@@ -7215,13 +7215,6 @@ namespace Game.Entities
 
         public bool CanTameExoticPets() { return IsGameMaster() || HasAuraType(AuraType.AllowTamePetType); }
 
-        public bool CanFlyInZone(uint mapid, uint zone)
-        {
-            // continent checked in SpellInfo.CheckLocation at cast and area update
-            uint v_map = Global.DB2Mgr.GetVirtualMapForMapAndZone(mapid, zone);
-            return v_map != 571 || HasSpell(54197); // 54197 = Cold Weather Flying
-        }
-
         void SendAttackSwingDeadTarget() { SendPacket(new AttackSwingError(AttackSwingErr.DeadTarget)); }
         void SendAttackSwingCantAttack() { SendPacket(new AttackSwingError(AttackSwingErr.CantAttack)); }
         public void SendAttackSwingNotInRange() { SendPacket(new AttackSwingError(AttackSwingErr.NotInRange)); }

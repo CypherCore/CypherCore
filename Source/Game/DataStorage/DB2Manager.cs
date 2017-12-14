@@ -485,6 +485,23 @@ namespace Game.DataStorage
             return _areaGroupMembers.LookupByKey(areaGroupId);
         }
 
+        public bool IsInArea(uint objectAreaId, uint areaId)
+        {
+            do
+            {
+                if (objectAreaId == areaId)
+                    return true;
+
+                AreaTableRecord objectArea = CliDB.AreaTableStorage.LookupByKey(objectAreaId);
+                if (objectArea == null)
+                    break;
+
+                objectAreaId = objectArea.ParentAreaID;
+            } while (objectAreaId != 0);
+
+            return false;
+        }
+
         public List<ArtifactPowerRecord> GetArtifactPowers(byte artifactId)
         {
             return _artifactPowers.LookupByKey(artifactId);

@@ -202,6 +202,7 @@ namespace Game
             SourceItemIdCount = fields.Read<byte>(15);
             RewardMailSenderEntry = fields.Read<uint>(16);
             SpecialFlags = (QuestSpecialFlags)fields.Read<byte>(17);
+            ScriptId = Global.ObjectMgr.GetScriptId(fields.Read<string>(18));
 
             if (SpecialFlags.HasAnyFlag(QuestSpecialFlags.AutoAccept))
                 Flags |= QuestFlags.AutoAccept;
@@ -524,6 +525,7 @@ namespace Game
         public uint SourceItemIdCount;
         public uint RewardMailSenderEntry;
         public QuestSpecialFlags SpecialFlags; // custom flags, not sniffed/WDB
+        public uint ScriptId;
 
         public List<int> prevQuests = new List<int>();
         public List<uint> prevChainQuests = new List<uint>();
