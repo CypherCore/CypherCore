@@ -21,6 +21,7 @@ using Framework.IO;
 using Game.Entities;
 using Game.Maps;
 using System;
+using System.Globalization;
 
 namespace Game.Chat.Commands
 {
@@ -284,7 +285,7 @@ namespace Game.Chat.Commands
 
                     if (arg_string == "posx")
                     {
-                        if (!float.TryParse(arg_3, out float arg3))
+                        if (!float.TryParse(arg_3, NumberStyles.Float, CultureInfo.InvariantCulture, out float arg3))
                             return false;
 
                         stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_X);
@@ -297,7 +298,7 @@ namespace Game.Chat.Commands
                     }
                     else if (arg_string == "posy")
                     {
-                        if (!float.TryParse(arg_3, out float arg3))
+                        if (!float.TryParse(arg_3, NumberStyles.Float, CultureInfo.InvariantCulture, out float arg3))
                             return false;
 
                         stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_Y);
@@ -310,7 +311,7 @@ namespace Game.Chat.Commands
                     }
                     else if (arg_string == "posz")
                     {
-                        if (!float.TryParse(arg_3, out float arg3))
+                        if (!float.TryParse(arg_3, NumberStyles.Float, CultureInfo.InvariantCulture, out float arg3))
                             return false;
 
                         stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_Z);
@@ -323,7 +324,7 @@ namespace Game.Chat.Commands
                     }
                     else if (arg_string == "orientation")
                     {
-                        if (!float.TryParse(arg_3, out float arg3))
+                        if (!float.TryParse(arg_3, NumberStyles.Float, CultureInfo.InvariantCulture, out float arg3))
                             return false;
 
                         stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_O);
