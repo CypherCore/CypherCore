@@ -25,7 +25,6 @@ using Game.SupportSystem;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Globalization;
 
 namespace Game.Chat.Commands
 {
@@ -157,10 +156,10 @@ namespace Game.Chat.Commands
 
             Player player = handler.GetSession().GetPlayer();
 
-            if (!float.TryParse(args.NextString(), NumberStyles.Float, CultureInfo.InvariantCulture, out float gridX))
+            if (!float.TryParse(args.NextString(), out float gridX))
                 return false;
 
-            if (!float.TryParse(args.NextString(), NumberStyles.Float, CultureInfo.InvariantCulture, out float gridY))
+            if (!float.TryParse(args.NextString(), out float gridY))
                 return false;
 
             if (!uint.TryParse(args.NextString(), out uint mapId))
@@ -403,10 +402,10 @@ namespace Game.Chat.Commands
 
             Player player = handler.GetSession().GetPlayer();
 
-            if (!float.TryParse(args.NextString(), NumberStyles.Float, CultureInfo.InvariantCulture, out float x))
+            if (!float.TryParse(args.NextString(), out float x))
                 return false;
 
-            if (!float.TryParse(args.NextString(), NumberStyles.Float, CultureInfo.InvariantCulture, out float y))
+            if (!float.TryParse(args.NextString(),out float y))
                 return false;
 
             // prevent accept wrong numeric args
@@ -469,10 +468,10 @@ namespace Game.Chat.Commands
 
             Player player = handler.GetSession().GetPlayer();
 
-            if (!float.TryParse( args.NextString(), NumberStyles.Float, CultureInfo.InvariantCulture, out float x))
+            if (!float.TryParse(args.NextString(), out float x))
                 return false;
 
-            if (!float.TryParse(args.NextString(), NumberStyles.Float, CultureInfo.InvariantCulture, out float y))
+            if (!float.TryParse(args.NextString(), out float y))
                 return false;
 
             string goZ = args.NextString();
@@ -480,13 +479,13 @@ namespace Game.Chat.Commands
             if (!uint.TryParse(args.NextString(), out uint mapId))
                 mapId = player.GetMapId();
 
-            if (!float.TryParse(args.NextString(), NumberStyles.Float, CultureInfo.InvariantCulture, out float ort))
+            if (!float.TryParse(args.NextString(), out float ort))
                 ort =  player.GetOrientation();
 
             float z;
             if (!goZ.IsEmpty())
             {
-                if (!float.TryParse(goZ, NumberStyles.Float, CultureInfo.InvariantCulture, out z))
+                if (!float.TryParse(goZ, out z))
                     return false;
 
                 if (!GridDefines.IsValidMapCoord(mapId, x, y, z))

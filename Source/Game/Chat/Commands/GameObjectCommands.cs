@@ -24,7 +24,6 @@ using Game.Entities;
 using Game.Maps;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Text;
 
 namespace Game.Chat
@@ -130,13 +129,13 @@ namespace Game.Chat
             }
             else
             {
-                if (!float.TryParse(toX, NumberStyles.Float, CultureInfo.InvariantCulture, out x))
+                if (!float.TryParse(toX, out x))
                     return false;
 
-                if (!float.TryParse(toY, NumberStyles.Float, CultureInfo.InvariantCulture, out y))
+                if (!float.TryParse(toY, out y))
                     return false;
 
-                if (!float.TryParse(toZ, NumberStyles.Float, CultureInfo.InvariantCulture, out z))
+                if (!float.TryParse(toZ, out z))
                     return false;
 
                 if (!GridDefines.IsValidMapCoord(obj.GetMapId(), x, y, z))
@@ -338,19 +337,19 @@ namespace Game.Chat
             float oz = 0.0f, oy = 0.0f, ox = 0.0f;
             if (!orientation.IsEmpty())
             {
-                if (!float.TryParse(orientation, NumberStyles.Float, CultureInfo.InvariantCulture, out oz))
+                if (!float.TryParse(orientation, out oz))
                     return false;
 
                 orientation = args.NextString();
                 if (!orientation.IsEmpty())
                 {
-                    if (!float.TryParse(orientation, NumberStyles.Float, CultureInfo.InvariantCulture, out oy))
+                    if (!float.TryParse(orientation, out oy))
                         return false;
 
                     orientation = args.NextString();
                     if (!orientation.IsEmpty())
                     {
-                        if (!float.TryParse(orientation, NumberStyles.Float, CultureInfo.InvariantCulture, out ox))
+                        if (!float.TryParse(orientation, out ox))
                             return false;
                     }
                 }

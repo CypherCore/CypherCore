@@ -28,7 +28,6 @@ using Game.Network.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 
 namespace Game.Chat
@@ -1275,7 +1274,7 @@ namespace Game.Chat
                 return false; 
             
             //0 to 1, sending -1 is instand good weather
-            if (!float.TryParse(args.NextString(), NumberStyles.Float, CultureInfo.InvariantCulture, out float grade))
+            if (!float.TryParse(args.NextString(), out float grade))
                 return false;                       
 
             Player player = handler.GetSession().GetPlayer();

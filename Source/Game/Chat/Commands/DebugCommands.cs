@@ -26,7 +26,6 @@ using Game.Maps;
 using Game.Network.Packets;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Text;
 
 namespace Game.Chat
@@ -893,7 +892,7 @@ namespace Game.Chat
             }
             else
             {
-                if (!float.TryParse(valueStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float value))
+                if (!float.TryParse(valueStr, out float value))
                     return false;
 
                 target.SetFloatValue(field, value);
