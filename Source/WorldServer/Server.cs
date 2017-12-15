@@ -22,6 +22,7 @@ using Game;
 using Game.Chat;
 using Game.Network;
 using System;
+using System.Globalization;
 using System.Threading;
 
 namespace WorldServer
@@ -71,6 +72,9 @@ namespace WorldServer
             DB.Login.Execute("UPDATE realmlist SET flag = flag & ~{0}, population = 0 WHERE id = '{1}'", (uint)RealmFlags.Offline, Global.WorldMgr.GetRealm().Id.Realm);
             Global.WorldMgr.GetRealm().PopulationLevel = 0.0f;
             Global.WorldMgr.GetRealm().Flags = Global.WorldMgr.GetRealm().Flags & ~RealmFlags.VersionMismatch;
+
+            //Set Culture
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 
             //- Launch CliRunnable thread
             if (ConfigMgr.GetDefaultValue("Console.Enable", true))
