@@ -191,8 +191,8 @@ namespace Game.Spells
             {
                 InterruptFlags = (SpellInterruptFlags)_interrupt.InterruptFlags;
                 // TODO: 6.x these flags have 2 parts
-                AuraInterruptFlags = (SpellAuraInterruptFlags)_interrupt.AuraInterruptFlags[0];
-                ChannelInterruptFlags = (SpellChannelInterruptFlags)_interrupt.ChannelInterruptFlags[0];
+                AuraInterruptFlags = _interrupt.AuraInterruptFlags;
+                ChannelInterruptFlags = _interrupt.ChannelInterruptFlags;
             }
 
             // SpellLevelsEntry
@@ -1367,7 +1367,7 @@ namespace Game.Spells
                 case SpellFamilyNames.Generic:
                     {
                         // Food / Drinks (mostly)
-                        if (AuraInterruptFlags.HasAnyFlag(SpellAuraInterruptFlags.NotSeated))
+                        if (HasAuraInterruptFlag(SpellAuraInterruptFlags.NotSeated))
                         {
                             bool food = false;
                             bool drink = false;
@@ -3051,6 +3051,13 @@ namespace Game.Spells
         public bool HasAttribute(SpellAttr13 attribute) { return Convert.ToBoolean(AttributesEx13 & attribute); }
         public bool HasAttribute(SpellCustomAttributes attribute) { return Convert.ToBoolean(AttributesCu & attribute); }
 
+        public bool HasAnyAuraInterruptFlag() { return AuraInterruptFlags.Any(flag => { return flag != 0; }); }
+        public bool HasAuraInterruptFlag(SpellAuraInterruptFlags flag) { return (AuraInterruptFlags[0] & (uint)flag) != 0; }
+        public bool HasAuraInterruptFlag(SpellAuraInterruptFlags2 flag) { return (AuraInterruptFlags[1] & (uint)flag) != 0; }
+
+        public bool HasChannelInterruptFlag(SpellChannelInterruptFlags flag) { return (ChannelInterruptFlags[0] & (uint)flag) != 0; }
+ 
+
         #region Fields
         public uint Id;
         uint CategoryId;
@@ -3091,8 +3098,8 @@ namespace Game.Spells
         public uint StartRecoveryCategory { get; set; }
         public uint StartRecoveryTime { get; set; }
         public SpellInterruptFlags InterruptFlags { get; set; }
-        public SpellAuraInterruptFlags AuraInterruptFlags { get; set; }
-        public SpellChannelInterruptFlags ChannelInterruptFlags { get; set; }
+        public uint[] AuraInterruptFlags { get; set; } = new uint[2];
+        public uint[] ChannelInterruptFlags { get; set; } = new uint[2];
         public ProcFlags ProcFlags { get; set; }
         public uint ProcChance { get; set; }
         public uint ProcCharges { get; set; }

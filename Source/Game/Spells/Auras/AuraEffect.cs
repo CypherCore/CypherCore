@@ -3058,7 +3058,7 @@ namespace Game.Spells
 
             // when removing flag aura, handle flag drop
             Player player = target.ToPlayer();
-            if (!apply && player != null && (GetSpellInfo().AuraInterruptFlags.HasAnyFlag(SpellAuraInterruptFlags.ImmuneOrLostSelection)))
+            if (!apply && player != null && GetSpellInfo().HasAuraInterruptFlag(SpellAuraInterruptFlags.ImmuneOrLostSelection))
             {
                 if (player.InBattleground())
                 {

@@ -249,7 +249,7 @@ namespace Game.AI
                             float range = spellInfo.GetMaxRange(false);
 
                             DefaultTargetSelector targetSelector = new DefaultTargetSelector(me, range, playerOnly, -(int)spellId);
-                            if (!spellInfo.AuraInterruptFlags.HasAnyFlag(SpellAuraInterruptFlags.NotVictim)
+                            if (!spellInfo.HasAuraInterruptFlag(SpellAuraInterruptFlags.NotVictim)
                             && targetSelector.Check(me.GetVictim()))
                                 target = me.GetVictim();
                             else

@@ -2849,7 +2849,7 @@ namespace Game.Spells
                         || (spell.getState() == SpellState.Preparing && spell.GetCastTime() > 0.0f))
                         && (curSpellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence))
                         && ((i == CurrentSpellTypes.Generic && curSpellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.Interrupt))
-                        || (i == CurrentSpellTypes.Channeled && curSpellInfo.ChannelInterruptFlags.HasAnyFlag(SpellChannelInterruptFlags.Interrupt))))
+                        || (i == CurrentSpellTypes.Channeled && curSpellInfo.HasChannelInterruptFlag(SpellChannelInterruptFlags.Interrupt))))
                     {
                         if (m_originalCaster != null)
                         {

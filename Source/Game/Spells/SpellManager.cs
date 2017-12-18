@@ -2389,7 +2389,7 @@ namespace Game.Entities
                         spellInfo.GetEffect(0).BasePoints = 0;// force seat 0, vehicle doesn't have the required seat flags for "no seat specified (-1)"
                         break;
                     case 61719: // Easter Lay Noblegarden Egg Aura - Interrupt flags copied from aura which this aura is linked with
-                        spellInfo.AuraInterruptFlags = SpellAuraInterruptFlags.Hitbyspell | SpellAuraInterruptFlags.TakeDamage;
+                        spellInfo.AuraInterruptFlags[0] = (uint)(SpellAuraInterruptFlags.Hitbyspell | SpellAuraInterruptFlags.TakeDamage);
                         break;
                     case 71838: // Drain Life - Bryntroll Normal
                     case 71839: // Drain Life - Bryntroll Heroic
@@ -2488,7 +2488,7 @@ namespace Game.Entities
                         break;
                     case 63414: // Spinning Up (Mimiron)
                         spellInfo.GetEffect(0).TargetB = new SpellImplicitTargetInfo(Targets.UnitCaster);
-                        spellInfo.ChannelInterruptFlags = 0;
+                        spellInfo.ChannelInterruptFlags.Initialize();
                         break;
                     case 63036: // Rocket Strike (Mimiron)
                         spellInfo.Speed = 0;
@@ -2698,7 +2698,7 @@ namespace Game.Entities
                         spellInfo.GetEffect(0).MaxRadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards45);
                         break;
                     case 24314: // Threatening Gaze
-                        spellInfo.AuraInterruptFlags |= SpellAuraInterruptFlags.Cast | SpellAuraInterruptFlags.Move | SpellAuraInterruptFlags.Jump;
+                        spellInfo.AuraInterruptFlags[0] |= (uint)(SpellAuraInterruptFlags.Cast | SpellAuraInterruptFlags.Move | SpellAuraInterruptFlags.Jump);
                         break;
                     case 5420: // Tree of Life (Passive)
                         spellInfo.Stances = 1 << ((int)ShapeShiftForm.TreeOfLife - 1);
@@ -2722,10 +2722,51 @@ namespace Game.Entities
                         break;
                     // ENDOF ISLE OF CONQUEST SPELLS
                     //
+                    // FIRELANDS SPELLS
+                    // Torment Searcher
+                    case 99253:
+                        spellInfo.GetEffect(0).MaxRadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards15);
+                        break;
+                    // Torment Damage
+                    case 99256:
+                        spellInfo.Attributes |= SpellAttr0.Negative1;
+                        break;
+                    // Blaze of Glory
+                    case 99252:
+                        spellInfo.AuraInterruptFlags[0] |= (uint)SpellAuraInterruptFlags.ChangeMap;
+                        break;
+                    // ENDOF FIRELANDS SPELLS
                     case 102445: // Summon Master Li Fei
                         spellInfo.GetEffect(0).TargetA = new SpellImplicitTargetInfo(Targets.DestDb);
                         break;
                 }
+            }
+
+            foreach (var spellInfo in mSpellInfoMap.Values)
+            {
+                foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(Difficulty.None))
+                {
+                    if (effect == null)
+                        continue;
+                    switch (effect.Effect)
+                    {
+                        case SpellEffectName.Charge:
+                        case SpellEffectName.ChargeDest:
+                        case SpellEffectName.Jump:
+                        case SpellEffectName.JumpDest:
+                        case SpellEffectName.LeapBack:
+                            if (spellInfo.Speed == 0 && spellInfo.SpellFamilyName == 0)
+                                spellInfo.Speed = MotionMaster.SPEED_CHARGE;
+                            break;
+                    }
+
+                    if (effect.TargetA.GetSelectionCategory() == SpellTargetSelectionCategories.Cone || effect.TargetB.GetSelectionCategory() == SpellTargetSelectionCategories.Cone)
+                        if (MathFunctions.fuzzyEq(spellInfo.ConeAngle, 0.0f))
+                            spellInfo.ConeAngle = 90.0f;
+                }
+
+                if (spellInfo.ActiveIconFileDataId == 135754)  // flight
+                    spellInfo.Attributes |= SpellAttr0.Passive;
             }
 
             SummonPropertiesRecord properties = CliDB.SummonPropertiesStorage.LookupByKey(121);

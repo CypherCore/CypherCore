@@ -1875,10 +1875,10 @@ namespace Game.Entities
             AuraApplication aurApp = new AuraApplication(this, caster, aura, effMask);
             m_appliedAuras.Add(aurId, aurApp);
 
-            if (aurSpellInfo.AuraInterruptFlags != 0)
+            if (aurSpellInfo.HasAnyAuraInterruptFlag())
             {
                 m_interruptableAuras.Add(aurApp);
-                AddInterruptMask((uint)aurSpellInfo.AuraInterruptFlags);
+                AddInterruptMask(aurSpellInfo.AuraInterruptFlags);
             }
 
             AuraStateType aState = aura.GetSpellInfo().GetAuraState();
@@ -1888,7 +1888,11 @@ namespace Game.Entities
             aura._ApplyForTarget(this, caster, aurApp);
             return aurApp;
         }
-        public void AddInterruptMask(uint mask) { m_interruptMask |= mask; }
+        public void AddInterruptMask(uint[] mask)
+        {
+            for (int i = 0; i < m_interruptMask.Length; ++i)
+                m_interruptMask[i] |= mask[i];
+        }
 
         void _UpdateAutoRepeatSpell()
         {

@@ -2987,13 +2987,13 @@ namespace Game.Spells
                     m_caster.ModSpellDurationTime(m_spellInfo, ref duration, this);
 
                     m_spellState = SpellState.Casting;
-                    m_caster.AddInterruptMask((uint)m_spellInfo.ChannelInterruptFlags);
+                    m_caster.AddInterruptMask(m_spellInfo.ChannelInterruptFlags);
                     SendChannelStart((uint)duration);
                 }
                 else if (duration == -1)
                 {
                     m_spellState = SpellState.Casting;
-                    m_caster.AddInterruptMask((uint)m_spellInfo.ChannelInterruptFlags);
+                    m_caster.AddInterruptMask(m_spellInfo.ChannelInterruptFlags);
                     SendChannelStart((uint)duration);
                 }
             }
@@ -4484,7 +4484,7 @@ namespace Game.Spells
                 // skip stuck spell to allow use it in falling case and apply spell limitations at movement
                 SpellEffectInfo effect = GetEffect(0);
                 if ((!m_caster.HasUnitMovementFlag(MovementFlag.FallingFar) || (effect != null && effect.Effect != SpellEffectName.Stuck)) &&
-                    (IsAutoRepeat() || (m_spellInfo.AuraInterruptFlags & SpellAuraInterruptFlags.NotSeated) != 0))
+                    (IsAutoRepeat() || m_spellInfo.HasAuraInterruptFlag(SpellAuraInterruptFlags.NotSeated)))
                     return SpellCastResult.Moving;
             }
 

@@ -86,7 +86,7 @@ namespace Game.Entities
         protected Dictionary<CurrentSpellTypes, Spell> m_currentSpells = new Dictionary<CurrentSpellTypes, Spell>((int)CurrentSpellTypes.Max);
         Dictionary<SpellValueMod, int> CustomSpellValueMod = new Dictionary<SpellValueMod, int>();
         MultiMap<SpellImmunity, SpellImmune> m_spellImmune = new MultiMap<SpellImmunity, SpellImmune>();
-        uint m_interruptMask;
+        uint[] m_interruptMask = new uint[2];
         protected int m_procDeep;
         bool m_AutoRepeatFirstCast;
         SpellHistory _spellHistory;

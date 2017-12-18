@@ -1083,12 +1083,8 @@ namespace Game.Entities
                         }
                         Spell spell1 = victim.GetCurrentSpell(CurrentSpellTypes.Channeled);
                         if (spell1 != null)
-                            if (spell1.getState() == SpellState.Casting)
-                            {
-                                var channelInterruptFlags = spell1.m_spellInfo.ChannelInterruptFlags;
-                                if (((channelInterruptFlags & SpellChannelInterruptFlags.Delay) != 0) && (damagetype != DamageEffectType.DOT))
-                                    spell1.DelayedChannel();
-                            }
+                            if (spell1.getState() == SpellState.Casting && spell1.m_spellInfo.HasChannelInterruptFlag(SpellChannelInterruptFlags.Delay) && damagetype != DamageEffectType.DOT)
+                                spell1.DelayedChannel();
                     }
                 }
                 // last damage from duel opponent

@@ -141,6 +141,11 @@ namespace Framework.Constants
         NotVictim = (Hitbyspell | TakeDamage | DirectDamage)
     }
 
+    public enum SpellAuraInterruptFlags2
+    {
+
+    }
+
     // Enum with EffectRadiusIndex and their actual radius
     public enum EffectRadiusIndex
     {
