@@ -134,25 +134,6 @@ namespace Scripts.Spells.Hunter
         }
     }
 
-    // 781 - Disengage
-    [Script]
-    class spell_hun_disengage : SpellScript
-    {
-        SpellCastResult CheckCast()
-        {
-            Unit caster = GetCaster();
-            if (caster.IsTypeId(TypeId.Player) && !caster.IsInCombat())
-                return SpellCastResult.CantDoThatRightNow;
-
-            return SpellCastResult.SpellCastOk;
-        }
-
-        public override void Register()
-        {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
-        }
-    }
-
     [Script] // 109304 - Exhilaration
     class spell_hun_exhilaration : SpellScript
     {
