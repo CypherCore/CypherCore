@@ -47,6 +47,8 @@ namespace Scripts.Spells.Paladin
         public const uint EnduringJudgement = 40472;
         public const uint EyeForAnEyeRank1 = 9799;
         public const uint EyeForAnEyeDamage = 25997;
+        public const uint FinalStand = 204077;
+        public const uint FinalStandEffect = 204079;
         public const uint Forbearance = 25771;
         public const uint HandOfSacrifice = 6940;
         public const uint HolyMending = 64891;
@@ -154,6 +156,42 @@ namespace Scripts.Spells.Paladin
         }
     }
 
+    // 1022 - Blessing of Protection
+    [Script] // 204018 - Blessing of Spellwarding
+    class spell_pal_blessing_of_protection : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.Forbearance) //, SPELL_PALADIN_IMMUNE_SHIELD_MARKER) // uncomment when we have serverside only spells
+                && spellInfo.ExcludeTargetAuraSpell == SpellIds.ImmuneShieldMarker;
+        }
+
+        SpellCastResult CheckForbearance()
+        {
+            Unit target = GetExplTargetUnit();
+            if (!target || target.HasAura(SpellIds.Forbearance))
+                return SpellCastResult.TargetAurastate;
+
+            return SpellCastResult.SpellCastOk;
+        }
+
+        void TriggerForbearance()
+        {
+            Unit target = GetHitUnit();
+            if (target)
+            {
+                GetCaster().CastSpell(target, SpellIds.Forbearance, true);
+                GetCaster().CastSpell(target, SpellIds.ImmuneShieldMarker, true);
+            }
+        }
+
+        public override void Register()
+        {
+            OnCheckCast.Add(new CheckCastHandler(CheckForbearance));
+            AfterHit.Add(new HitHandler(TriggerForbearance));
+        }
+    }
+
     [Script] // 115750 - Blinding Light
     class spell_pal_blinding_light : SpellScript
     {
@@ -172,6 +210,44 @@ namespace Scripts.Spells.Paladin
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.ApplyAura));
+        }
+    }
+
+    [Script] // 642 - Divine Shield
+    class spell_pal_divine_shield : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.FinalStand, SpellIds.FinalStandEffect, SpellIds.Forbearance) //, SPELL_PALADIN_IMMUNE_SHIELD_MARKER // uncomment when we have serverside only spells
+                    && spellInfo.ExcludeCasterAuraSpell == SpellIds.ImmuneShieldMarker;
+        }
+
+        SpellCastResult CheckForbearance()
+        {
+            if (GetCaster().HasAura(SpellIds.Forbearance))
+                return SpellCastResult.TargetAurastate;
+
+            return SpellCastResult.SpellCastOk;
+        }
+
+        void HandleFinalStand()
+        {
+            if (GetCaster().HasAura(SpellIds.FinalStand))
+                GetCaster().CastSpell((Unit)null, SpellIds.FinalStandEffect, true);
+        }
+
+        void TriggerForbearance()
+        {
+            Unit caster = GetCaster();
+            caster.CastSpell(caster, SpellIds.Forbearance, true);
+            caster.CastSpell(caster, SpellIds.ImmuneShieldMarker, true);
+        }
+
+        public override void Register()
+        {
+            OnCheckCast.Add(new CheckCastHandler(CheckForbearance));
+            AfterCast.Add(new CastHandler(HandleFinalStand));
+            AfterCast.Add(new CastHandler(TriggerForbearance));
         }
     }
 
@@ -541,28 +617,22 @@ namespace Scripts.Spells.Paladin
     [Script]
     class spell_pal_lay_on_hands : SpellScript
     {
-        public override bool Validate(SpellInfo spell)
+        public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.Forbearance, SpellIds.ImmuneShieldMarker);
+            return ValidateSpellInfo(SpellIds.Forbearance)//, SpellIds.ImmuneShieldMarker);
+                && spellInfo.ExcludeTargetAuraSpell == SpellIds.ImmuneShieldMarker;
         }
 
-        SpellCastResult CheckCast()
+        SpellCastResult CheckForbearance()
         {
-            Unit caster = GetCaster();
             Unit target = GetExplTargetUnit();
-            if (target)
-            {
-                if (caster == target)
-                {
-                    if (target.HasAura(SpellIds.Forbearance) || target.HasAura(SpellIds.ImmuneShieldMarker))
-                        return SpellCastResult.TargetAurastate;
-                }
-            }
+            if (!target || target.HasAura(SpellIds.Forbearance))
+                return SpellCastResult.TargetAurastate;
 
             return SpellCastResult.SpellCastOk;
         }
 
-        void HandleScript()
+        void TriggerForbearance()
         {
             Unit caster = GetCaster();
             if (caster == GetHitUnit())
@@ -574,8 +644,8 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
-            AfterHit.Add(new HitHandler(HandleScript));
+            OnCheckCast.Add(new CheckCastHandler(CheckForbearance));
+            AfterHit.Add(new HitHandler(TriggerForbearance));
         }
     }
 

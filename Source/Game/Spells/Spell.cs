@@ -2291,20 +2291,6 @@ namespace Game.Spells
             /// @todo move this code to scripts
             if (m_preCastSpell != 0)
             {
-                // Paladin immunity shields
-                if (m_preCastSpell == 61988)
-                {
-                    // Cast Forbearance
-                    m_caster.CastSpell(unit, 25771, true);
-                    // Cast Avenging Wrath Marker
-                    unit.CastSpell(unit, 61987, true);
-                }
-
-                // Avenging Wrath
-                if (m_preCastSpell == 61987)
-                    // Cast the serverside immunity shield marker
-                    m_caster.CastSpell(unit, 61988, true);
-
                 if (Global.SpellMgr.GetSpellInfo(m_preCastSpell) != null)
                     // Blizz seems to just apply aura without bothering to cast
                     m_caster.AddAura(m_preCastSpell, unit);

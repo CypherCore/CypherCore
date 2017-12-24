@@ -1263,29 +1263,6 @@ namespace Game.Spells
             {
                 switch (GetSpellInfo().SpellFamilyName)
                 {
-                    case SpellFamilyNames.Generic:
-                        switch (GetId())
-                        {
-                            case 61987: // Avenging Wrath
-                                // Remove the immunity shield marker on Avenging Wrath removal if Forbearance is not present
-                                if (target.HasAura(61988) && !target.HasAura(25771))
-                                    target.RemoveAura(61988);
-                                break;
-                            case 72368: // Shared Suffering
-                            case 72369:
-                                if (caster != null)
-                                {
-                                    AuraEffect aurEff = GetEffect(0);
-                                    if (aurEff != null)
-                                    {
-                                        int remainingDamage = (int)(aurEff.GetAmount() * (aurEff.GetTotalTicks() - aurEff.GetTickNumber()));
-                                        if (remainingDamage > 0)
-                                            caster.CastCustomSpell(caster, 72373, 0, remainingDamage, 0, true);
-                                    }
-                                }
-                                break;
-                        }
-                        break;
                     case SpellFamilyNames.Mage:
                         switch (GetId())
                         {
@@ -1338,11 +1315,6 @@ namespace Game.Spells
                         // Remove Vanish on stealth remove
                         if (GetId() == 1784)
                             target.RemoveAurasWithFamily(SpellFamilyNames.Rogue, new FlagArray128(0x0000800, 0, 0), target.GetGUID());
-                        break;
-                    case SpellFamilyNames.Paladin:
-                        // Remove the immunity shield marker on Forbearance removal if AW marker is not present
-                        if (GetId() == 25771 && target.HasAura(61988) && !target.HasAura(61987))
-                            target.RemoveAura(61988);
                         break;
                     case SpellFamilyNames.Hunter:
                         // Glyph of Freezing Trap
