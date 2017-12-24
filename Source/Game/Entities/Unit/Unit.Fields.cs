@@ -107,7 +107,7 @@ namespace Game.Entities
         uint m_removedAurasCount;
 
         //General  
-        Array<DiminishingReturn> m_Diminishing = new Array<DiminishingReturn>((int)DiminishingGroup.Max);
+        DiminishingReturn[] m_Diminishing = new DiminishingReturn[(int)DiminishingGroup.Max];
         protected List<GameObject> m_gameObj = new List<GameObject>();
         List<AreaTrigger> m_areaTrigger = new List<AreaTrigger>();
         protected List<DynamicObject> m_dynObj = new List<DynamicObject>();
@@ -140,6 +140,7 @@ namespace Game.Entities
 
     public class DiminishingReturn
     {
+        public DiminishingReturn() { }
         public DiminishingReturn(uint hitTime, DiminishingLevels hitCount)
         {
             Stack = 0;

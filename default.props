@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputPath>../../Build/$(Configuration)/$(Platform)</OutputPath>
-    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
     <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>False</AppendRuntimeIdentifierToOutputPath>
     <Platforms>win-x64;linux-x64;mac-x64</Platforms>

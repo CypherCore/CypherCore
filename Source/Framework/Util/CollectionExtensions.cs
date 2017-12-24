@@ -162,6 +162,11 @@ namespace System.Collections.Generic
             array.CopyTo(blockValues, 0);
             return blockValues;
         }
+
+        public static void Clear(this Array array)
+        {
+            Array.Clear(array, 0, array.Length);
+        }
     }
 
     public interface ICheck<T>

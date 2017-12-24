@@ -215,7 +215,7 @@ namespace Game
                 SQLResult result = DB.World.Query("SELECT eventEntry, UNIX_TIMESTAMP(start_time), UNIX_TIMESTAMP(end_time), occurence, length, holiday, description, world_event, announce FROM game_event");
                 if (result.IsEmpty())
                 {
-                    mGameEvent.Initialize();
+                    mGameEvent.Clear();
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 game events. DB table `game_event` is empty.");
                     return;
                 }

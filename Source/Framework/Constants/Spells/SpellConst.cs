@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+using System;
 
 namespace Framework.Constants
 {
@@ -2131,6 +2132,8 @@ namespace Framework.Constants
         Finish = 0x4,
         MaskAll = Cast | Hit | Finish
     }
+
+    [Flags]
     public enum ProcFlagsHit
     {
         None = 0x0, // No Value - Proc_Hit_Normal | Proc_Hit_Critical For Taken Proc Type, Proc_Hit_Normal | Proc_Hit_Critical | Proc_Hit_Absorb For Done

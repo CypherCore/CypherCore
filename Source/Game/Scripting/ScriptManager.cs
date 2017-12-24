@@ -70,7 +70,7 @@ namespace Game.Scripting
                 return;
             }
 
-            Assembly assembly = Assembly.LoadFile(Path.GetFullPath("Scripts.dll"));
+            Assembly assembly = Assembly.LoadFile(AppContext.BaseDirectory + "Scripts.dll");
             if (assembly == null)
             {
                 Log.outError(LogFilter.ServerLoading, "Error Loading Scripts.dll, Only Core Scripts are loaded.");

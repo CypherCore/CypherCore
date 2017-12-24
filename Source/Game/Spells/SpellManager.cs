@@ -2488,7 +2488,7 @@ namespace Game.Entities
                         break;
                     case 63414: // Spinning Up (Mimiron)
                         spellInfo.GetEffect(0).TargetB = new SpellImplicitTargetInfo(Targets.UnitCaster);
-                        spellInfo.ChannelInterruptFlags.Initialize();
+                        spellInfo.ChannelInterruptFlags.Clear();
                         break;
                     case 63036: // Rocket Strike (Mimiron)
                         spellInfo.Speed = 0;

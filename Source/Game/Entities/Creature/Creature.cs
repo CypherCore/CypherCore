@@ -1559,10 +1559,10 @@ namespace Game.Entities
             // This makes sure that creatures such as bosses wont have a bigger aggro range than the rest of the npc's
             // The following code is used for blizzlike behavior such as skipable bosses (e.g. Commander Springvale at level 85)
             if (creatureLevel > expansionMaxLevel)
-                aggroRadius += expansionMaxLevel - playerLevel;
+                aggroRadius += (float)expansionMaxLevel - (float)playerLevel;
             // + - 1 yard for each level difference between player and creature
             else
-                aggroRadius += creatureLevel - playerLevel;
+                aggroRadius += (float)creatureLevel - (float)playerLevel;
 
             // Make sure that we wont go over the total range limits
             if (aggroRadius > maxRadius)

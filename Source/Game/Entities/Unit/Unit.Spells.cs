@@ -2811,6 +2811,8 @@ namespace Game.Entities
         {
             // Checking for existing in the table
             DiminishingReturn diminish = m_Diminishing[(int)group];
+            if (diminish == null)
+                diminish = new DiminishingReturn();
 
             if (apply)
                 ++diminish.Stack;
@@ -2891,7 +2893,7 @@ namespace Game.Entities
         }
         public void UpdateInterruptMask()
         {
-            m_interruptMask.Initialize();
+            m_interruptMask.Clear();
             foreach (AuraApplication aurApp in m_interruptableAuras)
             {
                 for (var i = 0; i < m_interruptMask.Length; ++i)

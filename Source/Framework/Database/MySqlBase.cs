@@ -364,7 +364,10 @@ namespace Framework.Database
         {
             MySqlErrorCode code = (MySqlErrorCode)ex.Number;
             if (ex.InnerException != null)
-                code = (MySqlErrorCode)((MySqlException)ex.InnerException).Number;
+            {
+                if (ex.InnerException is MySqlException)
+                    code = (MySqlErrorCode)((MySqlException)ex.InnerException).Number;
+            }
 
             switch (code)
             {
