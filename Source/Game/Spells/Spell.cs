@@ -2287,15 +2287,6 @@ namespace Game.Spells
 
         void DoTriggersOnSpellHit(Unit unit, uint effMask)
         {
-            // Apply additional spell effects to target
-            /// @todo move this code to scripts
-            if (m_preCastSpell != 0)
-            {
-                if (Global.SpellMgr.GetSpellInfo(m_preCastSpell) != null)
-                    // Blizz seems to just apply aura without bothering to cast
-                    m_caster.AddAura(m_preCastSpell, unit);
-            }
-
             // handle SPELL_AURA_ADD_TARGET_TRIGGER auras
             // this is executed after spell proc spells on target hit
             // spells are triggered for each hit spell target
@@ -2307,7 +2298,7 @@ namespace Game.Spells
                 {
                     if (CanExecuteTriggersOnHit(effMask, hit.triggeredByAura) && RandomHelper.randChance(hit.chance))
                     {
-                        m_caster.CastSpell(unit, hit.triggeredSpell, true);
+                        m_caster.CastSpell(unit, hit.triggeredSpell, TriggerCastFlags.FullMask);
                         Log.outDebug(LogFilter.Spells, "Spell {0} triggered spell {1} by SPELL_AURA_ADD_TARGET_TRIGGER aura", m_spellInfo.Id, hit.triggeredSpell.Id);
 
                         // SPELL_AURA_ADD_TARGET_TRIGGER auras shouldn't trigger auras without duration
@@ -6938,59 +6929,29 @@ namespace Game.Spells
 
         void PrepareTriggersExecutedOnHit()
         {
-            // @todo move this to scripts
-            if (m_spellInfo.SpellFamilyName != 0)
-            {
-                SpellInfo excludeCasterSpellInfo = Global.SpellMgr.GetSpellInfo(m_spellInfo.ExcludeCasterAuraSpell);
-                if (excludeCasterSpellInfo != null && !excludeCasterSpellInfo.IsPositive())
-                    m_preCastSpell = m_spellInfo.ExcludeCasterAuraSpell;
-                SpellInfo excludeTargetSpellInfo = Global.SpellMgr.GetSpellInfo(m_spellInfo.ExcludeTargetAuraSpell);
-                if (excludeTargetSpellInfo != null && !excludeTargetSpellInfo.IsPositive())
-                    m_preCastSpell = m_spellInfo.ExcludeTargetAuraSpell;
-            }
-
-            // @todo move this to scripts
-            switch (m_spellInfo.SpellFamilyName)
-            {
-                case SpellFamilyNames.Mage:
-                    {
-                        // Permafrost
-                        if (m_spellInfo.SpellFamilyFlags[1].HasAnyFlag(0x00001000u) || m_spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x00100220u))
-                            m_preCastSpell = 68391;
-                        break;
-                    }
-            }
-
             // handle SPELL_AURA_ADD_TARGET_TRIGGER auras:
             // save auras which were present on spell caster on cast, to prevent triggered auras from affecting caster
             // and to correctly calculate proc chance when combopoints are present
             var targetTriggers = m_caster.GetAuraEffectsByType(AuraType.AddTargetTrigger);
-            foreach (var eff in targetTriggers)
+            foreach (var aurEff in targetTriggers)
             {
-                if (!eff.IsAffectingSpell(m_spellInfo))
+                if (!aurEff.IsAffectingSpell(m_spellInfo))
                     continue;
 
-                SpellInfo auraSpellInfo = eff.GetSpellInfo();
-                byte auraSpellIdx = eff.GetEffIndex();
-                SpellEffectInfo auraEffect = auraSpellInfo.GetEffect(m_caster.GetMap().GetDifficultyID(), auraSpellIdx);
-                if (auraEffect != null)
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(aurEff.GetSpellEffectInfo().TriggerSpell);
+                if (spellInfo != null)
                 {
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(auraEffect.TriggerSpell);
-                    if (spellInfo != null)
-                    {
-                        // calculate the chance using spell base amount, because aura amount is not updated on combo-points change
-                        // this possibly needs fixing
-                        int auraBaseAmount = eff.GetBaseAmount();
-                        // proc chance is stored in effect amount
-                        int chance = m_caster.CalculateSpellDamage(null, auraSpellInfo, auraSpellIdx, auraBaseAmount);
-                        // build trigger and add to the list
-                        HitTriggerSpell spellTriggerInfo = new HitTriggerSpell();
-                        spellTriggerInfo.triggeredSpell = spellInfo;
-                        spellTriggerInfo.triggeredByAura = auraSpellInfo;
-                        spellTriggerInfo.chance = chance * eff.GetBase().GetStackAmount();
-
-                        m_hitTriggerSpells.Add(spellTriggerInfo);
-                    }
+                    // calculate the chance using spell base amount, because aura amount is not updated on combo-points change
+                    // this possibly needs fixing
+                    int auraBaseAmount = aurEff.GetBaseAmount();
+                    // proc chance is stored in effect amount
+                    int chance = m_caster.CalculateSpellDamage(null, aurEff.GetSpellInfo(), aurEff.GetEffIndex(), auraBaseAmount);
+                    // build trigger and add to the list
+                    HitTriggerSpell spellTriggerInfo;
+                    spellTriggerInfo.triggeredSpell = spellInfo;
+                    spellTriggerInfo.triggeredByAura = aurEff.GetSpellInfo();
+                    spellTriggerInfo.chance = chance * aurEff.GetBase().GetStackAmount();
+                    m_hitTriggerSpells.Add(spellTriggerInfo);
                 }
             }
         }
@@ -7220,7 +7181,6 @@ namespace Game.Spells
         public SpellCastFlagsEx m_castFlagsEx;
         public SpellMisc m_misc;
         public uint m_SpellVisual;
-        public uint m_preCastSpell;
         public SpellCastTargets m_targets;
         public sbyte m_comboPointGain;
         public SpellCustomErrors m_customError;

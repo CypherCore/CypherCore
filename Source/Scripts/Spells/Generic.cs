@@ -2542,6 +2542,48 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script]
+    class spell_gen_trigger_exclude_caster_aura_spell_SpellScript : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(spellInfo.ExcludeCasterAuraSpell);
+        }
+
+        void HandleTrigger()
+        {
+            // Blizz seems to just apply aura without bothering to cast
+            GetCaster().AddAura(GetSpellInfo().ExcludeCasterAuraSpell, GetCaster());
+        }
+
+        public override void Register()
+        {
+            AfterCast.Add(new CastHandler(HandleTrigger));
+        }
+    }
+
+    [Script]
+    class spell_gen_trigger_exclude_target_aura_spell_SpellScript : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(spellInfo.ExcludeTargetAuraSpell);
+        }
+
+        void HandleTrigger()
+        {
+            Unit target = GetHitUnit();
+            if (target)
+                // Blizz seems to just apply aura without bothering to cast
+                GetCaster().AddAura(GetSpellInfo().ExcludeTargetAuraSpell, target);
+        }
+
+        public override void Register()
+        {
+            AfterHit.Add(new HitHandler(HandleTrigger));
+        }
+    }
+
     [Script("spell_pvp_trinket_shared_cd", SpellIds.WillOfTheForsakenCooldownTrigger)]
     [Script("spell_wotf_shared_cd", SpellIds.WillOfTheForsakenCooldownTriggerWotf)]
     class spell_pvp_trinket_wotf_shared_cd : SpellScript
