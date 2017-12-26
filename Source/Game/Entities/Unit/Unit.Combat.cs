@@ -858,6 +858,12 @@ namespace Game.Entities
         }
         public uint DealDamage(Unit victim, uint damage, CleanDamage cleanDamage = null, DamageEffectType damagetype = DamageEffectType.Direct, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal, SpellInfo spellProto = null, bool durabilityLoss = true)
         {
+            if (victim.IsImmunedToDamage(spellProto))
+            {
+                SendSpellDamageImmune(victim, spellProto.Id, false);
+                return 0;
+            }
+
             if (victim.IsAIEnabled)
                 victim.GetAI().DamageTaken(this, ref damage);
 

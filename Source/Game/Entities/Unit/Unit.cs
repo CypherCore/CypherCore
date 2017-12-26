@@ -54,6 +54,9 @@ namespace Game.Entities
             m_modAttackSpeedPct = new float[] { 1.0f, 1.0f, 1.0f };
             m_deathState = DeathState.Alive;
 
+            for (byte i = 0; i < (int)SpellImmunity.Max; ++i)
+                m_spellImmune[i] = new MultiMap<uint, uint>();
+
             for (byte i = 0; i < (int)UnitMods.End; ++i)
                 m_auraModifiersGroup[i] = new float[] { 0.0f, 100.0f, 1.0f, 0.0f, 1.0f };
 

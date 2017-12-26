@@ -85,7 +85,7 @@ namespace Game.Entities
         //Spells 
         protected Dictionary<CurrentSpellTypes, Spell> m_currentSpells = new Dictionary<CurrentSpellTypes, Spell>((int)CurrentSpellTypes.Max);
         Dictionary<SpellValueMod, int> CustomSpellValueMod = new Dictionary<SpellValueMod, int>();
-        MultiMap<SpellImmunity, SpellImmune> m_spellImmune = new MultiMap<SpellImmunity, SpellImmune>();
+        MultiMap<uint, uint>[] m_spellImmune = new MultiMap<uint, uint>[(int)SpellImmunity.Max];
         uint[] m_interruptMask = new uint[2];
         protected int m_procDeep;
         bool m_AutoRepeatFirstCast;
@@ -130,12 +130,6 @@ namespace Game.Entities
         ushort _aiAnimKitId;
         ushort _movementAnimKitId;
         ushort _meleeAnimKitId;
-    }
-
-    public struct SpellImmune
-    {
-        public uint spellType;
-        public uint spellId;
     }
 
     public class DiminishingReturn

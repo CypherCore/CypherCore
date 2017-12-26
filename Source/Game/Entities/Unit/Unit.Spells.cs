@@ -794,20 +794,20 @@ namespace Game.Entities
         //   Parry
         // For spells
         //   Resist
-        public SpellMissInfo SpellHitResult(Unit victim, SpellInfo spell, bool CanReflect)
+        public SpellMissInfo SpellHitResult(Unit victim, SpellInfo spellInfo, bool CanReflect)
         {
+            if (spellInfo.HasAttribute(SpellAttr3.IgnoreHitResult))
+                return SpellMissInfo.None;
+
             // Check for immune
-            if (victim.IsImmunedToSpell(spell))
+            if (victim.IsImmunedToSpell(spellInfo))
                 return SpellMissInfo.Immune;
 
             // All positive spells can`t miss
             // @todo client not show miss log for this spells - so need find info for this in dbc and use it!
-            if (spell.IsPositive()
+            if (spellInfo.IsPositive()
                 && (!IsHostileTo(victim)))  // prevent from affecting enemy by "positive" spell
                 return SpellMissInfo.None;
-            // Check for immune
-            if (victim.IsImmunedToDamage(spell))
-                return SpellMissInfo.Immune;
 
             if (this == victim)
                 return SpellMissInfo.None;
@@ -822,22 +822,22 @@ namespace Game.Entities
                 int reflectchance = victim.GetTotalAuraModifier(AuraType.ReflectSpells);
                 var mReflectSpellsSchool = victim.GetAuraEffectsByType(AuraType.ReflectSpellsSchool);
                 foreach (var eff in mReflectSpellsSchool)
-                    if (Convert.ToBoolean(eff.GetMiscValue() & (int)spell.GetSchoolMask()))
+                    if (Convert.ToBoolean(eff.GetMiscValue() & (int)spellInfo.GetSchoolMask()))
                         reflectchance += eff.GetAmount();
 
                 if (reflectchance > 0 && RandomHelper.randChance(reflectchance))
                     return SpellMissInfo.Reflect;
             }
 
-            switch (spell.DmgClass)
+            switch (spellInfo.DmgClass)
             {
                 case SpellDmgClass.Ranged:
                 case SpellDmgClass.Melee:
-                    return MeleeSpellHitResult(victim, spell);
+                    return MeleeSpellHitResult(victim, spellInfo);
                 case SpellDmgClass.None:
                     return SpellMissInfo.None;
                 case SpellDmgClass.Magic:
-                    return MagicSpellHitResult(victim, spell);
+                    return MagicSpellHitResult(victim, spellInfo);
             }
             return SpellMissInfo.None;
         }
@@ -845,11 +845,6 @@ namespace Game.Entities
         // Melee based spells hit result calculations
         SpellMissInfo MeleeSpellHitResult(Unit victim, SpellInfo spellInfo)
         {
-            // Spells with SPELL_ATTR3_IGNORE_HIT_RESULT will additionally fully ignore
-            // resist and deflect chances
-            if (spellInfo.HasAttribute(SpellAttr3.IgnoreHitResult))
-                return SpellMissInfo.None;
-
             WeaponAttackType attType = WeaponAttackType.BaseAttack;
 
             // Check damage class instead of attack type to correctly handle judgements
@@ -1433,10 +1428,11 @@ namespace Game.Entities
         {
             Spell spell = m_currentSpells.LookupByKey(CurrentSpellTypes.Channeled);
             if (spell)
-                if (spell.getState() != SpellState.Finished)
-                    return spell.GetSpellInfo().HasAttribute(SpellAttr5.CanChannelWhenMoving) && spell.IsChannelActive();
+                if (spell.getState() != SpellState.Finished && spell.IsChannelActive())
+                    if (!spell.GetSpellInfo().IsMoveAllowedChannel())
+                        return false;
 
-            return false;
+            return true;
         }
 
         bool HasBreakableByDamageAuraType(AuraType type, uint excludeAura)
@@ -1552,24 +1548,35 @@ namespace Game.Entities
             SendEnergizeSpellLog(victim, spellId, damage, overEnergize, powerType);
         }
 
-        public void ApplySpellImmune(uint spellId, SpellImmunity op, object type, bool apply)
+        public void ApplySpellImmune(uint spellId, SpellImmunity op, SpellSchoolMask type, bool apply)
+        {
+            ApplySpellImmune(spellId, op, (uint)type, apply);
+        }
+
+        public void ApplySpellImmune(uint spellId, SpellImmunity op, AuraType type, bool apply)
+        {
+            ApplySpellImmune(spellId, op, (uint)type, apply);
+        }
+
+        public void ApplySpellImmune(uint spellId, SpellImmunity op, SpellEffectName type, bool apply)
+        {
+            ApplySpellImmune(spellId, op, (uint)type, apply);
+        }
+
+        public void ApplySpellImmune(uint spellId, SpellImmunity op, uint type, bool apply)
         {
             if (apply)
             {
-                m_spellImmune[op].RemoveAll(p => p.spellType == Convert.ToUInt32(type));
-
-                SpellImmune Immune = new SpellImmune();
-                Immune.spellId = spellId;
-                Immune.spellType = Convert.ToUInt32(type);
-                m_spellImmune.Add(op, Immune);
+                m_spellImmune[(int)op].Add(type, spellId);
             }
             else
             {
-                foreach (var spell in m_spellImmune[op].ToList())
+                var bounds = m_spellImmune[(int)op].LookupByKey(type);
+                foreach (var spell in bounds)
                 {
-                    if (spell.spellId == spellId && spell.spellType == Convert.ToUInt32(type))
+                    if (spell == spellId)
                     {
-                        m_spellImmune.Remove(op, spell);
+                        m_spellImmune[(int)op].Remove(type, spell);
                         break;
                     }
                 }
@@ -1581,28 +1588,27 @@ namespace Game.Entities
                 return false;
 
             // Single spell immunity.
-            var idList = m_spellImmune.LookupByKey(SpellImmunity.Id);
-            foreach (var immune in idList)
-                if (immune.spellType == spellInfo.Id)
-                    return true;
+            var idList = m_spellImmune[(int)SpellImmunity.Id];
+            if (idList.ContainsKey(spellInfo.Id))
+                return true;
 
             if (spellInfo.HasAttribute(SpellAttr0.UnaffectedByInvulnerability))
                 return false;
 
-            if (spellInfo.Dispel != 0)
+            uint dispel = (uint)spellInfo.Dispel;
+            if (dispel != 0)
             {
-                var dispelList = m_spellImmune.LookupByKey(SpellImmunity.Dispel);
-                foreach (var immune in dispelList)
-                    if (immune.spellType == (int)spellInfo.Dispel)
-                        return true;
+                var dispelList = m_spellImmune[(int)SpellImmunity.Dispel];
+                if (dispelList.ContainsKey(dispel))
+                    return true;
             }
 
             // Spells that don't have effectMechanics.
-            if (spellInfo.Mechanic != 0)
+            uint mechanic = (uint)spellInfo.Mechanic;
+            if (mechanic != 0)
             {
-                var mechanicList = m_spellImmune.LookupByKey(SpellImmunity.Mechanic);
-                foreach (var immune in mechanicList)
-                    if (immune.spellType == (int)spellInfo.Mechanic)
+                var mechanicList = m_spellImmune[(int)SpellImmunity.Mechanic];
+                    if (mechanicList.ContainsKey(mechanic))
                         return true;
             }
 
@@ -1611,7 +1617,7 @@ namespace Game.Entities
             {
                 // State/effect immunities applied by aura expect full spell immunity
                 // Ignore effects with mechanic, they are supposed to be checked separately
-                if (effect == null || !effect.IsEffect())
+                if (effect == null)
                     continue;
 
                 if (!IsImmunedToSpellEffect(spellInfo, effect.EffectIndex))
@@ -1624,13 +1630,13 @@ namespace Game.Entities
             if (immuneToAllEffects) //Return immune only if the target is immune to all spell effects.
                 return true;
 
-            if (spellInfo.Id != 42292 && spellInfo.Id != 59752)
+            if (!spellInfo.HasAttribute(SpellAttr1.UnaffectedBySchoolImmune) && !spellInfo.HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
             {
-                var schoolList = m_spellImmune.LookupByKey(SpellImmunity.School);
-                foreach (var immune in schoolList)
+                var schoolList = m_spellImmune[(int)SpellImmunity.School];
+                foreach (var pair in schoolList)
                 {
-                    SpellInfo immuneSpellInfo = Global.SpellMgr.GetSpellInfo(immune.spellId);
-                    if (Convert.ToBoolean(immune.spellType & (uint)spellInfo.GetSchoolMask())
+                    SpellInfo immuneSpellInfo = Global.SpellMgr.GetSpellInfo(pair.Value);
+                    if (Convert.ToBoolean(pair.Key & (uint)spellInfo.GetSchoolMask())
                         && !(immuneSpellInfo != null && immuneSpellInfo.IsPositive() && spellInfo.IsPositive())
                         && !spellInfo.CanPierceImmuneAura(immuneSpellInfo))
                         return true;
@@ -1642,18 +1648,18 @@ namespace Game.Entities
         public uint GetSchoolImmunityMask()
         {
             uint mask = 0;
-            var mechanicList = m_spellImmune.LookupByKey(SpellImmunity.School);
-            foreach (var spell in mechanicList)
-                mask |= spell.spellType;
+            var mechanicList = m_spellImmune[(int)SpellImmunity.School];
+            foreach (var pair in mechanicList)
+                mask |= pair.Key;
 
             return mask;
         }
         public uint GetMechanicImmunityMask()
         {
             uint mask = 0;
-            var mechanicList = m_spellImmune.LookupByKey(SpellImmunity.Mechanic);
-            foreach (var spell in mechanicList)
-                mask |= (uint)(1 << (int)spell.spellType);
+            var mechanicList = m_spellImmune[(int)SpellImmunity.Mechanic];
+            foreach (var pair in mechanicList)
+                mask |= (1u << (int)pair.Value);
 
             return mask;
         }
@@ -1668,75 +1674,76 @@ namespace Game.Entities
 
             // If m_immuneToEffect type contain this effect type, IMMUNE effect.
             uint eff = (uint)effect.Effect;
-            var effectList = m_spellImmune.LookupByKey(SpellImmunity.Effect);
-            foreach (var immune in effectList)
-                if (immune.spellType == eff)
-                    return true;
+            var effectList = m_spellImmune[(int)SpellImmunity.Effect];
+            if (effectList.ContainsKey(eff))
+                return true;
 
             uint mechanic = (uint)effect.Mechanic;
             if (mechanic != 0)
             {
-                var mechanicList = m_spellImmune.LookupByKey(SpellImmunity.Mechanic);
-                foreach (var immune in mechanicList)
-                    if (immune.spellType == mechanic)
-                        return true;
+                var mechanicList = m_spellImmune[(int)SpellImmunity.Mechanic];
+                if (mechanicList.ContainsKey(mechanic))
+                    return true;
             }
 
-            uint aura = (uint)effect.ApplyAuraName;
-            if (aura != 0)
+            if (!spellInfo.HasAttribute(SpellAttr3.IgnoreHitResult))
             {
-                var list = m_spellImmune.LookupByKey(SpellImmunity.State);
-                foreach (var immune in list)
-                    if (immune.spellType == aura)
-                        if (!spellInfo.HasAttribute(SpellAttr3.IgnoreHitResult))
-                            return true;
-
-                // Check for immune to application of harmful magical effects
-                var immuneAuraApply = GetAuraEffectsByType(AuraType.ModImmuneAuraApplySchool);
-                foreach (var immune in immuneAuraApply)
-                    if (spellInfo.Dispel == DispelType.Magic &&                                      // Magic debuff
-                        Convert.ToBoolean(immune.GetMiscValue() & (uint)spellInfo.GetSchoolMask()) &&  // Check school
-                        !spellInfo.IsPositiveEffect(index))                                  // Harmful
+                uint aura = (uint)effect.ApplyAuraName;
+                if (aura != 0)
+                {
+                    var list = m_spellImmune[(int)SpellImmunity.State];
+                    if (list.ContainsKey(aura))
                         return true;
+
+                    if (!spellInfo.HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
+                    {
+                        // Check for immune to application of harmful magical effects
+                        var immuneAuraApply = GetAuraEffectsByType(AuraType.ModImmuneAuraApplySchool);
+                        foreach (var auraEffect in immuneAuraApply)
+                            if (Convert.ToBoolean(auraEffect.GetMiscValue() & (int)spellInfo.GetSchoolMask()) &&  // Check school
+                                !spellInfo.IsPositiveEffect(index))                       // Harmful
+                                return true;
+                    }
+                }
             }
 
             return false;
         }
-        public bool IsImmunedToDamage(SpellSchoolMask shoolMask)
+        public bool IsImmunedToDamage(SpellSchoolMask schoolMask)
         {
             // If m_immuneToSchool type contain this school type, IMMUNE damage.
-            var schoolList = m_spellImmune.LookupByKey(SpellImmunity.School);
+            var schoolList = m_spellImmune[(int)SpellImmunity.School];
             foreach (var immune in schoolList)
-                if (Convert.ToBoolean(immune.spellType & (uint)shoolMask))
+                if (Convert.ToBoolean(immune.Key & (uint)schoolMask))
                     return true;
 
             // If m_immuneToDamage type contain magic, IMMUNE damage.
-            var damageList = m_spellImmune.LookupByKey(SpellImmunity.Damage);
+            var damageList = m_spellImmune[(int)SpellImmunity.Damage];
             foreach (var immune in damageList)
-                if (Convert.ToBoolean(immune.spellType & (uint)shoolMask))
+                if (Convert.ToBoolean(immune.Key & (uint)schoolMask))
                     return true;
 
             return false;
         }
         public bool IsImmunedToDamage(SpellInfo spellInfo)
         {
-            if (spellInfo.HasAttribute(SpellAttr0.UnaffectedByInvulnerability))
+            if (spellInfo == null)
                 return false;
 
-            uint shoolMask = (uint)spellInfo.GetSchoolMask();
-            if (spellInfo.Id != 42292 && spellInfo.Id != 59752)
-            {
-                // If m_immuneToSchool type contain this school type, IMMUNE damage.
-                var schoolList = m_spellImmune.LookupByKey(SpellImmunity.School);
-                foreach (var immune in schoolList)
-                    if (Convert.ToBoolean(immune.spellType & shoolMask) && !spellInfo.CanPierceImmuneAura(Global.SpellMgr.GetSpellInfo(immune.spellId)))
-                        return true;
-            }
+            if (spellInfo.HasAttribute(SpellAttr1.UnaffectedBySchoolImmune) || spellInfo.HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
+                return false;
+
+            uint schoolMask = (uint)spellInfo.GetSchoolMask();
+            // If m_immuneToSchool type contain this school type, IMMUNE damage.
+            var schoolList = m_spellImmune[(int)SpellImmunity.School];
+            foreach (var pair in schoolList)
+                if (Convert.ToBoolean(pair.Key & schoolMask) && !spellInfo.CanPierceImmuneAura(Global.SpellMgr.GetSpellInfo(pair.Value)))
+                    return true;
 
             // If m_immuneToDamage type contain magic, IMMUNE damage.
-            var damageList = m_spellImmune.LookupByKey(SpellImmunity.Damage);
+            var damageList = m_spellImmune[(int)SpellImmunity.Damage];
             foreach (var immune in damageList)
-                if (Convert.ToBoolean(immune.spellType & shoolMask))
+                if (Convert.ToBoolean(immune.Key & schoolMask))
                     return true;
 
             return false;
@@ -2173,7 +2180,7 @@ namespace Game.Entities
         bool isSpellBlocked(Unit victim, SpellInfo spellProto, WeaponAttackType attackType = WeaponAttackType.BaseAttack)
         {
             // These spells can't be blocked
-            if (spellProto != null && spellProto.HasAttribute(SpellAttr0.ImpossibleDodgeParryBlock))
+            if (spellProto != null && (spellProto.HasAttribute(SpellAttr0.ImpossibleDodgeParryBlock) || spellProto.HasAttribute(SpellAttr3.IgnoreHitResult)))
                 return false;
 
             // Can't block when casting/controlled
@@ -2655,28 +2662,6 @@ namespace Game.Entities
                         return eff;
             }
             return null;
-        }
-
-        public void ApplySpellDispelImmunity(SpellInfo spellProto, DispelType type, bool apply)
-        {
-            ApplySpellImmune(spellProto.Id, SpellImmunity.Dispel, type, apply);
-
-            if (apply && spellProto.HasAttribute(SpellAttr1.DispelAurasOnImmunity))
-            {
-                // Create dispel mask by dispel type
-                uint dispelMask = SpellInfo.GetDispelMask(type);
-                // Dispel all existing auras vs current dispel type
-                var auras = GetAppliedAuras();
-                foreach (var pair in auras)
-                {
-                    SpellInfo spell = pair.Value.GetBase().GetSpellInfo();
-                    if ((spell.GetDispelMask() & dispelMask) != 0)
-                    {
-                        // Dispel aura
-                        RemoveAura(pair);
-                    }
-                }
-            }
         }
 
         public DiminishingLevels GetDiminishing(DiminishingGroup group)

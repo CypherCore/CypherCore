@@ -302,6 +302,7 @@ namespace Framework.Constants
         Sapped = 30,
         Enraged = 31,
         Wounded = 32,
+        Max = 33,
 
         ImmuneToMovementImpairmentAndLossControlMask = ((1 << Charm) | (1 << Disoriented) |
             (1 << Fear) | (1 << Root) | (1 << Sleep) | (1 << Snare) | (1 << Stun) |
@@ -1370,9 +1371,9 @@ namespace Framework.Constants
         IsArcaneConcentration = 0x800000, // 23 Only Mage Arcane Concentration Have This Flag
         Unk24 = 0x1000000, // 24
         Unk25 = 0x2000000, // 25
-        Unk26 = 0x4000000, // 26 Unaffected By School Immunity
+        UnaffectedByAuraSchoolImmune = 0x4000000, // 26 Unaffected By School Immunity
         Unk27 = 0x8000000, // 27
-        Unk28 = 0x10000000, // 28
+        IgnoreItemCheck = 0x10000000, // 28 Spell is cast without checking item requirements (charges/reagents/totem)
         CantCrit = 0x20000000, // 29 Spell Can'T Crit
         TriggeredCanTriggerProc = 0x40000000, // 30 Spell Can Trigger Even If Triggered
         FoodBuff = 0x80000000  // 31 Food Or Drink Buff (Like Well Fed)
@@ -1539,7 +1540,7 @@ namespace Framework.Constants
         Unk17 = 0x20000, // 17 Only 27965 (Suicide) Spell.
         HasChargeEffect = 0x40000, // 18 Only Spells That Have Charge Among Effects.
         ZoneTeleport = 0x80000, // 19 Teleports To Specific Zones.
-        Unk20 = 0x100000, // 20 Blink, Divine Shield, Ice Block
+        UsableInStunFearConfusion = 0x100000, // 20 Blink, Divine Shield, Ice Block
         Unk21 = 0x200000, // 21 Not Set
         Unk22 = 0x400000, // 22
         Unk23 = 0x800000, // 23 Motivate, Mutilate, Shattering Throw

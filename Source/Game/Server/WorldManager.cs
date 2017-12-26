@@ -377,6 +377,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading SpellInfo diminishing infos...");
             Global.SpellMgr.LoadSpellInfoDiminishing();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading SpellInfo immunity infos...");
+            Global.SpellMgr.LoadSpellInfoImmunities();
+
             Log.outInfo(LogFilter.ServerLoading, "Loading PetFamilySpellsStore Data...");
             Global.SpellMgr.LoadPetFamilySpellsStore();
 

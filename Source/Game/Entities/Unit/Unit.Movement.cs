@@ -1403,7 +1403,7 @@ namespace Game.Entities
             return GetPositionZ() - offset;
         }
 
-        Unit GetUnitBeingMoved()
+        public Unit GetUnitBeingMoved()
         {
             Player player = ToPlayer();
             if (player)

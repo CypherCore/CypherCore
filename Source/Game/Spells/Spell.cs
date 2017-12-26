@@ -2091,7 +2091,7 @@ namespace Game.Spells
                 return SpellMissInfo.Evade;
 
             // For delayed spells immunity may be applied between missile launch and hit - check immunity for that case
-            if (m_spellInfo.Speed != 0.0f && (unit.IsImmunedToDamage(m_spellInfo) || unit.IsImmunedToSpell(m_spellInfo)))
+            if (m_spellInfo.Speed != 0.0f && unit.IsImmunedToSpell(m_spellInfo))
                 return SpellMissInfo.Immune;
 
             // disable effects to which unit is immune
@@ -2523,7 +2523,8 @@ namespace Game.Spells
             if (Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnoreComboPoints) || m_CastItem != null || m_caster.m_playerMovingMe == null)
                 m_needComboPoints = false;
 
-            SpellCastResult result = CheckCast(true);
+            uint param1 = 0, param2 = 0;
+            SpellCastResult result = CheckCast(true, ref param1, ref param2);
             // target is checked in too many locations and with different results to handle each of them
             // handle just the general SPELL_FAILED_BAD_TARGETS result which is the default result for most DBC target checks
             if (Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnoreTargetCheck) && result == SpellCastResult.BadTargets)
@@ -2548,7 +2549,10 @@ namespace Game.Spells
                     m_caster.ToPlayer().SetSpellModTakingSpell(this, false);
                 }
 
-                SendCastResult(result);
+                if (param1 != 0 || param2 != 0)
+                    SendCastResult(result, param1, param2);
+                else
+                    SendCastResult(result);
 
                 finish(false);
                 return;
@@ -2749,10 +2753,11 @@ namespace Game.Spells
             // skip check if done already (for instant cast spells for example)
             if (!skipCheck)
             {
-                SpellCastResult castResult = CheckCast(false);
+                uint param1 = 0, param2 = 0;
+                SpellCastResult castResult = CheckCast(false, ref param1, ref param2);
                 if (castResult != SpellCastResult.SpellCastOk)
                 {
-                    SendCastResult(castResult);
+                    SendCastResult(castResult, param1, param2);
                     SendInterrupted(0);
                     //restore spell mods
                     if (m_caster.IsTypeId(TypeId.Player))
@@ -3316,7 +3321,7 @@ namespace Game.Spells
                 m_caster.AttackStop();
         }
 
-        static void FillSpellCastFailedArgs<T>(T packet, ObjectGuid castId, SpellInfo spellInfo, SpellCastResult result, SpellCustomErrors customError, uint[] misc, Player caster) where T : CastFailedBase
+        static void FillSpellCastFailedArgs<T>(T packet, ObjectGuid castId, SpellInfo spellInfo, SpellCastResult result, SpellCustomErrors customError, uint? param1, uint? param2, Player caster) where T : CastFailedBase
         {
             packet.CastID = castId;
             packet.SpellID = (int)spellInfo.Id;
@@ -3325,112 +3330,183 @@ namespace Game.Spells
             switch (result)
             {
                 case SpellCastResult.NotReady:
-                    packet.FailedArg1 = 0;                              // unknown (value 1 update cooldowns on client flag)
+                    if (param1.HasValue)
+                        packet.FailedArg1 = (int)param1;
+                    else
+                        packet.FailedArg1 = 0;// unknown (value 1 update cooldowns on client flag)
                     break;
                 case SpellCastResult.RequiresSpellFocus:
-                    packet.FailedArg1 = (int)spellInfo.RequiresSpellFocus;  // SpellFocusObject.dbc id
+                    if (param1.HasValue)
+                        packet.FailedArg1 = (int)param1;
+                    else
+                        packet.FailedArg1 = (int)spellInfo.RequiresSpellFocus;  // SpellFocusObject.dbc id
                     break;
                 case SpellCastResult.RequiresArea:                    // AreaTable.dbc id
-                                                                      // hardcode areas limitation case
-                    switch (spellInfo.Id)
+                    if (param1.HasValue)
+                        packet.FailedArg1 = (int)param1;
+                    else
                     {
-                        case 41617:                                 // Cenarion Mana Salve
-                        case 41619:                                 // Cenarion Healing Salve
-                            packet.FailedArg1 = 3905;
-                            break;
-                        case 41618:                                 // Bottled Nethergon Energy
-                        case 41620:                                 // Bottled Nethergon Vapor
-                            packet.FailedArg1 = 3842;
-                            break;
-                        case 45373:                                 // Bloodberry Elixir
-                            packet.FailedArg1 = 4075;
-                            break;
-                        default:                                    // default case (don't must be)
-                            packet.FailedArg1 = 0;
-                            break;
+                        // hardcode areas limitation case
+                        switch (spellInfo.Id)
+                        {
+                            case 41617:                                 // Cenarion Mana Salve
+                            case 41619:                                 // Cenarion Healing Salve
+                                packet.FailedArg1 = 3905;
+                                break;
+                            case 41618:                                 // Bottled Nethergon Energy
+                            case 41620:                                 // Bottled Nethergon Vapor
+                                packet.FailedArg1 = 3842;
+                                break;
+                            case 45373:                                 // Bloodberry Elixir
+                                packet.FailedArg1 = 4075;
+                                break;
+                            default:                                    // default case (don't must be)
+                                packet.FailedArg1 = 0;
+                                break;
+                        }
                     }
                     break;
                 case SpellCastResult.Totems:
-                    if (spellInfo.Totem[0] != 0)
-                        packet.FailedArg1 = (int)spellInfo.Totem[0];
-                    if (spellInfo.Totem[1] != 0)
-                        packet.FailedArg2 = (int)spellInfo.Totem[1];
+                    if (param1.HasValue)
+                    {
+                        packet.FailedArg1 = (int)param1;
+                        if (param2.HasValue)
+                            packet.FailedArg2 = (int)param2;
+                    }
+                    else
+                    {
+                        if (spellInfo.Totem[0] != 0)
+                            packet.FailedArg1 = (int)spellInfo.Totem[0];
+                        if (spellInfo.Totem[1] != 0)
+                            packet.FailedArg2 = (int)spellInfo.Totem[1];
+                    }
                     break;
                 case SpellCastResult.TotemCategory:
-                    if (spellInfo.TotemCategory[0] != 0)
-                        packet.FailedArg1 = (int)spellInfo.TotemCategory[0];
-                    if (spellInfo.TotemCategory[1] != 0)
-                        packet.FailedArg2 = (int)spellInfo.TotemCategory[1];
+                    if (param1.HasValue)
+                    {
+                        packet.FailedArg1 = (int)param1;
+                        if (param2.HasValue)
+                            packet.FailedArg2 = (int)param2;
+                    }
+                    else
+                    {
+                        if (spellInfo.TotemCategory[0] != 0)
+                            packet.FailedArg1 = (int)spellInfo.TotemCategory[0];
+                        if (spellInfo.TotemCategory[1] != 0)
+                            packet.FailedArg2 = (int)spellInfo.TotemCategory[1];
+                    }
                     break;
                 case SpellCastResult.EquippedItemClass:
                 case SpellCastResult.EquippedItemClassMainhand:
                 case SpellCastResult.EquippedItemClassOffhand:
-                    packet.FailedArg1 = (int)spellInfo.EquippedItemClass;
-                    packet.FailedArg2 = spellInfo.EquippedItemSubClassMask;
+                    if (param1.HasValue && param2.HasValue)
+                    {
+                        packet.FailedArg1 = (int)param1;
+                        packet.FailedArg2 = (int)param2;
+                    }
+                    else
+                    {
+                        packet.FailedArg1 = (int)spellInfo.EquippedItemClass;
+                        packet.FailedArg2 = spellInfo.EquippedItemSubClassMask;
+                    }
                     break;
                 case SpellCastResult.TooManyOfItem:
                     {
-                        uint item = 0;
-                        foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(caster.GetMap().GetDifficultyID()))
-                            if (effect.ItemType != 0)
-                                item = effect.ItemType;
-                        ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(item);
-                        if (proto != null && proto.GetItemLimitCategory() != 0)
-                            packet.FailedArg1 = (int)proto.GetItemLimitCategory();
+                        if (param1.HasValue)
+                            packet.FailedArg1 = (int)param1;
+                        else
+                        {
+                            uint item = 0;
+                            foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(caster.GetMap().GetDifficultyID()))
+                                if (effect.ItemType != 0)
+                                    item = effect.ItemType;
+                            ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(item);
+                            if (proto != null && proto.GetItemLimitCategory() != 0)
+                                packet.FailedArg1 = (int)proto.GetItemLimitCategory();
+                        }
                         break;
                     }
                 case SpellCastResult.PreventedByMechanic:
-                    packet.FailedArg1 = (int)spellInfo.GetAllEffectsMechanicMask();  // SpellMechanic.dbc id
+                    if (param1.HasValue)
+                        packet.FailedArg1 = (int)param1;
+                    else
+                        packet.FailedArg1 = (int)spellInfo.GetAllEffectsMechanicMask();  // SpellMechanic.dbc id
                     break;
                 case SpellCastResult.NeedExoticAmmo:
-                    packet.FailedArg1 = spellInfo.EquippedItemSubClassMask; // seems correct...
+                    if (param1.HasValue)
+                        packet.FailedArg1 = (int)param1;
+                    else
+                        packet.FailedArg1 = spellInfo.EquippedItemSubClassMask; // seems correct...
                     break;
                 case SpellCastResult.NeedMoreItems:
-                    packet.FailedArg1 = 0;                              // Item id
-                    packet.FailedArg2 = 0;                              // Item count?
+                    if (param1.HasValue && param2.HasValue)
+                    {
+                        packet.FailedArg1 = (int)param1;
+                        packet.FailedArg2 = (int)param2;
+                    }
+                    else
+                    {
+                        packet.FailedArg1 = 0;                              // Item id
+                        packet.FailedArg2 = 0;                              // Item count?
+                    }
                     break;
                 case SpellCastResult.MinSkill:
-                    packet.FailedArg1 = 0;                              // SkillLine.dbc id
-                    packet.FailedArg2 = 0;                              // required skill value
+                    if (param1.HasValue && param2.HasValue)
+                    {
+                        packet.FailedArg1 = (int)param1;
+                        packet.FailedArg2 = (int)param2;
+                    }
+                    else
+                    {
+                        packet.FailedArg1 = 0;                              // SkillLine.dbc id
+                        packet.FailedArg2 = 0;                              // required skill value
+                    }
                     break;
                 case SpellCastResult.FishingTooLow:
-                    packet.FailedArg1 = 0;                              // required fishing skill
+                    if (param1.HasValue)
+                        packet.FailedArg1 = (int)param1;
+                    else
+                        packet.FailedArg1 = 0;                              // required fishing skill
                     break;
                 case SpellCastResult.CustomError:
                     packet.FailedArg1 = (int)customError;
                     break;
                 case SpellCastResult.Silenced:
-                    packet.FailedArg1 = 0;                              // Unknown
+                    if (param1.HasValue)
+                        packet.FailedArg1 = (int)param1;
+                    else
+                        packet.FailedArg1 = 0;                              // Unknown
                     break;
                 case SpellCastResult.Reagents:
                     {
-                        uint missingItem = 0;
-                        for (uint i = 0; i < SpellConst.MaxReagents; i++)
+                        if (param1.HasValue)
+                            packet.FailedArg1 = (int)param1;
+                        else
                         {
-                            if (spellInfo.Reagent[i] <= 0)
-                                continue;
-
-                            uint itemid = (uint)spellInfo.Reagent[i];
-                            uint itemcount = spellInfo.ReagentCount[i];
-
-                            if (!caster.HasItemCount(itemid, itemcount))
+                            uint missingItem = 0;
+                            for (uint i = 0; i < SpellConst.MaxReagents; i++)
                             {
-                                missingItem = itemid;
-                                break;
-                            }
-                        }
+                                if (spellInfo.Reagent[i] <= 0)
+                                    continue;
 
-                        packet.FailedArg1 = (int)missingItem;  // first missing item
+                                uint itemid = (uint)spellInfo.Reagent[i];
+                                uint itemcount = spellInfo.ReagentCount[i];
+
+                                if (!caster.HasItemCount(itemid, itemcount))
+                                {
+                                    missingItem = itemid;
+                                    break;
+                                }
+                            }
+
+                            packet.FailedArg1 = (int)missingItem;  // first missing item
+                        }
                         break;
                     }
                 case SpellCastResult.CantUntalent:
                     {
-                        if (misc != null)
-                        {
-                            TalentRecord talent = CliDB.TalentStorage.LookupByKey(misc[0]);
-                            if (talent != null)
-                                packet.FailedArg1 = (int)talent.SpellID;
-                        }
+                        Contract.Assert(param1.HasValue);
+                        packet.FailedArg1 = (int)param1;
                         break;
                     }
                 // TODO: SPELL_FAILED_NOT_STANDING
@@ -3439,7 +3515,7 @@ namespace Game.Spells
             }
         }
 
-        public void SendCastResult(SpellCastResult result)
+        public void SendCastResult(SpellCastResult result, uint? param1 = null, uint? param2 = null)
         {
             if (result == SpellCastResult.SpellCastOk)
                 return;
@@ -3447,7 +3523,7 @@ namespace Game.Spells
             if (!m_caster.IsTypeId(TypeId.Player))
                 return;
 
-            if (m_caster.ToPlayer().GetSession().PlayerLoading())  // don't send cast results at loading time
+            if (m_caster.ToPlayer().IsLoading())  // don't send cast results at loading time
                 return;
 
             if (_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.DontReportCastError))
@@ -3455,11 +3531,11 @@ namespace Game.Spells
 
             CastFailed castFailed = new CastFailed();
             castFailed.SpellXSpellVisualID = (int)m_SpellVisual;
-            FillSpellCastFailedArgs(castFailed, m_castId, m_spellInfo, result, m_customError, m_misc.GetRawData(), m_caster.ToPlayer());
+            FillSpellCastFailedArgs(castFailed, m_castId, m_spellInfo, result, m_customError, param1, param2, m_caster.ToPlayer());
             m_caster.ToPlayer().SendPacket(castFailed);
         }
 
-        public void SendPetCastResult(SpellCastResult result)
+        public void SendPetCastResult(SpellCastResult result, uint? param1 = null, uint? param2 = null)
         {
             if (result == SpellCastResult.SpellCastOk)
                 return;
@@ -3472,18 +3548,18 @@ namespace Game.Spells
                 result = SpellCastResult.DontReport;
 
             PetCastFailed petCastFailed = new PetCastFailed();
-            FillSpellCastFailedArgs(petCastFailed, m_castId, m_spellInfo, result, SpellCustomErrors.None, m_misc.GetRawData(), owner.ToPlayer());
+            FillSpellCastFailedArgs(petCastFailed, m_castId, m_spellInfo, result, SpellCustomErrors.None, param1, param2, owner.ToPlayer());
             owner.ToPlayer().SendPacket(petCastFailed);
         }
 
-        public static void SendCastResult(Player caster, SpellInfo spellInfo, uint spellVisual, ObjectGuid cast_count, SpellCastResult result, SpellCustomErrors customError = SpellCustomErrors.None, uint[] misc = null)
+        public static void SendCastResult(Player caster, SpellInfo spellInfo, uint spellVisual, ObjectGuid cast_count, SpellCastResult result, SpellCustomErrors customError = SpellCustomErrors.None, uint? param1 = null, uint? param2 = null)
         {
             if (result == SpellCastResult.SpellCastOk)
                 return;
 
             CastFailed packet = new CastFailed();
             packet.SpellXSpellVisualID = (int)spellVisual;
-            FillSpellCastFailedArgs(packet, cast_count, spellInfo, result, customError, misc, caster);
+            FillSpellCastFailedArgs(packet, cast_count, spellInfo, result, customError, param1, param2, caster);
             caster.SendPacket(packet);
         }
 
@@ -4330,6 +4406,12 @@ namespace Game.Spells
 
         public SpellCastResult CheckCast(bool strict)
         {
+            uint param1 = 0, param2 = 0;
+            return CheckCast(strict, ref param1, ref param2);
+        }
+
+        public SpellCastResult CheckCast(bool strict, ref uint param1, ref uint param2)
+        {
             SpellCastResult castResult = SpellCastResult.SpellCastOk;
             // check death state
             if (!m_caster.IsAlive() && !m_spellInfo.IsPassive() && !(m_spellInfo.HasAttribute(SpellAttr0.CastableWhileDead) || (IsTriggered() && m_triggeredByAuraSpell == null)))
@@ -4395,13 +4477,15 @@ namespace Game.Spells
                 bool checkForm = true;
                 // Ignore form req aura
                 var ignore = m_caster.GetAuraEffectsByType(AuraType.ModIgnoreShapeshift);
-                foreach (var aura in ignore)
+                foreach (var aurEff in ignore)
                 {
-                    if (!aura.IsAffectingSpell(m_spellInfo))
+                    if (!aurEff.IsAffectingSpell(m_spellInfo))
                         continue;
+
                     checkForm = false;
                     break;
                 }
+
                 if (checkForm)
                 {
                     // Cannot be used in this stance/form
@@ -4630,7 +4714,7 @@ namespace Game.Spells
             // always (except passive spells) check items (focus object can be required for any type casts)
             if (!m_spellInfo.IsPassive())
             {
-                castResult = CheckItems();
+                castResult = CheckItems(ref param1, ref param2);
                 if (castResult != SpellCastResult.SpellCastOk)
                     return castResult;
             }
@@ -4650,7 +4734,7 @@ namespace Game.Spells
 
             if (!Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnoreCasterAuras))
             {
-                castResult = CheckCasterAuras();
+                castResult = CheckCasterAuras(ref param1);
                 if (castResult != SpellCastResult.SpellCastOk)
                     return castResult;
             }
@@ -4909,7 +4993,7 @@ namespace Game.Spells
                                 break;
 
                             if (!m_caster.IsTypeId(TypeId.Player)  // only players can open locks, gather etc.
-                                                      // we need a go target in case of TARGET_GAMEOBJECT_TARGET
+                                                                   // we need a go target in case of TARGET_GAMEOBJECT_TARGET
                                 || (effect.TargetA.GetTarget() == Targets.GameobjectTarget && m_targets.GetGOTarget() == null))
                                 return SpellCastResult.BadTargets;
 
@@ -5139,7 +5223,10 @@ namespace Game.Spells
                             if (talent == null)
                                 return SpellCastResult.DontReport;
                             if (m_caster.GetSpellHistory().HasCooldown(talent.SpellID))
+                            {
+                                param1 = talent.SpellID;
                                 return SpellCastResult.CantUntalent;
+                            }
                             break;
                         }
                     case SpellEffectName.GiveArtifactPower:
@@ -5362,144 +5449,107 @@ namespace Game.Spells
             return CheckCast(true);
         }
 
-        SpellCastResult CheckCasterAuras()
+        SpellCastResult CheckCasterAuras(ref uint param1)
         {
             // spells totally immuned to caster auras (wsg flag drop, give marks etc)
             if (m_spellInfo.HasAttribute(SpellAttr6.IgnoreCasterAuras))
                 return SpellCastResult.SpellCastOk;
 
-            int school_immune = 0;
-            uint mechanic_immune = 0;
-            uint dispel_immune = 0;
-
-            // Check if the spell grants school or mechanic immunity.
-            // We use bitmasks so the loop is done only once and not on every aura check below.
-            if (m_spellInfo.HasAttribute(SpellAttr1.DispelAurasOnImmunity))
+            bool usableWhileStunned = m_spellInfo.HasAttribute(SpellAttr5.UsableWhileStunned);
+            bool usableWhileFeared = m_spellInfo.HasAttribute(SpellAttr5.UsableWhileFeared);
+            bool usableWhileConfused = m_spellInfo.HasAttribute(SpellAttr5.UsableWhileConfused);
+            if (m_spellInfo.HasAttribute(SpellAttr7.UsableInStunFearConfusion))
             {
-                foreach (SpellEffectInfo effect in GetEffects())
-                {
-                    if (effect == null)
-                        continue;
-
-                    if (effect.ApplyAuraName == AuraType.SchoolImmunity)
-                        school_immune |= effect.MiscValue;
-                    else if (effect.ApplyAuraName == AuraType.MechanicImmunity)
-                        mechanic_immune |= (uint)(1 << effect.MiscValue);
-                    else if (effect.ApplyAuraName == AuraType.DispelImmunity)
-                        dispel_immune |= SpellInfo.GetDispelMask((DispelType)effect.MiscValue);
-                }
-                // immune movement impairment and loss of control
-                if (m_spellInfo.Id == 42292 || m_spellInfo.Id == 59752 || m_spellInfo.Id == 19574 || m_spellInfo.Id == 53490)
-                    mechanic_immune = (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
+                usableWhileStunned = true;
+                usableWhileFeared = true;
+                usableWhileConfused = true;
             }
 
-            bool usableInStun = m_spellInfo.HasAttribute(SpellAttr5.UsableWhileStunned);
 
             // Check whether the cast should be prevented by any state you might have.
-            SpellCastResult prevented_reason = SpellCastResult.SpellCastOk;
-            // Have to check if there is a stun aura. Otherwise will have problems with ghost aura apply while logging out
-            UnitFlags unitflag = (UnitFlags)m_caster.GetUInt32Value(UnitFields.Flags);     // Get unit state
-            if (Convert.ToBoolean(unitflag & UnitFlags.Stunned))
+            SpellCastResult result = SpellCastResult.SpellCastOk;
+            // Get unit state
+            UnitFlags unitflag = (UnitFlags)m_caster.GetUInt32Value(UnitFields.Flags);
+            if (!m_caster.GetCharmerGUID().IsEmpty())
             {
-                // spell is usable while stunned, check if caster has allowed stun auras, another stun types must prevent cast spell
-                if (usableInStun)
-                {
-                    uint allowedStunMask =
-                        1 << (int)Mechanics.Stun
-                        | 1 << (int)Mechanics.Freeze
-                        | 1 << (int)Mechanics.Sapped
-                        | 1 << (int)Mechanics.Sleep;
-
-                    bool foundNotStun = false;
-                    var stunAuras = m_caster.GetAuraEffectsByType(AuraType.ModStun);
-                    foreach (var auraEffect in stunAuras)
-                    {
-                        uint mechanicMask = auraEffect.GetSpellInfo().GetAllEffectsMechanicMask();
-                        if (mechanicMask != 0 && !Convert.ToBoolean(mechanicMask & allowedStunMask))
-                        {
-                            foundNotStun = true;
-                            break;
-                        }
-                    }
-                    if (foundNotStun)
-                        prevented_reason = SpellCastResult.Stunned;
-                }
-                else
-                    prevented_reason = SpellCastResult.Stunned;
+                Unit charmer = m_caster.GetCharmer();
+                if (charmer)
+                    if (charmer.GetUnitBeingMoved() != m_caster && CheckCasterNotImmunedCharmAuras(ref param1))
+                        result = SpellCastResult.Charmed;
             }
-            else if (unitflag.HasAnyFlag(UnitFlags.Confused) && !m_spellInfo.HasAttribute(SpellAttr5.UsableWhileConfused))
-                prevented_reason = SpellCastResult.Confused;
-            else if (unitflag.HasAnyFlag(UnitFlags.Fleeing) && !m_spellInfo.HasAttribute(SpellAttr5.UsableWhileFeared))
-                prevented_reason = SpellCastResult.Fleeing;
-            else if (unitflag.HasAnyFlag(UnitFlags.Silenced) && m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence))
-                prevented_reason = SpellCastResult.Silenced;
-            else if (unitflag.HasAnyFlag(UnitFlags.Pacified) && m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Pacify))
-                prevented_reason = SpellCastResult.Pacified;
+            else if (unitflag.HasAnyFlag(UnitFlags.Stunned) && !usableWhileStunned && CheckCasterNotImmunedStunAuras(ref param1))
+                result = SpellCastResult.Stunned;
+            else if (unitflag.HasAnyFlag(UnitFlags.Silenced) && m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence) && CheckCasterNotImmunedSilenceAuras(ref param1))
+                result = SpellCastResult.Silenced;
+            else if (unitflag.HasAnyFlag(UnitFlags.Pacified) && m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Pacify) && CheckCasterNotImmunedPacifyAuras(ref param1))
+                result = SpellCastResult.Pacified;
+            else if (unitflag.HasAnyFlag(UnitFlags.Fleeing) && !usableWhileFeared && CheckCasterNotImmunedFearAuras(ref param1))
+                result = SpellCastResult.Fleeing;
+            else if (unitflag.HasAnyFlag(UnitFlags.Confused) && !usableWhileConfused && CheckCasterNotImmunedDisorientAuras(ref param1))
+                result = SpellCastResult.Confused;
             else if (m_caster.HasFlag(UnitFields.Flags2, UnitFlags2.NoActions) && m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.NoActions))
-                prevented_reason = SpellCastResult.NoActions;
+                result = SpellCastResult.NoActions;
 
             // Attr must make flag drop spell totally immune from all effects
-            if (prevented_reason != SpellCastResult.SpellCastOk)
-            {
-                if (school_immune != 0 || mechanic_immune != 0 || dispel_immune != 0)
-                {
-                    //Checking auras is needed now, because you are prevented by some state but the spell grants immunity.
-                    foreach (var pair in m_caster.GetAppliedAuras())
-                    {
-                        Aura aura = pair.Value.GetBase();
-                        SpellInfo auraInfo = aura.GetSpellInfo();
-                        if (Convert.ToBoolean(auraInfo.GetAllEffectsMechanicMask() & mechanic_immune))
-                            continue;
-                        if (Convert.ToBoolean((int)auraInfo.GetSchoolMask() & school_immune) && !auraInfo.HasAttribute(SpellAttr1.UnaffectedBySchoolImmune))
-                            continue;
-                        if (Convert.ToBoolean((int)auraInfo.GetDispelMask() & dispel_immune))
-                            continue;
-
-                        //Make a second check for spell failed so the right SPELL_FAILED message is returned.
-                        //That is needed when your casting is prevented by multiple states and you are only immune to some of them.
-                        foreach (SpellEffectInfo effect in GetEffects())
-                        {
-                            if (effect == null)
-                                continue;
-
-                            AuraEffect part = aura.GetEffect(effect.EffectIndex);
-                            if (part != null)
-                            {
-                                switch (part.GetAuraType())
-                                {
-                                    case AuraType.ModStun:
-                                        if (!usableInStun || !Convert.ToBoolean(auraInfo.GetAllEffectsMechanicMask() & (1 << (int)Mechanics.Stun)))
-                                            return SpellCastResult.Stunned;
-                                        break;
-                                    case AuraType.ModConfuse:
-                                        if (!m_spellInfo.HasAttribute(SpellAttr5.UsableWhileConfused))
-                                            return SpellCastResult.Confused;
-                                        break;
-                                    case AuraType.ModFear:
-                                        if (!m_spellInfo.HasAttribute(SpellAttr5.UsableWhileFeared))
-                                            return SpellCastResult.Fleeing;
-                                        break;
-                                    case AuraType.ModSilence:
-                                    case AuraType.ModPacify:
-                                    case AuraType.ModPacifySilence:
-                                        if (m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Pacify))
-                                            return SpellCastResult.Pacified;
-                                        else if (m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence))
-                                            return SpellCastResult.Silenced;
-                                        break;
-                                    default:
-                                        break;
-                                }
-                            }
-
-                        }
-                    }
-                }
-                // You are prevented from casting and the spell casted does not grant immunity. Return a failed error.
-                else
-                    return prevented_reason;
-            }
+            if (result != SpellCastResult.SpellCastOk)
+                return (param1 != 0) ? SpellCastResult.PreventedByMechanic : result;
             return SpellCastResult.SpellCastOk;
+        }
+
+        // based on sub_00804430 from 12340 client
+        bool CheckCasterHasNotImmunedAuraType(AuraType auraType, ref uint param1)
+        {
+            // Checking auras is needed now, because you are prevented by some state but the spell grants immunity.
+            var auraEffects = m_caster.GetAuraEffectsByType(auraType);
+            if (auraEffects.Empty())
+                return false;
+
+            foreach (AuraEffect aurEff in auraEffects)
+            {
+                if (m_spellInfo.CanSpellCastOverrideAuraEffect(aurEff))
+                    continue;
+
+                param1 = (uint)aurEff.GetSpellEffectInfo().Mechanic;
+                if (param1 == 0)
+                    param1 = (uint)aurEff.GetSpellInfo().Mechanic;
+                return true;
+            }
+
+            return false;
+        }
+
+        bool CheckCasterNotImmunedCharmAuras(ref uint param1)
+        {
+            return CheckCasterHasNotImmunedAuraType(AuraType.ModCharm, ref param1) ||
+                CheckCasterHasNotImmunedAuraType(AuraType.AoeCharm, ref param1) ||
+                CheckCasterHasNotImmunedAuraType(AuraType.ModPossess, ref param1);
+        }
+
+        bool CheckCasterNotImmunedStunAuras(ref uint param1)
+        {
+            return CheckCasterHasNotImmunedAuraType(AuraType.ModStun, ref param1);
+        }
+
+        bool CheckCasterNotImmunedSilenceAuras(ref uint param1)
+        {
+            return CheckCasterHasNotImmunedAuraType(AuraType.ModSilence, ref param1) ||
+                CheckCasterHasNotImmunedAuraType(AuraType.ModPacifySilence, ref param1);
+        }
+
+        bool CheckCasterNotImmunedPacifyAuras(ref uint param1)
+        {
+            return CheckCasterHasNotImmunedAuraType(AuraType.ModPacify, ref param1) ||
+                CheckCasterHasNotImmunedAuraType(AuraType.ModPacifySilence, ref param1);
+        }
+
+        bool CheckCasterNotImmunedFearAuras(ref uint param1)
+        {
+            return CheckCasterHasNotImmunedAuraType(AuraType.ModFear, ref param1);
+        }
+
+        bool CheckCasterNotImmunedDisorientAuras(ref uint param1)
+        {
+            return CheckCasterHasNotImmunedAuraType(AuraType.ModConfuse, ref param1);
         }
 
         SpellCastResult CheckArenaAndRatedBattlegroundCastRules()
@@ -5727,11 +5777,13 @@ namespace Game.Spells
             return SpellCastResult.SpellCastOk;
         }
 
-        SpellCastResult CheckItems()
+        SpellCastResult CheckItems(ref uint param1, ref uint param2)
         {
             Player player = m_caster.ToPlayer();
-
             if (!player)
+                return SpellCastResult.SpellCastOk;
+
+            if (m_spellInfo.HasAttribute(SpellAttr2.IgnoreItemCheck))
                 return SpellCastResult.SpellCastOk;
 
             if (m_CastItem == null)
@@ -5809,13 +5861,11 @@ namespace Game.Spells
             // check target item
             if (!m_targets.GetItemTargetGUID().IsEmpty())
             {
-                if (!m_caster.IsTypeId(TypeId.Player))
-                    return SpellCastResult.BadTargets;
-
-                if (m_targets.GetItemTarget() == null)
+                Item item = m_targets.GetItemTarget();
+                if (item == null)
                     return SpellCastResult.ItemGone;
 
-                if (!m_targets.GetItemTarget().IsFitToSpellRequirements(m_spellInfo))
+                if (!item.IsFitToSpellRequirements(m_spellInfo))
                     return SpellCastResult.EquippedItemClass;
             }
             // if not item target then required item must be equipped
@@ -5868,7 +5918,10 @@ namespace Game.Spells
                             }
                         }
                         if (!player.HasItemCount(itemid, itemcount))
+                        {
+                            param1 = itemid;
                             return SpellCastResult.Reagents;
+                        }
                     }
                 }
 
@@ -6073,21 +6126,26 @@ namespace Game.Spells
                         }
                     case SpellEffectName.Prospecting:
                         {
-                            if (m_targets.GetItemTarget() == null)
+                            Item item = m_targets.GetItemTarget();
+                            if (!item)
                                 return SpellCastResult.CantBeProspected;
                             //ensure item is a prospectable ore
-                            if (!Convert.ToBoolean(m_targets.GetItemTarget().GetTemplate().GetFlags() & ItemFlags.IsProspectable))
+                            if (!Convert.ToBoolean(item.GetTemplate().GetFlags() & ItemFlags.IsProspectable))
                                 return SpellCastResult.CantBeProspected;
                             //prevent prospecting in trade slot
-                            if (m_targets.GetItemTarget().GetOwnerGUID() != m_caster.GetGUID())
+                            if (item.GetOwnerGUID() != m_caster.GetGUID())
                                 return SpellCastResult.CantBeProspected;
                             //Check for enough skill in jewelcrafting
-                            uint item_prospectingskilllevel = m_targets.GetItemTarget().GetTemplate().GetRequiredSkillRank();
+                            uint item_prospectingskilllevel = item.GetTemplate().GetRequiredSkillRank();
                             if (item_prospectingskilllevel > player.GetSkillValue(SkillType.Jewelcrafting))
                                 return SpellCastResult.LowCastlevel;
                             //make sure the player has the required ores in inventory
-                            if (m_targets.GetItemTarget().GetCount() < 5)
+                            if (item.GetCount() < 5)
+                            {
+                                param1 = item.GetEntry();
+                                param2 = 5;
                                 return SpellCastResult.NeedMoreItems;
+                            }
 
                             if (!LootStorage.Prospecting.HaveLootFor(m_targets.GetItemTargetEntry()))
                                 return SpellCastResult.CantBeProspected;
@@ -6096,21 +6154,26 @@ namespace Game.Spells
                         }
                     case SpellEffectName.Milling:
                         {
-                            if (m_targets.GetItemTarget() == null)
+                            Item item = m_targets.GetItemTarget();
+                            if (!item)
                                 return SpellCastResult.CantBeMilled;
                             //ensure item is a millable herb
-                            if (!(m_targets.GetItemTarget().GetTemplate().GetFlags().HasAnyFlag(ItemFlags.IsMillable)))
+                            if (!(item.GetTemplate().GetFlags().HasAnyFlag(ItemFlags.IsMillable)))
                                 return SpellCastResult.CantBeMilled;
                             //prevent milling in trade slot
-                            if (m_targets.GetItemTarget().GetOwnerGUID() != m_caster.GetGUID())
+                            if (item.GetOwnerGUID() != m_caster.GetGUID())
                                 return SpellCastResult.CantBeMilled;
                             //Check for enough skill in inscription
-                            uint item_millingskilllevel = m_targets.GetItemTarget().GetTemplate().GetRequiredSkillRank();
+                            uint item_millingskilllevel = item.GetTemplate().GetRequiredSkillRank();
                             if (item_millingskilllevel > player.GetSkillValue(SkillType.Inscription))
                                 return SpellCastResult.LowCastlevel;
                             //make sure the player has the required herbs in inventory
-                            if (m_targets.GetItemTarget().GetCount() < 5)
+                            if (item.GetCount() < 5)
+                            {
+                                param1 = item.GetEntry();
+                                param2 = 5;
                                 return SpellCastResult.NeedMoreItems;
+                            }
 
                             if (!LootStorage.Milling.HaveLootFor(m_targets.GetItemTargetEntry()))
                                 return SpellCastResult.CantBeMilled;
@@ -6675,7 +6738,7 @@ namespace Game.Spells
             {
                 Log.outDebug(LogFilter.Spells, "Spell.LoadScripts: Script `{0}` for spell `{1}` is loaded now", script._GetScriptName(), m_spellInfo.Id);
                 script.Register();
-            }            
+            }
         }
 
         void CallScriptBeforeCastHandlers()
@@ -7145,7 +7208,7 @@ namespace Game.Spells
             return false;
         }
 
-        public static implicit operator bool (Spell spell)
+        public static implicit operator bool(Spell spell)
         {
             return spell != null;
         }

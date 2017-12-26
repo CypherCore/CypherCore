@@ -60,7 +60,7 @@ namespace Scripts.Northrend
         public npc_mageguard_dalaran(Creature creature) : base(creature)
         {
             creature.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable);
-            creature.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchools.Normal, true);
+            creature.ApplySpellImmune(0, SpellImmunity.Damage, (uint)SpellSchools.Normal, true);
             creature.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Magic, true);
         }
 

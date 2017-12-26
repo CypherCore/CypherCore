@@ -2703,7 +2703,7 @@ namespace Game.Spells
                 {
                     //Players on flying mounts must be immune to polymorph
                     if (target.IsTypeId(TypeId.Player))
-                        target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Polymorph, apply);
+                        target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, (uint)Mechanics.Polymorph, apply);
 
                     // Dragonmaw Illusion (overwrite mount model, mounted aura already applied)
                     if (apply && target.HasAuraEffect(42016, 0) && target.GetMountID() != 0)
@@ -2767,228 +2767,13 @@ namespace Game.Spells
         /***                     IMMUNITY                      ***/
         /*********************************************************/
         [AuraEffectHandler(AuraType.MechanicImmunityMask)]
-        void HandleModStateImmunityMask(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        void HandleModMechanicImmunityMask(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
             Unit target = aurApp.GetTarget();
-            List<AuraType> aura_immunity_list = new List<AuraType>();
-
-            uint mechanic_immunity_list = (1 << (int)Mechanics.Snare) | (1 << (int)Mechanics.Root)
-                | (1 << (int)Mechanics.Fear) | (1 << (int)Mechanics.Stun)
-                | (1 << (int)Mechanics.Sleep) | (1 << (int)Mechanics.Charm)
-                | (1 << (int)Mechanics.Sapped) | (1 << (int)Mechanics.Horror)
-                | (1 << (int)Mechanics.Polymorph) | (1 << (int)Mechanics.Disoriented)
-                | (1 << (int)Mechanics.Freeze) | (1 << (int)Mechanics.Turn);
-
-            int miscVal = GetMiscValue();
-            switch (miscVal)
-            {
-                case 27:
-                    target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Silence, apply);
-                    aura_immunity_list.Add(AuraType.ModSilence);
-                    break;
-                case 96:
-                case 1615:
-                    {
-                        if (HasAmount())
-                        {
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Snare, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Root, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Fear, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Stun, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Sleep, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Charm, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Sapped, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Horror, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Polymorph, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Disoriented, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Freeze, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Turn, apply);
-                            aura_immunity_list.Add(AuraType.ModStun);
-                            aura_immunity_list.Add(AuraType.ModDecreaseSpeed);
-                            aura_immunity_list.Add(AuraType.ModRoot);
-                            aura_immunity_list.Add(AuraType.ModConfuse);
-                            aura_immunity_list.Add(AuraType.ModFear);
-                            aura_immunity_list.Add(AuraType.ModRoot2);
-                        }
-                        break;
-                    }
-                case 679:
-                    {
-                        if (GetId() == 57742)
-                        {
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Snare, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Root, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Fear, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Stun, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Sleep, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Charm, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Sapped, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Horror, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Polymorph, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Disoriented, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Freeze, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Turn, apply);
-                            aura_immunity_list.Add(AuraType.ModStun);
-                            aura_immunity_list.Add(AuraType.ModDecreaseSpeed);
-                            aura_immunity_list.Add(AuraType.ModRoot);
-                            aura_immunity_list.Add(AuraType.ModConfuse);
-                            aura_immunity_list.Add(AuraType.ModFear);
-                            aura_immunity_list.Add(AuraType.ModRoot2);
-                        }
-                        break;
-                    }
-                case 1557:
-                    {
-                        if (GetId() == 64187)
-                        {
-                            mechanic_immunity_list = (1 << (int)Mechanics.Stun);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Stun, apply);
-                            aura_immunity_list.Add(AuraType.ModStun);
-                        }
-                        else
-                        {
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Snare, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Root, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Fear, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Stun, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Sleep, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Charm, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Sapped, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Horror, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Polymorph, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Disoriented, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Freeze, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Turn, apply);
-                            aura_immunity_list.Add(AuraType.ModStun);
-                            aura_immunity_list.Add(AuraType.ModDecreaseSpeed);
-                            aura_immunity_list.Add(AuraType.ModRoot);
-                            aura_immunity_list.Add(AuraType.ModConfuse);
-                            aura_immunity_list.Add(AuraType.ModFear);
-                            aura_immunity_list.Add(AuraType.ModRoot2);
-                        }
-                        break;
-                    }
-                case 1614:
-                case 1694:
-                    {
-                        target.ApplySpellImmune(GetId(), SpellImmunity.Effect, SpellEffectName.AttackMe, apply);
-                        aura_immunity_list.Add(AuraType.ModTaunt);
-                        break;
-                    }
-                case 1630:
-                    {
-                        if (!HasAmount())
-                        {
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Effect, SpellEffectName.AttackMe, apply);
-                            aura_immunity_list.Add(AuraType.ModTaunt);
-                        }
-                        else
-                        {
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Snare, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Root, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Fear, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Stun, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Sleep, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Charm, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Sapped, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Horror, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Polymorph, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Disoriented, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Freeze, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Turn, apply);
-                            aura_immunity_list.Add(AuraType.ModStun);
-                            aura_immunity_list.Add(AuraType.ModDecreaseSpeed);
-                            aura_immunity_list.Add(AuraType.ModRoot);
-                            aura_immunity_list.Add(AuraType.ModConfuse);
-                            aura_immunity_list.Add(AuraType.ModFear);
-                            aura_immunity_list.Add(AuraType.ModRoot2);
-                        }
-                        break;
-                    }
-                case 477:
-                case 1733:
-                    {
-                        if (!HasAmount())
-                        {
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Snare, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Root, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Fear, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Stun, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Sleep, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Charm, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Sapped, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Horror, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Polymorph, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Disoriented, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Freeze, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Turn, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Effect, SpellEffectName.KnockBack, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Effect, SpellEffectName.KnockBackDest, apply);
-                            aura_immunity_list.Add(AuraType.ModStun);
-                            aura_immunity_list.Add(AuraType.ModDecreaseSpeed);
-                            aura_immunity_list.Add(AuraType.ModRoot);
-                            aura_immunity_list.Add(AuraType.ModConfuse);
-                            aura_immunity_list.Add(AuraType.ModFear);
-                            aura_immunity_list.Add(AuraType.ModRoot2);
-                        }
-                        break;
-                    }
-                case 878:
-                    {
-                        if (GetAmount() == 1)
-                        {
-                            mechanic_immunity_list = (1 << (int)Mechanics.Snare) | (1 << (int)Mechanics.Stun)
-                                | (1 << (int)Mechanics.Disoriented) | (1 << (int)Mechanics.Freeze);
-
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Snare, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Stun, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Disoriented, apply);
-                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Freeze, apply);
-                            aura_immunity_list.Add(AuraType.ModStun);
-                            aura_immunity_list.Add(AuraType.ModDecreaseSpeed);
-                        }
-                        break;
-                    }
-                default:
-                    break;
-            }
-
-            if (aura_immunity_list.Empty())
-            {
-                if (Convert.ToBoolean(miscVal & (1 << 10)))
-                    aura_immunity_list.Add(AuraType.ModStun);
-                if (Convert.ToBoolean(miscVal & (1 << 1)))
-                    aura_immunity_list.Add(AuraType.Transform);
-
-                // These flag can be recognized wrong:
-                if (Convert.ToBoolean(miscVal & (1 << 6)))
-                    aura_immunity_list.Add(AuraType.ModDecreaseSpeed);
-                if (Convert.ToBoolean(miscVal & (1 << 0)))
-                {
-                    aura_immunity_list.Add(AuraType.ModRoot);
-                    aura_immunity_list.Add(AuraType.ModRoot2);
-                }
-                if (Convert.ToBoolean(miscVal & (1 << 2)))
-                    aura_immunity_list.Add(AuraType.ModConfuse);
-                if (Convert.ToBoolean(miscVal & (1 << 9)))
-                    aura_immunity_list.Add(AuraType.ModFear);
-                if (Convert.ToBoolean(miscVal & (1 << 7)))
-                    aura_immunity_list.Add(AuraType.ModDisarm);
-            }
-
-            // apply immunities
-            foreach (var iter in aura_immunity_list)
-                target.ApplySpellImmune(GetId(), SpellImmunity.State, iter, apply);
-
-            if (apply && GetSpellInfo().HasAttribute(SpellAttr1.DispelAurasOnImmunity))
-            {
-                target.RemoveAurasWithMechanic(mechanic_immunity_list, AuraRemoveMode.Default, GetId());
-                foreach (var iter in aura_immunity_list)
-                    target.RemoveAurasByType(iter);
-            }
+            m_spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
         }
 
         [AuraEffectHandler(AuraType.MechanicImmunity)]
@@ -2998,52 +2783,7 @@ namespace Game.Spells
                 return;
 
             Unit target = aurApp.GetTarget();
-            uint mechanic;
-
-            switch (GetId())
-            {
-                case 34471: // The Beast Within
-                case 19574: // Bestial Wrath
-                    mechanic = (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
-                    target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Charm, apply);
-                    target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Disoriented, apply);
-                    target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Fear, apply);
-                    target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Root, apply);
-                    target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Sleep, apply);
-                    target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Snare, apply);
-                    target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Stun, apply);
-                    target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Freeze, apply);
-                    target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Knockout, apply);
-                    target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Polymorph, apply);
-                    target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Banish, apply);
-                    target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Shackle, apply);
-                    target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Turn, apply);
-                    target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Horror, apply);
-                    target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Daze, apply);
-                    target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Sapped, apply);
-                    break;
-                case 42292: // PvP trinket
-                case 59752: // Every Man for Himself
-                case 53490: // Bullheaded
-                    mechanic = (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
-                    // Actually we should apply immunities here, too, but the aura has only 100 ms duration, so there is practically no point
-                    break;
-                case 54508: // Demonic Empowerment
-                    mechanic = (1 << (int)Mechanics.Snare) | (1 << (int)Mechanics.Root);
-                    target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Snare, apply);
-                    target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Root, apply);
-                    target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, Mechanics.Stun, apply);
-                    break;
-                default:
-                    if (GetMiscValue() < 1)
-                        return;
-                    mechanic = (uint)(1 << GetMiscValue());
-                    target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, GetMiscValue(), apply);
-                    break;
-            }
-
-            if (apply && GetSpellInfo().HasAttribute(SpellAttr1.DispelAurasOnImmunity))
-                target.RemoveAurasWithMechanic(mechanic, AuraRemoveMode.Default, GetId());
+            m_spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
         }
 
         [AuraEffectHandler(AuraType.EffectImmunity)]
@@ -3053,8 +2793,7 @@ namespace Game.Spells
                 return;
 
             Unit target = aurApp.GetTarget();
-
-            target.ApplySpellImmune(GetId(), SpellImmunity.Effect, GetMiscValue(), apply);
+            m_spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
 
             // when removing flag aura, handle flag drop
             Player player = target.ToPlayer();
@@ -3078,11 +2817,7 @@ namespace Game.Spells
                 return;
 
             Unit target = aurApp.GetTarget();
-
-            target.ApplySpellImmune(GetId(), SpellImmunity.State, GetMiscValue(), apply);
-
-            if (apply && GetSpellInfo().HasAttribute(SpellAttr1.DispelAurasOnImmunity))
-                target.RemoveAurasByType((AuraType)GetMiscValue(), ObjectGuid.Empty, GetBase());
+            m_spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
         }
 
         [AuraEffectHandler(AuraType.SchoolImmunity)]
@@ -3092,8 +2827,7 @@ namespace Game.Spells
                 return;
 
             Unit target = aurApp.GetTarget();
-
-            target.ApplySpellImmune(GetId(), SpellImmunity.School, (uint)GetMiscValue(), (apply));
+            m_spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
 
             if (GetSpellInfo().Mechanic == Mechanics.Banish)
             {
@@ -3103,9 +2837,9 @@ namespace Game.Spells
                 {
                     bool banishFound = false;
                     var banishAuras = target.GetAuraEffectsByType(GetAuraType());
-                    foreach (var eff in banishAuras)
+                    foreach (var aurEff in banishAuras)
                     {
-                        if (eff.GetSpellInfo().Mechanic == Mechanics.Banish)
+                        if (aurEff.GetSpellInfo().Mechanic == Mechanics.Banish)
                         {
                             banishFound = true;
                             break;
@@ -3124,21 +2858,6 @@ namespace Game.Spells
             if (GetSpellInfo().HasAttribute(SpellAttr1.DispelAurasOnImmunity)
                 && GetSpellInfo().HasAttribute(SpellAttr2.DamageReducedShield))
                 target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ImmuneOrLostSelection);
-
-            /// @todo optimalize this cycle - use RemoveAurasWithInterruptFlags call or something else
-            if ((apply) && GetSpellInfo().HasAttribute(SpellAttr1.DispelAurasOnImmunity) && GetSpellInfo().IsPositive()) //Only positive immunity removes auras
-            {
-                int schoolMask = GetMiscValue();
-                target.RemoveAppliedAuras(aurApp1 =>
-                {
-                    SpellInfo spell = aurApp1.GetBase().GetSpellInfo();
-                    return Convert.ToBoolean((int)spell.GetSchoolMask() & schoolMask)//Check for school mask
-                        && GetSpellInfo().CanDispelAura(spell)
-                        && !aurApp1.IsPositive()          //Don't remove positive spells
-                        && !spell.IsPassive()                      // Don't remove passive auras
-                        && spell.Id != GetId();               //Don't remove self
-                });
-            }
         }
 
         [AuraEffectHandler(AuraType.DamageImmunity)]
@@ -3148,8 +2867,7 @@ namespace Game.Spells
                 return;
 
             Unit target = aurApp.GetTarget();
-
-            target.ApplySpellImmune(GetId(), SpellImmunity.Damage, (uint)GetMiscValue(), apply);
+            m_spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
         }
 
         [AuraEffectHandler(AuraType.DispelImmunity)]
@@ -3159,8 +2877,7 @@ namespace Game.Spells
                 return;
 
             Unit target = aurApp.GetTarget();
-
-            target.ApplySpellDispelImmunity(m_spellInfo, (DispelType)GetMiscValue(), (apply));
+            m_spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
         }
 
         /*********************************************************/
@@ -4608,7 +4325,7 @@ namespace Game.Spells
                         {
                             // Recently Bandaged
                             case 11196:
-                                target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, GetMiscValue(), apply);
+                                target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, (uint)GetMiscValue(), apply);
                                 break;
                             // Unstable Power
                             case 24658:

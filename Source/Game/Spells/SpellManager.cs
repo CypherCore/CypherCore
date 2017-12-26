@@ -2815,6 +2815,21 @@ namespace Game.Entities
             Log.outInfo(LogFilter.ServerLoading, "Loaded SpellInfo diminishing infos in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
+        public void LoadSpellInfoImmunities()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            foreach (SpellInfo spellInfo in mSpellInfoMap.Values)
+            {
+                if (spellInfo == null)
+                    continue;
+
+                spellInfo._LoadImmunityInfo();
+            }
+
+            Log.outInfo(LogFilter.ServerLoading, "Loaded SpellInfo immunity infos in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
+        }
+
         public void LoadPetFamilySpellsStore()
         {
             Dictionary<uint, SpellLevelsRecord> levelsBySpell = new Dictionary<uint, SpellLevelsRecord>();
