@@ -2655,8 +2655,9 @@ namespace Game.Entities
             else if ((u2.IsTypeId(TypeId.Player) && u1.IsTypeId(TypeId.Unit) && u1.ToCreature().GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.TreatAsRaidUnit)) ||
                 (u1.IsTypeId(TypeId.Player) && u2.IsTypeId(TypeId.Unit) && u2.ToCreature().GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.TreatAsRaidUnit)))
                 return true;
-            else
-                return false;
+
+            // else u1->GetTypeId() == u2->GetTypeId() == TYPEID_UNIT
+            return u1.getFaction() == u2.getFaction();
         }
 
         public bool IsInRaidWith(Unit unit)
@@ -2674,8 +2675,9 @@ namespace Game.Entities
             else if ((u2.IsTypeId(TypeId.Player) && u1.IsTypeId(TypeId.Unit) && u1.ToCreature().GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.TreatAsRaidUnit)) ||
                     (u1.IsTypeId(TypeId.Player) && u2.IsTypeId(TypeId.Unit) && u2.ToCreature().GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.TreatAsRaidUnit)))
                 return true;
-            else
-                return false;
+
+            // else u1->GetTypeId() == u2->GetTypeId() == TYPEID_UNIT
+            return u1.getFaction() == u2.getFaction();
         }
 
         public SheathState GetSheath() { return (SheathState)GetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.SheathState); }
