@@ -1214,6 +1214,8 @@ namespace Game.Entities
                             procEntry.Charges = spellInfo.ProcCharges;
                         if (procEntry.Chance == 0 && procEntry.ProcsPerMinute == 0)
                             procEntry.Chance = spellInfo.ProcChance;
+                        if (procEntry.Cooldown == 0)
+                            procEntry.Cooldown = spellInfo.ProcCooldown;
 
                         // validate data
                         if (Convert.ToBoolean(procEntry.SchoolMask & ~SpellSchoolMask.All))
@@ -1353,7 +1355,7 @@ namespace Game.Entities
 
                 procEntry.ProcsPerMinute = 0;
                 procEntry.Chance = spellInfo.ProcChance;
-                procEntry.Cooldown = 0;
+                procEntry.Cooldown = spellInfo.ProcCooldown;
                 procEntry.Charges = spellInfo.ProcCharges;
 
                 mSpellProcMap[spellInfo.Id] = procEntry;
