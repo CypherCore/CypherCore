@@ -88,7 +88,7 @@ namespace Framework.Networking
         {
             try
             {
-                _stream.AuthenticateAsServer(certificate, false, System.Security.Authentication.SslProtocols.Tls12, false);
+                _stream.AuthenticateAsServer(certificate, false, System.Security.Authentication.SslProtocols.Tls, false);
             }
             catch(Exception ex)
             {
