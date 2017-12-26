@@ -2573,7 +2573,7 @@ namespace Game.Spells
 
             if (m_caster.IsTypeId(TypeId.Unit) && !m_caster.HasFlag(UnitFields.Flags, UnitFlags.PlayerControlled)) // _UNIT actually means creature. for some reason.
             {
-                if (!(IsNextMeleeSwingSpell() || IsAutoRepeat() || _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreSetFacing)))
+                if (!(m_spellInfo.IsNextMeleeSwingSpell() || IsAutoRepeat() || _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreSetFacing)))
                 {
                     if (m_targets.GetObjectTarget() && m_caster != m_targets.GetObjectTarget())
                         m_caster.ToCreature().FocusTarget(this, m_targets.GetObjectTarget());
@@ -2589,8 +2589,8 @@ namespace Game.Spells
             if (((m_spellInfo.IsChanneled() || m_casttime != 0) && m_caster.IsTypeId(TypeId.Player) && !(m_caster.IsCharmed() && m_caster.GetCharmerGUID().IsCreature()) && m_caster.isMoving() &&
                 m_spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.Movement) && !m_caster.HasAuraTypeWithAffectMask(AuraType.CastWhileWalking, m_spellInfo)))
             {
-                // 1. Is a channel spell, 2. Has no casttime, 3. And has flag to allow movement during channel
-                if (!(m_spellInfo.IsChanneled() && m_casttime == 0 && m_spellInfo.HasAttribute(SpellAttr5.CanChannelWhenMoving)))
+                // 1. Has casttime, 2. Or doesn't have flag to allow movement during channel
+                if (m_casttime != 0 || !m_spellInfo.IsMoveAllowedChannel())
                 {
                     SendCastResult(SpellCastResult.Moving);
                     finish(false);
@@ -3172,7 +3172,7 @@ namespace Game.Spells
                 !m_caster.HasAuraTypeWithAffectMask(AuraType.CastWhileWalking, m_spellInfo))
             {
                 // don't cancel for melee, autorepeat, triggered and instant spells
-                if (!IsNextMeleeSwingSpell() && !IsAutoRepeat() && !IsTriggered() && !(IsChannelActive() && m_spellInfo.HasAttribute(SpellAttr5.CanChannelWhenMoving)))
+                if (!m_spellInfo.IsNextMeleeSwingSpell() && !IsAutoRepeat() && !IsTriggered() && !(IsChannelActive() && m_spellInfo.IsMoveAllowedChannel()))
                 {
                     // if charmed by creature, trust the AI not to cheat and allow the cast to proceed
                     // @todo this is a hack, "creature" movesplines don't differentiate turning/moving right now
@@ -3194,7 +3194,7 @@ namespace Game.Spells
                                 m_timer -= (int)difftime;
                         }
 
-                        if (m_timer == 0 && !IsNextMeleeSwingSpell() && !IsAutoRepeat())
+                        if (m_timer == 0 && !m_spellInfo.IsNextMeleeSwingSpell() && !IsAutoRepeat())
                             // don't CheckCast for instant spells - done in spell.prepare, skip duplicate checks, needed for range checks for example
                             cast(m_casttime == 0);
                         break;
@@ -5643,7 +5643,7 @@ namespace Game.Spells
             float minRange = 0.0f;
             float maxRange = 0.0f;
 
-            if (strict && IsNextMeleeSwingSpell())
+            if (strict && m_spellInfo.IsNextMeleeSwingSpell())
             {
                 maxRange = 100.0f;
                 return Tuple.Create(minRange, maxRange);
@@ -6333,14 +6333,14 @@ namespace Game.Spells
 
         public CurrentSpellTypes GetCurrentContainer()
         {
-            if (IsNextMeleeSwingSpell())
+            if (m_spellInfo.IsNextMeleeSwingSpell())
                 return CurrentSpellTypes.Melee;
             else if (IsAutoRepeat())
                 return CurrentSpellTypes.AutoRepeat;
             else if (m_spellInfo.IsChanneled())
                 return CurrentSpellTypes.Channeled;
-            else
-                return CurrentSpellTypes.Generic;
+
+            return CurrentSpellTypes.Generic;
         }
 
         bool CheckEffectTarget(Unit target, SpellEffectInfo effect, Position losPosition)
@@ -6421,11 +6421,6 @@ namespace Game.Spells
                 return false;
 
             return true;
-        }
-
-        bool IsNextMeleeSwingSpell()
-        {
-            return m_spellInfo.HasAttribute(SpellAttr0.OnNextSwing | SpellAttr0.OnNextSwing2);
         }
 
         bool IsAutoActionResetSpell()

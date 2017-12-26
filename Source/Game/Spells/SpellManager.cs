@@ -2436,6 +2436,10 @@ namespace Game.Entities
                     case 121093:
                         spellInfo.SpellFamilyFlags[2] = 0x80000000;
                         break;
+                    // Unleashed Souls
+                    case 68979:
+                        spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(13); // 50000yd
+                        break;
                     // VIOLET HOLD SPELLS
                     //
                     case 54258: // Water Globule (Ichoron)

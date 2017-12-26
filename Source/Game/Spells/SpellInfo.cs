@@ -571,9 +571,19 @@ namespace Game.Spells
             return HasAttribute(SpellAttr1.Channeled1 | SpellAttr1.Channeled2);
         }
 
+        public bool IsMoveAllowedChannel()
+        {
+            return IsChanneled() && HasAttribute(SpellAttr5.CanChannelWhenMoving);
+        }
+
         public bool NeedsComboPoints()
         {
             return HasAttribute(SpellAttr1.ReqComboPoints1 | SpellAttr1.ReqComboPoints2);
+        }
+
+        public bool IsNextMeleeSwingSpell()
+        {
+            return HasAttribute(SpellAttr0.OnNextSwing | SpellAttr0.OnNextSwing2);
         }
 
         public bool IsBreakingStealth()
