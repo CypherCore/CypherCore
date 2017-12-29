@@ -1575,11 +1575,6 @@ namespace Game.Entities
 
         void LearnSkillRewardedSpells(uint skillId, uint skillValue)
         {
-            // bad hack to work around data being suited only for the client - AcquireMethod == SKILL_LINE_ABILITY_LEARNED_ON_SKILL_LEARN for riding
-            // client uses it to show riding in spellbook as trainable
-            if (skillId == (uint)SkillType.Riding)
-                return;
-
             uint raceMask = getRaceMask();
             uint classMask = getClassMask();
             foreach (var ability in CliDB.SkillLineAbilityStorage.Values)
@@ -1592,6 +1587,10 @@ namespace Game.Entities
                     continue;
 
                 if (ability.AcquireMethod != AbilytyLearnType.OnSkillValue && ability.AcquireMethod != AbilytyLearnType.OnSkillLearn)
+                    continue;
+
+                // AcquireMethod == 2 && NumSkillUps == 1 --> automatically learn riding skill spell, else we skip it (client shows riding in spellbook as trainable).
+                if (skillId == (uint)SkillType.Riding && (ability.AcquireMethod != AbilytyLearnType.OnSkillLearn || ability.NumSkillUps != 1))
                     continue;
 
                 // Check race if set
