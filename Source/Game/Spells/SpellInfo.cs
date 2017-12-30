@@ -311,6 +311,35 @@ namespace Game.Spells
             return false;
         }
 
+        public bool HasOnlyDamageEffects()
+        {
+            foreach (var pair in _effects)
+            {
+                foreach (SpellEffectInfo effect in pair.Value)
+                {
+                    if (effect == null)
+                        continue;
+
+                    switch (effect.Effect)
+                    {
+                        case SpellEffectName.WeaponDamage:
+                        case SpellEffectName.WeaponDamageNoschool:
+                        case SpellEffectName.NormalizedWeaponDmg:
+                        case SpellEffectName.WeaponPercentDamage:
+                        case SpellEffectName.SchoolDamage:
+                        case SpellEffectName.EnvironmentalDamage:
+                        case SpellEffectName.HealthLeech:
+                        case SpellEffectName.DamageFromMaxHealthPCT:
+                            continue;
+                        default:
+                            return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
         public bool IsExplicitDiscovery()
         {
             SpellEffectInfo effect0 = GetEffect(Difficulty.None, 0);

@@ -2001,12 +2001,29 @@ namespace Game.Spells
                 // Fill base damage struct (unitTarget - is real spell target)
                 SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(caster, unitTarget, m_spellInfo.Id, m_SpellVisual, m_spellSchoolMask, m_castId);
 
-                // Add bonuses and fill damageInfo struct
-                caster.CalculateSpellDamageTaken(damageInfo, m_damage, m_spellInfo, m_attackType, target.crit);
-                caster.DealDamageMods(damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
+                // Check damage immunity
+                if (unitTarget.IsImmunedToDamage(m_spellInfo))
+                {
+                    hitMask = ProcFlagsHit.Immune;
+                    m_damage = 0;
+                    // no packet found in sniffs
+                }
+                else
+                {
+                    // Add bonuses and fill damageInfo struct
+                    caster.CalculateSpellDamageTaken(damageInfo, m_damage, m_spellInfo, m_attackType, target.crit);
+                    caster.DealDamageMods(damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
 
-                hitMask |= Unit.createProcHitMask(damageInfo, missInfo);
-                procVictim |= ProcFlags.TakenDamage;
+                    hitMask |= Unit.createProcHitMask(damageInfo, missInfo);
+                    procVictim |= ProcFlags.TakenDamage;
+
+                    m_damage = (int)damageInfo.damage;
+
+                    caster.DealSpellDamage(damageInfo, true);
+
+                    // Send log damage message to client
+                    caster.SendSpellNonMeleeDamageLog(damageInfo);
+                }
 
                 // Do triggers for unit
                 if (canEffectTrigger)
@@ -2018,13 +2035,6 @@ namespace Game.Spells
                         (m_spellInfo.DmgClass == SpellDmgClass.Melee || m_spellInfo.DmgClass == SpellDmgClass.Ranged))
                         caster.ToPlayer().CastItemCombatSpell(spellDamageInfo);
                 }
-
-                m_damage = (int)damageInfo.damage;
-
-                caster.DealSpellDamage(damageInfo, true);
-
-                // Send log damage message to client
-                caster.SendSpellNonMeleeDamageLog(damageInfo);
             }
             // Passive spell hits/misses or active spells only misses (only triggers)
             else

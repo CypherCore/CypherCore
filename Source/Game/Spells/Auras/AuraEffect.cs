@@ -5797,6 +5797,12 @@ namespace Game.Spells
         {
             Unit target = aurApp.GetTarget();
             Unit triggerTarget = eventInfo.GetProcTarget();
+            if (triggerTarget.HasUnitState(UnitState.Isolated) || triggerTarget.IsImmunedToDamage(GetSpellInfo()))
+            {
+                SendTickImmune(triggerTarget, target);
+                return;
+            }
+
             SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(target, triggerTarget, GetId(), GetBase().GetSpellXSpellVisualId(), GetSpellInfo().SchoolMask, GetBase().GetCastGUID());
             int damage = (int)target.SpellDamageBonusDone(triggerTarget, GetSpellInfo(), (uint)GetAmount(), DamageEffectType.SpellDirect, GetSpellEffectInfo());
             damage = (int)triggerTarget.SpellDamageBonusTaken(target, GetSpellInfo(), (uint)damage, DamageEffectType.SpellDirect, GetSpellEffectInfo());

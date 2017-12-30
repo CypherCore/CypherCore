@@ -810,19 +810,20 @@ namespace Game.Entities
                 var vDamageShieldsCopy = victim.GetAuraEffectsByType(AuraType.DamageShield);
                 foreach (var dmgShield in vDamageShieldsCopy)
                 {
-                    SpellInfo i_spellProto = dmgShield.GetSpellInfo();
+                    SpellInfo spellInfo = dmgShield.GetSpellInfo();
+
                     // Damage shield can be resisted...
-                    var missInfo = victim.SpellHitResult(this, i_spellProto, false);
-                    if (missInfo != 0)
+                    var missInfo = victim.SpellHitResult(this, spellInfo, false);
+                    if (missInfo != SpellMissInfo.None)
                     {
-                        victim.SendSpellMiss(this, i_spellProto.Id, missInfo);
+                        victim.SendSpellMiss(this, spellInfo.Id, missInfo);
                         continue;
                     }
 
                     // ...or immuned
-                    if (IsImmunedToDamage(i_spellProto))
+                    if (IsImmunedToDamage(spellInfo))
                     {
-                        victim.SendSpellDamageImmune(this, i_spellProto.Id, false);
+                        victim.SendSpellDamageImmune(this, spellInfo.Id, false);
                         continue;
                     }
 
@@ -830,11 +831,11 @@ namespace Game.Entities
                     Unit caster = dmgShield.GetCaster();
                     if (caster)
                     {
-                        damage = caster.SpellDamageBonusDone(this, i_spellProto, damage, DamageEffectType.SpellDirect, dmgShield.GetSpellEffectInfo());
-                        damage = SpellDamageBonusTaken(caster, i_spellProto, damage, DamageEffectType.SpellDirect, dmgShield.GetSpellEffectInfo());
+                        damage = caster.SpellDamageBonusDone(this, spellInfo, damage, DamageEffectType.SpellDirect, dmgShield.GetSpellEffectInfo());
+                        damage = SpellDamageBonusTaken(caster, spellInfo, damage, DamageEffectType.SpellDirect, dmgShield.GetSpellEffectInfo());
                     }
 
-                    DamageInfo damageInfo1 = new DamageInfo(this, victim, damage, i_spellProto, i_spellProto.GetSchoolMask(), DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
+                    DamageInfo damageInfo1 = new DamageInfo(this, victim, damage, spellInfo, spellInfo.GetSchoolMask(), DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
                     victim.CalcAbsorbResist(damageInfo1);
                     damage = damageInfo1.GetDamage();
                     // No Unit.CalcAbsorbResist here - opcode doesn't send that data - this damage is probably not affected by that
@@ -843,13 +844,13 @@ namespace Game.Entities
                     SpellDamageShield damageShield = new SpellDamageShield();
                     damageShield.Attacker = victim.GetGUID();
                     damageShield.Defender = GetGUID();
-                    damageShield.SpellID = i_spellProto.Id;
+                    damageShield.SpellID = spellInfo.Id;
                     damageShield.TotalDamage = damage;
                     damageShield.OverKill = (uint)Math.Max(damage - GetHealth(), 0);
-                    damageShield.SchoolMask = (uint)i_spellProto.SchoolMask;
+                    damageShield.SchoolMask = (uint)spellInfo.SchoolMask;
                     damageShield.LogAbsorbed = damageInfo1.GetAbsorb();
 
-                    victim.DealDamage(this, damage, null, DamageEffectType.SpellDirect, i_spellProto.GetSchoolMask(), i_spellProto, true);
+                    victim.DealDamage(this, damage, null, DamageEffectType.SpellDirect, spellInfo.GetSchoolMask(), spellInfo, true);
                     damageShield.LogData.Initialize(this);
 
                     victim.SendCombatLogMessage(damageShield);
@@ -858,12 +859,6 @@ namespace Game.Entities
         }
         public uint DealDamage(Unit victim, uint damage, CleanDamage cleanDamage = null, DamageEffectType damagetype = DamageEffectType.Direct, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal, SpellInfo spellProto = null, bool durabilityLoss = true)
         {
-            if (victim.IsImmunedToDamage(spellProto))
-            {
-                SendSpellDamageImmune(victim, spellProto.Id, false);
-                return 0;
-            }
-
             if (victim.IsAIEnabled)
                 victim.GetAI().DamageTaken(this, ref damage);
 
