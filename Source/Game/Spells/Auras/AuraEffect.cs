@@ -3411,15 +3411,9 @@ namespace Game.Spells
                 return;
 
             Unit target = aurApp.GetTarget();
-
             PowerType powerType = (PowerType)GetMiscValue();
-            // do not check power type, we can always modify the maximum
-            // as the client will not see any difference
-            // also, placing conditions that may change during the aura duration
-            // inside effect handlers is not a good idea
 
             UnitMods unitMod = (UnitMods.PowerStart + (int)powerType);
-
             target.HandleStatModifier(unitMod, UnitModifierType.TotalValue, GetAmount(), apply);
         }
 
@@ -3430,26 +3424,20 @@ namespace Game.Spells
                 return;
 
             Unit target = aurApp.GetTarget();
-
             PowerType powerType = (PowerType)GetMiscValue();
-            // do not check power type, we can always modify the maximum
-            // as the client will not see any difference
-            // also, placing conditions that may change during the aura duration
-            // inside effect handlers is not a good idea
 
             UnitMods unitMod = UnitMods.PowerStart + (int)powerType;
-            float amount = GetAmount();
 
-            if (apply)
-            {
-                target.HandleStatModifier(unitMod, UnitModifierType.TotalPCT, amount, apply);
-                target.ModifyPowerPct(powerType, amount, apply);
-            }
-            else
-            {
-                target.ModifyPowerPct(powerType, amount, apply);
-                target.HandleStatModifier(unitMod, UnitModifierType.TotalPCT, amount, apply);
-            }
+            // Save old powers for further calculation
+            int oldPower = target.GetPower(powerType);
+            int oldMaxPower = target.GetMaxPower(powerType);
+            
+            // Handle aura effect for max power
+            target.HandleStatModifier(unitMod, UnitModifierType.TotalPCT, GetAmount(), apply);
+
+            // Calculate the current power change
+            int change = target.GetMaxPower(powerType) - oldMaxPower;
+            change = (oldPower + change) - target.GetPower(powerType);
         }
 
         [AuraEffectHandler(AuraType.ModIncreaseHealthPercent)]

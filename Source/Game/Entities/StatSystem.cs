@@ -121,15 +121,9 @@ namespace Game.Entities
 
             return true;
         }
-        int GetMinPower(PowerType power) { return power == PowerType.LunarPower ? -100 : 0; }
-        // returns negative amount on power reduction
-        public int ModifyPowerPct(PowerType power, float pct, bool apply)
-        {
-            float amount = GetMaxPower(power);
-            MathFunctions.ApplyPercentModFloatVar(ref amount, pct, apply);
 
-            return ModifyPower(power, (int)amount - GetMaxPower(power));
-        }
+        int GetMinPower(PowerType power) { return power == PowerType.LunarPower ? -100 : 0; }
+
         // returns negative amount on power reduction
         public int ModifyPower(PowerType power, int dVal)
         {
