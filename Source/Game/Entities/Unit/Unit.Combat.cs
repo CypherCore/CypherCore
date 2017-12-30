@@ -1920,13 +1920,14 @@ namespace Game.Entities
                 CalcAbsorbResist(dmgInfo);
                 damageInfo.absorb = dmgInfo.GetAbsorb();
                 damageInfo.resist = dmgInfo.GetResist();
-                damageInfo.damage = dmgInfo.GetDamage();
 
                 if (damageInfo.absorb != 0)
                     damageInfo.HitInfo |= (damageInfo.damage - damageInfo.absorb == 0 ? HitInfo.FullAbsorb : HitInfo.PartialAbsorb);
 
                 if (damageInfo.resist != 0)
                     damageInfo.HitInfo |= (damageInfo.damage - damageInfo.resist == 0 ? HitInfo.FullResist : HitInfo.PartialResist);
+
+                damageInfo.damage = dmgInfo.GetDamage();
             }
             else // Impossible get negative result but....
                 damageInfo.damage = 0;

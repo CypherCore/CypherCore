@@ -2051,6 +2051,7 @@ namespace Framework.Constants
         HitTarget
     }
 
+    [Flags]
     public enum ProcFlags
     {
         None = 0x0,

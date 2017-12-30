@@ -165,7 +165,7 @@ namespace Game.DataStorage
         public uint ProcTypeMask;
         public uint ProcCategoryRecovery;
         public ushort CumulativeAura;
-        public byte SpellProcsPerMinuteID;
+        public ushort SpellProcsPerMinuteID;
         public byte DifficultyID;
         public byte ProcChance;
     }
