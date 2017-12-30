@@ -887,7 +887,7 @@ namespace Game.Entities
                             if (bound.Spell == dbc_node.Spell)
                             {
                                 Log.outError(LogFilter.Sql, "Spell {0} auto-learn spell {1} in spell.dbc then the record in `spell_learn_spell` is redundant, please fix DB.",
-                                    entry.SpellName, dbc_node.Spell);
+                                    entry.Id, dbc_node.Spell);
                                 found = true;
                                 break;
                             }

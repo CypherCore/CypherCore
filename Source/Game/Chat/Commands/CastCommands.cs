@@ -19,6 +19,7 @@ using Framework.Constants;
 using Framework.IO;
 using Game.Entities;
 using Game.Spells;
+using System;
 
 namespace Game.Chat
 {
@@ -53,10 +54,7 @@ namespace Game.Chat
                     return false;
             }
 
-            bool triggered = (triggeredStr != null);
-
-            handler.GetSession().GetPlayer().CastSpell(target, spellId, triggered);
-
+            handler.GetSession().GetPlayer().CastSpell(target, spellId, !triggeredStr.IsEmpty());
             return true;
         }
 
