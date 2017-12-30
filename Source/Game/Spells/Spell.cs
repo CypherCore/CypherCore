@@ -4928,7 +4928,7 @@ namespace Game.Spells
                         }
                     case SpellEffectName.Charge:
                         {
-                            if (m_caster.HasUnitState(UnitState.Root))
+                            if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreCasterAuras) && m_caster.HasUnitState(UnitState.Root))
                                 return SpellCastResult.Rooted;
 
                             if (GetSpellInfo().NeedsExplicitUnitTarget())

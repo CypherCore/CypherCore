@@ -1429,10 +1429,6 @@ namespace Game.Spells
                                 case 8091: // Armor
                                     _spellSpecific = SpellSpecificType.Scroll;
                                     break;
-                                case 12880: // Enrage (Enrage)
-                                case 57518: // Enrage (Wrecking Crew)
-                                    _spellSpecific = SpellSpecificType.WarriorEnrage;
-                                    break;
                             }
                         }
                         break;

@@ -371,9 +371,6 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading SpellInfo custom attributes...");
             Global.SpellMgr.LoadSpellInfoCustomAttributes();
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading SpellInfo SpellSpecific and AuraState...");
-            Global.SpellMgr.LoadSpellInfoSpellSpecificAndAuraState();
-
             Log.outInfo(LogFilter.ServerLoading, "Loading SpellInfo diminishing infos...");
             Global.SpellMgr.LoadSpellInfoDiminishing();
 
@@ -438,6 +435,9 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Spell Learn Skills...");
             Global.SpellMgr.LoadSpellLearnSkills();
+
+            Log.outInfo(LogFilter.ServerLoading, "Loading SpellInfo SpellSpecific and AuraState...");
+            Global.SpellMgr.LoadSpellInfoSpellSpecificAndAuraState();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Spell Learn Spells...");
             Global.SpellMgr.LoadSpellLearnSpells();
