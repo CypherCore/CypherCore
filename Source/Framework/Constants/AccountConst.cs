@@ -51,7 +51,6 @@ namespace Framework.Constants
 
     public enum RBACPermissions
     {
-        None = 0,
         InstantLogout = 1,
         SkipQueue = 2,
         JoinNormalBg = 3,
@@ -69,7 +68,7 @@ namespace Framework.Constants
         SkipCheckCharacterCreationClassmask = 15,
         SkipCheckCharacterCreationRacemask = 16,
         SkipCheckCharacterCreationReservedname = 17,
-        SkipCheckCharacterCreationDeathKnight = 18, // deprecated since Draenor DON'T reuse
+        SkipCheckCharacterCreationDeathKnight = 18,  // Deprecated Since Draenor Don'T Reuse
         SkipCheckChatChannelReq = 19,
         SkipCheckDisableMap = 20,
         SkipCheckMoreTalentsThanAllowed = 21,
@@ -289,7 +288,7 @@ namespace Framework.Constants
         CommandGoGrid = 380,
         CommandGoObject = 381,
         CommandGoTaxinode = 382,
-        // 383 reuse
+        CommandGoTicket = 383, // Deprecated Since Draenor Don'T Reuse
         CommandGoTrigger = 384,
         CommandGoXyz = 385,
         CommandGoZonexy = 386,
@@ -568,9 +567,9 @@ namespace Framework.Constants
         CommandReloadLocalesCreatureText = 659,
         CommandReloadLocalesGameobject = 660,
         CommandReloadLocalesGossipMenuOption = 661,
-        // 662 Unused
+        CommandReloadLocalesItem = 662, // Deprecated Since Draenor Don'T Reuse
         CommandReloadLocalesItemSetName = 663,
-        // 664 Unused
+        CommandReloadLocalesNpcText = 664, // Deprecated Since Draenor Don'T Reuse
         CommandReloadLocalesPageText = 665,
         CommandReloadLocalesPointsOfInterest = 666,
         CommandReloadQuestLocale = 667,
@@ -598,13 +597,13 @@ namespace Framework.Constants
         CommandReloadSmartScripts = 689,
         CommandReloadSpellRequired = 690,
         CommandReloadSpellArea = 691,
-        // 692 Unused
+        CommandReloadSpellBonusData = 692, // Deprecated Since Draenor Don'T Reuse
         CommandReloadSpellGroup = 693,
         CommandReloadSpellLearnSpell = 694,
         CommandReloadSpellLootTemplate = 695,
         CommandReloadSpellLinkedSpell = 696,
         CommandReloadSpellPetAuras = 697,
-        // 698 - reuse
+        // 698 - Reuse
         CommandReloadSpellProc = 699,
         CommandReloadSpellScripts = 700,
         CommandReloadSpellTargetPosition = 701,
@@ -649,11 +648,24 @@ namespace Framework.Constants
         CommandTeleName = 740,
         CommandTeleGroup = 741,
         CommandTicket = 742,
-        // 743 - 752 reuse
+        CommandTicketAssign = 743, // Deprecated Since Draenor Don'T Reuse
+        CommandTicketClose = 744, // Deprecated Since Draenor Don'T Reuse
+        CommandTicketClosedlist = 745, // Deprecated Since Draenor Don'T Reuse
+        CommandTicketComment = 746, // Deprecated Since Draenor Don'T Reuse
+        CommandTicketComplete = 747, // Deprecated Since Draenor Don'T Reuse
+        CommandTicketDelete = 748, // Deprecated Since Draenor Don'T Reuse
+        CommandTicketEscalate = 749, // Deprecated Since Draenor Don'T Reuse
+        CommandTicketEscalatedlist = 750, // Deprecated Since Draenor Don'T Reuse
+        CommandTicketList = 751, // Deprecated Since Draenor Don'T Reuse
+        CommandTicketOnlinelist = 752, // Deprecated Since Draenor Don'T Reuse
         CommandTicketReset = 753,
-        // 754 - 756 reuse
+        CommandTicketResponse = 754, // Deprecated Since Draenor Don'T Reuse
+        CommandTicketResponseAppend = 755, // Deprecated Since Draenor Don'T Reuse
+        CommandTicketResponseAppendln = 756, // Deprecated Since Draenor Don'T Reuse
         CommandTicketTogglesystem = 757,
-        // 758 - 760 reuse
+        CommandTicketUnassign = 758, // Deprecated Since Draenor Don'T Reuse
+        CommandTicketViewid = 759, // Deprecated Since Draenor Don'T Reuse
+        CommandTicketViewname = 760, // Deprecated Since Draenor Don'T Reuse
         CommandTitles = 761,
         CommandTitlesAdd = 762,
         CommandTitlesCurrent = 763,
@@ -668,8 +680,8 @@ namespace Framework.Constants
         CommandWpUnload = 772,
         CommandWpReload = 773,
         CommandWpShow = 774,
-        CommandModifyCurrency = 775, // Only 4.3.4
-        CommandDebugPhase = 776, // Only 4.3.4
+        CommandModifyCurrency = 775,
+        CommandDebugPhase = 776,
         CommandMailbox = 777,
         CommandAhbot = 778,
         CommandAhbotItems = 779,
@@ -738,17 +750,29 @@ namespace Framework.Constants
         CommandReloadCharacterTemplate = 842,
         CommandReloadQuestGreeting = 843,
         CommandScene = 844,
-        CommandSceneDedug = 845,
+        CommandSceneDebug = 845,
         CommandScenePlay = 846,
         CommandScenePlayPackage = 847,
         CommandSceneCancel = 848,
         CommandListScenes = 849,
-        CommandReloacSceneTemplate = 850,
+        CommandReloadSceneTemplate = 850,
         CommandReloadAreatriggerTemplate = 851,
         CommandGoOffset = 852,
         CommandReloadConversationTemplate = 853,
         CommandDebugConversation = 854,
-        ModifyPower = 867,
+        CommandNpcSpawngroup = 856, // Reserved For DynamicSpawning
+        CommandNpcDespawngroup = 857, // Reserved For DynamicSpawning
+        CommandGobjectSpawngroup = 858, // Reserved For DynamicSpawning
+        CommandGobjectDespawngroup = 859, // Reserved For DynamicSpawning
+        CommandListRespawns = 860, // Reserved For DynamicSpawning
+        CommandGroupSet = 861, // Reserved
+        CommandGroupAssistant = 862, // Reserved
+        CommandGroupMaintank = 863, // Reserved
+        CommandGroupMainassist = 864, // Reserved
+        CommandNpcShowloot = 865, // Reserved
+        CommandListSpawnpoints = 866, // Reserved
+        CommandReloadQuestGreetingLocale = 867, // Reserved
+        CommandModifyPower = 868,
 
         // Custom Permissions 1000+
         Max

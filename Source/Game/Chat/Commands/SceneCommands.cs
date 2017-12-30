@@ -48,7 +48,7 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("debug", RBACPermissions.CommandSceneDedug)]
+        [Command("debug", RBACPermissions.CommandSceneDebug)]
         static bool HandleDebugSceneCommand(StringArguments args, CommandHandler handler)
         {
             Player player = handler.GetSession().GetPlayer();

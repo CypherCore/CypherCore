@@ -72,7 +72,7 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("areatrigger_template", RBACPermissions.CommandReloacSceneTemplate, true)]
+        [Command("areatrigger_template", RBACPermissions.CommandReloadSceneTemplate, true)]
         static bool HandleReloadAreaTriggerTemplateCommand(StringArguments args, CommandHandler handler)
         {
             Log.outInfo(LogFilter.Server, "Reloading areatrigger_template table...");
@@ -670,7 +670,7 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("scene_template", RBACPermissions.CommandReloacSceneTemplate, true)]
+        [Command("scene_template", RBACPermissions.CommandReloadSceneTemplate, true)]
         static bool HandleReloadSceneTemplateCommand(StringArguments args, CommandHandler handler)
         {
             Log.outInfo(LogFilter.Misc, "Reloading scene_template table...");

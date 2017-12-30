@@ -516,7 +516,7 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("power", RBACPermissions.ModifyPower)]
+        [Command("power", RBACPermissions.CommandModifyPower)]
         static bool HandleModifyPowerCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
