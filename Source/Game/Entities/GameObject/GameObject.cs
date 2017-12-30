@@ -1942,7 +1942,7 @@ namespace Game.Entities
             }
             else
             {
-                trigger.SetFaction(14);
+                trigger.SetFaction(spellInfo.IsPositive() ? 35 : 14u);
                 // Set owner guid for target if no owner available - needed by trigger auras
                 // - trigger gets despawned and there's no caster avalible (see AuraEffect.TriggerSpell())
                 trigger.CastSpell(target != null ? target : trigger, spellInfo, triggered, null, null, target ? target.GetGUID() : ObjectGuid.Empty);
