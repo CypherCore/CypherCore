@@ -95,7 +95,7 @@ namespace Game
                         }
                         if (!mPoolTemplate.ContainsKey(pool_id))
                         {
-                            Log.outError(LogFilter.Sql, "`pool_creature` pool id ({0}) is out of range compared to max pool id in `pool_template`, skipped.", pool_id);
+                            Log.outError(LogFilter.Sql, "`pool_creature` pool id ({0}) is not in `pool_template`, skipped.", pool_id);
                             continue;
                         }
                         if (chance < 0 || chance > 100)
@@ -163,7 +163,7 @@ namespace Game
 
                         if (!mPoolTemplate.ContainsKey(pool_id))
                         {
-                            Log.outError(LogFilter.Sql, "`pool_gameobject` pool id ({0}) is out of range compared to max pool id in `pool_template`, skipped.", pool_id);
+                            Log.outError(LogFilter.Sql, "`pool_gameobject` pool id ({0}) is not in `pool_template`, skipped.", pool_id);
                             continue;
                         }
 
@@ -216,12 +216,12 @@ namespace Game
 
                         if (!mPoolTemplate.ContainsKey(mother_pool_id))
                         {
-                            Log.outError(LogFilter.Sql, "`pool_pool` mother_pool id ({0}) is out of range compared to max pool id in `pool_template`, skipped.", mother_pool_id);
+                            Log.outError(LogFilter.Sql, "`pool_pool` mother_pool id ({0}) is not in `pool_template`, skipped.", mother_pool_id);
                             continue;
                         }
                         if (!mPoolTemplate.ContainsKey(child_pool_id))
                         {
-                            Log.outError(LogFilter.Sql, "`pool_pool` included pool_id ({0}) is out of range compared to max pool id in `pool_template`, skipped.", child_pool_id);
+                            Log.outError(LogFilter.Sql, "`pool_pool` included pool_id ({0}) is not in `pool_template`, skipped.", child_pool_id);
                             continue;
                         }
                         if (mother_pool_id == child_pool_id)
@@ -288,7 +288,7 @@ namespace Game
 
                         if (!mPoolTemplate.ContainsKey(pool_id))
                         {
-                            Log.outError(LogFilter.Sql, "`pool_quest` pool id ({0}) is out of range compared to max pool id in `pool_template`, skipped.", pool_id);
+                            Log.outError(LogFilter.Sql, "`pool_quest` pool id ({0}) is not in `pool_template`, skipped.", pool_id);
                             continue;
                         }
 
@@ -494,11 +494,19 @@ namespace Game
 
         public bool CheckPool(uint pool_id)
         {
-            return mPoolTemplate.ContainsKey(pool_id) &&
-                (!mPoolGameobjectGroups.ContainsKey(pool_id) || mPoolGameobjectGroups[pool_id].CheckPool()) &&
-                (!mPoolCreatureGroups.ContainsKey(pool_id) || mPoolCreatureGroups[pool_id].CheckPool()) &&
-                (!mPoolPoolGroups.ContainsKey(pool_id) || mPoolPoolGroups[pool_id].CheckPool()) &&
-                (!mPoolQuestGroups.ContainsKey(pool_id) || mPoolQuestGroups[pool_id].CheckPool());
+            if (mPoolGameobjectGroups.ContainsKey(pool_id) && !mPoolGameobjectGroups[pool_id].CheckPool())
+                return false;
+
+            if (mPoolCreatureGroups.ContainsKey(pool_id) && !mPoolCreatureGroups[pool_id].CheckPool())
+                return false;
+
+            if (mPoolPoolGroups.ContainsKey(pool_id) && !mPoolPoolGroups[pool_id].CheckPool())
+                return false;
+
+            if (mPoolQuestGroups.ContainsKey(pool_id) && !mPoolQuestGroups[pool_id].CheckPool())
+                return false;
+
+            return true;
         }
 
         public void UpdatePool<T>(uint pool_id, ulong db_guid_or_pool_id)
