@@ -590,15 +590,11 @@ namespace Game
         }
         public PlayerChoice GetPlayerChoice(int choiceId)
         {
-            return _playerChoiceContainer.LookupByKey(choiceId);
+            return _playerChoices.LookupByKey(choiceId);
         }
-        public PlayerChoiceLocale GetPlayerChoiceLocale(uint ChoiceID)
+        public PlayerChoiceLocale GetPlayerChoiceLocale(int ChoiceID)
         {
-            return _playerChoiceLocaleContainer.LookupByKey(ChoiceID);
-        }
-        public PlayerChoiceResponseLocale GetPlayerChoiceResponseLocale(uint ChoiceID, uint ResponseID)
-        {
-            return _playerChoiceResponseLocaleContainer.LookupByKey(Tuple.Create(ChoiceID, ResponseID));
+            return _playerChoiceLocales.LookupByKey(ChoiceID);
         }
 
         //Gossip
@@ -8646,9 +8642,9 @@ namespace Game
         public void LoadPlayerChoices()
         {
             uint oldMSTime = Time.GetMSTime();
-            _playerChoiceContainer.Clear();
+            _playerChoices.Clear();
 
-            SQLResult choiceResult = DB.World.Query("SELECT ChoiceID, Question FROM playerchoice");
+            SQLResult choiceResult = DB.World.Query("SELECT ChoiceId, Question FROM playerchoice");
             if (choiceResult.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 player choices. DB table `playerchoice` is empty.");
@@ -8657,6 +8653,9 @@ namespace Game
 
             uint responseCount = 0;
             uint rewardCount = 0;
+            uint itemRewardCount = 0;
+            uint currencyRewardCount = 0;
+            uint factionRewardCount = 0;
 
             do
             {
@@ -8665,124 +8664,261 @@ namespace Game
                 PlayerChoice choice = new PlayerChoice();
                 choice.ChoiceId = choiceId;
                 choice.Question = choiceResult.Read<string>(1);
-                _playerChoiceContainer[choiceId] = choice;
+                _playerChoices[choiceId] = choice;
 
             } while (choiceResult.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_playerChoiceContainer.Count} player choices in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
-
-            SQLResult responses = DB.World.Query("SELECT ChoiceID, ResponseID, ChoiceArtFileID, Header, Answer, Description, Confirmation FROM playerchoice_response");
+            SQLResult responses = DB.World.Query("SELECT ChoiceId, ResponseId, ChoiceArtFileId, Header, Answer, Description, Confirmation FROM playerchoice_response ORDER BY `Index` ASC");
             if (!responses.IsEmpty())
             {
                 do
                 {
-                    ++responseCount;
-
                     int choiceId = responses.Read<int>(0);
-                    int ResponseID = responses.Read<int>(1);
+                    int responseId = responses.Read<int>(1);
 
-                    if (!_playerChoiceContainer.ContainsKey(choiceId))
+                    if (!_playerChoices.ContainsKey(choiceId))
                     {
-                        Log.outError(LogFilter.Sql, "Table `playerchoice_response` has nonexistent choiceId: {choiceId} (ResponseID : {ResponseID}), skipped");
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped");
                         continue;
                     }
 
-                    PlayerChoice choice = _playerChoiceContainer[choiceId];
+                    PlayerChoice choice = _playerChoices[choiceId];
                     PlayerChoiceResponse response = new PlayerChoiceResponse();
 
-                    response.ResponseID = ResponseID;
-                    response.ChoiceArtFileID = responses.Read<int>(2);
+                    response.ResponseId = responseId;
+                    response.ChoiceArtFileId = responses.Read<int>(2);
                     response.Header = responses.Read<string>(3);
                     response.Answer = responses.Read<string>(4);
                     response.Description = responses.Read<string>(5);
                     response.Confirmation = responses.Read<string>(6);
+                    ++responseCount;
 
-                    choice.Responses[ResponseID] = response;
+                    choice.Responses[responseId] = response;
                 } while (responses.NextRow());
-
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded {responseCount} player choices response in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
-            }
-            else
-            {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 player choices responses. DB table `playerchoice_response` is empty.");
             }
 
-            SQLResult rewards = DB.World.Query("SELECT ChoiceID, ResponseID, TitleID, PackageID, SkillLineID, SkillPointCount, ArenaPointCount, HonorPointCount, Money, Xp FROM playerchoice_response_reward");
+            SQLResult rewards = DB.World.Query("SELECT ChoiceId, ResponseId, TitleId, PackageId, SkillLineId, SkillPointCount, ArenaPointCount, HonorPointCount, Money, Xp FROM playerchoice_response_reward");
             if (!rewards.IsEmpty())
             {
                 do
                 {
-                    ++rewardCount;
-
                     int choiceId = rewards.Read<int>(0);
-                    int ResponseID = rewards.Read<int>(1);
+                    int responseId = rewards.Read<int>(1);
 
-                    if (!_playerChoiceContainer.ContainsKey(choiceId))
+                    if (!_playerChoices.ContainsKey(choiceId))
                     {
-                        Log.outError(LogFilter.Sql, "Table `playerchoice_response_reward` has nonexistent choiceId: {choiceId} (ResponseID : {ResponseID}), skipped");
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped");
                         continue;
                     }
 
-                    PlayerChoice choice = _playerChoiceContainer[choiceId];
-
-                    if (!choice.Responses.ContainsKey(ResponseID))
+                    PlayerChoice choice = _playerChoices[choiceId];
+                    if (!choice.Responses.Any(playerChoiceResponse => playerChoiceResponse.ResponseId == responseId))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward` has nonexistent ResponseID: {ResponseID} for choiceId {choiceId}, skipped");
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
                         continue;
                     }
-
-                    PlayerChoiceResponse response = choice.Responses[ResponseID];
 
                     PlayerChoiceResponseReward reward = new PlayerChoiceResponseReward();
-
-                    reward.TitleID = rewards.Read<int>(2);
-                    reward.PackageID = rewards.Read<int>(3);
-                    reward.SkillLineID = rewards.Read<int>(4);
+                    reward.TitleId = rewards.Read<int>(2);
+                    reward.PackageId = rewards.Read<int>(3);
+                    reward.SkillLineId = rewards.Read<int>(4);
                     reward.SkillPointCount = rewards.Read<uint>(5);
                     reward.ArenaPointCount = rewards.Read<uint>(6);
                     reward.HonorPointCount = rewards.Read<uint>(7);
                     reward.Money = rewards.Read<ulong>(8);
                     reward.Xp = rewards.Read<uint>(9);
+                    ++rewardCount;
 
-                    response.Reward.Set(reward);
+                    if (reward.TitleId != 0 && !CliDB.CharTitlesStorage.ContainsKey(reward.TitleId))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward` references non-existing Title {reward.TitleId} for ChoiceId {choiceId}, ResponseId: {responseId}, set to 0");
+                        reward.TitleId = 0;
+                    }
+
+                    if (reward.PackageId != 0 && Global.DB2Mgr.GetQuestPackageItems((uint)reward.PackageId) == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward` references non-existing QuestPackage {reward.TitleId} for ChoiceId {choiceId}, ResponseId: {responseId}, set to 0");
+                        reward.PackageId = 0;
+                    }
+
+                    if (reward.SkillLineId != 0 && !CliDB.SkillLineStorage.ContainsKey(reward.SkillLineId))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward` references non-existing SkillLine {reward.TitleId} for ChoiceId {choiceId}, ResponseId: {responseId}, set to 0");
+                        reward.SkillLineId = 0;
+                        reward.SkillPointCount = 0;
+                    }
+
+                    choice.Responses[responseId].Reward.Set(reward);
 
                 } while (rewards.NextRow());
+            }
 
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded {rewardCount} player choices reward in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
-            }
-            else
+            SQLResult rewardItem = DB.World.Query("SELECT ChoiceId, ResponseId, ItemId, BonusListIDs, Quantity FROM playerchoice_response_reward_item ORDER BY `Index` ASC");
+            if (!rewardItem.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 player choices responses reward. DB table `playerchoice_response_reward` is empty.");
+                do
+                {
+                    int choiceId = rewardItem.Read<int>(0);
+                    int responseId = rewardItem.Read<int>(1);
+                    uint itemId = rewardItem.Read<uint>(2);
+                    StringArray bonusListIDsTok = new StringArray(rewardItem.Read<string>(3), ' ');
+                    List<uint> bonusListIds = new List<uint>();
+                    foreach (uint token in bonusListIDsTok)
+                        bonusListIds.Add(token);
+                    int quantity = rewardItem.Read<int>(4);
+
+                    PlayerChoice choice = _playerChoices.LookupByKey(choiceId);
+                    if (choice == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped");
+                        continue;
+                    }
+
+                    var response = choice.Responses.FirstOrDefault(playerChoiceResponse => { return playerChoiceResponse.ResponseId == responseId; });
+                    if (response == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
+                        continue;
+                    }
+
+                    if (!response.Reward.HasValue)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item` references non-existing player choice reward for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
+                        continue;
+                    }
+
+                    if (GetItemTemplate(itemId) == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item` references non-existing item {itemId} for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
+                        continue;
+                    }
+
+                    itemRewardCount++;
+                    response.Reward.Value.Items.Add(new PlayerChoiceResponseRewardItem(itemId, bonusListIds, quantity));
+
+                } while (rewardItem.NextRow());
             }
+
+            SQLResult rewardCurrency = DB.World.Query("SELECT ChoiceId, ResponseId, CurrencyId, Quantity FROM playerchoice_response_reward_currency ORDER BY `Index` ASC");
+            if (!rewardCurrency.IsEmpty())
+            {
+                do
+                {
+                    int choiceId = rewardCurrency.Read<int>(0);
+                    int responseId = rewardCurrency.Read<int>(1);
+                    uint currencyId = rewardCurrency.Read<uint>(2);
+                    int quantity = rewardCurrency.Read<int>(3);
+
+                    PlayerChoice choice = _playerChoices.LookupByKey(choiceId);
+                    if (choice == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_currency` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped");
+                        continue;
+                    }
+
+                    var response = choice.Responses.FirstOrDefault(playerChoiceResponse => { return playerChoiceResponse.ResponseId == responseId; });
+                    if (response == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_currency` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
+                        continue;
+                    }
+
+                    if (!response.Reward.HasValue)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_currency` references non-existing player choice reward for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
+                        continue;
+                    }
+
+                    if (!CliDB.CurrencyTypesStorage.ContainsKey(currencyId))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_currency` references non-existing currency {currencyId} for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
+                        continue;
+                    }
+
+                    currencyRewardCount++;
+                    response.Reward.Value.Currency.Add(new PlayerChoiceResponseRewardEntry(currencyId, quantity));
+
+                } while (rewards.NextRow());
+            }
+
+            SQLResult rewardFaction = DB.World.Query("SELECT ChoiceId, ResponseId, FactionId, Quantity FROM playerchoice_response_reward_faction ORDER BY `Index` ASC");
+            if (!rewardFaction.IsEmpty())
+            {
+                do
+                {
+                    int choiceId = rewardFaction.Read<int>(0);
+                    int responseId = rewardFaction.Read<int>(1);
+                    uint factionId = rewardFaction.Read<uint>(2);
+                    int quantity = rewardFaction.Read<int>(3);
+
+                    PlayerChoice choice = _playerChoices.LookupByKey(choiceId);
+                    if (choice == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_faction` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped");
+                        continue;
+                    }
+
+                    var response = choice.Responses.FirstOrDefault(playerChoiceResponse => { return playerChoiceResponse.ResponseId == responseId; });
+                    if (response == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_faction` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
+                        continue;
+                    }
+
+                    if (!response.Reward.HasValue)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_faction` references non-existing player choice reward for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
+                        continue;
+                    }
+
+                    if (!CliDB.FactionStorage.ContainsKey(factionId))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_faction` references non-existing faction {factionId} for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
+                        continue;
+                    }
+
+                    factionRewardCount++;
+                    response.Reward.Value.Faction.Add(new PlayerChoiceResponseRewardEntry(factionId, quantity));
+
+                } while (rewardFaction.NextRow());
+            }
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_playerChoices.Count} player choices, {responseCount} responses, {rewardCount} rewards, {itemRewardCount} item rewards, {currencyRewardCount} " +
+                $"currency rewards and {factionRewardCount} faction rewards in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
         public void LoadPlayerChoicesLocale()
         {
             uint oldMSTime = Time.GetMSTime();
 
             // need for reload case
-            _playerChoiceLocaleContainer.Clear();
-            _playerChoiceResponseLocaleContainer.Clear();
+            _playerChoiceLocales.Clear();
 
             //                                               0         1       2
-            SQLResult result = DB.World.Query("SELECT ChoiceID, locale, Question FROM playerchoice_locale");
+            SQLResult result = DB.World.Query("SELECT ChoiceId, locale, Question FROM playerchoice_locale");
             if (!result.IsEmpty())
             {
                 do
                 {
-                    uint ChoiceID = result.Read<uint>(0);
+                    int choiceId = result.Read<int>(0);
                     string localeName = result.Read<string>(1);
                     LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
                     if (locale == LocaleConstant.enUS)
                         continue;
 
-                    if (!_playerChoiceLocaleContainer.ContainsKey(ChoiceID))
-                        _playerChoiceLocaleContainer[ChoiceID] = new PlayerChoiceLocale();
+                    if (GetPlayerChoice(choiceId) == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_locale` references non-existing ChoiceId: {choiceId} for locale {localeName}, skipped");
+                        continue;
+                    }
 
-                    PlayerChoiceLocale data = _playerChoiceLocaleContainer[ChoiceID];
+                    if (!_playerChoiceLocales.ContainsKey(choiceId))
+                        _playerChoiceLocales[choiceId] = new PlayerChoiceLocale();
+
+                    PlayerChoiceLocale data = _playerChoiceLocales[choiceId];
                     AddLocaleString(result.Read<string>(2), locale, data.Question);
                 } while (result.NextRow());
 
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded {_playerChoiceLocaleContainer.Count} Player Choice locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {_playerChoiceLocales.Count} Player Choice locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
             }
 
             oldMSTime = Time.GetMSTime();
@@ -8791,27 +8927,39 @@ namespace Game
             result = DB.World.Query("SELECT ChoiceID, ResponseID, locale, Header, Answer, Description, Confirmation FROM playerchoice_response_locale");
             if (!result.IsEmpty())
             {
+                uint count = 0;
                 do
                 {
-                    uint ChoiceID = result.Read<uint>(0);
-                    uint ResponseID = result.Read<uint>(1);
+                    int choiceId = result.Read<int>(0);
+                    int responseId = result.Read<int>(1);
                     string localeName = result.Read<string>(2);
                     LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
                     if (locale == LocaleConstant.enUS)
                         continue;
 
-                    Tuple<uint, uint> pair = Tuple.Create(ChoiceID, ResponseID);
-                    if (_playerChoiceResponseLocaleContainer.ContainsKey(pair))
-                        _playerChoiceResponseLocaleContainer[pair] = new PlayerChoiceResponseLocale();
+                    var playerChoiceLocale = _playerChoiceLocales.LookupByKey(choiceId);
+                    if (playerChoiceLocale == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_locale` references non-existing ChoiceId: {choiceId} for ResponseId {responseId} locale {localeName}, skipped");
+                        continue;
+                    }
 
-                    PlayerChoiceResponseLocale data = _playerChoiceResponseLocaleContainer[pair];
+                    PlayerChoice playerChoice = GetPlayerChoice(choiceId);
+                    if (playerChoice.GetResponse(responseId) == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_locale` references non-existing ResponseId: {responseId} for ChoiceId {choiceId} locale {localeName}, skipped");
+                        continue;
+                    }
+
+                    PlayerChoiceResponseLocale data = playerChoiceLocale.Responses[responseId];
                     AddLocaleString(result.Read<string>(3), locale, data.Header);
                     AddLocaleString(result.Read<string>(4), locale, data.Answer);
                     AddLocaleString(result.Read<string>(5), locale, data.Description);
                     AddLocaleString(result.Read<string>(6), locale, data.Confirmation);
+                    count++;
                 } while (result.NextRow());
 
-                Log.outInfo(LogFilter.ServerLoading, $"Loaded {_playerChoiceResponseLocaleContainer} Player Choice Response locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Player Choice Response locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
             }
         }
 
@@ -9317,7 +9465,7 @@ namespace Game
         Dictionary<uint, RepSpilloverTemplate> _repSpilloverTemplateStorage = new Dictionary<uint, RepSpilloverTemplate>();
         MultiMap<byte, MailLevelReward> _mailLevelRewardStorage = new MultiMap<byte, MailLevelReward>();
         MultiMap<Tuple<uint, SummonerType, byte>, TempSummonData> _tempSummonDataStorage = new MultiMap<Tuple<uint, SummonerType, byte>, TempSummonData>();
-        Dictionary<int /*choiceId*/, PlayerChoice> _playerChoiceContainer;
+        Dictionary<int /*choiceId*/, PlayerChoice> _playerChoices = new Dictionary<int, PlayerChoice>();
         Dictionary<uint, PageText> _pageTextStorage = new Dictionary<uint, PageText>();
         List<string> _reservedNamesStorage = new List<string>();
         Dictionary<uint, SceneTemplate> _sceneTemplateStorage = new Dictionary<uint, SceneTemplate>();
@@ -9427,8 +9575,7 @@ namespace Game
         Dictionary<uint, GossipMenuItemsLocale> _gossipMenuItemsLocaleStorage = new Dictionary<uint, GossipMenuItemsLocale>();
         Dictionary<uint, PageTextLocale> _pageTextLocaleStorage = new Dictionary<uint, PageTextLocale>();
         Dictionary<uint, PointOfInterestLocale> _pointOfInterestLocaleStorage = new Dictionary<uint, PointOfInterestLocale>();
-        Dictionary<uint, PlayerChoiceLocale> _playerChoiceLocaleContainer = new Dictionary<uint, PlayerChoiceLocale>();
-        Dictionary<Tuple<uint, uint>, PlayerChoiceResponseLocale> _playerChoiceResponseLocaleContainer = new Dictionary<Tuple<uint, uint>, PlayerChoiceResponseLocale>();
+        Dictionary<int, PlayerChoiceLocale> _playerChoiceLocales = new Dictionary<int, PlayerChoiceLocale>();
 
         List<uint> _tavernAreaTriggerStorage = new List<uint>();
         Dictionary<uint, AreaTriggerStruct> _areaTriggerStorage = new Dictionary<uint, AreaTriggerStruct>();
@@ -10209,50 +10356,80 @@ namespace Game
     public class PlayerChoiceLocale
     {
         public StringArray Question = new StringArray((int)LocaleConstant.Total);
+        public Dictionary<int /*ResponseId*/, PlayerChoiceResponseLocale> Responses = new Dictionary<int, PlayerChoiceResponseLocale>();
     }
 
     public class PlayerChoiceResponseLocale
     {
-        public StringArray Header = new StringArray((int)LocaleConstant.Total);
         public StringArray Answer = new StringArray((int)LocaleConstant.Total);
+        public StringArray Header = new StringArray((int)LocaleConstant.Total);
         public StringArray Description = new StringArray((int)LocaleConstant.Total);
         public StringArray Confirmation = new StringArray((int)LocaleConstant.Total);
     }
 
+    public class PlayerChoiceResponseRewardItem
+    {
+        public PlayerChoiceResponseRewardItem() { }
+        public PlayerChoiceResponseRewardItem(uint id, List<uint> bonusListIDs, int quantity)
+        {
+            Id = id;
+            BonusListIDs = bonusListIDs;
+            Quantity = quantity;
+        }
+
+        public uint Id;
+        public List<uint> BonusListIDs = new List<uint>();
+        public int Quantity;
+    }
+
+    public class PlayerChoiceResponseRewardEntry
+    {
+        public PlayerChoiceResponseRewardEntry(uint id, int quantity)
+        {
+            Id = id;
+            Quantity = quantity;
+        }
+
+        public uint Id;
+        public int Quantity;
+    }
+
     public class PlayerChoiceResponseReward
     {
-        public int TitleID;
-        public int PackageID;
-        public int SkillLineID;
+        public int TitleId;
+        public int PackageId;
+        public int SkillLineId;
         public uint SkillPointCount;
         public uint ArenaPointCount;
         public uint HonorPointCount;
         public ulong Money;
         public uint Xp;
 
-        //std::vector<Item> Items;
-        //std::vector<Currency> Currency;
-        //std::vector<Faction> Faction;
-        //std::vector<ItemChoice> ItemChoice;
+        public List<PlayerChoiceResponseRewardItem> Items = new List<PlayerChoiceResponseRewardItem>();
+        public List<PlayerChoiceResponseRewardEntry> Currency = new List<PlayerChoiceResponseRewardEntry>();
+        public List<PlayerChoiceResponseRewardEntry> Faction = new List<PlayerChoiceResponseRewardEntry>();
     }
 
     public class PlayerChoiceResponse
     {
-        public int ResponseID;
-        public int ChoiceArtFileID;
-
+        public int ResponseId;
+        public int ChoiceArtFileId;
         public string Header;
         public string Answer;
         public string Description;
         public string Confirmation;
-
         public Optional<PlayerChoiceResponseReward> Reward;
     }
 
     public class PlayerChoice
     {
+        public PlayerChoiceResponse GetResponse(int responseId)
+        {
+            return Responses.FirstOrDefault(playerChoiceResponse => { return playerChoiceResponse.ResponseId == responseId; });
+        }
+
         public int ChoiceId;
         public string Question;
-        public Dictionary<int /*ResponseID*/, PlayerChoiceResponse> Responses = new Dictionary<int, PlayerChoiceResponse>();
+        public List<PlayerChoiceResponse> Responses = new List<PlayerChoiceResponse>();
     }
 }

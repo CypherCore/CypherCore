@@ -21,6 +21,9 @@ using Game.Entities;
 using Game.Groups;
 using Game.Network;
 using Game.Network.Packets;
+using Game.DataStorage;
+using System.Collections.Generic;
+using System;
 
 namespace Game
 {
@@ -650,9 +653,64 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.ChoiceResponse)]
-        void HandlePlayerChoiceResponse(PlayerChoiceResponsePkt packet)
+        void HandlePlayerChoiceResponse(ChoiceResponse choiceResponse)
         {
-            Global.ScriptMgr.OnPlayerChoiceResponse(GetPlayer(), (uint)packet.ChoiceID, (uint)packet.ResponseID);
+            if (_player.PlayerTalkClass.GetInteractionData().PlayerChoiceId != choiceResponse.ChoiceID)
+            {
+                Log.outError(LogFilter.Player, $"Error in CMSG_CHOICE_RESPONSE: {GetPlayerInfo()} tried to respond to invalid player choice {choiceResponse.ChoiceID} (allowed {_player.PlayerTalkClass.GetInteractionData().PlayerChoiceId}) (possible packet-hacking detected)");
+                return;
+            }
+
+            PlayerChoice playerChoice = Global.ObjectMgr.GetPlayerChoice(choiceResponse.ChoiceID);
+            if (playerChoice == null)
+                return;
+
+            PlayerChoiceResponse playerChoiceResponse = playerChoice.GetResponse(choiceResponse.ResponseID);
+            if (playerChoiceResponse == null)
+            {
+                Log.outError(LogFilter.Player, $"Error in CMSG_CHOICE_RESPONSE: {GetPlayerInfo()} tried to select invalid player choice response {choiceResponse.ResponseID} (possible packet-hacking detected)");
+                return;
+            }
+
+            Global.ScriptMgr.OnPlayerChoiceResponse(GetPlayer(), (uint)choiceResponse.ChoiceID, (uint)choiceResponse.ResponseID);
+
+            if (playerChoiceResponse.Reward.HasValue)
+            {
+                var reward = playerChoiceResponse.Reward.Value;
+                if (reward.TitleId != 0)
+                    _player.SetTitle(CliDB.CharTitlesStorage.LookupByKey(reward.TitleId), false);
+
+                if (reward.PackageId != 0)
+                    _player.RewardQuestPackage((uint)reward.PackageId);
+
+                if (reward.SkillLineId != 0 && _player.HasSkill((SkillType)reward.SkillLineId))
+                    _player.UpdateSkillPro((uint)reward.SkillLineId, 1000, reward.SkillPointCount);
+
+                if (reward.HonorPointCount != 0)
+                    _player.AddHonorXP(reward.HonorPointCount);
+
+                if (reward.Money != 0)
+                    _player.ModifyMoney((long)reward.Money, false);
+
+                if (reward.Xp != 0)
+                    _player.GiveXP(reward.Xp, null, 0.0f);
+
+                foreach (PlayerChoiceResponseRewardItem item in reward.Items)
+                {
+                    List<ItemPosCount> dest = new List<ItemPosCount>();
+                    if (_player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item.Id, (uint)item.Quantity) == InventoryResult.Ok)
+                    {
+                        Item newItem = _player.StoreNewItem(dest, item.Id, true, ItemEnchantment.GenerateItemRandomPropertyId(item.Id), null, 0, item.BonusListIDs);
+                        _player.SendNewItem(newItem, (uint)item.Quantity, true, false);
+                    }
+                }
+
+                foreach (PlayerChoiceResponseRewardEntry currency in reward.Currency)
+                    _player.ModifyCurrency((CurrencyTypes)currency.Id, currency.Quantity);
+
+                foreach (PlayerChoiceResponseRewardEntry faction in reward.Faction)
+                    _player.GetReputationMgr().ModifyReputation(CliDB.FactionStorage.LookupByKey(faction.Id), faction.Quantity);
+            }
         }
     }
 }

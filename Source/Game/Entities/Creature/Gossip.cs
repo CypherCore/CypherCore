@@ -226,6 +226,7 @@ namespace Game.Misc
 
         public ObjectGuid SourceGuid;
         public uint TrainerId;
+        public uint PlayerChoiceId;
     }
 
     public class PlayerMenu

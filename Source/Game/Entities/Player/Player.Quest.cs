@@ -838,6 +838,51 @@ namespace Game.Entities
             return false;
         }
 
+        public void RewardQuestPackage(uint questPackageId, uint onlyItemId = 0)
+        {
+            bool hasFilteredQuestPackageReward = false;
+            var questPackageItems = Global.DB2Mgr.GetQuestPackageItems(questPackageId);
+            if (questPackageItems != null)
+            {
+                foreach (QuestPackageItemRecord questPackageItem in questPackageItems)
+                {
+                    if (onlyItemId != 0 && questPackageItem.ItemID != onlyItemId)
+                        continue;
+
+                    if (CanSelectQuestPackageItem(questPackageItem))
+                    {
+                        hasFilteredQuestPackageReward = true;
+                        List<ItemPosCount> dest = new List<ItemPosCount>();
+                        if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemCount) == InventoryResult.Ok)
+                        {
+                            Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantment.GenerateItemRandomPropertyId(questPackageItem.ItemID));
+                            SendNewItem(item, questPackageItem.ItemCount, true, false);
+                        }
+                    }
+                }
+            }
+
+            if (!hasFilteredQuestPackageReward)
+            {
+                var questPackageItemsFallback = Global.DB2Mgr.GetQuestPackageItemsFallback(questPackageId);
+                if (questPackageItemsFallback != null)
+                {
+                    foreach (QuestPackageItemRecord questPackageItem in questPackageItemsFallback)
+                    {
+                        if (onlyItemId != 0 && questPackageItem.ItemID != onlyItemId)
+                            continue;
+
+                        List<ItemPosCount> dest = new List<ItemPosCount>();
+                        if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemCount) == InventoryResult.Ok)
+                        {
+                            Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantment.GenerateItemRandomPropertyId(questPackageItem.ItemID));
+                            SendNewItem(item, questPackageItem.ItemCount, true, false);
+                        }
+                    }
+                }
+            }
+        }
+
         public void RewardQuest(Quest quest, uint reward, WorldObject questGiver, bool announce = true)
         {
             //this THING should be here to protect code from quest, which cast on player far teleport as a reward
@@ -893,49 +938,7 @@ namespace Game.Entities
 
             // QuestPackageItem.db2
             if (rewardProto != null && quest.PackageID != 0)
-            {
-                bool hasFilteredQuestPackageReward = false;
-                var questPackageItems = Global.DB2Mgr.GetQuestPackageItems(quest.PackageID);
-                if (questPackageItems != null)
-                {
-                    foreach (var questPackageItem in questPackageItems)
-                    {
-                        if (questPackageItem.ItemID != reward)
-                            continue;
-
-                        if (CanSelectQuestPackageItem(questPackageItem))
-                        {
-                            hasFilteredQuestPackageReward = true;
-                            List<ItemPosCount> dest = new List<ItemPosCount>();
-                            if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemCount) == InventoryResult.Ok)
-                            {
-                                Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantment.GenerateItemRandomPropertyId(questPackageItem.ItemID));
-                                SendNewItem(item, questPackageItem.ItemCount, true, false);
-                            }
-                        }
-                    }
-                }
-
-                if (!hasFilteredQuestPackageReward)
-                {
-                    List<QuestPackageItemRecord> questPackageItems1 = Global.DB2Mgr.GetQuestPackageItemsFallback(quest.PackageID);
-                    if (questPackageItems1 != null)
-                    {
-                        foreach (QuestPackageItemRecord questPackageItem in questPackageItems1)
-                        {
-                            if (questPackageItem.ItemID != reward)
-                                continue;
-
-                            List<ItemPosCount> dest = new List<ItemPosCount>();
-                            if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemCount) == InventoryResult.Ok)
-                            {
-                                Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantment.GenerateItemRandomPropertyId(questPackageItem.ItemID));
-                                SendNewItem(item, questPackageItem.ItemCount, true, false);
-                            }
-                        }
-                    }
-                }
-            }
+                RewardQuestPackage(quest.PackageID, reward);
 
             if (quest.GetRewItemsCount() > 0)
             {

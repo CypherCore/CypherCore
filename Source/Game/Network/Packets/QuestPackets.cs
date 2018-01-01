@@ -18,6 +18,7 @@
 using Framework.Constants;
 using Game.Entities;
 using System.Collections.Generic;
+using Framework.Dynamic;
 
 namespace Game.Network.Packets
 {
@@ -134,9 +135,9 @@ namespace Game.Network.Packets
                 _worldPacket.WriteInt32(Info.RewardSpell);
                 _worldPacket.WriteInt32(Info.RewardHonor);
                 _worldPacket.WriteFloat(Info.RewardKillHonor);
-                _worldPacket .WriteInt32(Info.RewardArtifactXPDifficulty);
-                _worldPacket .WriteFloat(Info.RewardArtifactXPMultiplier);
-                _worldPacket .WriteInt32(Info.RewardArtifactCategoryID);
+                _worldPacket.WriteInt32(Info.RewardArtifactXPDifficulty);
+                _worldPacket.WriteFloat(Info.RewardArtifactXPMultiplier);
+                _worldPacket.WriteInt32(Info.RewardArtifactCategoryID);
                 _worldPacket.WriteInt32(Info.StartItem);
                 _worldPacket.WriteUInt32(Info.Flags);
                 _worldPacket.WriteUInt32(Info.FlagsEx);
@@ -822,74 +823,29 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32(Choice.ChoiceId);
-            _worldPacket.WriteUInt32(Choice.Responses.Count);
+            _worldPacket.WriteInt32(ChoiceID);
+            _worldPacket.WriteUInt32(Responses.Count);
             _worldPacket.WritePackedGuid(SenderGUID);
-            _worldPacket.WriteBits(Choice.Question.Length, 8);
+            _worldPacket.WriteBits(Question.Length, 8);
             _worldPacket.WriteBit(CloseChoiceFrame);
             _worldPacket.FlushBits();
 
-            foreach (var response in Choice.Responses.Values)
-            {
-                _worldPacket.WriteInt32(response.ResponseID);
-                _worldPacket.WriteInt32(response.ChoiceArtFileID);
+            foreach (PlayerChoiceResponse response in Responses)
+                response.Write(_worldPacket);
 
-                _worldPacket.WriteBits(response.Answer.Length, 9);
-                _worldPacket.WriteBits(response.Header.Length, 9);
-                _worldPacket.WriteBits(response.Description.Length, 11);
-                _worldPacket.WriteBits(response.Confirmation.Length, 7);
-
-                _worldPacket.WriteBit(response.Reward.HasValue);
-                _worldPacket.FlushBits();
-
-                if (response.Reward.HasValue)
-                {
-                    var reward = response.Reward.Value;
-
-                    _worldPacket.WriteInt32(reward.TitleID);
-                    _worldPacket.WriteInt32(reward.PackageID);
-                    _worldPacket.WriteInt32(reward.SkillLineID);
-                    _worldPacket.WriteUInt32(reward.SkillPointCount);
-                    _worldPacket.WriteUInt32(reward.ArenaPointCount);
-                    _worldPacket.WriteUInt32(reward.HonorPointCount);
-                    _worldPacket.WriteUInt64(reward.Money);
-                    _worldPacket.WriteUInt32(reward.Xp);
-
-                    _worldPacket.WriteUInt32(0); // itemCount
-                    _worldPacket.WriteUInt32(0); // currencyCount
-                    _worldPacket.WriteUInt32(0); // factionCount
-                    _worldPacket.WriteUInt32(0); // itemChoiceCount
-
-                    /*for (var i = 0u; i < itemCount; ++i)
-                    ReadPlayerChoiceResponseRewardEntry(packet, "Item", i);
-
-                    for (var i = 0u; i < currencyCount; ++i)
-                    ReadPlayerChoiceResponseRewardEntry(packet, "Currency", i);
-
-                    for (var i = 0u; i < factionCount; ++i)
-                    ReadPlayerChoiceResponseRewardEntry(packet, "Faction", i);
-
-                    for (var i = 0u; i < itemChoiceCount; ++i)
-                    ReadPlayerChoiceResponseRewardEntry(packet, "ItemChoice", i);*/
-                }
-
-                _worldPacket.WriteString(response.Answer);
-                _worldPacket.WriteString(response.Header);
-                _worldPacket.WriteString(response.Description);
-                _worldPacket.WriteString(response.Confirmation);
-            }
-
-            _worldPacket.WriteString(Choice.Question);
+            _worldPacket.WriteString(Question);
         }
 
         public ObjectGuid SenderGUID;
-        public PlayerChoice Choice;
+        public int ChoiceID;
+        public string Question;
+        public List<PlayerChoiceResponse> Responses = new List<PlayerChoiceResponse>();
         public bool CloseChoiceFrame;
     }
 
-    class PlayerChoiceResponsePkt : ClientPacket
+    class ChoiceResponse : ClientPacket
     {
-        public PlayerChoiceResponsePkt(WorldPacket packet) : base(packet) { }
+        public ChoiceResponse(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
@@ -934,7 +890,7 @@ namespace Game.Network.Packets
             PortraitGiverName = "";
             PortraitTurnInText = "";
             PortraitTurnInName = "";
-            QuestCompletionLog = "";            
+            QuestCompletionLog = "";
         }
 
         public uint QuestID;
@@ -1209,5 +1165,95 @@ namespace Game.Network.Packets
         // WorldState
         public int VariableID;
         public int Value;
+    }
+
+    struct PlayerChoiceResponseRewardEntry
+    {
+        public void Write(WorldPacket data)
+        {
+            Item.Write(data);
+            data.WriteInt32(Quantity);
+        }
+
+        public ItemInstance Item;
+        public int Quantity;
+    }
+
+    class PlayerChoiceResponseReward
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(TitleID);
+            data.WriteInt32(PackageID);
+            data.WriteInt32(SkillLineID);
+            data.WriteUInt32(SkillPointCount);
+            data.WriteUInt32(ArenaPointCount);
+            data.WriteUInt32(HonorPointCount);
+            data.WriteUInt64(Money);
+            data.WriteUInt32(Xp);
+
+            data.WriteUInt32(Items.Count);
+            data.WriteUInt32(Currencies.Count);
+            data.WriteUInt32(Factions.Count);
+            data.WriteUInt32(ItemChoices.Count);
+
+            foreach (PlayerChoiceResponseRewardEntry item in Items)
+                item.Write(data);
+
+            foreach (PlayerChoiceResponseRewardEntry currency in Currencies)
+                currency.Write(data);
+
+            foreach (PlayerChoiceResponseRewardEntry faction in Factions)
+                faction.Write(data);
+
+            foreach (PlayerChoiceResponseRewardEntry itemChoice in ItemChoices)
+                itemChoice.Write(data);
+        }
+
+        public int TitleID;
+        public int PackageID;
+        public int SkillLineID;
+        public uint SkillPointCount;
+        public uint ArenaPointCount;
+        public uint HonorPointCount;
+        public ulong Money;
+        public uint Xp;
+        public List<PlayerChoiceResponseRewardEntry> Items = new List<PlayerChoiceResponseRewardEntry>();
+        public List<PlayerChoiceResponseRewardEntry> Currencies = new List<PlayerChoiceResponseRewardEntry>();
+        public List<PlayerChoiceResponseRewardEntry> Factions = new List<PlayerChoiceResponseRewardEntry>();
+        public List<PlayerChoiceResponseRewardEntry> ItemChoices = new List<PlayerChoiceResponseRewardEntry>();
+    }
+
+    class PlayerChoiceResponse
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(ResponseID);
+            data.WriteInt32(ChoiceArtFileID);
+
+            data.WriteBits(Answer.Length, 9);
+            data.WriteBits(Header.Length, 9);
+            data.WriteBits(Description.Length, 11);
+            data.WriteBits(Confirmation.Length, 7);
+
+            data.WriteBit(Reward.HasValue);
+            data.FlushBits();
+
+            if (Reward.HasValue)
+                Reward.Value.Write(data);
+
+            data.WriteString(Answer);
+            data.WriteString(Header);
+            data.WriteString(Description);
+            data.WriteString(Confirmation);
+        }
+
+        public int ResponseID;
+        public int ChoiceArtFileID;
+        public string Answer;
+        public string Header;
+        public string Description;
+        public string Confirmation;
+        public Optional<PlayerChoiceResponseReward> Reward;
     }
 }

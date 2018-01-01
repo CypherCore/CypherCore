@@ -4994,37 +4994,97 @@ namespace Game.Entities
             SendMessageToSet(updateCollisionHeight, false);
         }
 
-        public void SendPlayerChoice(ObjectGuid sender, uint choiceID)
+        public void SendPlayerChoice(ObjectGuid sender, int choiceId)
         {
-            PlayerChoice playerChoice = Global.ObjectMgr.GetPlayerChoice((int)choiceID);
+            PlayerChoice playerChoice = Global.ObjectMgr.GetPlayerChoice(choiceId);
             if (playerChoice == null)
                 return;
 
-            PlayerChoice localizedPlayerChoice = playerChoice;
-
             LocaleConstant locale = GetSession().GetSessionDbLocaleIndex();
-            if (locale != LocaleConstant.enUS)
-            {
-                PlayerChoiceLocale playerChoiceLocale = Global.ObjectMgr.GetPlayerChoiceLocale((uint)localizedPlayerChoice.ChoiceId);
-                if (playerChoiceLocale != null)
-                    ObjectManager.GetLocaleString(playerChoiceLocale.Question, locale, ref localizedPlayerChoice.Question);
+            PlayerChoiceLocale playerChoiceLocale = locale != LocaleConstant.enUS ? Global.ObjectMgr.GetPlayerChoiceLocale(choiceId) : null;
 
-                foreach (var playerChoiceResponse in localizedPlayerChoice.Responses)
+            PlayerTalkClass.GetInteractionData().Reset();
+            PlayerTalkClass.GetInteractionData().SourceGuid = sender;
+            PlayerTalkClass.GetInteractionData().PlayerChoiceId = (uint)choiceId;
+
+            DisplayPlayerChoice displayPlayerChoice = new DisplayPlayerChoice();
+            displayPlayerChoice.SenderGUID = sender;
+            displayPlayerChoice.ChoiceID = choiceId;
+            displayPlayerChoice.Question = playerChoice.Question;
+            if (playerChoiceLocale != null)
+                ObjectManager.GetLocaleString(playerChoiceLocale.Question, locale, ref displayPlayerChoice.Question);
+
+            displayPlayerChoice.CloseChoiceFrame = false;
+
+            for (var i = 0; i < playerChoice.Responses.Count; ++i)
+            {
+                PlayerChoiceResponse playerChoiceResponseTemplate = playerChoice.Responses[i];
+                var playerChoiceResponse = new Network.Packets.PlayerChoiceResponse();
+
+                playerChoiceResponse.ResponseID = playerChoiceResponseTemplate.ResponseId;
+                playerChoiceResponse.ChoiceArtFileID = playerChoiceResponseTemplate.ChoiceArtFileId;
+                playerChoiceResponse.Answer = playerChoiceResponseTemplate.Answer;
+                playerChoiceResponse.Header = playerChoiceResponseTemplate.Header;
+                playerChoiceResponse.Description = playerChoiceResponseTemplate.Description;
+                playerChoiceResponse.Confirmation = playerChoiceResponseTemplate.Confirmation;
+                if (playerChoiceLocale != null)
                 {
-                    PlayerChoiceResponseLocale playerChoiceResponseLocale = Global.ObjectMgr.GetPlayerChoiceResponseLocale((uint)localizedPlayerChoice.ChoiceId, (uint)playerChoiceResponse.Value.ResponseID);
+                    PlayerChoiceResponseLocale playerChoiceResponseLocale = playerChoiceLocale.Responses.LookupByKey(playerChoiceResponseTemplate.ResponseId);
                     if (playerChoiceResponseLocale != null)
                     {
-                        ObjectManager.GetLocaleString(playerChoiceResponseLocale.Header, locale, ref playerChoiceResponse.Value.Header);
-                        ObjectManager.GetLocaleString(playerChoiceResponseLocale.Answer, locale, ref playerChoiceResponse.Value.Answer);
-                        ObjectManager.GetLocaleString(playerChoiceResponseLocale.Description, locale, ref playerChoiceResponse.Value.Description);
-                        ObjectManager.GetLocaleString(playerChoiceResponseLocale.Confirmation, locale, ref playerChoiceResponse.Value.Confirmation);
+                        ObjectManager.GetLocaleString(playerChoiceResponseLocale.Answer, locale, ref playerChoiceResponse.Answer);
+                        ObjectManager.GetLocaleString(playerChoiceResponseLocale.Header, locale, ref playerChoiceResponse.Header);
+                        ObjectManager.GetLocaleString(playerChoiceResponseLocale.Description, locale, ref playerChoiceResponse.Description);
+                        ObjectManager.GetLocaleString(playerChoiceResponseLocale.Confirmation, locale, ref playerChoiceResponse.Confirmation);
                     }
+                }
+
+                if (playerChoiceResponseTemplate.Reward.HasValue)
+                {
+                    var reward = new Network.Packets.PlayerChoiceResponseReward();
+                    reward.TitleID = playerChoiceResponseTemplate.Reward.Value.TitleId;
+                    reward.PackageID = playerChoiceResponseTemplate.Reward.Value.PackageId;
+                    reward.SkillLineID = playerChoiceResponseTemplate.Reward.Value.SkillLineId;
+                    reward.SkillPointCount = playerChoiceResponseTemplate.Reward.Value.SkillPointCount;
+                    reward.ArenaPointCount = playerChoiceResponseTemplate.Reward.Value.ArenaPointCount;
+                    reward.HonorPointCount = playerChoiceResponseTemplate.Reward.Value.HonorPointCount;
+                    reward.Money = playerChoiceResponseTemplate.Reward.Value.Money;
+                    reward.Xp = playerChoiceResponseTemplate.Reward.Value.Xp;
+
+                    foreach (var item in playerChoiceResponseTemplate.Reward.Value.Items)
+                    {
+                        var rewardEntry = new Network.Packets.PlayerChoiceResponseRewardEntry();
+                        rewardEntry.Item.ItemID = item.Id;
+                        rewardEntry.Quantity = item.Quantity;
+                        if (!item.BonusListIDs.Empty())
+                        {
+                            rewardEntry.Item.ItemBonus.HasValue = true;
+                            rewardEntry.Item.ItemBonus.Value.BonusListIDs = item.BonusListIDs;
+                        }
+                        reward.Items.Add(rewardEntry);
+                    }
+
+                    foreach (var currency in playerChoiceResponseTemplate.Reward.Value.Currency)
+                    {
+                        var rewardEntry = new Network.Packets.PlayerChoiceResponseRewardEntry();
+                        rewardEntry.Item.ItemID = currency.Id;
+                        rewardEntry.Quantity = currency.Quantity;
+                        reward.Items.Add(rewardEntry);
+                    }
+
+                    foreach (var faction in playerChoiceResponseTemplate.Reward.Value.Faction)
+                    {
+                        var rewardEntry = new Network.Packets.PlayerChoiceResponseRewardEntry();
+                        rewardEntry.Item.ItemID = faction.Id;
+                        rewardEntry.Quantity = faction.Quantity;
+                        reward.Items.Add(rewardEntry);
+                    }
+
+                    playerChoiceResponse.Reward.Set(reward);
+                    displayPlayerChoice.Responses[i] = playerChoiceResponse;
                 }
             }
 
-            DisplayPlayerChoice displayPlayerChoice = new DisplayPlayerChoice();
-            displayPlayerChoice.Choice = localizedPlayerChoice;
-            displayPlayerChoice.SenderGUID = sender;
             SendPacket(displayPlayerChoice);
         }
 

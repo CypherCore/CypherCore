@@ -408,11 +408,11 @@ namespace Game.Entities
             SendPacket(cooldowns);
         }
 
-        bool UpdateSkillPro(SkillType skillId, int chance, uint step)
+        public bool UpdateSkillPro(SkillType skillId, int chance, uint step)
         {
             return UpdateSkillPro((uint)skillId, chance, step);
         }
-        bool UpdateSkillPro(uint skillId, int chance, uint step)
+        public bool UpdateSkillPro(uint skillId, int chance, uint step)
         {
             // levels sync. with spell requirement for skill levels to learn
             // bonus abilities in sSkillLineAbilityStore

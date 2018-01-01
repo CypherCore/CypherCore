@@ -5602,7 +5602,7 @@ namespace Game.Spells
             if (!unitTarget || !unitTarget.IsPlayer())
                 return;
 
-            unitTarget.ToPlayer().SendPlayerChoice(GetCaster().GetGUID(), (uint)GetEffect(effIndex).MiscValue);
+            unitTarget.ToPlayer().SendPlayerChoice(GetCaster().GetGUID(), effectInfo.MiscValue);
         }
 
         [SpellEffectHandler(SpellEffectName.UncageBattlepet)]

@@ -1175,9 +1175,9 @@ namespace Game.Scripting
         {
             ForEach<PlayerScript>(p => p.OnMovieComplete(player, movieId));
         }
-        public void OnPlayerChoiceResponse(Player player, uint choiceID, uint responseID)
+        public void OnPlayerChoiceResponse(Player player, uint choiceId, uint responseId)
         {
-            ForEach<PlayerScript>(p => p.OnPlayerChoiceResponse(player, choiceID, responseID));
+            ForEach<PlayerScript>(p => p.OnPlayerChoiceResponse(player, choiceId, responseId));
         }
 
         // GuildScript

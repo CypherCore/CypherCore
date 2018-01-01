@@ -657,7 +657,7 @@ namespace Game.Scripting
         public virtual void OnMovieComplete(Player player, uint movieId) { }
 
         // Called when a player choose a response from a PlayerChoice
-        public virtual void OnPlayerChoiceResponse(Player player, uint choiceID, uint responseID) { }
+        public virtual void OnPlayerChoiceResponse(Player player, uint choiceId, uint responseId) { }
     }
 
     public class GuildScript : ScriptObject
