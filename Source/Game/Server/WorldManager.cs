@@ -625,6 +625,12 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Scenes Templates...");
             Global.ObjectMgr.LoadSceneTemplates();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading Player Choices...");
+            Global.ObjectMgr.LoadPlayerChoices();
+
+            Log.outInfo(LogFilter.ServerLoading, "Loading Player Choices Locales...");
+            Global.ObjectMgr.LoadPlayerChoicesLocale();
+
             CharacterDatabaseCleaner.CleanDatabase();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading the max pet number...");

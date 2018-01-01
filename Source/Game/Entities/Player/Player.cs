@@ -4994,6 +4994,40 @@ namespace Game.Entities
             SendMessageToSet(updateCollisionHeight, false);
         }
 
+        public void SendPlayerChoice(ObjectGuid sender, uint choiceID)
+        {
+            PlayerChoice playerChoice = Global.ObjectMgr.GetPlayerChoice((int)choiceID);
+            if (playerChoice == null)
+                return;
+
+            PlayerChoice localizedPlayerChoice = playerChoice;
+
+            LocaleConstant locale = GetSession().GetSessionDbLocaleIndex();
+            if (locale != LocaleConstant.enUS)
+            {
+                PlayerChoiceLocale playerChoiceLocale = Global.ObjectMgr.GetPlayerChoiceLocale((uint)localizedPlayerChoice.ChoiceId);
+                if (playerChoiceLocale != null)
+                    ObjectManager.GetLocaleString(playerChoiceLocale.Question, locale, ref localizedPlayerChoice.Question);
+
+                foreach (var playerChoiceResponse in localizedPlayerChoice.Responses)
+                {
+                    PlayerChoiceResponseLocale playerChoiceResponseLocale = Global.ObjectMgr.GetPlayerChoiceResponseLocale((uint)localizedPlayerChoice.ChoiceId, (uint)playerChoiceResponse.Value.ResponseID);
+                    if (playerChoiceResponseLocale != null)
+                    {
+                        ObjectManager.GetLocaleString(playerChoiceResponseLocale.Header, locale, ref playerChoiceResponse.Value.Header);
+                        ObjectManager.GetLocaleString(playerChoiceResponseLocale.Answer, locale, ref playerChoiceResponse.Value.Answer);
+                        ObjectManager.GetLocaleString(playerChoiceResponseLocale.Description, locale, ref playerChoiceResponse.Value.Description);
+                        ObjectManager.GetLocaleString(playerChoiceResponseLocale.Confirmation, locale, ref playerChoiceResponse.Value.Confirmation);
+                    }
+                }
+            }
+
+            DisplayPlayerChoice displayPlayerChoice = new DisplayPlayerChoice();
+            displayPlayerChoice.Choice = localizedPlayerChoice;
+            displayPlayerChoice.SenderGUID = sender;
+            SendPacket(displayPlayerChoice);
+        }
+
         public float GetCollisionHeight(bool mounted)
         {
             if (mounted)

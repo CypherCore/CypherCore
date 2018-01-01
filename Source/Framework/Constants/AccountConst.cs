@@ -773,6 +773,7 @@ namespace Framework.Constants
         CommandListSpawnpoints = 866, // Reserved
         CommandReloadQuestGreetingLocale = 867, // Reserved
         CommandModifyPower = 868,
+        CommandDebugSendPlayerChoice = 869,
 
         // Custom Permissions 1000+
         Max

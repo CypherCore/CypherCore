@@ -648,5 +648,11 @@ namespace Game
 
             SendPacket(response);
         }
+
+        [WorldPacketHandler(ClientOpcodes.ChoiceResponse)]
+        void HandlePlayerChoiceResponse(PlayerChoiceResponsePkt packet)
+        {
+            Global.ScriptMgr.OnPlayerChoiceResponse(GetPlayer(), (uint)packet.ChoiceID, (uint)packet.ResponseID);
+        }
     }
 }

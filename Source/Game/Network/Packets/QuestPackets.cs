@@ -816,6 +816,91 @@ namespace Game.Network.Packets
         List<WorldQuestUpdateInfo> WorldQuestUpdates = new List<WorldQuestUpdateInfo>();
     }
 
+    class DisplayPlayerChoice : ServerPacket
+    {
+        public DisplayPlayerChoice() : base(ServerOpcodes.DisplayPlayerChoice) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(Choice.ChoiceId);
+            _worldPacket.WriteUInt32(Choice.Responses.Count);
+            _worldPacket.WritePackedGuid(SenderGUID);
+            _worldPacket.WriteBits(Choice.Question.Length, 8);
+            _worldPacket.WriteBit(CloseChoiceFrame);
+            _worldPacket.FlushBits();
+
+            foreach (var response in Choice.Responses.Values)
+            {
+                _worldPacket.WriteInt32(response.ResponseID);
+                _worldPacket.WriteInt32(response.ChoiceArtFileID);
+
+                _worldPacket.WriteBits(response.Answer.Length, 9);
+                _worldPacket.WriteBits(response.Header.Length, 9);
+                _worldPacket.WriteBits(response.Description.Length, 11);
+                _worldPacket.WriteBits(response.Confirmation.Length, 7);
+
+                _worldPacket.WriteBit(response.Reward.HasValue);
+                _worldPacket.FlushBits();
+
+                if (response.Reward.HasValue)
+                {
+                    var reward = response.Reward.Value;
+
+                    _worldPacket.WriteInt32(reward.TitleID);
+                    _worldPacket.WriteInt32(reward.PackageID);
+                    _worldPacket.WriteInt32(reward.SkillLineID);
+                    _worldPacket.WriteUInt32(reward.SkillPointCount);
+                    _worldPacket.WriteUInt32(reward.ArenaPointCount);
+                    _worldPacket.WriteUInt32(reward.HonorPointCount);
+                    _worldPacket.WriteUInt64(reward.Money);
+                    _worldPacket.WriteUInt32(reward.Xp);
+
+                    _worldPacket.WriteUInt32(0); // itemCount
+                    _worldPacket.WriteUInt32(0); // currencyCount
+                    _worldPacket.WriteUInt32(0); // factionCount
+                    _worldPacket.WriteUInt32(0); // itemChoiceCount
+
+                    /*for (var i = 0u; i < itemCount; ++i)
+                    ReadPlayerChoiceResponseRewardEntry(packet, "Item", i);
+
+                    for (var i = 0u; i < currencyCount; ++i)
+                    ReadPlayerChoiceResponseRewardEntry(packet, "Currency", i);
+
+                    for (var i = 0u; i < factionCount; ++i)
+                    ReadPlayerChoiceResponseRewardEntry(packet, "Faction", i);
+
+                    for (var i = 0u; i < itemChoiceCount; ++i)
+                    ReadPlayerChoiceResponseRewardEntry(packet, "ItemChoice", i);*/
+                }
+
+                _worldPacket.WriteString(response.Answer);
+                _worldPacket.WriteString(response.Header);
+                _worldPacket.WriteString(response.Description);
+                _worldPacket.WriteString(response.Confirmation);
+            }
+
+            _worldPacket.WriteString(Choice.Question);
+        }
+
+        public ObjectGuid SenderGUID;
+        public PlayerChoice Choice;
+        public bool CloseChoiceFrame;
+    }
+
+    class PlayerChoiceResponsePkt : ClientPacket
+    {
+        public PlayerChoiceResponsePkt(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            ChoiceID = _worldPacket.ReadInt32();
+            ResponseID = _worldPacket.ReadInt32();
+        }
+
+        public int ChoiceID;
+        public int ResponseID;
+    }
+
     //Structs
     public class QuestGiverInfo
     {

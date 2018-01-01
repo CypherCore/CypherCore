@@ -1989,7 +1989,7 @@ namespace Framework.Constants
         Unk202 = 202,
         Unk203 = 203,
         ChangeBattlepetQuality = 204,
-        LaunchQuestTask = 205,
+        LaunchQuestChoice = 205,
         AlterItem = 206,
         Unk207 = 207,
         Unk208 = 208,

@@ -32,6 +32,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Framework.Dynamic;
 
 namespace Game
 {
@@ -586,6 +587,18 @@ namespace Game
             if (_classExpansionRequirementStorage.ContainsKey((byte)class_))
                 return (Expansion)_classExpansionRequirementStorage[(byte)class_];
             return Expansion.Classic;
+        }
+        public PlayerChoice GetPlayerChoice(int choiceId)
+        {
+            return _playerChoiceContainer.LookupByKey(choiceId);
+        }
+        public PlayerChoiceLocale GetPlayerChoiceLocale(uint ChoiceID)
+        {
+            return _playerChoiceLocaleContainer.LookupByKey(ChoiceID);
+        }
+        public PlayerChoiceResponseLocale GetPlayerChoiceResponseLocale(uint ChoiceID, uint ResponseID)
+        {
+            return _playerChoiceResponseLocaleContainer.LookupByKey(Tuple.Create(ChoiceID, ResponseID));
         }
 
         //Gossip
@@ -7678,23 +7691,18 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
-                string name = result.Read<string>(2);
-                string nameAlt = result.Read<string>(3);
-                string title = result.Read<string>(4);
-                string titleAlt = result.Read<string>(5);
-
-                if (!_creatureLocaleStorage.ContainsKey(id))
-                    _creatureLocaleStorage[id] = new CreatureLocale();
-
                 LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
                 if (locale == LocaleConstant.enUS)
                     continue;
 
+                if (!_creatureLocaleStorage.ContainsKey(id))
+                    _creatureLocaleStorage[id] = new CreatureLocale();
+
                 CreatureLocale data = _creatureLocaleStorage[id];
-                AddLocaleString(name, locale, data.Name);
-                AddLocaleString(nameAlt, locale, data.NameAlt);
-                AddLocaleString(title, locale, data.Title);
-                AddLocaleString(titleAlt, locale, data.TitleAlt);
+                AddLocaleString(result.Read<string>(2), locale, data.Name);
+                AddLocaleString(result.Read<string>(3), locale, data.NameAlt);
+                AddLocaleString(result.Read<string>(4), locale, data.Title);
+                AddLocaleString(result.Read<string>(5), locale, data.TitleAlt);
 
             } while (result.NextRow());
         }
@@ -7713,22 +7721,17 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
-
-                string name = result.Read<string>(2);
-                string castBarCaption = result.Read<string>(3);
-                string unk1 = result.Read<string>(4);
+                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
+                if (locale == LocaleConstant.enUS)
+                    continue;
 
                 if (!_gameObjectLocaleStorage.ContainsKey(id))
                     _gameObjectLocaleStorage[id] = new GameObjectLocale();
 
                 GameObjectLocale data = _gameObjectLocaleStorage[id];
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
-                    continue;
-
-                AddLocaleString(name, locale, data.Name);
-                AddLocaleString(castBarCaption, locale, data.CastBarCaption);
-                AddLocaleString(unk1, locale, data.Unk1);
+                AddLocaleString(result.Read<string>(2), locale, data.Name);
+                AddLocaleString(result.Read<string>(3), locale, data.CastBarCaption);
+                AddLocaleString(result.Read<string>(4), locale, data.Unk1);
 
             } while (result.NextRow());
 
@@ -7749,34 +7752,23 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
-
-                string logTitle = result.Read<string>(2);
-                string logDescription = result.Read<string>(3);
-                string questDescription = result.Read<string>(4);
-                string areaDescription = result.Read<string>(5);
-                string portraitGiverText = result.Read<string>(6);
-                string portraitGiverName = result.Read<string>(7);
-                string portraitTurnInText = result.Read<string>(8);
-                string portraitTurnInName = result.Read<string>(9);
-                string questCompletionLog = result.Read<string>(10);
+                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
+                if (locale == LocaleConstant.enUS)
+                    continue;
 
                 if (!_questTemplateLocaleStorage.ContainsKey(id))
                     _questTemplateLocaleStorage[id] = new QuestTemplateLocale();
 
                 QuestTemplateLocale data = _questTemplateLocaleStorage[id];
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
-                    continue;
-
-                AddLocaleString(logTitle, locale, data.LogTitle);
-                AddLocaleString(logDescription, locale, data.LogDescription);
-                AddLocaleString(questDescription, locale, data.QuestDescription);
-                AddLocaleString(areaDescription, locale, data.AreaDescription);
-                AddLocaleString(portraitGiverText, locale, data.PortraitGiverText);
-                AddLocaleString(portraitGiverName, locale, data.PortraitGiverName);
-                AddLocaleString(portraitTurnInText, locale, data.PortraitTurnInText);
-                AddLocaleString(portraitTurnInName, locale, data.PortraitTurnInName);
-                AddLocaleString(questCompletionLog, locale, data.QuestCompletionLog);
+                AddLocaleString(result.Read<string>(2), locale, data.LogTitle);
+                AddLocaleString(result.Read<string>(3), locale, data.LogDescription);
+                AddLocaleString(result.Read<string>(4), locale, data.QuestDescription);
+                AddLocaleString(result.Read<string>(5), locale, data.AreaDescription);
+                AddLocaleString(result.Read<string>(6), locale, data.PortraitGiverText);
+                AddLocaleString(result.Read<string>(7), locale, data.PortraitGiverName);
+                AddLocaleString(result.Read<string>(8), locale, data.PortraitTurnInText);
+                AddLocaleString(result.Read<string>(9), locale, data.PortraitTurnInName);
+                AddLocaleString(result.Read<string>(10), locale, data.QuestCompletionLog);
             } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Quest Tempalate locale strings in {1} ms", _questTemplateLocaleStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
@@ -7795,18 +7787,15 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
-
-                string Description = result.Read<string>(2);
+                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
+                if (locale == LocaleConstant.enUS)
+                    continue;
 
                 if (!_questObjectivesLocaleStorage.ContainsKey(id))
                     _questObjectivesLocaleStorage[id] = new QuestObjectivesLocale();
 
                 QuestObjectivesLocale data = _questObjectivesLocaleStorage[id];
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
-                    continue;
-
-                AddLocaleString(Description, locale, data.Description);
+                AddLocaleString(result.Read<string>(2), locale, data.Description);
             }
             while (result.NextRow());
 
@@ -7826,18 +7815,15 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
-
-                string RewardText = result.Read<string>(2);
+                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
+                if (locale == LocaleConstant.enUS)
+                    continue;
 
                 if (!_questOfferRewardLocaleStorage.ContainsKey(id))
                     _questOfferRewardLocaleStorage[id] = new QuestOfferRewardLocale();
 
                 QuestOfferRewardLocale data = _questOfferRewardLocaleStorage[id];
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
-                    continue;
-
-                AddLocaleString(RewardText, locale, data.RewardText);
+                AddLocaleString(result.Read<string>(2), locale, data.RewardText);
             } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Quest Offer Reward locale strings in {1} ms", _questOfferRewardLocaleStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
@@ -7856,17 +7842,15 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
-                string completionText = result.Read<string>(2);
+                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
+                if (locale == LocaleConstant.enUS)
+                    continue;
 
                 if (!_questRequestItemsLocaleStorage.ContainsKey(id))
                     _questRequestItemsLocaleStorage[id] = new QuestRequestItemsLocale();
 
                 QuestRequestItemsLocale data = _questRequestItemsLocaleStorage[id];
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
-                    continue;
-
-                AddLocaleString(completionText, locale, data.CompletionText);
+                AddLocaleString(result.Read<string>(2), locale, data.CompletionText);
             } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Quest Request Items locale strings in {1} ms", _questRequestItemsLocaleStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
@@ -7887,16 +7871,14 @@ namespace Game
                 ushort menuId = result.Read<ushort>(0);
                 ushort optionId = result.Read<ushort>(1);
                 string localeName = result.Read<string>(2);
-                string optionText = result.Read<string>(3);
-                string boxText = result.Read<string>(4);
 
-                GossipMenuItemsLocale data = new GossipMenuItemsLocale();
                 LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
                 if (locale == LocaleConstant.enUS)
                     continue;
 
-                AddLocaleString(optionText, locale, data.OptionText);
-                AddLocaleString(boxText, locale, data.BoxText);
+                GossipMenuItemsLocale data = new GossipMenuItemsLocale();
+                AddLocaleString(result.Read<string>(3), locale, data.OptionText);
+                AddLocaleString(result.Read<string>(4), locale, data.BoxText);
 
                 _gossipMenuItemsLocaleStorage[MathFunctions.MakePair32(menuId, optionId)] = data;
             }
@@ -7919,17 +7901,15 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
-                string text = result.Read<string>(2);
+                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
+                if (locale == LocaleConstant.enUS)
+                    continue;
 
                 if (!_pageTextLocaleStorage.ContainsKey(id))
                     _pageTextLocaleStorage[id] = new PageTextLocale();
 
                 PageTextLocale data = _pageTextLocaleStorage[id];
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
-                    continue;
-
-                AddLocaleString(text, locale, data.Text);
+                AddLocaleString(result.Read<string>(2), locale, data.Text);
             } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} PageText locale strings in {1} ms", _pageTextLocaleStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
@@ -7949,18 +7929,15 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
-                string name = result.Read<string>(2);
+                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
+                if (locale == LocaleConstant.enUS)
+                    continue;
 
                 if (!_pointOfInterestLocaleStorage.ContainsKey(id))
                     _pointOfInterestLocaleStorage[id] = new PointOfInterestLocale();
 
                 PointOfInterestLocale data = _pointOfInterestLocaleStorage[id];
-
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
-                    continue;
-
-                AddLocaleString(name, locale, data.Name);
+                AddLocaleString(result.Read<string>(2), locale, data.Name);
             }
             while (result.NextRow());
         }
@@ -8666,6 +8643,177 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} scene templates in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
+        public void LoadPlayerChoices()
+        {
+            uint oldMSTime = Time.GetMSTime();
+            _playerChoiceContainer.Clear();
+
+            SQLResult choiceResult = DB.World.Query("SELECT ChoiceID, Question FROM playerchoice");
+            if (choiceResult.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 player choices. DB table `playerchoice` is empty.");
+                return;
+            }
+
+            uint responseCount = 0;
+            uint rewardCount = 0;
+
+            do
+            {
+                int choiceId = choiceResult.Read<int>(0);
+
+                PlayerChoice choice = new PlayerChoice();
+                choice.ChoiceId = choiceId;
+                choice.Question = choiceResult.Read<string>(1);
+                _playerChoiceContainer[choiceId] = choice;
+
+            } while (choiceResult.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_playerChoiceContainer.Count} player choices in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+
+            SQLResult responses = DB.World.Query("SELECT ChoiceID, ResponseID, ChoiceArtFileID, Header, Answer, Description, Confirmation FROM playerchoice_response");
+            if (!responses.IsEmpty())
+            {
+                do
+                {
+                    ++responseCount;
+
+                    int choiceId = responses.Read<int>(0);
+                    int ResponseID = responses.Read<int>(1);
+
+                    if (!_playerChoiceContainer.ContainsKey(choiceId))
+                    {
+                        Log.outError(LogFilter.Sql, "Table `playerchoice_response` has nonexistent choiceId: {choiceId} (ResponseID : {ResponseID}), skipped");
+                        continue;
+                    }
+
+                    PlayerChoice choice = _playerChoiceContainer[choiceId];
+                    PlayerChoiceResponse response = new PlayerChoiceResponse();
+
+                    response.ResponseID = ResponseID;
+                    response.ChoiceArtFileID = responses.Read<int>(2);
+                    response.Header = responses.Read<string>(3);
+                    response.Answer = responses.Read<string>(4);
+                    response.Description = responses.Read<string>(5);
+                    response.Confirmation = responses.Read<string>(6);
+
+                    choice.Responses[ResponseID] = response;
+                } while (responses.NextRow());
+
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {responseCount} player choices response in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+            }
+            else
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 player choices responses. DB table `playerchoice_response` is empty.");
+            }
+
+            SQLResult rewards = DB.World.Query("SELECT ChoiceID, ResponseID, TitleID, PackageID, SkillLineID, SkillPointCount, ArenaPointCount, HonorPointCount, Money, Xp FROM playerchoice_response_reward");
+            if (!rewards.IsEmpty())
+            {
+                do
+                {
+                    ++rewardCount;
+
+                    int choiceId = rewards.Read<int>(0);
+                    int ResponseID = rewards.Read<int>(1);
+
+                    if (!_playerChoiceContainer.ContainsKey(choiceId))
+                    {
+                        Log.outError(LogFilter.Sql, "Table `playerchoice_response_reward` has nonexistent choiceId: {choiceId} (ResponseID : {ResponseID}), skipped");
+                        continue;
+                    }
+
+                    PlayerChoice choice = _playerChoiceContainer[choiceId];
+
+                    if (!choice.Responses.ContainsKey(ResponseID))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward` has nonexistent ResponseID: {ResponseID} for choiceId {choiceId}, skipped");
+                        continue;
+                    }
+
+                    PlayerChoiceResponse response = choice.Responses[ResponseID];
+
+                    PlayerChoiceResponseReward reward = new PlayerChoiceResponseReward();
+
+                    reward.TitleID = rewards.Read<int>(2);
+                    reward.PackageID = rewards.Read<int>(3);
+                    reward.SkillLineID = rewards.Read<int>(4);
+                    reward.SkillPointCount = rewards.Read<uint>(5);
+                    reward.ArenaPointCount = rewards.Read<uint>(6);
+                    reward.HonorPointCount = rewards.Read<uint>(7);
+                    reward.Money = rewards.Read<ulong>(8);
+                    reward.Xp = rewards.Read<uint>(9);
+
+                    response.Reward.Set(reward);
+
+                } while (rewards.NextRow());
+
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {rewardCount} player choices reward in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+            }
+            else
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 player choices responses reward. DB table `playerchoice_response_reward` is empty.");
+            }
+        }
+        public void LoadPlayerChoicesLocale()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            // need for reload case
+            _playerChoiceLocaleContainer.Clear();
+            _playerChoiceResponseLocaleContainer.Clear();
+
+            //                                               0         1       2
+            SQLResult result = DB.World.Query("SELECT ChoiceID, locale, Question FROM playerchoice_locale");
+            if (!result.IsEmpty())
+            {
+                do
+                {
+                    uint ChoiceID = result.Read<uint>(0);
+                    string localeName = result.Read<string>(1);
+                    LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
+                    if (locale == LocaleConstant.enUS)
+                        continue;
+
+                    if (!_playerChoiceLocaleContainer.ContainsKey(ChoiceID))
+                        _playerChoiceLocaleContainer[ChoiceID] = new PlayerChoiceLocale();
+
+                    PlayerChoiceLocale data = _playerChoiceLocaleContainer[ChoiceID];
+                    AddLocaleString(result.Read<string>(2), locale, data.Question);
+                } while (result.NextRow());
+
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {_playerChoiceLocaleContainer.Count} Player Choice locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            }
+
+            oldMSTime = Time.GetMSTime();
+
+            //                                   0         1           2       3       4       5            6
+            result = DB.World.Query("SELECT ChoiceID, ResponseID, locale, Header, Answer, Description, Confirmation FROM playerchoice_response_locale");
+            if (!result.IsEmpty())
+            {
+                do
+                {
+                    uint ChoiceID = result.Read<uint>(0);
+                    uint ResponseID = result.Read<uint>(1);
+                    string localeName = result.Read<string>(2);
+                    LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
+                    if (locale == LocaleConstant.enUS)
+                        continue;
+
+                    Tuple<uint, uint> pair = Tuple.Create(ChoiceID, ResponseID);
+                    if (_playerChoiceResponseLocaleContainer.ContainsKey(pair))
+                        _playerChoiceResponseLocaleContainer[pair] = new PlayerChoiceResponseLocale();
+
+                    PlayerChoiceResponseLocale data = _playerChoiceResponseLocaleContainer[pair];
+                    AddLocaleString(result.Read<string>(3), locale, data.Header);
+                    AddLocaleString(result.Read<string>(4), locale, data.Answer);
+                    AddLocaleString(result.Read<string>(5), locale, data.Description);
+                    AddLocaleString(result.Read<string>(6), locale, data.Confirmation);
+                } while (result.NextRow());
+
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {_playerChoiceResponseLocaleContainer} Player Choice Response locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            }
+        }
 
         public MailLevelReward GetMailLevelReward(uint level, uint raceMask)
         {
@@ -9169,6 +9317,7 @@ namespace Game
         Dictionary<uint, RepSpilloverTemplate> _repSpilloverTemplateStorage = new Dictionary<uint, RepSpilloverTemplate>();
         MultiMap<byte, MailLevelReward> _mailLevelRewardStorage = new MultiMap<byte, MailLevelReward>();
         MultiMap<Tuple<uint, SummonerType, byte>, TempSummonData> _tempSummonDataStorage = new MultiMap<Tuple<uint, SummonerType, byte>, TempSummonData>();
+        Dictionary<int /*choiceId*/, PlayerChoice> _playerChoiceContainer;
         Dictionary<uint, PageText> _pageTextStorage = new Dictionary<uint, PageText>();
         List<string> _reservedNamesStorage = new List<string>();
         Dictionary<uint, SceneTemplate> _sceneTemplateStorage = new Dictionary<uint, SceneTemplate>();
@@ -9278,6 +9427,8 @@ namespace Game
         Dictionary<uint, GossipMenuItemsLocale> _gossipMenuItemsLocaleStorage = new Dictionary<uint, GossipMenuItemsLocale>();
         Dictionary<uint, PageTextLocale> _pageTextLocaleStorage = new Dictionary<uint, PageTextLocale>();
         Dictionary<uint, PointOfInterestLocale> _pointOfInterestLocaleStorage = new Dictionary<uint, PointOfInterestLocale>();
+        Dictionary<uint, PlayerChoiceLocale> _playerChoiceLocaleContainer = new Dictionary<uint, PlayerChoiceLocale>();
+        Dictionary<Tuple<uint, uint>, PlayerChoiceResponseLocale> _playerChoiceResponseLocaleContainer = new Dictionary<Tuple<uint, uint>, PlayerChoiceResponseLocale>();
 
         List<uint> _tavernAreaTriggerStorage = new List<uint>();
         Dictionary<uint, AreaTriggerStruct> _areaTriggerStorage = new Dictionary<uint, AreaTriggerStruct>();
@@ -10053,5 +10204,55 @@ namespace Game
     {
         public StringArray OptionText = new StringArray((int)LocaleConstant.Total);
         public StringArray BoxText = new StringArray((int)LocaleConstant.Total);
+    }
+
+    public class PlayerChoiceLocale
+    {
+        public StringArray Question = new StringArray((int)LocaleConstant.Total);
+    }
+
+    public class PlayerChoiceResponseLocale
+    {
+        public StringArray Header = new StringArray((int)LocaleConstant.Total);
+        public StringArray Answer = new StringArray((int)LocaleConstant.Total);
+        public StringArray Description = new StringArray((int)LocaleConstant.Total);
+        public StringArray Confirmation = new StringArray((int)LocaleConstant.Total);
+    }
+
+    public class PlayerChoiceResponseReward
+    {
+        public int TitleID;
+        public int PackageID;
+        public int SkillLineID;
+        public uint SkillPointCount;
+        public uint ArenaPointCount;
+        public uint HonorPointCount;
+        public ulong Money;
+        public uint Xp;
+
+        //std::vector<Item> Items;
+        //std::vector<Currency> Currency;
+        //std::vector<Faction> Faction;
+        //std::vector<ItemChoice> ItemChoice;
+    }
+
+    public class PlayerChoiceResponse
+    {
+        public int ResponseID;
+        public int ChoiceArtFileID;
+
+        public string Header;
+        public string Answer;
+        public string Description;
+        public string Confirmation;
+
+        public Optional<PlayerChoiceResponseReward> Reward;
+    }
+
+    public class PlayerChoice
+    {
+        public int ChoiceId;
+        public string Question;
+        public Dictionary<int /*ResponseID*/, PlayerChoiceResponse> Responses = new Dictionary<int, PlayerChoiceResponse>();
     }
 }

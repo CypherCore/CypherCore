@@ -5593,6 +5593,18 @@ namespace Game.Spells
             plr.GetSession().GetBattlePetMgr().UnlockSlot(0);
         }
 
+        [SpellEffectHandler(SpellEffectName.LaunchQuestChoice)]
+        void EffectLaunchQuestChoice(uint effIndex)
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            if (!unitTarget || !unitTarget.IsPlayer())
+                return;
+
+            unitTarget.ToPlayer().SendPlayerChoice(GetCaster().GetGUID(), (uint)GetEffect(effIndex).MiscValue);
+        }
+
         [SpellEffectHandler(SpellEffectName.UncageBattlepet)]
         void EffectUncageBattlePet(uint effIndex)
         {

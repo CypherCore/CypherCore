@@ -142,18 +142,16 @@ namespace Game
                 uint groupId = result.Read<byte>(1);
                 uint id = result.Read<byte>(2);
                 string localeName = result.Read<string>(3);
-                string text = result.Read<string>(4);
+                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
+                if (locale == LocaleConstant.enUS)
+                    continue;
 
                 var key = new CreatureTextId(creatureId, groupId, id);
                 if (!mLocaleTextMap.ContainsKey(key))
                     mLocaleTextMap[key] = new CreatureTextLocale();
 
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
-                    continue;
-
                 CreatureTextLocale data = mLocaleTextMap[key];
-                ObjectManager.AddLocaleString(text, locale, data.Text);
+                ObjectManager.AddLocaleString(result.Read<string>(4), locale, data.Text);
 
             } while (result.NextRow());
 
