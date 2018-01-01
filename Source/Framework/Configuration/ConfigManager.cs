@@ -18,6 +18,7 @@
 using Framework.Collections;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -71,8 +72,8 @@ namespace Framework.Configuration
 
             if (Type.GetTypeCode(typeof(T)) == TypeCode.Boolean && temp.IsNumber())
                 return (T)Convert.ChangeType(temp == "1", typeof(T));
-
-            return (T)Convert.ChangeType(temp, type);
+            
+            return (T)Convert.ChangeType(temp, type, CultureInfo.InvariantCulture);
         }
 
         public static List<string> GetKeysByString(string name)

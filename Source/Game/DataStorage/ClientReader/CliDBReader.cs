@@ -22,6 +22,7 @@ using Framework.Dynamic;
 using Framework.GameMath;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 
@@ -572,7 +573,9 @@ namespace Game.DataStorage
                                 array.SetValue(float.Parse(values[valueIndex++]), i);
                         }
                         else
-                            fields[fieldIndex].SetValue(obj, float.Parse(values[valueIndex]));
+                        {
+                            fields[fieldIndex].SetValue(obj, float.Parse(values[valueIndex], CultureInfo.InvariantCulture));
+                        }
                     }
 
                     data.Add(obj);
