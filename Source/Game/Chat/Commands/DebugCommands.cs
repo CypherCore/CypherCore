@@ -1128,6 +1128,19 @@ namespace Game.Chat
                 return true;
             }
 
+            [Command("playerchoice", RBACPermissions.CommandDebugSendPlayerChoice)]
+            static bool HandleDebugSendPlayerChoiceCommand(StringArguments args, CommandHandler handler)
+            {
+                if (args.Empty())
+                    return false;
+
+                int choiceId = args.NextInt32();
+                Player player = handler.GetSession().GetPlayer();
+
+                player.SendPlayerChoice(player.GetGUID(), choiceId);
+                return true;
+            }
+
             [Command("qpartymsg", RBACPermissions.CommandDebugSendQpartymsg)]
             static bool HandleDebugSendQuestPartyMsgCommand(StringArguments args, CommandHandler handler)
             {
