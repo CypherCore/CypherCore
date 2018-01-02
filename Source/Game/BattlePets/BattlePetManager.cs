@@ -333,9 +333,14 @@ namespace Game.BattlePets
             _owner.SendPacket(updates);
         }
 
-        public List<BattlePet> GetLearnedPets()
+        public ushort GetMaxPetLevel()
         {
-            return _pets.Values.Where(p => p.SaveInfo != BattlePetSaveInfo.Removed).ToList();
+            ushort level = 0;
+            foreach (var pet in _pets)
+                if (pet.Value.SaveInfo != BattlePetSaveInfo.Removed)
+                    level = Math.Max(level, pet.Value.PacketInfo.Level);
+
+            return level;
         }
 
         public void CageBattlePet(ObjectGuid guid)
@@ -359,7 +364,7 @@ namespace Game.BattlePets
             item.SetModifier(ItemModifier.BattlePetDisplayId, pet.PacketInfo.CreatureID);
 
             // FIXME: "You create: ." - item name missing in chat
-            _owner.GetPlayer().SendNewItem(item, 1, true, true);
+            _owner.GetPlayer().SendNewItem(item, 1, true, false);
 
             RemovePet(guid);
 
@@ -401,9 +406,34 @@ namespace Game.BattlePets
                 return;
 
             // TODO: set proper CreatureID for spell DEFAULT_SUMMON_BATTLE_PET_SPELL (default EffectMiscValueA is 40721 - Murkimus the Gladiator)
+            _owner.GetPlayer().SetGuidValue(PlayerFields.SummonedBattlePetId, guid);
             _owner.GetPlayer().CastSpell(_owner.GetPlayer(), speciesEntry.SummonSpellID != 0 ? speciesEntry.SummonSpellID : SharedConst.DefaultSummonBattlePetSpell);
 
             // TODO: set pet level, quality... update fields
+        }
+
+        public void DismissPet()
+        {
+            Player ownerPlayer = _owner.GetPlayer();
+            Creature pet = ObjectAccessor.GetCreatureOrPetOrVehicle(ownerPlayer, ownerPlayer.GetCritterGUID());
+            if (pet && ownerPlayer.GetGuidValue(PlayerFields.SummonedBattlePetId) == pet.GetGuidValue(UnitFields.BattlePetCompanionGuid))
+            {
+                pet.DespawnOrUnsummon();
+                ownerPlayer.SetGuidValue(PlayerFields.SummonedBattlePetId, ObjectGuid.Empty);
+            }
+        }
+
+        public void SendJournal()
+        {
+            BattlePetJournal battlePetJournal = new BattlePetJournal();
+            battlePetJournal.Trap = _trapLevel;
+
+            foreach (var pet in _pets)
+                if (pet.Value.SaveInfo != BattlePetSaveInfo.Removed)
+                    battlePetJournal.Pets.Add(pet.Value.PacketInfo);
+
+            battlePetJournal.Slots = _slots;
+            _owner.SendPacket(battlePetJournal);
         }
 
         void SendUpdates(List<BattlePet> pets, bool petAdded)

@@ -268,7 +268,7 @@ namespace Game.Network.Packets
         public ObjectGuid Guid;
         public uint Species;
         public uint CreatureID;
-        public uint CollarID; // what's this?
+        public uint CollarID;
         public ushort Breed;
         public ushort Level;
         public ushort Exp;
@@ -294,7 +294,7 @@ namespace Game.Network.Packets
         }
 
         public BattlePetStruct Pet;
-        public uint CollarID; // what's this?
+        public uint CollarID;
         public byte Index;
         public bool Locked = true;
     }

@@ -199,7 +199,11 @@ namespace Game.Entities
                     AddGuidValue(UnitFields.Summon, minion.GetGUID());
 
                 if (minion.m_Properties != null && minion.m_Properties.Type == SummonType.Minipet)
+                {
                     SetCritterGUID(minion.GetGUID());
+                    if (GetTypeId() == TypeId.Player)
+                        minion.SetGuidValue(UnitFields.BattlePetCompanionGuid, GetGuidValue(PlayerFields.SummonedBattlePetId));
+                }
 
                 // PvP, FFAPvP
                 minion.SetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag, GetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag));

@@ -424,9 +424,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(Quantity);
             _worldPacket.WriteUInt32(QuantityInInventory);
             _worldPacket.WriteUInt32(DungeonEncounterID);
+            _worldPacket.WriteInt32(BattlePetSpeciesID);
             _worldPacket.WriteInt32(BattlePetBreedID);
             _worldPacket.WriteUInt32(BattlePetBreedQuality);
-            _worldPacket.WriteInt32(BattlePetSpeciesID);
             _worldPacket.WriteInt32(BattlePetLevel);
             _worldPacket.WritePackedGuid(ItemGUID);
             _worldPacket.WriteBit(Pushed);
@@ -448,9 +448,9 @@ namespace Game.Network.Packets
         public uint Quantity;
         public uint QuantityInInventory;
         public int DungeonEncounterID;
+        public int BattlePetSpeciesID;
         public int BattlePetBreedID;
         public uint BattlePetBreedQuality;
-        public int BattlePetSpeciesID;
         public int BattlePetLevel;
         public ObjectGuid ItemGUID;
         public bool Pushed;

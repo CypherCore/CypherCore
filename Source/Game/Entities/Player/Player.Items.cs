@@ -2565,10 +2565,10 @@ namespace Game.Entities
             //packet.QuestLogItemID;
             packet.Quantity = quantity;
             packet.QuantityInInventory = GetItemCount(item.GetEntry());
-            //packet.DungeonEncounterID;
+            //packet.DungeonEncounterID; 
+            packet.BattlePetSpeciesID = (int)item.GetModifier(ItemModifier.BattlePetSpeciesId);
             packet.BattlePetBreedID = (int)item.GetModifier(ItemModifier.BattlePetBreedData) & 0xFFFFFF;
             packet.BattlePetBreedQuality = (item.GetModifier(ItemModifier.BattlePetBreedData) >> 24) & 0xFF;
-            packet.BattlePetSpeciesID = (int)item.GetModifier(ItemModifier.BattlePetSpeciesId);
             packet.BattlePetLevel = (int)item.GetModifier(ItemModifier.BattlePetLevel);
 
             packet.ItemGUID = item.GetGUID();

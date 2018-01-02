@@ -1900,23 +1900,6 @@ namespace Game.Spells
             uint spellToLearn = (m_spellInfo.Id == 483 || m_spellInfo.Id == 55884) ? (uint)damage : effectInfo.TriggerSpell;
             player.LearnSpell(spellToLearn, false);
 
-            if (m_spellInfo.Id == 55884)
-            {
-                BattlePetMgr battlePetMgr = player.GetSession().GetBattlePetMgr();
-                if (battlePetMgr != null)
-                {
-                    foreach (var entry in CliDB.BattlePetSpeciesStorage.Values)
-                    {
-                        if (entry.SummonSpellID == spellToLearn)
-                        {
-                            battlePetMgr.AddPet(entry.Id, entry.CreatureID);
-                            player.UpdateCriteria(CriteriaTypes.OwnBattlePetCount);
-                            break;
-                        }
-                    }
-                }
-            }
-
             Log.outDebug(LogFilter.Spells, "Spell: Player {0} has learned spell {1} from NpcGUID={2}", player.GetGUID().ToString(), spellToLearn, m_caster.GetGUID().ToString());
         }
 
@@ -5634,14 +5617,9 @@ namespace Game.Spells
             if (battlePetMgr == null)
                 return;
 
-            ushort maxLearnedLevel = 0;
-
-            foreach (var pet in battlePetMgr.GetLearnedPets())
-                maxLearnedLevel = Math.Max(pet.PacketInfo.Level, maxLearnedLevel);
-
             // TODO: This means if you put your highest lvl pet into cage, you won't be able to uncage it again which is probably wrong.
             // We will need to store maxLearnedLevel somewhere to avoid this behaviour.
-            if (maxLearnedLevel < level)
+            if (battlePetMgr.GetMaxPetLevel() < level)
             {
                 battlePetMgr.SendError(BattlePetError.TooHighLevelToUncage, creatureId); // or speciesEntry.CreatureID
                 SendCastResult(SpellCastResult.CantAddBattlePet);
@@ -5655,10 +5633,11 @@ namespace Game.Spells
                 return;
             }
 
+            battlePetMgr.AddPet(speciesId, creatureId, breed, quality, level);
+
             if (!plr.HasSpell(speciesEntry.SummonSpellID))
                 plr.LearnSpell(speciesEntry.SummonSpellID, false);
 
-            battlePetMgr.AddPet(speciesId, creatureId, breed, quality, level);
             plr.DestroyItem(m_CastItem.GetBagSlot(), m_CastItem.GetSlot(), true);
             m_CastItem = null;
         }
