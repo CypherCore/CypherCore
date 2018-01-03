@@ -516,7 +516,7 @@ namespace Game.Entities
 
                         if (HasFlag(UnitFields.Flags2, UnitFlags2.RegeneratePower))
                         {
-                            if (getPowerType() == PowerType.Energy)
+                            if (GetPowerType() == PowerType.Energy)
                                 Regenerate(PowerType.Energy);
                             else
                                 RegenerateMana();
@@ -1133,10 +1133,10 @@ namespace Game.Entities
             switch (GetClass())
             {
                 case Class.Warrior:
-                    setPowerType(PowerType.Rage);
+                    SetPowerType(PowerType.Rage);
                     break;
                 case Class.Rogue:
-                    setPowerType(PowerType.Energy);
+                    SetPowerType(PowerType.Energy);
                     break;
                 default:
                     SetMaxPower(PowerType.Mana, (int)mana);
@@ -1409,7 +1409,7 @@ namespace Game.Entities
             else
             {
                 curhealth = GetMaxHealth();
-                SetPower(PowerType.Mana, GetMaxPower(PowerType.Mana));
+                SetFullPower(PowerType.Mana);
             }
 
             SetHealth((m_deathState == DeathState.Alive || m_deathState == DeathState.JustRespawned) ? curhealth : 0);

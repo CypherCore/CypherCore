@@ -218,7 +218,7 @@ namespace Game.Entities
                     SetByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PetFlags, (result.Read<bool>(9) ? UnitPetFlags.CanBeAbandoned : UnitPetFlags.CanBeRenamed | UnitPetFlags.CanBeAbandoned));
 
                     SetUInt32Value(UnitFields.Flags, (uint)UnitFlags.PvpAttackable); // this enables popup window (pet abandon, cancel)
-                    setPowerType(PowerType.Focus);
+                    SetPowerType(PowerType.Focus);
                     break;
                 default:
                     if (!IsPetGhoul())
@@ -247,7 +247,7 @@ namespace Game.Entities
             SetCanModifyStats(true);
 
             if (getPetType() == PetType.Summon && !current)              //all (?) summon pets come with full health when called, but not when they are current
-                SetPower(PowerType.Mana, GetMaxPower(PowerType.Mana));
+                SetFullPower(PowerType.Mana);
             else
             {
                 uint savedhealth = result.Read<uint>(10);
@@ -256,8 +256,8 @@ namespace Game.Entities
                     setDeathState(DeathState.JustDied);
                 else
                 {
-                    SetHealth(savedhealth > GetMaxHealth() ? GetMaxHealth() : savedhealth);
-                    SetPower(PowerType.Mana, savedmana > GetMaxPower(PowerType.Mana) ? GetMaxPower(PowerType.Mana) : (int)savedmana);
+                    SetHealth(savedhealth);
+                    SetPower(PowerType.Mana, (int)savedmana);
                 }
             }
 
@@ -579,7 +579,7 @@ namespace Game.Entities
                                 m_focusRegenTimer -= diff;
                             else
                             {
-                                switch (getPowerType())
+                                switch (GetPowerType())
                                 {
                                     case PowerType.Focus:
                                         Regenerate(PowerType.Focus);
@@ -714,7 +714,7 @@ namespace Game.Entities
             if (!Create(map.GenerateLowGuid(HighGuid.Pet), map, cinfo.Entry))
                 return false;
 
-            setPowerType(PowerType.Focus);
+            SetPowerType(PowerType.Focus);
             SetUInt32Value(UnitFields.PetNameTimestamp, 0);
             SetUInt32Value(UnitFields.PetExperience, 0);
             SetUInt32Value(UnitFields.PetNextLevelExp, (uint)(Global.ObjectMgr.GetXPForLevel(getLevel() + 1) * PetXPFactor));

@@ -33,8 +33,8 @@ namespace Game.Entities
         {
             Unit a = objA.ToUnit();
             Unit b = objB.ToUnit();
-            float rA = a.GetMaxPower(m_power) != 0 ? a.GetPower(m_power) / (float)a.GetMaxPower(m_power) : 0.0f;
-            float rB = b.GetMaxPower(m_power) != 0 ? b.GetPower(m_power) / (float)b.GetMaxPower(m_power) : 0.0f;
+            float rA = a != null ? a.GetPowerPct(m_power) : 0.0f;
+            float rB = b != null ? b.GetPowerPct(m_power) : 0.0f;
             return Convert.ToInt32(m_ascending ? rA < rB : rA > rB);
         }
 

@@ -1180,7 +1180,7 @@ namespace Scripts.Spells.Items
             Unit caster = eventInfo.GetActor();
 
             uint spellId;
-            switch (caster.getPowerType())
+            switch (caster.GetPowerType())
             {
                 case PowerType.Mana:
                     spellId = _manaSpellId;

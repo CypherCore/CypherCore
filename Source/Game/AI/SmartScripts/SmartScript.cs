@@ -2927,7 +2927,7 @@ namespace Game.AI
                     {
                         if (me == null || !me.IsInCombat() || me.GetMaxPower(PowerType.Mana) == 0)
                             return;
-                        uint perc = (uint)(100.0f * me.GetPower(PowerType.Mana) / me.GetMaxPower(PowerType.Mana));
+                        uint perc = (uint)me.GetPowerPct(PowerType.Mana);
                         if (perc > e.Event.minMaxRepeat.max || perc < e.Event.minMaxRepeat.min)
                             return;
                         ProcessTimedAction(e, e.Event.minMaxRepeat.repeatMin, e.Event.minMaxRepeat.repeatMax);
@@ -2937,7 +2937,7 @@ namespace Game.AI
                     {
                         if (me == null || !me.IsInCombat() || me.GetVictim() == null || me.GetVictim().GetMaxPower(PowerType.Mana) == 0)
                             return;
-                        uint perc = (uint)(100.0f * me.GetVictim().GetPower(PowerType.Mana) / me.GetVictim().GetMaxPower(PowerType.Mana));
+                        uint perc = (uint)me.GetVictim().GetPowerPct(PowerType.Mana);
                         if (perc > e.Event.minMaxRepeat.max || perc < e.Event.minMaxRepeat.min)
                             return;
                         ProcessTimedAction(e, e.Event.minMaxRepeat.repeatMin, e.Event.minMaxRepeat.repeatMax, me.GetVictim());

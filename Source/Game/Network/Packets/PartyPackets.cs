@@ -268,10 +268,10 @@ namespace Game.Network.Packets
             MemberStats.MaxHealth = (int)player.GetMaxHealth();
 
             // Power
-            MemberStats.PowerType = (byte)player.getPowerType();
+            MemberStats.PowerType = (byte)player.GetPowerType();
             MemberStats.PowerDisplayID = 0;
-            MemberStats.CurrentPower = (ushort)player.GetPower(player.getPowerType());
-            MemberStats.MaxPower = (ushort)player.GetMaxPower(player.getPowerType());
+            MemberStats.CurrentPower = (ushort)player.GetPower(player.GetPowerType());
+            MemberStats.MaxPower = (ushort)player.GetMaxPower(player.GetPowerType());
 
             // Position
             MemberStats.ZoneID = (ushort)player.GetZoneId();

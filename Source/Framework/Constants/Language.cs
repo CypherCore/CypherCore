@@ -172,7 +172,7 @@ namespace Framework.Constants
         YouChangeEnergy = 122,
         YoursEnergyChanged = 123,
 
-        CurrentEnergy = 124,              //Log
+        CurrentEnergy = 124,
         YouChangeRage = 125,
         YoursRageChanged = 126,
         YouChangeLvl = 127,

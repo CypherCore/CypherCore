@@ -71,7 +71,6 @@ namespace Game.Chat
                 NotifyModification(handler, target, CypherStrings.YouChangeEnergy, CypherStrings.YoursEnergyChanged, energy / energyMultiplier, energymax / energyMultiplier);
                 target.SetMaxPower(PowerType.Energy, energymax);
                 target.SetPower(PowerType.Energy, energy);
-                Log.outDebug(LogFilter.Misc, handler.GetCypherString(CypherStrings.CurrentEnergy), target.GetMaxPower(PowerType.Energy));
                 return true;
             }
             return false;

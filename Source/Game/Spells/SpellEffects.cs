@@ -823,7 +823,7 @@ namespace Game.Spells
 
             PowerType powerType = (PowerType)effectInfo.MiscValue;
 
-            if (unitTarget == null || !unitTarget.IsAlive() || unitTarget.getPowerType() != powerType || damage < 0)
+            if (unitTarget == null || !unitTarget.IsAlive() || unitTarget.GetPowerType() != powerType || damage < 0)
                 return;
 
             // add spell damage bonus
@@ -902,7 +902,7 @@ namespace Game.Spells
 
             PowerType powerType = (PowerType)effectInfo.MiscValue;
 
-            if (unitTarget == null || !unitTarget.IsAlive() || unitTarget.getPowerType() != powerType || damage < 0)
+            if (unitTarget == null || !unitTarget.IsAlive() || unitTarget.GetPowerType() != powerType || damage < 0)
                 return;
 
             int newDamage = -(unitTarget.ModifyPower(powerType, -damage));
@@ -4077,7 +4077,7 @@ namespace Game.Spells
             player.SetHealth(health);
             player.SetPower(PowerType.Mana, mana);
             player.SetPower(PowerType.Rage, 0);
-            player.SetPower(PowerType.Energy, player.GetMaxPower(PowerType.Energy));
+            player.SetFullPower(PowerType.Energy);
             player.SetPower(PowerType.Focus, 0);
 
             player.SpawnCorpseBones();

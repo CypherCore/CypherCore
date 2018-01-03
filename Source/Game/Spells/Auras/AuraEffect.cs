@@ -4820,7 +4820,7 @@ namespace Game.Spells
                                 {
                                     // Converts up to 10 rage per second into health for $d.  Each point of rage is converted into ${$m2/10}.1% of max health.
                                     // Should be manauser
-                                    if (target.getPowerType() != PowerType.Rage)
+                                    if (target.GetPowerType() != PowerType.Rage)
                                         break;
                                     int rage = target.GetPower(PowerType.Rage);
                                     // Nothing todo
@@ -5595,7 +5595,7 @@ namespace Game.Spells
         {
             PowerType powerType = (PowerType)GetMiscValue();
 
-            if (caster == null || !caster.IsAlive() || !target.IsAlive() || target.getPowerType() != powerType)
+            if (caster == null || !caster.IsAlive() || !target.IsAlive() || target.GetPowerType() != powerType)
                 return;
 
             if (target.HasUnitState(UnitState.Isolated) || target.IsImmunedToDamage(GetSpellInfo()))
@@ -5646,7 +5646,7 @@ namespace Game.Spells
         {
             PowerType powerType;
             if (GetMiscValue() == (int)PowerType.All)
-                powerType = target.getPowerType();
+                powerType = target.GetPowerType();
             else
                 powerType = (PowerType)GetMiscValue();
 
@@ -5708,7 +5708,7 @@ namespace Game.Spells
         {
             PowerType powerType = (PowerType)GetMiscValue();
 
-            if (caster == null || !target.IsAlive() || target.getPowerType() != powerType)
+            if (caster == null || !target.IsAlive() || target.GetPowerType() != powerType)
                 return;
 
             if (target.HasUnitState(UnitState.Isolated) || target.IsImmunedToDamage(GetSpellInfo()))

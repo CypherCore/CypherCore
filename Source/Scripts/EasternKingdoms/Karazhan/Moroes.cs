@@ -421,7 +421,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             {
                 Unit target = SelectTarget(SelectAggroTarget.Random, 0, 100, true);
                 if (target)
-                    if (target.getPowerType() == PowerType.Mana)
+                    if (target.GetPowerType() == PowerType.Mana)
                         DoCast(target, SpellIds.Manaburn);
                 ManaBurn_Timer = 5000;                          // 3 sec cast
             }

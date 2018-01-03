@@ -225,7 +225,7 @@ namespace Scripts.Northrend.IcecrownCitadel
         public override void Reset()
         {
             _Reset();
-            me.SetPower(PowerType.Mana, me.GetMaxPower(PowerType.Mana));
+            me.SetFullPower(PowerType.Mana);
             _events.SetPhase(LadyConst.PhaseOne);
             _waveCounter = 0;
             _nextVengefulShadeTargetGUID.Clear();

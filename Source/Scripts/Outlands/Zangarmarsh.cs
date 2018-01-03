@@ -49,7 +49,7 @@ namespace Scripts.Outlands
             player.PlayerTalkClass.ClearMenus();
             if (action == eTradeskill.GossipActionInfoDef + 1)
             {
-                creature.setPowerType(PowerType.Mana);
+                creature.SetPowerType(PowerType.Mana);
                 creature.SetMaxPower(PowerType.Mana, 200);             //set a "fake" mana value, we can't depend on database doing it in this case
                 creature.SetPower(PowerType.Mana, 200);
 

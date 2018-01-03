@@ -464,7 +464,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
         void FilterTargets(List<WorldObject> targets)
         {
             // get a list of players with mana
-            targets.RemoveAll(unit => unit.IsTypeId(TypeId.Player) && unit.ToPlayer().getPowerType() == PowerType.Mana);
+            targets.RemoveAll(unit => unit.IsTypeId(TypeId.Player) && unit.ToPlayer().GetPowerType() == PowerType.Mana);
             if (targets.Empty())
                 return;
 

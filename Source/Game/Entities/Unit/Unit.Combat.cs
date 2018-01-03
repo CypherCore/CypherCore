@@ -944,7 +944,7 @@ namespace Game.Entities
             }
 
             // Rage from Damage made (only from direct weapon damage)
-            if (cleanDamage != null && (cleanDamage.attackType == WeaponAttackType.BaseAttack || cleanDamage.attackType == WeaponAttackType.OffAttack) && damagetype == DamageEffectType.Direct && this != victim && getPowerType() == PowerType.Rage)
+            if (cleanDamage != null && (cleanDamage.attackType == WeaponAttackType.BaseAttack || cleanDamage.attackType == WeaponAttackType.OffAttack) && damagetype == DamageEffectType.Direct && this != victim && GetPowerType() == PowerType.Rage)
             {
                 uint rage = (uint)(GetBaseAttackTime(cleanDamage.attackType) / 1000.0f * 1.75f);
                 if (cleanDamage.attackType == WeaponAttackType.OffAttack)

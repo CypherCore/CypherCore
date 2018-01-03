@@ -258,7 +258,7 @@ namespace Scripts.Northrend.FrozenHalls.ForgeOfSouls.Bronjahm
     {
         void RecalculateDamage()
         {
-            if (GetHitUnit().getPowerType() != PowerType.Mana)
+            if (GetHitUnit().GetPowerType() != PowerType.Mana)
                 return;
 
             int maxDamage = GetCaster().GetMap().IsHeroic() ? 15000 : 10000;

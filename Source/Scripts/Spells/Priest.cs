@@ -496,7 +496,7 @@ namespace Scripts.Spells.Priest
             {
                 Unit target = obj.ToUnit();
                 if (target)
-                    return target.getPowerType() != PowerType.Mana;
+                    return target.GetPowerType() != PowerType.Mana;
 
                 return true;
             }));

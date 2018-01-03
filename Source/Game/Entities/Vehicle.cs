@@ -75,9 +75,9 @@ namespace Game.Entities
             {
                 PowerDisplayRecord powerDisplay = CliDB.PowerDisplayStorage.LookupByKey(_vehicleInfo.PowerDisplayID[0]);
                 if (powerDisplay != null)
-                    _me.setPowerType((PowerType)powerDisplay.PowerType);
+                    _me.SetPowerType((PowerType)powerDisplay.PowerType);
                 else if (_me.GetClass() == Class.Rogue)
-                    _me.setPowerType(PowerType.Energy);
+                    _me.SetPowerType(PowerType.Energy);
             }
 
             _status = Status.Installed;

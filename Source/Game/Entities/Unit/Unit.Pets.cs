@@ -215,7 +215,7 @@ namespace Game.Entities
 
                 // Ghoul pets have energy instead of mana (is anywhere better place for this code?)
                 if (minion.IsPetGhoul())
-                    minion.setPowerType(PowerType.Energy);
+                    minion.SetPowerType(PowerType.Energy);
 
                 // Send infinity cooldown - client does that automatically but after relog cooldown needs to be set again
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(minion.GetUInt32Value(UnitFields.CreatedBySpell));

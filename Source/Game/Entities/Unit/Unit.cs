@@ -1651,7 +1651,7 @@ namespace Game.Entities
                 // without this when removing IncreaseMaxHealth aura player may stuck with 1 hp
                 // do not why since in IncreaseMaxHealth currenthealth is checked
                 SetHealth(0);
-                SetPower(getPowerType(), 0);
+                SetPower(GetPowerType(), 0);
                 SetUInt32Value(UnitFields.NpcEmotestate, 0);
 
                 // players in instance don't have ZoneScript, but they have InstanceScript
@@ -1969,7 +1969,7 @@ namespace Game.Entities
                     }
             }
 
-            setPowerType(displayPower);
+            SetPowerType(displayPower);
         }
 
         public FactionTemplateRecord GetFactionTemplateEntry()

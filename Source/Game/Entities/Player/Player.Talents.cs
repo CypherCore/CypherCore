@@ -357,7 +357,7 @@ namespace Game.Entities
             SendActionButtons(1);
 
             UpdateDisplayPower();
-            PowerType pw = getPowerType();
+            PowerType pw = GetPowerType();
             if (pw != PowerType.Mana)
                 SetPower(PowerType.Mana, 0); // Mana must be 0 even if it isn't the active power type.
 

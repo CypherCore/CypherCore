@@ -629,7 +629,7 @@ namespace Game.Entities
             UpdateAllStats();
 
             SetFullHealth();
-            SetPower(PowerType.Mana, GetMaxPower(PowerType.Mana));
+            SetFullPower(PowerType.Mana);
             return true;
         }
 

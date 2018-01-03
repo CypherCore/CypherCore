@@ -2047,7 +2047,7 @@ namespace Scripts.Spells.Generic
                         newPet.setDeathState(DeathState.Alive);
 
                     newPet.SetFullHealth();
-                    newPet.SetPower(newPet.getPowerType(), newPet.GetMaxPower(newPet.getPowerType()));
+                    newPet.SetFullPower(newPet.GetPowerType());
 
                     switch (newPet.GetEntry())
                     {
@@ -2171,7 +2171,7 @@ namespace Scripts.Spells.Generic
             {
                 var target = obj.ToUnit();
                 if (target)
-                    return target.getPowerType() != PowerType.Mana;
+                    return target.GetPowerType() != PowerType.Mana;
 
                 return true;
             });
@@ -3312,7 +3312,7 @@ namespace Scripts.Spells.Generic
             {
                 Unit unit = target.ToUnit();
                 if (unit)
-                    return unit.getPowerType() != PowerType.Mana;
+                    return unit.GetPowerType() != PowerType.Mana;
                 return false;
             });
         }

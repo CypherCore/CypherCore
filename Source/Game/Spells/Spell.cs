@@ -4931,7 +4931,7 @@ namespace Game.Spells
                             {
                                 Unit target1 = m_targets.GetUnitTarget();
                                 if (target1 != null)
-                                    if (target1 != m_caster && unitTarget.getPowerType() != (PowerType)effect.MiscValue)
+                                    if (target1 != m_caster && unitTarget.GetPowerType() != (PowerType)effect.MiscValue)
                                         return SpellCastResult.BadTargets;
                             }
                             break;
@@ -5378,7 +5378,7 @@ namespace Game.Spells
                             if (!m_caster.IsTypeId(TypeId.Player) || m_CastItem != null)
                                 break;
 
-                            if (m_targets.GetUnitTarget().getPowerType() != PowerType.Mana)
+                            if (m_targets.GetUnitTarget().GetPowerType() != PowerType.Mana)
                                 return SpellCastResult.BadTargets;
 
                             break;

@@ -49,24 +49,12 @@ namespace Scripts.World
             if (_resetHealthMana)
             {
                 player1.SaveHealthBeforeDuel();
-                player1.SetHealth(player1.GetMaxHealth());
+                player1.SaveManaBeforeDuel();
+                player1.ResetAllPowers();
 
                 player2.SaveHealthBeforeDuel();
-                player2.SetHealth(player2.GetMaxHealth());
-
-                // check if player1 class uses mana
-                if (player1.getPowerType() == PowerType.Mana || player1.GetClass() == Class.Druid)
-                {
-                    player1.SaveManaBeforeDuel();
-                    player1.SetPower(PowerType.Mana, player1.GetMaxPower(PowerType.Mana));
-                }
-
-                // check if player2 class uses mana
-                if (player2.getPowerType() == PowerType.Mana || player2.GetClass() == Class.Druid)
-                {
-                    player2.SaveManaBeforeDuel();
-                    player2.SetPower(PowerType.Mana, player2.GetMaxPower(PowerType.Mana));
-                }
+                player2.SaveManaBeforeDuel();
+                player2.ResetAllPowers();
             }
         }
 
@@ -92,11 +80,11 @@ namespace Scripts.World
                     loser.RestoreHealthAfterDuel();
 
                     // check if player1 class uses mana
-                    if (winner.getPowerType() == PowerType.Mana || winner.GetClass() == Class.Druid)
+                    if (winner.GetPowerType() == PowerType.Mana || winner.GetClass() == Class.Druid)
                         winner.RestoreManaAfterDuel();
 
                     // check if player2 class uses mana
-                    if (loser.getPowerType() == PowerType.Mana || loser.GetClass() == Class.Druid)
+                    if (loser.GetPowerType() == PowerType.Mana || loser.GetClass() == Class.Druid)
                         loser.RestoreManaAfterDuel();
                 }
             }

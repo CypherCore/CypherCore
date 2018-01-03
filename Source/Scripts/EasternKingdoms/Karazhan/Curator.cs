@@ -57,8 +57,8 @@ namespace Scripts.EasternKingdoms.Karazhan.Curator
         {
             _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
             {
-                    //Summon Astral Flare
-                    Creature AstralFlare = DoSpawnCreature(17096, RandomHelper.Rand32() % 37, RandomHelper.Rand32() % 37, 0, 0, TempSummonType.TimedDespawnOOC, 5000);
+                //Summon Astral Flare
+                Creature AstralFlare = DoSpawnCreature(17096, RandomHelper.Rand32() % 37, RandomHelper.Rand32() % 37, 0, 0, TempSummonType.TimedDespawnOOC, 5000);
                 Unit target = SelectTarget(SelectAggroTarget.Random, 0);
 
                 if (AstralFlare && target)
@@ -67,23 +67,23 @@ namespace Scripts.EasternKingdoms.Karazhan.Curator
                     AstralFlare.GetAI().AttackStart(target);
                 }
 
-                    //Reduce Mana by 10% of max health
-                    int mana = me.GetMaxPower(PowerType.Mana);
+                //Reduce Mana by 10% of max health
+                int mana = me.GetMaxPower(PowerType.Mana);
                 if (mana != 0)
                 {
                     mana /= 10;
                     me.ModifyPower(PowerType.Mana, -mana);
 
-                        //if this get's us below 10%, then we evocate (the 10th should be summoned now)
-                        if (me.GetPower(PowerType.Mana) * 100 / me.GetMaxPower(PowerType.Mana) < 10)
+                    //if this get's us below 10%, then we evocate (the 10th should be summoned now)
+                    if (me.GetPower(PowerType.Mana) * 100 / me.GetMaxPower(PowerType.Mana) < 10)
                     {
                         Talk(TextIds.SayEvocate);
                         me.InterruptNonMeleeSpells(false);
                         DoCast(me, SpellIds.Evocation);
                         _scheduler.DelayAll(TimeSpan.FromSeconds(20));
-                            //Evocating = true;
-                            //no AddTimer cooldown, this will make first flare appear instantly after evocate end, like expected
-                            return;
+                        //Evocating = true;
+                        //no AddTimer cooldown, this will make first flare appear instantly after evocate end, like expected
+                        return;
                     }
                     else
                     {
