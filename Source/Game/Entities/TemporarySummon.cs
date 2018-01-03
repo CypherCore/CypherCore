@@ -859,8 +859,6 @@ namespace Game.Entities
                 else if (IsSpiritWolf()) //wolf benefit from shaman's attack power
                 {
                     float dmg_multiplier = 0.31f;
-                    if (GetOwner().GetAuraEffect(63271, 0) != null) // Glyph of Feral Spirit
-                        dmg_multiplier = 0.61f;
                     bonusAP = owner.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * dmg_multiplier;
                     SetBonusDamage((int)(owner.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * dmg_multiplier));
                 }
@@ -938,21 +936,6 @@ namespace Game.Entities
 
             float mindamage = ((base_value + weapon_mindamage) * base_pct + total_value) * total_pct;
             float maxdamage = ((base_value + weapon_maxdamage) * base_pct + total_value) * total_pct;
-
-            var mDummy = GetAuraEffectsByType(AuraType.ModAttackspeed);
-            foreach (var eff in mDummy)
-            {
-                switch (eff.GetSpellInfo().Id)
-                {
-                    case 61682:
-                    case 61683:
-                        MathFunctions.AddPct(ref mindamage, -eff.GetAmount());
-                        MathFunctions.AddPct(ref maxdamage, -eff.GetAmount());
-                        break;
-                    default:
-                        break;
-                }
-            }
 
             SetStatFloatValue(UnitFields.MinDamage, mindamage);
             SetStatFloatValue(UnitFields.MaxDamage, maxdamage);

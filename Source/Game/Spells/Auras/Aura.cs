@@ -1249,13 +1249,6 @@ namespace Game.Spells
                             }
                         }
                         break;
-                    case SpellFamilyNames.Rogue:
-                        // Sprint (skip non player casted spells by category)
-                        if (GetSpellInfo().SpellFamilyFlags[0].HasAnyFlag(0x40u) && GetSpellInfo().GetCategory() == 44)
-                            // in official maybe there is only one icon?
-                            if (target.HasAura(58039)) // Glyph of Blurred Speed
-                                target.CastSpell(target, 61922, true); // Sprint (waterwalk)
-                        break;
                 }
             }
             // mods at aura remove
@@ -1315,12 +1308,6 @@ namespace Game.Spells
                         // Remove Vanish on stealth remove
                         if (GetId() == 1784)
                             target.RemoveAurasWithFamily(SpellFamilyNames.Rogue, new FlagArray128(0x0000800, 0, 0), target.GetGUID());
-                        break;
-                    case SpellFamilyNames.Hunter:
-                        // Glyph of Freezing Trap
-                        if (GetSpellInfo().SpellFamilyFlags[0].HasAnyFlag(0x00000008u))
-                            if (caster != null && caster.HasAura(56845))
-                                target.CastSpell(target, 61394, true);
                         break;
                 }
             }

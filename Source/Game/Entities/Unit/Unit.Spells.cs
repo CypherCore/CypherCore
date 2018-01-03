@@ -242,17 +242,6 @@ namespace Game.Entities
                             DoneTotalMod *= 3.0f;
 
                     break;
-                case SpellFamilyNames.Priest:
-                    // Smite
-                    if (spellProto.SpellFamilyFlags[0].HasAnyFlag<uint>(0x80))
-                    {
-                        // Glyph of Smite
-                        AuraEffect aurEff = GetAuraEffect(55692, 0);
-                        if (aurEff != null)
-                            if (victim.GetAuraEffect(AuraType.PeriodicDamage, SpellFamilyNames.Priest, new FlagArray128(0x100000, 0, 0), GetGUID()) != null)
-                                MathFunctions.AddPct(ref DoneTotalMod, aurEff.GetAmount());
-                    }
-                    break;
                 case SpellFamilyNames.Warlock:
                     // Shadow Bite (30% increase from each dot)
                     if (spellProto.SpellFamilyFlags[1].HasAnyFlag<uint>(0x00400000) && IsPet())
@@ -262,19 +251,10 @@ namespace Game.Entities
                             MathFunctions.AddPct(ref DoneTotalMod, 30 * count);
                     }
 
-                    // Drain Soul - increased damage for targets under 25 % HP
-                    if (spellProto.SpellFamilyFlags[0].HasAnyFlag<uint>(0x00004000))
-                        if (HasAura(100001))
+                    // Drain Soul - increased damage for targets under 20% HP
+                    if (spellProto.Id == 198590)
+                        if (HasAuraState(AuraStateType.HealthLess20Percent))
                             DoneTotalMod *= 2;
-                    break;
-                case SpellFamilyNames.Deathknight:
-                    // Sigil of the Vengeful Heart
-                    if (spellProto.SpellFamilyFlags[0].HasAnyFlag<uint>(0x2000))
-                    {
-                        AuraEffect aurEff = GetAuraEffect(64962, 1);
-                        if (aurEff != null)
-                            DoneTotalMod += aurEff.GetAmount();
-                    }
                     break;
             }
 
@@ -722,24 +702,6 @@ namespace Game.Entities
                                     // Shiv-applied poisons can't crit
                                     if (FindCurrentSpellBySpellId(5938) != null)
                                         crit_chance = 0.0f;
-                                    break;
-                                case SpellFamilyNames.Paladin:
-                                    // Flash of light
-                                    if (spellProto.SpellFamilyFlags[0].HasAnyFlag(0x40000000u))
-                                    {
-                                        // Sacred Shield
-                                        AuraEffect aura = victim.GetAuraEffect(58597, 1, GetGUID());
-                                        if (aura != null)
-                                            crit_chance += aura.GetAmount();
-                                        break;
-                                    }
-                                    // Exorcism
-                                    else if (spellProto.GetCategory() == 19)
-                                    {
-                                        if (victim.GetCreatureTypeMask().HasAnyFlag((uint)CreatureType.MaskDemonOrUnDead))
-                                            return 100.0f;
-                                        break;
-                                    }
                                     break;
                                 case SpellFamilyNames.Shaman:
                                     // Lava Burst

@@ -1834,22 +1834,6 @@ namespace Game.Entities
                 }
             }
 
-            // Glyphs which increase duration of selfcasted buffs
-            if (target == this)
-            {
-                switch (spellProto.SpellFamilyName)
-                {
-                    case SpellFamilyNames.Druid:
-                        if (spellProto.SpellFamilyFlags[0].HasAnyFlag(0x100u))
-                        {
-                            // Glyph of Thorns
-                            AuraEffect aurEff = GetAuraEffect(57862, 0);
-                            if (aurEff != null)
-                                duration += aurEff.GetAmount() * Time.Minute * Time.InMilliseconds;
-                        }
-                        break;
-                }
-            }
             return Math.Max(duration, 0);
         }
 
