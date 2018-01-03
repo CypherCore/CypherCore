@@ -20,6 +20,7 @@ using Framework.Configuration;
 using Framework.Database;
 using Framework.Networking;
 using System;
+using System.Globalization;
 using System.Timers;
 
 namespace BNetServer
@@ -28,6 +29,10 @@ namespace BNetServer
     {
         static void Main()
         {
+            //Set Culture
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+            System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+
             Console.CancelKeyPress += (o, e) =>
             {
                 Global.RealmMgr.Close();
