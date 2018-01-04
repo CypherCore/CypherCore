@@ -66,7 +66,11 @@ namespace Game.Chat
         [Command("motd", RBACPermissions.CommandServerMotd, true)]
         static bool Motd(StringArguments args, CommandHandler handler)
         {
-            handler.SendSysMessage(CypherStrings.MotdCurrent, Global.WorldMgr.GetMotd());
+            string motd = "";
+            foreach (var line in Global.WorldMgr.GetMotd())
+                motd += line;
+
+            handler.SendSysMessage(CypherStrings.MotdCurrent, motd);
             return true;
         }
 
@@ -349,7 +353,7 @@ namespace Game.Chat
             static bool SetMotd(StringArguments args, CommandHandler handler)
             {
                 Global.WorldMgr.SetMotd(args.NextString(""));
-                handler.SendSysMessage(CypherStrings.MotdNew, args);
+                handler.SendSysMessage(CypherStrings.MotdNew, args.GetString());
                 return true;
             }
 

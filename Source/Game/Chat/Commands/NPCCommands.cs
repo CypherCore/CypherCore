@@ -289,7 +289,7 @@ namespace Game.Chat
                 handler.SendSysMessage(CypherStrings.SelectCreature);
                 return false;
             }
-            string text = args.NextString();
+            string text = args.GetString();
             creature.Say(text, Language.Universal);
 
             // make some emotes
@@ -316,7 +316,7 @@ namespace Game.Chat
                 return false;
 
             string receiver_str = args.NextString();
-            string text = args.NextString();
+            string text = args.NextString("");
 
             if (string.IsNullOrEmpty(receiver_str) || string.IsNullOrEmpty(text))
             {
