@@ -462,6 +462,7 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(MapID);
+            _worldPacket.WriteXYZ(OldMapPosition);
             _worldPacket.WriteBit(Ship.HasValue);
             _worldPacket.WriteBit(TransferSpellID.HasValue);
             if (Ship.HasValue)
