@@ -1864,6 +1864,18 @@ namespace Game.Entities
                         player.SendPacket(artifactForgeOpened);
                         return;
                     }
+                case GameObjectTypes.UILink:
+                    {
+                        Player player = user.ToPlayer();
+                        if (!player)
+                            return;
+
+                        GameObjectUIAction gameObjectUIAction = new GameObjectUIAction();
+                        gameObjectUIAction.ObjectGUID = GetGUID();
+                        gameObjectUIAction.UILink = (int)GetGoInfo().UILink.UILinkType;
+                        player.SendPacket(gameObjectUIAction);
+                        return;
+                    }
                 default:
                     if (GetGoType() >= GameObjectTypes.Max)
                         Log.outError(LogFilter.Server, "GameObject.Use(): unit (type: {0}, guid: {1}, name: {2}) tries to use object (guid: {3}, entry: {4}, name: {5}) of unknown type ({6})",

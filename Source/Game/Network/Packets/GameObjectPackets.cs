@@ -135,4 +135,18 @@ namespace Game.Network.Packets
         public uint CustomAnim;
         public bool PlayAsDespawn;
     }
+
+    class GameObjectUIAction : ServerPacket
+    {
+        public GameObjectUIAction() : base(ServerOpcodes.GameObjectUiAction, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(ObjectGUID);
+            _worldPacket.WriteInt32(UILink);
+        }
+
+        public ObjectGuid ObjectGUID;
+        public int UILink;
+    }
 }
