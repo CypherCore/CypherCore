@@ -21,6 +21,7 @@ using Framework.Dynamic;
 using Framework.GameMath;
 using Framework.IO;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 
@@ -187,7 +188,7 @@ namespace Game.Network.Packets
                 data.WriteUInt32(NextPageID);
                 data.WriteInt32(PlayerConditionID);
                 data.WriteUInt8(Flags);
-                data.WriteBits(Text.Length, 12);
+                data.WriteBits(Text.GetByteCount(), 12);
                 data.FlushBits();
 
                 data.WriteString(Text);
@@ -502,11 +503,11 @@ namespace Game.Network.Packets
 
             if (Allow)
             {
-                _worldPacket.WriteBits(Name.Length, 8);
+                _worldPacket.WriteBits(Name.GetByteCount(), 8);
                 _worldPacket.WriteBit(HasDeclined);
 
                 for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
-                    _worldPacket.WriteBits(DeclinedNames.name[i].Length, 7);
+                    _worldPacket.WriteBits(DeclinedNames.name[i].GetByteCount(), 7);
 
                 for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
                     _worldPacket.WriteString(DeclinedNames.name[i]);
@@ -546,7 +547,7 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteBit(Valid);
-            _worldPacket.WriteBits(Text.Length, 13);
+            _worldPacket.WriteBits(Text.GetByteCount(), 13);
             _worldPacket.FlushBits();
 
             _worldPacket.WriteString(Text);
@@ -655,10 +656,10 @@ namespace Game.Network.Packets
         public void Write(WorldPacket data)
         {
             data.WriteBit(IsDeleted);
-            data.WriteBits(Name.Length, 6);
+            data.WriteBits(Name.GetByteCount(), 6);
 
             for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
-                data.WriteBits(DeclinedNames.name[i].Length, 7);
+                data.WriteBits(DeclinedNames.name[i].GetByteCount(), 7);
 
             data.FlushBits();
             for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)

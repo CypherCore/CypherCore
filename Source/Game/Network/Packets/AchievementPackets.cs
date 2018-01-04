@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -129,7 +130,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteBits(Name.Length, 7);
+            _worldPacket.WriteBits(Name.GetByteCount(), 7);
             _worldPacket.WriteBit(GuildAchievement);
             _worldPacket.WritePackedGuid(PlayerGUID);
             _worldPacket.WriteUInt32(AchievementID);

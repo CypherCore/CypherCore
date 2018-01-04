@@ -18,6 +18,7 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Groups;
+using System;
 
 namespace Game.Network.Packets
 {
@@ -244,14 +245,15 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(PartyGUID);
             _worldPacket.WriteUInt32(AchievementID);
             _worldPacket.WriteFloat(DisplayTime);
-            _worldPacket.WriteBits(SenderName.Length, 11);
-            _worldPacket.WriteBits(TargetName.Length, 11);
-            _worldPacket.WriteBits(Prefix.Length, 5);
-            _worldPacket.WriteBits(Channel.Length, 7);
-            _worldPacket.WriteBits(ChatText.Length, 12);
-            _worldPacket.WriteBits((uint)_ChatFlags, 11);
+            _worldPacket.WriteBits(SenderName.GetByteCount(), 11);
+            _worldPacket.WriteBits(TargetName.GetByteCount(), 11);
+            _worldPacket.WriteBits(Prefix.GetByteCount(), 5);
+            _worldPacket.WriteBits(Channel.GetByteCount(), 7);
+            _worldPacket.WriteBits(ChatText.GetByteCount(), 12);
+            _worldPacket.WriteBits((byte)_ChatFlags, 11);
             _worldPacket.WriteBit(HideChatLog);
             _worldPacket.WriteBit(FakeSenderName);
+            _worldPacket.FlushBits();
 
             _worldPacket.WriteString(SenderName);
             _worldPacket.WriteString(TargetName);
@@ -340,7 +342,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteBits(NotifyText.Length, 12);
+            _worldPacket.WriteBits(NotifyText.GetByteCount(), 12);
             _worldPacket.WriteString(NotifyText);
         }
 
@@ -363,7 +365,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteBits(Name.Length, 9);
+            _worldPacket.WriteBits(Name.GetByteCount(), 9);
             _worldPacket.WriteString(Name);
         }
 
@@ -379,7 +381,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteBits(Name.Length, 9);
+            _worldPacket.WriteBits(Name.GetByteCount(), 9);
             _worldPacket.WriteString(Name);
         }
 
@@ -409,7 +411,7 @@ namespace Game.Network.Packets
         {
             _worldPacket.WriteUInt32(MessageID);
 
-            _worldPacket.WriteBits(StringParam.Length, 11);
+            _worldPacket.WriteBits(StringParam.GetByteCount(), 11);
             _worldPacket.WriteString(StringParam);
         }
 
@@ -446,7 +448,7 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket .WriteUInt32(ZoneID);
-            _worldPacket.WriteBits(MessageText.Length, 12);
+            _worldPacket.WriteBits(MessageText.GetByteCount(), 12);
             _worldPacket.FlushBits();
             _worldPacket.WriteString(MessageText);
         }

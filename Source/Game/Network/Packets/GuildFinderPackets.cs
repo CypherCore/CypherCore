@@ -18,6 +18,7 @@
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Network.Packets
@@ -213,8 +214,8 @@ namespace Game.Network.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteBits(GuildName.Length, 7);
-            data.WriteBits(Comment.Length, 10);
+            data.WriteBits(GuildName.GetByteCount(), 7);
+            data.WriteBits(Comment.GetByteCount(), 10);
             data.WritePackedGuid(GuildGUID);
             data.WriteUInt32(GuildVirtualRealm);
             data.WriteInt32(GuildMembers);
@@ -264,8 +265,8 @@ namespace Game.Network.Packets
             data.WriteInt32(Availability);
             data.WriteUInt32(SecondsSinceCreated);
             data.WriteUInt32(SecondsUntilExpiration);
-            data.WriteBits(GuildName.Length, 7);
-            data.WriteBits(Comment.Length, 10);
+            data.WriteBits(GuildName.GetByteCount(), 7);
+            data.WriteBits(Comment.GetByteCount(), 10);
             data.FlushBits();
             data.WriteString(GuildName);
             data.WriteString(Comment);
@@ -287,7 +288,7 @@ namespace Game.Network.Packets
         public void Write(WorldPacket data)
         {
             data.WriteBit(Active);
-            data.WriteBits(Comment.Length, 10);
+            data.WriteBits(Comment.GetByteCount(), 10);
             data.WriteInt32(PlayStyle);
             data.WriteInt32(Availability);
             data.WriteInt32(ClassRoles);
@@ -319,8 +320,8 @@ namespace Game.Network.Packets
             data.WriteInt32(Availability);
             data.WriteUInt32(SecondsSinceCreated);
             data.WriteUInt32(SecondsUntilExpiration);
-            data.WriteBits(Name.Length, 6);
-            data.WriteBits(Comment.Length, 10);
+            data.WriteBits(Name.GetByteCount(), 6);
+            data.WriteBits(Comment.GetByteCount(), 10);
             data.FlushBits();
             data.WriteString(Name);
             data.WriteString(Comment);

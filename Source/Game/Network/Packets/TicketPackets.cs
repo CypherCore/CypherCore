@@ -19,6 +19,7 @@ using Framework.Constants;
 using Framework.Dynamic;
 using Framework.GameMath;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Network.Packets
@@ -66,8 +67,8 @@ namespace Game.Network.Packets
                 _worldPacket.WriteInt64(c.CharacterID);
                 _worldPacket.WriteInt32(c.WaitTimeOverrideMinutes);
 
-                _worldPacket.WriteBits(c.Url.Length, 11);
-                _worldPacket.WriteBits(c.WaitTimeOverrideMessage.Length, 10);
+                _worldPacket.WriteBits(c.Url.GetByteCount(), 11);
+                _worldPacket.WriteBits(c.WaitTimeOverrideMessage.GetByteCount(), 10);
 
                 _worldPacket.WriteString(c.Url);
                 _worldPacket.WriteString(c.WaitTimeOverrideMessage);

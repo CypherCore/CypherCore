@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Network.Packets
@@ -31,7 +32,7 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteBit(Display);
-            _worldPacket.WriteBits(Channel.Length, 7);
+            _worldPacket.WriteBits(Channel.GetByteCount(), 7);
             _worldPacket.WriteUInt32(ChannelFlags);
             _worldPacket.WriteUInt32(Members.Count);
             _worldPacket.WriteString(Channel);
@@ -71,8 +72,8 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteBits(Type, 6);
-            _worldPacket.WriteBits(Channel.Length, 7);
-            _worldPacket.WriteBits(Sender.Length, 6);
+            _worldPacket.WriteBits(Channel.GetByteCount(), 7);
+            _worldPacket.WriteBits(Sender.GetByteCount(), 6);
 
             _worldPacket.WritePackedGuid(SenderGuid);
             _worldPacket.WritePackedGuid(SenderAccountID);
@@ -110,8 +111,8 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteBits(Channel.Length, 7);
-            _worldPacket.WriteBits(ChannelWelcomeMsg.Length, 10);
+            _worldPacket.WriteBits(Channel.GetByteCount(), 7);
+            _worldPacket.WriteBits(ChannelWelcomeMsg.GetByteCount(), 10);
             _worldPacket.WriteUInt32(ChannelFlags);
             _worldPacket.WriteInt32(ChatChannelID);
             _worldPacket.WriteUInt64(InstanceID);
@@ -132,7 +133,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteBits(Channel.Length, 7);
+            _worldPacket.WriteBits(Channel.GetByteCount(), 7);
             _worldPacket.WriteBit(Suspended);
             _worldPacket.WriteUInt32(ChatChannelID);
             _worldPacket.WriteString(Channel);
@@ -154,7 +155,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(ChannelFlags);
             _worldPacket.WriteUInt32(ChannelID);
 
-            _worldPacket.WriteBits(ChannelName.Length, 7);
+            _worldPacket.WriteBits(ChannelName.GetByteCount(), 7);
             _worldPacket.FlushBits();
             _worldPacket.WriteString(ChannelName);
         }
@@ -176,7 +177,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(ChannelFlags);
             _worldPacket.WriteUInt32(ChannelID);
 
-            _worldPacket.WriteBits(ChannelName.Length, 7);
+            _worldPacket.WriteBits(ChannelName.GetByteCount(), 7);
             _worldPacket.FlushBits();
             _worldPacket.WriteString(ChannelName);
         }
@@ -198,7 +199,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(ChannelFlags);
             _worldPacket.WriteUInt32(ChannelID);
 
-            _worldPacket.WriteBits(ChannelName.Length, 7);
+            _worldPacket.WriteBits(ChannelName.GetByteCount(), 7);
             _worldPacket.FlushBits();
             _worldPacket.WriteString(ChannelName);
         }

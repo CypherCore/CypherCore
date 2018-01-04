@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Network.Packets
@@ -199,8 +200,8 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(EventGuildID);
             _worldPacket.WriteUInt32(Invites.Count);
 
-            _worldPacket.WriteBits(EventName.Length, 8);
-            _worldPacket.WriteBits(Description.Length, 11);
+            _worldPacket.WriteBits(EventName.GetByteCount(), 8);
+            _worldPacket.WriteBits(Description.GetByteCount(), 11);
             _worldPacket.FlushBits();
 
             foreach (var invite in Invites)
@@ -244,7 +245,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(InvitedByGuid);
             _worldPacket.WritePackedGuid(OwnerGuid);
 
-            _worldPacket.WriteBits(EventName.Length, 8);
+            _worldPacket.WriteBits(EventName.GetByteCount(), 8);
             _worldPacket.FlushBits();
             _worldPacket.WriteString(EventName);
         }
@@ -408,8 +409,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(TextureID);
             _worldPacket.WriteUInt8(EventType);
 
-            _worldPacket.WriteBits(EventName.Length, 8);
-            _worldPacket.WriteBits(Description.Length, 11);
+            _worldPacket.WriteBits(EventName.GetByteCount(), 8);
+            _worldPacket.WriteBits(Description.GetByteCount(), 11);
             _worldPacket.WriteBit(ClearPending);
             _worldPacket.FlushBits();
 
@@ -572,7 +573,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(Command);
             _worldPacket.WriteUInt8(Result);
 
-            _worldPacket.WriteBits(Name.Length, 9);
+            _worldPacket.WriteBits(Name.GetByteCount(), 9);
             _worldPacket.FlushBits();
             _worldPacket.WriteString(Name);
         }
@@ -685,7 +686,7 @@ namespace Game.Network.Packets
         {
             _worldPacket.WriteUInt64(EventID);
 
-            _worldPacket.WriteBits(Notes.Length, 8);
+            _worldPacket.WriteBits(Notes.GetByteCount(), 8);
             _worldPacket.FlushBits();
             _worldPacket.WriteString(Notes);
         }
@@ -703,7 +704,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(InviteGuid);
             _worldPacket.WriteUInt64(EventID);
 
-            _worldPacket.WriteBits(Notes.Length, 8);
+            _worldPacket.WriteBits(Notes.GetByteCount(), 8);
             _worldPacket.WriteBit(ClearPending);
             _worldPacket.FlushBits();
             _worldPacket.WriteString(Notes);
@@ -838,7 +839,7 @@ namespace Game.Network.Packets
             data.WritePackedGuid(EventGuildID);
             data.WritePackedGuid(OwnerGuid);
 
-            data.WriteBits(EventName.Length, 8);
+            data.WriteBits(EventName.GetByteCount(), 8);
             data.FlushBits();
             data.WriteString(EventName);
         }
@@ -867,7 +868,7 @@ namespace Game.Network.Packets
 
             data.WritePackedTime(ResponseTime);
 
-            data.WriteBits(Notes.Length, 8);
+            data.WriteBits(Notes.GetByteCount(), 8);
             data.FlushBits();
             data.WriteString(Notes);
         }

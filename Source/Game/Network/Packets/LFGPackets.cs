@@ -18,6 +18,7 @@
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Network.Packets
@@ -693,7 +694,7 @@ namespace Game.Network.Packets
             data.WriteBit(VotePassed);
             data.WriteBit(MyVoteCompleted);
             data.WriteBit(MyVote);
-            data.WriteBits(Reason.Length, 8);
+            data.WriteBits(Reason.GetByteCount(), 8);
             data.WritePackedGuid(Target);
             data.WriteUInt32(TotalVotes);
             data.WriteUInt32(BootVotes);

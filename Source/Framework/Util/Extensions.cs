@@ -306,6 +306,11 @@ namespace System
             double value;
             return double.TryParse(str, out value);
         }
+
+        public static int GetByteCount(this string str)
+        {
+            return Encoding.UTF8.GetByteCount(str);
+        }
         #endregion
 
         #region BinaryReader

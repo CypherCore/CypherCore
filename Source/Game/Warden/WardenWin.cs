@@ -207,7 +207,7 @@ namespace Game
                     case WardenCheckType.MPQ:
                     case WardenCheckType.LuaStr:
                     case WardenCheckType.Driver:
-                        buffer.WriteUInt8(wd.Str.Length);
+                        buffer.WriteUInt8(wd.Str.GetByteCount());
                         buffer.WriteString(wd.Str);
                         break;
                     default:

@@ -18,6 +18,7 @@
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Network.Packets
@@ -56,7 +57,7 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt32(Info.BorderStyle);
                 _worldPacket.WriteUInt32(Info.BorderColor);
                 _worldPacket.WriteUInt32(Info.BackgroundColor);
-                _worldPacket.WriteBits(Info.GuildName.Length, 7);
+                _worldPacket.WriteBits(Info.GuildName.GetByteCount(), 7);
                 _worldPacket.FlushBits();
 
                 foreach (var rank in Info.Ranks)
@@ -64,7 +65,7 @@ namespace Game.Network.Packets
                     _worldPacket.WriteUInt32(rank.RankID);
                     _worldPacket.WriteUInt32(rank.RankOrder);
 
-                    _worldPacket.WriteBits(rank.RankName.Length, 7);
+                    _worldPacket.WriteBits(rank.RankName.GetByteCount(), 7);
                     _worldPacket.WriteString(rank.RankName);
                 }
 
@@ -127,8 +128,8 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedTime(CreateDate);
             _worldPacket.WriteInt32(GuildFlags);
             _worldPacket.WriteUInt32(MemberData.Count);
-            _worldPacket.WriteBits(WelcomeText.Length, 10);
-            _worldPacket.WriteBits(InfoText.Length, 10);
+            _worldPacket.WriteBits(WelcomeText.GetByteCount(), 10);
+            _worldPacket.WriteBits(InfoText.GetByteCount(), 10);
             _worldPacket.FlushBits();
 
             MemberData.ForEach(p => p.Write(_worldPacket));
@@ -184,7 +185,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(Result);
             _worldPacket.WriteInt32(Command);
 
-            _worldPacket.WriteBits(Name.Length, 8);
+            _worldPacket.WriteBits(Name.GetByteCount(), 8);
             _worldPacket.WriteString(Name);
         }
 
@@ -238,9 +239,9 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteBits(InviterName.Length, 6);
-            _worldPacket.WriteBits(GuildName.Length, 7);
-            _worldPacket.WriteBits(OldGuildName.Length, 7);
+            _worldPacket.WriteBits(InviterName.GetByteCount(), 6);
+            _worldPacket.WriteBits(GuildName.GetByteCount(), 7);
+            _worldPacket.WriteBits(OldGuildName.GetByteCount(), 7);
 
             _worldPacket.WriteUInt32(InviterVirtualRealmAddress);
             _worldPacket.WriteUInt32(GuildVirtualRealmAddress);
@@ -284,7 +285,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(Guid);
             _worldPacket.WriteUInt32(VirtualRealmAddress);
 
-            _worldPacket.WriteBits(Name.Length, 6);
+            _worldPacket.WriteBits(Name.GetByteCount(), 6);
             _worldPacket.WriteBit(LoggedOn);
             _worldPacket.WriteBit(Mobile);
 
@@ -304,7 +305,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteBits(MotdText.Length, 10);
+            _worldPacket.WriteBits(MotdText.GetByteCount(), 10);
             _worldPacket.WriteString(MotdText);
         }
 
@@ -320,7 +321,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(Guid);
             _worldPacket.WriteUInt32(VirtualRealmAddress);
 
-            _worldPacket.WriteBits(Name.Length, 6);
+            _worldPacket.WriteBits(Name.GetByteCount(), 6);
             _worldPacket.WriteString(Name);
         }
 
@@ -405,12 +406,12 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteBit(Removed);
-            _worldPacket.WriteBits(LeaverName.Length, 6);
+            _worldPacket.WriteBits(LeaverName.GetByteCount(), 6);
             _worldPacket.FlushBits();
 
             if (Removed)
             {
-                _worldPacket.WriteBits(RemoverName.Length, 6);
+                _worldPacket.WriteBits(RemoverName.GetByteCount(), 6);
                 _worldPacket.WritePackedGuid(RemoverGUID);
                 _worldPacket.WriteUInt32(RemoverVirtualRealmAddress);
                 _worldPacket.WriteString(RemoverName);
@@ -437,8 +438,8 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteBit(SelfPromoted);
-            _worldPacket.WriteBits(NewLeaderName.Length, 6);
-            _worldPacket.WriteBits(OldLeaderName.Length, 6);
+            _worldPacket.WriteBits(NewLeaderName.GetByteCount(), 6);
+            _worldPacket.WriteBits(OldLeaderName.GetByteCount(), 6);
 
             _worldPacket.WritePackedGuid(OldLeaderGUID);
             _worldPacket.WriteUInt32(OldLeaderVirtualRealmAddress);
@@ -473,8 +474,8 @@ namespace Game.Network.Packets
         {
             _worldPacket.WriteInt32(Tab);
 
-            _worldPacket.WriteBits(Name.Length, 7);
-            _worldPacket.WriteBits(Icon.Length, 9);
+            _worldPacket.WriteBits(Name.GetByteCount(), 7);
+            _worldPacket.WriteBits(Icon.GetByteCount(), 9);
             _worldPacket.FlushBits();
 
             _worldPacket.WriteString(Name);
@@ -727,7 +728,7 @@ namespace Game.Network.Packets
         {
             _worldPacket.WritePackedGuid(Member);
 
-            _worldPacket.WriteBits(Note.Length, 8);
+            _worldPacket.WriteBits(Note.GetByteCount(), 8);
             _worldPacket.WriteBit(IsPublic);
             _worldPacket.FlushBits();
 
@@ -1021,8 +1022,8 @@ namespace Game.Network.Packets
             foreach (GuildBankTabInfo tab in TabInfo)
             {
                 _worldPacket.WriteUInt32(tab.TabIndex);
-                _worldPacket.WriteBits(tab.Name.Length, 7);
-                _worldPacket.WriteBits(tab.Icon.Length, 9);;
+                _worldPacket.WriteBits(tab.Name.GetByteCount(), 7);
+                _worldPacket.WriteBits(tab.Icon.GetByteCount(), 9);;
 
                 _worldPacket.WriteString(tab.Name);
                 _worldPacket.WriteString(tab.Icon);
@@ -1176,7 +1177,7 @@ namespace Game.Network.Packets
         {
             _worldPacket.WriteInt32(Tab);
 
-            _worldPacket.WriteBits(Text.Length, 14);
+            _worldPacket.WriteBits(Text.GetByteCount(), 14);
             _worldPacket.WriteString(Text);
         }
 
@@ -1345,7 +1346,7 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(GuildGUID);
-            _worldPacket.WriteBits(GuildName.Length, 7);
+            _worldPacket.WriteBits(GuildName.GetByteCount(), 7);
             _worldPacket.FlushBits();
             _worldPacket.WriteString(GuildName);
         }
@@ -1389,9 +1390,9 @@ namespace Game.Network.Packets
             data.WriteUInt8(ClassID);
             data.WriteUInt8(Gender);
 
-            data.WriteBits(Name.Length, 6);
-            data.WriteBits(Note.Length, 8);
-            data.WriteBits(OfficerNote.Length, 8);
+            data.WriteBits(Name.GetByteCount(), 6);
+            data.WriteBits(Note.GetByteCount(), 8);
+            data.WriteBits(OfficerNote.GetByteCount(), 8);
             data.WriteBit(Authenticated);
             data.WriteBit(SorEligible);
 
@@ -1446,7 +1447,7 @@ namespace Game.Network.Packets
                 data.WriteUInt32(TabWithdrawItemLimit[i]);
             }
 
-            data.WriteBits(RankName.Length, 7);
+            data.WriteBits(RankName.GetByteCount(), 7);
             data.WriteString(RankName);
         }
 

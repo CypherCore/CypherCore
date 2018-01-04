@@ -19,6 +19,7 @@ using Framework.Constants;
 using Framework.Dynamic;
 using Game.Entities;
 using Game.Mails;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Network.Packets
@@ -426,8 +427,8 @@ namespace Game.Network.Packets
 
             data.WriteBit(SenderCharacter.HasValue);
             data.WriteBit(AltSenderID.HasValue);
-            data.WriteBits(Subject.Length, 8);
-            data.WriteBits(Body.Length, 13);
+            data.WriteBits(Subject.GetByteCount(), 8);
+            data.WriteBits(Body.GetByteCount(), 13);
             data.FlushBits();
 
             Attachments.ForEach(p => p.Write(data));

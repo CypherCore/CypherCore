@@ -18,6 +18,7 @@
 using Framework.Constants;
 using Framework.GameMath;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Network.Packets
@@ -155,7 +156,7 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt32(pet.ExperienceLevel);
                 _worldPacket.WriteUInt32(pet.PetFlags);
 
-                _worldPacket.WriteUInt8(pet.PetName.Length);
+                _worldPacket.WriteUInt8(pet.PetName.GetByteCount());
                 _worldPacket.WriteString(pet.PetName);
             }
         }
@@ -201,7 +202,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(RenameData.PetGUID);
             _worldPacket.WriteInt32(RenameData.PetNumber);
 
-            _worldPacket.WriteUInt8(RenameData.NewName.Length);
+            _worldPacket.WriteUInt8(RenameData.NewName.GetByteCount());
 
             _worldPacket.WriteBit(RenameData.HasDeclinedNames);
             _worldPacket.FlushBits();
@@ -210,7 +211,7 @@ namespace Game.Network.Packets
             {
                 for (int i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
                 {
-                    _worldPacket.WriteBits(RenameData.DeclinedNames.name[i].Length, 7);
+                    _worldPacket.WriteBits(RenameData.DeclinedNames.name[i].GetByteCount(), 7);
                     _worldPacket.FlushBits();
                 }
 

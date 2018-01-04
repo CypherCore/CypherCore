@@ -243,7 +243,7 @@ namespace Game.Network.Packets
             data.WriteUInt32(MaxHealth);
             data .WriteUInt32( Speed);
             data .WriteUInt8( Quality);
-            data.WriteBits(Name.Length, 7);
+            data.WriteBits(Name.GetByteCount(), 7);
             data.WriteBit(OwnerInfo.HasValue); // HasOwnerInfo
             data.WriteBit(Name.IsEmpty()); // NoRename
             data.FlushBits();

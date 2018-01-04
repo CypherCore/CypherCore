@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Game.Entities;
+using System;
 
 namespace Game.Network.Packets
 {
@@ -125,8 +126,8 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteBits(BeatenName.Length, 6);
-            _worldPacket.WriteBits(WinnerName.Length, 6);
+            _worldPacket.WriteBits(BeatenName.GetByteCount(), 6);
+            _worldPacket.WriteBits(WinnerName.GetByteCount(), 6);
             _worldPacket.WriteBit(Fled);
             _worldPacket.WriteUInt32(BeatenVirtualRealmAddress);
             _worldPacket.WriteUInt32(WinnerVirtualRealmAddress);

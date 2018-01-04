@@ -18,6 +18,7 @@
 using Framework.Constants;
 using Framework.GameMath;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Network.Packets
@@ -62,8 +63,8 @@ namespace Game.Network.Packets
                 _worldPacket.WriteInt8(options.OptionFlags);
                 _worldPacket.WriteInt32(options.OptionCost);
 
-                _worldPacket.WriteBits(options.Text.Length, 12);
-                _worldPacket.WriteBits(options.Confirm.Length, 12);
+                _worldPacket.WriteBits(options.Text.GetByteCount(), 12);
+                _worldPacket.WriteBits(options.Confirm.GetByteCount(), 12);
                 _worldPacket.FlushBits();
 
                 _worldPacket.WriteString(options.Text);
@@ -79,7 +80,7 @@ namespace Game.Network.Packets
                 _worldPacket.WriteInt32(text.QuestFlagsEx);
 
                 _worldPacket.WriteBit(text.Repeatable);
-                _worldPacket.WriteBits(text.QuestTitle.Length, 9);
+                _worldPacket.WriteBits(text.QuestTitle.GetByteCount(), 9);
                 _worldPacket.FlushBits();
 
                 _worldPacket.WriteString(text.QuestTitle);
@@ -165,7 +166,7 @@ namespace Game.Network.Packets
                 _worldPacket.WriteInt8(spell.ReqLevel);
             }
 
-            _worldPacket.WriteBits(Greeting.Length, 11);
+            _worldPacket.WriteBits(Greeting.GetByteCount(), 11);
             _worldPacket.FlushBits();
             _worldPacket.WriteString(Greeting);
         }
@@ -208,7 +209,7 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteBits(Flags, 14);
-            _worldPacket.WriteBits(Name.Length, 6);
+            _worldPacket.WriteBits(Name.GetByteCount(), 6);
             _worldPacket.WriteFloat(Pos.X);
             _worldPacket.WriteFloat(Pos.Y);
             _worldPacket.WriteUInt32(Icon);

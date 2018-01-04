@@ -1398,7 +1398,7 @@ namespace Game.Network.Packets
             data.WriteBit(DstLocation.HasValue);
             data.WriteBit(Orientation.HasValue);
             data.WriteBit(MapID.HasValue);
-            data.WriteBits(Name.Length, 7);
+            data.WriteBits(Name.GetByteCount(), 7);
             data.FlushBits();
 
             data.WritePackedGuid(Unit);

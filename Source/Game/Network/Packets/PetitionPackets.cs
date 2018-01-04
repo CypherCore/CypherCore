@@ -18,6 +18,7 @@
 using Framework.Collections;
 using Framework.Constants;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Network.Packets
@@ -277,7 +278,7 @@ namespace Game.Network.Packets
         {
             _worldPacket.WritePackedGuid(PetitionGuid);
 
-            _worldPacket.WriteBits(NewGuildName.Length, 7);
+            _worldPacket.WriteBits(NewGuildName.GetByteCount(), 7);
             _worldPacket.FlushBits();
 
             _worldPacket.WriteString(NewGuildName);
@@ -308,11 +309,11 @@ namespace Game.Network.Packets
             data.WriteInt32(StaticType);
             data.WriteUInt32(Muid);
 
-            data.WriteBits(Title.Length, 7);
-            data.WriteBits(BodyText.Length, 12);
+            data.WriteBits(Title.GetByteCount(), 7);
+            data.WriteBits(BodyText.GetByteCount(), 12);
 
             for (byte i = 0; i < 10; i++)
-                data.WriteBits(Choicetext[i].Length, 6);
+                data.WriteBits(Choicetext[i].GetByteCount(), 6);
 
             data.FlushBits();
 

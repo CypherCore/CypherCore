@@ -16,9 +16,10 @@
  */
 
 using Framework.Constants;
-using Game.Entities;
-using System.Collections.Generic;
 using Framework.Dynamic;
+using Game.Entities;
+using System;
+using System.Collections.Generic;
 
 namespace Game.Network.Packets
 {
@@ -197,15 +198,15 @@ namespace Game.Network.Packets
                 _worldPacket.WriteInt32(Info.QuestRewardID);
                 _worldPacket.WriteInt32(Info.Expansion);
 
-                _worldPacket.WriteBits(Info.LogTitle.Length, 9);
-                _worldPacket.WriteBits(Info.LogDescription.Length, 12);
-                _worldPacket.WriteBits(Info.QuestDescription.Length, 12);
-                _worldPacket.WriteBits(Info.AreaDescription.Length, 9);
-                _worldPacket.WriteBits(Info.PortraitGiverText.Length, 10);
-                _worldPacket.WriteBits(Info.PortraitGiverName.Length, 8);
-                _worldPacket.WriteBits(Info.PortraitTurnInText.Length, 10);
-                _worldPacket.WriteBits(Info.PortraitTurnInName.Length, 8);
-                _worldPacket.WriteBits(Info.QuestCompletionLog.Length, 11);
+                _worldPacket.WriteBits(Info.LogTitle.GetByteCount(), 9);
+                _worldPacket.WriteBits(Info.LogDescription.GetByteCount(), 12);
+                _worldPacket.WriteBits(Info.QuestDescription.GetByteCount(), 12);
+                _worldPacket.WriteBits(Info.AreaDescription.GetByteCount(), 9);
+                _worldPacket.WriteBits(Info.PortraitGiverText.GetByteCount(), 10);
+                _worldPacket.WriteBits(Info.PortraitGiverName.GetByteCount(), 8);
+                _worldPacket.WriteBits(Info.PortraitTurnInText.GetByteCount(), 10);
+                _worldPacket.WriteBits(Info.PortraitTurnInName.GetByteCount(), 8);
+                _worldPacket.WriteBits(Info.QuestCompletionLog.GetByteCount(), 11);
                 _worldPacket.FlushBits();
 
                 foreach (QuestObjective questObjective in Info.Objectives)
@@ -223,7 +224,7 @@ namespace Game.Network.Packets
                     foreach (var visualEffect in questObjective.VisualEffects)
                         _worldPacket.WriteInt32(visualEffect);
 
-                    _worldPacket.WriteBits(questObjective.Description.Length, 8);
+                    _worldPacket.WriteBits(questObjective.Description.GetByteCount(), 8);
                     _worldPacket.FlushBits();
 
                     _worldPacket.WriteString(questObjective.Description);
@@ -309,12 +310,12 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(PortraitGiver);
             _worldPacket.WriteInt32(PortraitTurnIn);
 
-            _worldPacket.WriteBits(QuestTitle.Length, 9);
-            _worldPacket.WriteBits(RewardText.Length, 12);
-            _worldPacket.WriteBits(PortraitGiverText.Length, 10);
-            _worldPacket.WriteBits(PortraitGiverName.Length, 8);
-            _worldPacket.WriteBits(PortraitTurnInText.Length, 10);
-            _worldPacket.WriteBits(PortraitTurnInName.Length, 8);
+            _worldPacket.WriteBits(QuestTitle.GetByteCount(), 9);
+            _worldPacket.WriteBits(RewardText.GetByteCount(), 12);
+            _worldPacket.WriteBits(PortraitGiverText.GetByteCount(), 10);
+            _worldPacket.WriteBits(PortraitGiverName.GetByteCount(), 8);
+            _worldPacket.WriteBits(PortraitTurnInText.GetByteCount(), 10);
+            _worldPacket.WriteBits(PortraitTurnInName.GetByteCount(), 8);
 
             _worldPacket.WriteString(QuestTitle);
             _worldPacket.WriteString(RewardText);
@@ -437,13 +438,13 @@ namespace Game.Network.Packets
                 _worldPacket.WriteInt8(obj.Type);
             }
 
-            _worldPacket.WriteBits(QuestTitle.Length, 9);
-            _worldPacket.WriteBits(DescriptionText.Length, 12);
-            _worldPacket.WriteBits(LogDescription.Length, 12);
-            _worldPacket.WriteBits(PortraitGiverText.Length, 10);
-            _worldPacket.WriteBits(PortraitGiverName.Length, 8);
-            _worldPacket.WriteBits(PortraitTurnInText.Length, 10);
-            _worldPacket.WriteBits(PortraitTurnInName.Length, 8);
+            _worldPacket.WriteBits(QuestTitle.GetByteCount(), 9);
+            _worldPacket.WriteBits(DescriptionText.GetByteCount(), 12);
+            _worldPacket.WriteBits(LogDescription.GetByteCount(), 12);
+            _worldPacket.WriteBits(PortraitGiverText.GetByteCount(), 10);
+            _worldPacket.WriteBits(PortraitGiverName.GetByteCount(), 8);
+            _worldPacket.WriteBits(PortraitTurnInText.GetByteCount(), 10);
+            _worldPacket.WriteBits(PortraitTurnInName.GetByteCount(), 8);
             _worldPacket.WriteBit(AutoLaunched);
             _worldPacket.WriteBit(StartCheat);
             _worldPacket.WriteBit(DisplayPopup);
@@ -519,8 +520,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteBit(AutoLaunched);
             _worldPacket.FlushBits();
 
-            _worldPacket.WriteBits(QuestTitle.Length, 9);
-            _worldPacket.WriteBits(CompletionText.Length, 12);
+            _worldPacket.WriteBits(QuestTitle.GetByteCount(), 9);
+            _worldPacket.WriteBits(CompletionText.GetByteCount(), 12);
 
             _worldPacket.WriteString(QuestTitle);
             _worldPacket.WriteString(CompletionText);
@@ -610,7 +611,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(GreetEmoteDelay);
             _worldPacket.WriteUInt32(GreetEmoteType);
             _worldPacket.WriteUInt32(QuestDataText.Count);
-            _worldPacket.WriteBits(Greeting.Length, 11);
+            _worldPacket.WriteBits(Greeting.GetByteCount(), 11);
             _worldPacket.FlushBits();
 
             foreach (GossipText gossip in QuestDataText)
@@ -622,7 +623,7 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt32(gossip.QuestFlagsEx);
 
                 _worldPacket.WriteBit(gossip.Repeatable);
-                _worldPacket.WriteBits(gossip.QuestTitle.Length, 9);
+                _worldPacket.WriteBits(gossip.QuestTitle.GetByteCount(), 9);
                 _worldPacket.FlushBits();
 
                 _worldPacket.WriteString(gossip.QuestTitle);
@@ -659,7 +660,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(QuestID);
             _worldPacket.WritePackedGuid(InitiatedBy);
 
-            _worldPacket.WriteBits(QuestTitle.Length, 10);
+            _worldPacket.WriteBits(QuestTitle.GetByteCount(), 10);
             _worldPacket.WriteString(QuestTitle);
         }
 
@@ -720,7 +721,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(ContributionRewardID);
 
             _worldPacket.WriteBit(SendErrorMessage);
-            _worldPacket.WriteBits(ReasonText.Length, 9);
+            _worldPacket.WriteBits(ReasonText.GetByteCount(), 9);
             _worldPacket.FlushBits();
 
             _worldPacket.WriteString(ReasonText);
@@ -826,7 +827,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(ChoiceID);
             _worldPacket.WriteUInt32(Responses.Count);
             _worldPacket.WritePackedGuid(SenderGUID);
-            _worldPacket.WriteBits(Question.Length, 8);
+            _worldPacket.WriteBits(Question.GetByteCount(), 8);
             _worldPacket.WriteBit(CloseChoiceFrame);
             _worldPacket.FlushBits();
 
@@ -1231,10 +1232,10 @@ namespace Game.Network.Packets
             data.WriteInt32(ResponseID);
             data.WriteInt32(ChoiceArtFileID);
 
-            data.WriteBits(Answer.Length, 9);
-            data.WriteBits(Header.Length, 9);
-            data.WriteBits(Description.Length, 11);
-            data.WriteBits(Confirmation.Length, 7);
+            data.WriteBits(Answer.GetByteCount(), 9);
+            data.WriteBits(Header.GetByteCount(), 9);
+            data.WriteBits(Description.GetByteCount(), 11);
+            data.WriteBits(Confirmation.GetByteCount(), 7);
 
             data.WriteBit(Reward.HasValue);
             data.FlushBits();

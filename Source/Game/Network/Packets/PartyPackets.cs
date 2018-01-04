@@ -31,7 +31,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteBits(Name.Length, 9);
+            _worldPacket.WriteBits(Name.GetByteCount(), 9);
             _worldPacket.WriteBits(Command, 4);
             _worldPacket.WriteBits(Result, 6);
 
@@ -97,13 +97,13 @@ namespace Game.Network.Packets
             _worldPacket.WriteBit(IsXRealm);
             _worldPacket.WriteBit(MustBeBNetFriend);
             _worldPacket.WriteBit(AllowMultipleRoles);
-            _worldPacket.WriteBits(InviterName.Length, 6);
+            _worldPacket.WriteBits(InviterName.GetByteCount(), 6);
 
             _worldPacket.WriteUInt32(InviterVirtualRealmAddress);
             _worldPacket.WriteBit(IsLocal);
             _worldPacket.WriteBit(Unk2);
-            _worldPacket.WriteBits(InviterRealmNameActual.Length, 8);
-            _worldPacket.WriteBits(InviterRealmNameNormalized.Length, 8);
+            _worldPacket.WriteBits(InviterRealmNameActual.GetByteCount(), 8);
+            _worldPacket.WriteBits(InviterRealmNameNormalized.GetByteCount(), 8);
             _worldPacket.WriteString(InviterRealmNameActual);
             _worldPacket.WriteString(InviterRealmNameNormalized);
 
@@ -193,7 +193,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteBits(Name.Length, 9);
+            _worldPacket.WriteBits(Name.GetByteCount(), 9);
             _worldPacket.FlushBits();
             _worldPacket.WriteString(Name);
         }
@@ -736,7 +736,7 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteInt8(PartyIndex);
-            _worldPacket.WriteBits(Name.Length, 6);
+            _worldPacket.WriteBits(Name.GetByteCount(), 6);
             _worldPacket.WriteString(Name);
         }
 
@@ -950,7 +950,7 @@ namespace Game.Network.Packets
             data.WriteUInt32(Auras.Count);
             Auras.ForEach(p => p.Write(data));
 
-            data.WriteBits(Name.Length, 8);
+            data.WriteBits(Name.GetByteCount(), 8);
             data.FlushBits();
             data.WriteString(Name);
         }
@@ -1034,7 +1034,7 @@ namespace Game.Network.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteBits(Name.Length, 6);
+            data.WriteBits(Name.GetByteCount(), 6);
             data.WriteBit(FromSocialQueue);
             data.WritePackedGuid(GUID);
             data.WriteUInt8(Status);

@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Network.Packets
@@ -62,8 +63,8 @@ namespace Game.Network.Packets
                     _worldPacket.WriteInt32(id);
 
                 _worldPacket.WriteBit(equipSet.AssignedSpecIndex != -1);
-                _worldPacket.WriteBits(equipSet.SetName.Length, 8);
-                _worldPacket.WriteBits(equipSet.SetIcon.Length, 9);
+                _worldPacket.WriteBits(equipSet.SetName.GetByteCount(), 8);
+                _worldPacket.WriteBits(equipSet.SetIcon.GetByteCount(), 9);
 
                 if (equipSet.AssignedSpecIndex != -1)
                     _worldPacket.WriteInt32(equipSet.AssignedSpecIndex);

@@ -19,6 +19,7 @@ using Framework.Constants;
 using Framework.Dynamic;
 using Framework.GameMath;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Network.Packets
@@ -984,7 +985,7 @@ namespace Game.Network.Packets
 
             foreach (CUFProfile cufProfile in CUFProfiles)
             {
-                _worldPacket.WriteBits(cufProfile.ProfileName.Length, 7);
+                _worldPacket.WriteBits(cufProfile.ProfileName.GetByteCount(), 7);
 
                 // Bool Options
                 for (byte option = 0; option < (int)CUFBoolOptions.BoolOptionsCount; option++)

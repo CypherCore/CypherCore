@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Framework.Dynamic;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Network.Packets
@@ -277,7 +278,7 @@ namespace Game.Network.Packets
 
             foreach (var line in Text)
             {
-                _worldPacket.WriteBits(line.Length, 7);
+                _worldPacket.WriteBits(line.GetByteCount(), 7);
                 _worldPacket.FlushBits();
                 _worldPacket.WriteString(line);
             }
@@ -292,8 +293,8 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteBits(ServerTimeTZ.Length, 7);
-            _worldPacket.WriteBits(GameTimeTZ.Length, 7);
+            _worldPacket.WriteBits(ServerTimeTZ.GetByteCount(), 7);
+            _worldPacket.WriteBits(GameTimeTZ.GetByteCount(), 7);
             _worldPacket.WriteString(ServerTimeTZ);
             _worldPacket.WriteString(GameTimeTZ);
         }
