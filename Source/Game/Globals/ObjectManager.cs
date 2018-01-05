@@ -1712,21 +1712,21 @@ namespace Game
         {
             var time = Time.GetMSTime();
 
-            //                                          0      1                   2                   3                   4            5            6         7         8
+            //                                               0      1                   2                   3                   4            5            6         7         8
             SQLResult result = DB.World.Query("SELECT entry, difficulty_entry_1, difficulty_entry_2, difficulty_entry_3, KillCredit1, KillCredit2, modelid1, modelid2, modelid3, " +
-                //9         10    11          12       13        14              15        16        17                      18                 19
-                "modelid4, name, femaleName, subname, IconName, gossip_menu_id, minlevel, maxlevel, HealthScalingExpansion, RequiredExpansion, VignetteID, " +
-                //20       21       22          23         24     25    26         27              28               29            30
+                //9         10    11          12       13        14        15              16        17        18                      19                 20
+                "modelid4, name, femaleName, subname, TitleAlt, IconName, gossip_menu_id, minlevel, maxlevel, HealthScalingExpansion, RequiredExpansion, VignetteID, " +
+                //21       22       23          24         25     26    27         28              29               30            31
                 "faction, npcflag, speed_walk, speed_run, scale, rank, dmgschool, BaseAttackTime, RangeAttackTime, BaseVariance, RangeVariance, " +
-                //31          32          33           34           35            36      37             38
+                //32          33          34           35           36            37      38             39
                 "unit_class, unit_flags, unit_flags2, unit_flags3, dynamicflags, family, trainer_class, type, " +
-                //39          40           41      42              43        44           45           46           47           48           49
+                // 40          41           42      43              44        45           46           47           48           49           50
                 "type_flags, type_flags2, lootid, pickpocketloot, skinloot, resistance1, resistance2, resistance3, resistance4, resistance5, resistance6, " +
-                //50      51      52      53      54      55      56      57      58         59       60       61      62
+                //51      52      53      54      55      56      57      58      59         60       61       62      63
                 "spell1, spell2, spell3, spell4, spell5, spell6, spell7, spell8, VehicleId, mingold, maxgold, AIName, MovementType, " +
-                //63           64           65              66                   67            68                 69             70              71
+                //64           65           66              67                   68            69                 70             71              72
                 "InhabitType, HoverHeight, HealthModifier, HealthModifierExtra, ManaModifier, ManaModifierExtra, ArmorModifier, DamageModifier, ExperienceModifier, " +
-                //72            73          74           75                    76           77
+                //73            74          75           76                    77           78
                 "RacialLeader, movementId, RegenHealth, mechanic_immune_mask, flags_extra, ScriptName FROM creature_template");
 
             if (result.IsEmpty())
@@ -1766,64 +1766,65 @@ namespace Game
             creature.Name = fields.Read<string>(10);
             creature.FemaleName = fields.Read<string>(11);
             creature.SubName = fields.Read<string>(12);
-            creature.IconName = fields.Read<string>(13);
-            creature.GossipMenuId = fields.Read<uint>(14);
-            creature.Minlevel = fields.Read<short>(15);
-            creature.Maxlevel = fields.Read<short>(16);
-            creature.HealthScalingExpansion = fields.Read<int>(17);
-            creature.RequiredExpansion = fields.Read<uint>(18);
-            creature.VignetteID = fields.Read<uint>(19);
-            creature.Faction = fields.Read<uint>(20);
-            creature.Npcflag = (NPCFlags)fields.Read<uint>(21);
-            creature.SpeedWalk = fields.Read<float>(22);
-            creature.SpeedRun = fields.Read<float>(23);
-            creature.Scale = fields.Read<float>(24);
-            creature.Rank = (CreatureEliteType)fields.Read<uint>(25);
-            creature.DmgSchool = fields.Read<uint>(26);
-            creature.BaseAttackTime = fields.Read<uint>(27);
-            creature.RangeAttackTime = fields.Read<uint>(28);
-            creature.BaseVariance = fields.Read<float>(29);
-            creature.RangeVariance = fields.Read<float>(30);
-            creature.UnitClass = fields.Read<uint>(31);
-            creature.UnitFlags = (UnitFlags)fields.Read<uint>(32);
-            creature.UnitFlags2 = fields.Read<uint>(33);
-            creature.UnitFlags3 = fields.Read<uint>(34);
-            creature.DynamicFlags = fields.Read<uint>(35);
-            creature.Family = (CreatureFamily)fields.Read<byte>(36);
-            creature.TrainerClass = (Class)fields.Read<byte>(37);
-            creature.CreatureType = (CreatureType)fields.Read<uint>(38);
-            creature.TypeFlags = (CreatureTypeFlags)fields.Read<uint>(39);
-            creature.TypeFlags2 = fields.Read<uint>(40);
-            creature.LootId = fields.Read<uint>(41);
-            creature.PickPocketId = fields.Read<uint>(42);
-            creature.SkinLootId = fields.Read<uint>(43);
+            creature.TitleAlt = fields.Read<string>(13);
+            creature.IconName = fields.Read<string>(14);
+            creature.GossipMenuId = fields.Read<uint>(15);
+            creature.Minlevel = fields.Read<short>(16);
+            creature.Maxlevel = fields.Read<short>(17);
+            creature.HealthScalingExpansion = fields.Read<int>(18);
+            creature.RequiredExpansion = fields.Read<uint>(19);
+            creature.VignetteID = fields.Read<uint>(20);
+            creature.Faction = fields.Read<uint>(21);
+            creature.Npcflag = (NPCFlags)fields.Read<uint>(22);
+            creature.SpeedWalk = fields.Read<float>(23);
+            creature.SpeedRun = fields.Read<float>(24);
+            creature.Scale = fields.Read<float>(25);
+            creature.Rank = (CreatureEliteType)fields.Read<uint>(26);
+            creature.DmgSchool = fields.Read<uint>(27);
+            creature.BaseAttackTime = fields.Read<uint>(28);
+            creature.RangeAttackTime = fields.Read<uint>(29);
+            creature.BaseVariance = fields.Read<float>(30);
+            creature.RangeVariance = fields.Read<float>(31);
+            creature.UnitClass = fields.Read<uint>(32);
+            creature.UnitFlags = (UnitFlags)fields.Read<uint>(33);
+            creature.UnitFlags2 = fields.Read<uint>(34);
+            creature.UnitFlags3 = fields.Read<uint>(35);
+            creature.DynamicFlags = fields.Read<uint>(36);
+            creature.Family = (CreatureFamily)fields.Read<byte>(37);
+            creature.TrainerClass = (Class)fields.Read<byte>(38);
+            creature.CreatureType = (CreatureType)fields.Read<uint>(39);
+            creature.TypeFlags = (CreatureTypeFlags)fields.Read<uint>(40);
+            creature.TypeFlags2 = fields.Read<uint>(41);
+            creature.LootId = fields.Read<uint>(42);
+            creature.PickPocketId = fields.Read<uint>(43);
+            creature.SkinLootId = fields.Read<uint>(44);
 
             for (var i = (int)SpellSchools.Holy; i < (int)SpellSchools.Max; ++i)
-                creature.Resistance[i] = fields.Read<int>(44 + i - 1);
+                creature.Resistance[i] = fields.Read<int>(45 + i - 1);
 
             for (var i = 0; i < SharedConst.MaxCreatureSpells; ++i)
-                creature.Spells[i] = fields.Read<uint>(50 + i);
+                creature.Spells[i] = fields.Read<uint>(51 + i);
 
-            creature.VehicleId = fields.Read<uint>(58);
-            creature.MinGold = fields.Read<uint>(59);
-            creature.MaxGold = fields.Read<uint>(60);
-            creature.AIName = fields.Read<string>(61);
-            creature.MovementType = fields.Read<uint>(62);
-            creature.InhabitType = (InhabitType)fields.Read<uint>(63);
-            creature.HoverHeight = fields.Read<float>(64);
-            creature.ModHealth = fields.Read<float>(65);
-            creature.ModHealthExtra = fields.Read<float>(66);
-            creature.ModMana = fields.Read<float>(67);
-            creature.ModManaExtra = fields.Read<float>(68);
-            creature.ModArmor = fields.Read<float>(69);
-            creature.ModDamage = fields.Read<float>(70);
-            creature.ModExperience = fields.Read<float>(71);
-            creature.RacialLeader = fields.Read<bool>(72);
-            creature.MovementId = fields.Read<uint>(73);
-            creature.RegenHealth = fields.Read<bool>(74);
-            creature.MechanicImmuneMask = fields.Read<uint>(75);
-            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(76);
-            creature.ScriptID = GetScriptId(fields.Read<string>(77));
+            creature.VehicleId = fields.Read<uint>(59);
+            creature.MinGold = fields.Read<uint>(60);
+            creature.MaxGold = fields.Read<uint>(61);
+            creature.AIName = fields.Read<string>(62);
+            creature.MovementType = fields.Read<uint>(63);
+            creature.InhabitType = (InhabitType)fields.Read<uint>(64);
+            creature.HoverHeight = fields.Read<float>(65);
+            creature.ModHealth = fields.Read<float>(66);
+            creature.ModHealthExtra = fields.Read<float>(67);
+            creature.ModMana = fields.Read<float>(68);
+            creature.ModManaExtra = fields.Read<float>(69);
+            creature.ModArmor = fields.Read<float>(70);
+            creature.ModDamage = fields.Read<float>(71);
+            creature.ModExperience = fields.Read<float>(72);
+            creature.RacialLeader = fields.Read<bool>(73);
+            creature.MovementId = fields.Read<uint>(74);
+            creature.RegenHealth = fields.Read<bool>(75);
+            creature.MechanicImmuneMask = fields.Read<uint>(76);
+            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(77);
+            creature.ScriptID = GetScriptId(fields.Read<string>(78));
 
             creatureTemplateStorage.Add(entry, creature);
         }

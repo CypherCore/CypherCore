@@ -157,7 +157,7 @@ namespace Game
                 stats.VignetteID = creatureInfo.VignetteID;
 
                 stats.Title = creatureInfo.SubName;
-                //stats.TitleAlt = ;
+                stats.TitleAlt = creatureInfo.TitleAlt;
                 stats.CursorName = creatureInfo.IconName;
 
                 var items = Global.ObjectMgr.GetCreatureQuestItemList(packet.CreatureID);
