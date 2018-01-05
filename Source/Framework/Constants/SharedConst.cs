@@ -2323,6 +2323,6 @@ namespace Framework.Constants
 
     public enum WorldMapTransformsFlags
     {
-        Dundeon = 0x04
+        Dungeon = 0x04
     }
 }

@@ -1172,6 +1172,7 @@ namespace Game.Network.Packets
     {
         public void Write(WorldPacket data)
         {
+            Item = new ItemInstance();
             Item.Write(data);
             data.WriteInt32(Quantity);
         }

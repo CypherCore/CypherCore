@@ -310,13 +310,6 @@ namespace Game.Entities
         public byte Flags;
     }
 
-    struct PlayerDynamicFieldSpellModByLabel
-    {
-        public uint Mod;
-        public float Value;
-        public uint Label;
-    }
-
     public class SpecializationInfo
     {
         public SpecializationInfo()

@@ -1350,7 +1350,7 @@ namespace Game.DataStorage
                     continue;
                 if (transform.AreaID != 0)
                     continue;
-                if (Convert.ToBoolean(transform.Flags & (byte)WorldMapTransformsFlags.Dundeon))
+                if (Convert.ToBoolean(transform.Flags & (byte)WorldMapTransformsFlags.Dungeon))
                     continue;
                 if (transform.RegionMin.X > x || transform.RegionMax.X < x)
                     continue;
