@@ -59,7 +59,7 @@ namespace Game.Maps
         public bool NoCreate() { return data.nocreate; }
         public void SetNoCreate() { data.nocreate = true; }
 
-        public string GetGridCellString()
+        public override string ToString()
         {
             return string.Format("grid[{0}, {1}]cell[{2}, {3}]", GetGridX(), GetGridY(), GetCellX(), GetCellY());
         }

@@ -285,7 +285,6 @@ namespace Framework.Database
                 {
                     using (MySqlCommand cmd = Connection.CreateCommand())
                     {
-
                         Connection.Open();
                         cmd.CommandText = sql;
                         return cmd.ExecuteNonQuery() > 0;

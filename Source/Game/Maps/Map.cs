@@ -276,20 +276,22 @@ namespace Game.Maps
             Grid ngrid = getGrid(cell.GetGridX(), cell.GetGridY());
             Contract.Assert(ngrid != null);
 
-            GridCell grid = ngrid.GetGridCell(cell.GetCellX(), cell.GetCellY());
+            RemoveFromGrid(obj, cell);
 
-            RemoveFromGrid(obj, cell); //This step is not really necessary but we want to do ASSERT in remove/add
-            AddToGrid(obj, cell);
+            GridCell gridCell = ngrid.GetGridCell(cell.GetCellX(), cell.GetCellY());
             if (on)
             {
-                grid.AddWorldObject(obj);
+                gridCell.AddWorldObject(obj);
                 AddWorldObject(obj);
             }
             else
             {
-                grid.AddGridObject(obj);
+                gridCell.AddGridObject(obj);
                 RemoveWorldObject(obj);
             }
+
+            obj.SetCurrentCell(cell);
+
             if (obj.IsTypeId(TypeId.Unit))
                 obj.ToCreature().m_isTempWorldObject = on;
         }
@@ -962,7 +964,7 @@ namespace Game.Maps
             // delay areatrigger move for grid/cell to grid/cell moves
             if (old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell))
             {
-                Log.outDebug(LogFilter.Maps, "AreaTrigger ({0}) added to moving list from {1} to {2}.", at.GetGUID().ToString(), old_cell.GetGridCellString(), new_cell.GetGridCellString());
+                Log.outDebug(LogFilter.Maps, "AreaTrigger ({0}) added to moving list from {1} to {2}.", at.GetGUID().ToString(), old_cell.ToString(), new_cell.ToString());
 
                 AddAreaTriggerToMoveList(at, x, y, z, orientation);
                 // in diffcell/diffgrid case notifiers called at finishing move at in Map::MoveAllAreaTriggersInMoveList
@@ -1329,7 +1331,7 @@ namespace Game.Maps
                     AddToGrid(go, new_cell);
                 }
                 else
-                    Log.outDebug(LogFilter.Maps, "DynamicObject (GUID: {0}) moved in same {1}.", go.GetGUID().ToString(), old_cell.GetGridCellString());
+                    Log.outDebug(LogFilter.Maps, "DynamicObject (GUID: {0}) moved in same {1}.", go.GetGUID().ToString(), old_cell.ToString());
 
                 return true;
             }
@@ -1339,7 +1341,7 @@ namespace Game.Maps
             {
                 EnsureGridLoadedForActiveObject(new_cell, go);
 
-                Log.outDebug(LogFilter.Maps, "Active DynamicObject (GUID: {0}) moved from {1} to {2}.", go.GetGUID().ToString(), old_cell.GetGridCellString(), new_cell.GetGridCellString());
+                Log.outDebug(LogFilter.Maps, "Active DynamicObject (GUID: {0}) moved from {1} to {2}.", go.GetGUID().ToString(), old_cell.ToString(), new_cell.ToString());
 
                 RemoveFromGrid(go, old_cell);
                 AddToGrid(go, new_cell);
@@ -1350,7 +1352,7 @@ namespace Game.Maps
             // in diff. loaded grid normal GameObject
             if (IsGridLoaded(new GridCoord(new_cell.GetGridX(), new_cell.GetGridY())))
             {
-                Log.outDebug(LogFilter.Maps, "DynamicObject (GUID: {0}) moved from {1} to {2}.", go.GetGUID().ToString(), old_cell.GetGridCellString(), new_cell.GetGridCellString());
+                Log.outDebug(LogFilter.Maps, "DynamicObject (GUID: {0}) moved from {1} to {2}.", go.GetGUID().ToString(), old_cell.ToString(), new_cell.ToString());
 
                 RemoveFromGrid(go, old_cell);
                 EnsureGridCreated(new GridCoord(new_cell.GetGridX(), new_cell.GetGridY()));
@@ -1360,7 +1362,7 @@ namespace Game.Maps
             }
 
             // fail to move: normal GameObject attempt move to unloaded grid
-            Log.outDebug(LogFilter.Maps, "DynamicObject (GUID: {0}) attempted to move from {1} to unloaded {2}.", go.GetGUID().ToString(), old_cell.GetGridCellString(), new_cell.GetGridCellString());
+            Log.outDebug(LogFilter.Maps, "DynamicObject (GUID: {0}) attempted to move from {1} to unloaded {2}.", go.GetGUID().ToString(), old_cell.ToString(), new_cell.ToString());
             return false;
         }
 
@@ -1391,7 +1393,7 @@ namespace Game.Maps
             {
                 EnsureGridLoadedForActiveObject(new_cell, at);
 
-                Log.outDebug(LogFilter.Maps, "Active AreaTrigger ({0}) moved from {1} to {2}.", at.GetGUID().ToString(), old_cell.GetGridCellString(), new_cell.GetGridCellString());
+                Log.outDebug(LogFilter.Maps, "Active AreaTrigger ({0}) moved from {1} to {2}.", at.GetGUID().ToString(), old_cell.ToString(), new_cell.ToString());
 
                 RemoveFromGrid(at, old_cell);
                 AddToGrid(at, new_cell);
@@ -1402,7 +1404,7 @@ namespace Game.Maps
             // in diff. loaded grid normal AreaTrigger
             if (IsGridLoaded(new GridCoord(new_cell.GetGridX(), new_cell.GetGridY())))
             {
-                Log.outDebug(LogFilter.Maps, "AreaTrigger ({0}) moved from {1} to {2}.", at.GetGUID().ToString(), old_cell.GetGridCellString(), new_cell.GetGridCellString());
+                Log.outDebug(LogFilter.Maps, "AreaTrigger ({0}) moved from {1} to {2}.", at.GetGUID().ToString(), old_cell.ToString(), new_cell.ToString());
 
                 RemoveFromGrid(at, old_cell);
                 EnsureGridCreated(new GridCoord(new_cell.GetGridX(), new_cell.GetGridY()));
@@ -1412,7 +1414,7 @@ namespace Game.Maps
             }
 
             // fail to move: normal AreaTrigger attempt move to unloaded grid
-            Log.outDebug(LogFilter.Maps, "AreaTrigger ({0}) attempted to move from {1} to unloaded {2}.", at.GetGUID().ToString(), old_cell.GetGridCellString(), new_cell.GetGridCellString());
+            Log.outDebug(LogFilter.Maps, "AreaTrigger ({0}) attempted to move from {1} to unloaded {2}.", at.GetGUID().ToString(), old_cell.ToString(), new_cell.ToString());
             return false;
         }
 
