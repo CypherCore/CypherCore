@@ -22,7 +22,7 @@ namespace Game.Network.Packets
 {
     class PlayScene : ServerPacket
     {
-        public PlayScene() : base(ServerOpcodes.PlayScene) { }
+        public PlayScene() : base(ServerOpcodes.PlayScene, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -44,7 +44,7 @@ namespace Game.Network.Packets
 
     class CancelScene : ServerPacket
     {
-        public CancelScene() : base(ServerOpcodes.CancelScene) { }
+        public CancelScene() : base(ServerOpcodes.CancelScene, ConnectionType.Instance) { }
 
         public override void Write()
         {

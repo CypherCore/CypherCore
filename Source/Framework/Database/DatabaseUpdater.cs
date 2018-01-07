@@ -255,7 +255,8 @@ namespace Framework.Database
             uint oldMSTime = Time.GetMSTime();
 
             // Update database
-            _database.ApplyFile(path);
+            if (!_database.ApplyFile(path))
+                throw new Exception("Update Failed");
 
             // Return time the query took to apply
             return Time.GetMSTimeDiffToNow(oldMSTime);
