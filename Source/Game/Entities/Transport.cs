@@ -338,8 +338,8 @@ namespace Game.Entities
                 return null;
             }
 
-            if (data.phaseid != 0)
-                creature.SetInPhase(data.phaseid, false, true);
+            if (data.phaseId != 0)
+                creature.SetInPhase(data.phaseId, false, true);
             else if (data.phaseGroup != 0)
             {
                 foreach (var phase in Global.DB2Mgr.GetPhasesForGroup(data.phaseGroup))

@@ -3213,7 +3213,7 @@ namespace Game
                 return;
             }
 
-            Dictionary<uint, uint> spawnMasks = new Dictionary<uint, uint>();
+            Dictionary<uint, ulong> spawnMasks = new Dictionary<uint, ulong>();
             foreach (var mapDifficultyPair in Global.DB2Mgr.GetMapDifficulties())
             {
                 foreach (var difficultyPair in mapDifficultyPair.Value)
@@ -3221,7 +3221,7 @@ namespace Game
                     if (!spawnMasks.ContainsKey(mapDifficultyPair.Key))
                         spawnMasks[mapDifficultyPair.Key] = 0;
 
-                    spawnMasks[mapDifficultyPair.Key] |= (uint)(1 << (int)difficultyPair.Key);
+                    spawnMasks[mapDifficultyPair.Key] |= (1ul << (int)difficultyPair.Key);
                 }
             }
 
@@ -3253,7 +3253,7 @@ namespace Game
                 data.curhealth = result.Read<uint>(12);
                 data.curmana = result.Read<uint>(13);
                 data.movementType = result.Read<byte>(14);
-                data.spawnMask = result.Read<uint>(15);
+                data.spawnMask = result.Read<ulong>(15);
                 short gameEvent = result.Read<short>(16);
                 uint PoolId = result.Read<uint>(17);
                 data.npcflag = result.Read<ulong>(18);
@@ -3261,7 +3261,7 @@ namespace Game
                 data.unit_flags2 = result.Read<uint>(20);
                 data.unit_flags3 = result.Read<uint>(21);
                 data.dynamicflags = result.Read<uint>(22);
-                data.phaseid = result.Read<uint>(23);
+                data.phaseId = result.Read<uint>(23);
                 data.phaseGroup = result.Read<uint>(24);
                 data.ScriptId = GetScriptId(result.Read<string>(25));
                 if (data.ScriptId == 0)
@@ -3334,19 +3334,18 @@ namespace Game
                     data.orientation = Position.NormalizeOrientation(data.orientation);
                 }
 
-                data.phaseMask = 1;
-                if (data.phaseGroup != 0 && data.phaseid != 0)
+                if (data.phaseGroup != 0 && data.phaseId != 0)
                 {
                     Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with both `phaseid` and `phasegroup` set, `phasegroup` set to 0", guid, data.id);
                     data.phaseGroup = 0;
                 }
 
-                if (data.phaseid != 0)
+                if (data.phaseId != 0)
                 {
-                    if (!CliDB.PhaseStorage.ContainsKey(data.phaseid))
+                    if (!CliDB.PhaseStorage.ContainsKey(data.phaseId))
                     {
-                        Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with `phaseid` {2} does not exist, set to 0", guid, data.id, data.phaseid);
-                        data.phaseid = 0;
+                        Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with `phaseid` {2} does not exist, set to 0", guid, data.id, data.phaseId);
+                        data.phaseId = 0;
                     }
                 }
 
@@ -3386,7 +3385,7 @@ namespace Game
 
         public void AddCreatureToGrid(ulong guid, CreatureData data)
         {
-            uint mask = data.spawnMask;
+            ulong mask = data.spawnMask;
             for (byte i = 0; mask != 0; i++, mask >>= 1)
             {
                 if (Convert.ToBoolean(mask & 1))
@@ -3399,7 +3398,7 @@ namespace Game
         }
         public void RemoveCreatureFromGrid(ulong guid, CreatureData data)
         {
-            uint mask = data.spawnMask;
+            ulong mask = data.spawnMask;
             for (byte i = 0; mask != 0; i++, mask >>= 1)
             {
                 if (Convert.ToBoolean(mask & 1))
@@ -3441,8 +3440,7 @@ namespace Game
             data.curhealth = stats.GenerateHealth(cInfo);
             data.curmana = stats.GenerateMana(cInfo);
             data.movementType = (byte)cInfo.MovementType;
-            data.spawnMask = 1;
-            data.phaseMask = PhaseMasks.Normal;
+            data.spawnMask = (int)SpawnMask.Continent;
             data.dbData = false;
             data.npcflag = (uint)cInfo.Npcflag;
             data.unit_flags = (uint)cInfo.UnitFlags;
@@ -3884,14 +3882,14 @@ namespace Game
             uint count = 0;
 
             // build single time for check spawnmask
-            Dictionary<uint, uint> spawnMasks = new Dictionary<uint, uint>();
+            Dictionary<uint, ulong> spawnMasks = new Dictionary<uint, ulong>();
             foreach (var mapDifficultyPair in Global.DB2Mgr.GetMapDifficulties())
             {
                 foreach (var difficultyPair in mapDifficultyPair.Value)
                 {
                     if (!spawnMasks.ContainsKey(mapDifficultyPair.Key))
                         spawnMasks[mapDifficultyPair.Key] = 0;
-                    spawnMasks[mapDifficultyPair.Key] |= (uint)(1 << (int)difficultyPair.Key);
+                    spawnMasks[mapDifficultyPair.Key] |= (1ul << (int)difficultyPair.Key);
                 }
             }
 
@@ -3965,7 +3963,7 @@ namespace Game
                 }
                 data.go_state = (GameObjectState)gostate;
 
-                data.spawnMask = result.Read<uint>(14);
+                data.spawnMask = result.Read<ulong>(14);
 
                 //if (!_transportMaps.Contains(data.mapid) && (spawnMasks.ContainsKey(data.mapid) && Convert.ToBoolean(data.spawnMask & ~spawnMasks[data.mapid])))
                 //Log.outError(LogFilter.Sql, "Table `gameobject` has gameobject (GUID: {0} Entry: {1}) that has wrong spawn mask {2} including not supported difficulty modes for map (Id: {3}), skip",
@@ -3973,21 +3971,21 @@ namespace Game
 
                 short gameEvent = result.Read<sbyte>(15);
                 uint PoolId = result.Read<uint>(16);
-                data.phaseid = result.Read<uint>(17);
+                data.phaseId = result.Read<uint>(17);
                 data.phaseGroup = result.Read<uint>(18);
 
-                if (data.phaseGroup != 0 && data.phaseid != 0)
+                if (data.phaseGroup != 0 && data.phaseId != 0)
                 {
                     Log.outError(LogFilter.Sql, "Table `gameobject` have gameobject (GUID: {0} Entry: {1}) with both `phaseid` and `phasegroup` set, `phasegroup` set to 0", guid, data.id);
                     data.phaseGroup = 0;
                 }
 
-                if (data.phaseid != 0)
+                if (data.phaseId != 0)
                 {
-                    if (!CliDB.PhaseStorage.ContainsKey(data.phaseid))
+                    if (!CliDB.PhaseStorage.ContainsKey(data.phaseId))
                     {
-                        Log.outError(LogFilter.Sql, "Table `gameobject` have gameobject (GUID: {0} Entry: {1}) with `phaseid` {2} does not exist, set to 0", guid, data.id, data.phaseid);
-                        data.phaseid = 0;
+                        Log.outError(LogFilter.Sql, "Table `gameobject` have gameobject (GUID: {0} Entry: {1}) with `phaseid` {2} does not exist, set to 0", guid, data.id, data.phaseId);
+                        data.phaseId = 0;
                     }
                 }
 
@@ -4039,8 +4037,6 @@ namespace Game
                     Log.outError(LogFilter.Sql, "Table `gameobject` has gameobject (GUID: {0} Entry: {1}) with invalid coordinates, skip", guid, data.id);
                     continue;
                 }
-
-                data.phaseMask = 1;
 
                 if (WorldConfig.GetBoolValue(WorldCfg.CalculateGameobjectZoneAreaData))
                 {
@@ -4231,7 +4227,7 @@ namespace Game
         }
         public void AddGameObjectToGrid(ulong guid, GameObjectData data)
         {
-            uint mask = data.spawnMask;
+            ulong mask = data.spawnMask;
             for (byte i = 0; mask != 0; i++, mask >>= 1)
             {
                 if (Convert.ToBoolean(mask & 1))
@@ -4244,7 +4240,7 @@ namespace Game
         }
         public void RemoveGameObjectFromGrid(ulong guid, GameObjectData data)
         {
-            uint mask = data.spawnMask;
+            ulong mask = data.spawnMask;
             for (byte i = 0; mask != 0; i++, mask >>= 1)
             {
                 if (Convert.ToBoolean(mask & 1))
@@ -4282,9 +4278,8 @@ namespace Game
             data.rotation.W = rotation3;
             data.spawntimesecs = (int)spawntimedelay;
             data.animprogress = 100;
-            data.spawnMask = 1;
+            data.spawnMask = (int)SpawnMask.Continent;
             data.go_state = GameObjectState.Ready;
-            data.phaseMask = (ushort)PhaseMasks.Normal;
             data.artKit = (byte)(goinfo.type == GameObjectTypes.ControlZone ? 21 : 0);
             data.dbData = false;
 

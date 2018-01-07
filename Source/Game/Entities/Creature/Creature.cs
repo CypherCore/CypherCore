@@ -724,8 +724,8 @@ namespace Game.Entities
         {
             SetMap(map);
 
-            if (data != null && data.phaseid != 0)
-                SetInPhase(data.phaseid, false, true);
+            if (data != null && data.phaseId != 0)
+                SetInPhase(data.phaseId, false, true);
 
             if (data != null && data.phaseGroup != 0)
                 foreach (var ph in Global.DB2Mgr.GetPhasesForGroup(data.phaseGroup))
@@ -977,10 +977,10 @@ namespace Game.Entities
             }
 
             uint mapId = GetTransport() ? (uint)GetTransport().GetGoInfo().MoTransport.SpawnMap : GetMapId();
-            SaveToDB(mapId, data.spawnMask, GetPhaseMask());
+            SaveToDB(mapId, data.spawnMask);
         }
 
-        public virtual void SaveToDB(uint mapid, uint spawnMask, uint phaseMask)
+        public virtual void SaveToDB(uint mapid, ulong spawnMask)
         {
             // update in loaded data
             if (m_spawnId == 0)
@@ -1022,7 +1022,6 @@ namespace Game.Entities
             // data.guid = guid must not be updated at save
             data.id = GetEntry();
             data.mapid = (ushort)mapid;
-            data.phaseMask = phaseMask;
             data.displayid = displayId;
             data.equipmentId = GetCurrentEquipmentId();
             data.posX = GetPositionX();
@@ -1045,7 +1044,7 @@ namespace Game.Entities
             data.unit_flags3 = unitFlags3;
             data.dynamicflags = dynamicflags;
 
-            data.phaseid = (uint)(GetDBPhase() > 0 ? GetDBPhase() : 0);
+            data.phaseId = (uint)(GetDBPhase() > 0 ? GetDBPhase() : 0);
             data.phaseGroup = (uint)(GetDBPhase() < 0 ? Math.Abs(GetDBPhase()) : 0);
 
             // update in DB
@@ -1062,7 +1061,7 @@ namespace Game.Entities
             stmt.AddValue(index++, GetEntry());
             stmt.AddValue(index++, mapid);
             stmt.AddValue(index++, spawnMask);
-            stmt.AddValue(index++, data.phaseid);
+            stmt.AddValue(index++, data.phaseId);
             stmt.AddValue(index++, data.phaseGroup);
             stmt.AddValue(index++, displayId);
             stmt.AddValue(index++, GetCurrentEquipmentId());
@@ -1320,7 +1319,7 @@ namespace Game.Entities
 
             m_spawnId = spawnId;
             m_creatureData = data;
-            if (!Create(map.GenerateLowGuid(HighGuid.Creature), map, data.phaseMask, data.id, data.posX, data.posY, data.posZ, data.orientation, data))
+            if (!Create(map.GenerateLowGuid(HighGuid.Creature), map, PhaseMasks.Normal, data.id, data.posX, data.posY, data.posZ, data.orientation, data))
                 return false;
 
             //We should set first home position, because then AI calls home movement

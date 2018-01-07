@@ -278,7 +278,7 @@ namespace Game.Conditions
                         condMeets = player.HasTitle(ConditionValue1);
                     break;
                 case ConditionTypes.Spawnmask:
-                    condMeets = Convert.ToBoolean((1 << (int)obj.GetMap().GetSpawnMode()) & ConditionValue1);
+                    condMeets = Convert.ToBoolean((1ul << (int)obj.GetMap().GetSpawnMode()) & ConditionValue1);
                     break;
                 case ConditionTypes.UnitState:
                     if (unit != null)

@@ -288,7 +288,7 @@ namespace Game.Entities
             base.RemoveFromWorld();
         }
 
-        public override void SaveToDB(uint mapid, uint spawnMask, uint phaseMask) { }
+        public override void SaveToDB(uint mapid, ulong spawnMask) { }
 
         public ObjectGuid GetSummonerGUID() { return m_summonerGUID; }
 

@@ -725,14 +725,10 @@ namespace Game.Chat
                 return false;
             }
 
-            if (target.IsTypeId(TypeId.Unit))
-            {
-                int dbPhase = target.ToCreature().GetDBPhase();
-                if (dbPhase > 0)
-                    handler.SendSysMessage("Target creature's PhaseId in DB: {0}", dbPhase);
-                else if (dbPhase < 0)
-                    handler.SendSysMessage("Target creature's PhaseGroup in DB: {0}", Math.Abs(dbPhase));
-            }
+            if (target.GetDBPhase() > 0)
+                handler.SendSysMessage($"Target creature's PhaseId in DB: {target.GetDBPhase()}");
+            else if (target.GetDBPhase() < 0)
+                handler.SendSysMessage($"Target creature's PhaseGroup in DB: {Math.Abs(target.GetDBPhase())}");
 
             string phases = "";
             foreach (uint phase in target.GetPhases())

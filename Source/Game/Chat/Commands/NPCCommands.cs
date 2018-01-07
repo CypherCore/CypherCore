@@ -86,7 +86,7 @@ namespace Game.Chat
             CreatureData data = Global.ObjectMgr.GetCreatureData(target.GetSpawnId());
             if (data != null)
             {
-                handler.SendSysMessage(CypherStrings.NpcinfoPhases, data.phaseid, data.phaseGroup);
+                handler.SendSysMessage(CypherStrings.NpcinfoPhases, data.phaseId, data.phaseGroup);
                 if (data.phaseGroup != 0)
                 {
                     var _phases = target.GetPhases();
@@ -1106,15 +1106,14 @@ namespace Game.Chat
                     ulong guid = map.GenerateLowGuid(HighGuid.Creature);
                     CreatureData data = Global.ObjectMgr.NewOrExistCreatureData(guid);
                     data.id = id;
-                    data.phaseMask = chr.GetPhaseMask();
                     data.posX = chr.GetTransOffsetX();
                     data.posY = chr.GetTransOffsetY();
                     data.posZ = chr.GetTransOffsetZ();
                     data.orientation = chr.GetTransOffsetO();
-
+                    // @todo: add phases
+                    
                     Creature _creature = trans.CreateNPCPassenger(guid, data);
-
-                    _creature.SaveToDB((uint)trans.GetGoInfo().MoTransport.SpawnMap, (byte)(1 << (int)map.GetSpawnMode()), chr.GetPhaseMask());
+                    _creature.SaveToDB((uint)trans.GetGoInfo().MoTransport.SpawnMap, 1ul << (int)map.GetSpawnMode());
 
                     Global.ObjectMgr.AddCreatureToGrid(guid, data);
                     return true;
@@ -1124,7 +1123,8 @@ namespace Game.Chat
                 if (!creature.Create(map.GenerateLowGuid(HighGuid.Creature), map, chr.GetPhaseMask(), id, x, y, z, o))
                     return false;
 
-                creature.SaveToDB(map.GetId(), (byte)(1 << (int)map.GetSpawnMode()), chr.GetPhaseMask());
+                creature.CopyPhaseFrom(chr);
+                creature.SaveToDB(map.GetId(), 1ul << (int)map.GetSpawnMode());
 
                 ulong db_guid = creature.GetSpawnId();
 

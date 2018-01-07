@@ -487,7 +487,7 @@ namespace Game.Chat
                 }
 
                 // fill the gameobject data and save to the db
-                obj.SaveToDB(map.GetId(), (byte)(1 << (int)map.GetSpawnMode()), player.GetPhaseMask());
+                obj.SaveToDB(map.GetId(), 1ul << (int)map.GetSpawnMode());
                 ulong spawnId = obj.GetSpawnId();
 
                 // this will generate a new guid if the object is in an instance

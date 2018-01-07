@@ -846,10 +846,10 @@ namespace Game.Entities
                 return;
             }
 
-            SaveToDB(GetMapId(), data.spawnMask, data.phaseMask);
+            SaveToDB(GetMapId(), data.spawnMask);
         }
 
-        public void SaveToDB(uint mapid, uint spawnMask, uint phaseMask)
+        public void SaveToDB(uint mapid, ulong spawnMask)
         {
             GameObjectTemplate goI = GetGoInfo();
 
@@ -865,7 +865,6 @@ namespace Game.Entities
             // guid = guid must not be updated at save
             data.id = GetEntry();
             data.mapid = (ushort)mapid;
-            data.phaseMask = (ushort)phaseMask;
             data.posX = GetPositionX();
             data.posY = GetPositionY();
             data.posZ = GetPositionZ();
@@ -878,6 +877,9 @@ namespace Game.Entities
             data.artKit = GetGoArtKit();
             Global.ObjectMgr.NewGOData(m_spawnId, data);
 
+            data.phaseId = (uint)(GetDBPhase() > 0 ? GetDBPhase() : 0);
+            data.phaseGroup = (uint)(GetDBPhase() < 0 ? Math.Abs(GetDBPhase()) : 0);
+
             // Update in DB
             byte index = 0;
             PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_GAMEOBJECT);
@@ -889,6 +891,8 @@ namespace Game.Entities
             stmt.AddValue(index++, GetEntry());
             stmt.AddValue(index++, mapid);
             stmt.AddValue(index++, spawnMask);
+            stmt.AddValue(index++, data.phaseId);
+            stmt.AddValue(index++, data.phaseGroup);
             stmt.AddValue(index++, GetPositionX());
             stmt.AddValue(index++, GetPositionY());
             stmt.AddValue(index++, GetPositionZ());
@@ -914,7 +918,6 @@ namespace Game.Entities
             }
 
             uint entry = data.id;
-            uint phaseMask = data.phaseMask;
             Position pos = new Position(data.posX, data.posY, data.posZ, data.orientation);
 
             uint animprogress = data.animprogress;
@@ -922,11 +925,11 @@ namespace Game.Entities
             uint artKit = data.artKit;
 
             m_spawnId = spawnId;
-            if (!Create(entry, map, phaseMask, pos, data.rotation, animprogress, go_state, artKit))
+            if (!Create(entry, map, PhaseMasks.Normal, pos, data.rotation, animprogress, go_state, artKit))
                 return false;
 
-            if (data.phaseid != 0)
-                SetInPhase(data.phaseid, false, true);
+            if (data.phaseId != 0)
+                SetInPhase(data.phaseId, false, true);
 
             if (data.phaseGroup != 0)
             {

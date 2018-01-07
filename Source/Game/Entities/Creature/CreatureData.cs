@@ -279,7 +279,6 @@ namespace Game.Entities
     {
         public uint id;                                           // entry in creature_template
         public ushort mapid;
-        public uint phaseMask;
         public uint displayid;
         public int equipmentId;
         public float posX;
@@ -292,13 +291,13 @@ namespace Game.Entities
         public uint curhealth;
         public uint curmana;
         public byte movementType;
-        public uint spawnMask;
+        public ulong spawnMask;
         public ulong npcflag;
         public uint unit_flags;     // enum UnitFlags mask values
         public uint unit_flags2;    // enum UnitFlags2 mask values
         public uint unit_flags3;    // enum UnitFlags3 mask values
         public uint dynamicflags;
-        public uint phaseid;
+        public uint phaseId;
         public uint phaseGroup;
         public uint ScriptId;
         public bool dbData;
