@@ -55,12 +55,12 @@ namespace Game.DataStorage
         //Helpers
         public Expansion Expansion() { return (Expansion)ExpansionID; }
 
-        public bool IsDungeon() { return (InstanceType == MapTypes.Instance || InstanceType == MapTypes.Raid) && !IsGarrison(); }
+        public bool IsDungeon() { return (InstanceType == MapTypes.Instance || InstanceType == MapTypes.Raid || InstanceType == MapTypes.Scenario) && !IsGarrison(); }
         public bool IsNonRaidDungeon() { return InstanceType == MapTypes.Instance; }
         public bool Instanceable()
         {
             return InstanceType == MapTypes.Instance || InstanceType == MapTypes.Raid
-                || InstanceType == MapTypes.Battleground || InstanceType == MapTypes.Arena;
+                || InstanceType == MapTypes.Battleground || InstanceType == MapTypes.Arena || InstanceType == MapTypes.Scenario;
         }
         public bool IsRaid() { return InstanceType == MapTypes.Raid; }
         public bool IsBattleground() { return InstanceType == MapTypes.Battleground; }
