@@ -867,7 +867,13 @@ namespace Game.Entities
             }
 
             // search free slot
-            res = CanStoreItem_InInventorySlots(InventorySlots.ItemStart, InventorySlots.ItemEnd, dest, pProto, ref count, false, pItem, bag, slot);
+            byte searchSlotStart = InventorySlots.ItemStart;
+            // new bags can be directly equipped
+            if (!pItem && pProto.GetClass() == ItemClass.Container && (ItemSubClassContainer)pProto.GetSubClass() == ItemSubClassContainer.Container &&
+                (pProto.GetBonding() == ItemBondingType.None || pProto.GetBonding() == ItemBondingType.OnAcquire))
+                searchSlotStart = InventorySlots.BagStart;
+
+            res = CanStoreItem_InInventorySlots(searchSlotStart, InventorySlots.ItemEnd, dest, pProto, ref count, false, pItem, bag, slot);
             if (res != InventoryResult.Ok)
             {
                 no_space_count = count + no_similar_count;
