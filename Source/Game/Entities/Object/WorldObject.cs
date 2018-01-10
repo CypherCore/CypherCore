@@ -2175,34 +2175,28 @@ namespace Game.Entities
         public void UpdateAreaAndZonePhase()
         {
             bool updateNeeded = false;
-            var phases = Global.ObjectMgr.GetAreaAndZonePhases();
-            foreach (var areaOrZoneId in phases.Keys)
+            var allAreasPhases = Global.ObjectMgr.GetAreaAndZonePhases();
+            uint[] zoneAndArea = { GetZoneId(), GetAreaId() };
+
+            // We first remove all phases from other areas & zones
+            foreach (var key in allAreasPhases.Keys)
+                foreach (PhaseInfoStruct phase in allAreasPhases[key])
+                    if (!Global.DB2Mgr.IsInArea(GetAreaId(), key))
+                        updateNeeded = SetInPhase(phase.Id, false, false) || updateNeeded; // not in area, remove phase, true if there was something removed
+
+            // Then we add the phases from this area and zone if conditions are met
+            // Zone is done before Area, so if Area does not meet condition, the phase will be removed
+            foreach (uint area in zoneAndArea)
             {
-                foreach (var phase in phases[areaOrZoneId])
+                var currentPhases = Global.ObjectMgr.GetPhasesForArea(area);
+                if (currentPhases != null)
                 {
-                    if (areaOrZoneId == GetAreaId() || areaOrZoneId == GetZoneId())
+                    foreach (PhaseInfoStruct phaseInfoStruct in currentPhases)
                     {
-                        if (Global.ConditionMgr.IsObjectMeetToConditions(this, phase.Conditions))
-                        {
-                            // add new phase if condition passed, true if it wasnt added before
-                            bool up = SetInPhase(phase.Id, false, true);
-                            if (!updateNeeded && up)
-                                updateNeeded = true;
-                        }
-                        else
-                        {
-                            // condition failed, remove phase, true if there was something removed
-                            bool up = SetInPhase(phase.Id, false, false);
-                            if (!updateNeeded && up)
-                                updateNeeded = true;
-                        }
-                    }
-                    else
-                    {
-                        // not in area, remove phase, true if there was something removed
-                        bool up = SetInPhase(phase.Id, false, false);
-                        if (!updateNeeded && up)
-                            updateNeeded = true;
+                        bool apply = Global.ConditionMgr.IsObjectMeetToConditions(this, phaseInfoStruct.Conditions);
+
+                        // add or remove phase depending of condition
+                        updateNeeded = SetInPhase(phaseInfoStruct.Id, false, apply) || updateNeeded;
                     }
                 }
             }
