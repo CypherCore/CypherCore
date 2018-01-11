@@ -2393,7 +2393,7 @@ namespace Game.Entities
             return 0;
         }
 
-        public bool IsStopped() { return !(HasUnitState(UnitState.Moving)); }
+        public bool IsStopped() { return !HasUnitState(UnitState.Moving); }
 
         public bool HasUnitTypeMask(UnitTypeMask mask) { return Convert.ToBoolean(mask & m_unitTypeMask); }
         public void AddUnitTypeMask(UnitTypeMask mask) { m_unitTypeMask |= mask; }

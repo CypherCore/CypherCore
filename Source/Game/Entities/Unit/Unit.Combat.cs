@@ -2277,7 +2277,7 @@ namespace Game.Entities
             if (victimResistance <= 0)
                 return 0;
 
-            float averageResist = victimResistance / victimResistance + resistanceConstant;
+            float averageResist = (float)victimResistance / (float)(victimResistance + resistanceConstant);
 
             float[] discreteResistProbability = new float[11];
             for (uint i = 0; i < 11; ++i)

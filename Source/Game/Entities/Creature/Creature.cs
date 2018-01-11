@@ -2974,7 +2974,7 @@ namespace Game.Entities
         public void SetTransportHomePosition(float x, float y, float z, float o) { m_transportHomePosition.Relocate(x, y, z, o); }
         public void SetTransportHomePosition(Position pos) { m_transportHomePosition.Relocate(pos); }
         public void GetTransportHomePosition(out float x, out float y, out float z, out float ori) { m_transportHomePosition.GetPosition(out x, out y, out z, out ori); }
-        Position GetTransportHomePosition() { return m_transportHomePosition; }
+        public Position GetTransportHomePosition() { return m_transportHomePosition; }
 
         public uint GetWaypointPath() { return m_path_id; }
         public void LoadPath(uint pathid) { m_path_id = pathid; }

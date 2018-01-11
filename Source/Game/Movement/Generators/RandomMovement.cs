@@ -160,10 +160,7 @@ namespace Game.Movement
             }
 
             creature.AddUnitState(UnitState.RoamingMove);
-            if (destZ < 25f)
-            {
 
-            }
             MoveSplineInit init = new MoveSplineInit(creature);
             init.MoveTo(destX, destY, destZ);
             init.SetWalk(true);

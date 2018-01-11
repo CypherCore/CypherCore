@@ -276,7 +276,7 @@ namespace Game.Network.Packets
                 blackList.Write(_worldPacket);
         }
 
-        public RideTicket Ticket;
+        public RideTicket Ticket = new RideTicket();
         public byte Result;
         public byte ResultDetail;
         public List<LFGJoinBlackList> BlackList = new List<LFGJoinBlackList>();
