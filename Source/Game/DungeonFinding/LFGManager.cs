@@ -438,7 +438,7 @@ namespace Game.DungeonFinding
                     if (joinData.result != LfgJoinResult.Ok)
                         break;
 
-                    LfgType type = (LfgType)(it >> 24);
+                    LfgType type = GetDungeonType(it);
                     switch (type)
                     {
                         case LfgType.RandomDungeon:
