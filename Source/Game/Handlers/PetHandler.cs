@@ -427,7 +427,6 @@ namespace Game
                         response.DeclinedNames = names;
                     }
                 }
-                return;
             }
 
             GetPlayer().SendPacket(response);
