@@ -1473,7 +1473,7 @@ namespace Game.AI
                             break;
                         List<WorldObject> targets = GetTargets(e, unit);
                         if (e.GetTargetType() == SmartTargets.Self)
-                            me.SetFacingTo(me.GetHomePosition().GetOrientation());
+                            me.SetFacingTo((me.GetTransport() ? me.GetTransportHomePosition() : me.GetHomePosition()).GetOrientation());
                         else if (e.GetTargetType() == SmartTargets.Position)
                             me.SetFacingTo(e.Target.o);
                         else if (!targets.Empty())

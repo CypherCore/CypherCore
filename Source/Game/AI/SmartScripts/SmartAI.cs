@@ -340,15 +340,19 @@ namespace Game.AI
             if (mWPReached)//reached WP
             {
                 mWPReached = false;
-                SmartPath wp = GetNextWayPoint();
+                
                 if (mCurrentWPID == GetWPCount())
                 {
                     EndPath();
                 }
-                else if (wp != null)
+                else
                 {
-                    SetRun(mRun);
-                    me.GetMotionMaster().MovePoint(wp.id, wp.x, wp.y, wp.z);
+                    SmartPath wp = GetNextWayPoint();
+                    if (wp != null)
+                    {
+                        SetRun(mRun);
+                        me.GetMotionMaster().MovePoint(wp.id, wp.x, wp.y, wp.z);
+                    }
                 }
             }
         }
