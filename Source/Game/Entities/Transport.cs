@@ -474,7 +474,7 @@ namespace Game.Entities
             pos.GetPosition(out x, out y, out z, out o);
             CalculatePassengerPosition(ref x, ref y, ref z, ref o);
 
-            if (!summon.Create(map.GenerateLowGuid(HighGuid.Creature), map, 0, entry, x, y, z, o, null, vehId))
+            if (!summon.Create(map.GenerateLowGuid(HighGuid.Creature), map, entry, x, y, z, o, null, vehId))
                 return null;
 
             foreach (var phase in phases)

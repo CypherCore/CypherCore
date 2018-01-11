@@ -88,7 +88,6 @@ namespace Game.Entities
             }
 
             _Create(ObjectGuid.Create(HighGuid.DynamicObject, GetMapId(), spell.Id, guidlow));
-            SetPhaseMask(caster.GetPhaseMask(), false);
 
             SetEntry(spell.Id);
             SetObjectScale(1f);

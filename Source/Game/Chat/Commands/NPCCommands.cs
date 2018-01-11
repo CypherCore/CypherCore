@@ -1120,7 +1120,7 @@ namespace Game.Chat
                 }
 
                 Creature creature = new Creature();
-                if (!creature.Create(map.GenerateLowGuid(HighGuid.Creature), map, chr.GetPhaseMask(), id, x, y, z, o))
+                if (!creature.Create(map.GenerateLowGuid(HighGuid.Creature), map, id, x, y, z, o))
                     return false;
 
                 creature.CopyPhaseFrom(chr);

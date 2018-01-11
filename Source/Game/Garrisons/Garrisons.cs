@@ -709,7 +709,7 @@ namespace Game.Garrisons
 
                 Position pos = PacketInfo.PlotPos;
                 GameObject go = new GameObject();
-                if (!go.Create(entry, map, 0, pos, Quaternion.WAxis, 255, GameObjectState.Active))
+                if (!go.Create(entry, map, pos, Quaternion.WAxis, 255, GameObjectState.Active))
                     return null;
 
                 if (BuildingInfo.CanActivate() && BuildingInfo.PacketInfo.HasValue && !BuildingInfo.PacketInfo.Value.Active)
@@ -719,7 +719,7 @@ namespace Game.Garrisons
                     {
                         Position pos2 = finalizeInfo.factionInfo[faction].Pos;
                         GameObject finalizer = new GameObject();
-                        if (finalizer.Create(finalizeInfo.factionInfo[faction].GameObjectId, map, 0, pos2, Quaternion.WAxis, 255, GameObjectState.Ready))
+                        if (finalizer.Create(finalizeInfo.factionInfo[faction].GameObjectId, map, pos2, Quaternion.WAxis, 255, GameObjectState.Ready))
                         {
                             // set some spell id to make the object delete itself after use
                             finalizer.SetSpellId(finalizer.GetGoInfo().Goober.spell);

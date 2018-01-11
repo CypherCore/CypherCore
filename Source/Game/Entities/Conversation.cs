@@ -111,7 +111,6 @@ namespace Game.Entities
             Relocate(pos);
 
             base._Create(ObjectGuid.Create(HighGuid.Conversation, GetMapId(), conversationEntry, lowGuid));
-            SetPhaseMask(creator.GetPhaseMask(), false);
             CopyPhaseFrom(creator);
 
             SetEntry(conversationEntry);

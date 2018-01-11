@@ -43,7 +43,6 @@ namespace Game.Entities
         {
             _name = "";
             m_isWorldObject = isWorldObject;
-            phaseMask = PhaseMasks.Normal;
 
             m_serverSideVisibility.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive | GhostVisibilityType.Ghost);
             m_serverSideVisibilityDetect.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive);
@@ -2045,7 +2044,7 @@ namespace Game.Entities
 
             Map map = GetMap();
             GameObject go = new GameObject();
-            if (!go.Create(entry, map, GetPhaseMask(), pos, rotation, 255, GameObjectState.Ready))
+            if (!go.Create(entry, map, pos, rotation, 255, GameObjectState.Ready))
                 return null;
 
             go.CopyPhaseFrom(this);
@@ -2155,14 +2154,6 @@ namespace Game.Entities
             return (valuesCount > (uint)UnitFields.CombatReach) ? GetFloatValue(UnitFields.CombatReach) : SharedConst.DefaultWorldObjectSize;
         }
 
-        public virtual void SetPhaseMask(uint newPhaseMask, bool update)
-        {
-            phaseMask = newPhaseMask;
-
-            if (update && IsInWorld)
-                UpdateObjectVisibility();
-        }
-
         bool HasInPhaseList(uint phase)
         {
             return _phases.Contains(phase);
@@ -2209,20 +2200,14 @@ namespace Game.Entities
                 foreach (var eff in auraPhaseList)
                 {
                     uint phase = (uint)eff.GetMiscValueB();
-                    bool up = SetInPhase(phase, false, true);
-                    if (!updateNeeded && up)
-                        updateNeeded = true;
+                    updateNeeded = SetInPhase(phase, false, true) || updateNeeded;
                 }
                 var auraPhaseGroupList = unit.GetAuraEffectsByType(AuraType.PhaseGroup);
                 foreach (var eff in auraPhaseGroupList)
                 {
-                    bool up = false;
                     uint phaseGroup = (uint)eff.GetMiscValueB();
                     foreach (uint phase in Global.DB2Mgr.GetPhasesForGroup(phaseGroup))
-                        up = SetInPhase(phase, false, true);
-
-                    if (!updateNeeded && up)
-                        updateNeeded = true;
+                        updateNeeded = SetInPhase(phase, false, true) || updateNeeded;
                 }
             }
 
@@ -2242,13 +2227,17 @@ namespace Game.Entities
             {
                 if (apply)
                 {
-                    if (HasInPhaseList(id)) // do not run the updates if we are already in this phase
+                    // do not run the updates if we are already in this phase
+                    if (_phases.Contains(id)) 
                         return false;
 
                     _phases.Add(id);
                 }
                 else
                 {
+                    if (!_phases.Contains(id))
+                        return false;
+
                     // if area phase passes the condition we should not remove it (ie: if remove called from aura remove)
                     // this however breaks the .mod phase command, you wont be able to remove any area based phases with it
                     var phases = Global.ObjectMgr.GetPhasesForArea(GetAreaId());
@@ -2262,8 +2251,6 @@ namespace Game.Entities
                         }
                     }
 
-                    if (!HasInPhaseList(id)) // do not run the updates if we are not in this phase
-                        return false;
                     _phases.Remove(id);
                 }
             }
@@ -2400,7 +2387,6 @@ namespace Game.Entities
             }
         }
 
-        public uint GetPhaseMask() { return phaseMask; }
         public List<uint> GetPhases() { return _phases; }
         public List<uint> GetTerrainSwaps() { return _terrainSwaps; }
         public List<uint> GetWorldMapAreaSwaps() { return _worldMapAreaSwaps; }
@@ -3172,7 +3158,6 @@ namespace Game.Entities
         Transport m_transport;
         Map _currMap;
         uint instanceId;
-        uint phaseMask;
         List<uint> _phases = new List<uint>();
         List<uint> _terrainSwaps = new List<uint>();
         List<uint> _worldMapAreaSwaps = new List<uint>();

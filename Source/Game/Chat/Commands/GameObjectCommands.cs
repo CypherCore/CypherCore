@@ -476,7 +476,7 @@ namespace Game.Chat
                 GameObject obj = new GameObject();
 
                 Quaternion rotation = new Quaternion(Matrix3.fromEulerAnglesZYX(player.GetOrientation(), 0.0f, 0.0f));
-                if (!obj.Create(objectInfo.entry, map, 0, player, rotation, 255, GameObjectState.Ready))
+                if (!obj.Create(objectInfo.entry, map, player, rotation, 255, GameObjectState.Ready))
                     return false;
 
                 obj.CopyPhaseFrom(player);

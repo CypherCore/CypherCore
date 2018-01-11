@@ -941,7 +941,7 @@ namespace Game.Chat
             Creature creature = new Creature();
 
             Map map = handler.GetSession().GetPlayer().GetMap();
-            if (!creature.Create(map.GenerateLowGuid(HighGuid.Vehicle), map, handler.GetSession().GetPlayer().GetPhaseMask(), entry, x, y, z, o, null, id))
+            if (!creature.Create(map.GenerateLowGuid(HighGuid.Vehicle), map, entry, x, y, z, o, null, id))
                 return false;
 
             map.AddToMap(creature.ToCreature());

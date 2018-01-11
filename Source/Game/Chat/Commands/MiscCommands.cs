@@ -224,7 +224,7 @@ namespace Game.Chat
                 mapId, (mapEntry != null ? mapEntry.MapName[handler.GetSessionDbcLocale()] : unknown),
                 zoneId, (zoneEntry != null ? zoneEntry.AreaName[handler.GetSessionDbcLocale()] : unknown),
                 areaId, (areaEntry != null ? areaEntry.AreaName[handler.GetSessionDbcLocale()] : unknown),
-                obj.GetPhaseMask(), string.Join(", ", obj.GetPhases()), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), obj.GetOrientation());
+                string.Join(", ", obj.GetPhases()), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), obj.GetOrientation());
 
             Transport transport = obj.GetTransport();
             if (transport)

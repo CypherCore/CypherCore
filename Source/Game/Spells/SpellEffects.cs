@@ -2852,7 +2852,7 @@ namespace Game.Spells
 
             Map map = target.GetMap();
             Quaternion rotation = new Quaternion(Matrix3.fromEulerAnglesZYX(target.GetOrientation(), 0.0f, 0.0f));
-            if (!pGameObj.Create(gameobject_id, map, m_caster.GetPhaseMask(), new Position(x, y, z, target.GetOrientation()), rotation, 255, GameObjectState.Ready))
+            if (!pGameObj.Create(gameobject_id, map, new Position(x, y, z, target.GetOrientation()), rotation, 255, GameObjectState.Ready))
                 return;
 
             pGameObj.CopyPhaseFrom(m_caster);
@@ -3516,7 +3516,7 @@ namespace Game.Spells
 
             Map map = m_caster.GetMap();
             Quaternion rotation = new Quaternion(Matrix3.fromEulerAnglesZYX(pos.GetOrientation(), 0.0f, 0.0f));
-            if (!pGameObj.Create((uint)gameobject_id, map, m_caster.GetPhaseMask(), pos, rotation, 0, GameObjectState.Ready))
+            if (!pGameObj.Create((uint)gameobject_id, map, pos, rotation, 0, GameObjectState.Ready))
                 return;
 
             pGameObj.CopyPhaseFrom(m_caster);
@@ -3860,7 +3860,7 @@ namespace Game.Spells
 
             Map map = m_caster.GetMap();
             Quaternion rotation = new Quaternion(Matrix3.fromEulerAnglesZYX(m_caster.GetOrientation(), 0.0f, 0.0f));
-            if (!go.Create(go_id, map, m_caster.GetPhaseMask(), new Position(x, y, z, m_caster.GetOrientation()), rotation, 255, GameObjectState.Ready))
+            if (!go.Create(go_id, map, new Position(x, y, z, m_caster.GetOrientation()), rotation, 255, GameObjectState.Ready))
                 return;
 
             go.CopyPhaseFrom(m_caster);
@@ -4548,7 +4548,7 @@ namespace Game.Spells
 
             Position pos = new Position(fx, fy, fz, m_caster.GetOrientation());
             Quaternion rotation = new Quaternion(Matrix3.fromEulerAnglesZYX(m_caster.GetOrientation(), 0.0f, 0.0f));
-            if (!pGameObj.Create(name_id, cMap, m_caster.GetPhaseMask(), pos, rotation, 255, GameObjectState.Ready))
+            if (!pGameObj.Create(name_id, cMap, pos, rotation, 255, GameObjectState.Ready))
                 return;
 
             pGameObj.CopyPhaseFrom(m_caster);

@@ -144,7 +144,7 @@ namespace Scripts.Northrend.Nexus.EyeOfEternity
             void SpawnGameObject(uint entry, Position pos)
             {
                 GameObject go = new GameObject();
-                if (go.Create(entry, instance, PhaseMasks.Normal, pos, Quaternion.WAxis, 255, GameObjectState.Ready))
+                if (go.Create(entry, instance, pos, Quaternion.WAxis, 255, GameObjectState.Ready))
                     instance.AddToMap(go);
             }
 

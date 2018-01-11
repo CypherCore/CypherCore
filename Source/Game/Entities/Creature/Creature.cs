@@ -720,7 +720,7 @@ namespace Game.Entities
                 GetMotionMaster().Initialize();
         }
 
-        public bool Create(ulong guidlow, Map map, uint phaseMask, uint entry, float x, float y, float z, float ang, CreatureData data = null, uint vehId = 0)
+        public bool Create(ulong guidlow, Map map, uint entry, float x, float y, float z, float ang, CreatureData data = null, uint vehId = 0)
         {
             SetMap(map);
 
@@ -1044,8 +1044,8 @@ namespace Game.Entities
             data.unit_flags3 = unitFlags3;
             data.dynamicflags = dynamicflags;
 
-            data.phaseId = (uint)(GetDBPhase() > 0 ? GetDBPhase() : 0);
-            data.phaseGroup = (uint)(GetDBPhase() < 0 ? Math.Abs(GetDBPhase()) : 0);
+            data.phaseId = GetDBPhase() > 0 ? (uint)GetDBPhase() : data.phaseId;
+            data.phaseGroup = GetDBPhase() < 0 ? (uint)-GetDBPhase() : data.phaseGroup;
 
             // update in DB
             SQLTransaction trans = new SQLTransaction();
@@ -1319,7 +1319,7 @@ namespace Game.Entities
 
             m_spawnId = spawnId;
             m_creatureData = data;
-            if (!Create(map.GenerateLowGuid(HighGuid.Creature), map, PhaseMasks.Normal, data.id, data.posX, data.posY, data.posZ, data.orientation, data))
+            if (!Create(map.GenerateLowGuid(HighGuid.Creature), map, data.id, data.posX, data.posY, data.posZ, data.orientation, data))
                 return false;
 
             //We should set first home position, because then AI calls home movement

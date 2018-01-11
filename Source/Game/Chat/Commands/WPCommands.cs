@@ -546,7 +546,7 @@ namespace Game.Chat.Commands
 
                 // re-create
                 Creature wpCreature = new Creature();
-                if (!wpCreature.Create(map.GenerateLowGuid(HighGuid.Creature), map, chr.GetPhaseMask(), 1, chr.GetPositionX(), chr.GetPositionY(), chr.GetPositionZ(), chr.GetOrientation()))
+                if (!wpCreature.Create(map.GenerateLowGuid(HighGuid.Creature), map, 1, chr.GetPositionX(), chr.GetPositionY(), chr.GetPositionZ(), chr.GetOrientation()))
                 {
                     wpCreature.CopyPhaseFrom(chr);
                     wpCreature.SaveToDB(map.GetId(), 1ul << (int)map.GetSpawnMode());
@@ -755,7 +755,7 @@ namespace Game.Chat.Commands
                     float o = chr.GetOrientation();
 
                     Creature wpCreature = new Creature();
-                    if (!wpCreature.Create(map.GenerateLowGuid(HighGuid.Creature), map, chr.GetPhaseMask(), id, x, y, z, o))
+                    if (!wpCreature.Create(map.GenerateLowGuid(HighGuid.Creature), map, id, x, y, z, o))
                     {
                         handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, id);
                         return false;
@@ -815,7 +815,7 @@ namespace Game.Chat.Commands
                 Map map = chr.GetMap();
 
                 Creature creature = new Creature();
-                if (!creature.Create(map.GenerateLowGuid(HighGuid.Creature), map, chr.GetPhaseMask(), id, x, y, z, o))
+                if (!creature.Create(map.GenerateLowGuid(HighGuid.Creature), map, id, x, y, z, o))
                 {
                     handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, id);
                     return false;
@@ -863,7 +863,7 @@ namespace Game.Chat.Commands
                 Map map = chr.GetMap();
 
                 Creature creature = new Creature();
-                if (!creature.Create(map.GenerateLowGuid(HighGuid.Creature), map, chr.GetPhaseMask(), id, x, y, z, o))
+                if (!creature.Create(map.GenerateLowGuid(HighGuid.Creature), map, id, x, y, z, o))
                 {
                     handler.SendSysMessage(CypherStrings.WaypointNotcreated, id);
                     return false;

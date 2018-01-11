@@ -3203,7 +3203,7 @@ namespace Game.Maps
                     return null;
             }
 
-            if (!summon.Create(GenerateLowGuid(HighGuid.Creature), this, 0, entry, pos.posX, pos.posY, pos.posZ, pos.Orientation, null, vehId))
+            if (!summon.Create(GenerateLowGuid(HighGuid.Creature), this, entry, pos.posX, pos.posY, pos.posZ, pos.Orientation, null, vehId))
                 return null;
 
             // Set the summon to the summoner's phase

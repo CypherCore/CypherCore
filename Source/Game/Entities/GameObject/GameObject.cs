@@ -158,7 +158,7 @@ namespace Game.Entities
             }
         }
 
-        public bool Create(uint name_id, Map map, uint phaseMask, Position pos, Quaternion rotation, uint animprogress, GameObjectState go_state, uint artKit = 0)
+        public bool Create(uint name_id, Map map, Position pos, Quaternion rotation, uint animprogress, GameObjectState go_state, uint artKit = 0)
         {
             Contract.Assert(map);
             SetMap(map);
@@ -341,7 +341,7 @@ namespace Game.Entities
             if (linkedEntry != 0)
             {
                 GameObject linkedGO = new GameObject();
-                if (linkedGO.Create(linkedEntry, map, phaseMask, pos, rotation, 255, GameObjectState.Ready))
+                if (linkedGO.Create(linkedEntry, map, pos, rotation, 255, GameObjectState.Ready))
                 {
                     SetLinkedTrap(linkedGO);
                     map.AddToMap(linkedGO);
@@ -877,8 +877,8 @@ namespace Game.Entities
             data.artKit = GetGoArtKit();
             Global.ObjectMgr.NewGOData(m_spawnId, data);
 
-            data.phaseId = (uint)(GetDBPhase() > 0 ? GetDBPhase() : 0);
-            data.phaseGroup = (uint)(GetDBPhase() < 0 ? Math.Abs(GetDBPhase()) : 0);
+            data.phaseId = GetDBPhase() > 0 ? (uint)GetDBPhase() : data.phaseId;
+            data.phaseGroup = GetDBPhase() < 0 ? (uint)-GetDBPhase() : data.phaseGroup;
 
             // Update in DB
             byte index = 0;
@@ -925,7 +925,7 @@ namespace Game.Entities
             uint artKit = data.artKit;
 
             m_spawnId = spawnId;
-            if (!Create(entry, map, PhaseMasks.Normal, pos, data.rotation, animprogress, go_state, artKit))
+            if (!Create(entry, map, pos, data.rotation, animprogress, go_state, artKit))
                 return false;
 
             if (data.phaseId != 0)

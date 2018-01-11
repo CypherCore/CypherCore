@@ -324,12 +324,6 @@ namespace Framework.Constants
         }
     }
 
-    public struct PhaseMasks
-    {
-        public const uint Normal = 0x00000001;
-        public const uint Anywhere = 0xFFFFFFFF;
-    }
-
     public enum LocaleConstant
     {
         enUS = 0,

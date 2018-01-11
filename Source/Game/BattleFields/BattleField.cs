@@ -683,7 +683,7 @@ namespace Game.BattleFields
             pos.GetPosition(out x, out y, out z, out o);
 
             Creature creature = new Creature();
-            if (!creature.Create(map.GenerateLowGuid(HighGuid.Creature), map, PhaseMasks.Normal, entry, x, y, z, o))
+            if (!creature.Create(map.GenerateLowGuid(HighGuid.Creature), map, entry, x, y, z, o))
             {
                 Log.outError(LogFilter.Battlefield, "Battlefield:SpawnCreature: Can't create creature entry: {0}", entry);
                 return null;
@@ -715,7 +715,7 @@ namespace Game.BattleFields
 
             // Create gameobject
             GameObject go = new GameObject();
-            if (!go.Create(entry, map, PhaseMasks.Normal, pos, rotation, 255, GameObjectState.Ready))
+            if (!go.Create(entry, map, pos, rotation, 255, GameObjectState.Ready))
             {
                 Log.outError(LogFilter.Battlefield, "Battlefield:SpawnGameObject: Cannot create gameobject template {1}! Battlefield not created!", entry);
                 return null;

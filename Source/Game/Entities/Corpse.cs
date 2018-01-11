@@ -78,7 +78,6 @@ namespace Game.Entities
             }
 
             _Create(ObjectGuid.Create(HighGuid.Corpse, owner.GetMapId(), 0, guidlow));
-            SetPhaseMask(owner.GetPhaseMask(), false);
 
             SetObjectScale(1);
             SetGuidValue(CorpseFields.Owner, owner.GetGUID());
