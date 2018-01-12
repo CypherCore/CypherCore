@@ -1579,7 +1579,7 @@ namespace Game.Maps
                 }
             }
 
-            foreach (Transport transport in _transports)
+            foreach (Transport transport in _transports.ToList())
                 RemoveFromMap(transport, true);
 
             _transports.Clear();

@@ -111,6 +111,7 @@ namespace WorldServer
             catch (Exception ex)
             {
                 Log.outException(ex);
+                ExitNow();
             }
         }
 

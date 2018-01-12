@@ -401,8 +401,13 @@ namespace Game.Scripting
         //Unloading
         public void Unload()
         {
-            foreach (ScriptRegistry<ScriptObject> scr in ScriptStorage)
-                scr.Unload();
+            foreach (DictionaryEntry entry in ScriptStorage)
+            {
+                IScriptRegistry scriptRegistry = (IScriptRegistry)entry.Value;
+                scriptRegistry.Unload();
+            }
+
+            ScriptStorage.Clear();
         }
 
         //SpellScriptLoader
@@ -1339,7 +1344,6 @@ namespace Game.Scripting
 
             RunScript<QuestScript>(script => script.OnQuestStatusChange(player, quest, oldStatus, newStatus), quest.ScriptId);
         }
-
         public void OnQuestObjectiveChange(Player player, Quest quest, QuestObjective objective, int oldAmount, int newAmount)
         {
             Contract.Assert(player);
@@ -1416,7 +1420,12 @@ namespace Game.Scripting
         MultiMap<Tuple<uint, ushort>, SplineChainLink> m_mSplineChainsMap = new MultiMap<Tuple<uint, ushort>, SplineChainLink>(); // spline chains
     }
 
-    public class ScriptRegistry<TValue> where TValue : ScriptObject
+    public interface IScriptRegistry
+    {
+        void Unload();
+    }
+
+    public class ScriptRegistry<TValue> : IScriptRegistry where TValue : ScriptObject
     {
         public void AddScript(TValue script)
         {
@@ -1486,8 +1495,7 @@ namespace Game.Scripting
 
         public void Unload()
         {
-            foreach (var key in ScriptMap.Keys)
-                ScriptMap.Remove(key);
+            ScriptMap.Clear();
         }
 
         // Counter used for code-only scripts.

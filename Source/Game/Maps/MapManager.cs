@@ -254,7 +254,7 @@ namespace Game.Entities
             foreach (var pair in i_maps.ToList())
             {
                 pair.Value.UnloadAll();
-                i_maps.Remove(pair.Value.GetId());
+                i_maps.Remove(pair.Key);
             }
         }
 
