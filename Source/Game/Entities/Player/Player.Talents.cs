@@ -226,9 +226,9 @@ namespace Game.Entities
             UpdateItemSetAuras(false);
         }
 
-        bool HasTalent(uint talnetId, byte group)
+        bool HasTalent(uint talentId, byte group)
         {
-            return GetTalentMap(group).ContainsKey(talnetId) && GetTalentMap(group)[talnetId] != PlayerSpellState.Removed;
+            return GetTalentMap(group).ContainsKey(talentId) && GetTalentMap(group)[talentId] != PlayerSpellState.Removed;
         }
 
         uint GetTalentResetCost() { return _specializationInfo.ResetTalentsCost; }
@@ -327,7 +327,7 @@ namespace Game.Entities
                 if (talentInfo.SpellID == 0)
                     continue;
 
-                if (HasTalent(talentInfo.SpellID, GetActiveTalentGroup()))
+                if (HasTalent(talentInfo.Id, GetActiveTalentGroup()))
                 {
                     LearnSpell(talentInfo.SpellID, false);      // add the talent to the PlayerSpellMap
                     if (talentInfo.OverridesSpellID != 0)
