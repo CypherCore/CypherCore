@@ -453,8 +453,8 @@ namespace Game.Network.Packets
         public int Flags;
         public float DaysLeft;
         public int MailTemplateID;
-        public string Subject;
-        public string Body;
+        public string Subject = "";
+        public string Body = "";
         public List<MailAttachedItem> Attachments = new List<MailAttachedItem>();
     }
 }
