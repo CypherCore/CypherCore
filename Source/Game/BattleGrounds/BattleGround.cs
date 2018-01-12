@@ -536,14 +536,14 @@ namespace Game.BattleGrounds
             }
         }
 
-        void SendPacketToTeam(Team team, ServerPacket packet, Player sender, bool self)
+        void SendPacketToTeam(Team team, ServerPacket packet, Player except = null)
         {
             foreach (var pair in m_Players)
             {
                 Player player = _GetPlayerForTeam(team, pair, "SendPacketToTeam");
                 if (player)
                 {
-                    if (self || sender != player)
+                    if (player != except)
                         player.SendPacket(packet);
                 }
             }
@@ -561,12 +561,7 @@ namespace Game.BattleGrounds
 
         void PlaySoundToTeam(uint soundID, Team team)
         {
-            foreach (var pair in m_Players)
-            {
-                Player player = _GetPlayerForTeam(team, pair, "PlaySoundToTeam");
-                if (player)
-                    player.SendPacket(new PlaySound(ObjectGuid.Empty, soundID));
-            }
+            SendPacketToTeam(team, new PlaySound(ObjectGuid.Empty, soundID));
         }
 
         public void CastSpellOnTeam(uint SpellID, Team team)
@@ -897,7 +892,7 @@ namespace Game.BattleGrounds
                 // Let others know
                 BattlegroundPlayerLeft playerLeft = new BattlegroundPlayerLeft();
                 playerLeft.Guid = guid;
-                SendPacketToTeam(team, playerLeft, player, false);
+                SendPacketToTeam(team, playerLeft, player);
             }
 
             if (player)
@@ -987,7 +982,7 @@ namespace Game.BattleGrounds
 
             BattlegroundPlayerJoined playerJoined = new BattlegroundPlayerJoined();
             playerJoined.Guid = player.GetGUID();
-            SendPacketToTeam(team, playerJoined, player, false);
+            SendPacketToTeam(team, playerJoined, player);
 
             // BG Status packet
             BattlegroundQueueTypeId bgQueueTypeId = Global.BattlegroundMgr.BGQueueTypeId(m_TypeID, GetArenaType());
