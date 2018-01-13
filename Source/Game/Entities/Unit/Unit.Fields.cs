@@ -460,9 +460,10 @@ namespace Game.Entities
         public uint resist;
         public bool periodicLog;
         public uint blocked;
-        public SpellHitType HitInfo;
+        public HitInfo HitInfo;
         // Used for help
         public uint cleanDamage;
+        public bool fullBlock;
         public uint preHitHealth;
     }
 

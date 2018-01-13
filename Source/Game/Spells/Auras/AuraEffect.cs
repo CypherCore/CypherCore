@@ -5431,7 +5431,7 @@ namespace Game.Spells
             log.resist = resist;
             log.periodicLog = true;
             if (crit)
-                log.HitInfo |= SpellHitType.Crit;
+                log.HitInfo |= HitInfo.CriticalHit;
 
             // Set trigger flag
             ProcFlags procAttacker = ProcFlags.DonePeriodic;

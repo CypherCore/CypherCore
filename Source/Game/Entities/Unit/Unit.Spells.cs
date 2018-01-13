@@ -1319,7 +1319,8 @@ namespace Game.Entities
                         hitMask |= ProcFlagsHit.Parry;
                         break;
                     case SpellMissInfo.Block:
-                        hitMask |= ProcFlagsHit.Block;
+                        // spells can't be partially blocked (it's damage can though)
+                        hitMask |= ProcFlagsHit.Block | ProcFlagsHit.FullBlock;
                         break;
                     case SpellMissInfo.Evade:
                         hitMask |= ProcFlagsHit.Evade;
@@ -1337,6 +1338,9 @@ namespace Game.Entities
                     case SpellMissInfo.Reflect:
                         hitMask |= ProcFlagsHit.Reflect;
                         break;
+                    case SpellMissInfo.Resist:
+                        hitMask |= ProcFlagsHit.FullResist;
+                        break;
                     default:
                         break;
                 }
@@ -1345,15 +1349,27 @@ namespace Game.Entities
             {
                 // On block
                 if (damageInfo.blocked != 0)
+                {
                     hitMask |= ProcFlagsHit.Block;
+                    if (damageInfo.fullBlock)
+                        hitMask |= ProcFlagsHit.FullBlock;
+                }
                 // On absorb
                 if (damageInfo.absorb != 0)
                     hitMask |= ProcFlagsHit.Absorb;
-                // On crit
-                if (damageInfo.HitInfo.HasAnyFlag(SpellHitType.Crit))
-                    hitMask |= ProcFlagsHit.Critical;
-                else
-                    hitMask |= ProcFlagsHit.Normal;
+
+                // Don't set hit/crit hitMask if damage is nullified
+                bool damageNullified = damageInfo.HitInfo.HasAnyFlag(HitInfo.FullAbsorb | HitInfo.FullResist) || hitMask.HasAnyFlag(ProcFlagsHit.FullBlock);
+                if (!damageNullified)
+                {
+                    // On crit
+                    if (damageInfo.HitInfo.HasAnyFlag(HitInfo.CriticalHit))
+                        hitMask |= ProcFlagsHit.Critical;
+                    else
+                        hitMask |= ProcFlagsHit.Normal;
+                }
+                else if (damageInfo.HitInfo.HasAnyFlag(HitInfo.FullResist))
+                    hitMask |= ProcFlagsHit.FullResist;
             }
 
             return hitMask;
@@ -2384,7 +2400,7 @@ namespace Game.Entities
 
                         if (crit)
                         {
-                            damageInfo.HitInfo |= SpellHitType.Crit;
+                            damageInfo.HitInfo |= HitInfo.CriticalHit;
 
                             // Calculate crit bonus
                             uint crit_bonus = (uint)damage;
@@ -2409,6 +2425,11 @@ namespace Game.Entities
                             if (victim.isBlockCritical())
                                 value *= 2; // double blocked percent
                             damageInfo.blocked = (uint)MathFunctions.CalculatePct(damage, value);
+                            if (damage <= damageInfo.blocked)
+                            {
+                                damageInfo.blocked = (uint)damage;
+                                damageInfo.fullBlock = true;
+                            }
                             damage -= (int)damageInfo.blocked;
                         }
                         uint dmg = (uint)damage;
@@ -2423,7 +2444,7 @@ namespace Game.Entities
                         // If crit add critical bonus
                         if (crit)
                         {
-                            damageInfo.HitInfo |= SpellHitType.Crit;
+                            damageInfo.HitInfo |= HitInfo.CriticalHit;
                             damage = (int)SpellCriticalDamageBonus(spellInfo, (uint)damage, victim);
                         }
                         uint dmg = (uint)damage;
@@ -2445,6 +2466,15 @@ namespace Game.Entities
             damageInfo.damage = (uint)damage;
             DamageInfo dmgInfo = new DamageInfo(damageInfo, DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack, ProcFlagsHit.None);
             CalcAbsorbResist(dmgInfo);
+            damageInfo.absorb = dmgInfo.GetAbsorb();
+            damageInfo.resist = dmgInfo.GetResist();
+
+            if (damageInfo.absorb != 0)
+                damageInfo.HitInfo |= (damageInfo.damage - damageInfo.absorb == 0 ? HitInfo.FullAbsorb : HitInfo.PartialAbsorb);
+
+            if (damageInfo.resist != 0)
+                damageInfo.HitInfo |= (damageInfo.damage - damageInfo.resist == 0 ? HitInfo.FullResist : HitInfo.PartialResist);
+
             damageInfo.damage = dmgInfo.GetDamage();
         }
         public void DealSpellDamage(SpellNonMeleeDamage damageInfo, bool durabilityLoss)
