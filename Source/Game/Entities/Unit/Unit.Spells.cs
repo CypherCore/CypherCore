@@ -83,10 +83,7 @@ namespace Game.Entities
                     }
                 }
                 // ... and attack power
-                var mDamageDonebyAP = GetAuraEffectsByType(AuraType.ModSpellDamageOfAttackPower);
-                foreach (var eff in mDamageDonebyAP)
-                    if (Convert.ToBoolean(eff.GetMiscValue() & (int)schoolMask))
-                        DoneAdvertisedBenefit += (int)MathFunctions.CalculatePct(GetTotalAttackPowerValue(WeaponAttackType.BaseAttack), eff.GetAmount());
+                DoneAdvertisedBenefit += (int)MathFunctions.CalculatePct(GetTotalAttackPowerValue(WeaponAttackType.BaseAttack), GetTotalAuraModifierByMiscMask(AuraType.ModSpellDamageOfAttackPower, (int)schoolMask));
 
             }
             return DoneAdvertisedBenefit;
@@ -1695,6 +1692,9 @@ namespace Game.Entities
         public bool IsImmunedToDamage(SpellInfo spellInfo)
         {
             if (spellInfo == null)
+                return false;
+
+            if (spellInfo.HasAttribute(SpellAttr3.IgnoreHitResult))
                 return false;
 
             if (spellInfo.HasAttribute(SpellAttr1.UnaffectedBySchoolImmune) || spellInfo.HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
