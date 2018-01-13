@@ -1881,7 +1881,7 @@ namespace Game.Spells
             m_spellAura = null;
 
             //Spells with this flag cannot trigger if effect is cast on self
-            bool canEffectTrigger = !m_spellInfo.HasAttribute(SpellAttr3.CantTriggerProc) && (CanExecuteTriggersOnHit(mask) || missInfo == SpellMissInfo.Immune || missInfo == SpellMissInfo.Immune2);
+            bool canEffectTrigger = !m_spellInfo.HasAttribute(SpellAttr3.CantTriggerProc) && unitTarget.CanProc() && (CanExecuteTriggersOnHit(mask) || missInfo == SpellMissInfo.Immune || missInfo == SpellMissInfo.Immune2);
 
             Unit spellHitTarget = null;
 
@@ -7008,12 +7008,10 @@ namespace Game.Spells
                     int auraBaseAmount = aurEff.GetBaseAmount();
                     // proc chance is stored in effect amount
                     int chance = m_caster.CalculateSpellDamage(null, aurEff.GetSpellInfo(), aurEff.GetEffIndex(), auraBaseAmount);
+                    chance *= aurEff.GetBase().GetStackAmount();
+
                     // build trigger and add to the list
-                    HitTriggerSpell spellTriggerInfo;
-                    spellTriggerInfo.triggeredSpell = spellInfo;
-                    spellTriggerInfo.triggeredByAura = aurEff.GetSpellInfo();
-                    spellTriggerInfo.chance = chance * aurEff.GetBase().GetStackAmount();
-                    m_hitTriggerSpells.Add(spellTriggerInfo);
+                    m_hitTriggerSpells.Add(new HitTriggerSpell(spellInfo, aurEff.GetSpellInfo(), chance));
                 }
             }
         }
@@ -7133,6 +7131,7 @@ namespace Game.Spells
         }
 
         public bool IsTriggered() { return _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.FullMask); }
+        public bool IsTriggeredByAura(SpellInfo auraSpellInfo) { return (auraSpellInfo == m_triggeredByAuraSpell); }
         public bool IsIgnoringCooldowns() { return _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreSpellAndCategoryCD); }
         public bool IsProcDisabled() { return _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.DisallowProcEvents); }
         public bool IsChannelActive() { return m_caster.GetChannelSpellId() != 0; }
@@ -7382,6 +7381,13 @@ namespace Game.Spells
 
     public struct HitTriggerSpell
     {
+        public HitTriggerSpell(SpellInfo spellInfo, SpellInfo auraSpellInfo, int procChance)
+        {
+            triggeredSpell = spellInfo;
+            triggeredByAura = auraSpellInfo;
+            chance = procChance;
+        }
+
         public SpellInfo triggeredSpell;
         public SpellInfo triggeredByAura;
         // ubyte triggeredByEffIdx          This might be needed at a later stage - No need known for now

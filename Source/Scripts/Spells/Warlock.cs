@@ -746,7 +746,7 @@ namespace Scripts.Spells.Warlock
             if (!caster)
                 return;
 
-            caster.CastSpell(eventInfo.GetActionTarget(), SpellIds.SeedOfCorruptionGeneric, true);
+            caster.CastSpell(eventInfo.GetActionTarget(), SpellIds.SeedOfCorruptionGeneric, true, null, aurEff);
         }
 
         public override void Register()
@@ -982,7 +982,7 @@ namespace Scripts.Spells.Warlock
         {
             PreventDefaultAction();
             Unit caster = eventInfo.GetActor();
-            caster.CastSpell(caster, _triggerSpell, true);
+            caster.CastSpell(caster, _triggerSpell, true, null, aurEff);
         }
 
         public override void Register()

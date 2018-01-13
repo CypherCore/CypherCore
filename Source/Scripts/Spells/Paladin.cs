@@ -567,7 +567,7 @@ namespace Scripts.Spells.Paladin
                 return;
 
             if (RandomHelper.randChance(chance))
-                eventInfo.GetActor().CastSpell(eventInfo.GetProcTarget(), spellId, true);
+                eventInfo.GetActor().CastSpell(eventInfo.GetProcTarget(), spellId, true, null, aurEff);
         }
 
         public override void Register()
@@ -895,7 +895,7 @@ namespace Scripts.Spells.Paladin
                     return;
             }
 
-            caster.CastSpell(target, spellId, true);
+            caster.CastSpell(target, spellId, true, null, aurEff);
         }
 
         public override void Register()
@@ -929,7 +929,7 @@ namespace Scripts.Spells.Paladin
             // Add remaining ticks to damage done
             amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.HolyMending, AuraType.PeriodicHeal);
 
-            caster.CastCustomSpell(SpellIds.HolyMending, SpellValueMod.BasePoint0, amount, target, true);
+            caster.CastCustomSpell(SpellIds.HolyMending, SpellValueMod.BasePoint0, amount, target, true, null, aurEff);
         }
 
         public override void Register()

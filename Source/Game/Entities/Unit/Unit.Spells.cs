@@ -1719,10 +1719,10 @@ namespace Game.Entities
         public void ProcSkillsAndAuras(Unit actionTarget, ProcFlags typeMaskActor, ProcFlags typeMaskActionTarget, ProcFlagsSpellType spellTypeMask, ProcFlagsSpellPhase spellPhaseMask, ProcFlagsHit hitMask, Spell spell, DamageInfo damageInfo, HealInfo healInfo)
         {
             WeaponAttackType attType = damageInfo != null ? damageInfo.GetAttackType() : WeaponAttackType.BaseAttack;
-            if (typeMaskActor != 0 && CanProc())
+            if (typeMaskActor != 0)
                 ProcSkillsAndReactives(false, actionTarget, typeMaskActor, hitMask, attType);
 
-            if (typeMaskActionTarget != 0 && actionTarget && actionTarget.CanProc())
+            if (typeMaskActionTarget != 0 && actionTarget)
                 actionTarget.ProcSkillsAndReactives(true, this, typeMaskActionTarget, hitMask, attType);
 
             TriggerAurasProcOnEvent(null, null, actionTarget, typeMaskActor, typeMaskActionTarget, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
@@ -1832,7 +1832,7 @@ namespace Game.Entities
             // prepare data for self trigger
             ProcEventInfo myProcEventInfo = new ProcEventInfo(this, actionTarget, actionTarget, typeMaskActor, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
             List<Tuple<uint, AuraApplication>> myAurasTriggeringProc = new List<Tuple<uint, AuraApplication>>();
-            if (typeMaskActor != 0 && CanProc())
+            if (typeMaskActor != 0)
             {
                 GetProcAurasTriggeredOnEvent(myAurasTriggeringProc, myProcAuras, myProcEventInfo);
 
@@ -1856,7 +1856,7 @@ namespace Game.Entities
             // prepare data for target trigger
             ProcEventInfo targetProcEventInfo = new ProcEventInfo(this, actionTarget, this, typeMaskActionTarget, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
             List<Tuple<uint, AuraApplication>> targetAurasTriggeringProc = new List<Tuple<uint, AuraApplication>>();
-            if (typeMaskActionTarget != 0 && actionTarget && actionTarget.CanProc())
+            if (typeMaskActionTarget != 0 && actionTarget)
                 actionTarget.GetProcAurasTriggeredOnEvent(targetAurasTriggeringProc, targetProcAuras, targetProcEventInfo);
 
             TriggerAurasProcOnEvent(myProcEventInfo, myAurasTriggeringProc);

@@ -450,7 +450,7 @@ namespace Game.Entities
             return mSpellProcMap.LookupByKey(spellId);
         }
 
-        public bool CanSpellTriggerProcOnEvent(SpellProcEntry procEntry, ProcEventInfo eventInfo)
+        public static bool CanSpellTriggerProcOnEvent(SpellProcEntry procEntry, ProcEventInfo eventInfo)
         {
             // proc type doesn't match
             if (!Convert.ToBoolean(eventInfo.GetTypeMask() & procEntry.ProcFlags))

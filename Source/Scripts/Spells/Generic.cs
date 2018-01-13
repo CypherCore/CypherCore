@@ -2710,7 +2710,7 @@ namespace Scripts.Spells.Generic
 
             Unit caster = eventInfo.GetActor();
             int bp = (int)(damageInfo.GetDamage() / 2);
-            caster.CastCustomSpell(SpellIds.VampiricTouchHeal, SpellValueMod.BasePoint0, bp, caster, true);
+            caster.CastCustomSpell(SpellIds.VampiricTouchHeal, SpellValueMod.BasePoint0, bp, caster, true, null, aurEff);
         }
 
         public override void Register()

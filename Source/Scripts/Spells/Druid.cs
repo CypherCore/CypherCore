@@ -623,7 +623,7 @@ namespace Scripts.Spells.Druid
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            eventInfo.GetActor().CastSpell(eventInfo.GetProcTarget(), SpellIds.BlessingOfTheClaw, true);
+            eventInfo.GetActor().CastSpell(eventInfo.GetProcTarget(), SpellIds.BlessingOfTheClaw, true, null, aurEff);
         }
 
         public override void Register()
@@ -654,7 +654,7 @@ namespace Scripts.Spells.Druid
                 return;
 
             int amount = MathFunctions.CalculatePct(m.Amount, aurEff.GetAmount());
-            caster.CastCustomSpell(SpellIds.Exhilarate, SpellValueMod.BasePoint0, amount, (Unit)null, true);
+            caster.CastCustomSpell(SpellIds.Exhilarate, SpellValueMod.BasePoint0, amount, null, true, null, aurEff);
         }
 
         public override void Register()
@@ -675,7 +675,7 @@ namespace Scripts.Spells.Druid
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            eventInfo.GetActor().CastSpell((Unit)null, SpellIds.Infusion, true);
+            eventInfo.GetActor().CastSpell((Unit)null, SpellIds.Infusion, true, null, aurEff);
         }
 
         public override void Register()
@@ -724,7 +724,7 @@ namespace Scripts.Spells.Druid
                 return;
 
             if (RandomHelper.randChance(chance))
-                eventInfo.GetActor().CastSpell((Unit)null, spellId, true);
+                eventInfo.GetActor().CastSpell((Unit)null, spellId, true, null, aurEff);
         }
 
         public override void Register()
@@ -758,7 +758,7 @@ namespace Scripts.Spells.Druid
             // Add remaining ticks to damage done
             amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.Languish, AuraType.PeriodicDamage);
 
-            caster.CastCustomSpell(SpellIds.Languish, SpellValueMod.BasePoint0, amount, target, true);
+            caster.CastCustomSpell(SpellIds.Languish, SpellValueMod.BasePoint0, amount, target, true, null, aurEff);
         }
 
         public override void Register()
@@ -840,7 +840,7 @@ namespace Scripts.Spells.Druid
             PreventDefaultAction();
 
             int amount = (int)eventInfo.GetHealInfo().GetHeal();
-            eventInfo.GetActor().CastCustomSpell(SpellIds.RejuvenationT10Proc, SpellValueMod.BasePoint0, amount, (Unit)null, true);
+            eventInfo.GetActor().CastCustomSpell(SpellIds.RejuvenationT10Proc, SpellValueMod.BasePoint0, amount, null, true, null, aurEff);
         }
 
         public override void Register()
