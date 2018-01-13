@@ -1105,8 +1105,6 @@ namespace Game.Entities
             if (!IsInWorld)
                 return res;
 
-            RemoveNotOwnSingleTargetAuras(0, true);
-
             if (IsTypeId(TypeId.Unit) || (!ToPlayer().IsGameMaster() && !ToPlayer().GetSession().PlayerLogout()))
             {
                 HostileRefManager refManager = getHostileRefManager();

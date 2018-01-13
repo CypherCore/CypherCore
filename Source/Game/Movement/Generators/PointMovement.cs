@@ -99,8 +99,8 @@ namespace Game.Movement
 
         public override void DoFinalize(T owner)
         {
-            //if (owner.HasUnitState(UnitState.Charging))
-            owner.ClearUnitState(UnitState.Roaming | UnitState.RoamingMove);
+            if (!owner.HasUnitState(UnitState.Charging))
+                owner.ClearUnitState(UnitState.Roaming | UnitState.RoamingMove);
 
             if (owner.moveSpline.Finalized())
                 MovementInform(owner);

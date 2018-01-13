@@ -158,8 +158,7 @@ namespace Game.Entities
             {
                 foreach (TalentRecord talent in Global.DB2Mgr.GetTalentsByPosition(GetClass(), talentInfo.TierID, c))
                 {
-                    //Todo test me
-                    if (talent.SpecID != GetUInt32Value(PlayerFields.CurrentSpecId))
+                    if (talent.SpecID != 0 && talent.SpecID != GetUInt32Value(PlayerFields.CurrentSpecId))
                         continue;
 
                     if (HasTalent(talent.Id, GetActiveTalentGroup()) && !HasFlag(PlayerFields.Flags, PlayerFlags.Resting) && HasFlag(UnitFields.Flags, UnitFlags.ImmuneToNpc))
