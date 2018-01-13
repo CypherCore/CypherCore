@@ -1611,6 +1611,8 @@ namespace Game.Spells
                     m_castItemLevel = -1;
 
                     player.StoreItem(dest, pNewItem, true);
+                    player.SendNewItem(pNewItem, 1, true, false);
+                    player.ItemAddedQuestCheck(newitemid, 1);
                     return;
                 }
             }
@@ -1659,6 +1661,8 @@ namespace Game.Spells
 
                     player.EquipItem(dest, pNewItem, true);
                     player.AutoUnequipOffhandIfNeed();
+                    player.SendNewItem(pNewItem, 1, true, false);
+                    player.ItemAddedQuestCheck(newitemid, 1);
                     return;
                 }
             }
