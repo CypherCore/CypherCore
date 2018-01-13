@@ -287,7 +287,8 @@ namespace Framework.Database
                     {
                         Connection.Open();
                         cmd.CommandText = sql;
-                        return cmd.ExecuteNonQuery() > 0;
+                        cmd.ExecuteNonQuery();
+                        return true;
                     }
                 }
             }
@@ -308,8 +309,8 @@ namespace Framework.Database
                     {
                         connection.Open();
                         cmd.CommandText = File.ReadAllText(path);
-                        return cmd.ExecuteNonQuery() > 0;
-
+                        cmd.ExecuteNonQuery();
+                        return true;
                     }
                 }
             }
