@@ -1176,16 +1176,9 @@ namespace Game.Entities
             if (trapSpell == null)                                          // checked at load already
                 return;
 
-            float range = target.GetSpellMaxRangeForTarget(GetOwner(), trapSpell);
-
-            // using original GO distance
-            var go_check = new NearestGameObjectEntryInObjectRangeCheck(target, trapEntry, range);
-            var checker = new GameObjectLastSearcher(this, go_check);
-            Cell.VisitGridObjects(this, checker, range);
-
-            // found correct GO
-            if (checker.GetTarget() != null)
-                checker.GetTarget().CastSpell(target, trapInfo.Trap.spell);
+            GameObject trapGO = GetLinkedTrap();
+            if (trapGO)
+                trapGO.CastSpell(target, trapSpell.Id);
         }
 
         GameObject LookupFishingHoleAround(float range)
