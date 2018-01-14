@@ -256,7 +256,7 @@ namespace Framework.Database
 
             // Update database
             if (!_database.ApplyFile(path))
-                Log.outError(LogFilter.Sql, $"Update: {path} Failed.");
+                Log.outError(LogFilter.Sql, $"Update: {path} Failed. You need to apply it manually");
 
             // Return time the query took to apply
             return Time.GetMSTimeDiffToNow(oldMSTime);
