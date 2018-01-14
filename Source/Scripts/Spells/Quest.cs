@@ -289,7 +289,8 @@ namespace Scripts.Spells.Quest
     [Script("spell_q11515_fel_siphon_dummy", SpellEffectName.Dummy, 0u, CreatureIds.FelbloodInitiate, CreatureIds.EmaciatedFelblood, true)]
     class spell_generic_quest_update_entry : SpellScript
     {
-        public spell_generic_quest_update_entry(SpellEffectName spellEffect, uint effIndex, uint originalEntry, uint newEntry, bool shouldAttack, uint despawnTime = 0)
+        public spell_generic_quest_update_entry(SpellEffectName spellEffect, uint effIndex, uint originalEntry, uint newEntry, bool shouldAttack) : this(spellEffect, effIndex, originalEntry, newEntry, shouldAttack, 0) { }
+        public spell_generic_quest_update_entry(SpellEffectName spellEffect, uint effIndex, uint originalEntry, uint newEntry, bool shouldAttack, uint despawnTime)
         {
             _spellEffect = spellEffect;
             _effIndex = (byte)effIndex;

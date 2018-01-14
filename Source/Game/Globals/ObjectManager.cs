@@ -1597,7 +1597,7 @@ namespace Game
 
             uint count = 0;
 
-            foreach (var script in spellScriptsStorage.ToList())
+            foreach (var script in spellScriptsStorage.KeyValueList)
             {
                 SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(script.Key);
 

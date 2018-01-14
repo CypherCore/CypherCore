@@ -99,7 +99,7 @@ namespace Game.Scripting
                     var constructors = type.GetConstructors();
                     if (constructors.Length == 0)
                     {
-                        Log.outError(LogFilter.Scripts, "Type: {0} contains no Public Constructors. Can't load script.", type.Name);
+                        Log.outError(LogFilter.Scripts, "Script: {0} contains no Public Constructors. Can't load script.", type.Name);
                         continue;
                     }
 
@@ -107,6 +107,33 @@ namespace Game.Scripting
                     {
                         var genericType = type;
                         string name = type.Name;
+
+                        bool validArgs = true;
+                        int i = 0;
+                        foreach (var constructor in constructors)
+                        {
+                            var parameters = constructor.GetParameters();
+                            if (parameters.Length != attribute.Args.Length)
+                                continue;
+
+                            foreach (var arg in constructor.GetParameters())
+                            {
+                                if (arg.ParameterType != attribute.Args[i++].GetType())
+                                {
+                                    validArgs = false;
+                                    break;
+                                }
+                            }
+
+                            if (validArgs)
+                                break;
+                        }
+
+                        if (!validArgs)
+                        {
+                            Log.outError(LogFilter.Scripts, "Script: {0} contains no Public Constructors with the right parameter types. Can't load script.", type.Name);
+                            continue;
+                        }
 
                         switch (type.BaseType.Name)
                         {
