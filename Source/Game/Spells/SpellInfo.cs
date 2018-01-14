@@ -3378,7 +3378,7 @@ namespace Game.Spells
                         return false;
 
                     // negative spell if triggered spell is negative
-                    if (!deep && effect.ApplyAuraName != 0 && effect.TriggerSpell != 0)
+                    if (!deep && effect.ApplyAuraName == 0 && effect.TriggerSpell != 0)
                     {
                         SpellInfo spellTriggeredProto = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell);
                         if (spellTriggeredProto != null)
