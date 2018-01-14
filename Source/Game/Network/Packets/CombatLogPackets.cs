@@ -70,9 +70,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(Damage);
             _worldPacket.WriteInt32(Overkill);
             _worldPacket.WriteUInt8(SchoolMask);
-            _worldPacket.WriteInt32(ShieldBlock);
-            _worldPacket.WriteInt32(Resisted);
             _worldPacket.WriteInt32(Absorbed);
+            _worldPacket.WriteInt32(Resisted);
+            _worldPacket.WriteInt32(ShieldBlock);
 
             _worldPacket.WriteBit(Periodic);
             _worldPacket.WriteBits(Flags, 7);
@@ -91,7 +91,7 @@ namespace Game.Network.Packets
         public int SpellID;
         public int SpellXSpellVisualID;
         public int Damage;
-        public int Overkill;
+        public int Overkill = -1;
         public byte SchoolMask;
         public int ShieldBlock;
         public int Resisted;

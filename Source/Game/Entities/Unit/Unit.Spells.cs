@@ -2512,12 +2512,12 @@ namespace Game.Entities
             if (log.damage > log.preHitHealth)
                 packet.Overkill = (int)(log.damage - log.preHitHealth);
             else
-                packet.Overkill = 0;
+                packet.Overkill = -1;
 
             packet.SchoolMask = (byte)log.schoolMask;
-            packet.ShieldBlock = (int)log.blocked;
-            packet.Resisted = (int)log.resist;
             packet.Absorbed = (int)log.absorb;
+            packet.Resisted = (int)log.resist;
+            packet.ShieldBlock = (int)log.blocked;
             packet.Periodic = log.periodicLog;
             packet.Flags = (int)log.HitInfo;
 
