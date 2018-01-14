@@ -359,11 +359,11 @@ namespace Game.Entities
         {
             if (!CliDB.BroadcastTextStorage.ContainsKey(textId))
             {
-                Log.outError(LogFilter.Unit, "Unit.Talk: `broadcast_text` was not {0} found", textId);
+                Log.outError(LogFilter.Unit, "Unit.Talk: `broadcast_text` (Id: {0}) was not found", textId);
                 return;
             }
 
-            var builder = new BroadcastTextBuilder(this, msgType, textId, target);
+            var builder = new BroadcastTextBuilder(this, msgType, textId, GetGender(), target);
             var localizer = new LocalizedPacketDo(builder);
             var worker = new PlayerDistWorker(this, textRange, localizer);
             Cell.VisitWorldObjects(this, worker, textRange);

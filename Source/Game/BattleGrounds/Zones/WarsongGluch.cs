@@ -30,10 +30,9 @@ namespace Game.BattleGrounds.Zones
             BgObjects = new ObjectGuid[WSGObjectTypes.Max];
             BgCreatures = new ObjectGuid[WSGCreatureTypes.Max];
 
-            StartMessageIds[BattlegroundConst.EventIdFirst] = CypherStrings.BgWsStartTwoMinutes;
-            StartMessageIds[BattlegroundConst.EventIdSecond] = CypherStrings.BgWsStartOneMinute;
-            StartMessageIds[BattlegroundConst.EventIdThird] = CypherStrings.BgWsStartHalfMinute;
-            StartMessageIds[BattlegroundConst.EventIdFourth] = CypherStrings.BgWsHasBegun;
+            StartMessageIds[BattlegroundConst.EventIdSecond] = WSGBroadcastTexts.StartOneMinute;
+            StartMessageIds[BattlegroundConst.EventIdThird] = WSGBroadcastTexts.StartHalfMinute;
+            StartMessageIds[BattlegroundConst.EventIdFourth] = WSGBroadcastTexts.BattleHasBegun;
         }
 
         public override void PostUpdateImpl(uint diff)
@@ -250,7 +249,7 @@ namespace Game.BattleGrounds.Zones
                 //when map_update will be allowed for Battlegrounds this code will be useless
                 SpawnBGObject(WSGObjectTypes.HFlag, BattlegroundConst.RespawnImmediately);
                 SpawnBGObject(WSGObjectTypes.AFlag, BattlegroundConst.RespawnImmediately);
-                SendMessageToAll(CypherStrings.BgWsFPlaced, ChatMsg.BgSystemNeutral);
+                SendBroadcastText(WSGBroadcastTexts.FlagsPlaced, ChatMsg.BgSystemNeutral);
                 PlaySoundToAll(WSGSound.FlagsRespawned);        // flag respawned sound...
             }
             _bothFlagsKept = false;
@@ -263,16 +262,11 @@ namespace Game.BattleGrounds.Zones
 
             RespawnFlag(team, false);
             if (team == Team.Alliance)
-            {
                 SpawnBGObject(WSGObjectTypes.AFlag, BattlegroundConst.RespawnImmediately);
-                SendMessageToAll(CypherStrings.BgWsAllianceFlagRespawned, ChatMsg.BgSystemNeutral);
-            }
             else
-            {
                 SpawnBGObject(WSGObjectTypes.HFlag, BattlegroundConst.RespawnImmediately);
-                SendMessageToAll(CypherStrings.BgWsHordeFlagRespawned, ChatMsg.BgSystemNeutral);
-            }
 
+            SendBroadcastText(WSGBroadcastTexts.FlagsPlaced, ChatMsg.BgSystemNeutral);
             PlaySoundToAll(WSGSound.FlagsRespawned);
 
             GameObject obj = GetBgMap().GetGameObject(GetDroppedFlagGUID(team));
@@ -338,9 +332,9 @@ namespace Game.BattleGrounds.Zones
             SpawnBGObject(WSGObjectTypes.AFlag, WSGTimerOrScore.FlagRespawnTime);
 
             if (player.GetTeam() == Team.Alliance)
-                SendMessageToAll(CypherStrings.BgWsCapturedHf, ChatMsg.BgSystemAlliance, player);
+                SendBroadcastText(WSGBroadcastTexts.CapturedHordeFlag, ChatMsg.BgSystemAlliance, player);
             else
-                SendMessageToAll(CypherStrings.BgWsCapturedAf, ChatMsg.BgSystemHorde, player);
+                SendBroadcastText(WSGBroadcastTexts.CapturedAllianceFlag, ChatMsg.BgSystemHorde, player);
 
             UpdateFlagState(player.GetTeam(), WSGFlagState.WaitRespawn);                  // flag state none
             UpdateTeamScore(player.GetTeamId());
@@ -448,12 +442,12 @@ namespace Game.BattleGrounds.Zones
 
                 if (player.GetTeam() == Team.Alliance)
                 {
-                    SendMessageToAll(CypherStrings.BgWsDroppedHf, ChatMsg.BgSystemHorde, player);
+                    SendBroadcastText(WSGBroadcastTexts.HordeFlagDropped, ChatMsg.BgSystemHorde, player);
                     UpdateWorldState(WSGWorldStates.FlagUnkHorde, 0xFFFFFFFF);
                 }
                 else
                 {
-                    SendMessageToAll(CypherStrings.BgWsDroppedAf, ChatMsg.BgSystemAlliance, player);
+                    SendBroadcastText(WSGBroadcastTexts.AllianceFlagDropped, ChatMsg.BgSystemAlliance, player);
                     UpdateWorldState(WSGWorldStates.FlagUnkAlliance, 0xFFFFFFFF);
                 }
 
@@ -466,15 +460,11 @@ namespace Game.BattleGrounds.Zones
             if (GetStatus() != BattlegroundStatus.InProgress)
                 return;
 
-            CypherStrings message_id = 0;
-            ChatMsg type = ChatMsg.BgSystemNeutral;
-
             //alliance flag picked up from base
             if (player.GetTeam() == Team.Horde && GetFlagState(Team.Alliance) == WSGFlagState.OnBase
                 && BgObjects[WSGObjectTypes.AFlag] == target_obj.GetGUID())
             {
-                message_id = CypherStrings.BgWsPickedupAf;
-                type = ChatMsg.BgSystemHorde;
+                SendBroadcastText(WSGBroadcastTexts.AllianceFlagPickedUp, ChatMsg.BgSystemHorde, player);
                 PlaySoundToAll(WSGSound.AllianceFlagPickedUp);
                 SpawnBGObject(WSGObjectTypes.AFlag, BattlegroundConst.RespawnOneDay);
                 SetAllianceFlagPicker(player.GetGUID());
@@ -492,8 +482,7 @@ namespace Game.BattleGrounds.Zones
             if (player.GetTeam() == Team.Alliance && GetFlagState(Team.Horde) == WSGFlagState.OnBase
                 && BgObjects[WSGObjectTypes.HFlag] == target_obj.GetGUID())
             {
-                message_id = CypherStrings.BgWsPickedupHf;
-                type = ChatMsg.BgSystemAlliance;
+                SendBroadcastText(WSGBroadcastTexts.HordeFlagPickedUp, ChatMsg.BgSystemAlliance, player);
                 PlaySoundToAll(WSGSound.HordeFlagPickedUp);
                 SpawnBGObject(WSGObjectTypes.HFlag, BattlegroundConst.RespawnOneDay);
                 SetHordeFlagPicker(player.GetGUID());
@@ -513,8 +502,7 @@ namespace Game.BattleGrounds.Zones
             {
                 if (player.GetTeam() == Team.Alliance)
                 {
-                    message_id = CypherStrings.BgWsReturnedAf;
-                    type = ChatMsg.BgSystemAlliance;
+                    SendBroadcastText(WSGBroadcastTexts.AllianceFlagReturned, ChatMsg.BgSystemAlliance, player);
                     UpdateFlagState(Team.Horde, WSGFlagState.WaitRespawn);
                     RespawnFlag(Team.Alliance, false);
                     SpawnBGObject(WSGObjectTypes.AFlag, BattlegroundConst.RespawnImmediately);
@@ -524,8 +512,7 @@ namespace Game.BattleGrounds.Zones
                 }
                 else
                 {
-                    message_id = CypherStrings.BgWsPickedupAf;
-                    type = ChatMsg.BgSystemHorde;
+                    SendBroadcastText(WSGBroadcastTexts.AllianceFlagPickedUp, ChatMsg.BgSystemHorde, player);
                     PlaySoundToAll(WSGSound.AllianceFlagPickedUp);
                     SpawnBGObject(WSGObjectTypes.AFlag, BattlegroundConst.RespawnOneDay);
                     SetAllianceFlagPicker(player.GetGUID());
@@ -548,8 +535,7 @@ namespace Game.BattleGrounds.Zones
             {
                 if (player.GetTeam() == Team.Horde)
                 {
-                    message_id = CypherStrings.BgWsReturnedHf;
-                    type = ChatMsg.BgSystemHorde;
+                    SendBroadcastText(WSGBroadcastTexts.HordeFlagReturned, ChatMsg.BgSystemHorde, player);
                     UpdateFlagState(Team.Alliance, WSGFlagState.WaitRespawn);
                     RespawnFlag(Team.Horde, false);
                     SpawnBGObject(WSGObjectTypes.HFlag, BattlegroundConst.RespawnImmediately);
@@ -559,8 +545,7 @@ namespace Game.BattleGrounds.Zones
                 }
                 else
                 {
-                    message_id = CypherStrings.BgWsPickedupHf;
-                    type = ChatMsg.BgSystemAlliance;
+                    SendBroadcastText(WSGBroadcastTexts.HordeFlagPickedUp, ChatMsg.BgSystemAlliance, player);
                     PlaySoundToAll(WSGSound.HordeFlagPickedUp);
                     SpawnBGObject(WSGObjectTypes.HFlag, BattlegroundConst.RespawnOneDay);
                     SetHordeFlagPicker(player.GetGUID());
@@ -577,10 +562,6 @@ namespace Game.BattleGrounds.Zones
                 //target_obj.Delete();
             }
 
-            if (message_id == 0)
-                return;
-
-            SendMessageToAll(message_id, type, player);
             player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.EnterPvpCombat);
         }
 
@@ -1116,6 +1097,23 @@ namespace Game.BattleGrounds.Zones
         public const uint HordeFlagPickedUp = 8212;
         public const uint AllianceFlagPickedUp = 8174;
         public const uint FlagsRespawned = 8232;
+    }
+
+    struct WSGBroadcastTexts
+    {
+        public const uint StartOneMinute = 10015;
+        public const uint StartHalfMinute = 10016;
+        public const uint BattleHasBegun = 10014;
+
+        public const uint CapturedHordeFlag = 9801;
+        public const uint CapturedAllianceFlag = 9802;
+        public const uint FlagsPlaced = 9803;
+        public const uint AllianceFlagPickedUp = 9804;
+        public const uint AllianceFlagDropped = 9805;
+        public const uint HordeFlagPickedUp = 9807;
+        public const uint HordeFlagDropped = 9806;
+        public const uint AllianceFlagReturned = 9808;
+        public const uint HordeFlagReturned = 9809;
     }
     #endregion
 }

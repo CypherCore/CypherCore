@@ -34,10 +34,10 @@ namespace Game.Arenas
             StartDelayTimes[BattlegroundConst.EventIdThird] = BattlegroundStartTimeIntervals.Delay15s;
             StartDelayTimes[BattlegroundConst.EventIdFourth] = BattlegroundStartTimeIntervals.None;
 
-            StartMessageIds[BattlegroundConst.EventIdFirst] = CypherStrings.ArenaOneMinute;
-            StartMessageIds[BattlegroundConst.EventIdSecond] = CypherStrings.ArenaThirtySeconds;
-            StartMessageIds[BattlegroundConst.EventIdThird] = CypherStrings.ArenaFifteenSeconds;
-            StartMessageIds[BattlegroundConst.EventIdFourth] = CypherStrings.ArenaHasBegun;
+            StartMessageIds[BattlegroundConst.EventIdFirst] = ArenaBroadcastTexts.OneMinute;
+            StartMessageIds[BattlegroundConst.EventIdSecond] = ArenaBroadcastTexts.ThirtySeconds;
+            StartMessageIds[BattlegroundConst.EventIdThird] = ArenaBroadcastTexts.FifteenSeconds;
+            StartMessageIds[BattlegroundConst.EventIdFourth] = ArenaBroadcastTexts.HasBegun;
         }
 
         public override void AddPlayer(Player player)

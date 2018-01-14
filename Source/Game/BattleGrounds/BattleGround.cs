@@ -51,11 +51,11 @@ namespace Game.BattleGrounds
             StartDelayTimes[BattlegroundConst.EventIdSecond] = BattlegroundStartTimeIntervals.Delay1m;
             StartDelayTimes[BattlegroundConst.EventIdThird] = BattlegroundStartTimeIntervals.Delay30s;
             StartDelayTimes[BattlegroundConst.EventIdFourth] = BattlegroundStartTimeIntervals.None;
-            //we must set to some default existing values
-            StartMessageIds[BattlegroundConst.EventIdFirst] = CypherStrings.BgWsStartTwoMinutes;
-            StartMessageIds[BattlegroundConst.EventIdSecond] = CypherStrings.BgWsStartOneMinute;
-            StartMessageIds[BattlegroundConst.EventIdThird] = CypherStrings.BgWsStartHalfMinute;
-            StartMessageIds[BattlegroundConst.EventIdFourth] = CypherStrings.BgWsHasBegun;
+
+            StartMessageIds[BattlegroundConst.EventIdFirst] = BattlegroundBroadcastTexts.StartTwoMinutes;
+            StartMessageIds[BattlegroundConst.EventIdSecond] = BattlegroundBroadcastTexts.StartOneMinute;
+            StartMessageIds[BattlegroundConst.EventIdThird] = BattlegroundBroadcastTexts.StartHalfMinute;
+            StartMessageIds[BattlegroundConst.EventIdFourth] = BattlegroundBroadcastTexts.HasBegun;
         }
 
         public virtual void Dispose()
@@ -379,20 +379,23 @@ namespace Game.BattleGrounds
 
                 StartingEventCloseDoors();
                 SetStartDelayTime(StartDelayTimes[BattlegroundConst.EventIdFirst]);
-                // First start warning - 2 or 1 Time.Minute
-                SendMessageToAll(StartMessageIds[BattlegroundConst.EventIdFirst], ChatMsg.BgSystemNeutral);
+                // First start warning - 2 or 1 Minute
+                if (StartMessageIds[BattlegroundConst.EventIdFirst] != 0)
+                    SendBroadcastText(StartMessageIds[BattlegroundConst.EventIdFirst], ChatMsg.BgSystemNeutral);
             }
             // After 1 Time.Minute or 30 seconds, warning is signaled
             else if (GetStartDelayTime() <= (int)StartDelayTimes[BattlegroundConst.EventIdSecond] && !m_Events.HasAnyFlag(BattlegroundEventFlags.Event2))
             {
                 m_Events |= BattlegroundEventFlags.Event2;
-                SendMessageToAll(StartMessageIds[BattlegroundConst.EventIdSecond], ChatMsg.BgSystemNeutral);
+                if (StartMessageIds[BattlegroundConst.EventIdSecond] != 0)
+                    SendBroadcastText(StartMessageIds[BattlegroundConst.EventIdSecond], ChatMsg.BgSystemNeutral);
             }
             // After 30 or 15 seconds, warning is signaled
             else if (GetStartDelayTime() <= (int)StartDelayTimes[BattlegroundConst.EventIdThird] && !m_Events.HasAnyFlag(BattlegroundEventFlags.Event3))
             {
                 m_Events |= BattlegroundEventFlags.Event3;
-                SendMessageToAll(StartMessageIds[BattlegroundConst.EventIdThird], ChatMsg.BgSystemNeutral);
+                if (StartMessageIds[BattlegroundConst.EventIdThird] != 0)
+                    SendBroadcastText(StartMessageIds[BattlegroundConst.EventIdThird], ChatMsg.BgSystemNeutral);
             }
             // Delay expired (after 2 or 1 Time.Minute)
             else if (GetStartDelayTime() <= 0 && !m_Events.HasAnyFlag(BattlegroundEventFlags.Event4))
@@ -401,7 +404,8 @@ namespace Game.BattleGrounds
 
                 StartingEventOpenDoors();
 
-                SendMessageToAll(StartMessageIds[BattlegroundConst.EventIdFourth], ChatMsg.RaidBossEmote);
+                if (StartMessageIds[BattlegroundConst.EventIdFourth] != 0)
+                    SendBroadcastText(StartMessageIds[BattlegroundConst.EventIdFourth], ChatMsg.RaidBossEmote);
                 SetStatus(BattlegroundStatus.InProgress);
                 SetStartDelayTime(StartDelayTimes[BattlegroundConst.EventIdFourth]);
 
@@ -554,6 +558,19 @@ namespace Game.BattleGrounds
             Global.CreatureTextMgr.SendChat(source, textId, target);
         }
 
+        public void SendBroadcastText(uint id, ChatMsg msgType, WorldObject target = null)
+        {
+            if (!CliDB.BroadcastTextStorage.ContainsKey(id))
+            {
+                Log.outError(LogFilter.Battleground, $"Battleground.SendBroadcastText: `broadcast_text` (ID: {id}) was not found");
+                return;
+            }
+
+            BroadcastTextBuilder builder = new BroadcastTextBuilder(null, msgType, id, Gender.Male, target);
+            LocalizedPacketDo localizer = new LocalizedPacketDo(builder);
+            BroadcastWorker(localizer);
+        }
+
         public void PlaySoundToAll(uint soundID)
         {
             SendPacketToAll(new PlaySound(ObjectGuid.Empty, soundID));
@@ -635,23 +652,22 @@ namespace Game.BattleGrounds
         {
             RemoveFromBGFreeSlotQueue();
 
-            CypherStrings winmsg_id = 0;
             bool guildAwarded = false;
 
             if (winner == Team.Alliance)
             {
-                winmsg_id = isBattleground() ? CypherStrings.BgAWins : CypherStrings.ArenaGoldWins;
+                if (isBattleground())
+                    SendBroadcastText(BattlegroundBroadcastTexts.AllianceWins, ChatMsg.BgSystemNeutral);
 
                 PlaySoundToAll((uint)BattlegroundSounds.AllianceWins);
-
                 SetWinner(BattlegroundTeamId.Alliance);
             }
             else if (winner == Team.Horde)
             {
-                winmsg_id = isBattleground() ? CypherStrings.BgHWins : CypherStrings.ArenaGreenWins;
+                if (isBattleground())
+                    SendBroadcastText(BattlegroundBroadcastTexts.HordeWins, ChatMsg.BgSystemNeutral);
 
                 PlaySoundToAll((uint)BattlegroundSounds.HordeWins);
-
                 SetWinner(BattlegroundTeamId.Horde);
             }
             else
@@ -789,9 +805,6 @@ namespace Game.BattleGrounds
 
                 player.UpdateCriteria(CriteriaTypes.CompleteBattleground, 1);
             }
-
-            if (winmsg_id != 0)
-                SendMessageToAll(winmsg_id, ChatMsg.BgSystemNeutral);
         }
 
         public uint GetBonusHonorFromKill(uint kills)
@@ -1540,31 +1553,24 @@ namespace Game.BattleGrounds
             return AddSpiritGuide(type, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), teamIndex);
         }
 
-        public void SendMessageToAll(CypherStrings entry, ChatMsg type, Player source = null)
+        public void SendMessageToAll(CypherStrings entry, ChatMsg msgType, Player source = null)
         {
             if (entry == 0)
                 return;
 
-            var bg_builder = new BattlegroundChatBuilder(type, entry, source);
-            var bg_do = new LocalizedPacketDo(bg_builder);
-            BroadcastWorker(bg_do);
+            CypherStringChatBuilder builder = new CypherStringChatBuilder(null, msgType, entry, source);
+            LocalizedPacketDo localizer = new LocalizedPacketDo(builder);
+            BroadcastWorker(localizer);
         }
 
-        public void SendMessageToAll(CypherStrings entry, ChatMsg type, Player source, params object[] args)
+        public void SendMessageToAll(CypherStrings entry, ChatMsg msgType, Player source, params object[] args)
         {
             if (entry == 0)
                 return;
 
-            var bg_builder = new BattlegroundChatBuilder(type, entry, source, args);
-            var bg_do = new LocalizedPacketDo(bg_builder);
-            BroadcastWorker(bg_do);
-        }
-
-        public void SendMessage2ToAll(CypherStrings entry, ChatMsg type, Player source, CypherStrings arg1 = 0, CypherStrings arg2 = 0)
-        {
-            var bg_builder = new Battleground2ChatBuilder(type, entry, source, arg1, arg2);
-            var bg_do = new LocalizedPacketDo(bg_builder);
-            BroadcastWorker(bg_do);
+            CypherStringChatBuilder builder = new CypherStringChatBuilder(null, msgType, entry, source, args);
+            LocalizedPacketDo localizer = new LocalizedPacketDo(builder);
+            BroadcastWorker(localizer);
         }
 
         void EndNow()
@@ -1975,7 +1981,7 @@ namespace Game.BattleGrounds
         BattlegroundEventFlags m_Events;
         public BattlegroundStartTimeIntervals[] StartDelayTimes = new BattlegroundStartTimeIntervals[4];
         // this must be filled inructors!
-        public CypherStrings[] StartMessageIds = new CypherStrings[4];
+        public uint[] StartMessageIds = new uint[4];
 
         public bool m_BuffChange;
         bool m_IsRandom;
@@ -2051,61 +2057,6 @@ namespace Game.BattleGrounds
         float m_StartMaxDist;
         uint ScriptId;
         #endregion
-    }
-
-    class BattlegroundChatBuilder : MessageBuilder
-    {
-        public BattlegroundChatBuilder(ChatMsg msgtype, CypherStrings textId, Player source, params object[] args)
-        {
-            _msgtype = msgtype;
-            _textId = textId;
-            _source = source;
-            _args = args;
-        }
-
-        public override ServerPacket Invoke(LocaleConstant loc_idx = LocaleConstant.enUS)
-        {
-            string text = Global.ObjectMgr.GetCypherString(_textId, loc_idx);
-            string str = string.Format(text, _args);
-            var packet = new ChatPkt();
-            packet.Initialize(_msgtype, Language.Universal, _source, _source, str);
-            return packet;
-        }
-
-        ChatMsg _msgtype;
-        CypherStrings _textId;
-        Player _source;
-        object[] _args;
-    }
-
-    class Battleground2ChatBuilder : MessageBuilder
-    {
-        public Battleground2ChatBuilder(ChatMsg msgtype, CypherStrings textId, Player source, CypherStrings arg1, CypherStrings arg2)
-        {
-            _msgtype = msgtype;
-            _textId = textId;
-            _source = source;
-            _arg1 = arg1;
-            _arg2 = arg2;
-        }
-
-        public override ServerPacket Invoke(LocaleConstant loc_idx = LocaleConstant.enUS)
-        {
-            string text = Global.ObjectMgr.GetCypherString(_textId, loc_idx);
-            string arg1str = _arg1 != 0 ? Global.ObjectMgr.GetCypherString(_arg1, loc_idx) : "";
-            string arg2str = _arg2 != 0 ? Global.ObjectMgr.GetCypherString(_arg2, loc_idx) : "";
-
-            string str = string.Format(text, arg1str, arg2str);
-            var packet = new ChatPkt();
-            packet.Initialize(_msgtype, Language.Universal, _source, _source, str);
-            return packet;
-        }
-
-        ChatMsg _msgtype;
-        CypherStrings _textId;
-        Player _source;
-        CypherStrings _arg1;
-        CypherStrings _arg2;
     }
 
     public class BattlegroundPlayer

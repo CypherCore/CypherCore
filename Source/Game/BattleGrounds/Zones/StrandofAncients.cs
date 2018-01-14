@@ -28,9 +28,6 @@ namespace Game.BattleGrounds.Zones
     {
         public BgStrandOfAncients()
         {
-            StartMessageIds[BattlegroundConst.EventIdFirst] = CypherStrings.BgSaStartTwoMinutes;
-            StartMessageIds[BattlegroundConst.EventIdSecond] = CypherStrings.BgSaStartOneMinute;
-            StartMessageIds[BattlegroundConst.EventIdThird] = CypherStrings.BgSaStartHalfMinute;
             StartMessageIds[BattlegroundConst.EventIdFourth] = 0;
 
             BgObjects = new ObjectGuid[SAObjectTypes.MaxObj];
@@ -323,7 +320,7 @@ namespace Game.BattleGrounds.Zones
                     {
                         SignaledRoundTwo = true;
                         InitSecondRound = false;
-                        SendMessageToAll(CypherStrings.BgSaRoundTwoOneMinute, ChatMsg.BgSystemNeutral);
+                        SendBroadcastText(SABroadcastTexts.RoundTwoStartOneMinute, ChatMsg.BgSystemNeutral);
                     }
                 }
                 else
@@ -385,7 +382,7 @@ namespace Game.BattleGrounds.Zones
                     if (!SignaledRoundTwoHalfMin)
                     {
                         SignaledRoundTwoHalfMin = true;
-                        SendMessageToAll(CypherStrings.BgSaRoundTwoStartHalfMinute, ChatMsg.BgSystemNeutral);
+                        SendBroadcastText(SABroadcastTexts.RoundTwoStartHalfMinute, ChatMsg.BgSystemNeutral);
                     }
                 }
                 StartShips();
@@ -922,9 +919,9 @@ namespace Game.BattleGrounds.Zones
                 if (clicker.GetTeamId() == Attackers)
                 {
                     if (clicker.GetTeamId() == TeamId.Alliance)
-                        SendMessageToAll(CypherStrings.BgSaAllianceCapturedRelic, ChatMsg.BgSystemNeutral);
+                        SendBroadcastText(SABroadcastTexts.AllianceCapturedTitanPortal, ChatMsg.BgSystemNeutral);
                     else
-                        SendMessageToAll(CypherStrings.BgSaHordeCapturedRelic, ChatMsg.BgSystemNeutral);
+                        SendBroadcastText(SABroadcastTexts.HordeCapturedTitanPortal, ChatMsg.BgSystemNeutral);
 
                     if (Status == SAStatus.RoundOne)
                     {
@@ -1366,7 +1363,7 @@ namespace Game.BattleGrounds.Zones
         };
 
         public static uint[] ObjEntries =
-            {
+        {
             190722,
             190727,
             190724,
@@ -1417,6 +1414,15 @@ namespace Game.BattleGrounds.Zones
             new SAGateInfo(SAObjectTypes.PurpleGate,  SAGameObjectIds.GateOfThePurpleAmethyst, SAWorldStateIds.PurpleGate,  SATextIds.PurpleGateUnderAttack,  SATextIds.PurpleGateDestroyed),
             new SAGateInfo(SAObjectTypes.AncientGate, SAGameObjectIds.ChamberOfAncientRelics,  SAWorldStateIds.AncientGate, SATextIds.AncientGateUnderAttack, SATextIds.AncientGateDestroyed)
         };
+    }
+
+    struct SABroadcastTexts
+    {
+        public const uint AllianceCapturedTitanPortal = 28944;
+        public const uint HordeCapturedTitanPortal = 28945;
+
+        public const uint RoundTwoStartOneMinute = 29448;
+        public const uint RoundTwoStartHalfMinute = 29449;
     }
 
     enum SAStatus

@@ -32,11 +32,12 @@ namespace Game.Chat
 
     public class BroadcastTextBuilder : MessageBuilder
     {
-        public BroadcastTextBuilder(Unit obj, ChatMsg msgtype, uint id, WorldObject target = null, uint achievementId = 0)
+        public BroadcastTextBuilder(WorldObject obj, ChatMsg msgtype, uint textId, Gender gender, WorldObject target = null, uint achievementId = 0)
         {
             _source = obj;
             _msgType = msgtype;
-            _textId = id;
+            _textId = textId;
+            _gender = gender;
             _target = target;
             _achievementId = achievementId;
         }
@@ -45,13 +46,14 @@ namespace Game.Chat
         {
             BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(_textId);
             var packet = new ChatPkt();
-            packet.Initialize(_msgType, bct != null ? (Language)bct.Language : Language.Universal, _source, _target, bct != null ? Global.DB2Mgr.GetBroadcastTextValue(bct, locale, _source.GetGender()) : "", _achievementId, "", locale);
+            packet.Initialize(_msgType, bct != null ? (Language)bct.Language : Language.Universal, _source, _target, bct != null ? Global.DB2Mgr.GetBroadcastTextValue(bct, locale, _gender) : "", _achievementId, "", locale);
             return packet;
         }
 
-        Unit _source;
+        WorldObject _source;
         ChatMsg _msgType;
         uint _textId;
+        Gender _gender;
         WorldObject _target;
         uint _achievementId;
     }
@@ -79,5 +81,37 @@ namespace Game.Chat
         string _text;
         Language _language;
         WorldObject _target;
+    }
+
+    class CypherStringChatBuilder : MessageBuilder
+    {
+        public CypherStringChatBuilder(WorldObject obj, ChatMsg msgType, CypherStrings textId, WorldObject target = null, object[] args = null)
+        {
+            _source = obj;
+            _msgType = msgType;
+            _textId = textId;
+            _target = target;
+            _args = args;
+        }
+
+        public override ServerPacket Invoke(LocaleConstant locale)
+        {
+            ChatPkt packet = new ChatPkt();
+
+            string text = Global.ObjectMgr.GetCypherString(_textId, locale);
+
+            if (_args != null)
+                packet.Initialize(_msgType, Language.Universal, _source, _target, string.Format(text, _args), 0, "", locale);
+            else
+                packet.Initialize(_msgType, Language.Universal, _source, _target, text, 0, "", locale);
+
+            return packet;
+        }
+
+        WorldObject _source;
+        ChatMsg _msgType;
+        CypherStrings _textId;
+        WorldObject _target;
+        object[] _args;
     }
 }

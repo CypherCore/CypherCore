@@ -771,7 +771,7 @@ namespace Game.AI
                         me.DoFleeToGetAssistance();
                         if (e.Action.flee.withEmote != 0)
                         {
-                            var builder = new BroadcastTextBuilder(me, ChatMsg.MonsterEmote, (uint)BroadcastTextIds.FleeForAssist);
+                            var builder = new BroadcastTextBuilder(me, ChatMsg.MonsterEmote, (uint)BroadcastTextIds.FleeForAssist, me.GetGender());
                             Global.CreatureTextMgr.SendChatPacket(me, builder, ChatMsg.Emote);
                         }
                         Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_FLEE_FOR_ASSIST: Creature {0} DoFleeToGetAssistance", me.GetGUID().ToString());
@@ -1040,7 +1040,7 @@ namespace Game.AI
                             me.CallForHelp(e.Action.callHelp.range);
                             if (e.Action.callHelp.withEmote != 0)
                             {
-                                var builder = new BroadcastTextBuilder(me, ChatMsg.Emote, (uint)BroadcastTextIds.CallForHelp);
+                                var builder = new BroadcastTextBuilder(me, ChatMsg.Emote, (uint)BroadcastTextIds.CallForHelp, me.GetGender());
                                 Global.CreatureTextMgr.SendChatPacket(me, builder, ChatMsg.MonsterEmote);
                             }
                             Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction: SMART_ACTION_CALL_FOR_HELP: Creature {0}", me.GetGUID().ToString());

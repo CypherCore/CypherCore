@@ -654,79 +654,7 @@ namespace Framework.Constants
 
         // End Level 3 List, Continued At 1100
 
-        // Battleground
-        BgAWins = 600,
-        BgHWins = 601,
-
-        BgWsStartTwoMinutes = 753,
-        BgWsStartOneMinute = 602,
-        BgWsStartHalfMinute = 603,
-        BgWsHasBegun = 604,
-
-        BgWsCapturedHf = 605,
-        BgWsCapturedAf = 606,
-        BgWsDroppedHf = 607,
-        BgWsDroppedAf = 608,
-        BgWsReturnedAf = 609,
-        BgWsReturnedHf = 610,
-        BgWsPickedupHf = 611,
-        BgWsPickedupAf = 612,
-        BgWsFPlaced = 613,
-        BgWsAllianceFlagRespawned = 614,
-        BgWsHordeFlagRespawned = 615,
-
-        BgEyStartTwoMinutes = 755,
-        BgEyStartOneMinute = 636,
-        BgEyStartHalfMinute = 637,
-        BgEyHasBegun = 638,
-
-        BgAbAlly = 650,
-        BgAbHorde = 651,
-        BgAbNodeStables = 652,
-        BgAbNodeBlacksmith = 653,
-        BgAbNodeFarm = 654,
-        BgAbNodeLumberMill = 655,
-        BgAbNodeGoldMine = 656,
-        BgAbNodeTaken = 657,
-        BgAbNodeDefended = 658,
-        BgAbNodeAssaulted = 659,
-        BgAbNodeClaimed = 660,
-
-        BgAbStartTwoMinutes = 754,
-        BgAbStartOneMinute = 661,
-        BgAbStartHalfMinute = 662,
-        BgAbHasBegun = 663,
-        BgAbANearVictory = 664,
-        BgAbHNearVictory = 665,
-        BgMarkByMail = 666,
-
-        BgEyHasTakenAMTower = 667,
-        BgEyHasTakenHMTower = 668,
-        BgEyHasTakenADRuins = 669,
-        BgEyHasTakenHDRuins = 670,
-        BgEyHasTakenABTower = 671,
-        BgEyHasTakenHBTower = 672,
-        BgEyHasTakenAFRuins = 673,
-        BgEyHasTakenHFRuins = 674,
-        BgEyHasLostAMTower = 675,
-        BgEyHasLostHMTower = 676,
-        BgEyHasLostADRuins = 677,
-        BgEyHasLostHDRuins = 678,
-        BgEyHasLostABTower = 679,
-        BgEyHasLostHBTower = 680,
-        BgEyHasLostAFRuins = 681,
-        BgEyHasLostHFRuins = 682,
-        BgEyHasTakenFlag = 683,
-        BgEyCapturedFlagA = 684,
-        BgEyCapturedFlagH = 685,
-        BgEyDroppedFlag = 686,
-        BgEyResetedFlag = 687,
-
-        ArenaOneToolow = 700,
-        ArenaOneMinute = 701,
-        ArenaThirtySeconds = 702,
-        ArenaFifteenSeconds = 703,
-        ArenaHasBegun = 704,
+        // 600-704 - free
 
         WaitBeforeSpeaking = 705,
         NotEquippedItem = 706,
@@ -749,9 +677,7 @@ namespace Framework.Constants
         ArenaGroupTooLarge = 721,              // "Your Group Is Too Large For This Arena. Please Regroup To Join."
         ArenaYourTeamOnly = 722,              // "Your Group Has Members Not In Your Arena Team. Please Regroup To Join."
         ArenaNotEnoughPlayers = 723,              // "Your Group Does Not Have Enough Players To Join This Match."
-        ArenaGoldWins = 724,              // "The Gold Team Wins!"
-        ArenaGreenWins = 725,              // "The Green Team Wins!"
-                                           //                                      = 726, Not Used
+        // 724-726 - free
         BgGroupOfflineMember = 727,              // "Your Group Has An Offline Member. Please Remove Him Before Joining."
         BgGroupMixedFaction = 728,              // "Your Group Has Players From The Opposing Faction. You Can'T Join The Battleground As A Group."
         BgGroupMixedLevels = 729,              // "Your Group Has Players From Different Battleground Brakets. You Can'T Join As Group."
@@ -778,15 +704,13 @@ namespace Framework.Constants
         //                                      = 749, See PinfoAccOs
         BattlegroundPrematureFinishWarning = 750,       // "Not Enough Players. This Game Will Close In %U Mins."
         BattlegroundPrematureFinishWarningSecs = 751,  // "Not Enough Players. This Game Will Close In %U Seconds."
-                                                       //                                      = 752, See PinfoAccIp
-                                                       //  BgWsStartTwoMinutes        = 753, - Defined Above
-                                                       //  BgAbStartTwoMinutes        = 754, - Defined Above
-                                                       //  BgEyStartTwoMinutes        = 755, - Defined Above
-
-        // Room For Bg/Arena                = 773-784, 788-799 Not Used
+        //                                      = 752, See PinfoAccIp
+        // 753-755 - free
+        // Room For Bg/Arena                = 773-784
         ArenaTesting = 785,
         AutoAnn = 786,
         AnnounceColor = 787,
+        // 788-799 - free
 
         // In Game Strings
         PetInvalidName = 800,
@@ -1030,42 +954,7 @@ namespace Framework.Constants
         DebugAreatriggerOn = 1202,
         DebugAreatriggerOff = 1203,
         DebugAreatriggerEntered = 1204,
-
-        // Isle Of Conquest
-        BgIcStartTwoMinutes = 1205,
-        BgIcStartOneMinute = 1206,
-        BgIcStartHalfMinute = 1207,
-        BgIcHasBegun = 1208,
-        BgIcAllianceKeep = 1209,
-        BgIcHordeKeep = 1210,
-        BgIcTeamWins = 1211,
-        BgIcWestGateDestroyed = 1212,
-        BgIcEastGateDestroyed = 1213,
-        BgIcSouthGateDestroyed = 1214,
-        BgIcNorthGateDestroyed = 1215,
-        BgIcTeamAssaultedNode1 = 1216,
-        BgIcTeamDefendedNode = 1217,
-        BgIcTeamAssaultedNode2 = 1218,
-        BgIcTeamHasTakenNode = 1219,
-        BgIcWorkshop = 1220,
-        BgIcDocks = 1221,
-        BgIcRefinery = 1222,
-        BgIcQuarry = 1223,
-        BgIcHangar = 1224,
-        //                                    1225-1299
-        BgIcAlliance = 1300,
-        BgIcHorde = 1301,
-
-        //                                    1302-1325
-        // Av
-        BgAvStartOneMinute = 1326,
-        BgAvStartHalfMinute = 1327,
-        BgAvHasBegun = 1328,
-        BgAvANearLose = 1329,
-        BgAvHNearLose = 1330,
-        //                                    1331-1332
-        BgAvStartTwoMinutes = 1333,
-        // Free Ids                           1334-2002
+        // 1205-2002 - free
 
         // Ticket Strings 2003-2028
         CommandTicketclosed = 2003,
@@ -1230,14 +1119,7 @@ namespace Framework.Constants
         OpvpZmGossipAlliance = 10054,
         OpvpZmGossipHorde = 10055,
 
-        BgSaStartTwoMinutes = 10056,
-        BgSaStartOneMinute = 10057,
-        BgSaStartHalfMinute = 10058,
-        // Unused                                 10059-10062
-        BgSaAllianceCapturedRelic = 10063, //The Alliance Captured The Titan Portal!
-        BgSaHordeCapturedRelic = 10064, //The Horde Captured The Titan Portal!
-        BgSaRoundTwoOneMinute = 10065, //Round 2 Of The Battle For The Strand Of The Ancients Begins In 1 Minute.
-        BgSaRoundTwoStartHalfMinute = 10066, //Round 2 Begins In 30 Seconds. Prepare Yourselves!
+        // 10056-10066 - free
 
         // Use For Custom Patches             11000-11999
         AutoBroadcast = 11000,

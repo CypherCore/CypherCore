@@ -54,11 +54,6 @@ namespace Game.BattleGrounds.Zones
 
             m_HonorTics = 0;
             m_ReputationTics = 0;
-
-            StartMessageIds[BattlegroundConst.EventIdFirst] = CypherStrings.BgAbStartTwoMinutes;
-            StartMessageIds[BattlegroundConst.EventIdSecond] = CypherStrings.BgAbStartOneMinute;
-            StartMessageIds[BattlegroundConst.EventIdThird] = CypherStrings.BgAbStartHalfMinute;
-            StartMessageIds[BattlegroundConst.EventIdFourth] = CypherStrings.BgAbHasBegun;
         }
 
         public override void PostUpdateImpl(uint diff)
@@ -98,19 +93,17 @@ namespace Game.BattleGrounds.Zones
                             // create new occupied banner
                             _CreateBanner(node, ABNodeStatus.Occupied, teamIndex, true);
                             _SendNodeUpdate(node);
-                            _NodeOccupied(node, (teamIndex == 0) ? Team.Alliance : Team.Horde);
+                            _NodeOccupied(node, (teamIndex == TeamId.Alliance) ? Team.Alliance : Team.Horde);
                             // Message to chatlog
 
                             if (teamIndex == 0)
                             {
-                                // FIXME: team and node names not localized
-                                SendMessage2ToAll(CypherStrings.BgAbNodeTaken, ChatMsg.BgSystemAlliance, null, CypherStrings.BgAbAlly, _GetNodeNameId(node));
+                                SendBroadcastText(ABBattlegroundBroadcastTexts.ABNodes[node].TextAllianceTaken, ChatMsg.BgSystemAlliance);
                                 PlaySoundToAll(SoundCapturedAlliance);
                             }
                             else
                             {
-                                // FIXME: team and node names not localized
-                                SendMessage2ToAll(CypherStrings.BgAbNodeTaken, ChatMsg.BgSystemHorde, null, CypherStrings.BgAbHorde, _GetNodeNameId(node));
+                                SendBroadcastText(ABBattlegroundBroadcastTexts.ABNodes[node].TextHordeTaken, ChatMsg.BgSystemHorde);
                                 PlaySoundToAll(SoundCapturedHorde);
                             }
                         }
@@ -156,9 +149,9 @@ namespace Game.BattleGrounds.Zones
                         if (!m_IsInformedNearVictory && m_TeamScores[team] > WarningNearVictoryScore)
                         {
                             if (team == TeamId.Alliance)
-                                SendMessageToAll(CypherStrings.BgAbANearVictory, ChatMsg.BgSystemNeutral);
+                                SendBroadcastText(ABBattlegroundBroadcastTexts.AllianceNearVictory, ChatMsg.BgSystemNeutral);
                             else
-                                SendMessageToAll(CypherStrings.BgAbHNearVictory, ChatMsg.BgSystemNeutral);
+                                SendBroadcastText(ABBattlegroundBroadcastTexts.HordeNearVictory, ChatMsg.BgSystemNeutral);
                             PlaySoundToAll(SoundNearVictory);
                             m_IsInformedNearVictory = true;
                         }
@@ -301,27 +294,6 @@ namespace Game.BattleGrounds.Zones
                 return;
             obj = node * 8 + ((type == ABNodeStatus.Occupied) ? (5 + teamIndex) : 7);
             SpawnBGObject(obj, BattlegroundConst.RespawnOneDay);
-        }
-
-        CypherStrings _GetNodeNameId(byte node)
-        {
-            switch (node)
-            {
-                case ABBattlegroundNodes.NodeStables:
-                    return CypherStrings.BgAbNodeStables;
-                case ABBattlegroundNodes.NodeBlacksmith:
-                    return CypherStrings.BgAbNodeBlacksmith;
-                case ABBattlegroundNodes.NodeFarm:
-                    return CypherStrings.BgAbNodeFarm;
-                case ABBattlegroundNodes.NodeLumberMill:
-                    return CypherStrings.BgAbNodeLumberMill;
-                case ABBattlegroundNodes.NodeGoldMine:
-                    return CypherStrings.BgAbNodeGoldMine;
-                default:
-                    Contract.Assert(false);
-                    break;
-            }
-            return 0;
         }
 
         public override void FillInitialWorldStates(InitWorldStates packet)
@@ -472,10 +444,10 @@ namespace Game.BattleGrounds.Zones
                 m_NodeTimers[node] = FlagCapturingTime;
 
                 // FIXME: team and node names not localized
-                if (teamIndex == 0)
-                    SendMessage2ToAll(CypherStrings.BgAbNodeClaimed, ChatMsg.BgSystemAlliance, source, _GetNodeNameId(node), CypherStrings.BgAbAlly);
+                if (teamIndex == TeamId.Alliance)
+                    SendBroadcastText(ABBattlegroundBroadcastTexts.ABNodes[node].TextAllianceClaims, ChatMsg.BgSystemAlliance, source);
                 else
-                    SendMessage2ToAll(CypherStrings.BgAbNodeClaimed, ChatMsg.BgSystemHorde, source, _GetNodeNameId(node), CypherStrings.BgAbHorde);
+                    SendBroadcastText(ABBattlegroundBroadcastTexts.ABNodes[node].TextHordeClaims, ChatMsg.BgSystemHorde, source);
 
                 sound = SoundClaimed;
             }
@@ -495,11 +467,10 @@ namespace Game.BattleGrounds.Zones
                     _SendNodeUpdate(node);
                     m_NodeTimers[node] = FlagCapturingTime;
 
-                    // FIXME: node names not localized
                     if (teamIndex == TeamId.Alliance)
-                        SendMessage2ToAll(CypherStrings.BgAbNodeAssaulted, ChatMsg.BgSystemAlliance, source, _GetNodeNameId(node));
+                        SendBroadcastText(ABBattlegroundBroadcastTexts.ABNodes[node].TextAllianceAssaulted, ChatMsg.BgSystemAlliance, source);
                     else
-                        SendMessage2ToAll(CypherStrings.BgAbNodeAssaulted, ChatMsg.BgSystemHorde, source, _GetNodeNameId(node));
+                        SendBroadcastText(ABBattlegroundBroadcastTexts.ABNodes[node].TextHordeAssaulted, ChatMsg.BgSystemHorde, source);
                 }
                 // If contested, change back to occupied
                 else
@@ -515,11 +486,10 @@ namespace Game.BattleGrounds.Zones
                     m_NodeTimers[node] = 0;
                     _NodeOccupied(node, (teamIndex == TeamId.Alliance) ? Team.Alliance : Team.Horde);
 
-                    // FIXME: node names not localized
                     if (teamIndex == TeamId.Alliance)
-                        SendMessage2ToAll(CypherStrings.BgAbNodeDefended, ChatMsg.BgSystemAlliance, source, _GetNodeNameId(node));
+                        SendBroadcastText(ABBattlegroundBroadcastTexts.ABNodes[node].TextAllianceDefended, ChatMsg.BgSystemAlliance, source);
                     else
-                        SendMessage2ToAll(CypherStrings.BgAbNodeDefended, ChatMsg.BgSystemHorde, source, _GetNodeNameId(node));
+                        SendBroadcastText(ABBattlegroundBroadcastTexts.ABNodes[node].TextHordeDefended, ChatMsg.BgSystemHorde, source);
                 }
                 sound = (teamIndex == TeamId.Alliance) ? SoundAssaultedAlliance : SoundAssaultedHorde;
             }
@@ -537,11 +507,10 @@ namespace Game.BattleGrounds.Zones
                 _NodeDeOccupied(node);
                 m_NodeTimers[node] = FlagCapturingTime;
 
-                // FIXME: node names not localized
                 if (teamIndex == TeamId.Alliance)
-                    SendMessage2ToAll(CypherStrings.BgAbNodeAssaulted, ChatMsg.BgSystemAlliance, source, _GetNodeNameId(node));
+                    SendBroadcastText(ABBattlegroundBroadcastTexts.ABNodes[node].TextAllianceAssaulted, ChatMsg.BgSystemAlliance, source);
                 else
-                    SendMessage2ToAll(CypherStrings.BgAbNodeAssaulted, ChatMsg.BgSystemHorde, source, _GetNodeNameId(node));
+                    SendBroadcastText(ABBattlegroundBroadcastTexts.ABNodes[node].TextHordeAssaulted, ChatMsg.BgSystemHorde, source);
 
                 sound = (teamIndex == TeamId.Alliance) ? SoundAssaultedAlliance : SoundAssaultedHorde;
             }
@@ -551,9 +520,9 @@ namespace Game.BattleGrounds.Zones
             {
                 // FIXME: team and node names not localized
                 if (teamIndex == TeamId.Alliance)
-                    SendMessage2ToAll(CypherStrings.BgAbNodeTaken, ChatMsg.BgSystemAlliance, null, CypherStrings.BgAbAlly, _GetNodeNameId(node));
+                    SendBroadcastText(ABBattlegroundBroadcastTexts.ABNodes[node].TextAllianceTaken, ChatMsg.BgSystemAlliance);
                 else
-                    SendMessage2ToAll(CypherStrings.BgAbNodeTaken, ChatMsg.BgSystemHorde, null, CypherStrings.BgAbHorde, _GetNodeNameId(node));
+                    SendBroadcastText(ABBattlegroundBroadcastTexts.ABNodes[node].TextHordeTaken, ChatMsg.BgSystemHorde);
             }
             PlaySoundToAll(sound);
         }
@@ -1000,6 +969,49 @@ namespace Game.BattleGrounds.Zones
 
         public const int AllCount = 7;                         // All Nodes (Dynamic And Static)
     }
+
+    struct ABBattlegroundBroadcastTexts
+    {
+        public const uint AllianceNearVictory = 10598;
+        public const uint HordeNearVictory = 10599;
+
+        public static ABNodeInfo[] ABNodes =
+        {
+            new ABNodeInfo(ABBattlegroundNodes.NodeStables,    10199, 10200, 10203, 10204, 10201, 10202, 10286, 10287),
+            new ABNodeInfo(ABBattlegroundNodes.NodeBlacksmith, 10211, 10212, 10213, 10214, 10215, 10216, 10290, 10291),
+            new ABNodeInfo(ABBattlegroundNodes.NodeFarm,       10217, 10218, 10219, 10220, 10221, 10222, 10288, 10289),
+            new ABNodeInfo(ABBattlegroundNodes.NodeLumberMill, 10224, 10225, 10226, 10227, 10228, 10229, 10284, 10285),
+            new ABNodeInfo(ABBattlegroundNodes.NodeGoldMine,   10230, 10231, 10232, 10233, 10234, 10235, 10282, 10283)
+        };
+    }
+
+    struct ABNodeInfo
+    {
+        public ABNodeInfo(uint nodeId, uint textAllianceAssaulted, uint textHordeAssaulted, uint textAllianceTaken, uint textHordeTaken, uint textAllianceDefended, uint textHordeDefended, uint textAllianceClaims, uint textHordeClaims)
+        {
+            NodeId = nodeId;
+            TextAllianceAssaulted = textAllianceAssaulted;
+            TextHordeAssaulted = textHordeAssaulted;
+            TextAllianceTaken = textAllianceTaken;
+            TextHordeTaken = textHordeTaken;
+            TextAllianceDefended = textAllianceDefended;
+            TextHordeDefended = textHordeDefended;
+            TextAllianceClaims = textAllianceClaims;
+            TextHordeClaims = textHordeClaims;
+        }
+
+        public uint NodeId;
+        public uint TextAllianceAssaulted;
+        public uint TextHordeAssaulted;
+        public uint TextAllianceTaken;
+        public uint TextHordeTaken;
+        public uint TextAllianceDefended;
+        public uint TextHordeDefended;
+        public uint TextAllianceClaims;
+        public uint TextHordeClaims;
+    }
+
+
 
     enum ABNodeStatus
     {

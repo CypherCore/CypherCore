@@ -172,6 +172,17 @@ namespace Framework.Constants
         NotEvenAScratch,
     }
 
+    public struct BattlegroundBroadcastTexts
+    {
+        public const uint AllianceWins = 10633;
+        public const uint HordeWins = 10634;
+
+        public const uint StartTwoMinutes = 18193;
+        public const uint StartOneMinute = 18194;
+        public const uint StartHalfMinute = 18195;
+        public const uint HasBegun = 18196;
+    }
+
     public enum BattlegroundSounds
     {
         HordeWins = 8454,
@@ -306,6 +317,14 @@ namespace Framework.Constants
     }
 
     //Arenas
+    public struct ArenaBroadcastTexts
+    {
+        public const uint OneMinute = 15740;
+        public const uint ThirtySeconds = 15741;
+        public const uint FifteenSeconds = 15739;
+        public const uint HasBegun = 15742;
+    }
+
     public struct ArenaSpellIds
     {
         public const uint AllianceGoldFlag = 32724;
