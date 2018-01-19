@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -185,8 +185,8 @@ namespace Game.Network.Packets
                         _worldPacket.WriteUInt8(templateClass.FactionGroup);
                     }
 
-                    _worldPacket.WriteBits(templat.Name.Length, 7);
-                    _worldPacket.WriteBits(templat.Description.Length, 10);
+                    _worldPacket.WriteBits(templat.Name.GetByteCount(), 7);
+                    _worldPacket.WriteBits(templat.Description.GetByteCount(), 10);
                     _worldPacket.FlushBits();
 
                     _worldPacket.WriteString(templat.Name);
@@ -409,8 +409,8 @@ namespace Game.Network.Packets
         {
             data.WriteBit(IsLocal);
             data.WriteBit(IsInternalRealm);
-            data.WriteBits(RealmNameActual.Length, 8);
-            data.WriteBits(RealmNameNormalized.Length, 8);
+            data.WriteBits(RealmNameActual.GetByteCount(), 8);
+            data.WriteBits(RealmNameNormalized.GetByteCount(), 8);
             data.FlushBits();
 
             data.WriteString(RealmNameActual);

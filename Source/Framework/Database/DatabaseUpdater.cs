@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -255,7 +255,8 @@ namespace Framework.Database
             uint oldMSTime = Time.GetMSTime();
 
             // Update database
-            _database.ApplyFile(path);
+            if (!_database.ApplyFile(path))
+                Log.outError(LogFilter.Sql, $"Update: {path} Failed. You need to apply it manually");
 
             // Return time the query took to apply
             return Time.GetMSTimeDiffToNow(oldMSTime);

@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -258,7 +258,7 @@ namespace Scripts.Northrend.FrozenHalls.ForgeOfSouls.Bronjahm
     {
         void RecalculateDamage()
         {
-            if (GetHitUnit().getPowerType() != PowerType.Mana)
+            if (GetHitUnit().GetPowerType() != PowerType.Mana)
                 return;
 
             int maxDamage = GetCaster().GetMap().IsHeroic() ? 15000 : 10000;

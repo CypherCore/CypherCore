@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -144,7 +144,7 @@ namespace Scripts.Northrend.Nexus.EyeOfEternity
             void SpawnGameObject(uint entry, Position pos)
             {
                 GameObject go = new GameObject();
-                if (go.Create(entry, instance, PhaseMasks.Normal, pos, Quaternion.WAxis, 255, GameObjectState.Ready))
+                if (go.Create(entry, instance, pos, Quaternion.WAxis, 255, GameObjectState.Ready))
                     instance.AddToMap(go);
             }
 

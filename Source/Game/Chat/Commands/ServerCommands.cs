@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,7 +66,11 @@ namespace Game.Chat
         [Command("motd", RBACPermissions.CommandServerMotd, true)]
         static bool Motd(StringArguments args, CommandHandler handler)
         {
-            handler.SendSysMessage(CypherStrings.MotdCurrent, Global.WorldMgr.GetMotd());
+            string motd = "";
+            foreach (var line in Global.WorldMgr.GetMotd())
+                motd += line;
+
+            handler.SendSysMessage(CypherStrings.MotdCurrent, motd);
             return true;
         }
 
@@ -349,7 +353,7 @@ namespace Game.Chat
             static bool SetMotd(StringArguments args, CommandHandler handler)
             {
                 Global.WorldMgr.SetMotd(args.NextString(""));
-                handler.SendSysMessage(CypherStrings.MotdNew, args);
+                handler.SendSysMessage(CypherStrings.MotdNew, args.GetString());
                 return true;
             }
 

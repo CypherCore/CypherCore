@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -243,7 +243,7 @@ namespace Game.Network.Packets
             data.WriteUInt32(MaxHealth);
             data .WriteUInt32( Speed);
             data .WriteUInt8( Quality);
-            data.WriteBits(Name.Length, 7);
+            data.WriteBits(Name.GetByteCount(), 7);
             data.WriteBit(OwnerInfo.HasValue); // HasOwnerInfo
             data.WriteBit(Name.IsEmpty()); // NoRename
             data.FlushBits();
@@ -268,7 +268,7 @@ namespace Game.Network.Packets
         public ObjectGuid Guid;
         public uint Species;
         public uint CreatureID;
-        public uint CollarID; // what's this?
+        public uint CollarID;
         public ushort Breed;
         public ushort Level;
         public ushort Exp;
@@ -294,7 +294,7 @@ namespace Game.Network.Packets
         }
 
         public BattlePetStruct Pet;
-        public uint CollarID; // what's this?
+        public uint CollarID;
         public byte Index;
         public bool Locked = true;
     }

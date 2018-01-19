@@ -59,11 +59,6 @@ namespace Game.BattleGrounds.Zones
 
             for (byte i = 0; i < 2 * EotSPoints.PointsMax; ++i)
                 m_CurrentPointPlayersCount[i] = 0;
-
-            StartMessageIds[BattlegroundConst.EventIdFirst] = CypherStrings.BgEyStartTwoMinutes;
-            StartMessageIds[BattlegroundConst.EventIdSecond] = CypherStrings.BgEyStartOneMinute;
-            StartMessageIds[BattlegroundConst.EventIdThird] = CypherStrings.BgEyStartHalfMinute;
-            StartMessageIds[BattlegroundConst.EventIdFourth] = CypherStrings.BgEyHasBegun;
         }
 
         public override void PostUpdateImpl(uint diff)
@@ -300,17 +295,6 @@ namespace Game.BattleGrounds.Zones
         void UpdateTeamScore(int team)
         {
             uint score = GetTeamScore(team);
-            /// @todo there should be some sound played when one team is near victory!! - and define variables
-            /*if (!m_IsInformedNearVictory && score >= BG_EY_WARNING_NEAR_VICTORY_SCORE)
-            {
-                if (Team == ALLIANCE)
-                    SendMessageToAll(LANG_BG_EY_A_NEAR_VICTORY, CHAT_MSG_BG_SYSTEM_NEUTRAL);
-                else
-                    SendMessageToAll(LANG_BG_EY_H_NEAR_VICTORY, CHAT_MSG_BG_SYSTEM_NEUTRAL);
-                PlaySoundToAll(BG_EY_SOUND_NEAR_VICTORY);
-                m_IsInformedNearVictory = true;
-            }*/
-
             if (score >= EotSScoreIds.MaxTeamScore)
             {
                 score = EotSScoreIds.MaxTeamScore;
@@ -584,7 +568,7 @@ namespace Game.BattleGrounds.Zones
 
             if (send_message)
             {
-                SendMessageToAll(CypherStrings.BgEyResetedFlag, ChatMsg.BgSystemNeutral);
+                SendBroadcastText(EotSBroadcastTexts.FlagReset, ChatMsg.BgSystemNeutral);
                 PlaySoundToAll(EotSSoundIds.FlagReset);             // flags respawned sound...
             }
 
@@ -644,9 +628,9 @@ namespace Game.BattleGrounds.Zones
             UpdateWorldState(EotSWorldStateIds.NetherstormFlagStateAlliance, (uint)EotSFlagState.WaitRespawn);
 
             if (player.GetTeam() == Team.Alliance)
-                SendMessageToAll(CypherStrings.BgEyDroppedFlag, ChatMsg.BgSystemAlliance, null);
+                SendBroadcastText(EotSBroadcastTexts.FlagDropped, ChatMsg.BgSystemAlliance, null);
             else
-                SendMessageToAll(CypherStrings.BgEyDroppedFlag, ChatMsg.BgSystemHorde, null);
+                SendBroadcastText(EotSBroadcastTexts.FlagDropped, ChatMsg.BgSystemHorde, null);
         }
 
         public override void EventPlayerClickedOnFlag(Player player, GameObject target_obj)
@@ -676,9 +660,9 @@ namespace Game.BattleGrounds.Zones
             player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.EnterPvpCombat);
 
             if (player.GetTeam() == Team.Alliance)
-                SendMessageToAll(CypherStrings.BgEyHasTakenFlag, ChatMsg.BgSystemAlliance, null, player.GetName());
+                SendBroadcastText(EotSBroadcastTexts.TakenFlag, ChatMsg.BgSystemAlliance, player);
             else
-                SendMessageToAll(CypherStrings.BgEyHasTakenFlag, ChatMsg.BgSystemHorde, null, player.GetName());
+                SendBroadcastText(EotSBroadcastTexts.TakenFlag, ChatMsg.BgSystemHorde, player);
         }
 
         void EventTeamLostPoint(Player player, int Point)
@@ -687,7 +671,7 @@ namespace Game.BattleGrounds.Zones
                 return;
 
             //Natural point
-            Team Team = (Team)m_PointOwnedByTeam[Point];
+            Team Team = m_PointOwnedByTeam[Point];
 
             if (Team == 0)
                 return;
@@ -717,9 +701,9 @@ namespace Game.BattleGrounds.Zones
             m_PointState[Point] = EotSPointState.NoOwner;
 
             if (Team == Team.Alliance)
-                SendMessageToAll(EotSMisc.m_LosingPointTypes[Point].MessageIdAlliance, ChatMsg.BgSystemAlliance, player);
+                SendBroadcastText(EotSMisc.m_LosingPointTypes[Point].MessageIdAlliance, ChatMsg.BgSystemAlliance, player);
             else
-                SendMessageToAll(EotSMisc.m_LosingPointTypes[Point].MessageIdHorde, ChatMsg.BgSystemHorde, player);
+                SendBroadcastText(EotSMisc.m_LosingPointTypes[Point].MessageIdHorde, ChatMsg.BgSystemHorde, player);
 
             UpdatePointsIcons(Team, Point);
             UpdatePointsCount(Team);
@@ -761,9 +745,9 @@ namespace Game.BattleGrounds.Zones
             m_PointState[Point] = EotSPointState.UnderControl;
 
             if (Team == Team.Alliance)
-                SendMessageToAll(EotSMisc.m_CapturingPointTypes[Point].MessageIdAlliance, ChatMsg.BgSystemAlliance, player);
+                SendBroadcastText(EotSMisc.m_CapturingPointTypes[Point].MessageIdAlliance, ChatMsg.BgSystemAlliance, player);
             else
-                SendMessageToAll(EotSMisc.m_CapturingPointTypes[Point].MessageIdHorde, ChatMsg.BgSystemHorde, player);
+                SendBroadcastText(EotSMisc.m_CapturingPointTypes[Point].MessageIdHorde, ChatMsg.BgSystemHorde, player);
 
             if (!BgCreatures[Point].IsEmpty())
                 DelCreature(Point);
@@ -807,27 +791,22 @@ namespace Game.BattleGrounds.Zones
             player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.EnterPvpCombat);
 
             if (player.GetTeam() == Team.Alliance)
+            {
+                SendBroadcastText(EotSBroadcastTexts.AllianceCapturedFlag, ChatMsg.BgSystemAlliance, player);
                 PlaySoundToAll(EotSSoundIds.FlagCapturedAlliance);
+            }
             else
+            {
+                SendBroadcastText(EotSBroadcastTexts.HordeCapturedFlag, ChatMsg.BgSystemHorde, player);
                 PlaySoundToAll(EotSSoundIds.FlagCapturedHorde);
+            }
 
             SpawnBGObject((int)BgObjectType, BattlegroundConst.RespawnImmediately);
 
             m_FlagsTimer = EotSMisc.FlagRespawnTime;
             m_FlagCapturedBgObjectType = BgObjectType;
 
-            uint team_id = 0;
-            if (player.GetTeam() == Team.Alliance)
-            {
-                team_id = TeamId.Alliance;
-                SendMessageToAll(CypherStrings.BgEyCapturedFlagA, ChatMsg.BgSystemAlliance, player);
-            }
-            else
-            {
-                team_id = TeamId.Horde;
-                SendMessageToAll(CypherStrings.BgEyCapturedFlagH, ChatMsg.BgSystemHorde, player);
-            }
-
+            int team_id = player.GetTeam() == Team.Alliance ? TeamId.Alliance : TeamId.Horde;
             if (m_TeamPointsCount[team_id] > 0)
                 AddPoints(player.GetTeam(), EotSMisc.FlagPoints[m_TeamPointsCount[team_id] - 1]);
 
@@ -1050,7 +1029,7 @@ namespace Game.BattleGrounds.Zones
 
     struct BattlegroundEYLosingPointStruct
     {
-        public BattlegroundEYLosingPointStruct(int _SpawnNeutralObjectType, int _DespawnObjectTypeAlliance, CypherStrings _MessageIdAlliance, int _DespawnObjectTypeHorde, CypherStrings _MessageIdHorde)
+        public BattlegroundEYLosingPointStruct(int _SpawnNeutralObjectType, int _DespawnObjectTypeAlliance, uint _MessageIdAlliance, int _DespawnObjectTypeHorde, uint _MessageIdHorde)
         {
             SpawnNeutralObjectType = _SpawnNeutralObjectType;
             DespawnObjectTypeAlliance = _DespawnObjectTypeAlliance;
@@ -1061,14 +1040,14 @@ namespace Game.BattleGrounds.Zones
 
         public int SpawnNeutralObjectType;
         public int DespawnObjectTypeAlliance;
-        public CypherStrings MessageIdAlliance;
+        public uint MessageIdAlliance;
         public int DespawnObjectTypeHorde;
-        public CypherStrings MessageIdHorde;
+        public uint MessageIdHorde;
     }
 
     struct BattlegroundEYCapturingPointStruct
     {
-        public BattlegroundEYCapturingPointStruct(int _DespawnNeutralObjectType, int _SpawnObjectTypeAlliance, CypherStrings _MessageIdAlliance, int _SpawnObjectTypeHorde, CypherStrings _MessageIdHorde, uint _GraveYardId)
+        public BattlegroundEYCapturingPointStruct(int _DespawnNeutralObjectType, int _SpawnObjectTypeAlliance, uint _MessageIdAlliance, int _SpawnObjectTypeHorde, uint _MessageIdHorde, uint _GraveYardId)
         {
             DespawnNeutralObjectType = _DespawnNeutralObjectType;
             SpawnObjectTypeAlliance = _SpawnObjectTypeAlliance;
@@ -1080,9 +1059,9 @@ namespace Game.BattleGrounds.Zones
 
         public int DespawnNeutralObjectType;
         public int SpawnObjectTypeAlliance;
-        public CypherStrings MessageIdAlliance;
+        public uint MessageIdAlliance;
         public int SpawnObjectTypeHorde;
-        public CypherStrings MessageIdHorde;
+        public uint MessageIdHorde;
         public uint GraveYardId;
     }
 
@@ -1123,18 +1102,47 @@ namespace Game.BattleGrounds.Zones
         };
         public static BattlegroundEYLosingPointStruct[] m_LosingPointTypes =
         {
-            new BattlegroundEYLosingPointStruct(EotSObjectTypes.NBannerFelReaverCenter, EotSObjectTypes.ABannerFelReaverCenter, CypherStrings.BgEyHasLostAFRuins, EotSObjectTypes.HBannerFelReaverCenter, CypherStrings.BgEyHasLostHFRuins),
-            new BattlegroundEYLosingPointStruct(EotSObjectTypes.NBannerBloodElfCenter, EotSObjectTypes.ABannerBloodElfCenter, CypherStrings.BgEyHasLostABTower, EotSObjectTypes.HBannerBloodElfCenter, CypherStrings.BgEyHasLostHBTower),
-            new BattlegroundEYLosingPointStruct(EotSObjectTypes.NBannerDraeneiRuinsCenter, EotSObjectTypes.ABannerDraeneiRuinsCenter, CypherStrings.BgEyHasLostADRuins, EotSObjectTypes.HBannerDraeneiRuinsCenter, CypherStrings.BgEyHasLostHDRuins),
-            new BattlegroundEYLosingPointStruct(EotSObjectTypes.NBannerMageTowerCenter, EotSObjectTypes.ABannerMageTowerCenter, CypherStrings.BgEyHasLostAMTower, EotSObjectTypes.HBannerMageTowerCenter, CypherStrings.BgEyHasLostHMTower)
+            new BattlegroundEYLosingPointStruct(EotSObjectTypes.NBannerFelReaverCenter, EotSObjectTypes.ABannerFelReaverCenter, EotSBroadcastTexts.AllianceLostFelReaverRuins, EotSObjectTypes.HBannerFelReaverCenter, EotSBroadcastTexts.HordeLostFelReaverRuins),
+            new BattlegroundEYLosingPointStruct(EotSObjectTypes.NBannerBloodElfCenter, EotSObjectTypes.ABannerBloodElfCenter, EotSBroadcastTexts.AllianceLostBloodElfTower, EotSObjectTypes.HBannerBloodElfCenter, EotSBroadcastTexts.HordeLostBloodElfTower),
+            new BattlegroundEYLosingPointStruct(EotSObjectTypes.NBannerDraeneiRuinsCenter, EotSObjectTypes.ABannerDraeneiRuinsCenter, EotSBroadcastTexts.AllianceLostDraeneiRuins, EotSObjectTypes.HBannerDraeneiRuinsCenter, EotSBroadcastTexts.HordeLostDraeneiRuins),
+            new BattlegroundEYLosingPointStruct(EotSObjectTypes.NBannerMageTowerCenter, EotSObjectTypes.ABannerMageTowerCenter, EotSBroadcastTexts.AllianceLostMageTower, EotSObjectTypes.HBannerMageTowerCenter, EotSBroadcastTexts.HordeLostMageTower)
         };
         public static BattlegroundEYCapturingPointStruct[] m_CapturingPointTypes =
         {
-            new BattlegroundEYCapturingPointStruct(EotSObjectTypes.NBannerFelReaverCenter, EotSObjectTypes.ABannerFelReaverCenter, CypherStrings.BgEyHasTakenAFRuins, EotSObjectTypes.HBannerFelReaverCenter, CypherStrings.BgEyHasTakenHFRuins, EotSGaveyardIds.FelReaver),
-            new BattlegroundEYCapturingPointStruct(EotSObjectTypes.NBannerBloodElfCenter, EotSObjectTypes.ABannerBloodElfCenter, CypherStrings.BgEyHasTakenABTower, EotSObjectTypes.HBannerBloodElfCenter, CypherStrings.BgEyHasTakenHBTower, EotSGaveyardIds.BloodElf),
-            new BattlegroundEYCapturingPointStruct(EotSObjectTypes.NBannerDraeneiRuinsCenter, EotSObjectTypes.ABannerDraeneiRuinsCenter, CypherStrings.BgEyHasTakenADRuins, EotSObjectTypes.HBannerDraeneiRuinsCenter, CypherStrings.BgEyHasTakenHDRuins, EotSGaveyardIds.DraeneiRuins),
-            new BattlegroundEYCapturingPointStruct(EotSObjectTypes.NBannerMageTowerCenter, EotSObjectTypes.ABannerMageTowerCenter, CypherStrings.BgEyHasTakenAMTower, EotSObjectTypes.HBannerMageTowerCenter, CypherStrings.BgEyHasTakenHMTower, EotSGaveyardIds.MageTower)
+            new BattlegroundEYCapturingPointStruct(EotSObjectTypes.NBannerFelReaverCenter, EotSObjectTypes.ABannerFelReaverCenter, EotSBroadcastTexts.AllianceTakenFelReaverRuins, EotSObjectTypes.HBannerFelReaverCenter, EotSBroadcastTexts.HordeTakenFelReaverRuins, EotSGaveyardIds.FelReaver),
+            new BattlegroundEYCapturingPointStruct(EotSObjectTypes.NBannerBloodElfCenter, EotSObjectTypes.ABannerBloodElfCenter, EotSBroadcastTexts.AllianceTakenBloodElfTower, EotSObjectTypes.HBannerBloodElfCenter, EotSBroadcastTexts.HordeTakenBloodElfTower, EotSGaveyardIds.BloodElf),
+            new BattlegroundEYCapturingPointStruct(EotSObjectTypes.NBannerDraeneiRuinsCenter, EotSObjectTypes.ABannerDraeneiRuinsCenter, EotSBroadcastTexts.AllianceTakenDraeneiRuins, EotSObjectTypes.HBannerDraeneiRuinsCenter, EotSBroadcastTexts.HordeTakenDraeneiRuins, EotSGaveyardIds.DraeneiRuins),
+            new BattlegroundEYCapturingPointStruct(EotSObjectTypes.NBannerMageTowerCenter, EotSObjectTypes.ABannerMageTowerCenter, EotSBroadcastTexts.AllianceTakenMageTower, EotSObjectTypes.HBannerMageTowerCenter, EotSBroadcastTexts.HordeTakenMageTower, EotSGaveyardIds.MageTower)
         };
+    }
+
+    struct EotSBroadcastTexts
+    {
+        public const uint AllianceTakenFelReaverRuins = 17828;
+        public const uint HordeTakenFelReaverRuins = 17829;
+        public const uint AllianceLostFelReaverRuins = 17835;
+        public const uint HordeLostFelReaverRuins = 17836;
+
+        public const uint AllianceTakenBloodElfTower = 17819;
+        public const uint HordeTakenBloodElfTower = 17823;
+        public const uint AllianceLostBloodElfTower = 17831;
+        public const uint HordeLostBloodElfTower = 17832;
+
+        public const uint AllianceTakenDraeneiRuins = 17826;
+        public const uint HordeTakenDraeneiRuins = 17827;
+        public const uint AllianceLostDraeneiRuins = 17833;
+        public const uint HordeLostDraeneiRuins = 17834;
+
+        public const uint AllianceTakenMageTower = 17824;
+        public const uint HordeTakenMageTower = 17825;
+        public const uint AllianceLostMageTower = 17837;
+        public const uint HordeLostMageTower = 17838;
+
+        public const uint TakenFlag = 18359;
+        public const uint FlagDropped = 18361;
+        public const uint FlagReset = 18364;
+        public const uint AllianceCapturedFlag = 18375;
+        public const uint HordeCapturedFlag = 18384;
     }
 
     struct EotSWorldStateIds

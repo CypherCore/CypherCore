@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@ namespace Game.Entities
         public string Name;
         public string FemaleName;
         public string SubName;
+        public string TitleAlt;
         public string IconName;
         public uint GossipMenuId;
         public short Minlevel;
@@ -278,7 +279,6 @@ namespace Game.Entities
     {
         public uint id;                                           // entry in creature_template
         public ushort mapid;
-        public uint phaseMask;
         public uint displayid;
         public int equipmentId;
         public float posX;
@@ -291,13 +291,13 @@ namespace Game.Entities
         public uint curhealth;
         public uint curmana;
         public byte movementType;
-        public uint spawnMask;
+        public ulong spawnMask;
         public ulong npcflag;
         public uint unit_flags;     // enum UnitFlags mask values
         public uint unit_flags2;    // enum UnitFlags2 mask values
         public uint unit_flags3;    // enum UnitFlags3 mask values
         public uint dynamicflags;
-        public uint phaseid;
+        public uint phaseId;
         public uint phaseGroup;
         public uint ScriptId;
         public bool dbData;

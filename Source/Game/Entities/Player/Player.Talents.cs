@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -158,8 +158,7 @@ namespace Game.Entities
             {
                 foreach (TalentRecord talent in Global.DB2Mgr.GetTalentsByPosition(GetClass(), talentInfo.TierID, c))
                 {
-                    //Todo test me
-                    if (talent.SpecID != GetUInt32Value(PlayerFields.CurrentSpecId))
+                    if (talent.SpecID != 0 && talent.SpecID != GetUInt32Value(PlayerFields.CurrentSpecId))
                         continue;
 
                     if (HasTalent(talent.Id, GetActiveTalentGroup()) && !HasFlag(PlayerFields.Flags, PlayerFlags.Resting) && HasFlag(UnitFields.Flags, UnitFlags.ImmuneToNpc))
@@ -226,9 +225,9 @@ namespace Game.Entities
             UpdateItemSetAuras(false);
         }
 
-        bool HasTalent(uint talnetId, byte group)
+        bool HasTalent(uint talentId, byte group)
         {
-            return GetTalentMap(group).ContainsKey(talnetId) && GetTalentMap(group)[talnetId] != PlayerSpellState.Removed;
+            return GetTalentMap(group).ContainsKey(talentId) && GetTalentMap(group)[talentId] != PlayerSpellState.Removed;
         }
 
         uint GetTalentResetCost() { return _specializationInfo.ResetTalentsCost; }
@@ -327,7 +326,7 @@ namespace Game.Entities
                 if (talentInfo.SpellID == 0)
                     continue;
 
-                if (HasTalent(talentInfo.SpellID, GetActiveTalentGroup()))
+                if (HasTalent(talentInfo.Id, GetActiveTalentGroup()))
                 {
                     LearnSpell(talentInfo.SpellID, false);      // add the talent to the PlayerSpellMap
                     if (talentInfo.OverridesSpellID != 0)
@@ -357,7 +356,7 @@ namespace Game.Entities
             SendActionButtons(1);
 
             UpdateDisplayPower();
-            PowerType pw = getPowerType();
+            PowerType pw = GetPowerType();
             if (pw != PowerType.Mana)
                 SetPower(PowerType.Mana, 0); // Mana must be 0 even if it isn't the active power type.
 

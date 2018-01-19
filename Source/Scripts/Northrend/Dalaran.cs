@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@ namespace Scripts.Northrend
         public npc_mageguard_dalaran(Creature creature) : base(creature)
         {
             creature.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable);
-            creature.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchools.Normal, true);
+            creature.ApplySpellImmune(0, SpellImmunity.Damage, (uint)SpellSchools.Normal, true);
             creature.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Magic, true);
         }
 

@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -546,10 +546,10 @@ namespace Game.Chat.Commands
 
                 // re-create
                 Creature wpCreature = new Creature();
-                if (!wpCreature.Create(map.GenerateLowGuid(HighGuid.Creature), map, chr.GetPhaseMask(), 1, chr.GetPositionX(), chr.GetPositionY(), chr.GetPositionZ(), chr.GetOrientation()))
+                if (!wpCreature.Create(map.GenerateLowGuid(HighGuid.Creature), map, 1, chr.GetPositionX(), chr.GetPositionY(), chr.GetPositionZ(), chr.GetOrientation()))
                 {
                     wpCreature.CopyPhaseFrom(chr);
-                    wpCreature.SaveToDB(map.GetId(), (1u << (int)map.GetSpawnMode()), chr.GetPhaseMask());
+                    wpCreature.SaveToDB(map.GetId(), 1ul << (int)map.GetSpawnMode());
                     // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
                     /// @todo Should we first use "Create" then use "LoadFromDB"?
                     if (!wpCreature.LoadCreatureFromDB(wpCreature.GetSpawnId(), map))
@@ -755,14 +755,14 @@ namespace Game.Chat.Commands
                     float o = chr.GetOrientation();
 
                     Creature wpCreature = new Creature();
-                    if (!wpCreature.Create(map.GenerateLowGuid(HighGuid.Creature), map, chr.GetPhaseMask(), id, x, y, z, o))
+                    if (!wpCreature.Create(map.GenerateLowGuid(HighGuid.Creature), map, id, x, y, z, o))
                     {
                         handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, id);
                         return false;
                     }
 
                     wpCreature.CopyPhaseFrom(chr);
-                    wpCreature.SaveToDB(map.GetId(), (1u << (int)map.GetSpawnMode()), chr.GetPhaseMask());
+                    wpCreature.SaveToDB(map.GetId(), 1ul << (int)map.GetSpawnMode());
 
                     // Set "wpguid" column to the visual waypoint
                     stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_DATA_WPGUID);
@@ -815,15 +815,15 @@ namespace Game.Chat.Commands
                 Map map = chr.GetMap();
 
                 Creature creature = new Creature();
-                if (!creature.Create(map.GenerateLowGuid(HighGuid.Creature), map, chr.GetPhaseMask(), id, x, y, z, o))
+                if (!creature.Create(map.GenerateLowGuid(HighGuid.Creature), map, id, x, y, z, o))
                 {
                     handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, id);
                     return false;
                 }
 
                 creature.CopyPhaseFrom(chr);
+                creature.SaveToDB(map.GetId(), 1ul << (int)map.GetSpawnMode());
 
-                creature.SaveToDB(map.GetId(), (uint)(1 << (int)map.GetSpawnMode()), chr.GetPhaseMask());
                 if (!creature.LoadCreatureFromDB(creature.GetSpawnId(), map))
                 {
                     handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, id);
@@ -863,15 +863,15 @@ namespace Game.Chat.Commands
                 Map map = chr.GetMap();
 
                 Creature creature = new Creature();
-                if (!creature.Create(map.GenerateLowGuid(HighGuid.Creature), map, chr.GetPhaseMask(), id, x, y, z, o))
+                if (!creature.Create(map.GenerateLowGuid(HighGuid.Creature), map, id, x, y, z, o))
                 {
                     handler.SendSysMessage(CypherStrings.WaypointNotcreated, id);
                     return false;
                 }
 
                 creature.CopyPhaseFrom(chr);
+                creature.SaveToDB(map.GetId(), 1ul << (int)map.GetSpawnMode());
 
-                creature.SaveToDB(map.GetId(), (uint)(1 << (int)map.GetSpawnMode()), chr.GetPhaseMask());
                 if (!creature.LoadCreatureFromDB(creature.GetSpawnId(), map))
                 {
                     handler.SendSysMessage(CypherStrings.WaypointNotcreated, id);

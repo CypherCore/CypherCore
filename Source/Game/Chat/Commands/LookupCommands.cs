@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1107,9 +1107,9 @@ namespace Game.Chat
                         // send spell in "id - [name, rank N] [talent] [passive] [learn] [known]" format
                         StringBuilder ss = new StringBuilder();
                         if (handler.GetSession() != null)
-                            ss.Append(spellInfo.Id + " - |cffffffff|Hspell:" + spellInfo.Id + "|h[" + spellInfo.SpellName);
+                            ss.Append(spellInfo.Id + " - |cffffffff|Hspell:" + spellInfo.Id + "|h[" + name);
                         else
-                            ss.Append(spellInfo.Id + " - " + spellInfo.SpellName);
+                            ss.Append(spellInfo.Id + " - " + name);
 
                         // include rank in link name
                         if (rank != 0)

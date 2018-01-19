@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -607,7 +607,7 @@ namespace Game.Achievements
                 Guild guild = Global.GuildMgr.GetGuildById(_owner.GetGuildId());
                 if (guild)
                 {
-                    BroadcastTextBuilder say_builder = new BroadcastTextBuilder(_owner, ChatMsg.GuildAchievement, (uint)BroadcastTextIds.AchivementEarned, _owner, achievement.Id);
+                    BroadcastTextBuilder say_builder = new BroadcastTextBuilder(_owner, ChatMsg.GuildAchievement, (uint)BroadcastTextIds.AchivementEarned, _owner.GetGender(), _owner, achievement.Id);
                     var say_do = new LocalizedPacketDo(say_builder);
                     guild.BroadcastWorker(say_do, _owner);
                 }
@@ -624,7 +624,7 @@ namespace Game.Achievements
                 // if player is in world he can tell his friends about new achievement
                 else if (_owner.IsInWorld)
                 {
-                    BroadcastTextBuilder _builder = new BroadcastTextBuilder(_owner, ChatMsg.Achievement, (uint)BroadcastTextIds.AchivementEarned, _owner, achievement.Id);
+                    BroadcastTextBuilder _builder = new BroadcastTextBuilder(_owner, ChatMsg.Achievement, (uint)BroadcastTextIds.AchivementEarned, _owner.GetGender(), _owner, achievement.Id);
                     var _localizer = new LocalizedPacketDo(_builder);
                     var _worker = new PlayerDistWorker(_owner, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay), _localizer);
                     Cell.VisitWorldObjects(_owner, _worker, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay));

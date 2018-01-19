@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -129,7 +130,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteBits(Name.Length, 7);
+            _worldPacket.WriteBits(Name.GetByteCount(), 7);
             _worldPacket.WriteBit(GuildAchievement);
             _worldPacket.WritePackedGuid(PlayerGUID);
             _worldPacket.WriteUInt32(AchievementID);

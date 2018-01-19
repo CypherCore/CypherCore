@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1249,13 +1249,6 @@ namespace Game.Spells
                             }
                         }
                         break;
-                    case SpellFamilyNames.Rogue:
-                        // Sprint (skip non player casted spells by category)
-                        if (GetSpellInfo().SpellFamilyFlags[0].HasAnyFlag(0x40u) && GetSpellInfo().GetCategory() == 44)
-                            // in official maybe there is only one icon?
-                            if (target.HasAura(58039)) // Glyph of Blurred Speed
-                                target.CastSpell(target, 61922, true); // Sprint (waterwalk)
-                        break;
                 }
             }
             // mods at aura remove
@@ -1263,29 +1256,6 @@ namespace Game.Spells
             {
                 switch (GetSpellInfo().SpellFamilyName)
                 {
-                    case SpellFamilyNames.Generic:
-                        switch (GetId())
-                        {
-                            case 61987: // Avenging Wrath
-                                // Remove the immunity shield marker on Avenging Wrath removal if Forbearance is not present
-                                if (target.HasAura(61988) && !target.HasAura(25771))
-                                    target.RemoveAura(61988);
-                                break;
-                            case 72368: // Shared Suffering
-                            case 72369:
-                                if (caster != null)
-                                {
-                                    AuraEffect aurEff = GetEffect(0);
-                                    if (aurEff != null)
-                                    {
-                                        int remainingDamage = (int)(aurEff.GetAmount() * (aurEff.GetTotalTicks() - aurEff.GetTickNumber()));
-                                        if (remainingDamage > 0)
-                                            caster.CastCustomSpell(caster, 72373, 0, remainingDamage, 0, true);
-                                    }
-                                }
-                                break;
-                        }
-                        break;
                     case SpellFamilyNames.Mage:
                         switch (GetId())
                         {
@@ -1338,17 +1308,6 @@ namespace Game.Spells
                         // Remove Vanish on stealth remove
                         if (GetId() == 1784)
                             target.RemoveAurasWithFamily(SpellFamilyNames.Rogue, new FlagArray128(0x0000800, 0, 0), target.GetGUID());
-                        break;
-                    case SpellFamilyNames.Paladin:
-                        // Remove the immunity shield marker on Forbearance removal if AW marker is not present
-                        if (GetId() == 25771 && target.HasAura(61988) && !target.HasAura(61987))
-                            target.RemoveAura(61988);
-                        break;
-                    case SpellFamilyNames.Hunter:
-                        // Glyph of Freezing Trap
-                        if (GetSpellInfo().SpellFamilyFlags[0].HasAnyFlag(0x00000008u))
-                            if (caster != null && caster.HasAura(56845))
-                                target.CastSpell(target, 61394, true);
                         break;
                 }
             }
@@ -1692,6 +1651,29 @@ namespace Game.Spells
             if (procEntry == null)
                 return 0;
 
+            // check spell triggering us
+            Spell spell = eventInfo.GetProcSpell();
+            if (spell)
+            {
+                // Do not allow auras to proc from effect triggered from itself
+                if (spell.IsTriggeredByAura(m_spellInfo))
+                    return 0;
+
+                // check if aura can proc when spell is triggered (exception for hunter auto shot & wands)
+                if (spell.IsTriggered() && !procEntry.AttributesMask.HasAnyFlag(ProcAttributes.TriggeredCanProc) && !eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.AutoAttackMask))
+                    if (!GetSpellInfo().HasAttribute(SpellAttr3.CanProcWithTriggered))
+                        return 0;
+            }
+
+            // check don't break stealth attr present
+            if (m_spellInfo.HasAura(Difficulty.None, AuraType.ModStealth))
+            {
+                SpellInfo eventSpellInfo = eventInfo.GetSpellInfo();
+                if (eventSpellInfo != null)
+                    if (eventSpellInfo.HasAttribute(SpellCustomAttributes.DontBreakStealth))
+                        return 0;
+            }
+
             // check if we have charges to proc with
             if (IsUsingCharges())
             {
@@ -1700,9 +1682,9 @@ namespace Game.Spells
 
                 if (procEntry.AttributesMask.HasAnyFlag(ProcAttributes.ReqSpellmod))
                 {
-                    Spell spell = eventInfo.GetProcSpell();
-                    if (spell != null)
-                        if (!spell.m_appliedMods.Contains(this))
+                    Spell eventSpell = eventInfo.GetProcSpell();
+                    if (eventSpell != null)
+                        if (!eventSpell.m_appliedMods.Contains(this))
                             return 0;
                 }
             }
@@ -1712,27 +1694,8 @@ namespace Game.Spells
                 return 0;
 
             // do checks against db data
-            if (!Global.SpellMgr.CanSpellTriggerProcOnEvent(procEntry, eventInfo))
+            if (!SpellManager.CanSpellTriggerProcOnEvent(procEntry, eventInfo))
                 return 0;
-
-            // check don't break stealth attr present
-            if (m_spellInfo.HasAura(Difficulty.None, AuraType.ModStealth))
-            {
-                SpellInfo spell = eventInfo.GetSpellInfo();
-                if (spell != null)
-                    if (spell.HasAttribute(SpellCustomAttributes.DontBreakStealth))
-                        return 0;
-            }
-
-            // check if aura can proc when spell is triggered (exception for hunter auto shot & wands)
-            if (!procEntry.AttributesMask.HasAnyFlag(ProcAttributes.TriggeredCanProc) && !eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.AutoAttackMask))
-            {
-                Spell spell = eventInfo.GetProcSpell();
-                if (spell)
-                    if (spell.IsTriggered())
-                        if (!GetSpellInfo().HasAttribute(SpellAttr3.CanProcWithTriggered))
-                            return 0;
-            }
 
             // do checks using conditions table
             if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.SpellProc, GetId(), eventInfo.GetActor(), eventInfo.GetActionTarget()))

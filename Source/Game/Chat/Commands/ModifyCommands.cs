@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,7 +71,6 @@ namespace Game.Chat
                 NotifyModification(handler, target, CypherStrings.YouChangeEnergy, CypherStrings.YoursEnergyChanged, energy / energyMultiplier, energymax / energyMultiplier);
                 target.SetMaxPower(PowerType.Energy, energymax);
                 target.SetPower(PowerType.Energy, energy);
-                Log.outDebug(LogFilter.Misc, handler.GetCypherString(CypherStrings.CurrentEnergy), target.GetMaxPower(PowerType.Energy));
                 return true;
             }
             return false;
@@ -516,7 +515,7 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("power", RBACPermissions.ModifyPower)]
+        [Command("power", RBACPermissions.CommandModifyPower)]
         static bool HandleModifyPowerCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())

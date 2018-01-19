@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,9 +75,9 @@ namespace Game.Entities
             {
                 PowerDisplayRecord powerDisplay = CliDB.PowerDisplayStorage.LookupByKey(_vehicleInfo.PowerDisplayID[0]);
                 if (powerDisplay != null)
-                    _me.setPowerType((PowerType)powerDisplay.PowerType);
+                    _me.SetPowerType((PowerType)powerDisplay.PowerType);
                 else if (_me.GetClass() == Class.Rogue)
-                    _me.setPowerType(PowerType.Energy);
+                    _me.SetPowerType(PowerType.Energy);
             }
 
             _status = Status.Installed;
@@ -151,8 +151,8 @@ namespace Game.Entities
                 _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.SchoolImmunity, true);
                 _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.ModUnattackable, true);
                 _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.SchoolAbsorb, true);
-                _me.ApplySpellImmune(0, SpellImmunity.Mechanic, Mechanics.Shield, true);
-                _me.ApplySpellImmune(0, SpellImmunity.Mechanic, Mechanics.Immune_Shield, true);
+                _me.ApplySpellImmune(0, SpellImmunity.Mechanic, (uint)Mechanics.Shield, true);
+                _me.ApplySpellImmune(0, SpellImmunity.Mechanic, (uint)Mechanics.Immune_Shield, true);
 
                 // ... Resistance, Split damage, Change stats ...
                 _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.DamageShield, true);

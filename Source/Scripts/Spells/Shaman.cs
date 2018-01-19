@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -728,7 +728,7 @@ namespace Scripts.Spells.Shaman
                     return;
             }
 
-            caster.CastSpell(target, spellId, true);
+            caster.CastSpell(target, spellId, true, null, aurEff);
         }
 
         public override void Register()
@@ -757,12 +757,12 @@ namespace Scripts.Spells.Shaman
             int amount = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
             amount /= (int)spellInfo.GetMaxTicks(Difficulty.None);
 
-            // Add remaining ticks to healing done
+            // Add remaining ticks to damage done
             Unit caster = eventInfo.GetActor();
             Unit target = eventInfo.GetProcTarget();
             amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.Electrified, AuraType.PeriodicDamage);
 
-            caster.CastCustomSpell(SpellIds.Electrified, SpellValueMod.BasePoint0, amount, target, true);
+            caster.CastCustomSpell(SpellIds.Electrified, SpellValueMod.BasePoint0, amount, target, true, null, aurEff);
         }
 
         public override void Register()
@@ -791,12 +791,12 @@ namespace Scripts.Spells.Shaman
             int amount = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
             amount /= (int)spellInfo.GetMaxTicks(Difficulty.None);
 
-            // Add remaining ticks to healing done
+            // Add remaining ticks to damage done
             Unit caster = eventInfo.GetActor();
             Unit target = eventInfo.GetProcTarget();
             amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.LavaBurstBonusDamage, AuraType.PeriodicDamage);
 
-            caster.CastCustomSpell(SpellIds.LavaBurstBonusDamage, SpellValueMod.BasePoint0, amount, target, true);
+            caster.CastCustomSpell(SpellIds.LavaBurstBonusDamage, SpellValueMod.BasePoint0, amount, target, true, null, aurEff);
         }
 
         public override void Register()
@@ -862,7 +862,7 @@ namespace Scripts.Spells.Shaman
             Unit target = eventInfo.GetProcTarget();
             amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.ChainedHeal, AuraType.PeriodicHeal);
 
-            caster.CastCustomSpell(SpellIds.ChainedHeal, SpellValueMod.BasePoint0, amount, target, true);
+            caster.CastCustomSpell(SpellIds.ChainedHeal, SpellValueMod.BasePoint0, amount, target, true, null, aurEff);
         }
 
         public override void Register()

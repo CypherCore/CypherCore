@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,6 +53,9 @@ namespace Game.Entities
 
             m_modAttackSpeedPct = new float[] { 1.0f, 1.0f, 1.0f };
             m_deathState = DeathState.Alive;
+
+            for (byte i = 0; i < (int)SpellImmunity.Max; ++i)
+                m_spellImmune[i] = new MultiMap<uint, uint>();
 
             for (byte i = 0; i < (int)UnitMods.End; ++i)
                 m_auraModifiersGroup[i] = new float[] { 0.0f, 100.0f, 1.0f, 0.0f, 1.0f };
@@ -356,11 +359,11 @@ namespace Game.Entities
         {
             if (!CliDB.BroadcastTextStorage.ContainsKey(textId))
             {
-                Log.outError(LogFilter.Unit, "Unit.Talk: `broadcast_text` was not {0} found", textId);
+                Log.outError(LogFilter.Unit, "Unit.Talk: `broadcast_text` (Id: {0}) was not found", textId);
                 return;
             }
 
-            var builder = new BroadcastTextBuilder(this, msgType, textId, target);
+            var builder = new BroadcastTextBuilder(this, msgType, textId, GetGender(), target);
             var localizer = new LocalizedPacketDo(builder);
             var worker = new PlayerDistWorker(this, textRange, localizer);
             Cell.VisitWorldObjects(this, worker, textRange);
@@ -1102,8 +1105,6 @@ namespace Game.Entities
             if (!IsInWorld)
                 return res;
 
-            RemoveNotOwnSingleTargetAuras(0, true);
-
             if (IsTypeId(TypeId.Unit) || (!ToPlayer().IsGameMaster() && !ToPlayer().GetSession().PlayerLogout()))
             {
                 HostileRefManager refManager = getHostileRefManager();
@@ -1648,7 +1649,7 @@ namespace Game.Entities
                 // without this when removing IncreaseMaxHealth aura player may stuck with 1 hp
                 // do not why since in IncreaseMaxHealth currenthealth is checked
                 SetHealth(0);
-                SetPower(getPowerType(), 0);
+                SetPower(GetPowerType(), 0);
                 SetUInt32Value(UnitFields.NpcEmotestate, 0);
 
                 // players in instance don't have ZoneScript, but they have InstanceScript
@@ -1831,22 +1832,6 @@ namespace Game.Entities
                 }
             }
 
-            // Glyphs which increase duration of selfcasted buffs
-            if (target == this)
-            {
-                switch (spellProto.SpellFamilyName)
-                {
-                    case SpellFamilyNames.Druid:
-                        if (spellProto.SpellFamilyFlags[0].HasAnyFlag(0x100u))
-                        {
-                            // Glyph of Thorns
-                            AuraEffect aurEff = GetAuraEffect(57862, 0);
-                            if (aurEff != null)
-                                duration += aurEff.GetAmount() * Time.Minute * Time.InMilliseconds;
-                        }
-                        break;
-                }
-            }
             return Math.Max(duration, 0);
         }
 
@@ -1875,10 +1860,10 @@ namespace Game.Entities
             AuraApplication aurApp = new AuraApplication(this, caster, aura, effMask);
             m_appliedAuras.Add(aurId, aurApp);
 
-            if (aurSpellInfo.AuraInterruptFlags != 0)
+            if (aurSpellInfo.HasAnyAuraInterruptFlag())
             {
                 m_interruptableAuras.Add(aurApp);
-                AddInterruptMask((uint)aurSpellInfo.AuraInterruptFlags);
+                AddInterruptMask(aurSpellInfo.AuraInterruptFlags);
             }
 
             AuraStateType aState = aura.GetSpellInfo().GetAuraState();
@@ -1888,7 +1873,11 @@ namespace Game.Entities
             aura._ApplyForTarget(this, caster, aurApp);
             return aurApp;
         }
-        public void AddInterruptMask(uint mask) { m_interruptMask |= mask; }
+        public void AddInterruptMask(uint[] mask)
+        {
+            for (int i = 0; i < m_interruptMask.Length; ++i)
+                m_interruptMask[i] |= mask[i];
+        }
 
         void _UpdateAutoRepeatSpell()
         {
@@ -1962,7 +1951,7 @@ namespace Game.Entities
                     }
             }
 
-            setPowerType(displayPower);
+            SetPowerType(displayPower);
         }
 
         public FactionTemplateRecord GetFactionTemplateEntry()
@@ -2402,7 +2391,7 @@ namespace Game.Entities
             return 0;
         }
 
-        public bool IsStopped() { return !(HasUnitState(UnitState.Moving)); }
+        public bool IsStopped() { return !HasUnitState(UnitState.Moving); }
 
         public bool HasUnitTypeMask(UnitTypeMask mask) { return Convert.ToBoolean(mask & m_unitTypeMask); }
         public void AddUnitTypeMask(UnitTypeMask mask) { m_unitTypeMask |= mask; }
@@ -2648,8 +2637,9 @@ namespace Game.Entities
             else if ((u2.IsTypeId(TypeId.Player) && u1.IsTypeId(TypeId.Unit) && u1.ToCreature().GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.TreatAsRaidUnit)) ||
                 (u1.IsTypeId(TypeId.Player) && u2.IsTypeId(TypeId.Unit) && u2.ToCreature().GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.TreatAsRaidUnit)))
                 return true;
-            else
-                return false;
+
+            // else u1->GetTypeId() == u2->GetTypeId() == TYPEID_UNIT
+            return u1.getFaction() == u2.getFaction();
         }
 
         public bool IsInRaidWith(Unit unit)
@@ -2667,8 +2657,9 @@ namespace Game.Entities
             else if ((u2.IsTypeId(TypeId.Player) && u1.IsTypeId(TypeId.Unit) && u1.ToCreature().GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.TreatAsRaidUnit)) ||
                     (u1.IsTypeId(TypeId.Player) && u2.IsTypeId(TypeId.Unit) && u2.ToCreature().GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.TreatAsRaidUnit)))
                 return true;
-            else
-                return false;
+
+            // else u1->GetTypeId() == u2->GetTypeId() == TYPEID_UNIT
+            return u1.getFaction() == u2.getFaction();
         }
 
         public SheathState GetSheath() { return (SheathState)GetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.SheathState); }

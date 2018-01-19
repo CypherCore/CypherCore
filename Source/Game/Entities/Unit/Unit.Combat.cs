@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -810,19 +810,20 @@ namespace Game.Entities
                 var vDamageShieldsCopy = victim.GetAuraEffectsByType(AuraType.DamageShield);
                 foreach (var dmgShield in vDamageShieldsCopy)
                 {
-                    SpellInfo i_spellProto = dmgShield.GetSpellInfo();
+                    SpellInfo spellInfo = dmgShield.GetSpellInfo();
+
                     // Damage shield can be resisted...
-                    var missInfo = victim.SpellHitResult(this, i_spellProto, false);
-                    if (missInfo != 0)
+                    var missInfo = victim.SpellHitResult(this, spellInfo, false);
+                    if (missInfo != SpellMissInfo.None)
                     {
-                        victim.SendSpellMiss(this, i_spellProto.Id, missInfo);
+                        victim.SendSpellMiss(this, spellInfo.Id, missInfo);
                         continue;
                     }
 
                     // ...or immuned
-                    if (IsImmunedToDamage(i_spellProto))
+                    if (IsImmunedToDamage(spellInfo))
                     {
-                        victim.SendSpellDamageImmune(this, i_spellProto.Id, false);
+                        victim.SendSpellDamageImmune(this, spellInfo.Id, false);
                         continue;
                     }
 
@@ -830,11 +831,11 @@ namespace Game.Entities
                     Unit caster = dmgShield.GetCaster();
                     if (caster)
                     {
-                        damage = caster.SpellDamageBonusDone(this, i_spellProto, damage, DamageEffectType.SpellDirect, dmgShield.GetSpellEffectInfo());
-                        damage = SpellDamageBonusTaken(caster, i_spellProto, damage, DamageEffectType.SpellDirect, dmgShield.GetSpellEffectInfo());
+                        damage = caster.SpellDamageBonusDone(this, spellInfo, damage, DamageEffectType.SpellDirect, dmgShield.GetSpellEffectInfo());
+                        damage = SpellDamageBonusTaken(caster, spellInfo, damage, DamageEffectType.SpellDirect, dmgShield.GetSpellEffectInfo());
                     }
 
-                    DamageInfo damageInfo1 = new DamageInfo(this, victim, damage, i_spellProto, i_spellProto.GetSchoolMask(), DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
+                    DamageInfo damageInfo1 = new DamageInfo(this, victim, damage, spellInfo, spellInfo.GetSchoolMask(), DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
                     victim.CalcAbsorbResist(damageInfo1);
                     damage = damageInfo1.GetDamage();
                     // No Unit.CalcAbsorbResist here - opcode doesn't send that data - this damage is probably not affected by that
@@ -843,13 +844,13 @@ namespace Game.Entities
                     SpellDamageShield damageShield = new SpellDamageShield();
                     damageShield.Attacker = victim.GetGUID();
                     damageShield.Defender = GetGUID();
-                    damageShield.SpellID = i_spellProto.Id;
+                    damageShield.SpellID = spellInfo.Id;
                     damageShield.TotalDamage = damage;
                     damageShield.OverKill = (uint)Math.Max(damage - GetHealth(), 0);
-                    damageShield.SchoolMask = (uint)i_spellProto.SchoolMask;
+                    damageShield.SchoolMask = (uint)spellInfo.SchoolMask;
                     damageShield.LogAbsorbed = damageInfo1.GetAbsorb();
 
-                    victim.DealDamage(this, damage, null, DamageEffectType.SpellDirect, i_spellProto.GetSchoolMask(), i_spellProto, true);
+                    victim.DealDamage(this, damage, null, DamageEffectType.SpellDirect, spellInfo.GetSchoolMask(), spellInfo, true);
                     damageShield.LogData.Initialize(this);
 
                     victim.SendCombatLogMessage(damageShield);
@@ -943,7 +944,7 @@ namespace Game.Entities
             }
 
             // Rage from Damage made (only from direct weapon damage)
-            if (cleanDamage != null && (cleanDamage.attackType == WeaponAttackType.BaseAttack || cleanDamage.attackType == WeaponAttackType.OffAttack) && damagetype == DamageEffectType.Direct && this != victim && getPowerType() == PowerType.Rage)
+            if (cleanDamage != null && (cleanDamage.attackType == WeaponAttackType.BaseAttack || cleanDamage.attackType == WeaponAttackType.OffAttack) && damagetype == DamageEffectType.Direct && this != victim && GetPowerType() == PowerType.Rage)
             {
                 uint rage = (uint)(GetBaseAttackTime(cleanDamage.attackType) / 1000.0f * 1.75f);
                 if (cleanDamage.attackType == WeaponAttackType.OffAttack)
@@ -1083,12 +1084,8 @@ namespace Game.Entities
                         }
                         Spell spell1 = victim.GetCurrentSpell(CurrentSpellTypes.Channeled);
                         if (spell1 != null)
-                            if (spell1.getState() == SpellState.Casting)
-                            {
-                                var channelInterruptFlags = spell1.m_spellInfo.ChannelInterruptFlags;
-                                if (((channelInterruptFlags & SpellChannelInterruptFlags.Delay) != 0) && (damagetype != DamageEffectType.DOT))
-                                    spell1.DelayedChannel();
-                            }
+                            if (spell1.getState() == SpellState.Casting && spell1.m_spellInfo.HasChannelInterruptFlag(SpellChannelInterruptFlags.Delay) && damagetype != DamageEffectType.DOT)
+                                spell1.DelayedChannel();
                     }
                 }
                 // last damage from duel opponent
@@ -1918,13 +1915,14 @@ namespace Game.Entities
                 CalcAbsorbResist(dmgInfo);
                 damageInfo.absorb = dmgInfo.GetAbsorb();
                 damageInfo.resist = dmgInfo.GetResist();
-                damageInfo.damage = dmgInfo.GetDamage();
 
                 if (damageInfo.absorb != 0)
                     damageInfo.HitInfo |= (damageInfo.damage - damageInfo.absorb == 0 ? HitInfo.FullAbsorb : HitInfo.PartialAbsorb);
 
                 if (damageInfo.resist != 0)
                     damageInfo.HitInfo |= (damageInfo.damage - damageInfo.resist == 0 ? HitInfo.FullResist : HitInfo.PartialResist);
+
+                damageInfo.damage = dmgInfo.GetDamage();
             }
             else // Impossible get negative result but....
                 damageInfo.damage = 0;
@@ -2279,7 +2277,7 @@ namespace Game.Entities
             if (victimResistance <= 0)
                 return 0;
 
-            float averageResist = victimResistance / victimResistance + resistanceConstant;
+            float averageResist = (float)victimResistance / (float)(victimResistance + resistanceConstant);
 
             float[] discreteResistProbability = new float[11];
             for (uint i = 0; i < 11; ++i)

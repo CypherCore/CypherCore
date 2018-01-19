@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -2047,7 +2047,7 @@ namespace Scripts.Spells.Generic
                         newPet.setDeathState(DeathState.Alive);
 
                     newPet.SetFullHealth();
-                    newPet.SetPower(newPet.getPowerType(), newPet.GetMaxPower(newPet.getPowerType()));
+                    newPet.SetFullPower(newPet.GetPowerType());
 
                     switch (newPet.GetEntry())
                     {
@@ -2171,7 +2171,7 @@ namespace Scripts.Spells.Generic
             {
                 var target = obj.ToUnit();
                 if (target)
-                    return target.getPowerType() != PowerType.Mana;
+                    return target.GetPowerType() != PowerType.Mana;
 
                 return true;
             });
@@ -2542,6 +2542,48 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script]
+    class spell_gen_trigger_exclude_caster_aura_spell_SpellScript : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(spellInfo.ExcludeCasterAuraSpell);
+        }
+
+        void HandleTrigger()
+        {
+            // Blizz seems to just apply aura without bothering to cast
+            GetCaster().AddAura(GetSpellInfo().ExcludeCasterAuraSpell, GetCaster());
+        }
+
+        public override void Register()
+        {
+            AfterCast.Add(new CastHandler(HandleTrigger));
+        }
+    }
+
+    [Script]
+    class spell_gen_trigger_exclude_target_aura_spell_SpellScript : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(spellInfo.ExcludeTargetAuraSpell);
+        }
+
+        void HandleTrigger()
+        {
+            Unit target = GetHitUnit();
+            if (target)
+                // Blizz seems to just apply aura without bothering to cast
+                GetCaster().AddAura(GetSpellInfo().ExcludeTargetAuraSpell, target);
+        }
+
+        public override void Register()
+        {
+            AfterHit.Add(new HitHandler(HandleTrigger));
+        }
+    }
+
     [Script("spell_pvp_trinket_shared_cd", SpellIds.WillOfTheForsakenCooldownTrigger)]
     [Script("spell_wotf_shared_cd", SpellIds.WillOfTheForsakenCooldownTriggerWotf)]
     class spell_pvp_trinket_wotf_shared_cd : SpellScript
@@ -2668,7 +2710,7 @@ namespace Scripts.Spells.Generic
 
             Unit caster = eventInfo.GetActor();
             int bp = (int)(damageInfo.GetDamage() / 2);
-            caster.CastCustomSpell(SpellIds.VampiricTouchHeal, SpellValueMod.BasePoint0, bp, caster, true);
+            caster.CastCustomSpell(SpellIds.VampiricTouchHeal, SpellValueMod.BasePoint0, bp, caster, true, null, aurEff);
         }
 
         public override void Register()
@@ -3270,7 +3312,7 @@ namespace Scripts.Spells.Generic
             {
                 Unit unit = target.ToUnit();
                 if (unit)
-                    return unit.getPowerType() != PowerType.Mana;
+                    return unit.GetPowerType() != PowerType.Mana;
                 return false;
             });
         }

@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -516,7 +516,7 @@ namespace Game.Entities
 
                         if (HasFlag(UnitFields.Flags2, UnitFlags2.RegeneratePower))
                         {
-                            if (getPowerType() == PowerType.Energy)
+                            if (GetPowerType() == PowerType.Energy)
                                 Regenerate(PowerType.Energy);
                             else
                                 RegenerateMana();
@@ -720,12 +720,12 @@ namespace Game.Entities
                 GetMotionMaster().Initialize();
         }
 
-        public bool Create(ulong guidlow, Map map, uint phaseMask, uint entry, float x, float y, float z, float ang, CreatureData data = null, uint vehId = 0)
+        public bool Create(ulong guidlow, Map map, uint entry, float x, float y, float z, float ang, CreatureData data = null, uint vehId = 0)
         {
             SetMap(map);
 
-            if (data != null && data.phaseid != 0)
-                SetInPhase(data.phaseid, false, true);
+            if (data != null && data.phaseId != 0)
+                SetInPhase(data.phaseId, false, true);
 
             if (data != null && data.phaseGroup != 0)
                 foreach (var ph in Global.DB2Mgr.GetPhasesForGroup(data.phaseGroup))
@@ -977,10 +977,10 @@ namespace Game.Entities
             }
 
             uint mapId = GetTransport() ? (uint)GetTransport().GetGoInfo().MoTransport.SpawnMap : GetMapId();
-            SaveToDB(mapId, data.spawnMask, GetPhaseMask());
+            SaveToDB(mapId, data.spawnMask);
         }
 
-        public virtual void SaveToDB(uint mapid, uint spawnMask, uint phaseMask)
+        public virtual void SaveToDB(uint mapid, ulong spawnMask)
         {
             // update in loaded data
             if (m_spawnId == 0)
@@ -1022,7 +1022,6 @@ namespace Game.Entities
             // data.guid = guid must not be updated at save
             data.id = GetEntry();
             data.mapid = (ushort)mapid;
-            data.phaseMask = phaseMask;
             data.displayid = displayId;
             data.equipmentId = GetCurrentEquipmentId();
             data.posX = GetPositionX();
@@ -1045,8 +1044,8 @@ namespace Game.Entities
             data.unit_flags3 = unitFlags3;
             data.dynamicflags = dynamicflags;
 
-            data.phaseid = (uint)(GetDBPhase() > 0 ? GetDBPhase() : 0);
-            data.phaseGroup = (uint)(GetDBPhase() < 0 ? Math.Abs(GetDBPhase()) : 0);
+            data.phaseId = GetDBPhase() > 0 ? (uint)GetDBPhase() : data.phaseId;
+            data.phaseGroup = GetDBPhase() < 0 ? (uint)-GetDBPhase() : data.phaseGroup;
 
             // update in DB
             SQLTransaction trans = new SQLTransaction();
@@ -1062,7 +1061,7 @@ namespace Game.Entities
             stmt.AddValue(index++, GetEntry());
             stmt.AddValue(index++, mapid);
             stmt.AddValue(index++, spawnMask);
-            stmt.AddValue(index++, data.phaseid);
+            stmt.AddValue(index++, data.phaseId);
             stmt.AddValue(index++, data.phaseGroup);
             stmt.AddValue(index++, displayId);
             stmt.AddValue(index++, GetCurrentEquipmentId());
@@ -1133,10 +1132,10 @@ namespace Game.Entities
             switch (GetClass())
             {
                 case Class.Warrior:
-                    setPowerType(PowerType.Rage);
+                    SetPowerType(PowerType.Rage);
                     break;
                 case Class.Rogue:
-                    setPowerType(PowerType.Energy);
+                    SetPowerType(PowerType.Energy);
                     break;
                 default:
                     SetMaxPower(PowerType.Mana, (int)mana);
@@ -1320,7 +1319,7 @@ namespace Game.Entities
 
             m_spawnId = spawnId;
             m_creatureData = data;
-            if (!Create(map.GenerateLowGuid(HighGuid.Creature), map, data.phaseMask, data.id, data.posX, data.posY, data.posZ, data.orientation, data))
+            if (!Create(map.GenerateLowGuid(HighGuid.Creature), map, data.id, data.posX, data.posY, data.posZ, data.orientation, data))
                 return false;
 
             //We should set first home position, because then AI calls home movement
@@ -1409,7 +1408,7 @@ namespace Game.Entities
             else
             {
                 curhealth = GetMaxHealth();
-                SetPower(PowerType.Mana, GetMaxPower(PowerType.Mana));
+                SetFullPower(PowerType.Mana);
             }
 
             SetHealth((m_deathState == DeathState.Alive || m_deathState == DeathState.JustRespawned) ? curhealth : 0);
@@ -1559,10 +1558,10 @@ namespace Game.Entities
             // This makes sure that creatures such as bosses wont have a bigger aggro range than the rest of the npc's
             // The following code is used for blizzlike behavior such as skipable bosses (e.g. Commander Springvale at level 85)
             if (creatureLevel > expansionMaxLevel)
-                aggroRadius += expansionMaxLevel - playerLevel;
+                aggroRadius += (float)expansionMaxLevel - (float)playerLevel;
             // + - 1 yard for each level difference between player and creature
             else
-                aggroRadius += creatureLevel - playerLevel;
+                aggroRadius += (float)creatureLevel - (float)playerLevel;
 
             // Make sure that we wont go over the total range limits
             if (aggroRadius > maxRadius)
@@ -2975,7 +2974,7 @@ namespace Game.Entities
         public void SetTransportHomePosition(float x, float y, float z, float o) { m_transportHomePosition.Relocate(x, y, z, o); }
         public void SetTransportHomePosition(Position pos) { m_transportHomePosition.Relocate(pos); }
         public void GetTransportHomePosition(out float x, out float y, out float z, out float ori) { m_transportHomePosition.GetPosition(out x, out y, out z, out ori); }
-        Position GetTransportHomePosition() { return m_transportHomePosition; }
+        public Position GetTransportHomePosition() { return m_transportHomePosition; }
 
         public uint GetWaypointPath() { return m_path_id; }
         public void LoadPath(uint pathid) { m_path_id = pathid; }

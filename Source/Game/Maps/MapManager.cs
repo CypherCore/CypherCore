@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -254,7 +254,7 @@ namespace Game.Entities
             foreach (var pair in i_maps.ToList())
             {
                 pair.Value.UnloadAll();
-                i_maps.Remove(pair.Value.GetId());
+                i_maps.Remove(pair.Key);
             }
         }
 

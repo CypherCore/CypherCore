@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -322,12 +322,6 @@ namespace Framework.Constants
             }
             return SkillType.None;
         }
-    }
-
-    public struct PhaseMasks
-    {
-        public const uint Normal = 0x00000001;
-        public const uint Anywhere = 0xFFFFFFFF;
     }
 
     public enum LocaleConstant
@@ -2323,6 +2317,6 @@ namespace Framework.Constants
 
     public enum WorldMapTransformsFlags
     {
-        Dundeon = 0x04
+        Dungeon = 0x04
     }
 }

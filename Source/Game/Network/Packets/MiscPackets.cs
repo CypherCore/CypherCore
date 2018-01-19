@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ using Framework.Constants;
 using Framework.Dynamic;
 using Framework.GameMath;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Network.Packets
@@ -984,7 +985,7 @@ namespace Game.Network.Packets
 
             foreach (CUFProfile cufProfile in CUFProfiles)
             {
-                _worldPacket.WriteBits(cufProfile.ProfileName.Length, 7);
+                _worldPacket.WriteBits(cufProfile.ProfileName.GetByteCount(), 7);
 
                 // Bool Options
                 for (byte option = 0; option < (int)CUFBoolOptions.BoolOptionsCount; option++)

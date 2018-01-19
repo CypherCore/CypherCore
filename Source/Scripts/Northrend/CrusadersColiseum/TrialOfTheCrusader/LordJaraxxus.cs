@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -464,7 +464,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
         void FilterTargets(List<WorldObject> targets)
         {
             // get a list of players with mana
-            targets.RemoveAll(unit => unit.IsTypeId(TypeId.Player) && unit.ToPlayer().getPowerType() == PowerType.Mana);
+            targets.RemoveAll(unit => unit.IsTypeId(TypeId.Player) && unit.ToPlayer().GetPowerType() == PowerType.Mana);
             if (targets.Empty())
                 return;
 

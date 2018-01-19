@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Network.Packets
@@ -40,7 +41,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteBits(AccountName.Length, 11);
+            _worldPacket.WriteBits(AccountName.GetByteCount(), 11);
             _worldPacket.WriteString(AccountName);
         }
 
@@ -155,7 +156,7 @@ namespace Game.Network.Packets
             data.WriteUInt32(GuildVirtualRealmAddress);
             data.WriteInt32(AreaID);
 
-            data.WriteBits(GuildName.Length, 7);
+            data.WriteBits(GuildName.GetByteCount(), 7);
             data.WriteBit(IsGM);
             data.WriteString(GuildName);
 

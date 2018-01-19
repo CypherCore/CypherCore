@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,15 +27,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.BattlePetRequestJournal)]
         void HandleBattlePetRequestJournal(BattlePetRequestJournal battlePetRequestJournal)
         {
-            // TODO: Move this to BattlePetMgr::SendJournal() just to have all packets in one file
-            BattlePetJournal battlePetJournal = new BattlePetJournal();
-            battlePetJournal.Trap = GetBattlePetMgr().GetTrapLevel();
-
-            foreach (var battlePet in GetBattlePetMgr().GetLearnedPets())
-                battlePetJournal.Pets.Add(battlePet.PacketInfo);
-
-            battlePetJournal.Slots = GetBattlePetMgr().GetSlots();
-            SendPacket(battlePetJournal);
+            GetBattlePetMgr().SendJournal();
         }
 
         [WorldPacketHandler(ClientOpcodes.BattlePetSetBattleSlot)]
@@ -90,7 +82,10 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.BattlePetSummon, Processing = PacketProcessing.Inplace)]
         void HandleBattlePetSummon(BattlePetSummon battlePetSummon)
         {
-            GetBattlePetMgr().SummonPet(battlePetSummon.PetGuid);
+            if (_player.GetGuidValue(PlayerFields.SummonedBattlePetId) != battlePetSummon.PetGuid)
+                GetBattlePetMgr().SummonPet(battlePetSummon.PetGuid);
+            else
+                GetBattlePetMgr().DismissPet();
         }
     }
 }

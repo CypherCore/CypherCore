@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -278,7 +278,7 @@ namespace Game.Conditions
                         condMeets = player.HasTitle(ConditionValue1);
                     break;
                 case ConditionTypes.Spawnmask:
-                    condMeets = Convert.ToBoolean((1 << (int)obj.GetMap().GetSpawnMode()) & ConditionValue1);
+                    condMeets = Convert.ToBoolean((1ul << (int)obj.GetMap().GetSpawnMode()) & ConditionValue1);
                     break;
                 case ConditionTypes.UnitState:
                     if (unit != null)

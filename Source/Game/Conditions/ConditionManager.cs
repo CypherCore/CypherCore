@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1490,7 +1490,8 @@ namespace Game
                     }
                 case ConditionTypes.Spawnmask:
                     {
-                        if (cond.ConditionValue1 > (uint)SpawnMask.RaidAll)
+                        // @todo: ConditionValue need to be extended to uint64
+                        if ((ulong)cond.ConditionValue1 > 1ul << (int)SpawnMask.RaidAll)
                         {
                             Log.outError(LogFilter.Sql, "{0} has non existing SpawnMask in value1 ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
                             return false;

@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -450,7 +450,7 @@ namespace Game.Entities
             return mSpellProcMap.LookupByKey(spellId);
         }
 
-        public bool CanSpellTriggerProcOnEvent(SpellProcEntry procEntry, ProcEventInfo eventInfo)
+        public static bool CanSpellTriggerProcOnEvent(SpellProcEntry procEntry, ProcEventInfo eventInfo)
         {
             // proc type doesn't match
             if (!Convert.ToBoolean(eventInfo.GetTypeMask() & procEntry.ProcFlags))
@@ -887,7 +887,7 @@ namespace Game.Entities
                             if (bound.Spell == dbc_node.Spell)
                             {
                                 Log.outError(LogFilter.Sql, "Spell {0} auto-learn spell {1} in spell.dbc then the record in `spell_learn_spell` is redundant, please fix DB.",
-                                    entry.SpellName, dbc_node.Spell);
+                                    entry.Id, dbc_node.Spell);
                                 found = true;
                                 break;
                             }
@@ -1214,6 +1214,8 @@ namespace Game.Entities
                             procEntry.Charges = spellInfo.ProcCharges;
                         if (procEntry.Chance == 0 && procEntry.ProcsPerMinute == 0)
                             procEntry.Chance = spellInfo.ProcChance;
+                        if (procEntry.Cooldown == 0)
+                            procEntry.Cooldown = spellInfo.ProcCooldown;
 
                         // validate data
                         if (Convert.ToBoolean(procEntry.SchoolMask & ~SpellSchoolMask.All))
@@ -1353,7 +1355,7 @@ namespace Game.Entities
 
                 procEntry.ProcsPerMinute = 0;
                 procEntry.Chance = spellInfo.ProcChance;
-                procEntry.Cooldown = 0;
+                procEntry.Cooldown = spellInfo.ProcCooldown;
                 procEntry.Charges = spellInfo.ProcCharges;
 
                 mSpellProcMap[spellInfo.Id] = procEntry;
@@ -2389,7 +2391,7 @@ namespace Game.Entities
                         spellInfo.GetEffect(0).BasePoints = 0;// force seat 0, vehicle doesn't have the required seat flags for "no seat specified (-1)"
                         break;
                     case 61719: // Easter Lay Noblegarden Egg Aura - Interrupt flags copied from aura which this aura is linked with
-                        spellInfo.AuraInterruptFlags = SpellAuraInterruptFlags.Hitbyspell | SpellAuraInterruptFlags.TakeDamage;
+                        spellInfo.AuraInterruptFlags[0] = (uint)(SpellAuraInterruptFlags.Hitbyspell | SpellAuraInterruptFlags.TakeDamage);
                         break;
                     case 71838: // Drain Life - Bryntroll Normal
                     case 71839: // Drain Life - Bryntroll Heroic
@@ -2435,6 +2437,10 @@ namespace Game.Entities
                     case 59544:// Gift of the Naaru (priest and monk variants)
                     case 121093:
                         spellInfo.SpellFamilyFlags[2] = 0x80000000;
+                        break;
+                    // Unleashed Souls
+                    case 68979:
+                        spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(13); // 50000yd
                         break;
                     // VIOLET HOLD SPELLS
                     //
@@ -2488,7 +2494,7 @@ namespace Game.Entities
                         break;
                     case 63414: // Spinning Up (Mimiron)
                         spellInfo.GetEffect(0).TargetB = new SpellImplicitTargetInfo(Targets.UnitCaster);
-                        spellInfo.ChannelInterruptFlags = 0;
+                        spellInfo.ChannelInterruptFlags.Clear();
                         break;
                     case 63036: // Rocket Strike (Mimiron)
                         spellInfo.Speed = 0;
@@ -2698,7 +2704,7 @@ namespace Game.Entities
                         spellInfo.GetEffect(0).MaxRadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards45);
                         break;
                     case 24314: // Threatening Gaze
-                        spellInfo.AuraInterruptFlags |= SpellAuraInterruptFlags.Cast | SpellAuraInterruptFlags.Move | SpellAuraInterruptFlags.Jump;
+                        spellInfo.AuraInterruptFlags[0] |= (uint)(SpellAuraInterruptFlags.Cast | SpellAuraInterruptFlags.Move | SpellAuraInterruptFlags.Jump);
                         break;
                     case 5420: // Tree of Life (Passive)
                         spellInfo.Stances = 1 << ((int)ShapeShiftForm.TreeOfLife - 1);
@@ -2722,10 +2728,51 @@ namespace Game.Entities
                         break;
                     // ENDOF ISLE OF CONQUEST SPELLS
                     //
+                    // FIRELANDS SPELLS
+                    // Torment Searcher
+                    case 99253:
+                        spellInfo.GetEffect(0).MaxRadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards15);
+                        break;
+                    // Torment Damage
+                    case 99256:
+                        spellInfo.Attributes |= SpellAttr0.Negative1;
+                        break;
+                    // Blaze of Glory
+                    case 99252:
+                        spellInfo.AuraInterruptFlags[0] |= (uint)SpellAuraInterruptFlags.ChangeMap;
+                        break;
+                    // ENDOF FIRELANDS SPELLS
                     case 102445: // Summon Master Li Fei
                         spellInfo.GetEffect(0).TargetA = new SpellImplicitTargetInfo(Targets.DestDb);
                         break;
                 }
+            }
+
+            foreach (var spellInfo in mSpellInfoMap.Values)
+            {
+                foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(Difficulty.None))
+                {
+                    if (effect == null)
+                        continue;
+                    switch (effect.Effect)
+                    {
+                        case SpellEffectName.Charge:
+                        case SpellEffectName.ChargeDest:
+                        case SpellEffectName.Jump:
+                        case SpellEffectName.JumpDest:
+                        case SpellEffectName.LeapBack:
+                            if (spellInfo.Speed == 0 && spellInfo.SpellFamilyName == 0)
+                                spellInfo.Speed = MotionMaster.SPEED_CHARGE;
+                            break;
+                    }
+
+                    if (effect.TargetA.GetSelectionCategory() == SpellTargetSelectionCategories.Cone || effect.TargetB.GetSelectionCategory() == SpellTargetSelectionCategories.Cone)
+                        if (MathFunctions.fuzzyEq(spellInfo.ConeAngle, 0.0f))
+                            spellInfo.ConeAngle = 90.0f;
+                }
+
+                if (spellInfo.ActiveIconFileDataId == 135754)  // flight
+                    spellInfo.Attributes |= SpellAttr0.Passive;
             }
 
             SummonPropertiesRecord properties = CliDB.SummonPropertiesStorage.LookupByKey(121);
@@ -2768,6 +2815,21 @@ namespace Game.Entities
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded SpellInfo diminishing infos in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
+        }
+
+        public void LoadSpellInfoImmunities()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            foreach (SpellInfo spellInfo in mSpellInfoMap.Values)
+            {
+                if (spellInfo == null)
+                    continue;
+
+                spellInfo._LoadImmunityInfo();
+            }
+
+            Log.outInfo(LogFilter.ServerLoading, "Loaded SpellInfo immunity infos in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
         public void LoadPetFamilySpellsStore()

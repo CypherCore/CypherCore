@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -224,7 +224,7 @@ namespace Game.Chat
                 mapId, (mapEntry != null ? mapEntry.MapName[handler.GetSessionDbcLocale()] : unknown),
                 zoneId, (zoneEntry != null ? zoneEntry.AreaName[handler.GetSessionDbcLocale()] : unknown),
                 areaId, (areaEntry != null ? areaEntry.AreaName[handler.GetSessionDbcLocale()] : unknown),
-                obj.GetPhaseMask(), string.Join(", ", obj.GetPhases()), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), obj.GetOrientation());
+                string.Join(", ", obj.GetPhases()), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), obj.GetOrientation());
 
             Transport transport = obj.GetTransport();
             if (transport)
@@ -2039,12 +2039,14 @@ namespace Game.Chat
 
             string schoolStr = args.NextString();
 
+            Player attacker = handler.GetSession().GetPlayer();
+
             // flat melee damage without resistence/etc reduction
             if (string.IsNullOrEmpty(schoolStr))
             {
-                handler.GetSession().GetPlayer().DealDamage(target, damage_, null, DamageEffectType.Direct, SpellSchoolMask.Normal, null, false);
-                if (target != handler.GetSession().GetPlayer())
-                    handler.GetSession().GetPlayer().SendAttackStateUpdate(HitInfo.AffectsVictim, target, SpellSchoolMask.Normal, damage_, 0, 0, VictimState.Hit, 0);
+                attacker.DealDamage(target, damage_, null, DamageEffectType.Direct, SpellSchoolMask.Normal, null, false);
+                if (target != attacker)
+                    attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, SpellSchoolMask.Normal, damage_, 0, 0, VictimState.Hit, 0);
                 return true;
             }
 
@@ -2053,15 +2055,14 @@ namespace Game.Chat
 
             SpellSchoolMask schoolmask = (SpellSchoolMask)(1 << school);
 
-            if (handler.GetSession().GetPlayer().IsDamageReducedByArmor(schoolmask))
-                damage_ = handler.GetSession().GetPlayer().CalcArmorReducedDamage(handler.GetPlayer(), target, damage_, null, WeaponAttackType.BaseAttack);
+            if (attacker.IsDamageReducedByArmor(schoolmask))
+                damage_ = attacker.CalcArmorReducedDamage(handler.GetPlayer(), target, damage_, null, WeaponAttackType.BaseAttack);
 
             string spellStr = args.NextString();
 
             // melee damage by specific school
             if (string.IsNullOrEmpty(spellStr))
             {
-                Player attacker = handler.GetSession().GetPlayer();
                 DamageInfo dmgInfo = new DamageInfo(attacker, target, damage_, null, schoolmask, DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
                 attacker.CalcAbsorbResist(dmgInfo);
 
@@ -2081,13 +2082,16 @@ namespace Game.Chat
             // non-melee damage
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
             uint spellid = handler.extractSpellIdFromLink(args);
+            if (spellid == 0)
+                return false;
+
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellid);
             if (spellInfo == null)
                 return false;
 
-            SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(handler.GetSession().GetPlayer(), target, spellid, spellInfo.GetSpellXSpellVisualId(handler.GetSession().GetPlayer()), spellInfo.SchoolMask);
+            SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(attacker, target, spellid, spellInfo.GetSpellXSpellVisualId(attacker), spellInfo.SchoolMask);
             damageInfo.damage = damage_;
-            handler.GetSession().GetPlayer().DealDamageMods(damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
+            attacker.DealDamageMods(damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
             target.DealSpellDamage(damageInfo, true);
             target.SendSpellNonMeleeDamageLog(damageInfo);
             return true;

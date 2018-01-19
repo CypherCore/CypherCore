@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -725,14 +725,10 @@ namespace Game.Chat
                 return false;
             }
 
-            if (target.IsTypeId(TypeId.Unit))
-            {
-                int dbPhase = target.ToCreature().GetDBPhase();
-                if (dbPhase > 0)
-                    handler.SendSysMessage("Target creature's PhaseId in DB: {0}", dbPhase);
-                else if (dbPhase < 0)
-                    handler.SendSysMessage("Target creature's PhaseGroup in DB: {0}", Math.Abs(dbPhase));
-            }
+            if (target.GetDBPhase() > 0)
+                handler.SendSysMessage($"Target creature's PhaseId in DB: {target.GetDBPhase()}");
+            else if (target.GetDBPhase() < 0)
+                handler.SendSysMessage($"Target creature's PhaseGroup in DB: {Math.Abs(target.GetDBPhase())}");
 
             string phases = "";
             foreach (uint phase in target.GetPhases())
@@ -945,7 +941,7 @@ namespace Game.Chat
             Creature creature = new Creature();
 
             Map map = handler.GetSession().GetPlayer().GetMap();
-            if (!creature.Create(map.GenerateLowGuid(HighGuid.Vehicle), map, handler.GetSession().GetPlayer().GetPhaseMask(), entry, x, y, z, o, null, id))
+            if (!creature.Create(map.GenerateLowGuid(HighGuid.Vehicle), map, entry, x, y, z, o, null, id))
                 return false;
 
             map.AddToMap(creature.ToCreature());
@@ -1125,6 +1121,19 @@ namespace Game.Chat
             static bool HandleDebugSendOpcodeCommand(StringArguments args, CommandHandler handler)
             {
                 handler.SendSysMessage(CypherStrings.NoCmd);
+                return true;
+            }
+
+            [Command("playerchoice", RBACPermissions.CommandDebugSendPlayerChoice)]
+            static bool HandleDebugSendPlayerChoiceCommand(StringArguments args, CommandHandler handler)
+            {
+                if (args.Empty())
+                    return false;
+
+                int choiceId = args.NextInt32();
+                Player player = handler.GetSession().GetPlayer();
+
+                player.SendPlayerChoice(player.GetGUID(), choiceId);
                 return true;
             }
 

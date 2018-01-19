@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -85,8 +85,8 @@ namespace Game.Entities
         //Spells 
         protected Dictionary<CurrentSpellTypes, Spell> m_currentSpells = new Dictionary<CurrentSpellTypes, Spell>((int)CurrentSpellTypes.Max);
         Dictionary<SpellValueMod, int> CustomSpellValueMod = new Dictionary<SpellValueMod, int>();
-        MultiMap<SpellImmunity, SpellImmune> m_spellImmune = new MultiMap<SpellImmunity, SpellImmune>();
-        uint m_interruptMask;
+        MultiMap<uint, uint>[] m_spellImmune = new MultiMap<uint, uint>[(int)SpellImmunity.Max];
+        uint[] m_interruptMask = new uint[2];
         protected int m_procDeep;
         bool m_AutoRepeatFirstCast;
         SpellHistory _spellHistory;
@@ -107,7 +107,7 @@ namespace Game.Entities
         uint m_removedAurasCount;
 
         //General  
-        Array<DiminishingReturn> m_Diminishing = new Array<DiminishingReturn>((int)DiminishingGroup.Max);
+        DiminishingReturn[] m_Diminishing = new DiminishingReturn[(int)DiminishingGroup.Max];
         protected List<GameObject> m_gameObj = new List<GameObject>();
         List<AreaTrigger> m_areaTrigger = new List<AreaTrigger>();
         protected List<DynamicObject> m_dynObj = new List<DynamicObject>();
@@ -132,14 +132,9 @@ namespace Game.Entities
         ushort _meleeAnimKitId;
     }
 
-    public struct SpellImmune
-    {
-        public uint spellType;
-        public uint spellId;
-    }
-
     public class DiminishingReturn
     {
+        public DiminishingReturn() { }
         public DiminishingReturn(uint hitTime, DiminishingLevels hitCount)
         {
             Stack = 0;
@@ -465,9 +460,10 @@ namespace Game.Entities
         public uint resist;
         public bool periodicLog;
         public uint blocked;
-        public SpellHitType HitInfo;
+        public HitInfo HitInfo;
         // Used for help
         public uint cleanDamage;
+        public bool fullBlock;
         public uint preHitHealth;
     }
 
