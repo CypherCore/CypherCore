@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -134,25 +134,6 @@ namespace Scripts.Spells.Hunter
         }
     }
 
-    // 781 - Disengage
-    [Script]
-    class spell_hun_disengage : SpellScript
-    {
-        SpellCastResult CheckCast()
-        {
-            Unit caster = GetCaster();
-            if (caster.IsTypeId(TypeId.Player) && !caster.IsInCombat())
-                return SpellCastResult.CantDoThatRightNow;
-
-            return SpellCastResult.SpellCastOk;
-        }
-
-        public override void Register()
-        {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
-        }
-    }
-
     [Script] // 109304 - Exhilaration
     class spell_hun_exhilaration : SpellScript
     {
@@ -249,40 +230,58 @@ namespace Scripts.Spells.Hunter
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.MastersCallTriggered, (uint)spellInfo.GetEffect(0).CalcValue());
+            return spellInfo.GetEffect(0) != null && ValidateSpellInfo(SpellIds.MastersCallTriggered, (uint)spellInfo.GetEffect(0).CalcValue());
+        }
+
+        public override bool Load()
+        {
+            return GetCaster().IsPlayer();
+        }
+
+        SpellCastResult DoCheckCast()
+        {
+            Pet pet = GetCaster().ToPlayer().GetPet();
+            if (pet == null || !pet.IsAlive())
+                return SpellCastResult.CantDoThatRightNow;
+
+            // Do a mini Spell::CheckCasterAuras on the pet, no other way of doing this
+            SpellCastResult result = SpellCastResult.SpellCastOk;
+            UnitFlags unitflag = (UnitFlags)pet.GetUInt32Value(UnitFields.Flags);
+            if (!pet.GetCharmerGUID().IsEmpty())
+                result = SpellCastResult.Charmed;
+            else if (unitflag.HasAnyFlag(UnitFlags.Stunned))
+                result = SpellCastResult.Stunned;
+            else if (unitflag.HasAnyFlag(UnitFlags.Fleeing))
+                result = SpellCastResult.Fleeing;
+            else if (unitflag.HasAnyFlag(UnitFlags.Confused))
+                result = SpellCastResult.Confused;
+
+            if (result != SpellCastResult.SpellCastOk)
+                return result;
+
+            Unit target = GetExplTargetUnit();
+            if (!target)
+                return SpellCastResult.BadTargets;
+
+            if (!pet.IsWithinLOSInMap(target))
+                return SpellCastResult.LineOfSight;
+
+            return SpellCastResult.SpellCastOk;
         }
 
         void HandleDummy(uint effIndex)
         {
-            Unit ally = GetHitUnit();
-            if (ally)
-            {
-                Player caster = GetCaster().ToPlayer();
-                if (caster)
-                {
-                    Pet target = caster.GetPet();
-                    if (target)
-                    {
-                        TriggerCastFlags castMask = (TriggerCastFlags.FullMask & ~TriggerCastFlags.IgnoreCasterAurastate);
-                        target.CastSpell(ally, (uint)GetEffectValue(), castMask);
-                    }
-                }
-            }
+            GetCaster().ToPlayer().GetPet().CastSpell(GetHitUnit(), (uint)GetEffectValue(), true);
         }
 
         void HandleScriptEffect(uint effIndex)
         {
-            Unit target = GetHitUnit();
-            if (target)
-            {
-                // Cannot be processed while pet is dead
-                TriggerCastFlags castMask = (TriggerCastFlags.FullMask & ~TriggerCastFlags.IgnoreCasterAurastate);
-                target.CastSpell(target, SpellIds.MastersCallTriggered, castMask);
-            }
+            GetHitUnit().CastSpell((Unit)null, SpellIds.MastersCallTriggered, true);
         }
 
         public override void Register()
         {
+            OnCheckCast.Add(new CheckCastHandler(DoCheckCast));
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
             OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 1, SpellEffectName.ScriptEffect));
         }

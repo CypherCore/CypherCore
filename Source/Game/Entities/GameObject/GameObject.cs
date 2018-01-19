@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -158,7 +158,7 @@ namespace Game.Entities
             }
         }
 
-        public bool Create(uint name_id, Map map, uint phaseMask, Position pos, Quaternion rotation, uint animprogress, GameObjectState go_state, uint artKit = 0)
+        public bool Create(uint name_id, Map map, Position pos, Quaternion rotation, uint animprogress, GameObjectState go_state, uint artKit = 0)
         {
             Contract.Assert(map);
             SetMap(map);
@@ -341,7 +341,7 @@ namespace Game.Entities
             if (linkedEntry != 0)
             {
                 GameObject linkedGO = new GameObject();
-                if (linkedGO.Create(linkedEntry, map, phaseMask, pos, rotation, 255, GameObjectState.Ready))
+                if (linkedGO.Create(linkedEntry, map, pos, rotation, 255, GameObjectState.Ready))
                 {
                     SetLinkedTrap(linkedGO);
                     map.AddToMap(linkedGO);
@@ -846,10 +846,10 @@ namespace Game.Entities
                 return;
             }
 
-            SaveToDB(GetMapId(), data.spawnMask, data.phaseMask);
+            SaveToDB(GetMapId(), data.spawnMask);
         }
 
-        public void SaveToDB(uint mapid, uint spawnMask, uint phaseMask)
+        public void SaveToDB(uint mapid, ulong spawnMask)
         {
             GameObjectTemplate goI = GetGoInfo();
 
@@ -865,7 +865,6 @@ namespace Game.Entities
             // guid = guid must not be updated at save
             data.id = GetEntry();
             data.mapid = (ushort)mapid;
-            data.phaseMask = (ushort)phaseMask;
             data.posX = GetPositionX();
             data.posY = GetPositionY();
             data.posZ = GetPositionZ();
@@ -878,6 +877,9 @@ namespace Game.Entities
             data.artKit = GetGoArtKit();
             Global.ObjectMgr.NewGOData(m_spawnId, data);
 
+            data.phaseId = GetDBPhase() > 0 ? (uint)GetDBPhase() : data.phaseId;
+            data.phaseGroup = GetDBPhase() < 0 ? (uint)-GetDBPhase() : data.phaseGroup;
+
             // Update in DB
             byte index = 0;
             PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_GAMEOBJECT);
@@ -889,6 +891,8 @@ namespace Game.Entities
             stmt.AddValue(index++, GetEntry());
             stmt.AddValue(index++, mapid);
             stmt.AddValue(index++, spawnMask);
+            stmt.AddValue(index++, data.phaseId);
+            stmt.AddValue(index++, data.phaseGroup);
             stmt.AddValue(index++, GetPositionX());
             stmt.AddValue(index++, GetPositionY());
             stmt.AddValue(index++, GetPositionZ());
@@ -914,7 +918,6 @@ namespace Game.Entities
             }
 
             uint entry = data.id;
-            uint phaseMask = data.phaseMask;
             Position pos = new Position(data.posX, data.posY, data.posZ, data.orientation);
 
             uint animprogress = data.animprogress;
@@ -922,11 +925,11 @@ namespace Game.Entities
             uint artKit = data.artKit;
 
             m_spawnId = spawnId;
-            if (!Create(entry, map, phaseMask, pos, data.rotation, animprogress, go_state, artKit))
+            if (!Create(entry, map, pos, data.rotation, animprogress, go_state, artKit))
                 return false;
 
-            if (data.phaseid != 0)
-                SetInPhase(data.phaseid, false, true);
+            if (data.phaseId != 0)
+                SetInPhase(data.phaseId, false, true);
 
             if (data.phaseGroup != 0)
             {
@@ -1173,16 +1176,9 @@ namespace Game.Entities
             if (trapSpell == null)                                          // checked at load already
                 return;
 
-            float range = target.GetSpellMaxRangeForTarget(GetOwner(), trapSpell);
-
-            // using original GO distance
-            var go_check = new NearestGameObjectEntryInObjectRangeCheck(target, trapEntry, range);
-            var checker = new GameObjectLastSearcher(this, go_check);
-            Cell.VisitGridObjects(this, checker, range);
-
-            // found correct GO
-            if (checker.GetTarget() != null)
-                checker.GetTarget().CastSpell(target, trapInfo.Trap.spell);
+            GameObject trapGO = GetLinkedTrap();
+            if (trapGO)
+                trapGO.CastSpell(target, trapSpell.Id);
         }
 
         GameObject LookupFishingHoleAround(float range)
@@ -1864,6 +1860,18 @@ namespace Game.Entities
                         player.SendPacket(artifactForgeOpened);
                         return;
                     }
+                case GameObjectTypes.UILink:
+                    {
+                        Player player = user.ToPlayer();
+                        if (!player)
+                            return;
+
+                        GameObjectUIAction gameObjectUIAction = new GameObjectUIAction();
+                        gameObjectUIAction.ObjectGUID = GetGUID();
+                        gameObjectUIAction.UILink = (int)GetGoInfo().UILink.UILinkType;
+                        player.SendPacket(gameObjectUIAction);
+                        return;
+                    }
                 default:
                     if (GetGoType() >= GameObjectTypes.Max)
                         Log.outError(LogFilter.Server, "GameObject.Use(): unit (type: {0}, guid: {1}, name: {2}) tries to use object (guid: {3}, entry: {4}, name: {5}) of unknown type ({6})",
@@ -1942,7 +1950,7 @@ namespace Game.Entities
             }
             else
             {
-                trigger.SetFaction(14);
+                trigger.SetFaction(spellInfo.IsPositive() ? 35 : 14u);
                 // Set owner guid for target if no owner available - needed by trigger auras
                 // - trigger gets despawned and there's no caster avalible (see AuraEffect.TriggerSpell())
                 trigger.CastSpell(target != null ? target : trigger, spellInfo, triggered, null, null, target ? target.GetGUID() : ObjectGuid.Empty);

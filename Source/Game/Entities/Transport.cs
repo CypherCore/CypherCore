@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -338,8 +338,8 @@ namespace Game.Entities
                 return null;
             }
 
-            if (data.phaseid != 0)
-                creature.SetInPhase(data.phaseid, false, true);
+            if (data.phaseId != 0)
+                creature.SetInPhase(data.phaseId, false, true);
             else if (data.phaseGroup != 0)
             {
                 foreach (var phase in Global.DB2Mgr.GetPhasesForGroup(data.phaseGroup))
@@ -474,7 +474,7 @@ namespace Game.Entities
             pos.GetPosition(out x, out y, out z, out o);
             CalculatePassengerPosition(ref x, ref y, ref z, ref o);
 
-            if (!summon.Create(map.GenerateLowGuid(HighGuid.Creature), map, 0, entry, x, y, z, o, null, vehId))
+            if (!summon.Create(map.GenerateLowGuid(HighGuid.Creature), map, entry, x, y, z, o, null, vehId))
                 return null;
 
             foreach (var phase in phases)

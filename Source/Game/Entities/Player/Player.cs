@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -345,8 +345,8 @@ namespace Game.Entities
             // apply original stats mods before spell loading or item equipment that call before equip _RemoveStatsMods()
             UpdateMaxHealth();                                      // Update max Health (for add bonus from stamina)
             SetFullHealth();
-            if (getPowerType() == PowerType.Mana)
-                SetPower(PowerType.Mana, GetMaxPower(PowerType.Mana));
+            if (GetPowerType() == PowerType.Mana)
+                SetFullPower(PowerType.Mana);
 
             // original spells
             LearnDefaultSkills();
@@ -3573,19 +3573,12 @@ namespace Game.Entities
         {
             ResurrectPlayer(0.0f, false);
 
-            if (GetMaxHealth() > _resurrectionData.Health)
-                SetHealth(_resurrectionData.Health);
-            else
-                SetFullHealth();
-
-            if (GetMaxPower(PowerType.Mana) > _resurrectionData.Mana)
-                SetPower(PowerType.Mana, (int)_resurrectionData.Mana);
-            else
-                SetPower(PowerType.Mana, GetMaxPower(PowerType.Mana));
+            SetHealth(_resurrectionData.Health);
+            SetPower(PowerType.Mana, (int)_resurrectionData.Mana);
 
             SetPower(PowerType.Rage, 0);
-            SetPower(PowerType.Energy, GetMaxPower(PowerType.Energy));
-            SetPower(PowerType.Focus, GetMaxPower(PowerType.Focus));
+            SetFullPower(PowerType.Energy);
+            SetFullPower(PowerType.Focus);
             SetPower(PowerType.LunarPower, 0);
 
             uint aura = _resurrectionData.Aura;
@@ -3921,17 +3914,17 @@ namespace Game.Entities
         }
         public void ResetAllPowers()
         {
-            SetHealth(GetMaxHealth());
-            switch (getPowerType())
+            SetFullHealth();
+            switch (GetPowerType())
             {
                 case PowerType.Mana:
-                    SetPower(PowerType.Mana, GetMaxPower(PowerType.Mana));
+                    SetFullPower(PowerType.Mana);
                     break;
                 case PowerType.Rage:
                     SetPower(PowerType.Rage, 0);
                     break;
                 case PowerType.Energy:
-                    SetPower(PowerType.Energy, GetMaxPower(PowerType.Energy));
+                    SetFullPower(PowerType.Energy);
                     break;
                 case PowerType.RunicPower:
                     SetPower(PowerType.RunicPower, 0);
@@ -4484,7 +4477,7 @@ namespace Game.Entities
             // set health/powers (0- will be set in caller)
             if (restore_percent > 0.0f)
             {
-                SetHealth((uint)(GetMaxHealth() * restore_percent));
+                SetHealth((ulong)(GetMaxHealth() * restore_percent));
                 SetPower(PowerType.Mana, (int)(GetMaxPower(PowerType.Mana) * restore_percent));
                 SetPower(PowerType.Rage, 0);
                 SetPower(PowerType.Energy, (int)(GetMaxPower(PowerType.Energy) * restore_percent));
@@ -4842,7 +4835,7 @@ namespace Game.Entities
             pet.SetCreatorGUID(GetGUID());
             pet.SetUInt32Value(UnitFields.FactionTemplate, getFaction());
 
-            pet.setPowerType(PowerType.Mana);
+            pet.SetPowerType(PowerType.Mana);
             pet.SetUInt64Value(UnitFields.NpcFlags, (uint)NPCFlags.None);
             pet.SetUInt32Value(UnitFields.Bytes1, 0);
             pet.InitStatsForLevel(getLevel());
@@ -4858,7 +4851,7 @@ namespace Game.Entities
                     pet.SetUInt32Value(UnitFields.PetExperience, 0);
                     pet.SetUInt32Value(UnitFields.PetNextLevelExp, 1000);
                     pet.SetFullHealth();
-                    pet.SetPower(PowerType.Mana, pet.GetMaxPower(PowerType.Mana));
+                    pet.SetFullPower(PowerType.Mana);
                     pet.SetUInt32Value(UnitFields.PetNameTimestamp, (uint)Time.UnixTime); // cast can't be helped in this case
                     break;
                 default:
@@ -4992,6 +4985,100 @@ namespace Game.Entities
             updateCollisionHeight.Height = height;
             updateCollisionHeight.Scale = GetObjectScale();
             SendMessageToSet(updateCollisionHeight, false);
+        }
+
+        public void SendPlayerChoice(ObjectGuid sender, int choiceId)
+        {
+            PlayerChoice playerChoice = Global.ObjectMgr.GetPlayerChoice(choiceId);
+            if (playerChoice == null)
+                return;
+
+            LocaleConstant locale = GetSession().GetSessionDbLocaleIndex();
+            PlayerChoiceLocale playerChoiceLocale = locale != LocaleConstant.enUS ? Global.ObjectMgr.GetPlayerChoiceLocale(choiceId) : null;
+
+            PlayerTalkClass.GetInteractionData().Reset();
+            PlayerTalkClass.GetInteractionData().SourceGuid = sender;
+            PlayerTalkClass.GetInteractionData().PlayerChoiceId = (uint)choiceId;
+
+            DisplayPlayerChoice displayPlayerChoice = new DisplayPlayerChoice();
+            displayPlayerChoice.SenderGUID = sender;
+            displayPlayerChoice.ChoiceID = choiceId;
+            displayPlayerChoice.Question = playerChoice.Question;
+            if (playerChoiceLocale != null)
+                ObjectManager.GetLocaleString(playerChoiceLocale.Question, locale, ref displayPlayerChoice.Question);
+
+            displayPlayerChoice.CloseChoiceFrame = false;
+
+            for (var i = 0; i < playerChoice.Responses.Count; ++i)
+            {
+                PlayerChoiceResponse playerChoiceResponseTemplate = playerChoice.Responses[i];
+                var playerChoiceResponse = new Network.Packets.PlayerChoiceResponse();
+
+                playerChoiceResponse.ResponseID = playerChoiceResponseTemplate.ResponseId;
+                playerChoiceResponse.ChoiceArtFileID = playerChoiceResponseTemplate.ChoiceArtFileId;
+                playerChoiceResponse.Answer = playerChoiceResponseTemplate.Answer;
+                playerChoiceResponse.Header = playerChoiceResponseTemplate.Header;
+                playerChoiceResponse.Description = playerChoiceResponseTemplate.Description;
+                playerChoiceResponse.Confirmation = playerChoiceResponseTemplate.Confirmation;
+                if (playerChoiceLocale != null)
+                {
+                    PlayerChoiceResponseLocale playerChoiceResponseLocale = playerChoiceLocale.Responses.LookupByKey(playerChoiceResponseTemplate.ResponseId);
+                    if (playerChoiceResponseLocale != null)
+                    {
+                        ObjectManager.GetLocaleString(playerChoiceResponseLocale.Answer, locale, ref playerChoiceResponse.Answer);
+                        ObjectManager.GetLocaleString(playerChoiceResponseLocale.Header, locale, ref playerChoiceResponse.Header);
+                        ObjectManager.GetLocaleString(playerChoiceResponseLocale.Description, locale, ref playerChoiceResponse.Description);
+                        ObjectManager.GetLocaleString(playerChoiceResponseLocale.Confirmation, locale, ref playerChoiceResponse.Confirmation);
+                    }
+                }
+
+                if (playerChoiceResponseTemplate.Reward.HasValue)
+                {
+                    var reward = new Network.Packets.PlayerChoiceResponseReward();
+                    reward.TitleID = playerChoiceResponseTemplate.Reward.Value.TitleId;
+                    reward.PackageID = playerChoiceResponseTemplate.Reward.Value.PackageId;
+                    reward.SkillLineID = playerChoiceResponseTemplate.Reward.Value.SkillLineId;
+                    reward.SkillPointCount = playerChoiceResponseTemplate.Reward.Value.SkillPointCount;
+                    reward.ArenaPointCount = playerChoiceResponseTemplate.Reward.Value.ArenaPointCount;
+                    reward.HonorPointCount = playerChoiceResponseTemplate.Reward.Value.HonorPointCount;
+                    reward.Money = playerChoiceResponseTemplate.Reward.Value.Money;
+                    reward.Xp = playerChoiceResponseTemplate.Reward.Value.Xp;
+
+                    foreach (var item in playerChoiceResponseTemplate.Reward.Value.Items)
+                    {
+                        var rewardEntry = new Network.Packets.PlayerChoiceResponseRewardEntry();
+                        rewardEntry.Item.ItemID = item.Id;
+                        rewardEntry.Quantity = item.Quantity;
+                        if (!item.BonusListIDs.Empty())
+                        {
+                            rewardEntry.Item.ItemBonus.HasValue = true;
+                            rewardEntry.Item.ItemBonus.Value.BonusListIDs = item.BonusListIDs;
+                        }
+                        reward.Items.Add(rewardEntry);
+                    }
+
+                    foreach (var currency in playerChoiceResponseTemplate.Reward.Value.Currency)
+                    {
+                        var rewardEntry = new Network.Packets.PlayerChoiceResponseRewardEntry();
+                        rewardEntry.Item.ItemID = currency.Id;
+                        rewardEntry.Quantity = currency.Quantity;
+                        reward.Items.Add(rewardEntry);
+                    }
+
+                    foreach (var faction in playerChoiceResponseTemplate.Reward.Value.Faction)
+                    {
+                        var rewardEntry = new Network.Packets.PlayerChoiceResponseRewardEntry();
+                        rewardEntry.Item.ItemID = faction.Id;
+                        rewardEntry.Quantity = faction.Quantity;
+                        reward.Items.Add(rewardEntry);
+                    }
+
+                    playerChoiceResponse.Reward.Set(reward);
+                    displayPlayerChoice.Responses[i] = playerChoiceResponse;
+                }
+            }
+
+            SendPacket(displayPlayerChoice);
         }
 
         public float GetCollisionHeight(bool mounted)
@@ -5238,10 +5325,10 @@ namespace Game.Entities
 
             // set current level health and mana/energy to maximum after applying all mods.
             SetFullHealth();
-            SetPower(PowerType.Mana, GetMaxPower(PowerType.Mana));
-            SetPower(PowerType.Energy, GetMaxPower(PowerType.Energy));
+            SetFullPower(PowerType.Mana);
+            SetFullPower(PowerType.Energy);
             if (GetPower(PowerType.Rage) > GetMaxPower(PowerType.Rage))
-                SetPower(PowerType.Rage, GetMaxPower(PowerType.Rage));
+                SetFullPower(PowerType.Rage);
             SetPower(PowerType.Focus, 0);
 
             // update level to hunter/summon pet
@@ -5820,11 +5907,11 @@ namespace Game.Entities
 
             // set current level health and mana/energy to maximum after applying all mods.
             SetFullHealth();
-            SetPower(PowerType.Mana, GetMaxPower(PowerType.Mana));
-            SetPower(PowerType.Energy, GetMaxPower(PowerType.Energy));
+            SetFullPower(PowerType.Mana);
+            SetFullPower(PowerType.Energy);
             if (GetPower(PowerType.Rage) > GetMaxPower(PowerType.Rage))
-                SetPower(PowerType.Rage, GetMaxPower(PowerType.Rage));
-            SetPower(PowerType.Focus, GetMaxPower(PowerType.Focus));
+                SetFullPower(PowerType.Rage);
+            SetFullPower(PowerType.Focus);
             SetPower(PowerType.RunicPower, 0);
 
             // update level to hunter/summon pet

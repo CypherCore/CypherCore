@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1101,7 +1101,7 @@ namespace Game.Network.Packets
             Health = (long)unit.GetHealth();
             AttackPower = (int)unit.GetTotalAttackPowerValue(unit.GetClass() == Class.Hunter ? WeaponAttackType.RangedAttack : WeaponAttackType.BaseAttack);
             SpellPower = unit.SpellBaseDamageBonusDone(SpellSchoolMask.Spell);
-            PowerData.Add(new SpellLogPowerData((int)unit.getPowerType(), unit.GetPower(unit.getPowerType()), 0));
+            PowerData.Add(new SpellLogPowerData((int)unit.GetPowerType(), unit.GetPower(unit.GetPowerType()), 0));
         }
 
         public void Initialize(Spell spell)
@@ -1109,7 +1109,7 @@ namespace Game.Network.Packets
             Health = (long)spell.GetCaster().GetHealth();
             AttackPower = (int)spell.GetCaster().GetTotalAttackPowerValue(spell.GetCaster().GetClass() == Class.Hunter ? WeaponAttackType.RangedAttack : WeaponAttackType.BaseAttack);
             SpellPower = spell.GetCaster().SpellBaseDamageBonusDone(SpellSchoolMask.Spell);
-            PowerType primaryPowerType = spell.GetCaster().getPowerType();
+            PowerType primaryPowerType = spell.GetCaster().GetPowerType();
             bool primaryPowerAdded = false;
             foreach (SpellPowerCost cost in spell.GetPowerCost())
             {
@@ -1398,7 +1398,7 @@ namespace Game.Network.Packets
             data.WriteBit(DstLocation.HasValue);
             data.WriteBit(Orientation.HasValue);
             data.WriteBit(MapID.HasValue);
-            data.WriteBits(Name.Length, 7);
+            data.WriteBits(Name.GetByteCount(), 7);
             data.FlushBits();
 
             data.WritePackedGuid(Unit);

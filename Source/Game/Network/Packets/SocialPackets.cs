@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Network.Packets
@@ -80,7 +81,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(AreaID);
             _worldPacket.WriteUInt32(Level);
             _worldPacket.WriteUInt32(ClassID);
-            _worldPacket.WriteBits(Notes.Length, 10);
+            _worldPacket.WriteBits(Notes.GetByteCount(), 10);
             _worldPacket.FlushBits();
             _worldPacket.WriteString(Notes);
         }
@@ -190,7 +191,7 @@ namespace Game.Network.Packets
             data.WriteUInt32(AreaID);
             data.WriteUInt32(Level);
             data.WriteUInt32(ClassID);
-            data.WriteBits(Notes.Length, 10);
+            data.WriteBits(Notes.GetByteCount(), 10);
             data.FlushBits();
             data.WriteString(Notes);
         }

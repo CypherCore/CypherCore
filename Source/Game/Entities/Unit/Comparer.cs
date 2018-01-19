@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,8 +33,8 @@ namespace Game.Entities
         {
             Unit a = objA.ToUnit();
             Unit b = objB.ToUnit();
-            float rA = a.GetMaxPower(m_power) != 0 ? a.GetPower(m_power) / (float)a.GetMaxPower(m_power) : 0.0f;
-            float rB = b.GetMaxPower(m_power) != 0 ? b.GetPower(m_power) / (float)b.GetMaxPower(m_power) : 0.0f;
+            float rA = a != null ? a.GetPowerPct(m_power) : 0.0f;
+            float rB = b != null ? b.GetPowerPct(m_power) : 0.0f;
             return Convert.ToInt32(m_ascending ? rA < rB : rA > rB);
         }
 

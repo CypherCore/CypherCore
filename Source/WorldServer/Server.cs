@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ using Game;
 using Game.Chat;
 using Game.Network;
 using System;
+using System.Globalization;
 using System.Threading;
 
 namespace WorldServer
@@ -32,6 +33,10 @@ namespace WorldServer
 
         static void Main()
         {
+            //Set Culture
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+
             Console.CancelKeyPress += (o, e) => Global.WorldMgr.StopNow(ShutdownExitCode.Shutdown);
 
             if (!ConfigMgr.Load(System.Diagnostics.Process.GetCurrentProcess().ProcessName + ".conf"))
@@ -106,6 +111,7 @@ namespace WorldServer
             catch (Exception ex)
             {
                 Log.outException(ex);
+                ExitNow();
             }
         }
 

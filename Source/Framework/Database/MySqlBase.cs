@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -285,10 +285,10 @@ namespace Framework.Database
                 {
                     using (MySqlCommand cmd = Connection.CreateCommand())
                     {
-
                         Connection.Open();
                         cmd.CommandText = sql;
-                        return cmd.ExecuteNonQuery() > 0;
+                        cmd.ExecuteNonQuery();
+                        return true;
                     }
                 }
             }
@@ -309,8 +309,8 @@ namespace Framework.Database
                     {
                         connection.Open();
                         cmd.CommandText = File.ReadAllText(path);
-                        return cmd.ExecuteNonQuery() > 0;
-
+                        cmd.ExecuteNonQuery();
+                        return true;
                     }
                 }
             }
@@ -364,7 +364,10 @@ namespace Framework.Database
         {
             MySqlErrorCode code = (MySqlErrorCode)ex.Number;
             if (ex.InnerException != null)
-                code = (MySqlErrorCode)((MySqlException)ex.InnerException).Number;
+            {
+                if (ex.InnerException is MySqlException)
+                    code = (MySqlErrorCode)((MySqlException)ex.InnerException).Number;
+            }
 
             switch (code)
             {

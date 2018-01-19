@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -199,7 +199,11 @@ namespace Game.Entities
                     AddGuidValue(UnitFields.Summon, minion.GetGUID());
 
                 if (minion.m_Properties != null && minion.m_Properties.Type == SummonType.Minipet)
+                {
                     SetCritterGUID(minion.GetGUID());
+                    if (GetTypeId() == TypeId.Player)
+                        minion.SetGuidValue(UnitFields.BattlePetCompanionGuid, GetGuidValue(PlayerFields.SummonedBattlePetId));
+                }
 
                 // PvP, FFAPvP
                 minion.SetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag, GetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag));
@@ -211,7 +215,7 @@ namespace Game.Entities
 
                 // Ghoul pets have energy instead of mana (is anywhere better place for this code?)
                 if (minion.IsPetGhoul())
-                    minion.setPowerType(PowerType.Energy);
+                    minion.SetPowerType(PowerType.Energy);
 
                 // Send infinity cooldown - client does that automatically but after relog cooldown needs to be set again
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(minion.GetUInt32Value(UnitFields.CreatedBySpell));

@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,7 +13,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */﻿
+ */
+using System;
 
 namespace Framework.Constants
 {
@@ -152,9 +153,9 @@ namespace Framework.Constants
         Runes,
         RunicPower,
         SoulShards,
-        Eclipse,
+        LunarPower,
         HolyPower,
-        Alternative,
+        Alternate,
         Maelstrom,
         Chi,
         Insanity,
@@ -206,6 +207,7 @@ namespace Framework.Constants
         Deflects = 8
     }
 
+    [Flags]
     public enum HitInfo
     {
         NormalSwing = 0x0,

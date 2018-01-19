@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,7 +70,7 @@ namespace Game.Scripting
                 return;
             }
 
-            Assembly assembly = Assembly.LoadFile(Path.GetFullPath("Scripts.dll"));
+            Assembly assembly = Assembly.LoadFile(AppContext.BaseDirectory + "Scripts.dll");
             if (assembly == null)
             {
                 Log.outError(LogFilter.ServerLoading, "Error Loading Scripts.dll, Only Core Scripts are loaded.");
@@ -99,7 +99,7 @@ namespace Game.Scripting
                     var constructors = type.GetConstructors();
                     if (constructors.Length == 0)
                     {
-                        Log.outError(LogFilter.Scripts, "Type: {0} contains no Public Constructors. Can't load script.", type.Name);
+                        Log.outError(LogFilter.Scripts, "Script: {0} contains no Public Constructors. Can't load script.", type.Name);
                         continue;
                     }
 
@@ -107,6 +107,33 @@ namespace Game.Scripting
                     {
                         var genericType = type;
                         string name = type.Name;
+
+                        bool validArgs = true;
+                        int i = 0;
+                        foreach (var constructor in constructors)
+                        {
+                            var parameters = constructor.GetParameters();
+                            if (parameters.Length != attribute.Args.Length)
+                                continue;
+
+                            foreach (var arg in constructor.GetParameters())
+                            {
+                                if (arg.ParameterType != attribute.Args[i++].GetType())
+                                {
+                                    validArgs = false;
+                                    break;
+                                }
+                            }
+
+                            if (validArgs)
+                                break;
+                        }
+
+                        if (!validArgs)
+                        {
+                            Log.outError(LogFilter.Scripts, "Script: {0} contains no Public Constructors with the right parameter types. Can't load script.", type.Name);
+                            continue;
+                        }
 
                         switch (type.BaseType.Name)
                         {
@@ -401,8 +428,13 @@ namespace Game.Scripting
         //Unloading
         public void Unload()
         {
-            foreach (ScriptRegistry<ScriptObject> scr in ScriptStorage)
-                scr.Unload();
+            foreach (DictionaryEntry entry in ScriptStorage)
+            {
+                IScriptRegistry scriptRegistry = (IScriptRegistry)entry.Value;
+                scriptRegistry.Unload();
+            }
+
+            ScriptStorage.Clear();
         }
 
         //SpellScriptLoader
@@ -1175,6 +1207,10 @@ namespace Game.Scripting
         {
             ForEach<PlayerScript>(p => p.OnMovieComplete(player, movieId));
         }
+        public void OnPlayerChoiceResponse(Player player, uint choiceId, uint responseId)
+        {
+            ForEach<PlayerScript>(p => p.OnPlayerChoiceResponse(player, choiceId, responseId));
+        }
 
         // GuildScript
         public void OnGuildAddMember(Guild guild, Player player, byte plRank)
@@ -1335,7 +1371,6 @@ namespace Game.Scripting
 
             RunScript<QuestScript>(script => script.OnQuestStatusChange(player, quest, oldStatus, newStatus), quest.ScriptId);
         }
-
         public void OnQuestObjectiveChange(Player player, Quest quest, QuestObjective objective, int oldAmount, int newAmount)
         {
             Contract.Assert(player);
@@ -1412,7 +1447,12 @@ namespace Game.Scripting
         MultiMap<Tuple<uint, ushort>, SplineChainLink> m_mSplineChainsMap = new MultiMap<Tuple<uint, ushort>, SplineChainLink>(); // spline chains
     }
 
-    public class ScriptRegistry<TValue> where TValue : ScriptObject
+    public interface IScriptRegistry
+    {
+        void Unload();
+    }
+
+    public class ScriptRegistry<TValue> : IScriptRegistry where TValue : ScriptObject
     {
         public void AddScript(TValue script)
         {
@@ -1482,8 +1522,7 @@ namespace Game.Scripting
 
         public void Unload()
         {
-            foreach (var key in ScriptMap.Keys)
-                ScriptMap.Remove(key);
+            ScriptMap.Clear();
         }
 
         // Counter used for code-only scripts.

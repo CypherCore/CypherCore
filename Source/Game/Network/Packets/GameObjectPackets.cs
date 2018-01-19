@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -134,5 +134,19 @@ namespace Game.Network.Packets
         public ObjectGuid ObjectGUID;
         public uint CustomAnim;
         public bool PlayAsDespawn;
+    }
+
+    class GameObjectUIAction : ServerPacket
+    {
+        public GameObjectUIAction() : base(ServerOpcodes.GameObjectUiAction, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(ObjectGUID);
+            _worldPacket.WriteInt32(UILink);
+        }
+
+        public ObjectGuid ObjectGUID;
+        public int UILink;
     }
 }

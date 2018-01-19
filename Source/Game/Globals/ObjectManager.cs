@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Framework.Dynamic;
 
 namespace Game
 {
@@ -586,6 +587,14 @@ namespace Game
             if (_classExpansionRequirementStorage.ContainsKey((byte)class_))
                 return (Expansion)_classExpansionRequirementStorage[(byte)class_];
             return Expansion.Classic;
+        }
+        public PlayerChoice GetPlayerChoice(int choiceId)
+        {
+            return _playerChoices.LookupByKey(choiceId);
+        }
+        public PlayerChoiceLocale GetPlayerChoiceLocale(int ChoiceID)
+        {
+            return _playerChoiceLocales.LookupByKey(ChoiceID);
         }
 
         //Gossip
@@ -1588,7 +1597,7 @@ namespace Game
 
             uint count = 0;
 
-            foreach (var script in spellScriptsStorage.ToList())
+            foreach (var script in spellScriptsStorage.KeyValueList)
             {
                 SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(script.Key);
 
@@ -1703,21 +1712,21 @@ namespace Game
         {
             var time = Time.GetMSTime();
 
-            //                                          0      1                   2                   3                   4            5            6         7         8
+            //                                               0      1                   2                   3                   4            5            6         7         8
             SQLResult result = DB.World.Query("SELECT entry, difficulty_entry_1, difficulty_entry_2, difficulty_entry_3, KillCredit1, KillCredit2, modelid1, modelid2, modelid3, " +
-                //9         10    11          12       13        14              15        16        17                      18                 19
-                "modelid4, name, femaleName, subname, IconName, gossip_menu_id, minlevel, maxlevel, HealthScalingExpansion, RequiredExpansion, VignetteID, " +
-                //20       21       22          23         24     25    26         27              28               29            30
+                //9         10    11          12       13        14        15              16        17        18                      19                 20
+                "modelid4, name, femaleName, subname, TitleAlt, IconName, gossip_menu_id, minlevel, maxlevel, HealthScalingExpansion, RequiredExpansion, VignetteID, " +
+                //21       22       23          24         25     26    27         28              29               30            31
                 "faction, npcflag, speed_walk, speed_run, scale, rank, dmgschool, BaseAttackTime, RangeAttackTime, BaseVariance, RangeVariance, " +
-                //31          32          33           34           35            36      37             38
+                //32          33          34           35           36            37      38             39
                 "unit_class, unit_flags, unit_flags2, unit_flags3, dynamicflags, family, trainer_class, type, " +
-                //39          40           41      42              43        44           45           46           47           48           49
+                // 40          41           42      43              44        45           46           47           48           49           50
                 "type_flags, type_flags2, lootid, pickpocketloot, skinloot, resistance1, resistance2, resistance3, resistance4, resistance5, resistance6, " +
-                //50      51      52      53      54      55      56      57      58         59       60       61      62
+                //51      52      53      54      55      56      57      58      59         60       61       62      63
                 "spell1, spell2, spell3, spell4, spell5, spell6, spell7, spell8, VehicleId, mingold, maxgold, AIName, MovementType, " +
-                //63           64           65              66                   67            68                 69             70              71
+                //64           65           66              67                   68            69                 70             71              72
                 "InhabitType, HoverHeight, HealthModifier, HealthModifierExtra, ManaModifier, ManaModifierExtra, ArmorModifier, DamageModifier, ExperienceModifier, " +
-                //72            73          74           75                    76           77
+                //73            74          75           76                    77           78
                 "RacialLeader, movementId, RegenHealth, mechanic_immune_mask, flags_extra, ScriptName FROM creature_template");
 
             if (result.IsEmpty())
@@ -1757,64 +1766,65 @@ namespace Game
             creature.Name = fields.Read<string>(10);
             creature.FemaleName = fields.Read<string>(11);
             creature.SubName = fields.Read<string>(12);
-            creature.IconName = fields.Read<string>(13);
-            creature.GossipMenuId = fields.Read<uint>(14);
-            creature.Minlevel = fields.Read<short>(15);
-            creature.Maxlevel = fields.Read<short>(16);
-            creature.HealthScalingExpansion = fields.Read<int>(17);
-            creature.RequiredExpansion = fields.Read<uint>(18);
-            creature.VignetteID = fields.Read<uint>(19);
-            creature.Faction = fields.Read<uint>(20);
-            creature.Npcflag = (NPCFlags)fields.Read<uint>(21);
-            creature.SpeedWalk = fields.Read<float>(22);
-            creature.SpeedRun = fields.Read<float>(23);
-            creature.Scale = fields.Read<float>(24);
-            creature.Rank = (CreatureEliteType)fields.Read<uint>(25);
-            creature.DmgSchool = fields.Read<uint>(26);
-            creature.BaseAttackTime = fields.Read<uint>(27);
-            creature.RangeAttackTime = fields.Read<uint>(28);
-            creature.BaseVariance = fields.Read<float>(29);
-            creature.RangeVariance = fields.Read<float>(30);
-            creature.UnitClass = fields.Read<uint>(31);
-            creature.UnitFlags = (UnitFlags)fields.Read<uint>(32);
-            creature.UnitFlags2 = fields.Read<uint>(33);
-            creature.UnitFlags3 = fields.Read<uint>(34);
-            creature.DynamicFlags = fields.Read<uint>(35);
-            creature.Family = (CreatureFamily)fields.Read<byte>(36);
-            creature.TrainerClass = (Class)fields.Read<byte>(37);
-            creature.CreatureType = (CreatureType)fields.Read<uint>(38);
-            creature.TypeFlags = (CreatureTypeFlags)fields.Read<uint>(39);
-            creature.TypeFlags2 = fields.Read<uint>(40);
-            creature.LootId = fields.Read<uint>(41);
-            creature.PickPocketId = fields.Read<uint>(42);
-            creature.SkinLootId = fields.Read<uint>(43);
+            creature.TitleAlt = fields.Read<string>(13);
+            creature.IconName = fields.Read<string>(14);
+            creature.GossipMenuId = fields.Read<uint>(15);
+            creature.Minlevel = fields.Read<short>(16);
+            creature.Maxlevel = fields.Read<short>(17);
+            creature.HealthScalingExpansion = fields.Read<int>(18);
+            creature.RequiredExpansion = fields.Read<uint>(19);
+            creature.VignetteID = fields.Read<uint>(20);
+            creature.Faction = fields.Read<uint>(21);
+            creature.Npcflag = (NPCFlags)fields.Read<uint>(22);
+            creature.SpeedWalk = fields.Read<float>(23);
+            creature.SpeedRun = fields.Read<float>(24);
+            creature.Scale = fields.Read<float>(25);
+            creature.Rank = (CreatureEliteType)fields.Read<uint>(26);
+            creature.DmgSchool = fields.Read<uint>(27);
+            creature.BaseAttackTime = fields.Read<uint>(28);
+            creature.RangeAttackTime = fields.Read<uint>(29);
+            creature.BaseVariance = fields.Read<float>(30);
+            creature.RangeVariance = fields.Read<float>(31);
+            creature.UnitClass = fields.Read<uint>(32);
+            creature.UnitFlags = (UnitFlags)fields.Read<uint>(33);
+            creature.UnitFlags2 = fields.Read<uint>(34);
+            creature.UnitFlags3 = fields.Read<uint>(35);
+            creature.DynamicFlags = fields.Read<uint>(36);
+            creature.Family = (CreatureFamily)fields.Read<byte>(37);
+            creature.TrainerClass = (Class)fields.Read<byte>(38);
+            creature.CreatureType = (CreatureType)fields.Read<uint>(39);
+            creature.TypeFlags = (CreatureTypeFlags)fields.Read<uint>(40);
+            creature.TypeFlags2 = fields.Read<uint>(41);
+            creature.LootId = fields.Read<uint>(42);
+            creature.PickPocketId = fields.Read<uint>(43);
+            creature.SkinLootId = fields.Read<uint>(44);
 
             for (var i = (int)SpellSchools.Holy; i < (int)SpellSchools.Max; ++i)
-                creature.Resistance[i] = fields.Read<int>(44 + i - 1);
+                creature.Resistance[i] = fields.Read<int>(45 + i - 1);
 
             for (var i = 0; i < SharedConst.MaxCreatureSpells; ++i)
-                creature.Spells[i] = fields.Read<uint>(50 + i);
+                creature.Spells[i] = fields.Read<uint>(51 + i);
 
-            creature.VehicleId = fields.Read<uint>(58);
-            creature.MinGold = fields.Read<uint>(59);
-            creature.MaxGold = fields.Read<uint>(60);
-            creature.AIName = fields.Read<string>(61);
-            creature.MovementType = fields.Read<uint>(62);
-            creature.InhabitType = (InhabitType)fields.Read<uint>(63);
-            creature.HoverHeight = fields.Read<float>(64);
-            creature.ModHealth = fields.Read<float>(65);
-            creature.ModHealthExtra = fields.Read<float>(66);
-            creature.ModMana = fields.Read<float>(67);
-            creature.ModManaExtra = fields.Read<float>(68);
-            creature.ModArmor = fields.Read<float>(69);
-            creature.ModDamage = fields.Read<float>(70);
-            creature.ModExperience = fields.Read<float>(71);
-            creature.RacialLeader = fields.Read<bool>(72);
-            creature.MovementId = fields.Read<uint>(73);
-            creature.RegenHealth = fields.Read<bool>(74);
-            creature.MechanicImmuneMask = fields.Read<uint>(75);
-            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(76);
-            creature.ScriptID = GetScriptId(fields.Read<string>(77));
+            creature.VehicleId = fields.Read<uint>(59);
+            creature.MinGold = fields.Read<uint>(60);
+            creature.MaxGold = fields.Read<uint>(61);
+            creature.AIName = fields.Read<string>(62);
+            creature.MovementType = fields.Read<uint>(63);
+            creature.InhabitType = (InhabitType)fields.Read<uint>(64);
+            creature.HoverHeight = fields.Read<float>(65);
+            creature.ModHealth = fields.Read<float>(66);
+            creature.ModHealthExtra = fields.Read<float>(67);
+            creature.ModMana = fields.Read<float>(68);
+            creature.ModManaExtra = fields.Read<float>(69);
+            creature.ModArmor = fields.Read<float>(70);
+            creature.ModDamage = fields.Read<float>(71);
+            creature.ModExperience = fields.Read<float>(72);
+            creature.RacialLeader = fields.Read<bool>(73);
+            creature.MovementId = fields.Read<uint>(74);
+            creature.RegenHealth = fields.Read<bool>(75);
+            creature.MechanicImmuneMask = fields.Read<uint>(76);
+            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(77);
+            creature.ScriptID = GetScriptId(fields.Read<string>(78));
 
             creatureTemplateStorage.Add(entry, creature);
         }
@@ -3203,7 +3213,7 @@ namespace Game
                 return;
             }
 
-            Dictionary<uint, uint> spawnMasks = new Dictionary<uint, uint>();
+            Dictionary<uint, ulong> spawnMasks = new Dictionary<uint, ulong>();
             foreach (var mapDifficultyPair in Global.DB2Mgr.GetMapDifficulties())
             {
                 foreach (var difficultyPair in mapDifficultyPair.Value)
@@ -3211,7 +3221,7 @@ namespace Game
                     if (!spawnMasks.ContainsKey(mapDifficultyPair.Key))
                         spawnMasks[mapDifficultyPair.Key] = 0;
 
-                    spawnMasks[mapDifficultyPair.Key] |= (uint)(1 << (int)difficultyPair.Key);
+                    spawnMasks[mapDifficultyPair.Key] |= (1ul << (int)difficultyPair.Key);
                 }
             }
 
@@ -3243,7 +3253,7 @@ namespace Game
                 data.curhealth = result.Read<uint>(12);
                 data.curmana = result.Read<uint>(13);
                 data.movementType = result.Read<byte>(14);
-                data.spawnMask = result.Read<uint>(15);
+                data.spawnMask = result.Read<ulong>(15);
                 short gameEvent = result.Read<short>(16);
                 uint PoolId = result.Read<uint>(17);
                 data.npcflag = result.Read<ulong>(18);
@@ -3251,7 +3261,7 @@ namespace Game
                 data.unit_flags2 = result.Read<uint>(20);
                 data.unit_flags3 = result.Read<uint>(21);
                 data.dynamicflags = result.Read<uint>(22);
-                data.phaseid = result.Read<uint>(23);
+                data.phaseId = result.Read<uint>(23);
                 data.phaseGroup = result.Read<uint>(24);
                 data.ScriptId = GetScriptId(result.Read<string>(25));
                 if (data.ScriptId == 0)
@@ -3324,19 +3334,18 @@ namespace Game
                     data.orientation = Position.NormalizeOrientation(data.orientation);
                 }
 
-                data.phaseMask = 1;
-                if (data.phaseGroup != 0 && data.phaseid != 0)
+                if (data.phaseGroup != 0 && data.phaseId != 0)
                 {
                     Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with both `phaseid` and `phasegroup` set, `phasegroup` set to 0", guid, data.id);
                     data.phaseGroup = 0;
                 }
 
-                if (data.phaseid != 0)
+                if (data.phaseId != 0)
                 {
-                    if (!CliDB.PhaseStorage.ContainsKey(data.phaseid))
+                    if (!CliDB.PhaseStorage.ContainsKey(data.phaseId))
                     {
-                        Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with `phaseid` {2} does not exist, set to 0", guid, data.id, data.phaseid);
-                        data.phaseid = 0;
+                        Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with `phaseid` {2} does not exist, set to 0", guid, data.id, data.phaseId);
+                        data.phaseId = 0;
                     }
                 }
 
@@ -3376,7 +3385,7 @@ namespace Game
 
         public void AddCreatureToGrid(ulong guid, CreatureData data)
         {
-            uint mask = data.spawnMask;
+            ulong mask = data.spawnMask;
             for (byte i = 0; mask != 0; i++, mask >>= 1)
             {
                 if (Convert.ToBoolean(mask & 1))
@@ -3389,7 +3398,7 @@ namespace Game
         }
         public void RemoveCreatureFromGrid(ulong guid, CreatureData data)
         {
-            uint mask = data.spawnMask;
+            ulong mask = data.spawnMask;
             for (byte i = 0; mask != 0; i++, mask >>= 1)
             {
                 if (Convert.ToBoolean(mask & 1))
@@ -3431,8 +3440,7 @@ namespace Game
             data.curhealth = stats.GenerateHealth(cInfo);
             data.curmana = stats.GenerateMana(cInfo);
             data.movementType = (byte)cInfo.MovementType;
-            data.spawnMask = 1;
-            data.phaseMask = PhaseMasks.Normal;
+            data.spawnMask = (int)SpawnMask.Continent;
             data.dbData = false;
             data.npcflag = (uint)cInfo.Npcflag;
             data.unit_flags = (uint)cInfo.UnitFlags;
@@ -3874,14 +3882,14 @@ namespace Game
             uint count = 0;
 
             // build single time for check spawnmask
-            Dictionary<uint, uint> spawnMasks = new Dictionary<uint, uint>();
+            Dictionary<uint, ulong> spawnMasks = new Dictionary<uint, ulong>();
             foreach (var mapDifficultyPair in Global.DB2Mgr.GetMapDifficulties())
             {
                 foreach (var difficultyPair in mapDifficultyPair.Value)
                 {
                     if (!spawnMasks.ContainsKey(mapDifficultyPair.Key))
                         spawnMasks[mapDifficultyPair.Key] = 0;
-                    spawnMasks[mapDifficultyPair.Key] |= (uint)(1 << (int)difficultyPair.Key);
+                    spawnMasks[mapDifficultyPair.Key] |= (1ul << (int)difficultyPair.Key);
                 }
             }
 
@@ -3955,7 +3963,7 @@ namespace Game
                 }
                 data.go_state = (GameObjectState)gostate;
 
-                data.spawnMask = result.Read<uint>(14);
+                data.spawnMask = result.Read<ulong>(14);
 
                 //if (!_transportMaps.Contains(data.mapid) && (spawnMasks.ContainsKey(data.mapid) && Convert.ToBoolean(data.spawnMask & ~spawnMasks[data.mapid])))
                 //Log.outError(LogFilter.Sql, "Table `gameobject` has gameobject (GUID: {0} Entry: {1}) that has wrong spawn mask {2} including not supported difficulty modes for map (Id: {3}), skip",
@@ -3963,21 +3971,21 @@ namespace Game
 
                 short gameEvent = result.Read<sbyte>(15);
                 uint PoolId = result.Read<uint>(16);
-                data.phaseid = result.Read<uint>(17);
+                data.phaseId = result.Read<uint>(17);
                 data.phaseGroup = result.Read<uint>(18);
 
-                if (data.phaseGroup != 0 && data.phaseid != 0)
+                if (data.phaseGroup != 0 && data.phaseId != 0)
                 {
                     Log.outError(LogFilter.Sql, "Table `gameobject` have gameobject (GUID: {0} Entry: {1}) with both `phaseid` and `phasegroup` set, `phasegroup` set to 0", guid, data.id);
                     data.phaseGroup = 0;
                 }
 
-                if (data.phaseid != 0)
+                if (data.phaseId != 0)
                 {
-                    if (!CliDB.PhaseStorage.ContainsKey(data.phaseid))
+                    if (!CliDB.PhaseStorage.ContainsKey(data.phaseId))
                     {
-                        Log.outError(LogFilter.Sql, "Table `gameobject` have gameobject (GUID: {0} Entry: {1}) with `phaseid` {2} does not exist, set to 0", guid, data.id, data.phaseid);
-                        data.phaseid = 0;
+                        Log.outError(LogFilter.Sql, "Table `gameobject` have gameobject (GUID: {0} Entry: {1}) with `phaseid` {2} does not exist, set to 0", guid, data.id, data.phaseId);
+                        data.phaseId = 0;
                     }
                 }
 
@@ -4029,8 +4037,6 @@ namespace Game
                     Log.outError(LogFilter.Sql, "Table `gameobject` has gameobject (GUID: {0} Entry: {1}) with invalid coordinates, skip", guid, data.id);
                     continue;
                 }
-
-                data.phaseMask = 1;
 
                 if (WorldConfig.GetBoolValue(WorldCfg.CalculateGameobjectZoneAreaData))
                 {
@@ -4221,7 +4227,7 @@ namespace Game
         }
         public void AddGameObjectToGrid(ulong guid, GameObjectData data)
         {
-            uint mask = data.spawnMask;
+            ulong mask = data.spawnMask;
             for (byte i = 0; mask != 0; i++, mask >>= 1)
             {
                 if (Convert.ToBoolean(mask & 1))
@@ -4234,7 +4240,7 @@ namespace Game
         }
         public void RemoveGameObjectFromGrid(ulong guid, GameObjectData data)
         {
-            uint mask = data.spawnMask;
+            ulong mask = data.spawnMask;
             for (byte i = 0; mask != 0; i++, mask >>= 1)
             {
                 if (Convert.ToBoolean(mask & 1))
@@ -4272,9 +4278,8 @@ namespace Game
             data.rotation.W = rotation3;
             data.spawntimesecs = (int)spawntimedelay;
             data.animprogress = 100;
-            data.spawnMask = 1;
+            data.spawnMask = (int)SpawnMask.Continent;
             data.go_state = GameObjectState.Ready;
-            data.phaseMask = (ushort)PhaseMasks.Normal;
             data.artKit = (byte)(goinfo.type == GameObjectTypes.ControlZone ? 21 : 0);
             data.dbData = false;
 
@@ -7678,23 +7683,18 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
-                string name = result.Read<string>(2);
-                string nameAlt = result.Read<string>(3);
-                string title = result.Read<string>(4);
-                string titleAlt = result.Read<string>(5);
-
-                if (!_creatureLocaleStorage.ContainsKey(id))
-                    _creatureLocaleStorage[id] = new CreatureLocale();
-
                 LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
                 if (locale == LocaleConstant.enUS)
                     continue;
 
+                if (!_creatureLocaleStorage.ContainsKey(id))
+                    _creatureLocaleStorage[id] = new CreatureLocale();
+
                 CreatureLocale data = _creatureLocaleStorage[id];
-                AddLocaleString(name, locale, data.Name);
-                AddLocaleString(nameAlt, locale, data.NameAlt);
-                AddLocaleString(title, locale, data.Title);
-                AddLocaleString(titleAlt, locale, data.TitleAlt);
+                AddLocaleString(result.Read<string>(2), locale, data.Name);
+                AddLocaleString(result.Read<string>(3), locale, data.NameAlt);
+                AddLocaleString(result.Read<string>(4), locale, data.Title);
+                AddLocaleString(result.Read<string>(5), locale, data.TitleAlt);
 
             } while (result.NextRow());
         }
@@ -7713,22 +7713,17 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
-
-                string name = result.Read<string>(2);
-                string castBarCaption = result.Read<string>(3);
-                string unk1 = result.Read<string>(4);
+                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
+                if (locale == LocaleConstant.enUS)
+                    continue;
 
                 if (!_gameObjectLocaleStorage.ContainsKey(id))
                     _gameObjectLocaleStorage[id] = new GameObjectLocale();
 
                 GameObjectLocale data = _gameObjectLocaleStorage[id];
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
-                    continue;
-
-                AddLocaleString(name, locale, data.Name);
-                AddLocaleString(castBarCaption, locale, data.CastBarCaption);
-                AddLocaleString(unk1, locale, data.Unk1);
+                AddLocaleString(result.Read<string>(2), locale, data.Name);
+                AddLocaleString(result.Read<string>(3), locale, data.CastBarCaption);
+                AddLocaleString(result.Read<string>(4), locale, data.Unk1);
 
             } while (result.NextRow());
 
@@ -7749,34 +7744,23 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
-
-                string logTitle = result.Read<string>(2);
-                string logDescription = result.Read<string>(3);
-                string questDescription = result.Read<string>(4);
-                string areaDescription = result.Read<string>(5);
-                string portraitGiverText = result.Read<string>(6);
-                string portraitGiverName = result.Read<string>(7);
-                string portraitTurnInText = result.Read<string>(8);
-                string portraitTurnInName = result.Read<string>(9);
-                string questCompletionLog = result.Read<string>(10);
+                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
+                if (locale == LocaleConstant.enUS)
+                    continue;
 
                 if (!_questTemplateLocaleStorage.ContainsKey(id))
                     _questTemplateLocaleStorage[id] = new QuestTemplateLocale();
 
                 QuestTemplateLocale data = _questTemplateLocaleStorage[id];
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
-                    continue;
-
-                AddLocaleString(logTitle, locale, data.LogTitle);
-                AddLocaleString(logDescription, locale, data.LogDescription);
-                AddLocaleString(questDescription, locale, data.QuestDescription);
-                AddLocaleString(areaDescription, locale, data.AreaDescription);
-                AddLocaleString(portraitGiverText, locale, data.PortraitGiverText);
-                AddLocaleString(portraitGiverName, locale, data.PortraitGiverName);
-                AddLocaleString(portraitTurnInText, locale, data.PortraitTurnInText);
-                AddLocaleString(portraitTurnInName, locale, data.PortraitTurnInName);
-                AddLocaleString(questCompletionLog, locale, data.QuestCompletionLog);
+                AddLocaleString(result.Read<string>(2), locale, data.LogTitle);
+                AddLocaleString(result.Read<string>(3), locale, data.LogDescription);
+                AddLocaleString(result.Read<string>(4), locale, data.QuestDescription);
+                AddLocaleString(result.Read<string>(5), locale, data.AreaDescription);
+                AddLocaleString(result.Read<string>(6), locale, data.PortraitGiverText);
+                AddLocaleString(result.Read<string>(7), locale, data.PortraitGiverName);
+                AddLocaleString(result.Read<string>(8), locale, data.PortraitTurnInText);
+                AddLocaleString(result.Read<string>(9), locale, data.PortraitTurnInName);
+                AddLocaleString(result.Read<string>(10), locale, data.QuestCompletionLog);
             } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Quest Tempalate locale strings in {1} ms", _questTemplateLocaleStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
@@ -7795,18 +7779,15 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
-
-                string Description = result.Read<string>(2);
+                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
+                if (locale == LocaleConstant.enUS)
+                    continue;
 
                 if (!_questObjectivesLocaleStorage.ContainsKey(id))
                     _questObjectivesLocaleStorage[id] = new QuestObjectivesLocale();
 
                 QuestObjectivesLocale data = _questObjectivesLocaleStorage[id];
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
-                    continue;
-
-                AddLocaleString(Description, locale, data.Description);
+                AddLocaleString(result.Read<string>(2), locale, data.Description);
             }
             while (result.NextRow());
 
@@ -7826,18 +7807,15 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
-
-                string RewardText = result.Read<string>(2);
+                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
+                if (locale == LocaleConstant.enUS)
+                    continue;
 
                 if (!_questOfferRewardLocaleStorage.ContainsKey(id))
                     _questOfferRewardLocaleStorage[id] = new QuestOfferRewardLocale();
 
                 QuestOfferRewardLocale data = _questOfferRewardLocaleStorage[id];
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
-                    continue;
-
-                AddLocaleString(RewardText, locale, data.RewardText);
+                AddLocaleString(result.Read<string>(2), locale, data.RewardText);
             } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Quest Offer Reward locale strings in {1} ms", _questOfferRewardLocaleStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
@@ -7856,17 +7834,15 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
-                string completionText = result.Read<string>(2);
+                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
+                if (locale == LocaleConstant.enUS)
+                    continue;
 
                 if (!_questRequestItemsLocaleStorage.ContainsKey(id))
                     _questRequestItemsLocaleStorage[id] = new QuestRequestItemsLocale();
 
                 QuestRequestItemsLocale data = _questRequestItemsLocaleStorage[id];
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
-                    continue;
-
-                AddLocaleString(completionText, locale, data.CompletionText);
+                AddLocaleString(result.Read<string>(2), locale, data.CompletionText);
             } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Quest Request Items locale strings in {1} ms", _questRequestItemsLocaleStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
@@ -7887,16 +7863,14 @@ namespace Game
                 ushort menuId = result.Read<ushort>(0);
                 ushort optionId = result.Read<ushort>(1);
                 string localeName = result.Read<string>(2);
-                string optionText = result.Read<string>(3);
-                string boxText = result.Read<string>(4);
 
-                GossipMenuItemsLocale data = new GossipMenuItemsLocale();
                 LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
                 if (locale == LocaleConstant.enUS)
                     continue;
 
-                AddLocaleString(optionText, locale, data.OptionText);
-                AddLocaleString(boxText, locale, data.BoxText);
+                GossipMenuItemsLocale data = new GossipMenuItemsLocale();
+                AddLocaleString(result.Read<string>(3), locale, data.OptionText);
+                AddLocaleString(result.Read<string>(4), locale, data.BoxText);
 
                 _gossipMenuItemsLocaleStorage[MathFunctions.MakePair32(menuId, optionId)] = data;
             }
@@ -7919,17 +7893,15 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
-                string text = result.Read<string>(2);
+                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
+                if (locale == LocaleConstant.enUS)
+                    continue;
 
                 if (!_pageTextLocaleStorage.ContainsKey(id))
                     _pageTextLocaleStorage[id] = new PageTextLocale();
 
                 PageTextLocale data = _pageTextLocaleStorage[id];
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
-                    continue;
-
-                AddLocaleString(text, locale, data.Text);
+                AddLocaleString(result.Read<string>(2), locale, data.Text);
             } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} PageText locale strings in {1} ms", _pageTextLocaleStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
@@ -7949,18 +7921,15 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
                 string localeName = result.Read<string>(1);
-                string name = result.Read<string>(2);
+                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
+                if (locale == LocaleConstant.enUS)
+                    continue;
 
                 if (!_pointOfInterestLocaleStorage.ContainsKey(id))
                     _pointOfInterestLocaleStorage[id] = new PointOfInterestLocale();
 
                 PointOfInterestLocale data = _pointOfInterestLocaleStorage[id];
-
-                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
-                if (locale == LocaleConstant.enUS)
-                    continue;
-
-                AddLocaleString(name, locale, data.Name);
+                AddLocaleString(result.Read<string>(2), locale, data.Name);
             }
             while (result.NextRow());
         }
@@ -8666,6 +8635,329 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} scene templates in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
+        public void LoadPlayerChoices()
+        {
+            uint oldMSTime = Time.GetMSTime();
+            _playerChoices.Clear();
+
+            SQLResult choiceResult = DB.World.Query("SELECT ChoiceId, Question FROM playerchoice");
+            if (choiceResult.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 player choices. DB table `playerchoice` is empty.");
+                return;
+            }
+
+            uint responseCount = 0;
+            uint rewardCount = 0;
+            uint itemRewardCount = 0;
+            uint currencyRewardCount = 0;
+            uint factionRewardCount = 0;
+
+            do
+            {
+                int choiceId = choiceResult.Read<int>(0);
+
+                PlayerChoice choice = new PlayerChoice();
+                choice.ChoiceId = choiceId;
+                choice.Question = choiceResult.Read<string>(1);
+                _playerChoices[choiceId] = choice;
+
+            } while (choiceResult.NextRow());
+
+            SQLResult responses = DB.World.Query("SELECT ChoiceId, ResponseId, ChoiceArtFileId, Header, Answer, Description, Confirmation FROM playerchoice_response ORDER BY `Index` ASC");
+            if (!responses.IsEmpty())
+            {
+                do
+                {
+                    int choiceId = responses.Read<int>(0);
+                    int responseId = responses.Read<int>(1);
+
+                    if (!_playerChoices.ContainsKey(choiceId))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped");
+                        continue;
+                    }
+
+                    PlayerChoice choice = _playerChoices[choiceId];
+                    PlayerChoiceResponse response = new PlayerChoiceResponse();
+
+                    response.ResponseId = responseId;
+                    response.ChoiceArtFileId = responses.Read<int>(2);
+                    response.Header = responses.Read<string>(3);
+                    response.Answer = responses.Read<string>(4);
+                    response.Description = responses.Read<string>(5);
+                    response.Confirmation = responses.Read<string>(6);
+                    ++responseCount;
+
+                    choice.Responses[responseId] = response;
+                } while (responses.NextRow());
+            }
+
+            SQLResult rewards = DB.World.Query("SELECT ChoiceId, ResponseId, TitleId, PackageId, SkillLineId, SkillPointCount, ArenaPointCount, HonorPointCount, Money, Xp FROM playerchoice_response_reward");
+            if (!rewards.IsEmpty())
+            {
+                do
+                {
+                    int choiceId = rewards.Read<int>(0);
+                    int responseId = rewards.Read<int>(1);
+
+                    if (!_playerChoices.ContainsKey(choiceId))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped");
+                        continue;
+                    }
+
+                    PlayerChoice choice = _playerChoices[choiceId];
+                    if (!choice.Responses.Any(playerChoiceResponse => playerChoiceResponse.ResponseId == responseId))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
+                        continue;
+                    }
+
+                    PlayerChoiceResponseReward reward = new PlayerChoiceResponseReward();
+                    reward.TitleId = rewards.Read<int>(2);
+                    reward.PackageId = rewards.Read<int>(3);
+                    reward.SkillLineId = rewards.Read<int>(4);
+                    reward.SkillPointCount = rewards.Read<uint>(5);
+                    reward.ArenaPointCount = rewards.Read<uint>(6);
+                    reward.HonorPointCount = rewards.Read<uint>(7);
+                    reward.Money = rewards.Read<ulong>(8);
+                    reward.Xp = rewards.Read<uint>(9);
+                    ++rewardCount;
+
+                    if (reward.TitleId != 0 && !CliDB.CharTitlesStorage.ContainsKey(reward.TitleId))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward` references non-existing Title {reward.TitleId} for ChoiceId {choiceId}, ResponseId: {responseId}, set to 0");
+                        reward.TitleId = 0;
+                    }
+
+                    if (reward.PackageId != 0 && Global.DB2Mgr.GetQuestPackageItems((uint)reward.PackageId) == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward` references non-existing QuestPackage {reward.TitleId} for ChoiceId {choiceId}, ResponseId: {responseId}, set to 0");
+                        reward.PackageId = 0;
+                    }
+
+                    if (reward.SkillLineId != 0 && !CliDB.SkillLineStorage.ContainsKey(reward.SkillLineId))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward` references non-existing SkillLine {reward.TitleId} for ChoiceId {choiceId}, ResponseId: {responseId}, set to 0");
+                        reward.SkillLineId = 0;
+                        reward.SkillPointCount = 0;
+                    }
+
+                    choice.Responses[responseId].Reward.Set(reward);
+
+                } while (rewards.NextRow());
+            }
+
+            SQLResult rewardItem = DB.World.Query("SELECT ChoiceId, ResponseId, ItemId, BonusListIDs, Quantity FROM playerchoice_response_reward_item ORDER BY `Index` ASC");
+            if (!rewardItem.IsEmpty())
+            {
+                do
+                {
+                    int choiceId = rewardItem.Read<int>(0);
+                    int responseId = rewardItem.Read<int>(1);
+                    uint itemId = rewardItem.Read<uint>(2);
+                    StringArray bonusListIDsTok = new StringArray(rewardItem.Read<string>(3), ' ');
+                    List<uint> bonusListIds = new List<uint>();
+                    foreach (uint token in bonusListIDsTok)
+                        bonusListIds.Add(token);
+                    int quantity = rewardItem.Read<int>(4);
+
+                    PlayerChoice choice = _playerChoices.LookupByKey(choiceId);
+                    if (choice == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped");
+                        continue;
+                    }
+
+                    var response = choice.Responses.FirstOrDefault(playerChoiceResponse => { return playerChoiceResponse.ResponseId == responseId; });
+                    if (response == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
+                        continue;
+                    }
+
+                    if (!response.Reward.HasValue)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item` references non-existing player choice reward for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
+                        continue;
+                    }
+
+                    if (GetItemTemplate(itemId) == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item` references non-existing item {itemId} for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
+                        continue;
+                    }
+
+                    itemRewardCount++;
+                    response.Reward.Value.Items.Add(new PlayerChoiceResponseRewardItem(itemId, bonusListIds, quantity));
+
+                } while (rewardItem.NextRow());
+            }
+
+            SQLResult rewardCurrency = DB.World.Query("SELECT ChoiceId, ResponseId, CurrencyId, Quantity FROM playerchoice_response_reward_currency ORDER BY `Index` ASC");
+            if (!rewardCurrency.IsEmpty())
+            {
+                do
+                {
+                    int choiceId = rewardCurrency.Read<int>(0);
+                    int responseId = rewardCurrency.Read<int>(1);
+                    uint currencyId = rewardCurrency.Read<uint>(2);
+                    int quantity = rewardCurrency.Read<int>(3);
+
+                    PlayerChoice choice = _playerChoices.LookupByKey(choiceId);
+                    if (choice == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_currency` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped");
+                        continue;
+                    }
+
+                    var response = choice.Responses.FirstOrDefault(playerChoiceResponse => { return playerChoiceResponse.ResponseId == responseId; });
+                    if (response == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_currency` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
+                        continue;
+                    }
+
+                    if (!response.Reward.HasValue)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_currency` references non-existing player choice reward for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
+                        continue;
+                    }
+
+                    if (!CliDB.CurrencyTypesStorage.ContainsKey(currencyId))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_currency` references non-existing currency {currencyId} for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
+                        continue;
+                    }
+
+                    currencyRewardCount++;
+                    response.Reward.Value.Currency.Add(new PlayerChoiceResponseRewardEntry(currencyId, quantity));
+
+                } while (rewards.NextRow());
+            }
+
+            SQLResult rewardFaction = DB.World.Query("SELECT ChoiceId, ResponseId, FactionId, Quantity FROM playerchoice_response_reward_faction ORDER BY `Index` ASC");
+            if (!rewardFaction.IsEmpty())
+            {
+                do
+                {
+                    int choiceId = rewardFaction.Read<int>(0);
+                    int responseId = rewardFaction.Read<int>(1);
+                    uint factionId = rewardFaction.Read<uint>(2);
+                    int quantity = rewardFaction.Read<int>(3);
+
+                    PlayerChoice choice = _playerChoices.LookupByKey(choiceId);
+                    if (choice == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_faction` references non-existing ChoiceId: {choiceId} (ResponseId: {responseId}), skipped");
+                        continue;
+                    }
+
+                    var response = choice.Responses.FirstOrDefault(playerChoiceResponse => { return playerChoiceResponse.ResponseId == responseId; });
+                    if (response == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_faction` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
+                        continue;
+                    }
+
+                    if (!response.Reward.HasValue)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_faction` references non-existing player choice reward for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
+                        continue;
+                    }
+
+                    if (!CliDB.FactionStorage.ContainsKey(factionId))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_faction` references non-existing faction {factionId} for ChoiceId {choiceId}, ResponseId: {responseId}, skipped");
+                        continue;
+                    }
+
+                    factionRewardCount++;
+                    response.Reward.Value.Faction.Add(new PlayerChoiceResponseRewardEntry(factionId, quantity));
+
+                } while (rewardFaction.NextRow());
+            }
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_playerChoices.Count} player choices, {responseCount} responses, {rewardCount} rewards, {itemRewardCount} item rewards, {currencyRewardCount} " +
+                $"currency rewards and {factionRewardCount} faction rewards in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+        }
+        public void LoadPlayerChoicesLocale()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            // need for reload case
+            _playerChoiceLocales.Clear();
+
+            //                                               0         1       2
+            SQLResult result = DB.World.Query("SELECT ChoiceId, locale, Question FROM playerchoice_locale");
+            if (!result.IsEmpty())
+            {
+                do
+                {
+                    int choiceId = result.Read<int>(0);
+                    string localeName = result.Read<string>(1);
+                    LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
+                    if (locale == LocaleConstant.enUS)
+                        continue;
+
+                    if (GetPlayerChoice(choiceId) == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_locale` references non-existing ChoiceId: {choiceId} for locale {localeName}, skipped");
+                        continue;
+                    }
+
+                    if (!_playerChoiceLocales.ContainsKey(choiceId))
+                        _playerChoiceLocales[choiceId] = new PlayerChoiceLocale();
+
+                    PlayerChoiceLocale data = _playerChoiceLocales[choiceId];
+                    AddLocaleString(result.Read<string>(2), locale, data.Question);
+                } while (result.NextRow());
+
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {_playerChoiceLocales.Count} Player Choice locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            }
+
+            oldMSTime = Time.GetMSTime();
+
+            //                                   0         1           2       3       4       5            6
+            result = DB.World.Query("SELECT ChoiceID, ResponseID, locale, Header, Answer, Description, Confirmation FROM playerchoice_response_locale");
+            if (!result.IsEmpty())
+            {
+                uint count = 0;
+                do
+                {
+                    int choiceId = result.Read<int>(0);
+                    int responseId = result.Read<int>(1);
+                    string localeName = result.Read<string>(2);
+                    LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
+                    if (locale == LocaleConstant.enUS)
+                        continue;
+
+                    var playerChoiceLocale = _playerChoiceLocales.LookupByKey(choiceId);
+                    if (playerChoiceLocale == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_locale` references non-existing ChoiceId: {choiceId} for ResponseId {responseId} locale {localeName}, skipped");
+                        continue;
+                    }
+
+                    PlayerChoice playerChoice = GetPlayerChoice(choiceId);
+                    if (playerChoice.GetResponse(responseId) == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `playerchoice_locale` references non-existing ResponseId: {responseId} for ChoiceId {choiceId} locale {localeName}, skipped");
+                        continue;
+                    }
+
+                    PlayerChoiceResponseLocale data = playerChoiceLocale.Responses[responseId];
+                    AddLocaleString(result.Read<string>(3), locale, data.Header);
+                    AddLocaleString(result.Read<string>(4), locale, data.Answer);
+                    AddLocaleString(result.Read<string>(5), locale, data.Description);
+                    AddLocaleString(result.Read<string>(6), locale, data.Confirmation);
+                    count++;
+                } while (result.NextRow());
+
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Player Choice Response locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            }
+        }
 
         public MailLevelReward GetMailLevelReward(uint level, uint raceMask)
         {
@@ -9169,6 +9461,7 @@ namespace Game
         Dictionary<uint, RepSpilloverTemplate> _repSpilloverTemplateStorage = new Dictionary<uint, RepSpilloverTemplate>();
         MultiMap<byte, MailLevelReward> _mailLevelRewardStorage = new MultiMap<byte, MailLevelReward>();
         MultiMap<Tuple<uint, SummonerType, byte>, TempSummonData> _tempSummonDataStorage = new MultiMap<Tuple<uint, SummonerType, byte>, TempSummonData>();
+        Dictionary<int /*choiceId*/, PlayerChoice> _playerChoices = new Dictionary<int, PlayerChoice>();
         Dictionary<uint, PageText> _pageTextStorage = new Dictionary<uint, PageText>();
         List<string> _reservedNamesStorage = new List<string>();
         Dictionary<uint, SceneTemplate> _sceneTemplateStorage = new Dictionary<uint, SceneTemplate>();
@@ -9278,6 +9571,7 @@ namespace Game
         Dictionary<uint, GossipMenuItemsLocale> _gossipMenuItemsLocaleStorage = new Dictionary<uint, GossipMenuItemsLocale>();
         Dictionary<uint, PageTextLocale> _pageTextLocaleStorage = new Dictionary<uint, PageTextLocale>();
         Dictionary<uint, PointOfInterestLocale> _pointOfInterestLocaleStorage = new Dictionary<uint, PointOfInterestLocale>();
+        Dictionary<int, PlayerChoiceLocale> _playerChoiceLocales = new Dictionary<int, PlayerChoiceLocale>();
 
         List<uint> _tavernAreaTriggerStorage = new List<uint>();
         Dictionary<uint, AreaTriggerStruct> _areaTriggerStorage = new Dictionary<uint, AreaTriggerStruct>();
@@ -10053,5 +10347,85 @@ namespace Game
     {
         public StringArray OptionText = new StringArray((int)LocaleConstant.Total);
         public StringArray BoxText = new StringArray((int)LocaleConstant.Total);
+    }
+
+    public class PlayerChoiceLocale
+    {
+        public StringArray Question = new StringArray((int)LocaleConstant.Total);
+        public Dictionary<int /*ResponseId*/, PlayerChoiceResponseLocale> Responses = new Dictionary<int, PlayerChoiceResponseLocale>();
+    }
+
+    public class PlayerChoiceResponseLocale
+    {
+        public StringArray Answer = new StringArray((int)LocaleConstant.Total);
+        public StringArray Header = new StringArray((int)LocaleConstant.Total);
+        public StringArray Description = new StringArray((int)LocaleConstant.Total);
+        public StringArray Confirmation = new StringArray((int)LocaleConstant.Total);
+    }
+
+    public class PlayerChoiceResponseRewardItem
+    {
+        public PlayerChoiceResponseRewardItem() { }
+        public PlayerChoiceResponseRewardItem(uint id, List<uint> bonusListIDs, int quantity)
+        {
+            Id = id;
+            BonusListIDs = bonusListIDs;
+            Quantity = quantity;
+        }
+
+        public uint Id;
+        public List<uint> BonusListIDs = new List<uint>();
+        public int Quantity;
+    }
+
+    public class PlayerChoiceResponseRewardEntry
+    {
+        public PlayerChoiceResponseRewardEntry(uint id, int quantity)
+        {
+            Id = id;
+            Quantity = quantity;
+        }
+
+        public uint Id;
+        public int Quantity;
+    }
+
+    public class PlayerChoiceResponseReward
+    {
+        public int TitleId;
+        public int PackageId;
+        public int SkillLineId;
+        public uint SkillPointCount;
+        public uint ArenaPointCount;
+        public uint HonorPointCount;
+        public ulong Money;
+        public uint Xp;
+
+        public List<PlayerChoiceResponseRewardItem> Items = new List<PlayerChoiceResponseRewardItem>();
+        public List<PlayerChoiceResponseRewardEntry> Currency = new List<PlayerChoiceResponseRewardEntry>();
+        public List<PlayerChoiceResponseRewardEntry> Faction = new List<PlayerChoiceResponseRewardEntry>();
+    }
+
+    public class PlayerChoiceResponse
+    {
+        public int ResponseId;
+        public int ChoiceArtFileId;
+        public string Header;
+        public string Answer;
+        public string Description;
+        public string Confirmation;
+        public Optional<PlayerChoiceResponseReward> Reward;
+    }
+
+    public class PlayerChoice
+    {
+        public PlayerChoiceResponse GetResponse(int responseId)
+        {
+            return Responses.FirstOrDefault(playerChoiceResponse => { return playerChoiceResponse.ResponseId == responseId; });
+        }
+
+        public int ChoiceId;
+        public string Question;
+        public List<PlayerChoiceResponse> Responses = new List<PlayerChoiceResponse>();
     }
 }

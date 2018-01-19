@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1055,7 +1055,6 @@ namespace Game.Entities
     {
         public uint id;                                              // entry in gamobject_template
         public ushort mapid;
-        public ushort phaseMask;
         public float posX;
         public float posY;
         public float posZ;
@@ -1064,9 +1063,9 @@ namespace Game.Entities
         public int spawntimesecs;
         public uint animprogress;
         public GameObjectState go_state;
-        public uint spawnMask;
+        public ulong spawnMask;
         public byte artKit;
-        public uint phaseid;
+        public uint phaseId;
         public uint phaseGroup;
         public uint ScriptId;
         public bool dbData = true;

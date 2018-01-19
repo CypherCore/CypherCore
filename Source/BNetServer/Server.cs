@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ using Framework.Configuration;
 using Framework.Database;
 using Framework.Networking;
 using System;
+using System.Globalization;
 using System.Timers;
 
 namespace BNetServer
@@ -28,6 +29,10 @@ namespace BNetServer
     {
         static void Main()
         {
+            //Set Culture
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+            System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+
             Console.CancelKeyPress += (o, e) =>
             {
                 Global.RealmMgr.Close();

@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ namespace Scripts.Outlands
             player.PlayerTalkClass.ClearMenus();
             if (action == eTradeskill.GossipActionInfoDef + 1)
             {
-                creature.setPowerType(PowerType.Mana);
+                creature.SetPowerType(PowerType.Mana);
                 creature.SetMaxPower(PowerType.Mana, 200);             //set a "fake" mana value, we can't depend on database doing it in this case
                 creature.SetPower(PowerType.Mana, 200);
 

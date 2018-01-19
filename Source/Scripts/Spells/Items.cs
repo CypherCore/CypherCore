@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,8 +74,8 @@ namespace Scripts.Spells.Items
         public const uint StrengthOfTheTaunkaHero = 71561;  // +700 Strength
 
         //Defibrillate
-        public const int GoblinJumperCablesFail = 8338;
-        public const int GoblinJumperCablesXlFail = 23055;
+        public const uint GoblinJumperCablesFail = 8338;
+        public const uint GoblinJumperCablesXlFail = 23055;
 
         //Desperatedefense
         public const uint DesperateRage = 33898;
@@ -610,7 +610,7 @@ namespace Scripts.Spells.Items
                 if (player.GetWeaponForAttack(WeaponAttackType.OffAttack, true) && RandomHelper.URand(0, 1) != 0)
                     spellId = SpellIds.ManifestAngerOffHand;
 
-            caster.CastSpell(target, spellId, true);
+            caster.CastSpell(target, spellId, true, null, aurEff);
         }
 
         public override void Register()
@@ -680,7 +680,7 @@ namespace Scripts.Spells.Items
             PreventDefaultAction();
             Unit caster = eventInfo.GetActor();
             uint spellId = triggeredSpells[(int)caster.GetClass()].SelectRandom();
-            caster.CastSpell(caster, spellId, true);
+            caster.CastSpell(caster, spellId, true, null, aurEff);
 
             if (RandomHelper.randChance(10))
                 caster.Say(TextIds.SayMadness);
@@ -703,7 +703,7 @@ namespace Scripts.Spells.Items
         void HandlePeriodicDummy(AuraEffect aurEff)
         {
             PreventDefaultAction();
-            GetTarget().CastSpell(GetTarget(), RandomHelper.RAND(SpellIds.DementiaPos, SpellIds.DementiaNeg), true);
+            GetTarget().CastSpell(GetTarget(), RandomHelper.RAND(SpellIds.DementiaPos, SpellIds.DementiaNeg), true, null, aurEff);
         }
 
         public override void Register()
@@ -849,7 +849,7 @@ namespace Scripts.Spells.Items
                 return;
 
             uint spellId = randomSpells.SelectRandom();
-            caster.CastSpell(caster, spellId, true);
+            caster.CastSpell(caster, spellId, true, null, aurEff);
         }
 
         public override void Register()
@@ -898,9 +898,9 @@ namespace Scripts.Spells.Items
     // 8342  - Defibrillate (Goblin Jumper Cables) have 33% chance on success
     // 22999 - Defibrillate (Goblin Jumper Cables XL) have 50% chance on success
     // 54732 - Defibrillate (Gnomish Army Knife) have 67% chance on success
-    [Script("spell_item_goblin_jumper_cables", 33, SpellIds.GoblinJumperCablesFail)]
-    [Script("spell_item_goblin_jumper_cables_xl", 50, SpellIds.GoblinJumperCablesXlFail)]
-    [Script("spell_item_gnomish_army_knife", 67, 0)]
+    [Script("spell_item_goblin_jumper_cables", 33u, SpellIds.GoblinJumperCablesFail)]
+    [Script("spell_item_goblin_jumper_cables_xl", 50u, SpellIds.GoblinJumperCablesXlFail)]
+    [Script("spell_item_gnomish_army_knife", 67u, 0u)]
     class spell_item_defibrillate : SpellScript
     {
         public spell_item_defibrillate(uint chance, uint failSpell)
@@ -1115,7 +1115,7 @@ namespace Scripts.Spells.Items
 
             int amount = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
             Unit caster = eventInfo.GetActor();
-            caster.CastCustomSpell(SpellIds.Shadowmend, SpellValueMod.BasePoint0, amount, (Unit)null, true);
+            caster.CastCustomSpell(SpellIds.Shadowmend, SpellValueMod.BasePoint0, amount, null, true, null, aurEff);
         }
 
         public override void Register()
@@ -1140,9 +1140,9 @@ namespace Scripts.Spells.Items
             if (target)
             {
                 if (RandomHelper.URand(0, 99) < 15)
-                    caster.CastSpell(caster, SpellIds.GnomishDeathRaySelf, true, null);    // failure
+                    caster.CastSpell(caster, SpellIds.GnomishDeathRaySelf, true);    // failure
                 else
-                    caster.CastSpell(target, SpellIds.GnomishDeathRayTarget, true, null);
+                    caster.CastSpell(target, SpellIds.GnomishDeathRayTarget, true);
             }
         }
 
@@ -1180,7 +1180,7 @@ namespace Scripts.Spells.Items
             Unit caster = eventInfo.GetActor();
 
             uint spellId;
-            switch (caster.getPowerType())
+            switch (caster.GetPowerType())
             {
                 case PowerType.Mana:
                     spellId = _manaSpellId;
@@ -1191,6 +1191,7 @@ namespace Scripts.Spells.Items
                 case PowerType.Rage:
                     spellId = _rageSpellId;
                     break;
+                // Death Knights can't use daggers, but oh well
                 case PowerType.RunicPower:
                     spellId = _rpSpellId;
                     break;
@@ -1198,7 +1199,7 @@ namespace Scripts.Spells.Items
                     return;
             }
 
-            caster.CastSpell((Unit)null, spellId, true);
+            caster.CastSpell((Unit)null, spellId, true, null, aurEff);
         }
 
         public override void Register()
@@ -1300,7 +1301,7 @@ namespace Scripts.Spells.Items
                 // in that case, do not cast heal spell
                 PreventDefaultAction();
                 // but mana instead
-                eventInfo.GetActor().CastSpell((Unit)null, SpellIds.MarkOfConquestEnergize, true);
+                eventInfo.GetActor().CastSpell((Unit)null, SpellIds.MarkOfConquestEnergize, true, null, aurEff);
             }
         }
 
@@ -1529,7 +1530,7 @@ namespace Scripts.Spells.Items
 
             int bp = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
             Unit caster = eventInfo.GetActor();
-            caster.CastCustomSpell(SpellIds.HealthLink, SpellValueMod.BasePoint0, bp, (Unit)null, true);
+            caster.CastCustomSpell(SpellIds.HealthLink, SpellValueMod.BasePoint0, bp, null, true, null, aurEff);
         }
 
         public override void Register()
@@ -1825,7 +1826,7 @@ namespace Scripts.Spells.Items
 
             Unit caster = eventInfo.GetActor();
             int amount = (int)caster.CountPctFromMaxHealth(aurEff.GetAmount());
-            caster.CastCustomSpell(SpellIds.SwiftHandOfJusticeHeal, SpellValueMod.BasePoint0, amount, (Unit)null, true);
+            caster.CastCustomSpell(SpellIds.SwiftHandOfJusticeHeal, SpellValueMod.BasePoint0, amount, null, true, null, aurEff);
         }
 
         public override void Register()
@@ -2725,10 +2726,10 @@ namespace Scripts.Spells.Items
             Unit target = eventInfo.GetProcTarget();
 
             if (eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.DoneSpellMagicDmgClassPos))
-                caster.CastSpell(target, _healProcSpellId, true);
+                caster.CastSpell(target, _healProcSpellId, true, null, aurEff);
 
             if (eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.DoneSpellMagicDmgClassNeg))
-                caster.CastSpell(target, _damageProcSpellId, true);
+                caster.CastSpell(target, _damageProcSpellId, true, null, aurEff);
         }
 
         public override void Register()
@@ -2812,10 +2813,10 @@ namespace Scripts.Spells.Items
 
             // Aggression checks are in the spell system... just cast and forget
             if (player.GetReputationRank(FactionIds.Aldor) == ReputationRank.Exalted)
-                player.CastSpell(target, _aldorSpellId, true);
+                player.CastSpell(target, _aldorSpellId, true, null, aurEff);
 
             if (player.GetReputationRank(FactionIds.Scryers) == ReputationRank.Exalted)
-                player.CastSpell(target, _scryersSpellId, true);
+                player.CastSpell(target, _scryersSpellId, true, null, aurEff);
         }
 
         public override void Register()

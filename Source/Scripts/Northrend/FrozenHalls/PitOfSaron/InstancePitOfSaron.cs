@@ -22,6 +22,7 @@ namespace Scripts.Northrend.FrozenHalls.PitOfSaron
         };
     }
 
+    [Script]
     class instance_pit_of_saron : InstanceMapScript
     {
         public instance_pit_of_saron() : base(nameof(instance_pit_of_saron), 658) { }

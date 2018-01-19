@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 using Framework.Constants;
 using Game.DataStorage;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Network.Packets
@@ -371,7 +372,7 @@ namespace Game.Network.Packets
 
             AbilityID.ForEach(ability => data.WriteUInt32(ability.Id));
 
-            data.WriteBits(CustomName.Length, 7);
+            data.WriteBits(CustomName.GetByteCount(), 7);
             data.FlushBits();
             data.WriteString(CustomName);
         }

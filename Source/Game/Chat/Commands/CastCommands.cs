@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ using Framework.Constants;
 using Framework.IO;
 using Game.Entities;
 using Game.Spells;
+using System;
 
 namespace Game.Chat
 {
@@ -53,10 +54,7 @@ namespace Game.Chat
                     return false;
             }
 
-            bool triggered = (triggeredStr != null);
-
-            handler.GetSession().GetPlayer().CastSpell(target, spellId, triggered);
-
+            handler.GetSession().GetPlayer().CastSpell(target, spellId, !triggeredStr.IsEmpty());
             return true;
         }
 

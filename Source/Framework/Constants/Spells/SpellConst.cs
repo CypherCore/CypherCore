@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+using System;
 
 namespace Framework.Constants
 {
@@ -139,6 +140,11 @@ namespace Framework.Constants
         LeaveCombat = 0x80000000,   // 31   removed by leaving combat
 
         NotVictim = (Hitbyspell | TakeDamage | DirectDamage)
+    }
+
+    public enum SpellAuraInterruptFlags2
+    {
+
     }
 
     // Enum with EffectRadiusIndex and their actual radius
@@ -296,6 +302,7 @@ namespace Framework.Constants
         Sapped = 30,
         Enraged = 31,
         Wounded = 32,
+        Max = 33,
 
         ImmuneToMovementImpairmentAndLossControlMask = ((1 << Charm) | (1 << Disoriented) |
             (1 << Fear) | (1 << Root) | (1 << Sleep) | (1 << Snare) | (1 << Stun) |
@@ -1364,9 +1371,9 @@ namespace Framework.Constants
         IsArcaneConcentration = 0x800000, // 23 Only Mage Arcane Concentration Have This Flag
         Unk24 = 0x1000000, // 24
         Unk25 = 0x2000000, // 25
-        Unk26 = 0x4000000, // 26 Unaffected By School Immunity
+        UnaffectedByAuraSchoolImmune = 0x4000000, // 26 Unaffected By School Immunity
         Unk27 = 0x8000000, // 27
-        Unk28 = 0x10000000, // 28
+        IgnoreItemCheck = 0x10000000, // 28 Spell is cast without checking item requirements (charges/reagents/totem)
         CantCrit = 0x20000000, // 29 Spell Can'T Crit
         TriggeredCanTriggerProc = 0x40000000, // 30 Spell Can Trigger Even If Triggered
         FoodBuff = 0x80000000  // 31 Food Or Drink Buff (Like Well Fed)
@@ -1533,7 +1540,7 @@ namespace Framework.Constants
         Unk17 = 0x20000, // 17 Only 27965 (Suicide) Spell.
         HasChargeEffect = 0x40000, // 18 Only Spells That Have Charge Among Effects.
         ZoneTeleport = 0x80000, // 19 Teleports To Specific Zones.
-        Unk20 = 0x100000, // 20 Blink, Divine Shield, Ice Block
+        UsableInStunFearConfusion = 0x100000, // 20 Blink, Divine Shield, Ice Block
         Unk21 = 0x200000, // 21 Not Set
         Unk22 = 0x400000, // 22
         Unk23 = 0x800000, // 23 Motivate, Mutilate, Shattering Throw
@@ -1982,7 +1989,7 @@ namespace Framework.Constants
         Unk202 = 202,
         Unk203 = 203,
         ChangeBattlepetQuality = 204,
-        LaunchQuestTask = 205,
+        LaunchQuestChoice = 205,
         AlterItem = 206,
         Unk207 = 207,
         Unk208 = 208,
@@ -2044,6 +2051,7 @@ namespace Framework.Constants
         HitTarget
     }
 
+    [Flags]
     public enum ProcFlags
     {
         None = 0x0,
@@ -2126,6 +2134,8 @@ namespace Framework.Constants
         Finish = 0x4,
         MaskAll = Cast | Hit | Finish
     }
+
+    [Flags]
     public enum ProcFlagsHit
     {
         None = 0x0, // No Value - Proc_Hit_Normal | Proc_Hit_Critical For Taken Proc Type, Proc_Hit_Normal | Proc_Hit_Critical | Proc_Hit_Absorb For Done

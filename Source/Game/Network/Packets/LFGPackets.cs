@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.Entities;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Network.Packets
@@ -275,7 +276,7 @@ namespace Game.Network.Packets
                 blackList.Write(_worldPacket);
         }
 
-        public RideTicket Ticket;
+        public RideTicket Ticket = new RideTicket();
         public byte Result;
         public byte ResultDetail;
         public List<LFGJoinBlackList> BlackList = new List<LFGJoinBlackList>();
@@ -693,7 +694,7 @@ namespace Game.Network.Packets
             data.WriteBit(VotePassed);
             data.WriteBit(MyVoteCompleted);
             data.WriteBit(MyVote);
-            data.WriteBits(Reason.Length, 8);
+            data.WriteBits(Reason.GetByteCount(), 8);
             data.WritePackedGuid(Target);
             data.WriteUInt32(TotalVotes);
             data.WriteUInt32(BootVotes);

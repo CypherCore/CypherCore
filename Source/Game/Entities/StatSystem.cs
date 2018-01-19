@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,9 +79,9 @@ namespace Game.Entities
                 case UnitMods.Runes:
                 case UnitMods.RunicPower:
                 case UnitMods.SoulShards:
-                case UnitMods.Eclipse:
+                case UnitMods.LunarPower:
                 case UnitMods.HolyPower:
-                case UnitMods.Alternative:
+                case UnitMods.Alternate:
                 case UnitMods.Maelstrom:
                 case UnitMods.Chi:
                 case UnitMods.Insanity:
@@ -121,15 +121,9 @@ namespace Game.Entities
 
             return true;
         }
-        int GetMinPower(PowerType power) { return power == PowerType.LunarPower ? -100 : 0; }
-        // returns negative amount on power reduction
-        public int ModifyPowerPct(PowerType power, float pct, bool apply)
-        {
-            float amount = GetMaxPower(power);
-            MathFunctions.ApplyPercentModFloatVar(ref amount, pct, apply);
 
-            return ModifyPower(power, (int)amount - GetMaxPower(power));
-        }
+        int GetMinPower(PowerType power) { return power == PowerType.LunarPower ? -100 : 0; }
+
         // returns negative amount on power reduction
         public int ModifyPower(PowerType power, int dVal)
         {
@@ -419,16 +413,16 @@ namespace Game.Entities
         public virtual float GetArmorMultiplierForTarget(WorldObject target) { return 1.0f; }
 
         //Powers
-        public PowerType getPowerType()
+        public PowerType GetPowerType()
         {
             return (PowerType)GetUInt32Value(UnitFields.DisplayPower);
         }
-        public void setPowerType(PowerType newPowerType)
+        public void SetPowerType(PowerType powerType)
         {
-            if (getPowerType() == newPowerType)
+            if (GetPowerType() == powerType)
                 return;
 
-            SetUInt32Value(UnitFields.DisplayPower, (uint)newPowerType);
+            SetUInt32Value(UnitFields.DisplayPower, (uint)powerType);
 
             if (IsTypeId(TypeId.Player))
             {
@@ -450,7 +444,7 @@ namespace Game.Entities
                     powerMultiplier = creature.GetCreatureTemplate().ModMana;
             }
 
-            switch (newPowerType)
+            switch (powerType)
             {
                 default:
                 case PowerType.Mana:
@@ -468,13 +462,13 @@ namespace Game.Entities
                     break;
             }
         }
-        public void SetMaxPower(PowerType power, int val)
+        public void SetMaxPower(PowerType powerType, int val)
         {
-            uint powerIndex = GetPowerIndex(power);
+            uint powerIndex = GetPowerIndex(powerType);
             if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
                 return;
 
-            int cur_power = GetPower(power);
+            int cur_power = GetPower(powerType);
             SetInt32Value(UnitFields.MaxPower + (int)powerIndex, val);
 
             // group update
@@ -491,7 +485,7 @@ namespace Game.Entities
             }*/
 
             if (val < cur_power)
-                SetPower(power, val);
+                SetPower(powerType, val);
         }
         public void SetPower(PowerType powerType, int val)
         {
@@ -527,30 +521,31 @@ namespace Game.Entities
                     pet.SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_CUR_POWER);
             }*/
         }
-        public int GetPower(PowerType power)
+        public void SetFullPower(PowerType powerType) { SetPower(powerType, GetMaxPower(powerType)); }
+        public int GetPower(PowerType powerType)
         {
-            uint powerIndex = GetPowerIndex(power);
+            uint powerIndex = GetPowerIndex(powerType);
             if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
                 return 0;
 
             return GetInt32Value(UnitFields.Power + (int)powerIndex);
         }
-        public int GetMaxPower(PowerType power)
+        public int GetMaxPower(PowerType powerType)
         {
-            uint powerIndex = GetPowerIndex(power);
+            uint powerIndex = GetPowerIndex(powerType);
             if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
                 return 0;
 
             return GetInt32Value(UnitFields.MaxPower + (int)powerIndex);
         }
-        public int GetCreatePowers(PowerType power)
+        public int GetCreatePowers(PowerType powerType)
         {
-            if (power == PowerType.Mana)
+            if (powerType == PowerType.Mana)
                 return (int)GetCreateMana();
 
-            PowerTypeRecord powerType = Global.DB2Mgr.GetPowerTypeEntry(power);
-            if (powerType != null)
-                return powerType.MaxPower;
+            PowerTypeRecord powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(powerType);
+            if (powerTypeEntry != null)
+                return powerTypeEntry.MaxPower;
 
             return 0;
         }
@@ -566,6 +561,7 @@ namespace Game.Entities
 
             return Global.DB2Mgr.GetPowerIndexByClass(powerType, _class);
         }
+        public float GetPowerPct(PowerType powerType) { return GetMaxPower(powerType) != 0 ? 100.0f* GetPower(powerType) / GetMaxPower(powerType) : 0.0f; }
 
         public void ApplyResilience(Unit victim, ref uint damage)
         {

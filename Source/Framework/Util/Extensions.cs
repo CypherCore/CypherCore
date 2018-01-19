@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -305,6 +305,11 @@ namespace System
         {
             double value;
             return double.TryParse(str, out value);
+        }
+
+        public static int GetByteCount(this string str)
+        {
+            return Encoding.UTF8.GetByteCount(str);
         }
         #endregion
 

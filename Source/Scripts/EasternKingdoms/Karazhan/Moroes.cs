@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -421,7 +421,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             {
                 Unit target = SelectTarget(SelectAggroTarget.Random, 0, 100, true);
                 if (target)
-                    if (target.getPowerType() == PowerType.Mana)
+                    if (target.GetPowerType() == PowerType.Mana)
                         DoCast(target, SpellIds.Manaburn);
                 ManaBurn_Timer = 5000;                          // 3 sec cast
             }

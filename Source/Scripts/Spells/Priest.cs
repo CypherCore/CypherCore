@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -104,7 +104,7 @@ namespace Scripts.Spells.Priest
                 return;
 
             int amount = (int)MathFunctions.CalculatePct(healInfo.GetHeal(), 10);
-            caster.CastCustomSpell(SpellIds.OracularHeal, SpellValueMod.BasePoint0, amount, caster, true);
+            caster.CastCustomSpell(SpellIds.OracularHeal, SpellValueMod.BasePoint0, amount, caster, true, null, aurEff);
         }
 
         public override void Register()
@@ -496,7 +496,7 @@ namespace Scripts.Spells.Priest
             {
                 Unit target = obj.ToUnit();
                 if (target)
-                    return target.getPowerType() != PowerType.Mana;
+                    return target.GetPowerType() != PowerType.Mana;
 
                 return true;
             }));
@@ -936,7 +936,7 @@ namespace Scripts.Spells.Priest
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            eventInfo.GetActor().CastSpell(eventInfo.GetProcTarget(), SpellIds.ArmorOfFaith, true);
+            eventInfo.GetActor().CastSpell(eventInfo.GetProcTarget(), SpellIds.ArmorOfFaith, true, null, aurEff);
         }
 
         public override void Register()
@@ -1006,7 +1006,7 @@ namespace Scripts.Spells.Priest
             Unit target = eventInfo.GetProcTarget();
             amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.BlessedHealing, AuraType.PeriodicHeal);
 
-            caster.CastCustomSpell(SpellIds.BlessedHealing, SpellValueMod.BasePoint0, amount, target, true);
+            caster.CastCustomSpell(SpellIds.BlessedHealing, SpellValueMod.BasePoint0, amount, target, true, null, aurEff);
         }
 
         public override void Register()

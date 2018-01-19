@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -867,7 +867,13 @@ namespace Game.Entities
             }
 
             // search free slot
-            res = CanStoreItem_InInventorySlots(InventorySlots.ItemStart, InventorySlots.ItemEnd, dest, pProto, ref count, false, pItem, bag, slot);
+            byte searchSlotStart = InventorySlots.ItemStart;
+            // new bags can be directly equipped
+            if (!pItem && pProto.GetClass() == ItemClass.Container && (ItemSubClassContainer)pProto.GetSubClass() == ItemSubClassContainer.Container &&
+                (pProto.GetBonding() == ItemBondingType.None || pProto.GetBonding() == ItemBondingType.OnAcquire))
+                searchSlotStart = InventorySlots.BagStart;
+
+            res = CanStoreItem_InInventorySlots(searchSlotStart, InventorySlots.ItemEnd, dest, pProto, ref count, false, pItem, bag, slot);
             if (res != InventoryResult.Ok)
             {
                 no_space_count = count + no_similar_count;
@@ -2565,10 +2571,10 @@ namespace Game.Entities
             //packet.QuestLogItemID;
             packet.Quantity = quantity;
             packet.QuantityInInventory = GetItemCount(item.GetEntry());
-            //packet.DungeonEncounterID;
+            //packet.DungeonEncounterID; 
+            packet.BattlePetSpeciesID = (int)item.GetModifier(ItemModifier.BattlePetSpeciesId);
             packet.BattlePetBreedID = (int)item.GetModifier(ItemModifier.BattlePetBreedData) & 0xFFFFFF;
             packet.BattlePetBreedQuality = (item.GetModifier(ItemModifier.BattlePetBreedData) >> 24) & 0xFF;
-            packet.BattlePetSpeciesID = (int)item.GetModifier(ItemModifier.BattlePetSpeciesId);
             packet.BattlePetLevel = (int)item.GetModifier(ItemModifier.BattlePetLevel);
 
             packet.ItemGUID = item.GetGUID();

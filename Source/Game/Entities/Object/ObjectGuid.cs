@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -170,7 +170,7 @@ namespace Game.Entities
 
         public override string ToString()
         {
-            string str = string.Format("GUID Full: 0x{0}, Type: {1}", _low, GetHigh());
+            string str = string.Format("GUID Full: 0x{0}, Type: {1}", _high + _low, GetHigh());
             if (HasEntry())
                 str += (IsPet() ? " Pet number: " : " Entry: ") + GetEntry() + " ";
 

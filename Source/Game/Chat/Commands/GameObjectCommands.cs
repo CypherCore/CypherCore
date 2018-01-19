@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -476,7 +476,7 @@ namespace Game.Chat
                 GameObject obj = new GameObject();
 
                 Quaternion rotation = new Quaternion(Matrix3.fromEulerAnglesZYX(player.GetOrientation(), 0.0f, 0.0f));
-                if (!obj.Create(objectInfo.entry, map, 0, player, rotation, 255, GameObjectState.Ready))
+                if (!obj.Create(objectInfo.entry, map, player, rotation, 255, GameObjectState.Ready))
                     return false;
 
                 obj.CopyPhaseFrom(player);
@@ -487,7 +487,7 @@ namespace Game.Chat
                 }
 
                 // fill the gameobject data and save to the db
-                obj.SaveToDB(map.GetId(), (byte)(1 << (int)map.GetSpawnMode()), player.GetPhaseMask());
+                obj.SaveToDB(map.GetId(), 1ul << (int)map.GetSpawnMode());
                 ulong spawnId = obj.GetSpawnId();
 
                 // this will generate a new guid if the object is in an instance

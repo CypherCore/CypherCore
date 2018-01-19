@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,7 +88,7 @@ namespace Framework.Networking
         {
             try
             {
-                _stream.AuthenticateAsServer(certificate, false, System.Security.Authentication.SslProtocols.Tls12, false);
+                _stream.AuthenticateAsServer(certificate, false, System.Security.Authentication.SslProtocols.Tls, false);
             }
             catch(Exception ex)
             {

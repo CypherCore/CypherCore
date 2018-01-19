@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -98,7 +98,7 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt16(charInfo.SpecID);
                 _worldPacket.WriteUInt32(charInfo.Unknown703);
                 _worldPacket.WriteUInt32(charInfo.Flags4);
-                _worldPacket.WriteBits(charInfo.Name.Length, 6);
+                _worldPacket.WriteBits(charInfo.Name.GetByteCount(), 6);
                 _worldPacket.WriteBit(charInfo.FirstLogin);
                 _worldPacket.WriteBit(charInfo.BoostInProgress);
                 _worldPacket.WriteBits(charInfo.unkWod61x, 5);
@@ -371,7 +371,7 @@ namespace Game.Network.Packets
         {
             _worldPacket.WriteUInt8(Result);
             _worldPacket.WriteBit(Guid.HasValue);
-            _worldPacket.WriteBits(Name.Length, 6);
+            _worldPacket.WriteBits(Name.GetByteCount(), 6);
             _worldPacket.FlushBits();
 
             if (Guid.HasValue)
@@ -458,7 +458,7 @@ namespace Game.Network.Packets
 
             if (Display.HasValue)
             {
-                _worldPacket.WriteBits(Display.Value.Name.Length, 6);
+                _worldPacket.WriteBits(Display.Value.Name.GetByteCount(), 6);
                 _worldPacket.WriteUInt8(Display.Value.SexID);
                 _worldPacket.WriteUInt8(Display.Value.SkinID);
                 _worldPacket.WriteUInt8(Display.Value.HairColorID);
@@ -510,7 +510,7 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteBit(Success);
-            _worldPacket.WriteBits(Name.Length, 6);
+            _worldPacket.WriteBits(Name.GetByteCount(), 6);
 
             _worldPacket.WriteString(Name);
         }
@@ -943,7 +943,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(FacialHairStyleID);
             _worldPacket.WriteUInt8(FaceID);
             CustomDisplay.ForEach(id => _worldPacket.WriteUInt8(id));
-            _worldPacket.WriteBits(CharName.Length, 6);
+            _worldPacket.WriteBits(CharName.GetByteCount(), 6);
             _worldPacket.FlushBits();
             _worldPacket.WriteString(CharName);
         }

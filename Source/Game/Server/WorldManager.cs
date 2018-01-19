@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -371,11 +371,11 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading SpellInfo custom attributes...");
             Global.SpellMgr.LoadSpellInfoCustomAttributes();
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading SpellInfo SpellSpecific and AuraState...");
-            Global.SpellMgr.LoadSpellInfoSpellSpecificAndAuraState();
-
             Log.outInfo(LogFilter.ServerLoading, "Loading SpellInfo diminishing infos...");
             Global.SpellMgr.LoadSpellInfoDiminishing();
+
+            Log.outInfo(LogFilter.ServerLoading, "Loading SpellInfo immunity infos...");
+            Global.SpellMgr.LoadSpellInfoImmunities();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading PetFamilySpellsStore Data...");
             Global.SpellMgr.LoadPetFamilySpellsStore();
@@ -435,6 +435,9 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Spell Learn Skills...");
             Global.SpellMgr.LoadSpellLearnSkills();
+
+            Log.outInfo(LogFilter.ServerLoading, "Loading SpellInfo SpellSpecific and AuraState...");
+            Global.SpellMgr.LoadSpellInfoSpellSpecificAndAuraState();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Spell Learn Spells...");
             Global.SpellMgr.LoadSpellLearnSpells();
@@ -621,6 +624,12 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Scenes Templates...");
             Global.ObjectMgr.LoadSceneTemplates();
+
+            Log.outInfo(LogFilter.ServerLoading, "Loading Player Choices...");
+            Global.ObjectMgr.LoadPlayerChoices();
+
+            Log.outInfo(LogFilter.ServerLoading, "Loading Player Choices Locales...");
+            Global.ObjectMgr.LoadPlayerChoicesLocale();
 
             CharacterDatabaseCleaner.CleanDatabase();
 

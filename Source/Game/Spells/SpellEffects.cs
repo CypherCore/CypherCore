@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -823,7 +823,7 @@ namespace Game.Spells
 
             PowerType powerType = (PowerType)effectInfo.MiscValue;
 
-            if (unitTarget == null || !unitTarget.IsAlive() || unitTarget.getPowerType() != powerType || damage < 0)
+            if (unitTarget == null || !unitTarget.IsAlive() || unitTarget.GetPowerType() != powerType || damage < 0)
                 return;
 
             // add spell damage bonus
@@ -902,7 +902,7 @@ namespace Game.Spells
 
             PowerType powerType = (PowerType)effectInfo.MiscValue;
 
-            if (unitTarget == null || !unitTarget.IsAlive() || unitTarget.getPowerType() != powerType || damage < 0)
+            if (unitTarget == null || !unitTarget.IsAlive() || unitTarget.GetPowerType() != powerType || damage < 0)
                 return;
 
             int newDamage = -(unitTarget.ModifyPower(powerType, -damage));
@@ -1281,26 +1281,15 @@ namespace Game.Spells
                 return;
 
             // Some level depends spells
-            int level_multiplier = 0;
-            int level_diff = 0;
             switch (m_spellInfo.Id)
             {
-                case 9512:                                          // Restore Energy
-                    level_diff = (int)m_caster.getLevel() - 40;
-                    level_multiplier = 2;
-                    break;
                 case 24571:                                         // Blood Fury
-                    level_diff = (int)m_caster.getLevel() - 60;
-                    level_multiplier = 10;
+                                                                    // Instantly increases your rage by ${(300-10*$max(0,$PL-60))/10}.
+                    damage -= 10 * (int)Math.Max(0, Math.Min(30, m_caster.getLevel() - 60));
                     break;
                 case 24532:                                         // Burst of Energy
-                    level_diff = (int)m_caster.getLevel() - 60;
-                    level_multiplier = 4;
-                    break;
-                case 31930:                                         // Judgements of the Wise
-                case 63375:                                         // Primal Wisdom
-                case 68082:                                         // Glyph of Seal of Command
-                    damage = (int)MathFunctions.CalculatePct(unitTarget.GetCreateMana(), damage);
+                                                                    // Instantly increases your energy by ${60-4*$max(0,$min(15,$PL-60))}.
+                    damage -= 4 * (int)Math.Max(0, Math.Min(15, m_caster.getLevel() - 60));
                     break;
                 case 67490:                                         // Runic Mana Injector (mana gain increased by 25% for engineers - 3.2.0 patch change)
                     {
@@ -1313,12 +1302,6 @@ namespace Game.Spells
                 default:
                     break;
             }
-
-            if (level_diff > 0)
-                damage -= level_multiplier * level_diff;
-
-            if (damage < 0 && power != PowerType.LunarPower)
-                return;
 
             m_caster.EnergizeBySpell(unitTarget, m_spellInfo.Id, damage, power);
 
@@ -1628,6 +1611,8 @@ namespace Game.Spells
                     m_castItemLevel = -1;
 
                     player.StoreItem(dest, pNewItem, true);
+                    player.SendNewItem(pNewItem, 1, true, false);
+                    player.ItemAddedQuestCheck(newitemid, 1);
                     return;
                 }
             }
@@ -1676,6 +1661,8 @@ namespace Game.Spells
 
                     player.EquipItem(dest, pNewItem, true);
                     player.AutoUnequipOffhandIfNeed();
+                    player.SendNewItem(pNewItem, 1, true, false);
+                    player.ItemAddedQuestCheck(newitemid, 1);
                     return;
                 }
             }
@@ -1899,23 +1886,6 @@ namespace Game.Spells
 
             uint spellToLearn = (m_spellInfo.Id == 483 || m_spellInfo.Id == 55884) ? (uint)damage : effectInfo.TriggerSpell;
             player.LearnSpell(spellToLearn, false);
-
-            if (m_spellInfo.Id == 55884)
-            {
-                BattlePetMgr battlePetMgr = player.GetSession().GetBattlePetMgr();
-                if (battlePetMgr != null)
-                {
-                    foreach (var entry in CliDB.BattlePetSpeciesStorage.Values)
-                    {
-                        if (entry.SummonSpellID == spellToLearn)
-                        {
-                            battlePetMgr.AddPet(entry.Id, entry.CreatureID);
-                            player.UpdateCriteria(CriteriaTypes.OwnBattlePetCount);
-                            break;
-                        }
-                    }
-                }
-            }
 
             Log.outDebug(LogFilter.Spells, "Spell: Player {0} has learned spell {1} from NpcGUID={2}", player.GetGUID().ToString(), spellToLearn, m_caster.GetGUID().ToString());
         }
@@ -2849,7 +2819,7 @@ namespace Game.Spells
                         || (spell.getState() == SpellState.Preparing && spell.GetCastTime() > 0.0f))
                         && (curSpellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence))
                         && ((i == CurrentSpellTypes.Generic && curSpellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.Interrupt))
-                        || (i == CurrentSpellTypes.Channeled && curSpellInfo.ChannelInterruptFlags.HasAnyFlag(SpellChannelInterruptFlags.Interrupt))))
+                        || (i == CurrentSpellTypes.Channeled && curSpellInfo.HasChannelInterruptFlag(SpellChannelInterruptFlags.Interrupt))))
                     {
                         if (m_originalCaster != null)
                         {
@@ -2886,7 +2856,7 @@ namespace Game.Spells
 
             Map map = target.GetMap();
             Quaternion rotation = new Quaternion(Matrix3.fromEulerAnglesZYX(target.GetOrientation(), 0.0f, 0.0f));
-            if (!pGameObj.Create(gameobject_id, map, m_caster.GetPhaseMask(), new Position(x, y, z, target.GetOrientation()), rotation, 255, GameObjectState.Ready))
+            if (!pGameObj.Create(gameobject_id, map, new Position(x, y, z, target.GetOrientation()), rotation, 255, GameObjectState.Ready))
                 return;
 
             pGameObj.CopyPhaseFrom(m_caster);
@@ -3353,13 +3323,6 @@ namespace Game.Spells
                                             m_caster.CastCustomSpell(totem, 55277, basepoints0, 0, 0, true);
                                         }
                                     }
-                                    // Glyph of Stoneclaw Totem
-                                    AuraEffect aur = unitTarget.GetAuraEffect(63298, 0);
-                                    if (aur != null)
-                                    {
-                                        basepoints0 *= aur.GetAmount();
-                                        m_caster.CastCustomSpell(unitTarget, 55277, basepoints0, 0, 0, true);
-                                    }
                                     break;
                                 }
                             case 45668:                                 // Ultra-Advanced Proto-Typical Shortening Blaster
@@ -3557,7 +3520,7 @@ namespace Game.Spells
 
             Map map = m_caster.GetMap();
             Quaternion rotation = new Quaternion(Matrix3.fromEulerAnglesZYX(pos.GetOrientation(), 0.0f, 0.0f));
-            if (!pGameObj.Create((uint)gameobject_id, map, m_caster.GetPhaseMask(), pos, rotation, 0, GameObjectState.Ready))
+            if (!pGameObj.Create((uint)gameobject_id, map, pos, rotation, 0, GameObjectState.Ready))
                 return;
 
             pGameObj.CopyPhaseFrom(m_caster);
@@ -3901,7 +3864,7 @@ namespace Game.Spells
 
             Map map = m_caster.GetMap();
             Quaternion rotation = new Quaternion(Matrix3.fromEulerAnglesZYX(m_caster.GetOrientation(), 0.0f, 0.0f));
-            if (!go.Create(go_id, map, m_caster.GetPhaseMask(), new Position(x, y, z, m_caster.GetOrientation()), rotation, 255, GameObjectState.Ready))
+            if (!go.Create(go_id, map, new Position(x, y, z, m_caster.GetOrientation()), rotation, 255, GameObjectState.Ready))
                 return;
 
             go.CopyPhaseFrom(m_caster);
@@ -4094,7 +4057,7 @@ namespace Game.Spells
             player.SetHealth(health);
             player.SetPower(PowerType.Mana, mana);
             player.SetPower(PowerType.Rage, 0);
-            player.SetPower(PowerType.Energy, player.GetMaxPower(PowerType.Energy));
+            player.SetFullPower(PowerType.Energy);
             player.SetPower(PowerType.Focus, 0);
 
             player.SpawnCorpseBones();
@@ -4589,7 +4552,7 @@ namespace Game.Spells
 
             Position pos = new Position(fx, fy, fz, m_caster.GetOrientation());
             Quaternion rotation = new Quaternion(Matrix3.fromEulerAnglesZYX(m_caster.GetOrientation(), 0.0f, 0.0f));
-            if (!pGameObj.Create(name_id, cMap, m_caster.GetPhaseMask(), pos, rotation, 255, GameObjectState.Ready))
+            if (!pGameObj.Create(name_id, cMap, pos, rotation, 255, GameObjectState.Ready))
                 return;
 
             pGameObj.CopyPhaseFrom(m_caster);
@@ -5593,6 +5556,18 @@ namespace Game.Spells
             plr.GetSession().GetBattlePetMgr().UnlockSlot(0);
         }
 
+        [SpellEffectHandler(SpellEffectName.LaunchQuestChoice)]
+        void EffectLaunchQuestChoice(uint effIndex)
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            if (!unitTarget || !unitTarget.IsPlayer())
+                return;
+
+            unitTarget.ToPlayer().SendPlayerChoice(GetCaster().GetGUID(), effectInfo.MiscValue);
+        }
+
         [SpellEffectHandler(SpellEffectName.UncageBattlepet)]
         void EffectUncageBattlePet(uint effIndex)
         {
@@ -5622,14 +5597,9 @@ namespace Game.Spells
             if (battlePetMgr == null)
                 return;
 
-            ushort maxLearnedLevel = 0;
-
-            foreach (var pet in battlePetMgr.GetLearnedPets())
-                maxLearnedLevel = Math.Max(pet.PacketInfo.Level, maxLearnedLevel);
-
             // TODO: This means if you put your highest lvl pet into cage, you won't be able to uncage it again which is probably wrong.
             // We will need to store maxLearnedLevel somewhere to avoid this behaviour.
-            if (maxLearnedLevel < level)
+            if (battlePetMgr.GetMaxPetLevel() < level)
             {
                 battlePetMgr.SendError(BattlePetError.TooHighLevelToUncage, creatureId); // or speciesEntry.CreatureID
                 SendCastResult(SpellCastResult.CantAddBattlePet);
@@ -5643,10 +5613,11 @@ namespace Game.Spells
                 return;
             }
 
+            battlePetMgr.AddPet(speciesId, creatureId, breed, quality, level);
+
             if (!plr.HasSpell(speciesEntry.SummonSpellID))
                 plr.LearnSpell(speciesEntry.SummonSpellID, false);
 
-            battlePetMgr.AddPet(speciesId, creatureId, breed, quality, level);
             plr.DestroyItem(m_CastItem.GetBagSlot(), m_CastItem.GetSlot(), true);
             m_CastItem = null;
         }

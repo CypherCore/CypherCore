@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -771,7 +771,7 @@ namespace Game.AI
                         me.DoFleeToGetAssistance();
                         if (e.Action.flee.withEmote != 0)
                         {
-                            var builder = new BroadcastTextBuilder(me, ChatMsg.MonsterEmote, (uint)BroadcastTextIds.FleeForAssist);
+                            var builder = new BroadcastTextBuilder(me, ChatMsg.MonsterEmote, (uint)BroadcastTextIds.FleeForAssist, me.GetGender());
                             Global.CreatureTextMgr.SendChatPacket(me, builder, ChatMsg.Emote);
                         }
                         Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_FLEE_FOR_ASSIST: Creature {0} DoFleeToGetAssistance", me.GetGUID().ToString());
@@ -1040,7 +1040,7 @@ namespace Game.AI
                             me.CallForHelp(e.Action.callHelp.range);
                             if (e.Action.callHelp.withEmote != 0)
                             {
-                                var builder = new BroadcastTextBuilder(me, ChatMsg.Emote, (uint)BroadcastTextIds.CallForHelp);
+                                var builder = new BroadcastTextBuilder(me, ChatMsg.Emote, (uint)BroadcastTextIds.CallForHelp, me.GetGender());
                                 Global.CreatureTextMgr.SendChatPacket(me, builder, ChatMsg.MonsterEmote);
                             }
                             Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction: SMART_ACTION_CALL_FOR_HELP: Creature {0}", me.GetGUID().ToString());
@@ -1473,7 +1473,7 @@ namespace Game.AI
                             break;
                         List<WorldObject> targets = GetTargets(e, unit);
                         if (e.GetTargetType() == SmartTargets.Self)
-                            me.SetFacingTo(me.GetHomePosition().GetOrientation());
+                            me.SetFacingTo((me.GetTransport() ? me.GetTransportHomePosition() : me.GetHomePosition()).GetOrientation());
                         else if (e.GetTargetType() == SmartTargets.Position)
                             me.SetFacingTo(e.Target.o);
                         else if (!targets.Empty())
@@ -2927,7 +2927,7 @@ namespace Game.AI
                     {
                         if (me == null || !me.IsInCombat() || me.GetMaxPower(PowerType.Mana) == 0)
                             return;
-                        uint perc = (uint)(100.0f * me.GetPower(PowerType.Mana) / me.GetMaxPower(PowerType.Mana));
+                        uint perc = (uint)me.GetPowerPct(PowerType.Mana);
                         if (perc > e.Event.minMaxRepeat.max || perc < e.Event.minMaxRepeat.min)
                             return;
                         ProcessTimedAction(e, e.Event.minMaxRepeat.repeatMin, e.Event.minMaxRepeat.repeatMax);
@@ -2937,7 +2937,7 @@ namespace Game.AI
                     {
                         if (me == null || !me.IsInCombat() || me.GetVictim() == null || me.GetVictim().GetMaxPower(PowerType.Mana) == 0)
                             return;
-                        uint perc = (uint)(100.0f * me.GetVictim().GetPower(PowerType.Mana) / me.GetVictim().GetMaxPower(PowerType.Mana));
+                        uint perc = (uint)me.GetVictim().GetPowerPct(PowerType.Mana);
                         if (perc > e.Event.minMaxRepeat.max || perc < e.Event.minMaxRepeat.min)
                             return;
                         ProcessTimedAction(e, e.Event.minMaxRepeat.repeatMin, e.Event.minMaxRepeat.repeatMax, me.GetVictim());

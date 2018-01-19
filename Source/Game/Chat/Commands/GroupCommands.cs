@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2017 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -240,7 +240,6 @@ namespace Game.Chat
         {
             // Get ALL the variables!
             Player playerTarget;
-            uint phase = 0;
             ObjectGuid guidTarget;
             string nameTarget;
             string zoneName = "";
@@ -317,11 +316,12 @@ namespace Game.Chat
 
                 // Check if iterator is online. If is...
                 Player p = Global.ObjAccessor.FindPlayer(slot.guid);
+                string phases = "";
                 if (p && p.IsInWorld)
                 {
                     // ... than, it prints information like "is online", where he is, etc...
                     onlineState = "online";
-                    phase = (!p.IsGameMaster() ? p.GetPhaseMask() : uint.MaxValue);
+                    phases = string.Join(", ", p.GetPhases());
 
                     AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(p.GetAreaId());
                     if (area != null)
@@ -336,12 +336,11 @@ namespace Game.Chat
                     // ... else, everything is set to offline or neutral values.
                     zoneName = "<ERROR>";
                     onlineState = "Offline";
-                    phase = 0;
                 }
 
                 // Now we can print those informations for every single member of each group!
                 handler.SendSysMessage(CypherStrings.GroupPlayerNameGuid, slot.name, onlineState,
-                    zoneName, phase, slot.guid.ToString(), flags, LFGQueue.GetRolesString(slot.roles));
+                    zoneName, phases, slot.guid.ToString(), flags, LFGQueue.GetRolesString(slot.roles));
             }
 
             // And finish after every iterator is done.
