@@ -19,7 +19,7 @@ The current support game version is: 7.3.2.25549
 * Extract the sql files into the core sql folder (ex: C:\CypherCore\sql)
 
 ### Playing
-* Must use Arctium WoW Client Launcher [Download](https://arctium.io/files/?f=15a1828a531289)
+* Must use Arctium WoW Client Launcher [Download](https://arctium.io/files/?f=15a62b5dcaf9cf)
 
 ### Support / General Info
 * Check out our channel on Arctium Discord [Here](https://discord.gg/Zkd2xK)
