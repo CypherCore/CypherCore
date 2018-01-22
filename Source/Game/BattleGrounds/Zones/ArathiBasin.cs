@@ -21,7 +21,6 @@ using Game.Entities;
 using Game.Network.Packets;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 namespace Game.BattleGrounds.Zones
 {
