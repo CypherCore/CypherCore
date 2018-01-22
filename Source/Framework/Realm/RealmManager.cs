@@ -57,8 +57,6 @@ public class RealmManager : Singleton<RealmManager>
 
     void UpdateRealms(object source, ElapsedEventArgs e)
     {
-        Log.outInfo(LogFilter.Realmlist, "Updating Realm List...");
-
         PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_REALMLIST);
         SQLResult result = DB.Login.Query(stmt);
 
@@ -105,9 +103,9 @@ public class RealmManager : Singleton<RealmManager>
                     _subRegions.Add(subRegion);
 
                 if (!existingRealms.ContainsKey(realm.Id))
-                    Log.outInfo(LogFilter.Realmlist, "Added realm \"{0}\" at {1}:{2}.", realm.Name, realm.ExternalAddress.ToString(), realm.Port);
+                    Log.outInfo(LogFilter.Realmlist, "Added realm \"{0}\" at {1}:{2}", realm.Name, realm.ExternalAddress.ToString(), realm.Port);
                 else
-                    Log.outDebug(LogFilter.Realmlist, "Updating realm \"{0}\" at {1}:{2}.", realm.Name, realm.ExternalAddress.ToString(), realm.Port);
+                    Log.outDebug(LogFilter.Realmlist, "Updating realm \"{0}\" at {1}:{2}", realm.Name, realm.ExternalAddress.ToString(), realm.Port);
 
                 existingRealms.Remove(realm.Id);
             }

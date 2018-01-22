@@ -46,7 +46,7 @@ namespace BNetServer.Networking
         public override void Start()
         {
             string ip_address = GetRemoteIpAddress().ToString();
-            Log.outTrace(LogFilter.Session, "{0} Accepted connection", GetClientInfo());
+            Log.outInfo(LogFilter.Network, "{0} Accepted connection", GetClientInfo());
 
             // Verify that this IP is not in the ip_banned table
             DB.Login.Execute(DB.Login.GetPreparedStatement(LoginStatements.DEL_EXPIRED_IP_BANS));
