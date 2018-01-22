@@ -75,6 +75,7 @@ namespace Scripts.Spells.Warrior
         public const uint Vengeance = 76691;
         public const uint Victorious = 32216;
         public const uint VictoriousRushHeal = 118779;
+        public const uint OverpowerProc = 60503;
     }
 
     struct Misc
@@ -966,6 +967,43 @@ namespace Scripts.Spells.Warrior
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+
+    [Script] // 60503 - Overpower Proc
+    class spell_warr_overpower_proc : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.OverpowerProc);
+        }
+
+        bool CheckProc(ProcEventInfo eventInfo)
+        {
+            UInt32 spellId = eventInfo.GetSpellInfo().Id;
+            UInt32[] spellList = { 1680, 167105, 12294, 1464 };
+
+            foreach ( UInt32 id in spellList )
+            {
+                if (spellId == id)
+                    return true;
+            }
+
+            return false;
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            Unit caster = GetCaster();
+            
+            if( !caster.HasAura( SpellIds.OverpowerProc ))
+                caster.CastSpell( caster, SpellIds.OverpowerProc, true );
+        }
+
+        public override void Register()
+        {
+            DoCheckProc.Add(new CheckProcHandler(CheckProc));
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
         }
     }
 }
