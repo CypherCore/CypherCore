@@ -92,7 +92,7 @@ namespace Scripts.BrokenIsles
             Player player = GetCaster().ToPlayer();
             if (player != null)
             {
-                if (player.getLevel() < 100 || player.GetQuestStatus((uint)Quests.BLINK_OF_AN_EYE) != QuestStatus.Incomplete)
+                if (player.getLevel() < 100 || player.GetQuestStatus((uint)Quests.BLINK_OF_AN_EYE) == QuestStatus.Incomplete)
                     PreventHitEffect(effIndex);
             }
         }
