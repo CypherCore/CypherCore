@@ -42,7 +42,6 @@ namespace Scripts.BrokenIsles
             if (oldLevel < 100 && player.getLevel() >= 100)
             {
                 if (player.GetClass() == Class.Mage)
-                    //player.CastSpell(this, Contents.SPELL_MAGE_LEARN_GUARDIAN_HALL_TP, true);
                     player.CastSpell( player, (uint)Contents.SPELL_MAGE_LEARN_GUARDIAN_HALL_TP );
 
 
