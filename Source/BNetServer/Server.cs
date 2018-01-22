@@ -83,6 +83,8 @@ namespace BNetServer
                 ExitNow();
             }
 
+            Log.outInfo(LogFilter.Server, $"Bnetserver started successfully, listening on {bindIp}:{bnPort}");
+
             uint _banExpiryCheckInterval = ConfigMgr.GetDefaultValue("BanExpiryCheckInterval", 60u);
             _banExpiryCheckTimer = new Timer(_banExpiryCheckInterval);
             _banExpiryCheckTimer.Elapsed += _banExpiryCheckTimer_Elapsed;
