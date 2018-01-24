@@ -565,7 +565,7 @@ namespace Game.Entities
                                 if (owner)
                                 {
                                     // Hunter trap: Search units which are unfriendly to the trap's owner
-                                    var checker = new NearestUnfriendlyNoTotemUnitInObjectRangeCheck(this, owner, radius);
+                                    var checker = new NearestAttackableNoTotemUnitInObjectRangeCheck(this, owner, radius);
                                     var searcher = new UnitLastSearcher(this, checker);
                                     Cell.VisitAllObjects(this, searcher, radius);
                                     target = searcher.GetTarget();
@@ -1944,6 +1944,8 @@ namespace Game.Entities
                 trigger.SetFaction(owner.getFaction());
                 if (owner.HasFlag(UnitFields.Flags, UnitFlags.PvpAttackable))
                     trigger.SetFlag(UnitFields.Flags, UnitFlags.PvpAttackable);
+                // copy pvp state flags from owner
+                trigger.SetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag, owner.GetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag));
                 // needed for GO casts for proper target validation checks
                 trigger.SetOwnerGUID(owner.GetGUID());
                 trigger.CastSpell(target != null ? target : trigger, spellInfo, triggered, null, null, owner.GetGUID());

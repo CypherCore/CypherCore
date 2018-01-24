@@ -2508,8 +2508,7 @@ namespace Game.Entities
                     }
 
                     // check FFA_PVP
-                    if (Convert.ToBoolean(GetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag) & (byte)UnitBytes2Flags.FFAPvp)
-                        && Convert.ToBoolean(target.GetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag) & (byte)UnitBytes2Flags.FFAPvp))
+                    if (IsFFAPvP() && target.IsFFAPvP())
                         return ReputationRank.Hostile;
 
                     if (selfPlayerOwner != null)
