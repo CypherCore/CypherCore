@@ -81,10 +81,10 @@ namespace Game.Guilds
             stmt.AddValue(++index, m_bankMoney);
             trans.Append(stmt);
 
-            DB.Characters.CommitTransaction(trans);
-            _CreateDefaultGuildRanks(pLeaderSession.GetSessionDbLocaleIndex()); // Create default ranks
-            bool ret = AddMember(m_leaderGuid, GuildDefaultRanks.Master);                  // Add guildmaster
+            _CreateDefaultGuildRanks(trans, pLeaderSession.GetSessionDbLocaleIndex()); // Create default ranks
+            bool ret = AddMember(trans, m_leaderGuid, GuildDefaultRanks.Master);                  // Add guildmaster
 
+            DB.Characters.CommitTransaction(trans);
             if (ret)
             {
                 Member leader = GetMember(m_leaderGuid);
@@ -103,13 +103,12 @@ namespace Game.Guilds
 
             BroadcastPacket(new GuildEventDisbanded());
 
+            SQLTransaction trans = new SQLTransaction();
             while (!m_members.Empty())
             {
                 var member = m_members.First();
-                DeleteMember(member.Value.GetGUID(), true);
+                DeleteMember(trans, member.Value.GetGUID(), true);
             }
-
-            SQLTransaction trans = new SQLTransaction();
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GUILD);
             stmt.AddValue(0, m_id);
@@ -421,7 +420,7 @@ namespace Game.Guilds
                 if (newGuildMaster != null)
                 {
                     _SetLeaderGUID(newGuildMaster);
-                    oldGuildMaster.ChangeRank(GuildDefaultRanks.Initiate);
+                    oldGuildMaster.ChangeRank(null, GuildDefaultRanks.Initiate);
 
                     SendEventNewLeader(newGuildMaster, oldGuildMaster);
                 }
@@ -612,7 +611,7 @@ namespace Game.Guilds
                 player.GetTeam() != ObjectManager.GetPlayerTeamByGUID(GetLeaderGUID()))
                 return;
 
-            AddMember(player.GetGUID());
+            AddMember(null, player.GetGUID());
         }
 
         public void HandleLeaveMember(WorldSession session)
@@ -633,7 +632,7 @@ namespace Game.Guilds
             }
             else
             {
-                DeleteMember(player.GetGUID(), false, false);
+                DeleteMember(null, player.GetGUID(), false, false);
 
                 _LogEvent(GuildEventLogTypes.LeaveGuild, player.GetGUID().GetCounter());
                 SendEventPlayerLeft(player);
@@ -668,7 +667,7 @@ namespace Game.Guilds
                         SendCommandResult(session, GuildCommandType.RemovePlayer, GuildCommandError.RankTooHigh_S, name);
                     else
                     {
-                        DeleteMember(guid, false, true);
+                        DeleteMember(null, guid, false, true);
                         _LogEvent(GuildEventLogTypes.UninvitePlayer, player.GetGUID().GetCounter(), guid.GetCounter());
 
                         Player pMember = Global.ObjAccessor.FindConnectedPlayer(guid);
@@ -728,7 +727,7 @@ namespace Game.Guilds
                 }
 
                 uint newRankId = (uint)(member.GetRankId() + (demote ? 1 : -1));
-                member.ChangeRank(newRankId);
+                member.ChangeRank(null, newRankId);
                 _LogEvent(demote ? GuildEventLogTypes.DemotePlayer : GuildEventLogTypes.PromotePlayer, player.GetGUID().GetCounter(), member.GetGUID().GetCounter(), (byte)newRankId);
                 //_BroadcastEvent(demote ? GuildEvents.Demotion : GuildEvents.Promotion, ObjectGuid.Empty, player.GetName(), name, _GetRankName((byte)newRankId));
             }
@@ -772,7 +771,7 @@ namespace Game.Guilds
 
             // Only leader can add new rank
             if (_IsLeader(session.GetPlayer()))
-                if (_CreateRank(name, GuildRankRights.GChatListen | GuildRankRights.GChatSpeak))
+                if (_CreateRank(null, name, GuildRankRights.GChatListen | GuildRankRights.GChatSpeak))
                     BroadcastPacket(new GuildEventRanksUpdated());
         }
 
@@ -1196,7 +1195,7 @@ namespace Game.Guilds
             Member member = new Member(m_id, ObjectGuid.Create(HighGuid.Player, lowguid), field.Read<byte>(2));
             if (!member.LoadFromDB(field))
             {
-                _DeleteMemberFromDB(lowguid);
+                _DeleteMemberFromDB(null, lowguid);
                 return false;
             }
             m_members[member.GetGUID()] = member;
@@ -1316,6 +1315,8 @@ namespace Game.Guilds
             // Min ranks count is 2 and max is 10.
             bool broken_ranks = false;
             byte ranks = _GetRanksSize();
+
+            SQLTransaction trans = new SQLTransaction();
             if (ranks < GuildConst.MinRanks || ranks > GuildConst.MaxRanks)
             {
                 Log.outError(LogFilter.Guild, "Guild {0} has invalid number of ranks, creating new...", m_id);
@@ -1333,9 +1334,7 @@ namespace Game.Guilds
                     }
                     else
                     {
-                        SQLTransaction trans = new SQLTransaction();
                         rankInfo.CreateMissingTabsIfNeeded(_GetPurchasedTabsSize(), trans, true);
-                        DB.Characters.CommitTransaction(trans);
                     }
                 }
             }
@@ -1343,13 +1342,13 @@ namespace Game.Guilds
             if (broken_ranks)
             {
                 m_ranks.Clear();
-                _CreateDefaultGuildRanks();
+                _CreateDefaultGuildRanks(trans, SharedConst.DefaultLocale);
             }
 
             // Validate members' data
             foreach (var member in m_members.Values)
                 if (member.GetRankId() > _GetRanksSize())
-                    member.ChangeRank(_GetLowestRankId());
+                    member.ChangeRank(trans, _GetLowestRankId());
 
             // Repair the structure of the guild.
             // If the guildmaster doesn't exist or isn't member of the guild
@@ -1357,7 +1356,7 @@ namespace Game.Guilds
             Member pLeader = GetMember(m_leaderGuid);
             if (pLeader == null)
             {
-                DeleteMember(m_leaderGuid);
+                DeleteMember(trans, m_leaderGuid);
                 // If no more members left, disband guild
                 if (m_members.Empty())
                 {
@@ -1368,6 +1367,8 @@ namespace Game.Guilds
             else if (!pLeader.IsRank(GuildDefaultRanks.Master))
                 _SetLeaderGUID(pLeader);
 
+            if (trans.commands.Count > 0)
+                DB.Characters.CommitTransaction(trans);
             _UpdateAccountsNumber();
             return true;
         }
@@ -1468,7 +1469,7 @@ namespace Game.Guilds
             session.SendPacket(packet);
         }
 
-        public bool AddMember(ObjectGuid guid, byte rankId = GuildConst.RankNone)
+        public bool AddMember(SQLTransaction trans, ObjectGuid guid, byte rankId = GuildConst.RankNone)
         {
             Player player = Global.ObjAccessor.FindPlayer(guid);
             // Player cannot be in guild
@@ -1532,9 +1533,7 @@ namespace Game.Guilds
                 m_members[guid] = member;
             }
 
-            SQLTransaction trans = new SQLTransaction();
             member.SaveToDB(trans);
-            DB.Characters.CommitTransaction(trans);
 
             _UpdateAccountsNumber();
             _LogEvent(GuildEventLogTypes.JoinGuild, lowguid);
@@ -1553,7 +1552,7 @@ namespace Game.Guilds
             return true;
         }
 
-        public void DeleteMember(ObjectGuid guid, bool isDisbanding = false, bool isKicked = false, bool canDeleteGuild = false)
+        public void DeleteMember(SQLTransaction trans, ObjectGuid guid, bool isDisbanding = false, bool isKicked = false, bool canDeleteGuild = false)
         {
             Player player = Global.ObjAccessor.FindPlayer(guid);
 
@@ -1607,19 +1606,19 @@ namespace Game.Guilds
                         player.RemoveSpell(entry.SpellID, false, false);
             }
 
-            _DeleteMemberFromDB(guid.GetCounter());
+            _DeleteMemberFromDB(trans, guid.GetCounter());
             if (!isDisbanding)
                 _UpdateAccountsNumber();
         }
 
-        public bool ChangeMemberRank(ObjectGuid guid, byte newRank)
+        public bool ChangeMemberRank(SQLTransaction trans, ObjectGuid guid, byte newRank)
         {
             if (newRank <= _GetLowestRankId())                    // Validate rank (allow only existing ranks)
             {
                 Member member = GetMember(guid);
                 if (member != null)
                 {
-                    member.ChangeRank(newRank);
+                    member.ChangeRank(trans, newRank);
                     return true;
                 }
             }
@@ -1705,24 +1704,24 @@ namespace Game.Guilds
             DB.Characters.CommitTransaction(trans);
         }
 
-        void _CreateDefaultGuildRanks(LocaleConstant loc = LocaleConstant.enUS)
+        void _CreateDefaultGuildRanks(SQLTransaction trans, LocaleConstant loc = LocaleConstant.enUS)
         {
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GUILD_RANKS);
             stmt.AddValue(0, m_id);
-            DB.Characters.Execute(stmt);
+            trans.Append(stmt);
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GUILD_BANK_RIGHTS);
             stmt.AddValue(0, m_id);
-            DB.Characters.Execute(stmt);
+            trans.Append(stmt);
 
-            _CreateRank(Global.ObjectMgr.GetCypherString( CypherStrings.GuildMaster, loc), GuildRankRights.All);
-            _CreateRank(Global.ObjectMgr.GetCypherString(CypherStrings.GuildOfficer, loc), GuildRankRights.All);
-            _CreateRank(Global.ObjectMgr.GetCypherString(CypherStrings.GuildVeteran, loc), GuildRankRights.GChatListen | GuildRankRights.GChatSpeak);
-            _CreateRank(Global.ObjectMgr.GetCypherString(CypherStrings.GuildMember, loc), GuildRankRights.GChatListen | GuildRankRights.GChatSpeak);
-            _CreateRank(Global.ObjectMgr.GetCypherString(CypherStrings.GuildInitiate, loc), GuildRankRights.GChatListen | GuildRankRights.GChatSpeak);
+            _CreateRank(trans, Global.ObjectMgr.GetCypherString( CypherStrings.GuildMaster, loc), GuildRankRights.All);
+            _CreateRank(trans, Global.ObjectMgr.GetCypherString(CypherStrings.GuildOfficer, loc), GuildRankRights.All);
+            _CreateRank(trans, Global.ObjectMgr.GetCypherString(CypherStrings.GuildVeteran, loc), GuildRankRights.GChatListen | GuildRankRights.GChatSpeak);
+            _CreateRank(trans, Global.ObjectMgr.GetCypherString(CypherStrings.GuildMember, loc), GuildRankRights.GChatListen | GuildRankRights.GChatSpeak);
+            _CreateRank(trans, Global.ObjectMgr.GetCypherString(CypherStrings.GuildInitiate, loc), GuildRankRights.GChatListen | GuildRankRights.GChatSpeak);
         }
 
-        bool _CreateRank(string name, GuildRankRights rights)
+        bool _CreateRank(SQLTransaction trans, string name, GuildRankRights rights)
         {
             byte newRankId = _GetRanksSize();
             if (newRankId >= GuildConst.MaxRanks)
@@ -1732,10 +1731,16 @@ namespace Game.Guilds
             RankInfo info = new RankInfo(m_id, newRankId, name, rights, 0);
             m_ranks.Add(info);
 
-            SQLTransaction trans = new SQLTransaction();
+            bool isInTransaction = trans != null;
+            if (!isInTransaction)
+                trans = new SQLTransaction();
+
             info.CreateMissingTabsIfNeeded(_GetPurchasedTabsSize(), trans);
             info.SaveToDB(trans);
             DB.Characters.CommitTransaction(trans);
+
+            if (!isInTransaction)
+                DB.Characters.CommitTransaction(trans);
 
             return true;
         }
@@ -1795,13 +1800,16 @@ namespace Game.Guilds
             if (pLeader == null)
                 return;
 
+            SQLTransaction trans = new SQLTransaction();
             m_leaderGuid = pLeader.GetGUID();
-            pLeader.ChangeRank(GuildDefaultRanks.Master);
+            pLeader.ChangeRank(trans, GuildDefaultRanks.Master);
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GUILD_LEADER);
             stmt.AddValue(0, m_leaderGuid.GetCounter());
             stmt.AddValue(1, m_id);
-            DB.Characters.Execute(stmt);
+            trans.Append(stmt);
+
+            DB.Characters.CommitTransaction(trans);
         }
 
         void _SetRankBankMoneyPerDay(uint rankId, uint moneyPerDay)
@@ -2234,7 +2242,7 @@ namespace Game.Guilds
             rankChange.Promote = (rank < member.GetRankId());
             BroadcastPacket(rankChange);
 
-            member.ChangeRank(rank);
+            member.ChangeRank(null, rank);
 
             Log.outDebug(LogFilter.Network, "SMSG_GUILD_RANKS_UPDATE [Broadcast] Target: {0}, Issuer: {1}, RankId: {2}", targetGuid.ToString(), setterGuid.ToString(), rank);
         }
@@ -2361,11 +2369,11 @@ namespace Game.Guilds
             return null;
         }
 
-        void _DeleteMemberFromDB(ulong lowguid)
+        void _DeleteMemberFromDB(SQLTransaction trans, ulong lowguid)
         {
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GUILD_MEMBER);
             stmt.AddValue(0, lowguid);
-            DB.Characters.Execute(stmt);
+            DB.Characters.ExecuteOrAppend(trans, stmt);
         }
 
         ulong GetGuildBankTabPrice(byte tabId)
@@ -2496,7 +2504,7 @@ namespace Game.Guilds
                 DB.Characters.Execute(stmt);
             }
 
-            public void ChangeRank(uint newRank)
+            public void ChangeRank(SQLTransaction trans, uint newRank)
             {
                 m_rankId = (byte)newRank;
 
@@ -2508,7 +2516,7 @@ namespace Game.Guilds
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GUILD_MEMBER_RANK);
                 stmt.AddValue(0, newRank);
                 stmt.AddValue(1, m_guid.GetCounter());
-                DB.Characters.Execute(stmt);
+                DB.Characters.ExecuteOrAppend(trans, stmt);
             }
 
             public void SaveToDB(SQLTransaction trans)
@@ -2736,7 +2744,7 @@ namespace Game.Guilds
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GUILD_EVENTLOG);
                 stmt.AddValue(0, m_guildId);
                 stmt.AddValue(1, m_guid);
-                DB.Characters.ExecuteOrAppend(trans, stmt);
+                trans.Append(stmt);
 
                 byte index = 0;
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_GUILD_EVENTLOG);
@@ -2747,7 +2755,7 @@ namespace Game.Guilds
                 stmt.AddValue(++index, m_playerGuid2);
                 stmt.AddValue(++index, m_newRank);
                 stmt.AddValue(++index, m_timestamp);
-                DB.Characters.ExecuteOrAppend(trans, stmt);
+                trans.Append(stmt);
             }
 
             public void WritePacket(GuildEventLogQueryResults packet)
@@ -2816,7 +2824,7 @@ namespace Game.Guilds
                 stmt.AddValue(index, m_guildId);
                 stmt.AddValue(++index, m_guid);
                 stmt.AddValue(++index, m_bankTabId);
-                DB.Characters.ExecuteOrAppend(trans, stmt);
+                trans.Append(stmt);
 
                 index = 0;
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_GUILD_BANK_EVENTLOG);
@@ -2829,7 +2837,7 @@ namespace Game.Guilds
                 stmt.AddValue(++index, m_itemStackCount);
                 stmt.AddValue(++index, m_destTabId);
                 stmt.AddValue(++index, m_timestamp);
-                DB.Characters.ExecuteOrAppend(trans, stmt);
+                trans.Append(stmt);
             }
 
             public void WritePacket(GuildBankLogQueryResults packet)
@@ -3298,7 +3306,7 @@ namespace Game.Guilds
                 stmt.AddValue(0, m_guildId);
                 stmt.AddValue(1, m_tabId);
                 stmt.AddValue(2, slotId);
-                DB.Characters.ExecuteOrAppend(trans, stmt);
+                trans.Append(stmt);
 
                 if (item != null)
                 {
@@ -3307,13 +3315,14 @@ namespace Game.Guilds
                     stmt.AddValue(1, m_tabId);
                     stmt.AddValue(2, slotId);
                     stmt.AddValue(3, item.GetGUID().GetCounter());
-                    DB.Characters.ExecuteOrAppend(trans, stmt);
+                    trans.Append(stmt);
 
                     item.SetGuidValue(ItemFields.Contained, ObjectGuid.Empty);
                     item.SetGuidValue(ItemFields.Owner, ObjectGuid.Empty);
                     item.FSetState(ItemUpdateState.New);
                     item.SaveToDB(trans);                                 // Not in inventory and can be saved standalone
                 }
+
                 return true;
             }
 

@@ -482,14 +482,17 @@ namespace Game
 
             Guild.SendCommandResult(this, GuildCommandType.CreateGuild, GuildCommandError.Success, name);
 
+            SQLTransaction trans = new SQLTransaction();
+
             // Add members from signatures
             for (byte i = 0; i < signatures; ++i)
             {
-                guild.AddMember(ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(0)));
-                result.NextRow();
-            }
+                guild.AddMember(trans, ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(0)));
 
-            SQLTransaction trans = new SQLTransaction();
+                // Checking the return value just to be double safe
+                if (!result.NextRow())
+                    break;
+            }
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PETITION_BY_GUID);
             stmt.AddValue(0, packet.Item.GetCounter());

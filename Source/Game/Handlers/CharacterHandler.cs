@@ -1706,7 +1706,7 @@ namespace Game
                         {
                             Guild guild = Global.GuildMgr.GetGuildById(result.Read<ulong>(0));
                             if (guild)
-                                guild.DeleteMember(factionChangeInfo.Guid, false, false, true);
+                                guild.DeleteMember(trans, factionChangeInfo.Guid, false, false, true);
                         }
 
                         Player.LeaveAllArenaTeams(factionChangeInfo.Guid);

@@ -3597,12 +3597,13 @@ namespace Game.Entities
                     charDelete_method = CharDeleteMethod.Remove;
             }
 
+            SQLTransaction trans = new SQLTransaction();
             uint guildId = GetGuildIdFromDB(playerGuid);
             if (guildId != 0)
             {
                 Guild guild = Global.GuildMgr.GetGuildById(guildId);
                 if (guild)
-                    guild.DeleteMember(playerGuid, false, false, true);
+                    guild.DeleteMember(trans, playerGuid, false, false, true);
             }
 
             // remove from arena teams
@@ -3628,8 +3629,6 @@ namespace Game.Entities
                 // Completely remove from the database
                 case CharDeleteMethod.Remove:
                     {
-                        SQLTransaction trans = new SQLTransaction();
-
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_COD_ITEM_MAIL);
                         stmt.AddValue(0, guid);
                         SQLResult resultMail = DB.Characters.Query(stmt);
@@ -3949,7 +3948,6 @@ namespace Game.Entities
 
                         Garrison.DeleteFromDB(guid, trans);
 
-                        DB.Characters.CommitTransaction(trans);
                         Global.WorldMgr.DeleteCharacterInfo(playerGuid);
                         break;
                     }
@@ -3958,15 +3956,20 @@ namespace Game.Entities
                     {
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_DELETE_INFO);
                         stmt.AddValue(0, guid);
-                        DB.Characters.Execute(stmt);
+                        trans.Append(stmt);
 
                         Global.WorldMgr.UpdateCharacterInfoDeleted(playerGuid, true);
                         break;
                     }
                 default:
                     Log.outError(LogFilter.Player, "Player:DeleteFromDB: Unsupported delete method: {0}.", charDelete_method);
+
+                    if (trans.commands.Count > 0)
+                        DB.Characters.CommitTransaction(trans);
                     return;
             }
+
+            DB.Characters.CommitTransaction(trans);
 
             if (updateRealmChars)
                 Global.WorldMgr.UpdateRealmCharCount(accountId);

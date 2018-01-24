@@ -90,7 +90,7 @@ namespace Game.Chat
             if (targetGuild == null)
                 return false;
 
-            targetGuild.AddMember(target.GetGUID());
+            targetGuild.AddMember(null, target.GetGUID());
 
             return true;
         }
@@ -111,7 +111,7 @@ namespace Game.Chat
             if (targetGuild == null)
                 return false;
 
-            targetGuild.DeleteMember(targetGuid, false, true, true);
+            targetGuild.DeleteMember(null, targetGuid, false, true, true);
             return true;
         }
 
@@ -141,7 +141,7 @@ namespace Game.Chat
             if (!byte.TryParse(rankStr, out byte newRank))
                 return false;
 
-            return targetGuild.ChangeMemberRank(targetGuid, newRank);
+            return targetGuild.ChangeMemberRank(null, targetGuid, newRank);
         }
 
         [Command("rename", RBACPermissions.CommandGuildRename, true)]
