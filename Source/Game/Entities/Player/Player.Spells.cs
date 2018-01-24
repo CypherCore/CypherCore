@@ -2193,6 +2193,15 @@ namespace Game.Entities
             if (spellInfo.HasAttribute(SpellAttr8.MasterySpecialization))
                 need_cast &= IsCurrentSpecMasterySpell(spellInfo);
 
+            // Check EquippedItemClass
+            // passive spells which apply aura and have an item requirement are to be added in Player::ApplyItemDependentAuras
+            if (spellInfo.IsPassive() && spellInfo.EquippedItemClass >= 0)
+            {
+                foreach (SpellEffectInfo effectInfo in spellInfo.GetEffectsForDifficulty(Difficulty.None))
+                    if (effectInfo != null && effectInfo.IsAura())
+                        return false;
+            }
+
             //Check CasterAuraStates
             return need_cast && (spellInfo.CasterAuraState == 0 || HasAuraState(spellInfo.CasterAuraState));
         }
