@@ -1710,7 +1710,8 @@ namespace Game.Entities
             if (spellInfo == null)
                 return false;
 
-            if (spellInfo.HasAttribute(SpellAttr3.IgnoreHitResult))
+            // for example 40175
+            if (spellInfo.HasAttribute(SpellAttr0.UnaffectedByInvulnerability) && spellInfo.HasAttribute(SpellAttr3.IgnoreHitResult))
                 return false;
 
             if (spellInfo.HasAttribute(SpellAttr1.UnaffectedBySchoolImmune) || spellInfo.HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
