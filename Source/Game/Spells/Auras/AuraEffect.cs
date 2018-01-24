@@ -768,7 +768,7 @@ namespace Game.Spells
             GetBase().CallScriptAfterEffectProcHandlers(this, aurApp, eventInfo);
         }
 
-        void HandleShapeshiftBoosts(Unit target, bool apply)
+        public void HandleShapeshiftBoosts(Unit target, bool apply)
         {
             uint spellId = 0;
             uint spellId2 = 0;

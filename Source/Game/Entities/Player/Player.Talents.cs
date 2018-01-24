@@ -385,6 +385,13 @@ namespace Game.Entities
 
             activeGlyphs.IsFullUpdate = true;
             SendPacket(activeGlyphs);
+
+            var shapeshiftAuras = GetAuraEffectsByType(AuraType.ModShapeshift);
+            foreach (AuraEffect aurEff in shapeshiftAuras)
+            {
+                aurEff.HandleShapeshiftBoosts(this, false);
+                aurEff.HandleShapeshiftBoosts(this, true);
+            }
         }
 
         public Dictionary<uint, PlayerSpellState> GetTalentMap(uint spec) { return _specializationInfo.Talents[spec]; }
