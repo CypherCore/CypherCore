@@ -149,7 +149,6 @@ namespace Game.Entities
             float coeff = effect.BonusCoefficient;
             if (DoneAdvertisedBenefit != 0)
             {
-                float factorMod = CalculateLevelPenalty(spellProto) * stack;
                 Player modOwner = GetSpellModOwner();
                 if (modOwner)
                 {
@@ -157,7 +156,7 @@ namespace Game.Entities
                     modOwner.ApplySpellMod(spellProto.Id, SpellModOp.BonusMultiplier, ref coeff);
                     coeff /= 100.0f;
                 }
-                DoneTotal += (int)(DoneAdvertisedBenefit * coeff * factorMod);
+                DoneTotal += (int)(DoneAdvertisedBenefit * coeff * stack);
             }
 
             // Done Percentage for DOT is already calculated, no need to do it again. The percentage mod is applied in Aura.HandleAuraSpecificMods.
@@ -311,7 +310,6 @@ namespace Game.Entities
                 // Default calculation
                 if (TakenAdvertisedBenefit != 0)
                 {
-                    float factorMod = CalculateLevelPenalty(spellProto) * stack;
                     // level penalty still applied on Taken bonus - is it blizzlike?
                     Player modOwner = GetSpellModOwner();
                     if (modOwner)
@@ -320,7 +318,7 @@ namespace Game.Entities
                         modOwner.ApplySpellMod(spellProto.Id, SpellModOp.BonusMultiplier, ref coeff);
                         coeff /= 100.0f;
                     }
-                    TakenTotal += (int)(TakenAdvertisedBenefit * coeff * factorMod);
+                    TakenTotal += (int)(TakenAdvertisedBenefit * coeff * stack);
                 }
             }
 
@@ -451,7 +449,6 @@ namespace Game.Entities
 
             // Check for table values
             float coeff = effect.BonusCoefficient;
-            float factorMod = 1.0f;
             if (effect.BonusCoefficientFromAP > 0.0f)
             {
                 DoneTotal += (int)(effect.BonusCoefficientFromAP * stack * GetTotalAttackPowerValue(
@@ -467,7 +464,6 @@ namespace Game.Entities
             // Default calculation
             if (DoneAdvertisedBenefit != 0)
             {
-                factorMod *= CalculateLevelPenalty(spellProto) * stack;
                 Player modOwner = GetSpellModOwner();
                 if (modOwner)
                 {
@@ -476,7 +472,7 @@ namespace Game.Entities
                     coeff /= 100.0f;
                 }
 
-                DoneTotal += (int)(DoneAdvertisedBenefit * coeff * factorMod);
+                DoneTotal += (int)(DoneAdvertisedBenefit * coeff * stack);
             }
 
             foreach (SpellEffectInfo eff in spellProto.GetEffectsForDifficulty(GetMap().GetDifficultyID()))
@@ -566,7 +562,6 @@ namespace Game.Entities
 
             // Check for table values
             float coeff = effect.BonusCoefficient;
-            float factorMod = 1.0f;
             if (coeff <= 0.0f)
             {
                 // No bonus healing for SPELL_DAMAGE_CLASS_NONE class spells by default
@@ -580,7 +575,6 @@ namespace Game.Entities
             // Default calculation
             if (TakenAdvertisedBenefit != 0)
             {
-                factorMod *= CalculateLevelPenalty(spellProto) * stack;
                 Player modOwner = GetSpellModOwner();
                 if (modOwner)
                 {
@@ -589,7 +583,7 @@ namespace Game.Entities
                     coeff /= 100.0f;
                 }
 
-                TakenTotal += (int)(TakenAdvertisedBenefit * coeff * factorMod);
+                TakenTotal += (int)(TakenAdvertisedBenefit * coeff * stack);
             }
 
             var mHealingGet = GetAuraEffectsByType(AuraType.ModHealingReceived);
@@ -1147,22 +1141,6 @@ namespace Game.Entities
                 spell.SendChannelUpdate(0);
 
             spell.finish(ok);
-        }
-
-        public float CalculateLevelPenalty(SpellInfo spellProto)
-        {
-            if (spellProto.SpellLevel <= 0 || spellProto.SpellLevel >= spellProto.MaxLevel)
-                return 1.0f;
-
-            float LvlPenalty = 0.0f;
-
-            if (spellProto.SpellLevel < 20)
-                LvlPenalty = (20.0f - spellProto.SpellLevel) * 3.75f;
-            float LvlFactor = (spellProto.SpellLevel + 6.0f) / getLevel();
-            if (LvlFactor > 1.0f)
-                LvlFactor = 1.0f;
-
-            return MathFunctions.AddPct(ref LvlFactor, -LvlPenalty);
         }
 
         uint GetCastingTimeForBonus(SpellInfo spellProto, DamageEffectType damagetype, uint CastingTime)

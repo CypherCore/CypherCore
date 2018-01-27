@@ -768,7 +768,6 @@ namespace Scripts.Spells.Warlock
                 float bonus = 0.8068f;
 
                 bonus *= caster.SpellBaseHealingBonusDone(GetSpellInfo().GetSchoolMask());
-                bonus *= caster.CalculateLevelPenalty(GetSpellInfo());
 
                 amount += (int)bonus;
             }
