@@ -821,10 +821,10 @@ namespace Game
                 uint oldMSTime = Time.GetMSTime();
 
                 //                                                   0         1
-                SQLResult result = DB.World.Query("SELECT eventEntry, bgflag FROM game_event_Battleground_holiday");
+                SQLResult result = DB.World.Query("SELECT eventEntry, bgflag FROM game_event_battleground_holiday");
 
                 if (result.IsEmpty())
-                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Battlegroundholidays in game events. DB table `game_event_Battleground_holiday` is empty.");
+                    Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Battlegroundholidays in game events. DB table `game_event_battleground_holiday` is empty.");
                 else
                 {
                     uint count = 0;
@@ -834,7 +834,7 @@ namespace Game
 
                         if (event_id >= mGameEvent.Length)
                         {
-                            Log.outError(LogFilter.Sql, "`game_event_Battleground_holiday` game event id ({0}) not exist in `game_event`", event_id);
+                            Log.outError(LogFilter.Sql, "`game_event_battleground_holiday` game event id ({0}) not exist in `game_event`", event_id);
                             continue;
                         }
 

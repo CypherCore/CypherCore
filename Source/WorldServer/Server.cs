@@ -152,7 +152,7 @@ namespace WorldServer
             DB.Characters.Execute("UPDATE characters SET online = 0 WHERE online <> 0");
 
             // Battlegroundinstance ids reset at server restart
-            DB.Characters.Execute("UPDATE character_Battleground_data SET instanceId = 0");
+            DB.Characters.Execute("UPDATE character_battleground_data SET instanceId = 0");
         }
 
         static void WorldUpdateLoop()
