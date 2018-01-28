@@ -5944,9 +5944,7 @@ namespace Game.Spells
 
             if (apply)
             {
-                AreaTrigger areaTrigger = new AreaTrigger();
-                if (!areaTrigger.CreateAreaTrigger((uint)GetMiscValue(), GetCaster(), target, GetSpellInfo(), target, GetBase().GetDuration(), GetBase().GetSpellXSpellVisualId(), ObjectGuid.Empty, this))
-                    areaTrigger.Dispose();
+                AreaTrigger areaTrigger = AreaTrigger.CreateAreaTrigger((uint)GetMiscValue(), GetCaster(), target, GetSpellInfo(), target, GetBase().GetDuration(), GetBase().GetSpellXSpellVisualId(), ObjectGuid.Empty, this);
             }
             else
             {

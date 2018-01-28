@@ -2043,8 +2043,8 @@ namespace Game.Entities
             }
 
             Map map = GetMap();
-            GameObject go = new GameObject();
-            if (!go.Create(entry, map, pos, rotation, 255, GameObjectState.Ready))
+            GameObject go = GameObject.CreateGameObject(entry, map, pos, rotation, 255, GameObjectState.Ready);
+            if (!go)
                 return null;
 
             go.CopyPhaseFrom(this);

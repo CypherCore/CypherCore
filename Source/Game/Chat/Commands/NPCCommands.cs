@@ -1094,10 +1094,6 @@ namespace Game.Chat
                     return false;
 
                 Player chr = handler.GetSession().GetPlayer();
-                float x = chr.GetPositionX();
-                float y = chr.GetPositionY();
-                float z = chr.GetPositionZ();
-                float o = chr.GetOrientation();
                 Map map = chr.GetMap();
 
                 Transport trans = chr.GetTransport();
@@ -1119,8 +1115,8 @@ namespace Game.Chat
                     return true;
                 }
 
-                Creature creature = new Creature();
-                if (!creature.Create(map.GenerateLowGuid(HighGuid.Creature), map, id, x, y, z, o))
+                Creature creature = Creature.CreateCreature(id, map, chr.GetPosition());
+                if (!creature)
                     return false;
 
                 creature.CopyPhaseFrom(chr);
@@ -1131,8 +1127,8 @@ namespace Game.Chat
                 // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells()
                 // current "creature" variable is deleted and created fresh new, otherwise old values might trigger asserts or cause undefined behavior
                 creature.CleanupsBeforeDelete();
-                creature = new Creature();
-                if (!creature.LoadCreatureFromDB(db_guid, map))
+                creature = Creature.CreateCreatureFromDB(db_guid, map);
+                if (!creature)
                     return false;
 
                 Global.ObjectMgr.AddCreatureToGrid(db_guid, Global.ObjectMgr.GetCreatureData(db_guid));

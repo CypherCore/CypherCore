@@ -1331,8 +1331,8 @@ namespace Game.BattleGrounds
             // Must be created this way, adding to godatamap would add it to the base map of the instance
             // and when loading it (in go.LoadFromDB()), a new guid would be assigned to the object, and a new object would be created
             // So we must create it specific for this instance
-            GameObject go = new GameObject();
-            if (!go.Create(entry, GetBgMap(), new Position(x, y, z, o), rotation, 100, goState))
+            GameObject go = GameObject.CreateGameObject(entry, GetBgMap(), new Position(x, y, z, o), rotation, 255, goState);
+            if (!go)
             {
                 Log.outError(LogFilter.Battleground, "Battleground.AddObject: cannot create gameobject (entry: {0}) for BG (map: {1}, instance id: {2})!", entry, m_MapId, m_InstanceID);
                 return false;
@@ -1435,6 +1435,13 @@ namespace Game.BattleGrounds
             if (!map)
                 return null;
 
+            if (Global.ObjectMgr.GetCreatureTemplate(entry) == null)
+            {
+                Log.outError(LogFilter.Battleground, $"Battleground.AddCreature: creature template (entry: {entry}) does not exist for BG (map: {m_MapId}, instance id: {m_InstanceID})!");
+                return null;
+            }
+
+
             if (transport)
             {
                 Creature transCreature = transport.SummonPassenger(entry, new Position(x, y, z, o), TempSummonType.ManualDespawn);
@@ -1447,26 +1454,17 @@ namespace Game.BattleGrounds
                 return null;
             }
 
-            Creature creature = new Creature();
-            if (!creature.Create(map.GenerateLowGuid(HighGuid.Creature), map, entry, x, y, z, o))
+            Position pos = new Position(x, y, z, o);
+
+            Creature creature = Creature.CreateCreature(entry, map, pos);
+            if (!creature)
             {
                 Log.outError(LogFilter.Battleground, "Battleground.AddCreature: cannot create creature (entry: {0}) for BG (map: {1}, instance id: {2})!",
                     entry, m_MapId, m_InstanceID);
                 return null;
             }
 
-            creature.SetHomePosition(x, y, z, o);
-
-            CreatureTemplate cinfo = Global.ObjectMgr.GetCreatureTemplate(entry);
-            if (cinfo == null)
-            {
-                Log.outError(LogFilter.Battleground, "Battleground.AddCreature: creature template (entry: {0}) does not exist for BG (map: {1}, instance id: {2})!",
-                    entry, m_MapId, m_InstanceID);
-                return null;
-            }
-            // Force using DB speeds
-            creature.SetSpeed(UnitMoveType.Walk, cinfo.SpeedWalk);
-            creature.SetSpeed(UnitMoveType.Run, cinfo.SpeedRun);
+            creature.SetHomePosition(pos);
 
             if (!map.AddToMap(creature))
                 return null;

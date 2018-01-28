@@ -938,13 +938,14 @@ namespace Game.Chat
             if (vehicleRecord == null)
                 return false;
 
-            Creature creature = new Creature();
-
             Map map = handler.GetSession().GetPlayer().GetMap();
-            if (!creature.Create(map.GenerateLowGuid(HighGuid.Vehicle), map, entry, x, y, z, o, null, id))
+            Position pos = new Position(x, y, z, o);
+
+            Creature creature = Creature.CreateCreature(entry, map, pos, id);
+            if (!creature)
                 return false;
 
-            map.AddToMap(creature.ToCreature());
+            map.AddToMap(creature);
             return true;
         }
 

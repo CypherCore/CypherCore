@@ -309,9 +309,9 @@ namespace Game.Entities
         public Creature CreateNPCPassenger(ulong guid, CreatureData data)
         {
             Map map = GetMap();
-            Creature creature = new Creature();
 
-            if (!creature.LoadCreatureFromDB(guid, map, false))
+            Creature creature = Creature.CreateCreatureFromDB(guid, map, false);
+            if (!creature)
                 return null;
 
             float x = data.posX;
@@ -359,9 +359,9 @@ namespace Game.Entities
         GameObject CreateGOPassenger(ulong guid, GameObjectData data)
         {
             Map map = GetMap();
-            GameObject go = new GameObject();
 
-            if (!go.LoadGameObjectFromDB(guid, map, false))
+            GameObject go = CreateGameObjectFromDB(guid, map, false);
+            if (!go)
                 return null;
 
             float x = data.posX;

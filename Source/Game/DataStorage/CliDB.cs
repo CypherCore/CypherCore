@@ -283,8 +283,6 @@ namespace Game.DataStorage
             foreach (var entry in TaxiPathNodeStorage.Values)
                 TaxiPathNodesByPath[entry.PathID][entry.NodeIndex] = entry;
 
-            TaxiPathNodeStorage = null;
-
             foreach (var node in TaxiNodesStorage.Values)
             {
                 if (!node.Flags.HasAnyFlag(TaxiNodeFlags.Alliance | TaxiNodeFlags.Horde))

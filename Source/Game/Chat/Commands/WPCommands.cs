@@ -545,31 +545,42 @@ namespace Game.Chat.Commands
                 target.AddObjectToRemoveList();
 
                 // re-create
-                Creature wpCreature = new Creature();
-                if (!wpCreature.Create(map.GenerateLowGuid(HighGuid.Creature), map, 1, chr.GetPositionX(), chr.GetPositionY(), chr.GetPositionZ(), chr.GetOrientation()))
+                Creature creature = Creature.CreateCreature(1, map, chr.GetPosition());
+                if (!creature)
                 {
-                    wpCreature.CopyPhaseFrom(chr);
-                    wpCreature.SaveToDB(map.GetId(), 1ul << (int)map.GetSpawnMode());
-                    // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
-                    /// @todo Should we first use "Create" then use "LoadFromDB"?
-                    if (!wpCreature.LoadCreatureFromDB(wpCreature.GetSpawnId(), map))
-                    {
-                        handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, 1);
-                        return false;
-                    }
-
-                    stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_DATA_POSITION);
-                    stmt.AddValue(0, chr.GetPositionX());
-                    stmt.AddValue(1, chr.GetPositionY());
-                    stmt.AddValue(2, chr.GetPositionZ());
-                    stmt.AddValue(3, pathid);
-                    stmt.AddValue(4, point);
-                    DB.World.Execute(stmt);
-
-                    handler.SendSysMessage(CypherStrings.WaypointChanged);
+                    handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, 1);
+                    return false;
                 }
+
+                creature.CopyPhaseFrom(chr);
+                creature.SaveToDB(map.GetId(), 1ul << (int)map.GetSpawnMode());
+
+                ulong dbGuid = creature.GetSpawnId();
+
+                // current "wpCreature" variable is deleted and created fresh new, otherwise old values might trigger asserts or cause undefined behavior
+                creature.CleanupsBeforeDelete();
+                creature.Dispose();
+
+                // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
+                creature = Creature.CreateCreatureFromDB(dbGuid, map);
+                if (!creature)
+                {
+                    handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, 1);
+                    return false;
+                }
+
+                stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_DATA_POSITION);
+                stmt.AddValue(0, chr.GetPositionX());
+                stmt.AddValue(1, chr.GetPositionY());
+                stmt.AddValue(2, chr.GetPositionZ());
+                stmt.AddValue(3, pathid);
+                stmt.AddValue(4, point);
+                DB.World.Execute(stmt);
+
+                handler.SendSysMessage(CypherStrings.WaypointChanged);
+
                 return true;
-            }                                                       // move
+            }                                                     // move
 
             if (string.IsNullOrEmpty(arg_str))
             {
@@ -752,27 +763,27 @@ namespace Game.Chat.Commands
 
                     Player chr = handler.GetSession().GetPlayer();
                     Map map = chr.GetMap();
-                    float o = chr.GetOrientation();
+                    Position pos = new Position(x, y, z, chr.GetOrientation());
 
-                    Creature wpCreature = new Creature();
-                    if (!wpCreature.Create(map.GenerateLowGuid(HighGuid.Creature), map, id, x, y, z, o))
+                    Creature creature = Creature.CreateCreature(id, map, pos);
+                    if (!creature)
                     {
                         handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, id);
                         return false;
                     }
 
-                    wpCreature.CopyPhaseFrom(chr);
-                    wpCreature.SaveToDB(map.GetId(), 1ul << (int)map.GetSpawnMode());
+                    creature.CopyPhaseFrom(chr);
+                    creature.SaveToDB(map.GetId(), 1ul << (int)map.GetSpawnMode());
 
-                    // Set "wpguid" column to the visual waypoint
-                    stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_DATA_WPGUID);
-                    stmt.AddValue(0, wpCreature.GetSpawnId());
-                    stmt.AddValue(1, pathid);
-                    stmt.AddValue(2, point);
-                    DB.World.Execute(stmt);
+                    ulong dbGuid = creature.GetSpawnId();
+
+                    // current "wpCreature" variable is deleted and created fresh new, otherwise old values might trigger asserts or cause undefined behavior
+                    creature.CleanupsBeforeDelete();
+                    creature.Dispose();
 
                     // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
-                    if (!wpCreature.LoadCreatureFromDB(wpCreature.GetSpawnId(), map))
+                    creature = Creature.CreateCreatureFromDB(dbGuid, map);
+                    if (!creature)
                     {
                         handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, id);
                         return false;
@@ -780,10 +791,17 @@ namespace Game.Chat.Commands
 
                     if (target)
                     {
-                        wpCreature.SetDisplayId(target.GetDisplayId());
-                        wpCreature.SetObjectScale(0.5f);
-                        wpCreature.SetLevel(Math.Min(point, SharedConst.StrongMaxLevel));
+                        creature.SetDisplayId(target.GetDisplayId());
+                        creature.SetObjectScale(0.5f);
+                        creature.SetLevel(Math.Min(point, SharedConst.StrongMaxLevel));
                     }
+
+                    // Set "wpguid" column to the visual waypoint
+                    stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_DATA_WPGUID);
+                    stmt.AddValue(0, creature.GetSpawnId());
+                    stmt.AddValue(1, pathid);
+                    stmt.AddValue(2, point);
+                    DB.World.Execute(stmt);
                 }
                 while (result.NextRow());
 
@@ -808,25 +826,31 @@ namespace Game.Chat.Commands
                 float x = result.Read<float>(0);
                 float y = result.Read<float>(1);
                 float z = result.Read<float>(2);
-                uint id = 1;
 
                 Player chr = handler.GetSession().GetPlayer();
-                float o = chr.GetOrientation();
                 Map map = chr.GetMap();
+                Position pos = new Position(x, y, z, chr.GetOrientation());
 
-                Creature creature = new Creature();
-                if (!creature.Create(map.GenerateLowGuid(HighGuid.Creature), map, id, x, y, z, o))
+                Creature creature = Creature.CreateCreature(1, map, pos);
+                if (!creature)
                 {
-                    handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, id);
+                    handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, 1);
                     return false;
                 }
 
                 creature.CopyPhaseFrom(chr);
                 creature.SaveToDB(map.GetId(), 1ul << (int)map.GetSpawnMode());
 
-                if (!creature.LoadCreatureFromDB(creature.GetSpawnId(), map))
+                ulong dbGuid = creature.GetSpawnId();
+
+                // current "creature" variable is deleted and created fresh new, otherwise old values might trigger asserts or cause undefined behavior
+                creature.CleanupsBeforeDelete();
+                creature.Dispose();
+
+                creature = Creature.CreateCreatureFromDB(dbGuid, map);
+                if (!creature)
                 {
-                    handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, id);
+                    handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, 1);
                     return false;
                 }
 
@@ -857,24 +881,31 @@ namespace Game.Chat.Commands
                 float y = result.Read<float>(1);
                 float z = result.Read<float>(2);
                 float o = result.Read<float>(3);
-                uint id = 1;
 
                 Player chr = handler.GetSession().GetPlayer();
                 Map map = chr.GetMap();
+                Position pos = new Position(x, y, z, o);
 
-                Creature creature = new Creature();
-                if (!creature.Create(map.GenerateLowGuid(HighGuid.Creature), map, id, x, y, z, o))
+                Creature creature = Creature.CreateCreature(1, map, pos);
+                if (!creature)
                 {
-                    handler.SendSysMessage(CypherStrings.WaypointNotcreated, id);
+                    handler.SendSysMessage(CypherStrings.WaypointNotcreated, 1);
                     return false;
                 }
 
                 creature.CopyPhaseFrom(chr);
                 creature.SaveToDB(map.GetId(), 1ul << (int)map.GetSpawnMode());
 
-                if (!creature.LoadCreatureFromDB(creature.GetSpawnId(), map))
+                ulong dbGuid = creature.GetSpawnId();
+
+                // current "creature" variable is deleted and created fresh new, otherwise old values might trigger asserts or cause undefined behavior
+                creature.CleanupsBeforeDelete();
+                creature.Dispose();
+
+                creature = Creature.CreateCreatureFromDB(dbGuid, map);
+                if (!creature)
                 {
-                    handler.SendSysMessage(CypherStrings.WaypointNotcreated, id);
+                    handler.SendSysMessage(CypherStrings.WaypointNotcreated, 1);
                     return false;
                 }
 

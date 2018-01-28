@@ -3451,8 +3451,8 @@ namespace Game
             // We use spawn coords to spawn
             if (!map.Instanceable() && !map.IsRemovalGrid(x, y))
             {
-                Creature creature = new Creature();
-                if (!creature.LoadCreatureFromDB(guid, map))
+                Creature creature = Creature.CreateCreatureFromDB(guid, map);
+                if (!creature)
                 {
                     Log.outError(LogFilter.Server, "AddCreature: Cannot add creature entry {0} to map", entry);
                     return 0;
@@ -4290,8 +4290,8 @@ namespace Game
             // We use spawn coords to spawn
             if (!map.Instanceable() && map.IsGridLoaded(x, y))
             {
-                GameObject go = new GameObject();
-                if (!go.LoadGameObjectFromDB(guid, map))
+                GameObject go = GameObject.CreateGameObjectFromDB(guid, map);
+                if (!go)
                 {
                     Log.outError(LogFilter.Server, "AddGOData: cannot add gameobject entry {0} to map", entry);
                     return 0;

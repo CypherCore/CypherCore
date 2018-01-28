@@ -158,7 +158,29 @@ namespace Game.Entities
             }
         }
 
-        public bool Create(uint name_id, Map map, Position pos, Quaternion rotation, uint animprogress, GameObjectState go_state, uint artKit = 0)
+        public static GameObject CreateGameObject(uint entry, Map map, Position pos, Quaternion rotation, uint animProgress, GameObjectState goState, uint artKit = 0)
+        {
+            GameObjectTemplate goInfo = Global.ObjectMgr.GetGameObjectTemplate(entry);
+            if (goInfo == null)
+                return null;
+
+            GameObject go = new GameObject();
+            if (!go.Create(entry, map, pos, rotation, animProgress, goState, artKit))
+                return null;
+
+            return go;
+        }
+
+        public static GameObject CreateGameObjectFromDB(ulong spawnId, Map map, bool addToMap = true)
+        {
+            GameObject go = new GameObject();
+            if (!go.LoadGameObjectFromDB(spawnId, map, addToMap))
+                return null;
+
+            return go;
+        }
+
+        bool Create(uint entry, Map map, Position pos, Quaternion rotation, uint animProgress, GameObjectState goState, uint artKit)
         {
             Contract.Assert(map);
             SetMap(map);
@@ -167,34 +189,34 @@ namespace Game.Entities
             m_stationaryPosition.Relocate(pos);
             if (!IsPositionValid())
             {
-                Log.outError(LogFilter.Server, "Gameobject (Spawn id: {0} Entry: {1}) not created. Suggested coordinates isn't valid (X: {2} Y: {3})", GetSpawnId(), name_id, pos.GetPositionX(), pos.GetPositionY());
+                Log.outError(LogFilter.Server, "Gameobject (Spawn id: {0} Entry: {1}) not created. Suggested coordinates isn't valid (X: {2} Y: {3})", GetSpawnId(), entry, pos.GetPositionX(), pos.GetPositionY());
                 return false;
             }
 
             SetZoneScript();
             if (m_zoneScript != null)
             {
-                name_id = m_zoneScript.GetGameObjectEntry(m_spawnId, name_id);
-                if (name_id == 0)
+                entry = m_zoneScript.GetGameObjectEntry(m_spawnId, entry);
+                if (entry == 0)
                     return false;
             }
 
-            GameObjectTemplate goinfo = Global.ObjectMgr.GetGameObjectTemplate(name_id);
-            if (goinfo == null)
+            GameObjectTemplate goInfo = Global.ObjectMgr.GetGameObjectTemplate(entry);
+            if (goInfo == null)
             {
-                Log.outError(LogFilter.Sql, "Gameobject (Spawn id: {0} Entry: {1}) not created: non-existing entry in `gameobject_template`. Map: {2} (X: {3} Y: {4} Z: {5})", GetSpawnId(), name_id, map.GetId(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
+                Log.outError(LogFilter.Sql, "Gameobject (Spawn id: {0} Entry: {1}) not created: non-existing entry in `gameobject_template`. Map: {2} (X: {3} Y: {4} Z: {5})", GetSpawnId(), entry, map.GetId(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
                 return false;
             }
 
-            if (goinfo.type == GameObjectTypes.MapObjTransport)
+            if (goInfo.type == GameObjectTypes.MapObjTransport)
             {
-                Log.outError(LogFilter.Sql, "Gameobject (Spawn id: {0} Entry: {1}) not created: gameobject type GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT cannot be manually created.", GetSpawnId(), name_id);
+                Log.outError(LogFilter.Sql, "Gameobject (Spawn id: {0} Entry: {1}) not created: gameobject type GAMEOBJECT_TYPE_MAP_OBJ_TRANSPORT cannot be manually created.", GetSpawnId(), entry);
                 return false;
             }
 
             ObjectGuid guid;
-            if (goinfo.type != GameObjectTypes.Transport)
-                guid = ObjectGuid.Create(HighGuid.GameObject, map.GetId(), goinfo.entry, map.GenerateLowGuid(HighGuid.GameObject));
+            if (goInfo.type != GameObjectTypes.Transport)
+                guid = ObjectGuid.Create(HighGuid.GameObject, map.GetId(), goInfo.entry, map.GenerateLowGuid(HighGuid.GameObject));
             else
             {
                 guid = ObjectGuid.Create(HighGuid.Transport, map.GenerateLowGuid(HighGuid.Transport));
@@ -203,12 +225,12 @@ namespace Game.Entities
 
             _Create(guid);
 
-            m_goInfo = goinfo;
-            m_goTemplateAddon = Global.ObjectMgr.GetGameObjectTemplateAddon(name_id);
+            m_goInfo = goInfo;
+            m_goTemplateAddon = Global.ObjectMgr.GetGameObjectTemplateAddon(entry);
 
-            if (goinfo.type >= GameObjectTypes.Max)
+            if (goInfo.type >= GameObjectTypes.Max)
             {
-                Log.outError(LogFilter.Sql, "Gameobject (Spawn id: {0} Entry: {1}) not created: non-existing GO type '{2}' in `gameobject_template`. It will crash client if created.", GetSpawnId(), name_id, goinfo.type);
+                Log.outError(LogFilter.Sql, "Gameobject (Spawn id: {0} Entry: {1}) not created: non-existing GO type '{2}' in `gameobject_template`. It will crash client if created.", GetSpawnId(), entry, goInfo.type);
                 return false;
             }
 
@@ -222,7 +244,7 @@ namespace Game.Entities
 
             SetParentRotation(parentRotation);
 
-            SetObjectScale(goinfo.size);
+            SetObjectScale(goInfo.size);
 
             if (m_goTemplateAddon != null)
             {
@@ -236,85 +258,85 @@ namespace Game.Entities
                 }
             }
 
-            SetEntry(goinfo.entry);
+            SetEntry(goInfo.entry);
 
             // set name for logs usage, doesn't affect anything ingame
-            SetName(goinfo.name);
+            SetName(goInfo.name);
 
-            SetDisplayId(goinfo.displayId);
+            SetDisplayId(goInfo.displayId);
 
             m_model = CreateModel();
             // GAMEOBJECT_BYTES_1, index at 0, 1, 2 and 3
-            SetGoType(goinfo.type);
-            m_prevGoState = go_state;
-            SetGoState(go_state);
+            SetGoType(goInfo.type);
+            m_prevGoState = goState;
+            SetGoState(goState);
             SetGoArtKit((byte)artKit);
 
-            switch (goinfo.type)
+            switch (goInfo.type)
             {
                 case GameObjectTypes.FishingHole:
-                    SetGoAnimProgress(animprogress);
+                    SetGoAnimProgress(animProgress);
                     m_goValue.FishingHole.MaxOpens = RandomHelper.URand(GetGoInfo().FishingHole.minRestock, GetGoInfo().FishingHole.maxRestock);
                     break;
                 case GameObjectTypes.DestructibleBuilding:
                     m_goValue.Building.Health = 20000;//goinfo.DestructibleBuilding.intactNumHits + goinfo.DestructibleBuilding.damagedNumHits;
                     m_goValue.Building.MaxHealth = m_goValue.Building.Health;
                     SetGoAnimProgress(255);
-                    SetUInt32Value(GameObjectFields.ParentRotation, goinfo.DestructibleBuilding.DestructibleModelRec);
+                    SetUInt32Value(GameObjectFields.ParentRotation, goInfo.DestructibleBuilding.DestructibleModelRec);
                     break;
                 case GameObjectTypes.Transport:
-                    m_goValue.Transport.AnimationInfo = Global.TransportMgr.GetTransportAnimInfo(goinfo.entry);
+                    m_goValue.Transport.AnimationInfo = Global.TransportMgr.GetTransportAnimInfo(goInfo.entry);
                     m_goValue.Transport.PathProgress = Time.GetMSTime();
                     if (m_goValue.Transport.AnimationInfo.Path != null)
                         m_goValue.Transport.PathProgress -= m_goValue.Transport.PathProgress % GetTransportPeriod();    // align to period
                     m_goValue.Transport.CurrentSeg = 0;
                     m_goValue.Transport.StateUpdateTimer = 0;
                     m_goValue.Transport.StopFrames = new List<uint>();
-                    if (goinfo.Transport.Timeto2ndfloor > 0)
-                        m_goValue.Transport.StopFrames.Add(goinfo.Transport.Timeto2ndfloor);
-                    if (goinfo.Transport.Timeto3rdfloor > 0)
-                        m_goValue.Transport.StopFrames.Add(goinfo.Transport.Timeto3rdfloor);
-                    if (goinfo.Transport.Timeto4thfloor > 0)
-                        m_goValue.Transport.StopFrames.Add(goinfo.Transport.Timeto4thfloor);
-                    if (goinfo.Transport.Timeto5thfloor > 0)
-                        m_goValue.Transport.StopFrames.Add(goinfo.Transport.Timeto5thfloor);
-                    if (goinfo.Transport.Timeto6thfloor > 0)
-                        m_goValue.Transport.StopFrames.Add(goinfo.Transport.Timeto6thfloor);
-                    if (goinfo.Transport.Timeto7thfloor > 0)
-                        m_goValue.Transport.StopFrames.Add(goinfo.Transport.Timeto7thfloor);
-                    if (goinfo.Transport.Timeto8thfloor > 0)
-                        m_goValue.Transport.StopFrames.Add(goinfo.Transport.Timeto8thfloor);
-                    if (goinfo.Transport.Timeto9thfloor > 0)
-                        m_goValue.Transport.StopFrames.Add(goinfo.Transport.Timeto9thfloor);
-                    if (goinfo.Transport.Timeto10thfloor > 0)
-                        m_goValue.Transport.StopFrames.Add(goinfo.Transport.Timeto10thfloor);
+                    if (goInfo.Transport.Timeto2ndfloor > 0)
+                        m_goValue.Transport.StopFrames.Add(goInfo.Transport.Timeto2ndfloor);
+                    if (goInfo.Transport.Timeto3rdfloor > 0)
+                        m_goValue.Transport.StopFrames.Add(goInfo.Transport.Timeto3rdfloor);
+                    if (goInfo.Transport.Timeto4thfloor > 0)
+                        m_goValue.Transport.StopFrames.Add(goInfo.Transport.Timeto4thfloor);
+                    if (goInfo.Transport.Timeto5thfloor > 0)
+                        m_goValue.Transport.StopFrames.Add(goInfo.Transport.Timeto5thfloor);
+                    if (goInfo.Transport.Timeto6thfloor > 0)
+                        m_goValue.Transport.StopFrames.Add(goInfo.Transport.Timeto6thfloor);
+                    if (goInfo.Transport.Timeto7thfloor > 0)
+                        m_goValue.Transport.StopFrames.Add(goInfo.Transport.Timeto7thfloor);
+                    if (goInfo.Transport.Timeto8thfloor > 0)
+                        m_goValue.Transport.StopFrames.Add(goInfo.Transport.Timeto8thfloor);
+                    if (goInfo.Transport.Timeto9thfloor > 0)
+                        m_goValue.Transport.StopFrames.Add(goInfo.Transport.Timeto9thfloor);
+                    if (goInfo.Transport.Timeto10thfloor > 0)
+                        m_goValue.Transport.StopFrames.Add(goInfo.Transport.Timeto10thfloor);
 
-                    if (goinfo.Transport.startOpen != 0)
-                        SetTransportState(GameObjectState.TransportStopped, goinfo.Transport.startOpen - 1);
+                    if (goInfo.Transport.startOpen != 0)
+                        SetTransportState(GameObjectState.TransportStopped, goInfo.Transport.startOpen - 1);
                     else
                         SetTransportState(GameObjectState.TransportActive);
 
-                    SetGoAnimProgress(animprogress);
+                    SetGoAnimProgress(animProgress);
                     break;
                 case GameObjectTypes.FishingNode:
                     SetUInt32Value(GameObjectFields.Level, 1);
                     SetGoAnimProgress(255);
                     break;
                 case GameObjectTypes.Trap:
-                    if (goinfo.Trap.stealthed != 0)
+                    if (goInfo.Trap.stealthed != 0)
                     {
                         m_stealth.AddFlag(StealthType.Trap);
                         m_stealth.AddValue(StealthType.Trap, 70);
                     }
 
-                    if (goinfo.Trap.stealthAffected != 0)
+                    if (goInfo.Trap.stealthAffected != 0)
                     {
                         m_invisibility.AddFlag(InvisibilityType.Trap);
                         m_invisibility.AddValue(InvisibilityType.Trap, 300);
                     }
                     break;
                 default:
-                    SetGoAnimProgress(animprogress);
+                    SetGoAnimProgress(animProgress);
                     break;
             }
 
@@ -340,14 +362,14 @@ namespace Game.Entities
             uint linkedEntry = GetGoInfo().GetLinkedGameObjectEntry();
             if (linkedEntry != 0)
             {
-                GameObject linkedGO = new GameObject();
-                if (linkedGO.Create(linkedEntry, map, pos, rotation, 255, GameObjectState.Ready))
+                GameObject linkedGo = CreateGameObject(linkedEntry, map, pos, rotation, 255, GameObjectState.Ready);
+                if (linkedGo != null)
                 {
-                    SetLinkedTrap(linkedGO);
-                    map.AddToMap(linkedGO);
+                    SetLinkedTrap(linkedGo);
+                    map.AddToMap(linkedGo);
                 }
                 else
-                    linkedGO.Dispose();
+                    linkedGo.Dispose();
             }
 
             return true;
@@ -907,10 +929,9 @@ namespace Game.Entities
             DB.World.Execute(stmt);
         }
 
-        public bool LoadGameObjectFromDB(ulong spawnId, Map map, bool addToMap = true)
+        bool LoadGameObjectFromDB(ulong spawnId, Map map, bool addToMap)
         {
             GameObjectData data = Global.ObjectMgr.GetGOData(spawnId);
-
             if (data == null)
             {
                 Log.outError(LogFilter.Maps, "Gameobject (SpawnId: {0}) not found in table `gameobject`, can't load. ", spawnId);

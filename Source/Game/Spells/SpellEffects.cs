@@ -2840,10 +2840,6 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.Hit)
                 return;
 
-            uint gameobject_id = (uint)effectInfo.MiscValue;
-
-            GameObject pGameObj = new GameObject();
-
             WorldObject target = focusObject;
             if (target == null)
                 target = m_caster;
@@ -2855,34 +2851,37 @@ namespace Game.Spells
                 m_caster.GetClosePoint(out x, out y, out z, SharedConst.DefaultWorldObjectSize);
 
             Map map = target.GetMap();
+
+            Position pos = new Position(x, y, z, target.GetOrientation());
             Quaternion rotation = new Quaternion(Matrix3.fromEulerAnglesZYX(target.GetOrientation(), 0.0f, 0.0f));
-            if (!pGameObj.Create(gameobject_id, map, new Position(x, y, z, target.GetOrientation()), rotation, 255, GameObjectState.Ready))
+            GameObject go = GameObject.CreateGameObject((uint)effectInfo.MiscValue, map, pos, rotation, 255, GameObjectState.Ready);
+            if (!go)
                 return;
 
-            pGameObj.CopyPhaseFrom(m_caster);
+            go.CopyPhaseFrom(m_caster);
 
             int duration = m_spellInfo.CalcDuration(m_caster);
 
-            pGameObj.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
-            pGameObj.SetSpellId(m_spellInfo.Id);
+            go.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
+            go.SetSpellId(m_spellInfo.Id);
 
-            ExecuteLogEffectSummonObject(effIndex, pGameObj);
+            ExecuteLogEffectSummonObject(effIndex, go);
 
             // Wild object not have owner and check clickable by players
-            map.AddToMap(pGameObj);
+            map.AddToMap(go);
 
-            if (pGameObj.GetGoType() == GameObjectTypes.FlagDrop)
+            if (go.GetGoType() == GameObjectTypes.FlagDrop)
             {
                 Player player = m_caster.ToPlayer();
                 if (player != null)
                 {
                     Battleground bg = player.GetBattleground();
                     if (bg)
-                        bg.SetDroppedFlagGUID(pGameObj.GetGUID(), (player.GetTeam() == Team.Alliance ? TeamId.Horde : TeamId.Alliance));
+                        bg.SetDroppedFlagGUID(go.GetGUID(), (player.GetTeam() == Team.Alliance ? TeamId.Horde : TeamId.Alliance));
                 }
             }
 
-            GameObject linkedTrap = pGameObj.GetLinkedTrap();
+            GameObject linkedTrap = go.GetLinkedTrap();
             if (linkedTrap)
             {
                 linkedTrap.CopyPhaseFrom(m_caster);
@@ -3506,10 +3505,7 @@ namespace Game.Spells
             }
 
             //CREATE DUEL FLAG OBJECT
-            GameObject pGameObj = new GameObject();
-
-            int gameobject_id = effectInfo.MiscValue;
-
+            Map map = m_caster.GetMap();
             Position pos = new Position()
             {
                 posX = m_caster.GetPositionX() + (unitTarget.GetPositionX() - m_caster.GetPositionX()) / 2,
@@ -3517,29 +3513,29 @@ namespace Game.Spells
                 posZ = m_caster.GetPositionZ(),
                 Orientation = m_caster.GetOrientation()
             };
-
-            Map map = m_caster.GetMap();
             Quaternion rotation = new Quaternion(Matrix3.fromEulerAnglesZYX(pos.GetOrientation(), 0.0f, 0.0f));
-            if (!pGameObj.Create((uint)gameobject_id, map, pos, rotation, 0, GameObjectState.Ready))
+
+            GameObject go = GameObject.CreateGameObject((uint)effectInfo.MiscValue, map, pos, rotation, 0, GameObjectState.Ready);
+            if (!go)
                 return;
 
-            pGameObj.CopyPhaseFrom(m_caster);
+            go.CopyPhaseFrom(m_caster);
 
-            pGameObj.SetUInt32Value(GameObjectFields.Faction, m_caster.getFaction());
-            pGameObj.SetUInt32Value(GameObjectFields.Level, m_caster.getLevel() + 1);
+            go.SetUInt32Value(GameObjectFields.Faction, m_caster.getFaction());
+            go.SetUInt32Value(GameObjectFields.Level, m_caster.getLevel() + 1);
             int duration = m_spellInfo.CalcDuration(m_caster);
-            pGameObj.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
-            pGameObj.SetSpellId(m_spellInfo.Id);
+            go.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
+            go.SetSpellId(m_spellInfo.Id);
 
-            ExecuteLogEffectSummonObject(effIndex, pGameObj);
+            ExecuteLogEffectSummonObject(effIndex, go);
 
-            m_caster.AddGameObject(pGameObj);
-            map.AddToMap(pGameObj);
+            m_caster.AddGameObject(go);
+            map.AddToMap(go);
             //END
 
             // Send request
             DuelRequested packet = new DuelRequested();
-            packet.ArbiterGUID = pGameObj.GetGUID();
+            packet.ArbiterGUID = go.GetGUID();
             packet.RequestedByGUID = caster.GetGUID();
             packet.RequestedByWowAccount = caster.GetSession().GetAccountGUID();
 
@@ -3563,8 +3559,8 @@ namespace Game.Spells
             duel2.isMounted = (GetSpellInfo().Id == 62875); // Mounted Duel
             target.duel = duel2;
 
-            caster.SetGuidValue(PlayerFields.DuelArbiter, pGameObj.GetGUID());
-            target.SetGuidValue(PlayerFields.DuelArbiter, pGameObj.GetGUID());
+            caster.SetGuidValue(PlayerFields.DuelArbiter, go.GetGUID());
+            target.SetGuidValue(PlayerFields.DuelArbiter, go.GetGUID());
 
             Global.ScriptMgr.OnPlayerDuelRequest(target, caster);
         }
@@ -3836,7 +3832,6 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.Hit)
                 return;
 
-            uint go_id = (uint)effectInfo.MiscValue;
             byte slot = (byte)(effectInfo.Effect - SpellEffectName.SummonObjectSlot1);
             ObjectGuid guid = m_caster.m_ObjectSlot[slot];
             if (!guid.IsEmpty())
@@ -3852,8 +3847,6 @@ namespace Game.Spells
                 m_caster.m_ObjectSlot[slot].Clear();
             }
 
-            GameObject go = new GameObject();
-
             float x, y, z;
             // If dest location if present
             if (m_targets.HasDst())
@@ -3863,8 +3856,10 @@ namespace Game.Spells
                 m_caster.GetClosePoint(out x, out y, out z, SharedConst.DefaultWorldObjectSize);
 
             Map map = m_caster.GetMap();
+            Position pos = new Position(x, y, z, m_caster.GetOrientation());
             Quaternion rotation = new Quaternion(Matrix3.fromEulerAnglesZYX(m_caster.GetOrientation(), 0.0f, 0.0f));
-            if (!go.Create(go_id, map, new Position(x, y, z, m_caster.GetOrientation()), rotation, 255, GameObjectState.Ready))
+            GameObject go = GameObject.CreateGameObject((uint)effectInfo.MiscValue, map, pos, rotation, 255, GameObjectState.Ready);
+            if (!go)
                 return;
 
             go.CopyPhaseFrom(m_caster);
@@ -4548,14 +4543,13 @@ namespace Game.Spells
             if (goinfo.type == GameObjectTypes.Ritual)
                 m_caster.GetPosition(out fx, out fy, out fz);
 
-            GameObject pGameObj = new GameObject();
-
             Position pos = new Position(fx, fy, fz, m_caster.GetOrientation());
             Quaternion rotation = new Quaternion(Matrix3.fromEulerAnglesZYX(m_caster.GetOrientation(), 0.0f, 0.0f));
-            if (!pGameObj.Create(name_id, cMap, pos, rotation, 255, GameObjectState.Ready))
+            GameObject go = GameObject.CreateGameObject(name_id, cMap, pos, rotation, 255, GameObjectState.Ready);
+            if (!go)
                 return;
 
-            pGameObj.CopyPhaseFrom(m_caster);
+            go.CopyPhaseFrom(m_caster);
 
             int duration = m_spellInfo.CalcDuration(m_caster);
 
@@ -4563,11 +4557,11 @@ namespace Game.Spells
             {
                 case GameObjectTypes.FishingNode:
                     {
-                        pGameObj.SetFaction(m_caster.getFaction());
-                        ObjectGuid bobberGuid = pGameObj.GetGUID();
+                        go.SetFaction(m_caster.getFaction());
+                        ObjectGuid bobberGuid = go.GetGUID();
                         // client requires fishing bobber guid in channel object slot 0 to be usable
                         m_caster.SetDynamicStructuredValue(UnitDynamicFields.ChannelObjects, 0, bobberGuid);
-                        m_caster.AddGameObject(pGameObj);              // will removed at spell cancel
+                        m_caster.AddGameObject(go);              // will removed at spell cancel
 
                         // end time of range when possible catch fish (FISHING_BOBBER_READY_TIME..GetDuration(m_spellInfo))
                         // start time == fish-FISHING_BOBBER_READY_TIME (0..GetDuration(m_spellInfo)-FISHING_BOBBER_READY_TIME)
@@ -4587,13 +4581,13 @@ namespace Game.Spells
                     {
                         if (m_caster.IsTypeId(TypeId.Player))
                         {
-                            pGameObj.AddUniqueUse(m_caster.ToPlayer());
-                            m_caster.AddGameObject(pGameObj);      // will be removed at spell cancel
+                            go.AddUniqueUse(m_caster.ToPlayer());
+                            m_caster.AddGameObject(go);      // will be removed at spell cancel
                         }
                         break;
                     }
                 case GameObjectTypes.DuelArbiter: // 52991
-                    m_caster.AddGameObject(pGameObj);
+                    m_caster.AddGameObject(go);
                     break;
                 case GameObjectTypes.FishingHole:
                 case GameObjectTypes.Chest:
@@ -4601,16 +4595,16 @@ namespace Game.Spells
                     break;
             }
 
-            pGameObj.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
-            pGameObj.SetOwnerGUID(m_caster.GetGUID());
-            pGameObj.SetSpellId(m_spellInfo.Id);
+            go.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
+            go.SetOwnerGUID(m_caster.GetGUID());
+            go.SetSpellId(m_spellInfo.Id);
 
-            ExecuteLogEffectSummonObject(effIndex, pGameObj);
+            ExecuteLogEffectSummonObject(effIndex, go);
 
             Log.outDebug(LogFilter.Spells, "AddObject at SpellEfects.cpp EffectTransmitted");
 
-            cMap.AddToMap(pGameObj);
-            GameObject linkedTrap = pGameObj.GetLinkedTrap();
+            cMap.AddToMap(go);
+            GameObject linkedTrap = go.GetLinkedTrap();
             if (linkedTrap != null)
             {
                 linkedTrap.CopyPhaseFrom(m_caster);
@@ -5401,9 +5395,7 @@ namespace Game.Spells
             uint triggerEntry = (uint)effectInfo.MiscValue;
 
             int duration = GetSpellInfo().CalcDuration(GetCaster());
-            AreaTrigger areaTrigger = new AreaTrigger();
-            if (!areaTrigger.CreateAreaTrigger((uint)effectInfo.MiscValue, GetCaster(), null, GetSpellInfo(), destTarget.GetPosition(), duration, m_SpellVisual, m_castId))
-                areaTrigger.Dispose();
+            AreaTrigger.CreateAreaTrigger((uint)effectInfo.MiscValue, GetCaster(), null, GetSpellInfo(), destTarget.GetPosition(), duration, m_SpellVisual, m_castId);
         }
 
         [SpellEffectHandler(SpellEffectName.RemoveTalent)]

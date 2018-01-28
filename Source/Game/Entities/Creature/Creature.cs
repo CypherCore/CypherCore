@@ -720,7 +720,35 @@ namespace Game.Entities
                 GetMotionMaster().Initialize();
         }
 
-        public bool Create(ulong guidlow, Map map, uint entry, float x, float y, float z, float ang, CreatureData data = null, uint vehId = 0)
+        public static Creature CreateCreature(uint entry, Map map, Position pos, uint vehId = 0)
+        {
+            CreatureTemplate cInfo = Global.ObjectMgr.GetCreatureTemplate(entry);
+            if (cInfo == null)
+                return null;
+
+            ulong lowGuid;
+            if (vehId != 0 || cInfo.VehicleId != 0)
+                lowGuid = map.GenerateLowGuid(HighGuid.Vehicle);
+            else
+                lowGuid = map.GenerateLowGuid(HighGuid.Creature);
+
+            Creature creature = new Creature();
+            if (!creature.Create(lowGuid, map, entry, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), null, vehId))
+                return null;
+
+            return creature;
+        }
+
+        public static Creature CreateCreatureFromDB(ulong spawnId, Map map, bool addToMap = true, bool allowDuplicate = false)
+        {
+            Creature creature = new Creature();
+            if (!creature.LoadCreatureFromDB(spawnId, map, addToMap, allowDuplicate))
+                return null;
+
+            return creature;
+        }
+
+        public bool Create(ulong guidlow, Map map, uint entry, float x, float y, float z, float ang, CreatureData data, uint vehId)
         {
             SetMap(map);
 
@@ -1278,83 +1306,6 @@ namespace Game.Entities
             if (vehId != 0)
                 CreateVehicleKit(vehId, entry, true);
 
-            return true;
-        }
-
-        public bool LoadCreatureFromDB(ulong spawnId, Map map, bool addToMap = true, bool allowDuplicate = false)
-        {
-            if (!allowDuplicate)
-            {
-                // If an alive instance of this spawnId is already found, skip creation
-                // If only dead instance(s) exist, despawn them and spawn a new (maybe also dead) version
-                var creatureBounds = map.GetCreatureBySpawnIdStore().LookupByKey(spawnId);
-                List<Creature> despawnList = new List<Creature>();
-
-                foreach (var creature in creatureBounds)
-                {
-                    if (creature.IsAlive())
-                    {
-                        Log.outDebug(LogFilter.Maps, "Would have spawned {0} but {1} already exists", spawnId, creature.GetGUID().ToString());
-                        return false;
-                    }
-                    else
-                    {
-                        despawnList.Add(creature);
-                        Log.outDebug(LogFilter.Maps, "Despawned dead instance of spawn {0} ({1})", spawnId, creature.GetGUID().ToString());
-                    }
-                }
-
-                foreach (Creature despawnCreature in despawnList)
-                {
-                    despawnCreature.AddObjectToRemoveList();
-                }
-            }
-
-            CreatureData data = Global.ObjectMgr.GetCreatureData(spawnId);
-            if (data == null)
-            {
-                Log.outError(LogFilter.Sql, "Creature (GUID: {0}) not found in table `creature`, can't load. ", spawnId);
-                return false;
-            }
-
-            m_spawnId = spawnId;
-            m_creatureData = data;
-            if (!Create(map.GenerateLowGuid(HighGuid.Creature), map, data.id, data.posX, data.posY, data.posZ, data.orientation, data))
-                return false;
-
-            //We should set first home position, because then AI calls home movement
-            SetHomePosition(data.posX, data.posY, data.posZ, data.orientation);
-
-            m_respawnradius = data.spawndist;
-
-            m_respawnDelay = data.spawntimesecs;
-            m_deathState = DeathState.Alive;
-
-            m_respawnTime = GetMap().GetCreatureRespawnTime(m_spawnId);
-
-            // Is the creature script objecting to us spawning? If yes, delay by one second (then re-check in ::Update)
-            if (m_respawnTime == 0 && !Global.ScriptMgr.CanSpawn(spawnId, GetEntry(), GetCreatureTemplate(), GetCreatureData(), map))
-                m_respawnTime = Time.UnixTime + 1;
-
-            if (m_respawnTime != 0)                          // respawn on Update
-            {
-                m_deathState = DeathState.Dead;
-                if (CanFly())
-                {
-                    float tz = map.GetHeight(GetPhases(), data.posX, data.posY, data.posZ, true, MapConst.MaxFallDistance);
-                    if (data.posZ - tz > 0.1f && GridDefines.IsValidMapCoord(tz))
-                        Relocate(data.posX, data.posY, tz);
-                }
-            }
-
-            SetSpawnHealth();
-
-            m_defaultMovementType = (MovementGeneratorType)data.movementType;
-
-            loot.SetGUID(ObjectGuid.Create(HighGuid.LootObject, data.mapid, data.id, GetMap().GenerateLowGuid(HighGuid.LootObject)));
-
-            if (addToMap && !GetMap().AddToMap(this))
-                return false;
             return true;
         }
 
@@ -2914,7 +2865,84 @@ namespace Game.Entities
 
         public override bool LoadFromDB(ulong spawnId, Map map)
         {
-            return LoadCreatureFromDB(spawnId, map, false);
+            return LoadCreatureFromDB(spawnId, map, false, false);
+        }
+
+        public bool LoadCreatureFromDB(ulong spawnId, Map map, bool addToMap, bool allowDuplicate)
+        {
+            if (!allowDuplicate)
+            {
+                // If an alive instance of this spawnId is already found, skip creation
+                // If only dead instance(s) exist, despawn them and spawn a new (maybe also dead) version
+                var creatureBounds = map.GetCreatureBySpawnIdStore().LookupByKey(spawnId);
+                List<Creature> despawnList = new List<Creature>();
+
+                foreach (var creature in creatureBounds)
+                {
+                    if (creature.IsAlive())
+                    {
+                        Log.outDebug(LogFilter.Maps, "Would have spawned {0} but {1} already exists", spawnId, creature.GetGUID().ToString());
+                        return false;
+                    }
+                    else
+                    {
+                        despawnList.Add(creature);
+                        Log.outDebug(LogFilter.Maps, "Despawned dead instance of spawn {0} ({1})", spawnId, creature.GetGUID().ToString());
+                    }
+                }
+
+                foreach (Creature despawnCreature in despawnList)
+                {
+                    despawnCreature.AddObjectToRemoveList();
+                }
+            }
+
+            CreatureData data = Global.ObjectMgr.GetCreatureData(spawnId);
+            if (data == null)
+            {
+                Log.outError(LogFilter.Sql, "Creature (GUID: {0}) not found in table `creature`, can't load. ", spawnId);
+                return false;
+            }
+
+            m_spawnId = spawnId;
+            m_creatureData = data;
+            if (!Create(map.GenerateLowGuid(HighGuid.Creature), map, data.id, data.posX, data.posY, data.posZ, data.orientation, data, 0))
+                return false;
+
+            //We should set first home position, because then AI calls home movement
+            SetHomePosition(data.posX, data.posY, data.posZ, data.orientation);
+
+            m_respawnradius = data.spawndist;
+
+            m_respawnDelay = data.spawntimesecs;
+            m_deathState = DeathState.Alive;
+
+            m_respawnTime = GetMap().GetCreatureRespawnTime(m_spawnId);
+
+            // Is the creature script objecting to us spawning? If yes, delay by one second (then re-check in ::Update)
+            if (m_respawnTime == 0 && !Global.ScriptMgr.CanSpawn(spawnId, GetEntry(), GetCreatureTemplate(), GetCreatureData(), map))
+                m_respawnTime = Time.UnixTime + 1;
+
+            if (m_respawnTime != 0)                          // respawn on Update
+            {
+                m_deathState = DeathState.Dead;
+                if (CanFly())
+                {
+                    float tz = map.GetHeight(GetPhases(), data.posX, data.posY, data.posZ, true, MapConst.MaxFallDistance);
+                    if (data.posZ - tz > 0.1f && GridDefines.IsValidMapCoord(tz))
+                        Relocate(data.posX, data.posY, tz);
+                }
+            }
+
+            SetSpawnHealth();
+
+            m_defaultMovementType = (MovementGeneratorType)data.movementType;
+
+            loot.SetGUID(ObjectGuid.Create(HighGuid.LootObject, data.mapid, data.id, GetMap().GenerateLowGuid(HighGuid.LootObject)));
+
+            if (addToMap && !GetMap().AddToMap(this))
+                return false;
+            return true;
         }
 
         public bool hasLootRecipient() { return !m_lootRecipient.IsEmpty() || !m_lootRecipientGroup.IsEmpty(); }
