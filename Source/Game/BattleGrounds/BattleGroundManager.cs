@@ -399,7 +399,7 @@ namespace Game.BattleGrounds
             _BattlegroundTemplates.Clear();
 
             //                                         0   1                  2                  3       4       5                 6               7            8       9
-            SQLResult result = DB.World.Query("SELECT ID, MinPlayersPerTeam, MaxPlayersPerTeam, MinLvl, MaxLvl, AllianceStartLoc, HordeStartLoc, StartMaxDist, Weight, ScriptName FROM Battleground_template");
+            SQLResult result = DB.World.Query("SELECT ID, MinPlayersPerTeam, MaxPlayersPerTeam, MinLvl, MaxLvl, AllianceStartLoc, HordeStartLoc, StartMaxDist, Weight, ScriptName FROM battleground_template");
             if (result.IsEmpty())
             {
                 Log.outError(LogFilter.ServerLoading, "Loaded 0 Battlegrounds. DB table `Battleground_template` is empty.");

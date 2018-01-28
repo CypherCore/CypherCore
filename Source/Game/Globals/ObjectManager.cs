@@ -1039,7 +1039,7 @@ namespace Game
 
             scriptNamesStorage.Add("");
             SQLResult result = DB.World.Query(
-              "SELECT DISTINCT(ScriptName) FROM Battleground_template WHERE ScriptName <> '' " +
+              "SELECT DISTINCT(ScriptName) FROM battleground_template WHERE ScriptName <> '' " +
               "UNION SELECT DISTINCT(ScriptName) FROM conversation_template WHERE ScriptName <> '' " +
               "UNION SELECT DISTINCT(ScriptName) FROM creature WHERE ScriptName <> '' " +        
               "UNION SELECT DISTINCT(ScriptName) FROM creature_template WHERE ScriptName <> '' " +
