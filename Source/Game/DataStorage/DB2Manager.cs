@@ -47,6 +47,8 @@ namespace Game.DataStorage
             foreach (var areaGroupMember in CliDB.AreaGroupMemberStorage.Values)
                 _areaGroupMembers.Add(areaGroupMember.AreaGroupID, areaGroupMember.AreaID);
 
+            CliDB.AreaGroupMemberStorage.Clear();
+
             foreach (ArtifactPowerRecord artifactPower in CliDB.ArtifactPowerStorage.Values)
                 _artifactPowers.Add(artifactPower.ArtifactID, artifactPower);
 
@@ -56,11 +58,17 @@ namespace Game.DataStorage
                 _artifactPowerLinks.Add(artifactPowerLink.ToArtifactPowerID, artifactPowerLink.FromArtifactPowerID);
             }
 
+            CliDB.ArtifactPowerLinkStorage.Clear();
+
             foreach (ArtifactPowerRankRecord artifactPowerRank in CliDB.ArtifactPowerRankStorage.Values)
                 _artifactPowerRanks[Tuple.Create((uint)artifactPowerRank.ArtifactPowerID, artifactPowerRank.Rank)] = artifactPowerRank;
 
+            CliDB.ArtifactPowerRankStorage.Clear();
+
             foreach (CharacterFacialHairStylesRecord characterFacialStyle in CliDB.CharacterFacialHairStylesStorage.Values)
                 _characterFacialHairStyles.Add(Tuple.Create(characterFacialStyle.RaceID, characterFacialStyle.SexID, (uint)characterFacialStyle.VariationID));
+
+            CliDB.CharacterFacialHairStylesStorage.Clear();
 
             CharBaseSectionVariation[] sectionToBase = new CharBaseSectionVariation[(int)CharSectionType.Max];
             foreach (CharBaseSectionRecord charBaseSection in CliDB.CharBaseSectionStorage.Values)
@@ -68,8 +76,10 @@ namespace Game.DataStorage
                 Contract.Assert(charBaseSection.ResolutionVariation < (byte)CharSectionType.Max, $"SECTION_TYPE_MAX ({(byte)CharSectionType.Max}) must be equal to or greater than {charBaseSection.ResolutionVariation + 1}");
                 Contract.Assert(charBaseSection.Variation < CharBaseSectionVariation.Max, $"CharBaseSectionVariation.Max {(byte)CharBaseSectionVariation.Max} must be equal to or greater than {charBaseSection.Variation + 1}");
 
-                sectionToBase[charBaseSection.ResolutionVariation] = (CharBaseSectionVariation)charBaseSection.Variation;
+                sectionToBase[charBaseSection.ResolutionVariation] = charBaseSection.Variation;
             }
+
+            CliDB.CharBaseSectionStorage.Clear();
 
             MultiMap<Tuple<byte, byte, CharBaseSectionVariation>, Tuple<byte, byte>> addedSections = new MultiMap<Tuple<byte, byte, CharBaseSectionVariation>, Tuple<byte, byte>>();
             foreach (CharSectionsRecord charSection in CliDB.CharSectionsStorage.Values)
@@ -85,12 +95,16 @@ namespace Game.DataStorage
                 _charSections.Add(sectionKey, charSection);
             }
 
+            CliDB.CharSectionsStorage.Clear();
+
             foreach (var outfit in CliDB.CharStartOutfitStorage.Values)
                 _charStartOutfits[(uint)(outfit.RaceID | (outfit.ClassID << 8) | (outfit.GenderID << 16))] = outfit;
 
             var powers = new List<ChrClassesXPowerTypesRecord>();
             foreach (var chrClasses in CliDB.ChrClassesXPowerTypesStorage.Values)
                 powers.Add(chrClasses);
+
+            CliDB.ChrClassesXPowerTypesStorage.Clear();
 
             powers.Sort(new ChrClassesXPowerTypesRecordComparer());
             foreach (var power in powers)
@@ -129,11 +143,15 @@ namespace Game.DataStorage
                     _curvePoints.Add(curvePoint.CurveID, curvePoint);
             }
 
+            CliDB.CurvePointStorage.Clear();
+
             foreach (var key in _curvePoints.Keys.ToList())
                 _curvePoints[key] = _curvePoints[key].OrderBy(point => point.Index).ToList();
 
             foreach (EmotesTextSoundRecord emoteTextSound in CliDB.EmotesTextSoundStorage.Values)
                 _emoteTextSounds[Tuple.Create((uint)emoteTextSound.EmotesTextId, emoteTextSound.RaceId, emoteTextSound.SexId, emoteTextSound.ClassId)] = emoteTextSound;
+
+            CliDB.EmotesTextSoundStorage.Clear();
 
             foreach (FactionRecord faction in CliDB.FactionStorage.Values)
                 if (faction.ParentFactionID != 0)
@@ -152,17 +170,27 @@ namespace Game.DataStorage
             foreach (HeirloomRecord heirloom in CliDB.HeirloomStorage.Values)
                 _heirlooms[heirloom.ItemID] = heirloom;
 
+            CliDB.HeirloomStorage.Clear();
+
             foreach (GlyphBindableSpellRecord glyphBindableSpell in CliDB.GlyphBindableSpellStorage.Values)
                 _glyphBindableSpells.Add(glyphBindableSpell.GlyphPropertiesID, glyphBindableSpell.SpellID);
+
+            CliDB.GlyphBindableSpellStorage.Clear();
 
             foreach (GlyphRequiredSpecRecord glyphRequiredSpec in CliDB.GlyphRequiredSpecStorage.Values)
                 _glyphRequiredSpecs.Add(glyphRequiredSpec.GlyphPropertiesID, glyphRequiredSpec.ChrSpecializationID);
 
+            CliDB.GlyphRequiredSpecStorage.Clear();
+
             foreach (var bonus in CliDB.ItemBonusStorage.Values)
                 _itemBonusLists.Add(bonus.BonusListID, bonus);
 
+            CliDB.ItemBonusStorage.Clear();
+
             foreach (ItemBonusListLevelDeltaRecord itemBonusListLevelDelta in CliDB.ItemBonusListLevelDeltaStorage.Values)
                 _itemLevelDeltaToBonusListContainer[itemBonusListLevelDelta.Delta] = itemBonusListLevelDelta.Id;
+
+            CliDB.ItemBonusListLevelDeltaStorage.Clear();
 
             foreach (var key in CliDB.ItemBonusTreeNodeStorage.Keys)
             {
@@ -175,11 +203,15 @@ namespace Game.DataStorage
                 }
             }
 
+            CliDB.ItemBonusTreeNodeStorage.Clear();
+
             foreach (ItemChildEquipmentRecord itemChildEquipment in CliDB.ItemChildEquipmentStorage.Values)
             {
                 //ASSERT(_itemChildEquipment.find(itemChildEquipment.ItemID) == _itemChildEquipment.end(), "Item must have max 1 child item.");
                 _itemChildEquipment[itemChildEquipment.ItemID] = itemChildEquipment;
             }
+
+            CliDB.ItemChildEquipmentStorage.Clear();
 
             foreach (ItemClassRecord itemClass in CliDB.ItemClassStorage.Values)
             {
@@ -188,12 +220,18 @@ namespace Game.DataStorage
                 _itemClassByOldEnum[itemClass.OldEnumValue] = itemClass;
             }
 
+            CliDB.ItemClassStorage.Clear();
+
             foreach (ItemCurrencyCostRecord itemCurrencyCost in CliDB.ItemCurrencyCostStorage.Values)
                 _itemsWithCurrencyCost.Add(itemCurrencyCost.ItemId);
 
+            CliDB.ItemCurrencyCostStorage.Clear();
+
             foreach (ItemLevelSelectorQualityRecord itemLevelSelectorQuality in CliDB.ItemLevelSelectorQualityStorage.Values)
                 _itemLevelQualitySelectorQualities.Add(itemLevelSelectorQuality.ItemLevelSelectorQualitySetID, itemLevelSelectorQuality);
-            
+
+            CliDB.ItemLevelSelectorQualityStorage.Clear();
+
             foreach (var appearanceMod in CliDB.ItemModifiedAppearanceStorage.Values)
             {
                 //ASSERT(appearanceMod.ItemID <= 0xFFFFFF);
@@ -203,11 +241,17 @@ namespace Game.DataStorage
             foreach (ItemSetSpellRecord itemSetSpell in CliDB.ItemSetSpellStorage.Values)
                 _itemSetSpells.Add(itemSetSpell.ItemSetID, itemSetSpell);
 
+            CliDB.ItemSetSpellStorage.Clear();
+
             foreach (var itemSpecOverride in CliDB.ItemSpecOverrideStorage.Values)
                 _itemSpecOverrides.Add(itemSpecOverride.ItemID, itemSpecOverride);
 
+            CliDB.ItemSpecOverrideStorage.Clear();
+
             foreach (var itemBonusTreeAssignment in CliDB.ItemXBonusTreeStorage.Values)
                 _itemToBonusTree.Add(itemBonusTreeAssignment.ItemID, itemBonusTreeAssignment.BonusTreeID);
+
+            CliDB.ItemXBonusTreeStorage.Clear();
 
             foreach (MapDifficultyRecord entry in CliDB.MapDifficultyStorage.Values)
             {
@@ -218,17 +262,23 @@ namespace Game.DataStorage
             }
             _mapDifficulties[0][0] = _mapDifficulties[1][0]; // map 0 is missing from MapDifficulty.dbc so we cheat a bit
 
+            CliDB.MapDifficultyStorage.Clear();
+
             foreach (var mount in CliDB.MountStorage.Values)
                 _mountsBySpellId[mount.SpellId] = mount;
 
             foreach (MountTypeXCapabilityRecord mountTypeCapability in CliDB.MountTypeXCapabilityStorage.Values)
                 _mountCapabilitiesByType.Add(mountTypeCapability.MountTypeID, mountTypeCapability);
 
+            CliDB.MountTypeXCapabilityStorage.Clear();
+
             foreach (var key in _mountCapabilitiesByType.Keys)
                 _mountCapabilitiesByType[key].Sort(new MountTypeXCapabilityRecordComparer());
 
             foreach (MountXDisplayRecord mountDisplay in CliDB.MountXDisplayStorage.Values)
                 _mountDisplays.Add(mountDisplay.MountID, mountDisplay);
+
+            CliDB.MountXDisplayStorage.Clear();
 
             foreach (var entry in CliDB.NameGenStorage.Values)
             {
@@ -241,6 +291,8 @@ namespace Game.DataStorage
 
                 _nameGenData[entry.Race][entry.Sex].Add(entry);
             }
+
+            CliDB.NameGenStorage.Clear();
 
             foreach (var namesProfanity in CliDB.NamesProfanityStorage.Values)
             {
@@ -257,8 +309,12 @@ namespace Game.DataStorage
                     }
             }
 
+            CliDB.NamesProfanityStorage.Clear();
+
             foreach (var namesReserved in CliDB.NamesReservedStorage.Values)
                 _nameValidators[(int)LocaleConstant.Total].Add(new Regex(namesReserved.Name, RegexOptions.IgnoreCase | RegexOptions.Compiled));
+
+            CliDB.NamesReservedStorage.Clear();
 
             foreach (var namesReserved in CliDB.NamesReservedLocaleStorage.Values)
             {
@@ -272,6 +328,7 @@ namespace Game.DataStorage
                         _nameValidators[i].Add(new Regex(namesReserved.Name, RegexOptions.IgnoreCase | RegexOptions.Compiled));
                 }
             }
+            CliDB.NamesReservedLocaleStorage.Clear();
 
             foreach (var group in CliDB.PhaseXPhaseGroupStorage.Values)
             {
@@ -279,6 +336,7 @@ namespace Game.DataStorage
                 if (phase != null)
                     _phasesByGroup.Add(group.PhaseGroupID, phase.Id);
             }
+            CliDB.PhaseXPhaseGroupStorage.Clear();
 
             foreach (PowerTypeRecord powerType in CliDB.PowerTypeStorage.Values)
             {
@@ -289,6 +347,8 @@ namespace Game.DataStorage
 
             foreach (PvpRewardRecord pvpReward in CliDB.PvpRewardStorage.Values)
                 _pvpRewardPack[Tuple.Create(pvpReward.Prestige, pvpReward.HonorLevel)] = pvpReward.RewardPackID;
+
+            CliDB.PvpRewardStorage.Clear();
 
             foreach (QuestPackageItemRecord questPackageItem in CliDB.QuestPackageItemStorage.Values)
             {
@@ -301,11 +361,17 @@ namespace Game.DataStorage
                     _questPackages[questPackageItem.QuestPackageID].Item2.Add(questPackageItem);
             }
 
+            CliDB.QuestPackageItemStorage.Clear();
+
             foreach (RewardPackXItemRecord rewardPackXItem in CliDB.RewardPackXItemStorage.Values)
                 _rewardPackItems.Add(rewardPackXItem.RewardPackID, rewardPackXItem);
 
+            CliDB.RewardPackXItemStorage.Clear();
+
             foreach (RulesetItemUpgradeRecord rulesetItemUpgrade in CliDB.RulesetItemUpgradeStorage.Values)
                 _rulesetItemUpgrade[rulesetItemUpgrade.ItemID] = rulesetItemUpgrade.ItemUpgradeID;
+
+            CliDB.RulesetItemUpgradeStorage.Clear();
 
             foreach (SkillRaceClassInfoRecord entry in CliDB.SkillRaceClassInfoStorage.Values)
             {
@@ -316,10 +382,12 @@ namespace Game.DataStorage
             foreach (var specSpells in CliDB.SpecializationSpellsStorage.Values)
                 _specializationSpellsBySpec.Add(specSpells.SpecID, specSpells);
 
+            CliDB.SpecializationSpellsStorage.Clear();
+
             foreach (SpellClassOptionsRecord classOption in CliDB.SpellClassOptionsStorage.Values)
                 _spellFamilyNames.Add(classOption.SpellClassSet);
 
-            foreach (var power in CliDB.SpellPowerStorage.Values)
+            foreach (SpellPowerRecord power in CliDB.SpellPowerStorage.Values)
             {
                 SpellPowerDifficultyRecord powerDifficulty = CliDB.SpellPowerDifficultyStorage.LookupByKey(power.Id);
                 if (powerDifficulty != null)
@@ -341,8 +409,12 @@ namespace Game.DataStorage
                 }
             }
 
+            CliDB.SpellPowerStorage.Clear();
+
             foreach (SpellProcsPerMinuteModRecord ppmMod in CliDB.SpellProcsPerMinuteModStorage.Values)
                 _spellProcsPerMinuteMods.Add(ppmMod.SpellProcsPerMinuteID, ppmMod);
+
+            CliDB.SpellProcsPerMinuteModStorage.Clear();
 
             for (var i = 0; i < (int)Class.Max; ++i)
             {
@@ -355,6 +427,7 @@ namespace Game.DataStorage
                         _talentsByPosition[i][x][c] = new List<TalentRecord>();
                 }
             }
+
             foreach (TalentRecord talentInfo in CliDB.TalentStorage.Values)
             {
                 //ASSERT(talentInfo.ClassID < MAX_CLASSES);
@@ -366,6 +439,8 @@ namespace Game.DataStorage
             foreach (ToyRecord toy in CliDB.ToyStorage.Values)
                 _toys.Add(toy.ItemID);
 
+            CliDB.ToyStorage.Clear();
+
             foreach (TransmogSetItemRecord transmogSetItem in CliDB.TransmogSetItemStorage.Values)
             {
                 TransmogSetRecord set = CliDB.TransmogSetStorage.LookupByKey(transmogSetItem.TransmogSetID);
@@ -376,56 +451,17 @@ namespace Game.DataStorage
                 _transmogSetItemsByTransmogSet.Add(transmogSetItem.TransmogSetID, transmogSetItem);
             }
 
+            CliDB.TransmogSetItemStorage.Clear();
+
             foreach (WMOAreaTableRecord entry in CliDB.WMOAreaTableStorage.Values)
                 _wmoAreaTableLookup[Tuple.Create(entry.WMOID, entry.NameSet, entry.WMOGroupID)] = entry;
+
+            CliDB.WMOAreaTableStorage.Clear();
 
             foreach (WorldMapAreaRecord worldMapArea in CliDB.WorldMapAreaStorage.Values)
                 _worldMapAreaByAreaID[worldMapArea.AreaID] = worldMapArea;
 
-            ClearNotUsedTables();
-        }
-
-        void ClearNotUsedTables()
-        {
-            CliDB.AreaGroupMemberStorage = null;
-            CliDB.ArtifactPowerLinkStorage = null;
-            CliDB.ArtifactPowerRankStorage = null;
-            CliDB.CharSectionsStorage = null;
-            CliDB.ChrClassesXPowerTypesStorage = null;
-            CliDB.CurvePointStorage = null;
-            CliDB.EmotesTextSoundStorage = null;
-            CliDB.GlyphBindableSpellStorage = null;
-            CliDB.GlyphRequiredSpecStorage = null;
-            CliDB.HeirloomStorage = null;
-            CliDB.ItemBonusStorage = null;
-            CliDB.ItemBonusListLevelDeltaStorage = null;
-            CliDB.ItemBonusTreeNodeStorage = null;
-            CliDB.ItemClassStorage = null;
-            CliDB.ItemChildEquipmentStorage = null;
-            CliDB.ItemCurrencyCostStorage = null;
-            CliDB.ItemSetSpellStorage = null;
-            CliDB.ItemSpecOverrideStorage = null;
-            CliDB.ItemXBonusTreeStorage = null;
-            CliDB.MapDifficultyStorage = null;
-            CliDB.MountTypeXCapabilityStorage = null;
-            CliDB.MountXDisplayStorage = null;
-            CliDB.NameGenStorage = null;
-            CliDB.NamesProfanityStorage = null;
-            CliDB.NamesReservedStorage = null;
-            CliDB.NamesReservedLocaleStorage = null;
-            CliDB.PhaseXPhaseGroupStorage = null;
-            CliDB.PowerTypeStorage = null;
-            CliDB.PvpRewardStorage = null;
-            CliDB.QuestPackageItemStorage = null;
-            CliDB.RewardPackXItemStorage = null;
-            CliDB.RulesetItemUpgradeStorage = null;
-            CliDB.SpecializationSpellsStorage = null;
-            CliDB.SpellPowerDifficultyStorage = null;
-            CliDB.SpellPowerStorage = null;
-            CliDB.SpellProcsPerMinuteModStorage = null;
-            CliDB.ToyStorage = null;
-            CliDB.WMOAreaTableStorage = null;
-            CliDB.WorldMapAreaStorage = null;
+            CliDB.WorldMapAreaStorage.Clear();
         }
 
         public IDB2Storage GetStorage(uint type)

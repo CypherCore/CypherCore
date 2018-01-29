@@ -1742,8 +1742,8 @@ namespace Game.Entities
             mSpellAreaForQuestEndMap.Clear();
             mSpellAreaForAuraMap.Clear();
 
-            //                                            0     1         2              3               4                 5          6          7       8         9
-            SQLResult result = DB.World.Query("SELECT spell, area, quest_start, quest_start_status, quest_end_status, quest_end, aura_spell, racemask, gender, autocast FROM spell_area");
+            //                                            0     1         2              3               4                 5          6          7       8      9
+            SQLResult result = DB.World.Query("SELECT spell, area, quest_start, quest_start_status, quest_end_status, quest_end, aura_spell, racemask, gender, flags FROM spell_area");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell area requirements. DB table `spell_area` is empty.");
@@ -1766,12 +1766,12 @@ namespace Game.Entities
                 spellArea.auraSpell = result.Read<int>(6);
                 spellArea.raceMask = result.Read<uint>(7);
                 spellArea.gender = (Gender)result.Read<uint>(8);
-                spellArea.autocast = result.Read<bool>(9);
+                spellArea.flags = (SpellAreaFlag)result.Read<byte>(9);
 
                 SpellInfo spellInfo = GetSpellInfo(spell);
                 if (spellInfo != null)
                 {
-                    if (spellArea.autocast)
+                    if (spellArea.flags.HasAnyFlag(SpellAreaFlag.AutoCast))
                         spellInfo.Attributes |= SpellAttr0.CantCancel;
                 }
                 else
@@ -1847,13 +1847,13 @@ namespace Game.Entities
                     }
 
                     // not allow autocast chains by auraSpell field (but allow use as alternative if not present)
-                    if (spellArea.autocast && spellArea.auraSpell > 0)
+                    if (spellArea.flags.HasAnyFlag(SpellAreaFlag.AutoCast) && spellArea.auraSpell > 0)
                     {
                         bool chain = false;
                         var saBound = GetSpellAreaForAuraMapBounds(spellArea.spellId);
                         foreach (var bound in saBound)
                         {
-                            if (bound.autocast && bound.auraSpell > 0)
+                            if (bound.flags.HasAnyFlag(SpellAreaFlag.AutoCast) && bound.auraSpell > 0)
                             {
                                 chain = true;
                                 break;
@@ -1869,7 +1869,7 @@ namespace Game.Entities
                         var saBound2 = GetSpellAreaMapBounds((uint)spellArea.auraSpell);
                         foreach (var bound in saBound2)
                         {
-                            if (bound.autocast && bound.auraSpell > 0)
+                            if (bound.flags.HasAnyFlag(SpellAreaFlag.AutoCast) && bound.auraSpell > 0)
                             {
                                 chain = true;
                                 break;
@@ -1947,11 +1947,6 @@ namespace Game.Entities
                 if (!effectsBySpell.ContainsKey(effect.SpellID))
                     effectsBySpell[effect.SpellID] = new Dictionary<uint, SpellEffectRecord[]>();
 
-                if(effect.DifficultyID > (int)Difficulty.Max)
-                {
-
-                }
-
                 if (!effectsBySpell[effect.SpellID].ContainsKey(effect.DifficultyID))
                     effectsBySpell[effect.SpellID][effect.DifficultyID] = new SpellEffectRecord[SpellConst.MaxEffects];
 
@@ -1965,53 +1960,88 @@ namespace Game.Entities
                 if (auraOptions.DifficultyID == 0)    // TODO: implement
                     loadData[auraOptions.SpellID].AuraOptions = auraOptions;
 
+            CliDB.SpellAuraOptionsStorage.Clear();
+
             foreach (SpellAuraRestrictionsRecord auraRestrictions in CliDB.SpellAuraRestrictionsStorage.Values)
+            {
                 if (auraRestrictions.DifficultyID == 0)    // TODO: implement
                     loadData[auraRestrictions.SpellID].AuraRestrictions = auraRestrictions;
+            }
+            CliDB.SpellAuraRestrictionsStorage.Clear();
 
             foreach (SpellCastingRequirementsRecord castingRequirements in CliDB.SpellCastingRequirementsStorage.Values)
                 loadData[castingRequirements.SpellID].CastingRequirements = castingRequirements;
 
+            CliDB.SpellCastingRequirementsStorage.Clear();
+
             foreach (SpellCategoriesRecord categories in CliDB.SpellCategoriesStorage.Values)
+            {
                 if (categories.DifficultyID == 0)  // TODO: implement
                     loadData[categories.SpellID].Categories = categories;
+            }
+            CliDB.SpellCategoriesStorage.Clear();
 
             foreach (SpellClassOptionsRecord classOptions in CliDB.SpellClassOptionsStorage.Values)
                 loadData[classOptions.SpellID].ClassOptions = classOptions;
 
+            CliDB.SpellClassOptionsStorage.Clear();
+
             foreach (SpellCooldownsRecord cooldowns in CliDB.SpellCooldownsStorage.Values)
+            {
                 if (cooldowns.DifficultyID == 0)   // TODO: implement
                     loadData[cooldowns.SpellID].Cooldowns = cooldowns;
+            }
+            CliDB.SpellCooldownsStorage.Clear();
 
             foreach (SpellEffectScalingRecord spellEffectScaling in CliDB.SpellEffectScalingStorage.Values)
                 spellEffectScallingByEffectId[spellEffectScaling.SpellEffectID] = spellEffectScaling;
 
+            CliDB.SpellEffectScalingStorage.Clear();
+
             foreach (SpellEquippedItemsRecord equippedItems in CliDB.SpellEquippedItemsStorage.Values)
                 loadData[equippedItems.SpellID].EquippedItems = equippedItems;
 
+            CliDB.SpellEquippedItemsStorage.Clear();
+
             foreach (SpellInterruptsRecord interrupts in CliDB.SpellInterruptsStorage.Values)
+            {
                 if (interrupts.DifficultyID == 0)  // TODO: implement
                     loadData[interrupts.SpellID].Interrupts = interrupts;
+            }
+            CliDB.SpellInterruptsStorage.Clear();
 
             foreach (SpellLevelsRecord levels in CliDB.SpellLevelsStorage.Values)
+            {
                 if (levels.DifficultyID == 0)  // TODO: implement
                     loadData[levels.SpellID].Levels = levels;
+            }
 
             foreach (SpellReagentsRecord reagents in CliDB.SpellReagentsStorage.Values)
                 loadData[reagents.SpellID].Reagents = reagents;
 
+            CliDB.SpellReagentsStorage.Clear();
+
             foreach (SpellScalingRecord scaling in CliDB.SpellScalingStorage.Values)
                 loadData[scaling.SpellID].Scaling = scaling;
+
+            CliDB.SpellScalingStorage.Clear();
 
             foreach (SpellShapeshiftRecord shapeshift in CliDB.SpellShapeshiftStorage.Values)
                 loadData[shapeshift.SpellID].Shapeshift = shapeshift;
 
+            CliDB.SpellShapeshiftStorage.Clear();
+
             foreach (SpellTargetRestrictionsRecord targetRestrictions in CliDB.SpellTargetRestrictionsStorage.Values)
+            {
                 if (targetRestrictions.DifficultyID == 0)  // TODO: implement
                     loadData[targetRestrictions.SpellID].TargetRestrictions = targetRestrictions;
+            }
+            CliDB.SpellTargetRestrictionsStorage.Clear();
 
             foreach (SpellTotemsRecord totems in CliDB.SpellTotemsStorage.Values)
                 loadData[totems.SpellID].Totems = totems;
+
+            CliDB.SpellTotemsStorage.Clear();
 
             foreach (var visual in CliDB.SpellXSpellVisualStorage.Values)
             {
@@ -2027,6 +2057,8 @@ namespace Game.Entities
                 loadData[spellEntry.Id].Misc = CliDB.SpellMiscStorage.LookupByKey(spellEntry.MiscID);
                 mSpellInfoMap[spellEntry.Id] = new SpellInfo(loadData[spellEntry.Id], effectsBySpell.LookupByKey(spellEntry.Id), visualsBySpell.LookupByKey(spellEntry.Id), spellEffectScallingByEffectId);
             }
+
+            CliDB.SpellStorage.Clear();
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded SpellInfo store in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
         }
@@ -3161,15 +3193,15 @@ namespace Game.Entities
     public class SpellArea
     {
         public uint spellId;
-        public uint areaId;                                          // zone/subzone/or 0 is not limited to zone
-        public uint questStart;                                      // quest start (quest must be active or rewarded for spell apply)
-        public uint questEnd;                                        // quest end (quest must not be rewarded for spell apply)
+        public uint areaId;                                         // zone/subzone/or 0 is not limited to zone
+        public uint questStart;                                     // quest start (quest must be active or rewarded for spell apply)
+        public uint questEnd;                                       // quest end (quest must not be rewarded for spell apply)
         public int auraSpell;                                       // spell aura must be applied for spell apply)if possitive) and it must not be applied in other case
-        public uint raceMask;                                        // can be applied only to races
-        public Gender gender;                                          // can be applied only to gender
-        public uint questStartStatus;                                // QuestStatus that quest_start must have in order to keep the spell
-        public uint questEndStatus;                                  // QuestStatus that the quest_end must have in order to keep the spell (if the quest_end's status is different than this, the spell will be dropped)
-        public bool autocast;                                          // if true then auto applied at area enter, in other case just allowed to cast
+        public uint raceMask;                                       // can be applied only to races
+        public Gender gender;                                       // can be applied only to gender
+        public uint questStartStatus;                               // QuestStatus that quest_start must have in order to keep the spell
+        public uint questEndStatus;                                 // QuestStatus that the quest_end must have in order to keep the spell (if the quest_end's status is different than this, the spell will be dropped)
+        public SpellAreaFlag flags;                                 // if SPELL_AREA_FLAG_AUTOCAST then auto applied at area enter, in other case just allowed to cast || if SPELL_AREA_FLAG_AUTOREMOVE then auto removed inside area (will allways be removed on leaved even without flag)
 
         // helpers
         public bool IsFitToRequirements(Player player, uint newZone, uint newArea)

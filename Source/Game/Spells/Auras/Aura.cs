@@ -1132,16 +1132,16 @@ namespace Game.Spells
                 uint zone, area;
                 target.GetZoneAndAreaId(out zone, out area);
 
-                foreach (var bound in saBounds)
+                foreach (var spellArea in saBounds)
                 {
                     // some auras remove at aura remove
-                    if (!bound.IsFitToRequirements((Player)target, zone, area))
-                        target.RemoveAurasDueToSpell(bound.spellId);
+                    if (spellArea.flags.HasAnyFlag(SpellAreaFlag.AutoRemove) && !spellArea.IsFitToRequirements((Player)target, zone, area))
+                        target.RemoveAurasDueToSpell(spellArea.spellId);
                     // some auras applied at aura apply
-                    else if (bound.autocast)
+                    else if (spellArea.flags.HasAnyFlag(SpellAreaFlag.AutoCast))
                     {
-                        if (!target.HasAura(bound.spellId))
-                            target.CastSpell(target, bound.spellId, true);
+                        if (!target.HasAura(spellArea.spellId))
+                            target.CastSpell(target, spellArea.spellId, true);
                     }
                 }
             }

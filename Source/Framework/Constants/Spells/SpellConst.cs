@@ -2425,4 +2425,10 @@ namespace Framework.Constants
         IncludeGCD = 0x1,  // Starts GCD in addition to normal cooldown specified in the packet
         IncludeEventCooldowns = 0x2   // Starts GCD for spells that should start their cooldown on events, requires SPELL_COOLDOWN_FLAG_INCLUDE_GCD set
     }
+
+    public enum SpellAreaFlag
+    {
+        AutoCast = 0x1, // if has autocast, spell is applied on enter
+        AutoRemove = 0x2, // if has autoremove, spell is remove automatically inside zone/area (allways removed on leaving area or zone)
+    }
 }

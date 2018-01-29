@@ -1765,7 +1765,7 @@ namespace Game.Entities
             // Some spells applied at enter into zone (with subzones), aura removed in UpdateAreaDependentAuras that called always at zone.area update
             var saBounds = Global.SpellMgr.GetSpellAreaForAreaMapBounds(newZone);
             foreach (var spell in saBounds)
-                if (spell.autocast && spell.IsFitToRequirements(this, newZone, 0))
+                if (spell.flags.HasAnyFlag(SpellAreaFlag.AutoCast) && spell.IsFitToRequirements(this, newZone, 0))
                     if (!HasAura(spell.spellId))
                         CastSpell(this, spell.spellId, true);
         }
@@ -1783,7 +1783,7 @@ namespace Game.Entities
             // some auras applied at subzone enter
             var saBounds = Global.SpellMgr.GetSpellAreaForAreaMapBounds(newArea);
             foreach (var spell in saBounds)
-                if (spell.autocast && spell.IsFitToRequirements(this, m_zoneUpdateId, newArea))
+                if (spell.flags.HasAnyFlag(SpellAreaFlag.AutoCast) && spell.IsFitToRequirements(this, m_zoneUpdateId, newArea))
                     if (!HasAura(spell.spellId))
                         CastSpell(this, spell.spellId, true);
         }

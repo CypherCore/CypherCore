@@ -1802,9 +1802,9 @@ namespace Game.Entities
             {
                 foreach (var spell in saBounds)
                 {
-                    if (!spell.IsFitToRequirements(this, zone, area))
+                    if (spell.flags.HasAnyFlag(SpellAreaFlag.AutoRemove) && !spell.IsFitToRequirements(this, zone, area))
                         RemoveAurasDueToSpell(spell.spellId);
-                    else if (spell.autocast)
+                    else if (spell.flags.HasAnyFlag(SpellAreaFlag.AutoCast))
                         if (!HasAura(spell.spellId))
                             CastSpell(this, spell.spellId, true);
                 }
