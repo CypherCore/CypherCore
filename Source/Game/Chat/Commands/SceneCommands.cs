@@ -19,7 +19,6 @@ using Framework.Constants;
 using Framework.IO;
 using Game.DataStorage;
 using Game.Entities;
-using System;
 
 namespace Game.Chat
 {
