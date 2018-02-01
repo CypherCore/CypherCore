@@ -604,7 +604,7 @@ namespace Game
 
             gossipMenusStorage.Clear();
 
-            SQLResult result = DB.World.Query("SELECT MenuID, TextID FROM gossip_menu");
+            SQLResult result = DB.World.Query("SELECT MenuId, TextId FROM gossip_menu");
             if (result.IsEmpty())
             {
                 Log.outError(LogFilter.ServerLoading, "Loaded 0 gossip_menu entries. DB table `gossip_menu` is empty!");
@@ -637,14 +637,14 @@ namespace Game
             gossipMenuItemsStorage.Clear();
             
             //                                          0         1              2             3             4                        5             6
-            SQLResult result = DB.World.Query("SELECT o.MenuID, o.OptionID, o.OptionIcon, o.OptionText, o.OptionBroadcastTextId, o.OptionType, o.OptionNpcflag, " +
+            SQLResult result = DB.World.Query("SELECT o.MenuId, o.OptionIndex, o.OptionIcon, o.OptionText, o.OptionBroadcastTextId, o.OptionType, o.OptionNpcFlag, " +
                 //   7                8              9            10           11          12                     13
-                "oa.ActionMenuID, oa.ActionPoiID, ob.BoxCoded, ob.BoxMoney, ob.BoxText, ob.BoxBroadcastTextId, ot.TrainerId " +
+                "oa.ActionMenuId, oa.ActionPoiId, ob.BoxCoded, ob.BoxMoney, ob.BoxText, ob.BoxBroadcastTextId, ot.TrainerId " +
                 "FROM gossip_menu_option o " +
-                "LEFT JOIN gossip_menu_option_action oa ON o.MenuID = oa.MenuID AND o.OptionID = oa.OptionID " +
-                "LEFT JOIN gossip_menu_option_box ob ON o.MenuID = ob.MenuID AND o.OptionID = ob.OptionID " +
-                "LEFT JOIN gossip_menu_option_trainer ot ON o.MenuID = ot.MenuID AND o.OptionID = ot.OptionID " +
-                "ORDER BY o.MenuId, o.OptionID");
+                "LEFT JOIN gossip_menu_option_action oa ON o.MenuId = oa.MenuId AND o.OptionIndex = oa.OptionIndex " +
+                "LEFT JOIN gossip_menu_option_box ob ON o.MenuId = ob.MenuId AND o.OptionIndex = ob.OptionIndex " +
+                "LEFT JOIN gossip_menu_option_trainer ot ON o.MenuId = ot.MenuId AND o.OptionIndex = ot.OptionIndex " +
+                "ORDER BY o.MenuId, o.OptionIndex");
 
             if (result.IsEmpty())
             {
@@ -657,7 +657,7 @@ namespace Game
                 GossipMenuItems gMenuItem = new GossipMenuItems();
 
                 gMenuItem.MenuId = result.Read<uint>(0);
-                gMenuItem.OptionId = result.Read<uint>(1);
+                gMenuItem.OptionIndex = result.Read<uint>(1);
                 gMenuItem.OptionIcon = (GossipOptionIcon)result.Read<byte>(2);
                 gMenuItem.OptionText = result.Read<string>(3);
                 gMenuItem.OptionBroadcastTextId = result.Read<uint>(4);
@@ -673,7 +673,7 @@ namespace Game
 
                 if (gMenuItem.OptionIcon >= GossipOptionIcon.Max)
                 {
-                    Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionID {gMenuItem.OptionId} has unknown icon id {gMenuItem.OptionIcon}. Replacing with GossipOptionIcon.Chat");
+                    Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} has unknown icon id {gMenuItem.OptionIcon}. Replacing with GossipOptionIcon.Chat");
                     gMenuItem.OptionIcon = GossipOptionIcon.Chat;
                 }
 
@@ -681,17 +681,17 @@ namespace Game
                 {
                     if (!CliDB.BroadcastTextStorage.ContainsKey(gMenuItem.OptionBroadcastTextId))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuId}, OptionID {gMenuItem.OptionId} has non-existing or incompatible OptionBroadcastTextId {gMenuItem.OptionBroadcastTextId}, ignoring.");
+                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} has non-existing or incompatible OptionBroadcastTextId {gMenuItem.OptionBroadcastTextId}, ignoring.");
                         gMenuItem.OptionBroadcastTextId = 0;
                     }
                 }
 
                 if (gMenuItem.OptionType >= GossipOption.Max)
-                    Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionID {gMenuItem.OptionId} has unknown option id {gMenuItem.OptionType}. Option will not be used");
+                    Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} has unknown option id {gMenuItem.OptionType}. Option will not be used");
 
                 if (gMenuItem.ActionPoiId != 0 && GetPointOfInterest(gMenuItem.ActionPoiId) == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionID {gMenuItem.OptionId} use non-existing actionpoiid {gMenuItem.ActionPoiId}, ignoring");
+                    Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} use non-existing actionpoiid {gMenuItem.ActionPoiId}, ignoring");
                     gMenuItem.ActionPoiId = 0;
                 }
 
@@ -699,21 +699,21 @@ namespace Game
                 {
                     if (!CliDB.BroadcastTextStorage.ContainsKey(gMenuItem.BoxBroadcastTextId))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuId}, OptionID {gMenuItem.OptionId} has non-existing or incompatible BoxBroadcastTextId {gMenuItem.BoxBroadcastTextId}, ignoring.");
+                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} has non-existing or incompatible BoxBroadcastTextId {gMenuItem.BoxBroadcastTextId}, ignoring.");
                         gMenuItem.BoxBroadcastTextId = 0;
                     }
                 }
 
                 if (gMenuItem.TrainerId != 0 && GetTrainer(gMenuItem.TrainerId) == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `gossip_menu_option_trainer` for MenuId {gMenuItem.MenuId}, OptionID {gMenuItem.OptionId} use non-existing TrainerId {gMenuItem.TrainerId}, ignoring");
+                    Log.outError(LogFilter.Sql, $"Table `gossip_menu_option_trainer` for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} use non-existing TrainerId {gMenuItem.TrainerId}, ignoring");
                     gMenuItem.TrainerId = 0;
                 }
 
                 gossipMenuItemsStorage.Add(gMenuItem.MenuId, gMenuItem);
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} gossip_menu_option entries in {1} ms", gossipMenuItemsStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {gossipMenuItemsStorage.Count} gossip_menu_option entries in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
         public void LoadPointsOfInterest()
         {
@@ -7854,14 +7854,14 @@ namespace Game
             _gossipMenuItemsLocaleStorage.Clear();                              // need for reload case
 
             //                                         0       1            2       3           4
-            SQLResult result = DB.World.Query("SELECT MenuID, OptionID, Locale, OptionText, BoxText FROM gossip_menu_option_locale");
+            SQLResult result = DB.World.Query("SELECT MenuId, OptionIndex, Locale, OptionText, BoxText FROM gossip_menu_option_locale");
             if (result.IsEmpty())
                 return;
 
             do
             {
-                ushort menuId = result.Read<ushort>(0);
-                ushort optionId = result.Read<ushort>(1);
+                uint menuId = result.Read<uint>(0);
+                uint optionIndex = result.Read<uint>(1);
                 string localeName = result.Read<string>(2);
 
                 LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
@@ -7872,7 +7872,7 @@ namespace Game
                 AddLocaleString(result.Read<string>(3), locale, data.OptionText);
                 AddLocaleString(result.Read<string>(4), locale, data.BoxText);
 
-                _gossipMenuItemsLocaleStorage[MathFunctions.MakePair32(menuId, optionId)] = data;
+                _gossipMenuItemsLocaleStorage[Tuple.Create(menuId, optionIndex)] = data;
             }
             while (result.NextRow());
 
@@ -7958,9 +7958,9 @@ namespace Game
         {
             return _questObjectivesLocaleStorage.LookupByKey(entry);
         }
-        public GossipMenuItemsLocale GetGossipMenuItemsLocale(uint menuId, uint menuItemId)
+        public GossipMenuItemsLocale GetGossipMenuItemsLocale(uint menuId, uint optionIndex)
         {
-            return _gossipMenuItemsLocaleStorage.LookupByKey(MathFunctions.MakePair32(menuId, menuItemId));
+            return _gossipMenuItemsLocaleStorage.LookupByKey(Tuple.Create(menuId, optionIndex));
         }
         public PageTextLocale GetPageTextLocale(uint entry)
         {
@@ -9568,7 +9568,7 @@ namespace Game
         Dictionary<uint, QuestObjectivesLocale> _questObjectivesLocaleStorage = new Dictionary<uint, QuestObjectivesLocale>();
         Dictionary<uint, QuestOfferRewardLocale> _questOfferRewardLocaleStorage = new Dictionary<uint, QuestOfferRewardLocale>();
         Dictionary<uint, QuestRequestItemsLocale> _questRequestItemsLocaleStorage = new Dictionary<uint, QuestRequestItemsLocale>();
-        Dictionary<uint, GossipMenuItemsLocale> _gossipMenuItemsLocaleStorage = new Dictionary<uint, GossipMenuItemsLocale>();
+        Dictionary<Tuple<uint, uint>, GossipMenuItemsLocale> _gossipMenuItemsLocaleStorage = new Dictionary<Tuple<uint, uint>, GossipMenuItemsLocale>();
         Dictionary<uint, PageTextLocale> _pageTextLocaleStorage = new Dictionary<uint, PageTextLocale>();
         Dictionary<uint, PointOfInterestLocale> _pointOfInterestLocaleStorage = new Dictionary<uint, PointOfInterestLocale>();
         Dictionary<int, PlayerChoiceLocale> _playerChoiceLocales = new Dictionary<int, PlayerChoiceLocale>();

@@ -302,7 +302,7 @@ namespace Framework.Constants
         AddDynamicFlag = 95,     // Flags
         RemoveDynamicFlag = 96,     // Flags
         JumpToPos = 97,     // Speedxy, Speedz, Targetx, Targety, Targetz
-        SendGossipMenu = 98,     // Menuid, Optionid
+        SendGossipMenu = 98,     // Menuid, optionIndex
         GoSetLootState = 99,     // State
         SendTargetToTarget = 100,    // Id
         SetHomePos = 101,    // None

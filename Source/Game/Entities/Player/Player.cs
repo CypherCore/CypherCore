@@ -2405,7 +2405,7 @@ namespace Game.Entities
                         if (optionBroadcastText == null)
                         {
                             // Find localizations from database.
-                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItems.OptionId);
+                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItems.OptionIndex);
                             if (gossipMenuLocale != null)
                                 ObjectManager.GetLocaleString(gossipMenuLocale.OptionText, locale, ref strOptionText);
                         }
@@ -2413,14 +2413,14 @@ namespace Game.Entities
                         if (boxBroadcastText == null)
                         {
                             // Find localizations from database.
-                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItems.OptionId);
+                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItems.OptionIndex);
                             if (gossipMenuLocale != null)
                                 ObjectManager.GetLocaleString(gossipMenuLocale.BoxText, locale, ref strBoxText);
                         }
                     }
 
-                    menu.GetGossipMenu().AddMenuItem((int)menuItems.OptionId, menuItems.OptionIcon, strOptionText, 0, (uint)menuItems.OptionType, strBoxText, menuItems.BoxMoney, menuItems.BoxCoded);
-                    menu.GetGossipMenu().AddGossipMenuItemData(menuItems.OptionId, menuItems.ActionMenuId, menuItems.ActionPoiId, menuItems.TrainerId);
+                    menu.GetGossipMenu().AddMenuItem((int)menuItems.OptionIndex, menuItems.OptionIcon, strOptionText, 0, (uint)menuItems.OptionType, strBoxText, menuItems.BoxMoney, menuItems.BoxCoded);
+                    menu.GetGossipMenu().AddGossipMenuItemData(menuItems.OptionIndex, menuItems.ActionMenuId, menuItems.ActionPoiId, menuItems.TrainerId);
                 }
             }
         }
@@ -2448,7 +2448,7 @@ namespace Game.Entities
 
             PlayerTalkClass.SendGossipMenu(textId, source.GetGUID());
         }
-        public void OnGossipSelect(WorldObject source, uint gossipListId, uint menuId)
+        public void OnGossipSelect(WorldObject source, uint optionIndex, uint menuId)
         {
             GossipMenu gossipMenu = PlayerTalkClass.GetGossipMenu();
 
@@ -2456,27 +2456,27 @@ namespace Game.Entities
             if (menuId != gossipMenu.GetMenuId())
                 return;
 
-            GossipMenuItem item = gossipMenu.GetItem(gossipListId);
+            GossipMenuItem item = gossipMenu.GetItem(optionIndex);
             if (item == null)
                 return;
 
-            uint gossipOptionId = item.OptionType;
+            uint gossipOptionType = item.OptionType;
             ObjectGuid guid = source.GetGUID();
 
             if (source.IsTypeId(TypeId.GameObject))
             {
-                if (gossipOptionId > (int)GossipOption.Questgiver)
+                if (gossipOptionType > (int)GossipOption.Questgiver)
                 {
                     Log.outError(LogFilter.Player, "Player guid {0} request invalid gossip option for GameObject entry {1}", GetGUID().ToString(), source.GetEntry());
                     return;
                 }
             }
 
-            GossipMenuItemData menuItemData = gossipMenu.GetItemData(gossipListId);
+            GossipMenuItemData menuItemData = gossipMenu.GetItemData(optionIndex);
             if (menuItemData == null)
                 return;
 
-            int cost = (int)item.BoxMoney;
+            long cost = item.BoxMoney;
             if (!HasEnoughMoney(cost))
             {
                 SendBuyError(BuyResult.NotEnoughtMoney, null, 0);
@@ -2484,7 +2484,7 @@ namespace Game.Entities
                 return;
             }
 
-            switch ((GossipOption)gossipOptionId)
+            switch ((GossipOption)gossipOptionType)
             {
                 case GossipOption.Gossip:
                     {
@@ -2500,7 +2500,7 @@ namespace Game.Entities
                         break;
                     }
                 case GossipOption.Outdoorpvp:
-                    Global.OutdoorPvPMgr.HandleGossipOption(this, source.ToCreature(), gossipListId);
+                    Global.OutdoorPvPMgr.HandleGossipOption(this, source.ToCreature(), optionIndex);
                     break;
                 case GossipOption.Spirithealer:
                     if (IsDead())

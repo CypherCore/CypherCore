@@ -574,7 +574,7 @@ namespace Game
             var pMenuItemBounds = Global.ObjectMgr.GetGossipMenuItemsMapBounds(cond.SourceGroup);
             foreach (var menuItems in pMenuItemBounds)
             {
-                if (menuItems.MenuId == cond.SourceGroup && menuItems.OptionId == cond.SourceEntry)
+                if (menuItems.MenuId == cond.SourceGroup && menuItems.OptionIndex == cond.SourceEntry)
                 {
                     menuItems.Conditions.Add(cond);
                     return true;
