@@ -88,8 +88,7 @@ namespace BNetServer
             uint _banExpiryCheckInterval = ConfigMgr.GetDefaultValue("BanExpiryCheckInterval", 60u);
             _banExpiryCheckTimer = new Timer(_banExpiryCheckInterval);
             _banExpiryCheckTimer.Elapsed += _banExpiryCheckTimer_Elapsed;
-
-            while (true) ;
+            _banExpiryCheckTimer.Start();
         }
 
         static bool StartDB()
