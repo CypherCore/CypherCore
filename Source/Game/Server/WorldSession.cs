@@ -884,7 +884,7 @@ namespace Game
             set
             {
                 AccountId = (uint)(value & 0xFFFFFFFF);
-                connectionType = (ConnectionType)(value & (1u >> 32));
+                connectionType = (ConnectionType)((value >> 32) & 1);
                 Key = (value >> 33);
             }
         }

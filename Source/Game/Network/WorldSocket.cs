@@ -506,7 +506,6 @@ namespace Game.Network
 
             // Check locked state for server
             AccountTypes allowedAccountType = Global.WorldMgr.GetPlayerSecurityLimit();
-            Log.outDebug(LogFilter.Network, "Allowed Level: {0} Player Level {1}", allowedAccountType, account.game.Security);
             if (allowedAccountType > AccountTypes.Player && account.game.Security < allowedAccountType)
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.Denied);
