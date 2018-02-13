@@ -40,7 +40,7 @@ namespace Game.Movement
             if (owner.HasUnitState(UnitState.Root | UnitState.Stunned))
                 return;
 
-            if (owner.HasUnitState(UnitState.Casting) && !owner.CanMoveDuringChannel())
+            if (owner.IsMovementPreventedByCasting())
             {
                 owner.CastStop();
                 return;

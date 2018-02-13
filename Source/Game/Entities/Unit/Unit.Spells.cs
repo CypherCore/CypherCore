@@ -1382,14 +1382,20 @@ namespace Game.Entities
             return 0;
         }
 
-        public bool CanMoveDuringChannel()
+        public bool IsMovementPreventedByCasting()
         {
+            // can always move when not casting
+            if (!HasUnitState(UnitState.Casting))
+                return false;
+
+            // channeled spells during channel stage (after the initial cast timer) allow movement with a specific spell attribute
             Spell spell = m_currentSpells.LookupByKey(CurrentSpellTypes.Channeled);
             if (spell)
                 if (spell.getState() != SpellState.Finished && spell.IsChannelActive())
-                    if (!spell.GetSpellInfo().IsMoveAllowedChannel())
+                    if (spell.GetSpellInfo().IsMoveAllowedChannel())
                         return false;
 
+            // prohibit movement for all other spell casts
             return true;
         }
 

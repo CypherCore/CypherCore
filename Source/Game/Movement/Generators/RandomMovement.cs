@@ -86,7 +86,7 @@ namespace Game.Movement
 
         public void _setRandomLocation(T creature)
         {
-            if (creature.HasUnitState(UnitState.Casting) && !creature.CanMoveDuringChannel())
+            if (creature.IsMovementPreventedByCasting())
             {
                 creature.CastStop();
                 return;

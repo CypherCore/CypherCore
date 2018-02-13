@@ -64,7 +64,7 @@ namespace Game.Movement
             }
 
             // prevent movement while casting spells with cast time or channel time
-            if (owner.HasUnitState(UnitState.Casting) && !owner.CanMoveDuringChannel())
+            if (owner.IsMovementPreventedByCasting())
             {
                 if (!owner.isStopped())
                     owner.StopMoving();
@@ -144,7 +144,7 @@ namespace Game.Movement
             if (owner.HasUnitState(UnitState.NotMove))
                 return;
 
-            if (owner.HasUnitState(UnitState.Casting) && !owner.CanMoveDuringChannel())
+            if (owner.IsMovementPreventedByCasting())
                 return;
 
             if (owner.IsTypeId(TypeId.Unit) && !target.isInAccessiblePlaceFor(owner.ToCreature()))
