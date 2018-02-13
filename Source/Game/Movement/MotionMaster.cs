@@ -35,20 +35,15 @@ namespace Game.Movement
         public MotionMaster(Unit me)
         {
             _owner = me;
-            _expList = null;
+            _expireList = null;
             _top = -1;
             _cleanFlag = MMCleanFlag.None;
 
             for (byte i = 0; i < (int)MovementSlot.Max; ++i)
             {
-                Impl[i] = null;
-                _needInit[i] = true;
+                _slot[i] = null;
+                _initialize[i] = true;
             }
-        }
-
-        bool isStatic(IMovementGenerator mv)
-        {
-            return (mv == staticIdleMovement);
         }
 
         public void Initialize()
@@ -94,19 +89,19 @@ namespace Game.Movement
             else
                 _cleanFlag &= ~MMCleanFlag.Update;
 
-            if (_expList != null)
+            if (_expireList != null)
             {
-                for (int i = 0; i < _expList.Count; ++i)
+                for (int i = 0; i < _expireList.Count; ++i)
                 {
-                    IMovementGenerator mg = _expList[i];
+                    IMovementGenerator mg = _expireList[i];
                     DirectDelete(mg);
                 }
 
-                _expList = null;
+                _expireList = null;
 
                 if (empty())
                     Initialize();
-                else if (needInitTop())
+                else if (NeedInitTop())
                     InitTop();
                 else if (Convert.ToBoolean(_cleanFlag & MMCleanFlag.Reset))
                     top().Reset(_owner);
@@ -117,79 +112,84 @@ namespace Game.Movement
             _owner.UpdateUnderwaterState(_owner.GetMap(), _owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ());
         }
 
-        void DirectClean(bool reset)
+        public void Clear(bool reset = true)
         {
-            while (size() > 1)
+            if (Convert.ToBoolean(_cleanFlag & MMCleanFlag.Update))
             {
-                IMovementGenerator curr = top();
-                pop();
-                if (curr != null)
-                    DirectDelete(curr);
+                if (reset)
+                    _cleanFlag |= MMCleanFlag.Reset;
+                else
+                    _cleanFlag &= ~MMCleanFlag.Reset;
+                DelayedClean();
             }
+            else
+                DirectClean(reset);
+        }
 
+        public void MovementExpired(bool reset = true)
+        {
+            if (Convert.ToBoolean(_cleanFlag & MMCleanFlag.Update))
+            {
+                if (reset)
+                    _cleanFlag |= MMCleanFlag.Reset;
+                else
+                    _cleanFlag &= ~MMCleanFlag.Reset;
+                DelayedExpire();
+            }
+            else
+                DirectExpire(reset);
+        }
+
+        public MovementGeneratorType GetCurrentMovementGeneratorType()
+        {
             if (empty())
-                return;
+                return MovementGeneratorType.Idle;
 
-            if (needInitTop())
-                InitTop();
-            else if (reset)
-                top().Reset(_owner);
+            return top().GetMovementGeneratorType();
         }
 
-        void DelayedClean()
+        public MovementGeneratorType GetMotionSlotType(MovementSlot slot)
         {
-            while (size() > 1)
+            if (_slot[(int)slot] == null)
+                return MovementGeneratorType.Null;
+            else
+                return _slot[(int)slot].GetMovementGeneratorType();
+        }
+
+        public IMovementGenerator GetMotionSlot(int slot)
+        {
+            Contract.Assert(slot >= 0);
+            return _slot[slot];
+        }
+
+        public void propagateSpeedChange()
+        {
+            for (int i = 0; i <= _top; ++i)
             {
-                IMovementGenerator curr = top();
-                pop();
-                if (curr != null)
-                    DelayedDelete(curr);
+                if (_slot[i] != null)
+                    _slot[i].unitSpeedChanged();
             }
         }
 
-        void DirectExpire(bool reset)
+        public bool GetDestination(out float x, out float y, out float z)
         {
-            if (size() > 1)
-            {
-                IMovementGenerator curr = top();
-                pop();
-                DirectDelete(curr);
-            }
+            x = 0f;
+            y = 0f;
+            z = 0f;
+            if (_owner.moveSpline.Finalized())
+                return false;
 
-            while (!empty() && top() == null)//not sure this will work
-                --_top;
-
-            if (empty())
-                Initialize();
-            else if (needInitTop())
-                InitTop();
-            else if (reset)
-                top().Reset(_owner);
-        }
-
-        void DelayedExpire()
-        {
-            if (size() > 1)
-            {
-                IMovementGenerator curr = top();
-                pop();
-                DelayedDelete(curr);
-            }
-
-            while (!empty() && top() == null)
-                --_top;
+            Vector3 dest = _owner.moveSpline.FinalDestination();
+            x = dest.X;
+            y = dest.Y;
+            z = dest.Z;
+            return true;
         }
 
         public void MoveIdle()
         {
-            if (empty() || !isStatic(top()))
+            if (empty() || !IsStatic(top()))
                 StartMovement(staticIdleMovement, MovementSlot.Idle);
-        }
-
-        public void MoveRandom(float spawndist = 0.0f)
-        {
-            if (_owner.IsTypeId(TypeId.Unit))
-                StartMovement(new RandomMovementGenerator<Creature>(spawndist), MovementSlot.Idle);
         }
 
         public void MoveTargetedHome()
@@ -208,12 +208,22 @@ namespace Game.Movement
             }
         }
 
-        public void MoveConfused()
+        public void MoveRandom(float spawndist = 0.0f)
         {
+            if (_owner.IsTypeId(TypeId.Unit))
+                StartMovement(new RandomMovementGenerator(spawndist), MovementSlot.Idle);
+        }
+
+        public void MoveFollow(Unit target, float dist = 0.0f, float angle = 0.0f, MovementSlot slot = MovementSlot.Idle)
+        {
+            // ignore movement request if target not exist
+            if (!target || target == _owner)
+                return;
+
             if (_owner.IsTypeId(TypeId.Player))
-                StartMovement(new ConfusedGenerator<Player>(), MovementSlot.Controlled);
+                StartMovement(new FollowMovementGenerator<Player>(target, dist, angle), slot);
             else
-                StartMovement(new ConfusedGenerator<Creature>(), MovementSlot.Controlled);
+                StartMovement(new FollowMovementGenerator<Creature>(target, dist, angle), slot);
         }
 
         public void MoveChase(Unit target, float dist = 0.0f, float angle = 0.0f)
@@ -227,15 +237,33 @@ namespace Game.Movement
                 StartMovement(new ChaseMovementGenerator<Creature>(target, dist, angle), MovementSlot.Active);
         }
 
-        public void MoveFollow(Unit target, float dist = 0.0f, float angle = 0.0f, MovementSlot slot = MovementSlot.Idle)
+        public void MoveConfused()
         {
-            if (!target || target == _owner)
+            if (_owner.IsTypeId(TypeId.Player))
+                StartMovement(new ConfusedGenerator<Player>(), MovementSlot.Controlled);
+            else
+                StartMovement(new ConfusedGenerator<Creature>(), MovementSlot.Controlled);
+        }
+
+        public void MoveFleeing(Unit enemy, uint time)
+        {
+            if (!enemy)
                 return;
 
             if (_owner.IsTypeId(TypeId.Player))
-                StartMovement(new FollowMovementGenerator<Player>(target, dist, angle), slot);
+                StartMovement(new FleeingGenerator<Player>(enemy.GetGUID()), MovementSlot.Controlled);
             else
-                StartMovement(new FollowMovementGenerator<Creature>(target, dist, angle), slot);
+            {
+                if (time != 0)
+                    StartMovement(new TimedFleeingGenerator(enemy.GetGUID(), time), MovementSlot.Controlled);
+                else
+                    StartMovement(new FleeingGenerator<Creature>(enemy.GetGUID()), MovementSlot.Controlled);
+            }
+        }
+
+        public void MovePoint(uint id, Position pos, bool generatePath = true)
+        {
+            MovePoint(id, pos.posX, pos.posY, pos.posZ, generatePath);
         }
 
         public void MovePoint(ulong id, float x, float y, float z, bool generatePath = true)
@@ -246,9 +274,25 @@ namespace Game.Movement
                 StartMovement(new PointMovementGenerator<Creature>(id, x, y, z, generatePath), MovementSlot.Active);
         }
 
-        public void MovePoint(uint id, Position pos, bool generatePath = true)
+        void MoveCloserAndStop(uint id, Unit target, float distance)
         {
-            MovePoint(id, pos.posX, pos.posY, pos.posZ, generatePath);
+            float distanceToTravel = _owner.GetExactDist2d(target) - distance;
+            if (distanceToTravel > 0.0f)
+            {
+                float angle = _owner.GetAngle(target);
+                float destx = _owner.GetPositionX() + distanceToTravel * (float)Math.Cos(angle);
+                float desty = _owner.GetPositionY() + distanceToTravel * (float)Math.Sin(angle);
+                MovePoint(id, destx, desty, target.GetPositionZ());
+            }
+            else
+            {
+                // we are already close enough. We just need to turn toward the target without changing position.
+                MoveSplineInit init = new MoveSplineInit(_owner);
+                init.MoveTo(_owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZMinusOffset());
+                init.SetFacing(target);
+                init.Launch();
+                StartMovement(new EffectMovementGenerator(id), MovementSlot.Active);
+            }
         }
 
         public void MoveLand(uint id, Position pos)
@@ -273,6 +317,34 @@ namespace Game.Movement
             init.SetAnimation(AnimType.ToFly);
             init.Launch();
             StartMovement(new EffectMovementGenerator(id), MovementSlot.Active);
+        }
+
+        public void MoveCharge(float x, float y, float z, float speed = SPEED_CHARGE, uint id = EventId.Charge, bool generatePath = false, Unit target = null, SpellEffectExtraData spellEffectExtraData = null)
+        {
+            if (_slot[(int)MovementSlot.Controlled] != null && _slot[(int)MovementSlot.Controlled].GetMovementGeneratorType() != MovementGeneratorType.Distract)
+                return;
+
+            if (_owner.IsTypeId(TypeId.Player))
+                StartMovement(new PointMovementGenerator<Player>(id, x, y, z, generatePath, speed, target, spellEffectExtraData), MovementSlot.Controlled);
+            else
+                StartMovement(new PointMovementGenerator<Creature>(id, x, y, z, generatePath, speed, target, spellEffectExtraData), MovementSlot.Controlled);
+        }
+
+        public void MoveCharge(PathGenerator path, float speed = SPEED_CHARGE, Unit target = null, SpellEffectExtraData spellEffectExtraData = null)
+        {
+            Vector3 dest = path.GetActualEndPosition();
+
+            MoveCharge(dest.X, dest.Y, dest.Z, SPEED_CHARGE, EventId.ChargePrepath);
+
+            // Charge movement is not started when using EVENT_CHARGE_PREPATH
+            MoveSplineInit init = new MoveSplineInit(_owner);
+            init.MovebyPath(path.GetPath());
+            init.SetVelocity(speed);
+            if (target != null)
+                init.SetFacing(target);
+            if (spellEffectExtraData != null)
+                init.SetSpellEffectExtraData(spellEffectExtraData);
+            init.Launch();
         }
 
         public void MoveKnockbackFrom(float srcX, float srcY, float speedXY, float speedZ, SpellEffectExtraData spellEffectExtraData = null)
@@ -464,34 +536,6 @@ namespace Game.Movement
             StartMovement(new EffectMovementGenerator(id), MovementSlot.Controlled);
         }
 
-        public void MoveCharge(float x, float y, float z, float speed = SPEED_CHARGE, uint id = EventId.Charge, bool generatePath = false, Unit target = null, SpellEffectExtraData spellEffectExtraData = null)
-        {
-            if (Impl[(int)MovementSlot.Controlled] != null && Impl[(int)MovementSlot.Controlled].GetMovementGeneratorType() != MovementGeneratorType.Distract)
-                return;
-
-            if (_owner.IsTypeId(TypeId.Player))
-                StartMovement(new PointMovementGenerator<Player>(id, x, y, z, generatePath, speed, target, spellEffectExtraData), MovementSlot.Controlled);
-            else
-                StartMovement(new PointMovementGenerator<Creature>(id, x, y, z, generatePath, speed, target, spellEffectExtraData), MovementSlot.Controlled);
-        }
-
-        public void MoveCharge(PathGenerator path, float speed = SPEED_CHARGE, Unit target = null, SpellEffectExtraData spellEffectExtraData = null)
-        {
-            Vector3 dest = path.GetActualEndPosition();
-
-            MoveCharge(dest.X, dest.Y, dest.Z, SPEED_CHARGE, EventId.ChargePrepath);
-
-            // Charge movement is not started when using EVENT_CHARGE_PREPATH
-            MoveSplineInit init = new MoveSplineInit(_owner);
-            init.MovebyPath(path.GetPath());
-            init.SetVelocity(speed);
-            if (target != null)
-                init.SetFacing(target);
-            if (spellEffectExtraData != null)
-                init.SetSpellEffectExtraData(spellEffectExtraData);
-            init.Launch();
-        }
-
         public void MoveSeekAssistance(float x, float y, float z)
         {
             if (_owner.IsTypeId(TypeId.Player))
@@ -511,22 +555,6 @@ namespace Game.Movement
                 Log.outError(LogFilter.Server, "Player {0} attempt to call distract after assistance", _owner.GetGUID().ToString());
             else
                 StartMovement(new AssistanceDistractMovementGenerator(time), MovementSlot.Active);
-        }
-
-        public void MoveFleeing(Unit enemy, uint time)
-        {
-            if (!enemy)
-                return;
-
-            if (_owner.IsTypeId(TypeId.Player))
-                StartMovement(new FleeingGenerator<Player>(enemy.GetGUID()), MovementSlot.Controlled);
-            else
-            {                
-                if (time != 0)
-                    StartMovement(new TimedFleeingGenerator(enemy.GetGUID(), time), MovementSlot.Controlled);
-                else
-                    StartMovement(new FleeingGenerator<Creature>(enemy.GetGUID()), MovementSlot.Controlled);
-            }
         }
 
         public void MoveTaxiFlight(uint path, uint pathnode)
@@ -555,37 +583,10 @@ namespace Game.Movement
 
         public void MoveDistract(uint timer)
         {
-            if (Impl[(int)MovementSlot.Controlled] != null)
+            if (_slot[(int)MovementSlot.Controlled] != null)
                 return;
 
             StartMovement(new DistractMovementGenerator(timer), MovementSlot.Controlled);
-        }
-
-        void StartMovement(IMovementGenerator m, MovementSlot slot)
-        {
-            int _slot = (int)slot;
-            IMovementGenerator curr = Impl[_slot];
-            if (curr != null)
-            {
-                Impl[_slot] = null; // in case a new one is generated in this slot during directdelete
-                if (_top == _slot && Convert.ToBoolean(_cleanFlag & MMCleanFlag.Update))
-                    DelayedDelete(curr);
-                else
-                    DirectDelete(curr);
-            }
-            else if (_top < _slot)
-            {
-                _top = _slot;
-            }
-
-            Impl[_slot] = m;
-            if (_top > _slot)
-                _needInit[_slot] = true;
-            else
-            {
-                _needInit[_slot] = false;
-                m.Initialize(_owner);
-            }
         }
 
         public void MovePath(uint path_id, bool repeatable)
@@ -593,7 +594,12 @@ namespace Game.Movement
             if (path_id == 0)
                 return;
 
-            StartMovement(new WaypointMovementGenerator<Creature>(path_id, repeatable), MovementSlot.Idle);
+            StartMovement(new WaypointMovementGenerator(path_id, repeatable), MovementSlot.Idle);
+        }
+
+        public void MovePath(WaypointPath path, bool repeatable)
+        {
+            StartMovement(new WaypointMovementGenerator(path, repeatable), MovementSlot.Idle);
         }
 
         void MoveRotate(uint time, RotateDirection direction)
@@ -604,90 +610,133 @@ namespace Game.Movement
             StartMovement(new RotateMovementGenerator(time, direction), MovementSlot.Active);
         }
 
-        public void propagateSpeedChange()
-        {
-            for (int i = 0; i <= _top; ++i)
-            {
-                if (Impl[i] != null)
-                    Impl[i].unitSpeedChanged();
-            }
-        }
-
-        public MovementGeneratorType GetCurrentMovementGeneratorType()
+        void pop()
         {
             if (empty())
-                return MovementGeneratorType.Idle;
+                return;
 
-            return top().GetMovementGeneratorType();
+            _slot[_top] = null;
+            while (!empty() && top() == null)
+                --_top;
         }
 
-        public MovementGeneratorType GetMotionSlotType(MovementSlot slot)
+        bool NeedInitTop()
         {
-            if (Impl[(int)slot] == null)
-                return MovementGeneratorType.Null;
-            else
-                return Impl[(int)slot].GetMovementGeneratorType();
+            if (empty())
+                return false;
+
+            return _initialize[_top];
         }
 
         void InitTop()
         {
             top().Initialize(_owner);
-            _needInit[_top] = false;
+            _initialize[_top] = false;
+        }
+
+        void StartMovement(IMovementGenerator m, MovementSlot slot)
+        {
+            IMovementGenerator curr = _slot[(int)slot];
+            if (curr != null)
+            {
+                _slot[(int)slot] = null; // in case a new one is generated in this slot during directdelete
+                if (_top == (int)slot && Convert.ToBoolean(_cleanFlag & MMCleanFlag.Update))
+                    DelayedDelete(curr);
+                else
+                    DirectDelete(curr);
+            }
+            else if (_top < (int)slot)
+            {
+                _top = (int)slot;
+            }
+
+            _slot[(int)slot] = m;
+            if (_top > (int)slot)
+                _initialize[(int)slot] = true;
+            else
+            {
+                _initialize[(int)slot] = false;
+                m.Initialize(_owner);
+            }
+        }
+
+        void DirectClean(bool reset)
+        {
+            while (size() > 1)
+            {
+                IMovementGenerator curr = top();
+                pop();
+                if (curr != null)
+                    DirectDelete(curr);
+            }
+
+            if (empty())
+                return;
+
+            if (NeedInitTop())
+                InitTop();
+            else if (reset)
+                top().Reset(_owner);
+        }
+
+        void DelayedClean()
+        {
+            while (size() > 1)
+            {
+                IMovementGenerator curr = top();
+                pop();
+                if (curr != null)
+                    DelayedDelete(curr);
+            }
+        }
+
+        void DirectExpire(bool reset)
+        {
+            if (size() > 1)
+            {
+                IMovementGenerator curr = top();
+                pop();
+                DirectDelete(curr);
+            }
+
+            while (!empty() && top() == null)//not sure this will work
+                --_top;
+
+            if (empty())
+                Initialize();
+            else if (NeedInitTop())
+                InitTop();
+            else if (reset)
+                top().Reset(_owner);
+        }
+
+        void DelayedExpire()
+        {
+            if (size() > 1)
+            {
+                IMovementGenerator curr = top();
+                pop();
+                DelayedDelete(curr);
+            }
+
+            while (!empty() && top() == null)
+                --_top;
         }
 
         void DirectDelete(IMovementGenerator curr)
         {
-            if (isStatic(curr))
+            if (IsStatic(curr))
                 return;
             curr.Finalize(_owner);
         }
 
         void DelayedDelete(IMovementGenerator curr)
         {
-            if (isStatic(curr))
+            if (IsStatic(curr))
                 return;
-            if (_expList == null)
-                _expList = new List<IMovementGenerator>();
-            _expList.Add(curr);
-        }
-
-        public bool GetDestination(out float x, out float y, out float z)
-        {
-            x = 0f;
-            y = 0f;
-            z = 0f;
-            if (_owner.moveSpline.Finalized())
-                return false;
-
-            Vector3 dest = _owner.moveSpline.FinalDestination();
-            x = dest.X;
-            y = dest.Y;
-            z = dest.Z;
-            return true;
-        }
-
-        void pop()
-        {
-            if (empty())
-                return;
-
-            Impl[_top] = null;
-            while (!empty() && top() == null)
-                --_top;
-        }
-
-        void push(IMovementGenerator _Val)
-        {
-            ++_top; 
-            Impl[_top] = _Val;
-        }
-
-        bool needInitTop()
-        {
-            if (empty())
-                return false;
-
-            return _needInit[_top];
+            if (_expireList == null)
+                _expireList = new List<IMovementGenerator>();
+            _expireList.Add(curr);
         }
 
         public bool empty() { return (_top < 0); }
@@ -697,41 +746,7 @@ namespace Game.Movement
         public IMovementGenerator top()
         {
             Contract.Assert(!empty());
-            return Impl[_top];
-        }
-
-        public IMovementGenerator GetMotionSlot(int slot)
-        {
-            Contract.Assert(slot >= 0);
-            return Impl[slot];
-        }
-
-        public void Clear(bool reset = true)
-        {
-            if (Convert.ToBoolean(_cleanFlag & MMCleanFlag.Update))
-            {
-                if (reset)
-                    _cleanFlag |= MMCleanFlag.Reset;
-                else
-                    _cleanFlag &= ~MMCleanFlag.Reset;
-                DelayedClean();
-            }
-            else
-                DirectClean(reset);
-        }
-
-        public void MovementExpired(bool reset = true)
-        {
-            if (Convert.ToBoolean(_cleanFlag & MMCleanFlag.Update))
-            {
-                if (reset)
-                    _cleanFlag |= MMCleanFlag.Reset;
-                else
-                    _cleanFlag &= ~MMCleanFlag.Reset;
-                DelayedExpire();
-            }
-            else
-                DirectExpire(reset);
+            return _slot[_top];
         }
 
         public static uint SplineId
@@ -739,14 +754,19 @@ namespace Game.Movement
             get { return splineId++; }
         }
 
+        bool IsStatic(IMovementGenerator movement)
+        {
+            return (movement == staticIdleMovement);
+        }
+
         static uint splineId = 0;
 
         public Unit _owner { get; private set; }
-        protected IMovementGenerator[] Impl = new IMovementGenerator[(int)MovementSlot.Max];
+        protected IMovementGenerator[] _slot = new IMovementGenerator[(int)MovementSlot.Max];
         MMCleanFlag _cleanFlag;
-        bool[] _needInit = new bool[(int)MovementSlot.Max];
+        bool[] _initialize = new bool[(int)MovementSlot.Max];
         int _top;
-        List<IMovementGenerator> _expList = new List<IMovementGenerator>();
+        List<IMovementGenerator> _expireList = new List<IMovementGenerator>();
     }
 
     public class JumpArrivalCastArgs

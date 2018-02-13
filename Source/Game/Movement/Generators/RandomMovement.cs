@@ -22,7 +22,7 @@ using System;
 
 namespace Game.Movement
 {
-    public class RandomMovementGenerator<T> : MovementGeneratorMedium<T> where T : Creature
+    public class RandomMovementGenerator : MovementGeneratorMedium<Creature>
     {
         public RandomMovementGenerator(float spawn_dist = 0.0f)
         {
@@ -38,7 +38,7 @@ namespace Game.Movement
             return MovementGeneratorType.Random;
         }
 
-        public override void DoInitialize(T creature)
+        public override void DoInitialize(Creature creature)
         {
             if (!creature.IsAlive())
                 return;
@@ -53,17 +53,17 @@ namespace Game.Movement
             _setRandomLocation(creature);
 
         }
-        public override void DoFinalize(T creature)
+        public override void DoFinalize(Creature creature)
         {
             creature.ClearUnitState(UnitState.Roaming | UnitState.RoamingMove);
             creature.SetWalk(false);
         }
-        public override void DoReset(T creature)
+        public override void DoReset(Creature creature)
         {
             DoInitialize(creature);
         }
 
-        public override bool DoUpdate(T creature, uint diff)
+        public override bool DoUpdate(Creature creature, uint diff)
         {
             if (!creature || !creature.IsAlive())
                 return false;
@@ -84,7 +84,7 @@ namespace Game.Movement
             return true;
         }
 
-        public void _setRandomLocation(T creature)
+        public void _setRandomLocation(Creature creature)
         {
             if (creature.IsMovementPreventedByCasting())
             {

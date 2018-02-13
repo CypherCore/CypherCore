@@ -239,7 +239,6 @@ namespace Game.AI
 
                 if (last_entry != entry)
                 {
-                    waypoint_map[entry] = new Dictionary<uint, SmartPath>();
                     last_id = 1;
                     count++;
                 }
@@ -248,7 +247,14 @@ namespace Game.AI
                     Log.outError(LogFilter.Sql, "SmartWaypointMgr.LoadFromDB: Path entry {0}, unexpected point id {1}, expected {2}.", entry, id, last_id);
 
                 last_id++;
-                waypoint_map[entry][id] = new SmartPath(id, x, y, z);
+
+                WayPoint point = new WayPoint();
+                point.id = id;
+                point.x = x;
+                point.y = y;
+                point.z = z;
+
+                waypoint_map.Add(entry, point);
 
                 last_entry = entry;
                 total++;
@@ -993,7 +999,8 @@ namespace Game.AI
                     break;
                 case SmartActions.WpStart:
                     {
-                        if (Global.SmartAIMgr.GetPath(e.Action.wpStart.pathID) == null)
+                        List<WayPoint> path = Global.SmartAIMgr.GetPath(e.Action.wpStart.pathID);
+                        if (path.Empty())
                         {
                             Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Creature {0} Event {1} Action {2} uses non-existent WaypointPath id {3}, skipped.", e.entryOrGuid, e.event_id, e.GetActionType(), e.Action.wpStart.pathID);
                             return false;
@@ -1404,7 +1411,7 @@ namespace Game.AI
             return temp;
         }
 
-        public Dictionary<uint, SmartPath> GetPath(uint id)
+        public List<WayPoint> GetPath(uint id)
         {
             return waypoint_map.LookupByKey(id);
         }
@@ -1428,7 +1435,7 @@ namespace Game.AI
         }
 
         MultiMap<int, SmartScriptHolder>[] mEventMap = new MultiMap<int, SmartScriptHolder>[(int)SmartScriptType.Max];
-        Dictionary<uint, Dictionary<uint, SmartPath>> waypoint_map = new Dictionary<uint, Dictionary<uint, SmartPath>>();
+        MultiMap<uint, WayPoint> waypoint_map = new MultiMap<uint, WayPoint>();
 
         Dictionary<SmartScriptType, uint> SmartAITypeMask = new Dictionary<SmartScriptType, uint>
         {
@@ -1534,16 +1541,8 @@ namespace Game.AI
         };
     }
 
-    public class SmartPath
+    public class WayPoint
     {
-        public SmartPath(uint _id, float _x, float _y, float _z)
-        {
-            id = _id;
-            x = _x;
-            y = _y;
-            z = _z;
-        }
-
         public uint id;
         public float x;
         public float y;
