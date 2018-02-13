@@ -65,8 +65,6 @@ namespace Game.Entities
                     packet.Duration = duration;
                     packet.SpellID = GetUInt32Value(UnitFields.CreatedBySpell);
                     owner.ToPlayer().SendPacket(packet);
-
-
                 }
 
                 // set display id depending on caster's race
