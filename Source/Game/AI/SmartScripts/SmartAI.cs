@@ -975,7 +975,7 @@ namespace Game.AI
         bool mForcedPaused;
         uint mInvincibilityHpLevel;
 
-        WaypointPath _path;
+        WaypointPath _path = new WaypointPath();
         uint mDespawnTime;
         uint mRespawnTime;
         uint mDespawnState;

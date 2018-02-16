@@ -3094,7 +3094,7 @@ namespace Game.Maps
 
         public GameObject GetGameObject(ObjectGuid guid)
         {
-            if (!guid.IsGameObject())
+            if (!guid.IsAnyTypeGameObject())
                 return null;
 
             return (GameObject)_objectsStore.LookupByKey(guid);
