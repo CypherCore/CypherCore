@@ -211,7 +211,13 @@ namespace Game.Entities
             return false;
         }
 
-        public int GetQuestLevel(Quest quest) { return quest != null && (quest.Level > 0) ? quest.Level : (int)getLevel(); }
+        public uint GetQuestLevel(Quest quest)
+        {
+            if (quest == null)
+                return getLevel();
+            
+            return (uint)(quest.Level > 0 ? quest.Level : Math.Min((int)getLevel(), quest.MaxScalingLevel));
+        }
 
         public bool IsQuestRewarded(uint quest_id)
         {
@@ -1372,7 +1378,7 @@ namespace Game.Entities
 
         public bool SatisfyQuestRace(Quest qInfo, bool msg)
         {
-            int reqraces = qInfo.AllowableRaces;
+            long reqraces = qInfo.AllowableRaces;
             if (reqraces == -1)
                 return true;
 

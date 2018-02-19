@@ -1484,7 +1484,7 @@ namespace Game.Spells
             while (chainTargets != 0)
             {
                 // try to get unit for next chain jump
-                var found = tempTargets.LastOrDefault();
+                WorldObject found = null;
                 // get unit with highest hp deficit in dist
                 if (isChainHeal)
                 {

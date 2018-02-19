@@ -212,15 +212,7 @@ Logger.Network = 1,Console Server
 #Logger.Warden=3,Console Server
 
 #
-#    Log.Async.Enable
-#        Description: Enables asyncronous message logging.
-#        Default:     0 - (Disabled)
-#                     1 - (Enabled)
-
-Log.Async.Enable = 0
-
-#
-#    Allow.IP.Based.Action.Logging
+#    Allow.IP.Based.Action.Logging (NYI)
 #        Description: Logs actions, e.g. account login and logout to name a few, based on IP of
 #                     current session.
 #        Default:     0 - (Disabled)
@@ -2624,27 +2616,19 @@ ArenaLog.ExtendedInfo = 0
 ###################################################################################################
 # NETWORK CONFIG
 #
-#    Network.Threads (NYI)
+#    Network.Threads
 #        Description: Number of threads for network.
 #         Default:    1 - (Recommended 1 thread per 1000 connections)
 
 Network.Threads = 1
 
 #
-#    Network.OutKBuff (NYI)
-#        Description: Amount of memory (in bytes) used for the output kernel buffer (see SO_SNDBUF
-#                     socket option, TCP manual).
+#    Network.OutKBuff
+#        Description: Specifies the total per-socket buffer space reserved for sends. This is unrelated
+#					  to the maximum message size or the size of a TCP window.
 #        Default:     -1 - (Use system default setting)
 
 Network.OutKBuff = -1
-
-#
-#    Network.OutUBuff (NYI)
-#        Description: Amount of memory (in bytes) reserved in the user space per connection for
-#                     output buffering.
-#         Default:    65536
-
-Network.OutUBuff = 65536
 
 #
 #    Network.TcpNoDelay:
@@ -2658,7 +2642,7 @@ Network.TcpNodelay = 1
 ###################################################################################################
 
 ###################################################################################################
-# CONSOLE AND REMOTE ACCESS
+# CONSOLE
 #
 #    Console.Enable (NYI)
 #        Description: Enable console.
@@ -2666,57 +2650,6 @@ Network.TcpNodelay = 1
 #                     0 - (Disabled)
 
 Console.Enable = 1
-
-#
-#    Ra.Enable (NYI)
-#        Description: Enable remote console (telnet).
-#        Default:     0 - (Disabled)
-#                     1 - (Enabled)
-
-Ra.Enable = 0
-
-#
-#    Ra.IP (NYI)
-#        Description: Bind remote access to IP/hostname.
-#        Default:     "0.0.0.0" - (Bind to all IPs on the system)
-
-Ra.IP = "0.0.0.0"
-
-#
-#    Ra.Port (NYI)
-#        Description: TCP port to reach the remote console.
-#        Default:     3443
-
-Ra.Port = 3443
-
-#
-#    Ra.MinLevel (NYI)
-#        Description: Required security level to use the remote console.
-#        Default:     3
-
-Ra.MinLevel = 3
-
-#
-#    SOAP.Enable (NYI)
-#        Description: Enable soap service.
-#        Default:     0 - (Disabled)
-#                     1 - (Enabled)
-
-SOAP.Enabled = 0
-
-#
-#    SOAP.IP (NYI)
-#        Description: Bind SOAP service to IP/hostname.
-#        Default:     "127.0.0.1" - (Bind to localhost)
-
-SOAP.IP = "127.0.0.1"
-
-#
-#    SOAP.Port (NYI)
-#        Description: TCP port to reach the SOAP service.
-#        Default:     7878
-
-SOAP.Port = 7878
 
 #
 ###################################################################################################

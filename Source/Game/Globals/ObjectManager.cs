@@ -441,10 +441,10 @@ namespace Game
         public void LoadRaceAndClassExpansionRequirements()
         {
             uint oldMSTime = Time.GetMSTime();
-            _raceExpansionRequirementStorage.Clear();
+            _raceUnlockRequirementStorage.Clear();
 
-            //                                            0       1
-            SQLResult result = DB.World.Query("SELECT raceID, expansion FROM `race_expansion_requirement`");
+            //                                         0       1          2
+            SQLResult result = DB.World.Query("SELECT raceID, expansion, achievementId FROM `race_expansion_requirement`");
             if (!result.IsEmpty())
             {
                 uint count = 0;
@@ -452,21 +452,32 @@ namespace Game
                 {
                     byte raceID = result.Read<byte>(0);
                     byte expansion = result.Read<byte>(1);
+                    uint achievementId = result.Read<uint>(2);
 
                     ChrRacesRecord raceEntry = CliDB.ChrRacesStorage.LookupByKey(raceID);
                     if (raceEntry == null)
                     {
-                        Log.outError(LogFilter.Sql, "Race {0} defined in `race_expansion_requirement` does not exists, skipped.", raceID);
+                        Log.outError(LogFilter.Sql, "Race {0} defined in `race_unlock_requirement` does not exists, skipped.", raceID);
                         continue;
                     }
 
-                    if (expansion >= (int)Expansion.Max)
+                    if (expansion >= (int)Expansion.MaxAccountExpansions)
                     {
-                        Log.outError(LogFilter.Sql, "Race {0} defined in `race_expansion_requirement` has incorrect expansion {1}, skipped.", raceID, expansion);
+                        Log.outError(LogFilter.Sql, "Race {0} defined in `race_unlock_requirement` has incorrect expansion {1}, skipped.", raceID, expansion);
                         continue;
                     }
 
-                    _raceExpansionRequirementStorage[raceID] = expansion;
+                    if (achievementId != 0 && !CliDB.AchievementStorage.ContainsKey(achievementId))
+                    {
+                        Log.outError(LogFilter.Sql, $"Race {raceID} defined in `race_unlock_requirement` has incorrect achievement {achievementId}, skipped.");
+                        continue;
+                    }
+
+                    RaceUnlockRequirement raceUnlockRequirement = new RaceUnlockRequirement();
+                    raceUnlockRequirement.Expansion = expansion;
+                    raceUnlockRequirement.AchievementId = achievementId;
+
+                    _raceUnlockRequirementStorage[raceID] = raceUnlockRequirement;
 
                     ++count;
                 }
@@ -573,13 +584,8 @@ namespace Game
             }
             return false;
         }
-        public Dictionary<byte, byte> GetRaceExpansionRequirements() { return _raceExpansionRequirementStorage; }
-        public Expansion GetRaceExpansionRequirement(Race race)
-        {
-            if (_raceExpansionRequirementStorage.ContainsKey((byte)race))
-                return (Expansion)_raceExpansionRequirementStorage[(byte)race];
-            return Expansion.Classic;
-        }
+        public Dictionary<byte, RaceUnlockRequirement> GetRaceUnlockRequirements() { return _raceUnlockRequirementStorage; }
+        public RaceUnlockRequirement GetRaceUnlockRequirement(Race race) { return _raceUnlockRequirementStorage.LookupByKey((byte)race); }
         public Dictionary<byte, byte> GetClassExpansionRequirements() { return _classExpansionRequirementStorage; }
         public Expansion GetClassExpansionRequirement(Class class_)
         {
@@ -4854,7 +4860,7 @@ namespace Game
             if (id == -1)
                 return equip[RandomHelper.IRand(0, equip.Count - 1)].Item2;
             else
-                return equip.Find(p => p.Item1 == id).Item2;
+                return equip.Find(p => p.Item1 == id)?.Item2;
         }
 
         //Maps
@@ -6187,35 +6193,35 @@ namespace Game
             _exclusiveQuestGroups.Clear();
 
             SQLResult result = DB.World.Query("SELECT " +
-                //0  1          2           3               4         5            6            7                  8                9                   10
-                "ID, QuestType, QuestLevel, QuestPackageID, MinLevel, QuestSortID, QuestInfoID, SuggestedGroupNum, RewardNextQuest, RewardXPDifficulty, RewardXPMultiplier, " +
-                //11          12                     13                     14                15                   16                   17                   18           19           20               21
+                //0  1          2           3                4               5         6            7            8                  9                10                  11
+                "ID, QuestType, QuestLevel, MaxScalingLevel, QuestPackageID, MinLevel, QuestSortID, QuestInfoID, SuggestedGroupNum, RewardNextQuest, RewardXPDifficulty, RewardXPMultiplier, " +
+                //12          13                     14                     15                16                   17                   18                   19           20           21               22
                 "RewardMoney, RewardMoneyDifficulty, RewardMoneyMultiplier, RewardBonusMoney, RewardDisplaySpell1, RewardDisplaySpell2, RewardDisplaySpell3, RewardSpell, RewardHonor, RewardKillHonor, StartItem, " +
-                //22                         23                          24                        25     26
+                //23                         24                          25                        26     27
                 "RewardArtifactXPDifficulty, RewardArtifactXPMultiplier, RewardArtifactCategoryID, Flags, FlagsEx, " +
-                //27          28             29         30                 31           32             33         34
+                //28          29             30         31                 32           33             34         35
                 "RewardItem1, RewardAmount1, ItemDrop1, ItemDropQuantity1, RewardItem2, RewardAmount2, ItemDrop2, ItemDropQuantity2, " +
-                //35          36             37         38                 39           40             41         42
+                //36          37             38         39                 40             41           42         43
                 "RewardItem3, RewardAmount3, ItemDrop3, ItemDropQuantity3, RewardItem4, RewardAmount4, ItemDrop4, ItemDropQuantity4, " +
-                //43                  44                         45                          46                   47                         48
+                //44                  45                         46                          47                   48                         49
                 "RewardChoiceItemID1, RewardChoiceItemQuantity1, RewardChoiceItemDisplayID1, RewardChoiceItemID2, RewardChoiceItemQuantity2, RewardChoiceItemDisplayID2, " +
-                //49                  50                         51                          52                   53                         54
+                //50                  51                         52                          53                   54                         55
                 "RewardChoiceItemID3, RewardChoiceItemQuantity3, RewardChoiceItemDisplayID3, RewardChoiceItemID4, RewardChoiceItemQuantity4, RewardChoiceItemDisplayID4, " +
-                //55                  56                         57                          58                   59                         60
+                //56                  57                         58                          59                   60                         61
                 "RewardChoiceItemID5, RewardChoiceItemQuantity5, RewardChoiceItemDisplayID5, RewardChoiceItemID6, RewardChoiceItemQuantity6, RewardChoiceItemDisplayID6, " +
-                //61           62    63    64           65           66                 67                 68                 69             70
+                //62           63    64    65           66           67                 68                 69                 70             71
                 "POIContinent, POIx, POIy, POIPriority, RewardTitle, RewardArenaPoints, RewardSkillLineID, RewardNumSkillUps, PortraitGiver, PortraitTurnIn, " +
-                //71               72                   73                      74                75                   76                   77                      78
+                //72               73                   74                      75                   76                77                   78                      79
                 "RewardFactionID1, RewardFactionValue1, RewardFactionOverride1, RewardFactionCapIn1, RewardFactionID2, RewardFactionValue2, RewardFactionOverride2, RewardFactionCapIn2, " +
-                //79               80                   81                      82                   83                84                   85                      86
+                //80               81                   82                      83                   84                85                   86                      87
                 "RewardFactionID3, RewardFactionValue3, RewardFactionOverride3, RewardFactionCapIn3, RewardFactionID4, RewardFactionValue4, RewardFactionOverride4, RewardFactionCapIn4, " +
-                //87               88                   89                      90                   91
+                //88               89                   90                      91                   92
                 "RewardFactionID5, RewardFactionValue5, RewardFactionOverride5, RewardFactionCapIn5, RewardFactionFlags, " +
-                //92                93                  94                 95                  96                 97                  98                 99
+                //93                94                  95                 96                 97                  98                  99                 100
                 "RewardCurrencyID1, RewardCurrencyQty1, RewardCurrencyID2, RewardCurrencyQty2, RewardCurrencyID3, RewardCurrencyQty3, RewardCurrencyID4, RewardCurrencyQty4, " +
-                //100                101                 102          103          104             105              106
+                //101                102                 103          104          105             106            107
                 "AcceptedSoundKitID, CompleteSoundKitID, AreaGroupID, TimeAllowed, AllowableRaces, QuestRewardID, Expansion, " +
-                //107      108             109               110              111                112                113                 114                 115
+                //108      109             110               111              112                113                114                 115                 116
                 "LogTitle, LogDescription, QuestDescription, AreaDescription, PortraitGiverText, PortraitGiverName, PortraitTurnInText, PortraitTurnInName, QuestCompletionLog" +
                 " FROM quest_template");
 
@@ -6506,7 +6512,7 @@ namespace Game
                 // AllowableRaces, can be -1/RACEMASK_ALL_PLAYABLE to allow any race
                 if (qinfo.AllowableRaces != -1)
                 {
-                    if (!Convert.ToBoolean(qinfo.AllowableRaces & (uint)Race.RaceMaskAllPlayable))
+                    if (qinfo.AllowableRaces > 0 && !Convert.ToBoolean(qinfo.AllowableRaces & (long)Race.RaceMaskAllPlayable))
                     {
                         Log.outError(LogFilter.Sql, "Quest {0} does not contain any playable races in `RequiredRaces` ({1}), value set to 0 (all races).", qinfo.Id, qinfo.AllowableRaces);
                         qinfo.AllowableRaces = -1;
@@ -7137,8 +7143,8 @@ namespace Game
 
             uint count = 0;
 
-            //                                            0        1        2            3           4                 5           6         7            8       9       10         11              12             13
-            SQLResult result = DB.World.Query("SELECT QuestID, BlobIndex, Idx1, ObjectiveIndex, QuestObjectiveID, QuestObjectID, MapID, WorldMapAreaId, Floor, Priority, Flags, WorldEffectID, PlayerConditionID, WoDUnk1 FROM quest_poi order by QuestID, Idx1");
+            //                                            0        1        2            3           4                 5           6         7            8       9       10         11              12             13       14
+            SQLResult result = DB.World.Query("SELECT QuestID, BlobIndex, Idx1, ObjectiveIndex, QuestObjectiveID, QuestObjectID, MapID, WorldMapAreaId, Floor, Priority, Flags, WorldEffectID, PlayerConditionID, WoDUnk1, AlwaysAllowMergingBlobs FROM quest_poi order by QuestID, Idx1");
             if (result.IsEmpty())
             {
                 Log.outError(LogFilter.ServerLoading, "Loaded 0 quest POI definitions. DB table `quest_poi` is empty.");
@@ -7182,11 +7188,12 @@ namespace Game
                 int WorldEffectID = result.Read<int>(11);
                 int PlayerConditionID = result.Read<int>(12);
                 int WoDUnk1 = result.Read<int>(13);
+                bool AlwaysAllowMergingBlobs = result.Read<bool>(14);
 
                 if (Global.ObjectMgr.GetQuestTemplate(QuestID) == null)
                     Log.outError(LogFilter.Sql, "`quest_poi` quest id ({0}) Idx1 ({1}) does not exist in `quest_template`", QuestID, Idx1);
 
-                QuestPOI POI = new QuestPOI(BlobIndex, ObjectiveIndex, QuestObjectiveID, QuestObjectID, MapID, WorldMapAreaId, Floor, Priority, Flags, WorldEffectID, PlayerConditionID, WoDUnk1);
+                QuestPOI POI = new QuestPOI(BlobIndex, ObjectiveIndex, QuestObjectiveID, QuestObjectID, MapID, WorldMapAreaId, Floor, Priority, Flags, WorldEffectID, PlayerConditionID, WoDUnk1, AlwaysAllowMergingBlobs);
                 if (!POIs.ContainsKey(QuestID) || !POIs[QuestID].ContainsKey(Idx1))
                 {
                     Log.outError(LogFilter.Sql, "Table quest_poi references unknown quest points for quest {0} POI id {1}", QuestID, BlobIndex);
@@ -8640,7 +8647,7 @@ namespace Game
             uint oldMSTime = Time.GetMSTime();
             _playerChoices.Clear();
 
-            SQLResult choiceResult = DB.World.Query("SELECT ChoiceId, Question FROM playerchoice");
+            SQLResult choiceResult = DB.World.Query("SELECT ChoiceId, UiTextureKitId, Question, HideWarboardHeader FROM playerchoice");
             if (choiceResult.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 player choices. DB table `playerchoice` is empty.");
@@ -8655,12 +8662,13 @@ namespace Game
 
             do
             {
-                int choiceId = choiceResult.Read<int>(0);
-
                 PlayerChoice choice = new PlayerChoice();
-                choice.ChoiceId = choiceId;
-                choice.Question = choiceResult.Read<string>(1);
-                _playerChoices[choiceId] = choice;
+                choice.ChoiceId = choiceResult.Read<int>(0);
+                choice.UiTextureKitId = choiceResult.Read<int>(1);
+                choice.Question = choiceResult.Read<string>(2);
+                choice.HideWarboardHeader = choiceResult.Read<bool>(3);
+
+                _playerChoices[choice.ChoiceId] = choice;
 
             } while (choiceResult.NextRow());
 
@@ -9466,7 +9474,7 @@ namespace Game
         List<string> _reservedNamesStorage = new List<string>();
         Dictionary<uint, SceneTemplate> _sceneTemplateStorage = new Dictionary<uint, SceneTemplate>();
 
-        Dictionary<byte, byte> _raceExpansionRequirementStorage = new Dictionary<byte, byte>();
+        Dictionary<byte, RaceUnlockRequirement> _raceUnlockRequirementStorage = new Dictionary<byte, RaceUnlockRequirement>();
         Dictionary<byte, byte> _classExpansionRequirementStorage = new Dictionary<byte, byte>();
         Dictionary<uint, string> _realmNameStorage = new Dictionary<uint, string>();
 
@@ -9963,7 +9971,7 @@ namespace Game
     public class QuestPOI
     {
         public QuestPOI(int _BlobIndex, int _ObjectiveIndex, int _QuestObjectiveID, int _QuestObjectID, int _MapID, int _WorldMapAreaID, int _Foor, int _Priority, int _Flags, 
-            int _WorldEffectID, int _PlayerConditionID, int _UnkWoD1)
+            int _WorldEffectID, int _PlayerConditionID, int _UnkWoD1, bool _AlwaysAllowMergingBlobs)
         {
             BlobIndex = _BlobIndex;
             ObjectiveIndex = _ObjectiveIndex;
@@ -9977,6 +9985,7 @@ namespace Game
             WorldEffectID = _WorldEffectID;
             PlayerConditionID = _PlayerConditionID;
             UnkWoD1 = _UnkWoD1;
+            AlwaysAllowMergingBlobs = _AlwaysAllowMergingBlobs;
         }
 
         public int BlobIndex;
@@ -9992,6 +10001,7 @@ namespace Game
         public int PlayerConditionID;
         public int UnkWoD1;
         public List<QuestPOIPoint> points = new List<QuestPOIPoint>();
+        public bool AlwaysAllowMergingBlobs;
     }
 
     public class QuestPOIPoint
@@ -10425,7 +10435,15 @@ namespace Game
         }
 
         public int ChoiceId;
+        public int UiTextureKitId;
         public string Question;
         public List<PlayerChoiceResponse> Responses = new List<PlayerChoiceResponse>();
+        public bool HideWarboardHeader;
+    }
+
+    public class RaceUnlockRequirement
+    {
+        public byte Expansion;
+        public uint AchievementId;
     }
 }

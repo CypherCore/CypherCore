@@ -33,14 +33,6 @@ namespace Game.Network
             // -1 means use default
             _socketSendBufferSize = ConfigMgr.GetDefaultValue("Network.OutKBuff", -1);
 
-            m_SockOutUBuff = ConfigMgr.GetDefaultValue("Network.OutUBuff", 65536);
-
-            if (m_SockOutUBuff <= 0)
-            {
-                Log.outError(LogFilter.Network, "Network.OutUBuff is wrong in your config file");
-                return false;
-            }
-
             if (!base.StartNetwork(bindIp, port, threadCount))
                 return false;
 
@@ -82,7 +74,6 @@ namespace Game.Network
 
         AsyncAcceptor _instanceAcceptor;
         int _socketSendBufferSize;
-        int m_SockOutUBuff;
         bool _tcpNoDelay;
     }
 }

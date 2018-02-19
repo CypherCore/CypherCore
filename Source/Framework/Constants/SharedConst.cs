@@ -526,7 +526,12 @@ namespace Framework.Constants
         MistsOfPandaria = 4,
         WarlordsOfDraenor = 5,
         Legion = 6,
-        Max
+        Max,
+
+        // future expansion
+        BattleForAzeroth = 7,
+
+        MaxAccountExpansions
     }
     public enum PowerType : byte
     {
@@ -2302,7 +2307,8 @@ namespace Framework.Constants
         QuestTurnInFailReason = 983,
         ClaimedChallengeModeRewardOld = 984,
         TalentGrantedByAura = 985,
-        ChallengeModeAlreadyComplete = 986
+        ChallengeModeAlreadyComplete = 986,
+        GlyphTargetNotAvailable = 987
     }
 
     public enum SceneFlags

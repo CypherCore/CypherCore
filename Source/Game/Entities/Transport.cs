@@ -673,8 +673,10 @@ namespace Game.Entities
                   z = nextFrame.Node.Loc.Z,
                   o = nextFrame.InitialOrientation;
 
-            foreach (var obj in _passengers)
+            for (var i =0; i < _passengers.Count; ++i)
             {
+                WorldObject obj = _passengers[i];
+
                 float destX, destY, destZ, destO;
                 obj.m_movementInfo.transport.pos.GetPosition(out destX, out destY, out destZ, out destO);
                 TransportPosHelper.CalculatePassengerPosition(ref destX, ref destY, ref destZ, ref destO, x, y, z, o);

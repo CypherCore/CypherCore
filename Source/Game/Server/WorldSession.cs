@@ -46,7 +46,8 @@ namespace Game
             _accountId = id;
             _accountName = name;
             _battlenetAccountId = battlenetAccountId;
-            m_expansion = expansion;
+            m_accountExpansion = expansion;
+            m_expansion = (Expansion)Math.Min((byte)expansion, WorldConfig.GetIntValue(WorldCfg.Expansion));
             _os = os;
             m_sessionDbcLocale = Global.WorldMgr.GetAvailableDbcLocale(locale);
             m_sessionDbLocaleIndex = locale;
@@ -602,6 +603,7 @@ namespace Game
 
         public string GetRemoteAddress() { return m_Address; }
 
+        public Expansion GetAccountExpansion() { return m_accountExpansion; }
         public Expansion GetExpansion() { return m_expansion; }
         public string GetOS() { return _os; }
         public void SetInQueue(bool state) { m_inQueue = state; }
@@ -820,6 +822,7 @@ namespace Game
         uint _accountId;
         string _accountName;
         uint _battlenetAccountId;
+        Expansion m_accountExpansion;
         Expansion m_expansion;
         string _os;
 

@@ -108,21 +108,22 @@ namespace Framework.Constants
         public const byte BagStart = 19;
         public const byte BagEnd = 23;
         public const byte ItemStart = 23;
-        public const byte ItemEnd = 39;
+        public const byte ItemEnd = 47;
 
-        public const byte BankItemStart = 39;
-        public const byte BankItemEnd = 67;
-        public const byte BankBagStart = 67;
-        public const byte BankBagEnd = 74;
+        public const byte BankItemStart = 47;
+        public const byte BankItemEnd = 75;
+        public const byte BankBagStart = 75;
+        public const byte BankBagEnd = 82;
 
-        public const byte BuyBackStart = 74;
-        public const byte BuyBackEnd = 86;
-        public const byte ReagentStart = 87;
-        public const byte ReagentEnd = 184;
-        public const byte ChildEquipmentStart = 184;
-        public const byte ChildEquipmentEnd = 187;
+        public const byte BuyBackStart = 82;
+        public const byte BuyBackEnd = 94;
+        public const byte ReagentStart = 94;
+        public const byte ReagentEnd = 192;
+        public const byte ChildEquipmentStart = 192;
+        public const byte ChildEquipmentEnd = 195;
 
         public const byte Bag0 = 255;
+        public const byte DefaultSize = 16;
     }
 
     public struct EquipmentSlot
@@ -975,6 +976,7 @@ namespace Framework.Constants
         CantUseItem = 98, // You can't use that item.
         CantBeObliterated = 99, // You can't obliterate that item
         GuildBankConjuredItem = 100,// You cannot store conjured items in the guild bank
+        CantDoThatRightNow = 101,// You can't do that right now.
     }
 
     public enum BuyResult

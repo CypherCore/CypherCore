@@ -231,6 +231,7 @@ namespace Game.Entities
             SetUInt32Value(PlayerFields.RestInfo + PlayerFieldOffsets.RestStateHonor, (uint)PlayerRestState.NotRAFLinked);
             SetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetGender, (byte)createInfo.Sex);
             SetByteValue(PlayerFields.Bytes4, PlayerFieldOffsets.Bytes4OffsetArenaFaction, 0);
+            SetInventorySlotCount(InventorySlots.DefaultSize);
 
             SetGuidValue(ObjectFields.Data, ObjectGuid.Empty);
             SetUInt32Value(PlayerFields.GuildRank, 0);
@@ -409,7 +410,8 @@ namespace Game.Entities
 
             // bags and main-hand weapon must equipped at this moment
             // now second pass for not equipped (offhand weapon/shield if it attempt equipped before main-hand weapon)
-            for (var i = InventorySlots.ItemStart; i < InventorySlots.ItemEnd; i++)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = InventorySlots.ItemStart; i < inventoryEnd; i++)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem != null)
@@ -744,13 +746,11 @@ namespace Game.Entities
 
         public override void setDeathState(DeathState s)
         {
-            uint ressSpellId = 0;
-
-            bool cur = IsAlive();
+            bool oldIsAlive = IsAlive();
 
             if (s == DeathState.JustDied)
             {
-                if (!cur)
+                if (!oldIsAlive)
                 {
                     Log.outError(LogFilter.Player, "Player.setDeathState: Attempted to kill a dead player '{0}' ({1})", GetName(), GetGUID().ToString());
                     return;
@@ -766,12 +766,8 @@ namespace Game.Entities
                 //FIXME: is pet dismissed at dying or releasing spirit? if second, add setDeathState(DEAD) to HandleRepopRequestOpcode and define pet unsummon here with (s == DEAD)
                 RemovePet(null, PetSaveMode.NotInSlot, true);
 
-                // save value before aura remove in Unit::setDeathState
-                ressSpellId = GetUInt32Value(PlayerFields.SelfResSpell);
+                InitializeSelfResurrectionSpells();
 
-                // passive spell
-                if (ressSpellId == 0)
-                    ressSpellId = GetResurrectionSpellId();
                 UpdateCriteria(CriteriaTypes.DeathAtMap, 1);
                 UpdateCriteria(CriteriaTypes.Death, 1);
                 UpdateCriteria(CriteriaTypes.DeathInDungeon, 1);
@@ -782,13 +778,9 @@ namespace Game.Entities
 
             base.setDeathState(s);
 
-            // restore resurrection spell id for player after aura remove
-            if (s == DeathState.JustDied && cur && ressSpellId != 0)
-                SetUInt32Value(PlayerFields.SelfResSpell, ressSpellId);
-
-            if (IsAlive() && !cur)
+            if (IsAlive() && !oldIsAlive)
                 //clear aura case after resurrection by another way (spells will be applied before next death)
-                SetUInt32Value(PlayerFields.SelfResSpell, 0);
+                ClearDynamicValue(PlayerDynamicFields.SelfResSpells);
         }
 
         public override void DestroyForPlayer(Player target)
@@ -1667,15 +1659,15 @@ namespace Game.Entities
                     continue;
 
                 if (quest.IsDaily())
-                    rep = CalculateReputationGain(ReputationSource.DailyQuest, (uint)GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
+                    rep = CalculateReputationGain(ReputationSource.DailyQuest, GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
                 else if (quest.IsWeekly())
-                    rep = CalculateReputationGain(ReputationSource.WeeklyQuest, (uint)GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
+                    rep = CalculateReputationGain(ReputationSource.WeeklyQuest, GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
                 else if (quest.IsMonthly())
-                    rep = CalculateReputationGain(ReputationSource.MonthlyQuest, (uint)GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
+                    rep = CalculateReputationGain(ReputationSource.MonthlyQuest, GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
                 else if (quest.IsRepeatable())
-                    rep = CalculateReputationGain(ReputationSource.RepeatableQuest, (uint)GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
+                    rep = CalculateReputationGain(ReputationSource.RepeatableQuest, GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
                 else
-                    rep = CalculateReputationGain(ReputationSource.Quest, (uint)GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
+                    rep = CalculateReputationGain(ReputationSource.Quest, GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
 
                 bool noSpillover = Convert.ToBoolean(quest.RewardReputationMask & (1 << i));
                 GetReputationMgr().ModifyReputation(factionEntry, rep, noSpillover);
@@ -5003,11 +4995,13 @@ namespace Game.Entities
             DisplayPlayerChoice displayPlayerChoice = new DisplayPlayerChoice();
             displayPlayerChoice.SenderGUID = sender;
             displayPlayerChoice.ChoiceID = choiceId;
+            displayPlayerChoice.UiTextureKitID = playerChoice.UiTextureKitId;
             displayPlayerChoice.Question = playerChoice.Question;
             if (playerChoiceLocale != null)
                 ObjectManager.GetLocaleString(playerChoiceLocale.Question, locale, ref displayPlayerChoice.Question);
 
             displayPlayerChoice.CloseChoiceFrame = false;
+            displayPlayerChoice.HideWarboardHeader = playerChoice.HideWarboardHeader;
 
             for (var i = 0; i < playerChoice.Responses.Count; ++i)
             {
@@ -5900,7 +5894,9 @@ namespace Game.Entities
             RemoveByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag, (UnitBytes2Flags.FFAPvp | UnitBytes2Flags.Sanctuary));
 
             // restore if need some important flags
-            SetUInt32Value(PlayerFields.FieldBytes2, 0);                 // flags empty by default
+            SetByteValue(PlayerFields.FieldBytes2, PlayerFieldOffsets.FieldBytes2OffsetIgnorePowerRegenPredictionMask, 0);
+            SetByteValue(PlayerFields.FieldBytes2, PlayerFieldOffsets.FieldBytes2OffsetAuraVision, 0);
+            SetByteValue(PlayerFields.FieldBytes2, 3, 0);
 
             if (reapplyMods)                                        // reapply stats values only on .reset stats (level) command
                 _ApplyAllStatBonuses();
@@ -6512,7 +6508,7 @@ namespace Game.Entities
             packet.Reason = victim ? PlayerLogXPReason.Kill : PlayerLogXPReason.NoKill;
             packet.Amount = (int)xp;
             packet.GroupBonus = group_rate;
-            packet.ReferAFriend = recruitAFriend;
+            packet.ReferAFriendBonusType = (byte)(recruitAFriend ? 1 : 0);
             SendPacket(packet);
 
             uint curXP = GetUInt32Value(PlayerFields.Xp);

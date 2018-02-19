@@ -396,6 +396,7 @@ namespace Game
                             questPOIBlobData.WorldEffectID = data.WorldEffectID;
                             questPOIBlobData.PlayerConditionID = data.PlayerConditionID;
                             questPOIBlobData.UnkWoD1 = data.UnkWoD1;
+                            questPOIBlobData.AlwaysAllowMergingBlobs = data.AlwaysAllowMergingBlobs;
 
                             foreach (var point in data.points)
                                 questPOIBlobData.QuestPOIBlobPointStats.Add(new QuestPOIBlobPoint(point.X, point.Y));

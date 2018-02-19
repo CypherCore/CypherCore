@@ -108,15 +108,23 @@ namespace Game
                     else
                         charResult.HasDemonHunterOnRealm = false;
 
-                    if (charInfo.Level >= WorldConfig.GetIntValue(WorldCfg.CharacterCreatingMinLevelForDemonHunter) || canAlwaysCreateDemonHunter)
-                        charResult.HasLevel70OnRealm = true;
+                    charResult.MaxCharacterLevel = Math.Max(charResult.MaxCharacterLevel, charInfo.Level);
 
                     charResult.Characters.Add(charInfo);
                 }
                 while (result.NextRow());
             }
 
-            charResult.IsDemonHunterCreationAllowed = (!charResult.HasDemonHunterOnRealm && charResult.HasLevel70OnRealm) || canAlwaysCreateDemonHunter;
+            charResult.IsDemonHunterCreationAllowed = GetAccountExpansion() >= Expansion.Legion || canAlwaysCreateDemonHunter;
+            charResult.IsAlliedRacesCreationAllowed = GetAccountExpansion() >= Expansion.BattleForAzeroth;
+
+            foreach (var requirement in Global.ObjectMgr.GetRaceUnlockRequirements())
+            {
+                EnumCharactersResult.RaceUnlock raceUnlock = new EnumCharactersResult.RaceUnlock();
+                raceUnlock.RaceID = requirement.Key;
+                raceUnlock.HasExpansion = (byte)GetAccountExpansion() >= requirement.Value.Expansion;
+                charResult.RaceUnlockData.Add(raceUnlock);
+            }
 
             SendPacket(charResult);
         }
@@ -212,19 +220,34 @@ namespace Game
             }
 
             // prevent character creating Expansion race without Expansion account
-            var raceExpansionRequirement = Global.ObjectMgr.GetRaceExpansionRequirement(charCreate.CreateInfo.RaceId);
-            if (raceExpansionRequirement > GetExpansion())
+            RaceUnlockRequirement raceExpansionRequirement = Global.ObjectMgr.GetRaceUnlockRequirement(charCreate.CreateInfo.RaceId);
+            if (raceExpansionRequirement == null)
             {
-                Log.outError(LogFilter.Network, "Expansion {0} account:[{1}] tried to Create character with expansion {2} race ({3})", GetExpansion(), GetAccountId(), raceExpansionRequirement, charCreate.CreateInfo.RaceId);
+                Log.outError(LogFilter.Player, "Account {GetAccountId()} tried to create character with unavailable race {charCreate.CreateInfo.RaceId}");
+                SendCharCreate(ResponseCodes.AccountCreateFailed);
+                return;
+            }
+
+            if (raceExpansionRequirement.Expansion > (byte)GetAccountExpansion())
+            {
+                Log.outError(LogFilter.Player, $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character with expansion {raceExpansionRequirement.Expansion} race ({charCreate.CreateInfo.RaceId})");
                 SendCharCreate(ResponseCodes.CharCreateExpansion);
                 return;
             }
 
+            //if (raceExpansionRequirement->AchievementId && !)
+            //{
+            //    TC_LOG_ERROR("entities.player.cheat", "Expansion %u account:[%d] tried to Create character without achievement %u race (%u)",
+            //        GetAccountExpansion(), GetAccountId(), raceExpansionRequirement->AchievementId, charCreate.CreateInfo->Race);
+            //    SendCharCreate(CHAR_CREATE_ALLIED_RACE_ACHIEVEMENT);
+            //    return;
+            //}
+
             // prevent character creating Expansion class without Expansion account
             var classExpansionRequirement = Global.ObjectMgr.GetClassExpansionRequirement(charCreate.CreateInfo.ClassId);
-            if (classExpansionRequirement > GetExpansion())
+            if (classExpansionRequirement > GetAccountExpansion())
             {
-                Log.outError(LogFilter.Network, "Expansion {0} account:[{1}] tried to Create character with expansion {2} class ({3})", GetExpansion(), GetAccountId(), classExpansionRequirement, charCreate.CreateInfo.ClassId);
+                Log.outError(LogFilter.Network, $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character with expansion {classExpansionRequirement} class ({charCreate.CreateInfo.ClassId})");
                 SendCharCreate(ResponseCodes.CharCreateExpansionClass);
                 return;
             }
@@ -409,7 +432,7 @@ namespace Game
 
                     if (checkDemonHunterReqs && !hasDemonHunterReqLevel)
                     {
-                        SendCharCreate(ResponseCodes.CharCreateFailed);
+                        SendCharCreate(ResponseCodes.CharCreateLevelRequirementDemonHunter);
                         return;
                     }
 
@@ -1818,7 +1841,7 @@ namespace Game
                         var questTemplates = Global.ObjectMgr.GetQuestTemplates();
                         foreach (Quest quest in questTemplates.Values)
                         {
-                            uint newRaceMask = (uint)(newTeamId == TeamId.Alliance ? Race.RaceMaskAlliance : Race.RaceMaskHorde);
+                            long newRaceMask = (long)(newTeamId == TeamId.Alliance ? Race.RaceMaskAlliance : Race.RaceMaskHorde);
                             if (quest.AllowableRaces != -1 && !Convert.ToBoolean(quest.AllowableRaces & newRaceMask))
                             {
                                 stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_QUESTSTATUS_REWARDED_ACTIVE_BY_QUEST);

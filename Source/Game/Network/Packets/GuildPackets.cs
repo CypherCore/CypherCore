@@ -1467,7 +1467,7 @@ namespace Game.Network.Packets
             data.WriteUInt32(ItemID);
             data.WriteUInt32(Unk4);
             data.WriteUInt32(AchievementsRequired.Count);
-            data.WriteUInt32(RaceMask);
+            data.WriteUInt64(RaceMask);
             data.WriteUInt32(MinGuildLevel);
             data.WriteUInt32(MinGuildRep);
             data.WriteUInt64(Cost);
@@ -1479,7 +1479,7 @@ namespace Game.Network.Packets
         public uint ItemID;
         public uint Unk4;
         public List<uint> AchievementsRequired = new List<uint>();
-        public uint RaceMask;
+        public ulong RaceMask;
         public int MinGuildLevel;
         public int MinGuildRep;
         public ulong Cost;

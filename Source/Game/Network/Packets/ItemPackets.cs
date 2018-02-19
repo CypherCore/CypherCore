@@ -703,6 +703,13 @@ namespace Game.Network.Packets
         public ObjectGuid ItemGuid { get; set; }
     }
 
+    class CharacterInventoryOverflowWarning : ServerPacket
+    {
+        public CharacterInventoryOverflowWarning() : base(ServerOpcodes.CharacterInventoryOverflowWarning) { }
+
+        public override void Write() { }
+    }
+
     //Structs
     public class ItemBonusInstanceData
     {

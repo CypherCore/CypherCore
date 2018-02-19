@@ -32,7 +32,7 @@ namespace Game
                 response.SuccessInfo.HasValue = true;
 
                 response.SuccessInfo.Value = new AuthResponse.AuthSuccessInfo();
-                response.SuccessInfo.Value.AccountExpansionLevel = (byte)GetExpansion();
+                response.SuccessInfo.Value.AccountExpansionLevel = (byte)GetAccountExpansion();
                 response.SuccessInfo.Value.ActiveExpansionLevel = (byte)GetExpansion();
                 response.SuccessInfo.Value.VirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
                 response.SuccessInfo.Value.Time = (uint)Time.UnixTime;
@@ -47,7 +47,6 @@ namespace Game
                         response.SuccessInfo.Value.Templates.Add(templ);
 
                 response.SuccessInfo.Value.AvailableClasses = Global.ObjectMgr.GetClassExpansionRequirements();
-                response.SuccessInfo.Value.AvailableRaces = Global.ObjectMgr.GetRaceExpansionRequirements();
             }
 
             if (queued)

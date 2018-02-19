@@ -128,7 +128,8 @@ namespace Game
                     if (bag)
                         freeBagSlots += bag.GetFreeSlots();
                 }
-                for (byte i = InventorySlots.ItemStart; i < InventorySlots.ItemEnd; i++)
+                int inventoryEnd = InventorySlots.ItemStart + _player.GetInventorySlotCount();
+                for (byte i = InventorySlots.ItemStart; i < inventoryEnd; i++)
                 {
                     if (!player.GetItemByPos(InventorySlots.Bag0, i))
                         ++freeBagSlots;

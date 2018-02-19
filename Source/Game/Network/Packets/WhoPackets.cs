@@ -101,7 +101,7 @@ namespace Game.Network.Packets
         {
             MinLevel = data.ReadInt32();
             MaxLevel = data.ReadInt32();
-            RaceFilter = data.ReadInt32();
+            RaceFilter = data.ReadInt64();
             ClassFilter = data.ReadInt32();
 
             uint nameLength = data.ReadBits<uint>(6);
@@ -137,7 +137,7 @@ namespace Game.Network.Packets
         public string VirtualRealmName;
         public string Guild;
         public string GuildVirtualRealmName;
-        public int RaceFilter = -1;
+        public long RaceFilter = 0;
         public int ClassFilter = -1;
         public List<string> Words = new List<string>();
         public bool ShowEnemies;

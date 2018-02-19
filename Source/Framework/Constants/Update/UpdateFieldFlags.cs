@@ -363,6 +363,7 @@ namespace Framework.Constants
             Private | Owner | UnitAll,                      // UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER+5
             Public,                                         // UNIT_FIELD_LEVEL
             Public,                                         // UNIT_FIELD_EFFECTIVE_LEVEL
+            Public,                                         // UNIT_FIELD_SANDBOX_SCALING_ID
             Public,                                         // UNIT_FIELD_SCALING_LEVEL_MIN
             Public,                                         // UNIT_FIELD_SCALING_LEVEL_MAX
             Public,                                         // UNIT_FIELD_SCALING_LEVEL_DELTA
@@ -2110,6 +2111,39 @@ namespace Framework.Constants
             Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+745
             Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+746
             Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+747
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+748
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+749
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+750
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+751
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+752
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+753
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+754
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+755
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+756
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+757
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+758
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+759
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+760
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+761
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+762
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+763
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+764
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+765
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+766
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+767
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+768
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+769
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+770
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+771
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+772
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+773
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+774
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+775
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+776
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+777
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+778
+            Private,                                        // PLAYER_FIELD_INV_SLOT_HEAD+779
+
             Private,                                        // PLAYER_FARSIGHT
             Private,                                        // PLAYER_FARSIGHT+1
             Private,                                        // PLAYER_FARSIGHT+2
@@ -2134,6 +2168,7 @@ namespace Framework.Constants
             Private,                                        // PLAYER_FIELD_COINAGE+1
             Private,                                        // PLAYER_XP
             Private,                                        // PLAYER_NEXT_LEVEL_XP
+            Private,                                        // PLAYER_TRIAL_XP
             Private,                                        // PLAYER_SKILL_LINEID
             Private,                                        // PLAYER_SKILL_LINEID+1
             Private,                                        // PLAYER_SKILL_LINEID+2
@@ -2973,7 +3008,6 @@ namespace Framework.Constants
             Private,                                        // PLAYER_FIELD_MOD_TARGET_PHYSICAL_RESISTANCE
             Private,                                        // PLAYER_FIELD_LOCAL_FLAGS
             Private,                                        // PLAYER_FIELD_BYTES
-            Private,                                        // PLAYER_SELF_RES_SPELL
             Private,                                        // PLAYER_FIELD_PVP_MEDALS
             Private,                                        // PLAYER_FIELD_BUYBACK_PRICE_1
             Private,                                        // PLAYER_FIELD_BUYBACK_PRICE_1+1
@@ -4885,6 +4919,7 @@ namespace Framework.Constants
             Private,                                        // PLAYER_DYNAMIC_FIELD_TOYS
             Private,                                        // PLAYER_DYNAMIC_FIELD_TRANSMOG
             Private,                                        // PLAYER_DYNAMIC_FIELD_CONDITIONAL_TRANSMOG
+            Private,                                        // PLAYER_DYNAMIC_FIELD_SELF_RES_SPELLS
             Private,                                        // PLAYER_DYNAMIC_FIELD_CHARACTER_RESTRICTIONS
             Private,                                        // PLAYER_DYNAMIC_FIELD_SPELL_PCT_MOD_BY_LABEL
             Private,                                        // PLAYER_DYNAMIC_FIELD_SPELL_FLAT_MOD_BY_LABEL

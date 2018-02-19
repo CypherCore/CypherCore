@@ -44,79 +44,35 @@ namespace Game.Network.Packets
             _worldPacket.WriteBit(IsDeletedCharacters);
             _worldPacket.WriteBit(IsDemonHunterCreationAllowed);
             _worldPacket.WriteBit(HasDemonHunterOnRealm);
-            _worldPacket.WriteBit(HasLevel70OnRealm);
             _worldPacket.WriteBit(Unknown7x);
             _worldPacket.WriteBit(DisabledClassesMask.HasValue);
+            _worldPacket.WriteBit(IsAlliedRacesCreationAllowed);
             _worldPacket.WriteUInt32(Characters.Count);
-            _worldPacket.WriteUInt32(FactionChangeRestrictions.Count);
+            _worldPacket.WriteInt32(MaxCharacterLevel);
+            _worldPacket.WriteUInt32(RaceUnlockData.Count);
 
             if (DisabledClassesMask.HasValue)
                 _worldPacket.WriteUInt32(DisabledClassesMask.Value);
 
-            foreach (RestrictedFactionChangeRuleInfo rule in FactionChangeRestrictions)
-            {
-                _worldPacket.WriteUInt32(rule.Mask);
-                _worldPacket.WriteUInt8(rule.Race);
-            }
-
             foreach (CharacterInfo charInfo in Characters)
-            {
-                _worldPacket.WritePackedGuid(charInfo.Guid);
-                _worldPacket.WriteUInt8(charInfo.ListPosition);
-                _worldPacket.WriteUInt8(charInfo.RaceId);
-                _worldPacket.WriteUInt8(charInfo.ClassId);
-                _worldPacket.WriteUInt8(charInfo.Sex);
-                _worldPacket.WriteUInt8(charInfo.Skin);
-                _worldPacket.WriteUInt8(charInfo.Face);
-                _worldPacket.WriteUInt8(charInfo.HairStyle);
-                _worldPacket.WriteUInt8(charInfo.HairColor);
-                _worldPacket.WriteUInt8(charInfo.FacialHair);
-                charInfo.CustomDisplay.ForEach(id => _worldPacket.WriteUInt8(id));
-                _worldPacket.WriteUInt8(charInfo.Level);
-                _worldPacket.WriteUInt32(charInfo.ZoneId);
-                _worldPacket.WriteUInt32(charInfo.MapId);
-                _worldPacket.WriteVector3(charInfo.PreLoadPosition);
-                _worldPacket.WritePackedGuid(charInfo.GuildGuid);
-                _worldPacket.WriteUInt32(charInfo.Flags);
-                _worldPacket.WriteUInt32(charInfo.CustomizationFlag);
-                _worldPacket.WriteUInt32(charInfo.Flags3);
-                _worldPacket.WriteUInt32(charInfo.Pet.CreatureDisplayId);
-                _worldPacket.WriteUInt32(charInfo.Pet.Level);
-                _worldPacket.WriteUInt32(charInfo.Pet.CreatureFamily);
+                charInfo.Write(_worldPacket);
 
-                _worldPacket.WriteUInt32(charInfo.ProfessionIds[0]);
-                _worldPacket.WriteUInt32(charInfo.ProfessionIds[1]);
-
-                foreach (var visualItem in charInfo.VisualItems)
-                {
-                    _worldPacket.WriteUInt32(visualItem.DisplayId);
-                    _worldPacket.WriteUInt32(visualItem.DisplayEnchantId);
-                    _worldPacket.WriteUInt8(visualItem.InventoryType);
-                }
-
-                _worldPacket.WriteUInt32(charInfo.LastPlayedTime);
-                _worldPacket.WriteUInt16(charInfo.SpecID);
-                _worldPacket.WriteUInt32(charInfo.Unknown703);
-                _worldPacket.WriteUInt32(charInfo.Flags4);
-                _worldPacket.WriteBits(charInfo.Name.GetByteCount(), 6);
-                _worldPacket.WriteBit(charInfo.FirstLogin);
-                _worldPacket.WriteBit(charInfo.BoostInProgress);
-                _worldPacket.WriteBits(charInfo.unkWod61x, 5);
-                _worldPacket.WriteString(charInfo.Name);
-            }
+            foreach (RaceUnlock raceUnlock in RaceUnlockData)
+                raceUnlock.Write(_worldPacket);
         }
 
         public bool Success;
         public bool IsDeletedCharacters; // used for character undelete list
         public bool IsDemonHunterCreationAllowed = false; ///< used for demon hunter early access
         public bool HasDemonHunterOnRealm = false;
-        public bool HasLevel70OnRealm = false;
         public bool Unknown7x = false;
+        public bool IsAlliedRacesCreationAllowed = false;
 
+        public int MaxCharacterLevel = 1;
         public Optional<uint> DisabledClassesMask = new Optional<uint>();
 
         public List<CharacterInfo> Characters = new List<CharacterInfo>(); // all characters on the list
-        public List<RestrictedFactionChangeRuleInfo> FactionChangeRestrictions = new List<RestrictedFactionChangeRuleInfo>(); // @todo: research
+        public List<RaceUnlock> RaceUnlockData = new List<RaceUnlock>(); ///<
 
         public class CharacterInfo
         {
@@ -130,8 +86,8 @@ namespace Game.Network.Packets
                 // "characters.zone, characters.map, characters.position_x, characters.position_y, characters.position_z, "
                 //  19                    20                      21                   22                   23                     24                   25
                 // "guild_member.guildid, characters.playerFlags, characters.at_login, character_pet.entry, character_pet.modelid, character_pet.level, characters.equipmentCache, "
-                //  26                     27               28                      29                            30
-                // "character_banned.guid, characters.slot, characters.logout_time, characters.activeTalentGroup, character_declinedname.genitive"
+                //  26                     27               28                      29                            30                         31
+                // "character_banned.guid, characters.slot, characters.logout_time, characters.activeTalentGroup, characters.lastLoginBuild, character_declinedname.genitive"
 
                 Guid = ObjectGuid.Create(HighGuid.Player, fields.Read<ulong>(0));
                 Name = fields.Read<string>(1);
@@ -176,7 +132,7 @@ namespace Game.Network.Packets
                 if (fields.Read<uint>(26) != 0)
                     Flags |= CharacterFlags.LockedByBilling;
 
-                if (WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed) && !string.IsNullOrEmpty(fields.Read<string>(30)))
+                if (WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed) && !string.IsNullOrEmpty(fields.Read<string>(31)))
                     Flags |= CharacterFlags.Declined;
 
                 if (atLoginFlags.HasAnyFlag(AtLoginFlags.Customize))
@@ -214,12 +170,61 @@ namespace Game.Network.Packets
                 if (spec != null)
                     SpecID = (ushort)spec.Id;
 
+                LastLoginBuild = fields.Read<uint>(30);
+
                 for (byte slot = 0; slot < InventorySlots.BagEnd; ++slot)
                 {
                     VisualItems[slot].InventoryType = (byte)equipment.NextUInt32();
                     VisualItems[slot].DisplayId = equipment.NextUInt32();
                     VisualItems[slot].DisplayEnchantId = equipment.NextUInt32();
                 }
+            }
+
+            public void Write(WorldPacket data)
+            {
+                data.WritePackedGuid(Guid);
+                data.WriteUInt8(ListPosition);
+                data.WriteUInt8(RaceId);
+                data.WriteUInt8(ClassId);
+                data.WriteUInt8(Sex);
+                data.WriteUInt8(Skin);
+                data.WriteUInt8(Face);
+                data.WriteUInt8(HairStyle);
+                data.WriteUInt8(HairColor);
+                data.WriteUInt8(FacialHair);
+
+                foreach (var display in CustomDisplay)
+                    data.WriteUInt8(display);
+
+                data.WriteUInt8(Level);
+                data.WriteUInt32(ZoneId);
+                data.WriteUInt32(MapId);
+                data.WriteVector3(PreLoadPosition);
+                data.WritePackedGuid(GuildGuid);
+                data.WriteUInt32(Flags);
+                data.WriteUInt32(CustomizationFlag);
+                data.WriteUInt32(Flags3);
+                data.WriteUInt32(Pet.CreatureDisplayId);
+                data.WriteUInt32(Pet.Level);
+                data.WriteUInt32(Pet.CreatureFamily);
+
+                data.WriteUInt32(ProfessionIds[0]);
+                data.WriteUInt32(ProfessionIds[1]);
+
+                foreach (var visualItem in VisualItems)
+                    visualItem.Write(data);
+
+                data.WriteUInt32(LastPlayedTime);
+                data.WriteUInt16(SpecID);
+                data.WriteUInt32(Unknown703);
+                data.WriteUInt32(Flags4);
+                data.WriteBits(Name.GetByteCount(), 6);
+                data.WriteBit(FirstLogin);
+                data.WriteBit(BoostInProgress);
+                data.WriteBits(unkWod61x, 5);
+                data.FlushBits();
+
+                data.WriteString(Name);
             }
 
             public ObjectGuid Guid;
@@ -248,6 +253,7 @@ namespace Game.Network.Packets
             public uint LastPlayedTime;
             public ushort SpecID;
             public uint Unknown703;
+            public uint LastLoginBuild;
             public PetInfo Pet = new PetInfo();
             public bool BoostInProgress; // @todo
             public uint[] ProfessionIds = new uint[2];      // @todo
@@ -255,6 +261,13 @@ namespace Game.Network.Packets
 
             public struct VisualItemInfo
             {
+                public void Write(WorldPacket data)
+                {
+                    data.WriteUInt32(DisplayId);
+                    data.WriteUInt32(DisplayEnchantId);
+                    data.WriteUInt8(InventoryType);
+                }
+
                 public uint DisplayId;
                 public uint DisplayEnchantId;
                 public byte InventoryType;
@@ -267,16 +280,21 @@ namespace Game.Network.Packets
             }
         }
 
-        public struct RestrictedFactionChangeRuleInfo
+        public struct RaceUnlock
         {
-            public RestrictedFactionChangeRuleInfo(uint mask, byte race)
+            public void Write(WorldPacket data)
             {
-                Mask = mask;
-                Race = race;
+                data.WriteInt32(RaceID);
+                data.WriteBit(HasExpansion);
+                data.WriteBit(HasAchievement);
+                data.WriteBit(HasHeritageArmor);
+                data.FlushBits();
             }
 
-            public uint Mask;
-            public byte Race;
+            public int RaceID;
+            public bool HasExpansion;
+            public bool HasAchievement;
+            public bool HasHeritageArmor;
         }
     }
 
@@ -832,8 +850,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(Reason);
             _worldPacket.WriteInt32(Amount);
             _worldPacket.WriteFloat(GroupBonus);
-            _worldPacket.WriteBit(ReferAFriend);
-            _worldPacket.FlushBits();
+            _worldPacket.WriteUInt8(ReferAFriendBonusType);
         }
 
         public ObjectGuid Victim;
@@ -841,7 +858,7 @@ namespace Game.Network.Packets
         public PlayerLogXPReason Reason;
         public int Amount;
         public float GroupBonus;
-        public bool ReferAFriend;
+        public byte ReferAFriendBonusType; // 1 - 300% of normal XP; 2 - 150% of normal XP
     }
 
     class TitleEarned : ServerPacket

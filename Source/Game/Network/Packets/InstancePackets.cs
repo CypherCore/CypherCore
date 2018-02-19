@@ -218,12 +218,15 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(MaxInCombatResCount);
             _worldPacket.WriteUInt32(CombatResChargeRecovery);
             _worldPacket.WriteUInt32(NextCombatResChargeTime);
+            _worldPacket.WriteBit(InProgress);
+            _worldPacket.FlushBits();
         }
 
         public uint InCombatResCount; // amount of usable battle ressurections
         public uint MaxInCombatResCount;
         public uint CombatResChargeRecovery;
         public uint NextCombatResChargeTime;
+        public bool InProgress = true;
     }
 
     class InstanceEncounterEnd : ServerPacket

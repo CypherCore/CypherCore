@@ -864,7 +864,12 @@ namespace Game.Network.Packets
     {
         public SelfRes(WorldPacket packet) : base(packet) { }
 
-        public override void Read() { }
+        public override void Read()
+        {
+            SpellId = _worldPacket.ReadUInt32();
+        }
+
+        public uint SpellId;
     }
 
     class GetMirrorImageData : ClientPacket
@@ -1236,7 +1241,7 @@ namespace Game.Network.Packets
 
         public void Write(WorldPacket data)
         {
-            data.WriteBits(Type, 3);
+            data.WriteBits(Type, 4);
             data.WriteInt16(PlayerLevelDelta);
             data.WriteUInt16(PlayerItemLevel);
             data.WriteUInt8(TargetLevel);

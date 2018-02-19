@@ -282,6 +282,7 @@ namespace Game.Misc
                     text.QuestID = (int)questID;
                     text.QuestType = item.QuestIcon;
                     text.QuestLevel = quest.Level;
+                    text.QuestMaxScalingLevel = quest.MaxScalingLevel;
                     text.QuestFlags = (int)quest.Flags;
                     text.QuestFlagsEx = (int)quest.FlagsEx;
                     text.Repeatable = quest.IsRepeatable();
@@ -375,6 +376,7 @@ namespace Game.Misc
                     text.QuestID = questID;
                     text.QuestType = questMenuItem.QuestIcon;
                     text.QuestLevel = (uint)quest.Level;
+                    text.QuestMaxScalingLevel = (uint)quest.MaxScalingLevel;
                     text.QuestFlags = (uint)quest.Flags;
                     text.QuestFlagsEx = (uint)quest.FlagsEx;
                     text.Repeatable = false; // NYI
@@ -497,6 +499,7 @@ namespace Game.Misc
             packet.Info.QuestID = quest.Id;
             packet.Info.QuestType = (int)quest.Type;
             packet.Info.QuestLevel = quest.Level;
+            packet.Info.QuestMaxScalingLevel = quest.MaxScalingLevel;
             packet.Info.QuestPackageID = quest.PackageID;
             packet.Info.QuestMinLevel = quest.MinLevel;
             packet.Info.QuestSortID = quest.QuestSortID;

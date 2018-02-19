@@ -445,19 +445,20 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SelfRes)]
-        void HandleSelfRes(SelfRes packet)
+        void HandleSelfRes(SelfRes selfRes)
         {
             if (_player.HasAuraType(AuraType.PreventResurrection))
                 return; // silent return, client should display error by itself and not send this opcode
 
-            if (_player.GetUInt32Value(PlayerFields.SelfResSpell) != 0)
-            {
-                SpellInfo  spellInfo = Global.SpellMgr.GetSpellInfo(_player.GetUInt32Value(PlayerFields.SelfResSpell));
-                if (spellInfo != null)
-                    _player.CastSpell(_player, spellInfo, false, null);
+            var selfResSpells = _player.GetDynamicValues(PlayerDynamicFields.SelfResSpells);
+            if (!selfResSpells.Contains(selfRes.SpellId))
+                return;
 
-                _player.SetUInt32Value(PlayerFields.SelfResSpell, 0);
-            }
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(selfRes.SpellId);
+            if (spellInfo != null)
+                _player.CastSpell(_player, spellInfo, false, null);
+
+            _player.RemoveDynamicValue(PlayerDynamicFields.SelfResSpells, selfRes.SpellId);
         }
 
         [WorldPacketHandler(ClientOpcodes.SpellClick)]

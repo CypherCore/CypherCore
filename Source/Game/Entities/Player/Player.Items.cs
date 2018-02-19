@@ -274,7 +274,8 @@ namespace Game.Entities
 
             if (inventory)
             {
-                for (byte i = InventorySlots.ItemStart; i < InventorySlots.ItemEnd; i++)
+                int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+                for (byte i = InventorySlots.ItemStart; i < inventoryEnd; i++)
                 {
                     Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                     if (pItem != null)
@@ -326,7 +327,8 @@ namespace Game.Entities
 
             if (inventory)
             {
-                for (byte i = InventorySlots.ItemStart; i < InventorySlots.ItemEnd; i++)
+                int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+                for (byte i = InventorySlots.ItemStart; i < inventoryEnd; i++)
                 {
                     Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                     if (pItem != null)
@@ -388,7 +390,8 @@ namespace Game.Entities
         {
             uint TotalCost = 0;
             // equipped, backpack, bags itself
-            for (byte i = EquipmentSlot.Start; i < InventorySlots.ItemEnd; i++)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = EquipmentSlot.Start; i < inventoryEnd; i++)
                 TotalCost += DurabilityRepair((ushort)((InventorySlots.Bag0 << 8) | i), cost, discountMod, guildBank);
 
             // items in inventory bags
@@ -556,6 +559,7 @@ namespace Game.Entities
             }
 
             // not specific slot or have space for partly store only in specific slot
+            byte inventoryEnd = (byte)(InventorySlots.ItemStart + GetInventorySlotCount());
 
             // in specific bag
             if (bag != ItemConst.NullBag)
@@ -597,7 +601,7 @@ namespace Game.Entities
                             return InventoryResult.ItemMaxCount;
                         }
 
-                        res = CanStoreItem_InInventorySlots(InventorySlots.ItemStart, InventorySlots.ItemEnd, dest, pProto, ref count, true, pItem, bag, slot);
+                        res = CanStoreItem_InInventorySlots(InventorySlots.ItemStart, inventoryEnd, dest, pProto, ref count, true, pItem, bag, slot);
                         if (res != InventoryResult.Ok)
                         {
                             no_space_count = count + no_similar_count;
@@ -678,7 +682,7 @@ namespace Game.Entities
                         }
                     }
 
-                    res = CanStoreItem_InInventorySlots(InventorySlots.ItemStart, InventorySlots.ItemEnd, dest, pProto, ref count, false, pItem, bag, slot);
+                    res = CanStoreItem_InInventorySlots(InventorySlots.ItemStart, inventoryEnd, dest, pProto, ref count, false, pItem, bag, slot);
                     if (res != InventoryResult.Ok)
                     {
                         no_space_count = count + no_similar_count;
@@ -754,7 +758,7 @@ namespace Game.Entities
                     return InventoryResult.ItemMaxCount;
                 }
 
-                res = CanStoreItem_InInventorySlots(InventorySlots.ItemStart, InventorySlots.ItemEnd, dest, pProto, ref count, true, pItem, bag, slot);
+                res = CanStoreItem_InInventorySlots(InventorySlots.ItemStart, inventoryEnd, dest, pProto, ref count, true, pItem, bag, slot);
                 if (res != InventoryResult.Ok)
                 {
                     no_space_count = count + no_similar_count;
@@ -917,7 +921,8 @@ namespace Game.Entities
             uint[] inventoryCounts = new uint[InventorySlots.ItemEnd - InventorySlots.ItemStart];
             uint[][] bagCounts = new uint[InventorySlots.BagEnd - InventorySlots.BagStart][];
 
-            for (byte i = InventorySlots.ItemStart; i < InventorySlots.ItemEnd; i++)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = InventorySlots.ItemStart; i < inventoryEnd; i++)
             {
                 item2 = GetItemByPos(InventorySlots.Bag0, i);
                 if (item2 && !item2.IsInTrade())
@@ -974,7 +979,7 @@ namespace Game.Entities
                 // search stack for merge to
                 if (pProto.GetMaxStackSize() != 1)
                 {
-                    for (byte t = InventorySlots.ItemStart; t < InventorySlots.ItemEnd; ++t)
+                    for (byte t = InventorySlots.ItemStart; t < inventoryEnd; ++t)
                     {
                         item2 = GetItemByPos(InventorySlots.Bag0, t);
                         if (item2 && item2.CanBeMergedPartlyWith(pProto) == InventoryResult.Ok && inventoryCounts[t - InventorySlots.ItemStart] + item.GetCount() <= pProto.GetMaxStackSize())
@@ -1043,7 +1048,7 @@ namespace Game.Entities
 
                 // search free slot
                 b_found = false;
-                for (int t = InventorySlots.ItemStart; t < InventorySlots.ItemEnd; ++t)
+                for (int t = InventorySlots.ItemStart; t < inventoryEnd; ++t)
                 {
                     if (inventoryCounts[t - InventorySlots.ItemStart] == 0)
                     {
@@ -1538,7 +1543,8 @@ namespace Game.Entities
                 }
             }
 
-            for (byte i = InventorySlots.ItemStart; i < InventorySlots.ItemEnd; ++i)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = InventorySlots.ItemStart; i < inventoryEnd; ++i)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem != null)
@@ -2682,7 +2688,8 @@ namespace Game.Entities
         }
         public Item GetItemByGuid(ObjectGuid guid)
         {
-            for (byte i = EquipmentSlot.Start; i < InventorySlots.ItemEnd; ++i)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = EquipmentSlot.Start; i < inventoryEnd; ++i)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem != null)
@@ -2744,7 +2751,8 @@ namespace Game.Entities
         public uint GetItemCount(uint item, bool inBankAlso = false, Item skipItem = null)
         {
             uint count = 0;
-            for (byte i = EquipmentSlot.Start; i < InventorySlots.ItemEnd; i++)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = EquipmentSlot.Start; i < inventoryEnd; i++)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem != null)
@@ -2761,7 +2769,7 @@ namespace Game.Entities
 
             if (skipItem != null && skipItem.GetTemplate().GetGemProperties() != 0)
             {
-                for (byte i = EquipmentSlot.Start; i < InventorySlots.ItemEnd; ++i)
+                for (byte i = EquipmentSlot.Start; i < inventoryEnd; ++i)
                 {
                     Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                     if (pItem != null)
@@ -2874,7 +2882,8 @@ namespace Game.Entities
         public Item GetItemByEntry(uint entry)
         {
             // in inventory
-            for (byte i = InventorySlots.ItemStart; i < InventorySlots.ItemEnd; ++i)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = InventorySlots.ItemStart; i < inventoryEnd; ++i)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem != null)
@@ -2919,7 +2928,8 @@ namespace Game.Entities
         {
             List<Item> itemList = new List<Item>();
 
-            for (byte i = InventorySlots.ItemStart; i < InventorySlots.ItemEnd; ++i)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = InventorySlots.ItemStart; i < inventoryEnd; ++i)
             {
                 Item item = GetItemByPos(InventorySlots.Bag0, i);
                 if (item != null)
@@ -2974,7 +2984,8 @@ namespace Game.Entities
         public bool HasItemCount(uint item, uint count = 1, bool inBankAlso = false)
         {
             uint tempcount = 0;
-            for (byte i = EquipmentSlot.Start; i < InventorySlots.ItemEnd; i++)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = EquipmentSlot.Start; i < inventoryEnd; i++)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem != null && pItem.GetEntry() == item && !pItem.IsInTrade())
@@ -3083,7 +3094,7 @@ namespace Game.Entities
                     return true;
 
                 // backpack slots
-                if (slot >= InventorySlots.ItemStart && slot < InventorySlots.ItemEnd)
+                if (slot >= InventorySlots.ItemStart && slot < InventorySlots.ItemStart + GetInventorySlotCount())
                     return true;
 
                 // bank main slots
@@ -3115,7 +3126,8 @@ namespace Game.Entities
 
         public Item GetChildItemByGuid(ObjectGuid guid)
         {
-            for (byte i = EquipmentSlot.Start; i < InventorySlots.ItemEnd; ++i)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = EquipmentSlot.Start; i < inventoryEnd; ++i)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem)
@@ -3136,7 +3148,8 @@ namespace Game.Entities
         uint GetItemCountWithLimitCategory(uint limitCategory, Item skipItem)
         {
             uint count = 0;
-            for (byte i = EquipmentSlot.Start; i < InventorySlots.ItemEnd; ++i)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = EquipmentSlot.Start; i < inventoryEnd; ++i)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem)
@@ -3220,7 +3233,8 @@ namespace Game.Entities
             Log.outDebug(LogFilter.Player, "STORAGE: DestroyConjuredItems");
 
             // in inventory
-            for (byte i = InventorySlots.ItemStart; i < InventorySlots.ItemEnd; i++)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = InventorySlots.ItemStart; i < inventoryEnd; i++)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem)
@@ -3260,7 +3274,8 @@ namespace Game.Entities
             Log.outDebug(LogFilter.Player, "STORAGE: DestroyZoneLimitedItem in map {0} and area {1}", GetMapId(), new_zone);
 
             // in inventory
-            for (byte i = InventorySlots.ItemStart; i < InventorySlots.ItemEnd; i++)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = InventorySlots.ItemStart; i < inventoryEnd; i++)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem)
@@ -3873,7 +3888,8 @@ namespace Game.Entities
 
         public bool HasItemTotemCategory(uint TotemCategory)
         {
-            for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = EquipmentSlot.Start; i < inventoryEnd; ++i)
             {
                 Item item = GetUseableItemByPos(InventorySlots.Bag0, i);
                 if (item && Global.DB2Mgr.IsTotemCategoryCompatibleWith(item.GetTemplate().GetTotemCategory(), TotemCategory))
@@ -5701,7 +5717,8 @@ namespace Game.Entities
             uint remcount = 0;
 
             // in inventory
-            for (byte i = InventorySlots.ItemStart; i < InventorySlots.ItemEnd; ++i)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = InventorySlots.ItemStart; i < inventoryEnd; ++i)
             {
                 Item item = GetItemByPos(InventorySlots.Bag0, i);
                 if (item != null)
@@ -5971,6 +5988,52 @@ namespace Game.Entities
                 Item pItem = StoreNewItem(dest, lootItem.itemid, true, lootItem.randomPropertyId, null, lootItem.context, lootItem.BonusListIDs);
                 SendNewItem(pItem, lootItem.count, false, false, broadcast);
             }
+        }
+
+        public byte GetInventorySlotCount() { return GetByteValue(PlayerFields.Bytes2, PlayerFieldOffsets.FieldBytes2OffsetNumBackpackSlots);    }
+        public void SetInventorySlotCount(byte slots)
+        {
+            //ASSERT(slots <= (INVENTORY_SLOT_ITEM_END - INVENTORY_SLOT_ITEM_START));
+
+            if (slots < GetInventorySlotCount())
+            {
+                List<Item> unstorableItems = new List<Item>();
+
+                for (byte slot = (byte)(InventorySlots.ItemStart + slots); slot < InventorySlots.ItemEnd; ++slot)
+                {
+                    Item unstorableItem = GetItemByPos(InventorySlots.Bag0, slot);
+                    if (unstorableItem)
+                        unstorableItems.Add(unstorableItem);
+                }
+
+                if (!unstorableItems.Empty())
+                {
+                    int fullBatches = unstorableItems.Count / SharedConst.MaxMailItems;
+                    int remainder = unstorableItems.Count % SharedConst.MaxMailItems;
+                    SQLTransaction trans = new SQLTransaction();
+
+                    var sendItemsBatch = new Action<int, int>((batchNumber, batchSize) =>
+                    {
+                        MailDraft draft = new MailDraft(Global.ObjectMgr.GetCypherString(CypherStrings.NotEquippedItem), "There were problems with equipping item(s).");
+                        for (int j = 0; j < batchSize; ++j)
+                            draft.AddItem(unstorableItems[batchNumber * SharedConst.MaxMailItems + j]);
+
+                        draft.SendMailTo(trans, this, new MailSender(this, MailStationery.Gm), MailCheckMask.Copied);
+                    });
+
+                    for (int batch = 0; batch < fullBatches; ++batch)
+                        sendItemsBatch(batch, SharedConst.MaxMailItems);
+
+                    if (remainder != 0)
+                        sendItemsBatch(fullBatches, remainder);
+
+                    DB.Characters.CommitTransaction(trans);
+
+                    SendPacket(new CharacterInventoryOverflowWarning());
+                }
+            }
+
+            SetByteValue(PlayerFields.FieldBytes2, PlayerFieldOffsets.FieldBytes2OffsetNumBackpackSlots, slots);
         }
 
         public byte GetBankBagSlotCount() { return GetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetBankBagSlots); }

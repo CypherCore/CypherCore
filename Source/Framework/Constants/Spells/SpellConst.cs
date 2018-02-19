@@ -1051,6 +1051,19 @@ namespace Framework.Constants
         MustBeStandingNearInjuredChromieInMountHyjal = 340, // Must Be Standing Near The Injured Chromie In Mount Hyjal.
         RemoveCannonsHeavyIronPlatingFirst = 342, // You Should Remove The Cannon'S Heavy Iron Plating First.
         RemoveCannonsElectrokineticDefenseGridFirst = 343, // You Should Remove The Cannon'S Electrokinetic Defense Grid First.
+        RequiresTheArmoryKeyAndDendriteClusters = 344, // You Are Missing Pieces Of The Armory Key Or Do Not Have Enough Dendrite Clusters.
+        ThisItemRequiresBasicObliterumToUpgrade = 345, // This Item Requires Basic Obliterum To Upgrade.
+        ThisItemRequiresPrimalObliterumToUpgrade = 346, // This Item Requires Primal Obliterum To Upgrade.
+        ThisItemRequiresFlightMastersWhistle = 347, // This Item Requires A Flight Master'S Whistle.
+        RequiresPowerThatEchoesThatOfTheAugari = 349, // Will Only Open To One Wielding The Power That Echoes That Of The Augari.
+        ThatPlayerHasAPendingTotemicRevival = 350, // That Player Has A Pending Totemic Revival.
+        YouHaveNoFireMinesDeployed = 351, // You Have No Fire Mines Deployed.
+        YouAreBlockedByAStructureAboveYou = 353, // You Are Blocked By A Structure Above You.
+        Requires100ImpMeat = 354, // Requires 100 Imp Meat.
+        YouHaveNotObtainedAnyBackgroundFilters = 355, // You Have Not Obtained Any Background Filters.
+        NothingInterestingPostedHereRightNow = 356, // There Is Nothing Interesting Posted Here Right Now.
+        ParagonReputationRequiresHigherLevel = 357, // Paragon Reputation Is Not Available Until A Higher Level.
+        UunaIsMissing = 358, // Uuna Is Missing.
     }
 
     public enum SpellMissInfo

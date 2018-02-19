@@ -315,6 +315,8 @@ namespace Game.Network.Packets
                 LastTitleAuthorGuid = data.ReadPackedGuid();
                 LastDescriptionAuthorGuid = data.ReadPackedGuid();
                 LastVoiceChatAuthorGuid = data.ReadPackedGuid();
+                ListingCreatorGuid = data.ReadPackedGuid();
+                Unknown735 = data.ReadPackedGuid();
 
                 byte titleLength = data.ReadBits<byte>(8);
                 byte descriptionLength = data.ReadBits<byte>(11);
@@ -330,6 +332,8 @@ namespace Game.Network.Packets
             ObjectGuid LastTitleAuthorGuid;
             ObjectGuid LastDescriptionAuthorGuid;
             ObjectGuid LastVoiceChatAuthorGuid;
+            ObjectGuid ListingCreatorGuid;
+            ObjectGuid Unknown735;
             string Title;
             string Description;
             string VoiceChat;

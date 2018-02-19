@@ -36,9 +36,9 @@ namespace Game.Network
         static byte[] SessionKeySeed = { 0x58, 0xCB, 0xCF, 0x40, 0xFE, 0x2E, 0xCE, 0xA6, 0x5A, 0x90, 0xB8, 0x01, 0x68, 0x6C, 0x28, 0x0B };
         static byte[] ContinuedSessionSeed = { 0x16, 0xAD, 0x0C, 0xD4, 0x46, 0xF9, 0x4F, 0xB2, 0xEF, 0x7D, 0xEA, 0x2A, 0x17, 0x66, 0x4D, 0x2F };
 
-        static uint[] ClientTypeSeed_Win = { 0xC34F59FE, 0xFF9A7F5E, 0x8A9DD986, 0x97B24A36 };
-        static uint[] ClientTypeSeed_Wn64 = { 0x4E625212, 0xFAD6CBD8, 0x5D3FD3C7, 0xF335A567 };
-        static uint[] ClientTypeSeed_Mc64 = { 0x95EFC66, 0x266170B8, 0x3145F79, 0xD8C1C808 };
+        static byte[] ClientTypeSeed_Win = { 0x23, 0xC5, 0x9C, 0x59, 0x63, 0xCB, 0xEF, 0x5B, 0x72, 0x8D, 0x13, 0xA5, 0x08, 0x78, 0xDF, 0xCB };
+        static byte[] ClientTypeSeed_Wn64 = { 0xC7, 0xFF, 0x93, 0x2D, 0x6A, 0x21, 0x74, 0xA3, 0xD5, 0x38, 0xCA, 0x72, 0x12, 0x13, 0x6D, 0x2B };
+        static byte[] ClientTypeSeed_Mc64 = { 0x21, 0x0B, 0x97, 0x01, 0x49, 0xD6, 0xF5, 0x6C, 0xAC, 0x9B, 0xAD, 0xF2, 0xAA, 0xC9, 0x1E, 0x8E };
 
         public WorldSocket(Socket socket) : base(socket)
         {
@@ -383,18 +383,15 @@ namespace Game.Network
             // For hook purposes, we get Remoteaddress at this point.
             string address = GetRemoteIpAddress().ToString();
 
-            uint[] clientSeed = ClientTypeSeed_Win;
+            byte[] clientSeed = ClientTypeSeed_Win;
             if (account.game.OS == "Wn64")
                 clientSeed = ClientTypeSeed_Wn64;
             else if (account.game.OS == "Mc64")
                 clientSeed = ClientTypeSeed_Mc64;
 
-            byte[] byteArray = new byte[clientSeed.Length * 4];
-            Buffer.BlockCopy(clientSeed, 0, byteArray, 0, clientSeed.Length * 4);
-
             Sha256 digestKeyHash = new Sha256();
             digestKeyHash.Process(account.game.SessionKey, account.game.SessionKey.Length);
-            digestKeyHash.Finish(byteArray, byteArray.Length);
+            digestKeyHash.Finish(clientSeed, clientSeed.Length);
 
             HmacSha256 hmac = new HmacSha256(digestKeyHash.Digest);
             hmac.Process(authSession.LocalChallenge, authSession.LocalChallenge.Count);
@@ -743,10 +740,6 @@ namespace Game.Network
             battleNet.IsBanned = fields.Read<ulong>(12) != 0;
             game.IsBanned = fields.Read<ulong>(13) != 0;
             game.IsRectuiter = fields.Read<uint>(14) != 0;
-
-            uint world_expansion = WorldConfig.GetUIntValue(WorldCfg.Expansion);
-            if (game.Expansion > world_expansion)
-                game.Expansion = (byte)world_expansion;
 
             if (battleNet.Locale >= LocaleConstant.Total)
                 battleNet.Locale = LocaleConstant.enUS;

@@ -224,33 +224,30 @@ namespace Game.Entities
             return GetUInt16Value(PlayerFields.SkillLineTempBonus + field, offset);
         }
 
-        public uint GetResurrectionSpellId()
+        void InitializeSelfResurrectionSpells()
         {
-            // search priceless resurrection possibilities
-            uint prio = 0;
-            uint spell_id = 0;
+            ClearDynamicValue(PlayerDynamicFields.SelfResSpells);
+
+            uint[] spells = new uint[3];
+
             var dummyAuras = GetAuraEffectsByType(AuraType.Dummy);
-            foreach (var eff in dummyAuras)
+            foreach (var auraEffect in dummyAuras)
             {
                 // Soulstone Resurrection                           // prio: 3 (max, non death persistent)
-                if (prio < 2 && eff.GetSpellInfo().SpellFamilyName == SpellFamilyNames.Warlock && eff.GetSpellInfo().SpellFamilyFlags[1].HasAnyFlag(0x1000000u))
-                {
-                    spell_id = 3026;
-                    prio = 3;
-                }
+                if (auraEffect.GetSpellInfo().SpellFamilyName == SpellFamilyNames.Warlock && auraEffect.GetSpellInfo().SpellFamilyFlags[1].HasAnyFlag(0x1000000u))
+                    spells[0] = 3026;
                 // Twisting Nether                                  // prio: 2 (max)
-                else if (eff.GetId() == 23701 && RandomHelper.randChance(10))
-                {
-                    prio = 2;
-                    spell_id = 23700;
-                }
+                else if (auraEffect.GetId() == 23701 && RandomHelper.randChance(10))
+                    spells[1] = 23700;
             }
 
             // Reincarnation (passive spell)  // prio: 1
-            if (prio < 1 && HasSpell(20608) && !GetSpellHistory().HasCooldown(21169))
-                spell_id = 21169;
+            if (HasSpell(20608) && !GetSpellHistory().HasCooldown(21169))
+                spells[2] = 21169;
 
-            return spell_id;
+            foreach (uint selfResSpell in spells)
+                if (selfResSpell != 0)
+                    AddDynamicValue(PlayerDynamicFields.SelfResSpells, selfResSpell);
         }
 
         public void PetSpellInitialize()
@@ -1027,7 +1024,8 @@ namespace Game.Entities
             // remove enchants from inventory items
             // NOTE: no need to remove these from stats, since these aren't equipped
             // in inventory
-            for (byte i = InventorySlots.ItemStart; i < InventorySlots.ItemEnd; ++i)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = InventorySlots.ItemStart; i < inventoryEnd; ++i)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem)

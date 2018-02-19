@@ -101,6 +101,7 @@ namespace Framework.Constants
 
         public const byte FieldBytes2OffsetIgnorePowerRegenPredictionMask = 0;
         public const byte FieldBytes2OffsetAuraVision = 1;
+        public const byte FieldBytes2OffsetNumBackpackSlots = 2;
 
         public const byte FieldBytes3OffsetOverrideSpellsId = 2;     // Uint16!
         public const byte FieldBytes3OffsetOverrideSpellsIdUint16Offset = FieldBytes3OffsetOverrideSpellsId / 2;
@@ -485,14 +486,17 @@ namespace Framework.Constants
 
     public enum PlayerLocalFlags
     {
+        ControllingPet = 0x01, // Displays "You have an active summon already" when trying to tame new pet
         TrackStealthed = 0x02,
         ReleaseTimer = 0x08,       // Display time till auto release spirit
         NoReleaseWindow = 0x10,        // Display no "release spirit" window at all
-        NoPetBar = 0x00000020,   // CGPetInfo::IsPetBarUsed
-        OverrideCameraMinHeight = 0x00000040,
-        UsingPartGarrison = 0x00000100,
-        CanUseObjectsMounted = 0x00000200,
-        CanVisitPartyGarrison = 0x00000400
+        NoPetBar = 0x20,   // CGPetInfo::IsPetBarUsed
+        OverrideCameraMinHeight = 0x40,
+        NewlyBosstedCharacter = 0x80,
+        UsingPartGarrison = 0x100,
+        CanUseObjectsMounted = 0x200,
+        CanVisitPartyGarrison = 0x400,
+        AccountSecured = 0x1000 // Script_IsAccountSecured
     }
 
     public enum PlayerFieldByte2Flags
@@ -572,7 +576,7 @@ namespace Framework.Constants
         // first slot for item stored (in any way in player items data)
         Start = 0,
         // last+1 slot for item stored (in any way in player items data)
-        End = 187,
+        End = 195,
         Count = (End - Start)
     }
 
