@@ -263,8 +263,6 @@ namespace Game.DataStorage
  
                     Copies[idcopy].Add(id);
                 }
-
-                CliDB.Size += (uint)(Copies.Count * Header.RecordSize);
             }
 
             // ColumnMeta
