@@ -357,8 +357,6 @@ namespace Game
             //Load weighted graph on taxi nodes path
             Global.TaxiPathGraph.Initialize();
 
-            Global.MMapMgr.Initialize();
-
             Log.outInfo(LogFilter.ServerLoading, "Loading SpellInfo Storage...");
             Global.SpellMgr.LoadSpellInfoStore();
 

@@ -42,8 +42,8 @@ namespace Game.Movement
             uint mapId = _sourceUnit.GetMapId();
             if (Global.DisableMgr.IsPathfindingEnabled(mapId))
             {
-                _navMesh = Global.MMapMgr.GetNavMesh(mapId, _sourceUnit.GetTerrainSwaps());
-                _navMeshQuery = Global.MMapMgr.GetNavMeshQuery(mapId, _sourceUnit.GetInstanceId(), _sourceUnit.GetTerrainSwaps());
+                _navMesh = Global.MMapMgr.GetNavMesh(mapId);
+                _navMeshQuery = Global.MMapMgr.GetNavMeshQuery(mapId, _sourceUnit.GetInstanceId());
             }
             CreateFilter();
         }
