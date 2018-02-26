@@ -32,16 +32,16 @@ namespace Game.DataStorage
         public float ArtifactXPMultiplier;
         public byte ArtifactXPDifficulty;
         public byte ArtifactCategoryID;
-        public uint TitleID;
-        public uint Unused;
+        public ushort TitleID;
+        public ushort Unused;
     }
 
     public sealed class RewardPackXItemRecord
     {
         public uint Id;
         public uint ItemID;
-        public uint RewardPackID;
         public uint Amount;
+        public uint RewardPackID;
     }
 
     public sealed class RulesetItemUpgradeRecord

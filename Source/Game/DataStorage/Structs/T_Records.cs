@@ -29,9 +29,9 @@ namespace Game.DataStorage
     public sealed class TalentRecord
     {
         public uint Id;
+        public string Description;
         public uint SpellID;
         public uint OverridesSpellID;
-        public LocalizedString Description;
         public ushort SpecID;
         public byte TierID;
         public byte ColumnIndex;
@@ -43,8 +43,8 @@ namespace Game.DataStorage
     public sealed class TaxiNodesRecord
     {
         public uint Id;
-        public Vector3 Pos;
         public LocalizedString Name;
+        public Vector3 Pos;
         public uint[] MountCreatureID = new uint[2];
         public Vector2 MapOffset;
         public float Unk730;
@@ -88,8 +88,8 @@ namespace Game.DataStorage
 
     public sealed class ToyRecord
     {
-        public uint ItemID;
         public LocalizedString Description;
+        public uint ItemID;
         public byte Flags;
         public byte CategoryFilter;
         public uint Id;
@@ -108,11 +108,11 @@ namespace Game.DataStorage
         public ushort UIOrder;
         public byte ExpansionID;
         public uint Id;
-        public int Flags;
+        public byte Flags;
         public int QuestID;
         public int ClassMask;
         public int ItemNameDescriptionID;
-        public uint TransmogSetGroupID;
+        public byte TransmogSetGroupID;
     }
 
     public sealed class TransmogSetGroupRecord
@@ -132,20 +132,20 @@ namespace Game.DataStorage
     public sealed class TransportAnimationRecord
     {
         public uint Id;
-        public uint TransportID;
         public uint TimeIndex;
         public Vector3 Pos;
         public byte SequenceID;
+        public uint TransportID;
     }
 
     public sealed class TransportRotationRecord
     {
         public uint Id;
-        public uint TransportID;
         public uint TimeIndex;
         public float X;
         public float Y;
         public float Z;
         public float W;
+        public uint TransportID;
     }
 }

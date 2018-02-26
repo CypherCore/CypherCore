@@ -4185,7 +4185,11 @@ namespace Game.Entities
                 if (castItem != null)
                 {
                     castItemGuid = castItem.GetGUID();
-                    castItemLevel = (int)castItem.GetItemLevel(castItem.GetOwner());
+                    Player owner = castItem.GetOwner();
+                    if (owner)
+                        castItemLevel = (int)castItem.GetItemLevel(owner);
+                    else if (castItem.GetOwnerGUID() == caster.GetGUID())
+                        castItemLevel = (int)castItem.GetItemLevel(caster.ToPlayer());
                 }
 
                 // find current aura from spell and change it's stackamount, or refresh it's duration

@@ -117,7 +117,7 @@ namespace Game
             SoundTurnIn = fields.Read<uint>(102);
             AreaGroupID = fields.Read<uint>(103);
             LimitTime = fields.Read<uint>(104);
-            AllowableRaces = fields.Read<int>(105);
+            AllowableRaces = fields.Read<long>(105);
             QuestRewardID = fields.Read<uint>(106);
             Expansion = fields.Read<int>(107);
 

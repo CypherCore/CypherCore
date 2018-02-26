@@ -173,8 +173,8 @@ namespace Game.Collision
                         displayId = reader.ReadUInt32();
                         name_length = reader.ReadUInt32();
                         name = reader.ReadString((int)name_length);
-                        v1 = reader.ReadStruct<Vector3>();
-                        v2 = reader.ReadStruct<Vector3>();
+                        v1 = reader.Read<Vector3>();
+                        v2 = reader.Read<Vector3>();
 
                         StaticModelList.models.Add(displayId, new GameobjectModelData(name, new AxisAlignedBox(v1, v2)));
                     }

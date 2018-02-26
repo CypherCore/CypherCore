@@ -137,7 +137,7 @@ namespace Game.Network.Packets
         public string VirtualRealmName;
         public string Guild;
         public string GuildVirtualRealmName;
-        public long RaceFilter = 0;
+        public long RaceFilter;
         public int ClassFilter = -1;
         public List<string> Words = new List<string>();
         public bool ShowEnemies;

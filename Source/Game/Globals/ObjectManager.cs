@@ -444,7 +444,7 @@ namespace Game
             _raceUnlockRequirementStorage.Clear();
 
             //                                         0       1          2
-            SQLResult result = DB.World.Query("SELECT raceID, expansion, achievementId FROM `race_expansion_requirement`");
+            SQLResult result = DB.World.Query("SELECT raceID, expansion, achievementId FROM `race_unlock_requirement`");
             if (!result.IsEmpty())
             {
                 uint count = 0;
@@ -4414,9 +4414,7 @@ namespace Game
                     continue;
 
                 var itemTemplate = new ItemTemplate(db2Data, sparse);
-
                 itemTemplate.MaxDurability = FillMaxDurability(db2Data.Class, db2Data.SubClass, sparse.inventoryType, (ItemQuality)sparse.Quality, sparse.ItemLevel);
-                FillDisenchantFields(out itemTemplate.DisenchantID, out itemTemplate.RequiredDisenchantSkill, itemTemplate);
 
                 var itemSpecOverrides = Global.DB2Mgr.GetItemSpecOverrides(sparse.Id);
                 if (itemSpecOverrides != null)
@@ -4594,40 +4592,6 @@ namespace Game
             }
 
             return 5 * (uint)(Math.Round(18.0f * qualityMultipliers[(int)quality] * weaponMultipliers[itemSubClass] * levelPenalty));
-        }
-        void FillDisenchantFields(out uint disenchantID, out uint requiredDisenchantSkill, ItemTemplate itemTemplate)
-        {
-            disenchantID = 0;
-            requiredDisenchantSkill = 0xFFFFFFFF;
-            if (itemTemplate.GetFlags().HasAnyFlag(ItemFlags.Conjured | ItemFlags.NoDisenchant) ||
-                itemTemplate.GetBonding() == ItemBondingType.Quest || itemTemplate.GetArea() != 0 || itemTemplate.GetMap() != 0 ||
-                itemTemplate.GetMaxStackSize() > 1 ||
-                itemTemplate.GetQuality() < ItemQuality.Uncommon || itemTemplate.GetQuality() > ItemQuality.Epic ||
-                !(itemTemplate.GetClass() == ItemClass.Armor || itemTemplate.GetClass() == ItemClass.Weapon) ||
-                !(Item.GetSpecialPrice(itemTemplate) != 0 || Global.DB2Mgr.HasItemCurrencyCost(itemTemplate.GetId())))
-                return;
-
-            foreach (var disenchant in CliDB.ItemDisenchantLootStorage.Values)
-            {
-                if (disenchant.ItemClass == (uint)itemTemplate.GetClass() && disenchant.ItemQuality == (uint)itemTemplate.GetQuality() &&
-                    disenchant.MinItemLevel <= itemTemplate.GetBaseItemLevel() && disenchant.MaxItemLevel >= itemTemplate.GetBaseItemLevel())
-                {
-                    if (disenchant.Id == 60 || disenchant.Id == 61)   // epic item disenchant ilvl range 66-99 (classic)
-                    {
-                        if (itemTemplate.GetBaseRequiredLevel() > 60 || itemTemplate.GetRequiredSkillRank() > 300)
-                            continue;                                   // skip to epic item disenchant ilvl range 90-199 (TBC)
-                    }
-                    else if (disenchant.Id == 66 || disenchant.Id == 67)  // epic item disenchant ilvl range 90-199 (TBC)
-                    {
-                        if (itemTemplate.GetBaseRequiredLevel() <= 60 || (itemTemplate.GetRequiredSkill() != 0 && itemTemplate.GetRequiredSkillRank() <= 300))
-                            continue;
-                    }
-
-                    disenchantID = disenchant.Id;
-                    requiredDisenchantSkill = disenchant.RequiredDisenchantSkill;
-                    return;
-                }
-            }
         }
         public void LoadItemTemplateAddon()
         {
@@ -5344,7 +5308,7 @@ namespace Game
                     {
                         for (int raceIndex = (int)Race.Human; raceIndex < (int)Race.Max; ++raceIndex)
                         {
-                            if (rcInfo.RaceMask == -1 || Convert.ToBoolean((1 << (raceIndex - 1)) & rcInfo.RaceMask))
+                            if (rcInfo.RaceMask == -1 || Convert.ToBoolean((1L << (raceIndex - 1)) & rcInfo.RaceMask))
                             {
                                 for (int classIndex = (int)Class.Warrior; classIndex < (int)Class.Max; ++classIndex)
                                 {

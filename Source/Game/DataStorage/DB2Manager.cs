@@ -346,7 +346,7 @@ namespace Game.DataStorage
             }
 
             foreach (PvpRewardRecord pvpReward in CliDB.PvpRewardStorage.Values)
-                _pvpRewardPack[Tuple.Create(pvpReward.Prestige, pvpReward.HonorLevel)] = pvpReward.RewardPackID;
+                _pvpRewardPack[Tuple.Create((uint)pvpReward.Prestige, (uint)pvpReward.HonorLevel)] = pvpReward.RewardPackID;
 
             CliDB.PvpRewardStorage.Clear();
 
@@ -454,7 +454,7 @@ namespace Game.DataStorage
             CliDB.TransmogSetItemStorage.Clear();
 
             foreach (WMOAreaTableRecord entry in CliDB.WMOAreaTableStorage.Values)
-                _wmoAreaTableLookup[Tuple.Create(entry.WMOID, entry.NameSet, entry.WMOGroupID)] = entry;
+                _wmoAreaTableLookup[Tuple.Create((short)entry.WMOID, entry.NameSet, entry.WMOGroupID)] = entry;
 
             CliDB.WMOAreaTableStorage.Clear();
 

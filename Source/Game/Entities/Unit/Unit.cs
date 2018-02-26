@@ -2126,9 +2126,9 @@ namespace Game.Entities
         {
             return (Race)GetByteValue(UnitFields.Bytes0, 0);
         }
-        public uint getRaceMask()
+        public ulong getRaceMask()
         {
-            return (uint)(1 << ((int)GetRace() - 1));
+            return (1ul << ((int)GetRace() - 1));
         }
         public Class GetClass()
         {

@@ -41,7 +41,7 @@ namespace Game.DataStorage
         public ushort[] PowerDisplayID = new ushort[3];
         public byte FlagsB;
         public byte UILocomotionType;
-        public int MissileTargetingID;
+        public ushort MissileTargetingID;
     }
 
     public sealed class VehicleSeatRecord
@@ -105,7 +105,7 @@ namespace Game.DataStorage
         public sbyte VehicleRideAnimLoopBone;
         public byte VehicleAbilityDisplay;
         public uint EnterUISoundID;
-        public uint ExitUISoundID;
+        public ushort ExitUISoundID;
 
 
         public bool CanEnterOrExit()

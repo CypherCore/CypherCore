@@ -25,8 +25,8 @@ namespace Game.DataStorage
     {
         public LocalizedString Title;
         public LocalizedString Description;
-        public AchievementFlags Flags;
         public LocalizedString Reward;
+        public AchievementFlags Flags;
         public short MapID;
         public ushort Supercedes;
         public ushort Category;
@@ -37,7 +37,7 @@ namespace Game.DataStorage
         public byte MinimumCriteria;
         public uint Id;
         public uint IconFileDataID;
-        public uint CriteriaTree;
+        public ushort CriteriaTree;
     }
 
     public sealed class AnimKitRecord
@@ -51,17 +51,17 @@ namespace Game.DataStorage
     public sealed class AreaGroupMemberRecord
     {
         public uint Id;
-        public ushort AreaGroupID;
         public ushort AreaID;
+        public uint AreaGroupID;
     }
 
     public sealed class AreaTableRecord
     {
         public uint Id;
-        public AreaFlags[] Flags = new AreaFlags[2];
         public string ZoneName;
-        public float AmbientMultiplier;
         public LocalizedString AreaName;
+        public AreaFlags[] Flags = new AreaFlags[2];
+        public float AmbientMultiplier;
         public ushort MapId;
         public ushort ParentAreaID;
         public short AreaBit;
@@ -80,7 +80,7 @@ namespace Game.DataStorage
         public byte WildBattlePetLevelMin;
         public byte WildBattlePetLevelMax;
         public byte WindSettingsID;
-        public byte[] UWIntroSound = new byte[2];
+        public byte UWIntroSound;
 
         public bool IsSanctuary()
         {
@@ -127,7 +127,7 @@ namespace Game.DataStorage
         public ushort SpecID;
         public byte ArtifactCategoryID;
         public byte Flags;
-        public uint UiModelSceneID;
+        public byte UiModelSceneID;
         public uint SpellVisualKitID;
     }
 
@@ -145,9 +145,9 @@ namespace Game.DataStorage
         public byte Flags;
         public byte ModifiesShapeshiftFormDisplay;
         public uint Id;
-        public uint PlayerConditionID;
-        public uint ItemAppearanceID;
-        public uint AltItemAppearanceID;
+        public ushort PlayerConditionID;
+        public byte ItemAppearanceID;
+        public byte AltItemAppearanceID;
     }
 
     public sealed class ArtifactAppearanceSetRecord
@@ -156,11 +156,11 @@ namespace Game.DataStorage
         public LocalizedString Name2;
         public ushort UiCameraID;
         public ushort AltHandUICameraID;
-        public byte ArtifactID;
         public byte DisplayIndex;
         public byte AttachmentPoint;
         public byte Flags;
         public uint Id;
+        public uint ArtifactID;
     }
 
     public sealed class ArtifactCategoryRecord
@@ -178,7 +178,7 @@ namespace Game.DataStorage
         public byte MaxRank;
         public byte ArtifactTier;
         public uint Id;
-        public int RelicType;
+        public byte RelicType;
     }
 
     public sealed class ArtifactPowerLinkRecord
@@ -191,7 +191,7 @@ namespace Game.DataStorage
     public sealed class ArtifactPowerPickerRecord
     {
         public uint Id;
-        public uint PlayerConditionID;
+        public ushort PlayerConditionID;
     }
 
     public sealed class ArtifactPowerRankRecord
@@ -199,9 +199,9 @@ namespace Game.DataStorage
         public uint Id;
         public uint SpellID;
         public float Value;
-        public ushort ArtifactPowerID;
         public ushort Unknown;
         public byte Rank;
+        public uint ArtifactPowerID;
     }
 
     public sealed class ArtifactQuestXPRecord

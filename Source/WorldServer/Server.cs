@@ -42,8 +42,6 @@ namespace WorldServer
             if (!ConfigMgr.Load(System.Diagnostics.Process.GetCurrentProcess().ProcessName + ".conf"))
                 ExitNow();
 
-            var WorldSocketMgr = new WorldSocketManager();
-
             if (!StartDB())
                 ExitNow();
 
@@ -66,6 +64,7 @@ namespace WorldServer
                 return;
             }
 
+            var WorldSocketMgr = new WorldSocketManager();
             if (!WorldSocketMgr.StartNetwork(worldListener, worldPort, networkThreads))
             {
                 Log.outError(LogFilter.Network, "Failed to start Realm Network");

@@ -22,13 +22,13 @@ namespace Game.DataStorage
 {
     public sealed class FactionRecord
     {
+        public ulong[] ReputationRaceMask = new ulong[4];
+        public LocalizedString Name;
+        public string Description;
         public uint Id;
-        public uint[] ReputationRaceMask = new uint[4];
         public int[] ReputationBase = new int[4];
         public float ParentFactionModIn;                         // Faction gains incoming rep * ParentFactionModIn
         public float ParentFactionModOut;                        // Faction outputs rep * ParentFactionModOut as spillover reputation
-        public LocalizedString Name;
-        public LocalizedString Description;
         public uint[] ReputationMax = new uint[4];
         public short ReputationIndex;
         public ushort[] ReputationClassMask = new ushort[4];

@@ -343,7 +343,8 @@ namespace Framework.Constants
         ItemLevelCanIncrease = 14, // Displays a + next to item level indicating it can warforge
         RandomEnchantment = 15, // Responsible for showing "<Random additional stats>" or "+%d Rank Random Minor Trait" in the tooltip before item is obtained
         Bounding = 16,
-        RelicType = 17
+        RelicType = 17,
+        OverrideRequiredLevel = 18
     }
 
     public enum ItemEnchantmentType : byte

@@ -37,6 +37,7 @@ namespace Game.DataStorage
 
     struct M2Header
     {
+        /*
         public M2Header(BinaryReader reader)
         {
             Magic = null;/// reader.ReadStringFromChars(4);
@@ -108,6 +109,7 @@ namespace Game.DataStorage
             nBlendMaps = reader.ReadUInt32();
             ofsBlendMaps = reader.ReadUInt32();
         }
+        */
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
         public char[] Magic;               // "MD20"

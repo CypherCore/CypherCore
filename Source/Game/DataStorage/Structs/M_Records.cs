@@ -29,16 +29,15 @@ namespace Game.DataStorage
     public sealed class MapRecord
     {
         public uint Id;
-
         public uint Directory;
+        public LocalizedString MapName;
+        public string MapDescription0;                               // Horde
+        public string MapDescription1;                               // Alliance
+        public string ShortDescription;
+        public string LongDescription;
         public MapFlags[] Flags = new MapFlags[2];
         public float MinimapIconScale;
         public Vector2 CorpsePos;                                        // entrance coordinates in ghost mode  (in most cases = normal entrance)
-        public LocalizedString MapName;
-        public LocalizedString MapDescription0;                               // Horde
-        public LocalizedString MapDescription1;                               // Alliance
-        public LocalizedString ShortDescription;
-        public LocalizedString LongDescription;
         public ushort AreaTableID;
         public ushort LoadingScreenID;
         public short CorpseMapID;                                              // map_id of entrance map in ghost mode (continent always and in most cases = normal entrance)
@@ -95,7 +94,6 @@ namespace Game.DataStorage
     {
         public uint Id;
         public LocalizedString Message_lang;                          // m_message_lang (text showed when transfer to map failed)
-        public ushort MapID;
         public byte DifficultyID;
         public byte RaidDurationType;                                 // 1 means daily reset, 2 means weekly
         public byte MaxPlayers;                                       // m_maxPlayers some heroic versions have 0 when expected same amount as in normal version
@@ -103,6 +101,7 @@ namespace Game.DataStorage
         public byte Flags;
         public byte ItemBonusTreeModID;
         public uint Context;
+        public uint MapID;
 
         public uint GetRaidDuration()
         {
@@ -127,17 +126,17 @@ namespace Game.DataStorage
 
     public sealed class MountRecord
     {
+        public string Name;
+        public string Description;
+        public string SourceDescription;
         public uint SpellId;
-        public LocalizedString Name;
-        public LocalizedString Description;
-        public LocalizedString SourceDescription;
         public float CameraPivotMultiplier;
         public ushort MountTypeId;
         public ushort Flags;
         public byte Source;
         public uint Id;
         public uint PlayerConditionId;
-        public int UiModelSceneID;
+        public byte UiModelSceneID;
     }
 
     public sealed class MountCapabilityRecord
@@ -149,7 +148,7 @@ namespace Game.DataStorage
         public short RequiredMap;
         public MountCapabilityFlags Flags;
         public uint Id;
-        public uint RequiredAura;
+        public byte RequiredAura;
     }
 
     public sealed class MountTypeXCapabilityRecord
@@ -162,10 +161,10 @@ namespace Game.DataStorage
 
     public sealed class MountXDisplayRecord
     {
-        public uint ID;
-        public uint MountID;
+        public uint Id;
         public uint DisplayID;
         public uint PlayerConditionID;
+        public uint MountID;
     }
 
     public sealed class MovieRecord

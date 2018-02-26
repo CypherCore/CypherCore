@@ -5330,7 +5330,7 @@ namespace Game.Entities
             if (pet)
                 pet.SynchronizeLevelWithOwner();
 
-            MailLevelReward mailReward = Global.ObjectMgr.GetMailLevelReward(level, getRaceMask());
+            MailLevelReward mailReward = Global.ObjectMgr.GetMailLevelReward(level, (uint)getRaceMask());
             if (mailReward != null)
             {
                 //- TODO: Poor design of mail system
@@ -7057,7 +7057,7 @@ namespace Game.Entities
         }
         public bool IsSpellFitByClassAndRace(uint spell_id)
         {
-            uint racemask = getRaceMask();
+            ulong racemask = getRaceMask();
             uint classmask = getClassMask();
 
             var bounds = Global.SpellMgr.GetSkillLineAbilityMapBounds(spell_id);

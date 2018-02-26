@@ -3046,7 +3046,7 @@ namespace Game.Entities
                 float bubble0 = 0.031f;
                 //speed collect rest bonus in offline, in logout, in tavern, city (section/in hour)
                 float bubble1 = 0.125f;
-                float bubble = result.Read<byte>(32) > 0
+                float bubble = result.Read<byte>(33) > 0
                     ? bubble1 * WorldConfig.GetFloatValue(WorldCfg.RateRestOfflineInTavernOrCity)
                     : bubble0 * WorldConfig.GetFloatValue(WorldCfg.RateRestOfflineInWilderness);
 
@@ -3125,7 +3125,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, transLowGUID);
 
                 StringBuilder ss = new StringBuilder();
-                for (byte i = 0; i < PlayerConst.TaxiMaskSize; ++i)
+                for (int i = 0; i < PlayerConst.TaxiMaskSize; ++i)
                     ss.Append(m_taxi.m_taximask[i] + " ");
 
                 stmt.AddValue(index++, ss.ToString());
@@ -3274,7 +3274,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, transLowGUID);
 
                 StringBuilder ss = new StringBuilder();
-                for (byte i = 0; i < PlayerConst.TaxiMaskSize; ++i)
+                for (int i = 0; i < PlayerConst.TaxiMaskSize; ++i)
                     ss.Append(m_taxi.m_taximask[i] + " ");
 
                 stmt.AddValue(index++, ss.ToString());

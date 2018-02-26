@@ -1935,7 +1935,6 @@ namespace Game.Entities
 
             Dictionary<uint, Dictionary<uint, SpellEffectRecord[]>> effectsBySpell = new Dictionary<uint, Dictionary<uint, SpellEffectRecord[]>>();
             Dictionary<uint, MultiMap<uint, SpellXSpellVisualRecord>> visualsBySpell = new Dictionary<uint, MultiMap<uint, SpellXSpellVisualRecord>>();
-            Dictionary<uint, SpellEffectScalingRecord> spellEffectScallingByEffectId = new Dictionary<uint, SpellEffectScalingRecord>();
             foreach (var effect in CliDB.SpellEffectStorage.Values)
             {
                 /*Contract.Assert(effect.EffectIndex < MAX_SPELL_EFFECTS, "MAX_SPELL_EFFECTS must be at least {0}", effect.EffectIndex);
@@ -1993,11 +1992,6 @@ namespace Game.Entities
             }
             CliDB.SpellCooldownsStorage.Clear();
 
-            foreach (SpellEffectScalingRecord spellEffectScaling in CliDB.SpellEffectScalingStorage.Values)
-                spellEffectScallingByEffectId[spellEffectScaling.SpellEffectID] = spellEffectScaling;
-
-            CliDB.SpellEffectScalingStorage.Clear();
-
             foreach (SpellEquippedItemsRecord equippedItems in CliDB.SpellEquippedItemsStorage.Values)
                 loadData[equippedItems.SpellID].EquippedItems = equippedItems;
 
@@ -2015,6 +2009,10 @@ namespace Game.Entities
                 if (levels.DifficultyID == 0)  // TODO: implement
                     loadData[levels.SpellID].Levels = levels;
             }
+
+            foreach (SpellMiscRecord misc in CliDB.SpellMiscStorage.Values)
+                if (misc.DifficultyID == 0)
+                    loadData[misc.SpellID].Misc = misc;
 
             foreach (SpellReagentsRecord reagents in CliDB.SpellReagentsStorage.Values)
                 loadData[reagents.SpellID].Reagents = reagents;
@@ -2054,8 +2052,7 @@ namespace Game.Entities
             foreach (var spellEntry in CliDB.SpellStorage.Values)
             {
                 loadData[spellEntry.Id].Entry = spellEntry;
-                loadData[spellEntry.Id].Misc = CliDB.SpellMiscStorage.LookupByKey(spellEntry.MiscID);
-                mSpellInfoMap[spellEntry.Id] = new SpellInfo(loadData[spellEntry.Id], effectsBySpell.LookupByKey(spellEntry.Id), visualsBySpell.LookupByKey(spellEntry.Id), spellEffectScallingByEffectId);
+                mSpellInfoMap[spellEntry.Id] = new SpellInfo(loadData[spellEntry.Id], effectsBySpell.LookupByKey(spellEntry.Id), visualsBySpell.LookupByKey(spellEntry.Id));
             }
 
             CliDB.SpellStorage.Clear();

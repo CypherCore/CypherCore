@@ -3740,9 +3740,6 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
-            if (itemTarget == null || itemTarget.GetTemplate().DisenchantID == 0)
-                return;
-
             Player caster = m_caster.ToPlayer();
             if (caster != null)
             {

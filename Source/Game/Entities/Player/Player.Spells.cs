@@ -1573,7 +1573,7 @@ namespace Game.Entities
 
         void LearnSkillRewardedSpells(uint skillId, uint skillValue)
         {
-            uint raceMask = getRaceMask();
+            ulong raceMask = getRaceMask();
             uint classMask = getClassMask();
             foreach (var ability in CliDB.SkillLineAbilityStorage.Values)
             {

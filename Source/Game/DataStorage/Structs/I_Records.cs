@@ -98,7 +98,7 @@ namespace Game.DataStorage
     public sealed class ItemBonusRecord
     {
         public uint Id;
-        public int[] Value = new int[2];
+        public int[] Value = new int[3];
         public ushort BonusListID;
         public ItemBonusType Type;
         public byte Index;
@@ -113,26 +113,26 @@ namespace Game.DataStorage
     public sealed class ItemBonusTreeNodeRecord
     {
         public uint Id;
-        public ushort BonusTreeID;
         public ushort SubTreeID;
         public ushort BonusListID;
         public ushort ItemLevelSelectorID;
         public byte BonusTreeModID;
+        public uint BonusTreeID;
     }
 
     public sealed class ItemChildEquipmentRecord
     {
         public uint Id;
-        public uint ItemID;
         public uint AltItemID;
         public byte AltEquipmentSlot;
+        public uint ItemID;
     }
 
     public sealed class ItemClassRecord
     {
         public uint Id;
+        public string Name;
         public float PriceMod;
-        public LocalizedString Name;
         public byte OldEnumValue;
         public byte Flags;
     }
@@ -165,15 +165,15 @@ namespace Game.DataStorage
         public ushort MinItemLevel;
         public ushort MaxItemLevel;
         public ushort RequiredDisenchantSkill;
-        public byte ItemClass;
         public sbyte ItemSubClass;
         public byte ItemQuality;
+        public sbyte Expansion;
+        public uint ItemClass;
     }
 
     public sealed class ItemEffectRecord
     {
         public uint Id;
-        public uint ItemID;
         public uint SpellID;
         public int Cooldown;
         public int CategoryCooldown;
@@ -182,6 +182,7 @@ namespace Game.DataStorage
         public ushort ChrSpecializationID;
         public byte OrderIndex;
         public ItemSpelltriggerType Trigger;
+        public uint ItemID;
     }
 
     public sealed class ItemExtendedCostRecord
@@ -210,8 +211,8 @@ namespace Game.DataStorage
     {
         public uint ID;
         public uint ItemBonusListID;
-        public ushort ItemLevelSelectorQualitySetID;
         public byte Quality;
+        public uint ItemLevelSelectorQualitySetID;
     }
 
     public sealed class ItemLevelSelectorQualitySetRecord
@@ -232,11 +233,11 @@ namespace Game.DataStorage
     public sealed class ItemModifiedAppearanceRecord
     {
         public uint ItemID;
-        public ushort AppearanceID;
+        public uint Id;
         public byte AppearanceModID;
+        public ushort AppearanceID;
         public byte Index;
         public byte SourceType;
-        public uint Id;
     }
 
     public sealed class ItemPriceBaseRecord
@@ -264,17 +265,17 @@ namespace Game.DataStorage
 
     public sealed class ItemSearchNameRecord
     {
-        public uint Id;
+        public ulong AllowableRace;
         public LocalizedString Name;
+        public uint Id;
         public uint[] Flags = new uint[3];
-        public uint AllowableRace;
         public ushort ItemLevel;
         public byte Quality;
         public byte RequiredExpansion;
         public byte RequiredLevel;
-        public int AllowableClass;
         public ushort RequiredReputationFaction;
         public byte RequiredReputationRank;
+        public short AllowableClass;
         public ushort RequiredSkill;
         public ushort RequiredSkillRank;
         public uint RequiredSpell;
@@ -286,7 +287,7 @@ namespace Game.DataStorage
         public LocalizedString Name;
         public uint[] ItemID = new uint[17];
         public ushort RequiredSkillRank;
-        public uint RequiredSkill;
+        public byte RequiredSkill;
         public ItemSetFlags Flags;
     }
 
@@ -294,34 +295,34 @@ namespace Game.DataStorage
     {
         public uint Id;
         public uint SpellID;
-        public ushort ItemSetID;
         public ushort ChrSpecID;
         public byte Threshold;
+        public uint ItemSetID;
     }
 
     public sealed class ItemSparseRecord
     {
         public uint Id;
+        public long AllowableRace;
+        public LocalizedString Name;
+        public string Name2;
+        public string Name3;
+        public string Name4;
+        public string Description;
         public uint[] Flags = new uint[4];
         public float Unk1;
         public float Unk2;
         public uint BuyCount;
         public uint BuyPrice;
         public uint SellPrice;
-        public int AllowableRace;
         public uint RequiredSpell;
         public uint MaxCount;
         public uint Stackable;
         public int[] ItemStatAllocation = new int[ItemConst.MaxStats];
         public float[] ItemStatSocketCostMultiplier = new float[ItemConst.MaxStats];
         public float RangedModRange;
-        public LocalizedString Name;
-        public LocalizedString Name2;
-        public LocalizedString Name3;
-        public LocalizedString Name4;
-        public LocalizedString Description;
         public uint BagFamily;
-        public float ArmorDamageModifier;
+        public float ArmorDamageModifier;//wrong?
         public uint Duration;
         public float StatScalingFactor;
         public short AllowableClass;
@@ -382,8 +383,8 @@ namespace Game.DataStorage
     public sealed class ItemSpecOverrideRecord
     {
         public uint Id;
-        public uint ItemID;
         public ushort SpecID;
+        public uint ItemID;
     }
 
     public sealed class ItemUpgradeRecord
@@ -399,7 +400,7 @@ namespace Game.DataStorage
     public sealed class ItemXBonusTreeRecord
     {
         public uint Id;
-        public uint ItemID;
         public ushort BonusTreeID;
+        public uint ItemID;
     }
 }

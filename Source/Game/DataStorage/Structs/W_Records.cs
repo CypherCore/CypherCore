@@ -22,9 +22,8 @@ namespace Game.DataStorage
 {
     public sealed class WMOAreaTableRecord
     {
+        public string AreaName;
         public int WMOGroupID;                                               //  used in group WMO
-        public LocalizedString AreaName;
-        public short WMOID;                                                    //  used in root WMO
         public ushort AmbienceID;
         public ushort ZoneMusic;
         public ushort IntroSound;
@@ -35,8 +34,9 @@ namespace Game.DataStorage
         public byte SoundProviderPref;
         public byte SoundProviderPrefUnderwater;
         public byte Flags;
-        public uint I;
-        public uint UWZoneMusic;
+        public uint Id;
+        public byte UWZoneMusic;
+        public uint WMOID;                                                    //  used in root WMO
     }
 
     public sealed class WorldEffectRecord
@@ -47,7 +47,7 @@ namespace Game.DataStorage
         public byte TargetType;
         public byte WhenToDisplay;
         public uint QuestFeedbackEffectID;
-        public uint PlayerConditionID;
+        public ushort PlayerConditionID;
     }
 
     public sealed class WorldMapAreaRecord
@@ -73,20 +73,21 @@ namespace Game.DataStorage
 
     public sealed class WorldMapOverlayRecord
     {
-        public uint Id;
         public string TextureName;
+        public uint Id;
         public ushort TextureWidth;
         public ushort TextureHeight;
-        public uint MapAreaID;                                               // idx in WorldMapArea.dbc
-        public uint[] AreaID = new uint[SharedConst.MaxWorldMapOverlayArea];
-        public int OffsetX;
-        public int OffsetY;
-        public int HitRectTop;
-        public int HitRectLeft;
-        public int HitRectBottom;
-        public int HitRectRight;
-        public uint PlayerConditionID;
-        public uint Flags;
+        public ushort MapAreaID;                                               // idx in WorldMapArea.dbc
+        public ushort OffsetX;
+        public uint OffsetY;
+        public ushort HitRectTop;
+        public ushort HitRectLeft;
+        public ushort HitRectBottom;
+        public ushort HitRectRight;
+        public ushort PlayerConditionID;
+        public byte Flags;
+        public uint[] AreaID = new uint[SharedConst.MaxWorldMapOverlayArea]; // needs checked
+
     }
 
     public sealed class WorldMapTransformsRecord
@@ -108,9 +109,9 @@ namespace Game.DataStorage
     public sealed class WorldSafeLocsRecord
     {
         public uint Id;
+        public string AreaName;
         public Vector3 Loc;
         public float Facing;
-        public LocalizedString AreaName;
         public ushort MapID;
     }
 }

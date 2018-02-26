@@ -237,9 +237,9 @@ namespace Game.Entities
         public uint GetBuyCount() { return Math.Max(ExtendedData.BuyCount, 1u); }
         public uint GetBuyPrice() { return ExtendedData.BuyPrice; }
         public uint GetSellPrice() { return ExtendedData.SellPrice; }
-        public InventoryType GetInventoryType() { return (InventoryType)ExtendedData.inventoryType; }
+        public InventoryType GetInventoryType() { return ExtendedData.inventoryType; }
         public int GetAllowableClass() { return ExtendedData.AllowableClass; }
-        public int GetAllowableRace() { return ExtendedData.AllowableRace; }
+        public long GetAllowableRace() { return ExtendedData.AllowableRace; }
         public uint GetBaseItemLevel() { return ExtendedData.ItemLevel; }
         public int GetBaseRequiredLevel() { return ExtendedData.RequiredLevel; }
         public uint GetRequiredSkill() { return ExtendedData.RequiredSkill; }
@@ -297,6 +297,7 @@ namespace Game.Entities
         public HolidayIds GetHolidayID() { return (HolidayIds)ExtendedData.HolidayID; }
         public float GetStatScalingFactor() { return ExtendedData.StatScalingFactor; }
         public byte GetArtifactID() { return ExtendedData.ArtifactID; }
+        public byte GetRequiredExpansion() { return ExtendedData.RequiredExpansion; }
 
         public bool IsCurrencyToken() { return (GetBagFamily() & BagFamilyMask.CurrencyTokens) != 0; }
 
@@ -321,8 +322,6 @@ namespace Game.Entities
 
         // extra fields, not part of db2 files
         public uint ScriptId;
-        public uint DisenchantID;
-        public uint RequiredDisenchantSkill;
         public uint FoodType;
         public uint MinMoneyLoot;
         public uint MaxMoneyLoot;

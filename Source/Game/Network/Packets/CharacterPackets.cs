@@ -217,6 +217,7 @@ namespace Game.Network.Packets
                 data.WriteUInt32(LastPlayedTime);
                 data.WriteUInt16(SpecID);
                 data.WriteUInt32(Unknown703);
+                data.WriteUInt32(LastLoginBuild);
                 data.WriteUInt32(Flags4);
                 data.WriteBits(Name.GetByteCount(), 6);
                 data.WriteBit(FirstLogin);

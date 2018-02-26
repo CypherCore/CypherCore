@@ -20,15 +20,15 @@ namespace Game.DataStorage
     public sealed class EmotesRecord
     {
         public uint Id;
+        public long RaceMask;
         public uint EmoteSlashCommand;
         public uint SpellVisualKitID;
         public uint EmoteFlags;
-        public int RaceMask;
         public ushort AnimID;
         public byte EmoteSpecProc;
         public uint EmoteSpecProcParam;
-        public uint EmoteSoundID;
-        public int ClassMask;
+        public byte EmoteSoundID;
+        public short ClassMask;
     }
 
     public sealed class EmotesTextRecord
@@ -41,10 +41,10 @@ namespace Game.DataStorage
     public sealed class EmotesTextSoundRecord
     {
         public uint Id;
-        public ushort EmotesTextId;
         public byte RaceId;
         public byte SexId;
         public byte ClassId;
         public uint SoundId;
+        public uint EmotesTextId;
     }
 }

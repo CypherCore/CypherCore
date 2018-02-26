@@ -25,6 +25,7 @@ using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using Framework.IO;
 
 namespace System
 {
@@ -201,26 +202,6 @@ namespace System
             return (Action<object, object>)setterMethod.CreateDelegate(typeof(Action<object, object>));
         }
 
-        public static Func<T, object> GetGetter<T>(this FieldInfo fieldInfo)
-        {
-            var paramExpression = Expression.Parameter(typeof(T));
-            var propertyExpression = Expression.Field(paramExpression, fieldInfo);
-            var convertExpression = Expression.TypeAs(propertyExpression, typeof(object));
-
-            return Expression.Lambda<Func<T, object>>(convertExpression, paramExpression).Compile();
-        }
-
-        public static Action<T, object> GetSetter<T>(this FieldInfo fieldInfo)
-        {
-            var paramExpression = Expression.Parameter(typeof(T));
-            var propertyExpression = Expression.Field(paramExpression, fieldInfo);
-            var valueExpression = Expression.Parameter(typeof(object));
-            var convertExpression = Expression.Convert(valueExpression, fieldInfo.FieldType);
-            var assignExpression = Expression.Assign(propertyExpression, convertExpression);
-
-            return Expression.Lambda<Action<T, object>>(assignExpression, paramExpression, valueExpression).Compile();
-        }
-
         public static uint[] SerializeObject<T>(this T obj)
         {
             //if (obj.GetType()<StructLayoutAttribute>() == null)
@@ -369,6 +350,97 @@ namespace System
             reader.BaseStream.Seek(pos, SeekOrigin.Begin);
             return data;
 
+        }
+
+        public static T[] ReadArray<T>(this BinaryReader reader, int size) where T : struct
+        {
+            int numBytes = FastStruct<T>.Size * size;
+
+            byte[] result = reader.ReadBytes(numBytes);
+
+            return FastStruct<T>.ReadArray(result);
+        }
+
+        public static T Read<T>(this BinaryReader reader) where T : struct
+        {
+            byte[] result = reader.ReadBytes(FastStruct<T>.Size);
+
+            return FastStruct<T>.ArrayToStructure(result);
+        }
+
+        public static T Read<T>(this BinaryReader reader, int byteCount) where T : struct
+        {
+            byte[] result = reader.ReadBytes(byteCount == 0 ? FastStruct<T>.Size : byteCount);
+
+            return FastStruct<T>.ArrayToStructure(result);
+        }
+
+        public static int ReadInt32(this BinaryReader br, int byteCount = 0)
+        {
+            if (byteCount == 0)
+                return br.ReadInt32();
+
+            if (byteCount != 4)
+            {
+
+            }
+
+            byte[] b = new byte[sizeof(int)];
+            for (int i = 0; i < byteCount; i++)
+                b[i] = br.ReadByte();
+
+            return BitConverter.ToInt32(b, 0);
+        }
+
+        public static uint ReadUInt32(this BinaryReader br, int byteCount = 0)
+        {
+            if (byteCount == 0)
+                return br.ReadUInt32();
+
+            if (byteCount != 4)
+            {
+
+            }
+
+            byte[] b = new byte[sizeof(uint)];
+            for (int i = 0; i < byteCount; i++)
+                b[i] = br.ReadByte();
+
+            return BitConverter.ToUInt32(b, 0);
+        }
+
+        public static long ReadInt64(this BinaryReader br, int byteCount = 0)
+        {
+            if (byteCount == 0)
+                return br.ReadInt64();
+
+            if (byteCount != 8)
+            {
+
+            }
+
+            byte[] b = new byte[sizeof(long)];
+            for (int i = 0; i < byteCount; i++)
+                b[i] = br.ReadByte();
+
+            return BitConverter.ToInt64(b, 0);
+        }
+
+        public static ulong ReadUInt64(this BinaryReader br, int byteCount = 0)
+        {
+            if (byteCount == 0)
+                return br.ReadUInt64();
+
+            if (byteCount != 8)
+            {
+
+            }
+
+            byte[] b = new byte[sizeof(ulong)];
+            for (int i = 0; i < byteCount; i++)
+                b[i] = br.ReadByte();
+
+            return BitConverter.ToUInt64(b, 0);
         }
         #endregion
     }

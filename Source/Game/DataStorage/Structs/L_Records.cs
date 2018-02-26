@@ -24,8 +24,8 @@ namespace Game.DataStorage
     {
         public uint Id;
         public LocalizedString Name;
+        public string Description;
         public LfgFlags Flags;
-        public LocalizedString Description;
         public float MinItemLevel;
         public ushort MaxLevel;
         public ushort TargetLevelMax;
@@ -35,7 +35,7 @@ namespace Game.DataStorage
         public ushort LastBossJournalEncounterID;
         public ushort BonusReputationAmount;
         public ushort MentorItemLevel;
-        public uint PlayerConditionID;
+        public ushort PlayerConditionID;
         public byte MinLevel;
         public byte TargetLevel;
         public byte TargetLevelMin;
@@ -75,13 +75,13 @@ namespace Game.DataStorage
     {
         public uint Id;
         public LocalizedString Name;
+        public string[] Texture = new string[6];
         public uint SpellID;
         public float MaxDarkenDepth;
         public float FogDarkenIntensity;
         public float AmbDarkenIntensity;
         public float DirDarkenIntensity;
         public float ParticleScale;
-        public string[] Texture = new string[6];
         public uint[] Color = new uint[2];
         public float[] Float = new float[18];
         public uint[] Int = new uint[4];
@@ -92,7 +92,7 @@ namespace Game.DataStorage
         public byte ParticleTexSlots;
         public byte MaterialID;
         public byte[] DepthTexCount = new byte[6];
-        public uint SoundID;
+        public ushort SoundID;
     }
 
     public sealed class LockRecord

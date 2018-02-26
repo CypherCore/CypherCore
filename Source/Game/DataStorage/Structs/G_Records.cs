@@ -22,6 +22,7 @@ namespace Game.DataStorage
 {
     public sealed class GameObjectsRecord
     {
+        public LocalizedString Name;
         public Vector3 Position;
         public float RotationX;
         public float RotationY;
@@ -29,7 +30,6 @@ namespace Game.DataStorage
         public float RotationW;
         public float Size;
         public int[] Data = new int[8];
-        public LocalizedString Name;
         public ushort MapID;
         public ushort DisplayID;
         public ushort PhaseID;
@@ -65,12 +65,12 @@ namespace Game.DataStorage
     public sealed class GarrBuildingRecord
     {
         public uint Id;
+        public string NameAlliance;
+        public string NameHorde;
+        public string Description;
+        public string Tooltip;
         public uint HordeGameObjectID;
         public uint AllianceGameObjectID;
-        public LocalizedString NameAlliance;
-        public LocalizedString NameHorde;
-        public LocalizedString Description;
-        public LocalizedString Tooltip;
         public uint IconFileDataID;
         public ushort CostCurrencyID;
         public ushort HordeTexPrefixKitID;
@@ -86,9 +86,9 @@ namespace Game.DataStorage
         public GarrisonBuildingFlags Flags;
         public byte MaxShipments;
         public byte GarrTypeID;
-        public int BuildDuration;
+        public ushort BuildDuration;
         public int CostCurrencyAmount;
-        public int BonusAmount;
+        public byte BonusAmount;
     }
 
     public sealed class GarrBuildingPlotInstRecord
@@ -114,15 +114,15 @@ namespace Game.DataStorage
 
     public sealed class GarrFollowerRecord
     {
+        public string HordeSourceText;
+        public string AllianceSourceText;
+        public string Name;
         public uint HordeCreatureID;
         public uint AllianceCreatureID;
-        public LocalizedString HordeSourceText;
-        public LocalizedString AllianceSourceText;
         public uint HordePortraitIconID;
         public uint AlliancePortraitIconID;
         public uint HordeAddedBroadcastTextID;
         public uint AllianceAddedBroadcastTextID;
-        public LocalizedString Name;
         public ushort HordeGarrFollItemSetID;
         public ushort AllianceGarrFollItemSetID;
         public ushort ItemLevelWeapon;
@@ -151,9 +151,9 @@ namespace Game.DataStorage
     public sealed class GarrFollowerXAbilityRecord
     {
         public uint Id;
-        public ushort GarrFollowerID;
         public ushort GarrAbilityID;
         public byte FactionIndex;
+        public uint GarrFollowerID;
     }
 
     public sealed class GarrPlotRecord
@@ -165,8 +165,7 @@ namespace Game.DataStorage
         public byte GarrPlotUICategoryID;
         public byte PlotType;
         public byte Flags;
-        public uint MinCount;
-        public uint MaxCount;
+        public uint[] Count = new uint[2];
     }
 
     public sealed class GarrPlotBuildingRecord
@@ -218,7 +217,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public uint SpellID;
-        public ushort GlyphPropertiesID;
+        public uint GlyphPropertiesID;
     }
 
     public sealed class GlyphPropertiesRecord
@@ -233,14 +232,13 @@ namespace Game.DataStorage
     public sealed class GlyphRequiredSpecRecord
     {
         public uint Id;
-        public ushort GlyphPropertiesID;
         public ushort ChrSpecializationID;
+        public uint GlyphPropertiesID;
     }
 
     public sealed class GuildColorBackgroundRecord
     {
         public uint Id;
-
         public byte Red;
         public byte Green;
         public byte Blue;

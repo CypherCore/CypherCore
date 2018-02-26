@@ -273,8 +273,8 @@ namespace Game.Collision
 
         public bool readFromFile(BinaryReader reader)
         {
-            var lo = reader.ReadStruct<Vector3>();
-            var hi = reader.ReadStruct<Vector3>();
+            var lo = reader.Read<Vector3>();
+            var hi = reader.Read<Vector3>();
             bounds = new AxisAlignedBox(lo, hi);
 
             uint treeSize = reader.ReadUInt32();

@@ -54,11 +54,11 @@ namespace Game.DataStorage
         public uint Id;
         public int[] ItemID = new int[24];
         public uint PetDisplayID;
-        public byte RaceID;
         public byte ClassID;
         public byte GenderID;
         public byte OutfitID;
         public byte PetFamilyID;
+        public uint RaceID;
     }
 
     public sealed class CharTitlesRecord
@@ -73,9 +73,9 @@ namespace Game.DataStorage
     public sealed class ChatChannelsRecord
     {
         public uint Id;
-        public ChannelDBCFlags Flags;
         public LocalizedString Name;
         public LocalizedString Shortcut;
+        public ChannelDBCFlags Flags;
         public byte FactionGroup;
     }
 
@@ -90,6 +90,7 @@ namespace Game.DataStorage
         public uint SelectScreenFileDataID;
         public uint IconFileDataID;
         public uint LowResScreenFileDataID;
+        public uint StartingLevel;
         public ushort Flags;
         public ushort CinematicSequenceID;
         public ushort DefaultSpec;
@@ -105,28 +106,28 @@ namespace Game.DataStorage
     public sealed class ChrClassesXPowerTypesRecord
     {
         public uint Id;
-        public byte ClassID;
         public byte PowerType;
+        public uint ClassID;
     }
 
     public sealed class ChrRacesRecord
     {
-        public uint Id;
-        public uint Flags;
-        public uint MaleDisplayID;
-        public uint FemaleDisplayID;
         public uint ClientPrefix;
         public uint ClientFileString;
         public LocalizedString Name;
-        public LocalizedString NameFemale;
-        public LocalizedString NameMale;
-        public string[] FacialHairCustomization = new string[2];
-        public string HairCustomization;
+        public string NameFemale;
+        public string LowercaseName;
+        public string LowercaseNameFemale;
+        public uint Flags;
+        public uint MaleDisplayID;
+        public uint FemaleDisplayID;
         public uint CreateScreenFileDataID;
         public uint SelectScreenFileDataID;
         public uint[] MaleCustomizeOffset = new uint[3];
         public uint[] FemaleCustomizeOffset = new uint[3];
         public uint LowResScreenFileDataID;
+        public uint StartingLevel;
+        public uint UIDisplayOrder;
         public ushort FactionID;
         public ushort ResSicknessSpellID;
         public ushort SplashSoundID;
@@ -141,18 +142,22 @@ namespace Game.DataStorage
         public byte NeutralRaceID;
         public byte ItemAppearanceFrameRaceID;
         public byte CharComponentTexLayoutHiResID;
+        public uint Id;
         public uint HighResMaleDisplayID;
         public uint HighResFemaleDisplayID;
+        public uint HeritageArmorAchievementID;
+        public uint MaleCorpseBonesModelFileDataID;
+        public uint FemaleCorpseBonesModelFileDataID;
         public uint[] AlteredFormTransitionSpellVisualID = new uint[3];
         public uint[] AlteredFormTransitionSpellVisualKitID = new uint[3];
     }
 
     public sealed class ChrSpecializationRecord
     {
+        public string Name;
+        public string Name2;
+        public string Description;
         public uint[] MasterySpellID = new uint[PlayerConst.MaxMasterySpells];
-        public LocalizedString Name;
-        public LocalizedString Name2;
-        public LocalizedString Description;
         public byte ClassID;
         public byte OrderIndex;
         public byte PetTalentType;
@@ -208,7 +213,6 @@ namespace Game.DataStorage
         public byte Flags;
         public sbyte Gender;
         public uint ExtendedDisplayInfoID;
-        public uint[] TextureVariation = new uint[3];
         public uint PortraitTextureFileDataID;
         public byte CreatureModelAlpha;
         public ushort SoundID;
@@ -223,6 +227,7 @@ namespace Game.DataStorage
         public uint StateSpellVisualKitID;
         public float InstanceOtherPlayerPetScale;                              // scale of not own player pets inside dungeons/raids/scenarios
         public uint MountSpellVisualKitID;
+        public uint[] TextureVariation = new uint[3];
     }
 
     public sealed class CreatureDisplayInfoExtraRecord
@@ -245,9 +250,9 @@ namespace Game.DataStorage
     public sealed class CreatureFamilyRecord
     {
         public uint Id;
+        public LocalizedString Name;
         public float MinScale;
         public float MaxScale;
-        public LocalizedString Name;
         public uint IconFileDataID;
         public ushort[] SkillLine = new ushort[2];
         public ushort PetFoodMask;
@@ -280,12 +285,12 @@ namespace Game.DataStorage
         public float HoverHeight;
         public uint Flags;
         public uint FileDataID;
-        public uint SizeClass;
+        public byte SizeClass;
         public uint BloodID;
-        public uint FootprintTextureID;
-        public uint FoleyMaterialID;
-        public uint FootstepEffectID;
-        public uint DeathThudEffectID;
+        public byte FootprintTextureID;
+        public byte FoleyMaterialID;
+        public byte FootstepEffectID;
+        public byte DeathThudEffectID;
         public uint SoundID;
         public uint CreatureGeosetDataID;
     }
@@ -316,23 +321,23 @@ namespace Game.DataStorage
     public sealed class CriteriaTreeRecord
     {
         public uint Id;
+        public string Description;
         public uint Amount;
-        public LocalizedString Description;
         public CriteriaTreeFlags Flags;
         public byte Operator;
-        public uint CriteriaID;
-        public uint Parent;
+        public ushort CriteriaID;
+        public ushort Parent;
         public int OrderIndex;
     }
 
     public sealed class CurrencyTypesRecord
     {
         public uint Id;
-        public LocalizedString Name;
+        public string Name;
+        public string Description;
         public uint MaxQty;
         public uint MaxEarnablePerWeek;
         public CurrencyFlags Flags;
-        public LocalizedString Description;
         public byte CategoryID;
         public byte SpellCategory;
         public byte Quality;

@@ -98,7 +98,7 @@ namespace Game
                         bindAppearances.Add((uint)transmogItem.ItemModifiedAppearanceID);
 
                     // add cost
-                    cost += itemTransmogrified.GetSpecialPrice();
+                    cost += itemTransmogrified.GetSellPrice(_player);
                 }
                 else
                     resetAppearanceItems.Add(itemTransmogrified);

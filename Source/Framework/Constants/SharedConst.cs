@@ -505,14 +505,19 @@ namespace Framework.Constants
         PandarenNeutral = 24,
         PandarenAlliance = 25,
         PandarenHorde = 26,
-        Max = 27,
+        Nightborne = 27,
+        HighmountainTauren = 28,
+        VoidElf = 29,
+        LightforgedDraenei = 30,
+        Max = 31,
 
         RaceMaskAllPlayable = ((1 << (Human - 1)) | (1 << (Orc - 1)) | (1 << (Dwarf - 1)) | (1 << (NightElf - 1)) | (1 << (Undead - 1))
             | (1 << (Tauren - 1)) | (1 << (Gnome - 1)) | (1 << (Troll - 1)) | (1 << (BloodElf - 1)) | (1 << (Draenei - 1))
-            | (1 << (Goblin - 1)) | (1 << (Worgen - 1)) | (1 << (PandarenNeutral - 1)) | (1 << (PandarenAlliance - 1)) | (1 << (PandarenHorde - 1))),
+            | (1 << (Goblin - 1)) | (1 << (Worgen - 1)) | (1 << (PandarenNeutral - 1)) | (1 << (PandarenAlliance - 1)) | (1 << (PandarenHorde - 1))
+            | (1 << (Nightborne - 1)) | (1 << (HighmountainTauren - 1)) | (1 << (VoidElf - 1)) | (1 << (LightforgedDraenei - 1))),
 
-        RaceMaskAlliance = ((1 << (Human - 1)) | (1 << (Dwarf - 1)) | (1 << (NightElf - 1)) |
-            (1 << (Gnome - 1)) | (1 << (Draenei - 1)) | (1 << (Worgen - 1)) | (1 << (PandarenAlliance - 1))),
+        RaceMaskAlliance = ((1 << (Human - 1)) | (1 << (Dwarf - 1)) | (1 << (NightElf - 1)) | (1 << (Gnome - 1)) 
+            | (1 << (Draenei - 1)) | (1 << (Worgen - 1)) | (1 << (PandarenAlliance - 1)) | (1 << (VoidElf - 1)) | (1<<(LightforgedDraenei - 1))),
 
         RaceMaskHorde = RaceMaskAllPlayable & ~RaceMaskAlliance
     }

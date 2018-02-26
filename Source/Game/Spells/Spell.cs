@@ -6108,30 +6108,23 @@ namespace Game.Spells
                         break;
                     case SpellEffectName.Disenchant:
                         {
-                            if (m_targets.GetItemTarget() == null)
+                            Item item = m_targets.GetItemTarget();
+                            if (!item)
                                 return SpellCastResult.CantBeDisenchanted;
 
                             // prevent disenchanting in trade slot
-                            if (m_targets.GetItemTarget().GetOwnerGUID() != m_caster.GetGUID())
+                            if (item.GetOwnerGUID() != m_caster.GetGUID())
                                 return SpellCastResult.CantBeDisenchanted;
 
-                            ItemTemplate itemProto = m_targets.GetItemTarget().GetTemplate();
+                            ItemTemplate itemProto = item.GetTemplate();
                             if (itemProto == null)
                                 return SpellCastResult.CantBeDisenchanted;
 
-                            int item_quality = (int)itemProto.GetQuality();
-                            // 2.0.x addon: Check player enchanting level against the item disenchanting requirements
-                            uint item_disenchantskilllevel = itemProto.RequiredDisenchantSkill;
-                            if (item_disenchantskilllevel == Convert.ToUInt32(-1))
+                            ItemDisenchantLootRecord itemDisenchantLoot = item.GetDisenchantLoot(m_caster.ToPlayer());
+                            if (itemDisenchantLoot == null)
                                 return SpellCastResult.CantBeDisenchanted;
-                            if (item_disenchantskilllevel > player.GetSkillValue(SkillType.Enchanting))
+                            if (itemDisenchantLoot.RequiredDisenchantSkill > player.GetSkillValue(SkillType.Enchanting))
                                 return SpellCastResult.LowCastlevel;
-                            if (item_quality > 4 || item_quality < 2)
-                                return SpellCastResult.CantBeDisenchanted;
-                            if (itemProto.GetClass() != ItemClass.Weapon && itemProto.GetClass() != ItemClass.Armor)
-                                return SpellCastResult.CantBeDisenchanted;
-                            if (itemProto.DisenchantID == 0)
-                                return SpellCastResult.CantBeDisenchanted;
                             break;
                         }
                     case SpellEffectName.Prospecting:

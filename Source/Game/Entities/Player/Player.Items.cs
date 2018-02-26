@@ -1476,7 +1476,7 @@ namespace Game.Entities
             if (Convert.ToBoolean(proto.GetFlags2() & ItemFlags2.FactionAlliance) && GetTeam() != Team.Alliance)
                 return InventoryResult.CantEquipEver;
 
-            if ((proto.GetAllowableClass() & getClassMask()) == 0 || (proto.GetAllowableRace() & getRaceMask()) == 0)
+            if ((proto.GetAllowableClass() & getClassMask()) == 0 || (proto.GetAllowableRace() & (long)getRaceMask()) == 0)
                 return InventoryResult.CantEquipEver;
 
             if (proto.GetRequiredSkill() != 0)
@@ -3323,7 +3323,7 @@ namespace Game.Entities
                 return InventoryResult.ItemNotFound;
 
             // Used by group, function GroupLoot, to know if a prototype can be used by a player
-            if ((proto.GetAllowableClass() & getClassMask()) == 0 || (proto.GetAllowableRace() & getRaceMask()) == 0)
+            if ((proto.GetAllowableClass() & getClassMask()) == 0 || (proto.GetAllowableRace() & (long)getRaceMask()) == 0)
                 return InventoryResult.CantEquipEver;
 
             if (proto.GetRequiredSpell() != 0 && !HasSpell(proto.GetRequiredSpell()))
@@ -6320,7 +6320,7 @@ namespace Game.Entities
                     switch (loot_type)
                     {
                         case LootType.Disenchanting:
-                            loot.FillLoot(item.GetTemplate().DisenchantID, LootStorage.Disenchant, this, true);
+                            loot.FillLoot(item.GetDisenchantLoot(this).Id, LootStorage.Disenchant, this, true);
                             break;
                         case LootType.Prospecting:
                             loot.FillLoot(item.GetEntry(), LootStorage.Prospecting, this, true);

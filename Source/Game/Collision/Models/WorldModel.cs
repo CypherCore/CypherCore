@@ -139,7 +139,7 @@ namespace Game.Collision
 
             liquid.iTilesX = reader.ReadUInt32();
             liquid.iTilesY = reader.ReadUInt32();
-            liquid.iCorner = reader.ReadStruct<Vector3>();
+            liquid.iCorner = reader.Read<Vector3>();
             liquid.iType = reader.ReadUInt32();
 
             uint size = (liquid.iTilesX + 1) * (liquid.iTilesY + 1);
@@ -222,7 +222,7 @@ namespace Game.Collision
                 return false;
 
             for (var i = 0; i < count; ++i)
-                vertices.Add(reader.ReadStruct<Vector3>());
+                vertices.Add(reader.Read<Vector3>());
 
             // read triangle mesh
             if (reader.ReadStringFromChars(4) != "TRIM")

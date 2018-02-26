@@ -1382,7 +1382,7 @@ namespace Game.Entities
             if (reqraces == -1)
                 return true;
 
-            if ((reqraces & getRaceMask()) == 0)
+            if ((reqraces & (long)getRaceMask()) == 0)
             {
                 if (msg)
                 {

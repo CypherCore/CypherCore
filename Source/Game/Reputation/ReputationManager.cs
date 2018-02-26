@@ -91,7 +91,7 @@ namespace Game
             if (factionEntry == null)
                 return 0;
 
-            uint raceMask = _player.getRaceMask();
+            ulong raceMask = _player.getRaceMask();
             uint classMask = _player.getClassMask();
             for (var i = 0; i < 4; i++)
             {
@@ -149,7 +149,7 @@ namespace Game
             if (factionEntry == null)
                 return 0;
 
-            uint raceMask = _player.getRaceMask();
+            ulong raceMask = _player.getRaceMask();
             uint classMask = _player.getClassMask();
             for (int i = 0; i < 4; i++)
             {
@@ -625,13 +625,13 @@ namespace Game
             if (factionEntry == null)
                 return 0;
 
-            uint raceMask = (1u << ((int)race - 1));
+            ulong raceMask = (1ul << ((int)race - 1));
             uint classMask = (1u << ((int)playerClass - 1));
 
             for (int i = 0; i < 4; i++)
             {
                 if ((factionEntry.ReputationClassMask[i] == 0 || factionEntry.ReputationClassMask[i].HasAnyFlag((ushort)classMask))
-                    && (factionEntry.ReputationRaceMask[i] == 0 || factionEntry.ReputationRaceMask[i].HasAnyFlag(raceMask)))
+                    && (factionEntry.ReputationRaceMask[i] == 0 || factionEntry.ReputationRaceMask[i].HasAnyFlag((uint)raceMask)))
                     return factionEntry.ReputationBase[i];
             }
 

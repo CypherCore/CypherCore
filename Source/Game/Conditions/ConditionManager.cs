@@ -1675,7 +1675,7 @@ namespace Game
             if (condition.MaxLevel != 0 && player.getLevel() > condition.MaxLevel)
                 return false;
 
-            if (condition.RaceMask != 0 && !Convert.ToBoolean(player.getRaceMask() & condition.RaceMask))
+            if (condition.RaceMask != 0 && !Convert.ToBoolean((long)player.getRaceMask() & condition.RaceMask))
                 return false;
 
             if (condition.ClassMask != 0 && !Convert.ToBoolean(player.getClassMask() & condition.ClassMask))

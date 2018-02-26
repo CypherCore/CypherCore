@@ -30,13 +30,12 @@ namespace Game.Spells
 {
     public class SpellInfo
     {
-        public SpellInfo(SpellInfoLoadHelper data, Dictionary<uint, SpellEffectRecord[]> effectsMap, MultiMap<uint, SpellXSpellVisualRecord> visuals, Dictionary<uint, SpellEffectScalingRecord> effectScaling)
+        public SpellInfo(SpellInfoLoadHelper data, Dictionary<uint, SpellEffectRecord[]> effectsMap, MultiMap<uint, SpellXSpellVisualRecord> visuals)
         {
             Id = data.Entry.Id;
 
             _effects = new Dictionary<uint, SpellEffectInfo[]>();
 
-            // SpellDifficultyEntry
             if (effectsMap != null)
             {
                 foreach (var pair in effectsMap)
@@ -50,8 +49,7 @@ namespace Game.Spells
                         if (effect == null)
                             continue;
 
-                        var scaling = effectScaling.LookupByKey(effect.Id);
-                        _effects[pair.Key][effect.EffectIndex] = new SpellEffectInfo(scaling, this, effect.EffectIndex, effect);
+                        _effects[pair.Key][effect.EffectIndex] = new SpellEffectInfo(this, effect.EffectIndex, effect);
                     }
                 }
             }
@@ -3671,7 +3669,7 @@ namespace Game.Spells
 
     public class SpellEffectInfo
     {
-        public SpellEffectInfo(SpellEffectScalingRecord spellEffectScaling, SpellInfo spellInfo, uint effIndex, SpellEffectRecord _effect)
+        public SpellEffectInfo(SpellInfo spellInfo, uint effIndex, SpellEffectRecord _effect)
         {
             _spellInfo = spellInfo;
             EffectIndex = effIndex;
@@ -3706,13 +3704,12 @@ namespace Game.Spells
                 TriggerSpell = _effect.EffectTriggerSpell;
                 SpellClassMask = _effect.EffectSpellClassMask;
                 BonusCoefficientFromAP = _effect.BonusCoefficientFromAP;
+                Scaling.Coefficient = _effect.Coefficient;
+                Scaling.Variance = _effect.Variance;
+                Scaling.ResourceCoefficient = _effect.ResourceCoefficient;
             }
 
             ImplicitTargetConditions = null;
-
-            Scaling.Coefficient = spellEffectScaling != null ? spellEffectScaling.Coefficient : 0.0f;
-            Scaling.Variance = spellEffectScaling != null ? spellEffectScaling.Variance : 0.0f;
-            Scaling.ResourceCoefficient = spellEffectScaling != null ? spellEffectScaling.ResourceCoefficient : 0.0f;
 
             _immunityInfo = new ImmunityInfo();
         }

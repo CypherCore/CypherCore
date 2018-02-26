@@ -37,14 +37,14 @@ namespace Game.DataStorage
     [Serializable]
     public class DB6Storage<T> : Dictionary<uint, T>, IDB2Storage where T : new()
     {
-        public void LoadData(uint indexField, DBClientHelper[] helpers, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale)
+        public void LoadData(int indexField, DB6FieldInfo[] helpers, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale)
         {
             SQLResult result = DB.Hotfix.Query(DB.Hotfix.GetPreparedStatement(preparedStatement));
             if (!result.IsEmpty())
             {
                 do
                 {
-                    var idValue = result.Read<uint>((int)indexField);
+                    var idValue = result.Read<uint>(indexField == -1 ? 0 : indexField);
 
                     var obj = new T();
                     int index = 0;
@@ -56,7 +56,7 @@ namespace Game.DataStorage
                             Array array = (Array)helper.Getter(obj);
                             for (var i = 0; i < array.Length; ++i)
                             {
-                                switch (Type.GetTypeCode(helper.RealType))
+                                switch (Type.GetTypeCode(helper.FieldType))
                                 {
                                     case TypeCode.SByte:
                                         helper.SetValue(array, result.Read<sbyte>(index++), i);
@@ -116,7 +116,7 @@ namespace Game.DataStorage
                         }
                         else
                         {
-                            switch (Type.GetTypeCode(helper.RealType))
+                            switch (Type.GetTypeCode(helper.FieldType))
                             {
                                 case TypeCode.SByte:
                                     helper.SetValue(obj, result.Read<sbyte>(index++));
