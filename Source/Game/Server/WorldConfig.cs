@@ -352,7 +352,7 @@ namespace Game
             if ((int)Values[WorldCfg.CharactersPerRealm] < 1 || (int)Values[WorldCfg.CharactersPerRealm] > 12)
             {
                 Log.outError(LogFilter.ServerLoading, "CharactersPerRealm ({0}) must be in range 1..12. Set to 12.", Values[WorldCfg.CharactersPerRealm]);
-                Values[WorldCfg.CharactersPerRealm] = 11;
+                Values[WorldCfg.CharactersPerRealm] = 16;
             }
 
             // must be after CharactersPerRealm
