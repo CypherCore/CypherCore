@@ -2,7 +2,7 @@
 
 CypherCore is an open source server project for World of Warcraft written in C#.
 
-The current support game version is: 7.3.2.25549
+The current support game version is: 7.3.5.25996
 
 ### Prerequisites
 * Visual Studio 2017 with netcore 2.0 [Download](https://www.visualstudio.com/downloads/)
@@ -19,7 +19,8 @@ The current support game version is: 7.3.2.25549
 * Extract the sql files into the core sql folder (ex: C:\CypherCore\sql)
 
 ### Playing
-* Must use Arctium WoW Client Launcher [Download](https://arctium.io/files/?f=15a62b5dcaf9cf)
+* Must use Arctium WoW Client Launcher [Download](https://arctium.io/files/?f=15a5d2736a9539)
+* Must start the launch with the argument --custom (make a shortcut and edit shortcut and add argument to target ex: Arctium WoW Client Launcher.exe" --custom
 
 ### Support / General Info
 * Check out our channel on Arctium Discord [Here](https://discord.gg/Hac3qn6)
