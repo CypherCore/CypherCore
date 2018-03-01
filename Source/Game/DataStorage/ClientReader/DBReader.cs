@@ -1,15 +1,30 @@
-﻿using Framework.Collections;
+﻿/*
+ * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
 using Framework.Dynamic;
 using Framework.GameMath;
-using Framework.IO;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Linq;
+using System.Reflection;
 
 namespace Game.DataStorage
 {
@@ -147,7 +162,7 @@ namespace Game.DataStorage
         static void ReadHeader(BinaryReader reader)
         {
             Header = new DB6Header();
-            Header.Signature = reader.ReadStringFromChars(4);
+            Header.Signature = reader.ReadUInt32();
             Header.RecordCount = reader.ReadUInt32();
             Header.FieldCount = reader.ReadUInt32();
             Header.RecordSize = reader.ReadUInt32();
@@ -656,7 +671,7 @@ namespace Game.DataStorage
             return Convert.ToBoolean(Flags & HeaderFlags.OffsetMap);
         }
 
-        public string Signature;
+        public uint Signature;
         public uint RecordCount;
         public uint FieldCount;
         public uint RecordSize;

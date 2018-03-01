@@ -164,9 +164,11 @@ namespace Game.Collision
                 {
                     uint name_length, displayId;
                     string name;
+
+                    long length = reader.BaseStream.Length;
                     while (true)
                     {
-                        if (reader.BaseStream.Position >= reader.BaseStream.Length)
+                        if (reader.BaseStream.Position >= length)
                             break;
 
                         Vector3 v1, v2;

@@ -15,12 +15,13 @@ The current support game version is: 7.3.5.26124
 * Make sure Conf files are updated and point the the correct folders and sql user and databases
 
 ### Installing the database
-* Download the full Trinity Core database (TDB 720.00) [Download](https://github.com/TrinityCore/TrinityCore/releases)
+* Download the full Trinity Core database (TDB 735.00) [Download](https://github.com/TrinityCore/TrinityCore/releases)
 * Extract the sql files into the core sql folder (ex: C:\CypherCore\sql)
 
 ### Playing
 * Must use Arctium WoW Client Launcher [Download](https://arctium.io/files/?f=15a5d2736a9539)
-* Must start the launch with the argument --custom (make a shortcut and edit shortcut and add argument to target ex: Arctium WoW Client Launcher.exe" --custom
+* Must start the launch with the argument --custom 
+(make a shortcut and edit shortcut and add argument to target ex: Arctium WoW Client Launcher.exe" --custom)
 
 ### Support / General Info
 * Check out our channel on Arctium Discord [Here](https://discord.gg/Hac3qn6)
