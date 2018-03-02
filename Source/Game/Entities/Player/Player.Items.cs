@@ -5990,7 +5990,7 @@ namespace Game.Entities
             }
         }
 
-        public byte GetInventorySlotCount() { return GetByteValue(PlayerFields.Bytes2, PlayerFieldOffsets.FieldBytes2OffsetNumBackpackSlots);    }
+        public byte GetInventorySlotCount() { return GetByteValue(PlayerFields.FieldBytes2, PlayerFieldOffsets.FieldBytes2OffsetNumBackpackSlots);    }
         public void SetInventorySlotCount(byte slots)
         {
             //ASSERT(slots <= (INVENTORY_SLOT_ITEM_END - INVENTORY_SLOT_ITEM_START));
