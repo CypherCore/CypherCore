@@ -51,17 +51,17 @@ namespace Framework.Database
                     fileName = @"\sql\base\characters_database.sql";
                     break;
                 case "WorldDatabase":
-                    fileName = @"\TDB_world_720.00_2017_04_18.sql";
+                    fileName = @"\sql\TDB_world_735.00_2018_02_19.sql";
                     break;
                 case "HotfixDatabase":
-                    fileName = @"\TDB_hotfixes_720.00_2017_04_18.sql";
+                    fileName = @"\sql\TDB_hotfixes_735.00_2018_02_19.sql";
                     break;     
             }
 
             if (!File.Exists(path + fileName))
             {
                 Log.outError(LogFilter.SqlUpdates, $"File \"{fileName}\" is missing, download it from \"http://www.trinitycore.org/f/files/category/1-database/\"" +
-                    " and place it in your worldserver directory.");
+                    " and place it in your sql directory.");
                 return false;
             }
 

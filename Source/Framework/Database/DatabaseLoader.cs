@@ -30,18 +30,18 @@ namespace Framework.Database
             _updateFlags = ConfigMgr.GetDefaultValue("Updates.EnableDatabases", defaultUpdateMask);
         }
 
-        public void AddDatabase<T>(MySqlBase<T> database, string dbName)
+        public void AddDatabase<T>(MySqlBase<T> database, string baseDBName)
         {
             bool updatesEnabled = database.IsAutoUpdateEnabled(_updateFlags);
             _open.Add(() =>
             {
                 MySqlConnectionInfo connectionObject = new MySqlConnectionInfo
                 {
-                    Host = ConfigMgr.GetDefaultValue(dbName + "DatabaseInfo.Host", ""),
-                    Port = ConfigMgr.GetDefaultValue(dbName + "DatabaseInfo.Port", ""),
-                    Username = ConfigMgr.GetDefaultValue(dbName + "DatabaseInfo.Username", ""),
-                    Password = ConfigMgr.GetDefaultValue(dbName + "DatabaseInfo.Password", ""),
-                    Database = ConfigMgr.GetDefaultValue(dbName + "DatabaseInfo.Database", "")
+                    Host = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Host", ""),
+                    Port = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Port", ""),
+                    Username = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Username", ""),
+                    Password = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Password", ""),
+                    Database = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Database", "")
                 };
 
                 var error = database.Initialize(connectionObject);
@@ -50,14 +50,14 @@ namespace Framework.Database
                     // Database does not exist
                     if (error == MySqlErrorCode.UnknownDatabase && updatesEnabled && _autoSetup)
                     {
-                        Log.outInfo(LogFilter.ServerLoading, $"Database \"{dbName}\" does not exist, do you want to create it? [yes (default) / no]: ");
+                        Log.outInfo(LogFilter.ServerLoading, $"Database \"{connectionObject.Database}\" does not exist, do you want to create it? [yes (default) / no]: ");
 
                         string answer = Console.ReadLine();
                         if (string.IsNullOrEmpty(answer) || answer[0] != 'y')
                             return false;
 
-                        Log.outInfo(LogFilter.ServerLoading, $"Creating database \"{dbName}\"...");
-                        string sqlString = $"CREATE DATABASE `{dbName}` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci";
+                        Log.outInfo(LogFilter.ServerLoading, $"Creating database \"{connectionObject.Database}\"...");
+                        string sqlString = $"CREATE DATABASE `{connectionObject.Database}` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci";
                         // Try to create the database and connect again if auto setup is enabled
                         if (database.Apply(sqlString) && database.Initialize(connectionObject) == MySqlErrorCode.None)
                             error = MySqlErrorCode.None;
@@ -66,7 +66,7 @@ namespace Framework.Database
                     // If the error wasn't handled quit
                     if (error != MySqlErrorCode.None)
                     {
-                        Log.outError(LogFilter.ServerLoading, $"\nDatabase {dbName} NOT opened. There were errors opening the MySQL connections. Check your SQLErrors for specific errors.");
+                        Log.outError(LogFilter.ServerLoading, $"\nDatabase {connectionObject.Database} NOT opened. There were errors opening the MySQL connections. Check your SQLErrors for specific errors.");
                         return false;
                     }
 
@@ -84,7 +84,7 @@ namespace Framework.Database
                     database.Apply("SET GLOBAL max_allowed_packet=1073741824;");
                     if (!database.GetUpdater().Populate())
                     {
-                        Log.outError(LogFilter.ServerLoading, $"Could not populate the {dbName} database, see log for details.");
+                        Log.outError(LogFilter.ServerLoading, $"Could not populate the {database.GetDatabaseName()} database, see log for details.");
                         return false;
                     }
                     return true;
@@ -96,7 +96,7 @@ namespace Framework.Database
                     database.Apply("SET GLOBAL max_allowed_packet=1073741824;");
                     if (!database.GetUpdater().Update())
                     {
-                        Log.outError(LogFilter.ServerLoading, $"Could not update the {dbName} database, see log for details.");
+                        Log.outError(LogFilter.ServerLoading, $"Could not update the {database.GetDatabaseName()} database, see log for details.");
                         return false;
                     }
                     return true;
