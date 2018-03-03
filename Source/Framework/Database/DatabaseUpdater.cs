@@ -45,22 +45,22 @@ namespace Framework.Database
             switch (_database.GetType().Name)
             {
                 case "LoginDatabase":
-                    fileName = @"\sql\base\auth_database.sql";
+                    fileName = @"/sql/base/auth_database.sql";
                     break;
                 case "CharacterDatabase":
-                    fileName = @"\sql\base\characters_database.sql";
+                    fileName = @"/sql/base/characters_database.sql";
                     break;
                 case "WorldDatabase":
-                    fileName = @"\sql\TDB_world_735.00_2018_02_19.sql";
+                    fileName = @"/sql/TDB_world_735.00_2018_02_19.sql";
                     break;
                 case "HotfixDatabase":
-                    fileName = @"\sql\TDB_hotfixes_735.00_2018_02_19.sql";
-                    break;     
+                    fileName = @"/sql/TDB_hotfixes_735.00_2018_02_19.sql";
+                    break;
             }
 
             if (!File.Exists(path + fileName))
             {
-                Log.outError(LogFilter.SqlUpdates, $"File \"{fileName}\" is missing, download it from \"http://www.trinitycore.org/f/files/category/1-database/\"" +
+                Log.outError(LogFilter.SqlUpdates, $"File \"{path + fileName}\" is missing, download it from \"http://www.trinitycore.org/f/files/category/1-database/\"" +
                     " and place it in your sql directory.");
                 return false;
             }
