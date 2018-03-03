@@ -348,10 +348,10 @@ namespace Game
             Values[WorldCfg.CharacterCreatingDisabledRacemask] = GetDefaultValue("CharacterCreating.Disabled.RaceMask", 0);
             Values[WorldCfg.CharacterCreatingDisabledClassmask] = GetDefaultValue("CharacterCreating.Disabled.ClassMask", 0);
 
-            Values[WorldCfg.CharactersPerRealm] = GetDefaultValue("CharactersPerRealm", 12);
-            if ((int)Values[WorldCfg.CharactersPerRealm] < 1 || (int)Values[WorldCfg.CharactersPerRealm] > 12)
+            Values[WorldCfg.CharactersPerRealm] = GetDefaultValue("CharactersPerRealm", 16);
+            if ((int)Values[WorldCfg.CharactersPerRealm] < 1 || (int)Values[WorldCfg.CharactersPerRealm] > 16)
             {
-                Log.outError(LogFilter.ServerLoading, "CharactersPerRealm ({0}) must be in range 1..12. Set to 12.", Values[WorldCfg.CharactersPerRealm]);
+                Log.outError(LogFilter.ServerLoading, "CharactersPerRealm ({0}) must be in range 1..16. Set to 16.", Values[WorldCfg.CharactersPerRealm]);
                 Values[WorldCfg.CharactersPerRealm] = 16;
             }
 
