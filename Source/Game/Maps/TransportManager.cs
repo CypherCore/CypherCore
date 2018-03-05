@@ -61,7 +61,7 @@ namespace Game.Maps
                     continue;
                 }
 
-                if (goInfo.MoTransport.taxiPathID >= CliDB.TaxiPathNodesByPath.Keys.Max())
+                if (!CliDB.TaxiPathNodesByPath.ContainsKey(goInfo.MoTransport.taxiPathID))
                 {
                     Log.outError(LogFilter.Sql, "Transport {0} (name: {1}) has an invalid path specified in `gameobject_template`.`data0` ({2}) field, skipped.", entry, goInfo.name, goInfo.MoTransport.taxiPathID);
                     continue;

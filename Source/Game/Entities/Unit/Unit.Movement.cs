@@ -1537,18 +1537,18 @@ namespace Game.Entities
             Player playerMover = GetPlayerBeingMoved();
             if (playerMover)
             {
-                MoveTeleport moveTeleport = new MoveTeleport();
-                moveTeleport.MoverGUID = GetGUID();
-                moveTeleport.Pos = pos;
+                float x, y, z, o;
+                pos.GetPosition(out x, out y, out z, out o);
 
                 ITransport transportBase = GetDirectTransport();
                 if (transportBase != null)
-                {
-                    float o = 0f;
-                    transportBase.CalculatePassengerOffset(ref moveTeleport.Pos.posX, ref moveTeleport.Pos.posY, ref moveTeleport.Pos.posZ, ref o);
-                }
+                    transportBase.CalculatePassengerOffset(ref x, ref y, ref z, ref o);
+
+                MoveTeleport moveTeleport = new MoveTeleport();
+                moveTeleport.MoverGUID = GetGUID();
+                moveTeleport.Pos = new Position(x, y, z, o);
                 moveTeleport.TransportGUID.Set(GetTransGUID());
-                moveTeleport.Facing = pos.GetOrientation();
+                moveTeleport.Facing = o;
                 moveTeleport.SequenceIndex = m_movementCounter++;
                 playerMover.SendPacket(moveTeleport);
 

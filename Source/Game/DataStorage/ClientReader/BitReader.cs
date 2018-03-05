@@ -137,10 +137,6 @@ namespace Game.DataStorage
         {
             var val = ((bitSize + 7) / 8);
             var val1 = NextPow2((bitSize + 7) / 8);
-            if (val != val1)
-            {
-
-            }
 
             byte[] data = new byte[NextPow2((bitSize + 7) / 8)];
             unsafe

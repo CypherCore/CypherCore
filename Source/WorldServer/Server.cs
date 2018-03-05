@@ -186,6 +186,7 @@ namespace WorldServer
         static void ExitNow()
         {
             Log.outInfo(LogFilter.Server, "Halting process...");
+            Thread.Sleep(5000);
             Environment.Exit(-1);
         }
     }
