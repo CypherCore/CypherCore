@@ -218,7 +218,6 @@ namespace Game.Entities
                     SetByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PetFlags, (result.Read<bool>(9) ? UnitPetFlags.CanBeAbandoned : UnitPetFlags.CanBeRenamed | UnitPetFlags.CanBeAbandoned));
 
                     SetUInt32Value(UnitFields.Flags, (uint)UnitFlags.PvpAttackable); // this enables popup window (pet abandon, cancel)
-                    SetPowerType(PowerType.Focus);
                     break;
                 default:
                     if (!IsPetGhoul())
@@ -714,7 +713,6 @@ namespace Game.Entities
             if (!Create(map.GenerateLowGuid(HighGuid.Pet), map, cinfo.Entry))
                 return false;
 
-            SetPowerType(PowerType.Focus);
             SetUInt32Value(UnitFields.PetNameTimestamp, 0);
             SetUInt32Value(UnitFields.PetExperience, 0);
             SetUInt32Value(UnitFields.PetNextLevelExp, (uint)(Global.ObjectMgr.GetXPForLevel(getLevel() + 1) * PetXPFactor));

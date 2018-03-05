@@ -346,8 +346,7 @@ namespace Game.Entities
             // apply original stats mods before spell loading or item equipment that call before equip _RemoveStatsMods()
             UpdateMaxHealth();                                      // Update max Health (for add bonus from stamina)
             SetFullHealth();
-            if (GetPowerType() == PowerType.Mana)
-                SetFullPower(PowerType.Mana);
+            SetFullPower(PowerType.Mana);
 
             // original spells
             LearnDefaultSkills();
@@ -4826,8 +4825,6 @@ namespace Game.Entities
 
             pet.SetCreatorGUID(GetGUID());
             pet.SetUInt32Value(UnitFields.FactionTemplate, getFaction());
-
-            pet.SetPowerType(PowerType.Mana);
             pet.SetUInt64Value(UnitFields.NpcFlags, (uint)NPCFlags.None);
             pet.SetUInt32Value(UnitFields.Bytes1, 0);
             pet.InitStatsForLevel(getLevel());
@@ -5317,13 +5314,9 @@ namespace Game.Entities
 
             _ApplyAllLevelScaleItemMods(true); // Moved to above SetFullHealth so player will have full health from Heirlooms
 
-            // set current level health and mana/energy to maximum after applying all mods.
+            // Only health and mana are set to maximum.
             SetFullHealth();
             SetFullPower(PowerType.Mana);
-            SetFullPower(PowerType.Energy);
-            if (GetPower(PowerType.Rage) > GetMaxPower(PowerType.Rage))
-                SetFullPower(PowerType.Rage);
-            SetPower(PowerType.Focus, 0);
 
             // update level to hunter/summon pet
             Pet pet = GetPet();

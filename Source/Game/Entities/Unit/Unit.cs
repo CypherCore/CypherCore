@@ -1941,11 +1941,34 @@ namespace Game.Entities
                             AuraEffect powerTypeAura = powerTypeAuras.First();
                             displayPower = (PowerType)powerTypeAura.GetMiscValue();
                         }
-                        else
+                        else if (GetTypeId() == TypeId.Player)
                         {
                             ChrClassesRecord cEntry = CliDB.ChrClassesStorage.LookupByKey(GetClass());
                             if (cEntry != null && cEntry.PowerType < PowerType.Max)
                                 displayPower = cEntry.PowerType;
+                        }
+                        else if (GetTypeId() == TypeId.Unit)
+                        {
+                            Vehicle vehicle = GetVehicle();
+                            if (vehicle)
+                            {
+                                PowerDisplayRecord powerDisplay = CliDB.PowerDisplayStorage.LookupByKey(vehicle.GetVehicleInfo().PowerDisplayID[0]);
+                                if (powerDisplay != null)
+                                    displayPower = (PowerType)powerDisplay.PowerType;
+                                else if (GetClass() == Class.Rogue)
+                                    displayPower = PowerType.Energy;
+                            }
+                            else
+                            {
+                                Pet pet = ToPet();
+                                if (pet)
+                                {
+                                    if (pet.getPetType() == PetType.Hunter) // Hunter pets have focus
+                                        displayPower = PowerType.Focus;
+                                    else if (pet.IsPetGhoul() || pet.IsPetAbomination()) // DK pets have energy
+                                        displayPower = PowerType.Energy;
+                                }
+                            }
                         }
                         break;
                     }

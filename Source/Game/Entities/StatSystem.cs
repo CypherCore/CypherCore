@@ -436,29 +436,22 @@ namespace Game.Entities
                     pet.SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_POWER_TYPE);
             }*/
 
-            float powerMultiplier = 1.0f;
-            if (!IsPet())
-            {
-                Creature creature = ToCreature();
-                if (creature)
-                    powerMultiplier = creature.GetCreatureTemplate().ModMana;
-            }
+            // Update max power
+            UpdateMaxPower(powerType);
 
+            // Update current power
             switch (powerType)
             {
-                default:
-                case PowerType.Mana:
+                case PowerType.Mana: // Keep the same (druid form switching...)
+                case PowerType.Energy:
                     break;
-                case PowerType.Rage:
-                    SetMaxPower(PowerType.Rage, (int)Math.Ceiling(GetCreatePowers(PowerType.Rage) * powerMultiplier));
+                case PowerType.Rage: // Reset to zero
                     SetPower(PowerType.Rage, 0);
                     break;
-                case PowerType.Focus:
-                    SetMaxPower(PowerType.Focus, (int)Math.Ceiling(GetCreatePowers(PowerType.Focus) * powerMultiplier));
-                    SetPower(PowerType.Focus, (int)Math.Ceiling(GetCreatePowers(PowerType.Focus) * powerMultiplier));
+                case PowerType.Focus: // Make it full
+                    SetFullPower(powerType);
                     break;
-                case PowerType.Energy:
-                    SetMaxPower(PowerType.Energy, (int)Math.Ceiling(GetCreatePowers(PowerType.Energy) * powerMultiplier));
+                default:
                     break;
             }
         }
@@ -549,18 +542,7 @@ namespace Game.Entities
 
             return 0;
         }
-        public uint GetPowerIndex(PowerType powerType)
-        {
-            // This is here because hunter pets are of the warrior class.
-            // With the current implementation, the core only gives them
-            // POWER_RAGE, so we enforce the class to hunter so that they
-            // effectively get focus power.
-            Class _class = GetClass();
-            if (IsPet() && ToPet().getPetType() == PetType.Hunter)
-                _class = Class.Hunter;
-
-            return Global.DB2Mgr.GetPowerIndexByClass(powerType, _class);
-        }
+        public virtual uint GetPowerIndex(PowerType powerType) { return 0; }
         public float GetPowerPct(PowerType powerType) { return GetMaxPower(powerType) != 0 ? 100.0f* GetPower(powerType) / GetMaxPower(powerType) : 0.0f; }
 
         public void ApplyResilience(Unit victim, ref uint damage)
@@ -1651,8 +1633,16 @@ namespace Game.Entities
 
             return stamina * ratio;
         }
+        public override uint GetPowerIndex(PowerType powerType)
+        {
+            return Global.DB2Mgr.GetPowerIndexByClass(powerType, GetClass());
+        }
         public override void UpdateMaxPower(PowerType power)
         {
+            uint powerIndex = GetPowerIndex(power);
+            if (powerIndex == (uint)PowerType.Max || powerIndex >= (uint)PowerType.MaxPerClass)
+                return;
+
             UnitMods unitMod = UnitMods.PowerStart + (int)power;
 
             float value = GetModifierValue(unitMod, UnitModifierType.BaseValue) + GetCreatePowers(power);
@@ -1660,7 +1650,7 @@ namespace Game.Entities
             value += GetModifierValue(unitMod, UnitModifierType.TotalValue);
             value *= GetModifierValue(unitMod, UnitModifierType.TotalPCT);
 
-            SetMaxPower(power, (int)value);
+            SetMaxPower(power, (int)Math.Round(value));
         }
 
         public void ApplySpellPenetrationBonus(int amount, bool apply)
@@ -1782,12 +1772,31 @@ namespace Game.Entities
             SetMaxHealth((uint)value);
         }
 
+        public override uint GetPowerIndex(PowerType powerType)
+        {
+            if (powerType == GetPowerType())
+                return 0;
+            if (powerType == PowerType.AlternatePower)
+                return 1;
+            if (powerType == PowerType.ComboPoints)
+                return 2;
+
+            return (uint)PowerType.Max;
+        }
+
         public override void UpdateMaxPower(PowerType power)
         {
+            if (GetPowerIndex(power) == (uint)PowerType.Max)
+                return;
+
             UnitMods unitMod = UnitMods.PowerStart + (int)power;
 
-            float value = GetTotalAuraModValue(unitMod);
-            SetMaxPower(power, (int)value);
+            float value = GetModifierValue(unitMod, UnitModifierType.BaseValue) + GetCreatePowers(power);
+            value *= GetModifierValue(unitMod, UnitModifierType.BasePCT);
+            value += GetModifierValue(unitMod, UnitModifierType.TotalValue);
+            value *= GetModifierValue(unitMod, UnitModifierType.TotalPCT);
+
+            SetMaxPower(power, (int)Math.Round(value));
         }
 
         public override void UpdateAttackPowerAndDamage(bool ranged = false)

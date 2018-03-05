@@ -1159,27 +1159,21 @@ namespace Game.Entities
 
             switch (GetClass())
             {
-                case Class.Warrior:
-                    SetPowerType(PowerType.Rage);
-                    break;
-                case Class.Rogue:
-                    SetPowerType(PowerType.Energy);
-                    break;
-                default:
+                case Class.Paladin:
+                case Class.Mage:
                     SetMaxPower(PowerType.Mana, (int)mana);
                     SetPower(PowerType.Mana, (int)mana);
+                    break;
+                default: // We don't set max power here, 0 makes power bar hidden
                     break;
             }
 
             SetModifierValue(UnitMods.Health, UnitModifierType.BaseValue, health);
-            SetModifierValue(UnitMods.Mana, UnitModifierType.BaseValue, mana);
 
             //Damage
             float basedamage = stats.GenerateBaseDamage(cInfo);
-
             float weaponBaseMinDamage = basedamage;
             float weaponBaseMaxDamage = basedamage * 1.5f;
-
 
             SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, weaponBaseMinDamage);
             SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MaxDamage, weaponBaseMaxDamage);
