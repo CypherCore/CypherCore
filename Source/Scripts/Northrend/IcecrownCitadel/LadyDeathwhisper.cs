@@ -573,7 +573,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                 return;
 
             List<Creature> temp = new List<Creature>();
-            foreach (var guid in summons.ToList())
+            foreach (var guid in summons)
             {
                 Creature cre = ObjectAccessor.GetCreature(me, guid);
                 if (cre)

@@ -191,12 +191,12 @@ namespace Game.DataStorage
 
                         // Read header
                         M2Header header = m2file.ReadStruct<M2Header>();
-                        var buffer = new BinaryReader(new MemoryStream(m2file.ToByteArray(), 8, (int)(m2file.BaseStream.Length - 8)));
 
                         // Get camera(s) - Main header, then dump them.
                         M2Camera cam = m2file.ReadStruct<M2Camera>(8 + header.ofsCameras);
 
-                        readCamera(cam, (uint)m2file.BaseStream.Length - 8, buffer, cameraEntry);
+                        m2file.BaseStream.Position = 8;
+                        readCamera(cam, (uint)m2file.BaseStream.Length - 8, m2file, cameraEntry);
                     }
                 }
                 catch (EndOfStreamException)

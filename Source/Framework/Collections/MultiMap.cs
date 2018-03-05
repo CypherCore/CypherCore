@@ -119,7 +119,7 @@ namespace System.Collections.Generic
         public List<TValue> LookupByKey(TKey key)
         {
             if (_interalStorage.ContainsKey(key))
-                return _interalStorage[key].ToList();
+                return _interalStorage[key];
 
             return new List<TValue>();
         }
@@ -128,7 +128,7 @@ namespace System.Collections.Generic
         {
             TKey newkey = (TKey)Convert.ChangeType(key, typeof(TKey));
             if (_interalStorage.ContainsKey(newkey))
-                return _interalStorage[newkey].ToList();
+                return _interalStorage[newkey];
 
             return new List<TValue>();
         }
@@ -363,7 +363,7 @@ namespace System.Collections.Generic
         public List<TValue> LookupByKey(TKey key)
         {
             if (_interalStorage.ContainsKey(key))
-                return _interalStorage[key].ToList();
+                return _interalStorage[key];
 
             return new List<TValue>();
         }
@@ -372,7 +372,7 @@ namespace System.Collections.Generic
         {
             TKey newkey = (TKey)Convert.ChangeType(key, typeof(TKey));
             if (_interalStorage.ContainsKey(newkey))
-                return _interalStorage[newkey].ToList();
+                return _interalStorage[newkey];
 
             return new List<TValue>();
         }

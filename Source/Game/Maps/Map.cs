@@ -86,9 +86,8 @@ namespace Game.Maps
                 var header = reader.ReadStruct<mapFileHeader>();
                 if (new string(header.mapMagic) != MapConst.MapMagic || new string(header.versionMagic) != MapConst.MapVersionMagic)
                 {
-                    Log.outError(LogFilter.Maps,
-                        "Map file '{0}' is from an incompatible map version ({1}), {2} is expected. Please recreate using the mapextractor.",
-                        fileName, Convert.ToString(header.versionMagic), MapConst.MapVersionMagic);
+                    Log.outError(LogFilter.Maps, "Map file '{0}' is from an incompatible map version ({1}), {2} is expected. Please recreate using the mapextractor.",
+                        fileName, new string(header.versionMagic), MapConst.MapVersionMagic);
                     return false;
                 }
                 return true;
@@ -551,10 +550,11 @@ namespace Game.Maps
         public virtual void Update(uint diff)
         {
             _dynamicTree.update(diff);
-            
+
             // update worldsessions for existing players
-            foreach (Player player in m_activePlayers.ToList())
+            for (var i = 0; i < m_activePlayers.Count; ++i)
             {
+                Player player = m_activePlayers[i];
                 if (player.IsInWorld)
                 {
                     WorldSession session = player.GetSession();
@@ -562,6 +562,7 @@ namespace Game.Maps
                     session.Update(diff, updater);
                 }
             }
+
             // update active cells around players and active objects
             resetMarkedCells();
             
@@ -570,8 +571,9 @@ namespace Game.Maps
             var grid_object_update = new Visitor(update, GridMapTypeMask.AllGrid);
             var world_object_update = new Visitor(update, GridMapTypeMask.AllWorld);
 
-            foreach (Player player in m_activePlayers.ToList())
+            for (var i = 0; i < m_activePlayers.Count; ++i)
             {
+                Player player = m_activePlayers[i];
                 if (!player.IsInWorld)
                     continue;
                 
@@ -612,16 +614,18 @@ namespace Game.Maps
                 }
             }
        
-            foreach (WorldObject obj in m_activeNonPlayers.ToList())
+            for (var i = 0; i < m_activeNonPlayers.Count; ++i)
             {
+                WorldObject obj = m_activeNonPlayers[i];
                 if (!obj.IsInWorld)
                     continue;
 
                 VisitNearbyCellsOf(obj, grid_object_update, world_object_update);
             }
             
-            foreach (Transport transport in _transports.ToList())
+            for (var i = 0; i < _transports.Count; ++i)
             {
+                Transport transport = _transports[i];
                 if (!transport || !transport.IsInWorld)
                     continue;
 
@@ -923,6 +927,7 @@ namespace Game.Maps
             Cell old_cell = dynObj.GetCurrentCell();
 
             Contract.Assert(integrity_check == old_cell);
+
             Cell new_cell = new Cell(x, y);
 
             if (getGrid(new_cell.GetGridX(), new_cell.GetGridY()) == null)
@@ -947,6 +952,7 @@ namespace Game.Maps
 
             old_cell = dynObj.GetCurrentCell();
             integrity_check = new Cell(dynObj.GetPositionX(), dynObj.GetPositionY());
+
             Contract.Assert(integrity_check == old_cell);
         }
 
@@ -989,6 +995,7 @@ namespace Game.Maps
 
             if (c._moveState == ObjectCellMoveState.None)
                 creaturesToMove.Add(c);
+
             c.SetNewCellPosition(x, y, z, ang);
         }
 
@@ -1061,8 +1068,10 @@ namespace Game.Maps
         void MoveAllCreaturesInMoveList()
         {
             _creatureToMoveLock = true;
-            foreach (Creature creature in creaturesToMove.ToList())
+
+            for (var i = 0; i< creaturesToMove.Count; ++i)
             {
+                Creature creature = creaturesToMove[i];
                 if (creature.GetMap() != this) //pet is teleported to another map
                     continue;
 
@@ -1104,6 +1113,7 @@ namespace Game.Maps
                     }
                 }
             }
+
             creaturesToMove.Clear();
             _creatureToMoveLock = false;
         }
@@ -1111,8 +1121,10 @@ namespace Game.Maps
         void MoveAllGameObjectsInMoveList()
         {
             _gameObjectsToMoveLock = true;
-            foreach (GameObject go in _gameObjectsToMove)
+
+            for (var i = 0; i < _gameObjectsToMove.Count; ++i)
             {
+                GameObject go = _gameObjectsToMove[i];
                 if (go.GetMap() != this) //transport is teleported to another map
                     continue;
 
@@ -1148,6 +1160,7 @@ namespace Game.Maps
                     }
                 }
             }
+
             _gameObjectsToMove.Clear();
             _gameObjectsToMoveLock = false;
         }
@@ -1155,8 +1168,10 @@ namespace Game.Maps
         void MoveAllDynamicObjectsInMoveList()
         {
             _dynamicObjectsToMoveLock = true;
-            foreach (var dynObj in _dynamicObjectsToMove)
+
+            for (var i = 0; i < _dynamicObjectsToMove.Count; ++i)
             {
+                DynamicObject dynObj = _dynamicObjectsToMove[i];
                 if (dynObj.GetMap() != this) //transport is teleported to another map
                     continue;
 
@@ -1188,8 +1203,10 @@ namespace Game.Maps
         void MoveAllAreaTriggersInMoveList()
         {
             _areaTriggersToMoveLock = true;
-            foreach (AreaTrigger at in _areaTriggersToMove)
+
+            for (var i = 0; i < _areaTriggersToMove.Count; ++i)
             {
+                AreaTrigger at = _areaTriggersToMove[i];
                 if (at.GetMap() != this) //transport is teleported to another map
                     continue;
 
@@ -2095,8 +2112,9 @@ namespace Game.Maps
 
         public virtual void DelayedUpdate(uint diff)
         {
-            foreach (var transport in _transports.ToList())
+            for (var i = 0; i < _transports.Count; ++i)
             {
+                Transport transport = _transports[i];
                 if (!transport.IsInWorld)
                     continue;
 

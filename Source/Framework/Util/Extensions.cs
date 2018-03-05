@@ -15,17 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Framework.IO;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Numerics;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using Framework.IO;
 
 namespace System
 {
@@ -338,20 +337,6 @@ namespace System
             return new string(reader.ReadChars(count));
         }
 
-        public static byte[] ToByteArray(this BinaryReader reader)
-        {
-            var data = new byte[reader.BaseStream.Length];
-
-            long pos = reader.BaseStream.Position;
-            reader.BaseStream.Seek(0, SeekOrigin.Begin);
-            for (int i = 0; i < data.Length; i++)
-                data[i] = (byte)reader.BaseStream.ReadByte();
-
-            reader.BaseStream.Seek(pos, SeekOrigin.Begin);
-            return data;
-
-        }
-
         public static T[] ReadArray<T>(this BinaryReader reader, int size) where T : struct
         {
             int numBytes = FastStruct<T>.Size * size;
@@ -373,74 +358,6 @@ namespace System
             byte[] result = reader.ReadBytes(byteCount == 0 ? FastStruct<T>.Size : byteCount);
 
             return FastStruct<T>.ArrayToStructure(result);
-        }
-
-        public static int ReadInt32(this BinaryReader br, int byteCount = 0)
-        {
-            if (byteCount == 0)
-                return br.ReadInt32();
-
-            if (byteCount != 4)
-            {
-
-            }
-
-            byte[] b = new byte[sizeof(int)];
-            for (int i = 0; i < byteCount; i++)
-                b[i] = br.ReadByte();
-
-            return BitConverter.ToInt32(b, 0);
-        }
-
-        public static uint ReadUInt32(this BinaryReader br, int byteCount = 0)
-        {
-            if (byteCount == 0)
-                return br.ReadUInt32();
-
-            if (byteCount != 4)
-            {
-
-            }
-
-            byte[] b = new byte[sizeof(uint)];
-            for (int i = 0; i < byteCount; i++)
-                b[i] = br.ReadByte();
-
-            return BitConverter.ToUInt32(b, 0);
-        }
-
-        public static long ReadInt64(this BinaryReader br, int byteCount = 0)
-        {
-            if (byteCount == 0)
-                return br.ReadInt64();
-
-            if (byteCount != 8)
-            {
-
-            }
-
-            byte[] b = new byte[sizeof(long)];
-            for (int i = 0; i < byteCount; i++)
-                b[i] = br.ReadByte();
-
-            return BitConverter.ToInt64(b, 0);
-        }
-
-        public static ulong ReadUInt64(this BinaryReader br, int byteCount = 0)
-        {
-            if (byteCount == 0)
-                return br.ReadUInt64();
-
-            if (byteCount != 8)
-            {
-
-            }
-
-            byte[] b = new byte[sizeof(ulong)];
-            for (int i = 0; i < byteCount; i++)
-                b[i] = br.ReadByte();
-
-            return BitConverter.ToUInt64(b, 0);
         }
         #endregion
     }
