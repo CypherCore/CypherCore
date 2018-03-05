@@ -1687,12 +1687,15 @@ namespace Game.Entities
                         }
                         else
                         {
+                            // requires item equipped in all armor slots
                             foreach (byte i in new[] { EquipmentSlot.Head, EquipmentSlot.Shoulders, EquipmentSlot.Chest, EquipmentSlot.Waist, EquipmentSlot.Legs, EquipmentSlot.Feet, EquipmentSlot.Wrist, EquipmentSlot.Hands })
                             {
                                 Item item = GetUseableItemByPos(InventorySlots.Bag0, i);
-                                if (!item || !item.IsFitToSpellRequirements(spellInfo))
+                                if (!item || item == ignoreItem || !item.IsFitToSpellRequirements(spellInfo))
                                     return false;
                             }
+
+                            return true;
                         }
                         break;
                     }
