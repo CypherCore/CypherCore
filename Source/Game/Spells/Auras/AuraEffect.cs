@@ -2177,21 +2177,28 @@ namespace Game.Spells
                     var mountDisplays = Global.DB2Mgr.GetMountDisplays(mountEntry.Id);
                     if (mountDisplays != null)
                     {
-                        List<MountXDisplayRecord> usableDisplays = mountDisplays.Where(mountDisplay =>
+                        if (mountEntry.IsSelfMount())
                         {
-                            Player playerTarget = target.ToPlayer();
-                            if (playerTarget)
+                            displayId = 73200; //DisplayId: HiddenMount 
+                        }
+                        else
+                        {
+                            List<MountXDisplayRecord> usableDisplays = mountDisplays.Where(mountDisplay =>
                             {
-                                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(mountDisplay.PlayerConditionID);
-                                if (playerCondition != null)
-                                    return ConditionManager.IsPlayerMeetingCondition(playerTarget, playerCondition);
-                            }
+                                Player playerTarget = target.ToPlayer();
+                                if (playerTarget)
+                                {
+                                    PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(mountDisplay.PlayerConditionID);
+                                    if (playerCondition != null)
+                                        return ConditionManager.IsPlayerMeetingCondition(playerTarget, playerCondition);
+                                }
 
-                            return true;
-                        }).ToList();
+                                return true;
+                            }).ToList();
 
-                        if (!usableDisplays.Empty())
-                            displayId = usableDisplays.SelectRandom().DisplayID;
+                            if (!usableDisplays.Empty())
+                                displayId = usableDisplays.SelectRandom().DisplayID;
+                        }
                     }
                     // TODO: CREATE TABLE mount_vehicle (mountId, vehicleCreatureId) for future mounts that are vehicles (new mounts no longer have proper data in MiscValue)
                     //if (MountVehicle const* mountVehicle = sObjectMgr->GetMountVehicle(mountEntry->Id))
@@ -2203,7 +2210,7 @@ namespace Game.Spells
                 {
                     vehicleId = creatureInfo.VehicleId;
 
-                    if (displayId == 0 || vehicleId != 0)
+                    if (displayId == 0)
                     {
                         displayId = ObjectManager.ChooseDisplayId(creatureInfo);
                         Global.ObjectMgr.GetCreatureModelRandomGender(ref displayId);

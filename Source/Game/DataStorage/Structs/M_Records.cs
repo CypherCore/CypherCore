@@ -137,7 +137,9 @@ namespace Game.DataStorage
         public uint Id;
         public uint PlayerConditionId;
         public byte UiModelSceneID;
-    }
+
+        public bool IsSelfMount() { return (Flags & (ushort)MountFlags.SelfMount) != 0; }
+}
 
     public sealed class MountCapabilityRecord
     {

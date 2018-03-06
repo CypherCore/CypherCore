@@ -306,8 +306,7 @@ namespace Scripts.Spells.Generic
         public const uint GoblinMale = 31002;
         public const uint GoblinFemale = 31003;
 
-        //RunningWild
-        public const uint RunningWild = 73200;
+        public const uint HiddenMount = 73200;
     }
 
     struct TextIds
@@ -2246,7 +2245,7 @@ namespace Scripts.Spells.Generic
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            if (!CliDB.CreatureDisplayInfoStorage.ContainsKey(ModelIds.RunningWild))
+            if (!CliDB.CreatureDisplayInfoStorage.ContainsKey(ModelIds.HiddenMount))
                 return false;
             return true;
         }
@@ -2256,7 +2255,7 @@ namespace Scripts.Spells.Generic
             Unit target = GetTarget();
             PreventDefaultAction();
 
-            target.Mount(ModelIds.RunningWild, 0, 0);
+            target.Mount(ModelIds.HiddenMount, 0, 0);
 
             // cast speed aura
             MountCapabilityRecord mountCapability = CliDB.MountCapabilityStorage.LookupByKey(aurEff.GetAmount());
