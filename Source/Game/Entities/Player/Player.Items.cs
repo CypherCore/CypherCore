@@ -6713,5 +6713,23 @@ namespace Game.Entities
 
             return null;
         }
+
+        //Misc
+        void UpdateItemLevelAreaBasedScaling()
+        {
+            // @todo Activate pvp item levels during world pvp
+            Map map = GetMap();
+            bool pvpActivity = map.IsBattlegroundOrArena() || ((int)map.GetEntry().Flags[1]).HasAnyFlag(0x40) || HasPvpRulesEnabled();
+
+            if (_usePvpItemLevels != pvpActivity)
+            {
+                float healthPct = GetHealthPct();
+                _RemoveAllItemMods();
+                ActivatePvpItemLevels(pvpActivity);
+                _ApplyAllItemMods();
+                SetHealth(MathFunctions.CalculatePct(GetMaxHealth(), healthPct));
+            }
+            // @todo other types of power scaling such as timewalking
+        }
     }
 }

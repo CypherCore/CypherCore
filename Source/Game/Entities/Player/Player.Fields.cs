@@ -65,6 +65,7 @@ namespace Game.Entities
         uint m_ArenaTeamIdInvited;
         long m_lastHonorUpdateTime;
         uint m_contestedPvPTimer;
+        bool _usePvpItemLevels;
 
         //Groups/Raids
         GroupReference m_group = new GroupReference();

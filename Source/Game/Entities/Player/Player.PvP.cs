@@ -334,6 +334,9 @@ namespace Game.Entities
         public uint GetHonorLevel() { return GetUInt32Value(PlayerFields.HonorLevel); }
         public bool IsMaxHonorLevelAndPrestige() { return IsMaxPrestige() && GetHonorLevel() == PlayerConst.MaxHonorLevel; }
 
+        public void ActivatePvpItemLevels(bool activate) { _usePvpItemLevels = activate; }
+        public bool IsUsingPvpItemLevels() { return _usePvpItemLevels; }
+
         void ResetPvpTalents()
         {
             foreach (var talentInfo in CliDB.PvpTalentStorage.Values)
@@ -489,6 +492,8 @@ namespace Game.Entities
                     aura.SetDuration(-1);
                 }
             }
+
+            UpdateItemLevelAreaBasedScaling();
         }
 
         void DisablePvpRules()
@@ -498,7 +503,10 @@ namespace Game.Entities
                 return;
 
             if (GetCombatTimer() == 0)
+            { 
                 RemoveAurasDueToSpell(PlayerConst.SpellPvpRulesEnabled);
+                UpdateItemLevelAreaBasedScaling();
+            }
             else
             {
                 Aura aura = GetAura(PlayerConst.SpellPvpRulesEnabled);

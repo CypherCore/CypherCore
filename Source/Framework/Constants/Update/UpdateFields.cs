@@ -156,7 +156,7 @@ namespace Framework.Constants
         HoverHeight = ObjectFields.End + 0x0b3, // Size: 1, Flags: Public
         MinItemLevelCutoff = ObjectFields.End + 0x0b4, // Size: 1, Flags: Public
         MinItemLevel = ObjectFields.End + 0x0b5, // Size: 1, Flags: Public
-        Maxitemlevel = ObjectFields.End + 0x0b6, // Size: 1, Flags: Public
+        MaxItemlevel = ObjectFields.End + 0x0b6, // Size: 1, Flags: Public
         WildBattlepetLevel = ObjectFields.End + 0x0b7, // Size: 1, Flags: Public
         BattlepetCompanionNameTimestamp = ObjectFields.End + 0x0b8, // Size: 1, Flags: Public
         InteractSpellid = ObjectFields.End + 0x0b9, // Size: 1, Flags: Public

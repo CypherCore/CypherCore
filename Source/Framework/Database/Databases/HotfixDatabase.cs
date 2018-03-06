@@ -690,6 +690,9 @@ namespace Framework.Database
             // PvpDifficulty.db2
             PrepareStatement(HotfixStatements.SEL_PVP_DIFFICULTY, "SELECT ID, BracketID, MinLevel, MaxLevel, MapID FROM pvp_difficulty ORDER BY ID DESC");
 
+            // PvpItem.db2
+            PrepareStatement(HotfixStatements.SEL_PVP_ITEM, "SELECT ID, ItemID, ItemLevelBonus FROM pvp_item ORDER BY ID DESC");
+
             // PvpReward.db2
             PrepareStatement(HotfixStatements.SEL_PVP_REWARD, "SELECT ID, HonorLevel, Prestige, RewardPackID FROM pvp_reward ORDER BY ID DESC");
 
@@ -1390,6 +1393,8 @@ namespace Framework.Database
         SEL_PRESTIGE_LEVEL_INFO_LOCALE,
 
         SEL_PVP_DIFFICULTY,
+
+        SEL_PVP_ITEM,
 
         SEL_PVP_REWARD,
 

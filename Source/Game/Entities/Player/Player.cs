@@ -5702,6 +5702,8 @@ namespace Game.Entities
 
             if (_garrison != null)
                 _garrison.SendRemoteInfo();
+
+            UpdateItemLevelAreaBasedScaling();
         }
 
         public bool CanSpeak()

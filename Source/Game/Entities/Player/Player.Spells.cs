@@ -651,7 +651,7 @@ namespace Game.Entities
                             if (pEnchant.ScalingClass != 0)
                             {
                                 int scalingClass = pEnchant.ScalingClass;
-                                if ((GetUInt32Value(UnitFields.MinItemLevel) != 0 || GetUInt32Value(UnitFields.Maxitemlevel) != 0) && pEnchant.ScalingClassRestricted != 0)
+                                if ((GetUInt32Value(UnitFields.MinItemLevel) != 0 || GetUInt32Value(UnitFields.MaxItemlevel) != 0) && pEnchant.ScalingClassRestricted != 0)
                                     scalingClass = pEnchant.ScalingClassRestricted;
 
                                 uint minLevel = ((uint)(pEnchant.Flags)).HasAnyFlag(0x20u) ? 1 : 60u;
@@ -691,7 +691,7 @@ namespace Game.Entities
                                 if (pEnchant.ScalingClass != 0)
                                 {
                                     int scalingClass = pEnchant.ScalingClass;
-                                    if ((GetUInt32Value(UnitFields.MinItemLevel) != 0 || GetUInt32Value(UnitFields.Maxitemlevel) != 0) && pEnchant.ScalingClassRestricted != 0)
+                                    if ((GetUInt32Value(UnitFields.MinItemLevel) != 0 || GetUInt32Value(UnitFields.MaxItemlevel) != 0) && pEnchant.ScalingClassRestricted != 0)
                                         scalingClass = pEnchant.ScalingClassRestricted;
 
                                     uint minLevel = ((uint)(pEnchant.Flags)).HasAnyFlag(0x20u) ? 1 : 60u;

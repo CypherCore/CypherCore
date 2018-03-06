@@ -1975,10 +1975,16 @@ namespace Game.Entities
 
         public uint GetItemLevel(Player owner)
         {
-            return GetItemLevel(GetTemplate(), _bonusData, owner.getLevel(), GetModifier(ItemModifier.ScalingStatDistributionFixedLevel), GetModifier(ItemModifier.UpgradeId));
+            uint minItemLevel = owner.GetUInt32Value(UnitFields.MinItemLevel);
+            uint minItemLevelCutoff = owner.GetUInt32Value(UnitFields.MinItemLevelCutoff);
+            uint maxItemLevel = GetTemplate().GetFlags3().HasAnyFlag(ItemFlags3.IgnoreItemLevelCapInPvp) ? 0 : owner.GetUInt32Value(UnitFields.MaxItemlevel);
+            bool pvpBonus = owner.IsUsingPvpItemLevels();
+            return GetItemLevel(GetTemplate(), _bonusData, owner.getLevel(), GetModifier(ItemModifier.ScalingStatDistributionFixedLevel), GetModifier(ItemModifier.UpgradeId),
+                minItemLevel, minItemLevelCutoff, maxItemLevel, pvpBonus);
         }
 
-        public static uint GetItemLevel(ItemTemplate itemTemplate, BonusData bonusData, uint level, uint fixedLevel, uint upgradeId)
+        public static uint GetItemLevel(ItemTemplate itemTemplate, BonusData bonusData, uint level, uint fixedLevel, uint upgradeId,
+            uint minItemLevel, uint minItemLevelCutoff, uint maxItemLevel, bool pvpBonus)
         {
             if (itemTemplate == null)
                 return 1;
@@ -2004,12 +2010,25 @@ namespace Game.Entities
 
             itemLevel += (uint)bonusData.ItemLevelBonus;
 
+            for (uint i = 0; i < ItemConst.MaxGemSockets; ++i)
+                itemLevel += bonusData.GemItemLevelBonus[i];
+
+            uint itemLevelBeforeUpgrades = itemLevel;
             ItemUpgradeRecord upgrade = CliDB.ItemUpgradeStorage.LookupByKey(upgradeId);
             if (upgrade != null)
                 itemLevel += upgrade.ItemLevelBonus;
 
-            for (uint i = 0; i < ItemConst.MaxGemSockets; ++i)
-                itemLevel += bonusData.GemItemLevelBonus[i];
+            if (pvpBonus)
+                itemLevel += Global.DB2Mgr.GetPvpItemLevelBonus(itemTemplate.GetId());
+
+            if (itemTemplate.GetInventoryType() != InventoryType.NonEquip)
+            {
+                if (minItemLevel != 0 && (minItemLevelCutoff == 0 || itemLevelBeforeUpgrades >= minItemLevelCutoff) && itemLevel < minItemLevel)
+                    itemLevel = minItemLevel;
+
+                if (maxItemLevel != 0 && itemLevel > maxItemLevel)
+                    itemLevel = maxItemLevel;
+            }
 
             return Math.Min(Math.Max(itemLevel, 1), 1300);
         }

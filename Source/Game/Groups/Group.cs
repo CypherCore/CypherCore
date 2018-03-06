@@ -1705,7 +1705,7 @@ namespace Game.Groups
             if (!reference)
                 return GroupJoinBattlegroundResult.JoinFailed;
 
-            PVPDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bgOrTemplate.GetMapId(), reference.getLevel());
+            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bgOrTemplate.GetMapId(), reference.getLevel());
             if (bracketEntry == null)
                 return GroupJoinBattlegroundResult.JoinFailed;
 
@@ -1729,7 +1729,7 @@ namespace Game.Groups
                     return GroupJoinBattlegroundResult.JoinTimedOut;
                 }
                 // not in the same Battleground level braket, don't let join
-                PVPDifficultyRecord memberBracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bracketEntry.MapID, member.getLevel());
+                PvpDifficultyRecord memberBracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bracketEntry.MapID, member.getLevel());
                 if (memberBracketEntry != bracketEntry)
                     return GroupJoinBattlegroundResult.JoinRangeIndex;
                 // don't let join rated matches if the arena team id doesn't match
@@ -2633,7 +2633,7 @@ namespace Game.Groups
                 BonusData bonusData = new BonusData(itemInstance);
 
                 ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemid);
-                uint itemLevel = Item.GetItemLevel(itemTemplate, bonusData, player.getLevel(), 0, lootItemInSlot.upgradeId);
+                uint itemLevel = Item.GetItemLevel(itemTemplate, bonusData, player.getLevel(), 0, lootItemInSlot.upgradeId, 0, 0, 0, false);
                 return Item.GetDisenchantLoot(itemTemplate, (uint)bonusData.Quality, itemLevel);
             }
 

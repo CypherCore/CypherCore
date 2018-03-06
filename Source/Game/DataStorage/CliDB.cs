@@ -181,7 +181,8 @@ namespace Game.DataStorage
             PowerDisplayStorage = DBReader.Read<PowerDisplayRecord>("PowerDisplay.db2", HotfixStatements.SEL_POWER_DISPLAY);
             PowerTypeStorage = DBReader.Read<PowerTypeRecord>("PowerType.db2", HotfixStatements.SEL_POWER_TYPE);
             PrestigeLevelInfoStorage = DBReader.Read<PrestigeLevelInfoRecord>("PrestigeLevelInfo.db2", HotfixStatements.SEL_PRESTIGE_LEVEL_INFO, HotfixStatements.SEL_PRESTIGE_LEVEL_INFO_LOCALE);
-            PVPDifficultyStorage = DBReader.Read<PVPDifficultyRecord>("PVPDifficulty.db2", HotfixStatements.SEL_PVP_DIFFICULTY);
+            PvpDifficultyStorage = DBReader.Read<PvpDifficultyRecord>("PVPDifficulty.db2", HotfixStatements.SEL_PVP_DIFFICULTY);
+            PvpItemStorage = DBReader.Read<PvpItemRecord>("PVPItem.db2", HotfixStatements.SEL_PVP_ITEM);
             PvpRewardStorage = DBReader.Read<PvpRewardRecord>("PvpReward.db2", HotfixStatements.SEL_PVP_REWARD);
             PvpTalentStorage = DBReader.Read<PvpTalentRecord>("PvpTalent.db2", HotfixStatements.SEL_PVP_TALENT, HotfixStatements.SEL_PVP_TALENT_LOCALE);
             PvpTalentUnlockStorage = DBReader.Read<PvpTalentUnlockRecord>("PvpTalentUnlock.db2", HotfixStatements.SEL_PVP_TALENT_UNLOCK);
@@ -512,7 +513,8 @@ namespace Game.DataStorage
         public static DB6Storage<PowerDisplayRecord> PowerDisplayStorage;
         public static DB6Storage<PowerTypeRecord> PowerTypeStorage;
         public static DB6Storage<PrestigeLevelInfoRecord> PrestigeLevelInfoStorage;
-        public static DB6Storage<PVPDifficultyRecord> PVPDifficultyStorage;
+        public static DB6Storage<PvpDifficultyRecord> PvpDifficultyStorage;
+        public static DB6Storage<PvpItemRecord> PvpItemStorage;
         public static DB6Storage<PvpRewardRecord> PvpRewardStorage;
         public static DB6Storage<PvpTalentRecord> PvpTalentStorage;
         public static DB6Storage<PvpTalentUnlockRecord> PvpTalentUnlockStorage;

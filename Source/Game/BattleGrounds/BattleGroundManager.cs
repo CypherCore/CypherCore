@@ -249,7 +249,7 @@ namespace Game.BattleGrounds
         }
 
         // create a new Battleground that will really be used to play
-        public Battleground CreateNewBattleground(BattlegroundTypeId originalBgTypeId, PVPDifficultyRecord bracketEntry, ArenaTypes arenaType, bool isRated)
+        public Battleground CreateNewBattleground(BattlegroundTypeId originalBgTypeId, PvpDifficultyRecord bracketEntry, ArenaTypes arenaType, bool isRated)
         {
             BattlegroundTypeId bgTypeId = GetRandomBG(originalBgTypeId);
 

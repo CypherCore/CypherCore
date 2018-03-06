@@ -345,6 +345,9 @@ namespace Game.DataStorage
                 _powerTypes[powerType.PowerTypeEnum] = powerType;
             }
 
+            foreach (PvpItemRecord pvpItem in CliDB.PvpItemStorage.Values)
+                _pvpItemBonus[pvpItem.ItemID] = pvpItem.ItemLevelBonus;
+
             foreach (PvpRewardRecord pvpReward in CliDB.PvpRewardStorage.Values)
                 _pvpRewardPack[Tuple.Create((uint)pvpReward.Prestige, (uint)pvpReward.HonorLevel)] = pvpReward.RewardPackID;
 
@@ -1142,10 +1145,10 @@ namespace Game.DataStorage
             return max;
         }
 
-        public PVPDifficultyRecord GetBattlegroundBracketByLevel(uint mapid, uint level)
+        public PvpDifficultyRecord GetBattlegroundBracketByLevel(uint mapid, uint level)
         {
-            PVPDifficultyRecord maxEntry = null;              // used for level > max listed level case
-            foreach (var entry in CliDB.PVPDifficultyStorage.Values)
+            PvpDifficultyRecord maxEntry = null;              // used for level > max listed level case
+            foreach (var entry in CliDB.PvpDifficultyStorage.Values)
             {
                 // skip unrelated and too-high brackets
                 if (entry.MapID != mapid || entry.MinLevel > level)
@@ -1163,9 +1166,9 @@ namespace Game.DataStorage
             return maxEntry;
         }
 
-        public PVPDifficultyRecord GetBattlegroundBracketById(uint mapid, BattlegroundBracketId id)
+        public PvpDifficultyRecord GetBattlegroundBracketById(uint mapid, BattlegroundBracketId id)
         {
-            foreach (var entry in CliDB.PVPDifficultyStorage.Values)
+            foreach (var entry in CliDB.PvpDifficultyStorage.Values)
                 if (entry.MapID == mapid && entry.GetBracketId() == id)
                     return entry;
 
@@ -1241,6 +1244,11 @@ namespace Game.DataStorage
             }
 
             return null;
+        }
+
+        public byte GetPvpItemLevelBonus(uint itemId)
+        {
+            return _pvpItemBonus.LookupByKey(itemId);
         }
 
         public List<RewardPackXItemRecord> GetRewardPackItemsByRewardID(uint rewardPackID)
@@ -1513,6 +1521,7 @@ namespace Game.DataStorage
         List<Regex>[] _nameValidators = new List<Regex>[(int)LocaleConstant.Total + 1];
         MultiMap<uint, uint> _phasesByGroup = new MultiMap<uint, uint>();
         Dictionary<PowerType, PowerTypeRecord> _powerTypes = new Dictionary<PowerType, PowerTypeRecord>();
+        Dictionary<uint, byte> _pvpItemBonus = new Dictionary<uint, byte>();
         Dictionary<Tuple<uint /*prestige level*/, uint /*honor level*/>, uint> _pvpRewardPack = new Dictionary<Tuple<uint, uint>, uint>();
         List<PvpTalentRecord>[][][] _pvpTalentsByPosition = new List<PvpTalentRecord>[(int)Class.Max][][];
         uint[][] _pvpTalentUnlock = new uint[PlayerConst.MaxPvpTalentTiers][];

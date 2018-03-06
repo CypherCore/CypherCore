@@ -156,7 +156,7 @@ namespace Game.DataStorage
         public bool IsDisabled() { return Flags.HasAnyFlag(PrestigeLevelInfoFlags.Disabled); }
     }
 
-    public sealed class PVPDifficultyRecord
+    public sealed class PvpDifficultyRecord
     {
         public uint Id;
         public byte BracketID;
@@ -166,6 +166,13 @@ namespace Game.DataStorage
 
         // helpers
         public BattlegroundBracketId GetBracketId() { return (BattlegroundBracketId)BracketID; }
+    }
+
+    public sealed class PvpItemRecord
+    {
+        public uint Id;
+        public uint ItemID;
+        public byte ItemLevelBonus;
     }
 
     public sealed class PvpRewardRecord
