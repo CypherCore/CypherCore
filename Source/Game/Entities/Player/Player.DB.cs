@@ -948,6 +948,20 @@ namespace Game.Entities
                 while (result.NextRow());
             }
         }
+        void _LoadPvpTalents(SQLResult result)
+        {
+            // "SELECT TalentID, TalentGroup FROM character_pvp_talent WHERE guid = ?"
+            if (!result.IsEmpty())
+            {
+                do
+                {
+                    PvpTalentRecord talent = CliDB.PvpTalentStorage.LookupByKey(result.Read<uint>(0));
+                    if (talent != null)
+                        AddPvpTalent(talent, result.Read<byte>(1), false);
+                }
+                while (result.NextRow());
+            }
+        }
         void _LoadGlyphs(SQLResult result)
         {
             // SELECT talentGroup, glyphId from character_glyphs WHERE guid = ?
@@ -1977,6 +1991,29 @@ namespace Game.Entities
                     trans.Append(stmt);
                 }
             }
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_PVP_TALENT);
+            stmt.AddValue(0, GetGUID().GetCounter());
+            trans.Append(stmt);
+
+            for (byte group = 0; group < PlayerConst.MaxSpecializations; ++group)
+            {
+                talents = GetPvpTalentMap(group);
+                foreach (var pair in talents.ToList())
+                {
+                    if (pair.Value == PlayerSpellState.Removed)
+                    {
+                        talents.Remove(pair.Key);
+                        continue;
+                    }
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_PVP_TALENT);
+                    stmt.AddValue(0, GetGUID().GetCounter());
+                    stmt.AddValue(1, pair.Key);
+                    stmt.AddValue(2, group);
+                    trans.Append(stmt);
+                }
+            }
         }
         public void _SaveMail(SQLTransaction trans)
         {
@@ -2852,6 +2889,7 @@ namespace Game.Entities
                 SetUInt32Value(PlayerFields.CurrentSpecId, spec.Id);
 
             _LoadTalents(holder.GetResult(PlayerLoginQueryLoad.Talents));
+            _LoadPvpTalents(holder.GetResult(PlayerLoginQueryLoad.PvpTalents));
             _LoadSpells(holder.GetResult(PlayerLoginQueryLoad.Spells));
             GetSession().GetCollectionMgr().LoadToys();
             GetSession().GetCollectionMgr().LoadHeirlooms();
@@ -2880,6 +2918,8 @@ namespace Game.Entities
             InitTalentForLevel();
             LearnDefaultSkills();
             LearnCustomSpells();
+            if (getLevel() < PlayerConst.LevelMinHonor)
+                ResetPvpTalents();
 
             // must be before inventory (some items required reputation check)
             reputationMgr.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.Reputation));

@@ -2520,6 +2520,10 @@ namespace Game
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Talents, stmt);
 
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_PVP_TALENTS);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.PvpTalents, stmt);
+
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PLAYER_ACCOUNT_DATA);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.AccountData, stmt);
@@ -2615,6 +2619,7 @@ namespace Game
         BgData,
         Glyphs,
         Talents,
+        PvpTalents,
         AccountData,
         Skills,
         WeeklyQuestStatus,

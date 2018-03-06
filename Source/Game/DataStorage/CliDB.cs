@@ -183,6 +183,8 @@ namespace Game.DataStorage
             PrestigeLevelInfoStorage = DBReader.Read<PrestigeLevelInfoRecord>("PrestigeLevelInfo.db2", HotfixStatements.SEL_PRESTIGE_LEVEL_INFO, HotfixStatements.SEL_PRESTIGE_LEVEL_INFO_LOCALE);
             PVPDifficultyStorage = DBReader.Read<PVPDifficultyRecord>("PVPDifficulty.db2", HotfixStatements.SEL_PVP_DIFFICULTY);
             PvpRewardStorage = DBReader.Read<PvpRewardRecord>("PvpReward.db2", HotfixStatements.SEL_PVP_REWARD);
+            PvpTalentStorage = DBReader.Read<PvpTalentRecord>("PvpTalent.db2", HotfixStatements.SEL_PVP_TALENT, HotfixStatements.SEL_PVP_TALENT_LOCALE);
+            PvpTalentUnlockStorage = DBReader.Read<PvpTalentUnlockRecord>("PvpTalentUnlock.db2", HotfixStatements.SEL_PVP_TALENT_UNLOCK);
             QuestFactionRewardStorage = DBReader.Read<QuestFactionRewardRecord>("QuestFactionReward.db2", HotfixStatements.SEL_QUEST_FACTION_REWARD);
             QuestMoneyRewardStorage = DBReader.Read<QuestMoneyRewardRecord>("QuestMoneyReward.db2", HotfixStatements.SEL_QUEST_MONEY_REWARD);
             QuestPackageItemStorage = DBReader.Read<QuestPackageItemRecord>("QuestPackageItem.db2", HotfixStatements.SEL_QUEST_PACKAGE_ITEM);
@@ -512,6 +514,8 @@ namespace Game.DataStorage
         public static DB6Storage<PrestigeLevelInfoRecord> PrestigeLevelInfoStorage;
         public static DB6Storage<PVPDifficultyRecord> PVPDifficultyStorage;
         public static DB6Storage<PvpRewardRecord> PvpRewardStorage;
+        public static DB6Storage<PvpTalentRecord> PvpTalentStorage;
+        public static DB6Storage<PvpTalentUnlockRecord> PvpTalentUnlockStorage;
         public static DB6Storage<QuestFactionRewardRecord> QuestFactionRewardStorage;
         public static DB6Storage<QuestMoneyRewardRecord> QuestMoneyRewardStorage;
         public static DB6Storage<QuestPackageItemRecord> QuestPackageItemStorage;

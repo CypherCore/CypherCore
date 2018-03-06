@@ -175,4 +175,27 @@ namespace Game.DataStorage
         public byte Prestige;
         public ushort RewardPackID;
     }
+
+    public sealed class PvpTalentRecord
+    {
+        public uint Id;
+        public LocalizedString Description;
+        public uint SpellID;
+        public uint OverridesSpellID;
+        public int ExtraSpellID;
+        public int TierID;
+        public byte ColumnIndex;
+        public byte Flags;
+        public byte ClassID;
+        public ushort SpecID;
+        public byte Role;
+    }
+
+    public sealed class PvpTalentUnlockRecord
+    {
+        public uint Id;
+        public byte TierID;
+        public byte ColumnIndex;
+        public byte HonorLevel;
+    }
 }

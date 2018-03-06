@@ -350,6 +350,41 @@ namespace Game.DataStorage
 
             CliDB.PvpRewardStorage.Clear();
 
+            for (var x = 0; x < (int)Class.Max; ++x)
+            {
+                _pvpTalentsByPosition[x] = new List<PvpTalentRecord>[PlayerConst.MaxPvpTalentTiers][];
+                for (var y = 0; y < PlayerConst.MaxPvpTalentTiers; ++y)
+                {
+                    _pvpTalentsByPosition[x][y] = new List<PvpTalentRecord>[PlayerConst.MaxPvpTalentColumns];
+                    for (var z = 0; z < PlayerConst.MaxPvpTalentColumns; ++z)
+                        _pvpTalentsByPosition[x][y][z] = new List<PvpTalentRecord>();
+                }
+            }
+
+            for (var i = 0; i < PlayerConst.MaxPvpTalentTiers; ++i)
+                _pvpTalentUnlock[i] = new uint[PlayerConst.MaxPvpTalentColumns];
+
+            foreach (PvpTalentRecord talentInfo in CliDB.PvpTalentStorage.Values)
+            {
+                //ASSERT(talentInfo->ClassID < MAX_CLASSES);
+                //ASSERT(talentInfo->TierID < MAX_PVP_TALENT_TIERS, "MAX_PVP_TALENT_TIERS must be at least %u", talentInfo.TierID + 1);
+                //ASSERT(talentInfo->ColumnIndex < MAX_PVP_TALENT_COLUMNS, "MAX_PVP_TALENT_COLUMNS must be at least %u", talentInfo.ColumnIndex + 1);
+                if (talentInfo.ClassID == 0)
+                {
+                    for (uint i = 1; i < (int)Class.Max; ++i)
+                        _pvpTalentsByPosition[i][talentInfo.TierID][talentInfo.ColumnIndex].Add(talentInfo);
+                }
+                else
+                    _pvpTalentsByPosition[talentInfo.ClassID][talentInfo.TierID][talentInfo.ColumnIndex].Add(talentInfo);
+            }
+
+            foreach (PvpTalentUnlockRecord talentUnlock in CliDB.PvpTalentUnlockStorage.Values)
+            {
+                //ASSERT(talentUnlock->TierID < MAX_PVP_TALENT_TIERS, "MAX_PVP_TALENT_TIERS must be at least %u", talentUnlock->TierID + 1);
+                //ASSERT(talentUnlock->ColumnIndex < MAX_PVP_TALENT_COLUMNS, "MAX_PVP_TALENT_COLUMNS must be at least %u", talentUnlock->ColumnIndex + 1);
+                _pvpTalentUnlock[talentUnlock.TierID][talentUnlock.ColumnIndex] = (uint)talentUnlock.HonorLevel;
+            }
+
             foreach (QuestPackageItemRecord questPackageItem in CliDB.QuestPackageItemStorage.Values)
             {
                 if (!_questPackages.ContainsKey(questPackageItem.QuestPackageID))
@@ -1146,6 +1181,17 @@ namespace Game.DataStorage
             return value;
         }
 
+        public uint GetRequiredHonorLevelForPvpTalent(PvpTalentRecord talentInfo)
+        {
+            //ASSERT(talentInfo);
+            return _pvpTalentUnlock[talentInfo.TierID][talentInfo.ColumnIndex];
+        }
+
+        public List<PvpTalentRecord> GetPvpTalentsByPosition(uint classId, uint tier, uint column)
+        {
+            return _pvpTalentsByPosition[classId][tier][column];
+        }
+
         public List<QuestPackageItemRecord> GetQuestPackageItems(uint questPackageID)
         {
             if( _questPackages.ContainsKey(questPackageID))
@@ -1468,6 +1514,8 @@ namespace Game.DataStorage
         MultiMap<uint, uint> _phasesByGroup = new MultiMap<uint, uint>();
         Dictionary<PowerType, PowerTypeRecord> _powerTypes = new Dictionary<PowerType, PowerTypeRecord>();
         Dictionary<Tuple<uint /*prestige level*/, uint /*honor level*/>, uint> _pvpRewardPack = new Dictionary<Tuple<uint, uint>, uint>();
+        List<PvpTalentRecord>[][][] _pvpTalentsByPosition = new List<PvpTalentRecord>[(int)Class.Max][][];
+        uint[][] _pvpTalentUnlock = new uint[PlayerConst.MaxPvpTalentTiers][];
         Dictionary<uint, Tuple<List<QuestPackageItemRecord>, List<QuestPackageItemRecord>>> _questPackages = new Dictionary<uint, Tuple<List<QuestPackageItemRecord>, List<QuestPackageItemRecord>>>();
         MultiMap<uint, RewardPackXItemRecord> _rewardPackItems = new MultiMap<uint, RewardPackXItemRecord>();
         Dictionary<uint, uint> _rulesetItemUpgrade = new Dictionary<uint, uint>();

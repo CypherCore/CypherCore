@@ -275,7 +275,7 @@ namespace Game.DataStorage
 
                     if (!Copies.ContainsKey(idcopy))
                         Copies.Add(idcopy, new List<int>());
- 
+
                     Copies[idcopy].Add(id);
                 }
             }
@@ -429,7 +429,7 @@ namespace Game.DataStorage
                                 }
                                 else
                                 {
-                                    data.AddRange(bitReader.ReadValue64(bitWidth).GetBytes(bitWidth));
+                                    data.AddRange(bitReader.ReadValue64(bitWidth, ColumnMeta[f].BitOffset, ColumnMeta[f].Cardinality == 1).GetBytes(bitWidth));
                                 }
                                 break;
 

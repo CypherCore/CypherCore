@@ -306,6 +306,32 @@ namespace Game.Entities
                     RemoveOverrideSpell(talentInfo.OverridesSpellID, talentInfo.SpellID);
             }
 
+            foreach (var talentInfo in CliDB.PvpTalentStorage.Values)
+            {
+                // unlearn only talents for character class
+                // some spell learned by one class as normal spells or know at creation but another class learn it as talent,
+                // to prevent unexpected lost normal learned spell skip another class talents
+                if (talentInfo.ClassID != 0 && talentInfo.ClassID != (int)GetClass())
+                    continue;
+
+                if (talentInfo.SpellID == 0)
+                    continue;
+
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID);
+                if (spellInfo == null)
+                    continue;
+
+                RemoveSpell(talentInfo.SpellID, true);
+
+                // search for spells that the talent teaches and unlearn them
+                foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(Difficulty.None))
+                    if (effect != null && effect.TriggerSpell > 0 && effect.Effect == SpellEffectName.LearnSpell)
+                        RemoveSpell(effect.TriggerSpell, true);
+
+                if (talentInfo.OverridesSpellID != 0)
+                    RemoveOverrideSpell(talentInfo.OverridesSpellID, talentInfo.SpellID);
+            }
+
             // Remove spec specific spells
             RemoveSpecializationSpells();
 
@@ -332,6 +358,19 @@ namespace Game.Entities
                     if (talentInfo.OverridesSpellID != 0)
                         AddOverrideSpell(talentInfo.OverridesSpellID, talentInfo.SpellID);
                 }
+            }
+
+            foreach (var talentInfo in CliDB.PvpTalentStorage.Values)
+            {
+                // learn only talents for character class (or x-class talents)
+                if (talentInfo.ClassID != 0 && talentInfo.ClassID != (int)GetClass())
+                    continue;
+
+                if (talentInfo.SpellID == 0)
+                    continue;
+
+                if (HasPvpTalent(talentInfo.Id, GetActiveTalentGroup()))
+                    AddPvpTalent(talentInfo, GetActiveTalentGroup(), true);
             }
 
             LearnSpecializationSpells();
@@ -498,7 +537,7 @@ namespace Game.Entities
                     continue;
 
                 var talents = GetTalentMap(i);
-
+                var pvpTalents = GetPvpTalentMap(i);
 
                 UpdateTalentData.TalentGroupInfo groupInfoPkt = new UpdateTalentData.TalentGroupInfo();
                 groupInfoPkt.SpecID = spec.Id;
@@ -526,6 +565,31 @@ namespace Game.Entities
                     }
 
                     groupInfoPkt.TalentIDs.Add((ushort)pair.Key);
+                }
+
+                foreach (var pair in pvpTalents)
+                {
+                    if (pair.Value == PlayerSpellState.Removed)
+                        continue;
+
+                    PvpTalentRecord talentInfo = CliDB.PvpTalentStorage.LookupByKey(pair.Key);
+                    if (talentInfo == null)
+                    {
+                        Log.outError(LogFilter.Player, $"Player.SendTalentsInfoData: Player '{GetName()}' ({GetGUID().ToString()}) has unknown pvp talent id: {pair.Key}");
+                        continue;
+                    }
+
+                    if (talentInfo.ClassID != 0 && talentInfo.ClassID != (int)GetClass())
+                        continue;
+
+                    SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID);
+                    if (spellEntry == null)
+                    {
+                        Log.outError(LogFilter.Player, $"Player.SendTalentsInfoData: Player '{GetName()}' ({GetGUID().ToString()}) has unknown pvp talent spell: {talentInfo.SpellID}");
+                        continue;
+                    }
+
+                    groupInfoPkt.PvPTalentIDs.Add((ushort)pair.Key);
                 }
 
                 packet.Info.TalentGroups.Add(groupInfoPkt);

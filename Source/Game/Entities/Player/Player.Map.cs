@@ -122,6 +122,11 @@ namespace Game.Entities
             UpdateAreaDependentAuras(newArea);
             UpdateAreaAndZonePhase();
 
+            if (IsAreaThatActivatesPvpTalents(newArea))
+                EnablePvpRules();
+            else
+                DisablePvpRules();
+
             // previously this was in UpdateZone (but after UpdateArea) so nothing will break
             pvpInfo.IsInNoPvPArea = false;
             if (area != null && area.IsSanctuary())    // in sanctuary

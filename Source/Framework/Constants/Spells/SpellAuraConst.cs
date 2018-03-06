@@ -140,7 +140,7 @@ namespace Framework.Constants
         ModRegenDuringCombat = 116,
         ModMechanicResistance = 117,
         ModHealingPct = 118,
-        Unk119 = 119,  // Old SharePetTracking
+        PvpTalents = 119,
         Untrackable = 120,
         Empathy = 121,
         ModOffhandDamagePct = 122,

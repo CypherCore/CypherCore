@@ -137,6 +137,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.SEL_CHARACTER_BGDATA, "SELECT instanceId, team, joinX, joinY, joinZ, joinO, joinMapId, taxiStart, taxiEnd, mountSpell FROM character_battleground_data WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_GLYPHS, "SELECT talentGroup, glyphId FROM character_glyphs WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_TALENTS, "SELECT talentId, talentGroup FROM character_talent WHERE guid = ?");
+            PrepareStatement(CharStatements.SEL_CHARACTER_PVP_TALENTS, "SELECT talentId, talentGroup FROM character_pvp_talent WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_SKILLS, "SELECT skill, value, max FROM character_skills WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_RANDOMBG, "SELECT guid FROM character_battleground_random WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_BANNED, "SELECT guid FROM character_banned WHERE guid = ? AND active = 1");
@@ -584,6 +585,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.DEL_GUILD_BANK_EVENTLOG_BY_PLAYER, "DELETE FROM guild_bank_eventlog WHERE PlayerGuid = ?");
             PrepareStatement(CharStatements.DEL_CHAR_GLYPHS, "DELETE FROM character_glyphs WHERE guid = ?");
             PrepareStatement(CharStatements.DEL_CHAR_TALENT, "DELETE FROM character_talent WHERE guid = ?");
+            PrepareStatement(CharStatements.DEL_CHAR_PVP_TALENT, "DELETE FROM character_pvp_talent WHERE guid = ?");
             PrepareStatement(CharStatements.DEL_CHAR_SKILLS, "DELETE FROM character_skills WHERE guid = ?");
             PrepareStatement(CharStatements.UPD_CHAR_MONEY, "UPDATE characters SET money = ? WHERE guid = ?");
             PrepareStatement(CharStatements.INS_CHAR_ACTION, "INSERT INTO character_action (guid, spec, button, action, type) VALUES (?, ?, ?, ?, ?)");
@@ -616,6 +618,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.DEL_PETITION_SIGNATURE_BY_OWNER, "DELETE FROM petition_sign WHERE ownerguid = ?");
             PrepareStatement(CharStatements.INS_CHAR_GLYPHS, "INSERT INTO character_glyphs VALUES(?, ?, ?)");
             PrepareStatement(CharStatements.INS_CHAR_TALENT, "INSERT INTO character_talent (guid, talentId, talentGroup) VALUES (?, ?, ?)");
+            PrepareStatement(CharStatements.INS_CHAR_PVP_TALENT, "INSERT INTO character_pvp_talent (guid, talentId, talentGroup) VALUES (?, ?, ?)");
             PrepareStatement(CharStatements.UPD_CHAR_LIST_SLOT, "UPDATE characters SET slot = ? WHERE guid = ? AND account = ?");
             PrepareStatement(CharStatements.INS_CHAR_FISHINGSTEPS, "INSERT INTO character_fishingsteps (guid, fishingSteps) VALUES (?, ?)");
             PrepareStatement(CharStatements.DEL_CHAR_FISHINGSTEPS, "DELETE FROM character_fishingsteps WHERE guid = ?");
@@ -827,6 +830,7 @@ namespace Framework.Database
         SEL_CHARACTER_BGDATA,
         SEL_CHARACTER_GLYPHS,
         SEL_CHARACTER_TALENTS,
+        SEL_CHARACTER_PVP_TALENTS,
         SEL_CHARACTER_TRANSMOG_OUTFITS,
         SEL_CHARACTER_SKILLS,
         SEL_CHARACTER_RANDOMBG,
@@ -1207,6 +1211,7 @@ namespace Framework.Database
         DEL_GUILD_BANK_EVENTLOG_BY_PLAYER,
         DEL_CHAR_GLYPHS,
         DEL_CHAR_TALENT,
+        DEL_CHAR_PVP_TALENT,
         DEL_CHAR_SKILLS,
         UPD_CHAR_MONEY,
         INS_CHAR_ACTION,
@@ -1237,6 +1242,7 @@ namespace Framework.Database
         DEL_PETITION_SIGNATURE_BY_OWNER,
         INS_CHAR_GLYPHS,
         INS_CHAR_TALENT,
+        INS_CHAR_PVP_TALENT,
         UPD_CHAR_LIST_SLOT,
         INS_CHAR_FISHINGSTEPS,
         DEL_CHAR_FISHINGSTEPS,

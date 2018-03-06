@@ -23,6 +23,7 @@ using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Network.Packets;
 using Game.PvP;
+using Game.Spells;
 using System;
 using System.Collections.Generic;
 
@@ -333,6 +334,217 @@ namespace Game.Entities
         public uint GetHonorLevel() { return GetUInt32Value(PlayerFields.HonorLevel); }
         public bool IsMaxHonorLevelAndPrestige() { return IsMaxPrestige() && GetHonorLevel() == PlayerConst.MaxHonorLevel; }
 
+        void ResetPvpTalents()
+        {
+            foreach (var talentInfo in CliDB.PvpTalentStorage.Values)
+            {
+                if (talentInfo.ClassID != 0 && talentInfo.ClassID != (int)GetClass())
+                    continue;
+
+                RemovePvpTalent(talentInfo);
+            }
+
+            SQLTransaction trans = new SQLTransaction();
+            _SaveTalents(trans);
+            _SaveSpells(trans);
+            DB.Characters.CommitTransaction(trans);
+        }
+
+        public TalentLearnResult LearnPvpTalent(uint talentID, ref uint spellOnCooldown)
+        {
+            if (IsInCombat())
+                return TalentLearnResult.FailedAffectingCombat;
+
+            if (getLevel() < PlayerConst.LevelMinHonor)
+                return TalentLearnResult.FailedUnknown;
+
+            PvpTalentRecord talentInfo = CliDB.PvpTalentStorage.LookupByKey(talentID);
+            if (talentInfo == null)
+                return TalentLearnResult.FailedUnknown;
+
+            if (talentInfo.SpecID != 0)
+            {
+                if (talentInfo.SpecID != GetInt32Value(PlayerFields.CurrentSpecId))
+                    return TalentLearnResult.FailedUnknown;
+            }
+            else if (talentInfo.Role < 7)
+            {
+                if (talentInfo.Role != CliDB.ChrSpecializationStorage.LookupByKey(GetUInt32Value(PlayerFields.CurrentSpecId)).Role)
+                    return TalentLearnResult.FailedUnknown;
+            }
+
+            // prevent learn talent for different class (cheating)
+            if (talentInfo.ClassID != 0 && talentInfo.ClassID != (int)GetClass())
+                return TalentLearnResult.FailedUnknown;
+
+            if (GetPrestigeLevel() == 0)
+                if (Global.DB2Mgr.GetRequiredHonorLevelForPvpTalent(talentInfo) > GetHonorLevel())
+                    return TalentLearnResult.FailedUnknown;
+
+            // Check if player doesn't have any talent in current tier
+            for (uint c = 0; c < PlayerConst.MaxPvpTalentColumns; ++c)
+            {
+                foreach (PvpTalentRecord talent in Global.DB2Mgr.GetPvpTalentsByPosition((uint)GetClass(), (uint)talentInfo.TierID, c))
+                {
+                    if (HasPvpTalent(talent.Id, GetActiveTalentGroup()) && !HasFlag(PlayerFields.Flags, PlayerFlags.Resting) && HasFlag(UnitFields.Flags, UnitFlags.ImmuneToNpc))
+                        return TalentLearnResult.FailedRestArea;
+
+                    if (GetSpellHistory().HasCooldown(talent.SpellID))
+                    {
+                        spellOnCooldown = talent.SpellID;
+                        return TalentLearnResult.FailedCantRemoveTalent;
+                    }
+
+                    RemovePvpTalent(talent);
+                }
+            }
+
+            if (!AddPvpTalent(talentInfo, GetActiveTalentGroup(), true))
+                return TalentLearnResult.FailedUnknown;
+
+            return TalentLearnResult.LearnOk;
+        }
+
+        bool AddPvpTalent(PvpTalentRecord talent, byte activeTalentGroup, bool learning)
+        {
+            //ASSERT(talent);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID);
+            if (spellInfo == null)
+            {
+                Log.outError(LogFilter.Spells, $"Player.AddPvpTalent: Spell (ID: {talent.SpellID}) does not exist.");
+                return false;
+            }
+
+            if (!Global.SpellMgr.IsSpellValid(spellInfo, this, false))
+            {
+                Log.outError(LogFilter.Spells, $"Player.AddPvpTalent: Spell (ID: {talent.SpellID}) is invalid");
+                return false;
+            }
+
+            if (HasPvpRulesEnabled())
+                LearnSpell(talent.SpellID, false);
+
+            // Move this to toggle ?
+            if (talent.OverridesSpellID != 0)
+                AddOverrideSpell(talent.OverridesSpellID, talent.SpellID);
+
+            if (learning)
+                GetPvpTalentMap(activeTalentGroup)[talent.Id] = PlayerSpellState.New;
+            else
+                GetPvpTalentMap(activeTalentGroup)[talent.Id] = PlayerSpellState.Unchanged;
+
+            return true;
+        }
+
+        void RemovePvpTalent(PvpTalentRecord talent)
+        {
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID);
+            if (spellInfo == null)
+                return;
+
+            RemoveSpell(talent.SpellID, true);
+
+            // Move this to toggle ?
+            if (talent.OverridesSpellID != 0)
+                RemoveOverrideSpell(talent.OverridesSpellID, talent.SpellID);
+
+            // if this talent rank can be found in the PlayerTalentMap, mark the talent as removed so it gets deleted
+            if (!GetPvpTalentMap(GetActiveTalentGroup()).ContainsKey(talent.Id))
+                GetPvpTalentMap(GetActiveTalentGroup())[talent.Id] = PlayerSpellState.Removed;
+        }
+
+        public void TogglePvpTalents(bool enable)
+        {
+            var pvpTalents = GetPvpTalentMap(GetActiveTalentGroup());
+            foreach (var pair in pvpTalents)
+            {
+                PvpTalentRecord pvpTalentInfo = CliDB.PvpTalentStorage.LookupByKey(pair.Key);
+                if (enable && pair.Value != PlayerSpellState.Removed)
+                    LearnSpell(pvpTalentInfo.SpellID, false);
+                else
+                    RemoveSpell(pvpTalentInfo.SpellID, true);
+            }
+        }
+
+        bool HasPvpTalent(uint talentID, byte activeTalentGroup)
+        {
+            return GetPvpTalentMap(activeTalentGroup).ContainsKey(talentID) && GetPvpTalentMap(activeTalentGroup)[talentID] != PlayerSpellState.Removed;
+        }
+
+        public void EnablePvpRules(bool dueToCombat = false)
+        {
+            if (HasPvpRulesEnabled())
+                return;
+
+            if (!HasSpell(195710)) // Honorable Medallion
+                CastSpell(this, 208682); // Learn Gladiator's Medallion
+
+            CastSpell(this, PlayerConst.SpellPvpRulesEnabled);
+            if (!dueToCombat)
+            {
+                Aura aura = GetAura(PlayerConst.SpellPvpRulesEnabled);
+                if (aura != null)
+                {
+                    aura.SetMaxDuration(-1);
+                    aura.SetDuration(-1);
+                }
+            }
+        }
+
+        void DisablePvpRules()
+        {
+            // Don't disable pvp rules when in pvp zone.
+            if (IsInAreaThatActivatesPvpTalents())
+                return;
+
+            if (GetCombatTimer() == 0)
+                RemoveAurasDueToSpell(PlayerConst.SpellPvpRulesEnabled);
+            else
+            {
+                Aura aura = GetAura(PlayerConst.SpellPvpRulesEnabled);
+                if (aura != null)
+                    aura.SetDuration(aura.GetSpellInfo().GetMaxDuration());
+            }
+        }
+
+        bool HasPvpRulesEnabled()
+        {
+            return HasAura(PlayerConst.SpellPvpRulesEnabled);
+        }
+
+        bool IsInAreaThatActivatesPvpTalents()
+        {
+            return IsAreaThatActivatesPvpTalents(GetAreaId());
+        }
+
+        bool IsAreaThatActivatesPvpTalents(uint areaID)
+        {
+            if (InBattleground())
+                return true;
+
+            AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(areaID);
+            if (area != null)
+            {
+                do
+                {
+                    if (area.IsSanctuary())
+                        return false;
+
+                    if (area.Flags[0].HasAnyFlag(AreaFlags.Arena))
+                        return true;
+
+                    if (Global.BattleFieldMgr.GetBattlefieldToZoneId(area.Id) != null)
+                        return true;
+
+                    area = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
+
+                } while (area != null);
+            }
+
+            return false;
+        }
+
+        public Dictionary<uint, PlayerSpellState> GetPvpTalentMap(uint spec) { return _specializationInfo.PvpTalents[spec]; }
 
         //BGs
         public Battleground GetBattleground()

@@ -3431,7 +3431,7 @@ namespace Game.Spells
             // Save old powers for further calculation
             int oldPower = target.GetPower(powerType);
             int oldMaxPower = target.GetMaxPower(powerType);
-            
+
             // Handle aura effect for max power
             target.HandleStatModifier(unitMod, UnitModifierType.TotalPCT, GetAmount(), apply);
 
@@ -5951,6 +5951,22 @@ namespace Game.Spells
                 Unit caster = GetCaster();
                 if (caster)
                     caster.RemoveAreaTrigger(this);
+            }
+        }
+
+        [AuraEffectHandler(AuraType.PvpTalents)]
+        void HandleAuraPvpTalents(AuraApplication auraApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
+                return;
+
+            Player target = auraApp.GetTarget().ToPlayer();
+            if (target)
+            {
+                if (apply)
+                    target.TogglePvpTalents(true);
+                else if (!target.HasAuraType(AuraType.PvpTalents))
+                    target.TogglePvpTalents(false);
             }
         }
         #endregion

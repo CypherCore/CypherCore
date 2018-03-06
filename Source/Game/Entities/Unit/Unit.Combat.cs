@@ -1279,7 +1279,12 @@ namespace Game.Entities
                 return;
 
             if (PvP)
+            { 
                 m_CombatTimer = 5000;
+                Player me = ToPlayer();
+                if (me)
+                    me.EnablePvpRules(true);
+            }
 
             if (IsInCombat() || HasUnitState(UnitState.Evade))
                 return;

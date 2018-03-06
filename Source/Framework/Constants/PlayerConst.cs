@@ -24,6 +24,8 @@ namespace Framework.Constants
         public const int MaxTalentTiers = 7;
         public const int MaxTalentColumns = 3;
         public const int MaxTalentRank = 5;
+        public const int MaxPvpTalentTiers = 6;
+        public const int MaxPvpTalentColumns = 3;
         public const int MinSpecializationLevel = 10;
         public const int MaxSpecializations = 4;
         public const int MaxMasterySpells = 2;
@@ -67,6 +69,7 @@ namespace Framework.Constants
 
         public const byte MaxHonorLevel = 50;
         public const byte LevelMinHonor = 110;
+        public const uint SpellPvpRulesEnabled = 134735;
     }
 
     public struct MoneyConstants

@@ -48,75 +48,27 @@ namespace Game.DataStorage
             return result;
         }
 
-        public ulong ReadUInt64(int numBits)
+        public ulong ReadUInt64(int bitWidth, int bitOffset)
         {
-            ulong result = FastStruct<ulong>.ArrayToStructure(ref m_array[m_readOffset + (m_readPos >> 3)]) << (64 - numBits - (m_readPos & 7)) >> (64 - numBits);
-            m_readPos += numBits;
+            int bitsToRead = bitOffset & 7;
+            ulong result = FastStruct<ulong>.ArrayToStructure(ref m_array[m_readOffset + (m_readPos >> 3)]) << (64 - bitsToRead - bitWidth) >> (64 - bitWidth);
+            m_readPos += bitWidth;
             return result;
         }
 
-        public Value32 ReadValue32(int numBits)
+        public Value64 ReadValue64(int bitWidth, int bitOffset = 0, bool isSigned = false)
         {
             unsafe
             {
-                ulong result = ReadUInt32(numBits);
-                return *(Value32*)&result;
-            }
-        }
+                ulong result = ReadUInt64(bitWidth, bitOffset);
+                if (isSigned)
+                {
+                    ulong mask = 1ul << (bitWidth - 1);
+                    result = (result ^ mask) - mask;
+                }                
 
-        public Value64 ReadValue64(int numBits)
-        {
-            unsafe
-            {
-                ulong result = ReadUInt64(numBits);
                 return *(Value64*)&result;
             }
-        }
-    }
-
-    public struct Value32
-    {
-        unsafe fixed byte Value[4];
-
-        public T GetValue<T>() where T : struct
-        {
-            unsafe
-            {
-                fixed (byte* ptr = Value)
-                    return FastStruct<T>.ArrayToStructure(ref ptr[0]);
-            }
-        }
-
-        public byte[] GetBytes(int bitSize)
-        {
-            if (((bitSize + 7) / 8) != NextPow2((bitSize + 7) / 8))
-            {
-
-            }
-
-            byte[] data = new byte[NextPow2((bitSize + 7) / 8)];
-            unsafe
-            {
-                fixed (byte* ptr = Value)
-                {
-                    for (var i = 0; i < data.Length; ++i)
-                        data[i] = ptr[i];
-                }
-            }
-
-            return data;
-        }
-
-        private int NextPow2(int v)
-        {
-            v--;
-            v |= v >> 1;
-            v |= v >> 2;
-            v |= v >> 4;
-            v |= v >> 8;
-            v |= v >> 16;
-            v++;
-            return Math.Max(v, 1);
         }
     }
 
@@ -135,9 +87,6 @@ namespace Game.DataStorage
 
         public byte[] GetBytes(int bitSize)
         {
-            var val = ((bitSize + 7) / 8);
-            var val1 = NextPow2((bitSize + 7) / 8);
-
             byte[] data = new byte[NextPow2((bitSize + 7) / 8)];
             unsafe
             {

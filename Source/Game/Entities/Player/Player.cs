@@ -494,6 +494,14 @@ namespace Game.Entities
 
             UpdateAfkReport(now);
 
+            if (GetCombatTimer() != 0) // Only set when in pvp combat
+            {
+                Aura aura = GetAura(PlayerConst.SpellPvpRulesEnabled);
+                if (aura != null)
+                    if (!aura.IsPermanent())
+                        aura.SetDuration(aura.GetSpellInfo().GetMaxDuration());
+            }
+
             if (IsAIEnabled && GetAI() != null)
                 GetAI().UpdateAI(diff);
             else if (NeedChangeAI)
@@ -5306,6 +5314,9 @@ namespace Game.Entities
 
             InitTalentForLevel();
             InitTaxiNodesForLevel();
+
+            if (level < PlayerConst.LevelMinHonor)
+                ResetPvpTalents();
 
             UpdateAllStats();
 
