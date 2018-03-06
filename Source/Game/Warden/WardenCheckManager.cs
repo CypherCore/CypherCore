@@ -23,9 +23,9 @@ using System.Numerics;
 
 namespace Game
 {
-    public class WargenCheckManager : Singleton<WargenCheckManager>
+    public class WardenCheckManager : Singleton<WardenCheckManager>
     {
-        WargenCheckManager() { }
+        WardenCheckManager() { }
 
         public void LoadWardenChecks()
         {
