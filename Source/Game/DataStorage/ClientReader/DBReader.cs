@@ -416,7 +416,7 @@ namespace Game.DataStorage
                                 else
                                 {
                                     for (int x = 0; x < ColumnMeta[f].ArraySize; x++)
-                                        data.AddRange(bitReader.ReadValue64(bitSize).GetBytes(bitSize));
+                                        data.AddRange(bitReader.ReadValue(bitSize));
                                 }
                                 break;
 
@@ -429,7 +429,7 @@ namespace Game.DataStorage
                                 }
                                 else
                                 {
-                                    data.AddRange(bitReader.ReadValue64(bitWidth, ColumnMeta[f].BitOffset, ColumnMeta[f].Cardinality == 1).GetBytes(bitWidth));
+                                    data.AddRange(bitReader.ReadValue(bitWidth, ColumnMeta[f].BitOffset, ColumnMeta[f].Cardinality == 1));
                                 }
                                 break;
 

@@ -22,14 +22,6 @@ namespace Game.DataStorage
 {
     public class BitReader
     {
-        private byte[] m_array;
-        private int m_readPos;
-        private int m_readOffset;
-
-        public int Position { get => m_readPos; set => m_readPos = value; }
-        public int Offset { get => m_readOffset; set => m_readOffset = value; }
-        public byte[] Data { get => m_array; set => m_array = value; }
-
         public BitReader(byte[] data)
         {
             m_array = data;
@@ -43,7 +35,7 @@ namespace Game.DataStorage
 
         public uint ReadUInt32(int numBits)
         {
-            uint result = FastStruct<uint>.ArrayToStructure(ref m_array[m_readOffset + (m_readPos >> 3)]) << (32 - numBits - (m_readPos & 7)) >> (32 - numBits);
+            uint result = BitConverter.ToUInt32(m_array, m_readOffset + (m_readPos >> 3)) << (32 - numBits - (m_readPos & 7)) >> (32 - numBits);
             m_readPos += numBits;
             return result;
         }
@@ -51,51 +43,23 @@ namespace Game.DataStorage
         public ulong ReadUInt64(int bitWidth, int bitOffset)
         {
             int bitsToRead = bitOffset & 7;
-            ulong result = FastStruct<ulong>.ArrayToStructure(ref m_array[m_readOffset + (m_readPos >> 3)]) << (64 - bitsToRead - bitWidth) >> (64 - bitWidth);
+            ulong result = BitConverter.ToUInt64(m_array, m_readOffset + (m_readPos >> 3)) << (64 - bitsToRead - bitWidth) >> (64 - bitWidth);
             m_readPos += bitWidth;
             return result;
         }
 
-        public Value64 ReadValue64(int bitWidth, int bitOffset = 0, bool isSigned = false)
+        public byte[] ReadValue(int bitWidth, int bitOffset = 0, bool isSigned = false)
         {
-            unsafe
+            ulong result = ReadUInt64(bitWidth, bitOffset);
+            if (isSigned)
             {
-                ulong result = ReadUInt64(bitWidth, bitOffset);
-                if (isSigned)
-                {
-                    ulong mask = 1ul << (bitWidth - 1);
-                    result = (result ^ mask) - mask;
-                }                
-
-                return *(Value64*)&result;
+                ulong mask = 1ul << (bitWidth - 1);
+                result = (result ^ mask) - mask;
             }
-        }
-    }
 
-    public struct Value64
-    {
-        unsafe fixed byte Value[8];
-
-        public T GetValue<T>() where T : struct
-        {
-            unsafe
-            {
-                fixed (byte* ptr = Value)
-                    return FastStruct<T>.ArrayToStructure(ref ptr[0]);
-            }
-        }
-
-        public byte[] GetBytes(int bitSize)
-        {
-            byte[] data = new byte[NextPow2((bitSize + 7) / 8)];
-            unsafe
-            {
-                fixed (byte* ptr = Value)
-                {
-                    for (var i = 0; i < data.Length; ++i)
-                        data[i] = ptr[i];
-                }
-            }
+            var ulongBytes = BitConverter.GetBytes(result);
+            byte[] data = new byte[NextPow2((bitWidth + 7) / 8)];
+            Buffer.BlockCopy(ulongBytes, 0, data, 0, data.Length);
 
             return data;
         }
@@ -111,5 +75,12 @@ namespace Game.DataStorage
             v++;
             return Math.Max(v, 1);
         }
+
+        public int Position { get => m_readPos; set => m_readPos = value; }
+        public int Offset { get => m_readOffset; set => m_readOffset = value; }
+
+        private byte[] m_array;
+        private int m_readPos;
+        private int m_readOffset;
     }
 }

@@ -352,13 +352,6 @@ namespace System
 
             return FastStruct<T>.ArrayToStructure(result);
         }
-
-        public static T Read<T>(this BinaryReader reader, int byteCount) where T : struct
-        {
-            byte[] result = reader.ReadBytes(byteCount == 0 ? FastStruct<T>.Size : byteCount);
-
-            return FastStruct<T>.ArrayToStructure(result);
-        }
         #endregion
     }
 }
