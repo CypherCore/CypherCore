@@ -21,7 +21,7 @@ using System.Runtime.InteropServices;
 
 namespace Game.DataStorage
 {
-    struct M2SplineKey
+    public struct M2SplineKey
     {
         public M2SplineKey(BinaryReader reader)
         {
@@ -35,82 +35,8 @@ namespace Game.DataStorage
         public Vector3 p2;
     }
 
-    struct M2Header
+    public struct M2Header
     {
-        /*
-        public M2Header(BinaryReader reader)
-        {
-            Magic = null;/// reader.ReadStringFromChars(4);
-            Version = reader.ReadUInt32();
-            lName = reader.ReadUInt32();
-            ofsName = reader.ReadUInt32();
-            GlobalModelFlags = reader.ReadUInt32();
-            nGlobalSequences = reader.ReadUInt32();
-            ofsGlobalSequences = reader.ReadUInt32();
-            nAnimations = reader.ReadUInt32();
-            ofsAnimations = reader.ReadUInt32();
-            nAnimationLookup = reader.ReadUInt32();
-            ofsAnimationLookup = reader.ReadUInt32();
-            nBones = reader.ReadUInt32();
-            ofsBones = reader.ReadUInt32();
-            nKeyBoneLookup = reader.ReadUInt32();
-            ofsKeyBoneLookup = reader.ReadUInt32();
-            nVertices = reader.ReadUInt32();
-            ofsVertices = reader.ReadUInt32();
-            nViews = reader.ReadUInt32();
-            nSubmeshAnimations = reader.ReadUInt32();
-            ofsSubmeshAnimations = reader.ReadUInt32();
-            nTextures = reader.ReadUInt32();
-            ofsTextures = reader.ReadUInt32();
-            nTransparency = reader.ReadUInt32();
-            ofsTransparency = reader.ReadUInt32();
-            nUVAnimation = reader.ReadUInt32();
-            ofsUVAnimation = reader.ReadUInt32();
-            nTexReplace = reader.ReadUInt32();
-            ofsTexReplace = reader.ReadUInt32();
-            nRenderFlags = reader.ReadUInt32();
-            ofsRenderFlags = reader.ReadUInt32();
-            nBoneLookupTable = reader.ReadUInt32();
-            ofsBoneLookupTable = reader.ReadUInt32();
-            nTexLookup = reader.ReadUInt32();
-            ofsTexLookup = reader.ReadUInt32();
-            nTexUnits = reader.ReadUInt32();
-            ofsTexUnits = reader.ReadUInt32();
-            nTransLookup = reader.ReadUInt32();
-            ofsTransLookup = reader.ReadUInt32();
-            nUVAnimLookup = reader.ReadUInt32();
-            ofsUVAnimLookup = reader.ReadUInt32();
-            BoundingBox = new AxisAlignedBox(new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()) , new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()));
-            BoundingSphereRadius = reader.ReadSingle();
-            CollisionBox = new AxisAlignedBox(new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()), new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()));
-            CollisionSphereRadius = reader.ReadSingle();
-            nBoundingTriangles = reader.ReadUInt32();
-            ofsBoundingTriangles = reader.ReadUInt32();
-            nBoundingVertices = reader.ReadUInt32();
-            ofsBoundingVertices = reader.ReadUInt32();
-            nBoundingNormals = reader.ReadUInt32();
-            ofsBoundingNormals = reader.ReadUInt32();
-            nAttachments = reader.ReadUInt32();
-            ofsAttachments = reader.ReadUInt32();
-            nAttachLookup = reader.ReadUInt32();
-            ofsAttachLookup = reader.ReadUInt32();
-            nEvents = reader.ReadUInt32();
-            ofsEvents = reader.ReadUInt32();
-            nLights = reader.ReadUInt32();
-            ofsLights = reader.ReadUInt32();
-            nCameras = reader.ReadUInt32();
-            ofsCameras = reader.ReadUInt32();
-            nCameraLookup = reader.ReadUInt32();
-            ofsCameraLookup = reader.ReadUInt32();
-            nRibbonEmitters = reader.ReadUInt32();
-            ofsRibbonEmitters = reader.ReadUInt32();
-            nParticleEmitters = reader.ReadUInt32();
-            ofsParticleEmitters = reader.ReadUInt32();
-            nBlendMaps = reader.ReadUInt32();
-            ofsBlendMaps = reader.ReadUInt32();
-        }
-        */
-
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
         public char[] Magic;               // "MD20"
         public uint Version;                // The version of the format.
@@ -182,7 +108,7 @@ namespace Game.DataStorage
         public uint ofsBlendMaps;           // Same as above. Points to an array of uint16 of nBlendMaps entries -- From WoD information.};
     }
 
-    struct M2Array
+    public struct M2Array
     {
         public M2Array(BinaryReader reader, uint offset)
         {
@@ -197,38 +123,16 @@ namespace Game.DataStorage
         public uint offset_elements;
     }
 
-    struct M2Track
+    public struct M2Track
     {
-        public void Read(BinaryReader reader)
-        {
-            interpolation_type = reader.ReadUInt16();
-            global_sequence = reader.ReadUInt16();
-            timestamps = new M2Array(reader, 0);
-            values = new M2Array(reader, 0);
-        }
-
         public ushort interpolation_type;
         public ushort global_sequence;
         public M2Array timestamps;
         public M2Array values;
     }
 
-    struct M2Camera
+    public struct M2Camera
     {
-        public void Read(BinaryReader reader, M2Header header)
-        {
-            reader.BaseStream.Position = header.ofsCameras;
-            type = reader.ReadUInt32();
-            far_clip = reader.ReadSingle();
-            near_clip = reader.ReadSingle();
-            positions.Read(reader);
-            position_base = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-            target_positions.Read(reader);
-            target_position_base = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-            rolldata.Read(reader);
-            fovdata.Read(reader);
-        }
-
         public uint type; // 0: portrait, 1: characterinfo; -1: else (flyby etc.); referenced backwards in the lookup table.
         public float far_clip;
         public float near_clip;

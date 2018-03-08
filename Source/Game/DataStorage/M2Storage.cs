@@ -45,7 +45,7 @@ namespace Game.DataStorage
         }
 
         // Number of cameras not used. Multiple cameras never used in 7.1.5
-        static void readCamera(M2Camera cam, uint buffSize, BinaryReader buffer, CinematicCameraRecord dbcentry)
+        static void readCamera(M2Camera cam, BinaryReader reader, CinematicCameraRecord dbcentry)
         {
             List<FlyByCamera> cameras = new List<FlyByCamera>();
             List<FlyByCamera> targetcam = new List<FlyByCamera>();
@@ -56,19 +56,19 @@ namespace Game.DataStorage
             for (uint k = 0; k < cam.target_positions.timestamps.number; ++k)
             {
                 // Extract Target positions
-                M2Array targTsArray = new M2Array(buffer, cam.target_positions.timestamps.offset_elements);
+                M2Array targTsArray = new M2Array(reader, cam.target_positions.timestamps.offset_elements);
 
-                buffer.BaseStream.Position = targTsArray.offset_elements;
+                reader.BaseStream.Position = targTsArray.offset_elements;
                 uint[] targTimestamps = new uint[targTsArray.number];
                 for (var i = 0; i < targTsArray.number; ++i)
-                    targTimestamps[i] = buffer.ReadUInt32();
+                    targTimestamps[i] = reader.ReadUInt32();
 
-                M2Array targArray = new M2Array(buffer, cam.target_positions.values.offset_elements);
+                M2Array targArray = new M2Array(reader, cam.target_positions.values.offset_elements);
 
-                buffer.BaseStream.Position = targArray.offset_elements;
+                reader.BaseStream.Position = targArray.offset_elements;
                 M2SplineKey[] targPositions = new M2SplineKey[targArray.number];
                 for (var i = 0; i < targArray.number; ++i)
-                    targPositions[i] = new M2SplineKey(buffer);
+                    targPositions[i] = new M2SplineKey(reader);
 
                 // Read the data for this set
                 uint currPos = targArray.offset_elements;
@@ -90,19 +90,19 @@ namespace Game.DataStorage
             for (uint k = 0; k < cam.positions.timestamps.number; ++k)
             {
                 // Extract Camera positions for this set
-                M2Array posTsArray = buffer.ReadStruct<M2Array>(cam.positions.timestamps.offset_elements);
+                M2Array posTsArray = reader.ReadStruct<M2Array>(cam.positions.timestamps.offset_elements);
 
-                buffer.BaseStream.Position = posTsArray.offset_elements;
+                reader.BaseStream.Position = posTsArray.offset_elements;
                 uint[] posTimestamps = new uint[posTsArray.number];
                 for (var i = 0; i < posTsArray.number; ++i)
-                    posTimestamps[i] = buffer.ReadUInt32();
+                    posTimestamps[i] = reader.ReadUInt32();
 
-                M2Array posArray = new M2Array(buffer, cam.positions.values.offset_elements);
+                M2Array posArray = new M2Array(reader, cam.positions.values.offset_elements);
 
-                buffer.BaseStream.Position = posArray.offset_elements;
+                reader.BaseStream.Position = posArray.offset_elements;
                 M2SplineKey[] positions = new M2SplineKey[posTsArray.number];
                 for (var i = 0; i < posTsArray.number; ++i)
-                    positions[i] = new M2SplineKey(buffer);
+                    positions[i] = new M2SplineKey(reader);
 
                 // Read the data for this set
                 uint currPos = posArray.offset_elements;
@@ -196,7 +196,7 @@ namespace Game.DataStorage
                         M2Camera cam = m2file.ReadStruct<M2Camera>(8 + header.ofsCameras);
 
                         m2file.BaseStream.Position = 8;
-                        readCamera(cam, (uint)m2file.BaseStream.Length - 8, m2file, cameraEntry);
+                        readCamera(cam, new BinaryReader(new MemoryStream(m2file.ReadBytes((int)m2file.BaseStream.Length - 8))), cameraEntry);
                     }
                 }
                 catch (EndOfStreamException)
@@ -208,7 +208,7 @@ namespace Game.DataStorage
                     Log.outError(LogFilter.ServerLoading, "File {0} not found!!!!", filename);
                 }
             }
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} cinematic waypoint sets in {1} ms", FlyByCameraStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} cinematic waypoint sets in {1} ms", FlyByCameraStorage.Keys.Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
         public static List<FlyByCamera> GetFlyByCameras(uint cameraId)
