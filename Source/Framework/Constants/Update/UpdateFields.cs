@@ -221,7 +221,7 @@ namespace Framework.Constants
         SkillLineStep = UnitFields.End + 0x6ce,
         SkillLineRank = UnitFields.End + 0x70e,
         SkillLineSubRank = UnitFields.End + 0x74e,
-        SkillLineMaxRank = UnitFields.End + 0x78c,
+        SkillLineMaxRank = UnitFields.End + 0x78e,
         SkillLineTempBonus = UnitFields.End + 0x7ce,
         SkillLinePermBonus = UnitFields.End + 0x80e,
         CharacterPoints = UnitFields.End + 0x84e, // Size: 1, Flags: Private
