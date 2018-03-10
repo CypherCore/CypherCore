@@ -764,7 +764,6 @@ namespace Game.Loots
             }
         }
 
-
         public bool HasQuestDrop(LootTemplateMap store, byte groupId = 0)
         {
             if (groupId != 0)                                            // Group reference
@@ -835,7 +834,6 @@ namespace Game.Loots
 
             return false;
         }
-
 
         public void Verify(LootStore lootstore, uint id)
         {
@@ -925,7 +923,6 @@ namespace Game.Loots
 
             return false;//not found or not reference
         }
-
 
         LootStoreItemList Entries = new LootStoreItemList();                          // not grouped only
         Dictionary<int, LootGroup> Groups = new Dictionary<int,LootGroup>();                           // groups have own (optimised) processing, grouped entries go there

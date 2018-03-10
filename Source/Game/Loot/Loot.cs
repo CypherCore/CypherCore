@@ -213,7 +213,6 @@ namespace Game.Loots
                 return false;
 
             LootTemplate tab = store.GetLootFor(lootId);
-
             if (tab == null)
             {
                 if (!noEmptyError)
