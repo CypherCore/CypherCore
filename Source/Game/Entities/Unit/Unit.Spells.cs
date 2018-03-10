@@ -3394,8 +3394,10 @@ namespace Game.Entities
         }
         public void RemoveAurasDueToItemSpell(uint spellId, ObjectGuid castItemGuid)
         {
-            foreach (var app in m_appliedAuras.LookupByKey(spellId))
+            var appliedAuras = m_appliedAuras.LookupByKey(spellId);
+            for (var i = 0; i < appliedAuras.Count; ++i)
             {
+                AuraApplication app = appliedAuras[i];
                 if (app.GetBase().GetCastItemGUID() == castItemGuid)
                 {
                     RemoveAura(app);
