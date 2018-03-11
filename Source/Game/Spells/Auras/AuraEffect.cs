@@ -5362,9 +5362,9 @@ namespace Game.Spells
 
             SpellPeriodicAuraLogInfo pInfo = new SpellPeriodicAuraLogInfo(this, damage, overkill, absorb, resist, 0.0f, crit);
 
-            caster.ProcSkillsAndAuras(target, procAttacker, procVictim, ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.None, hitMask, null, damageInfo, null);
-
             caster.DealDamage(target, damage, cleanDamage, DamageEffectType.DOT, GetSpellInfo().GetSchoolMask(), GetSpellInfo(), true);
+
+            caster.ProcSkillsAndAuras(target, procAttacker, procVictim, ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.None, hitMask, null, damageInfo, null);
             target.SendPeriodicAuraLog(pInfo);
         }
 
@@ -5451,12 +5451,11 @@ namespace Game.Spells
                 procVictim |= ProcFlags.TakenDamage;
             }
 
-            if (caster.IsAlive())
-                caster.ProcSkillsAndAuras(target, procAttacker, procVictim, ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.None, hitMask, null, damageInfo, null);
-
             int new_damage = (int)caster.DealDamage(target, damage, cleanDamage, DamageEffectType.DOT, GetSpellInfo().GetSchoolMask(), GetSpellInfo(), false);
             if (caster.IsAlive())
             {
+                caster.ProcSkillsAndAuras(target, procAttacker, procVictim, ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.None, hitMask, null, damageInfo, null);
+
                 float gainMultiplier = GetSpellEffectInfo().CalcValueMultiplier(caster);
 
                 uint heal = (caster.SpellHealingBonusDone(caster, GetSpellInfo(), (uint)(new_damage * gainMultiplier), DamageEffectType.DOT, GetSpellEffectInfo(), GetBase().GetStackAmount()));
@@ -5750,10 +5749,11 @@ namespace Game.Spells
                 spellTypeMask |= ProcFlagsSpellType.Damage;
             }
 
+            caster.DealSpellDamage(damageInfo, true);
+
             DamageInfo dotDamageInfo = new DamageInfo(damageInfo, DamageEffectType.DOT, WeaponAttackType.BaseAttack, hitMask);
             caster.ProcSkillsAndAuras(target, procAttacker, procVictim, spellTypeMask, ProcFlagsSpellPhase.None, hitMask, null, dotDamageInfo, null);
 
-            caster.DealSpellDamage(damageInfo, true);
             caster.SendSpellNonMeleeDamageLog(damageInfo);
         }
 

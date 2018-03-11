@@ -585,10 +585,10 @@ namespace Game.Entities
                 DealDamageMods(victim, ref damageInfo.damage, ref damageInfo.absorb);
                 SendAttackStateUpdate(damageInfo);
 
+                DealMeleeDamage(damageInfo, true);
+
                 DamageInfo dmgInfo = new DamageInfo(damageInfo);
                 ProcSkillsAndAuras(damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, ProcFlagsSpellType.None, ProcFlagsSpellPhase.None, dmgInfo.GetHitMask(), null, dmgInfo, null);
-
-                DealMeleeDamage(damageInfo, true);
 
                 if (IsTypeId(TypeId.Player))
                     Log.outDebug(LogFilter.Unit, "AttackerStateUpdate: (Player) {0} attacked {1} (TypeId: {2}) for {3} dmg, absorbed {4}, blocked {5}, resisted {6}.",
