@@ -929,7 +929,7 @@ namespace Game.Entities
             if (skill == null || skill.State == SkillState.Deleted)
                 return;
 
-            ushort field = (ushort)(skill.Pos / 2 + (talent ? PlayerFields.SkillLinePermBonus : PlayerFields.SkillLineTempBonus));
+            int field = (int)(skill.Pos / 2 + (talent ? PlayerFields.SkillLinePermBonus : PlayerFields.SkillLineTempBonus));
             byte offset = (byte)(skill.Pos & 1);
 
             ushort bonus = GetUInt16Value(field, offset);

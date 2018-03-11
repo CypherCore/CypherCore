@@ -222,6 +222,8 @@ namespace Game.Entities
                     return Goober.allowMounted != 0;
                 case GameObjectTypes.SpellCaster:
                     return SpellCaster.allowMounted != 0;
+                case GameObjectTypes.UILink:
+                    return UILink.allowMounted != 0;
                 default:
                     return false;
             }
@@ -253,6 +255,14 @@ namespace Game.Entities
                     return FishingHole.open;
                 case GameObjectTypes.FlagDrop:
                     return FlagDrop.open;
+                case GameObjectTypes.NewFlag:
+                    return NewFlag.open;
+                case GameObjectTypes.NewFlagDrop:
+                    return NewFlagDrop.open;
+                case GameObjectTypes.CapturePoint:
+                    return CapturePoint.open;
+                case GameObjectTypes.GatheringNode:
+                    return GatheringNode.open;
                 default:
                     return 0;
             }
@@ -298,12 +308,16 @@ namespace Game.Entities
         {
             switch (type)
             {
+                case GameObjectTypes.Button:
+                    return Button.linkedTrap;
                 case GameObjectTypes.Chest:
                     return Chest.linkedTrap;
                 case GameObjectTypes.SpellFocus:
                     return SpellFocus.linkedTrap;
                 case GameObjectTypes.Goober:
                     return Goober.linkedTrap;
+                case GameObjectTypes.GatheringNode:
+                    return GatheringNode.linkedTrap;
                 default: return 0;
             }
         }
@@ -331,7 +345,11 @@ namespace Game.Entities
                 case GameObjectTypes.AreaDamage:
                     autoCloseTime = AreaDamage.autoClose;
                     break;
-                default: break;
+                case GameObjectTypes.TrapDoor:
+                    autoCloseTime = TrapDoor.autoClose;
+                    break;
+                default:
+                    break;
             }
             return autoCloseTime / Time.InMilliseconds;   // prior to 3.0.3, conversion was / 0x10000;
         }
@@ -344,6 +362,10 @@ namespace Game.Entities
                     return Chest.chestLoot;
                 case GameObjectTypes.FishingHole:
                     return FishingHole.chestLoot;
+                case GameObjectTypes.GatheringNode:
+                    return GatheringNode.chestLoot;
+                case GameObjectTypes.ChallengeModeReward:
+                    return ChallengeModeReward.chestLoot;
                 default: return 0;
             }
         }
@@ -371,6 +393,8 @@ namespace Game.Entities
                     return Chest.triggeredEvent;
                 case GameObjectTypes.Camera:
                     return Camera.eventID;
+                case GameObjectTypes.GatheringNode:
+                    return GatheringNode.triggeredEvent;
                 default:
                     return 0;
             }
