@@ -111,7 +111,7 @@ namespace Game.DataStorage
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 AreaTrigger templates splines. DB table `spell_areatrigger_splines` is empty.");
             }
 
-            //                                                      0   1     2      3      4      5      6      7      8      9
+            //                                            0   1     2      3      4      5      6      7      8      9
             SQLResult templates = DB.World.Query("SELECT Id, Type, Flags, Data0, Data1, Data2, Data3, Data4, Data5, ScriptName FROM `areatrigger_template`");
             if (!templates.IsEmpty())
             {

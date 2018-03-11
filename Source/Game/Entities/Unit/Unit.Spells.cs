@@ -2649,9 +2649,6 @@ namespace Game.Entities
         public DiminishingLevels GetDiminishing(DiminishingGroup group)
         {
             DiminishingReturn diminish = m_Diminishing[(int)group];
-            if (diminish == null)
-                return DiminishingLevels.Level1;
-
             if (diminish.HitCount == 0)
                 return DiminishingLevels.Level1;
 
@@ -2778,8 +2775,6 @@ namespace Game.Entities
         {
             // Checking for existing in the table
             DiminishingReturn diminish = m_Diminishing[(int)group];
-            if (diminish == null)
-                diminish = new DiminishingReturn();
 
             if (apply)
                 ++diminish.Stack;
