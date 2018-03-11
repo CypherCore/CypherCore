@@ -2515,6 +2515,29 @@ namespace Game.Entities
                 return GetCharmInfo().GetCharmSpell(pos).GetAction();
         }
 
+        public float GetPetChaseDistance()
+        {
+            float range = SharedConst.MeleeRange;
+
+            for (byte i = 0; i < GetPetAutoSpellSize(); ++i)
+            {
+                uint spellID = GetPetAutoSpellOnPos(i);
+                if (spellID == 0)
+                    continue;
+
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellID);
+                if (spellInfo != null)
+                {
+                    if (spellInfo.GetRecoveryTime() == 0  // No cooldown
+                        && spellInfo.RangeEntry.Id != 1 /*Self*/ && spellInfo.RangeEntry.Id != 2 /*Combat Range*/
+                        && spellInfo.GetMinRange() > range)
+                        range = spellInfo.GetMinRange();
+                }
+            }
+
+            return range;
+        }
+
         public void SetCannotReachTarget(bool cannotReach)
         {
             if (cannotReach == m_cannotReachTarget)
