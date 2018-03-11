@@ -3768,6 +3768,15 @@ namespace Game.AI
             return searcher.GetTarget();
         }
 
+        Unit DoSelectBelowHpPctFriendlyWithEntry(uint entry, float range, byte minHPDiff = 1, bool excludeSelf = true)
+        {
+            FriendlyBelowHpPctEntryInRange u_check = new FriendlyBelowHpPctEntryInRange(me, entry, range, minHPDiff, excludeSelf);
+            UnitLastSearcher searcher = new UnitLastSearcher(me, u_check);
+            Cell.VisitAllObjects(me, searcher, range);
+
+            return searcher.GetTarget();
+        }
+
         void DoFindFriendlyCC(List<Creature> _list, float range)
         {
             if (me == null)
