@@ -1320,7 +1320,18 @@ namespace Game.Entities
                 }
 
                 if (procSpellTypeMask == 0)
+                {
+                    foreach (SpellEffectInfo effectInfo in spellInfo.GetEffectsForDifficulty(Difficulty.None))
+                    {
+                        if (effectInfo != null && effectInfo.IsAura())
+                        {
+                            Log.outError(LogFilter.Sql, $"Spell Id {spellInfo.Id} has DBC ProcFlags {spellInfo.ProcFlags}, but it's of non-proc aura type, it probably needs an entry in `spell_proc` table to be handled correctly.");
+                            break;
+                        }
+                    }
+
                     continue;
+                }
 
                 SpellProcEntry procEntry = new SpellProcEntry();
                 procEntry.SchoolMask = 0;
