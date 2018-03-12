@@ -967,7 +967,6 @@ namespace Framework.Constants
         AhbotUpdateInterval,
         AllTaxiPaths,
         AllowGmGroup,
-        AllowPlayerCommands,
         AllowTrackBothResources,
         AllowTwoSideInteractionAuction,
         AllowTwoSideInteractionCalendar,

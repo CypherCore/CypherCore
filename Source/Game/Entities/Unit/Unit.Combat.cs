@@ -2668,10 +2668,10 @@ namespace Game.Entities
             float DoneTotalMod = 1.0f;
 
             // Some spells don't benefit from pct done mods
-            if (spellProto != null)
+            if (spellProto != null && !spellProto.HasAttribute(SpellAttr6.NoDonePctDamageMods))
             {
                 // mods for SPELL_SCHOOL_MASK_NORMAL are already factored in base melee damage calculation
-                if (!spellProto.HasAttribute(SpellAttr6.NoDonePctDamageMods) && !spellProto.GetSchoolMask().HasAnyFlag(SpellSchoolMask.Normal))
+                if (!spellProto.GetSchoolMask().HasAnyFlag(SpellSchoolMask.Normal))
                 {
                     float maxModDamagePercentSchool = 0.0f;
                     for (var i = SpellSchools.Holy; i < SpellSchools.Max; ++i)
