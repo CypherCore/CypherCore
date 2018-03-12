@@ -207,6 +207,9 @@ namespace Scripts.Spells.Generic
         public const uint OrcDisguiseMale = 45760;
         public const uint OrcDisguiseFemale = 45762;
 
+        //Paralytic Poison
+        public const uint Paralysis = 35202;
+
         //Parachutespells
         public const uint Parachute = 45472;
         public const uint ParachuteBuff = 44795;
@@ -1966,6 +1969,28 @@ namespace Scripts.Spells.Generic
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+
+    // 35201 - Paralytic Poison
+    class spell_gen_paralytic_poison_AuraScript : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SPELL_PARALYSIS);
+        }
+
+        void HandleStun(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
+                return;
+
+            GetTarget().CastSpell((Unit)null, SPELL_PARALYSIS, true, null, aurEff);
+        }
+
+        public override void Register()
+        {
+            AfterEffectRemove.Add(new EffectApplyHandler(HandleStun, 0, AuraType.PeriodicDamage, AuraEffectHandleModes.Real));
         }
     }
 
