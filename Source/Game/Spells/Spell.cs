@@ -2062,7 +2062,8 @@ namespace Game.Spells
                 }
             }
 
-            if (missInfo != SpellMissInfo.Evade && !m_caster.IsFriendlyTo(unit) && (!m_spellInfo.IsPositive() || m_spellInfo.HasEffect(SpellEffectName.Dispel)))
+            // spellHitTarget can be null if spell is missed in DoSpellHitOnUnit
+            if (missInfo != SpellMissInfo.Evade && spellHitTarget && !m_caster.IsFriendlyTo(unit) && (!m_spellInfo.IsPositive() || m_spellInfo.HasEffect(SpellEffectName.Dispel)))
             {
                 m_caster.CombatStart(unit, m_spellInfo.HasInitialAggro());
 
