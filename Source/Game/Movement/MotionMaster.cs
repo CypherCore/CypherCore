@@ -81,35 +81,14 @@ namespace Game.Movement
             Contract.Assert(!empty());
 
             _cleanFlag |= MMCleanFlag.Update;
-            if (!top().Update(_owner, diff))
-            {
-                _cleanFlag &= ~MMCleanFlag.Update;
+            bool isMoveGenUpdateSuccess = top().Update(_owner, diff);
+            _cleanFlag &= ~MMCleanFlag.Update;
+
+            if (!isMoveGenUpdateSuccess)
                 MovementExpired();
-            }
-            else
-                _cleanFlag &= ~MMCleanFlag.Update;
 
             if (_expireList != null)
-            {
-                for (int i = 0; i < _expireList.Count; ++i)
-                {
-                    IMovementGenerator mg = _expireList[i];
-                    DirectDelete(mg);
-                }
-
-                _expireList = null;
-
-                if (empty())
-                    Initialize();
-                else if (NeedInitTop())
-                    InitTop();
-                else if (Convert.ToBoolean(_cleanFlag & MMCleanFlag.Reset))
-                    top().Reset(_owner);
-
-                _cleanFlag &= ~MMCleanFlag.Reset;
-            }
-
-            _owner.UpdateUnderwaterState(_owner.GetMap(), _owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ());
+                ClearExpireList();
         }
 
         public void Clear(bool reset = true)
@@ -124,6 +103,26 @@ namespace Game.Movement
             }
             else
                 DirectClean(reset);
+        }
+
+        void ClearExpireList()
+        {
+            for (int i = 0; i < _expireList.Count; ++i)
+            {
+                IMovementGenerator mg = _expireList[i];
+                DirectDelete(mg);
+            }
+
+            _expireList = null;
+
+            if (empty())
+                Initialize();
+            else if (NeedInitTop())
+                InitTop();
+            else if (Convert.ToBoolean(_cleanFlag & MMCleanFlag.Reset))
+                top().Reset(_owner);
+
+            _cleanFlag &= ~MMCleanFlag.Reset;
         }
 
         public void MovementExpired(bool reset = true)
