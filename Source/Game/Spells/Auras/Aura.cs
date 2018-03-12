@@ -492,10 +492,10 @@ namespace Game.Spells
                 // check target immunities
                 for (byte effIndex = 0; effIndex < SpellConst.MaxEffects; ++effIndex)
                 {
-                    if (unit.IsImmunedToSpellEffect(GetSpellInfo(), effIndex))
+                    if (unit.IsImmunedToSpellEffect(GetSpellInfo(), effIndex, caster))
                         value &= (byte)~(1 << effIndex);
                 }
-                if (value == 0 || unit.IsImmunedToSpell(GetSpellInfo())
+                if (value == 0 || unit.IsImmunedToSpell(GetSpellInfo(), caster)
                     || !CanBeAppliedOn(unit))
                     addUnit = false;
 

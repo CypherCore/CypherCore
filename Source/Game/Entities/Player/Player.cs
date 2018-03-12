@@ -3675,7 +3675,7 @@ namespace Game.Entities
             return false;
         }
 
-        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, uint index)
+        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, uint index, Unit caster)
         {
             SpellEffectInfo effect = spellInfo.GetEffect(GetMap().GetDifficultyID(), index);
             if (effect == null || !effect.IsEffect())
@@ -3687,7 +3687,7 @@ namespace Game.Entities
             if (effect.IsEffect(SpellEffectName.AttackMe))
                 return true;
 
-            return base.IsImmunedToSpellEffect(spellInfo, index);
+            return base.IsImmunedToSpellEffect(spellInfo, index, caster);
         }
 
         void RegenerateAll()

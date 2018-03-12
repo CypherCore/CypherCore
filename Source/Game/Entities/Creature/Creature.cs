@@ -1709,7 +1709,7 @@ namespace Game.Entities
                 ForcedDespawn(msTimeToDespawn, forceRespawnTimer);
         }
 
-        public override bool IsImmunedToSpell(SpellInfo spellInfo)
+        public override bool IsImmunedToSpell(SpellInfo spellInfo, Unit caster)
         {
             if (spellInfo == null)
                 return false;
@@ -1726,7 +1726,7 @@ namespace Game.Entities
                 if (effect == null || !effect.IsEffect())
                     continue;
 
-                if (!IsImmunedToSpellEffect(spellInfo, effect.EffectIndex))
+                if (!IsImmunedToSpellEffect(spellInfo, effect.EffectIndex, caster))
                 {
                     immunedToAllEffects = false;
                     break;
@@ -1735,10 +1735,10 @@ namespace Game.Entities
             if (immunedToAllEffects)
                 return true;
 
-            return base.IsImmunedToSpell(spellInfo);
+            return base.IsImmunedToSpell(spellInfo, caster);
         }
 
-        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, uint index)
+        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, uint index, Unit caster)
         {
             SpellEffectInfo effect = spellInfo.GetEffect(GetMap().GetDifficultyID(), index);
             if (effect == null)
@@ -1749,7 +1749,7 @@ namespace Game.Entities
             if (GetCreatureTemplate().CreatureType == CreatureType.Mechanical && effect.Effect == SpellEffectName.Heal)
                 return true;
 
-            return base.IsImmunedToSpellEffect(spellInfo, index);
+            return base.IsImmunedToSpellEffect(spellInfo, index, caster);
         }
 
         public bool isElite()

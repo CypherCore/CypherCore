@@ -747,13 +747,13 @@ namespace Game.Entities
         //   Parry
         // For spells
         //   Resist
-        public SpellMissInfo SpellHitResult(Unit victim, SpellInfo spellInfo, bool CanReflect)
+        public SpellMissInfo SpellHitResult(Unit victim, SpellInfo spellInfo, bool canReflect = false)
         {
             if (spellInfo.HasAttribute(SpellAttr3.IgnoreHitResult))
                 return SpellMissInfo.None;
 
             // Check for immune
-            if (victim.IsImmunedToSpell(spellInfo))
+            if (victim.IsImmunedToSpell(spellInfo, this))
                 return SpellMissInfo.Immune;
 
             // Damage immunity is only checked if the spell has damage effects, this immunity must not prevent aura apply
@@ -775,7 +775,7 @@ namespace Game.Entities
                 return SpellMissInfo.Evade;
 
             // Try victim reflect spell
-            if (CanReflect)
+            if (canReflect)
             {
                 int reflectchance = victim.GetTotalAuraModifier(AuraType.ReflectSpells);
                 var mReflectSpellsSchool = victim.GetAuraEffectsByType(AuraType.ReflectSpellsSchool);
@@ -1546,7 +1546,7 @@ namespace Game.Entities
                 }
             }
         }
-        public virtual bool IsImmunedToSpell(SpellInfo spellInfo)
+        public virtual bool IsImmunedToSpell(SpellInfo spellInfo, Unit caster)
         {
             if (spellInfo == null)
                 return false;
@@ -1584,7 +1584,7 @@ namespace Game.Entities
                 if (effect == null)
                     continue;
 
-                if (!IsImmunedToSpellEffect(spellInfo, effect.EffectIndex))
+                if (!IsImmunedToSpellEffect(spellInfo, effect.EffectIndex, caster))
                 {
                     immuneToAllEffects = false;
                     break;
@@ -1601,7 +1601,7 @@ namespace Game.Entities
                 {
                     SpellInfo immuneSpellInfo = Global.SpellMgr.GetSpellInfo(pair.Value);
                     if (Convert.ToBoolean(pair.Key & (uint)spellInfo.GetSchoolMask())
-                        && !(immuneSpellInfo != null && immuneSpellInfo.IsPositive() && spellInfo.IsPositive())
+                        && !(immuneSpellInfo != null && immuneSpellInfo.IsPositive() && spellInfo.IsPositive() && IsFriendlyTo(caster))
                         && !spellInfo.CanPierceImmuneAura(immuneSpellInfo))
                         return true;
                 }
@@ -1627,7 +1627,7 @@ namespace Game.Entities
 
             return mask;
         }
-        public virtual bool IsImmunedToSpellEffect(SpellInfo spellInfo, uint index)
+        public virtual bool IsImmunedToSpellEffect(SpellInfo spellInfo, uint index, Unit caster)
         {
             if (spellInfo == null)
                 return false;
@@ -1665,7 +1665,7 @@ namespace Game.Entities
                         var immuneAuraApply = GetAuraEffectsByType(AuraType.ModImmuneAuraApplySchool);
                         foreach (var auraEffect in immuneAuraApply)
                             if (Convert.ToBoolean(auraEffect.GetMiscValue() & (int)spellInfo.GetSchoolMask()) &&  // Check school
-                                !spellInfo.IsPositiveEffect(index))                       // Harmful
+                                (!IsFriendlyTo(caster) || !spellInfo.IsPositiveEffect(index)))                       // Harmful
                                 return true;
                     }
                 }
@@ -2904,14 +2904,14 @@ namespace Game.Entities
             if (spellInfo == null)
                 return null;
 
-            if (target.IsImmunedToSpell(spellInfo))
+            if (target.IsImmunedToSpell(spellInfo, this))
                 return null;
 
             for (byte i = 0; i < SpellConst.MaxEffects; ++i)
             {
                 if (!Convert.ToBoolean(effMask & (1 << i)))
                     continue;
-                if (target.IsImmunedToSpellEffect(spellInfo, i))
+                if (target.IsImmunedToSpellEffect(spellInfo, i, this))
                     effMask &= ~(uint)(1 << i);
             }
 

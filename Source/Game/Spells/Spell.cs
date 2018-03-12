@@ -1628,7 +1628,7 @@ namespace Game.Spells
 
             // Check for effect immune skip if immuned
             foreach (SpellEffectInfo effect in GetEffects())
-                if (effect != null && target.IsImmunedToSpellEffect(m_spellInfo, effect.EffectIndex))
+                if (effect != null && target.IsImmunedToSpellEffect(m_spellInfo, effect.EffectIndex, m_caster))
                     effectMask &= ~(uint)(1 << (int)effect.EffectIndex);
 
             ObjectGuid targetGUID = target.GetGUID();
@@ -2102,14 +2102,14 @@ namespace Game.Spells
                 return SpellMissInfo.Evade;
 
             // For delayed spells immunity may be applied between missile launch and hit - check immunity for that case
-            if (m_spellInfo.Speed != 0.0f && unit.IsImmunedToSpell(m_spellInfo))
+            if (m_spellInfo.Speed != 0.0f && unit.IsImmunedToSpell(m_spellInfo, m_caster))
                 return SpellMissInfo.Immune;
 
             // disable effects to which unit is immune
             SpellMissInfo returnVal = SpellMissInfo.Immune;
             foreach (SpellEffectInfo effect in GetEffects())
                 if (effect != null && Convert.ToBoolean(effectMask & (1 << (int)effect.EffectIndex)))
-                    if (unit.IsImmunedToSpellEffect(m_spellInfo, effect.EffectIndex))
+                    if (unit.IsImmunedToSpellEffect(m_spellInfo, effect.EffectIndex, m_caster))
                         effectMask &= (uint)~(1 << (int)effect.EffectIndex);
 
             if (effectMask == 0)
