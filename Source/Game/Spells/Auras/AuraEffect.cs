@@ -3912,7 +3912,7 @@ namespace Game.Spells
                 for (int i = 0; i < (int)SpellSchools.Max; ++i)
                 {
                     if (Convert.ToBoolean(GetMiscValue() & (1 << i)))
-                        target.ApplyModUInt32Value(baseField + i, GetAmount(), apply);
+                        target.ApplyModInt32Value(baseField + i, GetAmount(), apply);
                 }
 
                 Guardian pet = target.ToPlayer().GetGuardianPet();

@@ -871,8 +871,8 @@ namespace Game.Entities
                 //demons benefit from warlocks shadow or fire damage
                 else if (IsPet())
                 {
-                    int fire = (int)((owner.GetUInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Fire)) + owner.GetUInt32Value(PlayerFields.ModDamageDoneNeg + (int)SpellSchools.Fire));
-                    int shadow = (int)((owner.GetUInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Shadow)) + owner.GetUInt32Value(PlayerFields.ModDamageDoneNeg + (int)SpellSchools.Shadow));
+                    int fire = owner.GetInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Fire) - owner.GetInt32Value(PlayerFields.ModDamageDoneNeg + (int)SpellSchools.Fire);
+                    int shadow = owner.GetInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Shadow) - owner.GetInt32Value(PlayerFields.ModDamageDoneNeg + (int)SpellSchools.Shadow);
                     int maximum = (fire > shadow) ? fire : shadow;
                     if (maximum < 0)
                         maximum = 0;
@@ -882,7 +882,7 @@ namespace Game.Entities
                 //water elementals benefit from mage's frost damage
                 else if (GetEntry() == ENTRY_WATER_ELEMENTAL)
                 {
-                    int frost = (int)((owner.GetUInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Frost)) + owner.GetUInt32Value(PlayerFields.ModDamageDoneNeg + (int)SpellSchools.Frost));
+                    int frost = owner.GetInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Frost) - owner.GetInt32Value(PlayerFields.ModDamageDoneNeg + (int)SpellSchools.Frost);
                     if (frost < 0)
                         frost = 0;
                     SetBonusDamage((int)(frost * 0.4f));
@@ -915,14 +915,14 @@ namespace Game.Entities
                 //force of nature
                 if (GetEntry() == ENTRY_TREANT)
                 {
-                    int spellDmg = (int)((GetOwner().GetUInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Nature)) + GetOwner().GetUInt32Value(PlayerFields.ModDamageDoneNeg + (int)SpellSchools.Nature));
+                    int spellDmg = GetOwner().GetInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Nature) - GetOwner().GetInt32Value(PlayerFields.ModDamageDoneNeg + (int)SpellSchools.Nature);
                     if (spellDmg > 0)
                         bonusDamage = spellDmg * 0.09f;
                 }
                 //greater fire elemental
                 else if (GetEntry() == ENTRY_FIRE_ELEMENTAL)
                 {
-                    int spellDmg = (int)((GetOwner().GetUInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Fire)) + GetOwner().GetUInt32Value(PlayerFields.ModDamageDoneNeg + (int)SpellSchools.Fire));
+                    int spellDmg = GetOwner().GetInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Fire) - GetOwner().GetInt32Value(PlayerFields.ModDamageDoneNeg + (int)SpellSchools.Fire);
                     if (spellDmg > 0)
                         bonusDamage = spellDmg * 0.4f;
                 }

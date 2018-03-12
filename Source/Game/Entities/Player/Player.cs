@@ -5802,16 +5802,16 @@ namespace Game.Entities
             SetFloatValue(PlayerFields.ModPeriodicHealingDonePercent, 1.0f);
             for (byte i = 0; i < 7; ++i)
             {
-                SetUInt32Value(PlayerFields.ModDamageDoneNeg + i, 0);
-                SetUInt32Value(PlayerFields.ModDamageDonePos + i, 0);
+                SetInt32Value(PlayerFields.ModDamageDoneNeg + i, 0);
+                SetInt32Value(PlayerFields.ModDamageDonePos + i, 0);
                 SetFloatValue(PlayerFields.ModDamageDonePct + i, 1.0f);
             }
+
             SetFloatValue(PlayerFields.ModSpellPowerPct, 1.0f);
 
             //reset attack power, damage and attack speed fields
-            SetBaseAttackTime(WeaponAttackType.BaseAttack, SharedConst.BaseAttackTime);
-            SetBaseAttackTime(WeaponAttackType.OffAttack, SharedConst.BaseAttackTime);
-            SetBaseAttackTime(WeaponAttackType.RangedAttack, SharedConst.BaseAttackTime);
+            for (byte i = 0; i < (int)WeaponAttackType.Max; ++i)
+                SetFloatValue(UnitFields.BaseAttackTime + i, SharedConst.BaseAttackTime);
 
             SetFloatValue(UnitFields.MinDamage, 0.0f);
             SetFloatValue(UnitFields.MaxDamage, 0.0f);
@@ -5852,11 +5852,11 @@ namespace Game.Entities
             SetResistanceBuffMods(SpellSchools.Normal, true, 0.0f);
             SetResistanceBuffMods(SpellSchools.Normal, false, 0.0f);
             // set other resistance to original value (0)
-            for (var i = 1; i < (int)SpellSchools.Max; ++i)
+            for (var spellSchool = SpellSchools.Holy; spellSchool < SpellSchools.Max; ++spellSchool)
             {
-                SetResistance((SpellSchools)i, 0);
-                SetResistanceBuffMods((SpellSchools)i, true, 0.0f);
-                SetResistanceBuffMods((SpellSchools)i, false, 0.0f);
+                SetResistance(spellSchool, 0);
+                SetResistanceBuffMods(spellSchool, true, 0.0f);
+                SetResistanceBuffMods(spellSchool, false, 0.0f);
             }
 
             SetUInt32Value(PlayerFields.ModTargetResistance, 0);
