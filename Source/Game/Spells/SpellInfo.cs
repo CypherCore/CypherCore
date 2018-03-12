@@ -2465,8 +2465,7 @@ namespace Game.Spells
             return false;
         }
 
-        // based on client sub_007FDFA0
-        public bool CanSpellCastOverrideAuraEffect(AuraEffect aurEff)
+        public bool SpellCancelsAuraEffect(AuraEffect aurEff)
         {
             if (!HasAttribute(SpellAttr1.DispelAurasOnImmunity))
                 return false;

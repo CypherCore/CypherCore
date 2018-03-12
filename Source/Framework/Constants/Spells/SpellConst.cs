@@ -1553,7 +1553,7 @@ namespace Framework.Constants
         Unk17 = 0x20000, // 17 Only 27965 (Suicide) Spell.
         HasChargeEffect = 0x40000, // 18 Only Spells That Have Charge Among Effects.
         ZoneTeleport = 0x80000, // 19 Teleports To Specific Zones.
-        UsableInStunFearConfusion = 0x100000, // 20 Blink, Divine Shield, Ice Block
+        Unk20 = 0x100000, // 20 Blink, Divine Shield, Ice Block
         Unk21 = 0x200000, // 21 Not Set
         Unk22 = 0x400000, // 22
         Unk23 = 0x800000, // 23 Motivate, Mutilate, Shattering Throw

@@ -98,7 +98,7 @@ namespace Game.DataStorage
             CliDB.CharSectionsStorage.Clear();
 
             foreach (var outfit in CliDB.CharStartOutfitStorage.Values)
-                _charStartOutfits[(uint)(outfit.RaceID | (outfit.ClassID << 8) | (outfit.GenderID << 16))] = outfit;
+                _charStartOutfits[(uint)((byte)outfit.RaceID | (outfit.ClassID << 8) | (outfit.GenderID << 16))] = outfit;
 
             var powers = new List<ChrClassesXPowerTypesRecord>();
             foreach (var chrClasses in CliDB.ChrClassesXPowerTypesStorage.Values)

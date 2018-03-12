@@ -5469,13 +5469,6 @@ namespace Game.Spells
             bool usableWhileStunned = m_spellInfo.HasAttribute(SpellAttr5.UsableWhileStunned);
             bool usableWhileFeared = m_spellInfo.HasAttribute(SpellAttr5.UsableWhileFeared);
             bool usableWhileConfused = m_spellInfo.HasAttribute(SpellAttr5.UsableWhileConfused);
-            if (m_spellInfo.HasAttribute(SpellAttr7.UsableInStunFearConfusion))
-            {
-                usableWhileStunned = true;
-                usableWhileFeared = true;
-                usableWhileConfused = true;
-            }
-
 
             // Check whether the cast should be prevented by any state you might have.
             SpellCastResult result = SpellCastResult.SpellCastOk;
@@ -5485,18 +5478,18 @@ namespace Game.Spells
             {
                 Unit charmer = m_caster.GetCharmer();
                 if (charmer)
-                    if (charmer.GetUnitBeingMoved() != m_caster && CheckCasterNotImmunedCharmAuras(ref param1))
+                    if (charmer.GetUnitBeingMoved() != m_caster && !CheckSpellCancelsCharm(ref param1))
                         result = SpellCastResult.Charmed;
             }
-            else if (unitflag.HasAnyFlag(UnitFlags.Stunned) && !usableWhileStunned && CheckCasterNotImmunedStunAuras(ref param1))
+            else if (unitflag.HasAnyFlag(UnitFlags.Stunned) && !usableWhileStunned && !CheckSpellCancelsStun(ref param1))
                 result = SpellCastResult.Stunned;
-            else if (unitflag.HasAnyFlag(UnitFlags.Silenced) && m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence) && CheckCasterNotImmunedSilenceAuras(ref param1))
+            else if (unitflag.HasAnyFlag(UnitFlags.Silenced) && m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence) && !CheckSpellCancelsSilence(ref param1))
                 result = SpellCastResult.Silenced;
-            else if (unitflag.HasAnyFlag(UnitFlags.Pacified) && m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Pacify) && CheckCasterNotImmunedPacifyAuras(ref param1))
+            else if (unitflag.HasAnyFlag(UnitFlags.Pacified) && m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Pacify) && !CheckSpellCancelsPacify(ref param1))
                 result = SpellCastResult.Pacified;
-            else if (unitflag.HasAnyFlag(UnitFlags.Fleeing) && !usableWhileFeared && CheckCasterNotImmunedFearAuras(ref param1))
+            else if (unitflag.HasAnyFlag(UnitFlags.Fleeing) && !usableWhileFeared && !CheckSpellCancelsFear(ref param1))
                 result = SpellCastResult.Fleeing;
-            else if (unitflag.HasAnyFlag(UnitFlags.Confused) && !usableWhileConfused && CheckCasterNotImmunedDisorientAuras(ref param1))
+            else if (unitflag.HasAnyFlag(UnitFlags.Confused) && !usableWhileConfused && !CheckSpellCancelsConfuse(ref param1))
                 result = SpellCastResult.Confused;
             else if (m_caster.HasFlag(UnitFields.Flags2, UnitFlags2.NoActions) && m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.NoActions))
                 result = SpellCastResult.NoActions;
@@ -5507,60 +5500,61 @@ namespace Game.Spells
             return SpellCastResult.SpellCastOk;
         }
 
-        // based on sub_00804430 from 12340 client
-        bool CheckCasterHasNotImmunedAuraType(AuraType auraType, ref uint param1)
+        bool CheckSpellCancelsAuraEffect(AuraType auraType, ref uint param1)
         {
             // Checking auras is needed now, because you are prevented by some state but the spell grants immunity.
             var auraEffects = m_caster.GetAuraEffectsByType(auraType);
             if (auraEffects.Empty())
-                return false;
+                return true;
 
             foreach (AuraEffect aurEff in auraEffects)
             {
-                if (m_spellInfo.CanSpellCastOverrideAuraEffect(aurEff))
+                if (m_spellInfo.SpellCancelsAuraEffect(aurEff))
                     continue;
 
                 param1 = (uint)aurEff.GetSpellEffectInfo().Mechanic;
                 if (param1 == 0)
                     param1 = (uint)aurEff.GetSpellInfo().Mechanic;
-                return true;
+
+                return false;
             }
 
-            return false;
+            return true;
         }
 
-        bool CheckCasterNotImmunedCharmAuras(ref uint param1)
+        bool CheckSpellCancelsCharm(ref uint param1)
         {
-            return CheckCasterHasNotImmunedAuraType(AuraType.ModCharm, ref param1) ||
-                CheckCasterHasNotImmunedAuraType(AuraType.AoeCharm, ref param1) ||
-                CheckCasterHasNotImmunedAuraType(AuraType.ModPossess, ref param1);
+            return CheckSpellCancelsAuraEffect(AuraType.ModCharm, ref param1) ||
+                CheckSpellCancelsAuraEffect(AuraType.AoeCharm, ref param1) ||
+                CheckSpellCancelsAuraEffect(AuraType.ModPossess, ref param1);
         }
 
-        bool CheckCasterNotImmunedStunAuras(ref uint param1)
+        bool CheckSpellCancelsStun(ref uint param1)
         {
-            return CheckCasterHasNotImmunedAuraType(AuraType.ModStun, ref param1);
+            return CheckSpellCancelsAuraEffect(AuraType.ModStun, ref param1) &&
+                 CheckSpellCancelsAuraEffect(AuraType.Strangulate, ref param1);
         }
 
-        bool CheckCasterNotImmunedSilenceAuras(ref uint param1)
+        bool CheckSpellCancelsSilence(ref uint param1)
         {
-            return CheckCasterHasNotImmunedAuraType(AuraType.ModSilence, ref param1) ||
-                CheckCasterHasNotImmunedAuraType(AuraType.ModPacifySilence, ref param1);
+            return CheckSpellCancelsAuraEffect(AuraType.ModSilence, ref param1) ||
+                CheckSpellCancelsAuraEffect(AuraType.ModPacifySilence, ref param1);
         }
 
-        bool CheckCasterNotImmunedPacifyAuras(ref uint param1)
+        bool CheckSpellCancelsPacify(ref uint param1)
         {
-            return CheckCasterHasNotImmunedAuraType(AuraType.ModPacify, ref param1) ||
-                CheckCasterHasNotImmunedAuraType(AuraType.ModPacifySilence, ref param1);
+            return CheckSpellCancelsAuraEffect(AuraType.ModPacify, ref param1) ||
+                CheckSpellCancelsAuraEffect(AuraType.ModPacifySilence, ref param1);
         }
 
-        bool CheckCasterNotImmunedFearAuras(ref uint param1)
+        bool CheckSpellCancelsFear(ref uint param1)
         {
-            return CheckCasterHasNotImmunedAuraType(AuraType.ModFear, ref param1);
+            return CheckSpellCancelsAuraEffect(AuraType.ModFear, ref param1);
         }
 
-        bool CheckCasterNotImmunedDisorientAuras(ref uint param1)
+        bool CheckSpellCancelsConfuse(ref uint param1)
         {
-            return CheckCasterHasNotImmunedAuraType(AuraType.ModConfuse, ref param1);
+            return CheckSpellCancelsAuraEffect(AuraType.ModConfuse, ref param1);
         }
 
         SpellCastResult CheckArenaAndRatedBattlegroundCastRules()
