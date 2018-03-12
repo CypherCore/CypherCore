@@ -1557,7 +1557,7 @@ namespace Game.Entities
             {
                 // State/effect immunities applied by aura expect full spell immunity
                 // Ignore effects with mechanic, they are supposed to be checked separately
-                if (effect == null)
+                if (effect == null || !effect.IsEffect())
                     continue;
 
                 if (!IsImmunedToSpellEffect(spellInfo, effect.EffectIndex, caster))
@@ -1570,17 +1570,14 @@ namespace Game.Entities
             if (immuneToAllEffects) //Return immune only if the target is immune to all spell effects.
                 return true;
 
-            if (!spellInfo.HasAttribute(SpellAttr1.UnaffectedBySchoolImmune) && !spellInfo.HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
+            var schoolList = m_spellImmune[(int)SpellImmunity.School];
+            foreach (var pair in schoolList)
             {
-                var schoolList = m_spellImmune[(int)SpellImmunity.School];
-                foreach (var pair in schoolList)
-                {
-                    SpellInfo immuneSpellInfo = Global.SpellMgr.GetSpellInfo(pair.Value);
-                    if (Convert.ToBoolean(pair.Key & (uint)spellInfo.GetSchoolMask())
-                        && !(immuneSpellInfo != null && immuneSpellInfo.IsPositive() && spellInfo.IsPositive() && IsFriendlyTo(caster))
-                        && !spellInfo.CanPierceImmuneAura(immuneSpellInfo))
-                        return true;
-                }
+                SpellInfo immuneSpellInfo = Global.SpellMgr.GetSpellInfo(pair.Value);
+                if (Convert.ToBoolean(pair.Key & (uint)spellInfo.GetSchoolMask())
+                    && !(immuneSpellInfo != null && immuneSpellInfo.IsPositive() && spellInfo.IsPositive() && IsFriendlyTo(caster))
+                    && !spellInfo.CanPierceImmuneAura(immuneSpellInfo))
+                    return true;
             }
 
             return false;

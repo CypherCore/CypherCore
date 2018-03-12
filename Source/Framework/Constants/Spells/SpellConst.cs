@@ -298,7 +298,7 @@ namespace Framework.Constants
         Interrupt = 26,
         Daze = 27,
         Discovery = 28,
-        Immune_Shield = 29,                         // Divine (Blessing) Shield/Protection And Ice Block
+        ImmuneShield = 29,                         // Divine (Blessing) Shield/Protection And Ice Block
         Sapped = 30,
         Enraged = 31,
         Wounded = 32,

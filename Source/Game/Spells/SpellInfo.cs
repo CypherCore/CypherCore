@@ -675,6 +675,17 @@ namespace Game.Spells
             if (HasAttribute(SpellAttr0.UnaffectedByInvulnerability))
                 return true;
 
+            // these spells (Cyclone for example) can pierce all...
+            if (HasAttribute(SpellAttr1.UnaffectedBySchoolImmune) || HasAttribute(SpellAttr2.UnaffectedByAuraSchoolImmune))
+            {
+                // ...but not these (Divine shield, Ice block, Cyclone and Banish for example)
+                if (auraSpellInfo == null ||
+                    (auraSpellInfo.Mechanic != Mechanics.ImmuneShield &&
+                        auraSpellInfo.Mechanic != Mechanics.Invulnerability &&
+                        (auraSpellInfo.Mechanic != Mechanics.Banish || IsRankOf(auraSpellInfo)))) // Banish shouldn't be immune to itself
+                    return true;
+            }
+
             // Dispels other auras on immunity, check if this spell makes the unit immune to aura
             if (HasAttribute(SpellAttr1.DispelAurasOnImmunity) && CanSpellProvideImmunityAgainstAura(auraSpellInfo))
                 return true;
@@ -3186,7 +3197,7 @@ namespace Game.Spells
                     break;
             }
 
-            if (Mechanic == Mechanics.Immune_Shield)
+            if (Mechanic == Mechanics.ImmuneShield)
                 return true;
 
             // Special case: effects which determine positivity of whole spell

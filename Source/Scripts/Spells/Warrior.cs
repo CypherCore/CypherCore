@@ -577,7 +577,7 @@ namespace Scripts.Spells.Warrior
             // remove shields, will still display immune to damage part
             Unit target = GetHitUnit();
             if (target)
-                target.RemoveAurasWithMechanic(1 << (int)Mechanics.Immune_Shield, AuraRemoveMode.EnemySpell);
+                target.RemoveAurasWithMechanic(1 << (int)Mechanics.ImmuneShield, AuraRemoveMode.EnemySpell);
         }
 
         public override void Register()

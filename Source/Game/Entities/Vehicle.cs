@@ -152,7 +152,7 @@ namespace Game.Entities
                 _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.ModUnattackable, true);
                 _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.SchoolAbsorb, true);
                 _me.ApplySpellImmune(0, SpellImmunity.Mechanic, (uint)Mechanics.Shield, true);
-                _me.ApplySpellImmune(0, SpellImmunity.Mechanic, (uint)Mechanics.Immune_Shield, true);
+                _me.ApplySpellImmune(0, SpellImmunity.Mechanic, (uint)Mechanics.ImmuneShield, true);
 
                 // ... Resistance, Split damage, Change stats ...
                 _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.DamageShield, true);
