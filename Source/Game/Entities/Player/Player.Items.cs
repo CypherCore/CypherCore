@@ -1945,7 +1945,7 @@ namespace Game.Entities
                         if (pProto != null && pProto.GetItemSet() != 0)
                             Item.RemoveItemsSetItem(this, pProto);
 
-                        _ApplyItemMods(pItem, slot, false);
+                        _ApplyItemMods(pItem, slot, false, update);
 
                         // remove item dependent auras and casts (only weapon and armor slots)
                         if (slot < EquipmentSlot.End)
@@ -2434,6 +2434,9 @@ namespace Game.Entities
             RemoveItem(dstbag, dstslot, false);
             RemoveItem(srcbag, srcslot, false);
 
+            if (srcbag == InventorySlots.Bag0 && srcslot < InventorySlots.BagEnd)
+                ApplyItemDependentAuras(pSrcItem, false);
+
             // add to dest
             if (IsInventoryPos(dst))
                 StoreItem(_sDest, pSrcItem, true);
@@ -2445,6 +2448,9 @@ namespace Game.Entities
                 if (!pSrcItem.GetChildItem().IsEmpty())
                     EquipChildItem(srcbag, srcslot, pSrcItem);
             }
+
+            if (dstbag == InventorySlots.Bag0 && dstslot < InventorySlots.BagEnd)
+                ApplyItemDependentAuras(pDstItem, false);
 
             // add to src
             if (IsInventoryPos(src))
@@ -3927,7 +3933,7 @@ namespace Game.Entities
             return false;
         }
 
-        public void _ApplyItemMods(Item item, byte slot, bool apply)
+        public void _ApplyItemMods(Item item, byte slot, bool apply, bool updateItemAuras = true)
         {
             if (slot >= InventorySlots.BagEnd || item == null)
                 return;
@@ -3948,7 +3954,8 @@ namespace Game.Entities
 
             _ApplyItemBonuses(item, slot, apply);
             ApplyItemEquipSpell(item, apply);
-            ApplyItemDependentAuras(item, apply);
+            if (updateItemAuras)
+                ApplyItemDependentAuras(item, apply);
             ApplyArtifactPowers(item, apply);
             ApplyEnchantment(item, apply);
 
