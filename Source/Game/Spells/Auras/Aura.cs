@@ -847,8 +847,8 @@ namespace Game.Spells
             {
                 if (!app.HasRemoveMode())
                 {
-                    HandleAuraSpecificMods(app, caster, true, true);
                     HandleAuraSpecificPeriodics(app, caster);
+                    HandleAuraSpecificMods(app, caster, true, true);
                 }
             }
 

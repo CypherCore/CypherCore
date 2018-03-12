@@ -4125,8 +4125,8 @@ namespace Game.Entities
             if (aurApp.HasRemoveMode())
                 return;
 
-            aura.HandleAuraSpecificMods(aurApp, caster, true, false);
             aura.HandleAuraSpecificPeriodics(aurApp, caster);
+            aura.HandleAuraSpecificMods(aurApp, caster, true, false);
 
             // apply effects of the aura
             for (byte i = 0; i < SpellConst.MaxEffects; i++)
