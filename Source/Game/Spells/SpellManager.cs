@@ -360,9 +360,8 @@ namespace Game.Entities
             }
         }
 
-        public bool AddSameEffectStackRuleSpellGroups(SpellInfo spellInfo, int amount, out Dictionary<SpellGroup, int> groups)
+        public bool AddSameEffectStackRuleSpellGroups(SpellInfo spellInfo, int amount, Dictionary<SpellGroup, int> groups)
         {
-            groups = new Dictionary<SpellGroup, int>();
             uint spellId = spellInfo.GetFirstRankSpell().Id;
             var spellGroup = GetSpellSpellGroupMapBounds(spellId);
             // Find group with SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT if it belongs to one

@@ -1688,59 +1688,6 @@ namespace Game.Entities
         {
             m_auraModifiersGroup[(int)unitMod][(int)modifierType] = value;
         }
-        public float GetTotalAuraMultiplierByMiscValue(AuraType auratype, int miscValue)
-        {
-            Dictionary<SpellGroup, int> SameEffectSpellGroup = new Dictionary<SpellGroup, int>();
-            float multiplier = 1.0f;
-
-            var mTotalAuraList = GetAuraEffectsByType(auratype);
-            foreach (var i in mTotalAuraList)
-            {
-                if (i.GetMiscValue() == miscValue)
-                    if (!Global.SpellMgr.AddSameEffectStackRuleSpellGroups(i.GetSpellInfo(), i.GetAmount(), out SameEffectSpellGroup))
-                        MathFunctions.AddPct(ref multiplier, i.GetAmount());
-            }
-
-            foreach (var pair in SameEffectSpellGroup)
-                MathFunctions.AddPct(ref multiplier, pair.Value);
-
-            return multiplier;
-        }
-        public int GetTotalAuraModifierByMiscValue(AuraType auratype, int miscValue)
-        {
-            Dictionary<SpellGroup, int> SameEffectSpellGroup = new Dictionary<SpellGroup, int>();
-            int modifier = 0;
-
-            var mTotalAuraList = GetAuraEffectsByType(auratype);
-            foreach (var i in mTotalAuraList)
-            {
-                if (i.GetMiscValue() == miscValue)
-                    if (!Global.SpellMgr.AddSameEffectStackRuleSpellGroups(i.GetSpellInfo(), i.GetAmount(), out SameEffectSpellGroup))
-                        modifier += i.GetAmount();
-            }
-
-            foreach (var pair in SameEffectSpellGroup)
-                modifier += pair.Value;
-
-            return modifier;
-        }
-        public int GetTotalAuraModifierByMiscMask(AuraType auratype, int miscMask)
-        {
-            Dictionary<SpellGroup, int> SameEffectSpellGroup = new Dictionary<SpellGroup, int>();
-            int modifier = 0;
-
-            var mTotalAuraList = GetAuraEffectsByType(auratype);
-
-            foreach (var i in mTotalAuraList)
-                if (Convert.ToBoolean(i.GetMiscValue() & miscMask))
-                    if (!Global.SpellMgr.AddSameEffectStackRuleSpellGroups(i.GetSpellInfo(), i.GetAmount(), out SameEffectSpellGroup))
-                        modifier += i.GetAmount();
-
-            foreach (var pair in SameEffectSpellGroup)
-                modifier += pair.Value;
-
-            return modifier;
-        }
         public int CalcSpellDuration(SpellInfo spellProto)
         {
             sbyte comboPoints = (sbyte)(m_playerMovingMe != null ? m_playerMovingMe.GetComboPoints() : 0);
