@@ -544,7 +544,11 @@ namespace Game.Entities
             }
 
             bool turn = (GetOrientation() != orientation);
-            bool relocated = (teleport || GetPositionX() != x || GetPositionY() != y || GetPositionZ() != z);
+            // G3D::fuzzyEq won't help here, in some cases magnitudes differ by a little more than G3D::eps, but should be considered equal
+            bool relocated = (teleport ||
+                Math.Abs(GetPositionX() - x) > 0.001f ||
+                Math.Abs(GetPositionY() - y) > 0.001f ||
+                Math.Abs(GetPositionZ() - z) > 0.001f);
 
             if (turn)
                 RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Turning);
