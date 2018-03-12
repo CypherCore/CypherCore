@@ -1876,7 +1876,7 @@ namespace Game.Spells
             // Fill base trigger info
             ProcFlags procAttacker = m_procAttacker;
             ProcFlags procVictim = m_procVictim;
-            ProcFlagsHit hitMask = m_hitMask;
+            ProcFlagsHit hitMask = ProcFlagsHit.None;
 
             m_spellAura = null;
 
@@ -2061,6 +2061,9 @@ namespace Game.Spells
                         unitTarget.ToCreature().GetAI().AttackStart(m_caster);
                 }
             }
+
+            // set hitmask for finish procs
+            m_hitMask |= hitMask;
 
             // spellHitTarget can be null if spell is missed in DoSpellHitOnUnit
             if (missInfo != SpellMissInfo.Evade && spellHitTarget && !m_caster.IsFriendlyTo(unit) && (!m_spellInfo.IsPositive() || m_spellInfo.HasEffect(SpellEffectName.Dispel)))
@@ -3148,11 +3151,7 @@ namespace Game.Spells
                     procAttacker = m_spellInfo.IsPositive() ? ProcFlags.DoneSpellNoneDmgClassPos : ProcFlags.DoneSpellNoneDmgClassNeg;
             }
 
-            ProcFlagsHit hitMask = m_hitMask;
-            if (!hitMask.HasAnyFlag(ProcFlagsHit.Critical))
-                hitMask |= ProcFlagsHit.Normal;
-
-            m_originalCaster.ProcSkillsAndAuras(null, procAttacker, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Finish, hitMask, this, null, null);
+            m_originalCaster.ProcSkillsAndAuras(null, procAttacker, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Finish, m_hitMask, this, null, null);
         }
 
         void SendSpellCooldown()
