@@ -366,10 +366,9 @@ namespace Game.Entities
                 if (linkedGo != null)
                 {
                     SetLinkedTrap(linkedGo);
-                    map.AddToMap(linkedGo);
+                    if (!map.AddToMap(linkedGo))
+                        linkedGo.Dispose();
                 }
-                else
-                    linkedGo.Dispose();
             }
 
             return true;
