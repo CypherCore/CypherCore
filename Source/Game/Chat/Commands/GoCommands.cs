@@ -40,36 +40,29 @@ namespace Game.Chat.Commands
             Player player = handler.GetSession().GetPlayer();
 
             // "id" or number or [name] Shift-click form |color|Hcreature_entry:creature_id|h[name]|h|r
-            string param1 = handler.extractKeyFromLink(args, "Hcreature");
+            string param1 = handler.extractKeyFromLink(args, "Hcreature", "Hcreature_entry");
             if (string.IsNullOrEmpty(param1))
                 return false;
 
             string whereClause = "";
 
             // User wants to teleport to the NPC's template entry
-            if (param1.Equals("id"))
+            if (param1.IsNumber())
             {
-                // Get the "creature_template.entry"
-                // number or [name] Shift-click form |color|Hcreature_entry:creature_id|h[name]|h|r
-                string idStr = handler.extractKeyFromLink(args, "Hcreature_entry");
-                if (string.IsNullOrEmpty(idStr))
-                    return false;
+                if (!int.TryParse(param1, out int entry) || entry == 0)
+                {
+                    if (!ulong.TryParse(param1, out ulong guidLow) || guidLow == 0)
+                        return false;
 
-                if (!int.TryParse(idStr, out int entry) || entry == 0)
-                    return false;
-
-                whereClause += "WHERE id = '" + entry + '\'';
+                    whereClause += "WHERE guid = '" + guidLow + '\'';
+                }
+                else
+                    whereClause += "WHERE id = '" + entry + '\'';
             }
             else
             {
-                // Number is invalid - maybe the user specified the mob's name
-                if (!ulong.TryParse(param1, out ulong guidLow) || guidLow == 0)
-                {
-                    string name = param1;
-                    whereClause += ", creature_template WHERE creature.id = creature_template.entry AND creature_template.name LIKE '" + name + '\'';
-                }
-                else
-                    whereClause += "WHERE guid = '" + guidLow + '\'';
+                // param1 is not a number, must be mob's name
+                whereClause += ", creature_template WHERE creature.id = creature_template.entry AND creature_template.name LIKE '" + param1 + '\'';
             }
 
             SQLResult result = DB.World.Query("SELECT position_x, position_y, position_z, orientation, map FROM creature {0}", whereClause);

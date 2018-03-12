@@ -117,7 +117,7 @@ public class Log
         if (!ShouldLog(LogFilter.Server, LogLevel.Fatal))
             return;
 
-        outMessage(LogFilter.Server, LogLevel.Fatal, "MemberName: {0} ExceptionMessage: {1}", memberName, ex.Message);
+        outMessage(LogFilter.Server, LogLevel.Fatal, "CallingMember: {0} ExceptionMessage: {1}", memberName, ex.Message);
     }
 
     public static void outFatal(LogFilter type, string text, params object[] args)
