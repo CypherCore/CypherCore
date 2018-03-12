@@ -2112,7 +2112,7 @@ namespace Game.Entities
         }
         public float GetAPMultiplier(WeaponAttackType attType, bool normalized)
         {
-            if (!IsTypeId(TypeId.Player))
+            if (!IsTypeId(TypeId.Player) || (IsInFeralForm() && !normalized))
                 return GetBaseAttackTime(attType) / 1000.0f;
 
             Item weapon = ToPlayer().GetWeaponForAttack(attType, true);
