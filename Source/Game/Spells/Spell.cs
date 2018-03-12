@@ -4509,10 +4509,8 @@ namespace Game.Spells
                 }
             }
 
-            var blockSpells = m_caster.GetAuraEffectsByType(AuraType.BlockSpellFamily);
-            foreach (var block in blockSpells)
-                if (block.GetMiscValue() == (int)m_spellInfo.SpellFamilyName)
-                    return SpellCastResult.SpellUnavailable;
+            if (m_caster.HasAuraTypeWithMiscvalue(AuraType.BlockSpellFamily, (int)m_spellInfo.SpellFamilyName))
+                return SpellCastResult.SpellUnavailable;
 
             bool reqCombat = true;
             var stateAuras = m_caster.GetAuraEffectsByType(AuraType.AbilityIgnoreAurastate);

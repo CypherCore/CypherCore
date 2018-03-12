@@ -3789,11 +3789,7 @@ namespace Game.Entities
             // Mana regen calculated in Player.UpdateManaRegen()
             if (power != PowerType.Mana)
             {
-                var ModPowerRegenPCTAuras = GetAuraEffectsByType(AuraType.ModPowerRegenPercent);
-                foreach (var eff in ModPowerRegenPCTAuras)
-                    if ((PowerType)eff.GetMiscValue() == power)
-                        MathFunctions.AddPct(ref addvalue, eff.GetAmount());
-
+                addvalue *= GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)power);
                 addvalue += GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)power) * ((power != PowerType.Energy) ? m_regenTimerCount : m_regenTimer) / (5 * Time.InMilliseconds);
             }
 
@@ -3873,43 +3869,40 @@ namespace Game.Entities
                 return;
 
             float HealthIncreaseRate = WorldConfig.GetFloatValue(WorldCfg.RateHealth);
-            float addvalue = 0.0f;
+            float addValue = 0.0f;
 
             // polymorphed case
             if (IsPolymorphed())
-                addvalue = (float)GetMaxHealth() / 3;
+                addValue = (float)GetMaxHealth() / 3;
             // normal regen case (maybe partly in combat case)
             else if (!IsInCombat() || HasAuraType(AuraType.ModRegenDuringCombat))
             {
-                addvalue = HealthIncreaseRate;
+                addValue = HealthIncreaseRate;
                 if (!IsInCombat())
                 {
                     if (getLevel() < 15)
-                        addvalue = (0.20f * (GetMaxHealth()) / getLevel() * HealthIncreaseRate);
+                        addValue = (0.20f * (GetMaxHealth()) / getLevel() * HealthIncreaseRate);
                     else
-                        addvalue = 0.015f * (GetMaxHealth()) * HealthIncreaseRate;
+                        addValue = 0.015f * (GetMaxHealth()) * HealthIncreaseRate;
 
-                    var mModHealthRegenPct = GetAuraEffectsByType(AuraType.ModHealthRegenPercent);
-                    foreach (var eff in mModHealthRegenPct)
-                        MathFunctions.AddPct(ref addvalue, eff.GetAmount());
-
-                    addvalue += GetTotalAuraModifier(AuraType.ModRegen) * 2 * Time.InMilliseconds / (5 * Time.InMilliseconds);
+                    addValue *= GetTotalAuraMultiplier(AuraType.ModHealthRegenPercent);
+                    addValue += GetTotalAuraModifier(AuraType.ModRegen) * 2 * Time.InMilliseconds / (5 * Time.InMilliseconds);
                 }
                 else if (HasAuraType(AuraType.ModRegenDuringCombat))
-                    MathFunctions.ApplyPct(ref addvalue, GetTotalAuraModifier(AuraType.ModRegenDuringCombat));
+                    MathFunctions.ApplyPct(ref addValue, GetTotalAuraModifier(AuraType.ModRegenDuringCombat));
 
                 if (!IsStandState())
-                    addvalue *= 1.5f;
+                    addValue *= 1.5f;
             }
 
             // always regeneration bonus (including combat)
-            addvalue += GetTotalAuraModifier(AuraType.ModHealthRegenInCombat);
-            addvalue += m_baseHealthRegen / 2.5f;
+            addValue += GetTotalAuraModifier(AuraType.ModHealthRegenInCombat);
+            addValue += m_baseHealthRegen / 2.5f;
 
-            if (addvalue < 0)
-                addvalue = 0;
+            if (addValue < 0)
+                addValue = 0;
 
-            ModifyHealth((int)addvalue);
+            ModifyHealth((int)addValue);
         }
         public void ResetAllPowers()
         {
@@ -4421,9 +4414,7 @@ namespace Game.Entities
                         if (!IsAlive() || HasAuraType(AuraType.WaterBreathing) || GetSession().GetSecurity() >= (AccountTypes)WorldConfig.GetIntValue(WorldCfg.DisableBreathing))
                             return -1;
                         int UnderWaterTime = 3 * Time.Minute * Time.InMilliseconds;
-                        var mModWaterBreathing = GetAuraEffectsByType(AuraType.WaterBreathing);
-                        foreach (var eff in mModWaterBreathing)
-                            MathFunctions.AddPct(ref UnderWaterTime, eff.GetAmount());
+                        UnderWaterTime *= (int)GetTotalAuraMultiplier(AuraType.ModWaterBreathing);
                         return UnderWaterTime;
                     }
                 case MirrorTimerType.Fire:

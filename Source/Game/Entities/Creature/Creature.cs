@@ -557,11 +557,7 @@ namespace Game.Entities
                 addvalue = maxValue / 3;
 
             // Apply modifiers (if any).
-            var ModPowerRegenPCTAuras = GetAuraEffectsByType(AuraType.ModPowerRegenPercent);
-            foreach (var eff in ModPowerRegenPCTAuras)
-                if (eff.GetMiscValue() == (int)PowerType.Mana)
-                    MathFunctions.AddPct(ref addvalue, eff.GetAmount());
-
+            addvalue *= (int)GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)PowerType.Mana);
             addvalue += GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)PowerType.Mana) * SharedConst.CreatureRegenInterval / (5 * Time.InMilliseconds);
 
             ModifyPower(PowerType.Mana, addvalue);
@@ -590,11 +586,8 @@ namespace Game.Entities
                 addvalue = (long)maxValue / 3;
 
             // Apply modifiers (if any).
-            var ModPowerRegenPCTAuras = GetAuraEffectsByType(AuraType.ModHealthRegenPercent);
-            foreach (var eff in ModPowerRegenPCTAuras)
-                MathFunctions.AddPct(ref addvalue, eff.GetAmount());
-
-            addvalue += (uint)GetTotalAuraModifier(AuraType.ModRegen) * SharedConst.CreatureRegenInterval / (5 * Time.InMilliseconds);
+            addvalue *= (int)GetTotalAuraMultiplier(AuraType.ModHealthRegenPercent);
+            addvalue += GetTotalAuraModifier(AuraType.ModRegen) * SharedConst.CreatureRegenInterval / (5 * Time.InMilliseconds);
 
             ModifyHealth(addvalue);
         }
@@ -628,11 +621,7 @@ namespace Game.Entities
             }
 
             // Apply modifiers (if any).
-            var ModPowerRegenPCTAuras = GetAuraEffectsByType(AuraType.ModPowerRegenPercent);
-            foreach (var i in ModPowerRegenPCTAuras)
-                if ((PowerType)i.GetMiscValue() == power)
-                    MathFunctions.AddPct(ref addvalue, i.GetAmount());
-
+            addvalue *= GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)power);
             addvalue += GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)power) * (IsHunterPet() ? SharedConst.PetFocusRegenInterval : SharedConst.CreatureRegenInterval) / (5 * Time.InMilliseconds);
 
             ModifyPower(power, (int)addvalue);

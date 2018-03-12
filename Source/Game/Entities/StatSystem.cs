@@ -660,14 +660,13 @@ namespace Game.Entities
             else
                 chance += victim.GetTotalAuraModifier(AuraType.ModAttackerMeleeCritChance);
 
-            var critChanceForCaster = victim.GetAuraEffectsByType(AuraType.ModCritChanceForCaster);
-            foreach (AuraEffect aurEff in critChanceForCaster)
+            chance += victim.GetTotalAuraModifier(AuraType.ModCritChanceForCaster, aurEff =>
             {
-                if (aurEff.GetCasterGUID() != GetGUID())
-                    continue;
+                if (aurEff.GetCasterGUID() == GetGUID())
+                    return true;
 
-                chance += aurEff.GetAmount();
-            }
+                return false;
+            });
 
             chance += victim.GetTotalAuraModifier(AuraType.ModAttackerSpellAndWeaponCritChance);
 
@@ -1195,14 +1194,14 @@ namespace Game.Entities
             // Apply bonus from SPELL_AURA_MOD_RATING_FROM_STAT
             // stat used stored in miscValueB for this aura
             var modRatingFromStat = GetAuraEffectsByType(AuraType.ModRatingFromStat);
-            foreach (var i in modRatingFromStat)
-                if (Convert.ToBoolean(i.GetMiscValue() & (1 << (int)cr)))
-                    amount += (int)MathFunctions.CalculatePct(GetStat((Stats)i.GetMiscValueB()), i.GetAmount());
+            foreach (var aurEff in modRatingFromStat)
+                if (Convert.ToBoolean(aurEff.GetMiscValue() & (1 << (int)cr)))
+                    amount += (int)MathFunctions.CalculatePct(GetStat((Stats)aurEff.GetMiscValueB()), aurEff.GetAmount());
 
             var modRatingPct = GetAuraEffectsByType(AuraType.ModRatingPct);
-            foreach (var i in modRatingPct)
-                if (Convert.ToBoolean(i.GetMiscValue() & (1 << (int)cr)))
-                    amount += MathFunctions.CalculatePct(amount, i.GetAmount());
+            foreach (var aurEff in modRatingPct)
+                if (Convert.ToBoolean(aurEff.GetMiscValue() & (1 << (int)cr)))
+                    amount += MathFunctions.CalculatePct(amount, aurEff.GetAmount());
 
             if (amount < 0)
                 amount = 0;
@@ -1478,16 +1477,17 @@ namespace Game.Entities
 
             Item weapon = GetWeaponForAttack(attack, true);
 
-            var expAuras = GetAuraEffectsByType(AuraType.ModExpertise);
-            foreach (var eff in expAuras)
+            expertise += GetTotalAuraModifier(AuraType.ModExpertise, aurEff =>
             {
                 // item neutral spell
-                if ((int)eff.GetSpellInfo().EquippedItemClass == -1)
-                    expertise += eff.GetAmount();
+                if ((int)aurEff.GetSpellInfo().EquippedItemClass == -1)
+                    return true;
                 // item dependent spell
-                else if (weapon != null && weapon.IsFitToSpellRequirements(eff.GetSpellInfo()))
-                    expertise += eff.GetAmount();
-            }
+                else if (weapon != null && weapon.IsFitToSpellRequirements(aurEff.GetSpellInfo()))
+                    return true;
+
+                return false;
+            });
 
             if (expertise < 0)
                 expertise = 0;

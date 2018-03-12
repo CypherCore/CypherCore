@@ -2268,13 +2268,7 @@ namespace Game.Entities
 
             if (victimResistance > 0)
             {
-                int ignoredResistance = 0;
-
-                var ResIgnoreAuras = GetAuraEffectsByType(AuraType.ModIgnoreTargetResist);
-                foreach (var eff in ResIgnoreAuras)
-                    if (Convert.ToBoolean(eff.GetMiscValue() & (int)schoolMask))
-                        ignoredResistance += eff.GetAmount();
-
+                int ignoredResistance = GetTotalAuraModifierByMiscMask(AuraType.ModIgnoreTargetResist, (int)schoolMask);
                 ignoredResistance = Math.Min(ignoredResistance, 100);
                 MathFunctions.ApplyPct(ref victimResistance, 100 - ignoredResistance);
             }
@@ -2320,18 +2314,16 @@ namespace Game.Entities
             // Ignore Absorption Auras
             float auraAbsorbMod = GetMaxPositiveAuraModifierByMiscMask(AuraType.ModTargetAbsorbSchool, (uint)damageInfo.GetSchoolMask());
 
-            var abilityAbsorbAuras = GetAuraEffectsByType(AuraType.ModTargetAbilityAbsorbSchool);
-            foreach (AuraEffect aurEff in abilityAbsorbAuras)
+            auraAbsorbMod = Math.Max(auraAbsorbMod, (float)GetMaxPositiveAuraModifier(AuraType.ModTargetAbilityAbsorbSchool, aurEff =>
             {
                 if (!Convert.ToBoolean(aurEff.GetMiscValue() & (int)damageInfo.GetSchoolMask()))
-                    continue;
+                    return false;
 
                 if (!aurEff.IsAffectingSpell(damageInfo.GetSpellInfo()))
-                    continue;
+                    return false;
 
-                if ((aurEff.GetAmount() > auraAbsorbMod))
-                    auraAbsorbMod = aurEff.GetAmount();
-            }
+                return true;
+            }));
 
             MathFunctions.RoundToInterval(ref auraAbsorbMod, 0.0f, 100.0f);
 
@@ -2596,7 +2588,7 @@ namespace Game.Entities
             var resIgnoreAuras = GetAuraEffectsByType(AuraType.ModIgnoreTargetResist);
             foreach (var eff in resIgnoreAuras)
             {
-                if (eff.GetMiscValue().HasAnyFlag((int)SpellSchoolMask.Normal))
+                if (eff.GetMiscValue().HasAnyFlag((int)SpellSchoolMask.Normal) && eff.IsAffectingSpell(spellInfo))
                     armor = (float)Math.Floor(MathFunctions.AddPct(ref armor, -eff.GetAmount()));
             }
 
@@ -2643,10 +2635,7 @@ namespace Game.Entities
             int DoneFlatBenefit = 0;
 
             // ..done
-            var mDamageDoneCreature = GetAuraEffectsByType(AuraType.ModDamageDoneCreature);
-            foreach (var eff in mDamageDoneCreature)
-                if (Convert.ToBoolean(creatureTypeMask & eff.GetMiscValue()))
-                    DoneFlatBenefit += eff.GetAmount();
+            DoneFlatBenefit += GetTotalAuraModifierByMiscMask(AuraType.ModDamageDoneCreature, (int)creatureTypeMask);
 
             // ..done
             // SPELL_AURA_MOD_DAMAGE_DONE included in weapon damage
@@ -2659,20 +2648,14 @@ namespace Game.Entities
                 APbonus += victim.GetTotalAuraModifier(AuraType.RangedAttackPowerAttackerBonus);
 
                 // ..done (base at attack power and creature type)
-                var mCreatureAttackPower = GetAuraEffectsByType(AuraType.ModRangedAttackPowerVersus);
-                foreach (var eff in mCreatureAttackPower)
-                    if (Convert.ToBoolean(creatureTypeMask & eff.GetMiscValue()))
-                        APbonus += eff.GetAmount();
+                APbonus += GetTotalAuraModifierByMiscMask(AuraType.ModRangedAttackPowerVersus, (int)creatureTypeMask);
             }
             else
             {
                 APbonus += victim.GetTotalAuraModifier(AuraType.MeleeAttackPowerAttackerBonus);
 
                 // ..done (base at attack power and creature type)
-                var mCreatureAttackPower = GetAuraEffectsByType(AuraType.ModMeleeAttackPowerVersus);
-                foreach (var eff in mCreatureAttackPower)
-                    if (Convert.ToBoolean(creatureTypeMask & eff.GetMiscValue()))
-                        APbonus += eff.GetAmount();
+                APbonus += GetTotalAuraModifierByMiscMask(AuraType.ModMeleeAttackPowerVersus, (int)creatureTypeMask);
             }
 
             if (APbonus != 0)                                       // Can be negative
@@ -2701,16 +2684,15 @@ namespace Game.Entities
                 }
             }
 
-            var mDamageDoneVersus = GetAuraEffectsByType(AuraType.ModDamageDoneVersus);
-            foreach (var eff in mDamageDoneVersus)
-                if (Convert.ToBoolean(creatureTypeMask & eff.GetMiscValue()))
-                    MathFunctions.AddPct(ref DoneTotalMod, eff.GetAmount());
+            DoneTotalMod *= GetTotalAuraMultiplierByMiscMask(AuraType.ModDamageDoneVersus, (uint)creatureTypeMask);
 
             // bonus against aurastate
-            var mDamageDoneVersusAurastate = GetAuraEffectsByType(AuraType.ModDamageDoneVersusAurastate);
-            foreach (var eff in mDamageDoneVersusAurastate)
-                if (victim.HasAuraState((AuraStateType)eff.GetMiscValue()))
-                    MathFunctions.AddPct(ref DoneTotalMod, eff.GetAmount());
+            DoneTotalMod *= GetTotalAuraMultiplier(AuraType.ModDamageDoneVersusAurastate, aurEff =>
+            {
+                if (victim.HasAuraState((AuraStateType)aurEff.GetMiscValue()))
+                    return true;
+                return false;
+            });
 
             // Add SPELL_AURA_MOD_DAMAGE_DONE_FOR_MECHANIC percent bonus
             if (spellProto != null)
@@ -2739,18 +2721,10 @@ namespace Game.Entities
 
             // get all auras from caster that allow the spell to ignore resistance (sanctified wrath)
             int attackSchoolMask = (int)(spellProto != null ? spellProto.GetSchoolMask() : SpellSchoolMask.Normal);
-            var IgnoreResistAuras = attacker.GetAuraEffectsByType(AuraType.ModIgnoreTargetResist);
-            foreach (var eff in IgnoreResistAuras)
-            {
-                if (eff.GetMiscValue().HasAnyFlag(attackSchoolMask))
-                    TakenTotalCasterMod += eff.GetAmount();
-            }
+            TakenTotalCasterMod += attacker.GetTotalAuraModifierByMiscMask(AuraType.ModIgnoreTargetResist, attackSchoolMask);
 
             // ..taken
-            var mDamageTaken = GetAuraEffectsByType(AuraType.ModDamageTaken);
-            foreach (var eff in mDamageTaken)
-                if (Convert.ToBoolean(eff.GetMiscValue() & (int)attacker.GetMeleeDamageSchoolMask()))
-                    TakenFlatBenefit += eff.GetAmount();
+            TakenFlatBenefit += GetTotalAuraModifierByMiscMask(AuraType.ModDamageTaken, (int)attacker.GetMeleeDamageSchoolMask());
 
             if (attType != WeaponAttackType.RangedAttack)
                 TakenFlatBenefit += GetTotalAuraModifier(AuraType.ModMeleeDamageTaken);
@@ -2767,10 +2741,12 @@ namespace Game.Entities
             if (spellProto != null)
             {
                 // From caster spells
-                var mOwnerTaken = GetAuraEffectsByType(AuraType.ModSpellDamageFromCaster);
-                foreach (var eff in mOwnerTaken)
-                    if (eff.GetCasterGUID() == attacker.GetGUID() && eff.IsAffectingSpell(spellProto))
-                        MathFunctions.AddPct(ref TakenTotalMod, eff.GetAmount());
+                TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModSpellDamageFromCaster, aurEff =>
+                {
+                    if (aurEff.GetCasterGUID() == attacker.GetGUID() && aurEff.IsAffectingSpell(spellProto))
+                        return true;
+                    return false;
+                });
 
                 // Mod damage from spell mechanic
                 uint mechanicMask = spellProto.GetAllEffectsMechanicMask();
@@ -2781,10 +2757,12 @@ namespace Game.Entities
 
                 if (mechanicMask != 0)
                 {
-                    var mDamageDoneMechanic = GetAuraEffectsByType(AuraType.ModMechanicDamageTakenPercent);
-                    foreach (var eff in mDamageDoneMechanic)
-                        if (mechanicMask.HasAnyFlag((uint)(1 << eff.GetMiscValue())))
-                            MathFunctions.AddPct(ref TakenTotalMod, eff.GetAmount());
+                    TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModMechanicDamageTakenPercent, aurEff =>
+                    {
+                        if ((mechanicMask & (1 << (aurEff.GetMiscValue()))) != 0)
+                            return true;
+                        return false;
+                    });
                 }
             }
 
@@ -2793,17 +2771,9 @@ namespace Game.Entities
                 MathFunctions.AddPct(ref TakenTotalMod, cheatDeath.GetAmount());
 
             if (attType != WeaponAttackType.RangedAttack)
-            {
-                var mModMeleeDamageTakenPercent = GetAuraEffectsByType(AuraType.ModMeleeDamageTakenPct);
-                foreach (var eff in mModMeleeDamageTakenPercent)
-                    MathFunctions.AddPct(ref TakenTotalMod, eff.GetAmount());
-            }
+                TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModMeleeDamageTakenPct);
             else
-            {
-                var mModRangedDamageTakenPercent = GetAuraEffectsByType(AuraType.ModRangedDamageTakenPct);
-                foreach (var eff in mModRangedDamageTakenPercent)
-                    MathFunctions.AddPct(ref TakenTotalMod, eff.GetAmount());
-            }
+                TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModRangedDamageTakenPct);
 
             float tmpDamage = 0.0f;
 
