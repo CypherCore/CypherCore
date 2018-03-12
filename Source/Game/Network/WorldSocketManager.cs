@@ -57,11 +57,10 @@ namespace Game.Network
             try
             {
                 if (_socketSendBufferSize >= 0)
-                    sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendBuffer, _socketSendBufferSize);
+                    sock.SendBufferSize = _socketSendBufferSize;
 
                 // Set TCP_NODELAY.
-                if (_tcpNoDelay)
-                    sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoDelay, true);
+                sock.NoDelay = _tcpNoDelay;
             }
             catch (SocketException ex)
             {
