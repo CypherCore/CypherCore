@@ -2274,13 +2274,6 @@ namespace Game.Entities
                     case 42835: // Spout, remove damage effect, only anim is needed
                         spellInfo.GetEffect(0).Effect = 0;
                         break;
-                    case 30657: // Quake
-                        spellInfo.GetEffect(0).TriggerSpell = 30571;
-                        break;
-                    case 30541: // Blaze (needs conditions entry)
-                        spellInfo.GetEffect(0).TargetA = new SpellImplicitTargetInfo(Targets.UnitEnemy);
-                        spellInfo.GetEffect(0).TargetB = new SpellImplicitTargetInfo();
-                        break;
                     case 63665: // Charge (Argent Tournament emote on riders)
                     case 31298: // Sleep (needs target selection script)
                     case 51904: // Summon Ghouls On Scarlet Crusade (this should use conditions table, script for this spell needs to be fixed)

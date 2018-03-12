@@ -2996,6 +2996,10 @@ namespace Game.Spells
             if (IsPassive())
                 return this;
 
+            // Client ignores spell with these attributes (sub_53D9D0)
+            if (HasAttribute(SpellAttr0.Negative1) || HasAttribute(SpellAttr2.Unk3))
+                return this;
+
             bool needRankSelection = false;
             foreach (SpellEffectInfo effect in GetEffectsForDifficulty(Difficulty.None))
             {
@@ -3854,9 +3858,8 @@ namespace Game.Spells
                         level = (int)_spellInfo.MaxLevel;
                     else if (level < _spellInfo.BaseLevel)
                         level = (int)_spellInfo.BaseLevel;
-                    if (!_spellInfo.IsPassive())
-                        level -= (int)_spellInfo.SpellLevel;
 
+                    level -= (int)_spellInfo.SpellLevel;
                     basePoints += (int)(level * basePointsPerLevel);
                 }
 
