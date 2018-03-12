@@ -2635,6 +2635,7 @@ namespace Game.Entities
                     case 70936: // Summon Suppressor (needs target selection script)
                         spellInfo.GetEffect(0).TargetA = new SpellImplicitTargetInfo(Targets.UnitAny);
                         spellInfo.GetEffect(0).TargetB = new SpellImplicitTargetInfo();
+                        spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(157); // 90yd
                         break;
                     case 70598: // Sindragosa's Fury
                         spellInfo.GetEffect(0).TargetA = new SpellImplicitTargetInfo(Targets.DestDest);

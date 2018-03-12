@@ -1977,7 +1977,7 @@ namespace Scripts.Spells.Generic
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SPELL_PARALYSIS);
+            return ValidateSpellInfo(SpellIds.Paralysis);
         }
 
         void HandleStun(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -1985,7 +1985,7 @@ namespace Scripts.Spells.Generic
             if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
                 return;
 
-            GetTarget().CastSpell((Unit)null, SPELL_PARALYSIS, true, null, aurEff);
+            GetTarget().CastSpell((Unit)null, SpellIds.Paralysis, true, null, aurEff);
         }
 
         public override void Register()
