@@ -682,7 +682,7 @@ namespace Game.Spells
                 if (auraSpellInfo == null ||
                     (auraSpellInfo.Mechanic != Mechanics.ImmuneShield &&
                         auraSpellInfo.Mechanic != Mechanics.Invulnerability &&
-                        (auraSpellInfo.Mechanic != Mechanics.Banish || IsRankOf(auraSpellInfo)))) // Banish shouldn't be immune to itself
+                        (auraSpellInfo.Mechanic != Mechanics.Banish || (IsRankOf(auraSpellInfo) && auraSpellInfo.Dispel != DispelType.None)))) // Banish shouldn't be immune to itself, but Cyclone should
                     return true;
             }
 
