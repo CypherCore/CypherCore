@@ -37,6 +37,7 @@ namespace Game.Movement
             isArrivalDone = false;
             pathId = pathid;
             repeating = _repeating;
+            loadedFromDB = true;
         }
 
         public WaypointMovementGenerator(WaypointPath _path, bool _repeating = true)
@@ -90,6 +91,10 @@ namespace Game.Movement
             }
             else
             {
+                // Set home position at place on waypoint movement.
+                if (creature.GetTransGUID().IsEmpty())
+                    creature.SetHomePosition(creature.GetPosition());
+
                 if (creature.IsStopped())
                     Stop(loadedFromDB ? WorldConfig.GetIntValue(WorldCfg.CreatureStopForPlayer) : 2 * Time.Hour * Time.InMilliseconds);
                 else if (creature.moveSpline.Finalized())
