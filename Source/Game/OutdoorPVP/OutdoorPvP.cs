@@ -298,7 +298,7 @@ namespace Game.PvP
         {
             AreaTableRecord areaTable = CliDB.AreaTableStorage.LookupByKey(zone);
             Contract.Assert(areaTable != null);
-            Map map = Global.MapMgr.CreateBaseMap(areaTable.MapId);
+            Map map = Global.MapMgr.CreateBaseMap(areaTable.ContinentID);
             Contract.Assert(!map.Instanceable());
             m_map = map;
         }

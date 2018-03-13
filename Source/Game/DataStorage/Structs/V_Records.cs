@@ -40,14 +40,16 @@ namespace Game.DataStorage
         public ushort VehicleUIIndicatorID;
         public ushort[] PowerDisplayID = new ushort[3];
         public byte FlagsB;
-        public byte UILocomotionType;
+        public byte UiLocomotionType;
         public ushort MissileTargetingID;
     }
 
     public sealed class VehicleSeatRecord
     {
         public uint Id;
-        public uint[] Flags = new uint[3];
+        public VehicleSeatFlags Flags;
+        public VehicleSeatFlagsB FlagsB;
+        public uint FlagsC;
         public Vector3 AttachmentOffset;
         public float EnterPreDelay;
         public float EnterSpeed;
@@ -78,7 +80,7 @@ namespace Game.DataStorage
         public float CameraEnteringZoom;
         public float CameraSeatZoomMin;
         public float CameraSeatZoomMax;
-        public uint UISkinFileDataID;
+        public uint UiSkinFileDataID;
         public short EnterAnimStart;
         public short EnterAnimLoop;
         public short RideAnimStart;
@@ -110,17 +112,17 @@ namespace Game.DataStorage
 
         public bool CanEnterOrExit()
         {
-            return (Flags[0].HasAnyFlag((uint)VehicleSeatFlags.CanEnterOrExit) ||
+            return (Flags.HasAnyFlag(VehicleSeatFlags.CanEnterOrExit) ||
                 //If it has anmation for enter/ride, means it can be entered/exited by logic
-                Flags[0].HasAnyFlag((uint)VehicleSeatFlags.HasLowerAnimForEnter | (uint)VehicleSeatFlags.HasLowerAnimForRide));
+                Flags.HasAnyFlag(VehicleSeatFlags.HasLowerAnimForEnter | VehicleSeatFlags.HasLowerAnimForRide));
         }
-        public bool CanSwitchFromSeat() { return Flags[0].HasAnyFlag((uint)VehicleSeatFlags.CanSwitch); }
+        public bool CanSwitchFromSeat() { return Flags.HasAnyFlag(VehicleSeatFlags.CanSwitch); }
         public bool IsUsableByOverride()
         {
-            return Flags[0].HasAnyFlag((uint)VehicleSeatFlags.Uncontrolled | (uint)VehicleSeatFlags.Unk18)
-                || Flags[1].HasAnyFlag((uint)VehicleSeatFlagsB.UsableForced | (uint)VehicleSeatFlagsB.UsableForced2 |
-                    (uint)VehicleSeatFlagsB.UsableForced3 | (uint)VehicleSeatFlagsB.UsableForced4);
+            return Flags.HasAnyFlag(VehicleSeatFlags.Uncontrolled | VehicleSeatFlags.Unk18)
+                || FlagsB.HasAnyFlag(VehicleSeatFlagsB.UsableForced | VehicleSeatFlagsB.UsableForced2 |
+                    VehicleSeatFlagsB.UsableForced3 | VehicleSeatFlagsB.UsableForced4);
         }
-        public bool IsEjectable() { return Flags[1].HasAnyFlag((uint)VehicleSeatFlagsB.Ejectable); }
+        public bool IsEjectable() { return FlagsB.HasAnyFlag(VehicleSeatFlagsB.Ejectable); }
     }
 }

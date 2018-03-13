@@ -480,16 +480,17 @@ namespace Game.DataStorage
         static Dictionary<Type, int> bytecounts = new Dictionary<Type, int>()
         {
             { typeof(byte), 1 },
+            { typeof(sbyte), 1 },
             { typeof(short), 2 },
             { typeof(ushort), 2 },
         };
 
         static int GetPadding(Type type, int fieldIndex)
         {
-            if (!bytecounts.ContainsKey(type))
+            if (ColumnMeta[fieldIndex].CompressionType < DB2ColumnCompression.CommonData)
                 return 0;
 
-            if (ColumnMeta[fieldIndex].CompressionType < DB2ColumnCompression.CommonData)
+            if (!bytecounts.ContainsKey(type))
                 return 0;
 
             return 4 - bytecounts[type];

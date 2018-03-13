@@ -900,7 +900,7 @@ namespace Game
                     if (mapEntry == null
                         || mapEntry.CorpseMapID < 0
                         || mapEntry.CorpseMapID != entry.MapID
-                        || (mapEntry.CorpsePos.X == 0 && mapEntry.CorpsePos.Y == 0))
+                        || (mapEntry.Corpse.X == 0 && mapEntry.Corpse.Y == 0))
                     {
                         // not have any corrdinates for check distance anyway
                         entryFar = entry;
@@ -908,8 +908,8 @@ namespace Game
                     }
 
                     // at entrance map calculate distance (2D);
-                    float dist2 = (entry.Loc.X - mapEntry.CorpsePos.X) * (entry.Loc.X - mapEntry.CorpsePos.X)
-                        + (entry.Loc.Y - mapEntry.CorpsePos.Y) * (entry.Loc.Y - mapEntry.CorpsePos.Y);
+                    float dist2 = (entry.Loc.X - mapEntry.Corpse.X) * (entry.Loc.X - mapEntry.Corpse.X)
+                        + (entry.Loc.Y - mapEntry.Corpse.Y) * (entry.Loc.Y - mapEntry.Corpse.Y);
                     if (foundEntr)
                     {
                         if (dist2 < distEntr)
@@ -2136,7 +2136,7 @@ namespace Game
                             equipmentInfo.Items[i].ItemId, equipmentInfo.Items[i].AppearanceModId, i + 1, i + 1, entry, id);
                         ItemModifiedAppearanceRecord defaultAppearance = Global.DB2Mgr.GetDefaultItemModifiedAppearance(equipmentInfo.Items[i].ItemId);
                         if (defaultAppearance != null)
-                            equipmentInfo.Items[i].AppearanceModId = defaultAppearance.AppearanceModID;
+                            equipmentInfo.Items[i].AppearanceModId = defaultAppearance.ItemAppearanceModifierID;
                         else
                             equipmentInfo.Items[i].AppearanceModId = 0;
                         continue;
@@ -3611,17 +3611,17 @@ namespace Game
             {
                 GameObjectTemplate go = new GameObjectTemplate();
                 go.entry = db2go.Id;
-                go.type = db2go.Type;
+                go.type = db2go.TypeID;
                 go.displayId = db2go.DisplayID;
                 go.name = db2go.Name[Global.WorldMgr.GetDefaultDbcLocale()];
-                go.size = db2go.Size;
+                go.size = db2go.Scale;
 
                 unsafe
                 {
                     fixed (int* b = go.Raw.data)
                     {
-                        for (byte x = 0; x < db2go.Data.Length; ++x)
-                            b[x] = db2go.Data[x];
+                        for (byte x = 0; x < db2go.PropValue.Length; ++x)
+                            b[x] = db2go.PropValue[x];
                     }
                 }
 
@@ -4414,7 +4414,7 @@ namespace Game
                     continue;
 
                 var itemTemplate = new ItemTemplate(db2Data, sparse);
-                itemTemplate.MaxDurability = FillMaxDurability(db2Data.Class, db2Data.SubClass, sparse.inventoryType, (ItemQuality)sparse.Quality, sparse.ItemLevel);
+                itemTemplate.MaxDurability = FillMaxDurability(db2Data.ClassID, db2Data.SubclassID, sparse.inventoryType, (ItemQuality)sparse.OverallQualityID, sparse.ItemLevel);
 
                 var itemSpecOverrides = Global.DB2Mgr.GetItemSpecOverrides(sparse.Id);
                 if (itemSpecOverrides != null)
@@ -4454,7 +4454,7 @@ namespace Game
                         if (!hasPrimary || !hasSecondary)
                             continue;
 
-                        ChrSpecializationRecord specialization = CliDB.ChrSpecializationStorage.LookupByKey(itemSpec.SpecID);
+                        ChrSpecializationRecord specialization = CliDB.ChrSpecializationStorage.LookupByKey(itemSpec.SpecializationID);
                         if (specialization != null)
                         {
                             if (Convert.ToBoolean((1 << (specialization.ClassID - 1)) & sparse.AllowableClass))
@@ -4482,7 +4482,7 @@ namespace Game
 
             foreach (var effectEntry in CliDB.ItemEffectStorage.Values)
             {
-                var itemTemplate = ItemTemplateStorage.LookupByKey(effectEntry.ItemID);
+                var itemTemplate = ItemTemplateStorage.LookupByKey(effectEntry.ParentItemID);
                 if (itemTemplate == null)
                     continue;
 
@@ -5223,8 +5223,8 @@ namespace Game
                     pInfo.PositionZ = positionZ;
                     pInfo.Orientation = orientation;
 
-                    pInfo.DisplayId_m = rEntry.MaleDisplayID;
-                    pInfo.DisplayId_f = rEntry.FemaleDisplayID;
+                    pInfo.DisplayId_m = rEntry.MaleDisplayId;
+                    pInfo.DisplayId_f = rEntry.FemaleDisplayId;
 
                     _playerInfo[currentrace][currentclass] = pInfo;
 
@@ -9153,7 +9153,7 @@ namespace Game
             foreach (var node in CliDB.TaxiNodesStorage.Values)
             {
                 var i = node.Id;
-                if (node.MapID != mapid || !node.Flags.HasAnyFlag(requireFlag))
+                if (node.ContinentID != mapid || !node.Flags.HasAnyFlag(requireFlag))
                     continue;
 
                 byte field = (byte)((i - 1) / 8);
@@ -9280,7 +9280,7 @@ namespace Game
                 if ((!useParentDbValue && pair.Value.target_mapId == entrance_map) || (useParentDbValue && pair.Value.target_mapId == parentId))
                 {
                     AreaTriggerRecord atEntry = CliDB.AreaTriggerStorage.LookupByKey(pair.Key);
-                    if (atEntry != null && atEntry.MapID == Map)
+                    if (atEntry != null && atEntry.ContinentID == Map)
                         return pair.Value;
                 }
             }
@@ -10076,10 +10076,10 @@ namespace Game
     {
         public ItemSpecStats(ItemRecord item, ItemSparseRecord sparse)
         {
-            if (item.Class == ItemClass.Weapon)
+            if (item.ClassID == ItemClass.Weapon)
             {
                 ItemType = 5;
-                switch ((ItemSubClassWeapon)item.SubClass)
+                switch ((ItemSubClassWeapon)item.SubclassID)
                 {
                     case ItemSubClassWeapon.Axe:
                         AddStat(ItemSpecStat.OneHandedAxe);
@@ -10133,9 +10133,9 @@ namespace Game
                         break;
                 }
             }
-            else if (item.Class == ItemClass.Armor)
+            else if (item.ClassID == ItemClass.Armor)
             {
-                switch ((ItemSubClassArmor)item.SubClass)
+                switch ((ItemSubClassArmor)item.SubclassID)
                 {
                     case ItemSubClassArmor.Cloth:
                         if (sparse.inventoryType != InventoryType.Cloak)
@@ -10157,12 +10157,12 @@ namespace Game
                         ItemType = 4;
                         break;
                     default:
-                        if (item.SubClass == (int)ItemSubClassArmor.Shield)
+                        if (item.SubclassID == (int)ItemSubClassArmor.Shield)
                         {
                             ItemType = 6;
                             AddStat(ItemSpecStat.Shield);
                         }
-                        else if (item.SubClass > (int)ItemSubClassArmor.Shield && item.SubClass <= (int)ItemSubClassArmor.Relic)
+                        else if (item.SubclassID > (int)ItemSubClassArmor.Shield && item.SubclassID <= (int)ItemSubClassArmor.Relic)
                         {
                             ItemType = 6;
                             AddStat(ItemSpecStat.Relic);
@@ -10172,7 +10172,7 @@ namespace Game
                         break;
                 }
             }
-            else if (item.Class == ItemClass.Gem)
+            else if (item.ClassID == ItemClass.Gem)
             {
                 ItemType = 7;
                 GemPropertiesRecord gem = CliDB.GemPropertiesStorage.LookupByKey(sparse.GemProperties);
@@ -10206,8 +10206,8 @@ namespace Game
                 ItemType = 0;
 
             for (uint i = 0; i < ItemConst.MaxStats; ++i)
-                if (sparse.ItemStatType[i] != -1)
-                    AddModStat(sparse.ItemStatType[i]);
+                if (sparse.StatModifierBonusStat[i] != -1)
+                    AddModStat(sparse.StatModifierBonusStat[i]);
         }
 
         void AddStat(ItemSpecStat statType)

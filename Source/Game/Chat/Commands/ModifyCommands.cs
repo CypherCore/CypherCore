@@ -555,8 +555,8 @@ namespace Game.Chat
                 return false;
             }
 
-            NotifyModification(handler, target, CypherStrings.YouChangePower, CypherStrings.YourPowerChanged, powerType.PowerTypeToken, powerAmount, powerAmount);
-            powerAmount *= powerType.UIModifier;
+            NotifyModification(handler, target, CypherStrings.YouChangePower, CypherStrings.YourPowerChanged, powerType.NameGlobalStringTag, powerAmount, powerAmount);
+            powerAmount *= powerType.DisplayModifier;
             target.SetMaxPower(powerType.PowerTypeEnum, powerAmount);
             target.SetPower(powerType.PowerTypeEnum, powerAmount);
             return true;

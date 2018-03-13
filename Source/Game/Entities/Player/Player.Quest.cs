@@ -652,7 +652,7 @@ namespace Game.Entities
                         if (CanSelectQuestPackageItem(questPackageItem))
                         {
                             hasFilteredQuestPackageReward = true;
-                            InventoryResult res = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemCount);
+                            InventoryResult res = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemQuantity);
                             if (res != InventoryResult.Ok)
                             {
                                 SendEquipError(res, null, null, questPackageItem.ItemID);
@@ -672,7 +672,7 @@ namespace Game.Entities
                             if (questPackageItem.ItemID != reward)
                                 continue;
 
-                            InventoryResult res = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemCount);
+                            InventoryResult res = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemQuantity);
                             if (res != InventoryResult.Ok)
                             {
                                 SendEquipError(res, null, null, questPackageItem.ItemID);
@@ -829,7 +829,7 @@ namespace Game.Entities
                 (rewardProto.GetFlags2().HasAnyFlag(ItemFlags2.FactionHorde) && GetTeam() != Team.Horde))
                 return false;
 
-            switch (questPackageItem.FilterType)
+            switch (questPackageItem.DisplayType)
             {
                 case QuestPackageFilter.LootSpecialization:
                     return rewardProto.IsUsableByLootSpecialization(this, true);
@@ -859,10 +859,10 @@ namespace Game.Entities
                     {
                         hasFilteredQuestPackageReward = true;
                         List<ItemPosCount> dest = new List<ItemPosCount>();
-                        if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemCount) == InventoryResult.Ok)
+                        if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemQuantity) == InventoryResult.Ok)
                         {
                             Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantment.GenerateItemRandomPropertyId(questPackageItem.ItemID));
-                            SendNewItem(item, questPackageItem.ItemCount, true, false);
+                            SendNewItem(item, questPackageItem.ItemQuantity, true, false);
                         }
                     }
                 }
@@ -879,10 +879,10 @@ namespace Game.Entities
                             continue;
 
                         List<ItemPosCount> dest = new List<ItemPosCount>();
-                        if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemCount) == InventoryResult.Ok)
+                        if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemQuantity) == InventoryResult.Ok)
                         {
                             Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantment.GenerateItemRandomPropertyId(questPackageItem.ItemID));
-                            SendNewItem(item, questPackageItem.ItemCount, true, false);
+                            SendNewItem(item, questPackageItem.ItemQuantity, true, false);
                         }
                     }
                 }

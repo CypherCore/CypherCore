@@ -2285,7 +2285,7 @@ namespace Scripts.Spells.Generic
             // cast speed aura
             MountCapabilityRecord mountCapability = CliDB.MountCapabilityStorage.LookupByKey(aurEff.GetAmount());
             if (mountCapability != null)
-                target.CastSpell(target, mountCapability.SpeedModSpell, TriggerCastFlags.FullMask);
+                target.CastSpell(target, mountCapability.ModSpellAuraID, TriggerCastFlags.FullMask);
         }
 
         public override void Register()

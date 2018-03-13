@@ -538,7 +538,7 @@ namespace Game.Entities
 
             PowerTypeRecord powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(powerType);
             if (powerTypeEntry != null)
-                return powerTypeEntry.MaxPower;
+                return powerTypeEntry.MaxBasePower;
 
             return 0;
         }

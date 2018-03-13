@@ -266,7 +266,7 @@ namespace Game
                 else if (diffFactor > 10)
                     diffFactor = 10;
 
-                uint xp = (uint)(diffFactor * questXp.Exp[RewardXPDifficulty] * RewardXPMultiplier / 10 * multiplier);
+                uint xp = (uint)(diffFactor * questXp.Difficulty[RewardXPDifficulty] * RewardXPMultiplier / 10 * multiplier);
                 if (xp <= 100)
                     xp = 5 * ((xp + 2) / 5);
                 else if (xp <= 500)
@@ -288,7 +288,7 @@ namespace Game
 
             QuestMoneyRewardRecord money = CliDB.QuestMoneyRewardStorage.LookupByKey(level);
             if (money != null)
-                return (uint)(money.Money[RewardMoneyDifficulty] * RewardMoneyMultiplier);
+                return (uint)(money.Difficulty[RewardMoneyDifficulty] * RewardMoneyMultiplier);
             else
                 return 0;
         }

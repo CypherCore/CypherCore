@@ -869,9 +869,9 @@ namespace Game.Spells
                     {
                         if (itemEffect.SpellID == spellInfo.Id)
                         {
-                            tmpCooldown = itemEffect.Cooldown;
-                            tmpCategoryId = itemEffect.Category;
-                            tmpCategoryCooldown = itemEffect.CategoryCooldown;
+                            tmpCooldown = itemEffect.CoolDownMSec;
+                            tmpCategoryId = itemEffect.SpellCategoryID;
+                            tmpCategoryCooldown = itemEffect.CategoryCoolDownMSec;
                             break;
                         }
                     }

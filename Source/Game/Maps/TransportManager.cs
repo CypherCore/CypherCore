@@ -94,7 +94,7 @@ namespace Game.Maps
                 AddPathNodeToTransport(anim.TransportID, anim.TimeIndex, anim);
 
             foreach (TransportRotationRecord rot in CliDB.TransportRotationStorage.Values)
-                AddPathRotationToTransport(rot.TransportID, rot.TimeIndex, rot);
+                AddPathRotationToTransport(rot.GameObjectsID, rot.TimeIndex, rot);
         }
 
         void GeneratePath(GameObjectTemplate goInfo, TransportTemplate transport)
@@ -124,7 +124,7 @@ namespace Game.Maps
                 if (!mapChange)
                 {
                     var node_i = path[i];
-                    if (i != path.Length - 1 && (node_i.Flags.HasAnyFlag(TaxiPathNodeFlags.Teleport) || node_i.MapID != path[i + 1].MapID))
+                    if (i != path.Length - 1 && (node_i.Flags.HasAnyFlag(TaxiPathNodeFlags.Teleport) || node_i.ContinentID != path[i + 1].ContinentID))
                     {
                         keyFrames.Last().Teleport = true;
                         mapChange = true;
@@ -138,8 +138,8 @@ namespace Game.Maps
 
                         keyFrames.Add(k);
                         splinePath.Add(new Vector3(node_i.Loc.X, node_i.Loc.Y, node_i.Loc.Z));
-                        if (!transport.mapsUsed.Contains(k.Node.MapID))
-                            transport.mapsUsed.Add(k.Node.MapID);
+                        if (!transport.mapsUsed.Contains(k.Node.ContinentID))
+                            transport.mapsUsed.Add(k.Node.ContinentID);
                     }
                 }
                 else
@@ -377,7 +377,7 @@ namespace Game.Maps
 
             // ...at first waypoint
             TaxiPathNodeRecord startNode = tInfo.keyFrames.First().Node;
-            uint mapId = startNode.MapID;
+            uint mapId = startNode.ContinentID;
             float x = startNode.Loc.X;
             float y = startNode.Loc.Y;
             float z = startNode.Loc.Z;
@@ -578,22 +578,9 @@ namespace Game.Maps
             return Path.First().Value;
         }
 
-        Quaternion GetAnimRotation(uint time)
+        TransportRotationRecord GetAnimRotation(uint time)
         {
-            if (Rotations.Empty())
-                return new Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
-
-            TransportRotationRecord rot = Rotations.First().Value;
-            foreach (var pair in Rotations)
-            {
-                if (time >= pair.Key)
-                {
-                    rot = pair.Value;
-                    break;
-                }
-            }
-
-            return new Quaternion(rot.X, rot.Y, rot.Z, rot.W);
+            return Rotations.LookupByKey(time);
         }
 
         public Dictionary<uint, TransportAnimationRecord> Path = new Dictionary<uint, TransportAnimationRecord>();

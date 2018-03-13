@@ -78,8 +78,8 @@ namespace Game.Entities
             bool store_error = false;
             for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i)
             {
-                uint count = iece.RequiredItemCount[i];
-                uint itemid = iece.RequiredItem[i];
+                uint count = iece.ItemCount[i];
+                uint itemid = iece.ItemID[i];
 
                 if (count != 0 && itemid != 0)
                 {
@@ -116,8 +116,8 @@ namespace Game.Entities
             // Grant back extendedcost items
             for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i)
             {
-                uint count = iece.RequiredItemCount[i];
-                uint itemid = iece.RequiredItem[i];
+                uint count = iece.ItemCount[i];
+                uint itemid = iece.ItemID[i];
                 if (count != 0 && itemid != 0)
                 {
                     List<ItemPosCount> dest = new List<ItemPosCount>();
@@ -131,11 +131,11 @@ namespace Game.Entities
             // Grant back currencies
             for (byte i = 0; i < ItemConst.MaxItemExtCostCurrencies; ++i)
             {
-                if (iece.RequirementFlags.HasAnyFlag((byte)((int)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
+                if (iece.Flags.HasAnyFlag((byte)((int)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
                     continue;
 
-                uint count = iece.RequiredCurrencyCount[i];
-                uint currencyid = iece.RequiredCurrency[i];
+                uint count = iece.CurrencyCount[i];
+                uint currencyid = iece.CurrencyID[i];
                 if (count != 0 && currencyid != 0)
                     ModifyCurrency((CurrencyTypes)currencyid, (int)count, true, true);
             }
@@ -179,17 +179,17 @@ namespace Game.Entities
 
             for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i)                             // item cost data
             {
-                setItemPurchaseData.Contents.Items[i].ItemCount = iece.RequiredItemCount[i];
-                setItemPurchaseData.Contents.Items[i].ItemID = iece.RequiredItem[i];
+                setItemPurchaseData.Contents.Items[i].ItemCount = iece.ItemCount[i];
+                setItemPurchaseData.Contents.Items[i].ItemID = iece.ItemID[i];
             }
 
             for (byte i = 0; i < ItemConst.MaxItemExtCostCurrencies; ++i)                       // currency cost data
             {
-                if (iece.RequirementFlags.HasAnyFlag((byte)((int)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
+                if (iece.Flags.HasAnyFlag((byte)((int)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
                     continue;
 
-                setItemPurchaseData.Contents.Currencies[i].CurrencyCount = iece.RequiredCurrencyCount[i];
-                setItemPurchaseData.Contents.Currencies[i].CurrencyID = iece.RequiredCurrency[i];
+                setItemPurchaseData.Contents.Currencies[i].CurrencyCount = iece.CurrencyCount[i];
+                setItemPurchaseData.Contents.Currencies[i].CurrencyID = iece.CurrencyID[i];
             }
 
             SendPacket(setItemPurchaseData);
@@ -205,17 +205,17 @@ namespace Game.Entities
                 itemPurchaseRefundResult.Contents.Value.Money = item.GetPaidMoney();
                 for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i) // item cost data
                 {
-                    itemPurchaseRefundResult.Contents.Value.Items[i].ItemCount = iece.RequiredItemCount[i];
-                    itemPurchaseRefundResult.Contents.Value.Items[i].ItemID = iece.RequiredItem[i];
+                    itemPurchaseRefundResult.Contents.Value.Items[i].ItemCount = iece.ItemCount[i];
+                    itemPurchaseRefundResult.Contents.Value.Items[i].ItemID = iece.ItemID[i];
                 }
 
                 for (byte i = 0; i < ItemConst.MaxItemExtCostCurrencies; ++i) // currency cost data
                 {
-                    if (iece.RequirementFlags.HasAnyFlag((byte)((uint)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
+                    if (iece.Flags.HasAnyFlag((byte)((uint)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
                         continue;
 
-                    itemPurchaseRefundResult.Contents.Value.Currencies[i].CurrencyCount = iece.RequiredCurrencyCount[i];
-                    itemPurchaseRefundResult.Contents.Value.Currencies[i].CurrencyID = iece.RequiredCurrency[i];
+                    itemPurchaseRefundResult.Contents.Value.Currencies[i].CurrencyCount = iece.CurrencyCount[i];
+                    itemPurchaseRefundResult.Contents.Value.Currencies[i].CurrencyID = iece.CurrencyID[i];
                 }
             }
 
@@ -442,7 +442,7 @@ namespace Game.Entities
                     else if (ditemProto.GetClass() == ItemClass.Armor)
                         dmultiplier = dcost.ArmorSubClassCost[ditemProto.GetSubClass()];
 
-                    uint costs = (uint)(LostDurability * dmultiplier * (double)dQualitymodEntry.QualityMod * item.GetRepairCostMultiplier());
+                    uint costs = (uint)(LostDurability * dmultiplier * (double)dQualitymodEntry.Data * item.GetRepairCostMultiplier());
                     costs = (uint)(costs * discountMod * WorldConfig.GetFloatValue(WorldCfg.RateRepaircost));
 
                     if (costs == 0)                                   //fix for ITEM_QUALITY_ARTIFACT
@@ -1159,7 +1159,7 @@ namespace Game.Entities
 
                 ItemTemplate proto = pItem.GetTemplate();
                 for (byte i = 0; i < proto.Effects.Count; ++i)
-                    if (proto.Effects[i].Trigger == ItemSpelltriggerType.OnObtain && proto.Effects[i].SpellID > 0) // On obtain trigger
+                    if (proto.Effects[i].TriggerType == ItemSpelltriggerType.OnObtain && proto.Effects[i].SpellID > 0) // On obtain trigger
                         if (bag == InventorySlots.Bag0 || (bag >= InventorySlots.BagStart && bag < InventorySlots.BagEnd))
                             if (!HasAura(proto.Effects[i].SpellID))
                                 CastSpell(this, proto.Effects[i].SpellID, true, pItem);
@@ -1202,7 +1202,7 @@ namespace Game.Entities
 
                 ItemTemplate proto = pItem2.GetTemplate();
                 for (byte i = 0; i < proto.Effects.Count; ++i)
-                    if (proto.Effects[i].Trigger == ItemSpelltriggerType.OnObtain && proto.Effects[i].SpellID > 0) // On obtain trigger
+                    if (proto.Effects[i].TriggerType == ItemSpelltriggerType.OnObtain && proto.Effects[i].SpellID > 0) // On obtain trigger
                         if (bag == InventorySlots.Bag0 || (bag >= InventorySlots.BagStart && bag < InventorySlots.BagEnd))
                             if (!HasAura(proto.Effects[i].SpellID))
                                 CastSpell(this, proto.Effects[i].SpellID, true, pItem2);
@@ -1321,7 +1321,7 @@ namespace Game.Entities
                 ItemChildEquipmentRecord childItemEntry = Global.DB2Mgr.GetItemChildEquipment(itemId);
                 if (childItemEntry != null)
                 {
-                    ItemTemplate childTemplate = Global.ObjectMgr.GetItemTemplate(childItemEntry.AltItemID);
+                    ItemTemplate childTemplate = Global.ObjectMgr.GetItemTemplate(childItemEntry.ChildItemID);
                     if (childTemplate != null)
                     {
                         List<ItemPosCount> childDest = new List<ItemPosCount>();
@@ -1510,7 +1510,7 @@ namespace Game.Entities
 
             ArtifactRecord artifact = CliDB.ArtifactStorage.LookupByKey(proto.GetArtifactID());
             if (artifact != null)
-                if (artifact.SpecID != GetUInt32Value(PlayerFields.CurrentSpecId))
+                if (artifact.ChrSpecializationID != GetUInt32Value(PlayerFields.CurrentSpecId))
                     return InventoryResult.CantUseItem;
 
             return InventoryResult.Ok;
@@ -1735,7 +1735,7 @@ namespace Game.Entities
                 Item childItem = GetChildItemByGuid(parentItem.GetChildItem());
                 if (childItem)
                 {
-                    ushort childDest = (ushort)((InventorySlots.Bag0 << 8) | itemChildEquipment.AltEquipmentSlot);
+                    ushort childDest = (ushort)((InventorySlots.Bag0 << 8) | itemChildEquipment.ChildItemEquipSlot);
                     if (childItem.GetPos() != childDest)
                     {
                         Item dstItem = GetItemByPos(childDest);
@@ -2521,17 +2521,17 @@ namespace Game.Entities
                 var iece = CliDB.ItemExtendedCostStorage.LookupByKey(crItem.ExtendedCost);
                 for (int i = 0; i < ItemConst.MaxItemExtCostItems; ++i)
                 {
-                    if (iece.RequiredItem[i] != 0)
-                        DestroyItemCount(iece.RequiredItem[i], iece.RequiredItemCount[i] * stacks, true);
+                    if (iece.ItemID[i] != 0)
+                        DestroyItemCount(iece.ItemID[i], iece.ItemCount[i] * stacks, true);
                 }
 
                 for (int i = 0; i < ItemConst.MaxItemExtCostCurrencies; ++i)
                 {
-                    if (iece.RequirementFlags.HasAnyFlag((byte)((int)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
+                    if (iece.Flags.HasAnyFlag((byte)((int)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
                         continue;
 
-                    if (iece.RequiredCurrency[i] != 0)
-                        ModifyCurrency((CurrencyTypes)iece.RequiredCurrency[i], -(int)(iece.RequiredCurrencyCount[i] * stacks), true, true);
+                    if (iece.CurrencyID[i] != 0)
+                        ModifyCurrency((CurrencyTypes)iece.CurrencyID[i], -(int)(iece.CurrencyCount[i] * stacks), true, true);
                 }
             }
 
@@ -3502,7 +3502,7 @@ namespace Game.Entities
 
                 for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i)
                 {
-                    if (iece.RequiredItem[i] != 0 && !HasItemCount(iece.RequiredItem[i], (iece.RequiredItemCount[i] * stacks)))
+                    if (iece.ItemID[i] != 0 && !HasItemCount(iece.ItemID[i], (iece.ItemCount[i] * stacks)))
                     {
                         SendEquipError(InventoryResult.VendorMissingTurnins);
                         return false;
@@ -3511,23 +3511,23 @@ namespace Game.Entities
 
                 for (byte i = 0; i < ItemConst.MaxItemExtCostCurrencies; ++i)
                 {
-                    if (iece.RequiredCurrency[i] == 0)
+                    if (iece.CurrencyID[i] == 0)
                         continue;
 
-                    CurrencyTypesRecord entry = CliDB.CurrencyTypesStorage.LookupByKey(iece.RequiredCurrency[i]);
+                    CurrencyTypesRecord entry = CliDB.CurrencyTypesStorage.LookupByKey(iece.CurrencyID[i]);
                     if (entry == null)
                     {
                         SendBuyError(BuyResult.CantFindItem, creature, currency); // Find correct error
                         return false;
                     }
 
-                    if (iece.RequirementFlags.HasAnyFlag((byte)((uint)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
+                    if (iece.Flags.HasAnyFlag((byte)((uint)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
                     {
                         // Not implemented
                         SendEquipError(InventoryResult.VendorMissingTurnins); // Find correct error
                         return false;
                     }
-                    else if (!HasCurrency(iece.RequiredCurrency[i], (iece.RequiredCurrencyCount[i] * stacks)))
+                    else if (!HasCurrency(iece.CurrencyID[i], (iece.CurrencyCount[i] * stacks)))
                     {
                         SendEquipError(InventoryResult.VendorMissingTurnins); // Find correct error
                         return false;
@@ -3535,20 +3535,20 @@ namespace Game.Entities
                 }
 
                 // check for personal arena rating requirement
-                if (GetMaxPersonalArenaRatingRequirement(iece.RequiredArenaSlot) < iece.RequiredPersonalArenaRating)
+                if (GetMaxPersonalArenaRatingRequirement(iece.ArenaBracket) < iece.RequiredArenaRating)
                 {
                     // probably not the proper equip err
                     SendEquipError(InventoryResult.CantEquipRank);
                     return false;
                 }
 
-                if (iece.RequiredFactionId != 0 && (uint)GetReputationRank(iece.RequiredFactionId) < iece.RequiredFactionStanding)
+                if (iece.MinFactionID != 0 && (uint)GetReputationRank(iece.MinFactionID) < iece.RequiredAchievement)
                 {
                     SendBuyError(BuyResult.ReputationRequire, creature, currency);
                     return false;
                 }
 
-                if (iece.RequirementFlags.HasAnyFlag((byte)ItemExtendedCostFlags.RequireGuild) && GetGuildId() == 0)
+                if (iece.Flags.HasAnyFlag((byte)ItemExtendedCostFlags.RequireGuild) && GetGuildId() == 0)
                 {
                     SendEquipError(InventoryResult.VendorMissingTurnins); // Find correct error
                     return false;
@@ -3571,21 +3571,21 @@ namespace Game.Entities
             {
                 for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i)
                 {
-                    if (iece.RequiredItem[i] == 0)
+                    if (iece.ItemID[i] == 0)
                         continue;
 
-                    DestroyItemCount(iece.RequiredItem[i], iece.RequiredItemCount[i] * stacks, true);
+                    DestroyItemCount(iece.ItemID[i], iece.ItemCount[i] * stacks, true);
                 }
 
                 for (byte i = 0; i < ItemConst.MaxItemExtCostCurrencies; ++i)
                 {
-                    if (iece.RequiredCurrency[i] == 0)
+                    if (iece.CurrencyID[i] == 0)
                         continue;
 
-                    if (iece.RequirementFlags.HasAnyFlag((byte)((uint)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
+                    if (iece.Flags.HasAnyFlag((byte)((uint)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
                         continue;
 
-                    ModifyCurrency((CurrencyTypes)iece.RequiredCurrency[i], -(int)(iece.RequiredCurrencyCount[i] * stacks), false, true);
+                    ModifyCurrency((CurrencyTypes)iece.CurrencyID[i], -(int)(iece.CurrencyCount[i] * stacks), false, true);
                 }
             }
 
@@ -3702,7 +3702,7 @@ namespace Game.Entities
 
                 for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i)
                 {
-                    if (iece.RequiredItem[i] != 0 && !HasItemCount(iece.RequiredItem[i], iece.RequiredItemCount[i] * stacks))
+                    if (iece.ItemID[i] != 0 && !HasItemCount(iece.ItemID[i], iece.ItemCount[i] * stacks))
                     {
                         SendEquipError(InventoryResult.VendorMissingTurnins);
                         return false;
@@ -3711,22 +3711,22 @@ namespace Game.Entities
 
                 for (byte i = 0; i < ItemConst.MaxItemExtCostCurrencies; ++i)
                 {
-                    if (iece.RequiredCurrency[i] == 0)
+                    if (iece.CurrencyID[i] == 0)
                         continue;
 
-                    var entry = CliDB.CurrencyTypesStorage.LookupByKey(iece.RequiredCurrency[i]);
+                    var entry = CliDB.CurrencyTypesStorage.LookupByKey(iece.CurrencyID[i]);
                     if (entry == null)
                     {
                         SendBuyError(BuyResult.CantFindItem, creature, item);
                         return false;
                     }
 
-                    if (iece.RequirementFlags.HasAnyFlag((byte)((uint)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
+                    if (iece.Flags.HasAnyFlag((byte)((uint)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
                     {
                         SendEquipError(InventoryResult.VendorMissingTurnins); // Find correct error
                         return false;
                     }
-                    else if (!HasCurrency(iece.RequiredCurrency[i], iece.RequiredCurrencyCount[i] * stacks))
+                    else if (!HasCurrency(iece.CurrencyID[i], iece.CurrencyCount[i] * stacks))
                     {
                         SendEquipError(InventoryResult.VendorMissingTurnins);
                         return false;
@@ -3734,20 +3734,20 @@ namespace Game.Entities
                 }
 
                 // check for personal arena rating requirement
-                if (GetMaxPersonalArenaRatingRequirement(iece.RequiredArenaSlot) < iece.RequiredPersonalArenaRating)
+                if (GetMaxPersonalArenaRatingRequirement(iece.ArenaBracket) < iece.RequiredArenaRating)
                 {
                     // probably not the proper equip err
                     SendEquipError(InventoryResult.CantEquipRank);
                     return false;
                 }
 
-                if (iece.RequiredFactionId != 0 && (uint)GetReputationRank(iece.RequiredFactionId) < iece.RequiredFactionStanding)
+                if (iece.MinFactionID != 0 && (uint)GetReputationRank(iece.MinFactionID) < iece.MinReputation)
                 {
                     SendBuyError(BuyResult.ReputationRequire, creature, item);
                     return false;
                 }
 
-                if (iece.RequirementFlags.HasAnyFlag((byte)ItemExtendedCostFlags.RequireGuild) && GetGuildId() == 0)
+                if (iece.Flags.HasAnyFlag((byte)ItemExtendedCostFlags.RequireGuild) && GetGuildId() == 0)
                 {
                     SendEquipError(InventoryResult.VendorMissingTurnins); // Find correct error
                     return false;
@@ -4264,7 +4264,7 @@ namespace Game.Entities
                     continue;
 
                 // wrong triggering type
-                if (apply && spellData.Trigger != ItemSpelltriggerType.OnEquip)
+                if (apply && spellData.TriggerType != ItemSpelltriggerType.OnEquip)
                     continue;
 
                 // check if it is valid spell
@@ -4336,7 +4336,7 @@ namespace Game.Entities
                 var effectData = proto.Effects[i];
 
                 // apply proc cooldown to equip auras if we have any
-                if (effectData.Trigger == ItemSpelltriggerType.OnEquip)
+                if (effectData.TriggerType == ItemSpelltriggerType.OnEquip)
                 {
                     SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry(effectData.SpellID);
                     if (procEntry == null)
@@ -4353,7 +4353,7 @@ namespace Game.Entities
                     continue;
 
                 // wrong triggering type
-                if (effectData.Trigger != ItemSpelltriggerType.OnUse)
+                if (effectData.TriggerType != ItemSpelltriggerType.OnUse)
                     continue;
 
                 // Don't replace longer cooldowns by equip cooldown if we have any.
@@ -5277,11 +5277,11 @@ namespace Game.Entities
             if (childEquipement == null)
                 return InventoryResult.Ok;
 
-            Item dstItem = GetItemByPos(InventorySlots.Bag0, childEquipement.AltEquipmentSlot);
+            Item dstItem = GetItemByPos(InventorySlots.Bag0, childEquipement.ChildItemEquipSlot);
             if (!dstItem)
                 return InventoryResult.Ok;
 
-            ushort childDest = (ushort)((InventorySlots.Bag0 << 8) | childEquipement.AltEquipmentSlot);
+            ushort childDest = (ushort)((InventorySlots.Bag0 << 8) | childEquipement.ChildItemEquipSlot);
             InventoryResult msg = CanUnequipItem(childDest, !childItem.IsBag());
             if (msg != InventoryResult.Ok)
                 return msg;
@@ -5428,7 +5428,7 @@ namespace Game.Entities
 
             ArtifactAppearanceRecord artifactAppearance = CliDB.ArtifactAppearanceStorage.LookupByKey(item.GetModifier(ItemModifier.ArtifactAppearanceId));
             if (artifactAppearance != null)
-                if (artifactAppearance.ShapeshiftDisplayID != 0 && GetShapeshiftForm() == (ShapeShiftForm)artifactAppearance.ModifiesShapeshiftFormDisplay)
+                if (artifactAppearance.OverrideShapeshiftDisplayID != 0 && GetShapeshiftForm() == (ShapeShiftForm)artifactAppearance.OverrideShapeshiftFormID)
                     RestoreDisplayId();
         }
 
@@ -5451,7 +5451,7 @@ namespace Game.Entities
                                 continue;
 
                             if (powerAura.HasEffect(auraEffect.GetEffIndex()))
-                                auraEffect.ChangeAmount((int)(artifactPowerRank.Value != 0 ? artifactPowerRank.Value : auraEffect.GetSpellEffectInfo().CalcValue()));
+                                auraEffect.ChangeAmount((int)(artifactPowerRank.AuraPointsOverride != 0 ? artifactPowerRank.AuraPointsOverride : auraEffect.GetSpellEffectInfo().CalcValue()));
                         }
                     }
                     else
@@ -5460,10 +5460,10 @@ namespace Game.Entities
                 else if (apply)
                 {
                     Dictionary<SpellValueMod, int> csv = new Dictionary<SpellValueMod, int>();
-                    if (artifactPowerRank.Value != 0)
+                    if (artifactPowerRank.AuraPointsOverride != 0)
                         for (int i = 0; i < SpellConst.MaxEffects; ++i)
                             if (spellInfo.GetEffect((uint)i) != null)
-                                csv.Add(SpellValueMod.BasePoint0 + i, (int)artifactPowerRank.Value);
+                                csv.Add(SpellValueMod.BasePoint0 + i, (int)artifactPowerRank.AuraPointsOverride);
 
                     CastCustomSpell(artifactPowerRank.SpellID, csv, this, TriggerCastFlags.FullMask, artifact);
                 }
@@ -5651,7 +5651,7 @@ namespace Game.Entities
 
                 ItemTemplate proto = pItem.GetTemplate();
                 for (byte i = 0; i < proto.Effects.Count; ++i)
-                    if (proto.Effects[i].Trigger == ItemSpelltriggerType.OnObtain && proto.Effects[i].SpellID > 0) // On obtain trigger
+                    if (proto.Effects[i].TriggerType == ItemSpelltriggerType.OnObtain && proto.Effects[i].SpellID > 0) // On obtain trigger
                         RemoveAurasDueToSpell(proto.Effects[i].SpellID);
 
                 ItemRemovedQuestCheck(pItem.GetEntry(), pItem.GetCount());

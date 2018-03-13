@@ -687,7 +687,7 @@ namespace Game.Entities
                 if (mountCapability == null)
                     continue;
 
-                if (ridingSkill < mountCapability.RequiredRidingSkill)
+                if (ridingSkill < mountCapability.ReqRidingSkill)
                     continue;
 
                 if (!mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.IgnoreRestrictions))
@@ -721,19 +721,19 @@ namespace Game.Entities
                 else if (!mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.Float))
                     continue;
 
-                if (mountCapability.RequiredMap != -1 &&
-                    GetMapId() != mountCapability.RequiredMap &&
-                    GetMap().GetEntry().CosmeticParentMapID != mountCapability.RequiredMap &&
-                    GetMap().GetEntry().ParentMapID != mountCapability.RequiredMap)
+                if (mountCapability.ReqMapID != -1 &&
+                    GetMapId() != mountCapability.ReqMapID &&
+                    GetMap().GetEntry().CosmeticParentMapID != mountCapability.ReqMapID &&
+                    GetMap().GetEntry().ParentMapID != mountCapability.ReqMapID)
                     continue;
 
-                if (mountCapability.RequiredArea != 0 && !Global.DB2Mgr.IsInArea(areaId, mountCapability.RequiredArea))
+                if (mountCapability.ReqAreaID != 0 && !Global.DB2Mgr.IsInArea(areaId, mountCapability.ReqAreaID))
                     continue;
 
-                if (mountCapability.RequiredAura != 0 && !HasAura(mountCapability.RequiredAura))
+                if (mountCapability.ReqSpellAuraID != 0 && !HasAura(mountCapability.ReqSpellAuraID))
                     continue;
 
-                if (mountCapability.RequiredSpell != 0 && !HasSpell(mountCapability.RequiredSpell))
+                if (mountCapability.ReqSpellKnownID != 0 && !HasSpell(mountCapability.ReqSpellKnownID))
                     continue;
 
                 return mountCapability;

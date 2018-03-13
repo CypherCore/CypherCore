@@ -337,7 +337,7 @@ namespace Game.Entities
 
         public bool IsGuardianPet()
         {
-            return IsPet() || (m_Properties != null && m_Properties.Category == SummonCategory.Pet);
+            return IsPet() || (m_Properties != null && m_Properties.Control == SummonCategory.Pet);
         }
 
         public override Unit GetOwner() { return m_owner; }
@@ -373,7 +373,7 @@ namespace Game.Entities
             m_bonusSpellDamage = 0;
 
             m_unitTypeMask |= UnitTypeMask.Guardian;
-            if (properties != null && (properties.Type == SummonType.Pet || properties.Category == SummonCategory.Pet))
+            if (properties != null && (properties.Title == SummonType.Pet || properties.Control == SummonCategory.Pet))
             {
                 m_unitTypeMask |= UnitTypeMask.ControlableGuardian;
                 InitCharmInfo();

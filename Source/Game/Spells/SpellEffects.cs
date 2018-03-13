@@ -1746,7 +1746,7 @@ namespace Game.Spells
                     break;
             }
 
-            switch (properties.Category)
+            switch (properties.Control)
             {
                 case SummonCategory.Wild:
                 case SummonCategory.Ally:
@@ -1756,7 +1756,7 @@ namespace Game.Spells
                         SummonGuardian(effIndex, entry, properties, numSummons);
                         break;
                     }
-                    switch (properties.Type)
+                    switch (properties.Title)
                     {
                         case SummonType.Pet:
                         case SummonType.Guardian:
@@ -1816,7 +1816,7 @@ namespace Game.Spells
                                     if (summon == null)
                                         continue;
 
-                                    if (properties.Category == SummonCategory.Ally)
+                                    if (properties.Control == SummonCategory.Ally)
                                     {
                                         summon.SetOwnerGUID(m_originalCaster.GetGUID());
                                         summon.SetFaction(m_originalCaster.getFaction());
@@ -5073,7 +5073,7 @@ namespace Game.Spells
                 if (summon.HasUnitTypeMask(UnitTypeMask.Guardian))
                     ((Guardian)summon).InitStatsForLevel(level);
 
-                if (properties != null && properties.Category == SummonCategory.Ally)
+                if (properties != null && properties.Control == SummonCategory.Ally)
                     summon.SetFaction(caster.getFaction());
 
                 if (summon.HasUnitTypeMask(UnitTypeMask.Minion) && m_targets.HasDst())

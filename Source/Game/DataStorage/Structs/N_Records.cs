@@ -20,8 +20,8 @@ namespace Game.DataStorage
     public sealed class NameGenRecord
     {
         public uint Id;
-        public LocalizedString Name;
-        public byte Race;
+        public string Name;
+        public byte RaceID;
         public byte Sex;
     }
 

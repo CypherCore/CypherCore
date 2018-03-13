@@ -59,20 +59,20 @@ namespace Game.Spells
             SpellMiscRecord _misc = data.Misc;
             if (_misc != null)
             {
-                Attributes = (SpellAttr0)_misc.Attributes;
-                AttributesEx = (SpellAttr1)_misc.AttributesEx;
-                AttributesEx2 = (SpellAttr2)_misc.AttributesExB;
-                AttributesEx3 = (SpellAttr3)_misc.AttributesExC;
-                AttributesEx4 = (SpellAttr4)_misc.AttributesExD;
-                AttributesEx5 = (SpellAttr5)_misc.AttributesExE;
-                AttributesEx6 = (SpellAttr6)_misc.AttributesExF;
-                AttributesEx7 = (SpellAttr7)_misc.AttributesExG;
-                AttributesEx8 = (SpellAttr8)_misc.AttributesExH;
-                AttributesEx9 = (SpellAttr9)_misc.AttributesExI;
-                AttributesEx10 = (SpellAttr10)_misc.AttributesExJ;
-                AttributesEx11 = (SpellAttr11)_misc.AttributesExK;
-                AttributesEx12 = (SpellAttr12)_misc.AttributesExL;
-                AttributesEx13 = (SpellAttr13)_misc.AttributesExM;
+                Attributes = (SpellAttr0)_misc.Attributes[0];
+                AttributesEx = (SpellAttr1)_misc.Attributes[1];
+                AttributesEx2 = (SpellAttr2)_misc.Attributes[2];
+                AttributesEx3 = (SpellAttr3)_misc.Attributes[3];
+                AttributesEx4 = (SpellAttr4)_misc.Attributes[4];
+                AttributesEx5 = (SpellAttr5)_misc.Attributes[5];
+                AttributesEx6 = (SpellAttr6)_misc.Attributes[6];
+                AttributesEx7 = (SpellAttr7)_misc.Attributes[7];
+                AttributesEx8 = (SpellAttr8)_misc.Attributes[8];
+                AttributesEx9 = (SpellAttr9)_misc.Attributes[9];
+                AttributesEx10 = (SpellAttr10)_misc.Attributes[10];
+                AttributesEx11 = (SpellAttr11)_misc.Attributes[11];
+                AttributesEx12 = (SpellAttr12)_misc.Attributes[12];
+                AttributesEx13 = (SpellAttr13)_misc.Attributes[13];
                 CastTimeEntry = CliDB.SpellCastTimesStorage.LookupByKey(_misc.CastingTimeIndex);
                 DurationEntry = CliDB.SpellDurationStorage.LookupByKey(_misc.DurationIndex);
                 RangeIndex = _misc.RangeIndex;
@@ -81,7 +81,7 @@ namespace Game.Spells
                 SchoolMask = (SpellSchoolMask)_misc.SchoolMask;
                 AttributesCu = 0;
 
-                IconFileDataId = _misc.IconFileDataID;
+                IconFileDataId = _misc.SpellIconFileDataID;
                 ActiveIconFileDataId = _misc.ActiveIconFileDataID;
             }
 
@@ -90,13 +90,13 @@ namespace Game.Spells
 
             // sort all visuals so that the ones without a condition requirement are last on the list
             foreach (var key in _visuals.Keys.ToList())
-                _visuals[key] = _visuals[key].OrderByDescending(x => x.PlayerConditionID).ToList();
+                _visuals[key] = _visuals[key].OrderByDescending(x => x.CasterPlayerConditionID).ToList();
 
             // SpellScalingEntry
             SpellScalingRecord _scaling = data.Scaling;
             if (_scaling != null)
             {
-                Scaling._Class = _scaling.ScalingClass;
+                Scaling._Class = _scaling.Class;
                 Scaling.MinScalingLevel = _scaling.MinScalingLevel;
                 Scaling.MaxScalingLevel = _scaling.MaxScalingLevel;
                 Scaling.ScalesFromItemLevel = _scaling.ScalesFromItemLevel;
@@ -179,8 +179,8 @@ namespace Game.Spells
             if (_equipped != null)
             {
                 EquippedItemClass = (ItemClass)_equipped.EquippedItemClass;
-                EquippedItemSubClassMask = _equipped.EquippedItemSubClassMask;
-                EquippedItemInventoryTypeMask = _equipped.EquippedItemInventoryTypeMask;
+                EquippedItemSubClassMask = _equipped.EquippedItemSubclass;
+                EquippedItemInventoryTypeMask = _equipped.EquippedItemInvTypes;
             }
 
             // SpellInterruptsEntry
@@ -226,10 +226,10 @@ namespace Game.Spells
             if (_target != null)
             {
                 targets = (SpellCastTargetFlags)_target.Targets;
-                ConeAngle = _target.ConeAngle;
+                ConeAngle = _target.ConeDegrees;
                 Width = _target.Width;
                 TargetCreatureType = _target.TargetCreatureType;
-                MaxAffectedTargets = _target.MaxAffectedTargets;
+                MaxAffectedTargets = _target.MaxTargets;
                 MaxTargetLevel = _target.MaxTargetLevel;
             }
 
@@ -964,7 +964,7 @@ namespace Game.Spells
                                 uint mountType = (uint)effect.MiscValueB;
                                 MountRecord mountEntry = Global.DB2Mgr.GetMount(Id);
                                 if (mountEntry != null)
-                                    mountType = mountEntry.MountTypeId;
+                                    mountType = mountEntry.MountTypeID;
                                 if (mountType != 0 && player.GetMountCapability(mountType) == null)
                                     return SpellCastResult.NotHere;
                                 break;
@@ -1210,11 +1210,11 @@ namespace Game.Spells
 
                 var vehicleSeat = vehicle.GetSeatForPassenger(caster);
                 if (!HasAttribute(SpellAttr6.CastableWhileOnVehicle) && !HasAttribute(SpellAttr0.CastableWhileMounted)
-                    && (vehicleSeat.Flags[0] & (uint)checkMask) != (uint)checkMask)
+                    && (vehicleSeat.Flags & checkMask) != checkMask)
                     return SpellCastResult.CantDoThatRightNow;
 
                 // Can only summon uncontrolled minions/guardians when on controlled vehicle
-                if (vehicleSeat.Flags[0].HasAnyFlag((uint)(VehicleSeatFlags.CanControl | VehicleSeatFlags.Unk2)))
+                if (vehicleSeat.Flags.HasAnyFlag((VehicleSeatFlags.CanControl | VehicleSeatFlags.Unk2)))
                 {
                     foreach (SpellEffectInfo effect in GetEffectsForDifficulty(caster.GetMap().GetDifficultyID()))
                     {
@@ -1222,7 +1222,7 @@ namespace Game.Spells
                             continue;
 
                         var props = CliDB.SummonPropertiesStorage.LookupByKey(effect.MiscValueB);
-                        if (props != null && props.Category != SummonCategory.Wild)
+                        if (props != null && props.Control != SummonCategory.Wild)
                             return SpellCastResult.CantDoThatRightNow;
                     }
                 }
@@ -2529,20 +2529,16 @@ namespace Game.Spells
         {
             if (RangeEntry == null)
                 return 0.0f;
-            if (positive)
-                return RangeEntry.MinRangeFriend;
-            return RangeEntry.MinRangeHostile;
+
+            return RangeEntry.RangeMin[positive ? 1 : 0];
         }
 
         public float GetMaxRange(bool positive = false, Unit caster = null, Spell spell = null)
         {
             if (RangeEntry == null)
                 return 0.0f;
-            float range;
-            if (positive)
-                range = RangeEntry.MaxRangeFriend;
-            else
-                range = RangeEntry.MaxRangeHostile;
+
+            float range = RangeEntry.RangeMax[positive ? 1 : 0];
             if (caster != null)
             {
                 Player modOwner = caster.GetSpellModOwner();
@@ -2601,9 +2597,9 @@ namespace Game.Spells
                 if (calcLevel < 0)
                     calcLevel = 0;
 
-                castTime = (int)(CastTimeEntry.CastTime + CastTimeEntry.CastTimePerLevel * level);
-                if (castTime < CastTimeEntry.MinCastTime)
-                    castTime = CastTimeEntry.MinCastTime;
+                castTime = (int)(CastTimeEntry.Base + CastTimeEntry.PerLevel * level);
+                if (castTime < CastTimeEntry.Minimum)
+                    castTime = CastTimeEntry.Minimum;
             }
 
             if (castTime <= 0)
@@ -2669,7 +2665,7 @@ namespace Game.Spells
 
                 foreach (SpellPowerRecord power in powers)
                 {
-                    if (power.RequiredAura != 0 && !caster.HasAura(power.RequiredAura))
+                    if (power.RequiredAuraSpellID != 0 && !caster.HasAura(power.RequiredAuraSpellID))
                         continue;
 
                     // Spell drain all exist power on cast (Only paladin lay of Hands)
@@ -2696,23 +2692,23 @@ namespace Game.Spells
                     }
 
                     // Base powerCost
-                    int powerCost = (int)power.ManaCost;
+                    int powerCost = power.ManaCost;
                     // PCT cost from total amount
-                    if (power.ManaCostPercentage != 0)
+                    if (power.PowerCostPct != 0)
                     {
                         switch (power.PowerType)
                         {
                             // health as power used
                             case PowerType.Health:
-                                powerCost += (int)MathFunctions.CalculatePct(caster.GetMaxHealth(), power.ManaCostPercentage);
+                                powerCost += (int)MathFunctions.CalculatePct(caster.GetMaxHealth(), power.PowerCostPct);
                                 break;
                             case PowerType.Mana:
-                                powerCost += (int)MathFunctions.CalculatePct(caster.GetCreateMana(), power.ManaCostPercentage);
+                                powerCost += (int)MathFunctions.CalculatePct(caster.GetCreateMana(), power.PowerCostPct);
                                 break;
                             case PowerType.Rage:
                             case PowerType.Focus:
                             case PowerType.Energy:
-                                powerCost += MathFunctions.CalculatePct(caster.GetMaxPower(power.PowerType), power.ManaCostPercentage);
+                                powerCost += MathFunctions.CalculatePct(caster.GetMaxPower(power.PowerType), power.PowerCostPct);
                                 break;
                             case PowerType.Runes:
                             case PowerType.RunicPower:
@@ -2724,8 +2720,8 @@ namespace Game.Spells
                         }
                     }
 
-                    if (power.HealthCostPercentage != 0)
-                        healthCost += (int)MathFunctions.CalculatePct(caster.GetMaxHealth(), power.HealthCostPercentage);
+                    if (power.PowerCostMaxPct != 0)
+                        healthCost += (int)MathFunctions.CalculatePct(caster.GetMaxHealth(), power.PowerCostMaxPct);
 
                     if (power.PowerType != PowerType.Health)
                     {
@@ -2766,13 +2762,13 @@ namespace Game.Spells
                     Player modOwner = caster.GetSpellModOwner();
                     if (modOwner)
                     {
-                        if (power.PowerIndex == 0)
+                        if (power.OrderIndex == 0)
                             modOwner.ApplySpellMod(Id, SpellModOp.Cost, ref powerCost);
-                        else if (power.PowerIndex == 1)
+                        else if (power.OrderIndex == 1)
                             modOwner.ApplySpellMod(Id, SpellModOp.SpellCost2, ref powerCost);
                     }
 
-                    if (!caster.IsControlledByPlayer() && MathFunctions.fuzzyEq(power.ManaCostPercentage, 0.0f) && SpellLevel != 0)
+                    if (!caster.IsControlledByPlayer() && MathFunctions.fuzzyEq(power.PowerCostPct, 0.0f) && SpellLevel != 0)
                     {
                         if (HasAttribute(SpellAttr0.LevelDamageCalculation))
                         {
@@ -3077,7 +3073,7 @@ namespace Game.Spells
                     {
                         foreach (SpellXSpellVisualRecord visual in visualList)
                         {
-                            PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(visual.PlayerConditionID);
+                            PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(visual.CasterPlayerConditionID);
                             if (playerCondition == null || (caster.IsTypeId(TypeId.Player) && ConditionManager.IsPlayerMeetingCondition(caster.ToPlayer(), playerCondition)))
                                 return visual.Id;
                         }
@@ -3092,7 +3088,7 @@ namespace Game.Spells
             {
                 foreach (var visual in defaultList)
                 {
-                    PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(visual.PlayerConditionID);
+                    PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(visual.CasterPlayerConditionID);
                     if (playerCondition == null || (caster && caster.IsTypeId(TypeId.Player) && ConditionManager.IsPlayerMeetingCondition(caster.ToPlayer(), playerCondition)))
                         return visual.Id;
                 }
@@ -3705,14 +3701,14 @@ namespace Game.Spells
                 Amplitude = _effect.EffectAmplitude;
                 ChainAmplitude = _effect.EffectChainAmplitude;
                 BonusCoefficient = _effect.EffectBonusCoefficient;
-                MiscValue = _effect.EffectMiscValue;
-                MiscValueB = _effect.EffectMiscValueB;
+                MiscValue = _effect.EffectMiscValue[0];
+                MiscValueB = _effect.EffectMiscValue[1];
                 Mechanic = (Mechanics)_effect.EffectMechanic;
                 PositionFacing = _effect.EffectPosFacing;
                 TargetA = new SpellImplicitTargetInfo((Targets)_effect.ImplicitTarget[0]);
                 TargetB = new SpellImplicitTargetInfo((Targets)_effect.ImplicitTarget[1]);
-                RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(_effect.EffectRadiusIndex);
-                MaxRadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(_effect.EffectRadiusMaxIndex);
+                RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(_effect.EffectRadiusIndex[0]);
+                MaxRadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(_effect.EffectRadiusIndex[1]);
                 ChainTargets = _effect.EffectChainTargets;
                 ItemType = _effect.EffectItemType;
                 TriggerSpell = _effect.EffectTriggerSpell;

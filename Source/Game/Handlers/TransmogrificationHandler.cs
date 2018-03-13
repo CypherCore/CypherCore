@@ -124,7 +124,7 @@ namespace Game
                         return;
                     }
 
-                    PlayerConditionRecord condition = CliDB.PlayerConditionStorage.LookupByKey(illusion.PlayerConditionID);
+                    PlayerConditionRecord condition = CliDB.PlayerConditionStorage.LookupByKey(illusion.TransmogPlayerConditionID);
                     if (condition != null)
                     {
                         if (!ConditionManager.IsPlayerMeetingCondition(player, condition))

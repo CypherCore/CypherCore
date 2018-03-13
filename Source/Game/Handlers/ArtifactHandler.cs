@@ -57,7 +57,7 @@ namespace Game
                 return;
 
             if (artifactAddPower.PowerChoices[0].Rank != artifactPower.PurchasedRank + 1 ||
-                artifactAddPower.PowerChoices[0].Rank > artifactPowerEntry.MaxRank)
+                artifactAddPower.PowerChoices[0].Rank > artifactPowerEntry.MaxPurchasableRank)
                 return;
 
             var artifactPowerLinks = Global.DB2Mgr.GetArtifactPowerLinks(artifactPower.ArtifactPowerId);
@@ -74,7 +74,7 @@ namespace Game
                     if (artifactPowerLinkLearned == null)
                         continue;
 
-                    if (artifactPowerLinkLearned.PurchasedRank >= artifactPowerLink.MaxRank)
+                    if (artifactPowerLinkLearned.PurchasedRank >= artifactPowerLink.MaxPurchasableRank)
                     {
                         hasAnyLink = true;
                         break;
@@ -139,18 +139,18 @@ namespace Game
             if (artifactAppearanceSet == null || artifactAppearanceSet.ArtifactID != artifact.GetTemplate().GetArtifactID())
                 return;
 
-            PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(artifactAppearance.PlayerConditionID);
+            PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(artifactAppearance.UnlockPlayerConditionID);
             if (playerCondition != null)
                 if (!ConditionManager.IsPlayerMeetingCondition(_player, playerCondition))
                     return;
 
-            artifact.SetAppearanceModId(artifactAppearance.AppearanceModID);
+            artifact.SetAppearanceModId(artifactAppearance.ItemAppearanceModifierID);
             artifact.SetModifier(ItemModifier.ArtifactAppearanceId, artifactAppearance.Id);
             artifact.SetState(ItemUpdateState.Changed, _player);
             Item childItem = _player.GetChildItemByGuid(artifact.GetChildItem());
             if (childItem)
             {
-                childItem.SetAppearanceModId(artifactAppearance.AppearanceModID);
+                childItem.SetAppearanceModId(artifactAppearance.ItemAppearanceModifierID);
                 childItem.SetState(ItemUpdateState.Changed, _player);
             }
 
@@ -162,7 +162,7 @@ namespace Game
                     _player.SetVisibleItemSlot(childItem.GetSlot(), childItem);
 
                 // change druid form appearance
-                if (artifactAppearance.ShapeshiftDisplayID != 0 && artifactAppearance.ModifiesShapeshiftFormDisplay != 0 && _player.GetShapeshiftForm() == (ShapeShiftForm)artifactAppearance.ModifiesShapeshiftFormDisplay)
+                if (artifactAppearance.OverrideShapeshiftDisplayID != 0 && artifactAppearance.OverrideShapeshiftFormID != 0 && _player.GetShapeshiftForm() == (ShapeShiftForm)artifactAppearance.OverrideShapeshiftFormID)
                     _player.RestoreDisplayId();
             }
         }

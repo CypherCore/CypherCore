@@ -51,7 +51,7 @@ namespace Game.DataStorage
         public ushort MaxFactionID;
         public byte MaxReputation;
         public uint ReputationLogic;
-        public byte Unknown1;
+        public byte CurrentPvpFaction;
         public byte MinPVPRank;
         public byte MaxPVPRank;
         public byte PvpMedal;
@@ -91,7 +91,7 @@ namespace Game.DataStorage
         public byte PowerTypeComp;
         public byte PowerTypeValue;
         public uint ModifierTreeID;
-        public int MainHandItemSubclassMask;
+        public int WeaponSubclassMask;
         public ushort[] SkillID = new ushort[4];
         public short[] MinSkill = new short[4];
         public short[] MaxSkill = new short[4];
@@ -106,7 +106,7 @@ namespace Game.DataStorage
         public ushort[] Explored = new ushort[2];
         public uint[] Time = new uint[2];
         public uint[] AuraSpellID = new uint[4];
-        public byte[] AuraCount = new byte[4];
+        public byte[] AuraStacks = new byte[4];
         public ushort[] Achievement = new ushort[4];
         public byte[] LfgStatus = new byte[4];
         public byte[] LfgCompare = new byte[4];
@@ -122,7 +122,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public uint GlobalStringBaseTag;
-        public byte PowerType;
+        public byte ActualType;
         public byte Red;
         public byte Green;
         public byte Blue;
@@ -131,25 +131,25 @@ namespace Game.DataStorage
     public sealed class PowerTypeRecord
     {
         public uint Id;
-        public string PowerTypeToken;
-        public string PowerCostToken;
-        public float RegenerationPeace;
-        public float RegenerationCombat;
-        public short MaxPower;
-        public ushort RegenerationDelay;
+        public string NameGlobalStringTag;
+        public string CostGlobalStringTag;
+        public float RegenPeace;
+        public float RegenCombat;
+        public short MaxBasePower;
+        public ushort RegenInterruptTimeMS;
         public ushort Flags;
         public PowerType PowerTypeEnum;
-        public sbyte RegenerationMin;
-        public sbyte RegenerationCenter;
-        public sbyte RegenerationMax;
-        public byte UIModifier;
+        public sbyte MinPower;
+        public sbyte CenterPower;
+        public sbyte DefaultPower;
+        public sbyte DisplayModifier;
     }
 
     public sealed class PrestigeLevelInfoRecord
     {
         public uint Id;
-        public string PrestigeText;
-        public uint IconID;
+        public string Name;
+        public uint BadgeTextureFileDataID;
         public byte PrestigeLevel;
         public PrestigeLevelInfoFlags Flags;
 
@@ -159,27 +159,27 @@ namespace Game.DataStorage
     public sealed class PvpDifficultyRecord
     {
         public uint Id;
-        public byte BracketID;
+        public byte RangeIndex;
         public byte MinLevel;
         public byte MaxLevel;
         public uint MapID;
 
         // helpers
-        public BattlegroundBracketId GetBracketId() { return (BattlegroundBracketId)BracketID; }
+        public BattlegroundBracketId GetBracketId() { return (BattlegroundBracketId)RangeIndex; }
     }
 
     public sealed class PvpItemRecord
     {
         public uint Id;
         public uint ItemID;
-        public byte ItemLevelBonus;
+        public byte ItemLevelDelta;
     }
 
     public sealed class PvpRewardRecord
     {
         public uint Id;
         public byte HonorLevel;
-        public byte Prestige;
+        public byte PrestigeLevel;
         public ushort RewardPackID;
     }
 
@@ -189,7 +189,7 @@ namespace Game.DataStorage
         public LocalizedString Description;
         public uint SpellID;
         public uint OverridesSpellID;
-        public int ExtraSpellID;
+        public int ActionBarSpellID;
         public int TierID;
         public byte ColumnIndex;
         public byte Flags;

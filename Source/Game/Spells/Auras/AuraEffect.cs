@@ -105,7 +105,7 @@ namespace Game.Spells
                                         {
                                             for (int t = 0; t < ItemConst.MaxItemEnchantmentEffects; t++)
                                             {
-                                                if (pEnchant.EffectSpellID[t] == m_spellInfo.Id)
+                                                if (pEnchant.EffectArg[t] == m_spellInfo.Id)
                                                 {
                                                     amount = (int)((item_rand_suffix.AllocationPct[k] * castItem.GetItemSuffixFactor()) / 10000);
                                                     break;
@@ -146,7 +146,7 @@ namespace Game.Spells
                     uint mountType = (uint)GetMiscValueB();
                     MountRecord mountEntry = Global.DB2Mgr.GetMount(GetId());
                     if (mountEntry != null)
-                        mountType = mountEntry.MountTypeId;
+                        mountType = mountEntry.MountTypeID;
 
                     var mountCapability = GetBase().GetUnitOwner().GetMountCapability(mountType);
                     if (mountCapability != null)
@@ -2197,7 +2197,7 @@ namespace Game.Spells
                             }).ToList();
 
                             if (!usableDisplays.Empty())
-                                displayId = usableDisplays.SelectRandom().DisplayID;
+                                displayId = usableDisplays.SelectRandom().CreatureDisplayInfoID;
                         }
                     }
                     // TODO: CREATE TABLE mount_vehicle (mountId, vehicleCreatureId) for future mounts that are vehicles (new mounts no longer have proper data in MiscValue)
@@ -2229,7 +2229,7 @@ namespace Game.Spells
                 {
                     var mountCapability = CliDB.MountCapabilityStorage.LookupByKey(GetAmount());
                     if (mountCapability != null)
-                        target.CastSpell(target, mountCapability.SpeedModSpell, true);
+                        target.CastSpell(target, mountCapability.ModSpellAuraID, true);
                 }
             }
             else
@@ -2245,7 +2245,7 @@ namespace Game.Spells
                     // remove speed aura
                     var mountCapability = CliDB.MountCapabilityStorage.LookupByKey(GetAmount());
                     if (mountCapability != null)
-                        target.RemoveAurasDueToSpell(mountCapability.SpeedModSpell, target.GetGUID());
+                        target.RemoveAurasDueToSpell(mountCapability.ModSpellAuraID, target.GetGUID());
                 }
             }
         }
@@ -3512,7 +3512,7 @@ namespace Game.Spells
                 return;
 
             Unit target = aurApp.GetTarget();
-            if (target.GetPowerIndex((PowerType)powerDisplay.PowerType) == (int)PowerType.Max)
+            if (target.GetPowerIndex((PowerType)powerDisplay.ActualType) == (int)PowerType.Max)
                 return;
 
             if (apply)
@@ -4693,7 +4693,7 @@ namespace Game.Spells
                 {
                     for (byte i = 0; i < SharedConst.MaxOverrideSpell; ++i)
                     {
-                        uint spellId = overrideSpells.SpellID[i];
+                        uint spellId = overrideSpells.Spells[i];
                         if (spellId != 0)
                             target.AddTemporarySpell(spellId);
                     }
@@ -4707,7 +4707,7 @@ namespace Game.Spells
                 {
                     for (byte i = 0; i < SharedConst.MaxOverrideSpell; ++i)
                     {
-                        uint spellId = overrideSpells.SpellID[i];
+                        uint spellId = overrideSpells.Spells[i];
                         if (spellId != 0)
                             target.RemoveTemporarySpell(spellId);
                     }

@@ -22,8 +22,8 @@ namespace Game.DataStorage
     public sealed class OverrideSpellDataRecord
     {
         public uint Id;
-        public uint[] SpellID = new uint[SharedConst.MaxOverrideSpell];
-        public uint PlayerActionbarFileDataID;
+        public uint[] Spells = new uint[SharedConst.MaxOverrideSpell];
+        public uint PlayerActionBarFileDataID;
         public byte Flags;
     }
 }

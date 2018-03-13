@@ -277,7 +277,7 @@ namespace Game.Chat
                     var record = CliDB.ItemSparseStorage.Values.FirstOrDefault(itemSparse =>
                     {
                         for (LocaleConstant i = 0; i < LocaleConstant.Max; ++i)
-                            if (itemName == itemSparse.Name[i])
+                            if (itemName == itemSparse.Display[i])
                                 return true;
                         return false;
                     });

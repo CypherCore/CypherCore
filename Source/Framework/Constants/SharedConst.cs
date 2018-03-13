@@ -538,7 +538,7 @@ namespace Framework.Constants
 
         MaxAccountExpansions
     }
-    public enum PowerType : byte
+    public enum PowerType : sbyte
     {
         Mana = 0,
         Rage = 1,
@@ -561,7 +561,7 @@ namespace Framework.Constants
         Pain = 18,
         Max = 19,
         All = 127,          // default for class?
-        Health = 0xFE,    // (-2 as signed value)
+        Health = -2,    // (-2 as signed value)
         MaxPerClass = 6
     }
 

@@ -642,11 +642,11 @@ namespace Game.Entities
                 if (skillAbility.SupercedesSpell == 0)
                     continue;
 
-                if (!HasSpellInfo(skillAbility.SupercedesSpell) || !HasSpellInfo(skillAbility.SpellID))
+                if (!HasSpellInfo(skillAbility.SupercedesSpell) || !HasSpellInfo(skillAbility.Spell))
                     continue;
 
-                chains[skillAbility.SupercedesSpell] = skillAbility.SpellID;
-                hasPrev.Add(skillAbility.SpellID);
+                chains[skillAbility.SupercedesSpell] = skillAbility.Spell;
+                hasPrev.Add(skillAbility.Spell);
             }
 
             // each key in chains that isn't present in hasPrev is a first rank
@@ -1418,7 +1418,7 @@ namespace Game.Entities
             mSkillLineAbilityMap.Clear();
 
             foreach (var skill in CliDB.SkillLineAbilityStorage.Values)
-                mSkillLineAbilityMap.Add(skill.SpellID, skill);
+                mSkillLineAbilityMap.Add(skill.Spell, skill);
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} SkillLineAbility MultiMap Data in {1} ms", mSkillLineAbilityMap.Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
@@ -1627,7 +1627,7 @@ namespace Game.Entities
                         if (skillLine.AcquireMethod != AbilytyLearnType.OnSkillLearn)
                             continue;
 
-                        SpellInfo spell = GetSpellInfo(skillLine.SpellID);
+                        SpellInfo spell = GetSpellInfo(skillLine.Spell);
                         if (spell == null) // not exist or triggered or talent
                             continue;
 
@@ -2189,7 +2189,7 @@ namespace Game.Entities
                                         if (enchant.Effect[s] != ItemEnchantmentType.CombatSpell)
                                             continue;
 
-                                        SpellInfo procInfo = GetSpellInfo(enchant.EffectSpellID[s]);
+                                        SpellInfo procInfo = GetSpellInfo(enchant.EffectArg[s]);
                                         if (procInfo == null)
                                             continue;
 
@@ -2810,13 +2810,13 @@ namespace Game.Entities
 
             SummonPropertiesRecord properties = CliDB.SummonPropertiesStorage.LookupByKey(121);
             if (properties != null)
-                properties.Type = SummonType.Totem;
+                properties.Title = SummonType.Totem;
             properties = CliDB.SummonPropertiesStorage.LookupByKey(647); // 52893
             if (properties != null)
-                properties.Type = SummonType.Totem;
+                properties.Title = SummonType.Totem;
             properties = CliDB.SummonPropertiesStorage.LookupByKey(628);
             if (properties != null) // Hungry Plaguehound
-                properties.Category = SummonCategory.Pet;
+                properties.Control = SummonCategory.Pet;
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded SpellInfo corrections in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
         }
@@ -2874,11 +2874,11 @@ namespace Game.Entities
 
             foreach (var skillLine in CliDB.SkillLineAbilityStorage.Values)
             {
-                SpellInfo spellInfo = GetSpellInfo(skillLine.SpellID);
+                SpellInfo spellInfo = GetSpellInfo(skillLine.Spell);
                 if (spellInfo == null)
                     continue;
 
-                var levels = levelsBySpell.LookupByKey(skillLine.SpellID);
+                var levels = levelsBySpell.LookupByKey(skillLine.Spell);
                 if (levels != null && levels.SpellLevel != 0)
                     continue;
 

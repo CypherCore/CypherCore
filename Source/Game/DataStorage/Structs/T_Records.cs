@@ -47,20 +47,20 @@ namespace Game.DataStorage
         public Vector3 Pos;
         public uint[] MountCreatureID = new uint[2];
         public Vector2 MapOffset;
-        public float Unk730;
+        public float Facing;
         public Vector2 FlightMapOffset;
-        public ushort MapID;
+        public ushort ContinentID;
         public ushort ConditionID;
-        public ushort LearnableIndex;
+        public ushort CharacterBitNumber;
         public TaxiNodeFlags Flags;
-        public int UiTextureKitPrefixID;
-        public uint SpecialAtlasIconPlayerConditionID;
+        public int UiTextureKitID;
+        public uint SpecialIconConditionID;
     }
 
     public sealed class TaxiPathRecord
     {
-        public ushort From;
-        public ushort To;
+        public ushort FromTaxiNode;
+        public ushort ToTaxiNode;
         public uint Id;
         public uint Cost;
     }
@@ -69,7 +69,7 @@ namespace Game.DataStorage
     {
         public Vector3 Loc;
         public ushort PathID;
-        public ushort MapID;
+        public ushort ContinentID;
         public byte NodeIndex;
         public uint Id;
         public TaxiPathNodeFlags Flags;
@@ -82,34 +82,34 @@ namespace Game.DataStorage
     {
         public uint Id;
         public LocalizedString Name;
-        public uint CategoryMask;
-        public byte CategoryType;
+        public uint TotemCategoryMask;
+        public byte TotemCategoryType;
     }
 
     public sealed class ToyRecord
     {
-        public LocalizedString Description;
+        public LocalizedString SourceText;
         public uint ItemID;
         public byte Flags;
-        public byte CategoryFilter;
+        public byte SourceTypeEnum;
         public uint Id;
     }
 
     public sealed class TransmogHolidayRecord
     {
         public uint Id;
-        public int HolidayID;
+        public int RequiredTransmogHoliday;
     }
 
     public sealed class TransmogSetRecord
     {
         public LocalizedString Name;
-        public ushort BaseSetID;
+        public ushort ParentTransmogSetID;
         public ushort UIOrder;
         public byte ExpansionID;
         public uint Id;
         public byte Flags;
-        public int QuestID;
+        public int TrackingQuestID;
         public int ClassMask;
         public int ItemNameDescriptionID;
         public byte TransmogSetGroupID;
@@ -117,7 +117,7 @@ namespace Game.DataStorage
 
     public sealed class TransmogSetGroupRecord
     {
-        public LocalizedString Label;
+        public LocalizedString Name;
         public uint Id;
     }
 
@@ -142,10 +142,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public uint TimeIndex;
-        public float X;
-        public float Y;
-        public float Z;
-        public float W;
-        public uint TransportID;
+        public float[] Rot = new float[4];
+        public uint GameObjectsID;
     }
 }

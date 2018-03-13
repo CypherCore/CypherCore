@@ -245,7 +245,7 @@ namespace Game.Garrisons
 
             GarrisonDeleteResult garrisonDelete = new GarrisonDeleteResult();
             garrisonDelete.Result = GarrisonError.Success;
-            garrisonDelete.GarrSiteID = _siteLevel.SiteID;
+            garrisonDelete.GarrSiteID = _siteLevel.GarrSiteID;
             _owner.SendPacket(garrisonDelete);
         }
 
@@ -267,7 +267,7 @@ namespace Game.Garrisons
 
                 Plot plotInfo = _plots[garrPlotInstanceId];
                 plotInfo.PacketInfo.GarrPlotInstanceID = garrPlotInstanceId;
-                plotInfo.PacketInfo.PlotPos.Relocate(gameObject.Position.X, gameObject.Position.Y, gameObject.Position.Z, 2 * (float)Math.Acos(gameObject.RotationW));
+                plotInfo.PacketInfo.PlotPos.Relocate(gameObject.Pos.X, gameObject.Pos.Y, gameObject.Pos.Z, 2 * (float)Math.Acos(gameObject.Rot[3]));
                 plotInfo.PacketInfo.PlotType = plot.PlotType;
                 plotInfo.EmptyGameObjectId = gameObject.Id;
                 plotInfo.GarrSiteLevelPlotInstId = plots[i].Id;
@@ -366,7 +366,7 @@ namespace Game.Garrisons
                 if (plot.BuildingInfo.PacketInfo.HasValue)
                 {
                     oldBuildingId = plot.BuildingInfo.PacketInfo.Value.GarrBuildingID;
-                    if (CliDB.GarrBuildingStorage.LookupByKey(oldBuildingId).Type != building.Type)
+                    if (CliDB.GarrBuildingStorage.LookupByKey(oldBuildingId).BuildingType != building.BuildingType)
                         plot.ClearBuildingInfo(_owner);
                 }
 
@@ -378,8 +378,8 @@ namespace Game.Garrisons
                         map.AddToMap(go);
                 }
 
-                _owner.ModifyCurrency((CurrencyTypes)building.CostCurrencyID, -building.CostCurrencyAmount, false, true);
-                _owner.ModifyMoney(-building.CostMoney * MoneyConstants.Gold, false);
+                _owner.ModifyCurrency((CurrencyTypes)building.CurrencyTypeID, -building.CurrencyQty, false, true);
+                _owner.ModifyMoney(-building.GoldCost * MoneyConstants.Gold, false);
 
                 if (oldBuildingId != 0)
                 {
@@ -418,13 +418,13 @@ namespace Game.Garrisons
 
                 GarrBuildingRecord constructing = CliDB.GarrBuildingStorage.LookupByKey(buildingRemoved.GarrBuildingID);
                 // Refund construction/upgrade cost
-                _owner.ModifyCurrency((CurrencyTypes)constructing.CostCurrencyID, constructing.CostCurrencyAmount, false, true);
-                _owner.ModifyMoney(constructing.CostMoney * MoneyConstants.Gold, false);
+                _owner.ModifyCurrency((CurrencyTypes)constructing.CurrencyTypeID, constructing.CurrencyQty, false, true);
+                _owner.ModifyMoney(constructing.GoldCost * MoneyConstants.Gold, false);
 
-                if (constructing.Level > 1)
+                if (constructing.UpgradeLevel > 1)
                 {
                     // Restore previous level building
-                    uint restored = Global.GarrisonMgr.GetPreviousLevelBuilding(constructing.Type, constructing.Level);
+                    uint restored = Global.GarrisonMgr.GetPreviousLevelBuilding(constructing.BuildingType, constructing.UpgradeLevel);
                     Contract.Assert(restored != 0);
 
                     GarrisonPlaceBuildingResult placeBuildingResult = new GarrisonPlaceBuildingResult();
@@ -493,7 +493,7 @@ namespace Game.Garrisons
             follower.PacketInfo.DbID = dbId;
             follower.PacketInfo.GarrFollowerID = garrFollowerId;
             follower.PacketInfo.Quality = followerEntry.Quality;   // TODO: handle magic upgrades
-            follower.PacketInfo.FollowerLevel = followerEntry.Level;
+            follower.PacketInfo.FollowerLevel = followerEntry.FollowerLevel;
             follower.PacketInfo.ItemLevelWeapon = followerEntry.ItemLevelWeapon;
             follower.PacketInfo.ItemLevelArmor = followerEntry.ItemLevelArmor;
             follower.PacketInfo.Xp = 0;
@@ -521,7 +521,7 @@ namespace Game.Garrisons
 
             GarrisonInfo garrison = new GarrisonInfo();
             garrison.GarrTypeID = GarrisonType.Garrison;
-            garrison.GarrSiteID = _siteLevel.SiteID;
+            garrison.GarrSiteID = _siteLevel.GarrSiteID;
             garrison.GarrSiteLevelID = _siteLevel.Id;
             garrison.NumFollowerActivationsRemaining = _followerActivationsRemainingToday;
             foreach (var plot in _plots.Values)
@@ -602,7 +602,7 @@ namespace Game.Garrisons
                 return GarrisonError.InvalidPlotBuilding;
 
             // Cannot place buldings of higher level than garrison level
-            if (building.Level > _siteLevel.Level)
+            if (building.UpgradeLevel > _siteLevel.MaxBuildingLevel)
                 return GarrisonError.InvalidBuildingId;
 
             if (building.Flags.HasAnyFlag(GarrisonBuildingFlags.NeedsPlan))
@@ -620,16 +620,16 @@ namespace Game.Garrisons
                 if (p.Value.BuildingInfo.PacketInfo.HasValue)
                 {
                     existingBuilding = CliDB.GarrBuildingStorage.LookupByKey(p.Value.BuildingInfo.PacketInfo.Value.GarrBuildingID);
-                    if (existingBuilding.Type == building.Type)
-                        if (p.Key != garrPlotInstanceId || existingBuilding.Level + 1 != building.Level)    // check if its an upgrade in same plot
+                    if (existingBuilding.BuildingType == building.BuildingType)
+                        if (p.Key != garrPlotInstanceId || existingBuilding.UpgradeLevel + 1 != building.UpgradeLevel)    // check if its an upgrade in same plot
                             return GarrisonError.BuildingExists;
                 }
             }
 
-            if (!_owner.HasCurrency(building.CostCurrencyID, (uint)building.CostCurrencyAmount))
+            if (!_owner.HasCurrency(building.CurrencyTypeID, (uint)building.CurrencyQty))
                 return GarrisonError.NotEnoughCurrency;
 
-            if (!_owner.HasEnoughMoney(building.CostMoney * MoneyConstants.Gold))
+            if (!_owner.HasEnoughMoney(building.GoldCost * MoneyConstants.Gold))
                 return GarrisonError.NotEnoughGold;
 
             // New building cannot replace another building currently under construction
@@ -673,7 +673,7 @@ namespace Game.Garrisons
                 if (PacketInfo.HasValue)
                 {
                     GarrBuildingRecord building = CliDB.GarrBuildingStorage.LookupByKey(PacketInfo.Value.GarrBuildingID);
-                    if (PacketInfo.Value.TimeBuilt + building.BuildDuration <= Time.UnixTime)
+                    if (PacketInfo.Value.TimeBuilt + building.BuildSeconds <= Time.UnixTime)
                         return true;
                 }
 
@@ -696,7 +696,7 @@ namespace Game.Garrisons
                     GarrPlotRecord plot = CliDB.GarrPlotStorage.LookupByKey(plotInstance.GarrPlotID);
                     GarrBuildingRecord building = CliDB.GarrBuildingStorage.LookupByKey(BuildingInfo.PacketInfo.Value.GarrBuildingID);
 
-                    entry = faction == GarrisonFactionIndex.Horde ? plot.HordeConstructionGameObjectID : plot.AllianceConstructionGameObjectID;
+                    entry = faction == GarrisonFactionIndex.Horde ? plot.HordeConstructObjID : plot.AllianceConstructObjID;
                     if (BuildingInfo.PacketInfo.Value.Active || entry == 0)
                         entry = faction == GarrisonFactionIndex.Horde ? building.HordeGameObjectID : building.AllianceGameObjectID;
                 }

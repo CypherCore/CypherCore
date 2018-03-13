@@ -2164,8 +2164,8 @@ namespace Game.Entities
                         uint modelId = m_goInfo.displayId;
                         DestructibleModelDataRecord modelData = CliDB.DestructibleModelDataStorage.LookupByKey(m_goInfo.DestructibleBuilding.DestructibleModelRec);
                         if (modelData != null)
-                            if (modelData.StateDamagedDisplayID != 0)
-                                modelId = modelData.StateDamagedDisplayID;
+                            if (modelData.State0Wmo != 0)
+                                modelId = modelData.State0Wmo;
                         SetDisplayId(modelId);
 
                         if (setHealth)
@@ -2196,8 +2196,8 @@ namespace Game.Entities
                         uint modelId = m_goInfo.displayId;
                         DestructibleModelDataRecord modelData = CliDB.DestructibleModelDataStorage.LookupByKey(m_goInfo.DestructibleBuilding.DestructibleModelRec);
                         if (modelData != null)
-                            if (modelData.StateDestroyedDisplayID != 0)
-                                modelId = modelData.StateDestroyedDisplayID;
+                            if (modelData.State1Wmo != 0)
+                                modelId = modelData.State1Wmo;
                         SetDisplayId(modelId);
 
                         if (setHealth)
@@ -2216,8 +2216,8 @@ namespace Game.Entities
                         uint modelId = m_goInfo.displayId;
                         DestructibleModelDataRecord modelData = CliDB.DestructibleModelDataStorage.LookupByKey(m_goInfo.DestructibleBuilding.DestructibleModelRec);
                         if (modelData != null)
-                            if (modelData.StateRebuildingDisplayID != 0)
-                                modelId = modelData.StateRebuildingDisplayID;
+                            if (modelData.State2Wmo != 0)
+                                modelId = modelData.State2Wmo;
                         SetDisplayId(modelId);
 
                         // restores to full health

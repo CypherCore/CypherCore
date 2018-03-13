@@ -22,29 +22,29 @@ namespace Game.DataStorage
     public sealed class QuestFactionRewardRecord
     {
         public uint Id;
-        public short[] QuestRewFactionValue = new short[10];
+        public short[] Difficulty = new short[10];
     }
 
     public sealed class QuestMoneyRewardRecord
     {
         public uint Id;
-        public uint[] Money = new uint[10];
+        public uint[] Difficulty = new uint[10];
     }
 
     public sealed class QuestPackageItemRecord
     {
         public uint Id;
         public uint ItemID;
-        public ushort QuestPackageID;
-        public QuestPackageFilter FilterType;
-        public byte ItemCount;
+        public ushort PackageID;
+        public QuestPackageFilter DisplayType;
+        public byte ItemQuantity;
     }
 
     public sealed class QuestSortRecord
     {
         public uint Id;
         public LocalizedString SortName;
-        public byte SortOrder;
+        public byte UiOrderIndex;
     }
 
     public sealed class QuestV2Record
@@ -56,6 +56,6 @@ namespace Game.DataStorage
     public sealed class QuestXPRecord
     {
         public uint Id;
-        public ushort[] Exp = new ushort[10];
+        public ushort[] Difficulty = new ushort[10];
     }
 }

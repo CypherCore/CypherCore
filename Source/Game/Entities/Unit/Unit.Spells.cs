@@ -2991,7 +2991,7 @@ namespace Game.Entities
         {
             if (spellInfo.RangeEntry == null)
                 return 0;
-            if (spellInfo.RangeEntry.MaxRangeFriend == spellInfo.RangeEntry.MaxRangeHostile)
+            if (spellInfo.RangeEntry.RangeMax[0] == spellInfo.RangeEntry.RangeMax[1])
                 return spellInfo.GetMaxRange();
             if (!target)
                 return spellInfo.GetMaxRange(true);
@@ -3002,7 +3002,7 @@ namespace Game.Entities
         {
             if (spellInfo.RangeEntry == null)
                 return 0;
-            if (spellInfo.RangeEntry.MinRangeFriend == spellInfo.RangeEntry.MinRangeHostile)
+            if (spellInfo.RangeEntry.RangeMin[0] == spellInfo.RangeEntry.RangeMin[1])
                 return spellInfo.GetMinRange();
             if (!target)
                 return spellInfo.GetMinRange(true);

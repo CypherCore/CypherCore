@@ -1175,8 +1175,8 @@ namespace Game.Entities
                     {
                         ArtifactAppearanceRecord artifactAppearance = CliDB.ArtifactAppearanceStorage.LookupByKey(artifact.GetModifier(ItemModifier.ArtifactAppearanceId));
                         if (artifactAppearance != null)
-                            if ((ShapeShiftForm)artifactAppearance.ModifiesShapeshiftFormDisplay == form)
-                                return artifactAppearance.ShapeshiftDisplayID;
+                            if ((ShapeShiftForm)artifactAppearance.OverrideShapeshiftFormID == form)
+                                return artifactAppearance.OverrideShapeshiftDisplayID;
                     }
                 }
 
@@ -1892,17 +1892,17 @@ namespace Game.Entities
                         else if (GetTypeId() == TypeId.Player)
                         {
                             ChrClassesRecord cEntry = CliDB.ChrClassesStorage.LookupByKey(GetClass());
-                            if (cEntry != null && cEntry.PowerType < PowerType.Max)
-                                displayPower = cEntry.PowerType;
+                            if (cEntry != null && cEntry.DisplayPower < PowerType.Max)
+                                displayPower = cEntry.DisplayPower;
                         }
                         else if (GetTypeId() == TypeId.Unit)
                         {
-                            Vehicle vehicle = GetVehicle();
+                            Vehicle vehicle = GetVehicleKit();
                             if (vehicle)
                             {
                                 PowerDisplayRecord powerDisplay = CliDB.PowerDisplayStorage.LookupByKey(vehicle.GetVehicleInfo().PowerDisplayID[0]);
                                 if (powerDisplay != null)
-                                    displayPower = (PowerType)powerDisplay.PowerType;
+                                    displayPower = (PowerType)powerDisplay.ActualType;
                                 else if (GetClass() == Class.Rogue)
                                     displayPower = PowerType.Energy;
                             }
@@ -2097,9 +2097,9 @@ namespace Game.Entities
         {
             return (Race)GetByteValue(UnitFields.Bytes0, 0);
         }
-        public ulong getRaceMask()
+        public long getRaceMask()
         {
-            return (1ul << ((int)GetRace() - 1));
+            return (1 << ((int)GetRace() - 1));
         }
         public Class GetClass()
         {

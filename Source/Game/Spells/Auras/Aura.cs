@@ -305,7 +305,7 @@ namespace Game.Spells
 
             var powers = Global.DB2Mgr.GetSpellPowers(GetId(), caster ? caster.GetMap().GetDifficultyID() : Difficulty.None);
             foreach (var power in powers)
-                if (power.ManaCostPerSecond != 0 || power.ManaCostPercentagePerSecond > 0.0f)
+                if (power.ManaPerSecond != 0 || power.PowerPctPerSecond > 0.0f)
                     m_periodicCosts.Add(power);
 
             if (!m_periodicCosts.Empty())
@@ -653,14 +653,14 @@ namespace Game.Spells
 
                             foreach (SpellPowerRecord power in m_periodicCosts)
                             {
-                                if (power.RequiredAura != 0 && !caster.HasAura(power.RequiredAura))
+                                if (power.RequiredAuraSpellID != 0 && !caster.HasAura(power.RequiredAuraSpellID))
                                     continue;
 
-                                int manaPerSecond = (int)power.ManaCostPerSecond;
+                                int manaPerSecond = (int)power.ManaPerSecond;
                                 if (power.PowerType != PowerType.Health)
-                                    manaPerSecond += MathFunctions.CalculatePct(caster.GetMaxPower(power.PowerType), power.ManaCostPercentagePerSecond);
+                                    manaPerSecond += MathFunctions.CalculatePct(caster.GetMaxPower(power.PowerType), power.PowerPctPerSecond);
                                 else
-                                    manaPerSecond += (int)MathFunctions.CalculatePct(caster.GetMaxHealth(), power.ManaCostPercentagePerSecond);
+                                    manaPerSecond += (int)MathFunctions.CalculatePct(caster.GetMaxHealth(), power.PowerPctPerSecond);
 
                                 if (manaPerSecond != 0)
                                 {

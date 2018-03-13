@@ -512,7 +512,7 @@ namespace Game.Entities
                     {
                         if (missingQuest != 0 && !string.IsNullOrEmpty(ar.questFailedText))
                             SendSysMessage("{0}", ar.questFailedText);
-                        else if (mapDiff.Message_lang.HasString(Global.WorldMgr.GetDefaultDbcLocale())) // if (missingAchievement) covered by this case
+                        else if (mapDiff.Message.HasString(Global.WorldMgr.GetDefaultDbcLocale())) // if (missingAchievement) covered by this case
                             SendTransferAborted(target_map, TransferAbortReason.Difficulty, (byte)target_difficulty);
                         else if (missingItem != 0)
                             GetSession().SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.LevelMinrequiredAndItem), LevelMin, Global.ObjectMgr.GetItemTemplate(missingItem).GetName());

@@ -186,10 +186,10 @@ namespace Game.DataStorage
                         else
                             Log.outError(LogFilter.Sql, "Table `conversation_line_template` has missing template for line (ID: {0}) in Conversation {1}, skipped", currentConversationLine.Id, conversationTemplate.Id);
 
-                        if (currentConversationLine.NextLineID == 0)
+                        if (currentConversationLine.NextConversationLineID == 0)
                             break;
 
-                        currentConversationLine = CliDB.ConversationLineStorage.LookupByKey(currentConversationLine.NextLineID);
+                        currentConversationLine = CliDB.ConversationLineStorage.LookupByKey(currentConversationLine.NextConversationLineID);
                     }
 
                     _conversationTemplateStorage[conversationTemplate.Id] = conversationTemplate;

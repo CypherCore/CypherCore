@@ -236,7 +236,7 @@ namespace Game.Entities
             if (rewardPackEntry == null)
                 return;
 
-            CharTitlesRecord charTitlesEntry = CliDB.CharTitlesStorage.LookupByKey(rewardPackEntry.TitleID);
+            CharTitlesRecord charTitlesEntry = CliDB.CharTitlesStorage.LookupByKey(rewardPackEntry.CharTitleID);
             if (charTitlesEntry != null)
                 SetTitle(charTitlesEntry);
 
@@ -245,7 +245,7 @@ namespace Game.Entities
             if (rewardPackXItems != null)
             {
                 foreach (RewardPackXItemRecord rewardPackXItem in rewardPackXItems)
-                    AddItem(rewardPackXItem.ItemID, rewardPackXItem.Amount);
+                    AddItem(rewardPackXItem.ItemID, rewardPackXItem.ItemQuantity);
             }
         }
 

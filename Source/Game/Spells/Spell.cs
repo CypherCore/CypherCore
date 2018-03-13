@@ -3850,9 +3850,9 @@ namespace Game.Spells
                         ItemRecord itemEntry = CliDB.ItemStorage.LookupByKey(itemId);
                         if (itemEntry != null)
                         {
-                            if (itemEntry.Class == ItemClass.Weapon)
+                            if (itemEntry.ClassID == ItemClass.Weapon)
                             {
-                                switch ((ItemSubClassWeapon)itemEntry.SubClass)
+                                switch ((ItemSubClassWeapon)itemEntry.SubclassID)
                                 {
                                     case ItemSubClassWeapon.Thrown:
                                         ammoDisplayID = Global.DB2Mgr.GetItemDisplayId(itemId, m_caster.GetVirtualItemAppearanceMod(i));
@@ -5065,7 +5065,7 @@ namespace Game.Spells
                             if (SummonProperties == null)
                                 break;
 
-                            switch (SummonProperties.Category)
+                            switch (SummonProperties.Control)
                             {
                                 case SummonCategory.Pet:
                                     if (!m_spellInfo.HasAttribute(SpellAttr1.DismissPet) && !m_caster.GetPetGUID().IsEmpty())
@@ -6034,7 +6034,7 @@ namespace Game.Spells
                             ItemTemplate proto = targetItem.GetTemplate();
                             for (byte e = 0; e < proto.Effects.Count; ++e)
                             {
-                                if (proto.Effects[e].SpellID != 0 && proto.Effects[e].Trigger == ItemSpelltriggerType.OnUse)
+                                if (proto.Effects[e].SpellID != 0 && proto.Effects[e].TriggerType == ItemSpelltriggerType.OnUse)
                                 {
                                     isItemUsable = true;
                                     break;
@@ -6115,7 +6115,7 @@ namespace Game.Spells
                             ItemDisenchantLootRecord itemDisenchantLoot = item.GetDisenchantLoot(m_caster.ToPlayer());
                             if (itemDisenchantLoot == null)
                                 return SpellCastResult.CantBeDisenchanted;
-                            if (itemDisenchantLoot.RequiredDisenchantSkill > player.GetSkillValue(SkillType.Enchanting))
+                            if (itemDisenchantLoot.SkillRequired > player.GetSkillValue(SkillType.Enchanting))
                                 return SpellCastResult.LowCastlevel;
                             break;
                         }
@@ -6715,19 +6715,6 @@ namespace Game.Spells
         void LoadScripts()
         {
             m_loadedScripts = Global.ScriptMgr.CreateSpellScripts(m_spellInfo.Id, this);
-
-            var holder = Global.SmartAIMgr.GetScript((int)GetSpellInfo().Id, SmartScriptType.Spell);
-            if (!holder.Empty())
-            {
-                var script = new SmartSpell();
-                script._Init("", GetSpellInfo().Id);
-                if (script._Load(this))
-                {
-                    script._Register();
-                    if (script._Validate(GetSpellInfo()))
-                        m_loadedScripts.Add(script);
-                }
-            }
 
             foreach (var script in m_loadedScripts)
             {

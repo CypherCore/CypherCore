@@ -46,16 +46,16 @@ namespace Game.DataStorage
     public sealed class BattlePetBreedQualityRecord
     {
         public uint Id;
-        public float Modifier;
-        public byte Quality;
+        public float StateMultiplier;
+        public byte QualityEnum;
     }
 
     public sealed class BattlePetBreedStateRecord
     {
         public uint Id;
-        public short Value;
-        public byte State;
-        public uint BreedID;
+        public ushort Value;
+        public byte BattlePetStateID;
+        public uint BattlePetBreedID;
     }
 
     public sealed class BattlePetSpeciesRecord
@@ -63,22 +63,22 @@ namespace Game.DataStorage
         public LocalizedString SourceText;
         public LocalizedString Description;
         public uint CreatureID;
-        public uint IconFileID;
+        public uint IconFileDataID;
         public uint SummonSpellID;
         public ushort Flags;
-        public byte PetType;
-        public sbyte Source;
+        public byte PetTypeEnum;
+        public sbyte SourceTypeEnum;
         public uint Id;
-        public byte CardModelSceneID;
-        public byte LoadoutModelSceneID;
+        public byte CardUIModelSceneID;
+        public byte LoadoutUIModelSceneID;
     }
 
     public sealed class BattlePetSpeciesStateRecord
     {
         public uint Id;
         public int Value;
-        public byte State;
-        public uint SpeciesID;
+        public byte BattlePetStateID;
+        public uint BattlePetSpeciesID;
     }
 
     public sealed class BattlemasterListRecord
@@ -88,10 +88,10 @@ namespace Game.DataStorage
         public LocalizedString GameType;
         public LocalizedString ShortDescription;
         public LocalizedString LongDescription;
-        public uint IconFileDataID;
+        public int IconFileDataID;
         public short[] MapId = new short[16];
         public ushort HolidayWorldState;
-        public ushort PlayerConditionId;
+        public ushort RequiredPlayerConditionID;
         public byte InstanceType;
         public byte GroupsAllowed;
         public byte MaxGroupSize;
@@ -106,14 +106,14 @@ namespace Game.DataStorage
     public sealed class BroadcastTextRecord
     {
         public uint Id;
-        public LocalizedString MaleText;
-        public LocalizedString FemaleText;
+        public LocalizedString Text;
+        public LocalizedString Text1;
         public ushort[] EmoteID = new ushort[3];
         public ushort[] EmoteDelay = new ushort[3];
-        public ushort UnkEmoteID;
-        public byte Language;
-        public byte Type;
-        public uint PlayerConditionID;
-        public uint[] SoundID = new uint[2];
+        public ushort EmotesID;
+        public byte LanguageID;
+        public byte Flags;
+        public uint ConditionID;
+        public uint[] SoundEntriesID = new uint[2];
     }
 }

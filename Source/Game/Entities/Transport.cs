@@ -213,15 +213,15 @@ namespace Game.Entities
 
                 MoveToNextWaypoint();
 
-                Global.ScriptMgr.OnRelocate(this, _currentFrame.Node.NodeIndex, _currentFrame.Node.MapID, _currentFrame.Node.Loc.X, _currentFrame.Node.Loc.Y, _currentFrame.Node.Loc.Z);
+                Global.ScriptMgr.OnRelocate(this, _currentFrame.Node.NodeIndex, _currentFrame.Node.ContinentID, _currentFrame.Node.Loc.X, _currentFrame.Node.Loc.Y, _currentFrame.Node.Loc.Z);
 
-                Log.outDebug(LogFilter.Transport, "Transport {0} ({1}) moved to node {2} {3} {4} {5} {6}", GetEntry(), GetName(), _currentFrame.Node.NodeIndex, _currentFrame.Node.MapID, 
+                Log.outDebug(LogFilter.Transport, "Transport {0} ({1}) moved to node {2} {3} {4} {5} {6}", GetEntry(), GetName(), _currentFrame.Node.NodeIndex, _currentFrame.Node.ContinentID, 
                     _currentFrame.Node.Loc.X, _currentFrame.Node.Loc.Y, _currentFrame.Node.Loc.Z);
 
                 // Departure event
                 var nextframe = GetKeyFrames()[_nextFrame];
                 if (_currentFrame.IsTeleportFrame())
-                    if (TeleportTransport(nextframe.Node.MapID, nextframe.Node.Loc.X, nextframe.Node.Loc.Y, nextframe.Node.Loc.Z, nextframe.InitialOrientation))
+                    if (TeleportTransport(nextframe.Node.ContinentID, nextframe.Node.Loc.X, nextframe.Node.Loc.Y, nextframe.Node.Loc.Z, nextframe.InitialOrientation))
                         return;
             }
 
@@ -399,7 +399,7 @@ namespace Game.Entities
             UnitTypeMask mask = UnitTypeMask.Summon;
             if (properties != null)
             {
-                switch (properties.Category)
+                switch (properties.Control)
                 {
                     case SummonCategory.Pet:
                         mask = UnitTypeMask.Guardian;
@@ -414,7 +414,7 @@ namespace Game.Entities
                     case SummonCategory.Ally:
                     case SummonCategory.Unk:
                         {
-                            switch (properties.Type)
+                            switch (properties.Title)
                             {
                                 case SummonType.Minion:
                                 case SummonType.Guardian:
@@ -664,7 +664,7 @@ namespace Game.Entities
             var nextFrame = GetKeyFrames()[_nextFrame];
 
             _delayedTeleport = false;
-            Map newMap = Global.MapMgr.CreateBaseMap(nextFrame.Node.MapID);
+            Map newMap = Global.MapMgr.CreateBaseMap(nextFrame.Node.ContinentID);
             GetMap().RemoveFromMap(this, false);
             SetMap(newMap);
 
@@ -684,7 +684,7 @@ namespace Game.Entities
                 switch (obj.GetTypeId())
                 {
                     case TypeId.Player:
-                        if (!obj.ToPlayer().TeleportTo(nextFrame.Node.MapID, destX, destY, destZ, destO, TeleportToOptions.NotLeaveTransport))
+                        if (!obj.ToPlayer().TeleportTo(nextFrame.Node.ContinentID, destX, destY, destZ, destO, TeleportToOptions.NotLeaveTransport))
                             RemovePassenger(obj);
                         break;
                     case TypeId.DynamicObject:

@@ -503,10 +503,10 @@ namespace Game.Movement
             if (i_path.Empty() || i_currentNode >= i_path.Count)
                 return;
 
-            uint map0 = i_path[i_currentNode].MapID;
+            uint map0 = i_path[i_currentNode].ContinentID;
             for (int i = i_currentNode + 1; i < i_path.Count; ++i)
             {
-                if (i_path[i].MapID != map0)
+                if (i_path[i].ContinentID != map0)
                 {
                     i_currentNode = i;
                     return;
@@ -537,7 +537,7 @@ namespace Game.Movement
         void InitEndGridInfo()
         {
             int nodeCount = i_path.Count;        //! Number of nodes in path.
-            _endMapId = i_path[nodeCount - 1].MapID; //! MapId of last node
+            _endMapId = i_path[nodeCount - 1].ContinentID; //! MapId of last node
             _preloadTargetNode = (uint)nodeCount - 3;
             _endGridX = i_path[nodeCount - 1].Loc.X;
             _endGridY = i_path[nodeCount - 1].Loc.Y;
@@ -563,10 +563,10 @@ namespace Game.Movement
             if (i_currentNode >= i_path.Count)
                 return (uint)i_path.Count;
 
-            uint curMapId = i_path[i_currentNode].MapID;
+            uint curMapId = i_path[i_currentNode].ContinentID;
             for (int i = i_currentNode; i < i_path.Count; ++i)
             {
-                if (i_path[i].MapID != curMapId)
+                if (i_path[i].ContinentID != curMapId)
                     return (uint)i;
             }
 
@@ -575,7 +575,7 @@ namespace Game.Movement
 
         bool IsNodeIncludedInShortenedPath(TaxiPathNodeRecord p1, TaxiPathNodeRecord p2)
         {
-            return p1.MapID != p2.MapID || Math.Pow(p1.Loc.X - p2.Loc.X, 2) + Math.Pow(p1.Loc.Y - p2.Loc.Y, 2) > (40.0f * 40.0f);
+            return p1.ContinentID != p2.ContinentID || Math.Pow(p1.Loc.X - p2.Loc.X, 2) + Math.Pow(p1.Loc.Y - p2.Loc.Y, 2) > (40.0f * 40.0f);
         }
 
         public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Flight; }

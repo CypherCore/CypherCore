@@ -22,19 +22,19 @@ namespace Game.DataStorage
         public uint Id;
         public long RaceMask;
         public uint EmoteSlashCommand;
-        public uint SpellVisualKitID;
         public uint EmoteFlags;
+        public uint SpellVisualKitID;
         public ushort AnimID;
         public byte EmoteSpecProc;
-        public uint EmoteSpecProcParam;
-        public byte EmoteSoundID;
-        public short ClassMask;
+        public int ClassMask;
+        public byte EmoteSpecProcParam;
+        public ushort EmoteSoundID;
     }
 
     public sealed class EmotesTextRecord
     {
         public uint Id;
-        public LocalizedString Name;
+        public string Name;
         public ushort EmoteID;
     }
 

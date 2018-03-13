@@ -56,8 +56,8 @@ namespace Game.Entities
                     ArtifactPowerRecord artifactPower = CliDB.ArtifactPowerStorage.LookupByKey(artifactPowerData.ArtifactPowerId);
                     if (artifactPower != null)
                     {
-                        if (artifactPowerData.PurchasedRank > artifactPower.MaxRank)
-                            artifactPowerData.PurchasedRank = artifactPower.MaxRank;
+                        if (artifactPowerData.PurchasedRank > artifactPower.MaxPurchasableRank)
+                            artifactPowerData.PurchasedRank = artifactPower.MaxPurchasableRank;
 
                         artifactPowerData.CurrentRankWithBonus = (byte)(artifactPower.Flags.HasAnyFlag(ArtifactPowerFlag.First) ? 1 : 0);
 
@@ -2659,7 +2659,7 @@ namespace Game.Entities
                     else                                                // have start node, to it
                     {
                         Log.outError(LogFilter.Player, "Character {0} have too short taxi destination list, teleport to original node.", GetGUID().ToString());
-                        mapId = nodeEntry.MapID;
+                        mapId = nodeEntry.ContinentID;
                         Relocate(nodeEntry.Pos.X, nodeEntry.Pos.Y, nodeEntry.Pos.Z, 0.0f);
                     }
                     m_taxi.ClearTaxiDestinations();
@@ -2669,10 +2669,10 @@ namespace Game.Entities
                 {
                     // save source node as recall coord to prevent recall and fall from sky
                     var nodeEntry = CliDB.TaxiNodesStorage.LookupByKey(nodeid);
-                    if (nodeEntry != null && nodeEntry.MapID == GetMapId())
+                    if (nodeEntry != null && nodeEntry.ContinentID == GetMapId())
                     {
                         Contract.Assert(nodeEntry != null);                                  // checked in m_taxi.LoadTaxiDestinationsFromString
-                        mapId = nodeEntry.MapID;
+                        mapId = nodeEntry.ContinentID;
                         Relocate(nodeEntry.Pos.X, nodeEntry.Pos.Y, nodeEntry.Pos.Z, 0.0f);
                     }
 

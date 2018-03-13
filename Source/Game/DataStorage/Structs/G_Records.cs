@@ -20,25 +20,6 @@ using Framework.GameMath;
 
 namespace Game.DataStorage
 {
-    public sealed class GameObjectsRecord
-    {
-        public LocalizedString Name;
-        public Vector3 Position;
-        public float RotationX;
-        public float RotationY;
-        public float RotationZ;
-        public float RotationW;
-        public float Size;
-        public int[] Data = new int[8];
-        public ushort MapID;
-        public ushort DisplayID;
-        public ushort PhaseID;
-        public ushort PhaseGroupID;
-        public byte PhaseUseFlags;
-        public GameObjectTypes Type;
-        public uint Id;
-    }
-
     public sealed class GameObjectDisplayInfoRecord
     {
         public uint Id;
@@ -50,50 +31,66 @@ namespace Game.DataStorage
         public ushort ObjectEffectPackageID;
     }
 
+    public sealed class GameObjectsRecord
+    {
+        public LocalizedString Name;
+        public Vector3 Pos;
+        public float[] Rot = new float[4];
+        public float Scale;
+        public int[] PropValue = new int[8];
+        public ushort OwnerID;
+        public ushort DisplayID;
+        public ushort PhaseID;
+        public ushort PhaseGroupID;
+        public byte PhaseUseFlags;
+        public GameObjectTypes TypeID;
+        public uint Id;
+    }
+
     public sealed class GarrAbilityRecord
     {
         public LocalizedString Name;
         public LocalizedString Description;
         public uint IconFileDataID;
         public GarrisonAbilityFlags Flags;
-        public ushort OtherFactionGarrAbilityID;
+        public ushort FactionChangeGarrAbilityID;
         public byte GarrAbilityCategoryID;
-        public byte FollowerTypeID;
+        public byte GarrFollowerTypeID;
         public uint Id;
     }
 
     public sealed class GarrBuildingRecord
     {
         public uint Id;
-        public string NameAlliance;
-        public string NameHorde;
+        public string AllianceName;
+        public string HordeName;
         public string Description;
         public string Tooltip;
         public uint HordeGameObjectID;
         public uint AllianceGameObjectID;
         public uint IconFileDataID;
-        public ushort CostCurrencyID;
-        public ushort HordeTexPrefixKitID;
-        public ushort AllianceTexPrefixKitID;
-        public ushort AllianceActivationScenePackageID;
-        public ushort HordeActivationScenePackageID;
-        public ushort FollowerRequiredGarrAbilityID;
-        public ushort FollowerGarrAbilityEffectID;
-        public short CostMoney;
-        public byte Unknown;
-        public byte Type;
-        public byte Level;
+        public ushort CurrencyTypeID;
+        public ushort HordeUiTextureKitID;
+        public ushort AllianceUiTextureKitID;
+        public ushort AllianceSceneScriptPackageID;
+        public ushort HordeSceneScriptPackageID;
+        public ushort GarrAbilityID;
+        public ushort BonusGarrAbilityID;
+        public short GoldCost;
+        public byte GarrSiteID;
+        public byte BuildingType;
+        public byte UpgradeLevel;
         public GarrisonBuildingFlags Flags;
-        public byte MaxShipments;
+        public byte ShipmentCapacity;
         public byte GarrTypeID;
-        public ushort BuildDuration;
-        public int CostCurrencyAmount;
-        public byte BonusAmount;
+        public ushort BuildSeconds;
+        public int CurrencyQty;
+        public byte MaxAssignments;
     }
 
     public sealed class GarrBuildingPlotInstRecord
     {
-        public Vector2 LandmarkOffset;
+        public Vector2 MapOffset;
         public ushort UiTextureAtlasMemberID;
         public ushort GarrSiteLevelPlotInstID;
         public byte GarrBuildingID;
@@ -102,12 +99,12 @@ namespace Game.DataStorage
 
     public sealed class GarrClassSpecRecord
     {
-        public LocalizedString NameMale;
-        public LocalizedString NameFemale;
-        public LocalizedString NameGenderless;
-        public ushort ClassAtlasID;                                            // UiTextureAtlasMember.db2 ref
+        public LocalizedString ClassSpec;
+        public LocalizedString ClassSpecMale;
+        public LocalizedString ClassSpecFemale;
+        public ushort UiTextureAtlasMemberID;                                            // UiTextureAtlasMember.db2 ref
         public ushort GarrFollItemSetID;
-        public byte Limit;
+        public byte FollowerClassLimit;
         public byte Flags;
         public uint Id;
     }
@@ -116,35 +113,35 @@ namespace Game.DataStorage
     {
         public string HordeSourceText;
         public string AllianceSourceText;
-        public string Name;
+        public string TitleName;
         public uint HordeCreatureID;
         public uint AllianceCreatureID;
-        public uint HordePortraitIconID;
-        public uint AlliancePortraitIconID;
-        public uint HordeAddedBroadcastTextID;
-        public uint AllianceAddedBroadcastTextID;
+        public uint HordeIconFileDataID;
+        public uint AllianceIconFileDataID;
+        public uint HordeSlottingBroadcastTextID;
+        public uint AllySlottingBroadcastTextID;
         public ushort HordeGarrFollItemSetID;
         public ushort AllianceGarrFollItemSetID;
         public ushort ItemLevelWeapon;
         public ushort ItemLevelArmor;
-        public ushort HordeListPortraitTextureKitID;
-        public ushort AllianceListPortraitTextureKitID;
-        public byte FollowerTypeID;
-        public byte HordeUiAnimRaceInfoID;
-        public byte AllianceUiAnimRaceInfoID;
+        public ushort HordeUITextureKitID;
+        public ushort AllianceUITextureKitID;
+        public byte GarrFollowerTypeID;
+        public byte HordeGarrFollRaceID;
+        public byte AllianceGarrFollRaceID;
         public byte Quality;
         public byte HordeGarrClassSpecID;
         public byte AllianceGarrClassSpecID;
-        public byte Level;
-        public byte Unknown1;
+        public byte FollowerLevel;
+        public byte Gender;
         public byte Flags;
-        public sbyte Unknown2;
-        public sbyte Unknown3;
+        public sbyte HordeSourceTypeEnum;
+        public sbyte AllianceSourceTypeEnum;
         public byte GarrTypeID;
-        public byte MaxDurability;
-        public byte Class;
-        public byte HordeFlavorTextGarrStringID;
-        public byte AllianceFlavorTextGarrStringID;
+        public byte Vitality;
+        public byte ChrClassID;
+        public byte HordeFlavorGarrStringID;
+        public byte AllianceFlavorGarrStringID;
         public uint Id;
     }
 
@@ -160,12 +157,12 @@ namespace Game.DataStorage
     {
         public uint Id;
         public LocalizedString Name;
-        public uint AllianceConstructionGameObjectID;
-        public uint HordeConstructionGameObjectID;
-        public byte GarrPlotUICategoryID;
+        public uint AllianceConstructObjID;
+        public uint HordeConstructObjID;
+        public byte UiCategoryID;
         public byte PlotType;
         public byte Flags;
-        public uint[] Count = new uint[2];
+        public uint[] UpgradeRequirement = new uint[2];
     }
 
     public sealed class GarrPlotBuildingRecord
@@ -178,38 +175,38 @@ namespace Game.DataStorage
     public sealed class GarrPlotInstanceRecord
     {
         public uint Id;
-        public LocalizedString Name;
+        public string Name;
         public byte GarrPlotID;
     }
 
     public sealed class GarrSiteLevelRecord
     {
         public uint Id;
-        public Vector2 TownHall;
+        public Vector2 TownHallUiPos;
         public ushort MapID;
-        public ushort SiteID;
-        public ushort MovieID;
-        public ushort UpgradeResourceCost;
-        public ushort UpgradeMoneyCost;
-        public byte Level;
-        public byte UITextureKitID;
-        public byte Level2;
+        public ushort UiTextureKitID;
+        public ushort UpgradeMovieID;
+        public ushort UpgradeCost;
+        public ushort UpgradeGoldCost;
+        public byte GarrLevel;
+        public byte GarrSiteID;
+        public byte MaxBuildingLevel;
     }
 
     public sealed class GarrSiteLevelPlotInstRecord
     {
         public uint Id;
-        public Vector2 Landmark;
+        public Vector2 UiMarkerPos;
         public ushort GarrSiteLevelID;
         public byte GarrPlotInstanceID;
-        public byte Unknown;
+        public byte UiMarkerSize;
     }
 
     public sealed class GemPropertiesRecord
     {
         public uint Id;
         public SocketColor Type;
-        public ushort EnchantID;
+        public ushort EnchantId;
         public ushort MinItemLevel;
     }
 
@@ -225,7 +222,7 @@ namespace Game.DataStorage
         public uint Id;
         public uint SpellID;
         public ushort SpellIconID;
-        public byte Type;
+        public byte GlyphType;
         public byte GlyphExclusiveCategoryID;
     }
 

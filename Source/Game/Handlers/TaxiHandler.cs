@@ -189,7 +189,7 @@ namespace Game
             MountRecord mount = CliDB.MountStorage.LookupByKey(activateTaxi.FlyingMountID);
             if (mount != null)
             {
-                if (GetPlayer().HasSpell(mount.SpellId))
+                if (GetPlayer().HasSpell(mount.SourceSpellID))
                 {
                     var mountDisplays = Global.DB2Mgr.GetMountDisplays(mount.Id);
                     if (mountDisplays != null)
@@ -204,7 +204,7 @@ namespace Game
                         }).ToList();
 
                         if (!usableDisplays.Empty())
-                            preferredMountDisplay = usableDisplays.SelectRandom().DisplayID;
+                            preferredMountDisplay = usableDisplays.SelectRandom().CreatureDisplayInfoID;
                     }
                 }
             }

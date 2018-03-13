@@ -89,21 +89,21 @@ namespace Game.DataStorage
             DurabilityCostsStorage = DBReader.Read<DurabilityCostsRecord>("DurabilityCosts.db2", HotfixStatements.SEL_DURABILITY_COSTS);
             DurabilityQualityStorage = DBReader.Read<DurabilityQualityRecord>("DurabilityQuality.db2", HotfixStatements.SEL_DURABILITY_QUALITY);
             EmotesStorage = DBReader.Read<EmotesRecord>("Emotes.db2", HotfixStatements.SEL_EMOTES);
-            EmotesTextStorage = DBReader.Read<EmotesTextRecord>("EmotesText.db2", HotfixStatements.SEL_EMOTES_TEXT, HotfixStatements.SEL_EMOTES_TEXT_LOCALE);
+            EmotesTextStorage = DBReader.Read<EmotesTextRecord>("EmotesText.db2", HotfixStatements.SEL_EMOTES_TEXT);
             EmotesTextSoundStorage = DBReader.Read<EmotesTextSoundRecord>("EmotesTextSound.db2", HotfixStatements.SEL_EMOTES_TEXT_SOUND);
             FactionStorage = DBReader.Read<FactionRecord>("Faction.db2", HotfixStatements.SEL_FACTION, HotfixStatements.SEL_FACTION_LOCALE);
             FactionTemplateStorage = DBReader.Read<FactionTemplateRecord>("FactionTemplate.db2", HotfixStatements.SEL_FACTION_TEMPLATE);
-            GameObjectsStorage = DBReader.Read<GameObjectsRecord>("GameObjects.db2", HotfixStatements.SEL_GAMEOBJECTS, HotfixStatements.SEL_GAMEOBJECTS_LOCALE);
             GameObjectDisplayInfoStorage = DBReader.Read<GameObjectDisplayInfoRecord>("GameObjectDisplayInfo.db2", HotfixStatements.SEL_GAMEOBJECT_DISPLAY_INFO);
+            GameObjectsStorage = DBReader.Read<GameObjectsRecord>("GameObjects.db2", HotfixStatements.SEL_GAMEOBJECTS, HotfixStatements.SEL_GAMEOBJECTS_LOCALE);
             GarrAbilityStorage = DBReader.Read<GarrAbilityRecord>("GarrAbility.db2", HotfixStatements.SEL_GARR_ABILITY, HotfixStatements.SEL_GARR_ABILITY_LOCALE);
             GarrBuildingStorage = DBReader.Read<GarrBuildingRecord>("GarrBuilding.db2", HotfixStatements.SEL_GARR_BUILDING, HotfixStatements.SEL_GARR_BUILDING_LOCALE);
             GarrBuildingPlotInstStorage = DBReader.Read<GarrBuildingPlotInstRecord>("GarrBuildingPlotInst.db2", HotfixStatements.SEL_GARR_BUILDING_PLOT_INST);
             GarrClassSpecStorage = DBReader.Read<GarrClassSpecRecord>("GarrClassSpec.db2", HotfixStatements.SEL_GARR_CLASS_SPEC, HotfixStatements.SEL_GARR_CLASS_SPEC_LOCALE);
             GarrFollowerStorage = DBReader.Read<GarrFollowerRecord>("GarrFollower.db2", HotfixStatements.SEL_GARR_FOLLOWER, HotfixStatements.SEL_GARR_FOLLOWER_LOCALE);
             GarrFollowerXAbilityStorage = DBReader.Read<GarrFollowerXAbilityRecord>("GarrFollowerXAbility.db2", HotfixStatements.SEL_GARR_FOLLOWER_X_ABILITY);
-            GarrPlotBuildingStorage = DBReader.Read<GarrPlotBuildingRecord>("GarrPlotBuilding.db2", HotfixStatements.SEL_GARR_PLOT_BUILDING);
             GarrPlotStorage = DBReader.Read<GarrPlotRecord>("GarrPlot.db2", HotfixStatements.SEL_GARR_PLOT, HotfixStatements.SEL_GARR_PLOT_LOCALE);
-            GarrPlotInstanceStorage = DBReader.Read<GarrPlotInstanceRecord>("GarrPlotInstance.db2", HotfixStatements.SEL_GARR_PLOT_INSTANCE, HotfixStatements.SEL_GARR_PLOT_INSTANCE_LOCALE);
+            GarrPlotBuildingStorage = DBReader.Read<GarrPlotBuildingRecord>("GarrPlotBuilding.db2", HotfixStatements.SEL_GARR_PLOT_BUILDING);
+            GarrPlotInstanceStorage = DBReader.Read<GarrPlotInstanceRecord>("GarrPlotInstance.db2", HotfixStatements.SEL_GARR_PLOT_INSTANCE);
             GarrSiteLevelStorage = DBReader.Read<GarrSiteLevelRecord>("GarrSiteLevel.db2", HotfixStatements.SEL_GARR_SITE_LEVEL);
             GarrSiteLevelPlotInstStorage = DBReader.Read<GarrSiteLevelPlotInstRecord>("GarrSiteLevelPlotInst.db2", HotfixStatements.SEL_GARR_SITE_LEVEL_PLOT_INST);
             GemPropertiesStorage = DBReader.Read<GemPropertiesRecord>("GemProperties.db2", HotfixStatements.SEL_GEM_PROPERTIES);
@@ -159,7 +159,7 @@ namespace Game.DataStorage
             //KeyChainStorage = DBReader.Read<KeyChainRecord>("KeyChain.db2", HotfixStatements.SEL_KEYCHAIN);
             LFGDungeonsStorage = DBReader.Read<LFGDungeonsRecord>("LFGDungeons.db2", HotfixStatements.SEL_LFG_DUNGEONS, HotfixStatements.SEL_LFG_DUNGEONS_LOCALE);
             LightStorage = DBReader.Read<LightRecord>("Light.db2", HotfixStatements.SEL_LIGHT);
-            LiquidTypeStorage = DBReader.Read<LiquidTypeRecord>("LiquidType.db2", HotfixStatements.SEL_LIQUID_TYPE, HotfixStatements.SEL_LIQUID_TYPE_LOCALE);
+            LiquidTypeStorage = DBReader.Read<LiquidTypeRecord>("LiquidType.db2", HotfixStatements.SEL_LIQUID_TYPE);
             LockStorage = DBReader.Read<LockRecord>("Lock.db2", HotfixStatements.SEL_LOCK);
             MailTemplateStorage = DBReader.Read<MailTemplateRecord>("MailTemplate.db2", HotfixStatements.SEL_MAIL_TEMPLATE, HotfixStatements.SEL_MAIL_TEMPLATE_LOCALE);
             MapStorage = DBReader.Read<MapRecord>("Map.db2", HotfixStatements.SEL_MAP, HotfixStatements.SEL_MAP_LOCALE);
@@ -170,7 +170,7 @@ namespace Game.DataStorage
             MountTypeXCapabilityStorage = DBReader.Read<MountTypeXCapabilityRecord>("MountTypeXCapability.db2", HotfixStatements.SEL_MOUNT_TYPE_X_CAPABILITY);
             MountXDisplayStorage = DBReader.Read<MountXDisplayRecord>("MountXDisplay.db2", HotfixStatements.SEL_MOUNT_X_DISPLAY);
             MovieStorage = DBReader.Read<MovieRecord>("Movie.db2", HotfixStatements.SEL_MOVIE);
-            NameGenStorage = DBReader.Read<NameGenRecord>("NameGen.db2", HotfixStatements.SEL_NAME_GEN, HotfixStatements.SEL_NAME_GEN_LOCALE);
+            NameGenStorage = DBReader.Read<NameGenRecord>("NameGen.db2", HotfixStatements.SEL_NAME_GEN);
             NamesProfanityStorage = DBReader.Read<NamesProfanityRecord>("NamesProfanity.db2", HotfixStatements.SEL_NAMES_PROFANITY);
             NamesReservedStorage = DBReader.Read<NamesReservedRecord>("NamesReserved.db2", HotfixStatements.SEL_NAMES_RESERVED, HotfixStatements.SEL_NAMES_RESERVED_LOCALE);
             NamesReservedLocaleStorage = DBReader.Read<NamesReservedLocaleRecord>("NamesReservedLocale.db2", HotfixStatements.SEL_NAMES_RESERVED_LOCALE);
@@ -265,19 +265,18 @@ namespace Game.DataStorage
             WorldMapTransformsStorage = DBReader.Read<WorldMapTransformsRecord>("WorldMapTransforms.db2", HotfixStatements.SEL_WORLD_MAP_TRANSFORMS);
             WorldSafeLocsStorage = DBReader.Read<WorldSafeLocsRecord>("WorldSafeLocs.db2", HotfixStatements.SEL_WORLD_SAFE_LOCS, HotfixStatements.SEL_WORLD_SAFE_LOCS_LOCALE);
 
-
             foreach (var entry in TaxiPathStorage.Values)
             {
-                if (!TaxiPathSetBySource.ContainsKey(entry.From))
-                    TaxiPathSetBySource.Add(entry.From, new Dictionary<uint, TaxiPathBySourceAndDestination>());
-                TaxiPathSetBySource[entry.From][entry.To] = new TaxiPathBySourceAndDestination(entry.Id, entry.Cost);
+                if (!TaxiPathSetBySource.ContainsKey(entry.FromTaxiNode))
+                    TaxiPathSetBySource.Add(entry.FromTaxiNode, new Dictionary<uint, TaxiPathBySourceAndDestination>());
+                TaxiPathSetBySource[entry.FromTaxiNode][entry.ToTaxiNode] = new TaxiPathBySourceAndDestination(entry.Id, entry.Cost);
             }
 
             uint pathCount = TaxiPathStorage.Keys.Max() + 1;
 
             // Calculate path nodes count
             uint[] pathLength = new uint[pathCount];                           // 0 and some other indexes not used
-            foreach (TaxiPathNodeRecord entry in CliDB.TaxiPathNodeStorage.Values)
+            foreach (TaxiPathNodeRecord entry in TaxiPathNodeStorage.Values)
                 if (pathLength[entry.PathID] < entry.NodeIndex + 1)
                     pathLength[entry.PathID] = entry.NodeIndex + 1u;
 
@@ -305,7 +304,7 @@ namespace Game.DataStorage
                     AllianceTaxiNodesMask[field] |= submask;
 
                 uint nodeMap;
-                Global.DB2Mgr.DeterminaAlternateMapPosition(node.MapID, node.Pos.X, node.Pos.Y, node.Pos.Z, out nodeMap);
+                Global.DB2Mgr.DeterminaAlternateMapPosition(node.ContinentID, node.Pos.X, node.Pos.Y, node.Pos.Z, out nodeMap);
                 if (nodeMap < 2)
                     OldContinentsNodesMask[field] |= submask;
             }

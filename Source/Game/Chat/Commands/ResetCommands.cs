@@ -67,7 +67,7 @@ namespace Game.Chat
                 return false;
             }
 
-            PowerType powerType = classEntry.PowerType;
+            PowerType powerType = classEntry.DisplayPower;
 
             // reset m_form if no aura
             if (!player.HasAuraType(AuraType.ModShapeshift))

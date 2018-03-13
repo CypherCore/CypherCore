@@ -33,11 +33,11 @@ namespace Game.DataStorage
         public LocalizedString MapName;
         public string MapDescription0;                               // Horde
         public string MapDescription1;                               // Alliance
-        public string ShortDescription;
-        public string LongDescription;
+        public string PvpShortDescription;
+        public string PvpLongDescription;
         public MapFlags[] Flags = new MapFlags[2];
         public float MinimapIconScale;
-        public Vector2 CorpsePos;                                        // entrance coordinates in ghost mode  (in most cases = normal entrance)
+        public Vector2 Corpse;                                        // entrance coordinates in ghost mode  (in most cases = normal entrance)
         public ushort AreaTableID;
         public ushort LoadingScreenID;
         public short CorpseMapID;                                              // map_id of entrance map in ghost mode (continent always and in most cases = normal entrance)
@@ -46,7 +46,7 @@ namespace Game.DataStorage
         public short CosmeticParentMapID;
         public ushort WindSettingsID;
         public MapTypes InstanceType;
-        public byte unk5;
+        public byte MapType;
         public byte ExpansionID;
         public byte MaxPlayers;
         public byte TimeOffset;
@@ -76,8 +76,8 @@ namespace Game.DataStorage
             if (CorpseMapID < 0)
                 return false;
             mapid = (uint)CorpseMapID;
-            x = CorpsePos.X;
-            y = CorpsePos.Y;
+            x = Corpse.X;
+            y = Corpse.Y;
             return true;
         }
 
@@ -93,21 +93,21 @@ namespace Game.DataStorage
     public sealed class MapDifficultyRecord
     {
         public uint Id;
-        public LocalizedString Message_lang;                          // m_message_lang (text showed when transfer to map failed)
+        public LocalizedString Message;                          // m_message_lang (text showed when transfer to map failed)
         public byte DifficultyID;
-        public byte RaidDurationType;                                 // 1 means daily reset, 2 means weekly
+        public byte ResetInterval;                                 // 1 means daily reset, 2 means weekly
         public byte MaxPlayers;                                       // m_maxPlayers some heroic versions have 0 when expected same amount as in normal version
         public byte LockID;
         public byte Flags;
-        public byte ItemBonusTreeModID;
-        public uint Context;
+        public byte ItemContext;
+        public uint ItemContextPickerID;
         public uint MapID;
 
         public uint GetRaidDuration()
         {
-            if (RaidDurationType == 1)
+            if (ResetInterval == 1)
                 return 86400;
-            if (RaidDurationType == 2)
+            if (ResetInterval == 2)
                 return 604800;
             return 0;
         }
@@ -116,10 +116,11 @@ namespace Game.DataStorage
     public sealed class ModifierTreeRecord
     {
         public uint Id;
-        public uint[] Asset = new uint[2];
+        public uint Asset;
+        public uint SecondaryAsset;
         public uint Parent;
         public byte Type;
-        public byte Unk700;
+        public byte TertiaryAsset;
         public byte Operator;
         public byte Amount;
     }
@@ -128,14 +129,14 @@ namespace Game.DataStorage
     {
         public string Name;
         public string Description;
-        public string SourceDescription;
-        public uint SpellId;
-        public float CameraPivotMultiplier;
-        public ushort MountTypeId;
+        public string SourceText;
+        public uint SourceSpellID;
+        public float MountFlyRideHeight;
+        public ushort MountTypeID;
         public ushort Flags;
-        public byte Source;
+        public byte SourceTypeEnum;
         public uint Id;
-        public uint PlayerConditionId;
+        public uint PlayerConditionID;
         public byte UiModelSceneID;
 
         public bool IsSelfMount() { return (Flags & (ushort)MountFlags.SelfMount) != 0; }
@@ -143,14 +144,14 @@ namespace Game.DataStorage
 
     public sealed class MountCapabilityRecord
     {
-        public uint RequiredSpell;
-        public uint SpeedModSpell;
-        public ushort RequiredRidingSkill;
-        public ushort RequiredArea;
-        public short RequiredMap;
+        public uint ReqSpellKnownID;
+        public uint ModSpellAuraID;
+        public ushort ReqRidingSkill;
+        public ushort ReqAreaID;
+        public short ReqMapID;
         public MountCapabilityFlags Flags;
         public uint Id;
-        public byte RequiredAura;
+        public byte ReqSpellAuraID;
     }
 
     public sealed class MountTypeXCapabilityRecord
@@ -164,7 +165,7 @@ namespace Game.DataStorage
     public sealed class MountXDisplayRecord
     {
         public uint Id;
-        public uint DisplayID;
+        public uint CreatureDisplayInfoID;
         public uint PlayerConditionID;
         public uint MountID;
     }

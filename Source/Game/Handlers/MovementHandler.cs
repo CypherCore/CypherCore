@@ -152,7 +152,7 @@ namespace Game
                 VehicleSeatRecord seat = vehicle.GetSeatForPassenger(mover);
                 if (seat != null)
                 {
-                    if (seat.Flags[0].HasAnyFlag((uint)VehicleSeatFlags.AllowTurning))
+                    if (seat.Flags.HasAnyFlag(VehicleSeatFlags.AllowTurning))
                     {
                         if (movementInfo.Pos.GetOrientation() != mover.GetOrientation())
                         {
@@ -620,7 +620,7 @@ namespace Game
                 TaxiNodesRecord curDestNode = CliDB.TaxiNodesStorage.LookupByKey(curDest);
 
                 // far teleport case
-                if (curDestNode != null && curDestNode.MapID != GetPlayer().GetMapId())
+                if (curDestNode != null && curDestNode.ContinentID != GetPlayer().GetMapId())
                 {
                     if (GetPlayer().GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Flight)
                     {
@@ -631,7 +631,7 @@ namespace Game
                         TaxiPathNodeRecord node = flight.GetPath()[(int)flight.GetCurrentNode()];
                         flight.SkipCurrentNode();
 
-                        GetPlayer().TeleportTo(curDestNode.MapID, node.Loc.X, node.Loc.Y, node.Loc.Z, GetPlayer().GetOrientation());
+                        GetPlayer().TeleportTo(curDestNode.ContinentID, node.Loc.X, node.Loc.Y, node.Loc.Z, GetPlayer().GetOrientation());
                     }
                 }
 

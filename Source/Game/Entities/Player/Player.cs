@@ -191,7 +191,7 @@ namespace Game.Entities
 
             SetMap(Global.MapMgr.CreateMap(info.MapId, this));
 
-            int powertype = (int)cEntry.PowerType;
+            int powertype = (int)cEntry.DisplayPower;
 
             SetObjectScale(1.0f);
 
@@ -388,7 +388,7 @@ namespace Game.Entities
                     {
                         if (!iProto.Effects.Empty())
                         {
-                            switch (iProto.Effects[0].Category)
+                            switch (iProto.Effects[0].SpellCategoryID)
                             {
                                 case 11:                                // food
                                     count = (uint)(GetClass() == Class.Deathknight ? 10 : 4);
@@ -1425,7 +1425,7 @@ namespace Game.Entities
                         return false;
                     }
 
-                    if (!HasSpell(mount.SpellId))
+                    if (!HasSpell(mount.SourceSpellID))
                     {
                         Log.outError(LogFilter.Player, "Mount action {0} not added into button {1} for player {2} ({3}): Player does not know this mount", action, button, GetName(), GetGUID().ToString());
                         return false;
@@ -1655,7 +1655,7 @@ namespace Game.Entities
                     if (questFactionRewEntry != null)
                     {
                         uint field = (uint)Math.Abs(quest.RewardFactionValue[i]);
-                        rep = questFactionRewEntry.QuestRewFactionValue[field];
+                        rep = questFactionRewEntry.Difficulty[field];
                     }
                 }
 
@@ -2117,7 +2117,7 @@ namespace Game.Entities
         }
         public bool IsInAreaTriggerRadius(AreaTriggerRecord trigger)
         {
-            if (trigger == null || GetMapId() != trigger.MapID)
+            if (trigger == null || GetMapId() != trigger.ContinentID)
                 return false;
 
             if (trigger.Radius > 0.0f)
@@ -3752,13 +3752,13 @@ namespace Game.Entities
 
             if (!IsInCombat())
             {
-                if (powerType.RegenerationDelay != 0 && Time.GetMSTimeDiffToNow(m_combatExitTime) < powerType.RegenerationDelay)
+                if (powerType.RegenInterruptTimeMS != 0 && Time.GetMSTimeDiffToNow(m_combatExitTime) < powerType.RegenInterruptTimeMS)
                     return;
 
-                addvalue = (powerType.RegenerationPeace + GetFloatValue(UnitFields.PowerRegenFlatModifier + (int)powerIndex)) * 0.001f * m_regenTimer;
+                addvalue = (powerType.RegenPeace + GetFloatValue(UnitFields.PowerRegenFlatModifier + (int)powerIndex)) * 0.001f * m_regenTimer;
             }
             else
-                addvalue = (powerType.RegenerationCombat + GetFloatValue(UnitFields.PowerRegenInterruptedFlatModifier + (int)powerIndex)) * 0.001f * m_regenTimer;
+                addvalue = (powerType.RegenCombat + GetFloatValue(UnitFields.PowerRegenInterruptedFlatModifier + (int)powerIndex)) * 0.001f * m_regenTimer;
 
             WorldCfg[] RatesForPower =
             {
@@ -3793,7 +3793,7 @@ namespace Game.Entities
                 addvalue += GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)power) * ((power != PowerType.Energy) ? m_regenTimerCount : m_regenTimer) / (5 * Time.InMilliseconds);
             }
 
-            int minPower = powerType.RegenerationMin;
+            int minPower = powerType.MinPower;
             int maxPower = GetMaxPower(power);
 
             if (addvalue < 0.0f)
@@ -3812,17 +3812,17 @@ namespace Game.Entities
             addvalue += m_powerFraction[powerIndex];
             int integerValue = (int)Math.Abs(addvalue);
 
-            if (powerType.RegenerationCenter != 0)
+            if (powerType.CenterPower != 0)
             {
-                if (curValue > powerType.RegenerationCenter)
+                if (curValue > powerType.CenterPower)
                 {
                     addvalue = -Math.Abs(addvalue);
-                    minPower = powerType.RegenerationCenter;
+                    minPower = powerType.CenterPower;
                 }
-                else if (curValue < powerType.RegenerationCenter)
+                else if (curValue < powerType.CenterPower)
                 {
                     addvalue = Math.Abs(addvalue);
-                    maxPower = powerType.RegenerationCenter;
+                    maxPower = powerType.CenterPower;
                 }
                 else
                     return;
@@ -3982,46 +3982,46 @@ namespace Game.Entities
             switch (selection)
             {
                 case 0:
-                    if (!entry.Flags.HasAnyFlag((ushort)1))
+                    if (!entry.Flags.HasAnyFlag((short)1))
                         return false;
-                    return !entry.Flags.HasAnyFlag((ushort)0x2C);
+                    return !entry.Flags.HasAnyFlag((short)0x2C);
                 case 1:
-                    if (!entry.Flags.HasAnyFlag((ushort)1))
+                    if (!entry.Flags.HasAnyFlag((short)1))
                         return false;
-                    if (!entry.Flags.HasAnyFlag((ushort)0x94))
+                    if (!entry.Flags.HasAnyFlag((short)0x94))
                         return false;
-                    return !entry.Flags.HasAnyFlag((ushort)8);
+                    return !entry.Flags.HasAnyFlag((short)8);
                 case 2:
-                    if (!entry.Flags.HasAnyFlag((ushort)1))
+                    if (!entry.Flags.HasAnyFlag((short)1))
                         return false;
-                    if (!entry.Flags.HasAnyFlag((ushort)0x70))
+                    if (!entry.Flags.HasAnyFlag((short)0x70))
                         return false;
-                    return !entry.Flags.HasAnyFlag((ushort)8);
+                    return !entry.Flags.HasAnyFlag((short)8);
                 case 3:
-                    if (!entry.Flags.HasAnyFlag((ushort)1))
+                    if (!entry.Flags.HasAnyFlag((short)1))
                         return false;
-                    if (!entry.Flags.HasAnyFlag((ushort)0x20))
+                    if (!entry.Flags.HasAnyFlag((short)0x20))
                         return false;
-                    return !entry.Flags.HasAnyFlag((ushort)8);
+                    return !entry.Flags.HasAnyFlag((short)8);
                 case 4:
                 case 8:
-                    if (!entry.Flags.HasAnyFlag((ushort)3))
+                    if (!entry.Flags.HasAnyFlag((short)3))
                         return false;
-                    return !entry.Flags.HasAnyFlag((ushort)0x2C);
+                    return !entry.Flags.HasAnyFlag((short)0x2C);
                 case 5:
                 case 9:
-                    if (!entry.Flags.HasAnyFlag((ushort)3))
+                    if (!entry.Flags.HasAnyFlag((short)3))
                         return false;
-                    if (!entry.Flags.HasAnyFlag((ushort)0x94))
+                    if (!entry.Flags.HasAnyFlag((short)0x94))
                         return false;
-                    return !entry.Flags.HasAnyFlag((ushort)8);
+                    return !entry.Flags.HasAnyFlag((short)8);
                 case 6:
                 case 10:
-                    if (!entry.Flags.HasAnyFlag((ushort)3))
+                    if (!entry.Flags.HasAnyFlag((short)3))
                         return false;
-                    if (!entry.Flags.HasAnyFlag((ushort)0x70))
+                    if (!entry.Flags.HasAnyFlag((short)0x70))
                         return false;
-                    return !entry.Flags.HasAnyFlag((ushort)8);
+                    return !entry.Flags.HasAnyFlag((short)8);
                 case 7:
                     return true;
                 default:
@@ -5143,7 +5143,7 @@ namespace Game.Entities
         {
             ChrRacesRecord rEntry = CliDB.ChrRacesStorage.LookupByKey((byte)race);
             if (rEntry != null)
-                return rEntry.TeamID;
+                return (uint)rEntry.Alliance;
 
             Log.outError(LogFilter.Player, "Race ({0}) not found in DBC: wrong DBC files?", race);
             return TeamId.Neutral;
@@ -6731,7 +6731,7 @@ namespace Game.Entities
             // check node starting pos data set case if provided
             if (node.Pos.X != 0.0f || node.Pos.Y != 0.0f || node.Pos.Z != 0.0f)
             {
-                if (node.MapID != GetMapId() || !IsInDist(node.Pos.X, node.Pos.Y, node.Pos.Z, 2 * SharedConst.InteractionDistance))
+                if (node.ContinentID != GetMapId() || !IsInDist(node.Pos.X, node.Pos.Y, node.Pos.Z, 2 * SharedConst.InteractionDistance))
                 {
                     GetSession().SendActivateTaxiReply(ActivateTaxiReply.TooFarAway);
                     return false;
@@ -6842,7 +6842,7 @@ namespace Game.Entities
                 m_taxi.ClearTaxiDestinations();
                 ModifyMoney(-totalcost);
                 UpdateCriteria(CriteriaTypes.GoldSpentForTravelling, totalcost);
-                TeleportTo(lastPathNode.MapID, lastPathNode.Pos.X, lastPathNode.Pos.Y, lastPathNode.Pos.Z, GetOrientation());
+                TeleportTo(lastPathNode.ContinentID, lastPathNode.Pos.X, lastPathNode.Pos.Y, lastPathNode.Pos.Z, GetOrientation());
                 return false;
             }
             else
@@ -6863,8 +6863,8 @@ namespace Game.Entities
 
             List<uint> nodes = new List<uint>();
 
-            nodes.Add(entry.From);
-            nodes.Add(entry.To);
+            nodes.Add(entry.FromTaxiNode);
+            nodes.Add(entry.ToTaxiNode);
 
             return ActivateTaxiPathTo(nodes, null, spellid);
         }
@@ -6905,7 +6905,7 @@ namespace Game.Entities
                 var prevNode = nodeList[i - 1];
 
                 // skip nodes at another map
-                if (node.MapID != GetMapId())
+                if (node.ContinentID != GetMapId())
                     continue;
 
                 distPrev = distNext;
@@ -7054,7 +7054,7 @@ namespace Game.Entities
         }
         public bool IsSpellFitByClassAndRace(uint spell_id)
         {
-            ulong racemask = getRaceMask();
+            long racemask = getRaceMask();
             uint classmask = getClassMask();
 
             var bounds = Global.SpellMgr.GetSkillLineAbilityMapBounds(spell_id);

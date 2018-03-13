@@ -43,9 +43,9 @@ namespace Game
             FactionTemplateRecord uEntry = CliDB.FactionTemplateStorage.LookupByKey(factionTemplateId);
             if (uEntry == null)
                 return mNeutralAuctions;
-            else if ((uEntry.Mask & (int)FactionMasks.Alliance) != 0)
+            else if ((uEntry.FactionGroup & (int)FactionMasks.Alliance) != 0)
                 return mAllianceAuctions;
-            else if ((uEntry.Mask & (int)FactionMasks.Horde) != 0)
+            else if ((uEntry.FactionGroup & (int)FactionMasks.Horde) != 0)
                 return mHordeAuctions;
             else
                 return mNeutralAuctions;
@@ -387,9 +387,9 @@ namespace Game
                             FactionTemplateRecord u_entry = CliDB.FactionTemplateStorage.LookupByKey(factionTemplateId);
                             if (u_entry == null)
                                 houseid = 7; // goblin auction house
-                            else if ((u_entry.Mask & (int)FactionMasks.Alliance) != 0)
+                            else if ((u_entry.FactionGroup & (int)FactionMasks.Alliance) != 0)
                                 houseid = 1; // human auction house
-                            else if ((u_entry.Mask & (int)FactionMasks.Horde) != 0)
+                            else if ((u_entry.FactionGroup & (int)FactionMasks.Horde) != 0)
                                 houseid = 6; // orc auction house
                             else
                                 houseid = 7; // goblin auction house

@@ -1883,7 +1883,7 @@ namespace Game.Maps
                     uint liquidFlagType = 0;
                     LiquidTypeRecord liq = CliDB.LiquidTypeStorage.LookupByKey(liquid_type);
                     if (liq != null)
-                        liquidFlagType = liq.LiquidType;
+                        liquidFlagType = liq.SoundBank;
 
                     if (liquid_type != 0 && liquid_type < 21)
                     {
@@ -1902,7 +1902,7 @@ namespace Game.Maps
                             if (liq != null)
                             {
                                 liquid_type = overrideLiquid;
-                                liquidFlagType = liq.LiquidType;
+                                liquidFlagType = liq.SoundBank;
                             }
                         }
                     }
@@ -2869,15 +2869,15 @@ namespace Game.Maps
             return Global.DB2Mgr.GetMapDifficultyData(GetId(), GetDifficultyID());
         }
 
-        public byte GetDifficultyLootBonusTreeMod()
+        public byte GetDifficultyLootItemContext()
         {
             MapDifficultyRecord mapDifficulty = GetMapDifficulty();
-            if (mapDifficulty != null && mapDifficulty.ItemBonusTreeModID != 0)
-                return mapDifficulty.ItemBonusTreeModID;
+            if (mapDifficulty != null && mapDifficulty.ItemContext != 0)
+                return mapDifficulty.ItemContext;
 
             DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(GetDifficultyID());
             if (difficulty != null)
-                return difficulty.ItemBonusTreeModID;
+                return difficulty.ItemContext;
 
             return 0;
         }
@@ -3154,7 +3154,7 @@ namespace Game.Maps
             var mask = UnitTypeMask.Summon;
             if (properties != null)
             {
-                switch (properties.Category)
+                switch (properties.Control)
                 {
                     case SummonCategory.Pet:
                         mask = UnitTypeMask.Guardian;
@@ -3169,7 +3169,7 @@ namespace Game.Maps
                     case SummonCategory.Ally:
                     case SummonCategory.Unk:
                         {
-                            switch (properties.Type)
+                            switch (properties.Title)
                             {
                                 case SummonType.Minion:
                                 case SummonType.Guardian:

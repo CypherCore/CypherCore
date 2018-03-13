@@ -327,9 +327,9 @@ namespace Game.Chat.Commands
             }
 
             if ((node.Pos.X == 0.0f && node.Pos.Y == 0.0f && node.Pos.Z == 0.0f) ||
-                !GridDefines.IsValidMapCoord(node.MapID, node.Pos.X, node.Pos.Y, node.Pos.Z))
+                !GridDefines.IsValidMapCoord(node.ContinentID, node.Pos.X, node.Pos.Y, node.Pos.Z))
             {
-                handler.SendSysMessage(CypherStrings.InvalidTargetCoord, node.Pos.X, node.Pos.Y, node.MapID);
+                handler.SendSysMessage(CypherStrings.InvalidTargetCoord, node.Pos.X, node.Pos.Y, node.ContinentID);
                 return false;
             }
 
@@ -343,7 +343,7 @@ namespace Game.Chat.Commands
             else
                 player.SaveRecallPosition();
 
-            player.TeleportTo(node.MapID, node.Pos.X, node.Pos.Y, node.Pos.Z, player.GetOrientation());
+            player.TeleportTo(node.ContinentID, node.Pos.X, node.Pos.Y, node.Pos.Z, player.GetOrientation());
             return true;
         }
 
@@ -366,9 +366,9 @@ namespace Game.Chat.Commands
                 return false;
             }
 
-            if (!GridDefines.IsValidMapCoord(at.MapID, at.Pos.X, at.Pos.Y, at.Pos.Z))
+            if (!GridDefines.IsValidMapCoord(at.ContinentID, at.Pos.X, at.Pos.Y, at.Pos.Z))
             {
-                handler.SendSysMessage(CypherStrings.InvalidTargetCoord, at.Pos.X, at.Pos.Y, at.MapID);
+                handler.SendSysMessage(CypherStrings.InvalidTargetCoord, at.Pos.X, at.Pos.Y, at.ContinentID);
                 return false;
             }
 
@@ -382,7 +382,7 @@ namespace Game.Chat.Commands
             else
                 player.SaveRecallPosition();
 
-            player.TeleportTo(at.MapID, at.Pos.X, at.Pos.Y, at.Pos.Z, player.GetOrientation());
+            player.TeleportTo(at.ContinentID, at.Pos.X, at.Pos.Y, at.Pos.Z, player.GetOrientation());
             return true;
         }
 
@@ -420,7 +420,7 @@ namespace Game.Chat.Commands
             AreaTableRecord zoneEntry = areaEntry.ParentAreaID != 0 ? CliDB.AreaTableStorage.LookupByKey(areaEntry.ParentAreaID) : areaEntry;
             Contract.Assert(zoneEntry != null);
 
-            Map map = Global.MapMgr.CreateBaseMap(zoneEntry.MapId);
+            Map map = Global.MapMgr.CreateBaseMap(zoneEntry.ContinentID);
 
             if (map.Instanceable())
             {
@@ -430,9 +430,9 @@ namespace Game.Chat.Commands
 
             Global.DB2Mgr.Zone2MapCoordinates(areaEntry.ParentAreaID != 0 ? areaEntry.ParentAreaID : areaId, ref x, ref y);
 
-            if (!GridDefines.IsValidMapCoord(zoneEntry.MapId, x, y))
+            if (!GridDefines.IsValidMapCoord(zoneEntry.ContinentID, x, y))
             {
-                handler.SendSysMessage(CypherStrings.InvalidTargetCoord, x, y, zoneEntry.MapId);
+                handler.SendSysMessage(CypherStrings.InvalidTargetCoord, x, y, zoneEntry.ContinentID);
                 return false;
             }
 
@@ -448,7 +448,7 @@ namespace Game.Chat.Commands
 
             float z = Math.Max(map.GetHeight(x, y, MapConst.MaxHeight), map.GetWaterLevel(x, y));
 
-            player.TeleportTo(zoneEntry.MapId, x, y, z, player.GetOrientation());
+            player.TeleportTo(zoneEntry.ContinentID, x, y, z, player.GetOrientation());
             return true;
         }
 

@@ -103,13 +103,13 @@ namespace Game.Entities
                         if (itemProto.GetArtifactID() != artifactAppearanceSet.ArtifactID)
                             continue;
 
-                        PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(artifactAppearance.PlayerConditionID);
+                        PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(artifactAppearance.UnlockPlayerConditionID);
                         if (playerCondition != null)
                             if (!owner || !ConditionManager.IsPlayerMeetingCondition(owner, playerCondition))
                                 continue;
 
                         SetModifier(ItemModifier.ArtifactAppearanceId, artifactAppearance.Id);
-                        SetAppearanceModId(artifactAppearance.AppearanceModID);
+                        SetAppearanceModId(artifactAppearance.ItemAppearanceModifierID);
                         break;
                     }
                 }
@@ -546,7 +546,7 @@ namespace Game.Entities
             SetModifier(ItemModifier.ArtifactAppearanceId, artifactAppearanceId);
             ArtifactAppearanceRecord artifactAppearance = CliDB.ArtifactAppearanceStorage.LookupByKey(artifactAppearanceId);
             if (artifactAppearance != null)
-                SetAppearanceModId(artifactAppearance.AppearanceModID);
+                SetAppearanceModId(artifactAppearance.ItemAppearanceModifierID);
 
             byte totalPurchasedRanks = 0;
             foreach (ItemDynamicFieldArtifactPowers power in powers)
@@ -565,22 +565,22 @@ namespace Game.Entities
                             switch (enchant.Effect[i])
                             {
                                 case ItemEnchantmentType.ArtifactPowerBonusRankByType:
-                                    if (artifactPower.RelicType == enchant.EffectSpellID[i])
+                                    if (artifactPower.Label == enchant.EffectArg[i])
                                         power.CurrentRankWithBonus += (byte)enchant.EffectPointsMin[i];
                                     break;
                                 case ItemEnchantmentType.ArtifactPowerBonusRankByID:
-                                    if (artifactPower.Id == enchant.EffectSpellID[i])
+                                    if (artifactPower.Id == enchant.EffectArg[i])
                                         power.CurrentRankWithBonus += (byte)enchant.EffectPointsMin[i];
                                     break;
                                 case ItemEnchantmentType.ArtifactPowerBonusRankPicker:
                                     if (_bonusData.GemRelicType[e - EnchantmentSlot.Sock1] != -1)
                                     {
-                                        ArtifactPowerPickerRecord artifactPowerPicker = CliDB.ArtifactPowerPickerStorage.LookupByKey(enchant.EffectSpellID[i]);
+                                        ArtifactPowerPickerRecord artifactPowerPicker = CliDB.ArtifactPowerPickerStorage.LookupByKey(enchant.EffectArg[i]);
                                         if (artifactPowerPicker != null)
                                         {
                                             PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(artifactPowerPicker.PlayerConditionID);
                                             if (playerCondition == null || ConditionManager.IsPlayerMeetingCondition(owner, playerCondition))
-                                                if (artifactPower.RelicType == _bonusData.GemRelicType[e - EnchantmentSlot.Sock1])
+                                                if (artifactPower.Label == _bonusData.GemRelicType[e - EnchantmentSlot.Sock1])
                                                     power.CurrentRankWithBonus += (byte)enchant.EffectPointsMin[i];
                                         }
                                     }
@@ -1010,7 +1010,7 @@ namespace Game.Entities
                 GemPropertiesRecord gemProperties = CliDB.GemPropertiesStorage.LookupByKey(gemTemplate.GetGemProperties());
                 if (gemProperties != null)
                 {
-                    SpellItemEnchantmentRecord gemEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(gemProperties.EnchantID);
+                    SpellItemEnchantmentRecord gemEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(gemProperties.EnchantId);
                     if (gemEnchant != null)
                     {
                         BonusData gemBonus = new BonusData(gemTemplate);
@@ -1029,7 +1029,7 @@ namespace Game.Entities
                             ScalingStatDistributionRecord ssd = CliDB.ScalingStatDistributionStorage.LookupByKey(gemBonus.ScalingStatDistribution);
                             if (ssd != null)
                             {
-                                uint scaledIlvl = (uint)Global.DB2Mgr.GetCurveValueAt(ssd.ItemLevelCurveID, gemScalingLevel);
+                                uint scaledIlvl = (uint)Global.DB2Mgr.GetCurveValueAt(ssd.PlayerLevelToItemLevelCurveID, gemScalingLevel);
                                 if (scaledIlvl != 0)
                                     gemBaseItemLevel = scaledIlvl;
                             }
@@ -1042,7 +1042,7 @@ namespace Game.Entities
                                 {
                                     case ItemEnchantmentType.BonusListID:
                                         {
-                                            var bonusesEffect = Global.DB2Mgr.GetItemBonusList(gemEnchant.EffectSpellID[i]);
+                                            var bonusesEffect = Global.DB2Mgr.GetItemBonusList(gemEnchant.EffectArg[i]);
                                             if (bonusesEffect != null)
                                             {
                                                 foreach (ItemBonusRecord itemBonus in bonusesEffect)
@@ -1600,7 +1600,7 @@ namespace Game.Entities
             if (basePrice == null)
                 return 0;
 
-            float qualityFactor = qualityPrice.Factor;
+            float qualityFactor = qualityPrice.Data;
             float baseFactor = 0.0f;
 
             var inventoryType = proto.GetInventoryType();
@@ -1612,9 +1612,9 @@ namespace Game.Entities
                 inventoryType == InventoryType.Ranged ||
                 inventoryType == InventoryType.Thrown ||
                 inventoryType == InventoryType.RangedRight)
-                baseFactor = basePrice.WeaponFactor;
+                baseFactor = basePrice.Weapon;
             else
-                baseFactor = basePrice.ArmorFactor;
+                baseFactor = basePrice.Armor;
 
             if (inventoryType == InventoryType.Robe)
                 inventoryType = InventoryType.Chest;
@@ -1622,7 +1622,7 @@ namespace Game.Entities
             if (proto.GetClass() == ItemClass.Gem && (ItemSubClassGem)proto.GetSubClass() == ItemSubClassGem.ArtifactRelic)
             {
                 inventoryType = InventoryType.Weapon;
-                baseFactor = basePrice.WeaponFactor / 3.0f;
+                baseFactor = basePrice.Weapon / 3.0f;
             }
 
 
@@ -1653,16 +1653,16 @@ namespace Game.Entities
                         {
                             case ItemSubClassArmor.Miscellaneous:
                             case ItemSubClassArmor.Cloth:
-                                typeFactor = armorPrice.ClothFactor;
+                                typeFactor = armorPrice.ClothModifier;
                                 break;
                             case ItemSubClassArmor.Leather:
-                                typeFactor = armorPrice.LeatherFactor;
+                                typeFactor = armorPrice.LeatherModifier;
                                 break;
                             case ItemSubClassArmor.Mail:
-                                typeFactor = armorPrice.MailFactor;
+                                typeFactor = armorPrice.ChainModifier;
                                 break;
                             case ItemSubClassArmor.Plate:
-                                typeFactor = armorPrice.PlateFactor;
+                                typeFactor = armorPrice.PlateModifier;
                                 break;
                             default:
                                 typeFactor = 1.0f;
@@ -1677,7 +1677,7 @@ namespace Game.Entities
                         if (shieldPrice == null)
                             return 0;
 
-                        typeFactor = shieldPrice.Factor;
+                        typeFactor = shieldPrice.Data;
                         break;
                     }
                 case InventoryType.WeaponMainhand:
@@ -1707,11 +1707,11 @@ namespace Game.Entities
                 if (weaponPrice == null)
                     return 0;
 
-                typeFactor = weaponPrice.Factor;
+                typeFactor = weaponPrice.Data;
             }
 
             standardPrice = false;
-            return (uint)(proto.GetUnk2() * typeFactor * baseFactor * qualityFactor * proto.GetUnk1());
+            return (uint)(proto.GetPriceVariance() * typeFactor * baseFactor * qualityFactor * proto.GetPriceRandomValue());
         }
 
         public uint GetSellPrice(Player owner)
@@ -1733,7 +1733,7 @@ namespace Game.Entities
                 if (classEntry != null)
                 {
                     uint buyCount = Math.Max(proto.GetBuyCount(), 1u);
-                    return (uint)(cost * classEntry.PriceMod / buyCount);
+                    return (uint)(cost * classEntry.PriceModifier / buyCount);
                 }
 
                 return 0;
@@ -1764,7 +1764,7 @@ namespace Game.Entities
                     var enchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(GetEnchantmentId(e));
                     if (enchant != null)
                         for (uint f = 0; f < ItemConst.MaxItemEnchantmentEffects; ++f)
-                            if (enchant.Effect[f] == ItemEnchantmentType.Stat && (ItemModType)enchant.EffectSpellID[f] == statType)
+                            if (enchant.Effect[f] == ItemEnchantmentType.Stat && (ItemModType)enchant.EffectArg[f] == statType)
                                 for (int k = 0; k < 5; ++k)
                                     if (randomSuffix.Enchantment[k] == enchant.Id)
                                         return (int)((randomSuffix.AllocationPct[k] * GetItemSuffixFactor()) / 10000);
@@ -1781,7 +1781,7 @@ namespace Game.Entities
                     var enchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(GetEnchantmentId(e));
                     if (enchant != null)
                         for (uint f = 0; f < ItemConst.MaxItemEnchantmentEffects; ++f)
-                            if (enchant.Effect[f] == ItemEnchantmentType.Stat && (ItemModType)enchant.EffectSpellID[f] == statType)
+                            if (enchant.Effect[f] == ItemEnchantmentType.Stat && (ItemModType)enchant.EffectArg[f] == statType)
                                 for (int k = 0; k < ItemConst.MaxItemRandomProperties; ++k)
                                     if (randomProp.Enchantment[k] == enchant.Id)
                                         return (int)(enchant.EffectPointsMin[k]);
@@ -2003,7 +2003,7 @@ namespace Game.Entities
                     if ((Convert.ToBoolean(sandbox.Flags & 2) || sandbox.MinLevel != 0 || sandbox.MaxLevel != 0) && !Convert.ToBoolean(sandbox.Flags & 4))
                         level = Math.Min(Math.Max(level, sandbox.MinLevel), sandbox.MaxLevel);
 
-                uint heirloomIlvl = (uint)Global.DB2Mgr.GetCurveValueAt(ssd.ItemLevelCurveID, level);
+                uint heirloomIlvl = (uint)Global.DB2Mgr.GetCurveValueAt(ssd.PlayerLevelToItemLevelCurveID, level);
                 if (heirloomIlvl != 0)
                     itemLevel = heirloomIlvl;
             }
@@ -2016,7 +2016,7 @@ namespace Game.Entities
             uint itemLevelBeforeUpgrades = itemLevel;
             ItemUpgradeRecord upgrade = CliDB.ItemUpgradeStorage.LookupByKey(upgradeId);
             if (upgrade != null)
-                itemLevel += upgrade.ItemLevelBonus;
+                itemLevel += upgrade.ItemLevelIncrement;
 
             if (pvpBonus)
                 itemLevel += Global.DB2Mgr.GetPvpItemLevelBonus(itemTemplate.GetId());
@@ -2072,19 +2072,19 @@ namespace Game.Entities
             byte expansion = itemTemplate.GetRequiredExpansion();
             foreach (ItemDisenchantLootRecord disenchant in CliDB.ItemDisenchantLootStorage.Values)
             {
-                if (disenchant.ItemClass != itemClass)
+                if (disenchant.ClassID != itemClass)
                     continue;
 
-                if (disenchant.ItemSubClass >= 0 && itemSubClass != 0)
+                if (disenchant.Subclass >= 0 && itemSubClass != 0)
                     continue;
 
-                if (disenchant.ItemQuality != quality)
+                if (disenchant.Quality != quality)
                     continue;
 
-                if (disenchant.MinItemLevel > itemLevel || disenchant.MaxItemLevel < itemLevel)
+                if (disenchant.MinLevel > itemLevel || disenchant.MaxLevel < itemLevel)
                     continue;
 
-                if (disenchant.Expansion != -2 && disenchant.Expansion != expansion)
+                if (disenchant.ExpansionID != -2 && disenchant.ExpansionID != expansion)
                     continue;
 
                 return disenchant;
@@ -2102,9 +2102,9 @@ namespace Game.Entities
             ItemModifiedAppearanceRecord transmog = CliDB.ItemModifiedAppearanceStorage.LookupByKey(GetModifier(transmogModifier));
             if (transmog != null)
             {
-                ItemAppearanceRecord itemAppearance = CliDB.ItemAppearanceStorage.LookupByKey(transmog.AppearanceID);
+                ItemAppearanceRecord itemAppearance = CliDB.ItemAppearanceStorage.LookupByKey(transmog.ItemAppearanceID);
                 if (itemAppearance != null)
-                    return itemAppearance.DisplayID;
+                    return itemAppearance.ItemDisplayInfoID;
             }
 
             return Global.DB2Mgr.GetItemDisplayId(GetEntry(), GetAppearanceModId());
@@ -2147,7 +2147,7 @@ namespace Game.Entities
 
             ItemModifiedAppearanceRecord transmog = CliDB.ItemModifiedAppearanceStorage.LookupByKey(GetModifier(transmogModifier));
             if (transmog != null)
-                return transmog.AppearanceModID;
+                return transmog.ItemAppearanceModifierID;
 
             return (ushort)GetAppearanceModId();
         }
@@ -2223,7 +2223,7 @@ namespace Game.Entities
         {
             foreach (ArtifactPowerRecord artifactPower in Global.DB2Mgr.GetArtifactPowers(artifactId))
             {
-                if (artifactPower.ArtifactTier != artifactTier)
+                if (artifactPower.Tier != artifactTier)
                     continue;
 
                 if (m_artifactPowerIdToIndex.ContainsKey(artifactPower.Id))
@@ -2259,7 +2259,7 @@ namespace Game.Entities
                             {
                                 foreach (ItemDynamicFieldArtifactPowers artifactPower in GetArtifactPowers())
                                 {
-                                    if (CliDB.ArtifactPowerStorage.LookupByKey(artifactPower.ArtifactPowerId).RelicType == enchant.EffectSpellID[i])
+                                    if (CliDB.ArtifactPowerStorage.LookupByKey(artifactPower.ArtifactPowerId).Label == enchant.EffectArg[i])
                                     {
                                         ItemDynamicFieldArtifactPowers newPower = artifactPower;
                                         if (apply)
@@ -2281,7 +2281,7 @@ namespace Game.Entities
                             break;
                         case ItemEnchantmentType.ArtifactPowerBonusRankByID:
                             {
-                                ItemDynamicFieldArtifactPowers artifactPower = GetArtifactPower(enchant.EffectSpellID[i]);
+                                ItemDynamicFieldArtifactPowers artifactPower = GetArtifactPower(enchant.EffectArg[i]);
                                 if (artifactPower != null)
                                 {
                                     ItemDynamicFieldArtifactPowers newPower = artifactPower;
@@ -2304,7 +2304,7 @@ namespace Game.Entities
                         case ItemEnchantmentType.ArtifactPowerBonusRankPicker:
                             if (slot >= EnchantmentSlot.Sock1 && slot <= EnchantmentSlot.Sock3 && _bonusData.GemRelicType[slot - EnchantmentSlot.Sock1] != -1)
                             {
-                                ArtifactPowerPickerRecord artifactPowerPicker = CliDB.ArtifactPowerPickerStorage.LookupByKey(enchant.EffectSpellID[i]);
+                                ArtifactPowerPickerRecord artifactPowerPicker = CliDB.ArtifactPowerPickerStorage.LookupByKey(enchant.EffectArg[i]);
                                 if (artifactPowerPicker != null)
                                 {
                                     PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(artifactPowerPicker.PlayerConditionID);
@@ -2312,7 +2312,7 @@ namespace Game.Entities
                                     {
                                         foreach (ItemDynamicFieldArtifactPowers artifactPower in GetArtifactPowers())
                                         {
-                                            if (CliDB.ArtifactPowerStorage.LookupByKey(artifactPower.ArtifactPowerId).RelicType == _bonusData.GemRelicType[slot - EnchantmentSlot.Sock1])
+                                            if (CliDB.ArtifactPowerStorage.LookupByKey(artifactPower.ArtifactPowerId).Label == _bonusData.GemRelicType[slot - EnchantmentSlot.Sock1])
                                             {
                                                 ItemDynamicFieldArtifactPowers newPower = artifactPower;
                                                 if (apply)
@@ -2363,7 +2363,7 @@ namespace Game.Entities
                     if (sourceItem && sourceItem.GetModifier(ItemModifier.ArtifactKnowledgeLevel) != 0)
                         artifactKnowledgeLevel = sourceItem.GetModifier(ItemModifier.ArtifactKnowledgeLevel);
                     else
-                        artifactKnowledgeLevel = owner.GetCurrency(artifactCategory.ArtifactKnowledgeCurrencyID) + 1;
+                        artifactKnowledgeLevel = owner.GetCurrency(artifactCategory.XpMultCurrencyID) + 1;
 
                     GtArtifactKnowledgeMultiplierRecord artifactKnowledge = CliDB.ArtifactKnowledgeMultiplierGameTable.GetRow(artifactKnowledgeLevel);
                     if (artifactKnowledge != null)
@@ -2403,7 +2403,7 @@ namespace Game.Entities
             if (set.RequiredSkill != 0 && player.GetSkillValue((SkillType)set.RequiredSkill) < set.RequiredSkillRank)
                 return;
 
-            if (set.Flags.HasAnyFlag(ItemSetFlags.LegacyInactive))
+            if (set.SetFlags.HasAnyFlag(ItemSetFlags.LegacyInactive))
                 return;
 
             ItemSetEffect eff = null;

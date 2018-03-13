@@ -814,7 +814,7 @@ namespace Game.Groups
 
             ItemDisenchantLootRecord disenchant = r.GetItemDisenchantLoot(p);
             if (disenchant != null)
-                if (m_maxEnchantingLevel >= disenchant.RequiredDisenchantSkill)
+                if (m_maxEnchantingLevel >= disenchant.SkillRequired)
                     startLootRoll.ValidRolls |= RollMask.Disenchant;
 
             p.SendPacket(startLootRoll);
@@ -1406,7 +1406,7 @@ namespace Game.Groups
                 {
                     LFGDungeonsRecord dungeon = CliDB.LFGDungeonsStorage.LookupByKey(selectedDungeons.First());
                     if (dungeon != null)
-                        if (dungeon.Type == LfgType.RandomDungeon)
+                        if (dungeon.TypeID == LfgType.RandomDungeon)
                             randomSlot= dungeon.Id;
                 }
 

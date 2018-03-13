@@ -521,24 +521,24 @@ namespace Game.Maps
                 {
                     entry = liquidEntry.Id;
                     type &= MapConst.MapLiquidTypeDarkWater;
-                    uint liqTypeIdx = liquidEntry.LiquidType;
+                    uint liqTypeIdx = liquidEntry.SoundBank;
                     if (entry < 21)
                     {
                         var area = CliDB.AreaTableStorage.LookupByKey(getArea(x, y));
                         if (area != null)
                         {
-                            uint overrideLiquid = area.LiquidTypeID[liquidEntry.LiquidType];
+                            uint overrideLiquid = area.LiquidTypeID[liquidEntry.SoundBank];
                             if (overrideLiquid == 0 && area.ParentAreaID == 0)
                             {
                                 area = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
                                 if (area != null)
-                                    overrideLiquid = area.LiquidTypeID[liquidEntry.LiquidType];
+                                    overrideLiquid = area.LiquidTypeID[liquidEntry.SoundBank];
                             }
                             var liq = CliDB.LiquidTypeStorage.LookupByKey(overrideLiquid);
                             if (liq != null)
                             {
                                 entry = overrideLiquid;
-                                liqTypeIdx = liq.LiquidType;
+                                liqTypeIdx = liq.SoundBank;
                             }
                         }
                     }

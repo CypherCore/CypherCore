@@ -26,23 +26,23 @@ namespace Game.DataStorage
         public LocalizedString Name;
         public string Description;
         public LfgFlags Flags;
-        public float MinItemLevel;
+        public float MinGear;
         public ushort MaxLevel;
         public ushort TargetLevelMax;
         public short MapID;
         public ushort RandomID;
         public ushort ScenarioID;
-        public ushort LastBossJournalEncounterID;
+        public ushort FinalEncounterID;
         public ushort BonusReputationAmount;
         public ushort MentorItemLevel;
-        public ushort PlayerConditionID;
+        public ushort RequiredPlayerConditionId;
         public byte MinLevel;
         public byte TargetLevel;
         public byte TargetLevelMin;
         public Difficulty DifficultyID;
-        public LfgType Type;
+        public LfgType TypeID;
         public byte Faction;
-        public byte Expansion;
+        public byte ExpansionLevel;
         public byte OrderIndex;
         public byte GroupID;
         public byte CountTank;
@@ -51,30 +51,30 @@ namespace Game.DataStorage
         public byte MinCountTank;
         public byte MinCountHealer;
         public byte MinCountDamage;
-        public byte SubType;
+        public byte Subtype;
         public byte MentorCharLevel;
-        public int TextureFileDataID;
-        public int RewardIconFileDataID;
-        public int ProposalTextureFileDataID;
+        public int IconTextureFileID;
+        public int RewardsBgTextureFileID;
+        public int PopupBgTextureFileID;
 
         // Helpers
-        public uint Entry() { return (uint)(Id + ((int)Type << 24)); }
+        public uint Entry() { return (uint)(Id + ((int)TypeID << 24)); }
     }
 
     public sealed class LightRecord
     {
         public uint Id;
-        public Vector3 Pos;
-        public float FalloffStart;
-        public float FalloffEnd;
-        public ushort MapID;
+        public Vector3 GameCoords;
+        public float GameFalloffStart;
+        public float GameFalloffEnd;
+        public ushort ContinentID;
         public ushort[] LightParamsID = new ushort[8];
     }
 
     public sealed class LiquidTypeRecord
     {
         public uint Id;
-        public LocalizedString Name;
+        public string Name;
         public string[] Texture = new string[6];
         public uint SpellID;
         public float MaxDarkenDepth;
@@ -87,11 +87,11 @@ namespace Game.DataStorage
         public uint[] Int = new uint[4];
         public ushort Flags;
         public ushort LightID;
-        public byte LiquidType;
+        public byte SoundBank;
         public byte ParticleMovement;
         public byte ParticleTexSlots;
         public byte MaterialID;
-        public byte[] DepthTexCount = new byte[6];
+        public byte[] FrameCountTexture = new byte[6];
         public ushort SoundID;
     }
 

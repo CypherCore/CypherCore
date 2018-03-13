@@ -91,7 +91,7 @@ namespace Game
             if (factionEntry == null)
                 return 0;
 
-            ulong raceMask = _player.getRaceMask();
+            long raceMask = _player.getRaceMask();
             uint classMask = _player.getClassMask();
             for (var i = 0; i < 4; i++)
             {
@@ -149,7 +149,7 @@ namespace Game
             if (factionEntry == null)
                 return 0;
 
-            ulong raceMask = _player.getRaceMask();
+            long raceMask = _player.getRaceMask();
             uint classMask = _player.getClassMask();
             for (int i = 0; i < 4; i++)
             {
@@ -297,9 +297,9 @@ namespace Game
                     // check for sub-factions that receive spillover
                     var flist = Global.DB2Mgr.GetFactionTeamList(factionEntry.Id);
                     // if has no sub-factions, check for factions with same parent
-                    if (flist == null && factionEntry.ParentFactionID != 0 && factionEntry.ParentFactionModOut != 0.0f)
+                    if (flist == null && factionEntry.ParentFactionID != 0 && factionEntry.ParentFactionMod[1] != 0.0f)
                     {
-                        spillOverRepOut *= factionEntry.ParentFactionModOut;
+                        spillOverRepOut *= factionEntry.ParentFactionMod[1];
                         FactionRecord parent = CliDB.FactionStorage.LookupByKey(factionEntry.ParentFactionID);
                         if (parent != null)
                         {
@@ -323,9 +323,9 @@ namespace Game
                             FactionRecord factionEntryCalc = CliDB.FactionStorage.LookupByKey(id);
                             if (factionEntryCalc != null)
                             {
-                                if (factionEntryCalc == factionEntry || GetRank(factionEntryCalc) > (ReputationRank)factionEntryCalc.ParentFactionCapIn)
+                                if (factionEntryCalc == factionEntry || GetRank(factionEntryCalc) > (ReputationRank)factionEntryCalc.ParentFactionMod[0])
                                     continue;
-                                int spilloverRep = (int)(spillOverRepOut * factionEntryCalc.ParentFactionModIn);
+                                int spilloverRep = (int)(spillOverRepOut * factionEntryCalc.ParentFactionMod[0]);
                                 if (spilloverRep != 0 || !incremental)
                                     res = SetOneFactionReputation(factionEntryCalc, spilloverRep, incremental);
                             }

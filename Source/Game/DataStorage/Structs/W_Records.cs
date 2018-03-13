@@ -23,20 +23,20 @@ namespace Game.DataStorage
     public sealed class WMOAreaTableRecord
     {
         public string AreaName;
-        public int WMOGroupID;                                               //  used in group WMO
+        public int WmoGroupID;                                               //  used in group WMO
         public ushort AmbienceID;
         public ushort ZoneMusic;
         public ushort IntroSound;
         public ushort AreaTableID;
-        public ushort UWIntroSound;
-        public ushort UWAmbience;
-        public sbyte NameSet;                                                   //  used in adt file
+        public ushort UwIntroSound;
+        public ushort UwAmbience;
+        public sbyte NameSetID;                                                   //  used in adt file
         public byte SoundProviderPref;
         public byte SoundProviderPrefUnderwater;
         public byte Flags;
         public uint Id;
-        public byte UWZoneMusic;
-        public uint WMOID;                                                    //  used in root WMO
+        public byte UwZoneMusic;
+        public uint WmoID;                                                    //  used in root WMO
     }
 
     public sealed class WorldEffectRecord
@@ -66,9 +66,9 @@ namespace Game.DataStorage
         public byte LevelRangeMin;
         public byte LevelRangeMax;
         public byte BountySetID;
-        public byte BountyBoardLocation;
+        public byte BountyDisplayLocation;
         public uint Id;
-        public uint PlayerConditionID;
+        public uint VisibilityPlayerConditionID;
     }
 
     public sealed class WorldMapOverlayRecord

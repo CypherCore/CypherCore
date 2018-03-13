@@ -1792,10 +1792,10 @@ namespace Game
             if (condition.MovementFlags[1] != 0 && !Convert.ToBoolean((uint)player.GetUnitMovementFlags2() & condition.MovementFlags[1]))
                 return false;
 
-            if (condition.MainHandItemSubclassMask != 0)
+            if (condition.WeaponSubclassMask != 0)
             {
                 Item mainHand = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
-                if (!mainHand || !Convert.ToBoolean((1 << (int)mainHand.GetTemplate().GetSubClass()) & condition.MainHandItemSubclassMask))
+                if (!mainHand || !Convert.ToBoolean((1 << (int)mainHand.GetTemplate().GetSubClass()) & condition.WeaponSubclassMask))
                     return false;
             }
 
@@ -1927,8 +1927,8 @@ namespace Game
                 {
                     if (condition.AuraSpellID[i] != 0)
                     {
-                        if (condition.AuraCount[i] != 0)
-                            results[i] = player.GetAuraCount(condition.AuraSpellID[i]) >= condition.AuraCount[i];
+                        if (condition.AuraStacks[i] != 0)
+                            results[i] = player.GetAuraCount(condition.AuraSpellID[i]) >= condition.AuraStacks[i];
                         else
                             results[i] = player.HasAura(condition.AuraSpellID[i]);
                     }

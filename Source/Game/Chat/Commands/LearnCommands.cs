@@ -228,11 +228,11 @@ namespace Game.Chat.Commands
                     if (skillLine.ClassMask != 0 && (skillLine.ClassMask & classmask) == 0)
                         continue;
 
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(skillLine.SpellID);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(skillLine.Spell);
                     if (spellInfo == null || !Global.SpellMgr.IsSpellValid(spellInfo, player, false))
                         continue;
 
-                    player.LearnSpell(skillLine.SpellID, false);
+                    player.LearnSpell(skillLine.Spell, false);
                 }
             }
 
@@ -257,7 +257,7 @@ namespace Game.Chat.Commands
 
                     foreach (var entry in CliDB.SkillLineAbilityStorage.Values)
                     {
-                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(entry.SpellID);
+                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(entry.Spell);
                         if (spellInfo == null)
                             continue;
 

@@ -37,12 +37,12 @@ namespace Game.Garrisons
 
             foreach (GameObjectsRecord gameObject in CliDB.GameObjectsStorage.Values)
             {
-                if (gameObject.Type == GameObjectTypes.GarrisonPlot)
+                if (gameObject.TypeID == GameObjectTypes.GarrisonPlot)
                 {
-                    if (!_garrisonPlots.ContainsKey(gameObject.MapID))
-                        _garrisonPlots[gameObject.MapID] = new Dictionary<uint, GameObjectsRecord>();
+                    if (!_garrisonPlots.ContainsKey(gameObject.OwnerID))
+                        _garrisonPlots[gameObject.OwnerID] = new Dictionary<uint, GameObjectsRecord>();
 
-                    _garrisonPlots[gameObject.MapID][(uint)gameObject.Data[0]] = gameObject;
+                    _garrisonPlots[gameObject.OwnerID][(uint)gameObject.PropValue[0]] = gameObject;
                 }
             }
 
@@ -53,7 +53,7 @@ namespace Game.Garrisons
                 _garrisonBuildingPlotInstances[MathFunctions.MakePair64(buildingPlotInst.GarrBuildingID, buildingPlotInst.GarrSiteLevelPlotInstID)] = buildingPlotInst.Id;
 
             foreach (GarrBuildingRecord building in CliDB.GarrBuildingStorage.Values)
-                _garrisonBuildingsByType.Add(building.Type, building.Id);
+                _garrisonBuildingsByType.Add(building.BuildingType, building.Id);
 
             for (var i = 0; i < 2; ++i)
                 _garrisonFollowerAbilities[i] = new Dictionary<uint, GarrAbilities>();
@@ -63,7 +63,7 @@ namespace Game.Garrisons
                 GarrAbilityRecord ability = CliDB.GarrAbilityStorage.LookupByKey(followerAbility.GarrAbilityID);
                 if (ability != null)
                 {
-                    if (ability.FollowerTypeID != (uint)GarrisonFollowerType.Garrison)
+                    if (ability.GarrFollowerTypeID != (uint)GarrisonFollowerType.Garrison)
                         continue;
 
                     if (!ability.Flags.HasAnyFlag(GarrisonAbilityFlags.CannotRoll) && ability.Flags.HasAnyFlag(GarrisonAbilityFlags.Trait))
@@ -92,7 +92,7 @@ namespace Game.Garrisons
         public GarrSiteLevelRecord GetGarrSiteLevelEntry(uint garrSiteId, uint level)
         {
             foreach (GarrSiteLevelRecord siteLevel in CliDB.GarrSiteLevelStorage.Values)
-                if (siteLevel.SiteID == garrSiteId && siteLevel.Level == level)
+                if (siteLevel.GarrSiteID == garrSiteId && siteLevel.GarrLevel == level)
                     return siteLevel;
 
             return null;
@@ -136,7 +136,7 @@ namespace Game.Garrisons
             if (!list.Empty())
             {
                 foreach (uint buildingId in list)
-                    if (CliDB.GarrBuildingStorage.LookupByKey(buildingId).Level == currentLevel - 1)
+                    if (CliDB.GarrBuildingStorage.LookupByKey(buildingId).UpgradeLevel == currentLevel - 1)
                         return buildingId;
             }
 

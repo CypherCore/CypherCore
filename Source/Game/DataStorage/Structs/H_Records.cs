@@ -23,12 +23,13 @@ namespace Game.DataStorage
     {
         public string SourceText;
         public uint ItemID;
-        public uint[] OldItem = new uint[2];
-        public uint NextDifficultyItemID;
+        public uint LegacyItemID;
+        public uint LegacyUpgradedItemID;
+        public uint StaticUpgradedItemID;
         public uint[] UpgradeItemID = new uint[3];
-        public ushort[] ItemBonusListID = new ushort[3];
+        public ushort[] UpgradeItemBonusListID = new ushort[3];
         public byte Flags;
-        public byte Source;
+        public byte SourceTypeEnum;
         public uint Id;
     }
 

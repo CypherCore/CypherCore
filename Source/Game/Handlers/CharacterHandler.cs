@@ -558,7 +558,7 @@ namespace Game
 
             GenerateRandomCharacterNameResult result = new GenerateRandomCharacterNameResult();
             result.Success = true;
-            result.Name = Global.DB2Mgr.GetNameGenEntry(packet.Race, packet.Sex, GetSessionDbcLocale(), Global.WorldMgr.GetDefaultDbcLocale());
+            result.Name = Global.DB2Mgr.GetNameGenEntry(packet.Race, packet.Sex);
 
             SendPacket(result);
         }
@@ -1373,7 +1373,7 @@ namespace Game
                     if (illusion.ItemVisual == 0 || !illusion.Flags.HasAnyFlag(EnchantmentSlotMask.Collectable))
                         return false;
 
-                    PlayerConditionRecord condition = CliDB.PlayerConditionStorage.LookupByKey(illusion.PlayerConditionID);
+                    PlayerConditionRecord condition = CliDB.PlayerConditionStorage.LookupByKey(illusion.TransmogPlayerConditionID);
                     if (condition != null)
                         if (!ConditionManager.IsPlayerMeetingCondition(_player, condition))
                             return false;

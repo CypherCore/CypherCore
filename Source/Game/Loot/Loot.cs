@@ -175,11 +175,11 @@ namespace Game.Loots
             for (uint i = 0; i < stacks && lootItems.Count < limit; ++i)
             {
                 LootItem generatedLoot = new LootItem(item);
-                generatedLoot.context = _difficultyBonusTreeMod;
+                generatedLoot.context = _itemContext;
                 generatedLoot.count = (byte)Math.Min(count, proto.GetMaxStackSize());
-                if (_difficultyBonusTreeMod != 0)
+                if (_itemContext != 0)
                 {
-                    List<uint> bonusListIDs = Global.DB2Mgr.GetItemBonusTree(generatedLoot.itemid, _difficultyBonusTreeMod);
+                    List<uint> bonusListIDs = Global.DB2Mgr.GetItemBonusTree(generatedLoot.itemid, _itemContext);
                     generatedLoot.BonusListIDs.AddRange(bonusListIDs);
                 }
                 lootItems.Add(generatedLoot);
@@ -220,7 +220,7 @@ namespace Game.Loots
                 return false;
             }
 
-            _difficultyBonusTreeMod = lootOwner.GetMap().GetDifficultyLootBonusTreeMod();
+            _itemContext = lootOwner.GetMap().GetDifficultyLootItemContext();
 
             tab.Process(this, store.IsRatesAllowed(), (byte)lootMode);          // Processing is done there, callback via Loot.AddItem()
 
@@ -830,7 +830,7 @@ namespace Game.Loots
             unlootedCount = 0;
             roundRobinPlayer = ObjectGuid.Empty;
             i_LootValidatorRefManager.clearReferences();
-            _difficultyBonusTreeMod = 0;
+            _itemContext = 0;
         }
 
         public bool empty() { return items.Empty() && gold == 0; }
@@ -866,7 +866,7 @@ namespace Game.Loots
 
         // Loot GUID
         ObjectGuid _GUID;
-        byte _difficultyBonusTreeMod;
+        byte _itemContext;
     }
 
     public class AELootResult
