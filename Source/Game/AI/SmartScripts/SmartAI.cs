@@ -357,7 +357,7 @@ namespace Game.AI
 
             if (HasEscortState(SmartEscortState.Returning))
             {
-                if (mWPReached)//reached OOC WP
+                if (mOOCReached)//reached OOC WP
                 {
                     mOOCReached = false;
                     RemoveEscortState(SmartEscortState.Returning);
@@ -1079,48 +1079,6 @@ namespace Game.AI
         public SmartScript GetScript() { return mScript; }
 
         SmartScript mScript;
-    }
-
-    public class SmartSpell : SpellScript
-    {
-        public override bool Load()
-        {
-            mScript.OnInitialize(GetSpell());
-            scriptHolders = Global.SmartAIMgr.GetScript((int)GetSpellInfo().Id, SmartScriptType.Spell);
-            return true;
-        }
-
-        void HandleEffectHit(uint effIndex)
-        {
-            mScript.ProcessEventsFor(SmartEvents.SpellEffectHit, GetCaster());
-        }
-
-        void HandleEffectHitTarget(uint effIndex)
-        {
-            mScript.ProcessEventsFor(SmartEvents.SpellEffectHitTarget);
-        }
-
-        public override void Register()
-        {
-            foreach (var holder in scriptHolders)
-            {
-                switch (holder.GetEventType())
-                {
-                    case SmartEvents.SpellEffectHit:
-                        OnEffectHit.Add(new EffectHandler(HandleEffectHit, holder.Event.spell.effIndex, SpellEffectName.ScriptEffect));
-                        OnEffectHit.Add(new EffectHandler(HandleEffectHit, holder.Event.spell.effIndex, SpellEffectName.Dummy));
-                        break;
-                    case SmartEvents.SpellEffectHitTarget:
-                        OnEffectHitTarget.Add(new EffectHandler(HandleEffectHitTarget, holder.Event.spell.effIndex, SpellEffectName.ScriptEffect));
-                        OnEffectHitTarget.Add(new EffectHandler(HandleEffectHitTarget, holder.Event.spell.effIndex, SpellEffectName.Dummy));
-                        break;
-                }
-
-            }
-        }
-
-        List<SmartScriptHolder> scriptHolders = new List<SmartScriptHolder>();
-        SmartScript mScript = new SmartScript();
     }
 
     public enum SmartEscortState
