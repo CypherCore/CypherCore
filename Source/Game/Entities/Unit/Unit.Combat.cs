@@ -1353,6 +1353,10 @@ namespace Game.Entities
             if (isRewardAllowed && creature != null && creature.GetLootRecipient() != null)
                 player = creature.GetLootRecipient();
 
+            // Exploit fix
+            if (creature && creature.IsPet() && creature.GetOwnerGUID().IsPlayer())
+                isRewardAllowed = false;
+
             // Reward player, his pets, and group/raid members
             // call kill spell proc event (before real die and combat stop to triggering auras removed at death/combat stop)
             if (isRewardAllowed && player != null && player != victim)
