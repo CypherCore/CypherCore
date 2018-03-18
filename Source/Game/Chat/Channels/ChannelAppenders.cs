@@ -78,9 +78,10 @@ namespace Game.Chat
 
     class ChannelNotifyLeftBuilder : MessageBuilder
     {
-        public ChannelNotifyLeftBuilder(Channel source)
+        public ChannelNotifyLeftBuilder(Channel source, bool suspend)
         {
             _source = source;
+            _suspended = suspend;
         }
 
         public override ServerPacket Invoke(LocaleConstant locale = LocaleConstant.enUS)
@@ -89,12 +90,13 @@ namespace Game.Chat
 
             ChannelNotifyLeft notify = new ChannelNotifyLeft();
             notify.Channel = _source.GetName(localeIdx);
-            notify.ChatChannelID = 0;
-            //notify->Suspended = false;
+            notify.ChatChannelID = _source.GetChannelId();
+            notify.Suspended = _suspended;
             return notify;
         }
 
         Channel _source;
+        bool _suspended;
     }
 
     class ChannelSayBuilder : MessageBuilder

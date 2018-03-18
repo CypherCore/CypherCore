@@ -250,7 +250,7 @@ namespace Game.Chat
             }
         }
 
-        public void LeaveChannel(Player player, bool send = true)
+        public void LeaveChannel(Player player, bool send = true, bool suspend = false)
         {
             ObjectGuid guid = player.GetGUID();
             if (!IsOn(guid))
@@ -272,7 +272,7 @@ namespace Game.Chat
                 SendToOne(builder, guid);
                 */
 
-                SendToOne(new ChannelNotifyLeftBuilder(this), guid);
+                SendToOne(new ChannelNotifyLeftBuilder(this, suspend), guid);
             }
 
             PlayerInfo info = _playersStore.LookupByKey(guid);
