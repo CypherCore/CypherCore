@@ -2379,6 +2379,8 @@ namespace Game.Entities
                         spellInfo.GetEffect(0).SpellClassMask = new FlagArray128(685904631, 1151048, 0, 0);
                         break;
                     case 52212: // Death and Decay
+                    case 41485: // Deadly Poison - Black Temple
+                    case 41487:  // Envenom - Black Temple
                         spellInfo.AttributesEx6 |= SpellAttr6.CanTargetInvisible;
                         break;
                     case 37408: // Oscillation Field
