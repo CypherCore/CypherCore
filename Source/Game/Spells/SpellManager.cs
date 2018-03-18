@@ -456,7 +456,7 @@ namespace Game.Entities
                 return false;
 
             // check XP or honor target requirement
-            if (((uint)procEntry.AttributesMask & 0x0000010) != 0)
+            if (((uint)procEntry.AttributesMask & 0x0000001) != 0)
             {
                 Player actor = eventInfo.GetActor().ToPlayer();
                 if (actor)
@@ -2470,8 +2470,8 @@ namespace Game.Entities
                     case 121093:
                         spellInfo.SpellFamilyFlags[2] = 0x80000000;
                         break;
-                    // Unleashed Souls
-                    case 68979:
+                    case 50661:// Weakened Resolve                    
+                    case 68979:// Unleashed Souls
                         spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(13); // 50000yd
                         break;
                     // VIOLET HOLD SPELLS
