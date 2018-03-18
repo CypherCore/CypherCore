@@ -3132,7 +3132,7 @@ namespace Game.Spells
                         continue;
 
                     // extend explicit target mask only if valid targets for effect could not be provided by target types
-                    SpellCastTargetFlags effectTargetMask = effect.GetMissingTargetMask(srcSet, dstSet, (uint)targetMask);
+                    SpellCastTargetFlags effectTargetMask = effect.GetMissingTargetMask(srcSet, dstSet, targetMask);
 
                     // don't add explicit object/dest flags when spell has no max range
                     if (GetMaxRange(true) == 0.0f && GetMaxRange(false) == 0.0f)
@@ -4025,10 +4025,12 @@ namespace Game.Spells
             return SpellInfo.GetTargetFlagMask(TargetA.GetObjectType()) | SpellInfo.GetTargetFlagMask(TargetB.GetObjectType());
         }
 
-        public SpellCastTargetFlags GetMissingTargetMask(bool srcSet = false, bool dstSet = false, uint mask = 0)
+        public SpellCastTargetFlags GetMissingTargetMask(bool srcSet = false, bool dstSet = false, SpellCastTargetFlags mask = 0)
         {
             var effImplicitTargetMask = SpellInfo.GetTargetFlagMask(GetUsedTargetObjectType());
-            var providedTargetMask = (SpellInfo.GetTargetFlagMask(TargetA.GetObjectType()) | SpellInfo.GetTargetFlagMask(TargetB.GetObjectType()) | (SpellCastTargetFlags)mask);
+            SpellCastTargetFlags providedTargetMask = GetProvidedTargetMask() | mask;
+            if (providedTargetMask == 0) // no targets to select
+                return 0;
 
             // remove all flags covered by effect target mask
             if (Convert.ToBoolean(providedTargetMask & SpellCastTargetFlags.UnitMask))
