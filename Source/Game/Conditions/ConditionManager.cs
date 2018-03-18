@@ -1074,6 +1074,13 @@ namespace Game
                 case ConditionSourceType.GossipMenuOption:
                 case ConditionSourceType.SmartEvent:
                     break;
+                case ConditionSourceType.Graveyard:
+                    if (!CliDB.WorldSafeLocsStorage.ContainsKey(cond.SourceEntry))
+                    {
+                        Log.outError(LogFilter.Sql, $"{cond.ToString()} SourceEntry in `condition` table, does not exist in WorldSafeLocs.db2, ignoring.");
+                        return false;
+                    }
+                    break;
                 default:
                     Log.outError(LogFilter.Sql, $"{cond.ToString()} Invalid ConditionSourceType in `condition` table, ignoring.");
                     break;

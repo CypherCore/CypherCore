@@ -1743,7 +1743,7 @@ namespace Game.BattleGrounds
 
         public virtual WorldSafeLocsRecord GetClosestGraveYard(Player player)
         {
-            return Global.ObjectMgr.GetClosestGraveYard(player.GetPositionX(), player.GetPositionY(), player.GetPositionZ(), player.GetMapId(), player.GetTeam());
+            return Global.ObjectMgr.GetClosestGraveYard(player, player.GetTeam(), player);
         }
 
         public void StartCriteriaTimer(CriteriaTimedTypes type, uint entry)

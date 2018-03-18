@@ -835,8 +835,12 @@ namespace Game
                 return CliDB.WorldSafeLocsStorage.LookupByKey(4);
             else return null;
         }
-        public WorldSafeLocsRecord GetClosestGraveYard(float x, float y, float z, uint MapId, Team team)
+        public WorldSafeLocsRecord GetClosestGraveYard(WorldLocation location, Team team, WorldObject conditionObject)
         {
+            float x, y, z;
+            location.GetPosition(out x, out y, out z);
+            uint MapId = location.GetMapId();
+
             // search for zone associated closest graveyard
             uint zoneId = Global.MapMgr.GetZoneId(MapId, x, y, z);
             if (zoneId == 0)
@@ -857,6 +861,8 @@ namespace Game
             //     then check faction
             var range = GraveYardStorage.LookupByKey(zoneId);
             MapRecord mapEntry = CliDB.MapStorage.LookupByKey(MapId);
+
+            ConditionSourceInfo conditionSource = new ConditionSourceInfo(conditionObject);
 
             // not need to check validity of map object; MapId _MUST_ be valid here
             if (range.Empty() && !mapEntry.IsBattlegroundOrArena())
@@ -891,6 +897,9 @@ namespace Game
                 // skip enemy faction graveyard
                 // team == 0 case can be at call from .neargrave
                 if (data.team != 0 && team != 0 && data.team != (uint)team)
+                    continue;
+
+                if (conditionObject != null && !Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.Graveyard, data.safeLocId, conditionSource))
                     continue;
 
                 // find now nearest graveyard at other map

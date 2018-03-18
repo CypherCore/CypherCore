@@ -4657,7 +4657,7 @@ namespace Game.Entities
                 if (bf != null)
                     ClosestGrave = bf.GetClosestGraveYard(this);
                 else
-                    ClosestGrave = Global.ObjectMgr.GetClosestGraveYard(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam());
+                    ClosestGrave = Global.ObjectMgr.GetClosestGraveYard(this, GetTeam(), this);
             }
 
             // stop countdown until repop

@@ -660,7 +660,7 @@ namespace Game.Chat
                     if (bf != null)
                         nearestLoc = bf.GetClosestGraveYard(player);
                     else
-                        nearestLoc = Global.ObjectMgr.GetClosestGraveYard(player.GetPositionX(), player.GetPositionY(), player.GetPositionZ(), player.GetMapId(), player.GetTeam());
+                        nearestLoc = Global.ObjectMgr.GetClosestGraveYard(player, player.GetTeam(), player);
                 }
             }
             else

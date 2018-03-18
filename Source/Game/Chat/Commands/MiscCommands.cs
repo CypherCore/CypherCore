@@ -1123,7 +1123,7 @@ namespace Game.Chat
             Player player = handler.GetSession().GetPlayer();
             uint zone_id = player.GetZoneId();
 
-            WorldSafeLocsRecord graveyard = Global.ObjectMgr.GetClosestGraveYard(player.GetPositionX(), player.GetPositionY(), player.GetPositionZ(), player.GetMapId(), team);
+            WorldSafeLocsRecord graveyard = Global.ObjectMgr.GetClosestGraveYard(player, team, null);
             if (graveyard != null)
             {
                 uint graveyardId = graveyard.Id;
