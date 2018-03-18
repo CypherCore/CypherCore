@@ -5471,15 +5471,49 @@ namespace Game.Spells
             SpellCastResult result = SpellCastResult.SpellCastOk;
             // Get unit state
             UnitFlags unitflag = (UnitFlags)m_caster.GetUInt32Value(UnitFields.Flags);
-            if (!m_caster.GetCharmerGUID().IsEmpty())
+
+            // this check should only be done when player does cast directly
+            // (ie not when it's called from a script) Breaks for example PlayerAI when charmed
+            /*if (!m_caster.GetCharmerGUID().IsEmpty())
             {
                 Unit charmer = m_caster.GetCharmer();
                 if (charmer)
                     if (charmer.GetUnitBeingMoved() != m_caster && !CheckSpellCancelsCharm(ref param1))
                         result = SpellCastResult.Charmed;
+            }*/
+
+            if (unitflag.HasAnyFlag(UnitFlags.Stunned))
+            {
+                // spell is usable while stunned, check if caster has allowed stun auras, another stun types must prevent cast spell
+                if (usableWhileStunned)
+                {
+                    uint allowedStunMask = 1 << (int)Mechanics.Stun | 1 << (int)Mechanics.Sleep;
+
+                    bool foundNotStun = false;
+                    var stunAuras = m_caster.GetAuraEffectsByType(AuraType.ModStun);
+                    foreach (AuraEffect stunEff in stunAuras)
+                    {
+                        uint stunMechanicMask = stunEff.GetSpellInfo().GetAllEffectsMechanicMask();
+                        if (stunMechanicMask != 0 && !Convert.ToBoolean(stunMechanicMask & allowedStunMask))
+                        {
+                            foundNotStun = true;
+
+                            // fill up aura mechanic info to send client proper error message
+                            param1 = (uint)stunEff.GetSpellInfo().GetEffect(stunEff.GetEffIndex()).Mechanic;
+                            if (param1 == 0)
+                                param1 = (uint)stunEff.GetSpellInfo().Mechanic;
+
+                            break;
+                        }
+                    }
+
+                    if (foundNotStun)
+                        result = SpellCastResult.Stunned;
+                }
+                // Not usable while stunned, however spell might provide some immunity that allows to cast it anyway
+                else if (!CheckSpellCancelsStun(ref param1))
+                    result = SpellCastResult.Stunned;
             }
-            else if (unitflag.HasAnyFlag(UnitFlags.Stunned) && !usableWhileStunned && !CheckSpellCancelsStun(ref param1))
-                result = SpellCastResult.Stunned;
             else if (unitflag.HasAnyFlag(UnitFlags.Silenced) && m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence) && !CheckSpellCancelsSilence(ref param1))
                 result = SpellCastResult.Silenced;
             else if (unitflag.HasAnyFlag(UnitFlags.Pacified) && m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Pacify) && !CheckSpellCancelsPacify(ref param1))
