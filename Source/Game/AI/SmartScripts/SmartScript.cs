@@ -2027,6 +2027,18 @@ namespace Game.AI
                                 obj.ToGameObject().SetLootState((LootState)e.Action.setGoLootState.state);
                         break;
                     }
+                case SmartActions.GoSetGoState:
+                    {
+                        List<WorldObject> targets = GetTargets(e, unit);
+
+                        if (targets.Empty())
+                            break;
+
+                        foreach (var obj in targets)
+                            if (IsGameObject(obj))
+                                obj.ToGameObject().SetGoState((GameObjectState)e.Action.goState.state);
+                        break;
+                    }
                 case SmartActions.SendTargetToTarget:
                     {
                         List<WorldObject> targets = GetTargets(e, unit);

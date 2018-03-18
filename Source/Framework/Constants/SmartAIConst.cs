@@ -322,7 +322,8 @@ namespace Framework.Constants
         RandomSound = 115,    // SoundId1, SoundId2, SoundId3, SoundId4, SoundId5, onlySelf
         SetCorpseDelay = 116,    // timer
         DisableEvade = 117,    // 0/1 (1 = disabled, 0 = enabled)
-        // 118 - 127 : 3.3.5 reserved
+        GoSetGoState = 118,
+        // 119 - 127 : 3.3.5 reserved
         PlayAnimkit = 128,
         ScenePlay = 129,    // sceneId
         SceneCancel = 130,    // sceneId

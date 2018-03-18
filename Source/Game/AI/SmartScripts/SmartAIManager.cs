@@ -1220,6 +1220,7 @@ namespace Game.AI
                 case SmartActions.JumpToPos:
                 case SmartActions.SendGossipMenu:
                 case SmartActions.GoSetLootState:
+                case SmartActions.GoSetGoState:
                 case SmartActions.SendTargetToTarget:
                 case SmartActions.SetHomePos:
                 case SmartActions.SetHealthRegen:
@@ -2163,6 +2164,9 @@ namespace Game.AI
         public GoFlag goFlag;
 
         [FieldOffset(4)]
+        public GoState goState;
+
+        [FieldOffset(4)]
         public CreatureGroup creatureGroup;
 
         [FieldOffset(4)]
@@ -2592,6 +2596,10 @@ namespace Game.AI
         public struct GoFlag
         {
             public uint flag;
+        }
+        public struct GoState
+        {
+            public uint state;
         }
         public struct CreatureGroup
         {
