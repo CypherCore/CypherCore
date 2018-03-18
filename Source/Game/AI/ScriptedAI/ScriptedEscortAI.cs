@@ -530,7 +530,7 @@ namespace Game.AI
         float MaxPlayerDistance;
         uint LastWP;
 
-        WaypointPath _path;
+        WaypointPath _path = new WaypointPath();
 
         Quest m_pQuestForEscort;                     //generally passed in Start() when regular escort script.
 

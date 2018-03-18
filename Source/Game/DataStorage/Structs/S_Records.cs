@@ -478,7 +478,7 @@ namespace Game.DataStorage
         public uint Id;
         public uint SpellID;
         public ushort ScalesFromItemLevel;
-        public byte Class;
+        public sbyte Class;
         public byte MinScalingLevel;
         public uint MaxScalingLevel;
     }

@@ -326,6 +326,9 @@ namespace Game.Movement
 
         void FormationMove(Creature creature)
         {
+            if (path == null || path.nodes.Empty())
+                return;
+
             bool transportPath = creature.GetTransport() != null;
 
             WaypointNode waypoint = path.nodes.LookupByIndex((int)currentNode);

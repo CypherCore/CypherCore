@@ -1193,12 +1193,17 @@ namespace Framework.Constants
         IgnoreCasterAurastate = 0x800,   //! Will Ignore Caster Aura States Including Combat Requirements And Death State
         DisallowProcEvents = 0x1000,   //! Disallows proc events from triggered spell (default)
         IgnoreCasterMountedOrOnVehicle = 0x2000,   //! Will Ignore Mounted/On Vehicle Restrictions
+        // reuse                                        = 0x00004000,
+        // reuse                                        = 0x00008000,
         IgnoreCasterAuras = 0x10000,   //! Will Ignore Caster Aura Restrictions Or Requirements
         DontResetPeriodicTimer = 0x20000,   //! Will allow periodic aura timers to keep ticking (instead of resetting)
         DontReportCastError = 0x40000,   //! Will Return SpellFailedDontReport In Checkcast Functions
-        IgnoreEquippedItemRequirement = 0x80000,
-        IgnoreTargetCheck = 0x100000,
-        FullMask = 0xffffffff
+        FullMask = 0x0007FFFF, //! Used when doing CastSpell with triggered == true
+
+        // debug flags (used with .cast triggered commands)
+        IgnoreEquippedItemRequirement = 0x80000, //! Will ignore equipped item requirements
+        IgnoreTargetCheck = 0x100000, //! Will ignore most target checks (mostly DBC target checks)
+        FullDebugMask = 0xFFFFFFFF
     }
 
     public enum SpellSchoolMask

@@ -1694,6 +1694,7 @@ namespace Game.Spells
                 return 0;
 
             // do checks against db data
+
             if (!SpellManager.CanSpellTriggerProcOnEvent(procEntry, eventInfo))
                 return 0;
 

@@ -3792,7 +3792,6 @@ namespace Game.Spells
             int basePoints = bp.HasValue ? bp.Value : BasePoints;
             float comboDamage = PointsPerResource;
 
-            float value;
             // base amount modification based on spell lvl vs caster lvl
             if (Scaling.Coefficient != 0.0f)
             {
@@ -3811,7 +3810,7 @@ namespace Game.Spells
                 if (_spellInfo.Scaling.MaxScalingLevel != 0 && _spellInfo.Scaling.MaxScalingLevel < level)
                     level = _spellInfo.Scaling.MaxScalingLevel;
 
-                value = 0.0f;
+                float tempValue = 0.0f;
                 if (level > 0)
                 {
                     if (_spellInfo.Scaling._Class == 0)
@@ -3820,40 +3819,40 @@ namespace Game.Spells
                     if (_spellInfo.Scaling.ScalesFromItemLevel == 0)
                     {
                         if (!_spellInfo.HasAttribute(SpellAttr11.ScalesWithItemLevel))
-                            value = CliDB.GetSpellScalingColumnForClass(CliDB.SpellScalingGameTable.GetRow(level), _spellInfo.Scaling._Class);
+                            tempValue = CliDB.GetSpellScalingColumnForClass(CliDB.SpellScalingGameTable.GetRow(level), _spellInfo.Scaling._Class);
                         else
                         {
                             uint effectiveItemLevel = (uint)(itemLevel != -1 ? itemLevel : 1);
-                            value = ItemEnchantment.GetRandomPropertyPoints(effectiveItemLevel, ItemQuality.Rare, InventoryType.Chest, 0);
+                            tempValue = ItemEnchantment.GetRandomPropertyPoints(effectiveItemLevel, ItemQuality.Rare, InventoryType.Chest, 0);
                             if (IsAura() && ApplyAuraName == AuraType.ModRating)
                             {
                                 GtCombatRatingsMultByILvlRecord ratingMult = CliDB.CombatRatingsMultByILvlGameTable.GetRow(effectiveItemLevel);
                                 if (ratingMult != null)
-                                    value *= ratingMult.ArmorMultiplier;
+                                    tempValue *= ratingMult.ArmorMultiplier;
                             }
                         }
                     }
                     else
-                        value = ItemEnchantment.GetRandomPropertyPoints(_spellInfo.Scaling.ScalesFromItemLevel, ItemQuality.Rare, InventoryType.Chest, 0);
+                        tempValue = ItemEnchantment.GetRandomPropertyPoints(_spellInfo.Scaling.ScalesFromItemLevel, ItemQuality.Rare, InventoryType.Chest, 0);
                 }
 
-                value *= Scaling.Coefficient;
-                if (value != 0.0f && value < 1.0f)
-                    value = 1.0f;
+                tempValue *= Scaling.Coefficient;
+                if (tempValue != 0.0f && tempValue < 1.0f)
+                    tempValue = 1.0f;
 
                 if (Scaling.Variance != 0f)
                 {
                     float delta = Math.Abs(Scaling.Variance * 0.5f);
                     float valueVariance = RandomHelper.FRand(-delta, delta);
-                    value += value * valueVariance;
+                    tempValue += tempValue * valueVariance;
 
                     variance = valueVariance;
                 }
 
-                basePoints = (int)Math.Round(value);
+                basePoints = (int)Math.Round(tempValue);
 
                 if (Scaling.ResourceCoefficient != 0f)
-                    comboDamage = Scaling.ResourceCoefficient * value;
+                    comboDamage = Scaling.ResourceCoefficient * tempValue;
             }
             else
             {
@@ -3889,7 +3888,7 @@ namespace Game.Spells
                 }
             }
 
-            value = basePoints;
+            float value = (float)basePoints;
 
             // random damage
             if (caster != null)
@@ -3954,6 +3953,7 @@ namespace Game.Spells
                     }
                 }
             }
+
             return (int)value;
         }
 

@@ -513,7 +513,6 @@ namespace Game.Spells
 
             // normal case
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(triggered_spell_id);
-
             if (spellInfo == null)
             {
                 Log.outError(LogFilter.Spells, "Spell.EffectForceCast of spell {0}: triggering unknown spell id {1}", m_spellInfo.Id, triggered_spell_id);

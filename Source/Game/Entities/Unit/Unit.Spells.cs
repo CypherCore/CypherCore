@@ -2872,7 +2872,7 @@ namespace Game.Entities
             return null;
         }
 
-        public bool HandleSpellClick(Unit clicker, sbyte seatId = 0)
+        public bool HandleSpellClick(Unit clicker, sbyte seatId = -1)
         {
             bool result = false;
 
