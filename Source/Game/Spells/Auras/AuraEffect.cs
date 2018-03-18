@@ -5589,6 +5589,10 @@ namespace Game.Spells
 
             target.getHostileRefManager().threatAssist(caster, healInfo.GetEffectiveHeal() * 0.5f, GetSpellInfo());
 
+            // %-based heal - does not proc auras
+            if (GetAuraType() == AuraType.ObsModHealth)
+                return;
+
             ProcFlags procAttacker = ProcFlags.DonePeriodic;
             ProcFlags procVictim = ProcFlags.TakenPeriodic;
             ProcFlagsHit hitMask = crit ? ProcFlagsHit.Critical : ProcFlagsHit.Normal;
