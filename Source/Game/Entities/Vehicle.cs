@@ -151,6 +151,7 @@ namespace Game.Entities
                 _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.SchoolImmunity, true);
                 _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.ModUnattackable, true);
                 _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.SchoolAbsorb, true);
+                _me.ApplySpellImmune(0, SpellImmunity.Mechanic, (uint)Mechanics.Banish, true);
                 _me.ApplySpellImmune(0, SpellImmunity.Mechanic, (uint)Mechanics.Shield, true);
                 _me.ApplySpellImmune(0, SpellImmunity.Mechanic, (uint)Mechanics.ImmuneShield, true);
 
