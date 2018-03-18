@@ -4029,8 +4029,6 @@ namespace Game.Spells
         {
             var effImplicitTargetMask = SpellInfo.GetTargetFlagMask(GetUsedTargetObjectType());
             SpellCastTargetFlags providedTargetMask = GetProvidedTargetMask() | mask;
-            if (providedTargetMask == 0) // no targets to select
-                return 0;
 
             // remove all flags covered by effect target mask
             if (Convert.ToBoolean(providedTargetMask & SpellCastTargetFlags.UnitMask))
