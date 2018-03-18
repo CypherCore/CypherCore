@@ -83,6 +83,10 @@ namespace WorldServer
                 commandThread.Start();
             }
 
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+
             WorldUpdateLoop();
 
             try
@@ -157,7 +161,6 @@ namespace WorldServer
         static void WorldUpdateLoop()
         {
             uint realPrevTime = Time.GetMSTime();
-            uint prevSleepTime = 0;      // used for balanced full tick time length near WORLD_SLEEP_CONST
 
             while (!Global.WorldMgr.IsStopped)
             {
@@ -167,13 +170,11 @@ namespace WorldServer
                 Global.WorldMgr.Update(diff);
                 realPrevTime = realCurrTime;
 
-                if (diff <= (WorldSleep + prevSleepTime))
-                {
-                    prevSleepTime = WorldSleep + prevSleepTime - diff;
-                    Thread.Sleep((int)prevSleepTime);
-                }
-                else
-                    prevSleepTime = 0;
+                uint executionTimeDiff = Time.GetMSTimeDiffToNow(realCurrTime);
+
+                // we know exactly how long it took to update the world, if the update took less than WORLD_SLEEP_CONST, sleep for WORLD_SLEEP_CONST - world update time
+                if (executionTimeDiff < WorldSleep)               
+                    Thread.Sleep((int)(WorldSleep - executionTimeDiff));                
             }
         }
 
