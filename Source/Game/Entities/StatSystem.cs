@@ -1479,14 +1479,7 @@ namespace Game.Entities
 
             expertise += GetTotalAuraModifier(AuraType.ModExpertise, aurEff =>
             {
-                // item neutral spell
-                if ((int)aurEff.GetSpellInfo().EquippedItemClass == -1)
-                    return true;
-                // item dependent spell
-                else if (weapon != null && weapon.IsFitToSpellRequirements(aurEff.GetSpellInfo()))
-                    return true;
-
-                return false;
+                return aurEff.GetSpellInfo().IsItemFitToSpellRequirements(weapon);
             });
 
             if (expertise < 0)

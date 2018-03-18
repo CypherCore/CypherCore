@@ -634,6 +634,45 @@ namespace Game.Spells
             return !(HasAttribute(SpellAttr1.NoThreat) || HasAttribute(SpellAttr3.NoInitialAggro));
         }
 
+        public WeaponAttackType GetAttackType()
+        {
+            WeaponAttackType result;
+            switch (DmgClass)
+            {
+                case SpellDmgClass.Melee:
+                    if (HasAttribute(SpellAttr3.ReqOffhand))
+                        result = WeaponAttackType.OffAttack;
+                    else
+                        result = WeaponAttackType.BaseAttack;
+                    break;
+                case SpellDmgClass.Ranged:
+                    result = IsRangedWeaponSpell() ? WeaponAttackType.RangedAttack : WeaponAttackType.BaseAttack;
+                    break;
+                default:
+                    // Wands
+                    if (IsAutoRepeatRangedSpell())
+                        result = WeaponAttackType.RangedAttack;
+                    else
+                        result = WeaponAttackType.BaseAttack;
+                    break;
+            }
+
+            return result;
+        }
+
+        public bool IsItemFitToSpellRequirements(Item item)
+        {
+            // item neutral spell
+            if (EquippedItemClass == ItemClass.None)
+                return true;
+
+            // item dependent spell
+            if (item && item.IsFitToSpellRequirements(this))
+                return true;
+
+            return false;
+        }
+
         public bool IsAffected(SpellFamilyNames familyName, FlagArray128 familyFlags)
         {
             if (familyName == 0)

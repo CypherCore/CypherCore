@@ -55,25 +55,7 @@ namespace Game.Spells
             m_needComboPoints = m_spellInfo.NeedsComboPoints();
 
             // Get data for type of attack
-            switch (m_spellInfo.DmgClass)
-            {
-                case SpellDmgClass.Melee:
-                    if (m_spellInfo.HasAttribute(SpellAttr3.ReqOffhand))
-                        m_attackType = WeaponAttackType.OffAttack;
-                    else
-                        m_attackType = WeaponAttackType.BaseAttack;
-                    break;
-                case SpellDmgClass.Ranged:
-                    m_attackType = m_spellInfo.IsRangedWeaponSpell() ? WeaponAttackType.RangedAttack : WeaponAttackType.BaseAttack;
-                    break;
-                default:
-                    // Wands
-                    if (m_spellInfo.HasAttribute(SpellAttr2.AutorepeatFlag))
-                        m_attackType = WeaponAttackType.RangedAttack;
-                    else
-                        m_attackType = WeaponAttackType.BaseAttack;
-                    break;
-            }
+            m_attackType = info.GetAttackType();
 
             m_spellSchoolMask = m_spellInfo.GetSchoolMask();           // Can be override for some spell (wand shoot for example)
 
@@ -6252,32 +6234,35 @@ namespace Game.Spells
             // check weapon presence in slots for main/offhand weapons
             if (!Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnoreEquippedItemRequirement) && m_spellInfo.EquippedItemClass >= 0)
             {
-                // main hand weapon required
-                if (m_spellInfo.HasAttribute(SpellAttr3.MainHand))
+                var weaponCheck = new Func<WeaponAttackType, SpellCastResult>(attackType =>
                 {
-                    Item item = m_caster.ToPlayer().GetWeaponForAttack(WeaponAttackType.BaseAttack);
+                    Item item = m_caster.ToPlayer().GetWeaponForAttack(attackType);
 
                     // skip spell if no weapon in slot or broken
-                    if (item == null || item.IsBroken())
+                    if (!item || item.IsBroken())
                         return SpellCastResult.EquippedItemClass;
 
                     // skip spell if weapon not fit to triggered spell
                     if (!item.IsFitToSpellRequirements(m_spellInfo))
                         return SpellCastResult.EquippedItemClass;
+
+                    return SpellCastResult.SpellCastOk;
+                });
+
+                // main hand weapon required
+                if (m_spellInfo.HasAttribute(SpellAttr3.MainHand))
+                {
+                    SpellCastResult mainHandResult = weaponCheck(WeaponAttackType.BaseAttack);
+                    if (mainHandResult != SpellCastResult.SpellCastOk)
+                        return mainHandResult;
                 }
 
                 // offhand hand weapon required
                 if (m_spellInfo.HasAttribute(SpellAttr3.ReqOffhand))
                 {
-                    Item item = m_caster.ToPlayer().GetWeaponForAttack(WeaponAttackType.OffAttack);
-
-                    // skip spell if no weapon in slot or broken
-                    if (item == null || item.IsBroken())
-                        return SpellCastResult.EquippedItemClass;
-
-                    // skip spell if weapon not fit to triggered spell
-                    if (!item.IsFitToSpellRequirements(m_spellInfo))
-                        return SpellCastResult.EquippedItemClass;
+                    SpellCastResult offHandResult = weaponCheck(WeaponAttackType.OffAttack);
+                    if (offHandResult != SpellCastResult.SpellCastOk)
+                        return offHandResult;
                 }
             }
 
