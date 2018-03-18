@@ -1149,8 +1149,8 @@ namespace Game.Entities
                     SetTarget(GetVictim().GetGUID());
 
                 // don't remove UNIT_FLAG_STUNNED for pet when owner is mounted (disabled pet's interface)
-                Unit owner = GetOwner();
-                if (owner == null || (owner.IsTypeId(TypeId.Player) && !owner.ToPlayer().IsMounted()))
+                Unit owner = GetCharmerOrOwner();
+                if (owner == null || !owner.IsTypeId(TypeId.Player) || !owner.ToPlayer().IsMounted())
                     RemoveFlag(UnitFields.Flags, UnitFlags.Stunned);
 
                 if (!HasUnitState(UnitState.Root))         // prevent moving if it also has root effect
