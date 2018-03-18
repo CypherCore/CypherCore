@@ -2434,9 +2434,6 @@ namespace Game.Entities
             RemoveItem(dstbag, dstslot, false);
             RemoveItem(srcbag, srcslot, false);
 
-            if (srcbag == InventorySlots.Bag0 && srcslot < InventorySlots.BagEnd)
-                ApplyItemDependentAuras(pSrcItem, false);
-
             // add to dest
             if (IsInventoryPos(dst))
                 StoreItem(_sDest, pSrcItem, true);
@@ -2449,9 +2446,6 @@ namespace Game.Entities
                     EquipChildItem(srcbag, srcslot, pSrcItem);
             }
 
-            if (dstbag == InventorySlots.Bag0 && dstslot < InventorySlots.BagEnd)
-                ApplyItemDependentAuras(pDstItem, false);
-
             // add to src
             if (IsInventoryPos(src))
                 StoreItem(sDest2, pDstItem, true);
@@ -2459,7 +2453,12 @@ namespace Game.Entities
                 BankItem(sDest2, pDstItem, true);
             else if (IsEquipmentPos(src))
                 EquipItem(eDest2, pDstItem, true);
-            
+
+            // if inventory item was moved, check if we can remove dependent auras, because they were not removed in Player::RemoveItem (update was set to false)
+            // do this after swaps are done, we pass nullptr because both weapons could be swapped and none of them should be ignored
+            if ((srcbag == InventorySlots.Bag0 && srcslot < InventorySlots.BagEnd) || (dstbag == InventorySlots.Bag0 && dstslot < InventorySlots.BagEnd))
+                ApplyItemDependentAuras(null, false);
+
             // if player is moving bags and is looting an item inside this bag
             // release the loot
             if (!GetLootGUID().IsEmpty())
