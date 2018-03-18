@@ -62,7 +62,7 @@ namespace Game.Loots
                 return false;
 
             // not show loot for players without profession or those who already know the recipe
-            if (pProto.GetFlags().HasAnyFlag(ItemFlags.HideUnusableRecipe) && (!player.HasSkill((SkillType)pProto.GetRequiredSkill()) || player.HasSpell(pProto.Effects[1].SpellID)))
+            if (pProto.GetFlags().HasAnyFlag(ItemFlags.HideUnusableRecipe) && (!player.HasSkill((SkillType)pProto.GetRequiredSkill()) || player.HasSpell((uint)pProto.Effects[1].SpellID)))
                 return false;
 
             // not show loot for not own team

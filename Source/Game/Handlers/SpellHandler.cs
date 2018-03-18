@@ -92,7 +92,7 @@ namespace Game
             {
                 for (int i = 0; i < proto.Effects.Count; ++i)
                 {
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(proto.Effects[i].SpellID);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)proto.Effects[i].SpellID);
                     if (spellInfo != null)
                     {
                         if (!spellInfo.CanBeUsedInCombat())

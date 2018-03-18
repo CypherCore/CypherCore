@@ -1156,13 +1156,8 @@ namespace Game.Entities
                 AddEnchantmentDurations(pItem);
                 AddItemDurations(pItem);
 
-
-                ItemTemplate proto = pItem.GetTemplate();
-                for (byte i = 0; i < proto.Effects.Count; ++i)
-                    if (proto.Effects[i].TriggerType == ItemSpelltriggerType.OnObtain && proto.Effects[i].SpellID > 0) // On obtain trigger
-                        if (bag == InventorySlots.Bag0 || (bag >= InventorySlots.BagStart && bag < InventorySlots.BagEnd))
-                            if (!HasAura(proto.Effects[i].SpellID))
-                                CastSpell(this, proto.Effects[i].SpellID, true, pItem);
+                if (bag == InventorySlots.Bag0 || (bag >= InventorySlots.BagStart && bag < InventorySlots.BagEnd))
+                    ApplyItemObtainSpells(pItem, true);
 
                 return pItem;
             }
@@ -1200,12 +1195,8 @@ namespace Game.Entities
 
                 pItem2.SetState(ItemUpdateState.Changed, this);
 
-                ItemTemplate proto = pItem2.GetTemplate();
-                for (byte i = 0; i < proto.Effects.Count; ++i)
-                    if (proto.Effects[i].TriggerType == ItemSpelltriggerType.OnObtain && proto.Effects[i].SpellID > 0) // On obtain trigger
-                        if (bag == InventorySlots.Bag0 || (bag >= InventorySlots.BagStart && bag < InventorySlots.BagEnd))
-                            if (!HasAura(proto.Effects[i].SpellID))
-                                CastSpell(this, proto.Effects[i].SpellID, true, pItem2);
+                if (bag == InventorySlots.Bag0 || (bag >= InventorySlots.BagStart && bag < InventorySlots.BagEnd))
+                    ApplyItemObtainSpells(pItem2, true);
 
                 return pItem2;
             }
@@ -1504,7 +1495,7 @@ namespace Game.Entities
             if (proto.Effects.Count >= 2)
             {
                 if (proto.Effects[0].SpellID == 483 || proto.Effects[0].SpellID == 55884)
-                    if (HasSpell(proto.Effects[1].SpellID))
+                    if (HasSpell((uint)proto.Effects[1].SpellID))
                         return InventoryResult.InternalBagError;
             }
 
@@ -4267,7 +4258,7 @@ namespace Game.Entities
                     continue;
 
                 // check if it is valid spell
-                SpellInfo spellproto = Global.SpellMgr.GetSpellInfo(spellData.SpellID);
+                SpellInfo spellproto = Global.SpellMgr.GetSpellInfo((uint)spellData.SpellID);
                 if (spellproto == null)
                     continue;
 
@@ -4337,11 +4328,11 @@ namespace Game.Entities
                 // apply proc cooldown to equip auras if we have any
                 if (effectData.TriggerType == ItemSpelltriggerType.OnEquip)
                 {
-                    SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry(effectData.SpellID);
+                    SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry((uint)effectData.SpellID);
                     if (procEntry == null)
                         continue;
 
-                    Aura itemAura = GetAura(effectData.SpellID, GetGUID(), pItem.GetGUID());
+                    Aura itemAura = GetAura((uint)effectData.SpellID, GetGUID(), pItem.GetGUID());
                     if (itemAura != null)
                         itemAura.AddProcCooldown(now + TimeSpan.FromMilliseconds(procEntry.Cooldown));
                     continue;
@@ -4356,14 +4347,14 @@ namespace Game.Entities
                     continue;
 
                 // Don't replace longer cooldowns by equip cooldown if we have any.
-                if (GetSpellHistory().GetRemainingCooldown(Global.SpellMgr.GetSpellInfo(effectData.SpellID)) > 30 * Time.InMilliseconds)
+                if (GetSpellHistory().GetRemainingCooldown(Global.SpellMgr.GetSpellInfo((uint)effectData.SpellID)) > 30 * Time.InMilliseconds)
                     continue;
 
-                GetSpellHistory().AddCooldown(effectData.SpellID, pItem.GetEntry(), TimeSpan.FromSeconds(30));
+                GetSpellHistory().AddCooldown((uint)effectData.SpellID, pItem.GetEntry(), TimeSpan.FromSeconds(30));
 
                 ItemCooldown data = new ItemCooldown();
                 data.ItemGuid = pItem.GetGUID();
-                data.SpellID = effectData.SpellID;
+                data.SpellID = (uint)effectData.SpellID;
                 data.Cooldown = 30 * Time.InMilliseconds; //Always 30secs?
                 SendPacket(data);
             }
@@ -5648,10 +5639,7 @@ namespace Game.Entities
                 pItem.ClearSoulboundTradeable(this);
                 RemoveTradeableItem(pItem);
 
-                ItemTemplate proto = pItem.GetTemplate();
-                for (byte i = 0; i < proto.Effects.Count; ++i)
-                    if (proto.Effects[i].TriggerType == ItemSpelltriggerType.OnObtain && proto.Effects[i].SpellID > 0) // On obtain trigger
-                        RemoveAurasDueToSpell(proto.Effects[i].SpellID);
+                ApplyItemObtainSpells(pItem, false);
 
                 ItemRemovedQuestCheck(pItem.GetEntry(), pItem.GetCount());
                 Bag pBag;

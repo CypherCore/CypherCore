@@ -1066,7 +1066,7 @@ namespace Game.Entities
                     {
                         if (proto.Effects[idx].SpellID != 0 && proto.Effects[idx].TriggerType == ItemSpelltriggerType.OnUse)
                         {
-                            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(proto.Effects[idx].SpellID);
+                            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)proto.Effects[idx].SpellID);
                             if (spellInfo != null)
                                 GetSpellHistory().SendCooldownEvent(spellInfo, m_lastPotionId);
                         }
@@ -1471,8 +1471,8 @@ namespace Game.Entities
             {
                 if (proto.Effects[0].SpellID == 483 || proto.Effects[0].SpellID == 55884)
                 {
-                    uint learn_spell_id = proto.Effects[0].SpellID;
-                    uint learning_spell_id = proto.Effects[1].SpellID;
+                    uint learn_spell_id = (uint)proto.Effects[0].SpellID;
+                    uint learning_spell_id = (uint)proto.Effects[1].SpellID;
 
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(learn_spell_id);
                     if (spellInfo == null)
@@ -1510,7 +1510,7 @@ namespace Game.Entities
                 if (spellData.TriggerType != ItemSpelltriggerType.OnUse)
                     continue;
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellData.SpellID);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)spellData.SpellID);
                 if (spellInfo == null)
                 {
                     Log.outError(LogFilter.Player, "Player.CastItemUseSpell: Item (Entry: {0}) in have wrong spell id {1}, ignoring", proto.GetId(), spellData.SpellID);
@@ -1708,6 +1708,52 @@ namespace Game.Entities
         }
 
         public Dictionary<uint, PlayerSpell> GetSpellMap() { return m_spells; }
+
+        void CastAllObtainSpells()
+        {
+            for (byte slot = InventorySlots.ItemStart; slot < InventorySlots.ItemEnd; ++slot)
+            {
+                Item item = GetItemByPos(InventorySlots.Bag0, slot);
+                if (item)
+                    ApplyItemObtainSpells(item, true);
+            }
+
+            for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; ++i)
+            {
+                Bag bag = GetBagByPos(i);
+                if (!bag)
+                    continue;
+
+                for (byte slot = 0; slot < bag.GetBagSize(); ++slot)
+                {
+                    Item item = bag.GetItemByPos(slot);
+                    if (item)
+                        ApplyItemObtainSpells(item, true);
+                }
+            }
+        }
+
+        void ApplyItemObtainSpells(Item item, bool apply)
+        {
+            ItemTemplate itemTemplate = item.GetTemplate();
+            for (byte i = 0; i < itemTemplate.Effects.Count; ++i)
+            {
+                if (itemTemplate.Effects[i].TriggerType != ItemSpelltriggerType.OnObtain) // On obtain trigger
+                    continue;
+
+                int spellId = itemTemplate.Effects[i].SpellID;
+                if (spellId <= 0)
+                    continue;
+
+                if (apply)
+                {
+                    if (!HasAura((uint)spellId))
+                        CastSpell(this, (uint)spellId, true, item);
+                }
+                else
+                    RemoveAurasDueToSpell((uint)spellId);
+            }
+        }
 
         public void ApplyItemDependentAuras(Item item, bool apply)
         {
@@ -3055,7 +3101,7 @@ namespace Game.Entities
                     if (spellData.TriggerType != ItemSpelltriggerType.ChanceOnHit)
                         continue;
 
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellData.SpellID);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)spellData.SpellID);
                     if (spellInfo == null)
                     {
                         Log.outError(LogFilter.Player, "WORLD: unknown Item spellid {0}", spellData.SpellID);

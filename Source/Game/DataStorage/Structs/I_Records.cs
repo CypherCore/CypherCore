@@ -177,7 +177,7 @@ namespace Game.DataStorage
     public sealed class ItemEffectRecord
     {
         public uint Id;
-        public uint SpellID;
+        public int SpellID;
         public int CoolDownMSec;
         public int CategoryCoolDownMSec;
         public short Charges;

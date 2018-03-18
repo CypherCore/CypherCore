@@ -77,7 +77,7 @@ namespace Game.Entities
                 if (i < 5)
                     SetSpellCharges(i, itemProto.Effects[i].Charges);
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(itemProto.Effects[i].SpellID);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)itemProto.Effects[i].SpellID);
                 if (spellInfo != null)
                 {
                     if (spellInfo.HasEffect(SpellEffectName.GiveArtifactPower))

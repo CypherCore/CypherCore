@@ -1057,7 +1057,7 @@ namespace Game
             if (item.GetTemplate().Effects.Count < 2)
                 return;
 
-            uint spellToLearn = item.GetTemplate().Effects[1].SpellID;
+            uint spellToLearn = (uint)item.GetTemplate().Effects[1].SpellID;
             foreach (BattlePetSpeciesRecord entry in CliDB.BattlePetSpeciesStorage.Values)
             {
                 if (entry.SummonSpellID == spellToLearn)
