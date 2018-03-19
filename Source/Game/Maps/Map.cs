@@ -3096,7 +3096,7 @@ namespace Game.Maps
 
         public Creature GetCreature(ObjectGuid guid)
         {
-            if (!guid.IsCreature())
+            if (!guid.IsCreatureOrVehicle())
                 return null;
 
             return (Creature)_objectsStore.LookupByKey(guid);

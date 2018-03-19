@@ -2734,7 +2734,7 @@ namespace Game.Entities
         public ObjectGuid lootingGroupLowGUID;                         // used to find group which is looting
         long m_packedRotation;
         Quaternion m_worldRotation;
-        Position m_stationaryPosition;
+        public Position m_stationaryPosition { get; set; }
 
         GameObjectAI m_AI;
         ushort _animKitId;

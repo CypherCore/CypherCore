@@ -519,8 +519,10 @@ namespace Game.Entities
         public void UpdatePosition(float x, float y, float z, float o)
         {
             bool newActive = GetMap().IsGridLoaded(x, y);
+            Cell oldCell = new Cell(GetPositionX(), GetPositionY());
 
             Relocate(x, y, z, o);
+            m_stationaryPosition.SetOrientation(o);
             UpdateModelPosition();
 
             UpdatePassengerPositions(_passengers);
@@ -533,7 +535,7 @@ namespace Game.Entities
              */
             if (_staticPassengers.Empty() && newActive) // 1. and 2.
                 LoadStaticPassengers();
-            else if (!_staticPassengers.Empty() && !newActive && new Cell(x, y).DiffGrid(new Cell(GetPositionX(), GetPositionY()))) // 3.
+            else if (!_staticPassengers.Empty() && !newActive && oldCell.DiffGrid(new Cell(GetPositionX(), GetPositionY()))) // 3.
                 UnloadStaticPassengers();
             else
                 UpdatePassengerPositions(_staticPassengers);
@@ -632,6 +634,8 @@ namespace Game.Entities
             }
             else
             {
+                UpdatePosition(x, y, z, o);
+
                 // Teleport players, they need to know it
                 foreach (var obj in _passengers)
                 {
@@ -651,7 +655,6 @@ namespace Game.Entities
                     }
                 }
 
-                UpdatePosition(x, y, z, o);
                 return false;
             }
         }
