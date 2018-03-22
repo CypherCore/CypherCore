@@ -249,7 +249,7 @@ namespace Game.Collision
             return true;
         }
 
-        public bool IntersectRay(Ray ray, ref float distance, bool stopAtFirstHit)
+        public override bool IntersectRay(Ray ray, ref float distance, bool stopAtFirstHit)
         {
             if (triangles.Empty())
                 return false;
@@ -311,7 +311,7 @@ namespace Game.Collision
             RootWMOID = 0;
         }
 
-        public bool IntersectRay(Ray ray, ref float distance, bool stopAtFirstHit)
+        public override bool IntersectRay(Ray ray, ref float distance, bool stopAtFirstHit)
         {
             // small M2 workaround, maybe better make separate class with virtual intersection funcs
             // in any case, there's no need to use a bound tree if we only have one submodel

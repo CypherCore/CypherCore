@@ -33,12 +33,10 @@ namespace Game.Collision
 
         void init_empty()
         {
-            tree.Clear();
-            objects.Clear();
+            tree= new uint[3];
+            objects = new uint[0];
             // create space for the first node
-            tree.Add(3u << 30); // dummy leaf
-            tree.Add(0);
-            tree.Add(0);
+            tree[0] = (3u << 30); // dummy leaf
         }
 
         void buildHierarchy(List<uint> tempTree, buildData dat, BuildStats stats)
@@ -278,14 +276,14 @@ namespace Game.Collision
             bounds = new AxisAlignedBox(lo, hi);
 
             uint treeSize = reader.ReadUInt32();
-            tree.Clear();
+            tree = new uint[treeSize];
             for (var i = 0; i < treeSize; i++)
-                tree.Add(reader.ReadUInt32());
+                tree[i] = reader.ReadUInt32();
 
             var count = reader.ReadUInt32();
-            objects.Clear();
+            objects = new uint[count];
             for (var i = 0; i < count; i++)
-                objects.Add(reader.ReadUInt32());
+                objects[i] = reader.ReadUInt32();
 
             return true;
         }
@@ -314,12 +312,14 @@ namespace Game.Collision
             BuildStats stats = new BuildStats();
             buildHierarchy(tempTree, dat, stats);
 
+            objects = new uint[dat.numPrims];
             for (int i = 0; i < dat.numPrims; ++i)
-                objects.Add(dat.indices[i]);
-            tree = tempTree;
+                objects[i] = dat.indices[i];
+
+            tree = tempTree.ToArray();
         }
 
-        public uint primCount() { return (uint)objects.Count; }
+        public uint primCount() { return (uint)objects.Length; }
 
         public void intersectRay(Ray r, WorkerCallback intersectCallback, ref float maxDist, bool stopAtFirst = false)
         {
@@ -612,8 +612,8 @@ namespace Game.Collision
 
 
         AxisAlignedBox bounds;
-        List<uint> tree = new List<uint>();
-        List<uint> objects = new List<uint>();
+        uint[] tree;
+        uint[] objects;
 
         [StructLayout(LayoutKind.Explicit)]
         public struct FloatToIntConverter

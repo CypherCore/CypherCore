@@ -25,7 +25,6 @@ namespace Game.Collision
     {
         public virtual void Invoke(Vector3 point, uint entry) { }
         public virtual bool Invoke(Ray ray, uint entry, ref float distance, bool pStopAtFirstHit) { return false; }
-        public virtual bool Invoke(Ray r, GameObjectModel obj, ref float distance) { return false; }
         public virtual bool Invoke(Ray r, IModel obj, ref float distance) { return false; }
         public virtual bool Invoke(Ray ray, uint idx, ref float maxDist) { return false; }
     }
@@ -234,9 +233,9 @@ namespace Game.Collision
             _phases = phases;
         }
 
-        public override bool Invoke(Ray r, GameObjectModel obj, ref float distance)
+        public override bool Invoke(Ray r, IModel obj, ref float distance)
         {
-            _didHit = obj.intersectRay(r, ref distance, true, _phases);
+            _didHit = obj.IntersectRay(r, ref distance, true, _phases);
             return _didHit;
         }
 

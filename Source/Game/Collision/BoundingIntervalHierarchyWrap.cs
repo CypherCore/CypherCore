@@ -85,7 +85,7 @@ namespace Game.Collision
             }
 
             /// Intersect ray
-            public override bool Invoke(Ray ray, uint idx, ref float maxDist)
+            public override bool Invoke(Ray ray, uint idx, ref float maxDist, bool stopAtFirst)
             {
                 if (idx >= objects_size)
                     return false;

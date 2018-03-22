@@ -86,7 +86,7 @@ namespace Game.Collision
             return mdl;
         }
 
-        public bool intersectRay(Ray ray, ref float maxDist, bool stopAtFirstHit, List<uint> phases)
+        public override bool IntersectRay(Ray ray, ref float maxDist, bool stopAtFirstHit, List<uint> phases)
         {
             if (!isCollisionEnabled() || !owner.IsSpawned())
                 return false;
