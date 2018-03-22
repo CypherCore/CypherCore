@@ -893,6 +893,11 @@ namespace Game.Entities
                             // processed in Player.CastItemUseSpell
                             break;
                         case ItemEnchantmentType.PrismaticSocket:
+                        case ItemEnchantmentType.ArtifactPowerBonusRankByType:
+                        case ItemEnchantmentType.ArtifactPowerBonusRankByID:
+                        case ItemEnchantmentType.BonusListID:
+                        case ItemEnchantmentType.BonusListCurve:
+                        case ItemEnchantmentType.ArtifactPowerBonusRankPicker:
                             // nothing do..
                             break;
                         default:
