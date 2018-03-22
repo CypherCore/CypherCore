@@ -2203,11 +2203,11 @@ namespace Game.Entities
 
         public override bool HasSpell(uint spellId)
         {
-            byte i;
-            for (i = 0; i < SharedConst.MaxCreatureSpells; ++i)
+            for (byte i = 0; i < SharedConst.MaxCreatureSpells; ++i)
                 if (spellId == m_spells[i])
-                    break;
-            return i < SharedConst.MaxCreatureSpells;                         //broke before end of iteration of known spells
+                    return true;
+
+            return false;
         }
 
         public long GetRespawnTimeEx()
