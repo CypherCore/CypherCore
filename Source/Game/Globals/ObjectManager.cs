@@ -2262,7 +2262,7 @@ namespace Game
                 modelInfo.BoundingRadius = result.Read<float>(1);
                 modelInfo.CombatReach = result.Read<float>(2);
                 modelInfo.DisplayIdOtherGender = result.Read<uint>(3);
-                modelInfo.gender = (sbyte)creatureDisplay.Gender;
+                modelInfo.gender = creatureDisplay.Gender;
 
                 // Checks
                 if (modelInfo.gender == (sbyte)Gender.Unknown)
@@ -3587,7 +3587,7 @@ namespace Game
                 return null;
 
             // If a model for another gender exists, 50% chance to use it
-            if (modelInfo.DisplayIdOtherGender != 0 && RandomHelper.NextDouble() == 0)
+            if (modelInfo.DisplayIdOtherGender != 0 && RandomHelper.URand(0, 1) == 0)
             {
                 CreatureModelInfo minfotmp = GetCreatureModelInfo(modelInfo.DisplayIdOtherGender);
                 if (minfotmp == null)

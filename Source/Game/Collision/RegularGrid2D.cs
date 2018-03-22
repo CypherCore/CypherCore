@@ -19,6 +19,7 @@ using Framework.GameMath;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Collections.Concurrent;
 
 namespace Game.Collision
 {
@@ -39,14 +40,14 @@ namespace Game.Collision
             Vector3 pos = value.getPosition();
             Node node = getGridFor(pos.X, pos.Y);
             node.insert(value);
-            memberTable.Add(value, node);
+            memberTable.TryAdd(value, node);
         }
 
         public virtual void remove(T value)
         {
             memberTable[value].remove(value);
             // Remove the member
-            memberTable.Remove(value);
+            memberTable.TryRemove(value, out Node node);
         }
 
         public virtual void balance()
@@ -205,7 +206,7 @@ namespace Game.Collision
                 node.intersectRay(ray, intersectCallback, ref max_dist);
         }
 
-        Dictionary<T, Node> memberTable = new Dictionary<T, Node>();
+        ConcurrentDictionary<T, Node> memberTable = new ConcurrentDictionary<T, Node>();
         Node[][] nodes = new Node[CELL_NUMBER][];
     }
 }

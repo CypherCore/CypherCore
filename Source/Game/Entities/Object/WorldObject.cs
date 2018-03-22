@@ -2568,14 +2568,6 @@ namespace Game.Entities
         public virtual bool LoadFromDB(ulong guid, Map map) { return true; }
 
         //Position
-        public bool HasInLine(WorldObject target, float width)
-        {
-            if (!HasInArc(MathFunctions.PI, target))
-                return false;
-            width += target.GetObjectSize();
-            float angle = GetRelativeAngle(target);
-            return Math.Abs(Math.Sin(angle)) * GetExactDist2d(target.GetPositionX(), target.GetPositionY()) < width;
-        }
 
         public float GetDistanceZ(WorldObject obj)
         {
