@@ -1675,10 +1675,6 @@ namespace Game.Spells
                     targetInfo.timeDelay = (ulong)Math.Floor((dist / m_spellInfo.Speed) * 1000.0f);
                 else
                     targetInfo.timeDelay = (ulong)(m_spellInfo.Speed * 1000.0f);
-
-                // Calculate minimum incoming time
-                if (m_delayMoment == 0 || m_delayMoment > targetInfo.timeDelay)
-                    m_delayMoment = targetInfo.timeDelay;
             }
             else
                 targetInfo.timeDelay = 0L;
@@ -1697,6 +1693,10 @@ namespace Game.Spells
             }
             else
                 targetInfo.reflectResult = SpellMissInfo.None;
+
+            // Calculate minimum incoming time
+            if (targetInfo.timeDelay != 0 && (m_delayMoment == 0 || m_delayMoment > targetInfo.timeDelay))
+                m_delayMoment = targetInfo.timeDelay;
 
             // Add target to list
             m_UniqueTargetInfo.Add(targetInfo);
