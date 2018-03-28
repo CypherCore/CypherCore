@@ -48,10 +48,7 @@ namespace Game.Collision
         {
             impl.balance();
         }
-        int size()
-        {
-            return impl.size();
-        }
+
         public void update(uint diff)
         {
             impl.update(diff);
@@ -161,7 +158,7 @@ namespace Game.Collision
 
         public void update(uint difftime)
         {
-            if (size() == 0)
+            if (empty())
                 return;
 
             rebalance_timer.Update((int)difftime);
