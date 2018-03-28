@@ -2857,7 +2857,7 @@ namespace Game.Spells
             if (!go)
                 return;
 
-            go.CopyPhaseFrom(m_caster);
+            PhasingHandler.InheritPhaseShift(go, m_caster);
 
             int duration = m_spellInfo.CalcDuration(m_caster);
 
@@ -2883,7 +2883,7 @@ namespace Game.Spells
             GameObject linkedTrap = go.GetLinkedTrap();
             if (linkedTrap)
             {
-                linkedTrap.CopyPhaseFrom(m_caster);
+                PhasingHandler.InheritPhaseShift(linkedTrap, m_caster);
                 linkedTrap.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
                 linkedTrap.SetSpellId(m_spellInfo.Id);
 
@@ -3518,7 +3518,7 @@ namespace Game.Spells
             if (!go)
                 return;
 
-            go.CopyPhaseFrom(m_caster);
+            PhasingHandler.InheritPhaseShift(go, m_caster);
 
             go.SetUInt32Value(GameObjectFields.Faction, m_caster.getFaction());
             go.SetUInt32Value(GameObjectFields.Level, m_caster.getLevel() + 1);
@@ -3858,7 +3858,7 @@ namespace Game.Spells
             if (!go)
                 return;
 
-            go.CopyPhaseFrom(m_caster);
+            PhasingHandler.InheritPhaseShift(go, m_caster);
 
             int duration = m_spellInfo.CalcDuration(m_caster);
             go.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
@@ -4545,7 +4545,7 @@ namespace Game.Spells
             if (!go)
                 return;
 
-            go.CopyPhaseFrom(m_caster);
+            PhasingHandler.InheritPhaseShift(go, m_caster);
 
             int duration = m_spellInfo.CalcDuration(m_caster);
 
@@ -4603,7 +4603,7 @@ namespace Game.Spells
             GameObject linkedTrap = go.GetLinkedTrap();
             if (linkedTrap != null)
             {
-                linkedTrap.CopyPhaseFrom(m_caster);
+                PhasingHandler.InheritPhaseShift(linkedTrap, m_caster);
                 linkedTrap.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
                 linkedTrap.SetSpellId(m_spellInfo.Id);
                 linkedTrap.SetOwnerGUID(m_caster.GetGUID());
@@ -5656,7 +5656,7 @@ namespace Game.Spells
             if (!unitTarget || !unitTarget.IsTypeId(TypeId.Player))
                 return;
 
-            unitTarget.UpdateAreaAndZonePhase();
+            PhasingHandler.OnConditionChange(unitTarget);
         }
 
         [SpellEffectHandler(SpellEffectName.UpdateZoneAurasPhases)]

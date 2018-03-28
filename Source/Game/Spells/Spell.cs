@@ -794,15 +794,19 @@ namespace Game.Spells
                     break;
                 case Targets.DestCasterFishing:
                     {
-                        float min_dis = m_spellInfo.GetMinRange(true);
-                        float max_dis = m_spellInfo.GetMaxRange(true);
-                        float dis = (float)RandomHelper.NextDouble() * (max_dis - min_dis) + min_dis;
+                        float minDist = m_spellInfo.GetMinRange(true);
+                        float maxDist = m_spellInfo.GetMaxRange(true);
+                        float dis = (float)RandomHelper.NextDouble() * (maxDist - minDist) + minDist;
                         float x, y, z;
                         float angle = (float)RandomHelper.NextDouble() * (MathFunctions.PI * 35.0f / 180.0f) - (float)(Math.PI * 17.5f / 180.0f);
                         m_caster.GetClosePoint(out x, out y, out z, SharedConst.DefaultWorldObjectSize, dis, angle);
 
-                        float ground = z;
-                        float liquidLevel = m_caster.GetMap().GetWaterOrGroundLevel(m_caster.GetPhases(), x, y, z, ref ground);
+                        float ground = m_caster.GetMap().GetHeight(m_caster.GetPhaseShift(), x, y, z, true, 50.0f);
+                        float liquidLevel = MapConst.VMAPInvalidHeightValue;
+                        LiquidData liquidData;
+                        if (m_caster.GetMap().getLiquidStatus(m_caster.GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out liquidData) != 0)
+                            liquidLevel = liquidData.level;
+
                         if (liquidLevel <= ground) // When there is no liquid Map.GetWaterOrGroundLevel returns ground level
                         {
                             SendCastResult(SpellCastResult.NotHere);
@@ -4458,11 +4462,11 @@ namespace Game.Spells
             if (m_caster.IsTypeId(TypeId.Player) && Global.VMapMgr.isLineOfSightCalcEnabled())
             {
                 if (m_spellInfo.HasAttribute(SpellAttr0.OutdoorsOnly) &&
-                        !m_caster.GetMap().IsOutdoors(m_caster.posX, m_caster.posY, m_caster.posZ))
+                        !m_caster.GetMap().IsOutdoors(m_caster.GetPhaseShift(), m_caster.posX, m_caster.posY, m_caster.posZ))
                     return SpellCastResult.OnlyOutdoors;
 
                 if (m_spellInfo.HasAttribute(SpellAttr0.IndoorsOnly) &&
-                        m_caster.GetMap().IsOutdoors(m_caster.posX, m_caster.posY, m_caster.posZ))
+                        m_caster.GetMap().IsOutdoors(m_caster.GetPhaseShift(), m_caster.posX, m_caster.posY, m_caster.posZ))
                     return SpellCastResult.OnlyIndoors;
             }
 

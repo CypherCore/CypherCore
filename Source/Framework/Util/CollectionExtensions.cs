@@ -156,6 +156,11 @@ namespace System.Collections.Generic
             return default(T);
         }
 
+        public static IEnumerable<TSource> Intersect<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second, Func<TSource, TSource, bool> comparer)
+        {
+            return first.Where(x => second.Count(y => comparer(x, y)) == 1);
+        }
+
         public static uint[] ToBlockRange(this BitSet array)
         {
             uint[] blockValues = new uint[array.Length / 32 + 1];

@@ -57,17 +57,17 @@ namespace Game.Collision
             impl.update(diff);
         }
 
-        public bool getIntersectionTime(List<uint> phases, Ray ray, Vector3 endPos, float maxDist)
+        public bool getIntersectionTime(Ray ray, Vector3 endPos, PhaseShift phaseShift, float maxDist)
         {
             float distance = maxDist;
-            DynamicTreeIntersectionCallback callback = new DynamicTreeIntersectionCallback(phases);
+            DynamicTreeIntersectionCallback callback = new DynamicTreeIntersectionCallback(phaseShift);
             impl.intersectRay(ray, callback, ref distance, endPos);
             if (callback.didHit())
                 maxDist = distance;
             return callback.didHit();
         }
 
-        public bool getObjectHitPos(List<uint> phases, Vector3 startPos, Vector3 endPos, ref Vector3 resultHitPos, float modifyDist)
+        public bool getObjectHitPos(Vector3 startPos, Vector3 endPos, ref Vector3 resultHitPos, float modifyDist, PhaseShift phaseShift)
         {
             bool result = false;
             float maxDist = (endPos - startPos).magnitude();
@@ -82,7 +82,7 @@ namespace Game.Collision
             Vector3 dir = (endPos - startPos) / maxDist;              // direction with length of 1
             Ray ray = new Ray(startPos, dir);
             float dist = maxDist;
-            if (getIntersectionTime(phases, ray, endPos, dist))
+            if (getIntersectionTime(ray, endPos, phaseShift, dist))
             {
                 resultHitPos = startPos + dir * dist;
                 if (modifyDist < 0)
@@ -105,7 +105,7 @@ namespace Game.Collision
             return result;
         }
 
-        public bool isInLineOfSight(Vector3 startPos, Vector3 endPos, List<uint> phases)
+        public bool isInLineOfSight(Vector3 startPos, Vector3 endPos, PhaseShift phaseShift)
         {
             float maxDist = (endPos - startPos).magnitude();
 
@@ -113,17 +113,17 @@ namespace Game.Collision
                 return true;
 
             Ray r = new Ray(startPos, (endPos - startPos) / maxDist);
-            DynamicTreeIntersectionCallback callback = new DynamicTreeIntersectionCallback(phases);
+            DynamicTreeIntersectionCallback callback = new DynamicTreeIntersectionCallback(phaseShift);
             impl.intersectRay(r, callback, ref maxDist, endPos);
 
             return !callback.didHit();
         }
 
-        public float getHeight(float x, float y, float z, float maxSearchDist, List<uint> phases)
+        public float getHeight(float x, float y, float z, float maxSearchDist, PhaseShift phaseShift)
         {
             Vector3 v = new Vector3(x, y, z + 0.5f);
             Ray r = new Ray(v, new Vector3(0, 0, -1));
-            DynamicTreeIntersectionCallback callback = new DynamicTreeIntersectionCallback(phases);
+            DynamicTreeIntersectionCallback callback = new DynamicTreeIntersectionCallback(phaseShift);
             impl.intersectZAllignedRay(r, callback, ref maxSearchDist);
 
             if (callback.didHit())

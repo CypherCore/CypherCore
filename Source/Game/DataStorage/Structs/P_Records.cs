@@ -23,7 +23,7 @@ namespace Game.DataStorage
     public sealed class PhaseRecord
     {
         public uint Id;
-        public ushort Flags;
+        public PhaseEntryFlags Flags;
     }
 
     public sealed class PhaseXPhaseGroupRecord

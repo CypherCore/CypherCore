@@ -730,14 +730,7 @@ namespace Game.Chat
             else if (target.GetDBPhase() < 0)
                 handler.SendSysMessage($"Target creature's PhaseGroup in DB: {Math.Abs(target.GetDBPhase())}");
 
-            string phases = "";
-            foreach (uint phase in target.GetPhases())
-                phases += phase + " ";
-
-            if (!string.IsNullOrEmpty(phases))
-                handler.SendSysMessage("Target's current phases: {0}", phases);
-            else
-                handler.SendSysMessage("Target is not phased");
+            PhasingHandler.PrintToChat(handler, target.GetPhaseShift());
             return true;
         }
 
@@ -1171,17 +1164,18 @@ namespace Game.Chat
                 if (args.Empty())
                     return false;
 
-                List<uint> terrainswap = new List<uint>();
-                List<uint> phaseId = new List<uint>();
-                List<uint> worldMapSwap = new List<uint>();
+                PhaseShift phaseShift = new PhaseShift();
 
                 if (uint.TryParse(args.NextString(), out uint terrain))
-                    terrainswap.Add(terrain);
+                    phaseShift.AddVisibleMapId(terrain, null);
 
                 if (uint.TryParse(args.NextString(), out uint phase))
-                    phaseId.Add(phase);
+                    phaseShift.AddPhase(phase, PhaseFlags.None, null);
 
-                handler.GetSession().SendSetPhaseShift(phaseId, terrainswap, worldMapSwap);
+                if (uint.TryParse(args.NextString(), out uint map))
+                    phaseShift.AddUiWorldMapAreaIdSwap(map);
+
+                PhasingHandler.SendToPlayer(handler.GetSession().GetPlayer(), phaseShift);
                 return true;
             }
 

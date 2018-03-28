@@ -1283,28 +1283,17 @@ namespace Game.Spells
 
             Unit target = aurApp.GetTarget();
 
-            var oldPhases = target.GetPhases();
-            target.SetInPhase((uint)GetMiscValueB(), false, apply);
-
-            // call functions which may have additional effects after chainging state of unit
-            // phase auras normally not expected at BG but anyway better check
             if (apply)
             {
+                PhasingHandler.AddPhase(target, (uint)GetMiscValueB(), true);
+
+                // call functions which may have additional effects after chainging state of unit
+                // phase auras normally not expected at BG but anyway better check
                 // drop flag at invisibiliy in bg
                 target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ImmuneOrLostSelection);
             }
-
-            Player player = target.ToPlayer();
-            if (player)
-            {
-                if (player.IsInWorld)
-                    player.GetMap().SendUpdateTransportVisibility(player, oldPhases);
-                player.SendUpdatePhasing();
-            }
-
-            // need triggering visibility update base at phase update of not GM invisible (other GMs anyway see in any phases)
-            if (target.IsVisible())
-                target.UpdateObjectVisibility();
+            else
+                PhasingHandler.RemovePhase(target, (uint)GetMiscValueB(), true);
         }
 
         [AuraEffectHandler(AuraType.PhaseGroup)]
@@ -1314,29 +1303,18 @@ namespace Game.Spells
                 return;
 
             Unit target = aurApp.GetTarget();
-            var oldPhases = target.GetPhases();
-            var phases = Global.DB2Mgr.GetPhasesForGroup((uint)GetMiscValueB());
-            foreach (var phase in phases)
-                target.SetInPhase(phase, false, apply);
-            // call functions which may have additional effects after chainging state of unit
-            // phase auras normally not expected at BG but anyway better check
+
             if (apply)
             {
+                PhasingHandler.AddPhaseGroup(target, (uint)GetMiscValueB(), true);
+
+                // call functions which may have additional effects after chainging state of unit
+                // phase auras normally not expected at BG but anyway better check
                 // drop flag at invisibiliy in bg
                 target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ImmuneOrLostSelection);
             }
-
-            Player player = target.ToPlayer();
-            if (player)
-            {
-                if (player.IsInWorld)
-                    player.GetMap().SendUpdateTransportVisibility(player, oldPhases);
-                player.SendUpdatePhasing();
-            }
-
-            // need triggering visibility update base at phase update of not GM invisible (other GMs anyway see in any phases)
-            if (target.IsVisible())
-                target.UpdateObjectVisibility();
+            else
+                PhasingHandler.RemovePhaseGroup(target, (uint)GetMiscValueB(), true);
         }
 
         /**********************/

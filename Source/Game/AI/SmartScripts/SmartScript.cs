@@ -1090,7 +1090,12 @@ namespace Game.AI
                             break;
 
                         foreach (var obj in targets)
-                            obj.SetInPhase(e.Action.ingamePhaseId.id, true, e.Action.ingamePhaseId.apply == 1);
+                        {
+                            if (e.Action.ingamePhaseId.apply == 1)
+                                PhasingHandler.AddPhase(obj, e.Action.ingamePhaseId.id, true);
+                            else
+                                PhasingHandler.RemovePhase(obj, e.Action.ingamePhaseId.id, true);
+                        }
 
                         break;
                     }
@@ -1101,12 +1106,12 @@ namespace Game.AI
                         if (targets.Empty())
                             break;
 
-                        var phases = Global.DB2Mgr.GetPhasesForGroup(e.Action.ingamePhaseGroup.groupId);
-
                         foreach (var obj in targets)
                         {
-                            foreach (var phase in phases)
-                                obj.SetInPhase(phase, true, e.Action.ingamePhaseGroup.apply == 1);
+                            if (e.Action.ingamePhaseGroup.apply == 1)
+                                PhasingHandler.AddPhaseGroup(obj, e.Action.ingamePhaseGroup.groupId, true);
+                            else
+                                PhasingHandler.RemovePhaseGroup(obj, e.Action.ingamePhaseGroup.groupId, true);
                         }
 
                         break;

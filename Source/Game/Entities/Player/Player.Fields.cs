@@ -191,6 +191,7 @@ namespace Game.Entities
 
         SpecializationInfo _specializationInfo;
         public List<ObjectGuid> m_clientGUIDs = new List<ObjectGuid>();
+        public List<ObjectGuid> m_visibleTransports = new List<ObjectGuid>();
         public WorldObject seerView;
         // only changed for direct client control (possess, vehicle etc.), not stuff you control using pet commands
         public Unit m_unitMovedByMe;

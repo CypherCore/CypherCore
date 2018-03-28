@@ -227,22 +227,22 @@ namespace Game.Collision
 
     public class DynamicTreeIntersectionCallback : WorkerCallback
     {
-        public DynamicTreeIntersectionCallback(List<uint> phases)
+        public DynamicTreeIntersectionCallback(PhaseShift phaseShift)
         {
             _didHit = false;
-            _phases = phases;
+            _phaseShift = phaseShift;
         }
 
         public override bool Invoke(Ray r, IModel obj, ref float distance)
         {
-            _didHit = obj.IntersectRay(r, ref distance, true, _phases);
+            _didHit = obj.IntersectRay(r, ref distance, true, _phaseShift);
             return _didHit;
         }
 
         public bool didHit() { return _didHit; }
 
         bool _didHit;
-        List<uint> _phases;
+        PhaseShift _phaseShift;
     }
 
 

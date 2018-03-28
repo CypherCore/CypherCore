@@ -232,16 +232,16 @@ namespace Framework.Constants
         LiquidStatus = 175,
         InvalidGameobjectType = 176,
         GameobjectDamaged = 177,
+        GridPosition = 178,
 
-        PhasingSuccess = 178,
-        PhasingFailed = 179,
-        PhasingLastPhase = 180,
-        PhasingList = 181,
-        PhasingPhasemask = 182,
-        PhasingReportStatus = 183,
-        PhasingNoDefinitions = 184,              // Phasing
+        PhaseshiftStatus = 179,
+        PhaseshiftPhases = 180,
+        PhaseshiftVisibleMapIds = 181,
+        PhaseshiftUiWorldMapAreaSwaps = 182,
+        PhaseFlagCosmetic = 183,
+        PhaseFlagPersonal = 184,
 
-        GridPosition = 185,
+        //                                    185 not used
         TransportPosition = 186,
         // Room For More Level 1              187-199 Not Used
 

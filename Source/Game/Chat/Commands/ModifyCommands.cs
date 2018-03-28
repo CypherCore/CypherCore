@@ -497,20 +497,38 @@ namespace Game.Chat
                 return false;
 
             uint phaseId = args.NextUInt32();
-            if (!CliDB.PhaseStorage.ContainsKey(phaseId))
+            uint visibleMapId = args.NextUInt32();
+
+            if (phaseId != 0 && !CliDB.PhaseStorage.ContainsKey(phaseId))
             {
                 handler.SendSysMessage(CypherStrings.PhaseNotfound);
                 return false;
             }
 
             Unit target = handler.getSelectedUnit();
-            if (!target)
-                target = handler.GetSession().GetPlayer();
 
-            target.SetInPhase(phaseId, true, !target.IsInPhase(phaseId));
+            if (visibleMapId != 0)
+            {
+                MapRecord visibleMap = CliDB.MapStorage.LookupByKey(visibleMapId);
+                if (visibleMap == null || visibleMap.ParentMapID != target.GetMapId())
+                {
+                    handler.SendSysMessage(CypherStrings.PhaseNotfound);
+                    return false;
+                }
 
-            if (target.IsTypeId(TypeId.Player))
-                target.ToPlayer().SendUpdatePhasing();
+                if (!target.GetPhaseShift().HasVisibleMapId(visibleMapId))
+                    PhasingHandler.AddVisibleMapId(target, visibleMapId);
+                else
+                    PhasingHandler.RemoveVisibleMapId(target, visibleMapId);
+            }
+
+            if (phaseId != 0)
+            {
+                if (!target.GetPhaseShift().HasPhase(phaseId))
+                    PhasingHandler.AddPhase(target, phaseId, true);
+                else
+                    PhasingHandler.RemovePhase(target, phaseId, true);
+            }
 
             return true;
         }

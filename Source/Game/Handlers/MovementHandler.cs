@@ -132,7 +132,7 @@ namespace Game
             if (plrMover && movementInfo.HasMovementFlag(MovementFlag.Swimming) != plrMover.IsInWater())
             {
                 // now client not include swimming flag in case jumping under water
-                plrMover.SetInWater(!plrMover.IsInWater() || plrMover.GetMap().IsUnderWater(movementInfo.Pos.posX, movementInfo.Pos.posY, movementInfo.Pos.posZ));
+                plrMover.SetInWater(!plrMover.IsInWater() || plrMover.GetMap().IsUnderWater(plrMover.GetPhaseShift(), movementInfo.Pos.posX, movementInfo.Pos.posY, movementInfo.Pos.posZ));
             }
 
             uint mstime = Time.GetMSTime();

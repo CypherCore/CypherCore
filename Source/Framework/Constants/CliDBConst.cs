@@ -1361,6 +1361,23 @@ namespace Framework.Constants
         HideIfUnknown = 0x40
     }
 
+    public enum PhaseEntryFlags : ushort
+    {
+        Normal = 0x08,
+        Cosmetic = 0x10,
+        Personal = 0x20
+    }
+
+    // PhaseUseFlags fields in different db2s
+    public  enum PhaseUseFlagsValues : byte
+    {
+        None = 0x0,
+        AlwaysVisible = 0x1,
+        Inverse = 0x2,
+
+        All = AlwaysVisible | Inverse
+    }
+
     public enum PrestigeLevelInfoFlags : byte
     {
         Disabled = 0x01                      // Prestige levels with this flag won't be included to calculate max prestigelevel.

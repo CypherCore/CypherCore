@@ -842,7 +842,7 @@ namespace Game
             uint MapId = location.GetMapId();
 
             // search for zone associated closest graveyard
-            uint zoneId = Global.MapMgr.GetZoneId(MapId, x, y, z);
+            uint zoneId = Global.MapMgr.GetZoneId(conditionObject ? conditionObject.GetPhaseShift() : PhasingHandler.EmptyPhaseShift, MapId, x, y, z);
             if (zoneId == 0)
             {
                 if (z > -500)
@@ -899,11 +899,17 @@ namespace Game
                 if (data.team != 0 && team != 0 && data.team != (uint)team)
                     continue;
 
-                if (conditionObject != null && !Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.Graveyard, data.safeLocId, conditionSource))
-                    continue;
+                if (conditionObject)
+                {
+                    if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.Graveyard, data.safeLocId, conditionSource))
+                        continue;
+
+                    if (entry.MapID == mapEntry.ParentMapID && !conditionObject.GetPhaseShift().HasVisibleMapId(entry.MapID))
+                        continue;
+                }
 
                 // find now nearest graveyard at other map
-                if (MapId != entry.MapID)
+                if (MapId != entry.MapID && entry.MapID != mapEntry.ParentMapID)
                 {
                     // if find graveyard at different map from where entrance placed (or no entrance data), use any first
                     if (mapEntry == null
@@ -3218,8 +3224,8 @@ namespace Game
             SQLResult result = DB.World.Query("SELECT creature.guid, id, map, modelid, equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, spawndist, " +
                 //   11               12         13       14            15         16          17          18                19                   20                    21
                 "currentwaypoint, curhealth, curmana, MovementType, spawnMask, eventEntry, pool_entry, creature.npcflag, creature.unit_flags, creature.unit_flags2, creature.unit_flags3, " +
-                //   22                     23                24                   25
-                "creature.dynamicflags, creature.phaseid, creature.phasegroup, creature.ScriptName " +        
+                //   22                     23                      24                25                   26                       27
+                "creature.dynamicflags, creature.phaseUseFlags, creature.phaseid, creature.phasegroup, creature.terrainSwapMap, creature.ScriptName " +
                 "FROM creature LEFT OUTER JOIN game_event_creature ON creature.guid = game_event_creature.guid LEFT OUTER JOIN pool_creature ON creature.guid = pool_creature.guid");
 
             if (result.IsEmpty())
@@ -3239,6 +3245,8 @@ namespace Game
                     spawnMasks[mapDifficultyPair.Key] |= (1ul << (int)difficultyPair.Key);
                 }
             }
+
+            PhaseShift phaseShift = new PhaseShift();
 
             uint count = 0;
             do
@@ -3276,9 +3284,11 @@ namespace Game
                 data.unit_flags2 = result.Read<uint>(20);
                 data.unit_flags3 = result.Read<uint>(21);
                 data.dynamicflags = result.Read<uint>(22);
-                data.phaseId = result.Read<uint>(23);
-                data.phaseGroup = result.Read<uint>(24);
-                data.ScriptId = GetScriptId(result.Read<string>(25));
+                data.phaseUseFlags = (PhaseUseFlagsValues)result.Read<byte>(23);
+                data.phaseId = result.Read<uint>(24);
+                data.phaseGroup = result.Read<uint>(25);
+                data.terrainSwapMap = result.Read<int>(26);
+                data.ScriptId = GetScriptId(result.Read<string>(27));
                 if (data.ScriptId == 0)
                     data.ScriptId = cInfo.ScriptID;
 
@@ -3349,6 +3359,19 @@ namespace Game
                     data.orientation = Position.NormalizeOrientation(data.orientation);
                 }
 
+                if (Convert.ToBoolean(data.phaseUseFlags & ~PhaseUseFlagsValues.All))
+                {
+                    Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) has unknown `phaseUseFlags` set, removed unknown value.", guid, data.id);
+                    data.phaseUseFlags &= PhaseUseFlagsValues.All;
+                }
+
+                if (data.phaseUseFlags.HasAnyFlag(PhaseUseFlagsValues.AlwaysVisible) && data.phaseUseFlags.HasAnyFlag(PhaseUseFlagsValues.Inverse))
+                {
+                    Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) has both `phaseUseFlags` PHASE_USE_FLAGS_ALWAYS_VISIBLE and PHASE_USE_FLAGS_INVERSE," +
+                        " removing PHASE_USE_FLAGS_INVERSE.", guid, data.id);
+                    data.phaseUseFlags &= ~PhaseUseFlagsValues.Inverse;
+                }
+
                 if (data.phaseGroup != 0 && data.phaseId != 0)
                 {
                     Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with both `phaseid` and `phasegroup` set, `phasegroup` set to 0", guid, data.id);
@@ -3373,11 +3396,27 @@ namespace Game
                     }
                 }
 
+                if (data.terrainSwapMap != -1)
+                {
+                    MapRecord terrainSwapEntry = CliDB.MapStorage.LookupByKey(data.terrainSwapMap);
+                    if (terrainSwapEntry == null)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with `terrainSwapMap` {2} does not exist, set to -1", guid, data.id, data.terrainSwapMap);
+                        data.terrainSwapMap = -1;
+                    }
+                    else if (terrainSwapEntry.ParentMapID != data.mapid)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with `terrainSwapMap` {2} which cannot be used on spawn map, set to -1", guid, data.id, data.terrainSwapMap);
+                        data.terrainSwapMap = -1;
+                    }
+                }
+
                 if (WorldConfig.GetBoolValue(WorldCfg.CalculateCreatureZoneAreaData))
                 {
                     uint zoneId = 0;
                     uint areaId = 0;
-                    Global.MapMgr.GetZoneAndAreaId(out zoneId, out areaId, data.mapid, data.posX, data.posY, data.posZ);
+                    PhasingHandler.InitDbVisibleMapId(phaseShift, data.terrainSwapMap);
+                    Global.MapMgr.GetZoneAndAreaId(phaseShift, out zoneId, out areaId, data.mapid, data.posX, data.posY, data.posZ);
 
                     PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_ZONE_AREA_DATA);
                     stmt.AddValue(0, zoneId);
@@ -3883,8 +3922,8 @@ namespace Game
             SQLResult result = DB.World.Query("SELECT gameobject.guid, id, map, position_x, position_y, position_z, orientation, " +
                 //   7          8          9          10         11             12            13     14         15          16
                 "rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state, spawnMask, eventEntry, pool_entry, " +
-                //   17       18          19
-                "phaseid, phasegroup, ScriptName " +
+                //   17             18       19          20              21
+                "phaseUseFlags, phaseid, phasegroup, terrainSwapMap, ScriptName " +
                 "FROM gameobject LEFT OUTER JOIN game_event_gameobject ON gameobject.guid = game_event_gameobject.guid " +
                 "LEFT OUTER JOIN pool_gameobject ON gameobject.guid = pool_gameobject.guid");
 
@@ -3907,6 +3946,8 @@ namespace Game
                     spawnMasks[mapDifficultyPair.Key] |= (1ul << (int)difficultyPair.Key);
                 }
             }
+
+            PhaseShift phaseShift = new PhaseShift();
 
             do
             {
@@ -3986,8 +4027,22 @@ namespace Game
 
                 short gameEvent = result.Read<sbyte>(15);
                 uint PoolId = result.Read<uint>(16);
-                data.phaseId = result.Read<uint>(17);
-                data.phaseGroup = result.Read<uint>(18);
+                data.phaseUseFlags = (PhaseUseFlagsValues)result.Read<byte>(17);
+                data.phaseId = result.Read<uint>(18);
+                data.phaseGroup = result.Read<uint>(19);
+
+                if (Convert.ToBoolean(data.phaseUseFlags & ~PhaseUseFlagsValues.All))
+                {
+                    Log.outError(LogFilter.Sql, "Table `gameobject` have gameobject (GUID: {0} Entry: {1}) has unknown `phaseUseFlags` set, removed unknown value.", guid, data.id);
+                    data.phaseUseFlags &= PhaseUseFlagsValues.All;
+                }
+
+                if (data.phaseUseFlags.HasAnyFlag(PhaseUseFlagsValues.AlwaysVisible) && data.phaseUseFlags.HasAnyFlag(PhaseUseFlagsValues.Inverse))
+                {
+                    Log.outError(LogFilter.Sql, "Table `gameobject` have gameobject (GUID: {0} Entry: {1}) has both `phaseUseFlags` PHASE_USE_FLAGS_ALWAYS_VISIBLE and PHASE_USE_FLAGS_INVERSE," +
+                        " removing PHASE_USE_FLAGS_INVERSE.", guid, data.id);
+                    data.phaseUseFlags &= ~PhaseUseFlagsValues.Inverse;
+                }
 
                 if (data.phaseGroup != 0 && data.phaseId != 0)
                 {
@@ -4013,7 +4068,23 @@ namespace Game
                     }
                 }
 
-                data.ScriptId = GetScriptId(result.Read<string>(19));
+                data.terrainSwapMap = result.Read<int>(20);
+                if (data.terrainSwapMap != -1)
+                {
+                    MapRecord terrainSwapEntry = CliDB.MapStorage.LookupByKey(data.terrainSwapMap);
+                    if (terrainSwapEntry == null)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `gameobject` have gameobject (GUID: {0} Entry: {1}) with `terrainSwapMap` {2} does not exist, set to -1", guid, data.id, data.terrainSwapMap);
+                        data.terrainSwapMap = -1;
+                    }
+                    else if (terrainSwapEntry.ParentMapID != data.mapid)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `gameobject` have gameobject (GUID: {0} Entry: {1}) with `terrainSwapMap` {2} which cannot be used on spawn map, set to -1", guid, data.id, data.terrainSwapMap);
+                        data.terrainSwapMap = -1;
+                    }
+                }
+
+                data.ScriptId = GetScriptId(result.Read<string>(21));
                 if (data.ScriptId == 0)
                     data.ScriptId = gInfo.ScriptId;
 
@@ -4057,7 +4128,8 @@ namespace Game
                 {
                     uint zoneId = 0;
                     uint areaId = 0;
-                    Global.MapMgr.GetZoneAndAreaId(out zoneId, out areaId, data.mapid, data.posX, data.posY, data.posZ);
+                    PhasingHandler.InitDbVisibleMapId(phaseShift, data.terrainSwapMap);
+                    Global.MapMgr.GetZoneAndAreaId(phaseShift, out zoneId, out areaId, data.mapid, data.posX, data.posY, data.posZ);
 
                     PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_GAMEOBJECT_ZONE_AREA_DATA);
                     stmt.AddValue(0, zoneId);
@@ -7365,10 +7437,74 @@ namespace Game
         }
 
         //Spells /Skills / Phases
-        public void LoadTerrainSwapDefaults()
+        public void LoadPhases()
         {
-            _terrainMapDefaultStore.Clear();
+            foreach (PhaseRecord phase in CliDB.PhaseStorage.Values)
+                _phaseInfoById.Add(phase.Id, new PhaseInfoStruct(phase.Id));
 
+            foreach (MapRecord map in CliDB.MapStorage.Values)
+                if (map.ParentMapID != -1)
+                    _terrainSwapInfoById.Add(map.Id, new TerrainSwapInfo(map.Id));
+
+            Log.outInfo(LogFilter.ServerLoading, "Loading Terrain World Map definitions...");
+            LoadTerrainWorldMaps();
+
+            Log.outInfo(LogFilter.ServerLoading, "Loading Terrain Swap Default definitions...");
+            LoadTerrainSwapDefaults();
+
+            Log.outInfo(LogFilter.ServerLoading, "Loading Phase Area definitions...");
+            LoadAreaPhases();
+        }
+        public void UnloadPhaseConditions()
+        {
+            foreach (var pair in _phaseInfoByArea)
+                    pair.Value.Conditions.Clear();
+        }
+        void LoadTerrainWorldMaps()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            //                                               0               1
+            SQLResult result = DB.World.Query("SELECT TerrainSwapMap, WorldMapArea FROM `terrain_worldmap`");
+
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 terrain world maps. DB table `terrain_worldmap` is empty.");
+                return;
+            }
+
+            uint count = 0;
+            do
+            {
+                uint mapId = result.Read<uint>(0);
+                uint worldMapArea = result.Read<uint>(1);
+
+                if (!CliDB.MapStorage.ContainsKey(mapId))
+                {
+                    Log.outError(LogFilter.Sql, "TerrainSwapMap {0} defined in `terrain_worldmap` does not exist, skipped.", mapId);
+                    continue;
+                }
+
+                if (!CliDB.WorldMapAreaStorage.ContainsKey(worldMapArea))
+                {
+                    Log.outError(LogFilter.Sql, "WorldMapArea {0} defined in `terrain_worldmap` does not exist, skipped.", worldMapArea);
+                    continue;
+                }
+
+                if (!_terrainSwapInfoById.ContainsKey(mapId))
+                    _terrainSwapInfoById.Add(mapId, new TerrainSwapInfo());
+
+                TerrainSwapInfo terrainSwapInfo = _terrainSwapInfoById[mapId];
+                terrainSwapInfo.Id = mapId;
+                terrainSwapInfo.UiWorldMapAreaIDSwaps.Add(worldMapArea);
+
+                ++count;
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} terrain world maps in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
+        }
+        void LoadTerrainSwapDefaults()
+        {
             uint oldMSTime = Time.GetMSTime();
 
             SQLResult result = DB.World.Query("SELECT MapId, TerrainSwapMap FROM `terrain_swap_defaults`");
@@ -7395,87 +7531,20 @@ namespace Game
                     continue;
                 }
 
-                _terrainMapDefaultStore.Add(mapId, terrainSwap);
+                TerrainSwapInfo terrainSwapInfo = _terrainSwapInfoById[terrainSwap];
+                terrainSwapInfo.Id = terrainSwap;
+                _terrainSwapInfoByMap[mapId].Add(terrainSwapInfo);
 
                 ++count;
             } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} terrain swap defaults in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
-        public void LoadTerrainPhaseInfo()
+        void LoadAreaPhases()
         {
-            _terrainPhaseInfoStore.Clear();
-
             uint oldMSTime = Time.GetMSTime();
 
-            SQLResult result = DB.World.Query("SELECT Id, TerrainSwapMap FROM `terrain_phase_info`");
-            if (result.IsEmpty())
-            {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 terrain phase infos. DB table `terrain_phase_info` is empty.");
-                return;
-            }
-
-            uint count = 0;
-            do
-            {
-                uint phaseId = result.Read<uint>(0);
-                if (!CliDB.PhaseStorage.ContainsKey(phaseId))
-                {
-                    Log.outError(LogFilter.Sql, "Phase {0} defined in `terrain_phase_info` does not exist, skipped.", phaseId);
-                    continue;
-                }
-
-                uint terrainSwap = result.Read<uint>(1);
-
-                _terrainPhaseInfoStore.Add(phaseId, terrainSwap);
-
-                ++count;
-            }
-            while (result.NextRow());
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} phase infos in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
-        }
-        public void LoadTerrainWorldMaps()
-        {
-            _terrainWorldMapStore.Clear();
-
-            uint oldMSTime = Time.GetMSTime();
-
-            //                                               0               1
-            SQLResult result = DB.World.Query("SELECT TerrainSwapMap, WorldMapArea FROM `terrain_worldmap`");
-
-            if (result.IsEmpty())
-            {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 terrain world maps. DB table `terrain_worldmap` is empty.");
-                return;
-            }
-
-            uint count = 0;
-            do
-            {
-                uint mapId = result.Read<uint>(0);
-
-                if (!CliDB.MapStorage.ContainsKey(mapId))
-                {
-                    Log.outError(LogFilter.Sql, "TerrainSwapMap {0} defined in `terrain_worldmap` does not exist, skipped.", mapId);
-                    continue;
-                }
-
-                uint worldMapArea = result.Read<uint>(1);
-
-                _terrainWorldMapStore.Add(mapId, worldMapArea);
-
-                ++count;
-            } while (result.NextRow());
-
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} terrain world maps in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
-        }
-        public void LoadAreaPhases()
-        {
-            _phases.Clear();
-
-            uint oldMSTime = Time.GetMSTime();
-
-            //                                               0       1
+            //                                         0       1
             SQLResult result = DB.World.Query("SELECT AreaId, PhaseId FROM `phase_area`");
             if (result.IsEmpty())
             {
@@ -7483,19 +7552,60 @@ namespace Game
                 return;
             }
 
+            Func<uint, PhaseInfoStruct> getOrCreatePhaseIfMissing = phaseId =>
+            {
+                PhaseInfoStruct phaseInfo = _phaseInfoById[phaseId];
+                phaseInfo.Id = phaseId;
+                return phaseInfo;
+            };
+
             uint count = 0;
             do
             {
-                PhaseInfoStruct phase = new PhaseInfoStruct();
                 uint area = result.Read<uint>(0);
-                phase.Id = result.Read<uint>(1);
+                uint phaseId = result.Read<uint>(1);
 
-                _phases.Add(area, phase);
+                if (!CliDB.AreaTableStorage.ContainsKey(area))
+                {
+                    Log.outError(LogFilter.Sql, $"Area {area} defined in `phase_area` does not exist, skipped.");
+                    continue;
+                }
+
+                if (!CliDB.PhaseStorage.ContainsKey(phaseId))
+                {
+                    Log.outError(LogFilter.Sql, $"Phase {phaseId} defined in `phase_area` does not exist, skipped.");
+                    continue;
+                }
+
+                PhaseInfoStruct phase = getOrCreatePhaseIfMissing(phaseId);
+                phase.Areas.Add(area);
+                _phaseInfoByArea[area].Add(new PhaseAreaInfo(phase));
 
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} phase areas in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            foreach (var pair in _phaseInfoByArea)
+            {
+                uint parentAreaId = pair.Key;
+                do
+                {
+                    AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(parentAreaId);
+                    if (area == null)
+                        break;
+
+                    parentAreaId = area.ParentAreaID;
+                    if (parentAreaId == 0)
+                        break;
+
+                    var parentAreaPhases = _phaseInfoByArea.LookupByKey(parentAreaId);
+                    foreach (PhaseAreaInfo parentAreaPhase in parentAreaPhases)
+                        if (parentAreaPhase.PhaseInfo.Id == pair.Value.PhaseInfo.Id)
+                            parentAreaPhase.SubAreaExclusions.Add(pair.Key);
+
+                } while (true);
+            }
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} phase areas in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
         public void LoadNPCSpellClickSpells()
         {
@@ -7623,15 +7733,21 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} skill max values in {1} ms", _skillTiers.Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public List<uint> GetPhaseTerrainSwaps(uint phaseid) { return _terrainPhaseInfoStore[phaseid]; }
-        public List<uint> GetDefaultTerrainSwaps(uint mapid) { return _terrainMapDefaultStore[mapid]; }
-        public List<uint> GetTerrainWorldMaps(uint terrainId) { return _terrainWorldMapStore[terrainId]; }
-        public MultiMap<uint, uint> GetDefaultTerrainSwapStore() { return _terrainMapDefaultStore; }
-        public List<PhaseInfoStruct> GetPhasesForArea(uint area) { return _phases[area]; }
-        public MultiMap<uint, PhaseInfoStruct> GetAreaAndZonePhases() { return _phases; }
-        public List<PhaseInfoStruct> GetPhasesForAreaOrZoneForLoading(uint areaOrZone)
+        public PhaseInfoStruct GetPhaseInfo(uint phaseId)
         {
-            return _phases.LookupByKey(areaOrZone);
+            return _phaseInfoById.LookupByKey(phaseId);
+        }
+        public List<PhaseAreaInfo> GetPhasesForArea(uint areaId)
+        {
+            return _phaseInfoByArea.LookupByKey(areaId);
+        }
+        public TerrainSwapInfo GetTerrainSwapInfo(uint terrainSwapId)
+        {
+            return _terrainSwapInfoById.LookupByKey(terrainSwapId);
+        }
+        public List<TerrainSwapInfo> GetTerrainSwapsForMap(uint mapId)
+        {
+            return _terrainSwapInfoByMap.LookupByKey(mapId);
         }
         public List<SpellClickInfo> GetSpellClickInfoMapBounds(uint creature_id)
         {
@@ -9481,10 +9597,10 @@ namespace Game
         List<ushort> _transportMaps = new List<ushort>();
 
         //Spells /Skills / Phases
-        MultiMap<uint, uint> _terrainPhaseInfoStore = new MultiMap<uint, uint>();
-        MultiMap<uint, uint> _terrainMapDefaultStore = new MultiMap<uint, uint>();
-        MultiMap<uint, uint> _terrainWorldMapStore = new MultiMap<uint, uint>();
-        MultiMap<uint, PhaseInfoStruct> _phases = new MultiMap<uint, PhaseInfoStruct>();
+        Dictionary<uint, PhaseInfoStruct> _phaseInfoById = new Dictionary<uint, PhaseInfoStruct>();
+        Dictionary<uint, TerrainSwapInfo> _terrainSwapInfoById = new Dictionary<uint, TerrainSwapInfo>();
+        MultiMap<uint, PhaseAreaInfo> _phaseInfoByArea = new MultiMap<uint, PhaseAreaInfo>();
+        MultiMap<uint, TerrainSwapInfo> _terrainSwapInfoByMap = new MultiMap<uint, TerrainSwapInfo>();
         MultiMap<uint, SpellClickInfo> _spellClickInfoStorage = new MultiMap<uint, SpellClickInfo>();
         Dictionary<uint, int> _fishingBaseForAreaStorage = new Dictionary<uint, int>();
         Dictionary<uint, SkillTiersEntry> _skillTiers = new Dictionary<uint, SkillTiersEntry>();
@@ -10296,9 +10412,46 @@ namespace Game
         public uint[] Value = new uint[SkillConst.MaxSkillStep];
     }
 
+    public class TerrainSwapInfo
+    {
+        public TerrainSwapInfo() { }
+        public TerrainSwapInfo(uint id)
+        {
+            Id = id;
+        }
+
+        public uint Id;
+        public List<uint> UiWorldMapAreaIDSwaps = new List<uint>();
+    }
+
     public class PhaseInfoStruct
     {
+        public PhaseInfoStruct(uint id)
+        {
+            Id = id;
+        }
+
+        public bool IsAllowedInArea(uint areaId)
+        {
+            return Areas.Any(areaToCheck =>
+            {
+                return Global.DB2Mgr.IsInArea(areaId, areaToCheck);
+            });
+        }
+
         public uint Id;
+        public List<uint> Areas = new List<uint>();
+    }
+
+    public class PhaseAreaInfo
+    {
+        public PhaseAreaInfo(PhaseInfoStruct phaseInfo)
+        {
+            PhaseInfo = phaseInfo;
+        }
+
+        public PhaseInfoStruct PhaseInfo;
+        public List<uint> SubAreaExclusions = new List<uint>();
         public List<Condition> Conditions = new List<Condition>();
     }
 

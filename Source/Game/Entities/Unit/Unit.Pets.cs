@@ -784,7 +784,7 @@ namespace Game.Entities
                 return false;
             }
 
-            pet.CopyPhaseFrom(this);
+            PhasingHandler.InheritPhaseShift(pet, this);
 
             pet.GetCharmInfo().SetPetNumber(Global.ObjectMgr.GeneratePetNumber(), true);
             // this enables pet details window (Shift+P)

@@ -232,7 +232,7 @@ namespace Game.Garrisons
             GarrisonCreateResult garrisonCreateResult = new GarrisonCreateResult();
             garrisonCreateResult.GarrSiteLevelID = _siteLevel.Id;
             _owner.SendPacket(garrisonCreateResult);
-            _owner.SendUpdatePhasing();
+            PhasingHandler.OnConditionChange(_owner);
             SendRemoteInfo();
             return true;
         }

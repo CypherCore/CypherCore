@@ -1608,17 +1608,17 @@ namespace Game.Entities
 
         public uint GetZoneId()
         {
-            return GetMap().GetZoneId(GetPositionX(), GetPositionY(), GetPositionZ());
+            return GetMap().GetZoneId(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ());
         }
 
         public uint GetAreaId()
         {
-            return GetMap().GetAreaId(GetPositionX(), GetPositionY(), GetPositionZ());
+            return GetMap().GetAreaId(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ());
         }
 
         public void GetZoneAndAreaId(out uint zoneid, out uint areaid)
         {
-            GetMap().GetZoneAndAreaId(out zoneid, out areaid, posX, posY, posZ);
+            GetMap().GetZoneAndAreaId(GetPhaseShift(), out zoneid, out areaid, posX, posY, posZ);
         }
 
         public InstanceScript GetInstanceScript()
@@ -2047,7 +2047,7 @@ namespace Game.Entities
             if (!go)
                 return null;
 
-            go.CopyPhaseFrom(this);
+            PhasingHandler.InheritPhaseShift(go, this);
 
             go.SetRespawnTime((int)respawnTime);
             if (IsTypeId(TypeId.Player) || IsTypeId(TypeId.Unit)) //not sure how to handle this
@@ -2154,242 +2154,15 @@ namespace Game.Entities
             return (valuesCount > (uint)UnitFields.CombatReach) ? GetFloatValue(UnitFields.CombatReach) : SharedConst.DefaultWorldObjectSize;
         }
 
-        bool HasInPhaseList(uint phase)
-        {
-            return _phases.Contains(phase);
-        }
-
-        /// <summary>
-        /// Updates Area based phases, does not remove phases from auras
-        /// Phases from gm commands are not taken into calculations, they can be lost!!
-        /// </summary>
-        public void UpdateAreaAndZonePhase()
-        {
-            bool updateNeeded = false;
-            var allAreasPhases = Global.ObjectMgr.GetAreaAndZonePhases();
-            uint[] zoneAndArea = { GetZoneId(), GetAreaId() };
-
-            // We first remove all phases from other areas & zones
-            foreach (var key in allAreasPhases.Keys)
-                foreach (PhaseInfoStruct phase in allAreasPhases[key])
-                    if (!Global.DB2Mgr.IsInArea(GetAreaId(), key))
-                        updateNeeded = SetInPhase(phase.Id, false, false) || updateNeeded; // not in area, remove phase, true if there was something removed
-
-            // Then we add the phases from this area and zone if conditions are met
-            // Zone is done before Area, so if Area does not meet condition, the phase will be removed
-            foreach (uint area in zoneAndArea)
-            {
-                var currentPhases = Global.ObjectMgr.GetPhasesForArea(area);
-                if (currentPhases != null)
-                {
-                    foreach (PhaseInfoStruct phaseInfoStruct in currentPhases)
-                    {
-                        bool apply = Global.ConditionMgr.IsObjectMeetToConditions(this, phaseInfoStruct.Conditions);
-
-                        // add or remove phase depending of condition
-                        updateNeeded = SetInPhase(phaseInfoStruct.Id, false, apply) || updateNeeded;
-                    }
-                }
-            }
-
-            // do not remove a phase if it would be removed by an area but we have the same phase from an aura
-            Unit unit = ToUnit();
-            if (unit)
-            {
-                var auraPhaseList = unit.GetAuraEffectsByType(AuraType.Phase);
-                foreach (var eff in auraPhaseList)
-                {
-                    uint phase = (uint)eff.GetMiscValueB();
-                    updateNeeded = SetInPhase(phase, false, true) || updateNeeded;
-                }
-                var auraPhaseGroupList = unit.GetAuraEffectsByType(AuraType.PhaseGroup);
-                foreach (var eff in auraPhaseGroupList)
-                {
-                    uint phaseGroup = (uint)eff.GetMiscValueB();
-                    foreach (uint phase in Global.DB2Mgr.GetPhasesForGroup(phaseGroup))
-                        updateNeeded = SetInPhase(phase, false, true) || updateNeeded;
-                }
-            }
-
-            // only update visibility and send packets if there was a change in the phase list
-
-            if (updateNeeded && IsTypeId(TypeId.Player) && IsInWorld)
-                ToPlayer().GetSession().SendSetPhaseShift(GetPhases(), GetTerrainSwaps(), GetWorldMapAreaSwaps());
-
-            // only update visibilty once, to prevent objects appearing for a moment while adding in multiple phases
-            if (updateNeeded && IsInWorld)
-                UpdateObjectVisibility();
-        }
-
-        public virtual bool SetInPhase(uint id, bool update, bool apply)
-        {
-            if (id != 0)
-            {
-                if (apply)
-                {
-                    // do not run the updates if we are already in this phase
-                    if (_phases.Contains(id)) 
-                        return false;
-
-                    _phases.Add(id);
-                }
-                else
-                {
-                    if (!_phases.Contains(id))
-                        return false;
-
-                    // if area phase passes the condition we should not remove it (ie: if remove called from aura remove)
-                    // this however breaks the .mod phase command, you wont be able to remove any area based phases with it
-                    var phases = Global.ObjectMgr.GetPhasesForArea(GetAreaId());
-                    if (phases != null)
-                    {
-                        foreach (PhaseInfoStruct phase in phases)
-                        {
-                            if (id == phase.Id)
-                                if (Global.ConditionMgr.IsObjectMeetToConditions(this, phase.Conditions))
-                                    return false;
-                        }
-                    }
-
-                    _phases.Remove(id);
-                }
-            }
-            RebuildTerrainSwaps();
-
-            if (update && IsInWorld)
-                UpdateObjectVisibility();
-            return true;
-        }
-
-        public void CopyPhaseFrom(WorldObject obj, bool update = false)
-        {
-            if (!obj)
-                return;
-
-            foreach (uint phase in obj.GetPhases())
-                SetInPhase(phase, false, true);
-
-            if (update && IsInWorld)
-                UpdateObjectVisibility();
-        }
-
-        public void ClearPhases(bool update = false)
-        {
-            _phases.Clear();
-
-            RebuildTerrainSwaps();
-
-            if (update && IsInWorld)
-                UpdateObjectVisibility();
-        }
-
-        public bool IsInPhase(uint phase) { return _phases.Contains(phase); }
-
-        public bool IsInPhase(List<uint> phases)
-        {
-            // PhaseId 169 is the default fallback phase
-            if (_phases.Empty() && phases.Empty())
-                return true;
-
-            if (_phases.Empty() && phases.Contains(169))
-                return true;
-
-            if (phases.Empty() && _phases.Contains(169))
-                return true;
-
-            return _phases.Intersect(phases).Any();
-        }
-
         public bool IsInPhase(WorldObject obj)
         {
-            // PhaseId 169 is the default fallback phase
-            if (_phases.Empty() && obj.GetPhases().Empty())
-                return true;
-
-            if (_phases.Empty() && obj.IsInPhase(169))
-                return true;
-
-            if (obj.GetPhases().Empty() && IsInPhase(169))
-                return true;
-
-            if (IsTypeId(TypeId.Player) && ToPlayer().IsGameMaster())
-                return true;
-
-            return IsInPhase(obj.GetPhases());
+            return GetPhaseShift().CanSee(obj.GetPhaseShift());
         }
 
-        public bool IsInTerrainSwap(uint terrainSwap) { return _terrainSwaps.Contains(terrainSwap); }
-
-        public void RebuildTerrainSwaps()
-        {
-            // Clear all terrain swaps, will be rebuilt below
-            // Reason for this is, multiple phases can have the same terrain swap, we should not remove the swap if another phase still use it
-            _terrainSwaps.Clear();
-
-            // Check all applied phases for terrain swap and add it only once
-            foreach (uint phaseId in _phases)
-            {
-                var swaps = Global.ObjectMgr.GetPhaseTerrainSwaps(phaseId);
-                foreach (uint swap in swaps)
-                {
-                    // only add terrain swaps for current map
-                    MapRecord mapEntry = CliDB.MapStorage.LookupByKey(swap);
-                    if (mapEntry == null || mapEntry.ParentMapID != GetMapId())
-                        continue;
-
-                    if (Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.TerrainSwap, swap, this))
-                        _terrainSwaps.Add(swap);
-                }
-            }
-
-            // get default terrain swaps, only for current map always
-            var mapSwaps = Global.ObjectMgr.GetDefaultTerrainSwaps(GetMapId());
-            foreach (uint swap in mapSwaps)
-            {
-                if (Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.TerrainSwap, swap, this))
-                    _terrainSwaps.Add(swap);
-            }
-
-            // online players have a game client with world map display
-            if (IsTypeId(TypeId.Player))
-                RebuildWorldMapAreaSwaps();
-        }
-
-        void RebuildWorldMapAreaSwaps()
-        {
-            // Clear all world map area swaps, will be rebuilt below
-            _worldMapAreaSwaps.Clear();
-
-            // get ALL default terrain swaps, if we are using it (condition is true) 
-            // send the worldmaparea for it, to see swapped worldmaparea in client from other maps too, not just from our current
-            var defaults = Global.ObjectMgr.GetDefaultTerrainSwapStore();
-            foreach (uint swap in defaults.Values)
-            {
-                var uiMapSwaps = Global.ObjectMgr.GetTerrainWorldMaps(swap);
-                if (Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.TerrainSwap, swap, this))
-                {
-                    foreach (uint worldMapAreaId in uiMapSwaps)
-                        _worldMapAreaSwaps.Add(worldMapAreaId);
-                }
-            }
-
-            // Check all applied phases for world map area swaps
-            foreach (uint phaseId in _phases)
-            {
-                var swaps = Global.ObjectMgr.GetPhaseTerrainSwaps(phaseId);
-                foreach (uint swap in swaps)
-                {
-                    var uiMapSwaps = Global.ObjectMgr.GetTerrainWorldMaps(swap);
-                    if (Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.TerrainSwap, swap, this))
-                        foreach (uint worldMapAreaId in uiMapSwaps)
-                            _worldMapAreaSwaps.Add(worldMapAreaId);
-                }
-            }
-        }
-
-        public List<uint> GetPhases() { return _phases; }
-        public List<uint> GetTerrainSwaps() { return _terrainSwaps; }
-        public List<uint> GetWorldMapAreaSwaps() { return _worldMapAreaSwaps; }
+        public PhaseShift GetPhaseShift() { return _phaseShift; }
+        public void SetPhaseShift(PhaseShift phaseShift) { _phaseShift = phaseShift; }
+        public PhaseShift GetSuppressedPhaseShift() { return _suppressedPhaseShift; }
+        public void SetSuppressedPhaseShift(PhaseShift phaseShift) { _suppressedPhaseShift = phaseShift; }
         public int GetDBPhase() { return _dbPhase; }
 
         // if negative it is used as PhaseGroupId
@@ -2707,7 +2480,7 @@ namespace Game.Entities
                 else
                     GetHitSpherePointFor(new Position(ox, oy, oz), out x, out y, out z);
 
-                return GetMap().isInLineOfSight(x, y, z + 2.0f, ox, oy, oz + 2.0f, GetPhases());
+                return GetMap().isInLineOfSight(GetPhaseShift(), x, y, z + 2.0f, ox, oy, oz + 2.0f);
             }
 
             return true;
@@ -2838,7 +2611,7 @@ namespace Game.Entities
 
         public void UpdateGroundPositionZ(float x, float y, ref float z)
         {
-            float new_z = GetMap().GetHeight(GetPhases(), x, y, z, true);
+            float new_z = GetMap().GetHeight(GetPhaseShift(), x, y, z, true);
             if (new_z > MapConst.InvalidHeight)
                 z = new_z + 0.05f;                                   // just to be sure that we are not a few pixel under the surface
         }
@@ -2860,8 +2633,8 @@ namespace Game.Entities
                             bool canSwim = ToCreature().CanSwim();
                             float ground_z = z;
                             float max_z = canSwim
-                                ? GetMap().GetWaterOrGroundLevel(GetPhases(), x, y, z, ref ground_z, !ToUnit().HasAuraType(AuraType.WaterWalk))
-                                : ((ground_z = GetMap().GetHeight(GetPhases(), x, y, z, true)));
+                                ? GetMap().GetWaterOrGroundLevel(GetPhaseShift(), x, y, z, ref ground_z, !ToUnit().HasAuraType(AuraType.WaterWalk))
+                                : ((ground_z = GetMap().GetHeight(GetPhaseShift(), x, y, z, true)));
                             if (max_z > MapConst.InvalidHeight)
                             {
                                 if (z > max_z)
@@ -2872,7 +2645,7 @@ namespace Game.Entities
                         }
                         else
                         {
-                            float ground_z = GetMap().GetHeight(GetPhases(), x, y, z, true);
+                            float ground_z = GetMap().GetHeight(GetPhaseShift(), x, y, z, true);
                             if (z < ground_z)
                                 z = ground_z;
                         }
@@ -2884,7 +2657,7 @@ namespace Game.Entities
                         if (!ToPlayer().CanFly())
                         {
                             float ground_z = z;
-                            float max_z = GetMap().GetWaterOrGroundLevel(GetPhases(), x, y, z, ref ground_z, !ToUnit().HasAuraType(AuraType.WaterWalk));
+                            float max_z = GetMap().GetWaterOrGroundLevel(GetPhaseShift(), x, y, z, ref ground_z, !ToUnit().HasAuraType(AuraType.WaterWalk));
                             if (max_z > MapConst.InvalidHeight)
                             {
                                 if (z > max_z)
@@ -2895,7 +2668,7 @@ namespace Game.Entities
                         }
                         else
                         {
-                            float ground_z = GetMap().GetHeight(GetPhases(), x, y, z, true);
+                            float ground_z = GetMap().GetHeight(GetPhaseShift(), x, y, z, true);
                             if (z < ground_z)
                                 z = ground_z;
                         }
@@ -2903,7 +2676,7 @@ namespace Game.Entities
                     }
                 default:
                     {
-                        float ground_z = GetMap().GetHeight(GetPhases(), x, y, z, true);
+                        float ground_z = GetMap().GetHeight(GetPhaseShift(), x, y, z, true);
                         if (ground_z > MapConst.InvalidHeight)
                             z = ground_z;
                         break;
@@ -3002,8 +2775,8 @@ namespace Game.Entities
                 return;
             }
 
-            ground = GetMap().GetHeight(GetPhases(), destx, desty, MapConst.MaxHeight, true);
-            floor = GetMap().GetHeight(GetPhases(), destx, desty, pos.posZ, true);
+            ground = GetMap().GetHeight(GetPhaseShift(), destx, desty, MapConst.MaxHeight, true);
+            floor = GetMap().GetHeight(GetPhaseShift(), destx, desty, pos.posZ, true);
             destz = Math.Abs(ground - pos.posZ) <= Math.Abs(floor - pos.posZ) ? ground : floor;
 
             float step = dist / 10.0f;
@@ -3015,8 +2788,8 @@ namespace Game.Entities
                 {
                     destx -= step * (float)Math.Cos(angle);
                     desty -= step * (float)Math.Sin(angle);
-                    ground = GetMap().GetHeight(GetPhases(), destx, desty, MapConst.MaxHeight, true);
-                    floor = GetMap().GetHeight(GetPhases(), destx, desty, pos.posZ, true);
+                    ground = GetMap().GetHeight(GetPhaseShift(), destx, desty, MapConst.MaxHeight, true);
+                    floor = GetMap().GetHeight(GetPhaseShift(), destx, desty, pos.posZ, true);
                     destz = Math.Abs(ground - pos.posZ) <= Math.Abs(floor - pos.posZ) ? ground : floor;
                 }
                 // we have correct destz now
@@ -3035,8 +2808,8 @@ namespace Game.Entities
 
         float NormalizeZforCollision(WorldObject obj, float x, float y, float z)
         {
-            float ground = obj.GetMap().GetHeight(obj.GetPhases(), x, y, MapConst.MaxHeight, true);
-            float floor = obj.GetMap().GetHeight(obj.GetPhases(), x, y, z + 2.0f, true);
+            float ground = obj.GetMap().GetHeight(obj.GetPhaseShift(), x, y, MapConst.MaxHeight, true);
+            float floor = obj.GetMap().GetHeight(obj.GetPhaseShift(), x, y, z + 2.0f, true);
             float helper = Math.Abs(ground - z) <= Math.Abs(floor - z) ? ground : floor;
             if (z > helper) // must be above ground
             {
@@ -3047,7 +2820,7 @@ namespace Game.Entities
                         return z;
                 }
                 LiquidData liquid_status;
-                ZLiquidStatus res = obj.GetMap().getLiquidStatus(x, y, z, MapConst.MapAllLiquidTypes, out liquid_status);
+                ZLiquidStatus res = obj.GetMap().getLiquidStatus(obj.GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out liquid_status);
                 if (res != 0 && liquid_status.level > helper) // water must be above ground
                 {
                     if (liquid_status.level > z) // z is underwater
@@ -3074,7 +2847,7 @@ namespace Game.Entities
             }
 
             destz = NormalizeZforCollision(this, destx, desty, pos.GetPositionZ());
-            bool col = Global.VMapMgr.getObjectHitPos(GetMapId(), pos.posX, pos.posY, pos.posZ + 0.5f, destx, desty, destz + 0.5f, out destx, out desty, out destz, -0.5f);
+            bool col = Global.VMapMgr.getObjectHitPos(PhasingHandler.GetTerrainMapId(GetPhaseShift(), GetMap(), pos.posX, pos.posY), pos.posX, pos.posY, pos.posZ + 0.5f, destx, desty, destz + 0.5f, out destx, out desty, out destz, -0.5f);
 
             // collision occured
             if (col)
@@ -3086,7 +2859,7 @@ namespace Game.Entities
             }
 
             // check dynamic collision
-            col = GetMap().getObjectHitPos(GetPhases(), pos.posX, pos.posY, pos.posZ + 0.5f, destx, desty, destz + 0.5f, out destx, out desty, out destz, -0.5f);
+            col = GetMap().getObjectHitPos(GetPhaseShift(), pos.posX, pos.posY, pos.posZ + 0.5f, destx, desty, destz + 0.5f, out destx, out desty, out destz, -0.5f);
 
             // Collided with a gameobject
             if (col)
@@ -3150,9 +2923,8 @@ namespace Game.Entities
         Transport m_transport;
         Map _currMap;
         uint instanceId;
-        List<uint> _phases = new List<uint>();
-        List<uint> _terrainSwaps = new List<uint>();
-        List<uint> _worldMapAreaSwaps = new List<uint>();
+        PhaseShift _phaseShift= new PhaseShift();
+        PhaseShift _suppressedPhaseShift = new PhaseShift();                   // contains phases for current area but not applied due to conditions
         int _dbPhase;
         public bool IsInWorld { get; set; }
 

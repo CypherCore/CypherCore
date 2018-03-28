@@ -179,7 +179,7 @@ namespace Game.Chat.Commands
                 player.SaveRecallPosition();
 
             Map map = Global.MapMgr.CreateBaseMap(mapId);
-            float z = Math.Max(map.GetHeight(x, y, MapConst.MaxHeight), map.GetWaterLevel(x, y));
+            float z = Math.Max(map.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), map.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
 
             player.TeleportTo(mapId, x, y, z, player.GetOrientation());
             return true;
@@ -298,7 +298,7 @@ namespace Game.Chat.Commands
                 player.SaveRecallPosition();
 
             Map map = Global.MapMgr.CreateBaseMap(mapId);
-            z = Math.Max(map.GetHeight(x, y, MapConst.MaxHeight), map.GetWaterLevel(x, y));
+            z = Math.Max(map.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), map.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
 
             player.TeleportTo(mapId, x, y, z, 0.0f);
             return true;
@@ -446,7 +446,7 @@ namespace Game.Chat.Commands
             else
                 player.SaveRecallPosition();
 
-            float z = Math.Max(map.GetHeight(x, y, MapConst.MaxHeight), map.GetWaterLevel(x, y));
+            float z = Math.Max(map.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), map.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
 
             player.TeleportTo(zoneEntry.ContinentID, x, y, z, player.GetOrientation());
             return true;
@@ -495,7 +495,7 @@ namespace Game.Chat.Commands
                     return false;
                 }
                 Map map = Global.MapMgr.CreateBaseMap(mapId);
-                z = Math.Max(map.GetHeight(x, y, MapConst.MaxHeight), map.GetWaterLevel(x, y));
+                z = Math.Max(map.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), map.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
             }
 
             // stop flight if need

@@ -172,7 +172,7 @@ namespace Game.Entities
             if (!Create(map.GenerateLowGuid(HighGuid.Pet), map, petEntry))
                 return false;
 
-            CopyPhaseFrom(owner);
+            PhasingHandler.InheritPhaseShift(this, owner);
 
             setPetType(petType);
             SetFaction(owner.getFaction());

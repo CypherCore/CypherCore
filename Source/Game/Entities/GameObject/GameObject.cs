@@ -948,15 +948,8 @@ namespace Game.Entities
             if (!Create(entry, map, pos, data.rotation, animprogress, go_state, artKit))
                 return false;
 
-            if (data.phaseId != 0)
-                SetInPhase(data.phaseId, false, true);
-
-            if (data.phaseGroup != 0)
-            {
-                // Set the gameobject in all the phases of the phasegroup
-                foreach (var ph in Global.DB2Mgr.GetPhasesForGroup(data.phaseGroup))
-                    SetInPhase(ph, false, true);
-            }
+            PhasingHandler.InitDbPhaseShift(GetPhaseShift(), data.phaseUseFlags, data.phaseId, data.phaseGroup);
+            PhasingHandler.InitDbVisibleMapId(GetPhaseShift(), data.terrainSwapMap);
 
             if (data.spawntimesecs >= 0)
             {
@@ -2766,7 +2759,7 @@ namespace Game.Entities
         }
 
         public override uint GetDisplayId() { return _owner.GetDisplayId(); }
-        public override bool IsInPhase(List<uint> phases) { return _owner.IsInPhase(phases); }
+        public override bool IsInPhase(PhaseShift phaseShift) { return _owner.GetPhaseShift().CanSee(phaseShift); }
         public override Vector3 GetPosition() { return new Vector3(_owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ()); }
         public override float GetOrientation() { return _owner.GetOrientation(); }
         public override float GetScale() { return _owner.GetObjectScale(); }

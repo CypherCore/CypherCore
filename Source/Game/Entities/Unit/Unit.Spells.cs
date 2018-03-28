@@ -3313,7 +3313,7 @@ namespace Game.Entities
                 }
             }
         }
-        public void RemoveNotOwnSingleTargetAuras(uint newPhase = 0, bool phaseid = false)
+        public void RemoveNotOwnSingleTargetAuras(bool onPhaseChange = false)
         {
             // Iterate m_ownedAuras - aura is marked as single target in Unit::AddAura (and pushed to m_ownedAuras).
             // m_appliedAuras will NOT contain the aura before first Unit::Update after adding it to m_ownedAuras.
@@ -3330,12 +3330,12 @@ namespace Game.Entities
 
                 if (aura.GetCasterGUID() != GetGUID() && aura.IsSingleTarget())
                 {
-                    if (newPhase == 0 && !phaseid)
+                    if (onPhaseChange)
                         RemoveOwnedAura(list[i]);
                     else
                     {
                         Unit caster = aura.GetCaster();
-                        if (!caster || (newPhase != 0 && !caster.IsInPhase(newPhase)) || (newPhase == 0 && !caster.IsInPhase(this)))
+                        if (!caster || !caster.IsInPhase(this))
                             RemoveOwnedAura(list[i]);
                     }
                 }
@@ -3345,7 +3345,7 @@ namespace Game.Entities
             for (var i = 0; i < m_scAuras.Count; i++)
             {
                 var aura = m_scAuras[i];
-                if (aura.GetUnitOwner() != this && !aura.GetUnitOwner().IsInPhase(newPhase))
+                if (aura.GetUnitOwner() != this && (!onPhaseChange || !aura.GetUnitOwner().IsInPhase(this)))
                     aura.Remove();
             }
         }

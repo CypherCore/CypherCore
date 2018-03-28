@@ -727,7 +727,7 @@ namespace Game.Maps
         {
             var players = instance.GetPlayers();
             foreach (var player in players)
-                player.SendUpdatePhasing();
+                PhasingHandler.SendToPlayer(player);
         }
 
         public void UpdateCombatResurrection(uint diff)

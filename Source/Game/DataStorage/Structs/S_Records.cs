@@ -552,6 +552,6 @@ namespace Game.DataStorage
         public SummonCategory Control;
         public ushort Faction;
         public SummonType Title;
-        public byte Slot;
+        public sbyte Slot;
     }
 }

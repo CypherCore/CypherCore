@@ -477,7 +477,7 @@ namespace Game.Chat
                 if (!obj)
                     return false;
 
-                obj.CopyPhaseFrom(player);
+                PhasingHandler.InheritPhaseShift(obj, player);
 
                 if (spawntimeSecs != 0)
                 {
@@ -616,6 +616,13 @@ namespace Game.Chat
                     obj.SetByteValue(GameObjectFields.Bytes1, (byte)objectType, (byte)objectState);
                 else if (objectType == 4)
                     obj.SendCustomAnim(objectState);
+                else if (objectType == 5)
+                {
+                    if (objectState < 0 || objectState > (uint)GameObjectDestructibleState.Rebuilding)
+                        return false;
+
+                    obj.SetDestructibleState((GameObjectDestructibleState)objectState);
+                }
 
                 handler.SendSysMessage("Set gobject type {0} state {1}", objectType, objectState);
                 return true;

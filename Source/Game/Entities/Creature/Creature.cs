@@ -741,12 +741,11 @@ namespace Game.Entities
         {
             SetMap(map);
 
-            if (data != null && data.phaseId != 0)
-                SetInPhase(data.phaseId, false, true);
-
-            if (data != null && data.phaseGroup != 0)
-                foreach (var ph in Global.DB2Mgr.GetPhasesForGroup(data.phaseGroup))
-                    SetInPhase(ph, false, true);
+            if (data != null)
+            {
+                PhasingHandler.InitDbPhaseShift(GetPhaseShift(), data.phaseUseFlags, data.phaseId, data.phaseGroup);
+                PhasingHandler.InitDbVisibleMapId(GetPhaseShift(), data.terrainSwapMap);
+            }
 
             CreatureTemplate cinfo = Global.ObjectMgr.GetCreatureTemplate(entry);
             if (cinfo == null)
@@ -2623,7 +2622,7 @@ namespace Game.Entities
                 return;
 
             // Set the movement flags if the creature is in that mode. (Only fly if actually in air, only swim if in water, etc)
-            float ground = GetMap().GetHeight(GetPhases(), GetPositionX(), GetPositionY(), GetPositionZMinusOffset());
+            float ground = GetMap().GetHeight(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZMinusOffset());
 
             bool isInAir = (MathFunctions.fuzzyGt(GetPositionZMinusOffset(), ground + 0.05f) || MathFunctions.fuzzyLt(GetPositionZMinusOffset(), ground - 0.05f)); // Can be underground too, prevent the falling
 
@@ -2934,7 +2933,7 @@ namespace Game.Entities
                 m_deathState = DeathState.Dead;
                 if (CanFly())
                 {
-                    float tz = map.GetHeight(GetPhases(), data.posX, data.posY, data.posZ, true, MapConst.MaxFallDistance);
+                    float tz = map.GetHeight(GetPhaseShift(), data.posX, data.posY, data.posZ, true, MapConst.MaxFallDistance);
                     if (data.posZ - tz > 0.1f && GridDefines.IsValidMapCoord(tz))
                         Relocate(data.posX, data.posY, tz);
                 }

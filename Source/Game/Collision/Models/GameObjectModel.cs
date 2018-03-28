@@ -31,7 +31,7 @@ namespace Game.Collision
     {
         public virtual bool IsSpawned() { return false; }
         public virtual uint GetDisplayId() { return 0; }
-        public virtual bool IsInPhase(List<uint> phases) { return false; }
+        public virtual bool IsInPhase(PhaseShift phaseShift) { return false; }
         public virtual Vector3 GetPosition() { return Vector3.Zero; }
         public virtual float GetOrientation() { return 0.0f; }
         public virtual float GetScale() { return 1.0f; }
@@ -86,12 +86,12 @@ namespace Game.Collision
             return mdl;
         }
 
-        public override bool IntersectRay(Ray ray, ref float maxDist, bool stopAtFirstHit, List<uint> phases)
+        public override bool IntersectRay(Ray ray, ref float maxDist, bool stopAtFirstHit, PhaseShift phaseShift)
         {
             if (!isCollisionEnabled() || !owner.IsSpawned())
                 return false;
 
-            if (!owner.IsInPhase(phases))
+            if (!owner.IsInPhase(phaseShift))
                 return false;
 
             float time = ray.intersectionTime(iBound);

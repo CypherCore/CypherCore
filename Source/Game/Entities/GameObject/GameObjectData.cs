@@ -1089,8 +1089,10 @@ namespace Game.Entities
         public GameObjectState go_state;
         public ulong spawnMask;
         public byte artKit;
+        public PhaseUseFlagsValues phaseUseFlags;
         public uint phaseId;
         public uint phaseGroup;
+        public int terrainSwapMap;
         public uint ScriptId;
         public bool dbData = true;
     }

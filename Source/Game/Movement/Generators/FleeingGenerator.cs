@@ -52,7 +52,7 @@ namespace Game.Movement
             _getPoint(owner, out x, out y, out z);
 
             Position mypos = owner.GetPosition();
-            bool isInLOS = Global.VMapMgr.isInLineOfSight(owner.GetMapId(), mypos.posX, mypos.posY, mypos.posZ + 2.0f, x, y, z + 2.0f);
+            bool isInLOS = Global.VMapMgr.isInLineOfSight(PhasingHandler.GetTerrainMapId(owner.GetPhaseShift(), owner.GetMap(), mypos.posX, mypos.posY), mypos.posX, mypos.posY, mypos.posZ + 2.0f, x, y, z + 2.0f);
 
             if (!isInLOS)
             {

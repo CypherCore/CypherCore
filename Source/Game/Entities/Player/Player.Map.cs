@@ -120,7 +120,7 @@ namespace Game.Entities
             UpdatePvPState(true);
 
             UpdateAreaDependentAuras(newArea);
-            UpdateAreaAndZonePhase();
+            PhasingHandler.OnAreaChange(this);
 
             if (IsAreaThatActivatesPvpTalents(newArea))
                 EnablePvpRules();
@@ -232,8 +232,6 @@ namespace Game.Entities
             UpdateLocalChannels(newZone);
 
             UpdateZoneDependentAuras(newZone);
-
-            UpdateAreaAndZonePhase();
         }
 
         public InstanceBind GetBoundInstance(uint mapid, Difficulty difficulty, bool withExpired = false)
@@ -721,7 +719,7 @@ namespace Game.Entities
         public override void UpdateUnderwaterState(Map m, float x, float y, float z)
         {
             LiquidData liquid_status;
-            ZLiquidStatus res = m.getLiquidStatus(x, y, z, MapConst.MapAllLiquidTypes, out liquid_status);
+            ZLiquidStatus res = m.getLiquidStatus(GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out liquid_status);
             if (res == 0)
             {
                 m_MirrorTimerFlags &= ~(PlayerUnderwaterState.InWater | PlayerUnderwaterState.InLava | PlayerUnderwaterState.InSlime | PlayerUnderwaterState.InDarkWater);

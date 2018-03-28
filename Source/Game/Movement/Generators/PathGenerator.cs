@@ -39,8 +39,8 @@ namespace Game.Movement
             _navMeshQuery = null;
             Log.outDebug(LogFilter.Maps, "PathGenerator:PathGenerator for {0}", _sourceUnit.GetGUID().ToString());
 
-            uint mapId = _sourceUnit.GetMapId();
-            if (Global.DisableMgr.IsPathfindingEnabled(mapId))
+            uint mapId = PhasingHandler.GetTerrainMapId(_sourceUnit.GetPhaseShift(), _sourceUnit.GetMap(), _sourceUnit.GetPositionX(), _sourceUnit.GetPositionY());
+            if (Global.DisableMgr.IsPathfindingEnabled(_sourceUnit.GetMapId()))
             {
                 _navMesh = Global.MMapMgr.GetNavMesh(mapId);
                 _navMeshQuery = Global.MMapMgr.GetNavMeshQuery(mapId, _sourceUnit.GetInstanceId());
@@ -175,7 +175,7 @@ namespace Game.Movement
                     // Check both start and end points, if they're both in water, then we can *safely* let the creature move
                     for (uint i = 0; i < _pathPoints.Length; ++i)
                     {
-                        ZLiquidStatus status = _sourceUnit.GetMap().getLiquidStatus(_pathPoints[i].X, _pathPoints[i].Y, _pathPoints[i].Z, MapConst.MapAllLiquidTypes);
+                        ZLiquidStatus status = _sourceUnit.GetMap().getLiquidStatus(_sourceUnit.GetPhaseShift(), _pathPoints[i].X, _pathPoints[i].Y, _pathPoints[i].Z, MapConst.MapAllLiquidTypes);
                         // One of the points is not in the water, cancel movement.
                         if (status == ZLiquidStatus.NoWater)
                         {
@@ -201,7 +201,7 @@ namespace Game.Movement
                     Creature owner = _sourceUnit.ToCreature();
 
                     Vector3 p = (distToStartPoly > 7.0f) ? startPos : endPos;
-                    if (_sourceUnit.GetMap().IsUnderWater(p.X, p.Y, p.Z))
+                    if (_sourceUnit.GetMap().IsUnderWater(_sourceUnit.GetPhaseShift(), p.X, p.Y, p.Z))
                     {
                         Log.outDebug(LogFilter.Maps, "++ BuildPolyPath . underWater case\n");
                         if (owner.CanSwim())
@@ -834,7 +834,7 @@ namespace Game.Movement
         NavTerrain GetNavTerrain(float x, float y, float z)
         {
             LiquidData data;
-            ZLiquidStatus liquidStatus = _sourceUnit.GetMap().getLiquidStatus(x, y, z, MapConst.MapAllLiquidTypes, out data);
+            ZLiquidStatus liquidStatus = _sourceUnit.GetMap().getLiquidStatus(_sourceUnit.GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out data);
             if (liquidStatus == ZLiquidStatus.NoWater)
                 return NavTerrain.Ground;
 

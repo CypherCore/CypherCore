@@ -283,7 +283,7 @@ namespace Game
                             mapID = (uint)corpseMapEntry.CorpseMapID;
                             x = corpseMapEntry.Corpse.X;
                             y = corpseMapEntry.Corpse.Y;
-                            z = entranceMap.GetHeight(player.GetPhases(), x, y, MapConst.MaxHeight);
+                            z = entranceMap.GetHeight(player.GetPhaseShift(), x, y, MapConst.MaxHeight);
                         }
                     }
                 }

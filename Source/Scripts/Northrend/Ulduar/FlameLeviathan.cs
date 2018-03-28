@@ -721,7 +721,7 @@ namespace Scripts.Northrend.Ulduar.FlameLeviathan
         {
             float x, y, z;
             me.GetPosition(out x, out y, out z);
-            z = me.GetMap().GetHeight(me.GetPhases(), x, y, z);
+            z = me.GetMap().GetHeight(me.GetPhaseShift(), x, y, z);
             me.GetMotionMaster().MovePoint(0, x, y, z);
             me.SetPosition(x, y, z, 0);
         }

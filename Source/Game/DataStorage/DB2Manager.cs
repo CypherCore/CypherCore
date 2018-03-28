@@ -498,8 +498,6 @@ namespace Game.DataStorage
 
             foreach (WorldMapAreaRecord worldMapArea in CliDB.WorldMapAreaStorage.Values)
                 _worldMapAreaByAreaID[worldMapArea.AreaID] = worldMapArea;
-
-            CliDB.WorldMapAreaStorage.Clear();
         }
 
         public IDB2Storage GetStorage(uint type)

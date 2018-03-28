@@ -1817,7 +1817,7 @@ namespace Game.Entities
             }
 
             UpdateForQuestWorldObjects();
-            SendUpdatePhasing();
+            PhasingHandler.OnConditionChange(this);
         }
 
         public QuestGiverStatus GetQuestDialogStatus(WorldObject questgiver)

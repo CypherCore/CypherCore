@@ -357,6 +357,18 @@ namespace Game
             //Load weighted graph on taxi nodes path
             Global.TaxiPathGraph.Initialize();
 
+            MultiMap<uint, uint> mapData = new MultiMap<uint, uint>();
+            foreach (MapRecord mapEntry in CliDB.MapStorage.Values)
+            {
+                if (mapEntry.ParentMapID != -1)
+                    mapData.Add((uint)mapEntry.ParentMapID, mapEntry.Id);
+            }
+
+            Global.MapMgr.InitializeParentMapData(mapData);
+
+            Global.VMapMgr.Initialize(mapData);
+            Global.MMapMgr.Initialize(mapData);
+
             Log.outInfo(LogFilter.ServerLoading, "Loading SpellInfo Storage...");
             Global.SpellMgr.LoadSpellInfoStore();
 
@@ -742,17 +754,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading World States...");              // must be loaded before Battleground, outdoor PvP and conditions
             LoadWorldStates();
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading Terrain Phase definitions...");
-            Global.ObjectMgr.LoadTerrainPhaseInfo();
-
-            Log.outInfo(LogFilter.ServerLoading, "Loading Terrain Swap Default definitions...");
-            Global.ObjectMgr.LoadTerrainSwapDefaults();
-
-            Log.outInfo(LogFilter.ServerLoading, "Loading Terrain World Map definitions...");
-            Global.ObjectMgr.LoadTerrainWorldMaps();
-
-            Log.outInfo(LogFilter.ServerLoading, "Loading Phase Area definitions...");
-            Global.ObjectMgr.LoadAreaPhases();
+            Global.ObjectMgr.LoadPhases();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Conditions...");
             Global.ConditionMgr.LoadConditions();

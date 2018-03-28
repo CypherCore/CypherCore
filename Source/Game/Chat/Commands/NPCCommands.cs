@@ -87,16 +87,7 @@ namespace Game.Chat
             if (data != null)
             {
                 handler.SendSysMessage(CypherStrings.NpcinfoPhases, data.phaseId, data.phaseGroup);
-                if (data.phaseGroup != 0)
-                {
-                    var _phases = target.GetPhases();
-                    if (!_phases.Empty())
-                    {
-                        handler.SendSysMessage(CypherStrings.NpcinfoPhaseIds);
-                        foreach (uint phaseId in _phases)
-                            handler.SendSysMessage("{0}", phaseId);
-                    }
-                }
+                PhasingHandler.PrintToChat(handler, target.GetPhaseShift());
             }
 
             handler.SendSysMessage(CypherStrings.NpcinfoArmor, target.GetArmor());
@@ -939,8 +930,8 @@ namespace Game.Chat
                     return false;
                 }
 
-                creature.ClearPhases();
-                creature.SetInPhase(phaseId, true, true);
+                PhasingHandler.ResetPhaseShift(creature);
+                PhasingHandler.AddPhase(creature, phaseId, true);
                 creature.SetDBPhase((int)phaseId);
 
                 creature.SaveToDB();
@@ -962,12 +953,8 @@ namespace Game.Chat
                     return false;
                 }
 
-                creature.ClearPhases();
-
-                foreach (uint id in Global.DB2Mgr.GetPhasesForGroup((uint)phaseGroupId))
-                    creature.SetInPhase(id, false, true); // don't send update here for multiple phases, only send it once after adding all phases
-
-                creature.UpdateObjectVisibility();
+                PhasingHandler.ResetPhaseShift(creature);
+                PhasingHandler.AddPhaseGroup(creature, (uint)phaseGroupId, true);
                 creature.SetDBPhase(-phaseGroupId);
 
                 creature.SaveToDB();
@@ -1119,7 +1106,7 @@ namespace Game.Chat
                 if (!creature)
                     return false;
 
-                creature.CopyPhaseFrom(chr);
+                PhasingHandler.InheritPhaseShift(creature, chr);
                 creature.SaveToDB(map.GetId(), 1ul << (int)map.GetSpawnMode());
 
                 ulong db_guid = creature.GetSpawnId();

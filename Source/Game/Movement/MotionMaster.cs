@@ -436,7 +436,7 @@ namespace Game.Movement
                 if (_owner.IsFlying())
                     point.Z = z;
                 else
-                    point.Z = _owner.GetMap().GetHeight(_owner.GetPhases(), point.X, point.Y, z);
+                    point.Z = _owner.GetMap().GetHeight(_owner.GetPhaseShift(), point.X, point.Y, z);
 
                 init.args.path[i] = point;
             }
@@ -514,7 +514,7 @@ namespace Game.Movement
         public void MoveFall(uint id = 0)
         {
             // use larger distance for vmap height search than in most other cases
-            float tz = _owner.GetMap().GetHeight(_owner.GetPhases(), _owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ(), true, MapConst.MaxFallDistance);
+            float tz = _owner.GetMap().GetHeight(_owner.GetPhaseShift(), _owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ(), true, MapConst.MaxFallDistance);
             if (tz <= MapConst.InvalidHeight)
                 return;
 

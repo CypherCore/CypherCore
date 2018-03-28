@@ -416,15 +416,6 @@ namespace Game.Entities
             }
         }
 
-        public override void AddToWorld()
-        {
-            if (!IsInWorld)
-            {
-                base.AddToWorld();
-            }
-            RebuildTerrainSwaps();
-        }
-
         public override void RemoveFromWorld()
         {
             // cleanup
@@ -935,7 +926,7 @@ namespace Game.Entities
             MoveSplineInit init = new MoveSplineInit(this);
 
             // Creatures without inhabit type air should begin falling after exiting the vehicle
-            if (IsTypeId(TypeId.Unit) && !ToCreature().CanFly() && height > GetMap().GetWaterOrGroundLevel(GetPhases(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), ref height) + 0.1f)
+            if (IsTypeId(TypeId.Unit) && !ToCreature().CanFly() && height > GetMap().GetWaterOrGroundLevel(GetPhaseShift(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), ref height) + 0.1f)
                 init.SetFall();
 
             init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), height, false);
@@ -1099,14 +1090,12 @@ namespace Game.Entities
 
         public HostileRefManager getHostileRefManager() { return m_HostileRefManager; }
 
-        public override bool SetInPhase(uint id, bool update, bool apply)
+        public void OnPhaseChange()
         {
-            bool res = base.SetInPhase(id, update, apply);
-
             if (!IsInWorld)
-                return res;
+                return;
 
-            if (IsTypeId(TypeId.Unit) || (!ToPlayer().IsGameMaster() && !ToPlayer().GetSession().PlayerLogout()))
+            if (IsTypeId(TypeId.Unit) || !ToPlayer().GetSession().PlayerLogout())
             {
                 HostileRefManager refManager = getHostileRefManager();
                 HostileReference refe = refManager.getFirst();
@@ -1143,26 +1132,8 @@ namespace Game.Entities
                     }
                 }
             }
-
-
-            foreach (var unit in m_Controlled)
-                if (unit.IsTypeId(TypeId.Unit))
-                    unit.SetInPhase(id, true, apply);
-
-            for (byte i = 0; i < SharedConst.MaxSummonSlot; ++i)
-            {
-                if (!m_SummonSlot[i].IsEmpty())
-                {
-                    Creature summon = GetMap().GetCreature(m_SummonSlot[i]);
-                    if (summon != null)
-                        summon.SetInPhase(id, true, apply);
-                }
-            }
-
-            RemoveNotOwnSingleTargetAuras(0, true);
-
-            return res;
         }
+
         public uint GetModelForForm(ShapeShiftForm form)
         {
             if (IsTypeId(TypeId.Player))

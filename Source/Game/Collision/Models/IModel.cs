@@ -25,7 +25,7 @@ namespace Game.Collision
         public virtual Vector3 getPosition() { return default(Vector3); }
         public virtual AxisAlignedBox getBounds() { return default(AxisAlignedBox); }
 
-        public virtual bool IntersectRay(Ray ray, ref float maxDist, bool stopAtFirstHit, List<uint> phases) { return false; }
+        public virtual bool IntersectRay(Ray ray, ref float maxDist, bool stopAtFirstHit, PhaseShift phaseShift) { return false; }
         public virtual bool IntersectRay(Ray ray, ref float distance, bool stopAtFirstHit) { return false; }
     }
 }

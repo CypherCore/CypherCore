@@ -1937,7 +1937,7 @@ namespace Game.Entities
         public override bool IsUnderWater()
         {
             return IsInWater() &&
-                GetPositionZ() < (GetMap().GetWaterLevel(GetPositionX(), GetPositionY()) - 2);
+                GetPositionZ() < (GetMap().GetWaterLevel(GetPhaseShift(), GetPositionX(), GetPositionY()) - 2);
         }
         public override bool IsInWater()
         {
@@ -2117,8 +2117,15 @@ namespace Game.Entities
         }
         public bool IsInAreaTriggerRadius(AreaTriggerRecord trigger)
         {
-            if (trigger == null || GetMapId() != trigger.ContinentID)
+            if (trigger == null)
                 return false;
+
+            if (GetMapId() != trigger.ContinentID && !GetPhaseShift().HasVisibleMapId(trigger.ContinentID))
+                return false;
+
+            if (trigger.PhaseID != 0 || trigger.PhaseGroupID != 0 || trigger.PhaseUseFlags != 0)
+                if (!PhasingHandler.InDbPhaseShift(this, (PhaseUseFlagsValues)trigger.PhaseUseFlags, trigger.PhaseID, trigger.PhaseGroupID))
+                    return false;
 
             if (trigger.Radius > 0.0f)
             {
@@ -2203,10 +2210,13 @@ namespace Game.Entities
                 getHostileRefManager().setOnlineOfflineState(false);
                 CombatStopWithPets();
 
+                PhasingHandler.SetAlwaysVisible(GetPhaseShift(), true);
                 m_serverSideVisibilityDetect.SetValue(ServerSideVisibilityType.GM, GetSession().GetSecurity());
             }
             else
             {
+                PhasingHandler.SetAlwaysVisible(GetPhaseShift(), false);
+
                 m_ExtraFlags &= ~PlayerExtraFlags.GMOn;
                 SetFactionForRace(GetRace());
                 RemoveFlag(PlayerFields.Flags, PlayerFlags.GM);
@@ -4820,7 +4830,7 @@ namespace Game.Entities
                 return null;
             }
 
-            pet.CopyPhaseFrom(this);
+            PhasingHandler.InheritPhaseShift(pet, this);
 
             pet.SetCreatorGUID(GetGUID());
             pet.SetUInt32Value(UnitFields.FactionTemplate, getFaction());
@@ -5691,6 +5701,8 @@ namespace Game.Entities
                 SendRaidDifficulty(difficulty.Flags.HasAnyFlag(DifficultyFlags.Legacy));
             }
 
+            PhasingHandler.OnMapChange(this);
+
             if (_garrison != null)
                 _garrison.SendRemoteInfo();
 
@@ -6202,7 +6214,7 @@ namespace Game.Entities
                 return;
 
             bool isOutdoor;
-            uint areaId = GetMap().GetAreaId(GetPositionX(), GetPositionY(), GetPositionZ(), out isOutdoor);
+            uint areaId = GetMap().GetAreaId(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ(), out isOutdoor);
             AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(areaId);
 
             if (WorldConfig.GetBoolValue(WorldCfg.VmapIndoorCheck) && !isOutdoor)
@@ -7305,16 +7317,6 @@ namespace Game.Entities
             CancelAutoRepeat cancelAutoRepeat = new CancelAutoRepeat();
             cancelAutoRepeat.Guid = target.GetGUID();                     // may be it's target guid
             SendMessageToSet(cancelAutoRepeat, false);
-        }
-
-        public void SendUpdatePhasing()
-        {
-            if (!IsInWorld)
-                return;
-
-            RebuildTerrainSwaps(); // to set default map swaps
-
-            GetSession().SendSetPhaseShift(GetPhases(), GetTerrainSwaps(), GetWorldMapAreaSwaps());
         }
 
         public override void BuildCreateUpdateBlockForPlayer(UpdateData data, Player target)

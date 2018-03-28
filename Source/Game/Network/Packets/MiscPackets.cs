@@ -743,42 +743,37 @@ namespace Game.Network.Packets
         public override void Write() { }
     }
 
-    public class PhaseShift : ServerPacket
+
+    class PhaseShiftChange : ServerPacket
     {
-        public PhaseShift() : base(ServerOpcodes.PhaseShiftChange, ConnectionType.Instance) { }
+        public PhaseShiftChange() : base(ServerOpcodes.PhaseShiftChange) { }
 
         public override void Write()
         {
-            _worldPacket.WritePackedGuid(ClientGUID);
-            _worldPacket.WriteUInt32(!PhaseShifts.Empty() ? 0 : 8);         // PhaseShiftFlags
-            _worldPacket.WriteUInt32(PhaseShifts.Count);
-            _worldPacket.WritePackedGuid(PersonalGUID);
-            foreach (uint phase in PhaseShifts)
-            {
-                _worldPacket.WriteUInt16(1);                              // PhaseFlags
-                _worldPacket.WriteUInt16(phase);                          // PhaseID
-            }
+            _worldPacket.WritePackedGuid(Client);
+            Phaseshift.Write(_worldPacket);
+            _worldPacket.WriteUInt32(VisibleMapIDs.Count * 2);           // size in bytes
+            foreach (ushort visibleMapId in VisibleMapIDs)
+                _worldPacket.WriteUInt16(visibleMapId);                   // Active terrain swap map id
 
-            _worldPacket.WriteUInt32(VisibleMapIDs.Count * 2);
-            foreach (uint map in VisibleMapIDs)
-                _worldPacket.WriteUInt16(map);                            // Active terrain swap map id
+            _worldPacket.WriteUInt32(PreloadMapIDs.Count * 2);           // size in bytes
+            foreach (ushort preloadMapId in PreloadMapIDs)
+                _worldPacket.WriteUInt16(preloadMapId);                            // Inactive terrain swap map id
 
-            _worldPacket.WriteUInt32(PreloadMapIDs.Count * 2);
-            foreach (uint map in PreloadMapIDs)
-                _worldPacket.WriteUInt16(map);                            // Inactive terrain swap map id
-
-            _worldPacket.WriteUInt32(UiWorldMapAreaIDSwaps.Count * 2);
-            foreach (uint map in UiWorldMapAreaIDSwaps)
-                _worldPacket.WriteUInt16(map);                            // UI map id, WorldMapArea.dbc, controls map display
+            _worldPacket.WriteUInt32(UiWorldMapAreaIDSwaps.Count * 2);   // size in bytes
+            foreach (ushort uiWorldMapAreaIDSwap in UiWorldMapAreaIDSwaps)
+                _worldPacket.WriteUInt16(uiWorldMapAreaIDSwap);          // UI map id, WorldMapArea.db2, controls map display
         }
 
-        public ObjectGuid ClientGUID;
-        public ObjectGuid PersonalGUID;
-        public List<uint> PhaseShifts = new List<uint>();
-        public List<uint> PreloadMapIDs = new List<uint>();
-        public List<uint> UiWorldMapAreaIDSwaps = new List<uint>();
-        public List<uint> VisibleMapIDs = new List<uint>();
+        public ObjectGuid Client;
+        public PhaseShiftData Phaseshift = new PhaseShiftData();
+        public List<ushort> PreloadMapIDs = new List<ushort>();
+        public List<ushort> UiWorldMapAreaIDSwaps = new List<ushort>();
+        public List<ushort> VisibleMapIDs = new List<ushort>();
     }
+
+
+
 
     public class ZoneUnderAttack : ServerPacket
     {
@@ -1298,5 +1293,40 @@ namespace Game.Network.Packets
         }
 
         public ObjectGuid SourceGuid;
+    }
+
+    //Structs
+    struct PhaseShiftDataPhase
+    {
+        public PhaseShiftDataPhase(uint phaseFlags, uint id)
+        {
+            PhaseFlags = (ushort)phaseFlags;
+            Id = (ushort)id;
+        }
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt16(PhaseFlags);
+            data.WriteUInt16(Id);
+        }
+
+        public ushort PhaseFlags;
+        public ushort Id;
+    }
+
+    class PhaseShiftData
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(PhaseShiftFlags);
+            data.WriteUInt32(Phases.Count);
+            data.WritePackedGuid(PersonalGUID);
+            foreach (PhaseShiftDataPhase phaseShiftDataPhase in Phases)
+                phaseShiftDataPhase.Write(data);
+        }
+
+        public uint PhaseShiftFlags;
+        public List<PhaseShiftDataPhase> Phases = new List<PhaseShiftDataPhase>();
+        public ObjectGuid PersonalGUID;
     }
 }

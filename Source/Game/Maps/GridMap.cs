@@ -43,6 +43,7 @@ namespace Game.Maps
             if (!File.Exists(filename))
                 return true;
 
+            _fileExists = true;
             using (BinaryReader reader = new BinaryReader(new FileStream(filename, FileMode.Open, FileAccess.Read)))
             {
                 mapFileHeader header = reader.ReadStruct<mapFileHeader>();
@@ -72,6 +73,7 @@ namespace Game.Maps
             _liquidFlags = null;
             _liquidMap = null;
             _gridGetHeight = getHeightFromFlat;
+            _fileExists = false;
         }
 
         void LoadAreaData(BinaryReader reader, uint offset)
@@ -435,8 +437,8 @@ namespace Game.Maps
             };
 
             Cell cell = new Cell(x, y);
-            float gx = x - (cell.GetGridX() - MapConst.CenterGridId + 1) *MapConst.SizeofGrids;
-            float gy = y - (cell.GetGridY() - MapConst.CenterGridId + 1) *MapConst.SizeofGrids;
+            float gx = x - (cell.GetGridX() - MapConst.CenterGridId + 1) * MapConst.SizeofGrids;
+            float gy = y - (cell.GetGridY() - MapConst.CenterGridId + 1) * MapConst.SizeofGrids;
 
             uint quarterIndex = 0;
             if (cell.GetCellY() < MapConst.MaxCells / 2)
@@ -595,6 +597,8 @@ namespace Game.Maps
 
         public float getHeight(float x, float y) { return _gridGetHeight(x, y); }
 
+        public bool fileExists() { return _fileExists; }
+
         #region Fields
         delegate float GetHeight(float x, float y);
 
@@ -627,6 +631,7 @@ namespace Game.Maps
         byte _liquidOffY;
         byte _liquidWidth;
         byte _liquidHeight;
+        bool _fileExists;
         #endregion
     }
 

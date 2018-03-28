@@ -71,7 +71,7 @@ namespace Framework.Constants
         public const string mmapMagic = "MMAP";
         public const int mmapVersion = 8;
 
-        public const string VMapMagic = "VMAP_4.5";
+        public const string VMapMagic = "VMAP_4.6";
         public const float VMAPInvalidHeightValue = -200000.0f;
     }
 

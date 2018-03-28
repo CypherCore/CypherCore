@@ -34,19 +34,27 @@ namespace Game
         const string MAP_FILE_NAME_FORMAT = "{0}/mmaps/{1:D4}.mmap";
         const string TILE_FILE_NAME_FORMAT = "{0}/mmaps/{1:D4}{2:D2}{3:D2}.mmtile";
 
+        public void Initialize(MultiMap<uint, uint> mapData)
+        {
+            childMapData = mapData;
+
+            foreach (var pair in mapData)
+                parentMapData[pair.Value] = pair.Key;
+        }
+
         MMapData GetMMapData(uint mapId)
         {
             return loadedMMaps.LookupByKey(mapId);
         }
 
-        bool loadMapData(uint mapId)
+        bool loadMapData(string basePath, uint mapId)
         {
             // we already have this map loaded?
             if (loadedMMaps.ContainsKey(mapId) && loadedMMaps[mapId] != null)
                 return true;
 
             // load and init dtNavMesh - read parameters from file
-            string filename = string.Format(MAP_FILE_NAME_FORMAT, Global.WorldMgr.GetDataPath(), mapId);
+            string filename = string.Format(MAP_FILE_NAME_FORMAT, basePath, mapId);
             if (!File.Exists(filename))
             {
                 Log.outError(LogFilter.Maps, "Could not open mmap file {0}", filename);
@@ -80,15 +88,30 @@ namespace Game
             }
         }
 
-        uint packTileID(int x, int y)
+        uint packTileID(uint x, uint y)
         {
-            return (uint)(x << 16 | y);
+            return (x << 16 | y);
         }
 
-        public bool loadMap(uint mapId, int x, int y)
+        public bool loadMap(string basePath, uint mapId, uint x, uint y)
         {
             // make sure the mmap is loaded and ready to load tiles
-            if (!loadMapData(mapId))
+            if (!loadMapImpl(basePath, mapId, x, y))
+                return false;
+
+            bool success = true;
+            var childMaps = childMapData.LookupByKey(mapId);
+            foreach (uint childMapId in childMaps)
+                if (!loadMapImpl(basePath, childMapId, x, y))
+                    success = false;
+
+            return success;
+        }
+
+        bool loadMapImpl(string basePath, uint mapId, uint x, uint y)
+        {
+            // make sure the mmap is loaded and ready to load tiles
+            if (!loadMapData(basePath, mapId))
                 return false;
 
             // get this mmap data
@@ -101,14 +124,20 @@ namespace Game
                 return false;
 
             // load this tile . mmaps/MMMXXYY.mmtile
-            string filename = string.Format(TILE_FILE_NAME_FORMAT, Global.WorldMgr.GetDataPath(), mapId, x, y);
-            if (!File.Exists(filename))
+            string fileName = string.Format(TILE_FILE_NAME_FORMAT, basePath, mapId, x, y);
+            if (!File.Exists(fileName))
             {
-                Log.outDebug(LogFilter.Maps, "MMAP:loadMap: Could not open mmtile file '{0}'", filename);
+                if (parentMapData.ContainsKey(mapId))
+                    fileName = string.Format(TILE_FILE_NAME_FORMAT, basePath, parentMapData[mapId], x, y);
+            }
+
+            if (!File.Exists(fileName))
+            { 
+                Log.outDebug(LogFilter.Maps, "MMAP:loadMap: Could not open mmtile file '{0}'", fileName);
                 return false;
             }
 
-            using (BinaryReader reader = new BinaryReader(new FileStream(filename, FileMode.Open, FileAccess.Read)))
+            using (BinaryReader reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read)))
             {
                 MmapTileHeader fileHeader = reader.ReadStruct<MmapTileHeader>();
                 Array.Reverse(fileHeader.mmapMagic);
@@ -144,7 +173,52 @@ namespace Game
             }
         }
 
+        public bool loadMapInstance(string basePath, uint mapId, uint instanceId)
+        {
+            if (!loadMapInstanceImpl(basePath, mapId, instanceId))
+                return false;
+
+            bool success = true;
+            var childMaps = childMapData.LookupByKey(mapId);
+            foreach (uint childMapId in childMaps)
+                if (!loadMapInstanceImpl(basePath, childMapId, instanceId))
+                    success = false;
+
+            return success;
+        }
+
+        bool loadMapInstanceImpl(string basePath, uint mapId, uint instanceId)
+        {
+            if (!loadMapData(basePath, mapId))
+                return false;
+
+            MMapData mmap = loadedMMaps[mapId];
+            if (mmap.navMeshQueries.ContainsKey(instanceId))
+                return true;
+
+            // allocate mesh query
+            Detour.dtNavMeshQuery query = new Detour.dtNavMeshQuery();
+            if (Detour.dtStatusFailed(query.init(mmap.navMesh, 1024)))
+            {
+                Log.outError(LogFilter.Maps, "MMAP.GetNavMeshQuery: Failed to initialize dtNavMeshQuery for mapId {0:D4} instanceId {1}", mapId, instanceId);
+                return false;
+            }
+
+            Log.outDebug(LogFilter.Maps, "MMAP.GetNavMeshQuery: created dtNavMeshQuery for mapId {0:D4} instanceId {1}", mapId, instanceId);
+            mmap.navMeshQueries.Add(instanceId, query);
+            return true;
+        }
+
         public bool unloadMap(uint mapId, uint x, uint y)
+        {
+            var childMaps = childMapData.LookupByKey(mapId);
+            foreach (uint childMapId in childMaps)
+                unloadMapImpl(childMapId, x, y);
+
+            return unloadMapImpl(mapId, x, y);
+        }
+
+        bool unloadMapImpl(uint mapId, uint x, uint y)
         {
             // check if we have this map loaded
             MMapData mmap = GetMMapData(mapId);
@@ -156,7 +230,7 @@ namespace Game
             }
 
             // check if we have this tile loaded
-            uint packedGridPos = packTileID((int)x, (int)y);
+            uint packedGridPos = packTileID(x, y);
             if (!mmap.loadedTileRefs.ContainsKey(packedGridPos))
             {
                 // file may not exist, therefore not loaded
@@ -164,7 +238,7 @@ namespace Game
                 return false;
             }
 
-            ulong tileRef = mmap.loadedTileRefs.LookupByKey(packedGridPos);
+            ulong tileRef = mmap.loadedTileRefs[packedGridPos];
 
             // unload, and mark as non loaded
             Detour.dtRawTileData data;
@@ -256,20 +330,6 @@ namespace Game
             if (mmap == null)
                 return null;
 
-            if (!mmap.navMeshQueries.ContainsKey(instanceId))
-            {
-                // allocate mesh query
-                Detour.dtNavMeshQuery query = new Detour.dtNavMeshQuery();
-                if (Detour.dtStatusFailed(query.init(mmap.navMesh, 1024)))
-                {
-                    Log.outError(LogFilter.Maps, "MMAP:GetNavMeshQuery: Failed to initialize dtNavMeshQuery for mapId {0} instanceId {1}", mapId, instanceId);
-                    return null;
-                }
-
-                Log.outInfo(LogFilter.Maps, "MMAP:GetNavMeshQuery: created dtNavMeshQuery for mapId {0} instanceId {1}", mapId, instanceId);
-                mmap.navMeshQueries.Add(instanceId, query);
-            }
-
             return mmap.navMeshQueries[instanceId];
         }
 
@@ -278,6 +338,9 @@ namespace Game
 
         Dictionary<uint, MMapData> loadedMMaps = new Dictionary<uint, MMapData>();
         uint loadedTiles;
+
+        MultiMap<uint, uint> childMapData = new MultiMap<uint, uint>();
+        Dictionary<uint, uint> parentMapData = new Dictionary<uint, uint>();
     }
 
     public class MMapData

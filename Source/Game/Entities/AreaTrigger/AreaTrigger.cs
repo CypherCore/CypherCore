@@ -24,6 +24,7 @@ using Game.Network.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using Game;
 
 namespace Game.Entities
 {
@@ -125,7 +126,7 @@ namespace Game.Entities
                 if (GetMiscTemplate().ScaleInfo.ExtraScale[scaleCurveIndex].AsInt32 != 0)
                     SetUInt32Value(AreaTriggerFields.ExtraScaleCurve + scaleCurveIndex, (uint)GetMiscTemplate().ScaleInfo.ExtraScale[scaleCurveIndex].AsInt32);
 
-            CopyPhaseFrom(caster);
+            PhasingHandler.InheritPhaseShift(this, caster);
 
             if (target && GetTemplate().HasFlag(AreaTriggerFlags.HasAttached))
             {

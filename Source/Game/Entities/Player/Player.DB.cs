@@ -3550,7 +3550,7 @@ namespace Game.Entities
                 if (!CliDB.MapStorage.ContainsKey(map))
                     return 0;
 
-                zone = Global.MapMgr.GetZoneId(map, posx, posy, posz);
+                zone = Global.MapMgr.GetZoneId(PhasingHandler.EmptyPhaseShift, map, posx, posy, posz);
 
                 if (zone > 0)
                 {

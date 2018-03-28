@@ -338,15 +338,8 @@ namespace Game.Entities
                 return null;
             }
 
-            if (data.phaseId != 0)
-                creature.SetInPhase(data.phaseId, false, true);
-            else if (data.phaseGroup != 0)
-            {
-                foreach (var phase in Global.DB2Mgr.GetPhasesForGroup(data.phaseGroup))
-                    creature.SetInPhase(phase, false, true);
-            }
-            else
-                creature.CopyPhaseFrom(this);
+            PhasingHandler.InitDbPhaseShift(creature.GetPhaseShift(), data.phaseUseFlags, data.phaseId, data.phaseGroup);
+            PhasingHandler.InitDbVisibleMapId(creature.GetPhaseShift(), data.terrainSwapMap);
 
             if (!map.AddToMap(creature))
                 return null;
@@ -382,6 +375,9 @@ namespace Game.Entities
                 Log.outError(LogFilter.Transport, "GameObject (guidlow {0}, entry {1}) not created. Suggested coordinates aren't valid (X: {2} Y: {3})", go.GetGUID().ToString(), go.GetEntry(), go.GetPositionX(), go.GetPositionY());
                 return null;
             }
+
+            PhasingHandler.InitDbPhaseShift(go.GetPhaseShift(), data.phaseUseFlags, data.phaseId, data.phaseGroup);
+            PhasingHandler.InitDbVisibleMapId(go.GetPhaseShift(), data.terrainSwapMap);
 
             if (!map.AddToMap(go))
                 return null;
@@ -444,12 +440,6 @@ namespace Game.Entities
                 }
             }
 
-            List<uint> phases = new List<uint>();
-            if (summoner)
-                phases = summoner.GetPhases();
-            else
-                phases = GetPhases(); // If there was no summoner, try to use the transport phases
-
             TempSummon summon = null;
             switch (mask)
             {
@@ -477,8 +467,7 @@ namespace Game.Entities
             if (!summon.Create(map.GenerateLowGuid(HighGuid.Creature), map, entry, x, y, z, o, null, vehId))
                 return null;
 
-            foreach (var phase in phases)
-                summon.SetInPhase(phase, false, true);
+            PhasingHandler.InheritPhaseShift(summon, summoner ? (WorldObject)summoner : this);
 
             summon.SetUInt32Value(UnitFields.CreatedBySpell, spellId);
 

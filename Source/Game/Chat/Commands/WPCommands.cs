@@ -552,7 +552,7 @@ namespace Game.Chat.Commands
                     return false;
                 }
 
-                creature.CopyPhaseFrom(chr);
+                PhasingHandler.InheritPhaseShift(creature, chr);
                 creature.SaveToDB(map.GetId(), 1ul << (int)map.GetSpawnMode());
 
                 ulong dbGuid = creature.GetSpawnId();
@@ -772,7 +772,7 @@ namespace Game.Chat.Commands
                         return false;
                     }
 
-                    creature.CopyPhaseFrom(chr);
+                    PhasingHandler.InheritPhaseShift(creature, chr);
                     creature.SaveToDB(map.GetId(), 1ul << (int)map.GetSpawnMode());
 
                     ulong dbGuid = creature.GetSpawnId();
@@ -838,7 +838,7 @@ namespace Game.Chat.Commands
                     return false;
                 }
 
-                creature.CopyPhaseFrom(chr);
+                PhasingHandler.InheritPhaseShift(creature, chr);
                 creature.SaveToDB(map.GetId(), 1ul << (int)map.GetSpawnMode());
 
                 ulong dbGuid = creature.GetSpawnId();
@@ -893,7 +893,7 @@ namespace Game.Chat.Commands
                     return false;
                 }
 
-                creature.CopyPhaseFrom(chr);
+                PhasingHandler.InheritPhaseShift(creature, chr);
                 creature.SaveToDB(map.GetId(), 1ul << (int)map.GetSpawnMode());
 
                 ulong dbGuid = creature.GetSpawnId();

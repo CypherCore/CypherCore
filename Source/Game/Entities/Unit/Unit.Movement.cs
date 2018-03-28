@@ -64,11 +64,11 @@ namespace Game.Entities
         }
         public virtual bool IsInWater()
         {
-            return GetMap().IsInWater(GetPositionX(), GetPositionY(), GetPositionZ());
+            return GetMap().IsInWater(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ());
         }
         public virtual bool IsUnderWater()
         {
-            return GetMap().IsUnderWater(GetPositionX(), GetPositionY(), GetPositionZ());
+            return GetMap().IsUnderWater(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ());
         }
 
         void propagateSpeedChange() { GetMotionMaster().propagateSpeedChange(); }
@@ -677,7 +677,7 @@ namespace Game.Entities
             }
 
             LiquidData liquid;
-            ZLiquidStatus liquidStatus = GetMap().getLiquidStatus(GetPositionX(), GetPositionY(), GetPositionZ(), MapConst.MapAllLiquidTypes, out liquid);
+            ZLiquidStatus liquidStatus = GetMap().getLiquidStatus(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ(), MapConst.MapAllLiquidTypes, out liquid);
             isSubmerged = liquidStatus.HasAnyFlag(ZLiquidStatus.UnderWater) || HasUnitMovementFlag(MovementFlag.Swimming);
             isInWater = liquidStatus.HasAnyFlag(ZLiquidStatus.InWater | ZLiquidStatus.UnderWater);
 
@@ -748,7 +748,7 @@ namespace Game.Entities
                 return;
 
             LiquidData liquid_status;
-            ZLiquidStatus res = m.getLiquidStatus(x, y, z, MapConst.MapAllLiquidTypes, out liquid_status);
+            ZLiquidStatus res = m.getLiquidStatus(GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out liquid_status);
             if (res == 0)
             {
                 if (_lastLiquid != null && _lastLiquid.SpellID != 0)

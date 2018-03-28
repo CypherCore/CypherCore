@@ -195,8 +195,8 @@ namespace Game.Chat
             Global.DB2Mgr.Map2ZoneCoordinates(zoneId, ref zoneX, ref zoneY);
 
             Map map = obj.GetMap();
-            float groundZ = map.GetHeight(obj.GetPhases(), obj.GetPositionX(), obj.GetPositionY(), MapConst.MaxHeight);
-            float floorZ = map.GetHeight(obj.GetPhases(), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ());
+            float groundZ = map.GetHeight(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), MapConst.MaxHeight);
+            float floorZ = map.GetHeight(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ());
 
             GridCoord gridCoord = GridDefines.ComputeGridCoord(obj.GetPositionX(), obj.GetPositionY());
 
@@ -210,13 +210,13 @@ namespace Game.Chat
 
             if (haveVMap)
             {
-                if (map.IsOutdoors(obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ()))
-                    handler.SendSysMessage("You are outdoors");
+                if (map.IsOutdoors(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ()))
+                    handler.SendSysMessage(CypherStrings.GpsPositionOutdoors);
                 else
-                    handler.SendSysMessage("You are indoors");
+                    handler.SendSysMessage(CypherStrings.GpsPositionIndoors);
             }
             else
-                handler.SendSysMessage("no VMAP available for area info");
+                handler.SendSysMessage(CypherStrings.GpsNoVmap);
 
             string unknown = handler.GetCypherString(CypherStrings.Unknown);
 
@@ -224,7 +224,7 @@ namespace Game.Chat
                 mapId, (mapEntry != null ? mapEntry.MapName[handler.GetSessionDbcLocale()] : unknown),
                 zoneId, (zoneEntry != null ? zoneEntry.AreaName[handler.GetSessionDbcLocale()] : unknown),
                 areaId, (areaEntry != null ? areaEntry.AreaName[handler.GetSessionDbcLocale()] : unknown),
-                string.Join(", ", obj.GetPhases()), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), obj.GetOrientation());
+                obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), obj.GetOrientation());
 
             Transport transport = obj.GetTransport();
             if (transport)
@@ -237,25 +237,12 @@ namespace Game.Chat
                 zoneX, zoneY, groundZ, floorZ, haveMap, haveVMap, haveMMap);
 
             LiquidData liquidStatus;
-            ZLiquidStatus status = map.getLiquidStatus(obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), MapConst.MapAllLiquidTypes, out liquidStatus);
+            ZLiquidStatus status = map.getLiquidStatus(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), MapConst.MapAllLiquidTypes, out liquidStatus);
 
             if (liquidStatus != null)
                 handler.SendSysMessage(CypherStrings.LiquidStatus, liquidStatus.level, liquidStatus.depth_level, liquidStatus.entry, liquidStatus.type_flags, status);
 
-            if (!obj.GetTerrainSwaps().Empty())
-            {
-                string ss = "";
-                foreach (uint swap in obj.GetTerrainSwaps())
-                    ss += swap + " ";
-                handler.SendSysMessage("Target's active terrain swaps: {0}", ss);
-            }
-            if (!obj.GetWorldMapAreaSwaps().Empty())
-            {
-                string ss = "";
-                foreach (uint swap in obj.GetWorldMapAreaSwaps())
-                    ss += swap + " ";
-                handler.SendSysMessage("Target's active world map area swaps: {0}", ss);
-            }
+            PhasingHandler.PrintToChat(handler, obj.GetPhaseShift());
 
             return true;
         }
@@ -602,7 +589,8 @@ namespace Game.Chat
                 target.GetContactPoint(_player, out x, out y, out z);
 
                 _player.TeleportTo(target.GetMapId(), x, y, z, _player.GetAngle(target), TeleportToOptions.GMMode);
-                _player.CopyPhaseFrom(target, true);
+                PhasingHandler.InheritPhaseShift(_player, target);
+                _player.UpdateObjectVisibility();
             }
             else
             {
@@ -727,7 +715,8 @@ namespace Game.Chat
                 float x, y, z;
                 handler.GetSession().GetPlayer().GetClosePoint(out x, out y, out z, target.GetObjectSize());
                 target.TeleportTo(handler.GetSession().GetPlayer().GetMapId(), x, y, z, target.GetOrientation());
-                target.CopyPhaseFrom(handler.GetSession().GetPlayer(), true);
+                PhasingHandler.InheritPhaseShift(target, handler.GetSession().GetPlayer());
+                target.UpdateObjectVisibility();
             }
             else
             {
@@ -1385,7 +1374,6 @@ namespace Game.Chat
             // Position data print
             uint mapId;
             uint areaId;
-            List<uint> phases = new List<uint>();
             string areaName = handler.GetCypherString(CypherStrings.Unknown);
             string zoneName = handler.GetCypherString(CypherStrings.Unknown);
 
@@ -1417,7 +1405,6 @@ namespace Game.Chat
                 areaId = target.GetAreaId();
                 alive = target.IsAlive() ? handler.GetCypherString(CypherStrings.Yes) : handler.GetCypherString(CypherStrings.No);
                 gender = (Gender)target.GetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetGender);
-                phases = target.GetPhases();
             }
             // get additional information from DB
             else
@@ -1582,9 +1569,9 @@ namespace Game.Chat
             // Output XII. LANG_PINFO_CHR_ALIVE
             handler.SendSysMessage(CypherStrings.PinfoChrAlive, alive);
 
-            // Output XIII. LANG_PINFO_CHR_PHASES
-            if (target && !phases.Empty())
-                handler.SendSysMessage(CypherStrings.PinfoChrPhases, string.Join(", ", phases));
+            // Output XIII. phases
+            if (target)
+                PhasingHandler.PrintToChat(handler, target.GetPhaseShift());
 
             // Output XIV. LANG_PINFO_CHR_MONEY
             ulong gold = money / MoneyConstants.Gold;
