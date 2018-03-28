@@ -31,6 +31,7 @@ namespace Game.Collision
     {
         public virtual bool IsSpawned() { return false; }
         public virtual uint GetDisplayId() { return 0; }
+        public virtual byte GetNameSetId() { return 0; }
         public virtual bool IsInPhase(PhaseShift phaseShift) { return false; }
         public virtual Vector3 GetPosition() { return Vector3.Zero; }
         public virtual float GetOrientation() { return 0.0f; }
@@ -109,6 +110,33 @@ namespace Game.Collision
                 maxDist = distance;
             }
             return hit;
+        }
+
+        public override void IntersectPoint(Vector3 point, AreaInfo info, PhaseShift phaseShift)
+        {
+            if (!isCollisionEnabled() || !owner.IsSpawned())
+                return;
+
+            if (!owner.IsInPhase(phaseShift))
+                return;
+
+            if (!iBound.contains(point))
+                return;
+
+            // child bounds are defined in object space:
+            Vector3 pModel = iInvRot * (point - iPos) * iInvScale;
+            Vector3 zDirModel = iInvRot * new Vector3(0.0f, 0.0f, -1.0f);
+            float zDist;
+            if (iModel.IntersectPoint(pModel, zDirModel, out zDist, info))
+            {
+                Vector3 modelGround = pModel + zDist * zDirModel;
+                float world_Z = ((modelGround * iInvRot) * iScale + iPos).Z;
+                if (info.ground_Z < world_Z)
+                {
+                    info.ground_Z = world_Z;
+                    info.adtId = owner.GetNameSetId();
+                }
+            }
         }
 
         public bool UpdatePosition()

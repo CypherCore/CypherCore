@@ -1834,16 +1834,59 @@ namespace Game.Maps
             groupId = 0;
 
             float vmap_z = z;
+            float dynamic_z = z;
+            float check_z = z;
             uint terrainMapId = PhasingHandler.GetTerrainMapId(phaseShift, this, x, y);
-            if (Global.VMapMgr.getAreaInfo(terrainMapId, x, y, ref vmap_z, out flags, out adtId, out rootId, out groupId))
+            uint vflags;
+            int vadtId;
+            int vrootId;
+            int vgroupId;
+            uint dflags;
+            int dadtId;
+            int drootId;
+            int dgroupId;
+
+            bool hasVmapAreaInfo = Global.VMapMgr.getAreaInfo(terrainMapId, x, y, ref vmap_z, out vflags, out vadtId, out vrootId, out vgroupId);
+            bool hasDynamicAreaInfo = _dynamicTree.getAreaInfo(x, y, ref dynamic_z, phaseShift, out dflags, out dadtId, out drootId, out dgroupId);
+
+            if (hasVmapAreaInfo)
+            {
+                if (hasDynamicAreaInfo && dynamic_z > vmap_z)
+                {
+                    check_z = dynamic_z;
+                    flags = dflags;
+                    adtId = dadtId;
+                    rootId = drootId;
+                    groupId = dgroupId;
+                }
+                else
+                {
+                    check_z = vmap_z;
+                    flags = vflags;
+                    adtId = vadtId;
+                    rootId = vrootId;
+                    groupId = vgroupId;
+                }
+            }
+            else if (hasDynamicAreaInfo)
+            {
+                check_z = dynamic_z;
+                flags = dflags;
+                adtId = dadtId;
+                rootId = drootId;
+                groupId = dgroupId;
+            }
+
+
+            if (hasVmapAreaInfo || hasDynamicAreaInfo)
             {
                 // check if there's terrain between player height and object height
                 GridMap gmap = GetGridMap(terrainMapId, x, y);
                 if (gmap != null)
                 {
-                    float _mapheight = gmap.getHeight(x, y);
+                    float mapHeight = gmap.getHeight(x, y);
                     // z + 2.0f condition taken from GetHeight(), not sure if it's such a great choice...
-                    if (z + 2.0f > _mapheight && _mapheight > vmap_z)
+                    if (z + 2.0f > mapHeight && mapHeight > check_z)
                         return false;
                 }
                 return true;

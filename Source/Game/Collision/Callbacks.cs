@@ -24,6 +24,7 @@ namespace Game.Collision
     public class WorkerCallback
     {
         public virtual void Invoke(Vector3 point, uint entry) { }
+        public virtual void Invoke(Vector3 point, IModel entry) { }
         public virtual bool Invoke(Ray ray, uint entry, ref float distance, bool pStopAtFirstHit) { return false; }
         public virtual bool Invoke(Ray r, IModel obj, ref float distance) { return false; }
         public virtual bool Invoke(Ray ray, uint idx, ref float maxDist) { return false; }
@@ -59,7 +60,7 @@ namespace Game.Collision
             zDist = float.PositiveInfinity;
             zVec = down;
         }
-        
+
         List<GroupModel> prims;
         public GroupModel hit;
         public float zDist;
@@ -245,5 +246,21 @@ namespace Game.Collision
         PhaseShift _phaseShift;
     }
 
+    public class DynamicTreeAreaInfoCallback : WorkerCallback
+    {
+        public DynamicTreeAreaInfoCallback(PhaseShift phaseShift)
+        {
+            _phaseShift = phaseShift;
+        }
 
+        public override void Invoke(Vector3 p, IModel obj)
+        {
+            obj.IntersectPoint(p, _areaInfo, _phaseShift);
+        }
+
+        public AreaInfo GetAreaInfo() { return _areaInfo; }
+
+        PhaseShift _phaseShift;
+        AreaInfo _areaInfo;
+    }
 }

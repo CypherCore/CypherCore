@@ -27,5 +27,6 @@ namespace Game.Collision
 
         public virtual bool IntersectRay(Ray ray, ref float maxDist, bool stopAtFirstHit, PhaseShift phaseShift) { return false; }
         public virtual bool IntersectRay(Ray ray, ref float distance, bool stopAtFirstHit) { return false; }
+        public virtual void IntersectPoint(Vector3 point, AreaInfo info, PhaseShift phaseShift) { }
     }
 }

@@ -23,12 +23,11 @@ namespace Game.Collision
 {
     public class DynamicMapTree
     {
-        DynTreeImpl impl;
-
         public DynamicMapTree()
         {
             impl = new DynTreeImpl();
         }
+
         public void insert(GameObjectModel mdl)
         {
             impl.insert(mdl);
@@ -128,6 +127,30 @@ namespace Game.Collision
             else
                 return float.NegativeInfinity;
         }
+
+        public bool getAreaInfo(float x, float y, ref float z, PhaseShift phaseShift, out uint flags, out int adtId, out int rootId, out int groupId)
+        {
+            flags = 0;
+            adtId = 0;
+            rootId = 0;
+            groupId = 0;
+
+            Vector3 v = new Vector3(x, y, z + 0.5f);
+            DynamicTreeAreaInfoCallback intersectionCallBack = new DynamicTreeAreaInfoCallback(phaseShift);
+            impl.intersectPoint(v, intersectionCallBack);
+            if (intersectionCallBack.GetAreaInfo().result)
+            {
+                flags = intersectionCallBack.GetAreaInfo().flags;
+                adtId = intersectionCallBack.GetAreaInfo().adtId;
+                rootId = intersectionCallBack.GetAreaInfo().rootId;
+                groupId = intersectionCallBack.GetAreaInfo().groupId;
+                z = intersectionCallBack.GetAreaInfo().ground_Z;
+                return true;
+            }
+            return false;
+        }
+
+        DynTreeImpl impl;
     }
 
     public class DynTreeImpl : RegularGrid2D<GameObjectModel, BIHWrap<GameObjectModel>>

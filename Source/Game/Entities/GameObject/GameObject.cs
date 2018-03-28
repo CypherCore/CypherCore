@@ -2157,8 +2157,8 @@ namespace Game.Entities
                         uint modelId = m_goInfo.displayId;
                         DestructibleModelDataRecord modelData = CliDB.DestructibleModelDataStorage.LookupByKey(m_goInfo.DestructibleBuilding.DestructibleModelRec);
                         if (modelData != null)
-                            if (modelData.State0Wmo != 0)
-                                modelId = modelData.State0Wmo;
+                            if (modelData.State1Wmo != 0)
+                                modelId = modelData.State1Wmo;
                         SetDisplayId(modelId);
 
                         if (setHealth)
@@ -2189,8 +2189,8 @@ namespace Game.Entities
                         uint modelId = m_goInfo.displayId;
                         DestructibleModelDataRecord modelData = CliDB.DestructibleModelDataStorage.LookupByKey(m_goInfo.DestructibleBuilding.DestructibleModelRec);
                         if (modelData != null)
-                            if (modelData.State1Wmo != 0)
-                                modelId = modelData.State1Wmo;
+                            if (modelData.State2Wmo != 0)
+                                modelId = modelData.State2Wmo;
                         SetDisplayId(modelId);
 
                         if (setHealth)
@@ -2209,8 +2209,8 @@ namespace Game.Entities
                         uint modelId = m_goInfo.displayId;
                         DestructibleModelDataRecord modelData = CliDB.DestructibleModelDataStorage.LookupByKey(m_goInfo.DestructibleBuilding.DestructibleModelRec);
                         if (modelData != null)
-                            if (modelData.State2Wmo != 0)
-                                modelId = modelData.State2Wmo;
+                            if (modelData.State3Wmo != 0)
+                                modelId = modelData.State3Wmo;
                         SetDisplayId(modelId);
 
                         // restores to full health
@@ -2301,6 +2301,40 @@ namespace Game.Entities
         {
             SetUInt32Value(GameObjectFields.DisplayId, displayid);
             UpdateModel();
+        }
+
+        public byte GetNameSetId()
+        {
+            switch (GetGoType())
+            {
+                case GameObjectTypes.DestructibleBuilding:
+                    DestructibleModelDataRecord modelData = CliDB.DestructibleModelDataStorage.LookupByKey(m_goInfo.DestructibleBuilding.DestructibleModelRec);
+                    if (modelData != null)
+                    {
+                        switch (GetDestructibleState())
+                        {
+                            case GameObjectDestructibleState.Intact:
+                                return modelData.State0NameSet;
+                            case GameObjectDestructibleState.Damaged:
+                                return modelData.State1NameSet;
+                            case GameObjectDestructibleState.Destroyed:
+                                return modelData.State2NameSet;
+                            case GameObjectDestructibleState.Rebuilding:
+                                return modelData.State3NameSet;
+                            default:
+                                break;
+                        }
+                    }
+                    break;
+                case GameObjectTypes.GarrisonBuilding:
+                case GameObjectTypes.GarrisonPlot:
+                case GameObjectTypes.PhaseableMo:
+                    return (byte)(GetByteValue(GameObjectFields.Flags, 1) & 0xF);
+                default:
+                    break;
+            }
+
+            return 0;
         }
 
         void EnableCollision(bool enable)
@@ -2753,12 +2787,9 @@ namespace Game.Entities
             _owner = owner;
         }
 
-        public override bool IsSpawned()
-        {
-            return _owner.isSpawned();
-        }
-
+        public override bool IsSpawned() { return _owner.isSpawned(); }
         public override uint GetDisplayId() { return _owner.GetDisplayId(); }
+        public override byte GetNameSetId() { return _owner.GetNameSetId(); }
         public override bool IsInPhase(PhaseShift phaseShift) { return _owner.GetPhaseShift().CanSee(phaseShift); }
         public override Vector3 GetPosition() { return new Vector3(_owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ()); }
         public override float GetOrientation() { return _owner.GetOrientation(); }

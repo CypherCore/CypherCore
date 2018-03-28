@@ -184,7 +184,7 @@ namespace Game.Collision
             } while (cell.isValid());
         }
 
-        void intersectPoint(Vector3 point, WorkerCallback intersectCallback)
+        public void intersectPoint(Vector3 point, WorkerCallback intersectCallback)
         {
             Cell cell = Cell.ComputeCell(point.X, point.Y);
             if (!cell.isValid())
