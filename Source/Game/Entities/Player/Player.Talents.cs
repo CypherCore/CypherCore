@@ -109,7 +109,7 @@ namespace Game.Entities
             if (IsInCombat())
                 return TalentLearnResult.FailedAffectingCombat;
 
-            if (IsDead() || GetMap().IsBattlegroundOrArena())
+            if (IsDead())
                 return TalentLearnResult.FailedCantDoThatRightNow;
 
             if (GetUInt32Value(PlayerFields.CurrentSpecId) == 0)
@@ -143,6 +143,7 @@ namespace Game.Entities
             {
                 if (talent.SpecID == 0)
                     bestSlotMatch = talent;
+
                 else if (talent.SpecID == GetUInt32Value(PlayerFields.CurrentSpecId))
                 {
                     bestSlotMatch = talent;
@@ -161,7 +162,10 @@ namespace Game.Entities
                     if (talent.SpecID != 0 && talent.SpecID != GetUInt32Value(PlayerFields.CurrentSpecId))
                         continue;
 
-                    if (HasTalent(talent.Id, GetActiveTalentGroup()) && !HasFlag(PlayerFields.Flags, PlayerFlags.Resting) && HasFlag(UnitFields.Flags, UnitFlags.ImmuneToNpc))
+                    if (!HasTalent(talent.Id, GetActiveTalentGroup()))
+                        continue;
+                    
+                    if (!HasFlag(PlayerFields.Flags, PlayerFlags.Resting) && HasFlag(UnitFields.Flags2, UnitFlags2.AllowChangingTalents))
                         return TalentLearnResult.FailedRestArea;
 
                     if (GetSpellHistory().HasCooldown(talent.SpellID))
