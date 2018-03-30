@@ -51,11 +51,13 @@ namespace Game.Maps
             if (parent)
             {
                 m_parentMap = parent;
+                m_parentTerrainMap = m_parentMap.m_parentTerrainMap;
                 m_childTerrainMaps = m_parentMap.m_childTerrainMaps;
             }
             else
             {
                 m_parentMap = this;
+                m_parentTerrainMap = this;
                 m_childTerrainMaps = new List<Map>();
             }
 
@@ -154,7 +156,7 @@ namespace Game.Maps
         {
             LoadMapImpl(this, gx, gy, reload);
             foreach (Map childBaseMap in m_childTerrainMaps)
-                LoadMapImpl(childBaseMap, gx, gy, reload);
+                childBaseMap.LoadMap(gx, gy, reload);
         }
 
         void LoadMapImpl(Map map, uint gx, uint gy, bool reload)
@@ -165,10 +167,11 @@ namespace Game.Maps
                     return;
 
                 // load grid map for base map
-                if (map.m_parentMap.GridMaps[gx][gy] == null)
-                    map.m_parentMap.EnsureGridCreated(new GridCoord(63 - gx, 63 - gy));
+                GridCoord ngridCoord = new GridCoord((MapConst.MaxGrids - 1) - gx, (MapConst.MaxGrids - 1) - gy);
+                if (map.m_parentMap.getGrid(ngridCoord.x_coord, ngridCoord.y_coord) == null)
+                    map.m_parentMap.EnsureGridCreated(ngridCoord);
 
-                map.m_parentMap.ToMapInstanced().AddGridMapReference(new GridCoord(gx, gy));
+                ((MapInstanced)map.m_parentMap).AddGridMapReference(new GridCoord(gx, gy));
                 map.GridMaps[gx][gy] = map.m_parentMap.GridMaps[gx][gy];
                 return;
             }
@@ -194,7 +197,15 @@ namespace Game.Maps
             Global.ScriptMgr.OnLoadGridMap(map, map.GridMaps[gx][gy], gx, gy);
         }
 
-        void UnloadMap(Map map, uint gx, uint gy)
+        void UnloadMap(uint gx, uint gy)
+        {
+            foreach (Map childBaseMap in m_childTerrainMaps)
+                childBaseMap.UnloadMap(gx, gy);
+
+            UnloadMapImpl(this, gx, gy);
+        }
+
+        void UnloadMapImpl(Map map, uint gx, uint gy)
         {
             if (map.i_InstanceId == 0)
             {
@@ -212,7 +223,7 @@ namespace Game.Maps
 
         void LoadMapAndVMap(uint gx, uint gy)
         {
-            LoadMap(gx, gy);
+            m_parentTerrainMap.LoadMap(gx, gy);
             // Only load the data for the base map
             if (i_InstanceId == 0)
             {
@@ -1585,10 +1596,8 @@ namespace Game.Maps
             // delete grid map, but don't delete if it is from parent map (and thus only reference)
             //+++if (GridMaps[gx][gy]) don't check for GridMaps[gx][gy], we might have to unload vmaps
             {
-                foreach (Map childBaseMap in m_childTerrainMaps)
-                    UnloadMap(childBaseMap, gx, gy);
-
-                UnloadMap(this, gx, gy);
+                if (m_parentTerrainMap == this)
+                    m_parentTerrainMap.UnloadMap(gx, gy);
 
                 if (i_InstanceId == 0)
                 {
@@ -1736,7 +1745,7 @@ namespace Game.Maps
             // find raw .map surface under Z coordinates
             float mapHeight = MapConst.VMAPInvalidHeightValue;
             uint terrainMapId = PhasingHandler.GetTerrainMapId(phaseShift, this, x, y);
-            GridMap gmap = GetGridMap(terrainMapId, x, y);
+            GridMap gmap = m_parentTerrainMap.GetGridMap(terrainMapId, x, y);
             if (gmap != null)
             {
                 float gridHeight = gmap.getHeight(x, y);
@@ -1881,7 +1890,7 @@ namespace Game.Maps
             if (hasVmapAreaInfo || hasDynamicAreaInfo)
             {
                 // check if there's terrain between player height and object height
-                GridMap gmap = GetGridMap(terrainMapId, x, y);
+                GridMap gmap = m_parentTerrainMap.GetGridMap(terrainMapId, x, y);
                 if (gmap != null)
                 {
                     float mapHeight = gmap.getHeight(x, y);
@@ -1923,7 +1932,7 @@ namespace Game.Maps
 
             if (areaId == 0)
             {
-                GridMap gmap = GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y);
+                GridMap gmap = m_parentTerrainMap.GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y);
                 if (gmap != null)
                     areaId = gmap.getArea(x, y);
 
@@ -1962,7 +1971,7 @@ namespace Game.Maps
 
         private byte GetTerrainType(PhaseShift phaseShift, float x, float y)
         {
-            GridMap gmap = GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y);
+            GridMap gmap = m_parentTerrainMap.GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y);
             if (gmap != null)
                 return gmap.getTerrainType(x, y);
             return 0;
@@ -2040,7 +2049,7 @@ namespace Game.Maps
                 }
             }
 
-            GridMap gmap = GetGridMap(terrainMapId, x, y);
+            GridMap gmap = m_parentTerrainMap.GetGridMap(terrainMapId, x, y);
             if (gmap != null)
             {
                 var map_data = new LiquidData();
@@ -2062,7 +2071,7 @@ namespace Game.Maps
 
         public float GetWaterLevel(PhaseShift phaseShift, float x, float y)
         {
-            GridMap gmap = GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y);
+            GridMap gmap = m_parentTerrainMap.GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y);
             if (gmap != null)
                 return gmap.getLiquidLevel(x, y);
             return 0;
@@ -2975,7 +2984,11 @@ namespace Game.Maps
             return m_parentMap;
         }
 
-        public void AddChildTerrainMap(Map map) { m_childTerrainMaps.Add(map); }
+        public void AddChildTerrainMap(Map map)
+        {
+            m_childTerrainMaps.Add(map);
+            map.m_parentTerrainMap = this;
+        }
 
         public void UnlinkAllChildTerrainMaps() { m_childTerrainMaps.Clear(); }
 
@@ -4351,8 +4364,9 @@ namespace Game.Maps
         List<WorldObject> i_worldObjects = new List<WorldObject>();
         protected List<WorldObject> m_activeNonPlayers = new List<WorldObject>();
         protected List<Player> m_activePlayers = new List<Player>();
-        Map m_parentMap;
-        List<Map> m_childTerrainMaps = new List<Map>();
+        Map m_parentMap; // points to MapInstanced or self (always same map id)
+        Map m_parentTerrainMap; // points to m_parentMap of MapEntry::ParentMapID
+        List<Map> m_childTerrainMaps = new List<Map>(); // contains m_parentMap of maps that have MapEntry::ParentMapID == GetId()
         SortedMultiMap<long, ScriptAction> m_scriptSchedule = new SortedMultiMap<long, ScriptAction>();
 
         BitArray marked_cells = new BitArray(MapConst.TotalCellsPerMap * MapConst.TotalCellsPerMap);

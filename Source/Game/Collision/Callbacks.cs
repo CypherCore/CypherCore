@@ -251,6 +251,7 @@ namespace Game.Collision
         public DynamicTreeAreaInfoCallback(PhaseShift phaseShift)
         {
             _phaseShift = phaseShift;
+            _areaInfo = new AreaInfo();
         }
 
         public override void Invoke(Vector3 p, IModel obj)
