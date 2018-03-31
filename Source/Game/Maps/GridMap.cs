@@ -139,13 +139,46 @@ namespace Game.Maps
 
             if (mapHeader.flags.HasAnyFlag(HeightHeaderFlags.HeightHasFlightBounds))
             {
-                _maxHeight = new short[3 * 3];
-                for (var i = 0; i < _maxHeight.Length; ++i)
-                    _maxHeight[i] = reader.ReadInt16();
+                short[] maxHeights = new short[3 * 3];
+                short[] minHeights = new short[3 * 3];
+                for (var i = 0; i < maxHeights.Length; ++i)
+                    maxHeights[i] = reader.ReadInt16();
 
-                _minHeight = new short[3 * 3];
-                for (var i = 0; i < _minHeight.Length; ++i)
-                    _minHeight[i] = reader.ReadInt16();
+                for (var i = 0; i < minHeights.Length; ++i)
+                    minHeights[i] = reader.ReadInt16();
+
+                uint[][] indices =
+                {
+                    new uint[] { 3, 0, 4 },
+                    new uint[] { 0, 1, 4 },
+                    new uint[] { 1, 2, 4 },
+                    new uint[] { 2, 5, 4 },
+                    new uint[] { 5, 8, 4 },
+                    new uint[] { 8, 7, 4 },
+                    new uint[] { 7, 6, 4 },
+                    new uint[] { 6, 3, 4 }
+                };
+
+                float[][] boundGridCoords =
+                {
+                    new float[] { 0.0f, 0.0f },
+                    new float[] { 0.0f, -266.66666f },
+                    new float[] { 0.0f, -533.33331f },
+                    new float[] { -266.66666f, 0.0f },
+                    new float[] { -266.66666f, -266.66666f },
+                    new float[] { -266.66666f, -533.33331f },
+                    new float[] { -533.33331f, 0.0f },
+                    new float[] { -533.33331f, -266.66666f },
+                    new float[] { -533.33331f, -533.33331f }
+                };
+
+                _minHeightPlanes = new Plane[8];
+                for (uint quarterIndex = 0; quarterIndex < 8; ++quarterIndex)
+                    _minHeightPlanes[quarterIndex] = new Plane(
+                        new Vector3(boundGridCoords[indices[quarterIndex][0]][0], boundGridCoords[indices[quarterIndex][0]][1], minHeights[indices[quarterIndex][0]]),
+                        new Vector3(boundGridCoords[indices[quarterIndex][1]][0], boundGridCoords[indices[quarterIndex][1]][1], minHeights[indices[quarterIndex][1]]),
+                        new Vector3(boundGridCoords[indices[quarterIndex][2]][0], boundGridCoords[indices[quarterIndex][2]][1], minHeights[indices[quarterIndex][2]])
+                    );
             }
         }
 
@@ -408,62 +441,33 @@ namespace Game.Maps
 
         public float getMinHeight(float x, float y)
         {
-            if (_minHeight == null)
+            if (_minHeightPlanes == null)
                 return -500.0f;
 
-            uint[] indices =
-            {
-                3, 0, 4,
-                0, 1, 4,
-                1, 2, 4,
-                2, 5, 4,
-                5, 8, 4,
-                8, 7, 4,
-                7, 6, 4,
-                6, 3, 4
-            };
+            GridCoord gridCoord = GridDefines.ComputeGridCoord(x, y);
 
-            float[] boundGridCoords =
-            {
-                0.0f, 0.0f,
-                0.0f, -266.66666f,
-                0.0f, -533.33331f,
-                -266.66666f, 0.0f,
-                -266.66666f, -266.66666f,
-                -266.66666f, -533.33331f,
-                -533.33331f, 0.0f,
-                -533.33331f, -266.66666f,
-                -533.33331f, -533.33331f
-            };
+            int doubleGridX = (int)(Math.Floor(-(x - MapConst.MapHalfSize) / MapConst.CenterGridOffset));
+            int doubleGridY = (int)(Math.Floor(-(y - MapConst.MapHalfSize) / MapConst.CenterGridOffset));
 
-            Cell cell = new Cell(x, y);
-            float gx = x - (cell.GetGridX() - MapConst.CenterGridId + 1) * MapConst.SizeofGrids;
-            float gy = y - (cell.GetGridY() - MapConst.CenterGridId + 1) * MapConst.SizeofGrids;
+            float gx = x - ((int)gridCoord.x_coord - MapConst.CenterGridId + 1) * MapConst.SizeofGrids;
+            float gy = y - ((int)gridCoord.y_coord - MapConst.CenterGridId + 1) * MapConst.SizeofGrids;
 
             uint quarterIndex = 0;
-            if (cell.GetCellY() < MapConst.MaxCells / 2)
+            if (Convert.ToBoolean(doubleGridY & 1))
             {
-                if (cell.GetCellX() < MapConst.MaxCells / 2)
-                {
-                    quarterIndex = 4 + (gy > gx ? 1u : 0u);
-                }
+                if (Convert.ToBoolean(doubleGridX & 1))
+                    quarterIndex = 4 + (gx <= gy ? 1 : 0u);
                 else
                     quarterIndex = (2 + ((-MapConst.SizeofGrids - gx) > gy ? 1u : 0));
             }
-            else if (cell.GetCellX() < MapConst.MaxCells / 2)
-            {
+            else if (Convert.ToBoolean(doubleGridX & 1))
                 quarterIndex = 6 + ((-MapConst.SizeofGrids - gx) <= gy ? 1u : 0);
-            }
             else
                 quarterIndex = gx > gy ? 1u : 0;
 
-            quarterIndex *= 3;
 
-            return new Plane(
-                new Vector3(boundGridCoords[indices[quarterIndex + 0] * 2 + 0], boundGridCoords[indices[quarterIndex + 0] * 2 + 1], _minHeight[indices[quarterIndex + 0]]),
-                new Vector3(boundGridCoords[indices[quarterIndex + 1] * 2 + 0], boundGridCoords[indices[quarterIndex + 1] * 2 + 1], _minHeight[indices[quarterIndex + 1]]),
-                new Vector3(boundGridCoords[indices[quarterIndex + 2] * 2 + 0], boundGridCoords[indices[quarterIndex + 2] * 2 + 1], _minHeight[indices[quarterIndex + 2]])
-            ).GetDistanceToPlane(new Vector3(gx, gy, 0.0f));
+            Ray ray = new Ray(new Vector3(gx, gy, 0.0f), Vector3.ZAxis);
+            return ray.intersection(_minHeightPlanes[quarterIndex]).Z;
         }
 
         public float getLiquidLevel(float x, float y)
@@ -612,8 +616,7 @@ namespace Game.Maps
         public float[] m_V8;
         public ushort[] m_uint16_V8;
         public byte[] m_ubyte_V8;
-        short[] _maxHeight;
-        short[] _minHeight;
+        Plane[] _minHeightPlanes;
         float _gridHeight;
         float _gridIntHeightMultiplier;
 

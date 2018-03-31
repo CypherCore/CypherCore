@@ -91,6 +91,8 @@ namespace Framework.GameMath
         public static readonly Vector3 Zero = new Vector3(0.0f, 0.0f, 0.0f);
 
         public static readonly Vector3 One = new Vector3(1.0f, 1.0f, 1.0f);
+
+        public static readonly Vector3 Inf = new Vector3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
         /// <summary>
         /// 4-Dimentional single-precision floating point X-Axis vector.
         /// </summary>
