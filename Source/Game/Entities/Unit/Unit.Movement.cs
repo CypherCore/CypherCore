@@ -263,7 +263,7 @@ namespace Game.Entities
             return true;
         }
 
-        bool SetCanTransitionBetweenSwimAndFly(bool enable)
+        public bool SetCanTransitionBetweenSwimAndFly(bool enable)
         {
             if (!IsTypeId(TypeId.Player))
                 return false;

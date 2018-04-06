@@ -105,9 +105,15 @@ namespace Game.Chat
             string arg = args.NextString().ToLower();
 
             if (arg == "on")
+            { 
                 target.SetCanFly(true);
+                target.SetCanTransitionBetweenSwimAndFly(true);
+            }
             else if (arg == "off")
+            { 
                 target.SetCanFly(false);
+                target.SetCanTransitionBetweenSwimAndFly(false);
+            }
             else
             {
                 handler.SendSysMessage(CypherStrings.UseBol);
