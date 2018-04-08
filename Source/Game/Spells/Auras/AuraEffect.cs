@@ -3343,6 +3343,20 @@ namespace Game.Spells
             target.ToPlayer().UpdateManaRegen();
         }
 
+        [AuraEffectHandler(AuraType.ModManaRegenPct)]
+        void HandleModManaRegenPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
+                return;
+
+            Unit target = aurApp.GetTarget();
+
+            if (!target.IsPlayer())
+                return;
+
+            target.ToPlayer().UpdateManaRegen();
+        }
+
         [AuraEffectHandler(AuraType.ModIncreaseHealth)]
         [AuraEffectHandler(AuraType.ModIncreaseHealth2)]
         [AuraEffectHandler(AuraType.ModMaxHealth)]

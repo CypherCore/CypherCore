@@ -997,19 +997,21 @@ namespace Game.Entities
             if (manaIndex == (int)PowerType.Max)
                 return;
 
-            // Mana regen from spirit
-            float spirit_regen = 0.0f;
-            // Apply PCT bonus from SPELL_AURA_MOD_POWER_REGEN_PERCENT aura on spirit base regen
-            spirit_regen *= GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)PowerType.Mana);
+            // Get base of Mana Pool in sBaseMPGameTable
+            uint basemana;
+            Global.ObjectMgr.GetPlayerClassLevelInfo(GetClass(), getLevel(), out basemana);
+            float base_regen = basemana / 100.0f;
 
-            // CombatRegen = 5% of Base Mana
-            float base_regen = GetCreateMana() * 0.02f + GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)PowerType.Mana) / 5.0f;
+            base_regen += GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)PowerType.Mana);
 
-            // Set regen rate in cast state apply only on spirit based regen
-            int modManaRegenInterrupt = GetTotalAuraModifier(AuraType.ModManaRegenInterrupt);
+            // Apply PCT bonus from SPELL_AURA_MOD_POWER_REGEN_PERCENT
+            base_regen *= GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)PowerType.Mana);
 
-            SetFloatValue(UnitFields.PowerRegenInterruptedFlatModifier + manaIndex, base_regen + MathFunctions.CalculatePct(spirit_regen, modManaRegenInterrupt));
-            SetFloatValue(UnitFields.PowerRegenFlatModifier + manaIndex, 0.001f + spirit_regen + base_regen);
+            // Apply PCT bonus from SPELL_AURA_MOD_MANA_REGEN_PCT
+            base_regen *= GetTotalAuraMultiplierByMiscValue(AuraType.ModManaRegenPct, (int)PowerType.Mana);
+
+            SetFloatValue(UnitFields.PowerRegenInterruptedFlatModifier + manaIndex, base_regen);
+            SetFloatValue(UnitFields.PowerRegenFlatModifier + manaIndex, base_regen);
         }
 
         public void UpdateSpellDamageAndHealingBonus()

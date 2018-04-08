@@ -429,7 +429,7 @@ namespace Game.Entities
                                     mask = UnitTypeMask.Minion;
                                     break;
                                 default:
-                                    if (properties.Flags.HasAnyFlag<uint>(512)) // Mirror Image, Summon Gargoyle
+                                    if (properties.Flags.HasAnyFlag(SummonPropFlags.Unk10)) // Mirror Image, Summon Gargoyle
                                         mask = UnitTypeMask.Guardian;
                                     break;
                             }

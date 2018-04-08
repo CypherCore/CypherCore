@@ -400,7 +400,7 @@ namespace Framework.Constants
         ModCurrencyGainFromSource = 376, // NYI
         CastWhileWalking2 = 377, // NYI
         Unk378 = 378,
-        Unk379 = 379,
+        ModManaRegenPct = 379,
         ModGlobalCooldownByHaste = 380, // Allows melee abilities to benefit from haste GCD reduction
         Unk381 = 381,
         ModPetStatPct = 382, // NYI
