@@ -335,6 +335,9 @@ namespace Game.Entities
                         m_invisibility.AddValue(InvisibilityType.Trap, 300);
                     }
                     break;
+                case GameObjectTypes.PhaseableMo:
+                    SetByteValue(GameObjectFields.Flags, 1, (byte)(m_goInfo.PhaseableMO.AreaNameSet & 0xF));
+                    break;
                 default:
                     SetGoAnimProgress(animProgress);
                     break;
