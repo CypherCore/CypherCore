@@ -3294,7 +3294,7 @@ namespace Game.Maps
             }
         }
 
-        public TempSummon SummonCreature(uint entry, Position pos, SummonPropertiesRecord properties = null, uint duration = 0, Unit summoner = null, uint spellId = 0, uint vehId = 0)
+        public TempSummon SummonCreature(uint entry, Position pos, SummonPropertiesRecord properties = null, uint duration = 0, Unit summoner = null, uint spellId = 0, uint vehId = 0, bool visibleBySummonerOnly = false)
         {
             var mask = UnitTypeMask.Summon;
             if (properties != null)
@@ -3333,7 +3333,7 @@ namespace Game.Maps
                                     mask = UnitTypeMask.Minion;
                                     break;
                                 default:
-                                    if (Convert.ToBoolean(properties.Flags & 512)) // Mirror Image, Summon Gargoyle
+                                    if (Convert.ToBoolean(properties.Flags & SummonPropFlags.Unk10)) // Mirror Image, Summon Gargoyle
                                         mask = UnitTypeMask.Guardian;
                                     break;
                             }
@@ -3374,10 +3374,10 @@ namespace Game.Maps
                 PhasingHandler.InheritPhaseShift(summon, summoner);
 
             summon.SetUInt32Value(UnitFields.CreatedBySpell, spellId);
-
             summon.SetHomePosition(pos);
-
             summon.InitStats(duration);
+            summon.SetVisibleBySummonerOnly(visibleBySummonerOnly);
+
             AddToMap(summon.ToCreature());
             summon.InitSummon();
 

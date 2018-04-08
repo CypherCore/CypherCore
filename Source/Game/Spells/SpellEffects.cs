@@ -1710,6 +1710,8 @@ namespace Game.Spells
             if (m_originalCaster == null)
                 return;
 
+            bool personalSpawn = (properties.Flags & SummonPropFlags.PersonalSpawn) != 0;
+
             int duration = m_spellInfo.CalcDuration(m_originalCaster);
 
             TempSummon summon = null;
@@ -1750,7 +1752,7 @@ namespace Game.Spells
                 case SummonCategory.Wild:
                 case SummonCategory.Ally:
                 case SummonCategory.Unk:
-                    if (Convert.ToBoolean(properties.Flags & 512))
+                    if (Convert.ToBoolean(properties.Flags & SummonPropFlags.Unk10))
                     {
                         SummonGuardian(effIndex, entry, properties, numSummons);
                         break;
@@ -1771,7 +1773,7 @@ namespace Game.Spells
                         case SummonType.LightWell:
                         case SummonType.Totem:
                             {
-                                summon = m_caster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, m_originalCaster, m_spellInfo.Id);
+                                summon = m_caster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, m_originalCaster, m_spellInfo.Id, 0, personalSpawn);
                                 if (summon == null || !summon.IsTotem())
                                     return;
 
@@ -1784,7 +1786,7 @@ namespace Game.Spells
                             }
                         case SummonType.Minipet:
                             {
-                                summon = m_caster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, m_originalCaster, m_spellInfo.Id);
+                                summon = m_caster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, m_originalCaster, m_spellInfo.Id, 0, personalSpawn);
                                 if (summon == null || !summon.HasUnitTypeMask(UnitTypeMask.Minion))
                                     return;
 
@@ -1811,7 +1813,7 @@ namespace Game.Spells
                                         // randomize position for multiple summons
                                         m_caster.GetRandomPoint(destTarget, radius, out pos);
 
-                                    summon = m_originalCaster.SummonCreature(entry, pos, summonType, (uint)duration);
+                                    summon = m_originalCaster.SummonCreature(entry, pos, summonType, (uint)duration, 0, personalSpawn);
                                     if (summon == null)
                                         continue;
 
@@ -1832,7 +1834,7 @@ namespace Game.Spells
                     SummonGuardian(effIndex, entry, properties, numSummons);
                     break;
                 case SummonCategory.Puppet:
-                    summon = m_caster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, m_originalCaster, m_spellInfo.Id);
+                    summon = m_caster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, m_originalCaster, m_spellInfo.Id, 0, personalSpawn);
                     break;
                 case SummonCategory.Vehicle:
                     // Summoning spells (usually triggered by npc_spellclick) that spawn a vehicle and that cause the clicker

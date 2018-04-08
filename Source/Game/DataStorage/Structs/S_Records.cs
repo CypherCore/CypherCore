@@ -548,7 +548,7 @@ namespace Game.DataStorage
     public sealed class SummonPropertiesRecord
     {
         public uint Id;
-        public uint Flags;
+        public SummonPropFlags Flags;
         public SummonCategory Control;
         public ushort Faction;
         public SummonType Title;

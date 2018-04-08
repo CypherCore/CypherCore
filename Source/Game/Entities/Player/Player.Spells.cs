@@ -1716,7 +1716,8 @@ namespace Game.Entities
 
         void CastAllObtainSpells()
         {
-            for (byte slot = InventorySlots.ItemStart; slot < InventorySlots.ItemEnd; ++slot)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte slot = InventorySlots.ItemStart; slot < inventoryEnd; ++slot)
             {
                 Item item = GetItemByPos(InventorySlots.Bag0, slot);
                 if (item)

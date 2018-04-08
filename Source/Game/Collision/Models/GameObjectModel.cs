@@ -37,7 +37,6 @@ namespace Game.Collision
         public abstract Vector3 GetPosition();
         public abstract float GetOrientation();
         public abstract float GetScale();
-        public abstract void DebugVisualizeCorner(Vector3 corner);
     }
 
     public class GameObjectModel : IModel
@@ -196,7 +195,7 @@ namespace Game.Collision
                     string magic = reader.ReadStringFromChars(8);
                     if (magic != MapConst.VMapMagic)
                     {
-                        Log.outError(LogFilter.Misc, $"File '{MapConst.GAMEOBJECT_MODELS}' has wrong header, expected {MapConst.VMapMagic}.");
+                        Log.outError(LogFilter.Misc, $"File '{filename}' has wrong header, expected {MapConst.VMapMagic}.");
                         return;
                     }
 

@@ -4501,6 +4501,9 @@ namespace Game.Entities
             // update visibility
             UpdateObjectVisibility();
 
+            // recast lost by death auras of any items held in the inventory
+            CastAllObtainSpells();
+
             if (!applySickness)
                 return;
 

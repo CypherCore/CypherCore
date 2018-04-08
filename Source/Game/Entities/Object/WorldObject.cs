@@ -1719,7 +1719,18 @@ namespace Game.Entities
                 WorldObject viewpoint = this;
                 Player player = ToPlayer();
                 if (player != null)
+                {
                     viewpoint = player.GetViewpoint();
+
+                    Creature creature = obj.ToCreature();
+                    if (creature)
+                    {
+                        TempSummon tempSummon = creature.ToTempSummon();
+                        if (tempSummon)
+                            if (tempSummon.IsVisibleBySummonerOnly() && GetGUID() != tempSummon.GetSummonerGUID())
+                                return false;
+                    }
+                }
 
                 if (viewpoint == null)
                     viewpoint = this;
@@ -1990,7 +2001,7 @@ namespace Game.Entities
             return null;
         }
 
-        public TempSummon SummonCreature(uint id, float x, float y, float z, float ang = 0, TempSummonType spwtype = TempSummonType.ManualDespawn, uint despwtime = 0)
+        public TempSummon SummonCreature(uint id, float x, float y, float z, float ang = 0, TempSummonType spwtype = TempSummonType.ManualDespawn, uint despwtime = 0, bool visibleBySummonerOnly = false)
         {
             if (x == 0.0f && y == 0.0f && z == 0.0f)
             {
@@ -1999,15 +2010,15 @@ namespace Game.Entities
             }
             Position pos = new Position();
             pos.Relocate(x, y, z, ang);
-            return SummonCreature(id, pos, spwtype, despwtime, 0);
+            return SummonCreature(id, pos, spwtype, despwtime, 0, visibleBySummonerOnly);
         }
 
-        public TempSummon SummonCreature(uint entry, Position pos, TempSummonType spwtype = TempSummonType.ManualDespawn, uint duration = 0, uint vehId = 0)
+        public TempSummon SummonCreature(uint entry, Position pos, TempSummonType spwtype = TempSummonType.ManualDespawn, uint duration = 0, uint vehId = 0, bool visibleBySummonerOnly = false)
         {
             Map map = GetMap();
             if (map != null)
             {
-                TempSummon summon = map.SummonCreature(entry, pos, null, duration, isTypeMask(TypeMask.Unit) ? ToUnit() : null);
+                TempSummon summon = map.SummonCreature(entry, pos, null, duration, ToUnit(), 0, vehId, visibleBySummonerOnly);
                 if (summon != null)
                 {
                     summon.SetTempSummonType(spwtype);
