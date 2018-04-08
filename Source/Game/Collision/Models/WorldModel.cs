@@ -47,8 +47,16 @@ namespace Game.Collision
             iCorner = corner;
             iType = type;
 
-            iHeight = new float[(width + 1) * (height + 1)];
-            iFlags = new byte[width * height];
+            if (width != 0 && height != 0)
+            {
+                iHeight = new float[(width + 1) * (height + 1)];
+                iFlags = new byte[width * height];
+            }
+            else
+            {
+                iHeight = new float[1];
+                iFlags = null;
+            }
         }
         public WmoLiquid(WmoLiquid other)
         {
@@ -77,6 +85,13 @@ namespace Game.Collision
 
         public bool GetLiquidHeight(Vector3 pos, out float liqHeight)
         {
+            // simple case
+            if (iFlags == null)
+            {
+                liqHeight = iHeight[0];
+                return true;
+            }
+
             liqHeight = 0f;
             float tx_f = (pos.X - iCorner.X) / MapConst.LiquidTileSize;
             uint tx = (uint)tx_f;
@@ -112,27 +127,6 @@ namespace Game.Collision
             return true;
         }
 
-        bool writeToFile(BinaryWriter writer)
-        {
-            writer.Write(iTilesX);
-            writer.Write(iTilesY);
-
-            writer.Write(iCorner.X);
-            writer.Write(iCorner.Y);
-            writer.Write(iCorner.Z);
-            writer.Write(iType);
-
-            uint size = (iTilesX + 1) * (iTilesY + 1);
-            for (var i = 0; i < size; i++)
-                writer.Write(iHeight[i]);
-
-            size = iTilesX * iTilesY;
-            for (var i = 0; i < size; i++)
-                writer.Write(iFlags[0]);
-
-            return true;
-        }
-
         public static WmoLiquid readFromFile(BinaryReader reader)
         {
             WmoLiquid liquid = new WmoLiquid();
@@ -142,15 +136,23 @@ namespace Game.Collision
             liquid.iCorner = reader.Read<Vector3>();
             liquid.iType = reader.ReadUInt32();
 
-            uint size = (liquid.iTilesX + 1) * (liquid.iTilesY + 1);
-            liquid.iHeight = new float[size];
-            for (var i = 0; i < size; i++)
-                liquid.iHeight[i] = reader.ReadSingle();
+            if (liquid.iTilesX != 0 && liquid.iTilesY != 0)
+            {
+                uint size = (liquid.iTilesX + 1) * (liquid.iTilesY + 1);
+                liquid.iHeight = new float[size];
+                for (var i = 0; i < size; i++)
+                    liquid.iHeight[i] = reader.ReadSingle();
 
-            size = liquid.iTilesX * liquid.iTilesY;
-            liquid.iFlags = new byte[size];
-            for (var i = 0; i < size; i++)
-                liquid.iFlags[i] = reader.ReadByte();
+                size = liquid.iTilesX * liquid.iTilesY;
+                liquid.iFlags = new byte[size];
+                for (var i = 0; i < size; i++)
+                    liquid.iFlags[i] = reader.ReadByte();
+            }
+            else
+            {
+                liquid.iHeight = new float[1];
+                liquid.iHeight[0] = reader.ReadSingle();
+            }
 
             return liquid;
         }

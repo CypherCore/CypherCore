@@ -187,7 +187,8 @@ namespace Game.Maps
             reader.BaseStream.Seek(offset, SeekOrigin.Begin);
             map_LiquidHeader liquidHeader = reader.ReadStruct<map_LiquidHeader>();
 
-            _liquidType = liquidHeader.liquidType;
+            _liquidGlobalEntry = liquidHeader.liquidType;
+            _liquidGlobalFlags = (byte)liquidHeader.liquidFlags;
             _liquidOffX = liquidHeader.offsetX;
             _liquidOffY = liquidHeader.offsetY;
             _liquidWidth = liquidHeader.width;
@@ -506,7 +507,7 @@ namespace Game.Maps
         public ZLiquidStatus getLiquidStatus(float x, float y, float z, byte ReqLiquidType, LiquidData data)
         {
             // Check water type (if no water return)
-            if (_liquidType == 0 && _liquidFlags == null)
+            if (_liquidGlobalFlags == 0 && _liquidFlags == null)
                 return ZLiquidStatus.NoWater;
 
             // Get cell
@@ -518,38 +519,34 @@ namespace Game.Maps
 
             // Check water type in cell
             int idx = (x_int >> 3) * 16 + (y_int >> 3);
-            byte type = _liquidFlags != null ? _liquidFlags[idx] : (byte)_liquidType;
-            uint entry = 0;
-            if (_liquidEntry != null)
+            byte type = _liquidFlags != null ? _liquidFlags[idx] : _liquidGlobalFlags;
+            uint entry = _liquidEntry != null ? _liquidEntry[idx] : _liquidGlobalEntry;
+            LiquidTypeRecord liquidEntry = CliDB.LiquidTypeStorage.LookupByKey(entry);
+            if (liquidEntry != null)
             {
-                var liquidEntry = CliDB.LiquidTypeStorage.LookupByKey(_liquidEntry[idx]);
-                if (liquidEntry != null)
+                type &= MapConst.MapLiquidTypeDarkWater;
+                uint liqTypeIdx = liquidEntry.SoundBank;
+                if (entry < 21)
                 {
-                    entry = liquidEntry.Id;
-                    type &= MapConst.MapLiquidTypeDarkWater;
-                    uint liqTypeIdx = liquidEntry.SoundBank;
-                    if (entry < 21)
+                    var area = CliDB.AreaTableStorage.LookupByKey(getArea(x, y));
+                    if (area != null)
                     {
-                        var area = CliDB.AreaTableStorage.LookupByKey(getArea(x, y));
-                        if (area != null)
+                        uint overrideLiquid = area.LiquidTypeID[liquidEntry.SoundBank];
+                        if (overrideLiquid == 0 && area.ParentAreaID == 0)
                         {
-                            uint overrideLiquid = area.LiquidTypeID[liquidEntry.SoundBank];
-                            if (overrideLiquid == 0 && area.ParentAreaID == 0)
-                            {
-                                area = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
-                                if (area != null)
-                                    overrideLiquid = area.LiquidTypeID[liquidEntry.SoundBank];
-                            }
-                            var liq = CliDB.LiquidTypeStorage.LookupByKey(overrideLiquid);
-                            if (liq != null)
-                            {
-                                entry = overrideLiquid;
-                                liqTypeIdx = liq.SoundBank;
-                            }
+                            area = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
+                            if (area != null)
+                                overrideLiquid = area.LiquidTypeID[liquidEntry.SoundBank];
+                        }
+                        var liq = CliDB.LiquidTypeStorage.LookupByKey(overrideLiquid);
+                        if (liq != null)
+                        {
+                            entry = overrideLiquid;
+                            liqTypeIdx = liq.SoundBank;
                         }
                     }
-                    type |= (byte)(1 << (int)liqTypeIdx);
                 }
+                type |= (byte)(1 << (int)liqTypeIdx);
             }
 
             if (type == 0)
@@ -629,7 +626,8 @@ namespace Game.Maps
         byte[] _liquidFlags;
         float[] _liquidMap;
         ushort _gridArea;
-        ushort _liquidType;
+        ushort _liquidGlobalEntry;
+        byte _liquidGlobalFlags;
         byte _liquidOffX;
         byte _liquidOffY;
         byte _liquidWidth;
@@ -679,6 +677,7 @@ namespace Game.Maps
     {
         public uint fourcc;
         public LiquidHeaderFlags flags;
+        public byte liquidFlags;
         public ushort liquidType;
         public byte offsetX;
         public byte offsetY;
@@ -712,7 +711,7 @@ namespace Game.Maps
     }
 
     [Flags]
-    public enum LiquidHeaderFlags : ushort
+    public enum LiquidHeaderFlags : byte
     {
         LiquidNoType = 0x0001,
         LiquidNoHeight = 0x0002
