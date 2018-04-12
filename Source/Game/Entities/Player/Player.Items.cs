@@ -6590,13 +6590,14 @@ namespace Game.Entities
                 }
             }
 
-            EquipmentSetInfo eqSlot = _equipmentSets[newEqSet.Guid];
-            EquipmentSetUpdateState old_state = eqSlot.state;
+            ulong setGuid = (newEqSet.Guid != 0) ? newEqSet.Guid : Global.ObjectMgr.GenerateEquipmentSetGuid();
+
+            EquipmentSetInfo eqSlot = _equipmentSets[setGuid];
             eqSlot.Data = newEqSet;
 
             if (eqSlot.Data.Guid == 0)
             {
-                eqSlot.Data.Guid = Global.ObjectMgr.GenerateEquipmentSetGuid();
+                eqSlot.Data.Guid = setGuid;
 
                 EquipmentSetID data = new EquipmentSetID();
                 data.GUID = eqSlot.Data.Guid;
@@ -6605,7 +6606,7 @@ namespace Game.Entities
                 SendPacket(data);
             }
 
-            eqSlot.state = old_state == EquipmentSetUpdateState.New ? EquipmentSetUpdateState.New : EquipmentSetUpdateState.Changed;
+            eqSlot.state = eqSlot.state == EquipmentSetUpdateState.New ? EquipmentSetUpdateState.New : EquipmentSetUpdateState.Changed;
         }
 
         public void DeleteEquipmentSet(ulong id)

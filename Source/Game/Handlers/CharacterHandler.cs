@@ -1325,16 +1325,20 @@ namespace Game
                         saveEquipmentSet.Set.Appearances[i] = 0;
 
                         ObjectGuid itemGuid = saveEquipmentSet.Set.Pieces[i];
+                        if (!itemGuid.IsEmpty())
+                        {
+                            Item item = _player.GetItemByPos(InventorySlots.Bag0, i);
 
-                        Item item = _player.GetItemByPos(InventorySlots.Bag0, i);
+                            /// cheating check 1 (item equipped but sent empty guid)
+                            if (!item)
+                                return;
 
-                        /// cheating check 1 (item equipped but sent empty guid)
-                        if (!item && !itemGuid.IsEmpty())
-                            return;
-
-                        /// cheating check 2 (sent guid does not match equipped item)
-                        if (item && item.GetGUID() != itemGuid)
-                            return;
+                            /// cheating check 2 (sent guid does not match equipped item)
+                            if (item.GetGUID() != itemGuid)
+                                return;
+                        }
+                        else
+                            saveEquipmentSet.Set.IgnoreMask |= 1u << i;
                     }
                     else
                     {
@@ -1344,10 +1348,12 @@ namespace Game
                             if (!CliDB.ItemModifiedAppearanceStorage.ContainsKey(saveEquipmentSet.Set.Appearances[i]))
                                 return;
 
-                            var pairValue = GetCollectionMgr().HasItemAppearance((uint)saveEquipmentSet.Set.Appearances[i]);
-                            if (!pairValue.Item1)
+                            (bool hasAppearance, bool isTemporary) = GetCollectionMgr().HasItemAppearance((uint)saveEquipmentSet.Set.Appearances[i]);
+                            if (!hasAppearance)
                                 return;
                         }
+                        else
+                            saveEquipmentSet.Set.IgnoreMask |= 1u << i;
                     }
                 }
                 else
@@ -1403,7 +1409,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.UseEquipmentSet)]
         void HandleUseEquipmentSet(UseEquipmentSet useEquipmentSet)
         {
-            ObjectGuid ignoredItemGuid = new ObjectGuid(0, 1);
+            ObjectGuid ignoredItemGuid = new ObjectGuid(0x0C00040000000000, 0xFFFFFFFFFFFFFFFF);
             for (byte i = 0; i < EquipmentSlot.End; ++i)
             {
                 Log.outDebug(LogFilter.Player, "{0}: ContainerSlot: {1}, Slot: {2}", useEquipmentSet.Items[i].Item.ToString(), useEquipmentSet.Items[i].ContainerSlot, useEquipmentSet.Items[i].Slot);

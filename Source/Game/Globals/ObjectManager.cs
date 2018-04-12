@@ -9112,7 +9112,7 @@ namespace Game
             if (!result.IsEmpty())
                 Global.ArenaTeamMgr.SetNextArenaTeamId(result.Read<uint>(0) + 1);
 
-            result = DB.Characters.Query("SELECT MAX(setguid) FROM character_equipmentsets");
+            result = DB.Characters.Query("SELECT MAX(maxguid) FROM ((SELECT MAX(setguid) AS maxguid FROM character_equipmentsets) UNION (SELECT MAX(setguid) AS maxguid FROM character_transmog_outfits)) allsets");
             if (!result.IsEmpty())
                 _equipmentSetGuid = result.Read<ulong>(0) + 1;
 
