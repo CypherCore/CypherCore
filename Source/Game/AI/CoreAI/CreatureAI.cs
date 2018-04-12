@@ -435,6 +435,9 @@ namespace Game.AI
         // Called when a spell cast gets interrupted
         public virtual void OnSpellCastInterrupt(SpellInfo spell) { }
 
+        // Called when a spell cast has been successfully finished
+        public virtual void OnSuccessfulSpellCast(SpellInfo spell) { }
+
         // Called at reaching home after evade
         public virtual void JustReachedHome() { }
         

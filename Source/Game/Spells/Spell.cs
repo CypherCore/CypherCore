@@ -2954,6 +2954,12 @@ namespace Game.Spells
                 hitMask |= ProcFlagsHit.Normal;
 
             m_originalCaster.ProcSkillsAndAuras(null, procAttacker, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Cast, hitMask, this, null, null);
+
+            // Call CreatureAI hook OnSuccessfulSpellCast
+            Creature caster = m_originalCaster.ToCreature();
+            if (caster)
+                if (caster.IsAIEnabled)
+                    caster.GetAI().OnSuccessfulSpellCast(GetSpellInfo());
         }
 
         void handle_immediate()
