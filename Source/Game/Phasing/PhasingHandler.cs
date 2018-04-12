@@ -292,6 +292,7 @@ namespace Game
                 if (!phaseRef.AreaConditions.Empty() && !Global.ConditionMgr.IsObjectMeetToConditions(srcInfo, phaseRef.AreaConditions))
                 {
                     newSuppressions.AddPhase(phaseRef.Id, phaseRef.Flags, phaseRef.AreaConditions, phaseRef.References);
+                    phaseShift.ModifyPhasesReferences(phaseRef, -phaseRef.References);
                     phaseShift.Phases.Remove(phaseRef);
                 }
             }
@@ -301,6 +302,7 @@ namespace Game
                 if (Global.ConditionMgr.IsObjectMeetToConditions(srcInfo, phaseRef.AreaConditions))
                 {
                     changed = phaseShift.AddPhase(phaseRef.Id, phaseRef.Flags, phaseRef.AreaConditions, phaseRef.References) || changed;
+                    suppressedPhaseShift.ModifyPhasesReferences(phaseRef, -phaseRef.References);
                     suppressedPhaseShift.Phases.Remove(phaseRef);
                 }
             }
