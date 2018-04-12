@@ -3516,6 +3516,32 @@ namespace Game.Spells
                 target.SetUInt32Value(UnitFields.OverrideDisplayPowerId, 0);
         }
 
+        [AuraEffectHandler(AuraType.ModMaxPowerPct)]
+        void HandleAuraModMaxPowerPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
+                return;
+
+            Unit target = aurApp.GetTarget();
+            if (!target.IsPlayer())
+                return;
+
+            PowerType powerType = (PowerType)GetMiscValue();
+            UnitMods unitMod = UnitMods.PowerStart + (int)powerType;
+
+            // Save old powers for further calculation
+            int oldPower = target.GetPower(powerType);
+            int oldMaxPower = target.GetMaxPower(powerType);
+
+            // Handle aura effect for max power
+            target.HandleStatModifier(unitMod, UnitModifierType.TotalPCT, (float)GetAmount(), apply);
+
+            // Calculate the current power change
+            int change = target.GetMaxPower(powerType) - oldMaxPower;
+            change = (oldPower + change) - target.GetPower(powerType);
+            target.ModifyPower(powerType, change);
+        }
+
         /********************************/
         /***          FIGHT           ***/
         /********************************/

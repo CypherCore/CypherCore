@@ -199,7 +199,7 @@ namespace Framework.Constants
         ModSpellHealingOfStatPercent = 175,
         SpiritOfRedemption = 176,
         AoeCharm = 177,
-        ModMaxPowerPct = 178,  // NYI
+        ModMaxPowerPct = 178,
         ModPowerDisplay = 179,
         ModFlatSpellDamageVersus = 180,
         Unk181 = 181,  // Old ModFlatSpellCritDamageVersus - Possible Flat Spell Crit Damage Versus
