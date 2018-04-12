@@ -2307,8 +2307,8 @@ namespace Game
         {
             uint oldMSTime = Time.GetMSTime();
 
-            //                                        0            1          2                 3
-            SQLResult result = DB.World.Query("SELECT Entry, LevelScalingMin, LevelScalingMax, LevelScalingDelta FROM creature_template_scaling");
+            //                                        0            1          2                 3                     4
+            SQLResult result = DB.World.Query("SELECT Entry, LevelScalingMin, LevelScalingMax, LevelScalingDeltaMin, LevelScalingDeltaMax FROM creature_template_scaling");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature template scaling definitions. DB table `creature_template_scaling` is empty.");
@@ -2330,7 +2330,8 @@ namespace Game
                 CreatureLevelScaling creatureLevelScaling;
                 creatureLevelScaling.MinLevel = result.Read<ushort>(1);
                 creatureLevelScaling.MaxLevel = result.Read<ushort>(2);
-                creatureLevelScaling.DeltaLevel = result.Read<short>(3);
+                creatureLevelScaling.DeltaLevelMin = result.Read<short>(3);
+                creatureLevelScaling.DeltaLevelMax = result.Read<short>(3);
                 template.levelScaling.Set(creatureLevelScaling);
 
                 ++count;

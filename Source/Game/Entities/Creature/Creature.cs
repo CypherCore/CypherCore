@@ -1105,20 +1105,22 @@ namespace Game.Entities
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
 
+            // level
+            byte minlevel = (byte)Math.Min(cInfo.Maxlevel, cInfo.Minlevel);
+            byte maxlevel = (byte)Math.Max(cInfo.Maxlevel, cInfo.Minlevel);
+            byte level = (byte)(minlevel == maxlevel ? minlevel : RandomHelper.URand(minlevel, maxlevel));
+            SetLevel(level);
+
             if (!HasScalableLevels())
             {
-                // level
-                byte minlevel = (byte)Math.Min(cInfo.Maxlevel, cInfo.Minlevel);
-                byte maxlevel = (byte)Math.Max(cInfo.Maxlevel, cInfo.Minlevel);
-                byte level = (byte)(minlevel == maxlevel ? minlevel : RandomHelper.URand(minlevel, maxlevel));
-                SetLevel(level);
-            }
-            else
-            {
-                SetLevel(cInfo.levelScaling.Value.MaxLevel);
                 SetUInt32Value(UnitFields.ScalingLevelMin, cInfo.levelScaling.Value.MinLevel);
                 SetUInt32Value(UnitFields.ScalingLevelMax, cInfo.levelScaling.Value.MaxLevel);
-                SetUInt32Value(UnitFields.ScalingLevelDelta, (uint)cInfo.levelScaling.Value.DeltaLevel);
+
+                int mindelta = Math.Min(cInfo.levelScaling.Value.DeltaLevelMax, cInfo.levelScaling.Value.DeltaLevelMin);
+                int maxdelta = Math.Max(cInfo.levelScaling.Value.DeltaLevelMax, cInfo.levelScaling.Value.DeltaLevelMin);
+                int delta = mindelta == maxdelta ? mindelta : RandomHelper.IRand(mindelta, maxdelta);
+
+                SetInt32Value(UnitFields.ScalingLevelDelta, delta);
             }
 
             UpdateLevelDependantStats();
@@ -2368,7 +2370,7 @@ namespace Game.Entities
                 // between UNIT_FIELD_SCALING_LEVEL_MIN and UNIT_FIELD_SCALING_LEVEL_MAX
                 if (HasScalableLevels())
                 {
-                    uint targetLevelWithDelta = (uint)(unitTarget.getLevel() + GetCreatureTemplate().levelScaling.Value.DeltaLevel);
+                    uint targetLevelWithDelta = (uint)(unitTarget.getLevel() + GetInt32Value(UnitFields.ScalingLevelDelta));
 
                     if (target.IsPlayer())
                         targetLevelWithDelta += target.GetUInt32Value(PlayerFields.ScalingLevelDelta);

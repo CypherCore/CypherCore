@@ -397,6 +397,7 @@ namespace Game.Entities
     {
         public ushort MinLevel;
         public ushort MaxLevel;
-        public short DeltaLevel;
+        public short DeltaLevelMin;
+        public short DeltaLevelMax;
     }
 }

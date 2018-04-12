@@ -1168,7 +1168,7 @@ namespace Game.Network.Packets
             Class = (byte)creatureTemplate.UnitClass;
             TargetMinScalingLevel = (byte)creatureTemplate.levelScaling.Value.MinLevel;
             TargetMaxScalingLevel = (byte)creatureTemplate.levelScaling.Value.MaxLevel;
-            TargetScalingLevelDelta = (sbyte)creatureTemplate.levelScaling.Value.DeltaLevel;
+            TargetScalingLevelDelta = (sbyte)attacker.GetInt32Value(UnitFields.ScalingLevelDelta);
             return true;
         }
 
@@ -1184,13 +1184,14 @@ namespace Game.Network.Packets
             Class = (byte)creatureTemplate.UnitClass;
             TargetMinScalingLevel = (byte)creatureTemplate.levelScaling.Value.MinLevel;
             TargetMaxScalingLevel = (byte)creatureTemplate.levelScaling.Value.MaxLevel;
-            TargetScalingLevelDelta = (sbyte)creatureTemplate.levelScaling.Value.DeltaLevel;
+            TargetScalingLevelDelta = (sbyte)target.GetInt32Value(UnitFields.ScalingLevelDelta);
             return true;
         }
 
         bool GenerateDataCreatureToCreature(Creature attacker, Creature target)
         {
-            CreatureTemplate creatureTemplate = target.HasScalableLevels() ? target.GetCreatureTemplate() : attacker.GetCreatureTemplate();
+            Creature accessor = target.HasScalableLevels() ? target : attacker;
+            CreatureTemplate creatureTemplate = accessor.GetCreatureTemplate();
 
             Type = SandboxScalingDataType.CreatureToCreatureDamage;
             PlayerLevelDelta = 0;
@@ -1200,7 +1201,7 @@ namespace Game.Network.Packets
             Class = (byte)creatureTemplate.UnitClass;
             TargetMinScalingLevel = (byte)creatureTemplate.levelScaling.Value.MinLevel;
             TargetMaxScalingLevel = (byte)creatureTemplate.levelScaling.Value.MaxLevel;
-            TargetScalingLevelDelta = (sbyte)creatureTemplate.levelScaling.Value.DeltaLevel;
+            TargetScalingLevelDelta = (sbyte)accessor.GetInt32Value(UnitFields.ScalingLevelDelta);
             return true;
         }
 
