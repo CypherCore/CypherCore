@@ -177,7 +177,7 @@ namespace Game.Collision
 
         public void enableCollision(bool enable) { _collisionEnabled = enable; }
         bool isCollisionEnabled() { return _collisionEnabled; }
-        bool isMapObject() { return isWmo; }
+        public bool isMapObject() { return isWmo; }
 
         public static void LoadGameObjectModelList()
         {

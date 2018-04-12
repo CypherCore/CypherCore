@@ -266,6 +266,9 @@ namespace Game.Entities
             SetDisplayId(goInfo.displayId);
 
             m_model = CreateModel();
+            if (m_model != null && m_model.isMapObject())
+                SetFlag(GameObjectFields.Flags, GameObjectFlags.MapObject);
+
             // GAMEOBJECT_BYTES_1, index at 0, 1, 2 and 3
             SetGoType(goInfo.type);
             m_prevGoState = goState;
@@ -2360,6 +2363,8 @@ namespace Game.Entities
             m_model = CreateModel();
             if (m_model != null)
                 GetMap().InsertGameObjectModel(m_model);
+
+            ApplyModFlag(GameObjectFields.Flags, GameObjectFlags.MapObject, m_model != null && m_model.isMapObject());
         }
 
         Player GetLootRecipient()
