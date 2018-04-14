@@ -104,7 +104,7 @@ namespace Game.Collision
 
                 T obj = objects[idx];
                 if (obj != null)
-                    _callback.Invoke(p, Convert.ToUInt32(obj));
+                    _callback.Invoke(p, obj);
             }
         }
     }
