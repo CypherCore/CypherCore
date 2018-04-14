@@ -2154,7 +2154,7 @@ namespace Game.Entities
 
         public uint GetVisibleEnchantmentId(Player owner)
         {
-            ItemModifier illusionModifier = ItemModifier.TransmogAppearanceAllSpecs;
+            ItemModifier illusionModifier = ItemModifier.EnchantIllusionAllSpecs;
             if (HasFlag(ItemFields.ModifiersMask, ItemConst.IllusionModifierMaskSpecSpecific))
                 illusionModifier = ItemConst.IllusionModifierSlotBySpec[owner.GetActiveTalentGroup()];
 
