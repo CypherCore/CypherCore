@@ -43,13 +43,13 @@ namespace Framework.Constants
         public const uint ReadycheckDuration = 35000;
 
         //Liquid
-        public const int MapLiquidTypeNoWater = 0x00;
-        public const int MapLiquidTypeWater = 0x01;
-        public const int MapLiquidTypeOcean = 0x02;
-        public const int MapLiquidTypeMagma = 0x04;
-        public const int MapLiquidTypeSlime = 0x08;
-        public const int MapLiquidTypeDarkWater = 0x10;
-        public const int MapAllLiquidTypes = (MapLiquidTypeWater | MapLiquidTypeOcean | MapLiquidTypeMagma | MapLiquidTypeSlime);
+        public const uint MapLiquidTypeNoWater = 0x00;
+        public const uint MapLiquidTypeWater = 0x01;
+        public const uint MapLiquidTypeOcean = 0x02;
+        public const uint MapLiquidTypeMagma = 0x04;
+        public const uint MapLiquidTypeSlime = 0x08;
+        public const uint MapLiquidTypeDarkWater = 0x10;
+        public const uint MapAllLiquidTypes = (MapLiquidTypeWater | MapLiquidTypeOcean | MapLiquidTypeMagma | MapLiquidTypeSlime);
         public const float LiquidTileSize = (533.333f / 128.0f);
 
         public const int MinMapUpdateDelay = 50;

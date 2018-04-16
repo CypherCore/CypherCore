@@ -1977,13 +1977,13 @@ namespace Game.Maps
             return 0;
         }
 
-        public ZLiquidStatus getLiquidStatus(PhaseShift phaseShift, float x, float y, float z, byte ReqLiquidType)
+        public ZLiquidStatus getLiquidStatus(PhaseShift phaseShift, float x, float y, float z, uint ReqLiquidType)
         {
             LiquidData throwaway;
             return getLiquidStatus(phaseShift, x, y, z, ReqLiquidType, out throwaway);
         }
 
-        public ZLiquidStatus getLiquidStatus(PhaseShift phaseShift, float x, float y, float z, byte ReqLiquidType, out LiquidData data)
+        public ZLiquidStatus getLiquidStatus(PhaseShift phaseShift, float x, float y, float z, uint ReqLiquidType, out LiquidData data)
         {
             data = new LiquidData();
             var result = ZLiquidStatus.NoWater;

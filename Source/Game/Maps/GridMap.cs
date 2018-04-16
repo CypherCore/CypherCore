@@ -504,7 +504,7 @@ namespace Game.Maps
         }
 
         // Get water state on map
-        public ZLiquidStatus getLiquidStatus(float x, float y, float z, byte ReqLiquidType, LiquidData data)
+        public ZLiquidStatus getLiquidStatus(float x, float y, float z, uint ReqLiquidType, LiquidData data)
         {
             // Check water type (if no water return)
             if (_liquidGlobalFlags == 0 && _liquidFlags == null)
@@ -524,7 +524,7 @@ namespace Game.Maps
             LiquidTypeRecord liquidEntry = CliDB.LiquidTypeStorage.LookupByKey(entry);
             if (liquidEntry != null)
             {
-                type &= MapConst.MapLiquidTypeDarkWater;
+                type &= (byte)MapConst.MapLiquidTypeDarkWater;
                 uint liqTypeIdx = liquidEntry.SoundBank;
                 if (entry < 21)
                 {

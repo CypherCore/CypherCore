@@ -838,6 +838,7 @@ namespace Game.Movement
             if (liquidStatus == ZLiquidStatus.NoWater)
                 return NavTerrain.Ground;
 
+            data.type_flags &= ~MapConst.MapLiquidTypeDarkWater;
             switch (data.type_flags)
             {
                 case MapConst.MapLiquidTypeWater:

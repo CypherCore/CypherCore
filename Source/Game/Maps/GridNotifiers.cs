@@ -382,7 +382,7 @@ namespace Game.Maps
 
         public override void Visit(ICollection<Player> objs)
         {
-            foreach (var player in objs)
+            foreach (var player in objs.ToList())
             {
                 if (!player.IsInPhase(i_source))
                     continue;

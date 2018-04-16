@@ -209,7 +209,7 @@ namespace Game.Collision
             return false;
         }
 
-        public bool GetLiquidLevel(uint mapId, float x, float y, float z, byte reqLiquidType, ref float level, ref float floor, ref uint type)
+        public bool GetLiquidLevel(uint mapId, float x, float y, float z, uint reqLiquidType, ref float level, ref float floor, ref uint type)
         {
             if (!Global.DisableMgr.IsDisabledFor(DisableType.VMAP, mapId, null, DisableFlags.VmapLiquidStatus))
             {
