@@ -194,6 +194,7 @@ namespace Game.DataStorage
             QuestXPStorage = DBReader.Read<QuestXPRecord>("QuestXP.db2", HotfixStatements.SEL_QUEST_XP);
             RandPropPointsStorage = DBReader.Read<RandPropPointsRecord>("RandPropPoints.db2", HotfixStatements.SEL_RAND_PROP_POINTS);
             RewardPackStorage = DBReader.Read<RewardPackRecord>("RewardPack.db2", HotfixStatements.SEL_REWARD_PACK);
+            RewardPackXCurrencyTypeStorage = DBReader.Read<RewardPackXCurrencyTypeRecord>("RewardPackXCurrencyType.db2", HotfixStatements.SEL_REWARD_PACK_X_CURRENCY_TYPE);
             RewardPackXItemStorage = DBReader.Read<RewardPackXItemRecord>("RewardPackXItem.db2", HotfixStatements.SEL_REWARD_PACK_X_ITEM);
             RulesetItemUpgradeStorage = DBReader.Read<RulesetItemUpgradeRecord>("RulesetItemUpgrade.db2", HotfixStatements.SEL_RULESET_ITEM_UPGRADE);
             SandboxScalingStorage = DBReader.Read<SandboxScalingRecord>("SandboxScaling.db2", HotfixStatements.SEL_SANDBOX_SCALING);
@@ -525,6 +526,7 @@ namespace Game.DataStorage
         public static DB6Storage<QuestXPRecord> QuestXPStorage;
         public static DB6Storage<RandPropPointsRecord> RandPropPointsStorage;
         public static DB6Storage<RewardPackRecord> RewardPackStorage;
+        public static DB6Storage<RewardPackXCurrencyTypeRecord> RewardPackXCurrencyTypeStorage;
         public static DB6Storage<RewardPackXItemRecord> RewardPackXItemStorage;
         public static DB6Storage<RulesetItemUpgradeRecord> RulesetItemUpgradeStorage;
         public static DB6Storage<SandboxScalingRecord> SandboxScalingStorage;

@@ -401,6 +401,11 @@ namespace Game.DataStorage
 
             CliDB.QuestPackageItemStorage.Clear();
 
+            foreach (RewardPackXCurrencyTypeRecord rewardPackXCurrencyType in CliDB.RewardPackXCurrencyTypeStorage.Values)
+                _rewardPackCurrencyTypes.Add(rewardPackXCurrencyType.RewardPackID, rewardPackXCurrencyType);
+
+            CliDB.RewardPackXCurrencyTypeStorage.Clear();
+
             foreach (RewardPackXItemRecord rewardPackXItem in CliDB.RewardPackXItemStorage.Values)
                 _rewardPackItems.Add(rewardPackXItem.RewardPackID, rewardPackXItem);
 
@@ -1244,6 +1249,11 @@ namespace Game.DataStorage
             return _pvpItemBonus.LookupByKey(itemId);
         }
 
+        public List<RewardPackXCurrencyTypeRecord> GetRewardPackCurrencyTypesByRewardID(uint rewardPackID)
+        {
+            return _rewardPackCurrencyTypes.LookupByKey(rewardPackID);
+        }
+
         public List<RewardPackXItemRecord> GetRewardPackItemsByRewardID(uint rewardPackID)
         {
             return _rewardPackItems.LookupByKey(rewardPackID);
@@ -1519,6 +1529,7 @@ namespace Game.DataStorage
         List<PvpTalentRecord>[][][] _pvpTalentsByPosition = new List<PvpTalentRecord>[(int)Class.Max][][];
         uint[][] _pvpTalentUnlock = new uint[PlayerConst.MaxPvpTalentTiers][];
         Dictionary<uint, Tuple<List<QuestPackageItemRecord>, List<QuestPackageItemRecord>>> _questPackages = new Dictionary<uint, Tuple<List<QuestPackageItemRecord>, List<QuestPackageItemRecord>>>();
+        MultiMap<uint, RewardPackXCurrencyTypeRecord> _rewardPackCurrencyTypes = new MultiMap<uint, RewardPackXCurrencyTypeRecord>();
         MultiMap<uint, RewardPackXItemRecord> _rewardPackItems = new MultiMap<uint, RewardPackXItemRecord>();
         Dictionary<uint, uint> _rulesetItemUpgrade = new Dictionary<uint, uint>();
         MultiMap<uint, SkillRaceClassInfoRecord> _skillRaceClassInfoBySkill = new MultiMap<uint, SkillRaceClassInfoRecord>();

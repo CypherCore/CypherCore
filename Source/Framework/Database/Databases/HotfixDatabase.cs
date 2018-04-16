@@ -736,6 +736,10 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_REWARD_PACK, "SELECT ID, Money, ArtifactXPMultiplier, ArtifactXPDifficulty, ArtifactXPCategoryID, CharTitleID, " +
                 "TreasurePickerID FROM reward_pack ORDER BY ID DESC");
 
+            // RewardPackXCurrencyType.db2
+            PrepareStatement(HotfixStatements.SEL_REWARD_PACK_X_CURRENCY_TYPE, "SELECT ID, CurrencyTypeID, Quantity, RewardPackID FROM reward_pack_x_currency_type" +
+                " ORDER BY ID DESC");
+
             // RewardPackXItem.db2
             PrepareStatement(HotfixStatements.SEL_REWARD_PACK_X_ITEM, "SELECT ID, ItemID, ItemQuantity, RewardPackID FROM reward_pack_x_item ORDER BY ID DESC");
 
@@ -1414,6 +1418,8 @@ namespace Framework.Database
         SEL_RAND_PROP_POINTS,
 
         SEL_REWARD_PACK,
+
+        SEL_REWARD_PACK_X_CURRENCY_TYPE,
 
         SEL_REWARD_PACK_X_ITEM,
 

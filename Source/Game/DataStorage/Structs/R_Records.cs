@@ -36,6 +36,14 @@ namespace Game.DataStorage
         public ushort TreasurePickerID;
     }
 
+    public sealed class RewardPackXCurrencyTypeRecord
+    {
+        public uint Id;
+        public uint CurrencyTypeID;
+        public int Quantity;
+        public uint RewardPackID;
+    }
+
     public sealed class RewardPackXItemRecord
     {
         public uint Id;

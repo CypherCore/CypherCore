@@ -241,12 +241,14 @@ namespace Game.Entities
                 SetTitle(charTitlesEntry);
 
             ModifyMoney(rewardPackEntry.Money);
+
+            var rewardCurrencyTypes = Global.DB2Mgr.GetRewardPackCurrencyTypesByRewardID(rewardPackEntry.Id);
+            foreach (RewardPackXCurrencyTypeRecord currency in rewardCurrencyTypes)
+                ModifyCurrency((CurrencyTypes)currency.CurrencyTypeID, currency.Quantity);
+
             var rewardPackXItems = Global.DB2Mgr.GetRewardPackItemsByRewardID(rewardPackEntry.Id);
-            if (rewardPackXItems != null)
-            {
-                foreach (RewardPackXItemRecord rewardPackXItem in rewardPackXItems)
-                    AddItem(rewardPackXItem.ItemID, rewardPackXItem.ItemQuantity);
-            }
+            foreach (RewardPackXItemRecord rewardPackXItem in rewardPackXItems)
+                AddItem(rewardPackXItem.ItemID, rewardPackXItem.ItemQuantity);
         }
 
         public void AddHonorXP(uint xp)
