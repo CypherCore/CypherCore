@@ -39,6 +39,7 @@ namespace Framework.Constants
         Unlearnpettalents_Old = 17,     // deprecated
         Learndualspec = 18,                   //Unit_Npc_Flag_Trainer             (16) (Bonus Option For Trainer)
         Outdoorpvp = 19,                   //Added By Code (Option For Outdoor Pvp Creatures)
+        Transmogrifier = 20,                   //UNIT_NPC_FLAG_TRANSMOGRIFIER
         Max
     }
 

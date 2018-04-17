@@ -2366,6 +2366,7 @@ namespace Game.Entities
                         case GossipOption.Petitioner:
                         case GossipOption.Tabarddesigner:
                         case GossipOption.Auctioneer:
+                        case GossipOption.Transmogrifier:
                             break;                                  // no checks
                         case GossipOption.Outdoorpvp:
                             if (!Global.OutdoorPvPMgr.CanTalkTo(this, creature, menuItems))
@@ -2573,6 +2574,9 @@ namespace Game.Entities
                         Global.BattlegroundMgr.SendBattlegroundList(this, guid, bgTypeId);
                         break;
                     }
+                case GossipOption.Transmogrifier:
+                    GetSession().SendOpenTransmogrifier(guid);
+                    break;
             }
 
             ModifyMoney(-cost);
