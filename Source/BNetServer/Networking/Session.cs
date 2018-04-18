@@ -324,13 +324,10 @@ namespace BNetServer.Networking
             logonResult.AccountId.High = 0x100000000000000;
             foreach (var pair in _accountInfo.GameAccounts)
             {
-                if (!pair.Value.IsBanned)
-                {
-                    EntityId gameAccountId = new EntityId();
-                    gameAccountId.Low = pair.Value.Id;
-                    gameAccountId.High = 0x200000200576F57;
-                    logonResult.GameAccountId.Add(gameAccountId);
-                }
+                EntityId gameAccountId = new EntityId();
+                gameAccountId.Low = pair.Value.Id;
+                gameAccountId.High = 0x200000200576F57;
+                logonResult.GameAccountId.Add(gameAccountId);
             }
 
             if (!_ipCountry.IsEmpty())
@@ -396,6 +393,7 @@ namespace BNetServer.Networking
                 {
                     response.State.GameStatus.IsSuspended = gameAccountInfo.IsBanned;
                     response.State.GameStatus.IsBanned = gameAccountInfo.IsPermanenetlyBanned;
+                    response.State.GameStatus.SuspensionExpires = (gameAccountInfo.UnbanDate * 1000000);
                 }
 
                 response.State.GameStatus.Program = 5730135; // WoW
@@ -456,6 +454,11 @@ namespace BNetServer.Networking
 
             if (_gameAccountInfo == null)
                 return BattlenetRpcErrorCode.UtilServerInvalidIdentityArgs;
+
+            if (_gameAccountInfo.IsPermanenetlyBanned)
+                return BattlenetRpcErrorCode.GameAccountBanned;
+            else if (_gameAccountInfo.IsBanned)
+                return BattlenetRpcErrorCode.GameAccountSuspended;
 
             bool clientInfoOk = false;
             Variant clientInfo = GetParam(Params, "Param_ClientInfo");
@@ -675,8 +678,9 @@ namespace BNetServer.Networking
         {
             Id = fields.Read<uint>(startColumn + 0);
             Name = fields.Read<string>(startColumn + 1);
-            IsBanned = fields.Read<ulong>(startColumn + 2) != 0;
-            IsPermanenetlyBanned = fields.Read<ulong>(startColumn + 3) != 0;
+            UnbanDate = fields.Read<uint>(startColumn + 2);
+            IsPermanenetlyBanned = fields.Read<uint>(startColumn + 3) != 0;
+            IsBanned = IsPermanenetlyBanned || UnbanDate > Time.UnixTime;
             SecurityLevel = (AccountTypes)fields.Read<byte>(startColumn + 4);
 
             int hashPos = Name.IndexOf('#');
@@ -689,6 +693,7 @@ namespace BNetServer.Networking
         public uint Id;
         public string Name;
         public string DisplayName;
+        public uint UnbanDate;
         public bool IsBanned;
         public bool IsPermanenetlyBanned;
         public AccountTypes SecurityLevel;

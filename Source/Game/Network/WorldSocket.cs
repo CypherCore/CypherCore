@@ -464,7 +464,7 @@ namespace Game.Network
             {
                 if (account.battleNet.LastIP != address)
                 {
-                    SendAuthResponseError(BattlenetRpcErrorCode.Denied);
+                    SendAuthResponseError(BattlenetRpcErrorCode.RiskAccountLocked);
                     Log.outDebug(LogFilter.Network, "HandleAuthSession: Sent Auth Response (Account IP differs).");
                     CloseSocket();
                     return;
@@ -474,7 +474,7 @@ namespace Game.Network
             {
                 if (account.battleNet.LockCountry != _ipCountry)
                 {
-                    SendAuthResponseError(BattlenetRpcErrorCode.Denied);
+                    SendAuthResponseError(BattlenetRpcErrorCode.RiskAccountLocked);
                     Log.outDebug(LogFilter.Network, "WorldSocket.HandleAuthSession: Sent Auth Response (Account country differs. Original country: {0}, new country: {1}).", account.battleNet.LockCountry, _ipCountry);
                     CloseSocket();
                     return;
@@ -495,7 +495,7 @@ namespace Game.Network
 
             if (account.IsBanned()) // if account banned
             {
-                SendAuthResponseError(BattlenetRpcErrorCode.Denied);
+                SendAuthResponseError(BattlenetRpcErrorCode.GameAccountBanned);
                 Log.outError(LogFilter.Network, "WorldSocket:HandleAuthSession: Sent Auth Response (Account banned).");
                 CloseSocket();
                 return;
@@ -505,7 +505,7 @@ namespace Game.Network
             AccountTypes allowedAccountType = Global.WorldMgr.GetPlayerSecurityLimit();
             if (allowedAccountType > AccountTypes.Player && account.game.Security < allowedAccountType)
             {
-                SendAuthResponseError(BattlenetRpcErrorCode.Denied);
+                SendAuthResponseError(BattlenetRpcErrorCode.ServerIsPrivate);
                 Log.outInfo(LogFilter.Network, "WorldSocket:HandleAuthSession: User tries to login but his security level is not enough");
                 CloseSocket();
                 return;
@@ -737,8 +737,8 @@ namespace Game.Network
             game.OS = fields.Read<string>(9);
             battleNet.Id = fields.Read<uint>(10);
             game.Security = (AccountTypes)fields.Read<byte>(11);
-            battleNet.IsBanned = fields.Read<ulong>(12) != 0;
-            game.IsBanned = fields.Read<ulong>(13) != 0;
+            battleNet.IsBanned = fields.Read<uint>(12) != 0;
+            game.IsBanned = fields.Read<uint>(13) != 0;
             game.IsRectuiter = fields.Read<uint>(14) != 0;
 
             if (battleNet.Locale >= LocaleConstant.Total)
