@@ -1459,6 +1459,10 @@ namespace Game
         /// Ban an account or ban an IP address, duration is in seconds if positive, otherwise permban
         public BanReturn BanAccount(BanMode mode, string nameOrIP, uint duration_secs, string reason, string author)
         {
+            // Prevent banning an already banned account
+            if (mode == BanMode.Account && Global.AccountMgr.IsBannedAccount(nameOrIP))
+                return BanReturn.Exists;
+
             SQLResult resultAccounts;
             PreparedStatement stmt = null;
 
@@ -1589,17 +1593,21 @@ namespace Game
             else
                 guid = pBanned.GetGUID();
 
+            //Use transaction in order to ensure the order of the queries
+            SQLTransaction trans = new SQLTransaction();
+
             // make sure there is only one active ban
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_BAN);
             stmt.AddValue(0, guid.GetCounter());
-            DB.Characters.Execute(stmt);
+            trans.Append(stmt);
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHARACTER_BAN);
             stmt.AddValue(0, guid.GetCounter());
             stmt.AddValue(1, duration_secs);
             stmt.AddValue(2, author);
             stmt.AddValue(3, reason);
-            DB.Characters.Execute(stmt);
+            trans.Append(stmt);
+            DB.Characters.CommitTransaction(trans);
 
             if (pBanned)
                 pBanned.GetSession().KickPlayer();

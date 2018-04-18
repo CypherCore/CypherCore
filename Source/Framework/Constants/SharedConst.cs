@@ -957,7 +957,8 @@ namespace Framework.Constants
     {
         Success,
         SyntaxError,
-        Notfound
+        Notfound,
+        Exists
     }
 
     public enum WorldCfg

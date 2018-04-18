@@ -85,7 +85,6 @@ namespace Game.Chat.Commands
                 case BanReturn.Notfound:
                     {
                         handler.SendSysMessage(CypherStrings.BanNotfound, "character", name);
-    
                         return false;
                     }
                 default:
@@ -174,8 +173,10 @@ namespace Game.Chat.Commands
                             handler.SendSysMessage(CypherStrings.BanNotfound, "ip", nameOrIP);
                             break;
                     }
-
                     return false;
+                case BanReturn.Exists:
+                    handler.SendSysMessage(CypherStrings.BanExists);
+                    break;
             }
 
             return true;
