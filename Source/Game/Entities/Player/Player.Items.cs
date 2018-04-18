@@ -1375,7 +1375,6 @@ namespace Game.Entities
             // check unique-equipped limit
             if (pProto.GetItemLimitCategory() != 0)
             {
-
                 ItemLimitCategoryRecord limitEntry = CliDB.ItemLimitCategoryStorage.LookupByKey(pProto.GetItemLimitCategory());
                 if (limitEntry == null)
                 {
@@ -1385,10 +1384,11 @@ namespace Game.Entities
 
                 if (limitEntry.Flags == 0)
                 {
+                    byte limitQuantity = GetItemLimitCategoryQuantity(limitEntry);
                     uint curcount = GetItemCountWithLimitCategory(pProto.GetItemLimitCategory(), pItem);
-                    if (curcount + count > limitEntry.Quantity)
+                    if (curcount + count > limitQuantity)
                     {
-                        no_space_count = count + curcount - limitEntry.Quantity;
+                        no_space_count = count + curcount - limitQuantity;
                         offendingItemId = pProto.GetId();
                         return InventoryResult.ItemMaxLimitCategoryCountExceededIs;
                     }
@@ -3220,6 +3220,20 @@ namespace Game.Entities
             }
 
             return count;
+        }
+        public byte GetItemLimitCategoryQuantity(ItemLimitCategoryRecord limitEntry)
+        {
+            byte limit = limitEntry.Quantity;
+
+            var limitConditions = Global.DB2Mgr.GetItemLimitCategoryConditions(limitEntry.Id);
+            foreach (ItemLimitCategoryConditionRecord limitCondition in limitConditions)
+            {
+                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(limitCondition.PlayerConditionID);
+                if (playerCondition == null || ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
+                    limit += (byte)limitCondition.AddQuantity;
+            }
+
+            return limit;
         }
 
         public void DestroyConjuredItems(bool update)
@@ -5340,14 +5354,15 @@ namespace Game.Entities
                     return InventoryResult.NotEquippable;
 
                 // NOTE: limitEntry.mode not checked because if item have have-limit then it applied and to equip case
+                byte limitQuantity = GetItemLimitCategoryQuantity(limitEntry);
 
-                if (limit_count > limitEntry.Quantity)
+                if (limit_count > limitQuantity)
                     return InventoryResult.ItemMaxLimitCategoryEquippedExceededIs;
 
                 // there is an equip limit on this item
-                if (HasItemWithLimitCategoryEquipped(itemProto.GetItemLimitCategory(), limitEntry.Quantity - limit_count + 1, except_slot))
+                if (HasItemWithLimitCategoryEquipped(itemProto.GetItemLimitCategory(), limitQuantity - limit_count + 1, except_slot))
                     return InventoryResult.ItemMaxLimitCategoryEquippedExceededIs;
-                else if (HasGemWithLimitCategoryEquipped(itemProto.GetItemLimitCategory(), limitEntry.Quantity - limit_count + 1, except_slot))
+                else if (HasGemWithLimitCategoryEquipped(itemProto.GetItemLimitCategory(), limitQuantity - limit_count + 1, except_slot))
                     return InventoryResult.ItemMaxCountEquippedSocketed;
             }
 

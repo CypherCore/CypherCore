@@ -227,6 +227,9 @@ namespace Game.DataStorage
 
             CliDB.ItemCurrencyCostStorage.Clear();
 
+            foreach (ItemLimitCategoryConditionRecord condition in CliDB.ItemLimitCategoryConditionStorage.Values)
+                _itemCategoryConditions.Add((uint)condition.ParentItemLimitCategoryID, condition);
+
             foreach (ItemLevelSelectorQualityRecord itemLevelSelectorQuality in CliDB.ItemLevelSelectorQualityStorage.Values)
                 _itemLevelQualitySelectorQualities.Add(itemLevelSelectorQuality.ParentILSQualitySetID, itemLevelSelectorQuality);
 
@@ -944,6 +947,11 @@ namespace Game.DataStorage
             return _itemClassByOldEnum[(int)itemClass];
         }
 
+        public List<ItemLimitCategoryConditionRecord> GetItemLimitCategoryConditions(uint categoryId)
+        {
+            return _itemCategoryConditions.LookupByKey(categoryId);
+        }
+
         public uint GetItemDisplayId(uint itemId, uint appearanceModId)
         {
             ItemModifiedAppearanceRecord modifiedAppearance = GetItemModifiedAppearance(itemId, appearanceModId);
@@ -1511,6 +1519,7 @@ namespace Game.DataStorage
         Dictionary<uint, ItemChildEquipmentRecord> _itemChildEquipment = new Dictionary<uint, ItemChildEquipmentRecord>();
         Array<ItemClassRecord> _itemClassByOldEnum = new Array<ItemClassRecord>(19);
         List<uint> _itemsWithCurrencyCost = new List<uint>();
+        MultiMap<uint, ItemLimitCategoryConditionRecord>  _itemCategoryConditions = new MultiMap<uint, ItemLimitCategoryConditionRecord>();
         MultiMap<uint, ItemLevelSelectorQualityRecord> _itemLevelQualitySelectorQualities = new MultiMap<uint, ItemLevelSelectorQualityRecord>();
         Dictionary<uint, ItemModifiedAppearanceRecord> _itemModifiedAppearancesByItem = new Dictionary<uint, ItemModifiedAppearanceRecord>();
         MultiMap<uint, uint> _itemToBonusTree = new MultiMap<uint, uint>();

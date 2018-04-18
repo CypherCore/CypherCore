@@ -233,6 +233,14 @@ namespace Game.DataStorage
         public byte Flags;
     }
 
+    public sealed class ItemLimitCategoryConditionRecord
+    {
+        public uint Id;
+        public sbyte AddQuantity;
+        public uint PlayerConditionID;
+        public int ParentItemLimitCategoryID;
+    }
+
     public sealed class ItemModifiedAppearanceRecord
     {
         public uint ItemID;

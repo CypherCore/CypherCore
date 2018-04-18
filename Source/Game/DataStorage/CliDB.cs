@@ -144,6 +144,7 @@ namespace Game.DataStorage
             ItemLevelSelectorQualityStorage = DBReader.Read<ItemLevelSelectorQualityRecord>("ItemLevelSelectorQuality.db2", HotfixStatements.SEL_ITEM_LEVEL_SELECTOR_QUALITY);
             ItemLevelSelectorQualitySetStorage = DBReader.Read<ItemLevelSelectorQualitySetRecord>("ItemLevelSelectorQualitySet.db2", HotfixStatements.SEL_ITEM_LEVEL_SELECTOR_QUALITY_SET);
             ItemLimitCategoryStorage = DBReader.Read<ItemLimitCategoryRecord>("ItemLimitCategory.db2", HotfixStatements.SEL_ITEM_LIMIT_CATEGORY, HotfixStatements.SEL_ITEM_LIMIT_CATEGORY_LOCALE);
+            ItemLimitCategoryConditionStorage = DBReader.Read<ItemLimitCategoryConditionRecord>("ItemLimitCategoryCondition.db2", HotfixStatements.SEL_ITEM_LIMIT_CATEGORY_CONDITION);
             ItemModifiedAppearanceStorage = DBReader.Read<ItemModifiedAppearanceRecord>("ItemModifiedAppearance.db2", HotfixStatements.SEL_ITEM_MODIFIED_APPEARANCE);
             ItemPriceBaseStorage = DBReader.Read<ItemPriceBaseRecord>("ItemPriceBase.db2", HotfixStatements.SEL_ITEM_PRICE_BASE);
             ItemRandomPropertiesStorage = DBReader.Read<ItemRandomPropertiesRecord>("ItemRandomProperties.db2", HotfixStatements.SEL_ITEM_RANDOM_PROPERTIES, HotfixStatements.SEL_ITEM_RANDOM_PROPERTIES_LOCALE);
@@ -476,6 +477,7 @@ namespace Game.DataStorage
         public static DB6Storage<ItemLevelSelectorQualityRecord> ItemLevelSelectorQualityStorage;
         public static DB6Storage<ItemLevelSelectorQualitySetRecord> ItemLevelSelectorQualitySetStorage;
         public static DB6Storage<ItemLimitCategoryRecord> ItemLimitCategoryStorage;
+        public static DB6Storage<ItemLimitCategoryConditionRecord> ItemLimitCategoryConditionStorage;
         public static DB6Storage<ItemModifiedAppearanceRecord> ItemModifiedAppearanceStorage;
         public static DB6Storage<ItemPriceBaseRecord> ItemPriceBaseStorage;
         public static DB6Storage<ItemRandomPropertiesRecord> ItemRandomPropertiesStorage;

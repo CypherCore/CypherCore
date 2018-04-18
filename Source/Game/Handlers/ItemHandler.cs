@@ -903,7 +903,7 @@ namespace Game
                             }
                         }
 
-                        if (limit_newcount > 0 && limit_newcount > limitEntry.Quantity)
+                        if (limit_newcount > 0 && limit_newcount > _player.GetItemLimitCategoryQuantity(limitEntry))
                         {
                             GetPlayer().SendEquipError(InventoryResult.ItemUniqueEquippableSocketed, itemTarget);
                             return;

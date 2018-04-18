@@ -503,6 +503,10 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_ITEM_LIMIT_CATEGORY, "SELECT ID, Name, Quantity, Flags FROM item_limit_category ORDER BY ID DESC");
             PrepareStatement(HotfixStatements.SEL_ITEM_LIMIT_CATEGORY_LOCALE, "SELECT ID, Name_lang FROM item_limit_category_locale WHERE locale = ?");
 
+            // ItemLimitCategoryCondition.db2
+            PrepareStatement(HotfixStatements.SEL_ITEM_LIMIT_CATEGORY_CONDITION, "SELECT ID, AddQuantity, PlayerConditionID, ParentItemLimitCategoryID " +
+                " FROM item_limit_category_condition ORDER BY ID DESC");
+
             // ItemModifiedAppearance.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_MODIFIED_APPEARANCE, "SELECT ItemID, ID, ItemAppearanceModifierID, ItemAppearanceID, OrderIndex, " +
                 "TransmogSourceTypeEnum FROM item_modified_appearance ORDER BY ID DESC");
@@ -1304,6 +1308,8 @@ namespace Framework.Database
 
         SEL_ITEM_LIMIT_CATEGORY,
         SEL_ITEM_LIMIT_CATEGORY_LOCALE,
+
+        SEL_ITEM_LIMIT_CATEGORY_CONDITION,
 
         SEL_ITEM_MODIFIED_APPEARANCE,
 
