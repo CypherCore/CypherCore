@@ -174,7 +174,7 @@ abstract class Appender
 
     public void Write(LogMessage message)
     {
-        if (_level == LogLevel.Disabled || _level > message.level)
+        if (_level == LogLevel.Disabled || (_level != LogLevel.Fatal && _level > message.level))
             return;
 
         StringBuilder ss = new StringBuilder();

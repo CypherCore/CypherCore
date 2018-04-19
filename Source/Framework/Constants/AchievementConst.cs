@@ -157,6 +157,7 @@ namespace Framework.Constants
         //CRITERIA_ADDITIONAL_CONDITION_UNK86                         = 86, // Some external event id
         //CRITERIA_ADDITIONAL_CONDITION_UNK87                         = 87, // Achievement id
         BattlePetSpecies = 91,
+        Expansion = 92,
         GarrisonFollowerEntry = 144,
         GarrisonFollowerQuality = 145,
         GarrisonFollowerLevel = 146,
@@ -403,7 +404,7 @@ namespace Framework.Constants
         GainParagonReputation = 206,
         EarnHonorXp = 207,
         RelicTalentUnlocked = 211,
-        TotalTypes = 212
+        TotalTypes = 213
     }
 
     public enum CriteriaDataType

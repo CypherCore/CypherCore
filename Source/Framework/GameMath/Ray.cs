@@ -192,6 +192,24 @@ namespace Framework.GameMath
 
         #endregion
 
+        public Vector3 intersection(Plane plane)
+        {
+            float d;
+            Vector3 normal = plane.Normal;
+            plane.getEquation(ref normal, out d);
+            float rate = Direction.dot(normal);
+
+            if (rate >= 0.0f)
+            {
+                return Vector3.Inf;
+            }
+            else
+            {
+                float t = -(d + Origin.dot(normal)) / rate;
+                return Origin + Direction * t;
+            }
+        }
+
         public float intersectionTime(AxisAlignedBox box)
         {
             Vector3 dummy = Vector3.Zero;

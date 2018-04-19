@@ -232,16 +232,16 @@ namespace Framework.Constants
         LiquidStatus = 175,
         InvalidGameobjectType = 176,
         GameobjectDamaged = 177,
+        GridPosition = 178,
 
-        PhasingSuccess = 178,
-        PhasingFailed = 179,
-        PhasingLastPhase = 180,
-        PhasingList = 181,
-        PhasingPhasemask = 182,
-        PhasingReportStatus = 183,
-        PhasingNoDefinitions = 184,              // Phasing
+        PhaseshiftStatus = 179,
+        PhaseshiftPhases = 180,
+        PhaseshiftVisibleMapIds = 181,
+        PhaseshiftUiWorldMapAreaSwaps = 182,
+        PhaseFlagCosmetic = 183,
+        PhaseFlagPersonal = 184,
 
-        GridPosition = 185,
+        //                                    185 not used
         TransportPosition = 186,
         // Room For More Level 1              187-199 Not Used
 
@@ -945,7 +945,8 @@ namespace Framework.Constants
         AccountBnetUnlinked = 1188,
         AccountBnetNotLinked = 1189,
         DisallowTicketsConfig = 1190,
-        // Room For More Level 3              1191-1198 Not Used
+        BanExists = 1191,
+        // Room For More Level 3              1192-1198 Not Used
 
         // Debug Commands
         DebugAreatriggerLeft = 1999,

@@ -331,6 +331,15 @@ namespace Game
             return sha.ComputeHash(Encoding.UTF8.GetBytes(name + ":" + password)).ToHexString();
         }
 
+        public bool IsBannedAccount(string name)
+        {
+            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BANNED_BY_USERNAME);
+            stmt.AddValue(0, name);
+            SQLResult result = DB.Login.Query(stmt);
+
+            return !result.IsEmpty();
+        }
+
         public bool IsPlayerAccount(AccountTypes gmlevel)
         {
             return gmlevel == AccountTypes.Player;

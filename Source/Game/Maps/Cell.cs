@@ -59,6 +59,29 @@ namespace Game.Maps
         public bool NoCreate() { return data.nocreate; }
         public void SetNoCreate() { data.nocreate = true; }
 
+        public static bool operator ==(Cell left, Cell right)
+        {
+            if (ReferenceEquals(left, right))
+                return true;
+
+            if (ReferenceEquals(left, null) || ReferenceEquals(right, null))
+                return false;
+
+            return left.data.cell_x == right.data.cell_x && left.data.cell_y == right.data.cell_y
+                && left.data.grid_x == right.data.grid_x && left.data.grid_y == right.data.grid_y;
+        }
+        public static bool operator !=(Cell left, Cell right) { return !(left == right); }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Cell && this == (Cell)obj;
+        }
+
+        public override int GetHashCode()
+        {
+            return (int)(data.cell_x ^ data.cell_y ^ data.grid_x ^ data.grid_y);
+        }
+
         public override string ToString()
         {
             return string.Format("grid[{0}, {1}]cell[{2}, {3}]", GetGridX(), GetGridY(), GetCellX(), GetCellY());

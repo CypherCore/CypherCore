@@ -1566,7 +1566,11 @@ namespace Scripts.Northrend.IcecrownCitadel
 
                 return true;
             });
-            targets = targets.SelectRandom(2).ToList();
+
+            var newTargets = targets.SelectRandom(2);
+            targets.Clear();
+
+            targets.AddRange(newTargets);
         }
 
         void Land(uint effIndex)

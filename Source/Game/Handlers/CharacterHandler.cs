@@ -108,15 +108,23 @@ namespace Game
                     else
                         charResult.HasDemonHunterOnRealm = false;
 
-                    if (charInfo.Level >= WorldConfig.GetIntValue(WorldCfg.CharacterCreatingMinLevelForDemonHunter) || canAlwaysCreateDemonHunter)
-                        charResult.HasLevel70OnRealm = true;
+                    charResult.MaxCharacterLevel = Math.Max(charResult.MaxCharacterLevel, charInfo.Level);
 
                     charResult.Characters.Add(charInfo);
                 }
                 while (result.NextRow());
             }
 
-            charResult.IsDemonHunterCreationAllowed = (!charResult.HasDemonHunterOnRealm && charResult.HasLevel70OnRealm) || canAlwaysCreateDemonHunter;
+            charResult.IsDemonHunterCreationAllowed = GetAccountExpansion() >= Expansion.Legion || canAlwaysCreateDemonHunter;
+            charResult.IsAlliedRacesCreationAllowed = GetAccountExpansion() >= Expansion.BattleForAzeroth;
+
+            foreach (var requirement in Global.ObjectMgr.GetRaceUnlockRequirements())
+            {
+                EnumCharactersResult.RaceUnlock raceUnlock = new EnumCharactersResult.RaceUnlock();
+                raceUnlock.RaceID = requirement.Key;
+                raceUnlock.HasExpansion = (byte)GetAccountExpansion() >= requirement.Value.Expansion;
+                charResult.RaceUnlockData.Add(raceUnlock);
+            }
 
             SendPacket(charResult);
         }
@@ -212,19 +220,34 @@ namespace Game
             }
 
             // prevent character creating Expansion race without Expansion account
-            var raceExpansionRequirement = Global.ObjectMgr.GetRaceExpansionRequirement(charCreate.CreateInfo.RaceId);
-            if (raceExpansionRequirement > GetExpansion())
+            RaceUnlockRequirement raceExpansionRequirement = Global.ObjectMgr.GetRaceUnlockRequirement(charCreate.CreateInfo.RaceId);
+            if (raceExpansionRequirement == null)
             {
-                Log.outError(LogFilter.Network, "Expansion {0} account:[{1}] tried to Create character with expansion {2} race ({3})", GetExpansion(), GetAccountId(), raceExpansionRequirement, charCreate.CreateInfo.RaceId);
+                Log.outError(LogFilter.Player, "Account {GetAccountId()} tried to create character with unavailable race {charCreate.CreateInfo.RaceId}");
+                SendCharCreate(ResponseCodes.AccountCreateFailed);
+                return;
+            }
+
+            if (raceExpansionRequirement.Expansion > (byte)GetAccountExpansion())
+            {
+                Log.outError(LogFilter.Player, $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character with expansion {raceExpansionRequirement.Expansion} race ({charCreate.CreateInfo.RaceId})");
                 SendCharCreate(ResponseCodes.CharCreateExpansion);
                 return;
             }
 
+            //if (raceExpansionRequirement->AchievementId && !)
+            //{
+            //    TC_LOG_ERROR("entities.player.cheat", "Expansion %u account:[%d] tried to Create character without achievement %u race (%u)",
+            //        GetAccountExpansion(), GetAccountId(), raceExpansionRequirement->AchievementId, charCreate.CreateInfo->Race);
+            //    SendCharCreate(CHAR_CREATE_ALLIED_RACE_ACHIEVEMENT);
+            //    return;
+            //}
+
             // prevent character creating Expansion class without Expansion account
             var classExpansionRequirement = Global.ObjectMgr.GetClassExpansionRequirement(charCreate.CreateInfo.ClassId);
-            if (classExpansionRequirement > GetExpansion())
+            if (classExpansionRequirement > GetAccountExpansion())
             {
-                Log.outError(LogFilter.Network, "Expansion {0} account:[{1}] tried to Create character with expansion {2} class ({3})", GetExpansion(), GetAccountId(), classExpansionRequirement, charCreate.CreateInfo.ClassId);
+                Log.outError(LogFilter.Network, $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character with expansion {classExpansionRequirement} class ({charCreate.CreateInfo.ClassId})");
                 SendCharCreate(ResponseCodes.CharCreateExpansionClass);
                 return;
             }
@@ -409,7 +432,7 @@ namespace Game
 
                     if (checkDemonHunterReqs && !hasDemonHunterReqLevel)
                     {
-                        SendCharCreate(ResponseCodes.CharCreateFailed);
+                        SendCharCreate(ResponseCodes.CharCreateLevelRequirementDemonHunter);
                         return;
                     }
 
@@ -535,7 +558,7 @@ namespace Game
 
             GenerateRandomCharacterNameResult result = new GenerateRandomCharacterNameResult();
             result.Success = true;
-            result.Name = Global.DB2Mgr.GetNameGenEntry(packet.Race, packet.Sex, GetSessionDbcLocale(), Global.WorldMgr.GetDefaultDbcLocale());
+            result.Name = Global.DB2Mgr.GetNameGenEntry(packet.Race, packet.Sex);
 
             SendPacket(result);
         }
@@ -1302,16 +1325,20 @@ namespace Game
                         saveEquipmentSet.Set.Appearances[i] = 0;
 
                         ObjectGuid itemGuid = saveEquipmentSet.Set.Pieces[i];
+                        if (!itemGuid.IsEmpty())
+                        {
+                            Item item = _player.GetItemByPos(InventorySlots.Bag0, i);
 
-                        Item item = _player.GetItemByPos(InventorySlots.Bag0, i);
+                            /// cheating check 1 (item equipped but sent empty guid)
+                            if (!item)
+                                return;
 
-                        /// cheating check 1 (item equipped but sent empty guid)
-                        if (!item && !itemGuid.IsEmpty())
-                            return;
-
-                        /// cheating check 2 (sent guid does not match equipped item)
-                        if (item && item.GetGUID() != itemGuid)
-                            return;
+                            /// cheating check 2 (sent guid does not match equipped item)
+                            if (item.GetGUID() != itemGuid)
+                                return;
+                        }
+                        else
+                            saveEquipmentSet.Set.IgnoreMask |= 1u << i;
                     }
                     else
                     {
@@ -1321,10 +1348,12 @@ namespace Game
                             if (!CliDB.ItemModifiedAppearanceStorage.ContainsKey(saveEquipmentSet.Set.Appearances[i]))
                                 return;
 
-                            var pairValue = GetCollectionMgr().HasItemAppearance((uint)saveEquipmentSet.Set.Appearances[i]);
-                            if (!pairValue.Item1)
+                            (bool hasAppearance, bool isTemporary) = GetCollectionMgr().HasItemAppearance((uint)saveEquipmentSet.Set.Appearances[i]);
+                            if (!hasAppearance)
                                 return;
                         }
+                        else
+                            saveEquipmentSet.Set.IgnoreMask |= 1u << i;
                     }
                 }
                 else
@@ -1350,7 +1379,7 @@ namespace Game
                     if (illusion.ItemVisual == 0 || !illusion.Flags.HasAnyFlag(EnchantmentSlotMask.Collectable))
                         return false;
 
-                    PlayerConditionRecord condition = CliDB.PlayerConditionStorage.LookupByKey(illusion.PlayerConditionID);
+                    PlayerConditionRecord condition = CliDB.PlayerConditionStorage.LookupByKey(illusion.TransmogPlayerConditionID);
                     if (condition != null)
                         if (!ConditionManager.IsPlayerMeetingCondition(_player, condition))
                             return false;
@@ -1380,7 +1409,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.UseEquipmentSet)]
         void HandleUseEquipmentSet(UseEquipmentSet useEquipmentSet)
         {
-            ObjectGuid ignoredItemGuid = new ObjectGuid(0, 1);
+            ObjectGuid ignoredItemGuid = new ObjectGuid(0x0C00040000000000, 0xFFFFFFFFFFFFFFFF);
             for (byte i = 0; i < EquipmentSlot.End; ++i)
             {
                 Log.outDebug(LogFilter.Player, "{0}: ContainerSlot: {1}, Slot: {2}", useEquipmentSet.Items[i].Item.ToString(), useEquipmentSet.Items[i].ContainerSlot, useEquipmentSet.Items[i].Slot);
@@ -1680,7 +1709,7 @@ namespace Game
 
 
                         var factionMask = newTeamId == TeamId.Horde ? CliDB.HordeTaxiNodesMask : CliDB.AllianceTaxiNodesMask;
-                        for (byte i = 0; i < PlayerConst.TaxiMaskSize; ++i)
+                        for (int i = 0; i < PlayerConst.TaxiMaskSize; ++i)
                         {
                             // i = (315 - 1) / 8 = 39
                             // m = 1 << ((315 - 1) % 8) = 4
@@ -1706,7 +1735,7 @@ namespace Game
                         {
                             Guild guild = Global.GuildMgr.GetGuildById(result.Read<ulong>(0));
                             if (guild)
-                                guild.DeleteMember(factionChangeInfo.Guid, false, false, true);
+                                guild.DeleteMember(trans, factionChangeInfo.Guid, false, false, true);
                         }
 
                         Player.LeaveAllArenaTeams(factionChangeInfo.Guid);
@@ -1818,7 +1847,7 @@ namespace Game
                         var questTemplates = Global.ObjectMgr.GetQuestTemplates();
                         foreach (Quest quest in questTemplates.Values)
                         {
-                            uint newRaceMask = (uint)(newTeamId == TeamId.Alliance ? Race.RaceMaskAlliance : Race.RaceMaskHorde);
+                            long newRaceMask = (long)(newTeamId == TeamId.Alliance ? Race.RaceMaskAlliance : Race.RaceMaskHorde);
                             if (quest.AllowableRaces != -1 && !Convert.ToBoolean(quest.AllowableRaces & newRaceMask))
                             {
                                 stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_QUESTSTATUS_REWARDED_ACTIVE_BY_QUEST);
@@ -2497,6 +2526,10 @@ namespace Game
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Talents, stmt);
 
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_PVP_TALENTS);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.PvpTalents, stmt);
+
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PLAYER_ACCOUNT_DATA);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.AccountData, stmt);
@@ -2592,6 +2625,7 @@ namespace Game
         BgData,
         Glyphs,
         Talents,
+        PvpTalents,
         AccountData,
         Skills,
         WeeklyQuestStatus,

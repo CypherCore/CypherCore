@@ -281,9 +281,9 @@ namespace Game
                         if (entranceMap != null)
                         {
                             mapID = (uint)corpseMapEntry.CorpseMapID;
-                            x = corpseMapEntry.CorpsePos.X;
-                            y = corpseMapEntry.CorpsePos.Y;
-                            z = entranceMap.GetHeight(player.GetPhases(), x, y, MapConst.MaxHeight);
+                            x = corpseMapEntry.Corpse.X;
+                            y = corpseMapEntry.Corpse.Y;
+                            z = entranceMap.GetHeight(player.GetPhaseShift(), x, y, MapConst.MaxHeight);
                         }
                     }
                 }
@@ -396,6 +396,7 @@ namespace Game
                             questPOIBlobData.WorldEffectID = data.WorldEffectID;
                             questPOIBlobData.PlayerConditionID = data.PlayerConditionID;
                             questPOIBlobData.UnkWoD1 = data.UnkWoD1;
+                            questPOIBlobData.AlwaysAllowMergingBlobs = data.AlwaysAllowMergingBlobs;
 
                             foreach (var point in data.points)
                                 questPOIBlobData.QuestPOIBlobPointStats.Add(new QuestPOIBlobPoint(point.X, point.Y));

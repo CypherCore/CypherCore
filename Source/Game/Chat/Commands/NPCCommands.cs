@@ -87,16 +87,7 @@ namespace Game.Chat
             if (data != null)
             {
                 handler.SendSysMessage(CypherStrings.NpcinfoPhases, data.phaseId, data.phaseGroup);
-                if (data.phaseGroup != 0)
-                {
-                    var _phases = target.GetPhases();
-                    if (!_phases.Empty())
-                    {
-                        handler.SendSysMessage(CypherStrings.NpcinfoPhaseIds);
-                        foreach (uint phaseId in _phases)
-                            handler.SendSysMessage("{0}", phaseId);
-                    }
-                }
+                PhasingHandler.PrintToChat(handler, target.GetPhaseShift());
             }
 
             handler.SendSysMessage(CypherStrings.NpcinfoArmor, target.GetArmor());
@@ -939,8 +930,8 @@ namespace Game.Chat
                     return false;
                 }
 
-                creature.ClearPhases();
-                creature.SetInPhase(phaseId, true, true);
+                PhasingHandler.ResetPhaseShift(creature);
+                PhasingHandler.AddPhase(creature, phaseId, true);
                 creature.SetDBPhase((int)phaseId);
 
                 creature.SaveToDB();
@@ -962,12 +953,8 @@ namespace Game.Chat
                     return false;
                 }
 
-                creature.ClearPhases();
-
-                foreach (uint id in Global.DB2Mgr.GetPhasesForGroup((uint)phaseGroupId))
-                    creature.SetInPhase(id, false, true); // don't send update here for multiple phases, only send it once after adding all phases
-
-                creature.UpdateObjectVisibility();
+                PhasingHandler.ResetPhaseShift(creature);
+                PhasingHandler.AddPhaseGroup(creature, (uint)phaseGroupId, true);
                 creature.SetDBPhase(-phaseGroupId);
 
                 creature.SaveToDB();
@@ -1094,10 +1081,6 @@ namespace Game.Chat
                     return false;
 
                 Player chr = handler.GetSession().GetPlayer();
-                float x = chr.GetPositionX();
-                float y = chr.GetPositionY();
-                float z = chr.GetPositionZ();
-                float o = chr.GetOrientation();
                 Map map = chr.GetMap();
 
                 Transport trans = chr.GetTransport();
@@ -1119,11 +1102,11 @@ namespace Game.Chat
                     return true;
                 }
 
-                Creature creature = new Creature();
-                if (!creature.Create(map.GenerateLowGuid(HighGuid.Creature), map, id, x, y, z, o))
+                Creature creature = Creature.CreateCreature(id, map, chr.GetPosition());
+                if (!creature)
                     return false;
 
-                creature.CopyPhaseFrom(chr);
+                PhasingHandler.InheritPhaseShift(creature, chr);
                 creature.SaveToDB(map.GetId(), 1ul << (int)map.GetSpawnMode());
 
                 ulong db_guid = creature.GetSpawnId();
@@ -1131,8 +1114,8 @@ namespace Game.Chat
                 // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells()
                 // current "creature" variable is deleted and created fresh new, otherwise old values might trigger asserts or cause undefined behavior
                 creature.CleanupsBeforeDelete();
-                creature = new Creature();
-                if (!creature.LoadCreatureFromDB(db_guid, map))
+                creature = Creature.CreateCreatureFromDB(db_guid, map);
+                if (!creature)
                     return false;
 
                 Global.ObjectMgr.AddCreatureToGrid(db_guid, Global.ObjectMgr.GetCreatureData(db_guid));

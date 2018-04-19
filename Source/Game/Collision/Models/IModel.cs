@@ -16,6 +16,7 @@
  */
 
 using Framework.GameMath;
+using System.Collections.Generic;
 
 namespace Game.Collision
 {
@@ -23,5 +24,9 @@ namespace Game.Collision
     {
         public virtual Vector3 getPosition() { return default(Vector3); }
         public virtual AxisAlignedBox getBounds() { return default(AxisAlignedBox); }
+
+        public virtual bool IntersectRay(Ray ray, ref float maxDist, bool stopAtFirstHit, PhaseShift phaseShift) { return false; }
+        public virtual bool IntersectRay(Ray ray, ref float distance, bool stopAtFirstHit) { return false; }
+        public virtual void IntersectPoint(Vector3 point, AreaInfo info, PhaseShift phaseShift) { }
     }
 }

@@ -25,7 +25,7 @@ namespace Game
     {
         WaypointManager()
         {
-            _waypointStore = new MultiMap<uint, WaypointData>();
+            _waypointStore = new Dictionary<uint, WaypointPath>();
         }
 
         public void Load()
@@ -45,8 +45,6 @@ namespace Game
 
             do
             {
-                WaypointData wp = new WaypointData();
-
                 uint pathId = result.Read<uint>(0);
 
                 float x = result.Read<float>(2);
@@ -57,23 +55,28 @@ namespace Game
                 GridDefines.NormalizeMapCoord(ref x);
                 GridDefines.NormalizeMapCoord(ref y);
 
+                WaypointNode wp = new WaypointNode();
                 wp.id = result.Read<uint>(1);
                 wp.x = x;
                 wp.y = y;
                 wp.z = z;
                 wp.orientation = o;
-                wp.movetype = (WaypointMoveType)result.Read<uint>(6);
-                if (wp.movetype >= WaypointMoveType.Max)
+                wp.moveType = (WaypointMoveType)result.Read<uint>(6);
+
+                if (wp.moveType >= WaypointMoveType.Max)
                 {
                     Log.outError(LogFilter.Sql, "Waypoint {0} in waypoint_data has invalid move_type, ignoring", wp.id);
                     continue;
                 }
 
                 wp.delay = result.Read<uint>(7);
-                wp.event_id = result.Read<uint>(8);
-                wp.event_chance = result.Read<byte>(9);
+                wp.eventId = result.Read<uint>(8);
+                wp.eventChance = result.Read<byte>(9);
 
-                _waypointStore.Add(pathId, wp);
+                if (!_waypointStore.ContainsKey(pathId))
+                    _waypointStore[pathId] = new WaypointPath();
+
+                _waypointStore[pathId].nodes.Add(wp);
                 ++count;
             } while (result.NextRow());
 
@@ -82,8 +85,7 @@ namespace Game
 
         public void ReloadPath(uint id)
         {
-            if (_waypointStore.ContainsKey(id))
-                _waypointStore.Remove(id);
+            _waypointStore.Remove(id);
 
             PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_BY_ID);
             stmt.AddValue(0, id);
@@ -94,8 +96,6 @@ namespace Game
 
             do
             {
-                WaypointData wp = new WaypointData();
-
                 float x = result.Read<float>(1);
                 float y = result.Read<float>(2);
                 float z = result.Read<float>(3);
@@ -104,45 +104,79 @@ namespace Game
                 GridDefines.NormalizeMapCoord(ref x);
                 GridDefines.NormalizeMapCoord(ref y);
 
+                WaypointNode wp = new WaypointNode();
                 wp.id = result.Read<uint>(0);
                 wp.x = x;
                 wp.y = y;
                 wp.z = z;
                 wp.orientation = o;
-                wp.movetype = (WaypointMoveType)result.Read<uint>(5);
+                wp.moveType = (WaypointMoveType)result.Read<uint>(5);
 
-                if (wp.movetype >= WaypointMoveType.Max)
+                if (wp.moveType >= WaypointMoveType.Max)
                 {
                     Log.outError(LogFilter.Sql, "Waypoint {0} in waypoint_data has invalid move_type, ignoring", wp.id);
                     continue;
                 }
 
                 wp.delay = result.Read<uint>(6);
-                wp.event_id = result.Read<uint>(7);
-                wp.event_chance = result.Read<byte>(8);
+                wp.eventId = result.Read<uint>(7);
+                wp.eventChance = result.Read<byte>(8);
 
-                _waypointStore.Add(id, wp);
+                if (!_waypointStore.ContainsKey(id))
+                    _waypointStore[id] = new WaypointPath();
+
+                _waypointStore[id].nodes.Add(wp);
 
             }
             while (result.NextRow());
         }
 
-        public List<WaypointData> GetPath(uint id)
+        public WaypointPath GetPath(uint id)
         {
             return _waypointStore.LookupByKey(id);
         }
 
-        MultiMap<uint, WaypointData> _waypointStore;
+        Dictionary<uint, WaypointPath> _waypointStore;
     }
 
-    public struct WaypointData
+    public class WaypointNode
     {
+        public WaypointNode() { moveType = WaypointMoveType.Run; }
+        public WaypointNode(uint _id, float _x, float _y, float _z, float _orientation = 0.0f, uint _delay = 0)
+        {
+            id = _id;
+            x = _x;
+            y = _y;
+            z = _z;
+            orientation = _orientation;
+            delay = _delay;
+            eventId = 0;
+            moveType = WaypointMoveType.Walk;
+            eventChance = 100;
+        }
+
         public uint id;
         public float x, y, z, orientation;
         public uint delay;
-        public uint event_id;
-        public WaypointMoveType movetype;
-        public byte event_chance;
+        public uint eventId;
+        public WaypointMoveType moveType;
+        public byte eventChance;
+    }
+
+    public class WaypointPath
+    {
+        public WaypointPath()
+        {
+            nodes = new List<WaypointNode>();
+        }
+        public WaypointPath(uint _id, List<WaypointNode> _nodes)
+        {
+            id = _id;
+            nodes = _nodes;
+        }
+
+        public List<WaypointNode> nodes;
+        public uint id;
     }
 
     public enum WaypointMoveType

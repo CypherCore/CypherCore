@@ -181,6 +181,7 @@ namespace Game.Entities
 
             UpdateSplineMovement(diff);
             GetMotionMaster().UpdateMotion(diff);
+            UpdateUnderwaterState(GetMap(), GetPositionX(), GetPositionY(), GetPositionZ());
         }
         void _UpdateSpells(uint diff)
         {
@@ -413,15 +414,6 @@ namespace Game.Entities
                 AIRelocationNotifier notifier = new AIRelocationNotifier(this);
                 Cell.VisitAllObjects(this, notifier, GetVisibilityRange());
             }
-        }
-
-        public override void AddToWorld()
-        {
-            if (!IsInWorld)
-            {
-                base.AddToWorld();
-            }
-            RebuildTerrainSwaps();
         }
 
         public override void RemoveFromWorld()
@@ -934,7 +926,7 @@ namespace Game.Entities
             MoveSplineInit init = new MoveSplineInit(this);
 
             // Creatures without inhabit type air should begin falling after exiting the vehicle
-            if (IsTypeId(TypeId.Unit) && !ToCreature().CanFly() && height > GetMap().GetWaterOrGroundLevel(GetPhases(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), ref height) + 0.1f)
+            if (IsTypeId(TypeId.Unit) && !ToCreature().CanFly() && height > GetMap().GetWaterOrGroundLevel(GetPhaseShift(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), ref height) + 0.1f)
                 init.SetFall();
 
             init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), height, false);
@@ -1098,14 +1090,12 @@ namespace Game.Entities
 
         public HostileRefManager getHostileRefManager() { return m_HostileRefManager; }
 
-        public override bool SetInPhase(uint id, bool update, bool apply)
+        public void OnPhaseChange()
         {
-            bool res = base.SetInPhase(id, update, apply);
-
             if (!IsInWorld)
-                return res;
+                return;
 
-            if (IsTypeId(TypeId.Unit) || (!ToPlayer().IsGameMaster() && !ToPlayer().GetSession().PlayerLogout()))
+            if (IsTypeId(TypeId.Unit) || !ToPlayer().GetSession().PlayerLogout())
             {
                 HostileRefManager refManager = getHostileRefManager();
                 HostileReference refe = refManager.getFirst();
@@ -1142,26 +1132,8 @@ namespace Game.Entities
                     }
                 }
             }
-
-
-            foreach (var unit in m_Controlled)
-                if (unit.IsTypeId(TypeId.Unit))
-                    unit.SetInPhase(id, true, apply);
-
-            for (byte i = 0; i < SharedConst.MaxSummonSlot; ++i)
-            {
-                if (!m_SummonSlot[i].IsEmpty())
-                {
-                    Creature summon = GetMap().GetCreature(m_SummonSlot[i]);
-                    if (summon != null)
-                        summon.SetInPhase(id, true, apply);
-                }
-            }
-
-            RemoveNotOwnSingleTargetAuras(0, true);
-
-            return res;
         }
+
         public uint GetModelForForm(ShapeShiftForm form)
         {
             if (IsTypeId(TypeId.Player))
@@ -1174,8 +1146,8 @@ namespace Game.Entities
                     {
                         ArtifactAppearanceRecord artifactAppearance = CliDB.ArtifactAppearanceStorage.LookupByKey(artifact.GetModifier(ItemModifier.ArtifactAppearanceId));
                         if (artifactAppearance != null)
-                            if ((ShapeShiftForm)artifactAppearance.ModifiesShapeshiftFormDisplay == form)
-                                return artifactAppearance.ShapeshiftDisplayID;
+                            if ((ShapeShiftForm)artifactAppearance.OverrideShapeshiftFormID == form)
+                                return artifactAppearance.OverrideShapeshiftDisplayID;
                     }
                 }
 
@@ -1687,59 +1659,6 @@ namespace Game.Entities
         {
             m_auraModifiersGroup[(int)unitMod][(int)modifierType] = value;
         }
-        public float GetTotalAuraMultiplierByMiscValue(AuraType auratype, int miscValue)
-        {
-            Dictionary<SpellGroup, int> SameEffectSpellGroup = new Dictionary<SpellGroup, int>();
-            float multiplier = 1.0f;
-
-            var mTotalAuraList = GetAuraEffectsByType(auratype);
-            foreach (var i in mTotalAuraList)
-            {
-                if (i.GetMiscValue() == miscValue)
-                    if (!Global.SpellMgr.AddSameEffectStackRuleSpellGroups(i.GetSpellInfo(), i.GetAmount(), out SameEffectSpellGroup))
-                        MathFunctions.AddPct(ref multiplier, i.GetAmount());
-            }
-
-            foreach (var pair in SameEffectSpellGroup)
-                MathFunctions.AddPct(ref multiplier, pair.Value);
-
-            return multiplier;
-        }
-        public int GetTotalAuraModifierByMiscValue(AuraType auratype, int miscValue)
-        {
-            Dictionary<SpellGroup, int> SameEffectSpellGroup = new Dictionary<SpellGroup, int>();
-            int modifier = 0;
-
-            var mTotalAuraList = GetAuraEffectsByType(auratype);
-            foreach (var i in mTotalAuraList)
-            {
-                if (i.GetMiscValue() == miscValue)
-                    if (!Global.SpellMgr.AddSameEffectStackRuleSpellGroups(i.GetSpellInfo(), i.GetAmount(), out SameEffectSpellGroup))
-                        modifier += i.GetAmount();
-            }
-
-            foreach (var pair in SameEffectSpellGroup)
-                modifier += pair.Value;
-
-            return modifier;
-        }
-        public int GetTotalAuraModifierByMiscMask(AuraType auratype, int miscMask)
-        {
-            Dictionary<SpellGroup, int> SameEffectSpellGroup = new Dictionary<SpellGroup, int>();
-            int modifier = 0;
-
-            var mTotalAuraList = GetAuraEffectsByType(auratype);
-
-            foreach (var i in mTotalAuraList)
-                if (Convert.ToBoolean(i.GetMiscValue() & miscMask))
-                    if (!Global.SpellMgr.AddSameEffectStackRuleSpellGroups(i.GetSpellInfo(), i.GetAmount(), out SameEffectSpellGroup))
-                        modifier += i.GetAmount();
-
-            foreach (var pair in SameEffectSpellGroup)
-                modifier += pair.Value;
-
-            return modifier;
-        }
         public int CalcSpellDuration(SpellInfo spellProto)
         {
             sbyte comboPoints = (sbyte)(m_playerMovingMe != null ? m_playerMovingMe.GetComboPoints() : 0);
@@ -1941,11 +1860,34 @@ namespace Game.Entities
                             AuraEffect powerTypeAura = powerTypeAuras.First();
                             displayPower = (PowerType)powerTypeAura.GetMiscValue();
                         }
-                        else
+                        else if (GetTypeId() == TypeId.Player)
                         {
                             ChrClassesRecord cEntry = CliDB.ChrClassesStorage.LookupByKey(GetClass());
-                            if (cEntry != null && cEntry.PowerType < PowerType.Max)
-                                displayPower = cEntry.PowerType;
+                            if (cEntry != null && cEntry.DisplayPower < PowerType.Max)
+                                displayPower = cEntry.DisplayPower;
+                        }
+                        else if (GetTypeId() == TypeId.Unit)
+                        {
+                            Vehicle vehicle = GetVehicleKit();
+                            if (vehicle)
+                            {
+                                PowerDisplayRecord powerDisplay = CliDB.PowerDisplayStorage.LookupByKey(vehicle.GetVehicleInfo().PowerDisplayID[0]);
+                                if (powerDisplay != null)
+                                    displayPower = (PowerType)powerDisplay.ActualType;
+                                else if (GetClass() == Class.Rogue)
+                                    displayPower = PowerType.Energy;
+                            }
+                            else
+                            {
+                                Pet pet = ToPet();
+                                if (pet)
+                                {
+                                    if (pet.getPetType() == PetType.Hunter) // Hunter pets have focus
+                                        displayPower = PowerType.Focus;
+                                    else if (pet.IsPetGhoul() || pet.IsPetAbomination()) // DK pets have energy
+                                        displayPower = PowerType.Energy;
+                                }
+                            }
                         }
                         break;
                     }
@@ -2126,9 +2068,9 @@ namespace Game.Entities
         {
             return (Race)GetByteValue(UnitFields.Bytes0, 0);
         }
-        public uint getRaceMask()
+        public long getRaceMask()
         {
-            return (uint)(1 << ((int)GetRace() - 1));
+            return (1 << ((int)GetRace() - 1));
         }
         public Class GetClass()
         {
@@ -2508,8 +2450,7 @@ namespace Game.Entities
                     }
 
                     // check FFA_PVP
-                    if (Convert.ToBoolean(GetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag) & (byte)UnitBytes2Flags.FFAPvp)
-                        && Convert.ToBoolean(target.GetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag) & (byte)UnitBytes2Flags.FFAPvp))
+                    if (IsFFAPvP() && target.IsFFAPvP())
                         return ReputationRank.Hostile;
 
                     if (selfPlayerOwner != null)

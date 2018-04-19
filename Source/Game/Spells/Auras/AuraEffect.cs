@@ -105,7 +105,7 @@ namespace Game.Spells
                                         {
                                             for (int t = 0; t < ItemConst.MaxItemEnchantmentEffects; t++)
                                             {
-                                                if (pEnchant.EffectSpellID[t] == m_spellInfo.Id)
+                                                if (pEnchant.EffectArg[t] == m_spellInfo.Id)
                                                 {
                                                     amount = (int)((item_rand_suffix.AllocationPct[k] * castItem.GetItemSuffixFactor()) / 10000);
                                                     break;
@@ -146,7 +146,7 @@ namespace Game.Spells
                     uint mountType = (uint)GetMiscValueB();
                     MountRecord mountEntry = Global.DB2Mgr.GetMount(GetId());
                     if (mountEntry != null)
-                        mountType = mountEntry.MountTypeId;
+                        mountType = mountEntry.MountTypeID;
 
                     var mountCapability = GetBase().GetUnitOwner().GetMountCapability(mountType);
                     if (mountCapability != null)
@@ -768,7 +768,7 @@ namespace Game.Spells
             GetBase().CallScriptAfterEffectProcHandlers(this, aurApp, eventInfo);
         }
 
-        void HandleShapeshiftBoosts(Unit target, bool apply)
+        public void HandleShapeshiftBoosts(Unit target, bool apply)
         {
             uint spellId = 0;
             uint spellId2 = 0;
@@ -1283,28 +1283,17 @@ namespace Game.Spells
 
             Unit target = aurApp.GetTarget();
 
-            var oldPhases = target.GetPhases();
-            target.SetInPhase((uint)GetMiscValueB(), false, apply);
-
-            // call functions which may have additional effects after chainging state of unit
-            // phase auras normally not expected at BG but anyway better check
             if (apply)
             {
+                PhasingHandler.AddPhase(target, (uint)GetMiscValueB(), true);
+
+                // call functions which may have additional effects after chainging state of unit
+                // phase auras normally not expected at BG but anyway better check
                 // drop flag at invisibiliy in bg
                 target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ImmuneOrLostSelection);
             }
-
-            Player player = target.ToPlayer();
-            if (player)
-            {
-                if (player.IsInWorld)
-                    player.GetMap().SendUpdateTransportVisibility(player, oldPhases);
-                player.SendUpdatePhasing();
-            }
-
-            // need triggering visibility update base at phase update of not GM invisible (other GMs anyway see in any phases)
-            if (target.IsVisible())
-                target.UpdateObjectVisibility();
+            else
+                PhasingHandler.RemovePhase(target, (uint)GetMiscValueB(), true);
         }
 
         [AuraEffectHandler(AuraType.PhaseGroup)]
@@ -1314,29 +1303,18 @@ namespace Game.Spells
                 return;
 
             Unit target = aurApp.GetTarget();
-            var oldPhases = target.GetPhases();
-            var phases = Global.DB2Mgr.GetPhasesForGroup((uint)GetMiscValueB());
-            foreach (var phase in phases)
-                target.SetInPhase(phase, false, apply);
-            // call functions which may have additional effects after chainging state of unit
-            // phase auras normally not expected at BG but anyway better check
+
             if (apply)
             {
+                PhasingHandler.AddPhaseGroup(target, (uint)GetMiscValueB(), true);
+
+                // call functions which may have additional effects after chainging state of unit
+                // phase auras normally not expected at BG but anyway better check
                 // drop flag at invisibiliy in bg
                 target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ImmuneOrLostSelection);
             }
-
-            Player player = target.ToPlayer();
-            if (player)
-            {
-                if (player.IsInWorld)
-                    player.GetMap().SendUpdateTransportVisibility(player, oldPhases);
-                player.SendUpdatePhasing();
-            }
-
-            // need triggering visibility update base at phase update of not GM invisible (other GMs anyway see in any phases)
-            if (target.IsVisible())
-                target.UpdateObjectVisibility();
+            else
+                PhasingHandler.RemovePhaseGroup(target, (uint)GetMiscValueB(), true);
         }
 
         /**********************/
@@ -2177,21 +2155,28 @@ namespace Game.Spells
                     var mountDisplays = Global.DB2Mgr.GetMountDisplays(mountEntry.Id);
                     if (mountDisplays != null)
                     {
-                        List<MountXDisplayRecord> usableDisplays = mountDisplays.Where(mountDisplay =>
+                        if (mountEntry.IsSelfMount())
                         {
-                            Player playerTarget = target.ToPlayer();
-                            if (playerTarget)
+                            displayId = 73200; //DisplayId: HiddenMount 
+                        }
+                        else
+                        {
+                            List<MountXDisplayRecord> usableDisplays = mountDisplays.Where(mountDisplay =>
                             {
-                                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(mountDisplay.PlayerConditionID);
-                                if (playerCondition != null)
-                                    return ConditionManager.IsPlayerMeetingCondition(playerTarget, playerCondition);
-                            }
+                                Player playerTarget = target.ToPlayer();
+                                if (playerTarget)
+                                {
+                                    PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(mountDisplay.PlayerConditionID);
+                                    if (playerCondition != null)
+                                        return ConditionManager.IsPlayerMeetingCondition(playerTarget, playerCondition);
+                                }
 
-                            return true;
-                        }).ToList();
+                                return true;
+                            }).ToList();
 
-                        if (!usableDisplays.Empty())
-                            displayId = usableDisplays.SelectRandom().DisplayID;
+                            if (!usableDisplays.Empty())
+                                displayId = usableDisplays.SelectRandom().CreatureDisplayInfoID;
+                        }
                     }
                     // TODO: CREATE TABLE mount_vehicle (mountId, vehicleCreatureId) for future mounts that are vehicles (new mounts no longer have proper data in MiscValue)
                     //if (MountVehicle const* mountVehicle = sObjectMgr->GetMountVehicle(mountEntry->Id))
@@ -2203,7 +2188,7 @@ namespace Game.Spells
                 {
                     vehicleId = creatureInfo.VehicleId;
 
-                    if (displayId == 0 || vehicleId != 0)
+                    if (displayId == 0)
                     {
                         displayId = ObjectManager.ChooseDisplayId(creatureInfo);
                         Global.ObjectMgr.GetCreatureModelRandomGender(ref displayId);
@@ -2222,7 +2207,7 @@ namespace Game.Spells
                 {
                     var mountCapability = CliDB.MountCapabilityStorage.LookupByKey(GetAmount());
                     if (mountCapability != null)
-                        target.CastSpell(target, mountCapability.SpeedModSpell, true);
+                        target.CastSpell(target, mountCapability.ModSpellAuraID, true);
                 }
             }
             else
@@ -2238,7 +2223,7 @@ namespace Game.Spells
                     // remove speed aura
                     var mountCapability = CliDB.MountCapabilityStorage.LookupByKey(GetAmount());
                     if (mountCapability != null)
-                        target.RemoveAurasDueToSpell(mountCapability.SpeedModSpell, target.GetGUID());
+                        target.RemoveAurasDueToSpell(mountCapability.ModSpellAuraID, target.GetGUID());
                 }
             }
         }
@@ -3358,6 +3343,20 @@ namespace Game.Spells
             target.ToPlayer().UpdateManaRegen();
         }
 
+        [AuraEffectHandler(AuraType.ModManaRegenPct)]
+        void HandleModManaRegenPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
+                return;
+
+            Unit target = aurApp.GetTarget();
+
+            if (!target.IsPlayer())
+                return;
+
+            target.ToPlayer().UpdateManaRegen();
+        }
+
         [AuraEffectHandler(AuraType.ModIncreaseHealth)]
         [AuraEffectHandler(AuraType.ModIncreaseHealth2)]
         [AuraEffectHandler(AuraType.ModMaxHealth)]
@@ -3431,7 +3430,7 @@ namespace Game.Spells
             // Save old powers for further calculation
             int oldPower = target.GetPower(powerType);
             int oldMaxPower = target.GetMaxPower(powerType);
-            
+
             // Handle aura effect for max power
             target.HandleStatModifier(unitMod, UnitModifierType.TotalPCT, GetAmount(), apply);
 
@@ -3505,7 +3504,7 @@ namespace Game.Spells
                 return;
 
             Unit target = aurApp.GetTarget();
-            if (target.GetPowerIndex((PowerType)powerDisplay.PowerType) == (int)PowerType.Max)
+            if (target.GetPowerIndex((PowerType)powerDisplay.ActualType) == (int)PowerType.Max)
                 return;
 
             if (apply)
@@ -3515,6 +3514,32 @@ namespace Game.Spells
             }
             else
                 target.SetUInt32Value(UnitFields.OverrideDisplayPowerId, 0);
+        }
+
+        [AuraEffectHandler(AuraType.ModMaxPowerPct)]
+        void HandleAuraModMaxPowerPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
+                return;
+
+            Unit target = aurApp.GetTarget();
+            if (!target.IsPlayer())
+                return;
+
+            PowerType powerType = (PowerType)GetMiscValue();
+            UnitMods unitMod = UnitMods.PowerStart + (int)powerType;
+
+            // Save old powers for further calculation
+            int oldPower = target.GetPower(powerType);
+            int oldMaxPower = target.GetMaxPower(powerType);
+
+            // Handle aura effect for max power
+            target.HandleStatModifier(unitMod, UnitModifierType.TotalPCT, (float)GetAmount(), apply);
+
+            // Calculate the current power change
+            int change = target.GetMaxPower(powerType) - oldMaxPower;
+            change = (oldPower + change) - target.GetPower(powerType);
+            target.ModifyPower(powerType, change);
         }
 
         /********************************/
@@ -3905,7 +3930,7 @@ namespace Game.Spells
                 for (int i = 0; i < (int)SpellSchools.Max; ++i)
                 {
                     if (Convert.ToBoolean(GetMiscValue() & (1 << i)))
-                        target.ApplyModUInt32Value(baseField + i, GetAmount(), apply);
+                        target.ApplyModInt32Value(baseField + i, GetAmount(), apply);
                 }
 
                 Guardian pet = target.ToPlayer().GetGuardianPet();
@@ -4686,7 +4711,7 @@ namespace Game.Spells
                 {
                     for (byte i = 0; i < SharedConst.MaxOverrideSpell; ++i)
                     {
-                        uint spellId = overrideSpells.SpellID[i];
+                        uint spellId = overrideSpells.Spells[i];
                         if (spellId != 0)
                             target.AddTemporarySpell(spellId);
                     }
@@ -4700,7 +4725,7 @@ namespace Game.Spells
                 {
                     for (byte i = 0; i < SharedConst.MaxOverrideSpell; ++i)
                     {
-                        uint spellId = overrideSpells.SpellID[i];
+                        uint spellId = overrideSpells.Spells[i];
                         if (spellId != 0)
                             target.RemoveTemporarySpell(spellId);
                     }
@@ -5355,9 +5380,9 @@ namespace Game.Spells
 
             SpellPeriodicAuraLogInfo pInfo = new SpellPeriodicAuraLogInfo(this, damage, overkill, absorb, resist, 0.0f, crit);
 
-            caster.ProcSkillsAndAuras(target, procAttacker, procVictim, ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.None, hitMask, null, damageInfo, null);
-
             caster.DealDamage(target, damage, cleanDamage, DamageEffectType.DOT, GetSpellInfo().GetSchoolMask(), GetSpellInfo(), true);
+
+            caster.ProcSkillsAndAuras(target, procAttacker, procVictim, ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.None, hitMask, null, damageInfo, null);
             target.SendPeriodicAuraLog(pInfo);
         }
 
@@ -5444,12 +5469,11 @@ namespace Game.Spells
                 procVictim |= ProcFlags.TakenDamage;
             }
 
-            if (caster.IsAlive())
-                caster.ProcSkillsAndAuras(target, procAttacker, procVictim, ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.None, hitMask, null, damageInfo, null);
-
             int new_damage = (int)caster.DealDamage(target, damage, cleanDamage, DamageEffectType.DOT, GetSpellInfo().GetSchoolMask(), GetSpellInfo(), false);
             if (caster.IsAlive())
             {
+                caster.ProcSkillsAndAuras(target, procAttacker, procVictim, ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.None, hitMask, null, damageInfo, null);
+
                 float gainMultiplier = GetSpellEffectInfo().CalcValueMultiplier(caster);
 
                 uint heal = (caster.SpellHealingBonusDone(caster, GetSpellInfo(), (uint)(new_damage * gainMultiplier), DamageEffectType.DOT, GetSpellEffectInfo(), GetBase().GetStackAmount()));
@@ -5582,6 +5606,10 @@ namespace Game.Spells
             target.SendPeriodicAuraLog(pInfo);
 
             target.getHostileRefManager().threatAssist(caster, healInfo.GetEffectiveHeal() * 0.5f, GetSpellInfo());
+
+            // %-based heal - does not proc auras
+            if (GetAuraType() == AuraType.ObsModHealth)
+                return;
 
             ProcFlags procAttacker = ProcFlags.DonePeriodic;
             ProcFlags procVictim = ProcFlags.TakenPeriodic;
@@ -5743,10 +5771,11 @@ namespace Game.Spells
                 spellTypeMask |= ProcFlagsSpellType.Damage;
             }
 
+            caster.DealSpellDamage(damageInfo, true);
+
             DamageInfo dotDamageInfo = new DamageInfo(damageInfo, DamageEffectType.DOT, WeaponAttackType.BaseAttack, hitMask);
             caster.ProcSkillsAndAuras(target, procAttacker, procVictim, spellTypeMask, ProcFlagsSpellPhase.None, hitMask, null, dotDamageInfo, null);
 
-            caster.DealSpellDamage(damageInfo, true);
             caster.SendSpellNonMeleeDamageLog(damageInfo);
         }
 
@@ -5944,15 +5973,29 @@ namespace Game.Spells
 
             if (apply)
             {
-                AreaTrigger areaTrigger = new AreaTrigger();
-                if (!areaTrigger.CreateAreaTrigger((uint)GetMiscValue(), GetCaster(), target, GetSpellInfo(), target, GetBase().GetDuration(), GetBase().GetSpellXSpellVisualId(), ObjectGuid.Empty, this))
-                    areaTrigger.Dispose();
+                AreaTrigger areaTrigger = AreaTrigger.CreateAreaTrigger((uint)GetMiscValue(), GetCaster(), target, GetSpellInfo(), target, GetBase().GetDuration(), GetBase().GetSpellXSpellVisualId(), ObjectGuid.Empty, this);
             }
             else
             {
                 Unit caster = GetCaster();
                 if (caster)
                     caster.RemoveAreaTrigger(this);
+            }
+        }
+
+        [AuraEffectHandler(AuraType.PvpTalents)]
+        void HandleAuraPvpTalents(AuraApplication auraApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
+                return;
+
+            Player target = auraApp.GetTarget().ToPlayer();
+            if (target)
+            {
+                if (apply)
+                    target.TogglePvpTalents(true);
+                else if (!target.HasAuraType(AuraType.PvpTalents))
+                    target.TogglePvpTalents(false);
             }
         }
         #endregion

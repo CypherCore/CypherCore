@@ -24,6 +24,7 @@ using Game.Network.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using Game;
 
 namespace Game.Entities
 {
@@ -75,7 +76,16 @@ namespace Game.Entities
             }
         }
 
-        public bool CreateAreaTrigger(uint spellMiscId, Unit caster, Unit target, SpellInfo spell, Position pos, int duration, uint spellXSpellVisualId, ObjectGuid castId = default(ObjectGuid), AuraEffect aurEff = null)
+        public static AreaTrigger CreateAreaTrigger(uint spellMiscId, Unit caster, Unit target, SpellInfo spell, Position pos, int duration, uint spellXSpellVisualId, ObjectGuid castId = default(ObjectGuid), AuraEffect aurEff = null)
+        {
+            AreaTrigger at = new AreaTrigger();
+            if (!at.Create(spellMiscId, caster, target, spell, pos, duration, spellXSpellVisualId, castId, aurEff))
+                return null;
+
+            return at;
+        }
+
+        bool Create(uint spellMiscId, Unit caster, Unit target, SpellInfo spell, Position pos, int duration, uint spellXSpellVisualId, ObjectGuid castId, AuraEffect aurEff)
         {
             _targetGuid = target ? target.GetGUID() : ObjectGuid.Empty;
             _aurEff = aurEff;
@@ -116,7 +126,7 @@ namespace Game.Entities
                 if (GetMiscTemplate().ScaleInfo.ExtraScale[scaleCurveIndex].AsInt32 != 0)
                     SetUInt32Value(AreaTriggerFields.ExtraScaleCurve + scaleCurveIndex, (uint)GetMiscTemplate().ScaleInfo.ExtraScale[scaleCurveIndex].AsInt32);
 
-            CopyPhaseFrom(caster);
+            PhasingHandler.InheritPhaseShift(this, caster);
 
             if (target && GetTemplate().HasFlag(AreaTriggerFlags.HasAttached))
             {

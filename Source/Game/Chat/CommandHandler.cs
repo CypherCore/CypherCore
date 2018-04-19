@@ -107,6 +107,9 @@ namespace Game.Chat
                     string arg = args.NextString("");
                     if (!ExecuteCommandInTable(command.ChildCommands, arg, fullcmd))
                     {
+                        if (_session != null && !_session.HasPermission(RBACPermissions.CommandsNotifyCommandNotFoundError))
+                            return false;
+
                         if (!arg.IsEmpty())
                             SendSysMessage(CypherStrings.NoSubcmd);
                         else

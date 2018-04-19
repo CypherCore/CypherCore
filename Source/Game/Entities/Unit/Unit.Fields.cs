@@ -132,9 +132,8 @@ namespace Game.Entities
         ushort _meleeAnimKitId;
     }
 
-    public class DiminishingReturn
+    public struct DiminishingReturn
     {
-        public DiminishingReturn() { }
         public DiminishingReturn(uint hitTime, DiminishingLevels hitCount)
         {
             Stack = 0;

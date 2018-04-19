@@ -140,7 +140,7 @@ namespace Framework.Constants
         ModRegenDuringCombat = 116,
         ModMechanicResistance = 117,
         ModHealingPct = 118,
-        Unk119 = 119,  // Old SharePetTracking
+        PvpTalents = 119,
         Untrackable = 120,
         Empathy = 121,
         ModOffhandDamagePct = 122,
@@ -199,7 +199,7 @@ namespace Framework.Constants
         ModSpellHealingOfStatPercent = 175,
         SpiritOfRedemption = 176,
         AoeCharm = 177,
-        ModMaxPowerPct = 178,  // NYI
+        ModMaxPowerPct = 178,
         ModPowerDisplay = 179,
         ModFlatSpellDamageVersus = 180,
         Unk181 = 181,  // Old ModFlatSpellCritDamageVersus - Possible Flat Spell Crit Damage Versus
@@ -400,7 +400,7 @@ namespace Framework.Constants
         ModCurrencyGainFromSource = 376, // NYI
         CastWhileWalking2 = 377, // NYI
         Unk378 = 378,
-        Unk379 = 379,
+        ModManaRegenPct = 379,
         ModGlobalCooldownByHaste = 380, // Allows melee abilities to benefit from haste GCD reduction
         Unk381 = 381,
         ModPetStatPct = 382, // NYI

@@ -22,25 +22,25 @@ namespace Game.DataStorage
     public sealed class DestructibleModelDataRecord
     {
         public uint Id;
-        public ushort StateDamagedDisplayID;
-        public ushort StateDestroyedDisplayID;
-        public ushort StateRebuildingDisplayID;
-        public ushort StateSmokeDisplayID;
+        public ushort State0Wmo;
+        public ushort State1Wmo;
+        public ushort State2Wmo;
+        public ushort State3Wmo;
         public ushort HealEffectSpeed;
-        public byte StateDamagedImpactEffectDoodadSet;
-        public byte StateDamagedAmbientDoodadSet;
-        public byte StateDamagedNameSet;
-        public byte StateDestroyedDestructionDoodadSet;
-        public byte StateDestroyedImpactEffectDoodadSet;
-        public byte StateDestroyedAmbientDoodadSet;
-        public byte StateDestroyedNameSet;
-        public byte StateRebuildingDestructionDoodadSet;
-        public byte StateRebuildingImpactEffectDoodadSet;
-        public byte StateRebuildingAmbientDoodadSet;
-        public byte StateRebuildingNameSet;
-        public byte StateSmokeInitDoodadSet;
-        public byte StateSmokeAmbientDoodadSet;
-        public byte StateSmokeNameSet;
+        public byte State0ImpactEffectDoodadSet;
+        public byte State0AmbientDoodadSet;
+        public byte State0NameSet;
+        public byte State1DestructionDoodadSet;
+        public byte State1ImpactEffectDoodadSet;
+        public byte State1AmbientDoodadSet;
+        public byte State1NameSet;
+        public byte State2DestructionDoodadSet;
+        public byte State2ImpactEffectDoodadSet;
+        public byte State2AmbientDoodadSet;
+        public byte State2NameSet;
+        public byte State3InitDoodadSet;
+        public byte State3AmbientDoodadSet;
+        public byte State3NameSet;
         public byte EjectDirection;
         public byte DoNotHighlight;
         public byte HealEffect;
@@ -60,7 +60,7 @@ namespace Game.DataStorage
         public sbyte OldEnumValue;
         public DifficultyFlags Flags;
         public byte ToggleDifficultyID;
-        public byte ItemBonusTreeModID;
+        public byte ItemContext;
         public byte OrderIndex;
     }
 
@@ -74,7 +74,7 @@ namespace Game.DataStorage
         public byte Flags;
         public uint Id;
         public uint OrderIndex;
-        public uint TextureFileDataID;
+        public uint SpellIconFileID;
     }
 
     public sealed class DurabilityCostsRecord
@@ -87,6 +87,6 @@ namespace Game.DataStorage
     public sealed class DurabilityQualityRecord
     {
         public uint Id;
-        public float QualityMod;
+        public float Data;
     }
 }

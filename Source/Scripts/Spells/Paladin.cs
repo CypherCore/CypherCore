@@ -634,11 +634,11 @@ namespace Scripts.Spells.Paladin
 
         void TriggerForbearance()
         {
-            Unit caster = GetCaster();
-            if (caster == GetHitUnit())
+            Unit target = GetHitUnit();
+            if (target)
             {
-                caster.CastSpell(caster, SpellIds.Forbearance, true);
-                caster.CastSpell(caster, SpellIds.ImmuneShieldMarker, true);
+                GetCaster().CastSpell(target, SpellIds.Forbearance, true);
+                GetCaster().CastSpell(target, SpellIds.ImmuneShieldMarker, true);
             }
         }
 

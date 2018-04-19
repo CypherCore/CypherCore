@@ -98,7 +98,7 @@ namespace Game
                         bindAppearances.Add((uint)transmogItem.ItemModifiedAppearanceID);
 
                     // add cost
-                    cost += itemTransmogrified.GetSpecialPrice();
+                    cost += itemTransmogrified.GetSellPrice(_player);
                 }
                 else
                     resetAppearanceItems.Add(itemTransmogrified);
@@ -124,7 +124,7 @@ namespace Game
                         return;
                     }
 
-                    PlayerConditionRecord condition = CliDB.PlayerConditionStorage.LookupByKey(illusion.PlayerConditionID);
+                    PlayerConditionRecord condition = CliDB.PlayerConditionStorage.LookupByKey(illusion.TransmogPlayerConditionID);
                     if (condition != null)
                     {
                         if (!ConditionManager.IsPlayerMeetingCondition(player, condition))
@@ -290,6 +290,11 @@ namespace Game
                     }
                 }
             }
+        }
+
+        public void SendOpenTransmogrifier(ObjectGuid guid)
+        {
+            SendPacket(new OpenTransmogrifier(guid));
         }
     }
 }

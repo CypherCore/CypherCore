@@ -297,8 +297,10 @@ namespace Game.Entities
         public uint unit_flags2;    // enum UnitFlags2 mask values
         public uint unit_flags3;    // enum UnitFlags3 mask values
         public uint dynamicflags;
+        public PhaseUseFlagsValues phaseUseFlags;
         public uint phaseId;
         public uint phaseGroup;
+        public int terrainSwapMap;
         public uint ScriptId;
         public bool dbData;
     }
@@ -395,6 +397,7 @@ namespace Game.Entities
     {
         public ushort MinLevel;
         public ushort MaxLevel;
-        public short DeltaLevel;
+        public short DeltaLevelMin;
+        public short DeltaLevelMax;
     }
 }

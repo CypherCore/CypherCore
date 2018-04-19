@@ -144,6 +144,9 @@ namespace Framework.Networking
 
         public void CloseSocket()
         {
+            if (_socket == null)
+                return;
+
             try
             {
                 _closed = true;

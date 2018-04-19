@@ -21,11 +21,19 @@ using System;
 
 namespace Game.DataStorage
 {
+    public sealed class SandboxScalingRecord
+    {
+        public uint Id;
+        public uint MinLevel;
+        public uint MaxLevel;
+        public uint Flags;
+    }
+
     public sealed class ScalingStatDistributionRecord
     {
         public uint Id;
-        public ushort ItemLevelCurveID;
-        public uint MinLevel;
+        public ushort PlayerLevelToItemLevelCurveID;
+        public byte MinLevel;
         public uint MaxLevel;
     }
 
@@ -33,7 +41,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public LocalizedString Name;
-        public ushort Data;                                                    // Seems to indicate different things, for zone invasions, this is the area id
+        public ushort AreaTableID;
         public byte Flags;
         public byte Type;
     }
@@ -42,14 +50,14 @@ namespace Game.DataStorage
     {
         public uint Id;
         public LocalizedString Description;
-        public LocalizedString Name;
+        public LocalizedString Title;
         public ushort ScenarioID;
-        public ushort PreviousStepID;                                          // Used in conjunction with Proving Grounds scenarios, when sequencing steps (Not using step order?)
-        public ushort QuestRewardID;
-        public byte Step;
+        public ushort Supersedes;                                          // Used in conjunction with Proving Grounds scenarios, when sequencing steps (Not using step order?)
+        public ushort RewardQuestID;
+        public byte OrderIndex;
         public ScenarioStepFlags Flags;
-        public uint CriteriaTreeID;
-        public uint BonusRequiredStepID;                                     // Bonus step can only be completed if scenario is in the step specified in this field
+        public ushort CriteriaTreeId;
+        public byte RelatedStep;                                     // Bonus step can only be completed if scenario is in the step specified in this field
 
         // helpers
         public bool IsBonusObjective()
@@ -61,16 +69,28 @@ namespace Game.DataStorage
     public sealed class SceneScriptRecord
     {
         public uint Id;
+        public ushort FirstSceneScriptID;
+        public ushort NextSceneScriptID;
+    }
+
+    public sealed class SceneScriptGlobalTextRecord
+    {
+        public uint Id;
         public string Name;
         public string Script;
-        public ushort PrevScriptId;
-        public ushort NextScriptId;
     }
 
     public sealed class SceneScriptPackageRecord
     {
         public uint Id;
         public string Name;
+    }
+
+    public sealed class SceneScriptTextRecord
+    {
+        public uint Id;
+        public string Name;
+        public string Script;
     }
 
     public sealed class SkillLineRecord
@@ -82,32 +102,32 @@ namespace Game.DataStorage
         public ushort Flags;
         public SkillCategory CategoryID;
         public byte CanLink;
-        public uint IconFileDataID;
-        public uint ParentSkillLineID;
+        public uint SpellIconFileID;
+        public byte ParentSkillLineID;
     }
 
     public sealed class SkillLineAbilityRecord
     {
+        public long RaceMask;
         public uint Id;
-        public uint SpellID;
-        public uint RaceMask;
+        public uint Spell;
         public uint SupercedesSpell;
         public ushort SkillLine;
-        public ushort MinSkillLineRank;
         public ushort TrivialSkillLineRankHigh;
         public ushort TrivialSkillLineRankLow;
         public ushort UniqueBit;
         public ushort TradeSkillCategoryID;
-        public AbilytyLearnType AcquireMethod;
         public byte NumSkillUps;
-        public byte Unknown703;
         public int ClassMask;
+        public ushort MinSkillLineRank;
+        public AbilytyLearnType AcquireMethod;
+        public byte Flags;
     }
 
     public sealed class SkillRaceClassInfoRecord
     {
         public uint Id;
-        public int RaceMask;
+        public long RaceMask;
         public ushort SkillID;
         public SkillRaceClassInfoFlags Flags;
         public ushort SkillTierID;
@@ -133,34 +153,31 @@ namespace Game.DataStorage
         public float PitchVariationMinus;
         public float PitchAdjust;
         public ushort BusOverwriteID;
-        public byte Unk700;
+        public byte MaxInstances;
     }
 
     public sealed class SpecializationSpellsRecord
     {
+        public string Description;
         public uint SpellID;
         public uint OverridesSpellID;
-        public LocalizedString Description;
         public ushort SpecID;
-        public byte OrderIndex;
+        public byte DisplayOrder;
         public uint Id;
     }
 
     public sealed class SpellRecord
     {
-        public LocalizedString Name;
-        public LocalizedString NameSubtext;
-        public LocalizedString Description;
-        public LocalizedString AuraDescription;
-        public uint MiscID;
         public uint Id;
-        public uint DescriptionVariablesID;
+        public LocalizedString Name;
+        public string NameSubtext;
+        public string Description;
+        public string AuraDescription;
     }
 
     public sealed class SpellAuraOptionsRecord
     {
         public uint Id;
-        public uint SpellID;
         public uint ProcCharges;
         public uint ProcTypeMask;
         public uint ProcCategoryRecovery;
@@ -168,12 +185,12 @@ namespace Game.DataStorage
         public ushort SpellProcsPerMinuteID;
         public byte DifficultyID;
         public byte ProcChance;
+        public uint SpellID;
     }
 
     public sealed class SpellAuraRestrictionsRecord
     {
         public uint Id;
-        public uint SpellID;
         public uint CasterAuraSpell;
         public uint TargetAuraSpell;
         public uint ExcludeCasterAuraSpell;
@@ -183,14 +200,15 @@ namespace Game.DataStorage
         public byte TargetAuraState;
         public byte ExcludeCasterAuraState;
         public byte ExcludeTargetAuraState;
+        public uint SpellID;
     }
 
     public sealed class SpellCastTimesRecord
     {
         public uint Id;
-        public int CastTime;
-        public int MinCastTime;
-        public short CastTimePerLevel;
+        public int Base;
+        public int Minimum;
+        public short PerLevel;
     }
 
     public sealed class SpellCastingRequirementsRecord
@@ -208,7 +226,6 @@ namespace Game.DataStorage
     public sealed class SpellCategoriesRecord
     {
         public uint Id;
-        public uint SpellID;
         public ushort Category;
         public ushort StartRecoveryCategory;
         public ushort ChargeCategory;
@@ -217,6 +234,7 @@ namespace Game.DataStorage
         public byte DispelType;
         public byte Mechanic;
         public byte PreventionType;
+        public uint SpellID;
     }
 
     public sealed class SpellCategoryRecord
@@ -227,7 +245,7 @@ namespace Game.DataStorage
         public SpellCategoryFlags Flags;
         public byte UsesPerWeek;
         public byte MaxCharges;
-        public uint ChargeCategoryType;
+        public byte TypeMask;
     }
 
     public sealed class SpellClassOptionsRecord
@@ -236,17 +254,17 @@ namespace Game.DataStorage
         public uint SpellID;
         public FlagArray128 SpellClassMask;
         public byte SpellClassSet;
-        public uint ModalNextSpell;
+        public ushort ModalNextSpell;
     }
 
     public sealed class SpellCooldownsRecord
     {
         public uint Id;
-        public uint SpellID;
         public uint CategoryRecoveryTime;
         public uint RecoveryTime;
         public uint StartRecoveryTime;
         public byte DifficultyID;
+        public uint SpellID;
     }
 
     public sealed class SpellDurationRecord
@@ -259,18 +277,11 @@ namespace Game.DataStorage
 
     public sealed class SpellEffectRecord
     {
-        public FlagArray128 EffectSpellClassMask;
         public uint Id;
-        public uint SpellID;
         public uint Effect;
-        public uint EffectAura;
         public int EffectBasePoints;
-        public uint EffectIndex;
-        public int EffectMiscValue;
-        public int EffectMiscValueB;
-        public uint EffectRadiusIndex;
-        public uint EffectRadiusMaxIndex;
-        public uint[] ImplicitTarget = new uint[2];
+        public byte EffectIndex;
+        public uint EffectAura;
         public uint DifficultyID;
         public float EffectAmplitude;
         public uint EffectAuraPeriod;
@@ -286,24 +297,24 @@ namespace Game.DataStorage
         public float EffectPosFacing;
         public uint EffectAttributes;
         public float BonusCoefficientFromAP;
-        public float PvPMultiplier;
-    }
-
-    public sealed class SpellEffectScalingRecord
-    {
-        public uint Id;
+        public float PvpMultiplier;
         public float Coefficient;
         public float Variance;
         public float ResourceCoefficient;
-        public uint SpellEffectID;
+        public float GroupSizeBasePointsCoefficient;
+        public FlagArray128 EffectSpellClassMask;
+        public int[] EffectMiscValue = new int[2];
+        public uint[] EffectRadiusIndex = new uint[2];
+        public uint[] ImplicitTarget = new uint[2];
+        public uint SpellID;
     }
 
     public sealed class SpellEquippedItemsRecord
     {
         public uint Id;
         public uint SpellID;
-        public int EquippedItemInventoryTypeMask;
-        public int EquippedItemSubClassMask;
+        public int EquippedItemInvTypes;
+        public int EquippedItemSubclass;
         public sbyte EquippedItemClass;
     }
 
@@ -316,21 +327,21 @@ namespace Game.DataStorage
     public sealed class SpellInterruptsRecord
     {
         public uint Id;
-        public uint SpellID;
+        public byte DifficultyID;
+        public ushort InterruptFlags;
         public uint[] AuraInterruptFlags = new uint[2];
         public uint[] ChannelInterruptFlags = new uint[2];
-        public ushort InterruptFlags;
-        public byte DifficultyID;
+        public uint SpellID;
     }
 
     public sealed class SpellItemEnchantmentRecord
     {
         public uint Id;
-        public uint[] EffectSpellID = new uint[ItemConst.MaxItemEnchantmentEffects];
-        public LocalizedString Name;
+        public string Name;
+        public uint[] EffectArg = new uint[ItemConst.MaxItemEnchantmentEffects];
         public float[] EffectScalingPoints = new float[ItemConst.MaxItemEnchantmentEffects];
         public uint TransmogCost;
-        public uint TextureFileDataID;
+        public uint IconFileDataID;
         public ushort[] EffectPointsMin = new ushort[ItemConst.MaxItemEnchantmentEffects];
         public ushort ItemVisual;
         public EnchantmentSlotMask Flags;
@@ -344,89 +355,78 @@ namespace Game.DataStorage
         public byte MaxLevel;
         public sbyte ScalingClass;
         public sbyte ScalingClassRestricted;
-        public uint PlayerConditionID;
+        public ushort TransmogPlayerConditionID;
     }
 
     public sealed class SpellItemEnchantmentConditionRecord
     {
         public uint Id;
-        public byte[] LTOperandType = new byte[5];
+        public uint[] LtOperand = new uint[5];
+        public byte[] LtOperandType = new byte[5];
         public byte[] Operator = new byte[5];
-        public byte[] RTOperandType = new byte[5];
-        public byte[] RTOperand = new byte[5];
+        public byte[] RtOperandType = new byte[5];
+        public byte[] RtOperand = new byte[5];
         public byte[] Logic = new byte[5];
-        public uint[] LTOperand = new uint[5];
     }
 
     public sealed class SpellLearnSpellRecord
     {
         public uint Id;
-        public uint LearnSpellID;
         public uint SpellID;
+        public uint LearnSpellID;
         public uint OverridesSpellID;
     }
 
     public sealed class SpellLevelsRecord
     {
         public uint Id;
-        public uint SpellID;
         public ushort BaseLevel;
         public ushort MaxLevel;
         public ushort SpellLevel;
         public byte DifficultyID;
-        public byte MaxUsableLevel;
+        public byte MaxPassiveAuraLevel;
+        public uint SpellID;
     }
 
     public sealed class SpellMiscRecord
     {
         public uint Id;
-        public uint Attributes;
-        public uint AttributesEx;
-        public uint AttributesExB;
-        public uint AttributesExC;
-        public uint AttributesExD;
-        public uint AttributesExE;
-        public uint AttributesExF;
-        public uint AttributesExG;
-        public uint AttributesExH;
-        public uint AttributesExI;
-        public uint AttributesExJ;
-        public uint AttributesExK;
-        public uint AttributesExL;
-        public uint AttributesExM;
-        public float Speed;
-        public float MultistrikeSpeedMod;
         public ushort CastingTimeIndex;
         public ushort DurationIndex;
         public ushort RangeIndex;
         public byte SchoolMask;
-        public uint IconFileDataID;
+        public uint SpellIconFileDataID;
+        public float Speed;
         public uint ActiveIconFileDataID;
+        public float LaunchDelay;
+        public byte DifficultyID;
+        public uint[] Attributes = new uint[14];
+        public uint SpellID;
     }
 
     public sealed class SpellPowerRecord
     {
-        public uint SpellID;
         public int ManaCost;
-        public float ManaCostPercentage;
-        public float ManaCostPercentagePerSecond;
-        public uint RequiredAura;
-        public float HealthCostPercentage;
-        public byte PowerIndex;
+        public float PowerCostPct;
+        public float PowerPctPerSecond;
+        public uint RequiredAuraSpellID;
+        public float PowerCostMaxPct;
+        public byte OrderIndex;
         public PowerType PowerType;
         public uint Id;
-        public int ManaCostPerLevel;
-        public int ManaCostPerSecond;
-        public int ManaCostAdditional;                                      // Spell uses [ManaCost, ManaCost+ManaCostAdditional] power - affects tooltip parsing as multiplier on SpellEffectEntry::EffectPointsPerResource
+        public byte ManaCostPerLevel;
+        public ushort ManaPerSecond;
+        public int OptionalCost;                                      // Spell uses [ManaCost, ManaCost+ManaCostAdditional] power - affects tooltip parsing as multiplier on SpellEffectEntry::EffectPointsPerResource
                                                                         //   only SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, SPELL_EFFECT_WEAPON_DAMAGE, SPELL_EFFECT_NORMALIZED_WEAPON_DMG
         public uint PowerDisplayID;
-        public uint UnitPowerBarID;
+        public uint AltPowerBarID;
+        public uint SpellID;
     }
 
     public sealed class SpellPowerDifficultyRecord
     {
         public byte DifficultyID;
-        public byte PowerIndex;
+        public byte OrderIndex;
         public uint Id;
     }
 
@@ -442,8 +442,8 @@ namespace Game.DataStorage
         public uint Id;
         public float Coeff;
         public ushort Param;
-        public byte SpellProcsPerMinuteID;
         public SpellProcsPerMinuteModType Type;
+        public uint SpellProcsPerMinuteID;
     }
 
     public sealed class SpellRadiusRecord
@@ -458,12 +458,10 @@ namespace Game.DataStorage
     public sealed class SpellRangeRecord
     {
         public uint Id;
-        public float MinRangeHostile;
-        public float MinRangeFriend;
-        public float MaxRangeHostile;
-        public float MaxRangeFriend;
-        public LocalizedString DisplayName;
-        public LocalizedString DisplayNameShort;
+        public string DisplayName;
+        public string DisplayNameShort;
+        public float[] RangeMin = new float[2];
+        public float[] RangeMax = new float[2];
         public SpellRangeFlag Flags;
     }
 
@@ -480,8 +478,8 @@ namespace Game.DataStorage
         public uint Id;
         public uint SpellID;
         public ushort ScalesFromItemLevel;
-        public int ScalingClass;
-        public uint MinScalingLevel;
+        public sbyte Class;
+        public byte MinScalingLevel;
         public uint MaxScalingLevel;
     }
 
@@ -498,13 +496,13 @@ namespace Game.DataStorage
     {
         public uint Id;
         public LocalizedString Name;
-        public float WeaponDamageVariance;
+        public float DamageVariance;
         public SpellShapeshiftFormFlags Flags;
         public ushort CombatRoundTime;
         public ushort MountTypeID;
         public sbyte CreatureType;
         public byte BonusActionBar;
-        public uint AttackIconFileDataID;
+        public uint AttackIconFileID;
         public ushort[] CreatureDisplayID = new ushort[4];
         public ushort[] PresetSpellID = new ushort[SpellConst.MaxShapeshift];
     }
@@ -512,14 +510,14 @@ namespace Game.DataStorage
     public sealed class SpellTargetRestrictionsRecord
     {
         public uint Id;
-        public uint SpellID;
-        public float ConeAngle;
+        public float ConeDegrees;
         public float Width;
         public uint Targets;
         public ushort TargetCreatureType;
         public byte DifficultyID;
-        public byte MaxAffectedTargets;
+        public byte MaxTargets;
         public uint MaxTargetLevel;
+        public uint SpellID;
     }
 
     public sealed class SpellTotemsRecord
@@ -532,28 +530,28 @@ namespace Game.DataStorage
 
     public sealed class SpellXSpellVisualRecord
     {
-        public uint SpellID;
         public uint SpellVisualID;
         public uint Id;
-        public float Chance;
+        public float Probability;
         public ushort CasterPlayerConditionID;
         public ushort CasterUnitConditionID;
-        public ushort PlayerConditionID;
-        public ushort UnitConditionID;
-        public uint IconFileDataID;
-        public uint ActiveIconFileDataID;
+        public ushort ViewerPlayerConditionID;
+        public ushort ViewerUnitConditionID;
+        public uint SpellIconFileID;
+        public uint ActiveIconFileID;
         public byte Flags;
         public byte DifficultyID;
         public byte Priority;
+        public uint SpellID;
     }
 
     public sealed class SummonPropertiesRecord
     {
         public uint Id;
-        public uint Flags;
-        public SummonCategory Category;
-        public uint Faction;
-        public SummonType Type;
-        public int Slot;
+        public SummonPropFlags Flags;
+        public SummonCategory Control;
+        public ushort Faction;
+        public SummonType Title;
+        public sbyte Slot;
     }
 }

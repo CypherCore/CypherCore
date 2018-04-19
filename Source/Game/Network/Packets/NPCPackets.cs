@@ -76,6 +76,7 @@ namespace Game.Network.Packets
                 _worldPacket.WriteInt32(text.QuestID);
                 _worldPacket.WriteInt32(text.QuestType);
                 _worldPacket.WriteInt32(text.QuestLevel);
+                _worldPacket.WriteInt32(text.QuestMaxScalingLevel);
                 _worldPacket.WriteInt32(text.QuestFlags);
                 _worldPacket.WriteInt32(text.QuestFlagsEx);
 
@@ -308,6 +309,7 @@ namespace Game.Network.Packets
         public int QuestID;
         public int QuestType;
         public int QuestLevel;
+        public int QuestMaxScalingLevel;
         public bool Repeatable;
         public string QuestTitle;
         public int QuestFlags;

@@ -112,6 +112,7 @@ namespace Game
                     case DisableType.Quest:
                         break;
                     case DisableType.Map:
+                    case DisableType.LFGMap:
                         {
                             MapRecord mapEntry = CliDB.MapStorage.LookupByKey(entry);
                             if (mapEntry == null)
@@ -339,6 +340,7 @@ namespace Game
                         break;
                     }
                 case DisableType.Map:
+                case DisableType.LFGMap:
                     Player player = unit.ToPlayer();
                     if (player != null)
                     {
@@ -407,7 +409,8 @@ namespace Game
         OutdoorPVP = 5,
         VMAP = 6,
         MMAP = 7,
-        Max = 8
+        LFGMap = 8,
+        Max = 9
     }
 
     public struct DisableFlags

@@ -713,17 +713,6 @@ namespace Game
             _player.ApplyModFlag(PlayerFields.Flags, PlayerFlags.TaxiBenchmark, packet.Enable);
         }
 
-        public void SendSetPhaseShift(List<uint> phaseIds, List<uint> terrainswaps, List<uint> worldMapAreaSwaps)
-        {
-            PhaseShift phaseShift = new PhaseShift();
-            phaseShift.ClientGUID = GetPlayer().GetGUID();
-            phaseShift.PersonalGUID = GetPlayer().GetGUID();
-            phaseShift.PhaseShifts = phaseIds;
-            phaseShift.VisibleMapIDs = terrainswaps;
-            phaseShift.UiWorldMapAreaIDSwaps = worldMapAreaSwaps;
-            SendPacket(phaseShift);
-        }
-
         [WorldPacketHandler(ClientOpcodes.GuildSetFocusedAchievement)]
         void HandleGuildSetFocusedAchievement(GuildSetFocusedAchievement setFocusedAchievement)
         {

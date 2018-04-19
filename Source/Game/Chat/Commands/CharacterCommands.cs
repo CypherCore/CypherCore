@@ -48,7 +48,7 @@ namespace Game.Chat
             {
                 if (target.HasTitle(titleInfo))
                 {
-                    string name = (target.GetGender() == Gender.Male ? titleInfo.NameMale : titleInfo.NameFemale)[handler.GetSessionDbcLocale()];
+                    string name = (target.GetGender() == Gender.Male ? titleInfo.Name : titleInfo.Name1)[handler.GetSessionDbcLocale()];
                     if (string.IsNullOrEmpty(name))
                         continue;
 

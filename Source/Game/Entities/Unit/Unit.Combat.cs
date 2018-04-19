@@ -585,10 +585,10 @@ namespace Game.Entities
                 DealDamageMods(victim, ref damageInfo.damage, ref damageInfo.absorb);
                 SendAttackStateUpdate(damageInfo);
 
+                DealMeleeDamage(damageInfo, true);
+
                 DamageInfo dmgInfo = new DamageInfo(damageInfo);
                 ProcSkillsAndAuras(damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, ProcFlagsSpellType.None, ProcFlagsSpellPhase.None, dmgInfo.GetHitMask(), null, dmgInfo, null);
-
-                DealMeleeDamage(damageInfo, true);
 
                 if (IsTypeId(TypeId.Player))
                     Log.outDebug(LogFilter.Unit, "AttackerStateUpdate: (Player) {0} attacked {1} (TypeId: {2}) for {3} dmg, absorbed {4}, blocked {5}, resisted {6}.",
@@ -1279,7 +1279,12 @@ namespace Game.Entities
                 return;
 
             if (PvP)
+            { 
                 m_CombatTimer = 5000;
+                Player me = ToPlayer();
+                if (me)
+                    me.EnablePvpRules(true);
+            }
 
             if (IsInCombat() || HasUnitState(UnitState.Evade))
                 return;
@@ -1347,6 +1352,10 @@ namespace Game.Entities
 
             if (isRewardAllowed && creature != null && creature.GetLootRecipient() != null)
                 player = creature.GetLootRecipient();
+
+            // Exploit fix
+            if (creature && creature.IsPet() && creature.GetOwnerGUID().IsPlayer())
+                isRewardAllowed = false;
 
             // Reward player, his pets, and group/raid members
             // call kill spell proc event (before real die and combat stop to triggering auras removed at death/combat stop)
@@ -2107,7 +2116,7 @@ namespace Game.Entities
         }
         public float GetAPMultiplier(WeaponAttackType attType, bool normalized)
         {
-            if (!IsTypeId(TypeId.Player))
+            if (!IsTypeId(TypeId.Player) || (IsInFeralForm() && !normalized))
                 return GetBaseAttackTime(attType) / 1000.0f;
 
             Item weapon = ToPlayer().GetWeaponForAttack(attType, true);
@@ -2263,13 +2272,7 @@ namespace Game.Entities
 
             if (victimResistance > 0)
             {
-                int ignoredResistance = 0;
-
-                var ResIgnoreAuras = GetAuraEffectsByType(AuraType.ModIgnoreTargetResist);
-                foreach (var eff in ResIgnoreAuras)
-                    if (Convert.ToBoolean(eff.GetMiscValue() & (int)schoolMask))
-                        ignoredResistance += eff.GetAmount();
-
+                int ignoredResistance = GetTotalAuraModifierByMiscMask(AuraType.ModIgnoreTargetResist, (int)schoolMask);
                 ignoredResistance = Math.Min(ignoredResistance, 100);
                 MathFunctions.ApplyPct(ref victimResistance, 100 - ignoredResistance);
             }
@@ -2315,18 +2318,16 @@ namespace Game.Entities
             // Ignore Absorption Auras
             float auraAbsorbMod = GetMaxPositiveAuraModifierByMiscMask(AuraType.ModTargetAbsorbSchool, (uint)damageInfo.GetSchoolMask());
 
-            var abilityAbsorbAuras = GetAuraEffectsByType(AuraType.ModTargetAbilityAbsorbSchool);
-            foreach (AuraEffect aurEff in abilityAbsorbAuras)
+            auraAbsorbMod = Math.Max(auraAbsorbMod, (float)GetMaxPositiveAuraModifier(AuraType.ModTargetAbilityAbsorbSchool, aurEff =>
             {
                 if (!Convert.ToBoolean(aurEff.GetMiscValue() & (int)damageInfo.GetSchoolMask()))
-                    continue;
+                    return false;
 
                 if (!aurEff.IsAffectingSpell(damageInfo.GetSpellInfo()))
-                    continue;
+                    return false;
 
-                if ((aurEff.GetAmount() > auraAbsorbMod))
-                    auraAbsorbMod = aurEff.GetAmount();
-            }
+                return true;
+            }));
 
             MathFunctions.RoundToInterval(ref auraAbsorbMod, 0.0f, 100.0f);
 
@@ -2339,7 +2340,7 @@ namespace Game.Entities
             vSchoolAbsorbCopy.Sort(new AbsorbAuraOrderPred());
 
             // absorb without mana cost
-            foreach (var absorbAurEff in vSchoolAbsorbCopy)
+            foreach (var absorbAurEff in vSchoolAbsorbCopy.ToList())
             {
                 if (damageInfo.GetDamage() == 0)
                     break;
@@ -2591,7 +2592,7 @@ namespace Game.Entities
             var resIgnoreAuras = GetAuraEffectsByType(AuraType.ModIgnoreTargetResist);
             foreach (var eff in resIgnoreAuras)
             {
-                if (eff.GetMiscValue().HasAnyFlag((int)SpellSchoolMask.Normal))
+                if (eff.GetMiscValue().HasAnyFlag((int)SpellSchoolMask.Normal) && eff.IsAffectingSpell(spellInfo))
                     armor = (float)Math.Floor(MathFunctions.AddPct(ref armor, -eff.GetAmount()));
             }
 
@@ -2638,10 +2639,7 @@ namespace Game.Entities
             int DoneFlatBenefit = 0;
 
             // ..done
-            var mDamageDoneCreature = GetAuraEffectsByType(AuraType.ModDamageDoneCreature);
-            foreach (var eff in mDamageDoneCreature)
-                if (Convert.ToBoolean(creatureTypeMask & eff.GetMiscValue()))
-                    DoneFlatBenefit += eff.GetAmount();
+            DoneFlatBenefit += GetTotalAuraModifierByMiscMask(AuraType.ModDamageDoneCreature, (int)creatureTypeMask);
 
             // ..done
             // SPELL_AURA_MOD_DAMAGE_DONE included in weapon damage
@@ -2654,20 +2652,14 @@ namespace Game.Entities
                 APbonus += victim.GetTotalAuraModifier(AuraType.RangedAttackPowerAttackerBonus);
 
                 // ..done (base at attack power and creature type)
-                var mCreatureAttackPower = GetAuraEffectsByType(AuraType.ModRangedAttackPowerVersus);
-                foreach (var eff in mCreatureAttackPower)
-                    if (Convert.ToBoolean(creatureTypeMask & eff.GetMiscValue()))
-                        APbonus += eff.GetAmount();
+                APbonus += GetTotalAuraModifierByMiscMask(AuraType.ModRangedAttackPowerVersus, (int)creatureTypeMask);
             }
             else
             {
                 APbonus += victim.GetTotalAuraModifier(AuraType.MeleeAttackPowerAttackerBonus);
 
                 // ..done (base at attack power and creature type)
-                var mCreatureAttackPower = GetAuraEffectsByType(AuraType.ModMeleeAttackPowerVersus);
-                foreach (var eff in mCreatureAttackPower)
-                    if (Convert.ToBoolean(creatureTypeMask & eff.GetMiscValue()))
-                        APbonus += eff.GetAmount();
+                APbonus += GetTotalAuraModifierByMiscMask(AuraType.ModMeleeAttackPowerVersus, (int)creatureTypeMask);
             }
 
             if (APbonus != 0)                                       // Can be negative
@@ -2680,10 +2672,10 @@ namespace Game.Entities
             float DoneTotalMod = 1.0f;
 
             // Some spells don't benefit from pct done mods
-            if (spellProto != null)
+            if (spellProto != null && !spellProto.HasAttribute(SpellAttr6.NoDonePctDamageMods))
             {
                 // mods for SPELL_SCHOOL_MASK_NORMAL are already factored in base melee damage calculation
-                if (!spellProto.HasAttribute(SpellAttr6.NoDonePctDamageMods) && !spellProto.GetSchoolMask().HasAnyFlag(SpellSchoolMask.Normal))
+                if (!spellProto.GetSchoolMask().HasAnyFlag(SpellSchoolMask.Normal))
                 {
                     float maxModDamagePercentSchool = 0.0f;
                     for (var i = SpellSchools.Holy; i < SpellSchools.Max; ++i)
@@ -2696,16 +2688,15 @@ namespace Game.Entities
                 }
             }
 
-            var mDamageDoneVersus = GetAuraEffectsByType(AuraType.ModDamageDoneVersus);
-            foreach (var eff in mDamageDoneVersus)
-                if (Convert.ToBoolean(creatureTypeMask & eff.GetMiscValue()))
-                    MathFunctions.AddPct(ref DoneTotalMod, eff.GetAmount());
+            DoneTotalMod *= GetTotalAuraMultiplierByMiscMask(AuraType.ModDamageDoneVersus, (uint)creatureTypeMask);
 
             // bonus against aurastate
-            var mDamageDoneVersusAurastate = GetAuraEffectsByType(AuraType.ModDamageDoneVersusAurastate);
-            foreach (var eff in mDamageDoneVersusAurastate)
-                if (victim.HasAuraState((AuraStateType)eff.GetMiscValue()))
-                    MathFunctions.AddPct(ref DoneTotalMod, eff.GetAmount());
+            DoneTotalMod *= GetTotalAuraMultiplier(AuraType.ModDamageDoneVersusAurastate, aurEff =>
+            {
+                if (victim.HasAuraState((AuraStateType)aurEff.GetMiscValue()))
+                    return true;
+                return false;
+            });
 
             // Add SPELL_AURA_MOD_DAMAGE_DONE_FOR_MECHANIC percent bonus
             if (spellProto != null)
@@ -2734,18 +2725,10 @@ namespace Game.Entities
 
             // get all auras from caster that allow the spell to ignore resistance (sanctified wrath)
             int attackSchoolMask = (int)(spellProto != null ? spellProto.GetSchoolMask() : SpellSchoolMask.Normal);
-            var IgnoreResistAuras = attacker.GetAuraEffectsByType(AuraType.ModIgnoreTargetResist);
-            foreach (var eff in IgnoreResistAuras)
-            {
-                if (eff.GetMiscValue().HasAnyFlag(attackSchoolMask))
-                    TakenTotalCasterMod += eff.GetAmount();
-            }
+            TakenTotalCasterMod += attacker.GetTotalAuraModifierByMiscMask(AuraType.ModIgnoreTargetResist, attackSchoolMask);
 
             // ..taken
-            var mDamageTaken = GetAuraEffectsByType(AuraType.ModDamageTaken);
-            foreach (var eff in mDamageTaken)
-                if (Convert.ToBoolean(eff.GetMiscValue() & (int)attacker.GetMeleeDamageSchoolMask()))
-                    TakenFlatBenefit += eff.GetAmount();
+            TakenFlatBenefit += GetTotalAuraModifierByMiscMask(AuraType.ModDamageTaken, (int)attacker.GetMeleeDamageSchoolMask());
 
             if (attType != WeaponAttackType.RangedAttack)
                 TakenFlatBenefit += GetTotalAuraModifier(AuraType.ModMeleeDamageTaken);
@@ -2762,10 +2745,12 @@ namespace Game.Entities
             if (spellProto != null)
             {
                 // From caster spells
-                var mOwnerTaken = GetAuraEffectsByType(AuraType.ModSpellDamageFromCaster);
-                foreach (var eff in mOwnerTaken)
-                    if (eff.GetCasterGUID() == attacker.GetGUID() && eff.IsAffectingSpell(spellProto))
-                        MathFunctions.AddPct(ref TakenTotalMod, eff.GetAmount());
+                TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModSpellDamageFromCaster, aurEff =>
+                {
+                    if (aurEff.GetCasterGUID() == attacker.GetGUID() && aurEff.IsAffectingSpell(spellProto))
+                        return true;
+                    return false;
+                });
 
                 // Mod damage from spell mechanic
                 uint mechanicMask = spellProto.GetAllEffectsMechanicMask();
@@ -2776,10 +2761,12 @@ namespace Game.Entities
 
                 if (mechanicMask != 0)
                 {
-                    var mDamageDoneMechanic = GetAuraEffectsByType(AuraType.ModMechanicDamageTakenPercent);
-                    foreach (var eff in mDamageDoneMechanic)
-                        if (mechanicMask.HasAnyFlag((uint)(1 << eff.GetMiscValue())))
-                            MathFunctions.AddPct(ref TakenTotalMod, eff.GetAmount());
+                    TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModMechanicDamageTakenPercent, aurEff =>
+                    {
+                        if ((mechanicMask & (1 << (aurEff.GetMiscValue()))) != 0)
+                            return true;
+                        return false;
+                    });
                 }
             }
 
@@ -2788,17 +2775,9 @@ namespace Game.Entities
                 MathFunctions.AddPct(ref TakenTotalMod, cheatDeath.GetAmount());
 
             if (attType != WeaponAttackType.RangedAttack)
-            {
-                var mModMeleeDamageTakenPercent = GetAuraEffectsByType(AuraType.ModMeleeDamageTakenPct);
-                foreach (var eff in mModMeleeDamageTakenPercent)
-                    MathFunctions.AddPct(ref TakenTotalMod, eff.GetAmount());
-            }
+                TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModMeleeDamageTakenPct);
             else
-            {
-                var mModRangedDamageTakenPercent = GetAuraEffectsByType(AuraType.ModRangedDamageTakenPct);
-                foreach (var eff in mModRangedDamageTakenPercent)
-                    MathFunctions.AddPct(ref TakenTotalMod, eff.GetAmount());
-            }
+                TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModRangedDamageTakenPct);
 
             float tmpDamage = 0.0f;
 
@@ -2903,10 +2882,26 @@ namespace Game.Entities
                 || (target.IsTypeId(TypeId.Player) && target.ToPlayer().IsGameMaster()))
                 return false;
 
-            // can't attack invisible (ignore stealth for aoe spells) also if the area being looked at is from a spell use the dynamic object created instead of the casting unit. Ignore stealth if target is player and unit in combat with same player
-            // skip visibility check for GO casts, needs removal when go cast is implemented
-            if (GetEntry() != SharedConst.WorldTrigger && (bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetInvisible)) && (obj ? !obj.CanSeeOrDetect(target, bySpell != null && bySpell.IsAffectingArea(GetMap().GetDifficultyID())) : !CanSeeOrDetect(target, (bySpell != null && bySpell.IsAffectingArea(GetMap().GetDifficultyID())) || (target.GetTypeId() == TypeId.Player && target.HasStealthAura() && target.IsInCombat() && IsInCombatWith(target)))))
-                return false;
+            // visibility checks
+            // skip visibility check for GO casts, needs removal when go cast is implemented. Also ignore for gameobject and dynauras
+            if (GetEntry() != SharedConst.WorldTrigger && (!obj || !obj.isTypeMask(TypeMask.GameObject | TypeMask.DynamicObject)))
+            {
+                // can't attack invisible
+                if (bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetInvisible))
+                {
+                    if (obj && !obj.CanSeeOrDetect(target, bySpell != null && bySpell.IsAffectingArea(GetMap().GetDifficultyID())))
+                        return false;
+                    else if (!obj)
+                    {
+                        // ignore stealth for aoe spells. Ignore stealth if target is player and unit in combat with same player
+                        bool ignoreStealthCheck = (bySpell != null && bySpell.IsAffectingArea(GetMap().GetDifficultyID())) ||
+                            (target.GetTypeId() == TypeId.Player && target.HasStealthAura() && target.IsInCombat() && IsInCombatWith(target));
+
+                        if (!CanSeeOrDetect(target, ignoreStealthCheck))
+                            return false;
+                    }
+                }
+            }
 
             // can't attack dead
             if ((bySpell == null || !bySpell.IsAllowingDeadTarget()) && !target.IsAlive())
@@ -2942,8 +2937,7 @@ namespace Game.Entities
 
             // PvP, PvC, CvP case
             // can't attack friendly targets
-            if (GetReactionTo(target) > ReputationRank.Neutral
-                || target.GetReactionTo(this) > ReputationRank.Neutral)
+            if (GetReactionTo(target) > ReputationRank.Neutral || target.GetReactionTo(this) > ReputationRank.Neutral)
                 return false;
 
             Player playerAffectingAttacker = HasFlag(UnitFields.Flags, UnitFlags.PvpAttackable) ? GetAffectingPlayer() : null;
@@ -2996,15 +2990,13 @@ namespace Game.Entities
             // additional checks - only PvP case
             if (playerAffectingAttacker != null && playerAffectingTarget != null)
             {
-                if (Convert.ToBoolean(target.GetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag) & (byte)UnitBytes2Flags.PvP))
+                if (target.IsPvP())
                     return true;
 
-                if (Convert.ToBoolean(GetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag) & (byte)UnitBytes2Flags.FFAPvp)
-                    && Convert.ToBoolean(target.GetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag) & (byte)UnitBytes2Flags.FFAPvp))
+                if (IsFFAPvP() && target.IsFFAPvP())
                     return true;
 
-                return (Convert.ToBoolean(GetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag) & (byte)UnitBytes2Flags.Unk1)
-                    || Convert.ToBoolean(target.GetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag) & (byte)UnitBytes2Flags.Unk1));
+                return HasByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag, UnitBytes2Flags.Unk1) || target.HasByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag, UnitBytes2Flags.Unk1);
             }
             return true;
         }

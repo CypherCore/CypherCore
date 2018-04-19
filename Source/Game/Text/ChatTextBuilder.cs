@@ -46,7 +46,7 @@ namespace Game.Chat
         {
             BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(_textId);
             var packet = new ChatPkt();
-            packet.Initialize(_msgType, bct != null ? (Language)bct.Language : Language.Universal, _source, _target, bct != null ? Global.DB2Mgr.GetBroadcastTextValue(bct, locale, _gender) : "", _achievementId, "", locale);
+            packet.Initialize(_msgType, bct != null ? (Language)bct.LanguageID : Language.Universal, _source, _target, bct != null ? Global.DB2Mgr.GetBroadcastTextValue(bct, locale, _gender) : "", _achievementId, "", locale);
             return packet;
         }
 

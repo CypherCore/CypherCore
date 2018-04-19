@@ -393,6 +393,9 @@ namespace Game.Entities
                 SendMessageToSet(duelWinner, true);
             }
 
+            duel.opponent.DisablePvpRules();
+            DisablePvpRules();
+
             Global.ScriptMgr.OnPlayerDuelEnd(duel.opponent, this, type);
 
             switch (type)

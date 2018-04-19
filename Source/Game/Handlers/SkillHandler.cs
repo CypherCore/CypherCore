@@ -52,6 +52,32 @@ namespace Game
                 GetPlayer().SendTalentsInfoData();
         }
 
+        [WorldPacketHandler(ClientOpcodes.LearnPvpTalents)]
+        void HandleLearnPvpTalentsOpcode(LearnPvpTalents packet)
+        {
+            LearnPvpTalentsFailed learnPvpTalentsFailed = new LearnPvpTalentsFailed();
+            bool anythingLearned = false;
+            foreach (ushort talentId in packet.Talents)
+            {
+                TalentLearnResult result = _player.LearnPvpTalent(talentId, ref learnPvpTalentsFailed.SpellID);
+                if (result != 0)
+                {
+                    if (learnPvpTalentsFailed.Reason == 0)
+                        learnPvpTalentsFailed.Reason = (uint)result;
+
+                    learnPvpTalentsFailed.Talents.Add(talentId);
+                }
+                else
+                    anythingLearned = true;
+            }
+
+            if (learnPvpTalentsFailed.Reason != 0)
+                SendPacket(learnPvpTalentsFailed);
+
+            if (anythingLearned)
+                _player.SendTalentsInfoData();
+        }
+
         [WorldPacketHandler(ClientOpcodes.ConfirmRespecWipe)]
         void HandleConfirmRespecWipe(ConfirmRespecWipe confirmRespecWipe)
         {

@@ -34,7 +34,7 @@ namespace Game.Entities
             {
                 case Class.Deathknight:
                     {
-                        for (byte i = 0; i < PlayerConst.TaxiMaskSize; ++i)
+                        for (int i = 0; i < PlayerConst.TaxiMaskSize; ++i)
                             m_taximask[i] |= (byte)(CliDB.OldContinentsNodesMask[i] & factionMask[i]);
                         break;
                     }
@@ -105,7 +105,7 @@ namespace Game.Entities
         {
             var split = new StringArray(data, ' ');
 
-            byte index = 0;
+            int index = 0;
             for (var i = 0; index < PlayerConst.TaxiMaskSize && i != split.Length; ++i, ++index)
             {
                 // load and set bits only for existing taxi nodes

@@ -265,10 +265,14 @@ namespace Game.Entities
             if (obj == this)
                 return true;
 
+            // move arc to range 0.. 2*pi
+            arc = NormalizeOrientation(arc);
+
             float angle = GetAngle(obj);
             angle -= GetOrientation();
 
             // move angle to range -pi ... +pi
+            angle = NormalizeOrientation(angle);
             if (angle > MathFunctions.PI)
                 angle -= 2.0f * MathFunctions.PI;
 
@@ -276,6 +280,16 @@ namespace Game.Entities
             float rborder = (arc / border);                             // in range 0..pi
             return ((angle >= lborder) && (angle <= rborder));
         }
+
+        public bool HasInLine(Position pos, float width)
+        {
+            if (!HasInArc(MathFunctions.PI, pos))
+                return false;
+
+            float angle = GetRelativeAngle(pos);
+            return Math.Abs(Math.Sin(angle)) * GetExactDist2d(pos.GetPositionX(), pos.GetPositionY()) < width;
+        }
+
         public void GetSinCos(float x, float y, out float vsin, out float vcos)
         {
             float dx = GetPositionX() - x;

@@ -48,7 +48,18 @@ namespace Game.Maps
             i_gridExpiry = expiry;
             _defaultLight = Global.DB2Mgr.GetDefaultMapLight(id);
 
-            m_parentMap = parent ?? this;
+            if (parent)
+            {
+                m_parentMap = parent;
+                m_parentTerrainMap = m_parentMap.m_parentTerrainMap;
+                m_childTerrainMaps = m_parentMap.m_childTerrainMaps;
+            }
+            else
+            {
+                m_parentMap = this;
+                m_parentTerrainMap = this;
+                m_childTerrainMaps = new List<Map>();
+            }
 
             for (uint x = 0; x < MapConst.MaxGrids; ++x)
             {
@@ -69,6 +80,8 @@ namespace Game.Maps
 
             GetGuidSequenceGenerator(HighGuid.Transport).Set(Global.ObjectMgr.GetGenerator(HighGuid.Transport).GetNextAfterMaxUsed());
 
+            Global.MMapMgr.loadMapInstance(Global.WorldMgr.GetDataPath(), GetId(), i_InstanceId);
+
             Global.ScriptMgr.OnCreateMap(this);
         }
 
@@ -86,9 +99,8 @@ namespace Game.Maps
                 var header = reader.ReadStruct<mapFileHeader>();
                 if (new string(header.mapMagic) != MapConst.MapMagic || new string(header.versionMagic) != MapConst.MapVersionMagic)
                 {
-                    Log.outError(LogFilter.Maps,
-                        "Map file '{0}' is from an incompatible map version ({1}), {2} is expected. Please recreate using the mapextractor.",
-                        fileName, Convert.ToString(header.versionMagic), MapConst.MapVersionMagic);
+                    Log.outError(LogFilter.Maps, "Map file '{0}' is from an incompatible map version ({1}), {2} is expected. Please recreate using the mapextractor.",
+                        fileName, new string(header.versionMagic), MapConst.MapVersionMagic);
                     return false;
                 }
                 return true;
@@ -113,7 +125,10 @@ namespace Game.Maps
 
         void LoadMMap(uint gx, uint gy)
         {
-            if (Global.MMapMgr.loadMap(GetId(), (int)gx, (int)gy))
+            if (!Global.DisableMgr.IsPathfindingEnabled(GetId()))
+                return;
+
+            if (Global.MMapMgr.loadMap(Global.WorldMgr.GetDataPath(), GetId(), gx, gy))
                 Log.outInfo(LogFilter.Maps, "MMAP loaded name:{0}, id:{1}, x:{2}, y:{3} (mmap rep.: x:{4}, y:{5})", GetMapName(), GetId(), gx, gy, gx, gy);
             else
                 Log.outInfo(LogFilter.Maps, "Could not load MMAP name:{0}, id:{1}, x:{2}, y:{3} (mmap rep.: x:{4}, y:{5})", GetMapName(), GetId(), gx, gy, gx, gy);
@@ -139,44 +154,76 @@ namespace Game.Maps
 
         void LoadMap(uint gx, uint gy, bool reload = false)
         {
-            if (i_InstanceId != 0)
+            LoadMapImpl(this, gx, gy, reload);
+            foreach (Map childBaseMap in m_childTerrainMaps)
+                childBaseMap.LoadMap(gx, gy, reload);
+        }
+
+        void LoadMapImpl(Map map, uint gx, uint gy, bool reload)
+        {
+            if (map.i_InstanceId != 0)
             {
-                if (GridMaps[gx][gy] != null)
+                if (map.GridMaps[gx][gy] != null)
                     return;
 
                 // load grid map for base map
-                if (m_parentMap.GridMaps[gx][gy] == null)
-                    m_parentMap.EnsureGridCreated(new GridCoord(63 - gx, 63 - gy));
+                GridCoord ngridCoord = new GridCoord((MapConst.MaxGrids - 1) - gx, (MapConst.MaxGrids - 1) - gy);
+                if (map.m_parentMap.getGrid(ngridCoord.x_coord, ngridCoord.y_coord) == null)
+                    map.m_parentMap.EnsureGridCreated(ngridCoord);
 
-                ((MapInstanced)m_parentMap).AddGridMapReference(new GridCoord(gx, gy));
-                GridMaps[gx][gy] = m_parentMap.GridMaps[gx][gy];
+                ((MapInstanced)map.m_parentMap).AddGridMapReference(new GridCoord(gx, gy));
+                map.GridMaps[gx][gy] = map.m_parentMap.GridMaps[gx][gy];
                 return;
             }
 
-            if (GridMaps[gx][gy] != null && !reload)
+            if (map.GridMaps[gx][gy] != null && !reload)
                 return;
 
-            if (GridMaps[gx][gy] != null)
+            if (map.GridMaps[gx][gy] != null)
             {
-                Log.outInfo(LogFilter.Maps, "Unloading previously loaded map {0} before reloading.", GetId());
-                Global.ScriptMgr.OnUnloadGridMap(this, GridMaps[gx][gy], gx, gy);
+                Log.outInfo(LogFilter.Maps, "Unloading previously loaded map {0} before reloading.", map.GetId());
+                Global.ScriptMgr.OnUnloadGridMap(map, map.GridMaps[gx][gy], gx, gy);
 
-                GridMaps[gx][gy] = null;
+                map.GridMaps[gx][gy] = null;
             }
             // map file name
-            string filename = string.Format("{0}/maps/{1:D4}_{2:D2}_{3:D2}.map", Global.WorldMgr.GetDataPath(), GetId(), gx, gy);
+            string filename = string.Format("{0}/maps/{1:D4}_{2:D2}_{3:D2}.map", Global.WorldMgr.GetDataPath(), map.GetId(), gx, gy);
             Log.outInfo(LogFilter.Maps, "Loading map {0}", filename);
             // loading data
-            GridMaps[gx][gy] = new GridMap();
-            if (!GridMaps[gx][gy].loadData(filename))
+            map.GridMaps[gx][gy] = new GridMap();
+            if (!map.GridMaps[gx][gy].loadData(filename))
                 Log.outError(LogFilter.Maps, "Error loading map file: {0}", filename);
 
-            Global.ScriptMgr.OnLoadGridMap(this, GridMaps[gx][gy], gx, gy);
+            Global.ScriptMgr.OnLoadGridMap(map, map.GridMaps[gx][gy], gx, gy);
+        }
+
+        void UnloadMap(uint gx, uint gy)
+        {
+            foreach (Map childBaseMap in m_childTerrainMaps)
+                childBaseMap.UnloadMap(gx, gy);
+
+            UnloadMapImpl(this, gx, gy);
+        }
+
+        void UnloadMapImpl(Map map, uint gx, uint gy)
+        {
+            if (map.i_InstanceId == 0)
+            {
+                if (map.GridMaps[gx][gy] != null)
+                {
+                    map.GridMaps[gx][gy].unloadData();
+                    map.GridMaps[gx][gy] = null;
+                }
+            }
+            else
+                map.m_parentMap.ToMapInstanced().RemoveGridMapReference(new GridCoord(gx, gy));
+
+            map.GridMaps[gx][gy] = null;
         }
 
         void LoadMapAndVMap(uint gx, uint gy)
         {
-            LoadMap(gx, gy);
+            m_parentTerrainMap.LoadMap(gx, gy);
             // Only load the data for the base map
             if (i_InstanceId == 0)
             {
@@ -416,7 +463,7 @@ namespace Game.Maps
                 player.m_clientGUIDs.Clear();
 
             player.UpdateObjectVisibility(false);
-            player.SendUpdatePhasing();
+            PhasingHandler.SendToPlayer(player);
 
             if (player.IsAlive())
                 ConvertCorpseToBones(player.GetGUID());
@@ -467,8 +514,6 @@ namespace Game.Maps
             if (obj.isActiveObject())
                 AddToActive(obj);
 
-            obj.RebuildTerrainSwaps();
-
             //something, such as vehicle, needs to be update immediately
             //also, trigger needs to cast spell, if not update, cannot see visual
             obj.UpdateObjectVisibilityOnCreate();
@@ -500,6 +545,7 @@ namespace Game.Maps
                 {
                     var data = new UpdateData(GetId());
                     obj.BuildCreateUpdateBlockForPlayer(data, player);
+                    player.m_visibleTransports.Add(obj.GetGUID());
                     UpdateObject packet;
                     data.BuildPacket(out packet);
                     player.SendPacket(packet);
@@ -551,10 +597,11 @@ namespace Game.Maps
         public virtual void Update(uint diff)
         {
             _dynamicTree.update(diff);
-            
+
             // update worldsessions for existing players
-            foreach (Player player in m_activePlayers.ToList())
+            for (var i = 0; i < m_activePlayers.Count; ++i)
             {
+                Player player = m_activePlayers[i];
                 if (player.IsInWorld)
                 {
                     WorldSession session = player.GetSession();
@@ -562,6 +609,7 @@ namespace Game.Maps
                     session.Update(diff, updater);
                 }
             }
+
             // update active cells around players and active objects
             resetMarkedCells();
             
@@ -570,8 +618,9 @@ namespace Game.Maps
             var grid_object_update = new Visitor(update, GridMapTypeMask.AllGrid);
             var world_object_update = new Visitor(update, GridMapTypeMask.AllWorld);
 
-            foreach (Player player in m_activePlayers.ToList())
+            for (var i = 0; i < m_activePlayers.Count; ++i)
             {
+                Player player = m_activePlayers[i];
                 if (!player.IsInWorld)
                     continue;
                 
@@ -612,16 +661,18 @@ namespace Game.Maps
                 }
             }
        
-            foreach (WorldObject obj in m_activeNonPlayers.ToList())
+            for (var i = 0; i < m_activeNonPlayers.Count; ++i)
             {
+                WorldObject obj = m_activeNonPlayers[i];
                 if (!obj.IsInWorld)
                     continue;
 
                 VisitNearbyCellsOf(obj, grid_object_update, world_object_update);
             }
             
-            foreach (Transport transport in _transports.ToList())
+            for (var i = 0; i < _transports.Count; ++i)
             {
+                Transport transport = _transports[i];
                 if (!transport || !transport.IsInWorld)
                     continue;
 
@@ -800,9 +851,14 @@ namespace Game.Maps
                 UpdateObject packet;
                 data.BuildPacket(out packet);
 
-                foreach (var pl in players)
-                    if (pl.GetTransport() != obj)
-                        pl.SendPacket(packet);
+                foreach (var player in players)
+                {
+                    if (player.GetTransport() != obj)
+                    {
+                        player.SendPacket(packet);
+                        player.m_visibleTransports.Remove(obj.GetGUID());
+                    }
+                }
             }
 
             if (!_transports.Contains(obj))
@@ -923,6 +979,7 @@ namespace Game.Maps
             Cell old_cell = dynObj.GetCurrentCell();
 
             Contract.Assert(integrity_check == old_cell);
+
             Cell new_cell = new Cell(x, y);
 
             if (getGrid(new_cell.GetGridX(), new_cell.GetGridY()) == null)
@@ -947,6 +1004,7 @@ namespace Game.Maps
 
             old_cell = dynObj.GetCurrentCell();
             integrity_check = new Cell(dynObj.GetPositionX(), dynObj.GetPositionY());
+
             Contract.Assert(integrity_check == old_cell);
         }
 
@@ -989,6 +1047,7 @@ namespace Game.Maps
 
             if (c._moveState == ObjectCellMoveState.None)
                 creaturesToMove.Add(c);
+
             c.SetNewCellPosition(x, y, z, ang);
         }
 
@@ -1061,8 +1120,10 @@ namespace Game.Maps
         void MoveAllCreaturesInMoveList()
         {
             _creatureToMoveLock = true;
-            foreach (Creature creature in creaturesToMove.ToList())
+
+            for (var i = 0; i< creaturesToMove.Count; ++i)
             {
+                Creature creature = creaturesToMove[i];
                 if (creature.GetMap() != this) //pet is teleported to another map
                     continue;
 
@@ -1104,6 +1165,7 @@ namespace Game.Maps
                     }
                 }
             }
+
             creaturesToMove.Clear();
             _creatureToMoveLock = false;
         }
@@ -1111,8 +1173,10 @@ namespace Game.Maps
         void MoveAllGameObjectsInMoveList()
         {
             _gameObjectsToMoveLock = true;
-            foreach (GameObject go in _gameObjectsToMove)
+
+            for (var i = 0; i < _gameObjectsToMove.Count; ++i)
             {
+                GameObject go = _gameObjectsToMove[i];
                 if (go.GetMap() != this) //transport is teleported to another map
                     continue;
 
@@ -1148,6 +1212,7 @@ namespace Game.Maps
                     }
                 }
             }
+
             _gameObjectsToMove.Clear();
             _gameObjectsToMoveLock = false;
         }
@@ -1155,8 +1220,10 @@ namespace Game.Maps
         void MoveAllDynamicObjectsInMoveList()
         {
             _dynamicObjectsToMoveLock = true;
-            foreach (var dynObj in _dynamicObjectsToMove)
+
+            for (var i = 0; i < _dynamicObjectsToMove.Count; ++i)
             {
+                DynamicObject dynObj = _dynamicObjectsToMove[i];
                 if (dynObj.GetMap() != this) //transport is teleported to another map
                     continue;
 
@@ -1188,8 +1255,10 @@ namespace Game.Maps
         void MoveAllAreaTriggersInMoveList()
         {
             _areaTriggersToMoveLock = true;
-            foreach (AreaTrigger at in _areaTriggersToMove)
+
+            for (var i = 0; i < _areaTriggersToMove.Count; ++i)
             {
+                AreaTrigger at = _areaTriggersToMove[i];
                 if (at.GetMap() != this) //transport is teleported to another map
                     continue;
 
@@ -1524,20 +1593,17 @@ namespace Game.Maps
             uint gx = (MapConst.MaxGrids - 1) - x;
             uint gy = (MapConst.MaxGrids - 1) - y;
 
+            // delete grid map, but don't delete if it is from parent map (and thus only reference)
+            //+++if (GridMaps[gx][gy]) don't check for GridMaps[gx][gy], we might have to unload vmaps
             {
+                if (m_parentTerrainMap == this)
+                    m_parentTerrainMap.UnloadMap(gx, gy);
+
                 if (i_InstanceId == 0)
                 {
-                    if (GridMaps[gx][gy] != null)
-                    {
-                        GridMaps[gx][gy].unloadData();
-                    }
                     Global.VMapMgr.unloadMap(GetId(), gx, gy);
                     Global.MMapMgr.unloadMap(GetId(), gx, gy);
                 }
-                else
-                    ((MapInstanced)m_parentMap).RemoveGridMapReference(new GridCoord(gx, gy));
-
-                GridMaps[gx][gy] = null;
             }
             Log.outDebug(LogFilter.Maps, "Unloading grid[{0}, {1}] for map {2} finished", x, y, GetId());
             return true;
@@ -1607,49 +1673,79 @@ namespace Game.Maps
             if (!m_scriptSchedule.Empty())
                 Global.MapMgr.DecreaseScheduledScriptCount((uint)m_scriptSchedule.Count);
 
+            if (m_parentMap == this)
+                 m_childTerrainMaps = null;
+
             Global.MMapMgr.unloadMapInstance(GetId(), i_InstanceId);
         }
 
         private GridMap GetGridMap(float x, float y)
         {
             // half opt method
-            var gx = (uint)(32 - x / MapConst.SizeofGrids); //grid x
-            var gy = (uint)(32 - y / MapConst.SizeofGrids); //grid y
+            var gx = (uint)(MapConst.CenterGridId - x / MapConst.SizeofGrids); //grid x
+            var gy = (uint)(MapConst.CenterGridId - y / MapConst.SizeofGrids); //grid y
 
             // ensure GridMap is loaded
-            EnsureGridCreated(new GridCoord(63 - gx, 63 - gy));
+            EnsureGridCreated(new GridCoord((MapConst.MaxGrids - 1) - gx, (MapConst.MaxGrids - 1) - gy));
 
             return GridMaps[gx][gy];
         }
 
-        public float GetWaterOrGroundLevel(List<uint> phases, float x, float y, float z)
+        GridMap GetGridMap(uint mapId, float x, float y)
         {
-            float ground = 0f;
-            return GetWaterOrGroundLevel(phases, x, y, z, ref ground);
+            if (GetId() == mapId)
+                return GetGridMap(x, y);
+
+            // half opt method
+            uint gx = (uint)(MapConst.CenterGridId - x / MapConst.SizeofGrids);                   //grid x
+            uint gy = (uint)(MapConst.CenterGridId - y / MapConst.SizeofGrids);                   //grid y
+
+            // ensure GridMap is loaded
+            EnsureGridCreated(new GridCoord((MapConst.MaxGrids - 1) - gx, (MapConst.MaxGrids - 1) - gy));
+
+            GridMap grid = GridMaps[gx][gy];
+            var childMap = m_childTerrainMaps.Find(childTerrainMap => childTerrainMap.GetId() == mapId);
+            if (childMap != null && childMap.GridMaps[gx][gy].fileExists())
+                grid = childMap.GridMaps[gx][gy];
+
+            return grid;
         }
 
-        public float GetWaterOrGroundLevel(List<uint> phases, float x, float y, float z, ref float ground, bool swim = false)
+        public bool HasGridMap(uint mapId, uint gx, uint gy)
+        {
+            var childMap = m_childTerrainMaps.Find(childTerrainMap => childTerrainMap.GetId() == mapId);
+            return childMap != null && childMap.GridMaps[gx][gy] != null && childMap.GridMaps[gx][gy].fileExists();
+        }
+
+        public float GetWaterOrGroundLevel(PhaseShift phaseShift, float x, float y, float z)
+        {
+            float ground = 0f;
+            return GetWaterOrGroundLevel(phaseShift, x, y, z, ref ground);
+        }
+
+        public float GetWaterOrGroundLevel(PhaseShift phaseShift, float x, float y, float z, ref float ground, bool swim = false)
         {
             if (GetGridMap(x, y) != null)
             {
                 // we need ground level (including grid height version) for proper return water level in point
-                float ground_z = GetHeight(phases, x, y, z, true, 50.0f);
+                float ground_z = GetHeight(phaseShift, x, y, z, true, 50.0f);
                 ground = ground_z;
 
                 LiquidData liquid_status;
 
-                ZLiquidStatus res = getLiquidStatus(x, y, ground_z, MapConst.MapAllLiquidTypes, out liquid_status);
+                ZLiquidStatus res = getLiquidStatus(phaseShift, x, y, ground_z, MapConst.MapAllLiquidTypes, out liquid_status);
                 return res != ZLiquidStatus.NoWater ? liquid_status.level : ground_z;
             }
 
             return MapConst.VMAPInvalidHeightValue;
         }
 
-        public float GetHeight(float x, float y, float z, bool checkVMap = true, float maxSearchDist = MapConst.DefaultHeightSearch)
+        public float GetStaticHeight(PhaseShift phaseShift, float x, float y, float z, bool checkVMap = true, float maxSearchDist = MapConst.DefaultHeightSearch)
         {
             // find raw .map surface under Z coordinates
             float mapHeight = MapConst.VMAPInvalidHeightValue;
-            GridMap gmap = GetGridMap(x, y);
+            uint terrainMapId = PhasingHandler.GetTerrainMapId(phaseShift, this, x, y);
+            GridMap gmap = m_parentTerrainMap.GetGridMap(terrainMapId, x, y);
             if (gmap != null)
             {
                 float gridHeight = gmap.getHeight(x, y);
@@ -1662,7 +1758,7 @@ namespace Game.Maps
             if (checkVMap)
             {
                 if (Global.VMapMgr.isHeightCalcEnabled())
-                    vmapHeight = Global.VMapMgr.getHeight(GetId(), x, y, z + 2.0f, maxSearchDist);
+                    vmapHeight = Global.VMapMgr.getHeight(terrainMapId, x, y, z + 2.0f, maxSearchDist);
                 // look from a bit higher pos to find the floor
             }
 
@@ -1719,13 +1815,13 @@ namespace Game.Maps
             return outdoor;
         }
 
-        public bool IsOutdoors(float x, float y, float z)
+        public bool IsOutdoors(PhaseShift phaseShift, float x, float y, float z)
         {
             uint mogpFlags;
             int adtId, rootId, groupId;
 
             // no wmo found? . outside by default
-            if (!GetAreaInfo(x, y, z, out mogpFlags, out adtId, out rootId, out groupId))
+            if (!GetAreaInfo(phaseShift, x, y, z, out mogpFlags, out adtId, out rootId, out groupId))
                 return true;
 
             AreaTableRecord atEntry = null;
@@ -1739,7 +1835,7 @@ namespace Game.Maps
             return IsOutdoorWMO(mogpFlags, adtId, rootId, groupId, wmoEntry, atEntry);
         }
 
-        private bool GetAreaInfo(float x, float y, float z, out uint flags, out int adtId, out int rootId, out int groupId)
+        private bool GetAreaInfo(PhaseShift phaseShift, float x, float y, float z, out uint flags, out int adtId, out int rootId, out int groupId)
         {
             flags = 0;
             adtId = 0;
@@ -1747,15 +1843,59 @@ namespace Game.Maps
             groupId = 0;
 
             float vmap_z = z;
-            if (Global.VMapMgr.getAreaInfo(GetId(), x, y, ref vmap_z, out flags, out adtId, out rootId, out groupId))
+            float dynamic_z = z;
+            float check_z = z;
+            uint terrainMapId = PhasingHandler.GetTerrainMapId(phaseShift, this, x, y);
+            uint vflags;
+            int vadtId;
+            int vrootId;
+            int vgroupId;
+            uint dflags;
+            int dadtId;
+            int drootId;
+            int dgroupId;
+
+            bool hasVmapAreaInfo = Global.VMapMgr.getAreaInfo(terrainMapId, x, y, ref vmap_z, out vflags, out vadtId, out vrootId, out vgroupId);
+            bool hasDynamicAreaInfo = _dynamicTree.getAreaInfo(x, y, ref dynamic_z, phaseShift, out dflags, out dadtId, out drootId, out dgroupId);
+
+            if (hasVmapAreaInfo)
+            {
+                if (hasDynamicAreaInfo && dynamic_z > vmap_z)
+                {
+                    check_z = dynamic_z;
+                    flags = dflags;
+                    adtId = dadtId;
+                    rootId = drootId;
+                    groupId = dgroupId;
+                }
+                else
+                {
+                    check_z = vmap_z;
+                    flags = vflags;
+                    adtId = vadtId;
+                    rootId = vrootId;
+                    groupId = vgroupId;
+                }
+            }
+            else if (hasDynamicAreaInfo)
+            {
+                check_z = dynamic_z;
+                flags = dflags;
+                adtId = dadtId;
+                rootId = drootId;
+                groupId = dgroupId;
+            }
+
+
+            if (hasVmapAreaInfo || hasDynamicAreaInfo)
             {
                 // check if there's terrain between player height and object height
-                GridMap gmap = GetGridMap(x, y);
+                GridMap gmap = m_parentTerrainMap.GetGridMap(terrainMapId, x, y);
                 if (gmap != null)
                 {
-                    float _mapheight = gmap.getHeight(x, y);
+                    float mapHeight = gmap.getHeight(x, y);
                     // z + 2.0f condition taken from GetHeight(), not sure if it's such a great choice...
-                    if (z + 2.0f > _mapheight && _mapheight > vmap_z)
+                    if (z + 2.0f > mapHeight && mapHeight > check_z)
                         return false;
                 }
                 return true;
@@ -1764,13 +1904,13 @@ namespace Game.Maps
             return false;
         }
 
-        public uint GetAreaId(float x, float y, float z)
+        public uint GetAreaId(PhaseShift phaseShift, float x, float y, float z)
         {
             bool throwaway;
-            return GetAreaId(x, y, z, out throwaway);
+            return GetAreaId(phaseShift, x, y, z, out throwaway);
         }
 
-        public uint GetAreaId(float x, float y, float z, out bool isOutdoors)
+        public uint GetAreaId(PhaseShift phaseShift, float x, float y, float z, out bool isOutdoors)
         {
             uint mogpFlags;
             int adtId, rootId, groupId;
@@ -1779,7 +1919,7 @@ namespace Game.Maps
             bool haveAreaInfo = false;
             uint areaId = 0;
 
-            if (GetAreaInfo(x, y, z, out mogpFlags, out adtId, out rootId, out groupId))
+            if (GetAreaInfo(phaseShift, x, y, z, out mogpFlags, out adtId, out rootId, out groupId))
             {
                 haveAreaInfo = true;
                 wmoEntry = Global.DB2Mgr.GetWMOAreaTable(rootId, adtId, groupId);
@@ -1792,7 +1932,7 @@ namespace Game.Maps
 
             if (areaId == 0)
             {
-                GridMap gmap = GetGridMap(x, y);
+                GridMap gmap = m_parentTerrainMap.GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y);
                 if (gmap != null)
                     areaId = gmap.getArea(x, y);
 
@@ -1809,9 +1949,9 @@ namespace Game.Maps
             return areaId;
         }
 
-        public uint GetZoneId(float x, float y, float z)
+        public uint GetZoneId(PhaseShift phaseShift, float x, float y, float z)
         {
-            uint areaId = GetAreaId(x, y, z);
+            uint areaId = GetAreaId(phaseShift, x, y, z);
             AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(areaId);
             if (area != null)
                 if (area.ParentAreaID != 0)
@@ -1820,38 +1960,38 @@ namespace Game.Maps
             return areaId;
         }
 
-        public void GetZoneAndAreaId(out uint zoneid, out uint areaid, float x, float y, float z)
+        public void GetZoneAndAreaId(PhaseShift phaseShift, out uint zoneid, out uint areaid, float x, float y, float z)
         {
-            areaid = zoneid = GetAreaId(x, y, z);
+            areaid = zoneid = GetAreaId(phaseShift, x, y, z);
             AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(areaid);
             if (area != null)
                 if (area.ParentAreaID != 0)
                     zoneid = area.ParentAreaID;
         }
 
-        private byte GetTerrainType(float x, float y)
+        private byte GetTerrainType(PhaseShift phaseShift, float x, float y)
         {
-            GridMap gmap = GetGridMap(x, y);
+            GridMap gmap = m_parentTerrainMap.GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y);
             if (gmap != null)
                 return gmap.getTerrainType(x, y);
             return 0;
         }
 
-        public ZLiquidStatus getLiquidStatus(float x, float y, float z, byte ReqLiquidType)
+        public ZLiquidStatus getLiquidStatus(PhaseShift phaseShift, float x, float y, float z, uint ReqLiquidType)
         {
             LiquidData throwaway;
-            return getLiquidStatus(x, y, z, ReqLiquidType, out throwaway);
+            return getLiquidStatus(phaseShift, x, y, z, ReqLiquidType, out throwaway);
         }
 
-        public ZLiquidStatus getLiquidStatus(float x, float y, float z, byte ReqLiquidType, out LiquidData data)
+        public ZLiquidStatus getLiquidStatus(PhaseShift phaseShift, float x, float y, float z, uint ReqLiquidType, out LiquidData data)
         {
             data = new LiquidData();
             var result = ZLiquidStatus.NoWater;
             float liquid_level = MapConst.InvalidHeight;
             float ground_level = MapConst.InvalidHeight;
             uint liquid_type = 0;
-
-            if (Global.VMapMgr.GetLiquidLevel(GetId(), x, y, z, ReqLiquidType, ref liquid_level, ref ground_level, ref liquid_type))
+            uint terrainMapId = PhasingHandler.GetTerrainMapId(phaseShift, this, x, y);
+            if (Global.VMapMgr.GetLiquidLevel(terrainMapId, x, y, z, ReqLiquidType, ref liquid_level, ref ground_level, ref liquid_type))
             {
                 Log.outDebug(LogFilter.Maps, "getLiquidStatus(): vmap liquid level: {0} ground: {1} type: {2}",
                     liquid_level, ground_level, liquid_type);
@@ -1866,11 +2006,11 @@ namespace Game.Maps
                     uint liquidFlagType = 0;
                     LiquidTypeRecord liq = CliDB.LiquidTypeStorage.LookupByKey(liquid_type);
                     if (liq != null)
-                        liquidFlagType = liq.LiquidType;
+                        liquidFlagType = liq.SoundBank;
 
                     if (liquid_type != 0 && liquid_type < 21)
                     {
-                        AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(GetAreaId(x, y, z));
+                        AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(GetAreaId(phaseShift, x, y, z));
                         if (area != null)
                         {
                             uint overrideLiquid = area.LiquidTypeID[liquidFlagType];
@@ -1885,7 +2025,7 @@ namespace Game.Maps
                             if (liq != null)
                             {
                                 liquid_type = overrideLiquid;
-                                liquidFlagType = liq.LiquidType;
+                                liquidFlagType = liq.SoundBank;
                             }
                         }
                     }
@@ -1909,7 +2049,7 @@ namespace Game.Maps
                 }
             }
 
-            GridMap gmap = GetGridMap(x, y);
+            GridMap gmap = m_parentTerrainMap.GetGridMap(terrainMapId, x, y);
             if (gmap != null)
             {
                 var map_data = new LiquidData();
@@ -1929,27 +2069,27 @@ namespace Game.Maps
             return result;
         }
 
-        public float GetWaterLevel(float x, float y)
+        public float GetWaterLevel(PhaseShift phaseShift, float x, float y)
         {
-            GridMap gmap = GetGridMap(x, y);
+            GridMap gmap = m_parentTerrainMap.GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y);
             if (gmap != null)
                 return gmap.getLiquidLevel(x, y);
             return 0;
         }
 
-        public bool isInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2, List<uint> phases)
+        public bool isInLineOfSight(PhaseShift phaseShift, float x1, float y1, float z1, float x2, float y2, float z2)
         {
-            return Global.VMapMgr.isInLineOfSight(GetId(), x1, y1, z1, x2, y2, z2)
-                   && _dynamicTree.isInLineOfSight(new Vector3(x1, y1, z1), new Vector3(x2, y2, z2), phases);
+            return Global.VMapMgr.isInLineOfSight(PhasingHandler.GetTerrainMapId(phaseShift, this, x1, y1), x1, y1, z1, x2, y2, z2)
+                   && _dynamicTree.isInLineOfSight(new Vector3(x1, y1, z1), new Vector3(x2, y2, z2), phaseShift);
         }
 
-        public bool getObjectHitPos(List<uint> phases, float x1, float y1, float z1, float x2, float y2, float z2, out float rx, out float ry, out float rz, float modifyDist)
+        public bool getObjectHitPos(PhaseShift phaseShift, float x1, float y1, float z1, float x2, float y2, float z2, out float rx, out float ry, out float rz, float modifyDist)
         {
             var startPos = new Vector3(x1, y1, z1);
             var dstPos = new Vector3(x2, y2, z2);
 
             var resultPos = new Vector3();
-            bool result = _dynamicTree.getObjectHitPos(phases, startPos, dstPos, ref resultPos, modifyDist);
+            bool result = _dynamicTree.getObjectHitPos(startPos, dstPos, ref resultPos, modifyDist, phaseShift);
 
             rx = resultPos.X;
             ry = resultPos.Y;
@@ -1957,22 +2097,19 @@ namespace Game.Maps
             return result;
         }
 
-        public float GetHeight(List<uint> phases, float x, float y, float z, bool vmap = true, float maxSearchDist = MapConst.DefaultHeightSearch)
+        public float GetHeight(PhaseShift phaseShift, float x, float y, float z, bool vmap = true, float maxSearchDist = MapConst.DefaultHeightSearch)
         {
-            return Math.Max(GetHeight(x, y, z, vmap, maxSearchDist), _dynamicTree.getHeight(x, y, z, maxSearchDist, phases));
+            return Math.Max(GetStaticHeight(phaseShift, x, y, z, vmap, maxSearchDist), _dynamicTree.getHeight(x, y, z, maxSearchDist, phaseShift));
         }
 
-        public bool IsInWater(float x, float y, float pZ)
+        public bool IsInWater(PhaseShift phaseShift, float x, float y, float pZ)
         {
-            return Convert.ToBoolean(getLiquidStatus(x, y, pZ, MapConst.MapAllLiquidTypes) &
-                                  (ZLiquidStatus.InWater | ZLiquidStatus.UnderWater));
+            return Convert.ToBoolean(getLiquidStatus(phaseShift, x, y, pZ, MapConst.MapAllLiquidTypes) & (ZLiquidStatus.InWater | ZLiquidStatus.UnderWater));
         }
 
-        public bool IsUnderWater(float x, float y, float z)
+        public bool IsUnderWater(PhaseShift phaseShift, float x, float y, float z)
         {
-            return
-                Convert.ToBoolean(getLiquidStatus(x, y, z, MapConst.MapLiquidTypeWater | MapConst.MapLiquidTypeOcean) &
-                                  ZLiquidStatus.UnderWater);
+            return Convert.ToBoolean(getLiquidStatus(phaseShift, x, y, z, MapConst.MapLiquidTypeWater | MapConst.MapLiquidTypeOcean) & ZLiquidStatus.UnderWater);
         }
 
         private bool CheckGridIntegrity(Creature c, bool moved)
@@ -1990,30 +2127,32 @@ namespace Game.Maps
             return i_mapRecord != null ? i_mapRecord.MapName[Global.WorldMgr.GetDefaultDbcLocale()] : "UNNAMEDMAP";
         }
 
-        public void SendInitSelf(Player pl)
+        public void SendInitSelf(Player player)
         {
-            var data = new UpdateData(pl.GetMapId());
+            var data = new UpdateData(player.GetMapId());
 
             // attach to player data current transport data
-            Transport transport = pl.GetTransport();
-            if (transport != null)
-                transport.BuildCreateUpdateBlockForPlayer(data, pl);
-
-            pl.BuildCreateUpdateBlockForPlayer(data, pl);
-
-            // build other passengers at transport also (they always visible and marked as visible and will not send at visibility update at add to map
-
+            Transport transport = player.GetTransport();
             if (transport != null)
             {
-                foreach (WorldObject obj in transport.GetPassengers())
+                transport.BuildCreateUpdateBlockForPlayer(data, player);
+                player.m_visibleTransports.Add(transport.GetGUID());
+            }
+
+            player.BuildCreateUpdateBlockForPlayer(data, player);
+
+            // build other passengers at transport also (they always visible and marked as visible and will not send at visibility update at add to map
+            if (transport != null)
+            {
+                foreach (WorldObject passenger in transport.GetPassengers())
                 {
-                    if (pl != obj && pl.HaveAtClient(obj))
-                        obj.BuildCreateUpdateBlockForPlayer(data, pl);
+                    if (player != passenger && player.HaveAtClient(passenger))
+                        passenger.BuildCreateUpdateBlockForPlayer(data, player);
                 }
             }
             UpdateObject packet;
             data.BuildPacket(out packet);
-            pl.SendPacket(packet);
+            player.SendPacket(packet);
         }
 
         void SendInitTransports(Player player)
@@ -2023,7 +2162,10 @@ namespace Game.Maps
             foreach (Transport transport in _transports)
             {
                 if (transport != player.GetTransport() && player.IsInPhase(transport))
+                {
                     transport.BuildCreateUpdateBlockForPlayer(transData, player);
+                    player.m_visibleTransports.Add(transport.GetGUID());
+                }
             }
 
             UpdateObject packet;
@@ -2035,27 +2177,39 @@ namespace Game.Maps
         {
             var transData = new UpdateData(player.GetMapId());
             foreach (Transport transport in _transports)
+            {
                 if (transport != player.GetTransport())
+                {
                     transport.BuildOutOfRangeUpdateBlock(transData);
+                    player.m_visibleTransports.Remove(transport.GetGUID());
+                }
+            }
 
             UpdateObject packet;
             transData.BuildPacket(out packet);
             player.SendPacket(packet);
         }
 
-        public void SendUpdateTransportVisibility(Player player, List<uint> previousPhases)
+        public void SendUpdateTransportVisibility(Player player)
         {
             // Hack to send out transports
             UpdateData transData = new UpdateData(player.GetMapId());
-            foreach (var trans in _transports)
+            foreach (var transport in _transports)
             {
-                if (trans == player.GetTransport())
-                    continue;
-
-                if (player.IsInPhase(trans) && !previousPhases.Intersect(trans.GetPhases()).Any())
-                    trans.BuildCreateUpdateBlockForPlayer(transData, player);
-                else if (!player.IsInPhase(trans))
-                    trans.BuildOutOfRangeUpdateBlock(transData);
+                var hasTransport = player.m_visibleTransports.Contains(transport.GetGUID());
+                if (player.IsInPhase(transport))
+                {
+                    if (!hasTransport)
+                    {
+                        transport.BuildCreateUpdateBlockForPlayer(transData, player);
+                        player.m_visibleTransports.Add(transport.GetGUID());
+                    }
+                }
+                else
+                {
+                    transport.BuildOutOfRangeUpdateBlock(transData);
+                    player.m_visibleTransports.Remove(transport.GetGUID());
+                }
             }
 
             UpdateObject packet;
@@ -2095,8 +2249,9 @@ namespace Game.Maps
 
         public virtual void DelayedUpdate(uint diff)
         {
-            foreach (var transport in _transports.ToList())
+            for (var i = 0; i < _transports.Count; ++i)
             {
+                Transport transport = _transports[i];
                 if (!transport.IsInWorld)
                     continue;
 
@@ -2507,7 +2662,7 @@ namespace Game.Maps
                     continue;
 
                 foreach (var phaseId in phases[guid])
-                    corpse.SetInPhase(phaseId, false, true);
+                    PhasingHandler.AddPhase(corpse, phaseId, false);
 
                 AddCorpse(corpse);
             } while (result.NextRow());
@@ -2586,7 +2741,7 @@ namespace Game.Maps
 
                 bones.SetUInt32Value(CorpseFields.Flags, corpse.GetUInt32Value(CorpseFields.Flags) | (uint)CorpseFlags.Bones);
 
-                bones.CopyPhaseFrom(corpse);
+                PhasingHandler.InheritPhaseShift(bones, corpse);
 
                 AddCorpse(bones);
 
@@ -2829,6 +2984,14 @@ namespace Game.Maps
             return m_parentMap;
         }
 
+        public void AddChildTerrainMap(Map map)
+        {
+            m_childTerrainMaps.Add(map);
+            map.m_parentTerrainMap = this;
+        }
+
+        public void UnlinkAllChildTerrainMaps() { m_childTerrainMaps.Clear(); }
+
         public uint GetInstanceId()
         {
             return i_InstanceId;
@@ -2851,15 +3014,15 @@ namespace Game.Maps
             return Global.DB2Mgr.GetMapDifficultyData(GetId(), GetDifficultyID());
         }
 
-        public byte GetDifficultyLootBonusTreeMod()
+        public byte GetDifficultyLootItemContext()
         {
             MapDifficultyRecord mapDifficulty = GetMapDifficulty();
-            if (mapDifficulty != null && mapDifficulty.ItemBonusTreeModID != 0)
-                return mapDifficulty.ItemBonusTreeModID;
+            if (mapDifficulty != null && mapDifficulty.ItemContext != 0)
+                return mapDifficulty.ItemContext;
 
             DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(GetDifficultyID());
             if (difficulty != null)
-                return difficulty.ItemBonusTreeModID;
+                return difficulty.ItemContext;
 
             return 0;
         }
@@ -3078,7 +3241,7 @@ namespace Game.Maps
 
         public Creature GetCreature(ObjectGuid guid)
         {
-            if (!guid.IsCreature())
+            if (!guid.IsCreatureOrVehicle())
                 return null;
 
             return (Creature)_objectsStore.LookupByKey(guid);
@@ -3094,7 +3257,7 @@ namespace Game.Maps
 
         public GameObject GetGameObject(ObjectGuid guid)
         {
-            if (!guid.IsGameObject())
+            if (!guid.IsAnyTypeGameObject())
                 return null;
 
             return (GameObject)_objectsStore.LookupByKey(guid);
@@ -3131,12 +3294,12 @@ namespace Game.Maps
             }
         }
 
-        public TempSummon SummonCreature(uint entry, Position pos, SummonPropertiesRecord properties = null, uint duration = 0, Unit summoner = null, uint spellId = 0, uint vehId = 0)
+        public TempSummon SummonCreature(uint entry, Position pos, SummonPropertiesRecord properties = null, uint duration = 0, Unit summoner = null, uint spellId = 0, uint vehId = 0, bool visibleBySummonerOnly = false)
         {
             var mask = UnitTypeMask.Summon;
             if (properties != null)
             {
-                switch (properties.Category)
+                switch (properties.Control)
                 {
                     case SummonCategory.Pet:
                         mask = UnitTypeMask.Guardian;
@@ -3151,7 +3314,7 @@ namespace Game.Maps
                     case SummonCategory.Ally:
                     case SummonCategory.Unk:
                         {
-                            switch (properties.Type)
+                            switch (properties.Title)
                             {
                                 case SummonType.Minion:
                                 case SummonType.Guardian:
@@ -3170,7 +3333,7 @@ namespace Game.Maps
                                     mask = UnitTypeMask.Minion;
                                     break;
                                 default:
-                                    if (Convert.ToBoolean(properties.Flags & 512)) // Mirror Image, Summon Gargoyle
+                                    if (Convert.ToBoolean(properties.Flags & SummonPropFlags.Unk10)) // Mirror Image, Summon Gargoyle
                                         mask = UnitTypeMask.Guardian;
                                     break;
                             }
@@ -3207,13 +3370,14 @@ namespace Game.Maps
                 return null;
 
             // Set the summon to the summoner's phase
-            summon.CopyPhaseFrom(summoner);
+            if (summoner)
+                PhasingHandler.InheritPhaseShift(summon, summoner);
 
             summon.SetUInt32Value(UnitFields.CreatedBySpell, spellId);
-
             summon.SetHomePosition(pos);
-
             summon.InitStats(duration);
+            summon.SetVisibleBySummonerOnly(visibleBySummonerOnly);
+
             AddToMap(summon.ToCreature());
             summon.InitSummon();
 
@@ -4200,7 +4364,9 @@ namespace Game.Maps
         List<WorldObject> i_worldObjects = new List<WorldObject>();
         protected List<WorldObject> m_activeNonPlayers = new List<WorldObject>();
         protected List<Player> m_activePlayers = new List<Player>();
-        Map m_parentMap;
+        Map m_parentMap; // points to MapInstanced or self (always same map id)
+        Map m_parentTerrainMap; // points to m_parentMap of MapEntry::ParentMapID
+        List<Map> m_childTerrainMaps = new List<Map>(); // contains m_parentMap of maps that have MapEntry::ParentMapID == GetId()
         SortedMultiMap<long, ScriptAction> m_scriptSchedule = new SortedMultiMap<long, ScriptAction>();
 
         BitArray marked_cells = new BitArray(MapConst.TotalCellsPerMap * MapConst.TotalCellsPerMap);

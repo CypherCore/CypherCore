@@ -64,11 +64,11 @@ namespace Game.Entities
         }
         public virtual bool IsInWater()
         {
-            return GetMap().IsInWater(GetPositionX(), GetPositionY(), GetPositionZ());
+            return GetMap().IsInWater(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ());
         }
         public virtual bool IsUnderWater()
         {
-            return GetMap().IsUnderWater(GetPositionX(), GetPositionY(), GetPositionZ());
+            return GetMap().IsUnderWater(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ());
         }
 
         void propagateSpeedChange() { GetMotionMaster().propagateSpeedChange(); }
@@ -263,7 +263,7 @@ namespace Game.Entities
             return true;
         }
 
-        bool SetCanTransitionBetweenSwimAndFly(bool enable)
+        public bool SetCanTransitionBetweenSwimAndFly(bool enable)
         {
             if (!IsTypeId(TypeId.Player))
                 return false;
@@ -544,7 +544,11 @@ namespace Game.Entities
             }
 
             bool turn = (GetOrientation() != orientation);
-            bool relocated = (teleport || GetPositionX() != x || GetPositionY() != y || GetPositionZ() != z);
+            // G3D::fuzzyEq won't help here, in some cases magnitudes differ by a little more than G3D::eps, but should be considered equal
+            bool relocated = (teleport ||
+                Math.Abs(GetPositionX() - x) > 0.001f ||
+                Math.Abs(GetPositionY() - y) > 0.001f ||
+                Math.Abs(GetPositionZ() - z) > 0.001f);
 
             if (turn)
                 RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Turning);
@@ -673,7 +677,7 @@ namespace Game.Entities
             }
 
             LiquidData liquid;
-            ZLiquidStatus liquidStatus = GetMap().getLiquidStatus(GetPositionX(), GetPositionY(), GetPositionZ(), MapConst.MapAllLiquidTypes, out liquid);
+            ZLiquidStatus liquidStatus = GetMap().getLiquidStatus(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ(), MapConst.MapAllLiquidTypes, out liquid);
             isSubmerged = liquidStatus.HasAnyFlag(ZLiquidStatus.UnderWater) || HasUnitMovementFlag(MovementFlag.Swimming);
             isInWater = liquidStatus.HasAnyFlag(ZLiquidStatus.InWater | ZLiquidStatus.UnderWater);
 
@@ -683,7 +687,7 @@ namespace Game.Entities
                 if (mountCapability == null)
                     continue;
 
-                if (ridingSkill < mountCapability.RequiredRidingSkill)
+                if (ridingSkill < mountCapability.ReqRidingSkill)
                     continue;
 
                 if (!mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.IgnoreRestrictions))
@@ -717,19 +721,19 @@ namespace Game.Entities
                 else if (!mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.Float))
                     continue;
 
-                if (mountCapability.RequiredMap != -1 &&
-                    GetMapId() != mountCapability.RequiredMap &&
-                    GetMap().GetEntry().CosmeticParentMapID != mountCapability.RequiredMap &&
-                    GetMap().GetEntry().ParentMapID != mountCapability.RequiredMap)
+                if (mountCapability.ReqMapID != -1 &&
+                    GetMapId() != mountCapability.ReqMapID &&
+                    GetMap().GetEntry().CosmeticParentMapID != mountCapability.ReqMapID &&
+                    GetMap().GetEntry().ParentMapID != mountCapability.ReqMapID)
                     continue;
 
-                if (mountCapability.RequiredArea != 0 && !Global.DB2Mgr.IsInArea(areaId, mountCapability.RequiredArea))
+                if (mountCapability.ReqAreaID != 0 && !Global.DB2Mgr.IsInArea(areaId, mountCapability.ReqAreaID))
                     continue;
 
-                if (mountCapability.RequiredAura != 0 && !HasAura(mountCapability.RequiredAura))
+                if (mountCapability.ReqSpellAuraID != 0 && !HasAura(mountCapability.ReqSpellAuraID))
                     continue;
 
-                if (mountCapability.RequiredSpell != 0 && !HasSpell(mountCapability.RequiredSpell))
+                if (mountCapability.ReqSpellKnownID != 0 && !HasSpell(mountCapability.ReqSpellKnownID))
                     continue;
 
                 return mountCapability;
@@ -744,7 +748,7 @@ namespace Game.Entities
                 return;
 
             LiquidData liquid_status;
-            ZLiquidStatus res = m.getLiquidStatus(x, y, z, MapConst.MapAllLiquidTypes, out liquid_status);
+            ZLiquidStatus res = m.getLiquidStatus(GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out liquid_status);
             if (res == 0)
             {
                 if (_lastLiquid != null && _lastLiquid.SpellID != 0)
@@ -1145,8 +1149,8 @@ namespace Game.Entities
                     SetTarget(GetVictim().GetGUID());
 
                 // don't remove UNIT_FLAG_STUNNED for pet when owner is mounted (disabled pet's interface)
-                Unit owner = GetOwner();
-                if (owner == null || (owner.IsTypeId(TypeId.Player) && !owner.ToPlayer().IsMounted()))
+                Unit owner = GetCharmerOrOwner();
+                if (owner == null || !owner.IsTypeId(TypeId.Player) || !owner.ToPlayer().IsMounted())
                     RemoveFlag(UnitFields.Flags, UnitFlags.Stunned);
 
                 if (!HasUnitState(UnitState.Root))         // prevent moving if it also has root effect
@@ -1537,18 +1541,18 @@ namespace Game.Entities
             Player playerMover = GetPlayerBeingMoved();
             if (playerMover)
             {
-                MoveTeleport moveTeleport = new MoveTeleport();
-                moveTeleport.MoverGUID = GetGUID();
-                moveTeleport.Pos = pos;
+                float x, y, z, o;
+                pos.GetPosition(out x, out y, out z, out o);
 
                 ITransport transportBase = GetDirectTransport();
                 if (transportBase != null)
-                {
-                    float o = 0f;
-                    transportBase.CalculatePassengerOffset(ref moveTeleport.Pos.posX, ref moveTeleport.Pos.posY, ref moveTeleport.Pos.posZ, ref o);
-                }
+                    transportBase.CalculatePassengerOffset(ref x, ref y, ref z, ref o);
+
+                MoveTeleport moveTeleport = new MoveTeleport();
+                moveTeleport.MoverGUID = GetGUID();
+                moveTeleport.Pos = new Position(x, y, z, o);
                 moveTeleport.TransportGUID.Set(GetTransGUID());
-                moveTeleport.Facing = pos.GetOrientation();
+                moveTeleport.Facing = o;
                 moveTeleport.SequenceIndex = m_movementCounter++;
                 playerMover.SendPacket(moveTeleport);
 

@@ -34,13 +34,12 @@ namespace Game
         const string MAP_FILE_NAME_FORMAT = "{0}/mmaps/{1:D4}.mmap";
         const string TILE_FILE_NAME_FORMAT = "{0}/mmaps/{1:D4}{2:D2}{3:D2}.mmtile";
 
-        public void Initialize()
+        public void Initialize(MultiMap<uint, uint> mapData)
         {
-            foreach (MapRecord mapEntry in CliDB.MapStorage.Values)
-            {
-                if (mapEntry.ParentMapID != -1)
-                    phaseMapData.Add((uint)mapEntry.ParentMapID, mapEntry.Id);
-            }
+            childMapData = mapData;
+
+            foreach (var pair in mapData)
+                parentMapData[pair.Value] = pair.Key;
         }
 
         MMapData GetMMapData(uint mapId)
@@ -48,14 +47,14 @@ namespace Game
             return loadedMMaps.LookupByKey(mapId);
         }
 
-        bool loadMapData(uint mapId)
+        bool loadMapData(string basePath, uint mapId)
         {
             // we already have this map loaded?
             if (loadedMMaps.ContainsKey(mapId) && loadedMMaps[mapId] != null)
                 return true;
 
             // load and init dtNavMesh - read parameters from file
-            string filename = string.Format(MAP_FILE_NAME_FORMAT, Global.WorldMgr.GetDataPath(), mapId);
+            string filename = string.Format(MAP_FILE_NAME_FORMAT, basePath, mapId);
             if (!File.Exists(filename))
             {
                 Log.outError(LogFilter.Maps, "Could not open mmap file {0}", filename);
@@ -84,20 +83,35 @@ namespace Game
                 Log.outInfo(LogFilter.Maps, "MMAP:loadMapData: Loaded {0:D4}.mmap", mapId);
 
                 // store inside our map list
-                loadedMMaps[mapId] = new MMapData(mesh, mapId);
+                loadedMMaps[mapId] = new MMapData(mesh);
                 return true;
             }
         }
 
-        uint packTileID(int x, int y)
+        uint packTileID(uint x, uint y)
         {
-            return (uint)(x << 16 | y);
+            return (x << 16 | y);
         }
 
-        public bool loadMap(uint mapId, int x, int y)
+        public bool loadMap(string basePath, uint mapId, uint x, uint y)
         {
             // make sure the mmap is loaded and ready to load tiles
-            if (!loadMapData(mapId))
+            if (!loadMapImpl(basePath, mapId, x, y))
+                return false;
+
+            bool success = true;
+            var childMaps = childMapData.LookupByKey(mapId);
+            foreach (uint childMapId in childMaps)
+                if (!loadMapImpl(basePath, childMapId, x, y))
+                    success = false;
+
+            return success;
+        }
+
+        bool loadMapImpl(string basePath, uint mapId, uint x, uint y)
+        {
+            // make sure the mmap is loaded and ready to load tiles
+            if (!loadMapData(basePath, mapId))
                 return false;
 
             // get this mmap data
@@ -110,14 +124,20 @@ namespace Game
                 return false;
 
             // load this tile . mmaps/MMMXXYY.mmtile
-            string filename = string.Format(TILE_FILE_NAME_FORMAT, Global.WorldMgr.GetDataPath(), mapId, x, y);
-            if (!File.Exists(filename))
+            string fileName = string.Format(TILE_FILE_NAME_FORMAT, basePath, mapId, x, y);
+            if (!File.Exists(fileName))
             {
-                Log.outDebug(LogFilter.Maps, "MMAP:loadMap: Could not open mmtile file '{0}'", filename);
+                if (parentMapData.ContainsKey(mapId))
+                    fileName = string.Format(TILE_FILE_NAME_FORMAT, basePath, parentMapData[mapId], x, y);
+            }
+
+            if (!File.Exists(fileName))
+            { 
+                Log.outDebug(LogFilter.Maps, "MMAP:loadMap: Could not open mmtile file '{0}'", fileName);
                 return false;
             }
 
-            using (BinaryReader reader = new BinaryReader(new FileStream(filename, FileMode.Open, FileAccess.Read)))
+            using (BinaryReader reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read)))
             {
                 MmapTileHeader fileHeader = reader.ReadStruct<MmapTileHeader>();
                 Array.Reverse(fileHeader.mmapMagic);
@@ -145,14 +165,6 @@ namespace Game
                     mmap.loadedTileRefs.Add(packedGridPos, tileRef);
                     ++loadedTiles;
                     Log.outInfo(LogFilter.Maps, "MMAP:loadMap: Loaded mmtile {0:D4}[{1:D2}, {2:D2}]", mapId, x, y);
-
-                    var phasedMaps = phaseMapData.LookupByKey(mapId);
-                    if (!phasedMaps.Empty())
-                    {
-                        mmap.AddBaseTile(packedGridPos, data, fileHeader, fileHeader.size);
-                        LoadPhaseTiles(phasedMaps, x, y);
-                    }
-
                     return true;
                 }
 
@@ -161,90 +173,52 @@ namespace Game
             }
         }
 
-        PhasedTile LoadTile(uint mapId, int x, int y)
+        public bool loadMapInstance(string basePath, uint mapId, uint instanceId)
         {
-            // load this tile . mmaps/MMMXXYY.mmtile
-            string filename = string.Format(TILE_FILE_NAME_FORMAT, Global.WorldMgr.GetDataPath(), mapId, x, y);
-            if (!File.Exists(filename))
-            {
-                // Not all tiles have phased versions, don't flood this msg
-                return null;
-            }
-            PhasedTile pTile = new PhasedTile();
+            if (!loadMapInstanceImpl(basePath, mapId, instanceId))
+                return false;
 
-            using (BinaryReader reader = new BinaryReader(new FileStream(filename, FileMode.Open, FileAccess.Read)))
-            {
-                // read header
-                pTile.fileHeader = reader.ReadStruct<MmapTileHeader>();
-                Array.Reverse(pTile.fileHeader.mmapMagic);
-                if (new string(pTile.fileHeader.mmapMagic) != MapConst.mmapMagic)
-                {
-                    Log.outError(LogFilter.Maps, "MMAP.LoadTile: Bad header in mmap {0:D4}{1:D2}{2:D2}.mmtile", mapId, x, y);
-                    return null;
-                }
+            bool success = true;
+            var childMaps = childMapData.LookupByKey(mapId);
+            foreach (uint childMapId in childMaps)
+                if (!loadMapInstanceImpl(basePath, childMapId, instanceId))
+                    success = false;
 
-                if (pTile.fileHeader.mmapVersion != MapConst.mmapVersion)
-                {
-                    Log.outError(LogFilter.Maps, "MMAP:LoadTile: {0:D4}{1:D2}{2:D2}.mmtile was built with generator v{3}, expected v{4}", mapId, x, y, pTile.fileHeader.mmapVersion, MapConst.mmapVersion);
-                    return null;
-                }
-
-                pTile.data = new Detour.dtRawTileData();
-                pTile.data.FromBytes(reader.ReadBytes((int)pTile.fileHeader.size), 0);
-
-                if (pTile.data.ToBytes().Length == 0)
-                {
-                    Log.outError(LogFilter.Maps, "MMAP.LoadTile: Bad header or data in mmap {0:D4}{1:D2}{2:D2}.mmtile", mapId, x, y);
-                    return null;
-                }
-            }
-
-            return pTile;
+            return success;
         }
 
-        void LoadPhaseTiles(List<uint> phasedMapData, int x, int y)
+        bool loadMapInstanceImpl(string basePath, uint mapId, uint instanceId)
         {
-            Log.outDebug(LogFilter.Maps, "MMAP.LoadPhaseTiles: Loading phased mmtiles for map {0}, X: {1}, Y: {2}", phasedMapData.FirstOrDefault(), x, y);
+            if (!loadMapData(basePath, mapId))
+                return false;
 
-            uint packedGridPos = packTileID(x, y);
+            MMapData mmap = loadedMMaps[mapId];
+            if (mmap.navMeshQueries.ContainsKey(instanceId))
+                return true;
 
-            foreach (uint phaseMapId in phasedMapData)
+            // allocate mesh query
+            Detour.dtNavMeshQuery query = new Detour.dtNavMeshQuery();
+            if (Detour.dtStatusFailed(query.init(mmap.navMesh, 1024)))
             {
-                PhasedTile data = LoadTile(phaseMapId, x, y);
-                // only a few tiles have terrain swaps, do not write error for them
-                if (data != null)
-                {
-                    Log.outDebug(LogFilter.Maps, "MMAP.LoadPhaseTiles: Loaded phased {0:D4}{1:D2}{2:D2}.mmtile for root phase map {3}", phaseMapId, x, y, phasedMapData.FirstOrDefault());
-                    if (!_phaseTiles.ContainsKey(phaseMapId))
-                        _phaseTiles[phaseMapId] = new Dictionary<uint, PhasedTile>();
-
-                    _phaseTiles[phaseMapId][packedGridPos] = data;
-                }
+                Log.outError(LogFilter.Maps, "MMAP.GetNavMeshQuery: Failed to initialize dtNavMeshQuery for mapId {0:D4} instanceId {1}", mapId, instanceId);
+                return false;
             }
-        }
 
-        void UnloadPhaseTile(List<uint> phasedMapData, int x, int y)
-        {
-            Log.outDebug(LogFilter.Maps, "MMAP.UnloadPhaseTile: Unloading phased mmtile for map {0}, X: {1}, Y: {2}", phasedMapData.FirstOrDefault(), x, y);
-
-            uint packedGridPos = packTileID(x, y);
-
-            foreach (uint phaseMapId in phasedMapData.ToList())
-            {
-                var phasedTileDic = _phaseTiles.LookupByKey(phaseMapId);
-                if (phasedTileDic == null)
-                    continue;
-
-                var phaseTile = phasedTileDic.LookupByKey(packedGridPos);
-                if (phaseTile != null)
-                {
-                    Log.outDebug(LogFilter.Maps, "MMAP.UnloadPhaseTile: Unloaded phased {0:D4}{1:D2}{2:D2}.mmtile for root phase map {3}", phaseMapId, x, y, phasedMapData.FirstOrDefault());
-                    phasedTileDic.Remove(packedGridPos);
-                }
-            }
+            Log.outDebug(LogFilter.Maps, "MMAP.GetNavMeshQuery: created dtNavMeshQuery for mapId {0:D4} instanceId {1}", mapId, instanceId);
+            mmap.navMeshQueries.Add(instanceId, query);
+            return true;
         }
 
         public bool unloadMap(uint mapId, uint x, uint y)
+        {
+            var childMaps = childMapData.LookupByKey(mapId);
+            foreach (uint childMapId in childMaps)
+                unloadMapImpl(childMapId, x, y);
+
+            return unloadMapImpl(mapId, x, y);
+        }
+
+        bool unloadMapImpl(uint mapId, uint x, uint y)
         {
             // check if we have this map loaded
             MMapData mmap = GetMMapData(mapId);
@@ -256,7 +230,7 @@ namespace Game
             }
 
             // check if we have this tile loaded
-            uint packedGridPos = packTileID((int)x, (int)y);
+            uint packedGridPos = packTileID(x, y);
             if (!mmap.loadedTileRefs.ContainsKey(packedGridPos))
             {
                 // file may not exist, therefore not loaded
@@ -264,7 +238,7 @@ namespace Game
                 return false;
             }
 
-            ulong tileRef = mmap.loadedTileRefs.LookupByKey(packedGridPos);
+            ulong tileRef = mmap.loadedTileRefs[packedGridPos];
 
             // unload, and mark as non loaded
             Detour.dtRawTileData data;
@@ -281,13 +255,6 @@ namespace Game
                 mmap.loadedTileRefs.Remove(packedGridPos);
                 --loadedTiles;
                 Log.outInfo(LogFilter.Maps, "MMAP:unloadMap: Unloaded mmtile {0:D4}[{1:D2}, {2:D2}] from {3:D4}", mapId, x, y, mapId);
-
-                var phasedMaps = phaseMapData.LookupByKey(mapId);
-                if (!phasedMaps.Empty())
-                {
-                    mmap.DeleteBaseTile(packedGridPos);
-                    UnloadPhaseTile(phasedMaps, (int)x, (int)y);
-                }
                 return true;
             }
 
@@ -314,12 +281,6 @@ namespace Game
                     Log.outError(LogFilter.Maps, "MMAP:unloadMap: Could not unload {0:D4}{1:D2}{2:D2}.mmtile from navmesh", mapId, x, y);
                 else
                 {
-                    var phasedMaps = phaseMapData.LookupByKey(mapId);
-                    if (!phasedMaps.Empty())
-                    {
-                        mmap.DeleteBaseTile(i.Key);
-                        UnloadPhaseTile(phasedMaps, (int)x, (int)y);
-                    }
                     --loadedTiles;
                     Log.outInfo(LogFilter.Maps, "MMAP:unloadMap: Unloaded mmtile {0:D4} [{1:D2}, {2:D2}] from {3:D4}", mapId, x, y, mapId);
                 }
@@ -354,34 +315,20 @@ namespace Game
             return true;
         }
 
-        public Detour.dtNavMesh GetNavMesh(uint mapId, List<uint> swaps)
+        public Detour.dtNavMesh GetNavMesh(uint mapId)
         {
             MMapData mmap = GetMMapData(mapId);
             if (mmap == null)
                 return null;
 
-            return mmap.GetNavMesh(swaps);
+            return mmap.navMesh;
         }
 
-        public Detour.dtNavMeshQuery GetNavMeshQuery(uint mapId, uint instanceId, List<uint> swaps)
+        public Detour.dtNavMeshQuery GetNavMeshQuery(uint mapId, uint instanceId)
         {
             MMapData mmap = GetMMapData(mapId);
             if (mmap == null)
                 return null;
-
-            if (!mmap.navMeshQueries.ContainsKey(instanceId))
-            {
-                // allocate mesh query
-                Detour.dtNavMeshQuery query = new Detour.dtNavMeshQuery();
-                if (Detour.dtStatusFailed(query.init(mmap.GetNavMesh(swaps), 1024)))
-                {
-                    Log.outError(LogFilter.Maps, "MMAP:GetNavMeshQuery: Failed to initialize dtNavMeshQuery for mapId {0} instanceId {1}", mapId, instanceId);
-                    return null;
-                }
-
-                Log.outInfo(LogFilter.Maps, "MMAP:GetNavMeshQuery: created dtNavMeshQuery for mapId {0} instanceId {1}", mapId, instanceId);
-                mmap.navMeshQueries.Add(instanceId, query);
-            }
 
             return mmap.navMeshQueries[instanceId];
         }
@@ -389,181 +336,24 @@ namespace Game
         public uint getLoadedTilesCount() { return loadedTiles; }
         public int getLoadedMapsCount() { return loadedMMaps.Count; }
 
-        public Dictionary<uint, PhasedTile> GetPhaseTileContainer(uint mapId) { return _phaseTiles.LookupByKey(mapId); }
-
         Dictionary<uint, MMapData> loadedMMaps = new Dictionary<uint, MMapData>();
-        MultiMap<uint, uint> phaseMapData = new MultiMap<uint, uint>();
-        Dictionary<uint, Dictionary<uint, PhasedTile>> _phaseTiles = new Dictionary<uint, Dictionary<uint, PhasedTile>>();
         uint loadedTiles;
+
+        MultiMap<uint, uint> childMapData = new MultiMap<uint, uint>();
+        Dictionary<uint, uint> parentMapData = new Dictionary<uint, uint>();
     }
 
     public class MMapData
     {
-        public MMapData(Detour.dtNavMesh mesh, uint mapId)
+        public MMapData(Detour.dtNavMesh mesh)
         {
             navMesh = mesh;
-            _mapId = mapId;
-        }
-
-        void RemoveSwap(PhasedTile ptile, uint swap, uint packedXY)
-        {
-            uint x = (packedXY >> 16);
-            uint y = (packedXY & 0x0000FFFF);
-
-            if (!loadedPhasedTiles[swap].Contains(packedXY))
-            {
-                Log.outDebug(LogFilter.Maps, "MMapData.RemoveSwap: mmtile {0:D4}[{1:D2}, {2:D2}] unload skipped, due to not loaded", swap, x, y);
-                return;
-            }
-            Detour.dtMeshHeader header = ptile.data.header;
-
-            Detour.dtRawTileData data;
-            // remove old tile
-            if (Detour.dtStatusFailed(navMesh.removeTile(loadedTileRefs[packedXY], out data)))
-                Log.outError(LogFilter.Maps, "MMapData.RemoveSwap: Could not unload phased {0:D4}{1:D2}{2:D2}.mmtile from navmesh", swap, x, y);
-            else
-            {
-                Log.outDebug(LogFilter.Maps, "MMapData.RemoveSwap: Unloaded phased {0:D4}{1:D2}{2:D2}.mmtile from navmesh", swap, x, y);
-
-                // restore base tile
-                ulong loadedRef = 0;
-                if (Detour.dtStatusSucceed(navMesh.addTile(_baseTiles[packedXY].data, 0, 0, ref loadedRef)))
-                {
-                    Log.outDebug(LogFilter.Maps, "MMapData.RemoveSwap: Loaded base mmtile {0:D4}[{1:D2}, {2:D2}] into {0:D4}[{1:D2}, {2:D2}]", _mapId, x, y, _mapId, header.x, header.y);
-                }
-                else
-                    Log.outError(LogFilter.Maps, "MMapData.RemoveSwap: Could not load base {0:D4}{1:D2}{2:D2}.mmtile to navmesh", _mapId, x, y);
-
-                loadedTileRefs[packedXY] = loadedRef;
-            }
-
-            loadedPhasedTiles.Remove(swap, packedXY);
-
-            if (loadedPhasedTiles[swap].Empty())
-            {
-                _activeSwaps.Remove(swap);
-                Log.outDebug(LogFilter.Maps, "MMapData.RemoveSwap: Fully removed swap {0} from map {1}", swap, _mapId);
-            }
-        }
-
-        void AddSwap(PhasedTile ptile, uint swap, uint packedXY)
-        {
-            uint x = (packedXY >> 16);
-            uint y = (packedXY & 0x0000FFFF);
-
-            if (!loadedTileRefs.ContainsKey(packedXY))
-            {
-                Log.outDebug(LogFilter.Maps, "MMapData.AddSwap: phased mmtile {0:D4}[{1:D2}, {2:D2}] load skipped, due to not loaded base tile on map {3}", swap, x, y, _mapId);
-                return;
-            }
-            if (loadedPhasedTiles[swap].Contains(packedXY))
-            {
-                Log.outDebug(LogFilter.Maps, "MMapData.AddSwap: WARNING! phased mmtile {0:D4}[{1:D2}, {2:D2}] load skipped, due to already loaded on map {3}", swap, x, y, _mapId);
-                return;
-            }
-
-            Detour.dtMeshHeader header = ptile.data.header;
-
-            Detour.dtMeshTile oldTile = navMesh.getTileByRef(loadedTileRefs[packedXY]);
-            if (oldTile == null)
-            {
-                Log.outDebug(LogFilter.Maps, "MMapData.AddSwap: phased mmtile {0:D4}[{1:D2}, {2:D2}] load skipped, due to not loaded base tile ref on map {3}", swap, x, y, _mapId);
-                return;
-            }
-
-            // header xy is based on the swap map's tile set, wich doesn't have all the same tiles as root map, so copy the xy from the orignal header
-            header.x = oldTile.header.x;
-            header.y = oldTile.header.y;
-
-            Detour.dtRawTileData data;
-            // remove old tile
-            if (Detour.dtStatusFailed(navMesh.removeTile(loadedTileRefs[packedXY], out data)))
-                Log.outError(LogFilter.Maps, "MMapData.AddSwap: Could not unload {0:D4}{1:D2}{2:D2}.mmtile from navmesh", _mapId, x, y);
-            else
-            {
-                Log.outDebug(LogFilter.Maps, "MMapData.AddSwap: Unloaded {0:D4}{1:D2}{2:D2}.mmtile from navmesh", _mapId, x, y);
-
-                _activeSwaps.Add(swap);
-                loadedPhasedTiles.Add(swap, packedXY);
-
-                // add new swapped tile
-                ulong loadedRef = 0;
-                if (Detour.dtStatusSucceed(navMesh.addTile(ptile.data, 0, 0, ref loadedRef)))
-                    Log.outDebug(LogFilter.Maps, "MMapData.AddSwap: Loaded phased mmtile {0:D4}[{1:D2}, {2:D2}] into {0:D4}[{1:D2}, {2:D2}]", swap, x, y, _mapId, header.x, header.y);
-                else
-                    Log.outError(LogFilter.Maps, "MMapData.AddSwap: Could not load {0:D4}{1:D2}{2:D2}.mmtile to navmesh", swap, x, y);
-
-                loadedTileRefs[packedXY] = loadedRef;
-            }
-        }
-
-        public Detour.dtNavMesh GetNavMesh(List<uint> swaps)
-        {
-            foreach (uint swap in _activeSwaps)
-            {
-                if (!swaps.Contains(swap)) // swap not active
-                {
-                    var ptc = Global.MMapMgr.GetPhaseTileContainer(swap);
-                    foreach (var pair in ptc)
-                        RemoveSwap(pair.Value, swap, pair.Key); // remove swap
-                }
-            }
-
-            // for each of the calling unit's terrain swaps
-            foreach (uint swap in swaps)
-            {
-                if (!_activeSwaps.Contains(swap)) // swap not active
-                {
-                    // for each of the terrain swap's xy tiles
-                    var ptc = Global.MMapMgr.GetPhaseTileContainer(swap);
-                    if (ptc != null)
-                    {
-                        foreach (var pair in ptc)
-                            AddSwap(pair.Value, swap, pair.Key); // add swap
-                    }
-                }
-            }
-
-            return navMesh;
-        }
-
-        public void AddBaseTile(uint packedGridPos, Detour.dtRawTileData data, MmapTileHeader fileHeader, uint dataSize)
-        {
-            if (!_baseTiles.ContainsKey(packedGridPos))
-            {
-                PhasedTile phasedTile = new PhasedTile();
-                phasedTile.data = data;
-                phasedTile.fileHeader = fileHeader;
-                phasedTile.dataSize = (int)dataSize;
-                _baseTiles[packedGridPos] = phasedTile;
-            }
-        }
-
-        public void DeleteBaseTile(uint packedGridPos)
-        {
-            var phaseTile = _baseTiles.LookupByKey(packedGridPos);
-            if (phaseTile != null)
-            {
-                _baseTiles.Remove(packedGridPos);
-            }
         }
 
         public Dictionary<uint, Detour.dtNavMeshQuery> navMeshQueries = new Dictionary<uint, Detour.dtNavMeshQuery>();     // instanceId to query
 
         public Detour.dtNavMesh navMesh;
-        public Dictionary<uint, ulong> loadedTileRefs = new Dictionary<uint, ulong>();
-        MultiMap<uint, uint> loadedPhasedTiles = new MultiMap<uint, uint>();
-
-        uint _mapId;
-        Dictionary<uint, PhasedTile> _baseTiles = new Dictionary<uint, PhasedTile>();
-        List<uint> _activeSwaps = new List<uint>();
-    }
-
-    public class PhasedTile
-    {
-        public Detour.dtRawTileData data;
-        public MmapTileHeader fileHeader;
-        public int dataSize;
+        public Dictionary<uint, ulong> loadedTileRefs = new Dictionary<uint, ulong>(); // maps [map grid coords] to [dtTile]
     }
 
     [StructLayout(LayoutKind.Sequential)]

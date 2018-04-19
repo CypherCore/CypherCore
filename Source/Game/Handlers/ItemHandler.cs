@@ -298,6 +298,11 @@ namespace Game
                 }
 
                 pl.AutoUnequipOffhandIfNeed();
+
+                // if inventory item was moved, check if we can remove dependent auras, because they were not removed in Player::RemoveItem (update was set to false)
+                // do this after swaps are done, we pass nullptr because both weapons could be swapped and none of them should be ignored
+                if ((autoEquipItem.PackSlot == InventorySlots.Bag0 && autoEquipItem.Slot < InventorySlots.BagEnd) || (dstbag == InventorySlots.Bag0 && dstslot < InventorySlots.BagEnd))
+                    pl.ApplyItemDependentAuras(null, false);
             }
         }
 
@@ -898,7 +903,7 @@ namespace Game
                             }
                         }
 
-                        if (limit_newcount > 0 && limit_newcount > limitEntry.Quantity)
+                        if (limit_newcount > 0 && limit_newcount > _player.GetItemLimitCategoryQuantity(limitEntry))
                         {
                             GetPlayer().SendEquipError(InventoryResult.ItemUniqueEquippableSocketed, itemTarget);
                             return;
@@ -938,8 +943,8 @@ namespace Game
 
                     itemTarget.SetGem(i, gemData[i], gemScalingLevel);
 
-                    if (gemProperties[i] != null && gemProperties[i].EnchantID != 0)
-                        itemTarget.SetEnchantment(EnchantmentSlot.Sock1 + i, gemProperties[i].EnchantID, 0, 0, GetPlayer().GetGUID());
+                    if (gemProperties[i] != null && gemProperties[i].EnchantId != 0)
+                        itemTarget.SetEnchantment(EnchantmentSlot.Sock1 + i, gemProperties[i].EnchantId, 0, 0, GetPlayer().GetGUID());
 
                     uint gemCount = 1;
                     GetPlayer().DestroyItemCount(gems[i], ref gemCount, true);
@@ -1052,7 +1057,7 @@ namespace Game
             if (item.GetTemplate().Effects.Count < 2)
                 return;
 
-            uint spellToLearn = item.GetTemplate().Effects[1].SpellID;
+            uint spellToLearn = (uint)item.GetTemplate().Effects[1].SpellID;
             foreach (BattlePetSpeciesRecord entry in CliDB.BattlePetSpeciesStorage.Values)
             {
                 if (entry.SummonSpellID == spellToLearn)
@@ -1097,16 +1102,16 @@ namespace Game
             }
 
             // Check if player has enough currency
-            if (!_player.HasCurrency(itemUpgradeEntry.CurrencyID, itemUpgradeEntry.CurrencyCost))
+            if (!_player.HasCurrency(itemUpgradeEntry.CurrencyType, itemUpgradeEntry.CurrencyAmount))
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleUpgradeItems - Player has not enougth currency (ID: {0}, Cost: {1}) not found.", itemUpgradeEntry.CurrencyID, itemUpgradeEntry.CurrencyCost);
+                Log.outDebug(LogFilter.Network, "WORLD: HandleUpgradeItems - Player has not enougth currency (ID: {0}, Cost: {1}) not found.", itemUpgradeEntry.CurrencyType, itemUpgradeEntry.CurrencyAmount);
                 itemUpgradeResult.Success = false;
                 SendPacket(itemUpgradeResult);
                 return;
             }
 
             uint currentUpgradeId = item.GetModifier(ItemModifier.UpgradeId);
-            if (currentUpgradeId != itemUpgradeEntry.PrevItemUpgradeID)
+            if (currentUpgradeId != itemUpgradeEntry.PrerequisiteID)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleUpgradeItems - ItemUpgradeEntry ({0}) is not related to this ItemUpgradePath ({1}).", itemUpgradeEntry.Id, currentUpgradeId);
                 itemUpgradeResult.Success = false;
@@ -1126,7 +1131,7 @@ namespace Game
                 _player._ApplyItemBonuses(item, item.GetSlot(), true);
 
             item.SetState(ItemUpdateState.Changed, _player);
-            _player.ModifyCurrency((CurrencyTypes)itemUpgradeEntry.CurrencyID, -(int)itemUpgradeEntry.CurrencyCost);
+            _player.ModifyCurrency((CurrencyTypes)itemUpgradeEntry.CurrencyType, -(int)itemUpgradeEntry.CurrencyAmount);
         }
 
         [WorldPacketHandler(ClientOpcodes.SortBags)]

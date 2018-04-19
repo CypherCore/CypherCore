@@ -15,10 +15,71 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Framework.Collections;
+using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Game.DataStorage
 {
+    public class GameTableReader
+    {
+        internal static GameTable<T> Read<T>(string fileName) where T : new()
+        {
+            GameTable<T> storage = new GameTable<T>();
+
+            if (!File.Exists(CliDB.DataPath + fileName))
+            {
+                Log.outError(LogFilter.ServerLoading, "File {0} not found.", fileName);
+                return storage;
+            }
+            using (var reader = new StreamReader(CliDB.DataPath + fileName))
+            {
+                string headers = reader.ReadLine();
+                if (headers.IsEmpty())
+                {
+                    Log.outError(LogFilter.ServerLoading, "GameTable file {0} is empty.", fileName);
+                    return storage;
+                }
+
+                var columnDefs = new StringArray(headers, '\t');
+
+                List<T> data = new List<T>();
+                data.Add(new T()); // row id 0, unused
+
+                string line;
+                while (!(line = reader.ReadLine()).IsEmpty())
+                {
+                    var values = new StringArray(line, '\t');
+                    if (values.Length == 0)
+                        break;
+
+                    var obj = new T();
+                    var fields = obj.GetType().GetFields();
+                    for (int fieldIndex = 0, valueIndex = 1; fieldIndex < fields.Length && valueIndex < values.Length; ++fieldIndex, ++valueIndex)
+                    {
+                        var field = fields[fieldIndex];
+                        if (field.FieldType.IsArray)
+                        {
+                            Array array = (Array)field.GetValue(obj);
+                            for (var i = 0; i < array.Length; ++i)
+                                array.SetValue(float.Parse(values[valueIndex++]), i);
+                        }
+                        else
+                            fields[fieldIndex].SetValue(obj, float.Parse(values[valueIndex]));
+                    }
+
+                    data.Add(obj);
+                }
+
+                storage.SetData(data);
+            }
+
+            CliDB.LoadedFileCount++;
+            return storage;
+        }
+    }
+
     public class GameTable<T> where T : new()
     {
         public T GetRow(uint row)

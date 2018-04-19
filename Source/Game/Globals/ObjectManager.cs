@@ -441,10 +441,10 @@ namespace Game
         public void LoadRaceAndClassExpansionRequirements()
         {
             uint oldMSTime = Time.GetMSTime();
-            _raceExpansionRequirementStorage.Clear();
+            _raceUnlockRequirementStorage.Clear();
 
-            //                                            0       1
-            SQLResult result = DB.World.Query("SELECT raceID, expansion FROM `race_expansion_requirement`");
+            //                                         0       1          2
+            SQLResult result = DB.World.Query("SELECT raceID, expansion, achievementId FROM `race_unlock_requirement`");
             if (!result.IsEmpty())
             {
                 uint count = 0;
@@ -452,21 +452,32 @@ namespace Game
                 {
                     byte raceID = result.Read<byte>(0);
                     byte expansion = result.Read<byte>(1);
+                    uint achievementId = result.Read<uint>(2);
 
                     ChrRacesRecord raceEntry = CliDB.ChrRacesStorage.LookupByKey(raceID);
                     if (raceEntry == null)
                     {
-                        Log.outError(LogFilter.Sql, "Race {0} defined in `race_expansion_requirement` does not exists, skipped.", raceID);
+                        Log.outError(LogFilter.Sql, "Race {0} defined in `race_unlock_requirement` does not exists, skipped.", raceID);
                         continue;
                     }
 
-                    if (expansion >= (int)Expansion.Max)
+                    if (expansion >= (int)Expansion.MaxAccountExpansions)
                     {
-                        Log.outError(LogFilter.Sql, "Race {0} defined in `race_expansion_requirement` has incorrect expansion {1}, skipped.", raceID, expansion);
+                        Log.outError(LogFilter.Sql, "Race {0} defined in `race_unlock_requirement` has incorrect expansion {1}, skipped.", raceID, expansion);
                         continue;
                     }
 
-                    _raceExpansionRequirementStorage[raceID] = expansion;
+                    if (achievementId != 0 && !CliDB.AchievementStorage.ContainsKey(achievementId))
+                    {
+                        Log.outError(LogFilter.Sql, $"Race {raceID} defined in `race_unlock_requirement` has incorrect achievement {achievementId}, skipped.");
+                        continue;
+                    }
+
+                    RaceUnlockRequirement raceUnlockRequirement = new RaceUnlockRequirement();
+                    raceUnlockRequirement.Expansion = expansion;
+                    raceUnlockRequirement.AchievementId = achievementId;
+
+                    _raceUnlockRequirementStorage[raceID] = raceUnlockRequirement;
 
                     ++count;
                 }
@@ -573,13 +584,8 @@ namespace Game
             }
             return false;
         }
-        public Dictionary<byte, byte> GetRaceExpansionRequirements() { return _raceExpansionRequirementStorage; }
-        public Expansion GetRaceExpansionRequirement(Race race)
-        {
-            if (_raceExpansionRequirementStorage.ContainsKey((byte)race))
-                return (Expansion)_raceExpansionRequirementStorage[(byte)race];
-            return Expansion.Classic;
-        }
+        public Dictionary<byte, RaceUnlockRequirement> GetRaceUnlockRequirements() { return _raceUnlockRequirementStorage; }
+        public RaceUnlockRequirement GetRaceUnlockRequirement(Race race) { return _raceUnlockRequirementStorage.LookupByKey((byte)race); }
         public Dictionary<byte, byte> GetClassExpansionRequirements() { return _classExpansionRequirementStorage; }
         public Expansion GetClassExpansionRequirement(Class class_)
         {
@@ -604,7 +610,7 @@ namespace Game
 
             gossipMenusStorage.Clear();
 
-            SQLResult result = DB.World.Query("SELECT MenuID, TextID FROM gossip_menu");
+            SQLResult result = DB.World.Query("SELECT MenuId, TextId FROM gossip_menu");
             if (result.IsEmpty())
             {
                 Log.outError(LogFilter.ServerLoading, "Loaded 0 gossip_menu entries. DB table `gossip_menu` is empty!");
@@ -637,14 +643,14 @@ namespace Game
             gossipMenuItemsStorage.Clear();
             
             //                                          0         1              2             3             4                        5             6
-            SQLResult result = DB.World.Query("SELECT o.MenuID, o.OptionID, o.OptionIcon, o.OptionText, o.OptionBroadcastTextId, o.OptionType, o.OptionNpcflag, " +
+            SQLResult result = DB.World.Query("SELECT o.MenuId, o.OptionIndex, o.OptionIcon, o.OptionText, o.OptionBroadcastTextId, o.OptionType, o.OptionNpcFlag, " +
                 //   7                8              9            10           11          12                     13
-                "oa.ActionMenuID, oa.ActionPoiID, ob.BoxCoded, ob.BoxMoney, ob.BoxText, ob.BoxBroadcastTextId, ot.TrainerId " +
+                "oa.ActionMenuId, oa.ActionPoiId, ob.BoxCoded, ob.BoxMoney, ob.BoxText, ob.BoxBroadcastTextId, ot.TrainerId " +
                 "FROM gossip_menu_option o " +
-                "LEFT JOIN gossip_menu_option_action oa ON o.MenuID = oa.MenuID AND o.OptionID = oa.OptionID " +
-                "LEFT JOIN gossip_menu_option_box ob ON o.MenuID = ob.MenuID AND o.OptionID = ob.OptionID " +
-                "LEFT JOIN gossip_menu_option_trainer ot ON o.MenuID = ot.MenuID AND o.OptionID = ot.OptionID " +
-                "ORDER BY o.MenuId, o.OptionID");
+                "LEFT JOIN gossip_menu_option_action oa ON o.MenuId = oa.MenuId AND o.OptionIndex = oa.OptionIndex " +
+                "LEFT JOIN gossip_menu_option_box ob ON o.MenuId = ob.MenuId AND o.OptionIndex = ob.OptionIndex " +
+                "LEFT JOIN gossip_menu_option_trainer ot ON o.MenuId = ot.MenuId AND o.OptionIndex = ot.OptionIndex " +
+                "ORDER BY o.MenuId, o.OptionIndex");
 
             if (result.IsEmpty())
             {
@@ -657,7 +663,7 @@ namespace Game
                 GossipMenuItems gMenuItem = new GossipMenuItems();
 
                 gMenuItem.MenuId = result.Read<uint>(0);
-                gMenuItem.OptionId = result.Read<uint>(1);
+                gMenuItem.OptionIndex = result.Read<uint>(1);
                 gMenuItem.OptionIcon = (GossipOptionIcon)result.Read<byte>(2);
                 gMenuItem.OptionText = result.Read<string>(3);
                 gMenuItem.OptionBroadcastTextId = result.Read<uint>(4);
@@ -673,7 +679,7 @@ namespace Game
 
                 if (gMenuItem.OptionIcon >= GossipOptionIcon.Max)
                 {
-                    Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionID {gMenuItem.OptionId} has unknown icon id {gMenuItem.OptionIcon}. Replacing with GossipOptionIcon.Chat");
+                    Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} has unknown icon id {gMenuItem.OptionIcon}. Replacing with GossipOptionIcon.Chat");
                     gMenuItem.OptionIcon = GossipOptionIcon.Chat;
                 }
 
@@ -681,17 +687,17 @@ namespace Game
                 {
                     if (!CliDB.BroadcastTextStorage.ContainsKey(gMenuItem.OptionBroadcastTextId))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuId}, OptionID {gMenuItem.OptionId} has non-existing or incompatible OptionBroadcastTextId {gMenuItem.OptionBroadcastTextId}, ignoring.");
+                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} has non-existing or incompatible OptionBroadcastTextId {gMenuItem.OptionBroadcastTextId}, ignoring.");
                         gMenuItem.OptionBroadcastTextId = 0;
                     }
                 }
 
                 if (gMenuItem.OptionType >= GossipOption.Max)
-                    Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionID {gMenuItem.OptionId} has unknown option id {gMenuItem.OptionType}. Option will not be used");
+                    Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} has unknown option id {gMenuItem.OptionType}. Option will not be used");
 
                 if (gMenuItem.ActionPoiId != 0 && GetPointOfInterest(gMenuItem.ActionPoiId) == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionID {gMenuItem.OptionId} use non-existing actionpoiid {gMenuItem.ActionPoiId}, ignoring");
+                    Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} use non-existing actionpoiid {gMenuItem.ActionPoiId}, ignoring");
                     gMenuItem.ActionPoiId = 0;
                 }
 
@@ -699,21 +705,21 @@ namespace Game
                 {
                     if (!CliDB.BroadcastTextStorage.ContainsKey(gMenuItem.BoxBroadcastTextId))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuId}, OptionID {gMenuItem.OptionId} has non-existing or incompatible BoxBroadcastTextId {gMenuItem.BoxBroadcastTextId}, ignoring.");
+                        Log.outError(LogFilter.Sql, $"Table `gossip_menu_option` for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} has non-existing or incompatible BoxBroadcastTextId {gMenuItem.BoxBroadcastTextId}, ignoring.");
                         gMenuItem.BoxBroadcastTextId = 0;
                     }
                 }
 
                 if (gMenuItem.TrainerId != 0 && GetTrainer(gMenuItem.TrainerId) == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `gossip_menu_option_trainer` for MenuId {gMenuItem.MenuId}, OptionID {gMenuItem.OptionId} use non-existing TrainerId {gMenuItem.TrainerId}, ignoring");
+                    Log.outError(LogFilter.Sql, $"Table `gossip_menu_option_trainer` for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} use non-existing TrainerId {gMenuItem.TrainerId}, ignoring");
                     gMenuItem.TrainerId = 0;
                 }
 
                 gossipMenuItemsStorage.Add(gMenuItem.MenuId, gMenuItem);
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} gossip_menu_option entries in {1} ms", gossipMenuItemsStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {gossipMenuItemsStorage.Count} gossip_menu_option entries in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
         public void LoadPointsOfInterest()
         {
@@ -829,10 +835,14 @@ namespace Game
                 return CliDB.WorldSafeLocsStorage.LookupByKey(4);
             else return null;
         }
-        public WorldSafeLocsRecord GetClosestGraveYard(float x, float y, float z, uint MapId, Team team)
+        public WorldSafeLocsRecord GetClosestGraveYard(WorldLocation location, Team team, WorldObject conditionObject)
         {
+            float x, y, z;
+            location.GetPosition(out x, out y, out z);
+            uint MapId = location.GetMapId();
+
             // search for zone associated closest graveyard
-            uint zoneId = Global.MapMgr.GetZoneId(MapId, x, y, z);
+            uint zoneId = Global.MapMgr.GetZoneId(conditionObject ? conditionObject.GetPhaseShift() : PhasingHandler.EmptyPhaseShift, MapId, x, y, z);
             if (zoneId == 0)
             {
                 if (z > -500)
@@ -851,6 +861,8 @@ namespace Game
             //     then check faction
             var range = GraveYardStorage.LookupByKey(zoneId);
             MapRecord mapEntry = CliDB.MapStorage.LookupByKey(MapId);
+
+            ConditionSourceInfo conditionSource = new ConditionSourceInfo(conditionObject);
 
             // not need to check validity of map object; MapId _MUST_ be valid here
             if (range.Empty() && !mapEntry.IsBattlegroundOrArena())
@@ -887,14 +899,23 @@ namespace Game
                 if (data.team != 0 && team != 0 && data.team != (uint)team)
                     continue;
 
+                if (conditionObject)
+                {
+                    if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.Graveyard, data.safeLocId, conditionSource))
+                        continue;
+
+                    if (entry.MapID == mapEntry.ParentMapID && !conditionObject.GetPhaseShift().HasVisibleMapId(entry.MapID))
+                        continue;
+                }
+
                 // find now nearest graveyard at other map
-                if (MapId != entry.MapID)
+                if (MapId != entry.MapID && entry.MapID != mapEntry.ParentMapID)
                 {
                     // if find graveyard at different map from where entrance placed (or no entrance data), use any first
                     if (mapEntry == null
                         || mapEntry.CorpseMapID < 0
                         || mapEntry.CorpseMapID != entry.MapID
-                        || (mapEntry.CorpsePos.X == 0 && mapEntry.CorpsePos.Y == 0))
+                        || (mapEntry.Corpse.X == 0 && mapEntry.Corpse.Y == 0))
                     {
                         // not have any corrdinates for check distance anyway
                         entryFar = entry;
@@ -902,8 +923,8 @@ namespace Game
                     }
 
                     // at entrance map calculate distance (2D);
-                    float dist2 = (entry.Loc.X - mapEntry.CorpsePos.X) * (entry.Loc.X - mapEntry.CorpsePos.X)
-                        + (entry.Loc.Y - mapEntry.CorpsePos.Y) * (entry.Loc.Y - mapEntry.CorpsePos.Y);
+                    float dist2 = (entry.Loc.X - mapEntry.Corpse.X) * (entry.Loc.X - mapEntry.Corpse.X)
+                        + (entry.Loc.Y - mapEntry.Corpse.Y) * (entry.Loc.Y - mapEntry.Corpse.Y);
                     if (foundEntr)
                     {
                         if (dist2 < distEntr)
@@ -1039,7 +1060,7 @@ namespace Game
 
             scriptNamesStorage.Add("");
             SQLResult result = DB.World.Query(
-              "SELECT DISTINCT(ScriptName) FROM Battleground_template WHERE ScriptName <> '' " +
+              "SELECT DISTINCT(ScriptName) FROM battleground_template WHERE ScriptName <> '' " +
               "UNION SELECT DISTINCT(ScriptName) FROM conversation_template WHERE ScriptName <> '' " +
               "UNION SELECT DISTINCT(ScriptName) FROM creature WHERE ScriptName <> '' " +        
               "UNION SELECT DISTINCT(ScriptName) FROM creature_template WHERE ScriptName <> '' " +
@@ -2130,7 +2151,7 @@ namespace Game
                             equipmentInfo.Items[i].ItemId, equipmentInfo.Items[i].AppearanceModId, i + 1, i + 1, entry, id);
                         ItemModifiedAppearanceRecord defaultAppearance = Global.DB2Mgr.GetDefaultItemModifiedAppearance(equipmentInfo.Items[i].ItemId);
                         if (defaultAppearance != null)
-                            equipmentInfo.Items[i].AppearanceModId = defaultAppearance.AppearanceModID;
+                            equipmentInfo.Items[i].AppearanceModId = defaultAppearance.ItemAppearanceModifierID;
                         else
                             equipmentInfo.Items[i].AppearanceModId = 0;
                         continue;
@@ -2247,7 +2268,7 @@ namespace Game
                 modelInfo.BoundingRadius = result.Read<float>(1);
                 modelInfo.CombatReach = result.Read<float>(2);
                 modelInfo.DisplayIdOtherGender = result.Read<uint>(3);
-                modelInfo.gender = (sbyte)creatureDisplay.Gender;
+                modelInfo.gender = creatureDisplay.Gender;
 
                 // Checks
                 if (modelInfo.gender == (sbyte)Gender.Unknown)
@@ -2286,8 +2307,8 @@ namespace Game
         {
             uint oldMSTime = Time.GetMSTime();
 
-            //                                        0            1          2                 3
-            SQLResult result = DB.World.Query("SELECT Entry, LevelScalingMin, LevelScalingMax, LevelScalingDelta FROM creature_template_scaling");
+            //                                        0            1          2                 3                     4
+            SQLResult result = DB.World.Query("SELECT Entry, LevelScalingMin, LevelScalingMax, LevelScalingDeltaMin, LevelScalingDeltaMax FROM creature_template_scaling");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature template scaling definitions. DB table `creature_template_scaling` is empty.");
@@ -2309,7 +2330,8 @@ namespace Game
                 CreatureLevelScaling creatureLevelScaling;
                 creatureLevelScaling.MinLevel = result.Read<ushort>(1);
                 creatureLevelScaling.MaxLevel = result.Read<ushort>(2);
-                creatureLevelScaling.DeltaLevel = result.Read<short>(3);
+                creatureLevelScaling.DeltaLevelMin = result.Read<short>(3);
+                creatureLevelScaling.DeltaLevelMax = result.Read<short>(3);
                 template.levelScaling.Set(creatureLevelScaling);
 
                 ++count;
@@ -3203,8 +3225,8 @@ namespace Game
             SQLResult result = DB.World.Query("SELECT creature.guid, id, map, modelid, equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, spawndist, " +
                 //   11               12         13       14            15         16          17          18                19                   20                    21
                 "currentwaypoint, curhealth, curmana, MovementType, spawnMask, eventEntry, pool_entry, creature.npcflag, creature.unit_flags, creature.unit_flags2, creature.unit_flags3, " +
-                //   22                     23                24                   25
-                "creature.dynamicflags, creature.phaseid, creature.phasegroup, creature.ScriptName " +        
+                //   22                     23                      24                25                   26                       27
+                "creature.dynamicflags, creature.phaseUseFlags, creature.phaseid, creature.phasegroup, creature.terrainSwapMap, creature.ScriptName " +
                 "FROM creature LEFT OUTER JOIN game_event_creature ON creature.guid = game_event_creature.guid LEFT OUTER JOIN pool_creature ON creature.guid = pool_creature.guid");
 
             if (result.IsEmpty())
@@ -3224,6 +3246,8 @@ namespace Game
                     spawnMasks[mapDifficultyPair.Key] |= (1ul << (int)difficultyPair.Key);
                 }
             }
+
+            PhaseShift phaseShift = new PhaseShift();
 
             uint count = 0;
             do
@@ -3261,9 +3285,11 @@ namespace Game
                 data.unit_flags2 = result.Read<uint>(20);
                 data.unit_flags3 = result.Read<uint>(21);
                 data.dynamicflags = result.Read<uint>(22);
-                data.phaseId = result.Read<uint>(23);
-                data.phaseGroup = result.Read<uint>(24);
-                data.ScriptId = GetScriptId(result.Read<string>(25));
+                data.phaseUseFlags = (PhaseUseFlagsValues)result.Read<byte>(23);
+                data.phaseId = result.Read<uint>(24);
+                data.phaseGroup = result.Read<uint>(25);
+                data.terrainSwapMap = result.Read<int>(26);
+                data.ScriptId = GetScriptId(result.Read<string>(27));
                 if (data.ScriptId == 0)
                     data.ScriptId = cInfo.ScriptID;
 
@@ -3334,6 +3360,19 @@ namespace Game
                     data.orientation = Position.NormalizeOrientation(data.orientation);
                 }
 
+                if (Convert.ToBoolean(data.phaseUseFlags & ~PhaseUseFlagsValues.All))
+                {
+                    Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) has unknown `phaseUseFlags` set, removed unknown value.", guid, data.id);
+                    data.phaseUseFlags &= PhaseUseFlagsValues.All;
+                }
+
+                if (data.phaseUseFlags.HasAnyFlag(PhaseUseFlagsValues.AlwaysVisible) && data.phaseUseFlags.HasAnyFlag(PhaseUseFlagsValues.Inverse))
+                {
+                    Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) has both `phaseUseFlags` PHASE_USE_FLAGS_ALWAYS_VISIBLE and PHASE_USE_FLAGS_INVERSE," +
+                        " removing PHASE_USE_FLAGS_INVERSE.", guid, data.id);
+                    data.phaseUseFlags &= ~PhaseUseFlagsValues.Inverse;
+                }
+
                 if (data.phaseGroup != 0 && data.phaseId != 0)
                 {
                     Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with both `phaseid` and `phasegroup` set, `phasegroup` set to 0", guid, data.id);
@@ -3358,11 +3397,27 @@ namespace Game
                     }
                 }
 
+                if (data.terrainSwapMap != -1)
+                {
+                    MapRecord terrainSwapEntry = CliDB.MapStorage.LookupByKey(data.terrainSwapMap);
+                    if (terrainSwapEntry == null)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with `terrainSwapMap` {2} does not exist, set to -1", guid, data.id, data.terrainSwapMap);
+                        data.terrainSwapMap = -1;
+                    }
+                    else if (terrainSwapEntry.ParentMapID != data.mapid)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0} Entry: {1}) with `terrainSwapMap` {2} which cannot be used on spawn map, set to -1", guid, data.id, data.terrainSwapMap);
+                        data.terrainSwapMap = -1;
+                    }
+                }
+
                 if (WorldConfig.GetBoolValue(WorldCfg.CalculateCreatureZoneAreaData))
                 {
                     uint zoneId = 0;
                     uint areaId = 0;
-                    Global.MapMgr.GetZoneAndAreaId(out zoneId, out areaId, data.mapid, data.posX, data.posY, data.posZ);
+                    PhasingHandler.InitDbVisibleMapId(phaseShift, data.terrainSwapMap);
+                    Global.MapMgr.GetZoneAndAreaId(phaseShift, out zoneId, out areaId, data.mapid, data.posX, data.posY, data.posZ);
 
                     PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_ZONE_AREA_DATA);
                     stmt.AddValue(0, zoneId);
@@ -3451,8 +3506,8 @@ namespace Game
             // We use spawn coords to spawn
             if (!map.Instanceable() && !map.IsRemovalGrid(x, y))
             {
-                Creature creature = new Creature();
-                if (!creature.LoadCreatureFromDB(guid, map))
+                Creature creature = Creature.CreateCreatureFromDB(guid, map);
+                if (!creature)
                 {
                     Log.outError(LogFilter.Server, "AddCreature: Cannot add creature entry {0} to map", entry);
                     return 0;
@@ -3572,7 +3627,7 @@ namespace Game
                 return null;
 
             // If a model for another gender exists, 50% chance to use it
-            if (modelInfo.DisplayIdOtherGender != 0 && RandomHelper.NextDouble() == 0)
+            if (modelInfo.DisplayIdOtherGender != 0 && RandomHelper.URand(0, 1) == 0)
             {
                 CreatureModelInfo minfotmp = GetCreatureModelInfo(modelInfo.DisplayIdOtherGender);
                 if (minfotmp == null)
@@ -3605,17 +3660,17 @@ namespace Game
             {
                 GameObjectTemplate go = new GameObjectTemplate();
                 go.entry = db2go.Id;
-                go.type = db2go.Type;
+                go.type = db2go.TypeID;
                 go.displayId = db2go.DisplayID;
                 go.name = db2go.Name[Global.WorldMgr.GetDefaultDbcLocale()];
-                go.size = db2go.Size;
+                go.size = db2go.Scale;
 
                 unsafe
                 {
                     fixed (int* b = go.Raw.data)
                     {
-                        for (byte x = 0; x < db2go.Data.Length; ++x)
-                            b[x] = db2go.Data[x];
+                        for (byte x = 0; x < db2go.PropValue.Length; ++x)
+                            b[x] = db2go.PropValue[x];
                     }
                 }
 
@@ -3868,8 +3923,8 @@ namespace Game
             SQLResult result = DB.World.Query("SELECT gameobject.guid, id, map, position_x, position_y, position_z, orientation, " +
                 //   7          8          9          10         11             12            13     14         15          16
                 "rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state, spawnMask, eventEntry, pool_entry, " +
-                //   17       18          19
-                "phaseid, phasegroup, ScriptName " +
+                //   17             18       19          20              21
+                "phaseUseFlags, phaseid, phasegroup, terrainSwapMap, ScriptName " +
                 "FROM gameobject LEFT OUTER JOIN game_event_gameobject ON gameobject.guid = game_event_gameobject.guid " +
                 "LEFT OUTER JOIN pool_gameobject ON gameobject.guid = pool_gameobject.guid");
 
@@ -3892,6 +3947,8 @@ namespace Game
                     spawnMasks[mapDifficultyPair.Key] |= (1ul << (int)difficultyPair.Key);
                 }
             }
+
+            PhaseShift phaseShift = new PhaseShift();
 
             do
             {
@@ -3971,8 +4028,22 @@ namespace Game
 
                 short gameEvent = result.Read<sbyte>(15);
                 uint PoolId = result.Read<uint>(16);
-                data.phaseId = result.Read<uint>(17);
-                data.phaseGroup = result.Read<uint>(18);
+                data.phaseUseFlags = (PhaseUseFlagsValues)result.Read<byte>(17);
+                data.phaseId = result.Read<uint>(18);
+                data.phaseGroup = result.Read<uint>(19);
+
+                if (Convert.ToBoolean(data.phaseUseFlags & ~PhaseUseFlagsValues.All))
+                {
+                    Log.outError(LogFilter.Sql, "Table `gameobject` have gameobject (GUID: {0} Entry: {1}) has unknown `phaseUseFlags` set, removed unknown value.", guid, data.id);
+                    data.phaseUseFlags &= PhaseUseFlagsValues.All;
+                }
+
+                if (data.phaseUseFlags.HasAnyFlag(PhaseUseFlagsValues.AlwaysVisible) && data.phaseUseFlags.HasAnyFlag(PhaseUseFlagsValues.Inverse))
+                {
+                    Log.outError(LogFilter.Sql, "Table `gameobject` have gameobject (GUID: {0} Entry: {1}) has both `phaseUseFlags` PHASE_USE_FLAGS_ALWAYS_VISIBLE and PHASE_USE_FLAGS_INVERSE," +
+                        " removing PHASE_USE_FLAGS_INVERSE.", guid, data.id);
+                    data.phaseUseFlags &= ~PhaseUseFlagsValues.Inverse;
+                }
 
                 if (data.phaseGroup != 0 && data.phaseId != 0)
                 {
@@ -3998,7 +4069,23 @@ namespace Game
                     }
                 }
 
-                data.ScriptId = GetScriptId(result.Read<string>(19));
+                data.terrainSwapMap = result.Read<int>(20);
+                if (data.terrainSwapMap != -1)
+                {
+                    MapRecord terrainSwapEntry = CliDB.MapStorage.LookupByKey(data.terrainSwapMap);
+                    if (terrainSwapEntry == null)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `gameobject` have gameobject (GUID: {0} Entry: {1}) with `terrainSwapMap` {2} does not exist, set to -1", guid, data.id, data.terrainSwapMap);
+                        data.terrainSwapMap = -1;
+                    }
+                    else if (terrainSwapEntry.ParentMapID != data.mapid)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `gameobject` have gameobject (GUID: {0} Entry: {1}) with `terrainSwapMap` {2} which cannot be used on spawn map, set to -1", guid, data.id, data.terrainSwapMap);
+                        data.terrainSwapMap = -1;
+                    }
+                }
+
+                data.ScriptId = GetScriptId(result.Read<string>(21));
                 if (data.ScriptId == 0)
                     data.ScriptId = gInfo.ScriptId;
 
@@ -4010,7 +4097,7 @@ namespace Game
 
                 if (data.rotation.X < -1.0f || data.rotation.X > 1.0f)
                 {
-                    Log.outError(LogFilter.Sql, "Table `gameobject` has gameobject (GUID: {0} Entry: {1}) with invalid rotationX ({1}) value, skip", guid, data.id, data.rotation.X);
+                    Log.outError(LogFilter.Sql, "Table `gameobject` has gameobject (GUID: {0} Entry: {1}) with invalid rotationX ({2}) value, skip", guid, data.id, data.rotation.X);
                     continue;
                 }
 
@@ -4022,13 +4109,13 @@ namespace Game
 
                 if (data.rotation.Z < -1.0f || data.rotation.Z > 1.0f)
                 {
-                    Log.outError(LogFilter.Sql, "Table `gameobject` has gameobject (GUID: {0} Entry: {1}) with invalid rotationZ ({3}) value, skip", guid, data.id, data.rotation.Z);
+                    Log.outError(LogFilter.Sql, "Table `gameobject` has gameobject (GUID: {0} Entry: {1}) with invalid rotationZ ({2}) value, skip", guid, data.id, data.rotation.Z);
                     continue;
                 }
 
                 if (data.rotation.W < -1.0f || data.rotation.W > 1.0f)
                 {
-                    Log.outError(LogFilter.Sql, "Table `gameobject` has gameobject (GUID: {0} Entry: {1}) with invalid rotationW ({4}) value, skip", guid, data.id, data.rotation.W);
+                    Log.outError(LogFilter.Sql, "Table `gameobject` has gameobject (GUID: {0} Entry: {1}) with invalid rotationW ({2}) value, skip", guid, data.id, data.rotation.W);
                     continue;
                 }
 
@@ -4042,7 +4129,8 @@ namespace Game
                 {
                     uint zoneId = 0;
                     uint areaId = 0;
-                    Global.MapMgr.GetZoneAndAreaId(out zoneId, out areaId, data.mapid, data.posX, data.posY, data.posZ);
+                    PhasingHandler.InitDbVisibleMapId(phaseShift, data.terrainSwapMap);
+                    Global.MapMgr.GetZoneAndAreaId(phaseShift, out zoneId, out areaId, data.mapid, data.posX, data.posY, data.posZ);
 
                     PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_GAMEOBJECT_ZONE_AREA_DATA);
                     stmt.AddValue(0, zoneId);
@@ -4290,8 +4378,8 @@ namespace Game
             // We use spawn coords to spawn
             if (!map.Instanceable() && map.IsGridLoaded(x, y))
             {
-                GameObject go = new GameObject();
-                if (!go.LoadGameObjectFromDB(guid, map))
+                GameObject go = GameObject.CreateGameObjectFromDB(guid, map);
+                if (!go)
                 {
                     Log.outError(LogFilter.Server, "AddGOData: cannot add gameobject entry {0} to map", entry);
                     return 0;
@@ -4408,9 +4496,7 @@ namespace Game
                     continue;
 
                 var itemTemplate = new ItemTemplate(db2Data, sparse);
-
-                itemTemplate.MaxDurability = FillMaxDurability(db2Data.Class, db2Data.SubClass, sparse.inventoryType, (ItemQuality)sparse.Quality, sparse.ItemLevel);
-                FillDisenchantFields(out itemTemplate.DisenchantID, out itemTemplate.RequiredDisenchantSkill, itemTemplate);
+                itemTemplate.MaxDurability = FillMaxDurability(db2Data.ClassID, db2Data.SubclassID, sparse.inventoryType, (ItemQuality)sparse.OverallQualityID, sparse.ItemLevel);
 
                 var itemSpecOverrides = Global.DB2Mgr.GetItemSpecOverrides(sparse.Id);
                 if (itemSpecOverrides != null)
@@ -4450,7 +4536,7 @@ namespace Game
                         if (!hasPrimary || !hasSecondary)
                             continue;
 
-                        ChrSpecializationRecord specialization = CliDB.ChrSpecializationStorage.LookupByKey(itemSpec.SpecID);
+                        ChrSpecializationRecord specialization = CliDB.ChrSpecializationStorage.LookupByKey(itemSpec.SpecializationID);
                         if (specialization != null)
                         {
                             if (Convert.ToBoolean((1 << (specialization.ClassID - 1)) & sparse.AllowableClass))
@@ -4478,7 +4564,7 @@ namespace Game
 
             foreach (var effectEntry in CliDB.ItemEffectStorage.Values)
             {
-                var itemTemplate = ItemTemplateStorage.LookupByKey(effectEntry.ItemID);
+                var itemTemplate = ItemTemplateStorage.LookupByKey(effectEntry.ParentItemID);
                 if (itemTemplate == null)
                     continue;
 
@@ -4588,40 +4674,6 @@ namespace Game
             }
 
             return 5 * (uint)(Math.Round(18.0f * qualityMultipliers[(int)quality] * weaponMultipliers[itemSubClass] * levelPenalty));
-        }
-        void FillDisenchantFields(out uint disenchantID, out uint requiredDisenchantSkill, ItemTemplate itemTemplate)
-        {
-            disenchantID = 0;
-            requiredDisenchantSkill = 0xFFFFFFFF;
-            if (itemTemplate.GetFlags().HasAnyFlag(ItemFlags.Conjured | ItemFlags.NoDisenchant) ||
-                itemTemplate.GetBonding() == ItemBondingType.Quest || itemTemplate.GetArea() != 0 || itemTemplate.GetMap() != 0 ||
-                itemTemplate.GetMaxStackSize() > 1 ||
-                itemTemplate.GetQuality() < ItemQuality.Uncommon || itemTemplate.GetQuality() > ItemQuality.Epic ||
-                !(itemTemplate.GetClass() == ItemClass.Armor || itemTemplate.GetClass() == ItemClass.Weapon) ||
-                !(Item.GetSpecialPrice(itemTemplate) != 0 || Global.DB2Mgr.HasItemCurrencyCost(itemTemplate.GetId())))
-                return;
-
-            foreach (var disenchant in CliDB.ItemDisenchantLootStorage.Values)
-            {
-                if (disenchant.ItemClass == (uint)itemTemplate.GetClass() && disenchant.ItemQuality == (uint)itemTemplate.GetQuality() &&
-                    disenchant.MinItemLevel <= itemTemplate.GetBaseItemLevel() && disenchant.MaxItemLevel >= itemTemplate.GetBaseItemLevel())
-                {
-                    if (disenchant.Id == 60 || disenchant.Id == 61)   // epic item disenchant ilvl range 66-99 (classic)
-                    {
-                        if (itemTemplate.GetBaseRequiredLevel() > 60 || itemTemplate.GetRequiredSkillRank() > 300)
-                            continue;                                   // skip to epic item disenchant ilvl range 90-199 (TBC)
-                    }
-                    else if (disenchant.Id == 66 || disenchant.Id == 67)  // epic item disenchant ilvl range 90-199 (TBC)
-                    {
-                        if (itemTemplate.GetBaseRequiredLevel() <= 60 || (itemTemplate.GetRequiredSkill() != 0 && itemTemplate.GetRequiredSkillRank() <= 300))
-                            continue;
-                    }
-
-                    disenchantID = disenchant.Id;
-                    requiredDisenchantSkill = disenchant.RequiredDisenchantSkill;
-                    return;
-                }
-            }
         }
         public void LoadItemTemplateAddon()
         {
@@ -4854,7 +4906,7 @@ namespace Game
             if (id == -1)
                 return equip[RandomHelper.IRand(0, equip.Count - 1)].Item2;
             else
-                return equip.Find(p => p.Item1 == id).Item2;
+                return equip.Find(p => p.Item1 == id)?.Item2;
         }
 
         //Maps
@@ -5253,8 +5305,8 @@ namespace Game
                     pInfo.PositionZ = positionZ;
                     pInfo.Orientation = orientation;
 
-                    pInfo.DisplayId_m = rEntry.MaleDisplayID;
-                    pInfo.DisplayId_f = rEntry.FemaleDisplayID;
+                    pInfo.DisplayId_m = rEntry.MaleDisplayId;
+                    pInfo.DisplayId_f = rEntry.FemaleDisplayId;
 
                     _playerInfo[currentrace][currentclass] = pInfo;
 
@@ -5338,7 +5390,7 @@ namespace Game
                     {
                         for (int raceIndex = (int)Race.Human; raceIndex < (int)Race.Max; ++raceIndex)
                         {
-                            if (rcInfo.RaceMask == -1 || Convert.ToBoolean((1 << (raceIndex - 1)) & rcInfo.RaceMask))
+                            if (rcInfo.RaceMask == -1 || Convert.ToBoolean((1L << (raceIndex - 1)) & rcInfo.RaceMask))
                             {
                                 for (int classIndex = (int)Class.Warrior; classIndex < (int)Class.Max; ++classIndex)
                                 {
@@ -6187,35 +6239,35 @@ namespace Game
             _exclusiveQuestGroups.Clear();
 
             SQLResult result = DB.World.Query("SELECT " +
-                //0  1          2           3               4         5            6            7                  8                9                   10
-                "ID, QuestType, QuestLevel, QuestPackageID, MinLevel, QuestSortID, QuestInfoID, SuggestedGroupNum, RewardNextQuest, RewardXPDifficulty, RewardXPMultiplier, " +
-                //11          12                     13                     14                15                   16                   17                   18           19           20               21
+                //0  1          2           3                4               5         6            7            8                  9                10                  11
+                "ID, QuestType, QuestLevel, MaxScalingLevel, QuestPackageID, MinLevel, QuestSortID, QuestInfoID, SuggestedGroupNum, RewardNextQuest, RewardXPDifficulty, RewardXPMultiplier, " +
+                //12          13                     14                     15                16                   17                   18                   19           20           21               22
                 "RewardMoney, RewardMoneyDifficulty, RewardMoneyMultiplier, RewardBonusMoney, RewardDisplaySpell1, RewardDisplaySpell2, RewardDisplaySpell3, RewardSpell, RewardHonor, RewardKillHonor, StartItem, " +
-                //22                         23                          24                        25     26
+                //23                         24                          25                        26     27
                 "RewardArtifactXPDifficulty, RewardArtifactXPMultiplier, RewardArtifactCategoryID, Flags, FlagsEx, " +
-                //27          28             29         30                 31           32             33         34
+                //28          29             30         31                 32           33             34         35
                 "RewardItem1, RewardAmount1, ItemDrop1, ItemDropQuantity1, RewardItem2, RewardAmount2, ItemDrop2, ItemDropQuantity2, " +
-                //35          36             37         38                 39           40             41         42
+                //36          37             38         39                 40             41           42         43
                 "RewardItem3, RewardAmount3, ItemDrop3, ItemDropQuantity3, RewardItem4, RewardAmount4, ItemDrop4, ItemDropQuantity4, " +
-                //43                  44                         45                          46                   47                         48
+                //44                  45                         46                          47                   48                         49
                 "RewardChoiceItemID1, RewardChoiceItemQuantity1, RewardChoiceItemDisplayID1, RewardChoiceItemID2, RewardChoiceItemQuantity2, RewardChoiceItemDisplayID2, " +
-                //49                  50                         51                          52                   53                         54
+                //50                  51                         52                          53                   54                         55
                 "RewardChoiceItemID3, RewardChoiceItemQuantity3, RewardChoiceItemDisplayID3, RewardChoiceItemID4, RewardChoiceItemQuantity4, RewardChoiceItemDisplayID4, " +
-                //55                  56                         57                          58                   59                         60
+                //56                  57                         58                          59                   60                         61
                 "RewardChoiceItemID5, RewardChoiceItemQuantity5, RewardChoiceItemDisplayID5, RewardChoiceItemID6, RewardChoiceItemQuantity6, RewardChoiceItemDisplayID6, " +
-                //61           62    63    64           65           66                 67                 68                 69             70
+                //62           63    64    65           66           67                 68                 69                 70             71
                 "POIContinent, POIx, POIy, POIPriority, RewardTitle, RewardArenaPoints, RewardSkillLineID, RewardNumSkillUps, PortraitGiver, PortraitTurnIn, " +
-                //71               72                   73                      74                75                   76                   77                      78
+                //72               73                   74                      75                   76                77                   78                      79
                 "RewardFactionID1, RewardFactionValue1, RewardFactionOverride1, RewardFactionCapIn1, RewardFactionID2, RewardFactionValue2, RewardFactionOverride2, RewardFactionCapIn2, " +
-                //79               80                   81                      82                   83                84                   85                      86
+                //80               81                   82                      83                   84                85                   86                      87
                 "RewardFactionID3, RewardFactionValue3, RewardFactionOverride3, RewardFactionCapIn3, RewardFactionID4, RewardFactionValue4, RewardFactionOverride4, RewardFactionCapIn4, " +
-                //87               88                   89                      90                   91
+                //88               89                   90                      91                   92
                 "RewardFactionID5, RewardFactionValue5, RewardFactionOverride5, RewardFactionCapIn5, RewardFactionFlags, " +
-                //92                93                  94                 95                  96                 97                  98                 99
+                //93                94                  95                 96                 97                  98                  99                 100
                 "RewardCurrencyID1, RewardCurrencyQty1, RewardCurrencyID2, RewardCurrencyQty2, RewardCurrencyID3, RewardCurrencyQty3, RewardCurrencyID4, RewardCurrencyQty4, " +
-                //100                101                 102          103          104             105              106
+                //101                102                 103          104          105             106            107
                 "AcceptedSoundKitID, CompleteSoundKitID, AreaGroupID, TimeAllowed, AllowableRaces, QuestRewardID, Expansion, " +
-                //107      108             109               110              111                112                113                 114                 115
+                //108      109             110               111              112                113                114                 115                 116
                 "LogTitle, LogDescription, QuestDescription, AreaDescription, PortraitGiverText, PortraitGiverName, PortraitTurnInText, PortraitTurnInName, QuestCompletionLog" +
                 " FROM quest_template");
 
@@ -6506,7 +6558,7 @@ namespace Game
                 // AllowableRaces, can be -1/RACEMASK_ALL_PLAYABLE to allow any race
                 if (qinfo.AllowableRaces != -1)
                 {
-                    if (!Convert.ToBoolean(qinfo.AllowableRaces & (uint)Race.RaceMaskAllPlayable))
+                    if (qinfo.AllowableRaces > 0 && !Convert.ToBoolean(qinfo.AllowableRaces & (long)Race.RaceMaskAllPlayable))
                     {
                         Log.outError(LogFilter.Sql, "Quest {0} does not contain any playable races in `RequiredRaces` ({1}), value set to 0 (all races).", qinfo.Id, qinfo.AllowableRaces);
                         qinfo.AllowableRaces = -1;
@@ -7137,8 +7189,8 @@ namespace Game
 
             uint count = 0;
 
-            //                                            0        1        2            3           4                 5           6         7            8       9       10         11              12             13
-            SQLResult result = DB.World.Query("SELECT QuestID, BlobIndex, Idx1, ObjectiveIndex, QuestObjectiveID, QuestObjectID, MapID, WorldMapAreaId, Floor, Priority, Flags, WorldEffectID, PlayerConditionID, WoDUnk1 FROM quest_poi order by QuestID, Idx1");
+            //                                            0        1        2            3           4                 5           6         7            8       9       10         11              12             13       14
+            SQLResult result = DB.World.Query("SELECT QuestID, BlobIndex, Idx1, ObjectiveIndex, QuestObjectiveID, QuestObjectID, MapID, WorldMapAreaId, Floor, Priority, Flags, WorldEffectID, PlayerConditionID, WoDUnk1, AlwaysAllowMergingBlobs FROM quest_poi order by QuestID, Idx1");
             if (result.IsEmpty())
             {
                 Log.outError(LogFilter.ServerLoading, "Loaded 0 quest POI definitions. DB table `quest_poi` is empty.");
@@ -7182,11 +7234,12 @@ namespace Game
                 int WorldEffectID = result.Read<int>(11);
                 int PlayerConditionID = result.Read<int>(12);
                 int WoDUnk1 = result.Read<int>(13);
+                bool AlwaysAllowMergingBlobs = result.Read<bool>(14);
 
                 if (Global.ObjectMgr.GetQuestTemplate(QuestID) == null)
                     Log.outError(LogFilter.Sql, "`quest_poi` quest id ({0}) Idx1 ({1}) does not exist in `quest_template`", QuestID, Idx1);
 
-                QuestPOI POI = new QuestPOI(BlobIndex, ObjectiveIndex, QuestObjectiveID, QuestObjectID, MapID, WorldMapAreaId, Floor, Priority, Flags, WorldEffectID, PlayerConditionID, WoDUnk1);
+                QuestPOI POI = new QuestPOI(BlobIndex, ObjectiveIndex, QuestObjectiveID, QuestObjectID, MapID, WorldMapAreaId, Floor, Priority, Flags, WorldEffectID, PlayerConditionID, WoDUnk1, AlwaysAllowMergingBlobs);
                 if (!POIs.ContainsKey(QuestID) || !POIs[QuestID].ContainsKey(Idx1))
                 {
                     Log.outError(LogFilter.Sql, "Table quest_poi references unknown quest points for quest {0} POI id {1}", QuestID, BlobIndex);
@@ -7385,10 +7438,74 @@ namespace Game
         }
 
         //Spells /Skills / Phases
-        public void LoadTerrainSwapDefaults()
+        public void LoadPhases()
         {
-            _terrainMapDefaultStore.Clear();
+            foreach (PhaseRecord phase in CliDB.PhaseStorage.Values)
+                _phaseInfoById.Add(phase.Id, new PhaseInfoStruct(phase.Id));
 
+            foreach (MapRecord map in CliDB.MapStorage.Values)
+                if (map.ParentMapID != -1)
+                    _terrainSwapInfoById.Add(map.Id, new TerrainSwapInfo(map.Id));
+
+            Log.outInfo(LogFilter.ServerLoading, "Loading Terrain World Map definitions...");
+            LoadTerrainWorldMaps();
+
+            Log.outInfo(LogFilter.ServerLoading, "Loading Terrain Swap Default definitions...");
+            LoadTerrainSwapDefaults();
+
+            Log.outInfo(LogFilter.ServerLoading, "Loading Phase Area definitions...");
+            LoadAreaPhases();
+        }
+        public void UnloadPhaseConditions()
+        {
+            foreach (var pair in _phaseInfoByArea)
+                    pair.Value.Conditions.Clear();
+        }
+        void LoadTerrainWorldMaps()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            //                                               0               1
+            SQLResult result = DB.World.Query("SELECT TerrainSwapMap, WorldMapArea FROM `terrain_worldmap`");
+
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 terrain world maps. DB table `terrain_worldmap` is empty.");
+                return;
+            }
+
+            uint count = 0;
+            do
+            {
+                uint mapId = result.Read<uint>(0);
+                uint worldMapArea = result.Read<uint>(1);
+
+                if (!CliDB.MapStorage.ContainsKey(mapId))
+                {
+                    Log.outError(LogFilter.Sql, "TerrainSwapMap {0} defined in `terrain_worldmap` does not exist, skipped.", mapId);
+                    continue;
+                }
+
+                if (!CliDB.WorldMapAreaStorage.ContainsKey(worldMapArea))
+                {
+                    Log.outError(LogFilter.Sql, "WorldMapArea {0} defined in `terrain_worldmap` does not exist, skipped.", worldMapArea);
+                    continue;
+                }
+
+                if (!_terrainSwapInfoById.ContainsKey(mapId))
+                    _terrainSwapInfoById.Add(mapId, new TerrainSwapInfo());
+
+                TerrainSwapInfo terrainSwapInfo = _terrainSwapInfoById[mapId];
+                terrainSwapInfo.Id = mapId;
+                terrainSwapInfo.UiWorldMapAreaIDSwaps.Add(worldMapArea);
+
+                ++count;
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} terrain world maps in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
+        }
+        void LoadTerrainSwapDefaults()
+        {
             uint oldMSTime = Time.GetMSTime();
 
             SQLResult result = DB.World.Query("SELECT MapId, TerrainSwapMap FROM `terrain_swap_defaults`");
@@ -7415,87 +7532,20 @@ namespace Game
                     continue;
                 }
 
-                _terrainMapDefaultStore.Add(mapId, terrainSwap);
+                TerrainSwapInfo terrainSwapInfo = _terrainSwapInfoById[terrainSwap];
+                terrainSwapInfo.Id = terrainSwap;
+                _terrainSwapInfoByMap[mapId].Add(terrainSwapInfo);
 
                 ++count;
             } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} terrain swap defaults in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
-        public void LoadTerrainPhaseInfo()
+        void LoadAreaPhases()
         {
-            _terrainPhaseInfoStore.Clear();
-
             uint oldMSTime = Time.GetMSTime();
 
-            SQLResult result = DB.World.Query("SELECT Id, TerrainSwapMap FROM `terrain_phase_info`");
-            if (result.IsEmpty())
-            {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 terrain phase infos. DB table `terrain_phase_info` is empty.");
-                return;
-            }
-
-            uint count = 0;
-            do
-            {
-                uint phaseId = result.Read<uint>(0);
-                if (!CliDB.PhaseStorage.ContainsKey(phaseId))
-                {
-                    Log.outError(LogFilter.Sql, "Phase {0} defined in `terrain_phase_info` does not exist, skipped.", phaseId);
-                    continue;
-                }
-
-                uint terrainSwap = result.Read<uint>(1);
-
-                _terrainPhaseInfoStore.Add(phaseId, terrainSwap);
-
-                ++count;
-            }
-            while (result.NextRow());
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} phase infos in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
-        }
-        public void LoadTerrainWorldMaps()
-        {
-            _terrainWorldMapStore.Clear();
-
-            uint oldMSTime = Time.GetMSTime();
-
-            //                                               0               1
-            SQLResult result = DB.World.Query("SELECT TerrainSwapMap, WorldMapArea FROM `terrain_worldmap`");
-
-            if (result.IsEmpty())
-            {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 terrain world maps. DB table `terrain_worldmap` is empty.");
-                return;
-            }
-
-            uint count = 0;
-            do
-            {
-                uint mapId = result.Read<uint>(0);
-
-                if (!CliDB.MapStorage.ContainsKey(mapId))
-                {
-                    Log.outError(LogFilter.Sql, "TerrainSwapMap {0} defined in `terrain_worldmap` does not exist, skipped.", mapId);
-                    continue;
-                }
-
-                uint worldMapArea = result.Read<uint>(1);
-
-                _terrainWorldMapStore.Add(mapId, worldMapArea);
-
-                ++count;
-            } while (result.NextRow());
-
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} terrain world maps in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
-        }
-        public void LoadAreaPhases()
-        {
-            _phases.Clear();
-
-            uint oldMSTime = Time.GetMSTime();
-
-            //                                               0       1
+            //                                         0       1
             SQLResult result = DB.World.Query("SELECT AreaId, PhaseId FROM `phase_area`");
             if (result.IsEmpty())
             {
@@ -7503,19 +7553,60 @@ namespace Game
                 return;
             }
 
+            Func<uint, PhaseInfoStruct> getOrCreatePhaseIfMissing = phaseId =>
+            {
+                PhaseInfoStruct phaseInfo = _phaseInfoById[phaseId];
+                phaseInfo.Id = phaseId;
+                return phaseInfo;
+            };
+
             uint count = 0;
             do
             {
-                PhaseInfoStruct phase = new PhaseInfoStruct();
                 uint area = result.Read<uint>(0);
-                phase.Id = result.Read<uint>(1);
+                uint phaseId = result.Read<uint>(1);
 
-                _phases.Add(area, phase);
+                if (!CliDB.AreaTableStorage.ContainsKey(area))
+                {
+                    Log.outError(LogFilter.Sql, $"Area {area} defined in `phase_area` does not exist, skipped.");
+                    continue;
+                }
+
+                if (!CliDB.PhaseStorage.ContainsKey(phaseId))
+                {
+                    Log.outError(LogFilter.Sql, $"Phase {phaseId} defined in `phase_area` does not exist, skipped.");
+                    continue;
+                }
+
+                PhaseInfoStruct phase = getOrCreatePhaseIfMissing(phaseId);
+                phase.Areas.Add(area);
+                _phaseInfoByArea[area].Add(new PhaseAreaInfo(phase));
 
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} phase areas in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            foreach (var pair in _phaseInfoByArea)
+            {
+                uint parentAreaId = pair.Key;
+                do
+                {
+                    AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(parentAreaId);
+                    if (area == null)
+                        break;
+
+                    parentAreaId = area.ParentAreaID;
+                    if (parentAreaId == 0)
+                        break;
+
+                    var parentAreaPhases = _phaseInfoByArea.LookupByKey(parentAreaId);
+                    foreach (PhaseAreaInfo parentAreaPhase in parentAreaPhases)
+                        if (parentAreaPhase.PhaseInfo.Id == pair.Value.PhaseInfo.Id)
+                            parentAreaPhase.SubAreaExclusions.Add(pair.Key);
+
+                } while (true);
+            }
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} phase areas in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
         public void LoadNPCSpellClickSpells()
         {
@@ -7643,15 +7734,21 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} skill max values in {1} ms", _skillTiers.Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public List<uint> GetPhaseTerrainSwaps(uint phaseid) { return _terrainPhaseInfoStore[phaseid]; }
-        public List<uint> GetDefaultTerrainSwaps(uint mapid) { return _terrainMapDefaultStore[mapid]; }
-        public List<uint> GetTerrainWorldMaps(uint terrainId) { return _terrainWorldMapStore[terrainId]; }
-        public MultiMap<uint, uint> GetDefaultTerrainSwapStore() { return _terrainMapDefaultStore; }
-        public List<PhaseInfoStruct> GetPhasesForArea(uint area) { return _phases[area]; }
-        public MultiMap<uint, PhaseInfoStruct> GetAreaAndZonePhases() { return _phases; }
-        public List<PhaseInfoStruct> GetPhasesForAreaOrZoneForLoading(uint areaOrZone)
+        public PhaseInfoStruct GetPhaseInfo(uint phaseId)
         {
-            return _phases.LookupByKey(areaOrZone);
+            return _phaseInfoById.LookupByKey(phaseId);
+        }
+        public List<PhaseAreaInfo> GetPhasesForArea(uint areaId)
+        {
+            return _phaseInfoByArea.LookupByKey(areaId);
+        }
+        public TerrainSwapInfo GetTerrainSwapInfo(uint terrainSwapId)
+        {
+            return _terrainSwapInfoById.LookupByKey(terrainSwapId);
+        }
+        public List<TerrainSwapInfo> GetTerrainSwapsForMap(uint mapId)
+        {
+            return _terrainSwapInfoByMap.LookupByKey(mapId);
         }
         public List<SpellClickInfo> GetSpellClickInfoMapBounds(uint creature_id)
         {
@@ -7854,14 +7951,14 @@ namespace Game
             _gossipMenuItemsLocaleStorage.Clear();                              // need for reload case
 
             //                                         0       1            2       3           4
-            SQLResult result = DB.World.Query("SELECT MenuID, OptionID, Locale, OptionText, BoxText FROM gossip_menu_option_locale");
+            SQLResult result = DB.World.Query("SELECT MenuId, OptionIndex, Locale, OptionText, BoxText FROM gossip_menu_option_locale");
             if (result.IsEmpty())
                 return;
 
             do
             {
-                ushort menuId = result.Read<ushort>(0);
-                ushort optionId = result.Read<ushort>(1);
+                uint menuId = result.Read<uint>(0);
+                uint optionIndex = result.Read<uint>(1);
                 string localeName = result.Read<string>(2);
 
                 LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
@@ -7872,7 +7969,7 @@ namespace Game
                 AddLocaleString(result.Read<string>(3), locale, data.OptionText);
                 AddLocaleString(result.Read<string>(4), locale, data.BoxText);
 
-                _gossipMenuItemsLocaleStorage[MathFunctions.MakePair32(menuId, optionId)] = data;
+                _gossipMenuItemsLocaleStorage[Tuple.Create(menuId, optionIndex)] = data;
             }
             while (result.NextRow());
 
@@ -7958,9 +8055,9 @@ namespace Game
         {
             return _questObjectivesLocaleStorage.LookupByKey(entry);
         }
-        public GossipMenuItemsLocale GetGossipMenuItemsLocale(uint menuId, uint menuItemId)
+        public GossipMenuItemsLocale GetGossipMenuItemsLocale(uint menuId, uint optionIndex)
         {
-            return _gossipMenuItemsLocaleStorage.LookupByKey(MathFunctions.MakePair32(menuId, menuItemId));
+            return _gossipMenuItemsLocaleStorage.LookupByKey(Tuple.Create(menuId, optionIndex));
         }
         public PageTextLocale GetPageTextLocale(uint entry)
         {
@@ -8640,7 +8737,7 @@ namespace Game
             uint oldMSTime = Time.GetMSTime();
             _playerChoices.Clear();
 
-            SQLResult choiceResult = DB.World.Query("SELECT ChoiceId, Question FROM playerchoice");
+            SQLResult choiceResult = DB.World.Query("SELECT ChoiceId, UiTextureKitId, Question, HideWarboardHeader FROM playerchoice");
             if (choiceResult.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 player choices. DB table `playerchoice` is empty.");
@@ -8655,12 +8752,13 @@ namespace Game
 
             do
             {
-                int choiceId = choiceResult.Read<int>(0);
-
                 PlayerChoice choice = new PlayerChoice();
-                choice.ChoiceId = choiceId;
-                choice.Question = choiceResult.Read<string>(1);
-                _playerChoices[choiceId] = choice;
+                choice.ChoiceId = choiceResult.Read<int>(0);
+                choice.UiTextureKitId = choiceResult.Read<int>(1);
+                choice.Question = choiceResult.Read<string>(2);
+                choice.HideWarboardHeader = choiceResult.Read<bool>(3);
+
+                _playerChoices[choice.ChoiceId] = choice;
 
             } while (choiceResult.NextRow());
 
@@ -9015,7 +9113,7 @@ namespace Game
             if (!result.IsEmpty())
                 Global.ArenaTeamMgr.SetNextArenaTeamId(result.Read<uint>(0) + 1);
 
-            result = DB.Characters.Query("SELECT MAX(setguid) FROM character_equipmentsets");
+            result = DB.Characters.Query("SELECT MAX(maxguid) FROM ((SELECT MAX(setguid) AS maxguid FROM character_equipmentsets) UNION (SELECT MAX(setguid) AS maxguid FROM character_transmog_outfits)) allsets");
             if (!result.IsEmpty())
                 _equipmentSetGuid = result.Read<ulong>(0) + 1;
 
@@ -9181,7 +9279,7 @@ namespace Game
             foreach (var node in CliDB.TaxiNodesStorage.Values)
             {
                 var i = node.Id;
-                if (node.MapID != mapid || !node.Flags.HasAnyFlag(requireFlag))
+                if (node.ContinentID != mapid || !node.Flags.HasAnyFlag(requireFlag))
                     continue;
 
                 byte field = (byte)((i - 1) / 8);
@@ -9308,7 +9406,7 @@ namespace Game
                 if ((!useParentDbValue && pair.Value.target_mapId == entrance_map) || (useParentDbValue && pair.Value.target_mapId == parentId))
                 {
                     AreaTriggerRecord atEntry = CliDB.AreaTriggerStorage.LookupByKey(pair.Key);
-                    if (atEntry != null && atEntry.MapID == Map)
+                    if (atEntry != null && atEntry.ContinentID == Map)
                         return pair.Value;
                 }
             }
@@ -9466,7 +9564,7 @@ namespace Game
         List<string> _reservedNamesStorage = new List<string>();
         Dictionary<uint, SceneTemplate> _sceneTemplateStorage = new Dictionary<uint, SceneTemplate>();
 
-        Dictionary<byte, byte> _raceExpansionRequirementStorage = new Dictionary<byte, byte>();
+        Dictionary<byte, RaceUnlockRequirement> _raceUnlockRequirementStorage = new Dictionary<byte, RaceUnlockRequirement>();
         Dictionary<byte, byte> _classExpansionRequirementStorage = new Dictionary<byte, byte>();
         Dictionary<uint, string> _realmNameStorage = new Dictionary<uint, string>();
 
@@ -9500,10 +9598,10 @@ namespace Game
         List<ushort> _transportMaps = new List<ushort>();
 
         //Spells /Skills / Phases
-        MultiMap<uint, uint> _terrainPhaseInfoStore = new MultiMap<uint, uint>();
-        MultiMap<uint, uint> _terrainMapDefaultStore = new MultiMap<uint, uint>();
-        MultiMap<uint, uint> _terrainWorldMapStore = new MultiMap<uint, uint>();
-        MultiMap<uint, PhaseInfoStruct> _phases = new MultiMap<uint, PhaseInfoStruct>();
+        Dictionary<uint, PhaseInfoStruct> _phaseInfoById = new Dictionary<uint, PhaseInfoStruct>();
+        Dictionary<uint, TerrainSwapInfo> _terrainSwapInfoById = new Dictionary<uint, TerrainSwapInfo>();
+        MultiMap<uint, PhaseAreaInfo> _phaseInfoByArea = new MultiMap<uint, PhaseAreaInfo>();
+        MultiMap<uint, TerrainSwapInfo> _terrainSwapInfoByMap = new MultiMap<uint, TerrainSwapInfo>();
         MultiMap<uint, SpellClickInfo> _spellClickInfoStorage = new MultiMap<uint, SpellClickInfo>();
         Dictionary<uint, int> _fishingBaseForAreaStorage = new Dictionary<uint, int>();
         Dictionary<uint, SkillTiersEntry> _skillTiers = new Dictionary<uint, SkillTiersEntry>();
@@ -9568,7 +9666,7 @@ namespace Game
         Dictionary<uint, QuestObjectivesLocale> _questObjectivesLocaleStorage = new Dictionary<uint, QuestObjectivesLocale>();
         Dictionary<uint, QuestOfferRewardLocale> _questOfferRewardLocaleStorage = new Dictionary<uint, QuestOfferRewardLocale>();
         Dictionary<uint, QuestRequestItemsLocale> _questRequestItemsLocaleStorage = new Dictionary<uint, QuestRequestItemsLocale>();
-        Dictionary<uint, GossipMenuItemsLocale> _gossipMenuItemsLocaleStorage = new Dictionary<uint, GossipMenuItemsLocale>();
+        Dictionary<Tuple<uint, uint>, GossipMenuItemsLocale> _gossipMenuItemsLocaleStorage = new Dictionary<Tuple<uint, uint>, GossipMenuItemsLocale>();
         Dictionary<uint, PageTextLocale> _pageTextLocaleStorage = new Dictionary<uint, PageTextLocale>();
         Dictionary<uint, PointOfInterestLocale> _pointOfInterestLocaleStorage = new Dictionary<uint, PointOfInterestLocale>();
         Dictionary<int, PlayerChoiceLocale> _playerChoiceLocales = new Dictionary<int, PlayerChoiceLocale>();
@@ -9963,7 +10061,7 @@ namespace Game
     public class QuestPOI
     {
         public QuestPOI(int _BlobIndex, int _ObjectiveIndex, int _QuestObjectiveID, int _QuestObjectID, int _MapID, int _WorldMapAreaID, int _Foor, int _Priority, int _Flags, 
-            int _WorldEffectID, int _PlayerConditionID, int _UnkWoD1)
+            int _WorldEffectID, int _PlayerConditionID, int _UnkWoD1, bool _AlwaysAllowMergingBlobs)
         {
             BlobIndex = _BlobIndex;
             ObjectiveIndex = _ObjectiveIndex;
@@ -9977,6 +10075,7 @@ namespace Game
             WorldEffectID = _WorldEffectID;
             PlayerConditionID = _PlayerConditionID;
             UnkWoD1 = _UnkWoD1;
+            AlwaysAllowMergingBlobs = _AlwaysAllowMergingBlobs;
         }
 
         public int BlobIndex;
@@ -9992,6 +10091,7 @@ namespace Game
         public int PlayerConditionID;
         public int UnkWoD1;
         public List<QuestPOIPoint> points = new List<QuestPOIPoint>();
+        public bool AlwaysAllowMergingBlobs;
     }
 
     public class QuestPOIPoint
@@ -10102,10 +10202,10 @@ namespace Game
     {
         public ItemSpecStats(ItemRecord item, ItemSparseRecord sparse)
         {
-            if (item.Class == ItemClass.Weapon)
+            if (item.ClassID == ItemClass.Weapon)
             {
                 ItemType = 5;
-                switch ((ItemSubClassWeapon)item.SubClass)
+                switch ((ItemSubClassWeapon)item.SubclassID)
                 {
                     case ItemSubClassWeapon.Axe:
                         AddStat(ItemSpecStat.OneHandedAxe);
@@ -10159,9 +10259,9 @@ namespace Game
                         break;
                 }
             }
-            else if (item.Class == ItemClass.Armor)
+            else if (item.ClassID == ItemClass.Armor)
             {
-                switch ((ItemSubClassArmor)item.SubClass)
+                switch ((ItemSubClassArmor)item.SubclassID)
                 {
                     case ItemSubClassArmor.Cloth:
                         if (sparse.inventoryType != InventoryType.Cloak)
@@ -10183,12 +10283,12 @@ namespace Game
                         ItemType = 4;
                         break;
                     default:
-                        if (item.SubClass == (int)ItemSubClassArmor.Shield)
+                        if (item.SubclassID == (int)ItemSubClassArmor.Shield)
                         {
                             ItemType = 6;
                             AddStat(ItemSpecStat.Shield);
                         }
-                        else if (item.SubClass > (int)ItemSubClassArmor.Shield && item.SubClass <= (int)ItemSubClassArmor.Relic)
+                        else if (item.SubclassID > (int)ItemSubClassArmor.Shield && item.SubclassID <= (int)ItemSubClassArmor.Relic)
                         {
                             ItemType = 6;
                             AddStat(ItemSpecStat.Relic);
@@ -10198,7 +10298,7 @@ namespace Game
                         break;
                 }
             }
-            else if (item.Class == ItemClass.Gem)
+            else if (item.ClassID == ItemClass.Gem)
             {
                 ItemType = 7;
                 GemPropertiesRecord gem = CliDB.GemPropertiesStorage.LookupByKey(sparse.GemProperties);
@@ -10232,8 +10332,8 @@ namespace Game
                 ItemType = 0;
 
             for (uint i = 0; i < ItemConst.MaxStats; ++i)
-                if (sparse.ItemStatType[i] != -1)
-                    AddModStat(sparse.ItemStatType[i]);
+                if (sparse.StatModifierBonusStat[i] != -1)
+                    AddModStat(sparse.StatModifierBonusStat[i]);
         }
 
         void AddStat(ItemSpecStat statType)
@@ -10313,9 +10413,46 @@ namespace Game
         public uint[] Value = new uint[SkillConst.MaxSkillStep];
     }
 
+    public class TerrainSwapInfo
+    {
+        public TerrainSwapInfo() { }
+        public TerrainSwapInfo(uint id)
+        {
+            Id = id;
+        }
+
+        public uint Id;
+        public List<uint> UiWorldMapAreaIDSwaps = new List<uint>();
+    }
+
     public class PhaseInfoStruct
     {
+        public PhaseInfoStruct(uint id)
+        {
+            Id = id;
+        }
+
+        public bool IsAllowedInArea(uint areaId)
+        {
+            return Areas.Any(areaToCheck =>
+            {
+                return Global.DB2Mgr.IsInArea(areaId, areaToCheck);
+            });
+        }
+
         public uint Id;
+        public List<uint> Areas = new List<uint>();
+    }
+
+    public class PhaseAreaInfo
+    {
+        public PhaseAreaInfo(PhaseInfoStruct phaseInfo)
+        {
+            PhaseInfo = phaseInfo;
+        }
+
+        public PhaseInfoStruct PhaseInfo;
+        public List<uint> SubAreaExclusions = new List<uint>();
         public List<Condition> Conditions = new List<Condition>();
     }
 
@@ -10425,7 +10562,15 @@ namespace Game
         }
 
         public int ChoiceId;
+        public int UiTextureKitId;
         public string Question;
         public List<PlayerChoiceResponse> Responses = new List<PlayerChoiceResponse>();
+        public bool HideWarboardHeader;
+    }
+
+    public class RaceUnlockRequirement
+    {
+        public byte Expansion;
+        public uint AchievementId;
     }
 }

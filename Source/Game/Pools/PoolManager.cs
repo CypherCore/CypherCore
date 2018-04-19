@@ -869,12 +869,7 @@ namespace Game
                         Map map = Global.MapMgr.CreateBaseMap(data.mapid);
                         // We use spawn coords to spawn
                         if (!map.Instanceable() && map.IsGridLoaded(data.posX, data.posY))
-                        {
-                            Creature creature = new Creature();
-                            if (!creature.LoadCreatureFromDB(obj.guid, map))
-                                return;
-
-                        }
+                            Creature.CreateCreatureFromDB(obj.guid, map);
                     }
                     break;
                 case "GameObject":
@@ -888,13 +883,11 @@ namespace Game
                         // We use current coords to unspawn, not spawn coords since creature can have changed grid
                         if (!map.Instanceable() && map.IsGridLoaded(data_.posX, data_.posY))
                         {
-                            GameObject pGameobject = new GameObject();
-                            if (!pGameobject.LoadGameObjectFromDB(obj.guid, map, false))
-                                return;
-                            else
+                            GameObject go = GameObject.CreateGameObjectFromDB(obj.guid, map, false);
+                            if (go)
                             {
-                                if (pGameobject.isSpawnedByDefault())
-                                    map.AddToMap(pGameobject);
+                                if (go.isSpawnedByDefault())
+                                    map.AddToMap(go);
                             }
                         }
                     }

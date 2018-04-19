@@ -462,7 +462,7 @@ namespace Game
 
                 reward.ItemID = result.Read<uint>(0);
                 reward.MinGuildRep = result.Read<byte>(1);
-                reward.RaceMask = result.Read<int>(2);
+                reward.RaceMask = result.Read<ulong>(2);
                 reward.Cost = result.Read<ulong>(3);
 
                 if (Global.ObjectMgr.GetItemTemplate(reward.ItemID) == null)
@@ -524,7 +524,7 @@ namespace Game
     {
         public uint ItemID;
         public byte MinGuildRep;
-        public int RaceMask;
+        public ulong RaceMask;
         public ulong Cost;
         public List<uint> AchievementsRequired = new List<uint>();
     }

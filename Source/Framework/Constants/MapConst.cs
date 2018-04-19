@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+using System;
 
 namespace Framework.Constants
 {
@@ -42,14 +43,13 @@ namespace Framework.Constants
         public const uint ReadycheckDuration = 35000;
 
         //Liquid
-        public const int MapLiquidTypeNoWater = 0x00;
-        public const int MapLiquidTypeWater = 0x01;
-        public const int MapLiquidTypeOcean = 0x02;
-        public const int MapLiquidTypeMagma = 0x04;
-        public const int MapLiquidTypeSlime = 0x08;
-        public const int MapLiquidTypeDarkWater = 0x10;
-        public const int MapLiquidTypeWMOWater = 0x20;
-        public const int MapAllLiquidTypes = (MapLiquidTypeWater | MapLiquidTypeOcean | MapLiquidTypeMagma | MapLiquidTypeSlime);
+        public const uint MapLiquidTypeNoWater = 0x00;
+        public const uint MapLiquidTypeWater = 0x01;
+        public const uint MapLiquidTypeOcean = 0x02;
+        public const uint MapLiquidTypeMagma = 0x04;
+        public const uint MapLiquidTypeSlime = 0x08;
+        public const uint MapLiquidTypeDarkWater = 0x10;
+        public const uint MapAllLiquidTypes = (MapLiquidTypeWater | MapLiquidTypeOcean | MapLiquidTypeMagma | MapLiquidTypeSlime);
         public const float LiquidTileSize = (533.333f / 128.0f);
 
         public const int MinMapUpdateDelay = 50;
@@ -62,7 +62,7 @@ namespace Framework.Constants
         public const float MaxFallDistance = 250000.0f;
 
         public const string MapMagic = "MAPS";
-        public const string MapVersionMagic = "v1.8";
+        public const string MapVersionMagic = "v1.9";
         public const string MapAreaMagic = "AREA";
         public const string MapHeightMagic = "MHGT";
         public const string MapLiquidMagic = "MLIQ";
@@ -70,7 +70,7 @@ namespace Framework.Constants
         public const string mmapMagic = "MMAP";
         public const int mmapVersion = 8;
 
-        public const string VMapMagic = "VMAP_4.5";
+        public const string VMapMagic = "VMAP_4.7";
         public const float VMAPInvalidHeightValue = -200000.0f;
     }
 
@@ -99,6 +99,7 @@ namespace Framework.Constants
         RespawnDelay
     }
 
+    [Flags]
     public enum GridMapTypeMask
     {
         None = 0x00,

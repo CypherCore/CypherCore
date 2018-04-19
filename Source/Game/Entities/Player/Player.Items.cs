@@ -78,8 +78,8 @@ namespace Game.Entities
             bool store_error = false;
             for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i)
             {
-                uint count = iece.RequiredItemCount[i];
-                uint itemid = iece.RequiredItem[i];
+                uint count = iece.ItemCount[i];
+                uint itemid = iece.ItemID[i];
 
                 if (count != 0 && itemid != 0)
                 {
@@ -116,8 +116,8 @@ namespace Game.Entities
             // Grant back extendedcost items
             for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i)
             {
-                uint count = iece.RequiredItemCount[i];
-                uint itemid = iece.RequiredItem[i];
+                uint count = iece.ItemCount[i];
+                uint itemid = iece.ItemID[i];
                 if (count != 0 && itemid != 0)
                 {
                     List<ItemPosCount> dest = new List<ItemPosCount>();
@@ -131,11 +131,11 @@ namespace Game.Entities
             // Grant back currencies
             for (byte i = 0; i < ItemConst.MaxItemExtCostCurrencies; ++i)
             {
-                if (iece.RequirementFlags.HasAnyFlag((byte)((int)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
+                if (iece.Flags.HasAnyFlag((byte)((int)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
                     continue;
 
-                uint count = iece.RequiredCurrencyCount[i];
-                uint currencyid = iece.RequiredCurrency[i];
+                uint count = iece.CurrencyCount[i];
+                uint currencyid = iece.CurrencyID[i];
                 if (count != 0 && currencyid != 0)
                     ModifyCurrency((CurrencyTypes)currencyid, (int)count, true, true);
             }
@@ -179,17 +179,17 @@ namespace Game.Entities
 
             for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i)                             // item cost data
             {
-                setItemPurchaseData.Contents.Items[i].ItemCount = iece.RequiredItemCount[i];
-                setItemPurchaseData.Contents.Items[i].ItemID = iece.RequiredItem[i];
+                setItemPurchaseData.Contents.Items[i].ItemCount = iece.ItemCount[i];
+                setItemPurchaseData.Contents.Items[i].ItemID = iece.ItemID[i];
             }
 
             for (byte i = 0; i < ItemConst.MaxItemExtCostCurrencies; ++i)                       // currency cost data
             {
-                if (iece.RequirementFlags.HasAnyFlag((byte)((int)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
+                if (iece.Flags.HasAnyFlag((byte)((int)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
                     continue;
 
-                setItemPurchaseData.Contents.Currencies[i].CurrencyCount = iece.RequiredCurrencyCount[i];
-                setItemPurchaseData.Contents.Currencies[i].CurrencyID = iece.RequiredCurrency[i];
+                setItemPurchaseData.Contents.Currencies[i].CurrencyCount = iece.CurrencyCount[i];
+                setItemPurchaseData.Contents.Currencies[i].CurrencyID = iece.CurrencyID[i];
             }
 
             SendPacket(setItemPurchaseData);
@@ -205,17 +205,17 @@ namespace Game.Entities
                 itemPurchaseRefundResult.Contents.Value.Money = item.GetPaidMoney();
                 for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i) // item cost data
                 {
-                    itemPurchaseRefundResult.Contents.Value.Items[i].ItemCount = iece.RequiredItemCount[i];
-                    itemPurchaseRefundResult.Contents.Value.Items[i].ItemID = iece.RequiredItem[i];
+                    itemPurchaseRefundResult.Contents.Value.Items[i].ItemCount = iece.ItemCount[i];
+                    itemPurchaseRefundResult.Contents.Value.Items[i].ItemID = iece.ItemID[i];
                 }
 
                 for (byte i = 0; i < ItemConst.MaxItemExtCostCurrencies; ++i) // currency cost data
                 {
-                    if (iece.RequirementFlags.HasAnyFlag((byte)((uint)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
+                    if (iece.Flags.HasAnyFlag((byte)((uint)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
                         continue;
 
-                    itemPurchaseRefundResult.Contents.Value.Currencies[i].CurrencyCount = iece.RequiredCurrencyCount[i];
-                    itemPurchaseRefundResult.Contents.Value.Currencies[i].CurrencyID = iece.RequiredCurrency[i];
+                    itemPurchaseRefundResult.Contents.Value.Currencies[i].CurrencyCount = iece.CurrencyCount[i];
+                    itemPurchaseRefundResult.Contents.Value.Currencies[i].CurrencyID = iece.CurrencyID[i];
                 }
             }
 
@@ -274,7 +274,8 @@ namespace Game.Entities
 
             if (inventory)
             {
-                for (byte i = InventorySlots.ItemStart; i < InventorySlots.ItemEnd; i++)
+                int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+                for (byte i = InventorySlots.ItemStart; i < inventoryEnd; i++)
                 {
                     Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                     if (pItem != null)
@@ -326,7 +327,8 @@ namespace Game.Entities
 
             if (inventory)
             {
-                for (byte i = InventorySlots.ItemStart; i < InventorySlots.ItemEnd; i++)
+                int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+                for (byte i = InventorySlots.ItemStart; i < inventoryEnd; i++)
                 {
                     Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                     if (pItem != null)
@@ -388,7 +390,8 @@ namespace Game.Entities
         {
             uint TotalCost = 0;
             // equipped, backpack, bags itself
-            for (byte i = EquipmentSlot.Start; i < InventorySlots.ItemEnd; i++)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = EquipmentSlot.Start; i < inventoryEnd; i++)
                 TotalCost += DurabilityRepair((ushort)((InventorySlots.Bag0 << 8) | i), cost, discountMod, guildBank);
 
             // items in inventory bags
@@ -439,7 +442,7 @@ namespace Game.Entities
                     else if (ditemProto.GetClass() == ItemClass.Armor)
                         dmultiplier = dcost.ArmorSubClassCost[ditemProto.GetSubClass()];
 
-                    uint costs = (uint)(LostDurability * dmultiplier * (double)dQualitymodEntry.QualityMod * item.GetRepairCostMultiplier());
+                    uint costs = (uint)(LostDurability * dmultiplier * (double)dQualitymodEntry.Data * item.GetRepairCostMultiplier());
                     costs = (uint)(costs * discountMod * WorldConfig.GetFloatValue(WorldCfg.RateRepaircost));
 
                     if (costs == 0)                                   //fix for ITEM_QUALITY_ARTIFACT
@@ -556,6 +559,7 @@ namespace Game.Entities
             }
 
             // not specific slot or have space for partly store only in specific slot
+            byte inventoryEnd = (byte)(InventorySlots.ItemStart + GetInventorySlotCount());
 
             // in specific bag
             if (bag != ItemConst.NullBag)
@@ -597,7 +601,7 @@ namespace Game.Entities
                             return InventoryResult.ItemMaxCount;
                         }
 
-                        res = CanStoreItem_InInventorySlots(InventorySlots.ItemStart, InventorySlots.ItemEnd, dest, pProto, ref count, true, pItem, bag, slot);
+                        res = CanStoreItem_InInventorySlots(InventorySlots.ItemStart, inventoryEnd, dest, pProto, ref count, true, pItem, bag, slot);
                         if (res != InventoryResult.Ok)
                         {
                             no_space_count = count + no_similar_count;
@@ -678,7 +682,7 @@ namespace Game.Entities
                         }
                     }
 
-                    res = CanStoreItem_InInventorySlots(InventorySlots.ItemStart, InventorySlots.ItemEnd, dest, pProto, ref count, false, pItem, bag, slot);
+                    res = CanStoreItem_InInventorySlots(InventorySlots.ItemStart, inventoryEnd, dest, pProto, ref count, false, pItem, bag, slot);
                     if (res != InventoryResult.Ok)
                     {
                         no_space_count = count + no_similar_count;
@@ -754,7 +758,7 @@ namespace Game.Entities
                     return InventoryResult.ItemMaxCount;
                 }
 
-                res = CanStoreItem_InInventorySlots(InventorySlots.ItemStart, InventorySlots.ItemEnd, dest, pProto, ref count, true, pItem, bag, slot);
+                res = CanStoreItem_InInventorySlots(InventorySlots.ItemStart, inventoryEnd, dest, pProto, ref count, true, pItem, bag, slot);
                 if (res != InventoryResult.Ok)
                 {
                     no_space_count = count + no_similar_count;
@@ -917,7 +921,8 @@ namespace Game.Entities
             uint[] inventoryCounts = new uint[InventorySlots.ItemEnd - InventorySlots.ItemStart];
             uint[][] bagCounts = new uint[InventorySlots.BagEnd - InventorySlots.BagStart][];
 
-            for (byte i = InventorySlots.ItemStart; i < InventorySlots.ItemEnd; i++)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = InventorySlots.ItemStart; i < inventoryEnd; i++)
             {
                 item2 = GetItemByPos(InventorySlots.Bag0, i);
                 if (item2 && !item2.IsInTrade())
@@ -974,7 +979,7 @@ namespace Game.Entities
                 // search stack for merge to
                 if (pProto.GetMaxStackSize() != 1)
                 {
-                    for (byte t = InventorySlots.ItemStart; t < InventorySlots.ItemEnd; ++t)
+                    for (byte t = InventorySlots.ItemStart; t < inventoryEnd; ++t)
                     {
                         item2 = GetItemByPos(InventorySlots.Bag0, t);
                         if (item2 && item2.CanBeMergedPartlyWith(pProto) == InventoryResult.Ok && inventoryCounts[t - InventorySlots.ItemStart] + item.GetCount() <= pProto.GetMaxStackSize())
@@ -1043,7 +1048,7 @@ namespace Game.Entities
 
                 // search free slot
                 b_found = false;
-                for (int t = InventorySlots.ItemStart; t < InventorySlots.ItemEnd; ++t)
+                for (int t = InventorySlots.ItemStart; t < inventoryEnd; ++t)
                 {
                     if (inventoryCounts[t - InventorySlots.ItemStart] == 0)
                     {
@@ -1151,13 +1156,8 @@ namespace Game.Entities
                 AddEnchantmentDurations(pItem);
                 AddItemDurations(pItem);
 
-
-                ItemTemplate proto = pItem.GetTemplate();
-                for (byte i = 0; i < proto.Effects.Count; ++i)
-                    if (proto.Effects[i].Trigger == ItemSpelltriggerType.OnObtain && proto.Effects[i].SpellID > 0) // On obtain trigger
-                        if (bag == InventorySlots.Bag0 || (bag >= InventorySlots.BagStart && bag < InventorySlots.BagEnd))
-                            if (!HasAura(proto.Effects[i].SpellID))
-                                CastSpell(this, proto.Effects[i].SpellID, true, pItem);
+                if (bag == InventorySlots.Bag0 || (bag >= InventorySlots.BagStart && bag < InventorySlots.BagEnd))
+                    ApplyItemObtainSpells(pItem, true);
 
                 return pItem;
             }
@@ -1195,12 +1195,8 @@ namespace Game.Entities
 
                 pItem2.SetState(ItemUpdateState.Changed, this);
 
-                ItemTemplate proto = pItem2.GetTemplate();
-                for (byte i = 0; i < proto.Effects.Count; ++i)
-                    if (proto.Effects[i].Trigger == ItemSpelltriggerType.OnObtain && proto.Effects[i].SpellID > 0) // On obtain trigger
-                        if (bag == InventorySlots.Bag0 || (bag >= InventorySlots.BagStart && bag < InventorySlots.BagEnd))
-                            if (!HasAura(proto.Effects[i].SpellID))
-                                CastSpell(this, proto.Effects[i].SpellID, true, pItem2);
+                if (bag == InventorySlots.Bag0 || (bag >= InventorySlots.BagStart && bag < InventorySlots.BagEnd))
+                    ApplyItemObtainSpells(pItem2, true);
 
                 return pItem2;
             }
@@ -1316,7 +1312,7 @@ namespace Game.Entities
                 ItemChildEquipmentRecord childItemEntry = Global.DB2Mgr.GetItemChildEquipment(itemId);
                 if (childItemEntry != null)
                 {
-                    ItemTemplate childTemplate = Global.ObjectMgr.GetItemTemplate(childItemEntry.AltItemID);
+                    ItemTemplate childTemplate = Global.ObjectMgr.GetItemTemplate(childItemEntry.ChildItemID);
                     if (childTemplate != null)
                     {
                         List<ItemPosCount> childDest = new List<ItemPosCount>();
@@ -1379,7 +1375,6 @@ namespace Game.Entities
             // check unique-equipped limit
             if (pProto.GetItemLimitCategory() != 0)
             {
-
                 ItemLimitCategoryRecord limitEntry = CliDB.ItemLimitCategoryStorage.LookupByKey(pProto.GetItemLimitCategory());
                 if (limitEntry == null)
                 {
@@ -1389,10 +1384,11 @@ namespace Game.Entities
 
                 if (limitEntry.Flags == 0)
                 {
+                    byte limitQuantity = GetItemLimitCategoryQuantity(limitEntry);
                     uint curcount = GetItemCountWithLimitCategory(pProto.GetItemLimitCategory(), pItem);
-                    if (curcount + count > limitEntry.Quantity)
+                    if (curcount + count > limitQuantity)
                     {
-                        no_space_count = count + curcount - limitEntry.Quantity;
+                        no_space_count = count + curcount - limitQuantity;
                         offendingItemId = pProto.GetId();
                         return InventoryResult.ItemMaxLimitCategoryCountExceededIs;
                     }
@@ -1471,7 +1467,7 @@ namespace Game.Entities
             if (Convert.ToBoolean(proto.GetFlags2() & ItemFlags2.FactionAlliance) && GetTeam() != Team.Alliance)
                 return InventoryResult.CantEquipEver;
 
-            if ((proto.GetAllowableClass() & getClassMask()) == 0 || (proto.GetAllowableRace() & getRaceMask()) == 0)
+            if ((proto.GetAllowableClass() & getClassMask()) == 0 || (proto.GetAllowableRace() & (long)getRaceMask()) == 0)
                 return InventoryResult.CantEquipEver;
 
             if (proto.GetRequiredSkill() != 0)
@@ -1499,13 +1495,13 @@ namespace Game.Entities
             if (proto.Effects.Count >= 2)
             {
                 if (proto.Effects[0].SpellID == 483 || proto.Effects[0].SpellID == 55884)
-                    if (HasSpell(proto.Effects[1].SpellID))
+                    if (HasSpell((uint)proto.Effects[1].SpellID))
                         return InventoryResult.InternalBagError;
             }
 
             ArtifactRecord artifact = CliDB.ArtifactStorage.LookupByKey(proto.GetArtifactID());
             if (artifact != null)
-                if (artifact.SpecID != GetUInt32Value(PlayerFields.CurrentSpecId))
+                if (artifact.ChrSpecializationID != GetUInt32Value(PlayerFields.CurrentSpecId))
                     return InventoryResult.CantUseItem;
 
             return InventoryResult.Ok;
@@ -1538,7 +1534,8 @@ namespace Game.Entities
                 }
             }
 
-            for (byte i = InventorySlots.ItemStart; i < InventorySlots.ItemEnd; ++i)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = InventorySlots.ItemStart; i < inventoryEnd; ++i)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem != null)
@@ -1729,7 +1726,7 @@ namespace Game.Entities
                 Item childItem = GetChildItemByGuid(parentItem.GetChildItem());
                 if (childItem)
                 {
-                    ushort childDest = (ushort)((InventorySlots.Bag0 << 8) | itemChildEquipment.AltEquipmentSlot);
+                    ushort childDest = (ushort)((InventorySlots.Bag0 << 8) | itemChildEquipment.ChildItemEquipSlot);
                     if (childItem.GetPos() != childDest)
                     {
                         Item dstItem = GetItemByPos(childDest);
@@ -1939,7 +1936,7 @@ namespace Game.Entities
                         if (pProto != null && pProto.GetItemSet() != 0)
                             Item.RemoveItemsSetItem(this, pProto);
 
-                        _ApplyItemMods(pItem, slot, false);
+                        _ApplyItemMods(pItem, slot, false, update);
 
                         // remove item dependent auras and casts (only weapon and armor slots)
                         if (slot < EquipmentSlot.End)
@@ -2447,7 +2444,12 @@ namespace Game.Entities
                 BankItem(sDest2, pDstItem, true);
             else if (IsEquipmentPos(src))
                 EquipItem(eDest2, pDstItem, true);
-            
+
+            // if inventory item was moved, check if we can remove dependent auras, because they were not removed in Player::RemoveItem (update was set to false)
+            // do this after swaps are done, we pass nullptr because both weapons could be swapped and none of them should be ignored
+            if ((srcbag == InventorySlots.Bag0 && srcslot < InventorySlots.BagEnd) || (dstbag == InventorySlots.Bag0 && dstslot < InventorySlots.BagEnd))
+                ApplyItemDependentAuras(null, false);
+
             // if player is moving bags and is looting an item inside this bag
             // release the loot
             if (!GetLootGUID().IsEmpty())
@@ -2509,17 +2511,17 @@ namespace Game.Entities
                 var iece = CliDB.ItemExtendedCostStorage.LookupByKey(crItem.ExtendedCost);
                 for (int i = 0; i < ItemConst.MaxItemExtCostItems; ++i)
                 {
-                    if (iece.RequiredItem[i] != 0)
-                        DestroyItemCount(iece.RequiredItem[i], iece.RequiredItemCount[i] * stacks, true);
+                    if (iece.ItemID[i] != 0)
+                        DestroyItemCount(iece.ItemID[i], iece.ItemCount[i] * stacks, true);
                 }
 
                 for (int i = 0; i < ItemConst.MaxItemExtCostCurrencies; ++i)
                 {
-                    if (iece.RequirementFlags.HasAnyFlag((byte)((int)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
+                    if (iece.Flags.HasAnyFlag((byte)((int)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
                         continue;
 
-                    if (iece.RequiredCurrency[i] != 0)
-                        ModifyCurrency((CurrencyTypes)iece.RequiredCurrency[i], -(int)(iece.RequiredCurrencyCount[i] * stacks), true, true);
+                    if (iece.CurrencyID[i] != 0)
+                        ModifyCurrency((CurrencyTypes)iece.CurrencyID[i], -(int)(iece.CurrencyCount[i] * stacks), true, true);
                 }
             }
 
@@ -2682,7 +2684,8 @@ namespace Game.Entities
         }
         public Item GetItemByGuid(ObjectGuid guid)
         {
-            for (byte i = EquipmentSlot.Start; i < InventorySlots.ItemEnd; ++i)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = EquipmentSlot.Start; i < inventoryEnd; ++i)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem != null)
@@ -2744,7 +2747,8 @@ namespace Game.Entities
         public uint GetItemCount(uint item, bool inBankAlso = false, Item skipItem = null)
         {
             uint count = 0;
-            for (byte i = EquipmentSlot.Start; i < InventorySlots.ItemEnd; i++)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = EquipmentSlot.Start; i < inventoryEnd; i++)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem != null)
@@ -2761,7 +2765,7 @@ namespace Game.Entities
 
             if (skipItem != null && skipItem.GetTemplate().GetGemProperties() != 0)
             {
-                for (byte i = EquipmentSlot.Start; i < InventorySlots.ItemEnd; ++i)
+                for (byte i = EquipmentSlot.Start; i < inventoryEnd; ++i)
                 {
                     Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                     if (pItem != null)
@@ -2874,7 +2878,8 @@ namespace Game.Entities
         public Item GetItemByEntry(uint entry)
         {
             // in inventory
-            for (byte i = InventorySlots.ItemStart; i < InventorySlots.ItemEnd; ++i)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = InventorySlots.ItemStart; i < inventoryEnd; ++i)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem != null)
@@ -2919,7 +2924,8 @@ namespace Game.Entities
         {
             List<Item> itemList = new List<Item>();
 
-            for (byte i = InventorySlots.ItemStart; i < InventorySlots.ItemEnd; ++i)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = InventorySlots.ItemStart; i < inventoryEnd; ++i)
             {
                 Item item = GetItemByPos(InventorySlots.Bag0, i);
                 if (item != null)
@@ -2974,7 +2980,8 @@ namespace Game.Entities
         public bool HasItemCount(uint item, uint count = 1, bool inBankAlso = false)
         {
             uint tempcount = 0;
-            for (byte i = EquipmentSlot.Start; i < InventorySlots.ItemEnd; i++)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = EquipmentSlot.Start; i < inventoryEnd; i++)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem != null && pItem.GetEntry() == item && !pItem.IsInTrade())
@@ -3083,7 +3090,7 @@ namespace Game.Entities
                     return true;
 
                 // backpack slots
-                if (slot >= InventorySlots.ItemStart && slot < InventorySlots.ItemEnd)
+                if (slot >= InventorySlots.ItemStart && slot < InventorySlots.ItemStart + GetInventorySlotCount())
                     return true;
 
                 // bank main slots
@@ -3115,7 +3122,8 @@ namespace Game.Entities
 
         public Item GetChildItemByGuid(ObjectGuid guid)
         {
-            for (byte i = EquipmentSlot.Start; i < InventorySlots.ItemEnd; ++i)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = EquipmentSlot.Start; i < inventoryEnd; ++i)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem)
@@ -3136,7 +3144,8 @@ namespace Game.Entities
         uint GetItemCountWithLimitCategory(uint limitCategory, Item skipItem)
         {
             uint count = 0;
-            for (byte i = EquipmentSlot.Start; i < InventorySlots.ItemEnd; ++i)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = EquipmentSlot.Start; i < inventoryEnd; ++i)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem)
@@ -3212,6 +3221,20 @@ namespace Game.Entities
 
             return count;
         }
+        public byte GetItemLimitCategoryQuantity(ItemLimitCategoryRecord limitEntry)
+        {
+            byte limit = limitEntry.Quantity;
+
+            var limitConditions = Global.DB2Mgr.GetItemLimitCategoryConditions(limitEntry.Id);
+            foreach (ItemLimitCategoryConditionRecord limitCondition in limitConditions)
+            {
+                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(limitCondition.PlayerConditionID);
+                if (playerCondition == null || ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
+                    limit += (byte)limitCondition.AddQuantity;
+            }
+
+            return limit;
+        }
 
         public void DestroyConjuredItems(bool update)
         {
@@ -3220,7 +3243,8 @@ namespace Game.Entities
             Log.outDebug(LogFilter.Player, "STORAGE: DestroyConjuredItems");
 
             // in inventory
-            for (byte i = InventorySlots.ItemStart; i < InventorySlots.ItemEnd; i++)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = InventorySlots.ItemStart; i < inventoryEnd; i++)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem)
@@ -3260,7 +3284,8 @@ namespace Game.Entities
             Log.outDebug(LogFilter.Player, "STORAGE: DestroyZoneLimitedItem in map {0} and area {1}", GetMapId(), new_zone);
 
             // in inventory
-            for (byte i = InventorySlots.ItemStart; i < InventorySlots.ItemEnd; i++)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = InventorySlots.ItemStart; i < inventoryEnd; i++)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem)
@@ -3308,7 +3333,7 @@ namespace Game.Entities
                 return InventoryResult.ItemNotFound;
 
             // Used by group, function GroupLoot, to know if a prototype can be used by a player
-            if ((proto.GetAllowableClass() & getClassMask()) == 0 || (proto.GetAllowableRace() & getRaceMask()) == 0)
+            if ((proto.GetAllowableClass() & getClassMask()) == 0 || (proto.GetAllowableRace() & (long)getRaceMask()) == 0)
                 return InventoryResult.CantEquipEver;
 
             if (proto.GetRequiredSpell() != 0 && !HasSpell(proto.GetRequiredSpell()))
@@ -3481,7 +3506,7 @@ namespace Game.Entities
 
                 for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i)
                 {
-                    if (iece.RequiredItem[i] != 0 && !HasItemCount(iece.RequiredItem[i], (iece.RequiredItemCount[i] * stacks)))
+                    if (iece.ItemID[i] != 0 && !HasItemCount(iece.ItemID[i], (iece.ItemCount[i] * stacks)))
                     {
                         SendEquipError(InventoryResult.VendorMissingTurnins);
                         return false;
@@ -3490,23 +3515,23 @@ namespace Game.Entities
 
                 for (byte i = 0; i < ItemConst.MaxItemExtCostCurrencies; ++i)
                 {
-                    if (iece.RequiredCurrency[i] == 0)
+                    if (iece.CurrencyID[i] == 0)
                         continue;
 
-                    CurrencyTypesRecord entry = CliDB.CurrencyTypesStorage.LookupByKey(iece.RequiredCurrency[i]);
+                    CurrencyTypesRecord entry = CliDB.CurrencyTypesStorage.LookupByKey(iece.CurrencyID[i]);
                     if (entry == null)
                     {
                         SendBuyError(BuyResult.CantFindItem, creature, currency); // Find correct error
                         return false;
                     }
 
-                    if (iece.RequirementFlags.HasAnyFlag((byte)((uint)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
+                    if (iece.Flags.HasAnyFlag((byte)((uint)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
                     {
                         // Not implemented
                         SendEquipError(InventoryResult.VendorMissingTurnins); // Find correct error
                         return false;
                     }
-                    else if (!HasCurrency(iece.RequiredCurrency[i], (iece.RequiredCurrencyCount[i] * stacks)))
+                    else if (!HasCurrency(iece.CurrencyID[i], (iece.CurrencyCount[i] * stacks)))
                     {
                         SendEquipError(InventoryResult.VendorMissingTurnins); // Find correct error
                         return false;
@@ -3514,20 +3539,20 @@ namespace Game.Entities
                 }
 
                 // check for personal arena rating requirement
-                if (GetMaxPersonalArenaRatingRequirement(iece.RequiredArenaSlot) < iece.RequiredPersonalArenaRating)
+                if (GetMaxPersonalArenaRatingRequirement(iece.ArenaBracket) < iece.RequiredArenaRating)
                 {
                     // probably not the proper equip err
                     SendEquipError(InventoryResult.CantEquipRank);
                     return false;
                 }
 
-                if (iece.RequiredFactionId != 0 && (uint)GetReputationRank(iece.RequiredFactionId) < iece.RequiredFactionStanding)
+                if (iece.MinFactionID != 0 && (uint)GetReputationRank(iece.MinFactionID) < iece.RequiredAchievement)
                 {
                     SendBuyError(BuyResult.ReputationRequire, creature, currency);
                     return false;
                 }
 
-                if (iece.RequirementFlags.HasAnyFlag((byte)ItemExtendedCostFlags.RequireGuild) && GetGuildId() == 0)
+                if (iece.Flags.HasAnyFlag((byte)ItemExtendedCostFlags.RequireGuild) && GetGuildId() == 0)
                 {
                     SendEquipError(InventoryResult.VendorMissingTurnins); // Find correct error
                     return false;
@@ -3550,21 +3575,21 @@ namespace Game.Entities
             {
                 for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i)
                 {
-                    if (iece.RequiredItem[i] == 0)
+                    if (iece.ItemID[i] == 0)
                         continue;
 
-                    DestroyItemCount(iece.RequiredItem[i], iece.RequiredItemCount[i] * stacks, true);
+                    DestroyItemCount(iece.ItemID[i], iece.ItemCount[i] * stacks, true);
                 }
 
                 for (byte i = 0; i < ItemConst.MaxItemExtCostCurrencies; ++i)
                 {
-                    if (iece.RequiredCurrency[i] == 0)
+                    if (iece.CurrencyID[i] == 0)
                         continue;
 
-                    if (iece.RequirementFlags.HasAnyFlag((byte)((uint)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
+                    if (iece.Flags.HasAnyFlag((byte)((uint)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
                         continue;
 
-                    ModifyCurrency((CurrencyTypes)iece.RequiredCurrency[i], -(int)(iece.RequiredCurrencyCount[i] * stacks), false, true);
+                    ModifyCurrency((CurrencyTypes)iece.CurrencyID[i], -(int)(iece.CurrencyCount[i] * stacks), false, true);
                 }
             }
 
@@ -3681,7 +3706,7 @@ namespace Game.Entities
 
                 for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i)
                 {
-                    if (iece.RequiredItem[i] != 0 && !HasItemCount(iece.RequiredItem[i], iece.RequiredItemCount[i] * stacks))
+                    if (iece.ItemID[i] != 0 && !HasItemCount(iece.ItemID[i], iece.ItemCount[i] * stacks))
                     {
                         SendEquipError(InventoryResult.VendorMissingTurnins);
                         return false;
@@ -3690,22 +3715,22 @@ namespace Game.Entities
 
                 for (byte i = 0; i < ItemConst.MaxItemExtCostCurrencies; ++i)
                 {
-                    if (iece.RequiredCurrency[i] == 0)
+                    if (iece.CurrencyID[i] == 0)
                         continue;
 
-                    var entry = CliDB.CurrencyTypesStorage.LookupByKey(iece.RequiredCurrency[i]);
+                    var entry = CliDB.CurrencyTypesStorage.LookupByKey(iece.CurrencyID[i]);
                     if (entry == null)
                     {
                         SendBuyError(BuyResult.CantFindItem, creature, item);
                         return false;
                     }
 
-                    if (iece.RequirementFlags.HasAnyFlag((byte)((uint)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
+                    if (iece.Flags.HasAnyFlag((byte)((uint)ItemExtendedCostFlags.RequireSeasonEarned1 << i)))
                     {
                         SendEquipError(InventoryResult.VendorMissingTurnins); // Find correct error
                         return false;
                     }
-                    else if (!HasCurrency(iece.RequiredCurrency[i], iece.RequiredCurrencyCount[i] * stacks))
+                    else if (!HasCurrency(iece.CurrencyID[i], iece.CurrencyCount[i] * stacks))
                     {
                         SendEquipError(InventoryResult.VendorMissingTurnins);
                         return false;
@@ -3713,20 +3738,20 @@ namespace Game.Entities
                 }
 
                 // check for personal arena rating requirement
-                if (GetMaxPersonalArenaRatingRequirement(iece.RequiredArenaSlot) < iece.RequiredPersonalArenaRating)
+                if (GetMaxPersonalArenaRatingRequirement(iece.ArenaBracket) < iece.RequiredArenaRating)
                 {
                     // probably not the proper equip err
                     SendEquipError(InventoryResult.CantEquipRank);
                     return false;
                 }
 
-                if (iece.RequiredFactionId != 0 && (uint)GetReputationRank(iece.RequiredFactionId) < iece.RequiredFactionStanding)
+                if (iece.MinFactionID != 0 && (uint)GetReputationRank(iece.MinFactionID) < iece.MinReputation)
                 {
                     SendBuyError(BuyResult.ReputationRequire, creature, item);
                     return false;
                 }
 
-                if (iece.RequirementFlags.HasAnyFlag((byte)ItemExtendedCostFlags.RequireGuild) && GetGuildId() == 0)
+                if (iece.Flags.HasAnyFlag((byte)ItemExtendedCostFlags.RequireGuild) && GetGuildId() == 0)
                 {
                     SendEquipError(InventoryResult.VendorMissingTurnins); // Find correct error
                     return false;
@@ -3873,7 +3898,8 @@ namespace Game.Entities
 
         public bool HasItemTotemCategory(uint TotemCategory)
         {
-            for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = EquipmentSlot.Start; i < inventoryEnd; ++i)
             {
                 Item item = GetUseableItemByPos(InventorySlots.Bag0, i);
                 if (item && Global.DB2Mgr.IsTotemCategoryCompatibleWith(item.GetTemplate().GetTotemCategory(), TotemCategory))
@@ -3911,7 +3937,7 @@ namespace Game.Entities
             return false;
         }
 
-        public void _ApplyItemMods(Item item, byte slot, bool apply)
+        public void _ApplyItemMods(Item item, byte slot, bool apply, bool updateItemAuras = true)
         {
             if (slot >= InventorySlots.BagEnd || item == null)
                 return;
@@ -3932,7 +3958,8 @@ namespace Game.Entities
 
             _ApplyItemBonuses(item, slot, apply);
             ApplyItemEquipSpell(item, apply);
-            ApplyItemDependentAuras(item, apply);
+            if (updateItemAuras)
+                ApplyItemDependentAuras(item, apply);
             ApplyArtifactPowers(item, apply);
             ApplyEnchantment(item, apply);
 
@@ -4241,11 +4268,11 @@ namespace Game.Entities
                     continue;
 
                 // wrong triggering type
-                if (apply && spellData.Trigger != ItemSpelltriggerType.OnEquip)
+                if (apply && spellData.TriggerType != ItemSpelltriggerType.OnEquip)
                     continue;
 
                 // check if it is valid spell
-                SpellInfo spellproto = Global.SpellMgr.GetSpellInfo(spellData.SpellID);
+                SpellInfo spellproto = Global.SpellMgr.GetSpellInfo((uint)spellData.SpellID);
                 if (spellproto == null)
                     continue;
 
@@ -4313,13 +4340,13 @@ namespace Game.Entities
                 var effectData = proto.Effects[i];
 
                 // apply proc cooldown to equip auras if we have any
-                if (effectData.Trigger == ItemSpelltriggerType.OnEquip)
+                if (effectData.TriggerType == ItemSpelltriggerType.OnEquip)
                 {
-                    SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry(effectData.SpellID);
+                    SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry((uint)effectData.SpellID);
                     if (procEntry == null)
                         continue;
 
-                    Aura itemAura = GetAura(effectData.SpellID, GetGUID(), pItem.GetGUID());
+                    Aura itemAura = GetAura((uint)effectData.SpellID, GetGUID(), pItem.GetGUID());
                     if (itemAura != null)
                         itemAura.AddProcCooldown(now + TimeSpan.FromMilliseconds(procEntry.Cooldown));
                     continue;
@@ -4330,18 +4357,18 @@ namespace Game.Entities
                     continue;
 
                 // wrong triggering type
-                if (effectData.Trigger != ItemSpelltriggerType.OnUse)
+                if (effectData.TriggerType != ItemSpelltriggerType.OnUse)
                     continue;
 
                 // Don't replace longer cooldowns by equip cooldown if we have any.
-                if (GetSpellHistory().GetRemainingCooldown(Global.SpellMgr.GetSpellInfo(effectData.SpellID)) > 30 * Time.InMilliseconds)
+                if (GetSpellHistory().GetRemainingCooldown(Global.SpellMgr.GetSpellInfo((uint)effectData.SpellID)) > 30 * Time.InMilliseconds)
                     continue;
 
-                GetSpellHistory().AddCooldown(effectData.SpellID, pItem.GetEntry(), TimeSpan.FromSeconds(30));
+                GetSpellHistory().AddCooldown((uint)effectData.SpellID, pItem.GetEntry(), TimeSpan.FromSeconds(30));
 
                 ItemCooldown data = new ItemCooldown();
                 data.ItemGuid = pItem.GetGUID();
-                data.SpellID = effectData.SpellID;
+                data.SpellID = (uint)effectData.SpellID;
                 data.Cooldown = 30 * Time.InMilliseconds; //Always 30secs?
                 SendPacket(data);
             }
@@ -5254,11 +5281,11 @@ namespace Game.Entities
             if (childEquipement == null)
                 return InventoryResult.Ok;
 
-            Item dstItem = GetItemByPos(InventorySlots.Bag0, childEquipement.AltEquipmentSlot);
+            Item dstItem = GetItemByPos(InventorySlots.Bag0, childEquipement.ChildItemEquipSlot);
             if (!dstItem)
                 return InventoryResult.Ok;
 
-            ushort childDest = (ushort)((InventorySlots.Bag0 << 8) | childEquipement.AltEquipmentSlot);
+            ushort childDest = (ushort)((InventorySlots.Bag0 << 8) | childEquipement.ChildItemEquipSlot);
             InventoryResult msg = CanUnequipItem(childDest, !childItem.IsBag());
             if (msg != InventoryResult.Ok)
                 return msg;
@@ -5327,14 +5354,15 @@ namespace Game.Entities
                     return InventoryResult.NotEquippable;
 
                 // NOTE: limitEntry.mode not checked because if item have have-limit then it applied and to equip case
+                byte limitQuantity = GetItemLimitCategoryQuantity(limitEntry);
 
-                if (limit_count > limitEntry.Quantity)
+                if (limit_count > limitQuantity)
                     return InventoryResult.ItemMaxLimitCategoryEquippedExceededIs;
 
                 // there is an equip limit on this item
-                if (HasItemWithLimitCategoryEquipped(itemProto.GetItemLimitCategory(), limitEntry.Quantity - limit_count + 1, except_slot))
+                if (HasItemWithLimitCategoryEquipped(itemProto.GetItemLimitCategory(), limitQuantity - limit_count + 1, except_slot))
                     return InventoryResult.ItemMaxLimitCategoryEquippedExceededIs;
-                else if (HasGemWithLimitCategoryEquipped(itemProto.GetItemLimitCategory(), limitEntry.Quantity - limit_count + 1, except_slot))
+                else if (HasGemWithLimitCategoryEquipped(itemProto.GetItemLimitCategory(), limitQuantity - limit_count + 1, except_slot))
                     return InventoryResult.ItemMaxCountEquippedSocketed;
             }
 
@@ -5405,7 +5433,7 @@ namespace Game.Entities
 
             ArtifactAppearanceRecord artifactAppearance = CliDB.ArtifactAppearanceStorage.LookupByKey(item.GetModifier(ItemModifier.ArtifactAppearanceId));
             if (artifactAppearance != null)
-                if (artifactAppearance.ShapeshiftDisplayID != 0 && GetShapeshiftForm() == (ShapeShiftForm)artifactAppearance.ModifiesShapeshiftFormDisplay)
+                if (artifactAppearance.OverrideShapeshiftDisplayID != 0 && GetShapeshiftForm() == (ShapeShiftForm)artifactAppearance.OverrideShapeshiftFormID)
                     RestoreDisplayId();
         }
 
@@ -5428,7 +5456,7 @@ namespace Game.Entities
                                 continue;
 
                             if (powerAura.HasEffect(auraEffect.GetEffIndex()))
-                                auraEffect.ChangeAmount((int)(artifactPowerRank.Value != 0 ? artifactPowerRank.Value : auraEffect.GetSpellEffectInfo().CalcValue()));
+                                auraEffect.ChangeAmount((int)(artifactPowerRank.AuraPointsOverride != 0 ? artifactPowerRank.AuraPointsOverride : auraEffect.GetSpellEffectInfo().CalcValue()));
                         }
                     }
                     else
@@ -5437,10 +5465,10 @@ namespace Game.Entities
                 else if (apply)
                 {
                     Dictionary<SpellValueMod, int> csv = new Dictionary<SpellValueMod, int>();
-                    if (artifactPowerRank.Value != 0)
+                    if (artifactPowerRank.AuraPointsOverride != 0)
                         for (int i = 0; i < SpellConst.MaxEffects; ++i)
                             if (spellInfo.GetEffect((uint)i) != null)
-                                csv.Add(SpellValueMod.BasePoint0 + i, (int)artifactPowerRank.Value);
+                                csv.Add(SpellValueMod.BasePoint0 + i, (int)artifactPowerRank.AuraPointsOverride);
 
                     CastCustomSpell(artifactPowerRank.SpellID, csv, this, TriggerCastFlags.FullMask, artifact);
                 }
@@ -5626,10 +5654,7 @@ namespace Game.Entities
                 pItem.ClearSoulboundTradeable(this);
                 RemoveTradeableItem(pItem);
 
-                ItemTemplate proto = pItem.GetTemplate();
-                for (byte i = 0; i < proto.Effects.Count; ++i)
-                    if (proto.Effects[i].Trigger == ItemSpelltriggerType.OnObtain && proto.Effects[i].SpellID > 0) // On obtain trigger
-                        RemoveAurasDueToSpell(proto.Effects[i].SpellID);
+                ApplyItemObtainSpells(pItem, false);
 
                 ItemRemovedQuestCheck(pItem.GetEntry(), pItem.GetCount());
                 Bag pBag;
@@ -5701,7 +5726,8 @@ namespace Game.Entities
             uint remcount = 0;
 
             // in inventory
-            for (byte i = InventorySlots.ItemStart; i < InventorySlots.ItemEnd; ++i)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = InventorySlots.ItemStart; i < inventoryEnd; ++i)
             {
                 Item item = GetItemByPos(InventorySlots.Bag0, i);
                 if (item != null)
@@ -5971,6 +5997,52 @@ namespace Game.Entities
                 Item pItem = StoreNewItem(dest, lootItem.itemid, true, lootItem.randomPropertyId, null, lootItem.context, lootItem.BonusListIDs);
                 SendNewItem(pItem, lootItem.count, false, false, broadcast);
             }
+        }
+
+        public byte GetInventorySlotCount() { return GetByteValue(PlayerFields.FieldBytes2, PlayerFieldOffsets.FieldBytes2OffsetNumBackpackSlots);    }
+        public void SetInventorySlotCount(byte slots)
+        {
+            //ASSERT(slots <= (INVENTORY_SLOT_ITEM_END - INVENTORY_SLOT_ITEM_START));
+
+            if (slots < GetInventorySlotCount())
+            {
+                List<Item> unstorableItems = new List<Item>();
+
+                for (byte slot = (byte)(InventorySlots.ItemStart + slots); slot < InventorySlots.ItemEnd; ++slot)
+                {
+                    Item unstorableItem = GetItemByPos(InventorySlots.Bag0, slot);
+                    if (unstorableItem)
+                        unstorableItems.Add(unstorableItem);
+                }
+
+                if (!unstorableItems.Empty())
+                {
+                    int fullBatches = unstorableItems.Count / SharedConst.MaxMailItems;
+                    int remainder = unstorableItems.Count % SharedConst.MaxMailItems;
+                    SQLTransaction trans = new SQLTransaction();
+
+                    var sendItemsBatch = new Action<int, int>((batchNumber, batchSize) =>
+                    {
+                        MailDraft draft = new MailDraft(Global.ObjectMgr.GetCypherString(CypherStrings.NotEquippedItem), "There were problems with equipping item(s).");
+                        for (int j = 0; j < batchSize; ++j)
+                            draft.AddItem(unstorableItems[batchNumber * SharedConst.MaxMailItems + j]);
+
+                        draft.SendMailTo(trans, this, new MailSender(this, MailStationery.Gm), MailCheckMask.Copied);
+                    });
+
+                    for (int batch = 0; batch < fullBatches; ++batch)
+                        sendItemsBatch(batch, SharedConst.MaxMailItems);
+
+                    if (remainder != 0)
+                        sendItemsBatch(fullBatches, remainder);
+
+                    DB.Characters.CommitTransaction(trans);
+
+                    SendPacket(new CharacterInventoryOverflowWarning());
+                }
+            }
+
+            SetByteValue(PlayerFields.FieldBytes2, PlayerFieldOffsets.FieldBytes2OffsetNumBackpackSlots, slots);
         }
 
         public byte GetBankBagSlotCount() { return GetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetBankBagSlots); }
@@ -6257,7 +6329,7 @@ namespace Game.Entities
                     switch (loot_type)
                     {
                         case LootType.Disenchanting:
-                            loot.FillLoot(item.GetTemplate().DisenchantID, LootStorage.Disenchant, this, true);
+                            loot.FillLoot(item.GetDisenchantLoot(this).Id, LootStorage.Disenchant, this, true);
                             break;
                         case LootType.Prospecting:
                             loot.FillLoot(item.GetEntry(), LootStorage.Prospecting, this, true);
@@ -6533,13 +6605,14 @@ namespace Game.Entities
                 }
             }
 
-            EquipmentSetInfo eqSlot = _equipmentSets[newEqSet.Guid];
-            EquipmentSetUpdateState old_state = eqSlot.state;
+            ulong setGuid = (newEqSet.Guid != 0) ? newEqSet.Guid : Global.ObjectMgr.GenerateEquipmentSetGuid();
+
+            EquipmentSetInfo eqSlot = _equipmentSets[setGuid];
             eqSlot.Data = newEqSet;
 
             if (eqSlot.Data.Guid == 0)
             {
-                eqSlot.Data.Guid = Global.ObjectMgr.GenerateEquipmentSetGuid();
+                eqSlot.Data.Guid = setGuid;
 
                 EquipmentSetID data = new EquipmentSetID();
                 data.GUID = eqSlot.Data.Guid;
@@ -6548,7 +6621,7 @@ namespace Game.Entities
                 SendPacket(data);
             }
 
-            eqSlot.state = old_state == EquipmentSetUpdateState.New ? EquipmentSetUpdateState.New : EquipmentSetUpdateState.Changed;
+            eqSlot.state = eqSlot.state == EquipmentSetUpdateState.New ? EquipmentSetUpdateState.New : EquipmentSetUpdateState.Changed;
         }
 
         public void DeleteEquipmentSet(ulong id)
@@ -6649,6 +6722,24 @@ namespace Game.Entities
             }
 
             return null;
+        }
+
+        //Misc
+        void UpdateItemLevelAreaBasedScaling()
+        {
+            // @todo Activate pvp item levels during world pvp
+            Map map = GetMap();
+            bool pvpActivity = map.IsBattlegroundOrArena() || ((int)map.GetEntry().Flags[1]).HasAnyFlag(0x40) || HasPvpRulesEnabled();
+
+            if (_usePvpItemLevels != pvpActivity)
+            {
+                float healthPct = GetHealthPct();
+                _RemoveAllItemMods();
+                ActivatePvpItemLevels(pvpActivity);
+                _ApplyAllItemMods();
+                SetHealth(MathFunctions.CalculatePct(GetMaxHealth(), healthPct));
+            }
+            // @todo other types of power scaling such as timewalking
         }
     }
 }

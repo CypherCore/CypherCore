@@ -324,53 +324,6 @@ namespace Game.AI
             _isCombatMovementAllowed = allowMovement;
         }
 
-        /*bool EnterEvadeIfOutOfCombatArea(uint diff)
-        {
-            if (_evadeCheckCooldown <= diff)
-                _evadeCheckCooldown = 2500;
-            else
-            {
-                _evadeCheckCooldown -= diff;
-                return false;
-            }
-
-            if (me.IsInEvadeMode() || me.GetVictim() == null)
-                return false;
-
-            float x = me.GetPositionX();
-            float y = me.GetPositionY();
-            float z = me.GetPositionZ();
-
-            switch (me.GetEntry())
-            {
-                case 12017: // broodlord (not move down stairs)
-                    if (z > 448.60f)
-                        return false;
-                    break;
-                case 19516: // void reaver (calculate from center of room)
-                    if (me.GetDistance2d(432.59f, 371.93f) < 105.0f)
-                        return false;
-                    break;
-                case 23578: // jan'alai (calculate by Z)
-                    if (z > 12.0f)
-                        return false;
-                    break;
-                case 28860: // sartharion (calculate box)
-                    if (x > 3218.86f && x < 3275.69f && y < 572.40f && y > 484.68f)
-                        return false;
-                    break;
-                default: // For most of creatures that certain area is their home area.
-                    Log.outInfo(LogFilter.Server, "Scripts: EnterEvadeIfOutOfCombatArea used for creature entry {0}, but does not have any definition. Using the default one.", me.GetEntry());
-                    uint homeAreaId = me.GetMap().GetAreaId(me.GetHomePosition().posX, me.GetHomePosition().posY, me.GetHomePosition().posZ);
-                    if (me.GetAreaId() == homeAreaId)
-                        return false;
-                    break;
-            }
-
-            EnterEvadeMode();
-            return true;
-        }*/
-
         // Called at any Damage from any attacker (before damage apply)
         public override void DamageTaken(Unit attacker, ref uint damage) { }
 

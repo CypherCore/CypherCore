@@ -37,10 +37,15 @@ namespace Game.Entities
         public void Initialize()
         {
             //todo needs alot of support for threadsafe.
-            //int num_threads= WorldConfig.GetIntValue(WorldCfg.Numthreads);
+            int num_threads = WorldConfig.GetIntValue(WorldCfg.Numthreads);
             // Start mtmaps if needed.
-            //if (num_threads > 0)
-                //m_updater = new MapUpdater(WorldConfig.GetIntValue(WorldCfg.Numthreads));
+            if (num_threads > 0)
+                m_updater = new MapUpdater(WorldConfig.GetIntValue(WorldCfg.Numthreads));
+        }
+
+        public void InitializeParentMapData(MultiMap<uint, uint> mapData)
+        {
+            _parentMapData = mapData;
         }
 
         public void InitializeVisibilityDistanceInfo()
@@ -52,28 +57,43 @@ namespace Game.Entities
         public Map CreateBaseMap(uint id)
         {
             Map map = FindBaseMap(id);
-
             if (map == null)
             {
-                lock (this)
+                var entry = CliDB.MapStorage.LookupByKey(id);
+                Contract.Assert(entry != null);
+                if (entry.ParentMapID != -1)
                 {
+                    CreateBaseMap((uint)entry.ParentMapID);
 
-                    var entry = CliDB.MapStorage.LookupByKey(id);
-                    Contract.Assert(entry != null);
-
-                    if (entry.Instanceable())
-                        map = new MapInstanced(id, i_gridCleanUpDelay);
-                    else
-                    {
-                        map = new Map(id, i_gridCleanUpDelay, 0, Difficulty.None);
-                        map.LoadRespawnTimes();
-                        map.LoadCorpseData();
-                    }
-
-                    i_maps[id] = map;
+                    // must have been created by parent map
+                    map = FindBaseMap(id);
+                    return map;
                 }
+
+                lock(_mapsLock)
+                    map = CreateBaseMap_i(entry);
             }
             Contract.Assert(map != null);
+            return map;
+        }
+
+        Map CreateBaseMap_i(MapRecord mapEntry)
+        {
+            Map map;
+            if (mapEntry.Instanceable())
+                map = new MapInstanced(mapEntry.Id, i_gridCleanUpDelay);
+            else
+            {
+                map = new Map(mapEntry.Id, i_gridCleanUpDelay, 0, Difficulty.None);
+                map.LoadRespawnTimes();
+                map.LoadCorpseData();
+            }
+
+            i_maps[mapEntry.Id] = map;
+
+            foreach (uint childMapId in _parentMapData[mapEntry.Id])
+                map.AddChildTerrainMap(CreateBaseMap_i(CliDB.MapStorage.LookupByKey(childMapId)));
+
             return map;
         }
 
@@ -206,20 +226,14 @@ namespace Game.Entities
             var time = (uint)i_timer.GetCurrent();
             foreach (var map in i_maps.Values.ToList())
             {
-                //if (!m_updater)
-                //m_updater.Enqueue(map, (uint)i_timer.GetCurrent());
-                //else
-                map.Update(time);
+                if (m_updater != null)
+                    m_updater.Enqueue(map, (uint)i_timer.GetCurrent());
+                else
+                    map.Update(time);
             }
 
-            //List<System.Threading.Tasks.Task> tasks = new List<System.Threading.Tasks.Task>();
-            //foreach (var map in i_maps.Values.ToList())
-            {
-                //tasks.Add(System.Threading.Tasks.Task.Factory.StartNew(() => map.Update(time)));
-            }
-            //System.Threading.Tasks.Task.WaitAll(tasks.ToArray());
-            //if (!m_updater)
-               // m_updater.Wait();
+            if (m_updater != null)
+                m_updater.Wait();
 
             foreach (var map in i_maps.ToList())
                 map.Value.DelayedUpdate(time);
@@ -251,6 +265,10 @@ namespace Game.Entities
 
         public void UnloadAll()
         {
+            // first unlink child maps
+            foreach (var pair in i_maps)
+                pair.Value.UnlinkAllChildTerrainMaps();
+
             foreach (var pair in i_maps.ToList())
             {
                 pair.Value.UnloadAll();
@@ -260,34 +278,40 @@ namespace Game.Entities
 
         public uint GetNumInstances()
         {
-            uint ret = 0;
-            foreach (var pair in i_maps.ToList())
+            lock (_mapsLock)
             {
-                Map map = pair.Value;
-                if (!map.Instanceable())
-                    continue;
-                var maps = ((MapInstanced)map).GetInstancedMaps();
-                foreach (var imap in maps)
-                    if (imap.Value.IsDungeon())
-                        ret++;
+                uint ret = 0;
+                foreach (var pair in i_maps.ToList())
+                {
+                    Map map = pair.Value;
+                    if (!map.Instanceable())
+                        continue;
+                    var maps = ((MapInstanced)map).GetInstancedMaps();
+                    foreach (var imap in maps)
+                        if (imap.Value.IsDungeon())
+                            ret++;
+                }
+                return ret;
             }
-            return ret;
         }
 
         public uint GetNumPlayersInInstances()
         {
-            uint ret = 0;
-            foreach (var pair in i_maps)
+            lock (_mapsLock)
             {
-                Map map = pair.Value;
-                if (!map.Instanceable())
-                    continue;
-                var maps = ((MapInstanced)map).GetInstancedMaps();
-                foreach (var imap in maps)
-                    if (imap.Value.IsDungeon())
-                        ret += (uint)imap.Value.GetPlayers().Count;
+                uint ret = 0;
+                foreach (var pair in i_maps)
+                {
+                    Map map = pair.Value;
+                    if (!map.Instanceable())
+                        continue;
+                    var maps = ((MapInstanced)map).GetInstancedMaps();
+                    foreach (var imap in maps)
+                        if (imap.Value.IsDungeon())
+                            ret += (uint)imap.Value.GetPlayers().Count;
+                }
+                return ret;
             }
-            return ret;
         }
 
         public void InitInstanceIds()
@@ -361,54 +385,60 @@ namespace Game.Entities
             return i_maps.LookupByKey(mapId);
         }
 
-        uint GetAreaId(uint mapid, float x, float y, float z)
+        uint GetAreaId(PhaseShift phaseShift, uint mapid, float x, float y, float z)
         {
             Map m = CreateBaseMap(mapid);
-            return m.GetAreaId(x, y, z);
+            return m.GetAreaId(phaseShift, x, y, z);
         }
 
-        public uint GetZoneId(uint mapid, float x, float y, float z)
+        public uint GetZoneId(PhaseShift phaseShift, uint mapid, float x, float y, float z)
         {
             Map m = CreateBaseMap(mapid);
-            return m.GetZoneId(x, y, z);
+            return m.GetZoneId(phaseShift, x, y, z);
         }
 
-        public void GetZoneAndAreaId(out uint zoneid, out uint areaid, uint mapid, float x, float y, float z)
+        public void GetZoneAndAreaId(PhaseShift phaseShift, out uint zoneid, out uint areaid, uint mapid, float x, float y, float z)
         {
             Map m = CreateBaseMap(mapid);
-            m.GetZoneAndAreaId(out zoneid, out areaid, x, y, z);
+            m.GetZoneAndAreaId(phaseShift, out zoneid, out areaid, x, y, z);
         }
 
         public void DoForAllMaps(Action<Map> worker)
         {
-            foreach (var map in i_maps.Values)
+            lock (_mapsLock)
             {
-                MapInstanced mapInstanced = map.ToMapInstanced();
-                if (mapInstanced)
+                foreach (var map in i_maps.Values)
                 {
-                    var instances = mapInstanced.GetInstancedMaps();
-                    foreach (var instance in instances.Values)
-                        worker(instance);
+                    MapInstanced mapInstanced = map.ToMapInstanced();
+                    if (mapInstanced)
+                    {
+                        var instances = mapInstanced.GetInstancedMaps();
+                        foreach (var instance in instances.Values)
+                            worker(instance);
+                    }
+                    else
+                        worker(map);
                 }
-                else
-                    worker(map);
             }
         }
 
         public void DoForAllMapsWithMapId(uint mapId, Action<Map> worker)
         {
-            var map = i_maps.LookupByKey(mapId);
-            if (map != null)
+            lock (_mapsLock)
             {
-                MapInstanced mapInstanced = map.ToMapInstanced();
-                if (mapInstanced)
+                var map = i_maps.LookupByKey(mapId);
+                if (map != null)
                 {
-                    var instances = mapInstanced.GetInstancedMaps();
-                    foreach (var instance in instances)
-                        worker(instance.Value);
+                    MapInstanced mapInstanced = map.ToMapInstanced();
+                    if (mapInstanced)
+                    {
+                        var instances = mapInstanced.GetInstancedMaps();
+                        foreach (var instance in instances)
+                            worker(instance.Value);
+                    }
+                    else
+                        worker(map);
                 }
-                else
-                    worker(map);
             }
         }
 
@@ -419,10 +449,14 @@ namespace Game.Entities
 
         Dictionary<uint, Map> i_maps = new Dictionary<uint, Map>();
         IntervalTimer i_timer = new IntervalTimer();
+        object _mapsLock= new object();
         uint i_gridCleanUpDelay;
         Dictionary<uint, bool> _instanceIds = new Dictionary<uint, bool>();
         uint _nextInstanceId;
-        //MapUpdater m_updater;
+        MapUpdater m_updater;
         uint _scheduledScripts;
+
+        // parent map links
+        MultiMap<uint, uint> _parentMapData;
     }
 }

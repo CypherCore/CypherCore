@@ -240,9 +240,9 @@ namespace Scripts.Spells.Hunter
 
         SpellCastResult DoCheckCast()
         {
-            Pet pet = GetCaster().ToPlayer().GetPet();
-            if (pet == null || !pet.IsAlive())
-                return SpellCastResult.CantDoThatRightNow;
+            Guardian pet = GetCaster().ToPlayer().GetGuardianPet();
+            if (pet == null || !pet.IsPet() || !pet.IsAlive())
+                return SpellCastResult.NoPet;
 
             // Do a mini Spell::CheckCasterAuras on the pet, no other way of doing this
             SpellCastResult result = SpellCastResult.SpellCastOk;

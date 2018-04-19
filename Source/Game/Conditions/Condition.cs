@@ -271,7 +271,7 @@ namespace Game.Conditions
                     condMeets = (ConditionValue2 == Global.WorldMgr.getWorldState((WorldStates)ConditionValue1));
                     break;
                 case ConditionTypes.PhaseId:
-                    condMeets = obj.IsInPhase(ConditionValue1);
+                    condMeets = obj.GetPhaseShift().HasPhase(ConditionValue1);
                     break;
                 case ConditionTypes.Title:
                     if (player != null)
@@ -303,7 +303,7 @@ namespace Game.Conditions
                         condMeets = unit.IsInWater();
                     break;
                 case ConditionTypes.TerrainSwap:
-                    condMeets = obj.IsInTerrainSwap(ConditionValue1);
+                    condMeets = obj.GetPhaseShift().HasVisibleMapId(ConditionValue1);
                     break;
                 case ConditionTypes.StandState:
                     {

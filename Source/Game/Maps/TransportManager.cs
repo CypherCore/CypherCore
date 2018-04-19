@@ -61,7 +61,7 @@ namespace Game.Maps
                     continue;
                 }
 
-                if (goInfo.MoTransport.taxiPathID >= CliDB.TaxiPathNodesByPath.Keys.Max())
+                if (!CliDB.TaxiPathNodesByPath.ContainsKey(goInfo.MoTransport.taxiPathID))
                 {
                     Log.outError(LogFilter.Sql, "Transport {0} (name: {1}) has an invalid path specified in `gameobject_template`.`data0` ({2}) field, skipped.", entry, goInfo.name, goInfo.MoTransport.taxiPathID);
                     continue;
@@ -94,7 +94,7 @@ namespace Game.Maps
                 AddPathNodeToTransport(anim.TransportID, anim.TimeIndex, anim);
 
             foreach (TransportRotationRecord rot in CliDB.TransportRotationStorage.Values)
-                AddPathRotationToTransport(rot.TransportID, rot.TimeIndex, rot);
+                AddPathRotationToTransport(rot.GameObjectsID, rot.TimeIndex, rot);
         }
 
         void GeneratePath(GameObjectTemplate goInfo, TransportTemplate transport)
@@ -124,7 +124,7 @@ namespace Game.Maps
                 if (!mapChange)
                 {
                     var node_i = path[i];
-                    if (i != path.Length - 1 && (node_i.Flags.HasAnyFlag(TaxiPathNodeFlags.Teleport) || node_i.MapID != path[i + 1].MapID))
+                    if (i != path.Length - 1 && (node_i.Flags.HasAnyFlag(TaxiPathNodeFlags.Teleport) || node_i.ContinentID != path[i + 1].ContinentID))
                     {
                         keyFrames.Last().Teleport = true;
                         mapChange = true;
@@ -138,8 +138,8 @@ namespace Game.Maps
 
                         keyFrames.Add(k);
                         splinePath.Add(new Vector3(node_i.Loc.X, node_i.Loc.Y, node_i.Loc.Z));
-                        if (!transport.mapsUsed.Contains(k.Node.MapID))
-                            transport.mapsUsed.Add(k.Node.MapID);
+                        if (!transport.mapsUsed.Contains(k.Node.ContinentID))
+                            transport.mapsUsed.Add(k.Node.ContinentID);
                     }
                 }
                 else
@@ -348,7 +348,7 @@ namespace Game.Maps
             _transportAnimations[transportEntry] = animNode;
         }
 
-        public Transport CreateTransport(uint entry, ulong guid = 0, Map map = null, uint phaseid = 0, uint phasegroup = 0)
+        public Transport CreateTransport(uint entry, ulong guid = 0, Map map = null, PhaseUseFlagsValues phaseUseFlags = 0, uint phaseId = 0, uint phaseGroupId = 0)
         {
             // instance case, execute GetGameObjectEntry hook
             if (map != null)
@@ -377,7 +377,7 @@ namespace Game.Maps
 
             // ...at first waypoint
             TaxiPathNodeRecord startNode = tInfo.keyFrames.First().Node;
-            uint mapId = startNode.MapID;
+            uint mapId = startNode.ContinentID;
             float x = startNode.Loc.X;
             float y = startNode.Loc.Y;
             float z = startNode.Loc.Z;
@@ -388,12 +388,7 @@ namespace Game.Maps
             if (!trans.Create(guidLow, entry, mapId, x, y, z, o, 255))
                 return null;
 
-            if (phaseid != 0)
-                trans.SetInPhase(phaseid, false, true);
-
-            if (phasegroup != 0)
-                foreach (var ph in Global.DB2Mgr.GetPhasesForGroup(phasegroup))
-                    trans.SetInPhase(ph, false, true);
+            PhasingHandler.InitDbPhaseShift(trans.GetPhaseShift(), phaseUseFlags, phaseId, phaseGroupId);
 
             MapRecord mapEntry = CliDB.MapStorage.LookupByKey(mapId);
             if (mapEntry != null)
@@ -424,7 +419,7 @@ namespace Game.Maps
 
             uint oldMSTime = Time.GetMSTime();
 
-            SQLResult result = DB.World.Query("SELECT guid, entry, phaseid, phasegroup FROM transports");
+            SQLResult result = DB.World.Query("SELECT guid, entry, phaseUseFlags, phaseid, phasegroup FROM transports");
 
             uint count = 0;
             if (!result.IsEmpty())
@@ -433,13 +428,51 @@ namespace Game.Maps
                 {
                     ulong guid = result.Read<ulong>(0);
                     uint entry = result.Read<uint>(1);
-                    uint phaseid = result.Read<uint>(2);
-                    uint phasegroup = result.Read<uint>(3);
+                    PhaseUseFlagsValues phaseUseFlags = (PhaseUseFlagsValues)result.Read<byte>(2);
+                    uint phaseId = result.Read<uint>(3);
+                    uint phaseGroupId = result.Read<uint>(4);
+
+                    if (Convert.ToBoolean(phaseUseFlags & ~PhaseUseFlagsValues.All))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) with unknown `phaseUseFlags` set, removed unknown value.");
+                        phaseUseFlags &= PhaseUseFlagsValues.All;
+                    }
+
+                    if (phaseUseFlags.HasAnyFlag(PhaseUseFlagsValues.AlwaysVisible) && phaseUseFlags.HasAnyFlag(PhaseUseFlagsValues.Inverse))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) has both `phaseUseFlags` PHASE_USE_FLAGS_ALWAYS_VISIBLE and PHASE_USE_FLAGS_INVERSE," +
+                            " removing PHASE_USE_FLAGS_INVERSE.");
+                        phaseUseFlags &= ~PhaseUseFlagsValues.Inverse;
+                    }
+
+                    if (phaseGroupId != 0 && phaseId != 0)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) with both `phaseid` and `phasegroup` set, `phasegroup` set to 0");
+                        phaseGroupId = 0;
+                    }
+
+                    if (phaseId != 0)
+                    {
+                        if (!CliDB.PhaseStorage.ContainsKey(phaseId))
+                        {
+                            Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) with `phaseid` {phaseId} does not exist, set to 0");
+                            phaseId = 0;
+                        }
+                    }
+
+                    if (phaseGroupId != 0)
+                    {
+                        if (Global.DB2Mgr.GetPhasesForGroup(phaseGroupId).Empty())
+                        {
+                            Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) with `phaseGroup` {phaseGroupId} does not exist, set to 0");
+                            phaseGroupId = 0;
+                        }
+                    }
 
                     TransportTemplate tInfo = GetTransportTemplate(entry);
                     if (tInfo != null)
                         if (!tInfo.inInstance)
-                            if (CreateTransport(entry, guid, null, phaseid, phasegroup))
+                            if (CreateTransport(entry, guid, null, phaseUseFlags, phaseId, phaseGroupId))
                                 ++count;
 
                 } while (result.NextRow());
@@ -578,22 +611,9 @@ namespace Game.Maps
             return Path.First().Value;
         }
 
-        Quaternion GetAnimRotation(uint time)
+        TransportRotationRecord GetAnimRotation(uint time)
         {
-            if (Rotations.Empty())
-                return new Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
-
-            TransportRotationRecord rot = Rotations.First().Value;
-            foreach (var pair in Rotations)
-            {
-                if (time >= pair.Key)
-                {
-                    rot = pair.Value;
-                    break;
-                }
-            }
-
-            return new Quaternion(rot.X, rot.Y, rot.Z, rot.W);
+            return Rotations.LookupByKey(time);
         }
 
         public Dictionary<uint, TransportAnimationRecord> Path = new Dictionary<uint, TransportAnimationRecord>();

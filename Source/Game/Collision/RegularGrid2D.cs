@@ -19,6 +19,7 @@ using Framework.GameMath;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Collections.Concurrent;
 
 namespace Game.Collision
 {
@@ -36,15 +37,22 @@ namespace Game.Collision
 
         public virtual void insert(T value)
         {
-            Vector3 pos = value.getPosition();
-            Node node = getGridFor(pos.X, pos.Y);
-            node.insert(value);
-            memberTable.Add(value, node);
+            AxisAlignedBox bounds = value.getBounds();
+            Cell low = Cell.ComputeCell(bounds.Lo.X, bounds.Lo.Y);
+            Cell high = Cell.ComputeCell(bounds.Hi.X, bounds.Hi.Y);
+            for (int x = low.x; x <= high.x; ++x)
+            {
+                for (int y = low.y; y <= high.y; ++y)
+                {
+                    Node node = getGrid(x, y);
+                    node.insert(value);
+                    memberTable.Add(value, node);
+                }
+            }
         }
 
         public virtual void remove(T value)
         {
-            memberTable[value].remove(value);
             // Remove the member
             memberTable.Remove(value);
         }
@@ -63,7 +71,7 @@ namespace Game.Collision
         }
 
         public bool contains(T value) { return memberTable.ContainsKey(value); }
-        public int size() { return memberTable.Count; }
+        public bool empty() { return memberTable.Empty(); }
 
         public struct Cell
         {
@@ -89,12 +97,6 @@ namespace Game.Collision
             }
 
             public bool isValid() { return x >= 0 && x < CELL_NUMBER && y >= 0 && y < CELL_NUMBER; }
-        }
-
-        Node getGridFor(float fx, float fy)
-        {
-            Cell c = Cell.ComputeCell(fx, fy);
-            return getGrid(c.x, c.y);
         }
 
         Node getGrid(int x, int y)
@@ -182,7 +184,7 @@ namespace Game.Collision
             } while (cell.isValid());
         }
 
-        void intersectPoint(Vector3 point, WorkerCallback intersectCallback)
+        public void intersectPoint(Vector3 point, WorkerCallback intersectCallback)
         {
             Cell cell = Cell.ComputeCell(point.X, point.Y);
             if (!cell.isValid())
@@ -205,7 +207,7 @@ namespace Game.Collision
                 node.intersectRay(ray, intersectCallback, ref max_dist);
         }
 
-        Dictionary<T, Node> memberTable = new Dictionary<T, Node>();
+        MultiMap<T, Node> memberTable = new MultiMap<T, Node>();
         Node[][] nodes = new Node[CELL_NUMBER][];
     }
 }

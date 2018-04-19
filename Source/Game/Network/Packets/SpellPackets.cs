@@ -864,7 +864,12 @@ namespace Game.Network.Packets
     {
         public SelfRes(WorldPacket packet) : base(packet) { }
 
-        public override void Read() { }
+        public override void Read()
+        {
+            SpellId = _worldPacket.ReadUInt32();
+        }
+
+        public uint SpellId;
     }
 
     class GetMirrorImageData : ClientPacket
@@ -1163,7 +1168,7 @@ namespace Game.Network.Packets
             Class = (byte)creatureTemplate.UnitClass;
             TargetMinScalingLevel = (byte)creatureTemplate.levelScaling.Value.MinLevel;
             TargetMaxScalingLevel = (byte)creatureTemplate.levelScaling.Value.MaxLevel;
-            TargetScalingLevelDelta = (sbyte)creatureTemplate.levelScaling.Value.DeltaLevel;
+            TargetScalingLevelDelta = (sbyte)attacker.GetInt32Value(UnitFields.ScalingLevelDelta);
             return true;
         }
 
@@ -1179,13 +1184,14 @@ namespace Game.Network.Packets
             Class = (byte)creatureTemplate.UnitClass;
             TargetMinScalingLevel = (byte)creatureTemplate.levelScaling.Value.MinLevel;
             TargetMaxScalingLevel = (byte)creatureTemplate.levelScaling.Value.MaxLevel;
-            TargetScalingLevelDelta = (sbyte)creatureTemplate.levelScaling.Value.DeltaLevel;
+            TargetScalingLevelDelta = (sbyte)target.GetInt32Value(UnitFields.ScalingLevelDelta);
             return true;
         }
 
         bool GenerateDataCreatureToCreature(Creature attacker, Creature target)
         {
-            CreatureTemplate creatureTemplate = target.HasScalableLevels() ? target.GetCreatureTemplate() : attacker.GetCreatureTemplate();
+            Creature accessor = target.HasScalableLevels() ? target : attacker;
+            CreatureTemplate creatureTemplate = accessor.GetCreatureTemplate();
 
             Type = SandboxScalingDataType.CreatureToCreatureDamage;
             PlayerLevelDelta = 0;
@@ -1195,7 +1201,7 @@ namespace Game.Network.Packets
             Class = (byte)creatureTemplate.UnitClass;
             TargetMinScalingLevel = (byte)creatureTemplate.levelScaling.Value.MinLevel;
             TargetMaxScalingLevel = (byte)creatureTemplate.levelScaling.Value.MaxLevel;
-            TargetScalingLevelDelta = (sbyte)creatureTemplate.levelScaling.Value.DeltaLevel;
+            TargetScalingLevelDelta = (sbyte)accessor.GetInt32Value(UnitFields.ScalingLevelDelta);
             return true;
         }
 
@@ -1236,7 +1242,7 @@ namespace Game.Network.Packets
 
         public void Write(WorldPacket data)
         {
-            data.WriteBits(Type, 3);
+            data.WriteBits(Type, 4);
             data.WriteInt16(PlayerLevelDelta);
             data.WriteUInt16(PlayerItemLevel);
             data.WriteUInt8(TargetLevel);

@@ -321,7 +321,7 @@ namespace Game.Chat
                 {
                     // ... than, it prints information like "is online", where he is, etc...
                     onlineState = "online";
-                    phases = string.Join(", ", p.GetPhases());
+                    phases = PhasingHandler.FormatPhases(p.GetPhaseShift());
 
                     AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(p.GetAreaId());
                     if (area != null)

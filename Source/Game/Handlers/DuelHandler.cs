@@ -77,6 +77,9 @@ namespace Game
 
             player.SendPacket(packet);
             plTarget.SendPacket(packet);
+
+            player.EnablePvpRules();
+            plTarget.EnablePvpRules();
         }
 
         void HandleDuelCancelled()

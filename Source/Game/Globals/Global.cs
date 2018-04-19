@@ -106,6 +106,6 @@ public static class Global
 
     public static SpellManager SpellMgr { get { return SpellManager.Instance; } }
     public static SupportManager SupportMgr { get { return SupportManager.Instance; } }
-    public static WargenCheckManager WardenCheckMgr { get { return WargenCheckManager.Instance; } }
+    public static WardenCheckManager WardenCheckMgr { get { return WardenCheckManager.Instance; } }
     public static BlackMarketManager BlackMarketMgr { get { return BlackMarketManager.Instance; } }
 }

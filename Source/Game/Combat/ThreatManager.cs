@@ -56,11 +56,28 @@ namespace Game.Combat
         public void doAddThreat(Unit victim, float threat)
         {
             uint redirectThreadPct = victim.GetRedirectThreatPercent();
+            Unit redirectTarget = victim.GetRedirectThreatTarget();
+
+            // If victim is personnal spawn, redirect all aggro to summoner
+            TempSummon tempSummonVictim = victim.ToTempSummon();
+            if (tempSummonVictim)
+            {
+                if (tempSummonVictim.IsVisibleBySummonerOnly())
+                {
+                    // Personnal Spawns from same summoner can aggro each other
+                    if (!GetOwner().ToTempSummon() ||
+                        !GetOwner().ToTempSummon().IsVisibleBySummonerOnly() ||
+                        tempSummonVictim.GetSummonerGUID() != GetOwner().ToTempSummon().GetSummonerGUID())
+                    {
+                        redirectThreadPct = 100;
+                        redirectTarget = tempSummonVictim.GetSummoner();
+                    }
+                }
+            }
 
             // must check > 0.0f, otherwise dead loop
             if (threat > 0.0f && redirectThreadPct != 0)
             {
-                Unit redirectTarget = victim.GetRedirectThreatTarget();
                 if (redirectTarget != null)
                 {
                     float redirectThreat = MathFunctions.CalculatePct(threat, redirectThreadPct);

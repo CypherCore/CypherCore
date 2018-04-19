@@ -129,16 +129,14 @@ namespace Framework.Database
 
                         using (var reader = cmd.ExecuteReader())
                         {
-                            if (reader.Read() && reader.HasRows)
+                            if (reader.HasRows)
                             {
-                                do
+                                while(reader.Read())
                                 {
                                     var row = new object[reader.FieldCount];
-
                                     reader.GetValues(row);
                                     rows.Add(row);
                                 }
-                                while (reader.Read());
                             }
                         }
                     }
@@ -180,16 +178,15 @@ namespace Framework.Database
 
                         using (var reader = await cmd.ExecuteReaderAsync())
                         {
-                            if (await reader.ReadAsync() && reader.HasRows)
+                            if (reader.HasRows)
                             {
-                                do
+                                while (await reader.ReadAsync())
                                 {
                                     var row = new object[reader.FieldCount];
 
                                     reader.GetValues(row);
                                     rows.Add(row);
                                 }
-                                while (await reader.ReadAsync());
                             }
                         }
                     }
@@ -225,16 +222,15 @@ namespace Framework.Database
                             query = cmd.CommandText;
                             using (var reader = await cmd.ExecuteReaderAsync())
                             {
-                                if (await reader.ReadAsync() && reader.HasRows)
+                                if (reader.HasRows)
                                 {
-                                    do
+                                    while (await reader.ReadAsync())
                                     {
                                         var row = new object[reader.FieldCount];
 
                                         reader.GetValues(row);
                                         rows.Add(row);
                                     }
-                                    while (await reader.ReadAsync());
                                 }
                             }
                         }
