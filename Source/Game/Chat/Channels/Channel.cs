@@ -884,6 +884,15 @@ namespace Game.Chat
         public bool IsConstant() { return _channelId != 0; }
 
         public bool IsLFG() { return GetFlags().HasAnyFlag(ChannelFlags.Lfg); }
+
+        public bool IsWorld()
+        {
+            if (GetName() == "world")
+                return true;
+
+            return false;
+        }
+
         bool IsAnnounce() { return _announceEnabled; }
         void SetAnnounce(bool nannounce) { _announceEnabled = nannounce; }
 

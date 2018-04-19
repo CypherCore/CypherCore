@@ -1741,19 +1741,28 @@ PreserveCustomChannelDuration = 14
 
 Discord.Enabled = 0
 
-#    Discord.RelayURL
-#        Description: Relay http server that will handle the http call
-#                     every 2 seconds with world channel player chats
-#        Default:     "http://127.0.0.1:8083"
-
-Discord.RelayURL = "http://127.0.0.1:8083"
-
+#
 #    Discord.BotToken
-#        Description: Relay http server that will handle the http call
-#                     every 2 seconds with world channel player chats
+#        Description: BOT TOKEN (not user token)
 #        Default:     ""
 
 Discord.BotToken = "hngOsTyxmJk8Wr7Yd9JcdSVLmVrAMNaU"
+
+#
+#    Discord.BotServerID
+#        Description: Server ID
+#        Default:     0
+
+Discord.BotServerID = 0
+
+#
+
+#
+#    Discord.BotChannelID
+#        Description: Channel ID
+#        Default:     0
+
+Discord.BotChannelID = 0
 
 #
 ###################################################################################################

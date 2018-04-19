@@ -23,10 +23,12 @@ using Game.Chat;
 using Game.Network;
 using System;
 using System.Globalization;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using Game.Discord;
 
 
 namespace WorldServer
@@ -208,18 +210,49 @@ namespace WorldServer
             DiscordSocketClient client = new DiscordSocketClient();
 
             client.Log += LogDiscord;
-            client.MessageReceived += MessageReceived;
+            client.MessageReceived += SendToDiscord;
 
             await client.LoginAsync(TokenType.Bot, "NDM2NDcxNDkxMTAyNTA3MDA5.DboG3A.6uoXeNgP8an4N1fuFUJ5zMEQ368");
             await client.StartAsync();
 
-            
+            while (true)
+            {
+                if (!DiscordMessageQueue.Empty())
+                {
+                    foreach (DiscordMessage message in DiscordMessageQueue.DiscordMessages)
+                    {
+                        string formatedMessage = "";
+                        switch (message.Channel)
+                        {
+                            case DiscordMessageChannel.Discord_World_A:
+                            case DiscordMessageChannel.Discord_World_H:
+                                formatedMessage = GetFormatedMessage( message );
+                                break;
+                            default:
+                                formatedMessage = message.Message;
+                                break;
+                        }
 
-            await Task.Delay(-1);
+                        ulong serverID = ConfigMgr.GetDefaultValue("Discord.BotServerID", default(ulong));
+                        ulong channelID = ConfigMgr.GetDefaultValue("Discord.BotChannelID", default(ulong));
+                        
+                        if( serverID != default(ulong) && channelID != default(ulong))
+                            await client.GetGuild(serverID).GetTextChannel(channelID).SendMessageAsync(formatedMessage);
+                    }
+                }
+                await Task.Delay(-1);
+            }
         }
 
-        private static async Task MessageReceived(SocketMessage message)
+        private static string GetFormatedMessage(DiscordMessage message)
         {
+            string blizzIcon = message.IsGm ? "<:blizz:407908963007594496>" : "";
+            return blizzIcon + "[" + message.CharacterName + "]: " + message.Message;
+        }
+
+        private static async Task SendToDiscord(SocketMessage message)
+        {
+            //Todo: we can implement some logic for custom commands from discord here!
             if (message.Content == "!ping")
             {
                 await message.Channel.SendMessageAsync("Pong!");
