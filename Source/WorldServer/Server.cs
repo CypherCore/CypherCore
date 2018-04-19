@@ -212,35 +212,40 @@ namespace WorldServer
             client.Log += LogDiscord;
             client.MessageReceived += SendToDiscord;
 
-            await client.LoginAsync(TokenType.Bot, "NDM2NDcxNDkxMTAyNTA3MDA5.DboG3A.6uoXeNgP8an4N1fuFUJ5zMEQ368");
-            await client.StartAsync();
+            string token = ConfigMgr.GetDefaultValue("Discord.BotToken", "");
 
-            while (true)
+            if (token != "")
             {
-                if (!DiscordMessageQueue.Empty())
-                {
-                    foreach (DiscordMessage message in DiscordMessageQueue.DiscordMessages)
-                    {
-                        string formatedMessage = "";
-                        switch (message.Channel)
-                        {
-                            case DiscordMessageChannel.Discord_World_A:
-                            case DiscordMessageChannel.Discord_World_H:
-                                formatedMessage = GetFormatedMessage( message );
-                                break;
-                            default:
-                                formatedMessage = message.Message;
-                                break;
-                        }
+                await client.LoginAsync(TokenType.Bot, token);
+                await client.StartAsync();
 
-                        ulong serverID = ConfigMgr.GetDefaultValue("Discord.BotServerID", default(ulong));
-                        ulong channelID = ConfigMgr.GetDefaultValue("Discord.BotChannelID", default(ulong));
+                while (true)
+                {
+                    if (!DiscordMessageQueue.Empty())
+                    {
+                        foreach (DiscordMessage message in DiscordMessageQueue.DiscordMessages)
+                        {
+                            string formatedMessage = "";
+                            switch (message.Channel)
+                            {
+                                case DiscordMessageChannel.Discord_World_A:
+                                case DiscordMessageChannel.Discord_World_H:
+                                    formatedMessage = GetFormatedMessage( message );
+                                    break;
+                                default:
+                                    formatedMessage = message.Message;
+                                    break;
+                            }
+
+                            ulong serverID = ConfigMgr.GetDefaultValue("Discord.BotServerID", default(ulong));
+                            ulong channelID = ConfigMgr.GetDefaultValue("Discord.BotChannelID", default(ulong));
                         
-                        if( serverID != default(ulong) && channelID != default(ulong))
-                            await client.GetGuild(serverID).GetTextChannel(channelID).SendMessageAsync(formatedMessage);
+                            if( serverID != default(ulong) && channelID != default(ulong))
+                                await client.GetGuild(serverID).GetTextChannel(channelID).SendMessageAsync(formatedMessage);
+                        }
                     }
+                    await Task.Delay(-1);
                 }
-                await Task.Delay(-1);
             }
         }
 

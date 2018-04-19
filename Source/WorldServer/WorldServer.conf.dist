@@ -1746,7 +1746,7 @@ Discord.Enabled = 0
 #        Description: BOT TOKEN (not user token)
 #        Default:     ""
 
-Discord.BotToken = "hngOsTyxmJk8Wr7Yd9JcdSVLmVrAMNaU"
+Discord.BotToken = ""
 
 #
 #    Discord.BotServerID
