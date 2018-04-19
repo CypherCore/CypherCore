@@ -22,7 +22,7 @@ namespace Scripts.World
 
             if (ConfigMgr.GetDefaultValue("Discord.Enabled", false))
             {
-                if (player.GetSession() && channel.IsWorld())
+                if (player.GetSession() && channel.GetName() == "world")
                 {
                     DiscordMessage newMessage = new DiscordMessage
                                                 {

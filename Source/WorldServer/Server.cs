@@ -82,12 +82,12 @@ namespace WorldServer
             Global.WorldMgr.GetRealm().PopulationLevel = 0.0f;
             Global.WorldMgr.GetRealm().Flags = Global.WorldMgr.GetRealm().Flags & ~RealmFlags.VersionMismatch;
 
-            if (ConfigMgr.GetDefaultValue("Discord.Enable", false))
+            if (ConfigMgr.GetDefaultValue("Discord.Enabled", false))
             {
                 Thread threadDiscord = new Thread( StartDiscordBot );
                 threadDiscord.Start();
 
-                Log.outInfo( LogFilter.ChatSystem, "Starting up world to discord thread...");
+                Console.WriteLine("Starting up world to discord thread...");
             }
 
             //- Launch CliRunnable thread
@@ -216,6 +216,8 @@ namespace WorldServer
 
             if (token != "")
             {
+                Console.WriteLine($"Starting bot with token: {token}");
+
                 await client.LoginAsync(TokenType.Bot, token);
                 await client.StartAsync();
 
@@ -239,13 +241,15 @@ namespace WorldServer
 
                             ulong serverID = ConfigMgr.GetDefaultValue("Discord.BotServerID", default(ulong));
                             ulong channelID = ConfigMgr.GetDefaultValue("Discord.BotChannelID", default(ulong));
-                        
+
                             if( serverID != default(ulong) && channelID != default(ulong))
                                 await client.GetGuild(serverID).GetTextChannel(channelID).SendMessageAsync(formatedMessage);
                         }
+                        DiscordMessageQueue.Clear();
                     }
-                    await Task.Delay(-1);
+                    Thread.Sleep(2000);
                 }
+                await Task.Delay(-1);
             }
         }
 
