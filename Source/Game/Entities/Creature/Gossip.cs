@@ -68,10 +68,10 @@ namespace Game.Misc
         /// Adds a localized gossip menu item from db by menu id and menu item id.
         /// </summary>
         /// <param name="menuId">menuId Gossip menu id.</param>
-        /// <param name="menuItemId">menuItemId Gossip menu item id.</param>
+        /// <param name="optionIndex">menuItemId Gossip menu item id.</param>
         /// <param name="sender">sender Identifier of the current menu.</param>
         /// <param name="action">action Custom action given to OnGossipHello.</param>
-        public void AddMenuItem(uint menuId, uint menuItemId, uint sender, uint action)
+        public void AddMenuItem(uint menuId, uint optionIndex, uint sender, uint action)
         {
             /// Find items for given menu id.
             var bounds = Global.ObjectMgr.GetGossipMenuItemsMapBounds(menuId);
@@ -83,7 +83,7 @@ namespace Game.Misc
             foreach (var item in bounds)
             {
                 // Find the one with the given menu item id.
-                if (item.OptionId != menuItemId)
+                if (item.OptionIndex != optionIndex)
                     continue;
 
                 /// Store texts for localization.
@@ -109,7 +109,7 @@ namespace Game.Misc
                     if (optionBroadcastText == null)
                     {
                         // Find localizations from database.
-                        GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItemId);
+                        GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, optionIndex);
                         if (gossipMenuLocale != null)
                             ObjectManager.GetLocaleString(gossipMenuLocale.OptionText, GetLocale(), ref strOptionText);
                     }
@@ -117,7 +117,7 @@ namespace Game.Misc
                     if (boxBroadcastText == null)
                     {
                         // Find localizations from database.
-                        GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItemId);
+                        GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, optionIndex);
                         if (gossipMenuLocale != null)
                             ObjectManager.GetLocaleString(gossipMenuLocale.BoxText, GetLocale(), ref strBoxText);
                     }
@@ -125,8 +125,8 @@ namespace Game.Misc
                 }
 
                 // Add menu item with existing method. Menu item id -1 is also used in ADD_GOSSIP_ITEM macro.
-                uint optionIndex = AddMenuItem(-1, item.OptionIcon, strOptionText, sender, action, strBoxText, item.BoxMoney, item.BoxCoded);
-                AddGossipMenuItemData(optionIndex, item.ActionMenuId, item.ActionPoiId, item.TrainerId);
+                uint newOptionIndex = AddMenuItem(-1, item.OptionIcon, strOptionText, sender, action, strBoxText, item.BoxMoney, item.BoxCoded);
+                AddGossipMenuItemData(newOptionIndex, item.ActionMenuId, item.ActionPoiId, item.TrainerId);
             }
         }
 
@@ -282,6 +282,7 @@ namespace Game.Misc
                     text.QuestID = (int)questID;
                     text.QuestType = item.QuestIcon;
                     text.QuestLevel = quest.Level;
+                    text.QuestMaxScalingLevel = quest.MaxScalingLevel;
                     text.QuestFlags = (int)quest.Flags;
                     text.QuestFlagsEx = (int)quest.FlagsEx;
                     text.Repeatable = quest.IsRepeatable();
@@ -375,6 +376,7 @@ namespace Game.Misc
                     text.QuestID = questID;
                     text.QuestType = questMenuItem.QuestIcon;
                     text.QuestLevel = (uint)quest.Level;
+                    text.QuestMaxScalingLevel = (uint)quest.MaxScalingLevel;
                     text.QuestFlags = (uint)quest.Flags;
                     text.QuestFlagsEx = (uint)quest.FlagsEx;
                     text.Repeatable = false; // NYI
@@ -497,6 +499,7 @@ namespace Game.Misc
             packet.Info.QuestID = quest.Id;
             packet.Info.QuestType = (int)quest.Type;
             packet.Info.QuestLevel = quest.Level;
+            packet.Info.QuestMaxScalingLevel = quest.MaxScalingLevel;
             packet.Info.QuestPackageID = quest.PackageID;
             packet.Info.QuestMinLevel = quest.MinLevel;
             packet.Info.QuestSortID = quest.QuestSortID;
@@ -844,7 +847,7 @@ namespace Game.Misc
     public class GossipMenuItems
     {
         public uint MenuId;
-        public uint OptionId;
+        public uint OptionIndex;
         public GossipOptionIcon OptionIcon;
         public string OptionText;
         public uint OptionBroadcastTextId;

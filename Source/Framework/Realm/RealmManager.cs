@@ -61,7 +61,7 @@ public class RealmManager : Singleton<RealmManager>
         SQLResult result = DB.Login.Query(stmt);
 
         Dictionary<RealmHandle, string> existingRealms = new Dictionary<RealmHandle, string>();
-        foreach (var p in _realms.ToList())
+        foreach (var p in _realms)
             existingRealms[p.Key] = p.Value.Name;
 
         _realms.Clear();
@@ -211,7 +211,7 @@ public class RealmManager : Singleton<RealmManager>
     public byte[] GetRealmList(uint build, string subRegion)
     {
         var realmList = new RealmListUpdates();
-        foreach (var realm in _realms.ToList())
+        foreach (var realm in _realms)
         {
             if (realm.Value.Id.GetSubRegionAddress() != subRegion)
                 continue;

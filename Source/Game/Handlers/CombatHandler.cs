@@ -53,7 +53,7 @@ namespace Game
             {
                 VehicleSeatRecord seat = vehicle.GetSeatForPassenger(GetPlayer());
                 Contract.Assert(seat != null);
-                if (!seat.Flags[0].HasAnyFlag((uint)VehicleSeatFlags.CanAttack))
+                if (!seat.Flags.HasAnyFlag(VehicleSeatFlags.CanAttack))
                 {
                     SendAttackStop(enemy);
                     return;

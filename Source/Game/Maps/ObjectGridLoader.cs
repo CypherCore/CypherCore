@@ -18,6 +18,7 @@
 using Framework.Constants;
 using Game.Entities;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Maps
 {
@@ -181,7 +182,7 @@ namespace Game.Maps
     {
         public override void Visit(ICollection<Creature> objs)
         {
-            foreach (var creature in objs)
+            foreach (var creature in objs.ToList())
             {
                 // creature in unloading grid can have respawn point in another grid
                 // if it will be unloaded then it will not respawn in original grid until unload/load original grid
@@ -191,7 +192,7 @@ namespace Game.Maps
         }
         public override void Visit(ICollection<GameObject> objs)
         {
-            foreach (var go in objs)
+            foreach (var go in objs.ToList())
             {
                 // gameobject in unloading grid can have respawn point in another grid
                 // if it will be unloaded then it will not respawn in original grid until unload/load original grid

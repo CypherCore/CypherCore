@@ -45,20 +45,20 @@ namespace Game.BattlePets
             if (!result.IsEmpty())
                 Global.ObjectMgr.GetGenerator(HighGuid.BattlePet).Set(result.Read<ulong>(0) + 1);
 
-            foreach (var breedState in CliDB.BattlePetBreedStateStorage.Values)
+            foreach (var battlePetBreedState in CliDB.BattlePetBreedStateStorage.Values)
             {
-                if (!_battlePetBreedStates.ContainsKey(breedState.BreedID))
-                    _battlePetBreedStates[breedState.BreedID] = new Dictionary<BattlePetState, int>();
+                if (!_battlePetBreedStates.ContainsKey(battlePetBreedState.BattlePetBreedID))
+                    _battlePetBreedStates[battlePetBreedState.BattlePetBreedID] = new Dictionary<BattlePetState, int>();
 
-                _battlePetBreedStates[breedState.BreedID][(BattlePetState)breedState.State] = breedState.Value;
+                _battlePetBreedStates[battlePetBreedState.BattlePetBreedID][(BattlePetState)battlePetBreedState.BattlePetStateID] = battlePetBreedState.Value;
             }
 
-            foreach (var speciesState in CliDB.BattlePetSpeciesStateStorage.Values)
+            foreach (var battlePetSpeciesState in CliDB.BattlePetSpeciesStateStorage.Values)
             {
-                if (!_battlePetSpeciesStates.ContainsKey(speciesState.SpeciesID))
-                    _battlePetSpeciesStates[speciesState.SpeciesID] = new Dictionary<BattlePetState, int>();
+                if (!_battlePetSpeciesStates.ContainsKey(battlePetSpeciesState.BattlePetSpeciesID))
+                    _battlePetSpeciesStates[battlePetSpeciesState.BattlePetSpeciesID] = new Dictionary<BattlePetState, int>();
 
-                _battlePetSpeciesStates[speciesState.SpeciesID][(BattlePetState)speciesState.State] = speciesState.Value;
+                _battlePetSpeciesStates[battlePetSpeciesState.BattlePetSpeciesID][(BattlePetState)battlePetSpeciesState.BattlePetStateID] = battlePetSpeciesState.Value;
             }
 
             LoadAvailablePetBreeds();
@@ -497,13 +497,13 @@ namespace Game.BattlePets
                 }
 
                 // modify stats by quality
-                foreach (var breedQualityRecord in CliDB.BattlePetBreedQualityStorage.Values)
+                foreach (var battlePetBreedQuality in CliDB.BattlePetBreedQualityStorage.Values)
                 {
-                    if (breedQualityRecord.Quality == PacketInfo.Quality)
+                    if (battlePetBreedQuality.QualityEnum == PacketInfo.Quality)
                     {
-                        health *= breedQualityRecord.Modifier;
-                        power *= breedQualityRecord.Modifier;
-                        speed *= breedQualityRecord.Modifier;
+                        health *= battlePetBreedQuality.StateMultiplier;
+                        power *= battlePetBreedQuality.StateMultiplier;
+                        speed *= battlePetBreedQuality.StateMultiplier;
                         break;
                     }
                     // TOOD: add check if pet has existing quality

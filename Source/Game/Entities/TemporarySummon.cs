@@ -296,11 +296,15 @@ namespace Game.Entities
 
         public uint GetTimer() { return m_timer; }
 
+        public void SetVisibleBySummonerOnly(bool visibleBySummonerOnly) { m_visibleBySummonerOnly = visibleBySummonerOnly; }
+        public bool IsVisibleBySummonerOnly() { return m_visibleBySummonerOnly; }
+
         public SummonPropertiesRecord m_Properties;
         TempSummonType m_type;
         uint m_timer;
         uint m_lifetime;
         ObjectGuid m_summonerGUID;
+        bool m_visibleBySummonerOnly;
     }
 
     public class Minion : TempSummon
@@ -337,7 +341,7 @@ namespace Game.Entities
 
         public bool IsGuardianPet()
         {
-            return IsPet() || (m_Properties != null && m_Properties.Category == SummonCategory.Pet);
+            return IsPet() || (m_Properties != null && m_Properties.Control == SummonCategory.Pet);
         }
 
         public override Unit GetOwner() { return m_owner; }
@@ -346,10 +350,20 @@ namespace Game.Entities
 
         public void SetFollowAngle(float angle) { m_followAngle = angle; }
 
-        public bool IsPetGhoul() { return GetEntry() == 26125; } // Ghoul may be guardian or pet
+        // Warlock pets
+        public bool IsPetImp() { return GetEntry() == (uint)PetEntry.Imp; }
+        public bool IsPetFelhunter() { return GetEntry() == (uint)PetEntry.FelHunter; }
+        public bool IsPetVoidwalker() { return GetEntry() == (uint)PetEntry.VoidWalker; }
+        public bool IsPetSuccubus() { return GetEntry() == (uint)PetEntry.Succubus; }
+        public bool IsPetDoomguard() { return GetEntry() == (uint)PetEntry.Doomguard; }
+        public bool IsPetFelguard() { return GetEntry() == (uint)PetEntry.Felguard; }
 
-        public bool IsSpiritWolf() { return GetEntry() == 29264; } // Spirit wolf from feral spirits
+        // Death Knight pets
+        public bool IsPetGhoul() { return GetEntry() == (uint)PetEntry.Ghoul; } // Ghoul may be guardian or pet
+        public bool IsPetAbomination() { return GetEntry() == (uint)PetEntry.Abomination; } // Sludge Belcher dk talent
 
+        // Shaman pet
+        public bool IsSpiritWolf() { return GetEntry() == (uint)PetEntry.SpiritWolf; } // Spirit wolf from feral spirits
 
         Unit m_owner;
         float m_followAngle;
@@ -363,7 +377,7 @@ namespace Game.Entities
             m_bonusSpellDamage = 0;
 
             m_unitTypeMask |= UnitTypeMask.Guardian;
-            if (properties != null && (properties.Type == SummonType.Pet || properties.Category == SummonCategory.Pet))
+            if (properties != null && (properties.Title == SummonType.Pet || properties.Control == SummonCategory.Pet))
             {
                 m_unitTypeMask |= UnitTypeMask.ControlableGuardian;
                 InitCharmInfo();
@@ -454,13 +468,12 @@ namespace Game.Entities
             for (int i = (int)SpellSchools.Holy; i < (int)SpellSchools.Max; ++i)
                 SetModifierValue(UnitMods.ResistanceStart + i, UnitModifierType.BaseValue, cinfo.Resistance[i]);
 
-            //health, mana, armor and resistance
+            // Health, Mana or Power, Armor
             PetLevelInfo pInfo = Global.ObjectMgr.GetPetLevelInfo(creature_ID, petlevel);
             if (pInfo != null)                                      // exist in DB
             {
                 SetCreateHealth(pInfo.health);
-                if (petType != PetType.Hunter) //hunter pet use focus
-                    SetCreateMana(pInfo.mana);
+                SetCreateMana(pInfo.mana);
 
                 if (pInfo.armor > 0)
                     SetModifierValue(UnitMods.Armor, UnitModifierType.BaseValue, pInfo.armor);
@@ -481,6 +494,17 @@ namespace Game.Entities
                 SetCreateStat(Stats.Intellect, 28);
             }
 
+            // Power
+            if (petType == PetType.Hunter) // Hunter pets have focus
+                SetPowerType(PowerType.Focus);
+            else if (IsPetGhoul() || IsPetAbomination()) // DK pets have energy
+                SetPowerType(PowerType.Energy);
+            else if (IsPetImp() || IsPetFelhunter() || IsPetVoidwalker() || IsPetSuccubus() || IsPetDoomguard() || IsPetFelguard()) // Warlock pets have energy (since 5.x)
+                SetPowerType(PowerType.Energy);
+            else
+                SetPowerType(PowerType.Mana);
+
+            // Damage
             SetBonusDamage(0);
             switch (petType)
             {
@@ -711,6 +735,8 @@ namespace Game.Entities
 
         public override bool UpdateAllStats()
         {
+            UpdateMaxHealth();
+
             for (var i = Stats.Strength; i < Stats.Max; ++i)
                 UpdateStats(i);
 
@@ -799,30 +825,14 @@ namespace Game.Entities
 
         public override void UpdateMaxPower(PowerType power)
         {
+            if (GetPowerIndex(power) == (uint)PowerType.Max)
+                return;
+
             UnitMods unitMod = UnitMods.PowerStart + (int)power;
-
-            float addValue = (power == PowerType.Mana) ? GetStat(Stats.Intellect) - GetCreateStat(Stats.Intellect) : 0.0f;
-            float multiplicator = 15.0f;
-
-            switch (GetEntry())
-            {
-                case ENTRY_IMP:
-                    multiplicator = 4.95f;
-                    break;
-                case ENTRY_VOIDWALKER:
-                case ENTRY_SUCCUBUS:
-                case ENTRY_FELHUNTER:
-                case ENTRY_FELGUARD:
-                    multiplicator = 11.5f;
-                    break;
-                default:
-                    multiplicator = 15.0f;
-                    break;
-            }
 
             float value = GetModifierValue(unitMod, UnitModifierType.BaseValue) + GetCreatePowers(power);
             value *= GetModifierValue(unitMod, UnitModifierType.BasePCT);
-            value += GetModifierValue(unitMod, UnitModifierType.TotalValue) + addValue * multiplicator;
+            value += GetModifierValue(unitMod, UnitModifierType.TotalValue);
             value *= GetModifierValue(unitMod, UnitModifierType.TotalPCT);
 
             SetMaxPower(power, (int)value);
@@ -865,8 +875,8 @@ namespace Game.Entities
                 //demons benefit from warlocks shadow or fire damage
                 else if (IsPet())
                 {
-                    int fire = (int)((owner.GetUInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Fire)) + owner.GetUInt32Value(PlayerFields.ModDamageDoneNeg + (int)SpellSchools.Fire));
-                    int shadow = (int)((owner.GetUInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Shadow)) + owner.GetUInt32Value(PlayerFields.ModDamageDoneNeg + (int)SpellSchools.Shadow));
+                    int fire = owner.GetInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Fire) - owner.GetInt32Value(PlayerFields.ModDamageDoneNeg + (int)SpellSchools.Fire);
+                    int shadow = owner.GetInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Shadow) - owner.GetInt32Value(PlayerFields.ModDamageDoneNeg + (int)SpellSchools.Shadow);
                     int maximum = (fire > shadow) ? fire : shadow;
                     if (maximum < 0)
                         maximum = 0;
@@ -876,7 +886,7 @@ namespace Game.Entities
                 //water elementals benefit from mage's frost damage
                 else if (GetEntry() == ENTRY_WATER_ELEMENTAL)
                 {
-                    int frost = (int)((owner.GetUInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Frost)) + owner.GetUInt32Value(PlayerFields.ModDamageDoneNeg + (int)SpellSchools.Frost));
+                    int frost = owner.GetInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Frost) - owner.GetInt32Value(PlayerFields.ModDamageDoneNeg + (int)SpellSchools.Frost);
                     if (frost < 0)
                         frost = 0;
                     SetBonusDamage((int)(frost * 0.4f));
@@ -909,14 +919,14 @@ namespace Game.Entities
                 //force of nature
                 if (GetEntry() == ENTRY_TREANT)
                 {
-                    int spellDmg = (int)((GetOwner().GetUInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Nature)) + GetOwner().GetUInt32Value(PlayerFields.ModDamageDoneNeg + (int)SpellSchools.Nature));
+                    int spellDmg = GetOwner().GetInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Nature) - GetOwner().GetInt32Value(PlayerFields.ModDamageDoneNeg + (int)SpellSchools.Nature);
                     if (spellDmg > 0)
                         bonusDamage = spellDmg * 0.09f;
                 }
                 //greater fire elemental
                 else if (GetEntry() == ENTRY_FIRE_ELEMENTAL)
                 {
-                    int spellDmg = (int)((GetOwner().GetUInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Fire)) + GetOwner().GetUInt32Value(PlayerFields.ModDamageDoneNeg + (int)SpellSchools.Fire));
+                    int spellDmg = GetOwner().GetInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Fire) - GetOwner().GetInt32Value(PlayerFields.ModDamageDoneNeg + (int)SpellSchools.Fire);
                     if (spellDmg > 0)
                         bonusDamage = spellDmg * 0.4f;
                 }
@@ -1023,5 +1033,23 @@ namespace Game.Entities
         public Position pos;        // Position, where should be creature spawned
         public TempSummonType type; // Summon type, see TempSummonType for available types
         public uint time;         // Despawn time, usable only with certain temp summon types
+    }
+
+    enum PetEntry
+    {
+        // Warlock pets
+        Imp = 416,
+        FelHunter = 691,
+        VoidWalker = 1860,
+        Succubus = 1863,
+        Doomguard = 18540,
+        Felguard = 30146,
+
+        // Death Knight pets
+        Ghoul = 26125,
+        Abomination = 106848,
+
+        // Shaman pet
+        SpiritWolf = 29264
     }
 }

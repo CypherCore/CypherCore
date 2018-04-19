@@ -92,6 +92,7 @@ namespace Framework.Constants
         ForceMove = 0x40,
         DisarmOffhand = 0x80,
         DisablePredStats = 0x100,
+        AllowChangingTalents = 0x200,
         DisarmRanged = 0x400,
         RegeneratePower = 0x800,
         RestrictPartyInteraction = 0x1000,

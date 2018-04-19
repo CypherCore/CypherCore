@@ -40,36 +40,29 @@ namespace Game.Chat.Commands
             Player player = handler.GetSession().GetPlayer();
 
             // "id" or number or [name] Shift-click form |color|Hcreature_entry:creature_id|h[name]|h|r
-            string param1 = handler.extractKeyFromLink(args, "Hcreature");
+            string param1 = handler.extractKeyFromLink(args, "Hcreature", "Hcreature_entry");
             if (string.IsNullOrEmpty(param1))
                 return false;
 
             string whereClause = "";
 
             // User wants to teleport to the NPC's template entry
-            if (param1.Equals("id"))
+            if (param1.IsNumber())
             {
-                // Get the "creature_template.entry"
-                // number or [name] Shift-click form |color|Hcreature_entry:creature_id|h[name]|h|r
-                string idStr = handler.extractKeyFromLink(args, "Hcreature_entry");
-                if (string.IsNullOrEmpty(idStr))
-                    return false;
+                if (!int.TryParse(param1, out int entry) || entry == 0)
+                {
+                    if (!ulong.TryParse(param1, out ulong guidLow) || guidLow == 0)
+                        return false;
 
-                if (!int.TryParse(idStr, out int entry) || entry == 0)
-                    return false;
-
-                whereClause += "WHERE id = '" + entry + '\'';
+                    whereClause += "WHERE guid = '" + guidLow + '\'';
+                }
+                else
+                    whereClause += "WHERE id = '" + entry + '\'';
             }
             else
             {
-                // Number is invalid - maybe the user specified the mob's name
-                if (!ulong.TryParse(param1, out ulong guidLow) || guidLow == 0)
-                {
-                    string name = param1;
-                    whereClause += ", creature_template WHERE creature.id = creature_template.entry AND creature_template.name LIKE '" + name + '\'';
-                }
-                else
-                    whereClause += "WHERE guid = '" + guidLow + '\'';
+                // param1 is not a number, must be mob's name
+                whereClause += ", creature_template WHERE creature.id = creature_template.entry AND creature_template.name LIKE '" + param1 + '\'';
             }
 
             SQLResult result = DB.World.Query("SELECT position_x, position_y, position_z, orientation, map FROM creature {0}", whereClause);
@@ -186,7 +179,7 @@ namespace Game.Chat.Commands
                 player.SaveRecallPosition();
 
             Map map = Global.MapMgr.CreateBaseMap(mapId);
-            float z = Math.Max(map.GetHeight(x, y, MapConst.MaxHeight), map.GetWaterLevel(x, y));
+            float z = Math.Max(map.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), map.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
 
             player.TeleportTo(mapId, x, y, z, player.GetOrientation());
             return true;
@@ -305,7 +298,7 @@ namespace Game.Chat.Commands
                 player.SaveRecallPosition();
 
             Map map = Global.MapMgr.CreateBaseMap(mapId);
-            z = Math.Max(map.GetHeight(x, y, MapConst.MaxHeight), map.GetWaterLevel(x, y));
+            z = Math.Max(map.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), map.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
 
             player.TeleportTo(mapId, x, y, z, 0.0f);
             return true;
@@ -334,9 +327,9 @@ namespace Game.Chat.Commands
             }
 
             if ((node.Pos.X == 0.0f && node.Pos.Y == 0.0f && node.Pos.Z == 0.0f) ||
-                !GridDefines.IsValidMapCoord(node.MapID, node.Pos.X, node.Pos.Y, node.Pos.Z))
+                !GridDefines.IsValidMapCoord(node.ContinentID, node.Pos.X, node.Pos.Y, node.Pos.Z))
             {
-                handler.SendSysMessage(CypherStrings.InvalidTargetCoord, node.Pos.X, node.Pos.Y, node.MapID);
+                handler.SendSysMessage(CypherStrings.InvalidTargetCoord, node.Pos.X, node.Pos.Y, node.ContinentID);
                 return false;
             }
 
@@ -350,7 +343,7 @@ namespace Game.Chat.Commands
             else
                 player.SaveRecallPosition();
 
-            player.TeleportTo(node.MapID, node.Pos.X, node.Pos.Y, node.Pos.Z, player.GetOrientation());
+            player.TeleportTo(node.ContinentID, node.Pos.X, node.Pos.Y, node.Pos.Z, player.GetOrientation());
             return true;
         }
 
@@ -373,9 +366,9 @@ namespace Game.Chat.Commands
                 return false;
             }
 
-            if (!GridDefines.IsValidMapCoord(at.MapID, at.Pos.X, at.Pos.Y, at.Pos.Z))
+            if (!GridDefines.IsValidMapCoord(at.ContinentID, at.Pos.X, at.Pos.Y, at.Pos.Z))
             {
-                handler.SendSysMessage(CypherStrings.InvalidTargetCoord, at.Pos.X, at.Pos.Y, at.MapID);
+                handler.SendSysMessage(CypherStrings.InvalidTargetCoord, at.Pos.X, at.Pos.Y, at.ContinentID);
                 return false;
             }
 
@@ -389,7 +382,7 @@ namespace Game.Chat.Commands
             else
                 player.SaveRecallPosition();
 
-            player.TeleportTo(at.MapID, at.Pos.X, at.Pos.Y, at.Pos.Z, player.GetOrientation());
+            player.TeleportTo(at.ContinentID, at.Pos.X, at.Pos.Y, at.Pos.Z, player.GetOrientation());
             return true;
         }
 
@@ -427,7 +420,7 @@ namespace Game.Chat.Commands
             AreaTableRecord zoneEntry = areaEntry.ParentAreaID != 0 ? CliDB.AreaTableStorage.LookupByKey(areaEntry.ParentAreaID) : areaEntry;
             Contract.Assert(zoneEntry != null);
 
-            Map map = Global.MapMgr.CreateBaseMap(zoneEntry.MapId);
+            Map map = Global.MapMgr.CreateBaseMap(zoneEntry.ContinentID);
 
             if (map.Instanceable())
             {
@@ -437,9 +430,9 @@ namespace Game.Chat.Commands
 
             Global.DB2Mgr.Zone2MapCoordinates(areaEntry.ParentAreaID != 0 ? areaEntry.ParentAreaID : areaId, ref x, ref y);
 
-            if (!GridDefines.IsValidMapCoord(zoneEntry.MapId, x, y))
+            if (!GridDefines.IsValidMapCoord(zoneEntry.ContinentID, x, y))
             {
-                handler.SendSysMessage(CypherStrings.InvalidTargetCoord, x, y, zoneEntry.MapId);
+                handler.SendSysMessage(CypherStrings.InvalidTargetCoord, x, y, zoneEntry.ContinentID);
                 return false;
             }
 
@@ -453,9 +446,9 @@ namespace Game.Chat.Commands
             else
                 player.SaveRecallPosition();
 
-            float z = Math.Max(map.GetHeight(x, y, MapConst.MaxHeight), map.GetWaterLevel(x, y));
+            float z = Math.Max(map.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), map.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
 
-            player.TeleportTo(zoneEntry.MapId, x, y, z, player.GetOrientation());
+            player.TeleportTo(zoneEntry.ContinentID, x, y, z, player.GetOrientation());
             return true;
         }
 
@@ -502,7 +495,7 @@ namespace Game.Chat.Commands
                     return false;
                 }
                 Map map = Global.MapMgr.CreateBaseMap(mapId);
-                z = Math.Max(map.GetHeight(x, y, MapConst.MaxHeight), map.GetWaterLevel(x, y));
+                z = Math.Max(map.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), map.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
             }
 
             // stop flight if need

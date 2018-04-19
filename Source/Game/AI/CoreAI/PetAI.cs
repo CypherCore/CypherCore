@@ -462,7 +462,7 @@ namespace Game.AI
                     ClearCharmInfoFlags();
                     me.GetCharmInfo().SetIsCommandAttack(oldCmdAttack); // For passive pets commanded to attack so they will use spells
                     me.GetMotionMaster().Clear();
-                    me.GetMotionMaster().MoveChase(target);
+                    me.GetMotionMaster().MoveChase(target, me.GetPetChaseDistance());
                 }
                 else
                 {

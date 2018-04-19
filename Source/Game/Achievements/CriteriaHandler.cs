@@ -1181,7 +1181,7 @@ namespace Game.Achievements
             if (reqType == 0)
                 return true;
 
-            uint reqValue = tree.Entry.Asset[0];
+            uint reqValue = tree.Entry.Asset;
             switch ((CriteriaAdditionalCondition)reqType)
             {
                 case CriteriaAdditionalCondition.ItemLevel: // 3
@@ -1485,8 +1485,8 @@ namespace Game.Achievements
             Dictionary<uint, ScenarioStepRecord> scenarioCriteriaTreeIds = new Dictionary<uint, ScenarioStepRecord>();
             foreach (ScenarioStepRecord scenarioStep in CliDB.ScenarioStepStorage.Values)
             {
-                if (scenarioStep.CriteriaTreeID != 0)
-                    scenarioCriteriaTreeIds[scenarioStep.CriteriaTreeID] = scenarioStep;
+                if (scenarioStep.CriteriaTreeId != 0)
+                    scenarioCriteriaTreeIds[scenarioStep.CriteriaTreeId] = scenarioStep;
             }
 
             Dictionary<uint /*criteriaTreeID*/, QuestObjective> questObjectiveCriteriaTreeIds = new Dictionary<uint, QuestObjective>();

@@ -301,20 +301,20 @@ namespace Game.Maps
             switch (visitor._mask)
             {
                 case GridMapTypeMask.AllGrid:
-                    visitor.Visit(_container.gameObjects.ToList());
-                    visitor.Visit(_container.creatures.ToList());
-                    visitor.Visit(_container.dynamicObjects.ToList());
-                    visitor.Visit(_container.corpses.ToList());
-                    visitor.Visit(_container.areaTriggers.ToList());
-                    visitor.Visit(_container.conversations.ToList());
-                    visitor.Visit(_container.worldObjects.ToList());
+                    visitor.Visit(_container.gameObjects);
+                    visitor.Visit(_container.creatures);
+                    visitor.Visit(_container.dynamicObjects);
+                    visitor.Visit(_container.corpses);
+                    visitor.Visit(_container.areaTriggers);
+                    visitor.Visit(_container.conversations);
+                    visitor.Visit(_container.worldObjects);
                     break;
                 case GridMapTypeMask.AllWorld:
                     visitor.Visit(_objects.players);
-                    visitor.Visit(_objects.creatures.ToList());
-                    visitor.Visit(_objects.corpses.ToList());
-                    visitor.Visit(_objects.dynamicObjects.ToList());
-                    visitor.Visit(_objects.worldObjects.ToList());
+                    visitor.Visit(_objects.creatures);
+                    visitor.Visit(_objects.corpses);
+                    visitor.Visit(_objects.dynamicObjects);
+                    visitor.Visit(_objects.worldObjects);
                     break;
                 default:
                     Log.outError(LogFilter.Server, "{0} called Visit with Unknown Mask {1}.", visitor.ToString(), visitor._mask);

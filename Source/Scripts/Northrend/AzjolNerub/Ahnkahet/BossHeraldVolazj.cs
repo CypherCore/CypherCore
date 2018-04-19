@@ -23,6 +23,7 @@ using Game.Scripting;
 using Game.Spells;
 using System.Collections.Generic;
 using System.Linq;
+using Game;
 
 namespace Scripts.Northrend.AzjolNerub.Ahnkahet.HeraldVolazj
 {
@@ -133,7 +134,7 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.HeraldVolazj
                         // clone
                         player.CastSpell(summon, SpellIds.ClonePlayer, true);
                         // phase the summon
-                        summon.SetInPhase((uint)spellInfo.GetEffect(0).MiscValueB, true, true);
+                        PhasingHandler.AddPhase(summon, (uint)spellInfo.GetEffect(0).MiscValueB, true);
                     }
                 }
                 ++insanityHandled;
@@ -158,9 +159,9 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.HeraldVolazj
             instance.DoStopCriteriaTimer(CriteriaTimedTypes.Event, Misc.AchievQuickDemiseStartEvent);
 
             // Visible for all players in insanity
-            me.SetInPhase(169, true, true);
             for (uint i = 173; i <= 177; ++i)
-                me.SetInPhase(i, true, true);
+                PhasingHandler.AddPhase(me, i, false);
+            PhasingHandler.AddPhase(me, 169, true);
 
             ResetPlayersPhase();
 
@@ -199,7 +200,7 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.HeraldVolazj
                         return;
                     else
                     {
-                        nextPhase = visage.GetPhases().First();
+                        nextPhase = visage.GetPhaseShift().GetPhases().First().Id;
                         break;
                     }
                 }

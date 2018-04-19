@@ -36,9 +36,9 @@ namespace Game.Network
         static byte[] SessionKeySeed = { 0x58, 0xCB, 0xCF, 0x40, 0xFE, 0x2E, 0xCE, 0xA6, 0x5A, 0x90, 0xB8, 0x01, 0x68, 0x6C, 0x28, 0x0B };
         static byte[] ContinuedSessionSeed = { 0x16, 0xAD, 0x0C, 0xD4, 0x46, 0xF9, 0x4F, 0xB2, 0xEF, 0x7D, 0xEA, 0x2A, 0x17, 0x66, 0x4D, 0x2F };
 
-        static uint[] ClientTypeSeed_Win = { 0x15E29B46, 0xD030E52E, 0x8BB823BD, 0x2EE440F4 };  // 25480
-        static uint[] ClientTypeSeed_Wn64 = { 0x4E625212, 0xFAD6CBD8, 0x5D3FD3C7, 0xF335A567 }; // 25549
-        static uint[] ClientTypeSeed_Mc64 = { 0xA69C3979, 0x92260A02, 0x75F80969, 0xBA56132D }; // 25480
+        static byte[] ClientTypeSeed_Win = { 0x2A, 0xAC, 0x82, 0xC8, 0x0E, 0x82, 0x9E, 0x2C, 0xA9, 0x02, 0xD7, 0x0C, 0xFA, 0x1A, 0x83, 0x3A };
+        static byte[] ClientTypeSeed_Wn64 = { 0x59, 0xA5, 0x3F, 0x30, 0x72, 0x88, 0x45, 0x4B, 0x41, 0x9B, 0x13, 0xE6, 0x94, 0xDF, 0x50, 0x3C };
+        static byte[] ClientTypeSeed_Mc64 = { 0xDB, 0xE7, 0xF8, 0x60, 0x27, 0x6D, 0x6B, 0x40, 0x0A, 0xAA, 0x86, 0xB3, 0x5D, 0x51, 0xA4, 0x17 };
 
         public WorldSocket(Socket socket) : base(socket)
         {
@@ -383,18 +383,15 @@ namespace Game.Network
             // For hook purposes, we get Remoteaddress at this point.
             string address = GetRemoteIpAddress().ToString();
 
-            uint[] clientSeed = ClientTypeSeed_Win;
+            byte[] clientSeed = ClientTypeSeed_Win;
             if (account.game.OS == "Wn64")
                 clientSeed = ClientTypeSeed_Wn64;
             else if (account.game.OS == "Mc64")
                 clientSeed = ClientTypeSeed_Mc64;
 
-            byte[] byteArray = new byte[clientSeed.Length * 4];
-            Buffer.BlockCopy(clientSeed, 0, byteArray, 0, clientSeed.Length * 4);
-
             Sha256 digestKeyHash = new Sha256();
             digestKeyHash.Process(account.game.SessionKey, account.game.SessionKey.Length);
-            digestKeyHash.Finish(byteArray, byteArray.Length);
+            digestKeyHash.Finish(clientSeed, clientSeed.Length);
 
             HmacSha256 hmac = new HmacSha256(digestKeyHash.Digest);
             hmac.Process(authSession.LocalChallenge, authSession.LocalChallenge.Count);
@@ -467,7 +464,7 @@ namespace Game.Network
             {
                 if (account.battleNet.LastIP != address)
                 {
-                    SendAuthResponseError(BattlenetRpcErrorCode.Denied);
+                    SendAuthResponseError(BattlenetRpcErrorCode.RiskAccountLocked);
                     Log.outDebug(LogFilter.Network, "HandleAuthSession: Sent Auth Response (Account IP differs).");
                     CloseSocket();
                     return;
@@ -477,7 +474,7 @@ namespace Game.Network
             {
                 if (account.battleNet.LockCountry != _ipCountry)
                 {
-                    SendAuthResponseError(BattlenetRpcErrorCode.Denied);
+                    SendAuthResponseError(BattlenetRpcErrorCode.RiskAccountLocked);
                     Log.outDebug(LogFilter.Network, "WorldSocket.HandleAuthSession: Sent Auth Response (Account country differs. Original country: {0}, new country: {1}).", account.battleNet.LockCountry, _ipCountry);
                     CloseSocket();
                     return;
@@ -498,7 +495,7 @@ namespace Game.Network
 
             if (account.IsBanned()) // if account banned
             {
-                SendAuthResponseError(BattlenetRpcErrorCode.Denied);
+                SendAuthResponseError(BattlenetRpcErrorCode.GameAccountBanned);
                 Log.outError(LogFilter.Network, "WorldSocket:HandleAuthSession: Sent Auth Response (Account banned).");
                 CloseSocket();
                 return;
@@ -506,10 +503,9 @@ namespace Game.Network
 
             // Check locked state for server
             AccountTypes allowedAccountType = Global.WorldMgr.GetPlayerSecurityLimit();
-            Log.outDebug(LogFilter.Network, "Allowed Level: {0} Player Level {1}", allowedAccountType, account.game.Security);
             if (allowedAccountType > AccountTypes.Player && account.game.Security < allowedAccountType)
             {
-                SendAuthResponseError(BattlenetRpcErrorCode.Denied);
+                SendAuthResponseError(BattlenetRpcErrorCode.ServerIsPrivate);
                 Log.outInfo(LogFilter.Network, "WorldSocket:HandleAuthSession: User tries to login but his security level is not enough");
                 CloseSocket();
                 return;
@@ -741,13 +737,9 @@ namespace Game.Network
             game.OS = fields.Read<string>(9);
             battleNet.Id = fields.Read<uint>(10);
             game.Security = (AccountTypes)fields.Read<byte>(11);
-            battleNet.IsBanned = fields.Read<ulong>(12) != 0;
-            game.IsBanned = fields.Read<ulong>(13) != 0;
+            battleNet.IsBanned = fields.Read<uint>(12) != 0;
+            game.IsBanned = fields.Read<uint>(13) != 0;
             game.IsRectuiter = fields.Read<uint>(14) != 0;
-
-            uint world_expansion = WorldConfig.GetUIntValue(WorldCfg.Expansion);
-            if (game.Expansion > world_expansion)
-                game.Expansion = (byte)world_expansion;
 
             if (battleNet.Locale >= LocaleConstant.Total)
                 battleNet.Locale = LocaleConstant.enUS;

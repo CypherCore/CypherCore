@@ -84,7 +84,7 @@ namespace Game.Entities
 
             _cellCoord = GridDefines.ComputeCellCoord(GetPositionX(), GetPositionY());
 
-            CopyPhaseFrom(owner);
+            PhasingHandler.InheritPhaseShift(this, owner);
 
             return true;
         }
@@ -114,12 +114,12 @@ namespace Game.Entities
             stmt.AddValue(index++, GetInstanceId());                                        // instanceId
             trans.Append(stmt);
 
-            foreach (uint phaseId in GetPhases())
+            foreach (PhaseRef phase in GetPhaseShift().GetPhases())
             {
                 index = 0;
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CORPSE_PHASES);
                 stmt.AddValue(index++, GetOwnerGUID().GetCounter());                        // OwnerGuid
-                stmt.AddValue(index++, phaseId);                                            // PhaseId
+                stmt.AddValue(index++, phase.Id);                                            // PhaseId
                 trans.Append(stmt);
             }
         }

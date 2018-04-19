@@ -63,7 +63,7 @@ namespace Game.Guilds
                 uint guildTeam = TeamId.Alliance;
                 ChrRacesRecord raceEntry = CliDB.ChrRacesStorage.LookupByKey(result.Read<byte>(7));
                 if (raceEntry != null)
-                    if (raceEntry.TeamID == 1)
+                    if (raceEntry.Alliance == 1)
                         guildTeam = TeamId.Horde;
 
                 LFGuildSettings settings = new LFGuildSettings(listed, guildTeam, guildId, classRoles, availability, interests, level, comment);

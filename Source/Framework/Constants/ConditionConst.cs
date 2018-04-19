@@ -100,7 +100,8 @@ namespace Framework.Constants
         SpellProc = 24,
         TerrainSwap = 25,
         Phase = 26,
-        Max = 27
+        Graveyard = 27,
+        Max = 28
     }
 
     public enum RelationType

@@ -22,7 +22,7 @@ using System;
 
 namespace Game.Movement
 {
-    public class RandomMovementGenerator<T> : MovementGeneratorMedium<T> where T : Creature
+    public class RandomMovementGenerator : MovementGeneratorMedium<Creature>
     {
         public RandomMovementGenerator(float spawn_dist = 0.0f)
         {
@@ -38,7 +38,7 @@ namespace Game.Movement
             return MovementGeneratorType.Random;
         }
 
-        public override void DoInitialize(T creature)
+        public override void DoInitialize(Creature creature)
         {
             if (!creature.IsAlive())
                 return;
@@ -53,17 +53,17 @@ namespace Game.Movement
             _setRandomLocation(creature);
 
         }
-        public override void DoFinalize(T creature)
+        public override void DoFinalize(Creature creature)
         {
             creature.ClearUnitState(UnitState.Roaming | UnitState.RoamingMove);
             creature.SetWalk(false);
         }
-        public override void DoReset(T creature)
+        public override void DoReset(Creature creature)
         {
             DoInitialize(creature);
         }
 
-        public override bool DoUpdate(T creature, uint diff)
+        public override bool DoUpdate(Creature creature, uint diff)
         {
             if (!creature || !creature.IsAlive())
                 return false;
@@ -84,9 +84,9 @@ namespace Game.Movement
             return true;
         }
 
-        public void _setRandomLocation(T creature)
+        public void _setRandomLocation(Creature creature)
         {
-            if (creature.HasUnitState(UnitState.Casting) && !creature.CanMoveDuringChannel())
+            if (creature.IsMovementPreventedByCasting())
             {
                 creature.CastStop();
                 return;
@@ -117,7 +117,7 @@ namespace Game.Movement
                 // Limit height change
                 float distanceZ = (float)(RandomHelper.NextDouble() * travelDistZ / 2.0f);
                 destZ = respZ + distanceZ;
-                float levelZ = map.GetWaterOrGroundLevel(creature.GetPhases(), destX, destY, destZ - 2.5f);
+                float levelZ = map.GetWaterOrGroundLevel(creature.GetPhaseShift(), destX, destY, destZ - 2.5f);
 
                 // Problem here, we must fly above the ground and water, not under. Let's try on next tick
                 if (levelZ >= destZ)
@@ -130,17 +130,17 @@ namespace Game.Movement
 
                 // The fastest way to get an accurate result 90% of the time.
                 // Better result can be obtained like 99% accuracy with a ray light, but the cost is too high and the code is too long.
-                destZ = map.GetHeight(creature.GetPhases(), destX, destY, respZ + travelDistZ - 2.0f, false);
+                destZ = map.GetHeight(creature.GetPhaseShift(), destX, destY, respZ + travelDistZ - 2.0f, false);
 
                 if (Math.Abs(destZ - respZ) > travelDistZ)              // Map check
                 {
                     // Vmap Horizontal or above
-                    destZ = map.GetHeight(creature.GetPhases(), destX, destY, respZ - 2.0f, true);
+                    destZ = map.GetHeight(creature.GetPhaseShift(), destX, destY, respZ - 2.0f, true);
 
                     if (Math.Abs(destZ - respZ) > travelDistZ)
                     {
                         // Vmap Higher
-                        destZ = map.GetHeight(creature.GetPhases(), destX, destY, respZ + travelDistZ - 2.0f, true);
+                        destZ = map.GetHeight(creature.GetPhaseShift(), destX, destY, respZ + travelDistZ - 2.0f, true);
 
                         // let's forget this bad coords where a z cannot be find and retry at next tick
                         if (Math.Abs(destZ - respZ) > travelDistZ)

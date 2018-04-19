@@ -437,6 +437,9 @@ namespace Game.Network.Packets
                         _worldPacket.WriteInt32(questPOIBlobPoint.X);
                         _worldPacket.WriteInt32(questPOIBlobPoint.Y);
                     }
+
+                    _worldPacket.WriteBit(questPOIBlobData.AlwaysAllowMergingBlobs);
+                    _worldPacket.FlushBits();
                 }
             }
         }
@@ -759,6 +762,7 @@ namespace Game.Network.Packets
         public int PlayerConditionID;
         public int UnkWoD1;
         public List<QuestPOIBlobPoint> QuestPOIBlobPointStats = new List<QuestPOIBlobPoint>();
+        public bool AlwaysAllowMergingBlobs;
     }
 
     public class QuestPOIData

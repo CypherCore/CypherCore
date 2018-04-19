@@ -47,6 +47,7 @@ namespace Game.BattleFields
 
             m_TimeForAcceptInvite = 20;
             m_StartGroupingTimer = 15 * Time.Minute * Time.InMilliseconds;
+            m_tenacityTeam = TeamId.Neutral;
 
             KickPosition = new WorldLocation(m_MapId, 5728.117f, 2714.346f, 697.733f, 0);
 
@@ -707,6 +708,7 @@ namespace Game.BattleFields
             player.RemoveAurasDueToSpell(WGSpells.AllianceControlsFactoryPhaseShift);
             player.RemoveAurasDueToSpell(WGSpells.HordeControlPhaseShift);
             player.RemoveAurasDueToSpell(WGSpells.AllianceControlPhaseShift);
+            UpdateTenacity();
         }
 
         public override void OnPlayerLeaveZone(Player player)
@@ -921,7 +923,6 @@ namespace Game.BattleFields
 
         void UpdateTenacity()
         {
-            int teamIndex = TeamId.Neutral;
             int alliancePlayers = m_PlayersInWar[TeamId.Alliance].Count;
             int hordePlayers = m_PlayersInWar[TeamId.Horde].Count;
             int newStack = 0;
@@ -937,16 +938,11 @@ namespace Game.BattleFields
             if (newStack == m_tenacityStack)
                 return;
 
-            if (m_tenacityStack > 0 && newStack <= 0)               // old buff was on alliance
-                teamIndex = TeamId.Alliance;
-            else if (newStack >= 0)                                 // old buff was on horde
-                teamIndex = TeamId.Horde;
-
             m_tenacityStack = (uint)newStack;
             // Remove old buff
-            if (teamIndex != TeamId.Neutral)
+            if (m_tenacityTeam != TeamId.Neutral)
             {
-                foreach (var guid in m_players[teamIndex])
+                foreach (var guid in m_players[m_tenacityTeam])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
                     if (player)
@@ -954,7 +950,7 @@ namespace Game.BattleFields
                             player.RemoveAurasDueToSpell(WGSpells.Tenacity);
                 }
 
-                foreach (var guid in m_vehicles[teamIndex])
+                foreach (var guid in m_vehicles[m_tenacityTeam])
                 {
                     Creature creature = GetCreature(guid);
                     if (creature)
@@ -965,7 +961,7 @@ namespace Game.BattleFields
             // Apply new buff
             if (newStack != 0)
             {
-                teamIndex = newStack > 0 ? TeamId.Alliance : TeamId.Horde;
+                m_tenacityTeam = newStack > 0 ? TeamId.Alliance : TeamId.Horde;
 
                 if (newStack < 0)
                     newStack = -newStack;
@@ -980,14 +976,14 @@ namespace Game.BattleFields
                 if (newStack < 5)
                     buff_honor = 0;
 
-                foreach (var guid in m_PlayersInWar[teamIndex])
+                foreach (var guid in m_PlayersInWar[m_tenacityTeam])
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
                     if (player)
                         player.SetAuraStack(WGSpells.Tenacity, player, (uint)newStack);
                 }
 
-                foreach (var guid in m_vehicles[teamIndex])
+                foreach (var guid in m_vehicles[m_tenacityTeam])
                 {
                     Creature creature = GetCreature(guid);
                     if (creature)
@@ -996,14 +992,14 @@ namespace Game.BattleFields
 
                 if (buff_honor != 0)
                 {
-                    foreach (var guid in m_PlayersInWar[teamIndex])
+                    foreach (var guid in m_PlayersInWar[m_tenacityTeam])
                     {
                         Player player = Global.ObjAccessor.FindPlayer(guid);
                         if (player)
                             player.CastSpell(player, buff_honor, true);
                     }
 
-                    foreach (var guid in m_vehicles[teamIndex])
+                    foreach (var guid in m_vehicles[m_tenacityTeam])
                     {
                         Creature creature = GetCreature(guid);
                         if (creature)
@@ -1011,6 +1007,8 @@ namespace Game.BattleFields
                     }
                 }
             }
+            else
+                m_tenacityTeam = TeamId.Neutral;
         }
 
         public GameObject GetRelic() { return GetGameObject(m_titansRelicGUID); }
@@ -1035,6 +1033,7 @@ namespace Game.BattleFields
         List<ObjectGuid>[] m_vehicles = new List<ObjectGuid>[SharedConst.BGTeamsCount];
         List<ObjectGuid> CanonList = new List<ObjectGuid>();
 
+        int m_tenacityTeam;
         uint m_tenacityStack;
         uint m_saveTimer;
 

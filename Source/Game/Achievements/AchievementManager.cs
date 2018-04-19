@@ -69,7 +69,7 @@ namespace Game.Achievements
                 return false;
             }
 
-            if (achievement.MapID != -1 && referencePlayer.GetMapId() != achievement.MapID)
+            if (achievement.InstanceID != -1 && referencePlayer.GetMapId() != achievement.InstanceID)
             {
                 Log.outTrace(LogFilter.Achievement, "CanUpdateCriteriaTree: (Id: {0} Type {1} Achievement {2}) Wrong map",
                     criteria.ID, criteria.Entry.Type, achievement.Id);
@@ -157,14 +157,14 @@ namespace Game.Achievements
             // Oddly, the target count is NOT contained in the achievement, but in each individual criteria
             if (entry.Flags.HasAnyFlag(AchievementFlags.Summ))
             {
-                ulong progress = 0;
+                long progress = 0;
                 CriteriaManager.WalkCriteriaTree(tree, criteriaTree =>
                 {
                     if (criteriaTree.Criteria != null)
                     {
                         CriteriaProgress criteriaProgress = this.GetCriteriaProgress(criteriaTree.Criteria);
                         if (criteriaProgress != null)
-                            progress += criteriaProgress.Counter;
+                            progress += (long)criteriaProgress.Counter;
                     }
                 });
                 return progress >= tree.Entry.Amount;
@@ -1092,7 +1092,7 @@ namespace Game.Achievements
             // Once Bitten, Twice Shy (10 player) - Icecrown Citadel
             AchievementRecord achievement1 = CliDB.AchievementStorage.LookupByKey(4539);
             if (achievement1 != null)
-                achievement1.MapID = 631;    // Correct map requirement (currently has Ulduar); 6.0.3 note - it STILL has ulduar requirement
+                achievement1.InstanceID = 631;    // Correct map requirement (currently has Ulduar); 6.0.3 note - it STILL has ulduar requirement
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} achievement references in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }

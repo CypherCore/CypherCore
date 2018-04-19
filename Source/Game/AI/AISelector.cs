@@ -102,9 +102,9 @@ namespace Game.AI
             switch (creature.m_defaultMovementType)
             {
                 case MovementGeneratorType.Random:
-                    return new RandomMovementGenerator<Creature>();
+                    return new RandomMovementGenerator();
                 case MovementGeneratorType.Waypoint:
-                    return new WaypointMovementGenerator<Creature>();
+                    return new WaypointMovementGenerator();
             }
             return null;
         }

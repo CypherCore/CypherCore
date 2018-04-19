@@ -545,8 +545,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteFloat(Facing);
             _worldPacket.WriteUInt8(PreloadWorld);
 
-            _worldPacket.WriteBit(Vehicle.HasValue);
             _worldPacket.WriteBit(TransportGUID.HasValue);
+            _worldPacket.WriteBit(Vehicle.HasValue);
             _worldPacket.FlushBits();
 
             if (Vehicle.HasValue)

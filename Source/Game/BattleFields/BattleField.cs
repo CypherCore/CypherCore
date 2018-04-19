@@ -672,24 +672,20 @@ namespace Game.BattleFields
                 return null;
             }
 
-            CreatureTemplate cinfo = Global.ObjectMgr.GetCreatureTemplate(entry);
-            if (cinfo == null)
+            if (Global.ObjectMgr.GetCreatureTemplate(entry) == null)
             {
                 Log.outError(LogFilter.Battlefield, "Battlefield:SpawnCreature: entry {0} does not exist.", entry);
                 return null;
             }
 
-            float x, y, z, o;
-            pos.GetPosition(out x, out y, out z, out o);
-
-            Creature creature = new Creature();
-            if (!creature.Create(map.GenerateLowGuid(HighGuid.Creature), map, entry, x, y, z, o))
+            Creature creature = Creature.CreateCreature(entry, map, pos);
+            if (!creature)
             {
                 Log.outError(LogFilter.Battlefield, "Battlefield:SpawnCreature: Can't create creature entry: {0}", entry);
                 return null;
             }
 
-            creature.SetHomePosition(x, y, z, o);
+            creature.SetHomePosition(pos);
 
             // Set creature in world
             map.AddToMap(creature);
@@ -706,16 +702,15 @@ namespace Game.BattleFields
             if (!map)
                 return null;
 
-            GameObjectTemplate goInfo = Global.ObjectMgr.GetGameObjectTemplate(entry);
-            if (goInfo == null)
+            if (Global.ObjectMgr.GetGameObjectTemplate(entry) == null)
             {
                 Log.outError(LogFilter.Battlefield, "Battlefield.SpawnGameObject: GameObject template {0} not found in database! Battlefield not created!", entry);
                 return null;
             }
 
             // Create gameobject
-            GameObject go = new GameObject();
-            if (!go.Create(entry, map, pos, rotation, 255, GameObjectState.Ready))
+            GameObject go = GameObject.CreateGameObject(entry, map, pos, rotation, 255, GameObjectState.Ready);
+            if (!go)
             {
                 Log.outError(LogFilter.Battlefield, "Battlefield:SpawnGameObject: Cannot create gameobject template {1}! Battlefield not created!", entry);
                 return null;

@@ -131,7 +131,7 @@ namespace Framework.Constants
         // uses this category
     }
 
-    public enum SummonType
+    public enum SummonType: byte
     {
         None = 0,
         Pet = 1,

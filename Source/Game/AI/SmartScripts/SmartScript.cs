@@ -1090,7 +1090,12 @@ namespace Game.AI
                             break;
 
                         foreach (var obj in targets)
-                            obj.SetInPhase(e.Action.ingamePhaseId.id, true, e.Action.ingamePhaseId.apply == 1);
+                        {
+                            if (e.Action.ingamePhaseId.apply == 1)
+                                PhasingHandler.AddPhase(obj, e.Action.ingamePhaseId.id, true);
+                            else
+                                PhasingHandler.RemovePhase(obj, e.Action.ingamePhaseId.id, true);
+                        }
 
                         break;
                     }
@@ -1101,12 +1106,12 @@ namespace Game.AI
                         if (targets.Empty())
                             break;
 
-                        var phases = Global.DB2Mgr.GetPhasesForGroup(e.Action.ingamePhaseGroup.groupId);
-
                         foreach (var obj in targets)
                         {
-                            foreach (var phase in phases)
-                                obj.SetInPhase(phase, true, e.Action.ingamePhaseGroup.apply == 1);
+                            if (e.Action.ingamePhaseGroup.apply == 1)
+                                PhasingHandler.AddPhaseGroup(obj, e.Action.ingamePhaseGroup.groupId, true);
+                            else
+                                PhasingHandler.RemovePhaseGroup(obj, e.Action.ingamePhaseGroup.groupId, true);
                         }
 
                         break;
@@ -2027,6 +2032,18 @@ namespace Game.AI
                                 obj.ToGameObject().SetLootState((LootState)e.Action.setGoLootState.state);
                         break;
                     }
+                case SmartActions.GoSetGoState:
+                    {
+                        List<WorldObject> targets = GetTargets(e, unit);
+
+                        if (targets.Empty())
+                            break;
+
+                        foreach (var obj in targets)
+                            if (IsGameObject(obj))
+                                obj.ToGameObject().SetGoState((GameObjectState)e.Action.goState.state);
+                        break;
+                    }
                 case SmartActions.SendTargetToTarget:
                     {
                         List<WorldObject> targets = GetTargets(e, unit);
@@ -2226,58 +2243,6 @@ namespace Game.AI
                             break;
                         }
                         Global.GameEventMgr.StartEvent(eventId, true);
-                        break;
-                    }
-                case SmartActions.StartClosestWaypoint:
-                    {
-                        uint[] waypoints = new uint[SharedConst.SmartActionParamCount];
-                        waypoints[0] = e.Action.closestWaypointFromList.wp1;
-                        waypoints[1] = e.Action.closestWaypointFromList.wp2;
-                        waypoints[2] = e.Action.closestWaypointFromList.wp3;
-                        waypoints[3] = e.Action.closestWaypointFromList.wp4;
-                        waypoints[4] = e.Action.closestWaypointFromList.wp5;
-                        waypoints[5] = e.Action.closestWaypointFromList.wp6;
-                        float distanceToClosest = float.MaxValue;
-                        SmartPath closestWp = null;
-
-                        var targets = GetTargets(e, unit);
-
-                        foreach (var obj in targets)
-                        {
-                            Creature target = obj.ToCreature();
-                            if (target)
-                            {
-                                if (IsSmart(target))
-                                {
-                                    for (byte i = 0; i < SharedConst.SmartActionParamCount; i++)
-                                    {
-                                        if (waypoints[i] == 0)
-                                            continue;
-
-                                        var path = Global.SmartAIMgr.GetPath(waypoints[i]);
-
-                                        if (path.Empty())
-                                            continue;
-
-                                        SmartPath wp = path[0];
-                                        if (wp != null)
-                                        {
-                                            float distToThisPath = target.GetDistance(wp.x, wp.y, wp.z);
-
-                                            if (distToThisPath < distanceToClosest)
-                                            {
-                                                distanceToClosest = distToThisPath;
-                                                closestWp = wp;
-                                            }
-
-                                        }
-                                    }
-
-                                    if (closestWp != null)
-                                        ((SmartAI)target.GetAI()).StartPath(false, closestWp.id, true);
-                                }
-                            }
-                        }
                         break;
                     }
                 case SmartActions.RandomSound:
@@ -3817,6 +3782,15 @@ namespace Game.AI
             var u_check = new MostHPMissingInRange<Unit>(me, range, MinHPDiff);
             var searcher = new UnitLastSearcher(me, u_check);
             Cell.VisitGridObjects(me, searcher, range);
+            return searcher.GetTarget();
+        }
+
+        Unit DoSelectBelowHpPctFriendlyWithEntry(uint entry, float range, byte minHPDiff = 1, bool excludeSelf = true)
+        {
+            FriendlyBelowHpPctEntryInRange u_check = new FriendlyBelowHpPctEntryInRange(me, entry, range, minHPDiff, excludeSelf);
+            UnitLastSearcher searcher = new UnitLastSearcher(me, u_check);
+            Cell.VisitAllObjects(me, searcher, range);
+
             return searcher.GetTarget();
         }
 

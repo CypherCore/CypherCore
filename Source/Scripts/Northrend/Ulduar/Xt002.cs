@@ -152,6 +152,12 @@ namespace Scripts.Northrend.Ulduar.Xt002
             instance.DoStopCriteriaTimer(CriteriaTimedTypes.Event, Misc.AchievMustDeconstructFaster);
         }
 
+        public override void EnterEvadeMode(EvadeReason why)
+        {
+            summons.DespawnAll();
+            _DespawnAtEvade();
+        }
+
         public override void EnterCombat(Unit who)
         {
             Talk(Texts.Aggro);
@@ -364,25 +370,21 @@ namespace Scripts.Northrend.Ulduar.Xt002
     }
 
     [Script]
-    class npc_xt002_heart : ScriptedAI
+    class npc_xt002_heart : NullCreatureAI
     {
         public npc_xt002_heart(Creature creature) : base(creature)
         {
             _instance = creature.GetInstanceScript();
-
-            SetCombatMovement(false);
         }
-
-        public override void UpdateAI(uint diff) { }
 
         public override void JustDied(Unit killer)
         {
-            Creature xt002 = _instance != null ? ObjectAccessor.GetCreature(me, _instance.GetGuidData(BossIds.Xt002)) : null;
-            if (!xt002 || xt002.GetAI() == null)
-                return;
-
-            xt002.GetAI().SetData(XT002Data.TransferedHealth, (uint)me.GetHealth());
-            xt002.GetAI().DoAction(Misc.ActionHardMode);
+            Creature xt002 = ObjectAccessor.GetCreature(me, _instance.GetGuidData(BossIds.Xt002));
+            if (xt002)
+            {
+                xt002.GetAI().SetData(XT002Data.TransferedHealth, (uint)me.GetHealth());
+                xt002.GetAI().DoAction(Misc.ActionHardMode);
+            }
         }
 
         InstanceScript _instance;

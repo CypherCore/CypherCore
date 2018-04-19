@@ -302,7 +302,7 @@ namespace Framework.Constants
         AddDynamicFlag = 95,     // Flags
         RemoveDynamicFlag = 96,     // Flags
         JumpToPos = 97,     // Speedxy, Speedz, Targetx, Targety, Targetz
-        SendGossipMenu = 98,     // Menuid, Optionid
+        SendGossipMenu = 98,     // Menuid, optionIndex
         GoSetLootState = 99,     // State
         SendTargetToTarget = 100,    // Id
         SetHomePos = 101,    // None
@@ -317,12 +317,13 @@ namespace Framework.Constants
         RemovePower = 110,    // PowerType, newPower
         GameEventStop = 111,    // GameEventId
         GameEventStart = 112,    // GameEventId
-        StartClosestWaypoint = 113,    // wp1, wp2, wp3, wp4, wp5, wp6, wp7
+        // Not used 
         MoveOffset = 114,
         RandomSound = 115,    // SoundId1, SoundId2, SoundId3, SoundId4, SoundId5, onlySelf
         SetCorpseDelay = 116,    // timer
         DisableEvade = 117,    // 0/1 (1 = disabled, 0 = enabled)
-        // 118 - 127 : 3.3.5 reserved
+        GoSetGoState = 118,
+        // 119 - 127 : 3.3.5 reserved
         PlayAnimkit = 128,
         ScenePlay = 129,    // sceneId
         SceneCancel = 130,    // sceneId

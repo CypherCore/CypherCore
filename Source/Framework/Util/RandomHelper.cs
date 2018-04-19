@@ -81,7 +81,7 @@ public class RandomHelper
     /// <returns></returns>
     public static bool randChance(float i)
     {
-        return i > rand.Next(0, 100);
+        return i > randChance();
     }
 
     public static double randChance()

@@ -102,23 +102,19 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.Amanitar
             for (byte i = 0; i < 30; ++i)
             {
                 Position pos = me.GetRandomNearPosition(30.0f);
-                pos.posZ = me.GetMap().GetHeight(pos.GetPositionX(), pos.GetPositionY(), MapConst.MaxHeight) + 2.0f;
+                me.UpdateGroundPositionZ(pos.GetPositionX(), pos.GetPositionY(), ref pos.posZ);
 
                 Creature trigger = me.SummonCreature(CreatureIds.Trigger, pos);
                 if (trigger)
                 {
                     Creature temp1 = trigger.FindNearestCreature(CreatureIds.HealthyMushroom, 4.0f, true);
                     Creature temp2 = trigger.FindNearestCreature(CreatureIds.PoisonousMushroom, 4.0f, true);
-                    if (temp1 || temp2)
-                    {
-                        trigger.DisappearAndDie();
-                    }
-                    else
+                    if (!temp1 && !temp2)
                     {
                         u = 1 - u;
-                        trigger.DisappearAndDie();
                         me.SummonCreature(u > 0 ? CreatureIds.PoisonousMushroom : CreatureIds.HealthyMushroom, pos, TempSummonType.TimedOrCorpseDespawn, 60 * Time.InMilliseconds);
                     }
+                    trigger.DespawnOrUnsummon();
                 }
             }
         }

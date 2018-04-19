@@ -64,6 +64,21 @@ namespace Game.Network.Packets
         public List<uint> FavoriteAppearances = new List<uint>();
     }
 
+    class OpenTransmogrifier : ServerPacket
+    {
+        public OpenTransmogrifier(ObjectGuid guid) : base(ServerOpcodes.OpenTransmogrifier, ConnectionType.Instance)
+        {
+            Guid = guid;
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(Guid);
+        }
+
+        ObjectGuid Guid;
+    }
+
     struct TransmogrifyItem
     {
         public void Read(WorldPacket data)

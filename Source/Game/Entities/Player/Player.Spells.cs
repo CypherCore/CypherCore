@@ -224,33 +224,30 @@ namespace Game.Entities
             return GetUInt16Value(PlayerFields.SkillLineTempBonus + field, offset);
         }
 
-        public uint GetResurrectionSpellId()
+        void InitializeSelfResurrectionSpells()
         {
-            // search priceless resurrection possibilities
-            uint prio = 0;
-            uint spell_id = 0;
+            ClearDynamicValue(PlayerDynamicFields.SelfResSpells);
+
+            uint[] spells = new uint[3];
+
             var dummyAuras = GetAuraEffectsByType(AuraType.Dummy);
-            foreach (var eff in dummyAuras)
+            foreach (var auraEffect in dummyAuras)
             {
                 // Soulstone Resurrection                           // prio: 3 (max, non death persistent)
-                if (prio < 2 && eff.GetSpellInfo().SpellFamilyName == SpellFamilyNames.Warlock && eff.GetSpellInfo().SpellFamilyFlags[1].HasAnyFlag(0x1000000u))
-                {
-                    spell_id = 3026;
-                    prio = 3;
-                }
+                if (auraEffect.GetSpellInfo().SpellFamilyName == SpellFamilyNames.Warlock && auraEffect.GetSpellInfo().SpellFamilyFlags[1].HasAnyFlag(0x1000000u))
+                    spells[0] = 3026;
                 // Twisting Nether                                  // prio: 2 (max)
-                else if (eff.GetId() == 23701 && RandomHelper.randChance(10))
-                {
-                    prio = 2;
-                    spell_id = 23700;
-                }
+                else if (auraEffect.GetId() == 23701 && RandomHelper.randChance(10))
+                    spells[1] = 23700;
             }
 
             // Reincarnation (passive spell)  // prio: 1
-            if (prio < 1 && HasSpell(20608) && !GetSpellHistory().HasCooldown(21169))
-                spell_id = 21169;
+            if (HasSpell(20608) && !GetSpellHistory().HasCooldown(21169))
+                spells[2] = 21169;
 
-            return spell_id;
+            foreach (uint selfResSpell in spells)
+                if (selfResSpell != 0)
+                    AddDynamicValue(PlayerDynamicFields.SelfResSpells, selfResSpell);
         }
 
         public void PetSpellInitialize()
@@ -597,7 +594,7 @@ namespace Game.Entities
                 {
                     ItemEnchantmentType enchant_display_type = (ItemEnchantmentType)pEnchant.Effect[s];
                     uint enchant_amount = pEnchant.EffectPointsMin[s];
-                    uint enchant_spell_id = pEnchant.EffectSpellID[s];
+                    uint enchant_spell_id = pEnchant.EffectArg[s];
 
                     switch (enchant_display_type)
                     {
@@ -654,7 +651,7 @@ namespace Game.Entities
                             if (pEnchant.ScalingClass != 0)
                             {
                                 int scalingClass = pEnchant.ScalingClass;
-                                if ((GetUInt32Value(UnitFields.MinItemLevel) != 0 || GetUInt32Value(UnitFields.Maxitemlevel) != 0) && pEnchant.ScalingClassRestricted != 0)
+                                if ((GetUInt32Value(UnitFields.MinItemLevel) != 0 || GetUInt32Value(UnitFields.MaxItemlevel) != 0) && pEnchant.ScalingClassRestricted != 0)
                                     scalingClass = pEnchant.ScalingClassRestricted;
 
                                 uint minLevel = ((uint)(pEnchant.Flags)).HasAnyFlag(0x20u) ? 1 : 60u;
@@ -694,7 +691,7 @@ namespace Game.Entities
                                 if (pEnchant.ScalingClass != 0)
                                 {
                                     int scalingClass = pEnchant.ScalingClass;
-                                    if ((GetUInt32Value(UnitFields.MinItemLevel) != 0 || GetUInt32Value(UnitFields.Maxitemlevel) != 0) && pEnchant.ScalingClassRestricted != 0)
+                                    if ((GetUInt32Value(UnitFields.MinItemLevel) != 0 || GetUInt32Value(UnitFields.MaxItemlevel) != 0) && pEnchant.ScalingClassRestricted != 0)
                                         scalingClass = pEnchant.ScalingClassRestricted;
 
                                     uint minLevel = ((uint)(pEnchant.Flags)).HasAnyFlag(0x20u) ? 1 : 60u;
@@ -896,6 +893,11 @@ namespace Game.Entities
                             // processed in Player.CastItemUseSpell
                             break;
                         case ItemEnchantmentType.PrismaticSocket:
+                        case ItemEnchantmentType.ArtifactPowerBonusRankByType:
+                        case ItemEnchantmentType.ArtifactPowerBonusRankByID:
+                        case ItemEnchantmentType.BonusListID:
+                        case ItemEnchantmentType.BonusListCurve:
+                        case ItemEnchantmentType.ArtifactPowerBonusRankPicker:
                             // nothing do..
                             break;
                         default:
@@ -932,7 +934,7 @@ namespace Game.Entities
             if (skill == null || skill.State == SkillState.Deleted)
                 return;
 
-            ushort field = (ushort)(skill.Pos / 2 + (talent ? PlayerFields.SkillLinePermBonus : PlayerFields.SkillLineTempBonus));
+            int field = (int)(skill.Pos / 2 + (talent ? PlayerFields.SkillLinePermBonus : PlayerFields.SkillLineTempBonus));
             byte offset = (byte)(skill.Pos & 1);
 
             ushort bonus = GetUInt16Value(field, offset);
@@ -1027,7 +1029,8 @@ namespace Game.Entities
             // remove enchants from inventory items
             // NOTE: no need to remove these from stats, since these aren't equipped
             // in inventory
-            for (byte i = InventorySlots.ItemStart; i < InventorySlots.ItemEnd; ++i)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = InventorySlots.ItemStart; i < inventoryEnd; ++i)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem)
@@ -1066,9 +1069,9 @@ namespace Game.Entities
                 if (proto != null)
                     for (byte idx = 0; idx < proto.Effects.Count; ++idx)
                     {
-                        if (proto.Effects[idx].SpellID != 0 && proto.Effects[idx].Trigger == ItemSpelltriggerType.OnUse)
+                        if (proto.Effects[idx].SpellID != 0 && proto.Effects[idx].TriggerType == ItemSpelltriggerType.OnUse)
                         {
-                            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(proto.Effects[idx].SpellID);
+                            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)proto.Effects[idx].SpellID);
                             if (spellInfo != null)
                                 GetSpellHistory().SendCooldownEvent(spellInfo, m_lastPotionId);
                         }
@@ -1160,7 +1163,7 @@ namespace Game.Entities
                     // remove all spells that related to this skill
                     foreach (var pAbility in CliDB.SkillLineAbilityStorage.Values)
                         if (pAbility.SkillLine == id)
-                            RemoveSpell(Global.SpellMgr.GetFirstSpellInChain(pAbility.SpellID));
+                            RemoveSpell(Global.SpellMgr.GetFirstSpellInChain(pAbility.Spell));
 
                     // Clear profession lines
                     if (GetUInt32Value(PlayerFields.ProfessionSkillLine1) == id)
@@ -1398,13 +1401,13 @@ namespace Game.Entities
 
             for (byte i = 0; i < 5; i++)
             {
-                if (Condition.LTOperandType[i] == 0)
+                if (Condition.LtOperandType[i] == 0)
                     continue;
 
-                uint _cur_gem = curcount[Condition.LTOperandType[i] - 1];
+                uint _cur_gem = curcount[Condition.LtOperandType[i] - 1];
 
                 // if have <CompareColor> use them as count, else use <value> from Condition
-                uint _cmp_gem = Condition.RTOperandType[i] != 0 ? curcount[Condition.RTOperandType[i] - 1] : Condition.RTOperand[i];
+                uint _cmp_gem = Condition.RtOperandType[i] != 0 ? curcount[Condition.RtOperandType[i] - 1] : Condition.RtOperand[i];
 
                 switch (Condition.Operator[i])
                 {
@@ -1473,8 +1476,8 @@ namespace Game.Entities
             {
                 if (proto.Effects[0].SpellID == 483 || proto.Effects[0].SpellID == 55884)
                 {
-                    uint learn_spell_id = proto.Effects[0].SpellID;
-                    uint learning_spell_id = proto.Effects[1].SpellID;
+                    uint learn_spell_id = (uint)proto.Effects[0].SpellID;
+                    uint learning_spell_id = (uint)proto.Effects[1].SpellID;
 
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(learn_spell_id);
                     if (spellInfo == null)
@@ -1509,10 +1512,10 @@ namespace Game.Entities
                     continue;
 
                 // wrong triggering type
-                if (spellData.Trigger != ItemSpelltriggerType.OnUse)
+                if (spellData.TriggerType != ItemSpelltriggerType.OnUse)
                     continue;
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellData.SpellID);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)spellData.SpellID);
                 if (spellInfo == null)
                 {
                     Log.outError(LogFilter.Player, "Player.CastItemUseSpell: Item (Entry: {0}) in have wrong spell id {1}, ignoring", proto.GetId(), spellData.SpellID);
@@ -1546,10 +1549,10 @@ namespace Game.Entities
                     if (pEnchant.Effect[s] != ItemEnchantmentType.UseSpell)
                         continue;
 
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(pEnchant.EffectSpellID[s]);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(pEnchant.EffectArg[s]);
                     if (spellInfo == null)
                     {
-                        Log.outError(LogFilter.Player, "Player.CastItemUseSpell Enchant {0}, cast unknown spell {1}", enchant_id, pEnchant.EffectSpellID[s]);
+                        Log.outError(LogFilter.Player, "Player.CastItemUseSpell Enchant {0}, cast unknown spell {1}", enchant_id, pEnchant.EffectArg[s]);
                         continue;
                     }
 
@@ -1575,14 +1578,14 @@ namespace Game.Entities
 
         void LearnSkillRewardedSpells(uint skillId, uint skillValue)
         {
-            uint raceMask = getRaceMask();
+            long raceMask = getRaceMask();
             uint classMask = getClassMask();
             foreach (var ability in CliDB.SkillLineAbilityStorage.Values)
             {
                 if (ability.SkillLine != skillId)
                     continue;
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(ability.SpellID);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(ability.Spell);
                 if (spellInfo == null)
                     continue;
 
@@ -1607,12 +1610,12 @@ namespace Game.Entities
 
                 // need unlearn spell
                 if (skillValue < ability.MinSkillLineRank && ability.AcquireMethod == AbilytyLearnType.OnSkillValue)
-                    RemoveSpell(ability.SpellID);
+                    RemoveSpell(ability.Spell);
                 // need learn
                 else if (!IsInWorld)
-                    AddSpell(ability.SpellID, true, true, true, false, false, ability.SkillLine);
+                    AddSpell(ability.Spell, true, true, true, false, false, ability.SkillLine);
                 else
-                    LearnSpell(ability.SpellID, true, ability.SkillLine);
+                    LearnSpell(ability.Spell, true, ability.SkillLine);
 
             }
         }
@@ -1689,12 +1692,15 @@ namespace Game.Entities
                         }
                         else
                         {
+                            // requires item equipped in all armor slots
                             foreach (byte i in new[] { EquipmentSlot.Head, EquipmentSlot.Shoulders, EquipmentSlot.Chest, EquipmentSlot.Waist, EquipmentSlot.Legs, EquipmentSlot.Feet, EquipmentSlot.Wrist, EquipmentSlot.Hands })
                             {
                                 Item item = GetUseableItemByPos(InventorySlots.Bag0, i);
-                                if (!item || !item.IsFitToSpellRequirements(spellInfo))
+                                if (!item || item == ignoreItem || !item.IsFitToSpellRequirements(spellInfo))
                                     return false;
                             }
+
+                            return true;
                         }
                         break;
                     }
@@ -1707,6 +1713,53 @@ namespace Game.Entities
         }
 
         public Dictionary<uint, PlayerSpell> GetSpellMap() { return m_spells; }
+
+        void CastAllObtainSpells()
+        {
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte slot = InventorySlots.ItemStart; slot < inventoryEnd; ++slot)
+            {
+                Item item = GetItemByPos(InventorySlots.Bag0, slot);
+                if (item)
+                    ApplyItemObtainSpells(item, true);
+            }
+
+            for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; ++i)
+            {
+                Bag bag = GetBagByPos(i);
+                if (!bag)
+                    continue;
+
+                for (byte slot = 0; slot < bag.GetBagSize(); ++slot)
+                {
+                    Item item = bag.GetItemByPos(slot);
+                    if (item)
+                        ApplyItemObtainSpells(item, true);
+                }
+            }
+        }
+
+        void ApplyItemObtainSpells(Item item, bool apply)
+        {
+            ItemTemplate itemTemplate = item.GetTemplate();
+            for (byte i = 0; i < itemTemplate.Effects.Count; ++i)
+            {
+                if (itemTemplate.Effects[i].TriggerType != ItemSpelltriggerType.OnObtain) // On obtain trigger
+                    continue;
+
+                int spellId = itemTemplate.Effects[i].SpellID;
+                if (spellId <= 0)
+                    continue;
+
+                if (apply)
+                {
+                    if (!HasAura((uint)spellId))
+                        CastSpell(this, (uint)spellId, true, item);
+                }
+                else
+                    RemoveAurasDueToSpell((uint)spellId);
+            }
+        }
 
         public void ApplyItemDependentAuras(Item item, bool apply)
         {
@@ -1765,7 +1818,7 @@ namespace Game.Entities
             // Some spells applied at enter into zone (with subzones), aura removed in UpdateAreaDependentAuras that called always at zone.area update
             var saBounds = Global.SpellMgr.GetSpellAreaForAreaMapBounds(newZone);
             foreach (var spell in saBounds)
-                if (spell.autocast && spell.IsFitToRequirements(this, newZone, 0))
+                if (spell.flags.HasAnyFlag(SpellAreaFlag.AutoCast) && spell.IsFitToRequirements(this, newZone, 0))
                     if (!HasAura(spell.spellId))
                         CastSpell(this, spell.spellId, true);
         }
@@ -1783,7 +1836,7 @@ namespace Game.Entities
             // some auras applied at subzone enter
             var saBounds = Global.SpellMgr.GetSpellAreaForAreaMapBounds(newArea);
             foreach (var spell in saBounds)
-                if (spell.autocast && spell.IsFitToRequirements(this, m_zoneUpdateId, newArea))
+                if (spell.flags.HasAnyFlag(SpellAreaFlag.AutoCast) && spell.IsFitToRequirements(this, m_zoneUpdateId, newArea))
                     if (!HasAura(spell.spellId))
                         CastSpell(this, spell.spellId, true);
         }
@@ -2192,6 +2245,15 @@ namespace Game.Entities
 
             if (spellInfo.HasAttribute(SpellAttr8.MasterySpecialization))
                 need_cast &= IsCurrentSpecMasterySpell(spellInfo);
+
+            // Check EquippedItemClass
+            // passive spells which apply aura and have an item requirement are to be added in Player::ApplyItemDependentAuras
+            if (spellInfo.IsPassive() && spellInfo.EquippedItemClass >= 0)
+            {
+                foreach (SpellEffectInfo effectInfo in spellInfo.GetEffectsForDifficulty(Difficulty.None))
+                    if (effectInfo != null && effectInfo.IsAura())
+                        return false;
+            }
 
             //Check CasterAuraStates
             return need_cast && (spellInfo.CasterAuraState == 0 || HasAuraState(spellInfo.CasterAuraState));
@@ -2951,8 +3013,8 @@ namespace Game.Entities
             PowerTypeRecord runeEntry = Global.DB2Mgr.GetPowerTypeEntry(PowerType.Runes);
 
             uint cooldown = GetRuneBaseCooldown();
-            SetStatFloatValue(UnitFields.PowerRegenFlatModifier + runeIndex, (float)(1 * Time.InMilliseconds) / (float)cooldown - runeEntry.RegenerationPeace);
-            SetStatFloatValue(UnitFields.PowerRegenInterruptedFlatModifier + runeIndex, (float)(1 * Time.InMilliseconds) / (float)cooldown - runeEntry.RegenerationCombat);
+            SetStatFloatValue(UnitFields.PowerRegenFlatModifier + runeIndex, (float)(1 * Time.InMilliseconds) / (float)cooldown - runeEntry.RegenPeace);
+            SetStatFloatValue(UnitFields.PowerRegenInterruptedFlatModifier + runeIndex, (float)(1 * Time.InMilliseconds) / (float)cooldown - runeEntry.RegenCombat);
         }
 
         public uint GetRuneCooldown(byte index) { return m_runes.Cooldown[index]; }
@@ -3042,10 +3104,10 @@ namespace Game.Entities
                         continue;
 
                     // wrong triggering type
-                    if (spellData.Trigger != ItemSpelltriggerType.ChanceOnHit)
+                    if (spellData.TriggerType != ItemSpelltriggerType.ChanceOnHit)
                         continue;
 
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellData.SpellID);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)spellData.SpellID);
                     if (spellInfo == null)
                     {
                         Log.outError(LogFilter.Player, "WORLD: unknown Item spellid {0}", spellData.SpellID);
@@ -3099,11 +3161,11 @@ namespace Game.Entities
                             continue;
                     }
 
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(pEnchant.EffectSpellID[s]);
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(pEnchant.EffectArg[s]);
                     if (spellInfo == null)
                     {
                         Log.outError(LogFilter.Player, "Player.CastItemCombatSpell(GUID: {0}, name: {1}, enchant: {2}): unknown spell {3} is casted, ignoring...",
-                            GetGUID().ToString(), GetName(), enchant_id, pEnchant.EffectSpellID[s]);
+                            GetGUID().ToString(), GetName(), enchant_id, pEnchant.EffectArg[s]);
                         continue;
                     }
 
@@ -3118,7 +3180,7 @@ namespace Game.Entities
                     }
 
                     // Apply spell mods
-                    ApplySpellMod(pEnchant.EffectSpellID[s], SpellModOp.ChanceOfSuccess, ref chance);
+                    ApplySpellMod(pEnchant.EffectArg[s], SpellModOp.ChanceOfSuccess, ref chance);
 
                     // Shiv has 100% chance to apply the poison
                     if (FindCurrentSpellBySpellId(5938) != null && e_slot == (byte)EnchantmentSlot.Temp)

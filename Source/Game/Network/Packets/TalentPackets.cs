@@ -18,6 +18,8 @@
 using Framework.Constants;
 using Game.Entities;
 using System.Collections.Generic;
+using Framework.Collections;
+using Framework.Dynamic;
 
 namespace Game.Network.Packets
 {
@@ -142,6 +144,39 @@ namespace Game.Network.Packets
 
         public List<GlyphBinding> Glyphs = new List<GlyphBinding>();
         public bool IsFullUpdate;
+    }
+
+    class LearnPvpTalents : ClientPacket
+    {
+        public LearnPvpTalents(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            int size = _worldPacket.ReadBits<int>(6);
+            for (int i = 0; i < size; ++i)
+                Talents[i] = _worldPacket.ReadUInt16();
+        }
+
+        public Array<ushort> Talents = new Array<ushort>(6);
+    }
+
+    class LearnPvpTalentsFailed : ServerPacket
+    {
+        public LearnPvpTalentsFailed() : base(ServerOpcodes.LearnPvpTalentsFailed) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBits(Reason, 4);
+            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteUInt32(Talents.Count);
+
+            foreach (var id in Talents)
+                _worldPacket.WriteUInt16(id);
+        }
+
+        public uint Reason;
+        public uint SpellID;
+        public List<ushort> Talents = new List<ushort>();
     }
 
     //Structs

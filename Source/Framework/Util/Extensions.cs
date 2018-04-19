@@ -15,10 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Framework.IO;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Numerics;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -201,26 +201,6 @@ namespace System
             return (Action<object, object>)setterMethod.CreateDelegate(typeof(Action<object, object>));
         }
 
-        public static Func<T, object> GetGetter<T>(this FieldInfo fieldInfo)
-        {
-            var paramExpression = Expression.Parameter(typeof(T));
-            var propertyExpression = Expression.Field(paramExpression, fieldInfo);
-            var convertExpression = Expression.TypeAs(propertyExpression, typeof(object));
-
-            return Expression.Lambda<Func<T, object>>(convertExpression, paramExpression).Compile();
-        }
-
-        public static Action<T, object> GetSetter<T>(this FieldInfo fieldInfo)
-        {
-            var paramExpression = Expression.Parameter(typeof(T));
-            var propertyExpression = Expression.Field(paramExpression, fieldInfo);
-            var valueExpression = Expression.Parameter(typeof(object));
-            var convertExpression = Expression.Convert(valueExpression, fieldInfo.FieldType);
-            var assignExpression = Expression.Assign(propertyExpression, convertExpression);
-
-            return Expression.Lambda<Action<T, object>>(assignExpression, paramExpression, valueExpression).Compile();
-        }
-
         public static uint[] SerializeObject<T>(this T obj)
         {
             //if (obj.GetType()<StructLayoutAttribute>() == null)
@@ -357,18 +337,20 @@ namespace System
             return new string(reader.ReadChars(count));
         }
 
-        public static byte[] ToByteArray(this BinaryReader reader)
+        public static T[] ReadArray<T>(this BinaryReader reader, int size) where T : struct
         {
-            var data = new byte[reader.BaseStream.Length];
+            int numBytes = FastStruct<T>.Size * size;
 
-            long pos = reader.BaseStream.Position;
-            reader.BaseStream.Seek(0, SeekOrigin.Begin);
-            for (int i = 0; i < data.Length; i++)
-                data[i] = (byte)reader.BaseStream.ReadByte();
+            byte[] result = reader.ReadBytes(numBytes);
 
-            reader.BaseStream.Seek(pos, SeekOrigin.Begin);
-            return data;
+            return FastStruct<T>.ReadArray(result);
+        }
 
+        public static T Read<T>(this BinaryReader reader) where T : struct
+        {
+            byte[] result = reader.ReadBytes(FastStruct<T>.Size);
+
+            return FastStruct<T>.ArrayToStructure(result);
         }
         #endregion
     }

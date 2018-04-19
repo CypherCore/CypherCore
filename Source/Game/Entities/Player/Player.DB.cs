@@ -56,8 +56,8 @@ namespace Game.Entities
                     ArtifactPowerRecord artifactPower = CliDB.ArtifactPowerStorage.LookupByKey(artifactPowerData.ArtifactPowerId);
                     if (artifactPower != null)
                     {
-                        if (artifactPowerData.PurchasedRank > artifactPower.MaxRank)
-                            artifactPowerData.PurchasedRank = artifactPower.MaxRank;
+                        if (artifactPowerData.PurchasedRank > artifactPower.MaxPurchasableRank)
+                            artifactPowerData.PurchasedRank = artifactPower.MaxPurchasableRank;
 
                         artifactPowerData.CurrentRankWithBonus = (byte)(artifactPower.Flags.HasAnyFlag(ArtifactPowerFlag.First) ? 1 : 0);
 
@@ -944,6 +944,20 @@ namespace Game.Entities
                     TalentRecord talent = CliDB.TalentStorage.LookupByKey(result.Read<uint>(0));
                     if (talent != null)
                         AddTalent(talent, result.Read<byte>(1), false);
+                }
+                while (result.NextRow());
+            }
+        }
+        void _LoadPvpTalents(SQLResult result)
+        {
+            // "SELECT TalentID, TalentGroup FROM character_pvp_talent WHERE guid = ?"
+            if (!result.IsEmpty())
+            {
+                do
+                {
+                    PvpTalentRecord talent = CliDB.PvpTalentStorage.LookupByKey(result.Read<uint>(0));
+                    if (talent != null)
+                        AddPvpTalent(talent, result.Read<byte>(1), false);
                 }
                 while (result.NextRow());
             }
@@ -1977,6 +1991,29 @@ namespace Game.Entities
                     trans.Append(stmt);
                 }
             }
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_PVP_TALENT);
+            stmt.AddValue(0, GetGUID().GetCounter());
+            trans.Append(stmt);
+
+            for (byte group = 0; group < PlayerConst.MaxSpecializations; ++group)
+            {
+                talents = GetPvpTalentMap(group);
+                foreach (var pair in talents.ToList())
+                {
+                    if (pair.Value == PlayerSpellState.Removed)
+                    {
+                        talents.Remove(pair.Key);
+                        continue;
+                    }
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_PVP_TALENT);
+                    stmt.AddValue(0, GetGUID().GetCounter());
+                    stmt.AddValue(1, pair.Key);
+                    stmt.AddValue(2, group);
+                    trans.Append(stmt);
+                }
+            }
         }
         public void _SaveMail(SQLTransaction trans)
         {
@@ -2370,8 +2407,8 @@ namespace Game.Entities
             SetUInt32Value(UnitFields.Level, result.Read<uint>(6));
             SetXP(result.Read<uint>(7));
 
-            _LoadIntoDataField(result.Read<string>(65), (int)PlayerFields.ExploredZones1, PlayerConst.ExploredZonesSize);
-            _LoadIntoDataField(result.Read<string>(66), (int)PlayerFields.KnownTitles, PlayerConst.KnowTitlesSize * 2);
+            _LoadIntoDataField(result.Read<string>(66), (int)PlayerFields.ExploredZones1, PlayerConst.ExploredZonesSize);
+            _LoadIntoDataField(result.Read<string>(67), (int)PlayerFields.KnownTitles, PlayerConst.KnowTitlesSize * 2);
 
             SetObjectScale(1.0f);
             SetFloatValue(UnitFields.HoverHeight, 1.0f);
@@ -2397,12 +2434,13 @@ namespace Game.Entities
             SetByteValue(PlayerFields.Bytes2, PlayerFieldOffsets.Bytes2OffsetFacialStyle, result.Read<byte>(13));
             for (byte i = 0; i < PlayerConst.CustomDisplaySize; ++i)
                 SetByteValue(PlayerFields.Bytes2, (byte)(PlayerFieldOffsets.Bytes2OffsetCustomDisplayOption + i), customDisplay[i]);
-            SetBankBagSlotCount(result.Read<byte>(17));
+            SetInventorySlotCount(result.Read<byte>(17));
+            SetBankBagSlotCount(result.Read<byte>(18));
             SetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetGender, (byte)gender);
-            SetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetInebriation, result.Read<byte>(54));
-            SetUInt32Value(PlayerFields.Flags, result.Read<uint>(19));
-            SetUInt32Value(PlayerFields.FlagsEx, result.Read<uint>(20));
-            SetInt32Value(PlayerFields.WatchedFactionIndex, (int)result.Read<uint>(53));
+            SetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetInebriation, result.Read<byte>(55));
+            SetUInt32Value(PlayerFields.Flags, result.Read<uint>(20));
+            SetUInt32Value(PlayerFields.FlagsEx, result.Read<uint>(21));
+            SetInt32Value(PlayerFields.WatchedFactionIndex, (int)result.Read<uint>(54));
 
             if (!ValidateAppearance((Race)result.Read<byte>(3), (Class)result.Read<byte>(4), (Gender)gender, 
                 GetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetHairStyleId), 
@@ -2416,9 +2454,9 @@ namespace Game.Entities
             }
 
             // set which actionbars the client has active - DO NOT REMOVE EVER AGAIN (can be changed though, if it does change fieldwise)
-            SetByteValue(PlayerFields.FieldBytes, PlayerFieldOffsets.FieldBytesOffsetActionBarToggles, result.Read<byte>(67));
+            SetByteValue(PlayerFields.FieldBytes, PlayerFieldOffsets.FieldBytesOffsetActionBarToggles, result.Read<byte>(68));
 
-            m_fishingSteps = result.Read<byte>(71);
+            m_fishingSteps = result.Read<byte>(72);
 
             InitDisplayIds();
 
@@ -2442,20 +2480,20 @@ namespace Game.Entities
             InitPrimaryProfessions();                               // to max set before any spell loaded
 
             // init saved position, and fix it later if problematic
-            ulong transLowGUID = result.Read<ulong>(40);
+            ulong transLowGUID = result.Read<ulong>(41);
 
-            Relocate(result.Read<float>(21), result.Read<float>(22), result.Read<float>(23), result.Read<float>(25));
+            Relocate(result.Read<float>(22), result.Read<float>(23), result.Read<float>(24), result.Read<float>(26));
 
-            uint mapId = result.Read<uint>(24);
-            uint instanceId = result.Read<uint>(62);
+            uint mapId = result.Read<uint>(25);
+            uint instanceId = result.Read<uint>(63);
 
             var RelocateToHomebind = new Action(() => { mapId = homebind.GetMapId(); instanceId = 0; Relocate(homebind); });
 
-            SetDungeonDifficultyID(CheckLoadedDungeonDifficultyID((Difficulty)result.Read<byte>(48)));
-            SetRaidDifficultyID(CheckLoadedRaidDifficultyID((Difficulty)result.Read<byte>(69)));
-            SetLegacyRaidDifficultyID(CheckLoadedLegacyRaidDifficultyID((Difficulty)result.Read<byte>(70)));
+            SetDungeonDifficultyID(CheckLoadedDungeonDifficultyID((Difficulty)result.Read<byte>(49)));
+            SetRaidDifficultyID(CheckLoadedRaidDifficultyID((Difficulty)result.Read<byte>(70)));
+            SetLegacyRaidDifficultyID(CheckLoadedLegacyRaidDifficultyID((Difficulty)result.Read<byte>(71)));
 
-            string taxi_nodes = result.Read<string>(47);
+            string taxi_nodes = result.Read<string>(48);
 
             _LoadGroup(holder.GetResult(PlayerLoginQueryLoad.Group));
 
@@ -2479,9 +2517,9 @@ namespace Game.Entities
             }
 
             _LoadCurrency(holder.GetResult(PlayerLoginQueryLoad.Currency));
-            SetUInt32Value(PlayerFields.LifetimeHonorableKills, result.Read<uint>(49));
-            SetUInt16Value(PlayerFields.Kills, 0, result.Read<ushort>(50));
-            SetUInt16Value(PlayerFields.Kills, 1, result.Read<ushort>(51));
+            SetUInt32Value(PlayerFields.LifetimeHonorableKills, result.Read<uint>(50));
+            SetUInt16Value(PlayerFields.Kills, PlayerFieldOffsets.FieldKillsOffsetTodayKills, result.Read<ushort>(51));
+            SetUInt16Value(PlayerFields.Kills, PlayerFieldOffsets.FieldKillsOffsetYesterdayKills, result.Read<ushort>(52));
 
             _LoadBoundInstances(holder.GetResult(PlayerLoginQueryLoad.BoundInstances));
             _LoadInstanceTimeRestrictions(holder.GetResult(PlayerLoginQueryLoad.InstanceLockTimes));
@@ -2559,10 +2597,10 @@ namespace Game.Entities
 
                 if (transport)
                 {
-                    float x = result.Read<float>(36);
-                    float y = result.Read<float>(37);
-                    float z = result.Read<float>(38);
-                    float o = result.Read<float>(39);
+                    float x = result.Read<float>(37);
+                    float y = result.Read<float>(38);
+                    float z = result.Read<float>(39);
+                    float o = result.Read<float>(40);
                     m_movementInfo.transport.pos = new Position(x, y, z, o);
                     transport.CalculatePassengerPosition(ref x, ref y, ref z, ref o);
 
@@ -2621,7 +2659,7 @@ namespace Game.Entities
                     else                                                // have start node, to it
                     {
                         Log.outError(LogFilter.Player, "Character {0} have too short taxi destination list, teleport to original node.", GetGUID().ToString());
-                        mapId = nodeEntry.MapID;
+                        mapId = nodeEntry.ContinentID;
                         Relocate(nodeEntry.Pos.X, nodeEntry.Pos.Y, nodeEntry.Pos.Z, 0.0f);
                     }
                     m_taxi.ClearTaxiDestinations();
@@ -2631,10 +2669,10 @@ namespace Game.Entities
                 {
                     // save source node as recall coord to prevent recall and fall from sky
                     var nodeEntry = CliDB.TaxiNodesStorage.LookupByKey(nodeid);
-                    if (nodeEntry != null && nodeEntry.MapID == GetMapId())
+                    if (nodeEntry != null && nodeEntry.ContinentID == GetMapId())
                     {
                         Contract.Assert(nodeEntry != null);                                  // checked in m_taxi.LoadTaxiDestinationsFromString
-                        mapId = nodeEntry.MapID;
+                        mapId = nodeEntry.ContinentID;
                         Relocate(nodeEntry.Pos.X, nodeEntry.Pos.Y, nodeEntry.Pos.Z, 0.0f);
                     }
 
@@ -2757,7 +2795,7 @@ namespace Game.Entities
             SaveRecallPosition();
 
             long now = Time.UnixTime;
-            long logoutTime = result.Read<int>(31);
+            long logoutTime = result.Read<int>(32);
 
             // since last logout (in seconds)
             uint time_diff = (uint)(now - logoutTime);
@@ -2770,32 +2808,32 @@ namespace Game.Entities
 
             SetDrunkValue(newDrunkValue);
 
-            m_cinematic = result.Read<byte>(27);
-            m_PlayedTimeTotal = result.Read<uint>(28);
-            m_PlayedTimeLevel = result.Read<uint>(29);
+            m_cinematic = result.Read<byte>(28);
+            m_PlayedTimeTotal = result.Read<uint>(29);
+            m_PlayedTimeLevel = result.Read<uint>(30);
 
-            SetTalentResetCost(result.Read<uint>(33));
-            SetTalentResetTime(result.Read<uint>(34));
+            SetTalentResetCost(result.Read<uint>(34));
+            SetTalentResetTime(result.Read<uint>(35));
 
-            m_taxi.LoadTaxiMask(result.Read<string>(26));            // must be before InitTaxiNodesForLevel
+            m_taxi.LoadTaxiMask(result.Read<string>(27));            // must be before InitTaxiNodesForLevel
 
-            PlayerExtraFlags extraflags = (PlayerExtraFlags)result.Read<uint>(41);
+            PlayerExtraFlags extraflags = (PlayerExtraFlags)result.Read<uint>(42);
 
-            m_stableSlots = result.Read<byte>(42);
+            m_stableSlots = result.Read<byte>(43);
             if (m_stableSlots > 4)
             {
                 Log.outError(LogFilter.Player, "Player can have not more {0} stable slots, but have in DB {1}", 4, m_stableSlots);
                 m_stableSlots = 4;
             }
 
-            atLoginFlags = (AtLoginFlags)result.Read<uint>(43);
+            atLoginFlags = (AtLoginFlags)result.Read<uint>(44);
 
             // Honor system
             // Update Honor kills data
             m_lastHonorUpdateTime = logoutTime;
             UpdateHonorFields();
 
-            m_deathExpireTime = result.Read<uint>(46);
+            m_deathExpireTime = result.Read<uint>(47);
             if (m_deathExpireTime > now + PlayerConst.MaxDeathCount * PlayerConst.DeathExpireStep)
                 m_deathExpireTime = now + PlayerConst.MaxDeathCount * PlayerConst.DeathExpireStep - 1;
 
@@ -2826,19 +2864,19 @@ namespace Game.Entities
             InitRunes();
 
             // rest bonus can only be calculated after InitStatsForLevel()
-            _restMgr.LoadRestBonus(RestTypes.XP, (PlayerRestState)result.Read<byte>(18), result.Read<float>(30));
+            _restMgr.LoadRestBonus(RestTypes.XP, (PlayerRestState)result.Read<byte>(19), result.Read<float>(31));
 
             // load skills after InitStatsForLevel because it triggering aura apply also
             _LoadSkills(holder.GetResult(PlayerLoginQueryLoad.Skills));
             UpdateSkillsForLevel();
 
-            SetPrimarySpecialization(result.Read<uint>(35));
-            SetActiveTalentGroup(result.Read<byte>(63));
+            SetPrimarySpecialization(result.Read<uint>(36));
+            SetActiveTalentGroup(result.Read<byte>(64));
             ChrSpecializationRecord primarySpec = CliDB.ChrSpecializationStorage.LookupByKey(GetPrimarySpecialization());
             if (primarySpec == null || primarySpec.ClassID != (byte)GetClass() || GetActiveTalentGroup() >= PlayerConst.MaxSpecializations)
                 ResetTalentSpecialization();
 
-            uint lootSpecId = result.Read<byte>(64);
+            uint lootSpecId = result.Read<byte>(65);
             ChrSpecializationRecord chrSpec = CliDB.ChrSpecializationStorage.LookupByKey(lootSpecId);
             if (chrSpec != null)
             {
@@ -2851,6 +2889,7 @@ namespace Game.Entities
                 SetUInt32Value(PlayerFields.CurrentSpecId, spec.Id);
 
             _LoadTalents(holder.GetResult(PlayerLoginQueryLoad.Talents));
+            _LoadPvpTalents(holder.GetResult(PlayerLoginQueryLoad.PvpTalents));
             _LoadSpells(holder.GetResult(PlayerLoginQueryLoad.Spells));
             GetSession().GetCollectionMgr().LoadToys();
             GetSession().GetCollectionMgr().LoadHeirlooms();
@@ -2879,6 +2918,8 @@ namespace Game.Entities
             InitTalentForLevel();
             LearnDefaultSkills();
             LearnCustomSpells();
+            if (getLevel() < PlayerConst.LevelMinHonor)
+                ResetPvpTalents();
 
             // must be before inventory (some items required reputation check)
             reputationMgr.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.Reputation));
@@ -2900,7 +2941,7 @@ namespace Game.Entities
 
             // check PLAYER_CHOSEN_TITLE compatibility with PLAYER__FIELD_KNOWN_TITLES
             // note: PLAYER__FIELD_KNOWN_TITLES updated at quest status loaded
-            uint curTitle = result.Read<uint>(52);
+            uint curTitle = result.Read<uint>(53);
             if (curTitle != 0 && !HasTitle(curTitle))
                 curTitle = 0;
 
@@ -2923,7 +2964,7 @@ namespace Game.Entities
             UpdateAllStats();
 
             // restore remembered power/health values (but not more max values)
-            uint savedHealth = result.Read<uint>(55);
+            uint savedHealth = result.Read<uint>(56);
             SetHealth(savedHealth > GetMaxHealth() ? GetMaxHealth() : savedHealth);
             int loadedPowers = 0;
             for (PowerType i = 0; i < PowerType.Max; ++i)
@@ -3014,7 +3055,7 @@ namespace Game.Entities
             }
 
             // RaF stuff.
-            m_grantableLevels = result.Read<byte>(68);
+            m_grantableLevels = result.Read<byte>(69);
             if (GetSession().IsARecruiter() || (GetSession().GetRecruiterId() != 0))
                 SetFlag(ObjectFields.DynamicFlags, UnitDynFlags.ReferAFriend);
 
@@ -3036,16 +3077,16 @@ namespace Game.Entities
                 holder.GetResult(PlayerLoginQueryLoad.GarrisonFollowerAbilities)))
                 _garrison = garrison;
 
-            _InitHonorLevelOnLoadFromDB(result.Read<uint>(72), result.Read<uint>(73), result.Read<uint>(74));
+            _InitHonorLevelOnLoadFromDB(result.Read<uint>(73), result.Read<uint>(74), result.Read<uint>(75));
 
-            _restMgr.LoadRestBonus(RestTypes.Honor, (PlayerRestState)result.Read<byte>(75), result.Read<float>(76));
+            _restMgr.LoadRestBonus(RestTypes.Honor, (PlayerRestState)result.Read<byte>(76), result.Read<float>(77));
             if (time_diff > 0)
             {
                 //speed collect rest bonus in offline, in logout, far from tavern, city (section/in hour)
                 float bubble0 = 0.031f;
                 //speed collect rest bonus in offline, in logout, in tavern, city (section/in hour)
                 float bubble1 = 0.125f;
-                float bubble = result.Read<byte>(32) > 0
+                float bubble = result.Read<byte>(33) > 0
                     ? bubble1 * WorldConfig.GetFloatValue(WorldCfg.RateRestOfflineInTavernOrCity)
                     : bubble0 * WorldConfig.GetFloatValue(WorldCfg.RateRestOfflineInWilderness);
 
@@ -3100,6 +3141,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetByteValue(PlayerFields.Bytes2, PlayerFieldOffsets.Bytes2OffsetFacialStyle));
                 for (int i = 0; i < PlayerConst.CustomDisplaySize; ++i)
                     stmt.AddValue(index++, GetByteValue(PlayerFields.Bytes2, (byte)(PlayerFieldOffsets.Bytes2OffsetCustomDisplayOption + i)));
+                stmt.AddValue(index++, GetInventorySlotCount());
                 stmt.AddValue(index++, GetBankBagSlotCount());
                 stmt.AddValue(index++, (byte)GetUInt32Value(PlayerFields.RestInfo + PlayerFieldOffsets.RestStateXp));
                 stmt.AddValue(index++, GetUInt32Value(PlayerFields.Flags));
@@ -3123,7 +3165,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, transLowGUID);
 
                 StringBuilder ss = new StringBuilder();
-                for (byte i = 0; i < PlayerConst.TaxiMaskSize; ++i)
+                for (int i = 0; i < PlayerConst.TaxiMaskSize; ++i)
                     ss.Append(m_taxi.m_taximask[i] + " ");
 
                 stmt.AddValue(index++, ss.ToString());
@@ -3211,6 +3253,7 @@ namespace Game.Entities
 
                 stmt.AddValue(index++, GetByteValue(PlayerFields.FieldBytes, PlayerFieldOffsets.FieldBytesOffsetActionBarToggles));
                 stmt.AddValue(index++, m_grantableLevels);
+                stmt.AddValue(index++, Global.WorldMgr.GetRealm().Build);
             }
             else
             {
@@ -3231,6 +3274,7 @@ namespace Game.Entities
                 for (int i = 0; i < PlayerConst.CustomDisplaySize; ++i)
                     stmt.AddValue(index++, GetByteValue(PlayerFields.Bytes2, (byte)(
                         PlayerFieldOffsets.Bytes2OffsetCustomDisplayOption + i)));
+                stmt.AddValue(index++, GetInventorySlotCount());
                 stmt.AddValue(index++, GetBankBagSlotCount());
                 stmt.AddValue(index++, (byte)GetUInt32Value(PlayerFields.RestInfo + PlayerFieldOffsets.RestStateXp));
                 stmt.AddValue(index++, GetUInt32Value(PlayerFields.Flags));
@@ -3270,7 +3314,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, transLowGUID);
 
                 StringBuilder ss = new StringBuilder();
-                for (byte i = 0; i < PlayerConst.TaxiMaskSize; ++i)
+                for (int i = 0; i < PlayerConst.TaxiMaskSize; ++i)
                     ss.Append(m_taxi.m_taximask[i] + " ");
 
                 stmt.AddValue(index++, ss.ToString());
@@ -3365,6 +3409,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetPrestigeLevel());
                 stmt.AddValue(index++, (byte)GetUInt32Value(PlayerFields.RestInfo + PlayerFieldOffsets.RestStateHonor));
                 stmt.AddValue(index++, _restMgr.GetRestBonus(RestTypes.Honor));
+                stmt.AddValue(index++, Global.WorldMgr.GetRealm().Build);
 
                 // Index
                 stmt.AddValue(index, GetGUID().GetCounter());
@@ -3505,7 +3550,7 @@ namespace Game.Entities
                 if (!CliDB.MapStorage.ContainsKey(map))
                     return 0;
 
-                zone = Global.MapMgr.GetZoneId(map, posx, posy, posz);
+                zone = Global.MapMgr.GetZoneId(PhasingHandler.EmptyPhaseShift, map, posx, posy, posz);
 
                 if (zone > 0)
                 {
@@ -3597,12 +3642,13 @@ namespace Game.Entities
                     charDelete_method = CharDeleteMethod.Remove;
             }
 
+            SQLTransaction trans = new SQLTransaction();
             uint guildId = GetGuildIdFromDB(playerGuid);
             if (guildId != 0)
             {
                 Guild guild = Global.GuildMgr.GetGuildById(guildId);
                 if (guild)
-                    guild.DeleteMember(playerGuid, false, false, true);
+                    guild.DeleteMember(trans, playerGuid, false, false, true);
             }
 
             // remove from arena teams
@@ -3628,8 +3674,6 @@ namespace Game.Entities
                 // Completely remove from the database
                 case CharDeleteMethod.Remove:
                     {
-                        SQLTransaction trans = new SQLTransaction();
-
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_COD_ITEM_MAIL);
                         stmt.AddValue(0, guid);
                         SQLResult resultMail = DB.Characters.Query(stmt);
@@ -3949,7 +3993,6 @@ namespace Game.Entities
 
                         Garrison.DeleteFromDB(guid, trans);
 
-                        DB.Characters.CommitTransaction(trans);
                         Global.WorldMgr.DeleteCharacterInfo(playerGuid);
                         break;
                     }
@@ -3958,15 +4001,20 @@ namespace Game.Entities
                     {
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_DELETE_INFO);
                         stmt.AddValue(0, guid);
-                        DB.Characters.Execute(stmt);
+                        trans.Append(stmt);
 
                         Global.WorldMgr.UpdateCharacterInfoDeleted(playerGuid, true);
                         break;
                     }
                 default:
                     Log.outError(LogFilter.Player, "Player:DeleteFromDB: Unsupported delete method: {0}.", charDelete_method);
+
+                    if (trans.commands.Count > 0)
+                        DB.Characters.CommitTransaction(trans);
                     return;
             }
+
+            DB.Characters.CommitTransaction(trans);
 
             if (updateRealmChars)
                 Global.WorldMgr.UpdateRealmCharCount(accountId);

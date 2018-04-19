@@ -812,6 +812,11 @@ namespace Game.Groups
             startLootRoll.Method = GetLootMethod();
             r.FillPacket(startLootRoll.Item);
 
+            ItemDisenchantLootRecord disenchant = r.GetItemDisenchantLoot(p);
+            if (disenchant != null)
+                if (m_maxEnchantingLevel >= disenchant.SkillRequired)
+                    startLootRoll.ValidRolls |= RollMask.Disenchant;
+
             p.SendPacket(startLootRoll);
         }
 
@@ -950,8 +955,6 @@ namespace Game.Groups
                     {
                         r.setLoot(loot);
                         r.itemSlot = itemSlot;
-                        if (item.DisenchantID != 0 && m_maxEnchantingLevel >= item.RequiredDisenchantSkill)
-                            r.rollTypeMask |= RollMask.Disenchant;
 
                         if (item.GetFlags2().HasAnyFlag(ItemFlags2.CanOnlyRollGreed))
                             r.rollTypeMask &= ~RollMask.Need;
@@ -1236,17 +1239,18 @@ namespace Game.Groups
                             item.is_looted = true;
                             roll.getLoot().NotifyItemRemoved(roll.itemSlot);
                             roll.getLoot().unlootedCount--;
-                            ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(roll.itemid);
                             player.UpdateCriteria(CriteriaTypes.CastSpell, 13262); // Disenchant
+
+                            ItemDisenchantLootRecord disenchant = roll.GetItemDisenchantLoot(player);
 
                             List<ItemPosCount> dest = new List<ItemPosCount>();
                             InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, roll.itemid, item.count);
                             if (msg == InventoryResult.Ok)
-                                player.AutoStoreLoot(pProto.DisenchantID, LootStorage.Disenchant, true);
+                                player.AutoStoreLoot(disenchant.Id, LootStorage.Disenchant, true);
                             else // If the player's inventory is full, send the disenchant result in a mail.
                             {
                                 Loot loot = new Loot();
-                                loot.FillLoot(pProto.DisenchantID, LootStorage.Disenchant, player, true);
+                                loot.FillLoot(disenchant.Id, LootStorage.Disenchant, player, true);
 
                                 uint max_slot = loot.GetMaxSlotInLootFor(player);
                                 for (uint i = 0; i < max_slot; ++i)
@@ -1402,7 +1406,7 @@ namespace Game.Groups
                 {
                     LFGDungeonsRecord dungeon = CliDB.LFGDungeonsStorage.LookupByKey(selectedDungeons.First());
                     if (dungeon != null)
-                        if (dungeon.Type == LfgType.RandomDungeon)
+                        if (dungeon.TypeID == LfgType.RandomDungeon)
                             randomSlot= dungeon.Id;
                 }
 
@@ -1701,7 +1705,7 @@ namespace Game.Groups
             if (!reference)
                 return GroupJoinBattlegroundResult.JoinFailed;
 
-            PVPDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bgOrTemplate.GetMapId(), reference.getLevel());
+            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bgOrTemplate.GetMapId(), reference.getLevel());
             if (bracketEntry == null)
                 return GroupJoinBattlegroundResult.JoinFailed;
 
@@ -1725,7 +1729,7 @@ namespace Game.Groups
                     return GroupJoinBattlegroundResult.JoinTimedOut;
                 }
                 // not in the same Battleground level braket, don't let join
-                PVPDifficultyRecord memberBracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bracketEntry.MapID, member.getLevel());
+                PvpDifficultyRecord memberBracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bracketEntry.MapID, member.getLevel());
                 if (memberBracketEntry != bracketEntry)
                     return GroupJoinBattlegroundResult.JoinRangeIndex;
                 // don't let join rated matches if the arena team id doesn't match
@@ -2618,6 +2622,22 @@ namespace Game.Groups
                 lootItem.CanTradeToTapList = lootItemInSlot.allowedGUIDs.Count > 1;
                 lootItem.Loot = new ItemInstance(lootItemInSlot);
             }
+        }
+
+        public ItemDisenchantLootRecord GetItemDisenchantLoot(Player player)
+        {
+            LootItem lootItemInSlot = getTarget().GetItemInSlot(itemSlot);
+            if (lootItemInSlot != null)
+            {
+                ItemInstance itemInstance = new ItemInstance(lootItemInSlot);
+                BonusData bonusData = new BonusData(itemInstance);
+
+                ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemid);
+                uint itemLevel = Item.GetItemLevel(itemTemplate, bonusData, player.getLevel(), 0, lootItemInSlot.upgradeId, 0, 0, 0, false);
+                return Item.GetDisenchantLoot(itemTemplate, (uint)bonusData.Quality, itemLevel);
+            }
+
+            return null;
         }
 
         public uint itemid;

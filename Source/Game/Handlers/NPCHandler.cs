@@ -276,8 +276,7 @@ namespace Game
             WorldLocation corpseLocation = GetPlayer().GetCorpseLocation();
             if (GetPlayer().HasCorpse())
             {
-                corpseGrave = Global.ObjectMgr.GetClosestGraveYard(corpseLocation.GetPositionX(), corpseLocation.GetPositionY(),
-                    corpseLocation.GetPositionZ(), corpseLocation.GetMapId(), GetPlayer().GetTeam());
+                corpseGrave = Global.ObjectMgr.GetClosestGraveYard(corpseLocation, GetPlayer().GetTeam(), GetPlayer());
             }
 
             // now can spawn bones
@@ -286,8 +285,7 @@ namespace Game
             // teleport to nearest from corpse graveyard, if different from nearest to player ghost
             if (corpseGrave != null)
             {
-                WorldSafeLocsRecord ghostGrave = Global.ObjectMgr.GetClosestGraveYard(
-                    GetPlayer().GetPositionX(), GetPlayer().GetPositionY(), GetPlayer().GetPositionZ(), GetPlayer().GetMapId(), GetPlayer().GetTeam());
+                WorldSafeLocsRecord ghostGrave = Global.ObjectMgr.GetClosestGraveYard(GetPlayer(), GetPlayer().GetTeam(), GetPlayer());
 
                 if (corpseGrave != ghostGrave)
                     GetPlayer().TeleportTo(corpseGrave.MapID, corpseGrave.Loc.X, corpseGrave.Loc.Y, corpseGrave.Loc.Z, GetPlayer().GetOrientation());

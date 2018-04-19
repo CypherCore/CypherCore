@@ -211,7 +211,13 @@ namespace Game.Entities
             return false;
         }
 
-        public int GetQuestLevel(Quest quest) { return quest != null && (quest.Level > 0) ? quest.Level : (int)getLevel(); }
+        public uint GetQuestLevel(Quest quest)
+        {
+            if (quest == null)
+                return getLevel();
+            
+            return (uint)(quest.Level > 0 ? quest.Level : Math.Min((int)getLevel(), quest.MaxScalingLevel));
+        }
 
         public bool IsQuestRewarded(uint quest_id)
         {
@@ -646,7 +652,7 @@ namespace Game.Entities
                         if (CanSelectQuestPackageItem(questPackageItem))
                         {
                             hasFilteredQuestPackageReward = true;
-                            InventoryResult res = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemCount);
+                            InventoryResult res = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemQuantity);
                             if (res != InventoryResult.Ok)
                             {
                                 SendEquipError(res, null, null, questPackageItem.ItemID);
@@ -666,7 +672,7 @@ namespace Game.Entities
                             if (questPackageItem.ItemID != reward)
                                 continue;
 
-                            InventoryResult res = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemCount);
+                            InventoryResult res = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemQuantity);
                             if (res != InventoryResult.Ok)
                             {
                                 SendEquipError(res, null, null, questPackageItem.ItemID);
@@ -823,7 +829,7 @@ namespace Game.Entities
                 (rewardProto.GetFlags2().HasAnyFlag(ItemFlags2.FactionHorde) && GetTeam() != Team.Horde))
                 return false;
 
-            switch (questPackageItem.FilterType)
+            switch (questPackageItem.DisplayType)
             {
                 case QuestPackageFilter.LootSpecialization:
                     return rewardProto.IsUsableByLootSpecialization(this, true);
@@ -853,10 +859,10 @@ namespace Game.Entities
                     {
                         hasFilteredQuestPackageReward = true;
                         List<ItemPosCount> dest = new List<ItemPosCount>();
-                        if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemCount) == InventoryResult.Ok)
+                        if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemQuantity) == InventoryResult.Ok)
                         {
                             Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantment.GenerateItemRandomPropertyId(questPackageItem.ItemID));
-                            SendNewItem(item, questPackageItem.ItemCount, true, false);
+                            SendNewItem(item, questPackageItem.ItemQuantity, true, false);
                         }
                     }
                 }
@@ -873,10 +879,10 @@ namespace Game.Entities
                             continue;
 
                         List<ItemPosCount> dest = new List<ItemPosCount>();
-                        if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemCount) == InventoryResult.Ok)
+                        if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemQuantity) == InventoryResult.Ok)
                         {
                             Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantment.GenerateItemRandomPropertyId(questPackageItem.ItemID));
-                            SendNewItem(item, questPackageItem.ItemCount, true, false);
+                            SendNewItem(item, questPackageItem.ItemQuantity, true, false);
                         }
                     }
                 }
@@ -1372,11 +1378,11 @@ namespace Game.Entities
 
         public bool SatisfyQuestRace(Quest qInfo, bool msg)
         {
-            int reqraces = qInfo.AllowableRaces;
+            long reqraces = qInfo.AllowableRaces;
             if (reqraces == -1)
                 return true;
 
-            if ((reqraces & getRaceMask()) == 0)
+            if ((reqraces & (long)getRaceMask()) == 0)
             {
                 if (msg)
                 {
@@ -1802,16 +1808,16 @@ namespace Game.Entities
             {
                 foreach (var spell in saBounds)
                 {
-                    if (!spell.IsFitToRequirements(this, zone, area))
+                    if (spell.flags.HasAnyFlag(SpellAreaFlag.AutoRemove) && !spell.IsFitToRequirements(this, zone, area))
                         RemoveAurasDueToSpell(spell.spellId);
-                    else if (spell.autocast)
+                    else if (spell.flags.HasAnyFlag(SpellAreaFlag.AutoCast))
                         if (!HasAura(spell.spellId))
                             CastSpell(this, spell.spellId, true);
                 }
             }
 
             UpdateForQuestWorldObjects();
-            SendUpdatePhasing();
+            PhasingHandler.OnConditionChange(this);
         }
 
         public QuestGiverStatus GetQuestDialogStatus(WorldObject questgiver)

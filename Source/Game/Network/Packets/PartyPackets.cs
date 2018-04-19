@@ -313,16 +313,7 @@ namespace Game.Network.Packets
             }
 
             // Phases
-            var phases = player.GetPhases();
-            MemberStats.Phases.PhaseShiftFlags = 0x08 | (!phases.Empty() ? 0x10 : 0);
-            MemberStats.Phases.PersonalGUID = ObjectGuid.Empty;
-            foreach (uint phaseId in phases)
-            {
-                PartyMemberPhase phase;
-                phase.Id = (ushort)phaseId;
-                phase.Flags = 1;
-                MemberStats.Phases.List.Add(phase);
-            }
+            PhasingHandler.FillPartyMemberPhase(MemberStats.Phases, player.GetPhaseShift());
 
             // Pet
             if (player.GetPet())
@@ -892,8 +883,14 @@ namespace Game.Network.Packets
     }
 
     //Structs
-    struct PartyMemberPhase
+    public struct PartyMemberPhase
     {
+        public PartyMemberPhase(uint flags, uint id)
+        {
+            Flags = (ushort)flags;
+            Id = (ushort)id;
+        }
+
         public void Write(WorldPacket data)
         {
             data.WriteUInt16(Flags);
@@ -904,7 +901,7 @@ namespace Game.Network.Packets
         public ushort Id;
     }
 
-    class PartyMemberPhaseStates
+    public class PartyMemberPhaseStates
     {
         public void Write(WorldPacket data)
         {

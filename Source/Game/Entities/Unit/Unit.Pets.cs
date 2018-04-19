@@ -198,7 +198,7 @@ namespace Game.Entities
                 if (minion.HasUnitTypeMask(UnitTypeMask.Guardian))
                     AddGuidValue(UnitFields.Summon, minion.GetGUID());
 
-                if (minion.m_Properties != null && minion.m_Properties.Type == SummonType.Minipet)
+                if (minion.m_Properties != null && minion.m_Properties.Title == SummonType.Minipet)
                 {
                     SetCritterGUID(minion.GetGUID());
                     if (GetTypeId() == TypeId.Player)
@@ -212,10 +212,6 @@ namespace Game.Entities
                 if (IsTypeId(TypeId.Player) && minion.IsPet())
                     for (UnitMoveType i = 0; i < UnitMoveType.Max; ++i)
                         minion.SetSpeedRate(i, m_speed_rate[(int)i]);
-
-                // Ghoul pets have energy instead of mana (is anywhere better place for this code?)
-                if (minion.IsPetGhoul())
-                    minion.SetPowerType(PowerType.Energy);
 
                 // Send infinity cooldown - client does that automatically but after relog cooldown needs to be set again
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(minion.GetUInt32Value(UnitFields.CreatedBySpell));
@@ -232,7 +228,7 @@ namespace Game.Entities
 
                 m_Controlled.Remove(minion);
 
-                if (minion.m_Properties != null && minion.m_Properties.Type == SummonType.Minipet)
+                if (minion.m_Properties != null && minion.m_Properties.Title == SummonType.Minipet)
                 {
                     if (GetCritterGUID() == minion.GetGUID())
                         SetCritterGUID(ObjectGuid.Empty);
@@ -788,7 +784,7 @@ namespace Game.Entities
                 return false;
             }
 
-            pet.CopyPhaseFrom(this);
+            PhasingHandler.InheritPhaseShift(pet, this);
 
             pet.GetCharmInfo().SetPetNumber(Global.ObjectMgr.GeneratePetNumber(), true);
             // this enables pet details window (Shift+P)

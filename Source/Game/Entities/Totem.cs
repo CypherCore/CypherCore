@@ -65,8 +65,6 @@ namespace Game.Entities
                     packet.Duration = duration;
                     packet.SpellID = GetUInt32Value(UnitFields.CreatedBySpell);
                     owner.ToPlayer().SendPacket(packet);
-
-
                 }
 
                 // set display id depending on caster's race
@@ -155,7 +153,7 @@ namespace Game.Entities
             AddObjectToRemoveList();
         }
 
-        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, uint index)
+        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, uint index, Unit caster)
         {
             // @todo possibly all negative auras immune?
             if (GetEntry() == 5925)
@@ -176,7 +174,7 @@ namespace Game.Entities
                     break;
             }
 
-            return base.IsImmunedToSpellEffect(spellInfo, index);
+            return base.IsImmunedToSpellEffect(spellInfo, index, caster);
         }
 
         public uint GetSpell(byte slot = 0) { return m_spells[slot]; }

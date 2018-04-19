@@ -55,7 +55,7 @@ namespace Game.BattleGrounds
         }
 
         // add group or player (grp == null) to bg queue with the given leader and bg specifications
-        public GroupQueueInfo AddGroup(Player leader, Group grp, BattlegroundTypeId BgTypeId, PVPDifficultyRecord bracketEntry, ArenaTypes ArenaType, bool isRated, bool isPremade, uint ArenaRating, uint MatchmakerRating, uint arenateamid = 0)
+        public GroupQueueInfo AddGroup(Player leader, Group grp, BattlegroundTypeId BgTypeId, PvpDifficultyRecord bracketEntry, ArenaTypes ArenaType, bool isRated, bool isPremade, uint ArenaRating, uint MatchmakerRating, uint arenateamid = 0)
         {
             BattlegroundBracketId bracketId = bracketEntry.GetBracketId();
 
@@ -776,7 +776,7 @@ namespace Game.BattleGrounds
                 return;
             }
 
-            PVPDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketById(bg_template.GetMapId(), bracket_id);
+            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketById(bg_template.GetMapId(), bracket_id);
             if (bracketEntry == null)
             {
                 Log.outError(LogFilter.Battleground, "Battleground: Update: bg bracket entry not found for map {0} bracket id {1}", bg_template.GetMapId(), bracket_id);

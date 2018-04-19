@@ -20,9 +20,9 @@ namespace Game.DataStorage
     public sealed class RandPropPointsRecord
     {
         public uint Id;
-        public uint[] EpicPropertiesPoints = new uint[5];
-        public uint[] RarePropertiesPoints = new uint[5];
-        public uint[] UncommonPropertiesPoints = new uint[5];
+        public uint[] Epic = new uint[5];
+        public uint[] Superior = new uint[5];
+        public uint[] Good = new uint[5];
     }
 
     public sealed class RewardPackRecord
@@ -31,17 +31,25 @@ namespace Game.DataStorage
         public uint Money;
         public float ArtifactXPMultiplier;
         public byte ArtifactXPDifficulty;
-        public byte ArtifactCategoryID;
-        public uint TitleID;
-        public uint Unused;
+        public byte ArtifactXPCategoryID;
+        public ushort CharTitleID;
+        public ushort TreasurePickerID;
+    }
+
+    public sealed class RewardPackXCurrencyTypeRecord
+    {
+        public uint Id;
+        public uint CurrencyTypeID;
+        public int Quantity;
+        public uint RewardPackID;
     }
 
     public sealed class RewardPackXItemRecord
     {
         public uint Id;
         public uint ItemID;
+        public uint ItemQuantity;
         public uint RewardPackID;
-        public uint Amount;
     }
 
     public sealed class RulesetItemUpgradeRecord

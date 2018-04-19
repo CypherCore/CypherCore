@@ -65,6 +65,7 @@ namespace Game.Entities
         uint m_ArenaTeamIdInvited;
         long m_lastHonorUpdateTime;
         uint m_contestedPvPTimer;
+        bool _usePvpItemLevels;
 
         //Groups/Raids
         GroupReference m_group = new GroupReference();
@@ -190,6 +191,7 @@ namespace Game.Entities
 
         SpecializationInfo _specializationInfo;
         public List<ObjectGuid> m_clientGUIDs = new List<ObjectGuid>();
+        public List<ObjectGuid> m_visibleTransports = new List<ObjectGuid>();
         public WorldObject seerView;
         // only changed for direct client control (possess, vehicle etc.), not stuff you control using pet commands
         public Unit m_unitMovedByMe;
@@ -317,11 +319,13 @@ namespace Game.Entities
             for (byte i = 0; i < PlayerConst.MaxSpecializations; ++i)
             {
                 Talents[i] = new Dictionary<uint, PlayerSpellState>();
+                PvpTalents[i] = new Dictionary<uint, PlayerSpellState>();
                 Glyphs[i] = new List<uint>();
             }
         }
 
         public Dictionary<uint, PlayerSpellState>[] Talents = new Dictionary<uint, PlayerSpellState>[PlayerConst.MaxSpecializations];
+        public Dictionary<uint, PlayerSpellState>[] PvpTalents = new Dictionary<uint, PlayerSpellState>[PlayerConst.MaxSpecializations];
         public List<uint>[] Glyphs = new List<uint>[PlayerConst.MaxSpecializations];
         public uint ResetTalentsCost;
         public long ResetTalentsTime;

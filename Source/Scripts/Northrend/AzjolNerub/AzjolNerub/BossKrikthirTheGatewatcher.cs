@@ -760,14 +760,14 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.KrikthirTheGatewatcher
         void HandleTargets(List<WorldObject> targetList)
         {
             // Remove any Watchers that are already in combat
-            foreach (var obj in targetList.ToList())
+            for (var i = 0; i < targetList.Count; ++i)
             {
-                Creature creature = obj.ToCreature();
+                Creature creature = targetList[i].ToCreature();
                 if (creature)
                     if (creature.IsAlive() && !creature.IsInCombat())
                         continue;
 
-                targetList.Remove(obj);
+                targetList.RemoveAt(i);
             }
 
             // Default to Krik'thir himself if he isn't engaged

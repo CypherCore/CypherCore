@@ -473,13 +473,11 @@ namespace Game.Chat
                 Player player = handler.GetPlayer();
                 Map map = player.GetMap();
 
-                GameObject obj = new GameObject();
-
-                Quaternion rotation = new Quaternion(Matrix3.fromEulerAnglesZYX(player.GetOrientation(), 0.0f, 0.0f));
-                if (!obj.Create(objectInfo.entry, map, player, rotation, 255, GameObjectState.Ready))
+                GameObject obj = GameObject.CreateGameObject(objectInfo.entry, map, player, new Quaternion(Matrix3.fromEulerAnglesZYX(player.GetOrientation(), 0.0f, 0.0f)), 255, GameObjectState.Ready);
+                if (!obj)
                     return false;
 
-                obj.CopyPhaseFrom(player);
+                PhasingHandler.InheritPhaseShift(obj, player);
 
                 if (spawntimeSecs != 0)
                 {
@@ -491,7 +489,8 @@ namespace Game.Chat
                 ulong spawnId = obj.GetSpawnId();
 
                 // this will generate a new guid if the object is in an instance
-                if (!obj.LoadGameObjectFromDB(spawnId, map))
+                obj = GameObject.CreateGameObjectFromDB(spawnId, map);
+                if (!obj)
                     return false;
 
                 // TODO: is it really necessary to add both the real and DB table guid here ?
@@ -617,6 +616,13 @@ namespace Game.Chat
                     obj.SetByteValue(GameObjectFields.Bytes1, (byte)objectType, (byte)objectState);
                 else if (objectType == 4)
                     obj.SendCustomAnim(objectState);
+                else if (objectType == 5)
+                {
+                    if (objectState < 0 || objectState > (uint)GameObjectDestructibleState.Rebuilding)
+                        return false;
+
+                    obj.SetDestructibleState((GameObjectDestructibleState)objectState);
+                }
 
                 handler.SendSysMessage("Set gobject type {0} state {1}", objectType, objectState);
                 return true;

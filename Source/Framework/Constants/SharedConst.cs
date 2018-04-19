@@ -505,14 +505,19 @@ namespace Framework.Constants
         PandarenNeutral = 24,
         PandarenAlliance = 25,
         PandarenHorde = 26,
-        Max = 27,
+        Nightborne = 27,
+        HighmountainTauren = 28,
+        VoidElf = 29,
+        LightforgedDraenei = 30,
+        Max = 31,
 
         RaceMaskAllPlayable = ((1 << (Human - 1)) | (1 << (Orc - 1)) | (1 << (Dwarf - 1)) | (1 << (NightElf - 1)) | (1 << (Undead - 1))
             | (1 << (Tauren - 1)) | (1 << (Gnome - 1)) | (1 << (Troll - 1)) | (1 << (BloodElf - 1)) | (1 << (Draenei - 1))
-            | (1 << (Goblin - 1)) | (1 << (Worgen - 1)) | (1 << (PandarenNeutral - 1)) | (1 << (PandarenAlliance - 1)) | (1 << (PandarenHorde - 1))),
+            | (1 << (Goblin - 1)) | (1 << (Worgen - 1)) | (1 << (PandarenNeutral - 1)) | (1 << (PandarenAlliance - 1)) | (1 << (PandarenHorde - 1))
+            | (1 << (Nightborne - 1)) | (1 << (HighmountainTauren - 1)) | (1 << (VoidElf - 1)) | (1 << (LightforgedDraenei - 1))),
 
-        RaceMaskAlliance = ((1 << (Human - 1)) | (1 << (Dwarf - 1)) | (1 << (NightElf - 1)) |
-            (1 << (Gnome - 1)) | (1 << (Draenei - 1)) | (1 << (Worgen - 1)) | (1 << (PandarenAlliance - 1))),
+        RaceMaskAlliance = ((1 << (Human - 1)) | (1 << (Dwarf - 1)) | (1 << (NightElf - 1)) | (1 << (Gnome - 1)) 
+            | (1 << (Draenei - 1)) | (1 << (Worgen - 1)) | (1 << (PandarenAlliance - 1)) | (1 << (VoidElf - 1)) | (1<<(LightforgedDraenei - 1))),
 
         RaceMaskHorde = RaceMaskAllPlayable & ~RaceMaskAlliance
     }
@@ -526,9 +531,14 @@ namespace Framework.Constants
         MistsOfPandaria = 4,
         WarlordsOfDraenor = 5,
         Legion = 6,
-        Max
+        Max,
+
+        // future expansion
+        BattleForAzeroth = 7,
+
+        MaxAccountExpansions
     }
-    public enum PowerType : byte
+    public enum PowerType : sbyte
     {
         Mana = 0,
         Rage = 1,
@@ -551,7 +561,7 @@ namespace Framework.Constants
         Pain = 18,
         Max = 19,
         All = 127,          // default for class?
-        Health = 0xFE,    // (-2 as signed value)
+        Health = -2,    // (-2 as signed value)
         MaxPerClass = 6
     }
 
@@ -947,7 +957,8 @@ namespace Framework.Constants
     {
         Success,
         SyntaxError,
-        Notfound
+        Notfound,
+        Exists
     }
 
     public enum WorldCfg
@@ -957,7 +968,6 @@ namespace Framework.Constants
         AhbotUpdateInterval,
         AllTaxiPaths,
         AllowGmGroup,
-        AllowPlayerCommands,
         AllowTrackBothResources,
         AllowTwoSideInteractionAuction,
         AllowTwoSideInteractionCalendar,
@@ -2302,7 +2312,8 @@ namespace Framework.Constants
         QuestTurnInFailReason = 983,
         ClaimedChallengeModeRewardOld = 984,
         TalentGrantedByAura = 985,
-        ChallengeModeAlreadyComplete = 986
+        ChallengeModeAlreadyComplete = 986,
+        GlyphTargetNotAvailable = 987
     }
 
     public enum SceneFlags

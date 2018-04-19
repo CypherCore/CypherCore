@@ -111,7 +111,7 @@ namespace Game.Entities
             Relocate(pos);
 
             base._Create(ObjectGuid.Create(HighGuid.Conversation, GetMapId(), conversationEntry, lowGuid));
-            CopyPhaseFrom(creator);
+            PhasingHandler.InheritPhaseShift(this, creator);
 
             SetEntry(conversationEntry);
             SetObjectScale(1.0f);

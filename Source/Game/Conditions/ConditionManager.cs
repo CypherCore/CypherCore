@@ -307,17 +307,7 @@ namespace Game
                 Global.ObjectMgr.LoadGossipMenuItems();
                 Global.SpellMgr.UnloadSpellInfoImplicitTargetConditionLists();
 
-                Log.outInfo(LogFilter.Server, "Re-Loading `terrain_phase_info` Table for Conditions!");
-                Global.ObjectMgr.LoadTerrainPhaseInfo();
-
-                Log.outInfo(LogFilter.Server, "Re-Loading `terrain_swap_defaults` Table for Conditions!");
-                Global.ObjectMgr.LoadTerrainSwapDefaults();
-
-                Log.outInfo(LogFilter.Server, "Re-Loading `terrain_worldmap` Table for Conditions!");
-                Global.ObjectMgr.LoadTerrainWorldMaps();
-
-                Log.outInfo(LogFilter.Server, "Re-Loading `phase_area` Table for Conditions!");
-                Global.ObjectMgr.LoadAreaPhases();
+                Global.ObjectMgr.UnloadPhaseConditions();
             }
 
             SQLResult result = DB.World.Query("SELECT SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, " +
@@ -574,7 +564,7 @@ namespace Game
             var pMenuItemBounds = Global.ObjectMgr.GetGossipMenuItemsMapBounds(cond.SourceGroup);
             foreach (var menuItems in pMenuItemBounds)
             {
-                if (menuItems.MenuId == cond.SourceGroup && menuItems.OptionId == cond.SourceEntry)
+                if (menuItems.MenuId == cond.SourceGroup && menuItems.OptionIndex == cond.SourceEntry)
                 {
                     menuItems.Conditions.Add(cond);
                     return true;
@@ -689,29 +679,36 @@ namespace Game
         {
             if (cond.SourceEntry == 0)
             {
-                bool found = false;
-                var map = Global.ObjectMgr.GetAreaAndZonePhases();
-                foreach (var key in map.Keys)
+                PhaseInfoStruct phaseInfo = Global.ObjectMgr.GetPhaseInfo(cond.SourceGroup);
+                if (phaseInfo != null)
                 {
-                    foreach (PhaseInfoStruct phase in map[key])
+                    bool found = false;
+                    foreach (uint areaId in phaseInfo.Areas)
                     {
-                        if (phase.Id == cond.SourceGroup)
+                        List<PhaseAreaInfo> phases = Global.ObjectMgr.GetPhasesForArea(areaId);
+                        if (phases != null)
                         {
-                            phase.Conditions.Add(cond);
-                            found = true;
+                                foreach (PhaseAreaInfo phase in phases)
+                            {
+                                if (phase.PhaseInfo.Id == cond.SourceGroup)
+                                {
+                                    phase.Conditions.Add(cond);
+                                    found = true;
+                                }
+                            }
                         }
                     }
-                }
 
-                if (found)
-                    return true;
+                    if (found)
+                        return true;
+                }
             }
             else
             {
-                var phases = Global.ObjectMgr.GetPhasesForAreaOrZoneForLoading((uint)cond.SourceEntry);
-                foreach (PhaseInfoStruct phase in phases)
+                var phases = Global.ObjectMgr.GetPhasesForArea((uint)cond.SourceEntry);
+                foreach (PhaseAreaInfo phase in phases)
                 {
-                    if (phase.Id == cond.SourceGroup)
+                    if (phase.PhaseInfo.Id == cond.SourceGroup)
                     {
                         phase.Conditions.Add(cond);
                         return true;
@@ -1073,6 +1070,13 @@ namespace Game
                 case ConditionSourceType.GossipMenu:
                 case ConditionSourceType.GossipMenuOption:
                 case ConditionSourceType.SmartEvent:
+                    break;
+                case ConditionSourceType.Graveyard:
+                    if (!CliDB.WorldSafeLocsStorage.ContainsKey(cond.SourceEntry))
+                    {
+                        Log.outError(LogFilter.Sql, $"{cond.ToString()} SourceEntry in `condition` table, does not exist in WorldSafeLocs.db2, ignoring.");
+                        return false;
+                    }
                     break;
                 default:
                     Log.outError(LogFilter.Sql, $"{cond.ToString()} Invalid ConditionSourceType in `condition` table, ignoring.");
@@ -1675,7 +1679,7 @@ namespace Game
             if (condition.MaxLevel != 0 && player.getLevel() > condition.MaxLevel)
                 return false;
 
-            if (condition.RaceMask != 0 && !Convert.ToBoolean(player.getRaceMask() & condition.RaceMask))
+            if (condition.RaceMask != 0 && !Convert.ToBoolean((long)player.getRaceMask() & condition.RaceMask))
                 return false;
 
             if (condition.ClassMask != 0 && !Convert.ToBoolean(player.getClassMask() & condition.ClassMask))
@@ -1792,10 +1796,10 @@ namespace Game
             if (condition.MovementFlags[1] != 0 && !Convert.ToBoolean((uint)player.GetUnitMovementFlags2() & condition.MovementFlags[1]))
                 return false;
 
-            if (condition.MainHandItemSubclassMask != 0)
+            if (condition.WeaponSubclassMask != 0)
             {
                 Item mainHand = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
-                if (!mainHand || !Convert.ToBoolean((1 << (int)mainHand.GetTemplate().GetSubClass()) & condition.MainHandItemSubclassMask))
+                if (!mainHand || !Convert.ToBoolean((1 << (int)mainHand.GetTemplate().GetSubClass()) & condition.WeaponSubclassMask))
                     return false;
             }
 
@@ -1927,8 +1931,8 @@ namespace Game
                 {
                     if (condition.AuraSpellID[i] != 0)
                     {
-                        if (condition.AuraCount[i] != 0)
-                            results[i] = player.GetAuraCount(condition.AuraSpellID[i]) >= condition.AuraCount[i];
+                        if (condition.AuraStacks[i] != 0)
+                            results[i] = player.GetAuraCount(condition.AuraSpellID[i]) >= condition.AuraStacks[i];
                         else
                             results[i] = player.HasAura(condition.AuraSpellID[i]);
                     }
@@ -1983,15 +1987,9 @@ namespace Game
                 || condition.MinExpansionLevel > WorldConfig.GetIntValue(WorldCfg.Expansion)))
                 return false;
 
-            if (condition.PhaseID != 0 && !player.IsInPhase(condition.PhaseID))
-                return false;
-
-            if (condition.PhaseGroupID != 0)
-            {
-                var phases = Global.DB2Mgr.GetPhasesForGroup(condition.PhaseGroupID);
-                if (!phases.Intersect(player.GetPhases()).Any())
+            if (condition.PhaseID != 0 || condition.PhaseGroupID != 0 || condition.PhaseUseFlags != 0)
+                if (!PhasingHandler.InDbPhaseShift(player, (PhaseUseFlagsValues)condition.PhaseUseFlags, condition.PhaseID, condition.PhaseGroupID))
                     return false;
-            }
 
             if (condition.QuestKillID != 0)
             {

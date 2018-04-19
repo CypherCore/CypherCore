@@ -43,6 +43,7 @@ namespace Game.Maps
             if (!File.Exists(filename))
                 return true;
 
+            _fileExists = true;
             using (BinaryReader reader = new BinaryReader(new FileStream(filename, FileMode.Open, FileAccess.Read)))
             {
                 mapFileHeader header = reader.ReadStruct<mapFileHeader>();
@@ -72,6 +73,7 @@ namespace Game.Maps
             _liquidFlags = null;
             _liquidMap = null;
             _gridGetHeight = getHeightFromFlat;
+            _fileExists = false;
         }
 
         void LoadAreaData(BinaryReader reader, uint offset)
@@ -137,13 +139,46 @@ namespace Game.Maps
 
             if (mapHeader.flags.HasAnyFlag(HeightHeaderFlags.HeightHasFlightBounds))
             {
-                _maxHeight = new short[3 * 3];
-                for (var i = 0; i < _maxHeight.Length; ++i)
-                    _maxHeight[i] = reader.ReadInt16();
+                short[] maxHeights = new short[3 * 3];
+                short[] minHeights = new short[3 * 3];
+                for (var i = 0; i < maxHeights.Length; ++i)
+                    maxHeights[i] = reader.ReadInt16();
 
-                _minHeight = new short[3 * 3];
-                for (var i = 0; i < _minHeight.Length; ++i)
-                    _minHeight[i] = reader.ReadInt16();
+                for (var i = 0; i < minHeights.Length; ++i)
+                    minHeights[i] = reader.ReadInt16();
+
+                uint[][] indices =
+                {
+                    new uint[] { 3, 0, 4 },
+                    new uint[] { 0, 1, 4 },
+                    new uint[] { 1, 2, 4 },
+                    new uint[] { 2, 5, 4 },
+                    new uint[] { 5, 8, 4 },
+                    new uint[] { 8, 7, 4 },
+                    new uint[] { 7, 6, 4 },
+                    new uint[] { 6, 3, 4 }
+                };
+
+                float[][] boundGridCoords =
+                {
+                    new float[] { 0.0f, 0.0f },
+                    new float[] { 0.0f, -266.66666f },
+                    new float[] { 0.0f, -533.33331f },
+                    new float[] { -266.66666f, 0.0f },
+                    new float[] { -266.66666f, -266.66666f },
+                    new float[] { -266.66666f, -533.33331f },
+                    new float[] { -533.33331f, 0.0f },
+                    new float[] { -533.33331f, -266.66666f },
+                    new float[] { -533.33331f, -533.33331f }
+                };
+
+                _minHeightPlanes = new Plane[8];
+                for (uint quarterIndex = 0; quarterIndex < 8; ++quarterIndex)
+                    _minHeightPlanes[quarterIndex] = new Plane(
+                        new Vector3(boundGridCoords[indices[quarterIndex][0]][0], boundGridCoords[indices[quarterIndex][0]][1], minHeights[indices[quarterIndex][0]]),
+                        new Vector3(boundGridCoords[indices[quarterIndex][1]][0], boundGridCoords[indices[quarterIndex][1]][1], minHeights[indices[quarterIndex][1]]),
+                        new Vector3(boundGridCoords[indices[quarterIndex][2]][0], boundGridCoords[indices[quarterIndex][2]][1], minHeights[indices[quarterIndex][2]])
+                    );
             }
         }
 
@@ -152,7 +187,8 @@ namespace Game.Maps
             reader.BaseStream.Seek(offset, SeekOrigin.Begin);
             map_LiquidHeader liquidHeader = reader.ReadStruct<map_LiquidHeader>();
 
-            _liquidType = liquidHeader.liquidType;
+            _liquidGlobalEntry = liquidHeader.liquidType;
+            _liquidGlobalFlags = (byte)liquidHeader.liquidFlags;
             _liquidOffX = liquidHeader.offsetX;
             _liquidOffY = liquidHeader.offsetY;
             _liquidWidth = liquidHeader.width;
@@ -406,62 +442,33 @@ namespace Game.Maps
 
         public float getMinHeight(float x, float y)
         {
-            if (_minHeight == null)
+            if (_minHeightPlanes == null)
                 return -500.0f;
 
-            uint[] indices =
-            {
-                3, 0, 4,
-                0, 1, 4,
-                1, 2, 4,
-                2, 5, 4,
-                5, 8, 4,
-                8, 7, 4,
-                7, 6, 4,
-                6, 3, 4
-            };
+            GridCoord gridCoord = GridDefines.ComputeGridCoord(x, y);
 
-            float[] boundGridCoords =
-            {
-                0.0f, 0.0f,
-                0.0f, -266.66666f,
-                0.0f, -533.33331f,
-                -266.66666f, 0.0f,
-                -266.66666f, -266.66666f,
-                -266.66666f, -533.33331f,
-                -533.33331f, 0.0f,
-                -533.33331f, -266.66666f,
-                -533.33331f, -533.33331f
-            };
+            int doubleGridX = (int)(Math.Floor(-(x - MapConst.MapHalfSize) / MapConst.CenterGridOffset));
+            int doubleGridY = (int)(Math.Floor(-(y - MapConst.MapHalfSize) / MapConst.CenterGridOffset));
 
-            Cell cell = new Cell(x, y);
-            float gx = x - (cell.GetGridX() - MapConst.CenterGridId + 1) *MapConst.SizeofGrids;
-            float gy = y - (cell.GetGridY() - MapConst.CenterGridId + 1) *MapConst.SizeofGrids;
+            float gx = x - ((int)gridCoord.x_coord - MapConst.CenterGridId + 1) * MapConst.SizeofGrids;
+            float gy = y - ((int)gridCoord.y_coord - MapConst.CenterGridId + 1) * MapConst.SizeofGrids;
 
             uint quarterIndex = 0;
-            if (cell.GetCellY() < MapConst.MaxCells / 2)
+            if (Convert.ToBoolean(doubleGridY & 1))
             {
-                if (cell.GetCellX() < MapConst.MaxCells / 2)
-                {
-                    quarterIndex = 4 + (gy > gx ? 1u : 0u);
-                }
+                if (Convert.ToBoolean(doubleGridX & 1))
+                    quarterIndex = 4 + (gx <= gy ? 1 : 0u);
                 else
                     quarterIndex = (2 + ((-MapConst.SizeofGrids - gx) > gy ? 1u : 0));
             }
-            else if (cell.GetCellX() < MapConst.MaxCells / 2)
-            {
+            else if (Convert.ToBoolean(doubleGridX & 1))
                 quarterIndex = 6 + ((-MapConst.SizeofGrids - gx) <= gy ? 1u : 0);
-            }
             else
                 quarterIndex = gx > gy ? 1u : 0;
 
-            quarterIndex *= 3;
 
-            return new Plane(
-                new Vector3(boundGridCoords[indices[quarterIndex + 0] * 2 + 0], boundGridCoords[indices[quarterIndex + 0] * 2 + 1], _minHeight[indices[quarterIndex + 0]]),
-                new Vector3(boundGridCoords[indices[quarterIndex + 1] * 2 + 0], boundGridCoords[indices[quarterIndex + 1] * 2 + 1], _minHeight[indices[quarterIndex + 1]]),
-                new Vector3(boundGridCoords[indices[quarterIndex + 2] * 2 + 0], boundGridCoords[indices[quarterIndex + 2] * 2 + 1], _minHeight[indices[quarterIndex + 2]])
-            ).GetDistanceToPlane(new Vector3(gx, gy, 0.0f));
+            Ray ray = new Ray(new Vector3(gx, gy, 0.0f), Vector3.ZAxis);
+            return ray.intersection(_minHeightPlanes[quarterIndex]).Z;
         }
 
         public float getLiquidLevel(float x, float y)
@@ -497,10 +504,10 @@ namespace Game.Maps
         }
 
         // Get water state on map
-        public ZLiquidStatus getLiquidStatus(float x, float y, float z, byte ReqLiquidType, LiquidData data)
+        public ZLiquidStatus getLiquidStatus(float x, float y, float z, uint ReqLiquidType, LiquidData data)
         {
             // Check water type (if no water return)
-            if (_liquidType == 0 && _liquidFlags == null)
+            if (_liquidGlobalFlags == 0 && _liquidFlags == null)
                 return ZLiquidStatus.NoWater;
 
             // Get cell
@@ -512,38 +519,34 @@ namespace Game.Maps
 
             // Check water type in cell
             int idx = (x_int >> 3) * 16 + (y_int >> 3);
-            byte type = _liquidFlags != null ? _liquidFlags[idx] : (byte)_liquidType;
-            uint entry = 0;
-            if (_liquidEntry != null)
+            byte type = _liquidFlags != null ? _liquidFlags[idx] : _liquidGlobalFlags;
+            uint entry = _liquidEntry != null ? _liquidEntry[idx] : _liquidGlobalEntry;
+            LiquidTypeRecord liquidEntry = CliDB.LiquidTypeStorage.LookupByKey(entry);
+            if (liquidEntry != null)
             {
-                var liquidEntry = CliDB.LiquidTypeStorage.LookupByKey(_liquidEntry[idx]);
-                if (liquidEntry != null)
+                type &= (byte)MapConst.MapLiquidTypeDarkWater;
+                uint liqTypeIdx = liquidEntry.SoundBank;
+                if (entry < 21)
                 {
-                    entry = liquidEntry.Id;
-                    type &= MapConst.MapLiquidTypeDarkWater;
-                    uint liqTypeIdx = liquidEntry.LiquidType;
-                    if (entry < 21)
+                    var area = CliDB.AreaTableStorage.LookupByKey(getArea(x, y));
+                    if (area != null)
                     {
-                        var area = CliDB.AreaTableStorage.LookupByKey(getArea(x, y));
-                        if (area != null)
+                        uint overrideLiquid = area.LiquidTypeID[liquidEntry.SoundBank];
+                        if (overrideLiquid == 0 && area.ParentAreaID == 0)
                         {
-                            uint overrideLiquid = area.LiquidTypeID[liquidEntry.LiquidType];
-                            if (overrideLiquid == 0 && area.ParentAreaID == 0)
-                            {
-                                area = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
-                                if (area != null)
-                                    overrideLiquid = area.LiquidTypeID[liquidEntry.LiquidType];
-                            }
-                            var liq = CliDB.LiquidTypeStorage.LookupByKey(overrideLiquid);
-                            if (liq != null)
-                            {
-                                entry = overrideLiquid;
-                                liqTypeIdx = liq.LiquidType;
-                            }
+                            area = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
+                            if (area != null)
+                                overrideLiquid = area.LiquidTypeID[liquidEntry.SoundBank];
+                        }
+                        var liq = CliDB.LiquidTypeStorage.LookupByKey(overrideLiquid);
+                        if (liq != null)
+                        {
+                            entry = overrideLiquid;
+                            liqTypeIdx = liq.SoundBank;
                         }
                     }
-                    type |= (byte)(1 << (int)liqTypeIdx);
                 }
+                type |= (byte)(1 << (int)liqTypeIdx);
             }
 
             if (type == 0)
@@ -595,6 +598,8 @@ namespace Game.Maps
 
         public float getHeight(float x, float y) { return _gridGetHeight(x, y); }
 
+        public bool fileExists() { return _fileExists; }
+
         #region Fields
         delegate float GetHeight(float x, float y);
 
@@ -608,8 +613,7 @@ namespace Game.Maps
         public float[] m_V8;
         public ushort[] m_uint16_V8;
         public byte[] m_ubyte_V8;
-        short[] _maxHeight;
-        short[] _minHeight;
+        Plane[] _minHeightPlanes;
         float _gridHeight;
         float _gridIntHeightMultiplier;
 
@@ -622,11 +626,13 @@ namespace Game.Maps
         byte[] _liquidFlags;
         float[] _liquidMap;
         ushort _gridArea;
-        ushort _liquidType;
+        ushort _liquidGlobalEntry;
+        byte _liquidGlobalFlags;
         byte _liquidOffX;
         byte _liquidOffY;
         byte _liquidWidth;
         byte _liquidHeight;
+        bool _fileExists;
         #endregion
     }
 
@@ -671,6 +677,7 @@ namespace Game.Maps
     {
         public uint fourcc;
         public LiquidHeaderFlags flags;
+        public byte liquidFlags;
         public ushort liquidType;
         public byte offsetX;
         public byte offsetY;
@@ -704,7 +711,7 @@ namespace Game.Maps
     }
 
     [Flags]
-    public enum LiquidHeaderFlags : ushort
+    public enum LiquidHeaderFlags : byte
     {
         LiquidNoType = 0x0001,
         LiquidNoHeight = 0x0002

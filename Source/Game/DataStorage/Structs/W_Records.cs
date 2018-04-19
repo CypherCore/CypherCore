@@ -22,21 +22,21 @@ namespace Game.DataStorage
 {
     public sealed class WMOAreaTableRecord
     {
-        public int WMOGroupID;                                               //  used in group WMO
-        public LocalizedString AreaName;
-        public short WMOID;                                                    //  used in root WMO
+        public string AreaName;
+        public int WmoGroupID;                                               //  used in group WMO
         public ushort AmbienceID;
         public ushort ZoneMusic;
         public ushort IntroSound;
         public ushort AreaTableID;
-        public ushort UWIntroSound;
-        public ushort UWAmbience;
-        public sbyte NameSet;                                                   //  used in adt file
+        public ushort UwIntroSound;
+        public ushort UwAmbience;
+        public sbyte NameSetID;                                                   //  used in adt file
         public byte SoundProviderPref;
         public byte SoundProviderPrefUnderwater;
         public byte Flags;
-        public uint I;
-        public uint UWZoneMusic;
+        public uint Id;
+        public byte UwZoneMusic;
+        public uint WmoID;                                                    //  used in root WMO
     }
 
     public sealed class WorldEffectRecord
@@ -47,7 +47,7 @@ namespace Game.DataStorage
         public byte TargetType;
         public byte WhenToDisplay;
         public uint QuestFeedbackEffectID;
-        public uint PlayerConditionID;
+        public ushort PlayerConditionID;
     }
 
     public sealed class WorldMapAreaRecord
@@ -66,27 +66,28 @@ namespace Game.DataStorage
         public byte LevelRangeMin;
         public byte LevelRangeMax;
         public byte BountySetID;
-        public byte BountyBoardLocation;
+        public byte BountyDisplayLocation;
         public uint Id;
-        public uint PlayerConditionID;
+        public uint VisibilityPlayerConditionID;
     }
 
     public sealed class WorldMapOverlayRecord
     {
-        public uint Id;
         public string TextureName;
+        public uint Id;
         public ushort TextureWidth;
         public ushort TextureHeight;
-        public uint MapAreaID;                                               // idx in WorldMapArea.dbc
-        public uint[] AreaID = new uint[SharedConst.MaxWorldMapOverlayArea];
-        public int OffsetX;
-        public int OffsetY;
-        public int HitRectTop;
-        public int HitRectLeft;
-        public int HitRectBottom;
-        public int HitRectRight;
-        public uint PlayerConditionID;
-        public uint Flags;
+        public ushort MapAreaID;                                               // idx in WorldMapArea.dbc
+        public ushort OffsetX;
+        public uint OffsetY;
+        public ushort HitRectTop;
+        public ushort HitRectLeft;
+        public ushort HitRectBottom;
+        public ushort HitRectRight;
+        public ushort PlayerConditionID;
+        public byte Flags;
+        public uint[] AreaID = new uint[SharedConst.MaxWorldMapOverlayArea]; // needs checked
+
     }
 
     public sealed class WorldMapTransformsRecord
@@ -108,9 +109,9 @@ namespace Game.DataStorage
     public sealed class WorldSafeLocsRecord
     {
         public uint Id;
+        public string AreaName;
         public Vector3 Loc;
         public float Facing;
-        public LocalizedString AreaName;
         public ushort MapID;
     }
 }

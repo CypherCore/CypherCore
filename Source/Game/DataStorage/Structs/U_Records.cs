@@ -20,21 +20,21 @@ namespace Game.DataStorage
     public sealed class UnitPowerBarRecord
     {
         public uint Id;
+        public string Name;
+        public string Cost;
+        public string OutOfError;
+        public string ToolTip;
         public float RegenerationPeace;
         public float RegenerationCombat;
         public uint[] FileDataID = new uint[6];
         public uint[] Color = new uint[6];
-        public LocalizedString Name;
-        public LocalizedString Cost;
-        public LocalizedString OutOfError;
-        public LocalizedString ToolTip;
         public float StartInset;
         public float EndInset;
         public ushort StartPower;
         public ushort Flags;
         public byte CenterPower;
         public byte BarType;
-        public uint MinPower;
+        public byte MinPower;
         public uint MaxPower;
     }
 }

@@ -305,7 +305,7 @@ namespace Game.Spells
 
             var powers = Global.DB2Mgr.GetSpellPowers(GetId(), caster ? caster.GetMap().GetDifficultyID() : Difficulty.None);
             foreach (var power in powers)
-                if (power.ManaCostPerSecond != 0 || power.ManaCostPercentagePerSecond > 0.0f)
+                if (power.ManaPerSecond != 0 || power.PowerPctPerSecond > 0.0f)
                     m_periodicCosts.Add(power);
 
             if (!m_periodicCosts.Empty())
@@ -492,10 +492,10 @@ namespace Game.Spells
                 // check target immunities
                 for (byte effIndex = 0; effIndex < SpellConst.MaxEffects; ++effIndex)
                 {
-                    if (unit.IsImmunedToSpellEffect(GetSpellInfo(), effIndex))
+                    if (unit.IsImmunedToSpellEffect(GetSpellInfo(), effIndex, caster))
                         value &= (byte)~(1 << effIndex);
                 }
-                if (value == 0 || unit.IsImmunedToSpell(GetSpellInfo())
+                if (value == 0 || unit.IsImmunedToSpell(GetSpellInfo(), caster)
                     || !CanBeAppliedOn(unit))
                     addUnit = false;
 
@@ -653,14 +653,14 @@ namespace Game.Spells
 
                             foreach (SpellPowerRecord power in m_periodicCosts)
                             {
-                                if (power.RequiredAura != 0 && !caster.HasAura(power.RequiredAura))
+                                if (power.RequiredAuraSpellID != 0 && !caster.HasAura(power.RequiredAuraSpellID))
                                     continue;
 
-                                int manaPerSecond = (int)power.ManaCostPerSecond;
+                                int manaPerSecond = (int)power.ManaPerSecond;
                                 if (power.PowerType != PowerType.Health)
-                                    manaPerSecond += MathFunctions.CalculatePct(caster.GetMaxPower(power.PowerType), power.ManaCostPercentagePerSecond);
+                                    manaPerSecond += MathFunctions.CalculatePct(caster.GetMaxPower(power.PowerType), power.PowerPctPerSecond);
                                 else
-                                    manaPerSecond += (int)MathFunctions.CalculatePct(caster.GetMaxHealth(), power.ManaCostPercentagePerSecond);
+                                    manaPerSecond += (int)MathFunctions.CalculatePct(caster.GetMaxHealth(), power.PowerPctPerSecond);
 
                                 if (manaPerSecond != 0)
                                 {
@@ -847,8 +847,8 @@ namespace Game.Spells
             {
                 if (!app.HasRemoveMode())
                 {
-                    HandleAuraSpecificMods(app, caster, true, true);
                     HandleAuraSpecificPeriodics(app, caster);
+                    HandleAuraSpecificMods(app, caster, true, true);
                 }
             }
 
@@ -1132,16 +1132,16 @@ namespace Game.Spells
                 uint zone, area;
                 target.GetZoneAndAreaId(out zone, out area);
 
-                foreach (var bound in saBounds)
+                foreach (var spellArea in saBounds)
                 {
                     // some auras remove at aura remove
-                    if (!bound.IsFitToRequirements((Player)target, zone, area))
-                        target.RemoveAurasDueToSpell(bound.spellId);
+                    if (spellArea.flags.HasAnyFlag(SpellAreaFlag.AutoRemove) && !spellArea.IsFitToRequirements((Player)target, zone, area))
+                        target.RemoveAurasDueToSpell(spellArea.spellId);
                     // some auras applied at aura apply
-                    else if (bound.autocast)
+                    else if (spellArea.flags.HasAnyFlag(SpellAreaFlag.AutoCast))
                     {
-                        if (!target.HasAura(bound.spellId))
-                            target.CastSpell(target, bound.spellId, true);
+                        if (!target.HasAura(spellArea.spellId))
+                            target.CastSpell(target, spellArea.spellId, true);
                     }
                 }
             }
@@ -1694,6 +1694,7 @@ namespace Game.Spells
                 return 0;
 
             // do checks against db data
+
             if (!SpellManager.CanSpellTriggerProcOnEvent(procEntry, eventInfo))
                 return 0;
 

@@ -177,7 +177,7 @@ namespace Game.DungeonFinding
             // Initialize Dungeon map with data from dbcs
             foreach (var dungeon in CliDB.LFGDungeonsStorage.Values)
             {
-                switch (dungeon.Type)
+                switch (dungeon.TypeID)
                 {
                     case LfgType.Dungeon:
                     case LfgType.Raid:
@@ -1506,6 +1506,8 @@ namespace Game.DungeonFinding
                     lockStatus = LfgLockStatusType.InsufficientExpansion;
                 else if (Global.DisableMgr.IsDisabledFor(DisableType.Map, dungeon.map, player))
                     lockStatus = LfgLockStatusType.RaidLocked;
+                else if (Global.DisableMgr.IsDisabledFor(DisableType.LFGMap, dungeon.map, player))
+                    lockStatus = LfgLockStatusType.RaidLocked;
                 else if (dungeon.difficulty > Difficulty.Normal && player.GetBoundInstance(dungeon.map, dungeon.difficulty) != null)
                     lockStatus = LfgLockStatusType.RaidLocked;
                 else if (dungeon.minlevel > level)
@@ -2149,8 +2151,8 @@ namespace Game.DungeonFinding
             id = dbc.Id;
             name = dbc.Name[Global.WorldMgr.GetDefaultDbcLocale()];
             map = (uint)dbc.MapID;
-            type = dbc.Type;
-            expansion = dbc.Expansion;
+            type = dbc.TypeID;
+            expansion = dbc.ExpansionLevel;
             group = dbc.GroupID;
             minlevel = dbc.MinLevel;
             maxlevel = dbc.MaxLevel;

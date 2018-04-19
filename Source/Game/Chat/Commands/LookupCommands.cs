@@ -713,10 +713,10 @@ namespace Game.Chat
                 // send taxinode in "id - [name] (Map:m X:x Y:y Z:z)" format
                 if (handler.GetSession() != null)
                     handler.SendSysMessage(CypherStrings.TaxinodeEntryListChat, nodeEntry.Id, nodeEntry.Id, name, "",
-                        nodeEntry.MapID, nodeEntry.Pos.X, nodeEntry.Pos.Y, nodeEntry.Pos.Z);
+                        nodeEntry.ContinentID, nodeEntry.Pos.X, nodeEntry.Pos.Y, nodeEntry.Pos.Z);
                 else
                     handler.SendSysMessage(CypherStrings.TaxinodeEntryListConsole, nodeEntry.Id, name, "",
-                        nodeEntry.MapID, nodeEntry.Pos.X, nodeEntry.Pos.Y, nodeEntry.Pos.Z);
+                        nodeEntry.ContinentID, nodeEntry.Pos.X, nodeEntry.Pos.Y, nodeEntry.Pos.Z);
 
                 if (!found)
                     found = true;
@@ -795,7 +795,7 @@ namespace Game.Chat
                         continue;
 
                     LocaleConstant locale = handler.GetSessionDbcLocale();
-                    string name = gender == Gender.Male ? titleInfo.NameMale[locale]: titleInfo.NameFemale[locale];
+                    string name = gender == Gender.Male ? titleInfo.Name[locale]: titleInfo.Name1[locale];
                     if (string.IsNullOrEmpty(name))
                         continue;
 
@@ -807,7 +807,7 @@ namespace Game.Chat
                             if (locale == handler.GetSessionDbcLocale())
                                 continue;
 
-                            name = (gender == Gender.Male ? titleInfo.NameMale : titleInfo.NameFemale)[locale];
+                            name = (gender == Gender.Male ? titleInfo.Name : titleInfo.Name1)[locale];
                             if (name.IsEmpty())
                                 continue;
 

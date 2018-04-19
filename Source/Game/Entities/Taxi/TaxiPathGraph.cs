@@ -37,8 +37,8 @@ namespace Game.Entities
             // Initialize here
             foreach (TaxiPathRecord path in CliDB.TaxiPathStorage.Values)
             {
-                TaxiNodesRecord from = CliDB.TaxiNodesStorage.LookupByKey(path.From);
-                TaxiNodesRecord to = CliDB.TaxiNodesStorage.LookupByKey(path.To);
+                TaxiNodesRecord from = CliDB.TaxiNodesStorage.LookupByKey(path.FromTaxiNode);
+                TaxiNodesRecord to = CliDB.TaxiNodesStorage.LookupByKey(path.ToTaxiNode);
                 if (from != null && to != null && from.Flags.HasAnyFlag(TaxiNodeFlags.Alliance | TaxiNodeFlags.Horde) && to.Flags.HasAnyFlag(TaxiNodeFlags.Alliance | TaxiNodeFlags.Horde))
                     AddVerticeAndEdgeFromNodeInfo(from, to, path.Id, edges);
             }
@@ -62,7 +62,7 @@ namespace Game.Entities
 
         uint GetVertexIDFromNodeID(TaxiNodesRecord node)
         {
-            return node.LearnableIndex;
+            return node.CharacterBitNumber;
         }
 
         int GetVertexCount()
@@ -105,8 +105,8 @@ namespace Game.Entities
                     uint map1, map2;
                     Vector2 pos1, pos2;
 
-                    Global.DB2Mgr.DeterminaAlternateMapPosition(nodes[i - 1].MapID, nodes[i - 1].Loc.X, nodes[i - 1].Loc.Y, nodes[i - 1].Loc.Z, out map1, out pos1);
-                    Global.DB2Mgr.DeterminaAlternateMapPosition(nodes[i].MapID, nodes[i].Loc.X, nodes[i].Loc.Y, nodes[i].Loc.Z, out map2, out pos2);
+                    Global.DB2Mgr.DeterminaAlternateMapPosition(nodes[i - 1].ContinentID, nodes[i - 1].Loc.X, nodes[i - 1].Loc.Y, nodes[i - 1].Loc.Z, out map1, out pos1);
+                    Global.DB2Mgr.DeterminaAlternateMapPosition(nodes[i].ContinentID, nodes[i].Loc.X, nodes[i].Loc.Y, nodes[i].Loc.Z, out map2, out pos2);
 
                     if (map1 != map2)
                         continue;
@@ -172,11 +172,11 @@ namespace Game.Entities
         uint CreateVertexFromFromNodeInfoIfNeeded(TaxiNodesRecord node)
         {
             //Check if we need a new one or if it may be already created
-            if (m_vertices.Length <= node.LearnableIndex)
-                Array.Resize(ref m_vertices, (int)node.LearnableIndex + 1);
+            if (m_vertices.Length <= node.CharacterBitNumber)
+                Array.Resize(ref m_vertices, (int)node.CharacterBitNumber + 1);
 
-            m_vertices[node.LearnableIndex] = node;
-            return node.LearnableIndex;
+            m_vertices[node.CharacterBitNumber] = node;
+            return node.CharacterBitNumber;
         }
 
         TaxiNodesRecord[] m_vertices = new TaxiNodesRecord[0];

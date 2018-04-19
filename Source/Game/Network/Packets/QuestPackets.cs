@@ -117,6 +117,7 @@ namespace Game.Network.Packets
                 _worldPacket.WriteInt32(Info.QuestID);
                 _worldPacket.WriteInt32(Info.QuestType);
                 _worldPacket.WriteInt32(Info.QuestLevel);
+                _worldPacket.WriteInt32(Info.QuestMaxScalingLevel);
                 _worldPacket.WriteInt32(Info.QuestPackageID);
                 _worldPacket.WriteInt32(Info.QuestMinLevel);
                 _worldPacket.WriteInt32(Info.QuestSortID);
@@ -194,7 +195,7 @@ namespace Game.Network.Packets
                 _worldPacket.WriteInt32(Info.TimeAllowed);
 
                 _worldPacket.WriteUInt32(Info.Objectives.Count);
-                _worldPacket.WriteInt32(Info.AllowableRaces);
+                _worldPacket.WriteInt64(Info.AllowableRaces);
                 _worldPacket.WriteInt32(Info.QuestRewardID);
                 _worldPacket.WriteInt32(Info.Expansion);
 
@@ -619,6 +620,7 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt32(gossip.QuestID);
                 _worldPacket.WriteUInt32(gossip.QuestType);
                 _worldPacket.WriteUInt32(gossip.QuestLevel);
+                _worldPacket.WriteUInt32(gossip.QuestMaxScalingLevel);
                 _worldPacket.WriteUInt32(gossip.QuestFlags);
                 _worldPacket.WriteUInt32(gossip.QuestFlagsEx);
 
@@ -827,8 +829,10 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(ChoiceID);
             _worldPacket.WriteUInt32(Responses.Count);
             _worldPacket.WritePackedGuid(SenderGUID);
+            _worldPacket.WriteInt32(UiTextureKitID);
             _worldPacket.WriteBits(Question.GetByteCount(), 8);
             _worldPacket.WriteBit(CloseChoiceFrame);
+            _worldPacket.WriteBit(HideWarboardHeader);
             _worldPacket.FlushBits();
 
             foreach (PlayerChoiceResponse response in Responses)
@@ -839,9 +843,11 @@ namespace Game.Network.Packets
 
         public ObjectGuid SenderGUID;
         public int ChoiceID;
+        public int UiTextureKitID;
         public string Question;
         public List<PlayerChoiceResponse> Responses = new List<PlayerChoiceResponse>();
         public bool CloseChoiceFrame;
+        public bool HideWarboardHeader;
     }
 
     class ChoiceResponse : ClientPacket
@@ -897,6 +903,7 @@ namespace Game.Network.Packets
         public uint QuestID;
         public int QuestType; // Accepted values: 0, 1 or 2. 0 == IsAutoComplete() (skip objectives/details)
         public int QuestLevel; // may be -1, static data, in other cases must be used dynamic level: Player.GetQuestLevel (0 is not known, but assuming this is no longer valid for quest intended for client)
+        public int QuestMaxScalingLevel = 255;
         public uint QuestPackageID;
         public int QuestMinLevel;
         public int QuestSortID; // zone or sort to display in quest log
@@ -923,7 +930,7 @@ namespace Game.Network.Packets
         public float POIx;
         public float POIy;
         public uint POIPriority;
-        public int AllowableRaces = -1;
+        public long AllowableRaces = -1;
         public string LogTitle;
         public string LogDescription;
         public string QuestDescription;
@@ -1129,11 +1136,12 @@ namespace Game.Network.Packets
 
     public struct GossipText
     {
-        public GossipText(uint questID, uint questType, uint questLevel, uint questFlags, uint questFlagsEx, bool repeatable, string questTitle)
+        public GossipText(uint questID, uint questType, uint questLevel, uint questMaxScalingLevel, uint questFlags, uint questFlagsEx, bool repeatable, string questTitle)
         {
             QuestID = questID;
             QuestType = questType;
             QuestLevel = questLevel;
+            QuestMaxScalingLevel = questMaxScalingLevel;
             QuestFlags = questFlags;
             QuestFlagsEx = questFlagsEx;
             Repeatable = repeatable;
@@ -1143,6 +1151,7 @@ namespace Game.Network.Packets
         public uint QuestID;
         public uint QuestType;
         public uint QuestLevel;
+        public uint QuestMaxScalingLevel;
         public uint QuestFlags;
         public uint QuestFlagsEx;
         public bool Repeatable;

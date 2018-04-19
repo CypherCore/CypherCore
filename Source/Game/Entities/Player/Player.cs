@@ -191,7 +191,7 @@ namespace Game.Entities
 
             SetMap(Global.MapMgr.CreateMap(info.MapId, this));
 
-            int powertype = (int)cEntry.PowerType;
+            int powertype = (int)cEntry.DisplayPower;
 
             SetObjectScale(1.0f);
 
@@ -231,6 +231,7 @@ namespace Game.Entities
             SetUInt32Value(PlayerFields.RestInfo + PlayerFieldOffsets.RestStateHonor, (uint)PlayerRestState.NotRAFLinked);
             SetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetGender, (byte)createInfo.Sex);
             SetByteValue(PlayerFields.Bytes4, PlayerFieldOffsets.Bytes4OffsetArenaFaction, 0);
+            SetInventorySlotCount(InventorySlots.DefaultSize);
 
             SetGuidValue(ObjectFields.Data, ObjectGuid.Empty);
             SetUInt32Value(PlayerFields.GuildRank, 0);
@@ -345,8 +346,7 @@ namespace Game.Entities
             // apply original stats mods before spell loading or item equipment that call before equip _RemoveStatsMods()
             UpdateMaxHealth();                                      // Update max Health (for add bonus from stamina)
             SetFullHealth();
-            if (GetPowerType() == PowerType.Mana)
-                SetFullPower(PowerType.Mana);
+            SetFullPower(PowerType.Mana);
 
             // original spells
             LearnDefaultSkills();
@@ -388,7 +388,7 @@ namespace Game.Entities
                     {
                         if (!iProto.Effects.Empty())
                         {
-                            switch (iProto.Effects[0].Category)
+                            switch (iProto.Effects[0].SpellCategoryID)
                             {
                                 case 11:                                // food
                                     count = (uint)(GetClass() == Class.Deathknight ? 10 : 4);
@@ -409,7 +409,8 @@ namespace Game.Entities
 
             // bags and main-hand weapon must equipped at this moment
             // now second pass for not equipped (offhand weapon/shield if it attempt equipped before main-hand weapon)
-            for (var i = InventorySlots.ItemStart; i < InventorySlots.ItemEnd; i++)
+            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (byte i = InventorySlots.ItemStart; i < inventoryEnd; i++)
             {
                 Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem != null)
@@ -492,6 +493,14 @@ namespace Game.Entities
             CheckDuelDistance(now);
 
             UpdateAfkReport(now);
+
+            if (GetCombatTimer() != 0) // Only set when in pvp combat
+            {
+                Aura aura = GetAura(PlayerConst.SpellPvpRulesEnabled);
+                if (aura != null)
+                    if (!aura.IsPermanent())
+                        aura.SetDuration(aura.GetSpellInfo().GetMaxDuration());
+            }
 
             if (IsAIEnabled && GetAI() != null)
                 GetAI().UpdateAI(diff);
@@ -744,13 +753,11 @@ namespace Game.Entities
 
         public override void setDeathState(DeathState s)
         {
-            uint ressSpellId = 0;
-
-            bool cur = IsAlive();
+            bool oldIsAlive = IsAlive();
 
             if (s == DeathState.JustDied)
             {
-                if (!cur)
+                if (!oldIsAlive)
                 {
                     Log.outError(LogFilter.Player, "Player.setDeathState: Attempted to kill a dead player '{0}' ({1})", GetName(), GetGUID().ToString());
                     return;
@@ -766,12 +773,8 @@ namespace Game.Entities
                 //FIXME: is pet dismissed at dying or releasing spirit? if second, add setDeathState(DEAD) to HandleRepopRequestOpcode and define pet unsummon here with (s == DEAD)
                 RemovePet(null, PetSaveMode.NotInSlot, true);
 
-                // save value before aura remove in Unit::setDeathState
-                ressSpellId = GetUInt32Value(PlayerFields.SelfResSpell);
+                InitializeSelfResurrectionSpells();
 
-                // passive spell
-                if (ressSpellId == 0)
-                    ressSpellId = GetResurrectionSpellId();
                 UpdateCriteria(CriteriaTypes.DeathAtMap, 1);
                 UpdateCriteria(CriteriaTypes.Death, 1);
                 UpdateCriteria(CriteriaTypes.DeathInDungeon, 1);
@@ -782,13 +785,9 @@ namespace Game.Entities
 
             base.setDeathState(s);
 
-            // restore resurrection spell id for player after aura remove
-            if (s == DeathState.JustDied && cur && ressSpellId != 0)
-                SetUInt32Value(PlayerFields.SelfResSpell, ressSpellId);
-
-            if (IsAlive() && !cur)
+            if (IsAlive() && !oldIsAlive)
                 //clear aura case after resurrection by another way (spells will be applied before next death)
-                SetUInt32Value(PlayerFields.SelfResSpell, 0);
+                ClearDynamicValue(PlayerDynamicFields.SelfResSpells);
         }
 
         public override void DestroyForPlayer(Player target)
@@ -1426,7 +1425,7 @@ namespace Game.Entities
                         return false;
                     }
 
-                    if (!HasSpell(mount.SpellId))
+                    if (!HasSpell(mount.SourceSpellID))
                     {
                         Log.outError(LogFilter.Player, "Mount action {0} not added into button {1} for player {2} ({3}): Player does not know this mount", action, button, GetName(), GetGUID().ToString());
                         return false;
@@ -1656,7 +1655,7 @@ namespace Game.Entities
                     if (questFactionRewEntry != null)
                     {
                         uint field = (uint)Math.Abs(quest.RewardFactionValue[i]);
-                        rep = questFactionRewEntry.QuestRewFactionValue[field];
+                        rep = questFactionRewEntry.Difficulty[field];
                     }
                 }
 
@@ -1667,15 +1666,15 @@ namespace Game.Entities
                     continue;
 
                 if (quest.IsDaily())
-                    rep = CalculateReputationGain(ReputationSource.DailyQuest, (uint)GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
+                    rep = CalculateReputationGain(ReputationSource.DailyQuest, GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
                 else if (quest.IsWeekly())
-                    rep = CalculateReputationGain(ReputationSource.WeeklyQuest, (uint)GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
+                    rep = CalculateReputationGain(ReputationSource.WeeklyQuest, GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
                 else if (quest.IsMonthly())
-                    rep = CalculateReputationGain(ReputationSource.MonthlyQuest, (uint)GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
+                    rep = CalculateReputationGain(ReputationSource.MonthlyQuest, GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
                 else if (quest.IsRepeatable())
-                    rep = CalculateReputationGain(ReputationSource.RepeatableQuest, (uint)GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
+                    rep = CalculateReputationGain(ReputationSource.RepeatableQuest, GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
                 else
-                    rep = CalculateReputationGain(ReputationSource.Quest, (uint)GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
+                    rep = CalculateReputationGain(ReputationSource.Quest, GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
 
                 bool noSpillover = Convert.ToBoolean(quest.RewardReputationMask & (1 << i));
                 GetReputationMgr().ModifyReputation(factionEntry, rep, noSpillover);
@@ -1938,7 +1937,7 @@ namespace Game.Entities
         public override bool IsUnderWater()
         {
             return IsInWater() &&
-                GetPositionZ() < (GetMap().GetWaterLevel(GetPositionX(), GetPositionY()) - 2);
+                GetPositionZ() < (GetMap().GetWaterLevel(GetPhaseShift(), GetPositionX(), GetPositionY()) - 2);
         }
         public override bool IsInWater()
         {
@@ -2118,8 +2117,15 @@ namespace Game.Entities
         }
         public bool IsInAreaTriggerRadius(AreaTriggerRecord trigger)
         {
-            if (trigger == null || GetMapId() != trigger.MapID)
+            if (trigger == null)
                 return false;
+
+            if (GetMapId() != trigger.ContinentID && !GetPhaseShift().HasVisibleMapId(trigger.ContinentID))
+                return false;
+
+            if (trigger.PhaseID != 0 || trigger.PhaseGroupID != 0 || trigger.PhaseUseFlags != 0)
+                if (!PhasingHandler.InDbPhaseShift(this, (PhaseUseFlagsValues)trigger.PhaseUseFlags, trigger.PhaseID, trigger.PhaseGroupID))
+                    return false;
 
             if (trigger.Radius > 0.0f)
             {
@@ -2204,10 +2210,13 @@ namespace Game.Entities
                 getHostileRefManager().setOnlineOfflineState(false);
                 CombatStopWithPets();
 
+                PhasingHandler.SetAlwaysVisible(GetPhaseShift(), true);
                 m_serverSideVisibilityDetect.SetValue(ServerSideVisibilityType.GM, GetSession().GetSecurity());
             }
             else
             {
+                PhasingHandler.SetAlwaysVisible(GetPhaseShift(), false);
+
                 m_ExtraFlags &= ~PlayerExtraFlags.GMOn;
                 SetFactionForRace(GetRace());
                 RemoveFlag(PlayerFields.Flags, PlayerFlags.GM);
@@ -2357,6 +2366,7 @@ namespace Game.Entities
                         case GossipOption.Petitioner:
                         case GossipOption.Tabarddesigner:
                         case GossipOption.Auctioneer:
+                        case GossipOption.Transmogrifier:
                             break;                                  // no checks
                         case GossipOption.Outdoorpvp:
                             if (!Global.OutdoorPvPMgr.CanTalkTo(this, creature, menuItems))
@@ -2405,7 +2415,7 @@ namespace Game.Entities
                         if (optionBroadcastText == null)
                         {
                             // Find localizations from database.
-                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItems.OptionId);
+                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItems.OptionIndex);
                             if (gossipMenuLocale != null)
                                 ObjectManager.GetLocaleString(gossipMenuLocale.OptionText, locale, ref strOptionText);
                         }
@@ -2413,14 +2423,14 @@ namespace Game.Entities
                         if (boxBroadcastText == null)
                         {
                             // Find localizations from database.
-                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItems.OptionId);
+                            GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuId, menuItems.OptionIndex);
                             if (gossipMenuLocale != null)
                                 ObjectManager.GetLocaleString(gossipMenuLocale.BoxText, locale, ref strBoxText);
                         }
                     }
 
-                    menu.GetGossipMenu().AddMenuItem((int)menuItems.OptionId, menuItems.OptionIcon, strOptionText, 0, (uint)menuItems.OptionType, strBoxText, menuItems.BoxMoney, menuItems.BoxCoded);
-                    menu.GetGossipMenu().AddGossipMenuItemData(menuItems.OptionId, menuItems.ActionMenuId, menuItems.ActionPoiId, menuItems.TrainerId);
+                    menu.GetGossipMenu().AddMenuItem((int)menuItems.OptionIndex, menuItems.OptionIcon, strOptionText, 0, (uint)menuItems.OptionType, strBoxText, menuItems.BoxMoney, menuItems.BoxCoded);
+                    menu.GetGossipMenu().AddGossipMenuItemData(menuItems.OptionIndex, menuItems.ActionMenuId, menuItems.ActionPoiId, menuItems.TrainerId);
                 }
             }
         }
@@ -2448,7 +2458,7 @@ namespace Game.Entities
 
             PlayerTalkClass.SendGossipMenu(textId, source.GetGUID());
         }
-        public void OnGossipSelect(WorldObject source, uint gossipListId, uint menuId)
+        public void OnGossipSelect(WorldObject source, uint optionIndex, uint menuId)
         {
             GossipMenu gossipMenu = PlayerTalkClass.GetGossipMenu();
 
@@ -2456,27 +2466,27 @@ namespace Game.Entities
             if (menuId != gossipMenu.GetMenuId())
                 return;
 
-            GossipMenuItem item = gossipMenu.GetItem(gossipListId);
+            GossipMenuItem item = gossipMenu.GetItem(optionIndex);
             if (item == null)
                 return;
 
-            uint gossipOptionId = item.OptionType;
+            uint gossipOptionType = item.OptionType;
             ObjectGuid guid = source.GetGUID();
 
             if (source.IsTypeId(TypeId.GameObject))
             {
-                if (gossipOptionId > (int)GossipOption.Questgiver)
+                if (gossipOptionType > (int)GossipOption.Questgiver)
                 {
                     Log.outError(LogFilter.Player, "Player guid {0} request invalid gossip option for GameObject entry {1}", GetGUID().ToString(), source.GetEntry());
                     return;
                 }
             }
 
-            GossipMenuItemData menuItemData = gossipMenu.GetItemData(gossipListId);
+            GossipMenuItemData menuItemData = gossipMenu.GetItemData(optionIndex);
             if (menuItemData == null)
                 return;
 
-            int cost = (int)item.BoxMoney;
+            long cost = item.BoxMoney;
             if (!HasEnoughMoney(cost))
             {
                 SendBuyError(BuyResult.NotEnoughtMoney, null, 0);
@@ -2484,7 +2494,7 @@ namespace Game.Entities
                 return;
             }
 
-            switch ((GossipOption)gossipOptionId)
+            switch ((GossipOption)gossipOptionType)
             {
                 case GossipOption.Gossip:
                     {
@@ -2500,7 +2510,7 @@ namespace Game.Entities
                         break;
                     }
                 case GossipOption.Outdoorpvp:
-                    Global.OutdoorPvPMgr.HandleGossipOption(this, source.ToCreature(), gossipListId);
+                    Global.OutdoorPvPMgr.HandleGossipOption(this, source.ToCreature(), optionIndex);
                     break;
                 case GossipOption.Spirithealer:
                     if (IsDead())
@@ -2564,6 +2574,9 @@ namespace Game.Entities
                         Global.BattlegroundMgr.SendBattlegroundList(this, guid, bgTypeId);
                         break;
                     }
+                case GossipOption.Transmogrifier:
+                    GetSession().SendOpenTransmogrifier(guid);
+                    break;
             }
 
             ModifyMoney(-cost);
@@ -2707,7 +2720,7 @@ namespace Game.Entities
 
                 if (removeChannel != null)
                 {
-                    removeChannel.LeaveChannel(this, sendRemove); // Leave old channel
+                    removeChannel.LeaveChannel(this, sendRemove, true); // Leave old channel
 
                     LeftChannel(removeChannel);                  // Remove from player's channel list
                     cMgr.LeftChannel(removeChannel.GetChannelId(), removeChannel.GetZoneEntry());                     // Delete if empty
@@ -3676,7 +3689,7 @@ namespace Game.Entities
             return false;
         }
 
-        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, uint index)
+        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, uint index, Unit caster)
         {
             SpellEffectInfo effect = spellInfo.GetEffect(GetMap().GetDifficultyID(), index);
             if (effect == null || !effect.IsEffect())
@@ -3688,7 +3701,7 @@ namespace Game.Entities
             if (effect.IsEffect(SpellEffectName.AttackMe))
                 return true;
 
-            return base.IsImmunedToSpellEffect(spellInfo, index);
+            return base.IsImmunedToSpellEffect(spellInfo, index, caster);
         }
 
         void RegenerateAll()
@@ -3753,13 +3766,13 @@ namespace Game.Entities
 
             if (!IsInCombat())
             {
-                if (powerType.RegenerationDelay != 0 && Time.GetMSTimeDiffToNow(m_combatExitTime) < powerType.RegenerationDelay)
+                if (powerType.RegenInterruptTimeMS != 0 && Time.GetMSTimeDiffToNow(m_combatExitTime) < powerType.RegenInterruptTimeMS)
                     return;
 
-                addvalue = (powerType.RegenerationPeace + GetFloatValue(UnitFields.PowerRegenFlatModifier + (int)powerIndex)) * 0.001f * m_regenTimer;
+                addvalue = (powerType.RegenPeace + GetFloatValue(UnitFields.PowerRegenFlatModifier + (int)powerIndex)) * 0.001f * m_regenTimer;
             }
             else
-                addvalue = (powerType.RegenerationCombat + GetFloatValue(UnitFields.PowerRegenInterruptedFlatModifier + (int)powerIndex)) * 0.001f * m_regenTimer;
+                addvalue = (powerType.RegenCombat + GetFloatValue(UnitFields.PowerRegenInterruptedFlatModifier + (int)powerIndex)) * 0.001f * m_regenTimer;
 
             WorldCfg[] RatesForPower =
             {
@@ -3790,15 +3803,11 @@ namespace Game.Entities
             // Mana regen calculated in Player.UpdateManaRegen()
             if (power != PowerType.Mana)
             {
-                var ModPowerRegenPCTAuras = GetAuraEffectsByType(AuraType.ModPowerRegenPercent);
-                foreach (var eff in ModPowerRegenPCTAuras)
-                    if ((PowerType)eff.GetMiscValue() == power)
-                        MathFunctions.AddPct(ref addvalue, eff.GetAmount());
-
+                addvalue *= GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)power);
                 addvalue += GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)power) * ((power != PowerType.Energy) ? m_regenTimerCount : m_regenTimer) / (5 * Time.InMilliseconds);
             }
 
-            int minPower = powerType.RegenerationMin;
+            int minPower = powerType.MinPower;
             int maxPower = GetMaxPower(power);
 
             if (addvalue < 0.0f)
@@ -3817,17 +3826,17 @@ namespace Game.Entities
             addvalue += m_powerFraction[powerIndex];
             int integerValue = (int)Math.Abs(addvalue);
 
-            if (powerType.RegenerationCenter != 0)
+            if (powerType.CenterPower != 0)
             {
-                if (curValue > powerType.RegenerationCenter)
+                if (curValue > powerType.CenterPower)
                 {
                     addvalue = -Math.Abs(addvalue);
-                    minPower = powerType.RegenerationCenter;
+                    minPower = powerType.CenterPower;
                 }
-                else if (curValue < powerType.RegenerationCenter)
+                else if (curValue < powerType.CenterPower)
                 {
                     addvalue = Math.Abs(addvalue);
-                    maxPower = powerType.RegenerationCenter;
+                    maxPower = powerType.CenterPower;
                 }
                 else
                     return;
@@ -3874,43 +3883,40 @@ namespace Game.Entities
                 return;
 
             float HealthIncreaseRate = WorldConfig.GetFloatValue(WorldCfg.RateHealth);
-            float addvalue = 0.0f;
+            float addValue = 0.0f;
 
             // polymorphed case
             if (IsPolymorphed())
-                addvalue = (float)GetMaxHealth() / 3;
+                addValue = (float)GetMaxHealth() / 3;
             // normal regen case (maybe partly in combat case)
             else if (!IsInCombat() || HasAuraType(AuraType.ModRegenDuringCombat))
             {
-                addvalue = HealthIncreaseRate;
+                addValue = HealthIncreaseRate;
                 if (!IsInCombat())
                 {
                     if (getLevel() < 15)
-                        addvalue = (0.20f * (GetMaxHealth()) / getLevel() * HealthIncreaseRate);
+                        addValue = (0.20f * (GetMaxHealth()) / getLevel() * HealthIncreaseRate);
                     else
-                        addvalue = 0.015f * (GetMaxHealth()) * HealthIncreaseRate;
+                        addValue = 0.015f * (GetMaxHealth()) * HealthIncreaseRate;
 
-                    var mModHealthRegenPct = GetAuraEffectsByType(AuraType.ModHealthRegenPercent);
-                    foreach (var eff in mModHealthRegenPct)
-                        MathFunctions.AddPct(ref addvalue, eff.GetAmount());
-
-                    addvalue += GetTotalAuraModifier(AuraType.ModRegen) * 2 * Time.InMilliseconds / (5 * Time.InMilliseconds);
+                    addValue *= GetTotalAuraMultiplier(AuraType.ModHealthRegenPercent);
+                    addValue += GetTotalAuraModifier(AuraType.ModRegen) * 2 * Time.InMilliseconds / (5 * Time.InMilliseconds);
                 }
                 else if (HasAuraType(AuraType.ModRegenDuringCombat))
-                    MathFunctions.ApplyPct(ref addvalue, GetTotalAuraModifier(AuraType.ModRegenDuringCombat));
+                    MathFunctions.ApplyPct(ref addValue, GetTotalAuraModifier(AuraType.ModRegenDuringCombat));
 
                 if (!IsStandState())
-                    addvalue *= 1.5f;
+                    addValue *= 1.5f;
             }
 
             // always regeneration bonus (including combat)
-            addvalue += GetTotalAuraModifier(AuraType.ModHealthRegenInCombat);
-            addvalue += m_baseHealthRegen / 2.5f;
+            addValue += GetTotalAuraModifier(AuraType.ModHealthRegenInCombat);
+            addValue += m_baseHealthRegen / 2.5f;
 
-            if (addvalue < 0)
-                addvalue = 0;
+            if (addValue < 0)
+                addValue = 0;
 
-            ModifyHealth((int)addvalue);
+            ModifyHealth((int)addValue);
         }
         public void ResetAllPowers()
         {
@@ -3990,46 +3996,46 @@ namespace Game.Entities
             switch (selection)
             {
                 case 0:
-                    if (!entry.Flags.HasAnyFlag((ushort)1))
+                    if (!entry.Flags.HasAnyFlag((short)1))
                         return false;
-                    return !entry.Flags.HasAnyFlag((ushort)0x2C);
+                    return !entry.Flags.HasAnyFlag((short)0x2C);
                 case 1:
-                    if (!entry.Flags.HasAnyFlag((ushort)1))
+                    if (!entry.Flags.HasAnyFlag((short)1))
                         return false;
-                    if (!entry.Flags.HasAnyFlag((ushort)0x94))
+                    if (!entry.Flags.HasAnyFlag((short)0x94))
                         return false;
-                    return !entry.Flags.HasAnyFlag((ushort)8);
+                    return !entry.Flags.HasAnyFlag((short)8);
                 case 2:
-                    if (!entry.Flags.HasAnyFlag((ushort)1))
+                    if (!entry.Flags.HasAnyFlag((short)1))
                         return false;
-                    if (!entry.Flags.HasAnyFlag((ushort)0x70))
+                    if (!entry.Flags.HasAnyFlag((short)0x70))
                         return false;
-                    return !entry.Flags.HasAnyFlag((ushort)8);
+                    return !entry.Flags.HasAnyFlag((short)8);
                 case 3:
-                    if (!entry.Flags.HasAnyFlag((ushort)1))
+                    if (!entry.Flags.HasAnyFlag((short)1))
                         return false;
-                    if (!entry.Flags.HasAnyFlag((ushort)0x20))
+                    if (!entry.Flags.HasAnyFlag((short)0x20))
                         return false;
-                    return !entry.Flags.HasAnyFlag((ushort)8);
+                    return !entry.Flags.HasAnyFlag((short)8);
                 case 4:
                 case 8:
-                    if (!entry.Flags.HasAnyFlag((ushort)3))
+                    if (!entry.Flags.HasAnyFlag((short)3))
                         return false;
-                    return !entry.Flags.HasAnyFlag((ushort)0x2C);
+                    return !entry.Flags.HasAnyFlag((short)0x2C);
                 case 5:
                 case 9:
-                    if (!entry.Flags.HasAnyFlag((ushort)3))
+                    if (!entry.Flags.HasAnyFlag((short)3))
                         return false;
-                    if (!entry.Flags.HasAnyFlag((ushort)0x94))
+                    if (!entry.Flags.HasAnyFlag((short)0x94))
                         return false;
-                    return !entry.Flags.HasAnyFlag((ushort)8);
+                    return !entry.Flags.HasAnyFlag((short)8);
                 case 6:
                 case 10:
-                    if (!entry.Flags.HasAnyFlag((ushort)3))
+                    if (!entry.Flags.HasAnyFlag((short)3))
                         return false;
-                    if (!entry.Flags.HasAnyFlag((ushort)0x70))
+                    if (!entry.Flags.HasAnyFlag((short)0x70))
                         return false;
-                    return !entry.Flags.HasAnyFlag((ushort)8);
+                    return !entry.Flags.HasAnyFlag((short)8);
                 case 7:
                     return true;
                 default:
@@ -4422,9 +4428,7 @@ namespace Game.Entities
                         if (!IsAlive() || HasAuraType(AuraType.WaterBreathing) || GetSession().GetSecurity() >= (AccountTypes)WorldConfig.GetIntValue(WorldCfg.DisableBreathing))
                             return -1;
                         int UnderWaterTime = 3 * Time.Minute * Time.InMilliseconds;
-                        var mModWaterBreathing = GetAuraEffectsByType(AuraType.WaterBreathing);
-                        foreach (var eff in mModWaterBreathing)
-                            MathFunctions.AddPct(ref UnderWaterTime, eff.GetAmount());
+                        UnderWaterTime *= (int)GetTotalAuraMultiplier(AuraType.ModWaterBreathing);
                         return UnderWaterTime;
                     }
                 case MirrorTimerType.Fire:
@@ -4500,6 +4504,9 @@ namespace Game.Entities
 
             // update visibility
             UpdateObjectVisibility();
+
+            // recast lost by death auras of any items held in the inventory
+            CastAllObtainSpells();
 
             if (!applySickness)
                 return;
@@ -4667,7 +4674,7 @@ namespace Game.Entities
                 if (bf != null)
                     ClosestGrave = bf.GetClosestGraveYard(this);
                 else
-                    ClosestGrave = Global.ObjectMgr.GetClosestGraveYard(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam());
+                    ClosestGrave = Global.ObjectMgr.GetClosestGraveYard(this, GetTeam(), this);
             }
 
             // stop countdown until repop
@@ -4830,12 +4837,10 @@ namespace Game.Entities
                 return null;
             }
 
-            pet.CopyPhaseFrom(this);
+            PhasingHandler.InheritPhaseShift(pet, this);
 
             pet.SetCreatorGUID(GetGUID());
             pet.SetUInt32Value(UnitFields.FactionTemplate, getFaction());
-
-            pet.SetPowerType(PowerType.Mana);
             pet.SetUInt64Value(UnitFields.NpcFlags, (uint)NPCFlags.None);
             pet.SetUInt32Value(UnitFields.Bytes1, 0);
             pet.InitStatsForLevel(getLevel());
@@ -5003,11 +5008,13 @@ namespace Game.Entities
             DisplayPlayerChoice displayPlayerChoice = new DisplayPlayerChoice();
             displayPlayerChoice.SenderGUID = sender;
             displayPlayerChoice.ChoiceID = choiceId;
+            displayPlayerChoice.UiTextureKitID = playerChoice.UiTextureKitId;
             displayPlayerChoice.Question = playerChoice.Question;
             if (playerChoiceLocale != null)
                 ObjectManager.GetLocaleString(playerChoiceLocale.Question, locale, ref displayPlayerChoice.Question);
 
             displayPlayerChoice.CloseChoiceFrame = false;
+            displayPlayerChoice.HideWarboardHeader = playerChoice.HideWarboardHeader;
 
             for (var i = 0; i < playerChoice.Responses.Count; ++i)
             {
@@ -5153,7 +5160,7 @@ namespace Game.Entities
         {
             ChrRacesRecord rEntry = CliDB.ChrRacesStorage.LookupByKey((byte)race);
             if (rEntry != null)
-                return rEntry.TeamID;
+                return (uint)rEntry.Alliance;
 
             Log.outError(LogFilter.Player, "Race ({0}) not found in DBC: wrong DBC files?", race);
             return TeamId.Neutral;
@@ -5316,6 +5323,9 @@ namespace Game.Entities
             InitTalentForLevel();
             InitTaxiNodesForLevel();
 
+            if (level < PlayerConst.LevelMinHonor)
+                ResetPvpTalents();
+
             UpdateAllStats();
 
             if (WorldConfig.GetBoolValue(WorldCfg.AlwaysMaxskill)) // Max weapon skill when leveling up
@@ -5323,20 +5333,16 @@ namespace Game.Entities
 
             _ApplyAllLevelScaleItemMods(true); // Moved to above SetFullHealth so player will have full health from Heirlooms
 
-            // set current level health and mana/energy to maximum after applying all mods.
+            // Only health and mana are set to maximum.
             SetFullHealth();
             SetFullPower(PowerType.Mana);
-            SetFullPower(PowerType.Energy);
-            if (GetPower(PowerType.Rage) > GetMaxPower(PowerType.Rage))
-                SetFullPower(PowerType.Rage);
-            SetPower(PowerType.Focus, 0);
 
             // update level to hunter/summon pet
             Pet pet = GetPet();
             if (pet)
                 pet.SynchronizeLevelWithOwner();
 
-            MailLevelReward mailReward = Global.ObjectMgr.GetMailLevelReward(level, getRaceMask());
+            MailLevelReward mailReward = Global.ObjectMgr.GetMailLevelReward(level, (uint)getRaceMask());
             if (mailReward != null)
             {
                 //- TODO: Poor design of mail system
@@ -5702,8 +5708,12 @@ namespace Game.Entities
                 SendRaidDifficulty(difficulty.Flags.HasAnyFlag(DifficultyFlags.Legacy));
             }
 
+            PhasingHandler.OnMapChange(this);
+
             if (_garrison != null)
                 _garrison.SendRemoteInfo();
+
+            UpdateItemLevelAreaBasedScaling();
         }
 
         public bool CanSpeak()
@@ -5802,16 +5812,16 @@ namespace Game.Entities
             SetFloatValue(PlayerFields.ModPeriodicHealingDonePercent, 1.0f);
             for (byte i = 0; i < 7; ++i)
             {
-                SetUInt32Value(PlayerFields.ModDamageDoneNeg + i, 0);
-                SetUInt32Value(PlayerFields.ModDamageDonePos + i, 0);
+                SetInt32Value(PlayerFields.ModDamageDoneNeg + i, 0);
+                SetInt32Value(PlayerFields.ModDamageDonePos + i, 0);
                 SetFloatValue(PlayerFields.ModDamageDonePct + i, 1.0f);
             }
+
             SetFloatValue(PlayerFields.ModSpellPowerPct, 1.0f);
 
             //reset attack power, damage and attack speed fields
-            SetBaseAttackTime(WeaponAttackType.BaseAttack, SharedConst.BaseAttackTime);
-            SetBaseAttackTime(WeaponAttackType.OffAttack, SharedConst.BaseAttackTime);
-            SetBaseAttackTime(WeaponAttackType.RangedAttack, SharedConst.BaseAttackTime);
+            for (byte i = 0; i < (int)WeaponAttackType.Max; ++i)
+                SetFloatValue(UnitFields.BaseAttackTime + i, SharedConst.BaseAttackTime);
 
             SetFloatValue(UnitFields.MinDamage, 0.0f);
             SetFloatValue(UnitFields.MaxDamage, 0.0f);
@@ -5852,11 +5862,11 @@ namespace Game.Entities
             SetResistanceBuffMods(SpellSchools.Normal, true, 0.0f);
             SetResistanceBuffMods(SpellSchools.Normal, false, 0.0f);
             // set other resistance to original value (0)
-            for (var i = 1; i < (int)SpellSchools.Max; ++i)
+            for (var spellSchool = SpellSchools.Holy; spellSchool < SpellSchools.Max; ++spellSchool)
             {
-                SetResistance((SpellSchools)i, 0);
-                SetResistanceBuffMods((SpellSchools)i, true, 0.0f);
-                SetResistanceBuffMods((SpellSchools)i, false, 0.0f);
+                SetResistance(spellSchool, 0);
+                SetResistanceBuffMods(spellSchool, true, 0.0f);
+                SetResistanceBuffMods(spellSchool, false, 0.0f);
             }
 
             SetUInt32Value(PlayerFields.ModTargetResistance, 0);
@@ -5900,7 +5910,9 @@ namespace Game.Entities
             RemoveByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag, (UnitBytes2Flags.FFAPvp | UnitBytes2Flags.Sanctuary));
 
             // restore if need some important flags
-            SetUInt32Value(PlayerFields.FieldBytes2, 0);                 // flags empty by default
+            SetByteValue(PlayerFields.FieldBytes2, PlayerFieldOffsets.FieldBytes2OffsetIgnorePowerRegenPredictionMask, 0);
+            SetByteValue(PlayerFields.FieldBytes2, PlayerFieldOffsets.FieldBytes2OffsetAuraVision, 0);
+            SetByteValue(PlayerFields.FieldBytes2, 3, 0);
 
             if (reapplyMods)                                        // reapply stats values only on .reset stats (level) command
                 _ApplyAllStatBonuses();
@@ -6209,7 +6221,7 @@ namespace Game.Entities
                 return;
 
             bool isOutdoor;
-            uint areaId = GetMap().GetAreaId(GetPositionX(), GetPositionY(), GetPositionZ(), out isOutdoor);
+            uint areaId = GetMap().GetAreaId(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ(), out isOutdoor);
             AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(areaId);
 
             if (WorldConfig.GetBoolValue(WorldCfg.VmapIndoorCheck) && !isOutdoor)
@@ -6512,7 +6524,7 @@ namespace Game.Entities
             packet.Reason = victim ? PlayerLogXPReason.Kill : PlayerLogXPReason.NoKill;
             packet.Amount = (int)xp;
             packet.GroupBonus = group_rate;
-            packet.ReferAFriend = recruitAFriend;
+            packet.ReferAFriendBonusType = (byte)(recruitAFriend ? 1 : 0);
             SendPacket(packet);
 
             uint curXP = GetUInt32Value(PlayerFields.Xp);
@@ -6738,7 +6750,7 @@ namespace Game.Entities
             // check node starting pos data set case if provided
             if (node.Pos.X != 0.0f || node.Pos.Y != 0.0f || node.Pos.Z != 0.0f)
             {
-                if (node.MapID != GetMapId() || !IsInDist(node.Pos.X, node.Pos.Y, node.Pos.Z, 2 * SharedConst.InteractionDistance))
+                if (node.ContinentID != GetMapId() || !IsInDist(node.Pos.X, node.Pos.Y, node.Pos.Z, 2 * SharedConst.InteractionDistance))
                 {
                     GetSession().SendActivateTaxiReply(ActivateTaxiReply.TooFarAway);
                     return false;
@@ -6849,7 +6861,7 @@ namespace Game.Entities
                 m_taxi.ClearTaxiDestinations();
                 ModifyMoney(-totalcost);
                 UpdateCriteria(CriteriaTypes.GoldSpentForTravelling, totalcost);
-                TeleportTo(lastPathNode.MapID, lastPathNode.Pos.X, lastPathNode.Pos.Y, lastPathNode.Pos.Z, GetOrientation());
+                TeleportTo(lastPathNode.ContinentID, lastPathNode.Pos.X, lastPathNode.Pos.Y, lastPathNode.Pos.Z, GetOrientation());
                 return false;
             }
             else
@@ -6870,8 +6882,8 @@ namespace Game.Entities
 
             List<uint> nodes = new List<uint>();
 
-            nodes.Add(entry.From);
-            nodes.Add(entry.To);
+            nodes.Add(entry.FromTaxiNode);
+            nodes.Add(entry.ToTaxiNode);
 
             return ActivateTaxiPathTo(nodes, null, spellid);
         }
@@ -6912,7 +6924,7 @@ namespace Game.Entities
                 var prevNode = nodeList[i - 1];
 
                 // skip nodes at another map
-                if (node.MapID != GetMapId())
+                if (node.ContinentID != GetMapId())
                     continue;
 
                 distPrev = distNext;
@@ -7061,7 +7073,7 @@ namespace Game.Entities
         }
         public bool IsSpellFitByClassAndRace(uint spell_id)
         {
-            uint racemask = getRaceMask();
+            long racemask = getRaceMask();
             uint classmask = getClassMask();
 
             var bounds = Global.SpellMgr.GetSkillLineAbilityMapBounds(spell_id);
@@ -7312,16 +7324,6 @@ namespace Game.Entities
             CancelAutoRepeat cancelAutoRepeat = new CancelAutoRepeat();
             cancelAutoRepeat.Guid = target.GetGUID();                     // may be it's target guid
             SendMessageToSet(cancelAutoRepeat, false);
-        }
-
-        public void SendUpdatePhasing()
-        {
-            if (!IsInWorld)
-                return;
-
-            RebuildTerrainSwaps(); // to set default map swaps
-
-            GetSession().SendSetPhaseShift(GetPhases(), GetTerrainSwaps(), GetWorldMapAreaSwaps());
         }
 
         public override void BuildCreateUpdateBlockForPlayer(UpdateData data, Player target)

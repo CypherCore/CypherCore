@@ -120,7 +120,12 @@ namespace Game.Entities
             UpdatePvPState(true);
 
             UpdateAreaDependentAuras(newArea);
-            UpdateAreaAndZonePhase();
+            PhasingHandler.OnAreaChange(this);
+
+            if (IsAreaThatActivatesPvpTalents(newArea))
+                EnablePvpRules();
+            else
+                DisablePvpRules();
 
             // previously this was in UpdateZone (but after UpdateArea) so nothing will break
             pvpInfo.IsInNoPvPArea = false;
@@ -227,8 +232,6 @@ namespace Game.Entities
             UpdateLocalChannels(newZone);
 
             UpdateZoneDependentAuras(newZone);
-
-            UpdateAreaAndZonePhase();
         }
 
         public InstanceBind GetBoundInstance(uint mapid, Difficulty difficulty, bool withExpired = false)
@@ -507,7 +510,7 @@ namespace Game.Entities
                     {
                         if (missingQuest != 0 && !string.IsNullOrEmpty(ar.questFailedText))
                             SendSysMessage("{0}", ar.questFailedText);
-                        else if (mapDiff.Message_lang.HasString(Global.WorldMgr.GetDefaultDbcLocale())) // if (missingAchievement) covered by this case
+                        else if (mapDiff.Message.HasString(Global.WorldMgr.GetDefaultDbcLocale())) // if (missingAchievement) covered by this case
                             SendTransferAborted(target_map, TransferAbortReason.Difficulty, (byte)target_difficulty);
                         else if (missingItem != 0)
                             GetSession().SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.LevelMinrequiredAndItem), LevelMin, Global.ObjectMgr.GetItemTemplate(missingItem).GetName());
@@ -716,7 +719,7 @@ namespace Game.Entities
         public override void UpdateUnderwaterState(Map m, float x, float y, float z)
         {
             LiquidData liquid_status;
-            ZLiquidStatus res = m.getLiquidStatus(x, y, z, MapConst.MapAllLiquidTypes, out liquid_status);
+            ZLiquidStatus res = m.getLiquidStatus(GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out liquid_status);
             if (res == 0)
             {
                 m_MirrorTimerFlags &= ~(PlayerUnderwaterState.InWater | PlayerUnderwaterState.InLava | PlayerUnderwaterState.InSlime | PlayerUnderwaterState.InDarkWater);

@@ -213,15 +213,15 @@ namespace Game.Entities
 
                 MoveToNextWaypoint();
 
-                Global.ScriptMgr.OnRelocate(this, _currentFrame.Node.NodeIndex, _currentFrame.Node.MapID, _currentFrame.Node.Loc.X, _currentFrame.Node.Loc.Y, _currentFrame.Node.Loc.Z);
+                Global.ScriptMgr.OnRelocate(this, _currentFrame.Node.NodeIndex, _currentFrame.Node.ContinentID, _currentFrame.Node.Loc.X, _currentFrame.Node.Loc.Y, _currentFrame.Node.Loc.Z);
 
-                Log.outDebug(LogFilter.Transport, "Transport {0} ({1}) moved to node {2} {3} {4} {5} {6}", GetEntry(), GetName(), _currentFrame.Node.NodeIndex, _currentFrame.Node.MapID, 
+                Log.outDebug(LogFilter.Transport, "Transport {0} ({1}) moved to node {2} {3} {4} {5} {6}", GetEntry(), GetName(), _currentFrame.Node.NodeIndex, _currentFrame.Node.ContinentID, 
                     _currentFrame.Node.Loc.X, _currentFrame.Node.Loc.Y, _currentFrame.Node.Loc.Z);
 
                 // Departure event
                 var nextframe = GetKeyFrames()[_nextFrame];
                 if (_currentFrame.IsTeleportFrame())
-                    if (TeleportTransport(nextframe.Node.MapID, nextframe.Node.Loc.X, nextframe.Node.Loc.Y, nextframe.Node.Loc.Z, nextframe.InitialOrientation))
+                    if (TeleportTransport(nextframe.Node.ContinentID, nextframe.Node.Loc.X, nextframe.Node.Loc.Y, nextframe.Node.Loc.Z, nextframe.InitialOrientation))
                         return;
             }
 
@@ -309,9 +309,9 @@ namespace Game.Entities
         public Creature CreateNPCPassenger(ulong guid, CreatureData data)
         {
             Map map = GetMap();
-            Creature creature = new Creature();
 
-            if (!creature.LoadCreatureFromDB(guid, map, false))
+            Creature creature = Creature.CreateCreatureFromDB(guid, map, false);
+            if (!creature)
                 return null;
 
             float x = data.posX;
@@ -338,15 +338,8 @@ namespace Game.Entities
                 return null;
             }
 
-            if (data.phaseId != 0)
-                creature.SetInPhase(data.phaseId, false, true);
-            else if (data.phaseGroup != 0)
-            {
-                foreach (var phase in Global.DB2Mgr.GetPhasesForGroup(data.phaseGroup))
-                    creature.SetInPhase(phase, false, true);
-            }
-            else
-                creature.CopyPhaseFrom(this);
+            PhasingHandler.InitDbPhaseShift(creature.GetPhaseShift(), data.phaseUseFlags, data.phaseId, data.phaseGroup);
+            PhasingHandler.InitDbVisibleMapId(creature.GetPhaseShift(), data.terrainSwapMap);
 
             if (!map.AddToMap(creature))
                 return null;
@@ -359,9 +352,9 @@ namespace Game.Entities
         GameObject CreateGOPassenger(ulong guid, GameObjectData data)
         {
             Map map = GetMap();
-            GameObject go = new GameObject();
 
-            if (!go.LoadGameObjectFromDB(guid, map, false))
+            GameObject go = CreateGameObjectFromDB(guid, map, false);
+            if (!go)
                 return null;
 
             float x = data.posX;
@@ -383,6 +376,9 @@ namespace Game.Entities
                 return null;
             }
 
+            PhasingHandler.InitDbPhaseShift(go.GetPhaseShift(), data.phaseUseFlags, data.phaseId, data.phaseGroup);
+            PhasingHandler.InitDbVisibleMapId(go.GetPhaseShift(), data.terrainSwapMap);
+
             if (!map.AddToMap(go))
                 return null;
 
@@ -399,7 +395,7 @@ namespace Game.Entities
             UnitTypeMask mask = UnitTypeMask.Summon;
             if (properties != null)
             {
-                switch (properties.Category)
+                switch (properties.Control)
                 {
                     case SummonCategory.Pet:
                         mask = UnitTypeMask.Guardian;
@@ -414,7 +410,7 @@ namespace Game.Entities
                     case SummonCategory.Ally:
                     case SummonCategory.Unk:
                         {
-                            switch (properties.Type)
+                            switch (properties.Title)
                             {
                                 case SummonType.Minion:
                                 case SummonType.Guardian:
@@ -433,7 +429,7 @@ namespace Game.Entities
                                     mask = UnitTypeMask.Minion;
                                     break;
                                 default:
-                                    if (properties.Flags.HasAnyFlag<uint>(512)) // Mirror Image, Summon Gargoyle
+                                    if (properties.Flags.HasAnyFlag(SummonPropFlags.Unk10)) // Mirror Image, Summon Gargoyle
                                         mask = UnitTypeMask.Guardian;
                                     break;
                             }
@@ -443,12 +439,6 @@ namespace Game.Entities
                         return null;
                 }
             }
-
-            List<uint> phases = new List<uint>();
-            if (summoner)
-                phases = summoner.GetPhases();
-            else
-                phases = GetPhases(); // If there was no summoner, try to use the transport phases
 
             TempSummon summon = null;
             switch (mask)
@@ -477,8 +467,7 @@ namespace Game.Entities
             if (!summon.Create(map.GenerateLowGuid(HighGuid.Creature), map, entry, x, y, z, o, null, vehId))
                 return null;
 
-            foreach (var phase in phases)
-                summon.SetInPhase(phase, false, true);
+            PhasingHandler.InheritPhaseShift(summon, summoner ? (WorldObject)summoner : this);
 
             summon.SetUInt32Value(UnitFields.CreatedBySpell, spellId);
 
@@ -519,8 +508,10 @@ namespace Game.Entities
         public void UpdatePosition(float x, float y, float z, float o)
         {
             bool newActive = GetMap().IsGridLoaded(x, y);
+            Cell oldCell = new Cell(GetPositionX(), GetPositionY());
 
             Relocate(x, y, z, o);
+            m_stationaryPosition.SetOrientation(o);
             UpdateModelPosition();
 
             UpdatePassengerPositions(_passengers);
@@ -533,7 +524,7 @@ namespace Game.Entities
              */
             if (_staticPassengers.Empty() && newActive) // 1. and 2.
                 LoadStaticPassengers();
-            else if (!_staticPassengers.Empty() && !newActive && new Cell(x, y).DiffGrid(new Cell(GetPositionX(), GetPositionY()))) // 3.
+            else if (!_staticPassengers.Empty() && !newActive && oldCell.DiffGrid(new Cell(GetPositionX(), GetPositionY()))) // 3.
                 UnloadStaticPassengers();
             else
                 UpdatePassengerPositions(_staticPassengers);
@@ -632,6 +623,8 @@ namespace Game.Entities
             }
             else
             {
+                UpdatePosition(x, y, z, o);
+
                 // Teleport players, they need to know it
                 foreach (var obj in _passengers)
                 {
@@ -651,7 +644,6 @@ namespace Game.Entities
                     }
                 }
 
-                UpdatePosition(x, y, z, o);
                 return false;
             }
         }
@@ -664,7 +656,7 @@ namespace Game.Entities
             var nextFrame = GetKeyFrames()[_nextFrame];
 
             _delayedTeleport = false;
-            Map newMap = Global.MapMgr.CreateBaseMap(nextFrame.Node.MapID);
+            Map newMap = Global.MapMgr.CreateBaseMap(nextFrame.Node.ContinentID);
             GetMap().RemoveFromMap(this, false);
             SetMap(newMap);
 
@@ -673,8 +665,10 @@ namespace Game.Entities
                   z = nextFrame.Node.Loc.Z,
                   o = nextFrame.InitialOrientation;
 
-            foreach (var obj in _passengers)
+            for (var i =0; i < _passengers.Count; ++i)
             {
+                WorldObject obj = _passengers[i];
+
                 float destX, destY, destZ, destO;
                 obj.m_movementInfo.transport.pos.GetPosition(out destX, out destY, out destZ, out destO);
                 TransportPosHelper.CalculatePassengerPosition(ref destX, ref destY, ref destZ, ref destO, x, y, z, o);
@@ -682,7 +676,7 @@ namespace Game.Entities
                 switch (obj.GetTypeId())
                 {
                     case TypeId.Player:
-                        if (!obj.ToPlayer().TeleportTo(nextFrame.Node.MapID, destX, destY, destZ, destO, TeleportToOptions.NotLeaveTransport))
+                        if (!obj.ToPlayer().TeleportTo(nextFrame.Node.ContinentID, destX, destY, destZ, destO, TeleportToOptions.NotLeaveTransport))
                             RemovePassenger(obj);
                         break;
                     case TypeId.DynamicObject:

@@ -50,7 +50,7 @@ namespace Game
             if (!seat.CanSwitchFromSeat())
             {
                 Log.outError(LogFilter.Network, "HandleRequestVehiclePrevSeat: {0} tried to switch seats but current seatflags {1} don't permit that.",
-                    GetPlayer().GetGUID().ToString(), seat.Flags[0]);
+                    GetPlayer().GetGUID().ToString(), seat.Flags);
                 return;
             }
 
@@ -68,7 +68,7 @@ namespace Game
             if (!seat.CanSwitchFromSeat())
             {
                 Log.outError(LogFilter.Network, "HandleRequestVehicleNextSeat: {0} tried to switch seats but current seatflags {1} don't permit that.",
-                    GetPlayer().GetGUID().ToString(), seat.Flags[0]);
+                    GetPlayer().GetGUID().ToString(), seat.Flags);
                 return;
             }
 
@@ -86,7 +86,7 @@ namespace Game
             if (!seat.CanSwitchFromSeat())
             {
                 Log.outError(LogFilter.Network, "HandleMoveChangeVehicleSeats, {0} tried to switch seats but current seatflags {1} don't permit that.",
-                    GetPlayer().GetGUID().ToString(), seat.Flags[0]);
+                    GetPlayer().GetGUID().ToString(), seat.Flags);
                 return;
             }
 
@@ -120,7 +120,7 @@ namespace Game
             if (!seat.CanSwitchFromSeat())
             {
                 Log.outError(LogFilter.Network, "HandleRequestVehicleSwitchSeat: {0} tried to switch seats but current seatflags {1} don't permit that.",
-                    GetPlayer().GetGUID().ToString(), seat.Flags[0]);
+                    GetPlayer().GetGUID().ToString(), seat.Flags);
                 return;
             }
             Unit vehUnit;
@@ -202,7 +202,7 @@ namespace Game
                         GetPlayer().ExitVehicle();
                     else
                         Log.outError(LogFilter.Network, "{0} tried to exit vehicle, but seatflags {1} (ID: {2}) don't permit that.",
-                        GetPlayer().GetGUID().ToString(), seat.Id, seat.Flags[0]);
+                        GetPlayer().GetGUID().ToString(), seat.Id, seat.Flags);
                 }
             }
         }

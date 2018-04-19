@@ -27,7 +27,7 @@ namespace Framework.Collections
             _str = new string[size];
 
             for (var i = 0; i < size; ++i)
-                _str[i] = "";
+                _str[i] = string.Empty;
         }
 
         public StringArray(string str, params string[] separator)
@@ -54,6 +54,5 @@ namespace Framework.Collections
         public int Length { get { return _str.Length; } }
 
         string[] _str;
-
     }
 }

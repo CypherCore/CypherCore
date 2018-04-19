@@ -727,7 +727,7 @@ namespace Game.Maps
         {
             var players = instance.GetPlayers();
             foreach (var player in players)
-                player.SendUpdatePhasing();
+                PhasingHandler.SendToPlayer(player);
         }
 
         public void UpdateCombatResurrection(uint diff)
@@ -735,12 +735,10 @@ namespace Game.Maps
             if (!_combatResurrectionTimerStarted)
                 return;
 
-            _combatResurrectionTimer -= diff;
-            if (_combatResurrectionTimer <= 0)
-            {
+            if (_combatResurrectionTimer <= diff)
                 AddCombatResurrectionCharge();
-                _combatResurrectionTimerStarted = false;
-            }
+            else
+                _combatResurrectionTimer -= diff;
         }
 
         void InitializeCombatResurrections(byte charges = 1, uint interval = 0)

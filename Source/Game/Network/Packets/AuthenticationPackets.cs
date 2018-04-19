@@ -132,17 +132,10 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt8(SuccessInfo.Value.ActiveExpansionLevel);
                 _worldPacket.WriteUInt8(SuccessInfo.Value.AccountExpansionLevel);
                 _worldPacket.WriteUInt32(SuccessInfo.Value.TimeSecondsUntilPCKick);
-                _worldPacket.WriteUInt32(SuccessInfo.Value.AvailableRaces.Count);
                 _worldPacket.WriteUInt32(SuccessInfo.Value.AvailableClasses.Count);
                 _worldPacket.WriteUInt32(SuccessInfo.Value.Templates.Count);
                 _worldPacket.WriteUInt32(SuccessInfo.Value.CurrencyID);
                 _worldPacket.WriteUInt32(SuccessInfo.Value.Time);
-
-                foreach (var race in SuccessInfo.Value.AvailableRaces)
-                {
-                    _worldPacket.WriteUInt8(race.Key); /// the current race
-                    _worldPacket.WriteUInt8(race.Value); /// the required Expansion
-                }
 
                 foreach (var klass in SuccessInfo.Value.AvailableClasses)
                 {
@@ -219,7 +212,6 @@ namespace Game.Network.Packets
             public List<CharacterTemplate> Templates = new List<CharacterTemplate>(); // list of pre-made character templates. @todo implement
 
             public Dictionary<byte, byte> AvailableClasses; // the minimum AccountExpansion required to select the classes
-            public Dictionary<byte, byte> AvailableRaces; // the minimum AccountExpansion required to select the races
 
             public bool IsExpansionTrial;
             public bool ForceCharacterTemplate; // forces the client to always use a character template when creating a new character. @see Templates. @todo implement

@@ -207,6 +207,19 @@ namespace Framework.GameMath
         {
             return Vector3.DotProduct(p, this.Normal) - this.Constant;
         }
+
+        public void getEquation(ref Vector3 n, out float d)
+        {
+            double _d;
+            getEquation(ref n, out _d);
+            d = (float)_d;
+        }
+
+        void getEquation(ref Vector3 n, out double d)
+        {
+            n = _normal;
+            d = -_const;
+        }
         #endregion
 
         #region Overrides

@@ -849,7 +849,7 @@ namespace Framework.Constants
         FlyWarriorChargeEnd = 821
     }
 
-    public enum AreaFlags
+    public enum AreaFlags : int
     {
         Snow = 0x01,                // Snow (Only Dun Morogh, Naxxramas, Razorfen Downs And Winterspring)
         Unk1 = 0x02,                // Razorfen Downs, Naxxramas And Acherus: The Ebon Hold (3.3.5a)
@@ -1232,7 +1232,7 @@ namespace Framework.Constants
         Prime = 2
     }
 
-    public enum ItemSetFlags
+    public enum ItemSetFlags : byte
     {
         LegacyInactive = 0x01,
     }
@@ -1361,6 +1361,23 @@ namespace Framework.Constants
         HideIfUnknown = 0x40
     }
 
+    public enum PhaseEntryFlags : ushort
+    {
+        Normal = 0x08,
+        Cosmetic = 0x10,
+        Personal = 0x20
+    }
+
+    // PhaseUseFlags fields in different db2s
+    public  enum PhaseUseFlagsValues : byte
+    {
+        None = 0x0,
+        AlwaysVisible = 0x1,
+        Inverse = 0x2,
+
+        All = AlwaysVisible | Inverse
+    }
+
     public enum PrestigeLevelInfoFlags : byte
     {
         Disabled = 0x01                      // Prestige levels with this flag won't be included to calculate max prestigelevel.
@@ -1419,6 +1436,32 @@ namespace Framework.Constants
         PreventLfgTeleport = 0x0200,
         PreventUsingOwnSkills = 0x0400,   // Prevents Using Spells That Don'T Have Any Shapeshift Requirement
         PreventEmoteSounds = 0x1000a
+    }
+
+    public enum SummonPropFlags
+    {
+        None = 0x00000000,          // 1342 Spells In 3.0.3
+        Unk1 = 0x00000001,          // 75 Spells In 3.0.3, Something Unfriendly
+        Unk2 = 0x00000002,          // 616 Spells In 3.0.3, Something Friendly
+        Unk3 = 0x00000004,          // 22 Spells In 3.0.3, No Idea...
+        Unk4 = 0x00000008,          // 49 Spells In 3.0.3, Some Mounts
+        PersonalSpawn = 0x00000010,          // Personal Spawn (Creature Visible Only By Summoner)
+        Unk6 = 0x00000020,          // 0 Spells In 3.3.5, Unused
+        Unk7 = 0x00000040,          // 12 Spells In 3.0.3, No Idea
+        Unk8 = 0x00000080,          // 4 Spells In 3.0.3, No Idea
+        Unk9 = 0x00000100,          // 51 Spells In 3.0.3, No Idea, Many Quest Related
+        Unk10 = 0x00000200,          // 51 Spells In 3.0.3, Something Defensive
+        Unk11 = 0x00000400,          // 3 Spells, Requires Something Near?
+        Unk12 = 0x00000800,          // 30 Spells In 3.0.3, No Idea
+        Unk13 = 0x00001000,          // Lightwell, Jeeves, Gnomish Alarm-O-Bot, Build Vehicles(Wintergrasp)
+        Unk14 = 0x00002000,          // Guides, Player Follows
+        Unk15 = 0x00004000,          // Force Of Nature, Shadowfiend, Feral Spirit, Summon Water Elemental
+        Unk16 = 0x00008000,          // Light/Dark Bullet, Soul/Fiery Consumption, Twisted Visage, Twilight Whelp. Phase Related?
+        Unk17 = 0x00010000,
+        Unk18 = 0x00020000,
+        Unk19 = 0x00040000,
+        Unk20 = 0x00080000,
+        Unk21 = 0x00100000           // Totems
     }
 
     public enum TaxiNodeFlags : byte

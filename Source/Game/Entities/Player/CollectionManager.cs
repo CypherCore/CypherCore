@@ -153,11 +153,11 @@ namespace Game.Entities
                 uint bonusId = 0;
 
                 if (flags.HasAnyFlag(HeirloomPlayerFlags.BonusLevel110))
-                    bonusId = heirloom.ItemBonusListID[2];
+                    bonusId = heirloom.UpgradeItemBonusListID[2];
                 else if (flags.HasAnyFlag(HeirloomPlayerFlags.BonusLevel100))
-                    bonusId = heirloom.ItemBonusListID[1];
+                    bonusId = heirloom.UpgradeItemBonusListID[1];
                 else if (flags.HasAnyFlag(HeirloomPlayerFlags.BonusLevel90))
-                    bonusId = heirloom.ItemBonusListID[0];
+                    bonusId = heirloom.UpgradeItemBonusListID[0];
 
                 _heirlooms[itemId] = new HeirloomData(flags, bonusId);
             } while (result.NextRow());
@@ -232,17 +232,17 @@ namespace Game.Entities
             if (heirloom.UpgradeItemID[0] == castItem)
             {
                 flags |= HeirloomPlayerFlags.BonusLevel90;
-                bonusId = heirloom.ItemBonusListID[0];
+                bonusId = heirloom.UpgradeItemBonusListID[0];
             }
             if (heirloom.UpgradeItemID[1] == castItem)
             {
                 flags |= HeirloomPlayerFlags.BonusLevel100;
-                bonusId = heirloom.ItemBonusListID[1];
+                bonusId = heirloom.UpgradeItemBonusListID[1];
             }
             if (heirloom.UpgradeItemID[2] == castItem)
             {
                 flags |= HeirloomPlayerFlags.BonusLevel110;
-                bonusId = heirloom.ItemBonusListID[2];
+                bonusId = heirloom.UpgradeItemBonusListID[2];
             }
 
             foreach (Item item in player.GetItemListByEntry(itemId, true))
@@ -272,7 +272,7 @@ namespace Game.Entities
                     return;
 
                 // Check for heirloom pairs (normal - heroic, heroic - mythic)
-                uint heirloomItemId = heirloom.NextDifficultyItemID;
+                uint heirloomItemId = heirloom.StaticUpgradedItemID;
                 uint newItemId = 0;
                 HeirloomRecord heirloomDiff;
                 while ((heirloomDiff = Global.DB2Mgr.GetHeirloomByItemId(heirloomItemId)) != null)
@@ -280,7 +280,7 @@ namespace Game.Entities
                     if (player.GetItemByEntry(heirloomDiff.ItemID))
                         newItemId = heirloomDiff.ItemID;
 
-                    HeirloomRecord heirloomSub = Global.DB2Mgr.GetHeirloomByItemId(heirloomDiff.NextDifficultyItemID);
+                    HeirloomRecord heirloomSub = Global.DB2Mgr.GetHeirloomByItemId(heirloomDiff.StaticUpgradedItemID);
                     if (heirloomSub != null)
                     {
                         heirloomItemId = heirloomSub.ItemID;
@@ -385,10 +385,10 @@ namespace Game.Entities
             _mounts[spellId] = flags;
 
             // Mount condition only applies to using it, should still learn it.
-            if (mount.PlayerConditionId != 0)
+            if (mount.PlayerConditionID != 0)
             {
-                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(mount.PlayerConditionId);
-                if (!ConditionManager.IsPlayerMeetingCondition(player, playerCondition))
+                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(mount.PlayerConditionID);
+                if (playerCondition != null && !ConditionManager.IsPlayerMeetingCondition(player, playerCondition))
                     return false;
             }
 
@@ -578,7 +578,7 @@ namespace Game.Entities
             if (itemModifiedAppearance == null)
                 return false;
 
-            if (itemModifiedAppearance.SourceType == 6 || itemModifiedAppearance.SourceType == 9)
+            if (itemModifiedAppearance.TransmogSourceTypeEnum == 6 || itemModifiedAppearance.TransmogSourceTypeEnum == 9)
                 return false;
 
             if (!CliDB.ItemSearchNameStorage.ContainsKey(itemModifiedAppearance.ItemID))

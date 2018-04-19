@@ -298,7 +298,7 @@ namespace Framework.Constants
         Interrupt = 26,
         Daze = 27,
         Discovery = 28,
-        Immune_Shield = 29,                         // Divine (Blessing) Shield/Protection And Ice Block
+        ImmuneShield = 29,                         // Divine (Blessing) Shield/Protection And Ice Block
         Sapped = 30,
         Enraged = 31,
         Wounded = 32,
@@ -1051,6 +1051,19 @@ namespace Framework.Constants
         MustBeStandingNearInjuredChromieInMountHyjal = 340, // Must Be Standing Near The Injured Chromie In Mount Hyjal.
         RemoveCannonsHeavyIronPlatingFirst = 342, // You Should Remove The Cannon'S Heavy Iron Plating First.
         RemoveCannonsElectrokineticDefenseGridFirst = 343, // You Should Remove The Cannon'S Electrokinetic Defense Grid First.
+        RequiresTheArmoryKeyAndDendriteClusters = 344, // You Are Missing Pieces Of The Armory Key Or Do Not Have Enough Dendrite Clusters.
+        ThisItemRequiresBasicObliterumToUpgrade = 345, // This Item Requires Basic Obliterum To Upgrade.
+        ThisItemRequiresPrimalObliterumToUpgrade = 346, // This Item Requires Primal Obliterum To Upgrade.
+        ThisItemRequiresFlightMastersWhistle = 347, // This Item Requires A Flight Master'S Whistle.
+        RequiresPowerThatEchoesThatOfTheAugari = 349, // Will Only Open To One Wielding The Power That Echoes That Of The Augari.
+        ThatPlayerHasAPendingTotemicRevival = 350, // That Player Has A Pending Totemic Revival.
+        YouHaveNoFireMinesDeployed = 351, // You Have No Fire Mines Deployed.
+        YouAreBlockedByAStructureAboveYou = 353, // You Are Blocked By A Structure Above You.
+        Requires100ImpMeat = 354, // Requires 100 Imp Meat.
+        YouHaveNotObtainedAnyBackgroundFilters = 355, // You Have Not Obtained Any Background Filters.
+        NothingInterestingPostedHereRightNow = 356, // There Is Nothing Interesting Posted Here Right Now.
+        ParagonReputationRequiresHigherLevel = 357, // Paragon Reputation Is Not Available Until A Higher Level.
+        UunaIsMissing = 358, // Uuna Is Missing.
     }
 
     public enum SpellMissInfo
@@ -1180,12 +1193,17 @@ namespace Framework.Constants
         IgnoreCasterAurastate = 0x800,   //! Will Ignore Caster Aura States Including Combat Requirements And Death State
         DisallowProcEvents = 0x1000,   //! Disallows proc events from triggered spell (default)
         IgnoreCasterMountedOrOnVehicle = 0x2000,   //! Will Ignore Mounted/On Vehicle Restrictions
+        // reuse                                        = 0x00004000,
+        // reuse                                        = 0x00008000,
         IgnoreCasterAuras = 0x10000,   //! Will Ignore Caster Aura Restrictions Or Requirements
         DontResetPeriodicTimer = 0x20000,   //! Will allow periodic aura timers to keep ticking (instead of resetting)
         DontReportCastError = 0x40000,   //! Will Return SpellFailedDontReport In Checkcast Functions
-        IgnoreEquippedItemRequirement = 0x80000,
-        IgnoreTargetCheck = 0x100000,
-        FullMask = 0xffffffff
+        FullMask = 0x0007FFFF, //! Used when doing CastSpell with triggered == true
+
+        // debug flags (used with .cast triggered commands)
+        IgnoreEquippedItemRequirement = 0x80000, //! Will ignore equipped item requirements
+        IgnoreTargetCheck = 0x100000, //! Will ignore most target checks (mostly DBC target checks)
+        FullDebugMask = 0xFFFFFFFF
     }
 
     public enum SpellSchoolMask
@@ -1540,7 +1558,7 @@ namespace Framework.Constants
         Unk17 = 0x20000, // 17 Only 27965 (Suicide) Spell.
         HasChargeEffect = 0x40000, // 18 Only Spells That Have Charge Among Effects.
         ZoneTeleport = 0x80000, // 19 Teleports To Specific Zones.
-        UsableInStunFearConfusion = 0x100000, // 20 Blink, Divine Shield, Ice Block
+        Unk20 = 0x100000, // 20 Blink, Divine Shield, Ice Block
         Unk21 = 0x200000, // 21 Not Set
         Unk22 = 0x400000, // 22
         Unk23 = 0x800000, // 23 Motivate, Mutilate, Shattering Throw
@@ -2424,5 +2442,11 @@ namespace Framework.Constants
         None = 0x0,
         IncludeGCD = 0x1,  // Starts GCD in addition to normal cooldown specified in the packet
         IncludeEventCooldowns = 0x2   // Starts GCD for spells that should start their cooldown on events, requires SPELL_COOLDOWN_FLAG_INCLUDE_GCD set
+    }
+
+    public enum SpellAreaFlag
+    {
+        AutoCast = 0x1, // if has autocast, spell is applied on enter
+        AutoRemove = 0x2, // if has autoremove, spell is remove automatically inside zone/area (allways removed on leaving area or zone)
     }
 }

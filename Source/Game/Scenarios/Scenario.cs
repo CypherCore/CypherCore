@@ -64,7 +64,7 @@ namespace Game.Scenarios
 
         public virtual void CompleteStep(ScenarioStepRecord step)
         {
-            Quest quest = Global.ObjectMgr.GetQuestTemplate(step.QuestRewardID);
+            Quest quest = Global.ObjectMgr.GetQuestTemplate(step.RewardQuestID);
             if (quest != null)
             {
                 foreach (ObjectGuid guid in _players)
@@ -87,7 +87,7 @@ namespace Game.Scenarios
                 if (GetStepState(_step) == ScenarioStepState.Done)
                     continue;
 
-                if (newStep == null || _step.Step < newStep.Step)
+                if (newStep == null || _step.OrderIndex < newStep.OrderIndex)
                     newStep = _step;
             }
 
@@ -265,7 +265,7 @@ namespace Game.Scenarios
                 if (scenarioStep.IsBonusObjective())
                     continue;
 
-                if (firstStep == null || scenarioStep.Step < firstStep.Step)
+                if (firstStep == null || scenarioStep.OrderIndex < firstStep.OrderIndex)
                     firstStep = scenarioStep;
             }
 
@@ -287,7 +287,7 @@ namespace Game.Scenarios
                 if (!step.IsBonusObjective())
                     continue;
 
-                if (Global.CriteriaMgr.GetCriteriaTree(step.CriteriaTreeID) != null)
+                if (Global.CriteriaMgr.GetCriteriaTree(step.CriteriaTreeId) != null)
                 {
                     BonusObjectiveData bonusObjectiveData;
                     bonusObjectiveData.BonusObjectiveID = (int)step.Id;

@@ -119,8 +119,8 @@ namespace Game.Scenarios
                 if (!scenarioSteps.ContainsKey(step.ScenarioID))
                     scenarioSteps[step.ScenarioID] = new Dictionary<byte, ScenarioStepRecord>();
 
-                scenarioSteps[step.ScenarioID][step.Step] = step;
-                CriteriaTree tree = Global.CriteriaMgr.GetCriteriaTree(step.CriteriaTreeID);
+                scenarioSteps[step.ScenarioID][step.OrderIndex] = step;
+                CriteriaTree tree = Global.CriteriaMgr.GetCriteriaTree(step.CriteriaTreeId);
                 if (tree != null)
                 {
                     uint criteriaTreeSize = 0;

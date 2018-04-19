@@ -21,14 +21,15 @@ namespace Game.DataStorage
 {
     public sealed class HeirloomRecord
     {
+        public string SourceText;
         public uint ItemID;
-        public LocalizedString SourceText;
-        public uint[] OldItem = new uint[2];
-        public uint NextDifficultyItemID;
+        public uint LegacyItemID;
+        public uint LegacyUpgradedItemID;
+        public uint StaticUpgradedItemID;
         public uint[] UpgradeItemID = new uint[3];
-        public ushort[] ItemBonusListID = new ushort[3];
+        public ushort[] UpgradeItemBonusListID = new ushort[3];
         public byte Flags;
-        public byte Source;
+        public byte SourceTypeEnum;
         public uint Id;
     }
 
@@ -43,8 +44,8 @@ namespace Game.DataStorage
         public byte Priority;
         public sbyte CalendarFilterType;
         public byte Flags;
-        public uint HolidayNameID;
-        public uint HolidayDescriptionID;
+        public ushort HolidayNameID;
+        public ushort HolidayDescriptionID;
         public int[] TextureFileDataID = new int[3];
     }
 }

@@ -436,29 +436,22 @@ namespace Game.Entities
                     pet.SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_POWER_TYPE);
             }*/
 
-            float powerMultiplier = 1.0f;
-            if (!IsPet())
-            {
-                Creature creature = ToCreature();
-                if (creature)
-                    powerMultiplier = creature.GetCreatureTemplate().ModMana;
-            }
+            // Update max power
+            UpdateMaxPower(powerType);
 
+            // Update current power
             switch (powerType)
             {
-                default:
-                case PowerType.Mana:
+                case PowerType.Mana: // Keep the same (druid form switching...)
+                case PowerType.Energy:
                     break;
-                case PowerType.Rage:
-                    SetMaxPower(PowerType.Rage, (int)Math.Ceiling(GetCreatePowers(PowerType.Rage) * powerMultiplier));
+                case PowerType.Rage: // Reset to zero
                     SetPower(PowerType.Rage, 0);
                     break;
-                case PowerType.Focus:
-                    SetMaxPower(PowerType.Focus, (int)Math.Ceiling(GetCreatePowers(PowerType.Focus) * powerMultiplier));
-                    SetPower(PowerType.Focus, (int)Math.Ceiling(GetCreatePowers(PowerType.Focus) * powerMultiplier));
+                case PowerType.Focus: // Make it full
+                    SetFullPower(powerType);
                     break;
-                case PowerType.Energy:
-                    SetMaxPower(PowerType.Energy, (int)Math.Ceiling(GetCreatePowers(PowerType.Energy) * powerMultiplier));
+                default:
                     break;
             }
         }
@@ -545,22 +538,11 @@ namespace Game.Entities
 
             PowerTypeRecord powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(powerType);
             if (powerTypeEntry != null)
-                return powerTypeEntry.MaxPower;
+                return powerTypeEntry.MaxBasePower;
 
             return 0;
         }
-        public uint GetPowerIndex(PowerType powerType)
-        {
-            // This is here because hunter pets are of the warrior class.
-            // With the current implementation, the core only gives them
-            // POWER_RAGE, so we enforce the class to hunter so that they
-            // effectively get focus power.
-            Class _class = GetClass();
-            if (IsPet() && ToPet().getPetType() == PetType.Hunter)
-                _class = Class.Hunter;
-
-            return Global.DB2Mgr.GetPowerIndexByClass(powerType, _class);
-        }
+        public virtual uint GetPowerIndex(PowerType powerType) { return 0; }
         public float GetPowerPct(PowerType powerType) { return GetMaxPower(powerType) != 0 ? 100.0f* GetPower(powerType) / GetMaxPower(powerType) : 0.0f; }
 
         public void ApplyResilience(Unit victim, ref uint damage)
@@ -678,14 +660,13 @@ namespace Game.Entities
             else
                 chance += victim.GetTotalAuraModifier(AuraType.ModAttackerMeleeCritChance);
 
-            var critChanceForCaster = victim.GetAuraEffectsByType(AuraType.ModCritChanceForCaster);
-            foreach (AuraEffect aurEff in critChanceForCaster)
+            chance += victim.GetTotalAuraModifier(AuraType.ModCritChanceForCaster, aurEff =>
             {
-                if (aurEff.GetCasterGUID() != GetGUID())
-                    continue;
+                if (aurEff.GetCasterGUID() == GetGUID())
+                    return true;
 
-                chance += aurEff.GetAmount();
-            }
+                return false;
+            });
 
             chance += victim.GetTotalAuraModifier(AuraType.ModAttackerSpellAndWeaponCritChance);
 
@@ -1016,19 +997,21 @@ namespace Game.Entities
             if (manaIndex == (int)PowerType.Max)
                 return;
 
-            // Mana regen from spirit
-            float spirit_regen = 0.0f;
-            // Apply PCT bonus from SPELL_AURA_MOD_POWER_REGEN_PERCENT aura on spirit base regen
-            spirit_regen *= GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)PowerType.Mana);
+            // Get base of Mana Pool in sBaseMPGameTable
+            uint basemana;
+            Global.ObjectMgr.GetPlayerClassLevelInfo(GetClass(), getLevel(), out basemana);
+            float base_regen = basemana / 100.0f;
 
-            // CombatRegen = 5% of Base Mana
-            float base_regen = GetCreateMana() * 0.02f + GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)PowerType.Mana) / 5.0f;
+            base_regen += GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)PowerType.Mana);
 
-            // Set regen rate in cast state apply only on spirit based regen
-            int modManaRegenInterrupt = GetTotalAuraModifier(AuraType.ModManaRegenInterrupt);
+            // Apply PCT bonus from SPELL_AURA_MOD_POWER_REGEN_PERCENT
+            base_regen *= GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)PowerType.Mana);
 
-            SetFloatValue(UnitFields.PowerRegenInterruptedFlatModifier + manaIndex, base_regen + MathFunctions.CalculatePct(spirit_regen, modManaRegenInterrupt));
-            SetFloatValue(UnitFields.PowerRegenFlatModifier + manaIndex, 0.001f + spirit_regen + base_regen);
+            // Apply PCT bonus from SPELL_AURA_MOD_MANA_REGEN_PCT
+            base_regen *= GetTotalAuraMultiplierByMiscValue(AuraType.ModManaRegenPct, (int)PowerType.Mana);
+
+            SetFloatValue(UnitFields.PowerRegenInterruptedFlatModifier + manaIndex, base_regen);
+            SetFloatValue(UnitFields.PowerRegenFlatModifier + manaIndex, base_regen);
         }
 
         public void UpdateSpellDamageAndHealingBonus()
@@ -1213,14 +1196,14 @@ namespace Game.Entities
             // Apply bonus from SPELL_AURA_MOD_RATING_FROM_STAT
             // stat used stored in miscValueB for this aura
             var modRatingFromStat = GetAuraEffectsByType(AuraType.ModRatingFromStat);
-            foreach (var i in modRatingFromStat)
-                if (Convert.ToBoolean(i.GetMiscValue() & (1 << (int)cr)))
-                    amount += (int)MathFunctions.CalculatePct(GetStat((Stats)i.GetMiscValueB()), i.GetAmount());
+            foreach (var aurEff in modRatingFromStat)
+                if (Convert.ToBoolean(aurEff.GetMiscValue() & (1 << (int)cr)))
+                    amount += (int)MathFunctions.CalculatePct(GetStat((Stats)aurEff.GetMiscValueB()), aurEff.GetAmount());
 
             var modRatingPct = GetAuraEffectsByType(AuraType.ModRatingPct);
-            foreach (var i in modRatingPct)
-                if (Convert.ToBoolean(i.GetMiscValue() & (1 << (int)cr)))
-                    amount += MathFunctions.CalculatePct(amount, i.GetAmount());
+            foreach (var aurEff in modRatingPct)
+                if (Convert.ToBoolean(aurEff.GetMiscValue() & (1 << (int)cr)))
+                    amount += MathFunctions.CalculatePct(amount, aurEff.GetAmount());
 
             if (amount < 0)
                 amount = 0;
@@ -1496,16 +1479,10 @@ namespace Game.Entities
 
             Item weapon = GetWeaponForAttack(attack, true);
 
-            var expAuras = GetAuraEffectsByType(AuraType.ModExpertise);
-            foreach (var eff in expAuras)
+            expertise += GetTotalAuraModifier(AuraType.ModExpertise, aurEff =>
             {
-                // item neutral spell
-                if ((int)eff.GetSpellInfo().EquippedItemClass == -1)
-                    expertise += eff.GetAmount();
-                // item dependent spell
-                else if (weapon != null && weapon.IsFitToSpellRequirements(eff.GetSpellInfo()))
-                    expertise += eff.GetAmount();
-            }
+                return aurEff.GetSpellInfo().IsItemFitToSpellRequirements(weapon);
+            });
 
             if (expertise < 0)
                 expertise = 0;
@@ -1651,8 +1628,16 @@ namespace Game.Entities
 
             return stamina * ratio;
         }
+        public override uint GetPowerIndex(PowerType powerType)
+        {
+            return Global.DB2Mgr.GetPowerIndexByClass(powerType, GetClass());
+        }
         public override void UpdateMaxPower(PowerType power)
         {
+            uint powerIndex = GetPowerIndex(power);
+            if (powerIndex == (uint)PowerType.Max || powerIndex >= (uint)PowerType.MaxPerClass)
+                return;
+
             UnitMods unitMod = UnitMods.PowerStart + (int)power;
 
             float value = GetModifierValue(unitMod, UnitModifierType.BaseValue) + GetCreatePowers(power);
@@ -1660,7 +1645,7 @@ namespace Game.Entities
             value += GetModifierValue(unitMod, UnitModifierType.TotalValue);
             value *= GetModifierValue(unitMod, UnitModifierType.TotalPCT);
 
-            SetMaxPower(power, (int)value);
+            SetMaxPower(power, (int)Math.Round(value));
         }
 
         public void ApplySpellPenetrationBonus(int amount, bool apply)
@@ -1782,12 +1767,31 @@ namespace Game.Entities
             SetMaxHealth((uint)value);
         }
 
+        public override uint GetPowerIndex(PowerType powerType)
+        {
+            if (powerType == GetPowerType())
+                return 0;
+            if (powerType == PowerType.AlternatePower)
+                return 1;
+            if (powerType == PowerType.ComboPoints)
+                return 2;
+
+            return (uint)PowerType.Max;
+        }
+
         public override void UpdateMaxPower(PowerType power)
         {
+            if (GetPowerIndex(power) == (uint)PowerType.Max)
+                return;
+
             UnitMods unitMod = UnitMods.PowerStart + (int)power;
 
-            float value = GetTotalAuraModValue(unitMod);
-            SetMaxPower(power, (int)value);
+            float value = GetModifierValue(unitMod, UnitModifierType.BaseValue) + GetCreatePowers(power);
+            value *= GetModifierValue(unitMod, UnitModifierType.BasePCT);
+            value += GetModifierValue(unitMod, UnitModifierType.TotalValue);
+            value *= GetModifierValue(unitMod, UnitModifierType.TotalPCT);
+
+            SetMaxPower(power, (int)Math.Round(value));
         }
 
         public override void UpdateAttackPowerAndDamage(bool ranged = false)
