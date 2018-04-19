@@ -176,7 +176,7 @@ namespace Scripts.BrokenIsles
         {
             base.OnSceneTriggerEvent(player, sceneInstanceID, sceneTemplate, triggerName);
             if (triggerName == "invisibledalaran")
-                player.SetInPhase((uint) Phases.DALARAN_KARAZHAN, true, false);
+                PhasingHandler.AddPhase(player, (uint) Phases.DALARAN_KARAZHAN, true);
         }
 
         public override void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)

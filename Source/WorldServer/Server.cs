@@ -26,9 +26,6 @@ using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
-using Discord.Net;
-using Discord.Net.Providers.WS4Net;
-using Discord.Rest;
 using Discord.WebSocket;
 
 
@@ -231,7 +228,7 @@ namespace WorldServer
 
         private static Task LogDiscord(LogMessage msg)
         {
-            Console.WriteLine(msg.ToString());
+            Log.outInfo(LogFilter.DiscordBot, msg.ToString());
             return Task.CompletedTask;
         }
     }
