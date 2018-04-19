@@ -237,8 +237,8 @@ namespace Game.DataStorage
     {
         public uint Id;
         public sbyte AddQuantity;
-        public uint PlayerConditionID;
-        public int ParentItemLimitCategoryID;
+        public ushort PlayerConditionID;
+        public uint ParentItemLimitCategoryID;
     }
 
     public sealed class ItemModifiedAppearanceRecord
