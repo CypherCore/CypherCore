@@ -39,8 +39,8 @@ namespace Game.DataStorage
     public sealed class RewardPackXCurrencyTypeRecord
     {
         public uint Id;
-        public uint CurrencyTypeID;
-        public int Quantity;
+        public ushort CurrencyTypeID;
+        public short Quantity;
         public uint RewardPackID;
     }
 
