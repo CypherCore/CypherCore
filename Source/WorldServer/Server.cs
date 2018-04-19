@@ -24,6 +24,13 @@ using Game.Network;
 using System;
 using System.Globalization;
 using System.Threading;
+using System.Threading.Tasks;
+using Discord;
+using Discord.Net;
+using Discord.Net.Providers.WS4Net;
+using Discord.Rest;
+using Discord.WebSocket;
+
 
 namespace WorldServer
 {
@@ -75,6 +82,14 @@ namespace WorldServer
             DB.Login.Execute("UPDATE realmlist SET flag = flag & ~{0}, population = 0 WHERE id = '{1}'", (uint)RealmFlags.Offline, Global.WorldMgr.GetRealm().Id.Realm);
             Global.WorldMgr.GetRealm().PopulationLevel = 0.0f;
             Global.WorldMgr.GetRealm().Flags = Global.WorldMgr.GetRealm().Flags & ~RealmFlags.VersionMismatch;
+
+            if (ConfigMgr.GetDefaultValue("Discord.Enable", false))
+            {
+                Thread threadDiscord = new Thread( StartDiscordBot );
+                threadDiscord.Start();
+
+                Log.outInfo( LogFilter.ChatSystem, "Starting up world to discord thread...");
+            }
 
             //- Launch CliRunnable thread
             if (ConfigMgr.GetDefaultValue("Console.Enable", true))
@@ -189,6 +204,35 @@ namespace WorldServer
             Log.outInfo(LogFilter.Server, "Halting process...");
             Thread.Sleep(5000);
             Environment.Exit(-1);
+        }
+
+        static async void StartDiscordBot()
+        {
+            DiscordSocketClient client = new DiscordSocketClient();
+
+            client.Log += LogDiscord;
+            client.MessageReceived += MessageReceived;
+
+            await client.LoginAsync(TokenType.Bot, "NDM2NDcxNDkxMTAyNTA3MDA5.DboG3A.6uoXeNgP8an4N1fuFUJ5zMEQ368");
+            await client.StartAsync();
+
+            
+
+            await Task.Delay(-1);
+        }
+
+        private static async Task MessageReceived(SocketMessage message)
+        {
+            if (message.Content == "!ping")
+            {
+                await message.Channel.SendMessageAsync("Pong!");
+            }
+        }
+
+        private static Task LogDiscord(LogMessage msg)
+        {
+            Console.WriteLine(msg.ToString());
+            return Task.CompletedTask;
         }
     }
 }

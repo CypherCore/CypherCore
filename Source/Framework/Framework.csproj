@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Discord.Net" Version="1.0.2" />
     <PackageReference Include="Microsoft.CSharp" Version="4.4.1" />
     <PackageReference Include="MySql.Data" Version="6.10.6" />
     <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.3.0" />
