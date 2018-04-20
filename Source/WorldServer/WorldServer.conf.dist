@@ -1758,11 +1758,32 @@ Discord.BotServerID = 0
 #
 
 #
-#    Discord.BotChannelID
-#        Description: Channel ID
+#    Discord.BotChannelIDHorde
+#        Description: Channel ID Horde
 #        Default:     0
 
-Discord.BotChannelID = 0
+Discord.BotChannelIDHorde = 0
+
+#
+#    Discord.BotChannelIDAlliance
+#        Description: Channel ID Alliance
+#        Default:     0
+
+Discord.BotChannelIDAlliance = 0
+
+#
+#    Discord.BotChannelIDBoth
+#        Description: Channel ID Both (Use only when AllowTwoSide.Interaction.Channel is set to 1)
+#        Default:     0
+
+Discord.BotChannelIDBoth = 0
+
+#
+#    Discord.GameChannelName
+#        Description: Channel Name
+#        Default:     "world"
+
+Discord.GameChannelName = "world"
 
 #
 ###################################################################################################

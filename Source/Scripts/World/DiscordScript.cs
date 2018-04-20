@@ -22,11 +22,16 @@ namespace Scripts.World
 
             if (ConfigMgr.GetDefaultValue("Discord.Enabled", false))
             {
-                if (player.GetSession() && channel.GetName() == "world")
+                if (player.GetSession() && channel.GetName() == ConfigMgr.GetDefaultValue("Discord.GameChannelName", "world"))
                 {
+                    DiscordMessageChannel channel_discordMessage = player.GetTeamId() == (int)Team.Alliance ? DiscordMessageChannel.Discord_World_A : DiscordMessageChannel.Discord_World_H;
+
+                    if (ConfigMgr.GetDefaultValue("AllowTwoSide.Interaction.Channel", false))
+                        channel_discordMessage = DiscordMessageChannel.Discord_Both;
+
                     DiscordMessage newMessage = new DiscordMessage
                                                 {
-                                                    Channel = player.GetTeamId() == (int)Team.Alliance ? DiscordMessageChannel.Discord_World_A : DiscordMessageChannel.Discord_World_H,
+                                                    Channel = channel_discordMessage,
                                                     IsGm = player.isGMChat(),
                                                     CharacterName = player.GetName(),
                                                     Message = msg
