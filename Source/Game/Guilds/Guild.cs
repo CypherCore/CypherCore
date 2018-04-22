@@ -419,10 +419,14 @@ namespace Game.Guilds
                 Member newGuildMaster = GetMember(name);
                 if (newGuildMaster != null)
                 {
-                    _SetLeaderGUID(newGuildMaster);
-                    oldGuildMaster.ChangeRank(null, GuildDefaultRanks.Initiate);
+                    SQLTransaction trans = new SQLTransaction();
+
+                    _SetLeader(trans, newGuildMaster);
+                    oldGuildMaster.ChangeRank(trans, GuildDefaultRanks.Initiate);
 
                     SendEventNewLeader(newGuildMaster, oldGuildMaster);
+
+                    DB.Characters.CommitTransaction(trans);
                 }
             }
         }
@@ -1353,8 +1357,8 @@ namespace Game.Guilds
             // Repair the structure of the guild.
             // If the guildmaster doesn't exist or isn't member of the guild
             // attempt to promote another member.
-            Member pLeader = GetMember(m_leaderGuid);
-            if (pLeader == null)
+            Member leader = GetMember(m_leaderGuid);
+            if (leader == null)
             {
                 DeleteMember(trans, m_leaderGuid);
                 // If no more members left, disband guild
@@ -1364,8 +1368,8 @@ namespace Game.Guilds
                     return false;
                 }
             }
-            else if (!pLeader.IsRank(GuildDefaultRanks.Master))
-                _SetLeaderGUID(pLeader);
+            else if (!leader.IsRank(GuildDefaultRanks.Master))
+                _SetLeader(trans, leader);
 
             if (trans.commands.Count > 0)
                 DB.Characters.CommitTransaction(trans);
@@ -1498,7 +1502,7 @@ namespace Game.Guilds
                 m_members[guid] = member;
                 player.SetInGuild(m_id);
                 player.SetGuildIdInvited(0);
-                player.SetRank(rankId);
+                player.SetGuildRank(rankId);
                 player.SetGuildLevel(GetLevel());
                 SendLoginInfo(player.GetSession());
                 name = player.GetName();
@@ -1576,12 +1580,7 @@ namespace Game.Guilds
                     return;
                 }
 
-                _SetLeaderGUID(newLeader);
-
-                // If player not online data in data field will be loaded from guild tabs no need to update it !!
-                Player newLeaderPlayer = newLeader.FindPlayer();
-                if (newLeaderPlayer)
-                    newLeaderPlayer.SetRank(GuildDefaultRanks.Master);
+                _SetLeader(trans, newLeader);
 
                 // If leader does not exist (at guild loading with deleted leader) do not send broadcasts
                 if (oldLeader != null)
@@ -1599,7 +1598,7 @@ namespace Game.Guilds
             if (player != null)
             {
                 player.SetInGuild(0);
-                player.SetRank(0);
+                player.SetGuildRank(0);
                 player.SetGuildLevel(0);
 
                 foreach (var entry in CliDB.GuildPerkSpellsStorage.Values)
@@ -1795,21 +1794,25 @@ namespace Game.Guilds
             return true;
         }
 
-        void _SetLeaderGUID(Member pLeader)
+        void _SetLeader(SQLTransaction trans, Member leader)
         {
-            if (pLeader == null)
+            if (leader == null)
                 return;
 
-            SQLTransaction trans = new SQLTransaction();
-            m_leaderGuid = pLeader.GetGUID();
-            pLeader.ChangeRank(trans, GuildDefaultRanks.Master);
+            bool isInTransaction = trans != null;
+            if (!isInTransaction)
+                trans = new SQLTransaction();
+
+            m_leaderGuid = leader.GetGUID();
+            leader.ChangeRank(trans, GuildDefaultRanks.Master);
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GUILD_LEADER);
             stmt.AddValue(0, m_leaderGuid.GetCounter());
             stmt.AddValue(1, m_id);
             trans.Append(stmt);
 
-            DB.Characters.CommitTransaction(trans);
+            if (!isInTransaction)
+                DB.Characters.CommitTransaction(trans);
         }
 
         void _SetRankBankMoneyPerDay(uint rankId, uint moneyPerDay)
@@ -2509,9 +2512,9 @@ namespace Game.Guilds
                 m_rankId = (byte)newRank;
 
                 // Update rank information in player's field, if he is online.
-                Player player = FindPlayer();
+                Player player = FindConnectedPlayer();
                 if (player != null)
-                    player.SetRank((byte)newRank);
+                    player.SetGuildRank((byte)newRank);
 
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GUILD_MEMBER_RANK);
                 stmt.AddValue(0, newRank);
@@ -2587,7 +2590,7 @@ namespace Game.Guilds
 
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_GUILD_MEMBER_WITHDRAW_TABS);
                 stmt.AddValue(0, m_guid.GetCounter());
-                for (byte i = 0; i < GuildConst.MaxBankTabs; )
+                for (byte i = 0; i < GuildConst.MaxBankTabs;)
                 {
                     uint withdraw = m_bankWithdraw[i++];
                     stmt.AddValue(i, withdraw);
@@ -2653,7 +2656,7 @@ namespace Game.Guilds
 
             public List<uint> GetTrackedCriteriaIds() { return m_trackedCriteriaIds; }
             public void SetTrackedCriteriaIds(List<uint> criteriaIds) { m_trackedCriteriaIds = criteriaIds; }
-            public bool IsTrackingCriteriaId(uint criteriaId) { return m_trackedCriteriaIds.Contains(criteriaId);  }
+            public bool IsTrackingCriteriaId(uint criteriaId) { return m_trackedCriteriaIds.Contains(criteriaId); }
             public bool IsOnline() { return m_flags.HasAnyFlag(GuildMemberFlags.Online); }
 
             public void UpdateLogoutTime() { m_logoutTime = (ulong)Time.UnixTime; }
@@ -2665,6 +2668,7 @@ namespace Game.Guilds
             public ulong GetBankMoneyWithdrawValue() { return m_bankWithdrawMoney; }
 
             public Player FindPlayer() { return Global.ObjAccessor.FindPlayer(m_guid); }
+            Player FindConnectedPlayer() { return Global.ObjAccessor.FindConnectedPlayer(m_guid); }
 
             #region Fields
             ulong m_guildId;

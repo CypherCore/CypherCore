@@ -676,7 +676,7 @@ namespace Game
             if (!resultGuild.IsEmpty())
             {
                 pCurrChar.SetInGuild(resultGuild.Read<uint>(0));
-                pCurrChar.SetRank(resultGuild.Read<byte>(1));
+                pCurrChar.SetGuildRank(resultGuild.Read<byte>(1));
                 Guild guild = Global.GuildMgr.GetGuildById(pCurrChar.GetGuildId());
                 if (guild)
                     pCurrChar.SetGuildLevel(guild.GetLevel());
@@ -684,13 +684,9 @@ namespace Game
             else if (pCurrChar.GetGuildId() != 0)
             {
                 pCurrChar.SetInGuild(0);
-                pCurrChar.SetRank(0);
+                pCurrChar.SetGuildRank(0);
                 pCurrChar.SetGuildLevel(0);
             }
-
-            //WorldPacket data = new WorldPacket(ServerOpcodes.LearnedDanceMoves);
-            //data.WriteUInt64(0);
-            //SendPacket(data);
 
             // TODO: Move this to BattlePetMgr::SendJournalLock() just to have all packets in one file
             SendPacket(new BattlePetJournalLockAcquired());

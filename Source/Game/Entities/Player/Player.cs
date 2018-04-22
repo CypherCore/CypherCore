@@ -5246,8 +5246,8 @@ namespace Game.Entities
             ApplyModFlag(PlayerFields.Flags, PlayerFlags.GuildLevelEnabled, guildId != 0);
             SetUInt16Value(ObjectFields.Type, 1, (ushort)(guildId != 0 ? 1 : 0));
         }
-        public void SetRank(uint rankId) { SetUInt32Value(PlayerFields.GuildRank, rankId); }
-        byte GetRank() { return (byte)GetUInt32Value(PlayerFields.GuildRank); }
+        public void SetGuildRank(uint rankId) { SetUInt32Value(PlayerFields.GuildRank, rankId); }
+        byte GetGuildRank() { return (byte)GetUInt32Value(PlayerFields.GuildRank); }
         public void SetGuildLevel(uint level) { SetUInt32Value(PlayerFields.GuildLevel, level); }
         uint GetGuildLevel() { return GetUInt32Value(PlayerFields.GuildLevel); }
         public void SetGuildIdInvited(ulong GuildId) { m_GuildIdInvited = GuildId; }
