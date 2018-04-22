@@ -463,13 +463,11 @@ namespace Game.Guilds
                 else
                     member.SetOfficerNote(note);
 
-                HandleRoster(session); // FIXME - We should send SMSG_GUILD_MEMBER_UPDATE_NOTE
-
                 GuildMemberUpdateNote updateNote = new GuildMemberUpdateNote();
                 updateNote.Member = guid;
                 updateNote.IsPublic = isPublic;
                 updateNote.Note = note;
-                session.SendPacket(updateNote); // @todo - Verify receiver of this packet...
+                BroadcastPacket(updateNote);
             }
         }
 
