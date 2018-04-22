@@ -2599,18 +2599,21 @@ namespace Game.Entities
             // Apply Player CR_ARMOR_PENETRATION rating
             if (IsTypeId(TypeId.Player))
             {
-                float maxArmorPen = 0;
+                float arpPct = ToPlayer().GetRatingBonusValue(CombatRating.ArmorPenetration);
+
+                // no more than 100%
+                MathFunctions.RoundToInterval(ref arpPct, 0.0f, 100.0f);
+
+                float maxArmorPen = 0.0f;
                 if (victim.GetLevelForTarget(attacker) < 60)
                     maxArmorPen = 400 + 85 * victim.GetLevelForTarget(attacker);
                 else
                     maxArmorPen = 400 + 85 * victim.GetLevelForTarget(attacker) + 4.5f * 85 * (victim.GetLevelForTarget(attacker) - 59);
 
                 // Cap armor penetration to this number
-                maxArmorPen = Math.Min((armor + maxArmorPen) / 3, armor);
+                maxArmorPen = Math.Min((armor + maxArmorPen) / 3.0f, armor);
                 // Figure out how much armor do we ignore
-                float armorPen = MathFunctions.CalculatePct(maxArmorPen, ToPlayer().GetRatingBonusValue(CombatRating.ArmorPenetration));
-                // Got the value, apply it
-                armor -= Math.Min(armorPen, maxArmorPen);
+                armor -= MathFunctions.CalculatePct(maxArmorPen, arpPct);
             }
 
             if (MathFunctions.fuzzyLe(armor, 0.0f))
