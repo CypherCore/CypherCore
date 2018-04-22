@@ -504,7 +504,7 @@ namespace Framework.GameMath
         /// <returns>A new <see cref="Matrix2"/> instance containing the sum.</returns>
         public static Matrix2 operator +(Matrix2 left, Matrix2 right)
         {
-            return Matrix2.Add(left, right); ;
+            return Matrix2.Add(left, right);
         }
         /// <summary>
         /// Adds a matrix and a scalar.
@@ -534,7 +534,7 @@ namespace Framework.GameMath
         /// <returns>A new <see cref="Matrix2"/> instance containing the difference.</returns>
         public static Matrix2 operator -(Matrix2 left, Matrix2 right)
         {
-            return Matrix2.Subtract(left, right); ;
+            return Matrix2.Subtract(left, right);
         }
         /// <summary>
         /// Subtracts a scalar from a matrix.
@@ -554,7 +554,7 @@ namespace Framework.GameMath
         /// <returns>A new <see cref="Matrix2"/> instance containing the result.</returns>
         public static Matrix2 operator *(Matrix2 left, Matrix2 right)
         {
-            return Matrix2.Multiply(left, right); ;
+            return Matrix2.Multiply(left, right);
         }
         /// <summary>
         /// Transforms a given vector by a matrix.

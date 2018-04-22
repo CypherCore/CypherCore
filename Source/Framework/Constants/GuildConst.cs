@@ -45,6 +45,8 @@ namespace Framework.Constants
         public static uint MinNewsItemLevel = 353;
 
         public static byte OldMaxLevel = 25;
+
+        public static uint MasterDethroneInactiveDays = 90;
     }
 
     public enum GuildRankRights

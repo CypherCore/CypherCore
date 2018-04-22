@@ -1000,7 +1000,7 @@ namespace Game.Network.Packets
 
         public override void Read()
         {
-            Player = _worldPacket.ReadPackedGuid(); ;
+            Player = _worldPacket.ReadPackedGuid();
 
             byte[] stringLengths = new byte[SharedConst.MaxDeclinedNameCases];
 

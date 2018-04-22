@@ -438,16 +438,16 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteBit(SelfPromoted);
-            _worldPacket.WriteBits(NewLeaderName.GetByteCount(), 6);
             _worldPacket.WriteBits(OldLeaderName.GetByteCount(), 6);
+            _worldPacket.WriteBits(NewLeaderName.GetByteCount(), 6);
 
             _worldPacket.WritePackedGuid(OldLeaderGUID);
             _worldPacket.WriteUInt32(OldLeaderVirtualRealmAddress);
             _worldPacket.WritePackedGuid(NewLeaderGUID);
             _worldPacket.WriteUInt32(NewLeaderVirtualRealmAddress);
 
-            _worldPacket.WriteString(NewLeaderName);
             _worldPacket.WriteString(OldLeaderName);
+            _worldPacket.WriteString(NewLeaderName);
         }
 
         public ObjectGuid NewLeaderGUID;
@@ -981,7 +981,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket .WriteInt64( RemainingWithdrawMoney);
+            _worldPacket.WriteInt64(RemainingWithdrawMoney);
         }
 
         public long RemainingWithdrawMoney;
@@ -1023,7 +1023,7 @@ namespace Game.Network.Packets
             {
                 _worldPacket.WriteUInt32(tab.TabIndex);
                 _worldPacket.WriteBits(tab.Name.GetByteCount(), 7);
-                _worldPacket.WriteBits(tab.Icon.GetByteCount(), 9);;
+                _worldPacket.WriteBits(tab.Icon.GetByteCount(), 9);
 
                 _worldPacket.WriteString(tab.Name);
                 _worldPacket.WriteString(tab.Icon);
@@ -1243,6 +1243,13 @@ namespace Game.Network.Packets
         public int NewsID;
         public ObjectGuid GuildGUID;
         public bool Sticky;
+    }
+
+    class GuildReplaceGuildMaster : ClientPacket
+    {
+        public GuildReplaceGuildMaster(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
     }
 
     public class GuildSetGuildMaster : ClientPacket

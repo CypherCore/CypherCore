@@ -724,7 +724,7 @@ namespace Game.Network.Packets
         public void Read(WorldPacket data)
         {
             Context = data.ReadUInt8();
-            uint bonusListIdSize = data.ReadUInt32(); ;
+            uint bonusListIdSize = data.ReadUInt32();
 
             BonusListIDs = new List<uint>();
             for (uint i = 0u; i < bonusListIdSize; ++i)

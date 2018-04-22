@@ -834,7 +834,7 @@ public static partial class Detour
                         vArrays[k] = tile.detailVerts;
                     }
                 }
-                float h = .0f; ;
+                float h = .0f;
                 if (dtClosestHeightPointTriangle(pos, posStart, vArrays[0], vIndices[0], vArrays[1], vIndices[1], vArrays[2], vIndices[2], ref h))
                 {
                     closest[1] = h;

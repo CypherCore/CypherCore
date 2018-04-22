@@ -228,7 +228,7 @@ namespace Game.Guilds
                 memberData.AreaID = (int)member.GetZoneId();
                 memberData.PersonalAchievementPoints = (int)member.GetAchievementPoints();
                 memberData.GuildReputation = (int)member.GetTotalReputation();
-                memberData.LastSave = (member.IsOnline() ? 0.0f : ((ulong)Time.UnixTime - member.GetLogoutTime()) / Time.Day);
+                memberData.LastSave = member.GetInactiveDays();
 
                 //GuildRosterProfessionData
 
@@ -405,30 +405,45 @@ namespace Game.Guilds
             }
         }
 
-        public void HandleSetNewGuildMaster(WorldSession session, string name)
+        public void HandleSetNewGuildMaster(WorldSession session, string name, bool isSelfPromote)
         {
             Player player = session.GetPlayer();
-            // Only the guild master can throne a new guild master
-            if (!_IsLeader(player))
-                SendCommandResult(session, GuildCommandType.ChangeLeader, GuildCommandError.Permissions);
-            // Old GM must be a guild member
-            Member oldGuildMaster = GetMember(player.GetGUID());
-            if (oldGuildMaster != null)
+            Member oldGuildMaster = GetMember(GetLeaderGUID());
+
+            Member newGuildMaster;
+            if (isSelfPromote)
             {
-                // Same for the new one
-                Member newGuildMaster = GetMember(name);
-                if (newGuildMaster != null)
+                newGuildMaster = GetMember(player.GetGUID());
+                if (newGuildMaster == null)
+                    return;
+
+                if (!newGuildMaster.IsRankNotLower(GuildDefaultRanks.Member) || oldGuildMaster.GetInactiveDays() < GuildConst.MasterDethroneInactiveDays)
                 {
-                    SQLTransaction trans = new SQLTransaction();
-
-                    _SetLeader(trans, newGuildMaster);
-                    oldGuildMaster.ChangeRank(trans, GuildDefaultRanks.Initiate);
-
-                    SendEventNewLeader(newGuildMaster, oldGuildMaster);
-
-                    DB.Characters.CommitTransaction(trans);
+                    SendCommandResult(session, GuildCommandType.ChangeLeader, GuildCommandError.Permissions);
+                    return;
                 }
             }
+            else
+            {
+                if (!_IsLeader(player))
+                {
+                    SendCommandResult(session, GuildCommandType.ChangeLeader, GuildCommandError.Permissions);
+                    return;
+                }
+
+                newGuildMaster = GetMember(name);
+                if (newGuildMaster == null)
+                    return;
+            }
+
+            SQLTransaction trans = new SQLTransaction();
+
+            _SetLeader(trans, newGuildMaster);
+            oldGuildMaster.ChangeRank(trans, GuildDefaultRanks.Initiate);
+
+            SendEventNewLeader(newGuildMaster, oldGuildMaster, isSelfPromote);
+
+            DB.Characters.CommitTransaction(trans);
         }
 
         public void HandleSetBankTabInfo(WorldSession session, byte tabId, string name, string icon)
@@ -2579,6 +2594,13 @@ namespace Game.Guilds
                     return false;
                 }
                 return true;
+            }
+
+            public float GetInactiveDays()
+            {
+                if (IsOnline())
+                    return 0.0f;
+                return (float)((Time.UnixTime - (long)GetLogoutTime()) / (float)Time.Day);
             }
 
             // Decreases amount of slots left for today.

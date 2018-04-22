@@ -4759,7 +4759,7 @@ namespace Game.Entities
                 if ((pvp && WorldConfig.GetBoolValue(WorldCfg.DeathCorpseReclaimDelayPvp)) ||
                    (!pvp && WorldConfig.GetBoolValue(WorldCfg.DeathCorpseReclaimDelayPve)))
                 {
-                    count = (ulong)(m_deathExpireTime - corpse.GetGhostTime()) / PlayerConst.DeathExpireStep; ;
+                    count = (ulong)(m_deathExpireTime - corpse.GetGhostTime()) / PlayerConst.DeathExpireStep;
 
                     if (count >= PlayerConst.MaxDeathCount)
                         count = PlayerConst.MaxDeathCount - 1;

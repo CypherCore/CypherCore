@@ -366,7 +366,7 @@ namespace Game.DungeonFinding
             foreach (var guid in check)
             {
                 if (!(numLfgGroups < 2) && !(numPlayers <= MapConst.MaxGroupSize))
-                    break; ;
+                    break;
 
                 var itQueue = QueueDataStore.LookupByKey(guid);
                 if (itQueue == null)

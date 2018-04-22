@@ -2448,7 +2448,7 @@ namespace Game.Entities
             if (vItem.maxcount == 0)
                 return 0;
 
-            VendorItemCount vCount = null; ;
+            VendorItemCount vCount = null;
             for (var i = 0; i < m_vendorItemCounts.Count; i++)
             {
                 vCount = m_vendorItemCounts[i];

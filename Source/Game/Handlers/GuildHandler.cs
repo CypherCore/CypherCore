@@ -440,12 +440,20 @@ namespace Game
                 guild.HandleNewsSetSticky(this, (uint)packet.NewsID, packet.Sticky);
         }
 
+        [WorldPacketHandler(ClientOpcodes.GuildReplaceGuildMaster)]
+        void HandleGuildReplaceGuildMaster(GuildReplaceGuildMaster replaceGuildMaster)
+        {
+            Guild guild = GetPlayer().GetGuild();
+            if (guild)
+                guild.HandleSetNewGuildMaster(this, "", true);
+        }
+
         [WorldPacketHandler(ClientOpcodes.GuildSetGuildMaster)]
         void HandleGuildSetGuildMaster(GuildSetGuildMaster packet)
         {
             Guild guild = GetPlayer().GetGuild();
             if (guild)
-                guild.HandleSetNewGuildMaster(this, packet.NewMasterName);
+                guild.HandleSetNewGuildMaster(this, packet.NewMasterName, false);
         }
 
         [WorldPacketHandler(ClientOpcodes.GuildSetAchievementTracking)]

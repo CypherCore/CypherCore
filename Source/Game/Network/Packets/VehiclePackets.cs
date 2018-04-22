@@ -43,7 +43,7 @@ namespace Game.Network.Packets
         public override void Read()
         {
             Data.Read(_worldPacket);
-            VehicleRecID = _worldPacket.ReadInt32(); ;
+            VehicleRecID = _worldPacket.ReadInt32();
         }
 
         public MovementAck Data;

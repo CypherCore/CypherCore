@@ -534,7 +534,7 @@ namespace Game
 
             LootItem item = slotid >= loot.items.Count ? loot.quest_items[slotid - loot.items.Count] : loot.items[slotid];
 
-            List<ItemPosCount> dest = new List<ItemPosCount>(); ;
+            List<ItemPosCount> dest = new List<ItemPosCount>();
             InventoryResult msg = target.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item.itemid, item.count);
             if (item.follow_loot_rules && !item.AllowedForPlayer(target))
                 msg = InventoryResult.CantEquipEver;
