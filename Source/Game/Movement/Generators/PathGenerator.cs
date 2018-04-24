@@ -797,20 +797,21 @@ namespace Game.Movement
 
         void CreateFilter()
         {
-            NavTerrain includeFlags = 0;
-            NavTerrain excludeFlags = 0;
+            NavArea includeFlags = 0;
+            NavArea excludeFlags = 0;
 
             if (_sourceUnit.IsTypeId(TypeId.Unit))
             {
                 Creature creature = _sourceUnit.ToCreature();
                 if (creature.CanWalk())
-                    includeFlags |= NavTerrain.Ground;
+                    includeFlags |= NavArea.Ground;
 
+                // creatures don't take environmental damage
                 if (creature.CanSwim())
-                    includeFlags |= (NavTerrain.Water | NavTerrain.Magma | NavTerrain.Slime);
+                    includeFlags |= (NavArea.Water | NavArea.MagmaSlime);
             }
             else
-                includeFlags = (NavTerrain.Ground | NavTerrain.Water | NavTerrain.Magma | NavTerrain.Slime);
+                includeFlags = (NavArea.Ground | NavArea.Water | NavArea.MagmaSlime);
 
             _filter.setIncludeFlags((ushort)includeFlags);
             _filter.setExcludeFlags((ushort)excludeFlags);
@@ -824,32 +825,31 @@ namespace Game.Movement
             // forcefully into terrain they can't normally move in
             if (_sourceUnit.IsInWater() || _sourceUnit.IsUnderWater())
             {
-                NavTerrain includedFlags = (NavTerrain)_filter.getIncludeFlags();
+                NavTerrainFlag includedFlags = (NavTerrainFlag)_filter.getIncludeFlags();
                 includedFlags |= GetNavTerrain(_sourceUnit.GetPositionX(), _sourceUnit.GetPositionY(), _sourceUnit.GetPositionZ());
 
                 _filter.setIncludeFlags((ushort)includedFlags);
             }
         }
 
-        NavTerrain GetNavTerrain(float x, float y, float z)
+        NavTerrainFlag GetNavTerrain(float x, float y, float z)
         {
             LiquidData data;
             ZLiquidStatus liquidStatus = _sourceUnit.GetMap().getLiquidStatus(_sourceUnit.GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out data);
             if (liquidStatus == ZLiquidStatus.NoWater)
-                return NavTerrain.Ground;
+                return NavTerrainFlag.Ground;
 
             data.type_flags &= ~MapConst.MapLiquidTypeDarkWater;
             switch (data.type_flags)
             {
                 case MapConst.MapLiquidTypeWater:
                 case MapConst.MapLiquidTypeOcean:
-                    return NavTerrain.Water;
+                    return NavTerrainFlag.Water;
                 case MapConst.MapLiquidTypeMagma:
-                    return NavTerrain.Magma;
                 case MapConst.MapLiquidTypeSlime:
-                    return NavTerrain.Slime;
+                    return NavTerrainFlag.MagmaSlime;
                 default:
-                    return NavTerrain.Ground;
+                    return NavTerrainFlag.Ground;
             }
         }
 
@@ -987,18 +987,23 @@ namespace Game.Movement
         NotUsingPath = 0x10,   // used when we are either flying/swiming or on map w/o mmaps
         Short = 0x20,   // path is longer or equal to its limited path length
     }
-    public enum NavTerrain
+
+    public enum NavArea
+    {
+        Empty = 0,
+        // areas 1-60 will be used for destructible areas (currently skipped in vmaps, WMO with flag 1)
+        // ground is the highest value to make recast choose ground over water when merging surfaces very close to each other (shallow water would be walkable) 
+        MagmaSlime = 61, // don't need to differentiate between them
+        Water = 62,
+        Ground = 63,
+    }
+
+    public enum NavTerrainFlag
     {
         Empty = 0x00,
-        Ground = 0x01,
-        Magma = 0x02,
-        Slime = 0x04,
-        Water = 0x08,
-        Unused1 = 0x10,
-        Unused2 = 0x20,
-        Unused3 = 0x40,
-        Unused4 = 0x80
-        // we only have 8 bits
+        Ground = 1 << (63 - NavArea.Ground),
+        Water = 1 << (63 - NavArea.Water),
+        MagmaSlime = 1 << (63 - NavArea.MagmaSlime)
     }
 
     public enum PolyFlag

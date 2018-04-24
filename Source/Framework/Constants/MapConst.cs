@@ -68,7 +68,7 @@ namespace Framework.Constants
         public const string MapLiquidMagic = "MLIQ";
 
         public const string mmapMagic = "MMAP";
-        public const int mmapVersion = 8;
+        public const int mmapVersion = 9;
 
         public const string VMapMagic = "VMAP_4.7";
         public const float VMAPInvalidHeightValue = -200000.0f;
