@@ -2899,6 +2899,52 @@ namespace Game.Entities
                 }
             }
         }
+
+        public void LoadSpellTotemModel()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            SQLResult result = DB.World.Query("SELECT SpellID, RaceID, DisplayID from spell_totem_model");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell totem model records. DB table `spell_totem_model` is empty.");
+                return;
+            }
+
+            uint count = 0;
+            do
+            {
+                uint spellId = result.Read<uint>(0);
+                byte race = result.Read<byte>(1);
+                uint displayId = result.Read<uint>(2);
+
+                SpellInfo spellEntry = GetSpellInfo(spellId);
+                if (spellEntry == null)
+                {
+                    Log.outError(LogFilter.Sql, $"SpellID: {spellId} in `spell_totem_model` table could not be found in dbc, skipped.");
+                    continue;
+                }
+
+                if (!CliDB.ChrRacesStorage.ContainsKey(race))
+                {
+                    Log.outError(LogFilter.Sql, $"Race {race} defined in `spell_totem_model` does not exists, skipped.");
+                    continue;
+                }
+
+                if (!CliDB.CreatureDisplayInfoStorage.ContainsKey(displayId))
+                {
+                    Log.outError(LogFilter.Sql, $"SpellID: {spellId} defined in `spell_totem_model` has non-existing model ({displayId}).");
+                    continue;
+                }
+
+                mSpellTotemModel[Tuple.Create(spellId, race)] = displayId;
+                ++count;
+
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} spell totem model records in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+
+        }
         #endregion
 
         bool isTriggerAura(AuraType type)
@@ -2980,7 +3026,6 @@ namespace Game.Entities
                     return ProcFlagsSpellType.MaskAll;
             }
         }
-
 
         // SpellInfo object management
         public SpellInfo GetSpellInfo(uint spellId)
@@ -3085,6 +3130,11 @@ namespace Game.Entities
             return SpellSchools.Normal;
         }
 
+        public uint GetModelForTotem(uint spellId, Race race)
+        {
+            return mSpellTotemModel.LookupByKey(Tuple.Create(spellId, race));
+        }
+
         #region Fields
         //private:
         Dictionary<uint, SpellChainNode> mSpellChains = new Dictionary<uint, SpellChainNode>();
@@ -3112,6 +3162,7 @@ namespace Game.Entities
         Dictionary<uint, MultiMap<uint, uint>> mPetLevelupSpellMap = new Dictionary<uint, MultiMap<uint, uint>>();
         Dictionary<uint, PetDefaultSpellsEntry> mPetDefaultSpellsMap = new Dictionary<uint, PetDefaultSpellsEntry>();           // only spells not listed in related mPetLevelupSpellMap entry
         Dictionary<uint, SpellInfo> mSpellInfoMap = new Dictionary<uint, SpellInfo>();
+        Dictionary<Tuple<uint, byte>, uint> mSpellTotemModel = new Dictionary<Tuple<uint, byte>, uint>();
 
         public delegate void AuraEffectHandler(AuraEffect effect, AuraApplication aurApp, AuraEffectHandleModes mode, bool apply);
         Dictionary<AuraType, AuraEffectHandler> AuraEffectHandlers = new Dictionary<AuraType, AuraEffectHandler>();

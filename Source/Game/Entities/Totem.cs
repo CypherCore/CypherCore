@@ -68,18 +68,11 @@ namespace Game.Entities
                 }
 
                 // set display id depending on caster's race
-                SpellInfo createdBySpell = Global.SpellMgr.GetSpellInfo(GetUInt32Value(UnitFields.CreatedBySpell));
-                if (createdBySpell != null)
-                {
-                    SpellEffectInfo[] effects = createdBySpell.GetEffectsForDifficulty(Difficulty.None);
-                    var summonEffect = effects.FirstOrDefault(effect =>
-                    {
-                        return effect != null && effect.IsEffect(SpellEffectName.Summon);
-                    });
-
-                    if (summonEffect != null)
-                        SetDisplayId(owner.GetModelForTotem((PlayerTotemType)summonEffect.MiscValueB));
-                }
+                uint totemDisplayId = Global.SpellMgr.GetModelForTotem(GetUInt32Value(UnitFields.CreatedBySpell), owner.GetRace());
+                if (totemDisplayId == 0)
+                    Log.outError(LogFilter.Spells, $"Spell {GetUInt32Value(UnitFields.CreatedBySpell)} with RaceID ({owner.GetRace()}) have no totem model data defined, set to default model.");
+                else
+                    SetDisplayId(totemDisplayId);
             }
 
             base.InitStats(duration);

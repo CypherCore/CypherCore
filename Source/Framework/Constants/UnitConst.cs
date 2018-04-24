@@ -83,13 +83,6 @@ namespace Framework.Constants
         MiniPet = 5,
         Quest = 6,
     }
-    public enum PlayerTotemType
-    {
-        Fire = 63,
-        Earth = 81,
-        Water = 82,
-        Air = 83
-    }
 
     public enum BaseModType
     {

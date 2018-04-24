@@ -390,6 +390,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading PetFamilySpellsStore Data...");
             Global.SpellMgr.LoadPetFamilySpellsStore();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading Spell Totem models...");
+            Global.SpellMgr.LoadSpellTotemModel();
+
             Log.outInfo(LogFilter.ServerLoading, "Loading GameObject models...");
             GameObjectModel.LoadGameObjectModelList();
 
