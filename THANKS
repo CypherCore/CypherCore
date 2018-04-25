@@ -1,7 +1,11 @@
 = CypherCore -- Thanks/credits file =
 
-Special thanks goes out to Arctium and TrinityCore. We have gained base code and help from
-them many times in the creation of this project. Keep up the good work guys.
+Special Thanks To:
 
-Arctium  (https://arctium.org/)
-TrinityCore (http://www.trinitycore.org)
+- Arctium (https://arctium.org/)
+For the base code, and tons of help and ideas.
+
+- TrinityCore (http://www.trinitycore.org)
+For code and DB. As CypherCore is a full port of them.
+We still add commits from them to keep CypherCore updated.
+Much of CpherCore is from them, and we give them alots of thanks.
