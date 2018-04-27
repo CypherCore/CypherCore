@@ -7317,9 +7317,10 @@ namespace Game
         {
             uint oldMSTime = Time.GetMSTime();
 
-            _questGreetingStorage.Clear(); // need for reload case
+            for (var i = 0; i < 2; ++i)
+                _questGreetingStorage[i] = new Dictionary<uint, QuestGreeting>();
 
-            //                                                0   1          2                3     
+            //                                         0   1          2                3     
             SQLResult result = DB.World.Query("SELECT ID, type, GreetEmoteType, GreetEmoteDelay, Greeting FROM quest_greeting");
             if (result.IsEmpty())
             {
@@ -7327,15 +7328,15 @@ namespace Game
                 return;
             }
 
+            uint count = 0;
             do
             {
                 uint id = result.Read<uint>(0);
                 byte type = result.Read<byte>(1);
-                // overwrite
+
                 switch (type)
                 {
                     case 0: // Creature
-                        type = (byte)TypeId.Unit;
                         if (Global.ObjectMgr.GetCreatureTemplate(id) == null)
                         {
                             Log.outError(LogFilter.Sql, "Table `quest_greeting`: creature template entry {0} does not exist.", id);
@@ -7343,7 +7344,6 @@ namespace Game
                         }
                         break;
                     case 1: // GameObject
-                        type = (byte)TypeId.GameObject;
                         if (Global.ObjectMgr.GetGameObjectTemplate(id) == null)
                         {
                             Log.outError(LogFilter.Sql, "Table `quest_greeting`: gameobject template entry {0} does not exist.", id);
@@ -7358,14 +7358,12 @@ namespace Game
                 uint greetEmoteDelay = result.Read<uint>(3);
                 string greeting = result.Read<string>(4);
 
-                if (!_questGreetingStorage.ContainsKey(type))
-                    _questGreetingStorage[type] = new Dictionary<uint, QuestGreeting>();
-
                 _questGreetingStorage[type][id] = new QuestGreeting(greetEmoteType, greetEmoteDelay, greeting);
+                count++;
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} quest_greeting in {1} ms", _questGreetingStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} quest_greeting in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         public Quest GetQuestTemplate(uint questId)
@@ -7424,17 +7422,29 @@ namespace Game
         {
             return _questAreaTriggerStorage.LookupByKey(triggerId);
         }
-        public QuestGreeting GetQuestGreeting(ObjectGuid guid)
+        public QuestGreeting GetQuestGreeting(TypeId type, uint id)
         {
-            var dic = _questGreetingStorage.LookupByKey(guid.GetTypeId());
-            if (dic.Empty())
+            byte typeIndex;
+            if (type == TypeId.Unit)
+                typeIndex = 0;
+            else if (type == TypeId.GameObject)
+                typeIndex = 1;
+            else
                 return null;
 
-            var greeting = dic.LookupByKey(guid.GetEntry());
-            if (greeting == null)
+            return _questGreetingStorage[typeIndex].LookupByKey(id);
+        }
+        public QuestGreetingLocale GetQuestGreetingLocale(TypeId type, uint id)
+        {
+            byte typeIndex;
+            if (type == TypeId.Unit)
+                typeIndex = 0;
+            else if (type == TypeId.GameObject)
+                typeIndex = 1;
+            else
                 return null;
 
-            return greeting;
+            return _questGreetingLocaleStorage[typeIndex].LookupByKey(id);
         }
 
         //Spells /Skills / Phases
@@ -7889,6 +7899,60 @@ namespace Game
             while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Quest Objectives locale strings in {1} ms", _questObjectivesLocaleStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+        }
+        public void LoadQuestGreetingLocales()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            for (var i = 0; i < 2; ++i)
+                _questGreetingLocaleStorage[i] = new Dictionary<uint, QuestGreetingLocale>();
+
+            //                                         0   1     2       3
+            SQLResult result = DB.World.Query("SELECT Id, type, locale, Greeting FROM quest_greeting_locale");
+            if (result.IsEmpty())
+                return;
+
+            uint count = 0;
+            do
+            {
+                uint id = result.Read<uint>(0);
+                byte type = result.Read<byte>(1);
+                switch (type)
+                {
+                    case 0: // Creature
+                        if (GetCreatureTemplate(id) == null)
+                        {
+                            Log.outError(LogFilter.Sql, $"Table `quest_greeting_locale`: creature template entry {id} does not exist.");
+                            continue;
+                        }
+                        break;
+                    case 1: // GameObject
+                        if (GetGameObjectTemplate(id) == null)
+                        {
+                            Log.outError(LogFilter.Sql, $"Table `quest_greeting_locale`: gameobject template entry {id} does not exist.");
+                            continue;
+                        }
+                        break;
+                    default:
+                        continue;
+                }
+
+                string localeName = result.Read<string>(2);
+
+                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
+                if (locale == LocaleConstant.enUS)
+                    continue;
+
+                if (!_questGreetingLocaleStorage[type].ContainsKey(id))
+                    _questGreetingLocaleStorage[type][id] = new QuestGreetingLocale();
+
+                QuestGreetingLocale data = _questGreetingLocaleStorage[type][id];
+                AddLocaleString(result.Read<string>(3), locale, data.Greeting);
+                ++count;
+            }
+            while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Quest Greeting locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
         public void LoadQuestOfferRewardLocale()
         {
@@ -9580,7 +9644,8 @@ namespace Game
         MultiMap<uint, QuestPOI> _questPOIStorage = new MultiMap<uint, QuestPOI>();
         MultiMap<uint, uint> _questAreaTriggerStorage = new MultiMap<uint, uint>();
         Dictionary<uint, QuestObjective> _questObjectives = new Dictionary<uint, QuestObjective>();
-        Dictionary<byte, Dictionary<uint, QuestGreeting>> _questGreetingStorage = new Dictionary<byte, Dictionary<uint, QuestGreeting>>();
+        Dictionary<uint, QuestGreeting>[] _questGreetingStorage = new Dictionary<uint, QuestGreeting>[2];
+        Dictionary<uint, QuestGreetingLocale>[] _questGreetingLocaleStorage = new Dictionary<uint, QuestGreetingLocale>[2];
 
         //Scripts
         List<string> scriptNamesStorage = new List<string>();
@@ -10104,24 +10169,6 @@ namespace Game
 
         public int X;
         public int Y;
-    }
-
-    public class QuestGreeting
-    {
-        public QuestGreeting()
-        {
-            greeting = "";
-        }
-        public QuestGreeting(ushort _greetEmoteType, uint _greetEmoteDelay, string _greeting)
-        {
-            greetEmoteType = _greetEmoteType;
-            greetEmoteDelay = _greetEmoteDelay;
-            greeting = _greeting;
-        }
-
-        public ushort greetEmoteType;
-        public uint greetEmoteDelay;
-        public string greeting;
     }
 
     public class AreaTriggerStruct

@@ -2443,7 +2443,7 @@ namespace Game.Entities
             {
                 if (PlayerTalkClass.GetGossipMenu().IsEmpty() && !PlayerTalkClass.GetQuestMenu().IsEmpty())
                 {
-                    SendPreparedQuest(source.GetGUID());
+                    SendPreparedQuest(source);
                     return;
                 }
             }
@@ -2518,7 +2518,7 @@ namespace Game.Entities
                     break;
                 case GossipOption.Questgiver:
                     PrepareQuestMenu(guid);
-                    SendPreparedQuest(guid);
+                    SendPreparedQuest(source);
                     break;
                 case GossipOption.Vendor:
                 case GossipOption.Armorer:

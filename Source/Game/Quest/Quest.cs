@@ -545,6 +545,29 @@ namespace Game
         public int[] ObjectiveData;
     }
 
+    public class QuestGreeting
+    {
+        public QuestGreeting()
+        {
+            Text = "";
+        }
+        public QuestGreeting(ushort emoteType, uint emoteDelay, string text)
+        {
+            EmoteType = emoteType;
+            EmoteDelay = emoteDelay;
+            Text = text;
+        }
+
+        public ushort EmoteType;
+        public uint EmoteDelay;
+        public string Text;
+    }
+
+    public class QuestGreetingLocale
+    {
+        public StringArray Greeting = new StringArray((int)LocaleConstant.Total);
+    }
+
     public class QuestTemplateLocale
     {
         public StringArray LogTitle = new StringArray((int)LocaleConstant.Total);

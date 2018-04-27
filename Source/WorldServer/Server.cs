@@ -45,6 +45,9 @@ namespace WorldServer
             if (!StartDB())
                 ExitNow();
 
+            // Server startup begin
+            uint startupBegin = Time.GetMSTime();
+
             // set server offline (not connectable)
             DB.Login.Execute("UPDATE realmlist SET flag = (flag & ~{0}) | {1} WHERE id = '{2}'", (uint)RealmFlags.VersionMismatch, (uint)RealmFlags.Offline, Global.WorldMgr.GetRealm().Id.Realm);
 
@@ -86,6 +89,9 @@ namespace WorldServer
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
+
+            uint startupDuration = Time.GetMSTimeDiffToNow(startupBegin);
+            Log.outInfo(LogFilter.Server, "World initialized in {0} minutes {1} seconds", (startupDuration / 60000), ((startupDuration % 60000) / 1000));
 
             WorldUpdateLoop();
 

@@ -339,20 +339,28 @@ namespace Game.Misc
             _session.SendPacket(packet);
         }
 
-        public void SendQuestGiverQuestListMessage(ObjectGuid guid)
+        public void SendQuestGiverQuestListMessage(WorldObject questgiver)
         {
+            ObjectGuid guid = questgiver.GetGUID();
+            LocaleConstant localeConstant = _session.GetSessionDbLocaleIndex();
+
             QuestGiverQuestListMessage questList = new QuestGiverQuestListMessage();
             questList.QuestGiverGUID = guid;
 
-            QuestGreeting questGreeting = Global.ObjectMgr.GetQuestGreeting(guid);
+            QuestGreeting questGreeting = Global.ObjectMgr.GetQuestGreeting(questgiver.GetTypeId(), questgiver.GetEntry());
             if (questGreeting != null)
             {
-                questList.GreetEmoteDelay = questGreeting.greetEmoteDelay;
-                questList.GreetEmoteType = questGreeting.greetEmoteType;
-                questList.Greeting = questGreeting.greeting;
+                questList.GreetEmoteDelay = questGreeting.EmoteDelay;
+                questList.GreetEmoteType = questGreeting.EmoteType;
+                questList.Greeting = questGreeting.Text;
+
+                if (localeConstant != LocaleConstant.enUS)
+                {
+                    QuestGreetingLocale questGreetingLocale = Global.ObjectMgr.GetQuestGreetingLocale(questgiver.GetTypeId(), questgiver.GetEntry());
+                    if (questGreetingLocale != null)
+                        ObjectManager.GetLocaleString(questGreetingLocale.Greeting, localeConstant, ref questList.Greeting);
+                }
             }
-            else
-                Log.outError(LogFilter.Server, "Guid: {0} - No quest greeting found.", guid.ToString());
 
             for (var i = 0; i < _questMenu.GetMenuItemCount(); ++i)
             {
@@ -364,12 +372,11 @@ namespace Game.Misc
                 {
                     string title = quest.LogTitle;
 
-                    LocaleConstant locale = _session.GetSessionDbLocaleIndex();
-                    if (locale != LocaleConstant.enUS)
+                    if (localeConstant != LocaleConstant.enUS)
                     {
                         QuestTemplateLocale localeData = Global.ObjectMgr.GetQuestLocale(quest.Id);
                         if (localeData != null)
-                            ObjectManager.GetLocaleString(localeData.LogTitle, locale, ref title);
+                            ObjectManager.GetLocaleString(localeData.LogTitle, localeConstant, ref title);
                     }
 
                     GossipText text = new GossipText();

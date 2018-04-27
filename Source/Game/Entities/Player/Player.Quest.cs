@@ -280,7 +280,7 @@ namespace Game.Entities
             }
         }
 
-        public void SendPreparedQuest(ObjectGuid guid)
+        public void SendPreparedQuest(WorldObject source)
         {
             QuestMenu questMenu = PlayerTalkClass.GetQuestMenu();
             if (questMenu.IsEmpty())
@@ -298,36 +298,35 @@ namespace Game.Entities
                 {
                     if (qmi0.QuestIcon == 4)
                     {
-                        PlayerTalkClass.SendQuestGiverRequestItems(quest, guid, CanRewardQuest(quest, false), true);
+                        PlayerTalkClass.SendQuestGiverRequestItems(quest, source.GetGUID(), CanRewardQuest(quest, false), true);
                         return;
                     }
                     // Send completable on repeatable and autoCompletable quest if player don't have quest
                     // @todo verify if check for !quest.IsDaily() is really correct (possibly not)
                     else
                     {
-                        WorldObject obj = Global.ObjAccessor.GetObjectByTypeMask(this, guid, TypeMask.Unit | TypeMask.GameObject | TypeMask.Item);
-                        if (!obj || (!obj.hasQuest(questId) && !obj.hasInvolvedQuest(questId)))
+                        if (!source.hasQuest(questId) && !source.hasInvolvedQuest(questId))
                         {
                             PlayerTalkClass.SendCloseGossip();
                             return;
                         }
 
-                        if (!obj.IsTypeId(TypeId.Unit) || obj.HasFlag64(UnitFields.NpcFlags, NPCFlags.Gossip))
+                        if (!source.IsTypeId(TypeId.Unit) || source.HasFlag64(UnitFields.NpcFlags, NPCFlags.Gossip))
                         {
                             if (quest.IsAutoAccept() && CanAddQuest(quest, true) && CanTakeQuest(quest, true))
-                                AddQuestAndCheckCompletion(quest, obj);
+                                AddQuestAndCheckCompletion(quest, source);
 
                             if (quest.IsAutoComplete() && quest.IsRepeatable() && !quest.IsDailyOrWeekly())
-                                PlayerTalkClass.SendQuestGiverRequestItems(quest, guid, CanCompleteRepeatableQuest(quest), true);
+                                PlayerTalkClass.SendQuestGiverRequestItems(quest, source.GetGUID(), CanCompleteRepeatableQuest(quest), true);
                             else
-                                PlayerTalkClass.SendQuestGiverQuestDetails(quest, guid, true, false);
+                                PlayerTalkClass.SendQuestGiverQuestDetails(quest, source.GetGUID(), true, false);
                             return;
                         }
                     }
                 }
             }
 
-            PlayerTalkClass.SendQuestGiverQuestListMessage(guid);
+            PlayerTalkClass.SendQuestGiverQuestListMessage(source);
         }
 
         public bool IsActiveQuest(uint quest_id)

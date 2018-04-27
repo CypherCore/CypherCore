@@ -304,9 +304,6 @@ namespace Game
 
         public void SetInitialWorldSettings()
         {
-            // Server startup begin
-            uint startupBegin = Time.GetMSTime();
-
             LoadRealmInfo();
 
             LoadConfigSettings();
@@ -411,6 +408,7 @@ namespace Game
             Global.ObjectMgr.LoadCreatureLocales();
             Global.ObjectMgr.LoadGameObjectLocales();
             Global.ObjectMgr.LoadQuestTemplateLocale();
+            Global.ObjectMgr.LoadQuestGreetingLocales();
             Global.ObjectMgr.LoadQuestOfferRewardLocale();
             Global.ObjectMgr.LoadQuestRequestItemsLocale();
             Global.ObjectMgr.LoadQuestObjectivesLocale();
@@ -966,10 +964,6 @@ namespace Game
                     }
                 });
             }
-
-            uint startupDuration = Time.GetMSTimeDiffToNow(startupBegin);
-
-            Log.outInfo(LogFilter.Server, "World initialized in {0} minutes {1} seconds", (startupDuration / 60000), ((startupDuration % 60000) / 1000));
 
             Log.SetRealmId(_realm.Id.Realm);
         }
@@ -1765,7 +1759,7 @@ namespace Game
                 AddSession_(sess);
 
             // Then send an update signal to remaining ones
-            foreach (var pair in m_sessions.ToList())
+            foreach (var pair in m_sessions)
             {
                 WorldSession session = pair.Value;
                 WorldSessionFilter updater = new WorldSessionFilter(session);
@@ -1775,7 +1769,7 @@ namespace Game
                         m_disconnects[session.GetAccountId()] = Time.UnixTime;
 
                     RemoveQueuedPlayer(session);
-                    m_sessions.Remove(pair.Key);
+                    m_sessions.TryRemove(pair.Key, out WorldSession tempSession);
                     session.Dispose();
                 }
             }
@@ -2422,7 +2416,7 @@ namespace Game
         uint m_updateTimeCount;
         uint m_currentTime;
 
-        Dictionary<uint, WorldSession> m_sessions = new Dictionary<uint, WorldSession>();
+        ConcurrentDictionary<uint, WorldSession> m_sessions = new ConcurrentDictionary<uint, WorldSession>();
         Dictionary<uint, long> m_disconnects = new Dictionary<uint, long>();
         uint m_maxActiveSessionCount;
         uint m_maxQueuedSessionCount;

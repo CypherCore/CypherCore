@@ -3132,7 +3132,7 @@ namespace Game.Entities
 
         public uint GetModelForTotem(uint spellId, Race race)
         {
-            return mSpellTotemModel.LookupByKey(Tuple.Create(spellId, race));
+            return mSpellTotemModel.LookupByKey(Tuple.Create(spellId, (byte)race));
         }
 
         #region Fields

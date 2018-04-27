@@ -19,7 +19,6 @@ public partial class Detour
 
 public partial class Detour
 {
-
     public enum dtNodeFlags
     {
         DT_NODE_OPEN = 0x01,
