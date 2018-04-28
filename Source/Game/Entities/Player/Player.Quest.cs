@@ -1809,7 +1809,7 @@ namespace Game.Entities
                 {
                     if (spell.flags.HasAnyFlag(SpellAreaFlag.AutoRemove) && !spell.IsFitToRequirements(this, zone, area))
                         RemoveAurasDueToSpell(spell.spellId);
-                    else if (spell.flags.HasAnyFlag(SpellAreaFlag.AutoCast))
+                    else if (spell.flags.HasAnyFlag(SpellAreaFlag.AutoCast) && !spell.flags.HasAnyFlag(SpellAreaFlag.IgnoreAutocastOnQuestStatusChange))
                         if (!HasAura(spell.spellId))
                             CastSpell(this, spell.spellId, true);
                 }
