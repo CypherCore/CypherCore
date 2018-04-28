@@ -3017,7 +3017,7 @@ namespace Game.Entities
 
             if (inBankAlso)
             {
-                for (byte i = InventorySlots.BankItemStart; i < InventorySlots.BankItemEnd; i++)
+                for (byte i = InventorySlots.BankItemStart; i < InventorySlots.BankBagEnd; i++)
                 {
                     Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                     if (pItem != null && pItem.GetEntry() == item && !pItem.IsInTrade())
@@ -5890,6 +5890,37 @@ namespace Game.Entities
                                     return;
                                 }
                             }
+                        }
+                    }
+                }
+            }
+
+            // in bank bag list
+            for (byte i = InventorySlots.BankBagStart; i < InventorySlots.BankBagEnd; i++)
+            {
+                Item item = GetItemByPos(InventorySlots.Bag0, i);
+                if (item)
+                {
+                    if (item.GetEntry() == itemEntry && !item.IsInTrade())
+                    {
+                        if (item.GetCount() + remcount <= count)
+                        {
+                            if (!unequip_check || CanUnequipItem((ushort)(InventorySlots.Bag0 << 8 | i), false) == InventoryResult.Ok)
+                            {
+                                remcount += item.GetCount();
+                                DestroyItem(InventorySlots.Bag0, i, update);
+                                if (remcount >= count)
+                                    return;
+                            }
+                        }
+                        else
+                        {
+                            ItemRemovedQuestCheck(item.GetEntry(), count - remcount);
+                            item.SetCount(item.GetCount() - count + remcount);
+                            if (IsInWorld && update)
+                                item.SendUpdateToPlayer(this);
+                            item.SetState(ItemUpdateState.Changed, this);
+                            return;
                         }
                     }
                 }
