@@ -520,9 +520,7 @@ namespace Game
                 {
                     _player.ModifyMoney(-price);
                     _player.RemoveItemFromBuyBackSlot(packet.Slot, false);
-                    _player.ItemAddedQuestCheck(pItem.GetEntry(), pItem.GetCount());
-                    _player.UpdateCriteria(CriteriaTypes.ReceiveEpicItem, pItem.GetEntry(), pItem.GetCount());
-                    _player.StoreItem(dest, pItem, true);
+                    _player.MoveItemToInventory(dest, pItem, true);
                 }
                 else
                     _player.SendEquipError(msg, pItem);

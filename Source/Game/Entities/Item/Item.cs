@@ -429,18 +429,6 @@ namespace Game.Entities
 
             SetUInt32Value(ItemFields.Flags, itemFlags);
 
-            _LoadIntoDataField(fields.Read<string>(8), (uint)ItemFields.Enchantment, (uint)EnchantmentSlot.Max * (uint)EnchantmentOffset.Max);
-            m_randomEnchantment.Type = (ItemRandomEnchantmentType)fields.Read<byte>(9);
-            m_randomEnchantment.Id = fields.Read<uint>(10);
-            if (m_randomEnchantment.Type == ItemRandomEnchantmentType.Property)
-                SetUInt32Value(ItemFields.RandomPropertiesId, m_randomEnchantment.Id);
-            else if (m_randomEnchantment.Type == ItemRandomEnchantmentType.Suffix)
-            {
-                SetInt32Value(ItemFields.RandomPropertiesId, -(int)m_randomEnchantment.Id);
-                // recalculate suffix factor
-                UpdateItemSuffixFactor();
-            }
-
             uint durability = fields.Read<uint>(11);
             SetUInt32Value(ItemFields.Durability, durability);
             // update max durability (and durability) if need
@@ -517,6 +505,19 @@ namespace Game.Entities
 
             SetModifier(ItemModifier.ScalingStatDistributionFixedLevel, fields.Read<uint>(43));
             SetModifier(ItemModifier.ArtifactKnowledgeLevel, fields.Read<uint>(44));
+
+            // Enchants must be loaded after all other bonus/scaling data
+            _LoadIntoDataField(fields.Read<string>(8), (uint)ItemFields.Enchantment, (uint)EnchantmentSlot.Max * (uint)EnchantmentOffset.Max);
+            m_randomEnchantment.Type = (ItemRandomEnchantmentType)fields.Read<byte>(9);
+            m_randomEnchantment.Id = fields.Read<uint>(10);
+            if (m_randomEnchantment.Type == ItemRandomEnchantmentType.Property)
+                SetUInt32Value(ItemFields.RandomPropertiesId, m_randomEnchantment.Id);
+            else if (m_randomEnchantment.Type == ItemRandomEnchantmentType.Suffix)
+            {
+                SetInt32Value(ItemFields.RandomPropertiesId, -(int)m_randomEnchantment.Id);
+                // recalculate suffix factor
+                UpdateItemSuffixFactor();
+            }
 
             // Remove bind flag for items vs NO_BIND set
             if (IsSoulBound() && GetBonding() == ItemBondingType.None)
@@ -699,9 +700,19 @@ namespace Game.Entities
 
         void UpdateItemSuffixFactor()
         {
-            uint suffixFactor = ItemEnchantment.GenerateEnchSuffixFactor(GetEntry());
+            if (GetTemplate().GetRandomSuffix() == 0)
+                return;
+
+            uint suffixFactor = 0;
+            Player owner = GetOwner();
+            if (owner)
+                suffixFactor = ItemEnchantment.GetRandomPropertyPoints(GetItemLevel(owner), GetQuality(), GetTemplate().GetInventoryType(), GetTemplate().GetSubClass());
+            else
+                suffixFactor = ItemEnchantment.GenerateEnchSuffixFactor(GetEntry());
+
             if (GetItemSuffixFactor() == suffixFactor)
                 return;
+
             SetUInt32Value(ItemFields.PropertySeed, suffixFactor);
         }
 
@@ -2388,6 +2399,35 @@ namespace Game.Entities
             SetState(ItemUpdateState.Changed, owner);
         }
 
+        public void SetFixedLevel(uint level)
+        {
+            if (!_bonusData.HasFixedLevel || GetModifier(ItemModifier.ScalingStatDistributionFixedLevel) != 0)
+                return;
+
+            ScalingStatDistributionRecord ssd = CliDB.ScalingStatDistributionStorage.LookupByKey(_bonusData.ScalingStatDistribution);
+            if (ssd != null)
+            {
+                level = Math.Min(Math.Max(level, ssd.MinLevel), ssd.MaxLevel);
+
+                SandboxScalingRecord sandbox = CliDB.SandboxScalingStorage.LookupByKey(_bonusData.SandboxScalingId);
+                if (sandbox != null)
+                    if ((sandbox.Flags.HasAnyFlag(2u) || sandbox.MinLevel != 0 || sandbox.MaxLevel != 0) && !sandbox.Flags.HasAnyFlag(4u))
+                        level = Math.Min(Math.Max(level, sandbox.MinLevel), sandbox.MaxLevel);
+
+                SetModifier(ItemModifier.ScalingStatDistributionFixedLevel, level);
+            }
+        }
+
+        public int GetRequiredLevel()
+        {
+            if (_bonusData.RequiredLevelOverride != 0)
+                return _bonusData.RequiredLevelOverride;
+            else if (_bonusData.HasFixedLevel)
+                return (int)GetModifier(ItemModifier.ScalingStatDistributionFixedLevel);
+            else
+                return _bonusData.RequiredLevel;
+        }
+
         public static void AddItemsSetItem(Player player, Item item)
         {
             ItemTemplate proto = item.GetTemplate();
@@ -2582,7 +2622,6 @@ namespace Game.Entities
         public bool IsConjuredConsumable() { return GetTemplate().IsConjuredConsumable(); }
         public bool IsRangedWeapon() { return GetTemplate().IsRangedWeapon(); }
         public ItemQuality GetQuality() { return _bonusData.Quality; }
-        public int GetRequiredLevel() { return _bonusData.RequiredLevel; }
         public int GetItemStatType(uint index)
         {
             Contract.Assert(index < ItemConst.MaxStats);
@@ -2793,6 +2832,8 @@ namespace Game.Entities
             ScalingStatDistribution = proto.GetScalingStatDistribution();
             RelicType = -1;
             HasItemLevelBonus = false;
+            HasFixedLevel = false;
+            RequiredLevelOverride = 0;
 
             _state.AppearanceModPriority = int.MaxValue;
             _state.ScalingStatDistributionPriority = int.MaxValue;
@@ -2873,12 +2914,13 @@ namespace Game.Entities
                     RepairCostMultiplier *= Convert.ToSingle(values[0]) * 0.01f;
                     break;
                 case ItemBonusType.ScalingStatDistribution:
-                case ItemBonusType.ScalingStatDistribution2:
+                case ItemBonusType.ScalingStatDistributionFixed:
                     if (values[1] < _state.ScalingStatDistributionPriority)
                     {
                         ScalingStatDistribution = (uint)values[0];
                         SandboxScalingId = (uint)values[2];
                         _state.ScalingStatDistributionPriority = values[1];
+                        HasFixedLevel = type == ItemBonusType.ScalingStatDistributionFixed;
                     }
                     break;
                 case ItemBonusType.Bounding:
@@ -2888,7 +2930,7 @@ namespace Game.Entities
                     RelicType = values[0];
                     break;
                 case ItemBonusType.OverrideRequiredLevel:
-                    RequiredLevel = values[0];
+                    RequiredLevelOverride = values[0];
                     break;
             }
         }
@@ -2911,7 +2953,9 @@ namespace Game.Entities
         public int[] GemRelicType = new int[ItemConst.MaxGemSockets];
         public ushort[] GemRelicRankBonus = new ushort[ItemConst.MaxGemSockets];
         public int RelicType;
+        public int RequiredLevelOverride;
         public bool HasItemLevelBonus;
+        public bool HasFixedLevel;
         State _state;
 
         struct State

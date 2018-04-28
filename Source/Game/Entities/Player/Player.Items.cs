@@ -1274,7 +1274,6 @@ namespace Game.Entities
                 UpdateCriteria(CriteriaTypes.OwnItem, itemId, 1);
 
                 item.SetFlag(ItemFields.Flags, ItemFieldFlags.NewItem);
-                item.SetItemRandomProperties(randomPropertyId);
 
                 uint upgradeID = Global.DB2Mgr.GetRulesetItemUpgrade(itemId);
                 if (upgradeID != 0)
@@ -1288,6 +1287,9 @@ namespace Game.Entities
                 }
 
                 item = StoreItem(pos, item, update);
+
+                item.SetFixedLevel(getLevel());
+                item.SetItemRandomProperties(randomPropertyId);
 
                 if (allowedLooters != null && allowedLooters.Count > 1 && item.GetTemplate().GetMaxStackSize() == 1 && item.IsSoulBound())
                 {
@@ -1413,6 +1415,9 @@ namespace Game.Entities
                 {
                     if (pItem.IsBindedNotWith(this))
                         return InventoryResult.NotOwner;
+
+                    if (getLevel() < pItem.GetRequiredLevel())
+                        return InventoryResult.CantEquipLevelI;
 
                     InventoryResult res = CanUseItem(pProto);
                     if (res != InventoryResult.Ok)

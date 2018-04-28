@@ -543,7 +543,7 @@ namespace Game
                 if (quality != 0xffffffff && (uint)proto.GetQuality() != quality)
                     continue;
 
-                if (levelmin != 0 && (proto.GetBaseRequiredLevel() < levelmin || (levelmax != 0x00 && proto.GetBaseRequiredLevel() > levelmax)))
+                if (levelmin != 0 && (item.GetRequiredLevel() < levelmin || (levelmax != 0 && item.GetRequiredLevel() > levelmax)))
                     continue;
 
                 if (usable && player.CanUseItem(item) != InventoryResult.Ok)

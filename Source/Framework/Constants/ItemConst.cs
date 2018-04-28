@@ -339,7 +339,7 @@ namespace Framework.Constants
         RepairCostMuliplier = 10,
         ScalingStatDistribution = 11,
         DisenchantLootId = 12,
-        ScalingStatDistribution2 = 13,
+        ScalingStatDistributionFixed = 13,
         ItemLevelCanIncrease = 14, // Displays a + next to item level indicating it can warforge
         RandomEnchantment = 15, // Responsible for showing "<Random additional stats>" or "+%d Rank Random Minor Trait" in the tooltip before item is obtained
         Bounding = 16,
