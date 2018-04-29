@@ -1847,67 +1847,6 @@ namespace Game.Entities
                         CastSpell(this, spell.spellId, true);
         }
 
-
-        // Restore spellmods in case of failed cast
-        public void RestoreSpellMods(Spell spell, uint ownerAuraId = 0, Aura aura = null)
-        {
-            if (spell == null || spell.m_appliedMods.Empty())
-                return;
-
-           List<Aura> aurasQueue = new List<Aura>();
-            for (var i = 0; i < (int)SpellModOp.Max; ++i)
-            {
-                for (var j = 0; j < (int)SpellModType.End; ++j)
-                {
-                    foreach (var mod in m_spellMods[i][j])
-                    {
-                        // Spellmods without charged aura set cannot be charged
-                        if (!mod.ownerAura.IsUsingCharges())
-                            continue;
-
-                        // Restore only specific owner aura mods
-                        if (ownerAuraId != 0 && mod.spellId != ownerAuraId)
-                            continue;
-
-                        if (aura != null && mod.ownerAura != aura)
-                            continue;
-
-                        // check if mod affected this spell
-                        // first, check if the mod aura applied at least one spellmod to this spell
-                        var iterMod = spell.m_appliedMods.Find(p => p == mod.ownerAura);
-                        if (iterMod == null)
-                            continue;
-
-                        // secondly, check if the current mod is one of the spellmods applied by the mod aura
-                        if (!(mod.mask & spell.m_spellInfo.SpellFamilyFlags))
-                            continue;
-
-                        // remove from list - This will be done after all mods have been gone through
-                        // to ensure we iterate over all mods of an aura before removing said aura
-                        // from applied mods (Else, an aura with two mods on the current spell would
-                        // only see the first of its modifier restored)
-                        aurasQueue.Add(mod.ownerAura);
-
-                        // add charges back to aura
-                        mod.ownerAura.ModCharges(1);
-                    }
-                }
-            }
-
-            foreach (var removeAura in aurasQueue)
-                spell.m_appliedMods.Remove(aura);
-        }
-
-        public void RestoreAllSpellMods(uint ownerAuraId = 0, Aura aura = null)
-        {
-            for (CurrentSpellTypes i = 0; i < CurrentSpellTypes.Max; ++i)
-            {
-                Spell spell = GetCurrentSpell(i);
-                if (spell != null)
-                    RestoreSpellMods(spell, ownerAuraId, aura);
-            }
-        }
-
         public void ApplyModToSpell(SpellModifier mod, Spell spell)
         {
             if (spell == null)

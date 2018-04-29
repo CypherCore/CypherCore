@@ -882,7 +882,6 @@ namespace Game.Spells
 
             if (refresh)
             {
-                RefreshSpellMods();
                 RefreshTimers(resetPeriodicTimer);
 
                 // reset charges
@@ -890,16 +889,6 @@ namespace Game.Spells
             }
             SetNeedClientUpdateForTargets();
             return false;
-        }
-
-        void RefreshSpellMods()
-        {
-            foreach (var app in m_applications.Values)
-            {
-                Player player = app.GetTarget().ToPlayer();
-                if (player != null)
-                    player.RestoreAllSpellMods(0, this);
-            }
         }
 
         public bool HasMoreThanOneEffectForType(AuraType auraType)

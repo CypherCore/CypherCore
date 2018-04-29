@@ -2541,13 +2541,10 @@ namespace Game.Spells
                     triggeredByAura.GetBase().SetDuration(0);
                 }
 
+                // cleanup after mod system
+                // triggered spell pointer can be not removed in some cases
                 if (m_caster.IsTypeId(TypeId.Player))
-                {
-                    m_caster.ToPlayer().RestoreSpellMods(this);
-                    // cleanup after mod system
-                    // triggered spell pointer can be not removed in some cases
                     m_caster.ToPlayer().SetSpellModTakingSpell(this, false);
-                }
 
                 if (param1 != 0 || param2 != 0)
                     SendCastResult(result, param1, param2);
@@ -2659,8 +2656,6 @@ namespace Game.Spells
             {
                 case SpellState.Preparing:
                     CancelGlobalCooldown();
-                    if (m_caster.IsTypeId(TypeId.Player))
-                        m_caster.ToPlayer().RestoreSpellMods(this);
                     goto case SpellState.Delayed;
                 case SpellState.Delayed:
                     SendInterrupted(0);
@@ -2763,13 +2758,12 @@ namespace Game.Spells
                 {
                     SendCastResult(castResult, param1, param2);
                     SendInterrupted(0);
-                    //restore spell mods
+
+                    // cleanup after mod system
+                    // triggered spell pointer can be not removed in some cases
                     if (m_caster.IsTypeId(TypeId.Player))
-                    {
-                        m_caster.ToPlayer().RestoreSpellMods(this);
-                        // cleanup after mod system
                         m_caster.ToPlayer().SetSpellModTakingSpell(this, false);
-                    }
+
                     finish(false);
                     SetExecutedCurrently(false);
                     return;
@@ -2790,9 +2784,10 @@ namespace Game.Spells
                                 my_trade.SetSpell(m_spellInfo.Id, m_CastItem);
                                 SendCastResult(SpellCastResult.DontReport);
                                 SendInterrupted(0);
-                                m_caster.ToPlayer().RestoreSpellMods(this);
+
                                 // cleanup after mod system
                                 m_caster.ToPlayer().SetSpellModTakingSpell(this, false);
+
                                 finish(false);
                                 SetExecutedCurrently(false);
                                 return;
@@ -2820,13 +2815,12 @@ namespace Game.Spells
             if (m_spellState == SpellState.Finished)
             {
                 SendInterrupted(0);
-                //restore spell mods
+
+                // cleanup after mod system
+                // triggered spell pointer can be not removed in some cases
                 if (m_caster.IsTypeId(TypeId.Player))
-                {
-                    m_caster.ToPlayer().RestoreSpellMods(this);
-                    // cleanup after mod system
                     m_caster.ToPlayer().SetSpellModTakingSpell(this, false);
-                }
+
                 finish(false);
                 SetExecutedCurrently(false);
                 return;
