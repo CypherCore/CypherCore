@@ -180,6 +180,11 @@ namespace Game.Entities
             if (IsTypeId(TypeId.Unit) && !IsPet())
                 DoneTotalMod *= ToCreature().GetSpellDamageMod(ToCreature().GetCreatureTemplate().Rank);
 
+            // Versatility
+            Player modOwner = GetSpellModOwner();
+            if (modOwner)
+                MathFunctions.AddPct(ref DoneTotalMod, modOwner.GetRatingBonusValue(CombatRating.VersatilityDamageDone) + modOwner.GetTotalAuraModifier(AuraType.ModVersatility));
+
             float maxModDamagePercentSchool = 0.0f;
             if (IsTypeId(TypeId.Player))
             {
@@ -270,6 +275,15 @@ namespace Game.Entities
                 // get all auras from caster that allow the spell to ignore resistance (sanctified wrath)
                 TakenTotalCasterMod += GetTotalAuraModifierByMiscMask(AuraType.ModIgnoreTargetResist, (int)spellProto.GetSchoolMask());
 
+                // Versatility
+                Player modOwner = GetSpellModOwner();
+                if (modOwner)
+                {
+                    // only 50% of SPELL_AURA_MOD_VERSATILITY for damage reduction
+                    float versaBonus = modOwner.GetTotalAuraModifier(AuraType.ModVersatility) / 2.0f;
+                    MathFunctions.AddPct(ref TakenTotalMod, -(modOwner.GetRatingBonusValue(CombatRating.VersatilityDamageTaken) + versaBonus));
+                }
+
                 // from positive and negative SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN
                 // multiplicative bonus, for example Dispersion + Shadowform (0.10*0.85=0.085)
                 TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(AuraType.ModDamagePercentTaken, (uint)spellProto.GetSchoolMask());
@@ -291,7 +305,6 @@ namespace Game.Entities
                 if (TakenAdvertisedBenefit != 0)
                 {
                     // level penalty still applied on Taken bonus - is it blizzlike?
-                    Player modOwner = GetSpellModOwner();
                     if (modOwner)
                     {
                         coeff *= 100.0f;
@@ -489,6 +502,9 @@ namespace Game.Entities
             // No bonus healing for potion spells
             if (spellProto.SpellFamilyName == SpellFamilyNames.Potion)
                 return 1.0f;
+
+            if (IsPlayer())
+                return GetFloatValue(PlayerFields.ModHealingDonePct);
 
             float DoneTotalMod = 1.0f;
 

@@ -2782,6 +2782,15 @@ namespace Game.Entities
             else
                 TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModRangedDamageTakenPct);
 
+            // Versatility
+            Player modOwner = GetSpellModOwner();
+            if (modOwner)
+            {
+                // only 50% of SPELL_AURA_MOD_VERSATILITY for damage reduction
+                float versaBonus = modOwner.GetTotalAuraModifier(AuraType.ModVersatility) / 2.0f;
+                MathFunctions.AddPct(ref TakenTotalMod, -(modOwner.GetRatingBonusValue(CombatRating.VersatilityDamageTaken) + versaBonus));
+            }
+
             float tmpDamage = 0.0f;
 
             if (TakenTotalCasterMod != 0)

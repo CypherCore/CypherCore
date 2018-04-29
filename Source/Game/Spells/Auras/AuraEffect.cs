@@ -3136,6 +3136,17 @@ namespace Game.Spells
             target.ToPlayer().UpdateSpellDamageAndHealingBonus();
         }
 
+        [AuraEffectHandler(AuraType.ModHealingDonePercent)]
+        void HandleModHealingDonePct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
+                return;
+
+            Player player = aurApp.GetTarget().ToPlayer();
+            if (player)
+                player.UpdateHealingDonePercentMod();
+        }
+
         [AuraEffectHandler(AuraType.ModTotalStatPercentage)]
         void HandleModTotalPercentStat(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
@@ -3284,6 +3295,21 @@ namespace Game.Spells
             target.ApplyModSignedFloatValue(PlayerFields.OverrideApBySpellPowerPercent, m_amount, apply);
             target.UpdateAttackPowerAndDamage();
             target.UpdateAttackPowerAndDamage(true);
+        }
+
+        [AuraEffectHandler(AuraType.ModVersatility)]
+        void HandleModVersatilityByPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
+                return;
+
+            Player target = aurApp.GetTarget().ToPlayer();
+            if (target)
+            {
+                target.SetStatFloatValue(PlayerFields.VersatilityBonus, target.GetTotalAuraModifier(AuraType.ModVersatility));
+                target.UpdateHealingDonePercentMod();
+                target.UpdateVersatilityDamageDone();
+            }
         }
 
         [AuraEffectHandler(AuraType.ModMaxPower)]

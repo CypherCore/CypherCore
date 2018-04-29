@@ -492,7 +492,7 @@ namespace Framework.Constants
         TriggerSpellOnHealthPct = 468,
         ShowConfirmationPromptWithDifficulty = 469,
         Unk470 = 470,
-        ModVersatility = 471, // NYI
+        ModVersatility = 471,
         Unk472 = 472,
         PreventDurabilityLossFromCombat = 473,
         Unk474 = 474,

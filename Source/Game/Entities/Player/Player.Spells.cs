@@ -866,6 +866,12 @@ namespace Game.Entities
                                         ApplyRatingMod(CombatRating.Mastery, (int)enchant_amount, apply);
                                         Log.outDebug(LogFilter.Player, "+ {0} MASTERY", enchant_amount);
                                         break;
+                                    case ItemModType.Versatility:
+                                        ApplyRatingMod(CombatRating.VersatilityDamageDone, (int)enchant_amount, apply);
+                                        ApplyRatingMod(CombatRating.VersatilityHealingDone, (int)enchant_amount, apply);
+                                        ApplyRatingMod(CombatRating.VersatilityDamageTaken, (int)enchant_amount, apply);
+                                        Log.outDebug(LogFilter.Player, "+ {0} VERSATILITY", enchant_amount);
+                                        break;
                                     default:
                                         break;
                                 }

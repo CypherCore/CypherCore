@@ -928,6 +928,7 @@ namespace Game.Entities
 
             UpdateRating(combatRating);
         }
+
         public override void CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bool addTotalPct, out float min_damage, out float max_damage)
         {
             UnitMods unitMod;
@@ -956,6 +957,10 @@ namespace Game.Entities
             float weaponMinDamage = GetWeaponDamageRange(attType, WeaponDamageRange.MinDamage);
             float weaponMaxDamage = GetWeaponDamageRange(attType, WeaponDamageRange.MaxDamage);
 
+            float versaDmgMod = 1.0f;
+
+            MathFunctions.AddPct(ref versaDmgMod, GetRatingBonusValue(CombatRating.VersatilityDamageDone) + (float)GetTotalAuraModifier(AuraType.ModVersatility));
+
             SpellShapeshiftFormRecord shapeshift = CliDB.SpellShapeshiftFormStorage.LookupByKey(GetShapeshiftForm());
             if (shapeshift != null && shapeshift.CombatRoundTime != 0)
             {
@@ -975,9 +980,10 @@ namespace Game.Entities
                 weaponMaxDamage = SharedConst.BaseMaxDamage;
             }
 
-            min_damage = ((baseValue + weaponMinDamage) * basePct + totalValue) * totalPct;
-            max_damage = ((baseValue + weaponMaxDamage) * basePct + totalValue) * totalPct;
+            min_damage = ((baseValue + weaponMinDamage) * basePct + totalValue) * totalPct * versaDmgMod;
+            max_damage = ((baseValue + weaponMaxDamage) * basePct + totalValue) * totalPct * versaDmgMod;
         }
+
         void UpdateAllCritPercentages()
         {
             float value = 5.0f;
@@ -1296,6 +1302,12 @@ namespace Game.Entities
                 case CombatRating.Mastery:
                     UpdateMastery();
                     break;
+                case CombatRating.VersatilityDamageDone:
+                    UpdateVersatilityDamageDone();
+                    break;
+                case CombatRating.VersatilityHealingDone:
+                    UpdateHealingDonePercentMod();
+                    break;
             }
         }
         public void UpdateMastery()
@@ -1332,6 +1344,29 @@ namespace Game.Entities
                     }
                 }
             }
+        }
+
+        public void UpdateVersatilityDamageDone()
+        {
+            // No proof that CR_VERSATILITY_DAMAGE_DONE is allways = PLAYER_VERSATILITY
+            SetUInt32Value(PlayerFields.Versatility, GetUInt32Value(PlayerFields.CombatRating1 + (int)CombatRating.VersatilityDamageDone));
+
+            if (GetClass() == Class.Hunter)
+                UpdateDamagePhysical(WeaponAttackType.RangedAttack);
+            else
+                UpdateDamagePhysical(WeaponAttackType.BaseAttack);
+        }
+
+        public void UpdateHealingDonePercentMod()
+        {
+            float value = 1.0f;
+
+            MathFunctions.AddPct(ref value, GetRatingBonusValue(CombatRating.VersatilityHealingDone) + GetTotalAuraModifier(AuraType.ModVersatility));
+
+            foreach (AuraEffect auraEffect in GetAuraEffectsByType(AuraType.ModHealingDonePercent))
+                MathFunctions.AddPct(ref value, auraEffect.GetAmount());
+
+            SetStatFloatValue(PlayerFields.ModHealingDonePct, value);
         }
 
         void UpdateArmorPenetration(int amount)
