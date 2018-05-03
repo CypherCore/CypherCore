@@ -24,8 +24,8 @@ namespace Game.Collision
     public enum ModelFlags
     {
         M2 = 1,
-        WorldSpawn = 1 << 1,
-        HasBound = 1 << 2
+        HasBound = 1 << 1,
+        ParentSpawn = 1 << 2
     }
 
     public class ModelSpawn

@@ -276,14 +276,10 @@ namespace Game.Collision
             bounds = new AxisAlignedBox(lo, hi);
 
             uint treeSize = reader.ReadUInt32();
-            tree = new uint[treeSize];
-            for (var i = 0; i < treeSize; i++)
-                tree[i] = reader.ReadUInt32();
+            tree = reader.ReadArray<uint>(treeSize);
 
             var count = reader.ReadUInt32();
-            objects = new uint[count];
-            for (var i = 0; i < count; i++)
-                objects[i] = reader.ReadUInt32();
+            objects = reader.ReadArray<uint>(count);
 
             return true;
         }

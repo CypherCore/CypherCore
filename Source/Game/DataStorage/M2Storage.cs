@@ -56,14 +56,14 @@ namespace Game.DataStorage
             for (uint k = 0; k < cam.target_positions.timestamps.number; ++k)
             {
                 // Extract Target positions
-                M2Array targTsArray = new M2Array(reader, cam.target_positions.timestamps.offset_elements);
+                reader.BaseStream.Position = cam.target_positions.timestamps.offset_elements;
+                M2Array targTsArray = reader.Read<M2Array>();
 
                 reader.BaseStream.Position = targTsArray.offset_elements;
-                uint[] targTimestamps = new uint[targTsArray.number];
-                for (var i = 0; i < targTsArray.number; ++i)
-                    targTimestamps[i] = reader.ReadUInt32();
+                uint[] targTimestamps = reader.ReadArray<uint>(targTsArray.number);
 
-                M2Array targArray = new M2Array(reader, cam.target_positions.values.offset_elements);
+                reader.BaseStream.Position = cam.target_positions.values.offset_elements;
+                M2Array targArray = reader.Read<M2Array>();
 
                 reader.BaseStream.Position = targArray.offset_elements;
                 M2SplineKey[] targPositions = new M2SplineKey[targArray.number];
@@ -90,14 +90,14 @@ namespace Game.DataStorage
             for (uint k = 0; k < cam.positions.timestamps.number; ++k)
             {
                 // Extract Camera positions for this set
-                M2Array posTsArray = reader.ReadStruct<M2Array>(cam.positions.timestamps.offset_elements);
+                reader.BaseStream.Position = cam.positions.timestamps.offset_elements;
+                M2Array posTsArray = reader.Read<M2Array>();
 
                 reader.BaseStream.Position = posTsArray.offset_elements;
-                uint[] posTimestamps = new uint[posTsArray.number];
-                for (var i = 0; i < posTsArray.number; ++i)
-                    posTimestamps[i] = reader.ReadUInt32();
+                uint[] posTimestamps = reader.ReadArray<uint>(posTsArray.number);
 
-                M2Array posArray = new M2Array(reader, cam.positions.values.offset_elements);
+                reader.BaseStream.Position = cam.positions.values.offset_elements;
+                M2Array posArray = reader.Read<M2Array>();
 
                 reader.BaseStream.Position = posArray.offset_elements;
                 M2SplineKey[] positions = new M2SplineKey[posTsArray.number];
@@ -181,7 +181,7 @@ namespace Game.DataStorage
                     using (BinaryReader m2file = new BinaryReader(new FileStream(filename, FileMode.Open, FileAccess.Read)))
                     {
                         // Check file has correct magic (MD21)
-                        if (m2file.ReadStringFromChars(4) != "MD21")
+                        if (m2file.ReadUInt32() != 0x3132444D) //"MD21"
                         {
                             Log.outError(LogFilter.ServerLoading, "Camera file {0} is damaged. File identifier not found.", filename);
                             continue;
@@ -190,10 +190,11 @@ namespace Game.DataStorage
                         var unknownSize = m2file.ReadUInt32(); //unknown size
 
                         // Read header
-                        M2Header header = m2file.ReadStruct<M2Header>();
+                        M2Header header = m2file.Read<M2Header>();
 
                         // Get camera(s) - Main header, then dump them.
-                        M2Camera cam = m2file.ReadStruct<M2Camera>(8 + header.ofsCameras);
+                        m2file.BaseStream.Position = 8 + header.ofsCameras;
+                        M2Camera cam = m2file.Read<M2Camera>();
 
                         m2file.BaseStream.Position = 8;
                         readCamera(cam, new BinaryReader(new MemoryStream(m2file.ReadBytes((int)m2file.BaseStream.Length - 8))), cameraEntry);

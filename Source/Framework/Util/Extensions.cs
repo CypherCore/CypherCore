@@ -294,27 +294,6 @@ namespace System
         #endregion
 
         #region BinaryReader
-        public static T ReadStruct<T>(this BinaryReader reader) where T : struct
-        {
-            byte[] data = reader.ReadBytes(Marshal.SizeOf(typeof(T)));
-            GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
-            T returnObject = (T)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(T));
-
-            handle.Free();
-            return returnObject;
-        }
-
-        public static T ReadStruct<T>(this BinaryReader reader, uint offset) where T : struct
-        {
-            reader.BaseStream.Position = offset;
-            byte[] data = reader.ReadBytes(Marshal.SizeOf(typeof(T)));
-            GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
-            T returnObject = (T)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(T));
-
-            handle.Free();
-            return returnObject;
-        }
-
         public static string ReadCString(this BinaryReader reader)
         {
             byte num;
@@ -337,9 +316,9 @@ namespace System
             return new string(reader.ReadChars(count));
         }
 
-        public static T[] ReadArray<T>(this BinaryReader reader, int size) where T : struct
+        public static T[] ReadArray<T>(this BinaryReader reader, uint size) where T : struct
         {
-            int numBytes = FastStruct<T>.Size * size;
+            int numBytes = FastStruct<T>.Size * (int)size;
 
             byte[] result = reader.ReadBytes(numBytes);
 

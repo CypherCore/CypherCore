@@ -17,7 +17,6 @@
 
 using Framework.GameMath;
 using System.IO;
-using System.Runtime.InteropServices;
 
 namespace Game.DataStorage
 {
@@ -37,8 +36,7 @@ namespace Game.DataStorage
 
     public struct M2Header
     {
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-        public char[] Magic;               // "MD20"
+        public uint Magic;               // "MD20"
         public uint Version;                // The version of the format.
         public uint lName;                  // Length of the model's name including the trailing \0
         public uint ofsName;                // Offset to the name, it seems like models can get reloaded by this name.should be unique, i guess.
@@ -110,15 +108,6 @@ namespace Game.DataStorage
 
     public struct M2Array
     {
-        public M2Array(BinaryReader reader, uint offset)
-        {
-            if (offset != 0)
-                reader.BaseStream.Position = offset;
-
-            number = reader.ReadUInt32();
-            offset_elements = reader.ReadUInt32();
-        }
-
         public uint number;
         public uint offset_elements;
     }

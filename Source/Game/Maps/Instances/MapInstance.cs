@@ -178,64 +178,73 @@ namespace Game.Maps
 
         InstanceMap CreateInstance(uint InstanceId, InstanceSave save, Difficulty difficulty, int teamId)
         {
-            // make sure we have a valid map id
-            MapRecord entry = CliDB.MapStorage.LookupByKey(GetId());
-            if (entry == null)
+            lock (_mapLock)
             {
-                Log.outError(LogFilter.Maps, "CreateInstance: no record for map {0}", GetId());
-                Contract.Assert(false);
+                // make sure we have a valid map id
+                MapRecord entry = CliDB.MapStorage.LookupByKey(GetId());
+                if (entry == null)
+                {
+                    Log.outError(LogFilter.Maps, "CreateInstance: no record for map {0}", GetId());
+                    Contract.Assert(false);
+                }
+                InstanceTemplate iTemplate = Global.ObjectMgr.GetInstanceTemplate(GetId());
+                if (iTemplate == null)
+                {
+                    Log.outError(LogFilter.Maps, "CreateInstance: no instance template for map {0}", GetId());
+                    Contract.Assert(false);
+                }
+
+                // some instances only have one difficulty
+                Global.DB2Mgr.GetDownscaledMapDifficultyData(GetId(), ref difficulty);
+
+                Log.outDebug(LogFilter.Maps, "MapInstanced.CreateInstance: {0} map instance {1} for {2} created with difficulty {3}", save != null ? "" : "new ", InstanceId, GetId(), difficulty);
+
+                InstanceMap map = new InstanceMap(GetId(), GetGridExpiry(), InstanceId, difficulty, this);
+                Contract.Assert(map.IsDungeon());
+
+                map.LoadRespawnTimes();
+                map.LoadCorpseData();
+
+                bool load_data = save != null;
+                map.CreateInstanceData(load_data);
+                InstanceScenario instanceScenario = Global.ScenarioMgr.CreateInstanceScenario(map, teamId);
+                if (instanceScenario != null)
+                    map.SetInstanceScenario(instanceScenario);
+
+                if (WorldConfig.GetBoolValue(WorldCfg.InstancemapLoadGrids))
+                    map.LoadAllCells();
+
+                m_InstancedMaps[InstanceId] = map;
+                return map;
             }
-            InstanceTemplate iTemplate = Global.ObjectMgr.GetInstanceTemplate(GetId());
-            if (iTemplate == null)
-            {
-                Log.outError(LogFilter.Maps, "CreateInstance: no instance template for map {0}", GetId());
-                Contract.Assert(false);
-            }
-
-            // some instances only have one difficulty
-            Global.DB2Mgr.GetDownscaledMapDifficultyData(GetId(), ref difficulty);
-
-            Log.outDebug(LogFilter.Maps, "MapInstanced.CreateInstance: {0} map instance {1} for {2} created with difficulty {3}", save != null ? "" : "new ", InstanceId, GetId(), difficulty);
-
-            InstanceMap map = new InstanceMap(GetId(), GetGridExpiry(), InstanceId, difficulty, this);
-            Contract.Assert(map.IsDungeon());
-
-            map.LoadRespawnTimes();
-            map.LoadCorpseData();
-
-            bool load_data = save != null;
-            map.CreateInstanceData(load_data);
-            InstanceScenario instanceScenario = Global.ScenarioMgr.CreateInstanceScenario(map, teamId);
-            if (instanceScenario != null)
-                map.SetInstanceScenario(instanceScenario);
-
-            if (WorldConfig.GetBoolValue(WorldCfg.InstancemapLoadGrids))
-                map.LoadAllCells();
-
-            m_InstancedMaps[InstanceId] = map;
-            return map;
         }
 
         BattlegroundMap CreateBattleground(uint InstanceId, Battleground bg)
         {
-            Log.outDebug(LogFilter.Maps, "MapInstanced.CreateBattleground: map bg {0} for {1} created.", InstanceId, GetId());
+            lock (_mapLock)
+            {
+                Log.outDebug(LogFilter.Maps, "MapInstanced.CreateBattleground: map bg {0} for {1} created.", InstanceId, GetId());
 
-            BattlegroundMap map = new BattlegroundMap(GetId(), (uint)GetGridExpiry(), InstanceId, this, Difficulty.None);
-            Contract.Assert(map.IsBattlegroundOrArena());
-            map.SetBG(bg);
-            bg.SetBgMap(map);
+                BattlegroundMap map = new BattlegroundMap(GetId(), (uint)GetGridExpiry(), InstanceId, this, Difficulty.None);
+                Contract.Assert(map.IsBattlegroundOrArena());
+                map.SetBG(bg);
+                bg.SetBgMap(map);
 
-            m_InstancedMaps[InstanceId] = map;
-            return map;
+                m_InstancedMaps[InstanceId] = map;
+                return map;
+            }
         }
 
         GarrisonMap CreateGarrison(uint instanceId, Player owner)
         {
-            GarrisonMap map = new GarrisonMap(GetId(), GetGridExpiry(), instanceId, this, owner.GetGUID());
-            Contract.Assert(map.IsGarrison());
+            lock (_mapLock)
+            {
+                GarrisonMap map = new GarrisonMap(GetId(), GetGridExpiry(), instanceId, this, owner.GetGUID());
+                Contract.Assert(map.IsGarrison());
 
-            m_InstancedMaps[instanceId] = map;
-            return map;
+                m_InstancedMaps[instanceId] = map;
+                return map;
+            }
         }
 
         bool DestroyInstance(KeyValuePair<uint, Map> pair)

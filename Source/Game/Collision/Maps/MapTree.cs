@@ -58,47 +58,23 @@ namespace Game.Collision
             iMapID = mapId;
         }
 
-        public bool InitMap(string fname, VMapManager vm)
+        public bool InitMap(string fname)
         {
             Log.outDebug(LogFilter.Maps, "StaticMapTree.InitMap() : initializing StaticMapTree '{0}'", fname);
             bool success = false;
             if (!File.Exists(fname))
                 return false;
 
-            char tiled = '0';
             using (BinaryReader reader = new BinaryReader(new FileStream(fname, FileMode.Open, FileAccess.Read)))
             {
                 var magic = reader.ReadStringFromChars(8);
-                tiled = reader.ReadChar();
                 var node = reader.ReadStringFromChars(4);
 
                 if (magic == MapConst.VMapMagic && node == "NODE" && iTree.readFromFile(reader))
                 {
                     iNTreeValues = iTree.primCount();
                     iTreeValues = new ModelInstance[iNTreeValues];
-                    success = reader.ReadStringFromChars(4) == "GOBJ";
-                }
-
-                iIsTiled = (tiled == 1);
-
-                // global model spawns
-                // only non-tiled maps have them, and if so exactly one (so far at least...)
-                ModelSpawn spawn;
-                if (!iIsTiled && ModelSpawn.readFromFile(reader, out spawn))
-                {
-                    WorldModel model = vm.acquireModelInstance(spawn.name);
-                    Log.outDebug(LogFilter.Maps, "StaticMapTree.InitMap() : loading {0}", spawn.name);
-                    if (model != null)
-                    {
-                        // assume that global model always is the first and only tree value (could be improved...)
-                        iTreeValues[0] = new ModelInstance(spawn, model);
-                        iLoadedSpawns[0] = 1;
-                    }
-                    else
-                    {
-                        success = false;
-                        Log.outError(LogFilter.Server, "StaticMapTree.InitMap() : could not acquire WorldModel for '{0}'", spawn.name);
-                    }
+                    success = true;
                 }
 
                 if (success)
@@ -107,7 +83,7 @@ namespace Game.Collision
                     if (success)
                     {
                         uint spawnIndicesSize = reader.ReadUInt32();
-                        for (uint i = 0; i < spawnIndicesSize && success; ++i)
+                        for (uint i = 0; i < spawnIndicesSize; ++i)
                         {
                             uint spawnId = reader.ReadUInt32();
                             uint spawnIndex = reader.ReadUInt32();
@@ -133,13 +109,6 @@ namespace Game.Collision
 
         public bool LoadMapTile(uint tileX, uint tileY, VMapManager vm)
         {
-            if (!iIsTiled)
-            {
-                // currently, core creates grids for all maps, whether it has terrain tiles or not
-                // so we need "fake" tile loads to know when we can unload map geometry
-                iLoadedTiles[packTileID(tileX, tileY)] = false;
-                return true;
-            }
             if (iTreeValues == null)
             {
                 Log.outError(LogFilter.Server, "StaticMapTree.LoadMapTile() : tree has not been initialized [{0}, {1}]", tileX, tileY);
@@ -285,25 +254,21 @@ namespace Game.Collision
             {
                 if (reader.ReadStringFromChars(8) != MapConst.VMapMagic)
                     return false;
+            }
 
-                char tiled = reader.ReadChar();
-                if (tiled == 1)
-                {
+            FileStream stream = OpenMapTileFile(vmapPath, mapID, tileX, tileY, vm);
+            if (stream == null)
+                return false;
 
-                    FileStream stream = OpenMapTileFile(vmapPath, mapID, tileX, tileY, vm);
-                    if (stream == null)
-                        return false;
-
-                    using (BinaryReader reader1 = new BinaryReader(stream))
-                    {
-                        if (reader1.ReadStringFromChars(8) != MapConst.VMapMagic)
-                            return false;
-                    }
-                }
+            using (BinaryReader reader = new BinaryReader(stream))
+            {
+                if (reader.ReadStringFromChars(8) != MapConst.VMapMagic)
+                    return false;
             }
 
             return true;
         }
+
         public static string getTileFileName(uint mapID, uint tileX, uint tileY)
         {
             return string.Format("{0:D4}_{1:D2}_{2:D2}.vmtile", mapID, tileY, tileX);
@@ -425,7 +390,6 @@ namespace Game.Collision
         public int numLoadedTiles() { return iLoadedTiles.Count; }
 
         uint iMapID;
-        bool iIsTiled;
         BIH iTree = new BIH();
         ModelInstance[] iTreeValues;
         uint iNTreeValues;

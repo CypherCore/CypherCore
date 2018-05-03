@@ -46,22 +46,33 @@ namespace Game.Maps
             _fileExists = true;
             using (BinaryReader reader = new BinaryReader(new FileStream(filename, FileMode.Open, FileAccess.Read)))
             {
-                mapFileHeader header = reader.ReadStruct<mapFileHeader>();
-                if (new string(header.mapMagic) != MapConst.MapMagic || new string(header.versionMagic) != MapConst.MapVersionMagic)
+                mapFileHeader header = reader.Read<mapFileHeader>();
+                if (header.mapMagic != MapConst.MapMagic || header.versionMagic != MapConst.MapVersionMagic)
                 {
-                    Log.outError(LogFilter.Maps, "Map file '{0}' is from an incompatible map version. Please recreate using the mapextractor.", filename);
+                    Log.outError(LogFilter.Maps, $"Map file '{filename}' is from an incompatible map version. Please recreate using the mapextractor.");
                     return false;
                 }
-                if (header.areaMapOffset != 0)
-                    LoadAreaData(reader, header.areaMapOffset);
 
-                if (header.heightMapOffset != 0)
-                    LoadHeightData(reader, header.heightMapOffset);
+                if (header.areaMapOffset != 0 && !LoadAreaData(reader, header.areaMapOffset))
+                {
+                    Log.outError(LogFilter.Maps, "Error loading map area data");
+                    return false;
+                }
 
-                if (header.liquidMapOffset != 0)
-                    LoadLiquidData(reader, header.liquidMapOffset);
+                if (header.heightMapOffset != 0 && !LoadHeightData(reader, header.heightMapOffset))
+                {
+                    Log.outError(LogFilter.Maps, "Error loading map height data");
+                    return false;
+                }
+
+                if (header.liquidMapOffset != 0 && !LoadLiquidData(reader, header.liquidMapOffset))
+                {
+                    Log.outError(LogFilter.Maps, "Error loading map liquids data");
+                    return false;
+                }
+
+                return true;
             }
-            return true;
         }
 
         public void unloadData()
@@ -76,25 +87,28 @@ namespace Game.Maps
             _fileExists = false;
         }
 
-        void LoadAreaData(BinaryReader reader, uint offset)
+        bool LoadAreaData(BinaryReader reader, uint offset)
         {
             reader.BaseStream.Seek(offset, SeekOrigin.Begin);
-            map_AreaHeader areaHeader = reader.ReadStruct<map_AreaHeader>();
+            map_AreaHeader areaHeader = reader.Read<map_AreaHeader>();
+            if (areaHeader.fourcc != MapConst.MapAreaMagic)
+                return false;
 
             _gridArea = areaHeader.gridArea;
 
             if (!areaHeader.flags.HasAnyFlag(AreaHeaderFlags.NoArea))
-            {
-                _areaMap = new ushort[16 * 16];
-                for (var i = 0; i < _areaMap.Length; ++i)
-                    _areaMap[i] = reader.ReadUInt16();
-            }
+                _areaMap = reader.ReadArray<ushort>(16 * 16);
+
+            return true;
         }
 
-        void LoadHeightData(BinaryReader reader, uint offset)
+        bool LoadHeightData(BinaryReader reader, uint offset)
         {
             reader.BaseStream.Seek(offset, SeekOrigin.Begin);
-            map_HeightHeader mapHeader = reader.ReadStruct<map_HeightHeader>();
+            map_HeightHeader mapHeader = reader.Read<map_HeightHeader>();
+
+            if (mapHeader.fourcc != MapConst.MapHeightMagic)
+                return false;
 
             _gridHeight = mapHeader.gridHeight;
             _flags = (uint)mapHeader.flags;
@@ -103,13 +117,8 @@ namespace Game.Maps
             {
                 if (mapHeader.flags.HasAnyFlag(HeightHeaderFlags.HeightAsInt16))
                 {
-                    m_uint16_V9 = new ushort[129 * 129];
-                    for (var i = 0; i < m_uint16_V9.Length; ++i)
-                        m_uint16_V9[i] = reader.ReadUInt16();
-
-                    m_uint16_V8 = new ushort[128 * 128];
-                    for (var i = 0; i < m_uint16_V8.Length; ++i)
-                        m_uint16_V8[i] = reader.ReadUInt16();
+                    m_uint16_V9 = reader.ReadArray<ushort>(129 * 129);
+                    m_uint16_V8 = reader.ReadArray<ushort>(128 * 128);
 
                     _gridIntHeightMultiplier = (mapHeader.gridMaxHeight - mapHeader.gridHeight) / 65535;
                     _gridGetHeight = getHeightFromUint16;
@@ -123,13 +132,8 @@ namespace Game.Maps
                 }
                 else
                 {
-                    m_V9 = new float[129 * 129];
-                    for (var i = 0; i < m_V9.Length; ++i)
-                        m_V9[i] = reader.ReadSingle();
-
-                    m_V8 = new float[128 * 128];
-                    for (var i = 0; i < m_V8.Length; ++i)
-                        m_V8[i] = reader.ReadSingle();
+                    m_V9 = reader.ReadArray<float>(129 * 129);
+                    m_V8 = reader.ReadArray<float>(128 * 128);
 
                     _gridGetHeight = getHeightFromFloat;
                 }
@@ -139,13 +143,8 @@ namespace Game.Maps
 
             if (mapHeader.flags.HasAnyFlag(HeightHeaderFlags.HeightHasFlightBounds))
             {
-                short[] maxHeights = new short[3 * 3];
-                short[] minHeights = new short[3 * 3];
-                for (var i = 0; i < maxHeights.Length; ++i)
-                    maxHeights[i] = reader.ReadInt16();
-
-                for (var i = 0; i < minHeights.Length; ++i)
-                    minHeights[i] = reader.ReadInt16();
+                short[] maxHeights = reader.ReadArray<short>(3 * 3);
+                short[] minHeights = reader.ReadArray<short>(3 * 3);
 
                 uint[][] indices =
                 {
@@ -180,15 +179,20 @@ namespace Game.Maps
                         new Vector3(boundGridCoords[indices[quarterIndex][2]][0], boundGridCoords[indices[quarterIndex][2]][1], minHeights[indices[quarterIndex][2]])
                     );
             }
+
+            return true;
         }
 
-        void LoadLiquidData(BinaryReader reader, uint offset)
+        bool LoadLiquidData(BinaryReader reader, uint offset)
         {
             reader.BaseStream.Seek(offset, SeekOrigin.Begin);
-            map_LiquidHeader liquidHeader = reader.ReadStruct<map_LiquidHeader>();
+            map_LiquidHeader liquidHeader = reader.Read<map_LiquidHeader>();
+
+            if (liquidHeader.fourcc != MapConst.MapLiquidMagic)
+                return false;
 
             _liquidGlobalEntry = liquidHeader.liquidType;
-            _liquidGlobalFlags = (byte)liquidHeader.liquidFlags;
+            _liquidGlobalFlags = liquidHeader.liquidFlags;
             _liquidOffX = liquidHeader.offsetX;
             _liquidOffY = liquidHeader.offsetY;
             _liquidWidth = liquidHeader.width;
@@ -197,19 +201,14 @@ namespace Game.Maps
 
             if (!liquidHeader.flags.HasAnyFlag(LiquidHeaderFlags.LiquidNoType))
             {
-                _liquidEntry = new ushort[16 * 16];
-                for (var i = 0; i < _liquidEntry.Length; ++i)
-                    _liquidEntry[i] = reader.ReadUInt16();
-
+                _liquidEntry = reader.ReadArray<ushort>(16 * 16);
                 _liquidFlags = reader.ReadBytes(16 * 16);
             }
 
             if (!liquidHeader.flags.HasAnyFlag(LiquidHeaderFlags.LiquidNoHeight))
-            {
-                _liquidMap = new float[_liquidWidth * _liquidHeight];
-                for (var i = 0; i < _liquidMap.Length; ++i)
-                    _liquidMap[i] = reader.ReadSingle();
-            }
+                _liquidMap = reader.ReadArray<float>((uint)(_liquidWidth * _liquidHeight));
+
+            return true;
         }
 
         public ushort getArea(float x, float y)
@@ -636,14 +635,10 @@ namespace Game.Maps
         #endregion
     }
 
-
-    [StructLayout(LayoutKind.Sequential)]
     public struct mapFileHeader
     {
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-        public char[] mapMagic;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-        public char[] versionMagic;
+        public uint mapMagic;
+        public uint versionMagic;
         public uint buildMagic;
         public uint areaMapOffset;
         public uint areaMapSize;
@@ -655,7 +650,6 @@ namespace Game.Maps
         public uint holesSize;
     }
 
-    [StructLayout(LayoutKind.Sequential)]
     public struct map_AreaHeader
     {
         public uint fourcc;
@@ -663,7 +657,6 @@ namespace Game.Maps
         public ushort gridArea;
     }
 
-    [StructLayout(LayoutKind.Sequential)]
     public struct map_HeightHeader
     {
         public uint fourcc;
@@ -672,7 +665,6 @@ namespace Game.Maps
         public float gridMaxHeight;
     }
 
-    [StructLayout(LayoutKind.Sequential)]
     public struct map_LiquidHeader
     {
         public uint fourcc;
@@ -686,7 +678,6 @@ namespace Game.Maps
         public float liquidLevel;
     }
 
-    [StructLayout(LayoutKind.Sequential)]
     public class LiquidData
     {
         public uint type_flags;

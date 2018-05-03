@@ -139,9 +139,8 @@ namespace Game
 
             using (BinaryReader reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read)))
             {
-                MmapTileHeader fileHeader = reader.ReadStruct<MmapTileHeader>();
-                Array.Reverse(fileHeader.mmapMagic);
-                if (new string(fileHeader.mmapMagic) != MapConst.mmapMagic)
+                MmapTileHeader fileHeader = reader.Read<MmapTileHeader>();
+                if (fileHeader.mmapMagic != MapConst.mmapMagic)
                 {
                     Log.outError(LogFilter.Maps, "MMAP:loadMap: Bad header in mmap {0:D4}{1:D2}{2:D2}.mmtile", mapId, x, y);
                     return false;
@@ -356,16 +355,12 @@ namespace Game
         public Dictionary<uint, ulong> loadedTileRefs = new Dictionary<uint, ulong>(); // maps [map grid coords] to [dtTile]
     }
 
-    [StructLayout(LayoutKind.Sequential)]
     public struct MmapTileHeader
     {
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-        public char[] mmapMagic;
+        public uint mmapMagic;
         public uint dtVersion;
         public uint mmapVersion;
         public uint size;
         public byte usesLiquids;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
-        public byte[] padding;
     }
 }

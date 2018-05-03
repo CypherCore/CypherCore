@@ -96,11 +96,11 @@ namespace Game.Maps
 
             using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read)))
             {
-                var header = reader.ReadStruct<mapFileHeader>();
-                if (new string(header.mapMagic) != MapConst.MapMagic || new string(header.versionMagic) != MapConst.MapVersionMagic)
+                var header = reader.Read<mapFileHeader>();
+                if (header.mapMagic != MapConst.MapMagic || header.versionMagic != MapConst.MapVersionMagic)
                 {
                     Log.outError(LogFilter.Maps, "Map file '{0}' is from an incompatible map version ({1}), {2} is expected. Please recreate using the mapextractor.",
-                        fileName, new string(header.versionMagic), MapConst.MapVersionMagic);
+                        fileName, header.versionMagic, MapConst.MapVersionMagic);
                     return false;
                 }
                 return true;
@@ -136,6 +136,9 @@ namespace Game.Maps
 
         void LoadVMap(uint gx, uint gy)
         {
+            if (!Global.VMapMgr.isMapLoadingEnabled())
+                return;
+
             // x and y are swapped !!
             VMAPLoadResult vmapLoadResult = Global.VMapMgr.loadMap(GetId(), gx, gy);
             switch (vmapLoadResult)
@@ -363,7 +366,7 @@ namespace Game.Maps
 
         void EnsureGridCreated(GridCoord p)
         {
-            lock (this)
+            lock (_gridLock)
             {
                 EnsureGridCreated_i(p);
             }
@@ -4338,6 +4341,9 @@ namespace Game.Maps
         #endregion
 
         #region Fields
+        internal object _mapLock = new object();
+        object _gridLock = new object();
+
         bool _creatureToMoveLock;
         List<Creature> creaturesToMove = new List<Creature>();
 
@@ -4455,6 +4461,7 @@ namespace Game.Maps
             /// @todo Not sure about checking player level: already done in HandleAreaTriggerOpcode
             // GMs still can teleport player in instance.
             // Is it needed?
+            lock(_mapLock)
             {
                 // Dungeon only code
                 if (IsDungeon())
@@ -4878,7 +4885,9 @@ namespace Game.Maps
 
         public override bool AddPlayerToMap(Player player, bool initPlayer = true)
         {
-            player.m_InstanceValid = true;
+            lock (_mapLock)
+                player.m_InstanceValid = true;
+
             return base.AddPlayerToMap(player, initPlayer);
         }
 

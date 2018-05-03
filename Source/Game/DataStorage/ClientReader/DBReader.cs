@@ -76,7 +76,7 @@ namespace Game.DataStorage
                                     if (fieldInfo.IsArray)
                                     {
                                         Array array = (Array)fieldInfo.Getter(obj);
-                                        SetArrayValue(obj, array.Length, fieldInfo, dataReader);
+                                        SetArrayValue(obj, (uint)array.Length, fieldInfo, dataReader);
 
                                         arrayLength -= array.Length;
                                     }
@@ -123,7 +123,7 @@ namespace Game.DataStorage
                                 if (fieldInfo.IsArray)
                                 {
                                     Array array = (Array)fieldInfo.Getter(obj);
-                                    SetArrayValue(obj, array.Length, fieldInfo, dataReader);
+                                    SetArrayValue(obj, (uint)array.Length, fieldInfo, dataReader);
 
                                     dataFieldIndex += array.Length - 1;
                                 }
@@ -258,11 +258,7 @@ namespace Game.DataStorage
 
             // IndexTable
             if (Header.HasIndexTable())
-            {
-                m_indexes = new int[Header.RecordCount];
-                for (int i = 0; i < Header.RecordCount; i++)
-                    m_indexes[i] = reader.ReadInt32();
-            }
+                m_indexes = reader.ReadArray<int>(Header.RecordCount);
 
             // Copytable
             if (Header.CopyTableSize > 0)
@@ -508,7 +504,7 @@ namespace Game.DataStorage
             return bits.ToArray();
         }
 
-        static void SetArrayValue(object obj, int arraySize, DB6FieldInfo fieldInfo, BinaryReader reader)
+        static void SetArrayValue(object obj, uint arraySize, DB6FieldInfo fieldInfo, BinaryReader reader)
         {
             switch (Type.GetTypeCode(fieldInfo.FieldType))
             {

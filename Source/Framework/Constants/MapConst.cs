@@ -61,16 +61,16 @@ namespace Framework.Constants
         public const float MaxHeight = 100000.0f;
         public const float MaxFallDistance = 250000.0f;
 
-        public const string MapMagic = "MAPS";
-        public const string MapVersionMagic = "v1.9";
-        public const string MapAreaMagic = "AREA";
-        public const string MapHeightMagic = "MHGT";
-        public const string MapLiquidMagic = "MLIQ";
+        public const uint MapMagic = 0x5350414D; //"MAPS";
+        public const uint MapVersionMagic = 0x392E3176; //"v1.9";
+        public const uint MapAreaMagic = 0x41455241; //"AREA";
+        public const uint MapHeightMagic = 0x5447484D; //"MHGT";
+        public const uint MapLiquidMagic = 0x51494C4D; //"MLIQ";
 
-        public const string mmapMagic = "MMAP";
+        public const uint mmapMagic = 0x4D4D4150; // 'MMAP'
         public const int mmapVersion = 9;
 
-        public const string VMapMagic = "VMAP_4.7";
+        public const string VMapMagic = "VMAP_4.8";
         public const float VMAPInvalidHeightValue = -200000.0f;
     }
 

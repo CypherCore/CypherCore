@@ -139,14 +139,10 @@ namespace Game.Collision
             if (liquid.iTilesX != 0 && liquid.iTilesY != 0)
             {
                 uint size = (liquid.iTilesX + 1) * (liquid.iTilesY + 1);
-                liquid.iHeight = new float[size];
-                for (var i = 0; i < size; i++)
-                    liquid.iHeight[i] = reader.ReadSingle();
+                liquid.iHeight = reader.ReadArray<float>(size);
 
                 size = liquid.iTilesX * liquid.iTilesY;
-                liquid.iFlags = new byte[size];
-                for (var i = 0; i < size; i++)
-                    liquid.iFlags[i] = reader.ReadByte();
+                liquid.iFlags = reader.ReadArray<byte>(size);
             }
             else
             {
@@ -210,7 +206,9 @@ namespace Game.Collision
             vertices.Clear();
             iLiquid = null;
 
-            iBound = reader.ReadStruct<AxisAlignedBox>();
+            var lo = reader.Read<Vector3>();
+            var hi = reader.Read<Vector3>();
+            iBound = new AxisAlignedBox(lo, hi);
             iMogpFlags = reader.ReadUInt32();
             iGroupWMOID = reader.ReadUInt32();
 
@@ -234,7 +232,7 @@ namespace Game.Collision
             count = reader.ReadUInt32();
 
             for (var i = 0; i < count; ++i)
-                triangles.Add(reader.ReadStruct<MeshTriangle>());
+                triangles.Add(reader.Read<MeshTriangle>());
 
             // read mesh BIH
             if (reader.ReadStringFromChars(4) != "MBIH")
