@@ -247,9 +247,10 @@ namespace Game.Collision
                         return null;
                     }
                     Log.outDebug(LogFilter.Maps, "VMapManager: loading file '{0}'", filename);
-                    iLoadedModelFiles.Add(filename, new ManagedModel());
-                    model = iLoadedModelFiles.LookupByKey(filename);
+                    model = new ManagedModel();
                     model.setModel(worldmodel);
+
+                    iLoadedModelFiles.Add(filename, model);
                 }
                 model.incRefCount();
                 return model.getModel();

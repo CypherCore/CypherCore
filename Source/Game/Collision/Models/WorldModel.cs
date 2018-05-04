@@ -97,6 +97,7 @@ namespace Game.Collision
             uint tx = (uint)tx_f;
             if (tx_f < 0.0f || tx >= iTilesX)
                 return false;
+
             float ty_f = (pos.Y - iCorner.Y) / MapConst.LiquidTileSize;
             uint ty = (uint)ty_f;
             if (ty_f < 0.0f || ty >= iTilesY)
@@ -200,8 +201,6 @@ namespace Game.Collision
 
         public bool readFromFile(BinaryReader reader)
         {
-            uint chunkSize = 0;
-            uint count = 0;
             triangles.Clear();
             vertices.Clear();
             iLiquid = null;
@@ -216,8 +215,8 @@ namespace Game.Collision
             if (reader.ReadStringFromChars(4) != "VERT")
                 return false;
 
-            chunkSize = reader.ReadUInt32();
-            count = reader.ReadUInt32();
+            uint chunkSize = reader.ReadUInt32();
+            uint count = reader.ReadUInt32();
             if (count == 0)
                 return false;
 
@@ -237,11 +236,13 @@ namespace Game.Collision
             // read mesh BIH
             if (reader.ReadStringFromChars(4) != "MBIH")
                 return false;
+
             meshTree.readFromFile(reader);
 
             // write liquid data
             if (reader.ReadStringFromChars(4).ToString() != "LIQU")
                 return false;
+
             chunkSize = reader.ReadUInt32();
             if (chunkSize > 0)
                 iLiquid = WmoLiquid.readFromFile(reader);
@@ -362,25 +363,30 @@ namespace Game.Collision
 
         public bool readFile(string filename)
         {
+            filename = filename.Replace("\0", "");
             if (!File.Exists(filename))
-                return false;
+            {
+                filename = filename.Replace(".vmo", "");
+                if (!File.Exists(filename))
+                    return false;
+            }
+
             using (BinaryReader reader = new BinaryReader(new FileStream(filename, FileMode.Open, FileAccess.Read)))
             {
-                uint chunkSize = 0;
-                uint count = 0;
                 if (reader.ReadStringFromChars(8) != MapConst.VMapMagic)
                     return false;
 
                 if (reader.ReadStringFromChars(4) != "WMOD")
                     return false;
-                chunkSize = reader.ReadUInt32();
+
+                uint chunkSize = reader.ReadUInt32();
                 RootWMOID = reader.ReadUInt32();
 
                 // read group models
                 if (reader.ReadStringFromChars(4) != "GMOD")
                     return false;
 
-                count = reader.ReadUInt32();
+                uint count = reader.ReadUInt32();
                 for (var i = 0; i < count; ++i)
                 {
                     GroupModel group = new GroupModel();
@@ -391,10 +397,8 @@ namespace Game.Collision
                 // read group BIH
                 if (reader.ReadStringFromChars(4) != "GBIH")
                     return false;
-                groupTree.readFromFile(reader);
 
-
-                return true;
+                return groupTree.readFromFile(reader);
             }
         }
 
