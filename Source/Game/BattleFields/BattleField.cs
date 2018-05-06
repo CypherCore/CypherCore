@@ -26,6 +26,7 @@ using Game.Network.Packets;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Linq;
 
 namespace Game.BattleFields
 {
@@ -1026,8 +1027,8 @@ namespace Game.BattleFields
             m_neutralValuePct = 0;
             m_maxSpeed = 0;
 
-            m_activePlayers[0] = new List<ObjectGuid>();
-            m_activePlayers[1] = new List<ObjectGuid>();
+            m_activePlayers[0] = new HashSet<ObjectGuid>();
+            m_activePlayers[1] = new HashSet<ObjectGuid>();
         }
 
         public virtual bool HandlePlayerEnter(Player player)
@@ -1043,12 +1044,10 @@ namespace Game.BattleFields
                 }
             }
 
-            m_activePlayers[player.GetTeamId()].Add(player.GetGUID());
-            return true;
+            return m_activePlayers[player.GetTeamId()].Add(player.GetGUID());
         }
 
-        //Index of place in for loop
-        public virtual int HandlePlayerLeave(Player player)
+        public virtual void HandlePlayerLeave(Player player)
         {
             if (!m_capturePointGUID.IsEmpty())
             {
@@ -1057,13 +1056,7 @@ namespace Game.BattleFields
                     player.SendUpdateWorldState(capturePoint.GetGoInfo().ControlZone.worldState1, 0);
             }
 
-            var index = m_activePlayers[player.GetTeamId()].IndexOf(player.GetGUID());
-
-            if (index == m_activePlayers[player.GetTeamId()].Count)
-                return m_activePlayers[player.GetTeamId()].Count; // return end()
-
             m_activePlayers[player.GetTeamId()].Remove(player.GetGUID());
-            return ++index;
         }
 
         public virtual void SendChangePhase()
@@ -1154,18 +1147,14 @@ namespace Game.BattleFields
 
                 for (byte team = 0; team < SharedConst.BGTeamsCount; ++team)
                 {
-                    for (int i = 0; i < m_activePlayers[team].Count; )
+                    foreach (var guid in m_activePlayers[team].ToList())
                     {
-                        Player player = Global.ObjAccessor.FindPlayer(m_activePlayers[team][i]);
+                        Player player = Global.ObjAccessor.FindPlayer(guid);
                         if (player)
                         {
                             if (!capturePoint.IsWithinDistInMap(player, radius) || !player.IsOutdoorPvPActive())
-                                i = HandlePlayerLeave(player);
-                            else
-                                ++i;
+                                HandlePlayerLeave(player);
                         }
-                        else
-                            ++i;
                     }
                 }
 
@@ -1178,8 +1167,8 @@ namespace Game.BattleFields
                 {
                     if (player.IsOutdoorPvPActive())
                     {
-                        m_activePlayers[player.GetTeamId()].Add(player.GetGUID());
-                        HandlePlayerEnter(player);
+                        if (m_activePlayers[player.GetTeamId()].Add(player.GetGUID()))
+                            HandlePlayerEnter(player);
                     }
                 }
             }
@@ -1317,7 +1306,7 @@ namespace Game.BattleFields
         uint GetTeamId() { return m_team; }
 
         // active Players in the area of the objective, 0 - alliance, 1 - horde
-        List<ObjectGuid>[] m_activePlayers = new List<ObjectGuid>[SharedConst.BGTeamsCount];
+        HashSet<ObjectGuid>[] m_activePlayers = new HashSet<ObjectGuid>[SharedConst.BGTeamsCount];
 
         // Total shift needed to capture the objective
         float m_maxValue;
