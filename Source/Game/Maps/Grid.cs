@@ -30,7 +30,6 @@ namespace Game.Maps
             vis_Update = new PeriodicTimer(0, RandomHelper.IRand(0, 1000));
             i_unloadActiveLockCount = 0;
             i_unloadExplicitLock = false;
-            i_unloadReferenceLock = false;
         }
 
         public GridInfo(long expiry, bool unload = true)
@@ -39,7 +38,6 @@ namespace Game.Maps
             vis_Update = new PeriodicTimer(0, RandomHelper.IRand(0, 1000));
             i_unloadActiveLockCount = 0;
             i_unloadExplicitLock = !unload;
-            i_unloadReferenceLock = false;
         }
 
         public TimeTracker getTimeTracker()
@@ -49,17 +47,12 @@ namespace Game.Maps
 
         public bool getUnloadLock()
         {
-            return i_unloadActiveLockCount != 0 || i_unloadExplicitLock || i_unloadReferenceLock;
+            return i_unloadActiveLockCount != 0 || i_unloadExplicitLock;
         }
 
         public void setUnloadExplicitLock(bool on)
         {
             i_unloadExplicitLock = on;
-        }
-
-        public void setUnloadReferenceLock(bool on)
-        {
-            i_unloadReferenceLock = on;
         }
 
         public void incUnloadActiveLock()
@@ -97,7 +90,6 @@ namespace Game.Maps
 
         ushort i_unloadActiveLockCount; // lock from active object spawn points (prevent clone loading)
         bool i_unloadExplicitLock; // explicit manual lock or config setting
-        bool i_unloadReferenceLock; // lock from instance map copy
     }
 
     public class Grid
@@ -184,11 +176,6 @@ namespace Game.Maps
         public void setUnloadExplicitLock(bool on)
         {
             gridInfo.setUnloadExplicitLock(on);
-        }
-
-        public void setUnloadReferenceLock(bool on)
-        {
-            gridInfo.setUnloadReferenceLock(on);
         }
 
         public void incUnloadActiveLock()

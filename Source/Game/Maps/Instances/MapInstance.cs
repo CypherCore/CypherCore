@@ -30,11 +30,7 @@ namespace Game.Maps
 {
     public class MapInstanced : Map
     {
-        public MapInstanced(uint id, uint expiry) : base(id, expiry, 0, Difficulty.Normal)
-        {
-            for (uint x = 0; x < MapConst.MaxGrids; ++x)
-                GridMapReference[x] = new uint[MapConst.MaxGrids];
-        }
+        public MapInstanced(uint id, uint expiry) : base(id, expiry, 0, Difficulty.Normal) { }
 
         public override void InitVisibilityDistance()
         {
@@ -281,23 +277,9 @@ namespace Game.Maps
             return m_InstancedMaps.LookupByKey(instanceId);
         }
 
-        public void AddGridMapReference(GridCoord p)
-        {
-            ++GridMapReference[p.x_coord][p.y_coord];
-            SetUnloadReferenceLock(new GridCoord(63 - p.x_coord, 63 - p.y_coord), true);
-        }
-
-        public void RemoveGridMapReference(GridCoord p)
-        {
-            --GridMapReference[p.x_coord][p.y_coord];
-            if (GridMapReference[p.x_coord][p.y_coord] == 0)
-                SetUnloadReferenceLock(new GridCoord(63 - p.x_coord, 63 - p.y_coord), false);
-        }
-
         public Dictionary<uint, Map> GetInstancedMaps() { return m_InstancedMaps; }
 
         Dictionary<uint, Map> m_InstancedMaps = new Dictionary<uint, Map>();
-        uint[][] GridMapReference = new uint[MapConst.MaxGrids][];
     }
 
     public class InstanceTemplate

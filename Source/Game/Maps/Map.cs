@@ -65,6 +65,7 @@ namespace Game.Maps
             {
                 i_grids[x] = new Grid[MapConst.MaxGrids];
                 GridMaps[x] = new GridMap[MapConst.MaxGrids];
+                GridMapReference[x] = new ushort[MapConst.MaxGrids];
                 for (uint y = 0; y < MapConst.MaxGrids; ++y)
                 {
                     //z code
@@ -155,40 +156,32 @@ namespace Game.Maps
             }
         }
 
-        void LoadMap(uint gx, uint gy, bool reload = false)
+        void LoadMap(uint gx, uint gy)
         {
-            LoadMapImpl(this, gx, gy, reload);
+            LoadMapImpl(this, gx, gy);
             foreach (Map childBaseMap in m_childTerrainMaps)
-                childBaseMap.LoadMap(gx, gy, reload);
+                childBaseMap.LoadMap(gx, gy);
         }
 
-        void LoadMapImpl(Map map, uint gx, uint gy, bool reload)
+        void LoadMapImpl(Map map, uint gx, uint gy)
         {
-            if (map.i_InstanceId != 0)
-            {
-                if (map.GridMaps[gx][gy] != null)
-                    return;
-
-                // load grid map for base map
-                GridCoord ngridCoord = new GridCoord((MapConst.MaxGrids - 1) - gx, (MapConst.MaxGrids - 1) - gy);
-                if (map.m_parentMap.getGrid(ngridCoord.x_coord, ngridCoord.y_coord) == null)
-                    map.m_parentMap.EnsureGridCreated(ngridCoord);
-
-                ((MapInstanced)map.m_parentMap).AddGridMapReference(new GridCoord(gx, gy));
-                map.GridMaps[gx][gy] = map.m_parentMap.GridMaps[gx][gy];
-                return;
-            }
-
-            if (map.GridMaps[gx][gy] != null && !reload)
-                return;
-
             if (map.GridMaps[gx][gy] != null)
-            {
-                Log.outInfo(LogFilter.Maps, "Unloading previously loaded map {0} before reloading.", map.GetId());
-                Global.ScriptMgr.OnUnloadGridMap(map, map.GridMaps[gx][gy], gx, gy);
+                return;
 
-                map.GridMaps[gx][gy] = null;
+            Map parent = map.m_parentMap;
+            ++parent.GridMapReference[gx][gy];
+
+            // load grid map for base map
+            if (parent != map)
+            {
+                GridCoord ngridCoord = new GridCoord((MapConst.MaxGrids - 1) - gx, (MapConst.MaxGrids - 1) - gy);
+                if (parent.GridMaps[gx][gy] == null)
+                    parent.EnsureGridCreated(ngridCoord);
+
+                map.GridMaps[gx][gy] = parent.GridMaps[gx][gy];
+                return;
             }
+
             // map file name
             string filename = string.Format("{0}/maps/{1:D4}_{2:D2}_{3:D2}.map", Global.WorldMgr.GetDataPath(), map.GetId(), gx, gy);
             Log.outInfo(LogFilter.Maps, "Loading map {0}", filename);
@@ -210,29 +203,25 @@ namespace Game.Maps
 
         void UnloadMapImpl(Map map, uint gx, uint gy)
         {
-            if (map.i_InstanceId == 0)
+            if (map.GridMaps[gx][gy] != null)
             {
-                if (map.GridMaps[gx][gy] != null)
+                Map parent = map.m_parentMap;
+
+                if ((--parent.GridMapReference[gx][gy]) == 0)
                 {
-                    map.GridMaps[gx][gy].unloadData();
-                    map.GridMaps[gx][gy] = null;
+                    parent.GridMaps[gx][gy].unloadData();
+                    parent.GridMaps[gx][gy] = null;
                 }
             }
-            else
-                map.m_parentMap.ToMapInstanced().RemoveGridMapReference(new GridCoord(gx, gy));
 
             map.GridMaps[gx][gy] = null;
         }
 
         void LoadMapAndVMap(uint gx, uint gy)
         {
-            m_parentTerrainMap.LoadMap(gx, gy);
-            // Only load the data for the base map
-            if (i_InstanceId == 0)
-            {
-                LoadVMap(gx, gy);
-                LoadMMap(gx, gy);
-            }
+            LoadMap(gx, gy);
+            LoadVMap(gx, gy);
+            LoadMMap(gx, gy);
         }
 
         public void LoadAllCells()
@@ -379,17 +368,16 @@ namespace Game.Maps
                 Log.outDebug(LogFilter.Maps, "Creating grid[{0}, {1}] for map {2} instance {3}", p.x_coord, p.y_coord,
                     GetId(), i_InstanceId);
 
-                setGrid(new Grid(p.x_coord * MapConst.MaxGrids + p.y_coord, p.x_coord, p.y_coord, i_gridExpiry, WorldConfig.GetBoolValue(WorldCfg.GridUnload)),
-                    p.x_coord, p.y_coord);
-
-                getGrid(p.x_coord, p.y_coord).SetGridState(GridState.Idle);
+                var grid = new Grid(p.x_coord * MapConst.MaxGrids + p.y_coord, p.x_coord, p.y_coord, i_gridExpiry, WorldConfig.GetBoolValue(WorldCfg.GridUnload));
+                grid.SetGridState(GridState.Idle);
+                setGrid(grid, p.x_coord, p.y_coord);
 
                 //z coord
                 uint gx = (MapConst.MaxGrids - 1) - p.x_coord;
                 uint gy = (MapConst.MaxGrids - 1) - p.y_coord;
 
                 if (GridMaps[gx][gy] == null)
-                    LoadMapAndVMap(gx, gy);
+                    m_parentTerrainMap.LoadMapAndVMap(gx, gy);
             }
         }
 
@@ -1597,17 +1585,13 @@ namespace Game.Maps
             uint gy = (MapConst.MaxGrids - 1) - y;
 
             // delete grid map, but don't delete if it is from parent map (and thus only reference)
-            //+++if (GridMaps[gx][gy]) don't check for GridMaps[gx][gy], we might have to unload vmaps
+            if (GridMaps[gx][gy] != null)
             {
-                if (m_parentTerrainMap == this)
-                    m_parentTerrainMap.UnloadMap(gx, gy);
-
-                if (i_InstanceId == 0)
-                {
-                    Global.VMapMgr.unloadMap(GetId(), gx, gy);
-                    Global.MMapMgr.unloadMap(GetId(), gx, gy);
-                }
+                m_parentTerrainMap.UnloadMap(gx, gy);
+                Global.VMapMgr.unloadMap(m_parentTerrainMap.GetId(), gx, gy);
+                Global.MMapMgr.unloadMap(m_parentTerrainMap.GetId(), gx, gy);
             }
+
             Log.outDebug(LogFilter.Maps, "Unloading grid[{0}, {1}] for map {2} finished", x, y, GetId());
             return true;
         }
@@ -2982,11 +2966,6 @@ namespace Game.Maps
             return i_gridExpiry;
         }
 
-        private Map GetParent()
-        {
-            return m_parentMap;
-        }
-
         public void AddChildTerrainMap(Map map)
         {
             m_childTerrainMaps.Add(map);
@@ -3214,11 +3193,6 @@ namespace Game.Maps
         void setGridObjectDataLoaded(bool pLoaded, uint x, uint y)
         {
             getGrid(x, y).setGridObjectDataLoaded(pLoaded);
-        }
-
-        public void SetUnloadReferenceLock(GridCoord p, bool on)
-        {
-            getGrid(p.x_coord, p.y_coord).setUnloadReferenceLock(on);
         }
 
         public AreaTrigger GetAreaTrigger(ObjectGuid guid)
@@ -4357,6 +4331,7 @@ namespace Game.Maps
         List<AreaTrigger> _areaTriggersToMove = new List<AreaTrigger>();
 
         GridMap[][] GridMaps = new GridMap[MapConst.MaxGrids][];
+        ushort[][] GridMapReference = new ushort[MapConst.MaxGrids][];
         Dictionary<ulong, long> _creatureRespawnTimes = new Dictionary<ulong, long>();
         DynamicMapTree _dynamicTree = new DynamicMapTree();
 
