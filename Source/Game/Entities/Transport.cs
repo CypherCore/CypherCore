@@ -283,12 +283,15 @@ namespace Game.Entities
             if (!IsInWorld)
                 return;
 
-            _passengers.Add(passenger);
-            passenger.SetTransport(this);
-            passenger.m_movementInfo.transport.guid = GetGUID();
+            if (_passengers.Add(passenger))
+            {
+                passenger.SetTransport(this);
+                passenger.m_movementInfo.transport.guid = GetGUID();
 
-            if (passenger.IsTypeId(TypeId.Player))
-                Global.ScriptMgr.OnAddPassenger(this, passenger.ToPlayer());
+                Player player = passenger.ToPlayer();
+                if (player)
+                    Global.ScriptMgr.OnAddPassenger(this, player);
+            }
         }
 
         public void RemovePassenger(WorldObject passenger)
@@ -665,10 +668,8 @@ namespace Game.Entities
                   z = nextFrame.Node.Loc.Z,
                   o = nextFrame.InitialOrientation;
 
-            for (var i =0; i < _passengers.Count; ++i)
+            foreach(WorldObject obj in _passengers.ToList())
             {
-                WorldObject obj = _passengers[i];
-
                 float destX, destY, destZ, destO;
                 obj.m_movementInfo.transport.pos.GetPosition(out destX, out destY, out destZ, out destO);
                 TransportPosHelper.CalculatePassengerPosition(ref destX, ref destY, ref destZ, ref destO, x, y, z, o);
@@ -693,7 +694,7 @@ namespace Game.Entities
             GetMap().AddToMap(this);
         }
 
-        void UpdatePassengerPositions(List<WorldObject> passengers)
+        void UpdatePassengerPositions(HashSet<WorldObject> passengers)
         {
             foreach (var passenger in passengers)
             {
@@ -774,7 +775,7 @@ namespace Game.Entities
             ClearUpdateMask(true);
         }
 
-        public List<WorldObject> GetPassengers() { return _passengers; }
+        public HashSet<WorldObject> GetPassengers() { return _passengers; }
 
         public override  uint GetTransportPeriod() { return GetUInt32Value(GameObjectFields.Level); }
         public void SetPeriod(uint period) { SetUInt32Value(GameObjectFields.Level, period); }
@@ -799,8 +800,8 @@ namespace Game.Entities
         bool _triggeredArrivalEvent;
         bool _triggeredDepartureEvent;
 
-        List<WorldObject> _passengers = new List<WorldObject>();
-        List<WorldObject> _staticPassengers = new List<WorldObject>();
+        HashSet<WorldObject> _passengers = new HashSet<WorldObject>();
+        HashSet<WorldObject> _staticPassengers = new HashSet<WorldObject>();
 
         bool _delayedAddModel;
         bool _delayedTeleport;

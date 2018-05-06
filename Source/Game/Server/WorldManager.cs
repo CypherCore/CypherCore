@@ -313,7 +313,7 @@ namespace Game
 
             Global.ObjectMgr.SetHighestGuids();
 
-            /*if (!Global.MapMgr.ExistMapAndVMap(0, -6240.32f, 331.033f) || !Global.MapMgr.ExistMapAndVMap(0, -8949.95f, -132.493f)
+            if (!Global.MapMgr.ExistMapAndVMap(0, -6240.32f, 331.033f) || !Global.MapMgr.ExistMapAndVMap(0, -8949.95f, -132.493f)
                 || !Global.MapMgr.ExistMapAndVMap(1, -618.518f, -4251.67f) || !Global.MapMgr.ExistMapAndVMap(0, 1676.35f, 1677.45f)
                 || !Global.MapMgr.ExistMapAndVMap(1, 10311.3f, 832.463f) || !Global.MapMgr.ExistMapAndVMap(1, -2917.58f, -257.98f)
                 || (WorldConfig.GetIntValue(WorldCfg.Expansion) != 0 && (!Global.MapMgr.ExistMapAndVMap(530, 10349.6f, -6357.29f) || !Global.MapMgr.ExistMapAndVMap(530, -3961.64f, -13931.2f))))
@@ -321,7 +321,7 @@ namespace Game
                 Log.outError(LogFilter.ServerLoading, "Unable to load critical files - server shutting down !!!");
                 ShutdownServ(0, 0, ShutdownExitCode.Error);
                 return;
-            }*/
+            }
 
             // Initialize pool manager
             Global.PoolMgr.Initialize();

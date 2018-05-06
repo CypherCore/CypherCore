@@ -76,10 +76,12 @@ namespace Game.Network.Packets
             var movementInfo = new MovementInfo();
             movementInfo.Guid = data.ReadPackedGuid();
             movementInfo.Time = data.ReadUInt32();
-            movementInfo.Pos.posX = data.ReadFloat();
-            movementInfo.Pos.posY = data.ReadFloat();
-            movementInfo.Pos.posZ = data.ReadFloat();
-            movementInfo.Pos.Orientation = data.ReadFloat();
+            float x = data.ReadFloat();
+            float y = data.ReadFloat();
+            float z = data.ReadFloat();
+            float o = data.ReadFloat();
+
+            movementInfo.Pos.Relocate(x, y, z, o);
             movementInfo.Pitch = data.ReadFloat();
             movementInfo.SplineElevation = data.ReadFloat();
 
@@ -175,8 +177,8 @@ namespace Game.Network.Packets
                 data.FlushBits();
                 if (hasFallDirection)
                 {
-                    data.WriteFloat(movementInfo.jump.cosAngle);
                     data.WriteFloat(movementInfo.jump.sinAngle);
+                    data.WriteFloat(movementInfo.jump.cosAngle);
                     data.WriteFloat(movementInfo.jump.xyspeed);
                 }
             }

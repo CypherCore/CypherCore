@@ -321,8 +321,8 @@ namespace Game.PvP
             m_State = ObjectiveStates.Neutral;
             m_PvP = pvp;
 
-            m_activePlayers[0] = new List<ObjectGuid>();
-            m_activePlayers[1] = new List<ObjectGuid>();
+            m_activePlayers[0] = new HashSet<ObjectGuid>();
+            m_activePlayers[1] = new HashSet<ObjectGuid>();
         }
 
         public virtual bool HandlePlayerEnter(Player player)
@@ -333,8 +333,7 @@ namespace Game.PvP
                 player.SendUpdateWorldState(m_capturePoint.GetGoInfo().ControlZone.worldstate2, (uint)Math.Ceiling((m_value + m_maxValue) / (2 * m_maxValue) * 100.0f));
                 player.SendUpdateWorldState(m_capturePoint.GetGoInfo().ControlZone.worldstate3, m_neutralValuePct);
             }
-            m_activePlayers[player.GetTeamId()].Add(player.GetGUID());
-            return true;
+            return m_activePlayers[player.GetTeamId()].Add(player.GetGUID());
         }
 
         public virtual void HandlePlayerLeave(Player player)
@@ -531,8 +530,8 @@ namespace Game.PvP
             {
                 if (player.IsOutdoorPvPActive())
                 {
-                    m_activePlayers[player.GetTeamId()].Add(player.GetGUID());
-                    HandlePlayerEnter(player);
+                    if (m_activePlayers[player.GetTeamId()].Add(player.GetGUID()))
+                        HandlePlayerEnter(player);
                 }
             }
 
@@ -652,9 +651,9 @@ namespace Game.PvP
             }
 
             // send to all players present in the area
-            foreach (var _guid in m_activePlayers[team])
+            foreach (var playerGuid in m_activePlayers[team])
             {
-                Player player = Global.ObjAccessor.FindPlayer(_guid);
+                Player player = Global.ObjAccessor.FindPlayer(playerGuid);
                 if (player)
                     player.KilledMonsterCredit(id, guid);
             }
@@ -706,7 +705,7 @@ namespace Game.PvP
         public ulong m_capturePointSpawnId;
         public GameObject m_capturePoint;
         // active players in the area of the objective, 0 - alliance, 1 - horde
-        public List<ObjectGuid>[] m_activePlayers = new List<ObjectGuid>[2];
+        public HashSet<ObjectGuid>[] m_activePlayers = new HashSet<ObjectGuid>[2];
         // total shift needed to capture the objective
         public float m_maxValue;
         float m_minValue;

@@ -55,8 +55,7 @@ namespace Game.DataStorage
                 var records = ReadData(fileReader);
                 foreach (var pair in records)
                 {
-                    using (MemoryStream ms = new MemoryStream(pair.Value))
-                    using (BinaryReader dataReader = new BinaryReader(ms, System.Text.Encoding.UTF8))
+                    using (BinaryReader dataReader = new BinaryReader(new MemoryStream(pair.Value), System.Text.Encoding.UTF8))
                     {
                         var obj = new T();
 

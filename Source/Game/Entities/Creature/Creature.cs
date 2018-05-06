@@ -1111,7 +1111,7 @@ namespace Game.Entities
             byte level = (byte)(minlevel == maxlevel ? minlevel : RandomHelper.URand(minlevel, maxlevel));
             SetLevel(level);
 
-            if (!HasScalableLevels())
+            if (HasScalableLevels())
             {
                 SetUInt32Value(UnitFields.ScalingLevelMin, cInfo.levelScaling.Value.MinLevel);
                 SetUInt32Value(UnitFields.ScalingLevelMax, cInfo.levelScaling.Value.MaxLevel);
