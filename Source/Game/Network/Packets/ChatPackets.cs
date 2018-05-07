@@ -276,7 +276,7 @@ namespace Game.Network.Packets
         public string Prefix = "";
         public string Channel = "";
         public string ChatText = "";
-        public uint AchievementID = 0;
+        public uint AchievementID;
         public ChatFlags _ChatFlags = 0;
         public float DisplayTime = 0.0f;
         public bool HideChatLog = false;

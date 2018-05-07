@@ -370,30 +370,32 @@ namespace Game.Entities
             // Set charmed
             charmer.SetCharm(this, true);
 
-            Player player;
             if (IsTypeId(TypeId.Unit))
             {
                 ToCreature().GetAI().OnCharmed(true);
                 GetMotionMaster().MoveIdle();
             }
-            else if (player = ToPlayer())
+            else
             {
-                if (player.isAFK())
-                    player.ToggleAFK();
-
-                Creature creatureCharmer = charmer.ToCreature();
-                if (charmer.IsTypeId(TypeId.Unit)) // we are charmed by a creature
+                Player player = ToPlayer();
+                if (player)
                 {
-                    // change AI to charmed AI on next Update tick
-                    NeedChangeAI = true;
-                    if (IsAIEnabled)
-                    {
-                        IsAIEnabled = false;
-                        player.GetAI().OnCharmed(true);
-                    }
-                }
+                    if (player.isAFK())
+                        player.ToggleAFK();
 
-                player.SetClientControl(this, false);
+                    if (charmer.IsTypeId(TypeId.Unit)) // we are charmed by a creature
+                    {
+                        // change AI to charmed AI on next Update tick
+                        NeedChangeAI = true;
+                        if (IsAIEnabled)
+                        {
+                            IsAIEnabled = false;
+                            player.GetAI().OnCharmed(true);
+                        }
+                    }
+
+                    player.SetClientControl(this, false);
+                }
             }
 
             // charm is set by aura, and aura effect remove handler was called during apply handler execution

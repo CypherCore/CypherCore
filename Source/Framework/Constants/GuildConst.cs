@@ -191,7 +191,7 @@ namespace Framework.Constants
         InvalidVendor = 5
     }
 
-    public enum GuildBankRights : int
+    public enum GuildBankRights
     {
         ViewTab = 0x01,
         PutItem = 0x02,

@@ -398,15 +398,14 @@ namespace Game.Maps
 
         void ReadSaveDataBossStates(StringArguments data)
         {
-            uint bossId = 0;
-            foreach (var i in bosses)
+            foreach (var pair in bosses)
             {
                 EncounterState buff = (EncounterState)data.NextUInt32();
                 if (buff == EncounterState.InProgress || buff == EncounterState.Fail || buff == EncounterState.Special)
                     buff = EncounterState.NotStarted;
 
                 if (buff < EncounterState.ToBeDecided)
-                    SetBossState(bossId++, buff);
+                    SetBossState(pair.Key, buff);
             }
         }
 

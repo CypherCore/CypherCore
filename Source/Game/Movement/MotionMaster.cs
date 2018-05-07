@@ -758,10 +758,10 @@ namespace Game.Movement
             return (movement == staticIdleMovement);
         }
 
-        static uint splineId = 0;
+        static uint splineId;
 
-        public Unit _owner { get; private set; }
-        protected IMovementGenerator[] _slot = new IMovementGenerator[(int)MovementSlot.Max];
+        Unit _owner { get; }
+        IMovementGenerator[] _slot = new IMovementGenerator[(int)MovementSlot.Max];
         MMCleanFlag _cleanFlag;
         bool[] _initialize = new bool[(int)MovementSlot.Max];
         int _top;

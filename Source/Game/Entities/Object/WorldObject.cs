@@ -2444,10 +2444,9 @@ namespace Game.Entities
 
         public bool IsInMap(WorldObject obj)
         {
-            var m = GetMap().GetId();
-            var b = obj.GetMap().GetId();
             if (obj != null)
-                return IsInWorld && obj.IsInWorld && m == b;
+                return IsInWorld && obj.IsInWorld && GetMap().GetId() == obj.GetMap().GetId();
+
             return false;
         }
 

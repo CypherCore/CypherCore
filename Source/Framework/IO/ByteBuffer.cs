@@ -266,7 +266,7 @@ namespace Framework.IO
         /// <summary>
         /// Writes a string to the packet with a null terminated (0)
         /// </summary>
-        /// <param name="data"></param>
+        /// <param name="str"></param>
         public void WriteCString(string str)
         {
             if (string.IsNullOrEmpty(str))
@@ -281,6 +281,9 @@ namespace Framework.IO
 
         public void WriteString(string str)
         {
+            if (str.IsEmpty())
+                return;
+
             byte[] sBytes = Encoding.UTF8.GetBytes(str);
             WriteBytes(sBytes);
         }

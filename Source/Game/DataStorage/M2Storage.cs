@@ -187,7 +187,7 @@ namespace Game.DataStorage
                             continue;
                         }
 
-                        var unknownSize = m2file.ReadUInt32(); //unknown size
+                        m2file.ReadUInt32(); //unknown size
 
                         // Read header
                         M2Header header = m2file.Read<M2Header>();

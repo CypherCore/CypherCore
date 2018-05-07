@@ -249,11 +249,15 @@ namespace Game
 
         public override bool Equals(object obj)
         {
-            return base.Equals(obj);
+            if (obj is PhaseRef)
+                return (PhaseRef)obj == this;
+
+            return false;
         }
+
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            return Id.GetHashCode() ^ Flags.GetHashCode() ^ References.GetHashCode() ^ AreaConditions.GetHashCode();
         }
     }
 

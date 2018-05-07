@@ -764,8 +764,6 @@ namespace Game.Misc
 
     public class QuestMenu
     {
-        public QuestMenu() { }
-
         public void AddMenuItem(uint QuestId, byte Icon)
         {
             if (Global.ObjectMgr.GetQuestTemplate(QuestId) == null)

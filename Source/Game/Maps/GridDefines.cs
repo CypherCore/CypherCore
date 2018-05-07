@@ -156,18 +156,23 @@ namespace Game.Maps
         {
             return (p1.x_coord == p2.x_coord && p1.y_coord == p2.y_coord);
         }
+
         public static bool operator !=(CellCoord p1, CellCoord p2)
         {
             return !(p1 == p2);
         }
+
         public override bool Equals(object obj)
         {
-            return base.Equals(obj);
+            if (obj is CellCoord)
+                return (CellCoord)obj == this;
+
+            return false;
         }
 
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            return x_coord.GetHashCode() ^ y_coord.GetHashCode();
         }
 
         public uint x_coord { get; set; }

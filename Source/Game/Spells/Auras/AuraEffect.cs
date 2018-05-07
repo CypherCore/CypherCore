@@ -5999,7 +5999,7 @@ namespace Game.Spells
 
             if (apply)
             {
-                AreaTrigger areaTrigger = AreaTrigger.CreateAreaTrigger((uint)GetMiscValue(), GetCaster(), target, GetSpellInfo(), target, GetBase().GetDuration(), GetBase().GetSpellXSpellVisualId(), ObjectGuid.Empty, this);
+                AreaTrigger.CreateAreaTrigger((uint)GetMiscValue(), GetCaster(), target, GetSpellInfo(), target, GetBase().GetDuration(), GetBase().GetSpellXSpellVisualId(), ObjectGuid.Empty, this);
             }
             else
             {
@@ -6029,8 +6029,6 @@ namespace Game.Spells
 
     class AbsorbAuraOrderPred : Comparer<AuraEffect>
     {
-        public AbsorbAuraOrderPred() { }
-
         public override int Compare(AuraEffect aurEffA, AuraEffect aurEffB)
         {
             SpellInfo spellProtoA = aurEffA.GetSpellInfo();

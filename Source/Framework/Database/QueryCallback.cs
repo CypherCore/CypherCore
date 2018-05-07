@@ -54,8 +54,7 @@ namespace Framework.Database
         {
             QueryCallbackData callback = _callbacks.Dequeue();
 
-            bool hasNext = true;
-            while (hasNext)
+            while (true)
             {
                 if (_result != null && _result.Wait(0))
                 {
@@ -65,7 +64,7 @@ namespace Framework.Database
 
                     cb(this, f.Result);
 
-                    hasNext = _result != null;
+                    bool hasNext = _result != null;
                     if (_callbacks.Count == 0)
                     {
                         Contract.Assert(!hasNext);
@@ -81,8 +80,6 @@ namespace Framework.Database
                 else
                     return QueryCallbackStatus.NotReady;
             }
-
-            return QueryCallbackStatus.Completed;
         }
 
         Task<SQLResult> _result;

@@ -104,8 +104,8 @@ namespace Game.Network.Packets
                 ModCooldown = cooldown;
             }
 
-            public uint Category = 0; // SpellCategory Id
-            public int ModCooldown = 0; // Reduced Cooldown in ms
+            public uint Category; // SpellCategory Id
+            public int ModCooldown; // Reduced Cooldown in ms
         }
     }
 

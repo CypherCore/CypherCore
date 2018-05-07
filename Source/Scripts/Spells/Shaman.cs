@@ -182,7 +182,7 @@ namespace Scripts.Spells.Shaman
             AfterCast.Add(new CastHandler(TriggerCleaveBuff));
         }
 
-        int _targetsHit = 0;
+        int _targetsHit;
     }
 
     [Script] // 204288 - Earth Shield

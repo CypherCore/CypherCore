@@ -368,7 +368,7 @@ namespace Scripts.Spells.Holiday
     [Script("spell_gen_candied_sweet_potato", SpellIds.WellFedHasteTrigger)]
     class spell_pilgrims_bounty_buff_food : AuraScript
     {
-        public spell_pilgrims_bounty_buff_food(uint triggeredSpellId) : base()
+        public spell_pilgrims_bounty_buff_food(uint triggeredSpellId)
         {
             _triggeredSpellId = triggeredSpellId;
             _handled = false;

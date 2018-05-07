@@ -92,21 +92,21 @@ namespace Game.Groups
 
                 stmt.AddValue(index++, m_dbStoreId);
                 stmt.AddValue(index++, m_leaderGuid.GetCounter());
-                stmt.AddValue(index++, m_lootMethod);
+                stmt.AddValue(index++, (byte)m_lootMethod);
                 stmt.AddValue(index++, m_looterGuid.GetCounter());
-                stmt.AddValue(index++, m_lootThreshold);
-                stmt.AddValue(index++, m_targetIcons[0]);
-                stmt.AddValue(index++, m_targetIcons[1]);
-                stmt.AddValue(index++, m_targetIcons[2]);
-                stmt.AddValue(index++, m_targetIcons[3]);
-                stmt.AddValue(index++, m_targetIcons[4]);
-                stmt.AddValue(index++, m_targetIcons[5]);
-                stmt.AddValue(index++, m_targetIcons[6]);
-                stmt.AddValue(index++, m_targetIcons[7]);
-                stmt.AddValue(index++, m_groupFlags);
-                stmt.AddValue(index++, m_dungeonDifficulty);
-                stmt.AddValue(index++, m_raidDifficulty);
-                stmt.AddValue(index++, m_legacyRaidDifficulty);
+                stmt.AddValue(index++, (byte)m_lootThreshold);
+                stmt.AddValue(index++, m_targetIcons[0].GetRawValue());
+                stmt.AddValue(index++, m_targetIcons[1].GetRawValue());
+                stmt.AddValue(index++, m_targetIcons[2].GetRawValue());
+                stmt.AddValue(index++, m_targetIcons[3].GetRawValue());
+                stmt.AddValue(index++, m_targetIcons[4].GetRawValue());
+                stmt.AddValue(index++, m_targetIcons[5].GetRawValue());
+                stmt.AddValue(index++, m_targetIcons[6].GetRawValue());
+                stmt.AddValue(index++, m_targetIcons[7].GetRawValue());
+                stmt.AddValue(index++, (byte)m_groupFlags);
+                stmt.AddValue(index++, (byte)m_dungeonDifficulty);
+                stmt.AddValue(index++, (byte)m_raidDifficulty);
+                stmt.AddValue(index++, (byte)m_legacyRaidDifficulty);
                 stmt.AddValue(index++, m_masterLooterGuid.GetCounter());
 
                 DB.Characters.Execute(stmt);

@@ -105,12 +105,6 @@ namespace Game.Entities
             return true;
         }
 
-        public override void SaveToDB(SQLTransaction trans)
-        {
-            base.SaveToDB(trans);
-
-        }
-
         public override bool LoadFromDB(ulong guid, ObjectGuid owner_guid, SQLFields fields, uint entry)
         {
             if (!base.LoadFromDB(guid, owner_guid, fields, entry))

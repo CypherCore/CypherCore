@@ -1854,6 +1854,7 @@ namespace Game.Spells
             // Need init unitTarget by default unit (can changed in code on reflect)
             // Or on missInfo != SPELL_MISS_NONE unitTarget undefined (but need in trigger subsystem)
             unitTarget = unit;
+            targetMissInfo = missInfo;
 
             // Reset damage/healing counter
             m_damage = target.damage;
@@ -2416,7 +2417,6 @@ namespace Game.Spells
                     {
                         if (Convert.ToBoolean(channelAuraMask & ihit.effectMask))
                         {
-                            var b = unit.GetGUID();
                             AuraApplication aurApp = unit.GetAuraApplication(m_spellInfo.Id, m_originalCasterGUID);
                             if (aurApp != null)
                             {
@@ -7282,6 +7282,7 @@ namespace Game.Spells
         public GameObject gameObjTarget;
         public WorldLocation destTarget;
         public int damage;
+        SpellMissInfo targetMissInfo;
         float variance;
         SpellEffectHandleMode effectHandleMode;
         public SpellEffectInfo effectInfo;

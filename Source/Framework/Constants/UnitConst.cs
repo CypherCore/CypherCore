@@ -450,6 +450,8 @@ namespace Framework.Constants
         Dead = 3,
         JustRespawned = 4
     }
+
+    [Flags]
     public enum UnitState : uint
     {
         Died = 0x01,                     // Player Has Fake Death Aura

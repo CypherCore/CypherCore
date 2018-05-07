@@ -116,8 +116,8 @@ namespace Game.Network.Packets
 
         public ObjectGuid Vendor;
         public uint Node;
-        public uint GroundMountID = 0;
-        public uint FlyingMountID = 0;
+        public uint GroundMountID;
+        public uint FlyingMountID;
     }
 
     class NewTaxiPath : ServerPacket

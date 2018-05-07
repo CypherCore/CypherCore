@@ -180,12 +180,6 @@ namespace Game.Entities
 
         public static bool operator ==(ObjectGuid first, ObjectGuid other)
         {
-            if (ReferenceEquals(first, other))
-                return true;
-
-            if ((object)first == null || (object)other == null)
-                return false;
-
             return first.Equals(other);
         }
 

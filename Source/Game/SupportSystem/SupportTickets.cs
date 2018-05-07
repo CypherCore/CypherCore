@@ -117,7 +117,7 @@ namespace Game.SupportSystem
         string _note;
 
 
-        public BugTicket() : base()
+        public BugTicket()
         {
             _note = "";
         }
@@ -217,7 +217,7 @@ namespace Game.SupportSystem
         SupportTicketSubmitComplaint.SupportTicketChatLog _chatLog;
         string _note;
 
-        public ComplaintTicket() : base()
+        public ComplaintTicket()
         {
             _note = "";
         }
@@ -359,7 +359,7 @@ namespace Game.SupportSystem
         float _facing;
         string _note;
 
-        public SuggestionTicket() : base()
+        public SuggestionTicket()
         {
             _note = "";
         }

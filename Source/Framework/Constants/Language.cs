@@ -17,7 +17,7 @@
 
 namespace Framework.Constants
 {
-    public enum Language : int
+    public enum Language
     {
         Universal = 0,
         Orcish = 1,

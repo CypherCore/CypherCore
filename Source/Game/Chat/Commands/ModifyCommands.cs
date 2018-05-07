@@ -277,7 +277,7 @@ namespace Game.Chat
 
             if (moneyToAdd < 0)
             {
-                ulong newmoney = (targetMoney + (ulong)moneyToAdd);
+                long newmoney = (long)targetMoney + moneyToAdd;
 
                 Log.outDebug(LogFilter.ChatSystem, Global.ObjectMgr.GetCypherString(CypherStrings.CurrentMoney), targetMoney, moneyToAdd, newmoney);
                 if (newmoney <= 0)
@@ -291,13 +291,13 @@ namespace Game.Chat
                 else
                 {
                     ulong moneyToAddMsg = (ulong)(moneyToAdd * -1);
-                    if (newmoney > PlayerConst.MaxMoneyAmount)
-                        newmoney = PlayerConst.MaxMoneyAmount;
+                    if (newmoney > (long)PlayerConst.MaxMoneyAmount)
+                        newmoney = (long)PlayerConst.MaxMoneyAmount;
 
-                    handler.SendSysMessage(CypherStrings.YouTakeMoney, Math.Abs(moneyToAdd), handler.GetNameLink(target));
+                    handler.SendSysMessage(CypherStrings.YouTakeMoney, moneyToAddMsg, handler.GetNameLink(target));
                     if (handler.needReportToTarget(target))
-                        target.SendSysMessage(CypherStrings.YoursMoneyTaken, handler.GetNameLink(), Math.Abs(moneyToAdd));
-                    target.SetMoney(newmoney);
+                        target.SendSysMessage(CypherStrings.YoursMoneyTaken, handler.GetNameLink(), moneyToAddMsg);
+                    target.SetMoney((ulong)newmoney);
                 }
             }
             else

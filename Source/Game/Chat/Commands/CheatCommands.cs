@@ -27,7 +27,7 @@ namespace Game.Chat.Commands
         [Command("god", RBACPermissions.CommandCheatGod)]
         static bool HandleGodModeCheat(StringArguments args, CommandHandler handler)
         {
-            if (handler.GetSession() == null || handler.GetSession().GetPlayer())
+            if (handler.GetSession() == null || !handler.GetSession().GetPlayer())
                 return false;
 
             string argstr = args.NextString();

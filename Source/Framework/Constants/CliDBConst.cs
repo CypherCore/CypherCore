@@ -849,7 +849,7 @@ namespace Framework.Constants
         FlyWarriorChargeEnd = 821
     }
 
-    public enum AreaFlags : int
+    public enum AreaFlags
     {
         Snow = 0x01,                // Snow (Only Dun Morogh, Naxxramas, Razorfen Downs And Winterspring)
         Unk1 = 0x02,                // Razorfen Downs, Naxxramas And Acherus: The Ebon Hold (3.3.5a)

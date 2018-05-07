@@ -119,10 +119,9 @@ namespace Game
             }
         }
 
-        public byte[] DecryptData(byte[] buffer)
+        public void DecryptData(byte[] buffer)
         {
             _inputCrypto.ProcessBuffer(buffer, buffer.Length);
-            return buffer;
         }
 
         public ByteBuffer EncryptData(byte[] buffer)

@@ -267,7 +267,7 @@ namespace Framework.Constants
     }
 
     // Spell mechanics
-    public enum Mechanics : int
+    public enum Mechanics
     {
         None = 0,
         Charm = 1,
@@ -277,7 +277,7 @@ namespace Framework.Constants
         Fear = 5,
         Grip = 6,
         Root = 7,
-        Slow_Attack = 8,
+        SlowAttack = 8,
         Silence = 9,
         Sleep = 10,
         Snare = 11,

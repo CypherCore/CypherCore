@@ -522,7 +522,7 @@ namespace Scripts.Spells.Mage
                 if (!unit)
                     return true;
 
-                return unit.HasAura(SpellIds.RingOfFrostDummy) || unit.HasAura(SpellIds.RingOfFrostFreeze) || unit.GetExactDist(GetExplTargetDest()) > outRadius || unit.GetExactDist(GetExplTargetDest()) < inRadius;
+                return unit.HasAura(SpellIds.RingOfFrostDummy) || unit.HasAura(SpellIds.RingOfFrostFreeze) || unit.GetExactDist(dest) > outRadius || unit.GetExactDist(dest) < inRadius;
             });
         }
 

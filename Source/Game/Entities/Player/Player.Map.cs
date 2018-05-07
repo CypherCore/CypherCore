@@ -30,11 +30,6 @@ namespace Game.Entities
 {
     public partial class Player
     {
-        public override void SetMap(Map map)
-        {
-            base.SetMap(map);
-        }
-
         public Difficulty GetDifficultyID(MapRecord mapEntry)
         {
             if (!mapEntry.IsRaid())

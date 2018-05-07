@@ -289,6 +289,9 @@ namespace System
 
         public static int GetByteCount(this string str)
         {
+            if (str.IsEmpty())
+                return 0;
+
             return Encoding.UTF8.GetByteCount(str);
         }
         #endregion

@@ -97,15 +97,18 @@ namespace Game
 
             vehicle_base.m_movementInfo = packet.Status;
 
-            Unit vehUnit;
             if (packet.DstVehicle.IsEmpty())
                 GetPlayer().ChangeSeat(-1, packet.DstSeatIndex != 255);
-            else if (vehUnit = Global.ObjAccessor.GetUnit(GetPlayer(), packet.DstVehicle))
+            else
             {
-                Vehicle vehicle = vehUnit.GetVehicleKit();
-                if (vehicle)
-                    if (vehicle.HasEmptySeat((sbyte)packet.DstSeatIndex))
-                    vehUnit.HandleSpellClick(GetPlayer(), (sbyte)packet.DstSeatIndex);
+                Unit vehUnit = Global.ObjAccessor.GetUnit(GetPlayer(), packet.DstVehicle);
+                if (vehUnit)
+                {
+                    Vehicle vehicle = vehUnit.GetVehicleKit();
+                    if (vehicle)
+                        if (vehicle.HasEmptySeat((sbyte) packet.DstSeatIndex))
+                            vehUnit.HandleSpellClick(GetPlayer(), (sbyte) packet.DstSeatIndex);
+                }
             }
         }
 
@@ -123,15 +126,19 @@ namespace Game
                     GetPlayer().GetGUID().ToString(), seat.Flags);
                 return;
             }
-            Unit vehUnit;
+
             if (vehicle_base.GetGUID() == packet.Vehicle)
                 GetPlayer().ChangeSeat((sbyte)packet.SeatIndex);
-            else if (vehUnit = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Vehicle))
+            else
             {
-                Vehicle vehicle = vehUnit.GetVehicleKit();
-                if (vehicle)                
-                    if (vehicle.HasEmptySeat((sbyte)packet.SeatIndex))
-                        vehUnit.HandleSpellClick(GetPlayer(), (sbyte)packet.SeatIndex);
+                Unit vehUnit = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Vehicle);
+                if (vehUnit)
+                {
+                    Vehicle vehicle = vehUnit.GetVehicleKit();
+                    if (vehicle)
+                        if (vehicle.HasEmptySeat((sbyte) packet.SeatIndex))
+                            vehUnit.HandleSpellClick(GetPlayer(), (sbyte) packet.SeatIndex);
+                }
             }
         }
 

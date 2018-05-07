@@ -91,7 +91,7 @@ namespace Game.Network.Packets
 
             for (uint i = 0; i < removeMovementForcesCount; ++i)
             {
-                ObjectGuid guid = data.ReadPackedGuid();
+                data.ReadPackedGuid();
             }
 
             // ResetBitReader
@@ -676,8 +676,8 @@ namespace Game.Network.Packets
         }
 
         public ObjectGuid MoverGUID;
-        int AckIndex = 0;
-        int MoveTime = 0;
+        int AckIndex;
+        int MoveTime;
     }
 
     public class MovementAckMessage : ClientPacket

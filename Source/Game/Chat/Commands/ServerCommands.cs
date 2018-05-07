@@ -83,8 +83,6 @@ namespace Game.Chat
                 if (string.IsNullOrEmpty(paramStr))
                     return false;
 
-                int limit = paramStr.Length;
-
                 switch (paramStr.ToLower())
                 {
                     case "player":

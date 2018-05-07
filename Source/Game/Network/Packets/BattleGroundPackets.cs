@@ -302,9 +302,9 @@ namespace Game.Network.Packets
             JoinAsGroup = _worldPacket.HasBit();
         }
 
-        public bool JoinAsGroup = false;
-        public byte Roles = 0;
-        public ulong QueueID = 0;
+        public bool JoinAsGroup;
+        public byte Roles;
+        public ulong QueueID;
         public int[] BlacklistMap = new int[2];
     }
 

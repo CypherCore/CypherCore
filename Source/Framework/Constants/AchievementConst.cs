@@ -13,7 +13,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */﻿
+ */
+
+using System;
 
 namespace Framework.Constants
 {
@@ -46,6 +48,7 @@ namespace Framework.Constants
         SumChildrenWeight = 9
     }
 
+    [Flags]
     public enum AchievementFlags
     {
         Counter = 0x01,
@@ -71,6 +74,7 @@ namespace Framework.Constants
         TrackingFlag = 0x00100000
     }
 
+    [Flags]
     public enum CriteriaFlagsCu
     {
         Player = 0x1,

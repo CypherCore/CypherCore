@@ -21,7 +21,7 @@ using System.Threading;
 
 namespace Framework.Networking
 {
-    public class NetworkThread<SocketType> where SocketType : ISocket
+    public class NetworkThread<TSocketType> where TSocketType : ISocket
     {
         public void Stop()
         {
@@ -43,15 +43,15 @@ namespace Framework.Networking
             return _connections;
         }
 
-        public virtual void AddSocket(SocketType sock)
+        public virtual void AddSocket(TSocketType sock)
         {
             Interlocked.Increment(ref _connections);
             _newSockets.Add(sock);
             SocketAdded(sock);
         }
 
-        public virtual void SocketAdded(SocketType sock) { }
-        public virtual void SocketRemoved(SocketType sock) { }
+        protected virtual void SocketAdded(TSocketType sock) { }
+        protected virtual void SocketRemoved(TSocketType sock) { }
 
         void AddNewSockets()
         {
@@ -78,12 +78,11 @@ namespace Framework.Networking
             Log.outDebug(LogFilter.Network, "Network Thread Starting");
 
             int sleepTime = 10;
-            uint tickStart = 0, diff = 0;
             while (!_stopped)
             {
                 Thread.Sleep(sleepTime);
 
-                tickStart = Time.GetMSTime();
+                uint tickStart = Time.GetMSTime();
 
                 AddNewSockets();
 
@@ -101,7 +100,7 @@ namespace Framework.Networking
                     }
                 }
 
-                diff = Time.GetMSTimeDiffToNow(tickStart);
+                uint diff = Time.GetMSTimeDiffToNow(tickStart);
                 sleepTime = (int)(diff > 10 ? 0 : 10 - diff);
             }
 
@@ -110,12 +109,12 @@ namespace Framework.Networking
             _Sockets.Clear();
         }
 
-        volatile int _connections;
+        int _connections;
         volatile bool _stopped;
 
         Thread _thread;
 
-        List<SocketType> _Sockets = new List<SocketType>();
-        List<SocketType> _newSockets = new List<SocketType>();
+        List<TSocketType> _Sockets = new List<TSocketType>();
+        List<TSocketType> _newSockets = new List<TSocketType>();
     }
 }

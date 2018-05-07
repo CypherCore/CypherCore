@@ -255,7 +255,7 @@ namespace Game
             }
 
             ObjectGuid ownerGuid = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(0));
-            ulong signs = result.Read<ulong>(1);
+            //ulong signs = result.Read<ulong>(1);
 
             if (ownerGuid == GetPlayer().GetGUID())
                 return;
@@ -266,7 +266,6 @@ namespace Game
                 Guild.SendCommandResult(this, GuildCommandType.CreateGuild, GuildCommandError.NotAllied);
                 return;
             }
-
 
             if (GetPlayer().GetGuildId() != 0)
             {

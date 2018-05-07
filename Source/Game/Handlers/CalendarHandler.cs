@@ -509,7 +509,6 @@ namespace Game
             if (save == null)
                 return;
 
-            ObjectGuid guid = GetPlayer().GetGUID();
             long currTime = Time.UnixTime;
 
             CalendarRaidLockoutUpdated packet = new CalendarRaidLockoutUpdated();

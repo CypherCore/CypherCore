@@ -40,7 +40,6 @@ namespace Framework.Configuration
             int lineCounter = 0;
             try
             {
-                string name = string.Empty;
                 foreach (var line in ConfigContent)
                 {
                     lineCounter++;

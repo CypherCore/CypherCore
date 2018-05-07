@@ -697,7 +697,7 @@ namespace Scripts.Spells.Warrior
             AfterCast.Add(new CastHandler(HandleAfterCast));
         }
 
-        uint _targetCount = 0;
+        uint _targetCount;
     }
 
     [Script] // 107570 - Storm Bolt

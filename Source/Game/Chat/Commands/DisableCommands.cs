@@ -34,7 +34,6 @@ namespace Game.Chat.Commands
                 if (entry == 0)
                     return false;
 
-                string flagsStr = args.NextString();
                 uint flags = args.NextUInt32();
 
                 string disableComment = args.NextString("");

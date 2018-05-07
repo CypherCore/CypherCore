@@ -984,8 +984,6 @@ namespace Game
 
     class AccountInfoQueryHolderPerRealm : SQLQueryHolder<AccountInfoQueryLoad>
     {
-        public AccountInfoQueryHolderPerRealm() { }
-
         public void Initialize(uint accountId, uint battlenetAccountId)
         {
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_ACCOUNT_DATA);
@@ -1000,8 +998,6 @@ namespace Game
 
     class AccountInfoQueryHolder : SQLQueryHolder<AccountInfoQueryLoad>
     {
-        public AccountInfoQueryHolder() { }
-
         public void Initialize(uint accountId, uint battlenetAccountId)
         {
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_TOYS);

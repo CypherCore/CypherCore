@@ -168,13 +168,13 @@ public static partial class Detour
         private class dtQueryData
         {
             public dtStatus status;
-            public dtNode lastBestNode = null;
+            public dtNode lastBestNode;
             public float lastBestNodeCost;
             public dtPolyRef startRef;
             public dtPolyRef endRef;
             public float[] startPos = new float[3];
             public float[] endPos = new float[3];
-            public dtQueryFilter filter = null;
+            public dtQueryFilter filter;
 
             public void dtcsClear()
             {

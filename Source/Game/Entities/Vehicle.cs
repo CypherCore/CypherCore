@@ -61,9 +61,9 @@ namespace Game.Entities
             InitMovementInfoForBase();
         }
 
-        public virtual void Dispose()
+        public void Dispose()
         {
-            /// @Uninstall must be called before this.
+            // @Uninstall must be called before this.
             Contract.Assert(_status == Status.UnInstalling);
             foreach (var pair in Seats)
                 Contract.Assert(pair.Value.IsEmpty());

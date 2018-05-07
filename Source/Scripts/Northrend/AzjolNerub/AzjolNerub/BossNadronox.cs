@@ -823,7 +823,7 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.Nadronox
     [Script("spell_hadronox_periodic_summon_necromancer", SpellIds.SummonNecromancerTop, SpellIds.SummonNecromancerBottom)]
     class spell_hadronox_periodic_summon_template : AuraScript
     {
-        public spell_hadronox_periodic_summon_template(uint topSpellId, uint bottomSpellId) : base()
+        public spell_hadronox_periodic_summon_template(uint topSpellId, uint bottomSpellId)
         {
             _topSpellId = topSpellId;
             _bottomSpellId = bottomSpellId;

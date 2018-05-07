@@ -106,8 +106,8 @@ namespace Game.Network.Packets
         }
 
         public ObjectGuid PlayerGuid;
-        public uint Time = 0; // UnixTime
-        public uint Size = 0; // decompressed size
+        public uint Time; // UnixTime
+        public uint Size; // decompressed size
         public AccountDataTypes DataType = 0;
         public ByteBuffer CompressedData;
     }

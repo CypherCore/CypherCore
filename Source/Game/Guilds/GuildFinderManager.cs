@@ -22,6 +22,7 @@ using Game.Entities;
 using Game.Network.Packets;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Guilds
 {
@@ -104,10 +105,11 @@ namespace Game.Guilds
                 if (!_membershipRequestsByGuild.ContainsKey(guildId))
                     _membershipRequestsByGuild[guildId] = new Dictionary<ObjectGuid, MembershipRequest>();
 
+                _membershipRequestsByGuild[guildId][playerId] = request;
+
                 if (!_membershipRequestsByPlayer.ContainsKey(playerId))
                     _membershipRequestsByPlayer[playerId] = new Dictionary<ObjectGuid, MembershipRequest>();
 
-                _membershipRequestsByGuild[guildId][playerId] = request;
                 _membershipRequestsByPlayer[playerId][guildId] = request;
 
                 ++count;
@@ -118,13 +120,18 @@ namespace Game.Guilds
 
         public void AddMembershipRequest(ObjectGuid guildGuid, MembershipRequest request)
         {
+            if (!_membershipRequestsByGuild.ContainsKey(guildGuid))
+                _membershipRequestsByGuild[guildGuid] = new Dictionary<ObjectGuid, MembershipRequest>();
             _membershipRequestsByGuild[guildGuid][request.GetPlayerGUID()] = request;
+
+            if (!_membershipRequestsByPlayer.ContainsKey(request.GetPlayerGUID()))
+                _membershipRequestsByPlayer[request.GetPlayerGUID()] = new Dictionary<ObjectGuid, MembershipRequest>();
             _membershipRequestsByPlayer[request.GetPlayerGUID()][guildGuid] = request;
 
             SQLTransaction trans = new SQLTransaction();
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_GUILD_FINDER_APPLICANT);
-            stmt.AddValue(0, request.GetGuildGuid());
-            stmt.AddValue(1, request.GetPlayerGUID());
+            stmt.AddValue(0, request.GetGuildGuid().GetCounter());
+            stmt.AddValue(1, request.GetPlayerGUID().GetCounter());
             stmt.AddValue(2, request.GetAvailability());
             stmt.AddValue(3, request.GetClassRoles());
             stmt.AddValue(4, request.GetInterests());
@@ -179,7 +186,6 @@ namespace Game.Guilds
 
         public void RemoveMembershipRequest(ObjectGuid playerId, ObjectGuid guildId)
         {
-
             if (_membershipRequestsByGuild.ContainsKey(guildId))
             {
                 var guildDic = _membershipRequestsByGuild[guildId];
@@ -278,7 +284,7 @@ namespace Game.Guilds
             SQLTransaction trans = new SQLTransaction();
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_GUILD_FINDER_GUILD_SETTINGS);
-            stmt.AddValue(0, settings.GetGUID());
+            stmt.AddValue(0, settings.GetGUID().GetCounter());
             stmt.AddValue(1, settings.GetAvailability());
             stmt.AddValue(2, settings.GetClassRoles());
             stmt.AddValue(3, settings.GetInterests());

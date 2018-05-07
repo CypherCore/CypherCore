@@ -25,8 +25,6 @@ namespace Game.Entities
 {
     public class FormationMgr
     {
-        public FormationMgr() { }
-
         public static void AddCreatureToGroup(uint groupId, Creature member)
         {
             Map map = member.GetMap();

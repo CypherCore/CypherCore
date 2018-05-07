@@ -627,7 +627,7 @@ namespace Game.Network.Packets
         }
 
         public ObjectGuid Guid;      // Guid of the player that is logging in
-        float FarClip = 0.0f; // Visibility distance (for terrain)
+        float FarClip; // Visibility distance (for terrain)
     }
 
     public class LoginVerifyWorld : ServerPacket
@@ -1036,13 +1036,13 @@ namespace Game.Network.Packets
         public Race RaceId = Race.None;
         public Class ClassId = Class.None;
         public Gender Sex = Gender.None;
-        public byte Skin = 0;
-        public byte Face = 0;
-        public byte HairStyle = 0;
-        public byte HairColor = 0;
-        public byte FacialHairStyle = 0;
+        public byte Skin;
+        public byte Face;
+        public byte HairStyle;
+        public byte HairColor;
+        public byte FacialHairStyle;
         public Array<byte> CustomDisplay = new Array<byte>(PlayerConst.CustomDisplaySize);
-        public byte OutfitId = 0;
+        public byte OutfitId;
         public Optional<uint> TemplateSet = new Optional<uint>();
         public string Name;
 
@@ -1058,14 +1058,14 @@ namespace Game.Network.Packets
 
     public class CharCustomizeInfo
     {
-        public byte HairStyleID = 0;
-        public byte FaceID = 0;
+        public byte HairStyleID;
+        public byte FaceID;
         public ObjectGuid CharGUID;
         public Gender SexID = Gender.None;
         public string CharName;
-        public byte HairColorID = 0;
-        public byte FacialHairStyleID = 0;
-        public byte SkinID = 0;
+        public byte HairColorID;
+        public byte FacialHairStyleID;
+        public byte SkinID;
         public Array<byte> CustomDisplay = new Array<byte>(PlayerConst.CustomDisplaySize);
     }
 
@@ -1077,7 +1077,7 @@ namespace Game.Network.Packets
         public byte SkinID;
         public byte FacialHairStyleID;
         public ObjectGuid Guid;
-        public bool FactionChange = false;
+        public bool FactionChange;
         public string Name;
         public byte FaceID;
         public byte HairStyleID;

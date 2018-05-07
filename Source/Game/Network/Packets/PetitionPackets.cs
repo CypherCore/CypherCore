@@ -34,7 +34,7 @@ namespace Game.Network.Packets
         }
 
         public ObjectGuid ItemGUID;
-        public uint PetitionID = 0;
+        public uint PetitionID;
     }
 
     public class QueryPetitionResponse : ServerPacket
@@ -156,7 +156,7 @@ namespace Game.Network.Packets
         }
 
         public ObjectGuid PetitionGUID;
-        public byte Choice = 0;
+        public byte Choice;
     }
 
     public class PetitionSignResults : ServerPacket

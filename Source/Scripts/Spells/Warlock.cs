@@ -831,7 +831,7 @@ namespace Scripts.Spells.Warlock
 
 
         List<uint> _dotList = new List<uint>();
-        Unit _swapCaster = null;
+        Unit _swapCaster;
     }
 
     [Script] //! Soul Swap Copy Spells - 92795 - Simply copies spell IDs.

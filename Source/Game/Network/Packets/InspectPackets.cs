@@ -138,7 +138,7 @@ namespace Game.Network.Packets
             Bracket.ForEach(p => p.Write(_worldPacket));
         }
 
-        public List<PVPBracketData> Bracket;
+        public List<PVPBracketData> Bracket = new List<PVPBracketData>();
         public ObjectGuid ClientGUID;
     }
 

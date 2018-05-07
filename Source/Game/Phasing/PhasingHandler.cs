@@ -337,7 +337,6 @@ namespace Game
                 foreach (AuraEffect aurEff in unit.GetAuraEffectsByType(AuraType.Phase))
                 {
                     uint phaseId = (uint)aurEff.GetMiscValueB();
-                    var eraseResult = newSuppressions.RemovePhase(phaseId);
                     // if condition was met previously there is nothing to erase
                     if (newSuppressions.RemovePhase(phaseId))
                         phaseShift.AddPhase(phaseId, GetPhaseFlags(phaseId), null);//todo needs checked

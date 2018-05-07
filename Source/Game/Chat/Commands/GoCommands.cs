@@ -570,7 +570,6 @@ namespace Game.Chat.Commands
             string goX = args.NextString();
             string goY = args.NextString();
             string goZ = args.NextString();
-            string id = args.NextString();
             string port = args.NextString();
 
             float x, y, z, o;

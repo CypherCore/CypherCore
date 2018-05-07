@@ -98,7 +98,6 @@ namespace Game.Chat.Commands
                 return false;
             }
 
-            string countStr = args.NextString();
             if (!uint.TryParse(args.NextString(), out uint count))
                 count = 10;
 

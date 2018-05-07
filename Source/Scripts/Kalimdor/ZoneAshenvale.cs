@@ -167,11 +167,6 @@ namespace Scripts.Kalimdor.ZoneAshenvale
                     break;
             }
         }
-
-        public override void UpdateAI(uint diff)
-        {
-            base.UpdateAI(diff);
-        }
     }
 
     [Script]

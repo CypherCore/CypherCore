@@ -21,7 +21,7 @@ using System.Net.Sockets;
 
 namespace Framework.Networking
 {
-    public class SocketManager<SocketType> where SocketType : ISocket
+    public class SocketManager<TSocketType> where TSocketType : ISocket
     {
         public virtual bool StartNetwork(string bindIp, int port, int threadCount = 1)
         {
@@ -30,11 +30,11 @@ namespace Framework.Networking
             Acceptor = new AsyncAcceptor(bindIp, port);
 
             _threadCount = threadCount;
-            _threads = new NetworkThread<SocketType>[GetNetworkThreadCount()];
+            _threads = new NetworkThread<TSocketType>[GetNetworkThreadCount()];
 
             for (int i = 0; i < _threadCount; ++i)
             {
-                _threads[i] = new NetworkThread<SocketType>();
+                _threads[i] = new NetworkThread<TSocketType>();
                 _threads[i].Start();
             }
 
@@ -69,7 +69,7 @@ namespace Framework.Networking
         {
             try
             {
-                SocketType newSocket = (SocketType)Activator.CreateInstance(typeof(SocketType), sock);
+                TSocketType newSocket = (TSocketType)Activator.CreateInstance(typeof(TSocketType), sock);
                 newSocket.Start();
 
                 _threads[SelectThreadWithMinConnections()].AddSocket(newSocket);
@@ -94,7 +94,7 @@ namespace Framework.Networking
         }
 
         public AsyncAcceptor Acceptor;
-        NetworkThread<SocketType>[] _threads;
+        NetworkThread<TSocketType>[] _threads;
         int _threadCount;
     }
 }

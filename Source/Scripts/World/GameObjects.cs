@@ -1081,7 +1081,7 @@ namespace Scripts.World
                 });
             }
 
-            uint rnd = 0;
+            uint rnd;
             uint musicTime = 1000;
         }
 

@@ -1683,9 +1683,12 @@ namespace Game.Entities
                     }
 
                     bool destroyItem = true;
-                    foreach (QuestObjective obj in quest.Objectives)
-                        if (obj.Type == QuestObjectiveType.Item && srcItemId == obj.ObjectID)
-                            destroyItem = false;
+                    if (item.GetStartQuest() == questId)
+                    {
+                        foreach (QuestObjective obj in quest.Objectives)
+                            if (obj.Type == QuestObjectiveType.Item && srcItemId == obj.ObjectID)
+                                destroyItem = false;
+                    }
 
                     if (destroyItem)
                         DestroyItemCount(srcItemId, count, true, true);

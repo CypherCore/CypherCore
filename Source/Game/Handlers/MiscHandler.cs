@@ -745,7 +745,7 @@ namespace Game
             if (_warden == null || packet.Data.GetSize() == 0)
                 return;
 
-            var unpacked = new ByteBuffer(_warden.DecryptData(packet.Data.GetData()));            
+            _warden.DecryptData(packet.Data.GetData());            
             WardenOpcodes opcode = (WardenOpcodes)packet.Data.ReadUInt8();
 
             switch (opcode)

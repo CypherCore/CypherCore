@@ -1904,12 +1904,15 @@ namespace Game.Spells
             uint dispel_type = (uint)effectInfo.MiscValue;
             uint dispelMask = SpellInfo.GetDispelMask((DispelType)dispel_type);
 
-            List<DispelCharges> dispel_list = unitTarget.GetDispellableAuraList(m_caster, dispelMask);
-            if (dispel_list.Empty())
+            List<DispelableAura> dispelList = unitTarget.GetDispellableAuraList(m_caster, dispelMask, targetMissInfo == SpellMissInfo.Reflect);
+            if (dispelList.Empty())
                 return;
 
+            int remaining = dispelList.Count();
+
             // Ok if exist some buffs for dispel try dispel it
-            List<DispelCharges> success_list = new List<DispelCharges>();
+            uint failCount = 0;
+            List<DispelableAura> successList = new List<DispelableAura>();
 
             DispelFailed dispelFailed = new DispelFailed();
             dispelFailed.CasterGUID = m_caster.GetGUID();
@@ -1917,49 +1920,44 @@ namespace Game.Spells
             dispelFailed.SpellID = m_spellInfo.Id;
 
             // dispel N = damage buffs (or while exist buffs for dispel)
-            for (int count = 0; count < damage && !dispel_list.Empty();)
+            for (int count = 0; count < damage && remaining > 0;)
             {
                 // Random select buff for dispel
-                var pair = dispel_list[RandomHelper.IRand(0, dispel_list.Count - 1)];
+                var dispelableAura = dispelList[RandomHelper.IRand(0, dispelList.Count - 1)];
 
-                int chance = pair.aura.CalcDispelChance(unitTarget, !unitTarget.IsFriendlyTo(m_caster));
-                // 2.4.3 Patch Notes: "Dispel effects will no longer attempt to remove effects that have 100% dispel resistance."
-                if (chance == 0)
+                if (dispelableAura.RollDispel())
                 {
-                    dispel_list.Remove(pair);
-                    continue;
+                    var successItr = successList.Find(dispelAura =>
+                    {
+                        if (dispelAura.GetAura().GetId() == dispelableAura.GetAura().GetId())
+                            return true;
+
+                        return false;
+                    });
+
+                    if (successItr == null)
+                        successList.Add(new DispelableAura(dispelableAura.GetAura(), 0, 1));
+                    else
+                        successItr.IncrementCharges();
+
+                    if (!dispelableAura.DecrementCharge())
+                    {
+                        --remaining;
+                        dispelList[remaining] = dispelableAura;
+                    }
                 }
                 else
                 {
-                    if (RandomHelper.randChance(chance))
-                    {
-                        bool alreadyListed = false;
-                        foreach (var successPair in success_list)
-                        {
-                            var successValue = successPair.value;
-                            if (successPair.aura.GetId() == pair.aura.GetId())
-                            {
-                                ++successPair.value;
-                                alreadyListed = true;
-                            }
-                        }
-                        if (!alreadyListed)
-                            success_list.Add(new DispelCharges(pair.aura, 1));
-                        --pair.value;
-                        if (pair.value <= 0)
-                            dispel_list.Remove(pair);
-                    }
-                    else
-                        dispelFailed.FailedSpells.Add(pair.aura.GetId());
-
-                    ++count;
+                    ++failCount;
+                    dispelFailed.FailedSpells.Add(dispelableAura.GetAura().GetId());
                 }
+                ++count;
             }
 
             if (!dispelFailed.FailedSpells.Empty())
                 m_caster.SendMessageToSet(dispelFailed, true);
 
-            if (success_list.Empty())
+            if (successList.Empty())
                 return;
 
             SpellDispellLog spellDispellLog = new SpellDispellLog();
@@ -1970,15 +1968,15 @@ namespace Game.Spells
             spellDispellLog.CasterGUID = m_caster.GetGUID();
             spellDispellLog.DispelledBySpellID = m_spellInfo.Id;
 
-            foreach (var dispellCharge in success_list)
+            foreach (var dispelableAura in successList)
             {
                 var dispellData = new SpellDispellData();
-                dispellData.SpellID = dispellCharge.aura.GetId();
+                dispellData.SpellID = dispelableAura.GetAura().GetId();
                 dispellData.Harmful = false;      // TODO: use me
                 //dispellData.Rolled = none; // TODO: use me
                 //dispellData.Needed = none; // TODO: use me
 
-                unitTarget.RemoveAurasDueToSpellByDispel(dispellCharge.aura.GetId(), m_spellInfo.Id, dispellCharge.aura.GetCasterGUID(), m_caster, dispellCharge.value);
+                unitTarget.RemoveAurasDueToSpellByDispel(dispelableAura.GetAura().GetId(), m_spellInfo.Id, dispelableAura.GetAura().GetCasterGUID(), m_caster, dispelableAura.GetDispelCharges());
 
                 spellDispellLog.DispellData.Add(dispellData);
             }
@@ -5056,7 +5054,7 @@ namespace Game.Spells
             float radius = 5.0f;
             int duration = m_spellInfo.CalcDuration(m_originalCaster);
 
-            TempSummonType summonType = (duration == 0) ? TempSummonType.DeadDespawn : TempSummonType.TimedDespawn;
+            //TempSummonType summonType = (duration == 0) ? TempSummonType.DeadDespawn : TempSummonType.TimedDespawn;
             Map map = caster.GetMap();
 
             for (uint count = 0; count < numGuardians; ++count)
@@ -5388,9 +5386,6 @@ namespace Game.Spells
 
             if (!m_targets.HasDst())
                 return;
-
-            // trigger entry/miscvalue relation is currently unknown, for now use MiscValue as trigger entry
-            uint triggerEntry = (uint)effectInfo.MiscValue;
 
             int duration = GetSpellInfo().CalcDuration(GetCaster());
             AreaTrigger.CreateAreaTrigger((uint)effectInfo.MiscValue, GetCaster(), null, GetSpellInfo(), destTarget.GetPosition(), duration, m_SpellVisual, m_castId);
@@ -5752,15 +5747,46 @@ namespace Game.Spells
         }
     }
 
-    public class DispelCharges
+    public class DispelableAura
     {
-        public DispelCharges(Aura _aura, byte _value)
+        public DispelableAura(Aura aura, int dispelChance, byte dispelCharges)
         {
-            aura = _aura;
-            value = _value;
+            _aura = aura;
+            _chance = dispelChance;
+            _charges = dispelCharges;
         }
 
-        public Aura aura;
-        public byte value;
+        public bool RollDispel()
+        {
+            return RandomHelper.randChance(_chance);
+        }
+
+        public Aura GetAura()
+        {
+            return _aura;
+        }
+
+        public byte GetDispelCharges()
+        {
+            return _charges;
+        }
+
+        public void IncrementCharges()
+        {
+            ++_charges;
+        }
+
+        public bool DecrementCharge()
+        {
+            if (_charges == 0)
+                return false;
+
+            --_charges;
+            return _charges > 0;
+        }
+
+        Aura _aura;
+        int _chance;
+        byte _charges;
     }
 }

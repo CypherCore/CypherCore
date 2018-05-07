@@ -265,7 +265,7 @@ namespace Game.Collision
             z_dist = 0f;
             if (triangles.Empty() || !iBound.contains(pos))
                 return false;
-            GModelRayCallback callback = new GModelRayCallback(triangles, vertices);
+
             Vector3 rPos = pos - 0.1f * down;
             float dist = float.PositiveInfinity;
             Ray ray = new Ray(rPos, down);
@@ -379,7 +379,7 @@ namespace Game.Collision
                 if (reader.ReadStringFromChars(4) != "WMOD")
                     return false;
 
-                uint chunkSize = reader.ReadUInt32();
+                reader.ReadUInt32(); //chunkSize notused
                 RootWMOID = reader.ReadUInt32();
 
                 // read group models

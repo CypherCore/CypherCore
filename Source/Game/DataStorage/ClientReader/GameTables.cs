@@ -42,8 +42,6 @@ namespace Game.DataStorage
                     return storage;
                 }
 
-                var columnDefs = new StringArray(headers, '\t');
-
                 List<T> data = new List<T>();
                 data.Add(new T()); // row id 0, unused
 

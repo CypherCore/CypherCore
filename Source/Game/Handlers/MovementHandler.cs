@@ -287,7 +287,6 @@ namespace Game
             // only add to bg group and object, if the player was invited (else he entered through command)
             if (GetPlayer().InBattleground())
             {
-                Battleground bg;
                 // cleanup setting if outdated
                 if (!mapEntry.IsBattlegroundOrArena())
                 {
@@ -297,10 +296,14 @@ namespace Game
                     GetPlayer().SetBGTeam(0);
                 }
                 // join to bg case
-                else if (bg = GetPlayer().GetBattleground())
+                else
                 {
-                    if (GetPlayer().IsInvitedForBattlegroundInstance(GetPlayer().GetBattlegroundId()))
-                        bg.AddPlayer(GetPlayer());
+                    Battleground bg = GetPlayer().GetBattleground();
+                    if (bg)
+                    {
+                        if (GetPlayer().IsInvitedForBattlegroundInstance(GetPlayer().GetBattlegroundId()))
+                            bg.AddPlayer(GetPlayer());
+                    }
                 }
             }
 

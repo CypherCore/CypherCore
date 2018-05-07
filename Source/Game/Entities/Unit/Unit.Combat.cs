@@ -145,8 +145,6 @@ namespace Game.Entities
         {
             if (!GetThreatManager().isThreatListEmpty())
             {
-                int count = GetThreatManager().getThreatList().Count;
-
                 ThreatUpdate packet = new ThreatUpdate();
                 packet.UnitGUID = GetGUID();
                 var tlist = GetThreatManager().getThreatList();

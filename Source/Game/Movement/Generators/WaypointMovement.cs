@@ -372,8 +372,6 @@ namespace Game.Movement
 
     public class FlightPathMovementGenerator : MovementGeneratorMedium<Player>
     {
-        public FlightPathMovementGenerator() { }
-
         public void LoadPath(Player player, uint startNode = 0)
         {
             i_path.Clear();

@@ -160,15 +160,15 @@ namespace Game.Maps
 
                 float[][] boundGridCoords =
                 {
-                    new float[] { 0.0f, 0.0f },
-                    new float[] { 0.0f, -266.66666f },
-                    new float[] { 0.0f, -533.33331f },
-                    new float[] { -266.66666f, 0.0f },
-                    new float[] { -266.66666f, -266.66666f },
-                    new float[] { -266.66666f, -533.33331f },
-                    new float[] { -533.33331f, 0.0f },
-                    new float[] { -533.33331f, -266.66666f },
-                    new float[] { -533.33331f, -533.33331f }
+                    new [] { 0.0f, 0.0f },
+                    new [] { 0.0f, -266.66666f },
+                    new [] { 0.0f, -533.33331f },
+                    new [] { -266.66666f, 0.0f },
+                    new [] { -266.66666f, -266.66666f },
+                    new [] { -266.66666f, -533.33331f },
+                    new [] { -533.33331f, 0.0f },
+                    new [] { -533.33331f, -266.66666f },
+                    new [] { -533.33331f, -533.33331f }
                 };
 
                 _minHeightPlanes = new Plane[8];

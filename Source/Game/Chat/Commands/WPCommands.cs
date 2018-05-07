@@ -314,7 +314,7 @@ namespace Game.Chat.Commands
                             return false;
 
                         stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_Z);
-                        stmt.AddValue(0, args);
+                        stmt.AddValue(0, arg3);
                         stmt.AddValue(1, id);
                         DB.World.Execute(stmt);
 

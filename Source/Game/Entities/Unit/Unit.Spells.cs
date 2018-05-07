@@ -3128,9 +3128,9 @@ namespace Game.Entities
             return null;
         }
 
-        public List<DispelCharges> GetDispellableAuraList(Unit caster, uint dispelMask)
+        public List<DispelableAura> GetDispellableAuraList(Unit caster, uint dispelMask, bool isReflect = false)
         {
-            List<DispelCharges> dispelList = new List<DispelCharges>();
+            List<DispelableAura> dispelList = new List<DispelableAura>();
 
             var auras = GetOwnedAuras();
             foreach (var pair in auras)
@@ -3147,8 +3147,14 @@ namespace Game.Entities
                 if (Convert.ToBoolean(aura.GetSpellInfo().GetDispelMask() & dispelMask))
                 {
                     // do not remove positive auras if friendly target
-                    //               negative auras if non-friendly target
-                    if (aurApp.IsPositive() == IsFriendlyTo(caster))
+                    //               negative auras if non-friendly
+                    // unless we're reflecting (dispeller eliminates one of it's benefitial buffs)
+                    if (isReflect != (aurApp.IsPositive() == IsFriendlyTo(caster)))
+                        continue;
+
+                    // 2.4.3 Patch Notes: "Dispel effects will no longer attempt to remove effects that have 100% dispel resistance."
+                    int chance = aura.CalcDispelChance(this, !IsFriendlyTo(caster));
+                    if (chance == 0)
                         continue;
 
                     // The charges / stack amounts don't count towards the total number of auras that can be dispelled.
@@ -3157,7 +3163,7 @@ namespace Game.Entities
                     bool dispelCharges = aura.GetSpellInfo().HasAttribute(SpellAttr7.DispelCharges);
                     byte charges = dispelCharges ? aura.GetCharges() : aura.GetStackAmount();
                     if (charges > 0)
-                        dispelList.Add(new DispelCharges(aura, charges));
+                        dispelList.Add(new DispelableAura(aura, chance, charges));
                 }
             }
 

@@ -84,7 +84,7 @@ namespace Game.Movement
             return true;
         }
 
-        public void _setRandomLocation(Creature creature)
+        void _setRandomLocation(Creature creature)
         {
             if (creature.IsMovementPreventedByCasting())
             {

@@ -40,7 +40,7 @@ namespace Game
             Values[WorldCfg.EnableSinfoLogin] = GetDefaultValue("Server.LoginInfo", 0);
 
             // Read all rates from the config file
-            Action<WorldCfg, string> setRegenRate = (WorldCfg rate, string configKey) =>
+            Action<WorldCfg, string> setRegenRate = (rate, configKey) =>
             {
                 Values[rate] = GetDefaultValue(configKey, 1.0f);
                 if ((float)Values[rate] < 0.0f)

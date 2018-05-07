@@ -369,7 +369,7 @@ namespace System.Collections
                 return MemberwiseClone();
             }
 
-            public virtual bool MoveNext()
+            public bool MoveNext()
             {
                 //if (version != bitarray._version) throw new InvalidOperationException(Environment.GetResourceString(ResId.InvalidOperation_EnumFailedVersion));
                 if (index < (bitarray.Count - 1))

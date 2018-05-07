@@ -90,7 +90,6 @@ namespace Game
         /// This is call when player leave battlefield zone.
         /// </summary>
         /// <param name="queueId">The queue id of Bf</param>
-        /// <param name="queueId">The queue id of Bf</param>
         /// <param name="battleState">Battlefield status</param>
         /// <param name="relocated">Whether player is added to Bf on the spot or teleported from queue</param>
         /// <param name="reason">Reason why player left battlefield</param>

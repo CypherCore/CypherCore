@@ -31,7 +31,7 @@ using System.Net.Sockets;
 
 namespace BNetServer.Networking
 {
-    public partial class Session : SSLSocket
+    public class Session : SSLSocket
     {
         public Session(Socket socket) : base(socket)
         {

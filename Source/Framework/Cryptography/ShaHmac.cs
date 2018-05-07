@@ -114,11 +114,6 @@ namespace Framework.Cryptography
 
     public class HmacSha256 : HMACSHA256
     {
-        public HmacSha256() : base()
-        {
-            Initialize();
-        }
-
         public HmacSha256(byte[] key) : base(key)
         {
             Initialize();

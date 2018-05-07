@@ -589,7 +589,6 @@ namespace Game
         public Dictionary<byte, byte> GetClassExpansionRequirements() { return _classExpansionRequirementStorage; }
         public Expansion GetClassExpansionRequirement(Class class_)
         {
-            var exp = _classExpansionRequirementStorage.LookupByKey(class_);
             if (_classExpansionRequirementStorage.ContainsKey((byte)class_))
                 return (Expansion)_classExpansionRequirementStorage[(byte)class_];
             return Expansion.Classic;
@@ -7804,6 +7803,8 @@ namespace Game
                 AddLocaleString(result.Read<string>(5), locale, data.TitleAlt);
 
             } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creature locale strings in {1} ms", _creatureLocaleStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
         public void LoadGameObjectLocales()
         {
@@ -8093,6 +8094,8 @@ namespace Game
                 AddLocaleString(result.Read<string>(2), locale, data.Name);
             }
             while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} points_of_interest locale strings in {1} ms", _pointOfInterestLocaleStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
         public CreatureLocale GetCreatureLocale(uint entry)

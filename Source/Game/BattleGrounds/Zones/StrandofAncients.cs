@@ -703,28 +703,22 @@ namespace Game.BattleGrounds.Zones
         public override WorldSafeLocsRecord GetClosestGraveYard(Player player)
         {
             uint safeloc = 0;
-            WorldSafeLocsRecord ret;
-            WorldSafeLocsRecord closest;
-            float dist, nearest;
-            float x, y, z;
-
-            player.GetPosition(out x, out y, out z);
 
             if (player.GetTeamId() == Attackers)
                 safeloc = SAMiscConst.GYEntries[SAGraveyards.BeachGy];
             else
                 safeloc = SAMiscConst.GYEntries[SAGraveyards.DefenderLastGy];
 
-            closest = CliDB.WorldSafeLocsStorage.LookupByKey(safeloc);
-            nearest = player.GetExactDistSq(closest.Loc.X, closest.Loc.Y, closest.Loc.Z);
+            WorldSafeLocsRecord closest = CliDB.WorldSafeLocsStorage.LookupByKey(safeloc);
+            float nearest = player.GetExactDistSq(closest.Loc.X, closest.Loc.Y, closest.Loc.Z);
 
             for (byte i = SAGraveyards.RightCapturableGy; i < SAGraveyards.Max; i++)
             {
                 if (GraveyardStatus[i] != player.GetTeamId())
                     continue;
 
-                ret = CliDB.WorldSafeLocsStorage.LookupByKey(SAMiscConst.GYEntries[i]);
-                dist = player.GetExactDistSq(ret.Loc.X, ret.Loc.Y, ret.Loc.Z);
+                WorldSafeLocsRecord ret = CliDB.WorldSafeLocsStorage.LookupByKey(SAMiscConst.GYEntries[i]);
+                float dist = player.GetExactDistSq(ret.Loc.X, ret.Loc.Y, ret.Loc.Z);
                 if (dist < nearest)
                 {
                     closest = ret;

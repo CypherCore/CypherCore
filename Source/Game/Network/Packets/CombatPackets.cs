@@ -92,7 +92,7 @@ namespace Game.Network.Packets
 
         public ObjectGuid Attacker;
         public ObjectGuid Victim;
-        public bool NowDead = false;
+        public bool NowDead;
     }
 
     public class ThreatUpdate : ServerPacket

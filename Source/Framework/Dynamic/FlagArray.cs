@@ -28,16 +28,6 @@ namespace Framework.Dynamic
                 _values[i] = parts[i];
         }
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        public override bool Equals(object obj)
-        {
-            return base.Equals(obj);
-        }
-
         public bool IsEqual(params uint[] parts)
         {
             for (var i = 0; i < _values.Length; ++i)
