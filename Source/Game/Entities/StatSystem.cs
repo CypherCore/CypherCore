@@ -1104,7 +1104,7 @@ namespace Game.Entities
                 var mAPbyArmor = GetAuraEffectsByType(AuraType.ModAttackPowerOfArmor);
                 foreach (var iter in mAPbyArmor)
                     // always: ((*i).GetModifier().m_miscvalue == 1 == SPELL_SCHOOL_MASK_NORMAL)
-                    attPowerMod += GetArmor() / iter.GetAmount();
+                    attPowerMod += (int)(GetArmor() / iter.GetAmount());
             }
 
             SetUInt32Value(index, (uint)base_attPower);            //UNIT_FIELD_(RANGED)_ATTACK_POWER field

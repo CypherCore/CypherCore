@@ -3772,7 +3772,7 @@ namespace Game.Entities
             ulong price = 0;
             if (crItem.IsGoldRequired(pProto) && pProto.GetBuyPrice() > 0) //Assume price cannot be negative (do not know why it is int32)
             {
-                float buyPricePerItem = pProto.GetBuyPrice() / pProto.GetBuyCount();
+                float buyPricePerItem = (float)pProto.GetBuyPrice() / pProto.GetBuyCount();
                 ulong maxCount = (ulong)(PlayerConst.MaxMoneyAmount / buyPricePerItem);
                 if (count > maxCount)
                 {

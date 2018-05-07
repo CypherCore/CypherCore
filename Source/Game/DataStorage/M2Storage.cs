@@ -146,9 +146,9 @@ namespace Game.DataStorage
                             float xDiff = nextTarget.locations.X - lastTarget.locations.X;
                             float yDiff = nextTarget.locations.Y - lastTarget.locations.Y;
                             float zDiff = nextTarget.locations.Z - lastTarget.locations.Z;
-                            x = lastTarget.locations.X + (xDiff * (timeDiffThis / timeDiffTarget));
-                            y = lastTarget.locations.Y + (yDiff * (timeDiffThis / timeDiffTarget));
-                            z = lastTarget.locations.Z + (zDiff * (timeDiffThis / timeDiffTarget));
+                            x = lastTarget.locations.X + (xDiff * ((float)timeDiffThis / timeDiffTarget));
+                            y = lastTarget.locations.Y + (yDiff * ((float)timeDiffThis / timeDiffTarget));
+                            z = lastTarget.locations.Z + (zDiff * ((float)timeDiffThis / timeDiffTarget));
                         }
                         float xDiff1 = x - thisCam.locations.X;
                         float yDiff1 = y - thisCam.locations.Y;

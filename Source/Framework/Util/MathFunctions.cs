@@ -71,7 +71,7 @@ public static class MathFunctions
     /// Returns the clamped value.
     /// result = (EpsilonF > Abs(value-calmpedValue)) ? calmpedValue : value;
     /// </returns>
-    /// <remarks><see cref="MathFunctions.EpsilonF"/> is used for tolerance.</remarks>
+    /// <remarks><see cref="MathFunctions.Epsilon"/> is used for tolerance.</remarks>
     public static float Clamp(float value, float calmpedValue)
     {
         return (Epsilon > Math.Abs(value - calmpedValue)) ? calmpedValue : value;
@@ -81,10 +81,10 @@ public static class MathFunctions
     static double eps(double a, double b)
     {
         double aa = Math.Abs(a) + 1.0;
-        if (aa == double.PositiveInfinity)
+        if (double.IsPositiveInfinity(aa))
             return double.Epsilon;
-        else
-            return double.Epsilon * aa;
+
+        return double.Epsilon * aa;
     }
 
     public static float lerp(float a, float b, float f)

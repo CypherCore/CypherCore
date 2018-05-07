@@ -536,7 +536,7 @@ namespace Game.PvP
             }
 
             // get the difference of numbers
-            float fact_diff = (m_activePlayers[0].Count - m_activePlayers[1].Count) * diff / 1000;
+            float fact_diff = (float)(m_activePlayers[0].Count - m_activePlayers[1].Count) * diff / 1000;
             if (fact_diff == 0.0f)
                 return false;
 

@@ -225,7 +225,7 @@ namespace Game.Entities
 
         float GetProgress()
         {
-            return GetTimeSinceCreated() < GetTimeToTargetScale() ? GetTimeSinceCreated() / GetTimeToTargetScale() : 1.0f;
+            return GetTimeSinceCreated() < GetTimeToTargetScale() ? (float)GetTimeSinceCreated() / GetTimeToTargetScale() : 1.0f;
         }
 
         void UpdateTargetList()
@@ -655,7 +655,7 @@ namespace Game.Entities
                 return;
             }
 
-            float currentTimePercent = _movementTime / GetTimeToTarget();
+            float currentTimePercent = (float)_movementTime / GetTimeToTarget();
 
             if (currentTimePercent <= 0.0f)
                 return;

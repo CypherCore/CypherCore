@@ -136,7 +136,7 @@ namespace Scripts.Spells.Warlock
             }
 
             // You take ${$s2/3}% reduced damage
-            float damageReductionPct = effect1.GetAmount() / 3;
+            float damageReductionPct = (float)effect1.GetAmount() / 3;
             // plus a random amount of up to ${$s2/3}% additional reduced damage
             damageReductionPct += RandomHelper.FRand(0.0f, damageReductionPct);
 

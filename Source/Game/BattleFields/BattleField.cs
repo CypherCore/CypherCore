@@ -1174,7 +1174,7 @@ namespace Game.BattleFields
             }
 
             // get the difference of numbers
-            float fact_diff = (m_activePlayers[TeamId.Alliance].Count - m_activePlayers[TeamId.Horde].Count) * diff / 1000;
+            float fact_diff = ((float)m_activePlayers[TeamId.Alliance].Count - m_activePlayers[TeamId.Horde].Count) * diff / 1000;
             if (MathFunctions.fuzzyEq(fact_diff, 0.0f))
                 return false;
 

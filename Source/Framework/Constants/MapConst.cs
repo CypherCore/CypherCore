@@ -23,8 +23,8 @@ namespace Framework.Constants
         //Grids
         public const int MaxGrids = 64;
         public const float SizeofGrids = 533.33333f;
-        public const float CenterGridCellId = (MaxCells * MaxGrids / 2);
-        public const float CenterGridId = (MaxGrids / 2);
+        public const int CenterGridCellId = (MaxCells * MaxGrids / 2);
+        public const int CenterGridId = (MaxGrids / 2);
         public const float CenterGridOffset = (SizeofGrids / 2);
         public const float CenterGridCellOffset = (SizeofCells / 2);
 

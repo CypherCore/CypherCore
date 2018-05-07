@@ -83,16 +83,17 @@ namespace Game.Collision
             {
                 return base.Equals(obj);
             }
+
             public override int GetHashCode()
             {
-                return base.GetHashCode();
+                return x.GetHashCode() ^ y.GetHashCode();
             }
 
             public static Cell ComputeCell(float fx, float fy)
             {
                 Cell c = new Cell();
-                c.x = (int)(fx * (1.0f / CELL_SIZE) + (CELL_NUMBER / 2));
-                c.y = (int)(fy * (1.0f / CELL_SIZE) + (CELL_NUMBER / 2));
+                c.x = (int)(fx * (1.0f / CELL_SIZE) + (CELL_NUMBER / 2f));
+                c.y = (int)(fy * (1.0f / CELL_SIZE) + (CELL_NUMBER / 2f));
                 return c;
             }
 

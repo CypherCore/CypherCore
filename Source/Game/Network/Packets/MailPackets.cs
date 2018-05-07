@@ -400,7 +400,7 @@ namespace Game.Network.Packets
             StationeryID = (int)mail.stationery;
             SentMoney = mail.money;
             Flags = (int)mail.checkMask;
-            DaysLeft = (mail.expire_time - Time.UnixTime) / Time.Day;
+            DaysLeft = (float)(mail.expire_time - Time.UnixTime) / Time.Day;
             MailTemplateID = (int)mail.mailTemplateId;
             Subject = mail.subject;
             Body = mail.body;

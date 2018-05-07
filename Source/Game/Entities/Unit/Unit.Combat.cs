@@ -784,7 +784,7 @@ namespace Game.Entities
                 uint VictimDefense = victim.GetMaxSkillValueForLevel(this);
                 uint AttackerMeleeSkill = GetMaxSkillValueForLevel();
 
-                Probability *= (float)(AttackerMeleeSkill / VictimDefense * 0.16);
+                Probability *= (AttackerMeleeSkill / (float)VictimDefense * 0.16f);
 
                 if (Probability < 0)
                     Probability = 0;
@@ -1014,7 +1014,7 @@ namespace Game.Entities
                     victim.ToCreature().LowerPlayerDamageReq(health < damage ? health : damage);
             }
 
-            damage /= (uint)victim.GetHealthMultiplierForTarget(this);
+            damage = (uint)(damage / victim.GetHealthMultiplierForTarget(this));
 
             if (health <= damage)
             {

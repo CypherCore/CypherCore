@@ -161,8 +161,8 @@ namespace Game.Entities
             float xDiff = nextPosition.posX - lastPosition.posX;
             float yDiff = nextPosition.posY - lastPosition.posY;
             float zDiff = nextPosition.posZ - lastPosition.posZ;
-            Position interPosition = new Position(lastPosition.posX + (xDiff * (interDiff / timeDiff)), lastPosition.posY +
-                (yDiff * (interDiff / timeDiff)), lastPosition.posZ + (zDiff * (interDiff / timeDiff)));
+            Position interPosition = new Position(lastPosition.posX + (xDiff * ((float)interDiff / timeDiff)), lastPosition.posY +
+                (yDiff * ((float)interDiff / timeDiff)), lastPosition.posZ + (zDiff * ((float)interDiff / timeDiff)));
 
             // Advance (at speed) to this position. The remote sight object is used
             // to send update information to player in cinematic

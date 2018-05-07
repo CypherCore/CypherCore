@@ -197,7 +197,7 @@ namespace Game.Movement
                 float t_passedf = MSToSec((uint)(time_point - effect_start_time));
                 float t_durationf = MSToSec((uint)(Duration() - effect_start_time)); //client use not modified duration here
                 if (spell_effect_extra.HasValue && spell_effect_extra.Value.ParabolicCurveId != 0)
-                    t_passedf *= Global.DB2Mgr.GetCurveValueAt(spell_effect_extra.Value.ParabolicCurveId, time_point / Duration());
+                    t_passedf *= Global.DB2Mgr.GetCurveValueAt(spell_effect_extra.Value.ParabolicCurveId, (float)time_point / Duration());
 
                 el += (t_durationf - t_passedf) * 0.5f * vertical_acceleration * t_passedf;
             }
