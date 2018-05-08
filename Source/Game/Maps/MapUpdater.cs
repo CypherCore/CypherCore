@@ -79,7 +79,7 @@ namespace Game.Maps
 
         private Queue<MapUpdateRequest> _queue;
         private object _syncLock = new object();
-        private AutoResetEvent[] autoResetEvent;
+        private WaitHandle[] autoResetEvent;
     }
 
     public class MapUpdateRequest

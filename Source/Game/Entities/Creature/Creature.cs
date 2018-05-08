@@ -2370,12 +2370,12 @@ namespace Game.Entities
                 // between UNIT_FIELD_SCALING_LEVEL_MIN and UNIT_FIELD_SCALING_LEVEL_MAX
                 if (HasScalableLevels())
                 {
-                    uint targetLevelWithDelta = (uint)(unitTarget.getLevel() + GetInt32Value(UnitFields.ScalingLevelDelta));
+                    int targetLevelWithDelta = ((int)unitTarget.getLevel() + GetInt32Value(UnitFields.ScalingLevelDelta));
 
                     if (target.IsPlayer())
-                        targetLevelWithDelta += target.GetUInt32Value(PlayerFields.ScalingLevelDelta);
+                        targetLevelWithDelta += target.GetInt32Value(PlayerFields.ScalingLevelDelta);
 
-                    return MathFunctions.RoundToInterval(ref targetLevelWithDelta, GetUInt32Value(UnitFields.ScalingLevelMin), GetUInt32Value(UnitFields.ScalingLevelMax));
+                    return (uint)MathFunctions.RoundToInterval(ref targetLevelWithDelta, GetInt32Value(UnitFields.ScalingLevelMin), GetInt32Value(UnitFields.ScalingLevelMax));
                 }
 
             }

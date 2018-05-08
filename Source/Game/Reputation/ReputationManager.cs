@@ -266,9 +266,7 @@ namespace Game
 
         public bool ModifyReputation(FactionRecord factionEntry, int standing, bool noSpillover = false) { return SetReputation(factionEntry, standing, true, noSpillover); }
 
-        bool SetReputation(FactionRecord factionEntry, int standing) { return SetReputation(factionEntry, standing, false, false); }
-
-        public bool SetReputation(FactionRecord factionEntry, int standing, bool incremental = true, bool noSpillover = false)
+        public bool SetReputation(FactionRecord factionEntry, int standing, bool incremental = false, bool noSpillover = false)
         {
             Global.ScriptMgr.OnPlayerReputationChange(_player, factionEntry.Id, standing, incremental);
             bool res = false;

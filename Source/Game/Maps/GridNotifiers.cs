@@ -248,7 +248,7 @@ namespace Game.Maps
 
             bool relocated_for_ai = (i_player == i_player.seerView);
 
-            foreach (var creature in objs)
+            foreach (var creature in objs.ToList())
             {
                 vis_guids.Remove(creature.GetGUID());
 
