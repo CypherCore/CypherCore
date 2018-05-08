@@ -1286,7 +1286,7 @@ namespace Game.AI
                                     continue;
 
                                 Position pos = obj.GetPositionWithOffset(new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o));
-                                Quaternion rot = new Quaternion(Matrix3.fromEulerAnglesZYX(pos.GetOrientation(), 0.0f, 0.0f));
+                                Quaternion rot = Quaternion.fromEulerAnglesZYX(pos.GetOrientation(), 0.0f, 0.0f);
                                 summoner.SummonGameObject(e.Action.summonGO.entry, pos, rot, e.Action.summonGO.despawnTime);
                             }
                         }
@@ -1294,7 +1294,7 @@ namespace Game.AI
                         if (e.GetTargetType() != SmartTargets.Position)
                             break;
 
-                        Quaternion rot1 = new Quaternion(Matrix3.fromEulerAnglesZYX(e.Target.o, 0.0f, 0.0f));
+                        Quaternion rot1 = Quaternion.fromEulerAnglesZYX(e.Target.o, 0.0f, 0.0f);
                         summoner.SummonGameObject(e.Action.summonGO.entry, new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o), rot1, e.Action.summonGO.despawnTime);
                         break;
                     }

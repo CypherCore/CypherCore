@@ -143,7 +143,7 @@ namespace Scripts.Northrend.Nexus.EyeOfEternity
             // There is no other way afaik...
             void SpawnGameObject(uint entry, Position pos)
             {
-                GameObject go = GameObject.CreateGameObject(entry, instance, pos, Quaternion.WAxis, 255, GameObjectState.Ready);
+                GameObject go = GameObject.CreateGameObject(entry, instance, pos, Quaternion.fromEulerAnglesZYX(pos.GetOrientation(), 0.0f, 0.0f), 255, GameObjectState.Ready);
                 if (go)
                     instance.AddToMap(go);
             }

@@ -476,8 +476,13 @@ namespace Framework.GameMath
         public Quaternion ToUnit()
         {
             Quaternion copyOfThis = this;
-            copyOfThis *= rsq(dot(this));
+            copyOfThis.unitize();
             return copyOfThis;
+        }
+
+        public void unitize()
+        {
+            this *= rsq(dot(this));
         }
 
         float dot(Quaternion other)
@@ -488,6 +493,11 @@ namespace Framework.GameMath
         float rsq(float x)
         {
             return 1.0f / (float)Math.Sqrt(x);
+        }
+
+        public static Quaternion fromEulerAnglesZYX(float z, float y, float x)
+        {
+            return new Quaternion(Matrix3.fromEulerAnglesZYX(z, y, x));
         }
 
         #region Public Static Complex Special Functions

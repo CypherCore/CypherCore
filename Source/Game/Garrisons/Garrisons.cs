@@ -269,6 +269,7 @@ namespace Game.Garrisons
                 plotInfo.PacketInfo.GarrPlotInstanceID = garrPlotInstanceId;
                 plotInfo.PacketInfo.PlotPos.Relocate(gameObject.Pos.X, gameObject.Pos.Y, gameObject.Pos.Z, 2 * (float)Math.Acos(gameObject.Rot[3]));
                 plotInfo.PacketInfo.PlotType = plot.PlotType;
+                plotInfo.Rotation = new Quaternion(gameObject.Rot[0], gameObject.Rot[1], gameObject.Rot[2], gameObject.Rot[3]);
                 plotInfo.EmptyGameObjectId = gameObject.Id;
                 plotInfo.GarrSiteLevelPlotInstId = plots[i].Id;
             }
@@ -707,7 +708,7 @@ namespace Game.Garrisons
                     return null;
                 }
 
-                GameObject go = GameObject.CreateGameObject(entry, map, PacketInfo.PlotPos, Quaternion.WAxis, 255, GameObjectState.Ready);
+                GameObject go = GameObject.CreateGameObject(entry, map, PacketInfo.PlotPos, Rotation, 255, GameObjectState.Ready);
                 if (!go)
                     return null;
 
@@ -717,7 +718,7 @@ namespace Game.Garrisons
                     if (finalizeInfo != null)
                     {
                         Position pos2 = finalizeInfo.factionInfo[faction].Pos;
-                        GameObject finalizer = GameObject.CreateGameObject(finalizeInfo.factionInfo[faction].GameObjectId, map, pos2, Quaternion.WAxis, 255, GameObjectState.Ready);
+                        GameObject finalizer = GameObject.CreateGameObject(finalizeInfo.factionInfo[faction].GameObjectId, map, pos2, Quaternion.fromEulerAnglesZYX(pos2.GetOrientation(), 0.0f, 0.0f), 255, GameObjectState.Ready);
                         if (finalizer)
                         {
                             // set some spell id to make the object delete itself after use
@@ -845,6 +846,7 @@ namespace Game.Garrisons
             }
 
             public GarrisonPlotInfo PacketInfo;
+            public Quaternion Rotation;
             public uint EmptyGameObjectId;
             public uint GarrSiteLevelPlotInstId;
             public Building BuildingInfo;

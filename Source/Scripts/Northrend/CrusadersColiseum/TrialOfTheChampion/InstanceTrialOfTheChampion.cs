@@ -156,7 +156,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
                                 {
                                     pAnnouncer.GetMotionMaster().MovePoint(0, 748.309f, 619.487f, 411.171f);
                                     pAnnouncer.SetFlag(UnitFields.NpcFlags, NPCFlags.Gossip);
-                                    pAnnouncer.SummonGameObject(instance.IsHeroic() ? GameObjectIds.CHAMPIONS_LOOT_H : GameObjectIds.CHAMPIONS_LOOT, 746.59f, 618.49f, 411.09f, 1.42f, Quaternion.WAxis, 90000);
+                                    pAnnouncer.SummonGameObject(instance.IsHeroic() ? GameObjectIds.CHAMPIONS_LOOT_H : GameObjectIds.CHAMPIONS_LOOT, 746.59f, 618.49f, 411.09f, 1.42f, Quaternion.fromEulerAnglesZYX(1.42f, 0.0f, 0.0f), 90000);
                                 }
                             }
                         }
@@ -182,7 +182,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
                             {
                                 pAnnouncer.GetMotionMaster().MovePoint(0, 748.309f, 619.487f, 411.171f);
                                 pAnnouncer.SetFlag(UnitFields.NpcFlags, NPCFlags.Gossip);
-                                pAnnouncer.SummonGameObject(instance.IsHeroic() ? GameObjectIds.EADRIC_LOOT_H : GameObjectIds.EADRIC_LOOT, 746.59f, 618.49f, 411.09f, 1.42f, Quaternion.WAxis, 90000);
+                                pAnnouncer.SummonGameObject(instance.IsHeroic() ? GameObjectIds.EADRIC_LOOT_H : GameObjectIds.EADRIC_LOOT, 746.59f, 618.49f, 411.09f, 1.42f, Quaternion.fromEulerAnglesZYX(1.42f, 0.0f, 0.0f), 90000);
                             }
                         }
                         break;
@@ -194,7 +194,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
                             {
                                 pAnnouncer.GetMotionMaster().MovePoint(0, 748.309f, 619.487f, 411.171f);
                                 pAnnouncer.SetFlag(UnitFields.NpcFlags, NPCFlags.Gossip);
-                                pAnnouncer.SummonGameObject(instance.IsHeroic() ? GameObjectIds.PALETRESS_LOOT_H : GameObjectIds.PALETRESS_LOOT, 746.59f, 618.49f, 411.09f, 1.42f, Quaternion.WAxis, 90000);
+                                pAnnouncer.SummonGameObject(instance.IsHeroic() ? GameObjectIds.PALETRESS_LOOT_H : GameObjectIds.PALETRESS_LOOT, 746.59f, 618.49f, 411.09f, 1.42f, Quaternion.fromEulerAnglesZYX(1.42f, 0.0f, 0.0f), 90000);
                             }
                         }
                         break;

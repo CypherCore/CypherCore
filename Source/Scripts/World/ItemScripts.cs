@@ -251,7 +251,7 @@ namespace Scripts.World
 
             float x, y, z;
             go.GetClosePoint(out x, out y, out z, go.GetObjectSize() / 3, 7.0f);
-            go.SummonGameObject(ItemScriptConst.GoHighQualityFur, go, Quaternion.WAxis, 1);
+            go.SummonGameObject(ItemScriptConst.GoHighQualityFur, go, Quaternion.fromEulerAnglesZYX(go.GetOrientation(), 0.0f, 0.0f), 1);
             TempSummon summon = player.SummonCreature(ItemScriptConst.NpcNesingwaryTrapper, x, y, z, go.GetOrientation(), TempSummonType.DeadDespawn, 1000);
             if (summon)
             {

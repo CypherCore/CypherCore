@@ -129,7 +129,7 @@ namespace Game.Entities
             SetGoType(GameObjectTypes.MapObjTransport);
             SetGoAnimProgress(animprogress);
             SetName(goinfo.name);
-            SetWorldRotation(Quaternion.WAxis);
+            SetWorldRotation(0.0f, 0.0f, 0.0f, 1.0f);
             SetParentRotation(Quaternion.WAxis);
 
             m_model = CreateModel();

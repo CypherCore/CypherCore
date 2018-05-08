@@ -1325,7 +1325,7 @@ namespace Game.BattleGrounds
                 Log.outDebug(LogFilter.Battleground, "Battleground.AddObject: gameoobject [entry: {0}, object type: {1}] for BG (map: {2}) has zeroed rotation fields, " +
                     "orientation used temporally, but please fix the spawn", entry, type, m_MapId);
 
-                rotation = new Quaternion(Matrix3.fromEulerAnglesZYX(o, 0.0f, 0.0f));
+                rotation = Quaternion.fromEulerAnglesZYX(o, 0.0f, 0.0f);
             }
 
             // Must be created this way, adding to godatamap would add it to the base map of the instance

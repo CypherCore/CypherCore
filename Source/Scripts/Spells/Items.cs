@@ -2216,7 +2216,7 @@ namespace Scripts.Spells.Items
             {
                 if (target.IsDead() && !target.IsPet())
                 {
-                    GetCaster().SummonGameObject(ObjectIds.ImprisonedDoomguard, target, Quaternion.WAxis, (uint)(target.GetRespawnTime() - Time.UnixTime));
+                    GetCaster().SummonGameObject(ObjectIds.ImprisonedDoomguard, target, Quaternion.fromEulerAnglesZYX(target.GetOrientation(), 0.0f, 0.0f), (uint)(target.GetRespawnTime() - Time.UnixTime));
                     target.DespawnOrUnsummon();
                 }
             }

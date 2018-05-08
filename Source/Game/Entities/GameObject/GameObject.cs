@@ -234,7 +234,7 @@ namespace Game.Entities
                 return false;
             }
 
-            SetWorldRotation(rotation);
+            SetWorldRotation(rotation.X, rotation.Y, rotation.Z, rotation.W);
             GameObjectAddon gameObjectAddon = Global.ObjectMgr.GetGameObjectAddon(GetSpawnId());
 
             // For most of gameobjects is (0, 0, 0, 1) quaternion, there are only some transports with not standard rotation
@@ -2067,9 +2067,14 @@ namespace Game.Entities
             m_packedRotation = z | (y << 21) | (x << 42);
         }
 
-        public void SetWorldRotation(Quaternion quaternion)
+        public void SetWorldRotation(float qx, float qy, float qz, float qw)
         {
-            m_worldRotation = quaternion.ToUnit();
+            Quaternion rotation = new Quaternion(qx, qy, qz, qw);
+            rotation.unitize();
+            m_worldRotation.X = rotation.X;
+            m_worldRotation.Y = rotation.Y;
+            m_worldRotation.Z = rotation.Z;
+            m_worldRotation.W = rotation.W;
             UpdatePackedRotation();
         }
 
@@ -2083,8 +2088,8 @@ namespace Game.Entities
 
         public void SetWorldRotationAngles(float z_rot, float y_rot, float x_rot)
         {
-            Quaternion quat = new Quaternion(Matrix3.fromEulerAnglesZYX(z_rot, y_rot, x_rot));
-            SetWorldRotation(quat);
+            Quaternion quat = Quaternion.fromEulerAnglesZYX(z_rot, y_rot, x_rot);
+            SetWorldRotation(quat.X, quat.Y, quat.Z, quat.W);
         }
 
         public void ModifyHealth(int change, Unit attackerOrHealer = null, uint spellId = 0)

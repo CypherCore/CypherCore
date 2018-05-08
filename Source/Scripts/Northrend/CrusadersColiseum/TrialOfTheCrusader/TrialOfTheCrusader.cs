@@ -338,7 +338,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                                         Creature tirion = instance.GetCreature(TirionGUID);
                                         if (tirion)
                                         {
-                                            GameObject chest = tirion.SummonGameObject(tributeChest, 805.62f, 134.87f, 142.16f, 3.27f, Quaternion.WAxis, Time.Week);
+                                            GameObject chest = tirion.SummonGameObject(tributeChest, 805.62f, 134.87f, 142.16f, 3.27f, Quaternion.fromEulerAnglesZYX(3.27f, 0.0f, 0.0f), Time.Week);
                                             if (chest)
                                                 chest.SetRespawnTime((int)chest.GetRespawnDelay());
                                         }
@@ -1479,7 +1479,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                     case 6000:
                         me.SummonCreature(CreatureIds.TirionFordring, MiscData.EndSpawnLoc[0]);
                         me.SummonCreature(CreatureIds.ArgentMage, MiscData.EndSpawnLoc[1]);
-                        me.SummonGameObject(GameObjectIds.PortalToDalaran, MiscData.EndSpawnLoc[2], Quaternion.WAxis, 0);
+                        me.SummonGameObject(GameObjectIds.PortalToDalaran, MiscData.EndSpawnLoc[2], Quaternion.fromEulerAnglesZYX(MiscData.EndSpawnLoc[2].GetOrientation(), 0.0f, 0.0f), 0);
                         _updateTimer = 20 * Time.InMilliseconds;
                         _instance.SetData(DataTypes.Event, 6005);
                         break;
