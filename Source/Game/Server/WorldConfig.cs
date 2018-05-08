@@ -40,34 +40,34 @@ namespace Game
             Values[WorldCfg.EnableSinfoLogin] = GetDefaultValue("Server.LoginInfo", 0);
 
             // Read all rates from the config file
-            Action<WorldCfg, string> setRegenRate = (rate, configKey) =>
+            void SetRegenRate(WorldCfg rate, string configKey)
             {
                 Values[rate] = GetDefaultValue(configKey, 1.0f);
-                if ((float)Values[rate] < 0.0f)
+                if ((float) Values[rate] < 0.0f)
                 {
                     Log.outError(LogFilter.ServerLoading, "{0} ({1}) must be > 0. Using 1 instead.", configKey, Values[rate]);
                     Values[rate] = 1;
                 }
-            };
+            }
 
-            setRegenRate(WorldCfg.RateHealth, "Rate.Health");
-            setRegenRate(WorldCfg.RatePowerMana, "Rate.Mana");
-            setRegenRate(WorldCfg.RatePowerRageIncome, "Rate.Rage.Gain");
-            setRegenRate(WorldCfg.RatePowerRageLoss, "Rate.Rage.Loss");
-            setRegenRate(WorldCfg.RatePowerFocus, "Rate.Focus");
-            setRegenRate(WorldCfg.RatePowerEnergy, "Rate.Energy");
-            setRegenRate(WorldCfg.RatePowerComboPointsLoss, "Rate.ComboPoints.Loss");
-            setRegenRate(WorldCfg.RatePowerRunicPowerIncome, "Rate.RunicPower.Gain");
-            setRegenRate(WorldCfg.RatePowerRunicPowerLoss, "Rate.RunicPower.Loss");
-            setRegenRate(WorldCfg.RatePowerSoulShards, "Rate.SoulShards.Loss");
-            setRegenRate(WorldCfg.RatePowerLunarPower, "Rate.LunarPower.Loss");
-            setRegenRate(WorldCfg.RatePowerHolyPower, "Rate.HolyPower.Loss");
-            setRegenRate(WorldCfg.RatePowerMaelstrom, "Rate.Maelstrom.Loss");
-            setRegenRate(WorldCfg.RatePowerChi, "Rate.Chi.Loss");
-            setRegenRate(WorldCfg.RatePowerInsanity, "Rate.Insanity.Loss");
-            setRegenRate(WorldCfg.RatePowerArcaneCharges, "Rate.ArcaneCharges.Loss");
-            setRegenRate(WorldCfg.RatePowerFury, "Rate.Fury.Loss");
-            setRegenRate(WorldCfg.RatePowerPain, "Rate.Pain.Loss");
+            SetRegenRate(WorldCfg.RateHealth, "Rate.Health");
+            SetRegenRate(WorldCfg.RatePowerMana, "Rate.Mana");
+            SetRegenRate(WorldCfg.RatePowerRageIncome, "Rate.Rage.Gain");
+            SetRegenRate(WorldCfg.RatePowerRageLoss, "Rate.Rage.Loss");
+            SetRegenRate(WorldCfg.RatePowerFocus, "Rate.Focus");
+            SetRegenRate(WorldCfg.RatePowerEnergy, "Rate.Energy");
+            SetRegenRate(WorldCfg.RatePowerComboPointsLoss, "Rate.ComboPoints.Loss");
+            SetRegenRate(WorldCfg.RatePowerRunicPowerIncome, "Rate.RunicPower.Gain");
+            SetRegenRate(WorldCfg.RatePowerRunicPowerLoss, "Rate.RunicPower.Loss");
+            SetRegenRate(WorldCfg.RatePowerSoulShards, "Rate.SoulShards.Loss");
+            SetRegenRate(WorldCfg.RatePowerLunarPower, "Rate.LunarPower.Loss");
+            SetRegenRate(WorldCfg.RatePowerHolyPower, "Rate.HolyPower.Loss");
+            SetRegenRate(WorldCfg.RatePowerMaelstrom, "Rate.Maelstrom.Loss");
+            SetRegenRate(WorldCfg.RatePowerChi, "Rate.Chi.Loss");
+            SetRegenRate(WorldCfg.RatePowerInsanity, "Rate.Insanity.Loss");
+            SetRegenRate(WorldCfg.RatePowerArcaneCharges, "Rate.ArcaneCharges.Loss");
+            SetRegenRate(WorldCfg.RatePowerFury, "Rate.Fury.Loss");
+            SetRegenRate(WorldCfg.RatePowerPain, "Rate.Pain.Loss");
 
             Values[WorldCfg.RateSkillDiscovery] = GetDefaultValue("Rate.Skill.Discovery", 1.0f);
             Values[WorldCfg.RateDropItemPoor] = GetDefaultValue("Rate.Drop.Item.Poor", 1.0f);

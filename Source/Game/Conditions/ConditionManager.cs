@@ -2001,10 +2001,7 @@ namespace Game
                     {
                         if (condition.QuestKillMonster[i] != 0)
                         {
-                            var questObjective = quest.Objectives.Find(objective =>
-                            {
-                                return objective.Type == QuestObjectiveType.Monster && objective.ObjectID == condition.QuestKillMonster[i];
-                            });
+                            var questObjective = quest.Objectives.Find(objective => objective.Type == QuestObjectiveType.Monster && objective.ObjectID == condition.QuestKillMonster[i]);
 
                             if (questObjective != null)
                                 results[i] = player.GetQuestObjectiveData(quest, questObjective.StorageIndex) >= questObjective.Amount;

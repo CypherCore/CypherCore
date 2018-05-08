@@ -150,7 +150,7 @@ namespace Game.Entities
                 // Check UNIT_STATE_MELEE_ATTACKING or UNIT_STATE_CHASE (without UNIT_STATE_FOLLOW in this case) so pets can reach far away
                 // targets without stopping half way there and running off.
                 // These flags are reset after target dies or another command is given.
-                if (m_HostileRefManager.isEmpty())
+                if (m_HostileRefManager.IsEmpty())
                 {
                     // m_CombatTimer set at aura start and it will be freeze until aura removing
                     if (m_CombatTimer <= diff)
@@ -1931,7 +1931,7 @@ namespace Game.Entities
 
         public void addFollower(FollowerReference pRef)
         {
-            m_FollowingRefManager.insertFirst(pRef);
+            m_FollowingRefManager.InsertFirst(pRef);
         }
         public void removeFollower(FollowerReference pRef) { } //nothing to do yet
 

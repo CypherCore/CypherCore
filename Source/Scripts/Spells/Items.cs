@@ -1462,7 +1462,7 @@ namespace Scripts.Spells.Items
             if (spell != null)
             {
                 var costs = spell.GetPowerCost();
-                var m = costs.FirstOrDefault(cost => { return cost.Power == PowerType.Mana && cost.Amount > 0; });
+                var m = costs.FirstOrDefault(cost => cost.Power == PowerType.Mana && cost.Amount > 0);
                 if (m != null)
                     return true;
             }
@@ -3040,10 +3040,7 @@ namespace Scripts.Spells.Items
 
         void FilterTargets(List<WorldObject> targets)
         {
-            targets.RemoveAll(obj =>
-            {
-                return !obj.IsTypeId(TypeId.Player) && !obj.IsTypeId(TypeId.Corpse);
-            });
+            targets.RemoveAll(obj => !obj.IsTypeId(TypeId.Player) && !obj.IsTypeId(TypeId.Corpse));
 
             if (targets.Empty())
             {

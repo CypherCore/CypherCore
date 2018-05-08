@@ -88,7 +88,7 @@ namespace Game.Maps
 
         public static bool ExistMap(uint mapid, uint gx, uint gy)
         {
-            string fileName = string.Format("{0}/maps/{1:D4}_{2:D2}_{3:D2}.map", Global.WorldMgr.GetDataPath(), mapid, gx, gy);
+            string fileName = $"{Global.WorldMgr.GetDataPath()}/maps/{mapid:D4}_{gx:D2}_{gy:D2}.map";
             if (!File.Exists(fileName))
             {
                 Log.outError(LogFilter.Maps, "Map file '{0}': does not exist!", fileName);
@@ -183,7 +183,7 @@ namespace Game.Maps
             }
 
             // map file name
-            string filename = string.Format("{0}/maps/{1:D4}_{2:D2}_{3:D2}.map", Global.WorldMgr.GetDataPath(), map.GetId(), gx, gy);
+            string filename = $"{Global.WorldMgr.GetDataPath()}/maps/{map.GetId():D4}_{gx:D2}_{gy:D2}.map";
             Log.outInfo(LogFilter.Maps, "Loading map {0}", filename);
             // loading data
             map.GridMaps[gx][gy] = new GridMap();
@@ -4184,7 +4184,7 @@ namespace Game.Maps
                             if (!creatureBounds.Empty())
                             {
                                 // Prefer alive (last respawned) creature
-                                var foundCreature = creatureBounds.Find(creature => { return creature.IsAlive(); });
+                                var foundCreature = creatureBounds.Find(creature => creature.IsAlive());
 
                                 cTarget = foundCreature ?? creatureBounds[0];
                             }

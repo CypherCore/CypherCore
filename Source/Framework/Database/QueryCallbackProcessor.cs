@@ -31,10 +31,7 @@ namespace Framework.Database
             if (_callbacks.Empty())
                 return;
 
-            _callbacks.RemoveAll(callback =>
-            {
-                return callback.InvokeIfReady() == QueryCallbackStatus.Completed;
-            });
+            _callbacks.RemoveAll(callback => callback.InvokeIfReady() == QueryCallbackStatus.Completed);
         }
 
         List<QueryCallback> _callbacks = new List<QueryCallback>();

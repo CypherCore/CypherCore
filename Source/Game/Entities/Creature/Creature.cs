@@ -3052,7 +3052,7 @@ namespace Game.Entities
                 // The last taunt aura caster is alive an we are happy to attack him
                 if (caster != null && caster.IsAlive())
                     return GetVictim();
-                else if (tauntAuras.Count() > 1)
+                else if (tauntAuras.Count > 1)
                 {
                     // We do not have last taunt aura caster but we have more taunt auras,
                     // so find first available target

@@ -162,7 +162,7 @@ namespace Game.Achievements
                 {
                     if (criteriaTree.Criteria != null)
                     {
-                        CriteriaProgress criteriaProgress = this.GetCriteriaProgress(criteriaTree.Criteria);
+                        CriteriaProgress criteriaProgress = GetCriteriaProgress(criteriaTree.Criteria);
                         if (criteriaProgress != null)
                             progress += (long)criteriaProgress.Counter;
                     }
@@ -656,7 +656,7 @@ namespace Game.Achievements
 
         public override string GetOwnerInfo()
         {
-            return string.Format("{0} {1}", _owner.GetGUID().ToString(), _owner.GetName());
+            return $"{_owner.GetGUID().ToString()} {_owner.GetName()}";
         }
 
         Player _owner;
@@ -1017,7 +1017,7 @@ namespace Game.Achievements
 
         public override string GetOwnerInfo()
         {
-            return string.Format("Guild ID {0} {1}", _owner.GetId(), _owner.GetName());
+            return $"Guild ID {_owner.GetId()} {_owner.GetName()}";
         }
 
         Guild _owner;

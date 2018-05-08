@@ -311,7 +311,7 @@ namespace Game.Entities
 
         public override string ToString()
         {
-            return string.Format("X: {0} Y: {1} Z: {2} O: {3}", posX, posY, posZ, Orientation);
+            return $"X: {posX} Y: {posY} Z: {posZ} O: {Orientation}";
         }
 
         public float posX;
@@ -356,7 +356,7 @@ namespace Game.Entities
         }
 
         public uint GetMapId() { return _mapId; }
-        public void SetMapId(uint _mapId) { this._mapId = _mapId; }
+        public void SetMapId(uint mapId) { _mapId = mapId; }
 
         public Cell GetCurrentCell()
         {

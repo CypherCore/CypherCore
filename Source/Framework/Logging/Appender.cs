@@ -180,7 +180,7 @@ abstract class Appender
         StringBuilder ss = new StringBuilder();
 
         if (_flags.HasAnyFlag(AppenderFlags.PrefixTimestamp))
-            ss.AppendFormat("{0} ", message.mtime.ToString("MM/dd/yyyy HH:mm:ss"));
+            ss.AppendFormat("{0:MM/dd/yyyy HH:mm:ss} ", message.mtime);
 
         if (_flags.HasAnyFlag(AppenderFlags.PrefixLogLevel))
             ss.AppendFormat("{0}: ", message.level);

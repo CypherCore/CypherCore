@@ -174,7 +174,7 @@ namespace Game.DataStorage
             uint oldMSTime = Time.GetMSTime();
             foreach (CinematicCameraRecord cameraEntry in CliDB.CinematicCameraStorage.Values)
             {
-                string filename = dataPath + "/cameras/" + string.Format("FILE{0:x8}.xxx", cameraEntry.FileDataID);
+                string filename = dataPath + "/cameras/" + $"FILE{cameraEntry.FileDataID:x8}.xxx";
 
                 try
                 {

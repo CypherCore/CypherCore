@@ -302,10 +302,7 @@ namespace Game.Entities
 
             AxisAlignedBox box = new AxisAlignedBox(new Vector3(minX, minY, minZ), new Vector3(maxX, maxY, maxZ));
 
-            targetList.RemoveAll(unit =>
-            {
-                return !box.contains(new Vector3(unit.GetPositionX(), unit.GetPositionY(), unit.GetPositionZ()));
-            });
+            targetList.RemoveAll(unit => !box.contains(new Vector3(unit.GetPositionX(), unit.GetPositionY(), unit.GetPositionZ())));
         }
 
         void SearchUnitInPolygon(List<Unit> targetList)
@@ -319,11 +316,7 @@ namespace Game.Entities
             float maxZ = GetPositionZ() + height;
 
             targetList.RemoveAll(unit =>
-            {
-                return !CheckIsInPolygon2D(unit)
-                    || unit.GetPositionZ() < minZ
-                    || unit.GetPositionZ() > maxZ;
-            });
+                !CheckIsInPolygon2D(unit) || unit.GetPositionZ() < minZ || unit.GetPositionZ() > maxZ);
         }
 
         void SearchUnitInCylinder(List<Unit> targetList)
@@ -336,11 +329,8 @@ namespace Game.Entities
             float minZ = GetPositionZ() - height;
             float maxZ = GetPositionZ() + height;
 
-            targetList.RemoveAll(unit =>
-            {
-                return unit.GetPositionZ() < minZ
-                    || unit.GetPositionZ() > maxZ;
-            });
+            targetList.RemoveAll(unit => unit.GetPositionZ() < minZ
+                                         || unit.GetPositionZ() > maxZ);
         }
 
         void HandleUnitEnterExit(List<Unit> newTargetList)

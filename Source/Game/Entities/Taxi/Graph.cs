@@ -342,7 +342,7 @@ namespace Game.Entities
         /// </returns>
         public override string ToString()
         {
-            return string.Format("From: {0}, To: {1}, Weight: {2}", From, To, Weight);
+            return $"From: {From}, To: {To}, Weight: {Weight}";
         }
     }
 
@@ -374,7 +374,7 @@ namespace Game.Entities
             {
                 if (edge.Weight < 0)
                 {
-                    throw new ArgumentOutOfRangeException(string.Format("Edge: '{0}' has negative weight", edge));
+                    throw new ArgumentOutOfRangeException($"Edge: '{edge}' has negative weight");
                 }
             }
 

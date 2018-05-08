@@ -124,7 +124,7 @@ namespace Game.Collision
                     if (1.3f * nodeNewW < nodeBoxW)
                     {
                         stats.updateBVH2();
-                        int nextIndex1 = tempTree.Count();
+                        int nextIndex1 = tempTree.Count;
                         // allocate child
                         tempTree.Add(0);
                         tempTree.Add(0);

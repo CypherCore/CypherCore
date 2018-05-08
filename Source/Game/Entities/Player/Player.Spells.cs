@@ -2778,15 +2778,9 @@ namespace Game.Entities
                     pctMod.ModifierData.Add(pctData);
                 }
 
-                flatMod.ModifierData.RemoveAll(mod =>
-                {
-                    return MathFunctions.fuzzyEq(mod.ModifierValue, 0.0f);
-                });
+                flatMod.ModifierData.RemoveAll(mod => MathFunctions.fuzzyEq(mod.ModifierValue, 0.0f));
 
-                pctMod.ModifierData.RemoveAll(mod =>
-                {
-                    return MathFunctions.fuzzyEq(mod.ModifierValue, 1.0f);
-                });
+                pctMod.ModifierData.RemoveAll(mod => MathFunctions.fuzzyEq(mod.ModifierValue, 1.0f));
 
                 flatMods.Modifiers.Add(flatMod);
                 pctMods.Modifiers.Add(pctMod);

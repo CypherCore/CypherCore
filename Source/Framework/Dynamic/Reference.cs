@@ -58,7 +58,7 @@ namespace Framework.Dynamic
         public void unlink()
         {
             targetObjectDestroyLink();
-            delink();
+            Delink();
             _RefTo = null;
             _RefFrom = null;
         }
@@ -68,7 +68,7 @@ namespace Framework.Dynamic
         public void invalidate()                                   // the iRefFrom MUST remain!!
         {
             sourceObjectDestroyLink();
-            delink();
+            Delink();
             _RefTo = null;
         }
 

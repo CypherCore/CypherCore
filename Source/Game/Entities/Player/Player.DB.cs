@@ -740,7 +740,7 @@ namespace Game.Entities
                     {
                         byte objectiveIndex = result.Read<byte>(1);
 
-                        var objectiveItr = quest.Objectives.FirstOrDefault(objective => { return objective.StorageIndex == objectiveIndex; });
+                        var objectiveItr = quest.Objectives.FirstOrDefault(objective => objective.StorageIndex == objectiveIndex);
                         if (objectiveIndex < questStatusData.ObjectiveData.Length && objectiveItr != null)
                         {
                             int data = result.Read<int>(2);

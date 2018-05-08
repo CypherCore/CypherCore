@@ -608,7 +608,7 @@ namespace Game.Groups
                     }
                 }
 
-                if (m_memberMgr.getSize() < ((isLFGGroup() || isBGGroup()) ? 1 : 2))
+                if (m_memberMgr.GetSize() < ((isLFGGroup() || isBGGroup()) ? 1 : 2))
                     Disband();
                 else if (player)
                 {
@@ -2448,7 +2448,7 @@ namespace Game.Groups
 
         public void LinkMember(GroupReference pRef)
         {
-            m_memberMgr.insertFirst(pRef);
+            m_memberMgr.InsertFirst(pRef);
         }
 
         void DelinkMember(ObjectGuid guid)
@@ -2616,7 +2616,7 @@ namespace Game.Groups
             lootItem.Quantity = itemCount;
             lootItem.LootListID = (byte)(itemSlot + 1);
 
-            LootItem lootItemInSlot = this.getTarget().GetItemInSlot(itemSlot);
+            LootItem lootItemInSlot = getTarget().GetItemInSlot(itemSlot);
             if (lootItemInSlot != null)
             {
                 lootItem.CanTradeToTapList = lootItemInSlot.allowedGUIDs.Count > 1;

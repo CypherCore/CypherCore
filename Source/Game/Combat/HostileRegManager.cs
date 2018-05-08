@@ -39,7 +39,7 @@ namespace Game.Combat
         public void threatAssist(Unit victim, float baseThreat, SpellInfo threatSpell = null)
         {
             float threat = ThreatManager.calcThreat(victim, Owner, baseThreat, (threatSpell != null ? threatSpell.GetSchoolMask() : SpellSchoolMask.Normal), threatSpell);
-            threat /= getSize();
+            threat /= GetSize();
 
             HostileReference refe = getFirst();
             while (refe != null)

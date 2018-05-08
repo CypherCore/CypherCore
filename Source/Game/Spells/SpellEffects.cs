@@ -156,10 +156,7 @@ namespace Game.Spells
                 // Meteor like spells (divided damage to targets)
                 if (m_spellInfo.HasAttribute(SpellCustomAttributes.ShareDamage))
                 {
-                    int count = m_UniqueTargetInfo.Count(targetInfo =>
-                    {
-                        return Convert.ToBoolean(targetInfo.effectMask & (1 << (int)effIndex));
-                    });
+                    int count = m_UniqueTargetInfo.Count(targetInfo => Convert.ToBoolean(targetInfo.effectMask & (1 << (int)effIndex)));
 
                     // divide to all targets
                     if (count != 0)
@@ -255,7 +252,7 @@ namespace Game.Spells
                 if (m_originalCaster != null && apply_direct_bonus)
                 {
                     uint bonus = m_originalCaster.SpellDamageBonusDone(unitTarget, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo);
-                    damage = (int)(bonus + (bonus * variance));
+                    damage = (int)(bonus + (bonus * _variance));
                     damage = (int)unitTarget.SpellDamageBonusTaken(m_originalCaster, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo);
                 }
 
@@ -827,7 +824,7 @@ namespace Game.Spells
 
             // add spell damage bonus
             uint bonus = m_caster.SpellDamageBonusDone(unitTarget, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo);
-            damage = (int)(bonus + (bonus * variance));
+            damage = (int)(bonus + (bonus * _variance));
             damage = (int)unitTarget.SpellDamageBonusTaken(m_caster, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo);
 
             int newDamage = -(unitTarget.ModifyPower(powerType, -damage));
@@ -963,7 +960,7 @@ namespace Game.Spells
                 {
                     addhealth = (int)caster.SpellHealingBonusDone(unitTarget, m_spellInfo, (uint)addhealth, DamageEffectType.Heal, effectInfo);
                     uint bonus = caster.SpellHealingBonusDone(unitTarget, m_spellInfo, (uint)addhealth, DamageEffectType.Heal, effectInfo);
-                    damage = (int)(bonus + (bonus * variance));
+                    damage = (int)(bonus + (bonus * _variance));
                 }
 
                 addhealth = (int)unitTarget.SpellHealingBonusTaken(caster, m_spellInfo, (uint)addhealth, DamageEffectType.Heal, effectInfo);
@@ -1009,7 +1006,7 @@ namespace Game.Spells
                 return;
 
             uint heal = m_originalCaster.SpellHealingBonusDone(unitTarget, m_spellInfo, (uint)damage, DamageEffectType.Heal, effectInfo);
-            heal += (uint)(heal * variance);
+            heal += (uint)(heal * _variance);
 
             m_healing += (int)unitTarget.SpellHealingBonusTaken(m_originalCaster, m_spellInfo, heal, DamageEffectType.Heal, effectInfo);
         }
@@ -1024,7 +1021,7 @@ namespace Game.Spells
                 return;
 
             uint bonus = m_caster.SpellDamageBonusDone(unitTarget, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo);
-            damage = (int)(bonus + (bonus * variance));
+            damage = (int)(bonus + (bonus * _variance));
             damage = (int)unitTarget.SpellDamageBonusTaken(m_caster, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo);
 
             Log.outDebug(LogFilter.Spells, "HealthLeech :{0}", damage);
@@ -1908,7 +1905,7 @@ namespace Game.Spells
             if (dispelList.Empty())
                 return;
 
-            int remaining = dispelList.Count();
+            int remaining = dispelList.Count;
 
             // Ok if exist some buffs for dispel try dispel it
             uint failCount = 0;

@@ -680,8 +680,8 @@ namespace Game.Network.Packets
 
         public uint Level = 0;
         public uint HealthDelta = 0;
-        public uint[] PowerDelta = new uint[6];
-        public uint[] StatDelta = new uint[(int)Stats.Max];
+        public int[] PowerDelta = new int[6];
+        public int[] StatDelta = new int[(int)Stats.Max];
         public int Cp = 0;
     }
 

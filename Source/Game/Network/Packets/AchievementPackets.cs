@@ -230,7 +230,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Earned.Count());
+            _worldPacket.WriteUInt32(Earned.Count);
 
             foreach (EarnedAchievement earned in Earned)
                 earned.Write(_worldPacket);

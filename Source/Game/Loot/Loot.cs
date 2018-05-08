@@ -812,7 +812,7 @@ namespace Game.Loots
 
         public void addLootValidatorRef(LootValidatorRef pLootValidatorRef)
         {
-            i_LootValidatorRefManager.insertFirst(pLootValidatorRef);
+            i_LootValidatorRefManager.InsertFirst(pLootValidatorRef);
         }
 
         public void clear()

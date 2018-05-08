@@ -3608,7 +3608,7 @@ namespace Game.Spells
         public bool HasAttribute(SpellAttr13 attribute) { return Convert.ToBoolean(AttributesEx13 & attribute); }
         public bool HasAttribute(SpellCustomAttributes attribute) { return Convert.ToBoolean(AttributesCu & attribute); }
 
-        public bool HasAnyAuraInterruptFlag() { return AuraInterruptFlags.Any(flag => { return flag != 0; }); }
+        public bool HasAnyAuraInterruptFlag() { return AuraInterruptFlags.Any(flag => flag != 0); }
         public bool HasAuraInterruptFlag(SpellAuraInterruptFlags flag) { return (AuraInterruptFlags[0] & (uint)flag) != 0; }
         public bool HasAuraInterruptFlag(SpellAuraInterruptFlags2 flag) { return (AuraInterruptFlags[1] & (uint)flag) != 0; }
 

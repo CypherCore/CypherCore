@@ -466,7 +466,7 @@ namespace BNetServer.Networking
             {
                 var realmListTicketClientInformation = Json.CreateObject<RealmListTicketClientInformation>(clientInfo.BlobValue.ToStringUtf8(), true);
                 clientInfoOk = true;
-                _clientSecret.AddRange(realmListTicketClientInformation.Info.Secret.Select(x => Convert.ToByte(x)).ToArray());
+                _clientSecret.AddRange(realmListTicketClientInformation.Info.Secret.Select(Convert.ToByte).ToArray());
             }
 
             if (!clientInfoOk)

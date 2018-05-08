@@ -720,13 +720,8 @@ namespace Game.DataStorage
 
         public FieldStructureEntry(short bits, ushort offset)
         {
-            this.Bits = bits;
-            this.Offset = offset;
-        }
-
-        public void SetLength(FieldStructureEntry nextField)
-        {
-            this.Length = Math.Max(1, (int)Math.Floor((nextField.Offset - this.Offset) / (double)this.ByteCount));
+            Bits = bits;
+            Offset = offset;
         }
     }
 
@@ -755,13 +750,13 @@ namespace Game.DataStorage
 
     struct OffsetDuplicate
     {
-        public int HiddenIndex { get; set; }
-        public int VisibleIndex { get; set; }
+        public int HiddenIndex { get; }
+        public int VisibleIndex { get; }
 
         public OffsetDuplicate(int hidden, int visible)
         {
-            this.HiddenIndex = hidden;
-            this.VisibleIndex = visible;
+            HiddenIndex = hidden;
+            VisibleIndex = visible;
         }
     }
 

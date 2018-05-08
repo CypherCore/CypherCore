@@ -191,7 +191,7 @@ namespace Game
                 tempGroup = textGroupContainer;
             }
 
-            var textEntry = tempGroup.SelectRandomElementByWeight(t => { return t.probability; });
+            var textEntry = tempGroup.SelectRandomElementByWeight(t => t.probability);
 
             ChatMsg finalType = (msgType == ChatMsg.Addon) ? textEntry.type : msgType;
             Language finalLang = (language == Language.Addon) ? textEntry.lang : language;

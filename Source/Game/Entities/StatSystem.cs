@@ -1514,10 +1514,7 @@ namespace Game.Entities
 
             Item weapon = GetWeaponForAttack(attack, true);
 
-            expertise += GetTotalAuraModifier(AuraType.ModExpertise, aurEff =>
-            {
-                return aurEff.GetSpellInfo().IsItemFitToSpellRequirements(weapon);
-            });
+            expertise += GetTotalAuraModifier(AuraType.ModExpertise, aurEff => aurEff.GetSpellInfo().IsItemFitToSpellRequirements(weapon));
 
             if (expertise < 0)
                 expertise = 0;

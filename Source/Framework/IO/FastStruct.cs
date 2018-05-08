@@ -26,8 +26,8 @@ namespace Framework.IO
         private delegate T LoadFromByteRefDelegate(ref byte source);
         private delegate void CopyMemoryDelegate(ref T dest, ref byte src, int count);
 
-        private readonly static LoadFromByteRefDelegate LoadFromByteRef = BuildLoadFromByteRefMethod();
-        private readonly static CopyMemoryDelegate CopyMemory = BuildCopyMemoryMethod();
+        private static readonly LoadFromByteRefDelegate LoadFromByteRef = BuildLoadFromByteRefMethod();
+        private static readonly CopyMemoryDelegate CopyMemory = BuildCopyMemoryMethod();
 
         public static readonly int Size = Marshal.SizeOf<T>();
 

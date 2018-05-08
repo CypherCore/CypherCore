@@ -4295,7 +4295,7 @@ namespace Game.Entities
 
         public int GetTotalAuraModifier(AuraType auratype)
         {
-            return GetTotalAuraModifier(auratype, aurEff => { return true; });
+            return GetTotalAuraModifier(auratype, aurEff => true);
         }
 
         public int GetTotalAuraModifier(AuraType auratype, Func<AuraEffect, bool> predicate)
@@ -4324,7 +4324,7 @@ namespace Game.Entities
 
         public float GetTotalAuraMultiplier(AuraType auratype)
         {
-            return GetTotalAuraMultiplier(auratype, aurEff => { return true; });
+            return GetTotalAuraMultiplier(auratype, aurEff => true);
         }
 
         public float GetTotalAuraMultiplier(AuraType auratype, Func<AuraEffect, bool> predicate)
@@ -4356,7 +4356,7 @@ namespace Game.Entities
 
         public int GetMaxPositiveAuraModifier(AuraType auratype)
         {
-            return GetMaxPositiveAuraModifier(auratype, aurEff => { return true; });
+            return GetMaxPositiveAuraModifier(auratype, aurEff => true);
         }
 
         public int GetMaxPositiveAuraModifier(AuraType auratype, Func<AuraEffect, bool> predicate)
@@ -4377,7 +4377,7 @@ namespace Game.Entities
 
         public int GetMaxNegativeAuraModifier(AuraType auratype)
         {
-            return GetMaxNegativeAuraModifier(auratype, aurEff => { return true; });
+            return GetMaxNegativeAuraModifier(auratype, aurEff => true);
         }
 
         public int GetMaxNegativeAuraModifier(AuraType auratype, Func<AuraEffect, bool> predicate)

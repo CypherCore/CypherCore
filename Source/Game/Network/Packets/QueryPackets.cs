@@ -283,8 +283,8 @@ namespace Game.Network.Packets
 
                 statsData.WriteFloat(Stats.Size);
                 statsData.WriteUInt8(Stats.QuestItems.Count);
-                foreach (int questItem in Stats.QuestItems)
-                    statsData.WriteInt32(questItem);
+                foreach (uint questItem in Stats.QuestItems)
+                    statsData.WriteUInt32(questItem);
 
                 statsData.WriteUInt32(Stats.RequiredLevel);
 
@@ -731,7 +731,7 @@ namespace Game.Network.Packets
         public uint DisplayID;
         public int[] Data = new int[33];
         public float Size;
-        public List<int> QuestItems = new List<int>();
+        public List<uint> QuestItems = new List<uint>();
         public uint RequiredLevel;
     }
 

@@ -816,7 +816,7 @@ namespace Game.Entities
                 if (transmogSlot < 0 || knownPieces[transmogSlot] == 1)
                     continue;
 
-                (var hasAppearance, var isTemporary) = HasItemAppearance(transmogSetItem.ItemModifiedAppearanceID);
+                (var hasAppearance, bool isTemporary) = HasItemAppearance(transmogSetItem.ItemModifiedAppearanceID);
 
                 knownPieces[transmogSlot] = (hasAppearance && !isTemporary) ? 1 : 0;
             }

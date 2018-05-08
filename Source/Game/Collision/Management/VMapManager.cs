@@ -301,7 +301,7 @@ namespace Game.Collision
 
         public static string getMapFileName(uint mapId)
         {
-            return string.Format("{0:D4}.vmtree", mapId);
+            return $"{mapId:D4}.vmtree";
         }
 
         public void setEnableLineOfSightCalc(bool pVal) { _enableLineOfSightCalc = pVal; }

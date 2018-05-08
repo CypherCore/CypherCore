@@ -633,8 +633,7 @@ namespace Framework.GameMath
         /// <returns>A string representation of this object.</returns>
         public override string ToString()
         {
-            return string.Format("3x3[{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}]",
-                _m11, _m12, _m13, _m21, _m22, _m23, _m31, _m32, _m33);
+            return $"3x3[{_m11}, {_m12}, {_m13}, {_m21}, {_m22}, {_m23}, {_m31}, {_m32}, {_m33}]";
         }
         #endregion
 

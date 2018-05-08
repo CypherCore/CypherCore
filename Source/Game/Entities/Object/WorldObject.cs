@@ -1526,7 +1526,7 @@ namespace Game.Entities
             SetDynamicValue(index, (ushort)((offset + 1) * BlockCount - 1), 0); // reserve space
 
             for (ushort i = 0; i < BlockCount; ++i)
-                SetDynamicValue(index, (ushort)(offset * BlockCount + i), Extensions.SerializeObject(value)[i]);
+                SetDynamicValue(index, (ushort)(offset * BlockCount + i), value.SerializeObject()[i]);
         }
 
         public void AddDynamicStructuredValue<T>(object index, T value)
@@ -1535,7 +1535,7 @@ namespace Game.Entities
             ushort offset = (ushort)(_dynamicValues[(int)index].Length / BlockCount);
             SetDynamicValue(index, (ushort)((offset + 1) * BlockCount - 1), 0); // reserve space
             for (ushort i = 0; i < BlockCount; ++i)
-                SetDynamicValue(index, (ushort)(offset * BlockCount + i), Extensions.SerializeObject(value)[i]);
+                SetDynamicValue(index, (ushort)(offset * BlockCount + i), value.SerializeObject()[i]);
         }
 
         bool PrintIndexError(object index, bool set)

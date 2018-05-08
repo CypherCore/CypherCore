@@ -794,7 +794,7 @@ namespace Game
 
         public string BuildAuctionMailSubject(MailAuctionAnswers response)
         {
-            return string.Format("{0}:0:{1}:{2}:{3}", itemEntry, response, Id, itemCount);
+            return $"{itemEntry}:0:{response}:{Id}:{itemCount}";
         }
 
         public static string BuildAuctionMailBody(ulong lowGuid, ulong bid, ulong buyout, ulong deposit, ulong cut)

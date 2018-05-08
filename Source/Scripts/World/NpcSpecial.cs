@@ -741,7 +741,7 @@ namespace Scripts.World.NpcSpecial
         {
             List<Creature> targets = new List<Creature>();
             me.GetCreatureListWithEntryInGrid(targets, CreatureIds.TorchTossingTargetBunny, 60.0f);
-            targets.RemoveAll(creature => { return creature.GetGUID() == lastTargetGUID; });
+            targets.RemoveAll(creature => creature.GetGUID() == lastTargetGUID);
 
             if (!targets.Empty())
             {
@@ -788,7 +788,7 @@ namespace Scripts.World.NpcSpecial
         {
             Initialize();
 
-            _scheduler.SetValidator(() => { return running; });
+            _scheduler.SetValidator(() => running);
 
             _scheduler.Schedule(TimeSpan.FromMilliseconds(1), task =>
             {

@@ -569,7 +569,7 @@ namespace Framework.GameMath
         /// <returns>A string representation of this object.</returns>
         public override string ToString()
         {
-            return string.Format("({0}, {1})", _x, _y);
+            return $"({_x}, {_y})";
         }
         #endregion
 

@@ -4396,7 +4396,7 @@ namespace Game.Spells
 
             Log.outDebug(LogFilter.Spells, "Spell: {0} Effect : {1}", m_spellInfo.Id, eff);
 
-            damage = CalculateDamage(i, unitTarget, out variance);
+            damage = CalculateDamage(i, unitTarget, out _variance);
 
             bool preventDefault = CallScriptEffectHandlers(i, mode);
 
@@ -7283,7 +7283,7 @@ namespace Game.Spells
         public WorldLocation destTarget;
         public int damage;
         SpellMissInfo targetMissInfo;
-        float variance;
+        float _variance;
         SpellEffectHandleMode effectHandleMode;
         public SpellEffectInfo effectInfo;
         // used in effects handlers

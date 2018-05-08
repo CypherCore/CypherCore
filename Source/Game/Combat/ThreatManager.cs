@@ -467,7 +467,7 @@ namespace Game.Combat
         }
         public HostileReference getMostHated()
         {
-            return threatList.Count() == 0 ? null : threatList[0];
+            return threatList.Count == 0 ? null : threatList[0];
         }
 
         public void remove(HostileReference hostileRef)

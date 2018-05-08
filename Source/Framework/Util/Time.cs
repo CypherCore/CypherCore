@@ -185,7 +185,7 @@ public static class Time
         long hours = (time % Day) / Hour;
         long minute = (time % Hour) / Minute;
 
-        return string.Format("Days: {0} Hours: {1} Minutes: {2}", days, hours, minute);
+        return $"Days: {days} Hours: {hours} Minutes: {minute}";
     }
 
     public static void Profile(string description, int iterations, Action func)

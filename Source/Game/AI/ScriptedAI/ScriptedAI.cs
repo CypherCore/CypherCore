@@ -440,10 +440,7 @@ namespace Game.AI
             if (instance != null)
                 SetBoundary(instance.GetBossBoundary(bossId));
 
-            _scheduler.SetValidator(() =>
-            {
-                return !me.HasUnitState(UnitState.Casting);
-            });
+            _scheduler.SetValidator(() => !me.HasUnitState(UnitState.Casting));
         }
 
         public void _Reset()
@@ -699,7 +696,7 @@ namespace Game.AI
             while (!this.Empty())
             {
                 Creature summon = ObjectAccessor.GetCreature(me, this.FirstOrDefault());
-                this.RemoveAt(0);
+                RemoveAt(0);
                 if (summon)
                     summon.DespawnOrUnsummon();
             }

@@ -290,7 +290,7 @@ namespace Game.Entities
 
         public void addHatedBy(HostileReference pHostileReference)
         {
-            m_HostileRefManager.insertFirst(pHostileReference);
+            m_HostileRefManager.InsertFirst(pHostileReference);
         }
         public void removeHatedBy(HostileReference pHostileReference) { } //nothing to do yet
 

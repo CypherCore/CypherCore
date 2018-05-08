@@ -130,12 +130,12 @@ public struct RealmHandle : IEquatable<RealmHandle>
     }
     public string GetAddressString()
     {
-        return string.Format("{0}-{1}-{2}", Region, Site, Realm);
+        return $"{Region}-{Site}-{Realm}";
     }
 
     public string GetSubRegionAddress()
     {
-        return string.Format("{0}-{1}-0", Region, Site);
+        return $"{Region}-{Site}-0";
     }
 
     public override bool Equals(object obj)

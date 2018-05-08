@@ -3063,7 +3063,7 @@ namespace Game
                     uint trainerId = trainerLocalesResult.Read<uint>(0);
                     string localeName = trainerLocalesResult.Read<string>(1);
 
-                    LocaleConstant locale = Extensions.ToEnum<LocaleConstant>(localeName);
+                    LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
                     if (locale == LocaleConstant.enUS)
                         continue;
 
@@ -4804,7 +4804,7 @@ namespace Game
 
             if (!Convert.ToBoolean(((ulong)cInfo.Npcflag | ORnpcflag) & (ulong)NPCFlags.Vendor))
             {
-                if (skipvendors == null || skipvendors.Count() == 0)
+                if (skipvendors == null || skipvendors.Count == 0)
                 {
                     if (player != null)
                         player.SendSysMessage(CypherStrings.CommandVendorselection);
@@ -7562,12 +7562,12 @@ namespace Game
                 return;
             }
 
-            Func<uint, PhaseInfoStruct> getOrCreatePhaseIfMissing = phaseId =>
+            PhaseInfoStruct getOrCreatePhaseIfMissing(uint phaseId)
             {
                 PhaseInfoStruct phaseInfo = _phaseInfoById[phaseId];
                 phaseInfo.Id = phaseId;
                 return phaseInfo;
-            };
+            }
 
             uint count = 0;
             do
@@ -8935,7 +8935,7 @@ namespace Game
                         continue;
                     }
 
-                    var response = choice.Responses.FirstOrDefault(playerChoiceResponse => { return playerChoiceResponse.ResponseId == responseId; });
+                    var response = choice.Responses.FirstOrDefault(playerChoiceResponse => playerChoiceResponse.ResponseId == responseId);
                     if (response == null)
                     {
                         Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_item` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
@@ -8977,7 +8977,7 @@ namespace Game
                         continue;
                     }
 
-                    var response = choice.Responses.FirstOrDefault(playerChoiceResponse => { return playerChoiceResponse.ResponseId == responseId; });
+                    var response = choice.Responses.FirstOrDefault(playerChoiceResponse => playerChoiceResponse.ResponseId == responseId);
                     if (response == null)
                     {
                         Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_currency` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
@@ -9019,7 +9019,7 @@ namespace Game
                         continue;
                     }
 
-                    var response = choice.Responses.FirstOrDefault(playerChoiceResponse => { return playerChoiceResponse.ResponseId == responseId; });
+                    var response = choice.Responses.FirstOrDefault(playerChoiceResponse => playerChoiceResponse.ResponseId == responseId);
                     if (response == null)
                     {
                         Log.outError(LogFilter.Sql, $"Table `playerchoice_response_reward_faction` references non-existing ResponseId: {responseId} for ChoiceId {choiceId}, skipped");
@@ -9853,7 +9853,7 @@ namespace Game
 
         public string GetDebugInfo()
         {
-            return string.Format("{0} ('{1}' script id: {2})", command, Global.ObjectMgr.GetScriptsTableNameByType(type), id);
+            return $"{command} ('{Global.ObjectMgr.GetScriptsTableNameByType(type)}' script id: {id})";
         }
 
         #region Structs
@@ -10484,10 +10484,7 @@ namespace Game
 
         public bool IsAllowedInArea(uint areaId)
         {
-            return Areas.Any(areaToCheck =>
-            {
-                return Global.DB2Mgr.IsInArea(areaId, areaToCheck);
-            });
+            return Areas.Any(areaToCheck => Global.DB2Mgr.IsInArea(areaId, areaToCheck));
         }
 
         public uint Id;
@@ -10608,7 +10605,7 @@ namespace Game
     {
         public PlayerChoiceResponse GetResponse(int responseId)
         {
-            return Responses.FirstOrDefault(playerChoiceResponse => { return playerChoiceResponse.ResponseId == responseId; });
+            return Responses.FirstOrDefault(playerChoiceResponse => playerChoiceResponse.ResponseId == responseId);
         }
 
         public int ChoiceId;

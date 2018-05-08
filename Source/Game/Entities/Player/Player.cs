@@ -5284,7 +5284,7 @@ namespace Game.Entities
             packet.HealthDelta = 0;
 
             /// @todo find some better solution
-            packet.PowerDelta[0] = basemana - GetCreateMana();
+            packet.PowerDelta[0] = (int)basemana - (int)GetCreateMana();
             packet.PowerDelta[1] = 0;
             packet.PowerDelta[2] = 0;
             packet.PowerDelta[3] = 0;
@@ -5292,7 +5292,7 @@ namespace Game.Entities
             packet.PowerDelta[5] = 0;
 
             for (Stats i = Stats.Strength; i < Stats.Max; ++i)
-                packet.StatDelta[(int)i] = info.stats[(int)i] - (uint)GetCreateStat(i);
+                packet.StatDelta[(int)i] = info.stats[(int)i] - (int)GetCreateStat(i);
 
             uint[] rowLevels = (GetClass() != Class.Deathknight) ? PlayerConst.DefaultTalentRowLevels : PlayerConst.DKTalentRowLevels;
 
@@ -6301,7 +6301,7 @@ namespace Game.Entities
             int count = 0;
             string result = System.Text.RegularExpressions.Regex.Replace(input, pattern, m =>
             {
-                return String.Concat("{", count++, "}");
+                return string.Concat("{", count++, "}");
             });
 
             SendSysMessage(result, args);

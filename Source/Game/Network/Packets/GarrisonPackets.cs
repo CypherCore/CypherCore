@@ -515,8 +515,8 @@ namespace Game.Network.Packets
             foreach (GarrisonTalent talent in Talents)
                 talent.Write(data);
 
-            if (!ArchivedMissions.Empty())
-                ArchivedMissions.ForEach(id => data.WriteInt32(id));
+            foreach(var id in ArchivedMissions)
+                    data.WriteInt32(id);
 
             foreach (GarrisonBuildingInfo building in Buildings)
                 building.Write(data);

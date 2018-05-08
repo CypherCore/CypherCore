@@ -265,7 +265,7 @@ namespace Game.Entities
                         stmt.AddValue(0, GetGUID().GetCounter());
                         trans.Append(stmt);
 
-                        if (transmogMods.Any(modifier => { return GetModifier(modifier) != 0; }))
+                        if (transmogMods.Any(modifier => GetModifier(modifier) != 0))
                         {
                             stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_TRANSMOG);
                             stmt.AddValue(0, GetGUID().GetCounter());
@@ -318,7 +318,7 @@ namespace Game.Entities
                         stmt.AddValue(0, GetGUID().GetCounter());
                         trans.Append(stmt);
 
-                        if (modifiersTable.Any(modifier => { return GetModifier(modifier) != 0; }))
+                        if (modifiersTable.Any(modifier => GetModifier(modifier) != 0))
                         {
                             stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_MODIFIERS);
                             stmt.AddValue(0, GetGUID().GetCounter());
@@ -1115,10 +1115,7 @@ namespace Game.Entities
 
         public byte GetGemCountWithID(uint GemID)
         {
-            return (byte)GetGems().Count(gemData =>
-            {
-                return gemData.ItemId == GemID;
-            });
+            return (byte)GetGems().Count(gemData => gemData.ItemId == GemID);
         }
 
         public byte GetGemCountWithLimitCategory(uint limitCategory)

@@ -649,7 +649,7 @@ namespace Scripts.Spells.Druid
 
             Unit caster = eventInfo.GetActor();
             var costs = spell.GetPowerCost();
-            var m = costs.First(cost => { return cost.Power == PowerType.Mana; });
+            var m = costs.First(cost => cost.Power == PowerType.Mana);
             if (m == null)
                 return;
 

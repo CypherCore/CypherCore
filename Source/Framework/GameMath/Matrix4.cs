@@ -705,8 +705,8 @@ namespace Framework.GameMath
         /// <returns>A string representation of this object.</returns>
         public override string ToString()
         {
-            return string.Format("4x4[{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, {13}, {14}, {15}]",
-                _m11, _m12, _m13, _m14, _m21, _m22, _m23, _m24, _m31, _m32, _m33, _m34, _m41, _m42, _m43, _m44);
+            return
+                $"4x4[{_m11}, {_m12}, {_m13}, {_m14}, {_m21}, {_m22}, {_m23}, {_m24}, {_m31}, {_m32}, {_m33}, {_m34}, {_m41}, {_m42}, {_m43}, {_m44}]";
         }
         #endregion
 

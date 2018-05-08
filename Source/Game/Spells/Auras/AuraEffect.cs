@@ -706,7 +706,7 @@ namespace Game.Spells
 
                         // Costs Check
                         var costs = eventInfo.GetProcSpell().GetPowerCost();
-                        var m = costs.Find(cost => { return cost.Amount > 0; });
+                        var m = costs.Find(cost => cost.Amount > 0);
                         if (m == null)
                             return false;
                         break;

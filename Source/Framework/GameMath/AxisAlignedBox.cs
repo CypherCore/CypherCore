@@ -174,7 +174,7 @@ namespace Framework.GameMath
         /// <returns>A string representation of this object.</returns> 
         public override string ToString()
         {
-            return string.Format("AxisAlignedBox(Min={0}, Max={1})", _lo, _hi);
+            return $"AxisAlignedBox(Min={_lo}, Max={_hi})";
         }
         #endregion
 

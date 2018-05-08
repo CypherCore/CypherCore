@@ -63,7 +63,7 @@ namespace Game
             if (!_collectionMgr.HasToy(itemId))
                 return;
 
-            var effect = item.Effects.Find(eff => { return packet.Cast.SpellID == eff.SpellID; });
+            var effect = item.Effects.Find(eff => packet.Cast.SpellID == eff.SpellID);
             if (effect == null)
                 return;
 

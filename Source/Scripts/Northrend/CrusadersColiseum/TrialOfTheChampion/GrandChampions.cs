@@ -330,16 +330,16 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
             }
         }
 
-        bool GrandChampionsOutVehicle(Creature me)
+        bool GrandChampionsOutVehicle(Creature creature)
         {
-            InstanceScript instance = me.GetInstanceScript();
+            InstanceScript instance = creature.GetInstanceScript();
 
             if (instance == null)
                 return false;
 
-            Creature pGrandChampion1 = ObjectAccessor.GetCreature(me, instance.GetGuidData((uint)Data64.DATA_GRAND_CHAMPION_1));
-            Creature pGrandChampion2 = ObjectAccessor.GetCreature(me, instance.GetGuidData((uint)Data64.DATA_GRAND_CHAMPION_2));
-            Creature pGrandChampion3 = ObjectAccessor.GetCreature(me, instance.GetGuidData((uint)Data64.DATA_GRAND_CHAMPION_3));
+            Creature pGrandChampion1 = ObjectAccessor.GetCreature(creature, instance.GetGuidData((uint)Data64.DATA_GRAND_CHAMPION_1));
+            Creature pGrandChampion2 = ObjectAccessor.GetCreature(creature, instance.GetGuidData((uint)Data64.DATA_GRAND_CHAMPION_2));
+            Creature pGrandChampion3 = ObjectAccessor.GetCreature(creature, instance.GetGuidData((uint)Data64.DATA_GRAND_CHAMPION_3));
 
             if (pGrandChampion1 && pGrandChampion2 && pGrandChampion3)
             {

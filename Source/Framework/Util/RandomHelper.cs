@@ -19,7 +19,7 @@ using System.Diagnostics.Contracts;
 
 public class RandomHelper
 {
-    private readonly static Random rand;
+    private static readonly Random rand;
 
     static RandomHelper()
     {

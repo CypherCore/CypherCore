@@ -271,7 +271,7 @@ namespace Game.Collision
 
         public static string getTileFileName(uint mapID, uint tileX, uint tileY)
         {
-            return string.Format("{0:D4}_{1:D2}_{2:D2}.vmtile", mapID, tileY, tileX);
+            return $"{mapID:D4}_{tileY:D2}_{tileX:D2}.vmtile";
         }
 
         public bool getAreaInfo(ref Vector3 pos, out uint flags, out int adtId, out int rootId, out int groupId)

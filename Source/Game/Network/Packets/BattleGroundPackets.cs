@@ -148,8 +148,9 @@ namespace Game.Network.Packets
                 data.WriteInt32(PrimaryTalentTree);
                 data.WriteInt32(PrimaryTalentTreeNameIndex);
                 data.WriteInt32(PlayerRace);
-                if (!Stats.Empty())
-                    Stats.ForEach(id => data.WriteUInt32(id));
+
+                foreach (var id in Stats)
+                    data.WriteUInt32(id);
 
                 data.WriteBit(Faction);
                 data.WriteBit(IsInWorld);
@@ -366,8 +367,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(MinLevel);
             _worldPacket.WriteUInt8(MaxLevel);
             _worldPacket.WriteUInt32(Battlefields.Count);
-            if (!Battlefields.Empty())
-                Battlefields.ForEach(field => _worldPacket.WriteInt32(field));
+
+            foreach (var field in Battlefields)
+                _worldPacket.WriteInt32(field);
 
             _worldPacket.WriteBit(PvpAnywhere);
             _worldPacket.WriteBit(HasRandomWinToday);
@@ -464,8 +466,9 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket .WriteUInt32(FlagCarriers.Count);
-            FlagCarriers.ForEach(pos => pos.Write(_worldPacket));
+            _worldPacket.WriteUInt32(FlagCarriers.Count);
+            foreach (var pos in FlagCarriers)
+                pos.Write(_worldPacket);
         }
 
         public List<BattlegroundPlayerPosition> FlagCarriers = new List<BattlegroundPlayerPosition>();

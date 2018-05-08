@@ -37,7 +37,7 @@ namespace Game.Movement
         public int first() { return index_lo; }
         public int last() { return index_hi; }
 
-        public bool isCyclic() { return cyclic;}
+        public bool isCyclic() { return _cyclic;}
         
         #region Evaluate
         public void Evaluate_Percent(int Idx, float u, out Vector3 c) 
@@ -76,28 +76,28 @@ namespace Game.Movement
         #region Init
         public void init_spline_custom(SplineRawInitializer initializer)
         {
-            initializer.Initialize(ref m_mode, ref cyclic, ref points, ref index_lo, ref index_hi);
+            initializer.Initialize(ref m_mode, ref _cyclic, ref points, ref index_lo, ref index_hi);
         }
         public void init_cyclic_spline(Vector3[] controls, int count, EvaluationMode m, int cyclic_point)
         {
             m_mode = m;
-            cyclic = true;
+            _cyclic = true;
 
             Init_Spline(controls, count, m);
         }
         public void Init_Spline(Vector3[] controls, int count, EvaluationMode m)
         {
             m_mode = m;
-            cyclic = false;
+            _cyclic = false;
 
             switch (m_mode)
             {
                 case EvaluationMode.Linear:
                 case EvaluationMode.Catmullrom:
-                    InitCatmullRom(controls, count, cyclic, 0);
+                    InitCatmullRom(controls, count, _cyclic, 0);
                     break;
                 case EvaluationMode.Bezier3_Unused:
-                    InitBezier3(controls, count, cyclic, 0);
+                    InitBezier3(controls, count, _cyclic, 0);
                     break;
                 default:
                     break;
@@ -355,7 +355,7 @@ namespace Game.Movement
         int[] lengths = new int[0];
         Vector3[] points = new Vector3[0];
         public EvaluationMode m_mode;
-        bool cyclic;
+        bool _cyclic;
         int index_lo;
         int index_hi;
         public enum EvaluationMode

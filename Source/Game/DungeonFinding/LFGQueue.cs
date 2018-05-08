@@ -655,7 +655,7 @@ namespace Game.DungeonFinding
                 }
             }
 
-            return string.Format("Queued Players: {0} (in group: {1}) Groups: {2}\n", players, playersInGroup, groups);
+            return $"Queued Players: {players} (in group: {playersInGroup}) Groups: {groups}\n";
         }
 
         public string DumpCompatibleInfo(bool full = false)

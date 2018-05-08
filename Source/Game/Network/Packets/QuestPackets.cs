@@ -422,8 +422,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(Objectives.Count);
             _worldPacket.WriteInt32(QuestStartItemID);
 
-            foreach (int spell in LearnSpells)
-                _worldPacket.WriteInt32(spell);
+            foreach (uint spell in LearnSpells)
+                _worldPacket.WriteUInt32(spell);
 
             foreach (QuestDescEmote emote in DescEmotes)
             {

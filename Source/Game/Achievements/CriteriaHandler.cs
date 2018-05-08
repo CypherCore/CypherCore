@@ -1554,7 +1554,8 @@ namespace Game.Achievements
             uint questObjectiveCriterias = 0;
             foreach (CriteriaRecord criteriaEntry in CliDB.CriteriaStorage.Values)
             {
-                Contract.Assert(criteriaEntry.Type < CriteriaTypes.TotalTypes, string.Format("CRITERIA_TYPE_TOTAL must be greater than or equal to {0} but is currently equal to {1}", criteriaEntry.Type + 1, CriteriaTypes.TotalTypes));
+                Contract.Assert(criteriaEntry.Type < CriteriaTypes.TotalTypes,
+                    $"CRITERIA_TYPE_TOTAL must be greater than or equal to {criteriaEntry.Type + 1} but is currently equal to {CriteriaTypes.TotalTypes}");
 
                 var treeList = _criteriaTreeByCriteria.LookupByKey(criteriaEntry.Id);
                 if (treeList.Empty())
@@ -1819,7 +1820,7 @@ namespace Game.Achievements
 
         public CriteriaData(CriteriaDataType _dataType, uint _value1, uint _value2, uint _scriptId)
         {
-            this.DataType = _dataType;
+            DataType = _dataType;
 
             Raw.Value1 = _value1;
             Raw.Value2 = _value2;

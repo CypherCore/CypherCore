@@ -330,8 +330,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(SpellID.Count);
             _worldPacket.WriteUInt32(FavoriteSpellID.Count);
 
-            foreach (int spell in SpellID)
-                _worldPacket.WriteInt32(spell);
+            foreach (uint spell in SpellID)
+                _worldPacket.WriteUInt32(spell);
 
             foreach (int spell in FavoriteSpellID)
                 _worldPacket.WriteInt32(spell);

@@ -3991,7 +3991,7 @@ namespace Game.AI
             if (bounds.Empty())
                 return null;
 
-            var foundCreature = bounds.Find(creature => { return creature.IsAlive(); });
+            var foundCreature = bounds.Find(creature => creature.IsAlive());
 
             return foundCreature ?? bounds[0];
         }

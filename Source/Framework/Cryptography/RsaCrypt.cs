@@ -29,13 +29,13 @@ namespace Framework.Cryptography
 
         public void InitializeEncryption<T>(T p, T q, T dp, T dq, T iq, bool isBigEndian = false)
         {
-            this._p = p.ToBigInteger(isBigEndian);
-            this._q = q.ToBigInteger(isBigEndian);
-            this._dp = dp.ToBigInteger(isBigEndian);
-            this._dq = dq.ToBigInteger(isBigEndian);
-            this._iq = iq.ToBigInteger(isBigEndian);
+            _p = p.ToBigInteger(isBigEndian);
+            _q = q.ToBigInteger(isBigEndian);
+            _dp = dp.ToBigInteger(isBigEndian);
+            _dq = dq.ToBigInteger(isBigEndian);
+            _iq = iq.ToBigInteger(isBigEndian);
 
-            if (this._p.IsZero && this._q.IsZero)
+            if (_p.IsZero && _q.IsZero)
                 throw new InvalidOperationException("'0' isn't allowed for p or q");
             else
                 _isEncryptionInitialized = true;
@@ -43,8 +43,8 @@ namespace Framework.Cryptography
 
         public void InitializeDecryption<T>(T e, T n, bool reverseBytes = false)
         {
-            this._e = e.ToBigInteger(reverseBytes);
-            this._n = n.ToBigInteger(reverseBytes);
+            _e = e.ToBigInteger(reverseBytes);
+            _n = n.ToBigInteger(reverseBytes);
 
             _isDecryptionInitialized = true;
         }
@@ -82,13 +82,13 @@ namespace Framework.Cryptography
 
         public void Dispose()
         {
-            this._e = 0;
-            this._n = 0;
-            this._p = 0;
-            this._q = 0;
-            this._dp = 0;
-            this._dq = 0;
-            this._iq = 0;
+            _e = 0;
+            _n = 0;
+            _p = 0;
+            _q = 0;
+            _dp = 0;
+            _dq = 0;
+            _iq = 0;
 
             _isEncryptionInitialized = false;
             _isDecryptionInitialized = false;

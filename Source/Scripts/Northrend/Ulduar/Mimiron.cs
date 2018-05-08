@@ -1741,7 +1741,7 @@ namespace Scripts.Northrend.Ulduar
         {
             void FilterTargets(List<WorldObject> targets)
             {
-                targets.RemoveAll(obj => { return obj.ToUnit() && (obj.ToUnit().GetVehicleBase() || obj.HasFlag(UnitFields.Flags, UnitFlags.NonAttackable)); });
+                targets.RemoveAll(obj => obj.ToUnit() && (obj.ToUnit().GetVehicleBase() || obj.HasFlag(UnitFields.Flags, UnitFlags.NonAttackable)));
             }
 
             public override void Register()

@@ -705,7 +705,8 @@ namespace Game.Scripting
 
         public SpellEffectInfo GetEffectInfo()
         {
-            Contract.Assert(IsInEffectHook(), string.Format("Script: `{0}` Spell: `{1}`: function SpellScript::GetEffectInfo was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId));
+            Contract.Assert(IsInEffectHook(),
+                $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript::GetEffectInfo was called, but function has no effect in current hook!");
 
             return m_spell.effectInfo;
         }

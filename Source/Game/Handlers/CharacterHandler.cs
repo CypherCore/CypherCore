@@ -341,7 +341,7 @@ namespace Game
                 bool allowTwoSideAccounts = !Global.WorldMgr.IsPvPRealm() || HasPermission(RBACPermissions.TwoSideCharacterCreation);
                 int skipCinematics = WorldConfig.GetIntValue(WorldCfg.SkipCinematics);
 
-                Action<SQLResult> finalizeCharacterCreation = result1 =>
+                void finalizeCharacterCreation(SQLResult result1)
                 {
                     bool haveSameRace = false;
                     int demonHunterReqLevel = WorldConfig.GetIntValue(WorldCfg.CharacterCreatingMinLevelForDemonHunter);
@@ -479,7 +479,7 @@ namespace Game
                     Global.WorldMgr.AddCharacterInfo(newChar.GetGUID(), GetAccountId(), newChar.GetName(), newChar.GetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetGender), (byte)newChar.GetRace(), (byte)newChar.GetClass(), (byte)newChar.getLevel(), false);
 
                     newChar.CleanupsBeforeDelete();
-                };
+                }
 
                 if (!allowTwoSideAccounts || skipCinematics == 1 || createInfo.ClassId == Class.DemonHunter)
                 {
@@ -2169,12 +2169,12 @@ namespace Game
             uint zoneId = GetPlayer().GetZoneId();
             uint team = (uint)GetPlayer().GetTeam();
 
-            List<int> graveyardIds = new List<int>();
+            List<uint> graveyardIds = new List<uint>();
             var range = Global.ObjectMgr.GraveYardStorage.LookupByKey(zoneId);
 
-            for (int i = 0; i < range.Count && graveyardIds.Count < 16; ++i) // client max
+            for (uint i = 0; i < range.Count && graveyardIds.Count < 16; ++i) // client max
             {
-                var gYard = range[i];
+                var gYard = range[(int)i];
                 if (gYard.team == 0 || gYard.team == team)
                     graveyardIds.Add(i);
             }

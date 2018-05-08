@@ -108,7 +108,7 @@ namespace Game.Entities
 
         TrainerSpellState GetSpellState(Player player, TrainerSpell trainerSpell)
         {
-            if (player.HasSpell(trainerSpell.SpellId))
+            if (player.HasSpell(trainerSpell.IsCastable() ? trainerSpell.LearnedSpellId : trainerSpell.SpellId))
                 return TrainerSpellState.Known;
 
             // check race/class requirement

@@ -170,7 +170,7 @@ namespace Game.Entities
 
         public override string ToString()
         {
-            string str = string.Format("GUID Full: 0x{0}, Type: {1}", _high + _low, GetHigh());
+            string str = $"GUID Full: 0x{_high + _low}, Type: {GetHigh()}";
             if (HasEntry())
                 str += (IsPet() ? " Pet number: " : " Entry: ") + GetEntry() + " ";
 

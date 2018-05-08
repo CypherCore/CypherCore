@@ -1780,10 +1780,7 @@ namespace Game
             if (m_Autobroadcasts.Empty())
                 return;
 
-            var pair = m_Autobroadcasts.SelectRandomElementByWeight(autoPair =>
-            {
-                return autoPair.Value.Weight;
-            });
+            var pair = m_Autobroadcasts.SelectRandomElementByWeight(autoPair => autoPair.Value.Weight);
 
             uint abcenter = WorldConfig.GetUIntValue(WorldCfg.AutoBroadcastCenter);
 

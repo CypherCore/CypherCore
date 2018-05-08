@@ -57,7 +57,7 @@ namespace System
 
         public static byte[] ToByteArray(this string value, char separator)
         {
-            return Array.ConvertAll(value.Split(separator), s => byte.Parse(s));
+            return Array.ConvertAll(value.Split(separator), byte.Parse);
         }
 
         static uint LeftRotate(this uint value, int shiftCount)
@@ -144,7 +144,7 @@ namespace System
                     ret = (BigInteger)Convert.ChangeType(value, typeof(BigInteger));
                     break;
                 default:
-                    throw new NotSupportedException(string.Format("'{0}' conversion to 'BigInteger' not supported.", typeof(T).Name));
+                    throw new NotSupportedException($"'{typeof(T).Name}' conversion to 'BigInteger' not supported.");
             }
 
             return ret;
@@ -268,10 +268,7 @@ namespace System
             string pattern = @"(%\W*\d*[a-zA-Z]*)";
             
             int count = 0;
-            string result = Regex.Replace(str, pattern, m =>
-            {
-                return string.Concat("{", count++, "}");
-            });
+            string result = Regex.Replace(str, pattern, m => string.Concat("{", count++, "}"));
 
             return result;
         }

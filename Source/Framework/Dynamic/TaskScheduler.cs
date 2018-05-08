@@ -157,7 +157,7 @@ namespace Framework.Dynamic
 
         public TaskScheduler CancelAll()
         {
-            /// Clear the task holder
+            // Clear the task holder
             _task_holder.Clear();
             _asyncHolder.Clear();
             return this;
@@ -165,10 +165,7 @@ namespace Framework.Dynamic
 
         public TaskScheduler CancelGroup(uint group)
         {
-            _task_holder.RemoveIf(task =>
-            {
-                return task.IsInGroup(group);
-            });
+            _task_holder.RemoveIf(task => task.IsInGroup(@group));
             return this;
         }
 
@@ -689,10 +686,7 @@ namespace Framework.Dynamic
         public TaskContext Schedule(TimeSpan time, Action<TaskContext> task)
         {
             var end = _task._end;
-            return Dispatch(scheduler =>
-            {
-                return scheduler.ScheduleAt(end, time, task);
-            });
+            return Dispatch(scheduler => scheduler.ScheduleAt(end, time, task));
         }
         public TaskContext Schedule(TimeSpan time, Action task) { return Schedule(time, delegate (TaskContext task1) { task(); }); }
 
@@ -709,7 +703,7 @@ namespace Framework.Dynamic
         public TaskContext Schedule(TimeSpan time, uint group, Action<TaskContext> task)
         {
             var end = _task._end;
-            return Dispatch(scheduler => { return scheduler.ScheduleAt(end, time, group, task); });
+            return Dispatch(scheduler => scheduler.ScheduleAt(end, time, @group, task));
         }
         public TaskContext Schedule(TimeSpan time, uint group, Action task) { return Schedule(time, group, delegate (TaskContext task1) { task(); }); }
 

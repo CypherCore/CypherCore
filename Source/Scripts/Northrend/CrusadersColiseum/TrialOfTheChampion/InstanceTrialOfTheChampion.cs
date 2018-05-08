@@ -266,7 +266,8 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
             {
                 OUT_SAVE_INST_DATA();
 
-                string str_data = string.Format("T C {0} {1} {2} {3} {4} {5}", m_auiEncounter[0], m_auiEncounter[1], m_auiEncounter[2], m_auiEncounter[3], uiGrandChampionsDeaths, uiMovementDone);
+                string str_data =
+                    $"T C {m_auiEncounter[0]} {m_auiEncounter[1]} {m_auiEncounter[2]} {m_auiEncounter[3]} {uiGrandChampionsDeaths} {uiMovementDone}";
 
                 OUT_SAVE_INST_DATA_COMPLETE();
                 return str_data;

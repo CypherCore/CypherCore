@@ -252,8 +252,8 @@ namespace Scripts.EasternKingdoms.Karazhan
                 {
                     OUT_SAVE_INST_DATA();
 
-                    strSaveData = string.Format("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}", m_auiEncounter[0], m_auiEncounter[1], m_auiEncounter[2], m_auiEncounter[3],
-                        m_auiEncounter[4], m_auiEncounter[5], m_auiEncounter[6], m_auiEncounter[7], m_auiEncounter[8], m_auiEncounter[9], m_auiEncounter[10], m_auiEncounter[11]);
+                    strSaveData =
+                        $"{m_auiEncounter[0]} {m_auiEncounter[1]} {m_auiEncounter[2]} {m_auiEncounter[3]} {m_auiEncounter[4]} {m_auiEncounter[5]} {m_auiEncounter[6]} {m_auiEncounter[7]} {m_auiEncounter[8]} {m_auiEncounter[9]} {m_auiEncounter[10]} {m_auiEncounter[11]}";
 
                     SaveToDB();
                     OUT_SAVE_INST_DATA_COMPLETE();

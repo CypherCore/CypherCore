@@ -793,7 +793,7 @@ namespace Game.Misc
 
         public int GetMenuItemCount()
         {
-            return _questMenuItems.Count();
+            return _questMenuItems.Count;
         }
 
         public bool IsEmpty()

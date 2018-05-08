@@ -168,15 +168,16 @@ namespace Game.DataStorage
                         continue;
                     }
 
-                    Func<uint, uint> ValidateAndSetCurve = value =>
+                    uint ValidateAndSetCurve(uint value)
                     {
                         if (value != 0 && !CliDB.CurveStorage.ContainsKey(value))
                         {
                             Log.outError(LogFilter.Sql, "Table `spell_areatrigger` has listed areatrigger (MiscId: {0}, Id: {1}) with invalid Curve ({2}), set to 0!", miscTemplate.MiscId, areatriggerId, value);
                             return 0;
                         }
+
                         return value;
-                    };
+                    }
 
                     miscTemplate.MoveCurveId = ValidateAndSetCurve(areatriggerSpellMiscs.Read<uint>(2));
                     miscTemplate.ScaleCurveId = ValidateAndSetCurve(areatriggerSpellMiscs.Read<uint>(3));

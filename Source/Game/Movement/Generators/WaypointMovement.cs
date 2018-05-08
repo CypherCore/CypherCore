@@ -215,7 +215,7 @@ namespace Game.Movement
             List<Vector3> pathing = new List<Vector3>();
 
             pathing.Add(new Vector3(creature.GetPositionX(), creature.GetPositionY(), creature.GetPositionZ()));
-            for (int i = (int)currentNode; i < path.nodes.Count(); ++i)
+            for (int i = (int)currentNode; i < path.nodes.Count; ++i)
             {
                 WaypointNode waypoint = path.nodes.LookupByIndex(i);
 

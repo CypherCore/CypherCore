@@ -96,7 +96,7 @@ namespace Game
                 }
 
                 var items = Global.ObjectMgr.GetGameObjectQuestItemList(packet.GameObjectID);                
-                foreach (int item in items)
+                foreach (uint item in items)
                     stats.QuestItems.Add(item);
 
                 unsafe

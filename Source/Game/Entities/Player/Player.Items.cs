@@ -1213,7 +1213,7 @@ namespace Game.Entities
                 ushort pos = itemPosCount.pos;
                 uint count = itemPosCount.count;
 
-                if (i == dest.Count() - 1)
+                if (i == dest.Count - 1)
                 {
                     lastItem = _StoreItem(pos, pItem, count, false, update);
                     break;
@@ -4489,10 +4489,7 @@ namespace Game.Entities
 
         public bool HasLootWorldObjectGUID(ObjectGuid lootWorldObjectGuid)
         {
-            return m_AELootView.Any(lootView =>
-            {
-                return lootView.Value == lootWorldObjectGuid;
-            });
+            return m_AELootView.Any(lootView => lootView.Value == lootWorldObjectGuid);
         }
 
         //Inventory

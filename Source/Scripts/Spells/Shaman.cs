@@ -345,10 +345,7 @@ namespace Scripts.Spells.Shaman
     {
         void SelectTargets(List<WorldObject> targets)
         {
-            targets.RemoveAll(target =>
-            {
-                return !target.ToUnit() || target.ToUnit().IsFullHealth();
-            });
+            targets.RemoveAll(target => !target.ToUnit() || target.ToUnit().IsFullHealth());
 
             targets.RandomResize(1);
 
@@ -635,10 +632,7 @@ namespace Scripts.Spells.Shaman
         void FilterTargets(List<WorldObject> targets)
         {
             targets.Remove(GetExplTargetUnit());
-            targets.RandomResize(target =>
-            {
-                return target.IsTypeId(TypeId.Unit) && !target.ToUnit().HasAura(SpellIds.FlameShockMaelstrom, GetCaster().GetGUID());
-            }, 1);
+            targets.RandomResize(target => target.IsTypeId(TypeId.Unit) && !target.ToUnit().HasAura(SpellIds.FlameShockMaelstrom, GetCaster().GetGUID()), 1);
         }
 
         void HandleScript(uint effIndex)

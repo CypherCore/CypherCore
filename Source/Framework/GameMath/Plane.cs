@@ -205,7 +205,7 @@ namespace Framework.GameMath
         /// <returns>A float representing the shortest distance from the given vector to the plane.</returns>
         public float GetDistanceToPlane(Vector3 p)
         {
-            return Vector3.DotProduct(p, this.Normal) - this.Constant;
+            return Vector3.DotProduct(p, Normal) - Constant;
         }
 
         public void getEquation(ref Vector3 n, out float d)
@@ -253,7 +253,7 @@ namespace Framework.GameMath
         /// <returns>A string representation of this object.</returns>
         public override string ToString()
         {
-            return string.Format("Plane[n={0}, c={1}]", _normal.ToString(), _const.ToString());
+            return $"Plane[n={_normal.ToString()}, c={_const.ToString()}]";
         }
         #endregion
     }

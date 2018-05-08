@@ -84,7 +84,7 @@ namespace Game.Maps
 
         public override string ToString()
         {
-            return string.Format("grid[{0}, {1}]cell[{2}, {3}]", GetGridX(), GetGridY(), GetCellX(), GetCellY());
+            return $"grid[{GetGridX()}, {GetGridY()}]cell[{GetCellX()}, {GetCellY()}]";
         }
 
         public struct Data
