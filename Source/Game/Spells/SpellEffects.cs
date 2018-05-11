@@ -1920,7 +1920,7 @@ namespace Game.Spells
             for (int count = 0; count < damage && remaining > 0;)
             {
                 // Random select buff for dispel
-                var dispelableAura = dispelList[RandomHelper.IRand(0, dispelList.Count - 1)];
+                var dispelableAura = dispelList[RandomHelper.IRand(0, remaining - 1)];
 
                 if (dispelableAura.RollDispel())
                 {
@@ -4708,7 +4708,7 @@ namespace Game.Spells
             if (unitTarget == null || unitTarget == m_caster)                 // can't steal from self
                 return;
 
-            List<Tuple<Aura, byte>> steal_list = new List<Tuple<Aura, byte>>();
+            List<DispelableAura> stealList = new List<DispelableAura>();
 
             // Create dispel mask by dispel type
             uint dispelMask = SpellInfo.GetDispelMask((DispelType)effectInfo.MiscValue);
@@ -4726,21 +4726,29 @@ namespace Game.Spells
                     if (!aurApp.IsPositive() || aura.IsPassive() || aura.GetSpellInfo().HasAttribute(SpellAttr4.NotStealable))
                         continue;
 
+                    // 2.4.3 Patch Notes: "Dispel effects will no longer attempt to remove effects that have 100% dispel resistance."
+                    int chance = aura.CalcDispelChance(unitTarget, !unitTarget.IsFriendlyTo(m_caster));
+                    if (chance == 0)
+                        continue;
+
                     // The charges / stack amounts don't count towards the total number of auras that can be dispelled.
-                    // Ie: A dispel on a target with 5 stacks of Winters Chill and a Polymorph has 1 / (1 + 1) . 50% chance to dispell
-                    // Polymorph instead of 1 / (5 + 1) . 16%.
+                    // Ie: A dispel on a target with 5 stacks of Winters Chill and a Polymorph has 1 / (1 + 1) -> 50% chance to dispell
+                    // Polymorph instead of 1 / (5 + 1) -> 16%.
                     bool dispelCharges = aura.GetSpellInfo().HasAttribute(SpellAttr7.DispelCharges);
                     byte charges = dispelCharges ? aura.GetCharges() : aura.GetStackAmount();
                     if (charges > 0)
-                        steal_list.Add(Tuple.Create(aura, charges));
+                        stealList.Add(new DispelableAura(aura, chance, charges));
                 }
             }
 
-            if (steal_list.Empty())
+            if (stealList.Empty())
                 return;
 
+            int remaining = stealList.Count;
+
             // Ok if exist some buffs for dispel try dispel it
-            List<KeyValuePair<uint, ObjectGuid>> success_list = new List<KeyValuePair<uint, ObjectGuid>>();
+            uint failCount = 0;
+            List<Tuple<uint, ObjectGuid>> successList = new List<Tuple<uint, ObjectGuid>>();
 
             DispelFailed dispelFailed = new DispelFailed();
             dispelFailed.CasterGUID = m_caster.GetGUID();
@@ -4748,40 +4756,32 @@ namespace Game.Spells
             dispelFailed.SpellID = m_spellInfo.Id;
 
             // dispel N = damage buffs (or while exist buffs for dispel)
-            for (int count = 0; count < damage && !steal_list.Empty();)
+            for (int count = 0; count < damage && remaining > 0;)
             {
                 // Random select buff for dispel
-                var pair = steal_list[RandomHelper.IRand(0, steal_list.Count - 1)];
+                var dispelableAura = stealList[RandomHelper.IRand(0, remaining - 1)];
 
-                int chance = pair.Item1.CalcDispelChance(unitTarget, !unitTarget.IsFriendlyTo(m_caster));
-                // 2.4.3 Patch Notes: "Dispel effects will no longer attempt to remove effects that have 100% dispel resistance."
-                if (chance == 0)
+                if (dispelableAura.RollDispel())
                 {
-                    steal_list.Remove(pair);
-                    continue;
+                    successList.Add(Tuple.Create(dispelableAura.GetAura().GetId(), dispelableAura.GetAura().GetCasterGUID()));
+                    if (!dispelableAura.DecrementCharge())
+                    {
+                        --remaining;
+                        stealList[remaining] = dispelableAura;
+                    }
                 }
                 else
                 {
-                    if (RandomHelper.randChance(chance))
-                    {
-                        success_list.Add(new KeyValuePair<uint, ObjectGuid>(pair.Item1.GetId(), pair.Item1.GetCasterGUID()));
-                        var temp = pair.Item2;
-                        --temp;
-                        pair = Tuple.Create(pair.Item1, temp);
-                        if (pair.Item2 <= 0)
-                            steal_list.Remove(pair);
-                    }
-                    else
-                        dispelFailed.FailedSpells.Add(pair.Item1.GetId());
-
-                    ++count;
+                    ++failCount;
+                    dispelFailed.FailedSpells.Add(dispelableAura.GetAura().GetId());
                 }
+                ++count;
             }
 
             if (!dispelFailed.FailedSpells.Empty())
                 m_caster.SendMessageToSet(dispelFailed, true);
 
-            if (success_list.Empty())
+            if (successList.Empty())
                 return;
 
             SpellDispellLog spellDispellLog = new SpellDispellLog();
@@ -4792,15 +4792,15 @@ namespace Game.Spells
             spellDispellLog.CasterGUID = m_caster.GetGUID();
             spellDispellLog.DispelledBySpellID = m_spellInfo.Id;
 
-            foreach (var dispell in success_list)
+            foreach (var dispell in successList)
             {
                 var dispellData = new SpellDispellData();
-                dispellData.SpellID = dispell.Key;
+                dispellData.SpellID = dispell.Item1;
                 dispellData.Harmful = false;      // TODO: use me
                 //dispellData.Rolled = none;        // TODO: use me
                 //dispellData.Needed = none;        // TODO: use me
 
-                unitTarget.RemoveAurasDueToSpellBySteal(dispell.Key, dispell.Value, m_caster);
+                unitTarget.RemoveAurasDueToSpellBySteal(dispell.Item1, dispell.Item2, m_caster);
 
                 spellDispellLog.DispellData.Add(dispellData);
             }

@@ -53,7 +53,7 @@ namespace Game.Chat.Commands
         [Command("casttime", RBACPermissions.CommandCheatCasttime)]
         static bool HandleCasttimeCheat(StringArguments args, CommandHandler handler)
         {
-            if (handler.GetSession() == null || handler.GetSession().GetPlayer())
+            if (handler.GetSession() == null || !handler.GetSession().GetPlayer())
                 return false;
 
             string argstr = args.NextString();
@@ -80,7 +80,7 @@ namespace Game.Chat.Commands
         [Command("cooldown", RBACPermissions.CommandCheatCooldown)]
         static bool HandleCoolDownCheat(StringArguments args, CommandHandler handler)
         {
-            if (handler.GetSession() == null || handler.GetSession().GetPlayer())
+            if (handler.GetSession() == null || !handler.GetSession().GetPlayer())
                 return false;
 
             string argstr = args.NextString();
@@ -107,7 +107,7 @@ namespace Game.Chat.Commands
         [Command("power", RBACPermissions.CommandCheatPower)]
         static bool HandlePowerCheat(StringArguments args, CommandHandler handler)
         {
-            if (handler.GetSession() == null || handler.GetSession().GetPlayer())
+            if (handler.GetSession() == null || !handler.GetSession().GetPlayer())
                 return false;
 
             string argstr = args.NextString();
@@ -152,7 +152,7 @@ namespace Game.Chat.Commands
         [Command("waterwalk", RBACPermissions.CommandCheatWaterwalk)]
         static bool HandleWaterWalkCheat(StringArguments args, CommandHandler handler)
         {
-            if (handler.GetSession() == null || handler.GetSession().GetPlayer())
+            if (handler.GetSession() == null || !handler.GetSession().GetPlayer())
                 return false;
 
             string argstr = args.NextString();

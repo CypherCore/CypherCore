@@ -141,7 +141,7 @@ namespace Game.Chat
             if (spellId == 0)
                 return false;
 
-            if (CheckSpellExistsAndIsValid(handler, spellId))
+            if (!CheckSpellExistsAndIsValid(handler, spellId))
                 return false;
 
             target.CastSpell(target, spellId, false);

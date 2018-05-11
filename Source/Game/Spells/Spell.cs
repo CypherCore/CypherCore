@@ -97,7 +97,7 @@ namespace Game.Spells
             // Patch 1.2 notes: Spell Reflection no longer reflects abilities
             m_canReflect = m_spellInfo.DmgClass == SpellDmgClass.Magic && !m_spellInfo.HasAttribute(SpellAttr0.Ability)
                 && !m_spellInfo.HasAttribute(SpellAttr1.CantBeReflected) && !m_spellInfo.HasAttribute(SpellAttr0.UnaffectedByInvulnerability)
-                && !m_spellInfo.IsPassive() && !m_spellInfo.IsPositive();
+                && !m_spellInfo.IsPassive();
 
             CleanupTargetList();
 
@@ -1657,7 +1657,7 @@ namespace Game.Spells
             // Calculate hit result
             if (m_originalCaster != null)
             {
-                targetInfo.missCondition = m_originalCaster.SpellHitResult(target, m_spellInfo, m_canReflect);
+                targetInfo.missCondition = m_originalCaster.SpellHitResult(target, m_spellInfo, m_canReflect && !(m_spellInfo.IsPositive() && m_caster.IsFriendlyTo(target)));
                 if (m_skipCheck && targetInfo.missCondition != SpellMissInfo.Immune)
                     targetInfo.missCondition = SpellMissInfo.None;
             }
@@ -7495,14 +7495,16 @@ namespace Game.Spells
     {
         public ObjectGuid targetGUID;
         public ulong timeDelay;
+        public int damage;
+
         public SpellMissInfo missCondition;
         public SpellMissInfo reflectResult;
+
         public uint effectMask;
         public bool processed;
         public bool alive;
         public bool crit;
         public bool scaleAura;
-        public int damage;
     }
 
     public class GOTargetInfo
