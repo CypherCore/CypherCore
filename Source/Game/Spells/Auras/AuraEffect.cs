@@ -6024,6 +6024,67 @@ namespace Game.Spells
                     target.TogglePvpTalents(false);
             }
         }
+
+        [AuraEffectHandler(AuraType.LinkedSummon)]
+        void HandleLinkedSummon(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
+                return;
+
+            Unit target = aurApp.GetTarget();
+            SpellInfo triggerSpellInfo = Global.SpellMgr.GetSpellInfo(GetSpellEffectInfo().TriggerSpell);
+            if (triggerSpellInfo == null)
+                return;
+
+            // on apply cast summon spell
+            if (apply)
+                target.CastSpell(target, triggerSpellInfo, true, null, this);
+            // on unapply we need to search for and remove the summoned creature
+            else
+            {
+                List<uint> summonedEntries = new List<uint>();
+                foreach (var spellEffect in triggerSpellInfo.GetEffectsForDifficulty(target.GetMap().GetDifficultyID()))
+                {
+                    if (spellEffect != null && spellEffect.Effect == SpellEffectName.Summon)
+                    {
+                        uint summonEntry = (uint)spellEffect.MiscValue;
+                        if (summonEntry != 0)
+                        {
+                            if (!summonedEntries.Contains(summonEntry))
+                                summonedEntries.Add(summonEntry);
+                        }
+                    }
+                }
+
+                // we don't know if there can be multiple summons for the same effect, so consider only 1 summon for each effect
+                // most of the spells have multiple effects with the same summon spell id for multiple spawns, so right now it's safe to assume there's only 1 spawn per effect
+                foreach (uint summonEntry in summonedEntries)
+                {
+                    List<Creature> nearbyEntries = new List<Creature>();
+                    target.GetCreatureListWithEntryInGrid(nearbyEntries, summonEntry);
+                    foreach (var creature in nearbyEntries)
+                    {
+                        if (creature.GetOwner() == target)
+                        {
+                            creature.DespawnOrUnsummon();
+                            break;
+                        }
+                        else
+                        {
+                            TempSummon tempSummon = creature.ToTempSummon();
+                            if (tempSummon)
+                            {
+                                if (tempSummon.GetSummoner() == target)
+                                {
+                                    tempSummon.DespawnOrUnsummon();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         #endregion
     }
 

@@ -449,7 +449,7 @@ namespace Framework.Constants
         Unk425 = 425,
         Unk426 = 426,
         ScalePlayerLevel = 427, // NYI
-        Unk428 = 428,
+        LinkedSummon = 428,
         Unk429 = 429,
         PlayScene = 430,
         ModOverrideZonePvpType = 431, // NYI
