@@ -224,10 +224,10 @@ namespace Game.Entities
                 return;
 
             var time = (uint)i_timer.GetCurrent();
-            foreach (var map in i_maps.Values.ToList())
+            foreach (var map in i_maps.Values)
             {
                 if (m_updater != null)
-                    m_updater.Enqueue(map, (uint)i_timer.GetCurrent());
+                    m_updater.ScheduleUpdate(map, (uint)i_timer.GetCurrent());
                 else
                     map.Update(time);
             }
@@ -235,7 +235,7 @@ namespace Game.Entities
             if (m_updater != null)
                 m_updater.Wait();
 
-            foreach (var map in i_maps.ToList())
+            foreach (var map in i_maps)
                 map.Value.DelayedUpdate(time);
 
             i_timer.SetCurrent(0);
@@ -269,11 +269,14 @@ namespace Game.Entities
             foreach (var pair in i_maps)
                 pair.Value.UnlinkAllChildTerrainMaps();
 
-            foreach (var pair in i_maps.ToList())
+            foreach (var pair in i_maps)
             {
                 pair.Value.UnloadAll();
                 i_maps.Remove(pair.Key);
             }
+
+            if (m_updater != null)
+                m_updater.Deactivate();
         }
 
         public uint GetNumInstances()
@@ -281,7 +284,7 @@ namespace Game.Entities
             lock (_mapsLock)
             {
                 uint ret = 0;
-                foreach (var pair in i_maps.ToList())
+                foreach (var pair in i_maps)
                 {
                     Map map = pair.Value;
                     if (!map.Instanceable())

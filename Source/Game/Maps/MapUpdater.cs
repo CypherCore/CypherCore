@@ -15,81 +15,108 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
-using System.Collections.Generic;
+using Framework.Threading;
 using System.Threading;
 
 namespace Game.Maps
 {
-    public class MapUpdater : IDisposable
+    public class MapUpdater
     {
+        ProducerConsumerQueue<MapUpdateRequest> _queue = new ProducerConsumerQueue<MapUpdateRequest>();
+
+        Thread[] _workerThreads;
+        volatile bool _cancelationToken;
+
+        object _lock = new object();
+        int _pendingRequests;
+
         public MapUpdater(int numThreads)
         {
-            _queue = new Queue<MapUpdateRequest>();
-
-            autoResetEvent = new AutoResetEvent[numThreads];
+            _workerThreads = new Thread[numThreads];
             for (var i = 0; i < numThreads; ++i)
             {
-                autoResetEvent[i] = new AutoResetEvent(false);
-                ThreadPool.QueueUserWorkItem(new WaitCallback(OnEnqueue), autoResetEvent[i]);
+                _workerThreads[i] = new Thread(WorkerThread);
+                _workerThreads[i].Start();
             }
+
         }
 
-        public void Enqueue(Map map, uint diff)
+        public void Deactivate()
         {
-            lock (_syncLock)
-            {
-                _queue.Enqueue(new MapUpdateRequest(map, diff));
-                Monitor.PulseAll(_syncLock);
-            }
-        }
+            _cancelationToken = true;
 
-        protected void OnEnqueue(object state)
-        {
-            while (true)
-            {
-                lock (_syncLock)
-                {
-                    if (_queue.Count == 0)
-                    {
-                        ((AutoResetEvent)state).Set();
-                        Monitor.Wait(_syncLock);
-                    }
+            Wait();
 
-                    if (_queue.Count > 0)
-                    {
-                        _queue.Dequeue().Call();
-                    }
-                }
+            _queue.Cancel();
+
+            foreach (var thread in _workerThreads)
+            {
+                thread.Join();
             }
         }
 
         public void Wait()
         {
-            WaitHandle.WaitAll(autoResetEvent);
-        }
-
-        public void Dispose()
-        {
-            lock (_syncLock)
+            lock (_lock)
             {
-                Monitor.PulseAll(_syncLock);
+                while (_pendingRequests > 0)
+                    Monitor.Wait(_lock);
             }
         }
 
-        private Queue<MapUpdateRequest> _queue;
-        private object _syncLock = new object();
-        private WaitHandle[] autoResetEvent;
+        public void ScheduleUpdate(Map map, uint diff)
+        {
+            lock (_lock)
+            {
+                ++_pendingRequests;
+
+                _queue.Push(new MapUpdateRequest(map, this, diff));
+            }
+        }
+
+        public void UpdateFinished()
+        {
+            lock (_lock)
+            {
+                --_pendingRequests;
+
+                Monitor.PulseAll(_lock);
+            }
+        }
+
+        void WorkerThread()
+        {
+            while (true)
+            {
+                MapUpdateRequest request;
+
+                _queue.WaitAndPop(out request);
+
+                if (_cancelationToken)
+                    return;
+
+                request.Call();
+                UpdateFinished();
+            }
+        }
     }
 
     public class MapUpdateRequest
     {
         Map m_map;
+        MapUpdater m_updater;
         uint m_diff;
 
         public MapUpdateRequest(Map m, uint d)
         {
             m_map = m;
+            m_diff = d;
+        }
+
+        public MapUpdateRequest(Map m, MapUpdater u, uint d)
+        {
+            m_map = m;
+            m_updater = u;
             m_diff = d;
         }
 
