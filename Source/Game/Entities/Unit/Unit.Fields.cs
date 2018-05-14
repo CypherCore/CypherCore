@@ -578,7 +578,7 @@ namespace Game.Entities
             return obj.GetExactDist2dSq(i_source) <= i_distSq;
         }
 
-        public override void Visit(ICollection<Player> objs)
+        public override void Visit(IList<Player> objs)
         {
             foreach (var target in objs)
             {
@@ -598,7 +598,7 @@ namespace Game.Entities
             }
         }
 
-        public override void Visit(ICollection<Creature> objs)
+        public override void Visit(IList<Creature> objs)
         {
             foreach (var target in objs)
             {
@@ -614,7 +614,7 @@ namespace Game.Entities
                 }
             }
         }
-        public override void Visit(ICollection<DynamicObject> objs)
+        public override void Visit(IList<DynamicObject> objs)
         {
             foreach (var target in objs)
             {

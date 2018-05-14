@@ -49,7 +49,7 @@ namespace Game.DataStorage
     public sealed class DifficultyRecord
     {
         public uint Id;
-        public LocalizedString Name;
+        public string Name;
         public ushort GroupSizeHealthCurveID;
         public ushort GroupSizeDmgCurveID;
         public ushort GroupSizeSpellPointsCurveID;

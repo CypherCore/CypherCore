@@ -1147,7 +1147,7 @@ namespace Game.BattleFields
 
                 for (byte team = 0; team < SharedConst.BGTeamsCount; ++team)
                 {
-                    foreach (var guid in m_activePlayers[team].ToList())
+                    foreach (var guid in m_activePlayers[team])
                     {
                         Player player = Global.ObjAccessor.FindPlayer(guid);
                         if (player)

@@ -202,50 +202,53 @@ namespace Framework.Database
 
         public async Task<SQLQueryHolder<R>> DelayQueryHolder<R>(SQLQueryHolder<R> holder)
         {
-            string query = "";
-
-            try
+            return await Task.Run(() =>
             {
-                using (var Connection = _connectionInfo.GetConnection())
+                string query = "";
+
+                try
                 {
-                    await Connection.OpenAsync();
-
-                    foreach (var pair in holder.m_queries)
+                    using (var Connection = _connectionInfo.GetConnection())
                     {
-                        List<object[]> rows = new List<object[]>();
-                        using (MySqlCommand cmd = Connection.CreateCommand())
+                        Connection.OpenAsync();
+
+                        foreach (var pair in holder.m_queries)
                         {
-                            cmd.CommandText = pair.Value.stmt.CommandText;
-                            foreach (var parameter in pair.Value.stmt.Parameters)
-                                cmd.Parameters.AddWithValue("@" + parameter.Key, parameter.Value);
-
-                            query = cmd.CommandText;
-                            using (var reader = await cmd.ExecuteReaderAsync())
+                            List<object[]> rows = new List<object[]>();
+                            using (MySqlCommand cmd = Connection.CreateCommand())
                             {
-                                if (reader.HasRows)
-                                {
-                                    while (await reader.ReadAsync())
-                                    {
-                                        var row = new object[reader.FieldCount];
+                                cmd.CommandText = pair.Value.stmt.CommandText;
+                                foreach (var parameter in pair.Value.stmt.Parameters)
+                                    cmd.Parameters.AddWithValue("@" + parameter.Key, parameter.Value);
 
-                                        reader.GetValues(row);
-                                        rows.Add(row);
+                                query = cmd.CommandText;
+                                using (var reader = cmd.ExecuteReader())
+                                {
+                                    if (reader.HasRows)
+                                    {
+                                        while (reader.Read())
+                                        {
+                                            var row = new object[reader.FieldCount];
+
+                                            reader.GetValues(row);
+                                            rows.Add(row);
+                                        }
                                     }
                                 }
                             }
+
+                            holder.SetResult(pair.Key, new SQLResult(rows));
                         }
-
-                        holder.SetResult(pair.Key, new SQLResult(rows));
                     }
-                }
 
-                return holder;
-            }
-            catch (MySqlException ex)
-            {
-                HandleMySQLException(ex, query);
-                return holder;
-            }
+                    return holder;
+                }
+                catch (MySqlException ex)
+                {
+                    HandleMySQLException(ex, query);
+                    return holder;
+                }
+            });
         }
 
         public void LoadPreparedStatements()
@@ -359,11 +362,8 @@ namespace Framework.Database
         MySqlErrorCode HandleMySQLException(MySqlException ex, string query = "")
         {
             MySqlErrorCode code = (MySqlErrorCode)ex.Number;
-            if (ex.InnerException != null)
-            {
-                if (ex.InnerException is MySqlException)
-                    code = (MySqlErrorCode)((MySqlException)ex.InnerException).Number;
-            }
+            if (ex.InnerException is MySqlException)
+                code = (MySqlErrorCode)((MySqlException)ex.InnerException).Number;
 
             switch (code)
             {

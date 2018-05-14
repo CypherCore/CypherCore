@@ -74,7 +74,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public LocalizedString Name;
-        public LocalizedString Shortcut;
+        public string Shortcut;
         public ChannelDBCFlags Flags;
         public sbyte FactionGroup;
     }
@@ -83,8 +83,8 @@ namespace Game.DataStorage
     {
         public string PetNameToken;
         public LocalizedString Name;
-        public LocalizedString NameFemale;
-        public LocalizedString NameMale;
+        public string NameFemale;
+        public string NameMale;
         public uint FileName;
         public uint CreateScreenFileDataID;
         public uint SelectScreenFileDataID;
@@ -297,7 +297,7 @@ namespace Game.DataStorage
     public sealed class CreatureTypeRecord
     {
         public uint Id;
-        public LocalizedString Name;
+        public string Name;
         public byte Flags;
     }
 

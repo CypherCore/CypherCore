@@ -112,8 +112,8 @@ namespace Game.Spells
         public virtual void Dispose()
         {
             // unload scripts
-            foreach (var script in m_loadedScripts.ToList())
-                script._Unload();
+            for (var i = 0; i < m_loadedScripts.Count; ++i)
+                m_loadedScripts[i]._Unload();
 
             if (m_referencedFromCurrentSpell && m_selfContainer && m_selfContainer == this)
             {
@@ -1460,8 +1460,9 @@ namespace Game.Spells
             // for some spells allow only chain targets in front of caster (swipe for example)
             if (!isBouncingFar)
             {
-                foreach (var obj in tempTargets.ToList())
+                for (var i = 0; i < tempTargets.Count; ++i)
                 {
+                    var obj = tempTargets[i];
                     if (!m_caster.HasInArc(MathFunctions.PI, obj))
                         tempTargets.Remove(obj);
                 }

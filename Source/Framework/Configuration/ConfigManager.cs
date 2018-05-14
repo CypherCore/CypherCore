@@ -74,9 +74,9 @@ namespace Framework.Configuration
             return (T)Convert.ChangeType(temp, type);
         }
 
-        public static List<string> GetKeysByString(string name)
+        public static IEnumerable<string> GetKeysByString(string name)
         {
-            return _configList.Where(p => p.Key.Contains(name)).Select(p => p.Key).ToList();
+            return _configList.Where(p => p.Key.Contains(name)).Select(p => p.Key);
         }
 
         static Dictionary<string, string> _configList = new Dictionary<string, string>();

@@ -1632,8 +1632,8 @@ namespace Game.Maps
                 }
             }
 
-            foreach (Transport transport in _transports.ToList())
-                RemoveFromMap(transport, true);
+            for (var i = 0; i < _transports.Count; ++i)
+                RemoveFromMap(_transports[i], true);
 
             _transports.Clear();
 
@@ -1650,8 +1650,9 @@ namespace Game.Maps
 
             Global.ScriptMgr.OnDestroyMap(this);
 
-            foreach (WorldObject obj in i_worldObjects.ToList())
+            for (var i = 0; i < i_worldObjects.Count; ++i)
             {
+                WorldObject obj = i_worldObjects[i];
                 Contract.Assert(obj.IsWorldObject());
                 obj.RemoveFromWorld();
                 obj.ResetMap();

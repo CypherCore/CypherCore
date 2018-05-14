@@ -49,8 +49,8 @@ namespace Game.DataStorage
 
     public sealed class GarrAbilityRecord
     {
-        public LocalizedString Name;
-        public LocalizedString Description;
+        public string Name;
+        public string Description;
         public uint IconFileDataID;
         public GarrisonAbilityFlags Flags;
         public ushort FactionChangeGarrAbilityID;
@@ -99,9 +99,9 @@ namespace Game.DataStorage
 
     public sealed class GarrClassSpecRecord
     {
-        public LocalizedString ClassSpec;
-        public LocalizedString ClassSpecMale;
-        public LocalizedString ClassSpecFemale;
+        public string ClassSpec;
+        public string ClassSpecMale;
+        public string ClassSpecFemale;
         public ushort UiTextureAtlasMemberID;                                            // UiTextureAtlasMember.db2 ref
         public ushort GarrFollItemSetID;
         public byte FollowerClassLimit;
@@ -156,7 +156,7 @@ namespace Game.DataStorage
     public sealed class GarrPlotRecord
     {
         public uint Id;
-        public LocalizedString Name;
+        public string Name;
         public uint AllianceConstructObjID;
         public uint HordeConstructObjID;
         public byte UiCategoryID;

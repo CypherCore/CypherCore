@@ -310,7 +310,7 @@ public class RealmManager : Singleton<RealmManager>
         return BattlenetRpcErrorCode.UtilServerUnknownRealm;
     }
 
-    public List<Realm> GetRealms() { return _realms.Values.ToList(); }
+    public ICollection<Realm> GetRealms() { return _realms.Values; }
     List<string> GetSubRegions() { return _subRegions; }
 
     ConcurrentDictionary<RealmHandle, Realm> _realms = new ConcurrentDictionary<RealmHandle, Realm>();

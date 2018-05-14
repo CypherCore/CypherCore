@@ -43,7 +43,7 @@ namespace Game.DataStorage
     public sealed class QuestSortRecord
     {
         public uint Id;
-        public LocalizedString SortName;
+        public string SortName;
         public byte UiOrderIndex;
     }
 

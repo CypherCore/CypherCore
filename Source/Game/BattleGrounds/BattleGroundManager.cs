@@ -59,7 +59,7 @@ namespace Game.BattleGrounds
                     var bgs = data.m_Battlegrounds;
 
                     // first one is template and should not be deleted
-                    foreach (var pair in bgs.ToList())
+                    foreach (var pair in bgs)
                     {
                         Battleground bg = pair.Value;
                         bg.Update(m_UpdateTimer);
@@ -834,7 +834,7 @@ namespace Game.BattleGrounds
         public void RemoveFromBGFreeSlotQueue(BattlegroundTypeId bgTypeId, uint instanceId)
         {
             var queues = bgDataStore[bgTypeId].BGFreeSlotQueue;
-            foreach (var bg in queues.ToList())
+            foreach (var bg in queues)
             {
                 if (bg.GetInstanceID() == instanceId)
                 {

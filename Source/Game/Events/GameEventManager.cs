@@ -1687,13 +1687,13 @@ namespace Game
             _activate = activate;
         }
 
-        public override void Visit(ICollection<Creature> objs)
+        public override void Visit(IList<Creature> objs)
         {
             foreach (var creature in objs)
                 if (creature.IsInWorld && creature.IsAIEnabled)
                     creature.GetAI().sOnGameEvent(_activate, _eventId);
         }
-        public override void Visit(ICollection<GameObject> objs)
+        public override void Visit(IList<GameObject> objs)
         {
             foreach (var gameobject in objs)
                 if (gameobject.IsInWorld)

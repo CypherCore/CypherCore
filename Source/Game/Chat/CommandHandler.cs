@@ -71,7 +71,7 @@ namespace Game.Chat
             return true;
         }
 
-        public bool ExecuteCommandInTable(List<ChatCommand> table, string text, string fullcmd)
+        public bool ExecuteCommandInTable(ICollection<ChatCommand> table, string text, string fullcmd)
         {
             StringArguments args = new StringArguments(text);
             string cmd = args.NextString();
@@ -168,7 +168,7 @@ namespace Game.Chat
             return false;
         }
 
-        public bool ShowHelpForCommand(List<ChatCommand> table, string text)
+        public bool ShowHelpForCommand(ICollection<ChatCommand> table, string text)
         {
             StringArguments args = new StringArguments(text);
             if (!args.Empty())
@@ -226,7 +226,7 @@ namespace Game.Chat
             return ShowHelpForSubCommands(table, "", text);
         }
 
-        public bool ShowHelpForSubCommands(List<ChatCommand> table, string cmd, string subcmd)
+        public bool ShowHelpForSubCommands(ICollection<ChatCommand> table, string cmd, string subcmd)
         {
             string list = "";
             foreach (var command in table)

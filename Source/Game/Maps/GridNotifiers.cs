@@ -24,19 +24,20 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Concurrent;
 
 namespace Game.Maps
 {
     public abstract class Notifier
     {
-        public virtual void Visit(ICollection<WorldObject> objs) { }
-        public virtual void Visit(ICollection<Creature> objs) { }
-        public virtual void Visit(ICollection<AreaTrigger> objs) { }
-        public virtual void Visit(ICollection<Conversation> objs) { }
-        public virtual void Visit(ICollection<GameObject> objs) { }
-        public virtual void Visit(ICollection<DynamicObject> objs) { }
-        public virtual void Visit(ICollection<Corpse> objs) { }
-        public virtual void Visit(ICollection<Player> objs) { }
+        public virtual void Visit(IList<WorldObject> objs) { }
+        public virtual void Visit(IList<Creature> objs) { }
+        public virtual void Visit(IList<AreaTrigger> objs) { }
+        public virtual void Visit(IList<Conversation> objs) { }
+        public virtual void Visit(IList<GameObject> objs) { }
+        public virtual void Visit(IList<DynamicObject> objs) { }
+        public virtual void Visit(IList<Corpse> objs) { }
+        public virtual void Visit(IList<Player> objs) { }
 
         public void CreatureUnitRelocationWorker(Creature c, Unit u)
         {
@@ -64,16 +65,16 @@ namespace Game.Maps
             _mask = mask;
         }
 
-        public void Visit(ICollection<WorldObject> collection) { _notifier.Visit(collection); }
-        public void Visit(ICollection<Creature> creatures) { _notifier.Visit(creatures); }
-        public void Visit(ICollection<AreaTrigger> areatriggers) { _notifier.Visit(areatriggers); }
-        public void Visit(ICollection<Conversation> conversations) { _notifier.Visit(conversations); }
-        public void Visit(ICollection<GameObject> gameobjects) { _notifier.Visit(gameobjects); }
-        public void Visit(ICollection<DynamicObject> dynamicobjects) { _notifier.Visit(dynamicobjects); }
-        public void Visit(ICollection<Corpse> corpses) { _notifier.Visit(corpses); }
-        public void Visit(ICollection<Player> players) { _notifier.Visit(players); }
+        public void Visit(IList<WorldObject> collection) { _notifier.Visit(collection); }
+        public void Visit(IList<Creature> creatures) { _notifier.Visit(creatures); }
+        public void Visit(IList<AreaTrigger> areatriggers) { _notifier.Visit(areatriggers); }
+        public void Visit(IList<Conversation> conversations) { _notifier.Visit(conversations); }
+        public void Visit(IList<GameObject> gameobjects) { _notifier.Visit(gameobjects); }
+        public void Visit(IList<DynamicObject> dynamicobjects) { _notifier.Visit(dynamicobjects); }
+        public void Visit(IList<Corpse> corpses) { _notifier.Visit(corpses); }
+        public void Visit(IList<Player> players) { _notifier.Visit(players); }
 
-        public void Visit(Dictionary<ObjectGuid, WorldObject> dict) { Visit(dict.Values); }
+        public void Visit(Dictionary<ObjectGuid, WorldObject> dict) { Visit(dict.Values.ToList()); }
 
         Notifier _notifier;
         internal GridMapTypeMask _mask;
@@ -89,7 +90,7 @@ namespace Game.Maps
             i_visibleNow = new List<Unit>();
         }
 
-        public override void Visit(ICollection<WorldObject> objs)
+        public override void Visit(IList<WorldObject> objs)
         {
             foreach (var obj in objs)
             {
@@ -171,7 +172,7 @@ namespace Game.Maps
             i_object = obj;
         }
 
-        public override void Visit(ICollection<Player> objs)
+        public override void Visit(IList<Player> objs)
         {
             foreach (var player in objs)
             {
@@ -191,7 +192,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(ICollection<Creature> objs)
+        public override void Visit(IList<Creature> objs)
         {
             foreach (var creature in objs)
             {
@@ -204,7 +205,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(ICollection<DynamicObject> objs)
+        public override void Visit(IList<DynamicObject> objs)
         {
             foreach (var dynamicObj in objs)
             {
@@ -225,7 +226,7 @@ namespace Game.Maps
     {
         public PlayerRelocationNotifier(Player player) : base(player) { }
 
-        public override void Visit(ICollection<Player> objs)
+        public override void Visit(IList<Player> objs)
         {
             base.Visit(objs);
 
@@ -242,13 +243,13 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(ICollection<Creature> objs)
+        public override void Visit(IList<Creature> objs)
         {
             base.Visit(objs);
 
             bool relocated_for_ai = (i_player == i_player.seerView);
 
-            foreach (var creature in objs.ToList())
+            foreach (var creature in objs)
             {
                 vis_guids.Remove(creature.GetGUID());
 
@@ -267,7 +268,7 @@ namespace Game.Maps
             i_creature = c;
         }
 
-        public override void Visit(ICollection<Player> objs)
+        public override void Visit(IList<Player> objs)
         {
             foreach (var player in objs)
             {
@@ -278,7 +279,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(ICollection<Creature> objs)
+        public override void Visit(IList<Creature> objs)
         {
             if (!i_creature.IsAlive())
                 return;
@@ -305,7 +306,7 @@ namespace Game.Maps
             i_radius = radius;
         }
 
-        public override void Visit(ICollection<Player> objs)
+        public override void Visit(IList<Player> objs)
         {
             foreach (var player in objs)
             {
@@ -324,7 +325,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(ICollection<Creature> objs)
+        public override void Visit(IList<Creature> objs)
         {
             foreach (var creature in objs)
             {
@@ -355,7 +356,7 @@ namespace Game.Maps
             isCreature = unit.IsTypeId(TypeId.Unit);
         }
 
-        public override void Visit(ICollection<Creature> objs)
+        public override void Visit(IList<Creature> objs)
         {
             foreach (var creature in objs)
             {
@@ -380,9 +381,9 @@ namespace Game.Maps
             skipped_receiver = skipped;
         }
 
-        public override void Visit(ICollection<Player> objs)
+        public override void Visit(IList<Player> objs)
         {
-            foreach (var player in objs.ToList())
+            foreach (var player in objs)
             {
                 if (!player.IsInPhase(i_source))
                     continue;
@@ -403,7 +404,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(ICollection<Creature> objs)
+        public override void Visit(IList<Creature> objs)
         {
             foreach (var creature in objs)
             {
@@ -427,7 +428,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(ICollection<DynamicObject> objs)
+        public override void Visit(IList<DynamicObject> objs)
         {
             foreach (var obj in objs)
             {
@@ -474,9 +475,9 @@ namespace Game.Maps
             i_timeDiff = diff;
         }
 
-        public override void Visit(ICollection<WorldObject> objs)
+        public override void Visit(IList<WorldObject> objs)
         {
-            foreach (var obj in objs.ToList())
+            foreach (var obj in objs)
             {
                 if (obj.IsTypeId(TypeId.Player) || obj.IsTypeId(TypeId.Corpse))
                     continue;
@@ -497,7 +498,7 @@ namespace Game.Maps
             action = _action;
         }
 
-        public override void Visit(ICollection<Player> objs)
+        public override void Visit(IList<Player> objs)
         {
             foreach (var player in objs)
                 if (player.IsInPhase(_searcher))
@@ -516,7 +517,7 @@ namespace Game.Maps
             Do = _Do;
         }
 
-        public override void Visit(ICollection<Creature> objs)
+        public override void Visit(IList<Creature> objs)
         {
             foreach (var creature in objs)
             {
@@ -537,7 +538,7 @@ namespace Game.Maps
             _searcher = searcher;
         }
 
-        public override void Visit(ICollection<GameObject> objs)
+        public override void Visit(IList<GameObject> objs)
         {
             foreach (var obj in objs)
                 if (obj.IsInPhase(_searcher))
@@ -557,7 +558,7 @@ namespace Game.Maps
             i_do = _do;
         }
 
-        public override void Visit(ICollection<WorldObject> objs)
+        public override void Visit(IList<WorldObject> objs)
         {
             foreach (var obj in objs)
             {
@@ -605,12 +606,12 @@ namespace Game.Maps
 
     public class ResetNotifier : Notifier
     {
-        public override void Visit(ICollection<Player> objs)
+        public override void Visit(IList<Player> objs)
         {
             foreach (var player in objs)
                 player.ResetAllNotifies();
         }
-        public override void Visit(ICollection<Creature> objs)
+        public override void Visit(IList<Creature> objs)
         {
             foreach (var creature in objs)
                 creature.ResetAllNotifies();
@@ -625,7 +626,7 @@ namespace Game.Maps
             worldObject = obj;
         }
 
-        public override void Visit(ICollection<Player> objs)
+        public override void Visit(IList<Player> objs)
         {
             foreach (var player in objs)
             {
@@ -639,7 +640,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(ICollection<Creature> objs)
+        public override void Visit(IList<Creature> objs)
         {
             foreach (var creature in objs)
             {
@@ -650,7 +651,7 @@ namespace Game.Maps
                 }
             }
         }
-        public override void Visit(ICollection<DynamicObject> objs)
+        public override void Visit(IList<DynamicObject> objs)
         {
             foreach (var obj in objs)
             {
@@ -691,7 +692,7 @@ namespace Game.Maps
             Do = _Do;
         }
 
-        public override void Visit(ICollection<Player> objs)
+        public override void Visit(IList<Player> objs)
         {
             foreach (var player in objs)
             {
@@ -830,7 +831,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(ICollection<WorldObject> objs)
+        public override void Visit(IList<WorldObject> objs)
         {
             // already found
             if (i_object)
@@ -898,7 +899,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(ICollection<WorldObject> objs)
+        public override void Visit(IList<WorldObject> objs)
         {
             foreach (var obj in objs)
             {
@@ -959,7 +960,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(ICollection<WorldObject> objs)
+        public override void Visit(IList<WorldObject> objs)
         {
             foreach (var obj in objs)
             {
@@ -1014,7 +1015,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(ICollection<GameObject> objs)
+        public override void Visit(IList<GameObject> objs)
         {
             // already found
             if (i_object)
@@ -1047,7 +1048,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(ICollection<GameObject> objs)
+        public override void Visit(IList<GameObject> objs)
         {
             foreach (var go in objs)
             {
@@ -1074,7 +1075,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(ICollection<GameObject> objs)
+        public override void Visit(IList<GameObject> objs)
         {
             foreach (var obj in objs)
             {
@@ -1097,7 +1098,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(ICollection<Player> objs)
+        public override void Visit(IList<Player> objs)
         {
             foreach (var player in objs)
             {
@@ -1112,7 +1113,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(ICollection<Creature> objs)
+        public override void Visit(IList<Creature> objs)
         {
             foreach (var creature in objs)
             {
@@ -1141,7 +1142,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(ICollection<Player> objs)
+        public override void Visit(IList<Player> objs)
         {
             foreach (var player in objs)
             {
@@ -1153,7 +1154,7 @@ namespace Game.Maps
             }
         }
 
-        public override void Visit(ICollection<Creature> objs)
+        public override void Visit(IList<Creature> objs)
         {
             foreach (var creature in objs)
             {
@@ -1180,7 +1181,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(ICollection<Player> objs)
+        public override void Visit(IList<Player> objs)
         {
             foreach (var player in objs)
             {
@@ -1189,7 +1190,7 @@ namespace Game.Maps
                         i_objects.Add(player);
             }
         }
-        public override void Visit(ICollection<Creature> objs)
+        public override void Visit(IList<Creature> objs)
         {
             foreach (var creature in objs)
             {
@@ -1212,7 +1213,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(ICollection<Creature> objs)
+        public override void Visit(IList<Creature> objs)
         {
             // already found
             if (i_object)
@@ -1245,7 +1246,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(ICollection<Creature> objs)
+        public override void Visit(IList<Creature> objs)
         {
             foreach (var creature in objs)
             {
@@ -1272,7 +1273,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(ICollection<Creature> objs)
+        public override void Visit(IList<Creature> objs)
         {
             foreach (var creature in objs)
                 if (creature.IsInPhase(_searcher))
@@ -1293,7 +1294,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(ICollection<Player> objs)
+        public override void Visit(IList<Player> objs)
         {
             // already found
             if (i_object)
@@ -1326,7 +1327,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(ICollection<Player> objs)
+        public override void Visit(IList<Player> objs)
         {
             foreach (var player in objs)
             {
@@ -1353,7 +1354,7 @@ namespace Game.Maps
             i_check = check;
         }
 
-        public override void Visit(ICollection<Player> objs)
+        public override void Visit(IList<Player> objs)
         {
             foreach (var player in objs)
                 if (player.IsInPhase(_searcher))

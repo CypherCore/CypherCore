@@ -23,9 +23,9 @@ namespace Game.DataStorage
 {
     public class AchievementRecord
     {
-        public LocalizedString Title;
-        public LocalizedString Description;
-        public LocalizedString Reward;
+        public string Title;
+        public string Description;
+        public string Reward;
         public AchievementFlags Flags;
         public short InstanceID;
         public ushort Supercedes;
@@ -123,7 +123,7 @@ namespace Game.DataStorage
     public sealed class ArtifactRecord
     {
         public uint Id;
-        public LocalizedString Name;
+        public string Name;
         public uint UiBarOverlayColor;
         public uint UiBarBackgroundColor;
         public uint UiNameColor;
@@ -137,7 +137,7 @@ namespace Game.DataStorage
 
     public sealed class ArtifactAppearanceRecord
     {
-        public LocalizedString Name;
+        public string Name;
         public uint UiSwatchColor;
         public float UiModelSaturation;
         public float UiModelOpacity;
@@ -156,8 +156,8 @@ namespace Game.DataStorage
 
     public sealed class ArtifactAppearanceSetRecord
     {
-        public LocalizedString Name;
-        public LocalizedString Description;
+        public string Name;
+        public string Description;
         public ushort UiCameraID;
         public ushort AltHandUICameraID;
         public byte DisplayIndex;
@@ -217,7 +217,7 @@ namespace Game.DataStorage
     public sealed class AuctionHouseRecord
     {
         public uint Id;
-        public LocalizedString Name;
+        public string Name;
         public ushort FactionID;
         public byte DepositRate;
         public byte ConsignmentRate;

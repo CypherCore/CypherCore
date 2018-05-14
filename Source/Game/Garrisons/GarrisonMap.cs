@@ -108,9 +108,9 @@ namespace Game.Garrisons
             Log.outDebug(LogFilter.Maps, "{0} GameObjects and {1} Creatures loaded for grid {2} on map {3}", i_gameObjects, i_creatures, i_grid.GetGridId(), i_map.GetId());
         }
 
-        public override void Visit(ICollection<WorldObject> objs)
+        public override void Visit(IList<WorldObject> objs)
         {
-            List<Garrison.Plot> plots = i_garrison.GetPlots().ToList();
+            ICollection<Garrison.Plot> plots = i_garrison.GetPlots();
             if (!plots.Empty())
             {
                 CellCoord cellCoord = i_cell.GetCellCoord();

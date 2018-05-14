@@ -19,6 +19,7 @@ using Framework.Constants;
 using Game.Entities;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Concurrent;
 
 namespace Game.Maps
 {
@@ -56,7 +57,7 @@ namespace Game.Maps
             Log.outDebug(LogFilter.Maps, "{0} GameObjects, {1} Creatures, and {2} Corpses/Bones loaded for grid {3} on map {4}", i_gameObjects, i_creatures, i_corpses, i_grid.GetGridId(), i_map.GetId());
         }
 
-        public override void Visit(ICollection<GameObject> objs)
+        public override void Visit(IList<GameObject> objs)
         {
             CellCoord cellCoord = i_cell.GetCellCoord();
             CellObjectGuids cellguids = Global.ObjectMgr.GetCellObjectGuids(i_map.GetId(), (byte)i_map.GetSpawnMode(), cellCoord.GetId());
@@ -66,7 +67,7 @@ namespace Game.Maps
             LoadHelper<GameObject>(cellguids.gameobjects, cellCoord, ref i_gameObjects, i_map);
         }
 
-        public override void Visit(ICollection<Creature> objs)
+        public override void Visit(IList<Creature> objs)
         {
             CellCoord cellCoord = i_cell.GetCellCoord();
             CellObjectGuids cellguids = Global.ObjectMgr.GetCellObjectGuids(i_map.GetId(), (byte)i_map.GetSpawnMode(), cellCoord.GetId());
@@ -125,7 +126,7 @@ namespace Game.Maps
             i_corpses = gloader.i_corpses;
         }
 
-        public override void Visit(ICollection<Corpse> objs)
+        public override void Visit(IList<Corpse> objs)
         {
             CellCoord cellCoord = i_cell.GetCellCoord();
             var corpses = i_map.GetCorpsesInCell(cellCoord.GetId());
@@ -158,7 +159,7 @@ namespace Game.Maps
     //Stop the creatures before unloading the NGrid
     class ObjectGridStoper : Notifier
     {
-        public override void Visit(ICollection<Creature> objs)
+        public override void Visit(IList<Creature> objs)
         {  
             // stop any fights at grid de-activation and remove dynobjects/areatriggers created at cast by creatures
             foreach (var creature in objs)
@@ -180,20 +181,23 @@ namespace Game.Maps
     //Move the foreign creatures back to respawn positions before unloading the NGrid
     class ObjectGridEvacuator : Notifier
     {
-        public override void Visit(ICollection<Creature> objs)
+        public override void Visit(IList<Creature> objs)
         {
-            foreach (var creature in objs.ToList())
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Creature creature = objs[i];
                 // creature in unloading grid can have respawn point in another grid
                 // if it will be unloaded then it will not respawn in original grid until unload/load original grid
                 // move to respawn point to prevent this case. For player view in respawn grid this will be normal respawn.
                 creature.GetMap().CreatureRespawnRelocation(creature, true);
             }
         }
-        public override void Visit(ICollection<GameObject> objs)
+
+        public override void Visit(IList<GameObject> objs)
         {
-            foreach (var go in objs.ToList())
+            for (var i = 0; i < objs.Count; ++i)
             {
+                GameObject go = objs[i];
                 // gameobject in unloading grid can have respawn point in another grid
                 // if it will be unloaded then it will not respawn in original grid until unload/load original grid
                 // move to respawn point to prevent this case. For player view in respawn grid this will be normal respawn.
@@ -205,7 +209,7 @@ namespace Game.Maps
     //Clean up and remove from world
     class ObjectGridCleaner : Notifier
     {
-        public override void Visit(ICollection<WorldObject> objs)
+        public override void Visit(IList<WorldObject> objs)
         {
             foreach (var obj in objs)
             {
@@ -220,7 +224,7 @@ namespace Game.Maps
     //Delete objects before deleting NGrid
     class ObjectGridUnloader : Notifier
     {
-        public override void Visit(ICollection<WorldObject> objs)
+        public override void Visit(IList<WorldObject> objs)
         {
             foreach (var obj in objs)
             {

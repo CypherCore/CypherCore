@@ -711,7 +711,7 @@ namespace Game.AI
 
         public void RemoveNotExisting()
         {
-            foreach (var id in this.ToList())
+            foreach (var id in this)
             {
                 if (!ObjectAccessor.GetCreature(me, id))
                     Remove(id);

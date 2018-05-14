@@ -195,7 +195,7 @@ namespace Game.BattlePets
         {
             PreparedStatement stmt;
 
-            foreach (var pair in _pets.ToList())
+            foreach (var pair in _pets)
             {
                 switch (pair.Value.SaveInfo)
                 {

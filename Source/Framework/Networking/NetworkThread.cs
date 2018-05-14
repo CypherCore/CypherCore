@@ -86,8 +86,9 @@ namespace Framework.Networking
 
                 AddNewSockets();
 
-                foreach (var socket in _Sockets.ToList())
+                for (var i =0; i < _Sockets.Count; ++i)
                 {
+                    TSocketType socket = _Sockets[i];
                     if (!socket.Update())
                     {
                         if (socket.IsOpen())

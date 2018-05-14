@@ -566,8 +566,9 @@ namespace Game.Entities
 
         public void GetAllMinionsByEntry(List<TempSummon> Minions, uint entry)
         {
-            foreach (var unit in m_Controlled)
+            for (var i = 0; i < m_Controlled.Count; ++i)
             {
+                Unit unit = m_Controlled[i];
                 if (unit.GetEntry() == entry && unit.IsSummon()) // minion, actually
                     Minions.Add(unit.ToTempSummon());
             }
@@ -575,8 +576,9 @@ namespace Game.Entities
 
         void RemoveAllMinionsByEntry(uint entry)
         {
-            foreach (var unit in m_Controlled.ToList())
+            for (var i = 0; i < m_Controlled.Count; ++i)
             {
+                Unit unit = m_Controlled[i];
                 if (unit.GetEntry() == entry && unit.IsTypeId(TypeId.Unit)
                     && unit.ToCreature().IsSummon()) // minion, actually
                     unit.ToTempSummon().UnSummon();

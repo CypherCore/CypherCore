@@ -69,7 +69,7 @@ namespace Game.Chat
             }
         }
 
-        static bool SetDataForCommandInTable(List<ChatCommand> table, string text, uint permission, string help, string fullcommand)
+        static bool SetDataForCommandInTable(ICollection<ChatCommand> table, string text, uint permission, string help, string fullcommand)
         {
             StringArguments args = new StringArguments(text);
             string cmd = args.NextString().ToLower();
@@ -135,9 +135,9 @@ namespace Game.Chat
             }
         }
 
-        public static List<ChatCommand> GetCommands()
+        public static ICollection<ChatCommand> GetCommands()
         {
-            return _commands.Values.ToList();
+            return _commands.Values;
         }
 
         static SortedDictionary<string, ChatCommand> _commands = new SortedDictionary<string, ChatCommand>();

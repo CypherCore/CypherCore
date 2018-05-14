@@ -121,7 +121,7 @@ namespace Game.BlackMarket
         {
             SQLTransaction trans = new SQLTransaction();
             // Delete completed auctions
-            foreach (var pair in _auctions.ToList())
+            foreach (var pair in _auctions)
             {
                 if (!pair.Value.IsCompleted())
                     continue;

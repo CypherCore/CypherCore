@@ -109,7 +109,6 @@ namespace Game.DataStorage
         public uint EnterUISoundID;
         public ushort ExitUISoundID;
 
-
         public bool CanEnterOrExit()
         {
             return (Flags.HasAnyFlag(VehicleSeatFlags.CanEnterOrExit) ||

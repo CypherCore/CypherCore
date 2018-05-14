@@ -40,7 +40,7 @@ namespace Game.DataStorage
     public sealed class ScenarioRecord
     {
         public uint Id;
-        public LocalizedString Name;
+        public string Name;
         public ushort AreaTableID;
         public byte Flags;
         public byte Type;
@@ -49,8 +49,8 @@ namespace Game.DataStorage
     public sealed class ScenarioStepRecord
     {
         public uint Id;
-        public LocalizedString Description;
-        public LocalizedString Title;
+        public string Description;
+        public string Title;
         public ushort ScenarioID;
         public ushort Supersedes;                                          // Used in conjunction with Proving Grounds scenarios, when sequencing steps (Not using step order?)
         public ushort RewardQuestID;
@@ -97,8 +97,8 @@ namespace Game.DataStorage
     {
         public uint Id;
         public LocalizedString DisplayName;
-        public LocalizedString Description;
-        public LocalizedString AlternateVerb;
+        public string Description;
+        public string AlternateVerb;
         public ushort Flags;
         public SkillCategory CategoryID;
         public byte CanLink;
@@ -240,7 +240,7 @@ namespace Game.DataStorage
     public sealed class SpellCategoryRecord
     {
         public uint Id;
-        public LocalizedString Name;
+        public string Name;
         public int ChargeRecoveryTime;
         public SpellCategoryFlags Flags;
         public byte UsesPerWeek;
@@ -321,7 +321,7 @@ namespace Game.DataStorage
     public sealed class SpellFocusObjectRecord
     {
         public uint Id;
-        public LocalizedString Name;
+        public string Name;
     }
 
     public sealed class SpellInterruptsRecord
@@ -495,7 +495,7 @@ namespace Game.DataStorage
     public sealed class SpellShapeshiftFormRecord
     {
         public uint Id;
-        public LocalizedString Name;
+        public string Name;
         public float DamageVariance;
         public SpellShapeshiftFormFlags Flags;
         public ushort CombatRoundTime;

@@ -476,24 +476,26 @@ namespace Game.Entities
 
         public void RemovePendingEventsForSeat(sbyte seatId)
         {
-            foreach (var Event in _pendingJoinEvents.ToList())
+            for (var i = 0; i < _pendingJoinEvents.Count; ++i)
             {
-                if (Event.Seat.Key == seatId)
+                var joinEvent = _pendingJoinEvents[i];
+                if (joinEvent.Seat.Key == seatId)
                 {
-                    Event.ScheduleAbort();
-                    _pendingJoinEvents.Remove(Event);
+                    joinEvent.ScheduleAbort();
+                    _pendingJoinEvents.Remove(joinEvent);
                 }
             }
         }
 
         public void RemovePendingEventsForPassenger(Unit passenger)
         {
-            foreach (var Event in _pendingJoinEvents.ToList())
+            for (var i = 0; i< _pendingJoinEvents.Count; ++i)
             {
-                if (Event.Passenger == passenger)
+                var joinEvent = _pendingJoinEvents[i];
+                if (joinEvent.Passenger == passenger)
                 {
-                    Event.ScheduleAbort();
-                    _pendingJoinEvents.Remove(Event);
+                    joinEvent.ScheduleAbort();
+                    _pendingJoinEvents.Remove(joinEvent);
                 }
             }
         }

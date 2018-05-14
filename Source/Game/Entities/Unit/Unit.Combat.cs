@@ -2338,8 +2338,9 @@ namespace Game.Entities
             vSchoolAbsorbCopy.Sort(new AbsorbAuraOrderPred());
 
             // absorb without mana cost
-            foreach (var absorbAurEff in vSchoolAbsorbCopy.ToList())
+            for (var i = 0; i < vSchoolAbsorbCopy.Count; ++i )
             {
+                var absorbAurEff = vSchoolAbsorbCopy[i];
                 if (damageInfo.GetDamage() == 0)
                     break;
 

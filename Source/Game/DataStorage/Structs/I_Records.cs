@@ -228,7 +228,7 @@ namespace Game.DataStorage
     public sealed class ItemLimitCategoryRecord
     {
         public uint Id;
-        public LocalizedString Name;
+        public string Name;
         public byte Quantity;
         public byte Flags;
     }
@@ -277,7 +277,7 @@ namespace Game.DataStorage
     public sealed class ItemSearchNameRecord
     {
         public ulong AllowableRace;
-        public LocalizedString Display;
+        public string Display;
         public uint Id;
         public uint[] Flags = new uint[3];
         public ushort ItemLevel;

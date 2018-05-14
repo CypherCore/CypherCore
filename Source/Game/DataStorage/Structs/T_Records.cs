@@ -81,14 +81,14 @@ namespace Game.DataStorage
     public sealed class TotemCategoryRecord
     {
         public uint Id;
-        public LocalizedString Name;
+        public string Name;
         public uint TotemCategoryMask;
         public byte TotemCategoryType;
     }
 
     public sealed class ToyRecord
     {
-        public LocalizedString SourceText;
+        public string SourceText;
         public uint ItemID;
         public byte Flags;
         public byte SourceTypeEnum;
@@ -103,7 +103,7 @@ namespace Game.DataStorage
 
     public sealed class TransmogSetRecord
     {
-        public LocalizedString Name;
+        public string Name;
         public ushort ParentTransmogSetID;
         public ushort UIOrder;
         public byte ExpansionID;
@@ -117,7 +117,7 @@ namespace Game.DataStorage
 
     public sealed class TransmogSetGroupRecord
     {
-        public LocalizedString Name;
+        public string Name;
         public uint Id;
     }
 

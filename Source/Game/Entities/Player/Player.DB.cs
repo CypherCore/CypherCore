@@ -1972,10 +1972,9 @@ namespace Game.Entities
             stmt.AddValue(0, GetGUID().GetCounter());
             trans.Append(stmt);
 
-            Dictionary<uint, PlayerSpellState> talents;
             for (byte group = 0; group < PlayerConst.MaxSpecializations; ++group)
             {
-                talents = GetTalentMap(group);
+                Dictionary<uint, PlayerSpellState> talents = GetTalentMap(group);
                 foreach (var pair in talents.ToList())
                 {
                     if (pair.Value == PlayerSpellState.Removed)
@@ -1998,7 +1997,7 @@ namespace Game.Entities
 
             for (byte group = 0; group < PlayerConst.MaxSpecializations; ++group)
             {
-                talents = GetPvpTalentMap(group);
+                Dictionary<uint, PlayerSpellState> talents = GetPvpTalentMap(group);
                 foreach (var pair in talents.ToList())
                 {
                     if (pair.Value == PlayerSpellState.Removed)

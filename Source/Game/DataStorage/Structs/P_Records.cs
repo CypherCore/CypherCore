@@ -186,7 +186,7 @@ namespace Game.DataStorage
     public sealed class PvpTalentRecord
     {
         public uint Id;
-        public LocalizedString Description;
+        public string Description;
         public uint SpellID;
         public uint OverridesSpellID;
         public int ActionBarSpellID;

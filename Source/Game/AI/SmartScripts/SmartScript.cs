@@ -3832,7 +3832,7 @@ namespace Game.AI
             if (mTimedActionList.Empty())
                 return;
             int i = 0;
-            foreach (var holder in mTimedActionList)
+            foreach (var holder in mTimedActionList.ToList())
             {
                 if (i++ == 0)
                 {

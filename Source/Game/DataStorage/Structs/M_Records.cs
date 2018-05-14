@@ -29,7 +29,7 @@ namespace Game.DataStorage
     public sealed class MapRecord
     {
         public uint Id;
-        public uint Directory;
+        public string Directory;
         public LocalizedString MapName;
         public string MapDescription0;                               // Horde
         public string MapDescription1;                               // Alliance

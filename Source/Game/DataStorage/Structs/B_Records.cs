@@ -33,8 +33,8 @@ namespace Game.DataStorage
 
     public sealed class BarberShopStyleRecord
     {
-        public LocalizedString DisplayName;
-        public LocalizedString Description;
+        public string DisplayName;
+        public string Description;
         public float CostModifier;
         public byte Type;
         public byte Race;
@@ -60,8 +60,8 @@ namespace Game.DataStorage
 
     public sealed class BattlePetSpeciesRecord
     {
-        public LocalizedString SourceText;
-        public LocalizedString Description;
+        public string SourceText;
+        public string Description;
         public uint CreatureID;
         public uint IconFileDataID;
         public uint SummonSpellID;
@@ -85,9 +85,9 @@ namespace Game.DataStorage
     {
         public uint Id;
         public LocalizedString Name;
-        public LocalizedString GameType;
-        public LocalizedString ShortDescription;
-        public LocalizedString LongDescription;
+        public string GameType;
+        public string ShortDescription;
+        public string LongDescription;
         public int IconFileDataID;
         public short[] MapId = new short[16];
         public ushort HolidayWorldState;

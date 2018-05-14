@@ -202,14 +202,15 @@ namespace Game.Entities
                 Aura i_aura = app.Value;
                 if (i_aura == null)
                     continue;
+
                 i_aura.UpdateOwner(diff, this);
             }
 
             // remove expired auras - do that after updates(used in scripts?)
-            foreach (var aura in GetOwnedAuras())
+            foreach (var pair in GetOwnedAuras())
             {
-                if (aura.Value != null && aura.Value.IsExpired())
-                    RemoveOwnedAura(aura, AuraRemoveMode.Expire);
+                if (pair.Value != null && pair.Value.IsExpired())
+                    RemoveOwnedAura(pair, AuraRemoveMode.Expire);
             }
 
             foreach (var aura in m_visibleAurasToUpdate)
@@ -221,8 +222,9 @@ namespace Game.Entities
 
             if (!m_gameObj.Empty())
             {
-                foreach (var go in m_gameObj.ToList())
+                for (var i = 0; i < m_gameObj.Count; ++i)
                 {
+                    GameObject go = m_gameObj[i];
                     if (!go.isSpawned())
                     {
                         go.SetOwnerGUID(ObjectGuid.Empty);
@@ -547,8 +549,9 @@ namespace Game.Entities
 
         public void RemoveDynObject(uint spellId)
         {
-            foreach (var dynObj in m_dynObj.ToList())
+            for (var i = 0; i < m_dynObj.Count; ++i)
             {
+                var dynObj = m_dynObj[i];
                 if (dynObj.GetSpellId() == spellId)
                     dynObj.Remove();
             }
@@ -699,8 +702,9 @@ namespace Game.Entities
             if (m_areaTrigger.Empty())
                 return;
 
-            foreach (var areaTrigger in m_areaTrigger.ToList())
+            for (var i = 0; i < m_areaTrigger.Count; ++i)
             {
+                AreaTrigger areaTrigger = m_areaTrigger[i];
                 if (areaTrigger.GetSpellId() == spellId)
                     areaTrigger.Remove();
             }
@@ -710,6 +714,7 @@ namespace Game.Entities
         {
             if (m_areaTrigger.Empty())
                 return;
+
             foreach (AreaTrigger areaTrigger in m_areaTrigger)
             {
                 if (areaTrigger.GetAuraEffect() == aurEff)

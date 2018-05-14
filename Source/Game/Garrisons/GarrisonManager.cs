@@ -245,7 +245,7 @@ namespace Game.Garrisons
             if (slots[0] > forcedAbilities.Count + abilityList.Count)
             {
                 List<GarrAbilityRecord> classSpecAbilities = GetClassSpecAbilities(follower, faction);
-                List<GarrAbilityRecord> classSpecAbilitiesTemp = classSpecAbilities.Except(forcedAbilities).ToList();
+                IEnumerable<GarrAbilityRecord> classSpecAbilitiesTemp = classSpecAbilities.Except(forcedAbilities);
 
                 abilityList = classSpecAbilitiesTemp.Union(abilityList).ToList();
                 abilityList.RandomResize((uint)Math.Max(0, slots[0] - forcedAbilities.Count));
