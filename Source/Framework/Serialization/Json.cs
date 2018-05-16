@@ -51,7 +51,7 @@ namespace Framework.Serialization
             return CreateObject<T>(Encoding.UTF8.GetBytes(split ? jsonData.Split(new[] { ':' }, 2)[1] : jsonData));
         }
 
-        public static T CreateObject<T>(byte[] jsonData) => (T)CreateObject<T>(new MemoryStream(jsonData));
+        public static T CreateObject<T>(byte[] jsonData) => CreateObject<T>(new MemoryStream(jsonData));
 
         public static object CreateObject(Stream jsonData, Type type)
         {

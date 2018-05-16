@@ -306,7 +306,7 @@ namespace Game.Chat
             stmt.AddValue(0, AtLoginFlags.ChangeRace);
             if (target)
             {
-                /// @todo add text into database
+                // @todo add text into database
                 handler.SendSysMessage(CypherStrings.CustomizePlayer, handler.GetNameLink(target));
                 target.SetAtLoginFlag(AtLoginFlags.ChangeRace);
                 stmt.AddValue(1, target.GetGUID().GetCounter());
@@ -314,7 +314,7 @@ namespace Game.Chat
             else
             {
                 string oldNameLink = handler.playerLink(targetName);
-                /// @todo add text into database
+                // @todo add text into database
                 handler.SendSysMessage(CypherStrings.CustomizePlayerGuid, oldNameLink, targetGuid.ToString());
                 stmt.AddValue(1, targetGuid.GetCounter());
             }

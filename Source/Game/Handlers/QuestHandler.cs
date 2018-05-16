@@ -471,7 +471,7 @@ namespace Game
                 if (!GetPlayer().IsInSameRaidWith(originalPlayer))
                     return;
 
-                if (!!originalPlayer.IsActiveQuest(packet.QuestID))
+                if (!originalPlayer.IsActiveQuest(packet.QuestID))
                     return;
 
                 if (!GetPlayer().CanTakeQuest(quest, true))
@@ -646,7 +646,7 @@ namespace Game
         {
             WorldQuestUpdate response = new WorldQuestUpdate();
 
-            /// @todo: 7.x Has to be implemented
+            // @todo: 7.x Has to be implemented
             //response.WorldQuestUpdates.push_back(WorldPackets::Quest::WorldQuestUpdateInfo(lastUpdate, questID, timer, variableID, value));
 
             SendPacket(response);

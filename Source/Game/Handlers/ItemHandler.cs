@@ -359,7 +359,7 @@ namespace Game
                 }
                 else
                 {
-                    /// @todo: 6.x research new values
+                    // @todo: 6.x research new values
                     /*WorldPackets.Item.ReadItemResultFailed packet;
                     packet.Item = item->GetGUID();
                     packet.Subcode = ??;

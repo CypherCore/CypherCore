@@ -63,7 +63,7 @@ namespace Game.Network.Packets
 
         public bool Success;
         public bool IsDeletedCharacters; // used for character undelete list
-        public bool IsDemonHunterCreationAllowed = false; ///< used for demon hunter early access
+        public bool IsDemonHunterCreationAllowed = false; //used for demon hunter early access
         public bool HasDemonHunterOnRealm = false;
         public bool Unknown7x = false;
         public bool IsAlliedRacesCreationAllowed = false;
@@ -72,7 +72,7 @@ namespace Game.Network.Packets
         public Optional<uint> DisabledClassesMask = new Optional<uint>();
 
         public List<CharacterInfo> Characters = new List<CharacterInfo>(); // all characters on the list
-        public List<RaceUnlock> RaceUnlockData = new List<RaceUnlock>(); ///<
+        public List<RaceUnlock> RaceUnlockData = new List<RaceUnlock>(); //
 
         public class CharacterInfo
         {

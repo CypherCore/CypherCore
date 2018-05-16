@@ -56,7 +56,7 @@ namespace Game.Chat.Commands
             // from console show not existed sender
             MailSender sender = new MailSender(MailMessageType.Normal, handler.GetSession() ? handler.GetSession().GetPlayer().GetGUID().GetCounter() : 0, MailStationery.Gm);
 
-            /// @todo Fix poor design
+            // @todo Fix poor design
             SQLTransaction trans = new SQLTransaction();
             new MailDraft(subject, text)
                 .SendMailTo(trans, new MailReceiver(target, targetGuid.GetCounter()), sender);
@@ -102,7 +102,7 @@ namespace Game.Chat.Commands
 
             // get from tail next item str
             StringArguments itemStr;
-            while ((itemStr = new StringArguments(tail.NextString(" "))) != null)
+            while (!(itemStr = new StringArguments(tail.NextString(" "))).Empty())
             {
                 // parse item str
                 string itemIdStr = itemStr.NextString(":");
@@ -172,7 +172,7 @@ namespace Game.Chat.Commands
         [Command("money", RBACPermissions.CommandSendMoney, true)]
         static bool HandleSendMoneyCommand(StringArguments args, CommandHandler handler)
         {
-            /// format: name "subject text" "mail text" money
+            // format: name "subject text" "mail text" money
 
             Player receiver;
             ObjectGuid receiverGuid;
@@ -221,7 +221,7 @@ namespace Game.Chat.Commands
         [Command("message", RBACPermissions.CommandSendMessage, true)]
         static bool HandleSendMessageCommand(StringArguments args, CommandHandler handler)
         {
-            /// - Find the player
+            // - Find the player
             Player player;
             if (!handler.extractPlayerTarget(args, out player))
                 return false;
@@ -237,7 +237,7 @@ namespace Game.Chat.Commands
                 return false;
             }
 
-            /// - Send the message
+            // - Send the message
             player.GetSession().SendNotification("{0}", msgStr);
             player.GetSession().SendNotification("|cffff0000[Message from administrator]:|r");
 

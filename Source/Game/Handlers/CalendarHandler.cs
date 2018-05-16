@@ -208,7 +208,7 @@ namespace Game
                 return;
 
             CalendarEvent oldEvent = Global.CalendarMgr.GetEvent(calendarCopyEvent.EventID);
-            if (oldEvent == null)
+            if (oldEvent != null)
             {
                 CalendarEvent newEvent = new CalendarEvent(oldEvent, Global.CalendarMgr.GetFreeEventId());
                 newEvent.Date = calendarCopyEvent.Date;

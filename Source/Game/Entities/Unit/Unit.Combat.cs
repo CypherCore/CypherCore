@@ -2411,7 +2411,7 @@ namespace Game.Entities
 
                 bool defaultPrevented = false;
 
-                absorbAurEff.GetBase().CallScriptEffectManaShieldHandlers(absorbAurEff, aurApp, damageInfo, ref tempAbsorb, defaultPrevented);
+                absorbAurEff.GetBase().CallScriptEffectManaShieldHandlers(absorbAurEff, aurApp, damageInfo, ref tempAbsorb, ref defaultPrevented);
                 currentAbsorb = (int)tempAbsorb;
 
                 if (defaultPrevented)

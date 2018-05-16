@@ -240,7 +240,7 @@ namespace Game.Collision
             meshTree.readFromFile(reader);
 
             // write liquid data
-            if (reader.ReadStringFromChars(4).ToString() != "LIQU")
+            if (reader.ReadStringFromChars(4) != "LIQU")
                 return false;
 
             chunkSize = reader.ReadUInt32();

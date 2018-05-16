@@ -448,7 +448,7 @@ namespace Game
                     }
                     break;
                 case ChatMsg.Whisper:
-                    /// @todo implement cross realm whispers (someday)
+                    // @todo implement cross realm whispers (someday)
                     ExtendedPlayerName extName = ObjectManager.ExtractExtendedPlayerName(target);
 
                     if (!ObjectManager.NormalizePlayerName(ref extName.Name))

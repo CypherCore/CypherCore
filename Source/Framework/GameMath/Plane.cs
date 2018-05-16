@@ -236,7 +236,7 @@ namespace Framework.GameMath
         /// the specified object.
         /// </summary>
         /// <param name="obj">An object to compare to this instance.</param>
-        /// <returns>True if <paramref name="obj"/> is a <see cref="Vector2D"/> and has the same values as this instance; otherwise, False.</returns>
+        /// <returns>True if <paramref name="obj"/> is a <see cref="Plane"/> and has the same values as this instance; otherwise, False.</returns>
         public override bool Equals(object obj)
         {
             if (obj is Plane)

@@ -447,7 +447,7 @@ namespace Scripts.Northrend.FrozenHalls.PitOfSaron.BossKrickAndIck
                     case Events.Outro9:
                         {
                             Talk(TextIds.SayKrickOutro8);
-                            /// @todo Tyrannus starts killing Krick.
+                            // @todo Tyrannus starts killing Krick.
                             // there shall be some visual spell effect
                             Creature tyrannus = ObjectAccessor.GetCreature(me, _tyrannusGUID);
                             if (tyrannus)

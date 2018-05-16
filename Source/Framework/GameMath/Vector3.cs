@@ -554,7 +554,7 @@ namespace Framework.GameMath
         /// </summary>
         /// <remarks>
         /// The vector values that are close to zero within the given tolerance are set to zero.
-        /// The tolerance value used is <see cref="MathFunctions.EpsilonD"/>
+        /// The tolerance value used is <see cref="MathFunctions.Epsilon"/>
         /// </remarks>
         public void ClampZero()
         {
@@ -895,10 +895,10 @@ namespace Framework.GameMath
             return array;
         }
         /// <summary>
-        /// Converts the vector to a <see cref="System.Collections.Generic.List"/> of single-precision floating point values.
+        /// Converts the vector to a <see cref="System.Collections.Generic.List{T}"/> of single-precision floating point values.
         /// </summary>
         /// <param name="vector">A <see cref="Vector3"/> instance.</param>
-        /// <returns>A <see cref="System.Collections.Generic.List"/> of single-precision floating point values.</returns>
+        /// <returns>A <see cref="System.Collections.Generic.List{T}"/> of single-precision floating point values.</returns>
         public static explicit operator List<float>(Vector3 vector)
         {
             List<float> list = new List<float>(3);
@@ -909,10 +909,10 @@ namespace Framework.GameMath
             return list;
         }
         /// <summary>
-        /// Converts the vector to a <see cref="System.Collections.Generic.LinkedList"/> of single-precision floating point values.
+        /// Converts the vector to a <see cref="System.Collections.Generic.LinkedList{T}"/> of single-precision floating point values.
         /// </summary>
         /// <param name="vector">A <see cref="Vector3"/> instance.</param>
-        /// <returns>A <see cref="System.Collections.Generic.LinkedList"/> of single-precision floating point values.</returns>
+        /// <returns>A <see cref="System.Collections.Generic.LinkedList{T}"/> of single-precision floating point values.</returns>
         public static explicit operator LinkedList<float>(Vector3 vector)
         {
             LinkedList<float> list = new LinkedList<float>();
@@ -1061,7 +1061,6 @@ namespace Framework.GameMath
         /// <param name="culture">The <see cref="System.Globalization.CultureInfo"/> to use as the current culture. </param>
         /// <param name="value">The <see cref="Object"/> to convert.</param>
         /// <returns>An <see cref="Object"/> that represents the converted value.</returns>
-        /// <exception cref="ParseException">Failed parsing from string.</exception>
         public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
         {
             if (value.GetType() == typeof(string))

@@ -609,13 +609,13 @@ namespace Game.Chat
                 if (string.IsNullOrEmpty(state))
                     return false;
 
-                if (!uint.TryParse(state, out uint objectState))
+                if (!int.TryParse(state, out int objectState))
                     return false;
 
                 if (objectType < 4)
                     obj.SetByteValue(GameObjectFields.Bytes1, (byte)objectType, (byte)objectState);
                 else if (objectType == 4)
-                    obj.SendCustomAnim(objectState);
+                    obj.SendCustomAnim((uint)objectState);
                 else if (objectType == 5)
                 {
                     if (objectState < 0 || objectState > (uint)GameObjectDestructibleState.Rebuilding)

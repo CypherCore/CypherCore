@@ -290,7 +290,7 @@ namespace System.Collections
             {
                 Contract.Ensures(Contract.Result<int>() >= 0);
 
-                return (int)_mLength;
+                return _mLength;
             }
         }
 

@@ -146,7 +146,7 @@ namespace Game.Chat.Commands
                     if (!uint.TryParse(durationStr, out uint tempValue) || tempValue > 0)
                     {
                         if (WorldConfig.GetBoolValue(WorldCfg.ShowBanInWorld))
-                            Global.WorldMgr.SendWorldText(CypherStrings.BanAccountYoubannedmessageWorld, author, nameOrIP, Time.secsToTimeString(Time.TimeStringToSecs(durationStr)).ToString(), reasonStr);
+                            Global.WorldMgr.SendWorldText(CypherStrings.BanAccountYoubannedmessageWorld, author, nameOrIP, Time.secsToTimeString(Time.TimeStringToSecs(durationStr)), reasonStr);
                         else
                             handler.SendSysMessage(CypherStrings.BanYoubanned, nameOrIP, Time.secsToTimeString(Time.TimeStringToSecs(durationStr), true), reasonStr);
                     }

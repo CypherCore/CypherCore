@@ -227,9 +227,9 @@ namespace Game.BattleGrounds
             {
                 if (GetReviveQueueSize() != 0)
                 {
+                    Creature sh = null;
                     foreach (var pair in m_ReviveQueue)
                     {
-                        Creature sh = null;
                         Player player = Global.ObjAccessor.FindPlayer(pair.Value);
                         if (!player)
                             continue;

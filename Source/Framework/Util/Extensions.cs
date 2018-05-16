@@ -72,7 +72,7 @@ namespace System
 
             for (int i = 0; i < length; i++)
             {
-                int randValue = -1;
+                int randValue;
 
                 do
                 {
@@ -128,7 +128,7 @@ namespace System
 
         public static BigInteger ToBigInteger<T>(this T value, bool isBigEndian = false)
         {
-            var ret = BigInteger.Zero;
+            BigInteger ret;
 
             switch (typeof(T).Name)
             {

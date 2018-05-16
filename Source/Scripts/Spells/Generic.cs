@@ -2451,7 +2451,7 @@ namespace Scripts.Spells.Generic
             {
                 Unit owner = GetCaster().GetOwner();
                 if (owner)
-                    if (owner.IsTypeId(TypeId.Player)) /// @todo this check is maybe wrong
+                    if (owner.IsTypeId(TypeId.Player)) // @todo this check is maybe wrong
                         owner.ToPlayer().RemovePet(null, PetSaveMode.NotInSlot, true);
             }
         }
@@ -2757,7 +2757,7 @@ namespace Scripts.Spells.Generic
             float factor;
             ushort baseItemLevel;
 
-            /// @todo Reserach coeffs for different vehicles
+            // @todo Reserach coeffs for different vehicles
             switch (GetId())
             {
                 case SpellIds.GearScaling:
@@ -2772,7 +2772,7 @@ namespace Scripts.Spells.Generic
 
             float avgILvl = caster.ToPlayer().GetAverageItemLevel();
             if (avgILvl < baseItemLevel)
-                return;                     /// @todo Research possibility of scaling down
+                return;                     // @todo Research possibility of scaling down
 
             amount = (int)((avgILvl - baseItemLevel) * factor);
         }

@@ -164,7 +164,7 @@ public static partial class Detour
 	    return new(mem) dtNavMesh;
     }
     */
-    /// @par
+    // @par
     ///
     /// This function will only free the memory for tiles with the #DT_TILE_FREE_DATA
     /// flag set.
@@ -208,7 +208,7 @@ public static partial class Detour
     @see dtNavMeshQuery, dtCreateNavMeshData, dtNavMeshCreateParams, #dtAllocNavMesh, #dtFreeNavMesh
     */
     /// A navigation mesh based on tiles of convex polygons.
-    /// @ingroup detour
+    // @ingroup detour
     public class dtNavMesh
     {
         private dtNavMeshParams m_params;			//< Current initialization params. TODO: do not store this info twice.
@@ -312,12 +312,12 @@ public static partial class Detour
             return (uint)(polyRef & polyMask);
         }
 
-        /// @{
-        /// @name Initialization and Tile Management
+        // @{
+        // @name Initialization and Tile Management
 
         /// Initializes the navigation mesh for tiled use.
         ///  @param[in]	params		Initialization parameters.
-        /// @return The status flags for the operation.
+        // @return The status flags for the operation.
         public dtStatus init(dtNavMeshParams navMeshParams)
         {
             //memcpy(&m_params, params, sizeof(dtNavMeshParams));
@@ -363,7 +363,7 @@ public static partial class Detour
         ///  @param[in]	data		Data of the new tile. (See: #dtCreateNavMeshData)
         ///  @param[in]	dataSize	The data size of the new tile.
         ///  @param[in]	flags		The tile flags. (See: #dtTileFlags)
-        /// @return The status flags for the operation.
+        // @return The status flags for the operation.
         ///  @see dtCreateNavMeshData
         public dtStatus init(dtRawTileData rawTile, int flags)
         {
@@ -394,9 +394,9 @@ public static partial class Detour
         }
 
         /// The navigation mesh initialization params.
-        /// @par
+        // @par
         ///
-        /// @note The parameters are created automatically when the single tile
+        // @note The parameters are created automatically when the single tile
         /// initialization is performed.
         public dtNavMeshParams getParams()
         {
@@ -988,7 +988,7 @@ public static partial class Detour
             }
         }
 
-        /// @par
+        // @par
         ///
         /// The add operation will fail if the data is in the wrong format, the allocated tile
         /// space is full, or there is a tile already at the specified reference.
@@ -998,14 +998,14 @@ public static partial class Detour
         /// tile will be restored to the same values they were before the tile was 
         /// removed.
         ///
-        /// @see dtCreateNavMeshData, #removeTile
+        // @see dtCreateNavMeshData, #removeTile
         /// Adds a tile to the navigation mesh.
         ///  @param[in]		data		Data for the new tile mesh. (See: #dtCreateNavMeshData)
         ///  @param[in]		dataSize	Data size of the new tile mesh.
         ///  @param[in]		flags		Tile flags. (See: #dtTileFlags)
         ///  @param[in]		lastRef		The desired reference for the tile. (When reloading a tile.) [opt] [Default: 0]
         ///  @param[out]	result		The tile reference. (If the tile was succesfully added.) [opt]
-        /// @return The status flags for the operation.
+        // @return The status flags for the operation.
         public dtStatus addTile(dtRawTileData rawTileData, int flags, dtTileRef lastRef, ref dtTileRef result)
         {
             //C#: Using an intermediate class dtRawTileData because Cpp uses a binary buffer.
@@ -1153,7 +1153,7 @@ public static partial class Detour
         ///  @param[in]	x		The tile's x-location. (x, y, layer)
         ///  @param[in]	y		The tile's y-location. (x, y, layer)
         ///  @param[in]	layer	The tile's layer. (x, y, layer)
-        /// @return The tile, or null if the tile does not exist.
+        // @return The tile, or null if the tile does not exist.
         public dtMeshTile getTileAt(int x, int y, int layer)
         {
             // Find tile based on hash.
@@ -1192,7 +1192,7 @@ public static partial class Detour
         }
 
 
-        /// @par
+        // @par
         ///
         /// This function will not fail if the tiles array is too small to hold the
         /// entire result set.  It will simply fill the array to capacity.
@@ -1201,7 +1201,7 @@ public static partial class Detour
         ///  @param[in]		y			The tile's y-location. (x, y)
         ///  @param[out]	tiles		A pointer to an array of tiles that will hold the result.
         ///  @param[in]		maxTiles	The maximum tiles the tiles parameter can hold.
-        /// @return The number of tiles returned in the tiles array.
+        // @return The number of tiles returned in the tiles array.
         public int getTilesAt(int x, int y, dtMeshTile[] tiles, int maxTiles)
         {
             int n = 0;
@@ -1228,7 +1228,7 @@ public static partial class Detour
         ///  @param[in]	x		The tile's x-location. (x, y, layer)
         ///  @param[in]	y		The tile's y-location. (x, y, layer)
         ///  @param[in]	layer	The tile's layer. (x, y, layer)
-        /// @return The tile reference of the tile, or 0 if there is none.
+        // @return The tile reference of the tile, or 0 if there is none.
         public dtTileRef getTileRefAt(int x, int y, int layer)
         {
             // Find tile based on hash.
@@ -1249,7 +1249,7 @@ public static partial class Detour
         }
         /// Gets the tile for the specified tile reference.
         ///  @param[in]	ref		The tile reference of the tile to retrieve.
-        /// @return The tile for the specified reference, or null if the 
+        // @return The tile for the specified reference, or null if the 
         ///		reference is invalid.
         public dtMeshTile getTileByRef(dtTileRef tileRef)
         {
@@ -1266,15 +1266,15 @@ public static partial class Detour
         }
 
         /// The maximum number of tiles supported by the navigation mesh.
-        /// @return The maximum number of tiles supported by the navigation mesh.
+        // @return The maximum number of tiles supported by the navigation mesh.
         public int getMaxTiles()
         {
             return m_maxTiles;
         }
 
         /// Gets the tile at the specified index.
-        ///  @param[in]	i		The tile index. [Limit: 0 >= index < #getMaxTiles()]
-        /// @return The tile at the specified index.
+        ///  @param[in]	i		The tile index. [Limit: 0 >= index &lt; #getMaxTiles()]
+        // @return The tile at the specified index.
         public dtMeshTile getTile(int i)
         {
             return m_tiles[i];
@@ -1294,7 +1294,7 @@ public static partial class Detour
         ///  @param[in]		ref		The reference for the a polygon.
         ///  @param[out]	tile	The tile containing the polygon.
         ///  @param[out]	poly	The polygon.
-        /// @return The status flags for the operation.
+        // @return The status flags for the operation.
         public dtStatus getTileAndPolyByRef(dtPolyRef polyRef, ref dtMeshTile tile, ref dtPoly poly)
         {
             if (polyRef == 0)
@@ -1331,9 +1331,9 @@ public static partial class Detour
             return DT_SUCCESS;
         }
 
-        /// @par
+        // @par
         ///
-        /// @warning Only use this function if it is known that the provided polygon
+        // @warning Only use this function if it is known that the provided polygon
         /// reference is valid. This function is faster than #getTileAndPolyByRef, but
         /// it does not validate the reference.
         /// Returns the tile and polygon for the specified polygon reference.
@@ -1358,7 +1358,7 @@ public static partial class Detour
 
         /// Checks the validity of a polygon reference.
         ///  @param[in]	ref		The polygon reference to check.
-        /// @return True if polygon reference is valid for the navigation mesh.
+        // @return True if polygon reference is valid for the navigation mesh.
         public bool isValidPolyRef(dtPolyRef polyRef)
         {
             if (polyRef == 0)
@@ -1374,17 +1374,17 @@ public static partial class Detour
             return true;
         }
 
-        /// @par
+        // @par
         ///
         /// This function returns the data for the tile so that, if desired,
         /// it can be added back to the navigation mesh at a later point.
         ///
-        /// @see #addTile
+        // @see #addTile
         /// Removes the specified tile from the navigation mesh.
         ///  @param[in]		ref			The reference of the tile to remove.
         ///  @param[out]	data		Data associated with deleted tile.
         ///  @param[out]	dataSize	Size of the data associated with deleted tile.
-        /// @return The status flags for the operation.
+        // @return The status flags for the operation.
         public dtStatus removeTile(dtTileRef tileRef, out dtRawTileData rawTileData)
         {
             rawTileData = null;
@@ -1488,7 +1488,7 @@ public static partial class Detour
 
         /// Gets the tile reference for the specified tile.
         ///  @param[in]	tile	The tile.
-        /// @return The tile reference of the tile.
+        // @return The tile reference of the tile.
         public dtTileRef getTileRef(dtMeshTile tile)
         {
             if (tile == null) return 0;
@@ -1496,23 +1496,23 @@ public static partial class Detour
             return encodePolyId(tile.salt, it, 0);
         }
 
-        /// @par
+        // @par
         ///
         /// Example use case:
-        /// @code
+        // @code
         ///
         /// const dtPolyRef base = navmesh.getPolyRefBase(tile);
-        /// for (int i = 0; i < tile.header.polyCount; ++i)
+        /// for (int i = 0; i &lt; tile.header.polyCount; ++i)
         /// {
-        ///     const dtPoly* p = &tile.polys[i];
+        ///     const dtPoly* p = tile.polys[i];
         ///     const dtPolyRef ref = base | (dtPolyRef)i;
         ///     
         ///     // Use the reference to access the polygon data.
         /// }
-        /// @endcode
+        // @endcode
         /// Gets the polygon reference for the tile's base polygon.
         ///  @param[in]	tile		The tile.
-        /// @return The polygon reference for the base polygon in the specified tile.
+        // @return The polygon reference for the base polygon in the specified tile.
         public dtPolyRef getPolyRefBase(dtMeshTile tile)
         {
             if (tile == null) return 0;
@@ -1525,7 +1525,7 @@ public static partial class Detour
         ///  @see #storeTileState
         /// Gets the size of the buffer required by #storeTileState to store the specified tile's state.
         ///  @param[in]	tile	The tile.
-        /// @return The size of the buffer required to store the state.
+        // @return The size of the buffer required to store the state.
         int getTileStateSize(dtMeshTile tile)
         {
             if (tile == null) return 0;
@@ -1534,16 +1534,16 @@ public static partial class Detour
             return headerSize + polyStateSize;
         }
 
-        /// @par
+        // @par
         ///
         /// Tile state includes non-structural data such as polygon flags, area ids, etc.
-        /// @note The state data is only valid until the tile reference changes.
-        /// @see #getTileStateSize, #restoreTileState
+        // @note The state data is only valid until the tile reference changes.
+        // @see #getTileStateSize, #restoreTileState
         /// Stores the non-structural state of the tile in the specified buffer. (Flags, area ids, etc.)
         ///  @param[in]		tile			The tile.
         ///  @param[out]	data			The buffer to store the tile's state in.
         ///  @param[in]		maxDataSize		The size of the data buffer. [Limit: >= #getTileStateSize]
-        /// @return The status flags for the operation.
+        // @return The status flags for the operation.
         dtStatus dtNavMesh::storeTileState(const dtMeshTile* tile, byte* data, const int maxDataSize) const
         {
             // Make sure there is enough space to store the state.
@@ -1571,16 +1571,16 @@ public static partial class Detour
             return DT_SUCCESS;
         }
 
-        /// @par
+        // @par
         ///
         /// Tile state includes non-structural data such as polygon flags, area ids, etc.
-        /// @note This function does not impact the tile's #dtTileRef and #dtPolyRef's.
-        /// @see #storeTileState
+        // @note This function does not impact the tile's #dtTileRef and #dtPolyRef's.
+        // @see #storeTileState
         /// Restores the state of the tile.
         ///  @param[in]	tile			The tile.
         ///  @param[in]	data			The new state. (Obtained from #storeTileState.)
         ///  @param[in]	maxDataSize		The size of the state within the data buffer.
-        /// @return The status flags for the operation.
+        // @return The status flags for the operation.
         dtStatus dtNavMesh::restoreTileState(dtMeshTile* tile, const byte* data, const int maxDataSize)
         {
             // Make sure there is enough space to store the state.
@@ -1611,7 +1611,7 @@ public static partial class Detour
             return DT_SUCCESS;
         }
             */
-        /// @par
+        // @par
         ///
         /// Off-mesh connections are stored in the navigation mesh as special 2-vertex 
         /// polygons with a single edge. At least one of the vertices is expected to be 
@@ -1623,7 +1623,7 @@ public static partial class Detour
         ///  @param[in]		polyRef		The reference of the off-mesh connection polygon.
         ///  @param[out]	startPos	The start position of the off-mesh connection. [(x, y, z)]
         ///  @param[out]	endPos		The end position of the off-mesh connection. [(x, y, z)]
-        /// @return The status flags for the operation.
+        // @return The status flags for the operation.
         public dtStatus getOffMeshConnectionPolyEndPoints(dtPolyRef prevRef, dtPolyRef polyRef, float[] startPos, float[] endPos)
         {
             uint salt = 0, it = 0, ip = 0;
@@ -1668,7 +1668,7 @@ public static partial class Detour
 
         /// Gets the specified off-mesh connection.
         ///  @param[in]	ref		The polygon reference of the off-mesh connection.
-        /// @return The specified off-mesh connection, or null if the polygon reference is not valid.
+        // @return The specified off-mesh connection, or null if the polygon reference is not valid.
         public dtOffMeshConnection getOffMeshConnectionByRef(dtPolyRef polyRef)
         {
             uint salt = 0, it = 0, ip = 0;
@@ -1693,14 +1693,14 @@ public static partial class Detour
             return tile.offMeshCons[idx];
         }
 
-        /// @{
-        /// @name State Management
+        // @{
+        // @name State Management
         /// These functions do not effect #dtTileRef or #dtPolyRef's. 
 
         /// Sets the user defined flags for the specified polygon.
         ///  @param[in]	ref		The polygon reference.
         ///  @param[in]	flags	The new flags for the polygon.
-        /// @return The status flags for the operation.
+        // @return The status flags for the operation.
         public dtStatus setPolyFlags(dtPolyRef polyRef, ushort flags)
         {
             if (polyRef == 0) return DT_FAILURE;
@@ -1723,7 +1723,7 @@ public static partial class Detour
         /// Gets the user defined flags for the specified polygon.
         ///  @param[in]		ref				The polygon reference.
         ///  @param[out]	resultFlags		The polygon flags.
-        /// @return The status flags for the operation.
+        // @return The status flags for the operation.
         public dtStatus getPolyFlags(dtPolyRef polyRef, ref ushort resultFlags)
         {
             if (polyRef == 0) return DT_FAILURE;
@@ -1742,8 +1742,8 @@ public static partial class Detour
 
         /// Sets the user defined area for the specified polygon.
         ///  @param[in]	ref		The polygon reference.
-        ///  @param[in]	area	The new area id for the polygon. [Limit: < #DT_MAX_AREAS]
-        /// @return The status flags for the operation.
+        ///  @param[in]	area	The new area id for the polygon. [Limit: &lt; #DT_MAX_AREAS]
+        // @return The status flags for the operation.
         public dtStatus setPolyArea(dtPolyRef polyRef, byte area)
         {
             if (polyRef == 0) return DT_FAILURE;
@@ -1763,7 +1763,7 @@ public static partial class Detour
         /// Gets the user defined area for the specified polygon.
         ///  @param[in]		ref			The polygon reference.
         ///  @param[out]	resultArea	The area id for the polygon.
-        /// @return The status flags for the operation.
+        // @return The status flags for the operation.
         public dtStatus getPolyArea(dtPolyRef polyRef, ref byte resultArea)
         {
             if (polyRef == 0) return DT_FAILURE;

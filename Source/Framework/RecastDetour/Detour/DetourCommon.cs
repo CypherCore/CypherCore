@@ -247,8 +247,8 @@ public static partial class Detour
     ///  @param[in]		pt		The point to check. [(x, y, z)]
     ///  @param[in]		verts	The polygon vertices. [(x, y, z) * @p nverts]
     ///  @param[in]		nverts	The number of vertices. [Limit: >= 3]
-    /// @return True if the point is inside the polygon.
-    /// @par
+    // @return True if the point is inside the polygon.
+    // @par
     ///
     /// All points are projected onto the xz-plane, so the y-values are ignored.
     public static bool dtPointInPolygon(float[] pt, float[] verts, int nverts)
@@ -305,8 +305,8 @@ public static partial class Detour
     ///  @param[in]		npolya		The number of vertices in polygon A.
     ///  @param[in]		polyb		Polygon B vertices.	[(x, y, z) * @p npolyb]
     ///  @param[in]		npolyb		The number of vertices in polygon B.
-    /// @return True if the two polygons overlap.
-    /// @par
+    // @return True if the two polygons overlap.
+    // @par
     ///
     /// All vertices are projected onto the xz-plane, so the y-values are ignored.
     public static bool dtOverlapPolyPoly2D(float[] polya, int npolya, float[] polyb, int npolyb)
@@ -478,9 +478,9 @@ public static partial class Detour
         return v < mn ? mn : (v > mx ? mx : v);
     }
 
-    /// @}
-    /// @name Vector helper functions.
-    /// @{
+    // @}
+    // @name Vector helper functions.
+    // @{
 
     /// Derives the cross product of two vectors. (@p v1 x @p v2)
     ///  @param[out]	dest	The cross product. [(x, y, z)]
@@ -495,7 +495,7 @@ public static partial class Detour
     /// Derives the dot product of two vectors. (@p v1 . @p v2)
     ///  @param[in]		v1	A Vector [(x, y, z)]
     ///  @param[in]		v2	A vector [(x, y, z)]
-    /// @return The dot product.
+    // @return The dot product.
     public static float dtVdot(float[] v1, float[] v2)
     {
         return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
@@ -521,7 +521,7 @@ public static partial class Detour
     ///  @param[out]	dest	The result vector. [(x, y, x)]
     ///  @param[in]		v1		The starting vector.
     ///  @param[in]		v2		The destination vector.
-    ///	 @param[in]		t		The interpolation factor. [Limits: 0 <= value <= 1.0]
+    ///	 @param[in]		t		The interpolation factor. [Limits: 0 &lt;= value &lt;= 1.0]
     public static void dtVlerp(float[] dest, float[] v1, float[] v2, float t)
     {
         dest[0] = v1[0] + (v2[0] - v1[0]) * t;
@@ -647,7 +647,7 @@ public static partial class Detour
     }
     /// Derives the scalar length of the vector.
     ///  @param[in]		v The vector. [(x, y, z)]
-    /// @return The scalar length of the vector.
+    // @return The scalar length of the vector.
     public static float dtVlen(float[] v)
     {
         return (float)Math.Sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
@@ -659,7 +659,7 @@ public static partial class Detour
 
     /// Derives the square of the scalar length of the vector. (len * len)
     ///  @param[in]		v The vector. [(x, y, z)]
-    /// @return The square of the scalar length of the vector.
+    // @return The square of the scalar length of the vector.
     public static float dtVlenSqr(float[] v)
     {
         return v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
@@ -672,7 +672,7 @@ public static partial class Detour
     /// Returns the distance between two points.
     ///  @param[in]		v1	A point. [(x, y, z)]
     ///  @param[in]		v2	A point. [(x, y, z)]
-    /// @return The distance between the two points.
+    // @return The distance between the two points.
     public static float dtVdist(float[] v1, float[] v2)
     {
         float dx = v2[0] - v1[0];
@@ -691,7 +691,7 @@ public static partial class Detour
     /// Returns the square of the distance between two points.
     ///  @param[in]		v1	A point. [(x, y, z)]
     ///  @param[in]		v2	A point. [(x, y, z)]
-    /// @return The square of the distance between the two points.
+    // @return The square of the distance between the two points.
     public static float dtVdistSqr(float[] v1, float[] v2)
     {
         float dx = v2[0] - v1[0];
@@ -710,7 +710,7 @@ public static partial class Detour
     /// Derives the distance between the specified points on the xz-plane.
     ///  @param[in]		v1	A point. [(x, y, z)]
     ///  @param[in]		v2	A point. [(x, y, z)]
-    /// @return The distance between the point on the xz-plane.
+    // @return The distance between the point on the xz-plane.
     ///
     /// The vectors are projected onto the xz-plane, so the y-values are ignored.
     public static float dtVdist2D(float[] v1, float[] v2)
@@ -728,7 +728,7 @@ public static partial class Detour
     /// Derives the square of the distance between the specified points on the xz-plane.
     ///  @param[in]		v1	A point. [(x, y, z)]
     ///  @param[in]		v2	A point. [(x, y, z)]
-    /// @return The square of the distance between the point on the xz-plane.
+    // @return The square of the distance between the point on the xz-plane.
     public static float dtVdist2DSqr(float[] v1, float[] v2)
     {
         float dx = v2[0] - v1[0];
@@ -761,7 +761,7 @@ public static partial class Detour
     /// Performs a 'sloppy' colocation check of the specified points.
     ///  @param[in]		p0	A point. [(x, y, z)]
     ///  @param[in]		p1	A point. [(x, y, z)]
-    /// @return True if the points are considered to be at the same location.
+    // @return True if the points are considered to be at the same location.
     ///
     /// Basically, this function will return true if the specified points are 
     /// close enough to eachother to be considered colocated.
@@ -782,7 +782,7 @@ public static partial class Detour
     /// Derives the dot product of two vectors on the xz-plane. (@p u . @p v)
     ///  @param[in]		u		A vector [(x, y, z)]
     ///  @param[in]		v		A vector [(x, y, z)]
-    /// @return The dot product on the xz-plane.
+    // @return The dot product on the xz-plane.
     ///
     /// The vectors are projected onto the xz-plane, so the y-values are ignored.
     public static float dtVdot2D(float[] u, float[] v)
@@ -797,7 +797,7 @@ public static partial class Detour
     /// Derives the xz-plane 2D perp product of the two vectors. (uz*vx - ux*vz)
     ///  @param[in]		u		The LHV vector [(x, y, z)]
     ///  @param[in]		v		The RHV vector [(x, y, z)]
-    /// @return The dot product on the xz-plane.
+    // @return The dot product on the xz-plane.
     ///
     /// The vectors are projected onto the xz-plane, so the y-values are ignored.
     public static float dtVperp2D(float[] u, float[] v)
@@ -808,9 +808,9 @@ public static partial class Detour
     {
         return u[uStart + 2] * v[vStart + 0] - u[uStart + 0] * v[vStart + 2];
     }
-    /// @}
-    /// @name Computational geometry helper functions.
-    /// @{
+    // @}
+    // @name Computational geometry helper functions.
+    // @{
 
     /**
 
@@ -856,7 +856,7 @@ public static partial class Detour
     ///  @param[in]		a		Vertex A. [(x, y, z)]
     ///  @param[in]		b		Vertex B. [(x, y, z)]
     ///  @param[in]		c		Vertex C. [(x, y, z)]
-    /// @return The signed xz-plane area of the triangle.
+    // @return The signed xz-plane area of the triangle.
     public static float dtTriArea2D(float[] a, float[] b, float[] c)
     {
         float abx = b[0] - a[0];
@@ -878,8 +878,8 @@ public static partial class Detour
     ///  @param[in]		amax	Maximum bounds of box A. [(x, y, z)]
     ///  @param[in]		bmin	Minimum bounds of box B. [(x, y, z)]
     ///  @param[in]		bmax	Maximum bounds of box B. [(x, y, z)]
-    /// @return True if the two AABB's overlap.
-    /// @see dtOverlapBounds
+    // @return True if the two AABB's overlap.
+    // @see dtOverlapBounds
     public static bool dtOverlapQuantBounds(ushort[] amin, ushort[] amax, ushort[] bmin, ushort[] bmax)
     {
         bool overlap = true;
@@ -894,8 +894,8 @@ public static partial class Detour
     ///  @param[in]		amax	Maximum bounds of box A. [(x, y, z)]
     ///  @param[in]		bmin	Minimum bounds of box B. [(x, y, z)]
     ///  @param[in]		bmax	Maximum bounds of box B. [(x, y, z)]
-    /// @return True if the two AABB's overlap.
-    /// @see dtOverlapQuantBounds
+    // @return True if the two AABB's overlap.
+    // @see dtOverlapQuantBounds
     public static bool dtOverlapBounds(float[] amin, float[] amax, float[] bmin, float[] bmax)
     {
         bool overlap = true;
@@ -905,9 +905,9 @@ public static partial class Detour
         return overlap;
     }
 
-    /// @}
-    /// @name Miscellanious functions.
-    /// @{
+    // @}
+    // @name Miscellanious functions.
+    // @{
 
     public static uint dtNextPow2(uint v)
     {

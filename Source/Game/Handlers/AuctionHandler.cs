@@ -231,7 +231,7 @@ namespace Game
             SQLTransaction trans;
 
             if (WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionAuction))
-                AH.auctioneer = 23442;     ///@TODO - HARDCODED DB GUID, BAD BAD BAD
+                AH.auctioneer = 23442;     //@TODO - HARDCODED DB GUID, BAD BAD BAD
             else
                 AH.auctioneer = creature.GetSpawnId();
 

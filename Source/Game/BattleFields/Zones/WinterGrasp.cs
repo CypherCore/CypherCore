@@ -694,7 +694,7 @@ namespace Game.BattleFields
 
         public override void OnPlayerLeaveWar(Player player)
         {
-            // Remove all aura from WG /// @todo false we can go out of this zone on retail and keep Rank buff, remove on end of WG
+            // Remove all aura from WG // @todo false we can go out of this zone on retail and keep Rank buff, remove on end of WG
             if (!player.GetSession().PlayerLogout())
             {
                 Creature vehicle = player.GetVehicleCreatureBase();

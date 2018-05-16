@@ -618,7 +618,7 @@ namespace Game.Chat
             Global.ObjectMgr.LoadQuests();
             handler.SendGlobalGMSysMessage("DB table `quest_template` (quest definitions) reloaded.");
 
-            /// dependent also from `gameobject` but this table not reloaded anyway
+            // dependent also from `gameobject` but this table not reloaded anyway
             Log.outInfo(LogFilter.Server, "Re-Loading GameObjects for quests...");
             Global.ObjectMgr.LoadGameObjectForQuests();
             handler.SendGlobalGMSysMessage("Data GameObjects for quests reloaded.");

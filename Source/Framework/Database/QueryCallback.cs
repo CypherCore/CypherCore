@@ -52,7 +52,7 @@ namespace Framework.Database
 
         public QueryCallbackStatus InvokeIfReady()
         {
-            QueryCallbackData callback = _callbacks.Dequeue();
+            QueryCallbackData callback = _callbacks.Peek();
 
             while (true)
             {
@@ -64,6 +64,7 @@ namespace Framework.Database
 
                     cb(this, f.Result);
 
+                    _callbacks.Dequeue();
                     bool hasNext = _result != null;
                     if (_callbacks.Count == 0)
                     {

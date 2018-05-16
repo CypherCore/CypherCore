@@ -6,11 +6,11 @@ using dtPolyRef = System.UInt64;
 public static partial class Detour
 {
     /// The maximum number of vertices per navigation polygon.
-    /// @ingroup detour
+    // @ingroup detour
     public const int DT_VERTS_PER_POLYGON = 6;
 
-    /// @{
-    /// @name Tile Serialization Constants
+    // @{
+    // @name Tile Serialization Constants
     /// These constants are used to detect whether a navigation tile's data
     /// and state format is compatible with the current build.
     ///
@@ -27,7 +27,7 @@ public static partial class Detour
     /// A version number used to detect compatibility of navigation tile states.
     public const int DT_NAVMESH_STATE_VERSION = 1;
 
-    /// @}
+    // @}
 
     /// A flag that indicates that an entity links to an external entity.
     /// (E.g. A polygon edge is a portal that links to another polygon.)
@@ -40,7 +40,7 @@ public static partial class Detour
     public const uint DT_OFFMESH_CON_BIDIR = 1;
 
     /// The maximum number of user defined area ids.
-    /// @ingroup detour
+    // @ingroup detour
     public const int DT_MAX_AREAS = 64;
 
     const ushort MESH_NULL_IDX = 0xffff;
@@ -79,7 +79,7 @@ public static partial class Detour
 
 
     /// Defines a polyogn within a dtMeshTile object.
-    /// @ingroup detour
+    // @ingroup detour
     public class dtPoly
     {
         /// Index to first link in linked list. (Or #DT_NULL_LINK if there is no link.)
@@ -119,7 +119,7 @@ public static partial class Detour
         public byte vertCount;
 
         /// The bit packed area id and polygon type.
-        /// @note Use the structure's set and get methods to acess this value.
+        // @note Use the structure's set and get methods to acess this value.
         public byte areaAndtype;
 
         public int FromBytes(byte[] array, int start)
@@ -158,7 +158,7 @@ public static partial class Detour
 
             return bytes.ToArray();
         }
-        /// Sets the user defined area id. [Limit: < #DT_MAX_AREAS]
+        /// Sets the user defined area id. [Limit: &lt; #DT_MAX_AREAS]
         public void setArea(byte a)
         {
             //Bitwise operators are done on ints in C#
@@ -216,8 +216,8 @@ public static partial class Detour
     };
 
     /// Defines a link between polygons.
-    /// @note This structure is rarely if ever used by the end user.
-    /// @see dtMeshTile
+    // @note This structure is rarely if ever used by the end user.
+    // @see dtMeshTile
     public class dtLink
     {
         public dtPolyRef polyRef;					//< Neighbour reference. (The neighbor that is linked to.)
@@ -254,8 +254,8 @@ public static partial class Detour
     };
 
     /// Bounding volume node.
-    /// @note This structure is rarely if ever used by the end user.
-    /// @see dtMeshTile
+    // @note This structure is rarely if ever used by the end user.
+    // @see dtMeshTile
     public class dtBVNode
     {
         public ushort[] bmin = new ushort[3];			//< Minimum bounds of the node's AABB. [(x, y, z)]
@@ -307,7 +307,7 @@ public static partial class Detour
         public ushort poly;
 
         /// Link flags. 
-        /// @note These are not the connection's user defined flags. Those are assigned via the 
+        // @note These are not the connection's user defined flags. Those are assigned via the 
         /// connection's dtPoly definition. These are link flags used for internal purposes.
         public byte flags;
 
@@ -352,7 +352,7 @@ public static partial class Detour
 
 
     /// Provides high level information related to a dtMeshTile object.
-    /// @ingroup detour
+    // @ingroup detour
     public class dtMeshHeader
     {
         public int magic;				//< Tile magic number. (Used to identify the data format.)
@@ -605,7 +605,7 @@ public static partial class Detour
         }
     }
     /// Defines a navigation mesh tile.
-    /// @ingroup detour
+    // @ingroup detour
     /* 
     @struct dtMeshTile
     @par
@@ -661,8 +661,8 @@ public static partial class Detour
 
     /// Configuration parameters used to define multi-tile navigation meshes.
     /// The values are used to allocate space during the initialization of a navigation mesh.
-    /// @see dtNavMesh::init()
-    /// @ingroup detour
+    // @see dtNavMesh::init()
+    // @ingroup detour
     public class dtNavMeshParams
     {
         public float[] orig = new float[3];					//< The world space origin of the navigation mesh's tile space. [(x, y, z)]
@@ -687,7 +687,7 @@ public static partial class Detour
     };
 
     /// Represents the source data used to build an navigation mesh tile.
-    /// @ingroup detour
+    // @ingroup detour
     /**
     @struct dtNavMeshCreateParams
     @par
@@ -709,10 +709,10 @@ public static partial class Detour
     public class dtNavMeshCreateParams
     {
 
-        /// @name Polygon Mesh Attributes
-        /// Used to create the base navigation graph.
-        /// See #rcPolyMesh for details related to these attributes.
-        /// @{
+        // @name Polygon Mesh Attributes
+        // Used to create the base navigation graph.
+        // See #rcPolyMesh for details related to these attributes.
+        // @{
 
         public ushort[] verts;			//< The polygon mesh vertices. [(x, y, z) * #vertCount] [Unit: vx]
         public int vertCount;							//< The number vertices in the polygon mesh. [Limit: >= 3]
@@ -722,10 +722,10 @@ public static partial class Detour
         public int polyCount;							//< Number of polygons in the mesh. [Limit: >= 1]
         public int nvp;								//< Number maximum number of vertices per polygon. [Limit: >= 3]
 
-        /// @}
-        /// @name Height Detail Attributes (Optional)
-        /// See #rcPolyMeshDetail for details related to these attributes.
-        /// @{
+        // @}
+        // @name Height Detail Attributes (Optional)
+        // See #rcPolyMeshDetail for details related to these attributes.
+        // @{
 
         public uint[] detailMeshes;		//< The height detail sub-mesh data. [Size: 4 * #polyCount]
         public float[] detailVerts;				//< The detail mesh vertices. [Size: 3 * #detailVertsCount] [Unit: wu]
@@ -733,35 +733,35 @@ public static partial class Detour
         public byte[] detailTris;		//< The detail mesh triangles. [Size: 4 * #detailTriCount]
         public int detailTriCount;						//< The number of triangles in the detail mesh.
 
-        /// @}
-        /// @name Off-Mesh Connections Attributes (Optional)
-        /// Used to define a custom point-to-point edge within the navigation graph, an 
-        /// off-mesh connection is a user defined traversable connection made up to two vertices, 
-        /// at least one of which resides within a navigation mesh polygon.
-        /// @{
+        // @}
+        // @name Off-Mesh Connections Attributes (Optional)
+        // Used to define a custom point-to-point edge within the navigation graph, an 
+        // off-mesh connection is a user defined traversable connection made up to two vertices, 
+        // at least one of which resides within a navigation mesh polygon.
+        // @{
 
-        /// Off-mesh connection vertices. [(ax, ay, az, bx, by, bz) * #offMeshConCount] [Unit: wu]
+        // Off-mesh connection vertices. [(ax, ay, az, bx, by, bz) * #offMeshConCount] [Unit: wu]
         public float[] offMeshConVerts;
-        /// Off-mesh connection radii. [Size: #offMeshConCount] [Unit: wu]
+        // Off-mesh connection radii. [Size: #offMeshConCount] [Unit: wu]
         public float[] offMeshConRad;
-        /// User defined flags assigned to the off-mesh connections. [Size: #offMeshConCount]
+        // User defined flags assigned to the off-mesh connections. [Size: #offMeshConCount]
         public ushort[] offMeshConFlags;
-        /// User defined area ids assigned to the off-mesh connections. [Size: #offMeshConCount]
+        // User defined area ids assigned to the off-mesh connections. [Size: #offMeshConCount]
         public byte[] offMeshConAreas;
-        /// The permitted travel direction of the off-mesh connections. [Size: #offMeshConCount]
-        ///
-        /// 0 = Travel only from endpoint A to endpoint B.<br/>
-        /// #DT_OFFMESH_CON_BIDIR = Bidirectional travel.
+        // The permitted travel direction of the off-mesh connections. [Size: #offMeshConCount]
+        //
+        // 0 = Travel only from endpoint A to endpoint B.<br/>
+        // #DT_OFFMESH_CON_BIDIR = Bidirectional travel.
         public byte[] offMeshConDir;
-        /// The user defined ids of the off-mesh connection. [Size: #offMeshConCount]
+        // The user defined ids of the off-mesh connection. [Size: #offMeshConCount]
         public uint[] offMeshConUserID;
-        /// The number of off-mesh connections. [Limit: >= 0]
+        // The number of off-mesh connections. [Limit: >= 0]
         public int offMeshConCount;
 
-        /// @}
-        /// @name Tile Attributes
-        /// @note The tile grid/layer data can be left at zero if the destination is a single tile mesh.
-        /// @{
+        // @}
+        // @name Tile Attributes
+        // @note The tile grid/layer data can be left at zero if the destination is a single tile mesh.
+        // @{
 
         public uint userId;	//< The user defined id of the tile.
         public int tileX;				//< The tile's x-grid location within the multi-tile destination mesh. (Along the x-axis.)
@@ -770,9 +770,9 @@ public static partial class Detour
         public float[] bmin = new float[3];			//< The minimum bounds of the tile. [(x, y, z)] [Unit: wu]
         public float[] bmax = new float[3];			//< The maximum bounds of the tile. [(x, y, z)] [Unit: wu]
 
-        /// @}
-        /// @name General Configuration Attributes
-        /// @{
+        // @}
+        // @name General Configuration Attributes
+        // @{
 
         public float walkableHeight;	//< The agent height. [Unit: wu]
         public float walkableRadius;	//< The agent radius. [Unit: wu]
@@ -781,10 +781,10 @@ public static partial class Detour
         public float ch;				//< The y-axis cell height of the polygon mesh. [Limit: > 0] [Unit: wu]
 
         /// True if a bounding volume tree should be built for the tile.
-        /// @note The BVTree is not normally needed for layered navigation meshes.
+        // @note The BVTree is not normally needed for layered navigation meshes.
         public bool buildBvTree;
 
-        /// @}
+        // @}
     }
 
     public class BVItem
@@ -1008,19 +1008,19 @@ public static partial class Detour
 
     // TODO: Better error handling.
 
-    /// @par
+    // @par
     /// 
     /// The output data array is allocated using the detour allocator (dtAlloc()).  The method
     /// used to free the memory will be determined by how the tile is added to the navigation
     /// mesh.
     ///
-    /// @see dtNavMesh, dtNavMesh::addTile()
+    // @see dtNavMesh, dtNavMesh::addTile()
     /// Builds navigation mesh tile data from the provided tile creation data.
-    /// @ingroup detour
+    // @ingroup detour
     ///  @param[in]		params		Tile creation data.
     ///  @param[out]	outData		The resulting tile data.
     ///  @param[out]	outDataSize	The size of the tile data array.
-    /// @return True if the tile data was successfully created.
+    // @return True if the tile data was successfully created.
     public static bool dtCreateNavMeshData(dtNavMeshCreateParams createParams, out dtRawTileData outTile)//ref byte[] outData, ref int outDataSize)
     {
         outTile = null;
@@ -1526,15 +1526,15 @@ public static partial class Detour
 	    return true;
     }
     */
-    /// @par
-    ///
-    /// @warning This function assumes that the header is in the correct endianess already. 
-    /// Call #dtNavMeshHeaderSwapEndian() first on the data if the data is expected to be in wrong endianess 
-    /// to start with. Call #dtNavMeshHeaderSwapEndian() after the data has been swapped if converting from 
-    /// native to foreign endianess.
-    /// Swaps endianess of the tile data.
-    ///  @param[in,out]	data		The tile data array.
-    ///  @param[in]		dataSize	The size of the data array.
+    // @par
+    //
+    // @warning This function assumes that the header is in the correct endianess already. 
+    // Call #dtNavMeshHeaderSwapEndian() first on the data if the data is expected to be in wrong endianess 
+    // to start with. Call #dtNavMeshHeaderSwapEndian() after the data has been swapped if converting from 
+    // native to foreign endianess.
+    // Swaps endianess of the tile data.
+    //  @param[in,out]	data		The tile data array.
+    //  @param[in]		dataSize	The size of the data array.
     /*
     bool dtNavMeshDataSwapEndian(byte* data, const int dataSize)
     {

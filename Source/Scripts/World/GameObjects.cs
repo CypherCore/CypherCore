@@ -304,7 +304,7 @@ namespace Scripts.World
     {
         public go_tablet_of_the_seven() : base("go_tablet_of_the_seven") { }
 
-        /// @todo use gossip option ("Transcript the Tablet") instead, if Trinity adds support.
+        // @todo use gossip option ("Transcript the Tablet") instead, if Trinity adds support.
         public override bool OnGossipHello(Player player, GameObject go)
         {
             if (go.GetGoType() != GameObjectTypes.QuestGiver)
@@ -799,7 +799,7 @@ namespace Scripts.World
             if (!pPrisoner || !pPrisoner.IsAlive())
                 return true;
 
-            /// @todo prisoner should help player for a short period of time
+            // @todo prisoner should help player for a short period of time
             player.KilledMonsterCredit(GameobjectConst.NpcCapturedValgardePrisonerProxy);
             pPrisoner.DespawnOrUnsummon();
             return true;

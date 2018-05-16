@@ -37,7 +37,7 @@ namespace Game
             Player player = GetPlayer();
             AELootResult aeResult = player.GetAELootView().Count > 1 ? new AELootResult() : null;
 
-            /// @todo Implement looting by LootObject guid
+            // @todo Implement looting by LootObject guid
             foreach (LootRequest req in packet.Loot)
             {
                 Loot loot = null;

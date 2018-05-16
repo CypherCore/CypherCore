@@ -469,7 +469,7 @@ namespace Game
             if (unit == null)
                 return;
 
-            /// @todo Unit.SetCharmedBy: 28782 is not in world but 0 is trying to charm it! . crash
+            // @todo Unit.SetCharmedBy: 28782 is not in world but 0 is trying to charm it! . crash
             if (!unit.IsInWorld)
                 return;
 

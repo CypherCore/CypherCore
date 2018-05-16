@@ -78,6 +78,7 @@ namespace Framework.Dynamic
         /// Calls the optional callback on successfully finish.
         /// </summary>
         /// <param name="milliseconds"></param>
+        /// <param name="callback"></param>
         /// <returns></returns>
         public TaskScheduler Update(uint milliseconds, success_t callback = null)
         {
@@ -89,6 +90,7 @@ namespace Framework.Dynamic
         /// Calls the optional callback on successfully finish.
         /// </summary>
         /// <param name="difftime"></param>
+        /// <param name="callback"></param>
         /// <returns></returns>
         TaskScheduler Update(TimeSpan difftime, success_t callback = null)
         {

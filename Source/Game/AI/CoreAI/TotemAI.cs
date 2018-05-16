@@ -57,7 +57,6 @@ namespace Game.AI
             if (victim == null || !victim.isTargetableForAttack() || !me.IsWithinDistInMap(victim, max_range) ||
                 me.IsFriendlyTo(victim) || !me.CanSeeOrDetect(victim))
             {
-                victim = null;
                 var u_check = new NearestAttackableUnitInObjectRangeCheck(me, me.GetCharmerOrOwnerOrSelf(), max_range);
                 var checker = new UnitLastSearcher(me, u_check);
                 Cell.VisitAllObjects(me, checker, max_range);

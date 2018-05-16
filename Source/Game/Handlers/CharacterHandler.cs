@@ -132,7 +132,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.EnumCharactersDeletedByClient, Status = SessionStatus.Authed)]
         void HandleCharUndeleteEnum(EnumCharacters enumCharacters)
         {
-            /// get all the data necessary for loading all undeleted characters (along with their pets) on the account
+            // get all the data necessary for loading all undeleted characters (along with their pets) on the account
             PreparedStatement stmt;
             if (WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed))
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_UNDELETE_ENUM_DECLINED_NAME);
@@ -379,7 +379,7 @@ namespace Game
                         }
 
                         // need to check team only for first character
-                        /// @todo what to if account already has characters of both races?
+                        // @todo what to if account already has characters of both races?
                         if (!allowTwoSideAccounts)
                         {
                             Team accTeam = 0;
@@ -866,7 +866,7 @@ namespace Game
         {
             FeatureSystemStatus features = new FeatureSystemStatus();
 
-            /// START OF DUMMY VALUES
+            // START OF DUMMY VALUES
             features.ComplaintStatus = 2;
             features.ScrollOfResurrectionRequestsRemaining = 1;
             features.ScrollOfResurrectionMaxRequestsPerDay = 1;
@@ -887,7 +887,7 @@ namespace Game
             features.ComplaintStatus = 0;
             features.TutorialsEnabled = true;
             features.NPETutorialsEnabled = true;
-            /// END OF DUMMY VALUES
+            // END OF DUMMY VALUES
 
             features.EuropaTicketSystemStatus.Value.TicketsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportTicketsEnabled);
             features.EuropaTicketSystemStatus.Value.BugsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportBugsEnabled);
@@ -1246,7 +1246,7 @@ namespace Game
             }
 
             // character with this name already exist
-            /// @todo: make async
+            // @todo: make async
             ObjectGuid newGuid = ObjectManager.GetPlayerGUIDByName(customizeInfo.CharName);
             if (!newGuid.IsEmpty())
             {
@@ -1261,7 +1261,7 @@ namespace Game
             SQLTransaction trans = new SQLTransaction();
             ulong lowGuid = customizeInfo.CharGUID.GetCounter();
 
-            /// Customize
+            // Customize
             {
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GENDER_AND_APPEARANCE);
 
@@ -1279,7 +1279,7 @@ namespace Game
                 trans.Append(stmt);
             }
 
-            /// Name Change and update atLogin flags
+            // Name Change and update atLogin flags
             {
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_NAME_AT_LOGIN);
                 stmt.AddValue(0, customizeInfo.CharName);
@@ -1325,11 +1325,11 @@ namespace Game
                         {
                             Item item = _player.GetItemByPos(InventorySlots.Bag0, i);
 
-                            /// cheating check 1 (item equipped but sent empty guid)
+                            // cheating check 1 (item equipped but sent empty guid)
                             if (!item)
                                 return;
 
-                            /// cheating check 2 (sent guid does not match equipped item)
+                            // cheating check 2 (sent guid does not match equipped item)
                             if (item.GetGUID() != itemGuid)
                                 return;
                         }
@@ -1358,7 +1358,7 @@ namespace Game
                     saveEquipmentSet.Set.Appearances[i] = 0;
                 }
             }
-            saveEquipmentSet.Set.IgnoreMask &= 0x7FFFF; /// clear invalid bits (i > EQUIPMENT_SLOT_END)
+            saveEquipmentSet.Set.IgnoreMask &= 0x7FFFF; // clear invalid bits (i > EQUIPMENT_SLOT_END)
             if (saveEquipmentSet.Set.Type == EquipmentSetInfo.EquipmentSetType.Equipment)
             {
                 saveEquipmentSet.Set.Enchants[0] = 0;
@@ -1583,7 +1583,7 @@ namespace Game
             // resurrect the character in case he's dead
             Player.OfflineResurrect(factionChangeInfo.Guid, trans);
 
-            /// Name Change and update atLogin flags
+            // Name Change and update atLogin flags
             {
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_NAME_AT_LOGIN);
                 stmt.AddValue(0, factionChangeInfo.Name);
@@ -1719,7 +1719,7 @@ namespace Game
                         trans.Append(stmt);
                     }
 
-                    /// @todo: make this part asynch
+                    // @todo: make this part asynch
                     if (!WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGuild))
                     {
                         // Reset guild
@@ -2092,11 +2092,11 @@ namespace Game
                     return;
                 }
 
-                /// @todo: add more safety checks
-                /// * max char count per account
-                /// * max death knight count
-                /// * max demon hunter count
-                /// * team violation
+                // @todo: add more safety checks
+                // * max char count per account
+                // * max death knight count
+                // * max demon hunter count
+                // * team violation
 
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_SUM_CHARS);
                 stmt.AddValue(0, GetAccountId());

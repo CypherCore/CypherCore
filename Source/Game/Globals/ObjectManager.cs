@@ -4561,6 +4561,7 @@ namespace Game
                 ItemTemplateStorage.Add(sparse.Id, itemTemplate);
             }
 
+            // Load item effects (spells)
             foreach (var effectEntry in CliDB.ItemEffectStorage.Values)
             {
                 var itemTemplate = ItemTemplateStorage.LookupByKey(effectEntry.ParentItemID);

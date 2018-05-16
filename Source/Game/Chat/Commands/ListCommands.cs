@@ -199,7 +199,7 @@ namespace Game.Chat.Commands
                     uint ownerAccountId = result.Read<uint>(4);
                     string ownerName = result.Read<string>(5);
 
-                    string itemPos = "";
+                    string itemPos;
                     if (Player.IsEquipmentPos((byte)itemBag, itemSlot))
                         itemPos = "[equipped]";
                     else if (Player.IsInventoryPos((byte)itemBag, itemSlot))

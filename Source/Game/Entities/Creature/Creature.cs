@@ -1177,7 +1177,7 @@ namespace Game.Entities
             SetModifierValue(UnitMods.AttackPower, UnitModifierType.BaseValue, stats.AttackPower);
             SetModifierValue(UnitMods.AttackPowerRanged, UnitModifierType.BaseValue, stats.RangedAttackPower);
 
-            float armor = stats.GenerateArmor(cInfo); /// @todo Why is this treated as uint32 when it's a float?
+            float armor = stats.GenerateArmor(cInfo); // @todo Why is this treated as uint32 when it's a float?
             SetModifierValue(UnitMods.Armor, UnitModifierType.BaseValue, armor);
         }
 

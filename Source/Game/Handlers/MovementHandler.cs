@@ -186,7 +186,7 @@ namespace Game
                     {
                         // NOTE: this is actually called many times while falling
                         // even after the player has been teleported away
-                        /// @todo discard movement packets after the player is rooted
+                        // @todo discard movement packets after the player is rooted
                         if (plrMover.IsAlive())
                         {
                             plrMover.SetFlag(PlayerFields.Flags, PlayerFlags.IsOutOfBounds);

@@ -47,7 +47,7 @@ namespace Game.Chat
                 "Unknown security level: Notify technician for details."));
 
             // RBAC required display - is not displayed for console
-            if (pwConfig == 2 && session != null && hasRBAC)
+            if (pwConfig == 2 && hasRBAC)
                 handler.SendSysMessage(CypherStrings.RbacEmailRequired);
 
             // Email display if sufficient rights
@@ -635,8 +635,8 @@ namespace Game.Chat
                         return false;
                     }
 
-                    /// can set email only for target with less security
-                    /// This also restricts setting handler's own email.
+                    // can set email only for target with less security
+                    // This also restricts setting handler's own email.
                     if (handler.HasLowerSecurityAccount(null, targetAccountId, true))
                         return false;
 
@@ -696,8 +696,8 @@ namespace Game.Chat
                         return false;
                     }
 
-                    /// can set email only for target with less security
-                    /// This also restricts setting handler's own email.
+                    // can set email only for target with less security
+                    // This also restricts setting handler's own email.
                     if (handler.HasLowerSecurityAccount(null, targetAccountId, true))
                         return false;
 

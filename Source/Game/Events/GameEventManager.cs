@@ -726,7 +726,7 @@ namespace Game
                     do
                     {
                         uint questId = result.Read<uint>(0);
-                        ushort eventEntry = result.Read<byte>(1); /// @todo Change to byte
+                        ushort eventEntry = result.Read<byte>(1); // @todo Change to byte
 
                         if (Global.ObjectMgr.GetQuestTemplate(questId) == null)
                         {
@@ -1214,10 +1214,10 @@ namespace Game
                     if (!map.Instanceable() && map.IsGridLoaded(data.posX, data.posY))
                     {
                         GameObject pGameobject = GameObject.CreateGameObjectFromDB(guid, map, false);
-                        /// @todo find out when it is add to map
+                        // @todo find out when it is add to map
                         if (pGameobject)
                         {
-                            /// @todo find out when it is add to map
+                            // @todo find out when it is add to map
                             if (pGameobject.isSpawnedByDefault())
                                 map.AddToMap(pGameobject);
                         }

@@ -1058,7 +1058,7 @@ namespace Scripts.Northrend.Ulduar.FlameLeviathan
                         {
                             brann.RemoveFlag(UnitFields.NpcFlags, NPCFlags.Gossip);
                             delorah.GetMotionMaster().MovePoint(0, brann.GetPositionX() - 4, brann.GetPositionY(), brann.GetPositionZ());
-                            /// @todo delorah->AI()->Talk(xxxx, brann->GetGUID()); when reached at branz
+                            // @todo delorah->AI()->Talk(xxxx, brann->GetGUID()); when reached at branz
                         }
                     }
                 }
@@ -1388,7 +1388,7 @@ namespace Scripts.Northrend.Ulduar.FlameLeviathan
 
         void FilterTargets(List<WorldObject> targets)
         {
-            targets.RemoveAll(new Predicate<WorldObject>(target =>
+            targets.RemoveAll(target =>
             {
                 //! No players, only vehicles (@todo check if blizzlike)
                 Creature creatureTarget = target.ToCreature();
@@ -1420,7 +1420,7 @@ namespace Scripts.Northrend.Ulduar.FlameLeviathan
                 }
 
                 return !playerFound;
-            }));
+            });
 
             if (targets.Empty())
             {

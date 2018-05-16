@@ -102,7 +102,7 @@ namespace Game
             honorStats.LifetimeHK = player.GetUInt32Value(PlayerFields.LifetimeHonorableKills);
             honorStats.YesterdayHK = player.GetUInt16Value(PlayerFields.Kills, 1);
             honorStats.TodayHK = player.GetUInt16Value(PlayerFields.Kills, 0);
-            honorStats.LifetimeMaxRank = 0; /// @todo
+            honorStats.LifetimeMaxRank = 0; // @todo
 
             SendPacket(honorStats);
         }
@@ -110,7 +110,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.InspectPvp)]
         void HandleInspectPVP(InspectPVPRequest request)
         {
-            /// @todo: deal with request.InspectRealmAddress
+            // @todo: deal with request.InspectRealmAddress
 
             Player player = Global.ObjAccessor.FindPlayer(request.InspectTarget);
             if (!player)
@@ -127,7 +127,7 @@ namespace Game
 
             InspectPVPResponse response = new InspectPVPResponse();
             response.ClientGUID = request.InspectTarget;
-            /// @todo: fill brackets
+            // @todo: fill brackets
 
             SendPacket(response);
         }

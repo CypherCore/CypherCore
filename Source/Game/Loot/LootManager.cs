@@ -841,7 +841,7 @@ namespace Game.Loots
             foreach (var group in Groups)
                     group.Value.Verify(lootstore, id, (byte)(group.Key + 1));
 
-            /// @todo References validity checks
+            // @todo References validity checks
         }
         public void CheckLootRefs(LootTemplateMap store, List<uint> ref_set)
         {
@@ -992,7 +992,7 @@ namespace Game.Loots
             public void Verify(LootStore lootstore, uint id, byte group_id = 0)
             {
                 float chance = RawTotalChance();
-                if (chance > 101.0f)                                    /// @todo replace with 100% when DBs will be ready
+                if (chance > 101.0f)                                    // @todo replace with 100% when DBs will be ready
                     Log.outError(LogFilter.Sql, "Table '{0}' entry {1} group {2} has total chance > 100% ({3})", lootstore.GetName(), id, group_id, chance);
 
                 if (chance >= 100.0f && !EqualChanced.Empty())

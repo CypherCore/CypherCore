@@ -2563,13 +2563,13 @@ namespace Game.Entities
         {
             Log.outDebug(LogFilter.Spells, "Player.AddSpellMod {0}", mod.spellId);
 
-            /// First, manipulate our spellmodifier container
+            // First, manipulate our spellmodifier container
             if (apply)
                 m_spellMods[(int)mod.op][(int)mod.type].Add(mod);
             else
                 m_spellMods[(int)mod.op][(int)mod.type].Remove(mod);
 
-            /// Now, send spellmodifier packet
+            // Now, send spellmodifier packet
             if (!IsLoading())
             {
                 ServerOpcodes opcode = (mod.type == SpellModType.Flat ? ServerOpcodes.SetFlatSpellModifier : ServerOpcodes.SetPctSpellModifier);

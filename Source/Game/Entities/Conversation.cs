@@ -40,7 +40,7 @@ namespace Game.Entities
 
         public override void AddToWorld()
         {
-            ///- Register the Conversation for guid lookup and for caster
+            //- Register the Conversation for guid lookup and for caster
             if (!IsInWorld)
             {
                 GetMap().GetObjectsStore().Add(GetGUID(), this);
@@ -50,7 +50,7 @@ namespace Game.Entities
 
         public override void RemoveFromWorld()
         {
-            ///- Remove the Conversation from the accessor and from all lists of objects in world
+            //- Remove the Conversation from the accessor and from all lists of objects in world
             if (IsInWorld)
             {
                 base.RemoveFromWorld();
@@ -110,7 +110,7 @@ namespace Game.Entities
             SetMap(map);
             Relocate(pos);
 
-            base._Create(ObjectGuid.Create(HighGuid.Conversation, GetMapId(), conversationEntry, lowGuid));
+            _Create(ObjectGuid.Create(HighGuid.Conversation, GetMapId(), conversationEntry, lowGuid));
             PhasingHandler.InheritPhaseShift(this, creator);
 
             SetEntry(conversationEntry);

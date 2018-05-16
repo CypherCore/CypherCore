@@ -282,7 +282,7 @@ namespace Game.BattleGrounds.Zones
                                 EventTeamLostPoint(player, point);
                         }
 
-                        /// @workaround The original AreaTrigger is covered by a bigger one and not triggered on client side.
+                        // @workaround The original AreaTrigger is covered by a bigger one and not triggered on client side.
                         if (point == EotSPoints.FelReaver && m_PointOwnedByTeam[point] == player.GetTeam())
                             if (m_FlagState != 0 && GetFlagPickerGUID() == player.GetGUID())
                                 if (player.GetDistance(2044.0f, 1729.729f, 1190.03f) < 3.0f)

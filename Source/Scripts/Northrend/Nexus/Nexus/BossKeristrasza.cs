@@ -220,7 +220,7 @@ namespace Scripts.Northrend.Nexus.Nexus
             if (aurEff.GetBase().GetStackAmount() < 2)
                 return;
             Unit caster = GetCaster();
-            /// @todo the caster should be boss but not the player
+            // @todo the caster should be boss but not the player
             if (!caster || caster.GetAI() == null)
                 return;
 

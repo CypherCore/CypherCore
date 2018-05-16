@@ -54,7 +54,7 @@ namespace Game.Movement
         // Returns true to show that the arguments were configured correctly and MoveSpline initialization will succeed.
         public bool Validate(Unit unit)
         {
-            Func<bool, bool> CHECK = new Func<bool, bool>(exp =>
+            Func<bool, bool> CHECK = exp =>
             {
                 if (!(exp))
                 {
@@ -62,7 +62,7 @@ namespace Game.Movement
                     return false;
                 }
                 return true;
-            });
+            };
 
             if (!CHECK(path.Length > 1))
                 return false;

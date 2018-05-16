@@ -139,7 +139,7 @@ namespace Scripts.Northrend.Nexus.EyeOfEternity
                 return true;
             }
 
-            /// @todo this should be handled in map, maybe add a summon function in map
+            // @todo this should be handled in map, maybe add a summon function in map
             // There is no other way afaik...
             void SpawnGameObject(uint entry, Position pos)
             {

@@ -1952,7 +1952,7 @@ namespace Game.Entities
             //move player's guid into HateOfflineList of those mobs
             //which can't swim and move guid back into ThreatList when
             //on surface.
-            /// @todo exist also swimming mobs, and function must be symmetric to enter/leave water
+            // @todo exist also swimming mobs, and function must be symmetric to enter/leave water
             m_isInWater = apply;
 
             // remove auras that need water/land
@@ -5283,7 +5283,7 @@ namespace Game.Entities
             packet.Level = level;
             packet.HealthDelta = 0;
 
-            /// @todo find some better solution
+            // @todo find some better solution
             packet.PowerDelta[0] = (int)basemana - (int)GetCreateMana();
             packet.PowerDelta[1] = 0;
             packet.PowerDelta[2] = 0;
@@ -5584,18 +5584,18 @@ namespace Game.Entities
             loginSetTimeSpeed.NewSpeed = TimeSpeed;
             loginSetTimeSpeed.GameTime = (uint)Global.WorldMgr.GetGameTime();
             loginSetTimeSpeed.ServerTime = (uint)Global.WorldMgr.GetGameTime();
-            loginSetTimeSpeed.GameTimeHolidayOffset = 0; /// @todo
-            loginSetTimeSpeed.ServerTimeHolidayOffset = 0; /// @todo
+            loginSetTimeSpeed.GameTimeHolidayOffset = 0; // @todo
+            loginSetTimeSpeed.ServerTimeHolidayOffset = 0; // @todo
             SendPacket(loginSetTimeSpeed);
 
             // SMSG_WORLD_SERVER_INFO
             WorldServerInfo worldServerInfo = new WorldServerInfo();
-            worldServerInfo.InstanceGroupSize.Set(GetMap().GetMapDifficulty().MaxPlayers);         /// @todo
-            worldServerInfo.IsTournamentRealm = 0;             /// @todo
-            worldServerInfo.RestrictedAccountMaxLevel.Clear(); /// @todo
-            worldServerInfo.RestrictedAccountMaxMoney.Clear(); /// @todo
+            worldServerInfo.InstanceGroupSize.Set(GetMap().GetMapDifficulty().MaxPlayers);         // @todo
+            worldServerInfo.IsTournamentRealm = 0;             // @todo
+            worldServerInfo.RestrictedAccountMaxLevel.Clear(); // @todo
+            worldServerInfo.RestrictedAccountMaxMoney.Clear(); // @todo
             worldServerInfo.DifficultyID = (uint)GetMap().GetDifficultyID();
-            // worldServerInfo.XRealmPvpAlert;  /// @todo
+            // worldServerInfo.XRealmPvpAlert;  // @todo
             SendPacket(worldServerInfo);
 
             // Spell modifiers

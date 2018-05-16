@@ -1504,7 +1504,7 @@ namespace Game
                     }
                 case ConditionTypes.UnitState:
                     {
-                        if (cond.ConditionValue1 > (uint)UnitState.AllState)
+                        if (cond.ConditionValue1 > (uint)UnitState.AllStateSupported)
                         {
                             Log.outError(LogFilter.Sql, "{0} has non existing UnitState in value1 ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
                             return false;

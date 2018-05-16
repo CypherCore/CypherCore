@@ -176,7 +176,7 @@ namespace Scripts.Northrend.Ulduar
             public const uint MagneticCore = 64436;
             public const uint MagneticCoreVisual = 64438;
             public const uint HalfHeal = 64188;
-            public const uint ClearAllDebuffs = 34098; /// @Todo: Make Use Of This Spell...
+            public const uint ClearAllDebuffs = 34098; // @Todo: Make Use Of This Spell...
             public const uint FreezeAnimStun = 63354; // Used To Prevent Mkii From Doing Stuff?..
             public const uint FreezeAnim = 16245;  // Idle Aura. Freezes Animation.
         }

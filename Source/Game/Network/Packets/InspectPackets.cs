@@ -98,8 +98,8 @@ namespace Game.Network.Packets
         {
             _worldPacket.WritePackedGuid(PlayerGUID);
             _worldPacket.WriteUInt8(LifetimeMaxRank);
-            _worldPacket.WriteUInt16(YesterdayHK); /// @todo: confirm order
-            _worldPacket.WriteUInt16(TodayHK); /// @todo: confirm order
+            _worldPacket.WriteUInt16(YesterdayHK); // @todo: confirm order
+            _worldPacket.WriteUInt16(TodayHK); // @todo: confirm order
             _worldPacket.WriteUInt32(LifetimeHK);
         }
 
@@ -184,7 +184,7 @@ namespace Game.Network.Packets
 
             Item = new ItemInstance(item);
             Index = index;
-            Usable = true; /// @todo
+            Usable = true; // @todo
 
             for (EnchantmentSlot enchant = 0; enchant < EnchantmentSlot.Max; ++enchant)
             {

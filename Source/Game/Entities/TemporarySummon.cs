@@ -232,7 +232,7 @@ namespace Game.Entities
 
         public override void UpdateObjectVisibilityOnCreate()
         {
-            base.UpdateObjectVisibility(true);
+            UpdateObjectVisibility(true);
         }
 
         public void SetTempSummonType(TempSummonType type)

@@ -52,11 +52,11 @@ namespace Game.Chat
             if (text.Length < 2)
                 return false;
 
-            /// ignore messages staring from many dots.
+            // ignore messages staring from many dots.
             if ((text[0] == '.' && text[1] == '.') || (text[0] == '!' && text[1] == '!'))
                 return false;
 
-            /// skip first . or ! (in console allowed use command with . and ! and without its)
+            // skip first . or ! (in console allowed use command with . and ! and without its)
             if (text[0] == '!' || text[0] == '.')
                 text = text.Substring(1);
 

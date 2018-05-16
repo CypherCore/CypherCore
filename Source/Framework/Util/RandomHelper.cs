@@ -100,9 +100,9 @@ public class RandomHelper
 
     public static T RAND<T>(params T[] args)
     {
-        int rand = IRand(0, args.Length - 1);
+        int randIndex = IRand(0, args.Length - 1);
 
-        return args[rand];
+        return args[randIndex];
     }
 }
 

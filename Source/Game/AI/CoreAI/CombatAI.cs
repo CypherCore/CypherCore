@@ -241,7 +241,7 @@ namespace Game.AI
         }
         public override bool CanAIAttack(Unit victim)
         {
-            /// todo use one function to replace it
+            // todo use one function to replace it
             if (!me.IsWithinCombatRange(me.GetVictim(), me.m_CombatDistance)
                 || (m_minRange != 0 && me.IsWithinCombatRange(me.GetVictim(), m_minRange)))
                 return false;

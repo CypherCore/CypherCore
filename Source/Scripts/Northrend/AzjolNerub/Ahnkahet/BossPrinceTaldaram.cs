@@ -316,7 +316,7 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.PrinceTaldaram
                         {
                             DoCast(me, SpellIds.FlameSpherePeriodic, true);
 
-                            /// @todo: find correct values
+                            // @todo: find correct values
                             float angleOffset = 0.0f;
                             float distOffset = Misc.DataSphereDistance;
 
@@ -342,7 +342,7 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.PrinceTaldaram
                             float x = me.GetPositionX() + distOffset * (float)Math.Cos(angle);
                             float y = me.GetPositionY() + distOffset * (float)Math.Sin(angle);
 
-                            /// @todo: correct speed
+                            // @todo: correct speed
                             me.GetMotionMaster().MovePoint(0, x, y, me.GetPositionZ());
                             break;
                         }

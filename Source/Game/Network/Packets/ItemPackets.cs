@@ -305,8 +305,8 @@ namespace Game.Network.Packets
         }
 
         public InvUpdate Inv;
-        public byte Slot1; /// Source Slot
-        public byte Slot2; /// Destination Slot
+        public byte Slot1; // Source Slot
+        public byte Slot2; // Destination Slot
     }
 
     public class SwapItem : ClientPacket

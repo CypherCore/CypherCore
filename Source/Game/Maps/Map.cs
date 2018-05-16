@@ -338,7 +338,7 @@ namespace Game.Maps
         void DeleteFromWorld(Player player)
         {
             Global.ObjAccessor.RemoveObject(player);
-            RemoveUpdateObject(player); /// @todo I do not know why we need this, it should be removed in ~Object anyway
+            RemoveUpdateObject(player); // @todo I do not know why we need this, it should be removed in ~Object anyway
             player.Dispose();
         }
 
@@ -1147,8 +1147,8 @@ namespace Game.Maps
                         //This may happen when a player just logs in and a pet moves to a nearby unloaded cell
                         //To avoid this, we can load nearby cells when player log in
                         //But this check is always needed to ensure safety
-                        /// @todo pets will disappear if this is outside CreatureRespawnRelocation
-                        /// //need to check why pet is frequently relocated to an unloaded cell
+                        // @todo pets will disappear if this is outside CreatureRespawnRelocation
+                        //need to check why pet is frequently relocated to an unloaded cell
                         if (creature.IsPet())
                             ((Pet)creature).Remove(PetSaveMode.NotInSlot, true);
                         else
@@ -4434,7 +4434,7 @@ namespace Game.Maps
 
         public override bool AddPlayerToMap(Player player, bool initPlayer = true)
         {
-            /// @todo Not sure about checking player level: already done in HandleAreaTriggerOpcode
+            // @todo Not sure about checking player level: already done in HandleAreaTriggerOpcode
             // GMs still can teleport player in instance.
             // Is it needed?
             lock(_mapLock)
@@ -4623,7 +4623,7 @@ namespace Game.Maps
 
             if (load)
             {
-                /// @todo make a global storage for this
+                // @todo make a global storage for this
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_INSTANCE);
                 stmt.AddValue(0, GetId());
                 stmt.AddValue(1, i_InstanceId);

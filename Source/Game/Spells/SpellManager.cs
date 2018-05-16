@@ -658,8 +658,8 @@ namespace Game.Entities
                 SpellInfo first = GetSpellInfo(pair.Key);
                 SpellInfo next = GetSpellInfo(pair.Value);
 
-                if (first == null || next != null)
-                    continue;
+                if (!mSpellChains.ContainsKey(pair.Key))
+                    mSpellChains[pair.Key] = new SpellChainNode();
 
                 mSpellChains[pair.Key].first = first;
                 mSpellChains[pair.Key].prev = null;
@@ -667,6 +667,9 @@ namespace Game.Entities
                 mSpellChains[pair.Key].last = next;
                 mSpellChains[pair.Key].rank = 1;
                 mSpellInfoMap[pair.Key].ChainEntry = mSpellChains[pair.Key];
+
+                if (!mSpellChains.ContainsKey(pair.Value))
+                    mSpellChains[pair.Value] = new SpellChainNode();
 
                 mSpellChains[pair.Value].first = first;
                 mSpellChains[pair.Value].prev = first;
@@ -684,7 +687,13 @@ namespace Game.Entities
                     if (last == null)
                         break;
 
+                    if (!mSpellChains.ContainsKey(nextPair.Key))
+                        mSpellChains[nextPair.Key] = new SpellChainNode();
+
                     mSpellChains[nextPair.Key].next = last;
+
+                    if (!mSpellChains.ContainsKey(nextPair.Value))
+                        mSpellChains[nextPair.Value] = new SpellChainNode();
 
                     mSpellChains[nextPair.Value].first = first;
                     mSpellChains[nextPair.Value].prev = prev;
@@ -2433,7 +2442,7 @@ namespace Game.Entities
                         break;
                     case 56606: // Ride Jokkum
                     case 61791: // Ride Vehicle (Yogg-Saron)
-                                /// @todo: remove this when basepoints of all Ride Vehicle auras are calculated correctly
+                                // @todo: remove this when basepoints of all Ride Vehicle auras are calculated correctly
                         spellInfo.GetEffect(0).BasePoints = 1;
                         break;
                     case 59630: // Black Magic

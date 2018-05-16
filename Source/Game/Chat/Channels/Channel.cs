@@ -574,7 +574,7 @@ namespace Game.Chat
             Log.outDebug(LogFilter.ChatSystem, "SMSG_CHANNEL_LIST {0} Channel: {1}", player.GetSession().GetPlayerInfo(), channelName);
 
             ChannelListResponse list = new ChannelListResponse();
-            list.Display = true; /// always true?
+            list.Display = true; // always true?
             list.Channel = channelName;
             list.ChannelFlags = GetFlags();
 

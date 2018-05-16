@@ -60,7 +60,7 @@ namespace Game.DungeonFinding
             }
 
             Global.LFGMgr.SetTeam(player.GetGUID(), player.GetTeam());
-            /// @todo - Restore LfgPlayerData and send proper status to player if it was in a group
+            // @todo - Restore LfgPlayerData and send proper status to player if it was in a group
         }
 
         public override void OnMapChanged(Player player)
@@ -157,7 +157,7 @@ namespace Game.DungeonFinding
 
             if (isLFG && method == RemoveMethod.Kick)        // Player have been kicked
             {
-                /// @todo - Update internal kick cooldown of kicker
+                // @todo - Update internal kick cooldown of kicker
                 string str_reason = "";
                 if (!string.IsNullOrEmpty(reason))
                     str_reason = reason;

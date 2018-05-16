@@ -2122,7 +2122,7 @@ namespace Game.DungeonFinding
         public bool isNew;
         public List<ObjectGuid> queues = new List<ObjectGuid>();
         public List<ulong> showorder = new List<ulong>();
-        public Dictionary<ObjectGuid, LfgProposalPlayer> players = new Dictionary<ObjectGuid, LfgProposalPlayer>();                  ///< Players data
+        public Dictionary<ObjectGuid, LfgProposalPlayer> players = new Dictionary<ObjectGuid, LfgProposalPlayer>();                  // Players data
     }
 
     public class LfgRoleCheck

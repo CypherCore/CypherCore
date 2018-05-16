@@ -258,7 +258,7 @@ namespace Framework.GameMath
         /// Converts the specified string to its <see cref="Quaternion"/> equivalent.
         /// </summary>
         /// <param name="value">A string representation of a <see cref="Quaternion"/></param>
-        /// <returns>A <see cref="Quaternion"/> that represents the vector specified by the <paramref name="s"/> parameter.</returns>
+        /// <returns>A <see cref="Quaternion"/> that represents the vector specified by the <paramref name="value"/> parameter.</returns>
         public static Quaternion Parse(string value)
         {
             Regex r = new Regex(@"\((?<w>.*),(?<x>.*),(?<y>.*),(?<z>.*)\)", RegexOptions.None);
@@ -358,7 +358,7 @@ namespace Framework.GameMath
         }
 
         /// <summary>
-        /// Multiplies quaternion <paramref name="a"/> by quaternion <paramref name="b"/>.
+        /// Multiplies quaternion <paramref name="left"/> by quaternion <paramref name="right"/>.
         /// </summary>
         /// <param name="left">A <see cref="Quaternion"/> instance.</param>
         /// <param name="right">A <see cref="Quaternion"/> instance.</param>
@@ -374,7 +374,7 @@ namespace Framework.GameMath
             return result;
         }
         /// <summary>
-        /// Multiplies quaternion <paramref name="a"/> by quaternion <paramref name="b"/> and put the result in a third quaternion.
+        /// Multiplies quaternion <paramref name="left"/> by quaternion <paramref name="right"/> and put the result in a third quaternion.
         /// </summary>
         /// <param name="left">A <see cref="Quaternion"/> instance.</param>
         /// <param name="right">A <see cref="Quaternion"/> instance.</param>
@@ -617,7 +617,7 @@ namespace Framework.GameMath
         /// </summary>
         /// <remarks>
         /// The quaternion values that are close to zero within the given tolerance are set to zero.
-        /// The tolerance value used is <see cref="MathFunctions.EpsilonD"/>
+        /// The tolerance value used is <see cref="MathFunctions.Epsilon"/>
         /// </remarks>
         public void ClampZero()
         {
@@ -707,7 +707,7 @@ namespace Framework.GameMath
             return Quaternion.Subtract(left, right);
         }
         /// <summary>
-        /// Multiplies quaternion <paramref name="a"/> by quaternion <paramref name="b"/>.
+        /// Multiplies quaternion <paramref name="left"/> by quaternion <paramref name="right"/>.
         /// </summary>
         /// <param name="left">A <see cref="Quaternion"/> instance.</param>
         /// <param name="right">A <see cref="Quaternion"/> instance.</param>

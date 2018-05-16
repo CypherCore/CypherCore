@@ -546,7 +546,7 @@ namespace Game.AI
             if (me.GetVictim() && me.GetVictim() != victim)
             {
                 // Check if our owner selected this target and clicked "attack"
-                Unit ownerTarget = null;
+                Unit ownerTarget;
                 Player owner = me.GetCharmerOrOwner().ToPlayer();
                 if (owner)
                     ownerTarget = owner.GetSelectedUnit();

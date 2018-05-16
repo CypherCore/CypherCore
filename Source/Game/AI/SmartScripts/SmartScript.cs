@@ -3272,7 +3272,7 @@ namespace Game.AI
                         if (me == null || !me.IsInCombat())
                             return;
 
-                        List<WorldObject> _targets = null;
+                        List<WorldObject> _targets;
 
                         switch (e.GetTargetType())
                         {

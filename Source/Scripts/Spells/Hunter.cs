@@ -433,7 +433,7 @@ namespace Scripts.Spells.Hunter
             {
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(p.Key);
 
-                ///! If spellId in cooldown map isn't valid, the above will return a null pointer.
+                //! If spellId in cooldown map isn't valid, the above will return a null pointer.
                 if (spellInfo.SpellFamilyName == SpellFamilyNames.Hunter &&
                 spellInfo.Id != SpellIds.Readiness &&
                 spellInfo.Id != SpellIds.BestialWrath &&

@@ -1255,7 +1255,7 @@ namespace Game.AI
             if (e.GetScriptType() != SmartScriptType.Creature)
                 return true;
 
-            uint entry = 0;
+            uint entry;
             if (e.GetEventType() == SmartEvents.TextOver)
             {
                 entry = e.Event.textOver.creatureEntry;

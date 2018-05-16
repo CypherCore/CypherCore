@@ -939,7 +939,7 @@ namespace Game.Guilds
             GuildChallengeUpdate updatePacket = new GuildChallengeUpdate();
 
             for (int i = 0; i < GuildConst.ChallengesTypes; ++i)
-                updatePacket.CurrentCount[i] = 0; /// @todo current count
+                updatePacket.CurrentCount[i] = 0; // @todo current count
 
             for (int i = 0; i < GuildConst.ChallengesTypes; ++i)
                 updatePacket.MaxCount[i] = GuildConst.ChallengesMaxCount[i];
@@ -3697,7 +3697,7 @@ namespace Game.Guilds
             public override void LogAction(MoveItemData pFrom)
             {
                 base.LogAction(pFrom);
-                if (!pFrom.IsBank() && m_pPlayer.GetSession().HasPermission(RBACPermissions.LogGmTrade)) /// @todo Move this to scripts
+                if (!pFrom.IsBank() && m_pPlayer.GetSession().HasPermission(RBACPermissions.LogGmTrade)) // @todo Move this to scripts
                 {
                     Log.outCommand(m_pPlayer.GetSession().GetAccountId(), "GM {0} ({1}) (Account: {2}) deposit item: {3} (Entry: {4} Count: {5}) to guild bank named: {6} (Guild ID: {7})",
                         m_pPlayer.GetName(), m_pPlayer.GetGUID().ToString(), m_pPlayer.GetSession().GetAccountId(), pFrom.GetItem().GetTemplate().GetName(),

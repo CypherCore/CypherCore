@@ -255,7 +255,7 @@ namespace Game.Movement
             }
 
             // look for startPoly/endPoly in current path
-            /// @todo we can merge it with getPathPolyByPosition() loop
+            // @todo we can merge it with getPathPolyByPosition() loop
             bool startPolyFound = false;
             bool endPolyFound = false;
             uint pathStartIndex = 0;
@@ -314,7 +314,7 @@ namespace Game.Movement
                 // sub-path of optimal path is optimal
 
                 // take ~80% of the original length
-                /// @todo play with the values here
+                // @todo play with the values here
                 uint prefixPolyLength = (uint)(_polyLength * 0.8f + 0.5f);
                 Array.Copy(_pathPolyRefs, pathStartIndex, _pathPolyRefs, 0, prefixPolyLength);
 
@@ -523,7 +523,7 @@ namespace Game.Movement
             {
                 // only happens if pass bad data to findStraightPath or navmesh is broken
                 // single point paths can be generated here
-                /// @todo check the exact cases
+                // @todo check the exact cases
                 Log.outDebug(LogFilter.Maps, "++ PathGenerator.BuildPointPath FAILED! path sized {0} returned\n", pointCount);
                 BuildShortcut();
                 pathType = PathType.NoPath;
@@ -921,9 +921,9 @@ namespace Game.Movement
 
             _navMesh.calcTileLoc(point, ref tx, ref ty);
 
-            /// Workaround
-            /// For some reason, often the tx and ty variables wont get a valid value
-            /// Use this check to prevent getting negative tile coords and crashing on getTileAt
+            // Workaround
+            // For some reason, often the tx and ty variables wont get a valid value
+            // Use this check to prevent getting negative tile coords and crashing on getTileAt
             if (tx < 0 || ty < 0)
                 return false;
 

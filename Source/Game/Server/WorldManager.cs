@@ -859,7 +859,7 @@ namespace Game
             //to set mailtimer to return mails every day between 4 and 5 am
             //mailtimer is increased when updating auctions
             //one second is 1000 -(tested on win system)
-            /// @todo Get rid of magic numbers
+            // @todo Get rid of magic numbers
             var localTime = Time.UnixTimeToDateTime(m_gameTime).ToLocalTime();
             mail_timer = ((((localTime.Hour + 20) % 24) * Time.Hour * Time.InMilliseconds) / m_timers[WorldTimers.Auctions].GetInterval());
             //1440
@@ -1212,7 +1212,7 @@ namespace Game
             {
                 m_timers[WorldTimers.Blackmarket].Reset();
 
-                ///- Update blackmarket, refresh auctions if necessary
+                //- Update blackmarket, refresh auctions if necessary
                 if ((blackmarket_timer * m_timers[WorldTimers.Blackmarket].GetInterval() >= WorldConfig.GetIntValue(WorldCfg.BlackmarketUpdatePeriod) * Time.Hour * Time.InMilliseconds) || blackmarket_timer == 0)
                 {
                     Global.BlackMarketMgr.RefreshAuctions();
@@ -1230,7 +1230,7 @@ namespace Game
             UpdateSessions(diff);
             RecordTimeDiff("UpdateSessions");
 
-            /// <li> Update uptime table
+            // <li> Update uptime table
             if (m_timers[WorldTimers.UpTime].Passed())
             {
                 uint tmpDiff = (uint)(m_gameTime - m_startTime);
@@ -1248,7 +1248,7 @@ namespace Game
                 DB.Login.Execute(stmt);
             }
 
-            /// <li> Clean logs table
+            // <li> Clean logs table
             if (WorldConfig.GetIntValue(WorldCfg.LogdbCleartime) > 0) // if not enabled, ignore the timer
             {
                 if (m_timers[WorldTimers.CleanDB].Passed())
@@ -1580,7 +1580,7 @@ namespace Game
 
             uint duration_secs = Time.TimeStringToSecs(duration);
 
-            /// Pick a player to ban if not online
+            // Pick a player to ban if not online
             if (!pBanned)
             {
                 guid = ObjectManager.GetPlayerGUIDByName(name);

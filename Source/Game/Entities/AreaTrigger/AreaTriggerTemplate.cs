@@ -121,41 +121,39 @@ namespace Game.Entities
             switch (TriggerType)
             {
                 case AreaTriggerTypes.Sphere:
-                    {
-                        MaxSearchRadius = Math.Max(SphereDatas.Radius, SphereDatas.RadiusTarget);
-                        break;
-                    }
+                {
+                    MaxSearchRadius = Math.Max(SphereDatas.Radius, SphereDatas.RadiusTarget);
+                    break;
+                }
                 case AreaTriggerTypes.Box:
+                {
+                    fixed (float* ptr = BoxDatas.Extents)
                     {
-                        unsafe
-                        {
-                            fixed (float* ptr = BoxDatas.Extents)
-                            {
-                                MaxSearchRadius = (float)Math.Sqrt(ptr[0] * ptr[0] / 4 + ptr[1] * ptr[1] / 4);
-                            }
-                        }
-                        break;
+                        MaxSearchRadius = (float) Math.Sqrt(ptr[0] * ptr[0] / 4 + ptr[1] * ptr[1] / 4);
                     }
+
+                    break;
+                }
                 case AreaTriggerTypes.Polygon:
+                {
+                    if (PolygonDatas.Height <= 0.0f)
+                        PolygonDatas.Height = 1.0f;
+
+                    foreach (Vector2 vertice in PolygonVertices)
                     {
-                        if (PolygonDatas.Height <= 0.0f)
-                            PolygonDatas.Height = 1.0f;
+                        float pointDist = vertice.GetLength();
 
-                        foreach (Vector2 vertice in PolygonVertices)
-                        {
-                            float pointDist = vertice.GetLength();
-
-                            if (pointDist > MaxSearchRadius)
-                                MaxSearchRadius = pointDist;
-                        }
-
-                        break;
+                        if (pointDist > MaxSearchRadius)
+                            MaxSearchRadius = pointDist;
                     }
+
+                    break;
+                }
                 case AreaTriggerTypes.Cylinder:
-                    {
-                        MaxSearchRadius = CylinderDatas.Radius;
-                        break;
-                    }
+                {
+                    MaxSearchRadius = CylinderDatas.Radius;
+                    break;
+                }
                 default:
                     break;
             }

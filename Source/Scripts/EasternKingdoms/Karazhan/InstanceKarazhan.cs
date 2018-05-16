@@ -318,7 +318,7 @@ namespace Scripts.EasternKingdoms.Karazhan
 
                 switch (m_uiOperaEvent)
                 {
-                    /// @todo Set Object visibilities for Opera based on performance
+                    // @todo Set Object visibilities for Opera based on performance
                     case OperaEvents.Oz:
                         break;
 

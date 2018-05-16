@@ -740,7 +740,7 @@ namespace Game.Entities
 
         public bool HasSplines() { return !_spline.empty(); }
         public Spline GetSpline() { return _spline; }
-        public uint GetElapsedTimeForMovement() { return GetTimeSinceCreated(); } /// @todo: research the right value, in sniffs both timers are nearly identical
+        public uint GetElapsedTimeForMovement() { return GetTimeSinceCreated(); } // @todo: research the right value, in sniffs both timers are nearly identical
 
         ObjectGuid _targetGuid;
 

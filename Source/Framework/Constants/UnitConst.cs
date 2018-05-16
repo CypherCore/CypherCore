@@ -483,6 +483,12 @@ namespace Framework.Constants
         ChaseMove = 0x4000000,
         FollowMove = 0x8000000,
         IgnorePathfinding = 0x10000000,
+        AllStateSupported = Died | MeleeAttacking | Stunned | Roaming | Chase
+                            | Fleeing | InFlight | Follow | Root | Confused
+                            | Distracted | Isolated | AttackPlayer | Casting
+                            | Possessed | Charging | Jumping | Move | Rotating
+                            | Evade | RoamingMove | ConfusedMove | FleeingMove
+                            | ChaseMove | FollowMove | IgnorePathfinding,
         Unattackable = InFlight,
         // For Real Move Using Movegen Check And Stop (Except Unstoppable Flight)
         Moving = RoamingMove | ConfusedMove | FleeingMove | ChaseMove | FollowMove,

@@ -41,7 +41,7 @@ namespace Game.Network.Packets
         }
 
         public int[] FactionStandings = new int[FactionCount];
-        public bool[] FactionHasBonus = new bool[FactionCount]; ///< @todo: implement faction bonus
+        public bool[] FactionHasBonus = new bool[FactionCount]; //@todo: implement faction bonus
         public FactionFlags[] FactionFlags = new FactionFlags[FactionCount];
     }
 

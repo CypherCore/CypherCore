@@ -255,14 +255,14 @@ namespace Scripts.Spells.Priest
 
         void FilterTargets(List<WorldObject> targets)
         {
-            targets.RemoveAll(new Predicate<WorldObject>(obj =>
+            targets.RemoveAll(obj =>
             {
                 Unit target = obj.ToUnit();
                 if (target)
                     return !GetCaster().IsInRaidWith(target);
 
                 return true;
-            }));
+            });
 
             uint maxTargets = (uint)(GetCaster().HasAura(SpellIds.GlyphOfCircleOfHealing) ? 6 : 5); // Glyph of Circle of Healing
 
@@ -368,14 +368,14 @@ namespace Scripts.Spells.Priest
     {
         void FilterTargets(List<WorldObject> targets)
         {
-            targets.RemoveAll(new Predicate<WorldObject>(obj =>
+            targets.RemoveAll(obj =>
             {
                 Unit target = obj.ToUnit();
                 if (target)
                     return !GetCaster().IsInRaidWith(target);
 
                 return true;
-            }));
+            });
 
             uint maxTargets = 3;
 
@@ -492,23 +492,23 @@ namespace Scripts.Spells.Priest
     {
         void FilterTargets(List<WorldObject> targets)
         {
-            targets.RemoveAll(new Predicate<WorldObject>(obj =>
+            targets.RemoveAll(obj =>
             {
                 Unit target = obj.ToUnit();
                 if (target)
                     return target.GetPowerType() != PowerType.Mana;
 
                 return true;
-            }));
+            });
 
-            targets.RemoveAll(new Predicate<WorldObject>(obj =>
+            targets.RemoveAll(obj =>
             {
                 Unit target = obj.ToUnit();
                 if (target)
                     return !GetCaster().IsInRaidWith(target);
 
                 return true;
-            }));
+            });
 
             uint maxTargets = 3;
 

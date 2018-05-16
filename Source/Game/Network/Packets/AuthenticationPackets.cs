@@ -139,8 +139,8 @@ namespace Game.Network.Packets
 
                 foreach (var klass in SuccessInfo.Value.AvailableClasses)
                 {
-                    _worldPacket.WriteUInt8(klass.Key); /// the current class
-                    _worldPacket.WriteUInt8(klass.Value); /// the required Expansion
+                    _worldPacket.WriteUInt8(klass.Key); // the current class
+                    _worldPacket.WriteUInt8(klass.Value); // the required Expansion
                 }
 
                 _worldPacket.WriteBit(SuccessInfo.Value.IsExpansionTrial);

@@ -81,7 +81,7 @@ namespace Game
 
         public void SendSetTimeZoneInformation()
         {
-            /// @todo: replace dummy values
+            // @todo: replace dummy values
             SetTimeZoneInformation packet = new SetTimeZoneInformation();
             packet.ServerTimeTZ = "Europe/Paris";
             packet.GameTimeTZ = "Europe/Paris";

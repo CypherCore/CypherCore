@@ -227,7 +227,7 @@ namespace Game.Entities
         {
             var seat = Seats.LookupByKey(seatId);
             if (seat == null)
-                return seat;
+                return null;
 
             foreach (var sea in Seats)
             {
@@ -633,7 +633,7 @@ namespace Game.Entities
                 Log.outDebug(LogFilter.Vehicle, "Passenger GuidLow: {0}, Entry: {1}, board on vehicle GuidLow: {2}, Entry: {3} SeatId: {4} cancelled",
                     Passenger.GetGUID().ToString(), Passenger.GetEntry(), Target.GetBase().GetGUID().ToString(), Target.GetBase().GetEntry(), Seat.Key);
 
-                /// Remove the pending event when Abort was called on the event directly
+                // Remove the pending event when Abort was called on the event directly
                 Target.RemovePendingEvent(this);
 
                 // @SPELL_AURA_CONTROL_VEHICLE auras can be applied even when the passenger is not (yet) on the vehicle.

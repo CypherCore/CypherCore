@@ -83,7 +83,7 @@ namespace Game
                     return;
             }
 
-            /// @todo allow control charmed player?
+            // @todo allow control charmed player?
             if (pet.IsTypeId(TypeId.Player) && !(flag == ActiveStates.Command && spellid == (uint)CommandStates.Attack))
                 return;
 
@@ -169,7 +169,7 @@ namespace Game
                                 // Can't attack if owner is pacified
                                 if (GetPlayer().HasAuraType(AuraType.ModPacify))
                                 {
-                                    /// @todo Send proper error message to client
+                                    // @todo Send proper error message to client
                                     return;
                                 }
 
@@ -376,7 +376,7 @@ namespace Game
                         }
                         else
                         {
-                            if (pet.isPossessed() || pet.IsVehicle()) /// @todo: confirm this check
+                            if (pet.isPossessed() || pet.IsVehicle()) // @todo: confirm this check
                                 Spell.SendCastResult(GetPlayer(), spellInfo, spell.m_SpellVisual, spell.m_castId, result);
                             else
                                 spell.SendPetCastResult(result);

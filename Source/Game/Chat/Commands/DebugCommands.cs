@@ -619,7 +619,7 @@ namespace Game.Chat
                     return false;
                 target.SetUnitMovementFlags((MovementFlag)moveFlags);
 
-                /// @fixme: port master's HandleDebugMoveflagsCommand; flags need different handling
+                // @fixme: port master's HandleDebugMoveflagsCommand; flags need different handling
 
                 if (!string.IsNullOrEmpty(mask2))
                 {

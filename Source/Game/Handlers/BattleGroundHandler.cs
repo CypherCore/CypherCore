@@ -591,8 +591,8 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RequestRatedBattlefieldInfo)]
         void HandleRequestRatedBattlefieldInfo(RequestRatedBattlefieldInfo packet)
         {
-            /// @Todo: perfome research in this case
-            /// The unk fields are related to arenas
+            // @Todo: perfome research in this case
+            // The unk fields are related to arenas
             WorldPacket data = new WorldPacket(ServerOpcodes.RatedBattlefieldInfo);
             data.WriteInt32(0);      // BgWeeklyWins20vs20
             data.WriteInt32(0);      // BgWeeklyPlayed20vs20

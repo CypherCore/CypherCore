@@ -476,11 +476,11 @@ namespace Game.Entities
             hitOutCome = _hitOutCome;
         }
 
-        public uint absorbed_damage { get; set; }
+        public uint absorbed_damage { get; }
         public uint mitigated_damage { get; set; }
 
-        public WeaponAttackType attackType { get; set; }
-        public MeleeHitOutcome hitOutCome { get; set; }
+        public WeaponAttackType attackType { get; }
+        public MeleeHitOutcome hitOutCome { get; }
     }
 
     public class DispelInfo

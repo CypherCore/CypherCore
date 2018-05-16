@@ -972,12 +972,5 @@ namespace Game.Spells
             public DateTime RechargeStart;
             public DateTime RechargeEnd;
         }
-
-        class CooldownDurations
-        {
-            public int Cooldown = -1;
-            public uint CategoryId = 0;
-            public int CategoryCooldown = -1;
-        }
     }
 }

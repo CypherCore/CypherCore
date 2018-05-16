@@ -778,7 +778,7 @@ namespace Game.Spells
                     SpellTargetPosition st = Global.SpellMgr.GetSpellTargetPosition(m_spellInfo.Id, effIndex);
                     if (st != null)
                     {
-                        /// @todo fix this check
+                        // @todo fix this check
                         if (m_spellInfo.HasEffect(SpellEffectName.TeleportUnits) || m_spellInfo.HasEffect(SpellEffectName.Bind))
                             dest = new SpellDestination(st.target_X, st.target_Y, st.target_Z, st.target_Orientation, st.target_mapId);
                         else if (st.target_mapId == m_caster.GetMapId())
@@ -1244,7 +1244,7 @@ namespace Game.Spells
         void SelectEffectTypeImplicitTargets(uint effIndex)
         {
             // special case for SPELL_EFFECT_SUMMON_RAF_FRIEND and SPELL_EFFECT_SUMMON_PLAYER
-            /// @todo this is a workaround - target shouldn't be stored in target map for those spells
+            // @todo this is a workaround - target shouldn't be stored in target map for those spells
             SpellEffectInfo effect = GetEffect(effIndex);
             if (effect == null)
                 return;
@@ -1670,7 +1670,7 @@ namespace Game.Spells
             if (m_spellInfo.Speed > 0.0f && m_caster != target)
             {
                 // calculate spell incoming interval
-                /// @todo this is a hack
+                // @todo this is a hack
                 float dist = m_caster.GetDistance(target.GetPositionX(), target.GetPositionY(), target.GetPositionZ());
 
                 if (dist < 5.0f)
@@ -2132,7 +2132,7 @@ namespace Game.Spells
                 else if (m_caster.IsFriendlyTo(unit))
                 {
                     // for delayed spells ignore negative spells (after duel end) for friendly targets
-                    /// @todo this cause soul transfer bugged
+                    // @todo this cause soul transfer bugged
                     // 63881 - Malady of the Mind jump spell (Yogg-Saron)
                     if (m_spellInfo.Speed > 0.0f && unit.IsTypeId(TypeId.Player) && !m_spellInfo.IsPositive() && m_spellInfo.Id != 63881)
                         return SpellMissInfo.Evade;
@@ -4089,7 +4089,7 @@ namespace Game.Spells
 
             resurrectRequest.SpellID = m_spellInfo.Id;
 
-            //packet.ReadBit("UseTimer"); /// @todo: 6.x Has to be implemented
+            //packet.ReadBit("UseTimer"); // @todo: 6.x Has to be implemented
             resurrectRequest.Sickness = !m_caster.IsTypeId(TypeId.Player); // "you'll be afflicted with resurrection sickness"
 
             resurrectRequest.Name = sentName;

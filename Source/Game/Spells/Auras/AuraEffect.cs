@@ -1938,7 +1938,7 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             // Vengeance of the Blue Flight (@todo REMOVE THIS!)
-            /// @workaround
+            // @workaround
             if (m_spellInfo.Id == 45839)
             {
                 if (apply)
@@ -4985,7 +4985,7 @@ namespace Game.Spells
                                             HealInfo healInfo = new HealInfo(caster, target, heal, auraSpellInfo, auraSpellInfo.GetSchoolMask());
                                             caster.HealBySpell(healInfo);
 
-                                            /// @todo: should proc other auras?
+                                            // @todo: should proc other auras?
                                             int mana = caster.GetMaxPower(PowerType.Mana);
                                             if (mana != 0)
                                             {
@@ -5044,7 +5044,7 @@ namespace Game.Spells
                                     triggerSpellId = 30571;
                                     break;
                                 // Doom
-                                /// @todo effect trigger spell may be independant on spell targets, and executed in spell finish phase
+                                // @todo effect trigger spell may be independant on spell targets, and executed in spell finish phase
                                 // so instakill will be naturally done before trigger spell
                                 case 31347:
                                     {

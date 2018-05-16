@@ -314,7 +314,7 @@ namespace Game
             // TIMING_CHECK
             {
                 byte result = buff.ReadUInt8();
-                /// @todo test it.
+                // @todo test it.
                 if (result == 0x00)
                 {
                     Log.outWarn(LogFilter.Warden, "{0} failed timing check. Action: {1}", _session.GetPlayerInfo(), Penalty());

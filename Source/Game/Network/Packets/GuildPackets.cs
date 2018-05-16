@@ -716,7 +716,7 @@ namespace Game.Network.Packets
         }
 
         public ObjectGuid NoteeGUID;
-        public bool IsPublic;          ///< 0 == Officer, 1 == Public
+        public bool IsPublic;          // 0 == Officer, 1 == Public
         public string Note;
     }
 
@@ -736,7 +736,7 @@ namespace Game.Network.Packets
         }
 
         public ObjectGuid Member;
-        public bool IsPublic;          ///< 0 == Officer, 1 == Public
+        public bool IsPublic;          // 0 == Officer, 1 == Public
         public string Note;
     }
 

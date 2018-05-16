@@ -134,7 +134,7 @@ namespace Scripts.Kalimdor.ZoneAshenvale
             if (quest.Id == QuestIds.FreedomToRuul)
             {
                 me.SetFaction(Misc.FactionQuest);
-                base.Start(true, false, player.GetGUID());
+                Start(true, false, player.GetGUID());
             }
         }
 
@@ -224,7 +224,7 @@ namespace Scripts.Kalimdor.ZoneAshenvale
             {
                 Talk(TextIds.SayMugStart1);
                 me.SetFaction(Misc.FactionQuest);
-                base.Start(true, false, player.GetGUID());
+                Start(true, false, player.GetGUID());
             }
         }
 

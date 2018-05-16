@@ -73,20 +73,20 @@ namespace Game.Misc
         /// <param name="action">action Custom action given to OnGossipHello.</param>
         public void AddMenuItem(uint menuId, uint optionIndex, uint sender, uint action)
         {
-            /// Find items for given menu id.
+            // Find items for given menu id.
             var bounds = Global.ObjectMgr.GetGossipMenuItemsMapBounds(menuId);
-            /// Return if there are none.
+            // Return if there are none.
             if (bounds.Empty())
                 return;
 
-            /// Iterate over each of them.
+            // Iterate over each of them.
             foreach (var item in bounds)
             {
                 // Find the one with the given menu item id.
                 if (item.OptionIndex != optionIndex)
                     continue;
 
-                /// Store texts for localization.
+                // Store texts for localization.
                 string strOptionText = "", strBoxText = "";
                 BroadcastTextRecord optionBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(item.OptionBroadcastTextId);
                 BroadcastTextRecord boxBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(item.BoxBroadcastTextId);

@@ -69,7 +69,7 @@ namespace Game
             if (_player)
                 LogoutPlayer(true);
 
-            /// - If have unclosed socket, close it
+            // - If have unclosed socket, close it
             for (byte i = 0; i < 2; ++i)
             {
                 if (m_Socket[i] != null)
@@ -633,7 +633,7 @@ namespace Game
                 _accountLoginCallback = null;
             }
 
-            //! HandlePlayerLoginOpcode
+            // HandlePlayerLoginOpcode
             if (_charLoginCallback != null && _charLoginCallback.IsCompleted)
             {
                 HandlePlayerLogin((LoginQueryHolder)_charLoginCallback.Result);

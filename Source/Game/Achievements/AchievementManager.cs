@@ -180,13 +180,13 @@ namespace Game.Achievements
 
         public virtual void CompletedAchievement(AchievementRecord entry, Player referencePlayer) { }
 
-        public Func<KeyValuePair<uint, CompletedAchievementData>, AchievementRecord> VisibleAchievementCheck = new Func<KeyValuePair<uint, CompletedAchievementData>, AchievementRecord>(value =>
+        public Func<KeyValuePair<uint, CompletedAchievementData>, AchievementRecord> VisibleAchievementCheck = value =>
         {
             AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(value.Key);
             if (achievement != null && !achievement.Flags.HasAnyFlag(AchievementFlags.Hidden))
                 return achievement;
             return null;
-        });
+        };
 
         protected Dictionary<uint, CompletedAchievementData> _completedAchievements = new Dictionary<uint, CompletedAchievementData>();
         protected uint _achievementPoints;
@@ -1045,7 +1045,7 @@ namespace Game.Achievements
         public bool IsRealmCompleted(AchievementRecord achievement)
         {
             var time = _allCompletedAchievements.LookupByKey(achievement.Id);
-            if (time == null)
+            if (time == default(DateTime))
                 return false;
 
             if (time == DateTime.MinValue)

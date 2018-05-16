@@ -367,7 +367,7 @@ namespace Scripts.Spells.Warrior
     }
 
     // 70844 - Item - Warrior T10 Protection 4P Bonus
-    [Script] /// 7.1.5
+    [Script] // 7.1.5
     class spell_warr_item_t10_prot_4p_bonus : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)

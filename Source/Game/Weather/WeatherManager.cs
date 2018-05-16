@@ -136,7 +136,7 @@ namespace Game
                 return false;
             }
 
-            /// Weather statistics:
+            // Weather statistics:
             // 30% - no change
             // 30% - weather gets better (if not fine) or change weather type
             // 30% - weather worsens (if not fine)
@@ -178,7 +178,7 @@ namespace Game
 
             if (m_type != WeatherType.Fine)
             {
-                /// Radical change:
+                // Radical change:
                 // if light . heavy
                 // if medium . change weather type
                 // if heavy . 50% light, 50% change weather type

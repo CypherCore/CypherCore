@@ -209,7 +209,7 @@ namespace Game
             {
                 initFactions.FactionFlags[pair.Key] = pair.Value.Flags;
                 initFactions.FactionStandings[pair.Key] = pair.Value.Standing;
-                /// @todo faction bonus
+                // @todo faction bonus
                 pair.Value.needSend = false;
             }
 

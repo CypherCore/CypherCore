@@ -44,17 +44,17 @@ namespace Game
             if (request.Words.Count > 4)
                 return;
 
-            /// @todo: handle following packet values
-            /// VirtualRealmNames
-            /// ShowEnemies
-            /// ShowArenaPlayers
-            /// ExactName
-            /// ServerInfo
+            // @todo: handle following packet values
+            // VirtualRealmNames
+            // ShowEnemies
+            // ShowArenaPlayers
+            // ExactName
+            // ServerInfo
 
             request.Words.ForEach(p => p = p.ToLower());
 
-            request.Name.ToLower();
-            request.Guild.ToLower();
+            request.Name = request.Name.ToLower();
+            request.Guild = request.Guild.ToLower();
 
             // client send in case not set max level value 100 but we support 255 max level,
             // update it to show GMs with characters after 100 level
@@ -282,7 +282,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.DelFriend)]
         void HandleDelFriend(DelFriend packet)
         {
-            /// @todo: handle VirtualRealmAddress
+            // @todo: handle VirtualRealmAddress
             GetPlayer().GetSocial().RemoveFromSocialList(packet.Player.Guid, SocialFlag.Friend);
 
             Global.SocialMgr.SendFriendStatus(GetPlayer(), FriendsResult.Removed, packet.Player.Guid);
@@ -336,7 +336,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.DelIgnore)]
         void HandleDelIgnore(DelIgnore packet)
         {
-            /// @todo: handle VirtualRealmAddress
+            // @todo: handle VirtualRealmAddress
             Log.outDebug(LogFilter.Network, "WorldSession.HandleDelIgnoreOpcode: {0}", packet.Player.Guid.ToString());
 
             GetPlayer().GetSocial().RemoveFromSocialList(packet.Player.Guid, SocialFlag.Ignored);
@@ -347,7 +347,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SetContactNotes)]
         void HandleSetContactNotes(SetContactNotes packet)
         {
-            /// @todo: handle VirtualRealmAddress
+            // @todo: handle VirtualRealmAddress
             Log.outDebug(LogFilter.Network, "WorldSession.HandleSetContactNotesOpcode: Contact: {0}, Notes: {1}", packet.Player.Guid.ToString(), packet.Notes);
             GetPlayer().GetSocial().SetFriendNote(packet.Player.Guid, packet.Notes);
         }

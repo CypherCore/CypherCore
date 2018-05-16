@@ -190,7 +190,7 @@ namespace Scripts.Outlands
             if (quest.Id == QUEST_ROAD_TO_FALCON_WATCH)
             {
                 me.SetFaction(FACTION_FALCON_WATCH_QUEST);
-                base.Start(true, false, player.GetGUID());
+                Start(true, false, player.GetGUID());
             }
         }
 

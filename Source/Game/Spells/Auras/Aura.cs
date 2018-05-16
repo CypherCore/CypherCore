@@ -388,7 +388,7 @@ namespace Game.Spells
 
             var app = m_applications.LookupByKey(target.GetGUID());
 
-            /// @todo Figure out why this happens
+            // @todo Figure out why this happens
             if (app == null)
             {
                 Log.outError(LogFilter.Spells, "Aura._UnapplyForTarget, target: {0}, caster: {1}, spell: {2} was not found in owners application map!",
@@ -537,7 +537,7 @@ namespace Game.Spells
                     // owner has to be in world, or effect has to be applied to self
                     if (!m_owner.IsSelfOrInSameMap(unit))
                     {
-                        /// @todo There is a crash caused by shadowfiend load addon
+                        // @todo There is a crash caused by shadowfiend load addon
                         Log.outFatal(LogFilter.Spells, "Aura {0}: Owner {1} (map {2}) is not in the same map as target {3} (map {4}).", GetSpellInfo().Id,
                             m_owner.GetName(), m_owner.IsInWorld ? (int)m_owner.GetMap().GetId() : -1,
                             unit.GetName(), unit.IsInWorld ? (int)unit.GetMap().GetId() : -1);
@@ -1706,7 +1706,7 @@ namespace Game.Spells
             if (procEffectMask == 0)
                 return 0;
 
-            /// @todo
+            // @todo
             // do allow additional requirements for procs
             // this is needed because this is the last moment in which you can prevent aura charge drop on proc
             // and possibly a way to prevent default checks (if there're going to be any)
@@ -1720,7 +1720,7 @@ namespace Game.Spells
 
             // Check if current equipment meets aura requirements
             // do that only for passive spells
-            /// @todo this needs to be unified for all kinds of auras
+            // @todo this needs to be unified for all kinds of auras
             Unit target = aurApp.GetTarget();
             if (IsPassive() && target.IsTypeId(TypeId.Player))
             {
@@ -2039,9 +2039,7 @@ namespace Game.Spells
                     if (eff.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
                         eff.Call(aurEff, dmgInfo, ref absorbAmount);
 
-                if (!defaultPrevented)
-                    defaultPrevented = auraScript._IsDefaultActionPrevented();
-
+                defaultPrevented = auraScript._IsDefaultActionPrevented();
                 auraScript._FinishScriptCall();
             }
         }
@@ -2060,7 +2058,7 @@ namespace Game.Spells
             }
         }
 
-        public void CallScriptEffectManaShieldHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref uint absorbAmount, bool defaultPrevented)
+        public void CallScriptEffectManaShieldHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref uint absorbAmount, ref bool defaultPrevented)
         {
             foreach (var auraScript in m_loadedScripts)
             {

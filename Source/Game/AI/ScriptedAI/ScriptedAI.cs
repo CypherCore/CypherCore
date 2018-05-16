@@ -133,12 +133,10 @@ namespace Game.AI
 
             uint spellCount = 0;
 
-            SpellInfo tempSpell = null;
-
             //Check if each spell is viable(set it to null if not)
             for (uint i = 0; i < SharedConst.MaxCreatureSpells; i++)
             {
-                tempSpell = Global.SpellMgr.GetSpellInfo(me.m_spells[i]);
+                SpellInfo tempSpell = Global.SpellMgr.GetSpellInfo(me.m_spells[i]);
 
                 //This spell doesn't exist
                 if (tempSpell == null)

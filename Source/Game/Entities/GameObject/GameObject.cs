@@ -396,16 +396,16 @@ namespace Game.Entities
                             case GameObjectTypes.Trap:
                                 {
                                     // Arming Time for GAMEOBJECT_TYPE_TRAP (6)
-                                    GameObjectTemplate m_goInfo = GetGoInfo();
+                                    GameObjectTemplate goInfo = GetGoInfo();
 
                                     // Bombs
                                     Unit owner = GetOwner();
-                                    if (m_goInfo.Trap.charges == 2)
+                                    if (goInfo.Trap.charges == 2)
                                         m_cooldownTime = (uint)Time.UnixTime + 10;   // Hardcoded tooltip value
                                     else if (owner)
                                     {
                                         if (owner.IsInCombat())
-                                            m_cooldownTime = (uint)Time.UnixTime + m_goInfo.Trap.startDelay;
+                                            m_cooldownTime = (uint)Time.UnixTime + goInfo.Trap.startDelay;
                                     }
                                     m_lootState = LootState.Ready;
                                     break;
@@ -1552,7 +1552,7 @@ namespace Game.Entities
 
                                     player.UpdateFishingSkill();
 
-                                    /// @todo find reasonable value for fishing hole search
+                                    // @todo find reasonable value for fishing hole search
                                     GameObject fishingPool = LookupFishingHoleAround(20.0f + SharedConst.ContactDistance);
 
                                     // If fishing skill is high enough, or if fishing on a pool, send correct loot.

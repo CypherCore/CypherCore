@@ -142,7 +142,7 @@ namespace Game.AI
             if (!HasFollowState(eFollowState.Inprogress) || m_uiLeaderGUID.IsEmpty() || m_pQuestForFollow == null)
                 return;
 
-            /// @todo need a better check for quests with time limit.
+            // @todo need a better check for quests with time limit.
             Player player = GetLeaderForFollower();
             if (player)
             {

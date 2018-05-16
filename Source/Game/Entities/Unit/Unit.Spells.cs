@@ -2243,7 +2243,7 @@ namespace Game.Entities
 
             spellHealLog.Crit = critical;
 
-            /// @todo: 6.x Has to be implemented
+            // @todo: 6.x Has to be implemented
             /*
             var hasCritRollMade = spellHealLog.WriteBit("HasCritRollMade");
             var hasCritRollNeeded = spellHealLog.WriteBit("HasCritRollNeeded");
@@ -2494,7 +2494,7 @@ namespace Game.Entities
             spellLogEffect.AbsorbedOrAmplitude = info.absorb;
             spellLogEffect.Resisted = info.resist;
             spellLogEffect.Crit = info.critical;
-            /// @todo: implement debug info
+            // @todo: implement debug info
 
             SandboxScalingData sandboxScalingData = new SandboxScalingData();
             Unit caster = Global.ObjAccessor.GetUnit(this, aura.GetCasterGUID());
@@ -4181,10 +4181,9 @@ namespace Game.Entities
             }
 
             bool remove = false;
-            var appliedAuraList = GetAppliedAuras();
-            for (var i = 0; i < appliedAuraList.Count; i++)
+            for (var i = 0; i < m_appliedAuras.KeyValueList.Count; i++)
             {
-                var app = appliedAuraList[i];
+                var app = m_appliedAuras.KeyValueList[i];
                 if (remove)
                 {
                     remove = false;
@@ -4195,7 +4194,7 @@ namespace Game.Entities
                     continue;
 
                 RemoveAura(app, AuraRemoveMode.Default);
-                if (i == appliedAuraList.Count - 1)
+                if (i == m_appliedAuras.KeyValueList.Count - 1)
                     break;
 
                 remove = true;
