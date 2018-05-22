@@ -203,8 +203,11 @@ namespace Game.DataStorage
             Dictionary<int, int> OffsetDuplicates = new Dictionary<int, int>();
             Dictionary<int, List<int>> Copies = new Dictionary<int, List<int>>();
 
+            bool hasOffsetTable = Header.HasOffsetTable();
+            bool hasIndexTable = Header.HasIndexTable();
+
             byte[] recordData;
-            if (Header.HasOffsetTable())
+            if (hasOffsetTable)
                 recordData = reader.ReadBytes((int)(Header.OffsetTableOffset - 84 - 4 * Header.FieldCount));
             else
             {
@@ -231,7 +234,7 @@ namespace Game.DataStorage
             int[] m_indexes = null;
 
             // OffsetTable
-            if (Header.HasOffsetTable() && Header.OffsetTableOffset > 0)
+            if (hasOffsetTable && Header.OffsetTableOffset > 0)
             {
                 reader.BaseStream.Position = Header.OffsetTableOffset;
                 for (int i = 0; i < (Header.MaxId - Header.MinId + 1); i++)
@@ -256,7 +259,7 @@ namespace Game.DataStorage
             }
 
             // IndexTable
-            if (Header.HasIndexTable())
+            if (hasIndexTable)
                 m_indexes = reader.ReadArray<int>(Header.RecordCount);
 
             // Copytable
@@ -353,7 +356,7 @@ namespace Game.DataStorage
             {
                 int id = 0;
 
-                if (Header.HasOffsetTable() && Header.HasIndexTable())
+                if (hasOffsetTable && hasIndexTable)
                 {
                     id = m_indexes[CopyTable.Count];
                     var map = offsetmap[i];
@@ -391,8 +394,10 @@ namespace Game.DataStorage
                     bitReader.Offset = i * (int)Header.RecordSize;
 
                     List<byte> data = new List<byte>();
+                    MemoryStream stream = new MemoryStream();
+                    BinaryWriter binaryWriter = new BinaryWriter(stream);
 
-                    if (Header.HasIndexTable())
+                    if (hasIndexTable)
                         id = m_indexes[i];
 
                     for (int f = 0; f < Header.FieldCount; f++)
@@ -403,42 +408,40 @@ namespace Game.DataStorage
                         {
                             case DB2ColumnCompression.None:
                                 int bitSize = FieldStructure[f].BitCount;
-                                if (!Header.HasIndexTable() && f == Header.IdIndex)
+                                if (!hasIndexTable && f == Header.IdIndex)
                                 {
                                     id = (int)bitReader.ReadUInt32(bitSize);// always read Ids as ints
-                                    data.AddRange(BitConverter.GetBytes(id));
+                                    binaryWriter.Write(id);
                                 }
                                 else
                                 {
                                     for (int x = 0; x < ColumnMeta[f].ArraySize; x++)
-                                        data.AddRange(bitReader.ReadValue(bitSize));
+                                        binaryWriter.Write(bitReader.ReadValue(bitSize));
                                 }
                                 break;
 
                             case DB2ColumnCompression.Immediate:
-                                if (!Header.HasIndexTable() && f == Header.IdIndex)
+                                if (!hasIndexTable && f == Header.IdIndex)
                                 {
                                     id = (int)bitReader.ReadUInt32(bitWidth);// always read Ids as ints
-                                    data.AddRange(BitConverter.GetBytes(id));
+                                    binaryWriter.Write(id);
                                     continue;
                                 }
                                 else
-                                {
-                                    data.AddRange(bitReader.ReadValue(bitWidth, ColumnMeta[f].BitOffset, ColumnMeta[f].Cardinality == 1));
-                                }
+                                    binaryWriter.Write(bitReader.ReadValue(bitWidth, ColumnMeta[f].BitOffset, ColumnMeta[f].Cardinality == 1));
                                 break;
 
                             case DB2ColumnCompression.CommonData:
                                 if (ColumnMeta[f].SparseValues.TryGetValue(id, out byte[] valBytes))
-                                    data.AddRange(valBytes);
+                                    binaryWriter.Write(valBytes);
                                 else
-                                    data.AddRange(BitConverter.GetBytes(ColumnMeta[f].BitOffset));
+                                    binaryWriter.Write(ColumnMeta[f].BitOffset);
                                 break;
 
                             case DB2ColumnCompression.Pallet:
                             case DB2ColumnCompression.PalletArray:
                                 uint palletIndex = bitReader.ReadUInt32(bitWidth);
-                                data.AddRange(ColumnMeta[f].PalletValues[(int)palletIndex]);
+                                binaryWriter.Write(ColumnMeta[f].PalletValues[(int)palletIndex]);
                                 break;
 
                             default:
@@ -451,12 +454,12 @@ namespace Game.DataStorage
                     {
                         // seen cases of missing indicies 
                         if (RelationShipData.Entries.TryGetValue((uint)i, out byte[] foreignData))
-                            data.AddRange(foreignData);
+                            binaryWriter.Write(foreignData);
                         else
-                            data.AddRange(new byte[4]);
+                            binaryWriter.Write(0);
                     }
 
-                    CopyTable.Add(id, data.ToArray());
+                    CopyTable.Add(id, stream.ToArray());
 
                     if (Copies.ContainsKey(id))
                     {

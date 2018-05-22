@@ -62,7 +62,7 @@ namespace Framework.Collections
             return _str == null || _str.Length == 0;
         }
 
-        public int Length => _str.Length;
+        public int Length => _str != null ? _str.Length : 0;
 
         string[] _str;
     }
