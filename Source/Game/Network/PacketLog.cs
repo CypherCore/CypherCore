@@ -49,7 +49,7 @@ public class PacketLog
         }
     }
 
-    public static void Write(byte[] data, ClientOpcodes opcode, IPAddress address, uint port, ConnectionType connectionType)
+    public static void Write(byte[] data, uint opcode, IPAddress address, uint port, ConnectionType connectionType, bool isClientPacket)
     {
         if (!CanLog())
             return;
@@ -58,7 +58,7 @@ public class PacketLog
         {
             using (var writer = new BinaryWriter(File.Open(FullPath, FileMode.Append), Encoding.ASCII))
             {
-                writer.Write("CMSG".ToCharArray());
+                writer.Write(isClientPacket ? 0x47534d43 : 0x47534d53);
                 writer.Write((uint)connectionType);
                 writer.Write(Time.GetMSTime());
 
@@ -72,36 +72,7 @@ public class PacketLog
                 writer.Write(data.Length + 4);
                 writer.Write(SocketIPBytes);
                 writer.Write(port);
-                writer.Write((uint)opcode);
-                writer.Write(data);
-            }
-        }
-    }
-
-    public static void Write(byte[] data, ServerOpcodes opcode, IPAddress address, uint port, ConnectionType connectionType)
-    {
-        if (!CanLog())
-            return;
-
-        lock (syncObj)
-        {
-            using (var writer = new BinaryWriter(File.Open(FullPath, FileMode.Append), Encoding.ASCII))
-            {
-                writer.Write("SMSG".ToCharArray());
-                writer.Write((uint)connectionType);
-                writer.Write(Time.GetMSTime());
-
-                writer.Write(20);
-                byte[] SocketIPBytes = new byte[16];
-                if (address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                    Buffer.BlockCopy(address.GetAddressBytes(), 0, SocketIPBytes, 0, 4);
-                else
-                    Buffer.BlockCopy(address.GetAddressBytes(), 0, SocketIPBytes, 0, 16);
-
-                writer.Write(data.Length + 4);
-                writer.Write(SocketIPBytes);
-                writer.Write(port);
-                writer.Write((uint)opcode);
+                writer.Write(opcode);
                 writer.Write(data);
             }
         }

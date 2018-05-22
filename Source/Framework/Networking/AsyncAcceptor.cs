@@ -25,13 +25,13 @@ namespace Framework.Networking
 
     public class AsyncAcceptor
     {
-        public AsyncAcceptor(string ip, int port)
+        public bool Start(string ip, int port)
         {
-            var bindIP = IPAddress.None;
+            IPAddress bindIP;
             if (!IPAddress.TryParse(ip, out bindIP))
             {
                 Log.outError(LogFilter.Network, "Server can't be started: Invalid IP-Address ({0})", ip);
-                return;
+                return false;
             }
 
             try
@@ -42,7 +42,10 @@ namespace Framework.Networking
             catch (SocketException ex)
             {
                 Log.outException(ex);
+                return false;
             }
+
+            return true;
         }
 
         public async void AsyncAcceptSocket(SocketAcceptDelegate mgrHandler)

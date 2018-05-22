@@ -161,6 +161,8 @@ namespace Game.Network
 
                 var data = new byte[size];
                 Buffer.BlockCopy(GetReceiveBuffer(), 6, data, 0, size);
+
+                PacketLog.Write(data, opcode, GetRemoteIpAddress(), GetRemotePort(), _connectType, true);
                 if (!ProcessPacket(new WorldPacket(data, opcode)))
                 {
                     CloseSocket();
@@ -191,7 +193,6 @@ namespace Game.Network
         bool ProcessPacket(WorldPacket packet)
         {
             ClientOpcodes opcode = (ClientOpcodes)packet.GetOpcode();
-            PacketLog.Write(packet.GetData(), opcode, GetRemoteIpAddress(), GetRemotePort(), _connectType);
 
             try
             {
@@ -272,14 +273,13 @@ namespace Game.Network
                 return;
 
             packet.LogPacket(_worldSession);
-
             packet.WritePacketData();
 
             var data = packet.GetData();
-            uint packetSize = (uint)data.Length;
             ServerOpcodes opcode = packet.GetOpcode();
-            PacketLog.Write(data, opcode, GetRemoteIpAddress(), GetRemotePort(), _connectType);
+            PacketLog.Write(data, (uint)opcode, GetRemoteIpAddress(), GetRemotePort(), _connectType, false);
 
+            uint packetSize = (uint)data.Length;
             if (packetSize > 0x400 && worldCrypt.IsInitialized)
             {
                 ByteBuffer buffer = new ByteBuffer();
@@ -398,6 +398,7 @@ namespace Game.Network
             hmac.Process(_serverChallenge, 16);
             hmac.Finish(AuthCheckSeed, 16);
 
+
             // Check that Key and account name are the same on client and server
             if (!hmac.Digest.Compare(authSession.Digest))
             {
@@ -405,6 +406,7 @@ namespace Game.Network
                 CloseSocket();
                 return;
             }
+
 
             Sha256 keyData = new Sha256();
             keyData.Finish(account.game.SessionKey, account.game.SessionKey.Length);

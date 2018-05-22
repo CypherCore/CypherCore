@@ -27,7 +27,12 @@ namespace Framework.Networking
         {
             Contract.Assert(threadCount > 0);
 
-            Acceptor = new AsyncAcceptor(bindIp, port);
+            Acceptor = new AsyncAcceptor();
+            if (!Acceptor.Start(bindIp, port))
+            {
+                Log.outError(LogFilter.Network, "StartNetwork failed to Start AsyncAcceptor");
+                return false;
+            }
 
             _threadCount = threadCount;
             _threads = new NetworkThread<TSocketType>[GetNetworkThreadCount()];
