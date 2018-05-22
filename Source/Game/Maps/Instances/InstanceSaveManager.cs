@@ -144,25 +144,25 @@ namespace Game.Maps
             uint oldMSTime = Time.GetMSTime();
 
             // Delete expired instances (Instance related spawns are removed in the following cleanup queries)
-            DB.Characters.Execute("DELETE i FROM instance i LEFT JOIN instance_reset ir ON mapid = map AND i.difficulty = ir.difficulty " +
+            DB.Characters.DirectExecute("DELETE i FROM instance i LEFT JOIN instance_reset ir ON mapid = map AND i.difficulty = ir.difficulty " +
                 "WHERE (i.resettime > 0 AND i.resettime < UNIX_TIMESTAMP()) OR (ir.resettime IS NOT NULL AND ir.resettime < UNIX_TIMESTAMP())");
 
             // Delete invalid character_instance and group_instance references
-            DB.Characters.Execute("DELETE ci.* FROM character_instance AS ci LEFT JOIN characters AS c ON ci.guid = c.guid WHERE c.guid IS NULL");
-            DB.Characters.Execute("DELETE gi.* FROM group_instance     AS gi LEFT JOIN groups     AS g ON gi.guid = g.guid WHERE g.guid IS NULL");
+            DB.Characters.DirectExecute("DELETE ci.* FROM character_instance AS ci LEFT JOIN characters AS c ON ci.guid = c.guid WHERE c.guid IS NULL");
+            DB.Characters.DirectExecute("DELETE gi.* FROM group_instance     AS gi LEFT JOIN groups     AS g ON gi.guid = g.guid WHERE g.guid IS NULL");
 
             // Delete invalid instance references
-            DB.Characters.Execute("DELETE i.* FROM instance AS i LEFT JOIN character_instance AS ci ON i.id = ci.instance LEFT JOIN group_instance AS gi ON i.id = gi.instance WHERE ci.guid IS NULL AND gi.guid IS NULL");
+            DB.Characters.DirectExecute("DELETE i.* FROM instance AS i LEFT JOIN character_instance AS ci ON i.id = ci.instance LEFT JOIN group_instance AS gi ON i.id = gi.instance WHERE ci.guid IS NULL AND gi.guid IS NULL");
 
             // Delete invalid references to instance
-            DB.Characters.Execute("DELETE FROM creature_respawn WHERE instanceId > 0 AND instanceId NOT IN (SELECT id FROM instance)");
-            DB.Characters.Execute("DELETE FROM gameobject_respawn WHERE instanceId > 0 AND instanceId NOT IN (SELECT id FROM instance)");
-            DB.Characters.Execute("DELETE tmp.* FROM character_instance AS tmp LEFT JOIN instance ON tmp.instance = instance.id WHERE tmp.instance > 0 AND instance.id IS NULL");
-            DB.Characters.Execute("DELETE tmp.* FROM group_instance     AS tmp LEFT JOIN instance ON tmp.instance = instance.id WHERE tmp.instance > 0 AND instance.id IS NULL");
+            DB.Characters.DirectExecute("DELETE FROM creature_respawn WHERE instanceId > 0 AND instanceId NOT IN (SELECT id FROM instance)");
+            DB.Characters.DirectExecute("DELETE FROM gameobject_respawn WHERE instanceId > 0 AND instanceId NOT IN (SELECT id FROM instance)");
+            DB.Characters.DirectExecute("DELETE tmp.* FROM character_instance AS tmp LEFT JOIN instance ON tmp.instance = instance.id WHERE tmp.instance > 0 AND instance.id IS NULL");
+            DB.Characters.DirectExecute("DELETE tmp.* FROM group_instance     AS tmp LEFT JOIN instance ON tmp.instance = instance.id WHERE tmp.instance > 0 AND instance.id IS NULL");
 
             // Clean invalid references to instance
-            DB.Characters.Execute("UPDATE corpse SET instanceId = 0 WHERE instanceId > 0 AND instanceId NOT IN (SELECT id FROM instance)");
-            DB.Characters.Execute("UPDATE characters AS tmp LEFT JOIN instance ON tmp.instance_id = instance.id SET tmp.instance_id = 0 WHERE tmp.instance_id > 0 AND instance.id IS NULL");
+            DB.Characters.DirectExecute("UPDATE corpse SET instanceId = 0 WHERE instanceId > 0 AND instanceId NOT IN (SELECT id FROM instance)");
+            DB.Characters.DirectExecute("UPDATE characters AS tmp LEFT JOIN instance ON tmp.instance_id = instance.id SET tmp.instance_id = 0 WHERE tmp.instance_id > 0 AND instance.id IS NULL");
 
             // Initialize instance id storage (Needs to be done after the trash has been clean out)
             Global.MapMgr.InitInstanceIds();
@@ -225,7 +225,7 @@ namespace Game.Maps
                         var pair = instResetTime.LookupByKey(instance);
                         if (pair != null && pair.Item2 != resettime)
                         {
-                            DB.Characters.Execute("UPDATE instance SET resettime = '{0}' WHERE id = '{1}'", resettime, instance);
+                            DB.Characters.DirectExecute("UPDATE instance SET resettime = '{0}' WHERE id = '{1}'", resettime, instance);
                             instResetTime[instance] = Tuple.Create(pair.Item1, resettime);
                         }
                     }
@@ -253,14 +253,14 @@ namespace Game.Maps
                     if (mapDiff == null)
                     {
                         Log.outError(LogFilter.Server, "InstanceSaveManager.LoadResetTimes: invalid mapid({0})/difficulty({1}) pair in instance_reset!", mapid, difficulty);
-                        DB.Characters.Execute("DELETE FROM instance_reset WHERE mapid = '{0}' AND difficulty = '{1}'", mapid, difficulty);
+                        DB.Characters.DirectExecute("DELETE FROM instance_reset WHERE mapid = '{0}' AND difficulty = '{1}'", mapid, difficulty);
                         continue;
                     }
 
                     // update the reset time if the hour in the configs changes
                     ulong newresettime = (oldresettime / Time.Day) * Time.Day + diff;
                     if (oldresettime != newresettime)
-                        DB.Characters.Execute("UPDATE instance_reset SET resettime = '{0}' WHERE mapid = '{1}' AND difficulty = '{2}'", newresettime, mapid, difficulty);
+                        DB.Characters.DirectExecute("UPDATE instance_reset SET resettime = '{0}' WHERE mapid = '{1}' AND difficulty = '{2}'", newresettime, mapid, difficulty);
 
                     InitializeResetTimeFor(mapid, difficulty, (long)newresettime);
                 } while (result.NextRow());
@@ -289,7 +289,7 @@ namespace Game.Maps
                     {
                         // initialize the reset time
                         t = today + period + diff;
-                        DB.Characters.Execute("INSERT INTO instance_reset VALUES ('{0}', '{1}', '{2}')", mapid, (uint)difficulty, (uint)t);
+                        DB.Characters.DirectExecute("INSERT INTO instance_reset VALUES ('{0}', '{1}', '{2}')", mapid, (uint)difficulty, (uint)t);
                     }
 
                     if (t < now)
@@ -298,7 +298,7 @@ namespace Game.Maps
                         // calculate the next reset time
                         t = (t / Time.Day) * Time.Day;
                         t += ((today - t) / period + 1) * period + diff;
-                        DB.Characters.Execute("UPDATE instance_reset SET resettime = '{0}' WHERE mapid = '{1}' AND difficulty= '{2}'", t, mapid, (uint)difficulty);
+                        DB.Characters.DirectExecute("UPDATE instance_reset SET resettime = '{0}' WHERE mapid = '{1}' AND difficulty= '{2}'", t, mapid, (uint)difficulty);
                     }
 
                     InitializeResetTimeFor(mapid, difficulty, t);
@@ -566,7 +566,7 @@ namespace Game.Maps
                     ((InstanceMap)map2).Reset(InstanceResetMethod.Global);
             }
 
-            /// @todo delete creature/gameobject respawn times even if the maps are not loaded
+            // @todo delete creature/gameobject respawn times even if the maps are not loaded
         }
 
         public uint GetNumBoundPlayersTotal()

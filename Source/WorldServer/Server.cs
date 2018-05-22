@@ -49,7 +49,7 @@ namespace WorldServer
             uint startupBegin = Time.GetMSTime();
 
             // set server offline (not connectable)
-            DB.Login.Execute("UPDATE realmlist SET flag = (flag & ~{0}) | {1} WHERE id = '{2}'", (uint)RealmFlags.VersionMismatch, (uint)RealmFlags.Offline, Global.WorldMgr.GetRealm().Id.Realm);
+            DB.Login.DirectExecute("UPDATE realmlist SET flag = (flag & ~{0}) | {1} WHERE id = '{2}'", (uint)RealmFlags.VersionMismatch, (uint)RealmFlags.Offline, Global.WorldMgr.GetRealm().Id.Realm);
 
             Global.RealmMgr.Initialize(ConfigMgr.GetDefaultValue("RealmsStateUpdateDelay", 10));
 
@@ -75,7 +75,7 @@ namespace WorldServer
             }
 
             // set server online (allow connecting now)
-            DB.Login.Execute("UPDATE realmlist SET flag = flag & ~{0}, population = 0 WHERE id = '{1}'", (uint)RealmFlags.Offline, Global.WorldMgr.GetRealm().Id.Realm);
+            DB.Login.DirectExecute("UPDATE realmlist SET flag = flag & ~{0}, population = 0 WHERE id = '{1}'", (uint)RealmFlags.Offline, Global.WorldMgr.GetRealm().Id.Realm);
             Global.WorldMgr.GetRealm().PopulationLevel = 0.0f;
             Global.WorldMgr.GetRealm().Flags = Global.WorldMgr.GetRealm().Flags & ~RealmFlags.VersionMismatch;
 
@@ -110,7 +110,7 @@ namespace WorldServer
                 Global.ScriptMgr.Unload();
 
                 // set server offline
-                DB.Login.Execute("UPDATE realmlist SET flag = flag | {0} WHERE id = '{1}'", (uint)RealmFlags.Offline, Global.WorldMgr.GetRealm().Id.Realm);
+                DB.Login.DirectExecute("UPDATE realmlist SET flag = flag | {0} WHERE id = '{1}'", (uint)RealmFlags.Offline, Global.WorldMgr.GetRealm().Id.Realm);
                 Global.RealmMgr.Close();
 
                 ClearOnlineAccounts();
@@ -155,13 +155,13 @@ namespace WorldServer
         static void ClearOnlineAccounts()
         {
             // Reset online status for all accounts with characters on the current realm
-            DB.Login.Execute("UPDATE account SET online = 0 WHERE online > 0 AND id IN (SELECT acctid FROM realmcharacters WHERE realmid = {0})", Global.WorldMgr.GetRealm().Id.Realm);
+            DB.Login.DirectExecute("UPDATE account SET online = 0 WHERE online > 0 AND id IN (SELECT acctid FROM realmcharacters WHERE realmid = {0})", Global.WorldMgr.GetRealm().Id.Realm);
 
             // Reset online status for all characters
-            DB.Characters.Execute("UPDATE characters SET online = 0 WHERE online <> 0");
+            DB.Characters.DirectExecute("UPDATE characters SET online = 0 WHERE online <> 0");
 
             // Battlegroundinstance ids reset at server restart
-            DB.Characters.Execute("UPDATE character_battleground_data SET instanceId = 0");
+            DB.Characters.DirectExecute("UPDATE character_battleground_data SET instanceId = 0");
         }
 
         static void WorldUpdateLoop()

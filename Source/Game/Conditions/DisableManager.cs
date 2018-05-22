@@ -104,7 +104,6 @@ namespace Game
                                 if (uint.TryParse(array[i++], out uint id))
                                     data.param1.Add(id);
                             }
-                                
                         }
 
                         break;

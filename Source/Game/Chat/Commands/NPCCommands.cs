@@ -1164,10 +1164,13 @@ namespace Game.Chat
                 if (fbonuslist.IsEmpty())
                 {
                     var bonusListIDsTok = new StringArray(fbonuslist, ';');
-                    foreach (string token in bonusListIDsTok)
+                    if (!bonusListIDsTok.IsEmpty())
                     {
-                        if (uint.TryParse(token, out uint id))
-                            vItem.BonusListIDs.Add(id);
+                        foreach (string token in bonusListIDsTok)
+                        {
+                            if (uint.TryParse(token, out uint id))
+                                vItem.BonusListIDs.Add(id);
+                        }
                     }
                 }
 

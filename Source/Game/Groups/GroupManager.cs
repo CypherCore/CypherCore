@@ -108,9 +108,9 @@ namespace Game.Groups
                 uint oldMSTime = Time.GetMSTime();
 
                 // Delete all groups whose leader does not exist
-                DB.Characters.Execute("DELETE FROM groups WHERE leaderGuid NOT IN (SELECT guid FROM characters)");
+                DB.Characters.DirectExecute("DELETE FROM groups WHERE leaderGuid NOT IN (SELECT guid FROM characters)");
                 // Delete all groups with less than 2 members
-                DB.Characters.Execute("DELETE FROM groups WHERE guid NOT IN (SELECT guid FROM group_member GROUP BY guid HAVING COUNT(guid) > 1)");
+                DB.Characters.DirectExecute("DELETE FROM groups WHERE guid NOT IN (SELECT guid FROM group_member GROUP BY guid HAVING COUNT(guid) > 1)");
 
                 //                                                    0              1           2             3                 4      5          6      7         8       9
                 SQLResult result = DB.Characters.Query("SELECT g.leaderGuid, g.lootMethod, g.looterGuid, g.lootThreshold, g.icon1, g.icon2, g.icon3, g.icon4, g.icon5, g.icon6" +
@@ -150,10 +150,10 @@ namespace Game.Groups
                 uint oldMSTime = Time.GetMSTime();
 
                 // Delete all rows from group_member or group_instance with no group
-                DB.Characters.Execute("DELETE FROM group_member WHERE guid NOT IN (SELECT guid FROM groups)");
-                DB.Characters.Execute("DELETE FROM group_instance WHERE guid NOT IN (SELECT guid FROM groups)");
+                DB.Characters.DirectExecute("DELETE FROM group_member WHERE guid NOT IN (SELECT guid FROM groups)");
+                DB.Characters.DirectExecute("DELETE FROM group_instance WHERE guid NOT IN (SELECT guid FROM groups)");
                 // Delete all members that does not exist
-                DB.Characters.Execute("DELETE FROM group_member WHERE memberGuid NOT IN (SELECT guid FROM characters)");
+                DB.Characters.DirectExecute("DELETE FROM group_member WHERE memberGuid NOT IN (SELECT guid FROM characters)");
 
                 //                                                0        1           2            3       4
                 SQLResult result = DB.Characters.Query("SELECT guid, memberGuid, memberFlags, subgroup, roles FROM group_member ORDER BY guid");
@@ -184,6 +184,7 @@ namespace Game.Groups
             Log.outInfo(LogFilter.ServerLoading, "Loading Group instance saves...");
             {
                 uint oldMSTime = Time.GetMSTime();
+
                 //                                                0           1        2              3             4             5            6           7
                 SQLResult result = DB.Characters.Query("SELECT gi.guid, i.map, gi.instance, gi.permanent, i.difficulty, i.resettime, i.entranceId, COUNT(g.guid) " +
                     "FROM group_instance gi INNER JOIN instance i ON gi.instance = i.id " +

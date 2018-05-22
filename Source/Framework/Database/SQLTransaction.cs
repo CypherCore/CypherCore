@@ -43,4 +43,19 @@ namespace Framework.Database
             commands.Add(new MySqlCommand(string.Format(sql, args)));
         }
     }
+
+    class TransactionTask : ISqlOperation
+    {
+        public TransactionTask(SQLTransaction trans)
+        {
+            m_trans = trans;
+        }
+
+        public bool Execute<T>(MySqlBase<T> mySqlBase)
+        {
+            return mySqlBase.DirectCommitTransaction(m_trans);
+        }
+
+        SQLTransaction m_trans;
+    }
 }

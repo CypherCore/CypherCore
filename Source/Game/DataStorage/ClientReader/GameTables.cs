@@ -49,7 +49,7 @@ namespace Game.DataStorage
                 while (!(line = reader.ReadLine()).IsEmpty())
                 {
                     var values = new StringArray(line, '\t');
-                    if (values.Length == 0)
+                    if (values.IsEmpty())
                         break;
 
                     var obj = new T();

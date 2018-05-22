@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Framework.Threading;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
@@ -27,19 +28,14 @@ namespace Framework.Database
 {
     public class MySqlConnectionInfo
     {
-        public MySqlConnectionInfo(int poolSize = 10)
-        {
-            Poolsize = poolSize;
-        }
-
         public MySqlConnection GetConnection()
         {
-            return new MySqlConnection($"Server={Host};Port={Port};User Id={Username};Password={Password};Database={Database};Allow Zero Datetime=True;Allow User Variables=True;Pooling=true;MaximumPoolSize={Poolsize};");
+            return new MySqlConnection($"Server={Host};Port={Port};User Id={Username};Password={Password};Database={Database};Allow User Variables=True;Pooling=true;");
         }
 
         public MySqlConnection GetConnectionNoDatabase()
         {
-            return new MySqlConnection($"Server={Host};Port={Port};User Id={Username};Password={Password};Allow Zero Datetime=True;Allow User Variables=True;Pooling=true;MaximumPoolSize={Poolsize};");
+            return new MySqlConnection($"Server={Host};Port={Port};User Id={Username};Password={Password};Allow User Variables=True;Pooling=true;");
         }
 
         public string Host;
@@ -52,10 +48,18 @@ namespace Framework.Database
 
     public abstract class MySqlBase<T>
     {
+        Dictionary<T, string> _preparedQueries = new Dictionary<T, string>();
+        ProducerConsumerQueue<ISqlOperation> _queue = new ProducerConsumerQueue<ISqlOperation>();
+
+        MySqlConnectionInfo _connectionInfo;
+        DatabaseUpdater<T> _updater;
+        DatabaseWorker<T> _worker;
+
         public MySqlErrorCode Initialize(MySqlConnectionInfo connectionInfo)
         {
             _connectionInfo = connectionInfo;
             _updater = new DatabaseUpdater<T>(this);
+            _worker = new DatabaseWorker<T>(_queue, this);
 
             try
             {
@@ -67,16 +71,17 @@ namespace Framework.Database
                 }
             }
             catch (MySqlException ex)
-            {                
+            {
                 return HandleMySQLException(ex);
             }
         }
 
-        public void Execute(string sql, params object[] args)
+        public bool DirectExecute(string sql, params object[] args)
         {
-            Execute(new PreparedStatement(string.Format(sql, args)));
+            return DirectExecute(new PreparedStatement(string.Format(sql, args)));
         }
-        public void Execute(PreparedStatement stmt)
+
+        public bool DirectExecute(PreparedStatement stmt)
         {
             try
             {
@@ -90,13 +95,26 @@ namespace Framework.Database
                             cmd.Parameters.AddWithValue("@" + parameter.Key, parameter.Value);
 
                         cmd.ExecuteNonQuery();
+                        return true;
                     }
                 }
             }
             catch (MySqlException ex)
             {
                 HandleMySQLException(ex, stmt.CommandText);
+                return false;
             }
+        }
+
+        public void Execute(string sql, params object[] args)
+        {
+            Execute(new PreparedStatement(string.Format(sql, args)));
+        }
+
+        public void Execute(PreparedStatement stmt)
+        {
+            PreparedStatementTask task = new PreparedStatementTask(stmt);
+            _queue.Push(task);
         }
 
         public void ExecuteOrAppend(SQLTransaction trans, PreparedStatement stmt)
@@ -114,141 +132,41 @@ namespace Framework.Database
 
         public SQLResult Query(PreparedStatement stmt)
         {
-            List<object[]> rows = new List<object[]>();
             try
             {
-                using (var Connection = _connectionInfo.GetConnection())
-                {
-                    Connection.Open();
-                    using (MySqlCommand cmd = Connection.CreateCommand())
-                    {
+                MySqlConnection Connection = _connectionInfo.GetConnection();
+                Connection.Open();
 
-                        cmd.CommandText = stmt.CommandText;
-                        foreach (var parameter in stmt.Parameters)
-                            cmd.Parameters.AddWithValue("@" + parameter.Key, parameter.Value);
+                MySqlCommand cmd = Connection.CreateCommand();
+                cmd.CommandText = stmt.CommandText;
+                foreach (var parameter in stmt.Parameters)
+                    cmd.Parameters.AddWithValue("@" + parameter.Key, parameter.Value);
 
-                        using (var reader = cmd.ExecuteReader())
-                        {
-                            if (reader.HasRows)
-                            {
-                                while(reader.Read())
-                                {
-                                    var row = new object[reader.FieldCount];
-                                    reader.GetValues(row);
-                                    rows.Add(row);
-                                }
-                            }
-                        }
-                    }
-
-                }
+                return new SQLResult(cmd.ExecuteReader(System.Data.CommandBehavior.CloseConnection));
             }
             catch (MySqlException ex)
             {
                 HandleMySQLException(ex, stmt.CommandText);
+                return new SQLResult();
             }
-
-            return new SQLResult(rows);
-        }
-
-        public QueryCallback AsyncQuery(string sql, params object[] args)
-        {
-            return AsyncQuery(new PreparedStatement(string.Format(sql, args)));
         }
 
         public QueryCallback AsyncQuery(PreparedStatement stmt)
         {
-            return new QueryCallback(_AsyncQuery(stmt));
+            PreparedStatementTask task = new PreparedStatementTask(stmt, true);
+            // Store future result before enqueueing - task might get already processed and deleted before returning from this method
+            Task<SQLResult> result = task.GetFuture();
+            _queue.Push(task);
+            return new QueryCallback(result);
         }
 
-        async Task<SQLResult> _AsyncQuery(PreparedStatement stmt)
+        public Task<SQLQueryHolder<R>> DelayQueryHolder<R>(SQLQueryHolder<R> holder)
         {
-            List<object[]> rows = new List<object[]>();
-
-            try
-            {
-                using (var Connection = _connectionInfo.GetConnection())
-                {
-                    await Connection.OpenAsync();
-                    using (MySqlCommand cmd = Connection.CreateCommand())
-                    {
-                        cmd.CommandText = stmt.CommandText;
-                        foreach (var parameter in stmt.Parameters)
-                            cmd.Parameters.AddWithValue("@" + parameter.Key, parameter.Value);
-
-                        using (var reader = await cmd.ExecuteReaderAsync())
-                        {
-                            if (reader.HasRows)
-                            {
-                                while (await reader.ReadAsync())
-                                {
-                                    var row = new object[reader.FieldCount];
-
-                                    reader.GetValues(row);
-                                    rows.Add(row);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            catch (MySqlException ex)
-            {
-                HandleMySQLException(ex, stmt.CommandText);
-            }
-
-            return new SQLResult(rows);
-        }
-
-        public async Task<SQLQueryHolder<R>> DelayQueryHolder<R>(SQLQueryHolder<R> holder)
-        {
-            return await Task.Run(() =>
-            {
-                string query = "";
-
-                try
-                {
-                    using (var Connection = _connectionInfo.GetConnection())
-                    {
-                        Connection.OpenAsync();
-
-                        foreach (var pair in holder.m_queries)
-                        {
-                            List<object[]> rows = new List<object[]>();
-                            using (MySqlCommand cmd = Connection.CreateCommand())
-                            {
-                                cmd.CommandText = pair.Value.stmt.CommandText;
-                                foreach (var parameter in pair.Value.stmt.Parameters)
-                                    cmd.Parameters.AddWithValue("@" + parameter.Key, parameter.Value);
-
-                                query = cmd.CommandText;
-                                using (var reader = cmd.ExecuteReader())
-                                {
-                                    if (reader.HasRows)
-                                    {
-                                        while (reader.Read())
-                                        {
-                                            var row = new object[reader.FieldCount];
-
-                                            reader.GetValues(row);
-                                            rows.Add(row);
-                                        }
-                                    }
-                                }
-                            }
-
-                            holder.SetResult(pair.Key, new SQLResult(rows));
-                        }
-                    }
-
-                    return holder;
-                }
-                catch (MySqlException ex)
-                {
-                    HandleMySQLException(ex, query);
-                    return holder;
-                }
-            });
+            SQLQueryHolderTask<R> task = new SQLQueryHolderTask<R>(holder);
+            // Store future result before enqueueing - task might get already processed and deleted before returning from this method
+            Task<SQLQueryHolder<R>> result = task.GetFuture();
+            _queue.Push(task);
+            return result;
         }
 
         public void LoadPreparedStatements()
@@ -268,12 +186,12 @@ namespace Framework.Database
                     sb.Append(sql[i]);
             }
 
-            _queries[statement] = sb.ToString();
+            _preparedQueries[statement] = sb.ToString();
         }
 
         public PreparedStatement GetPreparedStatement(T statement)
         {
-            return new PreparedStatement(_queries[statement]);
+            return new PreparedStatement(_preparedQueries[statement]);
         }
 
         public bool Apply(string sql)
@@ -282,9 +200,9 @@ namespace Framework.Database
             {
                 using (var Connection = _connectionInfo.GetConnectionNoDatabase())
                 {
+                    Connection.Open();
                     using (MySqlCommand cmd = Connection.CreateCommand())
                     {
-                        Connection.Open();
                         cmd.CommandText = sql;
                         cmd.ExecuteNonQuery();
                         return true;
@@ -302,12 +220,16 @@ namespace Framework.Database
         {
             try
             {
+                string query = File.ReadAllText(path);
+                if (query.Length > 1048576) //Default size limit of querys
+                    Apply("SET GLOBAL max_allowed_packet=1073741824;");
+
                 using (var connection = _connectionInfo.GetConnection())
                 {
+                    connection.Open();
                     using (MySqlCommand cmd = connection.CreateCommand())
                     {
-                        connection.Open();
-                        cmd.CommandText = File.ReadAllText(path);
+                        cmd.CommandText = query;
                         cmd.ExecuteNonQuery();
                         return true;
                     }
@@ -326,6 +248,11 @@ namespace Framework.Database
         }
 
         public void CommitTransaction(SQLTransaction transaction)
+        {
+            _queue.Push(new TransactionTask(transaction));
+        }
+
+        public bool DirectCommitTransaction(SQLTransaction transaction)
         {
             using (var Connection = _connectionInfo.GetConnection())
             {
@@ -349,11 +276,13 @@ namespace Framework.Database
                             trans.Commit();
                             scope.Complete();
                         }
+                        return true;
                     }
                     catch (MySqlException ex) //error occurred
                     {
                         HandleMySQLException(ex, query);
                         trans.Rollback();
+                        return false;
                     }
                 }
             }
@@ -407,9 +336,5 @@ namespace Framework.Database
         }
 
         public abstract void PreparedStatements();
-
-        Dictionary<T, string> _queries = new Dictionary<T, string>();
-        MySqlConnectionInfo _connectionInfo;
-        DatabaseUpdater<T> _updater;
     }
 }

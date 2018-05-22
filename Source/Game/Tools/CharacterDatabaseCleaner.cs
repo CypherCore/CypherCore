@@ -62,8 +62,8 @@ namespace Game
 
             // NOTE: In order to have persistentFlags be set in worldstates for the next cleanup,
             // you need to define them at least once in worldstates.
-            flags &= (CleaningFlags) WorldConfig.GetIntValue(WorldCfg.PersistentCharacterCleanFlags);
-            DB.Characters.Execute("UPDATE worldstates SET value = {0} WHERE entry = {1}", flags, (uint)WorldStates.CleaningFlags);
+            flags &= (CleaningFlags)WorldConfig.GetIntValue(WorldCfg.PersistentCharacterCleanFlags);
+            DB.Characters.DirectExecute("UPDATE worldstates SET value = {0} WHERE entry = {1}", flags, (uint)WorldStates.CleaningFlags);
 
             Global.WorldMgr.SetCleaningFlags(flags);
 
@@ -150,13 +150,13 @@ namespace Game
 
         static void CleanCharacterTalent()
         {
-            DB.Characters.Execute("DELETE FROM character_talent WHERE talentGroup > {0}", PlayerConst.MaxSpecializations);
+            DB.Characters.DirectExecute("DELETE FROM character_talent WHERE talentGroup > {0}", PlayerConst.MaxSpecializations);
             CheckUnique("talentId", "character_talent", TalentCheck);
         }
 
         static void CleanCharacterQuestStatus()
         {
-            DB.Characters.Execute("DELETE FROM character_queststatus WHERE status = 0");
+            DB.Characters.DirectExecute("DELETE FROM character_queststatus WHERE status = 0");
         }
     }
 

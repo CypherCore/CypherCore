@@ -59,7 +59,6 @@ public class RealmManager : Singleton<RealmManager>
     {
         PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_REALMLIST);
         SQLResult result = DB.Login.Query(stmt);
-
         Dictionary<RealmHandle, string> existingRealms = new Dictionary<RealmHandle, string>();
         foreach (var p in _realms)
             existingRealms[p.Key] = p.Value.Name;
@@ -285,7 +284,7 @@ public class RealmManager : Singleton<RealmManager>
             stmt.AddValue(2, locale);
             stmt.AddValue(3, os);
             stmt.AddValue(4, accountName);
-            DB.Login.Execute(stmt);
+            DB.Login.DirectExecute(stmt);
 
             Bgs.Protocol.Attribute attribute = new Bgs.Protocol.Attribute();
             attribute.Name = "Param_RealmJoinTicket";

@@ -15,81 +15,77 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using MySql.Data.MySqlClient;
 using System;
-using System.Collections.Generic;
 
 namespace Framework.Database
 {
     public class SQLResult
     {
-        public SQLResult()
+        MySqlDataReader _reader;
+
+        public SQLResult() { }
+
+        public SQLResult(MySqlDataReader reader)
         {
-            _rows = new List<object[]>();
+            _reader = reader;
+            NextRow();
         }
-        public SQLResult(List<object[]> values)
+
+        ~SQLResult()
         {
-            _rows = values;
+            _reader = null;
         }
 
         public T Read<T>(int column)
         {
-            var value = _rows[_rowIndex][column];
+            var value = _reader[column];
 
-            if (value.GetType() == typeof(T))
-                return (T)value;
+            if (value == DBNull.Value)
+                return default(T);
 
-            if (value != DBNull.Value)
-                return (T)Convert.ChangeType(value, typeof(T));
+            if (value.GetType() != typeof(T))
+                return (T)Convert.ChangeType(value, typeof(T));//todo remove me when all fields are the right type  this is super slow
 
-            if (typeof(T).Name == "String")
-                return (T)Convert.ChangeType("", typeof(T));
-
-            return default(T);
-        }
-
-        public T[] ReadValues<T>(int startIndex, int numColumns)
-        {
-            T[] values = new T[numColumns];
-            for (var c = 0; c < numColumns; ++c)
-                values[c] = Read<T>(startIndex + c);
-
-            return values;
+            return (T)value;
         }
 
         public bool IsNull(int column)
         {
-            return _rows[_rowIndex][column] == DBNull.Value;
+            return _reader.IsDBNull(column);
         }
 
-        public int GetRowCount() { return _rows.Count; }
+        public int GetFieldCount() { return _reader.FieldCount; }
 
-        public bool IsEmpty() { return GetRowCount() == 0; }
+        public bool IsEmpty()
+        {
+            return _reader == null || !_reader.HasRows;
+        }
 
-        public SQLFields GetFields() { return new SQLFields(_rows[_rowIndex]); }
+        public SQLFields GetFields()
+        {
+            object[] values = new object[_reader.FieldCount];
+            _reader.GetValues(values);
+            return new SQLFields(values);
+        }
 
         public bool NextRow()
         {
-            if (_rowIndex >= GetRowCount() - 1)
-            {
-                _rowIndex = 0;
+            if (_reader == null)
                 return false;
-            }
 
-            _rowIndex++;
-            return true;
+            if (_reader.Read())
+                return true;
+
+            _reader.Close();
+            return false;
         }
-
-        public void ResetRowIndex()
-        {
-            _rowIndex = 0;
-        }
-
-        private int _rowIndex;
-        List<object[]> _rows;
     }
 
     public class SQLFields
     {
+        object[] _currentRow;
+
         public SQLFields(object[] row) { _currentRow = row; }
 
         public T Read<T>(int column)
@@ -116,7 +112,5 @@ namespace Framework.Database
 
             return values;
         }
-
-        object[] _currentRow;
     }
 }

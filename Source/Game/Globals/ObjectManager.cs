@@ -3147,10 +3147,13 @@ namespace Game
                     vItem.IgnoreFiltering = result.Read<bool>(8);
 
                     var bonusListIDsTok = new StringArray(result.Read<string>(6), ' ');
-                    foreach (string token in bonusListIDsTok)
+                    if (!bonusListIDsTok.IsEmpty())
                     {
-                        if (uint.TryParse(token, out uint id))
-                            vItem.BonusListIDs.Add(id);
+                        foreach (string token in bonusListIDsTok)
+                        {
+                            if (uint.TryParse(token, out uint id))
+                                vItem.BonusListIDs.Add(id);
+                        }
                     }
 
                     if (!IsVendorItemValid(entry, vItem, null, skipvendors))
@@ -3196,10 +3199,13 @@ namespace Game
                     vItem.IgnoreFiltering = result.Read<bool>(7);
 
                     var bonusListIDsTok = new StringArray(result.Read<string>(5), ' ');
-                    foreach (string token in bonusListIDsTok)
+                    if (!bonusListIDsTok.IsEmpty())
                     {
-                        if (uint.TryParse(token, out uint id))
-                            vItem.BonusListIDs.Add(id);
+                        foreach (string token in bonusListIDsTok)
+                        {
+                            if (uint.TryParse(token, out uint id))
+                                vItem.BonusListIDs.Add(id);
+                        }
                     }
 
                     if (!IsVendorItemValid((uint)vendor, vItem, null, skip_vendors))
@@ -8925,8 +8931,12 @@ namespace Game
                     uint itemId = rewardItem.Read<uint>(2);
                     StringArray bonusListIDsTok = new StringArray(rewardItem.Read<string>(3), ' ');
                     List<uint> bonusListIds = new List<uint>();
-                    foreach (uint token in bonusListIDsTok)
-                        bonusListIds.Add(token);
+                    if (!bonusListIDsTok.IsEmpty())
+                    {
+                        foreach (uint token in bonusListIDsTok)
+                            bonusListIds.Add(token);
+                    }
+
                     int quantity = rewardItem.Read<int>(4);
 
                     PlayerChoice choice = _playerChoices.LookupByKey(choiceId);

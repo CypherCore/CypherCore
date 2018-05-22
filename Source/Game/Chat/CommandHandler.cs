@@ -772,7 +772,7 @@ namespace Game.Chat
             {
                 messageChat.Initialize(ChatMsg.System, Language.Universal, null, null, lines[i]);
                 _session.SendPacket(messageChat);
-            }
+            }            
         }
 
         public void SendNotification(CypherStrings str, params object[] args)

@@ -421,11 +421,13 @@ namespace Game.Entities
 
             var tokens = new StringArray(fields.Read<string>(6), ' ');
             if (tokens.Length == ItemConst.MaxProtoSpells)
+            {
                 for (byte i = 0; i < ItemConst.MaxProtoSpells; ++i)
                 {
                     if (int.TryParse(tokens[i], out int value))
                         SetSpellCharges(i, value);
                 }
+            }
 
             SetUInt32Value(ItemFields.Flags, itemFlags);
 
@@ -466,10 +468,13 @@ namespace Game.Entities
             SetUInt32Value(ItemFields.Context, fields.Read<byte>(19));
 
             var bonusListIDs = new StringArray(fields.Read<string>(20), ' ');
-            for (var i = 0; i < bonusListIDs.Length; ++i)
+            if (!tokens.IsEmpty())
             {
-                if (uint.TryParse(tokens[i], out uint bonusListID))
-                    AddBonuses(bonusListID);
+                for (var i = 0; i < bonusListIDs.Length; ++i)
+                {
+                    if (uint.TryParse(tokens[i], out uint bonusListID))
+                        AddBonuses(bonusListID);
+                }
             }
 
             SetModifier(ItemModifier.TransmogAppearanceAllSpecs, fields.Read<uint>(21));
@@ -491,11 +496,14 @@ namespace Game.Entities
                 gemData[i] = new ItemDynamicFieldGems();
                 gemData[i].ItemId = fields.Read<uint>(31 + i * gemFields);
                 var gemBonusListIDs = new StringArray(fields.Read<string>(32 + i * gemFields), ' ');
-                uint b = 0;
-                foreach (string token in gemBonusListIDs)
+                if (!gemBonusListIDs.IsEmpty())
                 {
-                    if (uint.TryParse(token, out uint bonusListID) && bonusListID != 0)
-                        gemData[i].BonusListIDs[b++] = (ushort)bonusListID;
+                    uint b = 0;
+                    foreach (string token in gemBonusListIDs)
+                    {
+                        if (uint.TryParse(token, out uint bonusListID) && bonusListID != 0)
+                            gemData[i].BonusListIDs[b++] = (ushort)bonusListID;
+                    }
                 }
 
                 gemData[i].Context = fields.Read<byte>(33 + i * gemFields);
@@ -1920,10 +1928,13 @@ namespace Game.Entities
                         loot_item.context = item_result.Read<byte>(11);
 
                         StringArray bonusLists = new StringArray(item_result.Read<string>(12), ' ');
-                        foreach (string line in bonusLists)
+                        if (!bonusLists.IsEmpty())
                         {
-                            if (uint.TryParse(line, out uint id))
-                                loot_item.BonusListIDs.Add(id);
+                            foreach (string line in bonusLists)
+                            {
+                                if (uint.TryParse(line, out uint id))
+                                    loot_item.BonusListIDs.Add(id);
+                            }
                         }
 
                         // Copy the extra loot conditions from the item in the loot template
