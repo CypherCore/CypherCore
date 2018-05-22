@@ -6049,10 +6049,8 @@ namespace Game.Spells
                     {
                         uint summonEntry = (uint)spellEffect.MiscValue;
                         if (summonEntry != 0)
-                        {
-                            if (!summonedEntries.Contains(summonEntry))
-                                summonedEntries.Add(summonEntry);
-                        }
+                            summonedEntries.Add(summonEntry);
+                        
                     }
                 }
 

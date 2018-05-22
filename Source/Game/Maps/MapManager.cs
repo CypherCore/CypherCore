@@ -154,7 +154,7 @@ namespace Game.Entities
             string mapName = entry.MapName[Global.WorldMgr.GetDefaultDbcLocale()];
 
             Group group = player.GetGroup();
-            if (entry.IsRaid()) // can only enter in a raid group
+            if (entry.IsRaid() && entry.Expansion() >= (Expansion)WorldConfig.GetIntValue(WorldCfg.Expansion)) // can only enter in a raid group but raids from old expansion don't need a group
                 if ((!group || !group.isRaidGroup()) && WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreRaid))
                     return EnterState.CannotEnterNotInRaid;
 
