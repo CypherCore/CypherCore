@@ -211,7 +211,7 @@ namespace Game
         {
             {
                 uint oldMSTime = Time.GetMSTime();
-                //                                             0           1                           2                         3          4       5        6            7            8
+                //                                                0           1                           2                         3          4       5        6            7            8
                 SQLResult result = DB.World.Query("SELECT eventEntry, UNIX_TIMESTAMP(start_time), UNIX_TIMESTAMP(end_time), occurence, length, holiday, description, world_event, announce FROM game_event");
                 if (result.IsEmpty())
                 {
@@ -267,7 +267,6 @@ namespace Game
                 while (result.NextRow());
 
                 Log.outInfo(LogFilter.ServerLoading, "Loaded {0} game events in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
-
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Game Event Saves Data...");
@@ -276,7 +275,6 @@ namespace Game
 
                 //                                                       0       1        2
                 SQLResult result = DB.Characters.Query("SELECT eventEntry, state, next_start FROM game_event_save");
-
                 if (result.IsEmpty())
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 game event saves in game events. DB table `game_event_save` is empty.");
                 else
@@ -354,7 +352,6 @@ namespace Game
                     while (result.NextRow());
 
                     Log.outInfo(LogFilter.ServerLoading, "Loaded {0} game event prerequisites in game events in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
-
                 }
             }
 
@@ -364,7 +361,6 @@ namespace Game
 
                 //                                                 0        1
                 SQLResult result = DB.World.Query("SELECT guid, eventEntry FROM game_event_creature");
-
                 if (result.IsEmpty())
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creatures in game events. DB table `game_event_creature` is empty");
                 else
@@ -395,7 +391,6 @@ namespace Game
                     while (result.NextRow());
 
                     Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creatures in game events in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
-
                 }
             }
 
@@ -405,7 +400,6 @@ namespace Game
 
                 //                                                0         1
                 SQLResult result = DB.World.Query("SELECT guid, eventEntry FROM game_event_gameobject");
-
                 if (result.IsEmpty())
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 gameobjects in game events. DB table `game_event_gameobject` is empty.");
                 else
@@ -446,8 +440,7 @@ namespace Game
 
                 //                                                       0           1                       2                                 3                                     4
                 SQLResult result = DB.World.Query("SELECT creature.guid, creature.id, game_event_model_equip.eventEntry, game_event_model_equip.modelid, game_event_model_equip.equipment_id " +
-                    "FROM creature JOIN game_event_model_equip ON creature.guid=game_event_model_equip.guid");
-
+                        "FROM creature JOIN game_event_model_equip ON creature.guid=game_event_model_equip.guid");
                 if (result.IsEmpty())
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 model/equipment changes in game events. DB table `game_event_model_equip` is empty.");
                 else
@@ -498,7 +491,6 @@ namespace Game
 
                 //                                               0     1      2
                 SQLResult result = DB.World.Query("SELECT id, quest, eventEntry FROM game_event_creature_quest");
-
                 if (result.IsEmpty())
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quests additions in game events. DB table `game_event_creature_quest` is empty.");
                 else
@@ -532,7 +524,6 @@ namespace Game
 
                 //                                               0     1      2
                 SQLResult result = DB.World.Query("SELECT id, quest, eventEntry FROM game_event_gameobject_quest");
-
                 if (result.IsEmpty())
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 go quests additions in game events. DB table `game_event_gameobject_quest` is empty.");
                 else
@@ -566,7 +557,6 @@ namespace Game
 
                 //                                                 0       1         2             3
                 SQLResult result = DB.World.Query("SELECT quest, eventEntry, condition_id, num FROM game_event_quest_condition");
-
                 if (result.IsEmpty())
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quest event conditions in game events. DB table `game_event_quest_condition` is empty.");
                 else
@@ -606,7 +596,6 @@ namespace Game
 
                 //                                                  0          1            2             3                      4
                 SQLResult result = DB.World.Query("SELECT eventEntry, condition_id, req_num, max_world_state_field, done_world_state_field FROM game_event_condition");
-
                 if (result.IsEmpty())
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 conditions in game events. DB table `game_event_condition` is empty.");
                 else
@@ -642,7 +631,6 @@ namespace Game
 
                 //                                                      0           1         2
                 SQLResult result = DB.Characters.Query("SELECT eventEntry, condition_id, done FROM game_event_condition_save");
-
                 if (result.IsEmpty())
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 condition saves in game events. DB table `game_event_condition_save` is empty.");
                 else
@@ -683,7 +671,6 @@ namespace Game
 
                 //                                                0       1        2
                 SQLResult result = DB.World.Query("SELECT guid, eventEntry, npcflag FROM game_event_npcflag");
-
                 if (result.IsEmpty())
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 npcflags in game events. DB table `game_event_npcflag` is empty.");
                 else
@@ -717,7 +704,6 @@ namespace Game
 
                 //                                                  0          1
                 SQLResult result = DB.World.Query("SELECT questId, eventEntry FROM game_event_seasonal_questrelation");
-
                 if (result.IsEmpty())
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 seasonal quests additions in game events. DB table `game_event_seasonal_questrelation` is empty.");
                 else
@@ -753,9 +739,8 @@ namespace Game
             {
                 uint oldMSTime = Time.GetMSTime();
 
-                //                                        0           1     2     3         4         5             6     7             8                  9
+                //                                               0           1     2     3         4         5             6     7             8                  9
                 SQLResult result = DB.World.Query("SELECT eventEntry, guid, item, maxcount, incrtime, ExtendedCost, type, BonusListIDs, PlayerConditionId, IgnoreFiltering FROM game_event_npc_vendor ORDER BY guid, slot ASC");
-
                 if (result.IsEmpty())
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 vendor additions in game events. DB table `game_event_npc_vendor` is empty.");
                 else
@@ -799,8 +784,9 @@ namespace Game
                         vItem.IgnoreFiltering = result.Read<bool>(9);
 
                         var bonusListIDsTok = new StringArray(result.Read<string>(7), ' ');
-                        foreach (uint token in bonusListIDsTok)
-                            vItem.BonusListIDs.Add(token);
+                        if (!bonusListIDsTok.IsEmpty())
+                            foreach (uint token in bonusListIDsTok)
+                                vItem.BonusListIDs.Add(token);
 
                         // check validity with event's npcflag
                         if (!Global.ObjectMgr.IsVendorItemValid(entry, vItem, null, null, event_npc_flag))
@@ -822,7 +808,6 @@ namespace Game
 
                 //                                                   0         1
                 SQLResult result = DB.World.Query("SELECT eventEntry, bgflag FROM game_event_battleground_holiday");
-
                 if (result.IsEmpty())
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Battlegroundholidays in game events. DB table `game_event_battleground_holiday` is empty.");
                 else
@@ -854,8 +839,7 @@ namespace Game
 
                 //                                                               0                         1
                 SQLResult result = DB.World.Query("SELECT pool_template.entry, game_event_pool.eventEntry FROM pool_template" +
-                    " JOIN game_event_pool ON pool_template.entry = game_event_pool.pool_entry");
-
+                        " JOIN game_event_pool ON pool_template.entry = game_event_pool.pool_entry");
                 if (result.IsEmpty())
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 pools for game events. DB table `game_event_pool` is empty.");
                 else
@@ -958,7 +942,6 @@ namespace Game
         {
             int season = WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId);
             SQLResult result = DB.World.Query("SELECT eventEntry FROM game_event_arena_seasons WHERE season = '{0}'", season);
-
             if (result.IsEmpty())
             {
                 Log.outError(LogFilter.Gameevent, "ArenaSeason ({0}) must be an existant Arena Season", season);
@@ -975,7 +958,6 @@ namespace Game
 
             StartEvent(eventId, true);
             Log.outInfo(LogFilter.Gameevent, "Arena Season {0} started...", season);
-
         }
 
         public uint Update()                               // return the next event delay in ms

@@ -709,7 +709,7 @@ namespace Game.Spells
                 else
                     recoveryStart = charges.LastOrDefault().RechargeEnd;
 
-                charges.Add(new ChargeEntry(recoveryStart, TimeSpan.FromMilliseconds(chargeRecovery)));
+                _categoryCharges.Add(chargeCategoryId, new ChargeEntry(recoveryStart, TimeSpan.FromMilliseconds(chargeRecovery)));
                 return true;
             }
 

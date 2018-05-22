@@ -401,30 +401,20 @@ namespace Game
             {
                 uint oldMSTime = Time.GetMSTime();
 
-                long achievementCount = 0;
-                long criteriaCount = 0;
-
-                SQLResult achievementResult;
-                SQLResult criteriaResult;
                 foreach (var pair in GuildStore)
                 {
                     PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GUILD_ACHIEVEMENT);
                     stmt.AddValue(0, pair.Key);
-                    achievementResult = DB.Characters.Query(stmt);
+                    SQLResult achievementResult = DB.Characters.Query(stmt);
 
                     stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GUILD_ACHIEVEMENT_CRITERIA);
                     stmt.AddValue(0, pair.Key);
-                    criteriaResult = DB.Characters.Query(stmt);
-
-                    if (!achievementResult.IsEmpty())
-                        achievementCount += achievementResult.GetRowCount();
-                    if (!criteriaResult.IsEmpty())
-                        criteriaCount += criteriaResult.GetRowCount();
+                    SQLResult criteriaResult = DB.Characters.Query(stmt);
 
                     pair.Value.GetAchievementMgr().LoadFromDB(achievementResult, criteriaResult);
                 }
 
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} guild achievements and {1} criterias in {2} ms", achievementCount, criteriaCount, Time.GetMSTimeDiffToNow(oldMSTime));
+                Log.outInfo(LogFilter.ServerLoading, "Loaded guild achievements and criterias in {1} ms", Time.GetMSTimeDiffToNow(oldMSTime));
             }
 
             // 11. Validate loaded guild data

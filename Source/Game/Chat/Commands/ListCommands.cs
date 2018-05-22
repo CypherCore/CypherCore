@@ -210,15 +210,10 @@ namespace Game.Chat.Commands
                         itemPos = "";
 
                     handler.SendSysMessage(CypherStrings.ItemlistSlot, itemGuid.ToString(), ownerName, ownerGuid.ToString(), ownerAccountId, itemPos);
+
+                    count--;
                 }
                 while (result.NextRow());
-
-                uint resultCount = (uint)result.GetRowCount();
-
-                if (count > resultCount)
-                    count -= resultCount;
-                else if (count != 0)
-                    count = 0;
             }
 
             // mail case
@@ -256,15 +251,10 @@ namespace Game.Chat.Commands
                     string itemPos = "[in mail]";
 
                     handler.SendSysMessage(CypherStrings.ItemlistMail, itemGuid, itemSenderName, itemSender, itemSenderAccountId, itemReceiverName, itemReceiver, itemReceiverAccount, itemPos);
+
+                    count--;
                 }
                 while (result.NextRow());
-
-                uint resultCount = (uint)result.GetRowCount();
-
-                if (count > resultCount)
-                    count -= resultCount;
-                else if (count != 0)
-                    count = 0;
             }
 
             // auction case
@@ -329,15 +319,10 @@ namespace Game.Chat.Commands
                     string itemPos = "[in guild bank]";
 
                     handler.SendSysMessage(CypherStrings.ItemlistGuild, itemGuid.ToString(), guildName, guildGuid.ToString(), itemPos);
+
+                    count--;
                 }
                 while (result.NextRow());
-
-                uint resultCount = (uint)result.GetRowCount();
-
-                if (count > resultCount)
-                    count -= resultCount;
-                else if (count != 0)
-                    count = 0;
             }
 
             if (inventoryCount + mailCount + auctionCount + guildCount == 0)

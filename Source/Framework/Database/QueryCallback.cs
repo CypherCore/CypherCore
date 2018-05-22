@@ -76,7 +76,7 @@ namespace Framework.Database
                     if (!hasNext)
                         return QueryCallbackStatus.Completed;
 
-                    callback = _callbacks.Dequeue();
+                    callback = _callbacks.Peek();
                 }
                 else
                     return QueryCallbackStatus.NotReady;

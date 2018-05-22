@@ -2134,7 +2134,7 @@ namespace Game.Entities
             if (cainfo.path_id != 0)
                 m_path_id = cainfo.path_id;
 
-            if (!cainfo.auras.Empty())
+            if (cainfo.auras != null)
             {
                 foreach (var id in cainfo.auras)
                 {

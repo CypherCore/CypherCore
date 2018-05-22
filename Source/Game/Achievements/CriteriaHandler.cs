@@ -452,7 +452,7 @@ namespace Game.Achievements
                     }
                     else
                     {
-                        value -= timeDiff;
+                        _timeCriteriaTrees[key] -= timeDiff;
                     }
                 }
             }

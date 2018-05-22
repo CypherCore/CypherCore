@@ -79,10 +79,9 @@ namespace Game.Maps
 
         void LoadHelper<T>(SortedSet<ulong> guid_set, CellCoord cell, ref uint count, Map map) where T : WorldObject, new()
         {
-            foreach (var i_guid in guid_set)
+            foreach (var guid in guid_set)
             {
                 T obj = new T();
-                ulong guid = i_guid;
                 if (!obj.LoadFromDB(guid, map))
                     continue;
 
@@ -162,8 +161,9 @@ namespace Game.Maps
         public override void Visit(IList<Creature> objs)
         {  
             // stop any fights at grid de-activation and remove dynobjects/areatriggers created at cast by creatures
-            foreach (var creature in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                Creature creature = objs[i];
                 creature.RemoveAllDynObjects();
                 creature.RemoveAllAreaTriggers();
 

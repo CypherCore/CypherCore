@@ -198,7 +198,7 @@ namespace Game.Maps
             gridInfo.UpdateTimeTracker(diff);
         }
 
-        public void Update(Map m, uint diff)
+        public void Update(Map map, uint diff)
         {
             switch (GetGridState())
             {
@@ -207,24 +207,24 @@ namespace Game.Maps
                     getGridInfoRef().UpdateTimeTracker(diff);
                     if (getGridInfoRef().getTimeTracker().Passed())
                     {
-                        if (GetWorldObjectCountInNGrid<Player>() == 0 && !m.ActiveObjectsNearGrid(this))
+                        if (GetWorldObjectCountInNGrid<Player>() == 0 && !map.ActiveObjectsNearGrid(this))
                         {
                             ObjectGridStoper worker = new ObjectGridStoper();
                             var visitor = new Visitor(worker, GridMapTypeMask.AllGrid);
                             VisitAllGrids(visitor);
                             SetGridState(GridState.Idle);
                             Log.outDebug(LogFilter.Maps, "Grid[{0}, {1}] on map {2} moved to IDLE state", getX(), getY(),
-                                m.GetId());
+                                map.GetId());
                         }
                         else
-                            m.ResetGridExpiry(this, 0.1f);
+                            map.ResetGridExpiry(this, 0.1f);
                     }
                     break;
                 case GridState.Idle:
-                    m.ResetGridExpiry(this);
+                    map.ResetGridExpiry(this);
                     SetGridState(GridState.Removal);
                     Log.outDebug(LogFilter.Maps, "Grid[{0}, {1}] on map {2} moved to REMOVAL state", getX(), getY(),
-                        m.GetId());
+                        map.GetId());
                     break;
                 case GridState.Removal:
                     if (!getGridInfoRef().getUnloadLock())
@@ -232,12 +232,12 @@ namespace Game.Maps
                         getGridInfoRef().UpdateTimeTracker(diff);
                         if (getGridInfoRef().getTimeTracker().Passed())
                         {
-                            if (!m.UnloadGrid(this, false))
+                            if (!map.UnloadGrid(this, false))
                             {
                                 Log.outDebug(LogFilter.Maps,
                                     "Grid[{0}, {1}] for map {2} differed unloading due to players or active objects nearby",
-                                    getX(), getY(), m.GetId());
-                                m.ResetGridExpiry(this);
+                                    getX(), getY(), map.GetId());
+                                map.ResetGridExpiry(this);
                             }
                         }
                     }

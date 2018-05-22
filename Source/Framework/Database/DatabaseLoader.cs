@@ -80,8 +80,6 @@ namespace Framework.Database
                 // Populate and update only if updates are enabled for this pool
                 _populate.Add(() =>
                 {
-                    //Hack used to allow big querys
-                    database.Apply("SET GLOBAL max_allowed_packet=1073741824;");
                     if (!database.GetUpdater().Populate())
                     {
                         Log.outError(LogFilter.ServerLoading, $"Could not populate the {database.GetDatabaseName()} database, see log for details.");
@@ -92,8 +90,6 @@ namespace Framework.Database
 
                 _update.Add(() =>
                 {
-                    //Hack used to allow big querys
-                    database.Apply("SET GLOBAL max_allowed_packet=1073741824;");
                     if (!database.GetUpdater().Update())
                     {
                         Log.outError(LogFilter.ServerLoading, $"Could not update the {database.GetDatabaseName()} database, see log for details.");

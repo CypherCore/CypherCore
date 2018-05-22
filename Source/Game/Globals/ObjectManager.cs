@@ -9186,7 +9186,7 @@ namespace Game
                 _equipmentSetGuid = result.Read<ulong>(0) + 1;
 
             result = DB.Characters.Query("SELECT MAX(guildId) FROM guild");
-            if (result.GetRowCount() == 1)
+            if (!result.IsEmpty())
                 Global.GuildMgr.SetNextGuildId(result.Read<uint>(0) + 1);
 
             result = DB.Characters.Query("SELECT MAX(itemId) from character_void_storage");

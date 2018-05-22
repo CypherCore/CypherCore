@@ -477,8 +477,9 @@ namespace Game.Maps
 
         public override void Visit(IList<WorldObject> objs)
         {
-            foreach (var obj in objs)
+            for (var i = 0; i < objs.Count; ++i)
             {
+                var obj = objs[i];
                 if (obj.IsTypeId(TypeId.Player) || obj.IsTypeId(TypeId.Corpse))
                     continue;
 

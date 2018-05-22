@@ -143,17 +143,13 @@ namespace Game
             stmt.AddValue(0, packet.Item.GetCounter());
             SQLResult result = DB.Characters.Query(stmt);
 
-            // result == NULL also correct in case no sign yet
-            if (!result.IsEmpty())
-                signs = (byte)result.GetRowCount();
-
             ServerPetitionShowSignatures signaturesPacket = new ServerPetitionShowSignatures();
             signaturesPacket.Item = packet.Item;
             signaturesPacket.Owner = GetPlayer().GetGUID();
             signaturesPacket.OwnerAccountID = ObjectGuid.Create(HighGuid.WowAccount, ObjectManager.GetPlayerAccountIdByGUID(GetPlayer().GetGUID()));
             signaturesPacket.PetitionID = (int)packet.Item.GetCounter();  // @todo verify that...
 
-            for (byte i = 1; i <= signs; ++i)
+            do
             {
                 ObjectGuid signerGUID = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(0));
 
@@ -161,9 +157,9 @@ namespace Game
                 signature.Signer = signerGUID;
                 signature.Choice = 0;
                 signaturesPacket.Signatures.Add(signature);
-
-                result.NextRow();
             }
+            while (result.NextRow());
+
             SendPacket(signaturesPacket);
         }
 
@@ -371,18 +367,13 @@ namespace Game
             stmt.AddValue(0, packet.ItemGUID.GetCounter());
             SQLResult result = DB.Characters.Query(stmt);
 
-            byte signs = 0;
-            // result == NULL also correct charter without signs
-            if (!result.IsEmpty())
-                signs = (byte)result.GetRowCount();
-
             ServerPetitionShowSignatures signaturesPacket = new ServerPetitionShowSignatures();
             signaturesPacket.Item = packet.ItemGUID;
             signaturesPacket.Owner = GetPlayer().GetGUID();
             signaturesPacket.OwnerAccountID = ObjectGuid.Create(HighGuid.WowAccount, player.GetSession().GetAccountId());
             signaturesPacket.PetitionID = (int)packet.ItemGUID.GetCounter();  // @todo verify that...
 
-            for (byte i = 1; i <= signs; ++i)
+            do
             {
                 ObjectGuid signerGUID = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(0));
 
@@ -390,9 +381,8 @@ namespace Game
                 signature.Signer = signerGUID;
                 signature.Choice = 0;
                 signaturesPacket.Signatures.Add(signature);
-
-                result.NextRow();
             }
+            while (result.NextRow());
 
             player.SendPacket(signaturesPacket);
         }
@@ -452,15 +442,20 @@ namespace Game
             stmt.AddValue(0, packet.Item.GetCounter());
             result = DB.Characters.Query(stmt);
 
+            List<ObjectGuid> guids = new List<ObjectGuid>();
             if (!result.IsEmpty())
-                signatures = (byte)result.GetRowCount();
-            else
-                signatures = 0;
+            {
+                do
+                {
+                    guids.Add(ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(0)));
+                }
+                while (result.NextRow());
+            }
 
             uint requiredSignatures = WorldConfig.GetUIntValue(WorldCfg.MinPetitionSigns);
 
             // Notify player if signatures are missing
-            if (signatures < requiredSignatures)
+            if (guids.Count < requiredSignatures)
             {
                 resultPacket.Result = PetitionTurns.NeedMoreSignatures;
                 SendPacket(resultPacket);
@@ -484,14 +479,8 @@ namespace Game
             SQLTransaction trans = new SQLTransaction();
 
             // Add members from signatures
-            for (byte i = 0; i < signatures; ++i)
-            {
-                guild.AddMember(trans, ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(0)));
-
-                // Checking the return value just to be double safe
-                if (!result.NextRow())
-                    break;
-            }
+            foreach (var guid in guids)
+                guild.AddMember(trans, guid);
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PETITION_BY_GUID);
             stmt.AddValue(0, packet.Item.GetCounter());

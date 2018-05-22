@@ -32,11 +32,17 @@ namespace Framework.Collections
 
         public StringArray(string str, params string[] separator)
         {
+            if (str.IsEmpty())
+                return;
+
             _str = str.Split(separator, StringSplitOptions.RemoveEmptyEntries);
         }
 
         public StringArray(string str, params char[] separator)
         {
+            if (str.IsEmpty())
+                return;
+
             _str = str.Split(separator, StringSplitOptions.RemoveEmptyEntries);
         }
 
@@ -51,7 +57,12 @@ namespace Framework.Collections
             return _str.GetEnumerator();
         }
 
-        public int Length { get { return _str.Length; } }
+        public bool IsEmpty()
+        {
+            return _str == null || _str.Length == 0;
+        }
+
+        public int Length => _str.Length;
 
         string[] _str;
     }

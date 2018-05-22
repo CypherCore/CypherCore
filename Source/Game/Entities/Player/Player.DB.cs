@@ -4038,12 +4038,14 @@ namespace Game.Entities
 
             if (!result.IsEmpty())
             {
-                Log.outDebug(LogFilter.Player, "Player:DeleteOldChars: Found {0} character(s) to delete", result.GetRowCount());
+                int count = 0;
                 do
                 {
                     DeleteFromDB(ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(0)), result.Read<uint>(1), true, true);
+                    count++;
                 }
                 while (result.NextRow());
+                Log.outDebug(LogFilter.Player, "Player:DeleteOldChars: Deleted {0} character(s)", count);
             }
         }
 

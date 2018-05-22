@@ -539,7 +539,7 @@ namespace Game.Chat.Commands
                     string accountName;
 
                     // "account" case, name can be get in same query
-                    if (result.GetRowCount() > 1)
+                    if (result.GetFieldCount() > 1)
                         accountName = result.Read<string>(1);
                     // "character" case, name need extract from another DB
                     else

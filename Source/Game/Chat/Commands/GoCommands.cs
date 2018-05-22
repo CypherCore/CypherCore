@@ -71,14 +71,15 @@ namespace Game.Chat.Commands
                 handler.SendSysMessage(CypherStrings.CommandGocreatnotfound);
                 return false;
             }
-            if (result.GetRowCount() > 1)
-                handler.SendSysMessage(CypherStrings.CommandGocreatmultiple);
 
             float x = result.Read<float>(0);
             float y = result.Read<float>(1);
             float z = result.Read<float>(2);
             float o = result.Read<float>(3);
             uint mapId = result.Read<ushort>(4);
+
+            if (result.NextRow())
+                handler.SendSysMessage(CypherStrings.CommandGocreatmultiple);
 
             if (!GridDefines.IsValidMapCoord(mapId, x, y, z, o) || Global.ObjectMgr.IsTransportMap(mapId))
             {
