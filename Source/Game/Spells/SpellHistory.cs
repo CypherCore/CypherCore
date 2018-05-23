@@ -103,7 +103,6 @@ namespace Game.Spells
                         stmt.AddValue(index++, pair.Value.CategoryId);
                         stmt.AddValue(index++, (uint)Time.DateTimeToUnixTime(pair.Value.CategoryEnd));
                         trans.Append(stmt);
-
                     }
                 }
 
@@ -142,7 +141,6 @@ namespace Game.Spells
                         stmt.AddValue(index++, pair.Value.CategoryId);
                         stmt.AddValue(index++, (uint)Time.DateTimeToUnixTime(pair.Value.CategoryEnd));
                         trans.Append(stmt);
-
                     }
                 }
 
@@ -177,11 +175,10 @@ namespace Game.Spells
                 }
             }
 
-            foreach (var key in _categoryCharges.Keys)
+            foreach (var pair in _categoryCharges.KeyValueList)
             {
-                var chargeRefreshTimes = _categoryCharges[key];
-                while (!chargeRefreshTimes.Empty() && chargeRefreshTimes.FirstOrDefault().RechargeEnd <= now)
-                    chargeRefreshTimes.RemoveAt(0);
+                if (pair.Value.RechargeEnd <= now)
+                    _categoryCharges.Remove(pair);
             }
         }
 
@@ -266,17 +263,17 @@ namespace Game.Spells
             DateTime now = DateTime.Now;
             foreach (var key in _categoryCharges.Keys)
             {
-                var p = _categoryCharges[key];
-                if (!p.Empty())
+                var list = _categoryCharges[key];
+                if (!list.Empty())
                 {
-                    TimeSpan cooldownDuration = p.FirstOrDefault().RechargeEnd - now;
+                    TimeSpan cooldownDuration = list.FirstOrDefault().RechargeEnd - now;
                     if (cooldownDuration.TotalMilliseconds <= 0)
                         continue;
 
                     SpellChargeEntry chargeEntry = new SpellChargeEntry();
                     chargeEntry.Category = key;
                     chargeEntry.NextRecoveryTime = (uint)cooldownDuration.TotalMilliseconds;
-                    chargeEntry.ConsumedCharges = (byte)p.Count;
+                    chargeEntry.ConsumedCharges = (byte)list.Count;
                     sendSpellCharges.Entries.Add(chargeEntry);
                 }
             }
@@ -707,7 +704,7 @@ namespace Game.Spells
                 if (charges.Empty())
                     recoveryStart = DateTime.Now;
                 else
-                    recoveryStart = charges.LastOrDefault().RechargeEnd;
+                    recoveryStart = charges.Last().RechargeEnd;
 
                 _categoryCharges.Add(chargeCategoryId, new ChargeEntry(recoveryStart, TimeSpan.FromMilliseconds(chargeRecovery)));
                 return true;
@@ -721,7 +718,7 @@ namespace Game.Spells
             var chargeList = _categoryCharges.LookupByKey(chargeCategoryId);
             if (!chargeList.Empty())
             {
-                chargeList.RemoveAt(0);
+                chargeList.RemoveAt(chargeList.Count - 1);
 
                 Player player = GetPlayerOwner();
                 if (player)
