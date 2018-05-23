@@ -220,7 +220,7 @@ namespace Game.Entities
             _duration = newDuration;
 
             // should be sent in object create packets only
-            UpdateData[(int)AreaTriggerFields.Duration] = _duration;
+            updateValues[(int)AreaTriggerFields.Duration].SignedValue = _duration;
         }
 
         float GetProgress()
@@ -597,7 +597,7 @@ namespace Game.Entities
             _spline.initLengths();
 
             // should be sent in object create packets only
-            UpdateData[(int)AreaTriggerFields.TimeToTarget] = timeToTarget;
+            updateValues[(int)AreaTriggerFields.TimeToTarget].UnsignedValue = timeToTarget;
 
             if (IsInWorld)
             {

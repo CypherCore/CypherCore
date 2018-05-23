@@ -87,10 +87,7 @@ namespace Game.Entities
 
         void InitValues()
         {
-            UpdateData = new Hashtable((int)valuesCount);
-            for (int i = 0; i < valuesCount; ++i)
-                UpdateData[i] = 0u;
-
+            updateValues = new UpdateValues[valuesCount];
             _changesMask = new BitArray((int)valuesCount);
 
             if (_dynamicValuesCount != 0)
@@ -111,7 +108,7 @@ namespace Game.Entities
 
         public void _Create(ObjectGuid guid)
         {
-            if (UpdateData == null)
+            if (updateValues == null)
                 InitValues();
 
             SetGuidValue(ObjectFields.Guid, guid);
@@ -269,39 +266,39 @@ namespace Game.Entities
         public int GetInt32Value(object index)
         {
             Contract.Assert((int)index < valuesCount || PrintIndexError(index, false));
-            return Convert.ToInt32(UpdateData[(int)index]);
+            return updateValues[(int)index].SignedValue;
         }
 
         public uint GetUInt32Value(object index)
         {
-            Contract.Assert(Convert.ToInt32(index) < valuesCount || PrintIndexError(index, false));
-            return Convert.ToUInt32(UpdateData[Convert.ToInt32(index)]);
+            Contract.Assert((int)index < valuesCount || PrintIndexError(index, false));
+            return updateValues[(int)index].UnsignedValue;
         }
 
         public ulong GetUInt64Value(object index)
         {
             Contract.Assert((int)index + 1 < valuesCount || PrintIndexError(index, false));
-            return (Convert.ToUInt64(UpdateData[(int)index + 1]) << 32 | (uint)UpdateData[(int)index]);
+            return ((ulong)updateValues[(int)index + 1].UnsignedValue << 32 | updateValues[(int)index].UnsignedValue);
         }
 
         public float GetFloatValue(object index)
         {
             Contract.Assert((int)index < valuesCount || PrintIndexError(index, false));
-            return Convert.ToSingle(UpdateData[(int)index]);
+            return updateValues[(int)index].FloatValue;
         }
 
         public byte GetByteValue(object index, byte offset)
         {
             Contract.Assert((int)index < valuesCount || PrintIndexError(index, false));
             Contract.Assert(offset < 4);
-            return Convert.ToByte(((uint)UpdateData[(int)index] >> (offset * 8)) & 0xFF);
+            return (byte)((updateValues[(int)index].UnsignedValue >> (offset * 8)) & 0xFF);
         }
 
         public ushort GetUInt16Value(object index, byte offset)
         {
             Contract.Assert((int)index < valuesCount || PrintIndexError(index, false));
             Contract.Assert(offset < 2);
-            return Convert.ToUInt16(((uint)UpdateData[(int)index] >> (offset * 16)) & 0xFFFF);
+            return (ushort)((updateValues[(int)index].UnsignedValue >> (offset * 16)) & 0xFFFF);
         }
 
         public ObjectGuid GetGuidValue(object index)
@@ -828,10 +825,10 @@ namespace Game.Entities
             for (int index = 0; index < valuesCount; ++index)
             {
                 if (Convert.ToBoolean(_fieldNotifyFlags & flags[index]) ||
-                    ((updatetype == UpdateType.Values ? _changesMask.Get(index) : HasUpdateValue(index)) && Convert.ToBoolean(flags[index] & visibleFlag)))
+                    ((updatetype == UpdateType.Values ? _changesMask.Get(index) : updateValues[index].UnsignedValue != 0) && Convert.ToBoolean(flags[index] & visibleFlag)))
                 {
                     updateMask.SetBit(index);
-                    WriteValue(fieldBuffer, index);
+                    fieldBuffer.WriteUInt32(updateValues[index].UnsignedValue);
                 }
             }
 
@@ -880,28 +877,6 @@ namespace Game.Entities
 
             fieldMask.AppendToPacket(data);
             data.WriteBytes(fieldBuffer);
-        }
-
-        public void WriteValue(ByteBuffer data, int index)
-        {
-            switch (UpdateData[index].GetType().Name)
-            {
-                default:
-                case "UInt32":
-                    data.WriteUInt32(UpdateData[index]);
-                    break;
-                case "Single":
-                    data.WriteFloat((float)UpdateData[index]);
-                    break;
-                case "Int32":
-                    data.WriteInt32((int)UpdateData[index]);
-                    break;
-            }
-        }
-
-        public bool HasUpdateValue(int index)
-        {
-            return UpdateData.ContainsKey(index);
         }
 
         public void AddToObjectUpdateIfNeeded()
@@ -1068,7 +1043,7 @@ namespace Game.Entities
             {
                 if (uint.TryParse(lines[index], out uint value))
                 {
-                    UpdateData[(int)startOffset + index] = value;
+                    updateValues[(int)startOffset + index].UnsignedValue = value;
                     _changesMask.Set((int)(startOffset + index), true);
                 }
             }
@@ -1078,9 +1053,9 @@ namespace Game.Entities
         {
             Contract.Assert((int)index < valuesCount || PrintIndexError(index, true));
 
-            if (Convert.ToInt32(UpdateData[(int)index]) != value)
+            if (updateValues[(int)index].SignedValue != value)
             {
-                UpdateData[(int)index] = value;
+                updateValues[(int)index].SignedValue = value;
                 _changesMask.Set((int)index, true);
 
                 AddToObjectUpdateIfNeeded();
@@ -1092,9 +1067,9 @@ namespace Game.Entities
             int _index = Convert.ToInt32(index);
             Contract.Assert(_index < valuesCount || PrintIndexError(index, true));
 
-            if (Convert.ToUInt32(UpdateData[_index]) != value)
+            if (updateValues[_index].UnsignedValue != value)
             {
-                UpdateData[_index] = value;
+                updateValues[_index].UnsignedValue = value;
                 _changesMask.Set(_index, true);
 
                 AddToObjectUpdateIfNeeded();
@@ -1103,7 +1078,9 @@ namespace Game.Entities
 
         public void UpdateUInt32Value(object index, uint value)
         {
-            UpdateData[(int)index] = value;
+            Contract.Assert((int)index < valuesCount || PrintIndexError(index, true));
+
+            updateValues[(int)index].UnsignedValue = value;
             _changesMask.Set((int)index, true);
         }
 
@@ -1112,8 +1089,8 @@ namespace Game.Entities
             Contract.Assert((int)index + 1 < valuesCount || PrintIndexError(index, true));
             if (GetUInt64Value(index) != value)
             {
-                UpdateData[(int)index] = MathFunctions.Pair64_LoPart(value);
-                UpdateData[(int)index + 1] = MathFunctions.Pair64_HiPart(value);
+                updateValues[(int)index].UnsignedValue = MathFunctions.Pair64_LoPart(value);
+                updateValues[(int)index + 1].UnsignedValue = MathFunctions.Pair64_HiPart(value);
                 _changesMask.Set((int)index, true);
                 _changesMask.Set((int)index + 1, true);
 
@@ -1121,30 +1098,9 @@ namespace Game.Entities
             }
         }
 
-        public bool AddUInt64Value(object index, ulong value)
-        {
-            if (value != 0 && GetUInt64Value(index) == 0)
-            {
-                SetUInt64Value(index, value);
-                return true;
-            }
-
-            return false;
-        }
-
-        public bool RemoveUInt64Value(object index, ulong value)
-        {
-            if (value != 0 && GetUInt64Value(index) == value)
-            {
-                SetUInt64Value(index, 0);
-                return true;
-            }
-
-            return false;
-        }
-
         public bool AddGuidValue(object index, ObjectGuid value)
         {
+            Contract.Assert((int)index + 3 < valuesCount || PrintIndexError(index, true));
             if (!value.IsEmpty() && GetGuidValue(index).IsEmpty())
             {
                 SetGuidValue(index, value);
@@ -1156,6 +1112,7 @@ namespace Game.Entities
 
         public bool RemoveGuidValue(object index, ObjectGuid value)
         {
+            Contract.Assert((int)index + 3 < valuesCount || PrintIndexError(index, true));
             if (!value.IsEmpty() && GetGuidValue(index) == value)
             {
                 SetGuidValue(index, ObjectGuid.Empty);
@@ -1169,9 +1126,9 @@ namespace Game.Entities
         {
             Contract.Assert((int)index < valuesCount || PrintIndexError(index, true));
 
-            if (GetFloatValue(index) != value)
+            if (updateValues[(int)index].FloatValue != value)
             {
-                UpdateData[(int)index] = value;
+                updateValues[(int)index].FloatValue = value;
                 _changesMask.Set((int)index, true);
 
                 AddToObjectUpdateIfNeeded();
@@ -1188,10 +1145,10 @@ namespace Game.Entities
                 return;
             }
 
-            if ((byte)(GetUInt32Value(index) >> (offset * 8)) != value)
+            if ((byte)(updateValues[(int)index].UnsignedValue >> (offset * 8)) != value)
             {
-                UpdateData[(int)index] = (uint)UpdateData[(int)index] & ~(uint)(0xFF << (offset * 8));
-                UpdateData[(int)index] = (uint)UpdateData[(int)index] | (uint)value << (offset * 8);
+                updateValues[(int)index].UnsignedValue &= ~(uint)(0xFF << (offset * 8));
+                updateValues[(int)index].UnsignedValue |= (uint)value << (offset * 8);
                 _changesMask.Set((int)index, true);
 
                 AddToObjectUpdateIfNeeded();
@@ -1210,8 +1167,8 @@ namespace Game.Entities
 
             if ((ushort)(GetUInt32Value(index) >> (offset * 16)) != value)
             {
-                UpdateData[(int)index] = (uint)UpdateData[(int)index] & ~((uint)0xFFFF << (offset * 16));
-                UpdateData[(int)index] = (uint)UpdateData[(int)index] | (uint)value << (offset * 16);
+                updateValues[(int)index].UnsignedValue &= ~((uint)0xFFFF << (offset * 16));
+                updateValues[(int)index].UnsignedValue |= (uint)value << (offset * 16);
                 _changesMask.Set((int)index, true);
 
                 AddToObjectUpdateIfNeeded();
@@ -1221,8 +1178,8 @@ namespace Game.Entities
         public void SetGuidValue(object index, ObjectGuid value)
         {
             Contract.Assert((int)index + 3 < valuesCount || PrintIndexError(index, true));
-            if (new ObjectGuid(GetUInt64Value((int)index + 2), GetUInt64Value(index)) != value)
-            {
+            if (GetGuidValue(index) != value)
+            {                
                 SetUInt64Value(index, value.GetLowValue());
                 SetUInt64Value((int)index + 2, value.GetHighValue());
 
@@ -1290,12 +1247,12 @@ namespace Game.Entities
         public void SetFlag(object index, object newflag)
         {
             Contract.Assert((int)index < valuesCount || PrintIndexError(index, true));
-            uint oldval = (uint)UpdateData[(int)index];
+            uint oldval = updateValues[(int)index].UnsignedValue;
             uint newval = oldval | Convert.ToUInt32(newflag);
 
             if (oldval != newval)
             {
-                UpdateData[(int)index] = newval;
+                updateValues[(int)index].UnsignedValue = newval;
                 _changesMask.Set((int)index, true);
 
                 AddToObjectUpdateIfNeeded();
@@ -1305,14 +1262,14 @@ namespace Game.Entities
         public void RemoveFlag(object index, object oldFlag)
         {
             Contract.Assert((int)index < valuesCount || PrintIndexError(index, true));
-            Contract.Assert(UpdateData != null);
+            Contract.Assert(updateValues != null);
 
-            uint oldval = (uint)UpdateData[(int)index];
+            uint oldval = updateValues[(int)index].UnsignedValue;
             uint newval = (oldval & ~Convert.ToUInt32(oldFlag));
 
             if (oldval != newval)
             {
-                UpdateData[(int)index] = newval;
+                updateValues[(int)index].UnsignedValue = newval;
                 _changesMask.Set((int)index, true);
                 AddToObjectUpdateIfNeeded();
             }
@@ -1352,9 +1309,9 @@ namespace Game.Entities
                 return;
             }
 
-            if (!Convert.ToBoolean((uint)UpdateData[(int)index] >> (offset * 8) & Convert.ToUInt32(newFlag)))
+            if (!Convert.ToBoolean(updateValues[(int)index].UnsignedValue >> (offset * 8) & Convert.ToUInt32(newFlag)))
             {
-                UpdateData[(int)index] = (uint)UpdateData[(int)index] | Convert.ToUInt32(newFlag) << (offset * 8);
+                updateValues[(int)index].UnsignedValue |= Convert.ToUInt32(newFlag) << (offset * 8);
                 _changesMask.Set((int)index, true);
 
                 AddToObjectUpdateIfNeeded();
@@ -1371,9 +1328,9 @@ namespace Game.Entities
                 return;
             }
 
-            if (Convert.ToBoolean((uint)UpdateData[(int)index] >> (offset * 8) & Convert.ToUInt32(oldFlag)))
+            if (Convert.ToBoolean(updateValues[(int)index].UnsignedValue >> (offset * 8) & Convert.ToUInt32(oldFlag)))
             {
-                UpdateData[(int)index] = (uint)UpdateData[(int)index] & ~(Convert.ToUInt32(oldFlag) << (offset * 8));
+                updateValues[(int)index].UnsignedValue &= ~(Convert.ToUInt32(oldFlag) << (offset * 8));
                 _changesMask.Set((int)index, true);
 
                 AddToObjectUpdateIfNeeded();
@@ -1392,7 +1349,7 @@ namespace Game.Entities
         {
             Contract.Assert((int)index < valuesCount || PrintIndexError(index, false));
             Contract.Assert(offset < 4);
-            return Convert.ToBoolean((uint)UpdateData[(int)index] >> (offset * 8) & Convert.ToUInt32(flag));
+            return Convert.ToBoolean(updateValues[(int)index].UnsignedValue >> (offset * 8) & Convert.ToUInt32(flag));
         }
 
         public void SetFlag64(object index, object newFlag)
@@ -1512,7 +1469,7 @@ namespace Game.Entities
         public List<T> GetDynamicStructuredValues<T>(object index)
         {
             var values = _dynamicValues[(int)index];
-            return new List<T>(values.DeserializeObjects<T>());
+            return values.DeserializeObjects<T>();
         }
 
         public T GetDynamicStructuredValue<T>(object index, ushort offset)
@@ -2911,7 +2868,7 @@ namespace Game.Entities
         protected TypeId objectTypeId { get; set; }
         protected UpdateFlag m_updateFlag { get; set; }
 
-        protected Hashtable UpdateData;
+        protected UpdateValues[] updateValues;
         protected uint[][] _dynamicValues;
         protected BitArray _changesMask { get; set; }
         protected Dictionary<int, DynamicFieldChangeType> _dynamicChangesMask = new Dictionary<int, DynamicFieldChangeType>();
@@ -2955,6 +2912,19 @@ namespace Game.Entities
         {
             return obj != null;
         }
+    }
+
+    [StructLayout(LayoutKind.Explicit)]
+    public struct UpdateValues
+    {
+        [FieldOffset(0)]
+        public uint UnsignedValue;
+
+        [FieldOffset(0)]
+        public int SignedValue;
+
+        [FieldOffset(0)]
+        public float FloatValue;
     }
 
     public class MovementInfo

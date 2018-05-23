@@ -2129,7 +2129,7 @@ namespace Game.Entities
 
             if (m_goValue.Building.Health == 0)
                 newState = GameObjectDestructibleState.Destroyed;
-            else if (m_goValue.Building.Health < m_goValue.Building.MaxHealth)
+            else if (m_goValue.Building.Health < m_goValue.Building.MaxHealth / 2)
                 newState = GameObjectDestructibleState.Damaged;
             else if (m_goValue.Building.Health == m_goValue.Building.MaxHealth)
                 newState = GameObjectDestructibleState.Intact;
@@ -2458,7 +2458,7 @@ namespace Game.Entities
             for (int index = 0; index < valuesCount; ++index)
             {
                 if (_fieldNotifyFlags.HasAnyFlag(flags[index]) ||
-                    ((updateType == UpdateType.Values ? _changesMask.Get(index) : HasUpdateValue(index)) && flags[index].HasAnyFlag(visibleFlag)) ||
+                    ((updateType == UpdateType.Values ? _changesMask.Get(index) : updateValues[index].UnsignedValue != 0) && flags[index].HasAnyFlag(visibleFlag)) ||
                     (index == (int)GameObjectFields.Flags && forcedFlags))
                 {
                     updateMask.SetBit(index);
@@ -2487,7 +2487,7 @@ namespace Game.Entities
                                 uint transportPeriod = GetTransportPeriod();
                                 if (transportPeriod != 0)
                                 {
-                                    float timer = m_goValue.Transport.PathProgress % transportPeriod;
+                                    float timer = (float)m_goValue.Transport.PathProgress % transportPeriod;
                                     pathProgress = (short)(timer / transportPeriod * 65535.0f);
                                 }
                                 break;
@@ -2512,7 +2512,7 @@ namespace Game.Entities
                         if (isStoppableTransport)
                             fieldBuffer.WriteUInt32(m_goValue.Transport.PathProgress);
                         else
-                            WriteValue(fieldBuffer, index);
+                            fieldBuffer.WriteUInt32(updateValues[index].UnsignedValue);
                     }
                     else if (index == (int)GameObjectFields.Bytes1)
                     {
@@ -2529,7 +2529,7 @@ namespace Game.Entities
                         fieldBuffer.WriteUInt32(bytes1);
                     }
                     else
-                        WriteValue(fieldBuffer, index);                // other cases
+                        fieldBuffer.WriteUInt32(updateValues[index].UnsignedValue);
                 }
             }
 

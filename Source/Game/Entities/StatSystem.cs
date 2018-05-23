@@ -237,7 +237,7 @@ namespace Game.Entities
         //Stats
         public float GetStat(Stats stat)
         {
-            return GetFloatValue(UnitFields.Stat + (int)stat);
+            return GetUInt32Value(UnitFields.Stat + (int)stat);
         }
         public void SetCreateStat(Stats stat, float val)
         {

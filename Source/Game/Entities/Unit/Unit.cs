@@ -2643,7 +2643,7 @@ namespace Game.Entities
             {
                 if (Convert.ToBoolean(_fieldNotifyFlags & flags[index]) ||
                     Convert.ToBoolean((flags[index] & visibleFlag) & UpdateFieldFlags.SpecialInfo) ||
-                    ((updatetype == UpdateType.Values ? _changesMask.Get(index) : HasUpdateValue(index)) && flags[index].HasAnyFlag(visibleFlag)) ||
+                    ((updatetype == UpdateType.Values ? _changesMask.Get(index) : updateValues[index].UnsignedValue != 0) && flags[index].HasAnyFlag(visibleFlag)) ||
                     (index == (int)UnitFields.AuraState && HasFlag(UnitFields.AuraState, AuraStateType.PerCasterAuraStateMask)))
                 {
                     updateMask.SetBit(index);
@@ -2674,7 +2674,7 @@ namespace Game.Entities
                     // Gamemasters should be always able to select units - remove not selectable flag
                     else if (index == (int)UnitFields.Flags)
                     {
-                        UnitFlags appendValue = (UnitFlags)GetUInt32Value(index);
+                        UnitFlags appendValue = (UnitFlags)updateValues[index].UnsignedValue;
                         if (target.IsGameMaster())
                             appendValue &= ~UnitFlags.NotSelectable;
 
@@ -2683,7 +2683,7 @@ namespace Game.Entities
                     // use modelid_a if not gm, _h if gm for CREATURE_FLAG_EXTRA_TRIGGER creatures
                     else if (index == (int)UnitFields.DisplayId)
                     {
-                        uint displayId = GetUInt32Value(index);
+                        uint displayId = updateValues[index].UnsignedValue;
                         if (creature != null)
                         {
                             CreatureTemplate cinfo = creature.GetCreatureTemplate();
@@ -2716,7 +2716,7 @@ namespace Game.Entities
                     // hide lootable animation for unallowed players
                     else if (index == (int)ObjectFields.DynamicFlags)
                     {
-                        UnitDynFlags dynamicFlags = (UnitDynFlags)GetUInt32Value(index) & ~UnitDynFlags.Tapped;
+                        UnitDynFlags dynamicFlags = (UnitDynFlags)updateValues[index].UnsignedValue & ~UnitDynFlags.Tapped;
 
                         if (creature != null)
                         {
@@ -2745,21 +2745,21 @@ namespace Game.Entities
                             {
                                 if (index == (int)UnitFields.Bytes2)
                                     // Allow targetting opposite faction in party when enabled in config
-                                    fieldBuffer.WriteUInt32(GetUInt32Value(index) & ((int)UnitBytes2Flags.Sanctuary << 8)); // this flag is at public byte offset 1 !!
+                                    fieldBuffer.WriteUInt32(updateValues[index].UnsignedValue & ((int)UnitBytes2Flags.Sanctuary << 8)); // this flag is at public byte offset 1 !!
                                 else
                                     // pretend that all other HOSTILE players have own faction, to allow follow, heal, rezz (trade wont work)
                                     fieldBuffer.WriteUInt32(target.getFaction());
                             }
                             else
-                                fieldBuffer.WriteUInt32(GetUInt32Value(index));
+                                fieldBuffer.WriteUInt32(updateValues[index].UnsignedValue);
                         }
                         else
-                            fieldBuffer.WriteUInt32(GetUInt32Value(index));
+                            fieldBuffer.WriteUInt32(updateValues[index].UnsignedValue);
                     }
                     else
                     {
                         // send in current format (float as float, public uint as uint32)
-                        WriteValue(fieldBuffer, index);
+                        fieldBuffer.WriteUInt32(updateValues[index].UnsignedValue);
                     }
                 }
             }
