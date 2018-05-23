@@ -59,7 +59,7 @@ namespace Game.BattleGrounds
                     var bgs = data.m_Battlegrounds;
 
                     // first one is template and should not be deleted
-                    foreach (var pair in bgs)
+                    foreach (var pair in bgs.ToList())
                     {
                         Battleground bg = pair.Value;
                         bg.Update(m_UpdateTimer);

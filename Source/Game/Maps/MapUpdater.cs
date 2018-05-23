@@ -38,7 +38,6 @@ namespace Game.Maps
                 _workerThreads[i] = new Thread(WorkerThread);
                 _workerThreads[i].Start();
             }
-
         }
 
         public void Deactivate()
@@ -48,11 +47,8 @@ namespace Game.Maps
             Wait();
 
             _queue.Cancel();
-
             foreach (var thread in _workerThreads)
-            {
                 thread.Join();
-            }
         }
 
         public void Wait()
@@ -96,7 +92,6 @@ namespace Game.Maps
                     return;
 
                 request.Call();
-                UpdateFinished();
             }
         }
     }
@@ -123,11 +118,7 @@ namespace Game.Maps
         public void Call()
         {
             m_map.Update(m_diff);
-        }
-
-        public uint GetId()
-        {
-            return m_map.GetId();
+            m_updater.UpdateFinished();
         }
     }
 }

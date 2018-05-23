@@ -27,7 +27,6 @@ public static class Time
     public const int Year = Month * 12;
     public const int InMilliseconds = 1000;
 
-    public static readonly DateTime Epoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
     public static readonly DateTime ApplicationStartTime = DateTime.Now;
 
     /// <summary>
@@ -37,7 +36,7 @@ public static class Time
     {
         get
         {
-            return (long)(DateTime.Now - Epoch).TotalSeconds;
+            return DateTimeToUnixTime(DateTime.Now);
         }
     }
 
@@ -48,8 +47,7 @@ public static class Time
     {
         get
         {
-            var ts = (DateTime.Now - Epoch);
-            return ts.ToMilliseconds();
+            return ((DateTimeOffset)DateTime.Now).ToUnixTimeMilliseconds();
         }
     }
 
@@ -95,11 +93,11 @@ public static class Time
 
     public static DateTime UnixTimeToDateTime(long unixTime)
     {
-        return Epoch.AddSeconds(unixTime);
+        return DateTimeOffset.FromUnixTimeSeconds(unixTime).LocalDateTime;
     }
     public static long DateTimeToUnixTime(DateTime dateTime)
     {
-        return (long)(dateTime - Epoch).TotalSeconds;
+        return ((DateTimeOffset)dateTime).ToUnixTimeSeconds();
     }
 
     public static long GetNextResetUnixTime(int hours)

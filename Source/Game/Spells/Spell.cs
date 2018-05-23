@@ -4643,7 +4643,7 @@ namespace Game.Spells
                 float x, y, z;
                 m_targets.GetDstPos().GetPosition(out x, out y, out z);
 
-                if (!m_spellInfo.HasAttribute(SpellAttr2.CanTargetDead) && !Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, null, DisableFlags.SpellLOS)
+                if (!m_spellInfo.HasAttribute(SpellAttr2.CanTargetNotInLos) && !Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, null, DisableFlags.SpellLOS)
                     && !m_caster.IsWithinLOS(x, y, z))
                     return SpellCastResult.LineOfSight;
             }

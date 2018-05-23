@@ -414,7 +414,7 @@ namespace Game
                     pair.Value.GetAchievementMgr().LoadFromDB(achievementResult, criteriaResult);
                 }
 
-                Log.outInfo(LogFilter.ServerLoading, "Loaded guild achievements and criterias in {1} ms", Time.GetMSTimeDiffToNow(oldMSTime));
+                Log.outInfo(LogFilter.ServerLoading, "Loaded guild achievements and criterias in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
             }
 
             // 11. Validate loaded guild data

@@ -59,7 +59,10 @@ namespace Framework.Database
 
         public bool IsEmpty()
         {
-            return _reader == null || !_reader.HasRows;
+            if (_reader == null)
+                return true;
+            
+            return _reader.IsClosed || !_reader.HasRows;
         }
 
         public SQLFields GetFields()

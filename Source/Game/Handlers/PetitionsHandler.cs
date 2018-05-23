@@ -133,8 +133,6 @@ namespace Game
         {
             Log.outDebug(LogFilter.Network, "Received opcode CMSG_PETITION_SHOW_SIGNATURES");
 
-            byte signs = 0;
-
             // if has guild => error, return;
             if (GetPlayer().GetGuildId() != 0)
                 return;
@@ -436,8 +434,6 @@ namespace Game
             }
 
             // Get petition signatures from db
-            byte signatures;
-
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PETITION_SIGNATURE);
             stmt.AddValue(0, packet.Item.GetCounter());
             result = DB.Characters.Query(stmt);

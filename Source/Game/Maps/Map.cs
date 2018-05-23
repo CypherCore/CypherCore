@@ -2340,8 +2340,9 @@ namespace Game.Maps
                         break;
                     case TypeId.GameObject:
                         GameObject go = obj.ToGameObject();
-                        if (go.IsTransport())
-                            RemoveFromMap(go.ToTransport(), true);
+                        Transport transport = go.ToTransport();
+                        if (transport)
+                            RemoveFromMap(transport, true);
                         else
                             RemoveFromMap(go, true);
                         break;
@@ -2721,7 +2722,7 @@ namespace Game.Maps
                 bones = new Corpse();
                 bones.Create(corpse.GetGUID().GetCounter(), this);
 
-                for (byte i = (int)ObjectFields.Guid + 4; i < (int)CorpseFields.End; ++i)                    // don't overwrite guid
+                for (int i = (int)ObjectFields.Guid + 4; i < (int)CorpseFields.End; ++i)                    // don't overwrite guid
                     bones.SetUInt32Value(i, corpse.GetUInt32Value(i));
 
                 bones.SetCellCoord(corpse.GetCellCoord());
