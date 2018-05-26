@@ -287,7 +287,7 @@ namespace Game.DataStorage
         public uint EffectAuraPeriod;
         public float EffectBonusCoefficient;
         public float EffectChainAmplitude;
-        public uint EffectChainTargets;
+        public int EffectChainTargets;
         public int EffectDieSides;
         public uint EffectItemType;
         public uint EffectMechanic;

@@ -4395,7 +4395,7 @@ namespace Game.Spells
         public SpellImplicitTargetInfo TargetB;
         public SpellRadiusRecord RadiusEntry;
         public SpellRadiusRecord MaxRadiusEntry;
-        public uint ChainTargets;
+        public int ChainTargets;
         public uint ItemType;
         public uint TriggerSpell;
         public FlagArray128 SpellClassMask;

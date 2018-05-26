@@ -1019,7 +1019,7 @@ namespace Game.Spells
             if (effect == null)
                 return;
 
-            uint maxTargets = effect.ChainTargets;
+            int maxTargets = effect.ChainTargets;
             Player modOwner = m_caster.GetSpellModOwner();
             if (modOwner)
                 modOwner.ApplySpellMod(m_spellInfo.Id, SpellModOp.JumpTargets, ref maxTargets, this);
@@ -1033,7 +1033,7 @@ namespace Game.Spells
                 m_applyMultiplierMask |= (byte)effMask;
 
                 List<WorldObject> targets = new List<WorldObject>();
-                SearchChainTargets(targets, maxTargets - 1, target, targetType.GetObjectType(), targetType.GetCheckType(), effect.ImplicitTargetConditions, targetType.GetTarget() == Targets.UnitChainhealAlly);
+                SearchChainTargets(targets, (uint)maxTargets - 1, target, targetType.GetObjectType(), targetType.GetCheckType(), effect.ImplicitTargetConditions, targetType.GetTarget() == Targets.UnitChainhealAlly);
 
                 // Chain primary target is added earlier
                 CallScriptObjectAreaTargetSelectHandlers(targets, effIndex, targetType);
