@@ -94,7 +94,7 @@ namespace Game.Entities
             Relocate(pos);
             if (!IsPositionValid())
             {
-                Log.outError(LogFilter.AreaTrigger, "AreaTrigger (spell {0}) not created. Invalid coordinates (X: {0} Y: {1})", spell.Id, GetPositionX(), GetPositionY());
+                Log.outError(LogFilter.AreaTrigger, $"AreaTrigger (spell {spell.Id}) not created. Invalid coordinates (X: {GetPositionX()} Y: {GetPositionY()})");
                 return false;
             }
 

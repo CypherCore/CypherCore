@@ -464,7 +464,7 @@ MaxCoreStuckTime = 0
 AddonChannel = 1
 
 #
-#    MapUpdate.Threads (NYI)
+#    MapUpdate.Threads
 #        Description: Number of threads to update maps.
 #        Default:     1
 

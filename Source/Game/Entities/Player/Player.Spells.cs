@@ -321,7 +321,7 @@ namespace Game.Entities
                 {
                     SpellInfo newInfo = Global.SpellMgr.GetSpellInfo(spellId);
                     if (newInfo != null)
-                        return base.GetCastSpellInfo(newInfo);
+                        return GetCastSpellInfo(newInfo);
                 }
             }
 
@@ -2612,7 +2612,6 @@ namespace Game.Entities
             }
         }
 
-        // "the bodies of template functions must be made available in a header file"
         public void ApplySpellMod<T>(uint spellId, SpellModOp op, ref T basevalue, Spell spell = null)
         {
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);

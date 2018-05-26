@@ -65,9 +65,9 @@ namespace Framework.Networking
 
         void Wait()
         {
-            //if (_threadCount != 0)
-                //for (int i = 0; i < _threadCount; ++i)
-                    //_threads[i].Wait();
+            if (_threadCount != 0)
+                for (int i = 0; i < _threadCount; ++i)
+                    _threads[i].Wait();
         }
 
         public virtual void OnSocketOpen(Socket sock)

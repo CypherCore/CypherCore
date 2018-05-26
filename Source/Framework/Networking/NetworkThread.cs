@@ -38,6 +38,12 @@ namespace Framework.Networking
             return true;
         }
 
+        public void Wait()
+        {
+            _thread.Join();
+            _thread = null;
+        }
+
         public int GetConnectionCount()
         {
             return _connections;
