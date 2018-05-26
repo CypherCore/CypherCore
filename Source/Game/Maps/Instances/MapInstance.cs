@@ -45,17 +45,17 @@ namespace Game.Maps
         {
             base.Update(diff);
 
-            foreach (var i in m_InstancedMaps.ToList())
+            foreach (var pair in m_InstancedMaps.ToList())
             {
-                if (i.Value.CanUnload(diff))
+                if (pair.Value.CanUnload(diff))
                 {
-                    if (!DestroyInstance(i))
+                    if (!DestroyInstance(pair))
                     {
                         //m_unloadTimer
                     }
                 }
                 else
-                    i.Value.Update(diff);
+                    pair.Value.Update(diff);
             }
         }
 
@@ -265,6 +265,7 @@ namespace Game.Maps
                 Global.MapMgr.FreeInstanceId(pair.Value.GetInstanceId());
 
             // erase map
+            pair.Value.Dispose();
             m_InstancedMaps.Remove(pair.Key);
 
             return true;

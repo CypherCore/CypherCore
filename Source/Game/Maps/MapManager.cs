@@ -269,9 +269,10 @@ namespace Game.Entities
             foreach (var pair in i_maps)
                 pair.Value.UnlinkAllChildTerrainMaps();
 
-            foreach (var pair in i_maps)
+            foreach (var pair in i_maps.ToList())
             {
                 pair.Value.UnloadAll();
+                pair.Value.Dispose();
                 i_maps.Remove(pair.Key);
             }
 

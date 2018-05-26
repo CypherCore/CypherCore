@@ -36,7 +36,7 @@ using System.Linq;
 
 namespace Game.Maps
 {
-    public class Map
+    public class Map : IDisposable
     {
         public Map(uint id, long expiry, uint instanceId, Difficulty spawnmode, Map parent = null)
         {
@@ -84,6 +84,27 @@ namespace Game.Maps
             Global.MMapMgr.loadMapInstance(Global.WorldMgr.GetDataPath(), GetId(), i_InstanceId);
 
             Global.ScriptMgr.OnCreateMap(this);
+        }
+
+        public void Dispose()
+        {
+            Global.ScriptMgr.OnDestroyMap(this);
+
+            for (var i = 0; i < i_worldObjects.Count; ++i)
+            {
+                WorldObject obj = i_worldObjects[i];
+                Contract.Assert(obj.IsWorldObject());
+                obj.RemoveFromWorld();
+                obj.ResetMap();
+            }
+
+            if (!m_scriptSchedule.Empty())
+                Global.MapMgr.DecreaseScheduledScriptCount((uint)m_scriptSchedule.Count);
+
+            if (m_parentMap == this)
+                m_childTerrainMaps = null;
+
+            Global.MMapMgr.unloadMapInstance(GetId(), i_InstanceId);
         }
 
         public static bool ExistMap(uint mapid, uint gx, uint gy)
@@ -1647,24 +1668,6 @@ namespace Game.Maps
             _corpsesByCell.Clear();
             _corpsesByPlayer.Clear();
             _corpseBones.Clear();
-
-            Global.ScriptMgr.OnDestroyMap(this);
-
-            for (var i = 0; i < i_worldObjects.Count; ++i)
-            {
-                WorldObject obj = i_worldObjects[i];
-                Contract.Assert(obj.IsWorldObject());
-                obj.RemoveFromWorld();
-                obj.ResetMap();
-            }
-
-            if (!m_scriptSchedule.Empty())
-                Global.MapMgr.DecreaseScheduledScriptCount((uint)m_scriptSchedule.Count);
-
-            if (m_parentMap == this)
-                 m_childTerrainMaps = null;
-
-            Global.MMapMgr.unloadMapInstance(GetId(), i_InstanceId);
         }
 
         private GridMap GetGridMap(float x, float y)
