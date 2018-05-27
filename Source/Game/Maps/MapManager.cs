@@ -140,8 +140,7 @@ namespace Game.Entities
             if (instance == null)
                 return EnterState.CannotEnterUninstancedDungeon;
 
-            Difficulty targetDifficulty, requestedDifficulty;
-            targetDifficulty = requestedDifficulty = player.GetDifficultyID(entry);
+            Difficulty targetDifficulty = player.GetDifficultyID(entry);
             // Get the highest available difficulty if current setting is higher than the instance allows
             MapDifficultyRecord mapDiff = Global.DB2Mgr.GetDownscaledMapDifficultyData(entry.Id, ref targetDifficulty);
             if (mapDiff == null)

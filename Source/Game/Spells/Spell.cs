@@ -1374,9 +1374,8 @@ namespace Game.Spells
             bool searchInWorld = containerMask.HasAnyFlag(GridMapTypeMask.Creature | GridMapTypeMask.Player | GridMapTypeMask.Corpse);
             if (searchInGrid || searchInWorld)
             {
-                float x, y;
-                x = pos.GetPositionX();
-                y = pos.GetPositionY();
+                float x = pos.GetPositionX();
+                float y = pos.GetPositionY();
 
                 CellCoord p = GridDefines.ComputeCellCoord(x, y);
                 Cell cell = new Cell(p);
@@ -1767,6 +1766,8 @@ namespace Game.Spells
             foreach (SpellEffectInfo effect in GetEffects())
                 if (effect != null && (effectMask & (1 << (int)effect.EffectIndex)) != 0 && CheckEffectTarget(item, effect))
                     validEffectMask |= 1u << (int)effect.EffectIndex;
+
+            effectMask &= validEffectMask;
 
             // no effects left
             if (effectMask == 0)

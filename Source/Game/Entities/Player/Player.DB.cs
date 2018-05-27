@@ -3112,10 +3112,9 @@ namespace Game.Entities
             UpdateHonorFields();
 
             SQLTransaction trans = new SQLTransaction();
-            PreparedStatement stmt;
             var index = 0;
 
-            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_FISHINGSTEPS);
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_FISHINGSTEPS);
             stmt.AddValue(0, GetGUID().GetCounter());
             trans.Append(stmt);
 

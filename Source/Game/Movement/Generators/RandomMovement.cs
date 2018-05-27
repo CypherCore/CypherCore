@@ -92,7 +92,7 @@ namespace Game.Movement
                 return;
             }
 
-            float respX, respY, respZ, respO, destX, destY, destZ, travelDistZ;
+            float respX, respY, respZ, respO, destZ;
             creature.GetHomePosition(out respX, out respY, out respZ, out respO);
             Map map = creature.GetMap();
 
@@ -103,14 +103,14 @@ namespace Game.Movement
             float distanceX = (float)(range * Math.Cos(angle));
             float distanceY = (float)(range * Math.Sin(angle));
 
-            destX = respX + distanceX;
-            destY = respY + distanceY;
+            float destX = respX + distanceX;
+            float destY = respY + distanceY;
 
             // prevent invalid coordinates generation
             GridDefines.NormalizeMapCoord(ref destX);
             GridDefines.NormalizeMapCoord(ref destY);
 
-            travelDistZ = range;   // sin^2+cos^2=1, so travelDistZ=range^2; no need for sqrt below
+            float travelDistZ = range;   // sin^2+cos^2=1, so travelDistZ=range^2; no need for sqrt below
 
             if (is_air_ok)                                          // 3D system above ground and above water (flying mode)
             {

@@ -143,7 +143,7 @@ namespace Game.Arenas
             newMember.WeekGames = 0;
             newMember.SeasonWins = 0;
             newMember.WeekWins = 0;
-            newMember.PersonalRating = (ushort)(uint)0;
+            newMember.PersonalRating = 0;
             newMember.MatchMakerRating = (ushort)matchMakerRating;
 
             Members.Add(newMember);
@@ -498,7 +498,7 @@ namespace Game.Arenas
         {
             // Returns the chance to win against a team with the given rating, used in the rating adjustment calculation
             // ELO system
-            return (float)(1.0f / (1.0f + Math.Exp(Math.Log(10.0f) * ((float)opponentRating - (float)ownRating) / 650.0f)));
+            return (float)(1.0f / (1.0f + Math.Exp(Math.Log(10.0f) * ((float)opponentRating - ownRating) / 650.0f)));
         }
 
         int GetMatchmakerRatingMod(uint ownRating, uint opponentRating, bool won)

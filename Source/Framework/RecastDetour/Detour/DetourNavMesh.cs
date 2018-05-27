@@ -1186,7 +1186,7 @@ public static partial class Detour
                 case 5: nx--; ny--; break;
                 case 6: ny--; break;
                 case 7: nx++; ny--; break;
-            };
+            }
 
             return getTilesAt(nx, ny, tiles, maxTiles);
         }

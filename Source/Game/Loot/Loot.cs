@@ -126,11 +126,6 @@ namespace Game.Loots
 
     public class LootValidatorRef : Reference<Loot, LootValidatorRef>
     {
-        public LootValidatorRef()
-        {
-
-        }
-
         public override void targetObjectDestroyLink()
         {
 

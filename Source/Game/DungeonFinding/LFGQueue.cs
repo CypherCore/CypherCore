@@ -471,10 +471,9 @@ namespace Game.DungeonFinding
                     if (guid == itguid)
                         continue;
 
-                    List<uint> temporal;
                     List<uint> dungeons = QueueDataStore[itguid].dungeons;
                     o.AppendFormat(", {0}: ({1})", guid, Global.LFGMgr.ConcatenateDungeons(dungeons));
-                    temporal = proposalDungeons.Intersect(dungeons).ToList();
+                    List<uint> temporal = proposalDungeons.Intersect(dungeons).ToList();
                     proposalDungeons = temporal;
                 }
 

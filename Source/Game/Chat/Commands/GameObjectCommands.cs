@@ -379,7 +379,6 @@ namespace Game.Chat
             uint entry = 0;
             GameObjectTypes type = 0;
             uint displayId = 0;
-            string name;
             uint lootId = 0;
 
             if (args.Empty())
@@ -415,7 +414,7 @@ namespace Game.Chat
 
             type = gameObjectInfo.type;
             displayId = gameObjectInfo.displayId;
-            name = gameObjectInfo.name;
+            string name = gameObjectInfo.name;
             lootId = gameObjectInfo.GetLootId();
 
             handler.SendSysMessage(CypherStrings.GoinfoEntry, entry);

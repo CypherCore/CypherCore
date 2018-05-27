@@ -71,7 +71,6 @@ namespace Game.DataStorage
                     targPositions[i] = new M2SplineKey(reader);
 
                 // Read the data for this set
-                uint currPos = targArray.offset_elements;
                 for (uint i = 0; i < targTsArray.number; ++i)
                 {
                     // Translate co-ordinates
@@ -82,7 +81,6 @@ namespace Game.DataStorage
                     thisCam.timeStamp = targTimestamps[i];
                     thisCam.locations = new Vector4(newPos.X, newPos.Y, newPos.Z, 0.0f);
                     targetcam.Add(thisCam);
-                    currPos += (uint)Marshal.SizeOf<M2SplineKey>();
                 }
             }
 
@@ -105,7 +103,6 @@ namespace Game.DataStorage
                     positions[i] = new M2SplineKey(reader);
 
                 // Read the data for this set
-                uint currPos = posArray.offset_elements;
                 for (uint i = 0; i < posTsArray.number; ++i)
                 {
                     // Translate co-ordinates
@@ -119,12 +116,9 @@ namespace Game.DataStorage
                     if (targetcam.Count > 0)
                     {
                         // Find the target camera before and after this camera
-                        FlyByCamera lastTarget;
-                        FlyByCamera nextTarget;
-
                         // Pre-load first item
-                        lastTarget = targetcam[0];
-                        nextTarget = targetcam[0];
+                        FlyByCamera lastTarget = targetcam[0];
+                        FlyByCamera nextTarget = targetcam[0];
                         for (int j = 0; j < targetcam.Count; ++j)
                         {
                             nextTarget = targetcam[j];
@@ -159,7 +153,6 @@ namespace Game.DataStorage
                     }
 
                     cameras.Add(thisCam);
-                    currPos += (uint)Marshal.SizeOf<M2SplineKey>();
                 }
             }
 

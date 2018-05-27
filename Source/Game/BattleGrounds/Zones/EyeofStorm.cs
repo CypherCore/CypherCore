@@ -125,7 +125,7 @@ namespace Game.BattleGrounds.Zones
             SpawnBGObject(EotSObjectTypes.DoorA, BattlegroundConst.RespawnImmediately);
             SpawnBGObject(EotSObjectTypes.DoorH, BattlegroundConst.RespawnImmediately);
 
-            for (int i = (int)EotSObjectTypes.ABannerFelReaverCenter; i < EotSObjectTypes.Max; ++i)
+            for (int i = EotSObjectTypes.ABannerFelReaverCenter; i < EotSObjectTypes.Max; ++i)
                 SpawnBGObject(i, BattlegroundConst.RespawnOneDay);
         }
 
@@ -884,8 +884,6 @@ namespace Game.BattleGrounds.Zones
                 default: return null;
             }
 
-            float distance, nearestDistance;
-
             WorldSafeLocsRecord entry = null;
             WorldSafeLocsRecord nearestEntry = null;
             entry = CliDB.WorldSafeLocsStorage.LookupByKey(g_id);
@@ -901,8 +899,8 @@ namespace Game.BattleGrounds.Zones
             float plr_y = player.GetPositionY();
             float plr_z = player.GetPositionZ();
 
-            distance = (entry.Loc.X - plr_x) * (entry.Loc.X - plr_x) + (entry.Loc.Y - plr_y) * (entry.Loc.Y - plr_y) + (entry.Loc.Z - plr_z) * (entry.Loc.Z - plr_z);
-            nearestDistance = distance;
+            float distance = (entry.Loc.X - plr_x) * (entry.Loc.X - plr_x) + (entry.Loc.Y - plr_y) * (entry.Loc.Y - plr_y) + (entry.Loc.Z - plr_z) * (entry.Loc.Z - plr_z);
+            float nearestDistance = distance;
 
             for (byte i = 0; i < EotSPoints.PointsMax; ++i)
             {

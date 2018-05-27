@@ -1001,7 +1001,7 @@ public static partial class Detour
             case XM | ZM: return 5;
             case ZM: return 6;
             case XP | ZM: return 7;
-        };
+        }
 
         return 0xff;
     }

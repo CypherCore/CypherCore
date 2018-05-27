@@ -391,13 +391,12 @@ namespace Game.Network
 
             Sha256 digestKeyHash = new Sha256();
             digestKeyHash.Process(account.game.SessionKey, account.game.SessionKey.Length);
-            digestKeyHash.Finish(clientSeed, clientSeed.Length);
+            digestKeyHash.Finish(clientSeed);
 
             HmacSha256 hmac = new HmacSha256(digestKeyHash.Digest);
             hmac.Process(authSession.LocalChallenge, authSession.LocalChallenge.Count);
             hmac.Process(_serverChallenge, 16);
             hmac.Finish(AuthCheckSeed, 16);
-
 
             // Check that Key and account name are the same on client and server
             if (!hmac.Digest.Compare(authSession.Digest))
@@ -409,7 +408,7 @@ namespace Game.Network
 
 
             Sha256 keyData = new Sha256();
-            keyData.Finish(account.game.SessionKey, account.game.SessionKey.Length);
+            keyData.Finish(account.game.SessionKey);
 
             HmacSha256 sessionKeyHmac = new HmacSha256(keyData.Digest);
             sessionKeyHmac.Process(_serverChallenge, 16);

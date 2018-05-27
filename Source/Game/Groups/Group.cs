@@ -1145,7 +1145,6 @@ namespace Game.Groups
                 {
                     byte maxresul = 0;
                     ObjectGuid maxguid = roll.playerVote.First().Key;
-                    Player player;
 
                     foreach (var pair in roll.playerVote)
                     {
@@ -1161,7 +1160,7 @@ namespace Game.Groups
                         }
                     }
                     SendLootRollWon(maxguid, maxresul, RollType.Need, roll);
-                    player = Global.ObjAccessor.FindPlayer(maxguid);
+                    Player player = Global.ObjAccessor.FindPlayer(maxguid);
 
                     if (player && player.GetSession() != null)
                     {
@@ -1191,7 +1190,6 @@ namespace Game.Groups
                 {
                     byte maxresul = 0;
                     ObjectGuid maxguid = roll.playerVote.First().Key;
-                    Player player;
                     RollType rollVote = RollType.NotValid;
 
                     foreach (var pair in roll.playerVote)
@@ -1209,7 +1207,7 @@ namespace Game.Groups
                         }
                     }
                     SendLootRollWon(maxguid, maxresul, rollVote, roll);
-                    player = Global.ObjAccessor.FindPlayer(maxguid);
+                    Player player = Global.ObjAccessor.FindPlayer(maxguid);
 
                     if (player && player.GetSession() != null)
                     {

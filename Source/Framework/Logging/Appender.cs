@@ -164,7 +164,7 @@ class DBAppender : Appender
 
 abstract class Appender
 {
-    public Appender(byte id, string name, LogLevel level = LogLevel.Disabled, AppenderFlags flags = AppenderFlags.None)
+    protected Appender(byte id, string name, LogLevel level = LogLevel.Disabled, AppenderFlags flags = AppenderFlags.None)
     {
         _id = id;
         _name = name;

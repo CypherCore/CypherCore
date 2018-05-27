@@ -318,7 +318,7 @@ namespace Framework.Database
             _database.Execute(update);
         }
 
-        public List<FileEntry> GetFileList()
+        List<FileEntry> GetFileList()
         {
             List<FileEntry> fileList = new List<FileEntry>();
 
@@ -348,7 +348,7 @@ namespace Framework.Database
             return fileList;
         }
 
-        public Dictionary<string, AppliedFileEntry> ReceiveAppliedFiles()
+        Dictionary<string, AppliedFileEntry> ReceiveAppliedFiles()
         {
             Dictionary<string, AppliedFileEntry> map = new Dictionary<string, AppliedFileEntry>();
 
@@ -402,7 +402,7 @@ namespace Framework.Database
             }
         }
 
-        protected MySqlBase<T> _database;
+        MySqlBase<T> _database;
     }
 
     public class AppliedFileEntry

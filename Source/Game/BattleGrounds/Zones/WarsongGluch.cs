@@ -603,9 +603,9 @@ namespace Game.BattleGrounds.Zones
         void UpdateTeamScore(int team)
         {
             if (team == TeamId.Alliance)
-                UpdateWorldState(WSGWorldStates.FlagCapturesAlliance, (uint)GetTeamScore(team));
+                UpdateWorldState(WSGWorldStates.FlagCapturesAlliance, GetTeamScore(team));
             else
-                UpdateWorldState(WSGWorldStates.FlagCapturesHorde, (uint)GetTeamScore(team));
+                UpdateWorldState(WSGWorldStates.FlagCapturesHorde, GetTeamScore(team));
         }
 
         public override void HandleAreaTrigger(Player player, uint trigger, bool entered)
@@ -912,7 +912,7 @@ namespace Game.BattleGrounds.Zones
         void SetLastFlagCapture(Team team) { _lastFlagCaptureTeam = (uint)team; }
         public override void SetDroppedFlagGUID(ObjectGuid guid, int team = -1)
         {
-            if (team == (int)TeamId.Alliance || team == (int)TeamId.Horde)
+            if (team == TeamId.Alliance || team == TeamId.Horde)
                 m_DroppedFlagGUID[team] = guid;
 
         }

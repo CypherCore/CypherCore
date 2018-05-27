@@ -27,7 +27,7 @@ namespace Game
 {
     public abstract class Warden
     {
-        public Warden()
+        protected Warden()
         {
             _inputCrypto = new SARC4();
             _outputCrypto = new SARC4();

@@ -955,7 +955,6 @@ namespace Game.Maps
 
         public void GameObjectRelocation(GameObject go, float x, float y, float z, float orientation, bool respawnRelocationOnFail = true)
         {
-            var integrity_check = new Cell(go.GetPositionX(), go.GetPositionY());
             Cell old_cell = go.GetCurrentCell();
 
             var new_cell = new Cell(x, y);
@@ -980,9 +979,6 @@ namespace Game.Maps
                 go.UpdateObjectVisibility(false);
                 RemoveGameObjectFromMoveList(go);
             }
-
-            old_cell = go.GetCurrentCell();
-            integrity_check = new Cell(go.GetPositionX(), go.GetPositionY());
         }
 
         public void DynamicObjectRelocation(DynamicObject dynObj, float x, float y, float z, float orientation)

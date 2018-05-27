@@ -232,10 +232,9 @@ namespace Game.AI
             {
                 uint entry = result.Read<uint>(0);
                 uint id = result.Read<uint>(1);
-                float x, y, z;
-                x = result.Read<float>(2);
-                y = result.Read<float>(3);
-                z = result.Read<float>(4);
+                float x = result.Read<float>(2);
+                float y = result.Read<float>(3);
+                float z = result.Read<float>(4);
 
                 if (last_entry != entry)
                 {

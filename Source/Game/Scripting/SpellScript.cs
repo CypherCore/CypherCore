@@ -85,7 +85,7 @@ namespace Game.Scripting
 
         public abstract class EffectHook
         {
-            public EffectHook(uint effIndex)
+            protected EffectHook(uint effIndex)
             {
                 // effect index must be in range <0;2>, allow use of special effindexes
                 Contract.Assert(_effIndex == SpellConst.EffectAll || _effIndex == SpellConst.EffectFirstFound || _effIndex < SpellConst.MaxEffects);

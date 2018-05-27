@@ -22,7 +22,7 @@ namespace Framework.Database
 {
     public class SQLTransaction
     {
-        public List<MySqlCommand> commands { get; set; }
+        public List<MySqlCommand> commands { get; }
 
         public SQLTransaction()
         {

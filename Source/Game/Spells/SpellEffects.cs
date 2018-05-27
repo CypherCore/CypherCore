@@ -1908,7 +1908,6 @@ namespace Game.Spells
             int remaining = dispelList.Count;
 
             // Ok if exist some buffs for dispel try dispel it
-            uint failCount = 0;
             List<DispelableAura> successList = new List<DispelableAura>();
 
             DispelFailed dispelFailed = new DispelFailed();
@@ -1945,7 +1944,6 @@ namespace Game.Spells
                 }
                 else
                 {
-                    ++failCount;
                     dispelFailed.FailedSpells.Add(dispelableAura.GetAura().GetId());
                 }
                 ++count;
@@ -4747,7 +4745,6 @@ namespace Game.Spells
             int remaining = stealList.Count;
 
             // Ok if exist some buffs for dispel try dispel it
-            uint failCount = 0;
             List<Tuple<uint, ObjectGuid>> successList = new List<Tuple<uint, ObjectGuid>>();
 
             DispelFailed dispelFailed = new DispelFailed();
@@ -4772,7 +4769,6 @@ namespace Game.Spells
                 }
                 else
                 {
-                    ++failCount;
                     dispelFailed.FailedSpells.Add(dispelableAura.GetAura().GetId());
                 }
                 ++count;

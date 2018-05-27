@@ -615,7 +615,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                                 return CreatureIds.Fizzlebang;
                             default:
                                 return CreatureIds.Tirion;
-                        };
+                        }
                     default:
                         break;
                 }

@@ -23,7 +23,7 @@ namespace Framework.Networking
 {
     public abstract class SocketBase : ISocket, IDisposable
     {
-        public SocketBase(Socket socket)
+        protected SocketBase(Socket socket)
         {
             _socket = socket;
             _remoteAddress = ((IPEndPoint)_socket.RemoteEndPoint).Address;

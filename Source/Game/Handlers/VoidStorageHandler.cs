@@ -70,11 +70,6 @@ namespace Game
                 return;
             }
 
-            byte count = 0;
-            for (byte i = 0; i < SharedConst.VoidStorageMaxSlot; ++i)
-                if (player.GetVoidStorageItem(i) != null)
-                    ++count;
-
             VoidStorageContents voidStorageContents = new VoidStorageContents();
             for (byte i = 0; i < SharedConst.VoidStorageMaxSlot; ++i)
             {

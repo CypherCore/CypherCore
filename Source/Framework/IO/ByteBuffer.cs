@@ -441,12 +441,11 @@ namespace Framework.IO
 
         public byte[] GetData()
         {
-            long pos;
             Stream stream = GetCurrentStream();
 
             var data = new byte[stream.Length];
 
-            pos = stream.Position;
+            long pos = stream.Position;
             stream.Seek(0, SeekOrigin.Begin);
             for (int i = 0; i < data.Length; i++)
                 data[i] = (byte)stream.ReadByte();

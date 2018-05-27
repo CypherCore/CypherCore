@@ -56,7 +56,7 @@ namespace Game.Services
 
     abstract class ServiceBase
     {
-        public ServiceBase(WorldSession session, uint serviceHash)
+        protected ServiceBase(WorldSession session, uint serviceHash)
         {
             _session = session;
             _serviceHash = serviceHash;

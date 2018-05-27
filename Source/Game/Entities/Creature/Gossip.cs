@@ -254,7 +254,6 @@ namespace Game.Misc
             packet.GossipID = (int)_gossipMenu.GetMenuId();
             packet.TextID = (int)titleTextId;
 
-            uint count = 0;
             foreach (var pair in _gossipMenu.GetMenuItems())
             {
                 ClientGossipOptions opt = new ClientGossipOptions();
@@ -267,10 +266,8 @@ namespace Game.Misc
                 opt.Confirm = item.BoxMessage;      // accept text (related to money) pop up box, 2.0.3
                 packet.GossipOptions.Add(opt);
 
-                ++count;
             }
 
-            count = 0;
             for (byte i = 0; i < _questMenu.GetMenuItemCount(); ++i)
             {
                 QuestMenuItem item = _questMenu.GetItem(i);
@@ -297,7 +294,6 @@ namespace Game.Misc
                     }
 
                     packet.GossipText.Add(text);
-                    ++count;
                 }
             }
 

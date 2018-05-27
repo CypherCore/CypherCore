@@ -602,7 +602,7 @@ namespace Framework.Dynamic
         /// <returns></returns>
         public TaskContext CancelGroup(uint group)
         {
-            return Dispatch(() => CancelGroup(group));
+            return Dispatch(() => _owner.CancelGroup(group));
         }
 
         /// <summary>
@@ -612,7 +612,7 @@ namespace Framework.Dynamic
         /// <returns></returns>
         public TaskContext CancelGroupsOf(List<uint> groups)
         {
-            return Dispatch(() => CancelGroupsOf(groups));
+            return Dispatch(() => _owner.CancelGroupsOf(groups));
         }
 
         /// <summary>

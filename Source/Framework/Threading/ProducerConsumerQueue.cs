@@ -80,7 +80,7 @@ namespace Framework.Threading
             {
                 while (_queue.Count != 0)
                 {
-                    T value = _queue.Dequeue();
+                    _queue.Dequeue();
                 }
 
                 _shutdown = true;

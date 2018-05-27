@@ -23,8 +23,6 @@ public class Singleton<T> where T : class
     private static volatile T instance;
     private static object syncRoot = new Object();
 
-    public Singleton() { }
-
     public static T Instance
     {
         get

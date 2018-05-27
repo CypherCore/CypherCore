@@ -159,7 +159,7 @@ namespace Game.Network
 
     public abstract class PacketFilter
     {
-        public PacketFilter(WorldSession pSession)
+        protected PacketFilter(WorldSession pSession)
         {
             m_pSession = pSession;
         }

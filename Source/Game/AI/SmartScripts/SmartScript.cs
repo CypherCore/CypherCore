@@ -1194,11 +1194,10 @@ namespace Game.AI
                                 Position pos = obj.GetPosition();
 
                                 // Use forward/backward/left/right cartesian plane movement
-                                float x, y, z, o;
-                                o = pos.GetOrientation();
-                                x = (float)(pos.GetPositionX() + (Math.Cos(o - (Math.PI / 2)) * e.Target.x) + (Math.Cos(o) * e.Target.y));
-                                y = (float)(pos.GetPositionY() + (Math.Sin(o - (Math.PI / 2)) * e.Target.x) + (Math.Sin(o) * e.Target.y));
-                                z = pos.GetPositionZ() + e.Target.z;
+                                float o = pos.GetOrientation();
+                                float x = (float)(pos.GetPositionX() + (Math.Cos(o - (Math.PI / 2)) * e.Target.x) + (Math.Cos(o) * e.Target.y));
+                                float y = (float)(pos.GetPositionY() + (Math.Sin(o - (Math.PI / 2)) * e.Target.x) + (Math.Sin(o) * e.Target.y));
+                                float z = pos.GetPositionZ() + e.Target.z;
                                 obj.ToCreature().GetMotionMaster().MovePoint(EventId.SmartRandomPoint, x, y, z);
                             }
                         }

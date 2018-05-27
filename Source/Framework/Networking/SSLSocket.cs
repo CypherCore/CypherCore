@@ -25,7 +25,7 @@ namespace Framework.Networking
 {
     public abstract class SSLSocket : ISocket
     {
-        public SSLSocket(Socket socket)
+        protected SSLSocket(Socket socket)
         {
             _socket = socket;
             _remoteAddress = ((IPEndPoint)_socket.RemoteEndPoint).Address;

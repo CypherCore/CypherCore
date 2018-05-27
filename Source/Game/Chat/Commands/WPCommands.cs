@@ -364,7 +364,6 @@ namespace Game.Chat.Commands
             string path_number = args.NextString();
 
             uint pathid;
-            ulong guidLow;
             Creature target = handler.getSelectedCreature();
 
             // Did player provide a path_id?
@@ -389,7 +388,7 @@ namespace Game.Chat.Commands
                 return true;
             }
 
-            guidLow = target.GetSpawnId();
+            ulong guidLow = target.GetSpawnId();
 
             PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_CREATURE_ADDON_BY_GUID);
             stmt.AddValue(0, guidLow);
@@ -445,9 +444,6 @@ namespace Game.Chat.Commands
                 return false;
             }
 
-            // Next arg is: <PATHID> <WPNUM> <ARGUMENT>
-            string arg_str;
-
             // Did user provide a GUID
             // or did the user select a creature?
             // . variable lowguid is filled with the GUID of the NPC
@@ -502,7 +498,7 @@ namespace Game.Chat.Commands
 
             // We have the waypoint number and the GUID of the "master npc"
             // Text is enclosed in "<>", all other arguments not
-            arg_str = args.NextString();
+            string arg_str = args.NextString();
 
             // Check for argument
             if (show != "del" && show != "move" && arg_str == null)

@@ -2731,9 +2731,8 @@ namespace Game.Entities
         public void MovePosition(ref Position pos, float dist, float angle)
         {
             angle += GetOrientation();
-            float destx, desty, destz, ground, floor;
-            destx = pos.posX + dist * (float)Math.Cos(angle);
-            desty = pos.posY + dist * (float)Math.Sin(angle);
+            float destx = pos.posX + dist * (float)Math.Cos(angle);
+            float desty = pos.posY + dist * (float)Math.Sin(angle);
 
             // Prevent invalid coordinates here, position is unchanged
             if (!GridDefines.IsValidMapCoord(destx, desty, pos.posZ))
@@ -2742,9 +2741,9 @@ namespace Game.Entities
                 return;
             }
 
-            ground = GetMap().GetHeight(GetPhaseShift(), destx, desty, MapConst.MaxHeight, true);
-            floor = GetMap().GetHeight(GetPhaseShift(), destx, desty, pos.posZ, true);
-            destz = Math.Abs(ground - pos.posZ) <= Math.Abs(floor - pos.posZ) ? ground : floor;
+            float ground = GetMap().GetHeight(GetPhaseShift(), destx, desty, MapConst.MaxHeight, true);
+            float floor = GetMap().GetHeight(GetPhaseShift(), destx, desty, pos.posZ, true);
+            float destz = Math.Abs(ground - pos.posZ) <= Math.Abs(floor - pos.posZ) ? ground : floor;
 
             float step = dist / 10.0f;
 
@@ -2802,9 +2801,8 @@ namespace Game.Entities
         public void MovePositionToFirstCollision(ref Position pos, float dist, float angle)
         {
             angle += GetOrientation();
-            float destx, desty, destz;
-            destx = pos.posX + dist * (float)Math.Cos(angle);
-            desty = pos.posY + dist * (float)Math.Sin(angle);
+            float destx = pos.posX + dist * (float)Math.Cos(angle);
+            float desty = pos.posY + dist * (float)Math.Sin(angle);
 
             // Prevent invalid coordinates here, position is unchanged
             if (!GridDefines.IsValidMapCoord(destx, desty))
@@ -2813,7 +2811,7 @@ namespace Game.Entities
                 return;
             }
 
-            destz = NormalizeZforCollision(this, destx, desty, pos.GetPositionZ());
+            float destz = NormalizeZforCollision(this, destx, desty, pos.GetPositionZ());
             bool col = Global.VMapMgr.getObjectHitPos(PhasingHandler.GetTerrainMapId(GetPhaseShift(), GetMap(), pos.posX, pos.posY), pos.posX, pos.posY, pos.posZ + 0.5f, destx, desty, destz + 0.5f, out destx, out desty, out destz, -0.5f);
 
             // collision occured

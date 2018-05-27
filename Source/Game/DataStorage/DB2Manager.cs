@@ -61,7 +61,7 @@ namespace Game.DataStorage
             CliDB.ArtifactPowerLinkStorage.Clear();
 
             foreach (ArtifactPowerRankRecord artifactPowerRank in CliDB.ArtifactPowerRankStorage.Values)
-                _artifactPowerRanks[Tuple.Create((uint)artifactPowerRank.ArtifactPowerID, artifactPowerRank.RankIndex)] = artifactPowerRank;
+                _artifactPowerRanks[Tuple.Create(artifactPowerRank.ArtifactPowerID, artifactPowerRank.RankIndex)] = artifactPowerRank;
 
             CliDB.ArtifactPowerRankStorage.Clear();
 
@@ -228,7 +228,7 @@ namespace Game.DataStorage
             CliDB.ItemCurrencyCostStorage.Clear();
 
             foreach (ItemLimitCategoryConditionRecord condition in CliDB.ItemLimitCategoryConditionStorage.Values)
-                _itemCategoryConditions.Add((uint)condition.ParentItemLimitCategoryID, condition);
+                _itemCategoryConditions.Add(condition.ParentItemLimitCategoryID, condition);
 
             foreach (ItemLevelSelectorQualityRecord itemLevelSelectorQuality in CliDB.ItemLevelSelectorQualityStorage.Values)
                 _itemLevelQualitySelectorQualities.Add(itemLevelSelectorQuality.ParentILSQualitySetID, itemLevelSelectorQuality);
@@ -388,7 +388,7 @@ namespace Game.DataStorage
             {
                 //ASSERT(talentUnlock->TierID < MAX_PVP_TALENT_TIERS, "MAX_PVP_TALENT_TIERS must be at least %u", talentUnlock->TierID + 1);
                 //ASSERT(talentUnlock->ColumnIndex < MAX_PVP_TALENT_COLUMNS, "MAX_PVP_TALENT_COLUMNS must be at least %u", talentUnlock->ColumnIndex + 1);
-                _pvpTalentUnlock[talentUnlock.TierID][talentUnlock.ColumnIndex] = (uint)talentUnlock.HonorLevel;
+                _pvpTalentUnlock[talentUnlock.TierID][talentUnlock.ColumnIndex] = talentUnlock.HonorLevel;
             }
 
             foreach (QuestPackageItemRecord questPackageItem in CliDB.QuestPackageItemStorage.Values)
@@ -1000,7 +1000,7 @@ namespace Game.DataStorage
         public LFGDungeonsRecord GetLfgDungeon(uint mapId, Difficulty difficulty)
         {
             foreach (LFGDungeonsRecord dungeon in CliDB.LFGDungeonsStorage.Values)
-                if (dungeon.MapID == mapId && (Difficulty)dungeon.DifficultyID == difficulty)
+                if (dungeon.MapID == mapId && dungeon.DifficultyID == difficulty)
                     return dungeon;
 
             return null;

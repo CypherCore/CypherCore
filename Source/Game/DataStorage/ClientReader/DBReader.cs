@@ -393,7 +393,6 @@ namespace Game.DataStorage
                     BitReader bitReader = new BitReader(recordData);
                     bitReader.Offset = i * (int)Header.RecordSize;
 
-                    List<byte> data = new List<byte>();
                     MemoryStream stream = new MemoryStream();
                     BinaryWriter binaryWriter = new BinaryWriter(stream);
 

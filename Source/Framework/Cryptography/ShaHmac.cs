@@ -49,7 +49,7 @@ namespace Framework.Cryptography
             sha.TransformBlock(bytes, 0, bytes.Length, bytes, 0);
         }
 
-        public void Finish(byte[] data, int length)
+        public void Finish(byte[] data)
         {
             sha.TransformFinalBlock(data, 0, data.Length);
 

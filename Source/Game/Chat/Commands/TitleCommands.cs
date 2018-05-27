@@ -185,7 +185,7 @@ namespace Game.Chat.Commands
                 ulong titles2 = titles;
 
                 foreach (CharTitlesRecord tEntry in CliDB.CharTitlesStorage.Values)
-                    titles2 &= ~(1ul << (int)tEntry.MaskID);
+                    titles2 &= ~(1ul << tEntry.MaskID);
 
                 titles &= ~titles2;                                     // remove not existed titles
 

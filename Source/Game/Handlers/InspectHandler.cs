@@ -69,10 +69,11 @@ namespace Game
             {
                 inspectResult.GuildData.HasValue = true;
 
-                InspectGuildData guildData = inspectResult.GuildData.Value;
+                InspectGuildData guildData;
                 guildData.GuildGUID = guild.GetGUID();
                 guildData.NumGuildMembers = guild.GetMembersCount();
                 guildData.AchievementPoints = (int)guild.GetAchievementMgr().GetAchievementPoints();
+                inspectResult.GuildData.Set(guildData);
             }
 
             inspectResult.InspecteeGUID = inspect.Target;

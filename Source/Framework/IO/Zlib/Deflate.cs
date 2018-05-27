@@ -1002,8 +1002,6 @@ namespace Framework.IO
 
 		public static int deflate(z_stream strm, int flush)
 		{
-			int old_flush; // value of flush param for previous deflate call
-
 			if(strm==null||strm.state==null||flush>Z_BLOCK||flush<0) return Z_STREAM_ERROR;
 			deflate_state s=(deflate_state)strm.state;
 
@@ -1020,7 +1018,7 @@ namespace Framework.IO
 			}
 
 			s.strm=strm; // just in case
-			old_flush=s.last_flush;
+		    int old_flush = s.last_flush;// value of flush param for previous deflate call
 			s.last_flush=flush;
 
 			// Write the header
@@ -1568,57 +1566,56 @@ namespace Framework.IO
 
 		// ---------------------------------------------------------------------------
 		// Optimized version for FASTEST only
-		static uint longest_match_fast(deflate_state s, uint cur_match)
-		{
-			byte[] scan=s.window;
-			int scan_ind=(int)s.strstart;	// current string
-			int len;						// length of current match
-			int strend_ind=(int)s.strstart+MAX_MATCH;
+	    static uint longest_match_fast(deflate_state s, uint cur_match)
+	    {
+	        byte[] scan = s.window;
+	        int scan_ind = (int) s.strstart; // current string
+	        int strend_ind = (int) s.strstart + MAX_MATCH;
 
-			// The code is optimized for HASH_BITS >= 8 and MAX_MATCH-2 multiple of 16.
-			// It is easy to get rid of this optimization if necessary.
-			//Assert(s.hash_bits >= 8 && MAX_MATCH == 258, "Code too clever");
+	        // The code is optimized for HASH_BITS >= 8 and MAX_MATCH-2 multiple of 16.
+	        // It is easy to get rid of this optimization if necessary.
+	        //Assert(s.hash_bits >= 8 && MAX_MATCH == 258, "Code too clever");
 
-			//Assert((uint)s.strstart <= s.window_size-MIN_LOOKAHEAD, "need lookahead");
+	        //Assert((uint)s.strstart <= s.window_size-MIN_LOOKAHEAD, "need lookahead");
 
-			//Assert(cur_match < s.strstart, "no future");
+	        //Assert(cur_match < s.strstart, "no future");
 
-			byte[] match=s.window;
-			int match_ind=(int)cur_match;
+	        byte[] match = s.window;
+	        int match_ind = (int) cur_match;
 
-			// Return failure if the match length is less than 2:
-			if(match[match_ind]!=scan[scan_ind]||match[match_ind+1]!=scan[scan_ind+1]) return MIN_MATCH-1;
+	        // Return failure if the match length is less than 2:
+	        if (match[match_ind] != scan[scan_ind] || match[match_ind + 1] != scan[scan_ind + 1]) return MIN_MATCH - 1;
 
-			// The check at best_len-1 can be removed because it will be made
-			// again later. (This heuristic is not always a win.)
-			// It is not necessary to compare scan[2] and match[2] since they
-			// are always equal when the other bytes match, given that
-			// the hash keys are equal and that HASH_BITS >= 8.
-			scan_ind+=2;
-			match_ind+=2;
-			//Assert(scan[scan_ind] == match[match_ind], "match[2]?");
+	        // The check at best_len-1 can be removed because it will be made
+	        // again later. (This heuristic is not always a win.)
+	        // It is not necessary to compare scan[2] and match[2] since they
+	        // are always equal when the other bytes match, given that
+	        // the hash keys are equal and that HASH_BITS >= 8.
+	        scan_ind += 2;
+	        match_ind += 2;
+	        //Assert(scan[scan_ind] == match[match_ind], "match[2]?");
 
-			// We check for insufficient lookahead only every 8th comparison;
-			// the 256th check will be made at strstart+258.
-			do
-			{
-			} while(scan[++scan_ind]==match[++match_ind]&&scan[++scan_ind]==match[++match_ind]&&
-					 scan[++scan_ind]==match[++match_ind]&&scan[++scan_ind]==match[++match_ind]&&
-					 scan[++scan_ind]==match[++match_ind]&&scan[++scan_ind]==match[++match_ind]&&
-					 scan[++scan_ind]==match[++match_ind]&&scan[++scan_ind]==match[++match_ind]&&
-					 scan_ind<strend_ind);
+	        // We check for insufficient lookahead only every 8th comparison;
+	        // the 256th check will be made at strstart+258.
+	        do
+	        {
+	        } while (scan[++scan_ind] == match[++match_ind] && scan[++scan_ind] == match[++match_ind] &&
+	                 scan[++scan_ind] == match[++match_ind] && scan[++scan_ind] == match[++match_ind] &&
+	                 scan[++scan_ind] == match[++match_ind] && scan[++scan_ind] == match[++match_ind] &&
+	                 scan[++scan_ind] == match[++match_ind] && scan[++scan_ind] == match[++match_ind] &&
+	                 scan_ind < strend_ind);
 
-			//Assert(scan_ind <= (uint)(s.window_size-1), "wild scan");
+	        //Assert(scan_ind <= (uint)(s.window_size-1), "wild scan");
 
-			len=MAX_MATCH-(int)(strend_ind-scan_ind);
+	        int len = MAX_MATCH - (int) (strend_ind - scan_ind);// length of current match
 
-			if(len<MIN_MATCH) return MIN_MATCH-1;
+	        if (len < MIN_MATCH) return MIN_MATCH - 1;
 
-			s.match_start=cur_match;
-			return (uint)len<=s.lookahead?(uint)len:s.lookahead;
-		}
+	        s.match_start = cur_match;
+	        return (uint) len <= s.lookahead ? (uint) len : s.lookahead;
+	    }
 
-		// ===========================================================================
+	    // ===========================================================================
 		// Fill the window when the lookahead becomes insufficient.
 		// Updates strstart and lookahead.
 		//

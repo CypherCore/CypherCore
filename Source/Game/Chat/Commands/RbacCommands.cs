@@ -228,7 +228,6 @@ namespace Game.Chat.Commands
             uint accountId = 0;
             string accountName;
             uint id = 0;
-            RBACCommandData data;
             RBACData rdata = null;
             bool useSelectedPlayer = false;
 
@@ -293,7 +292,7 @@ namespace Game.Chat.Commands
             if (checkParams && handler.HasLowerSecurityAccount(null, accountId, true))
                 return null;
 
-            data = new RBACCommandData();
+            RBACCommandData data = new RBACCommandData();
 
             if (rdata == null)
             {

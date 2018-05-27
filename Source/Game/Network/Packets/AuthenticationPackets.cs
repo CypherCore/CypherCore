@@ -77,8 +77,6 @@ namespace Game.Network.Packets
 
         public override void Read()
         {
-            uint realmJoinTicketSize;
-
             DosResponse = _worldPacket.ReadUInt64();
             Build = _worldPacket.ReadUInt16();
             BuildType = _worldPacket.ReadInt8();
@@ -92,7 +90,7 @@ namespace Game.Network.Packets
             Digest = _worldPacket.ReadBytes(24);
 
             UseIPv6 = _worldPacket.HasBit();
-            realmJoinTicketSize = _worldPacket.ReadUInt32();
+            uint realmJoinTicketSize = _worldPacket.ReadUInt32();
             if (realmJoinTicketSize != 0)
                 RealmJoinTicket = _worldPacket.ReadString(realmJoinTicketSize);
         }

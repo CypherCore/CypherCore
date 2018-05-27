@@ -220,9 +220,9 @@ namespace Game.Movement
         }
         float SegLengthCatmullRom(int index)
         {
-            Vector3 curPos, nextPos;
+            Vector3 nextPos;
             var p = points.Skip(index - 1).ToArray();
-            curPos = nextPos = p[1];
+            Vector3 curPos = nextPos = p[1];
 
             int i = 1;
             double length = 0;
@@ -239,11 +239,11 @@ namespace Game.Movement
         {
             index *= (int)3u;
 
-            Vector3 curPos, nextPos;
+            Vector3 nextPos;
             var p = points.Skip(index).ToArray();
 
             C_Evaluate(p, 0.0f, s_Bezier3Coeffs, out nextPos);
-            curPos = nextPos;
+            Vector3 curPos = nextPos;
 
             int i = 1;
             double length = 0;

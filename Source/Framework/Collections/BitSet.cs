@@ -359,7 +359,7 @@ namespace System.Collections
 
             internal BitArrayEnumeratorSimple(BitSet bitarray)
             {
-                this._bitarray = bitarray;
+                _bitarray = bitarray;
                 _index = -1;
                 _version = bitarray._version;
             }

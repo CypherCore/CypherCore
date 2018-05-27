@@ -28,7 +28,7 @@ namespace Game.Movement
         void stopFollowing();
     }
 
-    public abstract class TargetedMovementGeneratorMedium<T, D> : MovementGeneratorMedium<T>, TargetedMovementGeneratorBase where T : Unit
+    public abstract class TargetedMovementGeneratorMedium<T> : MovementGeneratorMedium<T>, TargetedMovementGeneratorBase where T : Unit
     {
         public FollowerReference reftarget { get; set; }
         public Unit target
@@ -38,7 +38,7 @@ namespace Game.Movement
 
         public void stopFollowing() { }
 
-        public TargetedMovementGeneratorMedium(Unit _target, float _offset = 0, float _angle = 0)
+        protected TargetedMovementGeneratorMedium(Unit _target, float _offset = 0, float _angle = 0)
         {
             reftarget = new FollowerReference();
             reftarget.link(_target, this);
@@ -268,7 +268,7 @@ namespace Game.Movement
         #endregion
     }
 
-    public class ChaseMovementGenerator<T> : TargetedMovementGeneratorMedium<T, ChaseMovementGenerator<T>> where T : Unit
+    public class ChaseMovementGenerator<T> : TargetedMovementGeneratorMedium<T> where T : Unit
     {
         public ChaseMovementGenerator(Unit target)
             : base(target)
@@ -334,7 +334,7 @@ namespace Game.Movement
         }
     }
 
-    public class FollowMovementGenerator<T> : TargetedMovementGeneratorMedium<T, FollowMovementGenerator<T>> where T : Unit
+    public class FollowMovementGenerator<T> : TargetedMovementGeneratorMedium<T> where T : Unit
     {
         public FollowMovementGenerator(Unit target) : base(target) { }
         public FollowMovementGenerator(Unit target, float offset, float angle) : base(target, offset, angle) { }

@@ -171,14 +171,12 @@ namespace Game.Chat.Commands
             if (count == 0)
                 return false;
 
-            SQLResult result;
-
             // inventory case
             uint inventoryCount = 0;
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_INVENTORY_COUNT_ITEM);
             stmt.AddValue(0, itemId);
-            result = DB.Characters.Query(stmt);
+            SQLResult result = DB.Characters.Query(stmt);
 
             if (!result.IsEmpty())
                 inventoryCount = result.Read<uint>(0);

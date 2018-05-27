@@ -459,7 +459,7 @@ namespace Game.BattleGrounds.Zones
                 {
                     UpdatePlayerScore(source, ScoreType.BasesAssaulted, 1);
                     m_prevNodes[node] = m_Nodes[node];
-                    m_Nodes[node] = (ABNodeStatus.Contested + (int)teamIndex);
+                    m_Nodes[node] = (ABNodeStatus.Contested + teamIndex);
                     // burn current contested banner
                     _DelBanner(node, ABNodeStatus.Contested, (byte)teamIndex);
                     // create new contested banner
@@ -477,7 +477,7 @@ namespace Game.BattleGrounds.Zones
                 {
                     UpdatePlayerScore(source, ScoreType.BasesDefended, 1);
                     m_prevNodes[node] = m_Nodes[node];
-                    m_Nodes[node] = (ABNodeStatus.Occupied + (int)teamIndex);
+                    m_Nodes[node] = (ABNodeStatus.Occupied + teamIndex);
                     // burn current contested banner
                     _DelBanner(node, ABNodeStatus.Contested, (byte)teamIndex);
                     // create new occupied banner
@@ -498,7 +498,7 @@ namespace Game.BattleGrounds.Zones
             {
                 UpdatePlayerScore(source, ScoreType.BasesAssaulted, 1);
                 m_prevNodes[node] = m_Nodes[node];
-                m_Nodes[node] = (ABNodeStatus.Contested + (int)teamIndex);
+                m_Nodes[node] = (ABNodeStatus.Contested + teamIndex);
                 // burn current occupied banner
                 _DelBanner(node, ABNodeStatus.Occupied, (byte)teamIndex);
                 // create new contested banner
@@ -639,7 +639,7 @@ namespace Game.BattleGrounds.Zones
             // Is there any occupied node for this team?
             List<byte> nodes = new List<byte>();
             for (byte i = 0; i < ABBattlegroundNodes.DynamicNodesCount; ++i)
-                if (m_Nodes[i] == ABNodeStatus.Occupied + (int)teamIndex)
+                if (m_Nodes[i] == ABNodeStatus.Occupied + teamIndex)
                     nodes.Add(i);
 
             WorldSafeLocsRecord good_entry = null;

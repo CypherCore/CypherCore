@@ -178,9 +178,10 @@ namespace Game.Entities
             // Rejoining the last group should not reset the sequence
             if (m_groupUpdateSequences[(int)category].GroupGuid != group.GetGUID())
             {
-                var groupUpdate = m_groupUpdateSequences[(int)category];
+                GroupUpdateCounter groupUpdate;
                 groupUpdate.GroupGuid = group.GetGUID();
                 groupUpdate.UpdateSequenceNumber = 1;
+                m_groupUpdateSequences[(int) category] = groupUpdate;
             }
         }
 

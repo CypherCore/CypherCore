@@ -229,7 +229,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
 
     abstract class boss_basic_toc5AI : ScriptedAI
     {
-        public boss_basic_toc5AI(Creature creature) : base(creature)
+        protected boss_basic_toc5AI(Creature creature) : base(creature)
         {
             Initialize();
             instance = creature.GetInstanceScript();

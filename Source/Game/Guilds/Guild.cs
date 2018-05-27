@@ -3456,7 +3456,7 @@ namespace Game.Guilds
 
         public abstract class MoveItemData
         {
-            public MoveItemData(Guild guild, Player player, byte container, byte slotId)
+            protected MoveItemData(Guild guild, Player player, byte container, byte slotId)
             {
                 m_pGuild = guild;
                 m_pPlayer = player;

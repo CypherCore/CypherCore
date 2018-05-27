@@ -4578,8 +4578,6 @@ namespace Game.Entities
             // prevent existence 2 corpse for player
             SpawnCorpseBones();
 
-            uint _cfb1, _cfb2;
-
             Corpse corpse = new Corpse(Convert.ToBoolean(m_ExtraFlags & PlayerExtraFlags.PVPDeath) ? CorpseType.ResurrectablePVP : CorpseType.ResurrectablePVE);
             SetPvPDeath(false);
 
@@ -4594,8 +4592,8 @@ namespace Game.Entities
             byte haircolor = GetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetHairColorId);
             byte facialhair = GetByteValue(PlayerFields.Bytes2, PlayerFieldOffsets.Bytes2OffsetFacialStyle);
 
-            _cfb1 = (uint)((0x00) | ((int)GetRace() << 8) | (GetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetGender) << 16) | (skin << 24));
-            _cfb2 = (uint)((face) | (hairstyle << 8) | (haircolor << 16) | (facialhair << 24));
+            uint _cfb1 = (uint)((0x00) | ((int)GetRace() << 8) | (GetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetGender) << 16) | (skin << 24));
+            uint _cfb2 = (uint)((face) | (hairstyle << 8) | (haircolor << 16) | (facialhair << 24));
 
             corpse.SetUInt32Value(CorpseFields.Bytes1, _cfb1);
             corpse.SetUInt32Value(CorpseFields.Bytes2, _cfb2);
@@ -6022,30 +6020,27 @@ namespace Game.Entities
                 }
             }
         }
-        void UpdateVisibilityOf_helper<T>(List<ObjectGuid> s64, GameObject target, List<Unit> v)
+        void UpdateVisibilityOf_helper<T>(List<ObjectGuid> s64, T target, List<Unit> v) where  T : WorldObject
         {
-            // @HACK: This is to prevent objects like deeprun tram from disappearing when player moves far from its spawn point while riding it
-            // But exclude stoppable elevators from this hack - they would be teleporting from one end to another
-            // if affected transports move so far horizontally that it causes them to run out of visibility range then you are out of luck
-            // fix visibility instead of adding hacks here
-            if (target.IsDynTransport())
-                s64.Add(target.GetGUID());
-        }
-        void UpdateVisibilityOf_helper(List<ObjectGuid> s64, Creature target, List<Unit> v)
-        {
-            s64.Add(target.GetGUID());
-            v.Add(target);
-        }
-
-        void UpdateVisibilityOf_helper(List<ObjectGuid> s64, Player target, List<Unit> v)
-        {
-            s64.Add(target.GetGUID());
-            v.Add(target);
-        }
-
-        void UpdateVisibilityOf_helper<T>(List<ObjectGuid> s64, T target, List<Unit> v) where T : WorldObject
-        {
-            s64.Add(target.GetGUID());
+            switch (target.GetTypeId())
+            {
+                case TypeId.GameObject:
+                    // @HACK: This is to prevent objects like deeprun tram from disappearing when player moves far from its spawn point while riding it
+                    // But exclude stoppable elevators from this hack - they would be teleporting from one end to another
+                    // if affected transports move so far horizontally that it causes them to run out of visibility range then you are out of luck
+                    // fix visibility instead of adding hacks here
+                    if (target.ToGameObject().IsDynTransport())
+                        s64.Add(target.GetGUID());
+                    break;
+                case TypeId.Unit:
+                    s64.Add(target.GetGUID());
+                    v.Add(target.ToCreature());
+                    break;
+                case TypeId.Player:
+                    s64.Add(target.GetGUID());
+                    v.Add(target.ToPlayer());
+                    break;
+            }
         }
 
         public void SendInitialVisiblePackets(Unit target)

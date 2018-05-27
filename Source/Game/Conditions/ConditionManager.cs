@@ -1679,7 +1679,7 @@ namespace Game
             if (condition.MaxLevel != 0 && player.getLevel() > condition.MaxLevel)
                 return false;
 
-            if (condition.RaceMask != 0 && !Convert.ToBoolean((long)player.getRaceMask() & condition.RaceMask))
+            if (condition.RaceMask != 0 && !Convert.ToBoolean(player.getRaceMask() & condition.RaceMask))
                 return false;
 
             if (condition.ClassMask != 0 && !Convert.ToBoolean(player.getClassMask() & condition.ClassMask))
@@ -1735,7 +1735,7 @@ namespace Game
                 if (lang != null)
                 {
                     uint languageSkill = player.GetSkillValue((SkillType)lang.skill_id);
-                    if (languageSkill == 0 && player.HasAuraTypeWithMiscvalue(AuraType.ComprehendLanguage, (int)condition.LanguageID))
+                    if (languageSkill == 0 && player.HasAuraTypeWithMiscvalue(AuraType.ComprehendLanguage, condition.LanguageID))
                         languageSkill = 300;
 
                     if (condition.MinLanguage != 0 && languageSkill < condition.MinLanguage)
@@ -1784,7 +1784,7 @@ namespace Game
                 }
             }
 
-            if (condition.PvpMedal != 0 && !Convert.ToBoolean((1 << (int)(condition.PvpMedal - 1)) & player.GetUInt32Value(PlayerFields.PvpMedals)))
+            if (condition.PvpMedal != 0 && !Convert.ToBoolean((1 << (condition.PvpMedal - 1)) & player.GetUInt32Value(PlayerFields.PvpMedals)))
                 return false;
 
             if (condition.LifetimeMaxPVPRank != 0 && player.GetByteValue(PlayerFields.FieldBytes, PlayerFieldOffsets.FieldBytesOffsetLifetimeMaxPvpRank) != condition.LifetimeMaxPVPRank)

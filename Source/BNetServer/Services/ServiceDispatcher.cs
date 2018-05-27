@@ -68,7 +68,7 @@ namespace BNetServer.Services
 
     abstract class ServiceBase
     {
-        public ServiceBase(Session session, uint serviceHash)
+        protected ServiceBase(Session session, uint serviceHash)
         {
             _session = session;
             _serviceHash = serviceHash;

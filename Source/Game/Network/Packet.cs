@@ -24,7 +24,7 @@ namespace Game.Network
 {
     public abstract class ClientPacket : IDisposable
     {
-        public ClientPacket(WorldPacket worldPacket)
+        protected ClientPacket(WorldPacket worldPacket)
         {
             _worldPacket = worldPacket;
         }
@@ -48,13 +48,13 @@ namespace Game.Network
 
     public abstract class ServerPacket
     {
-        public ServerPacket(ServerOpcodes opcode)
+        protected ServerPacket(ServerOpcodes opcode)
         {
             connectionType = ConnectionType.Realm;
             _worldPacket = new WorldPacket(opcode);
         }
 
-        public ServerPacket(ServerOpcodes opcode, ConnectionType type = ConnectionType.Realm)
+        protected ServerPacket(ServerOpcodes opcode, ConnectionType type = ConnectionType.Realm)
         {
             connectionType = type;
             _worldPacket = new WorldPacket(opcode);

@@ -3411,8 +3411,6 @@ namespace Game.Entities
             }
 
             uint spellId = auraToRemove.GetId();
-
-            var range = m_ownedAuras.LookupByKey(spellId);
             foreach (var pair in GetOwnedAuras())
             {
                 if (pair.Key != spellId)
@@ -3444,7 +3442,6 @@ namespace Game.Entities
         }
         public void RemoveAurasDueToSpellByDispel(uint spellId, uint dispellerSpellId, ObjectGuid casterGUID, Unit dispeller, byte chargesRemoved = 1)
         {
-            var range = m_ownedAuras.LookupByKey(spellId);
             foreach (var pair in GetOwnedAuras())
             {
                 if (pair.Key != spellId)
@@ -4139,8 +4136,7 @@ namespace Game.Entities
                         else
                             bp = effect.BasePoints;
 
-                        int oldBP = eff.m_baseAmount;
-                        oldBP = bp;
+                        eff.m_baseAmount = bp;
                     }
 
                     // correct cast item guid if needed

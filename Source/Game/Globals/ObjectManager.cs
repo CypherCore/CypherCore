@@ -2085,7 +2085,7 @@ namespace Game
                 {
                     Log.outError(LogFilter.Sql, "Table `creature_questitem` has nonexistent item (ID: {0}) in creature (entry: {1}, idx: {2}), skipped", item, entry, idx);
                     continue;
-                };
+                }
 
                 _creatureQuestItemStorage.Add(entry, item);
 
