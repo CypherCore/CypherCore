@@ -17,12 +17,13 @@
 
 using Framework.Constants;
 using Framework.Dynamic;
+using Game.BattlePets;
 using Game.DataStorage;
 using Game.Network.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using Game.BattlePets;
+using System.Linq;
 
 namespace Game.Entities
 {
@@ -1818,7 +1819,6 @@ namespace Game.Entities
             m_spells.Remove(spellId);
         }
 
-
         public void UpdateZoneDependentAuras(uint newZone)
         {
             // Some spells applied at enter into zone (with subzones), aura removed in UpdateAreaDependentAuras that called always at zone.area update
@@ -2865,9 +2865,9 @@ namespace Game.Entities
         {
             m_runes.Cooldown[index] = cooldown;
             m_runes.SetRuneState(index, (cooldown == 0) ? true : false);
-            uint activeRunes = m_runes.Cooldown[Math.Min(GetMaxPower(PowerType.Runes), (int)PowerType.Max)];
+            int activeRunes = m_runes.Cooldown.Count(p => p == 0);
             if (activeRunes != GetPower(PowerType.Runes))
-                SetPower(PowerType.Runes, (int)activeRunes);
+                SetPower(PowerType.Runes, activeRunes);
         }
 
         public byte GetRunesState()

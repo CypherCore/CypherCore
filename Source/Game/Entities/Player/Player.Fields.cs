@@ -337,17 +337,17 @@ namespace Game.Entities
     {
         public void SetRuneState(byte index, bool set = true)
         {
-            var id = CooldownOrder.LookupByIndex(index);
+            bool foundRune = CooldownOrder.Contains(index);
             if (set)
             {
                 RuneState |= (byte)(1 << index);                      // usable
-                if (id != 0)
-                    CooldownOrder.RemoveAt(index);
+                if (foundRune)
+                    CooldownOrder.Remove(index);
             }
             else
             {
                 RuneState &= (byte)~(1 << index);                     // on cooldown
-                if (id == 0)
+                if (!foundRune)
                     CooldownOrder.Add(index);
             }
         }
