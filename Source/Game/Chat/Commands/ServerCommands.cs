@@ -341,7 +341,7 @@ namespace Game.Chat
                 string name = args.NextString();
                 string level = args.NextString();
 
-                if (string.IsNullOrEmpty(type) || string.IsNullOrEmpty(name) || string.IsNullOrEmpty(level) || name.IsEmpty() || level.IsEmpty() || (type[0] != 'a' && type[0] != 'l'))
+                if (type.IsEmpty() || name.IsEmpty() || level.IsEmpty() || (type[0] != 'a' && type[0] != 'l'))
                     return false;
 
                 return Log.SetLogLevel(name, level, type[0] == 'l');

@@ -381,20 +381,20 @@ namespace Game.Maps
         public void Update()
         {
             long now = Time.UnixTime;
-            long t;
 
             while (!m_resetTimeQueue.Empty())
             {
-                t = m_resetTimeQueue.First().Key;
-                if (t >= now)
+                var pair = m_resetTimeQueue.First();
+                long time = pair.Key;
+                if (time >= now)
                     break;
 
-                InstResetEvent Event = m_resetTimeQueue.First().Value;
+                InstResetEvent Event = pair.Value;
                 if (Event.type == 0)
                 {
                     // for individual normal instances, max creature respawn + X hours
                     _ResetInstance(Event.mapid, Event.instanceId);
-                    m_resetTimeQueue.Remove(m_resetTimeQueue.First());
+                    m_resetTimeQueue.Remove(pair);
                 }
                 else
                 {
@@ -407,7 +407,7 @@ namespace Game.Maps
                         ++Event.type;
                         ScheduleReset(true, resetTime - ResetTimeDelay[Event.type - 1], Event);
                     }
-                    m_resetTimeQueue.Remove(m_resetTimeQueue.First());
+                    m_resetTimeQueue.Remove(pair);
                 }
             }
         }
@@ -535,9 +535,9 @@ namespace Game.Maps
 
                 // Update it in the DB
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GLOBAL_INSTANCE_RESETTIME);
-                stmt.AddValue(0, next_reset);
-                stmt.AddValue(1, mapid);
-                stmt.AddValue(2, difficulty);
+                stmt.AddValue(0, (uint)next_reset);
+                stmt.AddValue(1, (ushort)mapid);
+                stmt.AddValue(2, (byte)difficulty);
 
                 DB.Characters.Execute(stmt);
             }
