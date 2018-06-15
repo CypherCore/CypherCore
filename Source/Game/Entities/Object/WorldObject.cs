@@ -30,7 +30,6 @@ using Game.Scenarios;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -63,9 +62,8 @@ namespace Game.Entities
             {
                 if (IsTypeId(TypeId.Corpse))
                 {
-                    Log.outFatal(LogFilter.Misc, "WorldObject.Dispose() Corpse Type: {0} ({1}) deleted but still in map!!",
-                        ToCorpse().GetCorpseType(), GetGUID().ToString());
-                    Contract.Assert(false);
+                    Log.outFatal(LogFilter.Misc, "WorldObject.Dispose() Corpse Type: {0} ({1}) deleted but still in map!!", ToCorpse().GetCorpseType(), GetGUID().ToString());
+                    Cypher.Assert(false);
                 }
                 ResetMap();
             }
@@ -75,13 +73,13 @@ namespace Game.Entities
                 Log.outFatal(LogFilter.Misc, "WorldObject.Dispose() {0} deleted but still in world!!", GetGUID().ToString());
                 if (isTypeMask(TypeMask.Item))
                     Log.outFatal(LogFilter.Misc, "Item slot {0}", ((Item)this).GetSlot());
-                Contract.Assert(false);
+                Cypher.Assert(false);
             }
 
             if (m_objectUpdated)
             {
                 Log.outFatal(LogFilter.Misc, "WorldObject.Dispose() {0} deleted but still in update list!!", GetGUID().ToString());
-                Contract.Assert(false);
+                Cypher.Assert(false);
             }
         }
 
@@ -265,45 +263,45 @@ namespace Game.Entities
 
         public int GetInt32Value(object index)
         {
-            Contract.Assert((int)index < valuesCount || PrintIndexError(index, false));
+            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, false));
             return updateValues[(int)index].SignedValue;
         }
 
         public uint GetUInt32Value(object index)
         {
-            Contract.Assert((int)index < valuesCount || PrintIndexError(index, false));
+            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, false));
             return updateValues[(int)index].UnsignedValue;
         }
 
         public ulong GetUInt64Value(object index)
         {
-            Contract.Assert((int)index + 1 < valuesCount || PrintIndexError(index, false));
+            Cypher.Assert((int)index + 1 < valuesCount || PrintIndexError(index, false));
             return ((ulong)updateValues[(int)index + 1].UnsignedValue << 32 | updateValues[(int)index].UnsignedValue);
         }
 
         public float GetFloatValue(object index)
         {
-            Contract.Assert((int)index < valuesCount || PrintIndexError(index, false));
+            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, false));
             return updateValues[(int)index].FloatValue;
         }
 
         public byte GetByteValue(object index, byte offset)
         {
-            Contract.Assert((int)index < valuesCount || PrintIndexError(index, false));
-            Contract.Assert(offset < 4);
+            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, false));
+            Cypher.Assert(offset < 4);
             return (byte)((updateValues[(int)index].UnsignedValue >> (offset * 8)) & 0xFF);
         }
 
         public ushort GetUInt16Value(object index, byte offset)
         {
-            Contract.Assert((int)index < valuesCount || PrintIndexError(index, false));
-            Contract.Assert(offset < 2);
+            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, false));
+            Cypher.Assert(offset < 2);
             return (ushort)((updateValues[(int)index].UnsignedValue >> (offset * 16)) & 0xFFFF);
         }
 
         public ObjectGuid GetGuidValue(object index)
         {
-            Contract.Assert((int)index + 3 < valuesCount || PrintIndexError(index, false));
+            Cypher.Assert((int)index + 3 < valuesCount || PrintIndexError(index, false));
             return new ObjectGuid(GetUInt64Value((int)index + 2), GetUInt64Value(index));
         }
 
@@ -976,7 +974,7 @@ namespace Game.Entities
                     flags = UpdateFieldFlags.ConversationUpdateFieldFlags;
                     break;
                 case TypeId.Object:
-                    Contract.Assert(false);
+                    Cypher.Assert(false);
                     break;
             }
             return visibleFlag;
@@ -1051,7 +1049,7 @@ namespace Game.Entities
 
         public void SetInt32Value(object index, int value)
         {
-            Contract.Assert((int)index < valuesCount || PrintIndexError(index, true));
+            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, true));
 
             if (updateValues[(int)index].SignedValue != value)
             {
@@ -1065,7 +1063,7 @@ namespace Game.Entities
         public void SetUInt32Value(object index, uint value)
         {
             int _index = Convert.ToInt32(index);
-            Contract.Assert(_index < valuesCount || PrintIndexError(index, true));
+            Cypher.Assert(_index < valuesCount || PrintIndexError(index, true));
 
             if (updateValues[_index].UnsignedValue != value)
             {
@@ -1078,7 +1076,7 @@ namespace Game.Entities
 
         public void UpdateUInt32Value(object index, uint value)
         {
-            Contract.Assert((int)index < valuesCount || PrintIndexError(index, true));
+            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, true));
 
             updateValues[(int)index].UnsignedValue = value;
             _changesMask.Set((int)index, true);
@@ -1086,7 +1084,7 @@ namespace Game.Entities
 
         public void SetUInt64Value(object index, ulong value)
         {
-            Contract.Assert((int)index + 1 < valuesCount || PrintIndexError(index, true));
+            Cypher.Assert((int)index + 1 < valuesCount || PrintIndexError(index, true));
             if (GetUInt64Value(index) != value)
             {
                 updateValues[(int)index].UnsignedValue = MathFunctions.Pair64_LoPart(value);
@@ -1100,7 +1098,7 @@ namespace Game.Entities
 
         public bool AddGuidValue(object index, ObjectGuid value)
         {
-            Contract.Assert((int)index + 3 < valuesCount || PrintIndexError(index, true));
+            Cypher.Assert((int)index + 3 < valuesCount || PrintIndexError(index, true));
             if (!value.IsEmpty() && GetGuidValue(index).IsEmpty())
             {
                 SetGuidValue(index, value);
@@ -1112,7 +1110,7 @@ namespace Game.Entities
 
         public bool RemoveGuidValue(object index, ObjectGuid value)
         {
-            Contract.Assert((int)index + 3 < valuesCount || PrintIndexError(index, true));
+            Cypher.Assert((int)index + 3 < valuesCount || PrintIndexError(index, true));
             if (!value.IsEmpty() && GetGuidValue(index) == value)
             {
                 SetGuidValue(index, ObjectGuid.Empty);
@@ -1124,7 +1122,7 @@ namespace Game.Entities
 
         public void SetFloatValue(object index, float value)
         {
-            Contract.Assert((int)index < valuesCount || PrintIndexError(index, true));
+            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, true));
 
             if (updateValues[(int)index].FloatValue != value)
             {
@@ -1137,7 +1135,7 @@ namespace Game.Entities
 
         public void SetByteValue(object index, byte offset, byte value)
         {
-            Contract.Assert((int)index < valuesCount || PrintIndexError(index, true));
+            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, true));
 
             if (offset > 3)
             {
@@ -1157,7 +1155,7 @@ namespace Game.Entities
 
         public void SetUInt16Value(object index, byte offset, ushort value)
         {
-            Contract.Assert((int)index < valuesCount || PrintIndexError(index, true));
+            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, true));
 
             if (offset > 2)
             {
@@ -1177,7 +1175,7 @@ namespace Game.Entities
 
         public void SetGuidValue(object index, ObjectGuid value)
         {
-            Contract.Assert((int)index + 3 < valuesCount || PrintIndexError(index, true));
+            Cypher.Assert((int)index + 3 < valuesCount || PrintIndexError(index, true));
             if (GetGuidValue(index) != value)
             {                
                 SetUInt64Value(index, value.GetLowValue());
@@ -1246,7 +1244,7 @@ namespace Game.Entities
 
         public void SetFlag(object index, object newflag)
         {
-            Contract.Assert((int)index < valuesCount || PrintIndexError(index, true));
+            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, true));
             uint oldval = updateValues[(int)index].UnsignedValue;
             uint newval = oldval | Convert.ToUInt32(newflag);
 
@@ -1261,8 +1259,8 @@ namespace Game.Entities
 
         public void RemoveFlag(object index, object oldFlag)
         {
-            Contract.Assert((int)index < valuesCount || PrintIndexError(index, true));
-            Contract.Assert(updateValues != null);
+            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, true));
+            Cypher.Assert(updateValues != null);
 
             uint oldval = updateValues[(int)index].UnsignedValue;
             uint newval = (oldval & ~Convert.ToUInt32(oldFlag));
@@ -1301,7 +1299,7 @@ namespace Game.Entities
 
         public void SetByteFlag(object index, byte offset, object newFlag)
         {
-            Contract.Assert((int)index < valuesCount || PrintIndexError(index, true));
+            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, true));
 
             if (offset > 4)
             {
@@ -1320,7 +1318,7 @@ namespace Game.Entities
 
         public void RemoveByteFlag(object index, byte offset, object oldFlag)
         {
-            Contract.Assert((int)index < valuesCount || PrintIndexError(index, true));
+            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, true));
 
             if (offset > 4)
             {
@@ -1347,8 +1345,8 @@ namespace Game.Entities
 
         public bool HasByteFlag(object index, byte offset, object flag)
         {
-            Contract.Assert((int)index < valuesCount || PrintIndexError(index, false));
-            Contract.Assert(offset < 4);
+            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, false));
+            Cypher.Assert(offset < 4);
             return Convert.ToBoolean(updateValues[(int)index].UnsignedValue >> (offset * 8) & Convert.ToUInt32(flag));
         }
 
@@ -1376,7 +1374,7 @@ namespace Game.Entities
 
         public bool HasFlag64(object index, object flag)
         {
-            Contract.Assert((int)index < valuesCount || PrintIndexError(index, false));
+            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, false));
             return (GetUInt64Value(index) & Convert.ToUInt64(flag)) != 0;
         }
 
@@ -1390,13 +1388,13 @@ namespace Game.Entities
 
         public uint[] GetDynamicValues(object index)
         {
-            Contract.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, false));
+            Cypher.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, false));
             return _dynamicValues[(int)index];
         }
 
         public uint GetDynamicValue(object index, ushort offset)
         {
-            Contract.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, false));
+            Cypher.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, false));
             if (offset >= _dynamicValues[(int)index].Length)
                 return 0;
 
@@ -1405,14 +1403,14 @@ namespace Game.Entities
 
         public void AddDynamicValue(object index, uint value)
         {
-            Contract.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, true));
+            Cypher.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, true));
 
             SetDynamicValue(index, (byte)_dynamicValues[(int)index].Length, value);
         }
 
         public void RemoveDynamicValue(object index, uint value)
         {
-            Contract.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, false));
+            Cypher.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, false));
 
             // TODO: Research if this is blizzlike to just set value to 0
             for (var i = 0; i < _dynamicValues[(int)index].Length; ++i)
@@ -1430,7 +1428,7 @@ namespace Game.Entities
 
         public void ClearDynamicValue(object index)
         {
-            Contract.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, false));
+            Cypher.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, false));
 
             if (!_dynamicValues[(int)index].Empty())
             {
@@ -1444,7 +1442,7 @@ namespace Game.Entities
 
         public void SetDynamicValue(object index, ushort offset, uint value)
         {
-            Contract.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, true));
+            Cypher.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, true));
 
             DynamicFieldChangeType changeType = DynamicFieldChangeType.ValueChanged;
             if (_dynamicValues[(int)index].Length <= offset)
@@ -1892,8 +1890,8 @@ namespace Game.Entities
 
         public virtual void SetMap(Map map)
         {
-            Contract.Assert(map != null);
-            Contract.Assert(!IsInWorld);
+            Cypher.Assert(map != null);
+            Cypher.Assert(!IsInWorld);
 
             if (_currMap == map)
                 return;
@@ -1907,8 +1905,8 @@ namespace Game.Entities
 
         public virtual void ResetMap()
         {
-            Contract.Assert(_currMap != null);
-            Contract.Assert(!IsInWorld);
+            Cypher.Assert(_currMap != null);
+            Cypher.Assert(!IsInWorld);
             if (IsWorldObject())
                 _currMap.RemoveWorldObject(this);
             _currMap = null;
@@ -2047,7 +2045,7 @@ namespace Game.Entities
 
         public void SummonCreatureGroup(byte group, out List<TempSummon> list)
         {
-            Contract.Assert((IsTypeId(TypeId.GameObject) || IsTypeId(TypeId.Unit)), "Only GOs and creatures can summon npc groups!");
+            Cypher.Assert((IsTypeId(TypeId.GameObject) || IsTypeId(TypeId.Unit)), "Only GOs and creatures can summon npc groups!");
             list = new List<TempSummon>();
             var data = Global.ObjectMgr.GetSummonGroup(GetEntry(), IsTypeId(TypeId.GameObject) ? SummonerType.GameObject : SummonerType.Creature, group);
             if (data.Empty())
@@ -2128,9 +2126,9 @@ namespace Game.Entities
         }
 
         public PhaseShift GetPhaseShift() { return _phaseShift; }
-        public void SetPhaseShift(PhaseShift phaseShift) { _phaseShift = phaseShift; }
+        public void SetPhaseShift(PhaseShift phaseShift) { _phaseShift = new PhaseShift(phaseShift); }
         public PhaseShift GetSuppressedPhaseShift() { return _suppressedPhaseShift; }
-        public void SetSuppressedPhaseShift(PhaseShift phaseShift) { _suppressedPhaseShift = phaseShift; }
+        public void SetSuppressedPhaseShift(PhaseShift phaseShift) { _suppressedPhaseShift = new PhaseShift(phaseShift); }
         public int GetDBPhase() { return _dbPhase; }
 
         // if negative it is used as PhaseGroupId

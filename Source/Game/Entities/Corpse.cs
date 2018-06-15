@@ -21,7 +21,6 @@ using Game.DataStorage;
 using Game.Loots;
 using Game.Maps;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 namespace Game.Entities
 {
@@ -66,7 +65,7 @@ namespace Game.Entities
 
         public bool Create(ulong guidlow, Player owner)
         {
-            Contract.Assert(owner != null);
+            Cypher.Assert(owner != null);
 
             Relocate(owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ(), owner.GetOrientation());
 
@@ -114,12 +113,12 @@ namespace Game.Entities
             stmt.AddValue(index++, GetInstanceId());                                        // instanceId
             trans.Append(stmt);
 
-            foreach (PhaseRef phase in GetPhaseShift().GetPhases())
+            foreach (var phaseId in GetPhaseShift().GetPhases().Keys)
             {
                 index = 0;
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CORPSE_PHASES);
                 stmt.AddValue(index++, GetOwnerGUID().GetCounter());                        // OwnerGuid
-                stmt.AddValue(index++, phase.Id);                                            // PhaseId
+                stmt.AddValue(index++, phaseId);                                            // PhaseId
                 trans.Append(stmt);
             }
         }

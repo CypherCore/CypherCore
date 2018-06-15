@@ -34,9 +34,12 @@ namespace Game
 
         public static void ForAllControlled(Unit unit, Action<Unit> func)
         {
-            foreach (Unit controlled in unit.m_Controlled)
+            for (var i = 0; i < unit.m_Controlled.Count; ++i)
+            {
+                Unit controlled = unit.m_Controlled[i];
                 if (controlled.GetTypeId() != TypeId.Player)
                     func(controlled);
+            }
 
             for (byte i = 0; i < SharedConst.MaxSummonSlot; ++i)
             {
@@ -287,23 +290,23 @@ namespace Game
             ConditionSourceInfo srcInfo = new ConditionSourceInfo(obj);
             bool changed = false;
 
-            foreach (var phaseRef in phaseShift.Phases.ToArray())
+            foreach (var pair in phaseShift.Phases.ToList())
             {
-                if (!phaseRef.AreaConditions.Empty() && !Global.ConditionMgr.IsObjectMeetToConditions(srcInfo, phaseRef.AreaConditions))
+                if (pair.Value.AreaConditions != null && !Global.ConditionMgr.IsObjectMeetToConditions(srcInfo, pair.Value.AreaConditions))
                 {
-                    newSuppressions.AddPhase(phaseRef.Id, phaseRef.Flags, phaseRef.AreaConditions, phaseRef.References);
-                    phaseShift.ModifyPhasesReferences(phaseRef, -phaseRef.References);
-                    phaseShift.Phases.Remove(phaseRef);
+                    newSuppressions.AddPhase(pair.Key, pair.Value.Flags, pair.Value.AreaConditions, pair.Value.References);
+                    phaseShift.ModifyPhasesReferences(pair.Key, pair.Value, -pair.Value.References);
+                    phaseShift.Phases.Remove(pair.Key);
                 }
             }
 
-            foreach (var phaseRef in suppressedPhaseShift.Phases.ToArray())
+            foreach (var pair in suppressedPhaseShift.Phases.ToList())
             {
-                if (Global.ConditionMgr.IsObjectMeetToConditions(srcInfo, phaseRef.AreaConditions))
+                if (Global.ConditionMgr.IsObjectMeetToConditions(srcInfo, pair.Value.AreaConditions))
                 {
-                    changed = phaseShift.AddPhase(phaseRef.Id, phaseRef.Flags, phaseRef.AreaConditions, phaseRef.References) || changed;
-                    suppressedPhaseShift.ModifyPhasesReferences(phaseRef, -phaseRef.References);
-                    suppressedPhaseShift.Phases.Remove(phaseRef);
+                    changed = phaseShift.AddPhase(pair.Key, pair.Value.Flags, pair.Value.AreaConditions, pair.Value.References) || changed;
+                    suppressedPhaseShift.ModifyPhasesReferences(pair.Key, pair.Value, -pair.Value.References);
+                    suppressedPhaseShift.Phases.Remove(pair.Key);
                 }
             }
 
@@ -359,8 +362,8 @@ namespace Game
             }
 
             changed = changed || !newSuppressions.Phases.Empty() || !newSuppressions.VisibleMapIds.Empty();
-            foreach (var phaseRef in newSuppressions.Phases)
-                suppressedPhaseShift.AddPhase(phaseRef.Id, phaseRef.Flags, phaseRef.AreaConditions, phaseRef.References);
+            foreach (var pair in newSuppressions.Phases)
+                suppressedPhaseShift.AddPhase(pair.Key, pair.Value.Flags, pair.Value.AreaConditions, pair.Value.References);
 
             foreach (var pair in newSuppressions.VisibleMapIds)
                 suppressedPhaseShift.AddVisibleMapId(pair.Key, pair.Value.VisibleMapInfo, pair.Value.References);
@@ -389,8 +392,8 @@ namespace Game
             phaseShiftChange.Phaseshift.PhaseShiftFlags = (uint)phaseShift.Flags;
             phaseShiftChange.Phaseshift.PersonalGUID = phaseShift.PersonalGuid;
 
-            foreach (var phaseRef in phaseShift.Phases)
-                phaseShiftChange.Phaseshift.Phases.Add(new PhaseShiftDataPhase((uint)phaseRef.Flags, phaseRef.Id));
+            foreach (var pair in phaseShift.Phases)
+                phaseShiftChange.Phaseshift.Phases.Add(new PhaseShiftDataPhase((uint)pair.Value.Flags, pair.Key));
 
             foreach (var visibleMapId in phaseShift.VisibleMapIds)
                 phaseShiftChange.VisibleMapIDs.Add((ushort)visibleMapId.Key);
@@ -411,8 +414,8 @@ namespace Game
             partyMemberPhases.PhaseShiftFlags = (int)phaseShift.Flags;
             partyMemberPhases.PersonalGUID = phaseShift.PersonalGuid;
 
-            foreach (var phase in phaseShift.Phases)
-                partyMemberPhases.List.Add(new PartyMemberPhase((uint)phase.Flags, phase.Id));
+            foreach (var pair in phaseShift.Phases)
+                partyMemberPhases.List.Add(new PartyMemberPhase((uint)pair.Value.Flags, pair.Key));
         }
 
         public static void InitDbPhaseShift(PhaseShift phaseShift, PhaseUseFlagsValues phaseUseFlags, uint phaseId, uint phaseGroupId)
@@ -512,12 +515,12 @@ namespace Game
                 StringBuilder phases = new StringBuilder();
                 string cosmetic = Global.ObjectMgr.GetCypherString(CypherStrings.PhaseFlagCosmetic, chat.GetSessionDbcLocale());
                 string personal = Global.ObjectMgr.GetCypherString(CypherStrings.PhaseFlagPersonal, chat.GetSessionDbcLocale());
-                foreach (PhaseRef phase in phaseShift.Phases)
+                foreach (var pair in phaseShift.Phases)
                 {
-                    phases.Append(phase.Id);
-                    if (phase.Flags.HasFlag(PhaseFlags.Cosmetic))
+                    phases.Append(pair.Key);
+                    if (pair.Value.Flags.HasFlag(PhaseFlags.Cosmetic))
                         phases.Append(' ' + '(' + cosmetic + ')');
-                    if (phase.Flags.HasFlag(PhaseFlags.Personal))
+                    if (pair.Value.Flags.HasFlag(PhaseFlags.Personal))
                         phases.Append(' ' + '(' + personal + ')');
                     phases.Append(", ");
                 }
@@ -547,8 +550,8 @@ namespace Game
         public static string FormatPhases(PhaseShift phaseShift)
         {
             StringBuilder phases = new StringBuilder();
-            foreach (var phase in phaseShift.Phases)
-                phases.Append(phase.Id + ',');
+            foreach (var phaseId in phaseShift.Phases.Keys)
+                phases.Append(phaseId + ',');
 
             return phases.ToString();
         }

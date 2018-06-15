@@ -200,7 +200,7 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.HeraldVolazj
                         return;
                     else
                     {
-                        nextPhase = visage.GetPhaseShift().GetPhases().First().Id;
+                        nextPhase = visage.GetPhaseShift().GetPhases().First().Key;
                         break;
                     }
                 }
