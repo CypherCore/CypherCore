@@ -30,7 +30,6 @@ using Game.Scenarios;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 
@@ -93,7 +92,7 @@ namespace Game.Maps
             for (var i = 0; i < i_worldObjects.Count; ++i)
             {
                 WorldObject obj = i_worldObjects[i];
-                Contract.Assert(obj.IsWorldObject());
+                Cypher.Assert(obj.IsWorldObject());
                 obj.RemoveFromWorld();
                 obj.ResetMap();
             }
@@ -334,7 +333,7 @@ namespace Game.Maps
 
             Log.outDebug(LogFilter.Maps, "Switch object {0} from grid[{1}, {2}] {3}", obj.GetGUID(), cell.GetGridX(), cell.GetGridY(), on);
             Grid ngrid = getGrid(cell.GetGridX(), cell.GetGridY());
-            Contract.Assert(ngrid != null);
+            Cypher.Assert(ngrid != null);
 
             RemoveFromGrid(obj, cell);
 
@@ -462,7 +461,7 @@ namespace Game.Maps
             EnsureGridLoadedForActiveObject(cell, player);
             AddToGrid(player, cell);
 
-            Contract.Assert(player.GetMap() == this);
+            Cypher.Assert(player.GetMap() == this);
             player.SetMap(this);
             player.AddToWorld();
 
@@ -986,7 +985,7 @@ namespace Game.Maps
             Cell integrity_check = new Cell(dynObj.GetPositionX(), dynObj.GetPositionY());
             Cell old_cell = dynObj.GetCurrentCell();
 
-            Contract.Assert(integrity_check == old_cell);
+            Cypher.Assert(integrity_check == old_cell);
 
             Cell new_cell = new Cell(x, y);
 
@@ -1013,7 +1012,7 @@ namespace Game.Maps
             old_cell = dynObj.GetCurrentCell();
             integrity_check = new Cell(dynObj.GetPositionX(), dynObj.GetPositionY());
 
-            Contract.Assert(integrity_check == old_cell);
+            Cypher.Assert(integrity_check == old_cell);
         }
 
         public void AreaTriggerRelocation(AreaTrigger at, float x, float y, float z, float orientation)
@@ -1021,7 +1020,7 @@ namespace Game.Maps
             Cell integrity_check = new Cell(at.GetPositionX(), at.GetPositionY());
             Cell old_cell = at.GetCurrentCell();
 
-            Contract.Assert(integrity_check == old_cell);
+            Cypher.Assert(integrity_check == old_cell);
             Cell new_cell = new Cell(x, y);
 
             if (getGrid(new_cell.GetGridX(), new_cell.GetGridY()) == null)
@@ -1045,7 +1044,7 @@ namespace Game.Maps
 
             old_cell = at.GetCurrentCell();
             integrity_check = new Cell(at.GetPositionX(), at.GetPositionY());
-            Contract.Assert(integrity_check == old_cell);
+            Cypher.Assert(integrity_check == old_cell);
         }
 
         void AddCreatureToMoveList(Creature c, float x, float y, float z, float ang)
@@ -1595,7 +1594,7 @@ namespace Game.Maps
                 grid.VisitAllGrids(visitor);
             }
 
-            Contract.Assert(i_objectsToRemove.Empty());
+            Cypher.Assert(i_objectsToRemove.Empty());
             setGrid(null, x, y);
 
             uint gx = (MapConst.MaxGrids - 1) - x;
@@ -2221,7 +2220,7 @@ namespace Game.Maps
             while (!_updateObjects.Empty())
             {
                 WorldObject obj = _updateObjects[0];
-                Contract.Assert(obj.IsInWorld);
+                Cypher.Assert(obj.IsInWorld);
                 _updateObjects.RemoveAt(0);
                 obj.BuildUpdate(update_players);
             }
@@ -2265,7 +2264,7 @@ namespace Game.Maps
 
         public void AddObjectToRemoveList(WorldObject obj)
         {
-            Contract.Assert(obj.GetMapId() == GetId() && obj.GetInstanceId() == GetInstanceId());
+            Cypher.Assert(obj.GetMapId() == GetId() && obj.GetInstanceId() == GetInstanceId());
 
             obj.CleanupsBeforeDelete(false); // remove or simplify at least cross referenced links
 
@@ -2274,7 +2273,7 @@ namespace Game.Maps
 
         public void AddObjectToSwitchList(WorldObject obj, bool on)
         {
-            Contract.Assert(obj.GetMapId() == GetId() && obj.GetInstanceId() == GetInstanceId());
+            Cypher.Assert(obj.GetMapId() == GetId() && obj.GetInstanceId() == GetInstanceId());
             // i_objectsToSwitch is iterated only in Map::RemoveAllObjectsInRemoveList() and it uses
             // the contained objects only if GetTypeId() == TYPEID_UNIT , so we can return in all other cases
             if (!obj.IsTypeId(TypeId.Unit) && !obj.IsTypeId(TypeId.GameObject))
@@ -2285,7 +2284,7 @@ namespace Game.Maps
             else if (i_objectsToSwitch[obj] != on)
                 i_objectsToSwitch.Remove(obj);
             else
-                Contract.Assert(false);
+                Cypher.Assert(false);
         }
 
         void RemoveAllObjectsInRemoveList()
@@ -2678,7 +2677,7 @@ namespace Game.Maps
 
         void RemoveCorpse(Corpse corpse)
         {
-            Contract.Assert(corpse);
+            Cypher.Assert(corpse);
 
             corpse.DestroyForNearbyPlayers();
             if (corpse.GetCurrentCell() != null)
@@ -3368,7 +3367,7 @@ namespace Game.Maps
 
         public ulong GenerateLowGuid(HighGuid high)
         {
-            //Contract.Assert(!ObjectGuid.IsMapSpecific(high), "Only map specific guid can be generated in Map context");
+            //Cypher.Assert(!ObjectGuid.IsMapSpecific(high), "Only map specific guid can be generated in Map context");
 
             return GetGuidSequenceGenerator(high).Generate();
         }
@@ -4402,7 +4401,7 @@ namespace Game.Maps
             if (player.GetMap() == this)
             {
                 Log.outError(LogFilter.Maps, "InstanceMap:CannotEnter - player {0} ({1}) already in map {2}, {3}, {4}!", player.GetName(), player.GetGUID().ToString(), GetId(), GetInstanceId(), GetSpawnMode());
-                Contract.Assert(false);
+                Cypher.Assert(false);
                 return EnterState.CannotEnterAlreadyInMap;
             }
 
@@ -4456,7 +4455,7 @@ namespace Game.Maps
                         mapSave = Global.InstanceSaveMgr.AddInstanceSave(GetId(), GetInstanceId(), GetSpawnMode(), 0, 0, true);
                     }
 
-                    Contract.Assert(mapSave != null);
+                    Cypher.Assert(mapSave != null);
 
                     // check for existing instance binds
                     InstanceBind playerBind = player.GetBoundInstance(GetId(), GetSpawnMode());
@@ -4497,7 +4496,7 @@ namespace Game.Maps
                                         GetMapName(), groupBind.save.GetMapId(), groupBind.save.GetInstanceId(),
                                         groupBind.save.GetDifficultyID(), groupBind.save.GetPlayerCount(),
                                         groupBind.save.GetGroupCount(), groupBind.save.CanReset());
-                                Contract.Assert(false);
+                                Cypher.Assert(false);
                                 return false;
                             }
                             // bind to the group or keep using the group save
@@ -4544,7 +4543,7 @@ namespace Game.Maps
                                 player.BindToInstance(mapSave, false);
                             else
                                 // cannot jump to a different instance without resetting it
-                                Contract.Assert(playerBind.save == mapSave);
+                                Cypher.Assert(playerBind.save == mapSave);
                         }
                     }
                 }
@@ -4753,7 +4752,7 @@ namespace Game.Maps
 
         public override void UnloadAll()
         {
-            Contract.Assert(!HavePlayers());
+            Cypher.Assert(!HavePlayers());
 
             if (m_resetAfterUnload)
             {
@@ -4849,7 +4848,7 @@ namespace Game.Maps
             if (player.GetMap() == this)
             {
                 Log.outError(LogFilter.Maps, "BGMap:CannotEnter - player {0} is already in map!", player.GetGUID().ToString());
-                Contract.Assert(false);
+                Cypher.Assert(false);
                 return EnterState.CannotEnterAlreadyInMap;
             }
 

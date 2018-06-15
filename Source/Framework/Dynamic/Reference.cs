@@ -16,7 +16,6 @@
  */
 
 using Framework.Collections;
-using System.Diagnostics.Contracts;
 
 namespace Framework.Dynamic
 {
@@ -42,7 +41,7 @@ namespace Framework.Dynamic
         // Create new link
         public void link(TO toObj, FROM fromObj)
         {
-            Contract.Assert(fromObj != null);                                // fromObj MUST not be NULL
+            Cypher.Assert(fromObj != null);                                // fromObj MUST not be NULL
             if (isValid())
                 unlink();
             if (toObj != null)

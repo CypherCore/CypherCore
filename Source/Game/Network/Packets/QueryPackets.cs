@@ -23,7 +23,6 @@ using Framework.IO;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 namespace Game.Network.Packets
 {
@@ -621,7 +620,7 @@ namespace Game.Network.Packets
 
             if (player)
             {
-                Contract.Assert(player.GetGUID() == guid);
+                Cypher.Assert(player.GetGUID() == guid);
 
                 AccountID = player.GetSession().GetAccountGUID();
                 BnetAccountID = player.GetSession().GetBattlenetAccountGUID();

@@ -21,7 +21,6 @@ using Game.DataStorage;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game.Garrisons
@@ -173,7 +172,7 @@ namespace Game.Garrisons
         //todo check this method, might be slow.....
         public List<GarrAbilityRecord> RollFollowerAbilities(uint garrFollowerId, GarrFollowerRecord follower, uint quality, uint faction, bool initial)
         {
-            Contract.Assert(faction< 2);
+            Cypher.Assert(faction< 2);
 
             bool hasForcedExclusiveTrait = false;
             List<GarrAbilityRecord> result = new List<GarrAbilityRecord>();

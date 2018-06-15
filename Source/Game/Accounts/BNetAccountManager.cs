@@ -17,7 +17,6 @@
 
 using Framework.Database;
 using System;
-using System.Diagnostics.Contracts;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -46,7 +45,7 @@ namespace Game
             DB.Login.DirectExecute(stmt);
 
             uint newAccountId = GetId(email);
-            Contract.Assert(newAccountId != 0);
+            Cypher.Assert(newAccountId != 0);
 
             if (withGameAccount)
             {

@@ -27,7 +27,6 @@ using Game.Network;
 using Game.Network.Packets;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game.PvP
@@ -297,9 +296,9 @@ namespace Game.PvP
         public void SetMapFromZone(uint zone)
         {
             AreaTableRecord areaTable = CliDB.AreaTableStorage.LookupByKey(zone);
-            Contract.Assert(areaTable != null);
+            Cypher.Assert(areaTable != null);
             Map map = Global.MapMgr.CreateBaseMap(areaTable.ContinentID);
-            Contract.Assert(!map.Instanceable());
+            Cypher.Assert(!map.Instanceable());
             m_map = map;
         }
 

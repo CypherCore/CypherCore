@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.Diagnostics.Contracts;
 using System.Text.RegularExpressions;
 
 namespace Framework.IO
@@ -47,7 +46,6 @@ namespace Framework.IO
             if (!MoveNext(delimiters))
                 return "";
 
-            Contract.Assume(Current != null);
             return Current;
         }
 

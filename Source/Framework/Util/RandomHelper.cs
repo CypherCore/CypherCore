@@ -15,7 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 using System;
-using System.Diagnostics.Contracts;
 
 public class RandomHelper
 {
@@ -70,7 +69,7 @@ public class RandomHelper
     }
     public static float FRand(float min, float max)
     {
-        Contract.Assert(max >= min);
+        Cypher.Assert(max >= min);
         return (float)(rand.NextDouble() * (max - min) + min);
     }
 

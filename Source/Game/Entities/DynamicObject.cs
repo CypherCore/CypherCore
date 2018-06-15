@@ -17,7 +17,6 @@
 
 using Framework.Constants;
 using Game.Spells;
-using System.Diagnostics.Contracts;
 
 namespace Game.Entities
 {
@@ -36,9 +35,9 @@ namespace Game.Entities
         public override void Dispose()
         {
             // make sure all references were properly removed
-            Contract.Assert(_aura == null);
-            Contract.Assert(!_caster);
-            Contract.Assert(!_isViewpoint);
+            Cypher.Assert(_aura == null);
+            Cypher.Assert(!_caster);
+            Cypher.Assert(!_isViewpoint);
             _removedAura = null;
 
             base.Dispose();
@@ -129,8 +128,8 @@ namespace Game.Entities
         public override void Update(uint diff)
         {
             // caster has to be always available and in the same map
-            Contract.Assert(_caster != null);
-            Contract.Assert(_caster.GetMap() == GetMap());
+            Cypher.Assert(_caster != null);
+            Cypher.Assert(_caster.GetMap() == GetMap());
 
             bool expired = false;
 
@@ -189,13 +188,13 @@ namespace Game.Entities
 
         public void SetAura(Aura aura)
         {
-            Contract.Assert(_aura == null && aura != null);
+            Cypher.Assert(_aura == null && aura != null);
             _aura = aura;
         }
 
         void RemoveAura()
         {
-            Contract.Assert(_aura != null && _removedAura == null);
+            Cypher.Assert(_aura != null && _removedAura == null);
             _removedAura = _aura;
             _aura = null;
             if (!_removedAura.IsRemoved())
@@ -224,16 +223,16 @@ namespace Game.Entities
 
         void BindToCaster()
         {
-            Contract.Assert(_caster == null);
+            Cypher.Assert(_caster == null);
             _caster = Global.ObjAccessor.GetUnit(this, GetCasterGUID());
-            Contract.Assert(_caster != null);
-            Contract.Assert(_caster.GetMap() == GetMap());
+            Cypher.Assert(_caster != null);
+            Cypher.Assert(_caster.GetMap() == GetMap());
             _caster._RegisterDynObject(this);
         }
 
         void UnbindFromCaster()
         {
-            Contract.Assert(_caster != null);
+            Cypher.Assert(_caster != null);
             _caster._UnregisterDynObject(this);
             _caster = null;
         }

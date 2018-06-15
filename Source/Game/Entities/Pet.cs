@@ -23,7 +23,6 @@ using Game.Network.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 
@@ -39,7 +38,7 @@ namespace Game.Entities
         {
             m_petType = type;
 
-            Contract.Assert(GetOwner().IsTypeId(TypeId.Player));
+            Cypher.Assert(GetOwner().IsTypeId(TypeId.Player));
 
             m_unitTypeMask |= UnitTypeMask.Pet;
             if (type == PetType.Hunter)
@@ -663,7 +662,7 @@ namespace Game.Entities
 
         public bool CreateBaseAtCreature(Creature creature)
         {
-            Contract.Assert(creature);
+            Cypher.Assert(creature);
 
             if (!CreateBaseAtTamed(creature.GetCreatureTemplate(), creature.GetMap()))
                 return false;
@@ -1336,7 +1335,7 @@ namespace Game.Entities
 
         public bool Create(ulong guidlow, Map map, uint Entry)
         {
-            Contract.Assert(map);
+            Cypher.Assert(map);
             SetMap(map);
 
             _Create(ObjectGuid.Create(HighGuid.Pet, map.GetId(), Entry, guidlow));

@@ -207,7 +207,7 @@ public static class MathFunctions
                 return val1 <= val2;
             default:
                 // incorrect parameter
-                //Contract.Assert(false);
+                Cypher.Assert(false);
                 return false;
         }
 
@@ -228,7 +228,7 @@ public static class MathFunctions
                 return val1 <= val2;
             default:
                 // incorrect parameter
-                //Contract.Assert(false);
+                Cypher.Assert(false);
                 return false;
         }
     }

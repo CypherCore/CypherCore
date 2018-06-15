@@ -25,7 +25,6 @@ using Game.Network;
 using Game.Network.Packets;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game.Guilds
@@ -2087,7 +2086,7 @@ namespace Game.Guilds
 
         void _SendBankContentUpdate(MoveItemData pSrc, MoveItemData pDest)
         {
-            Contract.Assert(pSrc.IsBank() || pDest.IsBank());
+            Cypher.Assert(pSrc.IsBank() || pDest.IsBank());
 
             byte tabId = 0;
             List<byte> slots = new List<byte>();
@@ -2249,7 +2248,7 @@ namespace Game.Guilds
         void SendGuildRanksUpdate(ObjectGuid setterGuid, ObjectGuid targetGuid, uint rank)
         {
             Member member = GetMember(targetGuid);
-            Contract.Assert(member != null);
+            Cypher.Assert(member != null);
 
             GuildSendRankChange rankChange = new GuildSendRankChange();
             rankChange.Officer = setterGuid;
@@ -3468,7 +3467,7 @@ namespace Game.Guilds
 
             public virtual bool CheckItem(ref uint splitedAmount)
             {
-                Contract.Assert(m_pItem != null);
+                Cypher.Assert(m_pItem != null);
                 if (splitedAmount > m_pItem.GetCount())
                     return false;
                 if (splitedAmount == m_pItem.GetCount())
@@ -3487,7 +3486,7 @@ namespace Game.Guilds
 
             public bool CloneItem(uint count)
             {
-                Contract.Assert(m_pItem != null);
+                Cypher.Assert(m_pItem != null);
                 m_pClonedItem = m_pItem.CloneItem(count);
                 if (m_pClonedItem == null)
                 {
@@ -3499,7 +3498,7 @@ namespace Game.Guilds
 
             public virtual void LogAction(MoveItemData pFrom)
             {
-                Contract.Assert(pFrom.GetItem() != null);
+                Cypher.Assert(pFrom.GetItem() != null);
 
                 Global.ScriptMgr.OnGuildItemMove(m_pGuild, m_pPlayer, pFrom.GetItem(),
                      pFrom.IsBank(), pFrom.GetContainer(), pFrom.GetSlotId(),
@@ -3588,7 +3587,7 @@ namespace Game.Guilds
 
             public override Item StoreItem(SQLTransaction trans, Item pItem)
             {
-                Contract.Assert(pItem != null);
+                Cypher.Assert(pItem != null);
                 m_pPlayer.MoveItemToInventory(m_vec, pItem, true);
                 m_pPlayer.SaveInventoryAndGoldToDB(trans);
                 return pItem;
@@ -3596,7 +3595,7 @@ namespace Game.Guilds
 
             public override void LogBankEvent(SQLTransaction trans, MoveItemData pFrom, uint count)
             {
-                Contract.Assert(pFrom != null);
+                Cypher.Assert(pFrom != null);
                 // Bank . Char
                 m_pGuild._LogBankEvent(trans, GuildBankEventLogTypes.WithdrawItem, pFrom.GetContainer(), m_pPlayer.GetGUID().GetCounter(),
                     pFrom.GetItem().GetEntry(), (ushort)count);
@@ -3622,7 +3621,7 @@ namespace Game.Guilds
             }
             public override bool HasStoreRights(MoveItemData pOther)
             {
-                Contract.Assert(pOther != null);
+                Cypher.Assert(pOther != null);
                 // Do not check rights if item is being swapped within the same bank tab
                 if (pOther.IsBank() && pOther.GetContainer() == m_container)
                     return true;
@@ -3631,7 +3630,7 @@ namespace Game.Guilds
 
             public override bool HasWithdrawRights(MoveItemData pOther)
             {
-                Contract.Assert(pOther != null);
+                Cypher.Assert(pOther != null);
                 // Do not check rights if item is being swapped within the same bank tab
                 if (pOther.IsBank() && pOther.GetContainer() == m_container)
                     return true;
@@ -3646,7 +3645,7 @@ namespace Game.Guilds
 
             public override void RemoveItem(SQLTransaction trans, MoveItemData pOther, uint splitedAmount = 0)
             {
-                Contract.Assert(m_pItem != null);
+                Cypher.Assert(m_pItem != null);
                 if (splitedAmount != 0)
                 {
                     m_pItem.SetCount(m_pItem.GetCount() - splitedAmount);
@@ -3684,7 +3683,7 @@ namespace Game.Guilds
 
             public override void LogBankEvent(SQLTransaction trans, MoveItemData pFrom, uint count)
             {
-               Contract.Assert(pFrom.GetItem() != null);
+               Cypher.Assert(pFrom.GetItem() != null);
                 if (pFrom.IsBank())
                     // Bank . Bank
                     m_pGuild._LogBankEvent(trans, GuildBankEventLogTypes.MoveItem, pFrom.GetContainer(), m_pPlayer.GetGUID().GetCounter(),

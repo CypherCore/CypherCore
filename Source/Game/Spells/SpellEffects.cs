@@ -32,7 +32,6 @@ using Game.Movement;
 using Game.Network.Packets;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game.Spells
@@ -770,7 +769,7 @@ namespace Game.Spells
             if (m_spellAura == null || unitTarget == null)
                 return;
 
-            Contract.Assert(unitTarget == m_spellAura.GetOwner());
+            Cypher.Assert(unitTarget == m_spellAura.GetOwner());
             m_spellAura._ApplyEffectForTargets(effIndex);
         }
 
@@ -787,7 +786,7 @@ namespace Game.Spells
 
             if (m_spellAura == null || unitTarget == null)
                 return;
-            Contract.Assert(unitTarget == m_spellAura.GetOwner());
+            Cypher.Assert(unitTarget == m_spellAura.GetOwner());
             m_spellAura._ApplyEffectForTargets(effIndex);
         }
 
@@ -1253,7 +1252,7 @@ namespace Game.Spells
                     return;
             }
 
-            Contract.Assert(m_spellAura.GetDynobjOwner());
+            Cypher.Assert(m_spellAura.GetDynobjOwner());
             m_spellAura._ApplyEffectForTargets(effIndex);
         }
 
@@ -2436,7 +2435,7 @@ namespace Game.Spells
                     if (OldSummon.IsDead())
                         return;
 
-                    Contract.Assert(OldSummon.GetMap() == owner.GetMap());
+                    Cypher.Assert(OldSummon.GetMap() == owner.GetMap());
 
                     float px, py, pz;
                     owner.GetClosePoint(out px, out py, out pz, OldSummon.GetObjectSize());

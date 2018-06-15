@@ -22,6 +22,7 @@ using Game;
 using Game.Chat;
 using Game.Network;
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
 
@@ -39,7 +40,7 @@ namespace WorldServer
 
             Console.CancelKeyPress += (o, e) => Global.WorldMgr.StopNow(ShutdownExitCode.Shutdown);
 
-            if (!ConfigMgr.Load(System.Diagnostics.Process.GetCurrentProcess().ProcessName + ".conf"))
+            if (!ConfigMgr.Load(Process.GetCurrentProcess().ProcessName + ".conf"))
                 ExitNow();
 
             if (!StartDB())

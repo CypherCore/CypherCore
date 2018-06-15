@@ -20,7 +20,6 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Network;
 using Game.Network.Packets;
-using System.Diagnostics.Contracts;
 
 namespace Game
 {
@@ -185,7 +184,7 @@ namespace Game
                 }
 
                 VehicleSeatRecord seat = vehicle.GetSeatForPassenger(unit);
-                Contract.Assert(seat != null);
+                Cypher.Assert(seat != null);
                 if (seat.IsEjectable())
                     unit.ExitVehicle();
                 else

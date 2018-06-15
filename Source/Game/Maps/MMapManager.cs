@@ -19,7 +19,6 @@ using Framework.Constants;
 using Game.DataStorage;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -116,7 +115,7 @@ namespace Game
 
             // get this mmap data
             MMapData mmap = loadedMMaps[mapId];
-            Contract.Assert(mmap.navMesh != null);
+            Cypher.Assert(mmap.navMesh != null);
 
             // check if we already have this tile loaded
             uint packedGridPos = packTileID(x, y);
@@ -247,7 +246,7 @@ namespace Game
                 // if the grid is later reloaded, dtNavMesh.addTile will return error but no extra memory is used
                 // we cannot recover from this error - assert out
                 Log.outError(LogFilter.Maps, "MMAP:unloadMap: Could not unload {0:D4}{1:D2}{2:D2}.mmtile from navmesh", mapId, x, y);
-                Contract.Assert(false);
+                Cypher.Assert(false);
             }
             else
             {

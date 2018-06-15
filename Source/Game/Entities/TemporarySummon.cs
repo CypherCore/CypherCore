@@ -18,8 +18,8 @@
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.DataStorage;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 namespace Game.Entities
 {
@@ -175,7 +175,7 @@ namespace Game.Entities
 
         public virtual void InitStats(uint duration)
         {
-            Contract.Assert(!IsPet());
+            Cypher.Assert(!IsPet());
 
             m_timer = duration;
             m_lifetime = duration;
@@ -250,11 +250,11 @@ namespace Game.Entities
                 return;
             }
 
-            Contract.Assert(!IsPet());
+            Cypher.Assert(!IsPet());
             if (IsPet())
             {
                 ToPet().Remove(PetSaveMode.NotInSlot);
-                Contract.Assert(!IsInWorld);
+                Cypher.Assert(!IsInWorld);
                 return;
             }
 
@@ -313,9 +313,11 @@ namespace Game.Entities
             : base(properties, owner, isWorldObject)
         {
             m_owner = owner;
-            Contract.Assert(m_owner);
+            Cypher.Assert(m_owner);
             m_unitTypeMask |= UnitTypeMask.Minion;
             m_followAngle = SharedConst.PetFollowAngle;
+            /// @todo: Find correct way
+            InitCharmInfo();
         }
 
         public override void InitStats(uint duration)
@@ -411,7 +413,7 @@ namespace Game.Entities
         public bool InitStatsForLevel(uint petlevel)
         {
             CreatureTemplate cinfo = GetCreatureTemplate();
-            Contract.Assert(cinfo != null);
+            Cypher.Assert(cinfo != null);
 
             SetLevel(petlevel);
 
@@ -966,10 +968,9 @@ namespace Game.Entities
 
     public class Puppet : Minion
     {
-        public Puppet(SummonPropertiesRecord properties, Unit owner)
-            : base(properties, owner, false)
+        public Puppet(SummonPropertiesRecord properties, Unit owner) : base(properties, owner, false)
         {
-            Contract.Assert(owner.IsTypeId(TypeId.Player));
+            Cypher.Assert(owner.IsTypeId(TypeId.Player));
             m_unitTypeMask |= UnitTypeMask.Puppet;
         }
 
@@ -985,7 +986,7 @@ namespace Game.Entities
         {
             base.InitSummon();
             if (!SetCharmedBy(GetOwner(), CharmType.Possess))
-              Contract.Assert(false);
+                Cypher.Assert(false);
         }
 
         public override void Update(uint diff)

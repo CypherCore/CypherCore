@@ -30,7 +30,6 @@ using Game.Network.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game.Entities
@@ -100,7 +99,7 @@ namespace Game.Entities
             if (owner)
             {
                 owner.RemoveGameObject(this, false);
-                Contract.Assert(GetOwnerGUID().IsEmpty());
+                Cypher.Assert(GetOwnerGUID().IsEmpty());
                 return;
             }
 
@@ -182,7 +181,7 @@ namespace Game.Entities
 
         bool Create(uint entry, Map map, Position pos, Quaternion rotation, uint animProgress, GameObjectState goState, uint artKit)
         {
-            Contract.Assert(map);
+            Cypher.Assert(map);
             SetMap(map);
 
             Relocate(pos);
@@ -2143,7 +2142,7 @@ namespace Game.Entities
         public void SetDestructibleState(GameObjectDestructibleState state, Player eventInvoker = null, bool setHealth = false)
         {
             // the user calling this must know he is already operating on destructible gameobject
-            Contract.Assert(GetGoType() == GameObjectTypes.DestructibleBuilding);
+            Cypher.Assert(GetGoType() == GameObjectTypes.DestructibleBuilding);
 
             switch (state)
             {
@@ -2278,7 +2277,7 @@ namespace Game.Entities
 
         public virtual uint GetTransportPeriod()
         {
-            Contract.Assert(GetGoInfo().type == GameObjectTypes.Transport);
+            Cypher.Assert(GetGoInfo().type == GameObjectTypes.Transport);
             if (m_goValue.Transport.AnimationInfo.Path != null)
                 return m_goValue.Transport.AnimationInfo.TotalTime;
 
@@ -2290,8 +2289,8 @@ namespace Game.Entities
             if (GetGoState() == state)
                 return;
 
-            Contract.Assert(GetGoInfo().type == GameObjectTypes.Transport);
-            Contract.Assert(state >= GameObjectState.TransportActive);
+            Cypher.Assert(GetGoInfo().type == GameObjectTypes.Transport);
+            Cypher.Assert(state >= GameObjectState.TransportActive);
             if (state == GameObjectState.TransportActive)
             {
                 m_goValue.Transport.StateUpdateTimer = 0;
@@ -2302,7 +2301,7 @@ namespace Game.Entities
             }
             else
             {
-                Contract.Assert(stopFrame < m_goValue.Transport.StopFrames.Count);
+                Cypher.Assert(stopFrame < m_goValue.Transport.StopFrames.Count);
                 m_goValue.Transport.PathProgress = Time.GetMSTime() + m_goValue.Transport.StopFrames[(int)stopFrame];
                 SetGoState((GameObjectState)((int)GameObjectState.TransportStopped + stopFrame));
             }
@@ -2631,7 +2630,7 @@ namespace Game.Entities
             // Owner already found and different than expected owner - remove object from old owner
             if (!owner.IsEmpty() && !GetOwnerGUID().IsEmpty() && GetOwnerGUID() != owner)
             {
-                Contract.Assert(false);
+                Cypher.Assert(false);
             }
             m_spawnedByDefault = false;                     // all object with owner is despawned after delay
             SetGuidValue(GameObjectFields.CreatedBy, owner);

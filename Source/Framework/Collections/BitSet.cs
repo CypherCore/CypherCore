@@ -15,7 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System.Diagnostics.Contracts;
 
 namespace System.Collections
 {
@@ -27,7 +26,6 @@ namespace System.Collections
             {
                 throw new ArgumentOutOfRangeException("length");
             }
-            Contract.EndContractBlock();
 
             _mArray = new uint[GetArrayLength(length, BitsPerInt32)];
             _mLength = length;
@@ -47,7 +45,7 @@ namespace System.Collections
             {
                 throw new ArgumentNullException("values");
             }
-            Contract.EndContractBlock();
+
             // this value is chosen to prevent overflow when computing m_length
             if (values.Length > UInt32.MaxValue / BitsPerInt32)
             {
@@ -68,7 +66,6 @@ namespace System.Collections
             {
                 throw new ArgumentNullException("bits");
             }
-            Contract.EndContractBlock();
 
             int arrayLength = GetArrayLength(bits._mLength, BitsPerInt32);
             _mArray = new uint[arrayLength];
@@ -97,7 +94,6 @@ namespace System.Collections
             {
                 throw new ArgumentOutOfRangeException("index");
             }
-            Contract.EndContractBlock();
 
             return (Convert.ToInt64(_mArray[index / 32]) & (1 << (index % 32))) != 0;
         }
@@ -108,7 +104,6 @@ namespace System.Collections
             {
                 throw new ArgumentOutOfRangeException("index");
             }
-            Contract.EndContractBlock();
 
             if (value)
             {
@@ -140,7 +135,6 @@ namespace System.Collections
                 throw new ArgumentNullException("value");
             if (Length != value.Length)
                 throw new ArgumentException();
-            Contract.EndContractBlock();
 
             int ints = GetArrayLength(_mLength, BitsPerInt32);
             for (int i = 0; i < ints; i++)
@@ -158,7 +152,6 @@ namespace System.Collections
                 throw new ArgumentNullException("value");
             if (Length != value.Length)
                 throw new ArgumentException();
-            Contract.EndContractBlock();
 
             int ints = GetArrayLength(_mLength, BitsPerInt32);
             for (int i = 0; i < ints; i++)
@@ -176,7 +169,6 @@ namespace System.Collections
                 throw new ArgumentNullException("value");
             if (Length != value.Length)
                 throw new ArgumentException();
-            Contract.EndContractBlock();
 
             int ints = GetArrayLength(_mLength, BitsPerInt32);
             for (int i = 0; i < ints; i++)
@@ -204,7 +196,6 @@ namespace System.Collections
         {
             get
             {
-                Contract.Ensures(Contract.Result<int>() >= 0);
                 return _mLength;
             }
             set
@@ -213,7 +204,6 @@ namespace System.Collections
                 {
                     throw new ArgumentOutOfRangeException("value");
                 }
-                Contract.EndContractBlock();
 
                 int newints = GetArrayLength(value, BitsPerInt32);
                 if (newints > _mArray.Length || newints + ShrinkThreshold < _mArray.Length)
@@ -255,8 +245,6 @@ namespace System.Collections
             if (array.Rank != 1)
                 throw new ArgumentException();
 
-            Contract.EndContractBlock();
-
             if (array is uint[])
             {
                 Array.Copy(_mArray, 0, array, index, GetArrayLength(_mLength, BitsPerInt32));
@@ -288,17 +276,12 @@ namespace System.Collections
         {
             get
             {
-                Contract.Ensures(Contract.Result<int>() >= 0);
-
                 return _mLength;
             }
         }
 
         public Object Clone()
         {
-            Contract.Ensures(Contract.Result<Object>() != null);
-            Contract.Ensures(((BitArray)Contract.Result<Object>()).Length == this.Length);
-
             BitSet bitArray = new BitSet(_mArray);
             bitArray._version = _version;
             bitArray._mLength = _mLength;
@@ -345,7 +328,7 @@ namespace System.Collections
 
         private static int GetArrayLength(int n, int div)
         {
-            Contract.Assert(div > 0, "GetArrayLength: div arg must be greater than 0");
+            Cypher.Assert(div > 0, "GetArrayLength: div arg must be greater than 0");
             return n > 0 ? (((n - 1) / div) + 1) : 0;
         }
 

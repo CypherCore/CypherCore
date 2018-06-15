@@ -31,7 +31,6 @@ using Game.Spells;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game
@@ -124,7 +123,7 @@ namespace Game
 
         void AddSession_(WorldSession s)
         {
-            Contract.Assert(s != null);
+            Cypher.Assert(s != null);
 
             //NOTE - Still there is race condition in WorldSession* being used in the Sockets
 

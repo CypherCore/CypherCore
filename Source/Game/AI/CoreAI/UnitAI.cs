@@ -21,7 +21,6 @@ using Game.Entities;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game.AI
@@ -472,7 +471,7 @@ namespace Game.AI
             _caster = caster;
             _spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
 
-            Contract.Assert(_spellInfo != null);
+            Cypher.Assert(_spellInfo != null);
         }
 
         public bool Check(Unit target)

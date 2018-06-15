@@ -21,7 +21,6 @@ using Game.Groups;
 using Game.Maps;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game.Entities
@@ -60,7 +59,7 @@ namespace Game.Entities
             if (map == null)
             {
                 var entry = CliDB.MapStorage.LookupByKey(id);
-                Contract.Assert(entry != null);
+                Cypher.Assert(entry != null);
                 if (entry.ParentMapID != -1)
                 {
                     CreateBaseMap((uint)entry.ParentMapID);
@@ -73,7 +72,7 @@ namespace Game.Entities
                 lock(_mapsLock)
                     map = CreateBaseMap_i(entry);
             }
-            Contract.Assert(map != null);
+            Cypher.Assert(map != null);
             return map;
         }
 

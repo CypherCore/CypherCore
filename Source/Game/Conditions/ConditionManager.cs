@@ -25,7 +25,6 @@ using Game.Loots;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game
@@ -43,7 +42,7 @@ namespace Game
             foreach (var i in conditions)
             {
                 // no point of having not loaded conditions in list
-                Contract.Assert(i.isLoaded(), "ConditionMgr.GetSearcherTypeMaskForConditionList - not yet loaded condition found in list");
+                Cypher.Assert(i.isLoaded(), "ConditionMgr.GetSearcherTypeMaskForConditionList - not yet loaded condition found in list");
                 // group not filled yet, fill with widest mask possible
                 if (!elseGroupSearcherTypeMasks.ContainsKey(i.ElseGroup))
                     elseGroupSearcherTypeMasks[i.ElseGroup] = GridMapTypeMask.All;
@@ -54,7 +53,7 @@ namespace Game
                 if (i.ReferenceId != 0) // handle reference
                 {
                     var refe = ConditionReferenceStore.LookupByKey(i.ReferenceId);
-                    Contract.Assert(refe.Empty(), "ConditionMgr.GetSearcherTypeMaskForConditionList - incorrect reference");
+                    Cypher.Assert(refe.Empty(), "ConditionMgr.GetSearcherTypeMaskForConditionList - incorrect reference");
                     elseGroupSearcherTypeMasks[i.ElseGroup] &= GetSearcherTypeMaskForConditionList(refe);
                 }
                 else // handle normal condition
@@ -579,7 +578,7 @@ namespace Game
         {
             uint conditionEffMask = cond.SourceGroup;
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)cond.SourceEntry);
-            Contract.Assert(spellInfo != null);
+            Cypher.Assert(spellInfo != null);
             List<uint> sharedMasks = new List<uint>();
             for (byte i = 0; i < SpellConst.MaxEffects; ++i)
             {
@@ -1644,7 +1643,7 @@ namespace Game
 
         static bool PlayerConditionLogic(uint logic, bool[] results)
         {
-            Contract.Assert(results.Length < 16, "Logic array size must be equal to or less than 16");
+            Cypher.Assert(results.Length < 16, "Logic array size must be equal to or less than 16");
 
             for (var i = 0; i < results.Length; ++i)
             {

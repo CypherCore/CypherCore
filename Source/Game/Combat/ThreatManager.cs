@@ -19,7 +19,6 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Spells;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game.Combat
@@ -313,7 +312,7 @@ namespace Game.Combat
             if (threatSpell != null && threatSpell.HasAttribute(SpellAttr1.NoThreat))
                 return false;
 
-            Contract.Assert(hatingUnit.IsTypeId(TypeId.Unit));
+            Cypher.Assert(hatingUnit.IsTypeId(TypeId.Unit));
 
             return true;
         }
@@ -395,7 +394,7 @@ namespace Game.Combat
                 currentRef = threatList[i];
 
                 Unit target = currentRef.getTarget();
-                Contract.Assert(target);                                     // if the ref has status online the target must be there !
+                Cypher.Assert(target);                                     // if the ref has status online the target must be there !
 
                 // some units are prefered in comparison to others
                 if (!noPriorityTargetFound && (target.IsImmunedToDamage(attacker.GetMeleeDamageSchoolMask()) || target.HasNegativeAuraWithInterruptFlag(SpellAuraInterruptFlags.TakeDamage)))

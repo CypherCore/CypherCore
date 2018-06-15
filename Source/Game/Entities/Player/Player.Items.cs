@@ -29,7 +29,6 @@ using Game.Network.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 
@@ -122,7 +121,7 @@ namespace Game.Entities
                 {
                     List<ItemPosCount> dest = new List<ItemPosCount>();
                     InventoryResult msg = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, itemid, count);
-                    Contract.Assert(msg == InventoryResult.Ok); // Already checked before
+                    Cypher.Assert(msg == InventoryResult.Ok); // Already checked before
                     Item it = StoreNewItem(dest, itemid, true);
                     SendNewItem(it, count, true, false, true);
                 }

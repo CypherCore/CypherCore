@@ -25,7 +25,6 @@ using Game.Network;
 using Game.Network.Packets;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game.BattleFields
@@ -1078,7 +1077,7 @@ namespace Game.BattleFields
 
         public bool SetCapturePointData(GameObject capturePoint)
         {
-            Contract.Assert(capturePoint);
+            Cypher.Assert(capturePoint);
 
             Log.outError(LogFilter.Battlefield, "Creating capture point {0}", capturePoint.GetEntry());
 

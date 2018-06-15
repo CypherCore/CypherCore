@@ -20,7 +20,6 @@ using Game.Entities;
 using Game.Groups;
 using Game.Network;
 using Game.Network.Packets;
-using System.Diagnostics.Contracts;
 
 namespace Game
 {
@@ -204,7 +203,7 @@ namespace Game
                     }
 
                     // If we're about to create a group there really should be a leader present
-                    Contract.Assert(leader);
+                    Cypher.Assert(leader);
                     group.RemoveInvite(leader);
                     group.Create(leader);
                     Global.GroupMgr.AddGroup(group);
@@ -253,7 +252,7 @@ namespace Game
 
             Group grp = GetPlayer().GetGroup();
             // grp is checked already above in CanUninviteFromGroup()
-            Contract.Assert(grp);
+            Cypher.Assert(grp);
 
             if (grp.IsMember(packet.TargetGUID))
             {

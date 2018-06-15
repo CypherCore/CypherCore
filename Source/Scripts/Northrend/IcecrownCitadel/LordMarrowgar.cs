@@ -24,7 +24,6 @@ using Game.Scripting;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 namespace Scripts.Northrend.IcecrownCitadel
 {
@@ -398,11 +397,10 @@ namespace Scripts.Northrend.IcecrownCitadel
         [Script]
         class npc_bone_spike : ScriptedAI
         {
-            public npc_bone_spike(Creature creature)
-                : base(creature)
+            public npc_bone_spike(Creature creature) : base(creature)
             {
                 _hasTrappedUnit = false;
-                Contract.Assert(creature.GetVehicleKit());
+                Cypher.Assert(creature.GetVehicleKit());
 
                 SetCombatMovement(false);
             }

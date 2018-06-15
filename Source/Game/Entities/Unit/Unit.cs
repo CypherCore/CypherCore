@@ -30,7 +30,6 @@ using Game.Network.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game.Entities
@@ -139,7 +138,7 @@ namespace Game.Entities
 
             // If this is set during update SetCantProc(false) call is missing somewhere in the code
             // Having this would prevent spells from being proced, so let's crash
-            Contract.Assert(m_procDeep == 0);
+            Cypher.Assert(m_procDeep == 0);
 
             if (CanHaveThreatList() && GetThreatManager().isNeedUpdateToClient(diff))
                 SendThreatListUpdate();
@@ -811,7 +810,7 @@ namespace Game.Entities
         public void _EnterVehicle(Vehicle vehicle, sbyte seatId, AuraApplication aurApp)
         {
             // Must be called only from aura handler
-            Contract.Assert(aurApp != null);
+            Cypher.Assert(aurApp != null);
 
             if (!IsAlive() || GetVehicleKit() == vehicle || vehicle.GetBase().IsOnVehicle(this))
                 return;
@@ -840,7 +839,7 @@ namespace Game.Entities
                 }
             }
 
-            Contract.Assert(!m_vehicle);
+            Cypher.Assert(!m_vehicle);
             vehicle.AddPassenger(this, seatId);
         }
 
@@ -866,12 +865,12 @@ namespace Game.Entities
                     continue;
 
                 // Make sure there is only one ride vehicle aura on target cast by the unit changing seat
-                Contract.Assert(rideVehicleEffect == null);
+                Cypher.Assert(rideVehicleEffect == null);
                 rideVehicleEffect = eff;
             }
 
             // Unit riding a vehicle must always have control vehicle aura on target
-            Contract.Assert(rideVehicleEffect != null);
+            Cypher.Assert(rideVehicleEffect != null);
 
             rideVehicleEffect.ChangeAmount((seatId < 0 ? GetTransSeat() : seatId) + 1);
         }
@@ -1764,12 +1763,12 @@ namespace Game.Entities
         public AuraApplication _CreateAuraApplication(Aura aura, uint effMask)
         {
             // can't apply aura on unit which is going to be deleted - to not create a memory leak
-            Contract.Assert(!m_cleanupDone);
+            Cypher.Assert(!m_cleanupDone);
             // aura musn't be removed
-            Contract.Assert(!aura.IsRemoved());
+            Cypher.Assert(!aura.IsRemoved());
 
             // aura mustn't be already applied on target
-            Contract.Assert(!aura.IsAppliedOnTarget(GetGUID()), "Unit._CreateAuraApplication: aura musn't be applied on target");
+            Cypher.Assert(!aura.IsAppliedOnTarget(GetGUID()), "Unit._CreateAuraApplication: aura musn't be applied on target");
 
             SpellInfo aurSpellInfo = aura.GetSpellInfo();
             uint aurId = aurSpellInfo.Id;

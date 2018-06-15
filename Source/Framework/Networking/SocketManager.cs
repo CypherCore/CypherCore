@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.Diagnostics.Contracts;
 using System.Net.Sockets;
 
 namespace Framework.Networking
@@ -25,7 +24,7 @@ namespace Framework.Networking
     {
         public virtual bool StartNetwork(string bindIp, int port, int threadCount = 1)
         {
-            Contract.Assert(threadCount > 0);
+            Cypher.Assert(threadCount > 0);
 
             Acceptor = new AsyncAcceptor();
             if (!Acceptor.Start(bindIp, port))

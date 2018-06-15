@@ -1956,11 +1956,11 @@ namespace Game.Entities
             Dictionary<uint, MultiMap<uint, SpellXSpellVisualRecord>> visualsBySpell = new Dictionary<uint, MultiMap<uint, SpellXSpellVisualRecord>>();
             foreach (var effect in CliDB.SpellEffectStorage.Values)
             {
-                /*Contract.Assert(effect.EffectIndex < MAX_SPELL_EFFECTS, "MAX_SPELL_EFFECTS must be at least {0}", effect.EffectIndex);
-                Contract.Assert(effect.Effect < TOTAL_SPELL_EFFECTS, "TOTAL_SPELL_EFFECTS must be at least {0}", effect.Effect);
-                Contract.Assert(effect.EffectAura < TOTAL_AURAS, "TOTAL_AURAS must be at least {0}", effect.EffectAura);
-                Contract.Assert(effect.ImplicitTarget[0] < TOTAL_SPELL_TARGETS, "TOTAL_SPELL_TARGETS must be at least {0}", effect.ImplicitTarget[0]);
-                Contract.Assert(effect.ImplicitTarget[1] < TOTAL_SPELL_TARGETS, "TOTAL_SPELL_TARGETS must be at least {0}", effect.ImplicitTarget[1]);*/
+                Cypher.Assert(effect.EffectIndex < SpellConst.MaxEffects, $"MAX_SPELL_EFFECTS must be at least {effect.EffectIndex}");
+                Cypher.Assert(effect.Effect < (int)SpellEffectName.TotalSpellEffects, $"TOTAL_SPELL_EFFECTS must be at least {effect.Effect}");
+                Cypher.Assert(effect.EffectAura < (int)AuraType.Total, $"TOTAL_AURAS must be at least {effect.EffectAura}");
+                Cypher.Assert(effect.ImplicitTarget[0] < (int)Targets.TotalSpellTargets, $"TOTAL_SPELL_TARGETS must be at least {effect.ImplicitTarget[0]}");
+                Cypher.Assert(effect.ImplicitTarget[1] < (int)Targets.TotalSpellTargets, $"TOTAL_SPELL_TARGETS must be at least {effect.ImplicitTarget[1]}");
 
                 if (!effectsBySpell.ContainsKey(effect.SpellID))
                     effectsBySpell[effect.SpellID] = new Dictionary<uint, SpellEffectRecord[]>();

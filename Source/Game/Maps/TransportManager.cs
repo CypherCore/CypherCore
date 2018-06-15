@@ -23,7 +23,6 @@ using Game.Entities;
 using Game.Movement;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game.Maps
@@ -161,12 +160,12 @@ namespace Game.Maps
                 }
             }
 
-            Contract.Assert(!keyFrames.Empty());
+            Cypher.Assert(!keyFrames.Empty());
 
             if (transport.mapsUsed.Count > 1)
             {
                 foreach (var mapId in transport.mapsUsed)
-                    Contract.Assert(!CliDB.MapStorage.LookupByKey(mapId).Instanceable());
+                    Cypher.Assert(!CliDB.MapStorage.LookupByKey(mapId).Instanceable());
 
                 transport.inInstance = false;
             }

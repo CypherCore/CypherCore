@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Framework.Dynamic
@@ -622,7 +621,7 @@ namespace Framework.Dynamic
         {
             // This was adapted to TC to prevent static analysis tools from complaining.
             // If you encounter this assertion check if you repeat a TaskContext more then 1 time!
-            Contract.Assert(!_consumed, "Bad task logic, task context was consumed already!");
+            Cypher.Assert(!_consumed, "Bad task logic, task context was consumed already!");
         }
 
         /// <summary>

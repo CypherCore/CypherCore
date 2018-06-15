@@ -29,7 +29,6 @@ using Game.Network.Packets;
 using Game.Scripting;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Game.AI;
@@ -124,7 +123,7 @@ namespace Game.Spells
             }
 
             if (m_caster && m_caster.GetTypeId() == TypeId.Player)
-                Contract.Assert(m_caster.ToPlayer().m_spellModTakingSpell != this);
+                Cypher.Assert(m_caster.ToPlayer().m_spellModTakingSpell != this);
         }
 
         void InitExplicitTargets(SpellCastTargets targets)
@@ -282,8 +281,9 @@ namespace Game.Spells
                 else if (m_auraScaleMask != 0)
                 {
                     bool checkLvl = !m_UniqueTargetInfo.Empty();
-                    foreach (var ihit in m_UniqueTargetInfo)
+                    for (var i = 0; i < m_UniqueTargetInfo.Count; ++i)
                     {
+                        var ihit = m_UniqueTargetInfo[i];
                         // remove targets which did not pass min level check
                         if (m_auraScaleMask != 0 && ihit.effectMask == m_auraScaleMask)
                         {
@@ -388,7 +388,7 @@ namespace Game.Spells
                                     m_targets.SetSrc(m_caster);
                                     break;
                                 default:
-                                    Contract.Assert(false, "Spell.SelectEffectImplicitTargets: received not implemented select target reference type for TARGET_TYPE_OBJECT_SRC");
+                                    Cypher.Assert(false, "Spell.SelectEffectImplicitTargets: received not implemented select target reference type for TARGET_TYPE_OBJECT_SRC");
                                     break;
                             }
                             break;
@@ -405,7 +405,7 @@ namespace Game.Spells
                                     SelectImplicitDestDestTargets(effIndex, targetType);
                                     break;
                                 default:
-                                    Contract.Assert(false, "Spell.SelectEffectImplicitTargets: received not implemented select target reference type for TARGET_TYPE_OBJECT_DEST");
+                                    Cypher.Assert(false, "Spell.SelectEffectImplicitTargets: received not implemented select target reference type for TARGET_TYPE_OBJECT_DEST");
                                     break;
                             }
                             break;
@@ -419,7 +419,7 @@ namespace Game.Spells
                                     SelectImplicitTargetObjectTargets(effIndex, targetType);
                                     break;
                                 default:
-                                    Contract.Assert(false, "Spell.SelectEffectImplicitTargets: received not implemented select target reference type for TARGET_TYPE_OBJECT");
+                                    Cypher.Assert(false, "Spell.SelectEffectImplicitTargets: received not implemented select target reference type for TARGET_TYPE_OBJECT");
                                     break;
                             }
                             break;
@@ -429,7 +429,7 @@ namespace Game.Spells
                     Log.outDebug(LogFilter.Spells, "SPELL: target type {0}, found in spellID {1}, effect {2} is not implemented yet!", m_spellInfo.Id, effIndex, targetType.GetTarget());
                     break;
                 default:
-                    Contract.Assert(false, "Spell.SelectEffectImplicitTargets: received not implemented select target category");
+                    Cypher.Assert(false, "Spell.SelectEffectImplicitTargets: received not implemented select target category");
                     break;
             }
         }
@@ -438,7 +438,7 @@ namespace Game.Spells
         {
             if (targetType.GetReferenceType() != SpellTargetReferenceTypes.Caster)
             {
-                Contract.Assert(false, "Spell.SelectImplicitChannelTargets: received not implemented target reference type");
+                Cypher.Assert(false, "Spell.SelectImplicitChannelTargets: received not implemented target reference type");
                 return;
             }
 
@@ -498,7 +498,7 @@ namespace Game.Spells
                         break;
                     }
                 default:
-                    Contract.Assert(false, "Spell.SelectImplicitChannelTargets: received not implemented target type");
+                    Cypher.Assert(false, "Spell.SelectImplicitChannelTargets: received not implemented target type");
                     break;
             }
         }
@@ -507,7 +507,7 @@ namespace Game.Spells
         {
             if (targetType.GetReferenceType() != SpellTargetReferenceTypes.Caster)
             {
-                Contract.Assert(false, "Spell.SelectImplicitNearbyTargets: received not implemented target reference type");
+                Cypher.Assert(false, "Spell.SelectImplicitNearbyTargets: received not implemented target reference type");
                 return;
             }
 
@@ -532,7 +532,7 @@ namespace Game.Spells
                     range = m_spellInfo.GetMaxRange(m_spellInfo.IsPositive(), m_caster, this);
                     break;
                 default:
-                    Contract.Assert(false, "Spell.SelectImplicitNearbyTargets: received not implemented selection check type");
+                    Cypher.Assert(false, "Spell.SelectImplicitNearbyTargets: received not implemented selection check type");
                     break;
             }
 
@@ -629,7 +629,7 @@ namespace Game.Spells
                     m_targets.SetDst(dest);
                     break;
                 default:
-                    Contract.Assert(false, "Spell.SelectImplicitNearbyTargets: received not implemented target object type");
+                    Cypher.Assert(false, "Spell.SelectImplicitNearbyTargets: received not implemented target object type");
                     break;
             }
 
@@ -640,7 +640,7 @@ namespace Game.Spells
         {
             if (targetType.GetReferenceType() != SpellTargetReferenceTypes.Caster)
             {
-                Contract.Assert(false, "Spell.SelectImplicitConeTargets: received not implemented target reference type");
+                Cypher.Assert(false, "Spell.SelectImplicitConeTargets: received not implemented target reference type");
                 return;
             }
             List<WorldObject> targets = new List<WorldObject>();
@@ -709,7 +709,7 @@ namespace Game.Spells
                         break;
                     }
                 default:
-                    Contract.Assert(false, "Spell.SelectImplicitAreaTargets: received not implemented target reference type");
+                    Cypher.Assert(false, "Spell.SelectImplicitAreaTargets: received not implemented target reference type");
                     return;
             }
             if (referer == null)
@@ -730,7 +730,7 @@ namespace Game.Spells
                     center = referer.GetPosition();
                     break;
                 default:
-                    Contract.Assert(false, "Spell.SelectImplicitAreaTargets: received not implemented target reference type");
+                    Cypher.Assert(false, "Spell.SelectImplicitAreaTargets: received not implemented target reference type");
                     return;
             }
             List<WorldObject> targets = new List<WorldObject>();
@@ -2182,7 +2182,7 @@ namespace Game.Spells
                 if (scaleAura)
                 {
                     aurSpellInfo = m_spellInfo.GetAuraRankForLevel(unitTarget.getLevel());
-                    Contract.Assert(aurSpellInfo != null);
+                    Cypher.Assert(aurSpellInfo != null);
                     foreach (SpellEffectInfo effect in aurSpellInfo.GetEffectsForDifficulty(0))
                     {
                         if (effect == null)
@@ -3507,7 +3507,7 @@ namespace Game.Spells
                     }
                 case SpellCastResult.CantUntalent:
                     {
-                        Contract.Assert(param1.HasValue);
+                        Cypher.Assert(param1.HasValue);
                         packet.FailedArg1 = (int)param1;
                         break;
                     }
@@ -6844,7 +6844,7 @@ namespace Game.Spells
                         hookType = SpellScriptHookType.EffectHitTarget;
                         break;
                     default:
-                        Contract.Assert(false);
+                        Cypher.Assert(false);
                         return false;
                 }
                 script._PrepareScriptCall(hookType);
@@ -7528,7 +7528,7 @@ namespace Game.Spells
         public SpellValue(Difficulty difficulty, SpellInfo proto)
         {
             var effects = proto.GetEffectsForDifficulty(difficulty);
-            Contract.Assert(effects.Length <= SpellConst.MaxEffects);
+            Cypher.Assert(effects.Length <= SpellConst.MaxEffects);
             foreach (SpellEffectInfo effect in effects)
                 if (effect != null)
                     EffectBasePoints[effect.EffectIndex] = effect.BasePoints;
@@ -7795,7 +7795,7 @@ namespace Game.Spells
                             if (!m_Spell.m_targets.HasDst())
                             {
                                 ulong n_offset = m_Spell.handle_delayed(0);
-                                Contract.Assert(n_offset == m_Spell.GetDelayMoment());
+                                Cypher.Assert(n_offset == m_Spell.GetDelayMoment());
                             }
                             // re-plan the event for the delay moment
                             m_Spell.GetCaster().m_Events.AddEvent(this, e_time + m_Spell.GetDelayMoment(), false);

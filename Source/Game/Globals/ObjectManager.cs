@@ -29,7 +29,6 @@ using Game.Scripting;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Framework.Dynamic;
@@ -3017,7 +3016,7 @@ namespace Game
                     {
                         if (spellEffect != null && spellEffect.IsEffect(SpellEffectName.LearnSpell))
                         {
-                            Contract.Assert(spell.LearnedSpellId == spell.SpellId, $"Only one learned spell is currently supported - spell {spell.SpellId} already teaches {spell.LearnedSpellId} but it tried to overwrite it with {spellEffect.TriggerSpell}");
+                            Cypher.Assert(spell.LearnedSpellId == spell.SpellId, $"Only one learned spell is currently supported - spell {spell.SpellId} already teaches {spell.LearnedSpellId} but it tried to overwrite it with {spellEffect.TriggerSpell}");
                             spell.LearnedSpellId = spellEffect.TriggerSpell;
                             break;
                         }
@@ -9267,7 +9266,7 @@ namespace Game
         }
         public ObjectGuidGenerator GetGenerator(HighGuid high)
         {
-            Contract.Assert(ObjectGuid.IsGlobal(high) || ObjectGuid.IsRealmSpecific(high), "Only global guid can be generated in ObjectMgr context");
+            Cypher.Assert(ObjectGuid.IsGlobal(high) || ObjectGuid.IsRealmSpecific(high), "Only global guid can be generated in ObjectMgr context");
 
             return GetGuidSequenceGenerator(high);
         }

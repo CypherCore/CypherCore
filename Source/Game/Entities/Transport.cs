@@ -21,7 +21,6 @@ using Game.DataStorage;
 using Game.Maps;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game.Entities
@@ -72,7 +71,7 @@ namespace Game.Entities
 
         public override void Dispose()
         {
-            Contract.Assert(_passengers.Empty());
+            Cypher.Assert(_passengers.Empty());
             UnloadStaticPassengers();
             base.Dispose();
         }

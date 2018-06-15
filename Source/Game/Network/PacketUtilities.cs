@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.Diagnostics.Contracts;
 
 namespace Game.Network
 {
@@ -24,7 +23,7 @@ namespace Game.Network
     {
         public void Insert(int index, int value)
         {
-            Contract.Assert(index < 0x20);
+            Cypher.Assert(index < 0x20);
 
             _mask |= 1u << index;
             if (_contents.Length <= index)

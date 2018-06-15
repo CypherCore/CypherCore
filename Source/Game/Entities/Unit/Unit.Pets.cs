@@ -20,7 +20,6 @@ using Game.AI;
 using Game.Network.Packets;
 using Game.Spells;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game.Entities
@@ -163,7 +162,8 @@ namespace Game.Entities
 
                 minion.SetOwnerGUID(GetGUID());
 
-                m_Controlled.Add(minion);
+                if (!m_Controlled.Contains(minion))
+                    m_Controlled.Add(minion);
 
                 if (IsTypeId(TypeId.Player))
                 {
@@ -269,12 +269,12 @@ namespace Game.Entities
                         if (GetGUID() == unit.GetCharmerGUID())
                             continue;
 
-                        Contract.Assert(unit.GetOwnerGUID() == GetGUID());
+                        Cypher.Assert(unit.GetOwnerGUID() == GetGUID());
                         if (unit.GetOwnerGUID() != GetGUID())
                         {
-                            Contract.Assert(false);
+                            Cypher.Assert(false);
                         }
-                        Contract.Assert(unit.IsTypeId(TypeId.Unit));
+                        Cypher.Assert(unit.IsTypeId(TypeId.Unit));
 
                         if (!unit.HasUnitTypeMask(UnitTypeMask.Guardian))
                             continue;
@@ -308,8 +308,8 @@ namespace Game.Entities
             if (charmer.IsTypeId(TypeId.Player))
                 charmer.RemoveAurasByType(AuraType.Mounted);
 
-            Contract.Assert(type != CharmType.Possess || charmer.IsTypeId(TypeId.Player));
-            Contract.Assert((type == CharmType.Vehicle) == IsVehicle());
+            Cypher.Assert(type != CharmType.Possess || charmer.IsTypeId(TypeId.Player));
+            Cypher.Assert((type == CharmType.Vehicle) == IsVehicle());
 
             Log.outDebug(LogFilter.Unit, "SetCharmedBy: charmer {0} (GUID {1}), charmed {2} (GUID {3}), type {4}.", charmer.GetEntry(), charmer.GetGUID().ToString(), GetEntry(), GetGUID().ToString(), type);
 
@@ -505,8 +505,8 @@ namespace Game.Entities
             if (!charmer)
                 return;
 
-            Contract.Assert(type != CharmType.Possess || charmer.IsTypeId(TypeId.Player));
-            Contract.Assert(type != CharmType.Vehicle || (IsTypeId(TypeId.Unit) && IsVehicle()));
+            Cypher.Assert(type != CharmType.Possess || charmer.IsTypeId(TypeId.Player));
+            Cypher.Assert(type != CharmType.Vehicle || (IsTypeId(TypeId.Unit) && IsVehicle()));
 
             charmer.SetCharm(this, false);
 
@@ -574,7 +574,7 @@ namespace Game.Entities
             }
         }
 
-        void RemoveAllMinionsByEntry(uint entry)
+        public void RemoveAllMinionsByEntry(uint entry)
         {
             for (var i = 0; i < m_Controlled.Count; ++i)
             {
@@ -612,7 +612,8 @@ namespace Game.Entities
                 if (_isWalkingBeforeCharm)
                     charm.SetWalk(false);
 
-                m_Controlled.Add(charm);
+                if (!m_Controlled.Contains(charm))
+                    m_Controlled.Add(charm);
             }
             else
             {

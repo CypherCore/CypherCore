@@ -23,7 +23,6 @@ using Game.Groups;
 using Game.Network.Packets;
 using Game.Scenarios;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Text;
 
 namespace Game.Maps
@@ -157,7 +156,7 @@ namespace Game.Maps
         {
             foreach (var data in objectData)
             {
-                Contract.Assert(!objectInfo.ContainsKey(data.entry));
+                Cypher.Assert(!objectInfo.ContainsKey(data.entry));
                 objectInfo[data.entry] = data.type;
             }
         }
@@ -216,7 +215,7 @@ namespace Game.Maps
 
         public BossInfo GetBossInfo(uint id)
         {
-            Contract.Assert(id < bosses.Count);
+            Cypher.Assert(id < bosses.Count);
             return bosses[id];
         }
 

@@ -27,7 +27,6 @@ using Game.Network.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 namespace Game.Entities
 {
@@ -241,7 +240,7 @@ namespace Game.Entities
                 //we should obtain map from GetMap() in 99% of cases. Special case
                 //only for quests which cast teleport spells on player
                 Map _map = IsInWorld ? GetMap() : Global.MapMgr.FindMap(GetMapId(), GetInstanceId());
-                Contract.Assert(_map != null);
+                Cypher.Assert(_map != null);
                 GameObject gameObject = _map.GetGameObject(guid);
                 if (gameObject != null)
                 {
@@ -342,7 +341,7 @@ namespace Game.Entities
             switch (guid.GetHigh())
             {
                 case HighGuid.Player:
-                    Contract.Assert(quest.HasFlag(QuestFlags.AutoComplete));
+                    Cypher.Assert(quest.HasFlag(QuestFlags.AutoComplete));
                     return Global.ObjectMgr.GetQuestTemplate(nextQuestID);
                 case HighGuid.Creature:
                 case HighGuid.Pet:
@@ -360,7 +359,7 @@ namespace Game.Entities
                         //we should obtain map from GetMap() in 99% of cases. Special case
                         //only for quests which cast teleport spells on player
                         Map _map = IsInWorld ? GetMap() : Global.MapMgr.FindMap(GetMapId(), GetInstanceId());
-                        Contract.Assert(_map != null);
+                        Cypher.Assert(_map != null);
                         GameObject gameObject = _map.GetGameObject(guid);
                         if (gameObject != null)
                             objectQR = Global.ObjectMgr.GetGOQuestRelationBounds(gameObject.GetEntry());
@@ -2156,7 +2155,7 @@ namespace Game.Entities
 
         public void KilledMonster(CreatureTemplate cInfo, ObjectGuid guid)
         {
-            Contract.Assert(cInfo != null);
+            Cypher.Assert(cInfo != null);
 
             if (cInfo.Entry != 0)
                 KilledMonsterCredit(cInfo.Entry, guid);

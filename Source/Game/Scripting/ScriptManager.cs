@@ -33,7 +33,6 @@ using Game.Spells;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -584,8 +583,8 @@ namespace Game.Scripting
         }
         public void OnGainCalculation(uint gain, Player player, Unit unit)
         {
-            Contract.Assert(player != null);
-            Contract.Assert(unit != null);
+            Cypher.Assert(player != null);
+            Cypher.Assert(unit != null);
 
             ForEach<FormulaScript>(p => p.OnGainCalculation(gain, player, unit));
         }
@@ -597,7 +596,7 @@ namespace Game.Scripting
         //MapScript
         public void OnCreateMap(Map map)
         {
-            Contract.Assert(map != null);
+            Cypher.Assert(map != null);
             var record = map.GetEntry();
 
             if (record != null && record.IsWorldMap())
@@ -611,7 +610,7 @@ namespace Game.Scripting
         }
         public void OnDestroyMap(Map map)
         {
-            Contract.Assert(map != null);
+            Cypher.Assert(map != null);
             var record = map.GetEntry();
 
             if (record != null && record.IsWorldMap())
@@ -625,8 +624,8 @@ namespace Game.Scripting
         }
         public void OnLoadGridMap(Map map, GridMap gmap, uint gx, uint gy)
         {
-            Contract.Assert(map != null);
-            Contract.Assert(gmap != null);
+            Cypher.Assert(map != null);
+            Cypher.Assert(gmap != null);
             var record = map.GetEntry();
 
             if (record != null && record.IsWorldMap())
@@ -641,8 +640,8 @@ namespace Game.Scripting
         }
         public void OnUnloadGridMap(Map map, GridMap gmap, uint gx, uint gy)
         {
-            Contract.Assert(map != null);
-            Contract.Assert(gmap != null);
+            Cypher.Assert(map != null);
+            Cypher.Assert(gmap != null);
             var record = map.GetEntry();
 
             if (record != null && record.IsWorldMap())
@@ -656,8 +655,8 @@ namespace Game.Scripting
         }
         public void OnPlayerEnterMap(Map map, Player player)
         {
-            Contract.Assert(map != null);
-            Contract.Assert(player != null);
+            Cypher.Assert(map != null);
+            Cypher.Assert(player != null);
 
             ForEach<PlayerScript>(p => p.OnMapChanged(player));
 
@@ -674,7 +673,7 @@ namespace Game.Scripting
         }
         public void OnPlayerLeaveMap(Map map, Player player)
         {
-            Contract.Assert(map != null);
+            Cypher.Assert(map != null);
             var record = map.GetEntry();
 
             if (record != null && record.IsWorldMap())
@@ -688,7 +687,7 @@ namespace Game.Scripting
         }
         public void OnMapUpdate(Map map, uint diff)
         {
-            Contract.Assert(map != null);
+            Cypher.Assert(map != null);
             var record = map.GetEntry();
 
             if (record != null && record.IsWorldMap())
@@ -704,7 +703,7 @@ namespace Game.Scripting
         //InstanceMapScript
         public InstanceScript CreateInstanceData(InstanceMap map)
         {
-            Contract.Assert(map != null);
+            Cypher.Assert(map != null);
 
             return RunScriptRet<InstanceMapScript, InstanceScript>(p => p.GetInstanceScript(map), map.GetScriptId(), null);
         }
@@ -712,30 +711,30 @@ namespace Game.Scripting
         //ItemScript
         public bool OnDummyEffect(Unit caster, uint spellId, uint effIndex, Item target)
         {
-            Contract.Assert(caster != null);
-            Contract.Assert(target != null);
+            Cypher.Assert(caster != null);
+            Cypher.Assert(target != null);
 
             return RunScriptRet<ItemScript>(p => p.OnDummyEffect(caster, spellId, effIndex, target), target.GetScriptId());
         }
         public bool OnQuestAccept(Player player, Item item, Quest quest)
         {
-            Contract.Assert(player != null);
-            Contract.Assert(item != null);
-            Contract.Assert(quest != null);
+            Cypher.Assert(player != null);
+            Cypher.Assert(item != null);
+            Cypher.Assert(quest != null);
 
             return RunScriptRet<ItemScript>(p => p.OnQuestAccept(player, item, quest), item.GetScriptId());
         }
         public bool OnItemUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
         {
-            Contract.Assert(player);
-            Contract.Assert(item);
+            Cypher.Assert(player);
+            Cypher.Assert(item);
 
             return RunScriptRet<ItemScript>(p => p.OnUse(player, item, targets, castId), item.GetScriptId());
         }
         public bool OnItemExpire(Player player, ItemTemplate proto)
         {
-            Contract.Assert(player);
-            Contract.Assert(proto != null);
+            Cypher.Assert(player);
+            Cypher.Assert(proto != null);
 
             return RunScriptRet<ItemScript>(p => p.OnExpire(player, proto), proto.ScriptId);
         }
@@ -743,76 +742,76 @@ namespace Game.Scripting
         //CreatureScript
         public bool OnDummyEffect(Unit caster, uint spellId, uint effIndex, Creature target)
         {
-            Contract.Assert(caster);
-            Contract.Assert(target);
+            Cypher.Assert(caster);
+            Cypher.Assert(target);
 
             return RunScriptRet<CreatureScript>(p => p.OnDummyEffect(caster, spellId, effIndex, target), target.GetScriptId());
         }
         public bool OnGossipHello(Player player, Creature creature)
         {
-            Contract.Assert(player);
-            Contract.Assert(creature);
+            Cypher.Assert(player);
+            Cypher.Assert(creature);
 
             return RunScriptRet<CreatureScript>(p => p.OnGossipHello(player, creature), creature.GetScriptId());
         }
         public bool OnGossipSelect(Player player, Creature creature, uint sender, uint action)
         {
-            Contract.Assert(player != null);
-            Contract.Assert(creature != null);
+            Cypher.Assert(player != null);
+            Cypher.Assert(creature != null);
 
             return RunScriptRet<CreatureScript>(p => p.OnGossipSelect(player, creature, sender, action), creature.GetScriptId());
         }
         public bool OnGossipSelectCode(Player player, Creature creature, uint sender, uint action, string code)
         {
-            Contract.Assert(player != null);
-            Contract.Assert(creature != null);
-            Contract.Assert(code != null);
+            Cypher.Assert(player != null);
+            Cypher.Assert(creature != null);
+            Cypher.Assert(code != null);
 
             return RunScriptRet<CreatureScript>(p => p.OnGossipSelectCode(player, creature, sender, action, code), creature.GetScriptId());
         }
         public bool OnQuestAccept(Player player, Creature creature, Quest quest)
         {
-            Contract.Assert(player != null);
-            Contract.Assert(creature != null);
-            Contract.Assert(quest != null);
+            Cypher.Assert(player != null);
+            Cypher.Assert(creature != null);
+            Cypher.Assert(quest != null);
 
             return RunScriptRet<CreatureScript>(p => p.OnQuestAccept(player, creature, quest), creature.GetScriptId());
         }
         public bool OnQuestSelect(Player player, Creature creature, Quest quest)
         {
-            Contract.Assert(player != null);
-            Contract.Assert(creature != null);
-            Contract.Assert(quest != null);
+            Cypher.Assert(player != null);
+            Cypher.Assert(creature != null);
+            Cypher.Assert(quest != null);
 
             return RunScriptRet<CreatureScript>(p => p.OnQuestSelect(player, creature, quest), creature.GetScriptId());
         }
         public bool OnQuestComplete(Player player, Creature creature, Quest quest)
         {
-            Contract.Assert(player != null);
-            Contract.Assert(creature != null);
-            Contract.Assert(quest != null);
+            Cypher.Assert(player != null);
+            Cypher.Assert(creature != null);
+            Cypher.Assert(quest != null);
 
             return RunScriptRet<CreatureScript>(p => p.OnQuestComplete(player, creature, quest), creature.GetScriptId());
         }
         public bool OnQuestReward(Player player, Creature creature, Quest quest, uint opt)
         {
-            Contract.Assert(player != null);
-            Contract.Assert(creature != null);
-            Contract.Assert(quest != null);
+            Cypher.Assert(player != null);
+            Cypher.Assert(creature != null);
+            Cypher.Assert(quest != null);
 
             return RunScriptRet<CreatureScript>(p => p.OnQuestReward(player, creature, quest, opt), creature.GetScriptId());
         }
         public uint GetDialogStatus(Player player, Creature creature)
         {
-            Contract.Assert(player != null);
-            Contract.Assert(creature != null);
+            Cypher.Assert(player != null);
+            Cypher.Assert(creature != null);
 
             player.PlayerTalkClass.ClearMenus();
             return RunScriptRet<CreatureScript, uint>(p => p.GetDialogStatus(player, creature), creature.GetScriptId(), (uint)QuestGiverStatus.ScriptedNoStatus);
         }
         public bool CanSpawn(ulong spawnId, uint entry, CreatureTemplate actTemplate, CreatureData cData, Map map)
         {
-            Contract.Assert(actTemplate != null);
+            Cypher.Assert(actTemplate != null);
 
             CreatureTemplate baseTemplate = Global.ObjectMgr.GetCreatureTemplate(entry);
             if (baseTemplate == null)
@@ -821,13 +820,13 @@ namespace Game.Scripting
         }
         public CreatureAI GetCreatureAI(Creature creature)
         {
-            Contract.Assert(creature != null);
+            Cypher.Assert(creature != null);
 
             return RunScriptRet<CreatureScript, CreatureAI>(p => p.GetAI(creature), creature.GetScriptId());
         }
         public void OnCreatureUpdate(Creature creature, uint diff)
         {
-            Contract.Assert(creature != null);
+            Cypher.Assert(creature != null);
 
             RunScript<CreatureScript>(p => p.OnUpdate(creature, diff), creature.GetScriptId());
         }
@@ -835,90 +834,90 @@ namespace Game.Scripting
         //GameObjectScript
         public bool OnDummyEffect(Unit caster, uint spellId, uint effIndex, GameObject target)
         {
-            Contract.Assert(caster != null);
-            Contract.Assert(target != null);
+            Cypher.Assert(caster != null);
+            Cypher.Assert(target != null);
 
             return RunScriptRet<GameObjectScript>(p => p.OnDummyEffect(caster, spellId, effIndex, target), target.GetScriptId());
         }
         public bool OnGossipHello(Player player, GameObject go)
         {
-            Contract.Assert(player != null);
-            Contract.Assert(go != null);
+            Cypher.Assert(player != null);
+            Cypher.Assert(go != null);
 
             player.PlayerTalkClass.ClearMenus();
             return RunScriptRet<GameObjectScript>(p => p.OnGossipHello(player, go), go.GetScriptId());
         }
         public bool OnGossipSelect(Player player, GameObject go, uint sender, uint action)
         {
-            Contract.Assert(player != null);
-            Contract.Assert(go != null);
+            Cypher.Assert(player != null);
+            Cypher.Assert(go != null);
 
             return RunScriptRet<GameObjectScript>(p => p.OnGossipSelect(player, go, sender, action), go.GetScriptId());
         }
         public bool OnGossipSelectCode(Player player, GameObject go, uint sender, uint action, string code)
         {
-            Contract.Assert(player != null);
-            Contract.Assert(go != null);
-            Contract.Assert(code != null);
+            Cypher.Assert(player != null);
+            Cypher.Assert(go != null);
+            Cypher.Assert(code != null);
 
             return RunScriptRet<GameObjectScript>(p => p.OnGossipSelectCode(player, go, sender, action, code), go.GetScriptId());
         }
         public bool OnQuestAccept(Player player, GameObject go, Quest quest)
         {
-            Contract.Assert(player != null);
-            Contract.Assert(go != null);
-            Contract.Assert(quest != null);
+            Cypher.Assert(player != null);
+            Cypher.Assert(go != null);
+            Cypher.Assert(quest != null);
 
             return RunScriptRet<GameObjectScript>(p => p.OnQuestAccept(player, go, quest), go.GetScriptId());
         }
         public bool OnQuestReward(Player player, GameObject go, Quest quest, uint opt)
         {
-            Contract.Assert(player != null);
-            Contract.Assert(go != null);
-            Contract.Assert(quest != null);
+            Cypher.Assert(player != null);
+            Cypher.Assert(go != null);
+            Cypher.Assert(quest != null);
 
             return RunScriptRet<GameObjectScript>(p => p.OnQuestReward(player, go, quest, opt), go.GetScriptId());
         }
         public uint GetDialogStatus(Player player, GameObject go)
         {
-            Contract.Assert(player != null);
-            Contract.Assert(go != null);
+            Cypher.Assert(player != null);
+            Cypher.Assert(go != null);
 
             return RunScriptRet<GameObjectScript, uint>(p => p.GetDialogStatus(player, go), go.GetScriptId(), (uint)QuestGiverStatus.ScriptedNoStatus);
         }
         public void OnGameObjectDestroyed(GameObject go, Player player)
         {
-            Contract.Assert(go != null);
+            Cypher.Assert(go != null);
 
             RunScript<GameObjectScript>(p => p.OnDestroyed(go, player), go.GetScriptId());
         }
         public void OnGameObjectDamaged(GameObject go, Player player)
         {
-            Contract.Assert(go != null);
+            Cypher.Assert(go != null);
 
             RunScript<GameObjectScript>(p => p.OnDamaged(go, player), go.GetScriptId());
         }
         public void OnGameObjectLootStateChanged(GameObject go, uint state, Unit unit)
         {
-            Contract.Assert(go != null);
+            Cypher.Assert(go != null);
 
             RunScript<GameObjectScript>(p => p.OnLootStateChanged(go, state, unit), go.GetScriptId());
         }
         public void OnGameObjectStateChanged(GameObject go, GameObjectState state)
         {
-            Contract.Assert(go != null);
+            Cypher.Assert(go != null);
 
             RunScript<GameObjectScript>(p => p.OnGameObjectStateChanged(go, state), go.GetScriptId());
         }
         public void OnGameObjectUpdate(GameObject go, uint diff)
         {
-            Contract.Assert(go != null);
+            Cypher.Assert(go != null);
 
             RunScript<GameObjectScript>(p => p.OnUpdate(go, diff), go.GetScriptId());
         }
         public GameObjectAI GetGameObjectAI(GameObject go)
         {
-            Contract.Assert(go != null);
+            Cypher.Assert(go != null);
 
             return RunScriptRet<GameObjectScript, GameObjectAI>(p => p.GetAI(go), go.GetScriptId());
         }
@@ -926,8 +925,8 @@ namespace Game.Scripting
         //AreaTriggerScript
         public bool OnAreaTrigger(Player player, AreaTriggerRecord trigger, bool entered)
         {
-            Contract.Assert(player != null);
-            Contract.Assert(trigger != null);
+            Cypher.Assert(player != null);
+            Cypher.Assert(trigger != null);
 
             return RunScriptRet<AreaTriggerScript>(p => p.OnTrigger(player, trigger, entered), Global.ObjectMgr.GetAreaTriggerScriptId(trigger.Id));
         }
@@ -936,59 +935,59 @@ namespace Game.Scripting
         public Battleground CreateBattleground(BattlegroundTypeId typeId)
         {
             // @todo Implement script-side Battlegrounds.
-            Contract.Assert(false);
+            Cypher.Assert(false);
             return null;
         }
 
         // OutdoorPvPScript
         public OutdoorPvP CreateOutdoorPvP(OutdoorPvPData data)
         {
-            Contract.Assert(data != null);
+            Cypher.Assert(data != null);
             return RunScriptRet<OutdoorPvPScript, OutdoorPvP>(p => p.GetOutdoorPvP(), data.ScriptId, null);
         }
 
         // WeatherScript
         public void OnWeatherChange(Weather weather, WeatherState state, float grade)
         {
-            Contract.Assert(weather != null);
+            Cypher.Assert(weather != null);
             RunScript<WeatherScript>(p => p.OnChange(weather, state, grade), weather.GetScriptId());
         }
         public void OnWeatherUpdate(Weather weather, uint diff)
         {
-            Contract.Assert(weather != null);
+            Cypher.Assert(weather != null);
             RunScript<WeatherScript>(p => p.OnUpdate(weather, diff), weather.GetScriptId());
         }
 
         // AuctionHouseScript
         public void OnAuctionAdd(AuctionHouseObject ah, AuctionEntry entry)
         {
-            Contract.Assert(ah != null);
-            Contract.Assert(entry != null);
+            Cypher.Assert(ah != null);
+            Cypher.Assert(entry != null);
             ForEach<AuctionHouseScript>(p => p.OnAuctionAdd(ah, entry));
         }
         public void OnAuctionRemove(AuctionHouseObject ah, AuctionEntry entry)
         {
-            Contract.Assert(ah != null);
-            Contract.Assert(entry != null);
+            Cypher.Assert(ah != null);
+            Cypher.Assert(entry != null);
             ForEach<AuctionHouseScript>(p => p.OnAuctionRemove(ah, entry));
         }
         public void OnAuctionSuccessful(AuctionHouseObject ah, AuctionEntry entry)
         {
-            Contract.Assert(ah != null);
-            Contract.Assert(entry != null);
+            Cypher.Assert(ah != null);
+            Cypher.Assert(entry != null);
             ForEach<AuctionHouseScript>(p => p.OnAuctionSuccessful(ah, entry));
         }
         public void OnAuctionExpire(AuctionHouseObject ah, AuctionEntry entry)
         {
-            Contract.Assert(ah != null);
-            Contract.Assert(entry != null);
+            Cypher.Assert(ah != null);
+            Cypher.Assert(entry != null);
             ForEach<AuctionHouseScript>(p => p.OnAuctionExpire(ah, entry));
         }
 
         // ConditionScript
         public bool OnConditionCheck(Condition condition, ConditionSourceInfo sourceInfo)
         {
-            Contract.Assert(condition != null);
+            Cypher.Assert(condition != null);
 
             return RunScriptRet<ConditionScript>(p => p.OnConditionCheck(condition, sourceInfo), condition.ScriptId, true);
         }
@@ -996,46 +995,46 @@ namespace Game.Scripting
         // VehicleScript
         public void OnInstall(Vehicle veh)
         {
-            Contract.Assert(veh != null);
-            Contract.Assert(veh.GetBase().IsTypeId(TypeId.Unit));
+            Cypher.Assert(veh != null);
+            Cypher.Assert(veh.GetBase().IsTypeId(TypeId.Unit));
 
             RunScript<VehicleScript>(p => p.OnInstall(veh), veh.GetBase().ToCreature().GetScriptId());
         }
         public void OnUninstall(Vehicle veh)
         {
-            Contract.Assert(veh != null);
-            Contract.Assert(veh.GetBase().IsTypeId(TypeId.Unit));
+            Cypher.Assert(veh != null);
+            Cypher.Assert(veh.GetBase().IsTypeId(TypeId.Unit));
 
             RunScript<VehicleScript>(p => p.OnUninstall(veh), veh.GetBase().ToCreature().GetScriptId());
         }
         public void OnReset(Vehicle veh)
         {
-            Contract.Assert(veh != null);
-            Contract.Assert(veh.GetBase().IsTypeId(TypeId.Unit));
+            Cypher.Assert(veh != null);
+            Cypher.Assert(veh.GetBase().IsTypeId(TypeId.Unit));
 
             RunScript<VehicleScript>(p => p.OnReset(veh), veh.GetBase().ToCreature().GetScriptId());
         }
         public void OnInstallAccessory(Vehicle veh, Creature accessory)
         {
-            Contract.Assert(veh != null);
-            Contract.Assert(veh.GetBase().IsTypeId(TypeId.Unit));
-            Contract.Assert(accessory != null);
+            Cypher.Assert(veh != null);
+            Cypher.Assert(veh.GetBase().IsTypeId(TypeId.Unit));
+            Cypher.Assert(accessory != null);
 
             RunScript<VehicleScript>(p => p.OnInstallAccessory(veh, accessory), veh.GetBase().ToCreature().GetScriptId());
         }
         public void OnAddPassenger(Vehicle veh, Unit passenger, sbyte seatId)
         {
-            Contract.Assert(veh != null);
-            Contract.Assert(veh.GetBase().IsTypeId(TypeId.Unit));
-            Contract.Assert(passenger != null);
+            Cypher.Assert(veh != null);
+            Cypher.Assert(veh.GetBase().IsTypeId(TypeId.Unit));
+            Cypher.Assert(passenger != null);
 
             RunScript<VehicleScript>(p => p.OnAddPassenger(veh, passenger, seatId), veh.GetBase().ToCreature().GetScriptId());
         }
         public void OnRemovePassenger(Vehicle veh, Unit passenger)
         {
-            Contract.Assert(veh != null);
-            Contract.Assert(veh.GetBase().IsTypeId(TypeId.Unit));
-            Contract.Assert(passenger != null);
+            Cypher.Assert(veh != null);
+            Cypher.Assert(veh.GetBase().IsTypeId(TypeId.Unit));
+            Cypher.Assert(passenger != null);
 
             RunScript<VehicleScript>(p => p.OnRemovePassenger(veh, passenger), veh.GetBase().ToCreature().GetScriptId());
         }
@@ -1043,7 +1042,7 @@ namespace Game.Scripting
         // DynamicObjectScript
         public void OnDynamicObjectUpdate(DynamicObject dynobj, uint diff)
         {
-            Contract.Assert(dynobj != null);
+            Cypher.Assert(dynobj != null);
 
             ForEach<DynamicObjectScript>(p => p.OnUpdate(dynobj, diff));
         }
@@ -1051,28 +1050,28 @@ namespace Game.Scripting
         // TransportScript
         public void OnAddPassenger(Transport transport, Player player)
         {
-            Contract.Assert(transport != null);
-            Contract.Assert(player != null);
+            Cypher.Assert(transport != null);
+            Cypher.Assert(player != null);
 
             RunScript<TransportScript>(p => p.OnAddPassenger(transport, player), transport.GetScriptId());
         }
         public void OnAddCreaturePassenger(Transport transport, Creature creature)
         {
-            Contract.Assert(transport != null);
-            Contract.Assert(creature != null);
+            Cypher.Assert(transport != null);
+            Cypher.Assert(creature != null);
 
             RunScript<TransportScript>(p => p.OnAddCreaturePassenger(transport, creature), transport.GetScriptId());
         }
         public void OnRemovePassenger(Transport transport, Player player)
         {
-            Contract.Assert(transport != null);
-            Contract.Assert(player != null);
+            Cypher.Assert(transport != null);
+            Cypher.Assert(player != null);
 
             RunScript<TransportScript>(p => p.OnRemovePassenger(transport, player), transport.GetScriptId());
         }
         public void OnTransportUpdate(Transport transport, uint diff)
         {
-            Contract.Assert(transport != null);
+            Cypher.Assert(transport != null);
 
             RunScript<TransportScript>(p => p.OnUpdate(transport, diff), transport.GetScriptId());
         }
@@ -1084,7 +1083,7 @@ namespace Game.Scripting
         // AchievementCriteriaScript
         public bool OnCriteriaCheck(uint ScriptId, Player source, Unit target)
         {
-            Contract.Assert(source != null);
+            Cypher.Assert(source != null);
             // target can be NULL.
 
             return RunScriptRet<AchievementCriteriaScript>(p => p.OnCheck(source, target), ScriptId);
@@ -1261,27 +1260,27 @@ namespace Game.Scripting
         // GroupScript
         public void OnGroupAddMember(Group group, ObjectGuid guid)
         {
-            Contract.Assert(group);
+            Cypher.Assert(group);
             ForEach<GroupScript>(p => p.OnAddMember(group, guid));
         }
         public void OnGroupInviteMember(Group group, ObjectGuid guid)
         {
-            Contract.Assert(group);
+            Cypher.Assert(group);
             ForEach<GroupScript>(p => p.OnInviteMember(group, guid));
         }
         public void OnGroupRemoveMember(Group group, ObjectGuid guid, RemoveMethod method, ObjectGuid kicker, string reason)
         {
-            Contract.Assert(group);
+            Cypher.Assert(group);
             ForEach<GroupScript>(p => p.OnRemoveMember(group, guid, method, kicker, reason));
         }
         public void OnGroupChangeLeader(Group group, ObjectGuid newLeaderGuid, ObjectGuid oldLeaderGuid)
         {
-            Contract.Assert(group);
+            Cypher.Assert(group);
             ForEach<GroupScript>(p => p.OnChangeLeader(group, newLeaderGuid, oldLeaderGuid));
         }
         public void OnGroupDisband(Group group)
         {
-            Contract.Assert(group);
+            Cypher.Assert(group);
             ForEach<GroupScript>(p => p.OnDisband(group));
         }
 
@@ -1320,7 +1319,7 @@ namespace Game.Scripting
         // AreaTriggerEntityScript
         public AreaTriggerAI GetAreaTriggerAI(AreaTrigger areaTrigger)
         {
-            Contract.Assert(areaTrigger);
+            Cypher.Assert(areaTrigger);
 
             return RunScriptRet<AreaTriggerEntityScript, AreaTriggerAI>(p => p.GetAI(areaTrigger), areaTrigger.GetScriptId(), null);
         }
@@ -1328,7 +1327,7 @@ namespace Game.Scripting
         // ConversationScript
         public void OnConversationCreate(Conversation conversation, Unit creator)
         {
-            Contract.Assert(conversation != null);
+            Cypher.Assert(conversation != null);
 
             RunScript<ConversationScript>(script => script.OnConversationCreate(conversation, creator), conversation.GetScriptId());
         }
@@ -1336,29 +1335,29 @@ namespace Game.Scripting
         //SceneScript
         public void OnSceneStart(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
-            Contract.Assert(player);
-            Contract.Assert(sceneTemplate != null);
+            Cypher.Assert(player);
+            Cypher.Assert(sceneTemplate != null);
 
             RunScript<SceneScript>(script => script.OnSceneStart(player, sceneInstanceID, sceneTemplate), sceneTemplate.ScriptId);
         }
         public void OnSceneTrigger(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
         {
-            Contract.Assert(player);
-            Contract.Assert(sceneTemplate != null);
+            Cypher.Assert(player);
+            Cypher.Assert(sceneTemplate != null);
 
             RunScript<SceneScript>(script => script.OnSceneTriggerEvent(player, sceneInstanceID, sceneTemplate, triggerName), sceneTemplate.ScriptId);
         }
         public void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
-            Contract.Assert(player);
-            Contract.Assert(sceneTemplate != null);
+            Cypher.Assert(player);
+            Cypher.Assert(sceneTemplate != null);
 
             RunScript<SceneScript>(script => script.OnSceneCancel(player, sceneInstanceID, sceneTemplate), sceneTemplate.ScriptId);
         }
         public void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
-            Contract.Assert(player);
-            Contract.Assert(sceneTemplate != null);
+            Cypher.Assert(player);
+            Cypher.Assert(sceneTemplate != null);
 
             RunScript<SceneScript>(script => script.OnSceneComplete(player, sceneInstanceID, sceneTemplate), sceneTemplate.ScriptId);
         }
@@ -1366,15 +1365,15 @@ namespace Game.Scripting
         //QuestScript
         public void OnQuestStatusChange(Player player, Quest quest, QuestStatus oldStatus, QuestStatus newStatus)
         {
-            Contract.Assert(player);
-            Contract.Assert(quest != null);
+            Cypher.Assert(player);
+            Cypher.Assert(quest != null);
 
             RunScript<QuestScript>(script => script.OnQuestStatusChange(player, quest, oldStatus, newStatus), quest.ScriptId);
         }
         public void OnQuestObjectiveChange(Player player, Quest quest, QuestObjective objective, int oldAmount, int newAmount)
         {
-            Contract.Assert(player);
-            Contract.Assert(quest != null);
+            Cypher.Assert(player);
+            Cypher.Assert(quest != null);
 
             RunScript<QuestScript>(script => script.OnQuestObjectiveChange(player, quest, objective, oldAmount, newAmount), quest.ScriptId);
         }
@@ -1416,7 +1415,7 @@ namespace Game.Scripting
         }
         public void AddScript<T>(T script) where T : ScriptObject
         {
-            Contract.Assert(script != null);
+            Cypher.Assert(script != null);
 
             if (!ScriptStorage.ContainsKey(typeof(T)))
                 ScriptStorage[typeof(T)] = new ScriptRegistry<T>();
@@ -1456,7 +1455,7 @@ namespace Game.Scripting
     {
         public void AddScript(TValue script)
         {
-            Contract.Assert(script != null);
+            Cypher.Assert(script != null);
 
             if (!script.IsDatabaseBound())
             {
@@ -1493,7 +1492,7 @@ namespace Game.Scripting
                     // If the script is already assigned . delete it!
                     Log.outError(LogFilter.Scripts, "Script '{0}' already assigned with the same script name, so the script can't work.", script.GetName());
 
-                    Contract.Assert(false); // Error that should be fixed ASAP.
+                    Cypher.Assert(false); // Error that should be fixed ASAP.
                 }
             }
             else

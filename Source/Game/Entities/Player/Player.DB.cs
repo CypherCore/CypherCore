@@ -30,7 +30,6 @@ using Game.Network.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 
@@ -2670,7 +2669,7 @@ namespace Game.Entities
                     var nodeEntry = CliDB.TaxiNodesStorage.LookupByKey(nodeid);
                     if (nodeEntry != null && nodeEntry.ContinentID == GetMapId())
                     {
-                        Contract.Assert(nodeEntry != null);                                  // checked in m_taxi.LoadTaxiDestinationsFromString
+                        Cypher.Assert(nodeEntry != null);                                  // checked in m_taxi.LoadTaxiDestinationsFromString
                         mapId = nodeEntry.ContinentID;
                         Relocate(nodeEntry.Pos.X, nodeEntry.Pos.Y, nodeEntry.Pos.Z, 0.0f);
                     }

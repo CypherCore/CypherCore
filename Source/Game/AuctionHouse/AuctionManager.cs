@@ -24,7 +24,6 @@ using Game.Mails;
 using Game.Network.Packets;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 namespace Game
 {
@@ -327,8 +326,8 @@ namespace Game
 
         public void AddAItem(Item it)
         {
-            Contract.Assert(it);
-            Contract.Assert(!mAitems.ContainsKey(it.GetGUID().GetCounter()));
+            Cypher.Assert(it);
+            Cypher.Assert(!mAitems.ContainsKey(it.GetGUID().GetCounter()));
             mAitems[it.GetGUID().GetCounter()] = it;
         }
 
@@ -419,7 +418,7 @@ namespace Game
     {
         public void AddAuction(AuctionEntry auction)
         {
-            Contract.Assert(auction != null);
+            Cypher.Assert(auction != null);
 
             AuctionsMap[auction.Id] = auction;
             Global.ScriptMgr.OnAuctionAdd(this, auction);

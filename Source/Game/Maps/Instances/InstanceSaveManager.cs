@@ -23,7 +23,6 @@ using Game.Groups;
 using Game.Scenarios;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game.Maps
@@ -426,7 +425,7 @@ namespace Game.Maps
                 InstanceBind bind = player.GetBoundInstance(pair.Value.GetMapId(), pair.Value.GetDifficultyID());
                 if (bind != null)
                 {
-                    Contract.Assert(bind.save == pair.Value);
+                    Cypher.Assert(bind.save == pair.Value);
                     if (bind.perm && bind.extendState != 0) // permanent and not already expired
                     {
                         // actual promotion in DB already happened in caller
@@ -602,7 +601,7 @@ namespace Game.Maps
         void SetResetTimeFor(uint mapid, Difficulty d, long t)
         {
             var key = MathFunctions.MakePair64(mapid, (uint)d);
-            Contract.Assert(m_resetTimeByMapDifficulty.ContainsKey(key));
+            Cypher.Assert(m_resetTimeByMapDifficulty.ContainsKey(key));
             m_resetTimeByMapDifficulty[key] = t;
         }
 
@@ -662,7 +661,7 @@ namespace Game.Maps
             Map map = Global.MapMgr.FindMap(GetMapId(), m_instanceid);
             if (map != null)
             {
-                Contract.Assert(map.IsDungeon());
+                Cypher.Assert(map.IsDungeon());
                 InstanceScript instanceScript = ((InstanceMap)map).GetInstanceScript();
                 if (instanceScript != null)
                 {

@@ -26,7 +26,6 @@ using Game.Network.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -759,7 +758,7 @@ namespace Game.Entities
             if (item.IsInUpdateQueue())
                 return;
 
-            Contract.Assert(player != null);
+            Cypher.Assert(player != null);
 
             if (player.GetGUID() != item.GetOwnerGUID())
             {
@@ -779,7 +778,7 @@ namespace Game.Entities
             if (!item.IsInUpdateQueue())
                 return;
 
-            Contract.Assert(player != null);
+            Cypher.Assert(player != null);
 
             if (player.GetGUID() != item.GetOwnerGUID())
             {
@@ -2054,7 +2053,7 @@ namespace Game.Entities
 
         public int GetItemStatValue(uint index, Player owner)
         {
-            Contract.Assert(index < ItemConst.MaxStats);
+            Cypher.Assert(index < ItemConst.MaxStats);
             uint itemLevel = GetItemLevel(owner);
             uint randomPropPoints = ItemEnchantment.GetRandomPropertyPoints(itemLevel, GetQuality(), GetTemplate().GetInventoryType(), GetTemplate().GetSubClass());
             if (randomPropPoints != 0)
@@ -2550,7 +2549,7 @@ namespace Game.Entities
 
             if (eff.EquippedItemCount == 0)                                    //all items of a set were removed
             {
-                Contract.Assert(eff == player.ItemSetEff[setindex]);
+                Cypher.Assert(eff == player.ItemSetEff[setindex]);
                 player.ItemSetEff[setindex] = null;
             }
         }
@@ -2632,12 +2631,12 @@ namespace Game.Entities
         public ItemQuality GetQuality() { return _bonusData.Quality; }
         public int GetItemStatType(uint index)
         {
-            Contract.Assert(index < ItemConst.MaxStats);
+            Cypher.Assert(index < ItemConst.MaxStats);
             return _bonusData.ItemStatType[index];
         }
         public SocketColor GetSocketColor(uint index)
         {
-            Contract.Assert(index < ItemConst.MaxGemSockets);
+            Cypher.Assert(index < ItemConst.MaxGemSockets);
             return _bonusData.socketColor[index];
         }
         public uint GetAppearanceModId() { return GetUInt32Value(ItemFields.AppearanceModId); }

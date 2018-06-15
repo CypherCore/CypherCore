@@ -23,7 +23,6 @@ using Framework.IO;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 namespace Game.Network.Packets
 {
@@ -583,7 +582,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            Contract.Assert(UndeleteInfo != null);
+            Cypher.Assert(UndeleteInfo != null);
             _worldPacket.WriteInt32(UndeleteInfo.ClientToken);
             _worldPacket.WriteUInt32(Result);
             _worldPacket.WritePackedGuid(UndeleteInfo.CharacterGuid);

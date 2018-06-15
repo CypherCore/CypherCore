@@ -19,7 +19,6 @@ using Framework.Constants;
 using Game.Groups;
 using Game.Maps;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 namespace Game.Entities
 {
@@ -165,7 +164,7 @@ namespace Game.Entities
 
         public void SetPartyType(GroupCategory category, GroupType type)
         {
-            Contract.Assert(category < GroupCategory.Max);
+            Cypher.Assert(category < GroupCategory.Max);
             byte value = GetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetPartyType);
             value &= (byte)~((byte)0xFF << ((byte)category * 4));
             value |= (byte)((byte)type << ((byte)category * 4));

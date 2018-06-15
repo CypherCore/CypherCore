@@ -20,7 +20,6 @@ using Game.DataStorage;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 namespace Game.Entities
 {
@@ -275,22 +274,22 @@ namespace Game.Entities
         public uint GetContainerSlots() { return ExtendedData.ContainerSlots; }
         public int GetItemStatType(uint index)
         {
-            Contract.Assert(index < ItemConst.MaxStats);
+            Cypher.Assert(index < ItemConst.MaxStats);
             return ExtendedData.StatModifierBonusStat[index];
         }
         public int GetItemStatValue(uint index)
         {
-            Contract.Assert(index < ItemConst.MaxStats);
+            Cypher.Assert(index < ItemConst.MaxStats);
             return ExtendedData.ItemStatValue[index];
         }
         public int GetItemStatAllocation(uint index)
         {
-            Contract.Assert(index < ItemConst.MaxStats);
+            Cypher.Assert(index < ItemConst.MaxStats);
             return ExtendedData.StatPercentEditor[index];
         }
         public float GetItemStatSocketCostMultiplier(uint index)
         {
-            Contract.Assert(index < ItemConst.MaxStats);
+            Cypher.Assert(index < ItemConst.MaxStats);
             return ExtendedData.StatPercentageOfSocket[index];
         }
         public uint GetScalingStatDistribution() { return ExtendedData.ScalingStatDistributionID; }
@@ -310,7 +309,7 @@ namespace Game.Entities
         public uint GetTotemCategory() { return ExtendedData.TotemCategoryID; }
         public SocketColor GetSocketColor(uint index)
         {
-            Contract.Assert(index < ItemConst.MaxGemSockets);
+            Cypher.Assert(index < ItemConst.MaxGemSockets);
             return (SocketColor)ExtendedData.SocketType[index];
         }
         public uint GetSocketBonus() { return ExtendedData.SocketMatchEnchantmentId; }

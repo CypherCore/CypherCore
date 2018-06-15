@@ -29,7 +29,6 @@ using Game.Network.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game.BattleGrounds
@@ -520,13 +519,13 @@ namespace Game.BattleGrounds
 
         public BattlegroundMap GetBgMap()
         {
-            Contract.Assert(m_Map);
+            Cypher.Assert(m_Map);
             return m_Map;
         }
 
         public void SetTeamStartPosition(int teamIndex, Position pos)
         {
-            Contract.Assert(teamIndex < TeamId.Neutral);
+            Cypher.Assert(teamIndex < TeamId.Neutral);
             StartPosition[teamIndex] = pos;
         }
 
@@ -1892,7 +1891,7 @@ namespace Game.BattleGrounds
 
         public Position GetTeamStartPosition(int teamIndex)
         {
-            Contract.Assert(teamIndex < TeamId.Neutral);
+            Cypher.Assert(teamIndex < TeamId.Neutral);
             return StartPosition[teamIndex];
         }
 

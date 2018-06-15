@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Threading.Tasks;
 
 namespace Framework.Database
@@ -68,7 +67,7 @@ namespace Framework.Database
                     bool hasNext = _result != null;
                     if (_callbacks.Count == 0)
                     {
-                        Contract.Assert(!hasNext);
+                        Cypher.Assert(!hasNext);
                         return QueryCallbackStatus.Completed;
                     }
 

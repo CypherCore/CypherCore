@@ -19,7 +19,6 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Network.Packets;
 using System;
-using System.Diagnostics.Contracts;
 
 namespace Game.Spells
 {
@@ -280,7 +279,7 @@ namespace Game.Spells
 
         public void ModSrc(Position pos)
         {
-            Contract.Assert(m_targetMask.HasAnyFlag(SpellCastTargetFlags.SourceLocation));
+            Cypher.Assert(m_targetMask.HasAnyFlag(SpellCastTargetFlags.SourceLocation));
             m_src.Relocate(pos);
         }
 
@@ -331,13 +330,13 @@ namespace Game.Spells
 
         public void ModDst(Position pos)
         {
-            Contract.Assert(m_targetMask.HasAnyFlag(SpellCastTargetFlags.DestLocation));
+            Cypher.Assert(m_targetMask.HasAnyFlag(SpellCastTargetFlags.DestLocation));
             m_dst.Relocate(pos);
         }
 
         public void ModDst(SpellDestination spellDest)
         {
-            Contract.Assert(m_targetMask.HasAnyFlag(SpellCastTargetFlags.DestLocation));
+            Cypher.Assert(m_targetMask.HasAnyFlag(SpellCastTargetFlags.DestLocation));
             m_dst = spellDest;
         }
 

@@ -18,7 +18,6 @@
 using Framework.GameMath;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Collections.Concurrent;
 
 namespace Game.Collision
@@ -102,7 +101,7 @@ namespace Game.Collision
 
         Node getGrid(int x, int y)
         {
-            Contract.Assert(x < CELL_NUMBER && y < CELL_NUMBER);
+            Cypher.Assert(x < CELL_NUMBER && y < CELL_NUMBER);
             if (nodes[x][y] == null)
                 nodes[x][y] = new Node();
             return nodes[x][y];

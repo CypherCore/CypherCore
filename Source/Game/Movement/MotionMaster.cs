@@ -22,7 +22,6 @@ using Game.DataStorage;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 namespace Game.Movement
 {
@@ -78,7 +77,7 @@ namespace Game.Movement
             if (_owner.HasUnitState(UnitState.Root | UnitState.Stunned))
                 return;
 
-            Contract.Assert(!empty());
+            Cypher.Assert(!empty());
 
             _cleanFlag |= MMCleanFlag.Update;
             bool isMoveGenUpdateSuccess = top().Update(_owner, diff);
@@ -157,7 +156,7 @@ namespace Game.Movement
 
         public IMovementGenerator GetMotionSlot(int slot)
         {
-            Contract.Assert(slot >= 0);
+            Cypher.Assert(slot >= 0);
             return _slot[slot];
         }
 
@@ -744,7 +743,7 @@ namespace Game.Movement
 
         public IMovementGenerator top()
         {
-            Contract.Assert(!empty());
+            Cypher.Assert(!empty());
             return _slot[_top];
         }
 

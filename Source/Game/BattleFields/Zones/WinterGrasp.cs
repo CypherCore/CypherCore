@@ -21,7 +21,6 @@ using Game.Entities;
 using Game.Network.Packets;
 using Game.Spells;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 namespace Game.BattleFields
 {
@@ -1591,7 +1590,7 @@ namespace Game.BattleFields
 
         public override void ChangeTeam(uint oldteam)
         {
-            Contract.Assert(m_Workshop != null);
+            Cypher.Assert(m_Workshop != null);
             m_Workshop.GiveControlTo(m_team, false);
         }
         uint GetTeam() { return m_team; }

@@ -26,7 +26,6 @@ using Game.Maps;
 using Game.Network.Packets;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game.Spells
@@ -305,7 +304,7 @@ namespace Game.Spells
         public void HandleEffect(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             // check if call is correct, we really don't want using bitmasks here (with 1 exception)
-            Contract.Assert(mode == AuraEffectHandleModes.Real || mode == AuraEffectHandleModes.SendForClient
+            Cypher.Assert(mode == AuraEffectHandleModes.Real || mode == AuraEffectHandleModes.SendForClient
                 || mode == AuraEffectHandleModes.ChangeAmount || mode == AuraEffectHandleModes.Stat
                 || mode == AuraEffectHandleModes.Skill || mode == AuraEffectHandleModes.Reapply
                 || mode == (AuraEffectHandleModes.ChangeAmount | AuraEffectHandleModes.Reapply));
@@ -345,7 +344,7 @@ namespace Game.Spells
         public void HandleEffect(Unit target, AuraEffectHandleModes mode, bool apply)
         {
             AuraApplication aurApp = GetBase().GetApplicationOfTarget(target.GetGUID());
-            Contract.Assert(aurApp != null);
+            Cypher.Assert(aurApp != null);
             HandleEffect(aurApp, mode, apply);
         }
 
@@ -578,7 +577,7 @@ namespace Game.Spells
 
         bool CanPeriodicTickCrit(Unit caster)
         {
-            Contract.Assert(caster);
+            Cypher.Assert(caster);
 
             return caster.HasAuraTypeWithAffectMask(AuraType.AbilityPeriodicCrit, m_spellInfo);
         }

@@ -278,6 +278,7 @@ namespace Game.Movement
 
             return true;
         }
+
         void LoadPath(Creature creature)
         {
             if (loadedFromDB)
@@ -298,6 +299,7 @@ namespace Game.Movement
             if (!Stopped())
                 StartMoveNow(creature);
         }
+
         void OnArrived(Creature creature)
         {
             if (path == null || path.nodes.Empty())

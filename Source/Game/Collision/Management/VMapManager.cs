@@ -19,7 +19,6 @@ using Framework.Constants;
 using Framework.GameMath;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 namespace Game.Collision
 {
@@ -221,7 +220,7 @@ namespace Game.Collision
                     if (instanceTree.GetLocationInfo(pos, info))
                     {
                         floor = info.ground_Z;
-                        Contract.Assert(floor < float.MaxValue);
+                        Cypher.Assert(floor < float.MaxValue);
                         type = info.hitModel.GetLiquidType();  // entry from LiquidType.dbc
                         if (reqLiquidType != 0 && !Convert.ToBoolean(Global.DB2Mgr.GetLiquidFlags(type) & reqLiquidType))
                             return false;

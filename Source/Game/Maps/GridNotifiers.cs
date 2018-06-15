@@ -28,7 +28,7 @@ using System.Collections.Concurrent;
 
 namespace Game.Maps
 {
-    public abstract class Notifier
+    public class Notifier
     {
         public virtual void Visit(IList<WorldObject> objs) { }
         public virtual void Visit(IList<Creature> objs) { }

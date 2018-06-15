@@ -22,7 +22,6 @@ using Game.Network;
 using Game.Network.Packets;
 using Game.Spells;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 namespace Game
 {
@@ -231,7 +230,7 @@ namespace Game
                                 GetPlayer().StopCastingCharm();
                             else if (pet.GetOwnerGUID() == GetPlayer().GetGUID())
                             {
-                                Contract.Assert(pet.IsTypeId(TypeId.Unit));
+                                Cypher.Assert(pet.IsTypeId(TypeId.Unit));
                                 if (pet.IsPet())
                                 {
                                     if (pet.ToPet().getPetType() == PetType.Hunter)

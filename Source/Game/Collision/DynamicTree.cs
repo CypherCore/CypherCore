@@ -17,7 +17,6 @@
 
 using Framework.GameMath;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 namespace Game.Collision
 {
@@ -68,7 +67,7 @@ namespace Game.Collision
             bool result = false;
             float maxDist = (endPos - startPos).magnitude();
             // valid map coords should *never ever* produce float overflow, but this would produce NaNs too
-            Contract.Assert(maxDist < float.MaxValue);
+            Cypher.Assert(maxDist < float.MaxValue);
             // prevent NaN values which can cause BIH intersection to enter infinite loop
             if (maxDist < 1e-10f)
             {

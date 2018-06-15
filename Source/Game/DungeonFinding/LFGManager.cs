@@ -24,7 +24,6 @@ using Game.Groups;
 using Game.Maps;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using Game.Network.Packets;
@@ -757,8 +756,8 @@ namespace Game.DungeonFinding
                         if (it2.Value.lockStatus == LfgLockStatusType.RaidLocked && isContinue)
                         {
                             LFGDungeonData dungeon = GetLFGDungeon(dungeonId);
-                            Contract.Assert(dungeon != null);
-                            Contract.Assert(player);
+                            Cypher.Assert(dungeon != null);
+                            Cypher.Assert(player);
                             InstanceBind playerBind = player.GetBoundInstance(dungeon.map, dungeon.difficulty);
                             if (playerBind != null)
                             {
@@ -873,7 +872,7 @@ namespace Game.DungeonFinding
 
             // Set the dungeon difficulty
             LFGDungeonData dungeon = GetLFGDungeon(proposal.dungeonId);
-            Contract.Assert(dungeon != null);
+            Cypher.Assert(dungeon != null);
 
             Group grp = !proposal.group.IsEmpty() ? Global.GroupMgr.GetGroupByGUID(proposal.group) : null;
             foreach (var pguid in players)
@@ -1431,7 +1430,7 @@ namespace Game.DungeonFinding
 
         public bool IsVoteKickActive(ObjectGuid gguid)
         {
-            Contract.Assert(gguid.IsParty());
+            Cypher.Assert(gguid.IsParty());
 
             bool active = GroupsStore[gguid].IsVoteKickActive();
             Log.outInfo(LogFilter.Lfg, "Group: {0}, Active: {1}", gguid.ToString(), active);
@@ -1591,7 +1590,7 @@ namespace Game.DungeonFinding
 
         void SetVoteKick(ObjectGuid gguid, bool active)
         {
-            Contract.Assert(gguid.IsParty());
+            Cypher.Assert(gguid.IsParty());
 
             var data = GroupsStore[gguid];
             Log.outInfo(LogFilter.Lfg, "Group: {0}, New state: {1}, Previous: {2}", gguid.ToString(), active, data.IsVoteKickActive());

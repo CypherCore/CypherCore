@@ -21,7 +21,6 @@ using Game.Entities;
 using Game.Maps;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Text;
 
 namespace Game.Conditions
@@ -36,7 +35,7 @@ namespace Game.Conditions
 
         public bool Meets(ConditionSourceInfo sourceInfo)
         {
-            Contract.Assert(ConditionTarget < SharedConst.MaxConditionTargets);
+            Cypher.Assert(ConditionTarget < SharedConst.MaxConditionTargets);
             WorldObject obj = sourceInfo.mConditionTargets[ConditionTarget];
             // object not present, return false
             if (obj == null)
@@ -62,7 +61,7 @@ namespace Game.Conditions
                     if (player != null)
                     {
                         // don't allow 0 items (it's checked during table load)
-                        Contract.Assert(ConditionValue2 != 0);
+                        Cypher.Assert(ConditionValue2 != 0);
                         bool checkBank = ConditionValue3 != 0 ? true : false;
                         condMeets = player.HasItemCount(ConditionValue1, ConditionValue2, checkBank);
                     }
@@ -486,7 +485,7 @@ namespace Game.Conditions
                     mask |= GridMapTypeMask.Player;
                     break;
                 default:
-                    Contract.Assert(false, "Condition.GetSearcherTypeMaskForCondition - missing condition handling!");
+                    Cypher.Assert(false, "Condition.GetSearcherTypeMaskForCondition - missing condition handling!");
                     break;
             }
             return mask;

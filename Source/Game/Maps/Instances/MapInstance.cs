@@ -23,7 +23,6 @@ using Game.Garrisons;
 using Game.Groups;
 using Game.Scenarios;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game.Maps
@@ -181,13 +180,13 @@ namespace Game.Maps
                 if (entry == null)
                 {
                     Log.outError(LogFilter.Maps, "CreateInstance: no record for map {0}", GetId());
-                    Contract.Assert(false);
+                    Cypher.Assert(false);
                 }
                 InstanceTemplate iTemplate = Global.ObjectMgr.GetInstanceTemplate(GetId());
                 if (iTemplate == null)
                 {
                     Log.outError(LogFilter.Maps, "CreateInstance: no instance template for map {0}", GetId());
-                    Contract.Assert(false);
+                    Cypher.Assert(false);
                 }
 
                 // some instances only have one difficulty
@@ -196,7 +195,7 @@ namespace Game.Maps
                 Log.outDebug(LogFilter.Maps, "MapInstanced.CreateInstance: {0} map instance {1} for {2} created with difficulty {3}", save != null ? "" : "new ", InstanceId, GetId(), difficulty);
 
                 InstanceMap map = new InstanceMap(GetId(), GetGridExpiry(), InstanceId, difficulty, this);
-                Contract.Assert(map.IsDungeon());
+                Cypher.Assert(map.IsDungeon());
 
                 map.LoadRespawnTimes();
                 map.LoadCorpseData();
@@ -222,7 +221,7 @@ namespace Game.Maps
                 Log.outDebug(LogFilter.Maps, "MapInstanced.CreateBattleground: map bg {0} for {1} created.", InstanceId, GetId());
 
                 BattlegroundMap map = new BattlegroundMap(GetId(), (uint)GetGridExpiry(), InstanceId, this, Difficulty.None);
-                Contract.Assert(map.IsBattlegroundOrArena());
+                Cypher.Assert(map.IsBattlegroundOrArena());
                 map.SetBG(bg);
                 bg.SetBgMap(map);
 
@@ -236,7 +235,7 @@ namespace Game.Maps
             lock (_mapLock)
             {
                 GarrisonMap map = new GarrisonMap(GetId(), GetGridExpiry(), instanceId, this, owner.GetGUID());
-                Contract.Assert(map.IsGarrison());
+                Cypher.Assert(map.IsGarrison());
 
                 m_InstancedMaps[instanceId] = map;
                 return map;

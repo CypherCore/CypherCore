@@ -28,7 +28,6 @@ using Game.PvP;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game.Entities
@@ -168,7 +167,7 @@ namespace Game.Entities
 
         public void TauntApply(Unit taunter)
         {
-            Contract.Assert(IsTypeId(TypeId.Unit));
+            Cypher.Assert(IsTypeId(TypeId.Unit));
 
             if (!taunter || (taunter.IsTypeId(TypeId.Player) && taunter.ToPlayer().IsGameMaster()))
                 return;
@@ -192,7 +191,7 @@ namespace Game.Entities
 
         public void TauntFadeOut(Unit taunter)
         {
-            Contract.Assert(IsTypeId(TypeId.Unit));
+            Cypher.Assert(IsTypeId(TypeId.Unit));
 
             if (!taunter || (taunter.IsTypeId(TypeId.Player) && taunter.ToPlayer().IsGameMaster()))
                 return;
@@ -1091,7 +1090,7 @@ namespace Game.Entities
                 {
                     Player he = duel_wasMounted ? victim.GetCharmer().ToPlayer() : victim.ToPlayer();
 
-                    Contract.Assert(he && he.duel != null);
+                    Cypher.Assert(he && he.duel != null);
 
                     if (duel_wasMounted) // In this case victim==mount
                         victim.SetHealth(1);
@@ -2882,7 +2881,7 @@ namespace Game.Entities
         // function based on function Unit.CanAttack from 13850 client
         public bool _IsValidAttackTarget(Unit target, SpellInfo bySpell, WorldObject obj = null)
         {
-            Contract.Assert(target != null);
+            Cypher.Assert(target != null);
 
             // can't attack self
             if (this == target)
@@ -3019,7 +3018,7 @@ namespace Game.Entities
         // function based on function Unit.CanAssist from 13850 client
         public bool _IsValidAssistTarget(Unit target, SpellInfo bySpell)
         {
-            Contract.Assert(target != null);
+            Cypher.Assert(target != null);
 
             // can assist to self
             if (this == target)

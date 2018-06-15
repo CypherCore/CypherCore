@@ -22,7 +22,6 @@ using Game.DataStorage;
 using Game.Movement;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game.Entities
@@ -64,9 +63,9 @@ namespace Game.Entities
         public void Dispose()
         {
             // @Uninstall must be called before this.
-            Contract.Assert(_status == Status.UnInstalling);
+            Cypher.Assert(_status == Status.UnInstalling);
             foreach (var pair in Seats)
-                Contract.Assert(pair.Value.IsEmpty());
+                Cypher.Assert(pair.Value.IsEmpty());
         }
 
         public void Install()
@@ -254,7 +253,7 @@ namespace Game.Entities
             Log.outDebug(LogFilter.Vehicle, "Vehicle ({0}, Entry {1}): installing accessory (Entry: {2}) on seat: {3}", _me.GetGUID().ToString(), GetCreatureEntry(), entry, seatId);
 
             TempSummon accessory = _me.SummonCreature(entry, _me, (TempSummonType)type, summonTime);
-            Contract.Assert(accessory);
+            Cypher.Assert(accessory);
 
             if (minion)
                 accessory.AddUnitTypeMask(UnitTypeMask.Accessory);
@@ -319,11 +318,11 @@ namespace Game.Entities
                 if (!seat.Value.IsEmpty())
                 {
                     Unit passenger = Global.ObjAccessor.GetUnit(GetBase(), seat.Value.Passenger.Guid);
-                    Contract.Assert(passenger != null);
+                    Cypher.Assert(passenger != null);
                     passenger.ExitVehicle();
                 }
 
-                Contract.Assert(seat.Value.IsEmpty());
+                Cypher.Assert(seat.Value.IsEmpty());
             }
 
             return true;
@@ -335,7 +334,7 @@ namespace Game.Entities
                 return null;
 
             var seat = GetSeatKeyValuePairForPassenger(unit);
-            Contract.Assert(seat.Value != null);
+            Cypher.Assert(seat.Value != null);
 
             Log.outDebug( LogFilter.Vehicle, "Unit {0} exit vehicle entry {1} id {2} dbguid {3} seat {4}",
                 unit.GetName(), _me.GetEntry(), _vehicleInfo.Id, _me.GetGUID().ToString(), seat.Key);
@@ -371,7 +370,7 @@ namespace Game.Entities
 
         public void RelocatePassengers()
         {
-            Contract.Assert(_me.GetMap() != null);
+            Cypher.Assert(_me.GetMap() != null);
 
             List<Tuple<Unit, Position>> seatRelocation = new List<Tuple<Unit, Position>>();
 
@@ -381,7 +380,7 @@ namespace Game.Entities
                 Unit passenger = Global.ObjAccessor.GetUnit(GetBase(), pair.Value.Passenger.Guid);
                 if (passenger != null)
                 {
-                    Contract.Assert(passenger.IsInWorld);
+                    Cypher.Assert(passenger.IsInWorld);
 
                     float px, py, pz, po;
                     passenger.m_movementInfo.transport.pos.GetPosition(out px, out py, out pz, out po);
@@ -543,9 +542,9 @@ namespace Game.Entities
 
         public override bool Execute(ulong e_time, uint p_time)
         {
-            Contract.Assert(Passenger.IsInWorld);
-            Contract.Assert(Target != null && Target.GetBase().IsInWorld);
-            Contract.Assert(Target.GetBase().HasAuraTypeWithCaster(AuraType.ControlVehicle, Passenger.GetGUID()));
+            Cypher.Assert(Passenger.IsInWorld);
+            Cypher.Assert(Target != null && Target.GetBase().IsInWorld);
+            Cypher.Assert(Target.GetBase().HasAuraTypeWithCaster(AuraType.ControlVehicle, Passenger.GetGUID()));
 
             Target.RemovePendingEventsForSeat(Seat.Key);
             Target.RemovePendingEventsForPassenger(Passenger);
@@ -555,7 +554,7 @@ namespace Game.Entities
             Seat.Value.Passenger.IsUnselectable = Passenger.HasFlag(UnitFields.Flags, UnitFlags.NotSelectable);
             if (Seat.Value.SeatInfo.CanEnterOrExit())
             {
-                Contract.Assert(Target.UsableSeatNum != 0);
+                Cypher.Assert(Target.UsableSeatNum != 0);
                 --Target.UsableSeatNum;
                 if (Target.UsableSeatNum == 0)
                 {
@@ -596,7 +595,7 @@ namespace Game.Entities
 
             if (Target.GetBase().IsTypeId(TypeId.Unit) && Passenger.IsTypeId(TypeId.Player) &&
                 Seat.Value.SeatInfo.Flags.HasAnyFlag(VehicleSeatFlags.CanControl))
-                Contract.Assert(Target.GetBase().SetCharmedBy(Passenger, CharmType.Vehicle));  // SMSG_CLIENT_CONTROL
+                Cypher.Assert(Target.GetBase().SetCharmedBy(Passenger, CharmType.Vehicle));  // SMSG_CLIENT_CONTROL
 
             Passenger.SendClearTarget();                            // SMSG_BREAK_TARGET
             Passenger.SetControlled(true, UnitState.Root);         // SMSG_FORCE_ROOT - In some cases we send SMSG_SPLINE_MOVE_ROOT here (for creatures)

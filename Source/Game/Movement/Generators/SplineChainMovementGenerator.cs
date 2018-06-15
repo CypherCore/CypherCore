@@ -20,7 +20,6 @@ using Framework.GameMath;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game.Movement
@@ -49,7 +48,7 @@ namespace Game.Movement
         uint SendPathSpline(Unit me, List<Vector3> wp)
         {
             int numWp = wp.Count;
-            Contract.Assert(numWp > 1, "Every path must have source & destination");
+            Cypher.Assert(numWp > 1, "Every path must have source & destination");
             MoveSplineInit init = new MoveSplineInit(me);
             if (numWp > 2)
                 init.MovebyPath(wp.ToArray());
@@ -61,7 +60,7 @@ namespace Game.Movement
 
         void SendSplineFor(Unit me, int index, uint toNext)
         {
-            Contract.Assert(index < _chainSize);
+            Cypher.Assert(index < _chainSize);
             Log.outDebug(LogFilter.Movement, "{0}: Sending spline for {1}.", me.GetGUID().ToString(), index);
 
             SplineChainLink thisLink = _chain[index];

@@ -22,7 +22,6 @@ using Game.DataStorage;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 namespace Game
 {
@@ -288,7 +287,7 @@ namespace Game
 
         public bool IsDisabledFor(DisableType type, uint entry, Unit unit, byte flags = 0)
         {
-            Contract.Assert(type < DisableType.Max);
+            Cypher.Assert(type < DisableType.Max);
             if (!m_DisableMap.ContainsKey(type) || m_DisableMap[type].Empty())
                 return false;
 

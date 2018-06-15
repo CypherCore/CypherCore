@@ -17,7 +17,6 @@
 
 using Framework.Constants;
 using Game.Entities;
-using System.Diagnostics.Contracts;
 using Game.Network.Packets;
 
 namespace Game.BattleGrounds
@@ -53,7 +52,7 @@ namespace Game.BattleGrounds
                     HealingDone += value;
                     break;
                 default:
-                    Contract.Assert(false, "Not implemented Battleground score type!");
+                    Cypher.Assert(false, "Not implemented Battleground score type!");
                     break;
             }
         }

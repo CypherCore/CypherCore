@@ -25,7 +25,6 @@ using Game.Maps;
 using Game.Network.Packets;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 namespace Game.Garrisons
 {
@@ -426,7 +425,7 @@ namespace Game.Garrisons
                 {
                     // Restore previous level building
                     uint restored = Global.GarrisonMgr.GetPreviousLevelBuilding(constructing.BuildingType, constructing.UpgradeLevel);
-                    Contract.Assert(restored != 0);
+                    Cypher.Assert(restored != 0);
 
                     GarrisonPlaceBuildingResult placeBuildingResult = new GarrisonPlaceBuildingResult();
                     placeBuildingResult.GarrTypeID = GarrisonType.Garrison;

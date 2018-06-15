@@ -22,7 +22,6 @@ using Game.Network.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game.Entities
@@ -1787,7 +1786,7 @@ namespace Game.Entities
             {
                 foreach (AuraApplication aurApp in procAuras)
                 {
-                    Contract.Assert(aurApp.GetTarget() == this);
+                    Cypher.Assert(aurApp.GetTarget() == this);
                     uint procEffectMask = aurApp.GetBase().IsProcTriggeredOnEvent(aurApp, eventInfo, now);
                     if (procEffectMask != 0)
                     {
@@ -1890,7 +1889,7 @@ namespace Game.Entities
                 ++m_procDeep;
             else
             {
-                Contract.Assert(m_procDeep != 0);
+                Cypher.Assert(m_procDeep != 0);
                 --m_procDeep;
             }
         }
@@ -1989,7 +1988,7 @@ namespace Game.Entities
         }
         public void SetCurrentCastSpell(Spell pSpell)
         {
-            Contract.Assert(pSpell != null);                                         // NULL may be never passed here, use InterruptSpell or InterruptNonMeleeSpells
+            Cypher.Assert(pSpell != null);                                         // NULL may be never passed here, use InterruptSpell or InterruptNonMeleeSpells
 
             CurrentSpellTypes CSpellType = pSpell.GetCurrentContainer();
 
@@ -2789,7 +2788,7 @@ namespace Game.Entities
         }
         public void InterruptSpell(CurrentSpellTypes spellType, bool withDelayed = true, bool withInstant = true)
         {
-            Contract.Assert(spellType < CurrentSpellTypes.Max);
+            Cypher.Assert(spellType < CurrentSpellTypes.Max);
 
             Log.outDebug(LogFilter.Unit, "Interrupt spell for unit {0}", GetEntry());
             Spell spell = m_currentSpells.LookupByKey(spellType);
@@ -3375,7 +3374,7 @@ namespace Game.Entities
         {
             Aura aura = keyValuePair.Value;
 
-            Contract.Assert(!aura.IsRemoved());
+            Cypher.Assert(!aura.IsRemoved());
 
             m_ownedAuras.Remove(keyValuePair);
             m_removedAuras.Add(aura);
@@ -3402,7 +3401,7 @@ namespace Game.Entities
             if (auraToRemove.IsRemoved())
                 return;
 
-            Contract.Assert(auraToRemove.GetOwner() == this);
+            Cypher.Assert(auraToRemove.GetOwner() == this);
 
             if (removeMode == AuraRemoveMode.None)
             {
@@ -3423,7 +3422,7 @@ namespace Game.Entities
                 }
             }
 
-            Contract.Assert(false);
+            Cypher.Assert(false);
         }
 
         public void RemoveAurasDueToSpell(uint spellId, ObjectGuid casterGUID = default(ObjectGuid), uint reqEffMask = 0, AuraRemoveMode removeMode = AuraRemoveMode.Default)
@@ -3612,7 +3611,7 @@ namespace Game.Entities
             {
                 Aura aura = m_modAuras[auraType][i].GetBase();
                 AuraApplication aurApp = aura.GetApplicationOfTarget(GetGUID());
-                Contract.Assert(aurApp != null);
+                Cypher.Assert(aurApp != null);
 
                 if (check(aurApp))
                 {
@@ -3833,16 +3832,16 @@ namespace Game.Entities
         public void _UnapplyAura(KeyValuePair<uint, AuraApplication> pair, AuraRemoveMode removeMode)
         {
             AuraApplication aurApp = pair.Value;
-            Contract.Assert(aurApp != null);
-            Contract.Assert(!aurApp.HasRemoveMode());
-            Contract.Assert(aurApp.GetTarget() == this);
+            Cypher.Assert(aurApp != null);
+            Cypher.Assert(!aurApp.HasRemoveMode());
+            Cypher.Assert(aurApp.GetTarget() == this);
 
             aurApp.SetRemoveMode(removeMode);
             Aura aura = aurApp.GetBase();
             Log.outDebug(LogFilter.Spells, "Aura {0} now is remove mode {1}", aura.GetId(), removeMode);
 
             // dead loop is killing the server probably
-            Contract.Assert(m_removedAurasCount < 0xFFFFFFFF);
+            Cypher.Assert(m_removedAurasCount < 0xFFFFFFFF);
 
             ++m_removedAurasCount;
 
@@ -3889,7 +3888,7 @@ namespace Game.Entities
             }
 
             // all effect mustn't be applied
-            Contract.Assert(aurApp.GetEffectMask() == 0);
+            Cypher.Assert(aurApp.GetEffectMask() == 0);
 
             // Remove totem at next update if totem loses its aura
             if (aurApp.GetRemoveMode() == AuraRemoveMode.Expire && IsTypeId(TypeId.Unit) && IsTotem())
@@ -3908,7 +3907,7 @@ namespace Game.Entities
         public void _UnapplyAura(AuraApplication aurApp, AuraRemoveMode removeMode)
         {
             // aura can be removed from unit only if it's applied on it, shouldn't happen
-            Contract.Assert(aurApp.GetBase().GetApplicationOfTarget(GetGUID()) == aurApp);
+            Cypher.Assert(aurApp.GetBase().GetApplicationOfTarget(GetGUID()) == aurApp);
 
             uint spellId = aurApp.GetBase().GetId();
             var range = m_appliedAuras.LookupByKey(spellId);
@@ -3921,7 +3920,7 @@ namespace Game.Entities
                     return;
                 }
             }
-            Contract.Assert(false);
+            Cypher.Assert(false);
         }
 
         public AuraEffect GetAuraEffect(uint spellId, uint effIndex, ObjectGuid casterGUID = default(ObjectGuid))
@@ -4009,10 +4008,10 @@ namespace Game.Entities
 
         public void _ApplyAuraEffect(Aura aura, uint effIndex)
         {
-            Contract.Assert(aura != null);
-            Contract.Assert(aura.HasEffect(effIndex));
+            Cypher.Assert(aura != null);
+            Cypher.Assert(aura.HasEffect(effIndex));
             AuraApplication aurApp = aura.GetApplicationOfTarget(GetGUID());
-            Contract.Assert(aurApp != null);
+            Cypher.Assert(aurApp != null);
             if (aurApp.GetEffectMask() == 0)
                 _ApplyAura(aurApp, (uint)(1 << (int)effIndex));
             else
@@ -4058,7 +4057,7 @@ namespace Game.Entities
         }
         public void _AddAura(UnitAura aura, Unit caster)
         {
-            Contract.Assert(!m_cleanupDone);
+            Cypher.Assert(!m_cleanupDone);
             m_ownedAuras.Add(aura.GetId(), aura);
 
             _RemoveNoStackAurasDueToAura(aura);
@@ -4073,7 +4072,7 @@ namespace Game.Entities
                 // @HACK: Player is not in world during loading auras.
                 //Single target auras are not saved or loaded from database
                 //but may be created as a result of aura links (player mounts with passengers)
-                Contract.Assert((IsInWorld && !IsDuringRemoveFromWorld()) || (aura.GetCasterGUID() == GetGUID()) || (IsLoading() && aura.HasEffectType(AuraType.ControlVehicle)));
+                Cypher.Assert((IsInWorld && !IsDuringRemoveFromWorld()) || (aura.GetCasterGUID() == GetGUID()) || (IsLoading() && aura.HasEffectType(AuraType.ControlVehicle)));
 
                 // register single target aura
                 caster.m_scAuras.Add(aura);
@@ -4090,7 +4089,7 @@ namespace Game.Entities
         }
         public Aura _TryStackingOrRefreshingExistingAura(SpellInfo newAura, uint effMask, Unit caster, int[] baseAmount = null, Item castItem = null, ObjectGuid casterGUID = default(ObjectGuid), bool resetPeriodicTimer = true, ObjectGuid castItemGuid = default(ObjectGuid), int castItemLevel = -1)
         {
-            Contract.Assert(!casterGUID.IsEmpty() || caster);
+            Cypher.Assert(!casterGUID.IsEmpty() || caster);
 
             // Check if these can stack anyway
             if (casterGUID.IsEmpty() && !newAura.IsStackableOnOneSlotWithDifferentCasters())

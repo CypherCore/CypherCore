@@ -27,7 +27,6 @@ using Game.Network;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.InteropServices;
 
@@ -586,7 +585,7 @@ namespace Game.Achievements
             uint timeElapsed = 0;
             if (criteria.Entry.StartTimer != 0)
             {
-                Contract.Assert(trees != null);
+                Cypher.Assert(trees != null);
 
                 foreach (CriteriaTree tree in trees)
                 {
@@ -1554,7 +1553,7 @@ namespace Game.Achievements
             uint questObjectiveCriterias = 0;
             foreach (CriteriaRecord criteriaEntry in CliDB.CriteriaStorage.Values)
             {
-                Contract.Assert(criteriaEntry.Type < CriteriaTypes.TotalTypes,
+                Cypher.Assert(criteriaEntry.Type < CriteriaTypes.TotalTypes,
                     $"CRITERIA_TYPE_TOTAL must be greater than or equal to {criteriaEntry.Type + 1} but is currently equal to {CriteriaTypes.TotalTypes}");
 
                 var treeList = _criteriaTreeByCriteria.LookupByKey(criteriaEntry.Id);

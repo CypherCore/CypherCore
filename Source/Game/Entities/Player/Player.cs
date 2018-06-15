@@ -37,7 +37,6 @@ using Game.PvP;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game.Entities
@@ -1091,7 +1090,7 @@ namespace Game.Entities
                 if (!charm.GetCharmerGUID().IsEmpty())
                 {
                     Log.outFatal(LogFilter.Player, "Charmed unit has charmer guid {0}", charm.GetCharmerGUID());
-                    Contract.Assert(false);
+                    Cypher.Assert(false);
                 }
 
                 SetCharm(charm, false);
@@ -1231,7 +1230,7 @@ namespace Game.Entities
                 return;
 
             CurrencyTypesRecord currency = CliDB.CurrencyTypesStorage.LookupByKey(id);
-            Contract.Assert(currency != null);
+            Cypher.Assert(currency != null);
 
             if (!ignoreMultipliers)
                 count *= (int)GetTotalAuraMultiplierByMiscValue(AuraType.ModCurrencyGain, (int)id);
@@ -2605,7 +2604,7 @@ namespace Game.Entities
 
             return textId;
         }
-        uint GetDefaultGossipMenuForSource(WorldObject source)
+        public static uint GetDefaultGossipMenuForSource(WorldObject source)
         {
             switch (source.GetTypeId())
             {
@@ -3546,7 +3545,7 @@ namespace Game.Entities
 
         public void SetResurrectRequestData(Unit caster, uint health, uint mana, uint appliedAura)
         {
-            Contract.Assert(!IsResurrectRequested());
+            Cypher.Assert(!IsResurrectRequested());
             _resurrectionData = new ResurrectionData();
             _resurrectionData.GUID = caster.GetGUID();
             _resurrectionData.Location.WorldRelocate(caster);
@@ -5099,9 +5098,9 @@ namespace Game.Entities
                     return GetCollisionHeight(false);
 
                 var displayInfo = CliDB.CreatureDisplayInfoStorage.LookupByKey(GetNativeDisplayId());
-                Contract.Assert(displayInfo != null);
+                Cypher.Assert(displayInfo != null);
                 var modelData = CliDB.CreatureModelDataStorage.LookupByKey(displayInfo.ModelID);
-                Contract.Assert(modelData != null);
+                Cypher.Assert(modelData != null);
 
                 float scaleMod = GetObjectScale(); // 99% sure about this
 
@@ -5111,9 +5110,9 @@ namespace Game.Entities
             {
                 //! Dismounting case - use basic default model data
                 var displayInfo = CliDB.CreatureDisplayInfoStorage.LookupByKey(GetNativeDisplayId());
-                Contract.Assert(displayInfo != null);
+                Cypher.Assert(displayInfo != null);
                 var modelData = CliDB.CreatureModelDataStorage.LookupByKey(displayInfo.ModelID);
-                Contract.Assert(modelData != null);
+                Cypher.Assert(modelData != null);
 
                 return modelData.CollisionHeight;
             }
@@ -7009,7 +7008,7 @@ namespace Game.Entities
         //new
         public uint DoRandomRoll(uint minimum, uint maximum)
         {
-            Contract.Assert(maximum <= 10000);
+            Cypher.Assert(maximum <= 10000);
 
             uint roll = RandomHelper.URand(minimum, maximum);
 

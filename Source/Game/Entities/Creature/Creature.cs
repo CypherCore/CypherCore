@@ -27,7 +27,6 @@ using Game.Network.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game.Entities
@@ -662,7 +661,7 @@ namespace Game.Entities
                 return false;
             }
 
-            Contract.Assert(i_disabledAI == null, "The disabled AI wasn't cleared!");
+            Cypher.Assert(i_disabledAI == null, "The disabled AI wasn't cleared!");
 
             i_AI = null;
 

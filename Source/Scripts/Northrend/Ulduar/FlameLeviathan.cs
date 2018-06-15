@@ -23,7 +23,6 @@ using Game.Scripting;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 namespace Scripts.Northrend.Ulduar.FlameLeviathan
 {
@@ -217,7 +216,7 @@ namespace Scripts.Northrend.Ulduar.FlameLeviathan
 
         public override void InitializeAI()
         {
-            Contract.Assert(vehicle);
+            Cypher.Assert(vehicle);
             if (!me.IsDead())
                 Reset();
 
@@ -558,7 +557,7 @@ namespace Scripts.Northrend.Ulduar.FlameLeviathan
             : base(creature)
         {
             vehicle = creature.GetVehicleKit();
-            Contract.Assert(vehicle);
+            Cypher.Assert(vehicle);
             me.SetReactState(ReactStates.Passive);
             me.SetDisplayId(me.GetCreatureTemplate().ModelId2);
             instance = creature.GetInstanceScript();
@@ -736,7 +735,7 @@ namespace Scripts.Northrend.Ulduar.FlameLeviathan
     {
         public npc_mechanolift(Creature creature) : base(creature)
         {
-            Contract.Assert(me.GetVehicleKit());
+            Cypher.Assert(me.GetVehicleKit());
         }
 
         uint MoveTimer;

@@ -20,6 +20,7 @@ using Framework.Configuration;
 using Framework.Database;
 using Framework.Networking;
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Timers;
 
@@ -41,7 +42,7 @@ namespace BNetServer
                 Environment.Exit(-1);
             };
 
-            if (!ConfigMgr.Load(System.Diagnostics.Process.GetCurrentProcess().ProcessName + ".conf"))
+            if (!ConfigMgr.Load(Process.GetCurrentProcess().ProcessName + ".conf"))
                 ExitNow();
 
             // Initialize the database connection

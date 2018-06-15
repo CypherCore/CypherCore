@@ -24,7 +24,6 @@ using Game.Maps;
 using Game.SupportSystem;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 namespace Game.Chat.Commands
 {
@@ -419,7 +418,7 @@ namespace Game.Chat.Commands
 
             // update to parent zone if exist (client map show only zones without parents)
             AreaTableRecord zoneEntry = areaEntry.ParentAreaID != 0 ? CliDB.AreaTableStorage.LookupByKey(areaEntry.ParentAreaID) : areaEntry;
-            Contract.Assert(zoneEntry != null);
+            Cypher.Assert(zoneEntry != null);
 
             Map map = Global.MapMgr.CreateBaseMap(zoneEntry.ContinentID);
 

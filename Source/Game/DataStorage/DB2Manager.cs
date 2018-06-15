@@ -20,7 +20,6 @@ using Framework.Database;
 using Framework.GameMath;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -73,8 +72,8 @@ namespace Game.DataStorage
             CharBaseSectionVariation[] sectionToBase = new CharBaseSectionVariation[(int)CharSectionType.Max];
             foreach (CharBaseSectionRecord charBaseSection in CliDB.CharBaseSectionStorage.Values)
             {
-                Contract.Assert(charBaseSection.ResolutionVariationEnum < (byte)CharSectionType.Max, $"SECTION_TYPE_MAX ({(byte)CharSectionType.Max}) must be equal to or greater than {charBaseSection.ResolutionVariationEnum + 1}");
-                Contract.Assert(charBaseSection.VariationEnum < CharBaseSectionVariation.Max, $"CharBaseSectionVariation.Max {(byte)CharBaseSectionVariation.Max} must be equal to or greater than {charBaseSection.VariationEnum + 1}");
+                Cypher.Assert(charBaseSection.ResolutionVariationEnum < (byte)CharSectionType.Max, $"SECTION_TYPE_MAX ({(byte)CharSectionType.Max}) must be equal to or greater than {charBaseSection.ResolutionVariationEnum + 1}");
+                Cypher.Assert(charBaseSection.VariationEnum < CharBaseSectionVariation.Max, $"CharBaseSectionVariation.Max {(byte)CharBaseSectionVariation.Max} must be equal to or greater than {charBaseSection.VariationEnum + 1}");
 
                 sectionToBase[charBaseSection.ResolutionVariationEnum] = charBaseSection.VariationEnum;
             }
@@ -84,7 +83,7 @@ namespace Game.DataStorage
             MultiMap<Tuple<byte, byte, CharBaseSectionVariation>, Tuple<byte, byte>> addedSections = new MultiMap<Tuple<byte, byte, CharBaseSectionVariation>, Tuple<byte, byte>>();
             foreach (CharSectionsRecord charSection in CliDB.CharSectionsStorage.Values)
             {
-                Contract.Assert(charSection.BaseSection < (byte)CharSectionType.Max, $"SECTION_TYPE_MAX ({(byte)CharSectionType.Max}) must be equal to or greater than {charSection.BaseSection + 1}");
+                Cypher.Assert(charSection.BaseSection < (byte)CharSectionType.Max, $"SECTION_TYPE_MAX ({(byte)CharSectionType.Max}) must be equal to or greater than {charSection.BaseSection + 1}");
 
                 Tuple<byte, byte, CharBaseSectionVariation> sectionKey = Tuple.Create(charSection.RaceID, charSection.SexID, sectionToBase[charSection.BaseSection]);
                 Tuple<byte, byte> sectionCombination = Tuple.Create(charSection.VariationIndex, charSection.ColorIndex);
@@ -299,7 +298,7 @@ namespace Game.DataStorage
 
             foreach (var namesProfanity in CliDB.NamesProfanityStorage.Values)
             {
-                Contract.Assert(namesProfanity.Language < (int)LocaleConstant.Total || namesProfanity.Language == -1);
+                Cypher.Assert(namesProfanity.Language < (int)LocaleConstant.Total || namesProfanity.Language == -1);
                 if (namesProfanity.Language != -1)
                     _nameValidators[namesProfanity.Language].Add(new Regex(namesProfanity.Name, RegexOptions.IgnoreCase | RegexOptions.Compiled));
                 else
@@ -321,7 +320,7 @@ namespace Game.DataStorage
 
             foreach (var namesReserved in CliDB.NamesReservedLocaleStorage.Values)
             {
-                Contract.Assert(!Convert.ToBoolean(namesReserved.LocaleMask & ~((1 << (int)LocaleConstant.Total) - 1)));
+                Cypher.Assert(!Convert.ToBoolean(namesReserved.LocaleMask & ~((1 << (int)LocaleConstant.Total) - 1)));
                 for (int i = 0; i < (int)LocaleConstant.Total; ++i)
                 {
                     if (i == (int)LocaleConstant.None)
@@ -343,7 +342,7 @@ namespace Game.DataStorage
 
             foreach (PowerTypeRecord powerType in CliDB.PowerTypeStorage.Values)
             {
-                Contract.Assert(powerType.PowerTypeEnum < PowerType.Max);
+                Cypher.Assert(powerType.PowerTypeEnum < PowerType.Max);
 
                 _powerTypes[powerType.PowerTypeEnum] = powerType;
             }
@@ -1116,7 +1115,7 @@ namespace Game.DataStorage
 
         public string GetNameGenEntry(uint race, uint gender)
         {
-            Contract.Assert(gender < (int)Gender.None);
+            Cypher.Assert(gender < (int)Gender.None);
             var listNameGen = _nameGenData.LookupByKey(race);
             if (listNameGen == null)
                 return "";
@@ -1443,7 +1442,6 @@ namespace Game.DataStorage
         {
             newPos = new Vector2();
 
-            //Contract.Assert(newMapId != 0 || newPos != );
             WorldMapTransformsRecord transformation = null;
             foreach (WorldMapTransformsRecord transform in CliDB.WorldMapTransformsStorage.Values)
             {

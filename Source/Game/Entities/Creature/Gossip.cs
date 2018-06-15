@@ -23,7 +23,6 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Network.Packets;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game.Misc
@@ -32,7 +31,7 @@ namespace Game.Misc
     {
         public uint AddMenuItem(int optionIndex, GossipOptionIcon icon, string message, uint sender, uint action, string boxMessage, uint boxMoney, bool coded = false)
         {
-            Contract.Assert(_menuItems.Count <= SharedConst.MaxGossipMenuItems);
+            Cypher.Assert(_menuItems.Count <= SharedConst.MaxGossipMenuItems);
 
             // Find a free new id - script case
             if (optionIndex == -1)

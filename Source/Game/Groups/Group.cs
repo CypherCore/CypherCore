@@ -27,7 +27,6 @@ using Game.Network;
 using Game.Network.Packets;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Game.Groups
@@ -113,7 +112,7 @@ namespace Game.Groups
 
                 ConvertLeaderInstancesToGroup(leader, this, false);
 
-                Contract.Assert(AddMember(leader)); // If the leader can't be added to a new group because it appears full, something is clearly wrong.
+                Cypher.Assert(AddMember(leader)); // If the leader can't be added to a new group because it appears full, something is clearly wrong.
             }
             else if (!AddMember(leader))
                 return false;
@@ -898,7 +897,7 @@ namespace Game.Groups
         // notify group members which player is the allowed looter for the given creature
         public void SendLooter(Creature creature, Player groupLooter)
         {
-            Contract.Assert(creature);
+            Cypher.Assert(creature);
 
             LootList lootList = new LootList();
             lootList.Owner = creature.GetGUID();
