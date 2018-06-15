@@ -19,10 +19,11 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
 using Game.Network.Packets;
+using Game.Scripting;
 
 namespace Game.PvP
 {
-    public class HellfirePeninsulaPvP : OutdoorPvP
+    class HellfirePeninsulaPvP : OutdoorPvP
     {
         public HellfirePeninsulaPvP()
         {
@@ -307,6 +308,17 @@ namespace Game.PvP
         }
 
         uint m_TowerType;
+    }
+
+    [Script]
+    class OutdoorPvP_hellfire_peninsula : OutdoorPvPScript
+    {
+        public OutdoorPvP_hellfire_peninsula() : base("outdoorpvp_hp") { }
+
+        public override OutdoorPvP GetOutdoorPvP()
+        {
+            return new HellfirePeninsulaPvP();
+        }
     }
 
     struct HPConst

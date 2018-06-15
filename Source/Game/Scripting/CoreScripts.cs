@@ -64,6 +64,26 @@ namespace Game.Scripting
             return null;
         }
 
+        public void ClearGossipMenuFor(Player player) { player.PlayerTalkClass.ClearMenus(); }
+        // Using provided text, not from DB
+        public void AddGossipItemFor(Player player, GossipOptionIcon icon, string text, uint sender, uint action)
+        {
+            player.PlayerTalkClass.GetGossipMenu().AddMenuItem(-1, icon, text, sender, action, "", 0);
+        }
+        // Using provided texts, not from DB
+        public void AddGossipItemFor(Player player, GossipOptionIcon icon, string text, uint sender, uint action, string popupText, uint popupMoney, bool coded)
+        {
+            player.PlayerTalkClass.GetGossipMenu().AddMenuItem(-1, icon, text, sender, action, popupText, popupMoney, coded);
+        }
+        // Uses gossip item info from DB
+        public void AddGossipItemFor(Player player, uint gossipMenuID, uint gossipMenuItemID, uint sender, uint action)
+        {
+            player.PlayerTalkClass.GetGossipMenu().AddMenuItem(gossipMenuID, gossipMenuItemID, sender, action);
+        }
+        public void SendGossipMenuFor(Player player, uint npcTextID, ObjectGuid guid) { player.PlayerTalkClass.SendGossipMenu(npcTextID, guid); }
+        public void SendGossipMenuFor(Player player, uint npcTextID, Creature creature) { if (creature) SendGossipMenuFor(player, npcTextID, creature.GetGUID()); }
+        public void CloseGossipMenuFor(Player player) { player.PlayerTalkClass.SendCloseGossip(); }
+
         string _name;
     }
 
