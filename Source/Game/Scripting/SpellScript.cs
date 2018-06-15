@@ -20,7 +20,6 @@ using Game.Entities;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 namespace Game.Scripting
 {
@@ -31,7 +30,7 @@ namespace Game.Scripting
         // DO NOT OVERRIDE THESE IN SCRIPTS
         public BaseSpellScript()
         {
-            m_currentScriptState = SpellScriptHookType.None;
+            m_currentScriptState = (byte)SpellScriptState.None;
         }
 
         public virtual bool _Validate(SpellInfo entry)
@@ -61,20 +60,20 @@ namespace Game.Scripting
 
         public void _Register()
         {
-            m_currentScriptState = SpellScriptHookType.Registration;
+            m_currentScriptState = (byte)SpellScriptState.Registration;
             Register();
-            m_currentScriptState = SpellScriptHookType.None;
+            m_currentScriptState = (byte)SpellScriptState.None;
         }
         public void _Unload()
         {
-            m_currentScriptState = SpellScriptHookType.Unloading;
+            m_currentScriptState = (byte)SpellScriptState.Unloading;
             Unload();
-            m_currentScriptState = SpellScriptHookType.None;
+            m_currentScriptState = (byte)SpellScriptState.None;
         }
 
         public void _Init(string scriptname, uint spellId)
         {
-            m_currentScriptState = SpellScriptHookType.None;
+            m_currentScriptState = (byte)SpellScriptState.None;
             m_scriptName = scriptname;
             m_scriptSpellId = spellId;
         }
@@ -88,7 +87,7 @@ namespace Game.Scripting
             protected EffectHook(uint effIndex)
             {
                 // effect index must be in range <0;2>, allow use of special effindexes
-                Contract.Assert(_effIndex == SpellConst.EffectAll || _effIndex == SpellConst.EffectFirstFound || _effIndex < SpellConst.MaxEffects);
+                Cypher.Assert(_effIndex == SpellConst.EffectAll || _effIndex == SpellConst.EffectFirstFound || _effIndex < SpellConst.MaxEffects);
                 _effIndex = effIndex;
             }
 
@@ -123,8 +122,7 @@ namespace Game.Scripting
             uint _effIndex;
         }
 
-        public SpellScriptHookType m_currentScriptState { get; set; }
-        public AuraScriptHookType m_currentAuraScriptState { get; set; }
+        public byte m_currentScriptState { get; set; }
         public string m_scriptName { get; set; }
         public uint m_scriptSpellId { get; set; }
 
@@ -393,7 +391,7 @@ namespace Game.Scripting
         public bool _Load(Spell spell)
         {
             m_spell = spell;
-            _PrepareScriptCall(SpellScriptHookType.Loading);
+            _PrepareScriptCall((SpellScriptHookType)SpellScriptState.Loading);
             bool load = Load();
             _FinishScriptCall();
             return load;
@@ -407,19 +405,19 @@ namespace Game.Scripting
         public bool _IsDefaultEffectPrevented(uint effIndex) { return Convert.ToBoolean(m_hitPreventDefaultEffectMask & (1 << (int)effIndex)); }
         public void _PrepareScriptCall(SpellScriptHookType hookType)
         {
-            m_currentScriptState = hookType;
+            m_currentScriptState = (byte)hookType;
         }
         public void _FinishScriptCall()
         {
-            m_currentScriptState = SpellScriptHookType.None;
+            m_currentScriptState = (byte)SpellScriptState.None;
         }
         public bool IsInCheckCastHook()
         {
-            return m_currentScriptState == SpellScriptHookType.CheckCast;
+            return m_currentScriptState == (byte)SpellScriptHookType.CheckCast;
         }
         public bool IsInTargetHook()
         {
-            switch (m_currentScriptState)
+            switch ((SpellScriptHookType)m_currentScriptState)
             {
                 case SpellScriptHookType.LaunchTarget:
                 case SpellScriptHookType.EffectHitTarget:
@@ -433,12 +431,12 @@ namespace Game.Scripting
         }
         public bool IsInHitPhase()
         {
-            return (m_currentScriptState >= SpellScriptHookType.EffectHit && m_currentScriptState < SpellScriptHookType.AfterHit + 1);
+            return (m_currentScriptState >= (byte)SpellScriptHookType.EffectHit && m_currentScriptState < (byte)SpellScriptHookType.AfterHit + 1);
         }
         public bool IsInEffectHook()
         {
-            return (m_currentScriptState >= SpellScriptHookType.Launch && m_currentScriptState <= SpellScriptHookType.EffectHitTarget)
-                || m_currentScriptState == SpellScriptHookType.EffectSuccessfulDispel;
+            return (m_currentScriptState >= (byte)SpellScriptHookType.Launch && m_currentScriptState <= (byte)SpellScriptHookType.EffectHitTarget)
+                || m_currentScriptState == (byte)SpellScriptHookType.EffectSuccessfulDispel;
         }
 
         Spell m_spell;
@@ -705,8 +703,7 @@ namespace Game.Scripting
 
         public SpellEffectInfo GetEffectInfo()
         {
-            Contract.Assert(IsInEffectHook(),
-                $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript::GetEffectInfo was called, but function has no effect in current hook!");
+            Cypher.Assert(IsInEffectHook(), $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript::GetEffectInfo was called, but function has no effect in current hook!");
 
             return m_spell.effectInfo;
         }
@@ -1116,29 +1113,29 @@ namespace Game.Scripting
         public bool _Load(Aura aura)
         {
             m_aura = aura;
-            _PrepareScriptCall(AuraScriptHookType.Loading, null);
+            _PrepareScriptCall((AuraScriptHookType)SpellScriptState.Loading, null);
             bool load = Load();
             _FinishScriptCall();
             return load;
         }
         public void _PrepareScriptCall(AuraScriptHookType hookType, AuraApplication aurApp = null)
         {
-            m_scriptStates.Push(new ScriptStateStore((byte)m_currentScriptState, m_auraApplication, m_defaultActionPrevented));
-            m_currentAuraScriptState = hookType;
+            m_scriptStates.Push(new ScriptStateStore(m_currentScriptState, m_auraApplication, m_defaultActionPrevented));
+            m_currentScriptState = (byte)hookType;
             m_defaultActionPrevented = false;
             m_auraApplication = aurApp;
         }
         public void _FinishScriptCall()
         {
             ScriptStateStore stateStore = m_scriptStates.Peek();
-            m_currentAuraScriptState = (AuraScriptHookType)stateStore._currentScriptState;
+            m_currentScriptState = stateStore._currentScriptState;
             m_auraApplication = stateStore._auraApplication;
             m_defaultActionPrevented = stateStore._defaultActionPrevented;
             m_scriptStates.Pop();
         }
         public bool _IsDefaultActionPrevented()
         {
-            switch (m_currentAuraScriptState)
+            switch ((AuraScriptHookType)m_currentScriptState)
             {
                 case AuraScriptHookType.EffectApply:
                 case AuraScriptHookType.EffectRemove:
@@ -1150,8 +1147,7 @@ namespace Game.Scripting
                 case AuraScriptHookType.EffectProc:
                     return m_defaultActionPrevented;
                 default:
-                    Contract.Assert(false, "AuraScript._IsDefaultActionPrevented is called in a wrong place");
-                    return false;
+                    throw new Exception("AuraScript._IsDefaultActionPrevented is called in a wrong place");
             }
         }
 
@@ -1303,7 +1299,7 @@ namespace Game.Scripting
         // prevents default action of a hook from being executed (works only while called in a hook which default action can be prevented)
         public void PreventDefaultAction()
         {
-            switch (m_currentAuraScriptState)
+            switch ((AuraScriptHookType)m_currentScriptState)
             {
                 case AuraScriptHookType.EffectApply:
                 case AuraScriptHookType.EffectRemove:
@@ -1397,7 +1393,7 @@ namespace Game.Scripting
         // return null is when the call happens in an unsupported hook, in other cases, it is always valid
         public Unit GetTarget()
         {
-            switch (m_currentAuraScriptState)
+            switch ((AuraScriptHookType)m_currentScriptState)
             {
                 case AuraScriptHookType.EffectApply:
                 case AuraScriptHookType.EffectRemove:

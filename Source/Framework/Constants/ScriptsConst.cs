@@ -17,14 +17,38 @@
 
 namespace Framework.Constants
 {
-    // AuraScript interface - enum used for runtime checks of script function calls
-    public enum AuraScriptHookType
+    public enum SpellScriptState
     {
         None = 0,
         Registration,
         Loading,
         Unloading,
-        EffectApply,
+    }
+
+    // SpellScript interface - enum used for runtime checks of script function calls
+    public enum SpellScriptHookType
+    {
+        Launch = SpellScriptState.Unloading + 1,
+        LaunchTarget,
+        EffectHit,
+        EffectHitTarget,
+        EffectSuccessfulDispel,
+        BeforeHit,
+        OnHit,
+        AfterHit,
+        ObjectAreaTargetSelect,
+        ObjectTargetSelect,
+        DestinationTargetSelect,
+        CheckCast,
+        BeforeCast,
+        OnCast,
+        AfterCast
+    }
+
+    // AuraScript interface - enum used for runtime checks of script function calls
+    public enum AuraScriptHookType
+    {
+        EffectApply = SpellScriptState.Unloading + 1,
         EffectAfterApply,
         EffectRemove,
         EffectAfterRemove,
@@ -51,29 +75,5 @@ namespace Framework.Constants
         AfterProc,
         //Apply,
         //Remove
-    }
-
-    // SpellScript interface - enum used for runtime checks of script function calls
-    public enum SpellScriptHookType
-    {
-        None = 0,
-        Registration,
-        Loading,
-        Unloading,
-        Launch,
-        LaunchTarget,
-        EffectHit,
-        EffectHitTarget,
-        EffectSuccessfulDispel,
-        BeforeHit,
-        OnHit,
-        AfterHit,
-        ObjectAreaTargetSelect,
-        ObjectTargetSelect,
-        DestinationTargetSelect,
-        CheckCast,
-        BeforeCast,
-        OnCast,
-        AfterCast
     }
 }
