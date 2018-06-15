@@ -42,25 +42,25 @@ namespace Game.Movement
 
         UnitMoveType SelectSpeedType(MovementFlag moveFlags)
         {
-            if (Convert.ToBoolean(moveFlags & (MovementFlag.Flying | MovementFlag.CanFly | MovementFlag.DisableGravity)))
+            if (moveFlags.HasAnyFlag(MovementFlag.Flying))
             {
-                if (Convert.ToBoolean(moveFlags & MovementFlag.Backward))
+                if (moveFlags.HasAnyFlag(MovementFlag.Backward))
                     return UnitMoveType.FlightBack;
                 else
                     return UnitMoveType.Flight;
             }
-            else if (Convert.ToBoolean(moveFlags & MovementFlag.Swimming))
+            else if (moveFlags.HasAnyFlag(MovementFlag.Swimming))
             {
-                if (Convert.ToBoolean(moveFlags & MovementFlag.Backward))
+                if (moveFlags.HasAnyFlag(MovementFlag.Backward))
                     return UnitMoveType.SwimBack;
                 else
                     return UnitMoveType.Swim;
             }
-            else if (Convert.ToBoolean(moveFlags & MovementFlag.Walking))
+            else if (moveFlags.HasAnyFlag(MovementFlag.Walking))
             {
                 return UnitMoveType.Walk;
             }
-            else if (Convert.ToBoolean(moveFlags & MovementFlag.Backward))
+            else if (moveFlags.HasAnyFlag(MovementFlag.Backward))
                 return UnitMoveType.RunBack;
 
             // Flying creatures use MOVEMENTFLAG_CAN_FLY or MOVEMENTFLAG_DISABLE_GRAVITY
