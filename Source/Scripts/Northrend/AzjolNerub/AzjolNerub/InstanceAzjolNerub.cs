@@ -103,7 +103,7 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub
 
         class instance_azjol_nerub_InstanceScript : InstanceScript
         {
-            public instance_azjol_nerub_InstanceScript(Map map) : base(map)
+            public instance_azjol_nerub_InstanceScript(InstanceMap map) : base(map)
             {
                 SetHeaders(ANInstanceMisc.DataHeader);
                 SetBossNumber(ANInstanceMisc.EncounterCount);

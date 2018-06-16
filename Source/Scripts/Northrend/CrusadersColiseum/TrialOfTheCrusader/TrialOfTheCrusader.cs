@@ -32,7 +32,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
 
         class instance_trial_of_the_crusader_InstanceMapScript : InstanceScript
         {
-            public instance_trial_of_the_crusader_InstanceMapScript(Map map) : base(map)
+            public instance_trial_of_the_crusader_InstanceMapScript(InstanceMap map) : base(map)
             {
                 SetHeaders("TCR");
                 SetBossNumber(DataTypes.MaxEncounters);

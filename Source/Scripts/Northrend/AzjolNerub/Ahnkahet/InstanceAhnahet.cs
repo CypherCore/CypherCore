@@ -83,7 +83,7 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet
 
         class instance_ahnkahet_InstanceScript : InstanceScript
         {
-            public instance_ahnkahet_InstanceScript(Map map) : base(map)
+            public instance_ahnkahet_InstanceScript(InstanceMap map) : base(map)
             {
                 SetHeaders("AK");
                 SetBossNumber(DataTypes.HeraldVolazj + 1);

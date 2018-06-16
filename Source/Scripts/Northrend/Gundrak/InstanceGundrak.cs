@@ -128,7 +128,7 @@ namespace Scripts.Northrend.Gundrak
 
         class instance_gundrak_InstanceMapScript : InstanceScript
         {
-            public instance_gundrak_InstanceMapScript(Map map) : base(map)
+            public instance_gundrak_InstanceMapScript(InstanceMap map) : base(map)
             {
                 SetHeaders("GD");
                 SetBossNumber(5);

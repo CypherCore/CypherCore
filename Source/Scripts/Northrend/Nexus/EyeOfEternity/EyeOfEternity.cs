@@ -95,7 +95,7 @@ namespace Scripts.Northrend.Nexus.EyeOfEternity
 
         class instance_eye_of_eternity_InstanceMapScript : InstanceScript
         {
-            public instance_eye_of_eternity_InstanceMapScript(Map map) : base(map)
+            public instance_eye_of_eternity_InstanceMapScript(InstanceMap map) : base(map)
             {
                 SetHeaders("EOE");
                 SetBossNumber(EyeOfEternityConst.MaxEncounter);

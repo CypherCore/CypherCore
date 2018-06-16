@@ -32,7 +32,7 @@ namespace Scripts.Kalimdor
 
         class RagefireChasmInstanceMapScript : InstanceScript
         {
-            public RagefireChasmInstanceMapScript(Map map) : base(map) { }
+            public RagefireChasmInstanceMapScript(InstanceMap map) : base(map) { }
         }
     }
 }

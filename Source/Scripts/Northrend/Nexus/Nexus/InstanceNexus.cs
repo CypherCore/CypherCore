@@ -69,7 +69,7 @@ namespace Scripts.Northrend.Nexus.Nexus
 
         class instance_nexus_InstanceMapScript : InstanceScript
         {
-            public instance_nexus_InstanceMapScript(Map map) : base(map)
+            public instance_nexus_InstanceMapScript(InstanceMap map) : base(map)
             {
                 SetHeaders("NEX");
                 SetBossNumber(DataTypes.Keristrasza + 1);

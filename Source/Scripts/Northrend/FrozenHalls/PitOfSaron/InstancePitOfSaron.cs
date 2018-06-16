@@ -29,7 +29,7 @@ namespace Scripts.Northrend.FrozenHalls.PitOfSaron
 
         class instance_pit_of_saron_InstanceScript : InstanceScript
         {
-            public instance_pit_of_saron_InstanceScript(Map map) : base(map)
+            public instance_pit_of_saron_InstanceScript(InstanceMap map) : base(map)
             {
                 SetHeaders("POS");
                 SetBossNumber(3);

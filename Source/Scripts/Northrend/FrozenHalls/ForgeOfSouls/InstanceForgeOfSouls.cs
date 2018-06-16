@@ -110,7 +110,7 @@ namespace Scripts.Northrend.FrozenHalls.ForgeOfSouls
 
         class instance_forge_of_souls_InstanceScript : InstanceScript
         {
-            public instance_forge_of_souls_InstanceScript(Map map) : base(map)
+            public instance_forge_of_souls_InstanceScript(InstanceMap map) : base(map)
             {
                 SetHeaders("FOS");
                 SetBossNumber(2);

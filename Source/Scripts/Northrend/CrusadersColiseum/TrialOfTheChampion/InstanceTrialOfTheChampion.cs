@@ -35,7 +35,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
 
         class instance_trial_of_the_champion_InstanceMapScript : InstanceScript
         {
-            public instance_trial_of_the_champion_InstanceMapScript(Map map) : base(map)
+            public instance_trial_of_the_champion_InstanceMapScript(InstanceMap map) : base(map)
             {
                 SetHeaders("TC");
                 uiMovementDone = 0;

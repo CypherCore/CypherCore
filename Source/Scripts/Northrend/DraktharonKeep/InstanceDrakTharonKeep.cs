@@ -89,7 +89,7 @@ namespace Scripts.Northrend.DraktharonKeep
 
         class instance_drak_tharon_keep_InstanceScript : InstanceScript
         {
-            public instance_drak_tharon_keep_InstanceScript(Map map) : base(map)
+            public instance_drak_tharon_keep_InstanceScript(InstanceMap map) : base(map)
             {
                 SetHeaders("DTK");
                 SetBossNumber(4);

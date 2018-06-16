@@ -159,7 +159,7 @@ namespace Scripts.EasternKingdoms.Karazhan
 
         public class instance_karazhan_InstanceMapScript : InstanceScript
         {
-            public instance_karazhan_InstanceMapScript(Map map) : base(map)
+            public instance_karazhan_InstanceMapScript(InstanceMap map) : base(map)
             {
                 SetHeaders("KZ");
 

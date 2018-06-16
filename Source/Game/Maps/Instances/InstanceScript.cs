@@ -29,14 +29,14 @@ namespace Game.Maps
 {
     public class InstanceScript : ZoneScript
     {
-        public InstanceScript(Map map)
+        public InstanceScript(InstanceMap map)
         {
             instance = map;
         }
 
         public void SaveToDB()
         {
-            InstanceScenario scenario = instance.ToInstanceMap().GetInstanceScenario();
+            InstanceScenario scenario = instance.GetInstanceScenario();
             if (scenario != null)
                 scenario.SaveToDB();
 
@@ -838,7 +838,7 @@ namespace Game.Maps
 
         public virtual void WriteSaveDataMore(StringBuilder data) { }
 
-        public Map instance;
+        public InstanceMap instance;
         List<char> headers = new List<char>();
         Dictionary<uint, BossInfo> bosses = new Dictionary<uint, BossInfo>();
         MultiMap<uint, DoorInfo> doors = new MultiMap<uint, DoorInfo>();

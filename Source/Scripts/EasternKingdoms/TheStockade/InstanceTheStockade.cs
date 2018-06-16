@@ -35,7 +35,7 @@ namespace Scripts.EasternKingdoms.TheStockade
 
         class instance_the_stockade_InstanceMapScript : InstanceScript
         {
-            public instance_the_stockade_InstanceMapScript(Map map) : base(map)
+            public instance_the_stockade_InstanceMapScript(InstanceMap map) : base(map)
             {
                 SetHeaders("SS");
                 SetBossNumber(3);
