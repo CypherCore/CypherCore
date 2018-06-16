@@ -85,10 +85,9 @@ namespace Game.Chat
 
             CreatureData data = Global.ObjectMgr.GetCreatureData(target.GetSpawnId());
             if (data != null)
-            {
                 handler.SendSysMessage(CypherStrings.NpcinfoPhases, data.phaseId, data.phaseGroup);
-                PhasingHandler.PrintToChat(handler, target.GetPhaseShift());
-            }
+
+            PhasingHandler.PrintToChat(handler, target.GetPhaseShift());
 
             handler.SendSysMessage(CypherStrings.NpcinfoArmor, target.GetArmor());
             handler.SendSysMessage(CypherStrings.NpcinfoPosition, target.GetPositionX(), target.GetPositionY(), target.GetPositionZ());
