@@ -132,7 +132,7 @@ namespace Scripts.EasternKingdoms
     }
 
     [Script]
-    public class npc_unworthy_initiate : ScriptedAI
+    class npc_unworthy_initiate : ScriptedAI
     {
         public npc_unworthy_initiate(Creature creature) : base(creature)
         {
@@ -940,9 +940,9 @@ namespace Scripts.EasternKingdoms
     }
 
     [Script]
-    class npc_scarlet_minerAI : npc_escortAI
+    class npc_scarlet_miner : npc_escortAI
     {
-        public npc_scarlet_minerAI(Creature creature) : base(creature)
+        public npc_scarlet_miner(Creature creature) : base(creature)
         {
             Initialize();
             me.SetReactState(ReactStates.Passive);

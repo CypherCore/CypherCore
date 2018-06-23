@@ -1548,7 +1548,7 @@ namespace Game.Scripting
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class ScriptAttribute : Attribute
     {
-        public ScriptAttribute(string name="", params object[] args)
+        public ScriptAttribute(string name = "", params object[] args)
         {
             Name = name;
             Args = args;
