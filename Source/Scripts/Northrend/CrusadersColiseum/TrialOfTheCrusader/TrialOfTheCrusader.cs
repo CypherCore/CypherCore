@@ -770,12 +770,6 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
         {
             return new instance_trial_of_the_crusader_InstanceMapScript(map);
         }
-
-        public static T GetTrialOfTheCrusaderAI<T>(Creature creature) where T : CreatureAI
-        {
-            return GetInstanceAI<T>(creature, "instance_trial_of_the_crusader");
-        }
-
     }
 
     [Script]
@@ -899,7 +893,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
 
         public override CreatureAI GetAI(Creature creature)
         {
-            return instance_trial_of_the_crusader.GetTrialOfTheCrusaderAI<npc_announcer_toc10AI>(creature);
+            return GetInstanceAI<npc_announcer_toc10AI>(creature);
         }
     }
 

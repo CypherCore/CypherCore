@@ -58,7 +58,7 @@ namespace Scripts.Northrend.IcecrownCitadel
 
         public override GameObjectAI GetAI(GameObject go)
         {
-            return GetInstanceAI<icecrown_citadel_teleportAI>(go, "instance_icecrown_citadel");
+            return GetInstanceAI<icecrown_citadel_teleportAI>(go);
         }
 
         public const uint GOSSIP_SENDER_ICC_PORT = 631;

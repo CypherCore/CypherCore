@@ -1684,7 +1684,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
         public override CreatureAI GetAI(Creature creature)
         {
-            return instance_karazhan.GetKarazhanAI<npc_barnesAI>(creature);
+            return GetInstanceAI<npc_barnesAI>(creature);
         }
     }
 }

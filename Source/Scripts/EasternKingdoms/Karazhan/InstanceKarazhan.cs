@@ -459,10 +459,5 @@ namespace Scripts.EasternKingdoms.Karazhan
         {
             return new instance_karazhan_InstanceMapScript(map);
         }
-
-        public static T GetKarazhanAI<T>(Creature creature) where T : CreatureAI
-        {
-            return GetInstanceAI<T>(creature, "instance_karazhan");
-        }
     }
 }

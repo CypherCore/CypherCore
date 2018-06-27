@@ -582,7 +582,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
 
         public override CreatureAI GetAI(Creature creature)
         {
-            return instance_trial_of_the_champion.GetTrialOfTheChampionAI<npc_announcer_toc5AI>(creature);
+            return GetInstanceAI<npc_announcer_toc5AI>(creature);
         }
     }
 }

@@ -1584,10 +1584,5 @@ namespace Scripts.Northrend.IcecrownCitadel
         {
             return new instance_icecrown_citadel_InstanceMapScript(map);
         }
-
-        public static T GetInstanceAI<T>(Creature creature) where T : CreatureAI
-        {
-            return GetInstanceAI<T>(creature, "instance_icecrown_citadel");
-        }
     }
 }

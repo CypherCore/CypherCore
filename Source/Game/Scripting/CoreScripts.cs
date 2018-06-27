@@ -45,16 +45,6 @@ namespace Game.Scripting
         // whether or not this script type must be assigned in the database.
         public virtual bool IsDatabaseBound() { return false; }
 
-        public static T GetInstanceAI<T>(WorldObject obj, string scriptName) where T : class
-        {
-            InstanceMap instance = obj.GetMap().ToInstanceMap();
-            if (instance != null && instance.GetInstanceScript() != null)
-                if (instance.GetScriptName() == scriptName)
-                    return (T)Activator.CreateInstance(typeof(T), obj);
-
-            return null;
-        }
-
         public static T GetInstanceAI<T>(WorldObject obj) where T : class
         {
             InstanceMap instance = obj.GetMap().ToInstanceMap();

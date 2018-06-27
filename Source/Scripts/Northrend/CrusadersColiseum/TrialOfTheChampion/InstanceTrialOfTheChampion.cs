@@ -331,10 +331,5 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
         {
             return new instance_trial_of_the_champion_InstanceMapScript(map);
         }
-
-        public static T GetTrialOfTheChampionAI<T>(Creature creature) where T : CreatureAI
-        {
-            return GetInstanceAI<T>(creature, "instance_trial_of_the_champion");
-        }
     }
 }

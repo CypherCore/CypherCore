@@ -1232,10 +1232,5 @@ namespace Scripts.Northrend.Ulduar
         {
             return new instance_ulduar_InstanceMapScript(map);
         }
-
-        public static T GetUlduarInstanceAI<T>(WorldObject obj) where T : CreatureAI
-        {
-            return GetInstanceAI<T>(obj, "instance_ulduar");
-        }
     }
 }
