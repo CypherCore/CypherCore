@@ -1091,10 +1091,12 @@ namespace Scripts.Northrend.IcecrownCitadel
                 switch (eventId)
                 {
                     case EventTypes.ArnathFlashHeal:
-                        Creature target = FindFriendlyCreature();
-                        if (target)
-                            DoCast(target, InstanceSpells.SpellFlashHeal(IsUndead));
-                        _events.ScheduleEvent(EventTypes.ArnathFlashHeal, RandomHelper.URand(6000, 9000));
+                        {
+                            Creature target = FindFriendlyCreature();
+                            if (target)
+                                DoCast(target, InstanceSpells.SpellFlashHeal(IsUndead));
+                            _events.ScheduleEvent(EventTypes.ArnathFlashHeal, RandomHelper.URand(6000, 9000));
+                        }
                         break;
                     case EventTypes.ArnathPwShield:
                         {
@@ -1108,10 +1110,12 @@ namespace Scripts.Northrend.IcecrownCitadel
                         _events.ScheduleEvent(EventTypes.ArnathSmite, RandomHelper.URand(4000, 7000));
                         break;
                     case EventTypes.ArnathDominateMind:
-                        Unit target1 = SelectTarget(SelectAggroTarget.Random, 1, 0.0f, true);
-                        if (target1)
-                            DoCast(target1, InstanceSpells.DominateMind);
-                        _events.ScheduleEvent(EventTypes.ArnathDominateMind, RandomHelper.URand(28000, 37000));
+                        {
+                            Unit target = SelectTarget(SelectAggroTarget.Random, 1, 0.0f, true);
+                            if (target)
+                                DoCast(target, InstanceSpells.DominateMind);
+                            _events.ScheduleEvent(EventTypes.ArnathDominateMind, RandomHelper.URand(28000, 37000));
+                        }
                         break;
                     default:
                         break;

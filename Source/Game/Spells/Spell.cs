@@ -1254,12 +1254,12 @@ namespace Game.Spells
                 case SpellEffectName.SummonPlayer:
                     if (m_caster.IsTypeId(TypeId.Player) && !m_caster.GetTarget().IsEmpty())
                     {
-                        WorldObject target1 = Global.ObjAccessor.FindPlayer(m_caster.GetTarget());
+                        WorldObject rafTarget = Global.ObjAccessor.FindPlayer(m_caster.GetTarget());
 
-                        CallScriptObjectTargetSelectHandlers(ref target1, effIndex, new SpellImplicitTargetInfo());
+                        CallScriptObjectTargetSelectHandlers(ref rafTarget, effIndex, new SpellImplicitTargetInfo());
 
-                        if (target1 != null && target1.IsTypeId(TypeId.Player))
-                            AddUnitTarget(target1.ToUnit(), (uint)(1 << (int)effIndex), false);
+                        if (rafTarget != null && rafTarget.IsTypeId(TypeId.Player))
+                            AddUnitTarget(rafTarget.ToUnit(), (uint)(1 << (int)effIndex), false);
                     }
                     return;
                 default:
@@ -4765,8 +4765,8 @@ namespace Game.Spells
                                 if (!m_caster.IsTypeId(TypeId.Player))
                                     return SpellCastResult.DontReport;
 
-                                Unit target1 = m_targets.GetUnitTarget();
-                                if (target1 == null || !target1.IsFriendlyTo(m_caster) || target1.getAttackers().Empty())
+                                Unit target = m_targets.GetUnitTarget();
+                                if (target == null || !target.IsFriendlyTo(m_caster) || target.getAttackers().Empty())
                                     return SpellCastResult.BadTargets;
 
                             }
@@ -4819,7 +4819,6 @@ namespace Game.Spells
                                     return SpellCastResult.BadTargets;
 
                                 SpellInfo learn_spellproto = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell);
-
                                 if (learn_spellproto == null)
                                     return SpellCastResult.NotKnown;
 
@@ -4919,9 +4918,9 @@ namespace Game.Spells
                             // Can be area effect, Check only for players and not check if target - caster (spell can have multiply drain/burn effects)
                             if (m_caster.IsTypeId(TypeId.Player))
                             {
-                                Unit target1 = m_targets.GetUnitTarget();
-                                if (target1 != null)
-                                    if (target1 != m_caster && unitTarget.GetPowerType() != (PowerType)effect.MiscValue)
+                                Unit target = m_targets.GetUnitTarget();
+                                if (target != null)
+                                    if (target != m_caster && unitTarget.GetPowerType() != (PowerType)effect.MiscValue)
                                         return SpellCastResult.BadTargets;
                             }
                             break;
@@ -4933,31 +4932,31 @@ namespace Game.Spells
 
                             if (GetSpellInfo().NeedsExplicitUnitTarget())
                             {
-                                Unit target1 = m_targets.GetUnitTarget();
-                                if (target1 == null)
+                                Unit target = m_targets.GetUnitTarget();
+                                if (target == null)
                                     return SpellCastResult.DontReport;
 
 
-                                float objSize = target1.GetObjectSize();
+                                float objSize = target.GetObjectSize();
                                 float range = m_spellInfo.GetMaxRange(true, m_caster, this) * 1.5f + objSize; // can't be overly strict
 
                                 m_preGeneratedPath.SetPathLengthLimit(range);
                                 //first try with raycast, if it fails fall back to normal path
-                                float targetObjectSize = Math.Min(target1.GetObjectSize(), 4.0f);
-                                bool result = m_preGeneratedPath.CalculatePath(target1.GetPositionX(), target1.GetPositionY(), target1.GetPositionZ() + targetObjectSize, false, true);
+                                float targetObjectSize = Math.Min(target.GetObjectSize(), 4.0f);
+                                bool result = m_preGeneratedPath.CalculatePath(target.GetPositionX(), target.GetPositionY(), target.GetPositionZ() + targetObjectSize, false, true);
                                 if (m_preGeneratedPath.GetPathType().HasAnyFlag(PathType.Short))
                                     return SpellCastResult.OutOfRange;
                                 else if (!result || m_preGeneratedPath.GetPathType().HasAnyFlag(PathType.NoPath | PathType.Incomplete))
                                 {
-                                    result = m_preGeneratedPath.CalculatePath(target1.GetPositionX(), target1.GetPositionY(), target1.GetPositionZ() + targetObjectSize, false, false);
+                                    result = m_preGeneratedPath.CalculatePath(target.GetPositionX(), target.GetPositionY(), target.GetPositionZ() + targetObjectSize, false, false);
                                     if (m_preGeneratedPath.GetPathType().HasAnyFlag(PathType.Short))
                                         return SpellCastResult.OutOfRange;
                                     else if (!result || m_preGeneratedPath.GetPathType().HasAnyFlag(PathType.NoPath | PathType.Incomplete))
                                         return SpellCastResult.NoPath;
-                                    else if (m_preGeneratedPath.IsInvalidDestinationZ(target1)) // Check position z, if not in a straight line
+                                    else if (m_preGeneratedPath.IsInvalidDestinationZ(target)) // Check position z, if not in a straight line
                                         return SpellCastResult.NoPath;
                                 }
-                                else if (m_preGeneratedPath.IsInvalidDestinationZ(target1)) // Check position z, if in a straight line
+                                else if (m_preGeneratedPath.IsInvalidDestinationZ(target)) // Check position z, if in a straight line
                                     return SpellCastResult.NoPath;
 
                                 m_preGeneratedPath.ReducePathLenghtByDist(objSize); //move back
@@ -5152,10 +5151,9 @@ namespace Game.Spells
                             if (playerCaster.GetTarget().IsEmpty())
                                 return SpellCastResult.BadTargets;
 
-                            Player target1 = Global.ObjAccessor.FindPlayer(playerCaster.GetTarget());
-
-                            if (target1 == null ||
-                                !(target1.GetSession().GetRecruiterId() == playerCaster.GetSession().GetAccountId() || target1.GetSession().GetAccountId() == playerCaster.GetSession().GetRecruiterId()))
+                            Player target = Global.ObjAccessor.FindPlayer(playerCaster.GetTarget());
+                            if (target == null ||
+                                !(target.GetSession().GetRecruiterId() == playerCaster.GetSession().GetAccountId() || target.GetSession().GetAccountId() == playerCaster.GetSession().GetRecruiterId()))
                                 return SpellCastResult.BadTargets;
 
                             break;
@@ -5291,23 +5289,23 @@ namespace Game.Spells
                                     return SpellCastResult.AlreadyHaveCharm;
                             }
 
-                            Unit target1 = m_targets.GetUnitTarget();
-                            if (target1 != null)
+                            Unit target = m_targets.GetUnitTarget();
+                            if (target != null)
                             {
-                                if (target1.IsTypeId(TypeId.Unit) && target1.ToCreature().IsVehicle())
+                                if (target.IsTypeId(TypeId.Unit) && target.ToCreature().IsVehicle())
                                     return SpellCastResult.BadImplicitTargets;
 
-                                if (target1.IsMounted())
+                                if (target.IsMounted())
                                     return SpellCastResult.CantBeCharmed;
 
-                                if (!target1.GetCharmerGUID().IsEmpty())
+                                if (!target.GetCharmerGUID().IsEmpty())
                                     return SpellCastResult.Charmed;
 
-                                if (target1.GetOwner() != null && target1.GetOwner().IsTypeId(TypeId.Player))
+                                if (target.GetOwner() != null && target.GetOwner().IsTypeId(TypeId.Player))
                                     return SpellCastResult.TargetIsPlayerControlled;
 
-                                int damage = CalculateDamage(effect.EffectIndex, target1);
-                                if (damage != 0 && target1.GetLevelForTarget(m_caster) > damage)
+                                int damage = CalculateDamage(effect.EffectIndex, target);
+                                if (damage != 0 && target.GetLevelForTarget(m_caster) > damage)
                                     return SpellCastResult.Highlevel;
                             }
 

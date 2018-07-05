@@ -177,12 +177,12 @@ namespace System.Collections.Generic
         }
     }
 
-    public interface ICheck<T>
+    public interface ICheck<in T>
     {
         bool Invoke(T obj);
     }
 
-    public interface IDoWork<T>
+    public interface IDoWork<in T>
     {
         void Invoke(T obj);
     }

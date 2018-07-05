@@ -45,7 +45,7 @@ namespace Game.Chat.Commands
                 return false;
 
             string all = args.NextString();
-            bool allRanks = !string.IsNullOrEmpty(all) ? all == "all" : false;
+            bool allRanks = !string.IsNullOrEmpty(all) && all == "all";
 
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell);
             if (spellInfo == null || !Global.SpellMgr.IsSpellValid(spellInfo, handler.GetSession().GetPlayer()))
@@ -325,7 +325,7 @@ namespace Game.Chat.Commands
                 return false;
 
             string allStr = args.NextString();
-            bool allRanks = !string.IsNullOrEmpty(allStr) ? allStr == "all" : false;
+            bool allRanks = !string.IsNullOrEmpty(allStr) && allStr == "all";
 
             Player target = handler.getSelectedPlayer();
             if (!target)

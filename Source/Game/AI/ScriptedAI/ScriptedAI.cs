@@ -343,9 +343,6 @@ namespace Game.AI
         // Called when spell hits a target
         public override void SpellHitTarget(Unit target, SpellInfo spell) { }
 
-        //Called at waypoint reached or PointMovement end
-        public override void MovementInform(MovementGeneratorType type, uint id) { }
-
         // Called when AI is temporarily replaced or put back when possess is applied or removed
         public virtual void OnPossess(bool apply) { }
 

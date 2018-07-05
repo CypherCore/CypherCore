@@ -6276,7 +6276,7 @@ namespace Game.Entities
                         if (groupRules)
                             group.UpdateLooterGuid(go, true);
 
-                        loot.FillLoot(lootid, LootManager.Gameobject, this, !groupRules, false, go.GetLootMode());
+                        loot.FillLoot(lootid, LootStorage.Gameobject, this, !groupRules, false, go.GetLootMode());
 
                         // get next RR player (for next loot)
                         if (groupRules)

@@ -28,6 +28,7 @@ public class Log
     static Log()
     {
         m_logsDir = AppContext.BaseDirectory + ConfigMgr.GetDefaultValue("LogsDir", "");
+        lowestLogLevel = LogLevel.Fatal;
 
         foreach (var appenderName in ConfigMgr.GetKeysByString("Appender."))
         {
@@ -66,11 +67,15 @@ public class Log
         outInfo(LogFilter.Server, @"    \/___/  `/___/> \ \ \/  \/_/\/_/\/____/ \/_/ ");
         outInfo(LogFilter.Server, @"               /\___/\ \_\                       ");
         outInfo(LogFilter.Server, @"               \/__/  \/_/                   Core");
-        outInfo(LogFilter.Server, "\r");
+        outInfo(LogFilter.Server, "https://github.com/CypherCore/CypherCore \r\n");
     }
 
     static bool ShouldLog(LogFilter type, LogLevel level)
     {
+        // Don't even look for a logger if the LogLevel is lower than lowest log levels across all loggers
+        if (level < lowestLogLevel)
+            return false;
+
         Logger logger = GetLoggerByType(type);
         if (logger == null)
             return false;
@@ -256,6 +261,9 @@ public class Log
             return;
         }
 
+        if (level < lowestLogLevel)
+            lowestLogLevel = level;
+
         Logger logger = new Logger(name, level);
 
         int i = 0;
@@ -316,6 +324,8 @@ public class Log
                 if (logger.getName() == name)
                 {
                     logger.setLogLevel(newLevel);
+                    if (newLevel != LogLevel.Disabled && newLevel < lowestLogLevel)
+                        lowestLogLevel = newLevel;
                     return true;
                 }
             }
@@ -345,6 +355,8 @@ public class Log
     static Dictionary<LogFilter, Logger> loggers = new Dictionary<LogFilter, Logger>();
     static string m_logsDir;
     static byte AppenderId;
+
+    static LogLevel lowestLogLevel;
 }
 
 enum AppenderType

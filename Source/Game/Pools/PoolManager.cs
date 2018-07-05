@@ -826,14 +826,11 @@ namespace Game
             DespawnObject(spawns);
 
             // recycle minimal amount of quests if possible count is lower than limit
-            if (limit > newQuests.Count && !currentQuests.Empty())
+            while (limit > newQuests.Count && !currentQuests.Empty())
             {
-                do
-                {
-                    ulong questId = currentQuests.SelectRandom();
-                    newQuests.Add(questId);
-                    currentQuests.Remove(questId);
-                } while (newQuests.Count < limit && !currentQuests.Empty()); // failsafe
+                ulong questId = currentQuests.SelectRandom();
+                newQuests.Add(questId);
+                currentQuests.Remove(questId);
             }
 
             if (newQuests.Empty())

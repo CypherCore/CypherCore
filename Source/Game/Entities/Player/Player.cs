@@ -5204,6 +5204,9 @@ namespace Game.Entities
         }
 
         //Target
+        // Used for serverside target changes, does not apply to players
+        public override void SetTarget(ObjectGuid guid) { }
+
         public void SetSelection(ObjectGuid guid)
         {
             SetGuidValue(UnitFields.Target, guid);

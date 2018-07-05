@@ -1973,7 +1973,7 @@ namespace Game.Entities
             PlayerSpell spell = m_spells.LookupByKey(spellId);
 
             bool disabled = (spell != null) ? spell.Disabled : false;
-            bool active = disabled ? spell.Active : true;
+            bool active = !disabled || spell.Active;
 
             bool learning = AddSpell(spellId, active, true, dependent, false, false, fromSkill);
 
@@ -2525,7 +2525,7 @@ namespace Game.Entities
 
             // needs to be when spell is already learned, to prevent infinite recursion crashes
             if (Global.DB2Mgr.GetMount(spellId) != null)
-                GetSession().GetCollectionMgr().AddMount(spellId, MountStatusFlags.None, false, IsInWorld ? false : true);
+                GetSession().GetCollectionMgr().AddMount(spellId, MountStatusFlags.None, false, !IsInWorld);
 
             // need to add Battle pets automatically into pet journal
             foreach (BattlePetSpeciesRecord entry in CliDB.BattlePetSpeciesStorage.Values)

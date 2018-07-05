@@ -289,7 +289,7 @@ namespace Game
             stmt.AddValue(0, accountId);
             stmt.AddValue(1, CalculateShaPassHash(username, password));
             SQLResult result = DB.Login.Query(stmt);
-            return result.IsEmpty() ? false : true;
+            return !result.IsEmpty();
         }
 
         public bool CheckEmail(uint accountId, string newEmail)

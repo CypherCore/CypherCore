@@ -564,10 +564,10 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
                     {
                         me.InterruptNonMeleeSpells(true);
 
-                        Unit target1 = Global.ObjAccessor.GetUnit(me, uiTargetGUID);
-                        if (target1 && me.IsInRange(target1, 5.0f, 30.0f, false))
+                        Unit uiTarget = Global.ObjAccessor.GetUnit(me, uiTargetGUID);
+                        if (uiTarget && me.IsInRange(uiTarget, 5.0f, 30.0f, false))
                         {
-                            DoCast(target1, TrialOfChampionSpells.MULTI_SHOT);
+                            DoCast(uiTarget, TrialOfChampionSpells.MULTI_SHOT);
                         }
                         else
                         {

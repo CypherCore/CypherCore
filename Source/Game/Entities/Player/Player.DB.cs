@@ -4023,7 +4023,7 @@ namespace Game.Entities
             if (keepDays == 0)
                 return;
 
-            Player.DeleteOldCharacters(keepDays);
+            DeleteOldCharacters(keepDays);
         }
 
         public static void DeleteOldCharacters(int keepDays)

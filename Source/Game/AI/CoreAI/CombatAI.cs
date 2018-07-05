@@ -239,6 +239,7 @@ namespace Game.AI
             me.m_CombatDistance = spellInfo != null ? spellInfo.GetMaxRange(false) : 0;
             me.m_SightDistance = me.m_CombatDistance;
         }
+
         public override bool CanAIAttack(Unit victim)
         {
             // todo use one function to replace it
@@ -247,11 +248,13 @@ namespace Game.AI
                 return false;
             return true;
         }
+
         public override void AttackStart(Unit victim)
         {
             if (victim != null)
                 me.Attack(victim, false);
         }
+
         public override void UpdateAI(uint diff)
         {
             if (!UpdateVictim())
@@ -291,6 +294,10 @@ namespace Game.AI
                     m_DismissTimer -= diff;
             }
         }
+
+        public override void MoveInLineOfSight(Unit who) { }
+
+        public override void AttackStart(Unit victim) { }
 
         public override void OnCharmed(bool apply)
         {
@@ -349,6 +356,8 @@ namespace Game.AI
     public class ReactorAI : CreatureAI
     {
         public ReactorAI(Creature c) : base(c) { }
+
+        public override void MoveInLineOfSight(Unit who) { }
 
         public override void UpdateAI(uint diff)
         {

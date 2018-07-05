@@ -802,7 +802,7 @@ namespace Game.BattleGrounds.Zones
                     break;
                 default:
                     return;
-            };
+            }
         }
 
         void CaptureGraveyard(int i, Player Source)
@@ -900,7 +900,7 @@ namespace Game.BattleGrounds.Zones
                 default:
                     //ABORT();
                     break;
-            };
+            }
         }
 
         void TitanRelicActivated(Player clicker)

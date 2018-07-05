@@ -675,9 +675,7 @@ namespace Game
             Values[WorldCfg.ThreatRadius] = GetDefaultValue("ThreatRadius", 60.0f);
 
             // always use declined names in the russian client
-            Values[WorldCfg.DeclinedNamesUsed] =
-
-                ((RealmZones)Values[WorldCfg.RealmZone] == RealmZones.Russian) ? true : GetDefaultValue("DeclinedNames", false);
+            Values[WorldCfg.DeclinedNamesUsed] = (RealmZones)Values[WorldCfg.RealmZone] == RealmZones.Russian || GetDefaultValue("DeclinedNames", false);
 
             Values[WorldCfg.ListenRangeSay] = GetDefaultValue("ListenRange.Say", 25.0f);
             Values[WorldCfg.ListenRangeTextemote] = GetDefaultValue("ListenRange.TextEmote", 25.0f);

@@ -1449,7 +1449,7 @@ namespace Game.AI
                             break;
 
                         uint delay = e.Action.wpPause.delay;
-                        ((SmartAI)me.GetAI()).PausePath(delay, e.GetEventType() == SmartEvents.WaypointReached ? false : true);
+                        ((SmartAI)me.GetAI()).PausePath(delay, e.GetEventType() != SmartEvents.WaypointReached);
                         break;
                     }
                 case SmartActions.WpStop:
@@ -2695,7 +2695,7 @@ namespace Game.AI
                     }
                 case SmartTargets.ClosestCreature:
                     {
-                        Creature target = baseObject.FindNearestCreature(e.Target.closest.entry, e.Target.closest.dist != 0 ? e.Target.closest.dist : 100, e.Target.closest.dead != 0 ? false : true);
+                        Creature target = baseObject.FindNearestCreature(e.Target.closest.entry, e.Target.closest.dist != 0 ? e.Target.closest.dist : 100, e.Target.closest.dead == 0);
                         if (target)
                             l.Add(target);
                         break;
@@ -3431,7 +3431,7 @@ namespace Game.AI
             }
             // min/max was checked at loading!
             e.timer = RandomHelper.URand(min, max);
-            e.active = e.timer != 0 ? false : true;
+            e.active = e.timer == 0;
         }
 
         void UpdateTimer(SmartScriptHolder e, uint diff)

@@ -724,7 +724,7 @@ namespace Game.Loots
 
                 if (item.reference > 0)                            // References processing
                 {
-                    LootTemplate Referenced = LootManager.Reference.GetLootFor(item.reference);
+                    LootTemplate Referenced = LootStorage.Reference.GetLootFor(item.reference);
                     if (Referenced == null)
                         continue;                                       // Error message already printed at loading stage
 
@@ -849,8 +849,8 @@ namespace Game.Loots
             {
                 if (item.reference > 0)
                 {
-                    if (LootManager.Reference.GetLootFor(item.reference) == null)
-                        LootManager.Reference.ReportNonExistingId(item.reference, item.itemid);
+                    if (LootStorage.Reference.GetLootFor(item.reference) == null)
+                        LootStorage.Reference.ReportNonExistingId(item.reference, item.itemid);
                     else if (ref_set != null)
                         ref_set.Remove(item.reference);
                 }
@@ -1005,8 +1005,8 @@ namespace Game.Loots
                 {
                     if (item.reference > 0)
                     {
-                        if (LootManager.Reference.GetLootFor(item.reference) == null)
-                            LootManager.Reference.ReportNonExistingId(item.reference, item.itemid);
+                        if (LootStorage.Reference.GetLootFor(item.reference) == null)
+                            LootStorage.Reference.ReportNonExistingId(item.reference, item.itemid);
                         else if (ref_set != null)
                             ref_set.Remove(item.reference);
                     }
@@ -1016,8 +1016,8 @@ namespace Game.Loots
                 {
                     if (item.reference > 0)
                     {
-                        if (LootManager.Reference.GetLootFor(item.reference) == null)
-                            LootManager.Reference.ReportNonExistingId(item.reference, item.itemid);
+                        if (LootStorage.Reference.GetLootFor(item.reference) == null)
+                            LootStorage.Reference.ReportNonExistingId(item.reference, item.itemid);
                         else if (ref_set != null)
                             ref_set.Remove(item.reference);
                     }

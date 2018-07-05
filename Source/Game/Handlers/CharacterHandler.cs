@@ -83,7 +83,7 @@ namespace Game
                         charInfo.HairColor = 0;
                         charInfo.FacialHair = 0;
 
-                        if (!(charInfo.CustomizationFlag == CharacterCustomizeFlags.Customize))
+                        if (charInfo.CustomizationFlag != CharacterCustomizeFlags.Customize)
                         {
                             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
                             stmt.AddValue(0, (ushort)AtLoginFlags.Customize);
