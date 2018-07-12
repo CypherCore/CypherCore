@@ -154,7 +154,6 @@ namespace Game
                 Global.BattlegroundMgr.BuildBattlegroundStatusQueued(out battlefieldStatusQueued, bg, GetPlayer(), queueSlot, ginfo.JoinTime, avgTime, ginfo.ArenaType, false);
                 SendPacket(battlefieldStatusQueued);
 
-
                 Log.outDebug(LogFilter.Battleground, "Battleground: player joined queue for bg queue type {0} bg type {1}: GUID {2}, NAME {3}",
                                bgQueueTypeId, bgTypeId, GetPlayer().GetGUID().ToString(), GetPlayer().GetName());
             }
