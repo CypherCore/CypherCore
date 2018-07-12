@@ -292,7 +292,7 @@ namespace Game.Guilds
                 rankData.RankID = rankInfo.GetId();
                 rankData.RankOrder = i;
                 rankData.Flags = (uint)rankInfo.GetRights();
-                rankData.WithdrawGoldLimit = rankInfo.GetBankMoneyPerDay();
+                rankData.WithdrawGoldLimit = (rankInfo.GetId() == GuildDefaultRanks.Master ? uint.MaxValue : (rankInfo.GetBankMoneyPerDay() / MoneyConstants.Gold));
                 rankData.RankName = rankInfo.GetName();
 
                 for (byte j = 0; j < GuildConst.MaxBankTabs; ++j)
@@ -485,7 +485,7 @@ namespace Game.Guilds
             }
         }
 
-        public void HandleSetRankInfo(WorldSession session, uint rankId, string name, GuildRankRights rights, uint moneyPerDay, List<GuildBankRightsAndSlots> rightsAndSlots)
+        public void HandleSetRankInfo(WorldSession session, uint rankId, string name, GuildRankRights rights, uint moneyPerDay, GuildBankRightsAndSlots[] rightsAndSlots)
         {
             // Only leader can modify ranks
             if (!_IsLeader(session.GetPlayer()))
@@ -498,7 +498,7 @@ namespace Game.Guilds
 
                 rankInfo.SetName(name);
                 rankInfo.SetRights(rights);
-                _SetRankBankMoneyPerDay(rankId, moneyPerDay);
+                _SetRankBankMoneyPerDay(rankId, moneyPerDay * MoneyConstants.Gold);
 
                 foreach (var rightsAndSlot in rightsAndSlots)
                     _SetRankBankTabRightsAndSlots(rankId, rightsAndSlot);
@@ -3151,17 +3151,16 @@ namespace Game.Guilds
                 if (m_rankId == GuildDefaultRanks.Master)                     // Prevent loss of leader rights
                     rightsAndSlots.SetGuildMasterValues();
 
-                GuildBankRightsAndSlots guildBR = m_bankTabRightsAndSlots[rightsAndSlots.GetTabId()];
-                guildBR = rightsAndSlots;
+                m_bankTabRightsAndSlots[rightsAndSlots.GetTabId()] = rightsAndSlots;
 
                 if (saveToDB)
                 {
                     PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_GUILD_BANK_RIGHT);
                     stmt.AddValue(0, m_guildId);
-                    stmt.AddValue(1, guildBR.GetTabId());
+                    stmt.AddValue(1, rightsAndSlots.GetTabId());
                     stmt.AddValue(2, m_rankId);
-                    stmt.AddValue(3, guildBR.GetRights());
-                    stmt.AddValue(4, guildBR.GetSlots());
+                    stmt.AddValue(3, rightsAndSlots.GetRights());
+                    stmt.AddValue(4, rightsAndSlots.GetSlots());
                     DB.Characters.Execute(stmt);
                 }
             }

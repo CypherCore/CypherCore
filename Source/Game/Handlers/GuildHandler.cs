@@ -368,7 +368,7 @@ namespace Game
             if (!guild)
                 return;
 
-            List<Guild.GuildBankRightsAndSlots> rightsAndSlots = new List<Guild.GuildBankRightsAndSlots>(GuildConst.MaxBankTabs);
+            Guild.GuildBankRightsAndSlots[] rightsAndSlots = new Guild.GuildBankRightsAndSlots[GuildConst.MaxBankTabs];
             for (byte tabId = 0; tabId < GuildConst.MaxBankTabs; ++tabId)
                 rightsAndSlots[tabId] = new Guild.GuildBankRightsAndSlots(tabId, (sbyte)packet.TabFlags[tabId], packet.TabWithdrawItemLimit[tabId]);
 
