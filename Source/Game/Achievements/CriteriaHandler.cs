@@ -1254,10 +1254,12 @@ namespace Game.Achievements
                         break;
                     }
                 case CriteriaAdditionalCondition.MapDifficultyOld: // 20
-                    DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(referencePlayer.GetMap().GetDifficultyID());
-                    if (difficulty == null || difficulty.OldEnumValue == -1 || difficulty.OldEnumValue != reqValue)
-                        return false;
-                    break;
+                    {
+                        DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(referencePlayer.GetMap().GetDifficultyID());
+                        if (difficulty == null || difficulty.OldEnumValue == -1 || difficulty.OldEnumValue != reqValue)
+                            return false;
+                        break;
+                    }
                 case CriteriaAdditionalCondition.ArenaType: // 24
                     {
                         Battleground bg = referencePlayer.GetBattleground();
@@ -1322,6 +1324,13 @@ namespace Game.Achievements
                     if (referencePlayer.GetRBGPersonalRating() < reqValue)
                         return false;
                     break;
+                case CriteriaAdditionalCondition.MapDifficulty: // 68
+                    {
+                        DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(referencePlayer.GetMap().GetDifficultyID());
+                        if (difficulty == null || difficulty.Id != reqValue)
+                            return false;
+                        break;
+                    }
                 case CriteriaAdditionalCondition.BattlePetSpecies: // 91
                     if (miscValue1 != reqValue)
                         return false;
