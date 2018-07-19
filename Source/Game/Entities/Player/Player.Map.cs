@@ -539,7 +539,7 @@ namespace Game.Entities
                 return true;
 
             // raid instances require the player to be in a raid group to be valid
-            if (map.IsRaid() && !WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreRaid))
+            if (map.IsRaid() && !WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreRaid) && (map.GetEntry().Expansion() >= (Expansion)WorldConfig.GetIntValue(WorldCfg.Expansion)))
                 if (!GetGroup() || !GetGroup().isRaidGroup())
                     return false;
 

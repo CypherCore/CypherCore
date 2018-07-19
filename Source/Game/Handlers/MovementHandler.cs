@@ -350,7 +350,7 @@ namespace Game
             if (mInstance != null)
             {
                 // check if this instance has a reset time and send it to player if so
-                Difficulty diff = GetPlayer().GetDifficultyID(mapEntry);
+                Difficulty diff = newMap.GetDifficultyID();
                 MapDifficultyRecord mapDiff = Global.DB2Mgr.GetMapDifficultyData(mapEntry.Id, diff);
                 if (mapDiff != null)
                 {
