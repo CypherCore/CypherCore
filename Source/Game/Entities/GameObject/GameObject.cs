@@ -340,6 +340,9 @@ namespace Game.Entities
                 case GameObjectTypes.PhaseableMo:
                     SetByteValue(GameObjectFields.Flags, 1, (byte)(m_goInfo.PhaseableMO.AreaNameSet & 0xF));
                     break;
+                case GameObjectTypes.CapturePoint:
+                    SetUInt32Value(GameObjectFields.SpellVisualId, m_goInfo.CapturePoint.SpellVisual1);
+                    break;
                 default:
                     SetGoAnimProgress(animProgress);
                     break;
