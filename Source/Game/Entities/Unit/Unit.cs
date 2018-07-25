@@ -253,12 +253,16 @@ namespace Game.Entities
 
         public bool IsInDisallowedMountForm()
         {
+            return IsDisallowedMountForm(getTransForm(), GetShapeshiftForm(), GetDisplayId());
+        }
+
+        bool IsDisallowedMountForm(uint spellId, ShapeShiftForm form, uint displayId)
+        {
             SpellInfo transformSpellInfo = Global.SpellMgr.GetSpellInfo(getTransForm());
             if (transformSpellInfo != null)
                 if (transformSpellInfo.HasAttribute(SpellAttr0.CastableWhileMounted))
                     return false;
 
-            ShapeShiftForm form = GetShapeshiftForm();
             if (form != 0)
             {
                 SpellShapeshiftFormRecord shapeshift = CliDB.SpellShapeshiftFormStorage.LookupByKey(form);
@@ -268,10 +272,10 @@ namespace Game.Entities
                 if (!shapeshift.Flags.HasAnyFlag(SpellShapeshiftFormFlags.IsNotAShapeshift))
                     return true;
             }
-            if (GetDisplayId() == GetNativeDisplayId())
+            if (displayId == GetNativeDisplayId())
                 return false;
 
-            CreatureDisplayInfoRecord display = CliDB.CreatureDisplayInfoStorage.LookupByKey(GetDisplayId());
+            CreatureDisplayInfoRecord display = CliDB.CreatureDisplayInfoStorage.LookupByKey(displayId);
             if (display == null)
                 return true;
 
@@ -2545,7 +2549,7 @@ namespace Game.Entities
 
         public uint GetDisplayId() { return GetUInt32Value(UnitFields.DisplayId); }
 
-        public void RestoreDisplayId()
+        public void RestoreDisplayId(bool ignorePositiveAurasPreventingMounting = false)
         {
             AuraEffect handledAura = null;
             // try to receive model from transform auras
@@ -2559,7 +2563,18 @@ namespace Game.Entities
                     if (aurApp != null)
                     {
                         if (handledAura == null)
-                            handledAura = eff;
+                        {
+                            if (!ignorePositiveAurasPreventingMounting)
+                                handledAura = eff;
+                            else
+                            {
+                                CreatureTemplate ci = Global.ObjectMgr.GetCreatureTemplate((uint)eff.GetMiscValue());
+                                if (ci != null)
+                                    if (!IsDisallowedMountForm(eff.GetId(), ShapeShiftForm.None, ObjectManager.ChooseDisplayId(ci)))
+                                        handledAura = eff;
+                            }
+                        }
+
                         // prefer negative auras
                         if (!aurApp.IsPositive())
                         {
@@ -2575,7 +2590,12 @@ namespace Game.Entities
                 handledAura.HandleEffect(this, AuraEffectHandleModes.SendForClient, true);
             // we've found shapeshift
             else if ((modelId = GetModelForForm(GetShapeshiftForm())) != 0)
-                SetDisplayId(modelId);
+            {
+                if (!ignorePositiveAurasPreventingMounting || !IsDisallowedMountForm(0, GetShapeshiftForm(), modelId))
+                    SetDisplayId(modelId);
+                else
+                    SetDisplayId(GetNativeDisplayId());
+            }
             // no auras found - set modelid to default
             else
                 SetDisplayId(GetNativeDisplayId());

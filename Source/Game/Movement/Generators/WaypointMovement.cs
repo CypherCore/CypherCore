@@ -442,6 +442,7 @@ namespace Game.Movement
             }
 
             owner.RemoveFlag(PlayerFields.Flags, PlayerFlags.TaxiBenchmark);
+            owner.RestoreDisplayId();
         }
 
         public override void DoReset(Player owner)

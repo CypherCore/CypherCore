@@ -6694,13 +6694,12 @@ namespace Game.Entities
             if (npc != null)
             {
                 // not let cheating with start flight mounted
-                if (IsMounted())
-                {
-                    GetSession().SendActivateTaxiReply(ActivateTaxiReply.PlayerAlreadyMounted);
-                    return false;
-                }
+                RemoveAurasByType(AuraType.Mounted);
 
-                if (IsInDisallowedMountForm())
+                if (GetDisplayId() != GetNativeDisplayId())
+                    RestoreDisplayId(true);
+
+                if (IsDisallowedMountForm(getTransForm(), FORM_NONE, GetDisplayId()))
                 {
                     GetSession().SendActivateTaxiReply(ActivateTaxiReply.PlayerShapeshifted);
                     return false;
@@ -6718,8 +6717,8 @@ namespace Game.Entities
             {
                 RemoveAurasByType(AuraType.Mounted);
 
-                if (IsInDisallowedMountForm())
-                    RemoveAurasByType(AuraType.ModShapeshift);
+                if (GetDisplayId() != GetNativeDisplayId())
+                    RestoreDisplayId(true);
 
                 Spell spell = GetCurrentSpell(CurrentSpellTypes.Generic);
                 if (spell != null)

@@ -1394,7 +1394,7 @@ namespace Game.Spells
                 }
 
                 if (modelid > 0)
-                    target.RestoreDisplayId();
+                    target.RestoreDisplayId(target.IsMounted());
 
                 switch (form)
                 {
@@ -1659,7 +1659,7 @@ namespace Game.Spells
                 if (target.GetTransForm() == GetId())
                     target.setTransForm(0);
 
-                target.RestoreDisplayId();
+                target.RestoreDisplayId(target.IsMounted());
 
                 // Dragonmaw Illusion (restore mount model)
                 if (GetId() == 42016 && target.GetMountID() == 16314)

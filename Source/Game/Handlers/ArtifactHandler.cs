@@ -163,7 +163,7 @@ namespace Game
 
                 // change druid form appearance
                 if (artifactAppearance.OverrideShapeshiftDisplayID != 0 && artifactAppearance.OverrideShapeshiftFormID != 0 && _player.GetShapeshiftForm() == (ShapeShiftForm)artifactAppearance.OverrideShapeshiftFormID)
-                    _player.RestoreDisplayId();
+                    _player.RestoreDisplayId(_player.IsMounted());
             }
         }
 
