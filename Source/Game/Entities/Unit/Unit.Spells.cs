@@ -2563,7 +2563,7 @@ namespace Game.Entities
 
                 Aura aura = app.Value.GetBase();
                 if (!aura.IsPassive() && !aura.IsDeathPersistent())
-                    _UnapplyAura(app, AuraRemoveMode.ByDeath);
+                    _UnapplyAura(app, AuraRemoveMode.Death);
             }
 
             foreach (var pair in GetOwnedAuras())
@@ -2573,7 +2573,7 @@ namespace Game.Entities
                     continue;
 
                 if (!aura.IsPassive() && !aura.IsDeathPersistent())
-                    RemoveOwnedAura(pair, AuraRemoveMode.ByDeath);
+                    RemoveOwnedAura(pair, AuraRemoveMode.Death);
             }
         }
         public void RemoveMovementImpairingAuras()
@@ -3193,7 +3193,7 @@ namespace Game.Entities
                     && !(Convert.ToBoolean(flag & (uint)SpellAuraInterruptFlags.Move) && HasAuraTypeWithAffectMask(AuraType.CastWhileWalking, aura.GetSpellInfo())))
                 {
                     uint removedAuras = m_removedAurasCount;
-                    RemoveAura(aura);
+                    RemoveAura(aura, AuraRemoveMode.Interrupt);
                     if (m_removedAurasCount > removedAuras + 1)
                         i = 0;
                 }

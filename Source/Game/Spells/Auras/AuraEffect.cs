@@ -4468,7 +4468,7 @@ namespace Game.Spells
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
-            if (apply || aurApp.GetRemoveMode() != AuraRemoveMode.ByDeath)
+            if (apply || aurApp.GetRemoveMode() != AuraRemoveMode.Death)
                 return;
 
             Unit caster = GetCaster();

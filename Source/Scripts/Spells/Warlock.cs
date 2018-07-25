@@ -192,7 +192,7 @@ namespace Scripts.Spells.Warlock
                 return;
 
             AuraRemoveMode removeMode = GetTargetApplication().GetRemoveMode();
-            if (removeMode != AuraRemoveMode.ByDeath || !IsExpired())
+            if (removeMode != AuraRemoveMode.Death || !IsExpired())
                 return;
 
             if (GetCaster().ToPlayer().isHonorOrXPTarget(GetTarget()))

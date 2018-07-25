@@ -37,10 +37,11 @@ namespace Game.Spells
     {
         None = 0,
         Default = 1,       // scripted remove, remove by stack with aura with different ids and sc aura remove
+        Interrupt,
         Cancel,
         EnemySpell,       // dispel and absorb aura destroy
         Expire,            // aura duration has ended
-        ByDeath
+        Death
     }
     public enum AuraFlags
     {
@@ -1162,7 +1163,7 @@ namespace Game.Spells
                         {
                             if (spell < 0)
                                 target.RemoveAurasDueToSpell((uint)-spell);
-                            else if (removeMode != AuraRemoveMode.ByDeath)
+                            else if (removeMode != AuraRemoveMode.Death)
                                 target.CastSpell(target, (uint)spell, true, null, null, GetCasterGUID());
                         }
                     }
