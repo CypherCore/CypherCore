@@ -256,7 +256,7 @@ namespace Game.Entities
             return IsDisallowedMountForm(getTransForm(), GetShapeshiftForm(), GetDisplayId());
         }
 
-        bool IsDisallowedMountForm(uint spellId, ShapeShiftForm form, uint displayId)
+        public bool IsDisallowedMountForm(uint spellId, ShapeShiftForm form, uint displayId)
         {
             SpellInfo transformSpellInfo = Global.SpellMgr.GetSpellInfo(getTransForm());
             if (transformSpellInfo != null)

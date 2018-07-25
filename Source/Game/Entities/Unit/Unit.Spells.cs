@@ -2160,7 +2160,7 @@ namespace Game.Entities
             }
         }
 
-        uint getTransForm() { return m_transform; }
+        public uint getTransForm() { return m_transform; }
 
         public bool HasStealthAura() { return HasAuraType(AuraType.ModStealth); }
         public bool HasInvisibilityAura() { return HasAuraType(AuraType.ModInvisibility); }

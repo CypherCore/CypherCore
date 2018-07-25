@@ -2750,6 +2750,9 @@ namespace Game.Entities
                     case 24314: // Threatening Gaze
                         spellInfo.AuraInterruptFlags[0] |= (uint)(SpellAuraInterruptFlags.Cast | SpellAuraInterruptFlags.Move | SpellAuraInterruptFlags.Jump);
                         break;
+                    case 783:  // Travel Form (dummy) - cannot be cast indoors.
+                        spellInfo.Attributes |= SpellAttr0.OutdoorsOnly;
+                        break;
                     case 5420: // Tree of Life (Passive)
                         spellInfo.Stances = 1 << ((int)ShapeShiftForm.TreeOfLife - 1);
                         break;

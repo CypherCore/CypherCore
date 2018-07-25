@@ -6699,7 +6699,7 @@ namespace Game.Entities
                 if (GetDisplayId() != GetNativeDisplayId())
                     RestoreDisplayId(true);
 
-                if (IsDisallowedMountForm(getTransForm(), FORM_NONE, GetDisplayId()))
+                if (IsDisallowedMountForm(getTransForm(), ShapeShiftForm.None, GetDisplayId()))
                 {
                     GetSession().SendActivateTaxiReply(ActivateTaxiReply.PlayerShapeshifted);
                     return false;

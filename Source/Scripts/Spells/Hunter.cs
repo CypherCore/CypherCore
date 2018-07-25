@@ -298,7 +298,7 @@ namespace Scripts.Spells.Hunter
 
         void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            if (GetTargetApplication().GetRemoveMode() = AuraRemoveMode.Default || GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Interrupt)
+            if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Default || GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Interrupt)
                 return;
             
             if (!GetTarget().HasAura(SpellIds.MisdirectionProc))

@@ -880,7 +880,7 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.Nadronox
 
         void HandleEffectRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.ByDeath)
+            if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Death)
                 return;
 
             if (GetTarget().IsGuardian())
