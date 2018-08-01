@@ -38,7 +38,7 @@ namespace Game.Entities
             return PlaySceneByTemplate(sceneTemplate, position);
         }
 
-        uint PlaySceneByTemplate(SceneTemplate sceneTemplate, Position position = null)
+        public uint PlaySceneByTemplate(SceneTemplate sceneTemplate, Position position = null)
         {
             if (sceneTemplate == null)
                 return 0;
