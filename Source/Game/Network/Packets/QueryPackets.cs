@@ -83,9 +83,9 @@ namespace Game.Network.Packets
 
             if (Allow)
             {
-                _worldPacket.WriteBits(Stats.Title.Length + 1, 11);
-                _worldPacket.WriteBits(Stats.TitleAlt.Length + 1, 11);
-                _worldPacket.WriteBits(Stats.CursorName.Length + 1, 6);
+                _worldPacket.WriteBits(Stats.Title.IsEmpty() ? 0 : Stats.Title.Length + 1, 11);
+                _worldPacket.WriteBits(Stats.TitleAlt.IsEmpty() ? 0 : Stats.TitleAlt.Length + 1, 11);
+                _worldPacket.WriteBits(Stats.CursorName.IsEmpty() ? 0 : Stats.CursorName.Length + 1, 6);
                 _worldPacket.WriteBit(Stats.Leader);
 
                 for (var i = 0; i < SharedConst.MaxCreatureNames; ++i)
@@ -124,13 +124,13 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt32(Stats.RequiredExpansion);
                 _worldPacket.WriteInt32(Stats.VignetteID);
 
-                if (!string.IsNullOrEmpty(Stats.Title))
+                if (!Stats.Title.IsEmpty())
                     _worldPacket.WriteCString(Stats.Title);
 
-                if (!string.IsNullOrEmpty(Stats.TitleAlt))
+                if (!Stats.TitleAlt.IsEmpty())
                     _worldPacket.WriteCString(Stats.TitleAlt);
 
-                if (!string.IsNullOrEmpty(Stats.CursorName))
+                if (!Stats.CursorName.IsEmpty())
                     _worldPacket.WriteCString(Stats.CursorName);
 
                 foreach (var questItem in Stats.QuestItems)
@@ -693,9 +693,9 @@ namespace Game.Network.Packets
 
     public class CreatureStats
     {
-        public string Title = "";
-        public string TitleAlt = "";
-        public string CursorName = "";
+        public string Title;
+        public string TitleAlt;
+        public string CursorName;
         public int CreatureType;
         public int CreatureFamily;
         public int Classification;

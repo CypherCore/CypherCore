@@ -61,8 +61,8 @@ namespace Game.Collision
                 Vector3 bHigh = reader.Read<Vector3>();
                 spawn.iBound = new AxisAlignedBox(bLow, bHigh);
             }
-            uint nameLen = reader.ReadUInt32();
 
+            uint nameLen = reader.ReadUInt32();
             spawn.name = reader.ReadString((int)nameLen);
             return true;
         }
