@@ -39,28 +39,32 @@ namespace Game.Entities
     {
         void _LoadInventory(SQLResult result, SQLResult artifactsResult, uint timeDiff)
         {
-            //                 0     1                       2                   3                 4
-            // SELECT a.itemGuid, a.xp, a.artifactAppearanceId, ap.artifactPowerId, ap.purchasedRank FROM item_instance_artifact_powers ap LEFT JOIN item_instance_artifact a ON ap.itemGuid = a.itemGuid INNER JOIN character_inventory ci ON ci.item = ap.guid WHERE ci.guid = ?
-            Dictionary<ObjectGuid, Tuple<ulong, uint, List<ItemDynamicFieldArtifactPowers>>> artifactData = new Dictionary<ObjectGuid, Tuple<ulong, uint, List<ItemDynamicFieldArtifactPowers>>>();
-            //MultiMap<ObjectGuid, ItemDynamicFieldArtifactPowers> artifactPowerData = new MultiMap<ObjectGuid, ItemDynamicFieldArtifactPowers>();
+            //                 0     1                       2                 3                   4                 5
+            // SELECT a.itemGuid, a.xp, a.artifactAppearanceId, a.artifactTierId, ap.artifactPowerId, ap.purchasedRank FROM item_instance_artifact_powers ap LEFT JOIN item_instance_artifact a ON ap.itemGuid = a.itemGuid INNER JOIN character_inventory ci ON ci.item = ap.guid WHERE ci.guid = ?
+            var artifactData = new Dictionary<ObjectGuid, Tuple<ulong, uint, uint, List<ItemDynamicFieldArtifactPowers>>>();
             if (!artifactsResult.IsEmpty())
             {
                 do
                 {
-                    var artifactDataEntry = Tuple.Create(artifactsResult.Read<ulong>(1), artifactsResult.Read<uint>(2), new List<ItemDynamicFieldArtifactPowers>());
+                    var artifactDataEntry = Tuple.Create(artifactsResult.Read<ulong>(1), artifactsResult.Read<uint>(2), artifactsResult.Read<uint>(3), new List<ItemDynamicFieldArtifactPowers>());
                     ItemDynamicFieldArtifactPowers artifactPowerData = new ItemDynamicFieldArtifactPowers();
-                    artifactPowerData.ArtifactPowerId = artifactsResult.Read<uint>(3);
-                    artifactPowerData.PurchasedRank = artifactsResult.Read<byte>(4);
+                    artifactPowerData.ArtifactPowerId = artifactsResult.Read<uint>(4);
+                    artifactPowerData.PurchasedRank = artifactsResult.Read<byte>(5);
 
                     ArtifactPowerRecord artifactPower = CliDB.ArtifactPowerStorage.LookupByKey(artifactPowerData.ArtifactPowerId);
                     if (artifactPower != null)
                     {
-                        if (artifactPowerData.PurchasedRank > artifactPower.MaxPurchasableRank)
-                            artifactPowerData.PurchasedRank = artifactPower.MaxPurchasableRank;
+                        uint maxRank = artifactPower.MaxPurchasableRank;
+                        // allow ARTIFACT_POWER_FLAG_FINAL to overflow maxrank here - needs to be handled in Item::CheckArtifactUnlock (will refund artifact power)
+                        if (artifactPower.Flags.HasAnyFlag(ArtifactPowerFlag.MaxRankWithTier) && artifactPower.Tier < artifactDataEntry.Item3)
+                            maxRank += artifactDataEntry.Item3 - artifactPower.Tier;
 
-                        artifactPowerData.CurrentRankWithBonus = (byte)(artifactPower.Flags.HasAnyFlag(ArtifactPowerFlag.First) ? 1 : 0);
+                        if (artifactPowerData.PurchasedRank > maxRank)
+                            artifactPowerData.PurchasedRank = (byte)maxRank;
 
-                        artifactDataEntry.Item3.Add(artifactPowerData);
+                        artifactPowerData.CurrentRankWithBonus = (byte)((artifactPower.Flags & ArtifactPowerFlag.First) == ArtifactPowerFlag.First ? 1 : 0);
+
+                        artifactDataEntry.Item4.Add(artifactPowerData);
                     }
 
                     artifactData[ObjectGuid.Create(HighGuid.Item, artifactsResult.Read<ulong>(0))] = artifactDataEntry;
@@ -85,7 +89,7 @@ namespace Game.Entities
                     {
                         var artifactDataPair = artifactData.LookupByKey(item.GetGUID());
                         if (item.GetTemplate().GetArtifactID() != 0 && artifactDataPair != null)
-                            item.LoadArtifactData(this, artifactDataPair.Item1, artifactDataPair.Item2, artifactDataPair.Item3);
+                            item.LoadArtifactData(this, artifactDataPair.Item1, artifactDataPair.Item2, artifactDataPair.Item3, artifactDataPair.Item4);
 
                         ulong counter = result.Read<ulong>(45);
                         ObjectGuid bagGuid = counter != 0 ? ObjectGuid.Create(HighGuid.Item, counter) : ObjectGuid.Empty;

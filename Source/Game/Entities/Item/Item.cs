@@ -81,7 +81,7 @@ namespace Game.Entities
                 {
                     if (spellInfo.HasEffect(SpellEffectName.GiveArtifactPower))
                     {
-                        uint artifactKnowledgeLevel = owner.GetCurrency((uint)CurrencyTypes.ArtifactKnowledge);
+                        uint artifactKnowledgeLevel = WorldConfig.GetUIntValue(WorldCfg.CurrencyStartArtifactKnowledge);
                         if (artifactKnowledgeLevel != 0)
                             SetModifier(ItemModifier.ArtifactKnowledgeLevel, artifactKnowledgeLevel + 1);
                     }
@@ -112,6 +112,8 @@ namespace Game.Entities
                         break;
                     }
                 }
+
+                CheckArtifactRelicSlotUnlock(owner != null ? owner : GetOwner());
             }
             return true;
         }
@@ -295,6 +297,7 @@ namespace Game.Entities
                             stmt.AddValue(0, GetGUID().GetCounter());
                             stmt.AddValue(1, GetUInt64Value(ItemFields.ArtifactXp));
                             stmt.AddValue(2, GetModifier(ItemModifier.ArtifactAppearanceId));
+                            stmt.AddValue(3, GetModifier(ItemModifier.ArtifactTier));
                             trans.Append(stmt);
 
                             foreach (ItemDynamicFieldArtifactPowers artifactPower in GetArtifactPowers())
@@ -547,11 +550,15 @@ namespace Game.Entities
             return true;
         }
 
-        public void LoadArtifactData(Player owner, ulong xp, uint artifactAppearanceId, List<ItemDynamicFieldArtifactPowers> powers)
+        public void LoadArtifactData(Player owner, ulong xp, uint artifactAppearanceId, uint artifactTier, List<ItemDynamicFieldArtifactPowers> powers)
         {
-            InitArtifactPowers(GetTemplate().GetArtifactID(), 0);
+            for (byte i = 0; i <= artifactTier; ++i)
+                InitArtifactPowers(GetTemplate().GetArtifactID(), i);
+
             SetUInt64Value(ItemFields.ArtifactXp, xp);
             SetModifier(ItemModifier.ArtifactAppearanceId, artifactAppearanceId);
+            SetModifier(ItemModifier.ArtifactTier, artifactTier);
+
             ArtifactAppearanceRecord artifactAppearance = CliDB.ArtifactAppearanceStorage.LookupByKey(artifactAppearanceId);
             if (artifactAppearance != null)
                 SetAppearanceModId(artifactAppearance.ItemAppearanceModifierID);
@@ -612,6 +619,23 @@ namespace Game.Entities
                 power.CurrentRankWithBonus = (byte)(totalPurchasedRanks + 1);
                 SetArtifactPower(power);
             }
+
+            CheckArtifactRelicSlotUnlock(owner != null ? owner : GetOwner());
+        }
+
+        public void CheckArtifactRelicSlotUnlock(Player owner)
+        {
+            if (!owner)
+                return;
+
+            byte artifactId = GetTemplate().GetArtifactID();
+            if (artifactId == 0)
+                return;
+
+            foreach (ArtifactUnlockRecord artifactUnlock in CliDB.ArtifactUnlockStorage.Values)
+                if (artifactUnlock.ArtifactID == artifactId)
+                    if (owner.MeetPlayerCondition(artifactUnlock.PlayerConditionID))
+                        AddBonuses(artifactUnlock.ItemBonusListID);
         }
 
         public static void DeleteFromDB(SQLTransaction trans, ulong itemGuid)
@@ -2194,6 +2218,9 @@ namespace Game.Entities
 
         public void AddBonuses(uint bonusListID)
         {
+            if (HasDynamicValue(ItemDynamicFields.BonusListIds, bonusListID))
+                return;
+
             var bonuses = Global.DB2Mgr.GetItemBonusList(bonusListID);
             if (bonuses != null)
             {
@@ -2237,7 +2264,7 @@ namespace Game.Entities
             SetDynamicStructuredValue(ItemDynamicFields.ArtifactPowers, index, artifactPower);
         }
 
-        void InitArtifactPowers(byte artifactId, byte artifactTier)
+        public void InitArtifactPowers(byte artifactId, byte artifactTier)
         {
             foreach (ArtifactPowerRecord artifactPower in Global.DB2Mgr.GetArtifactPowers(artifactId))
             {
@@ -2250,7 +2277,7 @@ namespace Game.Entities
                 ItemDynamicFieldArtifactPowers powerData = new ItemDynamicFieldArtifactPowers();
                 powerData.ArtifactPowerId = artifactPower.Id;
                 powerData.PurchasedRank = 0;
-                powerData.CurrentRankWithBonus = (byte)(artifactPower.Flags.HasAnyFlag(ArtifactPowerFlag.First) ? 1 : 0);
+                powerData.CurrentRankWithBonus = (byte)((artifactPower.Flags & ArtifactPowerFlag.First) == ArtifactPowerFlag.First ? 1 : 0);
                 SetArtifactPower(powerData, true);
             }
         }
@@ -2366,7 +2393,7 @@ namespace Game.Entities
             SetAppearanceModId(parent.GetAppearanceModId());
         }
 
-        public void GiveArtifactXp(ulong amount, Item sourceItem, uint artifactCategoryId)
+        public void GiveArtifactXp(ulong amount, Item sourceItem, ArtifactCategory artifactCategoryId)
         {
             Player owner = GetOwner();
             if (!owner)
@@ -2374,26 +2401,22 @@ namespace Game.Entities
 
             if (artifactCategoryId != 0)
             {
-                ArtifactCategoryRecord artifactCategory = CliDB.ArtifactCategoryStorage.LookupByKey(artifactCategoryId);
-                if (artifactCategory != null)
-                {
-                    uint artifactKnowledgeLevel = 1;
-                    if (sourceItem && sourceItem.GetModifier(ItemModifier.ArtifactKnowledgeLevel) != 0)
-                        artifactKnowledgeLevel = sourceItem.GetModifier(ItemModifier.ArtifactKnowledgeLevel);
-                    else
-                        artifactKnowledgeLevel = owner.GetCurrency(artifactCategory.XpMultCurrencyID) + 1;
+                uint artifactKnowledgeLevel = 1;
+                if (sourceItem != null && sourceItem.GetModifier(ItemModifier.ArtifactKnowledgeLevel) != 0)
+                    artifactKnowledgeLevel = sourceItem.GetModifier(ItemModifier.ArtifactKnowledgeLevel);
+                else if (artifactCategoryId == ArtifactCategory.Primary)
+                    artifactKnowledgeLevel = WorldConfig.GetUIntValue(WorldCfg.CurrencyStartArtifactKnowledge) + 1;
 
-                    GtArtifactKnowledgeMultiplierRecord artifactKnowledge = CliDB.ArtifactKnowledgeMultiplierGameTable.GetRow(artifactKnowledgeLevel);
-                    if (artifactKnowledge != null)
-                        amount = (ulong)(amount * artifactKnowledge.Multiplier);
+                GtArtifactKnowledgeMultiplierRecord artifactKnowledge = CliDB.ArtifactKnowledgeMultiplierGameTable.GetRow(artifactKnowledgeLevel);
+                if (artifactKnowledge != null)
+                    amount = (ulong)(amount * artifactKnowledge.Multiplier);
 
-                    if (amount >= 5000)
-                        amount = 50 * (amount / 50);
-                    else if (amount >= 1000)
-                        amount = 25 * (amount / 25);
-                    else if (amount >= 50)
-                        amount = 5 * (amount / 5);
-                }
+                if (amount >= 5000)
+                    amount = 50 * (amount / 50);
+                else if (amount >= 1000)
+                    amount = 25 * (amount / 25);
+                else if (amount >= 50)
+                    amount = 5 * (amount / 5);
             }
 
             SetUInt64Value(ItemFields.ArtifactXp, GetUInt64Value(ItemFields.ArtifactXp) + amount);

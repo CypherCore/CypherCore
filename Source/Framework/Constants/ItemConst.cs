@@ -1052,7 +1052,6 @@ namespace Framework.Constants
         JusticePoints = 395,
         ValorPoints = 396,
         ApexisCrystals = 823,
-        ArtifactKnowledge = 1171,
     }
 
     public enum PlayerCurrencyState

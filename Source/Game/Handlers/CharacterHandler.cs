@@ -691,6 +691,16 @@ namespace Game
             // TODO: Move this to BattlePetMgr::SendJournalLock() just to have all packets in one file
             SendPacket(new BattlePetJournalLockAcquired());
 
+            ArtifactKnowledge artifactKnowledge = new ArtifactKnowledge();
+            artifactKnowledge.ArtifactCategoryID = ArtifactCategory.Primary;
+            artifactKnowledge.KnowledgeLevel = (sbyte)WorldConfig.GetIntValue(WorldCfg.CurrencyStartArtifactKnowledge);
+            SendPacket(artifactKnowledge);
+
+            ArtifactKnowledge artifactKnowledgeFishingPole = new ArtifactKnowledge();
+            artifactKnowledgeFishingPole.ArtifactCategoryID = ArtifactCategory.Fishing;
+            artifactKnowledgeFishingPole.KnowledgeLevel = 0;
+            SendPacket(artifactKnowledgeFishingPole);
+
             pCurrChar.SendInitialPacketsBeforeAddToMap();
 
             //Show cinematic at the first time that player login

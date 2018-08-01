@@ -1401,6 +1401,17 @@ namespace Game.Entities
             return _dynamicValues[(int)index][offset];
         }
 
+        public bool HasDynamicValue(object index, uint value)
+        {
+            Cypher.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, false));
+            uint[] values = _dynamicValues[(int)index];
+            for (var i = 0; i < values.Length; ++i)
+                if (values[i] == value)
+                    return true;
+
+            return false;
+        }
+
         public void AddDynamicValue(object index, uint value)
         {
             Cypher.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, true));

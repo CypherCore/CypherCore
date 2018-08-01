@@ -495,6 +495,13 @@ namespace Game
             }
             Values[WorldCfg.CurrencyMaxJusticePoints] = (int)Values[WorldCfg.CurrencyMaxJusticePoints] * 100;     //precision mod
 
+            Values[WorldCfg.CurrencyStartArtifactKnowledge] = GetDefaultValue("Currency.StartArtifactKnowledge", 55);
+            if ((int)(Values[WorldCfg.CurrencyStartArtifactKnowledge]) < 0)
+            {
+                Log.outError(LogFilter.ServerLoading, "Currency.StartArtifactKnowledge ({0}) must be >= 0, set to default 0.", Values[WorldCfg.CurrencyStartArtifactKnowledge]);
+                Values[WorldCfg.CurrencyStartArtifactKnowledge] = 0;
+            }
+
             Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevel] = GetDefaultValue("RecruitAFriend.MaxLevel", 85);
             if ((int)Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevel] > (int)Values[WorldCfg.MaxPlayerLevel])
             {
