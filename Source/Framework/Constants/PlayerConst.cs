@@ -67,6 +67,8 @@ namespace Framework.Constants
 
         public const int ArtifactsAllWeaponsGeneralWeaponEquippedPassive = 197886;
 
+        public const int MaxArtifactTier = 1;
+
         public const byte MaxHonorLevel = 50;
         public const byte LevelMinHonor = 110;
         public const uint SpellPvpRulesEnabled = 134735;

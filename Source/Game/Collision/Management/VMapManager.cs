@@ -242,9 +242,10 @@ namespace Game.Collision
                     WorldModel worldmodel = new WorldModel();
                     if (!worldmodel.readFile(VMapPath + filename + ".vmo"))
                     {
-                        Log.outError(LogFilter.Server, "VMapManager: could not load '{0}.vmo'", filename);
+                        Log.outError(LogFilter.Server, "VMapManager: could not load '{0}'", filename);
                         return null;
                     }
+
                     Log.outDebug(LogFilter.Maps, "VMapManager: loading file '{0}'", filename);
                     model = new ManagedModel();
                     model.setModel(worldmodel);
@@ -260,6 +261,7 @@ namespace Game.Collision
         {
             lock (LoadedModelFilesLock)
             {
+                filename = filename.Replace("\0", "");
                 var model = iLoadedModelFiles.LookupByKey(filename);
                 if (model == null)
                 {

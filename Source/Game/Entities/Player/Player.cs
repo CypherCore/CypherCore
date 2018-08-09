@@ -5085,6 +5085,16 @@ namespace Game.Entities
             SendPacket(displayPlayerChoice);
         }
 
+        public bool MeetPlayerCondition(uint conditionId)
+        {
+            PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(conditionId);
+            if (playerCondition != null)
+                if (!ConditionManager.IsPlayerMeetingCondition(this, playerCondition))
+                    return false;
+
+            return true;
+        }
+
         public float GetCollisionHeight(bool mounted)
         {
             if (mounted)
@@ -5332,6 +5342,14 @@ namespace Game.Entities
                 UpdateSkillsToMaxSkillsForLevel();
 
             _ApplyAllLevelScaleItemMods(true); // Moved to above SetFullHealth so player will have full health from Heirlooms
+
+            Aura artifactAura = GetAura(PlayerConst.ArtifactsAllWeaponsGeneralWeaponEquippedPassive);
+            if (artifactAura != null)
+            {
+                Item artifact = GetItemByGuid(artifactAura.GetCastItemGUID());
+                if (artifact != null)
+                    artifact.CheckArtifactRelicSlotUnlock(this);
+            }
 
             // Only health and mana are set to maximum.
             SetFullHealth();

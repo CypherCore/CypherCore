@@ -5674,7 +5674,7 @@ namespace Game.Spells
             {
                 Item artifact = m_caster.ToPlayer().GetItemByGuid(artifactAura.GetCastItemGUID());
                 if (artifact)
-                    artifact.GiveArtifactXp((ulong)damage, m_CastItem, (uint)effectInfo.MiscValue);
+                    artifact.GiveArtifactXp((ulong)damage, m_CastItem, (ArtifactCategory)effectInfo.MiscValue);
             }
         }
 

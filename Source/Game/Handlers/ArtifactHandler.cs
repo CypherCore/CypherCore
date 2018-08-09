@@ -37,10 +37,12 @@ namespace Game
             if (!artifact)
                 return;
 
+            uint currentArtifactTier = artifact.GetModifier(ItemModifier.ArtifactTier);
+
             ulong xpCost = 0;
             GtArtifactLevelXPRecord cost = CliDB.ArtifactLevelXPGameTable.GetRow(artifact.GetTotalPurchasedArtifactPowers() + 1);
             if (cost != null)
-                xpCost = (ulong)(artifact.GetModifier(ItemModifier.ArtifactTier) == 1 ? cost.XP2 : cost.XP);
+                xpCost = (ulong)(currentArtifactTier == PlayerConst.MaxArtifactTier ? cost.XP2 : cost.XP);
 
             if (xpCost > artifact.GetUInt64Value(ItemFields.ArtifactXp))
                 return;
@@ -56,33 +58,47 @@ namespace Game
             if (artifactPowerEntry == null)
                 return;
 
-            if (artifactAddPower.PowerChoices[0].Rank != artifactPower.PurchasedRank + 1 ||
-                artifactAddPower.PowerChoices[0].Rank > artifactPowerEntry.MaxPurchasableRank)
+            if (artifactPowerEntry.Tier > currentArtifactTier)
                 return;
 
-            var artifactPowerLinks = Global.DB2Mgr.GetArtifactPowerLinks(artifactPower.ArtifactPowerId);
-            if (artifactPowerLinks != null)
+            uint maxRank = artifactPowerEntry.MaxPurchasableRank;
+            if (artifactPowerEntry.Tier < currentArtifactTier)
             {
-                bool hasAnyLink = false;
-                foreach (uint artifactPowerLinkId in artifactPowerLinks)
+                if (artifactPowerEntry.Flags.HasAnyFlag(ArtifactPowerFlag.Final))
+                    maxRank = 1;
+                else if (artifactPowerEntry.Flags.HasAnyFlag(ArtifactPowerFlag.MaxRankWithTier))
+                    maxRank += currentArtifactTier - artifactPowerEntry.Tier;
+            }
+
+            if (artifactAddPower.PowerChoices[0].Rank != artifactPower.PurchasedRank + 1 ||
+                artifactAddPower.PowerChoices[0].Rank > maxRank)
+                return;
+            if (!artifactPowerEntry.Flags.HasAnyFlag(ArtifactPowerFlag.NoLinkRequired))
+            {
+                var artifactPowerLinks = Global.DB2Mgr.GetArtifactPowerLinks(artifactPower.ArtifactPowerId);
+                if (artifactPowerLinks != null)
                 {
-                    ArtifactPowerRecord artifactPowerLink = CliDB.ArtifactPowerStorage.LookupByKey(artifactPowerLinkId);
-                    if (artifactPowerLink == null)
-                        continue;
-
-                    ItemDynamicFieldArtifactPowers artifactPowerLinkLearned = artifact.GetArtifactPower(artifactPowerLinkId);
-                    if (artifactPowerLinkLearned == null)
-                        continue;
-
-                    if (artifactPowerLinkLearned.PurchasedRank >= artifactPowerLink.MaxPurchasableRank)
+                    bool hasAnyLink = false;
+                    foreach (uint artifactPowerLinkId in artifactPowerLinks)
                     {
-                        hasAnyLink = true;
-                        break;
-                    }
-                }
+                        ArtifactPowerRecord artifactPowerLink = CliDB.ArtifactPowerStorage.LookupByKey(artifactPowerLinkId);
+                        if (artifactPowerLink == null)
+                            continue;
 
-                if (!hasAnyLink)
-                    return;
+                        ItemDynamicFieldArtifactPowers artifactPowerLinkLearned = artifact.GetArtifactPower(artifactPowerLinkId);
+                        if (artifactPowerLinkLearned == null)
+                            continue;
+
+                        if (artifactPowerLinkLearned.PurchasedRank >= artifactPowerLink.MaxPurchasableRank)
+                        {
+                            hasAnyLink = true;
+                            break;
+                        }
+                    }
+
+                    if (!hasAnyLink)
+                        return;
+                }
             }
 
             ArtifactPowerRankRecord artifactPowerRank = Global.DB2Mgr.GetArtifactPowerRank(artifactPower.ArtifactPowerId, (byte)(artifactPower.CurrentRankWithBonus + 1 - 1)); // need data for next rank, but -1 because of how db2 data is structured
@@ -119,6 +135,31 @@ namespace Game
 
             artifact.SetUInt64Value(ItemFields.ArtifactXp, artifact.GetUInt64Value(ItemFields.ArtifactXp) - xpCost);
             artifact.SetState(ItemUpdateState.Changed, _player);
+
+            uint totalPurchasedArtifactPower = artifact.GetTotalPurchasedArtifactPowers();
+            uint artifactTier = 0;
+
+            foreach (ArtifactTierRecord tier in CliDB.ArtifactTierStorage.Values)
+            {
+                if (artifactPowerEntry.Flags.HasAnyFlag(ArtifactPowerFlag.Final) && artifactPowerEntry.Tier < PlayerConst.MaxArtifactTier)
+                {
+                    artifactTier = artifactPowerEntry.Tier + 1u;
+                    break;
+                }
+
+                if (totalPurchasedArtifactPower < tier.MaxNumTraits)
+                {
+                    artifactTier = tier.ArtifactTier;
+                    break;
+                }
+            }
+
+            artifactTier = Math.Max(artifactTier, currentArtifactTier);
+
+            for (uint i = currentArtifactTier; i <= artifactTier; ++i)
+                artifact.InitArtifactPowers(artifact.GetTemplate().GetArtifactID(), (byte)i);
+
+            artifact.SetModifier(ItemModifier.ArtifactTier, artifactTier);
         }
 
         [WorldPacketHandler(ClientOpcodes.ArtifactSetAppearance)]

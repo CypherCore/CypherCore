@@ -1066,6 +1066,7 @@ namespace Framework.Constants
         CurrencyResetInterval,
         CurrencyStartApexisCrystals,
         CurrencyStartJusticePoints,
+        CurrencyStartArtifactKnowledge,
         DailyQuestResetTimeHour,
         DbcEnforceItemAttributes,
         DeathBonesBgOrArena,

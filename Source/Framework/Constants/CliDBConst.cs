@@ -883,13 +883,22 @@ namespace Framework.Constants
         Unk9 = 0x40000000,
     }
 
+    public enum ArtifactCategory
+    {
+        Primary = 1,
+        Fishing = 2
+    }
+
     public enum ArtifactPowerFlag : byte
     {
         Gold = 0x01,
-        First = 0x02,
+        NoLinkRequired = 0x02,
         Final = 0x04,
         ScalesWithNumPowers = 0x08,
         DontCountFirstBonusRank = 0x10,
+        MaxRankWithTier = 0x20,
+
+        First = NoLinkRequired | DontCountFirstBonusRank,
     }
 
     public enum BattlegroundBracketId                                  // bracketId for level ranges

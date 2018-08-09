@@ -214,6 +214,26 @@ namespace Game.DataStorage
         public uint[] Difficulty = new uint[10];
     }
 
+    public class ArtifactTierRecord
+    {
+        public uint ID;
+        public uint ArtifactTier;
+        public uint MaxNumTraits;
+        public uint MaxArtifactKnowledge;
+        public uint KnowledgePlayerCondition;
+        public uint MinimumEmpowerKnowledge;
+    }
+
+    public class ArtifactUnlockRecord
+    {
+        public uint ID;
+        public ushort ItemBonusListID;
+        public byte PowerRank;
+        public uint PowerID;
+        public uint PlayerConditionID;
+        public byte ArtifactID;
+    }
+
     public sealed class AuctionHouseRecord
     {
         public uint Id;

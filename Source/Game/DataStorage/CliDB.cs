@@ -50,6 +50,8 @@ namespace Game.DataStorage
             ArtifactPowerPickerStorage = DBReader.Read<ArtifactPowerPickerRecord>("ArtifactPowerPicker.db2", HotfixStatements.SEL_ARTIFACT_POWER_PICKER);
             ArtifactPowerRankStorage = DBReader.Read<ArtifactPowerRankRecord>("ArtifactPowerRank.db2", HotfixStatements.SEL_ARTIFACT_POWER_RANK);
             //ArtifactQuestXPStorage = DBReader.Read<ArtifactQuestXPRecord>("ArtifactQuestXP.db2", HotfixStatements.SEL_ARTIFACT_QUEST_XP);
+            ArtifactTierStorage = DBReader.Read<ArtifactTierRecord> ("ArtifactTier.db2", HotfixStatements.SEL_ARTIFACT_TIER);
+            ArtifactUnlockStorage = DBReader.Read<ArtifactUnlockRecord> ("ArtifactUnlock.db2", HotfixStatements.SEL_ARTIFACT_UNLOCK);
             AuctionHouseStorage = DBReader.Read<AuctionHouseRecord>("AuctionHouse.db2", HotfixStatements.SEL_AUCTION_HOUSE, HotfixStatements.SEL_AUCTION_HOUSE_LOCALE);
             BankBagSlotPricesStorage = DBReader.Read<BankBagSlotPricesRecord>("BankBagSlotPrices.db2", HotfixStatements.SEL_BANK_BAG_SLOT_PRICES);
             //BannedAddOnsStorage = DBReader.Read<BannedAddOnsRecord>("BannedAddons.db2", HotfixStatements.SEL_BANNED_ADDONS);
@@ -383,6 +385,8 @@ namespace Game.DataStorage
         public static DB6Storage<ArtifactPowerPickerRecord> ArtifactPowerPickerStorage;
         public static DB6Storage<ArtifactPowerRankRecord> ArtifactPowerRankStorage;
         //public static DB6Storage<ArtifactQuestXPRecord> ArtifactQuestXPStorage;
+        public static DB6Storage<ArtifactTierRecord> ArtifactTierStorage;
+        public static DB6Storage<ArtifactUnlockRecord> ArtifactUnlockStorage;
         public static DB6Storage<AuctionHouseRecord> AuctionHouseStorage;
         public static DB6Storage<BankBagSlotPricesRecord> BankBagSlotPricesStorage;
         //public static DB6Storage<BannedAddOnsRecord> BannedAddOnsStorage;
