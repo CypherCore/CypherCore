@@ -217,6 +217,7 @@ namespace Framework.Constants
         ConnectToFailed = 0x35d4,
         ContributionContribute = 0x3558,
         ContributionGetState = 0x3559,
+        ConversationLineStarted = 0x354A,
         ConvertConsumptionTime = 0x36f9,
         ConvertRaid = 0x364e,
         CreateCharacter = 0x3643,

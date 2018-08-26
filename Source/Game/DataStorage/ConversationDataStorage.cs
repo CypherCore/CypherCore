@@ -60,7 +60,7 @@ namespace Game.DataStorage
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Conversation actor templates. DB table `conversation_actor_template` is empty.");
             }
 
-            SQLResult lineTemplates = DB.World.Query("SELECT Id, StartTime, UiCameraID, ActorIdx, Unk FROM conversation_line_template");
+            SQLResult lineTemplates = DB.World.Query("SELECT Id, StartTime, UiCameraID, ActorIdx, Flags FROM conversation_line_template");
             if (!lineTemplates.IsEmpty())
             {
                 uint oldMSTime = Time.GetMSTime();
@@ -79,8 +79,8 @@ namespace Game.DataStorage
                     conversationLine.Id = id;
                     conversationLine.StartTime = lineTemplates.Read<uint>(1);
                     conversationLine.UiCameraID = lineTemplates.Read<uint>(2);
-                    conversationLine.ActorIdx = lineTemplates.Read<ushort>(3);
-                    conversationLine.Unk = lineTemplates.Read<ushort>(4);
+                    conversationLine.ActorIdx = lineTemplates.Read<byte>(3);
+                    conversationLine.Flags = lineTemplates.Read<byte>(4);
 
                     _conversationLineTemplateStorage[id] = conversationLine;
                 }
@@ -226,8 +226,9 @@ namespace Game.DataStorage
         public uint Id;          // Link to ConversationLine.db2
         public uint StartTime;   // Time in ms after conversation creation the line is displayed
         public uint UiCameraID;  // Link to UiCamera.db2
-        public ushort ActorIdx;    // Index from conversation_actors
-        public ushort Unk;
+        public byte ActorIdx;    // Index from conversation_actors
+        public byte Flags;
+        public ushort Padding;
     }
 
     public class ConversationTemplate
