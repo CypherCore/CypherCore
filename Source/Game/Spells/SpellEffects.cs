@@ -5334,7 +5334,7 @@ namespace Game.Spells
             Player caster = m_caster.ToPlayer();
             Guild guild = caster.GetGuild();
             if (guild != null)
-                guild.HandleBuyBankTab(caster.GetSession(), (byte)(effectInfo.BasePoints - 1)); // Bank tabs start at zero internally
+                guild.HandleBuyBankTab(caster.GetSession(), (byte)(damage - 1)); // Bank tabs start at zero internally
         }
 
         [SpellEffectHandler(SpellEffectName.ResurrectWithAura)]
@@ -5411,9 +5411,7 @@ namespace Game.Spells
                 return;
 
             Player player = unitTarget.ToPlayer();
-            SpellEffectInfo effect = GetEffect(effIndex);
-            uint itemId = effect.ItemType;
-            Item item = player.GetItemByEntry(itemId);
+            Item item = player.GetItemByEntry(effectInfo.ItemType);
             if (item)
                 player.DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
         }
@@ -5429,7 +5427,7 @@ namespace Game.Spells
 
             Garrison garrison = unitTarget.ToPlayer().GetGarrison();
             if (garrison != null)
-                garrison.LearnBlueprint((uint)GetEffect(effIndex).MiscValue);
+                garrison.LearnBlueprint((uint)effectInfo.MiscValue);
         }
 
         [SpellEffectHandler(SpellEffectName.CreateGarrison)]
@@ -5441,7 +5439,7 @@ namespace Game.Spells
             if (!unitTarget || !unitTarget.IsTypeId(TypeId.Player))
                 return;
 
-            unitTarget.ToPlayer().CreateGarrison((uint)GetEffect(effIndex).MiscValue);
+            unitTarget.ToPlayer().CreateGarrison((uint)effectInfo.MiscValue);
         }
 
         [SpellEffectHandler(SpellEffectName.CreateConversation)]
@@ -5467,7 +5465,7 @@ namespace Game.Spells
 
             Garrison garrison = unitTarget.ToPlayer().GetGarrison();
             if (garrison != null)
-                garrison.AddFollower((uint)GetEffect(effIndex).MiscValue);
+                garrison.AddFollower((uint)effectInfo.MiscValue);
         }
 
         [SpellEffectHandler(SpellEffectName.CreateHeirloomItem)]
@@ -5502,7 +5500,7 @@ namespace Game.Spells
 
             Garrison garrison = unitTarget.ToPlayer().GetGarrison();
             if (garrison != null)
-                garrison.ActivateBuilding((uint)GetEffect(effIndex).MiscValue);
+                garrison.ActivateBuilding((uint)effectInfo.MiscValue);
         }
 
         [SpellEffectHandler(SpellEffectName.HealBattlepetPct)]
@@ -5516,7 +5514,7 @@ namespace Game.Spells
 
             BattlePetMgr battlePetMgr = unitTarget.ToPlayer().GetSession().GetBattlePetMgr();
             if (battlePetMgr != null)
-                battlePetMgr.HealBattlePetsPct((byte)GetEffect(effIndex).BasePoints);
+                battlePetMgr.HealBattlePetsPct((byte)damage);
         }
 
         [SpellEffectHandler(SpellEffectName.EnableBattlePets)]

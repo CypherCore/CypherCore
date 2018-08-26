@@ -626,7 +626,7 @@ namespace Scripts.Spells.Holiday
             PreventHitDefaultEffect(effIndex);
             // All this spells trigger a spell that requires reagents; if the
             // triggered spell is cast as "triggered", reagents are not consumed
-            GetHitUnit().CastSpell(null, GetSpellInfo().GetEffect(effIndex).TriggerSpell, TriggerCastFlags.FullMask & ~TriggerCastFlags.IgnorePowerAndReagentCost);
+            GetHitUnit().CastSpell(null, GetEffectInfo().TriggerSpell, TriggerCastFlags.FullMask & ~TriggerCastFlags.IgnorePowerAndReagentCost);
         }
 
         public override void Register()

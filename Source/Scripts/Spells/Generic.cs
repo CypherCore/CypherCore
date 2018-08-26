@@ -1203,7 +1203,7 @@ namespace Scripts.Spells.Generic
 
         void HandleDummy(uint effIndex)
         {
-            if (GetSpellInfo().GetEffect(effIndex).Effect == SpellEffectName.Dummy || GetSpellInfo().GetEffect(effIndex).Effect == SpellEffectName.ScriptEffect)
+            if (GetEffectInfo().IsEffect(SpellEffectName.Dummy) || GetEffectInfo().IsEffect(SpellEffectName.ScriptEffect))
                 GetCaster().ToCreature().DespawnOrUnsummon();
         }
 
@@ -1922,8 +1922,8 @@ namespace Scripts.Spells.Generic
         void HandleDummy(uint effIndex)
         {
             Player player = GetCaster().ToPlayer();
-            uint factionId = (uint)GetSpellInfo().GetEffect(effIndex).CalcValue();
-            int repChange = GetSpellInfo().GetEffect(1).CalcValue();
+            uint factionId = (uint)GetEffectInfo(effIndex).CalcValue();
+            int repChange = GetEffectInfo(1).CalcValue();
 
             FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(factionId);
 
