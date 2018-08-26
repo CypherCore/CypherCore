@@ -1668,6 +1668,7 @@ namespace Game
                             stmt.AddValue(1, 111);
                             break;
                         case Race.Draenei:
+                        case Race.LightforgedDraenei:
                             stmt.AddValue(1, 759);
                             break;
                         case Race.Gnome:
@@ -1683,17 +1684,26 @@ namespace Game
                             stmt.AddValue(1, 673);
                             break;
                         case Race.Tauren:
+                        case Race.HighmountainTauren:
                             stmt.AddValue(1, 115);
                             break;
                         case Race.Troll:
                             stmt.AddValue(1, 315);
                             break;
                         case Race.BloodElf:
+                        case Race.VoidElf:
                             stmt.AddValue(1, 137);
                             break;
                         case Race.Goblin:
                             stmt.AddValue(1, 792);
                             break;
+                        case Race.Nightborne:
+                            stmt.AddValue(1, 2464);
+                            break;
+                        default:
+                            Log.outError(LogFilter.Player, $"Could not find language data for race ({factionChangeInfo.RaceID}).");
+                            SendCharFactionChange(ResponseCodes.CharCreateError, factionChangeInfo);
+                            return;
                     }
 
                     trans.Append(stmt);
