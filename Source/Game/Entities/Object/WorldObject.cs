@@ -516,7 +516,7 @@ namespace Game.Entities
                 bool hasAreaTriggerPolygon = areaTriggerTemplate.IsPolygon();
                 bool hasAreaTriggerCylinder = areaTriggerTemplate.IsCylinder();
                 bool hasAreaTriggerSpline = areaTrigger.HasSplines();
-                bool hasAreaTriggerUnkType = false; // areaTriggerTemplate.HasFlag(AREATRIGGER_FLAG_UNK5);
+                bool hasCircularMovement = areaTrigger.HasCircularMovement();
 
                 data.WriteBit(hasAbsoluteOrientation);
                 data.WriteBit(hasDynamicShape);
@@ -537,7 +537,7 @@ namespace Game.Entities
                 data.WriteBit(hasAreaTriggerPolygon);
                 data.WriteBit(hasAreaTriggerCylinder);
                 data.WriteBit(hasAreaTriggerSpline);
-                data.WriteBit(hasAreaTriggerUnkType);
+                data.WriteBit(hasCircularMovement);
 
                 if (hasUnk3)
                     data.WriteBit(0);
@@ -623,28 +623,8 @@ namespace Game.Entities
                     data.WriteFloat(areaTriggerTemplate.CylinderDatas.LocationZOffsetTarget);
                 }
 
-                if (hasAreaTriggerUnkType)
-                {
-                    /*packet.ResetBitReader();
-                    var unk1 = packet.ReadBit("AreaTriggerUnk1");
-                    var hasCenter = packet.ReadBit("HasCenter", index);
-                    packet.ReadBit("Unk bit 703 1", index);
-                    packet.ReadBit("Unk bit 703 2", index);
-
-                    packet.ReadUInt32();
-                    packet.ReadInt32();
-                    packet.ReadUInt32();
-                    packet.ReadSingle("Radius", index);
-                    packet.ReadSingle("BlendFromRadius", index);
-                    packet.ReadSingle("InitialAngel", index);
-                    packet.ReadSingle("ZOffset", index);
-
-                    if (unk1)
-                        packet.ReadPackedGuid128("AreaTriggerUnkGUID", index);
-
-                    if (hasCenter)
-                        packet.ReadVector3("Center", index);*/
-                }
+                if (hasCircularMovement)
+                   areaTrigger.GetCircularMovementInfo().Value.Write(data);
             }
 
             if (HasGameObject)

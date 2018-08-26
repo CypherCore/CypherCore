@@ -85,18 +85,18 @@ namespace Game.Network.Packets
             _worldPacket .WritePackedGuid( TriggerGUID);
 
             _worldPacket.WriteBit(AreaTriggerSpline.HasValue);
-            _worldPacket.WriteBit(AreaTriggerUnkType.HasValue);
+            _worldPacket.WriteBit(AreaTriggerCircularMovement.HasValue);
             _worldPacket.FlushBits();
 
             if (AreaTriggerSpline.HasValue)
                 AreaTriggerSpline.Value.Write(_worldPacket);
 
-            if (AreaTriggerUnkType.HasValue)
-                AreaTriggerUnkType.Value.Write(_worldPacket);
+            if (AreaTriggerCircularMovement.HasValue)
+                AreaTriggerCircularMovement.Value.Write(_worldPacket);
         }
 
         public Optional<AreaTriggerSplineInfo> AreaTriggerSpline;
-        public Optional<AreaTriggerUnkTypeInfo> AreaTriggerUnkType;
+        public Optional<AreaTriggerCircularMovementInfo> AreaTriggerCircularMovement;
         public ObjectGuid TriggerGUID;
     }
 
@@ -118,42 +118,5 @@ namespace Game.Network.Packets
         public uint TimeToTarget;
         public uint ElapsedTimeForMovement;
         public List<Vector3> Points = new List<Vector3>();
-    }
-
-    struct AreaTriggerUnkTypeInfo
-    {
-        public void Write(WorldPacket data)
-        {
-            data.WriteBit(AreaTriggerUnkGUID.HasValue);
-            data.WriteBit(Center.HasValue);
-            data.WriteBit(UnkBit1);
-            data.WriteBit(UnkBit2);
-
-            data.WriteUInt32(UnkUInt1);
-            data.WriteInt32(UnkInt1);
-            data.WriteUInt32(UnkUInt2);
-            data.WriteFloat(Radius);
-            data.WriteFloat(BlendFromRadius);
-            data.WriteFloat(InitialAngel);
-            data.WriteFloat(ZOffset);
-
-            if (AreaTriggerUnkGUID.HasValue)
-                data.WritePackedGuid(AreaTriggerUnkGUID.Value);
-
-            if (Center.HasValue)
-                data.WriteVector3(Center.Value);
-        }
-
-        public Optional<ObjectGuid> AreaTriggerUnkGUID;
-        public Optional<Vector3> Center;
-        public bool UnkBit1;
-        public bool UnkBit2;
-        public uint UnkUInt1;
-        public int UnkInt1;
-        public uint UnkUInt2;
-        public float Radius;
-        public float BlendFromRadius;
-        public float InitialAngel;
-        public float ZOffset;
     }
 }

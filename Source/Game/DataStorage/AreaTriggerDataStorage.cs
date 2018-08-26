@@ -200,6 +200,64 @@ namespace Game.DataStorage
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Spell AreaTrigger templates. DB table `spell_areatrigger` is empty.");
             }
 
+            //                                                       0            1           2             3                4             5        6                 7
+            SQLResult circularMovementInfos = DB.World.Query("SELECT SpellMiscId, StartDelay, CircleRadius, BlendFromRadius, InitialAngle, ZOffset, CounterClockwise, CanLoop FROM `spell_areatrigger_circular` ORDER BY `SpellMiscId`");
+            if (!circularMovementInfos.IsEmpty())
+            {
+                do
+                {
+                    uint spellMiscId = circularMovementInfos.Read<uint>(0);
+
+                    var atSpellMisc = _areaTriggerTemplateSpellMisc.LookupByKey(spellMiscId);
+                    if (atSpellMisc == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `spell_areatrigger_circular` reference invalid SpellMiscId {spellMiscId}");
+                        continue;
+                    }
+
+                    AreaTriggerCircularMovementInfo circularMovementInfo = new AreaTriggerCircularMovementInfo();
+
+                    circularMovementInfo.StartDelay = circularMovementInfos.Read<uint>(1);
+                    circularMovementInfo.Radius = circularMovementInfos.Read<float>(2);
+                    if (!float.IsInfinity(circularMovementInfo.Radius))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `spell_areatrigger_circular` has listed areatrigger (MiscId: {spellMiscId}) with invalid Radius ({circularMovementInfo.Radius}), set to 0!");
+                        circularMovementInfo.Radius = 0.0f;
+                    }
+
+                    circularMovementInfo.BlendFromRadius = circularMovementInfos.Read<float>(3);
+                    if (!float.IsInfinity(circularMovementInfo.BlendFromRadius))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `spell_areatrigger_circular` has listed areatrigger (MiscId: {spellMiscId}) with invalid BlendFromRadius ({circularMovementInfo.BlendFromRadius}), set to 0!");
+                        circularMovementInfo.BlendFromRadius = 0.0f;
+                    }
+
+                    circularMovementInfo.InitialAngle = circularMovementInfos.Read<float>(4);
+                    if (!float.IsInfinity(circularMovementInfo.InitialAngle))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `spell_areatrigger_circular` has listed areatrigger (MiscId: {spellMiscId}) with invalid InitialAngle ({circularMovementInfo.InitialAngle}), set to 0!");
+                        circularMovementInfo.InitialAngle = 0.0f;
+                    }
+
+                    circularMovementInfo.ZOffset = circularMovementInfos.Read<float>(5);
+                    if (!float.IsInfinity(circularMovementInfo.ZOffset))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `spell_areatrigger_circular` has listed areatrigger (MiscId: {spellMiscId}) with invalid ZOffset ({circularMovementInfo.ZOffset}), set to 0!");
+                        circularMovementInfo.ZOffset = 0.0f;
+                    }
+
+                    circularMovementInfo.CounterClockwise = circularMovementInfos.Read<bool>(6);
+                    circularMovementInfo.CanLoop = circularMovementInfos.Read<bool>(7);
+
+                    atSpellMisc.CircularMovementInfo = circularMovementInfo;
+                }
+                while (circularMovementInfos.NextRow());
+            }
+            else
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 AreaTrigger templates circular movement infos. DB table `spell_areatrigger_circular` is empty.");
+            }
+
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell areatrigger templates in {1} ms.", _areaTriggerTemplateStore.Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 

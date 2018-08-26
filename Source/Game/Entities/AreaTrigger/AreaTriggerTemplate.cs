@@ -20,6 +20,8 @@ using Framework.GameMath;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Framework.Dynamic;
+using Game.Network;
 
 namespace Game.Entities
 {
@@ -114,6 +116,43 @@ namespace Game.Entities
         }
     }
 
+    public struct AreaTriggerCircularMovementInfo
+    {
+        public void Write(WorldPacket data)
+        {
+            data.WriteBit(TargetGUID.HasValue);
+            data.WriteBit(Center.HasValue);
+            data.WriteBit(CounterClockwise);
+            data.WriteBit(CanLoop);
+
+            data.WriteUInt32(TimeToTarget);
+            data.WriteInt32(ElapsedTimeForMovement);
+            data.WriteUInt32(StartDelay);
+            data.WriteFloat(Radius);
+            data.WriteFloat(BlendFromRadius);
+            data.WriteFloat(InitialAngle);
+            data.WriteFloat(ZOffset);
+
+            if (TargetGUID.HasValue)
+                data.WritePackedGuid(TargetGUID.Value);
+
+            if (Center.HasValue)
+                data.WriteVector3(Center.Value);
+        }
+
+        public Optional<ObjectGuid> TargetGUID;
+        public Optional<Vector3> Center;
+        public bool CounterClockwise;
+        public bool CanLoop;
+        public uint TimeToTarget;
+        public int ElapsedTimeForMovement;
+        public uint StartDelay;
+        public float Radius;
+        public float BlendFromRadius;
+        public float InitialAngle;
+        public float ZOffset;
+    }
+
     public class AreaTriggerTemplate : AreaTriggerData
     {
         public unsafe void InitMaxSearchRadius()
@@ -195,6 +234,7 @@ namespace Game.Entities
         public uint TimeToTargetScale;
 
         public AreaTriggerScaleInfo ScaleInfo = new AreaTriggerScaleInfo();
+        public AreaTriggerCircularMovementInfo CircularMovementInfo;
 
         public AreaTriggerTemplate Template;
         public List<Vector3> SplinePoints = new List<Vector3>();

@@ -217,11 +217,11 @@ namespace Game.DataStorage
     public class ArtifactTierRecord
     {
         public uint ID;
-        public uint ArtifactTier;
-        public uint MaxNumTraits;
-        public uint MaxArtifactKnowledge;
-        public uint KnowledgePlayerCondition;
-        public uint MinimumEmpowerKnowledge;
+        public byte ArtifactTier;
+        public byte MaxNumTraits;
+        public byte MaxArtifactKnowledge;
+        public byte KnowledgePlayerCondition;
+        public byte MinimumEmpowerKnowledge;
     }
 
     public class ArtifactUnlockRecord
@@ -230,8 +230,8 @@ namespace Game.DataStorage
         public ushort ItemBonusListID;
         public byte PowerRank;
         public uint PowerID;
-        public uint PlayerConditionID;
-        public byte ArtifactID;
+        public ushort PlayerConditionID;
+        public uint ArtifactID;
     }
 
     public sealed class AuctionHouseRecord

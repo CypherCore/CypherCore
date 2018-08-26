@@ -29,7 +29,7 @@ namespace Framework.Constants
         Unk2 = 0x080,
         Unk3 = 0x100,
         Unk4 = 0x200,
-        Unk5 = 0x400
+        HasCircularMovement = 0x400
     }
 
     public enum AreaTriggerTypes

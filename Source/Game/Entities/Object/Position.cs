@@ -31,6 +31,13 @@ namespace Game.Entities
             Orientation = o;
         }
 
+        public Position(Vector3 vector)
+        {
+            posX = vector.X;
+            posY = vector.Y;
+            posZ = vector.Z;
+        }
+
         public float GetPositionX()
         {
             return posX;
