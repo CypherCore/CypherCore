@@ -968,6 +968,18 @@ namespace Game.Network.Packets
         public RuneData Runes = new RuneData();
     }
 
+    class AddRunePower : ServerPacket
+    {
+        public AddRunePower() : base(ServerOpcodes.AddRunePower, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(AddedRunesMask);
+        }
+
+        public uint AddedRunesMask;
+    }
+
     class MissileTrajectoryCollision : ClientPacket
     {
         public MissileTrajectoryCollision(WorldPacket packet) : base(packet) { }

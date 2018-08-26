@@ -3110,13 +3110,6 @@ namespace Game.Entities
             SendPacket(data);
         }
 
-        void AddRunePower(byte index)
-        {
-            //WorldPacket data(SMSG_ADD_RUNE_POWER, 4);
-            //data << uint32(1 << index);                             // mask (0x00-0x3F probably)
-            //SendPacket(&data);
-        }
-
         public void InitRunes()
         {
             if (GetClass() != Class.Deathknight)
