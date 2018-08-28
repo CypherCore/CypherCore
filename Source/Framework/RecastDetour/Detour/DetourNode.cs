@@ -23,6 +23,7 @@ public partial class Detour
     {
         DT_NODE_OPEN = 0x01,
         DT_NODE_CLOSED = 0x02,
+        DT_NODE_PARENT_DETACHED = 0x04, // parent of the node is not adjacent. Found using raycast.
     };
 
     public const dtNodeIndex DT_NULL_IDX = dtNodeIndex.MaxValue; //(dtNodeIndex)~0;
@@ -32,8 +33,9 @@ public partial class Detour
         public float[] pos = new float[3];				//< Position of the node.
         public float cost;					//< Cost from previous node to current node.
         public float total;				//< Cost up to the node.
-        public uint pidx;// : 30;		//< Index to parent node.
-        public byte flags;// : 2;		//< Node flags 0/open/closed.
+        public uint pidx;// : 24;		//< Index to parent node.
+        public uint state;// : 2;	///< extra state information. A polyRef can have multiple nodes with different extra info. see DT_MAX_STATES_PER_NODE
+        public byte flags;// : 3;		//< Node flags 0/open/closed.
         public dtPolyRef id;				    //< Polygon ref the node corresponds to.
         ///
         public static int getSizeOf()
@@ -73,7 +75,6 @@ public partial class Detour
 
         //////////////////////////////////////////////////////////////////////////////////////////
         public dtNodePool(int maxNodes, int hashSize)
-
         {
             m_maxNodes = maxNodes;
             m_hashSize = hashSize;
@@ -164,14 +165,14 @@ public partial class Detour
             return null;
         }
 
-        public dtNode getNode(dtPolyRef id)
+        public dtNode getNode(dtPolyRef id, byte state = 0)
         {
             uint bucket = (uint)(dtHashRef(id) & (m_hashSize - 1));
             dtNodeIndex i = m_first[bucket];
             dtNode node = null;
             while (i != DT_NULL_IDX)
             {
-                if (m_nodes[i].id == id)
+                if (m_nodes[i].id == id && m_nodes[i].state == state)
                     return m_nodes[i];
                 i = m_next[i];
             }
@@ -188,6 +189,7 @@ public partial class Detour
             node.cost = 0;
             node.total = 0;
             node.id = id;
+            node.state = state;
             node.flags = 0;
 
             m_next[i] = m_first[bucket];

@@ -68,6 +68,18 @@ public static partial class Detour
         DT_STRAIGHTPATH_ALL_CROSSINGS = 0x02,	//< Add a vertex at every polygon edge crossing.
     };
 
+    /// Options for dtNavMeshQuery::initSlicedFindPath and updateSlicedFindPath
+    enum dtFindPathOptions
+    {
+        DT_FINDPATH_ANY_ANGLE = 0x02,       ///< use raycasts during pathfind to "shortcut" (raycast still consider costs)
+    };
+
+    /// Options for dtNavMeshQuery::raycast
+    enum dtRaycastOptions
+    {
+        DT_RAYCAST_USE_COSTS = 0x01,        ///< Raycast should calculate movement cost along the ray and fill RaycastHit::cost
+    };
+
     /// Flags representing the type of a navigation mesh polygon.
     public enum dtPolyTypes
     {
@@ -85,31 +97,11 @@ public static partial class Detour
         /// Index to first link in linked list. (Or #DT_NULL_LINK if there is no link.)
         public uint firstLink;
 
-        /// The indices of the polygon's vertices.
-        /// The actual vertices are located in dtMeshTile::verts.
+        // The indices of the polygon's vertices.
+        // The actual vertices are located in dtMeshTile::verts.
         public ushort[] verts = new ushort[DT_VERTS_PER_POLYGON];
 
-        /// Packed data representing neighbor polygons references and flags for each edge.
-        /*
-        @var ushort dtPoly::neis[DT_VERTS_PER_POLYGON]
-        @par
-
-        Each entry represents data for the edge starting at the vertex of the same index. 
-        E.g. The entry at index n represents the edge data for vertex[n] to vertex[n+1].
-
-        A value of zero indicates the edge has no polygon connection. (It makes up the 
-        border of the navigation mesh.)
-
-        The information can be extracted as follows: 
-        @code 
-        neighborRef = neis[n] & 0xff; // Get the neighbor polygon reference.
-
-        if (neis[n] & #DT_EX_LINK)
-        {
-            // The edge is an external (portal) edge.
-        }
-        @endcode
-         * */
+        // Packed data representing neighbor polygons references and flags for each edge.
         public ushort[] neis = new ushort[DT_VERTS_PER_POLYGON];
 
         /// The user defined polygon flags.
@@ -377,26 +369,9 @@ public static partial class Detour
         public float walkableRadius;		//< The radius of the agents using the tile.
         public float walkableClimb;		//< The maximum climb height of the agents using the tile.
         public float[] bmin = new float[3];				//< The minimum bounds of the tile's AABB. [(x, y, z)]
-        public float[] bmax = new float[3];				//< The maximum bounds of the tile's AABB. [(x, y, z)]
+        public float[] bmax = new float[3];             //< The maximum bounds of the tile's AABB. [(x, y, z)]
 
         /// The bounding volume quantization factor. 
-        /*
-        @var float dtMeshHeader::bvQuantFactor
-        @par
-
-        This value is used for converting between world and bounding volume coordinates.
-        For example:
-        @code
-        const float cs = 1.0f / tile.header.bvQuantFactor;
-        const dtBVNode* n = &tile.bvTree[i];
-        if (n.i >= 0)
-        {
-            // This is a leaf node.
-            float worldMinX = tile.header.bmin[0] + n.bmin[0]*cs;
-            float worldMinY = tile.header.bmin[0] + n.bmin[1]*cs;
-            // Etc...
-        }
-        @endcode */
         public float bvQuantFactor;
 
         public int FromBytes(byte[] array, int start)
@@ -557,8 +532,6 @@ public static partial class Detour
                 offMeshCons[i] = new dtOffMeshConnection();
                 start = offMeshCons[i].FromBytes(array, start);
             }
-            //flags = BitConverter.ToInt32(array, start);
-            //start += sizeof(int);
             return start;
         }
 
@@ -599,7 +572,6 @@ public static partial class Detour
             {
                 bytes.AddRange(offMeshCons[i].ToBytes());
             }
-            bytes.AddRange(BitConverter.GetBytes(flags));
 
             return bytes.ToArray();
         }

@@ -35,11 +35,10 @@ using dtTileRef = System.UInt64;
 
 public static partial class Detour
 {
-    public const uint DT_SALT_BITS = 16;
-    public const uint DT_TILE_BITS = 28;
-    public const uint DT_POLY_BITS = 20;
+    public const uint DT_SALT_BITS = 12;
+    public const uint DT_TILE_BITS = 21;
+    public const uint DT_POLY_BITS = 31;
 }
-
 
 public static partial class Detour
 {
@@ -85,6 +84,7 @@ public static partial class Detour
             return va[2];
         return 0;
     }
+
     public static float getSlabCoord(float[] va, int vaStart, int side)
     {
         if (side == 0 || side == 4)
@@ -93,7 +93,6 @@ public static partial class Detour
             return va[vaStart + 2];
         return 0;
     }
-
 
     public static void calcSlabEndPoints(float[] va, int vaStart, float[] vb, int vbStart, float[] bmin, float[] bmax, int side)
     {
@@ -157,28 +156,6 @@ public static partial class Detour
     }
 
     /*
-    dtNavMesh* dtAllocNavMesh()
-    {
-	    void* mem = dtAlloc(sizeof(dtNavMesh), DT_ALLOC_PERM);
-	    if (!mem) return 0;
-	    return new(mem) dtNavMesh;
-    }
-    */
-    // @par
-    ///
-    /// This function will only free the memory for tiles with the #DT_TILE_FREE_DATA
-    /// flag set.
-    /*
-    void dtFreeNavMesh(dtNavMesh* navmesh)
-    {
-	    if (!navmesh) return;
-	    navmesh.~dtNavMesh();
-	    dtFree(navmesh);
-    }
-    */
-    //////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
     @class dtNavMesh
 
     The navigation mesh consists of one or more tiles defining three primary types of structural data:
@@ -207,7 +184,7 @@ public static partial class Detour
 
     @see dtNavMeshQuery, dtCreateNavMeshData, dtNavMeshCreateParams, #dtAllocNavMesh, #dtFreeNavMesh
     */
-    /// A navigation mesh based on tiles of convex polygons.
+    // A navigation mesh based on tiles of convex polygons.
     // @ingroup detour
     public class dtNavMesh
     {
@@ -276,7 +253,7 @@ public static partial class Detour
         {
             dtPolyRef saltMask = (dtPolyRef)(1 << (int)DT_SALT_BITS) - 1;
             dtPolyRef tileMask = (dtPolyRef)((1 << (int)DT_TILE_BITS) - 1);
-            dtPolyRef polyMask = (dtPolyRef)((1 << (int)DT_POLY_BITS) - 1);
+            dtPolyRef polyMask = (dtPolyRef)((1ul << (int)DT_POLY_BITS) - 1);
             salt = (uint)((polyRef >> (int)(DT_POLY_BITS + DT_TILE_BITS)) & saltMask);
             it = (uint)((polyRef >> (int)DT_POLY_BITS) & tileMask);
             ip = (uint)(polyRef & polyMask);
@@ -308,7 +285,7 @@ public static partial class Detour
         ///  @see #encodePolyId
         public uint decodePolyIdPoly(dtPolyRef polyRef)
         {
-            dtPolyRef polyMask = (dtPolyRef)((1 << (int)DT_POLY_BITS) - 1);
+            dtPolyRef polyMask = (dtPolyRef)((1ul << (int)DT_POLY_BITS) - 1);
             return (uint)(polyRef & polyMask);
         }
 
@@ -1110,7 +1087,10 @@ public static partial class Detour
             tile.flags = flags;
 
             connectIntLinks(tile);
+
+            // Base off-mesh connections to their starting polygons and connect connections inside the tile.
             baseOffMeshLinks(tile);
+            connectExtOffMeshLinks(tile, tile, -1);
 
             // Create connections with neighbour tiles.
             const int MAX_NEIS = 32;
@@ -1121,11 +1101,11 @@ public static partial class Detour
             nneis = getTilesAt(header.x, header.y, neis, MAX_NEIS);
             for (int j = 0; j < nneis; ++j)
             {
-                if (neis[j] != tile)
-                {
-                    connectExtLinks(tile, neis[j], -1);
-                    connectExtLinks(neis[j], tile, -1);
-                }
+                if (neis[j] == tile)
+                    continue;
+
+                connectExtLinks(tile, neis[j], -1);
+                connectExtLinks(neis[j], tile, -1);
                 connectExtOffMeshLinks(tile, neis[j], -1);
                 connectExtOffMeshLinks(neis[j], tile, -1);
             }

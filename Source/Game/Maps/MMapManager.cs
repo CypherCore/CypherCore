@@ -16,12 +16,9 @@
  */
 
 using Framework.Constants;
-using Game.DataStorage;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Game
@@ -152,13 +149,12 @@ namespace Game
                 }
 
                 var bytes = reader.ReadBytes((int)fileHeader.size);
-
                 Detour.dtRawTileData data = new Detour.dtRawTileData();
                 data.FromBytes(bytes, 0);
 
                 ulong tileRef = 0;
                 // memory allocated for data is now managed by detour, and will be deallocated when the tile is removed
-                if (Detour.dtStatusSucceed(mmap.navMesh.addTile(data, 0, 0, ref tileRef)))
+                if (Detour.dtStatusSucceed(mmap.navMesh.addTile(data, 1, 0, ref tileRef)))
                 {
                     mmap.loadedTileRefs.Add(packedGridPos, tileRef);
                     ++loadedTiles;

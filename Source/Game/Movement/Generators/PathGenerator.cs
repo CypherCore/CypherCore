@@ -340,6 +340,7 @@ namespace Game.Movement
 
                 // generate suffix
                 uint suffixPolyLength = 0;
+                ulong[] tempPolyRefs = new ulong[_pathPolyRefs.Length];
 
                 uint dtResult;
                 if (_straightLine)
@@ -354,7 +355,7 @@ namespace Game.Movement
                         _filter,
                         ref hit,
                         hitNormal,
-                        _pathPolyRefs,
+                        tempPolyRefs,
                         ref suffixPolyLength,
                         74 - (int)prefixPolyLength);
 
@@ -374,7 +375,7 @@ namespace Game.Movement
                         suffixEndPoint,     // start position
                         endPoint,           // end position
                         _filter,            // polygon search filter
-                        _pathPolyRefs,
+                        tempPolyRefs,
                         ref suffixPolyLength,
                         74 - (int)prefixPolyLength);
                 }
@@ -388,6 +389,9 @@ namespace Game.Movement
                 }
 
                 Log.outDebug(LogFilter.Maps, "m_polyLength={0} prefixPolyLength={1} suffixPolyLength={2} \n", _polyLength, prefixPolyLength, suffixPolyLength);
+
+                for (var i = 0; i < _pathPolyRefs.Length - (prefixPolyLength - 1); ++i)
+                    _pathPolyRefs[(prefixPolyLength - 1) + i] = tempPolyRefs[i];
 
                 // new path = prefix + suffix - overlap
                 _polyLength = prefixPolyLength + suffixPolyLength - 1;
@@ -797,21 +801,21 @@ namespace Game.Movement
 
         void CreateFilter()
         {
-            NavArea includeFlags = 0;
-            NavArea excludeFlags = 0;
+            NavTerrainFlag includeFlags = 0;
+            NavTerrainFlag excludeFlags = 0;
 
             if (_sourceUnit.IsTypeId(TypeId.Unit))
             {
                 Creature creature = _sourceUnit.ToCreature();
                 if (creature.CanWalk())
-                    includeFlags |= NavArea.Ground;
+                    includeFlags |= NavTerrainFlag.Ground;
 
                 // creatures don't take environmental damage
                 if (creature.CanSwim())
-                    includeFlags |= (NavArea.Water | NavArea.MagmaSlime);
+                    includeFlags |= (NavTerrainFlag.Water | NavTerrainFlag.MagmaSlime);
             }
             else
-                includeFlags = (NavArea.Ground | NavArea.Water | NavArea.MagmaSlime);
+                includeFlags = (NavTerrainFlag.Ground | NavTerrainFlag.Water | NavTerrainFlag.MagmaSlime);
 
             _filter.setIncludeFlags((ushort)includeFlags);
             _filter.setExcludeFlags((ushort)excludeFlags);

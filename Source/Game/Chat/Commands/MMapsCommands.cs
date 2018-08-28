@@ -172,7 +172,7 @@ namespace Game.Chat
             for (int i = 0; i < navmesh.getMaxTiles(); ++i)
             {
                 Detour.dtMeshTile tile = navmesh.getTile(i);
-                if (tile == null)
+                if (tile.header == null)
                     continue;
 
                 handler.SendSysMessage("[{0:D2}, {1:D2}]", tile.header.x, tile.header.y);

@@ -36,6 +36,7 @@ using System;
 using System.Diagnostics;
 using dtPolyRef = System.UInt64;
 using dtStatus = System.UInt32;
+using System.Linq;
 
 // Define DT_VIRTUAL_QUERYFILTER if you wish to derive a custom filter from dtQueryFilter.
 // On certain platforms indirect or virtual function call is expensive. The default
@@ -46,7 +47,7 @@ using dtStatus = System.UInt32;
 
 public static partial class Detour
 {
-    const float H_SCALE = 0.999f; // Search heuristic scale.
+    const float H_SCALE = 2.0f; // Search heuristic scale.
 
     /// Defines polygon filtering and traversal costs for navigation mesh query operations.
     // @ingroup detour
@@ -141,6 +142,33 @@ public static partial class Detour
         }
     }
 
+    /// Provides information about raycast hit
+    /// filled by dtNavMeshQuery::raycast
+    /// @ingroup detour
+    public class dtRaycastHit
+    {
+        /// The hit parameter. (FLT_MAX if no wall hit.)
+        public float t;
+
+        /// hitNormal	The normal of the nearest wall hit. [(x, y, z)]
+        public float[] hitNormal = new float[3];
+
+        /// The index of the edge on the final polygon where the wall was hit.
+        public int hitEdgeIndex;
+
+        /// Pointer to an array of reference ids of the visited polygons. [opt]
+        public dtPolyRef[] path;
+
+        /// The number of visited polygons. [opt]
+        public int pathCount;
+
+        /// The maximum number of polygons the @p path array can hold.
+        public int maxPath;
+
+        ///  The cost of the path until hit.
+        public float pathCost;
+    };
+
     //////////////////////////////////////////////////////////////////////////////////////////
 
     // @class dtNavMeshQuery
@@ -175,6 +203,8 @@ public static partial class Detour
             public float[] startPos = new float[3];
             public float[] endPos = new float[3];
             public dtQueryFilter filter;
+            public uint options;
+            public float raycastLimitSqr;
 
             public void dtcsClear()
             {
@@ -185,10 +215,12 @@ public static partial class Detour
                 endRef = 0;
                 for (int i = 0; i < 3; ++i)
                 {
-                    startPos[i] = .0f;
-                    endPos[i] = .0f;
+                    startPos[i] = 0f;
+                    endPos[i] = 0f;
                 }
                 filter = null;
+                options = 0;
+                raycastLimitSqr = 0f;
             }
         }
         private dtQueryData m_query = new dtQueryData();				//< Sliced query state.
@@ -275,7 +307,7 @@ public static partial class Detour
         ///  @param[out]	randomRef		The reference id of the random location.
         ///  @param[out]	randomPt		The random location. 
         // @returns The status flags for the query.
-		public dtStatus findRandomPoint(dtQueryFilter filter, randomFloatGenerator frand, ref dtPolyRef randomRef, ref float[] randomPt)
+        public dtStatus findRandomPoint(dtQueryFilter filter, randomFloatGenerator frand, ref dtPolyRef randomRef, ref float[] randomPt)
         {
             Debug.Assert(m_nav != null);
 
@@ -378,7 +410,7 @@ public static partial class Detour
         ///  @param[out]	randomRef		The reference id of the random location.
         ///  @param[out]	randomPt		The random location. [(x, y, z)]
         // @returns The status flags for the query.
-		public dtStatus findRandomPointAroundCircle(dtPolyRef startRef, float[] centerPos, float radius, dtQueryFilter filter, randomFloatGenerator frand, ref dtPolyRef randomRef, ref float[] randomPt)
+        public dtStatus findRandomPointAroundCircle(dtPolyRef startRef, float[] centerPos, float radius, dtQueryFilter filter, randomFloatGenerator frand, ref dtPolyRef randomRef, ref float[] randomPt)
         {
             Debug.Assert(m_nav != null);
             Debug.Assert(m_nodePool != null);
@@ -853,60 +885,30 @@ public static partial class Detour
 
             nearestRef = 0;
 
-            // Get nearby polygons from proximity grid.
-            dtPolyRef[] polys = new dtPolyRef[128];
-            int polyCount = 0;
-            if (dtStatusFailed(queryPolygons(center, extents, filter, polys, ref polyCount, 128)))
-                return DT_FAILURE | DT_INVALID_PARAM;
+            dtFindNearestPolyQuery query = new dtFindNearestPolyQuery(this, center);
 
-            // Find nearest polygon amongst the nearby polygons.
-            dtPolyRef nearest = 0;
-            float nearestDistanceSqr = float.MaxValue;
-            for (int i = 0; i < polyCount; ++i)
-            {
-                dtPolyRef polyRef = polys[i];
-                float[] closestPtPoly = new float[3];
-                float[] diff = new float[3];
-                bool posOverPoly = false;
-                float d = 0;
-                closestPointOnPoly(polyRef, center, closestPtPoly, ref posOverPoly);
+            dtStatus status = queryPolygons(center, extents, filter, query);
+            if (dtStatusFailed(status))
+                return status;
 
-                // If a point is directly over a polygon and closer than
-                // climb height, favor that instead of straight line nearest point.
-                dtVsub(diff, center, closestPtPoly);
-                if (posOverPoly)
-                {
-                    dtMeshTile tile = null;
-                    dtPoly poly = null;
-                    m_nav.getTileAndPolyByRefUnsafe(polys[i], ref tile, ref poly);
-                    d = (float)(Math.Abs(diff[1]) - tile.header.walkableClimb);
-                    d = d > 0 ? d * d : 0;
-                }
-                else
-                {
-                    d = dtVlenSqr(diff);
-                }
-
-                if (d < nearestDistanceSqr)
-                {
-                    //if (nearestPt != null)
-                    dtVcopy(nearestPt, closestPtPoly);
-
-                    nearestDistanceSqr = d;
-                    nearest = polyRef;
-                }
-            }
-
-            //if (nearestRef)
-            nearestRef = nearest;
+            nearestRef = query.nearestRef();
+            // Only override nearestPt if we actually found a poly so the nearest point
+            // is valid.
+            if (nearestRef != 0)
+                dtVcopy(nearestPt, query.nearestPoint());
 
             return DT_SUCCESS;
         }
 
         /// Queries polygons within a tile.
-		public int queryPolygonsInTile(dtMeshTile tile, float[] qmin, float[] qmax, dtQueryFilter filter, dtPolyRef[] polys, int polyStart, int maxPolys)
+		public void queryPolygonsInTile(dtMeshTile tile, float[] qmin, float[] qmax, dtQueryFilter filter, dtFindNearestPolyQuery query)
         {
             Debug.Assert(m_nav != null);
+
+            const int batchSize = 32;
+            dtPolyRef[] polyRefs = new dtPolyRef[batchSize];
+            dtPoly[] polys = new dtPoly[batchSize];
+            int n = 0;
 
             if (tile.bvTree != null)
             {
@@ -918,7 +920,7 @@ public static partial class Detour
                 float qfac = tile.header.bvQuantFactor;
 
                 // Calculate quantized box
-                ushort[] bmin = new ushort[3];//, bmax[3];
+                ushort[] bmin = new ushort[3];
                 ushort[] bmax = new ushort[3];
                 // dtClamp query box to world box.
                 float minx = dtClamp(qmin[0], tbmin[0], tbmax[0]) - tbmin[0];
@@ -937,7 +939,6 @@ public static partial class Detour
 
                 // Traverse tree
                 dtPolyRef polyRefBase = m_nav.getPolyRefBase(tile);
-                int n = 0;
                 int nodeIndex = 0;
                 while (nodeIndex < endIndex)
                 {
@@ -951,8 +952,18 @@ public static partial class Detour
                         dtPolyRef polyRef = polyRefBase | (uint)node.i;
                         if (filter.passFilter(polyRef, tile, tile.polys[node.i]))
                         {
-                            if (n < maxPolys)
-                                polys[polyStart + n++] = polyRef;
+                            polyRefs[n] = polyRef;
+                            polys[n] = tile.polys[node.i];
+
+                            if (n == batchSize - 1)
+                            {
+                                query.process(tile, polys, polyRefs, batchSize);
+                                n = 0;
+                            }
+                            else
+                            {
+                                n++;
+                            }
                         }
                     }
 
@@ -966,14 +977,11 @@ public static partial class Detour
                         nodeIndex += escapeIndex;
                     }
                 }
-
-                return n;
             }
             else
             {
-                float[] bmin = new float[3];//, bmax[3];
+                float[] bmin = new float[3];
                 float[] bmax = new float[3];
-                int n = 0;
                 dtPolyRef polyRefBase = m_nav.getPolyRefBase(tile);
                 for (int i = 0; i < tile.header.polyCount; ++i)
                 {
@@ -999,12 +1007,26 @@ public static partial class Detour
                     }
                     if (dtOverlapBounds(qmin, qmax, bmin, bmax))
                     {
-                        if (n < maxPolys)
-                            polys[polyStart + n++] = polyRef;
+                        polyRefs[n] = polyRef;
+                        polys[n] = p;
+
+                        if (n == batchSize - 1)
+                        {
+                            query.process(tile, polys, polyRefs, batchSize);
+                            n = 0;
+                        }
+                        else
+                        {
+                            n++;
+                        }
                     }
                 }
-                return n;
             }
+
+
+            // Process the last polygons that didn't make a full batch.
+            if (n > 0)
+                query.process(tile, polys, polyRefs, n);
         }
 
         /// Finds polygons that overlap the search box.
@@ -1024,11 +1046,11 @@ public static partial class Detour
         /// be filled to capacity. The method of choosing which polygons from the 
         /// full set are included in the partial result set is undefined.
         ///
-		public dtStatus queryPolygons(float[] center, float[] extents, dtQueryFilter filter, dtPolyRef[] polys, ref int polyCount, int maxPolys)
+		public dtStatus queryPolygons(float[] center, float[] extents, dtQueryFilter filter, dtFindNearestPolyQuery query)
         {
             Debug.Assert(m_nav != null);
 
-            float[] bmin = new float[3];//, bmax[3];
+            float[] bmin = new float[3];
             float[] bmax = new float[3];
             dtVsub(bmin, center, extents);
             dtVadd(bmax, center, extents);
@@ -1041,7 +1063,6 @@ public static partial class Detour
             int MAX_NEIS = 32;
             dtMeshTile[] neis = new dtMeshTile[MAX_NEIS];
 
-            int n = 0;
             for (int y = miny; y <= maxy; ++y)
             {
                 for (int x = minx; x <= maxx; ++x)
@@ -1049,16 +1070,10 @@ public static partial class Detour
                     int nneis = m_nav.getTilesAt(x, y, neis, MAX_NEIS);
                     for (int j = 0; j < nneis; ++j)
                     {
-                        n += queryPolygonsInTile(neis[j], bmin, bmax, filter, polys, n, maxPolys - n);
-                        if (n >= maxPolys)
-                        {
-                            polyCount = n;
-                            return DT_SUCCESS | DT_BUFFER_TOO_SMALL;
-                        }
+                        queryPolygonsInTile(neis[j], bmin, bmax, filter, query);
                     }
                 }
             }
-            polyCount = n;
 
             return DT_SUCCESS;
         }
@@ -1092,14 +1107,12 @@ public static partial class Detour
 
             pathCount = 0;
 
-            if (startRef == 0 || endRef == 0)
-                return DT_FAILURE | DT_INVALID_PARAM;
-
-            if (maxPath == 0)
+            if (maxPath <= 0)
                 return DT_FAILURE | DT_INVALID_PARAM;
 
             // Validate input
-            if (!m_nav.isValidPolyRef(startRef) || !m_nav.isValidPolyRef(endRef))
+            if (!m_nav.isValidPolyRef(startRef) || !m_nav.isValidPolyRef(endRef) ||
+                startPos == null || endPos == null || filter == null || maxPath <= 0 || path == null)
                 return DT_FAILURE | DT_INVALID_PARAM;
 
             if (startRef == endRef)
@@ -1124,7 +1137,7 @@ public static partial class Detour
             dtNode lastBestNode = startNode;
             float lastBestNodeCost = startNode.total;
 
-            dtStatus status = DT_SUCCESS;
+            bool outOfNodes = false;
 
             while (!m_openList.empty())
             {
@@ -1176,10 +1189,15 @@ public static partial class Detour
                     if (!filter.passFilter(neighbourRef, neighbourTile, neighbourPoly))
                         continue;
 
-                    dtNode neighbourNode = m_nodePool.getNode(neighbourRef);
+                    // deal explicitly with crossing tile boundaries
+                    byte crossSide = 0;
+                    if (bestTile.links[i].side != 0xff)
+                        crossSide = (byte)(bestTile.links[i].side >> 1);
+
+                    dtNode neighbourNode = m_nodePool.getNode(neighbourRef, crossSide);
                     if (neighbourNode == null)
                     {
-                        status |= DT_OUT_OF_NODES;
+                        outOfNodes = true;
                         continue;
                     }
 
@@ -1236,7 +1254,7 @@ public static partial class Detour
                     neighbourNode.id = neighbourRef;
                     unchecked
                     {
-                        neighbourNode.flags = (byte)(neighbourNode.flags & (byte)~dtNodeFlags.DT_NODE_CLOSED);
+                        neighbourNode.flags = (byte)(neighbourNode.flags & ~(byte)dtNodeFlags.DT_NODE_CLOSED);
                     }
                     neighbourNode.cost = cost;
                     neighbourNode.total = total;
@@ -1262,39 +1280,56 @@ public static partial class Detour
                 }
             }
 
+            dtStatus status = getPathToNode(lastBestNode, path, ref pathCount, maxPath);
+
             if (lastBestNode.id != endRef)
                 status |= DT_PARTIAL_RESULT;
 
-            // Reverse the path.
-            dtNode prev = null;
-            dtNode node = lastBestNode;
-            do
-            {
-                dtNode next = m_nodePool.getNodeAtIdx(node.pidx);
-                node.pidx = m_nodePool.getNodeIdx(prev);
-                prev = node;
-                node = next;
-            }
-            while (node != null);
-
-            // Store path
-            node = prev;
-            int n = 0;
-            do
-            {
-                path[n++] = node.id;
-                if (n >= maxPath)
-                {
-                    status |= DT_BUFFER_TOO_SMALL;
-                    break;
-                }
-                node = m_nodePool.getNodeAtIdx(node.pidx);
-            }
-            while (node != null);
-
-            pathCount = (uint)n;
+            if (outOfNodes)
+                status |= DT_OUT_OF_NODES;
 
             return status;
+        }
+
+        dtStatus getPathToNode(dtNode endNode, dtPolyRef[] path, ref uint pathCount, int maxPath)
+        {
+            // Find the length of the entire path.
+            dtNode curNode = endNode;
+            int length = 0;
+            do
+            {
+                length++;
+                curNode = m_nodePool.getNodeAtIdx(curNode.pidx);
+            } while (curNode != null);
+
+            // If the path cannot be fully stored then advance to the last node we will be able to store.
+            curNode = endNode;
+            int writeCount;
+            for (writeCount = length; writeCount > maxPath; writeCount--)
+            {
+                //dtAssert(curNode);
+
+                curNode = m_nodePool.getNodeAtIdx(curNode.pidx);
+            }
+
+            // Write path
+            for (int i = writeCount - 1; i >= 0; i--)
+            {
+                //dtAssert(curNode);
+
+                path[i] = curNode.id;
+                curNode = m_nodePool.getNodeAtIdx(curNode.pidx);
+            }
+
+            //dtAssert(!curNode);
+
+
+            pathCount = (uint)Math.Min(length, maxPath);
+
+            if (length > maxPath)
+                return DT_SUCCESS | DT_BUFFER_TOO_SMALL;
+
+            return DT_SUCCESS;
         }
 
         ///@}
@@ -1320,7 +1355,7 @@ public static partial class Detour
         /// The @p filter pointer is stored and used for the duration of the sliced
         /// path query.
         ///
-		public dtStatus initSlicedFindPath(dtPolyRef startRef, dtPolyRef endRef, float[] startPos, float[] endPos, dtQueryFilter filter)
+		public dtStatus initSlicedFindPath(dtPolyRef startRef, dtPolyRef endRef, float[] startPos, float[] endPos, dtQueryFilter filter, uint options)
         {
             Debug.Assert(m_nav != null);
             Debug.Assert(m_nodePool != null);
@@ -1335,6 +1370,8 @@ public static partial class Detour
             dtVcopy(m_query.startPos, startPos);
             dtVcopy(m_query.endPos, endPos);
             m_query.filter = filter;
+            m_query.options = options;
+            m_query.raycastLimitSqr = float.MaxValue;
 
             if (startRef == 0 || endRef == 0)
                 return DT_FAILURE | DT_INVALID_PARAM;
@@ -1342,6 +1379,16 @@ public static partial class Detour
             // Validate input
             if (!m_nav.isValidPolyRef(startRef) || !m_nav.isValidPolyRef(endRef))
                 return DT_FAILURE | DT_INVALID_PARAM;
+
+            // trade quality with performance?
+            if ((options & (int)dtFindPathOptions.DT_FINDPATH_ANY_ANGLE) != 0)
+            {
+                // limiting to several times the character radius yields nice results. It is not sensitive 
+                // so it is enough to compute it from the first tile.
+                dtMeshTile tile = m_nav.getTileByRef(startRef);
+                float agentRadius = tile.header.walkableRadius;
+                m_query.raycastLimitSqr = dtSqr(agentRadius * 50.0f); //DT_RAY_CAST_LIMIT_PROPORTIONS;
+            }
 
             if (startRef == endRef)
             {
@@ -1384,6 +1431,9 @@ public static partial class Detour
                 return DT_FAILURE;
             }
 
+            dtRaycastHit rayHit = new dtRaycastHit();
+            rayHit.maxPath = 0;
+
             int iter = 0;
             while (iter < maxIter && !m_openList.empty())
             {
@@ -1421,13 +1471,21 @@ public static partial class Detour
 
                 // Get parent poly and tile.
                 dtPolyRef parentRef = 0;
+                dtPolyRef grandpaRef = 0;
                 dtMeshTile parentTile = null;
                 dtPoly parentPoly = null;
+                dtNode parentNode = null;
                 if (bestNode.pidx != 0)
-                    parentRef = m_nodePool.getNodeAtIdx(bestNode.pidx).id;
+                {
+                    parentNode = m_nodePool.getNodeAtIdx(bestNode.pidx);
+                    parentRef = parentNode.id;
+                    if (parentNode.pidx != 0)
+                        grandpaRef = m_nodePool.getNodeAtIdx(parentNode.pidx).id;
+                }
                 if (parentRef != 0)
                 {
-                    if (dtStatusFailed(m_nav.getTileAndPolyByRef(parentRef, ref parentTile, ref parentPoly)))
+                    bool invalidParent = dtStatusFailed(m_nav.getTileAndPolyByRef(parentRef, ref parentTile, ref parentPoly));
+                    if (invalidParent || (grandpaRef != 0 && !m_nav.isValidPolyRef(grandpaRef)))
                     {
                         // The polygon has disappeared during the sliced query, fail.
                         m_query.status = DT_FAILURE;
@@ -1435,6 +1493,14 @@ public static partial class Detour
                         doneIters = iter;
                         return m_query.status;
                     }
+                }
+
+                // decide whether to test raycast to previous nodes
+                bool tryLOS = false;
+                if ((m_query.options & (int)dtFindPathOptions.DT_FINDPATH_ANY_ANGLE) != 0)
+                {
+                    if ((parentRef != 0) && (dtVdistSqr(parentNode.pos, bestNode.pos) < m_query.raycastLimitSqr))
+                        tryLOS = true;
                 }
 
                 for (uint i = bestPoly.firstLink; i != DT_NULL_LINK; i = bestTile.links[i].next)
@@ -1461,6 +1527,10 @@ public static partial class Detour
                         continue;
                     }
 
+                    // do not expand to nodes that were already visited from the same parent
+                    if (neighbourNode.pidx != 0 && neighbourNode.pidx == bestNode.pidx)
+                        continue;
+
                     // If the node is visited the first time, calculate node position.
                     if (neighbourNode.flags == 0)
                     {
@@ -1473,30 +1543,44 @@ public static partial class Detour
                     float cost = 0;
                     float heuristic = 0;
 
+                    // raycast parent
+                    bool foundShortCut = false;
+                    rayHit.pathCost = rayHit.t = 0;
+                    if (tryLOS)
+                    {
+                        raycast(parentRef, parentNode.pos, neighbourNode.pos, m_query.filter, (int)dtRaycastOptions.DT_RAYCAST_USE_COSTS, rayHit, grandpaRef);
+                        foundShortCut = rayHit.t >= 1.0f;
+                    }
+
+                    // update move cost
+                    if (foundShortCut)
+                    {
+                        // shortcut found using raycast. Using shorter cost instead
+                        cost = parentNode.cost + rayHit.pathCost;
+                    }
+                    else
+                    {
+                        // No shortcut found.
+                        float curCost = m_query.filter.getCost(bestNode.pos, neighbourNode.pos,
+                                                                      parentRef, parentTile, parentPoly,
+                                                                    bestRef, bestTile, bestPoly,
+                                                                    neighbourRef, neighbourTile, neighbourPoly);
+                        cost = bestNode.cost + curCost;
+                    }
+
                     // Special case for last node.
                     if (neighbourRef == m_query.endRef)
                     {
-                        // Cost
-                        float curCost = m_query.filter.getCost(bestNode.pos, neighbourNode.pos,
-                                                                      parentRef, parentTile, parentPoly,
-                                                                      bestRef, bestTile, bestPoly,
-                                                                      neighbourRef, neighbourTile, neighbourPoly);
                         float endCost = m_query.filter.getCost(neighbourNode.pos, m_query.endPos,
                                                                       bestRef, bestTile, bestPoly,
                                                                       neighbourRef, neighbourTile, neighbourPoly,
                                                                       0, null, null);
 
-                        cost = bestNode.cost + curCost + endCost;
+                        cost = cost + endCost;
                         heuristic = 0;
                     }
                     else
                     {
-                        // Cost
-                        float curCost = m_query.filter.getCost(bestNode.pos, neighbourNode.pos,
-                                                                      parentRef, parentTile, parentPoly,
-                                                                      bestRef, bestTile, bestPoly,
-                                                                      neighbourRef, neighbourTile, neighbourPoly);
-                        cost = bestNode.cost + curCost;
                         heuristic = dtVdist(neighbourNode.pos, m_query.endPos) * H_SCALE;
                     }
 
@@ -1510,12 +1594,13 @@ public static partial class Detour
                         continue;
 
                     // Add or update the node.
-                    neighbourNode.pidx = m_nodePool.getNodeIdx(bestNode);
+                    neighbourNode.pidx = foundShortCut ? bestNode.pidx : m_nodePool.getNodeIdx(bestNode);
                     neighbourNode.id = neighbourRef;
-                    //neighbourNode.flags = (neighbourNode.flags & ~DT_NODE_CLOSED);
-                    neighbourNode.dtcsClearFlag(dtNodeFlags.DT_NODE_CLOSED);
+                    neighbourNode.flags = (byte)(neighbourNode.flags & ~(byte)(dtNodeFlags.DT_NODE_CLOSED | dtNodeFlags.DT_NODE_PARENT_DETACHED));
                     neighbourNode.cost = cost;
                     neighbourNode.total = total;
+                    if (foundShortCut)
+                        neighbourNode.flags = (byte)(neighbourNode.flags | (byte)dtNodeFlags.DT_NODE_PARENT_DETACHED);
 
                     if ((neighbourNode.flags & (byte)dtNodeFlags.DT_NODE_OPEN) != 0)
                     {
@@ -1558,7 +1643,7 @@ public static partial class Detour
         ///  @param[out]	pathCount	The number of polygons returned in the @p path array.
         ///  @param[in]		maxPath		The max number of polygons the path array can hold. [Limit: >= 1]
         // @returns The status flags for the query.
-		public dtStatus finalizeSlicedFindPath(dtPolyRef[] path, ref int pathCount, int maxPath)
+        public dtStatus finalizeSlicedFindPath(dtPolyRef[] path, ref int pathCount, int maxPath)
         {
             pathCount = 0;
 
@@ -1587,11 +1672,15 @@ public static partial class Detour
 
                 dtNode prev = null;
                 dtNode node = m_query.lastBestNode;
+                int prevRay = 0;
                 do
                 {
                     dtNode next = m_nodePool.getNodeAtIdx(node.pidx);
                     node.pidx = m_nodePool.getNodeIdx(prev);
                     prev = node;
+                    int nextRay = node.flags & (byte)dtNodeFlags.DT_NODE_PARENT_DETACHED; // keep track of whether parent is not adjacent (i.e. due to raycast shortcut)
+                    node.flags = (byte)((node.flags & ~(byte)dtNodeFlags.DT_NODE_PARENT_DETACHED) | prevRay); // and store it in the reversed path's node
+                    prevRay = nextRay;
                     node = next;
                 }
                 while (node != null);
@@ -1600,13 +1689,37 @@ public static partial class Detour
                 node = prev;
                 do
                 {
-                    path[n++] = node.id;
-                    if (n >= maxPath)
+                    dtNode next = m_nodePool.getNodeAtIdx(node.pidx);
+                    dtStatus status = 0;
+                    if ((node.flags & (byte)dtNodeFlags.DT_NODE_PARENT_DETACHED) != 0)
                     {
-                        m_query.status |= DT_BUFFER_TOO_SMALL;
+                        float t = 0;
+                        float[] normal = new float[3];
+                        uint m = 0;
+                        dtPolyRef[] temp = new dtPolyRef[path.Length];
+                        status = raycast(node.id, node.pos, next.pos, m_query.filter, ref t, normal, temp, ref m, maxPath - n);
+
+                        for (var i = 0; i < path.Length - n; ++i)
+                            path[n + i] = temp[i];
+
+                        n += (int)m;
+                        // raycast ends on poly boundary and the path might include the next poly boundary.
+                        if (path[n - 1] == next.id)
+                            n--; // remove to avoid duplicates
+                    }
+                    else
+                    {
+                        path[n++] = node.id;
+                        if (n >= maxPath)
+                            status = DT_BUFFER_TOO_SMALL;
+                    }
+
+                    if ((status & DT_STATUS_DETAIL_MASK) != 0)
+                    {
+                        m_query.status |= status & DT_STATUS_DETAIL_MASK;
                         break;
                     }
-                    node = m_nodePool.getNodeAtIdx(node.pidx);
+                    node = next;
                 }
                 while (node != null);
             }
@@ -1631,7 +1744,7 @@ public static partial class Detour
         ///  @param[out]	pathCount		The number of polygons returned in the @p path array.
         ///  @param[in]		maxPath			The max number of polygons the @p path array can hold. [Limit: >= 1]
         // @returns The status flags for the query.
-		public dtStatus finalizeSlicedFindPathPartial(dtPolyRef[] existing, int existingSize, dtPolyRef[] path, ref int pathCount, int maxPath)
+        public dtStatus finalizeSlicedFindPathPartial(dtPolyRef[] existing, int existingSize, dtPolyRef[] path, ref int pathCount, int maxPath)
         {
             pathCount = 0;
 
@@ -1675,11 +1788,15 @@ public static partial class Detour
                 }
 
                 // Reverse the path.
+                int prevRay = 0;
                 do
                 {
                     dtNode next = m_nodePool.getNodeAtIdx(node.pidx);
                     node.pidx = m_nodePool.getNodeIdx(prev);
                     prev = node;
+                    int nextRay = node.flags & (byte)dtNodeFlags.DT_NODE_PARENT_DETACHED; // keep track of whether parent is not adjacent (i.e. due to raycast shortcut)
+                    node.flags = (byte)((node.flags & ~(byte)dtNodeFlags.DT_NODE_PARENT_DETACHED) | prevRay); // and store it in the reversed path's node
+                    prevRay = nextRay;
                     node = next;
                 }
                 while (node != null);
@@ -1688,13 +1805,36 @@ public static partial class Detour
                 node = prev;
                 do
                 {
-                    path[n++] = node.id;
-                    if (n >= maxPath)
+                    dtNode next = m_nodePool.getNodeAtIdx(node.pidx);
+                    dtStatus status = 0;
+                    if ((node.flags & (byte)dtNodeFlags.DT_NODE_PARENT_DETACHED) != 0)
                     {
-                        m_query.status |= DT_BUFFER_TOO_SMALL;
+                        float t = 0;
+                        float[] normal = new float[3];
+                        uint m = 0;
+                        dtPolyRef[] temp = new dtPolyRef[path.Length - n];
+                        status = raycast(node.id, node.pos, next.pos, m_query.filter, ref t, normal, temp, ref m, maxPath - n);
+                        for (var i = 0; i < path.Length - n; ++i)
+                            path[n + i] = temp[i];
+
+                        n += (int)m;
+                        // raycast ends on poly boundary and the path might include the next poly boundary.
+                        if (path[n - 1] == next.id)
+                            n--; // remove to avoid duplicates
+                    }
+                    else
+                    {
+                        path[n++] = node.id;
+                        if (n >= maxPath)
+                            status = DT_BUFFER_TOO_SMALL;
+                    }
+
+                    if ((status & DT_STATUS_DETAIL_MASK) != 0)
+                    {
+                        m_query.status |= status & DT_STATUS_DETAIL_MASK;
                         break;
                     }
-                    node = m_nodePool.getNodeAtIdx(node.pidx);
+                    node = next;
                 }
                 while (node != null);
             }
@@ -1730,10 +1870,17 @@ public static partial class Detour
                 if (straightPathRefs != null)
                     straightPathRefs[straightPathCount] = polyRef;
                 straightPathCount++;
-                // If reached end of path or there is no space to append more vertices, return.
-                if (flags == (byte)dtStraightPathFlags.DT_STRAIGHTPATH_END || straightPathCount >= maxStraightPath)
+
+                // If there is no space to append more vertices, return.
+                if (straightPathCount >= maxStraightPath)
                 {
-                    return DT_SUCCESS | ((straightPathCount >= maxStraightPath) ? DT_BUFFER_TOO_SMALL : 0);
+                    return DT_SUCCESS | DT_BUFFER_TOO_SMALL;
+                }
+
+                // If reached end of path or there is no space to append more vertices, return.
+                if (flags == (byte)dtStraightPathFlags.DT_STRAIGHTPATH_END)
+                {
+                    return DT_SUCCESS;
                 }
             }
             return DT_IN_PROGRESS;
@@ -2392,6 +2539,60 @@ public static partial class Detour
             return DT_SUCCESS;
         }
 
+        /// @par
+        ///
+        /// This method is meant to be used for quick, short distance checks.
+        ///
+        /// If the path array is too small to hold the result, it will be filled as 
+        /// far as possible from the start postion toward the end position.
+        ///
+        /// <b>Using the Hit Parameter (t)</b>
+        /// 
+        /// If the hit parameter is a very high value (FLT_MAX), then the ray has hit 
+        /// the end position. In this case the path represents a valid corridor to the 
+        /// end position and the value of @p hitNormal is undefined.
+        ///
+        /// If the hit parameter is zero, then the start position is on the wall that 
+        /// was hit and the value of @p hitNormal is undefined.
+        ///
+        /// If 0 < t < 1.0 then the following applies:
+        ///
+        /// @code
+        /// distanceToHitBorder = distanceToEndPosition * t
+        /// hitPoint = startPos + (endPos - startPos) * t
+        /// @endcode
+        ///
+        /// <b>Use Case Restriction</b>
+        ///
+        /// The raycast ignores the y-value of the end position. (2D check.) This 
+        /// places significant limits on how it can be used. For example:
+        ///
+        /// Consider a scene where there is a main floor with a second floor balcony 
+        /// that hangs over the main floor. So the first floor mesh extends below the 
+        /// balcony mesh. The start position is somewhere on the first floor. The end 
+        /// position is on the balcony.
+        ///
+        /// The raycast will search toward the end position along the first floor mesh. 
+        /// If it reaches the end position's xz-coordinates it will indicate FLT_MAX
+        /// (no wall hit), meaning it reached the end position. This is one example of why
+        /// this method is meant for short distance checks.
+        ///
+        public dtStatus raycast(dtPolyRef startRef, float[] startPos, float[] endPos, dtQueryFilter filter, ref float t, float[] hitNormal, dtPolyRef[] path, ref uint pathCount, int maxPath)
+        {
+
+            dtRaycastHit hit = new dtRaycastHit();
+            hit.path = path;
+            hit.maxPath = maxPath;
+
+            dtStatus status = raycast(startRef, startPos, endPos, filter, 0, hit);
+
+            t = hit.t;
+            dtVcopy(hitNormal, hit.hitNormal);
+            pathCount = (uint)hit.pathCount;
+
+            return status;
+        }
+
         /// Casts a 'walkability' ray along the surface of the navigation mesh from 
         /// the start position toward the end position.
         ///  @param[in]		startRef	The reference id of the start polygon.
@@ -2443,36 +2644,52 @@ public static partial class Detour
         /// (no wall hit), meaning it reached the end position. This is one example of why
         /// this method is meant for short distance checks.
         ///
-        public dtStatus raycast(dtPolyRef startRef, float[] startPos, float[] endPos, dtQueryFilter filter, ref float t, float[] hitNormal, dtPolyRef[] path, ref uint pathCount, int maxPath)
+        public dtStatus raycast(dtPolyRef startRef, float[] startPos, float[] endPos, dtQueryFilter filter, uint options, dtRaycastHit hit, dtPolyRef prevRef = 0)
         {
             Debug.Assert(m_nav != null);
 
-            t = 0;
-            //if (pathCount)
-            pathCount = 0;
+            hit.t = 0;
+            hit.pathCount = 0;
+            hit.pathCost = 0;
 
             // Validate input
             if (startRef == 0 || !m_nav.isValidPolyRef(startRef))
                 return DT_FAILURE | DT_INVALID_PARAM;
 
-            dtPolyRef curRef = startRef;
-            float[] verts = new float[DT_VERTS_PER_POLYGON * 3];
+            if (prevRef != 0 && !m_nav.isValidPolyRef(prevRef))
+                return DT_FAILURE | DT_INVALID_PARAM;
+
+            float[] dir = new float[3];
+            float[] curPos = new float[3];
+            float[] lastPos = new float[3];
+            float[] verts = new float[DT_VERTS_PER_POLYGON * 3 + 3];
             int n = 0;
 
-            hitNormal[0] = 0;
-            hitNormal[1] = 0;
-            hitNormal[2] = 0;
+            dtVcopy(curPos, startPos);
+            dtVsub(dir, endPos, startPos);
+            dtVset(hit.hitNormal, 0, 0, 0);
 
             dtStatus status = DT_SUCCESS;
+
+            dtMeshTile prevTile = new dtMeshTile();
+            dtMeshTile nextTile;
+            dtPoly prevPoly = new dtPoly();
+            dtPoly nextPoly;
+            dtPolyRef curRef;
+
+            // The API input has been checked already, skip checking internal data.
+            curRef = startRef;
+            dtMeshTile tile = new dtMeshTile();
+            dtPoly poly = new dtPoly();
+            m_nav.getTileAndPolyByRefUnsafe(curRef, ref tile, ref poly);
+            nextTile = prevTile = tile;
+            nextPoly = prevPoly = poly;
+            if (prevRef != 0)
+                m_nav.getTileAndPolyByRefUnsafe(prevRef, ref prevTile, ref prevPoly);
 
             while (curRef != 0)
             {
                 // Cast ray against current polygon.
-
-                // The API input has been cheked already, skip checking internal data.
-                dtMeshTile tile = null;
-                dtPoly poly = null;
-                m_nav.getTileAndPolyByRefUnsafe(curRef, ref tile, ref poly);
 
                 // Collect vertices.
                 int nv = 0;
@@ -2487,25 +2704,31 @@ public static partial class Detour
                 if (!dtIntersectSegmentPoly2D(startPos, endPos, verts, nv, ref tmin, ref tmax, ref segMin, ref segMax))
                 {
                     // Could not hit the polygon, keep the old t and report hit.
-                    pathCount = (uint)n;
+                    hit.pathCount = n;
                     return status;
                 }
+
+                hit.hitEdgeIndex = segMax;
+
                 // Keep track of furthest t so far.
-                if (tmax > t)
-                    t = tmax;
+                if (tmax > hit.t)
+                    hit.t = tmax;
 
                 // Store visited polygons.
-                if (n < maxPath)
-                    path[n++] = curRef;
+                if (n < hit.maxPath)
+                    hit.path[n++] = curRef;
                 else
                     status |= DT_BUFFER_TOO_SMALL;
 
                 // Ray end is completely inside the polygon.
                 if (segMax == -1)
                 {
-                    t = float.MaxValue;
-                    //if (pathCount)
-                    pathCount = (uint)n;
+                    hit.t = float.MaxValue;
+                    hit.pathCount = n;
+
+                    // add the cost
+                    if ((options & (int)dtRaycastOptions.DT_RAYCAST_USE_COSTS) != 0)
+                        hit.pathCost += filter.getCost(curPos, endPos, prevRef, prevTile, prevPoly, curRef, tile, poly, curRef, tile, poly);
                     return status;
                 }
 
@@ -2521,8 +2744,8 @@ public static partial class Detour
                         continue;
 
                     // Get pointer to the next polygon.
-                    dtMeshTile nextTile = null;
-                    dtPoly nextPoly = null;
+                    nextTile = new dtMeshTile();
+                    nextPoly = new dtPoly();
                     m_nav.getTileAndPolyByRefUnsafe(link.polyRef, ref nextTile, ref nextPoly);
 
                     // Skip off-mesh connections.
@@ -2594,6 +2817,25 @@ public static partial class Detour
                     }
                 }
 
+                // add the cost
+                if ((options & (int)dtRaycastOptions.DT_RAYCAST_USE_COSTS) != 0)
+                {
+                    // compute the intersection point at the furthest end of the polygon
+                    // and correct the height (since the raycast moves in 2d)
+                    dtVcopy(lastPos, curPos);
+                    dtVmad(curPos, startPos, dir, hit.t);
+                    int e1Start = segMax * 3;
+                    int e2Start = ((segMax + 1) % nv) * 3;
+                    float[] eDir = new float[3];
+                    float[] diff = new float[3];
+                    dtVsub(eDir, 0, verts, e2Start, verts, e1Start);
+                    dtVsub(diff, 0, curPos, 0, verts, e1Start);
+                    float s = dtSqr(eDir[0]) > dtSqr(eDir[2]) ? diff[0] / eDir[0] : diff[2] / eDir[2];
+                    curPos[1] = verts[e1Start + 1] + eDir[1] * s;
+
+                    hit.pathCost += filter.getCost(lastPos, curPos, prevRef, prevTile, prevPoly, curRef, tile, poly, nextRef, nextTile, nextPoly);
+                }
+
                 if (nextRef == 0)
                 {
                     // No neighbour, we hit a wall.
@@ -2607,22 +2849,25 @@ public static partial class Detour
                     int vbStart = b * 3;
                     float dx = verts[vbStart + 0] - verts[vaStart + 0];
                     float dz = verts[vbStart + 2] - verts[vaStart + 2];
-                    hitNormal[0] = dz;
-                    hitNormal[1] = 0;
-                    hitNormal[2] = -dx;
-                    dtVnormalize(hitNormal);
+                    hit.hitNormal[0] = dz;
+                    hit.hitNormal[1] = 0;
+                    hit.hitNormal[2] = -dx;
+                    dtVnormalize(hit.hitNormal);
 
-                    //if (pathCount)
-                    pathCount = (uint)n;
+                    hit.pathCount = n;
                     return status;
                 }
 
                 // No hit, advance to neighbour polygon.
+                prevRef = curRef;
                 curRef = nextRef;
+                prevTile = tile;
+                tile = nextTile;
+                prevPoly = poly;
+                poly = nextPoly;
             }
 
-            //if (pathCount)
-            pathCount = (uint)n;
+            hit.pathCount = n;
 
             return status;
         }
@@ -3684,6 +3929,60 @@ public static partial class Detour
         public dtNavMesh getAttachedNavMesh()
         {
             return m_nav;
+        }
+    }
+
+    public class dtFindNearestPolyQuery
+    {
+        dtNavMeshQuery m_query;
+        float[] m_center;
+        float m_nearestDistanceSqr;
+        dtPolyRef m_nearestRef;
+        float[] m_nearestPoint = new float[3];
+
+        public dtFindNearestPolyQuery(dtNavMeshQuery query, float[] center)
+        {
+            m_query = query;
+            m_center = center;
+            m_nearestDistanceSqr = float.MaxValue;
+            m_nearestRef = 0;
+        }
+
+        public dtPolyRef nearestRef() { return m_nearestRef; }
+        public float[] nearestPoint() { return m_nearestPoint; }
+
+        public void process(dtMeshTile tile, dtPoly[] polys, dtPolyRef[] refs, int count)
+        {
+            for (int i = 0; i < count; ++i)
+            {
+                dtPolyRef refe = refs[i];
+                float[] closestPtPoly = new float[3];
+                float[] diff = new float[3];
+                bool posOverPoly = false;
+                float d;
+                m_query.closestPointOnPoly(refe, m_center, closestPtPoly, ref posOverPoly);
+
+                // If a point is directly over a polygon and closer than
+                // climb height, favor that instead of straight line nearest point.
+                dtVsub(diff, m_center, closestPtPoly);
+                if (posOverPoly)
+                {
+                    d = Math.Abs(diff[1]) - tile.header.walkableClimb;
+                    d = d > 0 ? d * d : 0;
+                }
+                else
+                {
+                    d = dtVlenSqr(diff);
+                }
+
+                if (d < m_nearestDistanceSqr)
+                {
+                    dtVcopy(m_nearestPoint, closestPtPoly);
+
+                    m_nearestDistanceSqr = d;
+                    m_nearestRef = refe;
+                }
+            }
         }
     }
 }
