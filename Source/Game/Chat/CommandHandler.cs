@@ -555,12 +555,11 @@ namespace Game.Chat
             if (_session == null)
                 return null;
 
-            ObjectGuid selected = _session.GetPlayer().GetTarget();
+            Unit selected = _session.GetPlayer().GetSelectedUnit();
+            if (selected)
+                return selected;
 
-            if (selected.IsEmpty())
-                return _session.GetPlayer();
-
-            return Global.ObjAccessor.GetUnit(_session.GetPlayer(), selected);
+            return _session.GetPlayer();
         }
         public WorldObject GetSelectedObject()
         {
