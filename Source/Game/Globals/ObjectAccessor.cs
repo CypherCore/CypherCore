@@ -25,6 +25,11 @@ using System.Collections.Generic;
 
 public class ObjectAccessor : Singleton<ObjectAccessor>
 {
+    object _lockObject = new object();
+
+    Dictionary<ObjectGuid, Player> _players = new Dictionary<ObjectGuid, Player>();
+    Dictionary<ObjectGuid, Transport> _transports = new Dictionary<ObjectGuid, Transport>();
+
     ObjectAccessor() { }
 
     public WorldObject GetWorldObject(WorldObject p, ObjectGuid guid)
@@ -200,7 +205,8 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
     // this returns Player even if he is not in world, for example teleporting
     public Player FindConnectedPlayer(ObjectGuid guid)
     {
-        return _players.LookupByKey(guid);
+        lock (_lockObject)
+            return _players.LookupByKey(guid);
     }
     public Player FindConnectedPlayerByName(string name)
     {
@@ -209,44 +215,52 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
 
     public Transport FindTransport(ObjectGuid guid)
     {
-        return _transports.LookupByKey(guid);
+        lock (_lockObject)
+            return _transports.LookupByKey(guid);
     }
 
     public void SaveAllPlayers()
     {
-        foreach (var pl in GetPlayers())
-            pl.SaveToDB();
+        lock (_lockObject)
+        {
+            foreach (var pl in GetPlayers())
+                pl.SaveToDB();
+        }
     }
 
     public ICollection<Player> GetPlayers()
     {
-        return _players.Values;
+        lock (_lockObject)
+            return _players.Values;
     }
 
     public void AddObject(Player obj)
     {
-        PlayerNameMapHolder.Insert(obj);
-        _players.TryAdd(obj.GetGUID(), obj);
+        lock (_lockObject)
+        {
+            PlayerNameMapHolder.Insert(obj);
+            _players[obj.GetGUID()] = obj;
+        }
     }
     public void AddObject(Transport obj)
     {
-        _transports.TryAdd(obj.GetGUID(), obj);
+        lock (_lockObject)
+            _transports[obj.GetGUID()] = obj;
     }
 
     public void RemoveObject(Player obj)
     {
-        Player player;
-        PlayerNameMapHolder.Remove(obj);
-        _players.TryRemove(obj.GetGUID(), out player);
+        lock (_lockObject)
+        {
+            PlayerNameMapHolder.Remove(obj);
+            _players.Remove(obj.GetGUID());
+        }
     }
     public void RemoveObject(Transport obj)
     {
-        Transport transport;
-        _transports.TryRemove(obj.GetGUID(), out transport);
+        lock (_lockObject)
+            _transports.Remove(obj.GetGUID());
     }
-
-    ConcurrentDictionary<ObjectGuid, Player> _players = new ConcurrentDictionary<ObjectGuid, Player>();
-    ConcurrentDictionary<ObjectGuid, Transport> _transports = new ConcurrentDictionary<ObjectGuid, Transport>();
 }
 
 class PlayerNameMapHolder
