@@ -115,7 +115,7 @@ public static partial class Detour
         }
         else if (side == 2 || side == 6)
         {
-            if (va[vaStart + 0] < vb[0])
+            if (va[vaStart] < vb[vbStart])
             {
                 bmin[0] = va[vaStart + 0];
                 bmin[1] = va[vaStart + 1];
