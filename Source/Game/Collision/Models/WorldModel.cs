@@ -363,10 +363,9 @@ namespace Game.Collision
 
         public bool readFile(string filename)
         {
-            filename = filename.Replace("\0", "");
             if (!File.Exists(filename))
             {
-                filename = filename.Replace(".vmo", "");
+                filename = filename + ".vmo";
                 if (!File.Exists(filename))
                     return false;
             }
