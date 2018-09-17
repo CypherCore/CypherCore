@@ -291,7 +291,7 @@ namespace Game.Entities
         public uint curhealth;
         public uint curmana;
         public byte movementType;
-        public ulong spawnMask;
+        public List<Difficulty> spawnDifficulties = new List<Difficulty>();
         public ulong npcflag;
         public uint unit_flags;     // enum UnitFlags mask values
         public uint unit_flags2;    // enum UnitFlags2 mask values

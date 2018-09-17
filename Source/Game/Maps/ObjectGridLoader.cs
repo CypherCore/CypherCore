@@ -60,7 +60,7 @@ namespace Game.Maps
         public override void Visit(IList<GameObject> objs)
         {
             CellCoord cellCoord = i_cell.GetCellCoord();
-            CellObjectGuids cellguids = Global.ObjectMgr.GetCellObjectGuids(i_map.GetId(), (byte)i_map.GetSpawnMode(), cellCoord.GetId());
+            CellObjectGuids cellguids = Global.ObjectMgr.GetCellObjectGuids(i_map.GetId(), i_map.GetDifficultyID(), cellCoord.GetId());
             if (cellguids == null)
                 return;
 
@@ -70,7 +70,7 @@ namespace Game.Maps
         public override void Visit(IList<Creature> objs)
         {
             CellCoord cellCoord = i_cell.GetCellCoord();
-            CellObjectGuids cellguids = Global.ObjectMgr.GetCellObjectGuids(i_map.GetId(), (byte)i_map.GetSpawnMode(), cellCoord.GetId());
+            CellObjectGuids cellguids = Global.ObjectMgr.GetCellObjectGuids(i_map.GetId(), i_map.GetDifficultyID(), cellCoord.GetId());
             if (cellguids == null)
                 return;
 

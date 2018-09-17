@@ -71,9 +71,6 @@ namespace Game.Entities
             m_logintime = Time.UnixTime;
             m_Last_tick = m_logintime;
 
-            for (byte i = 0; i < (int)Difficulty.Max; ++i)
-                m_boundInstances[i] = new Dictionary<uint, InstanceBind>();
-
             m_dungeonDifficulty = Difficulty.Normal;
             m_raidDifficulty = Difficulty.NormalRaid;
             m_legacyRaidDifficulty = Difficulty.Raid10N;
@@ -839,9 +836,9 @@ namespace Game.Entities
                 GetTransport().RemovePassenger(this);
 
             // clean up player-instance binds, may unload some instance saves
-            for (byte i = 0; i < (int)Difficulty.Max; ++i)
-                foreach (var bound in m_boundInstances[i])
-                    bound.Value.save.RemovePlayer(this);
+            foreach (var difficultyDic in m_boundInstances.Values)
+                foreach (var instanceBind in difficultyDic.Values)
+                    instanceBind.save.RemovePlayer(this);
         }
 
         public override void AddToWorld()

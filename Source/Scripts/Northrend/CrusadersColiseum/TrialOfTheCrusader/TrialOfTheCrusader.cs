@@ -166,19 +166,19 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                 switch (go.GetEntry())
                 {
                     case GameObjectIds.CrusadersCache10:
-                        if (instance.GetSpawnMode() == Difficulty.Raid10N)
+                        if (instance.GetDifficultyID() == Difficulty.Raid10N)
                             CrusadersCacheGUID = go.GetGUID();
                         break;
                     case GameObjectIds.CrusadersCache25:
-                        if (instance.GetSpawnMode() == Difficulty.Raid25N)
+                        if (instance.GetDifficultyID() == Difficulty.Raid25N)
                             CrusadersCacheGUID = go.GetGUID();
                         break;
                     case GameObjectIds.CrusadersCache10H:
-                        if (instance.GetSpawnMode() == Difficulty.Raid10HC)
+                        if (instance.GetDifficultyID() == Difficulty.Raid10HC)
                             CrusadersCacheGUID = go.GetGUID();
                         break;
                     case GameObjectIds.CrusadersCache25H:
-                        if (instance.GetSpawnMode() == Difficulty.Raid25HC)
+                        if (instance.GetDifficultyID() == Difficulty.Raid25HC)
                             CrusadersCacheGUID = go.GetGUID();
                         break;
                     case GameObjectIds.ArgentColiseumFloor:
@@ -298,7 +298,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                                 {
                                     EventStage = 6000;
                                     uint tributeChest = 0;
-                                    if (instance.GetSpawnMode() == Difficulty.Raid10HC)
+                                    if (instance.GetDifficultyID() == Difficulty.Raid10HC)
                                     {
                                         if (TrialCounter >= 50)
                                             tributeChest = GameObjectIds.TributeChest10h99;
@@ -315,7 +315,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                                             }
                                         }
                                     }
-                                    else if (instance.GetSpawnMode() == Difficulty.Raid25HC)
+                                    else if (instance.GetDifficultyID() == Difficulty.Raid25HC)
                                     {
                                         if (TrialCounter >= 50)
                                             tributeChest = GameObjectIds.TributeChest25h99;

@@ -1010,8 +1010,7 @@ namespace Game.Entities
         }
         void _LoadBoundInstances(SQLResult result)
         {
-            for (byte i = 0; i < (int)Difficulty.Max; ++i)
-                m_boundInstances[i].Clear();
+            m_boundInstances.Clear();
 
             Group group = GetGroup();
 

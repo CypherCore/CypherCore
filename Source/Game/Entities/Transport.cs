@@ -536,7 +536,7 @@ namespace Game.Entities
         void LoadStaticPassengers()
         {
             uint mapId = (uint)GetGoInfo().MoTransport.SpawnMap;
-            var cells = Global.ObjectMgr.GetMapObjectGuids(mapId, (byte)GetMap().GetSpawnMode());
+            var cells = Global.ObjectMgr.GetMapObjectGuids(mapId, (byte)GetMap().GetDifficultyID());
             if (cells == null)
                 return;
             foreach (var cell in cells)

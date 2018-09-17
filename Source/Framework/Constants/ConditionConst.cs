@@ -38,7 +38,7 @@ namespace Framework.Constants
         Race = 16,                   // Race             0              0                  True If Player'S Race Is Equal To Race
         Achievement = 17,            // Achievement_Id   0              0                  True If Achievement Is Complete
         Title = 18,                  // Title Id         0              0                  True If Player Has Title
-        Spawnmask = 19,              // Spawnmask        0              0                  True If In Spawnmask
+        SpawnmaskDeprecated = 19,    // Deprecated
         Gender = 20,                 // Gender           0              0                  True If Player'S Gender Is Equal To Gender
         UnitState = 21,              // Unitstate        0              0                  True If Unit Has Unitstate
         Mapid = 22,                  // Map_Id           0              0                  True If In Map_Id
@@ -68,7 +68,8 @@ namespace Framework.Constants
         Taxi = 46,                   // 0                0              0                  true if player is on taxi
         Queststate = 47,             // quest_id         state_mask     0                  true if player is in any of the provided quest states for the quest (1 = not taken, 2 = completed, 8 = in progress, 32 = failed, 64 = rewarded)
         ObjectiveComplete = 48,      // ID               0              0                  true if player has ID objective complete, but quest not yet rewarded
-        Max = 49                     // Max
+        DifficultyId = 49,           // Difficulty       0              0                  true is map has difficulty id
+        Max
     }
 
     public enum ConditionSourceType

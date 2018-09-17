@@ -875,10 +875,10 @@ namespace Game.Entities
                 return;
             }
 
-            SaveToDB(GetMapId(), data.spawnMask);
+            SaveToDB(GetMapId(), data.spawnDifficulties);
         }
 
-        public void SaveToDB(uint mapid, ulong spawnMask)
+        public void SaveToDB(uint mapid, List<Difficulty> spawnDifficulties)
         {
             GameObjectTemplate goI = GetGoInfo();
 
@@ -902,7 +902,7 @@ namespace Game.Entities
             data.spawntimesecs = (int)(m_spawnedByDefault ? m_respawnDelayTime : -m_respawnDelayTime);
             data.animprogress = GetGoAnimProgress();
             data.go_state = GetGoState();
-            data.spawnMask = spawnMask;
+            data.spawnDifficulties = spawnDifficulties;
             data.artKit = GetGoArtKit();
             Global.ObjectMgr.NewGOData(m_spawnId, data);
 
@@ -919,7 +919,7 @@ namespace Game.Entities
             stmt.AddValue(index++, m_spawnId);
             stmt.AddValue(index++, GetEntry());
             stmt.AddValue(index++, mapid);
-            stmt.AddValue(index++, spawnMask);
+            stmt.AddValue(index++, string.Join(",", data.spawnDifficulties));
             stmt.AddValue(index++, data.phaseId);
             stmt.AddValue(index++, data.phaseGroup);
             stmt.AddValue(index++, GetPositionX());

@@ -2980,16 +2980,11 @@ namespace Game.Maps
             return i_InstanceId;
         }
 
-        public Difficulty GetSpawnMode()
-        {
-            return i_spawnMode;
-        }
-
         public virtual EnterState CannotEnter(Player player) { return EnterState.CanEnter; }
 
         public Difficulty GetDifficultyID()
         {
-            return GetSpawnMode();
+            return i_spawnMode;
         }
 
         public MapDifficultyRecord GetMapDifficulty()
@@ -4401,7 +4396,7 @@ namespace Game.Maps
         {
             if (player.GetMap() == this)
             {
-                Log.outError(LogFilter.Maps, "InstanceMap:CannotEnter - player {0} ({1}) already in map {2}, {3}, {4}!", player.GetName(), player.GetGUID().ToString(), GetId(), GetInstanceId(), GetSpawnMode());
+                Log.outError(LogFilter.Maps, "InstanceMap:CannotEnter - player {0} ({1}) already in map {2}, {3}, {4}!", player.GetName(), player.GetGUID().ToString(), GetId(), GetInstanceId(), GetDifficultyID());
                 Cypher.Assert(false);
                 return EnterState.CannotEnterAlreadyInMap;
             }
@@ -4452,14 +4447,14 @@ namespace Game.Maps
                     InstanceSave mapSave = Global.InstanceSaveMgr.GetInstanceSave(GetInstanceId());
                     if (mapSave == null)
                     {
-                        Log.outInfo(LogFilter.Maps, "InstanceMap.Add: creating instance save for map {0} spawnmode {1} with instance id {2}", GetId(), GetSpawnMode(), GetInstanceId());
-                        mapSave = Global.InstanceSaveMgr.AddInstanceSave(GetId(), GetInstanceId(), GetSpawnMode(), 0, 0, true);
+                        Log.outInfo(LogFilter.Maps, "InstanceMap.Add: creating instance save for map {0} spawnmode {1} with instance id {2}", GetId(), GetDifficultyID(), GetInstanceId());
+                        mapSave = Global.InstanceSaveMgr.AddInstanceSave(GetId(), GetInstanceId(), GetDifficultyID(), 0, 0, true);
                     }
 
                     Cypher.Assert(mapSave != null);
 
                     // check for existing instance binds
-                    InstanceBind playerBind = player.GetBoundInstance(GetId(), GetSpawnMode());
+                    InstanceBind playerBind = player.GetBoundInstance(GetId(), GetDifficultyID());
                     if (playerBind != null && playerBind.perm)
                     {
                         // cannot enter other instances if bound permanently
@@ -4780,11 +4775,11 @@ namespace Game.Maps
                 InstanceSave save = Global.InstanceSaveMgr.GetInstanceSave(GetInstanceId());
                 if (save != null)
                     Global.InstanceSaveMgr.ScheduleReset(on, save.GetResetTime(),
-                        new InstanceSaveManager.InstResetEvent(0, GetId(), GetSpawnMode(), GetInstanceId()));
+                        new InstanceSaveManager.InstResetEvent(0, GetId(), GetDifficultyID(), GetInstanceId()));
                 else
                     Log.outError(LogFilter.Maps,
                         "InstanceMap.SetResetSchedule: cannot turn schedule {0}, there is no save information for instance (map [id: {1}, name: {2}], instance id: {3}, difficulty: {4})",
-                        on ? "on" : "off", GetId(), GetMapName(), GetInstanceId(), GetSpawnMode());
+                        on ? "on" : "off", GetId(), GetMapName(), GetInstanceId(), GetDifficultyID());
             }
         }
 

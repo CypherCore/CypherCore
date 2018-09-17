@@ -2772,7 +2772,8 @@ namespace Game
                                 break;
                             }
 
-                            if (!Convert.ToBoolean(master.spawnMask & slave.spawnMask))  // they must have a possibility to meet (normal/heroic difficulty)
+                            // they must have a possibility to meet (normal/heroic difficulty)
+                            if (!master.spawnDifficulties.Intersect(slave.spawnDifficulties).Any())
                             {
                                 Log.outError(LogFilter.Sql, "LinkedRespawn: Creature '{0}' linking to '{1}' with not corresponding spawnMask", guidLow, linkedGuidLow);
                                 error = true;
@@ -2809,7 +2810,8 @@ namespace Game
                                 break;
                             }
 
-                            if (!Convert.ToBoolean(master.spawnMask & slave.spawnMask))  // they must have a possibility to meet (normal/heroic difficulty)
+                            // they must have a possibility to meet (normal/heroic difficulty)
+                            if (!master.spawnDifficulties.Intersect(slave.spawnDifficulties).Any())
                             {
                                 Log.outError(LogFilter.Sql, "LinkedRespawn: Creature '{0}' linking to '{1}' with not corresponding spawnMask", guidLow, linkedGuidLow);
                                 error = true;
@@ -2846,7 +2848,8 @@ namespace Game
                                 break;
                             }
 
-                            if (!Convert.ToBoolean(master.spawnMask & slave.spawnMask))  // they must have a possibility to meet (normal/heroic difficulty)
+                            // they must have a possibility to meet (normal/heroic difficulty)
+                            if (!master.spawnDifficulties.Intersect(slave.spawnDifficulties).Any())
                             {
                                 Log.outError(LogFilter.Sql, "LinkedRespawn: Creature '{0}' linking to '{1}' with not corresponding spawnMask", guidLow, linkedGuidLow);
                                 error = true;
@@ -2883,7 +2886,8 @@ namespace Game
                                 break;
                             }
 
-                            if (!Convert.ToBoolean(master.spawnMask & slave.spawnMask))  // they must have a possibility to meet (normal/heroic difficulty)
+                            // they must have a possibility to meet (normal/heroic difficulty)
+                            if (!master.spawnDifficulties.Intersect(slave.spawnDifficulties).Any())
                             {
                                 Log.outError(LogFilter.Sql, "LinkedRespawn: Creature '{0}' linking to '{1}' with not corresponding spawnMask", guidLow, linkedGuidLow);
                                 error = true;
@@ -3227,9 +3231,9 @@ namespace Game
 
             //                                         0              1   2    3        4             5           6           7           8            9              10
             SQLResult result = DB.World.Query("SELECT creature.guid, id, map, modelid, equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, spawndist, " +
-                //   11               12         13       14            15         16          17          18                19                   20                    21
-                "currentwaypoint, curhealth, curmana, MovementType, spawnMask, eventEntry, pool_entry, creature.npcflag, creature.unit_flags, creature.unit_flags2, creature.unit_flags3, " +
-                //   22                     23                      24                25                   26                       27
+                //11               12         13       14            15                 16          17          18                19                   20                    21
+                "currentwaypoint, curhealth, curmana, MovementType, spawnDifficulties, eventEntry, pool_entry, creature.npcflag, creature.unit_flags, creature.unit_flags2, creature.unit_flags3, " +
+                //22                     23                      24                25                   26                       27
                 "creature.dynamicflags, creature.phaseUseFlags, creature.phaseid, creature.phasegroup, creature.terrainSwapMap, creature.ScriptName " +
                 "FROM creature LEFT OUTER JOIN game_event_creature ON creature.guid = game_event_creature.guid LEFT OUTER JOIN pool_creature ON creature.guid = pool_creature.guid");
 
@@ -3239,15 +3243,16 @@ namespace Game
                 return;
             }
 
-            Dictionary<uint, ulong> spawnMasks = new Dictionary<uint, ulong>();
+            // Build single time for check spawnmask
+            Dictionary<uint, List<Difficulty>> spawnMasks = new Dictionary<uint, List<Difficulty>>();
             foreach (var mapDifficultyPair in Global.DB2Mgr.GetMapDifficulties())
             {
                 foreach (var difficultyPair in mapDifficultyPair.Value)
                 {
                     if (!spawnMasks.ContainsKey(mapDifficultyPair.Key))
-                        spawnMasks[mapDifficultyPair.Key] = 0;
+                        spawnMasks[mapDifficultyPair.Key] = new List<Difficulty>();
 
-                    spawnMasks[mapDifficultyPair.Key] |= (1ul << (int)difficultyPair.Key);
+                    spawnMasks[mapDifficultyPair.Key].Add((Difficulty)difficultyPair.Key);
                 }
             }
 
@@ -3281,7 +3286,7 @@ namespace Game
                 data.curhealth = result.Read<uint>(12);
                 data.curmana = result.Read<uint>(13);
                 data.movementType = result.Read<byte>(14);
-                data.spawnMask = result.Read<ulong>(15);
+                data.spawnDifficulties = ParseSpawnDifficulties(result.Read<string>(15), "creature", guid, data.mapid, spawnMasks[data.mapid]);
                 short gameEvent = result.Read<short>(16);
                 uint PoolId = result.Read<uint>(17);
                 data.npcflag = result.Read<ulong>(18);
@@ -3304,8 +3309,11 @@ namespace Game
                     continue;
                 }
 
-                //if (!_transportMaps.Contains(data.mapid) && (spawnMasks.ContainsKey(data.mapid) && Convert.ToBoolean(data.spawnMask & ~spawnMasks[data.mapid])))
-                //Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0}) that have wrong spawn mask {1} including not supported difficulty modes for map (Id: {2}) spawnMasks[data.mapid]: {3}.", guid, data.spawnMask, data.mapid, spawnMasks[data.mapid]);
+                if (data.spawnDifficulties.Empty())
+                {
+                    Log.outError(LogFilter.Sql, $"Table `creature` has creature (GUID: {guid}) that is not spawned in any difficulty, skipped.");
+                    continue;
+                }
 
                 bool ok = true;
                 for (uint diff = 0; diff < SharedConst.MaxCreatureDifficulties && ok; ++diff)
@@ -3444,31 +3452,23 @@ namespace Game
 
         public void AddCreatureToGrid(ulong guid, CreatureData data)
         {
-            ulong mask = data.spawnMask;
-            for (byte i = 0; mask != 0; i++, mask >>= 1)
+            foreach (Difficulty difficulty in data.spawnDifficulties)
             {
-                if (Convert.ToBoolean(mask & 1))
-                {
-                    CellCoord cellCoord = GridDefines.ComputeCellCoord(data.posX, data.posY);
-                    var cellguids = CreateCellObjectGuids(data.mapid, i, cellCoord);
-                    cellguids.creatures.Add(guid);
-                }
+                CellCoord cellCoord = GridDefines.ComputeCellCoord(data.posX, data.posY);
+                var cellguids = CreateCellObjectGuids(data.mapid, difficulty, cellCoord.GetId());
+                cellguids.creatures.Add(guid);
             }
         }
         public void RemoveCreatureFromGrid(ulong guid, CreatureData data)
         {
-            ulong mask = data.spawnMask;
-            for (byte i = 0; mask != 0; i++, mask >>= 1)
+            foreach (Difficulty difficulty in data.spawnDifficulties)
             {
-                if (Convert.ToBoolean(mask & 1))
-                {
-                    CellCoord cellCoord = GridDefines.ComputeCellCoord(data.posX, data.posY);
-                    CellObjectGuids cellguids = GetCellObjectGuids(data.mapid, i, cellCoord.GetId());
-                    if (cellguids == null)
-                        return;
+                CellCoord cellCoord = GridDefines.ComputeCellCoord(data.posX, data.posY);
+                CellObjectGuids cellguids = GetCellObjectGuids(data.mapid, difficulty, cellCoord.GetId());
+                if (cellguids == null)
+                    return;
 
-                    cellguids.creatures.Remove(guid);
-                }
+                cellguids.creatures.Remove(guid);
             }
         }
         public ulong AddCreatureData(uint entry, uint team, uint mapId, float x, float y, float z, float o, uint spawntimedelay)
@@ -3499,7 +3499,7 @@ namespace Game
             data.curhealth = stats.GenerateHealth(cInfo);
             data.curmana = stats.GenerateMana(cInfo);
             data.movementType = (byte)cInfo.MovementType;
-            data.spawnMask = (int)SpawnMask.Continent;
+            data.spawnDifficulties.Add(Difficulty.None);
             data.dbData = false;
             data.npcflag = (uint)cInfo.Npcflag;
             data.unit_flags = (uint)cInfo.UnitFlags;
@@ -3587,7 +3587,8 @@ namespace Game
                 return false;
             }
 
-            if (!Convert.ToBoolean(master.spawnMask & slave.spawnMask))  // they must have a possibility to meet (normal/heroic difficulty)
+            // they must have a possibility to meet (normal/heroic difficulty)
+            if (!master.spawnDifficulties.Intersect(slave.spawnDifficulties).Any())
             {
                 Log.outError(LogFilter.Sql, "LinkedRespawn: Creature '{0}' linking to '{1}' with not corresponding spawnMask", guidLow, linkedGuidLow);
                 return false;
@@ -3923,11 +3924,11 @@ namespace Game
         public void LoadGameobjects()
         {
             var time = Time.GetMSTime();
-            //                                              0            1   2    3           4           5           6
+            //                                         0                1   2    3           4           5           6
             SQLResult result = DB.World.Query("SELECT gameobject.guid, id, map, position_x, position_y, position_z, orientation, " +
-                //   7          8          9          10         11             12            13     14         15          16
-                "rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state, spawnMask, eventEntry, pool_entry, " +
-                //   17             18       19          20              21
+                //7          8          9          10         11             12            13     14                 15          16
+                "rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state, spawnDifficulties, eventEntry, pool_entry, " +
+                //17             18       19          20              21
                 "phaseUseFlags, phaseid, phasegroup, terrainSwapMap, ScriptName " +
                 "FROM gameobject LEFT OUTER JOIN game_event_gameobject ON gameobject.guid = game_event_gameobject.guid " +
                 "LEFT OUTER JOIN pool_gameobject ON gameobject.guid = pool_gameobject.guid");
@@ -3941,14 +3942,15 @@ namespace Game
             uint count = 0;
 
             // build single time for check spawnmask
-            Dictionary<uint, ulong> spawnMasks = new Dictionary<uint, ulong>();
+            Dictionary<uint, List<Difficulty>> spawnMasks = new Dictionary<uint, List<Difficulty>>();
             foreach (var mapDifficultyPair in Global.DB2Mgr.GetMapDifficulties())
             {
                 foreach (var difficultyPair in mapDifficultyPair.Value)
                 {
                     if (!spawnMasks.ContainsKey(mapDifficultyPair.Key))
-                        spawnMasks[mapDifficultyPair.Key] = 0;
-                    spawnMasks[mapDifficultyPair.Key] |= (1ul << (int)difficultyPair.Key);
+                        spawnMasks[mapDifficultyPair.Key] = new List<Difficulty>();
+
+                    spawnMasks[mapDifficultyPair.Key].Add((Difficulty)difficultyPair.Key);
                 }
             }
 
@@ -4024,11 +4026,12 @@ namespace Game
                 }
                 data.go_state = (GameObjectState)gostate;
 
-                data.spawnMask = result.Read<ulong>(14);
-
-                //if (!_transportMaps.Contains(data.mapid) && (spawnMasks.ContainsKey(data.mapid) && Convert.ToBoolean(data.spawnMask & ~spawnMasks[data.mapid])))
-                //Log.outError(LogFilter.Sql, "Table `gameobject` has gameobject (GUID: {0} Entry: {1}) that has wrong spawn mask {2} including not supported difficulty modes for map (Id: {3}), skip",
-                //guid, data.id, data.spawnMask, data.mapid);
+                data.spawnDifficulties = ParseSpawnDifficulties(result.Read<string>(14), "gameobject", guid, data.mapid, spawnMasks[data.mapid]);
+                if (data.spawnDifficulties.Empty())
+                {
+                    Log.outError(LogFilter.Sql, $"Table `creature` has creature (GUID: {guid}) that is not spawned in any difficulty, skipped.");
+                    continue;
+                }
 
                 short gameEvent = result.Read<sbyte>(15);
                 uint PoolId = result.Read<uint>(16);
@@ -4319,31 +4322,23 @@ namespace Game
         }
         public void AddGameObjectToGrid(ulong guid, GameObjectData data)
         {
-            ulong mask = data.spawnMask;
-            for (byte i = 0; mask != 0; i++, mask >>= 1)
+            foreach (Difficulty difficulty in data.spawnDifficulties)
             {
-                if (Convert.ToBoolean(mask & 1))
-                {
-                    CellCoord cellCoord = GridDefines.ComputeCellCoord(data.posX, data.posY);
-                    var cellguids = CreateCellObjectGuids(data.mapid, i, cellCoord);
-                    cellguids.gameobjects.Add(guid);
-                }
+                CellCoord cellCoord = GridDefines.ComputeCellCoord(data.posX, data.posY);
+                var cellguids = CreateCellObjectGuids(data.mapid, difficulty, cellCoord.GetId());
+                cellguids.gameobjects.Add(guid);
             }
         }
         public void RemoveGameObjectFromGrid(ulong guid, GameObjectData data)
         {
-            ulong mask = data.spawnMask;
-            for (byte i = 0; mask != 0; i++, mask >>= 1)
+            foreach (Difficulty difficulty in data.spawnDifficulties)
             {
-                if (Convert.ToBoolean(mask & 1))
-                {
-                    CellCoord cellCoord = GridDefines.ComputeCellCoord(data.posX, data.posY);
-                    CellObjectGuids cellguids = GetCellObjectGuids(data.mapid, i, cellCoord.GetId());
-                    if (cellguids == null)
-                        return;
+                CellCoord cellCoord = GridDefines.ComputeCellCoord(data.posX, data.posY);
+                CellObjectGuids cellguids = GetCellObjectGuids(data.mapid, difficulty, cellCoord.GetId());
+                if (cellguids == null)
+                    return;
 
-                    cellguids.gameobjects.Remove(guid);
-                }
+                cellguids.gameobjects.Remove(guid);
             }
         }
         public ulong AddGOData(uint entry, uint mapId, float x, float y, float z, float o, uint spawntimedelay, float rotation0, float rotation1, float rotation2, float rotation3)
@@ -4370,7 +4365,7 @@ namespace Game
             data.rotation.W = rotation3;
             data.spawntimesecs = (int)spawntimedelay;
             data.animprogress = 100;
-            data.spawnMask = (int)SpawnMask.Continent;
+            data.spawnDifficulties.Add(Difficulty.None);
             data.go_state = GameObjectState.Ready;
             data.artKit = (byte)(goinfo.type == GameObjectTypes.ControlZone ? 21 : 0);
             data.dbData = false;
@@ -4485,6 +4480,33 @@ namespace Game
 
             Log.outError(LogFilter.Sql, "Gameobject (Entry: {0} GoType: {1}) have data{2}={3}  but expected boolean (0/1) consumable field value.",
                 goInfo.entry, goInfo.type, N, dataN);
+        }
+
+        List<Difficulty> ParseSpawnDifficulties(string difficultyString, string table, ulong spawnId, uint mapId, List<Difficulty> mapDifficulties)
+        {
+            StringArray tokens = new StringArray(difficultyString, ',');
+            List<Difficulty> difficulties = new List<Difficulty>();
+            bool isTransportMap = IsTransportMap(mapId);
+            foreach (string token in tokens)
+            {
+                Difficulty difficultyId = (Difficulty)Enum.Parse(typeof(Difficulty), token);
+                if (difficultyId != 0 && !CliDB.DifficultyStorage.ContainsKey(difficultyId))
+                {
+                    Log.outError(LogFilter.Sql, $"Table `{table}` has {table} (GUID: {spawnId}) with non invalid difficulty id {difficultyId}, skipped.");
+                    continue;
+                }
+
+                if (!isTransportMap && !mapDifficulties.Contains(difficultyId))
+                {
+                    Log.outError(LogFilter.Sql, "Table `{table}` has {table} (GUID: {spawnId}) has unsupported difficulty {difficultyId} for map (Id: {mapId}).");
+                    continue;
+                }
+
+                difficulties.Add(difficultyId);
+            }
+
+            difficulties.Sort();
+            return difficulties;
         }
 
         //Items
@@ -9311,13 +9333,9 @@ namespace Game
             }
             return 0;
         }
-        public CellObjectGuids CreateCellObjectGuids(uint mapid, byte spawnMask, CellCoord cellCoord)
+        CellObjectGuids CreateCellObjectGuids(uint mapid, Difficulty difficulty, uint cellid)
         {
-            return CreateCellObjectGuids(mapid, spawnMask, cellCoord.GetId());
-        }
-        CellObjectGuids CreateCellObjectGuids(uint mapid, byte spawnMask, uint cellid)
-        {
-            uint newid = MathFunctions.MakePair32(mapid, spawnMask);
+            uint newid = MathFunctions.MakePair32(mapid, (uint)difficulty);
 
             if (!mapObjectGuidsStore.ContainsKey(newid))
                 mapObjectGuidsStore.Add(newid, new Dictionary<uint, CellObjectGuids>());
@@ -9327,9 +9345,9 @@ namespace Game
 
             return mapObjectGuidsStore[newid][cellid];
         }
-        public CellObjectGuids GetCellObjectGuids(uint mapid, byte spawnMask, uint cellid)
+        public CellObjectGuids GetCellObjectGuids(uint mapid, Difficulty difficulty, uint cellid)
         {
-            uint newid = MathFunctions.MakePair32(mapid, spawnMask);
+            uint newid = MathFunctions.MakePair32(mapid, (uint)difficulty);
 
             if (mapObjectGuidsStore.ContainsKey(newid) && mapObjectGuidsStore[newid].ContainsKey(cellid))
                 return mapObjectGuidsStore[newid][cellid];

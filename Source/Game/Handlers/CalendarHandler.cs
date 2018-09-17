@@ -71,22 +71,25 @@ namespace Game
                 packet.Events.Add(eventInfo);
             }
 
-            for (byte i = 0; i < (int)Difficulty.Max; ++i)
+            for (Difficulty i = 0; i < Difficulty.Max; ++i)
             {
-                var boundInstances = GetPlayer().GetBoundInstances((Difficulty)i);
-                foreach (var pair in boundInstances)
+                var boundInstances = _player.GetBoundInstances(i);
+                if (boundInstances != null)
                 {
-                    if (pair.Value.perm)
+                    foreach (var boundInstance in boundInstances.Values)
                     {
-                        CalendarSendCalendarRaidLockoutInfo lockoutInfo;
+                        if (boundInstance.perm)
+                        {
+                            CalendarSendCalendarRaidLockoutInfo lockoutInfo;
 
-                        InstanceSave save = pair.Value.save;
-                        lockoutInfo.MapID = (int)save.GetMapId();
-                        lockoutInfo.DifficultyID = (uint)save.GetDifficultyID();
-                        lockoutInfo.ExpireTime = save.GetResetTime() - currTime;
-                        lockoutInfo.InstanceID = save.GetInstanceId(); // instance save id as unique instance copy id
+                            InstanceSave save = boundInstance.save;
+                            lockoutInfo.MapID = (int)save.GetMapId();
+                            lockoutInfo.DifficultyID = (uint)save.GetDifficultyID();
+                            lockoutInfo.ExpireTime = save.GetResetTime() - currTime;
+                            lockoutInfo.InstanceID = save.GetInstanceId(); // instance save id as unique instance copy id
 
-                        packet.RaidLockouts.Add(lockoutInfo);
+                            packet.RaidLockouts.Add(lockoutInfo);
+                        }
                     }
                 }
             }

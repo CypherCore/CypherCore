@@ -3612,9 +3612,29 @@ namespace Game.AI
                 {
                     if (obj != null && obj.GetMap().IsDungeon())
                     {
-                        if (Convert.ToBoolean(1 << ((int)obj.GetMap().GetSpawnMode() + 1) & (int)holder.Event.event_flags))
+                        // TODO: fix it for new maps and difficulties
+                        switch (obj.GetMap().GetDifficultyID())
                         {
-                            mEvents.Add(holder);
+                            case Difficulty.Normal:
+                            case Difficulty.Raid10N:
+                                if (holder.Event.event_flags.HasAnyFlag(SmartEventFlags.Difficulty0))
+                                    mEvents.Add(holder);
+                                break;
+                            case Difficulty.Heroic:
+                            case Difficulty.Raid25N:
+                                if (holder.Event.event_flags.HasAnyFlag(SmartEventFlags.Difficulty1))
+                                    mEvents.Add(holder);
+                                break;
+                            case Difficulty.Raid10HC:
+                                if (holder.Event.event_flags.HasAnyFlag(SmartEventFlags.Difficulty2))
+                                    mEvents.Add(holder);
+                                break;
+                            case Difficulty.Raid25HC:
+                                if (holder.Event.event_flags.HasAnyFlag(SmartEventFlags.Difficulty3))
+                                    mEvents.Add(holder);
+                                break;
+                            default:
+                                break;
                         }
                     }
                     continue;

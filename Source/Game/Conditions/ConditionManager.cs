@@ -1491,15 +1491,10 @@ namespace Game
                         }
                         break;
                     }
-                case ConditionTypes.Spawnmask:
+                case ConditionTypes.SpawnmaskDeprecated:
                     {
-                        // @todo: ConditionValue need to be extended to uint64
-                        if ((ulong)cond.ConditionValue1 > 1ul << (int)SpawnMask.RaidAll)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has non existing SpawnMask in value1 ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, $"{cond.ToString(true)} using deprecated condition type CONDITION_SPAWNMASK.");
+                        return false;
                     }
                 case ConditionTypes.UnitState:
                     {
@@ -1575,6 +1570,13 @@ namespace Game
                 case ConditionTypes.InWater:
                 case ConditionTypes.Charmed:
                 case ConditionTypes.Taxi:
+                    break;
+                case ConditionTypes.DifficultyId:
+                    if (!CliDB.DifficultyStorage.ContainsKey(cond.ConditionValue1))
+                    {
+                        Log.outError(LogFilter.Sql, $"{cond.ToString(true)} has non existing difficulty in value1 ({cond.ConditionValue1}), skipped.");
+                        return false;
+                    }
                     break;
                 default:
                     Log.outError(LogFilter.Sql, $"{cond.ToString()} Invalid ConditionType in `condition` table, ignoring.");

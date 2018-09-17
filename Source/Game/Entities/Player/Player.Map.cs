@@ -24,7 +24,6 @@ using Game.Maps;
 using Game.Network.Packets;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Game.Entities
 {
@@ -236,14 +235,18 @@ namespace Game.Entities
             if (mapDiff == null)
                 return null;
 
-            var bind = m_boundInstances[(int)difficulty].LookupByKey(mapid);
-            if (bind != null)
-                if (bind.extendState != 0 || withExpired)
-                    return bind;
+            var difficultyDic = m_boundInstances.LookupByKey(difficulty);
+            if (difficultyDic == null)
+                return null;
+
+            var instanceBind = difficultyDic.LookupByKey(mapid);
+            if (instanceBind != null)
+                if (instanceBind.extendState != 0 || withExpired)
+                    return instanceBind;
 
             return null;
         }
-        public Dictionary<uint, InstanceBind> GetBoundInstances(Difficulty difficulty) { return m_boundInstances[(int)difficulty]; }
+        public Dictionary<uint, InstanceBind> GetBoundInstances(Difficulty difficulty) { return m_boundInstances.LookupByKey(difficulty); }
 
         public InstanceSave GetInstanceSave(uint mapid)
         {
@@ -266,28 +269,16 @@ namespace Game.Entities
 
         public void UnbindInstance(uint mapid, Difficulty difficulty, bool unload = false)
         {
-            var bound = m_boundInstances[(int)difficulty].LookupByKey(mapid);
-            if (bound != null)
+            var difficultyDic = m_boundInstances.LookupByKey(difficulty);
+            if (difficultyDic != null)
             {
-                if (!unload)
-                {
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_INSTANCE_BY_INSTANCE_GUID);
-
-                    stmt.AddValue(0, GetGUID().GetCounter());
-                    stmt.AddValue(1, bound.save.GetInstanceId());
-
-                    DB.Characters.Execute(stmt);
-                }
-
-                if (bound.perm)
-                    GetSession().SendCalendarRaidLockout(bound.save, false);
-
-                bound.save.RemovePlayer(this);               // save can become invalid
-                m_boundInstances[(int)difficulty].Remove(mapid);
+                var pair = difficultyDic.Find(mapid);
+                if (pair.Value != null)
+                    UnbindInstance(pair, difficultyDic, unload);
             }
         }
 
-        public void UnbindInstance(KeyValuePair<uint, InstanceBind> pair, Difficulty difficulty, bool unload)
+        public void UnbindInstance(KeyValuePair<uint, InstanceBind> pair, Dictionary<uint, InstanceBind> difficultyDic, bool unload)
         {
             if (pair.Value != null)
             {
@@ -305,7 +296,7 @@ namespace Game.Entities
                     GetSession().SendCalendarRaidLockout(pair.Value.save, false);
 
                 pair.Value.save.RemovePlayer(this);               // save can become invalid
-                m_boundInstances[(int)difficulty].Remove(pair.Key);
+                difficultyDic.Remove(pair.Key);
             }
         }
 
@@ -314,8 +305,8 @@ namespace Game.Entities
             if (save != null)
             {
                 InstanceBind bind = new InstanceBind();
-                if (m_boundInstances[(int)save.GetDifficultyID()].ContainsKey(save.GetMapId()))
-                    bind = m_boundInstances[(int)save.GetDifficultyID()][save.GetMapId()];
+                if (m_boundInstances[save.GetDifficultyID()].ContainsKey(save.GetMapId()))
+                    bind = m_boundInstances[save.GetDifficultyID()][save.GetMapId()];
 
                 if (extendState == BindExtensionState.Keep) // special flag, keep the player's current extend state when updating for new boss down
                 {
@@ -373,7 +364,7 @@ namespace Game.Entities
 
                 Global.ScriptMgr.OnPlayerBindToInstance(this, save.GetDifficultyID(), save.GetMapId(), permanent, extendState);
 
-                m_boundInstances[(int)save.GetDifficultyID()][save.GetMapId()] = bind;
+                m_boundInstances[save.GetDifficultyID()][save.GetMapId()] = bind;
                 return bind;
             }
 
@@ -407,21 +398,19 @@ namespace Game.Entities
             InstanceInfoPkt instanceInfo = new InstanceInfoPkt();
 
             long now = Time.UnixTime;
-            for (byte i = 0; i < (int)Difficulty.Max; ++i)
+            foreach (var difficultyDic in m_boundInstances.Values)
             {
-                foreach (var pair in m_boundInstances[i])
+                foreach (var instanceBind in difficultyDic.Values)
                 {
-                    InstanceBind bind = pair.Value;
-                    if (bind.perm)
+                    if (instanceBind.perm)
                     {
-                        InstanceSave save = pair.Value.save;
+                        InstanceSave save = instanceBind.save;
 
                         InstanceLockInfos lockInfos;
-
                         lockInfos.InstanceID = save.GetInstanceId();
                         lockInfos.MapID = save.GetMapId();
                         lockInfos.DifficultyID = (uint)save.GetDifficultyID();
-                        if (bind.extendState != BindExtensionState.Extended)
+                        if (instanceBind.extendState != BindExtensionState.Extended)
                             lockInfos.TimeRemaining = (int)(save.GetResetTime() - now);
                         else
                             lockInfos.TimeRemaining = (int)(Global.InstanceSaveMgr.GetSubsequentResetTime(save.GetMapId(), save.GetDifficultyID(), save.GetResetTime()) - now);
@@ -435,8 +424,8 @@ namespace Game.Entities
                                 lockInfos.CompletedMask = instanceScript.GetCompletedEncounterMask();
                         }
 
-                        lockInfos.Locked = bind.extendState != BindExtensionState.Expired;
-                        lockInfos.Extended = bind.extendState == BindExtensionState.Extended;
+                        lockInfos.Locked = instanceBind.extendState != BindExtensionState.Expired;
+                        lockInfos.Extended = instanceBind.extendState == BindExtensionState.Extended;
 
                         instanceInfo.LockList.Add(lockInfos);
                     }
@@ -617,26 +606,30 @@ namespace Game.Entities
             // method can be INSTANCE_RESET_ALL, INSTANCE_RESET_CHANGE_DIFFICULTY, INSTANCE_RESET_GROUP_JOIN
 
             // we assume that when the difficulty changes, all instances that can be reset will be
-            Difficulty diff = GetDungeonDifficultyID();
+            Difficulty difficulty = GetDungeonDifficultyID();
             if (isRaid)
             {
                 if (!isLegacy)
-                    diff = GetRaidDifficultyID();
+                    difficulty = GetRaidDifficultyID();
                 else
-                    diff = GetLegacyRaidDifficultyID();
+                    difficulty = GetLegacyRaidDifficultyID();
             }
 
-            foreach (var pair in m_boundInstances[(int)diff].ToList())
+            var difficultyDic = m_boundInstances.LookupByKey(difficulty);
+            if (difficultyDic == null)
+                return;
+
+            foreach (var pair in difficultyDic)
             {
                 InstanceSave p = pair.Value.save;
-                MapRecord entry = CliDB.MapStorage.LookupByKey(pair.Key);
+                MapRecord entry = CliDB.MapStorage.LookupByKey(difficulty);
                 if (entry == null || entry.IsRaid() != isRaid || !p.CanReset())
                     continue;
 
                 if (method == InstanceResetMethod.All)
                 {
                     // the "reset all instances" method can only reset normal maps
-                    if (entry.InstanceType == MapTypes.Raid || diff == Difficulty.Heroic)
+                    if (entry.InstanceType == MapTypes.Raid || difficulty == Difficulty.Heroic)
                         continue;
                 }
 
@@ -651,7 +644,7 @@ namespace Game.Entities
                     SendResetInstanceSuccess(p.GetMapId());
 
                 p.DeleteFromDB();
-                m_boundInstances[(int)diff].Remove(pair.Key);
+                difficultyDic.Remove(pair.Key);
 
                 // the following should remove the instance save from the manager and delete it as well
                 p.RemovePlayer(this);

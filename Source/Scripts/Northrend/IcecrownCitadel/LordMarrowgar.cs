@@ -563,7 +563,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                 if (marrowgar)
                 {
                     CreatureAI marrowgarAI = marrowgar.GetAI();
-                    byte boneSpikeCount = (byte)(Convert.ToBoolean((int)GetCaster().GetMap().GetSpawnMode() & 1) ? 3 : 1);
+                    byte boneSpikeCount = (byte)(Convert.ToBoolean((int)GetCaster().GetMap().GetDifficultyID() & 1) ? 3 : 1);
 
                     List<Unit> targets = marrowgarAI.SelectTargetList(new BoneSpikeTargetSelector(marrowgarAI), boneSpikeCount, SelectAggroTarget.Random);
                     if (targets.Empty())

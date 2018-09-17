@@ -21,6 +21,7 @@ using Framework.IO;
 using Game.Entities;
 using Game.Maps;
 using System;
+using System.Collections.Generic;
 
 namespace Game.Chat.Commands
 {
@@ -549,7 +550,7 @@ namespace Game.Chat.Commands
                 }
 
                 PhasingHandler.InheritPhaseShift(creature, chr);
-                creature.SaveToDB(map.GetId(), 1ul << (int)map.GetSpawnMode());
+                creature.SaveToDB(map.GetId(), new List<Difficulty>() { map.GetDifficultyID() });
 
                 ulong dbGuid = creature.GetSpawnId();
 
@@ -769,7 +770,7 @@ namespace Game.Chat.Commands
                     }
 
                     PhasingHandler.InheritPhaseShift(creature, chr);
-                    creature.SaveToDB(map.GetId(), 1ul << (int)map.GetSpawnMode());
+                    creature.SaveToDB(map.GetId(), new List<Difficulty>() { map.GetDifficultyID() });
 
                     ulong dbGuid = creature.GetSpawnId();
 
@@ -835,7 +836,7 @@ namespace Game.Chat.Commands
                 }
 
                 PhasingHandler.InheritPhaseShift(creature, chr);
-                creature.SaveToDB(map.GetId(), 1ul << (int)map.GetSpawnMode());
+                creature.SaveToDB(map.GetId(), new List<Difficulty>() { map.GetDifficultyID() });
 
                 ulong dbGuid = creature.GetSpawnId();
 
@@ -890,7 +891,7 @@ namespace Game.Chat.Commands
                 }
 
                 PhasingHandler.InheritPhaseShift(creature, chr);
-                creature.SaveToDB(map.GetId(), 1ul << (int)map.GetSpawnMode());
+                creature.SaveToDB(map.GetId(), new List<Difficulty>() { map.GetDifficultyID() });
 
                 ulong dbGuid = creature.GetSpawnId();
 

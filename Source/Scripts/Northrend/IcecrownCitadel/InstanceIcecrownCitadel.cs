@@ -362,7 +362,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                             {
                                 if (WeeklyQuestData[questIndex].creatureEntry == entry)
                                 {
-                                    byte diffIndex = (byte)((int)instance.GetSpawnMode() & 1);
+                                    byte diffIndex = (byte)((int)instance.GetDifficultyID() & 1);
                                     if (!Global.PoolMgr.IsSpawnedObject<Quest>(WeeklyQuestData[questIndex].questId[diffIndex]))
                                         entry = 0;
                                     break;
@@ -976,7 +976,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                     case Bosses.ValithriaDreamwalker:
                         if (state == EncounterState.Done)
                         {
-                            if (Global.PoolMgr.IsSpawnedObject<Quest>(WeeklyQuestData[8].questId[(int)instance.GetSpawnMode() & 1]))
+                            if (Global.PoolMgr.IsSpawnedObject<Quest>(WeeklyQuestData[8].questId[(int)instance.GetDifficultyID() & 1]))
                                 instance.SummonCreature(CreatureIds.ValithriaDreamwalkerQuest, ValithriaDreamwalker.ValithriaSpawnPos);
 
                             GameObject teleporter = instance.GetGameObject(TeleporterSindragosaGUID);
@@ -1106,7 +1106,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                                 break;
 
                             // 5 is the index of Blood Quickening
-                            if (!Global.PoolMgr.IsSpawnedObject<Quest>(WeeklyQuestData[5].questId[(int)instance.GetSpawnMode() & 1]))
+                            if (!Global.PoolMgr.IsSpawnedObject<Quest>(WeeklyQuestData[5].questId[(int)instance.GetDifficultyID() & 1]))
                                 break;
 
                             switch ((EncounterState)data)

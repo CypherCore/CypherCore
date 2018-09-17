@@ -276,9 +276,6 @@ namespace Game.Conditions
                     if (player != null)
                         condMeets = player.HasTitle(ConditionValue1);
                     break;
-                case ConditionTypes.Spawnmask:
-                    condMeets = Convert.ToBoolean((1ul << (int)obj.GetMap().GetSpawnMode()) & ConditionValue1);
-                    break;
                 case ConditionTypes.UnitState:
                     if (unit != null)
                         condMeets = unit.HasUnitState((UnitState)ConditionValue1);
@@ -372,6 +369,11 @@ namespace Game.Conditions
                         }
                         break;
                     }
+                case ConditionTypes.DifficultyId:
+                    {
+                        condMeets = (uint)obj.GetMap().GetDifficultyID() == ConditionValue1;
+                        break;
+                    }
                 default:
                     condMeets = false;
                     break;
@@ -397,20 +399,20 @@ namespace Game.Conditions
             GridMapTypeMask mask = 0;
             switch (ConditionType)
             {
-                case ConditionTypes.DistanceTo:
-                case ConditionTypes.WorldState:
-                case ConditionTypes.PhaseId:
-                case ConditionTypes.Spawnmask:
-                case ConditionTypes.NearCreature:
-                case ConditionTypes.NearGameobject:
                 case ConditionTypes.ActiveEvent:
+                case ConditionTypes.Areaid:
+                case ConditionTypes.DifficultyId:
+                case ConditionTypes.DistanceTo:
                 case ConditionTypes.InstanceInfo:
                 case ConditionTypes.Mapid:
-                case ConditionTypes.Areaid:
+                case ConditionTypes.NearCreature:
+                case ConditionTypes.NearGameobject:
                 case ConditionTypes.None:
-                case ConditionTypes.Zoneid:
-                case ConditionTypes.TerrainSwap:
+                case ConditionTypes.PhaseId:
                 case ConditionTypes.RealmAchievement:
+                case ConditionTypes.TerrainSwap:
+                case ConditionTypes.WorldState:
+                case ConditionTypes.Zoneid:
                     mask |= GridMapTypeMask.All;
                     break;
                 case ConditionTypes.Gender:

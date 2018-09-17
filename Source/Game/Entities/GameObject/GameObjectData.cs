@@ -18,6 +18,7 @@
 using Framework.Collections;
 using Framework.Constants;
 using Framework.GameMath;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace Game.Entities
@@ -1087,7 +1088,7 @@ namespace Game.Entities
         public int spawntimesecs;
         public uint animprogress;
         public GameObjectState go_state;
-        public ulong spawnMask;
+        public List<Difficulty> spawnDifficulties = new List<Difficulty>();
         public byte artKit;
         public PhaseUseFlagsValues phaseUseFlags;
         public uint phaseId;

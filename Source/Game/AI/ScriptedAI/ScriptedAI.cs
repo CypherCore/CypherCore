@@ -32,7 +32,7 @@ namespace Game.AI
         {
             _isCombatMovementAllowed = true;
             _isHeroic = me.GetMap().IsHeroic();
-            _difficulty = me.GetMap().GetSpawnMode();
+            _difficulty = me.GetMap().GetDifficultyID();
         }
 
         void AttackStartNoMove(Unit target)

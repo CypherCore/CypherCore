@@ -158,7 +158,7 @@ namespace Game.Entities
 
             // get difficulty 1 mode entry
             CreatureTemplate cinfo = null;
-            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(GetMap().GetSpawnMode());
+            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(GetMap().GetDifficultyID());
             while (cinfo == null && difficultyEntry != null)
             {
                 int idx = CreatureTemplate.DifficultyIDToDifficultyEntryIndex(difficultyEntry.Id);
@@ -992,10 +992,10 @@ namespace Game.Entities
             }
 
             uint mapId = GetTransport() ? (uint)GetTransport().GetGoInfo().MoTransport.SpawnMap : GetMapId();
-            SaveToDB(mapId, data.spawnMask);
+            SaveToDB(mapId, data.spawnDifficulties);
         }
 
-        public virtual void SaveToDB(uint mapid, ulong spawnMask)
+        public virtual void SaveToDB(uint mapid, List<Difficulty> spawnDifficulties)
         {
             // update in loaded data
             if (m_spawnId == 0)
@@ -1052,7 +1052,7 @@ namespace Game.Entities
             // prevent add data integrity problems
             data.movementType = (byte)(m_respawnradius == 0 && GetDefaultMovementType() == MovementGeneratorType.Random
                 ? MovementGeneratorType.Idle : GetDefaultMovementType());
-            data.spawnMask = spawnMask;
+            data.spawnDifficulties = spawnDifficulties;
             data.npcflag = npcflag;
             data.unit_flags = unitFlags;
             data.unit_flags2 = unitFlags2;
@@ -1075,7 +1075,7 @@ namespace Game.Entities
             stmt.AddValue(index++, m_spawnId);
             stmt.AddValue(index++, GetEntry());
             stmt.AddValue(index++, mapid);
-            stmt.AddValue(index++, spawnMask);
+            stmt.AddValue(index++, string.Join(",", data.spawnDifficulties));
             stmt.AddValue(index++, data.phaseId);
             stmt.AddValue(index++, data.phaseGroup);
             stmt.AddValue(index++, displayId);

@@ -1095,7 +1095,7 @@ namespace Game.Chat
                     // @todo: add phases
                     
                     Creature _creature = trans.CreateNPCPassenger(guid, data);
-                    _creature.SaveToDB((uint)trans.GetGoInfo().MoTransport.SpawnMap, 1ul << (int)map.GetSpawnMode());
+                    _creature.SaveToDB((uint)trans.GetGoInfo().MoTransport.SpawnMap, new List<Difficulty>() { map.GetDifficultyID() });
 
                     Global.ObjectMgr.AddCreatureToGrid(guid, data);
                     return true;
@@ -1106,7 +1106,7 @@ namespace Game.Chat
                     return false;
 
                 PhasingHandler.InheritPhaseShift(creature, chr);
-                creature.SaveToDB(map.GetId(), 1ul << (int)map.GetSpawnMode());
+                creature.SaveToDB(map.GetId(), new List<Difficulty>() { map.GetDifficultyID() });
 
                 ulong db_guid = creature.GetSpawnId();
 

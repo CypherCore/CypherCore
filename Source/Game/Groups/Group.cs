@@ -42,9 +42,6 @@ namespace Game.Groups
             m_legacyRaidDifficulty = Difficulty.Raid10N;
             m_lootMethod = LootMethod.FreeForAll;
             m_lootThreshold = ItemQuality.Uncommon;
-
-            for (byte i = 0; i < (int)Difficulty.Max; ++i)
-                m_boundInstances[i] = new Dictionary<uint, InstanceBind>();
         }
 
         public bool Create(Player leader)
@@ -645,9 +642,9 @@ namespace Game.Groups
                 SQLTransaction trans = new SQLTransaction();
 
                 // Remove the groups permanent instance bindings
-                for (byte i = 0; i < (int)Difficulty.Max; ++i)
+                foreach (var difficultyDic in m_boundInstances.Values)
                 {
-                    foreach (var pair in m_boundInstances[i])
+                    foreach (var pair in difficultyDic)
                     {
                         // Do not unbind saves of instances that already had map created (a newLeader entered)
                         // forcing a new instance with another leader requires group disbanding (confirmed on retail)
@@ -659,7 +656,7 @@ namespace Game.Groups
                             trans.Append(stmt);
 
                             pair.Value.save.RemoveGroup(this);
-                            m_boundInstances[i].Remove(pair.Key);
+                            difficultyDic.Remove(pair.Key);
                         }
                     }
                 }
@@ -692,9 +689,9 @@ namespace Game.Groups
         {
             // copy all binds to the group, when changing leader it's assumed the character
             // will not have any solo binds
-            for (byte i = 0; i < (int)Difficulty.Max; ++i)
+            foreach (var difficultyDic in player.m_boundInstances.Values)
             {
-                foreach (var pair in player.m_boundInstances[i])
+                foreach (var pair in difficultyDic)
                 {
                     if (!switchLeader || group.GetBoundInstance(pair.Value.save.GetDifficultyID(), pair.Key) == null)
                         if (pair.Value.extendState != 0) // not expired
@@ -703,7 +700,7 @@ namespace Game.Groups
                     // permanent binds are not removed
                     if (switchLeader && !pair.Value.perm)
                     {
-                        player.UnbindInstance(pair, (Difficulty)i, false);
+                        player.UnbindInstance(pair, difficultyDic, false);
                     }
                 }
             }
@@ -1871,7 +1868,11 @@ namespace Game.Groups
                     diff = GetLegacyRaidDifficultyID();
             }
 
-            foreach (var pair in m_boundInstances[(int)diff].ToList())
+            var difficultyDic = m_boundInstances.LookupByKey(diff);
+            if (difficultyDic == null)
+                return;
+
+            foreach (var pair in difficultyDic)
             {
                 InstanceSave instanceSave = pair.Value.save;
                 MapRecord entry = CliDB.MapStorage.LookupByKey(pair.Key);
@@ -1933,8 +1934,7 @@ namespace Game.Groups
                     }
 
 
-                    // i don't know for sure if hash_map iterators
-                    m_boundInstances[(int)diff].Remove(pair.Key);
+                    difficultyDic.Remove(pair.Key);
                     // this unloads the instance save unless online players are bound to it
                     // (eg. permanent binds or GM solo binds)
                     instanceSave.RemoveGroup(this);
@@ -1968,7 +1968,15 @@ namespace Game.Groups
             // some instances only have one difficulty
             Global.DB2Mgr.GetDownscaledMapDifficultyData(mapId, ref difficulty);
 
-            return m_boundInstances[(int)difficulty].LookupByKey(mapId);
+            var difficultyDic = m_boundInstances.LookupByKey(difficulty);
+            if (difficultyDic == null)
+                return null;
+
+            var instanceBind = difficultyDic.LookupByKey(mapId);
+            if (instanceBind != null)
+                return instanceBind;
+
+            return null;
         }
 
         public InstanceBind BindToInstance(InstanceSave save, bool permanent, bool load = false)
@@ -1976,10 +1984,10 @@ namespace Game.Groups
             if (save == null || isBGGroup() || isBFGroup())
                 return null;
 
-            if (!m_boundInstances[(int)save.GetDifficultyID()].ContainsKey(save.GetMapId()))
-                m_boundInstances[(int)save.GetDifficultyID()][save.GetMapId()] = new InstanceBind();
+            if (!m_boundInstances[save.GetDifficultyID()].ContainsKey(save.GetMapId()))
+                m_boundInstances[save.GetDifficultyID()][save.GetMapId()] = new InstanceBind();
 
-            InstanceBind bind = m_boundInstances[(int)save.GetDifficultyID()][save.GetMapId()];
+            InstanceBind bind = m_boundInstances[save.GetDifficultyID()][save.GetMapId()];
             if (!load && (bind.save == null || permanent != bind.perm || save != bind.save))
             {
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_GROUP_INSTANCE);
@@ -2004,14 +2012,18 @@ namespace Game.Groups
                 Log.outDebug(LogFilter.Maps, "Group.BindToInstance: Group ({0}, storage id: {1}) is now bound to map {2}, instance {3}, difficulty {4}",
                 GetGUID().ToString(), m_dbStoreId, save.GetMapId(), save.GetInstanceId(), save.GetDifficultyID());
 
-            m_boundInstances[(int)save.GetDifficultyID()][save.GetMapId()] = bind;
+            m_boundInstances[save.GetDifficultyID()][save.GetMapId()] = bind;
 
             return bind;
         }
 
         public void UnbindInstance(uint mapid, Difficulty difficulty, bool unload = false)
         {
-            var instanceBind = m_boundInstances[(int)difficulty].LookupByKey(mapid);
+            var difficultyDic = m_boundInstances.LookupByKey(difficulty);
+            if (difficultyDic == null)
+                return;
+
+            var instanceBind = difficultyDic.LookupByKey(mapid);
             if (instanceBind != null)
             {
                 if (!unload)
@@ -2025,7 +2037,7 @@ namespace Game.Groups
                 }
 
                 instanceBind.save.RemoveGroup(this);                // save can become invalid
-                m_boundInstances[(int)difficulty].Remove(mapid);
+                difficultyDic.Remove(mapid);
             }
         }
 
@@ -2465,7 +2477,7 @@ namespace Game.Groups
 
         public Dictionary<uint, InstanceBind> GetBoundInstances(Difficulty difficulty)
         {
-            return m_boundInstances[(int)difficulty];
+            return m_boundInstances.LookupByKey(difficulty);
         }
 
         void _initRaidSubGroupsCounter()
@@ -2560,7 +2572,7 @@ namespace Game.Groups
         ObjectGuid m_looterGuid;
         ObjectGuid m_masterLooterGuid;
         List<Roll> RollId = new List<Roll>();
-        Dictionary<uint, InstanceBind>[] m_boundInstances = new Dictionary<uint, InstanceBind>[(int)Difficulty.Max];
+        Dictionary<Difficulty, Dictionary<uint, InstanceBind>> m_boundInstances = new Dictionary<Difficulty, Dictionary<uint, InstanceBind>>();
         byte[] m_subGroupsCounts;
         ObjectGuid m_guid;
         uint m_maxEnchantingLevel;
