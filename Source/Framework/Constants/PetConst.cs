@@ -106,7 +106,7 @@ namespace Framework.Constants
         DeclensionDoesntMatchBaseName = 16
     }
 
-    public enum PetStableinfo
+    public enum PetStableinfo : byte
     {
         Active = 1,
         Inactive = 2

@@ -44,4 +44,12 @@ namespace Game.DataStorage
         public string Name;
         public byte LocaleMask;
     }
+
+    public sealed class NumTalentsAtLevelRecord
+    {
+        public uint Id;
+        public uint NumTalents;
+        public uint NumTalentsDeathKnight;
+        public uint NumTalentsDemonHunter;
+    }
 }

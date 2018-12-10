@@ -201,6 +201,12 @@ namespace Game
                 }
                 else
                     plrMover.RemoveFlag(PlayerFields.Flags, PlayerFlags.IsOutOfBounds);
+
+                if (opcode == ClientOpcodes.MoveJump)
+                { 
+                    plrMover.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Jump, 605); // Mind Control
+                    plrMover.ProcSkillsAndAuras(null, ProcFlags.Jump, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
+                }
             }
         }
 

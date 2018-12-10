@@ -51,8 +51,8 @@ namespace Game.Chat
             if (!handler.extractPlayerTarget(args, out target))
                 return false;
 
-            target.SetUInt32Value(PlayerFields.Kills, 0);
-            target.SetUInt32Value(PlayerFields.LifetimeHonorableKills, 0);
+            target.SetUInt32Value(ActivePlayerFields.Kills, 0);
+            target.SetUInt32Value(ActivePlayerFields.LifetimeHonorableKills, 0);
             target.UpdateCriteria(CriteriaTypes.EarnHonorableKill);
 
             return true;
@@ -85,7 +85,7 @@ namespace Game.Chat
             player.SetUInt32Value(UnitFields.Flags, (uint)UnitFlags.PvpAttackable);
 
             //-1 is default value
-            player.SetUInt32Value(PlayerFields.WatchedFactionIndex, 0xFFFFFFFF);
+            player.SetUInt32Value(ActivePlayerFields.WatchedFactionIndex, 0xFFFFFFFF);
             return true;
         }
 
@@ -110,7 +110,7 @@ namespace Game.Chat
             target.InitStatsForLevel(true);
             target.InitTaxiNodesForLevel();
             target.InitTalentForLevel();
-            target.SetUInt32Value(PlayerFields.Xp, 0);
+            target.SetUInt32Value(ActivePlayerFields.Xp, 0);
 
             target._ApplyAllLevelScaleItemMods(true);
 

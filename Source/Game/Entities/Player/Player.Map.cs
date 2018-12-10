@@ -305,7 +305,7 @@ namespace Game.Entities
             if (save != null)
             {
                 InstanceBind bind = new InstanceBind();
-                if (m_boundInstances[save.GetDifficultyID()].ContainsKey(save.GetMapId()))
+                if (m_boundInstances.ContainsKey(save.GetDifficultyID()) && m_boundInstances[save.GetDifficultyID()].ContainsKey(save.GetMapId()))
                     bind = m_boundInstances[save.GetDifficultyID()][save.GetMapId()];
 
                 if (extendState == BindExtensionState.Keep) // special flag, keep the player's current extend state when updating for new boss down
@@ -364,6 +364,9 @@ namespace Game.Entities
 
                 Global.ScriptMgr.OnPlayerBindToInstance(this, save.GetDifficultyID(), save.GetMapId(), permanent, extendState);
 
+                if (!m_boundInstances.ContainsKey(save.GetDifficultyID()))
+                    m_boundInstances[save.GetDifficultyID()] = new Dictionary<uint, InstanceBind>();
+
                 m_boundInstances[save.GetDifficultyID()][save.GetMapId()] = bind;
                 return bind;
             }
@@ -406,7 +409,7 @@ namespace Game.Entities
                     {
                         InstanceSave save = instanceBind.save;
 
-                        InstanceLockInfos lockInfos;
+                        InstanceLock lockInfos;
                         lockInfos.InstanceID = save.GetInstanceId();
                         lockInfos.MapID = save.GetMapId();
                         lockInfos.DifficultyID = (uint)save.GetDifficultyID();

@@ -13,7 +13,7 @@ namespace Game.Entities
         {
             byte rest_rested_offset;
             byte rest_state_offset;
-            PlayerFields next_level_xp_field;
+            ActivePlayerFields next_level_xp_field;
             bool affectedByRaF = false;
 
             switch (restType)
@@ -25,17 +25,17 @@ namespace Game.Entities
 
                     rest_rested_offset = PlayerFieldOffsets.RestRestedXp;
                     rest_state_offset = PlayerFieldOffsets.RestStateXp;
-                    next_level_xp_field = PlayerFields.NextLevelXp;
+                    next_level_xp_field = ActivePlayerFields.NextLevelXp;
                     affectedByRaF = true;
                     break;
                 case RestTypes.Honor:
                     // Reset restBonus (Honor only) for players with max honor level.
-                    if (_player.IsMaxHonorLevelAndPrestige())
+                    if (_player.IsMaxHonorLevel())
                         restBonus = 0;
 
                     rest_rested_offset = PlayerFieldOffsets.RestRestedHonor;
                     rest_state_offset = PlayerFieldOffsets.RestStateHonor;
-                    next_level_xp_field = PlayerFields.HonorNextLevel;
+                    next_level_xp_field = ActivePlayerFields.HonorNextLevel;
                     break;
                 default:
                     return;
@@ -53,17 +53,17 @@ namespace Game.Entities
 
             // update data for client
             if (affectedByRaF && _player.GetsRecruitAFriendBonus(true) && (_player.GetSession().IsARecruiter() || _player.GetSession().GetRecruiterId() != 0))
-                _player.SetUInt32Value(PlayerFields.RestInfo + rest_state_offset, (uint)PlayerRestState.RAFLinked);
+                _player.SetUInt32Value(ActivePlayerFields.RestInfo + rest_state_offset, (uint)PlayerRestState.RAFLinked);
             else
             {
                 if (_restBonus[(int)restType] > 10)
-                    _player.SetUInt32Value(PlayerFields.RestInfo + rest_state_offset, (uint)PlayerRestState.Rested);
+                    _player.SetUInt32Value(ActivePlayerFields.RestInfo + rest_state_offset, (uint)PlayerRestState.Rested);
                 else if (_restBonus[(int)restType] <= 1)
-                    _player.SetUInt32Value(PlayerFields.RestInfo + rest_state_offset, (uint)PlayerRestState.NotRAFLinked);
+                    _player.SetUInt32Value(ActivePlayerFields.RestInfo + rest_state_offset, (uint)PlayerRestState.NotRAFLinked);
             }
 
             // RestTickUpdate
-            _player.SetUInt32Value(PlayerFields.RestInfo + rest_rested_offset, (uint)_restBonus[(int)restType]);
+            _player.SetUInt32Value(ActivePlayerFields.RestInfo + rest_rested_offset, (uint)_restBonus[(int)restType]);
         }
 
         public void AddRestBonus(RestTypes restType, float restBonus)
@@ -135,8 +135,8 @@ namespace Game.Entities
         public void LoadRestBonus(RestTypes restType, PlayerRestState state, float restBonus)
         {
             _restBonus[(int)restType] = restBonus;
-            _player.SetUInt32Value(PlayerFields.RestInfo + (int)restType * 2, (uint)state);
-            _player.SetUInt32Value(PlayerFields.RestInfo + (int)restType * 2 + 1, (uint)restBonus);
+            _player.SetUInt32Value(ActivePlayerFields.RestInfo + (int)restType * 2, (uint)state);
+            _player.SetUInt32Value(ActivePlayerFields.RestInfo + (int)restType * 2 + 1, (uint)restBonus);
         }
 
         public float CalcExtraPerSec(RestTypes restType, float bubble)
@@ -144,9 +144,9 @@ namespace Game.Entities
             switch (restType)
             {
                 case RestTypes.Honor:
-                    return (_player.GetUInt32Value(PlayerFields.HonorNextLevel)) / 72000.0f * bubble;
+                    return (_player.GetUInt32Value(ActivePlayerFields.HonorNextLevel)) / 72000.0f * bubble;
                 case RestTypes.XP:
-                    return (_player.GetUInt32Value(PlayerFields.NextLevelXp)) / 72000.0f * bubble;
+                    return (_player.GetUInt32Value(ActivePlayerFields.NextLevelXp)) / 72000.0f * bubble;
                 default:
                     return 0.0f;
             }

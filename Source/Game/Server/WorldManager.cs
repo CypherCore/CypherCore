@@ -341,6 +341,9 @@ namespace Game
             // Load DB2s
             CliDB.LoadStores(_dataPath, m_defaultDbcLocale);
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading hotfix blobs...");
+            Global.DB2Mgr.LoadHotfixBlob();
+
             Log.outInfo(LogFilter.ServerLoading, "Loading hotfix info...");
             Global.DB2Mgr.LoadHotfixData();
 
@@ -2233,6 +2236,14 @@ namespace Game
                 return;
 
             _characterInfoStorage[guid].Level = level;
+        }
+
+        public void UpdateCharacterInfoAccount(ObjectGuid guid, uint accountId)
+        {
+            if (!_characterInfoStorage.ContainsKey(guid))
+                return;
+
+            _characterInfoStorage[guid].AccountId = accountId;
         }
 
         public void UpdateCharacterInfoDeleted(ObjectGuid guid, bool deleted, string name = null)

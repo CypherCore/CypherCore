@@ -22,30 +22,30 @@ namespace Game.DataStorage
     public sealed class HeirloomRecord
     {
         public string SourceText;
-        public uint ItemID;
-        public uint LegacyItemID;
-        public uint LegacyUpgradedItemID;
-        public uint StaticUpgradedItemID;
-        public uint[] UpgradeItemID = new uint[3];
-        public ushort[] UpgradeItemBonusListID = new ushort[3];
-        public byte Flags;
-        public byte SourceTypeEnum;
         public uint Id;
+        public uint ItemID;
+        public int LegacyUpgradedItemID;
+        public uint StaticUpgradedItemID;
+        public sbyte SourceTypeEnum;
+        public byte Flags;
+        public int LegacyItemID;
+        public int[] UpgradeItemID = new int[3];
+        public ushort[] UpgradeItemBonusListID = new ushort[3];
     }
 
     public sealed class HolidaysRecord
     {
         public uint Id;
-        public uint[] Date = new uint[SharedConst.MaxHolidayDates];                                 // dates in unix time starting at January, 1, 2000
-        public ushort[] Duration = new ushort[SharedConst.MaxHolidayDurations];
         public ushort Region;
         public byte Looping;
-        public byte[] CalendarFlags = new byte[SharedConst.MaxHolidayFlags];
+        public uint HolidayNameID;
+        public uint HolidayDescriptionID;
         public byte Priority;
         public sbyte CalendarFilterType;
         public byte Flags;
-        public ushort HolidayNameID;
-        public ushort HolidayDescriptionID;
+        public ushort[] Duration = new ushort[SharedConst.MaxHolidayDurations];
+        public uint[] Date = new uint[SharedConst.MaxHolidayDates];                                 // dates in unix time starting at January, 1, 2000
+        public byte[] CalendarFlags = new byte[SharedConst.MaxHolidayFlags];
         public int[] TextureFileDataID = new int[3];
     }
 }

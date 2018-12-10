@@ -2786,7 +2786,7 @@ namespace Game.Guilds
                 ObjectGuid playerGUID = ObjectGuid.Create(HighGuid.Player, m_playerGuid1);
                 ObjectGuid otherGUID = ObjectGuid.Create(HighGuid.Player, m_playerGuid2);
 
-                GuildEventEntry eventEntry;
+                GuildEventEntry eventEntry = new GuildEventEntry();
                 eventEntry.PlayerGUID = playerGUID;
                 eventEntry.OtherGUID = otherGUID;
                 eventEntry.TransactionType = (byte)m_eventType;

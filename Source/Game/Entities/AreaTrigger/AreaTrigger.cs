@@ -39,7 +39,8 @@ namespace Game.Entities
             objectTypeMask |= TypeMask.AreaTrigger;
             objectTypeId = TypeId.AreaTrigger;
 
-            m_updateFlag = UpdateFlag.StationaryPosition | UpdateFlag.Areatrigger;
+            m_updateFlag.Stationary = true;
+            m_updateFlag.AreaTrigger = true;
 
             valuesCount = (int)AreaTriggerFields.End;
 
@@ -142,7 +143,7 @@ namespace Game.Entities
             {
                 AreaTriggerCircularMovementInfo cmi = GetMiscTemplate().CircularMovementInfo;
                 if (target && GetTemplate().HasFlag(AreaTriggerFlags.HasAttached))
-                    cmi.TargetGUID.Set(target.GetGUID());
+                    cmi.PathTarget.Set(target.GetGUID());
                 else
                     cmi.Center.Set(new Vector3(pos.posX, pos.posY, pos.posZ));
 
@@ -624,12 +625,12 @@ namespace Game.Entities
             {
                 if (_reachedDestination)
                 {
-                    AreaTriggerReShape reshapeDest = new AreaTriggerReShape();
+                    AreaTriggerRePath reshapeDest = new AreaTriggerRePath();
                     reshapeDest.TriggerGUID = GetGUID();
                     SendMessageToSet(reshapeDest, true);
                 }
 
-                AreaTriggerReShape reshape = new AreaTriggerReShape();
+                AreaTriggerRePath reshape = new AreaTriggerRePath();
                 reshape.TriggerGUID = GetGUID();
                 reshape.AreaTriggerSpline.HasValue = true;
                 reshape.AreaTriggerSpline.Value.ElapsedTimeForMovement = GetElapsedTimeForMovement();
@@ -644,7 +645,7 @@ namespace Game.Entities
         void InitCircularMovement(AreaTriggerCircularMovementInfo cmi, uint timeToTarget)
         {
             // Circular movement requires either a center position or an attached unit
-            Cypher.Assert(cmi.Center.HasValue || cmi.TargetGUID.HasValue);
+            Cypher.Assert(cmi.Center.HasValue || cmi.PathTarget.HasValue);
 
             // should be sent in object create packets only
             updateValues[(int)AreaTriggerFields.TimeToTarget].UnsignedValue = timeToTarget;
@@ -656,7 +657,7 @@ namespace Game.Entities
 
             if (IsInWorld)
             {
-                AreaTriggerReShape reshape = new AreaTriggerReShape();
+                AreaTriggerRePath reshape = new AreaTriggerRePath();
                 reshape.TriggerGUID = GetGUID();
                 reshape.AreaTriggerCircularMovement = _circularMovementInfo;
 
@@ -671,12 +672,12 @@ namespace Game.Entities
 
         Position GetCircularMovementCenterPosition()
         {
-            if (_circularMovementInfo.HasValue)
+            if (!_circularMovementInfo.HasValue)
                 return null;
 
-            if (_circularMovementInfo.Value.TargetGUID.HasValue)
+            if (_circularMovementInfo.Value.PathTarget.HasValue)
             {
-                WorldObject center = Global.ObjAccessor.GetWorldObject(this, _circularMovementInfo.Value.TargetGUID.Value);
+                WorldObject center = Global.ObjAccessor.GetWorldObject(this, _circularMovementInfo.Value.PathTarget.Value);
                 if (center)
                     return center;
             }

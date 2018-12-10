@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Framework.Constants;
 using Framework.GameMath;
 using System;
 using System.IO;
@@ -93,7 +94,7 @@ namespace Game.Collision
             iInvScale = 1.0f / iScale;
         }
 
-        public bool intersectRay(Ray pRay, ref float pMaxDist, bool pStopAtFirstHit)
+        public bool intersectRay(Ray pRay, ref float pMaxDist, bool pStopAtFirstHit, ModelIgnoreFlags ignoreFlags)
         {
             if (iModel == null)
                 return false;
@@ -106,7 +107,7 @@ namespace Game.Collision
             Vector3 p = iInvRot * (pRay.Origin - iPos) * iInvScale;
             Ray modRay = new Ray(p, iInvRot * pRay.Direction);
             float distance = pMaxDist * iInvScale;
-            bool hit = iModel.IntersectRay(modRay, ref distance, pStopAtFirstHit);
+            bool hit = iModel.IntersectRay(modRay, ref distance, pStopAtFirstHit, ignoreFlags);
             if (hit)
             {
                 distance *= iScale;

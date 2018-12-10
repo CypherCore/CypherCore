@@ -18,6 +18,7 @@
 using Framework.GameMath;
 using System;
 using System.Collections.Generic;
+using Framework.Constants;
 
 namespace Game.Collision
 {
@@ -168,7 +169,7 @@ namespace Game.Collision
 
     public class MapRayCallback : WorkerCallback
     {
-        public MapRayCallback(ModelInstance[] val)
+        public MapRayCallback(ModelInstance[] val, ModelIgnoreFlags ignoreFlags)
         {
             prims = val;
             hit = false;
@@ -177,7 +178,7 @@ namespace Game.Collision
         {
             if (prims[entry] == null)
                 return false;
-            bool result = prims[entry].intersectRay(ray, ref distance, pStopAtFirstHit);
+            bool result = prims[entry].intersectRay(ray, ref distance, pStopAtFirstHit, flags);
             if (result)
                 hit = true;
             return result;
@@ -186,6 +187,7 @@ namespace Game.Collision
 
         ModelInstance[] prims;
         bool hit;
+        ModelIgnoreFlags flags;
     }
 
     public class AreaInfoCallback : WorkerCallback
@@ -236,7 +238,7 @@ namespace Game.Collision
 
         public override bool Invoke(Ray r, IModel obj, ref float distance)
         {
-            _didHit = obj.IntersectRay(r, ref distance, true, _phaseShift);
+            _didHit = obj.IntersectRay(r, ref distance, true, _phaseShift, ModelIgnoreFlags.Nothing);
             return _didHit;
         }
 

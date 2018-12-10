@@ -450,7 +450,7 @@ namespace Game
             if (_player.HasAuraType(AuraType.PreventResurrection))
                 return; // silent return, client should display error by itself and not send this opcode
 
-            var selfResSpells = _player.GetDynamicValues(PlayerDynamicFields.SelfResSpells);
+            var selfResSpells = _player.GetDynamicValues(ActivePlayerDynamicFields.SelfResSpells);
             if (!selfResSpells.Contains(selfRes.SpellId))
                 return;
 
@@ -458,7 +458,7 @@ namespace Game
             if (spellInfo != null)
                 _player.CastSpell(_player, spellInfo, false, null);
 
-            _player.RemoveDynamicValue(PlayerDynamicFields.SelfResSpells, selfRes.SpellId);
+            _player.RemoveDynamicValue(ActivePlayerDynamicFields.SelfResSpells, selfRes.SpellId);
         }
 
         [WorldPacketHandler(ClientOpcodes.SpellClick)]

@@ -22,59 +22,59 @@ namespace Game.DataStorage
     public sealed class DestructibleModelDataRecord
     {
         public uint Id;
-        public ushort State0Wmo;
-        public ushort State1Wmo;
-        public ushort State2Wmo;
-        public ushort State3Wmo;
-        public ushort HealEffectSpeed;
-        public byte State0ImpactEffectDoodadSet;
+        public sbyte State0ImpactEffectDoodadSet;
         public byte State0AmbientDoodadSet;
-        public byte State0NameSet;
-        public byte State1DestructionDoodadSet;
-        public byte State1ImpactEffectDoodadSet;
+        public ushort State1Wmo;
+        public sbyte State1DestructionDoodadSet;
+        public sbyte State1ImpactEffectDoodadSet;
         public byte State1AmbientDoodadSet;
-        public byte State1NameSet;
-        public byte State2DestructionDoodadSet;
-        public byte State2ImpactEffectDoodadSet;
+        public ushort State2Wmo;
+        public sbyte State2DestructionDoodadSet;
+        public sbyte State2ImpactEffectDoodadSet;
         public byte State2AmbientDoodadSet;
-        public byte State2NameSet;
+        public ushort State3Wmo;
         public byte State3InitDoodadSet;
         public byte State3AmbientDoodadSet;
-        public byte State3NameSet;
         public byte EjectDirection;
         public byte DoNotHighlight;
+        public ushort State0Wmo;
         public byte HealEffect;
+        public ushort HealEffectSpeed;
+        public byte State0NameSet;
+        public byte State1NameSet;
+        public byte State2NameSet;
+        public byte State3NameSet;
     }
 
     public sealed class DifficultyRecord
     {
         public uint Id;
         public string Name;
+        public MapTypes InstanceType;
+        public byte OrderIndex;
+        public sbyte OldEnumValue;
+        public byte FallbackDifficultyID;
+        public byte MinPlayers;
+        public byte MaxPlayers;
+        public DifficultyFlags Flags;
+        public byte ItemContext;
+        public byte ToggleDifficultyID;
         public ushort GroupSizeHealthCurveID;
         public ushort GroupSizeDmgCurveID;
         public ushort GroupSizeSpellPointsCurveID;
-        public byte FallbackDifficultyID;
-        public MapTypes InstanceType;
-        public byte MinPlayers;
-        public byte MaxPlayers;
-        public sbyte OldEnumValue;
-        public DifficultyFlags Flags;
-        public byte ToggleDifficultyID;
-        public byte ItemContext;
-        public byte OrderIndex;
     }
 
     public sealed class DungeonEncounterRecord
     {
         public LocalizedString Name;
-        public uint CreatureDisplayID;
-        public ushort MapID;
-        public byte DifficultyID;
-        public byte Bit;
-        public byte Flags;
         public uint Id;
-        public uint OrderIndex;
-        public uint SpellIconFileID;
+        public short MapID;
+        public sbyte DifficultyID;
+        public int OrderIndex;
+        public sbyte Bit;
+        public int CreatureDisplayID;
+        public byte Flags;
+        public int SpellIconFileID;
     }
 
     public sealed class DurabilityCostsRecord

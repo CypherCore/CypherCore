@@ -120,12 +120,10 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ChatChannelInvite)]
         [WorldPacketHandler(ClientOpcodes.ChatChannelKick)]
         [WorldPacketHandler(ClientOpcodes.ChatChannelModerator)]
-        [WorldPacketHandler(ClientOpcodes.ChatChannelMute)]
         [WorldPacketHandler(ClientOpcodes.ChatChannelSetOwner)]
         [WorldPacketHandler(ClientOpcodes.ChatChannelSilenceAll)]
         [WorldPacketHandler(ClientOpcodes.ChatChannelUnban)]
         [WorldPacketHandler(ClientOpcodes.ChatChannelUnmoderator)]
-        [WorldPacketHandler(ClientOpcodes.ChatChannelUnmute)]
         [WorldPacketHandler(ClientOpcodes.ChatChannelUnsilenceAll)]
         void HandleChannelPlayerCommand(ChannelPlayerCommand packet)
         {
@@ -156,9 +154,6 @@ namespace Game
                 case ClientOpcodes.ChatChannelModerator:
                     channel.SetModerator(GetPlayer(), packet.Name);
                     break;
-                case ClientOpcodes.ChatChannelMute:
-                    channel.SetMute(GetPlayer(), packet.Name);
-                    break;
                 case ClientOpcodes.ChatChannelSetOwner:
                     channel.SetOwner(GetPlayer(), packet.Name);
                     break;
@@ -170,9 +165,6 @@ namespace Game
                     break;
                 case ClientOpcodes.ChatChannelUnmoderator:
                     channel.UnsetModerator(GetPlayer(), packet.Name);
-                    break;
-                case ClientOpcodes.ChatChannelUnmute:
-                    channel.UnsetMute(GetPlayer(), packet.Name);
                     break;
                 case ClientOpcodes.ChatChannelUnsilenceAll:
                     channel.UnsilenceAll(GetPlayer(), packet.Name);

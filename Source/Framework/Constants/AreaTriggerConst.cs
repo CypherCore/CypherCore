@@ -26,10 +26,11 @@ namespace Framework.Constants
         HasFollowsTerrain = 0x010, // Nyi
         Unk1 = 0x020,
         HasTargetRollPitchYaw = 0x040, // Nyi
-        Unk2 = 0x080,
+        HasAnimID = 0x080,
         Unk3 = 0x100,
-        Unk4 = 0x200,
-        HasCircularMovement = 0x400
+        HasAnimKitID = 0x200,
+        HasCircularMovement = 0x400,
+        Unk5 = 0x800
     }
 
     public enum AreaTriggerTypes

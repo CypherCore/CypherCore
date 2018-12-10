@@ -182,4 +182,10 @@ namespace Framework.Constants
         CannotEnterZoneInCombat, // A Boss Encounter Is Currently In Progress On The Target Map
         CannotEnterUnspecifiedReason
     }
+
+    public enum ModelIgnoreFlags
+    {
+        Nothing = 0x00,
+        M2 = 0x01
+    }
 }

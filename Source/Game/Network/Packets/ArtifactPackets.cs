@@ -122,18 +122,4 @@ namespace Game.Network.Packets
         public ObjectGuid ArtifactGUID;
         public ulong Amount;
     }
-
-    class ArtifactKnowledge : ServerPacket
-    {
-        public ArtifactKnowledge() : base(ServerOpcodes.ArtifactKnowledge) { }
-
-        public override void Write()
-        {
-            _worldPacket.WriteInt32(ArtifactCategoryID);
-            _worldPacket.WriteInt8(KnowledgeLevel);
-        }
-
-        public ArtifactCategory ArtifactCategoryID;
-        public sbyte KnowledgeLevel;
-    }
 }

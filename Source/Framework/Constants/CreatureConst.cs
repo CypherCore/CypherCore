@@ -202,6 +202,7 @@ namespace Framework.Constants
         NoXpAtKill = 0x40,       // Creature Kill Not Provide Xp
         Trigger = 0x80,       // Trigger Creature
         NoTaunt = 0x100,       // Creature Is Immune To Taunt Auras And Effect Attack Me
+        NoMoveFlagsUpdate = 0x200, // Creature won't update movement flags
         Worldevent = 0x4000,       // Custom Flag For World Event Creatures (Left Room For Merging)
         Guard = 0x8000,       // Creature Is Guard
         NoCrit = 0x20000,       // Creature Can'T Do Critical Strikes
@@ -214,7 +215,7 @@ namespace Framework.Constants
         ImmunityKnockback = 0x40000000,        // creature is immune to knockback effects
 
         DBAllowed = (InstanceBind | Civilian | NoParry | NoParryHasten | NoBlock | NoCrush | NoXpAtKill | 
-            Trigger | NoTaunt | Worldevent | NoCrit | NoSkillgain | TauntDiminish | AllDiminish | Guard |
+            Trigger | NoTaunt | NoMoveFlagsUpdate | Worldevent | NoCrit | NoSkillgain | TauntDiminish | AllDiminish | Guard |
             IgnorePathfinding | NoPlayerDamageReq | ImmunityKnockback)
     }
 

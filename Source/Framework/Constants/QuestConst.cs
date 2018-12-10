@@ -315,6 +315,11 @@ namespace Framework.Constants
         ClearProgressOfCriteriaTreeObjectivesOnAccept = 0x1000000
     }
 
+    public enum QuestFlagsEx2
+    {
+        NoWarModeBonus = 0x2
+    }
+
     public enum QuestSpecialFlags
     {
         None = 0x00,

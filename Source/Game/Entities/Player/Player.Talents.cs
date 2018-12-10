@@ -33,7 +33,7 @@ namespace Game.Entities
             if (level < PlayerConst.MinSpecializationLevel)
                 ResetTalentSpecialization();
 
-            uint talentTiers = CalculateTalentsTiers();
+            uint talentTiers = (uint)Global.DB2Mgr.GetNumTalentsAtLevel(level, GetClass());
             if (level < 15)
             {
                 // Remove all talent points
@@ -50,7 +50,7 @@ namespace Game.Entities
                 }
             }
 
-            SetUInt32Value(PlayerFields.MaxTalentTiers, talentTiers);
+            SetUInt32Value(ActivePlayerFields.MaxTalentTiers, talentTiers);
 
             if (!GetSession().PlayerLoading())
                 SendTalentsInfoData();   // update at client
@@ -127,7 +127,7 @@ namespace Game.Entities
                 return TalentLearnResult.FailedUnknown;
 
             // check if we have enough talent points
-            if (talentInfo.TierID >= GetUInt32Value(PlayerFields.MaxTalentTiers))
+            if (talentInfo.TierID >= GetUInt32Value(ActivePlayerFields.MaxTalentTiers))
                 return TalentLearnResult.FailedUnknown;
 
             // TODO: prevent changing talents that are on cooldown
@@ -244,8 +244,8 @@ namespace Game.Entities
         void SetActiveTalentGroup(byte group) { _specializationInfo.ActiveGroup = group; }
 
         // Loot Spec
-        public void SetLootSpecId(uint id) { SetUInt32Value(PlayerFields.LootSpecId, id); }
-        uint GetLootSpecId() { return GetUInt32Value(PlayerFields.LootSpecId); }
+        public void SetLootSpecId(uint id) { SetUInt32Value(ActivePlayerFields.LootSpecId, id); }
+        uint GetLootSpecId() { return GetUInt32Value(ActivePlayerFields.LootSpecId); }
 
         public uint GetDefaultSpecId()
         {
@@ -312,15 +312,6 @@ namespace Game.Entities
 
             foreach (var talentInfo in CliDB.PvpTalentStorage.Values)
             {
-                // unlearn only talents for character class
-                // some spell learned by one class as normal spells or know at creation but another class learn it as talent,
-                // to prevent unexpected lost normal learned spell skip another class talents
-                if (talentInfo.ClassID != 0 && talentInfo.ClassID != (int)GetClass())
-                    continue;
-
-                if (talentInfo.SpellID == 0)
-                    continue;
-
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID);
                 if (spellInfo == null)
                     continue;
@@ -364,17 +355,16 @@ namespace Game.Entities
                 }
             }
 
-            foreach (var talentInfo in CliDB.PvpTalentStorage.Values)
+            for (byte slot = 0; slot < PlayerConst.MaxPvpTalentSlots; ++slot)
             {
-                // learn only talents for character class (or x-class talents)
-                if (talentInfo.ClassID != 0 && talentInfo.ClassID != (int)GetClass())
+                PvpTalentRecord talentInfo = CliDB.PvpTalentStorage.LookupByKey(GetPvpTalentMap(GetActiveTalentGroup())[slot]);
+                if (talentInfo == null)
                     continue;
 
                 if (talentInfo.SpellID == 0)
                     continue;
 
-                if (HasPvpTalent(talentInfo.Id, GetActiveTalentGroup()))
-                    AddPvpTalent(talentInfo, GetActiveTalentGroup(), true);
+                AddPvpTalent(talentInfo, GetActiveTalentGroup(), slot);
             }
 
             LearnSpecializationSpells();
@@ -558,9 +548,6 @@ namespace Game.Entities
                         continue;
                     }
 
-                    if (talentInfo.ClassID != (uint)GetClass())
-                        continue;
-
                     SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID);
                     if (spellEntry == null)
                     {
@@ -571,20 +558,17 @@ namespace Game.Entities
                     groupInfoPkt.TalentIDs.Add((ushort)pair.Key);
                 }
 
-                foreach (var pair in pvpTalents)
+                for (byte slot = 0; slot < PlayerConst.MaxPvpTalentSlots; ++slot)
                 {
-                    if (pair.Value == PlayerSpellState.Removed)
+                    if (pvpTalents[slot] == 0)
                         continue;
 
-                    PvpTalentRecord talentInfo = CliDB.PvpTalentStorage.LookupByKey(pair.Key);
+                    PvpTalentRecord talentInfo = CliDB.PvpTalentStorage.LookupByKey(pvpTalents[slot]);
                     if (talentInfo == null)
                     {
-                        Log.outError(LogFilter.Player, $"Player.SendTalentsInfoData: Player '{GetName()}' ({GetGUID().ToString()}) has unknown pvp talent id: {pair.Key}");
+                        Log.outError(LogFilter.Player, $"Player.SendTalentsInfoData: Player '{GetName()}' ({GetGUID().ToString()}) has unknown pvp talent id: {pvpTalents[slot]}");
                         continue;
                     }
-
-                    if (talentInfo.ClassID != 0 && talentInfo.ClassID != (int)GetClass())
-                        continue;
 
                     SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID);
                     if (spellEntry == null)
@@ -593,7 +577,7 @@ namespace Game.Entities
                         continue;
                     }
 
-                    groupInfoPkt.PvPTalentIDs.Add((ushort)pair.Key);
+                    groupInfoPkt.PvPTalentIDs.Add((ushort)pvpTalents[slot]);
                 }
 
                 packet.Info.TalentGroups.Add(groupInfoPkt);
@@ -609,29 +593,6 @@ namespace Game.Entities
             respecWipeConfirm.Cost = cost;
             respecWipeConfirm.RespecType = SpecResetType.Talents;
             SendPacket(respecWipeConfirm);
-        }
-
-        uint CalculateTalentsTiers()
-        {
-            uint[] rowLevels = new uint[0];
-            switch (GetClass())
-            {
-                case Class.Deathknight:
-                    rowLevels = new uint[] { 57, 58, 59, 60, 75, 90, 100 };
-                    break;
-                case Class.DemonHunter:
-                    rowLevels = new uint[] { 99, 100, 102, 104, 106, 108, 110 };
-                    break;
-                default:
-                    rowLevels = new uint[] { 15, 30, 45, 60, 75, 90, 100 };
-                    break;
-            }
-
-            for (uint i = PlayerConst.MaxTalentTiers; i != 0; --i)
-                if (getLevel() >= rowLevels[i - 1])
-                    return i;
-
-            return 0;
         }
     }
 }

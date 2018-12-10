@@ -61,8 +61,6 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(Reactions.Count);
             foreach (ForcedReaction reaction in Reactions)
                 reaction.Write(_worldPacket);
-
-            _worldPacket.FlushBits();
         }
 
         public List<ForcedReaction> Reactions = new List<ForcedReaction>();

@@ -25,6 +25,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public VehicleFlags Flags;
+        public byte FlagsB;
         public float TurnSpeed;
         public float PitchSpeed;
         public float PitchMin;
@@ -36,21 +37,22 @@ namespace Game.DataStorage
         public float FacingLimitRight;
         public float FacingLimitLeft;
         public float CameraYawOffset;
-        public ushort[] SeatID = new ushort[SharedConst.MaxVehicleSeats];
-        public ushort VehicleUIIndicatorID;
-        public ushort[] PowerDisplayID = new ushort[3];
-        public byte FlagsB;
         public byte UiLocomotionType;
-        public ushort MissileTargetingID;
+        public ushort VehicleUIIndicatorID;
+        public int MissileTargetingID;
+        public ushort[] SeatID = new ushort[8];
+        public ushort[] PowerDisplayID = new ushort[3];
     }
 
     public sealed class VehicleSeatRecord
     {
         public uint Id;
+        public Vector3 AttachmentOffset;
+        public Vector3 CameraOffset;
         public VehicleSeatFlags Flags;
         public VehicleSeatFlagsB FlagsB;
-        public uint FlagsC;
-        public Vector3 AttachmentOffset;
+        public int FlagsC;
+        public sbyte AttachmentID;
         public float EnterPreDelay;
         public float EnterSpeed;
         public float EnterGravity;
@@ -58,6 +60,12 @@ namespace Game.DataStorage
         public float EnterMaxDuration;
         public float EnterMinArcHeight;
         public float EnterMaxArcHeight;
+        public int EnterAnimStart;
+        public int EnterAnimLoop;
+        public int RideAnimStart;
+        public int RideAnimLoop;
+        public int RideUpperAnimStart;
+        public int RideUpperAnimLoop;
         public float ExitPreDelay;
         public float ExitSpeed;
         public float ExitGravity;
@@ -65,49 +73,41 @@ namespace Game.DataStorage
         public float ExitMaxDuration;
         public float ExitMinArcHeight;
         public float ExitMaxArcHeight;
+        public int ExitAnimStart;
+        public int ExitAnimLoop;
+        public int ExitAnimEnd;
+        public short VehicleEnterAnim;
+        public sbyte VehicleEnterAnimBone;
+        public short VehicleExitAnim;
+        public sbyte VehicleExitAnimBone;
+        public short VehicleRideAnimLoop;
+        public sbyte VehicleRideAnimLoopBone;
+        public sbyte PassengerAttachmentID;
         public float PassengerYaw;
         public float PassengerPitch;
         public float PassengerRoll;
         public float VehicleEnterAnimDelay;
         public float VehicleExitAnimDelay;
+        public sbyte VehicleAbilityDisplay;
+        public uint EnterUISoundID;
+        public uint ExitUISoundID;
+        public int UiSkinFileDataID;
         public float CameraEnteringDelay;
         public float CameraEnteringDuration;
         public float CameraExitingDelay;
         public float CameraExitingDuration;
-        public Vector3 CameraOffset;
         public float CameraPosChaseRate;
         public float CameraFacingChaseRate;
         public float CameraEnteringZoom;
         public float CameraSeatZoomMin;
         public float CameraSeatZoomMax;
-        public uint UiSkinFileDataID;
-        public short EnterAnimStart;
-        public short EnterAnimLoop;
-        public short RideAnimStart;
-        public short RideAnimLoop;
-        public short RideUpperAnimStart;
-        public short RideUpperAnimLoop;
-        public short ExitAnimStart;
-        public short ExitAnimLoop;
-        public short ExitAnimEnd;
-        public short VehicleEnterAnim;
-        public short VehicleExitAnim;
-        public short VehicleRideAnimLoop;
-        public ushort EnterAnimKitID;
-        public ushort RideAnimKitID;
-        public ushort ExitAnimKitID;
-        public ushort VehicleEnterAnimKitID;
-        public ushort VehicleRideAnimKitID;
-        public ushort VehicleExitAnimKitID;
-        public ushort CameraModeID;
-        public sbyte AttachmentID;
-        public sbyte PassengerAttachmentID;
-        public sbyte VehicleEnterAnimBone;
-        public sbyte VehicleExitAnimBone;
-        public sbyte VehicleRideAnimLoopBone;
-        public byte VehicleAbilityDisplay;
-        public uint EnterUISoundID;
-        public ushort ExitUISoundID;
+        public short EnterAnimKitID;
+        public short RideAnimKitID;
+        public short ExitAnimKitID;
+        public short VehicleEnterAnimKitID;
+        public short VehicleRideAnimKitID;
+        public short VehicleExitAnimKitID;
+        public short CameraModeID;
 
         public bool CanEnterOrExit()
         {
@@ -115,7 +115,7 @@ namespace Game.DataStorage
                 //If it has anmation for enter/ride, means it can be entered/exited by logic
                 Flags.HasAnyFlag(VehicleSeatFlags.HasLowerAnimForEnter | VehicleSeatFlags.HasLowerAnimForRide));
         }
-        public bool CanSwitchFromSeat() { return Flags.HasAnyFlag(VehicleSeatFlags.CanSwitch); }
+        public bool CanSwitchFromSeat() { return (Flags & VehicleSeatFlags.CanSwitch) != 0; }
         public bool IsUsableByOverride()
         {
             return Flags.HasAnyFlag(VehicleSeatFlags.Uncontrolled | VehicleSeatFlags.Unk18)

@@ -284,7 +284,7 @@ namespace Game.Achievements
                         SetCriteriaProgress(criteria, referencePlayer.GetReputationMgr().GetVisibleFactionCount(), referencePlayer);
                         break;
                     case CriteriaTypes.EarnHonorableKill:
-                        SetCriteriaProgress(criteria, referencePlayer.GetUInt32Value(PlayerFields.LifetimeHonorableKills), referencePlayer);
+                        SetCriteriaProgress(criteria, referencePlayer.GetUInt32Value(ActivePlayerFields.LifetimeHonorableKills), referencePlayer);
                         break;
                     case CriteriaTypes.HighestGoldValueOwned:
                         SetCriteriaProgress(criteria, referencePlayer.GetMoney(), referencePlayer, ProgressType.Highest);
@@ -420,6 +420,9 @@ namespace Game.Achievements
                     case CriteriaTypes.GainParagonReputation:
                     case CriteriaTypes.EarnHonorXp:
                     case CriteriaTypes.RelicTalentUnlocked:
+                    case CriteriaTypes.ReachAccountHonorLevel:
+                    case CriteriaTypes.HeartOfAzerothArtifactPowerEarned:
+                    case CriteriaTypes.HeartOfAzerothLevelReached:
                         break;                                   // Not implemented yet :(
                 }
 
@@ -792,6 +795,9 @@ namespace Game.Achievements
                 case CriteriaTypes.GainParagonReputation:
                 case CriteriaTypes.EarnHonorXp:
                 case CriteriaTypes.RelicTalentUnlocked:
+                case CriteriaTypes.ReachAccountHonorLevel:
+                case CriteriaTypes.HeartOfAzerothArtifactPowerEarned:
+                case CriteriaTypes.HeartOfAzerothLevelReached:
                     return progress.Counter >= requiredAmount;
                 case CriteriaTypes.CompleteAchievement:
                 case CriteriaTypes.CompleteQuest:
@@ -1062,7 +1068,7 @@ namespace Game.Achievements
                                 continue;
 
                             uint mask = 1u << (int)((uint)area.AreaBit % 32);
-                            if (Convert.ToBoolean(referencePlayer.GetUInt32Value(PlayerFields.ExploredZones1 + playerIndexOffset) & mask))
+                            if (Convert.ToBoolean(referencePlayer.GetUInt32Value(ActivePlayerFields.ExploredZones + playerIndexOffset) & mask))
                             {
                                 matchFound = true;
                                 break;
@@ -1390,9 +1396,7 @@ namespace Game.Achievements
                         return false;
                     break;
                 case CriteriaAdditionalCondition.PrestigeLevel: // 194
-                    if (!referencePlayer || referencePlayer.GetPrestigeLevel() != reqValue)
-                        return false;
-                    break;
+                    return false;
                 default:
                     break;
             }
@@ -1907,7 +1911,7 @@ namespace Game.Achievements
                             criteria.ID, criteria.Entry.Type, DataType, ClassRace.ClassId);
                         return false;
                     }
-                    if (ClassRace.RaceId != 0 && ((1 << (int)(ClassRace.RaceId - 1)) & (int)Race.RaceMaskAllPlayable) == 0)
+                    if (ClassRace.RaceId != 0 && ((1ul << (int)(ClassRace.RaceId - 1)) & (ulong)Race.RaceMaskAllPlayable) == 0)
                     {
                         Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE ({2}) has non-existing race in value2 ({3}), ignored.",
                             criteria.ID, criteria.Entry.Type, DataType, ClassRace.RaceId);
@@ -2052,7 +2056,7 @@ namespace Game.Achievements
                             criteria.ID, criteria.Entry.Type, DataType, ClassRace.ClassId);
                         return false;
                     }
-                    if (ClassRace.RaceId != 0 && ((1 << (int)(ClassRace.RaceId - 1)) & (int)Race.RaceMaskAllPlayable) == 0)
+                    if (ClassRace.RaceId != 0 && ((1ul << (int)(ClassRace.RaceId - 1)) & (ulong)Race.RaceMaskAllPlayable) == 0)
                     {
                         Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_S_PLAYER_CLASS_RACE ({2}) has non-existing race in value2 ({3}), ignored.",
                             criteria.ID, criteria.Entry.Type, DataType, ClassRace.RaceId);

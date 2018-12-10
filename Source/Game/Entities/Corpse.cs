@@ -32,7 +32,7 @@ namespace Game.Entities
             objectTypeId = TypeId.Corpse;
             objectTypeMask |= TypeMask.Corpse;
 
-            m_updateFlag = UpdateFlag.StationaryPosition;
+            m_updateFlag.Stationary = true;
 
             valuesCount = (int)CorpseFields.End;
 

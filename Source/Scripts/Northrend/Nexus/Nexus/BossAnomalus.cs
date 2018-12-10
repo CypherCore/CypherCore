@@ -198,7 +198,7 @@ namespace Scripts.Northrend.Nexus.Nexus
         public override void Reset()
         {
             Initialize();
-            me.SetDisplayId(me.GetCreatureTemplate().ModelId2);
+            me.SetDisplayFromModel(1);
             DoCast(me, AnomalusConst.SpellArcaneform, false);
         }
 

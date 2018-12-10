@@ -5325,7 +5325,7 @@ namespace Bgs.Protocol.Account.V1
         public PrivacyInfo(PrivacyInfo other) : this()
         {
             isUsingRid_ = other.isUsingRid_;
-            isRealIdVisibleForViewFriends_ = other.isRealIdVisibleForViewFriends_;
+            isVisibleForViewFriends = other.isVisibleForViewFriends;
             isHiddenFromFriendFinder_ = other.isHiddenFromFriendFinder_;
             gameInfoPrivacy_ = other.gameInfoPrivacy_;
         }
@@ -5350,14 +5350,14 @@ namespace Bgs.Protocol.Account.V1
 
         /// <summary>Field number for the "is_real_id_visible_for_view_friends" field.</summary>
         public const int IsRealIdVisibleForViewFriendsFieldNumber = 4;
-        private bool isRealIdVisibleForViewFriends_;
+        private bool isVisibleForViewFriends;
         public bool IsRealIdVisibleForViewFriends
         {
-            get { return isRealIdVisibleForViewFriends_; }
+            get { return isVisibleForViewFriends; }
             set
             {
                 bitArray.Set(IsRealIdVisibleForViewFriendsFieldNumber, true);
-                isRealIdVisibleForViewFriends_ = value;
+                isVisibleForViewFriends = value;
             }
         }
 

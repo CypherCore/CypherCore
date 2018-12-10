@@ -367,7 +367,7 @@ namespace Game.Entities
         // Shaman pet
         public bool IsSpiritWolf() { return GetEntry() == (uint)PetEntry.SpiritWolf; } // Spirit wolf from feral spirits
 
-        Unit m_owner;
+        protected Unit m_owner;
         float m_followAngle;
     }
 
@@ -467,8 +467,12 @@ namespace Game.Entities
             }
 
             // Resistance
-            for (int i = (int)SpellSchools.Holy; i < (int)SpellSchools.Max; ++i)
-                SetModifierValue(UnitMods.ResistanceStart + i, UnitModifierType.BaseValue, cinfo.Resistance[i]);
+            // Hunters pet should not inherit resistances from creature_template, they have separate auras for that
+            if (!IsHunterPet())
+            {
+                for (int i = (int)SpellSchools.Holy; i < (int)SpellSchools.Max; ++i)
+                    SetModifierValue(UnitMods.ResistanceStart + i, UnitModifierType.BaseValue, cinfo.Resistance[i]);
+            }
 
             // Health, Mana or Power, Armor
             PetLevelInfo pInfo = Global.ObjectMgr.GetPetLevelInfo(creature_ID, petlevel);
@@ -513,8 +517,8 @@ namespace Game.Entities
                 case PetType.Summon:
                     {
                         // the damage bonus used for pets is either fire or shadow damage, whatever is higher
-                        int fire = GetOwner().GetInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Fire);
-                        int shadow = GetOwner().GetInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Shadow);
+                        int fire = GetOwner().GetInt32Value(ActivePlayerFields.ModDamageDonePos + (int)SpellSchools.Fire);
+                        int shadow = GetOwner().GetInt32Value(ActivePlayerFields.ModDamageDonePos + (int)SpellSchools.Shadow);
                         int val = (fire > shadow) ? fire : shadow;
                         if (val < 0)
                             val = 0;
@@ -754,13 +758,18 @@ namespace Game.Entities
         {
             if (school > SpellSchools.Normal)
             {
-                float value = GetTotalAuraModValue(UnitMods.ResistanceStart + (int)school);
+                float baseValue = GetModifierValue( UnitMods.ResistanceStart + (int)school, UnitModifierType.BaseValue);
+                float bonusValue = GetTotalAuraModValue(UnitMods.ResistanceStart + (int)school) - baseValue;
 
                 // hunter and warlock pets gain 40% of owner's resistance
                 if (IsPet())
-                    value += MathFunctions.CalculatePct(GetOwner().GetResistance(school), 40);
+                {
+                    baseValue += (float)MathFunctions.CalculatePct(m_owner.GetResistance(school), 40);
+                    bonusValue += (float)MathFunctions.CalculatePct(m_owner.GetBonusResistanceMod(school), 40);
+                }
 
-                SetResistance(school, (int)value);
+                SetResistance(school, (int)baseValue);
+                SetBonusResistanceMod(school, (int)bonusValue);
             }
             else
                 UpdateArmor();
@@ -768,6 +777,7 @@ namespace Game.Entities
 
         public override void UpdateArmor()
         {
+            float baseValue = 0.0f;
             float value = 0.0f;
             float bonus_armor = 0.0f;
             UnitMods unitMod = UnitMods.Armor;
@@ -779,11 +789,12 @@ namespace Game.Entities
                 bonus_armor = GetOwner().GetArmor();
 
             value = GetModifierValue(unitMod, UnitModifierType.BaseValue);
+            baseValue = value;
             value *= GetModifierValue(unitMod, UnitModifierType.BasePCT);
             value += GetModifierValue(unitMod, UnitModifierType.TotalValue) + bonus_armor;
             value *= GetModifierValue(unitMod, UnitModifierType.TotalPCT);
 
-            SetArmor((int)value);
+            SetArmor((int)baseValue, (int)(value - baseValue));
         }
 
         public override void UpdateMaxHealth()
@@ -877,8 +888,8 @@ namespace Game.Entities
                 //demons benefit from warlocks shadow or fire damage
                 else if (IsPet())
                 {
-                    int fire = owner.GetInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Fire) - owner.GetInt32Value(PlayerFields.ModDamageDoneNeg + (int)SpellSchools.Fire);
-                    int shadow = owner.GetInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Shadow) - owner.GetInt32Value(PlayerFields.ModDamageDoneNeg + (int)SpellSchools.Shadow);
+                    int fire = owner.GetInt32Value(ActivePlayerFields.ModDamageDonePos + (int)SpellSchools.Fire) - owner.GetInt32Value(ActivePlayerFields.ModDamageDoneNeg + (int)SpellSchools.Fire);
+                    int shadow = owner.GetInt32Value(ActivePlayerFields.ModDamageDonePos + (int)SpellSchools.Shadow) - owner.GetInt32Value(ActivePlayerFields.ModDamageDoneNeg + (int)SpellSchools.Shadow);
                     int maximum = (fire > shadow) ? fire : shadow;
                     if (maximum < 0)
                         maximum = 0;
@@ -888,7 +899,7 @@ namespace Game.Entities
                 //water elementals benefit from mage's frost damage
                 else if (GetEntry() == ENTRY_WATER_ELEMENTAL)
                 {
-                    int frost = owner.GetInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Frost) - owner.GetInt32Value(PlayerFields.ModDamageDoneNeg + (int)SpellSchools.Frost);
+                    int frost = owner.GetInt32Value(ActivePlayerFields.ModDamageDonePos + (int)SpellSchools.Frost) - owner.GetInt32Value(ActivePlayerFields.ModDamageDoneNeg + (int)SpellSchools.Frost);
                     if (frost < 0)
                         frost = 0;
                     SetBonusDamage((int)(frost * 0.4f));
@@ -921,14 +932,14 @@ namespace Game.Entities
                 //force of nature
                 if (GetEntry() == ENTRY_TREANT)
                 {
-                    int spellDmg = GetOwner().GetInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Nature) - GetOwner().GetInt32Value(PlayerFields.ModDamageDoneNeg + (int)SpellSchools.Nature);
+                    int spellDmg = GetOwner().GetInt32Value(ActivePlayerFields.ModDamageDonePos + (int)SpellSchools.Nature) - GetOwner().GetInt32Value(ActivePlayerFields.ModDamageDoneNeg + (int)SpellSchools.Nature);
                     if (spellDmg > 0)
                         bonusDamage = spellDmg * 0.09f;
                 }
                 //greater fire elemental
                 else if (GetEntry() == ENTRY_FIRE_ELEMENTAL)
                 {
-                    int spellDmg = GetOwner().GetInt32Value(PlayerFields.ModDamageDonePos + (int)SpellSchools.Fire) - GetOwner().GetInt32Value(PlayerFields.ModDamageDoneNeg + (int)SpellSchools.Fire);
+                    int spellDmg = GetOwner().GetInt32Value(ActivePlayerFields.ModDamageDonePos + (int)SpellSchools.Fire) - GetOwner().GetInt32Value(ActivePlayerFields.ModDamageDoneNeg + (int)SpellSchools.Fire);
                     if (spellDmg > 0)
                         bonusDamage = spellDmg * 0.4f;
                 }
@@ -957,7 +968,7 @@ namespace Game.Entities
         {
             m_bonusSpellDamage = damage;
             if (GetOwner().IsTypeId(TypeId.Player))
-                GetOwner().SetUInt32Value(PlayerFields.PetSpellPower, (uint)damage);
+                GetOwner().SetUInt32Value(ActivePlayerFields.PetSpellPower, (uint)damage);
         }
 
         public int GetBonusDamage() { return m_bonusSpellDamage; }

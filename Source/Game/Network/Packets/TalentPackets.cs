@@ -152,12 +152,12 @@ namespace Game.Network.Packets
 
         public override void Read()
         {
-            int size = _worldPacket.ReadBits<int>(6);
+            uint size = _worldPacket.ReadUInt32();
             for (int i = 0; i < size; ++i)
-                Talents[i] = _worldPacket.ReadUInt16();
+                Talents[i].Read(_worldPacket);
         }
 
-        public Array<ushort> Talents = new Array<ushort>(6);
+        public Array<PvPTalent> Talents = new Array<PvPTalent>(4);
     }
 
     class LearnPvpTalentsFailed : ServerPacket
@@ -170,16 +170,34 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(SpellID);
             _worldPacket.WriteUInt32(Talents.Count);
 
-            foreach (var id in Talents)
-                _worldPacket.WriteUInt16(id);
+            foreach (var pvpTalent in Talents)
+                pvpTalent.Write(_worldPacket);
         }
 
         public uint Reason;
         public uint SpellID;
-        public List<ushort> Talents = new List<ushort>();
+        public List<PvPTalent> Talents = new List<PvPTalent>();
     }
 
     //Structs
+    public struct PvPTalent
+    {
+        public ushort PvPTalentID;
+        public byte Slot;
+
+        public void Read(WorldPacket data)
+        {
+            PvPTalentID = data.ReadUInt16();
+            Slot = data.ReadUInt8();
+        }
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt16(PvPTalentID);
+            data.WriteUInt8(Slot);
+        }
+    }
+
     struct GlyphBinding
     {
         public GlyphBinding(uint spellId, ushort glyphId)

@@ -39,7 +39,6 @@ namespace Game.Entities
             objectTypeMask |= TypeMask.Item;
             objectTypeId = TypeId.Item;
 
-            m_updateFlag = UpdateFlag.None;
             valuesCount = (int)ItemFields.End;
             _dynamicValuesCount = (int)ItemDynamicFields.End;
             uState = ItemUpdateState.New;
@@ -75,17 +74,6 @@ namespace Game.Entities
             {
                 if (i < 5)
                     SetSpellCharges(i, itemProto.Effects[i].Charges);
-
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)itemProto.Effects[i].SpellID);
-                if (spellInfo != null)
-                {
-                    if (spellInfo.HasEffect(SpellEffectName.GiveArtifactPower))
-                    {
-                        uint artifactKnowledgeLevel = WorldConfig.GetUIntValue(WorldCfg.CurrencyStartArtifactKnowledge);
-                        if (artifactKnowledgeLevel != 0)
-                            SetModifier(ItemModifier.ArtifactKnowledgeLevel, artifactKnowledgeLevel + 1);
-                    }
-                }
             }
 
             SetUInt32Value(ItemFields.Duration, itemProto.GetDuration());
@@ -1484,7 +1472,7 @@ namespace Game.Entities
             Player owner = GetOwner();
             for (byte i = 0; i < ItemConst.MaxStats; ++i)
             {
-                if ((owner ? GetItemStatValue(i, owner) : proto.GetItemStatValue(i)) != 0)
+                if ((owner ? GetItemStatValue(i, owner) : proto.GetItemStatAllocation(i)) != 0)
                     return true;
             }
 
@@ -1498,7 +1486,7 @@ namespace Game.Entities
 
             for (byte i = 0; i < ItemConst.MaxStats; ++i)
             {
-                if (bonus.ItemStatValue[i] != 0)
+                if (bonus.ItemStatAllocation[i] != 0)
                     return true;
             }
 
@@ -1781,55 +1769,6 @@ namespace Game.Entities
                 return proto.GetSellPrice();
         }
 
-        public int GetReforgableStat(ItemModType statType)
-        {
-            ItemTemplate proto = GetTemplate();
-            for (uint i = 0; i < ItemConst.MaxStats; ++i)
-                if ((ItemModType)proto.GetItemStatType(i) == statType)
-                    return proto.GetItemStatValue(i);
-
-            int randomPropId = GetItemRandomPropertyId();
-            if (randomPropId == 0)
-                return 0;
-
-            if (randomPropId < 0)
-            {
-                ItemRandomSuffixRecord randomSuffix = CliDB.ItemRandomSuffixStorage.LookupByKey(-randomPropId);
-                if (randomSuffix == null)
-                    return 0;
-
-                for (var e = EnchantmentSlot.Prop0; e <= EnchantmentSlot.Prop4; ++e)
-                {
-                    var enchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(GetEnchantmentId(e));
-                    if (enchant != null)
-                        for (uint f = 0; f < ItemConst.MaxItemEnchantmentEffects; ++f)
-                            if (enchant.Effect[f] == ItemEnchantmentType.Stat && (ItemModType)enchant.EffectArg[f] == statType)
-                                for (int k = 0; k < 5; ++k)
-                                    if (randomSuffix.Enchantment[k] == enchant.Id)
-                                        return (int)((randomSuffix.AllocationPct[k] * GetItemSuffixFactor()) / 10000);
-                }
-            }
-            else
-            {
-                var randomProp = CliDB.ItemRandomPropertiesStorage.LookupByKey(randomPropId);
-                if (randomProp == null)
-                    return 0;
-
-                for (var e = EnchantmentSlot.Prop0; e <= EnchantmentSlot.Prop4; ++e)
-                {
-                    var enchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(GetEnchantmentId(e));
-                    if (enchant != null)
-                        for (uint f = 0; f < ItemConst.MaxItemEnchantmentEffects; ++f)
-                            if (enchant.Effect[f] == ItemEnchantmentType.Stat && (ItemModType)enchant.EffectArg[f] == statType)
-                                for (int k = 0; k < ItemConst.MaxItemRandomProperties; ++k)
-                                    if (randomProp.Enchantment[k] == enchant.Id)
-                                        return (int)(enchant.EffectPointsMin[k]);
-                }
-            }
-
-            return 0;
-        }
-
         public void ItemContainerSaveLootToDB()
         {
             // Saves the money and item loot associated with an openable item to the DB
@@ -2038,12 +1977,12 @@ namespace Game.Entities
                 if (fixedLevel != 0)
                     level = fixedLevel;
                 else
-                    level = Math.Min(Math.Max(level, ssd.MinLevel), ssd.MaxLevel);
+                    level = (uint)Math.Min(Math.Max(level, ssd.MinLevel), ssd.MaxLevel);
 
-                SandboxScalingRecord sandbox = CliDB.SandboxScalingStorage.LookupByKey(bonusData.SandboxScalingId);
-                if (sandbox != null)
-                    if ((Convert.ToBoolean(sandbox.Flags & 2) || sandbox.MinLevel != 0 || sandbox.MaxLevel != 0) && !Convert.ToBoolean(sandbox.Flags & 4))
-                        level = Math.Min(Math.Max(level, sandbox.MinLevel), sandbox.MaxLevel);
+                ContentTuningRecord contentTuning = CliDB.ContentTuningStorage.LookupByKey(bonusData.ContentTuningId);
+                if (contentTuning != null)
+                    if ((Convert.ToBoolean(contentTuning.Flags & 2) || contentTuning.MinLevel != 0 || contentTuning.MaxLevel != 0) && !Convert.ToBoolean(contentTuning.Flags & 4))
+                        level = (uint)Math.Min(Math.Max(level, contentTuning.MinLevel), contentTuning.MaxLevel);
 
                 uint heirloomIlvl = (uint)Global.DB2Mgr.GetCurveValueAt(ssd.PlayerLevelToItemLevelCurveID, level);
                 if (heirloomIlvl != 0)
@@ -2090,7 +2029,7 @@ namespace Game.Entities
                 return (int)(Math.Floor(statValue + 0.5f));
             }
 
-            return _bonusData.ItemStatValue[index];
+            return 0;
         }
 
         public ItemDisenchantLootRecord GetDisenchantLoot(Player owner)
@@ -2114,7 +2053,7 @@ namespace Game.Entities
             byte expansion = itemTemplate.GetRequiredExpansion();
             foreach (ItemDisenchantLootRecord disenchant in CliDB.ItemDisenchantLootStorage.Values)
             {
-                if (disenchant.ClassID != itemClass)
+                if (disenchant.Class != itemClass)
                     continue;
 
                 if (disenchant.Subclass >= 0 && itemSubClass != 0)
@@ -2404,8 +2343,6 @@ namespace Game.Entities
                 uint artifactKnowledgeLevel = 1;
                 if (sourceItem != null && sourceItem.GetModifier(ItemModifier.ArtifactKnowledgeLevel) != 0)
                     artifactKnowledgeLevel = sourceItem.GetModifier(ItemModifier.ArtifactKnowledgeLevel);
-                else if (artifactCategoryId == ArtifactCategory.Primary)
-                    artifactKnowledgeLevel = WorldConfig.GetUIntValue(WorldCfg.CurrencyStartArtifactKnowledge) + 1;
 
                 GtArtifactKnowledgeMultiplierRecord artifactKnowledge = CliDB.ArtifactKnowledgeMultiplierGameTable.GetRow(artifactKnowledgeLevel);
                 if (artifactKnowledge != null)
@@ -2437,12 +2374,12 @@ namespace Game.Entities
             ScalingStatDistributionRecord ssd = CliDB.ScalingStatDistributionStorage.LookupByKey(_bonusData.ScalingStatDistribution);
             if (ssd != null)
             {
-                level = Math.Min(Math.Max(level, ssd.MinLevel), ssd.MaxLevel);
+                level = (uint)Math.Min(Math.Max(level, ssd.MinLevel), ssd.MaxLevel);
 
-                SandboxScalingRecord sandbox = CliDB.SandboxScalingStorage.LookupByKey(_bonusData.SandboxScalingId);
-                if (sandbox != null)
-                    if ((sandbox.Flags.HasAnyFlag(2u) || sandbox.MinLevel != 0 || sandbox.MaxLevel != 0) && !sandbox.Flags.HasAnyFlag(4u))
-                        level = Math.Min(Math.Max(level, sandbox.MinLevel), sandbox.MaxLevel);
+                ContentTuningRecord contentTuning = CliDB.ContentTuningStorage.LookupByKey(_bonusData.ContentTuningId);
+                if (contentTuning != null)
+                    if ((contentTuning.Flags.HasAnyFlag(2) || contentTuning.MinLevel != 0 || contentTuning.MaxLevel != 0) && !contentTuning.Flags.HasAnyFlag(4))
+                        level = (uint)Math.Min(Math.Max(level, contentTuning.MinLevel), contentTuning.MaxLevel);
 
                 SetModifier(ItemModifier.ScalingStatDistributionFixedLevel, level);
             }
@@ -2839,9 +2776,6 @@ namespace Game.Entities
                 ItemStatType[i] = proto.GetItemStatType(i);
 
             for (uint i = 0; i < ItemConst.MaxStats; ++i)
-                ItemStatValue[i] = proto.GetItemStatValue(i);
-
-            for (uint i = 0; i < ItemConst.MaxStats; ++i)
                 ItemStatAllocation[i] = proto.GetItemStatAllocation(i);
 
             for (uint i = 0; i < ItemConst.MaxStats; ++i)
@@ -2948,7 +2882,7 @@ namespace Game.Entities
                     if (values[1] < _state.ScalingStatDistributionPriority)
                     {
                         ScalingStatDistribution = (uint)values[0];
-                        SandboxScalingId = (uint)values[2];
+                        ContentTuningId = (uint)values[2];
                         _state.ScalingStatDistributionPriority = values[1];
                         HasFixedLevel = type == ItemBonusType.ScalingStatDistributionFixed;
                     }
@@ -2969,7 +2903,6 @@ namespace Game.Entities
         public int ItemLevelBonus;
         public int RequiredLevel;
         public int[] ItemStatType = new int[ItemConst.MaxStats];
-        public int[] ItemStatValue = new int[ItemConst.MaxStats];
         public int[] ItemStatAllocation = new int[ItemConst.MaxStats];
         public float[] ItemStatSocketCostMultiplier = new float[ItemConst.MaxStats];
         public SocketColor[] socketColor = new SocketColor[ItemConst.MaxGemSockets];
@@ -2977,7 +2910,7 @@ namespace Game.Entities
         public uint AppearanceModID;
         public float RepairCostMultiplier;
         public uint ScalingStatDistribution;
-        public uint SandboxScalingId;
+        public uint ContentTuningId;
         public uint DisenchantLootId;
         public uint[] GemItemLevelBonus = new uint[ItemConst.MaxGemSockets];
         public int[] GemRelicType = new int[ItemConst.MaxGemSockets];

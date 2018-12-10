@@ -23,87 +23,48 @@ namespace Game.DataStorage
     public sealed class WMOAreaTableRecord
     {
         public string AreaName;
+        public uint Id;
+        public ushort WmoID;                                                   //  used in root WMO
+        public byte NameSetID;                                                //  used in adt file
         public int WmoGroupID;                                               //  used in group WMO
-        public ushort AmbienceID;
-        public ushort ZoneMusic;
-        public ushort IntroSound;
-        public ushort AreaTableID;
-        public ushort UwIntroSound;
-        public ushort UwAmbience;
-        public sbyte NameSetID;                                                   //  used in adt file
         public byte SoundProviderPref;
         public byte SoundProviderPrefUnderwater;
+        public ushort AmbienceID;
+        public ushort UwAmbience;
+        public ushort ZoneMusic;
+        public uint UwZoneMusic;
+        public ushort IntroSound;
+        public ushort UwIntroSound;
+        public ushort AreaTableID;
         public byte Flags;
-        public uint Id;
-        public byte UwZoneMusic;
-        public uint WmoID;                                                    //  used in root WMO
     }
 
     public sealed class WorldEffectRecord
     {
-        public uint ID;
-        public uint TargetAsset;
-        public ushort CombatConditionID;
-        public byte TargetType;
-        public byte WhenToDisplay;
-        public uint QuestFeedbackEffectID;
-        public ushort PlayerConditionID;
-    }
-
-    public sealed class WorldMapAreaRecord
-    {
-        public string AreaName;
-        public float LocLeft;
-        public float LocRight;
-        public float LocTop;
-        public float LocBottom;
-        public uint Flags;
-        public ushort MapID;
-        public ushort AreaID;
-        public short DisplayMapID;
-        public short DefaultDungeonFloor;
-        public ushort ParentWorldMapID;
-        public byte LevelRangeMin;
-        public byte LevelRangeMax;
-        public byte BountySetID;
-        public byte BountyDisplayLocation;
         public uint Id;
-        public uint VisibilityPlayerConditionID;
+        public uint QuestFeedbackEffectID;
+        public byte WhenToDisplay;
+        public byte TargetType;
+        public int TargetAsset;
+        public uint PlayerConditionID;
+        public ushort CombatConditionID;
     }
 
     public sealed class WorldMapOverlayRecord
     {
-        public string TextureName;
         public uint Id;
+        public uint UiMapArtID;
         public ushort TextureWidth;
         public ushort TextureHeight;
-        public ushort MapAreaID;                                               // idx in WorldMapArea.dbc
-        public ushort OffsetX;
-        public uint OffsetY;
-        public ushort HitRectTop;
-        public ushort HitRectLeft;
-        public ushort HitRectBottom;
-        public ushort HitRectRight;
-        public ushort PlayerConditionID;
-        public byte Flags;
-        public uint[] AreaID = new uint[SharedConst.MaxWorldMapOverlayArea]; // needs checked
-
-    }
-
-    public sealed class WorldMapTransformsRecord
-    {
-        public uint Id;
-        public Vector3 RegionMin;
-        public Vector3 RegionMax;
-        public Vector2 RegionOffset;
-        public float RegionScale;
-        public ushort MapID;
-        public ushort AreaID;
-        public ushort NewMapID;
-        public ushort NewDungeonMapID;
-        public ushort NewAreaID;
-        public byte Flags;
-        public int Priority;
+        public int OffsetX;
+        public int OffsetY;
+        public int HitRectTop;
+        public int HitRectBottom;
+        public int HitRectLeft;
+        public int HitRectRight;
+        public uint PlayerConditionID;
+        public uint Flags;
+        public uint[] AreaID = new uint[SharedConst.MaxWorldMapOverlayArea];
     }
 
     public sealed class WorldSafeLocsRecord
@@ -111,7 +72,7 @@ namespace Game.DataStorage
         public uint Id;
         public string AreaName;
         public Vector3 Loc;
-        public float Facing;
         public ushort MapID;
+        public float Facing;
     }
 }

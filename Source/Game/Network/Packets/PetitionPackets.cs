@@ -312,12 +312,12 @@ namespace Game.Network.Packets
             data.WriteBits(Title.GetByteCount(), 7);
             data.WriteBits(BodyText.GetByteCount(), 12);
 
-            for (byte i = 0; i < 10; i++)
+            for (byte i = 0; i < Choicetext.Length; i++)
                 data.WriteBits(Choicetext[i].GetByteCount(), 6);
 
             data.FlushBits();
 
-            for (byte i = 0; i < 10; i++)
+            for (byte i = 0; i < Choicetext.Length; i++)
                 data.WriteString(Choicetext[i]);
 
             data.WriteString(Title);

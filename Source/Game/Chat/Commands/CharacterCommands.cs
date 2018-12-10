@@ -265,6 +265,81 @@ namespace Game.Chat
             return true;
         }
 
+        [Command("changeaccount", RBACPermissions.CommandCharacterChangeaccount, true)]
+        static bool HandleCharacterChangeAccountCommand(StringArguments args, CommandHandler handler)
+        {
+            string playerNameStr;
+            string accountName;
+            handler.extractOptFirstArg(args, out playerNameStr, out accountName);
+            if (accountName.IsEmpty())
+                return false;
+
+            ObjectGuid targetGuid;
+            string targetName;
+            Player playerNotUsed;
+            if (!handler.extractPlayerTarget(new StringArguments(playerNameStr), out playerNotUsed, out targetGuid, out targetName))
+                return false;
+
+            CharacterInfo characterInfo = Global.WorldMgr.GetCharacterInfo(targetGuid);
+            if (characterInfo == null)
+            {
+                handler.SendSysMessage(CypherStrings.PlayerNotFound);
+                return false;
+            }
+
+            uint oldAccountId = characterInfo.AccountId;
+            uint newAccountId = oldAccountId;
+
+            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_ID_BY_NAME);
+            stmt.AddValue(0, accountName);
+            SQLResult result = DB.Login.Query(stmt);
+            if (!result.IsEmpty())
+                newAccountId = result.Read<uint>(0);
+            else
+            {
+                handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
+                return false;
+            }
+
+            // nothing to do :)
+            if (newAccountId == oldAccountId)
+                return true;
+
+            uint charCount = Global.AccountMgr.GetCharactersCount(newAccountId);
+            if (charCount != 0)
+            {
+                if (charCount >= WorldConfig.GetIntValue(WorldCfg.CharactersPerRealm))
+                {
+                    handler.SendSysMessage(CypherStrings.AccountCharacterListFull, accountName, newAccountId);
+                    return false;
+                }
+            }
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ACCOUNT_BY_GUID);
+            stmt.AddValue(0, newAccountId);
+            stmt.AddValue(1, targetGuid.GetCounter());
+            DB.Characters.DirectExecute(stmt);
+
+            Global.WorldMgr.UpdateRealmCharCount(oldAccountId);
+            Global.WorldMgr.UpdateRealmCharCount(newAccountId);
+
+            Global.WorldMgr.UpdateCharacterInfoAccount(targetGuid, newAccountId);
+
+            handler.SendSysMessage(CypherStrings.ChangeAccountSuccess, targetName, accountName);
+
+            string logString = $"changed ownership of player {targetName} ({targetGuid.ToString()}) from account {oldAccountId} to account {newAccountId}";
+            WorldSession session = handler.GetSession();
+            if (session != null)
+            {
+                Player player = session.GetPlayer();
+                if (player != null)
+                    Log.outCommand(session.GetAccountId(), $"GM {player.GetName()} (Account: {session.GetAccountId()}) {logString}");
+            }
+            else
+                Log.outCommand(0, $"{handler.GetCypherString(CypherStrings.Console)} {logString}");
+            return true;
+        }
+
         [Command("changefaction", RBACPermissions.CommandCharacterChangefaction, true)]
         static bool HandleCharacterChangeFactionCommand(StringArguments args, CommandHandler handler)
         {
@@ -702,7 +777,7 @@ namespace Game.Chat
             {
                 player.GiveLevel((uint)newLevel);
                 player.InitTalentForLevel();
-                player.SetUInt32Value(PlayerFields.Xp, 0);
+                player.SetUInt32Value(ActivePlayerFields.Xp, 0);
 
                 if (handler.needReportToTarget(player))
                 {

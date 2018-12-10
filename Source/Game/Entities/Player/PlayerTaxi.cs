@@ -225,13 +225,13 @@ namespace Game.Entities
 
         public bool IsTaximaskNodeKnown(uint nodeidx)
         {
-            byte field = (byte)((nodeidx - 1) / 8);
+            uint field = (nodeidx - 1) / 8;
             uint submask = (uint)(1 << (int)((nodeidx - 1) % 8));
             return (m_taximask[field] & submask) == submask;
         }
         public bool SetTaximaskNode(uint nodeidx)
         {
-            byte field = (byte)((nodeidx - 1) / 8);
+            uint field = (nodeidx - 1) / 8;
             uint submask = (uint)(1 << (int)((nodeidx - 1) % 8));
             if ((m_taximask[field] & submask) != submask)
             {

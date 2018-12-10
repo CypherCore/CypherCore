@@ -953,7 +953,7 @@ namespace Game.Spells
             public bool OnHold;
         }
 
-        struct ChargeEntry
+        public struct ChargeEntry
         {
             public ChargeEntry(DateTime startTime, TimeSpan rechargeTime)
             {

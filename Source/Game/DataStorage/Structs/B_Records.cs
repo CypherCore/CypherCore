@@ -23,24 +23,24 @@ namespace Game.DataStorage
         public uint Cost;
     }
 
-    public sealed class BannedAddOnsRecord
+    public sealed class BannedAddonsRecord
     {
         public uint Id;
         public string Name;
         public string Version;
-        public byte[] Flags = new byte[4];
+        public byte Flags;
     }
 
     public sealed class BarberShopStyleRecord
     {
         public string DisplayName;
         public string Description;
+        public uint Id;
+        public byte Type;                                                     // value 0 -> hair, value 2 -> facialhair
         public float CostModifier;
-        public byte Type;
         public byte Race;
         public byte Sex;
-        public byte Data;
-        public uint Id;
+        public byte Data;                                                     // real ID to hair/facial hair
     }
 
     public sealed class BattlePetBreedQualityRecord
@@ -53,32 +53,32 @@ namespace Game.DataStorage
     public sealed class BattlePetBreedStateRecord
     {
         public uint Id;
-        public ushort Value;
         public byte BattlePetStateID;
-        public uint BattlePetBreedID;
+        public ushort Value;
+        public byte BattlePetBreedID;
     }
 
     public sealed class BattlePetSpeciesRecord
     {
-        public string SourceText;
         public string Description;
-        public uint CreatureID;
-        public uint IconFileDataID;
-        public uint SummonSpellID;
-        public ushort Flags;
-        public byte PetTypeEnum;
-        public sbyte SourceTypeEnum;
+        public string SourceText;
         public uint Id;
-        public byte CardUIModelSceneID;
-        public byte LoadoutUIModelSceneID;
+        public uint CreatureID;
+        public uint SummonSpellID;
+        public int IconFileDataID;
+        public byte PetTypeEnum;
+        public ushort Flags;
+        public sbyte SourceTypeEnum;
+        public int CardUIModelSceneID;
+        public int LoadoutUIModelSceneID;
     }
 
     public sealed class BattlePetSpeciesStateRecord
     {
         public uint Id;
-        public int Value;
         public byte BattlePetStateID;
-        public uint BattlePetSpeciesID;
+        public int Value;
+        public ushort BattlePetSpeciesID;
     }
 
     public sealed class BattlemasterListRecord
@@ -88,32 +88,33 @@ namespace Game.DataStorage
         public string GameType;
         public string ShortDescription;
         public string LongDescription;
-        public int IconFileDataID;
-        public short[] MapId = new short[16];
+        public sbyte InstanceType;
+        public sbyte MinLevel;
+        public sbyte MaxLevel;
+        public sbyte RatedPlayers;
+        public sbyte MinPlayers;
+        public sbyte MaxPlayers;
+        public sbyte GroupsAllowed;
+        public sbyte MaxGroupSize;
         public ushort HolidayWorldState;
-        public ushort RequiredPlayerConditionID;
-        public byte InstanceType;
-        public byte GroupsAllowed;
-        public byte MaxGroupSize;
-        public byte MinLevel;
-        public byte MaxLevel;
-        public byte RatedPlayers;
-        public byte MinPlayers;
-        public byte MaxPlayers;
-        public byte Flags;
+        public sbyte Flags;
+        public int IconFileDataID;
+        public short RequiredPlayerConditionID;
+        public short[] MapId = new short[16];
     }
 
     public sealed class BroadcastTextRecord
     {
-        public uint Id;
         public LocalizedString Text;
         public LocalizedString Text1;
+        public uint Id;
+        public byte LanguageID;
+        public int ConditionID;
+        public ushort EmotesID;
+        public byte Flags;
+        public uint ChatBubbleDurationMs;
+        public uint[] SoundEntriesID = new uint[2];
         public ushort[] EmoteID = new ushort[3];
         public ushort[] EmoteDelay = new ushort[3];
-        public ushort EmotesID;
-        public byte LanguageID;
-        public byte Flags;
-        public uint ConditionID;
-        public uint[] SoundEntriesID = new uint[2];
     }
 }

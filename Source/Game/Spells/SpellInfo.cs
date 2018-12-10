@@ -107,7 +107,7 @@ namespace Game.Spells
             if (_options != null)
             {
                 SpellProcsPerMinuteRecord _ppm = CliDB.SpellProcsPerMinuteStorage.LookupByKey(_options.SpellProcsPerMinuteID);
-                ProcFlags = (ProcFlags)_options.ProcTypeMask;
+                ProcFlags = (ProcFlags)_options.ProcTypeMask[0];
                 ProcChance = _options.ProcChance;
                 ProcCharges = _options.ProcCharges;
                 ProcCooldown = _options.ProcCategoryRecovery;
@@ -892,10 +892,34 @@ namespace Game.Spells
             // continent limitation (virtual continent)
             if (HasAttribute(SpellAttr4.CastOnlyInOutland))
             {
-                uint v_map = Global.DB2Mgr.GetVirtualMapForMapAndZone(map_id, zone_id);
-                var map = CliDB.MapStorage.LookupByKey(v_map);
-                if (map == null || map.ExpansionID < 1 || !map.IsContinent())
+                uint mountFlags = 0;
+                if (player && player.HasAuraType(AuraType.MountRestrictions))
+                {
+                    foreach (AuraEffect auraEffect in player.GetAuraEffectsByType(AuraType.MountRestrictions))
+                        mountFlags |= (uint)auraEffect.GetMiscValue();
+                }
+                else
+                {
+                    AreaTableRecord areaTable = CliDB.AreaTableStorage.LookupByKey(area_id);
+                    if (areaTable != null)
+                        mountFlags = areaTable.MountFlags;
+                }
+                if (!Convert.ToBoolean(mountFlags & (uint)AreaMountFlags.FlyingAllowed))
                     return SpellCastResult.IncorrectArea;
+
+                if (player)
+                {
+                    uint mapToCheck = map_id;
+                    MapRecord mapEntry1 = CliDB.MapStorage.LookupByKey(map_id);
+                    if (mapEntry1 != null)
+                        mapToCheck = (uint)mapEntry1.CosmeticParentMapID;
+                    if ((mapToCheck == 1116 || mapToCheck == 1464) && !player.HasSpell(191645)) // Draenor Pathfinder
+                        return SpellCastResult.IncorrectArea;
+                    else if (mapToCheck == 1220 && !player.HasSpell(233368)) // Broken Isles Pathfinder
+                        return SpellCastResult.IncorrectArea;
+                    else if ((mapToCheck == 1642 || mapToCheck == 1643) && !player.HasSpell(278833)) // Battle for Azeroth Pathfinder
+                        return SpellCastResult.IncorrectArea;
+                }
             }
 
             var mapEntry = CliDB.MapStorage.LookupByKey(map_id);
@@ -2905,9 +2929,9 @@ namespace Game.Spells
             if (!caster.IsTypeId(TypeId.Player))
                 return 0.0f;
 
-            float crit = caster.GetFloatValue(PlayerFields.CritPercentage);
-            float rangedCrit = caster.GetFloatValue(PlayerFields.RangedCritPercentage);
-            float spellCrit = caster.GetFloatValue(PlayerFields.SpellCritPercentage1);
+            float crit = caster.GetFloatValue(ActivePlayerFields.CritPercentage);
+            float rangedCrit = caster.GetFloatValue(ActivePlayerFields.RangedCritPercentage);
+            float spellCrit = caster.GetFloatValue(ActivePlayerFields.SpellCritPercentage1);
 
             switch (mod.Param)
             {
@@ -3733,7 +3757,6 @@ namespace Game.Spells
                 Effect = (SpellEffectName)_effect.Effect;
                 ApplyAuraName = (AuraType)_effect.EffectAura;
                 ApplyAuraPeriod = _effect.EffectAuraPeriod;
-                DieSides = (int)_effect.EffectDieSides;
                 RealPointsPerLevel = _effect.EffectRealPointsPerLevel;
                 BasePoints = (int)_effect.EffectBasePoints;
                 PointsPerResource = _effect.EffectPointsPerResource;
@@ -3828,10 +3851,57 @@ namespace Game.Spells
         {
             variance = 0.0f;
             float basePointsPerLevel = RealPointsPerLevel;
-            int basePoints = bp.HasValue ? bp.Value : BasePoints;
+            // TODO: this needs to be a float, not rounded
+            int basePoints = CalcBaseValue(caster, target, itemLevel);
+            float value = bp.HasValue ? bp.Value : BasePoints;
             float comboDamage = PointsPerResource;
 
+            if (Scaling.Variance != 0)
+            {
+                float delta = Math.Abs(Scaling.Variance * 0.5f);
+                float valueVariance = RandomHelper.FRand(-delta, delta);
+                value += basePoints * valueVariance;
+                variance = valueVariance;
+            }
+
             // base amount modification based on spell lvl vs caster lvl
+            if (Scaling.Coefficient != 0.0f)
+            {
+                if (Scaling.ResourceCoefficient != 0)
+                    comboDamage = Scaling.ResourceCoefficient * value;
+            }
+            else
+            {
+                if (GetScalingExpectedStat() == ExpectedStatType.None)
+                {
+                    int level = caster ? (int)caster.getLevel() : 0;
+                    if (level > (int)_spellInfo.MaxLevel && _spellInfo.MaxLevel > 0)
+                        level = (int)_spellInfo.MaxLevel;
+                    level -= (int)_spellInfo.BaseLevel;
+                    if (level < 0)
+                        level = 0;
+                    value += level * basePointsPerLevel;
+                }
+            }
+            // random damage
+            if (caster)
+            {
+                // bonus amount from combo points
+                if (caster.m_playerMovingMe && comboDamage != 0)
+                {
+                    uint comboPoints = caster.m_playerMovingMe.GetComboPoints();
+                    if (comboPoints != 0)
+                        value += comboDamage * comboPoints;
+                }
+
+                value = caster.ApplyEffectModifiers(_spellInfo, EffectIndex, value);
+            }
+
+            return (int)Math.Round(value);
+        }
+
+        public int CalcBaseValue(Unit caster, Unit target, int itemLevel)
+        {
             if (Scaling.Coefficient != 0.0f)
             {
                 uint level = _spellInfo.SpellLevel;
@@ -3855,153 +3925,57 @@ namespace Game.Spells
                     if (_spellInfo.Scaling._Class == 0)
                         return 0;
 
-                    if (_spellInfo.Scaling.ScalesFromItemLevel == 0)
+                    uint effectiveItemLevel = itemLevel != -1 ? (uint)itemLevel : 1u;
+                    if (_spellInfo.Scaling.ScalesFromItemLevel != 0 || _spellInfo.HasAttribute(SpellAttr11.ScalesWithItemLevel))
                     {
-                        if (!_spellInfo.HasAttribute(SpellAttr11.ScalesWithItemLevel))
-                            tempValue = CliDB.GetSpellScalingColumnForClass(CliDB.SpellScalingGameTable.GetRow(level), _spellInfo.Scaling._Class);
-                        else
+                        if (_spellInfo.Scaling.ScalesFromItemLevel != 0)
+                            effectiveItemLevel = _spellInfo.Scaling.ScalesFromItemLevel;
+
+                        if (_spellInfo.Scaling._Class == -8)
                         {
-                            uint effectiveItemLevel = (uint)(itemLevel != -1 ? itemLevel : 1);
-                            tempValue = ItemEnchantment.GetRandomPropertyPoints(effectiveItemLevel, ItemQuality.Rare, InventoryType.Chest, 0);
-                            if (IsAura() && ApplyAuraName == AuraType.ModRating)
-                            {
-                                GtCombatRatingsMultByILvlRecord ratingMult = CliDB.CombatRatingsMultByILvlGameTable.GetRow(effectiveItemLevel);
-                                if (ratingMult != null)
-                                    tempValue *= ratingMult.ArmorMultiplier;
-                            }
+                            RandPropPointsRecord randPropPoints = CliDB.RandPropPointsStorage.LookupByKey(effectiveItemLevel);
+                            if (randPropPoints == null)
+                                randPropPoints = CliDB.RandPropPointsStorage.LookupByKey(CliDB.RandPropPointsStorage.Count - 1);
+
+                            tempValue = randPropPoints.DamageReplaceStat;
                         }
+                        else
+                            tempValue = ItemEnchantment.GetRandomPropertyPoints(effectiveItemLevel, ItemQuality.Rare, InventoryType.Chest, 0);
                     }
                     else
-                        tempValue = ItemEnchantment.GetRandomPropertyPoints(_spellInfo.Scaling.ScalesFromItemLevel, ItemQuality.Rare, InventoryType.Chest, 0);
+                        tempValue = CliDB.GetSpellScalingColumnForClass(CliDB.SpellScalingGameTable.GetRow(level), _spellInfo.Scaling._Class);
+
+                    if (_spellInfo.Scaling._Class == -7)
+                    {
+                        // todo: get inventorytype here
+                        GtCombatRatingsMultByILvlRecord ratingMult = CliDB.CombatRatingsMultByILvlGameTable.GetRow(effectiveItemLevel);
+                        if (ratingMult != null)
+                            tempValue *= ratingMult.ArmorMultiplier;
+                    }
                 }
 
                 tempValue *= Scaling.Coefficient;
                 if (tempValue != 0.0f && tempValue < 1.0f)
                     tempValue = 1.0f;
 
-                if (Scaling.Variance != 0f)
-                {
-                    float delta = Math.Abs(Scaling.Variance * 0.5f);
-                    float valueVariance = RandomHelper.FRand(-delta, delta);
-                    tempValue += tempValue * valueVariance;
-
-                    variance = valueVariance;
-                }
-
-                basePoints = (int)Math.Round(tempValue);
-
-                if (Scaling.ResourceCoefficient != 0f)
-                    comboDamage = Scaling.ResourceCoefficient * tempValue;
+                return (int)Math.Round(tempValue);
             }
             else
             {
-                if (caster != null)
+                float tempValue = BasePoints;
+                ExpectedStatType stat = GetScalingExpectedStat();
+                if (stat != ExpectedStatType.None)
                 {
-                    int level = (int)caster.getLevel();
-                    if (level > _spellInfo.MaxLevel && _spellInfo.MaxLevel > 0)
-                        level = (int)_spellInfo.MaxLevel;
-                    else if (level < _spellInfo.BaseLevel)
-                        level = (int)_spellInfo.BaseLevel;
+                    if (_spellInfo.HasAttribute(SpellAttr0.LevelDamageCalculation))
+                        stat = ExpectedStatType.CreatureAutoAttackDps;
 
-                    level -= (int)_spellInfo.SpellLevel;
-                    basePoints += (int)(level * basePointsPerLevel);
+                    // TODO - add expansion and content tuning id args?
+                    uint level = caster ? caster.getLevel() : 1;
+                    tempValue = Global.DB2Mgr.EvaluateExpectedStat(stat, level, -2, 0, Class.None) * BasePoints / 100.0f;
                 }
 
-                // roll in a range <1;EffectDieSides> as of patch 3.3.3
-                int randomPoints = DieSides;
-                switch (randomPoints)
-                {
-                    case 0:
-                        break;
-                    case 1:
-                        basePoints += 1;
-                        break;     // range 1..1
-                    default:
-                        {
-                            // range can have positive (1..rand) and negative (rand..1) values, so order its for irand
-                            int randvalue = (randomPoints >= 1) ? RandomHelper.IRand(1, randomPoints) : RandomHelper.IRand(randomPoints, 1);
-
-                            basePoints += randvalue;
-                            break;
-                        }
-                }
+                return (int)Math.Round(tempValue);
             }
-
-            float value = (float)basePoints;
-
-            // random damage
-            if (caster != null)
-            {
-                // bonus amount from combo points
-                if (caster.m_playerMovingMe != null && comboDamage != 0)
-                {
-                    byte comboPoints = caster.m_playerMovingMe.GetComboPoints();
-                    if (comboPoints != 0)
-                        value += comboDamage * comboPoints;
-                }
-
-                value = caster.ApplyEffectModifiers(_spellInfo, EffectIndex, value);
-
-                if (!caster.IsControlledByPlayer() && _spellInfo.SpellLevel != 0 && _spellInfo.SpellLevel != caster.getLevel() &&
-                    basePointsPerLevel == 0 && _spellInfo.HasAttribute(SpellAttr0.LevelDamageCalculation))
-                {
-                    bool canEffectScale = false;
-                    switch (Effect)
-                    {
-                        case SpellEffectName.SchoolDamage:
-                        case SpellEffectName.Dummy:
-                        case SpellEffectName.PowerDrain:
-                        case SpellEffectName.HealthLeech:
-                        case SpellEffectName.Heal:
-                        case SpellEffectName.WeaponDamage:
-                        case SpellEffectName.PowerBurn:
-                        case SpellEffectName.ScriptEffect:
-                        case SpellEffectName.NormalizedWeaponDmg:
-                        case SpellEffectName.ForceCastWithValue:
-                        case SpellEffectName.TriggerSpellWithValue:
-                        case SpellEffectName.TriggerMissileSpellWithValue:
-                            canEffectScale = true;
-                            break;
-                        default:
-                            break;
-                    }
-
-                    switch (ApplyAuraName)
-                    {
-                        case AuraType.PeriodicDamage:
-                        case AuraType.Dummy:
-                        case AuraType.PeriodicHeal:
-                        case AuraType.DamageShield:
-                        case AuraType.ProcTriggerDamage:
-                        case AuraType.PeriodicLeech:
-                        case AuraType.PeriodicManaLeech:
-                        case AuraType.SchoolAbsorb:
-                        case AuraType.PeriodicTriggerSpellWithValue:
-                            canEffectScale = true;
-                            break;
-                        default:
-                            break;
-                    }
-
-                    if (canEffectScale)
-                    {
-                        GtNpcManaCostScalerRecord spellScaler = CliDB.NpcManaCostScalerGameTable.GetRow(_spellInfo.SpellLevel);
-                        GtNpcManaCostScalerRecord casterScaler = CliDB.NpcManaCostScalerGameTable.GetRow(caster.getLevel());
-                        if (spellScaler != null && casterScaler != null)
-                            value *= casterScaler.Scaler / spellScaler.Scaler;
-                    }
-                }
-            }
-
-            return (int)value;
-        }
-
-        public int CalcBaseValue(int value)
-        {
-            if (DieSides == 0)
-                return value;
-            else
-                return value - 1;
         }
 
         public float CalcValueMultiplier(Unit caster, Spell spell = null)
@@ -4096,6 +4070,94 @@ namespace Game.Spells
         public SpellTargetObjectTypes GetUsedTargetObjectType()
         {
             return _data[(int)Effect].UsedTargetObjectType;
+        }
+
+        ExpectedStatType GetScalingExpectedStat()
+        {
+            switch (Effect)
+            {
+                case SpellEffectName.SchoolDamage:
+                case SpellEffectName.EnvironmentalDamage:
+                case SpellEffectName.HealthLeech:
+                case SpellEffectName.WeaponDamageNoschool:
+                case SpellEffectName.WeaponDamage:
+                    return ExpectedStatType.CreatureSpellDamage;
+                case SpellEffectName.Heal:
+                case SpellEffectName.HealMechanical:
+                    return ExpectedStatType.PlayerHealth;
+                case SpellEffectName.Energize:
+                case SpellEffectName.PowerBurn:
+                    if (MiscValue == 0)
+                        return ExpectedStatType.PlayerMana;
+                    return ExpectedStatType.None;
+                case SpellEffectName.PowerDrain:
+                    return ExpectedStatType.PlayerMana;
+                case SpellEffectName.ApplyAura:
+                case SpellEffectName.PersistentAreaAura:
+                case SpellEffectName.ApplyAreaAuraParty:
+                case SpellEffectName.ApplyAreaAuraRaid:
+                case SpellEffectName.ApplyAreaAuraPet:
+                case SpellEffectName.ApplyAreaAuraFriend:
+                case SpellEffectName.ApplyAreaAuraEnemy:
+                case SpellEffectName.ApplyAreaAuraOwner:
+                case SpellEffectName.ApllyAuraOnPet:
+                case SpellEffectName.Unk202:
+                    switch (ApplyAuraName)
+                    {
+                        case AuraType.PeriodicDamage:
+                        case AuraType.ModDamageDone:
+                        case AuraType.DamageShield:
+                        case AuraType.ProcTriggerDamage:
+                        case AuraType.PeriodicLeech:
+                        case AuraType.ModDamageDoneCreature:
+                        case AuraType.PeriodicHealthFunnel:
+                        case AuraType.ModMeleeAttackPowerVersus:
+                        case AuraType.ModRangedAttackPowerVersus:
+                        case AuraType.ModFlatSpellDamageVersus:
+                            return ExpectedStatType.CreatureSpellDamage;
+                        case AuraType.PeriodicHeal:
+                        case AuraType.ModDamageTaken:
+                        case AuraType.ModIncreaseHealth:
+                        case AuraType.SchoolAbsorb:
+                        case AuraType.ModRegen:
+                        case AuraType.ManaShield:
+                        case AuraType.ModHealing:
+                        case AuraType.ModHealingDone:
+                        case AuraType.ModHealthRegenInCombat:
+                        case AuraType.ModMaxHealth:
+                        case AuraType.ModIncreaseHealth2:
+                        case AuraType.SchoolHealAbsorb:
+                            return ExpectedStatType.PlayerHealth;
+                        case AuraType.PeriodicManaLeech:
+                            return ExpectedStatType.PlayerMana;
+                        case AuraType.ModStat:
+                        case AuraType.ModAttackPower:
+                        case AuraType.ModRangedAttackPower:
+                            return ExpectedStatType.PlayerPrimaryStat;
+                        case AuraType.ModRating:
+                            return ExpectedStatType.PlayerSecondaryStat;
+                        case AuraType.ModResistance:
+                        case AuraType.ModBaseResistance:
+                        case AuraType.ModTargetResistance:
+                        case AuraType.ModBonusArmor:
+                            return ExpectedStatType.ArmorConstant;
+                        case AuraType.PeriodicEnergize:
+                        case AuraType.ModIncreaseEnergy:
+                        case AuraType.ModPowerCostSchool:
+                        case AuraType.ModPowerRegen:
+                        case AuraType.PowerBurn:
+                        case AuraType.ModMaxPower:
+                            if (MiscValue == 0)
+                                return ExpectedStatType.PlayerMana;
+                            return ExpectedStatType.None;
+                        default:
+                            break;
+                    }
+                    break;
+                default:
+                    break;
+            }
+            return ExpectedStatType.None;
         }
 
         public ImmunityInfo GetImmunityInfo() { return _immunityInfo; }
@@ -4370,7 +4432,13 @@ namespace Game.Spells
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 252 SPELL_EFFECT_252
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 253 SPELL_EFFECT_GIVE_HONOR
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 254 SPELL_EFFECT_254
-            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit)  // 255 SPELL_EFFECT_LEARN_TRANSMOG_SET
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 255 SPELL_EFFECT_LEARN_TRANSMOG_SET
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 256 SPELL_EFFECT_256
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 257 SPELL_EFFECT_257
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 258 SPELL_EFFECT_MODIFY_KEYSTONE
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 259 SPELL_EFFECT_RESPEC_AZERITE_EMPOWERED_ITEM
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 260 SPELL_EFFECT_SUMMON_STABLED_PET
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 261 SPELL_EFFECT_SCRAP_ITEM
         };
 
         #region Fields
@@ -4380,7 +4448,6 @@ namespace Game.Spells
         public SpellEffectName Effect;
         public AuraType ApplyAuraName;
         public uint ApplyAuraPeriod;
-        public int DieSides;
         public float RealPointsPerLevel;
         public int BasePoints;
         public float PointsPerResource;
@@ -4741,8 +4808,9 @@ namespace Game.Spells
             new StaticData(SpellTargetObjectTypes.None, SpellTargetReferenceTypes.None,   SpellTargetSelectionCategories.Nyi,     SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 145
             new StaticData(SpellTargetObjectTypes.None, SpellTargetReferenceTypes.None,   SpellTargetSelectionCategories.Nyi,     SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 146
             new StaticData(SpellTargetObjectTypes.None, SpellTargetReferenceTypes.None,   SpellTargetSelectionCategories.Nyi,     SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 147
-            new StaticData(SpellTargetObjectTypes.None, SpellTargetReferenceTypes.None,   SpellTargetSelectionCategories.Nyi,     SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 148)
-            new StaticData(SpellTargetObjectTypes.Dest, SpellTargetReferenceTypes.Caster, SpellTargetSelectionCategories.Default, SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.Random),      // 149)
+            new StaticData(SpellTargetObjectTypes.None, SpellTargetReferenceTypes.None,   SpellTargetSelectionCategories.Nyi,     SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 148
+            new StaticData(SpellTargetObjectTypes.Dest, SpellTargetReferenceTypes.Caster, SpellTargetSelectionCategories.Default, SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.Random),      // 149
+            new StaticData(SpellTargetObjectTypes.Unit, SpellTargetReferenceTypes.Caster, SpellTargetSelectionCategories.Default, SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 150
         };
     }
 

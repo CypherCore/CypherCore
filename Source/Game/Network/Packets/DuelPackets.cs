@@ -114,10 +114,12 @@ namespace Game.Network.Packets
         {
             ArbiterGUID = _worldPacket.ReadPackedGuid();
             Accepted = _worldPacket.HasBit();
+            Forfeited = _worldPacket.HasBit();
         }
 
         public ObjectGuid ArbiterGUID;
         public bool Accepted;
+        public bool Forfeited;
     }
 
     public class DuelWinner : ServerPacket

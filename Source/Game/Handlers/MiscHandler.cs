@@ -130,7 +130,7 @@ namespace Game
                 return;
             }
 
-            GetPlayer().SetByteValue(PlayerFields.FieldBytes, PlayerFieldOffsets.FieldBytesOffsetActionBarToggles, packet.Mask);
+            GetPlayer().SetByteValue(ActivePlayerFields.Bytes, PlayerFieldOffsets.FieldBytesOffsetActionBarToggles, packet.Mask);
         }
 
         [WorldPacketHandler(ClientOpcodes.CompleteCinematic)]
@@ -425,13 +425,6 @@ namespace Game
             _collectionMgr.MountSetFavorite(mountSetFavorite.MountSpellID, mountSetFavorite.IsFavorite);
         }
 
-        [WorldPacketHandler(ClientOpcodes.PvpPrestigeRankUp)]
-        void HandlePvpPrestigeRankUp(PvpPrestigeRankUp pvpPrestigeRankUp)
-        {
-            if (_player.CanPrestige())
-                _player.Prestige();
-        }
-
         [WorldPacketHandler(ClientOpcodes.CloseInteraction)]
         void HandleCloseInteraction(CloseInteraction closeInteraction)
         {
@@ -505,12 +498,12 @@ namespace Game
         {
             if (farSight.Enable)
             {
-                Log.outDebug(LogFilter.Network, "Added FarSight {0} to player {1}", GetPlayer().GetUInt64Value(PlayerFields.Farsight), GetPlayer().GetGUID().ToString());
+                Log.outDebug(LogFilter.Network, "Added FarSight {0} to player {1}", GetPlayer().GetUInt64Value(ActivePlayerFields.Farsight), GetPlayer().GetGUID().ToString());
                 WorldObject target = GetPlayer().GetViewpoint();
                 if (target)
                     GetPlayer().SetSeer(target);
                 else
-                    Log.outDebug(LogFilter.Network, "Player {0} (GUID: {1}) requests non-existing seer {2}", GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), GetPlayer().GetUInt64Value(PlayerFields.Farsight));
+                    Log.outDebug(LogFilter.Network, "Player {0} (GUID: {1}) requests non-existing seer {2}", GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), GetPlayer().GetUInt64Value(ActivePlayerFields.Farsight));
             }
             else
             {

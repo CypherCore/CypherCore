@@ -644,7 +644,7 @@ namespace Game.Groups
                 // Remove the groups permanent instance bindings
                 foreach (var difficultyDic in m_boundInstances.Values)
                 {
-                    foreach (var pair in difficultyDic)
+                    foreach (var pair in difficultyDic.ToList())
                     {
                         // Do not unbind saves of instances that already had map created (a newLeader entered)
                         // forcing a new instance with another leader requires group disbanding (confirmed on retail)
@@ -1175,6 +1175,7 @@ namespace Game.Groups
                         else
                         {
                             item.is_blocked = false;
+                            item.rollWinnerGUID = player.GetGUID();
                             player.SendEquipError(msg, null, null, roll.itemid);
                         }
                     }
@@ -1225,6 +1226,7 @@ namespace Game.Groups
                             else
                             {
                                 item.is_blocked = false;
+                                item.rollWinnerGUID = player.GetGUID();
                                 player.SendEquipError(msg, null, null, roll.itemid);
                             }
                         }
@@ -1983,6 +1985,9 @@ namespace Game.Groups
         {
             if (save == null || isBGGroup() || isBFGroup())
                 return null;
+
+            if (!m_boundInstances.ContainsKey(save.GetDifficultyID()))
+                m_boundInstances[save.GetDifficultyID()] = new Dictionary<uint, InstanceBind>();
 
             if (!m_boundInstances[save.GetDifficultyID()].ContainsKey(save.GetMapId()))
                 m_boundInstances[save.GetDifficultyID()][save.GetMapId()] = new InstanceBind();

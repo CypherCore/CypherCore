@@ -69,7 +69,7 @@ namespace Game.DataStorage
                             int arrayLength = ColumnMeta[dataFieldIndex].ArraySize;
                             if (arrayLength > 1)
                             {
-                                for (var arrayIndex = 0; arrayIndex < arrayLength; ++arrayIndex)
+                                while (arrayLength > 0)
                                 {
                                     var fieldInfo = fieldsInfo[objectFieldIndex++];
                                     if (fieldInfo.IsArray)
@@ -155,7 +155,6 @@ namespace Game.DataStorage
             StringTable = null;
             FieldStructure = null;
             ColumnMeta = null;
-            RelationShipData = null;
         }
 
         static void ReadHeader(BinaryReader reader)
@@ -172,137 +171,49 @@ namespace Game.DataStorage
             Header.MinId = reader.ReadInt32();
             Header.MaxId = reader.ReadInt32();
             Header.Locale = reader.ReadInt32();
-            Header.CopyTableSize = reader.ReadInt32();
             Header.Flags = (HeaderFlags)reader.ReadUInt16();
             Header.IdIndex = reader.ReadUInt16();
             Header.TotalFieldCount = reader.ReadUInt32();
 
             Header.BitpackedDataOffset = reader.ReadUInt32();
             Header.LookupColumnCount = reader.ReadUInt32();
-            Header.OffsetTableOffset = reader.ReadUInt32();
-            Header.IdListSize = reader.ReadUInt32();
             Header.ColumnMetaSize = reader.ReadUInt32();
             Header.CommonDataSize = reader.ReadUInt32();
             Header.PalletDataSize = reader.ReadUInt32();
-            Header.RelationshipDataSize = reader.ReadUInt32();
-
-            //Gather field structures
-            FieldStructure = new List<FieldStructureEntry>();
-            for (int i = 0; i < Header.FieldCount; i++)
-            {
-                var field = new FieldStructureEntry(reader.ReadInt16(), reader.ReadUInt16());
-                FieldStructure.Add(field);
-            }
+            Header.SectionsCount = reader.ReadUInt32();
         }
 
         static Dictionary<int, byte[]> ReadData(BinaryReader reader)
         {
-            Dictionary<int, byte[]> CopyTable = new Dictionary<int, byte[]>();
-            List<Tuple<int, short>> offsetmap = new List<Tuple<int, short>>();
-            Dictionary<int, OffsetDuplicate> firstindex = new Dictionary<int, OffsetDuplicate>();
-            Dictionary<int, int> OffsetDuplicates = new Dictionary<int, int>();
-            Dictionary<int, List<int>> Copies = new Dictionary<int, List<int>>();
+            Dictionary<int, byte[]> records = new Dictionary<int, byte[]>();
 
-            bool hasOffsetTable = Header.HasOffsetTable();
-            bool hasIndexTable = Header.HasIndexTable();
+            var sections = reader.ReadArray<SectionHeader>(Header.SectionsCount);
 
-            byte[] recordData;
-            if (hasOffsetTable)
-                recordData = reader.ReadBytes((int)(Header.OffsetTableOffset - 84 - 4 * Header.FieldCount));
-            else
-            {
-                recordData = reader.ReadBytes((int)(Header.RecordCount * Header.RecordSize));
-                Array.Resize(ref recordData, recordData.Length + 8);
-            }
+            //Gather field structures
+            FieldStructure = reader.ReadArray<FieldMetaData>(Header.FieldCount);
 
-            if (Header.StringTableSize != 0)
-            {
-                // string data
-                StringTable = new Dictionary<int, string>();
-
-                for (int i = 0; i < Header.StringTableSize;)
-                {
-                    long oldPos = reader.BaseStream.Position;
-
-                    StringTable[i] = reader.ReadCString();
-
-                    i += (int)(reader.BaseStream.Position - oldPos);
-
-                }
-            }
-
-            int[] m_indexes = null;
-
-            // OffsetTable
-            if (hasOffsetTable && Header.OffsetTableOffset > 0)
-            {
-                reader.BaseStream.Position = Header.OffsetTableOffset;
-                for (int i = 0; i < (Header.MaxId - Header.MinId + 1); i++)
-                {
-                    int offset = reader.ReadInt32();
-                    short length = reader.ReadInt16();
-
-                    if (offset == 0 || length == 0)
-                        continue;
-
-                    // special case, may contain duplicates in the offset map that we don't want
-                    if (Header.CopyTableSize == 0)
-                    {
-                        if (!firstindex.ContainsKey(offset))
-                            firstindex.Add(offset, new OffsetDuplicate(offsetmap.Count, firstindex.Count));
-                        else
-                            OffsetDuplicates.Add(Header.MinId + i, firstindex[offset].VisibleIndex);
-                    }
-
-                    offsetmap.Add(new Tuple<int, short>(offset, length));
-                }
-            }
-
-            // IndexTable
-            if (hasIndexTable)
-                m_indexes = reader.ReadArray<int>(Header.RecordCount);
-
-            // Copytable
-            if (Header.CopyTableSize > 0)
-            {
-                long end = reader.BaseStream.Position + Header.CopyTableSize;
-                while (reader.BaseStream.Position < end)
-                {
-                    int id = reader.ReadInt32();
-                    int idcopy = reader.ReadInt32();
-
-                    if (!Copies.ContainsKey(idcopy))
-                        Copies.Add(idcopy, new List<int>());
-
-                    Copies[idcopy].Add(id);
-                }
-            }
-
-            // ColumnMeta
+            // column meta data
             ColumnMeta = new List<ColumnStructureEntry>();
-            if (Header.ColumnMetaSize != 0)
+            for (int i = 0; i < Header.FieldCount; i++)
             {
-                for (int i = 0; i < Header.FieldCount; i++)
+                var column = new ColumnStructureEntry()
                 {
-                    var column = new ColumnStructureEntry()
-                    {
-                        RecordOffset = reader.ReadUInt16(),
-                        Size = reader.ReadUInt16(),
-                        AdditionalDataSize = reader.ReadUInt32(), // size of pallet / sparse values
-                        CompressionType = (DB2ColumnCompression)reader.ReadUInt32(),
-                        BitOffset = reader.ReadInt32(),
-                        BitWidth = reader.ReadInt32(),
-                        Cardinality = reader.ReadInt32()
-                    };
+                    RecordOffset = reader.ReadUInt16(),
+                    Size = reader.ReadUInt16(),
+                    AdditionalDataSize = reader.ReadUInt32(), // size of pallet / sparse values
+                    CompressionType = (DB2ColumnCompression)reader.ReadUInt32(),
+                    BitOffset = reader.ReadInt32(),
+                    BitWidth = reader.ReadInt32(),
+                    Cardinality = reader.ReadInt32()
+                };
 
-                    // preload arraysizes
-                    if (column.CompressionType == DB2ColumnCompression.None)
-                        column.ArraySize = Math.Max(column.Size / FieldStructure[i].BitCount, 1);
-                    else if (column.CompressionType == DB2ColumnCompression.PalletArray)
-                        column.ArraySize = Math.Max(column.Cardinality, 1);
+                // preload arraysizes
+                if (column.CompressionType == DB2ColumnCompression.None)
+                    column.ArraySize = Math.Max(column.Size / FieldStructure[i].BitCount, 1);
+                else if (column.CompressionType == DB2ColumnCompression.PalletArray)
+                    column.ArraySize = Math.Max(column.Cardinality, 1);
 
-                    ColumnMeta.Add(column);
-                }
+                ColumnMeta.Add(column);
             }
 
             // Pallet values
@@ -330,148 +241,194 @@ namespace Game.DataStorage
                 }
             }
 
-            // Relationships
-            if (Header.RelationshipDataSize > 0)
-            {
-                RelationShipData = new RelationShipData()
-                {
-                    Records = reader.ReadUInt32(),
-                    MinId = reader.ReadUInt32(),
-                    MaxId = reader.ReadUInt32(),
-                    Entries = new Dictionary<uint, byte[]>()
-                };
+            List<Tuple<int, int>> offsetmap = new List<Tuple<int, int>>();
 
-                for (int i = 0; i < RelationShipData.Records; i++)
-                {
-                    byte[] foreignKey = reader.ReadBytes(4);
-                    uint index = reader.ReadUInt32();
-                    // has duplicates just like the copy table does... why?
-                    if (!RelationShipData.Entries.ContainsKey(index))
-                        RelationShipData.Entries.Add(index, foreignKey);
+            bool hasIndexTable = Header.HasIndexTable();
+
+            byte[] recordData;
+            for (int sectionIndex = 0; sectionIndex < Header.SectionsCount; sectionIndex++)
+            {
+                reader.BaseStream.Position = sections[sectionIndex].FileOffset;
+
+                if (Header.HasOffsetTable())
+                {   
+                    // sparse data with inlined strings
+                    recordData = reader.ReadBytes(sections[sectionIndex].SparseTableOffset - sections[sectionIndex].FileOffset);
+
+                    // OffsetTable
+                    for (int i = 0; i < (Header.MaxId - Header.MinId + 1); i++)
+                    {
+                        int offset = reader.ReadInt32();
+                        int length = reader.ReadInt32();
+
+                        offsetmap.Add(new Tuple<int, int>(offset, length));
+                    }                    
                 }
-            }
-
-            // Record Data
-            for (int i = 0; i < Header.RecordCount; i++)
-            {
-                int id = 0;
-
-                if (hasOffsetTable && hasIndexTable)
+                else
                 {
-                    id = m_indexes[CopyTable.Count];
-                    var map = offsetmap[i];
+                    // records data
+                    recordData = reader.ReadBytes((int)(sections[sectionIndex].NumRecords * Header.RecordSize));
 
-                    if (Header.CopyTableSize == 0 && firstindex[map.Item1].HiddenIndex != i) // ignore duplicates
-                        continue;
+                    Array.Resize(ref recordData, recordData.Length + 8); // pad with extra zeros so we don't crash when reading
 
-                    reader.BaseStream.Position = map.Item1;
+                    // string data
+                    StringTable = new Dictionary<int, string>();
 
-                    byte[] data = reader.ReadBytes(map.Item2);
-
-                    IEnumerable<byte> recordbytes = data;
-
-                    // append relationship id
-                    if (RelationShipData != null)
+                    for (int i = 0; i < sections[sectionIndex].StringTableSize;)
                     {
-                        // seen cases of missing indicies 
-                        if (RelationShipData.Entries.TryGetValue((uint)i, out byte[] foreignData))
-                            recordbytes = recordbytes.Concat(foreignData);
-                        else
-                            recordbytes = recordbytes.Concat(new byte[4]);
+                        int oldPos = (int)reader.BaseStream.Position;
+
+                        StringTable[i] = reader.ReadCString();
+
+                        i += (int)(reader.BaseStream.Position - oldPos);
                     }
+                }
 
-                    CopyTable.Add(id, recordbytes.ToArray());
+                // IndexTable
+                int[] m_indexes = reader.ReadArray<int>((uint)(sections[sectionIndex].IndexDataSize / 4));
 
-                    if (Copies.ContainsKey(id))
+                // duplicate rows data
+                Dictionary<int, int> copyData = new Dictionary<int, int>();
+
+                for (int i = 0; i < sections[sectionIndex].CopyTableSize / 8; i++)
+                    copyData[reader.ReadInt32()] = reader.ReadInt32();
+
+                // Relationships
+                RelationShipData relationShipData = null;
+                if (sections[sectionIndex].ParentLookupDataSize > 0)
+                {
+                    relationShipData = new RelationShipData()
                     {
-                        foreach (int copy in Copies[id])
-                            CopyTable.Add(copy, data.ToArray());
+                        Records = reader.ReadUInt32(),
+                        MinId = reader.ReadUInt32(),
+                        MaxId = reader.ReadUInt32(),
+                        Entries = new Dictionary<uint, byte[]>()
+                    };
+
+                    for (int i = 0; i < relationShipData.Records; i++)
+                    {
+                        byte[] foreignKey = reader.ReadBytes(4);
+                        uint index = reader.ReadUInt32();
+                        // has duplicates just like the copy table does... why?
+                        if (!relationShipData.Entries.ContainsKey(index))
+                            relationShipData.Entries.Add(index, foreignKey);
+                    }
+                }
+
+                // Record Data
+                if (Header.HasOffsetTable() && hasIndexTable)
+                {
+                    for (int i = 0; i < Header.RecordCount; ++i)
+                    {
+                        int id = m_indexes[records.Count];
+                        var map = offsetmap[i];
+
+                        reader.BaseStream.Position = map.Item1;
+
+                        byte[] data = reader.ReadBytes(map.Item2);
+
+                        IEnumerable<byte> recordbytes = data;
+
+                        // append relationship id
+                        if (relationShipData != null)
+                        {
+                            // seen cases of missing indicies 
+                            if (relationShipData.Entries.TryGetValue((uint)i, out byte[] foreignData))
+                                recordbytes = recordbytes.Concat(foreignData);
+                            else
+                                recordbytes = recordbytes.Concat(new byte[4]);
+                        }
+
+                        records.Add(id, recordbytes.ToArray());
                     }
                 }
                 else
                 {
                     BitReader bitReader = new BitReader(recordData);
-                    bitReader.Offset = i * (int)Header.RecordSize;
-
-                    MemoryStream stream = new MemoryStream();
-                    BinaryWriter binaryWriter = new BinaryWriter(stream);
-
-                    if (hasIndexTable)
-                        id = m_indexes[i];
-
-                    for (int f = 0; f < Header.FieldCount; f++)
+                    for (int i = 0; i < Header.RecordCount; ++i)
                     {
-                        int bitWidth = ColumnMeta[f].BitWidth;
+                        bitReader.Position = 0;
+                        bitReader.Offset = i * (int)Header.RecordSize;
 
-                        switch (ColumnMeta[f].CompressionType)
+                        MemoryStream stream = new MemoryStream();
+                        BinaryWriter binaryWriter = new BinaryWriter(stream);
+
+                        int id = 0;
+                        if (sections[sectionIndex].IndexDataSize != 0)
+                            id = m_indexes[i];
+
+                        for (int f = 0; f < Header.FieldCount; f++)
                         {
-                            case DB2ColumnCompression.None:
-                                int bitSize = FieldStructure[f].BitCount;
-                                if (!hasIndexTable && f == Header.IdIndex)
-                                {
-                                    id = (int)bitReader.ReadUInt32(bitSize);// always read Ids as ints
-                                    binaryWriter.Write(id);
-                                }
-                                else
-                                {
-                                    for (int x = 0; x < ColumnMeta[f].ArraySize; x++)
-                                        binaryWriter.Write(bitReader.ReadValue(bitSize));
-                                }
-                                break;
+                            int bitWidth = ColumnMeta[f].BitWidth;
 
-                            case DB2ColumnCompression.Immediate:
-                                if (!hasIndexTable && f == Header.IdIndex)
-                                {
-                                    id = (int)bitReader.ReadUInt32(bitWidth);// always read Ids as ints
-                                    binaryWriter.Write(id);
-                                    continue;
-                                }
-                                else
-                                    binaryWriter.Write(bitReader.ReadValue(bitWidth, ColumnMeta[f].BitOffset, ColumnMeta[f].Cardinality == 1));
-                                break;
+                            switch (ColumnMeta[f].CompressionType)
+                            {
+                                case DB2ColumnCompression.None:
+                                    int bitSize = FieldStructure[f].BitCount;
+                                    if (!hasIndexTable && f == Header.IdIndex)
+                                    {
+                                        id = (int)bitReader.ReadUInt32(bitSize);// always read Ids as ints
+                                        binaryWriter.Write(id);
+                                    }
+                                    else
+                                    {
+                                        for (int x = 0; x < ColumnMeta[f].ArraySize; x++)
+                                            binaryWriter.Write(bitReader.ReadValue(bitSize));
+                                    }
+                                    break;
 
-                            case DB2ColumnCompression.CommonData:
-                                if (ColumnMeta[f].SparseValues.TryGetValue(id, out byte[] valBytes))
-                                    binaryWriter.Write(valBytes);
-                                else
-                                    binaryWriter.Write(ColumnMeta[f].BitOffset);
-                                break;
+                                case DB2ColumnCompression.Immediate:
+                                case DB2ColumnCompression.SignedImmediate:
+                                    if (!hasIndexTable && f == Header.IdIndex)
+                                    {
+                                        id = (int)bitReader.ReadUInt32(bitWidth);// always read Ids as ints
+                                        binaryWriter.Write(id);
+                                        continue;
+                                    }
+                                    else
+                                        binaryWriter.Write(bitReader.ReadValue(bitWidth, ColumnMeta[f].BitOffset, ColumnMeta[f].CompressionType == DB2ColumnCompression.SignedImmediate));
+                                    break;
 
-                            case DB2ColumnCompression.Pallet:
-                            case DB2ColumnCompression.PalletArray:
-                                uint palletIndex = bitReader.ReadUInt32(bitWidth);
-                                binaryWriter.Write(ColumnMeta[f].PalletValues[(int)palletIndex]);
-                                break;
+                                case DB2ColumnCompression.CommonData:
+                                    if (ColumnMeta[f].SparseValues.TryGetValue(id, out byte[] valBytes))
+                                        binaryWriter.Write(valBytes);
+                                    else
+                                        binaryWriter.Write(ColumnMeta[f].BitOffset);
+                                    break;
 
-                            default:
-                                throw new Exception($"Unknown compression {ColumnMeta[f].CompressionType}");
+                                case DB2ColumnCompression.Pallet:
+                                case DB2ColumnCompression.PalletArray:
+                                    uint palletIndex = bitReader.ReadUInt32(bitWidth);
+                                    binaryWriter.Write(ColumnMeta[f].PalletValues[(int)palletIndex]);
+                                    break;
+
+                                default:
+                                    throw new Exception($"Unknown compression {ColumnMeta[f].CompressionType}");
+                            }
                         }
-                    }
 
-                    // append relationship id
-                    if (RelationShipData != null)
-                    {
-                        // seen cases of missing indicies 
-                        if (RelationShipData.Entries.TryGetValue((uint)i, out byte[] foreignData))
-                            binaryWriter.Write(foreignData);
-                        else
-                            binaryWriter.Write(0);
-                    }
-
-                    CopyTable.Add(id, stream.ToArray());
-
-                    if (Copies.ContainsKey(id))
-                    {
-                        foreach (int copy in Copies[id])
+                        // append relationship id
+                        if (relationShipData != null)
                         {
-                            byte[] newrecord = CopyTable[id].ToArray();
-                            CopyTable.Add(copy, newrecord);
+                            // seen cases of missing indicies 
+                            if (relationShipData.Entries.TryGetValue((uint)i, out byte[] foreignData))
+                                binaryWriter.Write(foreignData);
+                            else
+                                binaryWriter.Write(0);
                         }
+
+                        records.Add(id, stream.ToArray());
                     }
+                }
+
+                foreach (var copyRow in copyData)
+                {
+                    byte[] newrecord = records[copyRow.Value].ToArray();
+                    records.Add(copyRow.Key, newrecord);
                 }
             }
 
-            return CopyTable;
+            return records;
         }
 
         static Dictionary<Type, int> bytecounts = new Dictionary<Type, int>()
@@ -493,13 +450,13 @@ namespace Game.DataStorage
             return 4 - bytecounts[type];
         }
 
-        static FieldStructureEntry[] GetBits()
+        static FieldMetaData[] GetBits()
         {
-            List<FieldStructureEntry> bits = new List<FieldStructureEntry>();
+            List<FieldMetaData> bits = new List<FieldMetaData>();
             for (int i = 0; i < ColumnMeta.Count; i++)
             {
                 short bitcount = (short)(FieldStructure[i].BitCount == 64 ? FieldStructure[i].BitCount : 0); // force bitcounts
-                bits.Add(new FieldStructureEntry(bitcount, 0));
+                bits.Add(new FieldMetaData(bitcount, 0));
             }
 
             return bits.ToArray();
@@ -619,9 +576,8 @@ namespace Game.DataStorage
         static DB6Header Header;
         static Dictionary<int, string> StringTable;
 
-        static List<FieldStructureEntry> FieldStructure;
+        static FieldMetaData[] FieldStructure;
         static List<ColumnStructureEntry> ColumnMeta;
-        static RelationShipData RelationShipData;
     }
 
     public struct DB6FieldInfo
@@ -680,25 +636,21 @@ namespace Game.DataStorage
         public int MinId;
         public int MaxId;
         public int Locale;
-        public int CopyTableSize;
         public HeaderFlags Flags;
         public int IdIndex;
         public uint TotalFieldCount;
         public uint BitpackedDataOffset;
         public uint LookupColumnCount;
-        public uint OffsetTableOffset;
-        public uint IdListSize;
         public uint ColumnMetaSize;
         public uint CommonDataSize;
         public uint PalletDataSize;
-        public uint RelationshipDataSize;
+        public uint SectionsCount;
     }
 
-    public class FieldStructureEntry
+    public struct FieldMetaData
     {
         public short Bits;
         public ushort Offset;
-        public int Length = 1;
 
         public int ByteCount
         {
@@ -720,7 +672,7 @@ namespace Game.DataStorage
             }
         }
 
-        public FieldStructureEntry(short bits, ushort offset)
+        public FieldMetaData(short bits, ushort offset)
         {
             Bits = bits;
             Offset = offset;
@@ -740,6 +692,19 @@ namespace Game.DataStorage
         public List<byte[]> PalletValues { get; set; }
         public Dictionary<int, byte[]> SparseValues { get; set; }
         public int ArraySize { get; set; } = 1;
+    }
+
+    public struct SectionHeader
+    {
+        public int unk1;
+        public int unk2;
+        public int FileOffset;
+        public int NumRecords;
+        public int StringTableSize;
+        public int CopyTableSize;
+        public int SparseTableOffset; // CatalogDataOffset, absolute value, {uint offset, ushort size}[MaxId - MinId + 1]
+        public int IndexDataSize; // int indexData[IndexDataSize / 4]
+        public int ParentLookupDataSize; // uint NumRecords, uint minId, uint maxId, {uint id, uint index}[NumRecords], questionable usefulness...
     }
 
     public class RelationShipData
@@ -790,7 +755,8 @@ namespace Game.DataStorage
         Immediate,
         CommonData,
         Pallet,
-        PalletArray
+        PalletArray,
+        SignedImmediate
     }
 
     [Flags]

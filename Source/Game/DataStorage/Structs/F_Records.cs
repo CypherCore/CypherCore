@@ -22,23 +22,24 @@ namespace Game.DataStorage
 {
     public sealed class FactionRecord
     {
-        public long[] ReputationRaceMask = new long[4];
+        public ulong[] ReputationRaceMask = new ulong[4];
         public LocalizedString Name;
         public string Description;
         public uint Id;
-        public int[] ReputationBase = new int[4];
-        public float[] ParentFactionMod = new float[2];                        // Faction outputs rep * ParentFactionModOut as spillover reputation
-        public uint[] ReputationMax = new uint[4];
         public short ReputationIndex;
-        public ushort[] ReputationClassMask = new ushort[4];
-        public ushort[] ReputationFlags = new ushort[4];
         public ushort ParentFactionID;
-        public ushort ParagonFactionID;
-        public byte[] ParentFactionCap = new byte[2];                         // The highest rank the faction will profit from incoming spillover
         public byte Expansion;
-        public byte Flags;
         public byte FriendshipRepID;
+        public byte Flags;
+        public ushort ParagonFactionID;
+        public short[] ReputationClassMask = new short[4];
+        public ushort[] ReputationFlags = new ushort[4];
+        public int[] ReputationBase = new int[4];
+        public int[] ReputationMax = new int[4];
+        public float[] ParentFactionMod = new float[2];                        // Faction outputs rep * ParentFactionModOut as spillover reputation
+        public byte[] ParentFactionCap = new byte[2];                        // The highest rank the faction will profit from incoming spillover
 
+        // helpers
         public bool CanHaveReputation()
         {
             return ReputationIndex >= 0;
@@ -50,16 +51,18 @@ namespace Game.DataStorage
         public uint Id;
         public ushort Faction;
         public ushort Flags;
-        public ushort[] Enemies = new ushort[4];
-        public ushort[] Friend = new ushort[4];
         public byte FactionGroup;
         public byte FriendGroup;
         public byte EnemyGroup;
+        public ushort[] Enemies = new ushort[4];
+        public ushort[] Friend = new ushort[4];
 
+        // helpers
         public bool IsFriendlyTo(FactionTemplateRecord entry)
         {
-            if (Id == entry.Id)
+            if (this == entry)
                 return true;
+
             if (entry.Faction != 0)
             {
                 for (int i = 0; i < 4; ++i)
@@ -69,12 +72,13 @@ namespace Game.DataStorage
                     if (Friend[i] == entry.Faction)
                         return true;
             }
-            return Convert.ToBoolean(FriendGroup & entry.FactionGroup) || Convert.ToBoolean(FactionGroup & entry.FriendGroup);
+            return (FriendGroup & entry.FactionGroup) != 0 || (FactionGroup & entry.FriendGroup) != 0;
         }
         public bool IsHostileTo(FactionTemplateRecord entry)
         {
-            if (Id == entry.Id)
+            if (this == entry)
                 return false;
+
             if (entry.Faction != 0)
             {
                 for (int i = 0; i < 4; ++i)
@@ -86,16 +90,15 @@ namespace Game.DataStorage
             }
             return (EnemyGroup & entry.FactionGroup) != 0;
         }
-        public bool IsHostileToPlayers() { return (EnemyGroup & (uint)FactionMasks.Player) != 0; }
+        public bool IsHostileToPlayers() { return (EnemyGroup & (byte)FactionMasks.Player) != 0; }
         public bool IsNeutralToAll()
         {
             for (int i = 0; i < 4; ++i)
                 if (Enemies[i] != 0)
                     return false;
-
             return EnemyGroup == 0 && FriendGroup == 0;
         }
-        public bool IsContestedGuardFaction() { return Flags.HasAnyFlag((ushort)FactionTemplateFlags.ContestedGuard); }
-        public bool ShouldSparAttack() { return Flags.HasAnyFlag((ushort)FactionTemplateFlags.EnemySpar); }
+        public bool IsContestedGuardFaction() { return (Flags & (ushort)FactionTemplateFlags.ContestedGuard) != 0; }
+        public bool ShouldSparAttack() { return (Flags & (ushort)FactionTemplateFlags.EnemySpar) != 0; }
     }
 }

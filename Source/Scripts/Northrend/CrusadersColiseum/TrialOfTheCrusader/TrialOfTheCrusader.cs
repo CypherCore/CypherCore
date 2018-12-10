@@ -913,7 +913,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             if (summoned)
             {
                 summoned.CastSpell(summoned, 51807, false);
-                summoned.SetDisplayId(summoned.GetCreatureTemplate().ModelId2);
+                summoned.SetDisplayFromModel(1);
             }
 
             _instance.SetBossState(DataTypes.BossLichKing, EncounterState.InProgress);
@@ -1102,12 +1102,12 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                             me.GetMotionMaster().MovementExpired();
                             Talk(Texts.Stage_1_03);
                             me.HandleEmoteCommand(Emote.OneshotSpellCastOmni);
-                            Unit pTrigger = me.SummonCreature(CreatureIds.Trigger, MiscData.ToCCommonLoc[1].GetPositionX(), MiscData.ToCCommonLoc[1].GetPositionY(), MiscData.ToCCommonLoc[1].GetPositionZ(), 4.69494f, TempSummonType.ManualDespawn);
+                            Creature pTrigger = me.SummonCreature(CreatureIds.Trigger, MiscData.ToCCommonLoc[1].GetPositionX(), MiscData.ToCCommonLoc[1].GetPositionY(), MiscData.ToCCommonLoc[1].GetPositionZ(), 4.69494f, TempSummonType.ManualDespawn);
                             if (pTrigger)
                             {
                                 _triggerGUID = pTrigger.GetGUID();
                                 pTrigger.SetObjectScale(2.0f);
-                                pTrigger.SetDisplayId(pTrigger.ToCreature().GetCreatureTemplate().ModelId1);
+                                pTrigger.SetDisplayFromModel(0);
                                 pTrigger.CastSpell(pTrigger, Spells.WilfredPortal, false);
                             }
                             _instance.SetData(DataTypes.Event, 1132);

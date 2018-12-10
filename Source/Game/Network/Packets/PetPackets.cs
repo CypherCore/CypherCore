@@ -154,9 +154,8 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt32(pet.CreatureID);
                 _worldPacket.WriteUInt32(pet.DisplayID);
                 _worldPacket.WriteUInt32(pet.ExperienceLevel);
-                _worldPacket.WriteUInt32(pet.PetFlags);
-
-                _worldPacket.WriteUInt8(pet.PetName.GetByteCount());
+                _worldPacket.WriteUInt8(pet.PetFlags);
+                _worldPacket.WriteBits(pet.PetName.GetByteCount(), 8);
                 _worldPacket.WriteString(pet.PetName);
             }
         }
@@ -199,21 +198,18 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
+            _worldPacket.WriteUInt8(Result);
             _worldPacket.WritePackedGuid(RenameData.PetGUID);
             _worldPacket.WriteInt32(RenameData.PetNumber);
 
             _worldPacket.WriteUInt8(RenameData.NewName.GetByteCount());
 
             _worldPacket.WriteBit(RenameData.HasDeclinedNames);
-            _worldPacket.FlushBits();
 
             if (RenameData.HasDeclinedNames)
             {
                 for (int i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
-                {
                     _worldPacket.WriteBits(RenameData.DeclinedNames.name[i].GetByteCount(), 7);
-                    _worldPacket.FlushBits();
-                }
 
                 for (int i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
                     _worldPacket.WriteString(RenameData.DeclinedNames.name[i]);
@@ -235,7 +231,7 @@ namespace Game.Network.Packets
             RenameData.PetGUID = _worldPacket.ReadPackedGuid();
             RenameData.PetNumber = _worldPacket.ReadInt32();
 
-            uint nameLen = _worldPacket.ReadUInt8();
+            uint nameLen = _worldPacket.ReadBits<uint>(8);
 
             RenameData.HasDeclinedNames = _worldPacket.HasBit();
             if (RenameData.HasDeclinedNames)

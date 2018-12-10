@@ -151,8 +151,8 @@ namespace Game.Scenarios
 
             uint count = 0;
 
-            //                                                      0            1        2     6          7           8       9       10         11               12
-            SQLResult result = DB.World.Query("SELECT CriteriaTreeID, BlobIndex, Idx1, MapID, WorldMapAreaId, Floor, Priority, Flags, WorldEffectID, PlayerConditionID FROM scenario_poi ORDER BY CriteriaTreeID, Idx1");
+            //                                         0               1          2     3      4        5         6      7              8
+            SQLResult result = DB.World.Query("SELECT CriteriaTreeID, BlobIndex, Idx1, MapID, UiMapID, Priority, Flags, WorldEffectID, PlayerConditionID FROM scenario_poi ORDER BY CriteriaTreeID, Idx1");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 scenario POI definitions. DB table `scenario_poi` is empty.");
@@ -186,24 +186,23 @@ namespace Game.Scenarios
 
             do
             {
-                int CriteriaTreeID = result.Read<int>(0);
-                int BlobIndex = result.Read<int>(1);
-                int Idx1 = result.Read<int>(2);
-                int MapID = result.Read<int>(3);
-                int WorldMapAreaId = result.Read<int>(4);
-                int Floor = result.Read<int>(5);
-                int Priority = result.Read<int>(6);
-                int Flags = result.Read<int>(7);
-                int WorldEffectID = result.Read<int>(8);
-                int PlayerConditionID = result.Read<int>(9);
+                int criteriaTreeID = result.Read<int>(0);
+                int blobIndex = result.Read<int>(1);
+                int idx1 = result.Read<int>(2);
+                int mapID = result.Read<int>(3);
+                int uiMapID = result.Read<int>(4);
+                int priority = result.Read<int>(5);
+                int flags = result.Read<int>(6);
+                int worldEffectID = result.Read<int>(7);
+                int playerConditionID = result.Read<int>(8);
 
-                if (Global.CriteriaMgr.GetCriteriaTree((uint)CriteriaTreeID) == null)
-                    Log.outError(LogFilter.Sql, "`scenario_poi` CriteriaTreeID ({0}) Idx1 ({1}) does not correspond to a valid criteria tree", CriteriaTreeID, Idx1);
+                if (Global.CriteriaMgr.GetCriteriaTree((uint)criteriaTreeID) == null)
+                    Log.outError(LogFilter.Sql, "`scenario_poi` CriteriaTreeID ({0}) Idx1 ({1}) does not correspond to a valid criteria tree", criteriaTreeID, idx1);
 
-                if (CriteriaTreeID < POIs.Length && Idx1 < POIs[CriteriaTreeID].Length)
-                    _scenarioPOIStore.Add((uint)CriteriaTreeID, new ScenarioPOI(BlobIndex, MapID, WorldMapAreaId, Floor, Priority, Flags, WorldEffectID, PlayerConditionID, POIs[CriteriaTreeID][Idx1]));
+                if (criteriaTreeID < POIs.Length && idx1 < POIs[criteriaTreeID].Length)
+                    _scenarioPOIStore.Add((uint)criteriaTreeID, new ScenarioPOI(blobIndex, mapID, uiMapID, priority, flags, worldEffectID, playerConditionID, POIs[criteriaTreeID][idx1]));
                 else
-                    Log.outError(LogFilter.ServerLoading, "Table scenario_poi references unknown scenario poi points for criteria tree id {0} POI id {1}", CriteriaTreeID, BlobIndex);
+                    Log.outError(LogFilter.ServerLoading, "Table scenario_poi references unknown scenario poi points for criteria tree id {0} POI id {1}", criteriaTreeID, blobIndex);
 
                 ++count;
             } while (result.NextRow());
@@ -240,12 +239,11 @@ namespace Game.Scenarios
 
     public class ScenarioPOI
     {
-        public ScenarioPOI(int blobIndex, int mapID, int worldMapAreaID, int floor, int priority, int flags, int worldEffectID, int playerConditionID, List<Vector2> points)
+        public ScenarioPOI(int blobIndex, int mapID, int uiMapID, int priority, int flags, int worldEffectID, int playerConditionID, List<Vector2> points)
         {
             BlobIndex = blobIndex;
             MapID = mapID;
-            WorldMapAreaID = worldMapAreaID;
-            Floor = floor;
+            UiMapID = uiMapID;
             Priority = priority;
             Flags = flags;
             WorldEffectID = worldEffectID;
@@ -255,8 +253,7 @@ namespace Game.Scenarios
 
         public int BlobIndex;
         public int MapID;
-        public int WorldMapAreaID;
-        public int Floor;
+        public int UiMapID;
         public int Priority;
         public int Flags;
         public int WorldEffectID;

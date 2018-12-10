@@ -158,7 +158,7 @@ namespace Game.DataStorage
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Conversation actors. DB table `conversation_actors` is empty.");
             }
 
-            SQLResult templateResult = DB.World.Query("SELECT Id, FirstLineId, LastLineEndTime, ScriptName FROM conversation_template");
+            SQLResult templateResult = DB.World.Query("SELECT Id, FirstLineId, LastLineEndTime, TextureKitId, ScriptName FROM conversation_template");
             if (!templateResult.IsEmpty())
             {
                 uint oldMSTime = Time.GetMSTime();
@@ -169,6 +169,7 @@ namespace Game.DataStorage
                     conversationTemplate.Id = templateResult.Read<uint>(0);
                     conversationTemplate.FirstLineId = templateResult.Read<uint>(1);
                     conversationTemplate.LastLineEndTime = templateResult.Read<uint>(2);
+                    conversationTemplate.TextureKitId = templateResult.Read<uint>(3);
                     conversationTemplate.ScriptId = Global.ObjectMgr.GetScriptId(templateResult.Read<string>(3));
 
                     conversationTemplate.Actors = actorsByConversation[conversationTemplate.Id].ToList();
@@ -236,6 +237,7 @@ namespace Game.DataStorage
         public uint Id;
         public uint FirstLineId;     // Link to ConversationLine.db2
         public uint LastLineEndTime; // Time in ms after conversation creation the last line fades out
+        public uint TextureKitId;    // Background texture
         public uint ScriptId;
 
         public List<ConversationActorTemplate> Actors = new List<ConversationActorTemplate>();

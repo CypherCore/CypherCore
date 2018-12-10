@@ -202,7 +202,7 @@ namespace Game.Entities
                 {
                     SetCritterGUID(minion.GetGUID());
                     if (GetTypeId() == TypeId.Player)
-                        minion.SetGuidValue(UnitFields.BattlePetCompanionGuid, GetGuidValue(PlayerFields.SummonedBattlePetId));
+                        minion.SetGuidValue(UnitFields.BattlePetCompanionGuid, GetGuidValue(ActivePlayerFields.SummonedBattlePetId));
                 }
 
                 // PvP, FFAPvP

@@ -221,7 +221,6 @@ namespace Game.Network.Packets
                 case ClientOpcodes.ChatChannelDeclineInvite:
                 case ClientOpcodes.ChatChannelDisplayList:
                 case ClientOpcodes.ChatChannelList:
-                case ClientOpcodes.ChatChannelModerate:
                 case ClientOpcodes.ChatChannelOwner:
                     break;
                 default:
@@ -248,12 +247,10 @@ namespace Game.Network.Packets
                 case ClientOpcodes.ChatChannelInvite:
                 case ClientOpcodes.ChatChannelKick:
                 case ClientOpcodes.ChatChannelModerator:
-                case ClientOpcodes.ChatChannelMute:
                 case ClientOpcodes.ChatChannelSetOwner:
                 case ClientOpcodes.ChatChannelSilenceAll:
                 case ClientOpcodes.ChatChannelUnban:
                 case ClientOpcodes.ChatChannelUnmoderator:
-                case ClientOpcodes.ChatChannelUnmute:
                 case ClientOpcodes.ChatChannelUnsilenceAll:
                     break;
                 default:

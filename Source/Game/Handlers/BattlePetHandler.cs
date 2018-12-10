@@ -82,7 +82,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.BattlePetSummon, Processing = PacketProcessing.Inplace)]
         void HandleBattlePetSummon(BattlePetSummon battlePetSummon)
         {
-            if (_player.GetGuidValue(PlayerFields.SummonedBattlePetId) != battlePetSummon.PetGuid)
+            if (_player.GetGuidValue(ActivePlayerFields.SummonedBattlePetId) != battlePetSummon.PetGuid)
                 GetBattlePetMgr().SummonPet(battlePetSummon.PetGuid);
             else
                 GetBattlePetMgr().DismissPet();

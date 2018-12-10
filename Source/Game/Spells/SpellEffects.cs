@@ -134,7 +134,8 @@ namespace Game.Spells
                 m_caster.CalcAbsorbResist(damageInfo);
 
                 SpellNonMeleeDamage log = new SpellNonMeleeDamage(m_caster, unitTarget, m_spellInfo.Id, m_SpellVisual, m_spellInfo.GetSchoolMask(), m_castId);
-                log.damage = (uint)damage;
+                log.damage = damageInfo.GetDamage();
+                log.originalDamage = (uint)damage;
                 log.absorb = damageInfo.GetAbsorb();
                 log.resist = damageInfo.GetResist();
 
@@ -2102,7 +2103,7 @@ namespace Game.Spells
             if (!unitTarget.IsTypeId(TypeId.Player))
                 return;
 
-            if (damage < 0)
+            if (damage < 1)
                 return;
 
             uint skillid = (uint)effectInfo.MiscValue;
@@ -2114,7 +2115,7 @@ namespace Game.Spells
             if (tier == null)
                 return;
             ushort skillval = unitTarget.ToPlayer().GetPureSkillValue((SkillType)skillid);
-            unitTarget.ToPlayer().SetSkill(skillid, (uint)effectInfo.CalcValue(), Math.Max(skillval, (ushort)1), tier.Value[damage - 1]);
+            unitTarget.ToPlayer().SetSkill(skillid, (uint)damage, Math.Max(skillval, (ushort)1), tier.Value[damage - 1]);
         }
 
         [SpellEffectHandler(SpellEffectName.PlayMovie)]
@@ -4068,12 +4069,41 @@ namespace Game.Spells
             creature.RemoveFlag(UnitFields.Flags, UnitFlags.Skinnable);
             creature.SetFlag(ObjectFields.DynamicFlags, UnitDynFlags.Lootable);
 
-            uint reqValue = (uint)(targetLevel < 10 ? 0 : targetLevel < 20 ? (targetLevel - 10) * 10 : targetLevel * 5);
+            if (skill == SkillType.Skinning)
+            {
+                int reqValue;
+                if (targetLevel <= 10)
+                    reqValue = 1;
+                else if (targetLevel < 20)
+                    reqValue = (targetLevel - 10) * 10;
+                else if (targetLevel <= 73)
+                    reqValue = targetLevel * 5;
+                else if (targetLevel < 80)
+                    reqValue = targetLevel * 10 - 365;
+                else if (targetLevel <= 84)
+                    reqValue = targetLevel * 5 + 35;
+                else if (targetLevel <= 87)
+                    reqValue = targetLevel * 15 - 805;
+                else if (targetLevel <= 92)
+                    reqValue = (targetLevel - 62) * 20;
+                else if (targetLevel <= 104)
+                    reqValue = targetLevel * 5 + 175;
+                else if (targetLevel <= 107)
+                    reqValue = targetLevel * 15 - 905;
+                else if (targetLevel <= 112)
+                    reqValue = (targetLevel - 72) * 20;
+                else if (targetLevel <= 122)
+                    reqValue = (targetLevel - 32) * 10;
+                else
+                    reqValue = 900;
 
-            uint skillValue = m_caster.ToPlayer().GetPureSkillValue(skill);
+                // TODO: Specialize skillid for each expansion
+                // new db field?
+                // tied to one of existing expansion fields in creature_template?
 
-            // Double chances for elites
-            m_caster.ToPlayer().UpdateGatherSkill(skill, skillValue, reqValue, (uint)(creature.isElite() ? 2 : 1));
+                // Double chances for elites
+                m_caster.ToPlayer().UpdateGatherSkill(skill, (uint)damage, (uint)reqValue, (uint)(creature.isElite() ? 2 : 1));
+            }
         }
 
         [SpellEffectHandler(SpellEffectName.Charge)]

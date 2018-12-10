@@ -115,6 +115,7 @@ namespace Game
                 while (result.NextRow());
             }
 
+            charResult.IsTestDemonHunterCreationAllowed = canAlwaysCreateDemonHunter;
             charResult.IsDemonHunterCreationAllowed = GetAccountExpansion() >= Expansion.Legion || canAlwaysCreateDemonHunter;
             charResult.IsAlliedRacesCreationAllowed = GetAccountExpansion() >= Expansion.BattleForAzeroth;
 
@@ -254,8 +255,8 @@ namespace Game
 
             if (!HasPermission(RBACPermissions.SkipCheckCharacterCreationRacemask))
             {
-                int raceMaskDisabled = WorldConfig.GetIntValue(WorldCfg.CharacterCreatingDisabledRacemask);
-                if (Convert.ToBoolean((1 << ((int)charCreate.CreateInfo.RaceId - 1)) & raceMaskDisabled))
+                ulong raceMaskDisabled = WorldConfig.GetUInt64Value(WorldCfg.CharacterCreatingDisabledRacemask);
+                if (Convert.ToBoolean((1ul << ((int)charCreate.CreateInfo.RaceId - 1)) & raceMaskDisabled))
                 {
                     SendCharCreate(ResponseCodes.CharCreateDisabled);
                     return;
@@ -472,7 +473,7 @@ namespace Game
                     DB.Login.CommitTransaction(trans);
 
                     // Success
-                    SendCharCreate(ResponseCodes.CharCreateSuccess);
+                    SendCharCreate(ResponseCodes.CharCreateSuccess, newChar.GetGUID());
 
                     Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}) Create Character: {2} {3}", GetAccountId(), GetRemoteAddress(), createInfo.Name, newChar.GetGUID().ToString());
                     Global.ScriptMgr.OnPlayerCreate(newChar);
@@ -690,16 +691,6 @@ namespace Game
 
             // TODO: Move this to BattlePetMgr::SendJournalLock() just to have all packets in one file
             SendPacket(new BattlePetJournalLockAcquired());
-
-            ArtifactKnowledge artifactKnowledge = new ArtifactKnowledge();
-            artifactKnowledge.ArtifactCategoryID = ArtifactCategory.Primary;
-            artifactKnowledge.KnowledgeLevel = (sbyte)WorldConfig.GetIntValue(WorldCfg.CurrencyStartArtifactKnowledge);
-            SendPacket(artifactKnowledge);
-
-            ArtifactKnowledge artifactKnowledgeFishingPole = new ArtifactKnowledge();
-            artifactKnowledgeFishingPole.ArtifactCategoryID = ArtifactCategory.Fishing;
-            artifactKnowledgeFishingPole.KnowledgeLevel = 0;
-            SendPacket(artifactKnowledgeFishingPole);
 
             pCurrChar.SendInitialPacketsBeforeAddToMap();
 
@@ -954,7 +945,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SetWatchedFaction)]
         void HandleSetWatchedFaction(SetWatchedFaction packet)
         {
-            GetPlayer().SetInt32Value(PlayerFields.WatchedFactionIndex, (int)packet.FactionIndex);
+            GetPlayer().SetInt32Value(ActivePlayerFields.WatchedFactionIndex, (int)packet.FactionIndex);
         }
 
         [WorldPacketHandler(ClientOpcodes.SetFactionInactive)]
@@ -1531,8 +1522,8 @@ namespace Game
 
             if (!HasPermission(RBACPermissions.SkipCheckCharacterCreationRacemask))
             {
-                uint raceMaskDisabled = WorldConfig.GetUIntValue(WorldCfg.CharacterCreatingDisabledRacemask);
-                if (Convert.ToBoolean(1 << ((int)factionChangeInfo.RaceID - 1) & raceMaskDisabled))
+                ulong raceMaskDisabled = WorldConfig.GetUInt64Value(WorldCfg.CharacterCreatingDisabledRacemask);
+                if (Convert.ToBoolean(1ul << ((int)factionChangeInfo.RaceID - 1) & raceMaskDisabled))
                 {
                     SendCharFactionChange(ResponseCodes.CharCreateError, factionChangeInfo);
                     return;
@@ -2018,7 +2009,7 @@ namespace Game
         void HandleOpeningCinematic(OpeningCinematic packet)
         {
             // Only players that has not yet gained any experience can use this
-            if (GetPlayer().GetUInt32Value(PlayerFields.Xp) != 0)
+            if (GetPlayer().GetUInt32Value(ActivePlayerFields.Xp) != 0)
                 return;
 
             ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey(GetPlayer().GetClass());
@@ -2287,10 +2278,11 @@ namespace Game
             GetPlayer().SetStandState(packet.StandState);
         }
 
-        void SendCharCreate(ResponseCodes result)
+        void SendCharCreate(ResponseCodes result, ObjectGuid guid = default(ObjectGuid))
         {
             CreateChar response = new CreateChar();
             response.Code = result;
+            response.Guid = guid;
 
             SendPacket(response);
         }

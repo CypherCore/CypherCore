@@ -1132,7 +1132,7 @@ namespace Game.Entities
                 if (pBag == null)
                 {
                     m_items[slot] = pItem;
-                    SetGuidValue(PlayerFields.InvSlotHead + (slot * 4), pItem.GetGUID());
+                    SetGuidValue(ActivePlayerFields.InvSlotHead + (slot * 4), pItem.GetGUID());
                     pItem.SetGuidValue(ItemFields.Contained, GetGUID());
                     pItem.SetGuidValue(ItemFields.Owner, GetGUID());
 
@@ -1975,7 +1975,7 @@ namespace Game.Entities
                     }
 
                     m_items[slot] = null;
-                    SetGuidValue(PlayerFields.InvSlotHead + (slot * 4), ObjectGuid.Empty);
+                    SetGuidValue(ActivePlayerFields.InvSlotHead + (slot * 4), ObjectGuid.Empty);
 
                     if (slot < EquipmentSlot.End)
                     {
@@ -3399,7 +3399,7 @@ namespace Game.Entities
                 // if current back slot non-empty search oldest or free
                 if (m_items[slot] != null)
                 {
-                    uint oldest_time = GetUInt32Value(PlayerFields.BuyBackTimestamp1);
+                    uint oldest_time = GetUInt32Value(ActivePlayerFields.BuyBackTimestamp);
                     uint oldest_slot = InventorySlots.BuyBackStart;
 
                     for (byte i = InventorySlots.BuyBackStart + 1; i < InventorySlots.BuyBackEnd; ++i)
@@ -3411,7 +3411,7 @@ namespace Game.Entities
                             break;
                         }
 
-                        uint i_time = GetUInt32Value(PlayerFields.BuyBackTimestamp1 + i - InventorySlots.BuyBackStart);
+                        uint i_time = GetUInt32Value(ActivePlayerFields.BuyBackTimestamp + i - InventorySlots.BuyBackStart);
 
                         if (oldest_time > i_time)
                         {
@@ -3432,13 +3432,13 @@ namespace Game.Entities
                 uint etime = (uint)(time - m_logintime + (30 * 3600));
                 int eslot = (int)slot - InventorySlots.BuyBackStart;
 
-                SetGuidValue(PlayerFields.InvSlotHead + ((int)slot * 4), pItem.GetGUID());
+                SetGuidValue(ActivePlayerFields.InvSlotHead + ((int)slot * 4), pItem.GetGUID());
                 ItemTemplate proto = pItem.GetTemplate();
                 if (proto != null)
-                    SetUInt32Value(PlayerFields.BuyBackPrice1 + eslot, proto.GetSellPrice() * pItem.GetCount());
+                    SetUInt32Value(ActivePlayerFields.BuyBackPrice + eslot, proto.GetSellPrice() * pItem.GetCount());
                 else
-                    SetUInt32Value(PlayerFields.BuyBackPrice1 + eslot, 0);
-                SetUInt32Value(PlayerFields.BuyBackTimestamp1 + eslot, etime);
+                    SetUInt32Value(ActivePlayerFields.BuyBackPrice + eslot, 0);
+                SetUInt32Value(ActivePlayerFields.BuyBackTimestamp + eslot, etime);
 
                 // move to next (for non filled list is move most optimized choice)
                 if (m_currentBuybackSlot < InventorySlots.BuyBackEnd - 1)
@@ -3890,9 +3890,9 @@ namespace Game.Entities
                 m_items[slot] = null;
 
                 int eslot = (int)slot - InventorySlots.BuyBackStart;
-                SetGuidValue(PlayerFields.InvSlotHead + (int)(slot * 4), ObjectGuid.Empty);
-                SetUInt32Value(PlayerFields.BuyBackPrice1 + eslot, 0);
-                SetUInt32Value(PlayerFields.BuyBackTimestamp1 + eslot, 0);
+                SetGuidValue(ActivePlayerFields.InvSlotHead + (int)(slot * 4), ObjectGuid.Empty);
+                SetUInt32Value(ActivePlayerFields.BuyBackPrice + eslot, 0);
+                SetUInt32Value(ActivePlayerFields.BuyBackTimestamp + eslot, 0);
 
                 // if current backslot is filled set to now free slot
                 if (m_items[m_currentBuybackSlot])
@@ -4137,6 +4137,9 @@ namespace Game.Entities
                     case ItemModType.MasteryRating:
                         ApplyRatingMod(CombatRating.Mastery, (int)(val * combatRatingMultiplier), apply);
                         break;
+                    case ItemModType.ExtraArmor:
+                        HandleStatModifier(UnitMods.Armor, UnitModifierType.TotalValue, (float)val, apply);
+                        break;
                     case ItemModType.FireResistance:
                         HandleStatModifier(UnitMods.ResistanceFire, UnitModifierType.BaseValue, (float)val, apply);
                         break;
@@ -4219,27 +4222,8 @@ namespace Game.Entities
 
             uint armor = item.GetArmor(this);
             if (armor != 0)
-            {
-                UnitModifierType modType = UnitModifierType.TotalValue;
-                if (proto.GetClass() == ItemClass.Armor)
-                {
-                    switch ((ItemSubClassArmor)proto.GetSubClass())
-                    {
-                        case ItemSubClassArmor.Cloth:
-                        case ItemSubClassArmor.Leather:
-                        case ItemSubClassArmor.Mail:
-                        case ItemSubClassArmor.Plate:
-                        case ItemSubClassArmor.Shield:
-                            modType = UnitModifierType.BaseValue;
-                            break;
-                    }
-                }
-                HandleStatModifier(UnitMods.Armor, modType, armor, apply);
-            }
+                HandleStatModifier(UnitMods.Armor, UnitModifierType.BaseValue, (float)armor, apply);
 
-            //if (proto.GetArmorDamageModifier() > 0)
-            //    HandleStatModifier(UnitMods.Armor, UnitModifierType.TotalValue, (float)proto.GetArmorDamageModifier(), apply);
-            
             WeaponAttackType attType = WeaponAttackType.BaseAttack;
             if (slot == EquipmentSlot.MainHand && (proto.GetInventoryType() == InventoryType.Ranged || proto.GetInventoryType() == InventoryType.RangedRight))
             {
@@ -5617,7 +5601,7 @@ namespace Game.Entities
             Log.outDebug(LogFilter.Player, "STORAGE: EquipItem slot = {0}, item = {1}", slot, pItem.GetEntry());
 
             m_items[slot] = pItem;
-            SetGuidValue(PlayerFields.InvSlotHead + (int)(slot * 4), pItem.GetGUID());
+            SetGuidValue(ActivePlayerFields.InvSlotHead + (int)(slot * 4), pItem.GetGUID());
             pItem.SetGuidValue(ItemFields.Contained, GetGUID());
             pItem.SetGuidValue(ItemFields.Owner, GetGUID());
             pItem.SetSlot((byte)slot);
@@ -5661,7 +5645,7 @@ namespace Game.Entities
                 Bag pBag;
                 if (bag == InventorySlots.Bag0)
                 {
-                    SetGuidValue(PlayerFields.InvSlotHead + (slot * 4), ObjectGuid.Empty);
+                    SetGuidValue(ActivePlayerFields.InvSlotHead + (slot * 4), ObjectGuid.Empty);
 
                     // equipment and equipped bags can have applied bonuses
                     if (slot < InventorySlots.BagEnd)
@@ -6031,7 +6015,7 @@ namespace Game.Entities
             }
         }
 
-        public byte GetInventorySlotCount() { return GetByteValue(PlayerFields.FieldBytes2, PlayerFieldOffsets.FieldBytes2OffsetNumBackpackSlots);    }
+        public byte GetInventorySlotCount() { return GetByteValue(ActivePlayerFields.Bytes2, PlayerFieldOffsets.FieldBytes2OffsetNumBackpackSlots);    }
         public void SetInventorySlotCount(byte slots)
         {
             //ASSERT(slots <= (INVENTORY_SLOT_ITEM_END - INVENTORY_SLOT_ITEM_START));
@@ -6074,7 +6058,7 @@ namespace Game.Entities
                 }
             }
 
-            SetByteValue(PlayerFields.FieldBytes2, PlayerFieldOffsets.FieldBytes2OffsetNumBackpackSlots, slots);
+            SetByteValue(ActivePlayerFields.Bytes2, PlayerFieldOffsets.FieldBytes2OffsetNumBackpackSlots, slots);
         }
 
         public byte GetBankBagSlotCount() { return GetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetBankBagSlots); }
@@ -6106,6 +6090,13 @@ namespace Game.Entities
             if (qitem == null && item.is_blocked)
             {
                 SendLootReleaseAll();
+                return;
+            }
+
+            // dont allow protected item to be looted by someone else
+            if (!item.rollWinnerGUID.IsEmpty() && item.rollWinnerGUID != GetGUID())
+            {
+                SendLootRelease(GetLootGUID());
                 return;
             }
 

@@ -137,7 +137,7 @@ namespace Game.Collision
                         if (result)
                         {
                             // acquire model instance
-                            WorldModel model = vm.acquireModelInstance(spawn.name);
+                            WorldModel model = vm.acquireModelInstance(spawn.name, spawn.flags);
                             if (model == null)
                                 Log.outError(LogFilter.Server, "StaticMapTree.LoadMapTile() : could not acquire WorldModel [{0}, {1}]", tileX, tileY);
 
@@ -243,29 +243,29 @@ namespace Game.Collision
             return new FileStream(tilefile, FileMode.Open, FileAccess.Read);
         }
 
-        public static bool CanLoadMap(string vmapPath, uint mapID, uint tileX, uint tileY, VMapManager vm)
+        public static LoadResult CanLoadMap(string vmapPath, uint mapID, uint tileX, uint tileY, VMapManager vm)
         {
             string fullname = vmapPath + VMapManager.getMapFileName(mapID);
             if (!File.Exists(fullname))
-                return false;
+                return LoadResult.FileNotFound;
 
             using (BinaryReader reader = new BinaryReader(new FileStream(fullname, FileMode.Open, FileAccess.Read)))
             {
                 if (reader.ReadStringFromChars(8) != MapConst.VMapMagic)
-                    return false;
+                    return LoadResult.VersionMismatch;
             }
 
             FileStream stream = OpenMapTileFile(vmapPath, mapID, tileX, tileY, vm);
             if (stream == null)
-                return false;
+                return LoadResult.FileNotFound;
 
             using (BinaryReader reader = new BinaryReader(stream))
             {
                 if (reader.ReadStringFromChars(8) != MapConst.VMapMagic)
-                    return false;
+                    return LoadResult.VersionMismatch;
             }
 
-            return true;
+            return LoadResult.Success;
         }
 
         public static string getTileFileName(uint mapID, uint tileX, uint tileY)
@@ -307,15 +307,15 @@ namespace Game.Collision
             Vector3 dir = new Vector3(0, 0, -1);
             Ray ray = new Ray(pPos, dir);   // direction with length of 1
             float maxDist = maxSearchDist;
-            if (getIntersectionTime(ray, ref maxDist, false))
+            if (getIntersectionTime(ray, ref maxDist, false, ModelIgnoreFlags.Nothing))
                 height = pPos.Z - maxDist;
 
             return height;
         }
-        bool getIntersectionTime(Ray pRay, ref float pMaxDist, bool pStopAtFirstHit)
+        bool getIntersectionTime(Ray pRay, ref float pMaxDist, bool pStopAtFirstHit, ModelIgnoreFlags ignoreFlags)
         {
             float distance = pMaxDist;
-            MapRayCallback intersectionCallBack = new MapRayCallback(iTreeValues);
+            MapRayCallback intersectionCallBack = new MapRayCallback(iTreeValues, ignoreFlags);
             iTree.intersectRay(pRay, intersectionCallBack, ref distance, pStopAtFirstHit);
             if (intersectionCallBack.didHit())
                 pMaxDist = distance;
@@ -337,7 +337,7 @@ namespace Game.Collision
             Vector3 dir = (pPos2 - pPos1) / maxDist;              // direction with length of 1
             Ray ray = new Ray(pPos1, dir);
             float dist = maxDist;
-            if (getIntersectionTime(ray, ref dist, false))
+            if (getIntersectionTime(ray, ref dist, false, ModelIgnoreFlags.Nothing))
             {
                 pResultHitPos = pPos1 + dir * dist;
                 if (pModifyDist < 0)
@@ -365,7 +365,7 @@ namespace Game.Collision
             return result;
         }
 
-        public bool isInLineOfSight(Vector3 pos1, Vector3 pos2)
+        public bool isInLineOfSight(Vector3 pos1, Vector3 pos2, ModelIgnoreFlags ignoreFlags)
         {
             float maxDist = (pos2 - pos1).magnitude();
             // return false if distance is over max float, in case of cheater teleporting to the end of the universe
@@ -380,7 +380,7 @@ namespace Game.Collision
                 return true;
             // direction with length of 1
             Ray ray = new Ray(pos1, (pos2 - pos1) / maxDist);
-            if (getIntersectionTime(ray, ref maxDist, true))
+            if (getIntersectionTime(ray, ref maxDist, true, ignoreFlags))
                 return false;
 
             return true;

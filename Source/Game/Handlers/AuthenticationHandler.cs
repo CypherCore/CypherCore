@@ -96,6 +96,9 @@ namespace Game
             features.BpayStoreDisabledByParentalControls = false;
             features.CharUndeleteEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemCharacterUndeleteEnabled);
             features.BpayStoreEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemBpayStoreEnabled);
+            features.MaxCharactersPerRealm = WorldConfig.GetIntValue(WorldCfg.CharactersPerRealm);
+            features.MinimumExpansionLevel = (int)Expansion.Classic;
+            features.MaximumExpansionLevel = WorldConfig.GetIntValue(WorldCfg.Expansion);
 
             SendPacket(features);
         }

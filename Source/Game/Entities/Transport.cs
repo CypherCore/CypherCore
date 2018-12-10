@@ -66,7 +66,9 @@ namespace Game.Entities
         {
             _isMoving = true;
 
-            m_updateFlag = UpdateFlag.Transport | UpdateFlag.StationaryPosition | UpdateFlag.Rotation;
+            m_updateFlag.ServerTime = true;
+            m_updateFlag.Stationary = true;
+            m_updateFlag.Rotation = true;
         }
 
         public override void Dispose()

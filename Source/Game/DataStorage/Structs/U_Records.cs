@@ -14,9 +14,60 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+using Framework.GameMath;
+using Framework.Constants;
 
 namespace Game.DataStorage
 {
+    public sealed class UiMapRecord
+    {
+        public LocalizedString Name;
+        public uint Id;
+        public int ParentUiMapID;
+        public int Flags;
+        public int System;
+        public UiMapType Type;
+        public uint LevelRangeMin;
+        public uint LevelRangeMax;
+        public int BountySetID;
+        public uint BountyDisplayLocation;
+        public int VisibilityPlayerConditionID;
+        public sbyte HelpTextPosition;
+        public int BkgAtlasID;
+    }
+
+    public sealed class UiMapAssignmentRecord
+    {
+        public Vector2 UiMin;
+        public Vector2 UiMax;
+        public Vector3[] Region = new Vector3[2];
+        public uint Id;
+        public int UiMapID;
+        public int OrderIndex;
+        public int MapID;
+        public int AreaID;
+        public int WmoDoodadPlacementID;
+        public int WmoGroupID;
+    }
+
+    public sealed class UiMapLinkRecord
+    {
+        public Vector2 UiMin;
+        public Vector2 UiMax;
+        public uint Id;
+        public int ParentUiMapID;
+        public int OrderIndex;
+        public int ChildUiMapID;
+    }
+
+    public sealed class UiMapXMapArtRecord
+    {
+        public uint Id;
+        public int PhaseID;
+        public int UiMapArtID;
+        public int UiMapID;
+    }
+
     public sealed class UnitPowerBarRecord
     {
         public uint Id;
@@ -24,17 +75,17 @@ namespace Game.DataStorage
         public string Cost;
         public string OutOfError;
         public string ToolTip;
+        public uint MinPower;
+        public uint MaxPower;
+        public ushort StartPower;
+        public byte CenterPower;
         public float RegenerationPeace;
         public float RegenerationCombat;
-        public uint[] FileDataID = new uint[6];
-        public uint[] Color = new uint[6];
+        public byte BarType;
+        public ushort Flags;
         public float StartInset;
         public float EndInset;
-        public ushort StartPower;
-        public ushort Flags;
-        public byte CenterPower;
-        public byte BarType;
-        public byte MinPower;
-        public uint MaxPower;
+        public uint[] FileDataID = new uint[6];
+        public uint[] Color = new uint[6];
     }
 }

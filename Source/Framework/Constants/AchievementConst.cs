@@ -408,7 +408,10 @@ namespace Framework.Constants
         GainParagonReputation = 206,
         EarnHonorXp = 207,
         RelicTalentUnlocked = 211,
-        TotalTypes = 213
+        ReachAccountHonorLevel = 213,
+        HeartOfAzerothArtifactPowerEarned = 214,
+        HeartOfAzerothLevelReached = 215,
+        TotalTypes
     }
 
     public enum CriteriaDataType

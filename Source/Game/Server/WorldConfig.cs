@@ -495,13 +495,6 @@ namespace Game
             }
             Values[WorldCfg.CurrencyMaxJusticePoints] = (int)Values[WorldCfg.CurrencyMaxJusticePoints] * 100;     //precision mod
 
-            Values[WorldCfg.CurrencyStartArtifactKnowledge] = GetDefaultValue("Currency.StartArtifactKnowledge", 55);
-            if ((int)(Values[WorldCfg.CurrencyStartArtifactKnowledge]) < 0)
-            {
-                Log.outError(LogFilter.ServerLoading, "Currency.StartArtifactKnowledge ({0}) must be >= 0, set to default 0.", Values[WorldCfg.CurrencyStartArtifactKnowledge]);
-                Values[WorldCfg.CurrencyStartArtifactKnowledge] = 0;
-            }
-
             Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevel] = GetDefaultValue("RecruitAFriend.MaxLevel", 85);
             if ((int)Values[WorldCfg.MaxRecruitAFriendBonusPlayerLevel] > (int)Values[WorldCfg.MaxPlayerLevel])
             {
@@ -617,9 +610,9 @@ namespace Game
             else
                 Values[WorldCfg.Expansion] = GetDefaultValue("Expansion", Expansion.WarlordsOfDraenor);
 
-            Values[WorldCfg.ChatfloodMessageCount] = GetDefaultValue("ChatFlood.MessageCount", 10);
-            Values[WorldCfg.ChatfloodMessageDelay] = GetDefaultValue("ChatFlood.MessageDelay", 1);
-            Values[WorldCfg.ChatfloodMuteTime] = GetDefaultValue("ChatFlood.MuteTime", 10);
+            Values[WorldCfg.ChatFloodMessageCount] = GetDefaultValue("ChatFlood.MessageCount", 10);
+            Values[WorldCfg.ChatFloodMessageDelay] = GetDefaultValue("ChatFlood.MessageDelay", 1);
+            Values[WorldCfg.ChatFloodMuteTime] = GetDefaultValue("ChatFlood.MuteTime", 10);
 
             Values[WorldCfg.EventAnnounce] = GetDefaultValue("Event.Announce", false);
 
@@ -914,6 +907,9 @@ namespace Game
             // prevent character rename on character customization
             Values[WorldCfg.PreventRenameCustomization] = GetDefaultValue("PreventRenameCharacterOnCustomization", false);
 
+            // Allow 5-man parties to use raid warnings
+            Values[WorldCfg.ChatPartyRaidWarnings] = GetDefaultValue("PartyRaidWarnings", false);
+
             // Check Invalid Position
             Values[WorldCfg.CreatureCheckInvalidPostion] = GetDefaultValue("Creature.CheckInvalidPosition", false);
             Values[WorldCfg.GameobjectCheckInvalidPostion] = GetDefaultValue("GameObject.CheckInvalidPosition", false);
@@ -931,6 +927,11 @@ namespace Game
         public static int GetIntValue(WorldCfg confi)
         {
             return Convert.ToInt32(Values.LookupByKey(confi));
+        }
+
+        public static ulong GetUInt64Value(WorldCfg confi)
+        {
+            return Convert.ToUInt64(Values.LookupByKey(confi));
         }
 
         public static bool GetBoolValue(WorldCfg confi)

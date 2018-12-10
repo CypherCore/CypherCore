@@ -173,6 +173,9 @@ namespace Game.Movement
             if (path == null || path.nodes.Empty())
                 return false;
 
+            if (Stopped())
+                return true;
+
             bool transportPath = creature.GetTransport() != null;
 
             if (isArrivalDone)

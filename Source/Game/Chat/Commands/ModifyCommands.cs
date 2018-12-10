@@ -215,7 +215,11 @@ namespace Game.Chat
             if (CheckModifySpeed(args, handler, target, out Scale, 0.1f, 10.0f, false))
             {
                 NotifyModification(handler, target, CypherStrings.YouChangeSize, CypherStrings.YoursSizeChanged, Scale);
-                target.SetObjectScale(Scale);
+                Creature creatureTarget = target.ToCreature();
+                if (creatureTarget)
+                    creatureTarget.SetFloatValue(UnitFields.DisplayScale, Scale);
+                else
+                    target.SetObjectScale(Scale);
                 return true;
             }
             return false;

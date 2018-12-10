@@ -48,7 +48,7 @@ namespace Game.Entities
 
             objectTypeId = TypeId.Unit;
             objectTypeMask |= TypeMask.Unit;
-            m_updateFlag = UpdateFlag.Living;
+            m_updateFlag.MovementUpdate = true;
 
             m_modAttackSpeedPct = new float[] { 1.0f, 1.0f, 1.0f };
             m_deathState = DeathState.Alive;
@@ -2076,9 +2076,9 @@ namespace Game.Entities
         {
             return (Race)GetByteValue(UnitFields.Bytes0, 0);
         }
-        public long getRaceMask()
+        public ulong getRaceMask()
         {
-            return (1 << ((int)GetRace() - 1));
+            return (1ul << ((int)GetRace() - 1));
         }
         public Class GetClass()
         {
@@ -2093,13 +2093,15 @@ namespace Game.Entities
             return (Gender)GetByteValue(UnitFields.Bytes0, 3);
         }
 
-        public void SetNativeDisplayId(uint modelId)
+        public void SetNativeDisplayId(uint displayId, float displayScale = 1f)
         {
-            SetUInt32Value(UnitFields.NativeDisplayId, modelId);
+            SetUInt32Value(UnitFields.NativeDisplayId, displayId);
+            SetFloatValue(UnitFields.NativeXDisplayScale, displayScale);
         }
-        public virtual void SetDisplayId(uint modelId)
+        public virtual void SetDisplayId(uint modelId, float displayScale = 1f)
         {
             SetUInt32Value(UnitFields.DisplayId, modelId);
+            SetFloatValue(UnitFields.DisplayScale, displayScale);
             // Set Gender by modelId
             CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelInfo(modelId);
             if (minfo != null)
@@ -2109,7 +2111,10 @@ namespace Game.Entities
         {
             return GetUInt32Value(UnitFields.NativeDisplayId);
         }
-
+        public float GetNativeDisplayScale()
+        {
+            return GetFloatValue(UnitFields.NativeXDisplayScale);
+        }
         public virtual Unit GetOwner()
         {
             ObjectGuid ownerid = GetOwnerGUID();
@@ -2570,7 +2575,7 @@ namespace Game.Entities
                             {
                                 CreatureTemplate ci = Global.ObjectMgr.GetCreatureTemplate((uint)eff.GetMiscValue());
                                 if (ci != null)
-                                    if (!IsDisallowedMountForm(eff.GetId(), ShapeShiftForm.None, ObjectManager.ChooseDisplayId(ci)))
+                                    if (!IsDisallowedMountForm(eff.GetId(), ShapeShiftForm.None, ObjectManager.ChooseDisplayId(ci).CreatureDisplayID))
                                         handledAura = eff;
                             }
                         }
@@ -2642,7 +2647,7 @@ namespace Game.Entities
             if (target == this)
                 visibleFlag |= UpdateFieldFlags.Private;
             else if (IsTypeId(TypeId.Player))
-                valCount = (int)PlayerFields.EndNotSelf;
+                valCount = (int)PlayerFields.End;
 
             UpdateMask updateMask = new UpdateMask(valCount);
 
@@ -2684,8 +2689,6 @@ namespace Game.Entities
                     }
                     // FIXME: Some values at server stored in float format but must be sent to client in public uint format
                     else if ((index >= (int)UnitFields.NegStat && index < (int)UnitFields.NegStat + (int)Stats.Max) ||
-                        (index >= (int)UnitFields.ResistanceBuffModsPositive && index < ((int)UnitFields.ResistanceBuffModsPositive + (int)SpellSchools.Max)) ||
-                        (index >= (int)UnitFields.ResistanceBuffModsNegative && index < ((int)UnitFields.ResistanceBuffModsNegative + (int)SpellSchools.Max)) ||
                         (index >= (int)UnitFields.PosStat && index < (int)UnitFields.PosStat + (int)Stats.Max))
                     {
                         fieldBuffer.WriteUInt32((uint)GetFloatValue(index));
@@ -2727,7 +2730,7 @@ namespace Game.Entities
 
                             if (cinfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.Trigger))
                                 if (target.IsGameMaster())
-                                    displayId = cinfo.GetFirstVisibleModel();
+                                    displayId = cinfo.GetFirstVisibleModel().CreatureDisplayID;
                         }
 
                         fieldBuffer.WriteUInt32(displayId);

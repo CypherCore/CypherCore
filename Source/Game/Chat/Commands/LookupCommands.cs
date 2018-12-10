@@ -542,7 +542,11 @@ namespace Game.Chat
                                 }
 
                                 if (handler.GetSession() != null)
-                                    handler.SendSysMessage(CypherStrings.QuestListChat, qInfo.Id, qInfo.Id, qInfo.Level, title, statusStr);
+                                    handler.SendSysMessage(CypherStrings.QuestListChat, qInfo.Id, qInfo.Id, 
+                                        handler.GetSession().GetPlayer().GetQuestLevel(qInfo),
+                                        handler.GetSession().GetPlayer().GetQuestMinLevel(qInfo),
+                                        qInfo.MaxScalingLevel, qInfo.ScalingFactionGroup,
+                                        title, statusStr);
                                 else
                                     handler.SendSysMessage(CypherStrings.QuestListConsole, qInfo.Id, title, statusStr);
 
@@ -590,7 +594,11 @@ namespace Game.Chat
                     }
 
                     if (handler.GetSession() != null)
-                        handler.SendSysMessage(CypherStrings.QuestListChat, qInfo.Id, qInfo.Id, qInfo.Level, _title, statusStr);
+                        handler.SendSysMessage(CypherStrings.QuestListChat, qInfo.Id, qInfo.Id,
+                            handler.GetSession().GetPlayer().GetQuestLevel(qInfo),
+                            handler.GetSession().GetPlayer().GetQuestMinLevel(qInfo),
+                            qInfo.MaxScalingLevel, qInfo.ScalingFactionGroup,
+                            _title, statusStr);
                     else
                         handler.SendSysMessage(CypherStrings.QuestListConsole, qInfo.Id, _title, statusStr);
 

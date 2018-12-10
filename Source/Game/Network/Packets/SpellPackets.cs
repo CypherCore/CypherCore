@@ -53,9 +53,12 @@ namespace Game.Network.Packets
         public override void Read()
         {
             ChannelSpell = _worldPacket.ReadInt32();
+            Reason = _worldPacket.ReadInt32();
         }
 
         int ChannelSpell;
+        int Reason = 0;       // 40 = /run SpellStopCasting(), 16 = movement/AURA_INTERRUPT_FLAG_MOVE, 41 = turning/AURA_INTERRUPT_FLAG_TURNING
+                                // does not match SpellCastResult enum
     }
 
     class CancelGrowthAura : ClientPacket
@@ -689,6 +692,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(SpellVisualID);
             _worldPacket.WriteFloat(TravelSpeed);
             _worldPacket.WriteFloat(UnkZero);
+            _worldPacket.WriteFloat(Unk801);
             _worldPacket.WriteBit(SpeedAsTime);
             _worldPacket.FlushBits();
         }
@@ -699,6 +703,7 @@ namespace Game.Network.Packets
         public bool SpeedAsTime;
         public float TravelSpeed;
         public float UnkZero; // Always zero
+        public float Unk801;
         public Vector3 SourceRotation; // Vector of rotations, Orientation is z
         public Vector3 TargetLocation; // Exclusive with Target
     }
@@ -711,18 +716,21 @@ namespace Game.Network.Packets
         {
             _worldPacket.WritePackedGuid(Source);
             _worldPacket.WritePackedGuid(Target);
+            _worldPacket.WritePackedGuid(Unk801_1);
             _worldPacket.WriteVector3(TargetPosition);
             _worldPacket.WriteUInt32(SpellVisualID);
             _worldPacket.WriteFloat(TravelSpeed);
             _worldPacket.WriteUInt16(MissReason);
             _worldPacket.WriteUInt16(ReflectStatus);
             _worldPacket.WriteFloat(Orientation);
+            _worldPacket.WriteFloat(Unk801_2);
             _worldPacket.WriteBit(SpeedAsTime);
             _worldPacket.FlushBits();
         }
 
         public ObjectGuid Source;
         public ObjectGuid Target; // Exclusive with TargetPosition
+        public ObjectGuid Unk801_1;
         public ushort MissReason;
         public uint SpellVisualID;
         public bool SpeedAsTime;
@@ -730,6 +738,7 @@ namespace Game.Network.Packets
         public float TravelSpeed;
         public Vector3 TargetPosition; // Exclusive with Target
         public float Orientation;
+        public float Unk801_2;
     }
 
     class PlaySpellVisualKit : ServerPacket
@@ -1118,6 +1127,7 @@ namespace Game.Network.Packets
             Health = (long)unit.GetHealth();
             AttackPower = (int)unit.GetTotalAttackPowerValue(unit.GetClass() == Class.Hunter ? WeaponAttackType.RangedAttack : WeaponAttackType.BaseAttack);
             SpellPower = unit.SpellBaseDamageBonusDone(SpellSchoolMask.Spell);
+            Armor = unit.GetArmor();
             PowerData.Add(new SpellLogPowerData((int)unit.GetPowerType(), unit.GetPower(unit.GetPowerType()), 0));
         }
 
@@ -1126,6 +1136,7 @@ namespace Game.Network.Packets
             Health = (long)spell.GetCaster().GetHealth();
             AttackPower = (int)spell.GetCaster().GetTotalAttackPowerValue(spell.GetCaster().GetClass() == Class.Hunter ? WeaponAttackType.RangedAttack : WeaponAttackType.BaseAttack);
             SpellPower = spell.GetCaster().SpellBaseDamageBonusDone(SpellSchoolMask.Spell);
+            Armor = spell.GetCaster().GetArmor();
             PowerType primaryPowerType = spell.GetCaster().GetPowerType();
             bool primaryPowerAdded = false;
             foreach (SpellPowerCost cost in spell.GetPowerCost())
@@ -1144,6 +1155,7 @@ namespace Game.Network.Packets
             data.WriteInt64(Health);
             data.WriteInt32(AttackPower);
             data.WriteInt32(SpellPower);
+            data.WriteUInt32(Armor);
             data.WriteBits(PowerData.Count, 9);
             data.FlushBits();
 
@@ -1158,10 +1170,11 @@ namespace Game.Network.Packets
         long Health;
         int AttackPower;
         int SpellPower;
+        uint Armor;
         List<SpellLogPowerData> PowerData = new List<SpellLogPowerData>();
     }
 
-    class SandboxScalingData
+    class ContentTuningParams
     {
         bool GenerateDataPlayerToPlayer(Player attacker, Player target)
         {
@@ -1172,12 +1185,12 @@ namespace Game.Network.Packets
         {
             CreatureTemplate creatureTemplate = attacker.GetCreatureTemplate();
 
-            Type = SandboxScalingDataType.CreatureToPlayerDamage;
-            PlayerLevelDelta = (short)target.GetInt32Value(PlayerFields.ScalingLevelDelta);
+            TuningType = ContentTuningType.CreatureToPlayerDamage;
+            PlayerLevelDelta = (short)target.GetInt32Value(ActivePlayerFields.ScalingPlayerLevelDelta);
             PlayerItemLevel = (ushort)target.GetAverageItemLevel();
+            ScalingHealthItemLevelCurveID = (ushort)target.GetUInt32Value(UnitFields.ScalingHealthItemLevelCurveId);
             TargetLevel = (byte)target.getLevel();
             Expansion = (byte)creatureTemplate.RequiredExpansion;
-            Class = (byte)creatureTemplate.UnitClass;
             TargetMinScalingLevel = (byte)creatureTemplate.levelScaling.Value.MinLevel;
             TargetMaxScalingLevel = (byte)creatureTemplate.levelScaling.Value.MaxLevel;
             TargetScalingLevelDelta = (sbyte)attacker.GetInt32Value(UnitFields.ScalingLevelDelta);
@@ -1188,12 +1201,12 @@ namespace Game.Network.Packets
         {
             CreatureTemplate creatureTemplate = target.GetCreatureTemplate();
 
-            Type = SandboxScalingDataType.PlayerToCreatureDamage;
-            PlayerLevelDelta = (short)attacker.GetInt32Value(PlayerFields.ScalingLevelDelta);
+            TuningType = ContentTuningType.PlayerToCreatureDamage;
+            PlayerLevelDelta = (short)attacker.GetInt32Value(ActivePlayerFields.ScalingPlayerLevelDelta);
             PlayerItemLevel = (ushort)attacker.GetAverageItemLevel();
+            ScalingHealthItemLevelCurveID = (ushort)target.GetUInt32Value(UnitFields.ScalingHealthItemLevelCurveId);
             TargetLevel = (byte)target.getLevel();
             Expansion = (byte)creatureTemplate.RequiredExpansion;
-            Class = (byte)creatureTemplate.UnitClass;
             TargetMinScalingLevel = (byte)creatureTemplate.levelScaling.Value.MinLevel;
             TargetMaxScalingLevel = (byte)creatureTemplate.levelScaling.Value.MaxLevel;
             TargetScalingLevelDelta = (sbyte)target.GetInt32Value(UnitFields.ScalingLevelDelta);
@@ -1205,12 +1218,11 @@ namespace Game.Network.Packets
             Creature accessor = target.HasScalableLevels() ? target : attacker;
             CreatureTemplate creatureTemplate = accessor.GetCreatureTemplate();
 
-            Type = SandboxScalingDataType.CreatureToCreatureDamage;
+            TuningType = ContentTuningType.CreatureToCreatureDamage;
             PlayerLevelDelta = 0;
             PlayerItemLevel = 0;
             TargetLevel = (byte)target.getLevel();
             Expansion = (byte)creatureTemplate.RequiredExpansion;
-            Class = (byte)creatureTemplate.UnitClass;
             TargetMinScalingLevel = (byte)creatureTemplate.levelScaling.Value.MinLevel;
             TargetMaxScalingLevel = (byte)creatureTemplate.levelScaling.Value.MaxLevel;
             TargetScalingLevelDelta = (sbyte)accessor.GetInt32Value(UnitFields.ScalingLevelDelta);
@@ -1254,32 +1266,35 @@ namespace Game.Network.Packets
 
         public void Write(WorldPacket data)
         {
-            data.WriteBits(Type, 4);
             data.WriteInt16(PlayerLevelDelta);
             data.WriteUInt16(PlayerItemLevel);
+            data.WriteUInt16(ScalingHealthItemLevelCurveID);
             data.WriteUInt8(TargetLevel);
             data.WriteUInt8(Expansion);
-            data.WriteUInt8(Class);
             data.WriteUInt8(TargetMinScalingLevel);
             data.WriteUInt8(TargetMaxScalingLevel);
             data.WriteInt8(TargetScalingLevelDelta);
+            data.WriteBits(TuningType, 4);
+            data.WriteBit(ScalesWithItemLevel);
+            data.FlushBits();
         }
 
-        public SandboxScalingDataType Type;
+        public ContentTuningType TuningType;
         public short PlayerLevelDelta;
         public ushort PlayerItemLevel;
+        public ushort ScalingHealthItemLevelCurveID;
         public byte TargetLevel;
         public byte Expansion;
-        public byte Class;
         public byte TargetMinScalingLevel;
         public byte TargetMaxScalingLevel;
         public sbyte TargetScalingLevelDelta;
+        public bool ScalesWithItemLevel;
 
-        public enum SandboxScalingDataType
+        public enum ContentTuningType
         {
-            PlayerToPlayer = 1, // NYI
-            CreatureToPlayerDamage = 2,
-            PlayerToCreatureDamage = 3,
+            PlayerToPlayer = 7, // NYI
+            CreatureToPlayerDamage = 1,
+            PlayerToCreatureDamage = 2,
             CreatureToCreatureDamage = 4
         }
     }
@@ -1295,16 +1310,17 @@ namespace Game.Network.Packets
             data.WriteUInt32(ActiveFlags);
             data.WriteUInt16(CastLevel);
             data.WriteUInt8(Applications);
+            data.WriteInt32(ContentTuningID);
             data.WriteBit(CastUnit.HasValue);
             data.WriteBit(Duration.HasValue);
             data.WriteBit(Remaining.HasValue);
             data.WriteBit(TimeMod.HasValue);
             data.WriteBits(Points.Length, 6);
             data.WriteBits(EstimatedPoints.Count, 6);
-            data.WriteBit(SandboxScaling.HasValue);
+            data.WriteBit(ContentTuning.HasValue);
 
-            if (SandboxScaling.HasValue)
-                SandboxScaling.Value.Write(data);
+            if (ContentTuning.HasValue)
+                ContentTuning.Value.Write(data);
 
             if (CastUnit.HasValue)
                 data.WritePackedGuid(CastUnit.Value);
@@ -1332,7 +1348,8 @@ namespace Game.Network.Packets
         public uint ActiveFlags;
         public ushort CastLevel = 1;
         public byte Applications = 1;
-        Optional<SandboxScalingData> SandboxScaling;
+        public int ContentTuningID;
+        Optional<ContentTuningParams> ContentTuning;
         public Optional<ObjectGuid> CastUnit;
         public Optional<int> Duration;
         public Optional<int> Remaining;
@@ -1476,7 +1493,7 @@ namespace Game.Network.Packets
             SpellID = data.ReadUInt32();
             SpellXSpellVisualID = data.ReadUInt32();
             MissileTrajectory.Read(data);
-            Charmer = data.ReadPackedGuid();
+            CraftingNPC = data.ReadPackedGuid();
             SendCastFlags = data.ReadBits<uint>(5);
             MoveUpdate.HasValue = data.HasBit();
             var weightCount = data.ReadBits<uint>(2);
@@ -1504,7 +1521,7 @@ namespace Game.Network.Packets
         public MissileTrajectoryRequest MissileTrajectory;
         public Optional<MovementInfo> MoveUpdate;
         public List<SpellWeight> Weight = new List<SpellWeight>();
-        public ObjectGuid Charmer;
+        public ObjectGuid CraftingNPC;
         public uint[] Misc = new uint[2];
     }
 
@@ -1613,6 +1630,7 @@ namespace Game.Network.Packets
             data.WriteInt32(SpellID);
             data.WriteUInt32(SpellXSpellVisualID);
             data.WriteUInt32(CastFlags);
+            data.WriteUInt32(CastFlagsEx);
             data.WriteUInt32(CastTime);
 
             MissileTrajectory.Write(data);
@@ -1622,8 +1640,7 @@ namespace Game.Network.Packets
 
             Immunities.Write(data);
             Predict.Write(data);
-
-            data.WriteBits(CastFlagsEx, 23);
+ 
             data.WriteBits(HitTargets.Count, 16);
             data.WriteBits(MissTargets.Count, 16);
             data.WriteBits(MissStatus.Count, 16);

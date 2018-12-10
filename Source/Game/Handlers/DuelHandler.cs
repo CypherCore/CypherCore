@@ -49,7 +49,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.DuelResponse)]
         void HandleDuelResponse(DuelResponse duelResponse)
         {
-            if (duelResponse.Accepted)
+            if (duelResponse.Accepted && !duelResponse.Forfeited)
                 HandleDuelAccepted();
             else
                 HandleDuelCancelled();

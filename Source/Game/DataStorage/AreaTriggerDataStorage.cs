@@ -150,8 +150,8 @@ namespace Game.DataStorage
                 while (templates.NextRow());
             }
 
-            //                                                                  0            1              2            3             4             5              6                  7             8
-            SQLResult areatriggerSpellMiscs = DB.World.Query("SELECT SpellMiscId, AreaTriggerId, MoveCurveId, ScaleCurveId, MorphCurveId, FacingCurveId, DecalPropertiesId, TimeToTarget, TimeToTargetScale FROM `spell_areatrigger`");
+            //                                                        0            1              2            3             4             5              6       7          8                  9             10
+            SQLResult areatriggerSpellMiscs = DB.World.Query("SELECT SpellMiscId, AreaTriggerId, MoveCurveId, ScaleCurveId, MorphCurveId, FacingCurveId, AnimId, AnimKitId, DecalPropertiesId, TimeToTarget, TimeToTargetScale FROM `spell_areatrigger`");
             if (!areatriggerSpellMiscs.IsEmpty())
             {
                 do
@@ -184,10 +184,12 @@ namespace Game.DataStorage
                     miscTemplate.MorphCurveId = ValidateAndSetCurve(areatriggerSpellMiscs.Read<uint>(4));
                     miscTemplate.FacingCurveId = ValidateAndSetCurve(areatriggerSpellMiscs.Read<uint>(5));
 
-                    miscTemplate.DecalPropertiesId = areatriggerSpellMiscs.Read<uint>(6);
+                    miscTemplate.AnimId = areatriggerSpellMiscs.Read<uint>(6);
+                    miscTemplate.AnimKitId = areatriggerSpellMiscs.Read<uint>(7);
+                    miscTemplate.DecalPropertiesId = areatriggerSpellMiscs.Read<uint>(8);
 
-                    miscTemplate.TimeToTarget = areatriggerSpellMiscs.Read<uint>(7);
-                    miscTemplate.TimeToTargetScale = areatriggerSpellMiscs.Read<uint>(8);
+                    miscTemplate.TimeToTarget = areatriggerSpellMiscs.Read<uint>(9);
+                    miscTemplate.TimeToTargetScale = areatriggerSpellMiscs.Read<uint>(10);
 
                     miscTemplate.SplinePoints = splinesBySpellMisc[miscTemplate.MiscId];
 

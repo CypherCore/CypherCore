@@ -373,7 +373,7 @@ namespace Scripts.EasternKingdoms
     {
         public npc_eye_of_acherus(Creature creature) : base(creature)
         {
-            me.SetDisplayId(me.GetCreatureTemplate().ModelId1);
+            me.SetDisplayFromModel(0);
 
             Player owner = me.GetCharmerOrOwner().ToPlayer();
             if (owner)
@@ -886,7 +886,7 @@ namespace Scripts.EasternKingdoms
     {
         public npc_scarlet_miner_cart(Creature creature) : base(creature)
         {
-            me.SetDisplayId(me.GetCreatureTemplate().ModelId1); // Modelid2 is a horse.
+            me.SetDisplayFromModel(0); // Modelid2
         }
 
         public override void JustSummoned(Creature summon)

@@ -2565,6 +2565,7 @@ namespace Game.AI
             public uint pointId;
             public uint transport;
             public uint disablePathfinding;
+            public uint contactDistance;
         }
         public struct SendGossipMenu
         {

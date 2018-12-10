@@ -287,7 +287,7 @@ namespace Game
             }
         }
 
-        [WorldPacketHandler(ClientOpcodes.GuildBankSwapItems)]
+        //[WorldPacketHandler(ClientOpcodes.GuildBankSwapItems)]
         void HandleGuildBankSwapItems(GuildBankSwapItems packet)
         {
             if (!GetPlayer().GetGameObjectIfCanInteractWith(packet.Banker, GameObjectTypes.GuildBank))
@@ -370,9 +370,9 @@ namespace Game
 
             Guild.GuildBankRightsAndSlots[] rightsAndSlots = new Guild.GuildBankRightsAndSlots[GuildConst.MaxBankTabs];
             for (byte tabId = 0; tabId < GuildConst.MaxBankTabs; ++tabId)
-                rightsAndSlots[tabId] = new Guild.GuildBankRightsAndSlots(tabId, (sbyte)packet.TabFlags[tabId], packet.TabWithdrawItemLimit[tabId]);
+                rightsAndSlots[tabId] = new Guild.GuildBankRightsAndSlots(tabId, (sbyte)packet.TabFlags[tabId], (int)packet.TabWithdrawItemLimit[tabId]);
 
-            guild.HandleSetRankInfo(this, (byte)packet.RankOrder, packet.RankName, (GuildRankRights)packet.Flags, (uint)packet.WithdrawGoldLimit, rightsAndSlots);
+            guild.HandleSetRankInfo(this, (byte)packet.RankOrder, packet.RankName, (GuildRankRights)packet.Flags, packet.WithdrawGoldLimit, rightsAndSlots);
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestGuildPartyState)]

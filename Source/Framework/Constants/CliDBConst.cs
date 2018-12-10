@@ -17,7 +17,7 @@
 
 namespace Framework.Constants
 {
-    public enum AbilytyLearnType : byte
+    public enum AbilityLearnType : byte
     {
         OnSkillValue = 1, // Spell state will update depending on skill value
         OnSkillLearn = 2  // Spell will be learned/removed together with entire skill
@@ -904,7 +904,7 @@ namespace Framework.Constants
     public enum BattlegroundBracketId                                  // bracketId for level ranges
     {
         First = 0,
-        Last = 11,
+        Last = 12,
         Max
     }
 
@@ -1241,7 +1241,7 @@ namespace Framework.Constants
         Prime = 2
     }
 
-    public enum ItemSetFlags : byte
+    public enum ItemSetFlags
     {
         LegacyInactive = 0x01,
     }
@@ -1301,7 +1301,7 @@ namespace Framework.Constants
 
     public enum LockType
     {
-        Picklock = 1,
+        Lockpicking = 1,
         Herbalism = 2,
         Mining = 3,
         DisarmTrap = 4,
@@ -1317,14 +1317,34 @@ namespace Framework.Constants
         OpenAttacking = 14,
         Gahzridian = 15,
         Blasting = 16,
-        SlowOpen = 17,
-        SlowClose = 18,
+        PvpOpen = 17,
+        PvpClose = 18,
         Fishing = 19,
         Inscription = 20,
         OpenFromVehicle = 21,
-        Archaelogy = 22,
+        Archaeology = 22,
         PvpOpenFast = 23,
-        LumberMill = 28
+        LumberMill = 28,
+        Skinning = 29,
+        AncientMana = 30,
+        Warboard = 31,
+        ClassicHerbalism = 32,
+        OutlandHerbalism = 33,
+        NorthrendHerbalism = 34,
+        CataclysmHerbalism = 35,
+        PandariaHerbalism = 36,
+        DraenorHerbalism = 37,
+        LegionHerbalism = 38,
+        KulTiranHerbalism = 39,
+        ClassicMining = 40,
+        OutlandMining = 41,
+        NorthrendMining = 42,
+        CataclysmMining = 43,
+        PandariaMining = 44,
+        DraenorMining = 45,
+        LegionMining = 46,
+        KulTiranMining = 47,
+        Skinning2 = 48
     }
 
     public enum MapTypes : byte
@@ -1359,7 +1379,7 @@ namespace Framework.Constants
         IgnoreRestrictions = 0x20
     }
 
-    public enum MountFlags
+    public enum MountFlags : ushort
     {
         CanPitch = 0x4,                    // client checks MOVEMENTFLAG2_FULL_SPEED_PITCHING
         CanSwim = 0x8,                    // client checks MOVEMENTFLAG_SWIMMING
@@ -1416,7 +1436,7 @@ namespace Framework.Constants
         MonoValue = 0x400     // Skill always has value 1
     }
 
-    public enum SpellCategoryFlags : byte
+    public enum SpellCategoryFlags : sbyte
     {
         CooldownScalesWithWeaponSpeed = 0x01, // unused
         CooldownStartsOnEvent = 0x04,
@@ -1742,5 +1762,38 @@ namespace Framework.Constants
         Yw = 453,
         Read = 456,
         Boot = 506
+    }
+
+    public enum ExpectedStatType : byte
+    {
+        CreatureHealth = 0,
+        PlayerHealth = 1,
+        CreatureAutoAttackDps = 2,
+        CreatureArmor = 3,
+        PlayerMana = 4,
+        PlayerPrimaryStat = 5,
+        PlayerSecondaryStat = 6,
+        ArmorConstant = 7,
+        None = 8,
+        CreatureSpellDamage = 9
+    }
+
+    public enum UiMapSystem : sbyte
+    {
+        World = 0,
+        Taxi = 1,
+        Adventure = 2,
+        Max = 3
+    }
+
+    public enum UiMapType
+    {
+        Cosmic = 0,
+        World = 1,
+        Continent = 2,
+        Zone = 3,
+        Dungeon = 4,
+        Micro = 5,
+        Orphan = 6
     }
 }

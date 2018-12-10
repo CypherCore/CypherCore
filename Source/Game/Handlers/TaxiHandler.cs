@@ -108,6 +108,15 @@ namespace Game
 
             GetPlayer().m_taxi.AppendTaximaskTo(data, lastTaxiCheaterState);
 
+            byte[] reachableNodes = new byte[PlayerConst.TaxiMaskSize];
+            Global.TaxiPathGraph.GetReachableNodesMask(CliDB.TaxiNodesStorage.LookupByKey(curloc), reachableNodes);
+            for (var i = 0; i < PlayerConst.TaxiMaskSize; ++i)
+            {
+                data.CanLandNodes[i] &= reachableNodes[i];
+                data.CanUseNodes[i] &= reachableNodes[i];
+            }
+
+
             SendPacket(data);
 
             GetPlayer().SetTaxiCheater(lastTaxiCheaterState);
@@ -164,6 +173,7 @@ namespace Game
             if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleActivateTaxiOpcode - {0} not found or you can't interact with it.", activateTaxi.Vendor.ToString());
+                SendActivateTaxiReply(ActivateTaxiReply.TooFarAway);
                 return;
             }
 

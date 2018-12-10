@@ -141,6 +141,10 @@ namespace Game.Entities
             if (setSpawnTime)
                 m_respawnTime = Time.UnixTime + respawnDelay;
 
+            // if corpse was removed during falling, the falling will continue and override relocation to respawn position
+            if (IsFalling())
+                StopMoving();
+
             float x, y, z, o;
             GetRespawnPosition(out x, out y, out z, out o);
             SetHomePosition(x, y, z, o);
@@ -193,22 +197,22 @@ namespace Game.Entities
             SetByteValue(UnitFields.Bytes0, 1, (byte)cinfo.UnitClass);
 
             // Cancel load if no model defined
-            if (cinfo.GetFirstValidModelId() == 0)
+            if (cinfo.GetFirstValidModel() == null)
             {
                 Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has no model defined in table `creature_template`, can't load. ", entry);
                 return false;
             }
 
-            uint displayID = ObjectManager.ChooseDisplayId(GetCreatureTemplate(), data);
-            CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelRandomGender(ref displayID);
+            CreatureModel model = ObjectManager.ChooseDisplayId(cinfo, data);
+            CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelRandomGender(ref model, cinfo);
             if (minfo == null)                                             // Cancel load if no model defined
             {
-                Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has no model defined in table `creature_template`, can't load. ", entry);
+                Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has invalid model {1} defined in table `creature_template`, can't load.", entry, model.CreatureDisplayID);
                 return false;
             }
 
-            SetDisplayId(displayID);
-            SetNativeDisplayId(displayID);
+            SetDisplayId(model.CreatureDisplayID, model.DisplayScale);
+            SetNativeDisplayId(model.CreatureDisplayID, model.DisplayScale);
             SetByteValue(UnitFields.Bytes0, 3, (byte)minfo.gender);
 
             // Load creature equipment
@@ -278,6 +282,8 @@ namespace Game.Entities
             SetUInt32Value(UnitFields.Flags3, unitFlags3);
 
             SetUInt32Value(ObjectFields.DynamicFlags, dynamicFlags);
+
+            SetUInt32Value(UnitFields.StateAnimId, (uint)CliDB.AnimationDataStorage.Count);
 
             RemoveFlag(UnitFields.Flags, UnitFlags.InCombat);
 
@@ -768,7 +774,8 @@ namespace Game.Entities
             if (!CreateFromProto(guidlow, entry, data, vehId))
                 return false;
 
-            switch (GetCreatureTemplate().Rank)
+            cinfo = GetCreatureTemplate(); // might be different than initially requested
+            switch (cinfo.Rank)
             {
                 case CreatureEliteType.Rare:
                     m_corpseDelay = WorldConfig.GetUIntValue(WorldCfg.CorpseDecayRare);
@@ -797,12 +804,12 @@ namespace Game.Entities
                 Relocate(x, y, z, ang);
             }
 
-            uint displayID = GetNativeDisplayId();
-            CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelRandomGender(ref displayID);
+            CreatureModel display = new CreatureModel(GetNativeDisplayId(), GetNativeDisplayScale(), 1.0f);
+            CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelRandomGender(ref display, cinfo);
             if (minfo != null && !IsTotem())                               // Cancel load if no model defined or if totem
             {
-                SetDisplayId(displayID);
-                SetNativeDisplayId(displayID);
+                SetDisplayId(display.CreatureDisplayID, display.DisplayScale);
+                SetNativeDisplayId(display.CreatureDisplayID, display.DisplayScale);
                 SetByteValue(UnitFields.Bytes0, 3, (byte)minfo.gender);
             }
 
@@ -815,10 +822,10 @@ namespace Game.Entities
                 m_serverSideVisibilityDetect.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Ghost);
             }
 
-            if (GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.IgnorePathfinding))
+            if (cinfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.IgnorePathfinding))
                 AddUnitState(UnitState.IgnorePathfinding);
 
-            if (GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.ImmunityKnockback))
+            if (cinfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.ImmunityKnockback))
             {
                 ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.KnockBack, true);
                 ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.KnockBackDest, true);
@@ -1014,9 +1021,9 @@ namespace Game.Entities
             CreatureTemplate cinfo = GetCreatureTemplate();
             if (cinfo != null)
             {
-                if (displayId == cinfo.ModelId1 || displayId == cinfo.ModelId2 ||
-                    displayId == cinfo.ModelId3 || displayId == cinfo.ModelId4)
-                    displayId = 0;
+                foreach (CreatureModel model in cinfo.Models)
+                    if (displayId != 0 && displayId == model.CreatureDisplayID)
+                        displayId = 0;
 
                 if (npcflag == (uint)cinfo.Npcflag)
                     npcflag = 0;
@@ -1620,12 +1627,12 @@ namespace Game.Entities
 
                 setDeathState(DeathState.JustRespawned);
 
-                uint displayID = GetNativeDisplayId();
-                CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelRandomGender(ref displayID);
+                CreatureModel display = new CreatureModel(GetNativeDisplayId(), GetNativeDisplayScale(), 1.0f);
+                CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelRandomGender(ref display, GetCreatureTemplate());
                 if (minfo != null)                                             // Cancel load if no model defined
                 {
-                    SetDisplayId(displayID);
-                    SetNativeDisplayId(displayID);
+                    SetDisplayId(display.CreatureDisplayID, display.DisplayScale);
+                    SetNativeDisplayId(display.CreatureDisplayID, display.DisplayScale);
                     SetByteValue(UnitFields.Bytes0, 3, (byte)minfo.gender);
                 }
 
@@ -2372,7 +2379,7 @@ namespace Game.Entities
                     int targetLevelWithDelta = ((int)unitTarget.getLevel() + GetInt32Value(UnitFields.ScalingLevelDelta));
 
                     if (target.IsPlayer())
-                        targetLevelWithDelta += target.GetInt32Value(PlayerFields.ScalingLevelDelta);
+                        targetLevelWithDelta += target.GetInt32Value(ActivePlayerFields.ScalingPlayerLevelDelta);
 
                     return (uint)MathFunctions.RoundToInterval(ref targetLevelWithDelta, GetInt32Value(UnitFields.ScalingLevelMin), GetInt32Value(UnitFields.ScalingLevelMax));
                 }
@@ -2622,6 +2629,10 @@ namespace Game.Entities
             if (m_playerMovingMe != null)
                 return;
 
+            // Creatures with CREATURE_FLAG_EXTRA_NO_MOVE_FLAGS_UPDATE should control MovementFlags in your own scripts
+            if (GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoMoveFlagsUpdate))
+                return;
+
             // Set the movement flags if the creature is in that mode. (Only fly if actually in air, only swim if in water, etc)
             float ground = GetMap().GetHeight(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZMinusOffset());
 
@@ -2653,21 +2664,28 @@ namespace Game.Entities
             CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelInfo(GetDisplayId());
             if (minfo != null)
             {
-                SetFloatValue(UnitFields.BoundingRadius, minfo.BoundingRadius * scale);
-                SetFloatValue(UnitFields.CombatReach, minfo.CombatReach * scale);
+                SetFloatValue(UnitFields.BoundingRadius, (IsPet() ? 1.0f : minfo.BoundingRadius) * scale);
+                SetFloatValue(UnitFields.CombatReach, (IsPet() ? SharedConst.DefaultCombatReach : minfo.CombatReach) * scale);
             }
         }
 
-        public override void SetDisplayId(uint modelId)
+        public override void SetDisplayId(uint modelId, float displayScale = 1f)
         {
-            base.SetDisplayId(modelId);
+            base.SetDisplayId(modelId, displayScale);
 
             CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelInfo(modelId);
             if (minfo != null)
             {
-                SetFloatValue(UnitFields.BoundingRadius, minfo.BoundingRadius * GetObjectScale());
-                SetFloatValue(UnitFields.CombatReach, minfo.CombatReach * GetObjectScale());
+                SetFloatValue(UnitFields.BoundingRadius, (IsPet() ? 1.0f : minfo.BoundingRadius) * GetObjectScale());
+                SetFloatValue(UnitFields.CombatReach, (IsPet() ? SharedConst.DefaultCombatReach : minfo.CombatReach) * GetObjectScale());
             }
+        }
+
+        public void SetDisplayFromModel(int modelIdx)
+        {
+            CreatureModel model = GetCreatureTemplate().GetModelByIdx(modelIdx);
+            if (model != null)
+                SetDisplayId(model.CreatureDisplayID, model.DisplayScale);
         }
 
         public override void SetTarget(ObjectGuid guid)

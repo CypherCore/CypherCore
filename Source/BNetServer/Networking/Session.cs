@@ -228,6 +228,9 @@ namespace BNetServer.Networking
 
         public BattlenetRpcErrorCode HandleVerifyWebCredentials(Bgs.Protocol.Authentication.V1.VerifyWebCredentialsRequest verifyWebCredentialsRequest)
         {
+            if (verifyWebCredentialsRequest.WebCredentials.IsEmpty)
+                return BattlenetRpcErrorCode.Denied;
+
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_ACCOUNT_INFO);
             stmt.AddValue(0, verifyWebCredentialsRequest.WebCredentials.ToStringUtf8());
 

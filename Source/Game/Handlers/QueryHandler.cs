@@ -23,6 +23,7 @@ using Game.Maps;
 using Game.Misc;
 using Game.Network;
 using Game.Network.Packets;
+using System;
 using System.Collections.Generic;
 
 namespace Game
@@ -143,10 +144,11 @@ namespace Game
                 for (uint i = 0; i < SharedConst.MaxCreatureKillCredit; ++i)
                     stats.ProxyCreatureID[i] = creatureInfo.KillCredit[i];
 
-                stats.CreatureDisplayID[0] = creatureInfo.ModelId1;
-                stats.CreatureDisplayID[1] = creatureInfo.ModelId2;
-                stats.CreatureDisplayID[2] = creatureInfo.ModelId3;
-                stats.CreatureDisplayID[3] = creatureInfo.ModelId4;
+                foreach (var model in creatureInfo.Models)
+                {
+                    stats.Display.TotalProbability += model.Probability;
+                    stats.Display.CreatureDisplay.Add(new CreatureXDisplay(model.CreatureDisplayID, model.DisplayScale, model.Probability));
+                }
 
                 stats.HpMulti = creatureInfo.ModHealth;
                 stats.EnergyMulti = creatureInfo.ModMana;
@@ -155,6 +157,7 @@ namespace Game
                 stats.RequiredExpansion = creatureInfo.RequiredExpansion;
                 stats.HealthScalingExpansion = creatureInfo.HealthScalingExpansion;
                 stats.VignetteID = creatureInfo.VignetteID;
+                stats.Class = (int)creatureInfo.UnitClass;
 
                 stats.Title = creatureInfo.SubName;
                 stats.TitleAlt = creatureInfo.TitleAlt;
@@ -389,13 +392,12 @@ namespace Game
                             questPOIBlobData.QuestObjectiveID = data.QuestObjectiveID;
                             questPOIBlobData.QuestObjectID = data.QuestObjectID;
                             questPOIBlobData.MapID = data.MapID;
-                            questPOIBlobData.WorldMapAreaID = data.WorldMapAreaID;
-                            questPOIBlobData.Floor = data.Floor;
+                            questPOIBlobData.UiMapID = data.UiMapID;
                             questPOIBlobData.Priority = data.Priority;
                             questPOIBlobData.Flags = data.Flags;
                             questPOIBlobData.WorldEffectID = data.WorldEffectID;
                             questPOIBlobData.PlayerConditionID = data.PlayerConditionID;
-                            questPOIBlobData.UnkWoD1 = data.UnkWoD1;
+                            questPOIBlobData.SpawnTrackingID = data.SpawnTrackingID;
                             questPOIBlobData.AlwaysAllowMergingBlobs = data.AlwaysAllowMergingBlobs;
 
                             foreach (var point in data.points)

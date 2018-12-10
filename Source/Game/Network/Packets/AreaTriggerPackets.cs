@@ -68,21 +68,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WritePackedGuid( TriggerGUID);
-            AreaTriggerSpline.Write(_worldPacket);
-        }
-
-        public AreaTriggerSplineInfo AreaTriggerSpline = new AreaTriggerSplineInfo();
-        public ObjectGuid TriggerGUID;
-    }
-
-    class AreaTriggerReShape : ServerPacket
-    {
-        public AreaTriggerReShape() : base(ServerOpcodes.AreaTriggerReShape) { }
-
-        public override void Write()
-        {
-            _worldPacket .WritePackedGuid( TriggerGUID);
+            _worldPacket.WritePackedGuid(TriggerGUID);
 
             _worldPacket.WriteBit(AreaTriggerSpline.HasValue);
             _worldPacket.WriteBit(AreaTriggerCircularMovement.HasValue);

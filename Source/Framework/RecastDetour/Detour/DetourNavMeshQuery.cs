@@ -47,7 +47,7 @@ using System.Linq;
 
 public static partial class Detour
 {
-    const float H_SCALE = 2.0f; // Search heuristic scale.
+    const float H_SCALE = 0.999f; // Search heuristic scale.
 
     /// Defines polygon filtering and traversal costs for navigation mesh query operations.
     // @ingroup detour

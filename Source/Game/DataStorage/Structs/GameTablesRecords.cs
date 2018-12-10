@@ -98,11 +98,6 @@ namespace Game.DataStorage
         public float JewelryMultiplier;
     }
 
-    public sealed class GtHonorLevelRecord
-    {
-        public float[] Prestige = new float[33];
-    }
-
     public sealed class GtHpPerStaRecord
     {
         public float Health;
@@ -170,6 +165,7 @@ namespace Game.DataStorage
         public float Gem2;
         public float Gem3;
         public float Health;
+        public float DamageReplaceStat;
     }
 
     public sealed class GtXpRecord

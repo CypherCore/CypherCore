@@ -543,7 +543,8 @@ namespace Game.Entities
                 return false;
             }
 
-            bool turn = (GetOrientation() != orientation);
+            // Check if angular distance changed
+            bool turn = MathFunctions.fuzzyGt(Math.PI - Math.Abs(Math.Abs(GetOrientation() - orientation) - Math.PI), 0.0f);
             // G3D::fuzzyEq won't help here, in some cases magnitudes differ by a little more than G3D::eps, but should be considered equal
             bool relocated = (teleport ||
                 Math.Abs(GetPositionX() - x) > 0.001f ||
@@ -1290,6 +1291,12 @@ namespace Game.Entities
                         player.UnsummonPetTemporaryIfAny();
                 }
 
+                // if we have charmed npc, stun him also (everywhere)
+                Unit charm = player.GetCharm();
+                if (charm)
+                    if (charm.GetTypeId() == TypeId.Unit)
+                        charm.SetFlag(UnitFields.Flags, UnitFlags.Stunned);
+
                 player.SendMovementSetCollisionHeight(player.GetCollisionHeight(true));
             }
 
@@ -1335,6 +1342,12 @@ namespace Game.Entities
                 }
                 else
                     player.ResummonPetTemporaryUnSummonedIfAny();
+
+                // if we have charmed npc, remove stun also
+                Unit charm = player.GetCharm();
+                if (charm)
+                    if (charm.GetTypeId() == TypeId.Unit && charm.HasFlag(UnitFields.Flags, UnitFlags.Stunned) && !charm.HasUnitState(UnitState.Stunned))
+                        charm.RemoveFlag(UnitFields.Flags, UnitFlags.Stunned);
             }
         }
 
@@ -1345,7 +1358,7 @@ namespace Game.Entities
                 return false;
 
             m_vehicleKit = new Vehicle(this, vehInfo, creatureEntry);
-            m_updateFlag |= UpdateFlag.Vehicle;
+            m_updateFlag.Vehicle = true;
             m_unitTypeMask |= UnitTypeMask.Vehicle;
 
             if (!loading)
@@ -1366,7 +1379,7 @@ namespace Game.Entities
 
             m_vehicleKit = null;
 
-            m_updateFlag &= ~UpdateFlag.Vehicle;
+            m_updateFlag.Vehicle = false;
             m_unitTypeMask &= ~UnitTypeMask.Vehicle;
             RemoveFlag64(UnitFields.NpcFlags, NPCFlags.SpellClick | NPCFlags.PlayerVehicle);
         }

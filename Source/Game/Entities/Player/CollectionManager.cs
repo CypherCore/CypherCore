@@ -70,14 +70,14 @@ namespace Game.Entities
         public void LoadToys()
         {
             foreach (var value in _toys.Keys)
-                _owner.GetPlayer().AddDynamicValue(PlayerDynamicFields.Toys, value);
+                _owner.GetPlayer().AddDynamicValue(ActivePlayerDynamicFields.Toys, value);
         }
 
         public bool AddToy(uint itemId, bool isFavourite = false)
         {
             if (UpdateAccountToys(itemId, isFavourite))
             {
-                _owner.GetPlayer().AddDynamicValue(PlayerDynamicFields.Toys, itemId);
+                _owner.GetPlayer().AddDynamicValue(ActivePlayerDynamicFields.Toys, itemId);
                 return true;
             }
 
@@ -198,8 +198,8 @@ namespace Game.Entities
         {
             foreach (var item in _heirlooms)
             {
-                _owner.GetPlayer().AddDynamicValue(PlayerDynamicFields.Heirlooms, item.Key);
-                _owner.GetPlayer().AddDynamicValue(PlayerDynamicFields.HeirloomsFlags, (uint)item.Value.flags);
+                _owner.GetPlayer().AddDynamicValue(ActivePlayerDynamicFields.Heirlooms, item.Key);
+                _owner.GetPlayer().AddDynamicValue(ActivePlayerDynamicFields.HeirloomFlags, (uint)item.Value.flags);
             }
         }
 
@@ -207,8 +207,8 @@ namespace Game.Entities
         {
             if (UpdateAccountHeirlooms(itemId, flags))
             {
-                _owner.GetPlayer().AddDynamicValue(PlayerDynamicFields.Heirlooms, itemId);
-                _owner.GetPlayer().AddDynamicValue(PlayerDynamicFields.HeirloomsFlags, (uint)flags);
+                _owner.GetPlayer().AddDynamicValue(ActivePlayerDynamicFields.Heirlooms, itemId);
+                _owner.GetPlayer().AddDynamicValue(ActivePlayerDynamicFields.HeirloomFlags, (uint)flags);
             }
         }
 
@@ -249,10 +249,10 @@ namespace Game.Entities
                 item.AddBonuses(bonusId);
 
             // Get heirloom offset to update only one part of dynamic field
-            var fields = player.GetDynamicValues(PlayerDynamicFields.Heirlooms);
+            var fields = player.GetDynamicValues(ActivePlayerDynamicFields.Heirlooms);
             ushort offset = (ushort)Array.IndexOf(fields, itemId);
 
-            player.SetDynamicValue(PlayerDynamicFields.HeirloomsFlags, offset, (uint)flags);
+            player.SetDynamicValue(ActivePlayerDynamicFields.HeirloomFlags, offset, (uint)flags);
             data.flags = flags;
             data.bonusId = bonusId;
         }
@@ -292,11 +292,11 @@ namespace Game.Entities
 
                 if (newItemId != 0)
                 {
-                    var heirloomFields = player.GetDynamicValues(PlayerDynamicFields.Heirlooms);
+                    var heirloomFields = player.GetDynamicValues(ActivePlayerDynamicFields.Heirlooms);
                     ushort offset = (ushort)Array.IndexOf(heirloomFields, item.GetEntry());
 
-                    player.SetDynamicValue(PlayerDynamicFields.Heirlooms, offset, newItemId);
-                    player.SetDynamicValue(PlayerDynamicFields.HeirloomsFlags, offset, 0);
+                    player.SetDynamicValue(ActivePlayerDynamicFields.Heirlooms, offset, newItemId);
+                    player.SetDynamicValue(ActivePlayerDynamicFields.HeirloomFlags, offset, 0);
 
                     _heirlooms.Remove(item.GetEntry());
                     _heirlooms[newItemId] = null;
@@ -432,11 +432,11 @@ namespace Game.Entities
         {
             foreach (uint blockValue in _appearances.ToBlockRange())
             {
-                _owner.GetPlayer().AddDynamicValue(PlayerDynamicFields.Transmog, blockValue);
+                _owner.GetPlayer().AddDynamicValue(ActivePlayerDynamicFields.Transmog, blockValue);
             }
 
             foreach (var value in _temporaryAppearances.Keys)
-                _owner.GetPlayer().AddDynamicValue(PlayerDynamicFields.ConditionalTransmog, value);
+                _owner.GetPlayer().AddDynamicValue(ActivePlayerDynamicFields.ConditionalTransmog, value);
         }
 
         public void LoadAccountItemAppearances(SQLResult knownAppearances, SQLResult favoriteAppearances)
@@ -661,18 +661,18 @@ namespace Game.Entities
                 _appearances.Length = (int)itemModifiedAppearance.Id + 1;
                 numBlocks = (uint)(_appearances.Count << 2) - numBlocks;
                 while (numBlocks-- != 0)
-                    _owner.GetPlayer().AddDynamicValue(PlayerDynamicFields.Transmog, 0);
+                    _owner.GetPlayer().AddDynamicValue(ActivePlayerDynamicFields.Transmog, 0);
             }
 
             _appearances.Set((int)itemModifiedAppearance.Id, true);
             uint blockIndex = itemModifiedAppearance.Id / 32;
             uint bitIndex = itemModifiedAppearance.Id % 32;
-            uint currentMask = _owner.GetPlayer().GetDynamicValue(PlayerDynamicFields.Transmog, (ushort)blockIndex);
-            _owner.GetPlayer().SetDynamicValue(PlayerDynamicFields.Transmog, (ushort)blockIndex, (uint)((int)currentMask | (1 << (int)bitIndex)));
+            uint currentMask = _owner.GetPlayer().GetDynamicValue(ActivePlayerDynamicFields.Transmog, (ushort)blockIndex);
+            _owner.GetPlayer().SetDynamicValue(ActivePlayerDynamicFields.Transmog, (ushort)blockIndex, (uint)((int)currentMask | (1 << (int)bitIndex)));
             var temporaryAppearance = _temporaryAppearances.LookupByKey(itemModifiedAppearance.Id);
             if (!temporaryAppearance.Empty())
             {
-                _owner.GetPlayer().RemoveDynamicValue(PlayerDynamicFields.ConditionalTransmog, itemModifiedAppearance.Id);
+                _owner.GetPlayer().RemoveDynamicValue(ActivePlayerDynamicFields.ConditionalTransmog, itemModifiedAppearance.Id);
                 _temporaryAppearances.Remove(itemModifiedAppearance.Id);
             }
 
@@ -694,7 +694,7 @@ namespace Game.Entities
         {
             var itemsWithAppearance = _temporaryAppearances[itemModifiedAppearance.Id];
             if (itemsWithAppearance.Empty())
-                _owner.GetPlayer().AddDynamicValue(PlayerDynamicFields.ConditionalTransmog, itemModifiedAppearance.Id);
+                _owner.GetPlayer().AddDynamicValue(ActivePlayerDynamicFields.ConditionalTransmog, itemModifiedAppearance.Id);
 
             itemsWithAppearance.Add(itemGuid);
         }
@@ -712,7 +712,7 @@ namespace Game.Entities
             guid.Remove(item.GetGUID());
             if (guid.Empty())
             {
-                _owner.GetPlayer().RemoveDynamicValue(PlayerDynamicFields.ConditionalTransmog, itemModifiedAppearance.Id);
+                _owner.GetPlayer().RemoveDynamicValue(ActivePlayerDynamicFields.ConditionalTransmog, itemModifiedAppearance.Id);
                 _temporaryAppearances.Remove(itemModifiedAppearance.Id);
             }
         }

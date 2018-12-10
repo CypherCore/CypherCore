@@ -116,7 +116,7 @@ namespace Framework.Constants
         Cast = 0x04,   // 2    Cast Any Spells
         Move = 0x08,   // 3    Removed By Any Movement
         Turning = 0x10,   // 4    Removed By Any Turning
-        Jump = 0x20,   // 5    Removed By Entering Combat
+        Jump = 0x20,   // 5    Removed By Jumping
         NotMounted = 0x40,   // 6    Removed By Dismounting
         NotAbovewater = 0x80,   // 7    Removed By Entering Water
         NotUnderwater = 0x100,   // 8    Removed By Leaving Water
@@ -687,23 +687,29 @@ namespace Framework.Constants
         NotWhileMercenary = 270,
         SpecDisabled = 271,
         CantBeObliterated = 272,
-        FollowerClassSpecCap = 273,
-        TransportNotReady = 274,
-        TransmogSetAlreadyKnown = 275,
-        DisabledByAuraLabel = 276,
-        DisabledByMaxUsableLevel = 277,
-        SpellAlreadyKnown = 278,
-        MustKnowSupercedingSpell = 279,
-        YouCannotUseThatInPvpInstance = 280,
-        NoArtifactEquipped = 281,
-        WrongArtifactEquipped = 282,
-        TargetIsUntargetableByAnyone = 283,
-        SpellEffectFailed = 284,
-        NeedAllPartyMembers = 285,
-        ArtifactAtFullPower = 286,
-        ApItemFromPreviousTier = 287,
-        AreaTriggerCreation = 288,
-        Unknown = 289,
+        CantBeScrapped = 273,
+        FollowerClassSpecCap = 274,
+        TransportNotReady = 275,
+        TransmogSetAlreadyKnown = 276,
+        DisabledByAuraLabel = 277,
+        DisabledByMaxUsableLevel = 278,
+        SpellAlreadyKnown = 279,
+        MustKnowSupercedingSpell = 280,
+        YouCannotUseThatInPvpInstance = 281,
+        NoArtifactEquipped = 282,
+        WrongArtifactEquipped = 283,
+        TargetIsUntargetableByAnyone = 284,
+        SpellEffectFailed = 285,
+        NeedAllPartyMembers = 286,
+        ArtifactAtFullPower = 287,
+        ApItemFromPreviousTier = 288,
+        AreaTriggerCreation = 289,
+        AzeriteEmpoweredOnly = 290,
+        AzeriteEmpoweredNoChoicesToUndo = 291,
+        WrongFaction = 292,
+        NotEnoughCurrency = 293,
+        BattleForAzerothRidingRequirement = 294,
+        Unknown = 295,
 
         // Ok Cast Value - Here In Case A Future Version Removes Success And We Need To Use A Custom Value (Not Sent To Client Either Way)
         SpellCastOk = Success
@@ -1030,6 +1036,7 @@ namespace Framework.Constants
         CannotRitualOfDoomWhileSummoningSiters = 317, // You Cannot Perform The Ritual Of Doom While Attempting To Summon The Sisters.
         LearnedAllThatYouCanAboutYourArtifact = 318, // You Have Learned All That You Can About Your Artifact.
         CantCallPetWithLoneWolf = 319, // You Cannot Use Call Pet While Lone Wolf Is Active.
+        TargetCannotAlreadyHaveOrbOfPower = 320, // Target cannot already have a Orb of Power.
         YouMustBeInAnInnToStrumThatGuitar = 321, // You must be in an inn to strum that guitar.
         YouCannotReachTheLatch = 322, // You cannot reach the latch.
         RequiresABrimmingKeystone = 323, // Requires A Brimming Keystone.
@@ -1048,22 +1055,41 @@ namespace Framework.Constants
         YouDoNotKnowHowToTameFeathermanes = 336, // You Do Not Know How To Tame Feathermanes.
         YouMustReachArtifactKnowledgeLevel25 = 337, // You Must Reach Artifact Knowledge Level 25 To Use The Tome.
         RequiresANetherPortalDisruptor = 338, // Requires A Nether Portal Disruptor.
+        YouAreNotTheCorrectRankToUseThisItem = 339, // You Are Not The Correct Rank To Use This Item.
         MustBeStandingNearInjuredChromieInMountHyjal = 340, // Must Be Standing Near The Injured Chromie In Mount Hyjal.
+        TheresNothingFurtherYouCanLearn = 341, // There'S Nothing Further You Can Learn.
         RemoveCannonsHeavyIronPlatingFirst = 342, // You Should Remove The Cannon'S Heavy Iron Plating First.
         RemoveCannonsElectrokineticDefenseGridFirst = 343, // You Should Remove The Cannon'S Electrokinetic Defense Grid First.
         RequiresTheArmoryKeyAndDendriteClusters = 344, // You Are Missing Pieces Of The Armory Key Or Do Not Have Enough Dendrite Clusters.
         ThisItemRequiresBasicObliterumToUpgrade = 345, // This Item Requires Basic Obliterum To Upgrade.
         ThisItemRequiresPrimalObliterumToUpgrade = 346, // This Item Requires Primal Obliterum To Upgrade.
         ThisItemRequiresFlightMastersWhistle = 347, // This Item Requires A Flight Master'S Whistle.
+        RequiresMorrisonsMasterKey = 348, // Requires Morrison'S Master Key.
         RequiresPowerThatEchoesThatOfTheAugari = 349, // Will Only Open To One Wielding The Power That Echoes That Of The Augari.
         ThatPlayerHasAPendingTotemicRevival = 350, // That Player Has A Pending Totemic Revival.
         YouHaveNoFireMinesDeployed = 351, // You Have No Fire Mines Deployed.
+        MustBeAffectedBySpiritPowder = 352, // You Must Be Affected By The Spirit Powder To Take The Phylactery.
         YouAreBlockedByAStructureAboveYou = 353, // You Are Blocked By A Structure Above You.
         Requires100ImpMeat = 354, // Requires 100 Imp Meat.
         YouHaveNotObtainedAnyBackgroundFilters = 355, // You Have Not Obtained Any Background Filters.
         NothingInterestingPostedHereRightNow = 356, // There Is Nothing Interesting Posted Here Right Now.
         ParagonReputationRequiresHigherLevel = 357, // Paragon Reputation Is Not Available Until A Higher Level.
         UunaIsMissing = 358, // Uuna Is Missing.
+        OnlyOtherHivemindMembersMayJoin = 359, // Only Other Members Of Their Hivemind May Join With Them.
+        NoValidFlaskPresent = 360, // No Valid Flask Present.
+        NoWildImpsToSacrifice = 361, // There Are No Wild Imps To Sacrifice.
+        YouAreCarryingTooMuchIron = 362, // You Are Carrying Too Much Iron
+        YouHaveNoIronToCollect = 363, // You Have No Iron To Collect
+        YouHaveNoWildImps = 364, // You Have No Available Wild Imps.
+        NeedsRepairs = 365, // Needs Repairs.
+        YouAreCarryingTooMuchWood = 366, // You'Re Carrying Too Much Wood.
+        YouAreAlreadyCarryingRepairParts = 367, // You'Re Already Carrying Repair Parts.
+        YouHaveNotUnlockedFlightWhistleForZone = 368, // You Have Not Unlocked The Flight Whistle For This Zone.
+        ThereAreNoUnlockedFlightPointsNearby = 369, // There Are No Unlocked Flight Points Nearby To Take You To.
+        YouMustHaveAFelguard = 370, // You Must Have A Felguard.
+        TargetHasNoFesteringWounds = 371, // The Target Has No Festering Wounds.
+        YouDontHaveDeadlyOrWoundPoisonActive = 372, // You Do Not Have Deadly Poison Or Wound Poison Active.
+        CannotReadSoldierDogTagWithoutHeadlampOn = 373, // You Cannot Read The Soldier'S Dog Tag Without Your Headlamp On.
     }
 
     public enum SpellMissInfo
@@ -2058,7 +2084,13 @@ namespace Framework.Constants
         GiveHonor = 253,
         Unk254 = 254,
         LearnTransmogSet = 255,
-        TotalSpellEffects = 256,
+        Unk256 = 256,
+        Unk257 = 257,
+        ModifyKeystone = 258,
+        RespecAzeriteEmpoweredItem = 259,
+        SummonStabledPet = 260,
+        ScrapItem = 261,
+        TotalSpellEffects,
     }
 
     public enum SpellEffectHandle
@@ -2363,6 +2395,7 @@ namespace Framework.Constants
         Unk147 = 147,
         Unk148 = 148,
         Unk149 = 149,
+        UnitOwnCritter = 150, // own battle pet from UNIT_FIELD_CRITTER
         TotalSpellTargets
     }
     public enum SpellTargetSelectionCategories

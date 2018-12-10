@@ -156,7 +156,7 @@ namespace Game.DataStorage
                 }
             }
 
-            FlyByCameraStorage[dbcentry.ID] = cameras;
+            FlyByCameraStorage[dbcentry.Id] = cameras;
         }
 
         public static void LoadM2Cameras(string dataPath)

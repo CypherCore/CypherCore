@@ -317,6 +317,11 @@ namespace Game.Maps
                                 uint resInterval = GetCombatResurrectionChargeInterval();
                                 InitializeCombatResurrections(1, resInterval);
                                 SendEncounterStart(1, 9, resInterval, resInterval);
+
+                                var playerList = instance.GetPlayers();
+                                foreach (var player in playerList)
+                                        if (player.IsAlive())
+                                            player.ProcSkillsAndAuras(null, ProcFlags.EncounterStart, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
                                 break;
                             }
                         case EncounterState.Fail:

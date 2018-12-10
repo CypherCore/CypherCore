@@ -1229,7 +1229,7 @@ namespace Game
                     }
                 case ConditionTypes.Class:
                     {
-                        if (!Convert.ToBoolean(cond.ConditionValue1 & (uint)Class.ClassMaskAllPlayable))
+                        if (Convert.ToBoolean(cond.ConditionValue1 & ~(uint)Class.ClassMaskAllPlayable))
                         {
                             Log.outError(LogFilter.Sql, "{0} has non existing classmask ({1}), skipped.", cond.ToString(true), cond.ConditionValue1 & ~(uint)Class.ClassMaskAllPlayable);
                             return false;
@@ -1238,7 +1238,7 @@ namespace Game
                     }
                 case ConditionTypes.Race:
                     {
-                        if (!Convert.ToBoolean(cond.ConditionValue1 & (uint)Race.RaceMaskAllPlayable))
+                        if (Convert.ToBoolean(cond.ConditionValue1 & ~(uint)Race.RaceMaskAllPlayable))
                         {
                             Log.outError(LogFilter.Sql, "{0} has non existing racemask ({1}), skipped.", cond.ToString(true), cond.ConditionValue1 & ~(uint)Race.RaceMaskAllPlayable);
                             return false;
@@ -1785,10 +1785,10 @@ namespace Game
                 }
             }
 
-            if (condition.PvpMedal != 0 && !Convert.ToBoolean((1 << (condition.PvpMedal - 1)) & player.GetUInt32Value(PlayerFields.PvpMedals)))
+            if (condition.PvpMedal != 0 && !Convert.ToBoolean((1 << (condition.PvpMedal - 1)) & player.GetUInt32Value(ActivePlayerFields.PvpMedals)))
                 return false;
 
-            if (condition.LifetimeMaxPVPRank != 0 && player.GetByteValue(PlayerFields.FieldBytes, PlayerFieldOffsets.FieldBytesOffsetLifetimeMaxPvpRank) != condition.LifetimeMaxPVPRank)
+            if (condition.LifetimeMaxPVPRank != 0 && player.GetByteValue(ActivePlayerFields.Bytes, PlayerFieldOffsets.FieldBytesOffsetLifetimeMaxPvpRank) != condition.LifetimeMaxPVPRank)
                 return false;
 
             if (condition.MovementFlags[0] != 0 && !Convert.ToBoolean((uint)player.GetUnitMovementFlags() & condition.MovementFlags[0]))
@@ -1841,7 +1841,7 @@ namespace Game
                 {
                     uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(condition.PrevQuestID[i]);
                     if (questBit != 0)
-                        results[i] = (player.GetUInt32Value(PlayerFields.QuestCompleted + (int)((questBit - 1) >> 5)) & (1 << (int)((questBit - 1) & 31))) != 0;
+                        results[i] = (player.GetUInt32Value(ActivePlayerFields.QuestCompleted + (int)((questBit - 1) >> 5)) & (1 << (int)((questBit - 1) & 31))) != 0;
                 }
 
                 if (!PlayerConditionLogic(condition.PrevQuestLogic, results))
@@ -1920,7 +1920,7 @@ namespace Game
                 {
                     AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(condition.Explored[i]);
                     if (area != null)
-                        if (area.AreaBit != -1 && !Convert.ToBoolean(player.GetUInt32Value(PlayerFields.ExploredZones1 + area.AreaBit / 32) & (1 << (area.AreaBit % 32))))
+                        if (area.AreaBit != -1 && !Convert.ToBoolean(player.GetUInt32Value(ActivePlayerFields.ExploredZones + area.AreaBit / 32) & (1 << (area.AreaBit % 32))))
                             return false;
                 }
             }
@@ -2114,13 +2114,13 @@ namespace Game
             new ConditionTypeInfo("Realm Achievement",    true, false, false),
             new ConditionTypeInfo("In Water",             false,false, false),
             new ConditionTypeInfo("Terrain Swap",         true, false, false),
-            new ConditionTypeInfo("Sit/stand state",      true,  true, false),
+            new ConditionTypeInfo("Sit/stand state",      true, true, false),
             new ConditionTypeInfo("Daily Quest Completed",true, false, false),
             new ConditionTypeInfo("Charmed",              false,false, false),
             new ConditionTypeInfo("Pet type",             true, false, false),
-            new ConditionTypeInfo("On Taxi",             false, false, false),
-            new ConditionTypeInfo("Quest state mask",     true,  true, false),
-            new ConditionTypeInfo("Objective Complete",   true,  false, false)
+            new ConditionTypeInfo("On Taxi",              false,false, false),
+            new ConditionTypeInfo("Quest state mask",     true, true, false),
+            new ConditionTypeInfo("Objective Complete",   true, false, false)
         };
 
         public struct ConditionTypeInfo

@@ -370,10 +370,10 @@ namespace Game.Network.Packets
 
         public override void Read()
         {
-            DifficultyID = _worldPacket.ReadInt32();
+            DifficultyID = _worldPacket.ReadUInt32();
         }
 
-        public int DifficultyID;
+        public uint DifficultyID;
     }
 
     public class SetRaidDifficulty : ClientPacket
@@ -675,14 +675,16 @@ namespace Game.Network.Packets
             foreach (int stat in StatDelta)
                 _worldPacket.WriteInt32(stat);
 
-            _worldPacket.WriteInt32(Cp);
+            _worldPacket.WriteInt32(NumNewTalents);
+            _worldPacket.WriteInt32(NumNewPvpTalentSlots);
         }
 
         public uint Level = 0;
         public uint HealthDelta = 0;
         public int[] PowerDelta = new int[6];
         public int[] StatDelta = new int[(int)Stats.Max];
-        public int Cp = 0;
+        public int NumNewTalents;
+        public int NumNewPvpTalentSlots;
     }
 
     public class PlayMusic : ServerPacket
@@ -760,15 +762,15 @@ namespace Game.Network.Packets
             foreach (ushort preloadMapId in PreloadMapIDs)
                 _worldPacket.WriteUInt16(preloadMapId);                            // Inactive terrain swap map id
 
-            _worldPacket.WriteUInt32(UiWorldMapAreaIDSwaps.Count * 2);   // size in bytes
-            foreach (ushort uiWorldMapAreaIDSwap in UiWorldMapAreaIDSwaps)
-                _worldPacket.WriteUInt16(uiWorldMapAreaIDSwap);          // UI map id, WorldMapArea.db2, controls map display
+            _worldPacket.WriteUInt32(UiMapPhaseIDs.Count * 2);   // size in bytes
+            foreach (ushort uiMapPhaseId in UiMapPhaseIDs)
+                _worldPacket.WriteUInt16(uiMapPhaseId);          // UI map id, WorldMapArea.db2, controls map display
         }
 
         public ObjectGuid Client;
         public PhaseShiftData Phaseshift = new PhaseShiftData();
         public List<ushort> PreloadMapIDs = new List<ushort>();
-        public List<ushort> UiWorldMapAreaIDSwaps = new List<ushort>();
+        public List<ushort> UiMapPhaseIDs = new List<ushort>();
         public List<ushort> VisibleMapIDs = new List<ushort>();
     }
 
@@ -1274,13 +1276,6 @@ namespace Game.Network.Packets
 
         public uint MountSpellID;
         public bool IsFavorite;
-    }
-
-    class PvpPrestigeRankUp : ClientPacket
-    {
-        public PvpPrestigeRankUp(WorldPacket packet) : base(packet) { }
-
-        public override void Read() { }
     }
 
     class CloseInteraction : ClientPacket

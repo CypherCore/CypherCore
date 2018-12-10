@@ -490,7 +490,7 @@ namespace Game.Network.Packets
         {
             _worldPacket.WritePackedGuid(Item);
             _worldPacket.WriteUInt32(Delay);
-            _worldPacket.WriteBits(Subcode, 3);
+            _worldPacket.WriteBits(Subcode, 2);
             _worldPacket.FlushBits();
         }
 

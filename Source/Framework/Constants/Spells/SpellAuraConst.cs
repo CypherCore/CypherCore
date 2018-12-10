@@ -513,7 +513,9 @@ namespace Framework.Constants
         Unk489 = 489,
         Unk490 = 490,
         Unk491 = 491,
-        Total = 492
+        Unk492 = 492,
+        Unk493 = 493,
+        Total
     }
 
     public enum AuraEffectHandleModes

@@ -15,8 +15,7 @@ namespace Game.Entities
         public Array<uint> ReqAbility = new Array<uint>(3);
         public byte ReqLevel;
 
-        public uint LearnedSpellId;
-        public bool IsCastable() { return LearnedSpellId != SpellId; }
+        public bool IsCastable() { return Global.SpellMgr.GetSpellInfo(SpellId).HasEffect(SpellEffectName.LearnSpell); }
     }
 
     public class Trainer
@@ -108,7 +107,7 @@ namespace Game.Entities
 
         TrainerSpellState GetSpellState(Player player, TrainerSpell trainerSpell)
         {
-            if (player.HasSpell(trainerSpell.IsCastable() ? trainerSpell.LearnedSpellId : trainerSpell.SpellId))
+            if (player.HasSpell(trainerSpell.SpellId))
                 return TrainerSpellState.Known;
 
             // check race/class requirement
@@ -128,10 +127,32 @@ namespace Game.Entities
                 return TrainerSpellState.Unavailable;
 
             // check ranks
-            uint previousRankSpellId = Global.SpellMgr.GetPrevSpellInChain(trainerSpell.LearnedSpellId);
-            if (previousRankSpellId != 0)
-                if (!player.HasSpell(previousRankSpellId))
-                    return TrainerSpellState.Unavailable;
+            bool hasLearnSpellEffect = false;
+            bool knowsAllLearnedSpells = true;
+            foreach (SpellEffectInfo spellEffect in Global.SpellMgr.GetSpellInfo(trainerSpell.SpellId).GetEffectsForDifficulty(Difficulty.None))
+            {
+                if (spellEffect == null || !spellEffect.IsEffect(SpellEffectName.LearnSpell))
+                    continue;
+
+                hasLearnSpellEffect = true;
+                if (!player.HasSpell(spellEffect.TriggerSpell))
+                    knowsAllLearnedSpells = false;
+
+                uint previousRankSpellId = Global.SpellMgr.GetPrevSpellInChain(spellEffect.TriggerSpell);
+                if (previousRankSpellId != 0)
+                    if (!player.HasSpell(previousRankSpellId))
+                        return TrainerSpellState.Unavailable;
+            }
+
+            if (!hasLearnSpellEffect)
+            {
+                uint previousRankSpellId = Global.SpellMgr.GetPrevSpellInChain(trainerSpell.SpellId);
+                if (previousRankSpellId != 0)
+                    if (!player.HasSpell(previousRankSpellId))
+                        return TrainerSpellState.Unavailable;
+            }
+            else if (knowsAllLearnedSpells)
+                return TrainerSpellState.Known;
 
             // check additional spell requirement
             foreach (var spellId in Global.SpellMgr.GetSpellsRequiredForSpellBounds(trainerSpell.SpellId))

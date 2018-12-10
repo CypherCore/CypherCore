@@ -49,30 +49,29 @@ namespace Game.DataStorage
     public sealed class ItemRecord
     {
         public uint Id;
-        public uint IconFileDataID;
         public ItemClass ClassID;
         public byte SubclassID;
-        public sbyte SoundOverrideSubclassID;
         public byte Material;
         public InventoryType inventoryType;
         public byte SheatheType;
+        public sbyte SoundOverrideSubclassID;
+        public int IconFileDataID;
         public byte ItemGroupSoundsID;
     }
 
     public sealed class ItemAppearanceRecord
     {
         public uint Id;
-        public uint ItemDisplayInfoID;
-        public uint DefaultIconFileDataID;
-        public uint UIOrder;
         public byte DisplayType;
+        public uint ItemDisplayInfoID;
+        public int DefaultIconFileDataID;
+        public int UiOrder;
     }
 
     public sealed class ItemArmorQualityRecord
     {
         public uint Id;
         public float[] QualityMod = new float[7];
-        public ushort ItemLevel;
     }
 
     public sealed class ItemArmorShieldRecord
@@ -85,17 +84,17 @@ namespace Game.DataStorage
     public sealed class ItemArmorTotalRecord
     {
         public uint Id;
+        public short ItemLevel;
         public float Cloth;
         public float Leather;
         public float Mail;
         public float Plate;
-        public ushort ItemLevel;
     }
 
     public sealed class ItemBagFamilyRecord
     {
         public uint Id;
-        public uint Name;
+        public string Name;
     }
 
     public sealed class ItemBonusRecord
@@ -116,11 +115,11 @@ namespace Game.DataStorage
     public sealed class ItemBonusTreeNodeRecord
     {
         public uint Id;
+        public byte ItemContext;
         public ushort ChildItemBonusTreeID;
         public ushort ChildItemBonusListID;
         public ushort ChildItemLevelSelectorID;
-        public byte ItemContext;
-        public uint ParentItemBonusTreeID;
+        public ushort ParentItemBonusTreeID;
     }
 
     public sealed class ItemChildEquipmentRecord
@@ -135,8 +134,8 @@ namespace Game.DataStorage
     {
         public uint Id;
         public string ClassName;
+        public sbyte ClassID;
         public float PriceModifier;
-        public byte ClassID;
         public byte Flags;
     }
 
@@ -145,7 +144,6 @@ namespace Game.DataStorage
         public uint Id;
         public uint ItemID;
     }
-
     // common struct for:
     // ItemDamageAmmo.dbc
     // ItemDamageOneHand.dbc
@@ -158,71 +156,71 @@ namespace Game.DataStorage
     public sealed class ItemDamageRecord
     {
         public uint Id;
-        public float[] Quality = new float[7];
         public ushort ItemLevel;
+        public float[] Quality = new float[7];
     }
 
     public sealed class ItemDisenchantLootRecord
     {
         public uint Id;
+        public sbyte Subclass;
+        public byte Quality;
         public ushort MinLevel;
         public ushort MaxLevel;
         public ushort SkillRequired;
-        public sbyte Subclass;
-        public byte Quality;
         public sbyte ExpansionID;
-        public uint ClassID;
+        public byte Class;
     }
 
     public sealed class ItemEffectRecord
     {
         public uint Id;
-        public int SpellID;
-        public int CoolDownMSec;
-        public int CategoryCoolDownMSec;
-        public short Charges;
-        public ushort SpellCategoryID;
-        public ushort ChrSpecializationID;
         public byte LegacySlotIndex;
         public ItemSpelltriggerType TriggerType;
-        public uint ParentItemID;
+        public short Charges;
+        public int CoolDownMSec;
+        public int CategoryCoolDownMSec;
+        public ushort SpellCategoryID;
+        public int SpellID;
+        public ushort ChrSpecializationID;
+        public int ParentItemID;
     }
 
     public sealed class ItemExtendedCostRecord
     {
         public uint Id;
-        public uint[] ItemID = new uint[ItemConst.MaxItemExtCostItems];                   // required item id
-        public uint[] CurrencyCount = new uint[ItemConst.MaxItemExtCostCurrencies];     // required curency count
-        public ushort[] ItemCount = new ushort[ItemConst.MaxItemExtCostItems];              // required count of 1st item
-        public ushort RequiredArenaRating;                             // required personal arena rating
-        public ushort[] CurrencyID = new ushort[ItemConst.MaxItemExtCostCurrencies];          // required curency id
-        public byte ArenaBracket;                                        // arena slot restrictions (min slot value)
+        public ushort RequiredArenaRating;
+        public byte ArenaBracket;                                             // arena slot restrictions (min slot value)
+        public byte Flags;
         public byte MinFactionID;
         public byte MinReputation;
-        public byte Flags;
-        public byte RequiredAchievement;
+        public byte RequiredAchievement;                                      // required personal arena rating
+        public uint[] ItemID = new uint[ItemConst.MaxItemExtCostItems];                          // required item id
+        public ushort[] ItemCount = new ushort[ItemConst.MaxItemExtCostItems];                      // required count of 1st item
+        public ushort[] CurrencyID = new ushort[ItemConst.MaxItemExtCostCurrencies];                // required curency id
+        public uint[] CurrencyCount = new uint[ItemConst.MaxItemExtCostCurrencies];              // required curency count
     }
 
     public sealed class ItemLevelSelectorRecord
     {
-        public uint ID;
+        public uint Id;
         public ushort MinItemLevel;
         public ushort ItemLevelSelectorQualitySetID;
     }
 
     public sealed class ItemLevelSelectorQualityRecord
     {
-        public uint ID;
+        public uint Id;
         public uint QualityItemBonusListID;
-        public byte Quality;
-        public uint ParentILSQualitySetID;
+        public sbyte Quality;
+        public short ParentILSQualitySetID;
     }
 
     public sealed class ItemLevelSelectorQualitySetRecord
     {
-        public uint ID;
-        public ushort IlvlRare;
-        public ushort IlvlEpic;
+        public uint Id;
+        public short IlvlRare;
+        public short IlvlEpic;
     }
 
     public sealed class ItemLimitCategoryRecord
@@ -237,26 +235,26 @@ namespace Game.DataStorage
     {
         public uint Id;
         public sbyte AddQuantity;
-        public ushort PlayerConditionID;
+        public uint PlayerConditionID;
         public uint ParentItemLimitCategoryID;
     }
 
     public sealed class ItemModifiedAppearanceRecord
     {
-        public uint ItemID;
         public uint Id;
+        public uint ItemID;
         public byte ItemAppearanceModifierID;
         public ushort ItemAppearanceID;
         public byte OrderIndex;
-        public byte TransmogSourceTypeEnum;
+        public sbyte TransmogSourceTypeEnum;
     }
 
     public sealed class ItemPriceBaseRecord
     {
         public uint Id;
+        public ushort ItemLevel;
         public float Armor;
         public float Weapon;
-        public ushort ItemLevel;
     }
 
     public sealed class ItemRandomPropertiesRecord
@@ -276,119 +274,119 @@ namespace Game.DataStorage
 
     public sealed class ItemSearchNameRecord
     {
-        public ulong AllowableRace;
+        public long AllowableRace;
         public string Display;
         public uint Id;
-        public uint[] Flags = new uint[3];
-        public ushort ItemLevel;
         public byte OverallQualityID;
         public byte ExpansionID;
-        public byte RequiredLevel;
         public ushort MinFactionID;
         public byte MinReputation;
-        public short AllowableClass;
+        public int AllowableClass;
+        public sbyte RequiredLevel;
         public ushort RequiredSkill;
         public ushort RequiredSkillRank;
         public uint RequiredAbility;
+        public ushort ItemLevel;
+        public int[] Flags = new int[4];
     }
 
     public sealed class ItemSetRecord
     {
         public uint Id;
         public LocalizedString Name;
-        public uint[] ItemID = new uint[17];
-        public ushort RequiredSkillRank;
-        public byte RequiredSkill;
         public ItemSetFlags SetFlags;
+        public uint RequiredSkill;
+        public ushort RequiredSkillRank;
+        public uint[] ItemID = new uint[ItemConst.MaxItemSetItems];
     }
 
     public sealed class ItemSetSpellRecord
     {
         public uint Id;
-        public uint SpellID;
         public ushort ChrSpecID;
+        public uint SpellID;
         public byte Threshold;
-        public uint ItemSetID;
+        public ushort ItemSetID;
     }
 
     public sealed class ItemSparseRecord
     {
         public uint Id;
         public long AllowableRace;
-        public LocalizedString Display;
-        public string Display2;
-        public string Display3;
-        public string Display4;
         public string Description;
-        public uint[] Flags = new uint[4];
-        public float PriceRandomValue;
-        public float PriceVariance;
-        public uint VendorStackCount;
-        public uint BuyPrice;
-        public uint SellPrice;
-        public uint RequiredAbility;
-        public uint MaxCount;
-        public uint Stackable;
-        public int[] StatPercentEditor = new int[ItemConst.MaxStats];
-        public float[] StatPercentageOfSocket = new float[ItemConst.MaxStats];
-        public float ItemRange;
-        public uint BagFamily;
-        public float QualityModifier;
-        public uint DurationInInventory;
+        public string Display3;
+        public string Display2;
+        public string Display1;
+        public LocalizedString Display;
         public float DmgVariance;
-        public short AllowableClass;
-        public ushort ItemLevel;
-        public ushort RequiredSkill;
-        public ushort RequiredSkillRank;
-        public ushort MinFactionID;
-        public short[] ItemStatValue = new short[ItemConst.MaxStats];
-        public ushort ScalingStatDistributionID;
-        public ushort ItemDelay;
-        public ushort PageID;
-        public ushort StartQuestID;
-        public ushort LockID;
-        public ushort RandomSelect;
-        public ushort ItemRandomSuffixGroupID;
-        public ushort ItemSet;
-        public ushort ZoneBound;
-        public ushort InstanceBound;
-        public ushort TotemCategoryID;
-        public ushort SocketMatchEnchantmentId;
-        public ushort GemProperties;
-        public ushort LimitCategory;
-        public ushort RequiredHoliday;
-        public ushort RequiredTransmogHoliday;
+        public uint DurationInInventory;
+        public float QualityModifier;
+        public uint BagFamily;
+        public float ItemRange;
+        public float[] StatPercentageOfSocket = new float[ItemConst.MaxStats];
+        public int[] StatPercentEditor = new int[ItemConst.MaxStats];
+        public uint Stackable;
+        public uint MaxCount;
+        public uint RequiredAbility;
+        public uint SellPrice;
+        public uint BuyPrice;
+        public uint VendorStackCount;
+        public float PriceVariance;
+        public float PriceRandomValue;
+        public uint[] Flags = new uint[4];
+        public int FactionRelated;
         public ushort ItemNameDescriptionID;
-        public byte OverallQualityID;
-        public InventoryType inventoryType;
-        public sbyte RequiredLevel;
-        public byte RequiredPVPRank;
-        public byte RequiredPVPMedal;
-        public byte MinReputation;
-        public byte ContainerSlots;
-        public sbyte[] StatModifierBonusStat = new sbyte[ItemConst.MaxStats];
-        public byte DamageType;
-        public byte Bonding;
-        public byte LanguageID;
-        public byte PageMaterialID;
-        public sbyte Material;
-        public byte SheatheType;
-        public byte[] SocketType = new byte[ItemConst.MaxGemSockets];
-        public byte SpellWeightCategory;
-        public byte SpellWeight;
-        public byte ArtifactID;
+        public ushort RequiredTransmogHoliday;
+        public ushort RequiredHoliday;
+        public ushort LimitCategory;
+        public ushort GemProperties;
+        public ushort SocketMatchEnchantmentId;
+        public ushort TotemCategoryID;
+        public ushort InstanceBound;
+        public ushort ZoneBound;
+        public ushort ItemSet;
+        public ushort ItemRandomSuffixGroupID;
+        public ushort RandomSelect;
+        public ushort LockID;
+        public ushort StartQuestID;
+        public ushort PageID;
+        public ushort ItemDelay;
+        public ushort ScalingStatDistributionID;
+        public ushort MinFactionID;
+        public ushort RequiredSkillRank;
+        public ushort RequiredSkill;
+        public ushort ItemLevel;
+        public short AllowableClass;
         public byte ExpansionID;
+        public byte ArtifactID;
+        public byte SpellWeight;
+        public byte SpellWeightCategory;
+        public byte[] SocketType = new byte[ItemConst.MaxGemSockets];
+        public byte SheatheType;
+        public byte Material;
+        public byte PageMaterialID;
+        public byte LanguageID;
+        public byte Bonding;
+        public byte DamageType;
+        public sbyte[] StatModifierBonusStat = new sbyte[ItemConst.MaxStats];
+        public byte ContainerSlots;
+        public byte MinReputation;
+        public byte RequiredPVPMedal;
+        public byte RequiredPVPRank;
+        public sbyte RequiredLevel;
+        public InventoryType inventoryType;
+        public byte OverallQualityID;
     }
 
     public sealed class ItemSpecRecord
     {
         public uint Id;
-        public ushort SpecializationID;
         public byte MinLevel;
         public byte MaxLevel;
         public byte ItemType;
         public ItemSpecStat PrimaryStat;
         public ItemSpecStat SecondaryStat;
+        public ushort SpecializationID;
     }
 
     public sealed class ItemSpecOverrideRecord
@@ -401,11 +399,11 @@ namespace Game.DataStorage
     public sealed class ItemUpgradeRecord
     {
         public uint Id;
-        public uint CurrencyAmount;
-        public ushort PrerequisiteID;
-        public ushort CurrencyType;
         public byte ItemUpgradePathID;
         public byte ItemLevelIncrement;
+        public ushort PrerequisiteID;
+        public ushort CurrencyType;
+        public uint CurrencyAmount;
     }
 
     public sealed class ItemXBonusTreeRecord

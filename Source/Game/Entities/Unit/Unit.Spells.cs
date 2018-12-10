@@ -47,7 +47,7 @@ namespace Game.Entities
         {
             if (IsTypeId(TypeId.Player))
             {
-                float overrideSP = GetFloatValue(PlayerFields.OverrideSpellPowerByApPct);
+                float overrideSP = GetFloatValue(ActivePlayerFields.OverrideSpellPowerByApPct);
                 if (overrideSP > 0.0f)
                     return (int)(MathFunctions.CalculatePct(GetTotalAttackPowerValue(WeaponAttackType.BaseAttack), overrideSP) + 0.5f);
             }
@@ -190,7 +190,7 @@ namespace Game.Entities
                 for (int i = 0; i < (int)SpellSchools.Max; ++i)
                 {
                     if (Convert.ToBoolean((int)spellProto.GetSchoolMask() & (1 << i)))
-                        maxModDamagePercentSchool = Math.Max(maxModDamagePercentSchool, GetFloatValue(PlayerFields.ModDamageDonePct + i));
+                        maxModDamagePercentSchool = Math.Max(maxModDamagePercentSchool, GetFloatValue(ActivePlayerFields.ModDamageDonePct + i));
                 }
             }
             else
@@ -338,7 +338,7 @@ namespace Game.Entities
         {
             if (IsTypeId(TypeId.Player))
             {
-                float overrideSP = GetFloatValue(PlayerFields.OverrideSpellPowerByApPct);
+                float overrideSP = GetFloatValue(ActivePlayerFields.OverrideSpellPowerByApPct);
                 if (overrideSP > 0.0f)
                     return (uint)(MathFunctions.CalculatePct(GetTotalAttackPowerValue(WeaponAttackType.BaseAttack), overrideSP) + 0.5f);
             }
@@ -503,7 +503,7 @@ namespace Game.Entities
                 return 1.0f;
 
             if (IsPlayer())
-                return GetFloatValue(PlayerFields.ModHealingDonePct);
+                return GetFloatValue(ActivePlayerFields.ModHealingDonePct);
 
             float DoneTotalMod = 1.0f;
 
@@ -640,7 +640,7 @@ namespace Game.Entities
                             crit_chance = 0.0f;
                         // For other schools
                         else if (IsTypeId(TypeId.Player))
-                            crit_chance = GetFloatValue(PlayerFields.CritPercentage);
+                            crit_chance = GetFloatValue(ActivePlayerFields.CritPercentage);
                         else
                             crit_chance = m_baseSpellCritChance;
 
@@ -1588,11 +1588,13 @@ namespace Game.Entities
             var schoolList = m_spellImmune[(int)SpellImmunity.School];
             foreach (var pair in schoolList)
             {
+                if ((pair.Key & (uint)spellInfo.GetSchoolMask()) == 0)
+                    continue;
+
                 SpellInfo immuneSpellInfo = Global.SpellMgr.GetSpellInfo(pair.Value);
-                if (Convert.ToBoolean(pair.Key & (uint)spellInfo.GetSchoolMask())
-                    && !(immuneSpellInfo != null && immuneSpellInfo.IsPositive() && spellInfo.IsPositive() && IsFriendlyTo(caster))
-                    && !spellInfo.CanPierceImmuneAura(immuneSpellInfo))
-                    return true;
+                if (!(immuneSpellInfo != null && immuneSpellInfo.IsPositive() && spellInfo.IsPositive() && caster && IsFriendlyTo(caster)))
+                    if (!spellInfo.CanPierceImmuneAura(immuneSpellInfo))
+                        return true;
             }
 
             return false;
@@ -2234,29 +2236,13 @@ namespace Game.Entities
 
             spellHealLog.TargetGUID = healInfo.GetTarget().GetGUID();
             spellHealLog.CasterGUID = healInfo.GetHealer().GetGUID();
-
             spellHealLog.SpellID = healInfo.GetSpellInfo().Id;
             spellHealLog.Health = healInfo.GetHeal();
+            spellHealLog.OriginalHeal = (int)healInfo.GetOriginalHeal();
             spellHealLog.OverHeal = healInfo.GetHeal() - healInfo.GetEffectiveHeal();
             spellHealLog.Absorbed = healInfo.GetAbsorb();
-
             spellHealLog.Crit = critical;
 
-            // @todo: 6.x Has to be implemented
-            /*
-            var hasCritRollMade = spellHealLog.WriteBit("HasCritRollMade");
-            var hasCritRollNeeded = spellHealLog.WriteBit("HasCritRollNeeded");
-            var hasLogData = spellHealLog.WriteBit("HasLogData");
-
-            if (hasCritRollMade)
-                packet.ReadSingle("CritRollMade");
-
-            if (hasCritRollNeeded)
-                packet.ReadSingle("CritRollNeeded");
-
-            if (hasLogData)
-                SpellParsers.ReadSpellCastLogData(packet);
-            */
             spellHealLog.LogData.Initialize(healInfo.GetTarget());
             SendCombatLogMessage(spellHealLog);
         }
@@ -2411,6 +2397,7 @@ namespace Game.Entities
                 damage = 0;
 
             damageInfo.damage = (uint)damage;
+            damageInfo.originalDamage = (uint)damage;
             DamageInfo dmgInfo = new DamageInfo(damageInfo, DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack, ProcFlagsHit.None);
             CalcAbsorbResist(dmgInfo);
             damageInfo.absorb = dmgInfo.GetAbsorb();
@@ -2456,6 +2443,7 @@ namespace Game.Entities
             packet.CastID = log.castId;
             packet.SpellID = (int)log.SpellId;
             packet.Damage = (int)log.damage;
+            packet.OriginalDamage = (int)log.originalDamage;
             if (log.damage > log.preHitHealth)
                 packet.Overkill = (int)(log.damage - log.preHitHealth);
             else
@@ -2468,9 +2456,9 @@ namespace Game.Entities
             packet.Periodic = log.periodicLog;
             packet.Flags = (int)log.HitInfo;
 
-            SandboxScalingData sandboxScalingData = new SandboxScalingData();
-            if (sandboxScalingData.GenerateDataForUnits(log.attacker, log.target))
-                packet.SandboxScaling.Set(sandboxScalingData);
+            ContentTuningParams contentTuningParams = new ContentTuningParams();
+            if (contentTuningParams.GenerateDataForUnits(log.attacker, log.target))
+                packet.ContentTuning.Set(contentTuningParams);
 
             SendCombatLogMessage(packet);
         }
@@ -2488,6 +2476,7 @@ namespace Game.Entities
             SpellPeriodicAuraLog.SpellLogEffect spellLogEffect = new SpellPeriodicAuraLog.SpellLogEffect();
             spellLogEffect.Effect = (uint)aura.GetAuraType();
             spellLogEffect.Amount = info.damage;
+            spellLogEffect.OriginalDamage = (int)info.originalDamage;
             spellLogEffect.OverHealOrKill = (uint)info.overDamage;
             spellLogEffect.SchoolMaskOrPower = (uint)aura.GetSpellInfo().GetSchoolMask();
             spellLogEffect.AbsorbedOrAmplitude = info.absorb;
@@ -2495,11 +2484,10 @@ namespace Game.Entities
             spellLogEffect.Crit = info.critical;
             // @todo: implement debug info
 
-            SandboxScalingData sandboxScalingData = new SandboxScalingData();
+            ContentTuningParams contentTuningParams = new ContentTuningParams();
             Unit caster = Global.ObjAccessor.GetUnit(this, aura.GetCasterGUID());
-            if (caster)
-                if (sandboxScalingData.GenerateDataForUnits(caster, this))
-                    spellLogEffect.SandboxScaling.Set(sandboxScalingData);
+            if (caster && contentTuningParams.GenerateDataForUnits(caster, this))
+                spellLogEffect.ContentTuning.Set(contentTuningParams);
 
             data.Effects.Add(spellLogEffect);
 

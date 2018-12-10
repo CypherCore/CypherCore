@@ -111,9 +111,18 @@ namespace Game.Network.Packets
 
                 for (var i = 0; i < SharedConst.MaxCreatureKillCredit; ++i)
                     _worldPacket.WriteUInt32(Stats.ProxyCreatureID[i]);
+                _worldPacket.WriteUInt32(Stats.Display.CreatureDisplay.Count);
+                _worldPacket.WriteFloat(Stats.Display.TotalProbability);
 
-                for (var i = 0; i < SharedConst.MaxCreatureModelIds; ++i)
-                    _worldPacket.WriteUInt32(Stats.CreatureDisplayID[i]);
+                _worldPacket.WriteUInt32(Stats.Display.CreatureDisplay.Count);
+                _worldPacket.WriteFloat(Stats.Display.TotalProbability);
+
+                foreach (CreatureXDisplay display in Stats.Display.CreatureDisplay)
+                {
+                    _worldPacket.WriteUInt32(display.CreatureDisplayID);
+                    _worldPacket.WriteFloat(display.Scale);
+                    _worldPacket.WriteFloat(display.Probability);
+                }
 
                 _worldPacket.WriteFloat(Stats.HpMulti);
                 _worldPacket.WriteFloat(Stats.EnergyMulti);
@@ -123,6 +132,7 @@ namespace Game.Network.Packets
                 _worldPacket.WriteInt32(Stats.HealthScalingExpansion);
                 _worldPacket.WriteUInt32(Stats.RequiredExpansion);
                 _worldPacket.WriteInt32(Stats.VignetteID);
+                _worldPacket.WriteInt32(Stats.Class);
 
                 if (!Stats.Title.IsEmpty())
                     _worldPacket.WriteCString(Stats.Title);
@@ -392,12 +402,12 @@ namespace Game.Network.Packets
         {
             MissingQuestCount = _worldPacket.ReadInt32();
 
-            for (byte i = 0; i < 50; ++i)
+            for (byte i = 0; i < MissingQuestCount; ++i)
                 MissingQuestPOIs[i] = _worldPacket.ReadUInt32();
         }
 
         public int MissingQuestCount;
-        public uint[] MissingQuestPOIs = new uint[50];
+        public uint[] MissingQuestPOIs = new uint[100];
     }
 
     public class QuestPOIQueryResponse : ServerPacket
@@ -422,13 +432,12 @@ namespace Game.Network.Packets
                     _worldPacket.WriteInt32(questPOIBlobData.QuestObjectiveID);
                     _worldPacket.WriteInt32(questPOIBlobData.QuestObjectID);
                     _worldPacket.WriteInt32(questPOIBlobData.MapID);
-                    _worldPacket.WriteInt32(questPOIBlobData.WorldMapAreaID);
-                    _worldPacket.WriteInt32(questPOIBlobData.Floor);
+                    _worldPacket.WriteInt32(questPOIBlobData.UiMapID);
                     _worldPacket.WriteInt32(questPOIBlobData.Priority);
                     _worldPacket.WriteInt32(questPOIBlobData.Flags);
                     _worldPacket.WriteInt32(questPOIBlobData.WorldEffectID);
                     _worldPacket.WriteInt32(questPOIBlobData.PlayerConditionID);
-                    _worldPacket.WriteInt32(questPOIBlobData.UnkWoD1);
+                    _worldPacket.WriteInt32(questPOIBlobData.SpawnTrackingID);
                     _worldPacket.WriteInt32(questPOIBlobData.QuestPOIBlobPointStats.Count);
 
                     foreach (QuestPOIBlobPoint questPOIBlobPoint in questPOIBlobData.QuestPOIBlobPointStats)
@@ -670,6 +679,7 @@ namespace Game.Network.Packets
             data.WritePackedGuid(AccountID);
             data.WritePackedGuid(BnetAccountID);
             data.WritePackedGuid(GuidActual);
+            data.WriteUInt64(GuildClubMemberID);
             data.WriteUInt32(VirtualRealmAddress);
             data.WriteUInt8(RaceID);
             data.WriteUInt8(Sex);
@@ -683,12 +693,33 @@ namespace Game.Network.Packets
         public ObjectGuid BnetAccountID;
         public ObjectGuid GuidActual;
         public string Name = "";
+        public ulong GuildClubMemberID;   // same as bgs.protocol.club.v1.MemberId.unique_id
         public uint VirtualRealmAddress;
         public Race RaceID = Race.None;
         public Gender Sex = Gender.None;
         public Class ClassID = Class.None;
         public byte Level;
         public DeclinedName DeclinedNames = new DeclinedName();
+    }
+
+    public class CreatureXDisplay
+    {
+        public CreatureXDisplay(uint creatureDisplayID, float displayScale, float probability)
+        {
+            CreatureDisplayID = creatureDisplayID;
+            Scale = displayScale;
+            Probability = probability;
+        }
+
+        public uint CreatureDisplayID;
+        public float Scale = 1.0f;
+        public float Probability = 1.0f;
+    }
+
+    public class CreatureDisplayStats
+    {
+        public float TotalProbability;
+        public List<CreatureXDisplay> CreatureDisplay = new List<CreatureXDisplay>();
     }
 
     public class CreatureStats
@@ -699,6 +730,7 @@ namespace Game.Network.Packets
         public int CreatureType;
         public int CreatureFamily;
         public int Classification;
+        public CreatureDisplayStats Display = new CreatureDisplayStats();
         public float HpMulti;
         public float EnergyMulti;
         public bool Leader;
@@ -707,9 +739,9 @@ namespace Game.Network.Packets
         public int HealthScalingExpansion;
         public uint RequiredExpansion;
         public uint VignetteID;
+        public int Class;
         public uint[] Flags = new uint[2];
         public uint[] ProxyCreatureID = new uint[SharedConst.MaxCreatureKillCredit];
-        public uint[] CreatureDisplayID = new uint[SharedConst.MaxCreatureModelIds];
         public StringArray Name = new StringArray(SharedConst.MaxCreatureNames);
         public StringArray NameAlt = new StringArray(SharedConst.MaxCreatureNames);
     }
@@ -753,13 +785,12 @@ namespace Game.Network.Packets
         public int QuestObjectiveID;
         public int QuestObjectID;
         public int MapID;
-        public int WorldMapAreaID;
-        public int Floor;
+        public int UiMapID;
         public int Priority;
         public int Flags;
         public int WorldEffectID;
         public int PlayerConditionID;
-        public int UnkWoD1;
+        public int SpawnTrackingID;
         public List<QuestPOIBlobPoint> QuestPOIBlobPointStats = new List<QuestPOIBlobPoint>();
         public bool AlwaysAllowMergingBlobs;
     }

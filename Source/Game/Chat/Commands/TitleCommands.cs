@@ -189,7 +189,7 @@ namespace Game.Chat.Commands
 
                 titles &= ~titles2;                                     // remove not existed titles
 
-                target.SetUInt64Value(PlayerFields.KnownTitles, titles);
+                target.SetUInt64Value(ActivePlayerFields.KnownTitles, titles);
                 handler.SendSysMessage(CypherStrings.Done);
 
                 if (!target.HasTitle(target.GetUInt32Value(PlayerFields.ChosenTitle)))

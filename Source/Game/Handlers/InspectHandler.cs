@@ -100,9 +100,9 @@ namespace Game
 
             InspectHonorStats honorStats = new InspectHonorStats();
             honorStats.PlayerGUID = request.TargetGUID;
-            honorStats.LifetimeHK = player.GetUInt32Value(PlayerFields.LifetimeHonorableKills);
-            honorStats.YesterdayHK = player.GetUInt16Value(PlayerFields.Kills, 1);
-            honorStats.TodayHK = player.GetUInt16Value(PlayerFields.Kills, 0);
+            honorStats.LifetimeHK = player.GetUInt32Value(ActivePlayerFields.LifetimeHonorableKills);
+            honorStats.YesterdayHK = player.GetUInt16Value(ActivePlayerFields.Kills, 1);
+            honorStats.TodayHK = player.GetUInt16Value(ActivePlayerFields.Kills, 0);
             honorStats.LifetimeMaxRank = 0; // @todo
 
             SendPacket(honorStats);

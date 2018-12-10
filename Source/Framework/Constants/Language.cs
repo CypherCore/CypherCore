@@ -42,8 +42,14 @@ namespace Framework.Constants
         PandarenNeutral = 42,
         PandarenAlliance = 43,
         PandarenHorde = 44,
-        Rikkitun = 168,
-        Addon = -1                        // Used By Addons, In 2.4.0 Not Exist, Replaced By Messagetype?
+        Sprite = 168,
+        ShathYar = 178,
+        Nerglish = 179,
+        Moonkin = 180,
+        Shalassian = 181,
+        Thalassian2 = 182,
+        Addon = 183,
+        AddonLogged = 184
     }
 
     public enum CypherStrings
@@ -946,7 +952,8 @@ namespace Framework.Constants
         AccountBnetNotLinked = 1189,
         DisallowTicketsConfig = 1190,
         BanExists = 1191,
-        // Room For More Level 3              1192-1198 Not Used
+        ChangeAccountSuccess = 1192,
+        // Room For More Level 3              1193-1198 Not Used
 
         // Debug Commands
         DebugAreatriggerLeft = 1999,

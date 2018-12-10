@@ -141,8 +141,8 @@ namespace Game
             TerrainSwapInfo terrainSwapInfo = Global.ObjectMgr.GetTerrainSwapInfo(visibleMapId);
             bool changed = obj.GetPhaseShift().AddVisibleMapId(visibleMapId, terrainSwapInfo);
 
-            foreach (uint uiWorldMapAreaIDSwap in terrainSwapInfo.UiWorldMapAreaIDSwaps)
-                changed = obj.GetPhaseShift().AddUiWorldMapAreaIdSwap(uiWorldMapAreaIDSwap) || changed;
+            foreach (uint uiMapPhaseId  in terrainSwapInfo.UiMapPhaseIDs)
+                changed = obj.GetPhaseShift().AddUiMapPhaseId(uiMapPhaseId ) || changed;
 
             Unit unit = obj.ToUnit();
             if (unit)
@@ -161,8 +161,8 @@ namespace Game
             TerrainSwapInfo terrainSwapInfo = Global.ObjectMgr.GetTerrainSwapInfo(visibleMapId);
             bool changed = obj.GetPhaseShift().RemoveVisibleMapId(visibleMapId);
 
-            foreach (uint uiWorldMapAreaIDSwap in terrainSwapInfo.UiWorldMapAreaIDSwaps)
-                changed = obj.GetPhaseShift().RemoveUiWorldMapAreaIdSwap(uiWorldMapAreaIDSwap) || changed;
+            foreach (uint uiWorldMapAreaIDSwap in terrainSwapInfo.UiMapPhaseIDs)
+                changed = obj.GetPhaseShift().RemoveUiMapPhaseId(uiWorldMapAreaIDSwap) || changed;
 
             Unit unit = obj.ToUnit();
             if (unit)
@@ -195,23 +195,22 @@ namespace Game
             ConditionSourceInfo srcInfo = new ConditionSourceInfo(obj);
 
             obj.GetPhaseShift().VisibleMapIds.Clear();
-            obj.GetPhaseShift().UiWorldMapAreaIdSwaps.Clear();
+            obj.GetPhaseShift().UiMapPhaseIds.Clear();
             obj.GetSuppressedPhaseShift().VisibleMapIds.Clear();
 
-            var visibleMapIds = Global.ObjectMgr.GetTerrainSwapsForMap(obj.GetMapId());
-            if (!visibleMapIds.Empty())
+            foreach (var pair in Global.ObjectMgr.GetTerrainSwaps())
             {
-                foreach (TerrainSwapInfo visibleMapInfo in visibleMapIds)
+                if (Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.TerrainSwap, pair.Value.Id, srcInfo))
                 {
-                    if (Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.TerrainSwap, visibleMapInfo.Id, srcInfo))
-                    {
-                        phaseShift.AddVisibleMapId(visibleMapInfo.Id, visibleMapInfo);
-                        foreach (uint uiWorldMapAreaIdSwap in visibleMapInfo.UiWorldMapAreaIDSwaps)
-                            phaseShift.AddUiWorldMapAreaIdSwap(uiWorldMapAreaIdSwap);
-                    }
-                    else
-                        suppressedPhaseShift.AddVisibleMapId(visibleMapInfo.Id, visibleMapInfo);
+                    if (pair.Key == obj.GetMapId())
+                        phaseShift.AddVisibleMapId(pair.Value.Id, pair.Value);
+
+                    // ui map is visible on all maps
+                    foreach (uint uiMapPhaseId in pair.Value.UiMapPhaseIDs)
+                        phaseShift.AddUiMapPhaseId(uiMapPhaseId);
                 }
+                else
+                    suppressedPhaseShift.AddVisibleMapId(pair.Value.Id, pair.Value);
             }
 
             UpdateVisibilityIfNeeded(obj, false, true);
@@ -315,8 +314,8 @@ namespace Game
                 if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.TerrainSwap, pair.Key, srcInfo))
                 {
                     newSuppressions.AddVisibleMapId(pair.Key, pair.Value.VisibleMapInfo, pair.Value.References);
-                    foreach (uint uiWorldMapAreaIdSwap in pair.Value.VisibleMapInfo.UiWorldMapAreaIDSwaps)
-                        changed = phaseShift.RemoveUiWorldMapAreaIdSwap(uiWorldMapAreaIdSwap) || changed;
+                    foreach (uint uiMapPhaseId in pair.Value.VisibleMapInfo.UiMapPhaseIDs)
+                        changed = phaseShift.RemoveUiMapPhaseId(uiMapPhaseId) || changed;
 
                     phaseShift.VisibleMapIds.Remove(pair.Key);
                 }
@@ -327,8 +326,8 @@ namespace Game
                 if (Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.TerrainSwap, pair.Key, srcInfo))
                 {
                     changed = phaseShift.AddVisibleMapId(pair.Key, pair.Value.VisibleMapInfo, pair.Value.References) || changed;
-                    foreach (uint uiWorldMapAreaIdSwap in pair.Value.VisibleMapInfo.UiWorldMapAreaIDSwaps)
-                        changed = phaseShift.AddUiWorldMapAreaIdSwap(uiWorldMapAreaIdSwap) || changed;
+                    foreach (uint uiMapPhaseId in pair.Value.VisibleMapInfo.UiMapPhaseIDs)
+                        changed = phaseShift.AddUiMapPhaseId(uiMapPhaseId) || changed;
 
                     suppressedPhaseShift.VisibleMapIds.Remove(pair.Key);
                 }
@@ -398,8 +397,8 @@ namespace Game
             foreach (var visibleMapId in phaseShift.VisibleMapIds)
                 phaseShiftChange.VisibleMapIDs.Add((ushort)visibleMapId.Key);
 
-            foreach (var uiWorldMapAreaIdSwap in phaseShift.UiWorldMapAreaIdSwaps)
-                phaseShiftChange.UiWorldMapAreaIDSwaps.Add((ushort)uiWorldMapAreaIdSwap.Key);
+            foreach (var uiWorldMapAreaIdSwap in phaseShift.UiMapPhaseIds)
+                phaseShiftChange.UiMapPhaseIDs.Add((ushort)uiWorldMapAreaIdSwap.Key);
 
             player.SendPacket(phaseShiftChange);
         }
@@ -537,10 +536,10 @@ namespace Game
                 chat.SendSysMessage(CypherStrings.PhaseshiftVisibleMapIds, visibleMapIds.ToString());
             }
 
-            if (!phaseShift.UiWorldMapAreaIdSwaps.Empty())
+            if (!phaseShift.UiMapPhaseIds.Empty())
             {
                 StringBuilder uiWorldMapAreaIdSwaps = new StringBuilder();
-                foreach (var uiWorldMapAreaIdSwap in phaseShift.UiWorldMapAreaIdSwaps)
+                foreach (var uiWorldMapAreaIdSwap in phaseShift.UiMapPhaseIds)
                     uiWorldMapAreaIdSwaps.Append(uiWorldMapAreaIdSwap.Key + ',' + ' ');
 
                 chat.SendSysMessage(CypherStrings.PhaseshiftUiWorldMapAreaSwaps, uiWorldMapAreaIdSwaps.ToString());

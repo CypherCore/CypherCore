@@ -175,6 +175,11 @@ namespace Game.Entities
                     // why we need to apply this? we can simple add immunities to slow mechanic in DB
                     _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.ModDecreaseSpeed, true);
                     break;
+                case 335: // Salvaged Chopper
+                case 336: // Salvaged Siege Engine
+                case 338: // Salvaged Demolisher
+                    _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.ModDamagePercentTaken, false); // Battering Ram
+                    break;
                 default:
                     break;
             }
@@ -341,6 +346,10 @@ namespace Game.Entities
 
             if (seat.Value.SeatInfo.CanEnterOrExit() && ++UsableSeatNum != 0)
                 _me.SetFlag64(UnitFields.NpcFlags, (_me.IsTypeId(TypeId.Player) ? NPCFlags.PlayerVehicle : NPCFlags.SpellClick));
+
+            // Enable gravity for passenger when he did not have it active before entering the vehicle
+            if (seat.Value.SeatInfo.Flags.HasAnyFlag(VehicleSeatFlags.DisableGravity) && !seat.Value.Passenger.IsGravityDisabled)
+                unit.SetDisableGravity(false);
 
             // Remove UNIT_FLAG_NOT_SELECTABLE if passenger did not have it before entering vehicle
             if (seat.Value.SeatInfo.Flags.HasAnyFlag(VehicleSeatFlags.PassengerNotSelectable) && !seat.Value.Passenger.IsUnselectable)
@@ -552,6 +561,7 @@ namespace Game.Entities
             Passenger.SetVehicle(Target);
             Seat.Value.Passenger.Guid = Passenger.GetGUID();
             Seat.Value.Passenger.IsUnselectable = Passenger.HasFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+            Seat.Value.Passenger.IsGravityDisabled = Passenger.HasUnitMovementFlag(MovementFlag.DisableGravity);
             if (Seat.Value.SeatInfo.CanEnterOrExit())
             {
                 Cypher.Assert(Target.UsableSeatNum != 0);
@@ -584,6 +594,9 @@ namespace Game.Entities
                 if (!veSeat.FlagsB.HasAnyFlag(VehicleSeatFlagsB.KeepPet))
                     player.UnsummonPetTemporaryIfAny();
             }
+
+            if (veSeat.Flags.HasAnyFlag(VehicleSeatFlags.DisableGravity))
+                Passenger.SetDisableGravity(true);
 
             if (Seat.Value.SeatInfo.Flags.HasAnyFlag(VehicleSeatFlags.PassengerNotSelectable))
                 Passenger.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable);
@@ -657,11 +670,13 @@ namespace Game.Entities
     {
         public ObjectGuid Guid;
         public bool IsUnselectable;
+        public bool IsGravityDisabled;
 
         public void Reset()
         {
             Guid = ObjectGuid.Empty;
             IsUnselectable = false;
+            IsGravityDisabled = false;
         }
     }
 

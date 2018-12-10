@@ -71,7 +71,11 @@ namespace Framework.Constants
         KeystoneReceptacle = 49,
         GatheringNode = 50,
         ChallengeModeReward = 51,
-        Max = 52
+        Multi = 52,
+        SiegeableMulti = 53,
+        SiegeableMo = 54,
+        PvpReward = 55,
+        Max = 56
     }
 
     public enum GameObjectState

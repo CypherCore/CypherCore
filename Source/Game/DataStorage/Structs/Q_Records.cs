@@ -34,10 +34,10 @@ namespace Game.DataStorage
     public sealed class QuestPackageItemRecord
     {
         public uint Id;
-        public uint ItemID;
         public ushort PackageID;
-        public QuestPackageFilter DisplayType;
+        public uint ItemID;
         public byte ItemQuantity;
+        public QuestPackageFilter DisplayType;
     }
 
     public sealed class QuestSortRecord

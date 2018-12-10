@@ -106,6 +106,23 @@ namespace Game.Combat
             }
         }
 
+        // delete all references out of specified range
+        public void deleteReferencesOutOfRange(float range)
+        {
+            HostileReference refe = getFirst();
+            range = range * range;
+            while (refe != null)
+            {
+                HostileReference nextRef = refe.next();
+                Unit owner = refe.GetSource().GetOwner();
+                if (!owner.isActiveObject() && owner.GetExactDist2dSq(getOwner()) > range)
+                {
+                    refe.removeReference();
+                }
+                refe = nextRef;
+            }
+        }
+
         public new HostileReference getFirst() { return ((HostileReference)base.getFirst()); }
 
         public void updateThreatTables()

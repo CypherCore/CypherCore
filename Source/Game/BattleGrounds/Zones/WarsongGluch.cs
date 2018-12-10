@@ -1019,7 +1019,7 @@ namespace Game.BattleGrounds.Zones
         public const int Berserkbuff2 = 17;
         public const int Max = 18;
     }
-    struct WSGObjectEntry
+    public sealed class WSGObjectEntry
     {
         public const uint DoorA1 = 179918;
         public const uint DoorA2 = 179919;

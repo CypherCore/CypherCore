@@ -117,6 +117,7 @@ namespace Game.Network.Packets
                 _worldPacket.WriteInt32(Info.QuestID);
                 _worldPacket.WriteInt32(Info.QuestType);
                 _worldPacket.WriteInt32(Info.QuestLevel);
+                _worldPacket.WriteInt32(Info.QuestScalingFactionGroup);
                 _worldPacket.WriteInt32(Info.QuestMaxScalingLevel);
                 _worldPacket.WriteInt32(Info.QuestPackageID);
                 _worldPacket.WriteInt32(Info.QuestMinLevel);
@@ -143,6 +144,7 @@ namespace Game.Network.Packets
                 _worldPacket.WriteInt32(Info.StartItem);
                 _worldPacket.WriteUInt32(Info.Flags);
                 _worldPacket.WriteUInt32(Info.FlagsEx);
+                _worldPacket.WriteUInt32(Info.FlagsEx2);
 
                 for (uint i = 0; i < SharedConst.QuestRewardItemCount; ++i)
                 {
@@ -170,6 +172,7 @@ namespace Game.Network.Packets
                 _worldPacket.WriteInt32(Info.RewardNumSkillUps);
 
                 _worldPacket.WriteInt32(Info.PortraitGiver);
+                _worldPacket.WriteInt32(Info.PortraitGiverMount);
                 _worldPacket.WriteInt32(Info.PortraitTurnIn);
 
                 for (uint i = 0; i < SharedConst.QuestRewardReputationsCount; ++i)
@@ -196,7 +199,7 @@ namespace Game.Network.Packets
 
                 _worldPacket.WriteUInt32(Info.Objectives.Count);
                 _worldPacket.WriteInt64(Info.AllowableRaces);
-                _worldPacket.WriteInt32(Info.QuestRewardID);
+                _worldPacket.WriteInt32(Info.TreasurePickerID);
                 _worldPacket.WriteInt32(Info.Expansion);
 
                 _worldPacket.WriteBits(Info.LogTitle.GetByteCount(), 9);
@@ -309,6 +312,7 @@ namespace Game.Network.Packets
             QuestData.Write(_worldPacket);
             _worldPacket.WriteInt32(QuestPackageID);
             _worldPacket.WriteInt32(PortraitGiver);
+            _worldPacket.WriteInt32(PortraitGiverMount);
             _worldPacket.WriteInt32(PortraitTurnIn);
 
             _worldPacket.WriteBits(QuestTitle.GetByteCount(), 9);
@@ -328,6 +332,7 @@ namespace Game.Network.Packets
 
         public uint PortraitTurnIn;
         public uint PortraitGiver;
+        public uint PortraitGiverMount;
         public string QuestTitle = "";
         public string RewardText = "";
         public string PortraitGiverText = "";
@@ -413,6 +418,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(QuestID);
             _worldPacket.WriteInt32(QuestPackageID);
             _worldPacket.WriteInt32(PortraitGiver);
+            _worldPacket.WriteUInt32(PortraitGiverMount);
             _worldPacket.WriteInt32(PortraitTurnIn);
             _worldPacket.WriteUInt32(QuestFlags[0]); // Flags
             _worldPacket.WriteUInt32(QuestFlags[1]); // FlagsEx
@@ -474,6 +480,7 @@ namespace Game.Network.Packets
         public List<uint> LearnSpells = new List<uint>();
         public uint PortraitTurnIn;
         public uint PortraitGiver;
+        public uint PortraitGiverMount;
         public int QuestStartItemID;
         public string PortraitGiverText = "";
         public string PortraitGiverName = "";
@@ -833,6 +840,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteBits(Question.GetByteCount(), 8);
             _worldPacket.WriteBit(CloseChoiceFrame);
             _worldPacket.WriteBit(HideWarboardHeader);
+            _worldPacket.WriteBit(KeepOpenAfterChoice);
             _worldPacket.FlushBits();
 
             foreach (PlayerChoiceResponse response in Responses)
@@ -848,6 +856,7 @@ namespace Game.Network.Packets
         public List<PlayerChoiceResponse> Responses = new List<PlayerChoiceResponse>();
         public bool CloseChoiceFrame;
         public bool HideWarboardHeader;
+        public bool KeepOpenAfterChoice;
     }
 
     class ChoiceResponse : ClientPacket
@@ -903,6 +912,7 @@ namespace Game.Network.Packets
         public uint QuestID;
         public int QuestType; // Accepted values: 0, 1 or 2. 0 == IsAutoComplete() (skip objectives/details)
         public int QuestLevel; // may be -1, static data, in other cases must be used dynamic level: Player.GetQuestLevel (0 is not known, but assuming this is no longer valid for quest intended for client)
+        public int QuestScalingFactionGroup;
         public int QuestMaxScalingLevel = 255;
         public uint QuestPackageID;
         public int QuestMinLevel;
@@ -926,6 +936,7 @@ namespace Game.Network.Packets
         public uint StartItem;
         public uint Flags;
         public uint FlagsEx;
+        public uint FlagsEx2;
         public uint POIContinent;
         public float POIx;
         public float POIy;
@@ -940,6 +951,7 @@ namespace Game.Network.Packets
         public uint RewardSkillLineID; // reward skill id
         public uint RewardNumSkillUps; // reward skill points
         public uint PortraitGiver; // quest giver entry ?
+        public uint PortraitGiverMount;
         public uint PortraitTurnIn; // quest turn in entry ?
         public string PortraitGiverText;
         public string PortraitGiverName;
@@ -951,7 +963,7 @@ namespace Game.Network.Packets
         public uint CompleteSoundKitID;
         public uint AreaGroupID;
         public uint TimeAllowed;
-        public int QuestRewardID;
+        public int TreasurePickerID;
         public int Expansion;
         public List<QuestObjective> Objectives = new List<QuestObjective>();
         public uint[] RewardItems = new uint[SharedConst.QuestRewardItemCount];
@@ -969,7 +981,7 @@ namespace Game.Network.Packets
 
     public struct QuestChoiceItem
     {
-        public uint ItemID;
+        public ItemInstance Item;
         public uint Quantity;
     }
 
@@ -978,13 +990,6 @@ namespace Game.Network.Packets
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(ChoiceItemCount);
-
-            for (int i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
-            {
-                data.WriteUInt32(ChoiceItems[i].ItemID);
-                data.WriteUInt32(ChoiceItems[i].Quantity);
-            }
-
             data.WriteUInt32(ItemCount);
 
             for (int i = 0; i < SharedConst.QuestRewardItemCount; ++i)
@@ -1022,7 +1027,13 @@ namespace Game.Network.Packets
 
             data.WriteUInt32(SkillLineID);
             data.WriteUInt32(NumSkillUps);
-            data.WriteInt32(RewardID);
+            data.WriteInt32(TreasurePickerID);
+
+            for (int i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
+            {
+                ChoiceItems[i].Item.Write(data);
+                data.WriteUInt32(ChoiceItems[i].Quantity);
+            }
 
             data.WriteBit(IsBoostSpell);
             data.FlushBits();
@@ -1041,7 +1052,7 @@ namespace Game.Network.Packets
         public uint SpellCompletionID;
         public uint SkillLineID;
         public uint NumSkillUps;
-        public uint RewardID;
+        public uint TreasurePickerID;
         public QuestChoiceItem[] ChoiceItems = new QuestChoiceItem[SharedConst.QuestRewardChoicesCount];
         public uint[] ItemID = new uint[SharedConst.QuestRewardItemCount];
         public uint[] ItemQty = new uint[SharedConst.QuestRewardItemCount];
@@ -1177,7 +1188,7 @@ namespace Game.Network.Packets
         public int Value;
     }
 
-    struct PlayerChoiceResponseRewardEntry
+    public sealed class PlayerChoiceResponseRewardEntry
     {
         public void Write(WorldPacket data)
         {
@@ -1241,6 +1252,9 @@ namespace Game.Network.Packets
         {
             data.WriteInt32(ResponseID);
             data.WriteInt32(ChoiceArtFileID);
+            data.WriteInt32(Flags);
+            data.WriteUInt32(WidgetSetID);
+            data.WriteUInt8(GroupID);
 
             data.WriteBits(Answer.GetByteCount(), 9);
             data.WriteBits(Header.GetByteCount(), 9);
@@ -1261,6 +1275,9 @@ namespace Game.Network.Packets
 
         public int ResponseID;
         public int ChoiceArtFileID;
+        public int Flags;
+        public uint WidgetSetID;
+        public byte GroupID;
         public string Answer;
         public string Header;
         public string Description;

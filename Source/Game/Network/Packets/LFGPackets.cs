@@ -663,27 +663,40 @@ namespace Game.Network.Packets
 
     public struct LFGPlayerRewards
     {
-        public LFGPlayerRewards(uint rewardItem, uint rewardItemQuantity, int bonusCurrency, bool isCurrency)
+        public LFGPlayerRewards(uint id, uint quantity, int bonusQuantity, bool isCurrency)
         {
-            RewardItem = rewardItem;
-            RewardItemQuantity = rewardItemQuantity;
-            BonusCurrency = bonusCurrency;
-            IsCurrency = isCurrency;
+            Quantity = quantity;
+            BonusQuantity = bonusQuantity;
+            RewardItem = new Optional<ItemInstance>();
+            RewardCurrency = new Optional<uint>();
+
+            if (!isCurrency)
+            {
+                RewardItem.HasValue = true;
+                RewardItem.Value.ItemID = id;
+            }
+            else
+            {
+                RewardCurrency.Set(id);
+            }
         }
 
         public void Write(WorldPacket data)
         {
-            data.WriteInt32(RewardItem);
-            data.WriteUInt32(RewardItemQuantity);
-            data.WriteInt32(BonusCurrency);
-            data.WriteBit(IsCurrency);
-            data.FlushBits();
+            data.WriteBit(RewardItem.HasValue);
+            data.WriteBit(RewardCurrency.HasValue);
+            if (RewardItem.HasValue)
+                RewardItem.Value.Write(data);
+            data.WriteUInt32(Quantity);
+            data.WriteInt32(BonusQuantity);
+            if (RewardCurrency.HasValue)
+                data.WriteInt32(RewardCurrency.Value);
         }
 
-        public uint RewardItem;
-        public uint RewardItemQuantity;
-        public int BonusCurrency;
-        public bool IsCurrency;
+        public Optional<ItemInstance> RewardItem;
+        public Optional<uint> RewardCurrency;
+        public uint Quantity;
+        public int BonusQuantity;
     }
 
     public class LfgBootInfo

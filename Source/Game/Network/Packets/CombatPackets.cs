@@ -42,7 +42,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteBits((uint)Reason, 2);
+            _worldPacket.WriteBits((uint)Reason, 3);
             _worldPacket.FlushBits();
         }
 

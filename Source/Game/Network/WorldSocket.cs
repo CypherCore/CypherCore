@@ -36,8 +36,7 @@ namespace Game.Network
         static byte[] SessionKeySeed = { 0x58, 0xCB, 0xCF, 0x40, 0xFE, 0x2E, 0xCE, 0xA6, 0x5A, 0x90, 0xB8, 0x01, 0x68, 0x6C, 0x28, 0x0B };
         static byte[] ContinuedSessionSeed = { 0x16, 0xAD, 0x0C, 0xD4, 0x46, 0xF9, 0x4F, 0xB2, 0xEF, 0x7D, 0xEA, 0x2A, 0x17, 0x66, 0x4D, 0x2F };
 
-        static byte[] ClientTypeSeed_Win = { 0x79, 0x7E, 0xCC, 0x19, 0x66, 0x2D, 0xCB, 0xD5, 0x09, 0x0A, 0x44, 0x81, 0x17, 0x3F, 0x1D, 0x26 };
-        static byte[] ClientTypeSeed_Wn64 = { 0x6E, 0x21, 0x2D, 0xEF, 0x6A, 0x01, 0x24, 0xA3, 0xD9, 0xAD, 0x07, 0xF5, 0xE3, 0x22, 0xF7, 0xAE };
+        static byte[] ClientTypeSeed_Wn64 = { 0xDD, 0x62, 0x65, 0x17, 0xCC, 0x6D, 0x31, 0x93, 0x2B, 0x47, 0x99, 0x34, 0xCC, 0xDC, 0x0A, 0xBF };
         static byte[] ClientTypeSeed_Mc64 = { 0x34, 0x1C, 0xFE, 0xFE, 0x3D, 0x72, 0xAC, 0xA9, 0xA4, 0x40, 0x7D, 0xC5, 0x35, 0xDE, 0xD6, 0x6A };
 
         public WorldSocket(Socket socket) : base(socket)
@@ -383,15 +382,18 @@ namespace Game.Network
             // For hook purposes, we get Remoteaddress at this point.
             string address = GetRemoteIpAddress().ToString();
 
-            byte[] clientSeed = ClientTypeSeed_Win;
-            if (account.game.OS == "Wn64")
-                clientSeed = ClientTypeSeed_Wn64;
-            else if (account.game.OS == "Mc64")
-                clientSeed = ClientTypeSeed_Mc64;
-
             Sha256 digestKeyHash = new Sha256();
             digestKeyHash.Process(account.game.SessionKey, account.game.SessionKey.Length);
-            digestKeyHash.Finish(clientSeed);
+            if (account.game.OS == "Wn64")
+                digestKeyHash.Finish(ClientTypeSeed_Wn64);
+            else if (account.game.OS == "Mc64")
+                digestKeyHash.Finish(ClientTypeSeed_Mc64);
+            else
+            {
+                Log.outError(LogFilter.Network, "WorldSocket.HandleAuthSession: Authentication failed for account: {0} ('{1}') address: {2}", account.game.Id, authSession.RealmJoinTicket, address);
+                CloseSocket();
+                return;
+            }
 
             HmacSha256 hmac = new HmacSha256(digestKeyHash.Digest);
             hmac.Process(authSession.LocalChallenge, authSession.LocalChallenge.Count);

@@ -559,7 +559,7 @@ namespace Scripts.Northrend.Ulduar.FlameLeviathan
             vehicle = creature.GetVehicleKit();
             Cypher.Assert(vehicle);
             me.SetReactState(ReactStates.Passive);
-            me.SetDisplayId(me.GetCreatureTemplate().ModelId2);
+            me.SetDisplayFromModel(1);
             instance = creature.GetInstanceScript();
         }
 

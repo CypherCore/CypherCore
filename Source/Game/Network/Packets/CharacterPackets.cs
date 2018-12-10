@@ -41,9 +41,9 @@ namespace Game.Network.Packets
         {
             _worldPacket.WriteBit(Success);
             _worldPacket.WriteBit(IsDeletedCharacters);
-            _worldPacket.WriteBit(IsDemonHunterCreationAllowed);
+            _worldPacket.WriteBit(IsTestDemonHunterCreationAllowed);
             _worldPacket.WriteBit(HasDemonHunterOnRealm);
-            _worldPacket.WriteBit(Unknown7x);
+            _worldPacket.WriteBit(IsDemonHunterCreationAllowed);
             _worldPacket.WriteBit(DisabledClassesMask.HasValue);
             _worldPacket.WriteBit(IsAlliedRacesCreationAllowed);
             _worldPacket.WriteUInt32(Characters.Count);
@@ -62,9 +62,9 @@ namespace Game.Network.Packets
 
         public bool Success;
         public bool IsDeletedCharacters; // used for character undelete list
-        public bool IsDemonHunterCreationAllowed = false; //used for demon hunter early access
+        public bool IsTestDemonHunterCreationAllowed = false; //allows client to skip 1 per realm and level 70 requirements
         public bool HasDemonHunterOnRealm = false;
-        public bool Unknown7x = false;
+        public bool IsDemonHunterCreationAllowed = false; //used for demon hunter early access
         public bool IsAlliedRacesCreationAllowed = false;
 
         public int MaxCharacterLevel = 1;
@@ -306,7 +306,9 @@ namespace Game.Network.Packets
         {
             CreateInfo = new CharacterCreateInfo();
             uint nameLength = _worldPacket.ReadBits<uint>(6);
-            CreateInfo.TemplateSet.HasValue = _worldPacket.HasBit();
+            bool hasTemplateSet = _worldPacket.HasBit();
+            CreateInfo.IsTrialBoost = _worldPacket.HasBit();
+
             CreateInfo.RaceId = (Race)_worldPacket.ReadUInt8();
             CreateInfo.ClassId = (Class)_worldPacket.ReadUInt8();
             CreateInfo.Sex = (Gender)_worldPacket.ReadUInt8();
@@ -322,7 +324,7 @@ namespace Game.Network.Packets
 
             CreateInfo.Name = _worldPacket.ReadString(nameLength);
             if (CreateInfo.TemplateSet.HasValue)
-                CreateInfo.TemplateSet.Value = _worldPacket.ReadUInt32();
+                CreateInfo.TemplateSet.Set(_worldPacket.ReadUInt32());
         }
 
         public CharacterCreateInfo CreateInfo;
@@ -335,9 +337,11 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt8(Code);
+            _worldPacket.WritePackedGuid(Guid);
         }
 
         public ResponseCodes Code;
+        public ObjectGuid Guid;
     }
 
     public class CharDelete : ClientPacket
@@ -1043,6 +1047,7 @@ namespace Game.Network.Packets
         public Array<byte> CustomDisplay = new Array<byte>(PlayerConst.CustomDisplaySize);
         public byte OutfitId;
         public Optional<uint> TemplateSet = new Optional<uint>();
+        public bool IsTrialBoost;
         public string Name;
 
         // Server side data

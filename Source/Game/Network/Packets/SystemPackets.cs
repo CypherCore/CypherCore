@@ -19,6 +19,7 @@ using Framework.Constants;
 using Framework.Dynamic;
 using System;
 using System.Collections.Generic;
+using Game.Entities;
 
 namespace Game.Network.Packets
 {
@@ -48,6 +49,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt64(TokenBalanceAmount);
 
             _worldPacket.WriteUInt32(BpayStoreProductDeliveryDelay);
+            _worldPacket.WriteUInt32(ClubsPresenceUpdateTimer);
 
             _worldPacket.WriteBit(VoiceEnabled);
             _worldPacket.WriteBit(EuropaTicketSystemStatus.HasValue);
@@ -61,16 +63,22 @@ namespace Game.Network.Packets
             _worldPacket.WriteBit(RecruitAFriendSendingEnabled);
             _worldPacket.WriteBit(CharUndeleteEnabled);
             _worldPacket.WriteBit(RestrictedAccount);
+            _worldPacket.WriteBit(CommerceSystemEnabled);
             _worldPacket.WriteBit(TutorialsEnabled);
             _worldPacket.WriteBit(NPETutorialsEnabled);
             _worldPacket.WriteBit(TwitterEnabled);
-            _worldPacket.WriteBit(CommerceSystemEnabled);
             _worldPacket.WriteBit(Unk67);
             _worldPacket.WriteBit(WillKickFromWorld);
             _worldPacket.WriteBit(KioskModeEnabled);
             _worldPacket.WriteBit(CompetitiveModeEnabled);
             _worldPacket.WriteBit(RaceClassExpansionLevels.HasValue);
-            _worldPacket.FlushBits();
+            _worldPacket.WriteBit(TokenBalanceEnabled);
+            _worldPacket.WriteBit(WarModeFeatureEnabled);
+            _worldPacket.WriteBit(ClubsEnabled);
+            _worldPacket.WriteBit(ClubsBattleNetClubTypeAllowed);
+            _worldPacket.WriteBit(ClubsCharacterClubTypeAllowed);
+            _worldPacket.WriteBit(VoiceChatDisabledByParentalControl);
+            _worldPacket.WriteBit(VoiceChatMutedByParentalControl);
 
             {
                 _worldPacket.WriteBit(QuickJoinConfig.ToastsDisabled);
@@ -112,6 +120,10 @@ namespace Game.Network.Packets
                     _worldPacket.WriteUInt8(level);
             }
 
+            _worldPacket.WriteBit(VoiceChatManagerSettings.Enabled);
+            _worldPacket.WritePackedGuid(VoiceChatManagerSettings.BnetAccountGuid);
+            _worldPacket.WritePackedGuid(VoiceChatManagerSettings.GuildGuid);
+
             if (EuropaTicketSystemStatus.HasValue)
             {
                 _worldPacket.WriteBit(EuropaTicketSystemStatus.Value.TicketsEnabled);
@@ -145,6 +157,7 @@ namespace Game.Network.Packets
         public uint TokenRedeemIndex;
         public long TokenBalanceAmount;
         public uint BpayStoreProductDeliveryDelay;
+        public uint ClubsPresenceUpdateTimer;
         public bool ItemRestorationButtonEnabled;
         public bool CharUndeleteEnabled; // Implemented
         public bool BpayStoreDisabledByParentalControls;
@@ -152,16 +165,22 @@ namespace Game.Network.Packets
         public bool CommerceSystemEnabled;
         public bool Unk67;
         public bool WillKickFromWorld;
-
         public bool RestrictedAccount;
         public bool TutorialsEnabled;
         public bool NPETutorialsEnabled;
         public bool KioskModeEnabled;
         public bool CompetitiveModeEnabled;
         public bool TokenBalanceEnabled;
+        public bool WarModeFeatureEnabled;
+        public bool ClubsEnabled;
+        public bool ClubsBattleNetClubTypeAllowed;
+        public bool ClubsCharacterClubTypeAllowed;
+        public bool VoiceChatDisabledByParentalControl;
+        public bool VoiceChatMutedByParentalControl;
 
         public Optional<List<byte>> RaceClassExpansionLevels;
         public SocialQueueConfig QuickJoinConfig;
+        public VoiceChatProxySettings VoiceChatManagerSettings;
 
         public struct SavedThrottleObjectState
         {
@@ -214,6 +233,13 @@ namespace Game.Network.Packets
             public float ThrottleDfMaxItemLevel;
             public float ThrottleDfBestPriority;
         }
+
+        public struct VoiceChatProxySettings
+        {
+            public bool Enabled;
+            public ObjectGuid BnetAccountGuid;
+            public ObjectGuid GuildGuid;
+        }
     }
 
     public class FeatureSystemStatusGlueScreen : ServerPacket
@@ -243,7 +269,12 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(TokenPollTimeSeconds);
             _worldPacket.WriteInt32(TokenRedeemIndex);
             _worldPacket.WriteInt64(TokenBalanceAmount);
+            _worldPacket.WriteInt32(MaxCharactersPerRealm);
             _worldPacket.WriteUInt32(BpayStoreProductDeliveryDelay);
+            _worldPacket.WriteInt32(ActiveCharacterUpgradeBoostType);
+            _worldPacket.WriteInt32(ActiveClassTrialBoostType);
+            _worldPacket.WriteInt32(MinimumExpansionLevel);
+            _worldPacket.WriteInt32(MaximumExpansionLevel);
         }
 
         public bool BpayStoreAvailable; // NYI
@@ -263,8 +294,13 @@ namespace Game.Network.Packets
         public bool LiveRegionAccountCopyEnabled; // NYI
         public int TokenPollTimeSeconds;     // NYI
         public int TokenRedeemIndex;     // NYI
-        public long TokenBalanceAmount;     // NYI
+        public long TokenBalanceAmount;     // NYI 
+        public int MaxCharactersPerRealm;
         public uint BpayStoreProductDeliveryDelay;     // NYI
+        public int ActiveCharacterUpgradeBoostType;     // NYI
+        public int ActiveClassTrialBoostType;     // NYI
+        public int MinimumExpansionLevel;
+        public int MaximumExpansionLevel;
     }
 
     public class MOTD : ServerPacket

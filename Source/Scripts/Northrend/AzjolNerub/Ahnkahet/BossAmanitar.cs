@@ -153,7 +153,7 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.Amanitar
                 task.Repeat(TimeSpan.FromSeconds(7));
             });
 
-            me.SetDisplayId(me.GetCreatureTemplate().ModelId2);
+            me.SetDisplayFromModel(1);
             DoCast(SpellIds.PutridMushroom);
 
             if (me.GetEntry() == CreatureIds.PoisonousMushroom)

@@ -622,6 +622,7 @@ namespace Game.Entities
             damageInfo.damageSchoolMask = (uint)GetMeleeDamageSchoolMask();
             damageInfo.attackType = attType;
             damageInfo.damage = 0;
+            damageInfo.originalDamage = 0;
             damageInfo.cleanDamage = 0;
             damageInfo.absorb = 0;
             damageInfo.resist = 0;
@@ -835,7 +836,7 @@ namespace Game.Entities
                     DamageInfo damageInfo1 = new DamageInfo(this, victim, damage, spellInfo, spellInfo.GetSchoolMask(), DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
                     victim.CalcAbsorbResist(damageInfo1);
                     damage = damageInfo1.GetDamage();
-                    // No Unit.CalcAbsorbResist here - opcode doesn't send that data - this damage is probably not affected by that
+
                     victim.DealDamageMods(this, ref damage);
 
                     SpellDamageShield damageShield = new SpellDamageShield();
@@ -843,6 +844,7 @@ namespace Game.Entities
                     damageShield.Defender = GetGUID();
                     damageShield.SpellID = spellInfo.Id;
                     damageShield.TotalDamage = damage;
+                    damageShield.OriginalDamage = (int)damageInfo.originalDamage;
                     damageShield.OverKill = (uint)Math.Max(damage - GetHealth(), 0);
                     damageShield.SchoolMask = (uint)spellInfo.SchoolMask;
                     damageShield.LogAbsorbed = damageInfo1.GetAbsorb();
@@ -1183,6 +1185,7 @@ namespace Game.Entities
             dmgInfo.attacker = this;
             dmgInfo.target = target;
             dmgInfo.damage = Damage - AbsorbDamage - Resist - BlockedAmount;
+            dmgInfo.originalDamage = Damage;
             dmgInfo.damageSchoolMask = (uint)damageSchoolMask;
             dmgInfo.absorb = AbsorbDamage;
             dmgInfo.resist = Resist;
@@ -1197,6 +1200,7 @@ namespace Game.Entities
             packet.AttackerGUID = damageInfo.attacker.GetGUID();
             packet.VictimGUID = damageInfo.target.GetGUID();
             packet.Damage = (int)damageInfo.damage;
+            packet.OriginalDamage = (int)damageInfo.originalDamage;
             int overkill = (int)(damageInfo.damage - damageInfo.target.GetHealth());
             packet.OverDamage = (overkill < 0 ? -1 : overkill);
 
@@ -1212,9 +1216,9 @@ namespace Game.Entities
             packet.BlockAmount = (int)damageInfo.blocked_amount;
             packet.LogData.Initialize(damageInfo.attacker);
 
-            SandboxScalingData sandboxScalingData = new SandboxScalingData();
-            if (sandboxScalingData.GenerateDataForUnits(damageInfo.attacker, damageInfo.target))
-                packet.SandboxScaling = sandboxScalingData;
+            ContentTuningParams contentTuningParams = new ContentTuningParams();
+            if (contentTuningParams.GenerateDataForUnits(damageInfo.attacker, damageInfo.target))
+                packet.ContentTuning = contentTuningParams;
 
             SendCombatLogMessage(packet);
         }
@@ -1321,6 +1325,8 @@ namespace Game.Entities
                 unit.SetInCombatState(PvP, enemy);
                 unit.SetFlag(UnitFields.Flags, UnitFlags.PetInCombat);
             }
+
+            ProcSkillsAndAuras(enemy, ProcFlags.EnterCombat, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
         }
 
         internal void SendCombatLogMessage(CombatLogServerPacket combatLog)
@@ -1770,6 +1776,7 @@ namespace Game.Entities
             damageInfo.damageSchoolMask = (uint)SpellSchoolMask.Normal;
             damageInfo.attackType = attackType;
             damageInfo.damage = 0;
+            damageInfo.originalDamage = 0;
             damageInfo.cleanDamage = 0;
             damageInfo.absorb = 0;
             damageInfo.resist = 0;
@@ -1838,18 +1845,20 @@ namespace Game.Entities
                 case MeleeHitOutcome.Evade:
                     damageInfo.HitInfo |= HitInfo.Miss | HitInfo.SwingNoHitSound;
                     damageInfo.TargetState = VictimState.Evades;
-
+                    damageInfo.originalDamage = damageInfo.damage;
                     damageInfo.damage = 0;
                     damageInfo.cleanDamage = 0;
                     return;
                 case MeleeHitOutcome.Miss:
                     damageInfo.HitInfo |= HitInfo.Miss;
                     damageInfo.TargetState = VictimState.Intact;
+                    damageInfo.originalDamage = damageInfo.damage;
                     damageInfo.damage = 0;
                     damageInfo.cleanDamage = 0;
                     break;
                 case MeleeHitOutcome.Normal:
                     damageInfo.TargetState = VictimState.Hit;
+                    damageInfo.originalDamage = damageInfo.damage;
                     break;
                 case MeleeHitOutcome.Crit:
                     damageInfo.HitInfo |= HitInfo.CriticalHit;
@@ -1862,19 +1871,25 @@ namespace Game.Entities
 
                     if (mod != 0)
                         MathFunctions.AddPct(ref damageInfo.damage, mod);
+
+                    damageInfo.originalDamage = damageInfo.damage;
                     break;
                 case MeleeHitOutcome.Parry:
                     damageInfo.TargetState = VictimState.Parry;
+                    damageInfo.originalDamage = damageInfo.damage;
                     damageInfo.cleanDamage += damageInfo.damage;
                     damageInfo.damage = 0;
                     break;
                 case MeleeHitOutcome.Dodge:
                     damageInfo.TargetState = VictimState.Dodge;
+                    damageInfo.originalDamage = damageInfo.damage;
                     damageInfo.cleanDamage += damageInfo.damage;
                     damageInfo.damage = 0;
                     break;
                 case MeleeHitOutcome.Block:
                     damageInfo.TargetState = VictimState.Hit;
+                    damageInfo.HitInfo |= HitInfo.Block;
+                    damageInfo.originalDamage = damageInfo.damage;
                     // 30% damage blocked, double blocked amount if block is critical
                     damageInfo.blocked_amount = MathFunctions.CalculatePct(damageInfo.damage, damageInfo.target.isBlockCritical() ? damageInfo.target.GetBlockPercent() * 2 : damageInfo.target.GetBlockPercent());
                     damageInfo.damage -= damageInfo.blocked_amount;
@@ -1883,6 +1898,7 @@ namespace Game.Entities
                 case MeleeHitOutcome.Glancing:
                     damageInfo.HitInfo |= HitInfo.Glancing;
                     damageInfo.TargetState = VictimState.Hit;
+                    damageInfo.originalDamage = damageInfo.damage;
                     int leveldif = (int)victim.getLevel() - (int)getLevel();
                     if (leveldif > 3)
                         leveldif = 3;
@@ -1896,6 +1912,7 @@ namespace Game.Entities
                     damageInfo.TargetState = VictimState.Hit;
                     // 150% normal damage
                     damageInfo.damage += (damageInfo.damage / 2);
+                    damageInfo.originalDamage = damageInfo.damage;
                     break;
 
                 default:
@@ -2495,6 +2512,7 @@ namespace Game.Entities
                     CleanDamage cleanDamage = new CleanDamage(splitDamage, 0, WeaponAttackType.BaseAttack, MeleeHitOutcome.Normal);
                     DealDamage(caster, splitDamage, cleanDamage, DamageEffectType.Direct, damageInfo.GetSchoolMask(), itr.GetSpellInfo(), false);
                     log.damage = splitDamage;
+                    log.originalDamage = splitDamage;
                     log.absorb = split_absorb;
                     SendSpellNonMeleeDamageLog(log);
 
@@ -2682,7 +2700,7 @@ namespace Game.Entities
                     for (var i = SpellSchools.Holy; i < SpellSchools.Max; ++i)
                     {
                         if (Convert.ToBoolean((int)spellProto.GetSchoolMask() & (1 << (int)i)))
-                            maxModDamagePercentSchool = Math.Max(maxModDamagePercentSchool, GetFloatValue(PlayerFields.ModDamageDonePct + (int)i));
+                            maxModDamagePercentSchool = Math.Max(maxModDamagePercentSchool, GetFloatValue(ActivePlayerFields.ModDamageDonePct + (int)i));
                     }
 
                     DoneTotalMod *= maxModDamagePercentSchool;

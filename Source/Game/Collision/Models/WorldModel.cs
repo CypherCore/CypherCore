@@ -312,8 +312,16 @@ namespace Game.Collision
             RootWMOID = 0;
         }
 
-        public override bool IntersectRay(Ray ray, ref float distance, bool stopAtFirstHit)
+        public override bool IntersectRay(Ray ray, ref float distance, bool stopAtFirstHit, ModelIgnoreFlags ignoreFlags)
         {
+            // If the caller asked us to ignore certain objects we should check flags
+            if ((ignoreFlags & ModelIgnoreFlags.M2) != ModelIgnoreFlags.Nothing)
+            {
+                // M2 models are not taken into account for LoS calculation if caller requested their ignoring.
+                if ((Flags & (uint)ModelFlags.M2) != 0)
+                    return false;
+            }
+
             // small M2 workaround, maybe better make separate class with virtual intersection funcs
             // in any case, there's no need to use a bound tree if we only have one submodel
             if (groupModels.Count == 1)
@@ -404,5 +412,6 @@ namespace Game.Collision
         List<GroupModel> groupModels = new List<GroupModel>();
         BIH groupTree = new BIH();
         uint RootWMOID;
+        public uint Flags;
     }
 }

@@ -261,6 +261,7 @@ namespace Game.AI
             me.ResetPlayerDamageReq();
             me.SetLastDamagedTime(0);
             me.SetCannotReachTarget(false);
+            me.DoNotReacquireTarget();
 
             if (me.IsInEvadeMode())
                 return false;

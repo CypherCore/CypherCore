@@ -38,7 +38,7 @@ namespace Game.Chat
             }
 
             // .addquest #entry'
-            // number or [name] Shift-click form |color|Hquest:quest_id:quest_level|h[name]|h|r
+            // number or [name] Shift-click form |color|Hquest:quest_id:quest_level:min_level:max_level:scaling_faction|h[name]|h|r
             string cId = handler.extractKeyFromLink(args, "Hquest");
             if (!uint.TryParse(cId, out uint entry))
                 return false;
@@ -78,7 +78,7 @@ namespace Game.Chat
             }
 
             // .quest complete #entry
-            // number or [name] Shift-click form |color|Hquest:quest_id:quest_level|h[name]|h|r
+            // number or [name] Shift-click form |color|Hquest:quest_id:quest_level:min_level:max_level:scaling_faction|h[name]|h|r
             string cId = handler.extractKeyFromLink(args, "Hquest");
             if (!uint.TryParse(cId, out uint entry))
                 return false;
@@ -170,7 +170,7 @@ namespace Game.Chat
             }
 
             // .removequest #entry'
-            // number or [name] Shift-click form |color|Hquest:quest_id:quest_level|h[name]|h|r
+            // number or [name] Shift-click form |color|Hquest:quest_id:quest_level:min_level:max_level:scaling_faction|h[name]|h|r
             string cId = handler.extractKeyFromLink(args, "Hquest");
             if (!uint.TryParse(cId, out uint entry))
                 return false;
@@ -224,7 +224,7 @@ namespace Game.Chat
             }
 
             // .quest reward #entry
-            // number or [name] Shift-click form |color|Hquest:quest_id:quest_level|h[name]|h|r
+            // number or [name] Shift-click form |color|Hquest:quest_id:quest_level:min_level:max_level:scaling_faction|h[name]|h|r
             string cId = handler.extractKeyFromLink(args, "Hquest");
             if (!uint.TryParse(cId, out uint entry))
                 return false;

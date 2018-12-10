@@ -22,29 +22,35 @@ namespace Framework.Constants
         Object = 0,
         Item = 1,
         Container = 2,
-        Unit = 3,
-        Player = 4,
-        GameObject = 5,
-        DynamicObject = 6,
-        Corpse = 7,
-        AreaTrigger = 8,
-        SceneObject = 9,
-        Conversation = 10
+        AzeriteEmpoweredItem = 3,
+        AzeriteItem = 4,
+        Unit = 5,
+        Player = 6,
+        ActivePlayer = 7,
+        GameObject = 8,
+        DynamicObject = 9,
+        Corpse = 10,
+        AreaTrigger = 11,
+        SceneObject = 12,
+        Conversation = 13
     }
 
     public enum TypeMask
     {
         Object = 0x01,
         Item = 0x02,
-        Container = Item | 0x04,
-        Unit = 0x08,
-        Player = 0x10,
-        GameObject = 0x20,
-        DynamicObject = 0x40,
-        Corpse = 0x80,
-        AreaTrigger = 0x100,
-        Sceneobject = 0x200,
-        Conversation = 0x400,
+        Container = 0x04,
+        AzeriteEmpoweredItem = 0x08,
+        AzeriteItem = 0x10,
+        Unit = 0x20,
+        Player = 0x40,
+        ActivePlayer = 0x80,
+        GameObject = 0x100,
+        DynamicObject = 0x200,
+        Corpse = 0x400,
+        AreaTrigger = 0x800,
+        Sceneobject = 0x1000,
+        Conversation = 0x2000,
         Seer = Player | Unit | DynamicObject
     }
 
@@ -97,7 +103,8 @@ namespace Framework.Constants
         BattlePet = 44,
         CommerceObj = 45,
         ClientSession = 46,
-        Cast = 47
+        Cast = 47,
+        ClientConnection = 48
     }
 
     public enum NotifyFlags
@@ -131,7 +138,7 @@ namespace Framework.Constants
         // uses this category
     }
 
-    public enum SummonType: byte
+    public enum SummonType
     {
         None = 0,
         Pet = 1,

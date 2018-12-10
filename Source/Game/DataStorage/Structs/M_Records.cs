@@ -35,32 +35,32 @@ namespace Game.DataStorage
         public string MapDescription1;                               // Alliance
         public string PvpShortDescription;
         public string PvpLongDescription;
-        public MapFlags[] Flags = new MapFlags[2];
-        public float MinimapIconScale;
-        public Vector2 Corpse;                                        // entrance coordinates in ghost mode  (in most cases = normal entrance)
+        public Vector2 Corpse;                                           // entrance coordinates in ghost mode  (in most cases = normal entrance)
+        public byte MapType;
+        public MapTypes InstanceType;
+        public byte ExpansionID;
         public ushort AreaTableID;
-        public ushort LoadingScreenID;
-        public short CorpseMapID;                                              // map_id of entrance map in ghost mode (continent always and in most cases = normal entrance)
-        public ushort TimeOfDayOverride;
+        public short LoadingScreenID;
+        public short TimeOfDayOverride;
         public short ParentMapID;
         public short CosmeticParentMapID;
-        public ushort WindSettingsID;
-        public MapTypes InstanceType;
-        public byte MapType;
-        public byte ExpansionID;
-        public byte MaxPlayers;
         public byte TimeOffset;
+        public float MinimapIconScale;
+        public short CorpseMapID;                                              // map_id of entrance map in ghost mode (continent always and in most cases = normal entrance)
+        public byte MaxPlayers;
+        public short WindSettingsID;
+        public int ZmpFileDataID;
+        public MapFlags[] Flags = new MapFlags[2];
 
-        //Helpers
+        // Helpers
         public Expansion Expansion() { return (Expansion)ExpansionID; }
 
-        public bool IsDungeon() { return (InstanceType == MapTypes.Instance || InstanceType == MapTypes.Raid || InstanceType == MapTypes.Scenario) && !IsGarrison(); }
-        public bool IsNonRaidDungeon() { return InstanceType == MapTypes.Instance; }
-        public bool Instanceable()
+        public bool IsDungeon()
         {
-            return InstanceType == MapTypes.Instance || InstanceType == MapTypes.Raid
-                || InstanceType == MapTypes.Battleground || InstanceType == MapTypes.Arena || InstanceType == MapTypes.Scenario;
+            return (InstanceType == MapTypes.Instance || InstanceType == MapTypes.Raid || InstanceType == MapTypes.Scenario) && !IsGarrison();
         }
+        public bool IsNonRaidDungeon() { return InstanceType == MapTypes.Instance; }
+        public bool Instanceable() { return InstanceType == MapTypes.Instance || InstanceType == MapTypes.Raid || InstanceType == MapTypes.Battleground || InstanceType == MapTypes.Arena || InstanceType == MapTypes.Scenario; }
         public bool IsRaid() { return InstanceType == MapTypes.Raid; }
         public bool IsBattleground() { return InstanceType == MapTypes.Battleground; }
         public bool IsBattleArena() { return InstanceType == MapTypes.Arena; }
@@ -75,6 +75,7 @@ namespace Game.DataStorage
 
             if (CorpseMapID < 0)
                 return false;
+
             mapid = (uint)CorpseMapID;
             x = Corpse.X;
             y = Corpse.Y;
@@ -86,22 +87,23 @@ namespace Game.DataStorage
             return Id == 0 || Id == 1 || Id == 530 || Id == 571 || Id == 870 || Id == 1116 || Id == 1220;
         }
 
-        public bool IsDynamicDifficultyMap() { return Flags[0].HasAnyFlag(MapFlags.CanToggleDifficulty); }
-        public bool IsGarrison() { return Flags[0].HasAnyFlag(MapFlags.Garrison); }
+        public bool IsDynamicDifficultyMap() { return (Flags[0] & MapFlags.CanToggleDifficulty) != 0; }
+        public bool IsGarrison() { return (Flags[0] & MapFlags.Garrison) != 0; }
     }
 
     public sealed class MapDifficultyRecord
     {
         public uint Id;
-        public LocalizedString Message;                          // m_message_lang (text showed when transfer to map failed)
-        public byte DifficultyID;
-        public byte ResetInterval;                                 // 1 means daily reset, 2 means weekly
-        public byte MaxPlayers;                                       // m_maxPlayers some heroic versions have 0 when expected same amount as in normal version
-        public byte LockID;
-        public byte Flags;
-        public byte ItemContext;
+        public LocalizedString Message;                               // m_message_lang (text showed when transfer to map failed)
         public uint ItemContextPickerID;
-        public uint MapID;
+        public int ContentTuningID;
+        public byte DifficultyID;
+        public byte LockID;
+        public byte ResetInterval;
+        public byte MaxPlayers;
+        public byte ItemContext;
+        public byte Flags;
+        public ushort MapID;
 
         public uint GetRaidDuration()
         {
@@ -116,42 +118,42 @@ namespace Game.DataStorage
     public sealed class ModifierTreeRecord
     {
         public uint Id;
-        public uint Asset;
-        public uint SecondaryAsset;
         public uint Parent;
+        public sbyte Operator;
+        public sbyte Amount;
         public byte Type;
-        public byte TertiaryAsset;
-        public byte Operator;
-        public byte Amount;
+        public uint Asset;
+        public int SecondaryAsset;
+        public sbyte TertiaryAsset;
     }
 
     public sealed class MountRecord
     {
         public string Name;
-        public string Description;
         public string SourceText;
-        public uint SourceSpellID;
-        public float MountFlyRideHeight;
-        public ushort MountTypeID;
-        public ushort Flags;
-        public byte SourceTypeEnum;
+        public string Description;
         public uint Id;
+        public ushort MountTypeID;
+        public MountFlags Flags;
+        public sbyte SourceTypeEnum;
+        public uint SourceSpellID;
         public uint PlayerConditionID;
-        public byte UiModelSceneID;
+        public float MountFlyRideHeight;
+        public int UiModelSceneID;
 
-        public bool IsSelfMount() { return (Flags & (ushort)MountFlags.SelfMount) != 0; }
-}
+        public bool IsSelfMount() { return (Flags & MountFlags.SelfMount) != 0; }
+    }
 
     public sealed class MountCapabilityRecord
     {
-        public uint ReqSpellKnownID;
-        public uint ModSpellAuraID;
+        public uint Id;
+        public MountCapabilityFlags Flags;
         public ushort ReqRidingSkill;
         public ushort ReqAreaID;
+        public uint ReqSpellAuraID;
+        public uint ReqSpellKnownID;
+        public uint ModSpellAuraID;
         public short ReqMapID;
-        public MountCapabilityFlags Flags;
-        public uint Id;
-        public byte ReqSpellAuraID;
     }
 
     public sealed class MountTypeXCapabilityRecord
@@ -173,9 +175,9 @@ namespace Game.DataStorage
     public sealed class MovieRecord
     {
         public uint Id;
-        public uint AudioFileDataID;
-        public uint SubtitleFileDataID;
         public byte Volume;
         public byte KeyID;
+        public uint AudioFileDataID;
+        public uint SubtitleFileDataID;
     }
 }

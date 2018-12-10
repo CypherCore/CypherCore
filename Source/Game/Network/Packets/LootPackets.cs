@@ -203,7 +203,7 @@ namespace Game.Network.Packets
 
     class LootList : ServerPacket
     {
-        public LootList() : base(ServerOpcodes.LootList) { }
+        public LootList() : base(ServerOpcodes.LootList, ConnectionType.Instance) { }
 
         public override void Write()
         {

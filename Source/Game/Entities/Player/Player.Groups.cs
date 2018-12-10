@@ -233,6 +233,8 @@ namespace Game.Entities
                     return IsInSameRaidWith(p);
                 case 2: 
                     return GetTeam() == p.GetTeam();
+                case 3:
+                    return false;
             }
         }
         public bool IsInSameGroupWith(Player p)

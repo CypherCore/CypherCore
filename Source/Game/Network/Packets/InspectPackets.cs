@@ -59,12 +59,16 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt16(PvpTalents[i]);
 
             _worldPacket.WriteBit(GuildData.HasValue);
+            _worldPacket.WriteBit(AzeriteLevel.HasValue);
             _worldPacket.FlushBits();
 
             Items.ForEach(p => p.Write(_worldPacket));
 
             if (GuildData.HasValue)
                 GuildData.Value.Write(_worldPacket);
+
+            if (AzeriteLevel.HasValue)
+                _worldPacket.WriteInt32(AzeriteLevel.Value);
         }
 
         public ObjectGuid InspecteeGUID;
@@ -76,6 +80,7 @@ namespace Game.Network.Packets
         public Gender GenderID = Gender.None;
         public Optional<InspectGuildData> GuildData = new Optional<InspectGuildData>();
         public int SpecializationID;
+        public Optional<int> AzeriteLevel;
     }
 
     public class RequestHonorStats : ClientPacket
@@ -211,6 +216,10 @@ namespace Game.Network.Packets
         {
             data.WritePackedGuid(CreatorGUID);
             data.WriteUInt8(Index);
+            data.WriteUInt32(AzeritePowers.Count);
+            foreach (var id in AzeritePowers)
+                data.WriteInt32(id);
+
             Item.Write(data);
             data.WriteBit(Usable);
             data.WriteBits(Enchants.Count, 4);
@@ -230,6 +239,7 @@ namespace Game.Network.Packets
         public bool Usable;
         public List<InspectEnchantData> Enchants = new List<InspectEnchantData>();
         public List<ItemGemData> Gems = new List<ItemGemData>();
+        public List<int> AzeritePowers = new List<int>();
     }
 
     public struct InspectGuildData
@@ -250,6 +260,7 @@ namespace Game.Network.Packets
     {
         public void Write(WorldPacket data)
         {
+            data.WriteUInt8(Bracket);
             data.WriteInt32(Rating);
             data.WriteInt32(Rank);
             data.WriteInt32(WeeklyPlayed);
@@ -258,7 +269,10 @@ namespace Game.Network.Packets
             data.WriteInt32(SeasonWon);
             data.WriteInt32(WeeklyBestRating);
             data.WriteInt32(Unk710);
-            data.WriteUInt8(Bracket);
+            data.WriteInt32(Unk801_1);
+            data.WriteBit(Unk801_2);
+            data.FlushBits();
+
         }
 
         public int Rating;
@@ -269,7 +283,9 @@ namespace Game.Network.Packets
         public int SeasonWon;
         public int WeeklyBestRating;
         public int Unk710;
+        public int Unk801_1;
         public byte Bracket;
+        public bool Unk801_2;
     }
 }
 

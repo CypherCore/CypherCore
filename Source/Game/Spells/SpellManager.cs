@@ -1356,14 +1356,30 @@ namespace Game.Entities
                 procEntry.SpellPhaseMask = ProcFlagsSpellPhase.Hit;
                 procEntry.HitMask = ProcFlagsHit.None; // uses default proc @see SpellMgr::CanSpellTriggerProcOnEvent
 
-                // Reflect auras should only proc off reflects
                 foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(Difficulty.None))
                 {
-                    if (effect != null && (effect.IsAura(AuraType.ReflectSpells) || effect.IsAura(AuraType.ReflectSpellsSchool)))
+                    if (effect == null || !effect.IsAura())
+                        continue;
+
+                    switch (effect.ApplyAuraName)
                     {
-                        procEntry.HitMask = ProcFlagsHit.Reflect;
-                        break;
+                        // Reflect auras should only proc off reflects
+                        case AuraType.ReflectSpells:
+                        case AuraType.ReflectSpellsSchool:
+                            procEntry.HitMask = ProcFlagsHit.Reflect;
+                            break;
+                        // Only drop charge on crit
+                        case AuraType.ModWeaponCritPercent:
+                            procEntry.HitMask = ProcFlagsHit.Critical;
+                            break;
+                        // Only drop charge on block
+                        case AuraType.ModBlockPercent:
+                            procEntry.HitMask = ProcFlagsHit.Block;
+                            break;
+                        default:
+                            continue;
                     }
+                    break;
                 }
 
                 procEntry.AttributesMask = 0;
@@ -1633,7 +1649,7 @@ namespace Game.Entities
                         if (skillLine.SkillLine != creatureFamily.SkillLine[j])
                             continue;
 
-                        if (skillLine.AcquireMethod != AbilytyLearnType.OnSkillLearn)
+                        if (skillLine.AcquireMethod != AbilityLearnType.OnSkillLearn)
                             continue;
 
                         SpellInfo spell = GetSpellInfo(skillLine.Spell);
@@ -1783,7 +1799,7 @@ namespace Game.Entities
                 spellArea.questEndStatus = result.Read<uint>(4);
                 spellArea.questEnd = result.Read<uint>(5);
                 spellArea.auraSpell = result.Read<int>(6);
-                spellArea.raceMask = result.Read<uint>(7);
+                spellArea.raceMask = result.Read<ulong>(7);
                 spellArea.gender = (Gender)result.Read<uint>(8);
                 spellArea.flags = (SpellAreaFlag)result.Read<byte>(9);
 
@@ -1971,7 +1987,7 @@ namespace Game.Entities
                 effectsBySpell[effect.SpellID][effect.DifficultyID][effect.EffectIndex] = effect;
             }
 
-            foreach (var spell in CliDB.SpellStorage.Values)
+            foreach (var spell in CliDB.SpellNameStorage.Values)
                 loadData[spell.Id] = new SpellInfoLoadHelper();
 
             foreach (SpellAuraOptionsRecord auraOptions in CliDB.SpellAuraOptionsStorage.Values)
@@ -2068,13 +2084,13 @@ namespace Game.Entities
                 visualsBySpell[visual.SpellID].Add(visual.DifficultyID, visual);
             }
 
-            foreach (var spellEntry in CliDB.SpellStorage.Values)
+            foreach (var spellEntry in CliDB.SpellNameStorage.Values)
             {
                 loadData[spellEntry.Id].Entry = spellEntry;
                 mSpellInfoMap[spellEntry.Id] = new SpellInfo(loadData[spellEntry.Id], effectsBySpell.LookupByKey(spellEntry.Id), visualsBySpell.LookupByKey(spellEntry.Id));
             }
 
-            CliDB.SpellStorage.Clear();
+            CliDB.SpellNameStorage.Clear();
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded SpellInfo store in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
         }
@@ -2483,6 +2499,8 @@ namespace Game.Entities
                         break;
                     case 50661:// Weakened Resolve                    
                     case 68979:// Unleashed Souls
+                    case 48714:// Compelled
+                    case 7853: // The Art of Being a Water Terror: Force Cast on Player
                         spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(13); // 50000yd
                         break;
                     // VIOLET HOLD SPELLS
@@ -2903,7 +2921,7 @@ namespace Game.Entities
                         if (skillLine.SkillLine != cFamily.SkillLine[0] && skillLine.SkillLine != cFamily.SkillLine[1])
                             continue;
 
-                        if (skillLine.AcquireMethod != AbilytyLearnType.OnSkillLearn)
+                        if (skillLine.AcquireMethod != AbilityLearnType.OnSkillLearn)
                             continue;
 
                         Global.SpellMgr.PetFamilySpellsStorage.Add(cFamily.Id, spellInfo.Id);
@@ -2998,6 +3016,15 @@ namespace Game.Entities
                 case AuraType.ProcTriggerSpellWithValue:
                 case AuraType.ModSpellDamageFromCaster:
                 case AuraType.AbilityIgnoreAurastate:
+                case AuraType.ModInvisibility:
+                case AuraType.ForceReaction:
+                case AuraType.ModTaunt:
+                case AuraType.ModDetaunt:
+                case AuraType.ModDamagePercentDone:
+                case AuraType.ModAttackPowerPct:
+                case AuraType.ModHitChance:
+                case AuraType.ModWeaponCritPercent:
+                case AuraType.ModBlockPercent:
                 case AuraType.ModRoot2:
                     return true;
             }
@@ -3014,6 +3041,7 @@ namespace Game.Entities
                 case AuraType.ModRoot:
                 case AuraType.ModStun:
                 case AuraType.Transform:
+                case AuraType.ModInvisibility:
                 case AuraType.SpellMagnet:
                 case AuraType.SchoolAbsorb:
                 case AuraType.ModRoot2:
@@ -3033,6 +3061,7 @@ namespace Game.Entities
                 case AuraType.ModRoot2:
                 case AuraType.ModStun:
                 case AuraType.Transform:
+                case AuraType.ModInvisibility:
                     return ProcFlagsSpellType.Damage;
                 default:
                     return ProcFlagsSpellType.MaskAll;
@@ -3117,7 +3146,7 @@ namespace Game.Entities
 
         public bool IsProfessionSkill(uint skill)
         {
-            return IsPrimaryProfessionSkill(skill) || skill == (uint)SkillType.Fishing || skill == (uint)SkillType.Cooking || skill == (uint)SkillType.FirstAid;
+            return IsPrimaryProfessionSkill(skill) || skill == (uint)SkillType.Fishing || skill == (uint)SkillType.Cooking;
         }
 
         public bool IsPartOfSkillLine(SkillType skillId, uint spellId)
@@ -3209,7 +3238,7 @@ namespace Game.Entities
 
     public class SpellInfoLoadHelper
     {
-        public SpellRecord Entry;
+        public SpellNameRecord Entry;
 
         public SpellAuraOptionsRecord AuraOptions;
         public SpellAuraRestrictionsRecord AuraRestrictions;
@@ -3263,7 +3292,7 @@ namespace Game.Entities
         public uint questStart;                                     // quest start (quest must be active or rewarded for spell apply)
         public uint questEnd;                                       // quest end (quest must not be rewarded for spell apply)
         public int auraSpell;                                       // spell aura must be applied for spell apply)if possitive) and it must not be applied in other case
-        public uint raceMask;                                       // can be applied only to races
+        public ulong raceMask;                                      // can be applied only to races
         public Gender gender;                                       // can be applied only to gender
         public uint questStartStatus;                               // QuestStatus that quest_start must have in order to keep the spell
         public uint questEndStatus;                                 // QuestStatus that the quest_end must have in order to keep the spell (if the quest_end's status is different than this, the spell will be dropped)

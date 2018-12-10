@@ -132,13 +132,20 @@ namespace Game.Maps
         {
             if (Global.VMapMgr.isMapLoadingEnabled())
             {
-                bool exists = Global.VMapMgr.existsMap(mapid, gx, gy);
-                if (!exists)
+                LoadResult result = Global.VMapMgr.existsMap(mapid, gx, gy);
+                string name = VMapManager.getMapFileName(mapid);
+                switch (result)
                 {
-                    string name = VMapManager.getMapFileName(mapid);
-                    Log.outError(LogFilter.Maps, "VMap file '{0}' is missing or points to wrong version of vmap file. Redo vmaps with latest version of vmap_assembler.exe.",
-                        Global.WorldMgr.GetDataPath() + "vmaps/" + name);
-                    return false;
+                    case LoadResult.Success:
+                        break;
+                    case LoadResult.FileNotFound:
+                        Log.outError(LogFilter.Maps, $"VMap file '{Global.WorldMgr.GetDataPath() + "vmaps/" + name}' does not exist");
+                        Log.outError(LogFilter.Maps, $"Please place VMAP files (*.vmtree and *.vmtile) in the vmap directory ({Global.WorldMgr.GetDataPath() + "vmaps/"}), or correct the DataDir setting in your worldserver.conf file.");
+                        return false;
+                    case LoadResult.VersionMismatch:
+                        Log.outError(LogFilter.Maps, $"VMap file '{Global.WorldMgr.GetDataPath() + "vmaps/" + name}e' couldn't b loaded");
+                        Log.outError(LogFilter.Maps, "This is because the version of the VMap file and the version of this module are different, please re-extract the maps with the tools compiled with this module.");
+                        return false;
                 }
             }
             return true;
@@ -2064,9 +2071,9 @@ namespace Game.Maps
             return 0;
         }
 
-        public bool isInLineOfSight(PhaseShift phaseShift, float x1, float y1, float z1, float x2, float y2, float z2)
+        public bool isInLineOfSight(PhaseShift phaseShift, float x1, float y1, float z1, float x2, float y2, float z2, ModelIgnoreFlags ignoreFlags)
         {
-            return Global.VMapMgr.isInLineOfSight(PhasingHandler.GetTerrainMapId(phaseShift, this, x1, y1), x1, y1, z1, x2, y2, z2)
+            return Global.VMapMgr.isInLineOfSight(PhasingHandler.GetTerrainMapId(phaseShift, this, x1, y1), x1, y1, z1, x2, y2, z2, ignoreFlags)
                    && _dynamicTree.isInLineOfSight(new Vector3(x1, y1, z1), new Vector3(x2, y2, z2), phaseShift);
         }
 
@@ -4597,6 +4604,7 @@ namespace Game.Maps
             base.RemovePlayerFromMap(player, remove);
             // for normal instances schedule the reset after all players have left
             SetResetSchedule(true);
+            Global.InstanceSaveMgr.UnloadInstanceSave(GetInstanceId());
         }
 
         public void CreateInstanceData(bool load)

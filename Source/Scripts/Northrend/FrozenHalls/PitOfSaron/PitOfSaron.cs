@@ -238,7 +238,7 @@ namespace Scripts.Northrend.FrozenHalls.PitOfSaron
     {
         public npc_pit_of_saron_icicle(Creature creature) : base(creature)
         {
-            me.SetDisplayId(me.GetCreatureTemplate().ModelId1);
+            me.SetDisplayFromModel(0);
         }
 
         public override void IsSummonedBy(Unit summoner)

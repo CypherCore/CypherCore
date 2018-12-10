@@ -318,12 +318,13 @@ namespace Game.Network.Packets
 
             if (splineFlags.hasFlag(SplineFlag.Parabolic))
             {
-                movementSpline.JumpGravity = moveSpline.vertical_acceleration;
-                movementSpline.SpecialTime = (uint)moveSpline.effect_start_time;
+                movementSpline.JumpExtraData.HasValue = true;
+                movementSpline.JumpExtraData.Value.JumpGravity = moveSpline.vertical_acceleration;
+                movementSpline.JumpExtraData.Value.StartTime = (uint)moveSpline.effect_start_time;
             }
 
             if (splineFlags.hasFlag(SplineFlag.FadeObject))
-                movementSpline.SpecialTime = (uint)moveSpline.effect_start_time;
+                movementSpline.FadeObjectTime = (uint)moveSpline.effect_start_time;
 
             if (moveSpline.spell_effect_extra.HasValue)
             {
@@ -332,6 +333,7 @@ namespace Game.Network.Packets
                 movementSpline.SpellEffectExtraData.Value.SpellVisualID = moveSpline.spell_effect_extra.Value.SpellVisualId;
                 movementSpline.SpellEffectExtraData.Value.ProgressCurveID = moveSpline.spell_effect_extra.Value.ProgressCurveId;
                 movementSpline.SpellEffectExtraData.Value.ParabolicCurveID = moveSpline.spell_effect_extra.Value.ParabolicCurveId;
+                movementSpline.SpellEffectExtraData.Value.JumpGravity = moveSpline.vertical_acceleration;
             }
 
             Spline spline = moveSpline.spline;
@@ -1096,12 +1098,28 @@ namespace Game.Network.Packets
             data.WriteUInt32(SpellVisualID);
             data.WriteUInt32(ProgressCurveID);
             data.WriteUInt32(ParabolicCurveID);
+            data.WriteFloat(JumpGravity);
         }
 
         public ObjectGuid TargetGuid;
         public uint SpellVisualID;
         public uint ProgressCurveID;
         public uint ParabolicCurveID;
+        public float JumpGravity;
+    }
+
+    public struct MonsterSplineJumpExtraData
+    {
+        public float JumpGravity;
+        public uint StartTime;
+        public uint Duration;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteFloat(JumpGravity);
+            data.WriteUInt32(StartTime);
+            data.WriteUInt32(Duration);
+        }
     }
 
     public class MovementSpline
@@ -1113,8 +1131,7 @@ namespace Game.Network.Packets
             data.WriteUInt32(TierTransStartTime);
             data.WriteInt32(Elapsed);
             data.WriteUInt32(MoveTime);
-            data.WriteFloat(JumpGravity);
-            data.WriteUInt32(SpecialTime);
+            data.WriteUInt32(FadeObjectTime);
             data.WriteUInt8(Mode);
             data.WriteUInt8(VehicleExitVoluntary);
             data.WritePackedGuid(TransportGUID);
@@ -1124,6 +1141,7 @@ namespace Game.Network.Packets
             data.WriteBits(PackedDeltas.Count, 16);
             data.WriteBit(SplineFilter.HasValue);
             data.WriteBit(SpellEffectExtraData.HasValue);
+            data.WriteBit(JumpExtraData.HasValue);
             data.FlushBits();
 
             if (SplineFilter.HasValue)
@@ -1151,6 +1169,9 @@ namespace Game.Network.Packets
 
             if (SpellEffectExtraData.HasValue)
                 SpellEffectExtraData.Value.Write(data);
+
+            if (JumpExtraData.HasValue)
+                JumpExtraData.Value.Write(data);
         }
 
         public uint Flags; // Spline flags
@@ -1159,8 +1180,7 @@ namespace Game.Network.Packets
         public uint TierTransStartTime;
         public int Elapsed;
         public uint MoveTime;
-        public float JumpGravity;
-        public uint SpecialTime;
+        public uint FadeObjectTime;
         public List<Vector3> Points = new List<Vector3>(); // Spline path
         public byte Mode; // Spline mode - actually always 0 in this packet - Catmullrom mode appears only in SMSG_UPDATE_OBJECT. In this packet it is determined by flags
         public byte VehicleExitVoluntary;
@@ -1169,6 +1189,7 @@ namespace Game.Network.Packets
         public List<Vector3> PackedDeltas = new List<Vector3>();
         public Optional<MonsterSplineFilter> SplineFilter;
         public Optional<MonsterSplineSpellEffectExtraData> SpellEffectExtraData;
+        public Optional<MonsterSplineJumpExtraData> JumpExtraData;
         public float FaceDirection;
         public ObjectGuid FaceGUID;
         public Vector3 FaceSpot;

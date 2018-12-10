@@ -32,7 +32,8 @@ namespace Game.Entities
             objectTypeMask |= TypeMask.Conversation;
             objectTypeId = TypeId.Conversation;
 
-            m_updateFlag = UpdateFlag.StationaryPosition;
+            m_updateFlag.Stationary = true;
+            m_updateFlag.Conversation = true;
 
             valuesCount = (int)ConversationFields.End;
             _dynamicValuesCount = (int)ConversationDynamicFields.End;
@@ -118,6 +119,7 @@ namespace Game.Entities
 
             SetUInt32Value(ConversationFields.LastLineEndTime, conversationTemplate.LastLineEndTime);
             _duration = conversationTemplate.LastLineEndTime;
+            _textureKitId = conversationTemplate.TextureKitId;
 
             for (ushort actorIndex = 0; actorIndex < conversationTemplate.Actors.Count; ++actorIndex)
             {
@@ -125,7 +127,8 @@ namespace Game.Entities
                 if (actor != null)
                 {
                     ConversationDynamicFieldActor actorField = new ConversationDynamicFieldActor();
-                    actorField.ActorTemplate = actor;
+                    actorField.ActorTemplate.CreatureId = actor.CreatureId;
+                    actorField.ActorTemplate.CreatureModelId = actor.CreatureModelId;
                     actorField.Type = ConversationDynamicFieldActor.ActorType.CreatureActor;
                     SetDynamicStructuredValue(ConversationDynamicFields.Actors, actorIndex, actorField);
                 }
@@ -189,6 +192,7 @@ namespace Game.Entities
         }
 
         uint GetDuration() { return _duration; }
+        public uint GetTextureKitId() { return _textureKitId; }
 
         public ObjectGuid GetCreatorGuid() { return _creatorGuid; }
 
@@ -201,6 +205,7 @@ namespace Game.Entities
         Position _stationaryPosition = new Position();
         ObjectGuid _creatorGuid;
         uint _duration;
+        uint _textureKitId;
         List<ObjectGuid> _participants = new List<ObjectGuid>();
     }
 
@@ -218,7 +223,13 @@ namespace Game.Entities
         }
 
         public ObjectGuid ActorGuid;
-        public ConversationActorTemplate ActorTemplate;
+        public ActorTemplateStruct ActorTemplate;
+
+        public struct ActorTemplateStruct
+        {
+            public uint CreatureId;
+            public uint CreatureModelId;
+        }
 
         public ActorType Type;
     }

@@ -146,8 +146,11 @@ namespace Game.Network.Packets
                 data.WriteUInt32(HealingDone);
                 data.WriteUInt32(Stats.Count);
                 data.WriteInt32(PrimaryTalentTree);
-                data.WriteInt32(PrimaryTalentTreeNameIndex);
+                data.WriteInt32(Sex);
                 data.WriteInt32(PlayerRace);
+                data.WriteInt32(PlayerClass);
+                data.WriteInt32(CreatureID);
+                data.WriteInt32(HonorLevel);
 
                 foreach (var id in Stats)
                     data.WriteUInt32(id);
@@ -190,9 +193,11 @@ namespace Game.Network.Packets
             public Optional<int> MmrChange;
             public List<uint> Stats = new List<uint>();
             public int PrimaryTalentTree;
-            public int PrimaryTalentTreeNameIndex;  // controls which name field from ChrSpecialization.dbc will be sent to lua
+            public int Sex;
             public Race PlayerRace;
-            public uint Prestige;
+            public int PlayerClass;
+            public int CreatureID;
+            public int HonorLevel;
         }
     }
 

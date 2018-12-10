@@ -293,7 +293,7 @@ namespace Game.Network.Packets
             data.WriteInt32(Availability);
             data.WriteInt32(ClassRoles);
             data.WriteInt32(LevelRange);
-            data.WriteUInt32(SecondsRemaining);
+            data.WriteInt32(SecondsRemaining);
             data.WriteString(Comment);
         }
 
@@ -302,7 +302,7 @@ namespace Game.Network.Packets
         public int Availability;
         public int ClassRoles;
         public int LevelRange;
-        public long SecondsRemaining;
+        public int SecondsRemaining;
         public string Comment = "";
     }
 

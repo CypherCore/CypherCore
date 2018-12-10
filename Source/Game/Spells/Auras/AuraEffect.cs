@@ -37,7 +37,7 @@ namespace Game.Spells
             auraBase = abase;
             m_spellInfo = abase.GetSpellInfo();
             _effectInfo = abase.GetSpellEffectInfo(effindex);
-            m_baseAmount = baseAmount.HasValue ? baseAmount.Value : abase.GetSpellEffectInfo(effindex).BasePoints;
+            m_baseAmount = baseAmount.HasValue ? baseAmount.Value : _effectInfo.CalcBaseValue(caster, abase.GetAuraType() == AuraObjectType.Unit ? abase.GetOwner().ToUnit() : null, abase.GetCastItemLevel());
             m_donePct = 1.0f;
             m_effIndex = (byte)effindex;
             m_canBeRecalculated = true;
@@ -78,7 +78,7 @@ namespace Game.Spells
             if (!m_spellInfo.HasAttribute(SpellAttr8.MasterySpecialization) || MathFunctions.fuzzyEq(GetSpellEffectInfo().BonusCoefficient, 0.0f))
                 amount = GetSpellEffectInfo().CalcValue(caster, m_baseAmount, GetBase().GetOwner().ToUnit(), GetBase().GetCastItemLevel());
             else if (caster != null && caster.IsTypeId(TypeId.Player))
-                amount = (int)(caster.GetFloatValue(PlayerFields.Mastery) * GetSpellEffectInfo().BonusCoefficient);
+                amount = (int)(caster.GetFloatValue(ActivePlayerFields.Mastery) * GetSpellEffectInfo().BonusCoefficient);
 
             // check item enchant aura cast
             if (amount == 0 && caster != null)
@@ -1088,7 +1088,7 @@ namespace Game.Spells
             {
                 // apply glow vision
                 if (target.IsTypeId(TypeId.Player))
-                    target.SetByteFlag(PlayerFields.FieldBytes2, PlayerFieldOffsets.FieldBytes2OffsetAuraVision, PlayerFieldByte2Flags.InvisibilityGlow);
+                    target.SetByteFlag(ActivePlayerFields.Bytes2, PlayerFieldOffsets.FieldBytes2OffsetAuraVision, PlayerFieldByte2Flags.InvisibilityGlow);
 
                 target.m_invisibility.AddFlag(type);
                 target.m_invisibility.AddValue(type, GetAmount());
@@ -1100,7 +1100,7 @@ namespace Game.Spells
                     // if not have different invisibility auras.
                     // remove glow vision
                     if (target.IsTypeId(TypeId.Player))
-                        target.RemoveByteFlag(PlayerFields.FieldBytes2, PlayerFieldOffsets.FieldBytes2OffsetAuraVision, PlayerFieldByte2Flags.InvisibilityGlow);
+                        target.RemoveByteFlag(ActivePlayerFields.Bytes2, PlayerFieldOffsets.FieldBytes2OffsetAuraVision, PlayerFieldByte2Flags.InvisibilityGlow);
 
                     target.m_invisibility.DelFlag(type);
                 }
@@ -1173,7 +1173,7 @@ namespace Game.Spells
                 target.m_stealth.AddValue(type, GetAmount());
                 target.SetStandFlags(UnitStandFlags.Creep);
                 if (target.IsTypeId(TypeId.Player))
-                    target.SetByteFlag(PlayerFields.FieldBytes2, PlayerFieldOffsets.FieldBytes2OffsetAuraVision, PlayerFieldByte2Flags.Stealth);
+                    target.SetByteFlag(ActivePlayerFields.Bytes2, PlayerFieldOffsets.FieldBytes2OffsetAuraVision, PlayerFieldByte2Flags.Stealth);
             }
             else
             {
@@ -1185,7 +1185,7 @@ namespace Game.Spells
 
                     target.RemoveStandFlags(UnitStandFlags.Creep);
                     if (target.IsTypeId(TypeId.Player))
-                        target.RemoveByteFlag(PlayerFields.FieldBytes2, PlayerFieldOffsets.FieldBytes2OffsetAuraVision, PlayerFieldByte2Flags.Stealth);
+                        target.RemoveByteFlag(ActivePlayerFields.Bytes2, PlayerFieldOffsets.FieldBytes2OffsetAuraVision, PlayerFieldByte2Flags.Stealth);
                 }
             }
 
@@ -1623,7 +1623,7 @@ namespace Game.Spells
                         else
                         {
                             uint model_id = 0;
-                            uint modelid = ObjectManager.ChooseDisplayId(ci);
+                            uint modelid = ObjectManager.ChooseDisplayId(ci).CreatureDisplayID;
                             if (modelid != 0)
                                 model_id = modelid;                     // Will use the default model here
 
@@ -1670,10 +1670,10 @@ namespace Game.Spells
                         CreatureTemplate ci = Global.ObjectMgr.GetCreatureTemplate((uint)cr_id);
                         if (ci != null)
                         {
-                            uint displayID = ObjectManager.ChooseDisplayId(ci);
-                            Global.ObjectMgr.GetCreatureModelRandomGender(ref displayID);
+                            CreatureModel model = ObjectManager.ChooseDisplayId(ci);
+                            Global.ObjectMgr.GetCreatureModelRandomGender(ref model, ci);
 
-                            target.SetUInt32Value(UnitFields.MountDisplayId, displayID);
+                            target.SetUInt32Value(UnitFields.MountDisplayId, model.CreatureDisplayID);
                         }
                     }
                 }
@@ -2025,9 +2025,9 @@ namespace Game.Spells
                 return;
 
             if (apply)
-                target.SetFlag(PlayerFields.TrackCreatures, 1 << (GetMiscValue() - 1));
+                target.SetFlag(ActivePlayerFields.TrackCreatures, 1 << (GetMiscValue() - 1));
             else
-                target.RemoveFlag(PlayerFields.TrackCreatures, 1 << (GetMiscValue() - 1));
+                target.RemoveFlag(ActivePlayerFields.TrackCreatures, 1 << (GetMiscValue() - 1));
         }
 
         [AuraEffectHandler(AuraType.TrackResources)]
@@ -2042,9 +2042,9 @@ namespace Game.Spells
                 return;
 
             if (apply)
-                target.SetFlag(PlayerFields.TrackResources, 1 << (GetMiscValue() - 1));
+                target.SetFlag(ActivePlayerFields.TrackResources, 1 << (GetMiscValue() - 1));
             else
-                target.RemoveFlag(PlayerFields.TrackResources, 1 << (GetMiscValue() - 1));
+                target.RemoveFlag(ActivePlayerFields.TrackResources, 1 << (GetMiscValue() - 1));
         }
 
         [AuraEffectHandler(AuraType.TrackStealthed)]
@@ -2064,7 +2064,7 @@ namespace Game.Spells
                 if (target.HasAuraType(GetAuraType()))
                     return;
             }
-            target.ApplyModFlag(PlayerFields.LocalFlags, PlayerLocalFlags.TrackStealthed, apply);
+            target.ApplyModFlag(ActivePlayerFields.LocalFlags, PlayerLocalFlags.TrackStealthed, apply);
         }
 
         [AuraEffectHandler(AuraType.ModStalked)]
@@ -2189,8 +2189,9 @@ namespace Game.Spells
 
                     if (displayId == 0)
                     {
-                        displayId = ObjectManager.ChooseDisplayId(creatureInfo);
-                        Global.ObjectMgr.GetCreatureModelRandomGender(ref displayId);
+                        CreatureModel model = ObjectManager.ChooseDisplayId(creatureInfo);
+                        Global.ObjectMgr.GetCreatureModelRandomGender(ref model, creatureInfo);
+                        displayId = model.CreatureDisplayID;
                     }
 
                     //some spell has one aura of mount and one of vehicle
@@ -2880,20 +2881,14 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             for (byte x = (byte)SpellSchools.Normal; x < (byte)SpellSchools.Max; x++)
-            {
                 if (Convert.ToBoolean(GetMiscValue() & (1 << x)))
-                {
-                    target.HandleStatModifier((UnitMods.ResistanceStart + x), UnitModifierType.TotalValue, GetAmount(), apply);
-                    if (target.IsTypeId(TypeId.Player) || target.IsPet())
-                        target.ApplyResistanceBuffModsMod((SpellSchools)x, GetAmount() > 0, GetAmount(), apply);
-                }
-            }
+                    target.HandleStatModifier(UnitMods.ResistanceStart + x, UnitModifierType.TotalValue, GetAmount(), apply);
         }
 
         [AuraEffectHandler(AuraType.ModBaseResistancePct)]
         void HandleAuraModBaseResistancePCT(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
-            if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
 
             Unit target = aurApp.GetTarget();
@@ -2918,7 +2913,7 @@ namespace Game.Spells
         [AuraEffectHandler(AuraType.ModResistancePct)]
         void HandleModResistancePercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
-            if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
 
             Unit target = aurApp.GetTarget();
@@ -2931,21 +2926,9 @@ namespace Game.Spells
                 if (Convert.ToBoolean(GetMiscValue() & (1 << i)))
                 {
                     if (spellGroupVal != 0)
-                    {
-                        target.HandleStatModifier((UnitMods.ResistanceStart + i), UnitModifierType.TotalPCT, (float)spellGroupVal, !apply);
-                        if (target.IsTypeId(TypeId.Player) || target.IsPet())
-                        {
-                            target.ApplyResistanceBuffModsPercentMod((SpellSchools)i, true, spellGroupVal, !apply);
-                            target.ApplyResistanceBuffModsPercentMod((SpellSchools)i, false, spellGroupVal, !apply);
-                        }
+                        target.HandleStatModifier(UnitMods.ResistanceStart + i, UnitModifierType.TotalPCT, (float)spellGroupVal, !apply);
 
-                    }
-                    target.HandleStatModifier((UnitMods.ResistanceStart + i), UnitModifierType.TotalPCT, GetAmount(), apply);
-                    if (target.IsTypeId(TypeId.Player) || target.IsPet())
-                    {
-                        target.ApplyResistanceBuffModsPercentMod((SpellSchools)i, true, GetAmount(), apply);
-                        target.ApplyResistanceBuffModsPercentMod((SpellSchools)i, false, GetAmount(), apply);
-                    }
+                    target.HandleStatModifier(UnitMods.ResistanceStart + i, UnitModifierType.TotalPCT, GetAmount(), apply);
                 }
             }
         }
@@ -2953,7 +2936,7 @@ namespace Game.Spells
         [AuraEffectHandler(AuraType.ModBaseResistance)]
         void HandleModBaseResistance(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
-            if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
 
             Unit target = aurApp.GetTarget();
@@ -2985,11 +2968,11 @@ namespace Game.Spells
 
             // show armor penetration
             if (target.IsTypeId(TypeId.Player) && Convert.ToBoolean(GetMiscValue() & (int)SpellSchoolMask.Normal))
-                target.ApplyModUInt32Value(PlayerFields.ModTargetPhysicalResistance, GetAmount(), apply);
+                target.ApplyModUInt32Value(ActivePlayerFields.ModTargetPhysicalResistance, GetAmount(), apply);
 
             // show as spell penetration only full spell penetration bonuses (all resistances except armor and holy
             if (target.IsTypeId(TypeId.Player) && ((SpellSchoolMask)GetMiscValue() & SpellSchoolMask.Spell) == SpellSchoolMask.Spell)
-                target.ApplyModUInt32Value(PlayerFields.ModTargetResistance, GetAmount(), apply);
+                target.ApplyModUInt32Value(ActivePlayerFields.ModTargetResistance, GetAmount(), apply);
         }
 
         /********************************/
@@ -3277,7 +3260,7 @@ namespace Game.Spells
             if (!target)
                 return;
 
-            target.ApplyModSignedFloatValue(PlayerFields.OverrideSpellPowerByApPct, m_amount, apply);
+            target.ApplyModSignedFloatValue(ActivePlayerFields.OverrideSpellPowerByApPct, m_amount, apply);
             target.UpdateSpellDamageAndHealingBonus();
         }
 
@@ -3291,7 +3274,7 @@ namespace Game.Spells
             if (!target)
                 return;
 
-            target.ApplyModSignedFloatValue(PlayerFields.OverrideApBySpellPowerPercent, m_amount, apply);
+            target.ApplyModSignedFloatValue(ActivePlayerFields.OverrideApBySpellPowerPercent, m_amount, apply);
             target.UpdateAttackPowerAndDamage();
             target.UpdateAttackPowerAndDamage(true);
         }
@@ -3305,7 +3288,7 @@ namespace Game.Spells
             Player target = aurApp.GetTarget().ToPlayer();
             if (target)
             {
-                target.SetStatFloatValue(PlayerFields.VersatilityBonus, target.GetTotalAuraModifier(AuraType.ModVersatility));
+                target.SetStatFloatValue(ActivePlayerFields.VersatilityBonus, target.GetTotalAuraModifier(AuraType.ModVersatility));
                 target.UpdateHealingDonePercentMod();
                 target.UpdateVersatilityDamageDone();
             }
@@ -3951,7 +3934,7 @@ namespace Game.Spells
             // This information for client side use only
             if (target.IsTypeId(TypeId.Player))
             {
-                PlayerFields baseField = GetAmount() >= 0 ? PlayerFields.ModDamageDonePos : PlayerFields.ModDamageDoneNeg;
+                ActivePlayerFields baseField = GetAmount() >= 0 ? ActivePlayerFields.ModDamageDonePos : ActivePlayerFields.ModDamageDoneNeg;
                 for (int i = 0; i < (int)SpellSchools.Max; ++i)
                 {
                     if (Convert.ToBoolean(GetMiscValue() & (1 << i)))
@@ -3996,9 +3979,9 @@ namespace Game.Spells
                     if (Convert.ToBoolean(GetMiscValue() & (1 << i)))
                     {
                         if (spellGroupVal != 0)
-                            target.ApplyPercentModFloatValue(PlayerFields.ModDamageDonePct + i, spellGroupVal, !apply);
+                            target.ApplyPercentModFloatValue(ActivePlayerFields.ModDamageDonePct + i, spellGroupVal, !apply);
 
-                        target.ApplyPercentModFloatValue(PlayerFields.ModDamageDonePct + i, GetAmount(), apply);
+                        target.ApplyPercentModFloatValue(ActivePlayerFields.ModDamageDonePct + i, GetAmount(), apply);
                     }
                 }
             }
@@ -4095,9 +4078,9 @@ namespace Game.Spells
                     mask |= effect.SpellClassMask;
             }
 
-            target.SetUInt32Value(PlayerFields.NoReagentCost1, mask[0]);
-            target.SetUInt32Value(PlayerFields.NoReagentCost1 + 1, mask[1]);
-            target.SetUInt32Value(PlayerFields.NoReagentCost1 + 2, mask[2]);
+            target.SetUInt32Value(ActivePlayerFields.NoReagentCost, mask[0]);
+            target.SetUInt32Value(ActivePlayerFields.NoReagentCost + 1, mask[1]);
+            target.SetUInt32Value(ActivePlayerFields.NoReagentCost + 2, mask[2]);
         }
 
         [AuraEffectHandler(AuraType.RetainComboPoints)]
@@ -4730,7 +4713,7 @@ namespace Game.Spells
 
             if (apply)
             {
-                target.SetUInt16Value(PlayerFields.FieldBytes3, PlayerFieldOffsets.FieldBytes3OffsetOverrideSpellsIdUint16Offset, (ushort)overrideId);
+                target.SetUInt16Value(ActivePlayerFields.Bytes3, PlayerFieldOffsets.FieldBytes3OffsetOverrideSpellsIdUint16Offset, (ushort)overrideId);
                 OverrideSpellDataRecord overrideSpells = CliDB.OverrideSpellDataStorage.LookupByKey(overrideId);
                 if (overrideSpells != null)
                 {
@@ -4744,7 +4727,7 @@ namespace Game.Spells
             }
             else
             {
-                target.SetUInt16Value(PlayerFields.FieldBytes3, PlayerFieldOffsets.FieldBytes3OffsetOverrideSpellsIdUint16Offset, 0);
+                target.SetUInt16Value(ActivePlayerFields.Bytes3, PlayerFieldOffsets.FieldBytes3OffsetOverrideSpellsIdUint16Offset, 0);
                 OverrideSpellDataRecord overrideSpells = CliDB.OverrideSpellDataStorage.LookupByKey(overrideId);
                 if (overrideSpells != null)
                 {
@@ -4796,9 +4779,9 @@ namespace Game.Spells
                 return;
 
             if (apply)
-                aurApp.GetTarget().RemoveByteFlag(PlayerFields.LocalFlags, 0, PlayerLocalFlags.ReleaseTimer);
+                aurApp.GetTarget().RemoveByteFlag(ActivePlayerFields.LocalFlags, 0, PlayerLocalFlags.ReleaseTimer);
             else if (!aurApp.GetTarget().GetMap().Instanceable())
-                aurApp.GetTarget().SetByteFlag(PlayerFields.LocalFlags, 0, PlayerLocalFlags.ReleaseTimer);
+                aurApp.GetTarget().SetByteFlag(ActivePlayerFields.LocalFlags, 0, PlayerLocalFlags.ReleaseTimer);
         }
 
         [AuraEffectHandler(AuraType.Mastery)]
@@ -5377,8 +5360,10 @@ namespace Game.Spells
             if (crit)
                 damage = caster.SpellCriticalDamageBonus(m_spellInfo, damage, target);
 
+            uint dmg = damage;
             if (!GetSpellInfo().HasAttribute(SpellAttr4.FixedDamage))
-                caster.ApplyResilience(target, ref damage);
+                caster.ApplyResilience(target, ref dmg);
+            damage = dmg;
 
             DamageInfo damageInfo = new DamageInfo(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetSchoolMask(), DamageEffectType.DOT, WeaponAttackType.BaseAttack);
             caster.CalcAbsorbResist(damageInfo);
@@ -5403,7 +5388,7 @@ namespace Game.Spells
             if (overkill < 0)
                 overkill = 0;
 
-            SpellPeriodicAuraLogInfo pInfo = new SpellPeriodicAuraLogInfo(this, damage, overkill, absorb, resist, 0.0f, crit);
+            SpellPeriodicAuraLogInfo pInfo = new SpellPeriodicAuraLogInfo(this, damage, dmg, (uint)overkill, absorb, resist, 0.0f, crit);
 
             caster.DealDamage(target, damage, cleanDamage, DamageEffectType.DOT, GetSpellInfo().GetSchoolMask(), GetSpellInfo(), true);
 
@@ -5465,8 +5450,10 @@ namespace Game.Spells
             if (crit)
                 damage = caster.SpellCriticalDamageBonus(m_spellInfo, damage, target);
 
+            uint dmg = damage;
             if (!GetSpellInfo().HasAttribute(SpellAttr4.FixedDamage))
-                caster.ApplyResilience(target, ref damage);
+                caster.ApplyResilience(target, ref dmg);
+            damage = dmg;
 
             DamageInfo damageInfo = new DamageInfo(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetSchoolMask(), DamageEffectType.DOT, WeaponAttackType.BaseAttack);
             caster.CalcAbsorbResist(damageInfo);
@@ -5477,6 +5464,7 @@ namespace Game.Spells
             // SendSpellNonMeleeDamageLog expects non-absorbed/non-resisted damage
             SpellNonMeleeDamage log = new SpellNonMeleeDamage(caster, target, GetId(), GetBase().GetSpellXSpellVisualId(), GetSpellInfo().GetSchoolMask(), GetBase().GetCastGUID());
             log.damage = damage;
+            log.originalDamage = dmg;
             log.absorb = absorb;
             log.resist = resist;
             log.periodicLog = true;
@@ -5627,7 +5615,7 @@ namespace Game.Spells
             caster.CalcHealAbsorb(healInfo);
             caster.DealHeal(healInfo);
 
-            SpellPeriodicAuraLogInfo pInfo = new SpellPeriodicAuraLogInfo(this, heal, (int)(heal - healInfo.GetEffectiveHeal()), healInfo.GetAbsorb(), 0, 0.0f, crit);
+            SpellPeriodicAuraLogInfo pInfo = new SpellPeriodicAuraLogInfo(this, heal, (uint)damage, heal - healInfo.GetEffectiveHeal(), healInfo.GetAbsorb(), 0, 0.0f, crit);
             target.SendPeriodicAuraLog(pInfo);
 
             target.getHostileRefManager().threatAssist(caster, healInfo.GetEffectiveHeal() * 0.5f, GetSpellInfo());
@@ -5667,7 +5655,7 @@ namespace Game.Spells
             int drainedAmount = -target.ModifyPower(powerType, -drainAmount);
             float gainMultiplier = GetSpellEffectInfo().CalcValueMultiplier(caster);
 
-            SpellPeriodicAuraLogInfo pInfo = new SpellPeriodicAuraLogInfo(this, (uint)drainedAmount, 0, 0, 0, gainMultiplier, false);
+            SpellPeriodicAuraLogInfo pInfo = new SpellPeriodicAuraLogInfo(this, (uint)drainedAmount, (uint)drainAmount, 0, 0, 0, gainMultiplier, false);
 
             int gainAmount = (int)(drainedAmount * gainMultiplier);
             int gainedAmount = 0;
@@ -5719,7 +5707,7 @@ namespace Game.Spells
             // ignore negative values (can be result apply spellmods to aura damage
             int amount = Math.Max(m_amount, 0) * target.GetMaxPower(powerType) / 100;
 
-            SpellPeriodicAuraLogInfo pInfo = new SpellPeriodicAuraLogInfo(this, (uint)amount, 0, 0, 0, 0.0f, false);
+            SpellPeriodicAuraLogInfo pInfo = new SpellPeriodicAuraLogInfo(this, (uint)amount, (uint)amount, 0, 0, 0, 0.0f, false);
 
             int gain = target.ModifyPower(powerType, amount);
 
@@ -5748,7 +5736,7 @@ namespace Game.Spells
             // ignore negative values (can be result apply spellmods to aura damage
             int amount = Math.Max(m_amount, 0);
 
-            SpellPeriodicAuraLogInfo pInfo = new SpellPeriodicAuraLogInfo(this, (uint)amount, 0, 0, 0, 0.0f, false);
+            SpellPeriodicAuraLogInfo pInfo = new SpellPeriodicAuraLogInfo(this, (uint)amount, (uint)amount, 0, 0, 0, 0.0f, false);
             int gain = target.ModifyPower(powerType, amount);
 
             if (caster != null)
@@ -5962,9 +5950,9 @@ namespace Game.Spells
                 return;
 
             if (apply)
-                aurApp.GetTarget().SetFlag(PlayerFields.LocalFlags, PlayerLocalFlags.CanUseObjectsMounted);
+                aurApp.GetTarget().SetFlag(ActivePlayerFields.LocalFlags, PlayerLocalFlags.CanUseObjectsMounted);
             else if (!aurApp.GetTarget().HasAuraType(AuraType.AllowUsingGameobjectsWhileMounted))
-                aurApp.GetTarget().RemoveFlag(PlayerFields.LocalFlags, PlayerLocalFlags.CanUseObjectsMounted);
+                aurApp.GetTarget().RemoveFlag(ActivePlayerFields.LocalFlags, PlayerLocalFlags.CanUseObjectsMounted);
         }
 
         [AuraEffectHandler(AuraType.PlayScene)]

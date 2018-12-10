@@ -37,7 +37,7 @@ namespace Game
             PersonalGuid = copy.PersonalGuid;
             Phases = new Dictionary<uint, PhaseRef>(copy.Phases);
             VisibleMapIds = new Dictionary<uint, VisibleMapIdRef>(copy.VisibleMapIds);
-            UiWorldMapAreaIdSwaps = new Dictionary<uint, UiWorldMapAreaIdSwapRef>(copy.UiWorldMapAreaIdSwaps);
+            UiMapPhaseIds = new Dictionary<uint, UiMapPhaseIdRef>(copy.UiMapPhaseIds);
 
             NonCosmeticReferences = copy.NonCosmeticReferences;
             CosmeticReferences = copy.CosmeticReferences;
@@ -103,23 +103,23 @@ namespace Game
             return false;
         }
 
-        public bool AddUiWorldMapAreaIdSwap(uint uiWorldMapAreaId, int references = 1)
+        public bool AddUiMapPhaseId(uint uiMapPhaseId, int references = 1)
         {
-            if (UiWorldMapAreaIdSwaps.ContainsKey(uiWorldMapAreaId))
+            if (UiMapPhaseIds.ContainsKey(uiMapPhaseId))
                 return false;
 
-            UiWorldMapAreaIdSwaps.Add(uiWorldMapAreaId, new UiWorldMapAreaIdSwapRef(references));
+            UiMapPhaseIds.Add(uiMapPhaseId, new UiMapPhaseIdRef(references));
             return true;
         }
 
-        public bool RemoveUiWorldMapAreaIdSwap(uint uiWorldMapAreaId)
+        public bool RemoveUiMapPhaseId(uint uiWorldMapAreaId)
         {
-            if (UiWorldMapAreaIdSwaps.ContainsKey(uiWorldMapAreaId))
+            if (UiMapPhaseIds.ContainsKey(uiWorldMapAreaId))
             {
-                var value = UiWorldMapAreaIdSwaps[uiWorldMapAreaId];
+                var value = UiMapPhaseIds[uiWorldMapAreaId];
                 if ((--value.References) == 0)
                 {
-                    UiWorldMapAreaIdSwaps.Remove(uiWorldMapAreaId);
+                    UiMapPhaseIds.Remove(uiWorldMapAreaId);
                     return true;
                 }
             }
@@ -132,7 +132,7 @@ namespace Game
             ClearPhases();
             PersonalGuid.Clear();
             VisibleMapIds.Clear();
-            UiWorldMapAreaIdSwaps.Clear();
+            UiMapPhaseIds.Clear();
         }
 
         public void ClearPhases()
@@ -228,14 +228,14 @@ namespace Game
         public bool HasVisibleMapId(uint visibleMapId) { return VisibleMapIds.ContainsKey(visibleMapId); }
         public Dictionary<uint, VisibleMapIdRef> GetVisibleMapIds() { return VisibleMapIds; }
 
-        public bool HasUiWorldMapAreaIdSwap(uint uiWorldMapAreaId) { return UiWorldMapAreaIdSwaps.ContainsKey(uiWorldMapAreaId); }
-        public Dictionary<uint, UiWorldMapAreaIdSwapRef> GetUiWorldMapAreaIdSwaps() { return UiWorldMapAreaIdSwaps; }
+        public bool HasUiWorldMapAreaIdSwap(uint uiWorldMapAreaId) { return UiMapPhaseIds.ContainsKey(uiWorldMapAreaId); }
+        public Dictionary<uint, UiMapPhaseIdRef> GetUiWorldMapAreaIdSwaps() { return UiMapPhaseIds; }
 
         public PhaseShiftFlags Flags;
         public ObjectGuid PersonalGuid;
         public Dictionary<uint, PhaseRef> Phases = new Dictionary<uint, PhaseRef>();
         public Dictionary<uint, VisibleMapIdRef> VisibleMapIds = new Dictionary<uint, VisibleMapIdRef>();
-        public Dictionary<uint, UiWorldMapAreaIdSwapRef> UiWorldMapAreaIdSwaps = new Dictionary<uint, UiWorldMapAreaIdSwapRef>();
+        public Dictionary<uint, UiMapPhaseIdRef> UiMapPhaseIds = new Dictionary<uint, UiMapPhaseIdRef>();
 
         int NonCosmeticReferences;
         int CosmeticReferences;
@@ -269,9 +269,9 @@ namespace Game
         public TerrainSwapInfo VisibleMapInfo;
     }
 
-    public struct UiWorldMapAreaIdSwapRef
+    public struct UiMapPhaseIdRef
     {
-        public UiWorldMapAreaIdSwapRef(int references)
+        public UiMapPhaseIdRef(int references)
         {
             References = references;
         }

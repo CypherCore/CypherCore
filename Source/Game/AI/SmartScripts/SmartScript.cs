@@ -255,10 +255,10 @@ namespace Game.AI
                                     CreatureTemplate ci = Global.ObjectMgr.GetCreatureTemplate(e.Action.morphOrMount.creature);
                                     if (ci != null)
                                     {
-                                        uint displayId = ObjectManager.ChooseDisplayId(ci);
-                                        obj.ToCreature().SetDisplayId(displayId);
+                                        CreatureModel model = ObjectManager.ChooseDisplayId(ci);
+                                        obj.ToCreature().SetDisplayId(model.CreatureDisplayID, model.DisplayScale);
                                         Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_MORPH_TO_ENTRY_OR_MODEL: Creature entry {0}, GuidLow {1} set displayid to {2}",
-                                            obj.GetEntry(), obj.GetGUID().ToString(), displayId);
+                                            obj.GetEntry(), obj.GetGUID().ToString(), model.CreatureDisplayID);
                                     }
                                 }
                                 //if no param1, then use value from param2 (modelId)
@@ -1133,7 +1133,7 @@ namespace Game.AI
                                 {
                                     CreatureTemplate cInfo = Global.ObjectMgr.GetCreatureTemplate(e.Action.morphOrMount.creature);
                                     if (cInfo != null)
-                                        obj.ToUnit().Mount(ObjectManager.ChooseDisplayId(cInfo));
+                                        obj.ToUnit().Mount(ObjectManager.ChooseDisplayId(cInfo).CreatureDisplayID);
                                 }
                                 else
                                     obj.ToUnit().Mount(e.Action.morphOrMount.model);
@@ -1541,7 +1541,13 @@ namespace Game.AI
                             me.GetMotionMaster().MovePoint(e.Action.moveToPos.pointId, x, y, z, e.Action.moveToPos.disablePathfinding == 0);
                         }
                         else
-                            me.GetMotionMaster().MovePoint(e.Action.moveToPos.pointId, target.GetPositionX(), target.GetPositionY(), target.GetPositionZ(), e.Action.moveToPos.disablePathfinding == 0);
+                        {
+                            float x, y, z;
+                            target.GetPosition(out x, out y, out z);
+                            if (e.Action.moveToPos.contactDistance > 0)
+                                target.GetContactPoint(me, out x, out y, out z, e.Action.moveToPos.contactDistance);
+                            me.GetMotionMaster().MovePoint(e.Action.moveToPos.pointId, x, y, z, e.Action.moveToPos.disablePathfinding == 0);
+                        }
                         break;
                     }
                 case SmartActions.RespawnTarget:

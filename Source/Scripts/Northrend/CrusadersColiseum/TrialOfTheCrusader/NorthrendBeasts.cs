@@ -458,7 +458,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             DoCast(me, SpellIds.FireBombDot, true);
             SetCombatMovement(false);
             me.SetReactState(ReactStates.Passive);
-            me.SetDisplayId(me.GetCreatureTemplate().ModelId2);
+            me.SetDisplayFromModel(1);
         }
 
         public override void UpdateAI(uint diff)

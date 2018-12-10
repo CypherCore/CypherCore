@@ -95,6 +95,7 @@ namespace Game.Loots
         public byte context;
         public List<Condition> conditions = new List<Condition>();                               // additional loot condition
         public List<ObjectGuid> allowedGUIDs = new List<ObjectGuid>();
+        public ObjectGuid rollWinnerGUID;                                   // Stores the guid of person who won loot, if his bags are full only he can see the item in loot list!
         public byte count;
         public bool is_looted;
         public bool is_blocked;
@@ -666,6 +667,13 @@ namespace Game.Loots
                                     // or it IS the round robin group owner
                                     // => item is lootable
                                     slot_type = LootSlotType.AllowLoot;
+                                }
+                                else if (!items[i].rollWinnerGUID.IsEmpty())
+                                {
+                                    if (items[i].rollWinnerGUID == viewer.GetGUID())
+                                        slot_type = LootSlotType.Owner;
+                                    else
+                                        continue;
                                 }
                                 else
                                     // item shall not be displayed.

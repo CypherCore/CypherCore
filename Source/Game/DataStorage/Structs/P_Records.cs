@@ -30,20 +30,17 @@ namespace Game.DataStorage
     {
         public uint Id;
         public ushort PhaseId;
-        public uint PhaseGroupID;
+        public ushort PhaseGroupID;
     }
 
     public sealed class PlayerConditionRecord
     {
-        public long RaceMask;
+        public ulong RaceMask;
         public string FailureDescription;
         public uint Id;
-        public byte Flags;
         public ushort MinLevel;
         public ushort MaxLevel;
         public int ClassMask;
-        public sbyte Gender;
-        public sbyte NativeGender;
         public uint SkillLogic;
         public byte LanguageID;
         public byte MinLanguage;
@@ -51,9 +48,7 @@ namespace Game.DataStorage
         public ushort MaxFactionID;
         public byte MaxReputation;
         public uint ReputationLogic;
-        public byte CurrentPvpFaction;
-        public byte MinPVPRank;
-        public byte MaxPVPRank;
+        public sbyte CurrentPvpFaction;
         public byte PvpMedal;
         public uint PrevQuestLogic;
         public uint CurrQuestLogic;
@@ -67,34 +62,39 @@ namespace Game.DataStorage
         public byte PartyStatus;
         public byte LifetimeMaxPVPRank;
         public uint AchievementLogic;
-        public uint LfgLogic;
+        public sbyte Gender;
+        public sbyte NativeGender;
         public uint AreaLogic;
+        public uint LfgLogic;
         public uint CurrencyLogic;
         public ushort QuestKillID;
         public uint QuestKillLogic;
         public sbyte MinExpansionLevel;
         public sbyte MaxExpansionLevel;
-        public sbyte MinExpansionTier;
-        public sbyte MaxExpansionTier;
-        public byte MinGuildLevel;
-        public byte MaxGuildLevel;
-        public byte PhaseUseFlags;
-        public ushort PhaseID;
-        public uint PhaseGroupID;
         public int MinAvgItemLevel;
         public int MaxAvgItemLevel;
         public ushort MinAvgEquippedItemLevel;
         public ushort MaxAvgEquippedItemLevel;
+        public byte PhaseUseFlags;
+        public ushort PhaseID;
+        public uint PhaseGroupID;
+        public byte Flags;
         public sbyte ChrSpecializationIndex;
         public sbyte ChrSpecializationRole;
+        public uint ModifierTreeID;
         public sbyte PowerType;
         public byte PowerTypeComp;
         public byte PowerTypeValue;
-        public uint ModifierTreeID;
         public int WeaponSubclassMask;
+        public byte MaxGuildLevel;
+        public byte MinGuildLevel;
+        public sbyte MaxExpansionTier;
+        public sbyte MinExpansionTier;
+        public byte MinPVPRank;
+        public byte MaxPVPRank;
         public ushort[] SkillID = new ushort[4];
-        public short[] MinSkill = new short[4];
-        public short[] MaxSkill = new short[4];
+        public ushort[] MinSkill = new ushort[4];
+        public ushort[] MaxSkill = new ushort[4];
         public uint[] MinFactionID = new uint[3];
         public byte[] MinReputation = new byte[3];
         public ushort[] PrevQuestID = new ushort[4];
@@ -108,12 +108,12 @@ namespace Game.DataStorage
         public uint[] AuraSpellID = new uint[4];
         public byte[] AuraStacks = new byte[4];
         public ushort[] Achievement = new ushort[4];
+        public ushort[] AreaID = new ushort[4];
         public byte[] LfgStatus = new byte[4];
         public byte[] LfgCompare = new byte[4];
         public uint[] LfgValue = new uint[4];
-        public ushort[] AreaID = new ushort[4];
         public uint[] CurrencyID = new uint[4];
-        public byte[] CurrencyCount = new byte[4];
+        public uint[] CurrencyCount = new uint[4];
         public uint[] QuestKillMonster = new uint[6];
         public int[] MovementFlags = new int[2];
     }
@@ -121,7 +121,7 @@ namespace Game.DataStorage
     public sealed class PowerDisplayRecord
     {
         public uint Id;
-        public uint GlobalStringBaseTag;
+        public string GlobalStringBaseTag;
         public byte ActualType;
         public byte Red;
         public byte Green;
@@ -133,27 +133,28 @@ namespace Game.DataStorage
         public uint Id;
         public string NameGlobalStringTag;
         public string CostGlobalStringTag;
-        public float RegenPeace;
-        public float RegenCombat;
-        public short MaxBasePower;
-        public ushort RegenInterruptTimeMS;
-        public ushort Flags;
         public PowerType PowerTypeEnum;
         public sbyte MinPower;
+        public short MaxBasePower;
         public sbyte CenterPower;
         public sbyte DefaultPower;
         public sbyte DisplayModifier;
+        public short RegenInterruptTimeMS;
+        public float RegenPeace;
+        public float RegenCombat;
+        public short Flags;
     }
 
     public sealed class PrestigeLevelInfoRecord
     {
         public uint Id;
         public string Name;
-        public uint BadgeTextureFileDataID;
-        public byte PrestigeLevel;
+        public int PrestigeLevel;
+        public int BadgeTextureFileDataID;
         public PrestigeLevelInfoFlags Flags;
+        public int AwardedAchievementID;
 
-        public bool IsDisabled() { return Flags.HasAnyFlag(PrestigeLevelInfoFlags.Disabled); }
+        public bool IsDisabled() { return (Flags & PrestigeLevelInfoFlags.Disabled) != 0; }
     }
 
     public sealed class PvpDifficultyRecord
@@ -162,10 +163,13 @@ namespace Game.DataStorage
         public byte RangeIndex;
         public byte MinLevel;
         public byte MaxLevel;
-        public uint MapID;
+        public ushort MapID;
 
         // helpers
-        public BattlegroundBracketId GetBracketId() { return (BattlegroundBracketId)RangeIndex; }
+        public BattlegroundBracketId GetBracketId()
+        {
+            return (BattlegroundBracketId)RangeIndex;
+        }
     }
 
     public sealed class PvpItemRecord
@@ -175,34 +179,31 @@ namespace Game.DataStorage
         public byte ItemLevelDelta;
     }
 
-    public sealed class PvpRewardRecord
-    {
-        public uint Id;
-        public byte HonorLevel;
-        public byte PrestigeLevel;
-        public ushort RewardPackID;
-    }
-
     public sealed class PvpTalentRecord
     {
-        public uint Id;
         public string Description;
+        public uint Id;
+        public int SpecID;
         public uint SpellID;
         public uint OverridesSpellID;
+        public int Flags;
         public int ActionBarSpellID;
-        public int TierID;
-        public byte ColumnIndex;
-        public byte Flags;
-        public byte ClassID;
-        public ushort SpecID;
-        public byte Role;
+        public int PvpTalentCategoryID;
+        public int LevelRequired;
     }
 
-    public sealed class PvpTalentUnlockRecord
+    public sealed class PvpTalentCategoryRecord
     {
         public uint Id;
-        public byte TierID;
-        public byte ColumnIndex;
-        public byte HonorLevel;
+        public byte TalentSlotMask;
+    }
+
+    public sealed class PvpTalentSlotUnlockRecord
+    {
+        public uint Id;
+        public sbyte Slot;
+        public uint LevelRequired;
+        public uint DeathKnightLevelRequired;
+        public uint DemonHunterLevelRequired;
     }
 }

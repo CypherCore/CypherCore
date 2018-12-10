@@ -558,12 +558,12 @@ namespace Game.Network.Packets
             RankOrder = _worldPacket.ReadInt32();
             Flags = _worldPacket.ReadUInt32();
             OldFlags = _worldPacket.ReadUInt32();
-            WithdrawGoldLimit = _worldPacket.ReadInt32();
+            WithdrawGoldLimit = _worldPacket.ReadUInt32();
 
             for (byte i = 0; i < GuildConst.MaxBankTabs; i++)
             {
-                TabFlags[i] = _worldPacket.ReadInt32();
-                TabWithdrawItemLimit[i] = _worldPacket.ReadInt32();
+                TabFlags[i] = _worldPacket.ReadUInt32();
+                TabWithdrawItemLimit[i] = _worldPacket.ReadUInt32();
             }
 
             _worldPacket.ResetBitPos();
@@ -574,11 +574,11 @@ namespace Game.Network.Packets
 
         public int RankID;
         public int RankOrder;
-        public int WithdrawGoldLimit;
+        public uint WithdrawGoldLimit;
         public uint Flags;
         public uint OldFlags;
-        public int[] TabFlags = new int[GuildConst.MaxBankTabs];
-        public int[] TabWithdrawItemLimit = new int[GuildConst.MaxBankTabs];
+        public uint[] TabFlags = new uint[GuildConst.MaxBankTabs];
+        public uint[] TabWithdrawItemLimit = new uint[GuildConst.MaxBankTabs];
         public string RankName;
     }
 
@@ -1430,7 +1430,7 @@ namespace Game.Network.Packets
         public GuildRosterProfessionData[] Profession = new GuildRosterProfessionData[2];
     }
 
-    public struct GuildEventEntry
+    public class GuildEventEntry
     {
         public ObjectGuid PlayerGUID;
         public ObjectGuid OtherGUID;
@@ -1512,7 +1512,7 @@ namespace Game.Network.Packets
         public string Icon;
     }
 
-    public struct GuildBankLogEntry
+    public class GuildBankLogEntry
     {
         public ObjectGuid PlayerGUID;
         public uint TimeOffset;

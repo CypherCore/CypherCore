@@ -1173,7 +1173,7 @@ namespace Game.Chat
                     phaseShift.AddPhase(phase, PhaseFlags.None, null);
 
                 if (uint.TryParse(args.NextString(), out uint map))
-                    phaseShift.AddUiWorldMapAreaIdSwap(map);
+                    phaseShift.AddUiMapPhaseId(map);
 
                 PhasingHandler.SendToPlayer(handler.GetSession().GetPlayer(), phaseShift);
                 return true;

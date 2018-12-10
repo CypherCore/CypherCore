@@ -44,6 +44,35 @@ namespace Game.Entities
         public List<uint> getRewardedQuests() { return m_RewardedQuests; }
         Dictionary<uint, QuestStatusData> getQuestStatusMap() { return m_QuestStatus; }
 
+        public int GetQuestMinLevel(Quest quest)
+        {
+            if (quest.Level == -1 && quest.ScalingFactionGroup != 0)
+            {
+                ChrRacesRecord race = CliDB.ChrRacesStorage.LookupByKey(GetRace());
+                FactionTemplateRecord raceFaction = CliDB.FactionTemplateStorage.LookupByKey(race.FactionID);
+                if (raceFaction == null || raceFaction.FactionGroup != quest.ScalingFactionGroup)
+                    return quest.MaxScalingLevel;
+            }
+            return quest.MinLevel;
+        }
+
+        public int GetQuestLevel(Quest quest)
+        {
+            if (quest == null)
+                return 0;
+
+            if (quest.Level == -1)
+            {
+                int minLevel = GetQuestMinLevel(quest);
+                int maxLevel = quest.MaxScalingLevel;
+                int level = (int)getLevel();
+                if (level >= minLevel)
+                    return Math.Min(level, maxLevel);
+                return minLevel;
+            }
+            return quest.Level;
+        }
+
         public int GetRewardedQuestCount() { return m_RewardedQuests.Count; }
 
         public void LearnQuestRewardedSpells(Quest quest)
@@ -116,7 +145,7 @@ namespace Game.Entities
 
         public void DailyReset()
         {
-            foreach (uint questId in GetDynamicValues(PlayerDynamicFields.DailyQuests))
+            foreach (uint questId in GetDynamicValues(ActivePlayerDynamicFields.DailyQuests))
             {
                 uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(questId);
                 if (questBit != 0)
@@ -124,10 +153,10 @@ namespace Game.Entities
             }
 
             DailyQuestsReset dailyQuestsReset = new DailyQuestsReset();
-            dailyQuestsReset.Count = GetDynamicValues(PlayerDynamicFields.DailyQuests).Length;
+            dailyQuestsReset.Count = GetDynamicValues(ActivePlayerDynamicFields.DailyQuests).Length;
             SendPacket(dailyQuestsReset);
 
-            ClearDynamicValue(PlayerDynamicFields.DailyQuests);
+            ClearDynamicValue(ActivePlayerDynamicFields.DailyQuests);
 
             m_DFQuests.Clear(); // Dungeon Finder Quests.
 
@@ -208,14 +237,6 @@ namespace Game.Entities
                     break;
             }
             return false;
-        }
-
-        public uint GetQuestLevel(Quest quest)
-        {
-            if (quest == null)
-                return getLevel();
-            
-            return (uint)(quest.Level > 0 ? quest.Level : Math.Min((int)getLevel(), quest.MaxScalingLevel));
         }
 
         public bool IsQuestRewarded(uint quest_id)
@@ -389,7 +410,7 @@ namespace Game.Entities
                 SatisfyQuestPrevChain(quest, false) && SatisfyQuestDay(quest, false) && SatisfyQuestWeek(quest, false) &&
                 SatisfyQuestMonth(quest, false) && SatisfyQuestSeasonal(quest, false))
             {
-                return getLevel() + WorldConfig.GetIntValue(WorldCfg.QuestHighLevelHideDiff) >= quest.MinLevel;
+                return getLevel() + WorldConfig.GetIntValue(WorldCfg.QuestHighLevelHideDiff) >= GetQuestMinLevel(quest);
             }
 
             return false;
@@ -796,7 +817,7 @@ namespace Game.Entities
 
         public uint GetQuestMoneyReward(Quest quest)
         {
-            return (uint)(quest.MoneyValue(getLevel()) * WorldConfig.GetFloatValue(WorldCfg.RateMoneyQuest));
+            return (uint)(quest.MoneyValue(this) * WorldConfig.GetFloatValue(WorldCfg.RateMoneyQuest));
         }
 
         public uint GetQuestXPReward(Quest quest)
@@ -807,7 +828,7 @@ namespace Game.Entities
             if (rewarded && !quest.IsDFQuest())
                 return 0;
 
-            uint XP = (uint)(quest.XPValue(getLevel()) * WorldConfig.GetFloatValue(WorldCfg.RateXpQuest));
+            uint XP = (uint)(quest.XPValue(this) * WorldConfig.GetFloatValue(WorldCfg.RateXpQuest));
 
             // handle SPELL_AURA_MOD_XP_QUEST_PCT auras
             var ModXPPctAuras = GetAuraEffectsByType(AuraType.ModXpQuestPct);
@@ -1231,7 +1252,7 @@ namespace Game.Entities
 
         public bool SatisfyQuestLevel(Quest qInfo, bool msg)
         {
-            if (getLevel() < qInfo.MinLevel)
+            if (getLevel() < GetQuestMinLevel(qInfo))
             {
                 if (msg)
                 {
@@ -1588,7 +1609,7 @@ namespace Game.Entities
                 return true;
             }
 
-            var dailies = GetDynamicValues(PlayerDynamicFields.DailyQuests);
+            var dailies = GetDynamicValues(ActivePlayerDynamicFields.DailyQuests);
             foreach (var dailyQuestId in dailies)
                 if (dailyQuestId == qInfo.Id)
                     return false;
@@ -2018,7 +2039,7 @@ namespace Game.Entities
             if (fieldOffset >= PlayerConst.QuestsCompletedBitsSize)
                 return;
 
-            ApplyModFlag(PlayerFields.QuestCompleted + fieldOffset, (uint)(1 << (((int)questBit - 1) & 31)), completed);
+            ApplyModFlag(ActivePlayerFields.QuestCompleted + fieldOffset, (uint)(1 << (((int)questBit - 1) & 31)), completed);
         }
 
         public void AreaExploredOrEventHappens(uint questId)
@@ -2993,7 +3014,7 @@ namespace Game.Entities
             {
                 if (!qQuest.IsDFQuest())
                 {
-                    AddDynamicValue(PlayerDynamicFields.DailyQuests, quest_id);
+                    AddDynamicValue(ActivePlayerDynamicFields.DailyQuests, quest_id);
                     m_lastDailyQuestTime = Time.UnixTime;              // last daily quest time
                     m_DailyQuestChanged = true;
 
@@ -3012,7 +3033,7 @@ namespace Game.Entities
             bool found = false;
             if (Global.ObjectMgr.GetQuestTemplate(quest_id) != null)
             {
-                var dailies = GetDynamicValues(PlayerDynamicFields.DailyQuests);
+                var dailies = GetDynamicValues(ActivePlayerDynamicFields.DailyQuests);
                 foreach (uint dailyQuestId in dailies)
                 {
                     if (dailyQuestId == quest_id)

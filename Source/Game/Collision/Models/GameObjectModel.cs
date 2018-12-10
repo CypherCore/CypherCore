@@ -88,7 +88,7 @@ namespace Game.Collision
             return mdl;
         }
 
-        public override bool IntersectRay(Ray ray, ref float maxDist, bool stopAtFirstHit, PhaseShift phaseShift)
+        public override bool IntersectRay(Ray ray, ref float maxDist, bool stopAtFirstHit, PhaseShift phaseShift, ModelIgnoreFlags ignoreFlags)
         {
             if (!isCollisionEnabled() || !owner.IsSpawned())
                 return false;
@@ -104,7 +104,7 @@ namespace Game.Collision
             Vector3 p = iInvRot * (ray.Origin - iPos) * iInvScale;
             Ray modRay = new Ray(p, iInvRot * ray.Direction);
             float distance = maxDist * iInvScale;
-            bool hit = iModel.IntersectRay(modRay, ref distance, stopAtFirstHit);
+            bool hit = iModel.IntersectRay(modRay, ref distance, stopAtFirstHit, ignoreFlags);
             if (hit)
             {
                 distance *= iScale;

@@ -615,7 +615,7 @@ namespace Game.Achievements
                 if (achievement.Flags.HasAnyFlag(AchievementFlags.RealmFirstReach | AchievementFlags.RealmFirstKill))
                 {
                     // broadcast realm first reached
-                    ServerFirstAchievement serverFirstAchievement = new ServerFirstAchievement();
+                    BroadcastAchievement serverFirstAchievement = new BroadcastAchievement();
                     serverFirstAchievement.Name = _owner.GetName();
                     serverFirstAchievement.PlayerGUID = _owner.GetGUID();
                     serverFirstAchievement.AchievementID = achievement.Id;
@@ -993,7 +993,7 @@ namespace Game.Achievements
             if (achievement.Flags.HasAnyFlag(AchievementFlags.RealmFirstReach | AchievementFlags.RealmFirstKill))
             {
                 // broadcast realm first reached
-                ServerFirstAchievement serverFirstAchievement = new ServerFirstAchievement();
+                BroadcastAchievement serverFirstAchievement = new BroadcastAchievement();
                 serverFirstAchievement.Name = _owner.GetName();
                 serverFirstAchievement.PlayerGUID = _owner.GetGUID();
                 serverFirstAchievement.AchievementID = achievement.Id;
@@ -1147,22 +1147,21 @@ namespace Game.Achievements
 
             _achievementRewards.Clear();                           // need for reload case
 
-            //                                         0      1        2        3     4       5        6     7
-            SQLResult result = DB.World.Query("SELECT entry, title_A, title_H, item, sender, subject, text, mailTemplate FROM achievement_reward");
+            //                                         0   1       2       3       4       5        6     7
+            SQLResult result = DB.World.Query("SELECT ID, TitleA, TitleH, ItemID, Sender, Subject, Body, MailTemplateID FROM achievement_reward");
             if (result.IsEmpty())
             {
                 Log.outError(LogFilter.ServerLoading, ">> Loaded 0 achievement rewards. DB table `achievement_reward` is empty.");
                 return;
             }
 
-            uint count = 0;
             do
             {
-                uint entry = result.Read<uint>(0);
-                AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(entry);
+                uint id = result.Read<uint>(0);
+                AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(id);
                 if (achievement == null)
                 {
-                    Log.outError(LogFilter.Sql, "Table `achievement_reward` contains a wrong achievement entry (Entry: {0}), ignored.", entry);
+                    Log.outError(LogFilter.Sql, $"Table `achievement_reward` contains a wrong achievement ID ({id}), ignored.");
                     continue;
                 }
 
@@ -1178,19 +1177,19 @@ namespace Game.Achievements
                 // must be title or mail at least
                 if (reward.TitleId[0] == 0 && reward.TitleId[1] == 0 && reward.SenderCreatureId == 0)
                 {
-                    Log.outError(LogFilter.Sql, "Table `achievement_reward` (Entry: {0}) does not contain title or item reward data. Ignored.", entry);
+                    Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) does not contain title or item reward data. Ignored.");
                     continue;
                 }
 
                 if (achievement.Faction == AchievementFaction.Any && (reward.TitleId[0] == 0 ^ reward.TitleId[1] == 0))
-                    Log.outError(LogFilter.Sql, "Table `achievement_reward` (Entry: {0}) contains the title (A: {1} H: {2}) for only one team.", entry, reward.TitleId[0], reward.TitleId[1]);
+                    Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) contains the title (A: {reward.TitleId[0]} H: {reward.TitleId[1]}) for only one team.");
 
                 if (reward.TitleId[0] != 0)
                 {
                     CharTitlesRecord titleEntry = CliDB.CharTitlesStorage.LookupByKey(reward.TitleId[0]);
                     if (titleEntry == null)
                     {
-                        Log.outError(LogFilter.Sql, "Table `achievement_reward` (Entry: {0}) contains an invalid title id ({1}) in `title_A`, set to 0", entry, reward.TitleId[0]);
+                        Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) contains an invalid title ID ({reward.TitleId[0]}) in `title_A`, set to 0");
                         reward.TitleId[0] = 0;
                     }
                 }
@@ -1200,7 +1199,7 @@ namespace Game.Achievements
                     CharTitlesRecord titleEntry = CliDB.CharTitlesStorage.LookupByKey(reward.TitleId[1]);
                     if (titleEntry == null)
                     {
-                        Log.outError(LogFilter.Sql, "Table `achievement_reward` (Entry: {0}) contains an invalid title id ({1}) in `title_H`, set to 0", entry, reward.TitleId[1]);
+                        Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) contains an invalid title ID ({reward.TitleId[1]}) in `title_H`, set to 0");
                         reward.TitleId[1] = 0;
                     }
                 }
@@ -1210,51 +1209,50 @@ namespace Game.Achievements
                 {
                     if (Global.ObjectMgr.GetCreatureTemplate(reward.SenderCreatureId) == null)
                     {
-                        Log.outError(LogFilter.Sql, "Table `achievement_reward` (Entry: {0}) contains an invalid creature entry {1} as sender, mail reward skipped.", entry, reward.SenderCreatureId);
+                        Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) contains an invalid creature ID {reward.SenderCreatureId} as sender, mail reward skipped.");
                         reward.SenderCreatureId = 0;
                     }
                 }
                 else
                 {
                     if (reward.ItemId != 0)
-                        Log.outError(LogFilter.Sql, "Table `achievement_reward` (Entry: {0}) does not have sender data, but contains an item reward. Item will not be rewarded.", entry);
+                        Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) does not have sender data, but contains an item reward. Item will not be rewarded.");
 
                     if (!reward.Subject.IsEmpty())
-                        Log.outError(LogFilter.Sql, "Table `achievement_reward` (Entry: {0}) does not have sender data, but contains a mail subject.", entry);
+                        Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) does not have sender data, but contains a mail subject.");
 
                     if (!reward.Body.IsEmpty())
-                        Log.outError(LogFilter.Sql, "Table `achievement_reward` (Entry: {0}) does not have sender data, but contains mail text.", entry);
+                        Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) does not have sender data, but contains mail text.");
 
                     if (reward.MailTemplateId != 0)
-                        Log.outError(LogFilter.Sql, "Table `achievement_reward` (Entry: {0}) does not have sender data, but has a MailTemplateId.", entry);
+                        Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) does not have sender data, but has a MailTemplateId.");
                 }
 
                 if (reward.MailTemplateId != 0)
                 {
                     if (!CliDB.MailTemplateStorage.ContainsKey(reward.MailTemplateId))
                     {
-                        Log.outError(LogFilter.Sql, "Table `achievement_reward` (Entry: {0}) is using an invalid MailTemplateId ({1}).", entry, reward.MailTemplateId);
+                        Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) is using an invalid MailTemplateId ({reward.MailTemplateId}).");
                         reward.MailTemplateId = 0;
                     }
                     else if (!reward.Subject.IsEmpty() || !reward.Body.IsEmpty())
-                        Log.outError(LogFilter.Sql, "Table `achievement_reward` (Entry: {0}) is using MailTemplateId ({1}) and mail subject/text.", entry, reward.MailTemplateId);
+                        Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) is using MailTemplateId ({reward.MailTemplateId}) and mail subject/text.");
                 }
 
                 if (reward.ItemId != 0)
                 {
                     if (Global.ObjectMgr.GetItemTemplate(reward.ItemId) == null)
                     {
-                        Log.outError(LogFilter.Sql, "Table `achievement_reward` (Entry: {0}) contains an invalid item id {1}, reward mail will not contain the rewarded item.", entry, reward.ItemId);
+                        Log.outError(LogFilter.Sql, $"Table `achievement_reward` (ID: {id}) contains an invalid item id {reward.ItemId}, reward mail will not contain the rewarded item.");
                         reward.ItemId = 0;
                     }
                 }
 
-                _achievementRewards[entry] = reward;
-                ++count;
+                _achievementRewards[id] = reward;
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} achievement rewards in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} achievement rewards in {1} ms.", _achievementRewards.Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
         public void LoadRewardLocales()
@@ -1263,34 +1261,34 @@ namespace Game.Achievements
 
             _achievementRewardLocales.Clear();                       // need for reload case
 
-            SQLResult result = DB.World.Query("SELECT entry, subject_loc1, text_loc1, subject_loc2, text_loc2, subject_loc3, text_loc3, subject_loc4, text_loc4, " +
-                "subject_loc5, text_loc5, subject_loc6, text_loc6, subject_loc7, text_loc7, subject_loc8, text_loc8 FROM locales_achievement_reward");
+            //                                         0   1       2        3
+            SQLResult result = DB.World.Query("SELECT ID, Locale, Subject, Body FROM achievement_reward_locale");
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 achievement reward locale strings.  DB table `locales_achievement_reward` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 achievement reward locale strings.  DB table `achievement_reward_locale` is empty.");
                 return;
             }
 
             do
             {
-                uint entry = result.Read<uint>(0);
+                uint id = result.Read<uint>(0);
+                string localeName = result.Read<string>(1);
 
-                if (!_achievementRewards.ContainsKey(entry))
+                if (!_achievementRewards.ContainsKey(id))
                 {
-                    Log.outError(LogFilter.Sql, "Table `locales_achievement_reward` (Entry: {0}) contains locale strings for a non-existing achievement reward.", entry);
+                    Log.outError(LogFilter.Sql, "Table `achievement_reward_locale` (ID: {id}) contains locale strings for a non-existing achievement reward.");
                     continue;
                 }
 
                 AchievementRewardLocale data = new AchievementRewardLocale();
+                LocaleConstant locale = localeName.ToEnum<LocaleConstant>();
+                if (locale == LocaleConstant.enUS)
+                    continue;
 
-                for (int i = (int)LocaleConstant.OldTotal - 1; i > 0; --i)
-                {
-                    LocaleConstant locale = (LocaleConstant)i;
-                    ObjectManager.AddLocaleString(result.Read<string>(1 + 2 * (i - 1)), locale, data.Subject);
-                    ObjectManager.AddLocaleString(result.Read<string>(1 + 2 * (i - 1) + 1), locale, data.Body);
-                }
+                ObjectManager.AddLocaleString(result.Read<string>(2), locale, data.Subject);
+                ObjectManager.AddLocaleString(result.Read<string>(3), locale, data.Body);
 
-                _achievementRewardLocales[entry] = data;
+                _achievementRewardLocales[id] = data;
             }
             while (result.NextRow());
 

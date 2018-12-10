@@ -142,8 +142,7 @@ namespace Game.Network.Packets
                 {
                     _worldPacket.WriteInt32(scenarioPOI.BlobIndex);
                     _worldPacket.WriteInt32(scenarioPOI.MapID);
-                    _worldPacket.WriteInt32(scenarioPOI.WorldMapAreaID);
-                    _worldPacket.WriteInt32(scenarioPOI.Floor);
+                    _worldPacket.WriteInt32(scenarioPOI.UiMapID);
                     _worldPacket.WriteInt32(scenarioPOI.Priority);
                     _worldPacket.WriteInt32(scenarioPOI.Flags);
                     _worldPacket.WriteInt32(scenarioPOI.WorldEffectID);

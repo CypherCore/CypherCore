@@ -48,8 +48,8 @@ namespace Game.Entities
             objectTypeMask |= TypeMask.Player;
             objectTypeId = TypeId.Player;
 
-            valuesCount = (int)PlayerFields.End;
-            _dynamicValuesCount = (int)PlayerDynamicFields.End;
+            valuesCount = (int)ActivePlayerFields.End;
+            _dynamicValuesCount = (int)ActivePlayerDynamicFields.End;
             Session = session;
 
             // players always accept
@@ -214,7 +214,7 @@ namespace Game.Entities
             SetFlag(UnitFields.Flags2, UnitFlags2.RegeneratePower);
             SetFloatValue(UnitFields.HoverHeight, 1.0f);            // default for players in 3.0.3
 
-            SetUInt32Value(PlayerFields.WatchedFactionIndex, 0xFFFFFFFF);  // -1 is default value
+            SetUInt32Value(ActivePlayerFields.WatchedFactionIndex, 0xFFFFFFFF);  // -1 is default value
 
             SetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetSkinId, createInfo.Skin);
             SetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetFaceId, createInfo.Face);
@@ -223,23 +223,23 @@ namespace Game.Entities
             SetByteValue(PlayerFields.Bytes2, PlayerFieldOffsets.Bytes2OffsetFacialStyle, createInfo.FacialHairStyle);
             for (byte i = 0; i < PlayerConst.CustomDisplaySize; ++i)
                 SetByteValue(PlayerFields.Bytes2, (byte)(PlayerFieldOffsets.Bytes2OffsetCustomDisplayOption + i), createInfo.CustomDisplay[i]);
-            SetUInt32Value(PlayerFields.RestInfo + PlayerFieldOffsets.RestStateXp, (uint)((GetSession().IsARecruiter() || GetSession().GetRecruiterId() != 0) ? PlayerRestState.RAFLinked : PlayerRestState.NotRAFLinked));
-            SetUInt32Value(PlayerFields.RestInfo + PlayerFieldOffsets.RestStateHonor, (uint)PlayerRestState.NotRAFLinked);
+            SetUInt32Value(ActivePlayerFields.RestInfo + PlayerFieldOffsets.RestStateXp, (uint)((GetSession().IsARecruiter() || GetSession().GetRecruiterId() != 0) ? PlayerRestState.RAFLinked : PlayerRestState.NotRAFLinked));
+            SetUInt32Value(ActivePlayerFields.RestInfo + PlayerFieldOffsets.RestStateHonor, (uint)PlayerRestState.NotRAFLinked);
             SetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetGender, (byte)createInfo.Sex);
             SetByteValue(PlayerFields.Bytes4, PlayerFieldOffsets.Bytes4OffsetArenaFaction, 0);
             SetInventorySlotCount(InventorySlots.DefaultSize);
 
-            SetGuidValue(ObjectFields.Data, ObjectGuid.Empty);
+            SetGuidValue(UnitFields.GuildGuid, ObjectGuid.Empty);
             SetUInt32Value(PlayerFields.GuildRank, 0);
             SetGuildLevel(0);
             SetUInt32Value(PlayerFields.GuildTimestamp, 0);
 
             for (int i = 0; i < PlayerConst.KnowTitlesSize; ++i)
-                SetUInt64Value(PlayerFields.KnownTitles + i, 0);  // 0=disabled
+                SetUInt64Value(ActivePlayerFields.KnownTitles + i, 0);  // 0=disabled
             SetUInt32Value(PlayerFields.ChosenTitle, 0);
 
-            SetUInt32Value(PlayerFields.Kills, 0);
-            SetUInt32Value(PlayerFields.LifetimeHonorableKills, 0);
+            SetUInt32Value(ActivePlayerFields.Kills, 0);
+            SetUInt32Value(ActivePlayerFields.LifetimeHonorableKills, 0);
 
             // set starting level
             uint start_level = WorldConfig.GetUIntValue(WorldCfg.StartPlayerLevel);
@@ -274,7 +274,7 @@ namespace Game.Entities
 
             InitRunes();
 
-            SetUInt64Value(PlayerFields.Coinage, WorldConfig.GetUIntValue(WorldCfg.StartPlayerMoney));
+            SetUInt64Value(ActivePlayerFields.Coinage, WorldConfig.GetUIntValue(WorldCfg.StartPlayerMoney));
             SetCurrency(CurrencyTypes.ApexisCrystals, WorldConfig.GetUIntValue(WorldCfg.CurrencyStartApexisCrystals));
             SetCurrency(CurrencyTypes.JusticePoints, WorldConfig.GetUIntValue(WorldCfg.CurrencyStartJusticePoints));
 
@@ -282,7 +282,7 @@ namespace Game.Entities
             if (WorldConfig.GetBoolValue(WorldCfg.StartAllExplored))
             {
                 for (ushort i = 0; i < PlayerConst.ExploredZonesSize; i++)
-                    SetFlag(PlayerFields.ExploredZones1 + i, 0xFFFFFFFF);
+                    SetFlag(ActivePlayerFields.ExploredZones + i, 0xFFFFFFFF);
             }
 
             //Reputations if "StartAllReputation" is enabled, -- TODO: Fix this in a better way
@@ -741,6 +741,18 @@ namespace Game.Entities
             if (pet != null && !pet.IsWithinDistInMap(this, GetMap().GetVisibilityRange()) && !pet.isPossessed())
                 RemovePet(pet, PetSaveMode.NotInSlot, true);
 
+            if (IsAlive())
+            {
+                if (m_hostileReferenceCheckTimer <= diff)
+                {
+                    m_hostileReferenceCheckTimer = 15 * Time.InMilliseconds;
+                    if (!GetMap().IsDungeon())
+                        getHostileRefManager().deleteReferencesOutOfRange(GetVisibilityRange());
+                }
+                else
+                    m_hostileReferenceCheckTimer -= diff;
+            }
+
             //we should execute delayed teleports only for alive(!) players
             //because we don't want player's ghost teleported from graveyard
             if (IsHasDelayedTeleport() && IsAlive())
@@ -783,7 +795,7 @@ namespace Game.Entities
 
             if (IsAlive() && !oldIsAlive)
                 //clear aura case after resurrection by another way (spells will be applied before next death)
-                ClearDynamicValue(PlayerDynamicFields.SelfResSpells);
+                ClearDynamicValue(ActivePlayerDynamicFields.SelfResSpells);
         }
 
         public override void DestroyForPlayer(Player target)
@@ -1662,15 +1674,15 @@ namespace Game.Entities
                     continue;
 
                 if (quest.IsDaily())
-                    rep = CalculateReputationGain(ReputationSource.DailyQuest, GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
+                    rep = CalculateReputationGain(ReputationSource.DailyQuest, (uint)GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
                 else if (quest.IsWeekly())
-                    rep = CalculateReputationGain(ReputationSource.WeeklyQuest, GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
+                    rep = CalculateReputationGain(ReputationSource.WeeklyQuest, (uint)GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
                 else if (quest.IsMonthly())
-                    rep = CalculateReputationGain(ReputationSource.MonthlyQuest, GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
+                    rep = CalculateReputationGain(ReputationSource.MonthlyQuest, (uint)GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
                 else if (quest.IsRepeatable())
-                    rep = CalculateReputationGain(ReputationSource.RepeatableQuest, GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
+                    rep = CalculateReputationGain(ReputationSource.RepeatableQuest, (uint)GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
                 else
-                    rep = CalculateReputationGain(ReputationSource.Quest, GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
+                    rep = CalculateReputationGain(ReputationSource.Quest, (uint)GetQuestLevel(quest), rep, (int)quest.RewardFactionId[i], noQuestBonus);
 
                 bool noSpillover = Convert.ToBoolean(quest.RewardReputationMask & (1 << i));
                 GetReputationMgr().ModifyReputation(factionEntry, rep, noSpillover);
@@ -4180,7 +4192,7 @@ namespace Game.Entities
             if (m_unitMovedByMe == obj)
                 return true;
 
-            ObjectGuid guid = GetGuidValue(PlayerFields.Farsight);
+            ObjectGuid guid = GetGuidValue(ActivePlayerFields.Farsight);
             if (!guid.IsEmpty())
                 if (obj.GetGUID() == guid)
                     return true;
@@ -4542,7 +4554,7 @@ namespace Game.Entities
             setDeathState(DeathState.Corpse);
 
             SetUInt32Value(ObjectFields.DynamicFlags, 0);
-            ApplyModFlag(PlayerFields.LocalFlags, PlayerLocalFlags.ReleaseTimer, !CliDB.MapStorage.LookupByKey(GetMapId()).Instanceable() && !HasAuraType(AuraType.PreventResurrection));
+            ApplyModFlag(ActivePlayerFields.LocalFlags, PlayerLocalFlags.ReleaseTimer, !CliDB.MapStorage.LookupByKey(GetMapId()).Instanceable() && !HasAuraType(AuraType.PreventResurrection));
 
             // 6 minutes until repop at graveyard
             m_deathTimer = 6 * Time.Minute * Time.InMilliseconds;
@@ -5009,6 +5021,7 @@ namespace Game.Entities
 
             displayPlayerChoice.CloseChoiceFrame = false;
             displayPlayerChoice.HideWarboardHeader = playerChoice.HideWarboardHeader;
+            displayPlayerChoice.KeepOpenAfterChoice = playerChoice.KeepOpenAfterChoice;
 
             for (var i = 0; i < playerChoice.Responses.Count; ++i)
             {
@@ -5017,6 +5030,9 @@ namespace Game.Entities
 
                 playerChoiceResponse.ResponseID = playerChoiceResponseTemplate.ResponseId;
                 playerChoiceResponse.ChoiceArtFileID = playerChoiceResponseTemplate.ChoiceArtFileId;
+                playerChoiceResponse.Flags = playerChoiceResponseTemplate.Flags;
+                playerChoiceResponse.WidgetSetID = playerChoiceResponseTemplate.WidgetSetID;
+                playerChoiceResponse.GroupID = playerChoiceResponseTemplate.GroupID;
                 playerChoiceResponse.Answer = playerChoiceResponseTemplate.Answer;
                 playerChoiceResponse.Header = playerChoiceResponseTemplate.Header;
                 playerChoiceResponse.Description = playerChoiceResponseTemplate.Description;
@@ -5173,7 +5189,7 @@ namespace Game.Entities
         public int GetTeamId() { return m_team == Team.Alliance ? TeamId.Alliance : TeamId.Horde; }
 
         //Money
-        public ulong GetMoney() { return GetUInt64Value(PlayerFields.Coinage); }
+        public ulong GetMoney() { return GetUInt64Value(ActivePlayerFields.Coinage); }
         public bool HasEnoughMoney(ulong amount) { return GetMoney() >= amount; }
         public bool HasEnoughMoney(long amount)
         {
@@ -5205,7 +5221,7 @@ namespace Game.Entities
         }
         public void SetMoney(ulong value)
         {
-            SetUInt64Value(PlayerFields.Coinage, value);
+            SetUInt64Value(ActivePlayerFields.Coinage, value);
             MoneyChanged((uint)value);
             UpdateCriteria(CriteriaTypes.HighestGoldValueOwned);
         }
@@ -5246,19 +5262,18 @@ namespace Game.Entities
         public void SetInGuild(ulong guildId)
         {
             if (guildId != 0)
-                SetGuidValue(ObjectFields.Data, ObjectGuid.Create(HighGuid.Guild, guildId));
+                SetGuidValue(UnitFields.GuildGuid, ObjectGuid.Create(HighGuid.Guild, guildId));
             else
-                SetGuidValue(ObjectFields.Data, ObjectGuid.Empty);
+                SetGuidValue(UnitFields.GuildGuid, ObjectGuid.Empty);
 
             ApplyModFlag(PlayerFields.Flags, PlayerFlags.GuildLevelEnabled, guildId != 0);
-            SetUInt16Value(ObjectFields.Type, 1, (ushort)(guildId != 0 ? 1 : 0));
         }
         public void SetGuildRank(uint rankId) { SetUInt32Value(PlayerFields.GuildRank, rankId); }
         byte GetGuildRank() { return (byte)GetUInt32Value(PlayerFields.GuildRank); }
         public void SetGuildLevel(uint level) { SetUInt32Value(PlayerFields.GuildLevel, level); }
         uint GetGuildLevel() { return GetUInt32Value(PlayerFields.GuildLevel); }
         public void SetGuildIdInvited(ulong GuildId) { m_GuildIdInvited = GuildId; }
-        public uint GetGuildId() { return GetUInt32Value(ObjectFields.Data); }
+        public uint GetGuildId() { return GetUInt32Value(UnitFields.GuildGuid); }
         public Guild GetGuild()
         {
             uint guildId = GetGuildId();
@@ -5270,7 +5285,7 @@ namespace Game.Entities
             return GetGuildId() != 0 ? Global.GuildMgr.GetGuildById(GetGuildId()).GetName() : "";
         }
 
-        public void SetFreePrimaryProfessions(uint profs) { SetUInt32Value(PlayerFields.CharacterPoints, profs); }
+        public void SetFreePrimaryProfessions(uint profs) { SetUInt32Value(ActivePlayerFields.CharacterPoints, profs); }
         public void GiveLevel(uint level)
         {
             var oldLevel = getLevel();
@@ -5301,13 +5316,12 @@ namespace Game.Entities
             for (Stats i = Stats.Strength; i < Stats.Max; ++i)
                 packet.StatDelta[(int)i] = info.stats[(int)i] - (int)GetCreateStat(i);
 
-            uint[] rowLevels = (GetClass() != Class.Deathknight) ? PlayerConst.DefaultTalentRowLevels : PlayerConst.DKTalentRowLevels;
-
-            packet.Cp = rowLevels.Any(p => p == level) ? 1 : 0;
+            packet.NumNewTalents = (int)(Global.DB2Mgr.GetNumTalentsAtLevel(level, GetClass()) - Global.DB2Mgr.GetNumTalentsAtLevel(oldLevel, GetClass()));
+            packet.NumNewPvpTalentSlots = Global.DB2Mgr.GetPvpTalentNumSlotsAtLevel(level, GetClass()) - Global.DB2Mgr.GetPvpTalentNumSlotsAtLevel(oldLevel, GetClass());
 
             SendPacket(packet);
 
-            SetUInt32Value(PlayerFields.NextLevelXp, Global.ObjectMgr.GetXPForLevel(level));
+            SetUInt32Value(ActivePlayerFields.NextLevelXp, Global.ObjectMgr.GetXPForLevel(level));
 
             //update level, max level of skills
             m_PlayedTimeLevel = 0;                   // Level Played Time reset
@@ -5377,8 +5391,8 @@ namespace Game.Entities
                     {
                         ++m_grantableLevels;
 
-                        if (!HasByteFlag(PlayerFields.FieldBytes, PlayerFieldOffsets.FieldBytesOffsetRafGrantableLevel, 0x01))
-                            SetByteFlag(PlayerFields.FieldBytes, PlayerFieldOffsets.FieldBytesOffsetRafGrantableLevel, 0x01);
+                        if (!HasByteFlag(ActivePlayerFields.Bytes, PlayerFieldOffsets.FieldBytesOffsetRafGrantableLevel, 0x01))
+                            SetByteFlag(ActivePlayerFields.Bytes, PlayerFieldOffsets.FieldBytesOffsetRafGrantableLevel, 0x01);
                     }
                 }
             }
@@ -5449,6 +5463,8 @@ namespace Game.Entities
                     Log.outError(LogFilter.Player, "Player {0} ({1}) has invalid gender {2}", GetName(), GetGUID().ToString(), gender);
                     return;
             }
+
+            SetUInt32Value(UnitFields.StateAnimId, (uint)CliDB.AnimationDataStorage.Count);
         }
 
         //Creature
@@ -5782,8 +5798,8 @@ namespace Game.Entities
 
             PlayerLevelInfo info = Global.ObjectMgr.GetPlayerLevelInfo(GetRace(), GetClass(), getLevel());
 
-            SetUInt32Value(PlayerFields.MaxLevel, WorldConfig.GetUIntValue(WorldCfg.MaxPlayerLevel));
-            SetUInt32Value(PlayerFields.NextLevelXp, Global.ObjectMgr.GetXPForLevel(getLevel()));
+            SetUInt32Value(ActivePlayerFields.MaxLevel, WorldConfig.GetUIntValue(WorldCfg.MaxPlayerLevel));
+            SetUInt32Value(ActivePlayerFields.NextLevelXp, Global.ObjectMgr.GetXPForLevel(getLevel()));
 
             // reset before any aura state sources (health set/aura apply)
             SetUInt32Value(UnitFields.AuraState, 0);
@@ -5813,26 +5829,26 @@ namespace Game.Entities
             //set create powers
             SetCreateMana(basemana);
 
-            SetArmor((int)(GetCreateStat(Stats.Agility) * 2));
+            SetArmor((int)(GetCreateStat(Stats.Agility) * 2), 0);
 
             InitStatBuffMods();
 
             //reset rating fields values
-            for (var index = PlayerFields.CombatRating1; index < PlayerFields.CombatRating1 + (int)CombatRating.Max; ++index)
-                SetUInt32Value(index, 0);
+            for (var index = 0; index < (int)CombatRating.Max; ++index)
+                SetUInt32Value(ActivePlayerFields.CombatRating + index, 0);
 
-            SetUInt32Value(PlayerFields.ModHealingDonePos, 0);
-            SetFloatValue(PlayerFields.ModHealingPct, 1.0f);
-            SetFloatValue(PlayerFields.ModHealingDonePct, 1.0f);
-            SetFloatValue(PlayerFields.ModPeriodicHealingDonePercent, 1.0f);
+            SetUInt32Value(ActivePlayerFields.ModHealingDonePos, 0);
+            SetFloatValue(ActivePlayerFields.ModHealingPct, 1.0f);
+            SetFloatValue(ActivePlayerFields.ModHealingDonePct, 1.0f);
+            SetFloatValue(ActivePlayerFields.ModPeriodicHealingDonePercent, 1.0f);
             for (byte i = 0; i < 7; ++i)
             {
-                SetInt32Value(PlayerFields.ModDamageDoneNeg + i, 0);
-                SetInt32Value(PlayerFields.ModDamageDonePos + i, 0);
-                SetFloatValue(PlayerFields.ModDamageDonePct + i, 1.0f);
+                SetInt32Value(ActivePlayerFields.ModDamageDoneNeg + i, 0);
+                SetInt32Value(ActivePlayerFields.ModDamageDonePos + i, 0);
+                SetFloatValue(ActivePlayerFields.ModDamageDonePct + i, 1.0f);
             }
 
-            SetFloatValue(PlayerFields.ModSpellPowerPct, 1.0f);
+            SetFloatValue(ActivePlayerFields.ModSpellPowerPct, 1.0f);
 
             //reset attack power, damage and attack speed fields
             for (byte i = 0; i < (int)WeaponAttackType.Max; ++i)
@@ -5846,8 +5862,8 @@ namespace Game.Entities
             SetFloatValue(UnitFields.MaxRangedDamage, 0.0f);
             for (var i = 0; i < 3; ++i)
             {
-                SetFloatValue(PlayerFields.WeaponDmgMultipliers + i, 1.0f);
-                SetFloatValue(PlayerFields.WeaponAtkSpeedMultipliers + i, 1.0f);
+                SetFloatValue(ActivePlayerFields.WeaponDmgMultipliers + i, 1.0f);
+                SetFloatValue(ActivePlayerFields.WeaponAtkSpeedMultipliers + i, 1.0f);
             }
 
             SetInt32Value(UnitFields.AttackPower, 0);
@@ -5856,44 +5872,42 @@ namespace Game.Entities
             SetFloatValue(UnitFields.RangedAttackPowerMultiplier, 0.0f);
 
             // Base crit values (will be recalculated in UpdateAllStats() at loading and in _ApplyAllStatBonuses() at reset
-            SetFloatValue(PlayerFields.CritPercentage, 0.0f);
-            SetFloatValue(PlayerFields.OffhandCritPercentage, 0.0f);
-            SetFloatValue(PlayerFields.RangedCritPercentage, 0.0f);
+            SetFloatValue(ActivePlayerFields.CritPercentage, 0.0f);
+            SetFloatValue(ActivePlayerFields.OffhandCritPercentage, 0.0f);
+            SetFloatValue(ActivePlayerFields.RangedCritPercentage, 0.0f);
 
             // Init spell schools (will be recalculated in UpdateAllStats() at loading and in _ApplyAllStatBonuses() at reset
-            SetFloatValue(PlayerFields.SpellCritPercentage1, 0.0f);
+            SetFloatValue(ActivePlayerFields.SpellCritPercentage1, 0.0f);
 
-            SetFloatValue(PlayerFields.ParryPercentage, 0.0f);
-            SetFloatValue(PlayerFields.BlockPercentage, 0.0f);
+            SetFloatValue(ActivePlayerFields.ParryPercentage, 0.0f);
+            SetFloatValue(ActivePlayerFields.BlockPercentage, 0.0f);
 
             // Static 30% damage blocked
-            SetUInt32Value(PlayerFields.ShieldBlock, 30);
+            SetUInt32Value(ActivePlayerFields.ShieldBlock, 30);
 
             // Dodge percentage
-            SetFloatValue(PlayerFields.DodgePercentage, 0.0f);
+            SetFloatValue(ActivePlayerFields.DodgePercentage, 0.0f);
 
             // set armor (resistance 0) to original value (create_agility*2)
-            SetArmor((int)(GetCreateStat(Stats.Agility) * 2));
-            SetResistanceBuffMods(SpellSchools.Normal, true, 0.0f);
-            SetResistanceBuffMods(SpellSchools.Normal, false, 0.0f);
+            SetArmor((int)(GetCreateStat(Stats.Agility) * 2), 0);
+            SetBonusResistanceMod(SpellSchools.Normal, 0);
             // set other resistance to original value (0)
             for (var spellSchool = SpellSchools.Holy; spellSchool < SpellSchools.Max; ++spellSchool)
             {
                 SetResistance(spellSchool, 0);
-                SetResistanceBuffMods(spellSchool, true, 0.0f);
-                SetResistanceBuffMods(spellSchool, false, 0.0f);
+                SetBonusResistanceMod(spellSchool, 0);
             }
 
-            SetUInt32Value(PlayerFields.ModTargetResistance, 0);
-            SetUInt32Value(PlayerFields.ModTargetPhysicalResistance, 0);
+            SetUInt32Value(ActivePlayerFields.ModTargetResistance, 0);
+            SetUInt32Value(ActivePlayerFields.ModTargetPhysicalResistance, 0);
             for (var i = 0; i < (int)SpellSchools.Max; ++i)
             {
                 SetUInt32Value(UnitFields.PowerCostModifier + i, 0);
                 SetFloatValue(UnitFields.PowerCostMultiplier + i, 0.0f);
             }
             // Reset no reagent cost field
-            for (byte i = 0; i < 3; ++i)
-                SetUInt32Value(PlayerFields.NoReagentCost1 + i, 0);
+            for (byte i = 0; i < 4; ++i)
+                SetUInt32Value(ActivePlayerFields.NoReagentCost + i, 0);
             // Init data for form but skip reapply item mods for form
             InitDataForForm(reapplyMods);
 
@@ -5925,9 +5939,9 @@ namespace Game.Entities
             RemoveByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag, (UnitBytes2Flags.FFAPvp | UnitBytes2Flags.Sanctuary));
 
             // restore if need some important flags
-            SetByteValue(PlayerFields.FieldBytes2, PlayerFieldOffsets.FieldBytes2OffsetIgnorePowerRegenPredictionMask, 0);
-            SetByteValue(PlayerFields.FieldBytes2, PlayerFieldOffsets.FieldBytes2OffsetAuraVision, 0);
-            SetByteValue(PlayerFields.FieldBytes2, 3, 0);
+            SetByteValue(ActivePlayerFields.Bytes2, PlayerFieldOffsets.FieldBytes2OffsetIgnorePowerRegenPredictionMask, 0);
+            SetByteValue(ActivePlayerFields.Bytes2, PlayerFieldOffsets.FieldBytes2OffsetAuraVision, 0);
+            SetByteValue(ActivePlayerFields.Bytes2, 3, 0);
 
             if (reapplyMods)                                        // reapply stats values only on .reset stats (level) command
                 _ApplyAllStatBonuses();
@@ -6258,11 +6272,11 @@ namespace Game.Entities
             }
 
             uint val = 1u << (areaEntry.AreaBit % 32);
-            uint currFields = GetUInt32Value(PlayerFields.ExploredZones1 + offset);
+            uint currFields = GetUInt32Value(ActivePlayerFields.ExploredZones + offset);
 
             if (!Convert.ToBoolean(currFields & val))
             {
-                SetUInt32Value(PlayerFields.ExploredZones1 + offset, currFields | val);
+                SetUInt32Value(ActivePlayerFields.ExploredZones + offset, currFields | val);
 
                 UpdateCriteria(CriteriaTypes.ExploreArea);
 
@@ -6488,15 +6502,15 @@ namespace Game.Entities
 
         void SetXP(uint xp)
         {
-            SetUInt32Value(PlayerFields.Xp, xp);
+            SetUInt32Value(ActivePlayerFields.Xp, xp);
 
             int playerLevelDelta = 0;
 
             // If XP < 50%, player should see scaling creature with -1 level except for level max
-            if (getLevel() < SharedConst.MaxLevel && xp < (GetUInt32Value(PlayerFields.NextLevelXp) / 2))
+            if (getLevel() < SharedConst.MaxLevel && xp < (GetUInt32Value(ActivePlayerFields.NextLevelXp) / 2))
                 playerLevelDelta = -1;
 
-            SetInt32Value(PlayerFields.ScalingLevelDelta, playerLevelDelta);
+            SetInt32Value(UnitFields.ScalingLevelDelta, playerLevelDelta);
         }
 
         public void GiveXP(uint xp, Unit victim, float group_rate = 1.0f)
@@ -6539,8 +6553,8 @@ namespace Game.Entities
             packet.ReferAFriendBonusType = (byte)(recruitAFriend ? 1 : 0);
             SendPacket(packet);
 
-            uint curXP = GetUInt32Value(PlayerFields.Xp);
-            uint nextLvlXP = GetUInt32Value(PlayerFields.NextLevelXp);
+            uint curXP = GetUInt32Value(ActivePlayerFields.Xp);
+            uint nextLvlXP = GetUInt32Value(ActivePlayerFields.NextLevelXp);
             uint newXP = curXP + xp + bonus_xp;
 
             while (newXP >= nextLvlXP && level < WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
@@ -6551,7 +6565,7 @@ namespace Game.Entities
                     GiveLevel(level + 1);
 
                 level = getLevel();
-                nextLvlXP = GetUInt32Value(PlayerFields.NextLevelXp);
+                nextLvlXP = GetUInt32Value(ActivePlayerFields.NextLevelXp);
             }
 
             SetXP(newXP);
@@ -6755,22 +6769,6 @@ namespace Game.Entities
             if (node == null)
             {
                 GetSession().SendActivateTaxiReply(ActivateTaxiReply.NoSuchPath);
-                return false;
-            }
-
-            // check node starting pos data set case if provided
-            if (node.Pos.X != 0.0f || node.Pos.Y != 0.0f || node.Pos.Z != 0.0f)
-            {
-                if (node.ContinentID != GetMapId() || !IsInDist(node.Pos.X, node.Pos.Y, node.Pos.Z, 2 * SharedConst.InteractionDistance))
-                {
-                    GetSession().SendActivateTaxiReply(ActivateTaxiReply.TooFarAway);
-                    return false;
-                }
-            }
-            // node must have pos if taxi master case (npc != NULL)
-            else if (npc != null)
-            {
-                GetSession().SendActivateTaxiReply(ActivateTaxiReply.UnspecifiedServerError);
                 return false;
             }
 
@@ -7084,7 +7082,7 @@ namespace Game.Entities
         }
         public bool IsSpellFitByClassAndRace(uint spell_id)
         {
-            long racemask = getRaceMask();
+            ulong racemask = getRaceMask();
             uint classmask = getClassMask();
 
             var bounds = Global.SpellMgr.GetSkillLineAbilityMapBounds(spell_id);
@@ -7113,8 +7111,8 @@ namespace Game.Entities
         {
             SetFreePrimaryProfessions(WorldConfig.GetUIntValue(WorldCfg.MaxPrimaryTradeSkill));
         }
-        public uint GetFreePrimaryProfessionPoints() { return GetUInt32Value(PlayerFields.CharacterPoints); }
-        void SetFreePrimaryProfessions(ushort profs) { SetUInt32Value(PlayerFields.CharacterPoints, profs); }
+        public uint GetFreePrimaryProfessionPoints() { return GetUInt32Value(ActivePlayerFields.CharacterPoints); }
+        void SetFreePrimaryProfessions(ushort profs) { SetUInt32Value(ActivePlayerFields.CharacterPoints, profs); }
         public bool HaveAtClient(WorldObject u)
         {
             bool one = u.GetGUID() == GetGUID();
@@ -7130,7 +7128,7 @@ namespace Game.Entities
 
             int fieldIndexOffset = (int)bitIndex / 32;
             uint flag = (uint)(1 << ((int)bitIndex % 32));
-            return HasFlag(PlayerFields.KnownTitles + fieldIndexOffset, flag);
+            return HasFlag(ActivePlayerFields.KnownTitles + fieldIndexOffset, flag);
         }
         public void SetTitle(CharTitlesRecord title, bool lost = false)
         {
@@ -7139,17 +7137,17 @@ namespace Game.Entities
 
             if (lost)
             {
-                if (!HasFlag(PlayerFields.KnownTitles + fieldIndexOffset, flag))
+                if (!HasFlag(ActivePlayerFields.KnownTitles + fieldIndexOffset, flag))
                     return;
 
-                RemoveFlag(PlayerFields.KnownTitles + fieldIndexOffset, flag);
+                RemoveFlag(ActivePlayerFields.KnownTitles + fieldIndexOffset, flag);
             }
             else
             {
-                if (HasFlag(PlayerFields.KnownTitles + fieldIndexOffset, flag))
+                if (HasFlag(ActivePlayerFields.KnownTitles + fieldIndexOffset, flag))
                     return;
 
-                SetFlag(PlayerFields.KnownTitles + fieldIndexOffset, flag);
+                SetFlag(ActivePlayerFields.KnownTitles + fieldIndexOffset, flag);
             }
 
             TitleEarned packet = new TitleEarned(lost ? ServerOpcodes.TitleLost : ServerOpcodes.TitleEarned);
@@ -7163,7 +7161,7 @@ namespace Game.Entities
             {
                 Log.outDebug(LogFilter.Maps, "Player.CreateViewpoint: Player {0} create seer {1} (TypeId: {2}).", GetName(), target.GetEntry(), target.GetTypeId());
 
-                if (!AddGuidValue(PlayerFields.Farsight, target.GetGUID()))
+                if (!AddGuidValue(ActivePlayerFields.Farsight, target.GetGUID()))
                 {
                     Log.outFatal(LogFilter.Player, "Player.CreateViewpoint: Player {0} cannot add new viewpoint!", GetName());
                     return;
@@ -7181,7 +7179,7 @@ namespace Game.Entities
             {
                 Log.outDebug(LogFilter.Maps, "Player.CreateViewpoint: Player {0} remove seer", GetName());
 
-                if (!RemoveGuidValue(PlayerFields.Farsight, target.GetGUID()))
+                if (!RemoveGuidValue(ActivePlayerFields.Farsight, target.GetGUID()))
                 {
                     Log.outFatal(LogFilter.Player, "Player.CreateViewpoint: Player {0} cannot remove current viewpoint!", GetName());
                     return;
@@ -7196,7 +7194,7 @@ namespace Game.Entities
         }
         public WorldObject GetViewpoint()
         {
-            ObjectGuid guid = GetGuidValue(PlayerFields.Farsight);
+            ObjectGuid guid = GetGuidValue(ActivePlayerFields.Farsight);
             if (!guid.IsEmpty())
                 return Global.ObjAccessor.GetObjectByTypeMask(this, guid, TypeMask.Seer);
             return null;

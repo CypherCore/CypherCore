@@ -316,6 +316,7 @@ namespace Game.Misc
             }
 
             GossipPOI packet = new GossipPOI();
+            packet.ID = pointOfInterest.ID;
             packet.Name = pointOfInterest.Name;
 
             LocaleConstant locale = _session.GetSessionDbLocaleIndex();
@@ -431,10 +432,11 @@ namespace Game.Misc
             packet.InformUnit = _session.GetPlayer().GetDivider();
             packet.QuestID = quest.Id;
             packet.PortraitGiver = quest.QuestGiverPortrait;
+            packet.PortraitGiverMount = quest.QuestGiverPortraitMount;
             packet.PortraitTurnIn = quest.QuestTurnInPortrait;
             packet.AutoLaunched = autoLaunched;
             packet.DisplayPopup = displayPopup;
-            packet.QuestFlags[0] = (uint)quest.Flags;
+            packet.QuestFlags[0] = (uint)(quest.Flags & (WorldConfig.GetBoolValue(WorldCfg.QuestIgnoreAutoAccept) ? ~QuestFlags.AutoAccept : ~QuestFlags.None));
             packet.QuestFlags[1] = (uint)quest.FlagsEx;
             packet.SuggestedPartyMembers = quest.SuggestedPlayers;
 
@@ -501,6 +503,7 @@ namespace Game.Misc
             packet.Info.QuestID = quest.Id;
             packet.Info.QuestType = (int)quest.Type;
             packet.Info.QuestLevel = quest.Level;
+            packet.Info.QuestScalingFactionGroup = quest.ScalingFactionGroup;
             packet.Info.QuestMaxScalingLevel = quest.MaxScalingLevel;
             packet.Info.QuestPackageID = quest.PackageID;
             packet.Info.QuestMinLevel = quest.MinLevel;
@@ -532,12 +535,14 @@ namespace Game.Misc
             packet.Info.StartItem = quest.SourceItemId;
             packet.Info.Flags = (uint)quest.Flags;
             packet.Info.FlagsEx = (uint)quest.FlagsEx;
+            packet.Info.FlagsEx2 = (uint)quest.FlagsEx2;
             packet.Info.RewardTitle = quest.RewardTitleId;
             packet.Info.RewardArenaPoints = quest.RewardArenaPoints;
             packet.Info.RewardSkillLineID = quest.RewardSkillId;
             packet.Info.RewardNumSkillUps = quest.RewardSkillPoints;
             packet.Info.RewardFactionFlags = quest.RewardReputationMask;
             packet.Info.PortraitGiver = quest.QuestGiverPortrait;
+            packet.Info.PortraitGiverMount = quest.QuestGiverPortraitMount;
             packet.Info.PortraitTurnIn = quest.QuestTurnInPortrait;
 
             for (byte i = 0; i < SharedConst.QuestItemDropCount; ++i)
@@ -574,7 +579,7 @@ namespace Game.Misc
             packet.Info.POIPriority = quest.POIPriority;
 
             packet.Info.AllowableRaces = quest.AllowableRaces;
-            packet.Info.QuestRewardID = (int)quest.QuestRewardID;
+            packet.Info.TreasurePickerID = (int)quest.TreasurePickerID;
             packet.Info.Expansion = quest.Expansion;
 
             foreach (QuestObjective questObjective in quest.Objectives)
@@ -654,6 +659,7 @@ namespace Game.Misc
 
             packet.PortraitTurnIn = quest.QuestTurnInPortrait;
             packet.PortraitGiver = quest.QuestGiverPortrait;
+            packet.PortraitGiverMount = quest.QuestGiverPortraitMount;
             packet.QuestPackageID = quest.PackageID;
 
             packet.QuestData = offer;

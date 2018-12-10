@@ -688,7 +688,7 @@ namespace Game
                             continue;
                         }
 
-                        mGameEventNPCFlags[event_id].Add(Tuple.Create(guid, npcflag));
+                        mGameEventNPCFlags[event_id].Add((guid, npcflag));
 
                         ++count;
                     }
@@ -762,9 +762,9 @@ namespace Game
                         var flist = mGameEventNPCFlags[event_id];
                         foreach (var pair in flist)
                         {
-                            if (pair.Item1 == guid)
+                            if (pair.guid == guid)
                             {
-                                event_npc_flag = pair.Item2;
+                                event_npc_flag = pair.npcflag;
                                 break;
                             }
                         }
@@ -883,8 +883,8 @@ namespace Game
             foreach (var id in m_ActiveEvents)
             {
                 foreach (var pair in mGameEventNPCFlags[id])
-                    if (pair.Item1 == guid)
-                        mask |= pair.Item2;
+                    if (pair.guid == guid)
+                        mask |= pair.npcflag;
             }
 
             return mask;
@@ -916,7 +916,7 @@ namespace Game
                 mGameEventGameObjectQuests = new List<Tuple<uint, uint>>[maxEventId];
                 mGameEventVendors = new Dictionary<uint, VendorItem>[maxEventId];
                 mGameEventBattlegroundHolidays = new uint[maxEventId];
-                mGameEventNPCFlags = new List<Tuple<ulong, ulong>>[maxEventId];
+                mGameEventNPCFlags = new List<(ulong guid, ulong npcflag)>[maxEventId];
                 mGameEventModelEquip = new List<Tuple<ulong, ModelEquip>>[maxEventId];
                 for (var i = 0; i < maxEventId; ++i)
                 {
@@ -924,7 +924,7 @@ namespace Game
                     mGameEventCreatureQuests[i] = new List<Tuple<uint, uint>>();
                     mGameEventGameObjectQuests[i] = new List<Tuple<uint, uint>>();
                     mGameEventVendors[i] = new Dictionary<uint, VendorItem>();
-                    mGameEventNPCFlags[i] = new List<Tuple<ulong, ulong>>();
+                    mGameEventNPCFlags[i] = new List<(ulong guid, ulong npcflag)>();
                     mGameEventModelEquip[i] = new List<Tuple<ulong, ModelEquip>>();
                 }
             }
@@ -1100,9 +1100,9 @@ namespace Game
             foreach (var pair in mGameEventNPCFlags[event_id])
             {
                 // get the creature data from the low guid to get the entry, to be able to find out the whole guid
-                CreatureData data = Global.ObjectMgr.GetCreatureData(pair.Item1);
+                CreatureData data = Global.ObjectMgr.GetCreatureData(pair.guid);
                 if (data != null)
-                    creaturesByMap.Add(data.mapid, pair.Item1);
+                    creaturesByMap.Add(data.mapid, pair.guid);
             }
 
             foreach (var key in creaturesByMap.Keys)
@@ -1607,7 +1607,7 @@ namespace Game
         GameEventData[] mGameEvent;
         uint[] mGameEventBattlegroundHolidays;
         Dictionary<uint, GameEventQuestToEventConditionNum> mQuestToEventConditions = new Dictionary<uint, GameEventQuestToEventConditionNum>();
-        List<Tuple<ulong, ulong>>[] mGameEventNPCFlags;
+        List<(ulong guid, ulong npcflag)>[] mGameEventNPCFlags;
         List<ushort> m_ActiveEvents = new List<ushort>();
         Dictionary<uint, ushort> _questToEventLinks = new Dictionary<uint, ushort>();
         bool isSystemInit;

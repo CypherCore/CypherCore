@@ -24,8 +24,7 @@ namespace Framework.Constants
         public const int MaxTalentTiers = 7;
         public const int MaxTalentColumns = 3;
         public const int MaxTalentRank = 5;
-        public const int MaxPvpTalentTiers = 6;
-        public const int MaxPvpTalentColumns = 3;
+        public const int MaxPvpTalentSlots = 4;
         public const int MinSpecializationLevel = 10;
         public const int MaxSpecializations = 4;
         public const int MaxMasterySpells = 2;
@@ -46,7 +45,7 @@ namespace Framework.Constants
         public const uint infinityCooldownDelayCheck = Time.Month / 2;
         public const int MaxPlayerSummonDelay = 2 * Time.Minute;
 
-        public const int TaxiMaskSize = 258;
+        public const int TaxiMaskSize = 286;
 
         // corpse reclaim times
         public const int DeathExpireStep = (5 * Time.Minute);
@@ -59,17 +58,13 @@ namespace Framework.Constants
         public const int MaxRunes = 7;
         public const int MaxRechargingRunes = 3;
 
-        public static uint[] DefaultTalentRowLevels = { 15, 30, 45, 60, 75, 90, 100 };
-        public static uint[] DKTalentRowLevels = { 57, 58, 59, 60, 75, 90, 100 };
-        //public static uint[] DHTalentRowLevels = { 99, 100, 102, 104, 106, 108, 110 };
-
         public const int CustomDisplaySize = 3;
 
         public const int ArtifactsAllWeaponsGeneralWeaponEquippedPassive = 197886;
 
         public const int MaxArtifactTier = 1;
 
-        public const byte MaxHonorLevel = 50;
+        public const int MaxHonorLevel = 500;
         public const byte LevelMinHonor = 110;
         public const uint SpellPvpRulesEnabled = 134735;
     }
@@ -418,7 +413,7 @@ namespace Framework.Constants
         GM = 0x08,
         Ghost = 0x10,
         Resting = 0x20,
-        Unk6 = 0x40,
+        VoiceChat = 0x40,
         Unk7 = 0x80,
         ContestedPVP = 0x100,
         InPVP = 0x200,
@@ -449,7 +444,8 @@ namespace Framework.Constants
     public enum PlayerFlagsEx
     {
         ReagentBankUnlocked = 0x01,
-        MercenaryMode = 0x02
+        MercenaryMode = 0x02,
+        ArtifactForgeCheat = 0x04
     }
 
     public enum CharacterFlags : uint
@@ -724,9 +720,9 @@ namespace Framework.Constants
 
     public enum AttackSwingErr
     {
-        CantAttack = 0,
+        NotInRange = 0,
         BadFacing = 1,
-        NotInRange = 2,
+        CantAttack = 2,
         DeadTarget = 3
     }
 

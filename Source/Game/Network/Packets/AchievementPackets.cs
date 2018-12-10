@@ -124,9 +124,9 @@ namespace Game.Network.Packets
         public ObjectGuid Sender;
     }
 
-    public class ServerFirstAchievement : ServerPacket
+    public class BroadcastAchievement  : ServerPacket
     {
-        public ServerFirstAchievement() : base(ServerOpcodes.ServerFirstAchievement) { }
+        public BroadcastAchievement() : base(ServerOpcodes.BroadcastAchievement) { }
 
         public override void Write()
         {

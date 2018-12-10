@@ -19,6 +19,7 @@ using Framework.Constants;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
+using Framework.Dynamic;
 
 namespace Game.Network.Packets
 {
@@ -41,17 +42,19 @@ namespace Game.Network.Packets
         public ulong EventID;
     }
 
-    class CalendarGuildFilter : ClientPacket
+    class CalendarCommunityFilter : ClientPacket
     {
-        public CalendarGuildFilter(WorldPacket packet) : base(packet) { }
+        public CalendarCommunityFilter(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
+            ClubId = _worldPacket.ReadUInt64();
             MinLevel = _worldPacket.ReadUInt8();
             MaxLevel = _worldPacket.ReadUInt8();
             MaxRankOrder = _worldPacket.ReadUInt8();
         }
 
+        public ulong ClubId;
         public byte MinLevel = 1;
         public byte MaxLevel = 100;
         public byte MaxRankOrder;
@@ -77,18 +80,7 @@ namespace Game.Network.Packets
 
         public override void Read()
         {
-            EventInfo.EventID = _worldPacket.ReadUInt64();
-            EventInfo.ModeratorID = _worldPacket.ReadUInt64();
-            EventInfo.EventType = _worldPacket.ReadUInt8();
-            EventInfo.TextureID = _worldPacket.ReadUInt32();
-            EventInfo.Time = _worldPacket.ReadPackedTime();
-            EventInfo.Flags = _worldPacket.ReadUInt32();
-
-            byte titleLen = _worldPacket.ReadBits<byte>(8);
-            ushort descLen = _worldPacket.ReadBits<ushort>(11);
-
-            EventInfo.Title = _worldPacket.ReadString(titleLen);
-            EventInfo.Description = _worldPacket.ReadString(descLen);
+            EventInfo.Read(_worldPacket);
             MaxSize = _worldPacket.ReadUInt32();
         }
 
@@ -104,11 +96,13 @@ namespace Game.Network.Packets
         {
             EventID = _worldPacket.ReadUInt64();
             ModeratorID = _worldPacket.ReadUInt64();
+            ClubID = _worldPacket.ReadUInt64();
             Flags = _worldPacket.ReadUInt32();
         }
 
         public ulong ModeratorID;
         public ulong EventID;
+        public ulong ClubID;
         public uint Flags;
     }
 
@@ -120,11 +114,13 @@ namespace Game.Network.Packets
         {
             EventID = _worldPacket.ReadUInt64();
             ModeratorID = _worldPacket.ReadUInt64();
+            EventClubID = _worldPacket.ReadUInt64();
             Date = _worldPacket.ReadPackedTime();
         }
 
         public ulong ModeratorID;
         public ulong EventID;
+        public ulong EventClubID;
         public long Date;
     }
 
@@ -272,6 +268,7 @@ namespace Game.Network.Packets
         {
             EventID = _worldPacket.ReadUInt64();
             ModeratorID = _worldPacket.ReadUInt64();
+            ClubID = _worldPacket.ReadUInt64();
 
             ushort nameLen = _worldPacket.ReadBits<ushort>(9);
             Creating = _worldPacket.HasBit();
@@ -284,6 +281,7 @@ namespace Game.Network.Packets
         public bool IsSignUp;
         public bool Creating = true;
         public ulong EventID;
+        public ulong ClubID;
         public string Name;
     }
 
@@ -477,11 +475,13 @@ namespace Game.Network.Packets
         public override void Read()
         {
             EventID = _worldPacket.ReadUInt64();
+            ClubID = _worldPacket.ReadUInt64();
             Tentative = _worldPacket.HasBit();
         }
 
         public bool Tentative;
         public ulong EventID;
+        public ulong ClubID;
     }
 
     class CalendarRemoveInvite : ClientPacket
@@ -740,28 +740,40 @@ namespace Game.Network.Packets
             Guid = data.ReadPackedGuid();
             Status = data.ReadUInt8();
             Moderator = data.ReadUInt8();
+
+            bool hasUnused801_1 = data.HasBit();
+            bool hasUnused801_2 = data.HasBit();
+            bool hasUnused801_3 = data.HasBit();
+
+            if (hasUnused801_1)
+                Unused801_1.Set(data.ReadPackedGuid());
+            if (hasUnused801_2)
+                Unused801_2.Set(data.ReadUInt64());
+            if (hasUnused801_3)
+                Unused801_3.Set(data.ReadUInt64());
         }
 
         public ObjectGuid Guid;
         public byte Status;
         public byte Moderator;
+        public Optional<ObjectGuid> Unused801_1;
+        public Optional<ulong> Unused801_2;
+        public Optional<ulong> Unused801_3;
     }
 
     class CalendarAddEventInfo
     {
         public void Read(WorldPacket data)
         {
-            byte titleLength = data.ReadBits<byte>(8);
-            ushort descriptionLength = data.ReadBits<ushort>(11);
-
+            ClubId = data.ReadUInt64();
             EventType = data.ReadUInt8();
             TextureID = data.ReadInt32();
             Time = data.ReadPackedTime();
             Flags = data.ReadUInt32();
             var InviteCount = data.ReadUInt32();
 
-            Title = data.ReadString(titleLength);
-            Description = data.ReadString(descriptionLength);
+            byte titleLength = data.ReadBits<byte>(8);
+            ushort descriptionLength = data.ReadBits<ushort>(11);
 
             for (var i = 0; i < InviteCount; ++i)
             {
@@ -769,8 +781,12 @@ namespace Game.Network.Packets
                 invite.Read(data);
                 Invites[i] = invite;
             }
+
+            Title = data.ReadString(titleLength);
+            Description = data.ReadString(descriptionLength);
         }
 
+        public ulong ClubId;
         public string Title;
         public string Description;
         public byte EventType;
@@ -782,6 +798,24 @@ namespace Game.Network.Packets
 
     struct CalendarUpdateEventInfo
     {
+        public void Read(WorldPacket data)
+        {
+            ClubID = data.ReadUInt64();
+            EventID = data.ReadUInt64();
+            ModeratorID = data.ReadUInt64();
+            EventType = data.ReadUInt8();
+            TextureID = data.ReadUInt32();
+            Time = data.ReadPackedTime();
+            Flags = data.ReadUInt32();
+
+            byte titleLen = data.ReadBits<byte>(8);
+            ushort descLen = data.ReadBits<ushort>(11);
+
+            Title = data.ReadString(titleLen);
+            Description = data.ReadString(descLen);
+        }
+
+        public ulong ClubID;
         public ulong EventID;
         public ulong ModeratorID;
         public string Title;
@@ -836,7 +870,7 @@ namespace Game.Network.Packets
             data.WritePackedTime(Date);
             data.WriteUInt32(Flags);
             data.WriteInt32(TextureID);
-            data.WritePackedGuid(EventGuildID);
+            data.WriteUInt64(EventClubID);
             data.WritePackedGuid(OwnerGuid);
 
             data.WriteBits(EventName.GetByteCount(), 8);
@@ -850,7 +884,7 @@ namespace Game.Network.Packets
         public long Date;
         public CalendarFlags Flags;
         public int TextureID;
-        public ObjectGuid EventGuildID;
+        public ulong EventClubID;
         public ObjectGuid OwnerGuid;
     }
 

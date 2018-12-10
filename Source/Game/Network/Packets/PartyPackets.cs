@@ -53,8 +53,8 @@ namespace Game.Network.Packets
 
         public override void Read()
         {
-            PartyIndex = _worldPacket.ReadInt8();
-            ProposedRoles = _worldPacket.ReadInt32();
+            PartyIndex = _worldPacket.ReadUInt8();
+            ProposedRoles = _worldPacket.ReadUInt32();
             TargetGUID = _worldPacket.ReadPackedGuid();
 
             uint targetNameLen = _worldPacket.ReadBits<uint>(9);
@@ -64,8 +64,8 @@ namespace Game.Network.Packets
             TargetRealm = _worldPacket.ReadString(targetRealmLen);
         }
 
-        public sbyte PartyIndex;
-        public int ProposedRoles;
+        public byte PartyIndex;
+        public uint ProposedRoles;
         public string TargetName;
         public string TargetRealm;
         public ObjectGuid TargetGUID;
@@ -75,7 +75,7 @@ namespace Game.Network.Packets
     {
         public PartyInvite() : base(ServerOpcodes.PartyInvite) { }
 
-        public void Initialize(Player inviter, int proposedRoles, bool canAccept)
+        public void Initialize(Player inviter, uint proposedRoles, bool canAccept)
         {
             CanAccept = canAccept;
 
@@ -141,7 +141,7 @@ namespace Game.Network.Packets
         public string InviterRealmNameNormalized;
 
         // Lfg
-        public int ProposedRoles;
+        public uint ProposedRoles;
         public int LfgCompletedMask;
         public List<int> LfgSlots = new List<int>();
     }
@@ -152,18 +152,18 @@ namespace Game.Network.Packets
 
         public override void Read()
         {
-            PartyIndex = _worldPacket.ReadInt8();
+            PartyIndex = _worldPacket.ReadUInt8();
 
             Accept = _worldPacket.HasBit();
 
             bool hasRolesDesired = _worldPacket.HasBit();
             if (hasRolesDesired)
-                RolesDesired.Set(_worldPacket.ReadInt32());
+                RolesDesired.Set(_worldPacket.ReadUInt32());
         }
 
-        public sbyte PartyIndex;
+        public byte PartyIndex;
         public bool Accept;
-        public Optional<int> RolesDesired;
+        public Optional<uint> RolesDesired;
     }
 
     class PartyUninvite : ClientPacket
@@ -172,14 +172,14 @@ namespace Game.Network.Packets
 
         public override void Read()
         {
-            PartyIndex = _worldPacket.ReadInt8();
+            PartyIndex = _worldPacket.ReadUInt8();
             TargetGUID = _worldPacket.ReadPackedGuid();
 
             byte reasonLen = _worldPacket.ReadBits<byte>(8);
             Reason = _worldPacket.ReadString(reasonLen);
         }
 
-        public sbyte PartyIndex;
+        public byte PartyIndex;
         public ObjectGuid TargetGUID;
         public string Reason;
     }
@@ -207,11 +207,11 @@ namespace Game.Network.Packets
 
         public override void Read()
         {
-            PartyIndex = _worldPacket.ReadInt8();
+            PartyIndex = _worldPacket.ReadUInt8();
             TargetGUID = _worldPacket.ReadPackedGuid();
         }
 
-        public sbyte PartyIndex;
+        public byte PartyIndex;
         public ObjectGuid TargetGUID;
     }
 
@@ -571,13 +571,13 @@ namespace Game.Network.Packets
 
         public override void Read()
         {
-            PartyIndex = _worldPacket.ReadInt8();
+            PartyIndex = _worldPacket.ReadUInt8();
             Target = _worldPacket.ReadPackedGuid();
             Apply = _worldPacket.HasBit();
         }
 
         public ObjectGuid Target;
-        public sbyte PartyIndex;
+        public byte PartyIndex;
         public bool Apply;
     }
 
@@ -635,11 +635,11 @@ namespace Game.Network.Packets
 
         public override void Read()
         {
-            PartyIndex = _worldPacket.ReadInt8();
+            PartyIndex = _worldPacket.ReadUInt8();
             IsReady = _worldPacket.HasBit();
         }
 
-        public sbyte PartyIndex;
+        public byte PartyIndex;
         public bool IsReady;
     }
 
@@ -790,11 +790,11 @@ namespace Game.Network.Packets
 
         public override void Read()
         {
-            PartyIndex = _worldPacket.ReadInt8();
+            PartyIndex = _worldPacket.ReadUInt8();
             EveryoneIsAssistant = _worldPacket.HasBit();
         }
 
-        public sbyte PartyIndex;
+        public byte PartyIndex;
         public bool EveryoneIsAssistant;
     }
 
@@ -1032,7 +1032,9 @@ namespace Game.Network.Packets
         public void Write(WorldPacket data)
         {
             data.WriteBits(Name.GetByteCount(), 6);
+            data.WriteBits(VoiceStateID.GetByteCount(), 6);
             data.WriteBit(FromSocialQueue);
+            data.WriteBit(VoiceChatSilenced);
             data.WritePackedGuid(GUID);
             data.WriteUInt8(Status);
             data.WriteUInt8(Subgroup);
@@ -1040,17 +1042,19 @@ namespace Game.Network.Packets
             data.WriteUInt8(RolesAssigned);
             data.WriteUInt8(Class);
             data.WriteString(Name);
+            data.WriteString(VoiceStateID);
         }
 
         public ObjectGuid GUID;
         public string Name;
+        public string VoiceStateID;   // same as bgs.protocol.club.v1.MemberVoiceState.id
         public byte Class;
-
         public GroupMemberOnlineStatus Status;
         public byte Subgroup;
         public byte Flags;
         public byte RolesAssigned;
         public bool FromSocialQueue;
+        public bool VoiceChatSilenced;
     }
 
     struct PartyLFGInfo

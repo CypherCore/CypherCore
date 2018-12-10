@@ -1235,9 +1235,10 @@ namespace Game.BattleGrounds
                 {
                     playerData.IsInWorld = true;
                     playerData.PrimaryTalentTree = (int)player.GetUInt32Value(PlayerFields.CurrentSpecId);
-                    playerData.PrimaryTalentTreeNameIndex = 0;
+                    playerData.Sex = (int)player.GetGender();
                     playerData.PlayerRace = player.GetRace();
-                    playerData.Prestige = player.GetPrestigeLevel();
+                    playerData.PlayerClass = (int)player.GetClass();
+                    playerData.HonorLevel = (int)player.GetHonorLevel();
                 }
 
                 pvpLogData.Players.Add(playerData);

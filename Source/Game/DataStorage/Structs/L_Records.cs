@@ -25,37 +25,37 @@ namespace Game.DataStorage
         public uint Id;
         public LocalizedString Name;
         public string Description;
-        public LfgFlags Flags;
-        public float MinGear;
+        public byte MinLevel;
         public ushort MaxLevel;
-        public ushort TargetLevelMax;
+        public LfgType TypeID;
+        public byte Subtype;
+        public sbyte Faction;
+        public int IconTextureFileID;
+        public int RewardsBgTextureFileID;
+        public int PopupBgTextureFileID;
+        public byte ExpansionLevel;
         public short MapID;
+        public Difficulty DifficultyID;
+        public float MinGear;
+        public byte GroupID;
+        public byte OrderIndex;
+        public uint RequiredPlayerConditionId;
+        public byte TargetLevel;
+        public byte TargetLevelMin;
+        public ushort TargetLevelMax;
         public ushort RandomID;
         public ushort ScenarioID;
         public ushort FinalEncounterID;
-        public ushort BonusReputationAmount;
-        public ushort MentorItemLevel;
-        public ushort RequiredPlayerConditionId;
-        public byte MinLevel;
-        public byte TargetLevel;
-        public byte TargetLevelMin;
-        public Difficulty DifficultyID;
-        public LfgType TypeID;
-        public byte Faction;
-        public byte ExpansionLevel;
-        public byte OrderIndex;
-        public byte GroupID;
         public byte CountTank;
         public byte CountHealer;
         public byte CountDamage;
         public byte MinCountTank;
         public byte MinCountHealer;
         public byte MinCountDamage;
-        public byte Subtype;
+        public ushort BonusReputationAmount;
+        public ushort MentorItemLevel;
         public byte MentorCharLevel;
-        public int IconTextureFileID;
-        public int RewardsBgTextureFileID;
-        public int PopupBgTextureFileID;
+        public LfgFlags[] Flags = new LfgFlags[2];
 
         // Helpers
         public uint Entry() { return (uint)(Id + ((int)TypeID << 24)); }
@@ -67,7 +67,7 @@ namespace Game.DataStorage
         public Vector3 GameCoords;
         public float GameFalloffStart;
         public float GameFalloffEnd;
-        public ushort ContinentID;
+        public short ContinentID;
         public ushort[] LightParamsID = new ushort[8];
     }
 
@@ -76,29 +76,31 @@ namespace Game.DataStorage
         public uint Id;
         public string Name;
         public string[] Texture = new string[6];
+        public ushort Flags;
+        public byte SoundBank;                                                // used to be "type", maybe needs fixing (works well for now)
+        public uint SoundID;
         public uint SpellID;
         public float MaxDarkenDepth;
         public float FogDarkenIntensity;
         public float AmbDarkenIntensity;
         public float DirDarkenIntensity;
-        public float ParticleScale;
-        public uint[] Color = new uint[2];
-        public float[] Float = new float[18];
-        public uint[] Int = new uint[4];
-        public ushort Flags;
         public ushort LightID;
-        public byte SoundBank;
+        public float ParticleScale;
         public byte ParticleMovement;
         public byte ParticleTexSlots;
         public byte MaterialID;
+        public int MinimapStaticCol;
         public byte[] FrameCountTexture = new byte[6];
-        public ushort SoundID;
+        public int[] Color = new int[2];
+        public float[] Float = new float[18];
+        public uint[] Int = new uint[4];
+        public float[] Coefficient = new float[4];
     }
 
     public sealed class LockRecord
     {
         public uint Id;
-        public uint[] Index = new uint[SharedConst.MaxLockCase];
+        public int[] Index = new int[SharedConst.MaxLockCase];
         public ushort[] Skill = new ushort[SharedConst.MaxLockCase];
         public byte[] LockType = new byte[SharedConst.MaxLockCase];
         public byte[] Action = new byte[SharedConst.MaxLockCase];
