@@ -79,6 +79,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteBit(ClubsCharacterClubTypeAllowed);
             _worldPacket.WriteBit(VoiceChatDisabledByParentalControl);
             _worldPacket.WriteBit(VoiceChatMutedByParentalControl);
+            _worldPacket.FlushBits();
 
             {
                 _worldPacket.WriteBit(QuickJoinConfig.ToastsDisabled);

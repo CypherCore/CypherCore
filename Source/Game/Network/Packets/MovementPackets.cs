@@ -204,12 +204,13 @@ namespace Game.Network.Packets
                 data.WriteFloat(1.0f);                                  // DurationModifier
                 data.WriteFloat(1.0f);                                  // NextDurationModifier
                 data.WriteBits((byte)moveSpline.facing.type, 2);        // Face
-                bool HasJumpGravity = data.WriteBit(moveSpline.splineflags.hasFlag(SplineFlag.Parabolic | SplineFlag.Animation));                                   // HasJumpGravity
-                bool HasSpecialTime = data.WriteBit(moveSpline.splineflags.hasFlag(SplineFlag.Parabolic) && moveSpline.effect_start_time < moveSpline.Duration());  // HasSpecialTime
+                bool hasFadeObjectTime = data.WriteBit(moveSpline.splineflags.hasFlag(SplineFlag.FadeObject) && moveSpline.effect_start_time < moveSpline.Duration());
                 data.WriteBits(moveSpline.getPath().Length, 16);
                 data.WriteBits((byte)moveSpline.spline.m_mode, 2);      // Mode
                 data.WriteBit(0);                                       // HasSplineFilter
                 data.WriteBit(moveSpline.spell_effect_extra.HasValue);  // HasSpellEffectExtraData
+                data.WriteBit(moveSpline.splineflags.hasFlag(SplineFlag.Parabolic));        // HasJumpExtraData
+                data.FlushBits();
 
                 //if (HasSplineFilterKey)
                 //{
@@ -237,11 +238,8 @@ namespace Game.Network.Packets
                         break;
                 }
 
-                if (HasJumpGravity)
-                    data.WriteFloat(moveSpline.vertical_acceleration);  // JumpGravity
-
-                if (HasSpecialTime)
-                    data.WriteUInt32(moveSpline.effect_start_time);     // SpecialTime
+                if (hasFadeObjectTime)
+                    data.WriteUInt32(moveSpline.effect_start_time);     // FadeObjectTime
 
                 foreach (var vec in moveSpline.getPath())
                     data.WriteVector3(vec);
@@ -252,6 +250,13 @@ namespace Game.Network.Packets
                     data.WriteUInt32(moveSpline.spell_effect_extra.Value.SpellVisualId);
                     data.WriteUInt32(moveSpline.spell_effect_extra.Value.ProgressCurveId);
                     data.WriteUInt32(moveSpline.spell_effect_extra.Value.ParabolicCurveId);
+                }
+
+                if (moveSpline.splineflags.hasFlag(SplineFlag.Parabolic))
+                {
+                    data.WriteFloat(moveSpline.vertical_acceleration);
+                    data.WriteUInt32(moveSpline.effect_start_time);
+                    data.WriteUInt32(0);                                                  // Duration (override)
                 }
             }
         }

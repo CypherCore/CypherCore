@@ -36,7 +36,7 @@ namespace Framework.Constants
 
         public const int MaxItemSubclassTotal = 21;
 
-        public const int MaxItemSetItems = 10;
+        public const int MaxItemSetItems = 17;
         public const int MaxItemSetSpells = 8;
 
         public static uint[] ItemQualityColors =

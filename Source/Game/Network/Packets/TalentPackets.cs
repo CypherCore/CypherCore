@@ -71,9 +71,8 @@ namespace Game.Network.Packets
         public override void Read()
         {
             uint count = _worldPacket.ReadBits<uint>(6);
-
-            for (uint i = 0; i < count; ++i)
-                Talents.Add(_worldPacket.ReadUInt16());
+            for (int i = 0; i < count; ++i)
+                Talents[i] = _worldPacket.ReadUInt16();
         }
 
         public Array<ushort> Talents = new Array<ushort>(PlayerConst.MaxTalentTiers);

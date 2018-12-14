@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Framework.Database;
+using Framework.Dynamic;
 using Framework.GameMath;
 using Framework.IO;
 using System;
@@ -37,146 +38,130 @@ namespace Game.DataStorage
     [Serializable]
     public class DB6Storage<T> : Dictionary<uint, T>, IDB2Storage where T : new()
     {
-        public void LoadData(int indexField, DB6FieldInfo[] helpers, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale)
+        public void LoadData(int indexField, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale)
         {
             SQLResult result = DB.Hotfix.Query(DB.Hotfix.GetPreparedStatement(preparedStatement));
             if (!result.IsEmpty())
             {
                 do
                 {
-                    var idValue = result.Read<uint>(indexField == -1 ? 0 : indexField);
+                    var id = result.Read<uint>(indexField == -1 ? 0 : indexField);
 
                     var obj = new T();
-                    int index = 0;
-                    for (var fieldIndex = 0; fieldIndex < helpers.Length; fieldIndex++)
+
+                    int dbIndex = 0;
+                    foreach (var f in typeof(T).GetFields())
                     {
-                        var helper = helpers[fieldIndex];
-                        if (helper.IsArray)
+                        Type type = f.FieldType;
+
+                        if (type.IsArray)
                         {
-                            Array array = (Array)helper.Getter(obj);
-                            for (var i = 0; i < array.Length; ++i)
+                            Type arrayElementType = type.GetElementType();
+                            if (arrayElementType.IsEnum)
+                                arrayElementType = arrayElementType.GetEnumUnderlyingType();
+
+                            Array array = (Array)f.GetValue(obj);
+                            switch (Type.GetTypeCode(arrayElementType))
                             {
-                                switch (Type.GetTypeCode(helper.FieldType))
-                                {
-                                    case TypeCode.SByte:
-                                        helper.SetValue(array, result.Read<sbyte>(index++), i);
-                                        break;
-                                    case TypeCode.Byte:
-                                        helper.SetValue(array, result.Read<byte>(index++), i);
-                                        break;
-                                    case TypeCode.Int16:
-                                        helper.SetValue(array, result.Read<short>(index++), i);
-                                        break;
-                                    case TypeCode.UInt16:
-                                        helper.SetValue(array, result.Read<ushort>(index++), i);
-                                        break;
-                                    case TypeCode.Int32:
-                                        helper.SetValue(array, result.Read<int>(index++), i);
-                                        break;
-                                    case TypeCode.UInt32:
-                                        helper.SetValue(array, result.Read<uint>(index++), i);
-                                        break;
-                                    case TypeCode.Single:
-                                        helper.SetValue(array, result.Read<float>(index++), i);
-                                        break;
-                                    case TypeCode.String:
-                                        helper.SetValue(array, result.Read<string>(index++), i);
-                                        break;
-                                    case TypeCode.Object:
-                                        switch (helper.FieldType.Name)
-                                        {
-                                            case "Vector2":
-                                                var vector2 = new Vector2();
-                                                vector2.X = result.Read<float>(index++);
-                                                vector2.Y = result.Read<float>(index++);
-                                                helper.SetValue(array, vector2, i);
-                                                break;
-                                            case "Vector3":
-                                                var vector3 = new Vector3();
-                                                vector3.X = result.Read<float>(index++);
-                                                vector3.Y = result.Read<float>(index++);
-                                                vector3.Z = result.Read<float>(index++);
-                                                helper.SetValue(array, vector3, i);
-                                                break;
-                                            case "LocalizedString":
-                                                LocalizedString locString = new LocalizedString();
-                                                locString[Global.WorldMgr.GetDefaultDbcLocale()] = result.Read<string>(index++);
-                                                helper.SetValue(array, locString, i);
-                                                break;
-                                            default:
-                                                Log.outError(LogFilter.ServerLoading, "Wrong Array Type: {0}", helper.FieldType.Name);
-                                                break;
-                                        }
-                                        break;
-                                    default:
-                                        Log.outError(LogFilter.ServerLoading, "Wrong Array Type: {0}", helper.FieldType.Name);
-                                        break;
-                                }
+                                case TypeCode.SByte:
+                                    f.SetValue(obj, ReadArray<sbyte>(result, dbIndex, array.Length));
+                                    break;
+                                case TypeCode.Byte:
+                                    f.SetValue(obj, ReadArray<byte>(result, dbIndex, array.Length));
+                                    break;
+                                case TypeCode.Int16:
+                                    f.SetValue(obj, ReadArray<short>(result, dbIndex, array.Length));
+                                    break;
+                                case TypeCode.UInt16:
+                                    f.SetValue(obj, ReadArray<ushort>(result, dbIndex, array.Length));
+                                    break;
+                                case TypeCode.Int32:
+                                    f.SetValue(obj, ReadArray<int>(result, dbIndex, array.Length));
+                                    break;
+                                case TypeCode.UInt32:
+                                    f.SetValue(obj, ReadArray<uint>(result, dbIndex, array.Length));
+                                    break;
+                                case TypeCode.Single:
+                                    f.SetValue(obj, ReadArray<float>(result, dbIndex, array.Length));
+                                    break;
+                                case TypeCode.String:
+                                    f.SetValue(obj, ReadArray<string>(result, dbIndex, array.Length));
+                                    break;
+                                case TypeCode.Object:
+                                    if (arrayElementType == typeof(Vector3))
+                                        f.SetValue(obj, new Vector3(ReadArray<float>(result, dbIndex, 3)));
+                                    break;
+                                default:
+                                    Log.outError(LogFilter.ServerLoading, "Wrong Array Type: {0}", arrayElementType.Name);
+                                    break;
                             }
+
+                            dbIndex += array.Length;
                         }
                         else
                         {
-                            switch (Type.GetTypeCode(helper.FieldType))
+                            if (type.IsEnum)
+                                type = type.GetEnumUnderlyingType();
+
+                            switch (Type.GetTypeCode(type))
                             {
                                 case TypeCode.SByte:
-                                    helper.SetValue(obj, result.Read<sbyte>(index++));
+                                    f.SetValue(obj, result.Read<sbyte>(dbIndex++));
                                     break;
                                 case TypeCode.Byte:
-                                    helper.SetValue(obj, result.Read<byte>(index++));
+                                    f.SetValue(obj, result.Read<byte>(dbIndex++));
                                     break;
                                 case TypeCode.Int16:
-                                    helper.SetValue(obj, result.Read<short>(index++));
+                                    f.SetValue(obj, result.Read<short>(dbIndex++));
                                     break;
                                 case TypeCode.UInt16:
-                                    helper.SetValue(obj, result.Read<ushort>(index++));
+                                    f.SetValue(obj, result.Read<ushort>(dbIndex++));
                                     break;
                                 case TypeCode.Int32:
-                                    helper.SetValue(obj, result.Read<int>(index++));
+                                    f.SetValue(obj, result.Read<int>(dbIndex++));
                                     break;
                                 case TypeCode.UInt32:
-                                    helper.SetValue(obj, result.Read<uint>(index++));
+                                    f.SetValue(obj, result.Read<uint>(dbIndex++));
                                     break;
                                 case TypeCode.Single:
-                                    helper.SetValue(obj, result.Read<float>(index++));
+                                    f.SetValue(obj, result.Read<float>(dbIndex++));
                                     break;
                                 case TypeCode.String:
-                                    string str = result.Read<string>(index++);
-                                    helper.SetValue(obj, str);
+                                    string str = result.Read<string>(dbIndex++);
+                                    f.SetValue(obj, str);
                                     break;
                                 case TypeCode.Object:
-                                    switch (helper.FieldType.Name)
+                                    if (type == typeof(LocalizedString))
                                     {
-                                        case "Vector2":
-                                            var vector2 = new Vector2();
-                                            vector2.X = result.Read<float>(index++);
-                                            vector2.Y = result.Read<float>(index++);
-                                            helper.SetValue(obj, vector2);
-                                            break;
-                                        case "Vector3":
-                                            var vector3 = new Vector3();
-                                            vector3.X = result.Read<float>(index++);
-                                            vector3.Y = result.Read<float>(index++);
-                                            vector3.Z = result.Read<float>(index++);
-                                            helper.SetValue(obj, vector3);
-                                            break;
-                                        case "LocalizedString":
-                                            LocalizedString locString = new LocalizedString();
-                                            locString[Global.WorldMgr.GetDefaultDbcLocale()] = result.Read<string>(index++);
-                                            helper.SetValue(obj, locString);
-                                            break;
-                                        default:
-                                            Log.outError(LogFilter.ServerLoading, "Wrong Array Type: {0}", helper.FieldType.Name);
-                                            break;
+                                        LocalizedString locString = new LocalizedString();
+                                        locString[Global.WorldMgr.GetDefaultDbcLocale()] = result.Read<string>(dbIndex++);
+
+                                        f.SetValue(obj, locString);
+                                    }
+                                    else if (type == typeof(Vector2))
+                                    {
+                                        f.SetValue(obj, new Vector2(ReadArray<float>(result, dbIndex, 2)));
+                                        dbIndex += 2;
+                                    }
+                                    else if (type == typeof(Vector3))
+                                    {
+                                        f.SetValue(obj, new Vector3(ReadArray<float>(result, dbIndex, 3)));
+                                        dbIndex += 3;
+                                    }
+                                    else if (type == typeof(FlagArray128))
+                                    {
+                                        f.SetValue(obj, new FlagArray128(ReadArray<uint>(result, dbIndex, 4)));
+                                        dbIndex += 4;
                                     }
                                     break;
                                 default:
-                                    Log.outError(LogFilter.ServerLoading, "Wrong Array Type: {0}", helper.FieldType.Name);
+                                    Log.outError(LogFilter.ServerLoading, "Wrong Type: {0}", type.Name);
                                     break;
                             }
                         }
                     }
 
-                    base[idValue] = obj;
+                    base[id] = obj;
                 }
                 while (result.NextRow());
             }
@@ -202,17 +187,25 @@ namespace Game.DataStorage
                     if (obj == null)
                         continue;
 
-                    for (var i = 0; i < helpers.Length; i++)
+                    foreach (var f in typeof(T).GetFields())
                     {
-                        var fieldInfo = helpers[i];
-                        if (fieldInfo.FieldType != typeof(LocalizedString))
+                        if (f.FieldType != typeof(LocalizedString))
                             continue;
 
-                        LocalizedString locString = (LocalizedString)fieldInfo.Getter(obj);
+                        LocalizedString locString = (LocalizedString)f.GetValue(obj);
                         locString[locale] = localeResult.Read<string>(index++);
                     }
                 } while (localeResult.NextRow());
             }
+        }
+
+        TValue[] ReadArray<TValue>(SQLResult result, int dbIndex, int arrayLength)
+        {
+            TValue[] values = new TValue[arrayLength];
+            for (int i = 0; i < arrayLength; ++i)
+                values[i] = result.Read<TValue>(dbIndex + i);
+
+            return values;
         }
 
         public bool HasRecord(uint id)

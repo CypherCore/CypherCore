@@ -55,7 +55,7 @@ namespace Game.DataStorage
         public uint Id;
         public byte BattlePetStateID;
         public ushort Value;
-        public byte BattlePetBreedID;
+        public uint BattlePetBreedID;
     }
 
     public sealed class BattlePetSpeciesRecord
@@ -78,7 +78,7 @@ namespace Game.DataStorage
         public uint Id;
         public byte BattlePetStateID;
         public int Value;
-        public ushort BattlePetSpeciesID;
+        public uint BattlePetSpeciesID;
     }
 
     public sealed class BattlemasterListRecord

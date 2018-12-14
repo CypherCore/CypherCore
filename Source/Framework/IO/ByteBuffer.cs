@@ -305,44 +305,6 @@ namespace Framework.IO
             WriteBytes(buffer.GetData());
         }
 
-        public void Replace<T>(int pos, T value)
-        {
-            int retpos = (int)writeStream.BaseStream.Position;
-
-            writeStream.Seek(pos, SeekOrigin.Begin);
-            switch (typeof(T).Name)
-            {
-                case "Byte":
-                    WriteUInt8(Convert.ToByte(value));
-                    break;
-                case "SByte":
-                    WriteInt8(Convert.ToSByte(value));
-                    break;
-                case "Float":
-                    WriteFloat(Convert.ToSingle(value));
-                    break;
-                case "Int16":
-                    WriteInt16(Convert.ToInt16(value));
-                    break;
-                case "UInt16":
-                    WriteUInt16(Convert.ToUInt16(value));
-                    break;
-                case "Int32":
-                    WriteInt32(Convert.ToInt32(value));
-                    break;
-                case "UInt32":
-                    WriteUInt32(Convert.ToUInt32(value));
-                    break;
-                case "Int64":
-                    WriteInt64(Convert.ToInt64(value));
-                    break;
-                case "UInt64":
-                    WriteUInt64(Convert.ToUInt64(value));
-                    break;
-            }
-            writeStream.Seek(retpos, SeekOrigin.Begin);
-        }
-
         public void WriteVector3(Vector3 pos)
         {
             WriteFloat(pos.X);
@@ -400,25 +362,6 @@ namespace Framework.IO
             WriteUInt32(Convert.ToUInt32((now.Year - 2000) << 24 | (now.Month - 1) << 20 | (now.Day - 1) << 14 | (int)now.DayOfWeek << 11 | now.Hour << 6 | now.Minute));
         }
         #endregion
-
-        public int GetPosition()
-        {
-            long pos = 0;
-            if (writeStream != null)
-                pos = writeStream.BaseStream.Position;
-            else if (readStream != null)
-                pos = readStream.BaseStream.Position;
-
-            return (int)pos;
-        }
-
-        public void SetPosition(long pos)
-        {
-            if (writeStream != null)
-                writeStream.BaseStream.Position = pos;
-            else if (readStream != null)
-                readStream.BaseStream.Position = pos;
-        }
 
         public void FlushBits()
         {

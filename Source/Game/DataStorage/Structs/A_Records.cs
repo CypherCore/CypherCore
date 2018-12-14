@@ -173,7 +173,7 @@ namespace Game.DataStorage
         public ushort AltHandUICameraID;
         public sbyte ForgeAttachmentOverride;
         public byte Flags;
-        public byte ArtifactID;
+        public uint ArtifactID;
     }
 
     public sealed class ArtifactCategoryRecord
@@ -214,7 +214,7 @@ namespace Game.DataStorage
         public uint SpellID;
         public ushort ItemBonusListID;
         public float AuraPointsOverride;
-        public ushort ArtifactPowerID;
+        public uint ArtifactPowerID;
     }
 
     public sealed class ArtifactQuestXPRecord
@@ -240,7 +240,7 @@ namespace Game.DataStorage
         public byte PowerRank;
         public ushort ItemBonusListID;
         public uint PlayerConditionID;
-        public byte ArtifactID;
+        public uint ArtifactID;
     }
 
     public sealed class AuctionHouseRecord

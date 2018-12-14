@@ -21,6 +21,8 @@ namespace System.Collections.Generic
 {
     public class Array<T> : List<T>
     {
+        int _limit;
+
         public Array(int size) : base(size)
         {
             _limit = size;
@@ -31,8 +33,9 @@ namespace System.Collections.Generic
             _limit = args.Length;
         }
 
-        public Array(int size, T defaultFillValue) : this(size)
+        public Array(int size, T defaultFillValue) : base(size)
         {
+            _limit = size;
             Fill(defaultFillValue);
         }
 
@@ -40,14 +43,6 @@ namespace System.Collections.Generic
         {
             for (var i = 0; i < _limit; ++i)
                 Add(value);
-        }
-
-        public new void Add(T value)
-        {
-            if (base.Count >= _limit)
-                throw new InternalBufferOverflowException("Attempted to read more array elements from packet " + base.Count + 1 + " than allowed " + _limit);
-
-            base.Add(value);
         }
 
         public new T this[int index]
@@ -61,8 +56,8 @@ namespace System.Collections.Generic
                 if (index >= Count)
                 {
                     if (Count >= _limit)
-                        throw new InternalBufferOverflowException("Attempted to read more array elements from packet " + base.Count + 1 + " than allowed " + _limit);
-                    base.Insert(index, value);
+                        throw new InternalBufferOverflowException("Attempted to read more array elements from packet " + Count + 1 + " than allowed " + _limit);
+                    Insert(index, value);
                 }
                 else
                     base[index] = value;
@@ -75,7 +70,5 @@ namespace System.Collections.Generic
         {
             return array.ToArray();
         }
-
-        int _limit;
     }
 }

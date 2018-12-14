@@ -106,7 +106,8 @@ namespace Game.Network.Packets
         public override void Read()
         {
             Token = _worldPacket.ReadUInt32();
-            Secret.AddRange(_worldPacket.ReadBytes((uint)Secret.Capacity));
+            for (var i = 0; i < Secret.GetLimit(); ++i)
+                Secret[i] = _worldPacket.ReadUInt8();
         }
 
         public uint Token;

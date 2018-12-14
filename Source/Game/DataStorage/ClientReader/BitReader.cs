@@ -15,72 +15,58 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Framework.IO;
-using System;
+using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace Game.DataStorage
 {
     public class BitReader
     {
+        private byte[] m_data;
+        private int m_bitPosition;
+        private int m_offset;
+
+        public int Position { get => m_bitPosition; set => m_bitPosition = value; }
+        public int Offset { get => m_offset; set => m_offset = value; }
+        public byte[] Data { get => m_data; set => m_data = value; }
+
         public BitReader(byte[] data)
         {
-            m_array = data;
+            m_data = data;
         }
 
         public BitReader(byte[] data, int offset)
         {
-            m_array = data;
-            m_readOffset = offset;
+            m_data = data;
+            m_offset = offset;
         }
 
-        public uint ReadUInt32(int numBits)
+        public T Read<T>(int numBits) where T : unmanaged
         {
-            uint result = BitConverter.ToUInt32(m_array, m_readOffset + (m_readPos >> 3)) << (32 - numBits - (m_readPos & 7)) >> (32 - numBits);
-            m_readPos += numBits;
+            ulong result = Unsafe.As<byte, ulong>(ref m_data[m_offset + (m_bitPosition >> 3)]) << (64 - numBits - (m_bitPosition & 7)) >> (64 - numBits);
+            m_bitPosition += numBits;
+            return Unsafe.As<ulong, T>(ref result);
+        }
+
+        public T ReadSigned<T>(int numBits) where T : unmanaged
+        {
+            ulong result = Unsafe.As<byte, ulong>(ref m_data[m_offset + (m_bitPosition >> 3)]) << (64 - numBits - (m_bitPosition & 7)) >> (64 - numBits);
+            m_bitPosition += numBits;
+            ulong signedShift = (1UL << (numBits - 1));
+            result = (signedShift ^ result) - signedShift;
+            return Unsafe.As<ulong, T>(ref result);
+        }
+
+        public string ReadCString()
+        {
+            int start = m_bitPosition;
+
+            while (m_data[m_offset + (m_bitPosition >> 3)] != 0)
+                m_bitPosition += 8;
+
+            string result = Encoding.UTF8.GetString(m_data, m_offset + (start >> 3), (m_bitPosition - start) >> 3);
+            m_bitPosition += 8;
             return result;
         }
-
-        public ulong ReadUInt64(int bitWidth, int bitOffset)
-        {
-            int bitsToRead = bitOffset & 7;
-            ulong result = BitConverter.ToUInt64(m_array, m_readOffset + (m_readPos >> 3)) << (64 - bitsToRead - bitWidth) >> (64 - bitWidth);
-            m_readPos += bitWidth;
-            return result;
-        }
-
-        public byte[] ReadValue(int bitWidth, int bitOffset = 0, bool isSigned = false)
-        {
-            ulong result = ReadUInt64(bitWidth, bitOffset);
-            if (isSigned)
-            {
-                ulong mask = 1ul << (bitWidth - 1);
-                result = (result ^ mask) - mask;
-            }
-
-            var ulongBytes = BitConverter.GetBytes(result);
-            byte[] data = new byte[NextPow2((bitWidth + 7) / 8)];
-            Buffer.BlockCopy(ulongBytes, 0, data, 0, data.Length);
-
-            return data;
-        }
-
-        private int NextPow2(int v)
-        {
-            v--;
-            v |= v >> 1;
-            v |= v >> 2;
-            v |= v >> 4;
-            v |= v >> 8;
-            v |= v >> 16;
-            v++;
-            return Math.Max(v, 1);
-        }
-
-        public int Position { get => m_readPos; set => m_readPos = value; }
-        public int Offset { get => m_readOffset; set => m_readOffset = value; }
-
-        private byte[] m_array;
-        private int m_readPos;
-        private int m_readOffset;
     }
 }

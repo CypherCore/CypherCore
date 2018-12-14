@@ -102,7 +102,7 @@ namespace Game.Network.Packets
                 AuctionItemForSale item;
                 item.Guid = _worldPacket.ReadPackedGuid();
                 item.UseCount = _worldPacket.ReadUInt32();
-                Items.Add(item);
+                Items[i] = item;
             }
         }
 
@@ -304,9 +304,9 @@ namespace Game.Network.Packets
                     ClassFilter.SubClassFilter subClassFilter;
                     subClassFilter.ItemSubclass = _worldPacket.ReadInt32();
                     subClassFilter.InvTypeMask = _worldPacket.ReadUInt32();
-                    classFilter.SubClassFilters.Add(subClassFilter);
+                    classFilter.SubClassFilters[x] = subClassFilter;
                 }
-                ClassFilters.Add(classFilter);
+                ClassFilters[i] = classFilter;
             }
 
             _worldPacket.Skip(4); // DataSize = (SortCount * 2)

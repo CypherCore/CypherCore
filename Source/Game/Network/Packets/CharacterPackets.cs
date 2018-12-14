@@ -182,6 +182,7 @@ namespace Game.Network.Packets
             public void Write(WorldPacket data)
             {
                 data.WritePackedGuid(Guid);
+                data.WriteUInt64(GuildClubMemberID);
                 data.WriteUInt8(ListPosition);
                 data.WriteUInt8(RaceId);
                 data.WriteUInt8(ClassId);
@@ -228,6 +229,7 @@ namespace Game.Network.Packets
             }
 
             public ObjectGuid Guid;
+            public ulong GuildClubMemberID; // same as bgs.protocol.club.v1.MemberId.unique_id, guessed basing on SMSG_QUERY_PLAYER_NAME_RESPONSE (that one is known)
             public string Name;
             public byte ListPosition; // Order of the characters in list
             public byte RaceId;
@@ -320,7 +322,7 @@ namespace Game.Network.Packets
             CreateInfo.OutfitId = _worldPacket.ReadUInt8();
 
             for (var i = 0; i < CreateInfo.CustomDisplay.GetLimit(); ++i)
-                CreateInfo.CustomDisplay.Add(_worldPacket.ReadUInt8());
+                CreateInfo.CustomDisplay[i] = _worldPacket.ReadUInt8();
 
             CreateInfo.Name = _worldPacket.ReadString(nameLength);
             if (CreateInfo.TemplateSet.HasValue)
@@ -423,7 +425,7 @@ namespace Game.Network.Packets
             CustomizeInfo.FaceID = _worldPacket.ReadUInt8();
 
             for (var i = 0; i < CustomizeInfo.CustomDisplay.GetLimit(); ++i)
-                CustomizeInfo.CustomDisplay.Add(_worldPacket.ReadUInt8());
+                CustomizeInfo.CustomDisplay[i] = _worldPacket.ReadUInt8();
 
             CustomizeInfo.CharName = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(6));
         }
@@ -456,7 +458,7 @@ namespace Game.Network.Packets
             RaceOrFactionChangeInfo.FaceID = _worldPacket.ReadUInt8();
 
             for (var i = 0; i < RaceOrFactionChangeInfo.CustomDisplay.GetLimit(); ++i)
-                RaceOrFactionChangeInfo.CustomDisplay.Add(_worldPacket.ReadUInt8());
+                RaceOrFactionChangeInfo.CustomDisplay[i] = _worldPacket.ReadUInt8();
 
             RaceOrFactionChangeInfo.Name = _worldPacket.ReadString(nameLength);
         }
@@ -809,7 +811,7 @@ namespace Game.Network.Packets
             NewFace = _worldPacket.ReadUInt32();
 
             for (var i = 0; i < NewCustomDisplay.GetLimit(); ++i)
-                NewCustomDisplay.Add(_worldPacket.ReadUInt32());
+                NewCustomDisplay[i] = _worldPacket.ReadUInt32();
         }
 
         public uint NewHairStyle;

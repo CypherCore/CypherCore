@@ -1564,7 +1564,8 @@ namespace Game.Entities
                 MoveTeleport moveTeleport = new MoveTeleport();
                 moveTeleport.MoverGUID = GetGUID();
                 moveTeleport.Pos = new Position(x, y, z, o);
-                moveTeleport.TransportGUID.Set(GetTransGUID());
+                if (GetTransGUID() != ObjectGuid.Empty)
+                    moveTeleport.TransportGUID.Set(GetTransGUID());
                 moveTeleport.Facing = o;
                 moveTeleport.SequenceIndex = m_movementCounter++;
                 playerMover.SendPacket(moveTeleport);

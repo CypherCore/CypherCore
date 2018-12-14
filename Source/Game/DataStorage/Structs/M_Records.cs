@@ -103,7 +103,7 @@ namespace Game.DataStorage
         public byte MaxPlayers;
         public byte ItemContext;
         public byte Flags;
-        public ushort MapID;
+        public uint MapID;
 
         public uint GetRaidDuration()
         {

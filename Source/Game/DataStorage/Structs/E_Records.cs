@@ -45,7 +45,7 @@ namespace Game.DataStorage
         public byte ClassId;
         public byte SexId;
         public uint SoundId;
-        public ushort EmotesTextId;
+        public uint EmotesTextId;
     }
 
     public sealed class ExpectedStatRecord

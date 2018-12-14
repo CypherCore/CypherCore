@@ -155,8 +155,8 @@ namespace Game.Entities
             {
                 flags.ThisIsYou = true;
                 flags.ActivePlayer = true;
-                tempObjectType = TypeId.Player;
-                tempObjectTypeMask |= TypeMask.Player;
+                tempObjectType = TypeId.ActivePlayer;
+                tempObjectTypeMask |= TypeMask.ActivePlayer;
             }
 
             switch (GetGUID().GetHigh())

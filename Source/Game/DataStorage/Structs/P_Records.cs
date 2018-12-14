@@ -30,7 +30,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public ushort PhaseId;
-        public ushort PhaseGroupID;
+        public uint PhaseGroupID;
     }
 
     public sealed class PlayerConditionRecord
@@ -163,7 +163,7 @@ namespace Game.DataStorage
         public byte RangeIndex;
         public byte MinLevel;
         public byte MaxLevel;
-        public ushort MapID;
+        public uint MapID;
 
         // helpers
         public BattlegroundBracketId GetBracketId()

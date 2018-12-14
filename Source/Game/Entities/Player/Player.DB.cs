@@ -2424,9 +2424,9 @@ namespace Game.Entities
             SetMoney(money);
 
             Array<byte> customDisplay = new Array<byte>(PlayerConst.CustomDisplaySize);
-            customDisplay.Add(result.Read<byte>(14));
-            customDisplay.Add(result.Read<byte>(15));
-            customDisplay.Add(result.Read<byte>(16));
+            customDisplay[0] = result.Read<byte>(14);
+            customDisplay[1] = result.Read<byte>(15);
+            customDisplay[2] = result.Read<byte>(16);
 
             SetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetSkinId, result.Read<byte>(9));
             SetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetFaceId, result.Read<byte>(10));

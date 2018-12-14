@@ -119,7 +119,7 @@ namespace Game.DataStorage
         public ushort ChildItemBonusTreeID;
         public ushort ChildItemBonusListID;
         public ushort ChildItemLevelSelectorID;
-        public ushort ParentItemBonusTreeID;
+        public uint ParentItemBonusTreeID;
     }
 
     public sealed class ItemChildEquipmentRecord
@@ -169,7 +169,7 @@ namespace Game.DataStorage
         public ushort MaxLevel;
         public ushort SkillRequired;
         public sbyte ExpansionID;
-        public byte Class;
+        public uint Class;
     }
 
     public sealed class ItemEffectRecord
@@ -183,7 +183,7 @@ namespace Game.DataStorage
         public ushort SpellCategoryID;
         public int SpellID;
         public ushort ChrSpecializationID;
-        public int ParentItemID;
+        public uint ParentItemID;
     }
 
     public sealed class ItemExtendedCostRecord
@@ -213,7 +213,7 @@ namespace Game.DataStorage
         public uint Id;
         public uint QualityItemBonusListID;
         public sbyte Quality;
-        public short ParentILSQualitySetID;
+        public uint ParentILSQualitySetID;
     }
 
     public sealed class ItemLevelSelectorQualitySetRecord
@@ -306,7 +306,7 @@ namespace Game.DataStorage
         public ushort ChrSpecID;
         public uint SpellID;
         public byte Threshold;
-        public ushort ItemSetID;
+        public uint ItemSetID;
     }
 
     public sealed class ItemSparseRecord

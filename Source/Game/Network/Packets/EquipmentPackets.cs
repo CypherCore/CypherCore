@@ -93,12 +93,12 @@ namespace Game.Network.Packets
 
             for (byte i = 0; i < EquipmentSlot.End; ++i)
             {
-                Set.Pieces.Add(_worldPacket.ReadPackedGuid());
-                Set.Appearances.Add(_worldPacket.ReadInt32());
+                Set.Pieces[i] = _worldPacket.ReadPackedGuid();
+                Set.Appearances[i] = _worldPacket.ReadInt32();
             }
 
-            Set.Enchants.Add(_worldPacket.ReadInt32());
-            Set.Enchants.Add(_worldPacket.ReadInt32());
+            Set.Enchants[0] = _worldPacket.ReadInt32();
+            Set.Enchants[1] = _worldPacket.ReadInt32();
 
             bool hasSpecIndex = _worldPacket.HasBit();
 

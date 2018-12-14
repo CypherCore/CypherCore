@@ -275,6 +275,8 @@ namespace Game.DataStorage
             WorldMapOverlayStorage = DBReader.Read<WorldMapOverlayRecord>("WorldMapOverlay.db2", HotfixStatements.SEL_WORLD_MAP_OVERLAY);
             WorldSafeLocsStorage = DBReader.Read<WorldSafeLocsRecord>("WorldSafeLocs.db2", HotfixStatements.SEL_WORLD_SAFE_LOCS, HotfixStatements.SEL_WORLD_SAFE_LOCS_LOCALE);
 
+            Global.DB2Mgr.LoadStores();
+
             foreach (var entry in TaxiPathStorage.Values)
             {
                 if (!TaxiPathSetBySource.ContainsKey(entry.FromTaxiNode))
@@ -320,8 +322,6 @@ namespace Game.DataStorage
                 if (uiMapId == 985 || uiMapId == 986)
                     OldContinentsNodesMask[field] |= submask;
             }
-
-            Global.DB2Mgr.LoadStores();
 
             // Check loaded DB2 files proper version
             if (!AreaTableStorage.ContainsKey(10048) ||                // last area added in 8.0.1 (28153)

@@ -164,11 +164,11 @@ namespace Game.DataStorage
             foreach (GameObjectDisplayInfoRecord gameObjectDisplayInfo in CliDB.GameObjectDisplayInfoStorage.Values)
             {
                 if (gameObjectDisplayInfo.GeoBoxMax.X < gameObjectDisplayInfo.GeoBoxMin.X)
-                    Extensions.Swap(ref gameObjectDisplayInfo.GeoBoxMax.X, ref gameObjectDisplayInfo.GeoBoxMin.X);
+                    Extensions.Swap(ref gameObjectDisplayInfo.GeoBox[3], ref gameObjectDisplayInfo.GeoBox[0]);
                 if (gameObjectDisplayInfo.GeoBoxMax.Y < gameObjectDisplayInfo.GeoBoxMin.Y)
-                    Extensions.Swap(ref gameObjectDisplayInfo.GeoBoxMax.Y, ref gameObjectDisplayInfo.GeoBoxMin.Y);
+                    Extensions.Swap(ref gameObjectDisplayInfo.GeoBox[4], ref gameObjectDisplayInfo.GeoBox[1]);
                 if (gameObjectDisplayInfo.GeoBoxMax.Z < gameObjectDisplayInfo.GeoBoxMin.Z)
-                    Extensions.Swap(ref gameObjectDisplayInfo.GeoBoxMax.Z, ref gameObjectDisplayInfo.GeoBoxMin.Z);
+                    Extensions.Swap(ref gameObjectDisplayInfo.GeoBox[5], ref gameObjectDisplayInfo.GeoBox[2]);
             }
 
             foreach (HeirloomRecord heirloom in CliDB.HeirloomStorage.Values)
@@ -1732,7 +1732,7 @@ namespace Game.DataStorage
 
         UiMapAssignmentRecord FindNearestMapAssignment(float x, float y, float z, int mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system)
         {
-            UiMapAssignmentStatus nearestMapAssignment = null;
+            UiMapAssignmentStatus nearestMapAssignment = new UiMapAssignmentStatus();
             var iterateUiMapAssignments = new Action<MultiMap<int, UiMapAssignmentRecord>, int>((assignments, id) =>
             {
                 foreach (var assignment in assignments.LookupByKey(id))

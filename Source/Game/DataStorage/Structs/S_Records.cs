@@ -441,7 +441,7 @@ namespace Game.DataStorage
         public SpellProcsPerMinuteModType Type;
         public ushort Param;
         public float Coeff;
-        public ushort SpellProcsPerMinuteID;
+        public uint SpellProcsPerMinuteID;
     }
 
     public sealed class SpellRadiusRecord

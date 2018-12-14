@@ -34,7 +34,7 @@ namespace Game.Network.Packets
             {
                 TransmogrifyItem item = new TransmogrifyItem();
                 item.Read(_worldPacket);
-                Items.Add(item);
+                Items[i] = item;
             }
 
             CurrentSpecOnly = _worldPacket.HasBit();

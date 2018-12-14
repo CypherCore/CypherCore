@@ -35,7 +35,7 @@ namespace Game.Entities
 
         public void Initialize()
         {
-            if (m_graph.NumberOfVertices > 0)
+            if (m_graph != null)
                 return;
 
             List<Tuple<Tuple<uint, uint>, uint>> edges = new List<Tuple<Tuple<uint, uint>, uint>>();

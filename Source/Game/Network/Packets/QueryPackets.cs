@@ -111,8 +111,6 @@ namespace Game.Network.Packets
 
                 for (var i = 0; i < SharedConst.MaxCreatureKillCredit; ++i)
                     _worldPacket.WriteUInt32(Stats.ProxyCreatureID[i]);
-                _worldPacket.WriteUInt32(Stats.Display.CreatureDisplay.Count);
-                _worldPacket.WriteFloat(Stats.Display.TotalProbability);
 
                 _worldPacket.WriteUInt32(Stats.Display.CreatureDisplay.Count);
                 _worldPacket.WriteFloat(Stats.Display.TotalProbability);
@@ -760,7 +758,7 @@ namespace Game.Network.Packets
         public string UnkString;
         public uint Type;
         public uint DisplayID;
-        public int[] Data = new int[33];
+        public int[] Data = new int[SharedConst.MaxGOData];
         public float Size;
         public List<uint> QuestItems = new List<uint>();
         public uint RequiredLevel;

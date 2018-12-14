@@ -65,7 +65,7 @@ namespace Game.DataStorage
         public uint Id;
         public int PhaseID;
         public int UiMapArtID;
-        public int UiMapID;
+        public uint UiMapID;
     }
 
     public sealed class UnitPowerBarRecord

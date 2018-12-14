@@ -6,6 +6,7 @@ Special Thanks To:
 For the base code, and tons of help and ideas.
 
 - TrinityCore (http://www.trinitycore.org)
-For code and DB. As CypherCore is a full port of them.
-We still add commits from them to keep CypherCore updated.
-Much of CpherCore is from them, and we give them alots of thanks.
+For code and DB and updates.
+
+- Wow-Tools (https://github.com/WoW-Tools)
+For CASC Ideas and ClientDB loading code.

@@ -13,10 +13,32 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */﻿
+ */
+using System;
 
 namespace Framework.Constants
 {
+    public enum DB2ColumnCompression : uint
+    {
+        None,
+        Immediate,
+        Common,
+        Pallet,
+        PalletArray,
+        SignedImmediate
+    }
+
+    [Flags]
+    public enum HeaderFlags : short
+    {
+        None = 0x0,
+        OffsetMap = 0x1,
+        SecondIndex = 0x2,
+        IndexMap = 0x4,
+        Unknown = 0x8,
+        Compressed = 0x10,
+    }
+
     public enum AbilityLearnType : byte
     {
         OnSkillValue = 1, // Spell state will update depending on skill value

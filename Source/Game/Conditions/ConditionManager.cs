@@ -2120,7 +2120,8 @@ namespace Game
             new ConditionTypeInfo("Pet type",             true, false, false),
             new ConditionTypeInfo("On Taxi",              false,false, false),
             new ConditionTypeInfo("Quest state mask",     true, true, false),
-            new ConditionTypeInfo("Objective Complete",   true, false, false)
+            new ConditionTypeInfo("Objective Complete",   true, false, false),
+            new ConditionTypeInfo("Map Difficulty",       true, false, false)
         };
 
         public struct ConditionTypeInfo

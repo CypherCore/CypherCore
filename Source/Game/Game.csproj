@@ -4,7 +4,12 @@
     <TargetFramework>netstandard2.0</TargetFramework>
 	<Platforms>x64</Platforms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.2" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Framework\Framework.csproj" />

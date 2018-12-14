@@ -36,7 +36,7 @@ namespace Game.Network.Packets
                 ArtifactPowerChoice artifactPowerChoice;
                 artifactPowerChoice.ArtifactPowerID = _worldPacket.ReadUInt32();
                 artifactPowerChoice.Rank = _worldPacket.ReadUInt8();
-                PowerChoices.Add(artifactPowerChoice);
+                PowerChoices[i] = artifactPowerChoice;
             }
         }
 

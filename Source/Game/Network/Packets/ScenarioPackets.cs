@@ -119,7 +119,7 @@ namespace Game.Network.Packets
         {
             var count = _worldPacket.ReadUInt32();
             for (var i = 0; i < count; ++i)
-                MissingScenarioPOIs.Add(_worldPacket.ReadInt32());
+                MissingScenarioPOIs[i] = _worldPacket.ReadInt32();
         }
 
         public Array<int> MissingScenarioPOIs = new Array<int>(35);

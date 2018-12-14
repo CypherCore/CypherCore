@@ -320,7 +320,7 @@ namespace Game.Entities
             for (byte i = 0; i < PlayerConst.MaxSpecializations; ++i)
             {
                 Talents[i] = new Dictionary<uint, PlayerSpellState>();
-                PvpTalents[i] = new Array<uint>(PlayerConst.MaxPvpTalentSlots);
+                PvpTalents[i] = new Array<uint>(PlayerConst.MaxPvpTalentSlots, 0);
                 Glyphs[i] = new List<uint>();
             }
         }

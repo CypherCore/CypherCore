@@ -68,7 +68,7 @@ namespace Game.DataStorage
         public uint PetDisplayID;                                            // Pet Model ID for starting pet
         public byte PetFamilyID;                                              // Pet Family Entry for starting pet
         public int[] ItemID = new int[24];
-        public byte RaceID;
+        public uint RaceID;
     }
 
     public sealed class CharTitlesRecord
@@ -117,7 +117,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public sbyte PowerType;
-        public byte ClassID;
+        public uint ClassID;
     }
 
     public sealed class ChrRacesRecord

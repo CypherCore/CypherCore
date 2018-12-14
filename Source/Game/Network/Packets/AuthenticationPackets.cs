@@ -83,7 +83,7 @@ namespace Game.Network.Packets
             RealmID = _worldPacket.ReadUInt32();
 
             for (var i = 0; i < LocalChallenge.GetLimit(); ++i)
-                LocalChallenge.Add(_worldPacket.ReadUInt8());
+                LocalChallenge[i] = _worldPacket.ReadUInt8();
 
             Digest = _worldPacket.ReadBytes(24);
 

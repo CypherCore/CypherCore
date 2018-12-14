@@ -82,13 +82,14 @@ namespace Game.Entities
 
         public void EncodeDynamicFieldChangeType(DynamicFieldChangeType changeType, UpdateType updateType)
         {
+            _updateType = updateType;
             DynamicFieldChangeType = (uint)(_blockCount | ((uint)(changeType & Entities.DynamicFieldChangeType.ValueAndSizeChanged) * ((3 - (int)updateType /*this part evaluates to 0 if update type is not VALUES*/) / 3)));
         }
 
         public override void AppendToPacket(ByteBuffer data)
         {
             data.WriteUInt16(DynamicFieldChangeType);
-            if (DynamicFieldChangeType.HasAnyFlag((uint)Entities.DynamicFieldChangeType.ValueAndSizeChanged))
+            if (DynamicFieldChangeType.HasAnyFlag((uint)Entities.DynamicFieldChangeType.ValueAndSizeChanged) && _updateType == UpdateType.Values)
                 data.WriteUInt32(_fieldCount);
 
             var maskArray = new byte[_blockCount << 2];
@@ -98,6 +99,7 @@ namespace Game.Entities
         }
 
         public uint DynamicFieldChangeType;
+        public UpdateType _updateType;
     }
 
     public enum DynamicFieldChangeType
