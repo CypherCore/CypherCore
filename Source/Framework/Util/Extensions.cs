@@ -25,6 +25,7 @@ using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Runtime.CompilerServices;
 
 namespace System
 {
@@ -157,50 +158,6 @@ namespace System
             right = temp;
         }
 
-        public static Func<object, object> CompileGetter(this FieldInfo field)
-        {
-            string methodName = field.ReflectedType.FullName + ".get_" + field.Name;
-            DynamicMethod setterMethod = new DynamicMethod(methodName, typeof(object), new[] { typeof(object) }, true);
-            ILGenerator gen = setterMethod.GetILGenerator();
-            if (field.IsStatic)
-            {
-                gen.Emit(OpCodes.Ldsfld, field);
-                gen.Emit(field.FieldType.IsClass ? OpCodes.Castclass : OpCodes.Box, field.FieldType);
-            }
-            else
-            {
-                gen.Emit(OpCodes.Ldarg_0);
-                gen.Emit(OpCodes.Castclass, field.DeclaringType);
-                gen.Emit(OpCodes.Ldfld, field);
-                gen.Emit(field.FieldType.IsClass ? OpCodes.Castclass : OpCodes.Box, field.FieldType);
-            }
-            gen.Emit(OpCodes.Ret);
-            return (Func<object, object>)setterMethod.CreateDelegate(typeof(Func<object, object>));
-        }
-
-        public static Action<object, object> CompileSetter(this FieldInfo field)
-        {
-            string methodName = field.ReflectedType.FullName + ".set_" + field.Name;
-            DynamicMethod setterMethod = new DynamicMethod(methodName, null, new[] { typeof(object), typeof(object) }, true);
-            ILGenerator gen = setterMethod.GetILGenerator();
-            if (field.IsStatic)
-            {
-                gen.Emit(OpCodes.Ldarg_1);
-                gen.Emit(field.FieldType.IsClass ? OpCodes.Castclass : OpCodes.Unbox_Any, field.FieldType);
-                gen.Emit(OpCodes.Stsfld, field);
-            }
-            else
-            {
-                gen.Emit(OpCodes.Ldarg_0);
-                gen.Emit(OpCodes.Castclass, field.DeclaringType);
-                gen.Emit(OpCodes.Ldarg_1);
-                gen.Emit(field.FieldType.IsClass ? OpCodes.Castclass : OpCodes.Unbox_Any, field.FieldType);
-                gen.Emit(OpCodes.Stfld, field);
-            }
-            gen.Emit(OpCodes.Ret);
-            return (Action<object, object>)setterMethod.CreateDelegate(typeof(Action<object, object>));
-        }
-
         public static uint[] SerializeObject<T>(this T obj)
         {
             //if (obj.GetType()<StructLayoutAttribute>() == null)
@@ -318,18 +275,28 @@ namespace System
 
         public static T[] ReadArray<T>(this BinaryReader reader, uint size) where T : struct
         {
-            int numBytes = FastStruct<T>.Size * (int)size;
+            int numBytes = Unsafe.SizeOf<T>() * (int)size;
 
-            byte[] result = reader.ReadBytes(numBytes);
+            byte[] source = reader.ReadBytes(numBytes);
 
-            return FastStruct<T>.ReadArray(result);
+            T[] result = new T[source.Length / Unsafe.SizeOf<T>()];
+
+            if (source.Length > 0)
+            {
+                unsafe
+                {
+                    Unsafe.CopyBlockUnaligned(Unsafe.AsPointer(ref result[0]), Unsafe.AsPointer(ref source[0]), (uint)source.Length);
+                }
+            }
+
+            return result;
         }
 
         public static T Read<T>(this BinaryReader reader) where T : struct
         {
-            byte[] result = reader.ReadBytes(FastStruct<T>.Size);
+            byte[] result = reader.ReadBytes(Unsafe.SizeOf<T>());
 
-            return FastStruct<T>.ArrayToStructure(result);
+            return Unsafe.ReadUnaligned<T>(ref result[0]);
         }
         #endregion
     }
