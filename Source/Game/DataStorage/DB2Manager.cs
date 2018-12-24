@@ -38,7 +38,7 @@ namespace Game.DataStorage
             }
 
             for (uint i = 0; i < (int)LocaleConstant.Total + 1; ++i)
-                _nameValidators[i] = new List<Regex>();
+                _nameValidators[i] = new List<string>();
         }
 
         public void LoadStores()
@@ -305,21 +305,21 @@ namespace Game.DataStorage
             {
                 Cypher.Assert(namesProfanity.Language < (int)LocaleConstant.Total || namesProfanity.Language == -1);
                 if (namesProfanity.Language != -1)
-                    _nameValidators[namesProfanity.Language].Add(new Regex(namesProfanity.Name, RegexOptions.IgnoreCase | RegexOptions.Compiled));
+                    _nameValidators[namesProfanity.Language].Add(namesProfanity.Name);
                 else
                     for (uint i = 0; i < (int)LocaleConstant.Total; ++i)
                     {
                         if (i == (int)LocaleConstant.None)
                             continue;
 
-                        _nameValidators[i].Add(new Regex(namesProfanity.Name, RegexOptions.IgnoreCase | RegexOptions.Compiled));
+                        _nameValidators[i].Add(namesProfanity.Name);
                     }
             }
 
             CliDB.NamesProfanityStorage.Clear();
 
             foreach (var namesReserved in CliDB.NamesReservedStorage.Values)
-                _nameValidators[(int)LocaleConstant.Total].Add(new Regex(namesReserved.Name, RegexOptions.IgnoreCase | RegexOptions.Compiled));
+                _nameValidators[(int)LocaleConstant.Total].Add(namesReserved.Name);
 
             CliDB.NamesReservedStorage.Clear();
 
@@ -332,7 +332,7 @@ namespace Game.DataStorage
                         continue;
 
                     if (Convert.ToBoolean(namesReserved.LocaleMask & (1 << i)))
-                        _nameValidators[i].Add(new Regex(namesReserved.Name, RegexOptions.IgnoreCase | RegexOptions.Compiled));
+                        _nameValidators[i].Add(namesReserved.Name);
                 }
             }
             CliDB.NamesReservedLocaleStorage.Clear();
@@ -1315,13 +1315,13 @@ namespace Game.DataStorage
 
         public ResponseCodes ValidateName(string name, LocaleConstant locale)
         {
-            foreach (var regex in _nameValidators[(int)locale])
-                if (regex.IsMatch(name))
+            foreach (var testName in _nameValidators[(int)locale])
+                if (testName.Equals(name, StringComparison.OrdinalIgnoreCase))
                     return ResponseCodes.CharNameProfane;
 
             // regexes at TOTAL_LOCALES are loaded from NamesReserved which is not locale specific
-            foreach (var regex in _nameValidators[(int)LocaleConstant.Total])
-                if (regex.IsMatch(name))
+            foreach (var testName in _nameValidators[(int)LocaleConstant.Total])
+                if (testName.Equals(name, StringComparison.OrdinalIgnoreCase))
                     return ResponseCodes.CharNameReserved;
 
             return ResponseCodes.CharNameSuccess;
@@ -1331,7 +1331,7 @@ namespace Game.DataStorage
         {
             NumTalentsAtLevelRecord numTalentsAtLevel = CliDB.NumTalentsAtLevelStorage.LookupByKey(level);
             if (numTalentsAtLevel == null)
-                numTalentsAtLevel = CliDB.NumTalentsAtLevelStorage.LastOrDefault().Value;//.LookupByKey(sNumTalentsAtLevelStore.GetNumRows() - 1);
+                numTalentsAtLevel = CliDB.NumTalentsAtLevelStorage.LastOrDefault().Value;
             if (numTalentsAtLevel != null)
             {
                 switch (playerClass)
@@ -1918,7 +1918,7 @@ namespace Game.DataStorage
         MultiMap<uint, MountTypeXCapabilityRecord> _mountCapabilitiesByType = new MultiMap<uint, MountTypeXCapabilityRecord>();
         MultiMap<uint, MountXDisplayRecord> _mountDisplays = new MultiMap<uint, MountXDisplayRecord>();
         Dictionary<uint, List<NameGenRecord>[]> _nameGenData = new Dictionary<uint, List<NameGenRecord>[]>();
-        List<Regex>[] _nameValidators = new List<Regex>[(int)LocaleConstant.Total + 1];
+        List<string>[] _nameValidators = new List<string>[(int)LocaleConstant.Total + 1];
         MultiMap<uint, uint> _phasesByGroup = new MultiMap<uint, uint>();
         Dictionary<PowerType, PowerTypeRecord> _powerTypes = new Dictionary<PowerType, PowerTypeRecord>();
         Dictionary<uint, byte> _pvpItemBonus = new Dictionary<uint, byte>();
