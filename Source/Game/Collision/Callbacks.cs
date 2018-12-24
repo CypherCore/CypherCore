@@ -28,7 +28,6 @@ namespace Game.Collision
         public virtual void Invoke(Vector3 point, IModel entry) { }
         public virtual bool Invoke(Ray ray, uint entry, ref float distance, bool pStopAtFirstHit) { return false; }
         public virtual bool Invoke(Ray r, IModel obj, ref float distance) { return false; }
-        public virtual bool Invoke(Ray ray, uint idx, ref float maxDist) { return false; }
     }
 
     public class TriBoundFunc
@@ -173,6 +172,7 @@ namespace Game.Collision
         {
             prims = val;
             hit = false;
+            flags = ignoreFlags;
         }
         public override bool Invoke(Ray ray, uint entry, ref float distance, bool pStopAtFirstHit = true)
         {
