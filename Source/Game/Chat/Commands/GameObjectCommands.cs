@@ -145,11 +145,20 @@ namespace Game.Chat
                 }
             }
 
-            obj.DestroyForNearbyPlayers();
-            obj.RelocateStationaryPosition(x, y, z, obj.GetOrientation());
-            obj.GetMap().GameObjectRelocation(obj, x, y, z, obj.GetOrientation());
+            Map map = obj.GetMap();
 
+            obj.Relocate(x, y, z, obj.GetOrientation());
             obj.SaveToDB();
+
+            // Generate a completely new spawn with new guid
+            // client caches recently deleted objects and brings them back to life
+            // when CreateObject block for this guid is received again
+            // however it entirely skips parsing that block and only uses already known location
+            obj.Delete();
+
+            obj = GameObject.CreateGameObjectFromDB(guidLow, map);
+            if (!obj)
+                return false;
 
             handler.SendSysMessage(CypherStrings.CommandMoveobjmessage, obj.GetSpawnId(), obj.GetGoInfo().name, obj.GetGUID().ToString());
 
@@ -360,13 +369,21 @@ namespace Game.Chat
                 oz = player.GetOrientation();
             }
 
-            obj.Relocate(obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ());
-            obj.RelocateStationaryPosition(obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), obj.GetOrientation());
-            obj.SetWorldRotationAngles(oz, oy, ox);
-            obj.DestroyForNearbyPlayers();
-            obj.UpdateObjectVisibility();
+            Map map = obj.GetMap();
 
+            obj.Relocate(obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ());
+            obj.SetWorldRotationAngles(oz, oy, ox);
             obj.SaveToDB();
+
+            // Generate a completely new spawn with new guid
+            // client caches recently deleted objects and brings them back to life
+            // when CreateObject block for this guid is received again
+            // however it entirely skips parsing that block and only uses already known location
+            obj.Delete();
+
+            obj = GameObject.CreateGameObjectFromDB(guidLow, map);
+            if (!obj)
+                return false;
 
             handler.SendSysMessage(CypherStrings.CommandTurnobjmessage, obj.GetSpawnId(), obj.GetGoInfo().name, obj.GetGUID().ToString(), obj.GetOrientation());
 
