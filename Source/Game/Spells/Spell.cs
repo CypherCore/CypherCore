@@ -6555,8 +6555,8 @@ namespace Game.Spells
                             if (m_caster.IsTypeId(TypeId.Player))
                             {
                                 int targetAmount = m_UniqueTargetInfo.Count;
-                                if (targetAmount > 10)
-                                    m_damage = m_damage * 10 / targetAmount;
+                                if (targetAmount > 20)
+                                    m_damage = m_damage * 20 / targetAmount;
                             }
                         }
                     }
