@@ -113,8 +113,8 @@ namespace Game.Entities
             pvpInfo.IsInFFAPvPArea = area != null && area.Flags[0].HasAnyFlag(AreaFlags.Arena);
             UpdatePvPState(true);
 
-            UpdateAreaDependentAuras(newArea);
             PhasingHandler.OnAreaChange(this);
+            UpdateAreaDependentAuras(newArea);
 
             if (IsAreaThatActivatesPvpTalents(newArea))
                 EnablePvpRules();
