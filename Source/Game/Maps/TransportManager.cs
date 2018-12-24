@@ -203,7 +203,8 @@ namespace Game.Maps
                 {
                     int extra = !keyFrames[i - 1].Teleport ? 1 : 0;
                     Spline spline = new Spline();
-                    spline.Init_Spline(splinePath.Skip(start).ToArray(), i - start + extra, Spline.EvaluationMode.Catmullrom);
+                    Span<Vector3> span = splinePath.ToArray();
+                    spline.Init_Spline(span.Slice(start), i - start + extra, Spline.EvaluationMode.Catmullrom);
                     spline.initLengths();
                     for (int j = start; j < i + extra; ++j)
                     {

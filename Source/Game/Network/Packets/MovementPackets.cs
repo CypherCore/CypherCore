@@ -22,6 +22,7 @@ using Game.Entities;
 using Game.Movement;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace Game.Network.Packets
 {
@@ -363,7 +364,7 @@ namespace Game.Network.Packets
             else
             {
                 int lastIdx = spline.getPointCount() - 3;
-                Vector3[] realPath = spline.getPoints().Skip(1).ToArray();
+                Span<Vector3> realPath = new Span<Vector3>(spline.getPoints()).Slice(1);
 
                 movementSpline.Points.Add(realPath[lastIdx]);
 
@@ -372,7 +373,7 @@ namespace Game.Network.Packets
                     Vector3 middle = (realPath[0] + realPath[lastIdx]) / 2.0f;
 
                     // first and last points already appended
-                    for (uint i = 1; i < lastIdx; ++i)
+                    for (int i = 1; i < lastIdx; ++i)
                         movementSpline.PackedDeltas.Add(middle - realPath[i]);
                 }
             }

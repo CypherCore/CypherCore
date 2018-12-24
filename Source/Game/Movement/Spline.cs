@@ -64,12 +64,14 @@ namespace Game.Movement
         }
         void EvaluateCatmullRom(int index, float t, out Vector3 result)
         {
-            C_Evaluate(points.Skip(index - 1).ToArray(), t, s_catmullRomCoeffs, out result);
+            Span<Vector3> span = points;
+            C_Evaluate(span.Slice(index - 1), t, s_catmullRomCoeffs, out result);
         }
         void EvaluateBezier3(int index, float t, out Vector3 result)
         {
             index *= (int)3u;
-            C_Evaluate(points.Skip(index).ToArray(), t, s_Bezier3Coeffs, out result);
+            Span<Vector3> span = points;
+            C_Evaluate(span.Slice(index), t, s_Bezier3Coeffs, out result);
         }
         #endregion
 
@@ -85,7 +87,7 @@ namespace Game.Movement
 
             Init_Spline(controls, count, m);
         }
-        public void Init_Spline(Vector3[] controls, int count, EvaluationMode m)
+        public void Init_Spline(Span<Vector3> controls, int count, EvaluationMode m)
         {
             m_mode = m;
             _cyclic = false;
@@ -120,7 +122,7 @@ namespace Game.Movement
             index_lo = 0;
             index_hi = cyclic ? count : (count - 1);
         }
-        void InitCatmullRom(Vector3[] controls, int count, bool cyclic, int cyclic_point)
+        void InitCatmullRom(Span<Vector3> controls, int count, bool cyclic, int cyclic_point)
         {
             int real_size = count + (cyclic ? (1 + 2) : (1 + 1));
 
@@ -129,7 +131,7 @@ namespace Game.Movement
             int lo_index = 1;
             int high_index = lo_index + count - 1;
 
-            Array.Copy(controls, 0, points, lo_index, count);
+            Array.Copy(controls.ToArray(), 0, points, lo_index, count);
 
             // first and last two indexes are space for special 'virtual points'
             // these points are required for proper C_Evaluate and C_Evaluate_Derivative methtod work
@@ -152,13 +154,13 @@ namespace Game.Movement
             index_lo = lo_index;
             index_hi = high_index + (cyclic ? 1 : 0);
         }
-        void InitBezier3(Vector3[] controls, int count, bool cyclic, int cyclic_point)
+        void InitBezier3(Span<Vector3> controls, int count, bool cyclic, int cyclic_point)
         {
             int c = (int)(count / 3u * 3u);
             int t = (int)(c / 3u);
 
             Array.Resize(ref points, c);
-            Array.Copy(controls, points, c);
+            Array.Copy(controls.ToArray(), points, c);
 
             index_lo = 0;
             index_hi = t - 1;
@@ -190,12 +192,14 @@ namespace Game.Movement
         }
         void EvaluateDerivativeCatmullRom(int index, float t, out Vector3 result)
         {
-            C_Evaluate_Derivative(points.Skip(index - 1).ToArray(), t, s_catmullRomCoeffs, out result);
+            Span<Vector3> span = points;
+            C_Evaluate_Derivative(span.Slice(index - 1), t, s_catmullRomCoeffs, out result);
         }
         void EvaluateDerivativeBezier3(int index, float t, out Vector3 result)
         {
             index *= (int)3u;
-            C_Evaluate_Derivative(points.Skip(index).ToArray(), t, s_Bezier3Coeffs, out result);
+            Span<Vector3> span = points;
+            C_Evaluate_Derivative(span.Slice(index), t, s_Bezier3Coeffs, out result);
         }
         #endregion
         
@@ -221,7 +225,7 @@ namespace Game.Movement
         float SegLengthCatmullRom(int index)
         {
             Vector3 nextPos;
-            var p = points.Skip(index - 1).ToArray();
+            Span<Vector3> p = points.AsSpan(index - 1);
             Vector3 curPos = nextPos = p[1];
 
             int i = 1;
@@ -240,7 +244,7 @@ namespace Game.Movement
             index *= (int)3u;
 
             Vector3 nextPos;
-            var p = points.Skip(index).ToArray();
+            Span<Vector3> p = points.AsSpan(index);
 
             C_Evaluate(p, 0.0f, s_Bezier3Coeffs, out nextPos);
             Vector3 curPos = nextPos;
@@ -297,7 +301,7 @@ namespace Game.Movement
 
         private static readonly Matrix4 s_Bezier3Coeffs = new Matrix4(-1.0f, 3.0f, -3.0f, 1.0f, 3.0f, -6.0f, 3.0f, 0.0f, -3.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f);
 
-        void C_Evaluate(Vector3[] vertice, float t, Matrix4 matr, out Vector3 result)
+        void C_Evaluate(Span<Vector3> vertice, float t, Matrix4 matr, out Vector3 result)
         {
             Vector4 tvec = new Vector4(t * t * t, t * t, t, 1.0f);
             Vector4 weights = (tvec * matr);
@@ -305,7 +309,7 @@ namespace Game.Movement
             result = vertice[0] * weights[0] + vertice[1] * weights[1]
                    + vertice[2] * weights[2] + vertice[3] * weights[3];
         }
-        void C_Evaluate_Derivative(Vector3[] vertice, float t, Matrix4 matr, out Vector3 result)
+        void C_Evaluate_Derivative(Span<Vector3> vertice, float t, Matrix4 matr, out Vector3 result)
         {
             Vector4 tvec = new Vector4(3.0f * t * t, 2.0f * t, 1.0f, 0.0f);
             Vector4 weights = (tvec * matr);

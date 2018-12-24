@@ -17,6 +17,7 @@
 
 using System.Linq;
 using System.Security.Cryptography;
+using System;
 
 namespace Game
 {
@@ -25,12 +26,13 @@ namespace Game
         public SHA1Randx(byte[] buff)
         {
             int halfSize = buff.Length / 2;
+            Span<byte> span = buff;
 
             sh = SHA1.Create();
             o1 = sh.ComputeHash(buff, 0, halfSize);
 
             sh = SHA1.Create();
-            o2 = sh.ComputeHash(buff.Skip(halfSize).ToArray(), 0, buff.Length - halfSize);
+            o2 = sh.ComputeHash(span.Slice(halfSize).ToArray(), 0, buff.Length - halfSize);
 
             FillUp();
         }

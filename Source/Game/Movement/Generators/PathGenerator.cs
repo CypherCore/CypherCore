@@ -634,9 +634,10 @@ namespace Game.Movement
             uint ns = 0;
             while (ns < nsteerPath)
             {
+                Span<float> span = steerPath;
                 // Stop at Off-Mesh link or when point is further than slop away.
                 if ((steerPathFlags[ns].HasAnyFlag((byte)Detour.dtStraightPathFlags.DT_STRAIGHTPATH_OFFMESH_CONNECTION) ||
-                    !InRangeYZX(steerPath.Skip((int)ns * 3).ToArray(), startPos, minTargetDist, 1000.0f)))
+                    !InRangeYZX(span.Slice((int)ns * 3).ToArray(), startPos, minTargetDist, 1000.0f)))
                     break;
                 ns++;
             }
