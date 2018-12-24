@@ -771,7 +771,7 @@ namespace Game.Maps
         }
 
         MessageBuilder Builder;
-        ServerPacket[] i_data_cache = new ServerPacket[(int)LocaleConstant.Max];     // 0 = default, i => i-1 locale index
+        ServerPacket[] i_data_cache = new ServerPacket[(int)LocaleConstant.Total];     // 0 = default, i => i-1 locale index
     }
 
     public class LocalizedPacketListDo : IDoWork<Player>

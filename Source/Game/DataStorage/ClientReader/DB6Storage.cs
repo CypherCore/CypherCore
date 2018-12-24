@@ -169,7 +169,7 @@ namespace Game.DataStorage
             if (preparedStatementLocale == 0)
                 return;
 
-            for (LocaleConstant locale = 0; locale < LocaleConstant.OldTotal; ++locale)
+            for (LocaleConstant locale = 0; locale < LocaleConstant.Total; ++locale)
             {
                 if (Global.WorldMgr.GetDefaultDbcLocale() == locale || locale == LocaleConstant.None)
                     continue;

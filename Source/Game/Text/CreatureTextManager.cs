@@ -398,7 +398,7 @@ namespace Game
             if (creatureTextEntry == null)
                 return "";
 
-            if (locale > LocaleConstant.Max)
+            if (locale >= LocaleConstant.Total)
                 locale = LocaleConstant.enUS;
 
             string baseText = "";

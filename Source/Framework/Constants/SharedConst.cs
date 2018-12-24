@@ -368,10 +368,7 @@ namespace Framework.Constants
         None = 9,
         ptBR = 10,
         itIT = 11,
-        Total = 12,
-
-        Max = 11,
-        OldTotal = 9// @todo convert in simple system
+        Total = 12
     }
 
     public enum ComparisionType
