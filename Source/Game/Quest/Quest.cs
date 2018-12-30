@@ -314,6 +314,7 @@ namespace Game
 
             for (int i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
             {
+                rewards.ChoiceItems[i].Item = new ItemInstance();
                 rewards.ChoiceItems[i].Item.ItemID = RewardChoiceItemId[i];
                 rewards.ChoiceItems[i].Quantity = RewardChoiceItemCount[i];
             }
