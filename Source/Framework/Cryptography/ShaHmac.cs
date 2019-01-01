@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2019 CypherCore <http://github.com/CypherCore>
  * Copyright (C) 2012-2014 Arctium Emulation <http://arctium.org>
  * 
  * This program is free software: you can redistribute it and/or modify

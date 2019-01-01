@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2012-2018 CypherCore <http://github.com/CypherCore>
+ * Copyright (C) 2012-2019 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -95,16 +95,13 @@ namespace Framework.Database
         {
             var value = _currentRow[column];
 
-            if (value.GetType() == typeof(T))
-                return (T)value;
+            if (value == DBNull.Value)
+                return default(T);
 
-            if (value != DBNull.Value)
-                return (T)Convert.ChangeType(value, typeof(T));
+            if (value.GetType() != typeof(T))
+                return (T)Convert.ChangeType(value, typeof(T));//todo remove me when all fields are the right type  this is super slow
 
-            if (typeof(T).Name == "String")
-                return (T)Convert.ChangeType("", typeof(T));
-
-            return default(T);
+            return (T)value;
         }
 
         public T[] ReadValues<T>(int startIndex, int numColumns)
