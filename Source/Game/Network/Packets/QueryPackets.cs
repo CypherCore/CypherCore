@@ -83,15 +83,15 @@ namespace Game.Network.Packets
 
             if (Allow)
             {
-                _worldPacket.WriteBits(Stats.Title.IsEmpty() ? 0 : Stats.Title.Length + 1, 11);
-                _worldPacket.WriteBits(Stats.TitleAlt.IsEmpty() ? 0 : Stats.TitleAlt.Length + 1, 11);
-                _worldPacket.WriteBits(Stats.CursorName.IsEmpty() ? 0 : Stats.CursorName.Length + 1, 6);
+                _worldPacket.WriteBits(Stats.Title.IsEmpty() ? 0 : Stats.Title.GetByteCount() + 1, 11);
+                _worldPacket.WriteBits(Stats.TitleAlt.IsEmpty() ? 0 : Stats.TitleAlt.GetByteCount() + 1, 11);
+                _worldPacket.WriteBits(Stats.CursorName.IsEmpty() ? 0 : Stats.CursorName.GetByteCount() + 1, 6);
                 _worldPacket.WriteBit(Stats.Leader);
 
                 for (var i = 0; i < SharedConst.MaxCreatureNames; ++i)
                 {
-                    _worldPacket.WriteBits(Stats.Name[i].Length + 1, 11);
-                    _worldPacket.WriteBits(Stats.NameAlt[i].Length + 1, 11);
+                    _worldPacket.WriteBits(Stats.Name[i].GetByteCount() + 1, 11);
+                    _worldPacket.WriteBits(Stats.NameAlt[i].GetByteCount() + 1, 11);
                 }
 
                 for (var i = 0; i < SharedConst.MaxCreatureNames; ++i)

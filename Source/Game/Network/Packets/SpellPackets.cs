@@ -840,7 +840,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(ResurrectOffererVirtualRealmAddress);
             _worldPacket.WriteUInt32(PetNumber);
             _worldPacket.WriteUInt32(SpellID);
-            _worldPacket.WriteBits(Name.Length, 11);
+            _worldPacket.WriteBits(Name.GetByteCount(), 11);
             _worldPacket.WriteBit(UseTimer);
             _worldPacket.WriteBit(Sickness);
             _worldPacket.FlushBits();
