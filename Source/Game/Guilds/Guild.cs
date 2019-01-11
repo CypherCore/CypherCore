@@ -1406,12 +1406,12 @@ namespace Game.Guilds
             }
         }
 
-        public void BroadcastAddonToGuild(WorldSession session, bool officerOnly, string msg, string prefix)
+        public void BroadcastAddonToGuild(WorldSession session, bool officerOnly, string msg, string prefix, bool isLogged)
         {
             if (session != null && session.GetPlayer() != null && _HasRankRight(session.GetPlayer(), officerOnly ? GuildRankRights.OffChatSpeak : GuildRankRights.GChatSpeak))
             {
                 ChatPkt data = new ChatPkt();
-                data.Initialize(officerOnly ? ChatMsg.Officer : ChatMsg.Guild, Language.Addon, session.GetPlayer(), null, msg, 0, "", LocaleConstant.enUS, prefix);
+                data.Initialize(officerOnly ? ChatMsg.Officer : ChatMsg.Guild, isLogged ? Language.AddonLogged : Language.Addon, session.GetPlayer(), null, msg, 0, "", LocaleConstant.enUS, prefix);
                 foreach (var member in m_members.Values)
                 {
                     Player player = member.FindPlayer();

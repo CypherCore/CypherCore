@@ -659,7 +659,7 @@ namespace Game.Chat
             SendToAll(new ChannelSayBuilder(this, lang, what, guid), !playerInfo.IsModerator() ? guid : ObjectGuid.Empty);
         }
 
-        public void AddonSay(ObjectGuid guid, string prefix, string what)
+        public void AddonSay(ObjectGuid guid, string prefix, string what, bool isLogged)
         {
             if (what.IsEmpty())
                 return;
@@ -681,7 +681,7 @@ namespace Game.Chat
                 return;
             }
 
-            SendToAllWithAddon(new ChannelWhisperBuilder(this, Language.Addon, what, prefix, guid), prefix, !playerInfo.IsModerator() ? guid : ObjectGuid.Empty);
+            SendToAllWithAddon(new ChannelWhisperBuilder(this, isLogged ? Language.AddonLogged : Language.Addon, what, prefix, guid), prefix, !playerInfo.IsModerator() ? guid : ObjectGuid.Empty);
         }
 
         public void Invite(Player player, string newname)

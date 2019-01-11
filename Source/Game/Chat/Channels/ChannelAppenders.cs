@@ -151,10 +151,10 @@ namespace Game.Chat
             ChatPkt packet = new ChatPkt();
             Player player = Global.ObjAccessor.FindConnectedPlayer(_guid);
             if (player)
-                packet.Initialize(ChatMsg.Channel, Language.Addon, player, player, _what, 0, _source.GetName(localeIdx), LocaleConstant.enUS, _prefix);
+                packet.Initialize(ChatMsg.Channel, _lang, player, player, _what, 0, _source.GetName(localeIdx), LocaleConstant.enUS, _prefix);
             else
             {
-                packet.Initialize(ChatMsg.Channel, Language.Addon, null, null, _what, 0, _source.GetName(localeIdx), LocaleConstant.enUS, _prefix);
+                packet.Initialize(ChatMsg.Channel, _lang, null, null, _what, 0, _source.GetName(localeIdx), LocaleConstant.enUS, _prefix);
                 packet.SenderGUID = _guid;
                 packet.TargetGUID = _guid;
             }

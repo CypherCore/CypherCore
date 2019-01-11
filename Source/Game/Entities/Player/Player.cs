@@ -6391,15 +6391,15 @@ namespace Game.Entities
         {
             Talk(textId, ChatMsg.Emote, WorldConfig.GetFloatValue(WorldCfg.ListenRangeTextemote), target);
         }
-        public void WhisperAddon(string text, string prefix, Player receiver)
+        public void WhisperAddon(string text, string prefix, bool isLogged, Player receiver)
         {
-            Global.ScriptMgr.OnPlayerChat(this, ChatMsg.Whisper, Language.Universal, text, receiver);
+            Global.ScriptMgr.OnPlayerChat(this, ChatMsg.Whisper, isLogged ? Language.AddonLogged : Language.Addon, text, receiver);
 
             if (!receiver.GetSession().IsAddonRegistered(prefix))
                 return;
 
             ChatPkt data = new ChatPkt();
-            data.Initialize(ChatMsg.Whisper, Language.Addon, this, this, text, 0, "", LocaleConstant.enUS, prefix);
+            data.Initialize(ChatMsg.Whisper, isLogged ? Language.AddonLogged : Language.Addon, this, this, text, 0, "", LocaleConstant.enUS, prefix);
             receiver.SendPacket(data);
         }
         public override void Whisper(string text, Language language, Player target = null, bool something = false)

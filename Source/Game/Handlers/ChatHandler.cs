@@ -383,16 +383,16 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ChatAddonMessageTargeted)]
         void HandleChatAddonMessage(ChatAddonMessage chatAddonMessage)
         {
-            HandleChatAddon(chatAddonMessage.Params.Type, chatAddonMessage.Params.Prefix, chatAddonMessage.Params.Text);
+            HandleChatAddon(chatAddonMessage.Params.Type, chatAddonMessage.Params.Prefix, chatAddonMessage.Params.Text, chatAddonMessage.Params.IsLogged);
         }
 
         [WorldPacketHandler(ClientOpcodes.ChatAddonMessageTargeted)]
         void HandleChatAddonMessageTargeted(ChatAddonMessageTargeted chatAddonMessageTargeted)
         {
-            HandleChatAddon(chatAddonMessageTargeted.Params.Type, chatAddonMessageTargeted.Params.Prefix, chatAddonMessageTargeted.Params.Text, chatAddonMessageTargeted.Target);
+            HandleChatAddon(chatAddonMessageTargeted.Params.Type, chatAddonMessageTargeted.Params.Prefix, chatAddonMessageTargeted.Params.Text, chatAddonMessageTargeted.Params.IsLogged, chatAddonMessageTargeted.Target);
         }
 
-        void HandleChatAddon(ChatMsg type, string prefix, string text, string target = "")
+        void HandleChatAddon(ChatMsg type, string prefix, string text, bool isLogged, string target = "")
         {
             Player sender = GetPlayer();
 
@@ -411,7 +411,7 @@ namespace Game
                     {
                         Guild guild = Global.GuildMgr.GetGuildById(sender.GetGuildId());
                         if (guild)
-                            guild.BroadcastAddonToGuild(this, type == ChatMsg.Officer, text, prefix);
+                            guild.BroadcastAddonToGuild(this, type == ChatMsg.Officer, text, prefix, isLogged);
                     }
                     break;
                 case ChatMsg.Whisper:
@@ -425,7 +425,7 @@ namespace Game
                     if (!receiver)
                         break;
 
-                    sender.WhisperAddon(text, prefix, receiver);
+                    sender.WhisperAddon(text, prefix, isLogged, receiver);
                     break;
                 // Messages sent to "RAID" while in a party will get delivered to "PARTY"
                 case ChatMsg.Party:
@@ -448,14 +448,14 @@ namespace Game
                         }
 
                         ChatPkt data = new ChatPkt();
-                        data.Initialize(type, Language.Addon, sender, null, text, 0, "", LocaleConstant.enUS, prefix);
+                        data.Initialize(type, isLogged ? Language.AddonLogged : Language.Addon, sender, null, text, 0, "", LocaleConstant.enUS, prefix);
                         group.BroadcastAddonMessagePacket(data, prefix, true, subGroup, sender.GetGUID());
                         break;
                     }
                 case ChatMsg.Channel:
                     Channel chn = ChannelManager.GetChannelForPlayerByNamePart(target, sender);
                     if (chn != null)
-                        chn.AddonSay(sender.GetGUID(), prefix, text);
+                        chn.AddonSay(sender.GetGUID(), prefix, text, isLogged);
                     break;
 
                 default:
