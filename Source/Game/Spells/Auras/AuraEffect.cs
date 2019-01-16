@@ -748,6 +748,7 @@ namespace Game.Spells
                 case AuraType.ModStun:
                 case AuraType.ModRoot:
                 case AuraType.Transform:
+                case AuraType.ModRoot2:
                     HandleBreakableCCAuraProc(aurApp, eventInfo);
                     break;
                 case AuraType.Dummy:
