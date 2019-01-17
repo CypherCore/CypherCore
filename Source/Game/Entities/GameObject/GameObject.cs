@@ -382,6 +382,18 @@ namespace Game.Entities
                 }
             }
 
+            // Check if GameObject is Infinite
+            if (goInfo.IsInfiniteGameObject())
+                SetVisibilityDistanceOverride(VisibilityDistanceType.Infinite);
+
+            // Check if GameObject is Gigantic
+            if (goInfo.IsGiganticGameObject())
+                SetVisibilityDistanceOverride(VisibilityDistanceType.Gigantic);
+
+            // Check if GameObject is Large
+            if (goInfo.IsLargeGameObject())
+                SetVisibilityDistanceOverride(VisibilityDistanceType.Large);
+
             return true;
         }
 
@@ -1865,7 +1877,7 @@ namespace Game.Entities
                             return;
 
                         Player player = user.ToPlayer();
-                        PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(info.artifactForge.conditionID1);
+                        PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(info.ArtifactForge.conditionID1);
                         if (playerCondition != null)
                             if (!ConditionManager.IsPlayerMeetingCondition(player, playerCondition))
                                 return;

@@ -180,7 +180,7 @@ namespace Game.Entities
         public garrisonmonumentplaque GarrisonMonumentPlaque;
 
         [FieldOffset(68)]
-        public artifactforge artifactForge;
+        public artifactforge ArtifactForge;
 
         [FieldOffset(68)]
         public uilink UILink;
@@ -428,6 +428,90 @@ namespace Game.Entities
                     return Goober.cooldown;
                 default:
                     return 0;
+            }
+        }
+
+        public bool IsInfiniteGameObject()
+        {
+            switch (type)
+            {
+                case GameObjectTypes.Door:
+                    return Door.InfiniteAOI != 0;
+                case GameObjectTypes.FlagStand:
+                    return FlagStand.InfiniteAOI != 0;
+                case GameObjectTypes.FlagDrop:
+                    return FlagDrop.InfiniteAOI != 0;
+                case GameObjectTypes.TrapDoor:
+                    return TrapDoor.InfiniteAOI != 0;
+                case GameObjectTypes.NewFlag:
+                    return NewFlag.InfiniteAOI != 0;
+                default: return false;
+            }
+        }
+
+        public bool IsGiganticGameObject()
+        {
+            switch (type)
+            {
+                case GameObjectTypes.Door:
+                    return Door.GiganticAOI != 0;
+                case GameObjectTypes.Button:
+                    return Button.GiganticAOI != 0;
+                case GameObjectTypes.QuestGiver:
+                    return QuestGiver.GiganticAOI != 0;
+                case GameObjectTypes.Chest:
+                    return Chest.GiganticAOI != 0;
+                case GameObjectTypes.Generic:
+                    return Generic.GiganticAOI != 0;
+                case GameObjectTypes.Trap:
+                    return Trap.GiganticAOI != 0;
+                case GameObjectTypes.SpellFocus:
+                    return SpellFocus.GiganticAOI != 0;
+                case GameObjectTypes.Goober:
+                    return Goober.GiganticAOI != 0;
+                case GameObjectTypes.SpellCaster:
+                    return SpellCaster.GiganticAOI != 0;
+                case GameObjectTypes.FlagStand:
+                    return FlagStand.GiganticAOI != 0;
+                case GameObjectTypes.FlagDrop:
+                    return FlagDrop.GiganticAOI != 0;
+                case GameObjectTypes.ControlZone:
+                    return ControlZone.GiganticAOI != 0;
+                case GameObjectTypes.DungeonDifficulty:
+                    return DungeonDifficulty.GiganticAOI != 0;
+                case GameObjectTypes.TrapDoor:
+                    return TrapDoor.GiganticAOI != 0;
+                case GameObjectTypes.NewFlag:
+                    return NewFlag.GiganticAOI != 0;
+                case GameObjectTypes.CapturePoint:
+                    return CapturePoint.GiganticAOI != 0;
+                case GameObjectTypes.GarrisonShipment:
+                    return GarrisonShipment.GiganticAOI != 0;
+                case GameObjectTypes.UILink:
+                    return UILink.GiganticAOI != 0;
+                case GameObjectTypes.GatheringNode:
+                    return GatheringNode.GiganticAOI != 0;
+                default: return false;
+            }
+        }
+
+        public bool IsLargeGameObject()
+        {
+            switch (type)
+            {
+                case GameObjectTypes.Chest:
+                    return Chest.LargeAOI != 0;
+                case GameObjectTypes.Generic:
+                    return Generic.LargeAOI != 0;
+                case GameObjectTypes.DungeonDifficulty:
+                    return DungeonDifficulty.LargeAOI != 0;
+                case GameObjectTypes.GarrisonShipment:
+                    return GarrisonShipment.LargeAOI != 0;
+                case GameObjectTypes.ArtifactForge:
+                    return ArtifactForge.LargeAOI != 0;
+                case GameObjectTypes.GatheringNode:
+                    return GatheringNode.LargeAOI != 0;
+                default: return false;
             }
         }
 

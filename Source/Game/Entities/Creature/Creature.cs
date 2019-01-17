@@ -2136,6 +2136,10 @@ namespace Game.Entities
             SetMovementAnimKitId(cainfo.movementAnimKit);
             SetMeleeAnimKitId(cainfo.meleeAnimKit);
 
+            // Check if visibility distance different
+            if (cainfo.visibilityDistanceType != VisibilityDistanceType.Normal)
+                SetVisibilityDistanceOverride(cainfo.visibilityDistanceType);
+
             //Load Path
             if (cainfo.path_id != 0)
                 m_path_id = cainfo.path_id;

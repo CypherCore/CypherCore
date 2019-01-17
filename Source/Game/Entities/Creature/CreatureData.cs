@@ -332,6 +332,7 @@ namespace Game.Entities
         public ushort movementAnimKit;
         public ushort meleeAnimKit;
         public uint[] auras;
+        public VisibilityDistanceType visibilityDistanceType;
     }
 
     public class VendorItem

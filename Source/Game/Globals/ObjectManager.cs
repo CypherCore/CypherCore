@@ -1913,8 +1913,8 @@ namespace Game
         public void LoadCreatureTemplateAddons()
         {
             var time = Time.GetMSTime();
-            //                                        0       1       2      3       4       5        6             7              8          9
-            SQLResult result = DB.World.Query("SELECT entry, path_id, mount, bytes1, bytes2, emote, aiAnimKit, movementAnimKit, meleeAnimKit, auras FROM creature_template_addon");
+            //                                        0       1        2      3       4       5      6          7                8             9                       10
+            SQLResult result = DB.World.Query("SELECT entry, path_id, mount, bytes1, bytes2, emote, aiAnimKit, movementAnimKit, meleeAnimKit, visibilityDistanceType, auras FROM creature_template_addon");
 
             if (result.IsEmpty())
             {
@@ -1941,8 +1941,9 @@ namespace Game
                 creatureAddon.aiAnimKit = result.Read<ushort>(6);
                 creatureAddon.movementAnimKit = result.Read<ushort>(7);
                 creatureAddon.meleeAnimKit = result.Read<ushort>(8);
+                creatureAddon.visibilityDistanceType = (VisibilityDistanceType)result.Read<byte>(9);
 
-                var tokens = new StringArray(result.Read<string>(9), ' ');
+                var tokens = new StringArray(result.Read<string>(10), ' ');
 
                 creatureAddon.auras = new uint[tokens.Length];
                 byte i = 0;
@@ -2004,6 +2005,12 @@ namespace Game
                     creatureAddon.meleeAnimKit = 0;
                 }
 
+                if (creatureAddon.visibilityDistanceType >= VisibilityDistanceType.Max)
+                {
+                    Log.outError(LogFilter.Sql, $"Creature (Entry: {entry}) has invalid visibilityDistanceType ({creatureAddon.visibilityDistanceType}) defined in `creature_template_addon`.");
+                    creatureAddon.visibilityDistanceType = VisibilityDistanceType.Normal;
+                }
+
                 creatureTemplateAddonStorage.Add(entry, creatureAddon);
                 count++;
             }
@@ -2013,8 +2020,8 @@ namespace Game
         public void LoadCreatureAddons()
         {
             var time = Time.GetMSTime();
-            //                                        0       1       2      3       4       5        6             7              8          9
-            SQLResult result = DB.World.Query("SELECT guid, path_id, mount, bytes1, bytes2, emote, aiAnimKit, movementAnimKit, meleeAnimKit, auras FROM creature_addon");
+            //                                        0       1       2      3       4       5        6             7              8          9                       10
+            SQLResult result = DB.World.Query("SELECT guid, path_id, mount, bytes1, bytes2, emote, aiAnimKit, movementAnimKit, meleeAnimKit, visibilityDistanceType, auras FROM creature_addon");
 
             if (result.IsEmpty())
             {
@@ -2049,8 +2056,9 @@ namespace Game
                 creatureAddon.aiAnimKit = result.Read<ushort>(6);
                 creatureAddon.movementAnimKit = result.Read<ushort>(7);
                 creatureAddon.meleeAnimKit = result.Read<ushort>(8);
+                creatureAddon.visibilityDistanceType = (VisibilityDistanceType)result.Read<byte>(9);
 
-                var tokens = new StringArray(result.Read<string>(9), ' ');
+                var tokens = new StringArray(result.Read<string>(10), ' ');
                 byte i = 0;
                 creatureAddon.auras = new uint[tokens.Length];
                 for (var c = 0; c < tokens.Length; ++c)
@@ -2110,6 +2118,12 @@ namespace Game
                 {
                     Log.outError(LogFilter.Sql, "Creature (Guid: {0}) has invalid meleeAnimKit ({1}) defined in `creature_addon`.", guid, creatureAddon.meleeAnimKit);
                     creatureAddon.meleeAnimKit = 0;
+                }
+
+                if (creatureAddon.visibilityDistanceType >= VisibilityDistanceType.Max)
+                {
+                    Log.outError(LogFilter.Sql, $"Creature (GUID: {guid}) has invalid visibilityDistanceType ({creatureAddon.visibilityDistanceType}) defined in `creature_addon`.");
+                    creatureAddon.visibilityDistanceType = VisibilityDistanceType.Normal;
                 }
 
                 creatureAddonStorage.Add(guid, creatureAddon);

@@ -1560,6 +1560,17 @@ namespace Game.Entities
             }
         }
 
+        bool IsVisibilityOverridden() { return m_visibilityDistanceOverride.HasValue; }
+
+        public void SetVisibilityDistanceOverride(VisibilityDistanceType type)
+        {
+            Cypher.Assert(type < VisibilityDistanceType.Max);
+            if (GetTypeId() == TypeId.Player)
+                return;
+
+            m_visibilityDistanceOverride.Set(SharedConst.VisibilityDistances[(int)type]);
+        }
+
         public virtual void CleanupsBeforeDelete(bool finalCleanup = true)
         {
             if (IsInWorld)
@@ -1615,7 +1626,9 @@ namespace Game.Entities
 
         public float GetVisibilityRange()
         {
-            if (isActiveObject() && !IsTypeId(TypeId.Player))
+            if (IsVisibilityOverridden() && !IsTypeId(TypeId.Player))
+                return m_visibilityDistanceOverride.Value;
+            else if (isActiveObject() && !IsTypeId(TypeId.Player))
                 return SharedConst.MaxVisibilityDistance;
             else
                 return GetMap().GetVisibilityRange();
@@ -1627,7 +1640,9 @@ namespace Game.Entities
             {
                 if (IsTypeId(TypeId.Player))
                 {
-                    if (target != null && target.isActiveObject() && target.ToPlayer() == null)
+                    if (target != null && target.IsVisibilityOverridden() && !target.IsTypeId(TypeId.Player))
+                        return target.m_visibilityDistanceOverride.Value;
+                    else if (target != null && target.isActiveObject() && !target.IsTypeId(TypeId.Player))
                         return SharedConst.MaxVisibilityDistance;
                     else if (ToPlayer().GetCinematicMgr().IsOnCinematic())
                         return SharedConst.DefaultVisibilityInstance;
@@ -2902,6 +2917,7 @@ namespace Game.Entities
         public MovementInfo m_movementInfo;
         string _name;
         protected bool m_isActive;
+        Optional<float> m_visibilityDistanceOverride;
         bool m_isWorldObject;
         public ZoneScript m_zoneScript;
 

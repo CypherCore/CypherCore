@@ -65,7 +65,6 @@ namespace Framework.Constants
         public const int LFGHealersNeeded = 1;
         public const int LFGDPSNeeded = 3;
 
-
         /// <summary>
         /// Loot Const
         /// </summary>
@@ -82,7 +81,6 @@ namespace Framework.Constants
         public const float terminal_safeFall_length = (float)((terminalSafefallVelocity * terminalSafefallVelocity) / (2.0f * gravity));
         public const float terminal_fallTime = (float)(terminalVelocity / gravity); // the time that needed to reach terminalVelocity
         public const float terminal_safeFall_fallTime = (float)(terminalSafefallVelocity / gravity); // the time that needed to reach terminalVelocity with safefall
-
 
         /// <summary>
         /// Vehicle Const
@@ -212,7 +210,6 @@ namespace Framework.Constants
         public const int MaxPetTalentRank = 3;
         public const int ActionBarIndexMax = (ActionBarIndexEnd - ActionBarIndexStart);
 
-
         /// <summary>
         /// Object Const
         /// </summary>
@@ -227,9 +224,14 @@ namespace Framework.Constants
         public const float InteractionDistance = 5.0f;
         public const float MaxVisibilityDistance = MapConst.SizeofGrids;        // max distance for visible objects
         public const float SightRangeUnit = 50.0f;
-        public const float DefaultVisibilityDistance = 90.0f;                  // default visible distance, 90 yards on continents
-        public const float DefaultVisibilityInstance = 170.0f;                 // default visible distance in instances, 170 yards
-        public const float DefaultVisibilityBGAreans = 533.0f;             // default visible distance in BG/Arenas, roughly 533 yards
+        public const float VisibilityDistanceGigantic = 400.0f;
+        public const float VisibilityDistanceLarge = 200.0f;
+        public const float VisibilityDistanceNormal = 100.0f;
+        public const float VisibilityDistanceSmall = 50.0f;
+        public const float VisibilityDistanceTiny = 25.0f;
+        public const float DefaultVisibilityDistance = VisibilityDistanceNormal;  // default visible distance, 100 yards on continents
+        public const float DefaultVisibilityInstance = 170.0f;                    // default visible distance in instances, 170 yards
+        public const float DefaultVisibilityBGAreans = 533.0f;                    // default visible distance in BG/Arenas, roughly 533 yards
         public const int DefaultVisibilityNotifyPeriod = 1000;
 
         public const int WorldTrigger = 12999;
@@ -258,6 +260,16 @@ namespace Framework.Constants
             7.0f,                  // MOVE_FLIGHT
             4.5f,                  // MOVE_FLIGHT_BACK
             3.14f                  // MOVE_PITCH_RATE
+        };
+
+        public static float[] VisibilityDistances =
+        {
+            DefaultVisibilityDistance,
+            VisibilityDistanceTiny,
+            VisibilityDistanceSmall,
+            VisibilityDistanceLarge,
+            VisibilityDistanceGigantic,
+            MaxVisibilityDistance
         };
 
         //Todo move these else where
@@ -2388,5 +2400,17 @@ namespace Framework.Constants
     public enum WorldMapTransformsFlags
     {
         Dungeon = 0x04
+    }
+
+    public enum VisibilityDistanceType
+    {
+        Normal = 0,
+        Tiny = 1,
+        Small = 2,
+        Large = 3,
+        Gigantic = 4,
+        Infinite = 5,
+
+        Max
     }
 }
