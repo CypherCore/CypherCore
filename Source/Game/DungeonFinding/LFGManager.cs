@@ -1504,7 +1504,7 @@ namespace Game.DungeonFinding
                 else if (dungeon.expansion > (uint)expansion)
                     lockStatus = LfgLockStatusType.InsufficientExpansion;
                 else if (Global.DisableMgr.IsDisabledFor(DisableType.Map, dungeon.map, player))
-                    lockStatus = LfgLockStatusType.RaidLocked;
+                    lockStatus = LfgLockStatusType.NotInSeason;
                 else if (Global.DisableMgr.IsDisabledFor(DisableType.LFGMap, dungeon.map, player))
                     lockStatus = LfgLockStatusType.RaidLocked;
                 else if (dungeon.difficulty > Difficulty.Normal && player.GetBoundInstance(dungeon.map, dungeon.difficulty) != null)

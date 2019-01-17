@@ -1754,14 +1754,17 @@ namespace Game.DataStorage
                 areaEntry = CliDB.AreaTableStorage.LookupByKey(areaEntry.ParentAreaID);
             }
 
-            MapRecord mapEntry = CliDB.MapStorage.LookupByKey(mapId);
-            if (mapEntry != null)
+            if (mapId > 0)
             {
-                iterateUiMapAssignments(_uiMapAssignmentByMap[(int)system], (int)mapEntry.Id);
-                if (mapEntry.ParentMapID >= 0)
-                    iterateUiMapAssignments(_uiMapAssignmentByMap[(int)system], mapEntry.ParentMapID);
-                if (mapEntry.CosmeticParentMapID >= 0)
-                    iterateUiMapAssignments(_uiMapAssignmentByMap[(int)system], mapEntry.CosmeticParentMapID);
+                MapRecord mapEntry = CliDB.MapStorage.LookupByKey(mapId);
+                if (mapEntry != null)
+                {
+                    iterateUiMapAssignments(_uiMapAssignmentByMap[(int)system], (int)mapEntry.Id);
+                    if (mapEntry.ParentMapID >= 0)
+                        iterateUiMapAssignments(_uiMapAssignmentByMap[(int)system], mapEntry.ParentMapID);
+                    if (mapEntry.CosmeticParentMapID >= 0)
+                        iterateUiMapAssignments(_uiMapAssignmentByMap[(int)system], mapEntry.CosmeticParentMapID);
+                }
             }
 
             return nearestMapAssignment.UiMapAssignment;

@@ -62,7 +62,7 @@ namespace Framework.Database
             PrepareStatement(LoginStatements.INS_REALM_CHARACTERS_INIT, "INSERT INTO realmcharacters (realmid, acctid, numchars) SELECT realmlist.id, account.id, 0 FROM realmlist, account LEFT JOIN realmcharacters ON acctid=account.id WHERE acctid IS NULL");
             PrepareStatement(LoginStatements.UPD_EXPANSION, "UPDATE account SET expansion = ? WHERE id = ?");
             PrepareStatement(LoginStatements.UPD_ACCOUNT_LOCK, "UPDATE account SET locked = ? WHERE id = ?");
-            PrepareStatement(LoginStatements.UPD_ACCOUNT_LOCK_CONTRY, "UPDATE account SET lock_country = ? WHERE id = ?");
+            PrepareStatement(LoginStatements.UPD_ACCOUNT_LOCK_COUNTRY, "UPDATE account SET lock_country = ? WHERE id = ?");
             PrepareStatement(LoginStatements.INS_LOG, "INSERT INTO logs (time, realm, type, level, string) VALUES (?, ?, ?, ?, ?)");
             PrepareStatement(LoginStatements.UPD_USERNAME, "UPDATE account SET username = ?, sha_pass_hash = ? WHERE id = ?");
             PrepareStatement(LoginStatements.UPD_PASSWORD, "UPDATE account SET sha_pass_hash = ? WHERE id = ?");
@@ -212,7 +212,7 @@ namespace Framework.Database
         INS_REALM_CHARACTERS_INIT,
         UPD_EXPANSION,
         UPD_ACCOUNT_LOCK,
-        UPD_ACCOUNT_LOCK_CONTRY,
+        UPD_ACCOUNT_LOCK_COUNTRY,
         INS_LOG,
         UPD_USERNAME,
         UPD_PASSWORD,

@@ -544,7 +544,7 @@ namespace Game.Entities
             }
 
             // Check if angular distance changed
-            bool turn = MathFunctions.fuzzyGt(Math.PI - Math.Abs(Math.Abs(GetOrientation() - orientation) - Math.PI), 0.0f);
+            bool turn = MathFunctions.fuzzyGt((float)Math.PI - Math.Abs(Math.Abs(GetOrientation() - orientation) - (float)Math.PI), 0.0f);
             // G3D::fuzzyEq won't help here, in some cases magnitudes differ by a little more than G3D::eps, but should be considered equal
             bool relocated = (teleport ||
                 Math.Abs(GetPositionX() - x) > 0.001f ||
