@@ -19,10 +19,12 @@ The current support game version is: 8.0.1.28153
 * Extract the sql files into the core sql folder (ex: C:\CypherCore\sql)
 
 ### Playing
-* Must use Arctium WoW Client Launcher [Download](https://arctium.io/files/?f=15ac71b2f0df3f)
-* Must start the launch with the argument --custom 
-(make a shortcut and edit shortcut and add argument to target ex: Arctium WoW Client Launcher.exe" --custom)
+* Must use Arctium WoW Client Launcher [Download](https://arctium.io) (World of Warcraft -> Client Launchers)
 
 ### Support / General Info
 * Check out our channel on Arctium Discord [Here](https://discord.gg/Hac3qn6)
 * Check out Trinity Core Wiki as a few steps are the same [Here](https://trinitycore.atlassian.net/wiki/spaces/tc/pages/2130077/Installation+Guide)
+
+### Legal
+* Blizzard, Battle.net, World of Warcraft, and all associated logos and designs are trademarks or registered trademarks of Blizzard Entertainment.
+* All other trademarks are the property of their respective owners. This project is **not** affiliated with Blizzard Entertainment or any of their family of sites.
