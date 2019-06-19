@@ -87,7 +87,7 @@ namespace Game.Entities
             return at;
         }
 
-        bool Create(uint spellMiscId, Unit caster, Unit target, SpellInfo spell, Position pos, int duration, uint spellXSpellVisualId, ObjectGuid castId, AuraEffect aurEff)
+        unsafe bool Create(uint spellMiscId, Unit caster, Unit target, SpellInfo spell, Position pos, int duration, uint spellXSpellVisualId, ObjectGuid castId, AuraEffect aurEff)
         {
             _targetGuid = target ? target.GetGUID() : ObjectGuid.Empty;
             _aurEff = aurEff;
@@ -125,8 +125,8 @@ namespace Game.Entities
             SetUInt32Value(AreaTriggerFields.DecalPropertiesId, GetMiscTemplate().DecalPropertiesId);
 
             for (byte scaleCurveIndex = 0; scaleCurveIndex < SharedConst.MaxAreatriggerScale; ++scaleCurveIndex)
-                if (GetMiscTemplate().ScaleInfo.ExtraScale[scaleCurveIndex].AsInt32 != 0)
-                    SetUInt32Value(AreaTriggerFields.ExtraScaleCurve + scaleCurveIndex, (uint)GetMiscTemplate().ScaleInfo.ExtraScale[scaleCurveIndex].AsInt32);
+                if (GetMiscTemplate().ExtraScale.Raw.Data[scaleCurveIndex] != 0)
+                    SetUInt32Value(AreaTriggerFields.ExtraScaleCurve + scaleCurveIndex, (uint)GetMiscTemplate().ExtraScale.Raw.Data[scaleCurveIndex]);
 
             PhasingHandler.InheritPhaseShift(this, caster);
 

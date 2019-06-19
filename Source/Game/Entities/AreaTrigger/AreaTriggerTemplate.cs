@@ -81,38 +81,51 @@ namespace Game.Entities
         }
     }
 
+    /// <summary>
+    /// Scale array definition
+    /// 0 - time offset from creation for starting of scaling
+    /// 1+2,3+4 are values for curve points Vector2[2]
+    //  5 is packed curve information (has_no_data & 1) | ((interpolation_mode & 0x7) << 1) | ((first_point_offset & 0x7FFFFF) << 4) | ((point_count & 0x1F) << 27)
+    /// 6 bool is_override, only valid for AREATRIGGER_OVERRIDE_SCALE_CURVE, if true then use data from AREATRIGGER_OVERRIDE_SCALE_CURVE instead of ScaleCurveId from CreateObject
+    /// </summary>
+    [StructLayout(LayoutKind.Explicit)]
     public class AreaTriggerScaleInfo
     {
-        public AreaTriggerScaleInfo()
-        {
-            OverrideScale = new OverrideScaleStruct[SharedConst.MaxAreatriggerScale];
-            ExtraScale = new ExtraScaleStruct[SharedConst.MaxAreatriggerScale];
+        [FieldOffset(0)]
+        public StructuredData Structured;
 
-            ExtraScale[5].AsFloat = 1.0000001f;
-            ExtraScale[6].AsInt32 = 1;
-        }
-
-        public OverrideScaleStruct[] OverrideScale;
-        public ExtraScaleStruct[] ExtraScale;
+        [FieldOffset(0)]
+        public RawData Raw;
 
         [StructLayout(LayoutKind.Explicit)]
-        public struct OverrideScaleStruct
+        public struct StructuredData
         {
             [FieldOffset(0)]
-            public int AsInt32;
+            public uint StartTimeOffset;
 
-            [FieldOffset(0)]
-            public float AsFloat;
+            [FieldOffset(4)]
+            public float[] Points;
+
+            [FieldOffset(20)]
+            public curveparameters CurveParameters;
+
+            [FieldOffset(24)]
+            public uint OverrideActive;
+
+            public struct curveparameters
+            {
+                public uint Raw;
+
+                public uint NoData { get { return Raw & 1; } }
+                public uint InterpolationMode { get { return (Raw & 0x7) << 1; } }
+                public uint FirstPointOffset { get { return (Raw & 0x7FFFFF) << 4; } }
+                public uint PointCount { get { return (Raw & 0x1F) << 27; } }
+            }
         }
 
-        [StructLayout(LayoutKind.Explicit)]
-        public struct ExtraScaleStruct
+        public unsafe struct RawData
         {
-            [FieldOffset(0)]
-            public int AsInt32;
-
-            [FieldOffset(0)]
-            public float AsFloat;
+            public fixed uint Data[SharedConst.MaxAreatriggerScale];
         }
     }
 
@@ -216,8 +229,17 @@ namespace Game.Entities
         public List<AreaTriggerAction> Actions = new List<AreaTriggerAction>();
     }
 
-    public class AreaTriggerMiscTemplate
+    public unsafe class AreaTriggerMiscTemplate
     {
+        public AreaTriggerMiscTemplate()
+        {
+            // legacy code from before it was known what each curve field does
+            // wtf? thats not how you pack curve data
+            ExtraScale.Raw.Data[5] = (uint)1.0000001f;
+            // also OverrideActive does nothing on ExtraScale
+            ExtraScale.Structured.OverrideActive = 1;
+        }
+
         public bool HasSplines() { return SplinePoints.Count >= 2; }
 
         public uint MiscId;
@@ -236,7 +258,8 @@ namespace Game.Entities
         public uint TimeToTarget;
         public uint TimeToTargetScale;
 
-        public AreaTriggerScaleInfo ScaleInfo = new AreaTriggerScaleInfo();
+        public AreaTriggerScaleInfo OverrideScale = new AreaTriggerScaleInfo();
+        public AreaTriggerScaleInfo ExtraScale = new AreaTriggerScaleInfo();
         public AreaTriggerCircularMovementInfo CircularMovementInfo;
 
         public AreaTriggerTemplate Template;
