@@ -137,24 +137,25 @@ namespace Game.AI
                 temp.Event.raw.param2 = result.Read<uint>(9);
                 temp.Event.raw.param3 = result.Read<uint>(10);
                 temp.Event.raw.param4 = result.Read<uint>(11);
-                temp.Event.param_string = result.Read<string>(12);
+                temp.Event.raw.param5 = result.Read<uint>(12);
+                temp.Event.param_string = result.Read<string>(13);
 
-                temp.Action.type = (SmartActions)result.Read<byte>(13);
-                temp.Action.raw.param1 = result.Read<uint>(14);
-                temp.Action.raw.param2 = result.Read<uint>(15);
-                temp.Action.raw.param3 = result.Read<uint>(16);
-                temp.Action.raw.param4 = result.Read<uint>(17);
-                temp.Action.raw.param5 = result.Read<uint>(18);
-                temp.Action.raw.param6 = result.Read<uint>(19);
+                temp.Action.type = (SmartActions)result.Read<byte>(14);
+                temp.Action.raw.param1 = result.Read<uint>(15);
+                temp.Action.raw.param2 = result.Read<uint>(16);
+                temp.Action.raw.param3 = result.Read<uint>(17);
+                temp.Action.raw.param4 = result.Read<uint>(18);
+                temp.Action.raw.param5 = result.Read<uint>(19);
+                temp.Action.raw.param6 = result.Read<uint>(20);
 
-                temp.Target.type = (SmartTargets)result.Read<byte>(20);
-                temp.Target.raw.param1 = result.Read<uint>(21);
-                temp.Target.raw.param2 = result.Read<uint>(22);
-                temp.Target.raw.param3 = result.Read<uint>(23);
-                temp.Target.x = result.Read<float>(24);
-                temp.Target.y = result.Read<float>(25);
-                temp.Target.z = result.Read<float>(26);
-                temp.Target.o = result.Read<float>(27);
+                temp.Target.type = (SmartTargets)result.Read<byte>(21);
+                temp.Target.raw.param1 = result.Read<uint>(22);
+                temp.Target.raw.param2 = result.Read<uint>(23);
+                temp.Target.raw.param3 = result.Read<uint>(24);
+                temp.Target.x = result.Read<float>(25);
+                temp.Target.y = result.Read<float>(26);
+                temp.Target.z = result.Read<float>(27);
+                temp.Target.o = result.Read<float>(28);
 
                 //check target
                 if (!IsTargetValid(temp))
@@ -1927,6 +1928,7 @@ namespace Game.AI
             public uint param2;
             public uint param3;
             public uint param4;
+            public uint param5;
         }
         #endregion
     }
