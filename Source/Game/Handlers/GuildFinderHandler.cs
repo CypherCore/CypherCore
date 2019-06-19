@@ -241,6 +241,9 @@ namespace Game
                 return;
 
             Guild guild = Global.GuildMgr.GetGuildById(player.GetGuildId());
+            if (guild == null)
+                return;
+
             if (guild.GetLeaderGUID() != player.GetGUID())
                     return;
 
