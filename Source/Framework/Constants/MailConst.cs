@@ -24,7 +24,8 @@ namespace Framework.Constants
         Creature = 3,
         Gameobject = 4,
         Calendar = 5,
-        Blackmarket = 6
+        Blackmarket = 6,
+        CommerceAuction = 7
     }
 
     public enum MailCheckMask
