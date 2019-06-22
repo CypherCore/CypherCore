@@ -34,13 +34,14 @@ namespace Game
             {
                 if (guild.IsMember(query.PlayerGuid))
                 {
-                    guild.SendQueryResponse(this);
+                    guild.SendQueryResponse(this, query.PlayerGuid);
                     return;
                 }
             }
 
             QueryGuildInfoResponse response = new QueryGuildInfoResponse();
             response.GuildGUID = query.GuildGuid;
+            response.PlayerGuid = query.PlayerGuid;
             SendPacket(response);
         }
 

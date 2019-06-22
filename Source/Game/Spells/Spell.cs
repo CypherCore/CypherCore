@@ -3724,6 +3724,7 @@ namespace Game.Spells
                 if (targetInfo.missCondition == SpellMissInfo.None) // hits
                 {
                     data.HitTargets.Add(targetInfo.targetGUID);
+                    data.HitStatus.Add(new SpellHitStatus(SpellMissInfo.None));
 
                     m_channelTargetEffectMask |= targetInfo.effectMask;
                 }
@@ -3731,12 +3732,7 @@ namespace Game.Spells
                 {
                     data.MissTargets.Add(targetInfo.targetGUID);
 
-                    SpellMissStatus missStatus = new SpellMissStatus();
-                    missStatus.Reason = (byte)targetInfo.missCondition;
-                    if (targetInfo.missCondition == SpellMissInfo.Reflect)
-                        missStatus.ReflectStatus = (byte)targetInfo.reflectResult;
-
-                    data.MissStatus.Add(missStatus);
+                    data.MissStatus.Add(new SpellMissStatus(targetInfo.missCondition, targetInfo.reflectResult));
                 }
             }
 

@@ -369,7 +369,7 @@ namespace Framework.Constants
         BypassArmorForCaster = 345,
         EnableAltPower = 346,  // Nyi
         ModSpellCooldownByHaste = 347,
-        DepositBonusMoneyInGuildBankOnLoot = 348,  // Nyi
+        ModMoneyGain = 348,  // Modifies gold gains from source: [Misc = 0, Quests][Misc = 1, Loot]
         ModCurrencyGain = 349,
         ModGatheringItemsGainedPercent = 350,  // Nyi
         Unk351 = 351,

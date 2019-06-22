@@ -48,6 +48,11 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(ClassID);
             _worldPacket.WriteInt32(SpecializationID);
             _worldPacket.WriteInt32(GenderID);
+            _worldPacket.WriteUInt8(LifetimeMaxRank);
+            _worldPacket.WriteUInt16(TodayHK);
+            _worldPacket.WriteUInt16(YesterdayHK);
+            _worldPacket.WriteInt32(LifetimeHK);
+            _worldPacket.WriteInt32(HonorLevel);
 
             for (int i = 0; i < Glyphs.Count; ++i)
                 _worldPacket.WriteUInt16(Glyphs[i]);
@@ -62,13 +67,17 @@ namespace Game.Network.Packets
             _worldPacket.WriteBit(AzeriteLevel.HasValue);
             _worldPacket.FlushBits();
 
-            Items.ForEach(p => p.Write(_worldPacket));
+            foreach (PVPBracketData bracket in Bracket)
+                bracket.Write(_worldPacket);
 
             if (GuildData.HasValue)
                 GuildData.Value.Write(_worldPacket);
 
             if (AzeriteLevel.HasValue)
                 _worldPacket.WriteInt32(AzeriteLevel.Value);
+
+            foreach (InspectItemData item in Items)
+                item.Write(_worldPacket);
         }
 
         public ObjectGuid InspecteeGUID;
@@ -79,72 +88,14 @@ namespace Game.Network.Packets
         public Class ClassID = Class.None;
         public Gender GenderID = Gender.None;
         public Optional<InspectGuildData> GuildData = new Optional<InspectGuildData>();
+        public Array<PVPBracketData> Bracket = new Array<PVPBracketData>(6);
         public int SpecializationID;
         public Optional<int> AzeriteLevel;
-    }
-
-    public class RequestHonorStats : ClientPacket
-    {
-        public RequestHonorStats(WorldPacket packet) : base(packet) { }
-
-        public override void Read()
-        {
-            TargetGUID = _worldPacket.ReadPackedGuid();
-        }
-
-        public ObjectGuid TargetGUID;
-    }
-
-    public class InspectHonorStats : ServerPacket
-    {
-        public InspectHonorStats() : base(ServerOpcodes.InspectHonorStats) { }
-
-        public override void Write()
-        {
-            _worldPacket.WritePackedGuid(PlayerGUID);
-            _worldPacket.WriteUInt8(LifetimeMaxRank);
-            _worldPacket.WriteUInt16(YesterdayHK); // @todo: confirm order
-            _worldPacket.WriteUInt16(TodayHK); // @todo: confirm order
-            _worldPacket.WriteUInt32(LifetimeHK);
-        }
-
-        public ObjectGuid PlayerGUID;
         public uint LifetimeHK;
-        public ushort YesterdayHK;
+        public uint HonorLevel;
         public ushort TodayHK;
+        public ushort YesterdayHK;
         public byte LifetimeMaxRank;
-    }
-
-    public class InspectPVPRequest : ClientPacket
-    {
-        public InspectPVPRequest(WorldPacket packet) : base(packet) { }
-
-        public override void Read()
-        {
-            InspectTarget = _worldPacket.ReadPackedGuid();
-            InspectRealmAddress = _worldPacket.ReadUInt32();
-        }
-
-        public ObjectGuid InspectTarget;
-        public uint InspectRealmAddress;
-    }
-
-    public class InspectPVPResponse : ServerPacket
-    {
-        public InspectPVPResponse() : base(ServerOpcodes.InspectPvp) { }
-
-        public override void Write()
-        {
-            _worldPacket.WritePackedGuid(ClientGUID);
-
-            _worldPacket.WriteBits(Bracket.Count, 3);
-            _worldPacket.FlushBits();
-
-            Bracket.ForEach(p => p.Write(_worldPacket));
-        }
-
-        public List<PVPBracketData> Bracket = new List<PVPBracketData>();
-        public ObjectGuid ClientGUID;
     }
 
     public class QueryInspectAchievements : ClientPacket
@@ -272,7 +223,6 @@ namespace Game.Network.Packets
             data.WriteInt32(Unk801_1);
             data.WriteBit(Unk801_2);
             data.FlushBits();
-
         }
 
         public int Rating;

@@ -283,9 +283,9 @@ namespace Game.Network.Packets
         }
     }
 
-    public class NotifyRecievedMail : ServerPacket
+    public class NotifyReceivedMail : ServerPacket
     {
-        public NotifyRecievedMail() : base(ServerOpcodes.NotifyReceivedMail) { }
+        public NotifyReceivedMail() : base(ServerOpcodes.NotifyReceivedMail) { }
 
         public override void Write()
         {

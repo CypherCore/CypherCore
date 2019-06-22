@@ -73,9 +73,9 @@ namespace Game.Entities
                 _owner.GetPlayer().AddDynamicValue(ActivePlayerDynamicFields.Toys, value);
         }
 
-        public bool AddToy(uint itemId, bool isFavourite = false)
+        public bool AddToy(uint itemId, bool isFavourite, bool hasFanfare)
         {
-            if (UpdateAccountToys(itemId, isFavourite))
+            if (UpdateAccountToys(itemId, isFavourite, hasFanfare))
             {
                 _owner.GetPlayer().AddDynamicValue(ActivePlayerDynamicFields.Toys, itemId);
                 return true;
@@ -92,9 +92,8 @@ namespace Game.Entities
             do
             {
                 uint itemId = result.Read<uint>(0);
-                bool isFavourite = result.Read<bool>(1);
 
-                _toys[itemId] = isFavourite;
+                _toys[itemId] = GetToyFlags(result.Read<bool>(1), result.Read<bool>(2));
             } while (result.NextRow());
         }
 
@@ -106,17 +105,18 @@ namespace Game.Entities
                 stmt = DB.Login.GetPreparedStatement(LoginStatements.REP_ACCOUNT_TOYS);
                 stmt.AddValue(0, _owner.GetBattlenetAccountId());
                 stmt.AddValue(1, pair.Key);
-                stmt.AddValue(2, pair.Value);
+                stmt.AddValue(2, pair.Value.HasAnyFlag(ToyFlags.Favorite));
+                stmt.AddValue(3, pair.Value.HasAnyFlag(ToyFlags.HasFanfare));
                 trans.Append(stmt);
             }
         }
 
-        bool UpdateAccountToys(uint itemId, bool isFavourite = false)
+        bool UpdateAccountToys(uint itemId, bool isFavourite, bool hasFanfare)
         {
             if (_toys.ContainsKey(itemId))
                 return false;
 
-            _toys.Add(itemId, isFavourite);
+            _toys.Add(itemId, GetToyFlags(isFavourite, hasFanfare));
             return true;
         }
 
@@ -125,7 +125,30 @@ namespace Game.Entities
             if (!_toys.ContainsKey(itemId))
                 return;
 
-            _toys[itemId] = favorite;
+            if (favorite)
+                _toys[itemId] |= ToyFlags.Favorite;
+            else
+                _toys[itemId] &= ~ToyFlags.Favorite;
+        }
+
+        public void ToyClearFanfare(uint itemId)
+        {
+            if (!_toys.ContainsKey(itemId))
+                return;
+
+            _toys[itemId] &= ~ToyFlags.HasFanfare;
+        }
+
+        ToyFlags GetToyFlags(bool isFavourite, bool hasFanfare)
+        {
+            ToyFlags flags = ToyFlags.None;
+            if (isFavourite)
+                flags |= ToyFlags.Favorite;
+
+            if (hasFanfare)
+                flags |= ToyFlags.HasFanfare;
+
+            return flags;
         }
 
         public void OnItemAdded(Item item)
@@ -825,13 +848,13 @@ namespace Game.Entities
         }
 
         public bool HasToy(uint itemId) { return _toys.ContainsKey(itemId); }
-        public Dictionary<uint, bool> GetAccountToys() { return _toys; }
+        public Dictionary<uint, ToyFlags> GetAccountToys() { return _toys; }
         public Dictionary<uint, HeirloomData> GetAccountHeirlooms() { return _heirlooms; }
         public Dictionary<uint, MountStatusFlags> GetAccountMounts() { return _mounts; }
 
         WorldSession _owner;
 
-        Dictionary<uint, bool> _toys = new Dictionary<uint, bool>();
+        Dictionary<uint, ToyFlags> _toys = new Dictionary<uint, ToyFlags>();
         Dictionary<uint, HeirloomData> _heirlooms = new Dictionary<uint, HeirloomData>();
         Dictionary<uint, MountStatusFlags> _mounts = new Dictionary<uint, MountStatusFlags>();
         System.Collections.BitSet _appearances;

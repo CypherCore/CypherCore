@@ -534,6 +534,7 @@ namespace Game
                     item.StackCount = (int)itemTemplate.GetBuyCount();
                     item.Price = (ulong)price;
                     item.DoNotFilterOnVendor = vendorItem.IgnoreFiltering;
+                    item.Refundable = (itemTemplate.GetFlags() & ItemFlags.ItemPurchaseRecord) != 0 && vendorItem.ExtendedCost != 0 && itemTemplate.GetMaxStackSize() == 1;
 
                     item.Item.ItemID = vendorItem.item;
                     if (!vendorItem.BonusListIDs.Empty())

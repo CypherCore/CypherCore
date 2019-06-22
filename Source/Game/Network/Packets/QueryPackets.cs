@@ -131,6 +131,9 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt32(Stats.RequiredExpansion);
                 _worldPacket.WriteInt32(Stats.VignetteID);
                 _worldPacket.WriteInt32(Stats.Class);
+                _worldPacket.WriteFloat(Stats.FadeRegionRadius);
+                _worldPacket.WriteInt32(Stats.WidgetSetID);
+                _worldPacket.WriteInt32(Stats.WidgetSetUnitConditionID);
 
                 if (!Stats.Title.IsEmpty())
                     _worldPacket.WriteCString(Stats.Title);
@@ -738,6 +741,9 @@ namespace Game.Network.Packets
         public uint RequiredExpansion;
         public uint VignetteID;
         public int Class;
+        public float FadeRegionRadius;
+        public int WidgetSetID;
+        public int WidgetSetUnitConditionID;
         public uint[] Flags = new uint[2];
         public uint[] ProxyCreatureID = new uint[SharedConst.MaxCreatureKillCredit];
         public StringArray Name = new StringArray(SharedConst.MaxCreatureNames);

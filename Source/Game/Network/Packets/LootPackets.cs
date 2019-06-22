@@ -143,12 +143,14 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Money);
+            _worldPacket.WriteUInt64(Money);
+            _worldPacket.WriteUInt64(MoneyMod);
             _worldPacket.WriteBit(SoleLooter);
             _worldPacket.FlushBits();
         }
 
-        public uint Money;
+        public ulong Money;
+        public ulong MoneyMod;
         public bool SoleLooter;
     }
 

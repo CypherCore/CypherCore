@@ -235,12 +235,15 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(PartyIndex);
             _worldPacket.WriteUInt8(RoleCheckStatus);
             _worldPacket.WriteUInt32(JoinSlots.Count);
-            _worldPacket.WriteUInt64(BgQueueID);
+            _worldPacket.WriteUInt32(BgQueueIDs.Count);
             _worldPacket.WriteUInt32(GroupFinderActivityID);
             _worldPacket.WriteUInt32(Members.Count);
 
             foreach (var slot in JoinSlots)
                 _worldPacket.WriteUInt32(slot);
+
+            foreach (ulong bgQueueID in BgQueueIDs)
+                _worldPacket.WriteUInt64(bgQueueID);
 
             _worldPacket.WriteBit(IsBeginning);
             _worldPacket.WriteBit(IsRequeue);
@@ -253,7 +256,7 @@ namespace Game.Network.Packets
         public byte PartyIndex;
         public byte RoleCheckStatus;
         public List<uint> JoinSlots = new List<uint>();
-        public ulong BgQueueID;
+        public List<ulong> BgQueueIDs = new List<ulong>();
         public int GroupFinderActivityID = 0;
         public List<LFGRoleCheckUpdateMember> Members = new List<LFGRoleCheckUpdateMember>();
         public bool IsBeginning;
@@ -271,15 +274,24 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(Result);
             _worldPacket.WriteUInt8(ResultDetail);
             _worldPacket.WriteUInt32(BlackList.Count);
+            _worldPacket.WriteUInt32(BlackListNames.Count);
 
             foreach (LFGJoinBlackList blackList in BlackList)
                 blackList.Write(_worldPacket);
+
+            foreach (string str in BlackListNames)
+                _worldPacket.WriteBits(str.GetByteCount() + 1, 24);
+
+            foreach (string str in BlackListNames)
+                if (!str.IsEmpty())
+                    _worldPacket.WriteCString(str);
         }
 
         public RideTicket Ticket = new RideTicket();
         public byte Result;
         public byte ResultDetail;
         public List<LFGJoinBlackList> BlackList = new List<LFGJoinBlackList>();
+        public List<string> BlackListNames = new List<string>();
     }
 
     class LFGQueueStatus : ServerPacket

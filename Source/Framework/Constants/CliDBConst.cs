@@ -948,7 +948,8 @@ namespace Framework.Constants
     {
         Player = 0x01,
         DeathKnight = 0x04,
-        DemonHunter = 0x20
+        DemonHunter = 0x20,
+        Conditional = 0x400
     }
 
     public enum CharSectionType

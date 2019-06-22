@@ -443,7 +443,7 @@ namespace Game.Network.Packets
         public int Unknown;
     }
 
-    struct GarrisonMissionAreaBonus
+    struct GarrisonMissionBonusAbility
     {
         public void Write(WorldPacket data)
         {
@@ -509,7 +509,7 @@ namespace Game.Network.Packets
                     missionRewardItem.Write(data);
             }
 
-            foreach (GarrisonMissionAreaBonus areaBonus in MissionAreaBonuses)
+            foreach (GarrisonMissionBonusAbility areaBonus in MissionAreaBonuses)
                 areaBonus.Write(data);
 
             foreach (GarrisonTalent talent in Talents)
@@ -541,7 +541,7 @@ namespace Game.Network.Packets
         public List<GarrisonMission> Missions = new List<GarrisonMission>();
         public List<List<GarrisonMissionReward>> MissionRewards = new List<List<GarrisonMissionReward>>();
         public List<List<GarrisonMissionReward>> MissionOvermaxRewards = new List<List<GarrisonMissionReward>>();
-        public List<GarrisonMissionAreaBonus> MissionAreaBonuses = new List<GarrisonMissionAreaBonus>();
+        public List<GarrisonMissionBonusAbility> MissionAreaBonuses = new List<GarrisonMissionBonusAbility>();
         public List<GarrisonTalent> Talents = new List<GarrisonTalent>();
         public List<bool> CanStartMission = new List<bool>();
         public List<int> ArchivedMissions = new List<int>();

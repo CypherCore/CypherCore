@@ -20,6 +20,7 @@ using Framework.Dynamic;
 using Framework.IO;
 using Game.Entities;
 using System.Collections.Generic;
+using System;
 
 namespace Game.Network.Packets
 {
@@ -78,23 +79,32 @@ namespace Game.Network.Packets
 
     class AvailableHotfixes : ServerPacket
     {
-        public AvailableHotfixes(int hotfixCacheVersion, Dictionary<ulong, int> hotfixes) : base(ServerOpcodes.AvailableHotfixes)
+        public AvailableHotfixes(int hotfixCacheVersion, uint hotfixCount, MultiMap<int, Tuple<uint, int>> hotfixes) : base(ServerOpcodes.AvailableHotfixes)
         {
             HotfixCacheVersion = hotfixCacheVersion;
+            HotfixCount = hotfixCount;
             Hotfixes = hotfixes;
         }
 
         public override void Write()
         {
             _worldPacket.WriteInt32(HotfixCacheVersion);
+            _worldPacket.WriteUInt32(HotfixCount);
 
-            _worldPacket.WriteUInt32(Hotfixes.Count);
-            foreach (var hotfixEntry in Hotfixes)
-                _worldPacket.WriteInt64(hotfixEntry.Key);
+            foreach (var key in Hotfixes.Keys)
+            {
+                foreach (var tableRecord in Hotfixes[key])
+                {
+                    _worldPacket.WriteUInt32(tableRecord.Item1);
+                    _worldPacket.WriteInt32(tableRecord.Item2);
+                    _worldPacket.WriteInt32(key);
+                }
+            }
         }
 
         public int HotfixCacheVersion;
-        public Dictionary<ulong, int> Hotfixes = new Dictionary<ulong, int>();
+        public uint HotfixCount;
+        public MultiMap<int, Tuple<uint, int>> Hotfixes;
     }
 
     class HotfixRequest : ClientPacket
@@ -103,15 +113,17 @@ namespace Game.Network.Packets
 
         public override void Read()
         {
-            uint hotfixCount = _worldPacket.ReadUInt32();
-            //if (hotfixCount > Global.DB2Mgr.GetHotfixData().Count)
-                //throw PacketArrayMaxCapacityException(hotfixCount, sDB2Manager.GetHotfixData().size());
+            ClientBuild = _worldPacket.ReadUInt32();
+            DataBuild = _worldPacket.ReadUInt32();
 
+            uint hotfixCount = _worldPacket.ReadUInt32();
             for (var i = 0; i < hotfixCount; ++i)
-                Hotfixes.Add(_worldPacket.ReadUInt64());
+                Hotfixes.Add(new HotfixRecord(_worldPacket));
         }
 
-        public List<ulong> Hotfixes = new List<ulong>();
+        public uint ClientBuild;
+        public uint DataBuild;
+        public List<HotfixRecord> Hotfixes = new List<HotfixRecord>();
     }
 
     class HotfixResponse : ServerPacket
@@ -123,27 +135,55 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(Hotfixes.Count);
             foreach (HotfixData hotfix in Hotfixes)
                 hotfix.Write(_worldPacket);
+
+            _worldPacket.WriteUInt32(HotfixContent.GetSize());
+            _worldPacket.WriteBytes(HotfixContent);
         }
 
         public List<HotfixData> Hotfixes = new List<HotfixData>();
+        public ByteBuffer HotfixContent;
 
         public class HotfixData
         {
             public void Write(WorldPacket data)
             {
-                data.WriteInt64(ID);
-                data.WriteInt32(RecordID);
-                data.WriteBit(Data.HasValue);
-                if (Data.HasValue)
+                Record.Write(data);
+                if (Size.HasValue)
                 {
-                    data.WriteUInt32(Data.Value.GetSize());
-                    data.WriteBytes(Data.Value);
+                    data.WriteUInt32(Size);
+                    data.WriteBit(true);
                 }
+                else
+                {
+                    data.WriteUInt32(0);
+                    data.WriteBit(false);
+                }
+                data.FlushBits();
             }
 
-            public ulong ID;
-            public int RecordID;
-            public Optional<ByteBuffer> Data;
+            public HotfixRecord Record;
+            public Optional<uint> Size;
         }
+    }
+
+    public struct HotfixRecord
+    {
+        public HotfixRecord(WorldPacket data)
+        {
+            TableHash = data.ReadUInt32();
+            RecordID = data.ReadInt32();
+            HotfixID = data.ReadInt32();
+        }
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(TableHash);
+            data.WriteInt32(RecordID);
+            data.WriteInt32(HotfixID);
+        }
+
+        public uint TableHash;
+        public int RecordID;
+        public int HotfixID;
     }
 }

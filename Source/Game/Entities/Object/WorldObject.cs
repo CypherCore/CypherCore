@@ -399,6 +399,7 @@ namespace Game.Entities
                 data.WriteFloat(unit.GetSpeed(UnitMoveType.PitchRate));
 
                 data.WriteUInt32(0); // unit.m_movementInfo.forces.size()
+                data.WriteFloat(1.0f); // MovementForcesModMagnitude
 
                 data.WriteBit(HasSpline);
                 data.FlushBits();

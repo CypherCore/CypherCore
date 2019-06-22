@@ -316,7 +316,6 @@ namespace Game
             foreach (var dungeonId in dungeons)
                 lfgRoleCheckUpdate.JoinSlots.Add(Global.LFGMgr.GetLFGDungeonEntry(dungeonId));
 
-            lfgRoleCheckUpdate.BgQueueID = 0;
             lfgRoleCheckUpdate.GroupFinderActivityID = 0;
             if (!roleCheck.roles.Empty())
             {
@@ -348,6 +347,8 @@ namespace Game
             lfgJoinResult.Result = (byte)joinData.result;
             if (joinData.result == LfgJoinResult.RoleCheckFailed)
                 lfgJoinResult.ResultDetail = (byte)joinData.state;
+            else if (joinData.result == LfgJoinResult.NoSlots)
+                lfgJoinResult.BlackListNames = joinData.playersMissingRequirement;
 
             foreach (var it in joinData.lockmap)
             {

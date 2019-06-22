@@ -333,6 +333,7 @@ namespace Game.Network.Packets
             data.WriteInt32(PlayerConditionFailed);
             Item.Write(data);
             data.WriteBit(DoNotFilterOnVendor);
+            data.WriteBit(Refundable);
             data.FlushBits();
         }
 
@@ -346,6 +347,7 @@ namespace Game.Network.Packets
         public int ExtendedCostID;
         public int PlayerConditionFailed;
         public bool DoNotFilterOnVendor;
+        public bool Refundable;
     }
 
     public class TrainerListSpell

@@ -201,6 +201,13 @@ namespace Game.Network.Packets
         public string Name;
     }
 
+    class GroupUninvite : ServerPacket
+    {
+        public GroupUninvite() : base(ServerOpcodes.GroupUninvite) { }
+
+        public override void Write() { }
+    }
+
     class RequestPartyMemberStats : ClientPacket
     {
         public RequestPartyMemberStats(WorldPacket packet) : base(packet) { }
@@ -420,13 +427,6 @@ namespace Game.Network.Packets
         }
 
         public sbyte PartyIndex;
-    }
-
-    class GroupUninvite : ServerPacket
-    {
-        public GroupUninvite() : base(ServerOpcodes.GroupUninvite) { }
-
-        public override void Write() { }
     }
 
     class GroupDestroyed : ServerPacket
@@ -1042,7 +1042,8 @@ namespace Game.Network.Packets
             data.WriteUInt8(RolesAssigned);
             data.WriteUInt8(Class);
             data.WriteString(Name);
-            data.WriteString(VoiceStateID);
+            if (!VoiceStateID.IsEmpty())
+                data.WriteString(VoiceStateID);
         }
 
         public ObjectGuid GUID;

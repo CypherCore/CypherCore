@@ -48,7 +48,7 @@ namespace Game
                 return;
             }
 
-            if (_collectionMgr.AddToy(item.GetEntry(), false))
+            if (_collectionMgr.AddToy(item.GetEntry(), false, false))
                 _player.DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
         }
 
@@ -92,6 +92,12 @@ namespace Game
             spell.m_misc.Data1 = packet.Cast.Misc[1];
             spell.m_castFlagsEx |= SpellCastFlagsEx.UseToySpell;
             spell.prepare(targets);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.ToyClearFanfare)]
+        void HandleToyClearFanfare(ToyClearFanfare toyClearFanfare)
+        {
+            _collectionMgr.ToyClearFanfare(toyClearFanfare.ItemID);
         }
     }
 }

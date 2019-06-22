@@ -50,6 +50,7 @@ namespace Game.Network.Packets
 
             _worldPacket.WriteUInt32(BpayStoreProductDeliveryDelay);
             _worldPacket.WriteUInt32(ClubsPresenceUpdateTimer);
+            _worldPacket.WriteUInt32(HiddenUIClubsPresenceUpdateTimer);
 
             _worldPacket.WriteBit(VoiceEnabled);
             _worldPacket.WriteBit(EuropaTicketSystemStatus.HasValue);
@@ -77,6 +78,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteBit(ClubsEnabled);
             _worldPacket.WriteBit(ClubsBattleNetClubTypeAllowed);
             _worldPacket.WriteBit(ClubsCharacterClubTypeAllowed);
+            _worldPacket.WriteBit(ClubsPresenceUpdateEnabled);
             _worldPacket.WriteBit(VoiceChatDisabledByParentalControl);
             _worldPacket.WriteBit(VoiceChatMutedByParentalControl);
             _worldPacket.FlushBits();
@@ -159,6 +161,7 @@ namespace Game.Network.Packets
         public long TokenBalanceAmount;
         public uint BpayStoreProductDeliveryDelay;
         public uint ClubsPresenceUpdateTimer;
+        public uint HiddenUIClubsPresenceUpdateTimer; // Timer for updating club presence when communities ui frame is hidden
         public bool ItemRestorationButtonEnabled;
         public bool CharUndeleteEnabled; // Implemented
         public bool BpayStoreDisabledByParentalControls;
@@ -176,6 +179,7 @@ namespace Game.Network.Packets
         public bool ClubsEnabled;
         public bool ClubsBattleNetClubTypeAllowed;
         public bool ClubsCharacterClubTypeAllowed;
+        public bool ClubsPresenceUpdateEnabled;
         public bool VoiceChatDisabledByParentalControl;
         public bool VoiceChatMutedByParentalControl;
 

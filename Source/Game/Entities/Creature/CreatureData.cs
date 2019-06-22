@@ -83,6 +83,9 @@ namespace Game.Entities
         public float ModExperience;
         public bool RacialLeader;
         public uint MovementId;
+        public float FadeRegionRadius;
+        public int WidgetSetID;
+        public int WidgetSetUnitConditionID;
         public bool RegenHealth;
         public uint MechanicImmuneMask;
         public CreatureFlagsExtra FlagsExtra;

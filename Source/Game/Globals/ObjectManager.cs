@@ -1760,8 +1760,10 @@ namespace Game
                 "spell1, spell2, spell3, spell4, spell5, spell6, spell7, spell8, VehicleId, mingold, maxgold, AIName, MovementType, " +
                 //60           61           62              63                   64            65                 66             67              68
                 "InhabitType, HoverHeight, HealthModifier, HealthModifierExtra, ManaModifier, ManaModifierExtra, ArmorModifier, DamageModifier, ExperienceModifier, " +
-                //69            70          71           72                    73           74
-                "RacialLeader, movementId, RegenHealth, mechanic_immune_mask, flags_extra, ScriptName FROM creature_template");
+                //69            70          71                72           73                        74           75                    76
+                "RacialLeader, movementId, FadeRegionRadius, WidgetSetID, WidgetSetUnitConditionID, RegenHealth, mechanic_immune_mask, flags_extra, " +
+                //77
+                "ScriptName FROM creature_template");
 
 
             if (result.IsEmpty())
@@ -1855,10 +1857,13 @@ namespace Game
             creature.ModExperience = fields.Read<float>(68);
             creature.RacialLeader = fields.Read<bool>(69);
             creature.MovementId = fields.Read<uint>(70);
-            creature.RegenHealth = fields.Read<bool>(71);
-            creature.MechanicImmuneMask = fields.Read<uint>(72);
-            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(73);
-            creature.ScriptID = GetScriptId(fields.Read<string>(74));
+            creature.FadeRegionRadius = fields.Read<float>(71);
+            creature.WidgetSetID = fields.Read<int>(72);
+            creature.WidgetSetUnitConditionID = fields.Read<int>(73);
+            creature.RegenHealth = fields.Read<bool>(74);
+            creature.MechanicImmuneMask = fields.Read<uint>(75);
+            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(76);
+            creature.ScriptID = GetScriptId(fields.Read<string>(77));
 
             creatureTemplateStorage.Add(entry, creature);
         }
@@ -6298,9 +6303,9 @@ namespace Game
                 "RewardFactionID5, RewardFactionValue5, RewardFactionOverride5, RewardFactionCapIn5, RewardFactionFlags, " +
                 //96                97                  98                 99                  100                101                 102                103
                 "RewardCurrencyID1, RewardCurrencyQty1, RewardCurrencyID2, RewardCurrencyQty2, RewardCurrencyID3, RewardCurrencyQty3, RewardCurrencyID4, RewardCurrencyQty4, " +
-                //104                105                 106          107          108             109               110
-                "AcceptedSoundKitID, CompleteSoundKitID, AreaGroupID, TimeAllowed, AllowableRaces, TreasurePickerID, Expansion, " +
-                //111      112             113               114              115                116                117                 118                 119
+                //104                105                 106          107          108             109               110        111
+                "AcceptedSoundKitID, CompleteSoundKitID, AreaGroupID, TimeAllowed, AllowableRaces, TreasurePickerID, Expansion, ManagedWorldStateID, " +
+                //112      113             114               115              116                117                118                 119                 120
                 "LogTitle, LogDescription, QuestDescription, AreaDescription, PortraitGiverText, PortraitGiverName, PortraitTurnInText, PortraitTurnInName, QuestCompletionLog" +
                 " FROM quest_template");
 
@@ -8834,7 +8839,7 @@ namespace Game
             uint oldMSTime = Time.GetMSTime();
             _playerChoices.Clear();
 
-            SQLResult choiceResult = DB.World.Query("SELECT ChoiceId, UiTextureKitId, Question, HideWarboardHeader, KeepOpenAfterChoice FROM playerchoice");
+            SQLResult choiceResult = DB.World.Query("SELECT ChoiceId, UiTextureKitId, SoundKitId, Question, HideWarboardHeader, KeepOpenAfterChoice FROM playerchoice");
             if (choiceResult.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 player choices. DB table `playerchoice` is empty.");
@@ -8852,15 +8857,16 @@ namespace Game
                 PlayerChoice choice = new PlayerChoice();
                 choice.ChoiceId = choiceResult.Read<int>(0);
                 choice.UiTextureKitId = choiceResult.Read<int>(1);
-                choice.Question = choiceResult.Read<string>(2);
-                choice.HideWarboardHeader = choiceResult.Read<bool>(3);
-                choice.KeepOpenAfterChoice = choiceResult.Read<bool>(4);
+                choice.SoundKitId = choiceResult.Read<uint>(2);
+                choice.Question = choiceResult.Read<string>(3);
+                choice.HideWarboardHeader = choiceResult.Read<bool>(4);
+                choice.KeepOpenAfterChoice = choiceResult.Read<bool>(5);
 
                 _playerChoices[choice.ChoiceId] = choice;
 
             } while (choiceResult.NextRow());
 
-            SQLResult responses = DB.World.Query("SELECT ChoiceId, ResponseId, ChoiceArtFileId, Flags, WidgetSetID, GroupID, Header, Answer, Description, Confirmation FROM playerchoice_response ORDER BY `Index` ASC");
+            SQLResult responses = DB.World.Query("SELECT ChoiceId, ResponseId, ChoiceArtFileId, Flags, WidgetSetID, UiTextureAtlasElementID, SoundKitID, GroupID, Answer, Header, SubHeader, ButtonTemplate, Description, Confirmation, RewardQuestID FROM playerchoice_response ORDER BY `Index` ASC");
             if (!responses.IsEmpty())
             {
                 do
@@ -8881,11 +8887,17 @@ namespace Game
                     response.ChoiceArtFileId = responses.Read<int>(2);
                     response.Flags = responses.Read<int>(3);
                     response.WidgetSetID = responses.Read<uint>(4);
-                    response.GroupID = responses.Read<byte>(5);
-                    response.Header = responses.Read<string>(6);
-                    response.Answer = responses.Read<string>(7);
-                    response.Description = responses.Read<string>(8);
-                    response.Confirmation = responses.Read<string>(9);
+                    response.UiTextureAtlasElementID = responses.Read<uint>(5);
+                    response.SoundKitID = responses.Read<uint>(6);
+                    response.GroupID = responses.Read<byte>(7);
+                    response.Answer = responses.Read<string>(8);
+                    response.Header = responses.Read<string>(9);
+                    response.SubHeader = responses.Read<string>(10);
+                    response.ButtonTooltip = responses.Read<string>(11);
+                    response.Description = responses.Read<string>(12);
+                    response.Confirmation = responses.Read<string>(13);
+                    if (!responses.IsNull(14))
+                        response.RewardQuestID.Set(responses.Read<uint>(14));
                     ++responseCount;
 
                     choice.Responses[responseId] = response;
@@ -9122,8 +9134,8 @@ namespace Game
 
             oldMSTime = Time.GetMSTime();
 
-            //                                   0         1           2       3       4       5            6
-            result = DB.World.Query("SELECT ChoiceID, ResponseID, locale, Header, Answer, Description, Confirmation FROM playerchoice_response_locale");
+            //                               0         1           2       3       4       5          6               7            8
+            result = DB.World.Query("SELECT ChoiceID, ResponseID, locale, Answer, Header, SubHeader, ButtonTooltip, Description, Confirmation FROM playerchoice_response_locale");
             if (!result.IsEmpty())
             {
                 uint count = 0;
@@ -9151,10 +9163,12 @@ namespace Game
                     }
 
                     PlayerChoiceResponseLocale data = playerChoiceLocale.Responses[responseId];
-                    AddLocaleString(result.Read<string>(3), locale, data.Header);
-                    AddLocaleString(result.Read<string>(4), locale, data.Answer);
-                    AddLocaleString(result.Read<string>(5), locale, data.Description);
-                    AddLocaleString(result.Read<string>(6), locale, data.Confirmation);
+                    AddLocaleString(result.Read<string>(3), locale, data.Answer);
+                    AddLocaleString(result.Read<string>(4), locale, data.Header);
+                    AddLocaleString(result.Read<string>(5), locale, data.SubHeader);
+                    AddLocaleString(result.Read<string>(6), locale, data.ButtonTooltip);
+                    AddLocaleString(result.Read<string>(7), locale, data.Description);
+                    AddLocaleString(result.Read<string>(8), locale, data.Confirmation);
                     count++;
                 } while (result.NextRow());
 
@@ -10579,6 +10593,8 @@ namespace Game
     {
         public StringArray Answer = new StringArray((int)LocaleConstant.Total);
         public StringArray Header = new StringArray((int)LocaleConstant.Total);
+        public StringArray SubHeader = new StringArray((int)LocaleConstant.Total);
+        public StringArray ButtonTooltip = new StringArray((int)LocaleConstant.Total);
         public StringArray Description = new StringArray((int)LocaleConstant.Total);
         public StringArray Confirmation = new StringArray((int)LocaleConstant.Total);
     }
@@ -10632,12 +10648,17 @@ namespace Game
         public int ChoiceArtFileId;
         public int Flags;
         public uint WidgetSetID;
+        public uint UiTextureAtlasElementID;
+        public uint SoundKitID;
         public byte GroupID;
-        public string Header;
         public string Answer;
+        public string Header;
+        public string SubHeader;
+        public string ButtonTooltip;
         public string Description;
         public string Confirmation;
         public Optional<PlayerChoiceResponseReward> Reward;
+        public Optional<uint> RewardQuestID;
     }
 
     public class PlayerChoice
@@ -10649,6 +10670,7 @@ namespace Game
 
         public int ChoiceId;
         public int UiTextureKitId;
+        public uint SoundKitId;
         public string Question;
         public List<PlayerChoiceResponse> Responses = new List<PlayerChoiceResponse>();
         public bool HideWarboardHeader;

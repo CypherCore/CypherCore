@@ -118,6 +118,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteBit(TrackedQuantity.HasValue);
             _worldPacket.WriteBit(MaxQuantity.HasValue);
             _worldPacket.WriteBit(SuppressChatLog);
+            _worldPacket.WriteBit(QuantityChange.HasValue);
+            _worldPacket.WriteBit(QuantityGainSource.HasValue);
+            _worldPacket.WriteBit(QuantityLostSource.HasValue);
             _worldPacket.FlushBits();
 
             if (WeeklyQuantity.HasValue)
@@ -128,6 +131,15 @@ namespace Game.Network.Packets
 
             if (MaxQuantity.HasValue)
                 _worldPacket.WriteInt32(MaxQuantity.Value);
+
+            if (QuantityChange.HasValue)
+                _worldPacket.WriteInt32(QuantityChange.Value);
+
+            if (QuantityGainSource.HasValue)
+                _worldPacket.WriteInt32(QuantityGainSource.Value);
+
+            if (QuantityLostSource.HasValue)
+                _worldPacket.WriteInt32(QuantityLostSource.Value);
         }
 
         public uint Type;
@@ -136,6 +148,9 @@ namespace Game.Network.Packets
         public Optional<int> WeeklyQuantity;
         public Optional<int> TrackedQuantity;
         public Optional<int> MaxQuantity;
+        public Optional<int> QuantityChange;
+        public Optional<int> QuantityGainSource;
+        public Optional<int> QuantityLostSource;
         public bool SuppressChatLog;
     }
 

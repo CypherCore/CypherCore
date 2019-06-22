@@ -977,7 +977,7 @@ namespace Game.Entities
             playOrphanSpellVisual.SpellVisualID = spellVisualId;
             playOrphanSpellVisual.TravelSpeed = travelSpeed;
             playOrphanSpellVisual.SpeedAsTime = speedAsTime;
-            playOrphanSpellVisual.UnkZero = 0.0f;
+            playOrphanSpellVisual.LaunchDelay = 0.0f;
             SendMessageToSet(playOrphanSpellVisual, true);
         }
 
@@ -991,7 +991,7 @@ namespace Game.Entities
             playOrphanSpellVisual.SpellVisualID = spellVisualId;
             playOrphanSpellVisual.TravelSpeed = travelSpeed;
             playOrphanSpellVisual.SpeedAsTime = speedAsTime;
-            playOrphanSpellVisual.UnkZero = 0.0f;
+            playOrphanSpellVisual.LaunchDelay = 0.0f;
             SendMessageToSet(playOrphanSpellVisual, true);
         }
 
@@ -1016,12 +1016,12 @@ namespace Game.Entities
             SendMessageToSet(playSpellVisual, true);
         }
 
-        public void SendPlaySpellVisual(Vector3 targetPosition, float o, uint spellVisualId, uint missReason, uint reflectStatus, float travelSpeed, bool speedAsTime = false)
+        public void SendPlaySpellVisual(Vector3 targetPosition, float launchDelay, uint spellVisualId, uint missReason, uint reflectStatus, float travelSpeed, bool speedAsTime = false)
         {
             PlaySpellVisual playSpellVisual = new PlaySpellVisual();
             playSpellVisual.Source = GetGUID();
             playSpellVisual.TargetPosition = targetPosition; // exclusive with Target
-            playSpellVisual.Orientation = o;
+            playSpellVisual.LaunchDelay = launchDelay;
             playSpellVisual.SpellVisualID = spellVisualId;
             playSpellVisual.TravelSpeed = travelSpeed;
             playSpellVisual.MissReason = (ushort)missReason;

@@ -1327,6 +1327,7 @@ namespace Game.Entities
                 packet.WeeklyQuantity.Set(newWeekCount);
                 packet.TrackedQuantity.Set(newTrackedCount);
                 packet.Flags = playerCurrency.Flags;
+                packet.QuantityChange.Set(count);
 
                 SendPacket(packet);
             }
@@ -2771,7 +2772,7 @@ namespace Game.Entities
         }
         void SendNewMail()
         {
-            SendPacket(new NotifyRecievedMail());
+            SendPacket(new NotifyReceivedMail());
         }
         public void UpdateNextMailTimeAndUnreads()
         {
@@ -5015,6 +5016,7 @@ namespace Game.Entities
             displayPlayerChoice.SenderGUID = sender;
             displayPlayerChoice.ChoiceID = choiceId;
             displayPlayerChoice.UiTextureKitID = playerChoice.UiTextureKitId;
+            displayPlayerChoice.SoundKitID = playerChoice.SoundKitId;
             displayPlayerChoice.Question = playerChoice.Question;
             if (playerChoiceLocale != null)
                 ObjectManager.GetLocaleString(playerChoiceLocale.Question, locale, ref displayPlayerChoice.Question);
@@ -5032,9 +5034,13 @@ namespace Game.Entities
                 playerChoiceResponse.ChoiceArtFileID = playerChoiceResponseTemplate.ChoiceArtFileId;
                 playerChoiceResponse.Flags = playerChoiceResponseTemplate.Flags;
                 playerChoiceResponse.WidgetSetID = playerChoiceResponseTemplate.WidgetSetID;
+                playerChoiceResponse.UiTextureAtlasElementID = playerChoiceResponseTemplate.UiTextureAtlasElementID;
+                playerChoiceResponse.SoundKitID = playerChoiceResponseTemplate.SoundKitID;
                 playerChoiceResponse.GroupID = playerChoiceResponseTemplate.GroupID;
                 playerChoiceResponse.Answer = playerChoiceResponseTemplate.Answer;
                 playerChoiceResponse.Header = playerChoiceResponseTemplate.Header;
+                playerChoiceResponse.SubHeader = playerChoiceResponseTemplate.SubHeader;
+                playerChoiceResponse.ButtonTooltip = playerChoiceResponseTemplate.ButtonTooltip;
                 playerChoiceResponse.Description = playerChoiceResponseTemplate.Description;
                 playerChoiceResponse.Confirmation = playerChoiceResponseTemplate.Confirmation;
                 if (playerChoiceLocale != null)
@@ -5044,6 +5050,8 @@ namespace Game.Entities
                     {
                         ObjectManager.GetLocaleString(playerChoiceResponseLocale.Answer, locale, ref playerChoiceResponse.Answer);
                         ObjectManager.GetLocaleString(playerChoiceResponseLocale.Header, locale, ref playerChoiceResponse.Header);
+                        ObjectManager.GetLocaleString(playerChoiceResponseLocale.SubHeader, locale, ref playerChoiceResponse.SubHeader);
+                        ObjectManager.GetLocaleString(playerChoiceResponseLocale.ButtonTooltip, locale, ref playerChoiceResponse.ButtonTooltip);
                         ObjectManager.GetLocaleString(playerChoiceResponseLocale.Description, locale, ref playerChoiceResponse.Description);
                         ObjectManager.GetLocaleString(playerChoiceResponseLocale.Confirmation, locale, ref playerChoiceResponse.Confirmation);
                     }
@@ -5093,6 +5101,8 @@ namespace Game.Entities
                     playerChoiceResponse.Reward.Set(reward);
                     displayPlayerChoice.Responses[i] = playerChoiceResponse;
                 }
+
+                playerChoiceResponse.RewardQuestID = playerChoiceResponseTemplate.RewardQuestID;
             }
 
             SendPacket(displayPlayerChoice);

@@ -388,7 +388,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(MessageID);
+            _worldPacket.WriteInt32(MessageID);
 
             _worldPacket.WriteBits(StringParam.GetByteCount(), 11);
             _worldPacket.WriteString(StringParam);

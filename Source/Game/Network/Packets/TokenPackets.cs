@@ -87,12 +87,12 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt64(CurrentMarketPrice);
             _worldPacket.WriteUInt32(UnkInt);
             _worldPacket.WriteUInt32(Result);
-            _worldPacket.WriteUInt32(UnkInt2);
+            _worldPacket.WriteUInt32(AuctionDuration);
         }
 
         public ulong CurrentMarketPrice;
         public uint UnkInt; // send CMSG_REQUEST_WOW_TOKEN_MARKET_PRICE
         public TokenResult Result;
-        public uint UnkInt2 = 0;
+        public uint AuctionDuration; // preset auction duration enum
     }
 }

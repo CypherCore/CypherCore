@@ -1481,9 +1481,6 @@ namespace Game.Entities
 
         static bool HasStats(ItemInstance itemInstance, BonusData bonus)
         {
-            if (itemInstance.RandomPropertiesID != 0)
-                return true;
-
             for (byte i = 0; i < ItemConst.MaxStats; ++i)
             {
                 if (bonus.ItemStatAllocation[i] != 0)

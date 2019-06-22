@@ -158,6 +158,9 @@ namespace Game
                 stats.HealthScalingExpansion = creatureInfo.HealthScalingExpansion;
                 stats.VignetteID = creatureInfo.VignetteID;
                 stats.Class = (int)creatureInfo.UnitClass;
+                stats.FadeRegionRadius = creatureInfo.FadeRegionRadius;
+                stats.WidgetSetID = creatureInfo.WidgetSetID;
+                stats.WidgetSetUnitConditionID = creatureInfo.WidgetSetUnitConditionID;
 
                 stats.Title = creatureInfo.SubName;
                 stats.TitleAlt = creatureInfo.TitleAlt;

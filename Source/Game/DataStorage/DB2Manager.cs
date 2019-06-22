@@ -611,7 +611,7 @@ namespace Game.DataStorage
             uint count = 0;
             do
             {
-                uint id = result.Read<uint>(0);
+                int id = result.Read<int>(0);
                 uint tableHash = result.Read<uint>(1);
                 int recordId = result.Read<int>(2);
                 bool deleted = result.Read<bool>(3);
@@ -621,7 +621,8 @@ namespace Game.DataStorage
                     continue;
                 }
 
-                _hotfixData[MathFunctions.MakePair64(id, tableHash)] = recordId;
+                _hotfixData.Add(id, Tuple.Create(tableHash, recordId));
+                ++_hotfixCount;
                 deletedRecords[Tuple.Create(tableHash, recordId)] = deleted;
 
                 ++count;
@@ -669,7 +670,8 @@ namespace Game.DataStorage
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {_hotfixBlob.Count} hotfix blob records in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
-        public Dictionary<ulong, int> GetHotfixData() { return _hotfixData; }
+        public uint GetHotfixCount() { return _hotfixCount; }
+        public MultiMap<int, Tuple<uint, int>> GetHotfixData() { return _hotfixData; }
 
         public byte[] GetHotfixBlobData(uint tableHash, int recordId)
         {
@@ -1884,7 +1886,8 @@ namespace Game.DataStorage
         }
 
         Dictionary<uint, IDB2Storage> _storage = new Dictionary<uint, IDB2Storage>();
-        Dictionary<ulong, int> _hotfixData = new Dictionary<ulong, int>();
+        uint _hotfixCount = 0;
+        MultiMap<int, Tuple<uint, int>> _hotfixData = new MultiMap<int, Tuple<uint, int>>();
         Dictionary<Tuple<uint, int>, byte[]> _hotfixBlob = new Dictionary<Tuple<uint, int>, byte[]>();
 
         MultiMap<uint, uint> _areaGroupMembers = new MultiMap<uint, uint>();

@@ -399,24 +399,6 @@ namespace Game.Arenas
             }
         }
 
-        public void Inspect(WorldSession session, ObjectGuid guid)
-        {
-            ArenaTeamMember member = GetMember(guid);
-            if (member == null)
-                return;
-
-            WorldPacket data = new WorldPacket(ServerOpcodes.InspectPvp);
-            data.WritePackedGuid(guid);                                   // player guid
-            data.WriteUInt8(GetSlot());                               // slot (0...2)
-            data.WriteUInt32(GetId());                                // arena team id
-            data.WriteUInt32(stats.Rating);                           // rating
-            data.WriteUInt32(stats.SeasonGames);                      // season played
-            data.WriteUInt32(stats.SeasonWins);                       // season wins
-            data.WriteUInt32(member.SeasonGames);                    // played (count of all games, that the inspected member participated...)
-            data.WriteUInt32(member.PersonalRating);                 // personal rating
-            //session.SendPacket(data);
-        }
-
         void BroadcastPacket(ServerPacket packet)
         {
             foreach (var member in Members)

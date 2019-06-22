@@ -120,36 +120,47 @@ public class RealmManager : Singleton<RealmManager>
         return _realms.LookupByKey(id);
     }
 
+    // List of client builds for verbose version info in realmlist packet
+    RealmBuildInfo[] ClientBuilds =
+    {
+        new RealmBuildInfo(28938, 8, 1, 5, ' ' ),
+        new RealmBuildInfo(21355, 6, 2, 4, ' ' ),
+        new RealmBuildInfo(20726, 6, 2, 3, ' ' ),
+        new RealmBuildInfo(20574, 6, 2, 2, 'a' ),
+        new RealmBuildInfo(20490, 6, 2, 2, 'a' ),
+        new RealmBuildInfo(15595, 4, 3, 4, ' ' ),
+        new RealmBuildInfo(14545, 4, 2, 2, ' ' ),
+        new RealmBuildInfo(13623, 4, 0, 6, 'a' ),
+        new RealmBuildInfo(13930, 3, 3, 5, 'a' ),                                  // 3.3.5a China Mainland build
+        new RealmBuildInfo(12340, 3, 3, 5, 'a' ),
+        new RealmBuildInfo(11723, 3, 3, 3, 'a' ),
+        new RealmBuildInfo(11403, 3, 3, 2, ' ' ),
+        new RealmBuildInfo(11159, 3, 3, 0, 'a' ),
+        new RealmBuildInfo(10505, 3, 2, 2, 'a' ),
+        new RealmBuildInfo(9947,  3, 1, 3, ' ' ),
+        new RealmBuildInfo(8606,  2, 4, 3, ' ' ),
+        new RealmBuildInfo(6141,  1, 12, 3, ' ' ),
+        new RealmBuildInfo(6005,  1, 12, 2, ' ' ),
+        new RealmBuildInfo(5875,  1, 12, 1, ' ' ),
+    };
+
     RealmBuildInfo GetBuildInfo(uint build)
     {
-        // List of client builds for verbose version info in realmlist packet
-        RealmBuildInfo[] ClientBuilds =
-        {
-                new RealmBuildInfo(21355, 6, 2, 4, ' '),
-                new RealmBuildInfo( 20726, 6, 2, 3, ' '),
-                new RealmBuildInfo(20574, 6, 2, 2, 'a'),
-                new RealmBuildInfo( 20490, 6, 2, 2, 'a'),
-                new RealmBuildInfo( 15595, 4, 3, 4, ' '),
-                new RealmBuildInfo( 14545, 4, 2, 2, ' '),
-                new RealmBuildInfo( 13623, 4, 0, 6, 'a'),
-                new RealmBuildInfo( 13930, 3, 3, 5, 'a'),                                  // 3.3.5a China Mainland build
-                new RealmBuildInfo( 12340, 3, 3, 5, 'a'),
-                new RealmBuildInfo( 11723, 3, 3, 3, 'a'),
-                new RealmBuildInfo( 11403, 3, 3, 2, ' '),
-                new RealmBuildInfo( 11159, 3, 3, 0, 'a'),
-                new RealmBuildInfo( 10505, 3, 2, 2, 'a'),
-                new RealmBuildInfo( 9947,  3, 1, 3, ' '),
-                new RealmBuildInfo( 8606,  2, 4, 3, ' '),
-                new RealmBuildInfo( 6141,  1, 12, 3, ' '),
-                new RealmBuildInfo( 6005,  1, 12, 2, ' '),
-                new RealmBuildInfo( 5875,  1, 12, 1, ' '),
-        };
-
         foreach (var clientBuild in ClientBuilds)
             if (clientBuild.Build == build)
                 return clientBuild;
 
         return null;
+    }
+
+    public uint GetMinorMajorBugfixVersionForBuild(uint build)
+    {
+        RealmBuildInfo buildInfo = ClientBuilds.FirstOrDefault(p =>
+        {
+            return p.Build < build;
+        });
+
+        return buildInfo != null ? (buildInfo.MajorVersion * 10000 + buildInfo.MinorVersion * 100 + buildInfo.BugfixVersion) : 0;
     }
 
     public void WriteSubRegions(Bgs.Protocol.GameUtilities.V1.GetAllValuesForAttributeResponse response)

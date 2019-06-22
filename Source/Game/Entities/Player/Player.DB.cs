@@ -3253,7 +3253,7 @@ namespace Game.Entities
 
                 stmt.AddValue(index++, GetByteValue(ActivePlayerFields.Bytes, PlayerFieldOffsets.FieldBytesOffsetActionBarToggles));
                 stmt.AddValue(index++, m_grantableLevels);
-                stmt.AddValue(index++, Global.WorldMgr.GetRealm().Build);
+                stmt.AddValue(index++, Global.RealmMgr.GetMinorMajorBugfixVersionForBuild(Global.WorldMgr.GetRealm().Build));
             }
             else
             {

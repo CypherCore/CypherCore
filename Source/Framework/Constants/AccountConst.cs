@@ -785,4 +785,11 @@ namespace Framework.Constants
         NeedsFanfare = 0x01,
         IsFavorite = 0x02
     }
+
+    public enum ToyFlags
+    {
+        None = 0,
+        Favorite = 0x01,
+        HasFanfare = 0x02
+    }
 }

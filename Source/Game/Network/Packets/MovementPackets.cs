@@ -1017,7 +1017,7 @@ namespace Game.Network.Packets
                 data.WriteBit(VehicleRecID.HasValue);
                 data.WriteBit(CollisionHeight.HasValue);
                 data.WriteBit(MovementForce_.HasValue);
-                data.WriteBit(Unknown.HasValue);
+                data.WriteBit(MovementForceGUID.HasValue);
                 data.FlushBits();
 
                 if (CollisionHeight.HasValue)
@@ -1041,8 +1041,8 @@ namespace Game.Network.Packets
                 if (VehicleRecID.HasValue)
                     data.WriteInt32(VehicleRecID.Value);
 
-                if (Unknown.HasValue)
-                    data.WritePackedGuid(Unknown.Value);
+                if (MovementForceGUID.HasValue)
+                    data.WritePackedGuid(MovementForceGUID.Value);
 
                 if (MovementForce_.HasValue)
                     MovementForce_.Value.Write(data);
@@ -1055,7 +1055,7 @@ namespace Game.Network.Packets
             public Optional<int> VehicleRecID;
             public Optional<CollisionHeightInfo> CollisionHeight;
             public Optional<MovementForce> MovementForce_;
-            public Optional<ObjectGuid> Unknown;
+            public Optional<ObjectGuid> MovementForceGUID;
         }
     }
 

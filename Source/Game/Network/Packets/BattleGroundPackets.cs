@@ -32,10 +32,12 @@ namespace Game.Network.Packets
         {
             _worldPacket.WriteUInt32(CurrentSeason);
             _worldPacket.WriteUInt32(PreviousSeason);
+            _worldPacket.WriteUInt32(PvpSeasonID);
         }
 
-        public uint PreviousSeason = 0;
-        public uint CurrentSeason = 0;
+        public uint PreviousSeason;
+        public uint CurrentSeason;
+        public uint PvpSeasonID;
     }
 
     public class AreaSpiritHealerQuery : ClientPacket
@@ -301,16 +303,17 @@ namespace Game.Network.Packets
 
         public override void Read()
         {
-            QueueID = _worldPacket.ReadUInt64();
+            var queueCount = _worldPacket.ReadUInt32();
             Roles = _worldPacket.ReadUInt8();
             BlacklistMap[0] = _worldPacket.ReadInt32();
             BlacklistMap[1] = _worldPacket.ReadInt32();
-            JoinAsGroup = _worldPacket.HasBit();
+
+            for (var i = 0; i < queueCount; ++i)
+                QueueIDs[i] = _worldPacket.ReadUInt64();
         }
 
-        public bool JoinAsGroup;
+        public Array<ulong> QueueIDs = new Array<ulong>(1);
         public byte Roles;
-        public ulong QueueID;
         public int[] BlacklistMap = new int[2];
     }
 
@@ -548,21 +551,6 @@ namespace Game.Network.Packets
         public RequestRatedBattlefieldInfo(WorldPacket packet) : base(packet) { }
 
         public override void Read() { }
-    }
-
-    public class ArenaError : ServerPacket
-    {
-        public ArenaError() : base(ServerOpcodes.ArenaError) { }
-
-        public override void Write()
-        {
-            _worldPacket.WriteUInt32(ErrorType);
-            if (ErrorType == ArenaErrorType.NoTeam)
-                _worldPacket.WriteUInt8(TeamSize);
-        }
-
-        public ArenaErrorType ErrorType;
-        public byte TeamSize;
     }
 
     //Structs

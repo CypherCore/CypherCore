@@ -201,6 +201,7 @@ namespace Game.Network.Packets
                 _worldPacket.WriteInt64(Info.AllowableRaces);
                 _worldPacket.WriteInt32(Info.TreasurePickerID);
                 _worldPacket.WriteInt32(Info.Expansion);
+                _worldPacket.WriteInt32(Info.ManagedWorldStateID);
 
                 _worldPacket.WriteBits(Info.LogTitle.GetByteCount(), 9);
                 _worldPacket.WriteBits(Info.LogDescription.GetByteCount(), 12);
@@ -837,6 +838,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(Responses.Count);
             _worldPacket.WritePackedGuid(SenderGUID);
             _worldPacket.WriteInt32(UiTextureKitID);
+            _worldPacket.WriteUInt32(SoundKitID);
             _worldPacket.WriteBits(Question.GetByteCount(), 8);
             _worldPacket.WriteBit(CloseChoiceFrame);
             _worldPacket.WriteBit(HideWarboardHeader);
@@ -852,6 +854,7 @@ namespace Game.Network.Packets
         public ObjectGuid SenderGUID;
         public int ChoiceID;
         public int UiTextureKitID;
+        public uint SoundKitID;
         public string Question;
         public List<PlayerChoiceResponse> Responses = new List<PlayerChoiceResponse>();
         public bool CloseChoiceFrame;
@@ -965,6 +968,7 @@ namespace Game.Network.Packets
         public uint TimeAllowed;
         public int TreasurePickerID;
         public int Expansion;
+        public int ManagedWorldStateID;
         public List<QuestObjective> Objectives = new List<QuestObjective>();
         public uint[] RewardItems = new uint[SharedConst.QuestRewardItemCount];
         public uint[] RewardAmount = new uint[SharedConst.QuestRewardItemCount];
@@ -1254,13 +1258,18 @@ namespace Game.Network.Packets
             data.WriteInt32(ChoiceArtFileID);
             data.WriteInt32(Flags);
             data.WriteUInt32(WidgetSetID);
+            data.WriteUInt32(UiTextureAtlasElementID);
+            data.WriteUInt32(SoundKitID);
             data.WriteUInt8(GroupID);
 
             data.WriteBits(Answer.GetByteCount(), 9);
             data.WriteBits(Header.GetByteCount(), 9);
+            data.WriteBits(SubHeader.GetByteCount(), 7);
+            data.WriteBits(ButtonTooltip.GetByteCount(), 9);
             data.WriteBits(Description.GetByteCount(), 11);
             data.WriteBits(Confirmation.GetByteCount(), 7);
 
+            data.WriteBit(RewardQuestID.HasValue);
             data.WriteBit(Reward.HasValue);
             data.FlushBits();
 
@@ -1269,19 +1278,29 @@ namespace Game.Network.Packets
 
             data.WriteString(Answer);
             data.WriteString(Header);
+            data.WriteString(SubHeader);
+            data.WriteString(ButtonTooltip);
             data.WriteString(Description);
             data.WriteString(Confirmation);
+
+            if (RewardQuestID.HasValue)
+                data.WriteUInt32(RewardQuestID.Value);
         }
 
         public int ResponseID;
         public int ChoiceArtFileID;
         public int Flags;
         public uint WidgetSetID;
+        public uint UiTextureAtlasElementID;
+        public uint SoundKitID;
         public byte GroupID;
         public string Answer;
         public string Header;
+        public string SubHeader;
+        public string ButtonTooltip;
         public string Description;
         public string Confirmation;
         public Optional<PlayerChoiceResponseReward> Reward;
+        public Optional<uint> RewardQuestID;
     }
 }

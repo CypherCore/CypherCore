@@ -691,8 +691,8 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(Target);
             _worldPacket.WriteUInt32(SpellVisualID);
             _worldPacket.WriteFloat(TravelSpeed);
-            _worldPacket.WriteFloat(UnkZero);
-            _worldPacket.WriteFloat(Unk801);
+            _worldPacket.WriteFloat(LaunchDelay);
+            _worldPacket.WriteFloat(MinDuration);
             _worldPacket.WriteBit(SpeedAsTime);
             _worldPacket.FlushBits();
         }
@@ -702,8 +702,8 @@ namespace Game.Network.Packets
         public uint SpellVisualID;
         public bool SpeedAsTime;
         public float TravelSpeed;
-        public float UnkZero; // Always zero
-        public float Unk801;
+        public float LaunchDelay; // Always zero
+        public float MinDuration;
         public Vector3 SourceRotation; // Vector of rotations, Orientation is z
         public Vector3 TargetLocation; // Exclusive with Target
     }
@@ -716,29 +716,31 @@ namespace Game.Network.Packets
         {
             _worldPacket.WritePackedGuid(Source);
             _worldPacket.WritePackedGuid(Target);
-            _worldPacket.WritePackedGuid(Unk801_1);
+            _worldPacket.WritePackedGuid(Transport);
             _worldPacket.WriteVector3(TargetPosition);
             _worldPacket.WriteUInt32(SpellVisualID);
             _worldPacket.WriteFloat(TravelSpeed);
+            _worldPacket.WriteUInt16(HitReason);
             _worldPacket.WriteUInt16(MissReason);
             _worldPacket.WriteUInt16(ReflectStatus);
-            _worldPacket.WriteFloat(Orientation);
-            _worldPacket.WriteFloat(Unk801_2);
+            _worldPacket.WriteFloat(LaunchDelay);
+            _worldPacket.WriteFloat(MinDuration);
             _worldPacket.WriteBit(SpeedAsTime);
             _worldPacket.FlushBits();
         }
 
         public ObjectGuid Source;
         public ObjectGuid Target; // Exclusive with TargetPosition
-        public ObjectGuid Unk801_1;
-        public ushort MissReason;
-        public uint SpellVisualID;
-        public bool SpeedAsTime;
-        public ushort ReflectStatus;
-        public float TravelSpeed;
+        public ObjectGuid Transport; // Used when Target = Empty && (SpellVisual::Flags & 0x400) == 0
         public Vector3 TargetPosition; // Exclusive with Target
-        public float Orientation;
-        public float Unk801_2;
+        public uint SpellVisualID;
+        public float TravelSpeed;
+        public ushort HitReason;
+        public ushort MissReason;
+        public ushort ReflectStatus;
+        public float LaunchDelay;
+        public float MinDuration;
+        public bool SpeedAsTime;
     }
 
     class PlaySpellVisualKit : ServerPacket
@@ -1268,6 +1270,7 @@ namespace Game.Network.Packets
         {
             data.WriteInt16(PlayerLevelDelta);
             data.WriteUInt16(PlayerItemLevel);
+            data.WriteUInt16(TargetItemLevel);
             data.WriteUInt16(ScalingHealthItemLevelCurveID);
             data.WriteUInt8(TargetLevel);
             data.WriteUInt8(Expansion);
@@ -1282,6 +1285,7 @@ namespace Game.Network.Packets
         public ContentTuningType TuningType;
         public short PlayerLevelDelta;
         public ushort PlayerItemLevel;
+        public ushort TargetItemLevel;
         public ushort ScalingHealthItemLevelCurveID;
         public byte TargetLevel;
         public byte Expansion;
@@ -1401,7 +1405,7 @@ namespace Game.Network.Packets
     {
         public void Read(WorldPacket data)
         {
-            Flags = (SpellCastTargetFlags)data.ReadBits<uint>(25);
+            Flags = (SpellCastTargetFlags)data.ReadBits<uint>(26);
             SrcLocation.HasValue = data.HasBit();
             DstLocation.HasValue = data.HasBit();
             Orientation.HasValue = data.HasBit();
@@ -1428,7 +1432,7 @@ namespace Game.Network.Packets
 
         public void Write(WorldPacket data)
         {
-            data.WriteBits((uint)Flags, 25);
+            data.WriteBits((uint)Flags, 26);
             data.WriteBit(SrcLocation.HasValue);
             data.WriteBit(DstLocation.HasValue);
             data.WriteBit(Orientation.HasValue);
@@ -1525,19 +1529,40 @@ namespace Game.Network.Packets
         public uint[] Misc = new uint[2];
     }
 
-    public struct SpellMissStatus
+    public struct SpellHitStatus
     {
+        public SpellHitStatus(SpellMissInfo reason)
+        {
+            Reason = reason;
+        }
+
         public void Write(WorldPacket data)
         {
-            data.WriteBits(Reason, 4);
-            if (Reason == (byte)SpellMissInfo.Reflect)
+            data.WriteUInt8(Reason);
+        }
+
+        public SpellMissInfo Reason;
+    }
+
+    public struct SpellMissStatus
+    {
+        public SpellMissStatus(SpellMissInfo reason, SpellMissInfo reflectStatus)
+        {
+            Reason = reason;
+            ReflectStatus = reflectStatus;
+        }
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteBits((byte)Reason, 4);
+            if (Reason == SpellMissInfo.Reflect)
                 data.WriteBits(ReflectStatus, 4);
 
             data.FlushBits();
         }
 
-        public byte Reason;
-        public byte ReflectStatus;
+        public SpellMissInfo Reason;
+        public SpellMissInfo ReflectStatus;
     }
 
     public struct SpellPowerData
@@ -1643,22 +1668,26 @@ namespace Game.Network.Packets
  
             data.WriteBits(HitTargets.Count, 16);
             data.WriteBits(MissTargets.Count, 16);
+            data.WriteBits(HitStatus.Count, 16);
             data.WriteBits(MissStatus.Count, 16);
             data.WriteBits(RemainingPower.Count, 9);
             data.WriteBit(RemainingRunes.HasValue);
             data.WriteBits(TargetPoints.Count, 16);
             data.FlushBits();
 
-            foreach (SpellMissStatus status in MissStatus)
-                status.Write(data);
+            foreach (SpellMissStatus missStatus in MissStatus)
+                missStatus.Write(data);
 
             Target.Write(data);
 
-            foreach (ObjectGuid target in HitTargets)
-                data.WritePackedGuid(target);
+            foreach (ObjectGuid hitTarget in HitTargets)
+                data.WritePackedGuid(hitTarget);
 
-            foreach (ObjectGuid target in MissTargets)
-                data.WritePackedGuid(target);
+            foreach (ObjectGuid missTarget in MissTargets)
+                data.WritePackedGuid(missTarget);
+
+            foreach (SpellHitStatus hitStatus in HitStatus)
+                hitStatus.Write(data);
 
             foreach (SpellPowerData power in RemainingPower)
                 power.Write(data);
@@ -1681,6 +1710,7 @@ namespace Game.Network.Packets
         public uint CastTime;
         public List<ObjectGuid> HitTargets = new List<ObjectGuid>();
         public List<ObjectGuid> MissTargets = new List<ObjectGuid>();
+        public List<SpellHitStatus> HitStatus = new List<SpellHitStatus>();
         public List<SpellMissStatus> MissStatus = new List<SpellMissStatus>();
         public SpellTargetData Target = new SpellTargetData();
         public List<SpellPowerData> RemainingPower = new List<SpellPowerData>();

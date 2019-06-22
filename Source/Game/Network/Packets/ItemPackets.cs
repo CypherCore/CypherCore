@@ -774,8 +774,6 @@ namespace Game.Network.Packets
         public ItemInstance(Item item)
         {
             ItemID = item.GetEntry();
-            RandomPropertiesSeed = item.GetItemSuffixFactor();
-            RandomPropertiesID = (uint)item.GetItemRandomPropertyId();
             var bonusListIds = item.GetDynamicValues(ItemDynamicFields.BonusListIds);
             if (!bonusListIds.Empty())
             {
@@ -800,9 +798,6 @@ namespace Game.Network.Packets
         public ItemInstance(Loots.LootItem lootItem)
         {
             ItemID = lootItem.itemid;
-            RandomPropertiesSeed = lootItem.randomSuffix;
-            if (lootItem.randomPropertyId.Type != ItemRandomEnchantmentType.BonusList)
-                RandomPropertiesID = lootItem.randomPropertyId.Id;
 
             if (!lootItem.BonusListIDs.Empty())
             {
@@ -821,9 +816,6 @@ namespace Game.Network.Packets
         public ItemInstance(VoidStorageItem voidItem)
         {
             ItemID = voidItem.ItemEntry;
-            RandomPropertiesSeed = voidItem.ItemSuffixFactor;
-            if (voidItem.ItemRandomPropertyId.Type != ItemRandomEnchantmentType.BonusList)
-                RandomPropertiesID = voidItem.ItemRandomPropertyId.Id;
 
             if (voidItem.ItemUpgradeId != 0 || voidItem.FixedScalingLevel != 0 || voidItem.ArtifactKnowledgeLevel != 0)
             {
@@ -861,8 +853,6 @@ namespace Game.Network.Packets
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(ItemID);
-            data.WriteUInt32(RandomPropertiesSeed);
-            data.WriteUInt32(RandomPropertiesID);
 
             data.WriteBit(ItemBonus.HasValue);
             data.WriteBit(Modifications.HasValue);
@@ -878,8 +868,6 @@ namespace Game.Network.Packets
         public void Read(WorldPacket data)
         {
             ItemID = data.ReadUInt32();
-            RandomPropertiesSeed = data.ReadUInt32();
-            RandomPropertiesID = data.ReadUInt32();
 
             ItemBonus.HasValue = data.HasBit();
             Modifications.HasValue = data.HasBit();
@@ -894,8 +882,7 @@ namespace Game.Network.Packets
 
         public override int GetHashCode()
         {
-            return ItemID.GetHashCode() ^ RandomPropertiesSeed.GetHashCode() ^
-                RandomPropertiesID.GetHashCode() ^ ItemBonus.GetHashCode() ^ Modifications.GetHashCode();
+            return ItemID.GetHashCode() ^ ItemBonus.GetHashCode() ^ Modifications.GetHashCode();
         }
 
         public override bool Equals(object obj)
@@ -908,7 +895,7 @@ namespace Game.Network.Packets
 
         public static bool operator ==(ItemInstance left, ItemInstance right)
         {
-            if (left.ItemID != right.ItemID || left.RandomPropertiesID != right.RandomPropertiesID || left.RandomPropertiesSeed != right.RandomPropertiesSeed)
+            if (left.ItemID != right.ItemID)
                 return false;
 
             if (left.ItemBonus.HasValue != right.ItemBonus.HasValue || left.Modifications.HasValue != right.Modifications.HasValue)
@@ -929,8 +916,6 @@ namespace Game.Network.Packets
         }
 
         public uint ItemID;
-        public uint RandomPropertiesSeed;
-        public uint RandomPropertiesID;
         public Optional<ItemBonusInstanceData> ItemBonus;
         public Optional<CompactArray> Modifications;
     }

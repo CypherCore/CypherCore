@@ -382,7 +382,7 @@ namespace Game.DungeonFinding
 
             // Check player or group member restrictions
             if (!player.GetSession().HasPermission(RBACPermissions.JoinDungeonFinder))
-                joinData.result = LfgJoinResult.NoSlotsPlayer;
+                joinData.result = LfgJoinResult.NoSlots;
             else if (player.InBattleground() || player.InArena() || player.InBattlegroundQueue())
                 joinData.result = LfgJoinResult.CantUseDungeons;
             else if (player.HasAura(SharedConst.LFGSpellDungeonDeserter))
@@ -390,9 +390,9 @@ namespace Game.DungeonFinding
             else if (player.HasAura(SharedConst.LFGSpellDungeonCooldown))
                 joinData.result = LfgJoinResult.RandomCooldownPlayer;
             else if (dungeons.Empty())
-                joinData.result = LfgJoinResult.NoSlotsPlayer;
+                joinData.result = LfgJoinResult.NoSlots;
             else if (player.HasAura(9454)) // check Freeze debuff
-                joinData.result = LfgJoinResult.NoSlotsPlayer;
+                joinData.result = LfgJoinResult.NoSlots;
             else if (grp)
             {
                 if (grp.GetMembersCount() > MapConst.MaxGroupSize)
@@ -414,7 +414,10 @@ namespace Game.DungeonFinding
                             else if (plrg.InBattleground() || plrg.InArena() || plrg.InBattlegroundQueue())
                                 joinData.result = LfgJoinResult.CantUseDungeons;
                             else if (plrg.HasAura(9454)) // check Freeze debuff
-                                joinData.result = LfgJoinResult.PartyNotMeetReqs;
+                            {
+                                joinData.result = LfgJoinResult.NoSlots;
+                                joinData.playersMissingRequirement.Add(plrg.GetName());
+                            }
                             ++memberCount;
                             players.Add(plrg.GetGUID());
                         }
@@ -471,9 +474,9 @@ namespace Game.DungeonFinding
                         dungeons = GetDungeonsByRandom(rDungeonId);
 
                     // if we have lockmap then there are no compatible dungeons
-                    GetCompatibleDungeons(dungeons, players, joinData.lockmap, isContinue);
+                    GetCompatibleDungeons(dungeons, players, joinData.lockmap, joinData.playersMissingRequirement, isContinue);
                     if (dungeons.Empty())
-                        joinData.result = grp ? LfgJoinResult.NoLfgObject : LfgJoinResult.NoSlotsPlayer;
+                        joinData.result = LfgJoinResult.NoSlots;
                 }
             }
 
@@ -730,10 +733,11 @@ namespace Game.DungeonFinding
             }
         }
 
-        void GetCompatibleDungeons(List<uint> dungeons, List<ObjectGuid> players, Dictionary<ObjectGuid, Dictionary<uint, LfgLockInfoData>> lockMap, bool isContinue)
+        void GetCompatibleDungeons(List<uint> dungeons, List<ObjectGuid> players, Dictionary<ObjectGuid, Dictionary<uint, LfgLockInfoData>> lockMap, List<string> playersMissingRequirement, bool isContinue)
         {
             lockMap.Clear();
             Dictionary<uint, uint> lockedDungeons = new Dictionary<uint, uint>();
+            List<uint> dungeonsToRemove = new List<uint>();
 
             foreach (var guid in players)
             {
@@ -775,15 +779,20 @@ namespace Game.DungeonFinding
                         }
 
                         if (eraseDungeon)
-                            dungeons.Remove(dungeonId);
+                            dungeonsToRemove.Add(dungeonId);
 
                         if (!lockMap.ContainsKey(guid))
                             lockMap[guid] = new Dictionary<uint, LfgLockInfoData>();
 
                         lockMap[guid][it2.Key] = it2.Value;
+                        playersMissingRequirement.Add(player.GetName());
                     }
                 }
             }
+
+            foreach (uint dungeonIdToRemove in dungeonsToRemove)
+                dungeons.Remove(dungeonIdToRemove);
+
             if (!dungeons.Empty())
                 lockMap.Clear();
         }
@@ -1995,6 +2004,7 @@ namespace Game.DungeonFinding
         public LfgJoinResult result;
         public LfgRoleCheckState state;
         public Dictionary<ObjectGuid, Dictionary<uint, LfgLockInfoData>> lockmap = new Dictionary<ObjectGuid, Dictionary<uint, LfgLockInfoData>>();
+        public List<string> playersMissingRequirement = new List<string>();
     }
 
     public class LfgUpdateData

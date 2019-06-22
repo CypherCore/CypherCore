@@ -57,11 +57,14 @@ namespace Game
         void HandleBattlemasterJoin(BattlemasterJoin battlemasterJoin)
         {
             bool isPremade = false;
-            Group grp = null;
 
-            BattlefieldStatusFailed battlefieldStatusFailed;
+            if (battlemasterJoin.QueueIDs.Empty())
+            {
+                Log.outError(LogFilter.Network, $"Battleground: no bgtype received. possible cheater? {_player.GetGUID().ToString()}");
+                return;
+            }
 
-            uint bgTypeId_ = (uint)(battlemasterJoin.QueueID & 0xFFFF);
+            uint bgTypeId_ = (uint)(battlemasterJoin.QueueIDs[0] & 0xFFFF);
             if (!CliDB.BattlemasterListStorage.ContainsKey(bgTypeId_))
             {
                 Log.outError(LogFilter.Network, "Battleground: invalid bgtype ({0}) received. possible cheater? player guid {1}", bgTypeId_, GetPlayer().GetGUID().ToString());
@@ -94,8 +97,12 @@ namespace Game
                 return;
 
             GroupJoinBattlegroundResult err = GroupJoinBattlegroundResult.None;
+
+            Group grp = _player.GetGroup();
+
+            BattlefieldStatusFailed battlefieldStatusFailed;
             // check queue conditions
-            if (!battlemasterJoin.JoinAsGroup)
+            if (grp == null)
             {
                 if (GetPlayer().isUsingLfg())
                 {
@@ -159,11 +166,6 @@ namespace Game
             }
             else
             {
-                grp = GetPlayer().GetGroup();
-
-                if (!grp)
-                    return;
-
                 if (grp.GetLeaderGUID() != GetPlayer().GetGUID())
                     return;
 
@@ -517,10 +519,7 @@ namespace Game
             // check real arenateam existence only here (if it was moved to group.CanJoin .. () then we would ahve to get it twice)
             ArenaTeam at = Global.ArenaTeamMgr.GetArenaTeamById(ateamId);
             if (at == null)
-            {
-                GetPlayer().GetSession().SendNotInArenaTeamPacket(arenatype);
                 return;
-            }
 
             // get the team rating for queuing
             uint arenaRating = at.GetRating();

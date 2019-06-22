@@ -157,7 +157,7 @@ namespace Game
 
             packet.MarketID = templ.MarketID;
             packet.Item = templ.Item;
-            packet.RandomPropertiesID = templ.Item.RandomPropertiesID;
+            packet.RandomPropertiesID = 0;
 
             SendPacket(packet);
         }

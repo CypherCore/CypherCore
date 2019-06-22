@@ -49,9 +49,13 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(Characters.Count);
             _worldPacket.WriteInt32(MaxCharacterLevel);
             _worldPacket.WriteUInt32(RaceUnlockData.Count);
+            _worldPacket.WriteUInt32(UnlockedConditionalAppearances.Count);
 
             if (DisabledClassesMask.HasValue)
                 _worldPacket.WriteUInt32(DisabledClassesMask.Value);
+
+            foreach (UnlockedConditionalAppearance unlockedConditionalAppearance in UnlockedConditionalAppearances)
+                unlockedConditionalAppearance.Write(_worldPacket);
 
             foreach (CharacterInfo charInfo in Characters)
                 charInfo.Write(_worldPacket);
@@ -72,6 +76,7 @@ namespace Game.Network.Packets
 
         public List<CharacterInfo> Characters = new List<CharacterInfo>(); // all characters on the list
         public List<RaceUnlock> RaceUnlockData = new List<RaceUnlock>(); //
+        public List<UnlockedConditionalAppearance> UnlockedConditionalAppearances = new List<UnlockedConditionalAppearance>();
 
         public class CharacterInfo
         {
@@ -169,7 +174,7 @@ namespace Game.Network.Packets
                 if (spec != null)
                     SpecID = (ushort)spec.Id;
 
-                LastLoginBuild = fields.Read<uint>(30);
+                LastLoginVersion = fields.Read<uint>(30);
 
                 for (byte slot = 0; slot < InventorySlots.BagEnd; ++slot)
                 {
@@ -217,7 +222,7 @@ namespace Game.Network.Packets
                 data.WriteUInt32(LastPlayedTime);
                 data.WriteUInt16(SpecID);
                 data.WriteUInt32(Unknown703);
-                data.WriteUInt32(LastLoginBuild);
+                data.WriteUInt32(LastLoginVersion);
                 data.WriteUInt32(Flags4);
                 data.WriteBits(Name.GetByteCount(), 6);
                 data.WriteBit(FirstLogin);
@@ -255,7 +260,7 @@ namespace Game.Network.Packets
             public uint LastPlayedTime;
             public ushort SpecID;
             public uint Unknown703;
-            public uint LastLoginBuild;
+            public uint LastLoginVersion;
             public PetInfo Pet = new PetInfo();
             public bool BoostInProgress; // @todo
             public uint[] ProfessionIds = new uint[2];      // @todo
@@ -274,6 +279,7 @@ namespace Game.Network.Packets
                 public uint DisplayEnchantId;
                 public byte InventoryType;
             }
+
             public struct PetInfo
             {
                 public uint CreatureDisplayId; // PetCreatureDisplayID
@@ -297,6 +303,18 @@ namespace Game.Network.Packets
             public bool HasExpansion;
             public bool HasAchievement;
             public bool HasHeritageArmor;
+        }
+
+        public struct UnlockedConditionalAppearance
+        {
+            public void Write(WorldPacket data)
+            {
+                data.WriteInt32(AchievementID);
+                data.WriteInt32(Unused);
+            }
+
+            public int AchievementID;
+            public int Unused;
         }
     }
 

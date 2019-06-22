@@ -124,16 +124,17 @@ namespace Game
             AllowableRaces = (long)fields.Read<ulong>(108);
             TreasurePickerID = fields.Read<int>(109);
             Expansion = fields.Read<int>(110);
+            ManagedWorldStateID = fields.Read<int>(111);
 
-            LogTitle = fields.Read<string>(111);
-            LogDescription = fields.Read<string>(112);
-            QuestDescription = fields.Read<string>(113);
-            AreaDescription = fields.Read<string>(114);
-            PortraitGiverText = fields.Read<string>(115);
-            PortraitGiverName = fields.Read<string>(116);
-            PortraitTurnInText = fields.Read<string>(117);
-            PortraitTurnInName = fields.Read<string>(118);
-            QuestCompletionLog = fields.Read<string>(119);
+            LogTitle = fields.Read<string>(112);
+            LogDescription = fields.Read<string>(113);
+            QuestDescription = fields.Read<string>(114);
+            AreaDescription = fields.Read<string>(115);
+            PortraitGiverText = fields.Read<string>(116);
+            PortraitGiverName = fields.Read<string>(117);
+            PortraitTurnInText = fields.Read<string>(118);
+            PortraitTurnInName = fields.Read<string>(119);
+            QuestCompletionLog = fields.Read<string>(120);
         }
 
         public void LoadQuestDetails(SQLFields fields)
@@ -487,6 +488,7 @@ namespace Game
         public long AllowableRaces { get; set; }
         public int TreasurePickerID;
         public int Expansion;
+        public int ManagedWorldStateID;
         public List<QuestObjective> Objectives = new List<QuestObjective>();
         public string LogTitle = "";
         public string LogDescription = "";

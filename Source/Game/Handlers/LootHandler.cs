@@ -196,42 +196,32 @@ namespace Game
                             playersNear.Add(member);
                     }
 
-                    uint goldPerPlayer = (uint)(loot.gold / playersNear.Count);
+                    ulong goldPerPlayer = (ulong)(loot.gold / playersNear.Count);
 
                     foreach (var pl in playersNear)
                     {
-                        pl.ModifyMoney(goldPerPlayer);
-                        pl.UpdateCriteria(CriteriaTypes.LootMoney, goldPerPlayer);
+                        ulong goldMod = MathFunctions.CalculatePct(goldPerPlayer, pl.GetTotalAuraModifierByMiscValue(AuraType.ModMoneyGain, 1));
 
-                        Guild guild = Global.GuildMgr.GetGuildById(pl.GetGuildId());
-                        if (guild)
-                        {
-                            uint guildGold = MathFunctions.CalculatePct(goldPerPlayer, pl.GetTotalAuraModifier(AuraType.DepositBonusMoneyInGuildBankOnLoot));
-                            if (guildGold != 0)
-                                guild.HandleMemberDepositMoney(this, guildGold, true);
-                        }
+                        pl.ModifyMoney((long)(goldPerPlayer + goldMod));
+                        pl.UpdateCriteria(CriteriaTypes.LootMoney, goldPerPlayer);
 
                         LootMoneyNotify packet = new LootMoneyNotify();
                         packet.Money = goldPerPlayer;
+                        packet.MoneyMod = goldMod;
                         packet.SoleLooter = playersNear.Count <= 1 ? true : false;
                         pl.SendPacket(packet);
                     }
                 }
                 else
                 {
-                    player.ModifyMoney(loot.gold);
-                    player.UpdateCriteria(CriteriaTypes.LootMoney, loot.gold);
+                    ulong goldMod = MathFunctions.CalculatePct(loot.gold, player.GetTotalAuraModifierByMiscValue(AuraType.ModMoneyGain, 1));
 
-                    Guild guild = Global.GuildMgr.GetGuildById(player.GetGuildId());
-                    if (guild)
-                    {
-                        uint guildGold = MathFunctions.CalculatePct(loot.gold, player.GetTotalAuraModifier(AuraType.DepositBonusMoneyInGuildBankOnLoot));
-                        if (guildGold != 0)
-                            guild.HandleMemberDepositMoney(this, guildGold, true);
-                    }
+                    player.ModifyMoney((long)(loot.gold + goldMod));
+                    player.UpdateCriteria(CriteriaTypes.LootMoney, loot.gold);
 
                     LootMoneyNotify packet = new LootMoneyNotify();
                     packet.Money = loot.gold;
+                    packet.MoneyMod = goldMod;
                     packet.SoleLooter = true; // "You loot..."
                     SendPacket(packet);
                 }

@@ -84,6 +84,8 @@ namespace Framework.Constants
         TooLowGearScore = 4,
         TooHighGearScore = 5,
         RaidLocked = 6,
+        NoSpec = 14,
+        HasRestriction = 15,
         AttunementTooLowLevel = 1001,
         AttunementTooHighLevel = 1002,
         QuestNotCompleted = 1022,
@@ -146,7 +148,7 @@ namespace Framework.Constants
         Ok = 0x00, // Joined (No Client Msg)
         GroupFull = 0x1f, // Your Group Is Already Full.
         NoLfgObject = 0x21, // Internal Lfg Error.
-        NoSlotsPlayer = 0x22, // You Do Not Meet The Requirements For The Chosen Dungeons.
+        NoSlots = 0x22, // You Do Not Meet The Requirements For The Chosen Dungeons.
         MismatchedSlots = 0x23, // You Cannot Mix Dungeons, Raids, And Random When Picking Dungeons.
         PartyPlayersFromDifferentRealms = 0x24, // The Dungeon You Chose Does Not Support Players From Multiple Realms.
         MembersNotPresent = 0x25, // One Or More Group Members Are Pending Invites Or Disconnected.

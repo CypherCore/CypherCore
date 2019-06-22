@@ -22,7 +22,7 @@ namespace Game.Network.Packets
 {
     public class InitializeFactions : ServerPacket
     {
-        const ushort FactionCount = 300;
+        const ushort FactionCount = 350;
 
         public InitializeFactions() : base(ServerOpcodes.InitializeFactions, ConnectionType.Instance) { }
 
