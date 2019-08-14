@@ -2702,8 +2702,10 @@ namespace Game.Entities
             if (_focusSpell != null)
                 return;
 
+            SpellInfo spellInfo = focusSpell.GetSpellInfo();
+
             // don't use spell focus for vehicle spells
-            if (focusSpell.GetSpellInfo().HasAura(Difficulty.None, AuraType.ControlVehicle))
+            if (spellInfo.HasAura(Difficulty.None, AuraType.ControlVehicle))
                 return;
 
             if ((!target || target == this) && focusSpell.GetCastTime() == 0) // instant cast, untargeted (or self-targeted) spell doesn't need any facing updates
@@ -2726,8 +2728,8 @@ namespace Game.Entities
 
                 // here we determine if the (relatively expensive) forced update is worth it, or whether we can afford to wait until the scheduled update tick
                 // only require instant update for spells that actually have a visual
-                if (focusSpell.GetSpellInfo().GetSpellVisual() != 0 && (focusSpell.GetCastTime() == 0 || // if the spell is instant cast
-                   focusSpell.GetSpellInfo().HasAttribute(SpellAttr5.DontTurnDuringCast))) // client gets confused if we attempt to turn at the regularly scheduled update packet
+                if (spellInfo.GetSpellVisual() != 0 && (focusSpell.GetCastTime() == 0 || // if the spell is instant cast
+                   spellInfo.HasAttribute(SpellAttr5.DontTurnDuringCast))) // client gets confused if we attempt to turn at the regularly scheduled update packet
                 {
                     List<Player> playersNearby = GetPlayerListInGrid(GetVisibilityRange());
                     foreach (var player in playersNearby)
