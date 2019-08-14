@@ -33,7 +33,7 @@ namespace Game
             Player player = GetPlayer();
 
             // Validate
-            if (!player.GetNPCIfCanInteractWith(transmogrifyItems.Npc, NPCFlags.Transmogrifier))
+            if (!player.GetNPCIfCanInteractWith(transmogrifyItems.Npc, NPCFlags.Transmogrifier, NPCFlags2.None))
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - Unit (GUID: {0}) not found or player can't interact with it.", transmogrifyItems.ToString());
                 return;

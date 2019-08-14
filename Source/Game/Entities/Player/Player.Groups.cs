@@ -165,10 +165,10 @@ namespace Game.Entities
         public void SetPartyType(GroupCategory category, GroupType type)
         {
             Cypher.Assert(category < GroupCategory.Max);
-            byte value = GetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetPartyType);
+            byte value = m_playerData.PartyType;
             value &= (byte)~((byte)0xFF << ((byte)category * 4));
             value |= (byte)((byte)type << ((byte)category * 4));
-            SetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetPartyType, value);
+            SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PartyType), value);
         }
 
         public void ResetGroupUpdateSequenceIfNeeded(Group group)

@@ -433,7 +433,7 @@ namespace Game.Movement
             owner.ClearUnitState(UnitState.InFlight);
 
             owner.Dismount();
-            owner.RemoveFlag(UnitFields.Flags, UnitFlags.RemoveClientControl | UnitFlags.TaxiFlight);
+            owner.RemoveUnitFlag(UnitFlags.RemoveClientControl | UnitFlags.TaxiFlight);
 
             if (owner.m_taxi.empty())
             {
@@ -444,7 +444,7 @@ namespace Game.Movement
                 owner.StopMoving();
             }
 
-            owner.RemoveFlag(PlayerFields.Flags, PlayerFlags.TaxiBenchmark);
+            owner.RemovePlayerFlag(PlayerFlags.TaxiBenchmark);
             owner.RestoreDisplayId();
         }
 
@@ -452,7 +452,7 @@ namespace Game.Movement
         {
             owner.getHostileRefManager().setOnlineOfflineState(false);
             owner.AddUnitState(UnitState.InFlight);
-            owner.SetFlag(UnitFields.Flags, UnitFlags.RemoveClientControl | UnitFlags.TaxiFlight);
+            owner.AddUnitFlag(UnitFlags.RemoveClientControl | UnitFlags.TaxiFlight);
 
             MoveSplineInit init = new MoveSplineInit(owner);
             uint end = GetPathAtMapEnd();

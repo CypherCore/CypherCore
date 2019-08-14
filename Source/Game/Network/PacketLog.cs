@@ -69,6 +69,9 @@ public class PacketLog
                 else
                     Buffer.BlockCopy(address.GetAddressBytes(), 0, SocketIPBytes, 0, 16);
 
+                if (!isClientPacket)
+                    data.Combine(new byte[2]);
+
                 writer.Write(data.Length + 4);
                 writer.Write(SocketIPBytes);
                 writer.Write(port);

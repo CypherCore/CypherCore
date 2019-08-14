@@ -63,8 +63,8 @@ namespace Game.Chat
             creatureTarget.RemoveCorpse();
             creatureTarget.SetHealth(0); // just for nice GM-mode view
 
-            pet.SetGuidValue(UnitFields.CreatedBy, player.GetGUID());
-            pet.SetUInt32Value(UnitFields.FactionTemplate, player.getFaction());
+            pet.SetCreatorGUID(player.GetGUID());
+            pet.SetFaction(player.GetFaction());
 
             if (!pet.InitStatsForLevel(creatureTarget.getLevel()))
             {
@@ -74,7 +74,7 @@ namespace Game.Chat
             }
 
             // prepare visual effect for levelup
-            pet.SetUInt32Value(UnitFields.Level, creatureTarget.getLevel() - 1);
+            pet.SetLevel(creatureTarget.getLevel() - 1);
 
             pet.GetCharmInfo().SetPetNumber(Global.ObjectMgr.GeneratePetNumber(), true);
             // this enables pet details window (Shift+P)
@@ -84,7 +84,7 @@ namespace Game.Chat
             pet.GetMap().AddToMap(pet.ToCreature());
 
             // visual effect for levelup
-            pet.SetUInt32Value(UnitFields.Level, creatureTarget.getLevel());
+            pet.SetLevel(creatureTarget.getLevel());
 
             player.SetMinion(pet, true);
             pet.SavePetToDB(PetSaveMode.AsCurrent);

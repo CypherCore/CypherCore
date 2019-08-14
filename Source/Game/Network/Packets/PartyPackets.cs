@@ -110,7 +110,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(InviterGUID);
             _worldPacket.WritePackedGuid(InviterBNetAccountId);
             _worldPacket.WriteUInt16(Unk1);
-            _worldPacket.WriteInt32(ProposedRoles);
+            _worldPacket.WriteUInt32(ProposedRoles);
             _worldPacket.WriteInt32(LfgSlots.Count);
             _worldPacket.WriteInt32(LfgCompletedMask);
 
@@ -249,7 +249,7 @@ namespace Game.Network.Packets
 
             if (!player.IsAlive())
             {
-                if (player.HasFlag(PlayerFields.Flags, PlayerFlags.Ghost))
+                if (player.HasPlayerFlag(PlayerFlags.Ghost))
                     MemberStats.Status |= GroupMemberOnlineStatus.Ghost;
                 else
                     MemberStats.Status |= GroupMemberOnlineStatus.Dead;
@@ -286,9 +286,9 @@ namespace Game.Network.Packets
             MemberStats.PositionY = (short)(player.GetPositionY());
             MemberStats.PositionZ = (short)(player.GetPositionZ());
 
-            MemberStats.SpecID = (ushort)player.GetUInt32Value(PlayerFields.CurrentSpecId);
-            MemberStats.PartyType[0] = (sbyte)(player.GetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetPartyType) & 0xF);
-            MemberStats.PartyType[1] = (sbyte)(player.GetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetPartyType) >> 4);
+            MemberStats.SpecID = (ushort)player.GetPrimarySpecialization();
+            MemberStats.PartyType[0] = (sbyte)(player.m_playerData.PartyType & 0xF);
+            MemberStats.PartyType[1] = (sbyte)(player.m_playerData.PartyType >> 4);
             MemberStats.WmoGroupID = 0;
             MemberStats.WmoDoodadPlacementID = 0;
 
@@ -741,14 +741,14 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt16(PartyFlags);
+            _worldPacket.WriteUInt16((ushort)PartyFlags);
             _worldPacket.WriteUInt8(PartyIndex);
-            _worldPacket.WriteUInt8(PartyType);
+            _worldPacket.WriteUInt8((byte)PartyType);
             _worldPacket.WriteInt32(MyIndex);
             _worldPacket.WritePackedGuid(PartyGUID);
             _worldPacket.WriteInt32(SequenceNum);
             _worldPacket.WritePackedGuid(LeaderGUID);
-            _worldPacket.WriteUInt32(PlayerList.Count);
+            _worldPacket.WriteInt32(PlayerList.Count);
             _worldPacket.WriteBit(LfgInfos.HasValue);
             _worldPacket.WriteBit(LootSettings.HasValue);
             _worldPacket.WriteBit(DifficultySettings.HasValue);
@@ -905,8 +905,8 @@ namespace Game.Network.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(PhaseShiftFlags);
-            data.WriteUInt32(List.Count);
+            data.WriteInt32(PhaseShiftFlags);
+            data.WriteInt32(List.Count);
             data.WritePackedGuid(PersonalGUID);
 
             foreach (PartyMemberPhase phase in List)
@@ -944,7 +944,7 @@ namespace Game.Network.Packets
             data.WriteInt32(ModelId);
             data.WriteInt32(CurrentHealth);
             data.WriteInt32(MaxHealth);
-            data.WriteUInt32(Auras.Count);
+            data.WriteInt32(Auras.Count);
             Auras.ForEach(p => p.Write(data));
 
             data.WriteBits(Name.GetByteCount(), 8);
@@ -969,9 +969,9 @@ namespace Game.Network.Packets
             for (byte i = 0; i < 2; i++)
                 data.WriteInt8(PartyType[i]);
 
-            data.WriteInt16(Status);
+            data.WriteInt16((short)Status);
             data.WriteUInt8(PowerType);
-            data.WriteInt16(PowerDisplayID);
+            data.WriteInt16((short)PowerDisplayID);
             data.WriteInt32(CurrentHealth);
             data.WriteInt32(MaxHealth);
             data.WriteUInt16(CurrentPower);
@@ -1036,7 +1036,7 @@ namespace Game.Network.Packets
             data.WriteBit(FromSocialQueue);
             data.WriteBit(VoiceChatSilenced);
             data.WritePackedGuid(GUID);
-            data.WriteUInt8(Status);
+            data.WriteUInt8((byte)Status);
             data.WriteUInt8(Subgroup);
             data.WriteUInt8(Flags);
             data.WriteUInt8(RolesAssigned);

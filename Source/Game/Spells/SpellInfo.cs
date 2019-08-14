@@ -83,6 +83,7 @@ namespace Game.Spells
 
                 IconFileDataId = _misc.SpellIconFileDataID;
                 ActiveIconFileDataId = _misc.ActiveIconFileDataID;
+                ContentTuningId = _misc.ContentTuningID;
             }
 
             if (visuals != null)
@@ -1307,8 +1308,9 @@ namespace Game.Spells
             }
 
             // if target is magnet (i.e Grounding Totem) the check is skipped
-            //if (target.IsMagnet())
-            //return true;
+            if (target.IsMagnet())
+                return true;
+
 
             uint creatureType = target.GetCreatureTypeMask();
             return TargetCreatureType == 0 || creatureType == 0 || Convert.ToBoolean(creatureType & TargetCreatureType);
@@ -2900,10 +2902,10 @@ namespace Game.Spells
 
         float CalcPPMHasteMod(SpellProcsPerMinuteModRecord mod, Unit caster)
         {
-            float haste = caster.GetFloatValue(UnitFields.ModHaste);
-            float rangedHaste = caster.GetFloatValue(UnitFields.ModRangedHaste);
-            float spellHaste = caster.GetFloatValue(UnitFields.ModCastHaste);
-            float regenHaste = caster.GetFloatValue(UnitFields.ModHasteRegen);
+            float haste = caster.m_unitData.ModHaste;
+            float rangedHaste = caster.m_unitData.ModRangedHaste;
+            float spellHaste = caster.m_unitData.ModSpellHaste;
+            float regenHaste = caster.m_unitData.ModHasteRegen;
 
             switch (mod.Param)
             {
@@ -2926,12 +2928,13 @@ namespace Game.Spells
 
         float CalcPPMCritMod(SpellProcsPerMinuteModRecord mod, Unit caster)
         {
-            if (!caster.IsTypeId(TypeId.Player))
+            Player player = caster.ToPlayer();
+            if (player == null)
                 return 0.0f;
 
-            float crit = caster.GetFloatValue(ActivePlayerFields.CritPercentage);
-            float rangedCrit = caster.GetFloatValue(ActivePlayerFields.RangedCritPercentage);
-            float spellCrit = caster.GetFloatValue(ActivePlayerFields.SpellCritPercentage1);
+            float crit = player.m_activePlayerData.CritPercentage;
+            float rangedCrit = player.m_activePlayerData.RangedCritPercentage;
+            float spellCrit = player.m_activePlayerData.SpellCritPercentage;
 
             switch (mod.Param)
             {
@@ -2955,8 +2958,8 @@ namespace Game.Spells
             if (itemLevel == mod.Param)
                 return 0.0f;
 
-            float itemLevelPoints = ItemEnchantment.GetRandomPropertyPoints((uint)itemLevel, ItemQuality.Rare, InventoryType.Chest, 0);
-            float basePoints = ItemEnchantment.GetRandomPropertyPoints(mod.Param, ItemQuality.Rare, InventoryType.Chest, 0);
+            float itemLevelPoints = ItemEnchantmentManager.GetRandomPropertyPoints((uint)itemLevel, ItemQuality.Rare, InventoryType.Chest, 0);
+            float basePoints = ItemEnchantmentManager.GetRandomPropertyPoints(mod.Param, ItemQuality.Rare, InventoryType.Chest, 0);
             if (itemLevelPoints == basePoints)
                 return 0.0f;
 
@@ -2993,7 +2996,7 @@ namespace Game.Spells
                         {
                             Player plrCaster = caster.ToPlayer();
                             if (plrCaster)
-                                if (plrCaster.GetUInt32Value(PlayerFields.CurrentSpecId) == mod.Param)
+                                if (plrCaster.GetPrimarySpecialization() == mod.Param)
                                     ppm *= 1.0f + mod.Coeff;
                             break;
                         }
@@ -3705,6 +3708,7 @@ namespace Game.Spells
         public uint[] TotemCategory = new uint[SpellConst.MaxTotems];
         public uint IconFileDataId { get; set; }
         public uint ActiveIconFileDataId { get; set; }
+        public uint ContentTuningId { get; set; }
         public LocalizedString SpellName { get; set; }
         public float ConeAngle { get; set; }
         public float Width { get; set; }
@@ -3931,16 +3935,16 @@ namespace Game.Spells
                         if (_spellInfo.Scaling.ScalesFromItemLevel != 0)
                             effectiveItemLevel = _spellInfo.Scaling.ScalesFromItemLevel;
 
-                        if (_spellInfo.Scaling._Class == -8)
+                        if (_spellInfo.Scaling._Class == -8 || _spellInfo.Scaling._Class == -9)
                         {
                             RandPropPointsRecord randPropPoints = CliDB.RandPropPointsStorage.LookupByKey(effectiveItemLevel);
                             if (randPropPoints == null)
                                 randPropPoints = CliDB.RandPropPointsStorage.LookupByKey(CliDB.RandPropPointsStorage.Count - 1);
 
-                            tempValue = randPropPoints.DamageReplaceStat;
+                            tempValue = _spellInfo.Scaling._Class == -8 ? randPropPoints.DamageReplaceStat : randPropPoints.DamageSecondary;
                         }
                         else
-                            tempValue = ItemEnchantment.GetRandomPropertyPoints(effectiveItemLevel, ItemQuality.Rare, InventoryType.Chest, 0);
+                            tempValue = ItemEnchantmentManager.GetRandomPropertyPoints(effectiveItemLevel, ItemQuality.Rare, InventoryType.Chest, 0);
                     }
                     else
                         tempValue = CliDB.GetSpellScalingColumnForClass(CliDB.SpellScalingGameTable.GetRow(level), _spellInfo.Scaling._Class);
@@ -3970,8 +3974,14 @@ namespace Game.Spells
                         stat = ExpectedStatType.CreatureAutoAttackDps;
 
                     // TODO - add expansion and content tuning id args?
+                    uint contentTuningId = _spellInfo.ContentTuningId; // content tuning should be passed as arg, the one stored in SpellInfo is fallback
+                    int expansion = -2;
+                    ContentTuningRecord contentTuning = CliDB.ContentTuningStorage.LookupByKey(contentTuningId);
+                    if (contentTuning != null)
+                        expansion = contentTuning.ExpansionID;
+
                     uint level = caster ? caster.getLevel() : 1;
-                    tempValue = Global.DB2Mgr.EvaluateExpectedStat(stat, level, -2, 0, Class.None) * BasePoints / 100.0f;
+                    tempValue = Global.DB2Mgr.EvaluateExpectedStat(stat, level, expansion, 0, Class.None) * BasePoints / 100.0f;
                 }
 
                 return (int)Math.Round(tempValue);
@@ -4439,6 +4449,16 @@ namespace Game.Spells
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 259 SPELL_EFFECT_RESPEC_AZERITE_EMPOWERED_ITEM
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 260 SPELL_EFFECT_SUMMON_STABLED_PET
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 261 SPELL_EFFECT_SCRAP_ITEM
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 262 SPELL_EFFECT_262
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 263 SPELL_EFFECT_REPAIR_ITEM
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 264 SPELL_EFFECT_REMOVE_GEM
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 265 SPELL_EFFECT_LEARN_AZERITE_ESSENCE_POWER
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 266 SPELL_EFFECT_266
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 267 SPELL_EFFECT_267
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 268 SPELL_EFFECT_APPLY_MOUNT_EQUIPMENT
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 269 SPELL_EFFECT_UPGRADE_ITEM
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 270 SPELL_EFFECT_270
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 271 SPELL_EFFECT_APPLY_AREA_AURA_PARTY_NONRANDOM
         };
 
         #region Fields

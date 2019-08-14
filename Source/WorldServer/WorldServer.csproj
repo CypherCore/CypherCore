@@ -2,14 +2,13 @@
   <Import Project="..\..\default.props" />
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <ApplicationIcon>Blue.ico</ApplicationIcon>
     <StartupObject>WorldServer.Server</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
 	<ProjectReference Include="..\Game\Game.csproj" />
-	<ProjectReference Include="..\Scripts\Scripts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

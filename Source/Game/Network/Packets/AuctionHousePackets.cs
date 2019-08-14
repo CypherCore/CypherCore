@@ -66,9 +66,9 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt32(AuctionItemID);
-            _worldPacket.WriteInt32(Command);
-            _worldPacket.WriteInt32(ErrorCode);
-            _worldPacket.WriteInt32(BagResult);
+            _worldPacket.WriteInt32((int)Command);
+            _worldPacket.WriteInt32((int)ErrorCode);
+            _worldPacket.WriteInt32((int)BagResult);
             _worldPacket.WritePackedGuid(Guid);
             _worldPacket.WriteUInt64(MinIncrement);
             _worldPacket.WriteUInt64(Money);
@@ -206,8 +206,8 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(Items.Count);
-            _worldPacket.WriteInt32(TotalCount);
-            _worldPacket.WriteInt32(DesiredDelay);
+            _worldPacket.WriteUInt32(TotalCount);
+            _worldPacket.WriteUInt32(DesiredDelay);
             _worldPacket.WriteBit(OnlyUsable);
             _worldPacket.FlushBits();
 
@@ -358,7 +358,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Mails.Count);
+            _worldPacket.WriteInt32(Mails.Count);
             _worldPacket.WriteInt32(TotalNumRecords);
 
             foreach (var mail in Mails)
@@ -441,7 +441,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(ChangeNumberGlobal);
             _worldPacket.WriteUInt32(ChangeNumberCursor);
             _worldPacket.WriteUInt32(ChangeNumberTombstone);
-            _worldPacket.WriteUInt32(Items.Count);
+            _worldPacket.WriteInt32(Items.Count);
 
             foreach (var item in Items)
                 item.Write(_worldPacket);
@@ -486,7 +486,7 @@ namespace Game.Network.Packets
             {
                 data.WritePackedGuid(ItemGuid);
                 data.WritePackedGuid(OwnerAccountID);
-                data.WriteInt32(EndTime);
+                data.WriteUInt32(EndTime);
             }
 
             if (!CensorBidInfo)

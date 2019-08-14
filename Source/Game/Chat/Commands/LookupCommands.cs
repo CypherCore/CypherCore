@@ -834,7 +834,7 @@ namespace Game.Chat
 
                         string knownStr = target && target.HasTitle(titleInfo) ? handler.GetCypherString(CypherStrings.Known) : "";
 
-                        string activeStr = target && target.GetUInt32Value(PlayerFields.ChosenTitle) == titleInfo.MaskID
+                        string activeStr = target && target.m_playerData.PlayerTitle == titleInfo.MaskID
                             ? handler.GetCypherString(CypherStrings.Active) : "";
 
                         string titleNameStr = string.Format(name.ConvertFormatSyntax(), targetName);

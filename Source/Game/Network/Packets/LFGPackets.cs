@@ -141,7 +141,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Dungeons.Count);
+            _worldPacket.WriteInt32(Dungeons.Count);
             BlackList.Write(_worldPacket);
 
             foreach (var dungeonInfo in Dungeons)
@@ -158,7 +158,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Player.Count);
+            _worldPacket.WriteInt32(Player.Count);
             foreach (var blackList in Player)
                 blackList.Write(_worldPacket);
         }
@@ -176,9 +176,9 @@ namespace Game.Network.Packets
 
             _worldPacket.WriteUInt8(SubType);
             _worldPacket.WriteUInt8(Reason);
-            _worldPacket.WriteUInt32(Slots.Count);
+            _worldPacket.WriteInt32(Slots.Count);
             _worldPacket.WriteUInt32(RequestedRoles);
-            _worldPacket.WriteUInt32(SuspendedPlayers.Count);
+            _worldPacket.WriteInt32(SuspendedPlayers.Count);
 
             foreach (var slot in Slots)
                 _worldPacket.WriteUInt32(slot);
@@ -216,7 +216,7 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(Player);
-            _worldPacket.WriteUInt32(RoleMask);
+            _worldPacket.WriteUInt32((uint)RoleMask);
             _worldPacket.WriteBit(Accepted);
             _worldPacket.FlushBits();
         }
@@ -234,10 +234,10 @@ namespace Game.Network.Packets
         {
             _worldPacket.WriteUInt8(PartyIndex);
             _worldPacket.WriteUInt8(RoleCheckStatus);
-            _worldPacket.WriteUInt32(JoinSlots.Count);
-            _worldPacket.WriteUInt32(BgQueueIDs.Count);
-            _worldPacket.WriteUInt32(GroupFinderActivityID);
-            _worldPacket.WriteUInt32(Members.Count);
+            _worldPacket.WriteInt32(JoinSlots.Count);
+            _worldPacket.WriteInt32(BgQueueIDs.Count);
+            _worldPacket.WriteInt32(GroupFinderActivityID);
+            _worldPacket.WriteInt32(Members.Count);
 
             foreach (var slot in JoinSlots)
                 _worldPacket.WriteUInt32(slot);
@@ -273,8 +273,8 @@ namespace Game.Network.Packets
 
             _worldPacket.WriteUInt8(Result);
             _worldPacket.WriteUInt8(ResultDetail);
-            _worldPacket.WriteUInt32(BlackList.Count);
-            _worldPacket.WriteUInt32(BlackListNames.Count);
+            _worldPacket.WriteInt32(BlackList.Count);
+            _worldPacket.WriteInt32(BlackListNames.Count);
 
             foreach (LFGJoinBlackList blackList in BlackList)
                 blackList.Write(_worldPacket);
@@ -334,7 +334,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(ActualSlot);
             _worldPacket.WriteUInt32(RewardMoney);
             _worldPacket.WriteUInt32(AddedXP);
-            _worldPacket.WriteUInt32(Rewards.Count);
+            _worldPacket.WriteInt32(Rewards.Count);
 
             foreach (var reward in Rewards)
                 reward.Write(_worldPacket);
@@ -373,7 +373,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt8(State);
             _worldPacket.WriteUInt32(CompletedMask);
             _worldPacket.WriteUInt32(EncounterMask);
-            _worldPacket.WriteUInt32(Players.Count);
+            _worldPacket.WriteInt32(Players.Count);
             _worldPacket.WriteUInt8(Unused);
             _worldPacket.WriteBit(ValidCompletedMask);
             _worldPacket.WriteBit(ProposalSilent);
@@ -458,7 +458,7 @@ namespace Game.Network.Packets
         public void Write(WorldPacket data)
         {
             data.WriteBit(PlayerGuid.HasValue);
-            data.WriteUInt32(Slot.Count);
+            data.WriteInt32(Slot.Count);
             if (PlayerGuid.HasValue)
                 data.WritePackedGuid(PlayerGuid.Value);
 
@@ -503,7 +503,7 @@ namespace Game.Network.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteInt32(Mask);
+            data.WriteUInt32(Mask);
             data.WriteUInt32(RewardMoney);
             data.WriteUInt32(RewardXP);
             data.WriteInt32(Item.Count);
@@ -566,7 +566,7 @@ namespace Game.Network.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteInt32(Slot);
+            data.WriteUInt32(Slot);
             data.WriteInt32(CompletionQuantity);
             data.WriteInt32(CompletionLimit);
             data.WriteInt32(CompletionCurrencyID);
@@ -579,7 +579,7 @@ namespace Game.Network.Packets
             data.WriteInt32(PurseQuantity);
             data.WriteInt32(PurseLimit);
             data.WriteInt32(Quantity);
-            data.WriteInt32(CompletedMask);
+            data.WriteUInt32(CompletedMask);
             data.WriteUInt32(EncounterMask);
             data.WriteInt32(ShortageReward.Count);
             data.WriteBit(FirstReward);
@@ -658,7 +658,7 @@ namespace Game.Network.Packets
         public void Write(WorldPacket data)
         {
             data.WritePackedGuid(PlayerGuid);
-            data.WriteUInt32(Slots.Count);
+            data.WriteInt32(Slots.Count);
 
             foreach (LFGJoinBlackListSlot lfgBlackListSlot in Slots)
             {
@@ -702,7 +702,7 @@ namespace Game.Network.Packets
             data.WriteUInt32(Quantity);
             data.WriteInt32(BonusQuantity);
             if (RewardCurrency.HasValue)
-                data.WriteInt32(RewardCurrency.Value);
+                data.WriteUInt32(RewardCurrency.Value);
         }
 
         public Optional<ItemInstance> RewardItem;
@@ -723,7 +723,7 @@ namespace Game.Network.Packets
             data.WritePackedGuid(Target);
             data.WriteUInt32(TotalVotes);
             data.WriteUInt32(BootVotes);
-            data.WriteInt32(TimeLeft);
+            data.WriteUInt32(TimeLeft);
             data.WriteUInt32(VotesNeeded);
             data.WriteString(Reason);
         }
@@ -775,7 +775,7 @@ namespace Game.Network.Packets
         {
             data.WritePackedGuid(RequesterGuid);
             data.WriteUInt32(Id);
-            data.WriteUInt32(Type);
+            data.WriteUInt32((uint)Type);
             data.WriteInt32(Time);
         }
 

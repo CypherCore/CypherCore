@@ -31,13 +31,13 @@ namespace Game.Network.Packets
         {
             _worldPacket.WriteUInt8(Info.ActiveGroup);
             _worldPacket.WriteUInt32(Info.PrimarySpecialization);
-            _worldPacket.WriteUInt32(Info.TalentGroups.Count);
+            _worldPacket.WriteInt32(Info.TalentGroups.Count);
 
             foreach (var talentGroupInfo in Info.TalentGroups)
             {
                 _worldPacket.WriteUInt32(talentGroupInfo.SpecID);
-                _worldPacket.WriteUInt32(talentGroupInfo.TalentIDs.Count);
-                _worldPacket.WriteUInt32(talentGroupInfo.PvPTalentIDs.Count);
+                _worldPacket.WriteInt32(talentGroupInfo.TalentIDs.Count);
+                _worldPacket.WriteInt32(talentGroupInfo.PvPTalentIDs.Count);
 
                 foreach (var talentID in talentGroupInfo.TalentIDs)
                     _worldPacket.WriteUInt16(talentID);
@@ -84,7 +84,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt8(RespecType);
+            _worldPacket.WriteInt8((sbyte)RespecType);
             _worldPacket.WriteUInt32(Cost);
             _worldPacket.WritePackedGuid(RespecMaster);
         }
@@ -116,7 +116,7 @@ namespace Game.Network.Packets
         {
             _worldPacket.WriteBits(Reason, 4);
             _worldPacket.WriteInt32(SpellID);
-            _worldPacket.WriteUInt32(Talents.Count);
+            _worldPacket.WriteInt32(Talents.Count);
 
             foreach (var talent in Talents)
                 _worldPacket.WriteUInt16(talent);
@@ -133,7 +133,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Glyphs.Count);
+            _worldPacket.WriteInt32(Glyphs.Count);
             foreach (GlyphBinding glyph in Glyphs)
                 glyph.Write(_worldPacket);
 
@@ -167,7 +167,7 @@ namespace Game.Network.Packets
         {
             _worldPacket.WriteBits(Reason, 4);
             _worldPacket.WriteUInt32(SpellID);
-            _worldPacket.WriteUInt32(Talents.Count);
+            _worldPacket.WriteInt32(Talents.Count);
 
             foreach (var pvpTalent in Talents)
                 pvpTalent.Write(_worldPacket);

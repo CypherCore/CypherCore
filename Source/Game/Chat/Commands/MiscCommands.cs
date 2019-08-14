@@ -345,7 +345,7 @@ namespace Game.Chat
                 return false;
             }
 
-            Item item = playerTarget.StoreNewItem(dest, itemId, true, ItemEnchantment.GenerateItemRandomPropertyId(itemId), null, 0, bonusListIDs);
+            Item item = playerTarget.StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(itemId), null, 0, bonusListIDs);
 
             // remove binding (let GM give it to another player later)
             if (player == playerTarget)
@@ -420,7 +420,7 @@ namespace Game.Chat
                     InventoryResult msg = playerTarget.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, template.Value.GetId(), 1);
                     if (msg == InventoryResult.Ok)
                     {
-                        Item item = playerTarget.StoreNewItem(dest, template.Value.GetId(), true, ItemRandomEnchantmentId.Empty, null, 0, bonusListIDs);
+                        Item item = playerTarget.StoreNewItem(dest, template.Value.GetId(), true, 0, null, 0, bonusListIDs);
 
                         // remove binding (let GM give it to another player later)
                         if (player == playerTarget)
@@ -451,7 +451,7 @@ namespace Game.Chat
         {
             if (args.Empty())
             {
-                if (handler.GetSession().GetPlayer().HasFlag(PlayerFields.Flags, PlayerFlags.Developer))
+                if (handler.GetSession().GetPlayer().HasPlayerFlag(PlayerFlags.Developer))
                     handler.GetSession().SendNotification(CypherStrings.DevOn);
                 else
                     handler.GetSession().SendNotification(CypherStrings.DevOff);
@@ -462,14 +462,14 @@ namespace Game.Chat
 
             if (argstr == "on")
             {
-                handler.GetSession().GetPlayer().SetFlag(PlayerFields.Flags, PlayerFlags.Developer);
+                handler.GetSession().GetPlayer().HasPlayerFlag(PlayerFlags.Developer);
                 handler.GetSession().SendNotification(CypherStrings.DevOn);
                 return true;
             }
 
             if (argstr == "off")
             {
-                handler.GetSession().GetPlayer().RemoveFlag(PlayerFields.Flags, PlayerFlags.Developer);
+                handler.GetSession().GetPlayer().RemovePlayerFlag(PlayerFlags.Developer);
                 handler.GetSession().SendNotification(CypherStrings.DevOff);
                 return true;
             }
@@ -1181,16 +1181,15 @@ namespace Game.Chat
                 return false;
             }
 
-            int offset = area.AreaBit / 32;
+            uint offset = (uint)area.AreaBit / 64;
             if (offset >= PlayerConst.ExploredZonesSize)
             {
                 handler.SendSysMessage(CypherStrings.BadValue);
                 return false;
             }
 
-            uint val = (1u << (area.AreaBit % 32));
-            uint currFields = playerTarget.GetUInt32Value(ActivePlayerFields.ExploredZones + offset);
-            playerTarget.SetUInt32Value(ActivePlayerFields.ExploredZones + offset, (currFields | val));
+            ulong val = 1ul << (area.AreaBit % 64);
+            playerTarget.AddExploredZones(offset, val);
 
             handler.SendSysMessage(CypherStrings.ExploreArea);
             return true;
@@ -1222,16 +1221,15 @@ namespace Game.Chat
                 return false;
             }
 
-            int offset = area.AreaBit / 32;
+            uint offset = (uint)area.AreaBit / 64;
             if (offset >= PlayerConst.ExploredZonesSize)
             {
                 handler.SendSysMessage(CypherStrings.BadValue);
                 return false;
             }
 
-            uint val = (1u << (area.AreaBit % 32));
-            uint currFields = playerTarget.GetUInt32Value(ActivePlayerFields.ExploredZones + offset);
-            playerTarget.SetUInt32Value(ActivePlayerFields.ExploredZones + offset, (currFields ^ val));
+            uint val = (1u << (area.AreaBit % 64));
+            playerTarget.RemoveExploredZones(offset, val);
 
             handler.SendSysMessage(CypherStrings.UnexploreArea);
             return true;
@@ -1404,7 +1402,7 @@ namespace Game.Chat
                 mapId = target.GetMapId();
                 areaId = target.GetAreaId();
                 alive = target.IsAlive() ? handler.GetCypherString(CypherStrings.Yes) : handler.GetCypherString(CypherStrings.No);
-                gender = (Gender)target.GetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetGender);
+                gender = (Gender)(byte)target.m_playerData.NativeSex;
             }
             // get additional information from DB
             else
@@ -1996,7 +1994,7 @@ namespace Game.Chat
                     }
 
                     go.ModifyHealth(-damage, player);
-                    handler.SendSysMessage(CypherStrings.GameobjectDamaged, go.GetName(), guidLow, -damage, go.m_goValue.Building.Health);
+                    handler.SendSysMessage(CypherStrings.GameobjectDamaged, go.GetName(), guidLow, -damage, go.GetGoValue().Building.Health);
                 }
 
                 return true;

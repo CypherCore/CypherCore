@@ -50,6 +50,7 @@ namespace Game.DataStorage
         public byte MaxPlayers;
         public short WindSettingsID;
         public int ZmpFileDataID;
+        public int WdtFileDataID;
         public MapFlags[] Flags = new MapFlags[2];
 
         // Helpers
@@ -95,14 +96,14 @@ namespace Game.DataStorage
     {
         public uint Id;
         public LocalizedString Message;                               // m_message_lang (text showed when transfer to map failed)
-        public uint ItemContextPickerID;
-        public int ContentTuningID;
-        public byte DifficultyID;
-        public byte LockID;
+        public uint DifficultyID;
+        public int LockID;
         public byte ResetInterval;
-        public byte MaxPlayers;
-        public byte ItemContext;
-        public byte Flags;
+        public uint MaxPlayers;
+        public int ItemContext;
+        public uint ItemContextPickerID;
+        public int Flags;
+        public int ContentTuningID;
         public uint MapID;
 
         public uint GetRaidDuration()
@@ -121,7 +122,7 @@ namespace Game.DataStorage
         public uint Parent;
         public sbyte Operator;
         public sbyte Amount;
-        public byte Type;
+        public uint Type;
         public uint Asset;
         public int SecondaryAsset;
         public sbyte TertiaryAsset;
@@ -154,6 +155,7 @@ namespace Game.DataStorage
         public uint ReqSpellKnownID;
         public uint ModSpellAuraID;
         public short ReqMapID;
+        public int PlayerConditionID;
     }
 
     public sealed class MountTypeXCapabilityRecord

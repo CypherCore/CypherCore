@@ -246,15 +246,15 @@ namespace Game.Entities
         public void ClearInCombat()
         {
             m_CombatTimer = 0;
-            RemoveFlag(UnitFields.Flags, UnitFlags.InCombat);
+            RemoveUnitFlag(UnitFlags.InCombat);
 
             // Player's state will be cleared in Player.UpdateContestedPvP
             Creature creature = ToCreature();
             if (creature != null)
             {
                 ClearUnitState(UnitState.AttackPlayer);
-                if (HasFlag(ObjectFields.DynamicFlags, UnitDynFlags.Tapped))
-                    SetUInt32Value(ObjectFields.DynamicFlags, creature.GetCreatureTemplate().DynamicFlags);
+                if (HasDynamicFlag(UnitDynFlags.Tapped))
+                    SetDynamicFlags((UnitDynFlags)creature.GetCreatureTemplate().DynamicFlags);
 
                 if (creature.IsPet() || creature.IsGuardian())
                 {
@@ -270,7 +270,7 @@ namespace Game.Entities
             else
                 ToPlayer().OnCombatExit();
 
-            RemoveFlag(UnitFields.Flags, UnitFlags.PetInCombat);
+            RemoveUnitFlag(UnitFlags.PetInCombat);
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.LeaveCombat);
         }
 
@@ -314,7 +314,7 @@ namespace Game.Entities
             if (!IsAlive())
                 return false;
 
-            if (HasFlag(UnitFields.Flags, (UnitFlags.NonAttackable | UnitFlags.NotSelectable)))
+            if (HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable))
                 return false;
 
             if (IsTypeId(TypeId.Player) && ToPlayer().IsGameMaster())
@@ -329,7 +329,7 @@ namespace Game.Entities
         }
         public bool IsInCombat()
         {
-            return HasFlag(UnitFields.Flags, UnitFlags.InCombat);
+            return HasUnitFlag(UnitFlags.InCombat);
         }
         public bool Attack(Unit victim, bool meleeAttack)
         {
@@ -344,7 +344,7 @@ namespace Game.Entities
             if (IsTypeId(TypeId.Player) && IsMounted())
                 return false;
 
-            if (HasFlag(UnitFields.Flags, UnitFlags.Pacified))
+            if (HasUnitFlag(UnitFlags.Pacified))
                 return false;
 
             // nobody can attack GM in GM-mode
@@ -417,7 +417,7 @@ namespace Game.Entities
                 ToCreature().CallAssistance();
 
                 // Remove emote state - will be restored on creature reset
-                SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotNone);
+                SetEmoteState(Emote.OneshotNone);
             }
 
             // delay offhand weapon attack to next attack time
@@ -455,7 +455,7 @@ namespace Game.Entities
             else
                 Log.outInfo(LogFilter.Unit, "{0} {1} stopped attacking", (IsTypeId(TypeId.Player) ? "Player" : "Creature"), GetGUID().ToString());
         }
-        public ObjectGuid GetTarget() { return GetGuidValue(UnitFields.Target); }
+        public ObjectGuid GetTarget() { return m_unitData.Target; }
         public virtual void SetTarget(ObjectGuid guid) { }
         public bool AttackStop()
         {
@@ -517,8 +517,10 @@ namespace Game.Entities
             return attackerList;
         }
 
-        public float GetCombatReach() { return GetFloatValue(UnitFields.CombatReach); }
-        float GetBoundaryRadius() { return GetFloatValue(UnitFields.BoundingRadius); }
+        public float GetCombatReach() { return m_unitData.CombatReach; }
+        public void SetCombatReach(float combatReach) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CombatReach), combatReach); }
+        public float GetBoundingRadius() { return m_unitData.BoundingRadius; }
+        public void SetBoundingRadius(float boundingRadius) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BoundingRadius), boundingRadius); }
 
         public bool haveOffhandWeapon()
         {
@@ -549,7 +551,7 @@ namespace Game.Entities
         }
         public void AttackerStateUpdate(Unit victim, WeaponAttackType attType = WeaponAttackType.BaseAttack, bool extra = false)
         {
-            if (HasUnitState(UnitState.CannotAutoattack) || HasFlag(UnitFields.Flags, UnitFlags.Pacified))
+            if (HasUnitState(UnitState.CannotAutoattack) || HasUnitFlag(UnitFlags.Pacified))
                 return;
 
             if (!victim.IsAlive())
@@ -565,7 +567,7 @@ namespace Game.Entities
             if (attType != WeaponAttackType.BaseAttack && attType != WeaponAttackType.OffAttack)
                 return;
 
-            if (IsTypeId(TypeId.Unit) && !HasFlag(UnitFields.Flags, UnitFlags.PlayerControlled))
+            if (IsTypeId(TypeId.Unit) && !HasUnitFlag(UnitFlags.PlayerControlled))
                 SetFacingToObject(victim); // update client side facing to face the target (prevents visual glitches when casting untargeted spells)
 
             // melee attack spell casted at main hand attack only - no normal melee dmg dealt
@@ -598,7 +600,7 @@ namespace Game.Entities
 
         public void FakeAttackerStateUpdate(Unit victim, WeaponAttackType attType = WeaponAttackType.BaseAttack)
         {
-            if (HasUnitState(UnitState.CannotAutoattack) || HasFlag(UnitFields.Flags, UnitFlags.Pacified))
+            if (HasUnitState(UnitState.CannotAutoattack) || HasUnitFlag(UnitFlags.Pacified))
                 return;
 
             if (!victim.IsAlive())
@@ -613,7 +615,7 @@ namespace Game.Entities
             if (attType != WeaponAttackType.BaseAttack && attType != WeaponAttackType.OffAttack)
                 return;                                             // ignore ranged case
 
-            if (IsTypeId(TypeId.Unit) && !HasFlag(UnitFields.Flags, UnitFlags.PlayerControlled))
+            if (IsTypeId(TypeId.Unit) && !HasUnitFlag(UnitFlags.PlayerControlled))
                 SetFacingToObject(victim); // update client side facing to face the target (prevents visual glitches when casting untargeted spells)
 
             CalcDamageInfo damageInfo = new CalcDamageInfo();
@@ -1290,7 +1292,7 @@ namespace Game.Entities
             if (IsInCombat() || HasUnitState(UnitState.Evade))
                 return;
 
-            SetFlag(UnitFields.Flags, UnitFlags.InCombat);
+            AddUnitFlag(UnitFlags.InCombat);
 
             Creature creature = ToCreature();
             if (creature != null)
@@ -1323,7 +1325,7 @@ namespace Game.Entities
             foreach (var unit in m_Controlled)
             {
                 unit.SetInCombatState(PvP, enemy);
-                unit.SetFlag(UnitFields.Flags, UnitFlags.PetInCombat);
+                unit.AddUnitFlag(UnitFlags.PetInCombat);
             }
 
             ProcSkillsAndAuras(enemy, ProcFlags.EnterCombat, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
@@ -1504,7 +1506,7 @@ namespace Game.Entities
 
                     // must be after setDeathState which resets dynamic flags
                     if (!creature.loot.isLooted())
-                        creature.SetFlag(ObjectFields.DynamicFlags, UnitDynFlags.Lootable);
+                        creature.AddDynamicFlag(UnitDynFlags.Lootable);
                     else
                         creature.AllLootRemovedFromCorpse();
                 }
@@ -1625,7 +1627,7 @@ namespace Game.Entities
             if (!player.HasUnitState(UnitState.AttackPlayer))
             {
                 player.AddUnitState(UnitState.AttackPlayer);
-                player.SetFlag(PlayerFields.Flags, PlayerFlags.ContestedPVP);
+                player.AddPlayerFlag(PlayerFlags.ContestedPVP);
                 // call MoveInLineOfSight for nearby contested guards
                 UpdateObjectVisibility();
             }
@@ -1764,6 +1766,21 @@ namespace Game.Entities
                 ModifyAuraState(AuraStateType.HunterParry, false);
             if (GetClass() == Class.Warrior && IsTypeId(TypeId.Player))
                 ToPlayer().ClearComboPoints();
+        }
+
+        public virtual bool CanUseAttackType(WeaponAttackType attacktype)
+        {
+            switch (attacktype)
+            {
+                case WeaponAttackType.BaseAttack:
+                    return !HasUnitFlag(UnitFlags.Disarmed);
+                case WeaponAttackType.OffAttack:
+                    return !HasUnitFlag2(UnitFlags2.DisarmOffhand);
+                case WeaponAttackType.RangedAttack:
+                    return !HasUnitFlag2(UnitFlags2.DisarmRanged);
+                default:
+                    return true;
+            }
         }
 
         // TODO for melee need create structure as in
@@ -2082,21 +2099,21 @@ namespace Game.Entities
                 switch (attType)
                 {
                     case WeaponAttackType.RangedAttack:
-                        minDamage = GetFloatValue(UnitFields.MinRangedDamage);
-                        maxDamage = GetFloatValue(UnitFields.MaxRangedDamage);
+                        minDamage = m_unitData.MinRangedDamage;
+                        maxDamage = m_unitData.MaxRangedDamage;
                         break;
                     case WeaponAttackType.BaseAttack:
-                        minDamage = GetFloatValue(UnitFields.MinDamage);
-                        maxDamage = GetFloatValue(UnitFields.MaxDamage);
+                        minDamage = m_unitData.MinDamage;
+                        maxDamage = m_unitData.MaxDamage;
                         if (IsInFeralForm())
                         {
-                            minDamage += GetFloatValue(UnitFields.MinOffHandDamage);
-                            maxDamage += GetFloatValue(UnitFields.MaxOffHandDamage);
+                            minDamage += m_unitData.MinOffHandDamage;
+                            maxDamage += m_unitData.MaxOffHandDamage;
                         }
                         break;
                     case WeaponAttackType.OffAttack:
-                        minDamage = GetFloatValue(UnitFields.MinOffHandDamage);
-                        maxDamage = GetFloatValue(UnitFields.MaxOffHandDamage);
+                        minDamage = m_unitData.MinOffHandDamage;
+                        maxDamage = m_unitData.MaxOffHandDamage;
                         break;
                     // Just for good manner
                     default:
@@ -2169,17 +2186,17 @@ namespace Game.Entities
         {
             if (attType == WeaponAttackType.RangedAttack)
             {
-                int ap = GetInt32Value(UnitFields.RangedAttackPower);
+                int ap = m_unitData.RangedAttackPower;
                 if (ap < 0)
                     return 0.0f;
-                return ap * (1.0f + GetFloatValue(UnitFields.RangedAttackPowerMultiplier));
+                return ap * (1.0f + m_unitData.RangedAttackPowerMultiplier);
             }
             else
             {
-                int ap = GetInt32Value(UnitFields.AttackPower);
+                int ap = m_unitData.AttackPower;
                 if (ap < 0)
                     return 0.0f;
-                return ap * (1.0f + GetFloatValue(UnitFields.AttackPowerMultiplier));
+                return ap * (1.0f + m_unitData.AttackPowerMultiplier);
             }
         }
         public float GetModifierValue(UnitMods unitMod, UnitModifierType modifierType)
@@ -2223,14 +2240,25 @@ namespace Game.Entities
         }
         void UpdateAttackTimeField(WeaponAttackType att)
         {
-            SetUInt32Value(UnitFields.BaseAttackTime + (int)att, (uint)(m_baseAttackSpeed[(int)att] * m_modAttackSpeedPct[(int)att]));
+            switch (att)
+            {
+                case WeaponAttackType.BaseAttack:
+                case WeaponAttackType.OffAttack:
+                    SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.AttackRoundBaseTime, (int)att), (uint)(m_baseAttackSpeed[(int)att] * m_modAttackSpeedPct[(int)att]));
+                    break;
+                case WeaponAttackType.RangedAttack:
+                    SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.RangedAttackRoundBaseTime), (uint)(m_baseAttackSpeed[(int)att] * m_modAttackSpeedPct[(int)att]));
+                    break;
+                default:
+                    break; ;
+            }
         }
         public virtual void SetPvP(bool state)
         {
             if (state)
-                SetByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag, UnitBytes2Flags.PvP);
+                AddPvpFlag(UnitPVPStateFlags.PvP);
             else
-                RemoveByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag, UnitBytes2Flags.PvP);
+                RemovePvpFlag(UnitPVPStateFlags.PvP);
         }
 
         public bool CanHaveThreatList(bool skipAliveCheck = false)
@@ -2697,11 +2725,17 @@ namespace Game.Entities
                 if (!spellProto.GetSchoolMask().HasAnyFlag(SpellSchoolMask.Normal))
                 {
                     float maxModDamagePercentSchool = 0.0f;
-                    for (var i = SpellSchools.Holy; i < SpellSchools.Max; ++i)
+                    Player thisPlayer = ToPlayer();
+                    if (thisPlayer != null)
                     {
-                        if (Convert.ToBoolean((int)spellProto.GetSchoolMask() & (1 << (int)i)))
-                            maxModDamagePercentSchool = Math.Max(maxModDamagePercentSchool, GetFloatValue(ActivePlayerFields.ModDamageDonePct + (int)i));
+                        for (var i = SpellSchools.Holy; i < SpellSchools.Max; ++i)
+                        {
+                            if (Convert.ToBoolean((int)spellProto.GetSchoolMask() & (1 << (int)i)))
+                                maxModDamagePercentSchool = Math.Max(maxModDamagePercentSchool, thisPlayer.m_activePlayerData.ModDamageDonePercent[(int)i]);
+                        }
                     }
+                    else
+                        maxModDamagePercentSchool = GetTotalAuraMultiplierByMiscMask(AuraType.ModDamagePercentDone, (uint)spellProto.GetSchoolMask());
 
                     DoneTotalMod *= maxModDamagePercentSchool;
                 }
@@ -2878,18 +2912,18 @@ namespace Game.Entities
                 MathFunctions.ApplyPercentModFloatVar(ref m_modAttackSpeedPct[(int)att], val, !apply);
 
                 if (att == WeaponAttackType.BaseAttack)
-                    ApplyPercentModFloatValue(UnitFields.ModHaste, val, !apply);
+                    ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModHaste), val, !apply);
                 else if (att == WeaponAttackType.RangedAttack)
-                    ApplyPercentModFloatValue(UnitFields.ModRangedHaste, val, !apply);
+                    ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModRangedHaste), val, !apply);
             }
             else
             {
                 MathFunctions.ApplyPercentModFloatVar(ref m_modAttackSpeedPct[(int)att], -val, apply);
 
                 if (att == WeaponAttackType.BaseAttack)
-                    ApplyPercentModFloatValue(UnitFields.ModHaste, -val, apply);
+                    ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModHaste), -val, apply);
                 else if (att == WeaponAttackType.RangedAttack)
-                    ApplyPercentModFloatValue(UnitFields.ModRangedHaste, -val, apply);
+                    ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModRangedHaste), -val, apply);
             }
 
             UpdateAttackTimeField(att);
@@ -2937,30 +2971,30 @@ namespace Game.Entities
 
             // can't attack untargetable
             if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetUntargetable))
-                && target.HasFlag(UnitFields.Flags, UnitFlags.NotSelectable))
+                && target.HasUnitFlag(UnitFlags.NotSelectable))
                 return false;
 
             Player playerAttacker = ToPlayer();
             if (playerAttacker != null)
             {
-                if (playerAttacker.HasFlag(PlayerFields.Flags, PlayerFlags.Commentator2))
+                if (playerAttacker.HasPlayerFlag(PlayerFlags.Commentator2))
                     return false;
             }
 
             // check flags
-            if (target.HasFlag(UnitFields.Flags, (UnitFlags.NonAttackable | UnitFlags.TaxiFlight | UnitFlags.NotAttackable1 | UnitFlags.Unk16))
-                || (!HasFlag(UnitFields.Flags, UnitFlags.PvpAttackable) && target.HasFlag(UnitFields.Flags, UnitFlags.ImmuneToNpc))
-                || (!target.HasFlag(UnitFields.Flags, UnitFlags.PvpAttackable) && HasFlag(UnitFields.Flags, UnitFlags.ImmuneToNpc)))
+            if (target.HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.TaxiFlight | UnitFlags.NotAttackable1 | UnitFlags.Unk16)
+                || (!HasUnitFlag(UnitFlags.PvpAttackable) && target.HasUnitFlag(UnitFlags.ImmuneToNpc))
+                || (!target.HasUnitFlag(UnitFlags.PvpAttackable) && HasUnitFlag(UnitFlags.ImmuneToNpc)))
                 return false;
 
             if ((bySpell == null || !bySpell.HasAttribute(SpellAttr8.AttackIgnoreImmuneToPCFlag))
-                && (HasFlag(UnitFields.Flags, UnitFlags.PvpAttackable) && target.HasFlag(UnitFields.Flags, UnitFlags.ImmuneToPc))
+                && (HasUnitFlag(UnitFlags.PvpAttackable) && target.HasUnitFlag(UnitFlags.ImmuneToPc))
                 // check if this is a world trigger cast - GOs are using world triggers to cast their spells, so we need to ignore their immunity flag here, this is a temp workaround, needs removal when go cast is implemented properly
                 && GetEntry() != SharedConst.WorldTrigger)
                 return false;
 
             // CvC case - can attack each other only when one of them is hostile
-            if (!HasFlag(UnitFields.Flags, UnitFlags.PvpAttackable) && !target.HasFlag(UnitFields.Flags, UnitFlags.PvpAttackable))
+            if (!HasUnitFlag(UnitFlags.PvpAttackable) && !target.HasUnitFlag(UnitFlags.PvpAttackable))
                 return GetReactionTo(target) <= ReputationRank.Hostile || target.GetReactionTo(this) <= ReputationRank.Hostile;
 
             // PvP, PvC, CvP case
@@ -2968,8 +3002,8 @@ namespace Game.Entities
             if (GetReactionTo(target) > ReputationRank.Neutral || target.GetReactionTo(this) > ReputationRank.Neutral)
                 return false;
 
-            Player playerAffectingAttacker = HasFlag(UnitFields.Flags, UnitFlags.PvpAttackable) ? GetAffectingPlayer() : null;
-            Player playerAffectingTarget = target.HasFlag(UnitFields.Flags, UnitFlags.PvpAttackable) ? target.GetAffectingPlayer() : null;
+            Player playerAffectingAttacker = HasUnitFlag(UnitFlags.PvpAttackable) ? GetAffectingPlayer() : null;
+            Player playerAffectingTarget = target.HasUnitFlag(UnitFlags.PvpAttackable) ? target.GetAffectingPlayer() : null;
 
             // Not all neutral creatures can be attacked (even some unfriendly faction does not react aggresive to you, like Sporaggar)
             if ((playerAffectingAttacker && !playerAffectingTarget) || (!playerAffectingAttacker && playerAffectingTarget))
@@ -3010,9 +3044,8 @@ namespace Game.Entities
 
             // PvP case - can't attack when attacker or target are in sanctuary
             // however, 13850 client doesn't allow to attack when one of the unit's has sanctuary flag and is pvp
-            if (target.HasFlag(UnitFields.Flags, UnitFlags.PvpAttackable) && HasFlag(UnitFields.Flags, UnitFlags.PvpAttackable)
-                && (Convert.ToBoolean(target.GetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag) & (byte)UnitBytes2Flags.Sanctuary)
-                || Convert.ToBoolean(GetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag) & (byte)UnitBytes2Flags.Sanctuary)))
+            if (target.HasUnitFlag(UnitFlags.PvpAttackable) && HasUnitFlag(UnitFlags.PvpAttackable)
+                && (target.HasPvpFlag(UnitPVPStateFlags.Sanctuary) || HasPvpFlag(UnitPVPStateFlags.Sanctuary)))
                 return false;
 
             // additional checks - only PvP case
@@ -3024,7 +3057,7 @@ namespace Game.Entities
                 if (IsFFAPvP() && target.IsFFAPvP())
                     return true;
 
-                return HasByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag, UnitBytes2Flags.Unk1) || target.HasByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag, UnitBytes2Flags.Unk1);
+                return HasPvpFlag(UnitPVPStateFlags.Unk1) || target.HasPvpFlag(UnitPVPStateFlags.Unk1);
             }
             return true;
         }
@@ -3062,19 +3095,19 @@ namespace Game.Entities
 
             // can't assist untargetable
             if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetUntargetable))
-                && target.HasFlag(UnitFields.Flags, UnitFlags.NotSelectable))
+                && target.HasUnitFlag(UnitFlags.NotSelectable))
                 return false;
 
             if (bySpell == null || !bySpell.HasAttribute(SpellAttr6.AssistIgnoreImmuneFlag))
             {
-                if (HasFlag(UnitFields.Flags, UnitFlags.PvpAttackable))
+                if (HasUnitFlag(UnitFlags.PvpAttackable))
                 {
-                    if (target.HasFlag(UnitFields.Flags, UnitFlags.ImmuneToPc))
+                    if (target.HasUnitFlag(UnitFlags.ImmuneToPc))
                         return false;
                 }
                 else
                 {
-                    if (target.HasFlag(UnitFields.Flags, UnitFlags.ImmuneToNpc))
+                    if (target.HasUnitFlag(UnitFlags.ImmuneToNpc))
                         return false;
                 }
             }
@@ -3090,10 +3123,10 @@ namespace Game.Entities
                 return true;
 
             // PvP case
-            else if (target.HasFlag(UnitFields.Flags, UnitFlags.PvpAttackable))
+            else if (target.HasUnitFlag(UnitFlags.PvpAttackable))
             {
                 Player targetPlayerOwner = target.GetAffectingPlayer();
-                if (HasFlag(UnitFields.Flags, UnitFlags.PvpAttackable))
+                if (HasUnitFlag(UnitFlags.PvpAttackable))
                 {
                     Player selfPlayerOwner = GetAffectingPlayer();
                     if (selfPlayerOwner != null && targetPlayerOwner != null)
@@ -3103,20 +3136,18 @@ namespace Game.Entities
                             return false;
                     }
                     // can't assist player in ffa_pvp zone from outside
-                    if (Convert.ToBoolean(target.GetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag) & (byte)UnitBytes2Flags.FFAPvp)
-                        && !Convert.ToBoolean(GetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag) & (byte)UnitBytes2Flags.FFAPvp))
+                    if (target.HasPvpFlag(UnitPVPStateFlags.FFAPvp) && !HasPvpFlag(UnitPVPStateFlags.FFAPvp))
                         return false;
                     // can't assist player out of sanctuary from sanctuary if has pvp enabled
-                    if (Convert.ToBoolean(target.GetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag) & (byte)UnitBytes2Flags.PvP))
-                        if (Convert.ToBoolean(GetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag) & (byte)UnitBytes2Flags.Sanctuary) 
-                            && !Convert.ToBoolean(target.GetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag) & (byte)UnitBytes2Flags.Sanctuary))
+                    if (target.HasPvpFlag(UnitPVPStateFlags.PvP))
+                        if (HasPvpFlag(UnitPVPStateFlags.Sanctuary) && !target.HasPvpFlag(UnitPVPStateFlags.Sanctuary))
                             return false;
                 }
             }
             // PvC case - player can assist creature only if has specific type flags
-            else if (HasFlag(UnitFields.Flags, UnitFlags.PvpAttackable)
+            else if (HasUnitFlag(UnitFlags.PvpAttackable)
                 && (bySpell == null || !bySpell.HasAttribute(SpellAttr6.AssistIgnoreImmuneFlag))
-                && !Convert.ToBoolean(target.GetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag) & (byte)UnitBytes2Flags.PvP))
+                && !target.HasPvpFlag(UnitPVPStateFlags.PvP))
             {
                 Creature creatureTarget = target.ToCreature();
                 if (creatureTarget != null)

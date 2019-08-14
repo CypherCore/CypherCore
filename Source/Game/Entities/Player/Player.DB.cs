@@ -41,13 +41,13 @@ namespace Game.Entities
         {
             //                 0     1                       2                 3                   4                 5
             // SELECT a.itemGuid, a.xp, a.artifactAppearanceId, a.artifactTierId, ap.artifactPowerId, ap.purchasedRank FROM item_instance_artifact_powers ap LEFT JOIN item_instance_artifact a ON ap.itemGuid = a.itemGuid INNER JOIN character_inventory ci ON ci.item = ap.guid WHERE ci.guid = ?
-            var artifactData = new Dictionary<ObjectGuid, Tuple<ulong, uint, uint, List<ItemDynamicFieldArtifactPowers>>>();
+            var artifactData = new Dictionary<ObjectGuid, Tuple<ulong, uint, uint, List<ArtifactPowerLoadInfo>>>();
             if (!artifactsResult.IsEmpty())
             {
                 do
                 {
-                    var artifactDataEntry = Tuple.Create(artifactsResult.Read<ulong>(1), artifactsResult.Read<uint>(2), artifactsResult.Read<uint>(3), new List<ItemDynamicFieldArtifactPowers>());
-                    ItemDynamicFieldArtifactPowers artifactPowerData = new ItemDynamicFieldArtifactPowers();
+                    var artifactDataEntry = Tuple.Create(artifactsResult.Read<ulong>(1), artifactsResult.Read<uint>(2), artifactsResult.Read<uint>(3), new List<ArtifactPowerLoadInfo>());
+                    ArtifactPowerLoadInfo artifactPowerData = new ArtifactPowerLoadInfo();
                     artifactPowerData.ArtifactPowerId = artifactsResult.Read<uint>(4);
                     artifactPowerData.PurchasedRank = artifactsResult.Read<byte>(5);
 
@@ -91,17 +91,17 @@ namespace Game.Entities
                         if (item.GetTemplate().GetArtifactID() != 0 && artifactDataPair != null)
                             item.LoadArtifactData(this, artifactDataPair.Item1, artifactDataPair.Item2, artifactDataPair.Item3, artifactDataPair.Item4);
 
-                        ulong counter = result.Read<ulong>(45);
+                        ulong counter = result.Read<ulong>(44);
                         ObjectGuid bagGuid = counter != 0 ? ObjectGuid.Create(HighGuid.Item, counter) : ObjectGuid.Empty;
-                        byte slot = result.Read<byte>(46);
+                        byte slot = result.Read<byte>(45);
 
                         GetSession().GetCollectionMgr().CheckHeirloomUpgrades(item);
                         GetSession().GetCollectionMgr().AddItemAppearance(item);
 
                         InventoryResult err = InventoryResult.Ok;
-                        if (item.HasFlag(ItemFields.Flags, ItemFieldFlags.Child))
+                        if (item.HasItemFlag(ItemFieldFlags.Child))
                         {
-                            Item parent = GetItemByGuid(item.GetGuidValue(ItemFields.Creator));
+                            Item parent = GetItemByGuid(item.GetCreator());
                             if (parent)
                             {
                                 parent.SetChildItem(item.GetGUID());
@@ -242,7 +242,7 @@ namespace Game.Entities
                             GetGUID().ToString(), GetName(), timeDiff, item.GetGUID().ToString(), item.GetEntry());
                         remove = true;
                     }
-                    if (item.HasFlag((int)ItemFields.Flags, ItemFieldFlags.Refundable))
+                    if (item.HasItemFlag(ItemFieldFlags.Refundable))
                     {
                         if (item.GetPlayedTime() > (2 * Time.Hour))
                         {
@@ -253,7 +253,7 @@ namespace Game.Entities
                             stmt.AddValue(0, item.GetGUID().ToString());
                             trans.Append(stmt);
 
-                            item.RemoveFlag(ItemFields.Flags, ItemFieldFlags.Refundable);
+                            item.RemoveItemFlag(ItemFieldFlags.Refundable);
                         }
                         else
                         {
@@ -272,11 +272,11 @@ namespace Game.Entities
                             {
                                 Log.outDebug(LogFilter.Player, "LoadInventory: player (GUID: {0}, name: {1}) has item (GUID: {2}, entry: {3}) with refundable flags, but without data in item_refund_instance. Removing flag.",
                                     GetGUID().ToString(), GetName(), item.GetGUID().ToString(), item.GetEntry());
-                                item.RemoveFlag(ItemFields.Flags, ItemFieldFlags.Refundable);
+                                item.RemoveItemFlag(ItemFieldFlags.Refundable);
                             }
                         }
                     }
-                    else if (item.HasFlag(ItemFields.Flags, ItemFieldFlags.BopTradeable))
+                    else if (item.HasItemFlag(ItemFieldFlags.BopTradeable))
                     {
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_ITEM_BOP_TRADE);
                         stmt.AddValue(0, item.GetGUID().ToString());
@@ -304,7 +304,7 @@ namespace Game.Entities
                         {
                             Log.outDebug(LogFilter.ServerLoading, "LoadInventory: player ({0}, name: {1}) has item ({2}, entry: {3}) with ITEM_FLAG_BOP_TRADEABLE flag, " +
                                 "but without data in item_soulbound_trade_data. Removing flag.", GetGUID().ToString(), GetName(), item.GetGUID().ToString(), item.GetEntry());
-                            item.RemoveFlag(ItemFields.Flags, ItemFieldFlags.BopTradeable);
+                            item.RemoveItemFlag(ItemFieldFlags.BopTradeable);
                         }
                     }
                     else if (proto.GetHolidayID() != 0)
@@ -348,12 +348,18 @@ namespace Game.Entities
         }
         void _LoadSkills(SQLResult result)
         {
-            var count = 0;
+            uint count = 0;
             Dictionary<uint, uint> loadedSkillValues = new Dictionary<uint, uint>();
             if (!result.IsEmpty())
             {
                 do
                 {
+                    if (mSkillStatus.Count >= SkillConst.MaxPlayerSkills)                      // client limit
+                    {
+                        Log.outError(LogFilter.Player, $"Player::_LoadSkills: Player '{GetName()}' ({GetGUID().ToString()}) has more than {SkillConst.MaxPlayerSkills} skills.");
+                        break;
+                    }
+
                     var skill = result.Read<ushort>(0);
                     var value = result.Read<ushort>(1);
                     var max = result.Read<ushort>(2);
@@ -382,20 +388,11 @@ namespace Game.Entities
                         default:
                             break;
                     }
-                    if (value == 0)
-                    {
-                        Log.outError(LogFilter.Player, "Character {0} has skill {1} with value 0. Will be deleted.", GetGUID().ToString(), skill);
 
-                        PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_SKILL);
-                        stmt.AddValue(0, GetGUID().GetCounter());
-                        stmt.AddValue(1, skill);
-                        DB.Characters.Execute(stmt);
-                        continue;
-                    }
-                    var field = (ushort)(count / 2);
-                    var offset = (byte)(count & 1);
+                    if (!mSkillStatus.ContainsKey(skill))
+                        mSkillStatus.Add(skill, new SkillStatusData((uint)mSkillStatus.Count, SkillState.Unchanged));
 
-                    SetUInt16Value(ActivePlayerFields.SkillLineId + field, offset, skill);
+                    var skillStatusData = mSkillStatus[skill];
                     ushort step = 0;
 
                     SkillLineRecord skillLine = CliDB.SkillLineStorage.LookupByKey(rcEntry.SkillID);
@@ -412,49 +409,48 @@ namespace Game.Entities
                             {
                                 int professionSlot = FindProfessionSlotFor(skill);
                                 if (professionSlot != -1)
-                                    SetUInt32Value(ActivePlayerFields.ProfessionSkillLine + professionSlot, skill);
+                                    SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, (int)professionSlot), skill);
                             }
                         }
                     }
 
-                    SetUInt16Value(ActivePlayerFields.SkillLineStep + field, offset, step);
-                    SetUInt16Value(ActivePlayerFields.SkillLineRank + field, offset, value);
-                    SetUInt16Value(ActivePlayerFields.SkillLineMaxRank + field, offset, max);
-                    SetUInt16Value(ActivePlayerFields.SkillLineTempBonus + field, offset, 0);
-                    SetUInt16Value(ActivePlayerFields.SkillLinePermBonus + field, offset, 0);
 
-                    mSkillStatus.Add(skill, new SkillStatusData((uint)count, SkillState.Unchanged));
+                    SetSkillLineId(skillStatusData.Pos, skill);
+                    SetSkillStep(skillStatusData.Pos, step);
+                    SetSkillRank(skillStatusData.Pos, value);
+                    SetSkillStartingRank(skillStatusData.Pos, 1);
+                    SetSkillMaxRank(skillStatusData.Pos, max);
+                    SetSkillTempBonus(skillStatusData.Pos, 0);
+                    SetSkillPermBonus(skillStatusData.Pos, 0);
 
                     loadedSkillValues[skill] = value;
-                    count++;
-
-                    if (count >= SkillConst.MaxPlayerSkills)                      // client limit
-                    {
-                        Log.outError(LogFilter.Player, "Character {0} has more than {1} skills.", GetGUID().ToString(), SkillConst.MaxPlayerSkills);
-                        break;
-                    }
                 }
                 while (result.NextRow());
             }
             // Learn skill rewarded spells after all skills have been loaded to prevent learning a skill from them before its loaded with proper value from DB
             foreach (var skill in loadedSkillValues)
+            {
                 LearnSkillRewardedSpells(skill.Key, skill.Value);
+                List<SkillLineRecord> childSkillLines = Global.DB2Mgr.GetSkillLinesForParentSkill(skill.Key);
+                if (childSkillLines != null)
+                {
+                    foreach (var childItr in childSkillLines)
+                    { 
+                        if (mSkillStatus.Count >= SkillConst.MaxPlayerSkills)
+                            break;
+
+                        if (!mSkillStatus.ContainsKey(childItr.Id))
+                        {
+                            SetSkillLineId(count, (ushort)childItr.Id);
+                            SetSkillStartingRank(count, 1);
+                            mSkillStatus.Add(childItr.Id, new SkillStatusData(count, SkillState.Unchanged));
+                        }
+                    }
+                }
+            }
 
             if (HasSkill(SkillType.FistWeapons))
                 SetSkill(SkillType.FistWeapons, 0, GetSkillValue(SkillType.Unarmed), GetMaxSkillValueForLevel());
-
-            for (; count < SkillConst.MaxPlayerSkills; count++)
-            {
-                var field = (ushort)(count / 2);
-                var offset = (byte)(count & 1);
-
-                SetUInt16Value(ActivePlayerFields.SkillLineId + field, offset, 0);
-                SetUInt16Value(ActivePlayerFields.SkillLineStep + field, offset, 0);
-                SetUInt16Value(ActivePlayerFields.SkillLineRank + field, offset, 0);
-                SetUInt16Value(ActivePlayerFields.SkillLineMaxRank + field, offset, 0);
-                SetUInt16Value(ActivePlayerFields.SkillLineTempBonus + field, offset, 0);
-                SetUInt16Value(ActivePlayerFields.SkillLinePermBonus + field, offset, 0);
-            }
         }
         void _LoadSpells(SQLResult result)
         {
@@ -715,7 +711,7 @@ namespace Game.Entities
                         int maxStorageIndex = 0;
                         foreach (QuestObjective obj in quest.Objectives)
                             if (obj.StorageIndex > maxStorageIndex)
-                            maxStorageIndex = obj.StorageIndex;
+                                maxStorageIndex = obj.StorageIndex;
 
                         questStatusData.ObjectiveData = new int[maxStorageIndex + 1];
 
@@ -849,7 +845,7 @@ namespace Game.Entities
                     if (quest == null)
                         continue;
 
-                    AddDynamicValue(ActivePlayerDynamicFields.DailyQuests, quest_id);
+                    AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.DailyQuestsCompleted), quest_id);
                     uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(quest_id);
                     if (questBit != 0)
                         SetQuestCompletedBit(questBit, true);
@@ -1006,7 +1002,10 @@ namespace Game.Entities
                 if (!result.IsEmpty() && !HasAtLoginFlag(AtLoginFlags.Resurrect))
                 {
                     _corpseLocation = new WorldLocation(result.Read<ushort>(0), result.Read<float>(1), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4));
-                    ApplyModFlag(ActivePlayerFields.LocalFlags, PlayerLocalFlags.ReleaseTimer, !CliDB.MapStorage.LookupByKey(_corpseLocation.GetMapId()).Instanceable());
+                    if (!CliDB.MapStorage.LookupByKey(_corpseLocation.GetMapId()).Instanceable())
+                        AddPlayerLocalFlag(PlayerLocalFlags.ReleaseTimer);
+                    else
+                        RemovePlayerLocalFlag(PlayerLocalFlags.ReleaseTimer);
                 }
                 else
                     ResurrectPlayer(0.5f);
@@ -1093,19 +1092,18 @@ namespace Game.Entities
 
             do
             {
-                // SELECT itemId, itemEntry, slot, creatorGuid, randomProperty, suffixFactor, upgradeId, fixedScalingLevel, artifactKnowledgeLevel, context, bonusListIDs FROM character_void_storage WHERE playerGuid = ?
+                // SELECT itemId, itemEntry, slot, creatorGuid, randomBonusListId, upgradeId, fixedScalingLevel, artifactKnowledgeLevel, context, bonusListIDs FROM character_void_storage WHERE playerGuid = ?
                 ulong itemId = result.Read<ulong>(0);
                 uint itemEntry = result.Read<uint>(1);
                 byte slot = result.Read<byte>(2);
                 ObjectGuid creatorGuid = result.Read<ulong>(3) != 0 ? ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(3)) : ObjectGuid.Empty;
-                ItemRandomEnchantmentId randomProperty = new ItemRandomEnchantmentId((ItemRandomEnchantmentType)result.Read<byte>(4), result.Read<uint>(5));
-                uint suffixFactor = result.Read<uint>(6);
-                uint upgradeId = result.Read<uint>(7);
-                uint fixedScalingLevel = result.Read<uint>(8);
-                uint artifactKnowledgeLevel = result.Read<uint>(9);
-                byte context = result.Read<byte>(10);
+                uint randomBonusListId = result.Read<uint>(4);
+                uint upgradeId = result.Read<uint>(5);
+                uint fixedScalingLevel = result.Read<uint>(6);
+                uint artifactKnowledgeLevel = result.Read<uint>(7);
+                byte context = result.Read<byte>(8);
                 List<uint> bonusListIDs = new List<uint>();
-                var bonusListIdTokens = new StringArray(result.Read<string>(11), ' ');
+                var bonusListIdTokens = new StringArray(result.Read<string>(9), ' ');
                 for (var i = 0; i < bonusListIdTokens.Length; ++i)
                 {
                     if (uint.TryParse(bonusListIdTokens[i], out uint id))
@@ -1130,7 +1128,7 @@ namespace Game.Entities
                     continue;
                 }
 
-                _voidStorageItems[slot] = new VoidStorageItem(itemId, itemEntry, creatorGuid, randomProperty, suffixFactor, upgradeId, fixedScalingLevel, artifactKnowledgeLevel, context, bonusListIDs);
+                _voidStorageItems[slot] = new VoidStorageItem(itemId, itemEntry, creatorGuid, randomBonusListId, upgradeId, fixedScalingLevel, artifactKnowledgeLevel, context, bonusListIDs);
 
                 BonusData bonus = new BonusData(new ItemInstance(_voidStorageItems[slot]));
 
@@ -1224,7 +1222,7 @@ namespace Game.Entities
                 }
 
                 Item item = Bag.NewItemOrBag(proto);
-                ObjectGuid ownerGuid = result.Read<ulong>(45) != 0 ? ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(45)) : ObjectGuid.Empty;
+                ObjectGuid ownerGuid = result.Read<ulong>(44) != 0 ? ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(44)) : ObjectGuid.Empty;
                 if (!item.LoadFromDB(itemGuid, ownerGuid, result.GetFields(), itemEntry))
                 {
                     Log.outError(LogFilter.Player, "Player:_LoadMailedItems - Item in mail ({0}) doesn't exist !!!! - item guid: {1}, deleted from mail", mail.messageID, itemGuid);
@@ -1297,7 +1295,7 @@ namespace Game.Entities
                 if (group)
                 {
                     if (group.IsLeader(GetGUID()))
-                        SetFlag(PlayerFields.Flags, PlayerFlags.GroupLeader);
+                        AddPlayerFlag(PlayerFlags.GroupLeader);
 
                     byte subgroup = group.GetMemberGroup(GetGUID());
                     SetGroup(group, subgroup);
@@ -1312,7 +1310,7 @@ namespace Game.Entities
             }
 
             if (!GetGroup() || !GetGroup().IsLeader(GetGUID()))
-                RemoveFlag(PlayerFields.Flags, PlayerFlags.GroupLeader);
+                RemovePlayerFlag(PlayerFlags.GroupLeader);
         }
         void _LoadInstanceTimeRestrictions(SQLResult result)
         {
@@ -1375,10 +1373,10 @@ namespace Game.Entities
 
                 eqSet.Data.Guid = result.Read<ulong>(0);
                 eqSet.Data.Type = EquipmentSetInfo.EquipmentSetType.Transmog;
-                eqSet.Data.SetID = result.Read <byte>(1);
-                eqSet.Data.SetName = result.Read <string>(2);
-                eqSet.Data.SetIcon = result.Read <string>(3);
-                eqSet.Data.IgnoreMask = result.Read <uint>(4);
+                eqSet.Data.SetID = result.Read<byte>(1);
+                eqSet.Data.SetName = result.Read<string>(2);
+                eqSet.Data.SetIcon = result.Read<string>(3);
+                eqSet.Data.IgnoreMask = result.Read<uint>(4);
                 eqSet.state = EquipmentSetUpdateState.Unchanged;
                 eqSet.Data.Pieces.Fill(ObjectGuid.Empty);
 
@@ -1563,34 +1561,22 @@ namespace Game.Entities
         {
             PreparedStatement stmt;// = null;
 
-            foreach (var skill in mSkillStatus.ToList())
+            SkillInfo skillInfoField = m_activePlayerData.Skill;
+
+            foreach (var pair in mSkillStatus.ToList())
             {
-                if (skill.Value.State == SkillState.Unchanged)
+                if (pair.Value.State == SkillState.Unchanged)
                     continue;
 
-                if (skill.Value.State == SkillState.Deleted)
-                {
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_SKILL_BY_SKILL);
-                    stmt.AddValue(0, GetGUID().GetCounter());
-                    stmt.AddValue(1, skill.Key);
-                    trans.Append(stmt);
+                ushort value = skillInfoField.SkillRank[pair.Value.Pos];
+                ushort max = skillInfoField.SkillMaxRank[pair.Value.Pos];
 
-                    mSkillStatus.Remove(skill.Key);
-                    continue;
-                }
-
-                var field = (ushort)(skill.Value.Pos / 2);
-                var offset = (byte)(skill.Value.Pos & 1);
-
-                var value = GetUInt16Value(ActivePlayerFields.SkillLineRank + field, offset);
-                var max = GetUInt16Value(ActivePlayerFields.SkillLineMaxRank + field, offset);
-
-                switch (skill.Value.State)
+                switch (pair.Value.State)
                 {
                     case SkillState.New:
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_SKILLS);
                         stmt.AddValue(0, GetGUID().GetCounter());
-                        stmt.AddValue(1, (ushort)skill.Key);
+                        stmt.AddValue(1, (ushort)pair.Key);
                         stmt.AddValue(2, value);
                         stmt.AddValue(3, max);
                         trans.Append(stmt);
@@ -1600,13 +1586,19 @@ namespace Game.Entities
                         stmt.AddValue(0, value);
                         stmt.AddValue(1, max);
                         stmt.AddValue(2, GetGUID().GetCounter());
-                        stmt.AddValue(3, (ushort)skill.Key);
+                        stmt.AddValue(3, (ushort)pair.Key);
+                        trans.Append(stmt);
+                        break;
+                    case SkillState.Deleted:
+                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_SKILL_BY_SKILL);
+                        stmt.AddValue(0, GetGUID().GetCounter());
+                        stmt.AddValue(1, pair.Key);
                         trans.Append(stmt);
                         break;
                     default:
                         break;
                 }
-                skill.Value.State = SkillState.Unchanged;
+                pair.Value.State = SkillState.Unchanged;
             }
         }
         void _SaveSpells(SQLTransaction trans)
@@ -1888,10 +1880,8 @@ namespace Game.Entities
             // we don't need transactions here.
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_QUESTSTATUS_DAILY);
             stmt.AddValue(0, GetGUID().GetCounter());
-            trans.Append(stmt);
 
-            var dailies = GetDynamicValues(ActivePlayerDynamicFields.DailyQuests);
-            foreach (var questId in dailies)
+            foreach (int questId in m_activePlayerData.DailyQuestsCompleted)
             {
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHARACTER_QUESTSTATUS_DAILY);
                 stmt.AddValue(0, GetGUID().GetCounter());
@@ -2104,16 +2094,16 @@ namespace Game.Entities
             for (int i = 0; i < (int)SpellSchools.Max; ++i)
                 stmt.AddValue(index++, GetResistance((SpellSchools)i) + GetBonusResistanceMod((SpellSchools)i));
 
-            stmt.AddValue(index++, GetFloatValue(ActivePlayerFields.BlockPercentage));
-            stmt.AddValue(index++, GetFloatValue(ActivePlayerFields.DodgePercentage));
-            stmt.AddValue(index++, GetFloatValue(ActivePlayerFields.ParryPercentage));
-            stmt.AddValue(index++, GetFloatValue(ActivePlayerFields.CritPercentage));
-            stmt.AddValue(index++, GetFloatValue(ActivePlayerFields.RangedCritPercentage));
-            stmt.AddValue(index++, GetFloatValue(ActivePlayerFields.SpellCritPercentage1));
-            stmt.AddValue(index++, GetUInt32Value(UnitFields.AttackPower));
-            stmt.AddValue(index++, GetUInt32Value(UnitFields.RangedAttackPower));
+            stmt.AddValue(index++, (float)m_activePlayerData.BlockPercentage);
+            stmt.AddValue(index++, (float)m_activePlayerData.DodgePercentage);
+            stmt.AddValue(index++, (float)m_activePlayerData.ParryPercentage);
+            stmt.AddValue(index++, (float)m_activePlayerData.CritPercentage);
+            stmt.AddValue(index++, (float)m_activePlayerData.RangedCritPercentage);
+            stmt.AddValue(index++, (float)m_activePlayerData.SpellCritPercentage);
+            stmt.AddValue(index++, (int)m_unitData.AttackPower);
+            stmt.AddValue(index++, (int)m_unitData.RangedAttackPower);
             stmt.AddValue(index++, GetBaseSpellPowerBonus());
-            stmt.AddValue(index, GetUInt32Value(ActivePlayerFields.CombatRating + (int)CombatRating.ResiliencePlayerDamage));
+            stmt.AddValue(index, m_activePlayerData.CombatRatings[(int)CombatRating.ResiliencePlayerDamage]);
 
             trans.Append(stmt);
         }
@@ -2239,25 +2229,23 @@ namespace Game.Entities
 
                 else
                 {
-                    // REPLACE INTO character_void_storage (itemId, playerGuid, itemEntry, slot, creatorGuid, randomProperty, suffixFactor, upgradeId, fixedScalingLevel, artifactKnowledgeLevel, bonusListIDs) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    // REPLACE INTO character_void_storage (itemId, playerGuid, itemEntry, slot, creatorGuid, randomPropertyType, randomProperty, upgradeId, fixedScalingLevel, artifactKnowledgeLevel, bonusListIDs) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_CHAR_VOID_STORAGE_ITEM);
                     stmt.AddValue(0, _voidStorageItems[i].ItemId);
                     stmt.AddValue(1, GetGUID().GetCounter());
                     stmt.AddValue(2, _voidStorageItems[i].ItemEntry);
                     stmt.AddValue(3, i);
                     stmt.AddValue(4, _voidStorageItems[i].CreatorGuid.GetCounter());
-                    stmt.AddValue(5, (byte)_voidStorageItems[i].ItemRandomPropertyId.Type);
-                    stmt.AddValue(6, _voidStorageItems[i].ItemRandomPropertyId.Id);
-                    stmt.AddValue(7, _voidStorageItems[i].ItemSuffixFactor);
-                    stmt.AddValue(8, _voidStorageItems[i].ItemUpgradeId);
-                    stmt.AddValue(9, _voidStorageItems[i].FixedScalingLevel);
-                    stmt.AddValue(10, _voidStorageItems[i].ArtifactKnowledgeLevel);
-                    stmt.AddValue(11, _voidStorageItems[i].Context);
+                    stmt.AddValue(5, (byte)_voidStorageItems[i].RandomBonusListId);
+                    stmt.AddValue(6, _voidStorageItems[i].ItemUpgradeId);
+                    stmt.AddValue(7, _voidStorageItems[i].FixedScalingLevel);
+                    stmt.AddValue(8, _voidStorageItems[i].ArtifactKnowledgeLevel);
+                    stmt.AddValue(9, _voidStorageItems[i].Context);
 
                     StringBuilder bonusListIDs = new StringBuilder();
                     foreach (uint bonusListID in _voidStorageItems[i].BonusListIDs)
                         bonusListIDs.AppendFormat("{0} ", bonusListID);
-                    stmt.AddValue(12, bonusListIDs.ToString());
+                    stmt.AddValue(10, bonusListIDs.ToString());
                 }
 
                 trans.Append(stmt);
@@ -2383,19 +2371,18 @@ namespace Game.Entities
             }
 
             // overwrite possible wrong/corrupted guid
-            SetGuidValue(ObjectFields.Guid, guid);
-            SetGuidValue(PlayerFields.WowAccount, GetSession().GetAccountGUID());
+            SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.WowAccount), GetSession().GetAccountGUID());
 
-            uint gender = result.Read<byte>(5);
-            if (gender >= (uint)Gender.None)
+            Gender gender = (Gender)result.Read<byte>(5);
+            if (gender >= Gender.None)
             {
                 Log.outError(LogFilter.Player, "Player {0} has wrong gender ({1}), can't be loaded.", guid.ToString(), gender);
                 return false;
             }
 
-            SetByteValue(UnitFields.Bytes0, 0, result.Read<byte>(3));
-            SetByteValue(UnitFields.Bytes0, 1, result.Read<byte>(4));
-            SetByteValue(UnitFields.Bytes0, 3, (byte)gender);
+            SetRace((Race)result.Read<byte>(3));
+            SetClass((Class)result.Read<byte>(4));
+            SetGender(gender);
 
             // check if race/class combination is valid
             PlayerInfo info = Global.ObjectMgr.GetPlayerInfo(GetRace(), GetClass());
@@ -2405,14 +2392,23 @@ namespace Game.Entities
                 return false;
             }
 
-            SetUInt32Value(UnitFields.Level, result.Read<uint>(6));
+            SetLevel(result.Read<uint>(6));
             SetXP(result.Read<uint>(7));
 
-            _LoadIntoDataField(result.Read<string>(66), (int)ActivePlayerFields.ExploredZones, PlayerConst.ExploredZonesSize);
-            _LoadIntoDataField(result.Read<string>(67), (int)ActivePlayerFields.KnownTitles, PlayerConst.KnowTitlesSize * 2);
+            StringArray exploredZones = new StringArray(result.Read<string>(66), ' ');
+            if (exploredZones.Length == PlayerConst.ExploredZonesSize * 2)
+                for (int i = 0; i < exploredZones.Length; ++i)
+                    SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ExploredZones, i / 2), (ulong)((long.Parse(exploredZones[i])) << (32 * (i % 2))));
+
+            StringArray knownTitles = new StringArray(result.Read<string>(67), ' ');
+            if ((knownTitles.Length % 2) == 0)
+            {
+                for (int i = 0; i < knownTitles.Length; ++i)
+                    SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.KnownTitles, i / 2), (ulong)((long.Parse(knownTitles[i])) << (32 * (i % 2))));
+            }
 
             SetObjectScale(1.0f);
-            SetFloatValue(UnitFields.HoverHeight, 1.0f);
+            SetHoverHeight(1.0f);
 
             // load achievements before anything else to prevent multiple gains for the same achievement/criteria on every loading (as loading does call UpdateAchievementCriteria)
             m_achievementSys.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.Achievements), holder.GetResult(PlayerLoginQueryLoad.CriteriaProgress));
@@ -2428,34 +2424,30 @@ namespace Game.Entities
             customDisplay[1] = result.Read<byte>(15);
             customDisplay[2] = result.Read<byte>(16);
 
-            SetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetSkinId, result.Read<byte>(9));
-            SetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetFaceId, result.Read<byte>(10));
-            SetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetHairStyleId, result.Read<byte>(11));
-            SetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetHairColorId, result.Read<byte>(12));
-            SetByteValue(PlayerFields.Bytes2, PlayerFieldOffsets.Bytes2OffsetFacialStyle, result.Read<byte>(13));
+            SetSkinId(result.Read<byte>(9));
+            SetFaceId(result.Read<byte>(10));
+            SetHairStyleId(result.Read<byte>(11));
+            SetHairColorId(result.Read<byte>(12));
+            SetFacialHairStyleId(result.Read<byte>(13));
             for (byte i = 0; i < PlayerConst.CustomDisplaySize; ++i)
-                SetByteValue(PlayerFields.Bytes2, (byte)(PlayerFieldOffsets.Bytes2OffsetCustomDisplayOption + i), customDisplay[i]);
+                SetCustomDisplayOption(i, customDisplay[i]);
             SetInventorySlotCount(result.Read<byte>(17));
             SetBankBagSlotCount(result.Read<byte>(18));
-            SetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetGender, (byte)gender);
-            SetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetInebriation, result.Read<byte>(55));
-            SetUInt32Value(PlayerFields.Flags, result.Read<uint>(20));
-            SetUInt32Value(PlayerFields.FlagsEx, result.Read<uint>(21));
-            SetInt32Value(ActivePlayerFields.WatchedFactionIndex, (int)result.Read<uint>(54));
+            SetNativeSex(gender);
+            SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.Inebriation), result.Read<byte>(55));
+            SetPlayerFlags((PlayerFlags)result.Read<uint>(20));
+            SetPlayerFlagsEx((PlayerFlagsEx)result.Read<uint>(21));
+            SetWatchedFactionIndex(result.Read<uint>(54));
 
-            if (!ValidateAppearance((Race)result.Read<byte>(3), (Class)result.Read<byte>(4), (Gender)gender, 
-                GetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetHairStyleId), 
-                GetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetHairColorId), 
-                GetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetFaceId),
-                GetByteValue(PlayerFields.Bytes2, PlayerFieldOffsets.Bytes2OffsetFacialStyle), 
-                GetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetSkinId), customDisplay))
+            if (!ValidateAppearance((Race)result.Read<byte>(3), (Class)result.Read<byte>(4), (Gender)gender,
+                m_playerData.HairStyleID, m_playerData.HairColorID, m_playerData.FaceID, m_playerData.FacialHairStyleID, m_playerData.SkinID, customDisplay))
             {
                 Log.outError(LogFilter.Player, "Player {0} has wrong Appearance values (Hair/Skin/Color), can't be loaded.", guid.ToString());
                 return false;
             }
 
             // set which actionbars the client has active - DO NOT REMOVE EVER AGAIN (can be changed though, if it does change fieldwise)
-            SetByteValue(ActivePlayerFields.Bytes, PlayerFieldOffsets.FieldBytesOffsetActionBarToggles, result.Read<byte>(68));
+            SetMultiActionBars(result.Read<byte>(68));
 
             m_fishingSteps = result.Read<byte>(72);
 
@@ -2464,7 +2456,7 @@ namespace Game.Entities
             // cleanup inventory related item value fields (its will be filled correctly in _LoadInventory)
             for (byte slot = EquipmentSlot.Start; slot < EquipmentSlot.End; ++slot)
             {
-                SetGuidValue(ActivePlayerFields.InvSlotHead + (slot * 4), ObjectGuid.Empty);
+                SetInvSlot(slot, ObjectGuid.Empty);
                 SetVisibleItemSlot(slot, null);
 
                 m_items[slot] = null;
@@ -2478,6 +2470,7 @@ namespace Game.Entities
             if (!_LoadHomeBind(holder.GetResult(PlayerLoginQueryLoad.HomeBind)))
                 return false;
 
+            InitializeSkillFields();
             InitPrimaryProfessions();                               // to max set before any spell loaded
 
             // init saved position, and fix it later if problematic
@@ -2498,29 +2491,10 @@ namespace Game.Entities
 
             _LoadGroup(holder.GetResult(PlayerLoginQueryLoad.Group));
 
-            _LoadArenaTeamInfo(holder.GetResult(PlayerLoginQueryLoad.ArenaInfo));
-
-            // check arena teams integrity
-            for (byte arena_slot = 0; arena_slot < SharedConst.MaxArenaSlot; ++arena_slot)
-            {
-                uint arena_team_id = GetArenaTeamId(arena_slot);
-                if (arena_team_id == 0)
-                    continue;
-
-                ArenaTeam at = Global.ArenaTeamMgr.GetArenaTeamById(arena_team_id);
-                if (at != null)
-                    if (at.IsMember(GetGUID()))
-                        continue;
-
-                // arena team not exist or not member, cleanup fields
-                for (int j = 0; j < 6; ++j)
-                    SetArenaTeamInfoField(arena_slot, (ArenaTeamInfoType)j, 0);
-            }
-
             _LoadCurrency(holder.GetResult(PlayerLoginQueryLoad.Currency));
-            SetUInt32Value(ActivePlayerFields.LifetimeHonorableKills, result.Read<uint>(50));
-            SetUInt16Value(ActivePlayerFields.Kills, PlayerFieldOffsets.FieldKillsOffsetTodayKills, result.Read<ushort>(51));
-            SetUInt16Value(ActivePlayerFields.Kills, PlayerFieldOffsets.FieldKillsOffsetYesterdayKills, result.Read<ushort>(52));
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LifetimeHonorableKills), result.Read<uint>(50));
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TodayHonorableKills), result.Read<ushort>(51));
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.YesterdayHonorableKills), result.Read<ushort>(52));
 
             _LoadBoundInstances(holder.GetResult(PlayerLoginQueryLoad.BoundInstances));
             _LoadInstanceTimeRestrictions(holder.GetResult(PlayerLoginQueryLoad.InstanceLockTimes));
@@ -2838,26 +2812,10 @@ namespace Game.Entities
             if (m_deathExpireTime > now + PlayerConst.MaxDeathCount * PlayerConst.DeathExpireStep)
                 m_deathExpireTime = now + PlayerConst.MaxDeathCount * PlayerConst.DeathExpireStep - 1;
 
-            // clear charm/summon related fields
-            SetOwnerGUID(ObjectGuid.Empty);
-            SetGuidValue(UnitFields.CharmedBy, ObjectGuid.Empty);
-            SetGuidValue(UnitFields.Charm, ObjectGuid.Empty);
-            SetGuidValue(UnitFields.Summon, ObjectGuid.Empty);
-            SetGuidValue(ActivePlayerFields.Farsight, ObjectGuid.Empty);
-            SetCreatorGUID(ObjectGuid.Empty);
-
-            RemoveFlag(UnitFields.Flags2, UnitFlags2.ForceMove);
-
-            // reset some aura modifiers before aura apply
-            SetUInt32Value(ActivePlayerFields.TrackCreatures, 0);
-            SetUInt32Value(ActivePlayerFields.TrackResources, 0);
+            RemoveUnitFlag2(UnitFlags2.ForceMove);
 
             // make sure the unit is considered out of combat for proper loading
             ClearInCombat();
-
-            // make sure the unit is considered not in duel for proper loading
-            SetGuidValue(PlayerFields.DuelArbiter, ObjectGuid.Empty);
-            SetUInt32Value(PlayerFields.DuelTeam, 0);
 
             // reset stats before loading any modifiers
             InitStatsForLevel();
@@ -2885,10 +2843,7 @@ namespace Game.Entities
                     SetLootSpecId(lootSpecId);
             }
 
-            ChrSpecializationRecord spec = Global.DB2Mgr.GetChrSpecializationByIndex(GetClass(), GetActiveTalentGroup());
-            if (spec != null)
-                SetUInt32Value(PlayerFields.CurrentSpecId, spec.Id);
-
+            UpdateDisplayPower();
             _LoadTalents(holder.GetResult(PlayerLoginQueryLoad.Talents));
             _LoadPvpTalents(holder.GetResult(PlayerLoginQueryLoad.PvpTalents));
             _LoadSpells(holder.GetResult(PlayerLoginQueryLoad.Spells));
@@ -2903,7 +2858,7 @@ namespace Game.Entities
             _LoadAuras(holder.GetResult(PlayerLoginQueryLoad.Auras), holder.GetResult(PlayerLoginQueryLoad.AuraEffects), time_diff);
             _LoadGlyphAuras();
             // add ghost flag (must be after aura load: PLAYER_FLAGS_GHOST set in aura)
-            if (HasFlag(PlayerFields.Flags, PlayerFlags.Ghost))
+            if (HasPlayerFlag(PlayerFlags.Ghost))
                 m_deathState = DeathState.Dead;
 
             // after spell load, learn rewarded spell if need also
@@ -2946,7 +2901,7 @@ namespace Game.Entities
             if (curTitle != 0 && !HasTitle(curTitle))
                 curTitle = 0;
 
-            SetUInt32Value(PlayerFields.ChosenTitle, curTitle);
+            SetChosenTitle(curTitle);
 
             // has to be called after last Relocate() in Player.LoadFromDB
             SetFallInformation(0, GetPositionZ());
@@ -2973,7 +2928,7 @@ namespace Game.Entities
                 if (Global.DB2Mgr.GetPowerIndexByClass(i, GetClass()) != (int)PowerType.Max)
                 {
                     uint savedPower = result.Read<uint>(56 + loadedPowers);
-                    uint maxPower = GetUInt32Value(UnitFields.MaxPower + loadedPowers);
+                    uint maxPower = m_unitData.MaxPower[loadedPowers];
                     SetPower(i, (int)(savedPower > maxPower ? maxPower : savedPower));
                     if (++loadedPowers >= (int)PowerType.MaxPerClass)
                         break;
@@ -2981,7 +2936,7 @@ namespace Game.Entities
             }
 
             for (; loadedPowers < (int)PowerType.MaxPerClass; ++loadedPowers)
-                SetUInt32Value(UnitFields.Power + loadedPowers, 0);
+                SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Power, (int)loadedPowers), 0);
 
             SetPower(PowerType.LunarPower, 0);
             // Init rune recharge
@@ -3058,10 +3013,10 @@ namespace Game.Entities
             // RaF stuff.
             m_grantableLevels = result.Read<byte>(69);
             if (GetSession().IsARecruiter() || (GetSession().GetRecruiterId() != 0))
-                SetFlag(ObjectFields.DynamicFlags, UnitDynFlags.ReferAFriend);
+                AddDynamicFlag(UnitDynFlags.ReferAFriend);
 
             if (m_grantableLevels > 0)
-                SetByteValue(ActivePlayerFields.Bytes, PlayerFieldOffsets.FieldBytesOffsetRafGrantableLevel, 0x01);
+                SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.GrantableLevels), (byte)1);
 
             _LoadDeclinedNames(holder.GetResult(PlayerLoginQueryLoad.DeclinedNames));
 
@@ -3071,7 +3026,7 @@ namespace Game.Entities
             _LoadCUFProfiles(holder.GetResult(PlayerLoginQueryLoad.CufProfiles));
 
             var garrison = new Garrison(this);
-            if (garrison.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.Garrison), 
+            if (garrison.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.Garrison),
                 holder.GetResult(PlayerLoginQueryLoad.GarrisonBlueprints),
                 holder.GetResult(PlayerLoginQueryLoad.GarrisonBuildings),
                 holder.GetResult(PlayerLoginQueryLoad.GarrisonFollowers),
@@ -3098,6 +3053,7 @@ namespace Game.Entities
             m_questObjectiveCriteriaMgr.CheckAllQuestObjectiveCriteria(this);
             return true;
         }
+
         public void SaveToDB(bool create = false)
         {
             // delay auto save at any saves (manual, in code, or autosave)
@@ -3113,52 +3069,60 @@ namespace Game.Entities
             // first save/honor gain after midnight will also update the player's honor fields
             UpdateHonorFields();
 
-            SQLTransaction trans = new SQLTransaction();
-            var index = 0;
+            Log.outDebug(LogFilter.Player, $"Player::SaveToDB: The value of player {GetName()}%s at save: ");
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_FISHINGSTEPS);
+            if (!create)
+                Global.ScriptMgr.OnPlayerSave(this);
+
+            SQLTransaction trans = new SQLTransaction();
+            PreparedStatement stmt;
+            byte index = 0;
+
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_FISHINGSTEPS);
             stmt.AddValue(0, GetGUID().GetCounter());
             trans.Append(stmt);
 
+            float finiteAlways(float f) { return float.IsInfinity(f) ? f : 0.0f; };
+
             if (create)
             {
+                //! Insert query
+                /// @todo: Filter out more redundant fields that can take their default value at player create
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHARACTER);
-                //! Insert Select
-                //! TO DO: Filter out more redundant fields that can take their default value at player create
                 stmt.AddValue(index++, GetGUID().GetCounter());
                 stmt.AddValue(index++, GetSession().GetAccountId());
                 stmt.AddValue(index++, GetName());
                 stmt.AddValue(index++, (byte)GetRace());
                 stmt.AddValue(index++, (byte)GetClass());
-                stmt.AddValue(index++, GetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetGender));
+                stmt.AddValue(index++, (byte)m_playerData.NativeSex);   // save gender from PLAYER_BYTES_3, UNIT_BYTES_0 changes with every transform effect
                 stmt.AddValue(index++, getLevel());
-                stmt.AddValue(index++, GetUInt32Value(ActivePlayerFields.Xp));
+                stmt.AddValue(index++, (uint)m_activePlayerData.XP);
                 stmt.AddValue(index++, GetMoney());
-                stmt.AddValue(index++, GetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetSkinId));
-                stmt.AddValue(index++, GetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetFaceId));
-                stmt.AddValue(index++, GetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetHairStyleId));
-                stmt.AddValue(index++, GetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetHairColorId));
-                stmt.AddValue(index++, GetByteValue(PlayerFields.Bytes2, PlayerFieldOffsets.Bytes2OffsetFacialStyle));
+                stmt.AddValue(index++, (byte)m_playerData.SkinID);
+                stmt.AddValue(index++, (byte)m_playerData.FaceID);
+                stmt.AddValue(index++, (byte)m_playerData.HairStyleID);
+                stmt.AddValue(index++, (byte)m_playerData.HairColorID);
+                stmt.AddValue(index++, (byte)m_playerData.FacialHairStyleID);
                 for (int i = 0; i < PlayerConst.CustomDisplaySize; ++i)
-                    stmt.AddValue(index++, GetByteValue(PlayerFields.Bytes2, (byte)(PlayerFieldOffsets.Bytes2OffsetCustomDisplayOption + i)));
+                    stmt.AddValue(index++, m_playerData.CustomDisplayOption[i]);
                 stmt.AddValue(index++, GetInventorySlotCount());
                 stmt.AddValue(index++, GetBankBagSlotCount());
-                stmt.AddValue(index++, (byte)GetUInt32Value(ActivePlayerFields.RestInfo + PlayerFieldOffsets.RestStateXp));
-                stmt.AddValue(index++, GetUInt32Value(PlayerFields.Flags));
-                stmt.AddValue(index++, GetUInt32Value(PlayerFields.FlagsEx));
+                stmt.AddValue(index++, (byte)m_activePlayerData.RestInfo[(int)RestTypes.XP].StateID);
+                stmt.AddValue(index++, (uint)m_playerData.PlayerFlags);
+                stmt.AddValue(index++, (uint)m_playerData.PlayerFlagsEx);
                 stmt.AddValue(index++, (ushort)GetMapId());
                 stmt.AddValue(index++, GetInstanceId());
                 stmt.AddValue(index++, (byte)GetDungeonDifficultyID());
                 stmt.AddValue(index++, (byte)GetRaidDifficultyID());
                 stmt.AddValue(index++, (byte)GetLegacyRaidDifficultyID());
-                stmt.AddValue(index++, GetPositionX());
-                stmt.AddValue(index++, GetPositionY());
-                stmt.AddValue(index++, GetPositionZ());
-                stmt.AddValue(index++, GetOrientation());
-                stmt.AddValue(index++, GetTransOffsetX());
-                stmt.AddValue(index++, GetTransOffsetY());
-                stmt.AddValue(index++, GetTransOffsetZ());
-                stmt.AddValue(index++, GetTransOffsetO());
+                stmt.AddValue(index++, finiteAlways(GetPositionX()));
+                stmt.AddValue(index++, finiteAlways(GetPositionY()));
+                stmt.AddValue(index++, finiteAlways(GetPositionZ()));
+                stmt.AddValue(index++, finiteAlways(GetOrientation()));
+                stmt.AddValue(index++, finiteAlways(GetTransOffsetX()));
+                stmt.AddValue(index++, finiteAlways(GetTransOffsetY()));
+                stmt.AddValue(index++, finiteAlways(GetTransOffsetZ()));
+                stmt.AddValue(index++, finiteAlways(GetTransOffsetO()));
                 ulong transLowGUID = 0;
                 if (GetTransport())
                     transLowGUID = GetTransport().GetGUID().GetCounter();
@@ -3172,41 +3136,39 @@ namespace Game.Entities
                 stmt.AddValue(index++, m_cinematic);
                 stmt.AddValue(index++, m_PlayedTimeTotal);
                 stmt.AddValue(index++, m_PlayedTimeLevel);
-                stmt.AddValue(index++, _restMgr.GetRestBonus(RestTypes.XP));
+                stmt.AddValue(index++, finiteAlways(_restMgr.GetRestBonus(RestTypes.XP)));
                 stmt.AddValue(index++, (uint)Time.UnixTime);
-                stmt.AddValue(index++, HasFlag(PlayerFields.Flags, PlayerFlags.Resting) ? 1 : 0);
+                stmt.AddValue(index++, (HasPlayerFlag(PlayerFlags.Resting) ? 1 : 0));
                 //save, far from tavern/city
                 //save, but in tavern/city
                 stmt.AddValue(index++, GetTalentResetCost());
                 stmt.AddValue(index++, GetTalentResetTime());
-
                 stmt.AddValue(index++, GetPrimarySpecialization());
                 stmt.AddValue(index++, (ushort)m_ExtraFlags);
                 stmt.AddValue(index++, m_stableSlots);
                 stmt.AddValue(index++, (ushort)atLoginFlags);
                 stmt.AddValue(index++, GetZoneId());
-                stmt.AddValue(index++, m_deathExpireTime);
+                stmt.AddValue(index++, (uint)m_deathExpireTime);
 
                 ss.Clear();
                 ss.Append(m_taxi.SaveTaxiDestinationsToString());
 
                 stmt.AddValue(index++, ss.ToString());
-                stmt.AddValue(index++, GetUInt32Value(ActivePlayerFields.LifetimeHonorableKills));
-                stmt.AddValue(index++, GetUInt16Value(ActivePlayerFields.Kills, 0));
-                stmt.AddValue(index++, GetUInt16Value(ActivePlayerFields.Kills, 1));
-                stmt.AddValue(index++, (uint)GetInt32Value(PlayerFields.ChosenTitle));
-                stmt.AddValue(index++, GetUInt32Value(ActivePlayerFields.WatchedFactionIndex));
+                stmt.AddValue(index++, (uint)m_activePlayerData.LifetimeHonorableKills);
+                stmt.AddValue(index++, (ushort)m_activePlayerData.TodayHonorableKills);
+                stmt.AddValue(index++, (ushort)m_activePlayerData.YesterdayHonorableKills);
+                stmt.AddValue(index++, (uint)m_playerData.PlayerTitle);
+                stmt.AddValue(index++, (int)m_activePlayerData.WatchedFactionIndex);
                 stmt.AddValue(index++, GetDrunkValue());
                 stmt.AddValue(index++, GetHealth());
 
                 int storedPowers = 0;
-                for (PowerType i = 0; i < PowerType.Max; ++i)
+                for (PowerType powerType = 0; powerType < PowerType.Max; ++powerType)
                 {
-                    if (Global.DB2Mgr.GetPowerIndexByClass(i, GetClass()) != (int)PowerType.Max)
+                    if (GetPowerIndex(powerType) != (int)PowerType.Max)
                     {
-                        stmt.AddValue(index++, GetUInt32Value(UnitFields.Power + storedPowers));
-                        storedPowers++;
-                        if (storedPowers >= (int)PowerType.MaxPerClass)
+                        stmt.AddValue(index++, m_unitData.Power[storedPowers]);
+                        if (++storedPowers >= (int)PowerType.MaxPerClass)
                             break;
                     }
                 }
@@ -3215,14 +3177,13 @@ namespace Game.Entities
                     stmt.AddValue(index++, 0);
 
                 stmt.AddValue(index++, GetSession().GetLatency());
-
                 stmt.AddValue(index++, GetActiveTalentGroup());
-
                 stmt.AddValue(index++, GetLootSpecId());
 
                 ss.Clear();
-                for (var i = 0; i < PlayerConst.ExploredZonesSize; ++i)
-                    ss.AppendFormat("{0} ", GetUInt32Value(ActivePlayerFields.ExploredZones + i));
+                for (int i = 0; i < PlayerConst.ExploredZonesSize; ++i)
+                    ss.Append($"{(uint)(m_activePlayerData.ExploredZones[i] & 0xFFFFFFFF)} {(uint)((m_activePlayerData.ExploredZones[i] >> 32) & 0xFFFFFFFF)} ");
+
                 stmt.AddValue(index++, ss.ToString());
 
                 ss.Clear();
@@ -3232,26 +3193,28 @@ namespace Game.Entities
                     Item item = GetItemByPos(InventorySlots.Bag0, i);
                     if (item != null)
                     {
-                        ss.AppendFormat("{0} {1} ", (uint)item.GetTemplate().GetInventoryType(), item.GetDisplayId(this));
+                        ss.Append($"{item.GetTemplate().GetInventoryType()} {item.GetDisplayId(this)} ");
                         SpellItemEnchantmentRecord enchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(item.GetVisibleEnchantmentId(this));
                         if (enchant != null)
                             ss.Append(enchant.ItemVisual);
                         else
-                            ss.Append(0);
+                            ss.Append('0');
 
                         ss.Append(' ');
                     }
                     else
                         ss.Append("0 0 0 ");
                 }
+
                 stmt.AddValue(index++, ss.ToString());
 
                 ss.Clear();
-                for (var i = 0; i < PlayerConst.KnowTitlesSize * 2; ++i)
-                    ss.AppendFormat("{0} ", GetUInt32Value(ActivePlayerFields.KnownTitles + i));
+                for (int i = 0; i < m_activePlayerData.KnownTitles.Size(); ++i)
+                    ss.Append($"{(uint)(m_activePlayerData.KnownTitles[i] & 0xFFFFFFFF)} {(uint)((m_activePlayerData.KnownTitles[i] >> 32) & 0xFFFFFFFF)} ");
+
                 stmt.AddValue(index++, ss.ToString());
 
-                stmt.AddValue(index++, GetByteValue(ActivePlayerFields.Bytes, PlayerFieldOffsets.FieldBytesOffsetActionBarToggles));
+                stmt.AddValue(index++, (byte)m_activePlayerData.MultiActionBars);
                 stmt.AddValue(index++, m_grantableLevels);
                 stmt.AddValue(index++, Global.RealmMgr.GetMinorMajorBugfixVersionForBuild(Global.WorldMgr.GetRealm().Build));
             }
@@ -3262,52 +3225,54 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetName());
                 stmt.AddValue(index++, (byte)GetRace());
                 stmt.AddValue(index++, (byte)GetClass());
-                stmt.AddValue(index++, GetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetGender));
+                stmt.AddValue(index++, (byte)m_playerData.NativeSex);   // save gender from PLAYER_BYTES_3, UNIT_BYTES_0 changes with every transform effect
                 stmt.AddValue(index++, getLevel());
-                stmt.AddValue(index++, GetUInt32Value(ActivePlayerFields.Xp));
+                stmt.AddValue(index++, (uint)m_activePlayerData.XP);
                 stmt.AddValue(index++, GetMoney());
-                stmt.AddValue(index++, GetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetSkinId));
-                stmt.AddValue(index++, GetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetFaceId));
-                stmt.AddValue(index++, GetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetHairStyleId));
-                stmt.AddValue(index++, GetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetHairColorId));
-                stmt.AddValue(index++, GetByteValue(PlayerFields.Bytes2, PlayerFieldOffsets.Bytes2OffsetFacialStyle));
+                stmt.AddValue(index++, (byte)m_playerData.SkinID);
+                stmt.AddValue(index++, (byte)m_playerData.FaceID);
+                stmt.AddValue(index++, (byte)m_playerData.HairStyleID);
+                stmt.AddValue(index++, (byte)m_playerData.HairColorID);
+                stmt.AddValue(index++, (byte)m_playerData.FacialHairStyleID);
+
                 for (int i = 0; i < PlayerConst.CustomDisplaySize; ++i)
-                    stmt.AddValue(index++, GetByteValue(PlayerFields.Bytes2, (byte)(
-                        PlayerFieldOffsets.Bytes2OffsetCustomDisplayOption + i)));
+                    stmt.AddValue(index++, m_playerData.CustomDisplayOption[i]);
+
                 stmt.AddValue(index++, GetInventorySlotCount());
                 stmt.AddValue(index++, GetBankBagSlotCount());
-                stmt.AddValue(index++, (byte)GetUInt32Value(ActivePlayerFields.RestInfo + PlayerFieldOffsets.RestStateXp));
-                stmt.AddValue(index++, GetUInt32Value(PlayerFields.Flags));
-                stmt.AddValue(index++, GetUInt32Value(PlayerFields.FlagsEx));
+                stmt.AddValue(index++, (byte)m_activePlayerData.RestInfo[(int)RestTypes.XP].StateID);
+                stmt.AddValue(index++, (uint)m_playerData.PlayerFlags);
+                stmt.AddValue(index++, (uint)m_playerData.PlayerFlagsEx);
 
                 if (!IsBeingTeleported())
                 {
-                    stmt.AddValue(index++, GetMapId());
+                    stmt.AddValue(index++, (ushort)GetMapId());
                     stmt.AddValue(index++, GetInstanceId());
                     stmt.AddValue(index++, (byte)GetDungeonDifficultyID());
                     stmt.AddValue(index++, (byte)GetRaidDifficultyID());
                     stmt.AddValue(index++, (byte)GetLegacyRaidDifficultyID());
-                    stmt.AddValue(index++, GetPositionX());
-                    stmt.AddValue(index++, GetPositionY());
-                    stmt.AddValue(index++, GetPositionZ());
-                    stmt.AddValue(index++, GetOrientation());
+                    stmt.AddValue(index++, finiteAlways(GetPositionX()));
+                    stmt.AddValue(index++, finiteAlways(GetPositionY()));
+                    stmt.AddValue(index++, finiteAlways(GetPositionZ()));
+                    stmt.AddValue(index++, finiteAlways(GetOrientation()));
                 }
                 else
                 {
-                    stmt.AddValue(index++, GetTeleportDest().GetMapId());
+                    stmt.AddValue(index++, (ushort)GetTeleportDest().GetMapId());
                     stmt.AddValue(index++, 0);
                     stmt.AddValue(index++, (byte)GetDungeonDifficultyID());
                     stmt.AddValue(index++, (byte)GetRaidDifficultyID());
                     stmt.AddValue(index++, (byte)GetLegacyRaidDifficultyID());
-                    stmt.AddValue(index++, GetTeleportDest().GetPositionX());
-                    stmt.AddValue(index++, GetTeleportDest().GetPositionY());
-                    stmt.AddValue(index++, GetTeleportDest().GetPositionZ());
-                    stmt.AddValue(index++, GetTeleportDest().GetOrientation());
+                    stmt.AddValue(index++, finiteAlways(GetTeleportDest().GetPositionX()));
+                    stmt.AddValue(index++, finiteAlways(GetTeleportDest().GetPositionY()));
+                    stmt.AddValue(index++, finiteAlways(GetTeleportDest().GetPositionZ()));
+                    stmt.AddValue(index++, finiteAlways(GetTeleportDest().GetOrientation()));
                 }
-                stmt.AddValue(index++, GetTransOffsetX());
-                stmt.AddValue(index++, GetTransOffsetY());
-                stmt.AddValue(index++, GetTransOffsetZ());
-                stmt.AddValue(index++, GetTransOffsetO());
+
+                stmt.AddValue(index++, finiteAlways(GetTransOffsetX()));
+                stmt.AddValue(index++, finiteAlways(GetTransOffsetY()));
+                stmt.AddValue(index++, finiteAlways(GetTransOffsetZ()));
+                stmt.AddValue(index++, finiteAlways(GetTransOffsetO()));
                 ulong transLowGUID = 0;
                 if (GetTransport())
                     transLowGUID = GetTransport().GetGUID().GetCounter();
@@ -3321,14 +3286,13 @@ namespace Game.Entities
                 stmt.AddValue(index++, m_cinematic);
                 stmt.AddValue(index++, m_PlayedTimeTotal);
                 stmt.AddValue(index++, m_PlayedTimeLevel);
-                stmt.AddValue(index++, _restMgr.GetRestBonus(RestTypes.XP));
-                stmt.AddValue(index++, Time.UnixTime);
-                stmt.AddValue(index++, HasFlag(PlayerFields.Flags, PlayerFlags.Resting) ? 1 : 0);
+                stmt.AddValue(index++, finiteAlways(_restMgr.GetRestBonus(RestTypes.XP)));
+                stmt.AddValue(index++, (uint)Time.UnixTime);
+                stmt.AddValue(index++, (HasPlayerFlag(PlayerFlags.Resting) ? 1 : 0));
                 //save, far from tavern/city
                 //save, but in tavern/city
                 stmt.AddValue(index++, GetTalentResetCost());
                 stmt.AddValue(index++, GetTalentResetTime());
-
                 stmt.AddValue(index++, GetPrimarySpecialization());
                 stmt.AddValue(index++, (ushort)m_ExtraFlags);
                 stmt.AddValue(index++, m_stableSlots);
@@ -3340,22 +3304,21 @@ namespace Game.Entities
                 ss.Append(m_taxi.SaveTaxiDestinationsToString());
 
                 stmt.AddValue(index++, ss.ToString());
-                stmt.AddValue(index++, GetUInt32Value(ActivePlayerFields.LifetimeHonorableKills));
-                stmt.AddValue(index++, GetUInt16Value(ActivePlayerFields.Kills, 0));
-                stmt.AddValue(index++, GetUInt16Value(ActivePlayerFields.Kills, 1));
-                stmt.AddValue(index++, GetUInt32Value(PlayerFields.ChosenTitle));
-                stmt.AddValue(index++, (uint)GetInt32Value(ActivePlayerFields.WatchedFactionIndex));
+                stmt.AddValue(index++, (uint)m_activePlayerData.LifetimeHonorableKills);
+                stmt.AddValue(index++, (ushort)m_activePlayerData.TodayHonorableKills);
+                stmt.AddValue(index++, (ushort)m_activePlayerData.YesterdayHonorableKills);
+                stmt.AddValue(index++, (uint)m_playerData.PlayerTitle);
+                stmt.AddValue(index++, (int)m_activePlayerData.WatchedFactionIndex);
                 stmt.AddValue(index++, GetDrunkValue());
                 stmt.AddValue(index++, GetHealth());
 
                 int storedPowers = 0;
-                for (PowerType i = 0; i < PowerType.Max; ++i)
+                for (PowerType powerType = 0; powerType < PowerType.Max; ++powerType)
                 {
-                    if (Global.DB2Mgr.GetPowerIndexByClass(i, GetClass()) != (int)PowerType.Max)
+                    if (GetPowerIndex(powerType) != (int)PowerType.Max)
                     {
-                        stmt.AddValue(index++, GetUInt32Value(UnitFields.Power + storedPowers));
-                        storedPowers++;
-                        if (storedPowers >= (int)PowerType.MaxPerClass)
+                        stmt.AddValue(index++, m_unitData.Power[storedPowers]);
+                        if (++storedPowers >= (int)PowerType.MaxPerClass)
                             break;
                     }
                 }
@@ -3364,14 +3327,13 @@ namespace Game.Entities
                     stmt.AddValue(index++, 0);
 
                 stmt.AddValue(index++, GetSession().GetLatency());
-
                 stmt.AddValue(index++, GetActiveTalentGroup());
-
                 stmt.AddValue(index++, GetLootSpecId());
 
                 ss.Clear();
-                for (var i = 0; i < PlayerConst.ExploredZonesSize; ++i)
-                    ss.AppendFormat("{0} ", GetUInt32Value(ActivePlayerFields.ExploredZones + i));
+                for (int i = 0; i < PlayerConst.ExploredZonesSize; ++i)
+                    ss.Append($"{(uint)(m_activePlayerData.ExploredZones[i] & 0xFFFFFFFF)} {(uint)((m_activePlayerData.ExploredZones[i] >> 32) & 0xFFFFFFFF)} ");
+
                 stmt.AddValue(index++, ss.ToString());
 
                 ss.Clear();
@@ -3381,33 +3343,34 @@ namespace Game.Entities
                     Item item = GetItemByPos(InventorySlots.Bag0, i);
                     if (item != null)
                     {
-                        ss.AppendFormat("{0} {1} ", (uint)item.GetTemplate().GetInventoryType(), item.GetDisplayId(this));
+                        ss.Append($"{(uint)item.GetTemplate().GetInventoryType()} {item.GetDisplayId(this)} ");
                         SpellItemEnchantmentRecord enchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(item.GetVisibleEnchantmentId(this));
                         if (enchant != null)
                             ss.Append(enchant.ItemVisual);
                         else
-                            ss.Append(0);
+                            ss.Append('0');
 
                         ss.Append(' ');
                     }
                     else
                         ss.Append("0 0 0 ");
                 }
+
                 stmt.AddValue(index++, ss.ToString());
 
                 ss.Clear();
-                for (var i = 0; i < PlayerConst.KnowTitlesSize * 2; ++i)
-                    ss.AppendFormat("{0} ", GetUInt32Value(ActivePlayerFields.KnownTitles + i));
+                for (int i = 0; i < m_activePlayerData.KnownTitles.Size(); ++i)
+                    ss.Append($"{(uint)(m_activePlayerData.KnownTitles[i] & 0xFFFFFFFF)} {(uint)((m_activePlayerData.KnownTitles[i] >> 32) & 0xFFFFFFFF)} ");
 
                 stmt.AddValue(index++, ss.ToString());
-                stmt.AddValue(index++, GetByteValue(ActivePlayerFields.Bytes, PlayerFieldOffsets.FieldBytesOffsetActionBarToggles));
+                stmt.AddValue(index++, (byte)m_activePlayerData.MultiActionBars);
                 stmt.AddValue(index++, m_grantableLevels);
 
                 stmt.AddValue(index++, IsInWorld && !GetSession().PlayerLogout() ? 1 : 0);
-                stmt.AddValue(index++, GetUInt32Value(ActivePlayerFields.Honor));
+                stmt.AddValue(index++, (uint)m_activePlayerData.Honor);
                 stmt.AddValue(index++, GetHonorLevel());
-                stmt.AddValue(index++, (byte)GetUInt32Value(ActivePlayerFields.RestInfo + PlayerFieldOffsets.RestStateHonor));
-                stmt.AddValue(index++, _restMgr.GetRestBonus(RestTypes.Honor));
+                stmt.AddValue(index++, (byte)m_activePlayerData.RestInfo[(int)RestTypes.Honor].StateID);
+                stmt.AddValue(index++, finiteAlways(_restMgr.GetRestBonus(RestTypes.Honor)));
                 stmt.AddValue(index++, Global.WorldMgr.GetRealm().Build);
 
                 // Index
@@ -3489,7 +3452,7 @@ namespace Game.Entities
 
             // save pet (hunter pet level and experience and all type pets health/mana).
             Pet pet = GetPet();
-            if (pet != null)
+            if (pet)
                 pet.SavePetToDB(PetSaveMode.AsCurrent);
         }
         void DeleteSpellFromAllPlayers(uint spellId)

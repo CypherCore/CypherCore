@@ -76,6 +76,7 @@ namespace Game.DataStorage
             CinematicCameraStorage = DBReader.Read<CinematicCameraRecord>("CinematicCamera.db2", HotfixStatements.SEL_CINEMATIC_CAMERA);
             CinematicSequencesStorage = DBReader.Read<CinematicSequencesRecord>("CinematicSequences.db2", HotfixStatements.SEL_CINEMATIC_SEQUENCES);
             ContentTuningStorage = DBReader.Read<ContentTuningRecord>("ContentTuning.db2", HotfixStatements.SEL_CONTENT_TUNING);
+            ContentTuningXExpectedStorage = DBReader.Read<ContentTuningXExpectedRecord>("ContentTuningXExpected.db2", HotfixStatements.SEL_CONTENT_TUNING_X_EXPECTED);
             ConversationLineStorage = DBReader.Read<ConversationLineRecord>("ConversationLine.db2", HotfixStatements.SEL_CONVERSATION_LINE);
             CreatureDisplayInfoStorage = DBReader.Read<CreatureDisplayInfoRecord>("CreatureDisplayInfo.db2", HotfixStatements.SEL_CREATURE_DISPLAY_INFO);
             CreatureDisplayInfoExtraStorage = DBReader.Read<CreatureDisplayInfoExtraRecord>("CreatureDisplayInfoExtra.db2", HotfixStatements.SEL_CREATURE_DISPLAY_INFO_EXTRA);
@@ -153,8 +154,6 @@ namespace Game.DataStorage
             ItemLimitCategoryConditionStorage = DBReader.Read<ItemLimitCategoryConditionRecord>("ItemLimitCategoryCondition.db2", HotfixStatements.SEL_ITEM_LIMIT_CATEGORY_CONDITION);
             ItemModifiedAppearanceStorage = DBReader.Read<ItemModifiedAppearanceRecord>("ItemModifiedAppearance.db2", HotfixStatements.SEL_ITEM_MODIFIED_APPEARANCE);
             ItemPriceBaseStorage = DBReader.Read<ItemPriceBaseRecord>("ItemPriceBase.db2", HotfixStatements.SEL_ITEM_PRICE_BASE);
-            ItemRandomPropertiesStorage = DBReader.Read<ItemRandomPropertiesRecord>("ItemRandomProperties.db2", HotfixStatements.SEL_ITEM_RANDOM_PROPERTIES, HotfixStatements.SEL_ITEM_RANDOM_PROPERTIES_LOCALE);
-            ItemRandomSuffixStorage = DBReader.Read<ItemRandomSuffixRecord>("ItemRandomSuffix.db2", HotfixStatements.SEL_ITEM_RANDOM_SUFFIX, HotfixStatements.SEL_ITEM_RANDOM_SUFFIX_LOCALE);
             ItemSearchNameStorage = DBReader.Read<ItemSearchNameRecord>("ItemSearchName.db2", HotfixStatements.SEL_ITEM_SEARCH_NAME, HotfixStatements.SEL_ITEM_SEARCH_NAME_LOCALE);
             ItemSetStorage = DBReader.Read<ItemSetRecord>("ItemSet.db2", HotfixStatements.SEL_ITEM_SET, HotfixStatements.SEL_ITEM_SET_LOCALE);
             ItemSetSpellStorage = DBReader.Read<ItemSetSpellRecord>("ItemSetSpell.db2", HotfixStatements.SEL_ITEM_SET_SPELL);
@@ -324,13 +323,13 @@ namespace Game.DataStorage
             }
 
             // Check loaded DB2 files proper version
-            if (!AreaTableStorage.ContainsKey(10048) ||                // last area added in 8.0.1 (28153)
-                !CharTitlesStorage.ContainsKey(633) ||                // last char title added in 8.0.1 (28153)
-                !GemPropertiesStorage.ContainsKey(3745) ||            // last gem property added in 8.0.1 (28153)
-                !ItemStorage.ContainsKey(164760) ||                   // last item added in 8.0.1 (28153)
-                !ItemExtendedCostStorage.ContainsKey(6448) ||         // last item extended cost added in 8.0.1 (28153)
-                !MapStorage.ContainsKey(2103) ||                      // last map added in 8.0.1 (28153)
-                !SpellNameStorage.ContainsKey(281872))                // last spell added in 8.0.1 (28153)
+            if (!AreaTableStorage.ContainsKey(10521) ||                // last area added in 8.0.1 (28153)
+                !CharTitlesStorage.ContainsKey(649) ||                // last char title added in 8.0.1 (28153)
+                !GemPropertiesStorage.ContainsKey(3746) ||            // last gem property added in 8.0.1 (28153)
+                !ItemStorage.ContainsKey(168279) ||                   // last item added in 8.0.1 (28153)
+                !ItemExtendedCostStorage.ContainsKey(6545) ||         // last item extended cost added in 8.0.1 (28153)
+                !MapStorage.ContainsKey(2178) ||                      // last map added in 8.0.1 (28153)
+                !SpellNameStorage.ContainsKey(296952))                // last spell added in 8.0.1 (28153)
             {
                 Log.outError(LogFilter.Misc, "You have _outdated_ DB2 files. Please extract correct versions from current using client.");
                 Global.WorldMgr.ShutdownServ(10, ShutdownMask.Force, ShutdownExitCode.Error);
@@ -420,6 +419,7 @@ namespace Game.DataStorage
         public static DB6Storage<CinematicCameraRecord> CinematicCameraStorage;
         public static DB6Storage<CinematicSequencesRecord> CinematicSequencesStorage;
         public static DB6Storage<ContentTuningRecord> ContentTuningStorage;
+        public static DB6Storage<ContentTuningXExpectedRecord> ContentTuningXExpectedStorage;
         public static DB6Storage<ConversationLineRecord> ConversationLineStorage;
         public static DB6Storage<CreatureDisplayInfoRecord> CreatureDisplayInfoStorage;
         public static DB6Storage<CreatureDisplayInfoExtraRecord> CreatureDisplayInfoExtraStorage;
@@ -497,8 +497,6 @@ namespace Game.DataStorage
         public static DB6Storage<ItemLimitCategoryConditionRecord> ItemLimitCategoryConditionStorage;
         public static DB6Storage<ItemModifiedAppearanceRecord> ItemModifiedAppearanceStorage;
         public static DB6Storage<ItemPriceBaseRecord> ItemPriceBaseStorage;
-        public static DB6Storage<ItemRandomPropertiesRecord> ItemRandomPropertiesStorage;
-        public static DB6Storage<ItemRandomSuffixRecord> ItemRandomSuffixStorage;
         public static DB6Storage<ItemSearchNameRecord> ItemSearchNameStorage;
         public static DB6Storage<ItemSetRecord> ItemSetStorage;
         public static DB6Storage<ItemSetSpellRecord> ItemSetSpellStorage;
@@ -725,6 +723,8 @@ namespace Game.DataStorage
                     return row.Health;
                 case -8:
                     return row.DamageReplaceStat;
+                case -9:
+                    return row.DamageSecondary;
                 default:
                     break;
             }

@@ -30,7 +30,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32(Result);
+            _worldPacket.WriteInt32((int)Result);
         }
 
         public VoidTransferError Result;

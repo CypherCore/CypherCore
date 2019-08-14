@@ -134,7 +134,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt64(EventID);
             _worldPacket.WriteUInt64(InviteID);
             _worldPacket.WriteUInt8(Level);
-            _worldPacket.WriteUInt8(Status);
+            _worldPacket.WriteUInt8((byte)Status);
             _worldPacket.WriteUInt8(Type);
             _worldPacket.WritePackedTime(ResponseTime);
 
@@ -159,9 +159,9 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WritePackedTime(ServerTime);
-            _worldPacket.WriteUInt32(Invites.Count);
-            _worldPacket.WriteUInt32(Events.Count);
-            _worldPacket.WriteUInt32(RaidLockouts.Count);
+            _worldPacket.WriteInt32(Invites.Count);
+            _worldPacket.WriteInt32(Events.Count);
+            _worldPacket.WriteInt32(RaidLockouts.Count);
 
             foreach (var invite in Invites)
                 invite.Write(_worldPacket);
@@ -185,16 +185,16 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8(EventType);
+            _worldPacket.WriteUInt8((byte)EventType);
             _worldPacket.WritePackedGuid(OwnerGuid);
             _worldPacket.WriteUInt64(EventID);
-            _worldPacket.WriteUInt8(GetEventType);
+            _worldPacket.WriteUInt8((byte)GetEventType);
             _worldPacket.WriteInt32(TextureID);
-            _worldPacket.WriteUInt32(Flags);
+            _worldPacket.WriteUInt32((uint)Flags);
             _worldPacket.WritePackedTime(Date);
-            _worldPacket.WriteUInt32(LockDate);
+            _worldPacket.WriteUInt32((uint)LockDate);
             _worldPacket.WritePackedGuid(EventGuildID);
-            _worldPacket.WriteUInt32(Invites.Count);
+            _worldPacket.WriteInt32(Invites.Count);
 
             _worldPacket.WriteBits(EventName.GetByteCount(), 8);
             _worldPacket.WriteBits(Description.GetByteCount(), 11);
@@ -229,13 +229,13 @@ namespace Game.Network.Packets
         {
             _worldPacket.WriteUInt64(EventID);
             _worldPacket.WritePackedTime(Date);
-            _worldPacket.WriteUInt32(Flags);
-            _worldPacket.WriteUInt8(EventType);
+            _worldPacket.WriteUInt32((uint)Flags);
+            _worldPacket.WriteUInt8((byte)EventType);
             _worldPacket.WriteInt32(TextureID);
             _worldPacket.WritePackedGuid(EventGuildID);
             _worldPacket.WriteUInt64(InviteID);
-            _worldPacket.WriteUInt8(Status);
-            _worldPacket.WriteUInt8(ModeratorStatus);
+            _worldPacket.WriteUInt8((byte)Status);
+            _worldPacket.WriteUInt8((byte)ModeratorStatus);
 
             // Todo: check order
             _worldPacket.WritePackedGuid(InvitedByGuid);
@@ -310,8 +310,8 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(InviteGuid);
             _worldPacket.WriteUInt64(EventID);
             _worldPacket.WritePackedTime(Date);
-            _worldPacket.WriteUInt32(Flags);
-            _worldPacket.WriteUInt8(Status);
+            _worldPacket.WriteUInt32((uint)Flags);
+            _worldPacket.WriteUInt8((byte)Status);
             _worldPacket.WritePackedTime(ResponseTime);
 
             _worldPacket.WriteBit(ClearPending);
@@ -355,7 +355,7 @@ namespace Game.Network.Packets
         {
             _worldPacket.WritePackedGuid(InviteGuid);
             _worldPacket.WriteUInt64(EventID);
-            _worldPacket.WriteUInt8(Status);
+            _worldPacket.WriteUInt8((byte)Status);
 
             _worldPacket.WriteBit(ClearPending);
             _worldPacket.FlushBits();
@@ -375,8 +375,8 @@ namespace Game.Network.Packets
         {
             _worldPacket.WriteUInt64(EventID);
             _worldPacket.WritePackedTime(Date);
-            _worldPacket.WriteUInt32(Flags);
-            _worldPacket.WriteUInt8(Status);
+            _worldPacket.WriteUInt32((uint)Flags);
+            _worldPacket.WriteUInt8((byte)Status);
         }
 
         public ulong EventID;
@@ -402,10 +402,10 @@ namespace Game.Network.Packets
 
             _worldPacket.WritePackedTime(OriginalDate);
             _worldPacket.WritePackedTime(Date);
-            _worldPacket.WriteUInt32(LockDate);
-            _worldPacket.WriteUInt32(Flags);
-            _worldPacket.WriteUInt32(TextureID);
-            _worldPacket.WriteUInt8(EventType);
+            _worldPacket.WriteUInt32((uint)LockDate);
+            _worldPacket.WriteUInt32((uint)Flags);
+            _worldPacket.WriteInt32(TextureID);
+            _worldPacket.WriteUInt8((byte)EventType);
 
             _worldPacket.WriteBits(EventName.GetByteCount(), 8);
             _worldPacket.WriteBits(Description.GetByteCount(), 11);
@@ -571,7 +571,7 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt8(Command);
-            _worldPacket.WriteUInt8(Result);
+            _worldPacket.WriteUInt8((byte)Result);
 
             _worldPacket.WriteBits(Name.GetByteCount(), 9);
             _worldPacket.FlushBits();
@@ -592,7 +592,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt64(InstanceID);
             _worldPacket.WriteUInt32(ServerTime);
             _worldPacket.WriteInt32(MapID);
-            _worldPacket.WriteUInt32(DifficultyID);
+            _worldPacket.WriteUInt32((uint)DifficultyID);
             _worldPacket.WriteInt32(TimeRemaining);
         }
 
@@ -611,7 +611,7 @@ namespace Game.Network.Packets
         {
             _worldPacket.WriteUInt64(InstanceID);
             _worldPacket.WriteInt32(MapID);
-            _worldPacket.WriteUInt32(DifficultyID);
+            _worldPacket.WriteUInt32((uint)DifficultyID);
         }
 
         public ulong InstanceID;
@@ -625,7 +625,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(ServerTime);
+            _worldPacket.WriteUInt32((uint)ServerTime);
             _worldPacket.WriteInt32(MapID);
             _worldPacket.WriteUInt32(DifficultyID);
             _worldPacket.WriteInt32(NewTimeRemaining);
@@ -645,7 +645,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Invites.Count);
+            _worldPacket.WriteInt32(Invites.Count);
             foreach (var invite in Invites)
             {
                 _worldPacket.WritePackedGuid(invite.InviteGuid);
@@ -832,8 +832,8 @@ namespace Game.Network.Packets
         {
             data.WriteUInt64(EventID);
             data.WriteUInt64(InviteID);
-            data.WriteUInt8(Status);
-            data.WriteUInt8(Moderator);
+            data.WriteUInt8((byte)Status);
+            data.WriteUInt8((byte)Moderator);
             data.WriteUInt8(InviteType);
             data.WritePackedGuid(InviterGuid);
         }
@@ -852,7 +852,7 @@ namespace Game.Network.Packets
             data.WriteUInt64(InstanceID);
             data.WriteInt32(MapID);
             data.WriteUInt32(DifficultyID);
-            data.WriteUInt32(ExpireTime);
+            data.WriteUInt32((uint)ExpireTime);
         }
 
         public ulong InstanceID;
@@ -866,9 +866,9 @@ namespace Game.Network.Packets
         public void Write(WorldPacket data)
         {
             data.WriteUInt64(EventID);
-            data.WriteUInt8(EventType);
+            data.WriteUInt8((byte)EventType);
             data.WritePackedTime(Date);
-            data.WriteUInt32(Flags);
+            data.WriteUInt32((uint)Flags);
             data.WriteInt32(TextureID);
             data.WriteUInt64(EventClubID);
             data.WritePackedGuid(OwnerGuid);
@@ -896,8 +896,8 @@ namespace Game.Network.Packets
             data.WriteUInt64(InviteID);
 
             data.WriteUInt8(Level);
-            data.WriteUInt8(Status);
-            data.WriteUInt8(Moderator);
+            data.WriteUInt8((byte)Status);
+            data.WriteUInt8((byte)Moderator);
             data.WriteUInt8(InviteType);
 
             data.WritePackedTime(ResponseTime);

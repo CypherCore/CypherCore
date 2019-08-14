@@ -76,7 +76,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteBits(DataType, 3);
 
             var bytes = CompressedData.GetData();
-            _worldPacket.WriteUInt32(bytes.Length);
+            _worldPacket.WriteInt32(bytes.Length);
             _worldPacket.WriteBytes(bytes);
         }
 

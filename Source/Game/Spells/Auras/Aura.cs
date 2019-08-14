@@ -730,7 +730,7 @@ namespace Game.Spells
                 int duration = m_spellInfo.GetMaxDuration();
                 // Calculate duration of periodics affected by haste.
                 if (caster.HasAuraTypeWithAffectMask(AuraType.PeriodicHaste, m_spellInfo) || m_spellInfo.HasAttribute(SpellAttr5.HasteAffectDuration))
-                    duration = (int)(duration * caster.GetFloatValue(UnitFields.ModCastSpeed));
+                    duration = (int)(duration * caster.m_unitData.ModCastingSpeed);
 
                 SetMaxDuration(duration);
                 SetDuration(duration);

@@ -1689,7 +1689,7 @@ namespace Game
             if (condition.Gender >= 0 && (int)player.GetGender() != condition.Gender)
                 return false;
 
-            if (condition.NativeGender >= 0 && player.GetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetGender) != condition.NativeGender)
+            if (condition.NativeGender >= 0 && player.m_playerData.NativeSex != condition.NativeGender)
                 return false;
 
             if (condition.PowerType != -1 && condition.PowerTypeComp != 0)
@@ -1701,7 +1701,7 @@ namespace Game
 
             if (condition.ChrSpecializationIndex >= 0 || condition.ChrSpecializationRole >= 0)
             {
-                ChrSpecializationRecord spec = CliDB.ChrSpecializationStorage.LookupByKey(player.GetUInt32Value(PlayerFields.CurrentSpecId));
+                ChrSpecializationRecord spec = CliDB.ChrSpecializationStorage.LookupByKey(player.GetPrimarySpecialization());
                 if (spec != null)
                 {
                     if (condition.ChrSpecializationIndex >= 0 && spec.OrderIndex != condition.ChrSpecializationIndex)
@@ -1785,10 +1785,10 @@ namespace Game
                 }
             }
 
-            if (condition.PvpMedal != 0 && !Convert.ToBoolean((1 << (condition.PvpMedal - 1)) & player.GetUInt32Value(ActivePlayerFields.PvpMedals)))
+            if (condition.PvpMedal != 0 && !Convert.ToBoolean((1 << (condition.PvpMedal - 1)) & player.m_activePlayerData.PvpMedals))
                 return false;
 
-            if (condition.LifetimeMaxPVPRank != 0 && player.GetByteValue(ActivePlayerFields.Bytes, PlayerFieldOffsets.FieldBytesOffsetLifetimeMaxPvpRank) != condition.LifetimeMaxPVPRank)
+            if (condition.LifetimeMaxPVPRank != 0 && player.m_activePlayerData.LifetimeMaxRank != condition.LifetimeMaxPVPRank)
                 return false;
 
             if (condition.MovementFlags[0] != 0 && !Convert.ToBoolean((uint)player.GetUnitMovementFlags() & condition.MovementFlags[0]))
@@ -1841,7 +1841,7 @@ namespace Game
                 {
                     uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(condition.PrevQuestID[i]);
                     if (questBit != 0)
-                        results[i] = (player.GetUInt32Value(ActivePlayerFields.QuestCompleted + (int)((questBit - 1) >> 5)) & (1 << (int)((questBit - 1) & 31))) != 0;
+                        results[i] = (player.m_activePlayerData.QuestCompleted[((int)questBit - 1) >> 6] & (1ul << (((int)questBit - 1) & 63))) != 0;
                 }
 
                 if (!PlayerConditionLogic(condition.PrevQuestLogic, results))
@@ -1920,7 +1920,7 @@ namespace Game
                 {
                     AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(condition.Explored[i]);
                     if (area != null)
-                        if (area.AreaBit != -1 && !Convert.ToBoolean(player.GetUInt32Value(ActivePlayerFields.ExploredZones + area.AreaBit / 32) & (1 << (area.AreaBit % 32))))
+                        if (area.AreaBit != -1 && !Convert.ToBoolean(player.m_activePlayerData.ExploredZones[area.AreaBit / 64] & (1ul << ((int)area.AreaBit % 64))))
                             return false;
                 }
             }
@@ -2014,16 +2014,16 @@ namespace Game
                 }
             }
 
-            if (condition.MinAvgItemLevel != 0 && Math.Floor(player.GetFloatValue(PlayerFields.AvgItemLevel)) < condition.MinAvgItemLevel)
+            if (condition.MinAvgItemLevel != 0 && Math.Floor(player.m_playerData.AvgItemLevel[0]) < condition.MinAvgItemLevel)
                 return false;
 
-            if (condition.MaxAvgItemLevel != 0 && Math.Floor(player.GetFloatValue(PlayerFields.AvgItemLevel)) > condition.MaxAvgItemLevel)
+            if (condition.MaxAvgItemLevel != 0 && Math.Floor(player.m_playerData.AvgItemLevel[0]) > condition.MaxAvgItemLevel)
                 return false;
 
-            if (condition.MinAvgEquippedItemLevel != 0 && Math.Floor(player.GetFloatValue(PlayerFields.AvgItemLevel + 1)) < condition.MinAvgEquippedItemLevel)
+            if (condition.MinAvgEquippedItemLevel != 0 && Math.Floor(player.m_playerData.AvgItemLevel[1]) < condition.MinAvgEquippedItemLevel)
                 return false;
 
-            if (condition.MaxAvgEquippedItemLevel != 0 && Math.Floor(player.GetFloatValue(PlayerFields.AvgItemLevel + 1)) > condition.MaxAvgEquippedItemLevel)
+            if (condition.MaxAvgEquippedItemLevel != 0 && Math.Floor(player.m_playerData.AvgItemLevel[1]) > condition.MaxAvgEquippedItemLevel)
                 return false;
 
             if (condition.ModifierTreeID != 0 && !player.ModifierTreeSatisfied(condition.ModifierTreeID))

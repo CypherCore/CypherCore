@@ -29,21 +29,24 @@ namespace Game.Network
 {
     public class WorldSocket : SocketBase
     {
-        static string ClientConnectionInitialize = "WORLD OF WARCRAFT CONNECTION - CLIENT TO SERVER";
-        static string ServerConnectionInitialize = "WORLD OF WARCRAFT CONNECTION - SERVER TO CLIENT";
+        static string ClientConnectionInitialize = "WORLD OF WARCRAFT CONNECTION - CLIENT TO SERVER - V2";
+        static string ServerConnectionInitialize = "WORLD OF WARCRAFT CONNECTION - SERVER TO CLIENT - V2";
 
         static byte[] AuthCheckSeed = { 0xC5, 0xC6, 0x98, 0x95, 0x76, 0x3F, 0x1D, 0xCD, 0xB6, 0xA1, 0x37, 0x28, 0xB3, 0x12, 0xFF, 0x8A };
         static byte[] SessionKeySeed = { 0x58, 0xCB, 0xCF, 0x40, 0xFE, 0x2E, 0xCE, 0xA6, 0x5A, 0x90, 0xB8, 0x01, 0x68, 0x6C, 0x28, 0x0B };
         static byte[] ContinuedSessionSeed = { 0x16, 0xAD, 0x0C, 0xD4, 0x46, 0xF9, 0x4F, 0xB2, 0xEF, 0x7D, 0xEA, 0x2A, 0x17, 0x66, 0x4D, 0x2F };
+        static byte[] EncryptionKeySeed = { 0xE9, 0x75, 0x3C, 0x50, 0x90, 0x93, 0x61, 0xDA, 0x3B, 0x07, 0xEE, 0xFA, 0xFF, 0x9D, 0x41, 0xB8 };
 
-        static byte[] ClientTypeSeed_Wn64 = { 0xDD, 0x62, 0x65, 0x17, 0xCC, 0x6D, 0x31, 0x93, 0x2B, 0x47, 0x99, 0x34, 0xCC, 0xDC, 0x0A, 0xBF };
+        static byte[] ClientTypeSeed_Wn64 = { 0x8A, 0x46, 0xF2, 0x36, 0x70, 0x30, 0x9F, 0x2A, 0xAE, 0x85, 0xC9, 0xA4, 0x72, 0x76, 0x38, 0x2B };
         static byte[] ClientTypeSeed_Mc64 = { 0x34, 0x1C, 0xFE, 0xFE, 0x3D, 0x72, 0xAC, 0xA9, 0xA4, 0x40, 0x7D, 0xC5, 0x35, 0xDE, 0xD6, 0x6A };
 
         public WorldSocket(Socket socket) : base(socket)
         {
             _connectType = ConnectionType.Realm;
             _serverChallenge = new byte[0].GenerateRandomKey(16);
-            worldCrypt = new WorldCrypt();
+            _worldCrypt = new WorldCrypt();
+
+            _encryptKey = new byte[16];
         }
 
         public override void Dispose()
@@ -51,9 +54,6 @@ namespace Game.Network
             _worldSession = null;
             _queryProcessor = null;
             _serverChallenge = null;
-            worldCrypt = null;
-            _encryptSeed = null;
-            _decryptSeed = null;
             _sessionKey = null;
             _compressionStream = null;
 
@@ -147,42 +147,51 @@ namespace Game.Network
 
             while (transferredBytes > 5)
             {
-                if (worldCrypt.IsInitialized)
-                    worldCrypt.Decrypt(GetReceiveBuffer(), 4);
-
-                int size;
-                uint opcode;
-                if (!ReadHeader(out opcode, out size))
+                PacketHeader header;
+                if (!ReadHeader(out header))
                 {
                     CloseSocket();
                     return;
                 }
 
-                var data = new byte[size];
-                Buffer.BlockCopy(GetReceiveBuffer(), 6, data, 0, size);
+                var data = new byte[header.Size];
+                Buffer.BlockCopy(GetReceiveBuffer(), 16, data, 0, header.Size);
 
-                PacketLog.Write(data, opcode, GetRemoteIpAddress(), GetRemotePort(), _connectType, true);
-                if (!ProcessPacket(new WorldPacket(data, opcode)))
+                if (!_worldCrypt.Decrypt(ref data, header.Size, header.Tag))
+                {
+                    Log.outError(LogFilter.Network, $"WorldSocket.ReadHandler(): client {GetRemoteIpAddress().ToString()} failed to decrypt packet (size: {header.Size})");
+                    return;
+                }
+
+                WorldPacket worldPacket = new WorldPacket(data);
+                if (worldPacket.GetOpcode() >= (int)ClientOpcodes.Max)
+                {
+                    Log.outError(LogFilter.Network, $"WorldSocket.ReadHandler(): client {GetRemoteIpAddress().ToString()} sent wrong opcode (opcode: {worldPacket.GetOpcode()})");
+                    return;
+                }
+
+                PacketLog.Write(data, worldPacket.GetOpcode(), GetRemoteIpAddress(), GetRemotePort(), _connectType, true);
+                if (!ProcessPacket(worldPacket))
                 {
                     CloseSocket();
                     return;
                 }
 
-                transferredBytes -= size + 6;
-                Buffer.BlockCopy(GetReceiveBuffer(), size + 6, GetReceiveBuffer(), 0, transferredBytes);
+                transferredBytes -= header.Size + 16;
+                Buffer.BlockCopy(GetReceiveBuffer(), header.Size + 16, GetReceiveBuffer(), 0, transferredBytes);
             }
 
             AsyncRead();
         }
 
-        bool ReadHeader(out uint opcode, out int size)
+        bool ReadHeader(out PacketHeader header)
         {
-            size = BitConverter.ToInt32(GetReceiveBuffer(), 0) - 2;
-            opcode = BitConverter.ToUInt16(GetReceiveBuffer(), 4);
+            header = new PacketHeader();
+            header.Read(GetReceiveBuffer());
 
-            if (size >= 0x10000 || (opcode >= (int)ClientOpcodes.Max + 1))
+            if (!header.IsValidSize())
             {
-                Log.outError(LogFilter.Network, "WorldSocket.ReadHeader(): client {0} sent malformed packet (size: {1}, cmd: {2})", GetRemoteIpAddress().ToString(), size, opcode);
+                Log.outError(LogFilter.Network, "WorldSocket.ReadHeader(): client {0} sent malformed packet (size: {1})", GetRemoteIpAddress().ToString(), header.Size);
                 return false;
             }
 
@@ -278,16 +287,18 @@ namespace Game.Network
             ServerOpcodes opcode = packet.GetOpcode();
             PacketLog.Write(data, (uint)opcode, GetRemoteIpAddress(), GetRemotePort(), _connectType, false);
 
-            uint packetSize = (uint)data.Length;
-            if (packetSize > 0x400 && worldCrypt.IsInitialized)
-            {
-                ByteBuffer buffer = new ByteBuffer();
-                buffer.WriteUInt32(packetSize + 2);
-                buffer.WriteUInt32(ZLib.adler32(ZLib.adler32(0x9827D8F1, BitConverter.GetBytes((ushort)opcode), 2), data, packetSize));
+            ByteBuffer buffer = new ByteBuffer();
 
-                uint compressedSize = CompressPacket(data, opcode);
-                buffer.WriteUInt32(ZLib.adler32(0x9827D8F1, data, compressedSize)); 
-                buffer.WriteBytes(data, compressedSize);
+            int packetSize = data.Length;
+            if (packetSize > 0x400 && _worldCrypt.IsInitialized)
+            {
+                buffer.WriteInt32(packetSize + 2);
+                buffer.WriteUInt32(ZLib.adler32(ZLib.adler32(0x9827D8F1, BitConverter.GetBytes((ushort)opcode), 2), data, (uint)packetSize));
+
+                byte[] compressedData;
+                uint compressedSize = CompressPacket(data, opcode, out compressedData);
+                buffer.WriteUInt32(ZLib.adler32(0x9827D8F1, compressedData, compressedSize)); 
+                buffer.WriteBytes(compressedData, compressedSize);
 
                 packetSize = (ushort)(compressedSize + 12);
                 opcode = ServerOpcodes.CompressedPacket;
@@ -295,11 +306,22 @@ namespace Game.Network
                 data = buffer.GetData();
             }
 
-            ServerPacketHeader header = new ServerPacketHeader(packetSize, opcode);
-            if (worldCrypt.IsInitialized)
-                worldCrypt.Encrypt(header.data, 4);
+            buffer = new ByteBuffer();
+            buffer.WriteUInt16((ushort)opcode);
+            buffer.WriteBytes(data);
+            packetSize += 2 /*opcode*/;
 
-            AsyncWrite(header.data.Combine(data));
+            data = buffer.GetData();
+
+            PacketHeader header = new PacketHeader();
+            header.Size = packetSize;
+            _worldCrypt.Encrypt(ref data, header.Size, ref header.Tag);
+
+            ByteBuffer byteBuffer = new ByteBuffer();
+            header.Write(byteBuffer);
+            byteBuffer.WriteBytes(data);
+
+            AsyncWrite(byteBuffer.GetData());
         }
 
         public void SetWorldSession(WorldSession session)
@@ -307,16 +329,16 @@ namespace Game.Network
             _worldSession = session;
         }
 
-        public uint CompressPacket(byte[] data, ServerOpcodes opcode)
+        public uint CompressPacket(byte[] data, ServerOpcodes opcode, out byte[] outData)
         {
             byte[] uncompressedData = BitConverter.GetBytes((ushort)opcode).Combine(data);
 
-            uint bufferSize = ZLib.deflateBound(_compressionStream, (uint)uncompressedData.Length);
-            byte[] outPrt = new byte[bufferSize];
+            uint bufferSize = ZLib.deflateBound(_compressionStream, (uint)data.Length);
+            outData = new byte[bufferSize];
 
             _compressionStream.next_out = 0;
             _compressionStream.avail_out = bufferSize;
-            _compressionStream.out_buf = outPrt;
+            _compressionStream.out_buf = outData;
 
             _compressionStream.next_in = 0;
             _compressionStream.avail_in = (uint)uncompressedData.Length;
@@ -329,9 +351,7 @@ namespace Game.Network
                 return 0;
             }
 
-            uint compressedSize = bufferSize - _compressionStream.avail_out;
-            Buffer.BlockCopy(outPrt, 0, data, 0, (int)compressedSize);
-            return compressedSize;
+            return bufferSize - _compressionStream.avail_out;
         }
 
         public override bool Update()
@@ -346,12 +366,9 @@ namespace Game.Network
 
         void HandleSendAuthSession()
         {
-            _encryptSeed = new byte[16].GenerateRandomKey(16);
-            _decryptSeed = new byte[16].GenerateRandomKey(16);
-
             AuthChallenge challenge = new AuthChallenge();
             challenge.Challenge = _serverChallenge;
-            challenge.DosChallenge = _encryptSeed.Combine(_decryptSeed);
+            challenge.DosChallenge = new byte[32].GenerateRandomKey(32);
             challenge.DosZeroBits = 1;
 
             SendPacket(challenge);
@@ -420,6 +437,14 @@ namespace Game.Network
             _sessionKey = new byte[40];
             var sessionKeyGenerator = new SessionKeyGenerator(sessionKeyHmac.Digest, 32);
             sessionKeyGenerator.Generate(_sessionKey, 40);
+
+            HmacSha256 encryptKeyGen = new HmacSha256(_sessionKey);
+            encryptKeyGen.Process(authSession.LocalChallenge, authSession.LocalChallenge.Count);
+            encryptKeyGen.Process(_serverChallenge, 16);
+            encryptKeyGen.Finish(EncryptionKeySeed, 16);
+
+            // only first 16 bytes of the hmac are used
+            Buffer.BlockCopy(encryptKeyGen.Digest, 0, _encryptKey, 0, 16);
 
             // As we don't know if attempted login process by ip works, we update last_attempt_ip right away
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LAST_ATTEMPT_IP);
@@ -537,7 +562,7 @@ namespace Game.Network
             // RBAC must be loaded before adding session to check for skip queue permission
             _worldSession.GetRBACData().LoadFromDBCallback(result);
 
-            SendPacket(new EnableEncryption());
+            SendPacket(new EnableEncryption(_encryptKey, true));
         }
 
         void HandleAuthContinuedSession(AuthContinuedSession authSession)
@@ -589,7 +614,15 @@ namespace Game.Network
                 return;
             }
 
-            SendPacket(new EnableEncryption());
+            HmacSha256 encryptKeyGen = new HmacSha256(_sessionKey);
+            encryptKeyGen.Process(authSession.LocalChallenge, authSession.LocalChallenge.Length);
+            encryptKeyGen.Process(_serverChallenge, 16);
+            encryptKeyGen.Finish(EncryptionKeySeed, 16);
+
+            // only first 16 bytes of the hmac are used
+            Buffer.BlockCopy(encryptKeyGen.Digest, 0, _encryptKey, 0, 16);
+
+            SendPacket(new EnableEncryption(_encryptKey, true));
         }
 
         void HandleConnectToFailed(ConnectToFailed connectToFailed)
@@ -633,16 +666,11 @@ namespace Game.Network
 
         void HandleEnableEncryptionAck()
         {
+            _worldCrypt.Initialize(_encryptKey);
             if (_connectType == ConnectionType.Realm)
-            {
-                worldCrypt.Initialize(_sessionKey);
                 Global.WorldMgr.AddSession(_worldSession);
-            }
             else
-            {
-                worldCrypt.Initialize(_sessionKey, _encryptSeed, _decryptSeed);
                 Global.WorldMgr.AddInstanceSocket(this, _key);
-            }
         }
 
         public void SendAuthResponseError(BattlenetRpcErrorCode code)
@@ -701,10 +729,9 @@ namespace Game.Network
         ulong _key;
 
         byte[] _serverChallenge;
-        WorldCrypt worldCrypt;
-        byte[] _encryptSeed;
-        byte[] _decryptSeed;
+        WorldCrypt _worldCrypt;
         byte[] _sessionKey;
+        byte[] _encryptKey;
 
         long _LastPingTime;
         uint _OverSpeedPings;

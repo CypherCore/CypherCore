@@ -27,8 +27,7 @@ namespace Framework.Database
             PrepareStatement(LoginStatements.SEL_REALMLIST, "SELECT id, name, address, localAddress, localSubnetMask, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild, Region, Battlegroup FROM realmlist WHERE flag <> 3 ORDER BY name");
             PrepareStatement(LoginStatements.DEL_EXPIRED_IP_BANS, "DELETE FROM ip_banned WHERE unbandate<>bandate AND unbandate<=UNIX_TIMESTAMP()");
             PrepareStatement(LoginStatements.UPD_EXPIRED_ACCOUNT_BANS, "UPDATE account_banned SET active = 0 WHERE active = 1 AND unbandate<>bandate AND unbandate<=UNIX_TIMESTAMP()");
-            PrepareStatement(LoginStatements.SEL_IP_INFO, "(SELECT unbandate > UNIX_TIMESTAMP() OR unbandate = bandate AS banned, NULL as country FROM ip_banned WHERE ip = ?) " +
-                "UNION (SELECT NULL AS banned, country FROM ip2nation WHERE INET_NTOA(ip) = ?)");
+            PrepareStatement(LoginStatements.SEL_IP_INFO, "SELECT unbandate > UNIX_TIMESTAMP() OR unbandate = bandate AS banned, NULL as country FROM ip_banned WHERE ip = ?");
 
             PrepareStatement(LoginStatements.INS_IP_AUTO_BANNED, "INSERT INTO ip_banned (ip, bandate, unbandate, bannedby, banreason) VALUES (?, UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+?, 'Cypher Auth', 'Failed login autoban')");
             PrepareStatement(LoginStatements.SEL_IP_BANNED_ALL, "SELECT ip, bandate, unbandate, bannedby, banreason FROM ip_banned WHERE (bandate = unbandate OR unbandate > UNIX_TIMESTAMP()) ORDER BY unbandate");
@@ -38,7 +37,6 @@ namespace Framework.Database
             PrepareStatement(LoginStatements.DEL_ACCOUNT_BANNED, "DELETE FROM account_banned WHERE id = ?");
             PrepareStatement(LoginStatements.UPD_ACCOUNT_INFO_CONTINUED_SESSION, "UPDATE account SET sessionkey = ? WHERE id = ?");
             PrepareStatement(LoginStatements.SEL_ACCOUNT_INFO_CONTINUED_SESSION, "SELECT username, sessionkey FROM account WHERE id = ?");
-            PrepareStatement(LoginStatements.SEL_LOGON_COUNTRY, "SELECT country FROM ip2nation WHERE ip < ? ORDER BY ip DESC LIMIT 0,1");
             PrepareStatement(LoginStatements.SEL_ACCOUNT_ID_BY_NAME, "SELECT id FROM account WHERE username = ?");
             PrepareStatement(LoginStatements.SEL_ACCOUNT_LIST_BY_NAME, "SELECT id, username FROM account WHERE username = ?");
             PrepareStatement(LoginStatements.SEL_ACCOUNT_INFO_BY_NAME, "SELECT a.id, a.sessionkey, ba.last_ip, ba.locked, ba.lock_country, a.expansion, a.mutetime, ba.locale, a.recruiter, a.os, ba.id, aa.gmLevel, " +
@@ -95,7 +93,6 @@ namespace Framework.Database
             PrepareStatement(LoginStatements.SEL_LAST_IP, "SELECT last_ip FROM account WHERE id = ?");
             PrepareStatement(LoginStatements.SEL_REALMLIST_SECURITY_LEVEL, "SELECT allowedSecurityLevel from realmlist WHERE id = ?");
             PrepareStatement(LoginStatements.DEL_ACCOUNT, "DELETE FROM account WHERE id = ?");
-            PrepareStatement(LoginStatements.SEL_IP2NATION_COUNTRY, "SELECT c.country FROM ip2nationCountries c, ip2nation i WHERE i.ip < ? AND c.code = i.country ORDER BY i.ip DESC LIMIT 0,1");
             PrepareStatement(LoginStatements.SEL_AUTOBROADCAST, "SELECT id, weight, text FROM autobroadcast WHERE realmid = ? OR realmid = -1");
             PrepareStatement(LoginStatements.GET_EMAIL_BY_ID, "SELECT email FROM account WHERE id = ?");
             // 0: uint32, 1: uint32, 2: uint8, 3: uint32, 4: string // Complete name: "Login_Insert_AccountLoginDeLete_IP_Logging"
@@ -191,7 +188,6 @@ namespace Framework.Database
         UPD_ACCOUNT_INFO_CONTINUED_SESSION,
         SEL_ACCOUNT_INFO_CONTINUED_SESSION,
         UPD_VS,
-        SEL_LOGON_COUNTRY,
         SEL_ACCOUNT_ID_BY_NAME,
         SEL_ACCOUNT_LIST_BY_NAME,
         SEL_ACCOUNT_INFO_BY_NAME,

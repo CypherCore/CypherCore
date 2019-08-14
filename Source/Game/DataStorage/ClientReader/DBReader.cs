@@ -32,8 +32,8 @@ namespace Game.DataStorage
 {
     class DBReader
     {
-        private const int HeaderSize = 72 + 1 * 36;
-        private const uint WDC2FmtSig = 0x32434457; // WDC2
+        private const int HeaderSize = 72;
+        private const uint WDC3FmtSig = 0x33434457; // WDC3
 
         public static DB6Storage<T> Read<T>(string fileName, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale = 0) where T : new()
         {
@@ -71,7 +71,7 @@ namespace Game.DataStorage
             {
                 Header = new WDCHeader();
                 Header.Signature = reader.ReadUInt32();
-                if (Header.Signature != WDC2FmtSig)
+                if (Header.Signature != WDC3FmtSig)
                     return false;
 
                 Header.RecordCount = reader.ReadUInt32();
@@ -126,28 +126,41 @@ namespace Game.DataStorage
                     }
                 }
 
+                long previousStringTableSize = 0;
                 for (int sectionIndex = 0; sectionIndex < Header.SectionsCount; sectionIndex++)
                 {
+                    if (sections[sectionIndex].TactKeyLookup != 0)// && !hasTactKeyFunc(sections[sectionIndex].TactKeyLookup))
+                    {
+                        previousStringTableSize += sections[sectionIndex].StringTableSize;
+                        //Console.WriteLine("Detected db2 with encrypted section! HasKey {0}", CASC.HasKey(Sections[sectionIndex].TactKeyLookup));
+                        continue;
+                    }
+
                     reader.BaseStream.Position = sections[sectionIndex].FileOffset;
 
                     byte[] recordsData;
                     Dictionary<long, string> stringsTable = null;
-                    List<Tuple<int, short>> offsetmap = null;
+                    SparseEntry[] sparseEntries = null;
+
                     if (!Header.HasOffsetTable())
                     {
                         // records data
                         recordsData = reader.ReadBytes((int)(sections[sectionIndex].NumRecords * Header.RecordSize));
 
-                        Array.Resize(ref recordsData, recordsData.Length + 8); // pad with extra zeros so we don't crash when reading
-
                         // string data
                         stringsTable = new Dictionary<long, string>();
+
+                        long stringDataOffset = 0;
+                        if (sectionIndex == 0)
+                            stringDataOffset = (Header.RecordCount - sections[sectionIndex].NumRecords) * Header.RecordSize;
+                        else
+                            stringDataOffset = previousStringTableSize;
 
                         for (int i = 0; i < sections[sectionIndex].StringTableSize;)
                         {
                             long oldPos = reader.BaseStream.Position;
 
-                            stringsTable[oldPos] = reader.ReadCString();
+                            stringsTable[oldPos + stringDataOffset] = reader.ReadCString();
 
                             i += (int)(reader.BaseStream.Position - oldPos);
                         }
@@ -159,28 +172,22 @@ namespace Game.DataStorage
 
                         if (reader.BaseStream.Position != sections[sectionIndex].SparseTableOffset)
                             throw new Exception("reader.BaseStream.Position != sections[sectionIndex].SparseTableOffset");
-
-                        offsetmap = new List<Tuple<int, short>>();
-                        for (int i = 0; i < (Header.MaxId - Header.MinId + 1); i++)
-                        {
-                            int offset = reader.ReadInt32();
-                            short length = reader.ReadInt16();
-
-                            if (offset == 0 || length == 0)
-                                continue;
-
-                            offsetmap.Add(new Tuple<int, short>(offset, length));
-                        }
                     }
+
+                    Array.Resize(ref recordsData, recordsData.Length + 8); // pad with extra zeros so we don't crash when reading
 
                     // index data
                     int[] indexData = reader.ReadArray<int>((uint)(sections[sectionIndex].IndexDataSize / 4));
+                    bool isIndexEmpty = Header.HasIndexTable() && indexData.Count(i => i == 0) == sections[sectionIndex].NumRecords;
 
                     // duplicate rows data
                     Dictionary<int, int> copyData = new Dictionary<int, int>();
 
-                    for (int i = 0; i < sections[sectionIndex].CopyTableSize / 8; i++)
+                    for (int i = 0; i < sections[sectionIndex].NumCopyRecords; i++)
                         copyData[reader.ReadInt32()] = reader.ReadInt32();
+
+                    if (sections[sectionIndex].NumSparseRecords > 0)
+                        sparseEntries = reader.ReadArray<SparseEntry>((uint)sections[sectionIndex].NumSparseRecords);
 
                     // reference data
                     ReferenceData refData = null;
@@ -208,24 +215,31 @@ namespace Game.DataStorage
                         };
                     }
 
+                    if (sections[sectionIndex].NumSparseRecords > 0)
+                    {
+                        // TODO: use this shit
+                        int[] sparseIndexData = reader.ReadArray<int>((uint)sections[sectionIndex].NumSparseRecords);
+
+                        if (Header.HasIndexTable() && indexData.Length != sparseIndexData.Length)
+                            throw new Exception("indexData.Length != sparseIndexData.Length");
+
+                        //indexData = sparseIndexData;
+                    }
+
                     BitReader bitReader = new BitReader(recordsData);
 
-                    for (int i = 0; i < Header.RecordCount; ++i)
+                    for (int i = 0; i < sections[sectionIndex].NumRecords; ++i)
                     {
                         bitReader.Position = 0;
-                        if (offsetmap != null)
-                            bitReader.Offset = offsetmap[i].Item1 - sections[sectionIndex].FileOffset;
+                        if (Header.HasOffsetTable())
+                            bitReader.Offset = sparseEntries[i].Offset - sections[sectionIndex].FileOffset;
                         else
                             bitReader.Offset = i * (int)Header.RecordSize;
 
                         bool hasRef = refData.Entries.TryGetValue(i, out int refId);
 
-                        var rec = new WDC2Row(this, bitReader, sections[sectionIndex].FileOffset, sections[sectionIndex].IndexDataSize != 0 ? indexData[i] : -1, hasRef ? refId : -1, stringsTable);
-
-                        if (sections[sectionIndex].IndexDataSize != 0)
-                            _records.Add(indexData[i], rec);
-                        else
-                            _records.Add(rec.Id, rec);
+                        var rec = new WDC3Row(this, bitReader, sections[sectionIndex].FileOffset, Header.HasIndexTable() ? (isIndexEmpty ? i : indexData[i]) : -1, hasRef ? refId : -1, stringsTable);
+                        _records.Add(rec.Id, rec);
                     }
 
                     foreach (var copyRow in copyData)
@@ -234,6 +248,8 @@ namespace Game.DataStorage
                         rec.Id = copyRow.Key;
                         _records.Add(copyRow.Key, rec);
                     }
+
+                    previousStringTableSize += sections[sectionIndex].StringTableSize;
                 }
             }
 
@@ -246,10 +262,10 @@ namespace Game.DataStorage
         internal Value32[][] PalletData;
         internal Dictionary<int, Value32>[] CommonData;
 
-        Dictionary<int, WDC2Row> _records = new Dictionary<int, WDC2Row>();
+        Dictionary<int, WDC3Row> _records = new Dictionary<int, WDC3Row>();
     }
 
-    class WDC2Row
+    class WDC3Row
     {
         private BitReader _data;
         private int _dataOffset;
@@ -265,7 +281,7 @@ namespace Game.DataStorage
         private Dictionary<int, Value32>[] _commonData;
         private Dictionary<long, string> _stringsTable;
 
-        public WDC2Row(DBReader reader, BitReader data, int recordsOffset, int id, int refId, Dictionary<long, string> stringsTable)
+        public WDC3Row(DBReader reader, BitReader data, int recordsOffset, int id, int refId, Dictionary<long, string> stringsTable)
         {
             _data = data;
             _recordsOffset = recordsOffset;
@@ -553,9 +569,9 @@ namespace Game.DataStorage
             return obj;
         }
 
-        public WDC2Row Clone()
+        public WDC3Row Clone()
         {
-            return (WDC2Row)MemberwiseClone();
+            return (WDC3Row)MemberwiseClone();
         }
     }
 
@@ -669,14 +685,15 @@ namespace Game.DataStorage
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct SectionHeader
     {
-        public long TactKeyLookup;
+        public ulong TactKeyLookup;
         public int FileOffset;
         public int NumRecords;
         public int StringTableSize;
-        public int CopyTableSize;
         public int SparseTableOffset; // CatalogDataOffset, absolute value, {uint offset, ushort size}[MaxId - MinId + 1]
         public int IndexDataSize; // int indexData[IndexDataSize / 4]
         public int ParentLookupDataSize; // uint NumRecords, uint minId, uint maxId, {uint id, uint index}[NumRecords], questionable usefulness...
+        public int NumSparseRecords;
+        public int NumCopyRecords;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

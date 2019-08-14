@@ -118,7 +118,7 @@ namespace Game.Network.Packets
 
             if (RaceClassExpansionLevels.HasValue)
             {
-                _worldPacket.WriteUInt32(RaceClassExpansionLevels.Value.Count);
+                _worldPacket.WriteInt32(RaceClassExpansionLevels.Value.Count);
                 foreach (var level in RaceClassExpansionLevels.Value)
                     _worldPacket.WriteUInt8(level);
             }

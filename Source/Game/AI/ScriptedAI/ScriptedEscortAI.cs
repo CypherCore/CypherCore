@@ -133,7 +133,7 @@ namespace Game.AI
             //add a small delay before going to first waypoint, normal in near all cases
             m_uiWPWaitTimer = 1000;
 
-            if (me.getFaction() != me.GetCreatureTemplate().Faction)
+            if (me.GetFaction() != me.GetCreatureTemplate().Faction)
                 me.RestoreFaction();
 
             Reset();
@@ -162,7 +162,7 @@ namespace Game.AI
             {
                 me.GetMotionMaster().MoveTargetedHome();
                 if (HasImmuneToNPCFlags)
-                    me.SetFlag(UnitFields.Flags, UnitFlags.ImmuneToNpc);
+                    me.AddUnitFlag(UnitFlags.ImmuneToNpc);
                 Reset();
             }
         }
@@ -463,11 +463,12 @@ namespace Game.AI
             }
 
             //disable npcflags
-            me.SetUInt64Value(UnitFields.NpcFlags, (ulong)NPCFlags.None);
-            if (me.HasFlag(UnitFields.Flags, UnitFlags.ImmuneToNpc))
+            me.SetNpcFlags(NPCFlags.None);
+            me.SetNpcFlags2(NPCFlags2.None);
+            if (me.HasUnitFlag(UnitFlags.ImmuneToNpc))
             {
                 HasImmuneToNPCFlags = true;
-                me.RemoveFlag(UnitFields.Flags, UnitFlags.ImmuneToNpc);
+                me.RemoveUnitFlag(UnitFlags.ImmuneToNpc);
             }
 
             Log.outDebug(LogFilter.Scripts, $"EscortAI started. ActiveAttacker = {m_bIsActiveAttacker}, Run = {m_bIsRunning}, PlayerGUID = {m_uiPlayerGUID.ToString()}");

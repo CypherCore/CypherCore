@@ -392,7 +392,7 @@ namespace Game.AI
         public PlayerAI(Player player) : base(player)
         {
             me = player;
-            _selfSpec = player.GetUInt32Value(PlayerFields.CurrentSpecId);
+            _selfSpec = player.GetPrimarySpecialization();
             _isSelfHealer = IsPlayerHealer(player);
             _isSelfRangedAttacker = IsPlayerRangedAttacker(player);
         }
@@ -414,15 +414,15 @@ namespace Game.AI
                 default:
                     return false;
                 case Class.Paladin:
-                    return who.GetUInt32Value(PlayerFields.CurrentSpecId) == (uint)TalentSpecialization.PaladinHoly;
+                    return who.GetPrimarySpecialization() == (uint)TalentSpecialization.PaladinHoly;
                 case Class.Priest:
-                    return who.GetUInt32Value(PlayerFields.CurrentSpecId) == (uint)TalentSpecialization.PriestDiscipline || who.GetUInt32Value(PlayerFields.CurrentSpecId) == (uint)TalentSpecialization.PriestHoly;
+                    return who.GetPrimarySpecialization() == (uint)TalentSpecialization.PriestDiscipline || who.GetPrimarySpecialization() == (uint)TalentSpecialization.PriestHoly;
                 case Class.Shaman:
-                    return who.GetUInt32Value(PlayerFields.CurrentSpecId) == (uint)TalentSpecialization.ShamanRestoration;
+                    return who.GetPrimarySpecialization() == (uint)TalentSpecialization.ShamanRestoration;
                 case Class.Monk:
-                    return who.GetUInt32Value(PlayerFields.CurrentSpecId) == (uint)TalentSpecialization.MonkMistweaver;
+                    return who.GetPrimarySpecialization() == (uint)TalentSpecialization.MonkMistweaver;
                 case Class.Druid:
-                    return who.GetUInt32Value(PlayerFields.CurrentSpecId) == (uint)TalentSpecialization.DruidRestoration;
+                    return who.GetPrimarySpecialization() == (uint)TalentSpecialization.DruidRestoration;
             }
         }
         bool IsPlayerRangedAttacker(Player who)
@@ -454,11 +454,11 @@ namespace Game.AI
                         return false;
                     }
                 case Class.Priest:
-                    return who.GetUInt32Value(PlayerFields.CurrentSpecId) == (uint)TalentSpecialization.PriestShadow;
+                    return who.GetPrimarySpecialization() == (uint)TalentSpecialization.PriestShadow;
                 case Class.Shaman:
-                    return who.GetUInt32Value(PlayerFields.CurrentSpecId) == (uint)TalentSpecialization.ShamanElemental;
+                    return who.GetPrimarySpecialization() == (uint)TalentSpecialization.ShamanElemental;
                 case Class.Druid:
-                    return who.GetUInt32Value(PlayerFields.CurrentSpecId) == (uint)TalentSpecialization.DruidBalance;
+                    return who.GetPrimarySpecialization() == (uint)TalentSpecialization.DruidBalance;
             }
         }
 
@@ -659,7 +659,7 @@ namespace Game.AI
             return (!who || who == me) ? _isSelfHealer : IsPlayerHealer(who);
         }
         public bool IsRangedAttacker(Player who = null) { return (!who || who == me) ? _isSelfRangedAttacker : IsPlayerRangedAttacker(who); }
-        uint GetSpec(Player who = null) { return (!who || who == me) ? _selfSpec : who.GetUInt32Value(PlayerFields.CurrentSpecId); }
+        uint GetSpec(Player who = null) { return (!who || who == me) ? _selfSpec : who.GetPrimarySpecialization(); }
         void SetIsRangedAttacker(bool state) { _isSelfRangedAttacker = state; } // this allows overriding of the default ranged attacker detection
 
         public virtual Unit SelectAttackTarget() { return me.GetCharmer() ? me.GetCharmer().GetVictim() : null; }

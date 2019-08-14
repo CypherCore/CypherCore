@@ -1313,7 +1313,7 @@ namespace Game.Guilds
 
         public bool LoadBankItemFromDB(SQLFields field)
         {
-            byte tabId = field.Read<byte>(46);
+            byte tabId = field.Read<byte>(45);
             if (tabId >= _GetPurchasedTabsSize())
             {
                 Log.outError(LogFilter.Guild, "Invalid tab for item (GUID: {0}, id: {1}) in guild bank, skipped.",
@@ -2137,14 +2137,14 @@ namespace Game.Guilds
                     itemInfo.Item.ItemID = tabItem ? tabItem.GetEntry() : 0;
                     itemInfo.Count = (int)(tabItem ? tabItem.GetCount() : 0);
                     itemInfo.Charges = tabItem ? Math.Abs(tabItem.GetSpellCharges()) : 0;
-                    itemInfo.OnUseEnchantmentID = 0/*int32(tabItem->GetItemSuffixFactor())*/;
+                    itemInfo.OnUseEnchantmentID = 0/*int32(tabItem.GetItemSuffixFactor())*/;
                     itemInfo.Flags = 0;
                     itemInfo.Locked = false;
 
                     if (tabItem != null)
                     {
                         byte i = 0;
-                        foreach (ItemDynamicFieldGems gemData in tabItem.GetGems())
+                        foreach (SocketedGem gemData in tabItem.m_itemData.Gems)
                         {
                             if (gemData.ItemId != 0)
                             {
@@ -2218,12 +2218,12 @@ namespace Game.Guilds
                             itemInfo.Item.ItemID = tabItem.GetEntry();
                             itemInfo.Count = (int)tabItem.GetCount();
                             itemInfo.Charges = Math.Abs(tabItem.GetSpellCharges());
-                            itemInfo.EnchantmentID = tabItem.GetItemRandomPropertyId(); // verify that...
-                            itemInfo.OnUseEnchantmentID = 0/*int32(tabItem->GetItemSuffixFactor())*/;
+                            itemInfo.EnchantmentID = (int)tabItem.GetEnchantmentId(EnchantmentSlot.Perm);
+                            itemInfo.OnUseEnchantmentID = (int)tabItem.GetEnchantmentId(EnchantmentSlot.Use);
                             itemInfo.Flags = 0;
 
                             byte i = 0;
-                            foreach (ItemDynamicFieldGems gemData in tabItem.GetGems())
+                            foreach (SocketedGem gemData in tabItem.m_itemData.Gems)
                             {
                                 if (gemData.ItemId != 0)
                                 {
@@ -2477,7 +2477,7 @@ namespace Game.Guilds
                 m_name = player.GetName();
                 m_level = (byte)player.getLevel();
                 m_class = player.GetClass();
-                _gender = (Gender)player.GetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetGender);
+                _gender = (Gender)(byte)player.m_playerData.NativeSex;
                 m_zoneId = player.GetZoneId();
                 m_accountId = player.GetSession().GetAccountId();
                 m_achievementPoints = player.GetAchievementPoints();
@@ -3213,7 +3213,7 @@ namespace Game.Guilds
 
             public bool LoadItemFromDB(SQLFields field)
             {
-                byte slotId = field.Read<byte>(47);
+                byte slotId = field.Read<byte>(46);
                 uint itemGuid = field.Read<uint>(0);
                 uint itemEntry = field.Read<uint>(1);
                 if (slotId >= GuildConst.MaxBankSlots)
@@ -3340,15 +3340,14 @@ namespace Game.Guilds
                     stmt.AddValue(3, item.GetGUID().GetCounter());
                     trans.Append(stmt);
 
-                    item.SetGuidValue(ItemFields.Contained, ObjectGuid.Empty);
-                    item.SetGuidValue(ItemFields.Owner, ObjectGuid.Empty);
+                    item.SetContainedIn(ObjectGuid.Empty);
+                    item.SetOwnerGUID(ObjectGuid.Empty);
                     item.FSetState(ItemUpdateState.New);
                     item.SaveToDB(trans);                                 // Not in inventory and can be saved standalone
                 }
 
                 return true;
             }
-
 
             ulong m_guildId;
             byte m_tabId;

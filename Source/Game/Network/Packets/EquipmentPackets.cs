@@ -44,11 +44,11 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(SetData.Count);
+            _worldPacket.WriteInt32(SetData.Count);
 
             foreach (var equipSet in SetData)
             {
-                _worldPacket.WriteInt32(equipSet.Type);
+                _worldPacket.WriteInt32((int)equipSet.Type);
                 _worldPacket.WriteUInt64(equipSet.Guid);
                 _worldPacket.WriteUInt32(equipSet.SetID);
                 _worldPacket.WriteUInt32(equipSet.IgnoreMask);

@@ -131,8 +131,8 @@ namespace Game.DataStorage
         public int AllianceCreatureID;
         public byte HordeGarrFollRaceID;
         public byte AllianceGarrFollRaceID;
-        public byte HordeGarrClassSpecID;
-        public byte AllianceGarrClassSpecID;
+        public uint HordeGarrClassSpecID;
+        public uint AllianceGarrClassSpecID;
         public byte Quality;
         public byte FollowerLevel;
         public ushort ItemLevelWeapon;
@@ -232,9 +232,9 @@ namespace Game.DataStorage
     {
         public uint Id;
         public uint SpellID;
-        public ushort SpellIconID;
         public byte GlyphType;
         public byte GlyphExclusiveCategoryID;
+        public uint SpellIconID;
     }
 
     public sealed class GlyphRequiredSpecRecord

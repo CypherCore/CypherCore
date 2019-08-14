@@ -33,7 +33,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.UnlockVoidStorage)]
         void HandleVoidStorageUnlock(UnlockVoidStorage unlockVoidStorage)
         {
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(unlockVoidStorage.Npc, NPCFlags.VaultKeeper);
+            Creature unit = GetPlayer().GetNPCIfCanInteractWith(unlockVoidStorage.Npc, NPCFlags.VaultKeeper, NPCFlags2.None);
             if (!unit)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleVoidStorageUnlock - {0} not found or player can't interact with it.", unlockVoidStorage.Npc.ToString());
@@ -55,7 +55,7 @@ namespace Game
         {
             Player player = GetPlayer();
 
-            Creature unit = player.GetNPCIfCanInteractWith(queryVoidStorage.Npc, NPCFlags.Transmogrifier | NPCFlags.VaultKeeper);
+            Creature unit = player.GetNPCIfCanInteractWith(queryVoidStorage.Npc, NPCFlags.Transmogrifier | NPCFlags.VaultKeeper, NPCFlags2.None);
             if (!unit)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleVoidStorageQuery - {0} not found or player can't interact with it.", queryVoidStorage.Npc.ToString());
@@ -94,7 +94,7 @@ namespace Game
         {
             Player player = GetPlayer();
 
-            Creature unit = player.GetNPCIfCanInteractWith(voidStorageTransfer.Npc, NPCFlags.VaultKeeper);
+            Creature unit = player.GetNPCIfCanInteractWith(voidStorageTransfer.Npc, NPCFlags.VaultKeeper, NPCFlags2.None);
             if (!unit)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleVoidStorageTransfer - {0} not found or player can't interact with it.", voidStorageTransfer.Npc.ToString());
@@ -155,14 +155,14 @@ namespace Game
                     continue;
                 }
 
-                VoidStorageItem itemVS = new VoidStorageItem(Global.ObjectMgr.GenerateVoidStorageItemId(), item.GetEntry(), item.GetGuidValue(ItemFields.Creator), 
-                    item.GetItemRandomEnchantmentId(), item.GetItemSuffixFactor(), item.GetModifier(ItemModifier.UpgradeId),
+                VoidStorageItem itemVS = new VoidStorageItem(Global.ObjectMgr.GenerateVoidStorageItemId(), item.GetEntry(), item.GetCreator(), 
+                    item.GetItemRandomBonusListId(), item.GetModifier(ItemModifier.UpgradeId),
                     item.GetModifier(ItemModifier.ScalingStatDistributionFixedLevel), item.GetModifier(ItemModifier.ArtifactKnowledgeLevel), 
-                    (byte)item.GetUInt32Value(ItemFields.Context), item.GetDynamicValues(ItemDynamicFields.BonusListIds));
+                    (byte)item.m_itemData.Context, item.m_itemData.BonusListIDs);
 
                 VoidItem voidItem;
                 voidItem.Guid = ObjectGuid.Create(HighGuid.Item, itemVS.ItemId);
-                voidItem.Creator = item.GetGuidValue(ItemFields.Creator);
+                voidItem.Creator = item.GetCreator();
                 voidItem.Item = new ItemInstance(itemVS);
                 voidItem.Slot = _player.AddVoidStorageItem(itemVS);
 
@@ -195,9 +195,8 @@ namespace Game
                     return;
                 }
 
-                Item item = player.StoreNewItem(dest, itemVS.ItemEntry, true, itemVS.ItemRandomPropertyId, null, itemVS.Context, itemVS.BonusListIDs);
-                item.SetUInt32Value(ItemFields.PropertySeed, itemVS.ItemSuffixFactor);
-                item.SetGuidValue(ItemFields.Creator, itemVS.CreatorGuid);
+                Item item = player.StoreNewItem(dest, itemVS.ItemEntry, true, itemVS.RandomBonusListId, null, itemVS.Context, itemVS.BonusListIDs);
+                item.SetCreator(itemVS.CreatorGuid);
                 item.SetModifier(ItemModifier.UpgradeId, itemVS.ItemUpgradeId);
                 item.SetBinding(true);
                 GetCollectionMgr().AddItemAppearance(item);
@@ -216,7 +215,7 @@ namespace Game
         { 
             Player player = GetPlayer();
 
-            Creature unit = player.GetNPCIfCanInteractWith(swapVoidItem.Npc, NPCFlags.VaultKeeper);
+            Creature unit = player.GetNPCIfCanInteractWith(swapVoidItem.Npc, NPCFlags.VaultKeeper, NPCFlags2.None);
             if (!unit)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleVoidSwapItem - {0} not found or player can't interact with it.", swapVoidItem.Npc.ToString());

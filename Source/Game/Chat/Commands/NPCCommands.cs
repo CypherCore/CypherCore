@@ -44,8 +44,8 @@ namespace Game.Chat
 
             CreatureTemplate cInfo = target.GetCreatureTemplate();
 
-            uint faction = target.getFaction();
-            ulong npcflags = target.GetUInt64Value(UnitFields.NpcFlags);
+            uint faction = target.GetFaction();
+            ulong npcflags = (ulong)target.m_unitData.NpcFlags[0] << 32 | target.m_unitData.NpcFlags[1];
             uint mechanicImmuneMask = cInfo.MechanicImmuneMask;
             uint displayid = target.GetDisplayId();
             uint nativeid = target.GetNativeDisplayId();
@@ -63,22 +63,22 @@ namespace Game.Chat
             handler.SendSysMessage(CypherStrings.NpcinfoHealth, target.GetCreateHealth(), target.GetMaxHealth(), target.GetHealth());
             handler.SendSysMessage(CypherStrings.NpcinfoInhabitType, cInfo.InhabitType);
 
-            handler.SendSysMessage(CypherStrings.NpcinfoUnitFieldFlags, target.GetUInt32Value(UnitFields.Flags));
-            foreach (uint value in Enum.GetValues(typeof(UnitFlags)))
-                if (target.GetUInt32Value(UnitFields.Flags).HasAnyFlag(value))
+            handler.SendSysMessage(CypherStrings.NpcinfoUnitFieldFlags, target.m_unitData.Flags);
+            foreach (UnitFlags value in Enum.GetValues(typeof(UnitFlags)))
+                if (target.HasUnitFlag(value))
                     handler.SendSysMessage("{0} (0x{1:X})", (UnitFlags)value, value);
 
-            handler.SendSysMessage(CypherStrings.NpcinfoUnitFieldFlags2, target.GetUInt32Value(UnitFields.Flags2));
-            foreach (uint value in Enum.GetValues(typeof(UnitFlags2)))
-                if (target.GetUInt32Value(UnitFields.Flags2).HasAnyFlag(value))
+            handler.SendSysMessage(CypherStrings.NpcinfoUnitFieldFlags2, target.m_unitData.Flags2);
+            foreach (UnitFlags2 value in Enum.GetValues(typeof(UnitFlags2)))
+                if (target.HasUnitFlag2(value))
                     handler.SendSysMessage("{0} (0x{1:X})", (UnitFlags2)value, value);
 
-            handler.SendSysMessage(CypherStrings.NpcinfoUnitFieldFlags3, target.GetUInt32Value(UnitFields.Flags3));
-            foreach (uint value in Enum.GetValues(typeof(UnitFlags3)))
-                if (target.GetUInt32Value(UnitFields.Flags3).HasAnyFlag(value))
+            handler.SendSysMessage(CypherStrings.NpcinfoUnitFieldFlags3, target.m_unitData.Flags3);
+            foreach (UnitFlags3 value in Enum.GetValues(typeof(UnitFlags3)))
+                if (target.HasUnitFlag3(value))
                     handler.SendSysMessage("{0} (0x{1:X})", (UnitFlags3)value, value);
 
-            handler.SendSysMessage(CypherStrings.NpcinfoDynamicFlags, target.GetUInt32Value(ObjectFields.DynamicFlags));
+            handler.SendSysMessage(CypherStrings.NpcinfoDynamicFlags, target.GetDynamicFlags());
             handler.SendSysMessage(CypherStrings.CommandRawpawntimes, defRespawnDelayStr, curRespawnDelayStr);
             handler.SendSysMessage(CypherStrings.NpcinfoLoot, cInfo.LootId, cInfo.PickPocketId, cInfo.SkinLootId);
             handler.SendSysMessage(CypherStrings.NpcinfoDungeonId, target.GetInstanceId());
@@ -243,7 +243,7 @@ namespace Game.Chat
                 return false;
             }
 
-            target.SetUInt32Value(UnitFields.NpcEmotestate, emote);
+            target.SetEmoteState((Emote)emote);
 
             return true;
         }
@@ -402,13 +402,13 @@ namespace Game.Chat
             uint level = (creatureTarget.getLevel() < (player.getLevel() - 5)) ? (player.getLevel() - 5) : creatureTarget.getLevel();
 
             // prepare visual effect for levelup
-            pet.SetUInt32Value(UnitFields.Level, level - 1);
+            pet.SetLevel(level - 1);
 
             // add to world
             pet.GetMap().AddToMap(pet.ToCreature());
 
             // visual effect for levelup
-            pet.SetUInt32Value(UnitFields.Level, level);
+            pet.SetLevel(level);
 
             // caster have pet now
             player.SetMinion(pet, true);
@@ -685,7 +685,8 @@ namespace Game.Chat
                     return false;
                 }
 
-                creature.SetUInt64Value(UnitFields.NpcFlags, npcFlags);
+                creature.SetNpcFlags((NPCFlags)(npcFlags & 0xFFFFFFFF));
+                creature.SetNpcFlags2((NPCFlags2)(npcFlags >> 32));
 
                 PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_NPCFLAG);
                 stmt.AddValue(0, npcFlags);

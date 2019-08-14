@@ -125,13 +125,13 @@ namespace Game.Entities
             pvpInfo.IsInNoPvPArea = false;
             if (area != null && area.IsSanctuary())    // in sanctuary
             {
-                SetByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag, UnitBytes2Flags.Sanctuary);
+                AddPvpFlag(UnitPVPStateFlags.Sanctuary);
                 pvpInfo.IsInNoPvPArea = true;
                 if (duel == null)
                     CombatStopWithPets();
             }
             else
-                RemoveByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag, UnitBytes2Flags.Sanctuary);
+                RemovePvpFlag(UnitPVPStateFlags.Sanctuary);
 
             AreaFlags areaRestFlag = (GetTeam() == Team.Alliance) ? AreaFlags.RestZoneAlliance : AreaFlags.RestZoneHorde;
             if (area != null && area.Flags[0].HasAnyFlag(areaRestFlag))

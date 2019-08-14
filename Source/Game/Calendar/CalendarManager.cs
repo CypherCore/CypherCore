@@ -546,7 +546,7 @@ namespace Game
                 Player invitee = Global.ObjAccessor.FindPlayer(inviteeGuid);
 
                 uint inviteeLevel = invitee ? invitee.getLevel() : Player.GetLevelFromDB(inviteeGuid);
-                uint inviteeGuildId = invitee ? invitee.GetGuildId() : Player.GetGuildIdFromDB(inviteeGuid);
+                ulong inviteeGuildId = invitee ? invitee.GetGuildId() : Player.GetGuildIdFromDB(inviteeGuid);
 
                 CalendarEventInviteInfo inviteInfo = new CalendarEventInviteInfo();
                 inviteInfo.Guid = inviteeGuid;

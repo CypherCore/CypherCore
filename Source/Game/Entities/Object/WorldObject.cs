@@ -33,10 +33,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Game.Entities
 {
-    public class WorldObject : WorldLocation, IDisposable
+    public abstract class WorldObject : WorldLocation, IDisposable
     {
         public WorldObject(bool isWorldObject)
         {
@@ -49,10 +51,12 @@ namespace Game.Entities
             objectTypeId = TypeId.Object;
             objectTypeMask = TypeMask.Object;
 
-            _fieldNotifyFlags = UpdateFieldFlags.Dynamic;
+            m_values = new UpdateFieldHolder(this);
 
             m_movementInfo = new MovementInfo();
             m_updateFlag.Clear();
+
+            m_objectData = new ObjectFieldData();
         }
 
         public virtual void Dispose()
@@ -83,41 +87,10 @@ namespace Game.Entities
             }
         }
 
-        void InitValues()
-        {
-            updateValues = new UpdateValues[valuesCount];
-            _changesMask = new BitArray((int)valuesCount);
-
-            if (_dynamicValuesCount != 0)
-            {
-                _dynamicValues = new uint[_dynamicValuesCount][];
-                _dynamicChangesArrayMask = new BitArray[_dynamicValuesCount];
-
-                for (var i = 0; i < _dynamicValuesCount; ++i)
-                {
-                    _dynamicValues[i] = new uint[0];
-                    _dynamicChangesArrayMask[i] = new BitArray(0);
-                    _dynamicChangesMask[i] = DynamicFieldChangeType.Unchanged;
-                }
-            }
-
-            m_objectUpdated = false;
-        }
-
         public void _Create(ObjectGuid guid)
         {
-            if (updateValues == null)
-                InitValues();
-
-            SetGuidValue(ObjectFields.Guid, guid);
-        }
-
-        public string _ConcatFields(object startIndex, uint size)
-        {
-            StringBuilder sb = new StringBuilder();
-            for (int index = 0; index < size; ++index)
-                sb.AppendFormat("{0} ", GetUInt32Value(index + (int)startIndex));
-            return sb.ToString();
+            m_objectUpdated = false;
+            m_guid = guid;
         }
 
         public virtual void AddToWorld()
@@ -212,14 +185,12 @@ namespace Game.Entities
                     flags.CombatVictim = true;
 
             WorldPacket buffer = new WorldPacket();
-            buffer.WriteUInt8(updateType);
+            buffer.WriteUInt8((byte)updateType);
             buffer.WritePackedGuid(GetGUID());
-            buffer.WriteUInt8(tempObjectType);
-            buffer.WriteUInt32(tempObjectTypeMask);
+            buffer.WriteUInt8((byte)tempObjectType);
 
             BuildMovementUpdate(buffer, flags);
-            BuildValuesUpdate(updateType, buffer, target);
-            BuildDynamicValuesUpdate(updateType, buffer, target);
+            BuildValuesCreate(buffer, target);
             data.AddUpdateBlock(buffer);
         }
 
@@ -242,11 +213,22 @@ namespace Game.Entities
         {
             WorldPacket buffer = new WorldPacket();
 
-            buffer.WriteUInt8(UpdateType.Values);
+            buffer.WriteUInt8((byte)UpdateType.Values);
             buffer.WritePackedGuid(GetGUID());
 
-            BuildValuesUpdate(UpdateType.Values, buffer, target);
-            BuildDynamicValuesUpdate(UpdateType.Values, buffer, target);
+            BuildValuesUpdate(buffer, target);
+
+            data.AddUpdateBlock(buffer);
+        }
+
+        public void BuildValuesUpdateBlockForPlayerWithFlag(UpdateData data, UpdateFieldFlag flags, Player target)
+        {
+            WorldPacket buffer = new WorldPacket();
+
+            buffer.WriteUInt8((byte)UpdateType.Values);
+            buffer.WritePackedGuid(GetGUID());
+
+            BuildValuesUpdateWithFlag(buffer, flags, target);
 
             data.AddUpdateBlock(buffer);
         }
@@ -265,50 +247,6 @@ namespace Game.Entities
             target.SendPacket(packet);
         }
 
-        public int GetInt32Value(object index)
-        {
-            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, false));
-            return updateValues[(int)index].SignedValue;
-        }
-
-        public uint GetUInt32Value(object index)
-        {
-            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, false));
-            return updateValues[(int)index].UnsignedValue;
-        }
-
-        public ulong GetUInt64Value(object index)
-        {
-            Cypher.Assert((int)index + 1 < valuesCount || PrintIndexError(index, false));
-            return ((ulong)updateValues[(int)index + 1].UnsignedValue << 32 | updateValues[(int)index].UnsignedValue);
-        }
-
-        public float GetFloatValue(object index)
-        {
-            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, false));
-            return updateValues[(int)index].FloatValue;
-        }
-
-        public byte GetByteValue(object index, byte offset)
-        {
-            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, false));
-            Cypher.Assert(offset < 4);
-            return (byte)((updateValues[(int)index].UnsignedValue >> (offset * 8)) & 0xFF);
-        }
-
-        public ushort GetUInt16Value(object index, byte offset)
-        {
-            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, false));
-            Cypher.Assert(offset < 2);
-            return (ushort)((updateValues[(int)index].UnsignedValue >> (offset * 16)) & 0xFFFF);
-        }
-
-        public ObjectGuid GetGuidValue(object index)
-        {
-            Cypher.Assert((int)index + 3 < valuesCount || PrintIndexError(index, false));
-            return new ObjectGuid(GetUInt64Value((int)index + 2), GetUInt64Value(index));
-        }
-
         public void BuildMovementUpdate(WorldPacket data, CreateObjectBits flags)
         {
             int PauseTimesCount = 0;
@@ -317,7 +255,7 @@ namespace Game.Entities
             if (go)
             {
                 if (go.GetGoType() == GameObjectTypes.Transport)
-                    PauseTimesCount = go.m_goValue.Transport.StopFrames.Count;
+                    PauseTimesCount = go.GetGoValue().Transport.StopFrames.Count;
             }
 
             data.WriteBit(flags.NoBirthAnim);
@@ -419,7 +357,7 @@ namespace Game.Entities
                     MovementExtensions.WriteCreateObjectSplineDataBlock(unit.moveSpline, data);
             }
 
-            data.WriteUInt32(PauseTimesCount);
+            data.WriteInt32(PauseTimesCount);
 
             if (flags.Stationary)
             {
@@ -442,7 +380,7 @@ namespace Game.Entities
                     resulting in players seeing the object in a different position
                 */
                 if (go1 && go1.ToTransport())                                    // ServerTime
-                    data.WriteUInt32(go1.m_goValue.Transport.PathProgress);
+                    data.WriteUInt32(go1.GetGoValue().Transport.PathProgress);
                 else
                     data.WriteUInt32(Time.GetMSTime());
             }
@@ -467,7 +405,7 @@ namespace Game.Entities
             if (go)
             {
                 for (int i = 0; i < PauseTimesCount; ++i)
-                    data.WriteUInt32(go.m_goValue.Transport.StopFrames[i]);
+                    data.WriteUInt32(go.GetGoValue().Transport.StopFrames[i]);
             }
 
             if (flags.MovementTransport)
@@ -559,7 +497,7 @@ namespace Game.Entities
                     data.WriteUInt32(areaTriggerMiscTemplate.MoveCurveId);
 
                 if (hasAnimation)
-                    data.WriteInt32(areaTriggerMiscTemplate.AnimId);
+                    data.WriteUInt32(areaTriggerMiscTemplate.AnimId);
 
                 if (hasAnimKitID)
                     data.WriteUInt32(areaTriggerMiscTemplate.AnimKitId);
@@ -775,11 +713,11 @@ namespace Game.Entities
                     float baseCd = player.GetRuneBaseCooldown();
                     uint maxRunes = (uint)player.GetMaxPower(PowerType.Runes);
 
-                    data.WriteUInt8((1 << (int)maxRunes) - 1u);
+                    data.WriteUInt8((byte)((1 << (int)maxRunes) - 1u));
                     data.WriteUInt8(player.GetRunesState());
                     data.WriteUInt32(maxRunes);
                     for (byte i = 0; i < maxRunes; ++i)
-                        data.WriteUInt8((baseCd - (float)player.GetRuneCooldown(i)) / baseCd * 255);
+                        data.WriteUInt8((byte)((baseCd - (float)player.GetRuneCooldown(i)) / baseCd * 255));
                 }
             }
 
@@ -792,75 +730,15 @@ namespace Game.Entities
             }
         }
 
-        public virtual void BuildValuesUpdate(UpdateType updatetype, ByteBuffer data, Player target)
+        public virtual UpdateFieldFlag GetUpdateFieldFlagsFor(Player target)
         {
-            if (!target)
-                return;
-
-            ByteBuffer fieldBuffer = new ByteBuffer();
-            UpdateMask updateMask = new UpdateMask(valuesCount);
-
-            uint[] flags;
-            uint visibleFlag = GetUpdateFieldData(target, out flags);
-            for (int index = 0; index < valuesCount; ++index)
-            {
-                if (Convert.ToBoolean(_fieldNotifyFlags & flags[index]) ||
-                    ((updatetype == UpdateType.Values ? _changesMask.Get(index) : updateValues[index].UnsignedValue != 0) && Convert.ToBoolean(flags[index] & visibleFlag)))
-                {
-                    updateMask.SetBit(index);
-                    fieldBuffer.WriteUInt32(updateValues[index].UnsignedValue);
-                }
-            }
-
-            updateMask.AppendToPacket(data);
-            data.WriteBytes(fieldBuffer);
+            return UpdateFieldFlag.None;
         }
 
-        public virtual void BuildDynamicValuesUpdate(UpdateType updateType, WorldPacket data, Player target)
+        void BuildValuesUpdateWithFlag(ByteBuffer data, UpdateFieldFlag flags, Player target)
         {
-            if (!target)
-                return;
-
-            uint valueCount = _dynamicValuesCount;
-            if (target != this && GetTypeId() == TypeId.Player)
-                valueCount = (uint)PlayerDynamicFields.End;
-
-            ByteBuffer fieldBuffer = new ByteBuffer();
-            UpdateMask fieldMask = new UpdateMask(valueCount);
-
-            uint[] flags;
-            uint visibleFlag = GetDynamicUpdateFieldData(target, out flags);
-
-            for (var index = 0; index < valueCount; ++index)
-            {
-                ByteBuffer valueBuffer = new ByteBuffer();
-                var values = _dynamicValues[index];
-                if (_fieldNotifyFlags.HasAnyFlag(flags[index]) ||
-                    ((updateType == UpdateType.Values ? _dynamicChangesMask[index] != DynamicFieldChangeType.Unchanged : !values.Empty()) && flags[index].HasAnyFlag(visibleFlag)))
-                {
-                    fieldMask.SetBit(index);
-
-                    DynamicUpdateMask arrayMask = new DynamicUpdateMask((uint)values.Length);
-                    arrayMask.EncodeDynamicFieldChangeType(_dynamicChangesMask[index], updateType);
-                    if (updateType == UpdateType.Values && _dynamicChangesMask[index] == DynamicFieldChangeType.ValueAndSizeChanged)
-                        arrayMask.SetCount(values.Length);
-
-                    for (var v = 0; v < values.Length; ++v)
-                    {
-                        if (updateType != UpdateType.Values || _dynamicChangesArrayMask[index].Get(v))
-                        {
-                            arrayMask.SetBit(v);
-                            valueBuffer.WriteUInt32(values[v]);
-                        }
-                    }
-
-                    arrayMask.AppendToPacket(fieldBuffer);
-                    fieldBuffer.WriteBytes(valueBuffer);
-                }
-            }
-
-            fieldMask.AppendToPacket(data);
-            data.WriteBytes(fieldBuffer);
+            data.WriteUInt32(0);
+            data.WriteUInt32(0);
         }
 
         public void AddToObjectUpdateIfNeeded()
@@ -872,14 +750,9 @@ namespace Game.Entities
             }
         }
 
-        public void ClearUpdateMask(bool remove)
+        public virtual void ClearUpdateMask(bool remove)
         {
-            _changesMask.SetAll(false);
-            for (int i = 0; i < _dynamicValuesCount; ++i)
-            {
-                _dynamicChangesMask[i] = DynamicFieldChangeType.Unchanged;
-                _dynamicChangesArrayMask[i].SetAll(false);
-            }
+            m_values.ClearChangesMask(m_objectData);
 
             if (m_objectUpdated)
             {
@@ -903,612 +776,157 @@ namespace Game.Entities
             BuildValuesUpdateBlockForPlayer(data, player);
         }
 
-        uint GetUpdateFieldData(Player target, out uint[] flags)
+        public abstract void BuildValuesCreate(WorldPacket data, Player target);
+        public abstract void BuildValuesUpdate(WorldPacket data, Player target);
+
+        public void SetUpdateFieldValue<T>(IUpdateField<T> updateField, T newValue) where T : new()
         {
-            var visibleFlag = UpdateFieldFlags.Public;
-            flags = null;
-
-            if (target == this)
-                visibleFlag |= UpdateFieldFlags.Private;
-
-            switch (GetTypeId())
+            Type type = typeof(T);
+            if (type.IsGenericType || (dynamic)newValue != updateField.GetValue())
             {
-                case TypeId.Item:
-                case TypeId.Container:
-                    flags = UpdateFieldFlags.ContainerUpdateFieldFlags;
-                    if (((Item)this).GetOwnerGUID() == target.GetGUID())
-                        visibleFlag |= UpdateFieldFlags.Owner | UpdateFieldFlags.ItemOwner;
-                    break;
-                case TypeId.AzeriteEmpoweredItem:
-                    flags = UpdateFieldFlags.AzeriteEmpoweredItemUpdateFieldFlags;
-                    if (((Item)this).GetOwnerGUID() == target.GetGUID())
-                        visibleFlag |= UpdateFieldFlags.Owner | UpdateFieldFlags.ItemOwner;
-                    break;
-                case TypeId.AzeriteItem:
-                    flags = UpdateFieldFlags.AzeriteItemUpdateFieldFlags;
-                    if (((Item)this).GetOwnerGUID() == target.GetGUID())
-                        visibleFlag |= UpdateFieldFlags.Owner | UpdateFieldFlags.ItemOwner;
-                    break;
-                case TypeId.Unit:
-                case TypeId.Player:
-                    {
-                        Player plr = ToUnit().GetCharmerOrOwnerPlayerOrPlayerItself();
-                        flags = UpdateFieldFlags.UnitUpdateFieldFlags;
-                        if (ToUnit().GetOwnerGUID() == target.GetGUID())
-                            visibleFlag |= UpdateFieldFlags.Owner;
-
-                        if (HasFlag(ObjectFields.DynamicFlags, UnitDynFlags.SpecialInfo))
-                            if (ToUnit().HasAuraTypeWithCaster(AuraType.Empathy, target.GetGUID()))
-                                visibleFlag |= UpdateFieldFlags.SpecialInfo;
-
-                        if (plr != null && plr.IsInSameGroupWith(target))
-                            visibleFlag |= UpdateFieldFlags.PartyMember;
-                        break;
-                    }
-                case TypeId.GameObject:
-                    flags = UpdateFieldFlags.GameObjectUpdateFieldFlags;
-                    if (ToGameObject().GetOwnerGUID() == target.GetGUID())
-                        visibleFlag |= UpdateFieldFlags.Owner;
-                    break;
-                case TypeId.DynamicObject:
-                    flags = UpdateFieldFlags.DynamicObjectUpdateFieldFlags;
-                    if (ToDynamicObject().GetCasterGUID() == target.GetGUID())
-                        visibleFlag |= UpdateFieldFlags.Owner;
-                    break;
-                case TypeId.Corpse:
-                    flags = UpdateFieldFlags.CorpseUpdateFieldFlags;
-                    if (ToCorpse().GetOwnerGUID() == target.GetGUID())
-                        visibleFlag |= UpdateFieldFlags.Owner;
-                    break;
-                case TypeId.AreaTrigger:
-                    flags = UpdateFieldFlags.AreaTriggerUpdateFieldFlags;
-                    break;
-                case TypeId.SceneObject:
-                    flags = UpdateFieldFlags.SceneObjectUpdateFieldFlags;
-                    break;
-                case TypeId.Conversation:
-                    flags = UpdateFieldFlags.ConversationUpdateFieldFlags;
-                    break;
-                case TypeId.Object:
-                case TypeId.ActivePlayer:
-                    Cypher.Assert(false);
-                    break;
-            }
-            return visibleFlag;
-        }
-
-        public uint GetDynamicUpdateFieldData(Player target, out uint[] flags)
-        {
-            uint visibleFlag = UpdateFieldFlags.Public;
-
-            if (target == this)
-                visibleFlag |= UpdateFieldFlags.Private;
-
-            switch (GetTypeId())
-            {
-                case TypeId.Item:
-                case TypeId.Container:
-                case TypeId.AzeriteEmpoweredItem:
-                case TypeId.AzeriteItem:
-                    flags = UpdateFieldFlags.ItemDynamicUpdateFieldFlags;
-                    if (((Item)this).GetOwnerGUID() == target.GetGUID())
-                        visibleFlag |= UpdateFieldFlags.Owner | UpdateFieldFlags.ItemOwner;
-                    break;
-                case TypeId.Unit:
-                case TypeId.Player:
-                    {
-                        Player plr = ToUnit().GetCharmerOrOwnerPlayerOrPlayerItself();
-                        flags = UpdateFieldFlags.UnitDynamicUpdateFieldFlags;
-                        if (ToUnit().GetOwnerGUID() == target.GetGUID())
-                            visibleFlag |= UpdateFieldFlags.Owner;
-
-                        if (HasFlag(ObjectFields.DynamicFlags, UnitDynFlags.SpecialInfo))
-                            if (ToUnit().HasAuraTypeWithCaster(AuraType.Empathy, target.GetGUID()))
-                                visibleFlag |= UpdateFieldFlags.SpecialInfo;
-
-                        if (plr && plr.IsInSameRaidWith(target))
-                            visibleFlag |= UpdateFieldFlags.PartyMember;
-                        break;
-                    }
-                case TypeId.GameObject:
-                    flags = UpdateFieldFlags.GameObjectDynamicUpdateFieldFlags;
-                    break;
-                case TypeId.Conversation:
-                    flags = UpdateFieldFlags.ConversationDynamicUpdateFieldFlags;
-
-                    if (ToConversation().GetCreatorGuid() == target.GetGUID())
-                        visibleFlag |= UpdateFieldFlags.Unknownx100;
-                    break;
-                default:
-                    flags = null;
-                    break;
-            }
-
-            return visibleFlag;
-        }
-
-        public void _LoadIntoDataField(string data, uint startOffset, uint count)
-        {
-            if (string.IsNullOrEmpty(data))
-                return;
-
-            var lines = new StringArray(data, ' ');
-            if (lines.Length != count)
-                return;
-
-            for (var index = 0; index < count; ++index)
-            {
-                if (uint.TryParse(lines[index], out uint value))
-                {
-                    updateValues[(int)startOffset + index].UnsignedValue = value;
-                    _changesMask.Set((int)(startOffset + index), true);
-                }
-            }
-        }
-
-        public void SetInt32Value(object index, int value)
-        {
-            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, true));
-
-            if (updateValues[(int)index].SignedValue != value)
-            {
-                updateValues[(int)index].SignedValue = value;
-                _changesMask.Set((int)index, true);
-
+                updateField.SetValue(newValue);
                 AddToObjectUpdateIfNeeded();
             }
         }
 
-        public void SetUInt32Value(object index, uint value)
+        public void SetUpdateFieldValue<T>(ref T value, T newValue) where T : new()
         {
-            int _index = Convert.ToInt32(index);
-            Cypher.Assert(_index < valuesCount || PrintIndexError(index, true));
-
-            if (updateValues[_index].UnsignedValue != value)
+            Type type = typeof(T);
+            if (type.IsGenericType || (dynamic)newValue != value)
             {
-                updateValues[_index].UnsignedValue = value;
-                _changesMask.Set(_index, true);
-
+                value = newValue;
                 AddToObjectUpdateIfNeeded();
             }
         }
 
-        public void UpdateUInt32Value(object index, uint value)
+        public void SetUpdateFieldValue<T>(DynamicUpdateField<T> updateField, int index, T newValue) where T : new()
         {
-            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, true));
-
-            updateValues[(int)index].UnsignedValue = value;
-            _changesMask.Set((int)index, true);
-        }
-
-        public void SetUInt64Value(object index, ulong value)
-        {
-            Cypher.Assert((int)index + 1 < valuesCount || PrintIndexError(index, true));
-            if (GetUInt64Value(index) != value)
+            if ((dynamic)newValue != updateField[index])
             {
-                updateValues[(int)index].UnsignedValue = MathFunctions.Pair64_LoPart(value);
-                updateValues[(int)index + 1].UnsignedValue = MathFunctions.Pair64_HiPart(value);
-                _changesMask.Set((int)index, true);
-                _changesMask.Set((int)index + 1, true);
-
+                updateField[index] = newValue;
                 AddToObjectUpdateIfNeeded();
             }
         }
 
-        public bool AddGuidValue(object index, ObjectGuid value)
+        public void SetUpdateFieldFlagValue<T>(IUpdateField<T> updateField, T flag) where T : new()
         {
-            Cypher.Assert((int)index + 3 < valuesCount || PrintIndexError(index, true));
-            if (!value.IsEmpty() && GetGuidValue(index).IsEmpty())
-            {
-                SetGuidValue(index, value);
-                return true;
-            }
-
-            return false;
+            //static_assert(std::is_integral < T >::value, "SetUpdateFieldFlagValue must be used with integral types");
+            SetUpdateFieldValue(updateField, (T)(updateField.GetValue() | (dynamic)flag));
         }
 
-        public bool RemoveGuidValue(object index, ObjectGuid value)
+        public void SetUpdateFieldFlagValue<T>(ref T value, T flag) where T : new()
         {
-            Cypher.Assert((int)index + 3 < valuesCount || PrintIndexError(index, true));
-            if (!value.IsEmpty() && GetGuidValue(index) == value)
-            {
-                SetGuidValue(index, ObjectGuid.Empty);
-                return true;
-            }
-
-            return false;
+            //static_assert(std::is_integral < T >::value, "SetUpdateFieldFlagValue must be used with integral types");
+            SetUpdateFieldValue(ref value, (T)(value | (dynamic)flag));
         }
 
-        public void SetFloatValue(object index, float value)
+        public void RemoveUpdateFieldFlagValue<T>(IUpdateField<T> updateField, T flag) where T : new()
         {
-            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, true));
-
-            if (updateValues[(int)index].FloatValue != value)
-            {
-                updateValues[(int)index].FloatValue = value;
-                _changesMask.Set((int)index, true);
-
-                AddToObjectUpdateIfNeeded();
-            }
+            //static_assert(std::is_integral < T >::value, "SetUpdateFieldFlagValue must be used with integral types");
+            SetUpdateFieldValue(updateField, (T)(updateField.GetValue() & ~(dynamic)flag));
         }
 
-        public void SetByteValue(object index, byte offset, byte value)
+        public void RemoveUpdateFieldFlagValue<T>(ref T value, T flag) where T : new()
         {
-            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, true));
-
-            if (offset > 3)
-            {
-                Log.outError(LogFilter.Server, "Object.SetByteValue: wrong offset {0}", offset);
-                return;
-            }
-
-            if ((byte)(updateValues[(int)index].UnsignedValue >> (offset * 8)) != value)
-            {
-                updateValues[(int)index].UnsignedValue &= ~(uint)(0xFF << (offset * 8));
-                updateValues[(int)index].UnsignedValue |= (uint)value << (offset * 8);
-                _changesMask.Set((int)index, true);
-
-                AddToObjectUpdateIfNeeded();
-            }
+            //static_assert(std::is_integral < T >::value, "RemoveUpdateFieldFlagValue must be used with integral types");
+            SetUpdateFieldValue(ref value, (T)(value & ~(dynamic)flag));
         }
 
-        public void SetUInt16Value(object index, byte offset, ushort value)
+        public void AddDynamicUpdateFieldValue<T>(DynamicUpdateField<T> updateField, T value) where T : new()
         {
-            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, true));
-
-            if (offset > 2)
-            {
-                Log.outError(LogFilter.Server, "WorldObject.SetUInt16Value: wrong offset {0}", offset);
-                return;
-            }
-
-            if ((ushort)(GetUInt32Value(index) >> (offset * 16)) != value)
-            {
-                updateValues[(int)index].UnsignedValue &= ~((uint)0xFFFF << (offset * 16));
-                updateValues[(int)index].UnsignedValue |= (uint)value << (offset * 16);
-                _changesMask.Set((int)index, true);
-
-                AddToObjectUpdateIfNeeded();
-            }
+            AddToObjectUpdateIfNeeded();
+            updateField.AddValue(value);
         }
 
-        public void SetGuidValue(object index, ObjectGuid value)
+        public void InsertDynamicUpdateFieldValue<T>(DynamicUpdateField<T> updateField, int index, T value) where T : new()
         {
-            Cypher.Assert((int)index + 3 < valuesCount || PrintIndexError(index, true));
-            if (GetGuidValue(index) != value)
-            {                
-                SetUInt64Value(index, value.GetLowValue());
-                SetUInt64Value((int)index + 2, value.GetHighValue());
-
-                AddToObjectUpdateIfNeeded();
-            }
+            AddToObjectUpdateIfNeeded();
+            updateField.InsertValue(index, value);
         }
 
-        public void SetStatFloatValue(object index, float value)
+        public void RemoveDynamicUpdateFieldValue<T>(DynamicUpdateField<T> updateField, int index) where T : new()
         {
-            if (value < 0)
-                value = 0.0f;
-
-            SetFloatValue(index, value);
+            AddToObjectUpdateIfNeeded();
+            updateField.RemoveValue(index);
         }
 
-        public void SetStatInt32Value(object index, int value)
+        public void ClearDynamicUpdateFieldValues<T>(DynamicUpdateField<T> updateField) where T : new()
         {
-            if (value < 0)
-                value = 0;
-
-            SetUInt32Value(index, (uint)value);
+            AddToObjectUpdateIfNeeded();
+            updateField.Clear();
         }
 
-        public void ApplyModInt32Value(object index, int val, bool apply)
+        // stat system helpers
+        public void SetUpdateFieldStatValue<T>(IUpdateField<T> updateField, T value) where T : new()
         {
-            int cur = GetInt32Value(index);
-            cur += (apply ? val : -val);
-            if (cur < 0)
-                cur = 0;
-            SetInt32Value(index, cur);
+            //static_assert(std::is_arithmetic < T >::value, "SetUpdateFieldStatValue must be used with arithmetic types");
+            SetUpdateFieldValue(updateField, Math.Max((dynamic)value, 0));
         }
 
-        public void ApplyModUInt32Value(object index, int val, bool apply)
-        {
-            int cur = (int)GetUInt32Value(index);
-            cur += (apply ? val : -val);
-            if (cur < 0)
-                cur = 0;
-            SetUInt32Value(index, (uint)cur);
+        public void SetUpdateFieldStatValue<T>(ref T oldValue, T value)
+        {      
+            //static_assert(std::is_arithmetic < T >::value, "SetUpdateFieldStatValue must be used with arithmetic types");
+            SetUpdateFieldValue(ref oldValue, Math.Max((dynamic)value, 0));
         }
 
-        public void ApplyModUInt16Value(object index, byte offset, short val, bool apply)
+        public void ApplyModUpdateFieldValue<T>(IUpdateField<T> updateField, T mod, bool apply) where T : new()
         {
-            short cur = (short)GetUInt16Value(index, offset);
-            cur += (short)(apply ? val : -val);
-            if (cur < 0)
-                cur = 0;
-            SetUInt16Value(index, offset, (ushort)cur);
-        }
-
-        public void ApplyModSignedFloatValue(object index, float val, bool apply)
-        {
-            float cur = GetFloatValue(index);
-            cur += (apply ? val : -val);
-            SetFloatValue(index, cur);
-        }
-
-        public void ApplyPercentModFloatValue(object index, float val, bool apply)
-        {
-            float value = GetFloatValue(index);
-            MathFunctions.ApplyPercentModFloatVar(ref value, val, apply);
-            SetFloatValue(index, value);
-        }
-
-        public void SetFlag(object index, object newflag)
-        {
-            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, true));
-            uint oldval = updateValues[(int)index].UnsignedValue;
-            uint newval = oldval | Convert.ToUInt32(newflag);
-
-            if (oldval != newval)
-            {
-                updateValues[(int)index].UnsignedValue = newval;
-                _changesMask.Set((int)index, true);
-
-                AddToObjectUpdateIfNeeded();
-            }
-        }
-
-        public void RemoveFlag(object index, object oldFlag)
-        {
-            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, true));
-            Cypher.Assert(updateValues != null);
-
-            uint oldval = updateValues[(int)index].UnsignedValue;
-            uint newval = (oldval & ~Convert.ToUInt32(oldFlag));
-
-            if (oldval != newval)
-            {
-                updateValues[(int)index].UnsignedValue = newval;
-                _changesMask.Set((int)index, true);
-                AddToObjectUpdateIfNeeded();
-            }
-        }
-
-        public void ToggleFlag(object index, object flag)
-        {
-            if (HasFlag(index, flag))
-                RemoveFlag(index, flag);
-            else
-                SetFlag(index, flag);
-        }
-
-        public bool HasFlag(object index, object flag)
-        {
-            if ((int)index >= valuesCount && !PrintIndexError(index, false))
-                return false;
-
-            return (GetUInt32Value(index) & Convert.ToUInt32(flag)) != 0;
-        }
-
-        public void ApplyModFlag<T>(object index, T flag, bool apply)
-        {
+            //static_assert(std::is_arithmetic < T >::value, "SetUpdateFieldStatValue must be used with arithmetic types");
+            dynamic value = updateField.GetValue();
             if (apply)
-                SetFlag(index, flag);
+                value += mod;
             else
-                RemoveFlag(index, flag);
+                value -= mod;
+
+            SetUpdateFieldValue(updateField, value);
         }
 
-        public void SetByteFlag(object index, byte offset, object newFlag)
+        public void ApplyModUpdateFieldValue<T>(ref T oldvalue, T mod, bool apply) where T : new()
         {
-            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, true));
+            //static_assert(std::is_arithmetic < T >::value, "SetUpdateFieldStatValue must be used with arithmetic types");
 
-            if (offset > 4)
-            {
-                Log.outError(LogFilter.Server, "Object.SetByteFlag: wrong offset {0}", offset);
-                return;
-            }
-
-            if (!Convert.ToBoolean(updateValues[(int)index].UnsignedValue >> (offset * 8) & Convert.ToUInt32(newFlag)))
-            {
-                updateValues[(int)index].UnsignedValue |= Convert.ToUInt32(newFlag) << (offset * 8);
-                _changesMask.Set((int)index, true);
-
-                AddToObjectUpdateIfNeeded();
-            }
-        }
-
-        public void RemoveByteFlag(object index, byte offset, object oldFlag)
-        {
-            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, true));
-
-            if (offset > 4)
-            {
-                Log.outError(LogFilter.Server, "Object.RemoveByteFlag: wrong offset {0}", offset);
-                return;
-            }
-
-            if (Convert.ToBoolean(updateValues[(int)index].UnsignedValue >> (offset * 8) & Convert.ToUInt32(oldFlag)))
-            {
-                updateValues[(int)index].UnsignedValue &= ~(Convert.ToUInt32(oldFlag) << (offset * 8));
-                _changesMask.Set((int)index, true);
-
-                AddToObjectUpdateIfNeeded();
-            }
-        }
-
-        public void ToggleByteFlag(object index, byte offset, byte flag)
-        {
-            if (HasByteFlag(index, offset, flag))
-                RemoveByteFlag(index, offset, flag);
-            else
-                SetByteFlag(index, offset, flag);
-        }
-
-        public bool HasByteFlag(object index, byte offset, object flag)
-        {
-            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, false));
-            Cypher.Assert(offset < 4);
-            return Convert.ToBoolean(updateValues[(int)index].UnsignedValue >> (offset * 8) & Convert.ToUInt32(flag));
-        }
-
-        public void SetFlag64(object index, object newFlag)
-        {
-            ulong oldval = GetUInt64Value(index);
-            ulong newval = oldval | Convert.ToUInt64(newFlag);
-            SetUInt64Value(index, newval);
-        }
-
-        public void RemoveFlag64(object index, object oldFlag)
-        {
-            ulong oldval = GetUInt64Value(index);
-            ulong newval = oldval & ~Convert.ToUInt64(oldFlag);
-            SetUInt64Value(index, newval);
-        }
-
-        public void ToggleFlag64(object index, object flag)
-        {
-            if (HasFlag64(index, flag))
-                RemoveFlag64(index, flag);
-            else
-                SetFlag64(index, flag);
-        }
-
-        public bool HasFlag64(object index, object flag)
-        {
-            Cypher.Assert((int)index < valuesCount || PrintIndexError(index, false));
-            return (GetUInt64Value(index) & Convert.ToUInt64(flag)) != 0;
-        }
-
-        void ApplyModFlag64(object index, ulong flag, bool apply)
-        {
+            dynamic value = oldvalue;
             if (apply)
-                SetFlag64(index, flag);
+                value += mod;
             else
-                RemoveFlag64(index, flag);
+                value -= mod;
+
+            SetUpdateFieldValue(ref oldvalue, value);
         }
 
-        public uint[] GetDynamicValues(object index)
+        public void ApplyPercentModUpdateFieldValue<T>(IUpdateField<T> updateField, float percent, bool apply) where T : new()
         {
-            Cypher.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, false));
-            return _dynamicValues[(int)index];
+            //static_assert(std::is_arithmetic < T >::value, "SetUpdateFieldStatValue must be used with arithmetic types");
+
+            dynamic value = updateField.GetValue();
+
+            // don't want to include Util.h here
+            //ApplyPercentModFloatVar(value, percent, apply);
+            if (percent == -100.0f)
+                percent = -99.99f;
+            value *= (apply ? (100.0f + percent) / 100.0f : 100.0f / (100.0f + percent));
+
+            SetUpdateFieldValue(updateField, value);
         }
 
-        public uint GetDynamicValue(object index, ushort offset)
+        public void ApplyPercentModUpdateFieldValue<T>(ref T oldValue, float percent, bool apply) where T : new()
         {
-            Cypher.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, false));
-            if (offset >= _dynamicValues[(int)index].Length)
-                return 0;
+            //static_assert(std::is_arithmetic < T >::value, "SetUpdateFieldStatValue must be used with arithmetic types");
 
-            return _dynamicValues[(int)index][offset];
+            dynamic value = oldValue;
+
+            // don't want to include Util.h here
+            //ApplyPercentModFloatVar(value, percent, apply);
+            if (percent == -100.0f)
+                percent = -99.99f;
+            value *= (apply ? (100.0f + percent) / 100.0f : 100.0f / (100.0f + percent));
+
+            SetUpdateFieldValue(ref oldValue, value);
         }
 
-        public bool HasDynamicValue(object index, uint value)
+        public void ForceUpdateFieldChange()
         {
-            Cypher.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, false));
-            uint[] values = _dynamicValues[(int)index];
-            for (var i = 0; i < values.Length; ++i)
-                if (values[i] == value)
-                    return true;
-
-            return false;
-        }
-
-        public void AddDynamicValue(object index, uint value)
-        {
-            Cypher.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, true));
-
-            SetDynamicValue(index, (byte)_dynamicValues[(int)index].Length, value);
-        }
-
-        public void RemoveDynamicValue(object index, uint value)
-        {
-            Cypher.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, false));
-
-            // TODO: Research if this is blizzlike to just set value to 0
-            for (var i = 0; i < _dynamicValues[(int)index].Length; ++i)
-            {
-                if (_dynamicValues[(int)index][i] == value)
-                {
-                    _dynamicValues[(int)index][i] = 0;
-                    _dynamicChangesMask[(int)index] = DynamicFieldChangeType.ValueChanged;
-                    _dynamicChangesArrayMask[(int)index].Set(i, true);
-
-                    AddToObjectUpdateIfNeeded();
-                }
-            }
-        }
-
-        public void ClearDynamicValue(object index)
-        {
-            Cypher.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, false));
-
-            if (!_dynamicValues[(int)index].Empty())
-            {
-                _dynamicValues[(int)index] = new uint[0];
-                _dynamicChangesMask[(int)index] = DynamicFieldChangeType.ValueAndSizeChanged;
-                _dynamicChangesArrayMask[(int)index].SetAll(false);
-
-                AddToObjectUpdateIfNeeded();
-            }
-        }
-
-        public void SetDynamicValue(object index, ushort offset, uint value)
-        {
-            Cypher.Assert((int)index < _dynamicValuesCount || PrintIndexError(index, true));
-
-            DynamicFieldChangeType changeType = DynamicFieldChangeType.ValueChanged;
-            if (_dynamicValues[(int)index].Length <= offset)
-            {
-                Array.Resize(ref _dynamicValues[(int)index], offset + 1);
-                changeType = DynamicFieldChangeType.ValueAndSizeChanged;
-            }
-
-            if (_dynamicChangesArrayMask[(int)index].Count <= offset)
-                _dynamicChangesArrayMask[(int)index].Length = offset + 1;
-
-            if (_dynamicValues[(int)index][offset] != value || changeType == DynamicFieldChangeType.ValueAndSizeChanged)
-            {
-                _dynamicValues[(int)index][offset] = value;
-                _dynamicChangesMask[(int)index] = changeType;
-                _dynamicChangesArrayMask[(int)index].Set(offset, true);
-
-                AddToObjectUpdateIfNeeded();
-            }
-        }
-
-        public List<T> GetDynamicStructuredValues<T>(object index)
-        {
-            var values = _dynamicValues[(int)index];
-            return values.DeserializeObjects<T>();
-        }
-
-        public T GetDynamicStructuredValue<T>(object index, ushort offset)
-        {
-            return GetDynamicStructuredValues<T>(index)[offset];
-        }
-
-        public void SetDynamicStructuredValue<T>(object index, ushort offset, T value)
-        {
-            int BlockCount = Marshal.SizeOf<T>() / sizeof(uint);
-            SetDynamicValue(index, (ushort)((offset + 1) * BlockCount - 1), 0); // reserve space
-
-            for (ushort i = 0; i < BlockCount; ++i)
-                SetDynamicValue(index, (ushort)(offset * BlockCount + i), value.SerializeObject()[i]);
-        }
-
-        public void AddDynamicStructuredValue<T>(object index, T value)
-        {
-            int BlockCount = Marshal.SizeOf<T>() / sizeof(uint);
-            ushort offset = (ushort)(_dynamicValues[(int)index].Length / BlockCount);
-            SetDynamicValue(index, (ushort)((offset + 1) * BlockCount - 1), 0); // reserve space
-            for (ushort i = 0; i < BlockCount; ++i)
-                SetDynamicValue(index, (ushort)(offset * BlockCount + i), value.SerializeObject()[i]);
-        }
-
-        bool PrintIndexError(object index, bool set)
-        {
-            Log.outError(LogFilter.Server, "Attempt {0} non-existed value field: {1} (count: {2}) for object typeid: {3} type mask: {4}", (set ? "set value to" : "get value from"), index, valuesCount, GetTypeId(), objectTypeId);
-
-            // ASSERT must fail after function call
-            return false;
+            AddToObjectUpdateIfNeeded();
         }
 
         public bool IsWorldObject()
@@ -1897,14 +1315,6 @@ namespace Game.Entities
             return true;
         }
 
-        public void ForceValuesUpdateAtIndex(object _index)
-        {
-            int index = (int)_index;
-            _changesMask.Set(index, true);
-
-            AddToObjectUpdateIfNeeded();
-        }
-
         public virtual void SendMessageToSet(ServerPacket packet, bool self)
         {
             if (IsInWorld)
@@ -2072,7 +1482,7 @@ namespace Game.Entities
 
             if (IsTypeId(TypeId.Player) || IsTypeId(TypeId.Unit))
             {
-                summon.SetFaction(ToUnit().getFaction());
+                summon.SetFaction(ToUnit().GetFaction());
                 summon.SetLevel(ToUnit().getLevel());
             }
 
@@ -2155,7 +1565,11 @@ namespace Game.Entities
 
         public float GetObjectSize()
         {
-            return (valuesCount > (uint)UnitFields.CombatReach) ? GetFloatValue(UnitFields.CombatReach) : SharedConst.DefaultWorldObjectSize;
+            Unit thisUnit = ToUnit();
+            if (thisUnit != null)
+                return thisUnit.m_unitData.CombatReach;
+
+            return SharedConst.DefaultWorldObjectSize;
         }
 
         public bool IsInPhase(WorldObject obj)
@@ -2262,12 +1676,18 @@ namespace Game.Entities
         public virtual string GetName(LocaleConstant locale_idx = LocaleConstant.enUS) { return _name; }
         public void SetName(string name) { _name = name; }
 
-        public ObjectGuid GetGUID() { return GetGuidValue(ObjectFields.Guid); }
-        public uint GetEntry() { return GetUInt32Value(ObjectFields.Entry); }
-        public void SetEntry(uint entry) { SetUInt32Value(ObjectFields.Entry, entry); }
+        public ObjectGuid GetGUID() { return m_guid; }
+        public uint GetEntry() { return m_objectData.EntryId; }
+        public void SetEntry(uint entry) { SetUpdateFieldValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.EntryId), entry); }
 
-        public float GetObjectScale() { return GetFloatValue(ObjectFields.ScaleX); }
-        public virtual void SetObjectScale(float scale) { SetFloatValue(ObjectFields.ScaleX, scale); }
+        public float GetObjectScale() { return m_objectData.Scale; }
+        public virtual void SetObjectScale(float scale) { SetUpdateFieldValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.Scale), scale); }
+
+        public UnitDynFlags GetDynamicFlags() { return (UnitDynFlags)(uint)m_objectData.DynamicFlags; }
+        public bool HasDynamicFlag(UnitDynFlags flag) { return (m_objectData.DynamicFlags & (uint)flag) != 0; }
+        public void AddDynamicFlag(UnitDynFlags flag) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags), (uint)flag); }
+        public void RemoveDynamicFlag(UnitDynFlags flag) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags), (uint)flag); }
+        public void SetDynamicFlags(UnitDynFlags flag) { SetUpdateFieldValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags), (uint)flag); }
 
         public TypeId GetTypeId() { return objectTypeId; }
         public bool IsTypeId(TypeId typeId) { return GetTypeId() == typeId; }
@@ -2275,9 +1695,6 @@ namespace Game.Entities
 
         public virtual bool hasQuest(uint questId) { return false; }
         public virtual bool hasInvolvedQuest(uint questId) { return false; }
-
-        public void SetFieldNotifyFlag(uint flag) { _fieldNotifyFlags |= flag; }
-        public void RemoveFieldNotifyFlag(uint flag) { _fieldNotifyFlags &= ~flag; }
 
         public bool IsCreature() { return GetTypeId() == TypeId.Unit; }
         public bool IsPlayer() { return GetTypeId() == TypeId.Player; }
@@ -2901,18 +2318,13 @@ namespace Game.Entities
         public TypeMask objectTypeMask { get; set; }
         protected TypeId objectTypeId { get; set; }
         protected CreateObjectBits m_updateFlag;
+        ObjectGuid m_guid;
 
-        protected UpdateValues[] updateValues;
-        protected uint[][] _dynamicValues;
-        protected BitArray _changesMask { get; set; }
-        protected Dictionary<int, DynamicFieldChangeType> _dynamicChangesMask = new Dictionary<int, DynamicFieldChangeType>();
-        protected BitArray[] _dynamicChangesArrayMask;
+        public UpdateFieldHolder m_values;
+        public ObjectFieldData m_objectData;
 
-        public uint valuesCount;
-        protected uint _dynamicValuesCount;
         public uint LastUsedScriptID;
 
-        protected uint _fieldNotifyFlags { get; set; }
         bool m_objectUpdated;
 
         public MovementInfo m_movementInfo;
@@ -2947,19 +2359,6 @@ namespace Game.Entities
         {
             return obj != null;
         }
-    }
-
-    [StructLayout(LayoutKind.Explicit)]
-    public struct UpdateValues
-    {
-        [FieldOffset(0)]
-        public uint UnsignedValue;
-
-        [FieldOffset(0)]
-        public int SignedValue;
-
-        [FieldOffset(0)]
-        public float FloatValue;
     }
 
     public class MovementInfo

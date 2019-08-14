@@ -189,7 +189,7 @@ namespace Game
             Guild.EmblemInfo emblemInfo = new Guild.EmblemInfo();
             emblemInfo.ReadPacket(packet);
 
-            if (GetPlayer().GetNPCIfCanInteractWith(packet.Vendor, NPCFlags.TabardDesigner))
+            if (GetPlayer().GetNPCIfCanInteractWith(packet.Vendor, NPCFlags.TabardDesigner, NPCFlags2.None))
             {
                 // Remove fake death
                 if (GetPlayer().HasUnitState(UnitState.Died))
@@ -395,7 +395,10 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.DeclineGuildInvites)]
         void HandleDeclineGuildInvites(DeclineGuildInvites packet)
         {
-            GetPlayer().ApplyModFlag(PlayerFields.Flags, PlayerFlags.AutoDeclineGuild, packet.Allow);
+            if (packet.Allow)
+                GetPlayer().AddPlayerFlag(PlayerFlags.AutoDeclineGuild);
+            else
+                GetPlayer().RemovePlayerFlag(PlayerFlags.AutoDeclineGuild);
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestGuildRewardsList, Processing = PacketProcessing.Inplace)]

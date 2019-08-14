@@ -53,7 +53,7 @@ namespace Game.Network.Packets
         {
             _worldPacket.WriteBit(IsFullUpdate);
             _worldPacket.WriteBit(IsSetFavorite);
-            _worldPacket.WriteUInt32(FavoriteAppearances.Count);
+            _worldPacket.WriteInt32(FavoriteAppearances.Count);
 
             foreach (uint itemModifiedAppearanceId in FavoriteAppearances)
                 _worldPacket.WriteUInt32(itemModifiedAppearanceId);

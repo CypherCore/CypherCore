@@ -34,7 +34,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.BattlemasterHello)]
         void HandleBattlemasterHello(Hello hello)
         {
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(hello.Unit, NPCFlags.BattleMaster);
+            Creature unit = GetPlayer().GetNPCIfCanInteractWith(hello.Unit, NPCFlags.BattleMaster, NPCFlags2.None);
             if (!unit)
                 return;
 

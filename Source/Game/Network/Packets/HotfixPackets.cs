@@ -132,7 +132,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Hotfixes.Count);
+            _worldPacket.WriteInt32(Hotfixes.Count);
             foreach (HotfixData hotfix in Hotfixes)
                 hotfix.Write(_worldPacket);
 
@@ -150,7 +150,7 @@ namespace Game.Network.Packets
                 Record.Write(data);
                 if (Size.HasValue)
                 {
-                    data.WriteUInt32(Size);
+                    data.WriteUInt32(Size.Value);
                     data.WriteBit(true);
                 }
                 else

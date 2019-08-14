@@ -75,7 +75,7 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(ObjectGUID);
-            _worldPacket.WriteUInt32(AnimKitID);
+            _worldPacket.WriteInt32(AnimKitID);
             _worldPacket.WriteBit(Maintain);
             _worldPacket.FlushBits();
         }

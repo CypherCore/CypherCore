@@ -51,8 +51,7 @@ namespace Game.Chat
             if (!handler.extractPlayerTarget(args, out target))
                 return false;
 
-            target.SetUInt32Value(ActivePlayerFields.Kills, 0);
-            target.SetUInt32Value(ActivePlayerFields.LifetimeHonorableKills, 0);
+            target.ResetHonorStats();
             target.UpdateCriteria(CriteriaTypes.EarnHonorableKill);
 
             return true;
@@ -74,18 +73,18 @@ namespace Game.Chat
                 player.SetShapeshiftForm(ShapeShiftForm.None);
 
             player.setFactionForRace(player.GetRace());
-            player.SetUInt32Value(UnitFields.DisplayPower, (uint)powerType);
+            player.SetPowerType(powerType);
 
             // reset only if player not in some form;
             if (player.GetShapeshiftForm() == ShapeShiftForm.None)
                 player.InitDisplayIds();
 
-            player.SetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag, (byte)UnitBytes2Flags.PvP);
+            player.SetPvpFlags(UnitPVPStateFlags.PvP);
 
-            player.SetUInt32Value(UnitFields.Flags, (uint)UnitFlags.PvpAttackable);
+            player.SetUnitFlags(UnitFlags.PvpAttackable);
 
             //-1 is default value
-            player.SetUInt32Value(ActivePlayerFields.WatchedFactionIndex, 0xFFFFFFFF);
+            player.SetWatchedFactionIndex(0xFFFFFFFF);
             return true;
         }
 
@@ -110,7 +109,7 @@ namespace Game.Chat
             target.InitStatsForLevel(true);
             target.InitTaxiNodesForLevel();
             target.InitTalentForLevel();
-            target.SetUInt32Value(ActivePlayerFields.Xp, 0);
+            target.SetXP(0);
 
             target._ApplyAllLevelScaleItemMods(true);
 

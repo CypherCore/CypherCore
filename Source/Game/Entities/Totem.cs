@@ -63,15 +63,13 @@ namespace Game.Entities
                     packet.Totem = GetGUID();
                     packet.Slot = (byte)(m_Properties.Slot - (int)SummonSlot.Totem);
                     packet.Duration = duration;
-                    packet.SpellID = GetUInt32Value(UnitFields.CreatedBySpell);
+                    packet.SpellID = m_unitData.CreatedBySpell;
                     owner.ToPlayer().SendPacket(packet);
                 }
 
                 // set display id depending on caster's race
-                uint totemDisplayId = Global.SpellMgr.GetModelForTotem(GetUInt32Value(UnitFields.CreatedBySpell), owner.GetRace());
-                if (totemDisplayId == 0)
-                    Log.outError(LogFilter.Spells, $"Spell {GetUInt32Value(UnitFields.CreatedBySpell)} with RaceID ({owner.GetRace()}) have no totem model data defined, set to default model.");
-                else
+                uint totemDisplayId = Global.SpellMgr.GetModelForTotem(m_unitData.CreatedBySpell, owner.GetRace());
+                if (totemDisplayId != 0)
                     SetDisplayId(totemDisplayId);
             }
 
@@ -127,7 +125,7 @@ namespace Game.Entities
             {
                 owner.SendAutoRepeatCancel(this);
 
-                SpellInfo spell = Global.SpellMgr.GetSpellInfo(GetUInt32Value(UnitFields.CreatedBySpell));
+                SpellInfo spell = Global.SpellMgr.GetSpellInfo(m_unitData.CreatedBySpell);
                 if (spell != null)
                     GetSpellHistory().SendCooldownEvent(spell, 0, null, false);
 

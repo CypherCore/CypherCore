@@ -88,21 +88,9 @@ namespace Game.Entities
             SendPacket(packet);
         }
 
-        bool CanTitanGrip() { return m_canTitanGrip; }
+        public override uint GetBlockPercent() { return m_activePlayerData.ShieldBlock; }
 
-        public override bool CanUseAttackType(WeaponAttackType attacktype)
-        {
-            switch (attacktype)
-            {
-                case WeaponAttackType.BaseAttack:
-                    return !HasFlag(UnitFields.Flags, UnitFlags.Disarmed);
-                case WeaponAttackType.OffAttack:
-                    return !HasFlag(UnitFields.Flags2, UnitFlags2.DisarmOffhand);
-                case WeaponAttackType.RangedAttack:
-                    return !HasFlag(UnitFields.Flags2, UnitFlags2.DisarmRanged);
-            }
-            return true;
-        }
+        bool CanTitanGrip() { return m_canTitanGrip; }
 
         float GetRatingMultiplier(CombatRating cr)
         {
@@ -118,7 +106,7 @@ namespace Game.Entities
         }
         public float GetRatingBonusValue(CombatRating cr)
         {
-            float baseResult = GetFloatValue(ActivePlayerFields.CombatRating + (int)cr) * GetRatingMultiplier(cr);
+            float baseResult = m_activePlayerData.CombatRatings[(int)cr] * GetRatingMultiplier(cr);
             if (cr != CombatRating.ResiliencePlayerDamage)
                 return baseResult;
             return (float)(1.0f - Math.Pow(0.99f, baseResult)) * 100.0f;
@@ -189,9 +177,9 @@ namespace Game.Entities
             switch (attType)
             {
                 case WeaponAttackType.BaseAttack:
-                    return baseExpertise + GetUInt32Value(ActivePlayerFields.Expertise) / 4.0f;
+                    return baseExpertise + m_activePlayerData.MainhandExpertise / 4.0f;
                 case WeaponAttackType.OffAttack:
-                    return baseExpertise + GetUInt32Value(ActivePlayerFields.OffhandExpertise) / 4.0f;
+                    return baseExpertise + m_activePlayerData.OffhandExpertise / 4.0f;
                 default:
                     break;
             }
@@ -201,7 +189,7 @@ namespace Game.Entities
         public bool IsUseEquipedWeapon(bool mainhand)
         {
             // disarm applied only to mainhand weapon
-            return !IsInFeralForm() && (!mainhand || !HasFlag(UnitFields.Flags, UnitFlags.Disarmed));
+            return !IsInFeralForm() && (!mainhand || !HasUnitFlag(UnitFlags.Disarmed));
         }
 
         public void SetCanTitanGrip(bool value, uint penaltySpellId = 0)
@@ -321,8 +309,8 @@ namespace Game.Entities
 
             Global.ScriptMgr.OnPlayerDuelStart(this, duel.opponent);
 
-            SetUInt32Value(PlayerFields.DuelTeam, 1);
-            duel.opponent.SetUInt32Value(PlayerFields.DuelTeam, 2);
+            SetDuelTeam(1);
+            duel.opponent.SetDuelTeam(2);
 
             duel.startTimer = 0;
             duel.startTime = currTime;
@@ -335,7 +323,7 @@ namespace Game.Entities
             if (duel == null)
                 return;
 
-            ObjectGuid duelFlagGUID = GetGuidValue(PlayerFields.DuelArbiter);
+            ObjectGuid duelFlagGUID = m_playerData.DuelArbiter;
             GameObject obj = GetMap().GetGameObject(duelFlagGUID);
             if (!obj)
                 return;
@@ -439,7 +427,7 @@ namespace Game.Entities
                 duel.opponent.CastSpell(duel.opponent, 52852, true);
 
             //Remove Duel Flag object
-            GameObject obj = GetMap().GetGameObject(GetGuidValue(PlayerFields.DuelArbiter));
+            GameObject obj = GetMap().GetGameObject(m_playerData.DuelArbiter);
             if (obj)
                 duel.initiator.RemoveGameObject(obj, true);
 
@@ -465,14 +453,16 @@ namespace Game.Entities
             duel.opponent.ClearComboPoints();
 
             //cleanups
-            SetGuidValue(PlayerFields.DuelArbiter, ObjectGuid.Empty);
-            SetUInt32Value(PlayerFields.DuelTeam, 0);
-            duel.opponent.SetGuidValue(PlayerFields.DuelArbiter, ObjectGuid.Empty);
-            duel.opponent.SetUInt32Value(PlayerFields.DuelTeam, 0);
+            SetDuelArbiter(ObjectGuid.Empty);
+            SetDuelTeam(0);
+            duel.opponent.SetDuelArbiter(ObjectGuid.Empty);
+            duel.opponent.SetDuelTeam(0);
 
             duel.opponent.duel = null;
             duel = null;
         }
+        public void SetDuelArbiter(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.DuelArbiter), guid); }
+        void SetDuelTeam(uint duelTeam) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.DuelTeam), duelTeam); }
 
         //PVP
         public void SetPvPDeath(bool on)
@@ -488,7 +478,7 @@ namespace Game.Entities
         public void ResetContestedPvP()
         {
             ClearUnitState(UnitState.AttackPlayer);
-            RemoveFlag(PlayerFields.Flags, PlayerFlags.ContestedPVP);
+            RemovePlayerFlag(PlayerFlags.ContestedPVP);
             m_contestedPvPTimer = 0;
         }
         void UpdateAfkReport(long currTime)
@@ -547,16 +537,16 @@ namespace Game.Entities
             {
                 if (!IsFFAPvP())
                 {
-                    SetByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag, UnitBytes2Flags.FFAPvp);
+                    AddPvpFlag(UnitPVPStateFlags.FFAPvp);
                     foreach (var unit in m_Controlled)
-                        unit.SetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag, (byte)UnitBytes2Flags.FFAPvp);
+                        unit.AddPvpFlag(UnitPVPStateFlags.FFAPvp);
                 }
             }
             else if (IsFFAPvP())
             {
-                RemoveByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag, UnitBytes2Flags.FFAPvp);
+                RemovePvpFlag(UnitPVPStateFlags.FFAPvp);
                 foreach (var unit in m_Controlled)
-                    unit.RemoveByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag, UnitBytes2Flags.FFAPvp);
+                    unit.RemovePvpFlag(UnitPVPStateFlags.FFAPvp);
             }
 
             if (onlyFFA)
@@ -569,7 +559,7 @@ namespace Game.Entities
             }
             else                                                    // in friendly area
             {
-                if (IsPvP() && !HasFlag(PlayerFields.Flags, PlayerFlags.InPVP) && pvpInfo.EndTimer == 0)
+                if (IsPvP() && !HasPlayerFlag(PlayerFlags.InPVP) && pvpInfo.EndTimer == 0)
                     pvpInfo.EndTimer = Time.UnixTime;                  // start toggle-off
             }
         }

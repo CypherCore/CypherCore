@@ -1132,7 +1132,7 @@ namespace Game.Spells
             if (num_to_add != 0)
             {
                 // create the new item and store it
-                Item pItem = player.StoreNewItem(dest, newitemid, true, ItemEnchantment.GenerateItemRandomPropertyId(newitemid), null, context, bonusListIds);
+                Item pItem = player.StoreNewItem(dest, newitemid, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(newitemid), null, context, bonusListIds);
 
                 // was it successful? return error if not
                 if (pItem == null)
@@ -1143,7 +1143,7 @@ namespace Game.Spells
 
                 // set the "Crafted by ..." property of the item
                 if (pItem.GetTemplate().GetClass() != ItemClass.Consumable && pItem.GetTemplate().GetClass() != ItemClass.Quest && newitemid != 6265 && newitemid != 6948)
-                    pItem.SetGuidValue(ItemFields.Creator, player.GetGUID());
+                    pItem.SetCreator(player.GetGUID());
 
                 // send info to the client
                 player.SendNewItem(pItem, num_to_add, true, bgType == 0);
@@ -1522,7 +1522,7 @@ namespace Game.Spells
                 SendLoot(guid, LootType.Skinning);
             else if (itemTarget != null)
             {
-                itemTarget.SetFlag(ItemFields.Flags, ItemFieldFlags.Unlocked);
+                itemTarget.AddItemFlag(ItemFieldFlags.Unlocked);
                 itemTarget.SetState(ItemUpdateState.Changed, itemTarget.GetOwner());
             }
 
@@ -1581,11 +1581,11 @@ namespace Game.Spells
 
             for (var j = EnchantmentSlot.Perm; j <= EnchantmentSlot.Temp; ++j)
                 if (m_CastItem.GetEnchantmentId(j) != 0)
-                    pNewItem.SetEnchantment(j, m_CastItem.GetEnchantmentId(j), m_CastItem.GetEnchantmentDuration(j), m_CastItem.GetEnchantmentCharges(j));
+                    pNewItem.SetEnchantment(j, m_CastItem.GetEnchantmentId(j), m_CastItem.GetEnchantmentDuration(j), (uint)m_CastItem.GetEnchantmentCharges(j));
 
-            if (m_CastItem.GetUInt32Value(ItemFields.Durability) < m_CastItem.GetUInt32Value(ItemFields.MaxDurability))
+            if (m_CastItem.m_itemData.Durability < m_CastItem.m_itemData.MaxDurability)
             {
-                double lossPercent = 1 - m_CastItem.GetUInt32Value(ItemFields.Durability) / (double)m_CastItem.GetUInt32Value(ItemFields.MaxDurability);
+                double lossPercent = 1 - m_CastItem.m_itemData.Durability / m_CastItem.m_itemData.MaxDurability;
                 player.DurabilityLoss(pNewItem, lossPercent);
             }
 
@@ -1788,9 +1788,10 @@ namespace Game.Spells
                                     return;
 
                                 summon.SelectLevel();       // some summoned creaters have different from 1 DB data for level/hp
-                                summon.SetUInt64Value(UnitFields.NpcFlags, (ulong)summon.GetCreatureTemplate().Npcflag);
+                                summon.SetNpcFlags((NPCFlags)((int)summon.GetCreatureTemplate().Npcflag & 0xFFFFFFFF));
+                                summon.SetNpcFlags2((NPCFlags2)((int)summon.GetCreatureTemplate().Npcflag >> 32));
 
-                                summon.SetFlag(UnitFields.Flags, UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc);
+                                summon.AddUnitFlag(UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc);
 
                                 summon.GetAI().EnterEvadeMode();
                                 break;
@@ -1817,8 +1818,8 @@ namespace Game.Spells
                                     if (properties.Control == SummonCategory.Ally)
                                     {
                                         summon.SetOwnerGUID(m_originalCaster.GetGUID());
-                                        summon.SetFaction(m_originalCaster.getFaction());
-                                        summon.SetUInt32Value(UnitFields.CreatedBySpell, m_spellInfo.Id);
+                                        summon.SetFaction(m_originalCaster.GetFaction());
+                                        summon.SetCreatedBySpell(m_spellInfo.Id);
                                     }
 
                                     ExecuteLogEffectSummonObject(effIndex, summon);
@@ -1851,7 +1852,7 @@ namespace Game.Spells
 
                     uint faction = properties.Faction;
                     if (faction == 0)
-                        faction = m_originalCaster.getFaction();
+                        faction = m_originalCaster.GetFaction();
 
                     summon.SetFaction(faction);
                     break;
@@ -2383,13 +2384,13 @@ namespace Game.Spells
             uint level = (creatureTarget.GetLevelForTarget(m_caster) < (m_caster.GetLevelForTarget(creatureTarget) - 5)) ? (m_caster.GetLevelForTarget(creatureTarget) - 5) : creatureTarget.GetLevelForTarget(m_caster);
 
             // prepare visual effect for levelup
-            pet.SetUInt32Value(UnitFields.Level, level - 1);
+            pet.SetLevel(level - 1);
 
             // add to world
             pet.GetMap().AddToMap(pet.ToCreature());
 
             // visual effect for levelup
-            pet.SetUInt32Value(UnitFields.Level, level);
+            pet.SetLevel(level);
 
             // caster have pet now
             m_caster.SetMinion(pet, true);
@@ -2469,7 +2470,7 @@ namespace Game.Spells
                     pet.SetReactState(ReactStates.Defensive);
             }
 
-            pet.SetUInt32Value(UnitFields.CreatedBySpell, m_spellInfo.Id);
+            pet.SetCreatedBySpell(m_spellInfo.Id);
 
             // generate new name for summon pet
             string new_name = Global.ObjectMgr.GeneratePetName(petentry);
@@ -3515,8 +3516,8 @@ namespace Game.Spells
 
             PhasingHandler.InheritPhaseShift(go, m_caster);
 
-            go.SetUInt32Value(GameObjectFields.Faction, m_caster.getFaction());
-            go.SetUInt32Value(GameObjectFields.Level, m_caster.getLevel() + 1);
+            go.SetFaction(m_caster.GetFaction());
+            go.SetLevel(m_caster.getLevel() + 1);
             int duration = m_spellInfo.CalcDuration(m_caster);
             go.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
             go.SetSpellId(m_spellInfo.Id);
@@ -3553,8 +3554,8 @@ namespace Game.Spells
             duel2.isMounted = (GetSpellInfo().Id == 62875); // Mounted Duel
             target.duel = duel2;
 
-            caster.SetGuidValue(PlayerFields.DuelArbiter, go.GetGUID());
-            target.SetGuidValue(PlayerFields.DuelArbiter, go.GetGUID());
+            caster.SetDuelArbiter(go.GetGUID());
+            target.SetDuelArbiter(go.GetGUID());
 
             Global.ScriptMgr.OnPlayerDuelRequest(target, caster);
         }
@@ -4066,8 +4067,8 @@ namespace Game.Spells
             SkillType skill = creature.GetCreatureTemplate().GetRequiredLootSkill();
 
             m_caster.ToPlayer().SendLoot(creature.GetGUID(), LootType.Skinning);
-            creature.RemoveFlag(UnitFields.Flags, UnitFlags.Skinnable);
-            creature.SetFlag(ObjectFields.DynamicFlags, UnitDynFlags.Lootable);
+            creature.RemoveUnitFlag(UnitFlags.Skinnable);
+            creature.AddDynamicFlag(UnitDynFlags.Lootable);
 
             if (skill == SkillType.Skinning)
             {
@@ -4396,8 +4397,8 @@ namespace Game.Spells
 
             player.GetMap().CreatureRelocation(pet, x, y, z, player.GetOrientation());
 
-            pet.SetUInt32Value(ObjectFields.DynamicFlags, (uint)UnitDynFlags.HideModel);
-            pet.RemoveFlag(UnitFields.Flags, UnitFlags.Skinnable);
+            pet.SetDynamicFlags(UnitDynFlags.HideModel);
+            pet.RemoveUnitFlag(UnitFlags.Skinnable);
             pet.setDeathState(DeathState.Alive);
             pet.ClearUnitState(UnitState.AllState);
             pet.SetHealth(pet.CountPctFromMaxHealth(damage));
@@ -4422,7 +4423,7 @@ namespace Game.Spells
                 Creature totem = m_caster.GetMap().GetCreature(m_caster.m_SummonSlot[slot]);
                 if (totem != null && totem.IsTotem())
                 {
-                    uint spell_id = totem.GetUInt32Value(UnitFields.CreatedBySpell);
+                    uint spell_id = totem.m_unitData.CreatedBySpell;
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell_id);
                     if (spellInfo != null)
                     {
@@ -4577,10 +4578,10 @@ namespace Game.Spells
             {
                 case GameObjectTypes.FishingNode:
                     {
-                        go.SetFaction(m_caster.getFaction());
+                        go.SetFaction(m_caster.GetFaction());
                         ObjectGuid bobberGuid = go.GetGUID();
                         // client requires fishing bobber guid in channel object slot 0 to be usable
-                        m_caster.SetDynamicStructuredValue(UnitDynamicFields.ChannelObjects, 0, bobberGuid);
+                        m_caster.SetChannelObject(0, bobberGuid);
                         m_caster.AddGameObject(go);              // will removed at spell cancel
 
                         // end time of range when possible catch fish (FISHING_BOBBER_READY_TIME..GetDuration(m_spellInfo))
@@ -4759,8 +4760,8 @@ namespace Game.Spells
                         continue;
 
                     // The charges / stack amounts don't count towards the total number of auras that can be dispelled.
-                    // Ie: A dispel on a target with 5 stacks of Winters Chill and a Polymorph has 1 / (1 + 1) -> 50% chance to dispell
-                    // Polymorph instead of 1 / (5 + 1) -> 16%.
+                    // Ie: A dispel on a target with 5 stacks of Winters Chill and a Polymorph has 1 / (1 + 1) . 50% chance to dispell
+                    // Polymorph instead of 1 / (5 + 1) . 16%.
                     bool dispelCharges = aura.GetSpellInfo().HasAttribute(SpellAttr7.DispelCharges);
                     byte charges = dispelCharges ? aura.GetCharges() : aura.GetStackAmount();
                     if (charges > 0)
@@ -5017,7 +5018,7 @@ namespace Game.Spells
                 return;
 
             FactionTemplateRecord casterFaction = caster.GetFactionTemplateEntry();
-            FactionTemplateRecord targetFaction = CliDB.FactionTemplateStorage.LookupByKey(gameObjTarget.GetUInt32Value(GameObjectFields.Faction));
+            FactionTemplateRecord targetFaction = CliDB.FactionTemplateStorage.LookupByKey(gameObjTarget.GetFaction());
             // Do not allow to damage GO's of friendly factions (ie: Wintergrasp Walls/Ulduar Storm Beacons)
             if (targetFaction == null || (casterFaction != null && targetFaction != null && !casterFaction.IsFriendlyTo(targetFaction)))
                 gameObjTarget.ModifyHealth(-damage, caster, GetSpellInfo().Id);
@@ -5095,18 +5096,18 @@ namespace Game.Spells
                     ((Guardian)summon).InitStatsForLevel(level);
 
                 if (properties != null && properties.Control == SummonCategory.Ally)
-                    summon.SetFaction(caster.getFaction());
+                    summon.SetFaction(caster.GetFaction());
 
                 if (summon.HasUnitTypeMask(UnitTypeMask.Minion) && m_targets.HasDst())
                     ((Minion)summon).SetFollowAngle(m_caster.GetAngle(summon.GetPosition()));
 
                 if (summon.GetEntry() == 27893)
                 {
-                    uint weapon = m_caster.GetUInt32Value(PlayerFields.VisibleItem + (EquipmentSlot.MainHand * 2));
-                    if (weapon != 0)
+                    VisibleItem weapon = m_caster.ToPlayer().m_playerData.VisibleItems[EquipmentSlot.MainHand];
+                    if (weapon.ItemID != 0)
                     {
                         summon.SetDisplayId(11686);
-                        summon.SetVirtualItem(0, weapon);
+                        summon.SetVirtualItem(0, weapon.ItemID, weapon.ItemAppearanceModID, weapon.ItemVisual);
                     }
                     else
                         summon.SetDisplayId(1126);
@@ -5128,7 +5129,7 @@ namespace Game.Spells
                 !unitTarget.IsPet() || unitTarget.ToPet().getPetType() != PetType.Hunter)
                 return;
 
-            unitTarget.SetByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PetFlags, UnitPetFlags.CanBeRenamed);
+            unitTarget.AddPetFlag(UnitPetFlags.CanBeRenamed);
         }
 
         [SpellEffectHandler(SpellEffectName.PlayMusic)]
@@ -5557,7 +5558,7 @@ namespace Game.Spells
                 return;
 
             Player plr = unitTarget.ToPlayer();
-            plr.SetFlag(PlayerFields.Flags, PlayerFlags.PetBattlesUnlocked);
+            plr.AddPlayerFlag(PlayerFlags.PetBattlesUnlocked);
             plr.GetSession().GetBattlePetMgr().UnlockSlot(0);
         }
 
@@ -5658,7 +5659,7 @@ namespace Game.Spells
             itemTarget.SetState(ItemUpdateState.Changed, player);
             itemTarget.SetModifier(ItemModifier.EnchantIllusionAllSpecs, (uint)effectInfo.MiscValue);
             if (itemTarget.IsEquipped())
-                player.SetUInt16Value(PlayerFields.VisibleItem + 1 + (itemTarget.GetSlot() * 2), 1, itemTarget.GetVisibleItemVisual(player));
+                player.SetVisibleItemSlot(itemTarget.GetSlot(), itemTarget);
 
             player.RemoveTradeableItem(itemTarget);
             itemTarget.ClearSoulboundTradeable(player);

@@ -61,7 +61,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.BankerActivate)]
         void HandleBankerActivate(Hello packet)
         {
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Banker);
+            Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Banker, NPCFlags2.None);
             if (!unit)
             {
                 Log.outError(LogFilter.Network, "HandleBankerActivate: {0} not found or you can not interact with him.", packet.Unit.ToString());

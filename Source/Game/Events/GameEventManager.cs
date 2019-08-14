@@ -1119,9 +1119,10 @@ namespace Game
                             if (creatureTemplate != null)
                                 npcflag |= (ulong)creatureTemplate.Npcflag;
 
-                            creature.SetUInt64Value(UnitFields.NpcFlags, npcflag);
+                            creature.SetNpcFlags((NPCFlags)(npcflag & 0xFFFFFFFF));
+                            creature.SetNpcFlags2((NPCFlags2)(npcflag >> 32));
                             // reset gossip options, since the flag change might have added / removed some
-                            //cr->ResetGossipOptions();
+                            //cr.ResetGossipOptions();
                         }
                     }
                 });

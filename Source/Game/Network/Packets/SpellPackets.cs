@@ -90,7 +90,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(CategoryCooldowns.Count);
+            _worldPacket.WriteInt32(CategoryCooldowns.Count);
 
             foreach (CategoryCooldownInfo cooldown in CategoryCooldowns)
             {
@@ -119,8 +119,8 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteBit(InitialLogin);
-            _worldPacket.WriteUInt32(KnownSpells.Count);
-            _worldPacket.WriteUInt32(FavoriteSpells.Count);
+            _worldPacket.WriteInt32(KnownSpells.Count);
+            _worldPacket.WriteInt32(FavoriteSpells.Count);
 
             foreach (var spellId in KnownSpells)
                 _worldPacket.WriteUInt32(spellId);
@@ -175,7 +175,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Spells.Count);
+            _worldPacket.WriteInt32(Spells.Count);
             foreach (var spell in Spells)
                 _worldPacket.WriteUInt32(spell);
         }
@@ -305,9 +305,9 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(SpellID.Count);
-            _worldPacket.WriteUInt32(Superceded.Count);
-            _worldPacket.WriteUInt32(FavoriteSpellID.Count);
+            _worldPacket.WriteInt32(SpellID.Count);
+            _worldPacket.WriteInt32(Superceded.Count);
+            _worldPacket.WriteInt32(FavoriteSpellID.Count);
 
             foreach (var spellId in SpellID)
                 _worldPacket.WriteUInt32(spellId);
@@ -330,8 +330,8 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(SpellID.Count);
-            _worldPacket.WriteUInt32(FavoriteSpellID.Count);
+            _worldPacket.WriteInt32(SpellID.Count);
+            _worldPacket.WriteInt32(FavoriteSpellID.Count);
 
             foreach (uint spell in SpellID)
                 _worldPacket.WriteUInt32(spell);
@@ -356,7 +356,7 @@ namespace Game.Network.Packets
         {
             _worldPacket.WritePackedGuid(CasterUnit);
             _worldPacket.WritePackedGuid(CastID);
-            _worldPacket.WriteInt32(SpellID);
+            _worldPacket.WriteUInt32(SpellID);
             _worldPacket.WriteUInt32(SpellXSpellVisualID);
             _worldPacket.WriteUInt16(Reason);
         }
@@ -410,7 +410,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(CastID);
             _worldPacket.WriteInt32(SpellID);
             _worldPacket.WriteInt32(SpellXSpellVisualID);
-            _worldPacket.WriteInt32(Reason);
+            _worldPacket.WriteInt32((int)Reason);
             _worldPacket.WriteInt32(FailedArg1);
             _worldPacket.WriteInt32(FailedArg2);
         }
@@ -426,7 +426,7 @@ namespace Game.Network.Packets
         {
             _worldPacket.WritePackedGuid(CastID);
             _worldPacket.WriteInt32(SpellID);
-            _worldPacket.WriteInt32(Reason);
+            _worldPacket.WriteInt32((int)Reason);
             _worldPacket.WriteInt32(FailedArg1);
             _worldPacket.WriteInt32(FailedArg2);
         }
@@ -438,7 +438,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Modifiers.Count);
+            _worldPacket.WriteInt32(Modifiers.Count);
             foreach (SpellModifierInfo spellMod in Modifiers)
                 spellMod.Write(_worldPacket);
         }
@@ -452,7 +452,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(SpellID.Count);
+            _worldPacket.WriteInt32(SpellID.Count);
             foreach (uint spellId in SpellID)
                 _worldPacket.WriteUInt32(spellId);
 
@@ -474,7 +474,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32(SpellID);
+            _worldPacket.WriteUInt32(SpellID);
             _worldPacket.WriteBit(IsPet);
             _worldPacket.FlushBits();
         }
@@ -489,7 +489,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(SpellID.Count);
+            _worldPacket.WriteInt32(SpellID.Count);
             if (!SpellID.Empty())
                 SpellID.ForEach(p => _worldPacket.WriteUInt32(p));
 
@@ -542,8 +542,8 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(Caster);
-            _worldPacket.WriteUInt8(Flags);
-            _worldPacket.WriteUInt32(SpellCooldowns.Count);
+            _worldPacket.WriteUInt8((byte)Flags);
+            _worldPacket.WriteInt32(SpellCooldowns.Count);
             SpellCooldowns.ForEach(p => p.Write(_worldPacket));
         }
 
@@ -558,7 +558,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Entries.Count);
+            _worldPacket.WriteInt32(Entries.Count);
             Entries.ForEach(p => p.Write(_worldPacket));
         }
 
@@ -620,7 +620,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Entries.Count);
+            _worldPacket.WriteInt32(Entries.Count);
             Entries.ForEach(p => p.Write(_worldPacket));
         }
 
@@ -904,7 +904,7 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(UnitGUID);
-            _worldPacket.WriteUInt32(DisplayID);
+            _worldPacket.WriteInt32(DisplayID);
             _worldPacket.WriteUInt8(RaceID);
             _worldPacket.WriteUInt8(Gender);
             _worldPacket.WriteUInt8(ClassID);
@@ -917,10 +917,10 @@ namespace Game.Network.Packets
             CustomDisplay.ForEach(id => _worldPacket.WriteUInt8(id));
 
             _worldPacket.WritePackedGuid(GuildGUID);
-            _worldPacket.WriteUInt32(ItemDisplayID.Count);
+            _worldPacket.WriteInt32(ItemDisplayID.Count);
 
             foreach (var itemDisplayId in ItemDisplayID)
-                _worldPacket.WriteUInt32(itemDisplayId);
+                _worldPacket.WriteInt32(itemDisplayId);
         }
 
         public ObjectGuid UnitGUID;
@@ -1188,14 +1188,14 @@ namespace Game.Network.Packets
             CreatureTemplate creatureTemplate = attacker.GetCreatureTemplate();
 
             TuningType = ContentTuningType.CreatureToPlayerDamage;
-            PlayerLevelDelta = (short)target.GetInt32Value(ActivePlayerFields.ScalingPlayerLevelDelta);
+            PlayerLevelDelta = (short)target.m_activePlayerData.ScalingPlayerLevelDelta;
             PlayerItemLevel = (ushort)target.GetAverageItemLevel();
-            ScalingHealthItemLevelCurveID = (ushort)target.GetUInt32Value(UnitFields.ScalingHealthItemLevelCurveId);
+            ScalingHealthItemLevelCurveID = (ushort)target.m_unitData.ScalingHealthItemLevelCurveID;
             TargetLevel = (byte)target.getLevel();
             Expansion = (byte)creatureTemplate.RequiredExpansion;
             TargetMinScalingLevel = (byte)creatureTemplate.levelScaling.Value.MinLevel;
             TargetMaxScalingLevel = (byte)creatureTemplate.levelScaling.Value.MaxLevel;
-            TargetScalingLevelDelta = (sbyte)attacker.GetInt32Value(UnitFields.ScalingLevelDelta);
+            TargetScalingLevelDelta = (sbyte)attacker.m_unitData.ScalingLevelDelta;
             return true;
         }
 
@@ -1204,14 +1204,14 @@ namespace Game.Network.Packets
             CreatureTemplate creatureTemplate = target.GetCreatureTemplate();
 
             TuningType = ContentTuningType.PlayerToCreatureDamage;
-            PlayerLevelDelta = (short)attacker.GetInt32Value(ActivePlayerFields.ScalingPlayerLevelDelta);
+            PlayerLevelDelta = (short)attacker.m_activePlayerData.ScalingPlayerLevelDelta;
             PlayerItemLevel = (ushort)attacker.GetAverageItemLevel();
-            ScalingHealthItemLevelCurveID = (ushort)target.GetUInt32Value(UnitFields.ScalingHealthItemLevelCurveId);
+            ScalingHealthItemLevelCurveID = (ushort)target.m_unitData.ScalingHealthItemLevelCurveID;
             TargetLevel = (byte)target.getLevel();
             Expansion = (byte)creatureTemplate.RequiredExpansion;
             TargetMinScalingLevel = (byte)creatureTemplate.levelScaling.Value.MinLevel;
             TargetMaxScalingLevel = (byte)creatureTemplate.levelScaling.Value.MaxLevel;
-            TargetScalingLevelDelta = (sbyte)target.GetInt32Value(UnitFields.ScalingLevelDelta);
+            TargetScalingLevelDelta = (sbyte)target.m_unitData.ScalingLevelDelta;
             return true;
         }
 
@@ -1227,7 +1227,7 @@ namespace Game.Network.Packets
             Expansion = (byte)creatureTemplate.RequiredExpansion;
             TargetMinScalingLevel = (byte)creatureTemplate.levelScaling.Value.MinLevel;
             TargetMaxScalingLevel = (byte)creatureTemplate.levelScaling.Value.MaxLevel;
-            TargetScalingLevelDelta = (sbyte)accessor.GetInt32Value(UnitFields.ScalingLevelDelta);
+            TargetScalingLevelDelta = (sbyte)accessor.m_unitData.ScalingLevelDelta;
             return true;
         }
 
@@ -1310,7 +1310,7 @@ namespace Game.Network.Packets
             data.WritePackedGuid(CastID);
             data.WriteInt32(SpellID);
             data.WriteInt32(SpellXSpellVisualID);
-            data.WriteUInt8(Flags);
+            data.WriteUInt8((byte)Flags);
             data.WriteUInt32(ActiveFlags);
             data.WriteUInt16(CastLevel);
             data.WriteUInt8(Applications);
@@ -1330,10 +1330,10 @@ namespace Game.Network.Packets
                 data.WritePackedGuid(CastUnit.Value);
 
             if (Duration.HasValue)
-                data.WriteUInt32(Duration.Value);
+                data.WriteInt32(Duration.Value);
 
             if (Remaining.HasValue)
-                data.WriteUInt32(Remaining.Value);
+                data.WriteInt32(Remaining.Value);
 
             if (TimeMod.HasValue)
                 data.WriteFloat(TimeMod.Value);
@@ -1538,7 +1538,7 @@ namespace Game.Network.Packets
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt8(Reason);
+            data.WriteUInt8((byte)Reason);
         }
 
         public SpellMissInfo Reason;
@@ -1573,7 +1573,7 @@ namespace Game.Network.Packets
         public void Write(WorldPacket data)
         {
             data.WriteInt32(Cost);
-            data.WriteInt8(Type);
+            data.WriteInt8((sbyte)Type);
         }
     }
 
@@ -1583,7 +1583,7 @@ namespace Game.Network.Packets
         {
             data.WriteUInt8(Start);
             data.WriteUInt8(Count);
-            data.WriteUInt32(Cooldowns.Count);
+            data.WriteInt32(Cooldowns.Count);
 
             foreach (byte cd in Cooldowns)
                 data.WriteUInt8(cd);
@@ -1654,8 +1654,8 @@ namespace Game.Network.Packets
             data.WritePackedGuid(OriginalCastID);
             data.WriteInt32(SpellID);
             data.WriteUInt32(SpellXSpellVisualID);
-            data.WriteUInt32(CastFlags);
-            data.WriteUInt32(CastFlagsEx);
+            data.WriteUInt32((uint)CastFlags);
+            data.WriteUInt32((uint)CastFlagsEx);
             data.WriteUInt32(CastTime);
 
             MissileTrajectory.Write(data);
@@ -1743,7 +1743,7 @@ namespace Game.Network.Packets
         public void Write(WorldPacket data)
         {
             data.WriteUInt8(ModIndex);
-            data.WriteUInt32(ModifierData.Count);
+            data.WriteInt32(ModifierData.Count);
             foreach (SpellModifierData modData in ModifierData)
                 modData.Write(data);
         }

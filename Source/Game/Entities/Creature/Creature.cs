@@ -46,8 +46,6 @@ namespace Game.Entities
             m_meleeDamageSchoolMask = SpellSchoolMask.Normal;
 
             m_regenTimer = SharedConst.CreatureRegenInterval;
-            valuesCount = (int)UnitFields.End;
-            _dynamicValuesCount = (int)UnitDynamicFields.End;
 
             m_SightDistance = SharedConst.SightRangeUnit;
 
@@ -192,9 +190,8 @@ namespace Game.Entities
             m_creatureInfo = cinfo;                                 // map mode related always
 
             // equal to player Race field, but creature does not have race
-            SetByteValue(UnitFields.Bytes0, 0, 0);
-
-            SetByteValue(UnitFields.Bytes0, 1, (byte)cinfo.UnitClass);
+            SetRace(0);
+            SetClass((Class)cinfo.UnitClass);
 
             // Cancel load if no model defined
             if (cinfo.GetFirstValidModel() == null)
@@ -213,7 +210,7 @@ namespace Game.Entities
 
             SetDisplayId(model.CreatureDisplayID, model.DisplayScale);
             SetNativeDisplayId(model.CreatureDisplayID, model.DisplayScale);
-            SetByteValue(UnitFields.Bytes0, 3, (byte)minfo.gender);
+            SetGender((Gender)minfo.gender);
 
             // Load creature equipment
             if (data == null || data.equipmentId == 0)
@@ -226,12 +223,12 @@ namespace Game.Entities
 
             SetName(normalInfo.Name);                              // at normal entry always
 
-            SetFloatValue(UnitFields.ModCastSpeed, 1.0f);
-            SetFloatValue(UnitFields.ModCastHaste, 1.0f);
-            SetFloatValue(UnitFields.ModHaste, 1.0f);
-            SetFloatValue(UnitFields.ModRangedHaste, 1.0f);
-            SetFloatValue(UnitFields.ModHasteRegen, 1.0f);
-            SetFloatValue(UnitFields.ModTimeRate, 1.0f);
+            SetModCastingSpeed(1.0f);
+            SetModSpellHaste(1.0f);
+            SetModHaste(1.0f);
+            SetModRangedHaste(1.0f);
+            SetModHasteRegen(1.0f);
+            SetModTimeRate(1.0f);
 
             SetSpeedRate(UnitMoveType.Walk, cinfo.SpeedWalk);
             SetSpeedRate(UnitMoveType.Run, cinfo.SpeedRun);
@@ -240,7 +237,7 @@ namespace Game.Entities
 
             SetObjectScale(cinfo.Scale);
 
-            SetFloatValue(UnitFields.HoverHeight, cinfo.HoverHeight);
+            SetHoverHeight(cinfo.HoverHeight);
 
             // checked at loading
             m_defaultMovementType = (MovementGeneratorType)cinfo.MovementType;
@@ -273,19 +270,20 @@ namespace Game.Entities
             ObjectManager.ChooseCreatureFlags(cInfo, out npcFlags, out unitFlags, out unitFlags2, out unitFlags3, out dynamicFlags, data);
 
             if (cInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.Worldevent))
-                SetUInt64Value(UnitFields.NpcFlags, npcFlags | Global.GameEventMgr.GetNPCFlag(this));
-            else
-                SetUInt64Value(UnitFields.NpcFlags, npcFlags);
+                npcFlags |= Global.GameEventMgr.GetNPCFlag(this);
 
-            SetUInt32Value(UnitFields.Flags, unitFlags);
-            SetUInt32Value(UnitFields.Flags2, unitFlags2);
-            SetUInt32Value(UnitFields.Flags3, unitFlags3);
+            SetNpcFlags((NPCFlags)(npcFlags & 0xFFFFFFFF));
+            SetNpcFlags2((NPCFlags2)(npcFlags >> 32));
 
-            SetUInt32Value(ObjectFields.DynamicFlags, dynamicFlags);
+            SetUnitFlags((UnitFlags)unitFlags);
+            SetUnitFlags2((UnitFlags2)unitFlags2);
+            SetUnitFlags3((UnitFlags3)unitFlags3);
 
-            SetUInt32Value(UnitFields.StateAnimId, (uint)CliDB.AnimationDataStorage.Count);
+            SetDynamicFlags((UnitDynFlags)dynamicFlags);
 
-            RemoveFlag(UnitFields.Flags, UnitFlags.InCombat);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StateAnimID), (uint)CliDB.AnimationDataStorage.Count);
+
+            RemoveUnitFlag(UnitFlags.InCombat);
 
             SetBaseAttackTime(WeaponAttackType.BaseAttack, cInfo.BaseAttackTime);
             SetBaseAttackTime(WeaponAttackType.OffAttack, cInfo.BaseAttackTime);
@@ -323,14 +321,14 @@ namespace Game.Entities
                 Player owner = GetCharmerOrOwnerPlayerOrPlayerItself();
                 if (owner != null) // this check comes in case we don't have a player
                 {
-                    SetFaction(owner.getFaction()); // vehicles should have same as owner faction
+                    SetFaction(owner.GetFaction()); // vehicles should have same as owner faction
                     owner.VehicleSpellInitialize();
                 }
             }
 
             // trigger creature is always not selectable and can not be attacked
             if (IsTrigger())
-                SetFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+                AddUnitFlag(UnitFlags.NotSelectable);
 
             InitializeReactState();
 
@@ -411,7 +409,7 @@ namespace Game.Entities
                     else if (m_corpseRemoveTime <= Time.UnixTime)
                     {
                         RemoveCorpse(false);
-                        Log.outDebug(LogFilter.Unit, "Removing corpse... {0} ", GetUInt32Value(ObjectFields.Entry));
+                        Log.outDebug(LogFilter.Unit, "Removing corpse... {0} ", GetEntry());
                     }
                     break;
                 case DeathState.Alive:
@@ -519,7 +517,7 @@ namespace Game.Entities
                         if (!IsInEvadeMode() && (!bInCombat || IsPolymorphed() || CanNotReachTarget())) // regenerate health if not in combat or if polymorphed
                             RegenerateHealth();
 
-                        if (HasFlag(UnitFields.Flags2, UnitFlags2.RegeneratePower))
+                        if (HasUnitFlag2(UnitFlags2.RegeneratePower))
                         {
                             if (GetPowerType() == PowerType.Energy)
                                 Regenerate(PowerType.Energy);
@@ -798,7 +796,7 @@ namespace Game.Entities
             //! Need to be called after LoadCreaturesAddon - MOVEMENTFLAG_HOVER is set there
             if (HasUnitMovementFlag(MovementFlag.Hover))
             {
-                z += GetFloatValue(UnitFields.HoverHeight);
+                z += m_unitData.HoverHeight;
 
                 //! Relocate again with updated Z coord
                 Relocate(x, y, z, ang);
@@ -810,7 +808,7 @@ namespace Game.Entities
             {
                 SetDisplayId(display.CreatureDisplayID, display.DisplayScale);
                 SetNativeDisplayId(display.CreatureDisplayID, display.DisplayScale);
-                SetByteValue(UnitFields.Bytes0, 3, (byte)minfo.gender);
+                SetGender((Gender)minfo.gender);
             }
 
             LastUsedScriptID = GetScriptId();
@@ -956,7 +954,7 @@ namespace Game.Entities
             {
                 m_lootRecipient.Clear();
                 m_lootRecipientGroup.Clear();
-                RemoveFlag(ObjectFields.DynamicFlags, UnitDynFlags.Lootable | UnitDynFlags.Tapped);
+                RemoveDynamicFlag(UnitDynFlags.Lootable | UnitDynFlags.Tapped);
                 return;
             }
 
@@ -972,7 +970,7 @@ namespace Game.Entities
             if (group)
                 m_lootRecipientGroup = group.GetGUID();
 
-            SetFlag(ObjectFields.DynamicFlags, UnitDynFlags.Tapped);
+            AddDynamicFlag(UnitDynFlags.Tapped);
         }
 
         public bool isTappedBy(Player player)
@@ -1011,11 +1009,11 @@ namespace Game.Entities
             CreatureData data = Global.ObjectMgr.NewOrExistCreatureData(m_spawnId);
 
             uint displayId = GetNativeDisplayId();
-            ulong npcflag = GetUInt64Value(UnitFields.NpcFlags);
-            uint unitFlags = GetUInt32Value(UnitFields.Flags);
-            uint unitFlags2 = GetUInt32Value(UnitFields.Flags2);
-            uint unitFlags3 = GetUInt32Value(UnitFields.Flags3);
-            uint dynamicflags = GetUInt32Value(ObjectFields.DynamicFlags);
+            ulong npcflag = ((ulong)m_unitData.NpcFlags[1] << 32) | m_unitData.NpcFlags[0];
+            uint unitFlags = m_unitData.Flags;
+            uint unitFlags2 = m_unitData.Flags2;
+            uint unitFlags3 = m_unitData.Flags3;
+            UnitDynFlags dynamicflags = (UnitDynFlags)(uint)m_objectData.DynamicFlags;
 
             // check if it's a custom model and if not, use 0 for displayId
             CreatureTemplate cinfo = GetCreatureTemplate();
@@ -1037,7 +1035,7 @@ namespace Game.Entities
                 if (unitFlags3 == cinfo.UnitFlags3)
                     unitFlags3 = 0;
 
-                if (dynamicflags == cinfo.DynamicFlags)
+                if (dynamicflags == (UnitDynFlags)cinfo.DynamicFlags)
                     dynamicflags = 0;
             }
 
@@ -1064,7 +1062,7 @@ namespace Game.Entities
             data.unit_flags = unitFlags;
             data.unit_flags2 = unitFlags2;
             data.unit_flags3 = unitFlags3;
-            data.dynamicflags = dynamicflags;
+            data.dynamicflags = (uint)dynamicflags;
 
             data.phaseId = GetDBPhase() > 0 ? (uint)GetDBPhase() : data.phaseId;
             data.phaseGroup = GetDBPhase() < 0 ? (uint)-GetDBPhase() : data.phaseGroup;
@@ -1119,14 +1117,14 @@ namespace Game.Entities
 
             if (HasScalableLevels())
             {
-                SetUInt32Value(UnitFields.ScalingLevelMin, cInfo.levelScaling.Value.MinLevel);
-                SetUInt32Value(UnitFields.ScalingLevelMax, cInfo.levelScaling.Value.MaxLevel);
+                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMin), cInfo.levelScaling.Value.MinLevel);
+                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMax), cInfo.levelScaling.Value.MaxLevel);
 
                 int mindelta = Math.Min(cInfo.levelScaling.Value.DeltaLevelMax, cInfo.levelScaling.Value.DeltaLevelMin);
                 int maxdelta = Math.Max(cInfo.levelScaling.Value.DeltaLevelMax, cInfo.levelScaling.Value.DeltaLevelMin);
                 int delta = mindelta == maxdelta ? mindelta : RandomHelper.IRand(mindelta, maxdelta);
 
-                SetInt32Value(UnitFields.ScalingLevelDelta, delta);
+                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelDelta), delta);
             }
 
             UpdateLevelDependantStats();
@@ -1434,9 +1432,9 @@ namespace Game.Entities
                 return false;
 
             // This set of checks is should be done only for creatures
-            if ((HasFlag(UnitFields.Flags, UnitFlags.ImmuneToNpc) && !who.IsTypeId(TypeId.Player))                                // flag is valid only for non player characters
-                || (HasFlag(UnitFields.Flags, UnitFlags.ImmuneToPc) && who.IsTypeId(TypeId.Player))                               // immune to PC and target is a player, return false
-                || (who.GetOwner() && who.GetOwner().IsTypeId(TypeId.Player) && HasFlag(UnitFields.Flags, UnitFlags.ImmuneToPc))) // player pets are immune to pc as well
+            if ((HasUnitFlag(UnitFlags.ImmuneToNpc) && !who.IsTypeId(TypeId.Player))                                // flag is valid only for non player characters
+                || (HasUnitFlag(UnitFlags.ImmuneToPc) && who.IsTypeId(TypeId.Player))                               // immune to PC and target is a player, return false
+                || (who.GetOwner() && who.GetOwner().IsTypeId(TypeId.Player) && HasUnitFlag(UnitFlags.ImmuneToPc))) // player pets are immune to pc as well
                 return false;
 
             // Do not attack non-combat pets
@@ -1530,9 +1528,10 @@ namespace Game.Entities
                 DoNotReacquireTarget(); // cancel delayed re-target
                 SetTarget(ObjectGuid.Empty); // drop target - dead mobs shouldn't ever target things
 
-                SetUInt64Value(UnitFields.NpcFlags, (ulong)NPCFlags.None);
+                SetNpcFlags(NPCFlags.None);
+                SetNpcFlags2(NPCFlags2.None);
 
-                SetUInt32Value(UnitFields.MountDisplayId, 0); // if creature is mounted on a virtual mount, remove it at death
+                SetMountDisplayId(0); // if creature is mounted on a virtual mount, remove it at death
 
                 setActive(false);
 
@@ -1576,16 +1575,17 @@ namespace Game.Entities
                     ObjectManager.ChooseCreatureFlags(cInfo, out npcFlags, out unitFlags, out unitFlags2, out unitFlags3, out dynamicFlags, creatureData);
 
                     if (cInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.Worldevent))
-                        SetUInt64Value(UnitFields.NpcFlags, npcFlags | Global.GameEventMgr.GetNPCFlag(this));
-                    else
-                        SetUInt64Value(UnitFields.NpcFlags, npcFlags);
+                        npcFlags |= Global.GameEventMgr.GetNPCFlag(this);
 
-                    SetUInt32Value(UnitFields.Flags, unitFlags);
-                    SetUInt32Value(UnitFields.Flags2, unitFlags2);
-                    SetUInt32Value(UnitFields.Flags3, unitFlags3);
-                    SetUInt32Value(ObjectFields.DynamicFlags, dynamicFlags);
+                    SetNpcFlags((NPCFlags)(npcFlags & 0xFFFFFFFF));
+                    SetNpcFlags2((NPCFlags2)(npcFlags >> 32));
 
-                    RemoveFlag(UnitFields.Flags, UnitFlags.InCombat);
+                    SetUnitFlags((UnitFlags)unitFlags);
+                    SetUnitFlags2((UnitFlags2)unitFlags2);
+                    SetUnitFlags3((UnitFlags3)unitFlags3);
+                    SetDynamicFlags((UnitDynFlags)dynamicFlags);
+
+                    RemoveUnitFlag(UnitFlags.InCombat);
 
                     SetMeleeDamageSchool((SpellSchools)cInfo.DmgSchool);
                 }
@@ -1633,7 +1633,7 @@ namespace Game.Entities
                 {
                     SetDisplayId(display.CreatureDisplayID, display.DisplayScale);
                     SetNativeDisplayId(display.CreatureDisplayID, display.DisplayScale);
-                    SetByteValue(UnitFields.Bytes0, 3, (byte)minfo.gender);
+                    SetGender((Gender)minfo.gender);
                 }
 
                 GetMotionMaster().InitDefault();
@@ -1805,9 +1805,9 @@ namespace Game.Entities
                 float dist = GetDistance(victim);
                 if (dist > range || dist < minrange)
                     continue;
-                if (spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence) && HasFlag(UnitFields.Flags, UnitFlags.Silenced))
+                if (spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence) && HasUnitFlag(UnitFlags.Silenced))
                     continue;
-                if (spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Pacify) && HasFlag(UnitFields.Flags, UnitFlags.Pacified))
+                if (spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Pacify) && HasUnitFlag(UnitFlags.Pacified))
                     continue;
                 return spellInfo;
             }
@@ -1854,9 +1854,9 @@ namespace Game.Entities
 
                 if (dist > range || dist < minrange)
                     continue;
-                if (spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence) && HasFlag(UnitFields.Flags, UnitFlags.Silenced))
+                if (spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence) && HasUnitFlag(UnitFlags.Silenced))
                     continue;
-                if (spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Pacify) && HasFlag(UnitFields.Flags, UnitFlags.Pacified))
+                if (spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Pacify) && HasUnitFlag(UnitFlags.Pacified))
                     continue;
                 return spellInfo;
             }
@@ -1969,7 +1969,7 @@ namespace Game.Entities
             if (IsCivilian())
                 return false;
 
-            if (HasFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable | UnitFlags.ImmuneToPc))
+            if (HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable | UnitFlags.ImmuneToPc))
                 return false;
 
             // skip fighting creature
@@ -1983,7 +1983,7 @@ namespace Game.Entities
             // only from same creature faction
             if (checkfaction)
             {
-                if (getFaction() != u.getFaction())
+                if (GetFaction() != u.GetFaction())
                     return false;
             }
             else
@@ -2009,7 +2009,7 @@ namespace Game.Entities
             if (target.HasUnitState(UnitState.Died))
             {
                 // guards can detect fake death
-                if (IsGuard() && target.HasFlag(UnitFields.Flags2, UnitFlags2.FeignDeath))
+                if (IsGuard() && target.HasUnitFlag2(UnitFlags2.FeignDeath))
                     return true;
                 else
                     return false;
@@ -2099,18 +2099,16 @@ namespace Game.Entities
                 // 2 StandFlags
                 // 3 StandMiscFlags
 
-                SetByteValue(UnitFields.Bytes1, UnitBytes1Offsets.StandState, (byte)(cainfo.bytes1 & 0xFF));
-                //SetByteValue(UnitFields.Bytes1, UnitBytes1Offsets.PetTalent, (byte)((cainfo.bytes1 >> 8) & 0xFF));
-                SetByteValue(UnitFields.Bytes1, UnitBytes1Offsets.PetTalents, 0);
-                SetByteValue(UnitFields.Bytes1, UnitBytes1Offsets.VisFlag, (byte)((cainfo.bytes1 >> 16) & 0xFF));
-                SetByteValue(UnitFields.Bytes1, UnitBytes1Offsets.AnimTier, (byte)((cainfo.bytes1 >> 24) & 0xFF));
+                SetStandState((UnitStandStateType)(cainfo.bytes1 & 0xFF));
+                SetVisFlags((UnitVisFlags)((cainfo.bytes1 >> 16) & 0xFF));
+                SetAnimTier((UnitBytes1Flags)((cainfo.bytes1 >> 24) & 0xFF), false);
 
                 //! Suspected correlation between UNIT_FIELD_BYTES_1, offset 3, value 0x2:
                 //! If no inhabittype_fly (if no MovementFlag_DisableGravity or MovementFlag_CanFly flag found in sniffs)
                 //! Check using InhabitType as movement flags are assigned dynamically
                 //! basing on whether the creature is in air or not
                 //! Set MovementFlag_Hover. Otherwise do nothing.
-                if (Convert.ToBoolean(GetByteValue(UnitFields.Bytes1, UnitBytes1Offsets.AnimTier) & (byte)UnitBytes1Flags.Hover) && !Convert.ToBoolean(GetCreatureTemplate().InhabitType & InhabitType.Air))
+                if (Convert.ToBoolean(m_unitData.AnimTier & (byte)UnitBytes1Flags.Hover) && !Convert.ToBoolean(GetCreatureTemplate().InhabitType & InhabitType.Air))
                     AddUnitMovementFlag(MovementFlag.Hover);
             }
 
@@ -2121,16 +2119,14 @@ namespace Game.Entities
                 // 2 PetFlags           Pet only, so always 0 for default creature
                 // 3 ShapeshiftForm     Must be determined/set by shapeshift spell/aura
 
-                SetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.SheathState, (byte)(cainfo.bytes2 & 0xFF));
-                //SetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag, uint8((cainfo->bytes2 >> 8) & 0xFF));
-                //SetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PetFlags, uint8((cainfo->bytes2 >> 16) & 0xFF));
-                SetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PetFlags, 0);
-                //SetByteValue(UnitFields.Bytes2, UNIT_BYTES_2_OFFSET_SHAPESHIFT_FORM, uint8((cainfo->bytes2 >> 24) & 0xFF));
-                SetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.ShapeshiftForm, 0);
+                SetSheath((SheathState)(cainfo.bytes2 & 0xFF));
+                SetPvpFlags(UnitPVPStateFlags.None);
+                SetPetFlags(UnitPetFlags.None);
+                SetShapeshiftForm(ShapeShiftForm.None);
             }
 
             if (cainfo.emote != 0)
-                SetUInt32Value(UnitFields.NpcEmotestate, cainfo.emote);
+                SetEmoteState((Emote)cainfo.emote);
 
             SetAIAnimKitId(cainfo.aiAnimKit);
             SetMovementAnimKitId(cainfo.movementAnimKit);
@@ -2289,7 +2285,7 @@ namespace Game.Entities
         {
             if (loot.loot_type != LootType.Skinning && !IsPet() && GetCreatureTemplate().SkinLootId != 0 && hasLootRecipient())
                 if (LootStorage.Skinning.HaveLootFor(GetCreatureTemplate().SkinLootId))
-                    SetFlag(UnitFields.Flags, UnitFlags.Skinnable);
+                    AddUnitFlag(UnitFlags.Skinnable);
 
             long now = Time.UnixTime;
             // Do not reset corpse remove time if corpse is already removed
@@ -2380,12 +2376,12 @@ namespace Game.Entities
                 // between UNIT_FIELD_SCALING_LEVEL_MIN and UNIT_FIELD_SCALING_LEVEL_MAX
                 if (HasScalableLevels())
                 {
-                    int targetLevelWithDelta = ((int)unitTarget.getLevel() + GetInt32Value(UnitFields.ScalingLevelDelta));
+                    int targetLevelWithDelta = (int)unitTarget.getLevel() + m_unitData.ScalingLevelDelta;
 
                     if (target.IsPlayer())
-                        targetLevelWithDelta += target.GetInt32Value(ActivePlayerFields.ScalingPlayerLevelDelta);
+                        targetLevelWithDelta += target.ToPlayer().m_activePlayerData.ScalingPlayerLevelDelta;
 
-                    return (uint)MathFunctions.RoundToInterval(ref targetLevelWithDelta, GetInt32Value(UnitFields.ScalingLevelMin), GetInt32Value(UnitFields.ScalingLevelMax));
+                    return (uint)MathFunctions.RoundToInterval(ref targetLevelWithDelta, m_unitData.ScalingLevelMin, m_unitData.ScalingLevelMax);
                 }
 
             }
@@ -2409,7 +2405,7 @@ namespace Game.Entities
             if (creatureData != null)
                 return creatureData.ScriptId;
 
-            return Global.ObjectMgr.GetCreatureTemplate(GetEntry()).ScriptID;
+            return Global.ObjectMgr.GetCreatureTemplate(GetEntry()) != null ? Global.ObjectMgr.GetCreatureTemplate(GetEntry()).ScriptID : 0;
         }
 
         public VendorItemData GetVendorItems()
@@ -2668,8 +2664,8 @@ namespace Game.Entities
             CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelInfo(GetDisplayId());
             if (minfo != null)
             {
-                SetFloatValue(UnitFields.BoundingRadius, (IsPet() ? 1.0f : minfo.BoundingRadius) * scale);
-                SetFloatValue(UnitFields.CombatReach, (IsPet() ? SharedConst.DefaultCombatReach : minfo.CombatReach) * scale);
+                SetBoundingRadius((IsPet() ? 1.0f : minfo.BoundingRadius) * scale);
+                SetCombatReach((IsPet() ? SharedConst.DefaultCombatReach : minfo.CombatReach) * scale);
             }
         }
 
@@ -2680,8 +2676,8 @@ namespace Game.Entities
             CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelInfo(modelId);
             if (minfo != null)
             {
-                SetFloatValue(UnitFields.BoundingRadius, (IsPet() ? 1.0f : minfo.BoundingRadius) * GetObjectScale());
-                SetFloatValue(UnitFields.CombatReach, (IsPet() ? SharedConst.DefaultCombatReach : minfo.CombatReach) * GetObjectScale());
+                SetBoundingRadius((IsPet() ? 1.0f : minfo.BoundingRadius) * GetObjectScale());
+                SetCombatReach((IsPet() ? SharedConst.DefaultCombatReach : minfo.CombatReach) * GetObjectScale());
             }
         }
 
@@ -2697,7 +2693,7 @@ namespace Game.Entities
             if (IsFocusing(null, true))
                 m_suppressedTarget = guid;
             else
-                SetGuidValue(UnitFields.Target, guid);
+                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Target), guid);
         }
 
         public void FocusTarget(Spell focusSpell, WorldObject target)
@@ -2716,7 +2712,7 @@ namespace Game.Entities
             // store pre-cast values for target and orientation (used to later restore)
             if (!IsFocusing(null, true))
             { // only overwrite these fields if we aren't transitioning from one spell focus to another
-                m_suppressedTarget = GetGuidValue(UnitFields.Target);
+                m_suppressedTarget = GetTarget();
                 m_suppressedOrientation = GetOrientation();
             }
 
@@ -2724,9 +2720,9 @@ namespace Game.Entities
 
             // set target, then force send update packet to players if it changed to provide appropriate facing
             ObjectGuid newTarget = target ? target.GetGUID() : ObjectGuid.Empty;
-            if (GetGuidValue(UnitFields.Target) != newTarget)
+            if (GetTarget() != newTarget)
             {
-                SetGuidValue(UnitFields.Target, newTarget);
+                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Target), newTarget);
 
                 // here we determine if the (relatively expensive) forced update is worth it, or whether we can afford to wait until the scheduled update tick
                 // only require instant update for spells that actually have a visual
@@ -2794,7 +2790,7 @@ namespace Game.Entities
 
             if (IsPet())// player pets do not use delay system
             {
-                SetGuidValue(UnitFields.Target, m_suppressedTarget);
+                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Target), m_suppressedTarget);
                 if (!m_suppressedTarget.IsEmpty())
                 {
                     WorldObject objTarget = Global.ObjAccessor.GetWorldObject(this, m_suppressedTarget);

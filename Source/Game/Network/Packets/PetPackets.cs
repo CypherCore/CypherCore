@@ -93,14 +93,14 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt16(Specialization);
             _worldPacket.WriteUInt32(TimeLimit);
             _worldPacket.WriteUInt16((ushort)((byte)CommandState | (Flag << 16)));
-            _worldPacket.WriteUInt8(ReactState);
+            _worldPacket.WriteUInt8((byte)ReactState);
 
             foreach (uint actionButton in ActionButtons)
                 _worldPacket.WriteUInt32(actionButton);
 
-            _worldPacket.WriteUInt32(Actions.Count);
-            _worldPacket.WriteUInt32(Cooldowns.Count);
-            _worldPacket.WriteUInt32(SpellHistory.Count);
+            _worldPacket.WriteInt32(Actions.Count);
+            _worldPacket.WriteInt32(Cooldowns.Count);
+            _worldPacket.WriteInt32(SpellHistory.Count);
 
             foreach (uint action in Actions)
                 _worldPacket.WriteUInt32(action);
@@ -116,8 +116,8 @@ namespace Game.Network.Packets
 
             foreach (PetSpellHistory history in SpellHistory)
             {
-                _worldPacket.WriteInt32(history.CategoryID);
-                _worldPacket.WriteInt32(history.RecoveryTime);
+                _worldPacket.WriteUInt32(history.CategoryID);
+                _worldPacket.WriteUInt32(history.RecoveryTime);
                 _worldPacket.WriteFloat(history.ChargeModRate);
                 _worldPacket.WriteInt8(history.ConsumedCharges);
             }
@@ -146,7 +146,7 @@ namespace Game.Network.Packets
         {
             _worldPacket.WritePackedGuid(StableMaster);
 
-            _worldPacket.WriteUInt32(Pets.Count);
+            _worldPacket.WriteInt32(Pets.Count);
             foreach (PetStableInfo pet in Pets)
             {
                 _worldPacket.WriteUInt32(pet.PetSlot);
@@ -154,7 +154,7 @@ namespace Game.Network.Packets
                 _worldPacket.WriteUInt32(pet.CreatureID);
                 _worldPacket.WriteUInt32(pet.DisplayID);
                 _worldPacket.WriteUInt32(pet.ExperienceLevel);
-                _worldPacket.WriteUInt8(pet.PetFlags);
+                _worldPacket.WriteUInt8((byte)pet.PetFlags);
                 _worldPacket.WriteBits(pet.PetName.GetByteCount(), 8);
                 _worldPacket.WriteString(pet.PetName);
             }
@@ -170,7 +170,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket .WriteUInt32(Spells.Count);
+            _worldPacket.WriteInt32(Spells.Count);
             foreach (uint spell in Spells)
                 _worldPacket.WriteUInt32(spell);
         }
@@ -184,7 +184,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Spells);
+            _worldPacket.WriteInt32(Spells.Count);
             foreach (uint spell in Spells)
                 _worldPacket.WriteUInt32(spell);
         }
@@ -198,11 +198,11 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8(Result);
+            _worldPacket.WriteUInt8((byte)Result);
             _worldPacket.WritePackedGuid(RenameData.PetGUID);
             _worldPacket.WriteInt32(RenameData.PetNumber);
 
-            _worldPacket.WriteUInt8(RenameData.NewName.GetByteCount());
+            _worldPacket.WriteUInt8((byte)RenameData.NewName.GetByteCount());
 
             _worldPacket.WriteBit(RenameData.HasDeclinedNames);
 
@@ -295,7 +295,7 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(UnitGUID);
-            _worldPacket.WriteUInt32(Action);
+            _worldPacket.WriteUInt32((uint)Action);
         }
 
         public ObjectGuid UnitGUID;
@@ -309,7 +309,7 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt32(SpellID);
-            _worldPacket.WriteUInt8(Response);
+            _worldPacket.WriteUInt8((byte)Response);
         }
 
         public uint SpellID;

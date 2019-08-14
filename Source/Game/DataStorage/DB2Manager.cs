@@ -136,6 +136,13 @@ namespace Game.DataStorage
                     _defaultChrSpecializationsByClass[(uint)chrSpec.ClassID] = chrSpec;
             }
 
+            foreach (ContentTuningXExpectedRecord contentTuningXExpectedStat in CliDB.ContentTuningXExpectedStorage.Values)
+            {
+                ExpectedStatModRecord expectedStatMod = CliDB.ExpectedStatModStorage.LookupByKey(contentTuningXExpectedStat.ExpectedStatModID);
+                if (expectedStatMod != null)
+                    _expectedStatModsByContentTuning.Add(contentTuningXExpectedStat.ContentTuningID, expectedStatMod);
+            }
+
             foreach (CurvePointRecord curvePoint in CliDB.CurvePointStorage.Values)
             {
                 if (CliDB.CurveStorage.ContainsKey(curvePoint.CurveID))
@@ -395,6 +402,12 @@ namespace Game.DataStorage
                 _rulesetItemUpgrade[rulesetItemUpgrade.ItemID] = rulesetItemUpgrade.ItemUpgradeID;
 
             CliDB.RulesetItemUpgradeStorage.Clear();
+
+            foreach (SkillLineRecord skill in CliDB.SkillLineStorage.Values)
+            {
+                if (skill.ParentSkillLineID != 0)
+                    _skillLinesByParentSkillLine.Add(skill.ParentSkillLineID, skill);
+            }
 
             foreach (SkillLineAbilityRecord skillLineAbility in CliDB.SkillLineAbilityStorage.Values)
                 _skillLineAbilitiesBySkillupSkill.Add(skillLineAbility.SkillupSkillLineID != 0 ? skillLineAbility.SkillupSkillLineID : skillLineAbility.SkillLine, skillLineAbility);
@@ -969,61 +982,93 @@ namespace Game.DataStorage
             if (expectedStatRecord == null)
                 return 1.0f;
 
-            ExpectedStatModRecord[] mods = new ExpectedStatModRecord[3];
-            ContentTuningRecord contentTuning = CliDB.ContentTuningStorage.LookupByKey(contentTuningId);
-            if (contentTuning != null)
-            {
-                mods[0] = CliDB.ExpectedStatModStorage.LookupByKey(contentTuning.ExpectedStatModID);
-                mods[1] = CliDB.ExpectedStatModStorage.LookupByKey(contentTuning.DifficultyESMID);
-            }
+            ExpectedStatModRecord classMod = null;
             switch (unitClass)
             {
                 case Class.Warrior:
-                    mods[2] = CliDB.ExpectedStatModStorage.LookupByKey(4);
+                    classMod = CliDB.ExpectedStatModStorage.LookupByKey(4);
                     break;
                 case Class.Paladin:
-                    mods[2] = CliDB.ExpectedStatModStorage.LookupByKey(2);
+                    classMod = CliDB.ExpectedStatModStorage.LookupByKey(2);
                     break;
                 case Class.Rogue:
-                    mods[2] = CliDB.ExpectedStatModStorage.LookupByKey(3);
+                    classMod = CliDB.ExpectedStatModStorage.LookupByKey(3);
                     break;
                 case Class.Mage:
-                    mods[2] = CliDB.ExpectedStatModStorage.LookupByKey(1);
+                    classMod = CliDB.ExpectedStatModStorage.LookupByKey(1);
                     break;
                 default:
                     break;
             }
+
+            List<ExpectedStatModRecord> contentTuningMods = _expectedStatModsByContentTuning.LookupByKey(contentTuningId);
             float value = 0.0f;
             switch (stat)
             {
                 case ExpectedStatType.CreatureHealth:
-                    value = mods.Sum(expectedStatMod => expectedStatRecord.CreatureHealth * (expectedStatMod != null ? expectedStatMod.CreatureHealthMod : 1.0f));
+                    value = expectedStatRecord.CreatureHealth;
+                    if (contentTuningMods != null)
+                        value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.CreatureHealthMod : 1.0f);
+                    if (classMod != null)
+                        value *= classMod.CreatureHealthMod;
                     break;
                 case ExpectedStatType.PlayerHealth:
-                    value = mods.Sum(expectedStatMod => expectedStatRecord.PlayerHealth * (expectedStatMod != null ? expectedStatMod.PlayerHealthMod : 1.0f));
+                    value = expectedStatRecord.PlayerHealth;
+                    if (contentTuningMods != null)
+                        value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.PlayerHealthMod : 1.0f);
+                    if (classMod != null)
+                        value *= classMod.PlayerHealthMod;
                     break;
                 case ExpectedStatType.CreatureAutoAttackDps:
-                    value = mods.Sum(expectedStatMod => expectedStatRecord.CreatureAutoAttackDps * (expectedStatMod != null ? expectedStatMod.CreatureAutoAttackDPSMod : 1.0f));
+                    value = expectedStatRecord.CreatureAutoAttackDps;
+                    if (contentTuningMods != null)
+                        value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.CreatureAutoAttackDPSMod : 1.0f);
+                    if (classMod != null)
+                        value *= classMod.CreatureAutoAttackDPSMod;
                     break;
                 case ExpectedStatType.CreatureArmor:
-                    value = mods.Sum(expectedStatMod => expectedStatRecord.CreatureArmor * (expectedStatMod != null ? expectedStatMod.CreatureArmorMod : 1.0f));
+                    value = expectedStatRecord.CreatureArmor;
+                    if (contentTuningMods != null)
+                        value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.CreatureArmorMod : 1.0f);
+                    if (classMod != null)
+                        value *= classMod.CreatureArmorMod;
                     break;
                 case ExpectedStatType.PlayerMana:
-                    value = mods.Sum(expectedStatMod => expectedStatRecord.PlayerMana * (expectedStatMod != null ? expectedStatMod.PlayerManaMod : 1.0f));
+                    value = expectedStatRecord.PlayerMana;
+                    if (contentTuningMods != null)
+                        value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.PlayerManaMod : 1.0f);
+                    if (classMod != null)
+                        value *= classMod.PlayerManaMod;
                     break;
                 case ExpectedStatType.PlayerPrimaryStat:
-                    value = mods.Sum(expectedStatMod => expectedStatRecord.PlayerPrimaryStat * (expectedStatMod != null ? expectedStatMod.PlayerPrimaryStatMod : 1.0f));
+                    value = expectedStatRecord.PlayerPrimaryStat;
+                    if (contentTuningMods != null)
+                        value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.PlayerPrimaryStatMod : 1.0f);
+                    if (classMod != null)
+                        value *= classMod.PlayerPrimaryStatMod;
                     break;
                 case ExpectedStatType.PlayerSecondaryStat:
-                    value = mods.Sum(expectedStatMod => expectedStatRecord.PlayerSecondaryStat * (expectedStatMod != null ? expectedStatMod.PlayerSecondaryStatMod : 1.0f));
+                    value = expectedStatRecord.PlayerSecondaryStat;
+                    if (contentTuningMods != null)
+                        value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.PlayerSecondaryStatMod : 1.0f);
+                    if (classMod != null)
+                        value *= classMod.PlayerSecondaryStatMod;
                     break;
                 case ExpectedStatType.ArmorConstant:
-                    value = mods.Sum(expectedStatMod => expectedStatRecord.ArmorConstant * (expectedStatMod != null ? expectedStatMod.ArmorConstantMod : 1.0f));
+                    value = expectedStatRecord.ArmorConstant;
+                    if (contentTuningMods != null)
+                        value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.ArmorConstantMod : 1.0f);
+                    if (classMod != null)
+                        value *= classMod.ArmorConstantMod;
                     break;
                 case ExpectedStatType.None:
                     break;
                 case ExpectedStatType.CreatureSpellDamage:
-                    value = mods.Sum(expectedStatMod => expectedStatRecord.CreatureSpellDamage * (expectedStatMod != null ? expectedStatMod.CreatureSpellDamageMod : 1.0f));
+                    value = expectedStatRecord.CreatureSpellDamage;
+                    if (contentTuningMods != null)
+                        value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.CreatureSpellDamageMod : 1.0f);
+                    if (classMod != null)
+                        value *= classMod.CreatureSpellDamageMod;
                     break;
                 default:
                     break;
@@ -1479,6 +1524,11 @@ namespace Game.DataStorage
             return _rulesetItemUpgrade.LookupByKey(itemId);
         }
 
+        public List<SkillLineRecord> GetSkillLinesForParentSkill(uint parentSkillId)
+        {
+            return _skillLinesByParentSkillLine.LookupByKey(parentSkillId);
+        }
+
         public List<SkillLineAbilityRecord> GetSkillLineAbilitiesBySkill(uint skillId)
         {
             return _skillLineAbilitiesBySkillupSkill.LookupByKey(skillId);
@@ -1903,6 +1953,7 @@ namespace Game.DataStorage
         MultiMap<uint, CurvePointRecord> _curvePoints = new MultiMap<uint, CurvePointRecord>();
         Dictionary<Tuple<uint, byte, byte, byte>, EmotesTextSoundRecord> _emoteTextSounds = new Dictionary<Tuple<uint, byte, byte, byte>, EmotesTextSoundRecord>();
         Dictionary<Tuple<uint, int>, ExpectedStatRecord> _expectedStatsByLevel = new Dictionary<Tuple<uint, int>, ExpectedStatRecord>();
+        MultiMap<uint, ExpectedStatModRecord> _expectedStatModsByContentTuning = new MultiMap<uint, ExpectedStatModRecord>();
         MultiMap<uint, uint> _factionTeams = new MultiMap<uint, uint>();
         Dictionary<uint, HeirloomRecord> _heirlooms = new Dictionary<uint, HeirloomRecord>();
         MultiMap<uint, uint> _glyphBindableSpells = new MultiMap<uint, uint>();
@@ -1933,6 +1984,7 @@ namespace Game.DataStorage
         MultiMap<uint, RewardPackXCurrencyTypeRecord> _rewardPackCurrencyTypes = new MultiMap<uint, RewardPackXCurrencyTypeRecord>();
         MultiMap<uint, RewardPackXItemRecord> _rewardPackItems = new MultiMap<uint, RewardPackXItemRecord>();
         Dictionary<uint, uint> _rulesetItemUpgrade = new Dictionary<uint, uint>();
+        MultiMap<uint, SkillLineRecord> _skillLinesByParentSkillLine = new MultiMap<uint, SkillLineRecord>();
         MultiMap<uint, SkillLineAbilityRecord> _skillLineAbilitiesBySkillupSkill = new MultiMap<uint, SkillLineAbilityRecord>();
         MultiMap<uint, SkillRaceClassInfoRecord> _skillRaceClassInfoBySkill = new MultiMap<uint, SkillRaceClassInfoRecord>();
         MultiMap<uint, SpecializationSpellsRecord> _specializationSpellsBySpec = new MultiMap<uint, SpecializationSpellsRecord>();

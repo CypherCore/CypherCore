@@ -107,11 +107,15 @@ namespace Game.Entities
         uint m_removedAurasCount;
 
         //General  
+        public UnitData m_unitData;
+
         DiminishingReturn[] m_Diminishing = new DiminishingReturn[(int)DiminishingGroup.Max];
         protected List<GameObject> m_gameObj = new List<GameObject>();
         List<AreaTrigger> m_areaTrigger = new List<AreaTrigger>();
         protected List<DynamicObject> m_dynObj = new List<DynamicObject>();
         protected float[] CreateStats = new float[(int)Stats.Max];
+        float[] m_floatStatPosBuff = new float[(int)Stats.Max];
+        float[] m_floatStatNegBuff = new float[(int)Stats.Max];
         public ObjectGuid[] m_SummonSlot = new ObjectGuid[7];
         public ObjectGuid[] m_ObjectSlot = new ObjectGuid[4];
         public EventSystem m_Events = new EventSystem();

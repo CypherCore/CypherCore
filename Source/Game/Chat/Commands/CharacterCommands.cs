@@ -52,7 +52,7 @@ namespace Game.Chat
                     if (string.IsNullOrEmpty(name))
                         continue;
 
-                    string activeStr = target.GetUInt32Value(PlayerFields.ChosenTitle) == titleInfo.MaskID
+                    string activeStr = target.m_playerData.PlayerTitle == titleInfo.MaskID
                     ? handler.GetCypherString(CypherStrings.Active) : "";
 
                     string titleNameStr = string.Format(name.ConvertFormatSyntax(), targetName);
@@ -600,7 +600,7 @@ namespace Game.Chat
                     if (!int.TryParse(daysStr, out keepDays) || keepDays < 0)
                         return false;
                 }
-                // config option value 0 -> disabled and can't be used
+                // config option value 0 . disabled and can't be used
                 else if (keepDays <= 0)
                     return false;
 
@@ -777,7 +777,7 @@ namespace Game.Chat
             {
                 player.GiveLevel((uint)newLevel);
                 player.InitTalentForLevel();
-                player.SetUInt32Value(ActivePlayerFields.Xp, 0);
+                player.SetXP(0);
 
                 if (handler.needReportToTarget(player))
                 {

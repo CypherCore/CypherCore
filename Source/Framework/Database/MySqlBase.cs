@@ -220,8 +220,8 @@ namespace Framework.Database
         {
             try
             {
-                string query = File.ReadAllText(path);
-                if (query.Length > 1048576) //Default size limit of querys
+                string query = File.ReadAllText(path);                
+                if (Encoding.UTF8.GetByteCount(query) > 1048576) //Default size limit of querys
                     Apply("SET GLOBAL max_allowed_packet=1073741824;");
 
                 using (var connection = _connectionInfo.GetConnection())
@@ -229,6 +229,7 @@ namespace Framework.Database
                     connection.Open();
                     using (MySqlCommand cmd = connection.CreateCommand())
                     {
+                        cmd.CommandTimeout = 120;
                         cmd.CommandText = query;
                         cmd.ExecuteNonQuery();
                         return true;

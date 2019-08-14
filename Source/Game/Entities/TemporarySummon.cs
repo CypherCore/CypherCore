@@ -187,7 +187,7 @@ namespace Game.Entities
 
             if (owner != null && IsTrigger() && m_spells[0] != 0)
             {
-                SetFaction(owner.getFaction());
+                SetFaction(owner.GetFaction());
                 SetLevel(owner.getLevel());
                 if (owner.IsTypeId(TypeId.Player))
                   m_ControlledByPlayer = true;
@@ -215,7 +215,7 @@ namespace Game.Entities
             if (m_Properties.Faction != 0)
                 SetFaction(m_Properties.Faction);
             else if (IsVehicle() && owner != null) // properties should be vehicle
-                SetFaction(owner.getFaction());
+                SetFaction(owner.GetFaction());
         }
 
         public virtual void InitSummon()
@@ -327,7 +327,7 @@ namespace Game.Entities
             SetReactState(ReactStates.Passive);
 
             SetCreatorGUID(GetOwner().GetGUID());
-            SetFaction(GetOwner().getFaction());
+            SetFaction(GetOwner().GetFaction());
 
             GetOwner().SetMinion(this, true);
         }
@@ -448,9 +448,6 @@ namespace Game.Entities
             SetBaseAttackTime(WeaponAttackType.OffAttack, SharedConst.BaseAttackTime);
             SetBaseAttackTime(WeaponAttackType.RangedAttack, SharedConst.BaseAttackTime);
 
-            SetFloatValue(UnitFields.ModCastSpeed, 1.0f);
-            SetFloatValue(UnitFields.ModCastHaste, 1.0f);
-
             //scale
             var cFamily = CliDB.CreatureFamilyStorage.LookupByKey(cinfo.Family);
             if (cFamily != null && cFamily.MinScale > 0.0f && petType == PetType.Hunter)
@@ -517,8 +514,8 @@ namespace Game.Entities
                 case PetType.Summon:
                     {
                         // the damage bonus used for pets is either fire or shadow damage, whatever is higher
-                        int fire = GetOwner().GetInt32Value(ActivePlayerFields.ModDamageDonePos + (int)SpellSchools.Fire);
-                        int shadow = GetOwner().GetInt32Value(ActivePlayerFields.ModDamageDonePos + (int)SpellSchools.Shadow);
+                        int fire = GetOwner().ToPlayer().m_activePlayerData.ModDamageDonePos[(int)SpellSchools.Fire];
+                        int shadow = GetOwner().ToPlayer().m_activePlayerData.ModDamageDonePos[(int)SpellSchools.Shadow];
                         int val = (fire > shadow) ? fire : shadow;
                         if (val < 0)
                             val = 0;
@@ -531,7 +528,7 @@ namespace Game.Entities
                     }
                 case PetType.Hunter:
                     {
-                        SetUInt32Value(UnitFields.PetNextLevelExp, (uint)(Global.ObjectMgr.GetXPForLevel(petlevel) * 0.05f));
+                        ToPet().SetPetNextLevelExperience((uint)(Global.ObjectMgr.GetXPForLevel(petlevel) * 0.05f));
                         //these formula may not be correct; however, it is designed to be close to what it should be
                         //this makes dps 0.5 of pets level
                         SetBaseWeaponDamage(WeaponAttackType.BaseAttack, WeaponDamageRange.MinDamage, petlevel - (petlevel / 4));
@@ -865,8 +862,8 @@ namespace Game.Entities
             else
                 val = 2 * GetStat(Stats.Strength) - 20.0f;
 
-            Unit owner = GetOwner();
-            if (owner != null && owner.IsTypeId(TypeId.Player))
+            Player owner = GetOwner() ? GetOwner().ToPlayer() : null;
+            if (owner != null)
             {
                 if (IsHunterPet())                      //hunter pets benefit from owner's attack power
                 {
@@ -888,8 +885,8 @@ namespace Game.Entities
                 //demons benefit from warlocks shadow or fire damage
                 else if (IsPet())
                 {
-                    int fire = owner.GetInt32Value(ActivePlayerFields.ModDamageDonePos + (int)SpellSchools.Fire) - owner.GetInt32Value(ActivePlayerFields.ModDamageDoneNeg + (int)SpellSchools.Fire);
-                    int shadow = owner.GetInt32Value(ActivePlayerFields.ModDamageDonePos + (int)SpellSchools.Shadow) - owner.GetInt32Value(ActivePlayerFields.ModDamageDoneNeg + (int)SpellSchools.Shadow);
+                    int fire = owner.m_activePlayerData.ModDamageDonePos[(int)SpellSchools.Fire] - owner.m_activePlayerData.ModDamageDoneNeg[(int)SpellSchools.Fire];
+                    int shadow = owner.m_activePlayerData.ModDamageDonePos[(int)SpellSchools.Shadow] - owner.m_activePlayerData.ModDamageDoneNeg[(int)SpellSchools.Shadow];
                     int maximum = (fire > shadow) ? fire : shadow;
                     if (maximum < 0)
                         maximum = 0;
@@ -899,7 +896,7 @@ namespace Game.Entities
                 //water elementals benefit from mage's frost damage
                 else if (GetEntry() == ENTRY_WATER_ELEMENTAL)
                 {
-                    int frost = owner.GetInt32Value(ActivePlayerFields.ModDamageDonePos + (int)SpellSchools.Frost) - owner.GetInt32Value(ActivePlayerFields.ModDamageDoneNeg + (int)SpellSchools.Frost);
+                    int frost = owner.m_activePlayerData.ModDamageDonePos[(int)SpellSchools.Frost] - owner.m_activePlayerData.ModDamageDoneNeg[(int)SpellSchools.Frost];
                     if (frost < 0)
                         frost = 0;
                     SetBonusDamage((int)(frost * 0.4f));
@@ -912,10 +909,8 @@ namespace Game.Entities
             float base_attPower = GetModifierValue(unitMod, UnitModifierType.BaseValue) * GetModifierValue(unitMod, UnitModifierType.BasePCT);
             float attPowerMultiplier = GetModifierValue(unitMod, UnitModifierType.TotalPCT) - 1.0f;
 
-            //UNIT_FIELD_(RANGED)_ATTACK_POWER field
-            SetInt32Value(UnitFields.AttackPower, (int)base_attPower);
-            //UNIT_FIELD_(RANGED)_ATTACK_POWER_MULTIPLIER field
-            SetFloatValue(UnitFields.AttackPowerMultiplier, attPowerMultiplier);
+            SetAttackPower((int)base_attPower);
+            SetAttackPowerMultiplier(attPowerMultiplier);
 
             //automatically update weapon damage after attack power modification
             UpdateDamagePhysical(WeaponAttackType.BaseAttack);
@@ -927,19 +922,20 @@ namespace Game.Entities
                 return;
 
             float bonusDamage = 0.0f;
-            if (GetOwner().IsTypeId(TypeId.Player))
+            Player playerOwner = m_owner.ToPlayer();
+            if (playerOwner != null)
             {
                 //force of nature
                 if (GetEntry() == ENTRY_TREANT)
                 {
-                    int spellDmg = GetOwner().GetInt32Value(ActivePlayerFields.ModDamageDonePos + (int)SpellSchools.Nature) - GetOwner().GetInt32Value(ActivePlayerFields.ModDamageDoneNeg + (int)SpellSchools.Nature);
+                    int spellDmg = playerOwner.m_activePlayerData.ModDamageDonePos[(int)SpellSchools.Nature] - playerOwner.m_activePlayerData.ModDamageDoneNeg[(int)SpellSchools.Nature];
                     if (spellDmg > 0)
                         bonusDamage = spellDmg * 0.09f;
                 }
                 //greater fire elemental
                 else if (GetEntry() == ENTRY_FIRE_ELEMENTAL)
                 {
-                    int spellDmg = GetOwner().GetInt32Value(ActivePlayerFields.ModDamageDonePos + (int)SpellSchools.Fire) - GetOwner().GetInt32Value(ActivePlayerFields.ModDamageDoneNeg + (int)SpellSchools.Fire);
+                    int spellDmg = playerOwner.m_activePlayerData.ModDamageDonePos[(int)SpellSchools.Fire] - playerOwner.m_activePlayerData.ModDamageDoneNeg[(int)SpellSchools.Fire];
                     if (spellDmg > 0)
                         bonusDamage = spellDmg * 0.4f;
                 }
@@ -960,15 +956,16 @@ namespace Game.Entities
             float mindamage = ((base_value + weapon_mindamage) * base_pct + total_value) * total_pct;
             float maxdamage = ((base_value + weapon_maxdamage) * base_pct + total_value) * total_pct;
 
-            SetStatFloatValue(UnitFields.MinDamage, mindamage);
-            SetStatFloatValue(UnitFields.MaxDamage, maxdamage);
+            SetUpdateFieldStatValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MinDamage), mindamage);
+            SetUpdateFieldStatValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MaxDamage), maxdamage);
         }
 
         void SetBonusDamage(int damage)
         {
             m_bonusSpellDamage = damage;
-            if (GetOwner().IsTypeId(TypeId.Player))
-                GetOwner().SetUInt32Value(ActivePlayerFields.PetSpellPower, (uint)damage);
+            Player playerOwner = GetOwner().ToPlayer();
+            if (playerOwner != null)
+                playerOwner.SetPetSpellPower((uint)damage);
         }
 
         public int GetBonusDamage() { return m_bonusSpellDamage; }

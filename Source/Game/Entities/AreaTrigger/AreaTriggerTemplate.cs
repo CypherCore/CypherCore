@@ -104,10 +104,19 @@ namespace Game.Entities
             public uint StartTimeOffset;
 
             [FieldOffset(4)]
-            public float[] Points;
+            public float X;
+
+            [FieldOffset(8)]
+            public float Y;
+
+            [FieldOffset(12)]
+            public float Z;
+
+            [FieldOffset(16)]
+            public float W;
 
             [FieldOffset(20)]
-            public curveparameters CurveParameters;
+            public uint CurveParameters;
 
             [FieldOffset(24)]
             public uint OverrideActive;

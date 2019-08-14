@@ -333,9 +333,9 @@ namespace Game.AI
                     if (point)
                     {
                         point.SetObjectScale(SharedConst.BoundaryVisualizeCreatureScale);
-                        point.SetFlag(UnitFields.Flags, UnitFlags.ImmuneToPc | UnitFlags.Stunned | UnitFlags.ImmuneToNpc);
+                        point.AddUnitFlag(UnitFlags.ImmuneToPc | UnitFlags.Stunned | UnitFlags.ImmuneToNpc);
                         if (!hasOutOfBoundsNeighbor)
-                            point.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+                            point.AddUnitFlag(UnitFlags.NotSelectable);
                     }
                     Q.Remove(front);
                 }

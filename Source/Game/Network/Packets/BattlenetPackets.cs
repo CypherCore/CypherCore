@@ -42,7 +42,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(BnetStatus);
+            _worldPacket.WriteUInt32((uint)BnetStatus);
             Method.Write(_worldPacket);
             _worldPacket.WriteUInt32(Data.GetSize());
             _worldPacket.WriteBytes(Data);
@@ -60,10 +60,12 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteBits(State, 2);
+            _worldPacket.WriteBit(SuppressNotification);
             _worldPacket.FlushBits();
         }
 
         public byte State;
+        public bool SuppressNotification;
     }
 
     class RealmListTicket : ServerPacket

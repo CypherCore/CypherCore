@@ -435,7 +435,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(ComplaintType);
+            _worldPacket.WriteUInt32((uint)ComplaintType);
             _worldPacket.WriteUInt8(Result);
         }
 

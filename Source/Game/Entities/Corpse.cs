@@ -21,6 +21,9 @@ using Game.DataStorage;
 using Game.Loots;
 using Game.Maps;
 using System.Collections.Generic;
+using System.Text;
+using Framework.Collections;
+using Game.Network;
 
 namespace Game.Entities
 {
@@ -34,7 +37,7 @@ namespace Game.Entities
 
             m_updateFlag.Stationary = true;
 
-            valuesCount = (int)CorpseFields.End;
+            m_corpseData = new CorpseData();
 
             m_time = Time.UnixTime;
         }
@@ -79,7 +82,7 @@ namespace Game.Entities
             _Create(ObjectGuid.Create(HighGuid.Corpse, owner.GetMapId(), 0, guidlow));
 
             SetObjectScale(1);
-            SetGuidValue(CorpseFields.Owner, owner.GetGUID());
+            SetOwnerGUID(owner.GetGUID());
 
             _cellCoord = GridDefines.ComputeCellCoord(GetPositionX(), GetPositionY());
 
@@ -94,6 +97,14 @@ namespace Game.Entities
             SQLTransaction trans = new SQLTransaction();
             DeleteFromDB(trans);
 
+            StringBuilder items = new StringBuilder();
+            for (var i = 0; i < EquipmentSlot.End; ++i)
+                items.Append($"{m_corpseData.Items[i]} ");
+
+            uint bytes1 = ((uint)m_corpseData.RaceID << 8) | ((uint)m_corpseData.Sex << 16) | ((uint)m_corpseData.SkinID << 24);
+            uint bytes2 = ((uint)m_corpseData.FaceID) | ((uint)m_corpseData.HairStyleID << 8) | ((uint)m_corpseData.HairColorID << 16) | ((uint)m_corpseData.FacialHairStyleID << 24);
+
+
             byte index = 0;
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CORPSE);
             stmt.AddValue(index++, GetOwnerGUID().GetCounter());                            // guid
@@ -102,14 +113,14 @@ namespace Game.Entities
             stmt.AddValue(index++, GetPositionZ());                                         // posZ
             stmt.AddValue(index++, GetOrientation());                                       // orientation
             stmt.AddValue(index++, GetMapId());                                             // mapId
-            stmt.AddValue(index++, GetUInt32Value(CorpseFields.DisplayId));                // displayId
-            stmt.AddValue(index++, _ConcatFields(CorpseFields.Item, EquipmentSlot.End));   // itemCache
-            stmt.AddValue(index++, GetUInt32Value(CorpseFields.Bytes1));                   // bytes1
-            stmt.AddValue(index++, GetUInt32Value(CorpseFields.Bytes2));                   // bytes2
-            stmt.AddValue(index++, GetUInt32Value(CorpseFields.Flags));                     // flags
-            stmt.AddValue(index++, GetUInt32Value(CorpseFields.DynamicFlags));             // dynFlags
-            stmt.AddValue(index++, (uint)m_time);                                         // time
-            stmt.AddValue(index++, (uint)GetCorpseType());                                              // corpseType
+            stmt.AddValue(index++, (uint)m_corpseData.DisplayID);                           // displayId
+            stmt.AddValue(index++, items.ToString());                                       // itemCache
+            stmt.AddValue(index++, bytes1);                                                 // bytes1
+            stmt.AddValue(index++, bytes2);                                                 // bytes2
+            stmt.AddValue(index++, (uint)m_corpseData.Flags);                               // flags
+            stmt.AddValue(index++, (uint)m_corpseData.DynamicFlags);                        // dynFlags
+            stmt.AddValue(index++, (uint)m_time);                                           // time
+            stmt.AddValue(index++, (uint)GetCorpseType());                                  // corpseType
             stmt.AddValue(index++, GetInstanceId());                                        // instanceId
             trans.Append(stmt);
 
@@ -153,16 +164,24 @@ namespace Game.Entities
             _Create(ObjectGuid.Create(HighGuid.Corpse, mapId, 0, guid));
 
             SetObjectScale(1.0f);
-            SetUInt32Value(CorpseFields.DisplayId, field.Read<uint>(5));
-            _LoadIntoDataField(field.Read<string>(6), (int)CorpseFields.Item, EquipmentSlot.End);
-            SetUInt32Value(CorpseFields.Bytes1, field.Read<uint>(7));
-            SetUInt32Value(CorpseFields.Bytes2, field.Read<uint>(8));
-            SetUInt32Value(CorpseFields.Flags, field.Read<byte>(9));
-            SetUInt32Value(CorpseFields.DynamicFlags, field.Read<byte>(10));
-            SetGuidValue(CorpseFields.Owner, ObjectGuid.Create(HighGuid.Player, field.Read<ulong>(14)));
-            CharacterInfo characterInfo = Global.WorldMgr.GetCharacterInfo(GetGuidValue(CorpseFields.Owner));
-            if (characterInfo != null)
-                SetUInt32Value(CorpseFields.FactionTemplate, CliDB.ChrRacesStorage.LookupByKey(characterInfo.RaceID).FactionID);
+            SetDisplayId(field.Read<uint>(5));
+            StringArray items = new StringArray(field.Read<string>(6), ' ');
+            for (uint index = 0; index < EquipmentSlot.End; ++index)
+                SetItem(index, uint.Parse(items[(int)index]));
+
+            uint bytes1 = field.Read<uint>(7);
+            uint bytes2 = field.Read<uint>(8);
+            SetRace((Race)((bytes1 >> 8) & 0xFF));
+            SetSex((Gender)((bytes1 >> 16) & 0xFF));
+            SetSkin((byte)((bytes1 >> 24) & 0xFF));
+            SetFace((byte)(bytes2 & 0xFF));
+            SetHairStyle((byte)((bytes2 >> 8) & 0xFF));
+            SetHairColor((byte)((bytes2 >> 16) & 0xFF));
+            SetFacialHairStyle((byte)((bytes2 >> 24) & 0xFF));
+            SetFlags((CorpseFlags)field.Read<byte>(9));
+            SetCorpseDynamicFlags((CorpseDynFlags)field.Read<byte>(10));
+            SetOwnerGUID(ObjectGuid.Create(HighGuid.Player, field.Read<ulong>(14)));
+            SetFactionTemplate(CliDB.ChrRacesStorage.LookupByKey(m_corpseData.RaceID).FactionID);
 
             m_time = field.Read<uint>(11);
 
@@ -196,7 +215,60 @@ namespace Game.Entities
                 return m_time < t - 3 * Time.Day;
         }
 
-        public ObjectGuid GetOwnerGUID() { return GetGuidValue(CorpseFields.Owner); }
+        public override void BuildValuesCreate(WorldPacket data, Player target)
+        {
+            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
+            WorldPacket buffer = new WorldPacket();
+
+            m_objectData.WriteCreate(buffer, flags, this, target);
+            m_corpseData.WriteCreate(buffer, flags, this, target);
+
+            data.WriteUInt32(buffer.GetSize());
+            data.WriteUInt8((byte)flags);
+            data.WriteBytes(buffer);
+        }
+
+        public override void BuildValuesUpdate(WorldPacket data, Player target)
+        {
+            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
+            WorldPacket buffer = new WorldPacket();
+
+            buffer.WriteUInt32(m_values.GetChangedObjectTypeMask());
+            if (m_values.HasChanged(TypeId.Object))
+                m_objectData.WriteUpdate(buffer, flags, this, target);
+
+            if (m_values.HasChanged(TypeId.Corpse))
+                m_corpseData.WriteUpdate(buffer, flags, this, target);
+
+            data.WriteUInt32(buffer.GetSize());
+            data.WriteBytes(buffer);
+        }
+
+        public override void ClearUpdateMask(bool remove)
+        {
+            m_values.ClearChangesMask(m_corpseData);
+            base.ClearUpdateMask(remove);
+        }
+
+        public void AddCorpseDynamicFlag(CorpseDynFlags dynamicFlags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.DynamicFlags), (uint)dynamicFlags); }
+        public void RemoveCorpseDynamicFlag(CorpseDynFlags dynamicFlags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.DynamicFlags), (uint)dynamicFlags); }
+        public void SetCorpseDynamicFlags(CorpseDynFlags dynamicFlags) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.DynamicFlags), (uint)dynamicFlags); }
+        public ObjectGuid GetOwnerGUID() { return m_corpseData.Owner; }
+        public void SetOwnerGUID(ObjectGuid owner) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.Owner), owner); }
+        public void SetPartyGUID(ObjectGuid partyGuid) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.PartyGUID), partyGuid); }
+        public void SetGuildGUID(ObjectGuid guildGuid) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.GuildGUID), guildGuid); }
+        public void SetDisplayId(uint displayId) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.DisplayID), displayId); }
+        public void SetRace(Race race) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.RaceID), (byte)race); }
+        public void SetSex(Gender sex) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.Sex), (byte)sex); }
+        public void SetSkin(byte skin) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.SkinID), skin); }
+        public void SetFace(byte face) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.FaceID), face); }
+        public void SetHairStyle(byte hairStyle) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.HairStyleID), hairStyle); }
+        public void SetHairColor(byte hairColor) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.HairColorID), hairColor); }
+        public void SetFacialHairStyle(byte facialHairStyle) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.FacialHairStyleID), facialHairStyle); }
+        public void SetFlags(CorpseFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.Flags), (uint)flags); }
+        public void SetFactionTemplate(int factionTemplate) { SetUpdateFieldValue(m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.FactionTemplate), factionTemplate); }
+        public void SetItem(uint slot, uint item) { SetUpdateFieldValue(ref m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.Items, (int)slot), item); }
+        public void SetCustomDisplayOption(uint slot, byte customDisplayOption) { SetUpdateFieldValue(ref m_values.ModifyValue(m_corpseData).ModifyValue(m_corpseData.CustomDisplayOption, (int)slot), customDisplayOption); }
 
         public long GetGhostTime() { return m_time; }
         public void ResetGhostTime() { m_time = Time.UnixTime; }
@@ -204,6 +276,8 @@ namespace Game.Entities
 
         public CellCoord GetCellCoord() { return _cellCoord; }
         public void SetCellCoord(CellCoord cellCoord) { _cellCoord = cellCoord; }
+
+        public CorpseData m_corpseData;
 
         public Loot loot = new Loot();
         public Player lootRecipient;

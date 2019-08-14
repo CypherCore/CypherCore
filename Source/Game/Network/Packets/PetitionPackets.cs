@@ -124,7 +124,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(OwnerAccountID);
             _worldPacket.WriteInt32(PetitionID);
 
-            _worldPacket.WriteUInt32(Signatures.Count);
+            _worldPacket.WriteInt32(Signatures.Count);
             foreach (PetitionSignature signature in Signatures)
             {
                 _worldPacket.WritePackedGuid(signature.Signer);

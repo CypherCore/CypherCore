@@ -625,19 +625,34 @@ namespace Game.Chat
                 if (string.IsNullOrEmpty(state))
                     return false;
 
-                if (!int.TryParse(state, out int objectState))
+                if (!uint.TryParse(state, out uint objectState))
                     return false;
 
-                if (objectType < 4)
-                    obj.SetByteValue(GameObjectFields.Bytes1, (byte)objectType, (byte)objectState);
-                else if (objectType == 4)
-                    obj.SendCustomAnim((uint)objectState);
-                else if (objectType == 5)
+                switch (objectType)
                 {
-                    if (objectState < 0 || objectState > (uint)GameObjectDestructibleState.Rebuilding)
-                        return false;
+                    case 0:
+                        obj.SetGoState((GameObjectState)objectState);
+                        break;
+                    case 1:
+                        obj.SetGoType((GameObjectTypes)objectState);
+                        break;
+                    case 2:
+                        obj.SetGoArtKit((byte)objectState);
+                        break;
+                    case 3:
+                        obj.SetGoAnimProgress(objectState);
+                        break;
+                    case 4:
+                        obj.SendCustomAnim(objectState);
+                        break;
+                    case 5:
+                        if (objectState < 0 || objectState > (uint)GameObjectDestructibleState.Rebuilding)
+                            return false;
 
-                    obj.SetDestructibleState((GameObjectDestructibleState)objectState);
+                        obj.SetDestructibleState((GameObjectDestructibleState)objectState);
+                        break;
+                    default:
+                        break;
                 }
 
                 handler.SendSysMessage("Set gobject type {0} state {1}", objectType, objectState);

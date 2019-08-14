@@ -42,4 +42,13 @@ namespace Framework.Constants
         //UPDATEFLAG_SCENEOBJECT           = 0x10000,
         //UPDATEFLAG_SCENE_PENDING_INSTANCE = 0x20000
     }
+
+    public enum UpdateFieldFlag
+    {
+        None = 0,
+        Owner = 0x01,
+        PartyMember = 0x02,
+        UnitAll = 0x04,
+        Empath = 0x08
+    }
 }

@@ -32,10 +32,11 @@ namespace Game.Entities
         void UpdateSkillsForLevel()
         {
             ushort maxSkill = GetMaxSkillValueForLevel();
+            SkillInfo skillInfoField = m_activePlayerData.Skill;
 
             foreach (var pair in mSkillStatus)
             {
-                if (pair.Value.State == SkillState.Deleted)
+                if (pair.Value.State == SkillState.Deleted || skillInfoField.SkillRank[pair.Value.Pos] == 0)
                     continue;
 
                 uint pskill = pair.Key;
@@ -43,36 +44,35 @@ namespace Game.Entities
                 if (rcEntry == null)
                     continue;
 
-                ushort field = (ushort)(pair.Value.Pos / 2);
-                byte offset = (byte)(pair.Value.Pos & 1);
-
                 if (Global.SpellMgr.GetSkillRangeType(rcEntry) == SkillRangeType.Level)
                 {
-                    ushort max = GetUInt16Value(ActivePlayerFields.SkillLineMaxRank + field, offset);
+                    ushort max = skillInfoField.SkillMaxRank[pair.Value.Pos];
 
                     // update only level dependent max skill values
                     if (max != 1)
                     {
-                        SetUInt16Value(ActivePlayerFields.SkillLineRank + field, offset, maxSkill);
-                        SetUInt16Value(ActivePlayerFields.SkillLineMaxRank + field, offset, maxSkill);
+                        SetSkillRank(pair.Value.Pos, maxSkill);
+                        SetSkillMaxRank(pair.Value.Pos, maxSkill);
                         if (pair.Value.State != SkillState.New)
                             pair.Value.State = SkillState.Changed;
                     }
                 }
 
                 // Update level dependent skillline spells
-                LearnSkillRewardedSpells(rcEntry.SkillID, GetUInt16Value(ActivePlayerFields.SkillLineRank + field, offset));
+                LearnSkillRewardedSpells(rcEntry.SkillID, skillInfoField.SkillRank[pair.Value.Pos]);
             }
         }
 
         public void UpdateSkillsToMaxSkillsForLevel()
         {
-            foreach (var skill in mSkillStatus)
+            SkillInfo skillInfoField = m_activePlayerData.Skill;
+
+            foreach (var pair in mSkillStatus)
             {
-                if (skill.Value.State == SkillState.Deleted)
+                if (pair.Value.State == SkillState.Deleted || skillInfoField.SkillRank[pair.Value.Pos] == 0)
                     continue;
 
-                uint pskill = skill.Key;
+                uint pskill = pair.Key;
                 SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(pskill, GetRace(), GetClass());
                 if (rcEntry == null)
                     continue;
@@ -83,16 +83,13 @@ namespace Game.Entities
                 if (Global.SpellMgr.IsWeaponSkill(rcEntry.SkillID))
                     continue;
 
-                ushort field = (ushort)(skill.Value.Pos / 2);
-                byte offset = (byte)(skill.Value.Pos & 1);
-
-                ushort max = GetUInt16Value(ActivePlayerFields.SkillLineMaxRank + field, offset);
+                ushort max = skillInfoField.SkillMaxRank[pair.Value.Pos];
                 if (max > 1)
                 {
-                    SetUInt16Value(ActivePlayerFields.SkillLineRank + field, offset, max);
+                    SetSkillRank(pair.Value.Pos, max);
 
-                    if (skill.Value.State != SkillState.New)
-                        skill.Value.State = SkillState.Changed;
+                    if (pair.Value.State != SkillState.New)
+                        pair.Value.State = SkillState.Changed;
                 }
             }
         }
@@ -102,16 +99,15 @@ namespace Game.Entities
             if (skill == 0)
                 return 0;
 
+            SkillInfo skillInfo = m_activePlayerData.Skill;
+
             var skillStatusData = mSkillStatus.LookupByKey(skill);
-            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted)
+            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || skillInfo.SkillRank[skillStatusData.Pos] == 0)
                 return 0;
 
-            var field = (ushort)(skillStatusData.Pos / 2);
-            var offset = (byte)(skillStatusData.Pos & 1);
-
-            int result = GetUInt16Value(ActivePlayerFields.SkillLineRank + field, offset);
-            result += GetUInt16Value(ActivePlayerFields.SkillLineTempBonus + field, offset);
-            result += GetUInt16Value(ActivePlayerFields.SkillLinePermBonus + field, offset);
+            int result = skillInfo.SkillRank[skillStatusData.Pos];
+            result += skillInfo.SkillTempBonus[skillStatusData.Pos];
+            result += skillInfo.SkillPermBonus[skillStatusData.Pos];
             return (ushort)(result < 0 ? 0 : result);
         }
 
@@ -120,16 +116,15 @@ namespace Game.Entities
             if (skill == 0)
                 return 0;
 
+            SkillInfo skillInfo = m_activePlayerData.Skill;
+
             var skillStatusData = mSkillStatus.LookupByKey(skill);
-            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted)
+            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || skillInfo.SkillRank[skillStatusData.Pos] == 0)
                 return 0;
 
-            var field = (ushort)(skillStatusData.Pos / 2);
-            var offset = (byte)(skillStatusData.Pos & 1);
-
-            int result = GetUInt16Value(ActivePlayerFields.SkillLineMaxRank + field, offset);
-            result += GetUInt16Value(ActivePlayerFields.SkillLineTempBonus + field, offset);
-            result += GetUInt16Value(ActivePlayerFields.SkillLinePermBonus + field, offset);
+            int result = skillInfo.SkillMaxRank[skillStatusData.Pos];
+            result += skillInfo.SkillTempBonus[skillStatusData.Pos];
+            result += skillInfo.SkillPermBonus[skillStatusData.Pos];
             return (ushort)(result < 0 ? 0 : result);
         }
 
@@ -138,14 +133,13 @@ namespace Game.Entities
             if (skill == 0)
                 return 0;
 
+            SkillInfo skillInfo = m_activePlayerData.Skill;
+
             var skillStatusData = mSkillStatus.LookupByKey((uint)skill);
-            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted)
+            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || skillInfo.SkillRank[skillStatusData.Pos] == 0)
                 return 0;
 
-            var field = (ushort)(skillStatusData.Pos / 2);
-            var offset = (byte)(skillStatusData.Pos & 1);
-
-            return GetUInt16Value(ActivePlayerFields.SkillLineRank + field, offset);
+            return skillInfo.SkillRank[skillStatusData.Pos];
         }
 
         public ushort GetSkillStep(SkillType skill)
@@ -153,14 +147,16 @@ namespace Game.Entities
             if (skill == 0)
                 return 0;
 
+            SkillInfo skillInfo = m_activePlayerData.Skill;
+
             var skillStatusData = mSkillStatus.LookupByKey(skill);
-            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted)
+            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || skillInfo.SkillRank[skillStatusData.Pos] == 0)
                 return 0;
 
             var field = (ushort)(skillStatusData.Pos / 2);
             var offset = (byte)(skillStatusData.Pos & 1);
 
-            return GetUInt16Value(ActivePlayerFields.SkillLineStep + field, offset);
+            return  skillInfo.SkillStep[skillStatusData.Pos];
         }
 
         public ushort GetPureMaxSkillValue(SkillType skill)
@@ -168,14 +164,13 @@ namespace Game.Entities
             if (skill == 0)
                 return 0;
 
+            SkillInfo skillInfo = m_activePlayerData.Skill;
+
             var skillStatusData = mSkillStatus.LookupByKey(skill);
-            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted)
+            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || skillInfo.SkillRank[skillStatusData.Pos] == 0)
                 return 0;
 
-            var field = (ushort)(skillStatusData.Pos / 2);
-            var offset = (byte)(skillStatusData.Pos & 1);
-
-            return GetUInt16Value(ActivePlayerFields.SkillLineMaxRank + field, offset);
+            return skillInfo.SkillMaxRank[skillStatusData.Pos];
         }
 
         public ushort GetBaseSkillValue(SkillType skill)
@@ -183,15 +178,14 @@ namespace Game.Entities
             if (skill == 0)
                 return 0;
 
+            SkillInfo skillInfo = m_activePlayerData.Skill;
+
             var skillStatusData = mSkillStatus.LookupByKey(skill);
-            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted)
+            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || skillInfo.SkillRank[skillStatusData.Pos] == 0)
                 return 0;
 
-            var field = (ushort)(skillStatusData.Pos / 2);
-            var offset = (byte)(skillStatusData.Pos & 1);
-
-            var result = (int)GetUInt16Value(ActivePlayerFields.SkillLineRank + field, offset);
-            result += GetUInt16Value(ActivePlayerFields.SkillLinePermBonus + field, offset);
+            int result = skillInfo.SkillRank[skillStatusData.Pos];
+            result += skillInfo.SkillPermBonus[skillStatusData.Pos];
             return (ushort)(result < 0 ? 0 : result);
         }
 
@@ -200,14 +194,13 @@ namespace Game.Entities
             if (skill == 0)
                 return 0;
 
+            SkillInfo skillInfo = m_activePlayerData.Skill;
+
             var skillStatusData = mSkillStatus.LookupByKey(skill);
-            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted)
+            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || skillInfo.SkillRank[skillStatusData.Pos] == 0)
                 return 0;
 
-            var field = (ushort)(skillStatusData.Pos / 2);
-            var offset = (byte)(skillStatusData.Pos & 1);
-
-            return GetUInt16Value(ActivePlayerFields.SkillLinePermBonus + field, offset);
+            return skillInfo.SkillPermBonus[skillStatusData.Pos];
         }
 
         public ushort GetSkillTempBonusValue(uint skill)
@@ -215,19 +208,18 @@ namespace Game.Entities
             if (skill == 0)
                 return 0;
 
+            SkillInfo skillInfo = m_activePlayerData.Skill;
+
             var skillStatusData = mSkillStatus.LookupByKey(skill);
-            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted)
+            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || skillInfo.SkillRank[skillStatusData.Pos] == 0)
                 return 0;
 
-            var field = (ushort)(skillStatusData.Pos / 2);
-            var offset = (byte)(skillStatusData.Pos & 1);
-
-            return GetUInt16Value(ActivePlayerFields.SkillLineTempBonus + field, offset);
+            return skillInfo.SkillTempBonus[skillStatusData.Pos];
         }
 
         void InitializeSelfResurrectionSpells()
         {
-            ClearDynamicValue(ActivePlayerDynamicFields.SelfResSpells);
+            ClearSelfResSpell();
 
             uint[] spells = new uint[3];
 
@@ -248,7 +240,7 @@ namespace Game.Entities
 
             foreach (uint selfResSpell in spells)
                 if (selfResSpell != 0)
-                    AddDynamicValue(ActivePlayerDynamicFields.SelfResSpells, selfResSpell);
+                    AddSelfResSpell(selfResSpell);
         }
 
         public void PetSpellInitialize()
@@ -294,7 +286,7 @@ namespace Game.Entities
 
         public bool CanSeeSpellClickOn(Creature creature)
         {
-            if (!creature.HasFlag64(UnitFields.NpcFlags, NPCFlags.SpellClick))
+            if (!creature.HasNpcFlag(NPCFlags.SpellClick))
                 return false;
 
             var clickPair = Global.ObjectMgr.GetSpellClickInfoMapBounds(creature.GetEntry());
@@ -329,19 +321,21 @@ namespace Game.Entities
             return base.GetCastSpellInfo(spellInfo);
         }
 
-        void AddOverrideSpell(uint overridenSpellId, uint newSpellId)
+        public void SetOverrideSpellsId(uint overrideSpellsId) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.OverrideSpellsID), overrideSpellsId); }
+
+        public void AddOverrideSpell(uint overridenSpellId, uint newSpellId)
         {
             m_overrideSpells.Add(overridenSpellId, newSpellId);
         }
 
-        void RemoveOverrideSpell(uint overridenSpellId, uint newSpellId)
+        public void RemoveOverrideSpell(uint overridenSpellId, uint newSpellId)
         {
             m_overrideSpells.Remove(overridenSpellId, newSpellId);
         }
 
         void LearnSpecializationSpells()
         {
-            var specSpells = Global.DB2Mgr.GetSpecializationSpells(GetUInt32Value(PlayerFields.CurrentSpecId));
+            var specSpells = Global.DB2Mgr.GetSpecializationSpells(GetPrimarySpecialization());
             if (specSpells != null)
             {
                 for (int j = 0; j < specSpells.Count; ++j)
@@ -406,6 +400,23 @@ namespace Game.Entities
             SendPacket(cooldowns);
         }
 
+        void InitializeSkillFields()
+        {
+            uint i = 0;
+            foreach (SkillLineRecord skillLine in CliDB.SkillLineStorage.Values)
+            {
+                SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skillLine.Id, GetRace(), GetClass());
+                if (rcEntry != null)
+                {
+                    SetSkillLineId(i, (ushort)skillLine.Id);
+                    SetSkillStartingRank(i, 1);
+                    mSkillStatus.Add(skillLine.Id, new SkillStatusData(i, SkillState.Unchanged));
+                    if (++i >= SkillConst.MaxPlayerSkills)
+                        break;
+                }
+            }
+        }
+
         public bool UpdateSkillPro(SkillType skillId, int chance, uint step)
         {
             return UpdateSkillPro((uint)skillId, chance, step);
@@ -431,11 +442,10 @@ namespace Game.Entities
             if (skillStatusData == null || skillStatusData.State == SkillState.Deleted)
                 return false;
 
-            ushort field = (ushort)(skillStatusData.Pos / 2);
-            byte offset = (byte)(skillStatusData.Pos & 1);
+            SkillInfo skillInfoField = m_activePlayerData.Skill;
 
-            ushort value = GetUInt16Value(ActivePlayerFields.SkillLineRank + field, offset);
-            ushort max = GetUInt16Value(ActivePlayerFields.SkillLineMaxRank + field, offset);
+            ushort value = skillInfoField.SkillRank[skillStatusData.Pos];
+            ushort max = skillInfoField.SkillMaxRank[skillStatusData.Pos];
 
             if (max == 0 || value == 0 || value >= max)
                 return false;
@@ -450,7 +460,7 @@ namespace Game.Entities
             if (new_value > max)
                 new_value = max;
 
-            SetUInt16Value(ActivePlayerFields.SkillLineRank + field, offset, new_value);
+            SetSkillRank(skillStatusData.Pos, new_value);
             if (skillStatusData.State != SkillState.New)
                 skillStatusData.State = SkillState.Changed;
 
@@ -577,7 +587,7 @@ namespace Game.Entities
                 }
 
                 // Cogwheel gems dont have requirement data set in SpellItemEnchantment.dbc, but they do have it in Item-sparse.db2
-                ItemDynamicFieldGems gem = item.GetGem((ushort)(slot - EnchantmentSlot.Sock1));
+                SocketedGem gem = item.GetGem((ushort)(slot - EnchantmentSlot.Sock1));
                 if (gem != null)
                 {
                     ItemTemplate gemTemplate = Global.ObjectMgr.GetItemTemplate(gem.ItemId);
@@ -617,31 +627,7 @@ namespace Game.Entities
                             if (enchant_spell_id != 0)
                             {
                                 if (apply)
-                                {
-                                    int basepoints = 0;
-                                    // Random Property Exist - try found basepoints for spell (basepoints depends from item suffix factor)
-                                    if (item.GetItemRandomPropertyId() < 0)
-                                    {
-                                        ItemRandomSuffixRecord item_rand = CliDB.ItemRandomSuffixStorage.LookupByKey(Math.Abs(item.GetItemRandomPropertyId()));
-                                        if (item_rand != null)
-                                        {
-                                            // Search enchant_amount
-                                            for (int k = 0; k < ItemConst.MaxItemRandomProperties; ++k)
-                                            {
-                                                if (item_rand.Enchantment[k] == enchant_id)
-                                                {
-                                                    basepoints = (int)((item_rand.AllocationPct[k] * item.GetItemSuffixFactor()) / 10000);
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    // Cast custom spell vs all equal basepoints got from enchant_amount
-                                    if (basepoints != 0)
-                                        CastCustomSpell(this, enchant_spell_id, basepoints, basepoints, basepoints, true, item);
-                                    else
-                                        CastSpell(this, enchant_spell_id, true, item);
-                                }
+                                    CastSpell(this, enchant_spell_id, true, item);
                                 else
                                     RemoveAurasDueToItemSpell(enchant_spell_id, item.GetGUID());
                             }
@@ -650,7 +636,7 @@ namespace Game.Entities
                             if (pEnchant.ScalingClass != 0)
                             {
                                 int scalingClass = pEnchant.ScalingClass;
-                                if ((GetUInt32Value(UnitFields.MinItemLevel) != 0 || GetUInt32Value(UnitFields.MaxItemlevel) != 0) && pEnchant.ScalingClassRestricted != 0)
+                                if ((m_unitData.MinItemLevel != 0 || m_unitData.MaxItemLevel != 0) && pEnchant.ScalingClassRestricted != 0)
                                     scalingClass = pEnchant.ScalingClassRestricted;
 
                                 uint minLevel = ((uint)(pEnchant.Flags)).HasAnyFlag(0x20u) ? 1 : 60u;
@@ -667,22 +653,7 @@ namespace Game.Entities
                                     enchant_amount = (uint)(pEnchant.EffectScalingPoints[s] * CliDB.GetSpellScalingColumnForClass(spellScaling, scalingClass));
                             }
 
-                            if (enchant_amount == 0)
-                            {
-                                ItemRandomSuffixRecord item_rand = CliDB.ItemRandomSuffixStorage.LookupByKey(Math.Abs(item.GetItemRandomPropertyId()));
-                                if (item_rand != null)
-                                {
-                                    for (int k = 0; k < ItemConst.MaxItemRandomProperties; ++k)
-                                    {
-                                        if (item_rand.Enchantment[k] == enchant_id)
-                                        {
-                                            enchant_amount = (item_rand.AllocationPct[k] * item.GetItemSuffixFactor()) / 10000;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-
+                            enchant_amount = Math.Max(enchant_amount, 1u);
                             HandleStatModifier((UnitMods)((uint)UnitMods.ResistanceStart + enchant_spell_id), UnitModifierType.TotalValue, enchant_amount, apply);
                             break;
                         case ItemEnchantmentType.Stat:
@@ -690,7 +661,7 @@ namespace Game.Entities
                                 if (pEnchant.ScalingClass != 0)
                                 {
                                     int scalingClass = pEnchant.ScalingClass;
-                                    if ((GetUInt32Value(UnitFields.MinItemLevel) != 0 || GetUInt32Value(UnitFields.MaxItemlevel) != 0) && pEnchant.ScalingClassRestricted != 0)
+                                    if ((m_unitData.MinItemLevel != 0 || m_unitData.MaxItemLevel != 0) && pEnchant.ScalingClassRestricted != 0)
                                         scalingClass = pEnchant.ScalingClassRestricted;
 
                                     uint minLevel = ((uint)(pEnchant.Flags)).HasAnyFlag(0x20u) ? 1 : 60u;
@@ -707,21 +678,7 @@ namespace Game.Entities
                                         enchant_amount = (uint)(pEnchant.EffectScalingPoints[s] * CliDB.GetSpellScalingColumnForClass(spellScaling, scalingClass));
                                 }
 
-                                if (enchant_amount == 0)
-                                {
-                                    ItemRandomSuffixRecord item_rand_suffix = CliDB.ItemRandomSuffixStorage.LookupByKey(Math.Abs(item.GetItemRandomPropertyId()));
-                                    if (item_rand_suffix != null)
-                                    {
-                                        for (int k = 0; k < ItemConst.MaxItemRandomProperties; ++k)
-                                        {
-                                            if (item_rand_suffix.Enchantment[k] == enchant_id)
-                                            {
-                                                enchant_amount = (item_rand_suffix.AllocationPct[k] * item.GetItemSuffixFactor()) / 10000;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                }
+                                enchant_amount = Math.Max(enchant_amount, 1u);
 
                                 Log.outDebug(LogFilter.Player, "Adding {0} to stat nb {1}", enchant_amount, enchant_spell_id);
                                 switch ((ItemModType)enchant_spell_id)
@@ -914,7 +871,9 @@ namespace Game.Entities
 
             // visualize enchantment at player and equipped items
             if (slot == EnchantmentSlot.Perm)
-                SetUInt16Value(PlayerFields.VisibleItem + 1 + (item.GetSlot() * 2), 1, item.GetVisibleItemVisual(this));
+            {
+                SetUpdateFieldValue(m_playerData.ModifyValue(m_playerData.VisibleItems, item.GetSlot()).ModifyValue((VisibleItem visibleItemField) => visibleItemField.ItemVisual), item.GetVisibleItemVisual(this));
+            }
 
             if (apply_dur)
             {
@@ -935,16 +894,16 @@ namespace Game.Entities
 
         public void ModifySkillBonus(SkillType skillid, int val, bool talent)
         {
-            var skill = mSkillStatus.LookupByKey(skillid);
-            if (skill == null || skill.State == SkillState.Deleted)
+            SkillInfo skillInfoField = m_activePlayerData.Skill;
+
+            var skillStatusData = mSkillStatus.LookupByKey(skillid);
+            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || skillInfoField.SkillRank[skillStatusData.Pos] == 0)
                 return;
 
-            int field = (int)(skill.Pos / 2 + (talent ? ActivePlayerFields.SkillLinePermBonus : ActivePlayerFields.SkillLineTempBonus));
-            byte offset = (byte)(skill.Pos & 1);
-
-            ushort bonus = GetUInt16Value(field, offset);
-
-            SetUInt16Value(field, offset, (ushort)(bonus + val));
+            if (talent)
+                SetSkillPermBonus(skillStatusData.Pos, (ushort)(skillInfoField.SkillPermBonus[skillStatusData.Pos] + val));
+            else
+                SetSkillTempBonus(skillStatusData.Pos, (ushort)(skillInfoField.SkillTempBonus[skillStatusData.Pos] + val));
         }
 
         public void StopCastingBindSight()
@@ -1091,7 +1050,7 @@ namespace Game.Entities
 
         public bool CanUseMastery()
         {
-            ChrSpecializationRecord chrSpec = CliDB.ChrSpecializationStorage.LookupByKey(GetUInt32Value(PlayerFields.CurrentSpecId));
+            ChrSpecializationRecord chrSpec = CliDB.ChrSpecializationStorage.LookupByKey(GetPrimarySpecialization());
             if (chrSpec != null)
                 return HasSpell(chrSpec.MasterySpellID[0]) || HasSpell(chrSpec.MasterySpellID[1]);
 
@@ -1103,8 +1062,10 @@ namespace Game.Entities
             if (skill == 0)
                 return false;
 
-            var _skill = mSkillStatus.LookupByKey((uint)skill);
-            return _skill != null && _skill.State != SkillState.Deleted;
+            SkillInfo skillInfoField = m_activePlayerData.Skill;
+
+            var skillStatusData = mSkillStatus.LookupByKey((uint)skill);
+            return skillStatusData != null && skillStatusData.State != SkillState.Deleted && skillInfoField.SkillRank[skillStatusData.Pos] != 0;
         }
         public void SetSkill(SkillType skill, uint step, uint newVal, uint maxVal)
         {
@@ -1117,13 +1078,12 @@ namespace Game.Entities
 
             ushort currVal;
             var skillStatusData = mSkillStatus.LookupByKey(id);
+            SkillInfo skillInfoField = m_activePlayerData.Skill;
 
             //has skill
             if (skillStatusData != null && skillStatusData.State != SkillState.Deleted)
             {
-                var field = (ushort)(skillStatusData.Pos / 2);
-                var offset = (byte)(skillStatusData.Pos & 1);
-                currVal = GetUInt16Value(ActivePlayerFields.SkillLineRank + field, offset);
+                currVal = skillInfoField.SkillRank[skillStatusData.Pos];
                 if (newVal != 0)
                 {
                     // if skill value is going down, update enchantments before setting the new value
@@ -1131,10 +1091,10 @@ namespace Game.Entities
                         UpdateSkillEnchantments(id, currVal, (ushort)newVal);
 
                     // update step
-                    SetUInt16Value(ActivePlayerFields.SkillLineStep + field, offset, (ushort)step);
+                    SetSkillStep(skillStatusData.Pos, (ushort)step);
                     // update value
-                    SetUInt16Value(ActivePlayerFields.SkillLineRank + field, offset, (ushort)newVal);
-                    SetUInt16Value(ActivePlayerFields.SkillLineMaxRank + field, offset, (ushort)maxVal);
+                    SetSkillRank(skillStatusData.Pos, (ushort)newVal);
+                    SetSkillMaxRank(skillStatusData.Pos, (ushort)maxVal);
 
                     if (skillStatusData.State != SkillState.New)
                         skillStatusData.State = SkillState.Changed;
@@ -1152,45 +1112,45 @@ namespace Game.Entities
                     //remove enchantments needing this skill
                     UpdateSkillEnchantments(id, currVal, 0);
                     // clear skill fields
-                    SetUInt16Value(ActivePlayerFields.SkillLineId + field, offset, 0);
-                    SetUInt16Value(ActivePlayerFields.SkillLineStep + field, offset, 0);
-                    SetUInt16Value(ActivePlayerFields.SkillLineRank + field, offset, 0);
-                    SetUInt16Value(ActivePlayerFields.SkillLineMaxRank + field, offset, 0);
-                    SetUInt16Value(ActivePlayerFields.SkillLineTempBonus + field, offset, 0);
-                    SetUInt16Value(ActivePlayerFields.SkillLinePermBonus + field, offset, 0);
+                    SetSkillStep(skillStatusData.Pos, 0);
+                    SetSkillRank(skillStatusData.Pos, 0);
+                    SetSkillStartingRank(skillStatusData.Pos, 1);
+                    SetSkillMaxRank(skillStatusData.Pos, 0);
+                    SetSkillTempBonus(skillStatusData.Pos, 0);
+                    SetSkillPermBonus(skillStatusData.Pos, 0);
 
                     // mark as deleted or simply remove from map if not saved yet
                     if (skillStatusData.State != SkillState.New)
                         skillStatusData.State = SkillState.Deleted;
-                    else
-                        mSkillStatus.Remove(id);
 
                     // remove all spells that related to this skill
                     List<SkillLineAbilityRecord> skillLineAbilities = Global.DB2Mgr.GetSkillLineAbilitiesBySkill(id);
                     foreach (SkillLineAbilityRecord skillLineAbility in skillLineAbilities)
                         RemoveSpell(Global.SpellMgr.GetFirstSpellInChain(skillLineAbility.Spell));
 
-                    foreach (SkillLineRecord childSkillLine in CliDB.SkillLineStorage.Values)
+                    List<SkillLineRecord> childSkillLines = Global.DB2Mgr.GetSkillLinesForParentSkill(id);
+                    if (childSkillLines != null)
                     {
-                        if (childSkillLine.ParentSkillLineID == id)
-                            SetSkill(childSkillLine.Id, 0, 0, 0);
+                        foreach (SkillLineRecord childSkillLine in childSkillLines)
+                        {
+                            if (childSkillLine.ParentSkillLineID == id)
+                                SetSkill(childSkillLine.Id, 0, 0, 0);
+                        }
                     }
 
                     // Clear profession lines
-                    if (GetUInt32Value(ActivePlayerFields.ProfessionSkillLine) == id)
-                        SetUInt32Value(ActivePlayerFields.ProfessionSkillLine, 0);
-                    else if (GetUInt32Value(ActivePlayerFields.ProfessionSkillLine + 1) == id)
-                        SetUInt32Value(ActivePlayerFields.ProfessionSkillLine + 1, 0);
+                    if (m_activePlayerData.ProfessionSkillLine[0] == id)
+                        SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, 0), 0u);
+                    else if (m_activePlayerData.ProfessionSkillLine[1] == id)
+                        SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, 1), 0u);
                 }
             }
-            else if (newVal != 0)                                        //add
+            else                                      //add
             {
                 currVal = 0;
-                for (int i = 0; i < SkillConst.MaxPlayerSkills; ++i)
+                for (uint i = 0; i < SkillConst.MaxPlayerSkills; ++i)
                 {
-                    var field = (ushort)(i / 2);
-                    var offset = (byte)(i & 1);
-                    if (GetUInt16Value(ActivePlayerFields.SkillLineId + field, offset) == 0)
+                    if (skillInfoField.SkillLineID[(int)i] == 0)
                     {
                         var skillEntry = CliDB.SkillLineStorage.LookupByKey(id);
                         if (skillEntry == null)
@@ -1200,7 +1160,7 @@ namespace Game.Entities
                         }
 
 
-                        if (skillEntry.ParentSkillLineID != 0 && skillEntry.ParentTierIndex > 0)
+                        if (skillEntry.ParentSkillLineID != 0)
                         {
                             SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(skillEntry.ParentSkillLineID, GetRace(), GetClass());
                             if (rcEntry != null)
@@ -1209,25 +1169,38 @@ namespace Game.Entities
                                 if (tier != null)
                                 {
                                     ushort skillval = GetPureSkillValue((SkillType)skillEntry.ParentSkillLineID);
-                                    SetSkill((SkillType)skillEntry.ParentSkillLineID, (uint)skillEntry.ParentTierIndex, Math.Max(skillval, (ushort)1), tier.Value[skillEntry.ParentTierIndex - 1]);
+                                    SetSkill(skillEntry.ParentSkillLineID, (uint)skillEntry.ParentTierIndex, Math.Max(skillval, (ushort)1), tier.Value[skillEntry.ParentTierIndex - 1]);
                                 }
                             }
+                        }
+                        else
+                        {                     // also learn missing child skills at 0 value
+                            List<SkillLineRecord> childSkillLines = Global.DB2Mgr.GetSkillLinesForParentSkill(id);
+                            if (childSkillLines != null)
+                                foreach (SkillLineRecord childSkillLine in childSkillLines)
+                                    if (!HasSkill((SkillType)childSkillLine.Id))
+                                        SetSkill(childSkillLine.Id, 0, 0, 0);
+
                             if (skillEntry.CategoryID == SkillCategory.Profession)
                             {
                                 int freeProfessionSlot = FindProfessionSlotFor(id);
                                 if (freeProfessionSlot != -1)
-                                    SetUInt32Value(ActivePlayerFields.ProfessionSkillLine + freeProfessionSlot, id);
+                                    SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ProfessionSkillLine, freeProfessionSlot), id);
                             }
                         }
 
-                        SetUInt16Value(ActivePlayerFields.SkillLineId + field, offset, (ushort)id);
-                        SetUInt16Value(ActivePlayerFields.SkillLineStep + field, offset, (ushort)step);
-                        SetUInt16Value(ActivePlayerFields.SkillLineRank + field, offset, (ushort)newVal);
-                        SetUInt16Value(ActivePlayerFields.SkillLineMaxRank + field, offset, (ushort)maxVal);
+                        SetSkillLineId(i, (ushort)id);
+
+                        SetSkillStep(i, (ushort)step);
+                        SetSkillRank(i, (ushort)newVal);
+                        SetSkillStartingRank(i, 1);
+                        SetSkillMaxRank(i, (ushort)maxVal);
+
+                        // apply skill bonuses
+                        SetSkillTempBonus(i, 0);
+                        SetSkillPermBonus(i, 0);
 
                         UpdateSkillEnchantments(id, currVal, (ushort)newVal);
-                        UpdateCriteria(CriteriaTypes.ReachSkillLevel, id);
-                        UpdateCriteria(CriteriaTypes.LearnSkillLevel, id);
 
                         // insert new entry or update if not deleted old entry yet
                         if (skillStatusData != null)
@@ -1238,35 +1211,31 @@ namespace Game.Entities
                         else
                             mSkillStatus.Add(id, new SkillStatusData((uint)i, SkillState.New));
 
-                        // apply skill bonuses
-                        SetUInt16Value(ActivePlayerFields.SkillLineTempBonus + field, offset, 0);
-                        SetUInt16Value(ActivePlayerFields.SkillLinePermBonus + field, offset, 0);
-
-                        // temporary bonuses
-                        var mModSkill = GetAuraEffectsByType(AuraType.ModSkill);
-                        foreach (var j in mModSkill)
+                        if (newVal != 0)
                         {
-                            if (j.GetMiscValue() == id)
-                                j.HandleEffect(this, AuraEffectHandleModes.Skill, true);
-                        }
+                            UpdateCriteria(CriteriaTypes.ReachSkillLevel, id);
+                            UpdateCriteria(CriteriaTypes.LearnSkillLevel, id);
 
-                        var mModSkill2 = GetAuraEffectsByType(AuraType.ModSkill2);
-                        foreach (var j in mModSkill2)
-                        {
-                            if (j.GetMiscValue() == id)
-                                j.HandleEffect(this, AuraEffectHandleModes.Skill, true);
-                        }
+                            // temporary bonuses
+                            var mModSkill = GetAuraEffectsByType(AuraType.ModSkill);
+                            foreach (var auraEffect in mModSkill)
+                                if (auraEffect.GetMiscValue() == id)
+                                    auraEffect.HandleEffect(this, AuraEffectHandleModes.Skill, true);
 
-                        // permanent bonuses
-                        var mModSkillTalent = GetAuraEffectsByType(AuraType.ModSkillTalent);
-                        foreach (var eff in mModSkillTalent)
-                        {
-                            if (eff.GetMiscValue() == id)
-                                eff.HandleEffect(this, AuraEffectHandleModes.Skill, true);
-                        }
+                            var mModSkill2 = GetAuraEffectsByType(AuraType.ModSkill2);
+                            foreach (var auraEffect in mModSkill2)
+                                if (auraEffect.GetMiscValue() == id)
+                                    auraEffect.HandleEffect(this, AuraEffectHandleModes.Skill, true);
 
-                        // Learn all spells for skill
-                        LearnSkillRewardedSpells(id, newVal);
+                            // permanent bonuses
+                            var mModSkillTalent = GetAuraEffectsByType(AuraType.ModSkillTalent);
+                            foreach (var auraEffect in mModSkillTalent)
+                                if (auraEffect.GetMiscValue() == id)
+                                    auraEffect.HandleEffect(this, AuraEffectHandleModes.Skill, true);
+
+                            // Learn all spells for skill
+                            LearnSkillRewardedSpells(id, newVal);
+                        }
                         return;
                     }
                 }
@@ -1424,7 +1393,7 @@ namespace Game.Entities
                 Item pItem2 = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem2 != null && !pItem2.IsBroken())
                 {
-                    foreach (ItemDynamicFieldGems gemData in pItem2.GetGems())
+                    foreach (SocketedGem gemData in pItem2.m_itemData.Gems)
                     {
                         ItemTemplate gemProto = Global.ObjectMgr.GetItemTemplate(gemData.ItemId);
                         if (gemProto == null)
@@ -1642,7 +1611,7 @@ namespace Game.Entities
                 if (ability.AcquireMethod != AbilityLearnType.OnSkillValue && ability.AcquireMethod != AbilityLearnType.OnSkillLearn)
                     continue;
 
-                // AcquireMethod == 2 && NumSkillUps == 1 --> automatically learn riding skill spell, else we skip it (client shows riding in spellbook as trainable).
+                // AcquireMethod == 2 && NumSkillUps == 1 -. automatically learn riding skill spell, else we skip it (client shows riding in spellbook as trainable).
                 if (skillId == (uint)SkillType.Riding && (ability.AcquireMethod != AbilityLearnType.OnSkillLearn || ability.NumSkillUps != 1))
                     continue;
 
@@ -1676,39 +1645,15 @@ namespace Game.Entities
             if (skillEntry == null)
                 return -1;
 
-            // both free, return first slot
-            if (GetUInt32Value(ActivePlayerFields.ProfessionSkillLine) == 0 && GetUInt32Value(ActivePlayerFields.ProfessionSkillLine + 1) == 0)
-                return 0;
-
-            ActivePlayerFields professionsBegin = ActivePlayerFields.ProfessionSkillLine;
-            ActivePlayerFields professionsEnd = professionsBegin + 2;
-
-            // when any slot is filled we need to check both - one of them might be earlier step of the same profession
-            ActivePlayerFields sameProfessionSlot = professionsEnd;
-            for (var slot = professionsBegin; slot < professionsEnd; ++slot)
-            {
-                SkillLineRecord slotProfession = CliDB.SkillLineStorage.LookupByKey(GetUInt32Value(slot));
-                if (slotProfession != null)
-                {
-                    if (slotProfession.ParentSkillLineID == skillEntry.ParentSkillLineID)
-                    {
-                        sameProfessionSlot = slot;
-                        break;
-                    }
-                }
-            }
-
-            if (sameProfessionSlot != professionsEnd)
-            {
-                if (CliDB.SkillLineStorage.LookupByKey(sameProfessionSlot).ParentTierIndex < skillEntry.ParentTierIndex)
-                    return sameProfessionSlot - professionsBegin;
-                return -1;
-            }
-
+            int index = 0;
             // if there is no same profession, find any free slot
-            for (var slot = professionsBegin; slot < professionsEnd; ++slot)
-                if (GetUInt32Value(slot) == 0)
-                    return slot - professionsBegin;
+            foreach (var b in m_activePlayerData.ProfessionSkillLine)
+            {
+                if (b == 0)
+                    return index;
+
+                index++;
+            }
 
             return -1;
         }
@@ -2288,7 +2233,7 @@ namespace Game.Entities
 
         public bool IsCurrentSpecMasterySpell(SpellInfo spellInfo)
         {
-            ChrSpecializationRecord chrSpec = CliDB.ChrSpecializationStorage.LookupByKey(GetUInt32Value(PlayerFields.CurrentSpecId));
+            ChrSpecializationRecord chrSpec = CliDB.ChrSpecializationStorage.LookupByKey(GetPrimarySpecialization());
             if (chrSpec != null)
                 return spellInfo.Id == chrSpec.MasterySpellID[0] || spellInfo.Id == chrSpec.MasterySpellID[1];
 
@@ -3107,7 +3052,7 @@ namespace Game.Entities
                 {
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(itemSetSpell.SpellID);
 
-                    if (itemSetSpell.ChrSpecID != 0 && itemSetSpell.ChrSpecID != GetUInt32Value(PlayerFields.CurrentSpecId))
+                    if (itemSetSpell.ChrSpecID != 0 && itemSetSpell.ChrSpecID != GetPrimarySpecialization())
                         ApplyEquipSpell(spellInfo, null, false, false);  // item set aura is not for current spec
                     else
                     {
@@ -3197,7 +3142,7 @@ namespace Game.Entities
             if (GetClass() != Class.Deathknight)
                 return;
 
-            int runeIndex = (int)GetPowerIndex(PowerType.Runes);
+            uint runeIndex = GetPowerIndex(PowerType.Runes);
             if (runeIndex == (int)PowerType.Max)
                 return;
 
@@ -3208,8 +3153,8 @@ namespace Game.Entities
                 SetRuneCooldown(i, 0);                                          // reset cooldowns
 
             // set a base regen timer equal to 10 sec
-            SetStatFloatValue(UnitFields.PowerRegenFlatModifier + runeIndex, 0.0f);
-            SetStatFloatValue(UnitFields.PowerRegenInterruptedFlatModifier + runeIndex, 0.0f);
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, (int)runeIndex), 0.0f);
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, (int)runeIndex), 0.0f);
         }
 
         public void UpdateAllRunesRegen()
@@ -3217,15 +3162,15 @@ namespace Game.Entities
             if (GetClass() != Class.Deathknight)
                 return;
 
-            int runeIndex = (int)GetPowerIndex(PowerType.Runes);
+            uint runeIndex = GetPowerIndex(PowerType.Runes);
             if (runeIndex == (int)PowerType.Max)
                 return;
 
             PowerTypeRecord runeEntry = Global.DB2Mgr.GetPowerTypeEntry(PowerType.Runes);
 
             uint cooldown = GetRuneBaseCooldown();
-            SetStatFloatValue(UnitFields.PowerRegenFlatModifier + runeIndex, (float)(1 * Time.InMilliseconds) / (float)cooldown - runeEntry.RegenPeace);
-            SetStatFloatValue(UnitFields.PowerRegenInterruptedFlatModifier + runeIndex, (float)(1 * Time.InMilliseconds) / (float)cooldown - runeEntry.RegenCombat);
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, (int)runeIndex), (float)(1 * Time.InMilliseconds) / cooldown - runeEntry.RegenPeace);
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, (int)runeIndex), (float)(1 * Time.InMilliseconds) / cooldown - runeEntry.RegenCombat);
         }
 
         public uint GetRuneCooldown(byte index) { return m_runes.Cooldown[index]; }
@@ -3234,19 +3179,24 @@ namespace Game.Entities
         {
             // don't take reagents for spells with SPELL_ATTR5_NO_REAGENT_WHILE_PREP
             if (spellInfo.HasAttribute(SpellAttr5.NoReagentWhilePrep) &&
-                HasFlag(UnitFields.Flags, UnitFlags.Preparation))
+                HasUnitFlag(UnitFlags.Preparation))
                 return true;
 
             // Check no reagent use mask
             FlagArray128 noReagentMask = new FlagArray128();
-            noReagentMask[0] = GetUInt32Value(ActivePlayerFields.NoReagentCost);
-            noReagentMask[1] = GetUInt32Value(ActivePlayerFields.NoReagentCost + 1);
-            noReagentMask[2] = GetUInt32Value(ActivePlayerFields.NoReagentCost + 2);
-            noReagentMask[3] = GetUInt32Value(ActivePlayerFields.NoReagentCost + 3);
+            noReagentMask[0] = m_activePlayerData.NoReagentCostMask[0];
+            noReagentMask[1] = m_activePlayerData.NoReagentCostMask[1];
+            noReagentMask[2] = m_activePlayerData.NoReagentCostMask[2];
+            noReagentMask[3] = m_activePlayerData.NoReagentCostMask[3];
             if (spellInfo.SpellFamilyFlags & noReagentMask)
                 return true;
 
             return false;
+        }
+        public void SetNoRegentCostMask(FlagArray128 mask)
+        {
+            for (byte i = 0; i < 4; ++i)
+                SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.NoReagentCostMask, i), mask[i]);
         }
 
         public void CastItemCombatSpell(DamageInfo damageInfo)
@@ -3469,6 +3419,16 @@ namespace Game.Entities
             LearnCustomSpells();
             LearnQuestRewardedSpells();
         }
+
+        public void SetPetSpellPower(uint spellPower) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.PetSpellPower), spellPower); }
+
+        public void SetSkillLineId(uint pos, ushort skillLineId) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill)._value.ModifyValue((SkillInfo skillInfo) => skillInfo.SkillLineID, (int)pos), skillLineId); }
+        public void SetSkillStep(uint pos, ushort step) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill)._value.ModifyValue((SkillInfo skillInfo) => skillInfo.SkillStep, (int)pos), step); }
+        public void SetSkillRank(uint pos, ushort rank) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill)._value.ModifyValue((SkillInfo skillInfo) => skillInfo.SkillRank, (int)pos), rank); }
+        public void SetSkillStartingRank(uint pos, ushort starting) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill)._value.ModifyValue((SkillInfo skillInfo) => skillInfo.SkillStartingRank, (int)pos), starting); }
+        public void SetSkillMaxRank(uint pos, ushort max) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill)._value.ModifyValue((SkillInfo skillInfo) => skillInfo.SkillMaxRank, (int)pos), max); }
+        public void SetSkillTempBonus(uint pos, ushort bonus) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill)._value.ModifyValue((SkillInfo skillInfo) => skillInfo.SkillTempBonus, (int)pos), bonus); }
+        public void SetSkillPermBonus(uint pos, ushort bonus) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill)._value.ModifyValue((SkillInfo skillInfo) => skillInfo.SkillPermBonus, (int)pos), bonus); }
     }
 
     public class PlayerSpell

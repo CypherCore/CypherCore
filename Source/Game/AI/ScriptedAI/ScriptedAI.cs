@@ -125,7 +125,7 @@ namespace Game.AI
                 return null;
 
             //Silenced so we can't cast
-            if (me.HasFlag(UnitFields.Flags, UnitFlags.Silenced))
+            if (me.HasUnitFlag(UnitFlags.Silenced))
                 return null;
 
             //Using the extended script system we first create a list of viable spells

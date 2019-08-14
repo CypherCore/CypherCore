@@ -284,7 +284,7 @@ namespace Game.Achievements
                         SetCriteriaProgress(criteria, referencePlayer.GetReputationMgr().GetVisibleFactionCount(), referencePlayer);
                         break;
                     case CriteriaTypes.EarnHonorableKill:
-                        SetCriteriaProgress(criteria, referencePlayer.GetUInt32Value(ActivePlayerFields.LifetimeHonorableKills), referencePlayer);
+                        SetCriteriaProgress(criteria, referencePlayer.m_activePlayerData.LifetimeHonorableKills, referencePlayer);
                         break;
                     case CriteriaTypes.HighestGoldValueOwned:
                         SetCriteriaProgress(criteria, referencePlayer.GetMoney(), referencePlayer, ProgressType.Highest);
@@ -1063,12 +1063,12 @@ namespace Game.Achievements
                             if (area.AreaBit < 0)
                                 continue;
 
-                            int playerIndexOffset = (int)((uint)area.AreaBit / 32);
+                            int playerIndexOffset = (int)((uint)area.AreaBit / 64);
                             if (playerIndexOffset >= PlayerConst.ExploredZonesSize)
                                 continue;
 
-                            uint mask = 1u << (int)((uint)area.AreaBit % 32);
-                            if (Convert.ToBoolean(referencePlayer.GetUInt32Value(ActivePlayerFields.ExploredZones + playerIndexOffset) & mask))
+                            ulong mask = 1ul << (int)((uint)area.AreaBit % 64);
+                            if (Convert.ToBoolean(referencePlayer.m_activePlayerData.ExploredZones[playerIndexOffset] & mask))
                             {
                                 matchFound = true;
                                 break;

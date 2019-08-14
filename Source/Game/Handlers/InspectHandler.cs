@@ -1,4 +1,5 @@
-﻿/*
+﻿
+/*
  * Copyright (C) 2012-2019 CypherCore <http://github.com/CypherCore>
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -42,17 +43,7 @@ namespace Game
                 return;
 
             InspectResult inspectResult = new InspectResult();
-            inspectResult.InspecteeGUID = inspect.Target;
-
-            for (byte i = 0; i < EquipmentSlot.End; ++i)
-            {
-                Item item = player.GetItemByPos(InventorySlots.Bag0, i);
-                if (item)
-                    inspectResult.Items.Add(new InspectItemData(item, i));
-            }
-
-            inspectResult.ClassID = player.GetClass();
-            inspectResult.GenderID = (Gender)player.GetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetGender);
+            inspectResult.DisplayInfo.Initialize(player);
 
             if (GetPlayer().CanBeGameMaster() || WorldConfig.GetIntValue(WorldCfg.TalentsInspecting) + (GetPlayer().GetTeamId() == player.GetTeamId() ? 1 : 0) > 1)
             {
@@ -76,13 +67,11 @@ namespace Game
                 inspectResult.GuildData.Set(guildData);
             }
 
-            inspectResult.InspecteeGUID = inspect.Target;
-            inspectResult.SpecializationID = (int)player.GetUInt32Value(PlayerFields.CurrentSpecId);
-            inspectResult.LifetimeMaxRank = player.GetByteValue(ActivePlayerFields.Bytes, PlayerFieldOffsets.FieldBytesOffsetLifetimeMaxPvpRank);
-            inspectResult.TodayHK = player.GetUInt16Value(ActivePlayerFields.Kills, PlayerFieldOffsets.FieldKillsOffsetTodayKills);
-            inspectResult.YesterdayHK = player.GetUInt16Value(ActivePlayerFields.Kills, PlayerFieldOffsets.FieldKillsOffsetYesterdayKills);
-            inspectResult.LifetimeHK = player.GetUInt32Value(ActivePlayerFields.LifetimeHonorableKills);
-            inspectResult.HonorLevel = player.GetUInt32Value(PlayerFields.HonorLevel);
+            inspectResult.LifetimeMaxRank = player.m_activePlayerData.LifetimeMaxRank;
+            inspectResult.TodayHK = player.m_activePlayerData.TodayHonorableKills;
+            inspectResult.YesterdayHK = player.m_activePlayerData.YesterdayHonorableKills;
+            inspectResult.LifetimeHK = player.m_activePlayerData.LifetimeHonorableKills;
+            inspectResult.HonorLevel = player.m_playerData.HonorLevel;
 
             SendPacket(inspectResult);
         }

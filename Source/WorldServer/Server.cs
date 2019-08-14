@@ -180,8 +180,8 @@ namespace WorldServer
                 uint executionTimeDiff = Time.GetMSTimeDiffToNow(realCurrTime);
 
                 // we know exactly how long it took to update the world, if the update took less than WORLD_SLEEP_CONST, sleep for WORLD_SLEEP_CONST - world update time
-                if (executionTimeDiff < WorldSleep)               
-                    Thread.Sleep((int)(WorldSleep - executionTimeDiff));                
+                if (executionTimeDiff < WorldSleep)
+                    Thread.Sleep((int)(WorldSleep - executionTimeDiff));
             }
         }
 

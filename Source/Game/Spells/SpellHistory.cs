@@ -351,7 +351,7 @@ namespace Game.Spells
                 // shoot spells used equipped item cooldown values already assigned in GetAttackTime(RANGED_ATTACK)
                 // prevent 0 cooldowns set by another way
                 if (cooldown <= 0 && categoryCooldown <= 0 && (categoryId == 76 || (spellInfo.IsAutoRepeatRangedSpell() && spellInfo.Id != 75)))
-                    cooldown = (int)_owner.GetUInt32Value(UnitFields.RangedAttackTime);
+                    cooldown = (int)(uint)_owner.m_unitData.RangedAttackRoundBaseTime;
 
                 // Now we have cooldown data (if found any), time to apply mods
                 Player modOwner = _owner.GetSpellModOwner();
@@ -366,14 +366,14 @@ namespace Game.Spells
 
                 if (_owner.HasAuraTypeWithAffectMask(AuraType.ModSpellCooldownByHaste, spellInfo))
                 {
-                    cooldown = (int)(cooldown * _owner.GetFloatValue(UnitFields.ModCastHaste));
-                    categoryCooldown = (int)(categoryCooldown * _owner.GetFloatValue(UnitFields.ModCastHaste));
+                    cooldown = (int)(cooldown * _owner.m_unitData.ModSpellHaste);
+                    categoryCooldown = (int)(categoryCooldown * _owner.m_unitData.ModSpellHaste);
                 }
 
                 if (_owner.HasAuraTypeWithAffectMask(AuraType.ModCooldownByHasteRegen, spellInfo))
                 {
-                    cooldown = (int)(cooldown * _owner.GetFloatValue(UnitFields.ModHasteRegen));
-                    categoryCooldown = (int)(categoryCooldown * _owner.GetFloatValue(UnitFields.ModHasteRegen));
+                    cooldown = (int)(cooldown * _owner.m_unitData.ModHasteRegen);
+                    categoryCooldown = (int)(categoryCooldown * _owner.m_unitData.ModHasteRegen);
                 }
 
                 int cooldownMod = _owner.GetTotalAuraModifier(AuraType.ModCooldown);
@@ -804,10 +804,10 @@ namespace Game.Spells
             recoveryTimeF *= _owner.GetTotalAuraMultiplierByMiscValue(AuraType.ChargeRecoveryMultiplier, (int)chargeCategoryId);
 
             if (_owner.HasAuraType(AuraType.ChargeRecoveryAffectedByHaste))
-                recoveryTimeF *= _owner.GetFloatValue(UnitFields.ModCastHaste);
+                recoveryTimeF *= _owner.m_unitData.ModSpellHaste;
 
             if (_owner.HasAuraType(AuraType.ChargeRecoveryAffectedByHasteRegen))
-                recoveryTimeF *= _owner.GetFloatValue(UnitFields.ModHasteRegen);
+                recoveryTimeF *= _owner.m_unitData.ModHasteRegen;
 
             return (int)Math.Floor(recoveryTimeF);
         }

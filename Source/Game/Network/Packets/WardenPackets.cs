@@ -22,7 +22,7 @@ namespace Game.Network.Packets
 {
     public enum WardenOpcodes
     {
-        // Client->Server
+        // Client.Server
         CMSG_ModuleMissing = 0,
         Cmsg_ModuleOk = 1,
         Cmsg_CheatChecksResult = 2,
@@ -30,7 +30,7 @@ namespace Game.Network.Packets
         Cmsg_HashResult = 4,
         Cmsg_ModuleFailed = 5,        // This Is Sent When Client Failed To Load Uploaded Module Due To Cache Fail
 
-        // Server->Client
+        // Server.Client
         Smsg_ModuleUse = 0,
         Smsg_ModuleCache = 1,
         Smsg_CheatChecksRequest = 2,
@@ -70,7 +70,7 @@ namespace Game.Network.Packets
     {
         public byte[] Write()
         {
-            WriteUInt8(Command);
+            WriteUInt8((byte)Command);
             WriteUInt16(DataSize);
             WriteBytes(Data, 500);
 
@@ -86,7 +86,7 @@ namespace Game.Network.Packets
     {
         public byte[] Write()
         {
-            WriteUInt8(Command);
+            WriteUInt8((byte)Command);
             WriteBytes(ModuleId, 16);
             WriteBytes(ModuleKey, 16);
             WriteUInt32(Size);
@@ -104,7 +104,7 @@ namespace Game.Network.Packets
     {
         public byte[] Write()
         {
-            WriteUInt8(Command);
+            WriteUInt8((byte)Command);
             WriteBytes(Seed);
 
             return GetData();
@@ -118,7 +118,7 @@ namespace Game.Network.Packets
     {
         public byte[] Write()
         {
-            WriteUInt8(Command1);
+            WriteUInt8((byte)Command1);
             WriteUInt16(Size1);
             WriteUInt32(CheckSumm1);
             WriteUInt8(Unk1);
@@ -128,7 +128,7 @@ namespace Game.Network.Packets
             foreach (var function in Function1)
                 WriteUInt32(function);
 
-            WriteUInt8(Command2);
+            WriteUInt8((byte)Command2);
             WriteUInt16(Size2);
             WriteUInt32(CheckSumm2);
             WriteUInt8(Unk3);
@@ -137,7 +137,7 @@ namespace Game.Network.Packets
             WriteUInt32(Function2);
             WriteUInt8(Function2_set);
 
-            WriteUInt8(Command3);
+            WriteUInt8((byte)Command3);
             WriteUInt16(Size3);
             WriteUInt32(CheckSumm3);
             WriteUInt8(Unk5);

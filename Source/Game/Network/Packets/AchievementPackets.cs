@@ -149,11 +149,11 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Progress.Count);
+            _worldPacket.WriteInt32(Progress.Count);
 
             foreach (GuildCriteriaProgress progress in Progress)
             {
-                _worldPacket.WriteInt32(progress.CriteriaID);
+                _worldPacket.WriteUInt32(progress.CriteriaID);
                 _worldPacket.WriteUInt32(progress.DateCreated);
                 _worldPacket.WriteUInt32(progress.DateStarted);
                 _worldPacket.WritePackedTime(progress.DateUpdated);
@@ -230,7 +230,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Earned.Count);
+            _worldPacket.WriteInt32(Earned.Count);
 
             foreach (EarnedAchievement earned in Earned)
                 earned.Write(_worldPacket);
@@ -263,7 +263,7 @@ namespace Game.Network.Packets
         {
             _worldPacket.WritePackedGuid(GuildGUID);
             _worldPacket.WriteUInt32(AchievementID);
-            _worldPacket.WriteUInt32(Member.Count);
+            _worldPacket.WriteInt32(Member.Count);
             foreach (ObjectGuid guid in Member)
                 _worldPacket.WritePackedGuid(guid);
         }
@@ -330,8 +330,8 @@ namespace Game.Network.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(Earned.Count);
-            data.WriteUInt32(Progress.Count);
+            data.WriteInt32(Earned.Count);
+            data.WriteInt32(Progress.Count);
 
             foreach (EarnedAchievement earned in Earned)
                 earned.Write(data);

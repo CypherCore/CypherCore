@@ -51,6 +51,7 @@ namespace Game.Groups
             m_guid = ObjectGuid.Create(HighGuid.Party, Global.GroupMgr.GenerateGroupId());
             m_leaderGuid = leaderGuid;
             m_leaderName = leader.GetName();
+            leader.AddPlayerFlag(PlayerFlags.GroupLeader);
 
             if (isBGGroup() || isBFGroup())
             { 
@@ -428,8 +429,6 @@ namespace Game.Groups
 
             {
                 // Broadcast new player group member fields to rest of the group
-                player.SetFieldNotifyFlag(UpdateFieldFlags.PartyMember);
-
                 UpdateData groupData = new UpdateData(player.GetMapId());
                 UpdateObject groupDataPacket;
 
@@ -439,25 +438,21 @@ namespace Game.Groups
                     if (refe.GetSource() == player)
                         continue;
 
-                    Player memberPlayer = refe.GetSource();
-                    if (memberPlayer != null)
+                    Player existingMember = refe.GetSource();
+                    if (existingMember != null)
                     {
-                        if (player.HaveAtClient(memberPlayer))
-                        {
-                            memberPlayer.SetFieldNotifyFlag(UpdateFieldFlags.PartyMember);
-                            memberPlayer.BuildValuesUpdateBlockForPlayer(groupData, player);
-                            memberPlayer.RemoveFieldNotifyFlag(UpdateFieldFlags.PartyMember);
-                        }
+                        if (player.HaveAtClient(existingMember))
+                            existingMember.BuildValuesUpdateBlockForPlayerWithFlag(groupData, UpdateFieldFlag.PartyMember, player);
 
-                        if (memberPlayer.HaveAtClient(player))
+                        if (existingMember.HaveAtClient(player))
                         {
                             UpdateData newData = new UpdateData(player.GetMapId());
                             UpdateObject newDataPacket;
-                            player.BuildValuesUpdateBlockForPlayer(newData, memberPlayer);
+                            player.BuildValuesUpdateBlockForPlayerWithFlag(newData, UpdateFieldFlag.PartyMember, existingMember);
                             if (newData.HasData())
                             {
                                 newData.BuildPacket(out newDataPacket);
-                                memberPlayer.SendPacket(newDataPacket);
+                                existingMember.SendPacket(newDataPacket);
                             }
                         }
                     }
@@ -468,8 +463,6 @@ namespace Game.Groups
                     groupData.BuildPacket(out groupDataPacket);
                     player.SendPacket(groupDataPacket);
                 }
-
-                player.RemoveFieldNotifyFlag(UpdateFieldFlags.PartyMember);
             }
 
             if (m_maxEnchantingLevel < player.GetSkillValue(SkillType.Enchanting))
@@ -675,6 +668,11 @@ namespace Game.Groups
                 DB.Characters.CommitTransaction(trans);
             }
 
+            Player oldLeader = Global.ObjAccessor.FindConnectedPlayer(m_leaderGuid);
+            if (oldLeader)
+                oldLeader.RemovePlayerFlag(PlayerFlags.GroupLeader);
+
+            newLeader.AddPlayerFlag(PlayerFlags.GroupLeader);
             m_leaderGuid = newLeader.GetGUID();
             m_leaderName = newLeader.GetName();
             ToggleGroupMemberFlag(slot, GroupMemberFlags.Assistant, false);
@@ -1170,7 +1168,7 @@ namespace Game.Groups
                             item.is_looted = true;
                             roll.getLoot().NotifyItemRemoved(roll.itemSlot);
                             roll.getLoot().unlootedCount--;
-                            player.StoreNewItem(dest, roll.itemid, true, item.randomPropertyId, item.GetAllowedLooters(), item.context, item.BonusListIDs);
+                            player.StoreNewItem(dest, roll.itemid, true, item.randomBonusListId, item.GetAllowedLooters(), item.context, item.BonusListIDs);
                         }
                         else
                         {
@@ -1221,7 +1219,7 @@ namespace Game.Groups
                                 item.is_looted = true;
                                 roll.getLoot().NotifyItemRemoved(roll.itemSlot);
                                 roll.getLoot().unlootedCount--;
-                                player.StoreNewItem(dest, roll.itemid, true, item.randomPropertyId, item.GetAllowedLooters(), item.context, item.BonusListIDs);
+                                player.StoreNewItem(dest, roll.itemid, true, item.randomBonusListId, item.GetAllowedLooters(), item.context, item.BonusListIDs);
                             }
                             else
                             {
@@ -2061,8 +2059,9 @@ namespace Game.Groups
                 Player pp = Global.ObjAccessor.FindPlayer(member.guid);
                 if (pp && pp.IsInWorld)
                 {
-                    pp.ForceValuesUpdateAtIndex(UnitFields.Bytes2);
-                    pp.ForceValuesUpdateAtIndex(UnitFields.FactionTemplate);
+                    pp.m_values.ModifyValue(pp.m_unitData).ModifyValue(pp.m_unitData.PvpFlags);
+                    pp.m_values.ModifyValue(pp.m_unitData).ModifyValue(pp.m_unitData.FactionTemplate);
+                    pp.ForceUpdateFieldChange();
                     Log.outDebug(LogFilter.Server, "-- Forced group value update for '{0}'", pp.GetName());
                 }
             }
@@ -2602,8 +2601,7 @@ namespace Game.Groups
         public Roll(LootItem li)
         {
             itemid = li.itemid;
-            itemRandomPropId = li.randomPropertyId;
-            itemRandomSuffix = li.randomSuffix;
+            itemRandomBonusListId = li.randomBonusListId;
             itemCount = li.count;
             rollTypeMask = RollMask.AllNoDisenchant;
         }
@@ -2655,8 +2653,7 @@ namespace Game.Groups
         }
 
         public uint itemid;
-        public ItemRandomEnchantmentId itemRandomPropId;
-        public uint itemRandomSuffix;
+        public uint itemRandomBonusListId;
         public byte itemCount;
         public Dictionary<ObjectGuid, RollType> playerVote = new Dictionary<ObjectGuid, RollType>();
         public byte totalPlayersRolling;

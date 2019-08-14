@@ -147,8 +147,8 @@ namespace Game.Network.Packets
             {
                 case TradeStatus.Failed:
                     _worldPacket.WriteBit(FailureForYou);
-                    _worldPacket.WriteInt32(BagResult);
-                    _worldPacket.WriteInt32(ItemID);
+                    _worldPacket.WriteInt32((int)BagResult);
+                    _worldPacket.WriteUInt32(ItemID);
                     break;
                 case TradeStatus.Initiated:
                     _worldPacket.WriteUInt32(ID);
@@ -159,7 +159,7 @@ namespace Game.Network.Packets
                     break;
                 case TradeStatus.WrongRealm:
                 case TradeStatus.NotOnTaplist:
-                    _worldPacket.WriteInt8(TradeSlot);
+                    _worldPacket.WriteUInt8(TradeSlot);
                     break;
                 case TradeStatus.NotEnoughCurrency:
                 case TradeStatus.CurrencyNotTradable:
@@ -199,7 +199,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(CurrencyType);
             _worldPacket.WriteInt32(CurrencyQuantity);
             _worldPacket.WriteInt32(ProposedEnchantment);
-            _worldPacket.WriteUInt32(Items.Count);
+            _worldPacket.WriteInt32(Items.Count);
 
             Items.ForEach(item => item.Write(_worldPacket));
         }
@@ -238,7 +238,7 @@ namespace Game.Network.Packets
             public void Write(WorldPacket data)
             {
                 data.WriteUInt8(Slot);
-                data.WriteUInt32(StackCount);
+                data.WriteInt32(StackCount);
                 data.WritePackedGuid(GiftCreator);
                 Item.Write(data);
                 data.WriteBit(Unwrapped.HasValue);

@@ -62,7 +62,7 @@ namespace Game.Chat.Commands
             string tNameLink = handler.GetNameLink(target);
 
             target.SetTitle(titleInfo);                            // to be sure that title now known
-            target.SetUInt32Value(PlayerFields.ChosenTitle, titleInfo.MaskID);
+            target.SetChosenTitle(titleInfo.MaskID);
 
             handler.SendSysMessage(CypherStrings.TitleCurrentRes, id, (target.GetGender() == Gender.Male ? titleInfo.Name : titleInfo.Name1)[handler.GetSessionDbcLocale()], tNameLink);
             return true;
@@ -150,9 +150,9 @@ namespace Game.Chat.Commands
 
             handler.SendSysMessage(CypherStrings.TitleRemoveRes, id, titleNameStr, tNameLink);
 
-            if (!target.HasTitle(target.GetUInt32Value(PlayerFields.ChosenTitle)))
+            if (!target.HasTitle(target.m_playerData.PlayerTitle))
             {
-                target.SetUInt32Value(PlayerFields.ChosenTitle, 0);
+                target.SetChosenTitle(0);
                 handler.SendSysMessage(CypherStrings.CurrentTitleReset, tNameLink);
             }
 
@@ -189,12 +189,12 @@ namespace Game.Chat.Commands
 
                 titles &= ~titles2;                                     // remove not existed titles
 
-                target.SetUInt64Value(ActivePlayerFields.KnownTitles, titles);
+                target.SetKnownTitles(0, titles);
                 handler.SendSysMessage(CypherStrings.Done);
 
-                if (!target.HasTitle(target.GetUInt32Value(PlayerFields.ChosenTitle)))
+                if (!target.HasTitle(target.m_playerData.PlayerTitle))
                 {
-                    target.SetUInt32Value(PlayerFields.ChosenTitle, 0);
+                    target.SetChosenTitle(0);
                     handler.SendSysMessage(CypherStrings.CurrentTitleReset, handler.GetNameLink(target));
                 }
 

@@ -103,7 +103,7 @@ namespace Game.Chat
             if (!handler.extractPlayerTarget(args, out target, out targetGuid))
                 return false;
 
-            uint guildId = target != null ? target.GetGuildId() : Player.GetGuildIdFromDB(targetGuid);
+            ulong guildId = target != null ? target.GetGuildId() : Player.GetGuildIdFromDB(targetGuid);
             if (guildId == 0)
                 return false;
 

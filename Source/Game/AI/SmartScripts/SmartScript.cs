@@ -221,7 +221,7 @@ namespace Game.AI
                                         CreatureTemplate ci = Global.ObjectMgr.GetCreatureTemplate(obj.ToCreature().GetEntry());
                                         if (ci != null)
                                         {
-                                            if (obj.ToCreature().getFaction() != ci.Faction)
+                                            if (obj.ToCreature().GetFaction() != ci.Faction)
                                             {
                                                 obj.ToCreature().SetFaction(ci.Faction);
                                                 Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_SET_FACTION: Creature entry {0}, GuidLow {1} set faction to {2}",
@@ -647,7 +647,7 @@ namespace Game.AI
                         {
                             if (IsUnit(obj))
                             {
-                                obj.ToUnit().SetUInt32Value(UnitFields.NpcEmotestate, e.Action.emote.emoteId);
+                                obj.ToUnit().SetEmoteState((Emote)e.Action.emote.emoteId);
                                 Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_SET_EMOTE_STATE. Unit {0} set emotestate to {1}",
                                     obj.GetGUID().ToString(), e.Action.emote.emoteId);
                             }
@@ -668,13 +668,13 @@ namespace Game.AI
                             {
                                 if (e.Action.unitFlag.type == 0)
                                 {
-                                    obj.ToUnit().SetFlag(UnitFields.Flags, e.Action.unitFlag.flag);
+                                    obj.ToUnit().AddUnitFlag((UnitFlags)e.Action.unitFlag.flag);
                                     Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_SET_UNIT_FLAG. Unit {0} added flag {1} to UNIT_FIELD_FLAGS",
                                     obj.GetGUID().ToString(), e.Action.unitFlag.flag);
                                 }
                                 else
                                 {
-                                    obj.ToUnit().SetFlag(UnitFields.Flags2, e.Action.unitFlag.flag);
+                                    obj.ToUnit().AddUnitFlag2((UnitFlags2)e.Action.unitFlag.flag);
                                     Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_SET_UNIT_FLAG. Unit {0} added flag {1} to UNIT_FIELD_FLAGS_2",
                                     obj.GetGUID().ToString(), e.Action.unitFlag.flag);
                                 }
@@ -696,13 +696,13 @@ namespace Game.AI
                             {
                                 if (e.Action.unitFlag.type == 0)
                                 {
-                                    obj.ToUnit().RemoveFlag(UnitFields.Flags2, e.Action.unitFlag.flag);
+                                    obj.ToUnit().RemoveUnitFlag((UnitFlags)e.Action.unitFlag.flag);
                                     Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_REMOVE_UNIT_FLAG. Unit {0} removed flag {1} to UNIT_FIELD_FLAGS",
                                     obj.GetGUID().ToString(), e.Action.unitFlag.flag);
                                 }
                                 else
                                 {
-                                    obj.ToUnit().RemoveFlag(UnitFields.Flags2, e.Action.unitFlag.flag);
+                                    obj.ToUnit().RemoveUnitFlag2((UnitFlags2)e.Action.unitFlag.flag);
                                     Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_REMOVE_UNIT_FLAG. Unit {0} removed flag {1} to UNIT_FIELD_FLAGS_2",
                                     obj.GetGUID().ToString(), e.Action.unitFlag.flag);
                                 }
@@ -1756,7 +1756,7 @@ namespace Game.AI
 
                         foreach (var obj in targets)
                             if (IsUnit(obj))
-                                obj.ToUnit().SetUInt64Value(UnitFields.NpcFlags, e.Action.unitFlag.flag);
+                                obj.ToUnit().SetNpcFlags((NPCFlags)e.Action.unitFlag.flag);
                         break;
                     }
                 case SmartActions.AddNpcFlag:
@@ -1767,7 +1767,7 @@ namespace Game.AI
 
                         foreach (var obj in targets)
                             if (IsUnit(obj))
-                                obj.ToUnit().SetFlag64(UnitFields.NpcFlags, e.Action.unitFlag.flag);
+                                obj.ToUnit().AddNpcFlag((NPCFlags)e.Action.unitFlag.flag);
                         break;
                     }
                 case SmartActions.RemoveNpcFlag:
@@ -1778,7 +1778,7 @@ namespace Game.AI
 
                         foreach (var obj in targets)
                             if (IsUnit(obj))
-                                obj.ToUnit().RemoveFlag64(UnitFields.NpcFlags, e.Action.unitFlag.flag);
+                                obj.ToUnit().RemoveNpcFlag((NPCFlags)e.Action.unitFlag.flag);
                         break;
                     }
                 case SmartActions.CrossCast:
@@ -1937,7 +1937,25 @@ namespace Game.AI
                             break;
                         foreach (var obj in targets)
                             if (IsUnit(obj))
-                                obj.ToUnit().SetByteFlag(UnitFields.Bytes1, (byte)e.Action.setunitByte.type, e.Action.setunitByte.byte1);
+                            {
+                                switch (e.Action.setunitByte.type)
+                                {
+                                    case 0:
+                                        obj.ToUnit().SetStandState((UnitStandStateType)e.Action.setunitByte.byte1);
+                                        break;
+                                    case 1:
+                                        // pet talent points
+                                        break;
+                                    case 2:
+                                        obj.ToUnit().AddVisFlags((UnitVisFlags)e.Action.setunitByte.byte1);
+                                        break;
+                                    case 3:
+                                        // this is totally wrong to maintain compatibility with existing scripts
+                                        // TODO: fix with animtier overhaul
+                                        obj.ToUnit().SetAnimTier((UnitBytes1Flags)(obj.ToUnit().m_unitData.AnimTier | e.Action.setunitByte.byte1), false);
+                                        break;
+                                }
+                            }
                         break;
                     }
                 case SmartActions.RemoveUnitFieldBytes1:
@@ -1948,7 +1966,23 @@ namespace Game.AI
 
                         foreach (var obj in targets)
                             if (IsUnit(obj))
-                                obj.ToUnit().RemoveByteFlag(UnitFields.Bytes1, (byte)e.Action.delunitByte.type, e.Action.delunitByte.byte1);
+                            {
+                                switch (e.Action.setunitByte.type)
+                                {
+                                    case 0:
+                                        obj.ToUnit().SetStandState(UnitStandStateType.Stand);
+                                        break;
+                                    case 1:
+                                        // pet talent points
+                                        break;
+                                    case 2:
+                                        obj.ToUnit().RemoveVisFlags((UnitVisFlags)e.Action.setunitByte.byte1);
+                                        break;
+                                    case 3:
+                                        obj.ToUnit().SetAnimTier((UnitBytes1Flags)(obj.ToUnit().m_unitData.AnimTier & ~e.Action.setunitByte.byte1), false);
+                                        break;
+                                }
+                            }
                         break;
                     }
                 case SmartActions.InterruptSpell:
@@ -1981,7 +2015,7 @@ namespace Game.AI
 
                         foreach (var obj in targets)
                             if (IsUnit(obj))
-                                obj.ToUnit().SetUInt32Value(ObjectFields.DynamicFlags, e.Action.unitFlag.flag);
+                                obj.ToUnit().SetDynamicFlags((UnitDynFlags)e.Action.unitFlag.flag);
                         break;
                     }
                 case SmartActions.AddDynamicFlag:
@@ -1992,7 +2026,7 @@ namespace Game.AI
 
                         foreach (var obj in targets)
                             if (IsUnit(obj))
-                                obj.ToUnit().SetFlag(ObjectFields.DynamicFlags, e.Action.unitFlag.flag);
+                                obj.ToUnit().AddDynamicFlag((UnitDynFlags)e.Action.unitFlag.flag);
                         break;
                     }
                 case SmartActions.RemoveDynamicFlag:
@@ -2003,7 +2037,7 @@ namespace Game.AI
 
                         foreach (var obj in targets)
                             if (IsUnit(obj))
-                                obj.ToUnit().RemoveFlag(ObjectFields.DynamicFlags, e.Action.unitFlag.flag);
+                                obj.ToUnit().RemoveDynamicFlag((UnitDynFlags)e.Action.unitFlag.flag);
                         break;
                     }
                 case SmartActions.JumpToPos:
@@ -2163,7 +2197,7 @@ namespace Game.AI
 
                         foreach (var obj in targets)
                             if (IsGameObject(obj))
-                                obj.ToGameObject().SetUInt32Value(GameObjectFields.Flags, e.Action.goFlag.flag);
+                                obj.ToGameObject().SetFlags((GameObjectFlags)e.Action.goFlag.flag);
                         break;
                     }
                 case SmartActions.AddGoFlag:
@@ -2174,7 +2208,7 @@ namespace Game.AI
 
                         foreach (var obj in targets)
                             if (IsGameObject(obj))
-                                obj.ToGameObject().SetFlag(GameObjectFields.Flags, e.Action.goFlag.flag);
+                                obj.ToGameObject().AddFlag((GameObjectFlags)e.Action.goFlag.flag);
                         break;
                     }
                 case SmartActions.RemoveGoFlag:
@@ -2185,7 +2219,7 @@ namespace Game.AI
 
                         foreach (var obj in targets)
                             if (IsGameObject(obj))
-                                obj.ToGameObject().RemoveFlag(GameObjectFields.Flags, e.Action.goFlag.flag);
+                                obj.ToGameObject().RemoveFlag((GameObjectFlags)e.Action.goFlag.flag);
                         break;
                     }
                 case SmartActions.SummonCreatureGroup:

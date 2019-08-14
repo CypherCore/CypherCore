@@ -208,8 +208,8 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8(SlashCmd);
-            _worldPacket.WriteUInt32(_Language);
+            _worldPacket.WriteUInt8((byte)SlashCmd);
+            _worldPacket.WriteUInt32((uint)_Language);
             _worldPacket.WritePackedGuid(SenderGUID);
             _worldPacket.WritePackedGuid(SenderGuildGUID);
             _worldPacket.WritePackedGuid(SenderAccountGUID);
@@ -269,7 +269,7 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(Guid);
-            _worldPacket.WriteUInt32(EmoteID);
+            _worldPacket.WriteInt32(EmoteID);
         }
 
         public ObjectGuid Guid;
@@ -300,7 +300,7 @@ namespace Game.Network.Packets
         {
             _worldPacket.WritePackedGuid(SourceGUID);
             _worldPacket.WritePackedGuid(SourceAccountGUID);
-            _worldPacket.WriteUInt32(EmoteID);
+            _worldPacket.WriteInt32(EmoteID);
             _worldPacket.WriteInt32(SoundIndex);
             _worldPacket.WritePackedGuid(TargetGUID);
         }
@@ -376,7 +376,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8(Reason);
+            _worldPacket.WriteUInt8((byte)Reason);
         }
 
         ChatRestrictionType Reason;

@@ -32,7 +32,8 @@ namespace Framework.Constants
         Corpse = 10,
         AreaTrigger = 11,
         SceneObject = 12,
-        Conversation = 13
+        Conversation = 13,
+        Max = 14
     }
 
     public enum TypeMask

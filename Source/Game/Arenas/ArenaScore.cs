@@ -29,7 +29,7 @@ namespace Game.Arenas
             TeamId = (int)(team == Team.Alliance ? BattlegroundTeamId.Alliance : BattlegroundTeamId.Horde);
         }
 
-        public override void BuildPvPLogPlayerDataPacket(out PVPLogData.PlayerData playerData)
+        public override void BuildPvPLogPlayerDataPacket(out PVPLogData.PVPMatchPlayerStatistics playerData)
         {
             base.BuildPvPLogPlayerDataPacket(out playerData);
 

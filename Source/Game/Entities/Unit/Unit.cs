@@ -31,6 +31,7 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Game.Network;
 
 namespace Game.Entities
 {
@@ -85,6 +86,8 @@ namespace Game.Entities
             m_serverSideVisibility.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive);
 
             movesplineTimer = new TimeTrackerSmall();
+
+            m_unitData = new UnitData();
         }
 
         public override void Dispose()
@@ -734,31 +737,41 @@ namespace Game.Entities
                 m_areaTrigger[0].Remove();
         }
 
-        public bool IsVendor() { return HasFlag64(UnitFields.NpcFlags, NPCFlags.Vendor); }
-        public bool IsTrainer() { return HasFlag64(UnitFields.NpcFlags, NPCFlags.Trainer); }
-        public bool IsQuestGiver() { return HasFlag64(UnitFields.NpcFlags, NPCFlags.QuestGiver); }
-        public bool IsGossip() { return HasFlag64(UnitFields.NpcFlags, NPCFlags.Gossip); }
-        public bool IsTaxi() { return HasFlag64(UnitFields.NpcFlags, NPCFlags.FlightMaster); }
-        public bool IsGuildMaster() { return HasFlag64(UnitFields.NpcFlags, NPCFlags.Petitioner); }
-        public bool IsBattleMaster() { return HasFlag64(UnitFields.NpcFlags, NPCFlags.BattleMaster); }
-        public bool IsBanker() { return HasFlag64(UnitFields.NpcFlags, NPCFlags.Banker); }
-        public bool IsInnkeeper() { return HasFlag64(UnitFields.NpcFlags, NPCFlags.Innkeeper); }
-        public bool IsSpiritHealer() { return HasFlag64(UnitFields.NpcFlags, NPCFlags.SpiritHealer); }
-        public bool IsSpiritGuide() { return HasFlag64(UnitFields.NpcFlags, NPCFlags.SpiritGuide); }
-        public bool IsTabardDesigner() { return HasFlag64(UnitFields.NpcFlags, NPCFlags.TabardDesigner); }
-        public bool IsAuctioner() { return HasFlag64(UnitFields.NpcFlags, NPCFlags.Auctioneer); }
-        public bool IsArmorer() { return HasFlag64(UnitFields.NpcFlags, NPCFlags.Repair); }
+        public bool HasNpcFlag(NPCFlags flags) { return (m_unitData.NpcFlags[0] & (uint)flags) != 0; }
+        public void AddNpcFlag(NPCFlags flags) { SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags, 0), (uint)flags); }
+        public void RemoveNpcFlag(NPCFlags flags) { RemoveUpdateFieldFlagValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags, 0), (uint)flags); }
+        public void SetNpcFlags(NPCFlags flags) { SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags, 0), (uint)flags); }
+        public bool HasNpcFlag2(NPCFlags2 flags) { return (m_unitData.NpcFlags[1] & (uint)flags) != 0; }
+        public void AddNpcFlag2(NPCFlags2 flags) { SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags, 1), (uint)flags); }
+        public void RemoveNpcFlag2(NPCFlags2 flags) { RemoveUpdateFieldFlagValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags, 1), (uint)flags); }
+        public void SetNpcFlags2(NPCFlags2 flags) { SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags, 1), (uint)flags); }
+
+        public bool IsVendor() { return HasNpcFlag(NPCFlags.Vendor); }
+        public bool IsTrainer() { return HasNpcFlag(NPCFlags.Trainer); }
+        public bool IsQuestGiver() { return HasNpcFlag(NPCFlags.QuestGiver); }
+        public bool IsGossip() { return HasNpcFlag(NPCFlags.Gossip); }
+        public bool IsTaxi() { return HasNpcFlag(NPCFlags.FlightMaster); }
+        public bool IsGuildMaster() { return HasNpcFlag(NPCFlags.Petitioner); }
+        public bool IsBattleMaster() { return HasNpcFlag(NPCFlags.BattleMaster); }
+        public bool IsBanker() { return HasNpcFlag(NPCFlags.Banker); }
+        public bool IsInnkeeper() { return HasNpcFlag(NPCFlags.Innkeeper); }
+        public bool IsSpiritHealer() { return HasNpcFlag(NPCFlags.SpiritHealer); }
+        public bool IsSpiritGuide() { return HasNpcFlag(NPCFlags.SpiritGuide); }
+        public bool IsTabardDesigner() { return HasNpcFlag(NPCFlags.TabardDesigner); }
+        public bool IsAuctioner() { return HasNpcFlag(NPCFlags.Auctioneer); }
+        public bool IsArmorer() { return HasNpcFlag(NPCFlags.Repair); }
         public bool IsServiceProvider()
         {
-            return HasFlag64(UnitFields.NpcFlags,
-                NPCFlags.Vendor | NPCFlags.Trainer | NPCFlags.FlightMaster |
+            return HasNpcFlag(NPCFlags.Vendor | NPCFlags.Trainer | NPCFlags.FlightMaster |
                 NPCFlags.Petitioner | NPCFlags.BattleMaster | NPCFlags.Banker |
                 NPCFlags.Innkeeper | NPCFlags.SpiritHealer |
                 NPCFlags.SpiritGuide | NPCFlags.TabardDesigner | NPCFlags.Auctioneer);
         }
-        public bool IsSpiritService() { return HasFlag64(UnitFields.NpcFlags, NPCFlags.SpiritHealer | NPCFlags.SpiritGuide); }
+        public bool IsSpiritService() { return HasNpcFlag(NPCFlags.SpiritHealer | NPCFlags.SpiritGuide); }
         public bool IsCritter() { return GetCreatureType() == CreatureType.Critter; }
         public bool IsInFlight() { return HasUnitState(UnitState.InFlight); }
+
+        public void SetHoverHeight(float hoverHeight) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.HoverHeight), hoverHeight); }
 
         public Guardian GetGuardianPet()
         {
@@ -1088,7 +1101,7 @@ namespace Game.Entities
                     return pet;
 
                 Log.outError(LogFilter.Unit, "Unit.GetCharm: Charmed creature {0} not exist.", charm_guid);
-                SetGuidValue(UnitFields.Charm, ObjectGuid.Empty);
+                SetCharmGUID(ObjectGuid.Empty);
             }
 
             return null;
@@ -1144,7 +1157,8 @@ namespace Game.Entities
 
         public uint GetModelForForm(ShapeShiftForm form)
         {
-            if (IsTypeId(TypeId.Player))
+            Player thisPlayer = ToPlayer();
+            if (thisPlayer != null)
             {
                 Aura artifactAura = GetAura(PlayerConst.ArtifactsAllWeaponsGeneralWeaponEquippedPassive);
                 if (artifactAura != null)
@@ -1159,8 +1173,8 @@ namespace Game.Entities
                     }
                 }
 
-                byte hairColor = GetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetHairColorId);
-                byte skinColor = GetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetSkinId);
+                byte hairColor = thisPlayer.m_playerData.HairColorID;
+                byte skinColor = thisPlayer.m_playerData.SkinID;
 
                 switch (form)
                 {
@@ -1568,21 +1582,6 @@ namespace Game.Entities
             return modelid;
         }
 
-        public virtual bool CanUseAttackType(WeaponAttackType attacktype)
-        {
-            switch (attacktype)
-            {
-                case WeaponAttackType.BaseAttack:
-                    return !HasFlag(UnitFields.Flags, UnitFlags.Disarmed);
-                case WeaponAttackType.OffAttack:
-                    return !HasFlag(UnitFields.Flags2, UnitFlags2.DisarmOffhand);
-                case WeaponAttackType.RangedAttack:
-                    return !HasFlag(UnitFields.Flags2, UnitFlags2.DisarmRanged);
-                default:
-                    return true;
-            }
-        }
-
         public Totem ToTotem() { return IsTotem() ? (this as Totem) : null; }
         public TempSummon ToTempSummon() { return IsSummon() ? (this as TempSummon) : null; }
         public virtual void setDeathState(DeathState s)
@@ -1630,7 +1629,7 @@ namespace Game.Entities
                 // do not why since in IncreaseMaxHealth currenthealth is checked
                 SetHealth(0);
                 SetPower(GetPowerType(), 0);
-                SetUInt32Value(UnitFields.NpcEmotestate, 0);
+                SetEmoteState(Emote.OneshotNone);
 
                 // players in instance don't have ZoneScript, but they have InstanceScript
                 ZoneScript zoneScript = GetZoneScript() != null ? GetZoneScript() : GetInstanceScript();
@@ -1638,7 +1637,7 @@ namespace Game.Entities
                     zoneScript.OnUnitDeath(this);
             }
             else if (s == DeathState.JustRespawned)
-                RemoveFlag(UnitFields.Flags, UnitFlags.Skinnable); // clear skinnable for creature and player (at Battleground)
+                RemoveUnitFlag(UnitFlags.Skinnable); // clear skinnable for creature and player (at Battleground)
         }
 
         public bool IsVisible()
@@ -1655,12 +1654,19 @@ namespace Game.Entities
 
             UpdateObjectVisibility();
         }
-        public bool IsMounted() { return HasFlag(UnitFields.Flags, UnitFlags.Mount); }
-        public uint GetMountID() { return GetUInt32Value(UnitFields.MountDisplayId); }
+
+        public bool IsMagnet()
+        {
+            // Grounding Totem
+            if (m_unitData.CreatedBySpell == 8177) /// @todo: find a more generic solution
+                return true;
+
+            return false;
+        }
 
         public void SetShapeshiftForm(ShapeShiftForm form)
         {
-            SetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.ShapeshiftForm, (byte)form);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ShapeshiftForm), (byte)form);
         }
 
         public void SetModifierValue(UnitMods unitMod, UnitModifierType modifierType, float value)
@@ -1906,7 +1912,7 @@ namespace Game.Entities
 
         public FactionTemplateRecord GetFactionTemplateEntry()
         {
-            FactionTemplateRecord entry = CliDB.FactionTemplateStorage.LookupByKey(getFaction());
+            FactionTemplateRecord entry = CliDB.FactionTemplateStorage.LookupByKey(GetFaction());
             if (entry == null)
             {
                 ObjectGuid guid = ObjectGuid.Empty;                             // prevent repeating spam same faction problem
@@ -1916,11 +1922,11 @@ namespace Game.Entities
                     Player player = ToPlayer();
                     Creature creature = ToCreature();
                     if (player != null)
-                        Log.outError(LogFilter.Unit, "Player {0} has invalid faction (faction template id) #{1}", player.GetName(), getFaction());
+                        Log.outError(LogFilter.Unit, "Player {0} has invalid faction (faction template id) #{1}", player.GetName(), GetFaction());
                     else if (creature != null)
-                        Log.outError(LogFilter.Unit, "Creature (template id: {0}) has invalid faction (faction template id) #{1}", creature.GetCreatureTemplate().Entry, getFaction());
+                        Log.outError(LogFilter.Unit, "Creature (template id: {0}) has invalid faction (faction template id) #{1}", creature.GetCreatureTemplate().Entry, GetFaction());
                     else
-                        Log.outError(LogFilter.Unit, "Unit (name={0}, type={1}) has invalid faction (faction template id) #{2}", GetName(), GetTypeId(), getFaction());
+                        Log.outError(LogFilter.Unit, "Unit (name={0}, type={1}) has invalid faction (faction template id) #{2}", GetName(), GetTypeId(), GetFaction());
 
                     guid = GetGUID();
                 }
@@ -2028,7 +2034,7 @@ namespace Game.Entities
             if (slot >= SharedConst.MaxEquipmentItems)
                 return 0;
 
-            return GetUInt32Value(UnitFields.VirtualItemSlotId + slot * 2);
+            return m_unitData.VirtualItems[slot].ItemID;
         }
 
         public ushort GetVirtualItemAppearanceMod(uint slot)
@@ -2036,85 +2042,121 @@ namespace Game.Entities
             if (slot >= SharedConst.MaxEquipmentItems)
                 return 0;
 
-            return GetUInt16Value(UnitFields.VirtualItemSlotId + (int)slot * 2 + 1, 0);
+            return m_unitData.VirtualItems[(int)slot].ItemAppearanceModID;
         }
 
-        public void SetVirtualItem(int slot, uint itemId, ushort appearanceModId = 0, ushort itemVisual = 0)
+        public void SetVirtualItem(uint slot, uint itemId, ushort appearanceModId = 0, ushort itemVisual = 0)
         {
             if (slot >= SharedConst.MaxEquipmentItems)
                 return;
 
-            SetUInt32Value(UnitFields.VirtualItemSlotId + slot * 2, itemId);
-            SetUInt16Value(UnitFields.VirtualItemSlotId + slot * 2 + 1, 0, appearanceModId);
-            SetUInt16Value(UnitFields.VirtualItemSlotId + slot * 2 + 1, 1, itemVisual);
+            var virtualItemField = m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.VirtualItems, (int)slot);
+            SetUpdateFieldValue(virtualItemField.ModifyValue((VisibleItem visibleItem) => visibleItem.ItemID), itemId);
+            SetUpdateFieldValue(virtualItemField.ModifyValue((VisibleItem visibleItem) => visibleItem.ItemAppearanceModID), appearanceModId);
+            SetUpdateFieldValue(virtualItemField.ModifyValue((VisibleItem visibleItem) => visibleItem.ItemVisual), itemVisual);
         }
 
         //Unit
         public void SetLevel(uint lvl)
         {
-            SetUInt32Value(UnitFields.Level, lvl);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Level), lvl);
 
-            if (IsTypeId(TypeId.Player))
+            Player player = ToPlayer();
+            if (player != null)
             {
-                Player player = ToPlayer();
                 if (player.GetGroup())
                     player.SetGroupUpdateFlag(GroupUpdateFlags.Level);
                 Global.WorldMgr.UpdateCharacterInfoLevel(ToPlayer().GetGUID(), (byte)lvl);
             }
         }
-        public uint getLevel()
-        {
-            return GetUInt32Value(UnitFields.Level);
-        }
+        public uint getLevel() { return m_unitData.Level; }
+        public override uint GetLevelForTarget(WorldObject target) { return getLevel(); }
 
-        public override uint GetLevelForTarget(WorldObject target)
-        {
-            return getLevel();
-        }
+        public Race GetRace() { return (Race)(byte)m_unitData.Race; }
+        public void SetRace(Race race) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Race), (byte)race); }
+        public ulong getRaceMask() { return 1ul << ((int)GetRace() - 1); }
+        public Class GetClass() { return (Class)(byte)m_unitData.ClassId; }
+        public void SetClass(Class classId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ClassId), (byte)classId); }
+        public uint getClassMask() { return (uint)(1 << ((int)GetClass() - 1)); }
+        public Gender GetGender() { return (Gender)(byte)m_unitData.Sex; }
+        public void SetGender(Gender sex) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Sex), (byte)sex); }
 
-        public Race GetRace()
-        {
-            return (Race)GetByteValue(UnitFields.Bytes0, 0);
-        }
-        public ulong getRaceMask()
-        {
-            return (1ul << ((int)GetRace() - 1));
-        }
-        public Class GetClass()
-        {
-            return (Class)GetByteValue(UnitFields.Bytes0, 1);
-        }
-        public uint getClassMask()
-        {
-            return (uint)(1 << ((int)GetClass() - 1));
-        }
-        public Gender GetGender()
-        {
-            return (Gender)GetByteValue(UnitFields.Bytes0, 3);
-        }
-
-        public void SetNativeDisplayId(uint displayId, float displayScale = 1f)
-        {
-            SetUInt32Value(UnitFields.NativeDisplayId, displayId);
-            SetFloatValue(UnitFields.NativeXDisplayScale, displayScale);
-        }
+        public uint GetDisplayId() { return m_unitData.DisplayID; }
         public virtual void SetDisplayId(uint modelId, float displayScale = 1f)
         {
-            SetUInt32Value(UnitFields.DisplayId, modelId);
-            SetFloatValue(UnitFields.DisplayScale, displayScale);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DisplayID), modelId);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DisplayScale), displayScale);
             // Set Gender by modelId
             CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelInfo(modelId);
             if (minfo != null)
-                SetByteValue(UnitFields.Bytes0, 3, (byte)minfo.gender);
+                SetGender((Gender)minfo.gender);
         }
-        public uint GetNativeDisplayId()
+        public void RestoreDisplayId(bool ignorePositiveAurasPreventingMounting = false)
         {
-            return GetUInt32Value(UnitFields.NativeDisplayId);
+            AuraEffect handledAura = null;
+            // try to receive model from transform auras
+            var transforms = GetAuraEffectsByType(AuraType.Transform);
+            if (!transforms.Empty())
+            {
+                // iterate over already applied transform auras - from newest to oldest
+                foreach (var eff in transforms)
+                {
+                    AuraApplication aurApp = eff.GetBase().GetApplicationOfTarget(GetGUID());
+                    if (aurApp != null)
+                    {
+                        if (handledAura == null)
+                        {
+                            if (!ignorePositiveAurasPreventingMounting)
+                                handledAura = eff;
+                            else
+                            {
+                                CreatureTemplate ci = Global.ObjectMgr.GetCreatureTemplate((uint)eff.GetMiscValue());
+                                if (ci != null)
+                                    if (!IsDisallowedMountForm(eff.GetId(), ShapeShiftForm.None, ObjectManager.ChooseDisplayId(ci).CreatureDisplayID))
+                                        handledAura = eff;
+                            }
+                        }
+
+                        // prefer negative auras
+                        if (!aurApp.IsPositive())
+                        {
+                            handledAura = eff;
+                            break;
+                        }
+                    }
+                }
+            }
+            uint modelId;
+            // transform aura was found
+            if (handledAura != null)
+                handledAura.HandleEffect(this, AuraEffectHandleModes.SendForClient, true);
+            // we've found shapeshift
+            else if ((modelId = GetModelForForm(GetShapeshiftForm())) != 0)
+            {
+                if (!ignorePositiveAurasPreventingMounting || !IsDisallowedMountForm(0, GetShapeshiftForm(), modelId))
+                    SetDisplayId(modelId);
+                else
+                    SetDisplayId(GetNativeDisplayId());
+            }
+            // no auras found - set modelid to default
+            else
+                SetDisplayId(GetNativeDisplayId());
         }
-        public float GetNativeDisplayScale()
+        public uint GetNativeDisplayId() { return m_unitData.NativeDisplayID; }
+        public void SetNativeDisplayId(uint displayId, float displayScale = 1f)
         {
-            return GetFloatValue(UnitFields.NativeXDisplayScale);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NativeDisplayID), displayId);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NativeXDisplayScale), displayScale);
         }
+        public float GetNativeDisplayScale() { return m_unitData.NativeXDisplayScale; }
+
+        public bool IsMounted()
+        {
+            return HasUnitFlag(UnitFlags.Mount);
+        }
+        public uint GetMountDisplayId() { return m_unitData.MountDisplayID; }
+        public void SetMountDisplayId(uint mountDisplayId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MountDisplayID), mountDisplayId); }
+
         public virtual Unit GetOwner()
         {
             ObjectGuid ownerid = GetOwnerGUID();
@@ -2125,18 +2167,46 @@ namespace Game.Entities
         }
         public virtual float GetFollowAngle() { return MathFunctions.PiOver2; }
 
-        public ObjectGuid GetOwnerGUID() { return GetGuidValue(UnitFields.SummonedBy); }
-        public ObjectGuid GetCreatorGUID() { return GetGuidValue(UnitFields.CreatedBy); }
-        public ObjectGuid GetMinionGUID() { return GetGuidValue(UnitFields.Summon); }
-        public ObjectGuid GetCharmerGUID() { return GetGuidValue(UnitFields.CharmedBy); }
-        public ObjectGuid GetCharmGUID() { return GetGuidValue(UnitFields.Charm); }
+        public ObjectGuid GetOwnerGUID() { return m_unitData.SummonedBy; }
+        public void SetOwnerGUID(ObjectGuid owner)
+        {
+            if (GetOwnerGUID() == owner)
+                return;
+
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.SummonedBy), owner);
+            if (owner.IsEmpty())
+                return;
+
+            // Update owner dependent fields
+            Player player = Global.ObjAccessor.GetPlayer(this, owner);
+            if (player == null || !player.HaveAtClient(this)) // if player cannot see this unit yet, he will receive needed data with create object
+                return;
+
+            UpdateData udata = new UpdateData(GetMapId());
+            UpdateObject packet;
+            BuildValuesUpdateBlockForPlayerWithFlag(udata, UpdateFieldFlag.Owner, player);
+            udata.BuildPacket(out packet);
+            player.SendPacket(packet);
+        }
+        public ObjectGuid GetCreatorGUID() { return m_unitData.CreatedBy; }
+        public void SetCreatorGUID(ObjectGuid creator) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CreatedBy), creator); }
+        public ObjectGuid GetMinionGUID() { return m_unitData.Summon; }
+        public void SetMinionGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Summon), guid); }
+        public ObjectGuid GetCharmerGUID() { return m_unitData.CharmedBy; }
+        public void SetCharmerGUID(ObjectGuid owner) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CharmedBy), owner); }
+        public ObjectGuid GetCharmGUID() { return m_unitData.Charm; }
+        public void SetCharmGUID(ObjectGuid charm) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Charm), charm); }
         public ObjectGuid GetPetGUID() { return m_SummonSlot[0]; }
-        public ObjectGuid GetCritterGUID() { return GetGuidValue(UnitFields.Critter); }
+        public void SetPetGUID(ObjectGuid guid) { m_SummonSlot[0] = guid; }
+        public ObjectGuid GetCritterGUID() { return m_unitData.Critter; }
+        public void SetCritterGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Critter), guid); }
+        public ObjectGuid GetBattlePetCompanionGUID() { return m_unitData.BattlePetCompanionGUID; }
+        public void SetBattlePetCompanionGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BattlePetCompanionGUID), guid); }
         public ObjectGuid GetCharmerOrOwnerGUID()
         {
             return !GetCharmerGUID().IsEmpty() ? GetCharmerGUID() : GetOwnerGUID();
         }
-        ObjectGuid GetCharmerOrOwnerOrOwnGUID()
+        public ObjectGuid GetCharmerOrOwnerOrOwnGUID()
         {
             ObjectGuid guid = GetCharmerOrOwnerGUID();
             if (!guid.IsEmpty())
@@ -2172,52 +2242,49 @@ namespace Game.Entities
             return !GetCharmerGUID().IsEmpty() ? GetCharmer() : GetOwner();
         }
 
-        public uint GetChannelSpellId() { return GetUInt32Value(UnitFields.ChannelData);    }
-        public void SetChannelSpellId(uint channelSpellId) { SetUInt32Value(UnitFields.ChannelData, channelSpellId); }
-        public uint GetChannelSpellXSpellVisualId() { return GetUInt32Value(UnitFields.ChannelData + 1);}
-        public void SetChannelSpellXSpellVisualId(uint channelSpellXSpellVisualId) { SetUInt32Value(UnitFields.ChannelData + 1, channelSpellXSpellVisualId); }
+        public bool HasUnitFlag(UnitFlags flags) { return (m_unitData.Flags & (uint)flags) != 0; }
+        public void AddUnitFlag(UnitFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Flags), (uint)flags); }
+        public void RemoveUnitFlag(UnitFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Flags), (uint)flags); }
+        public void SetUnitFlags(UnitFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Flags), (uint)flags); }
+        public bool HasUnitFlag2(UnitFlags2 flags) { return (m_unitData.Flags2 & (uint)flags) != 0; }
+        public void AddUnitFlag2(UnitFlags2 flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Flags2), (uint)flags); }
+        public void RemoveUnitFlag2(UnitFlags2 flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Flags2), (uint)flags); }
+        public void SetUnitFlags2(UnitFlags2 flags) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Flags2), (uint)flags); }
+        public bool HasUnitFlag3(UnitFlags3 flags) { return (m_unitData.Flags3 & (uint)flags) != 0; }
+        public void AddUnitFlag3(UnitFlags3 flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Flags3), (uint)flags); }
+        public void RemoveUnitFlag3(UnitFlags3 flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Flags3), (uint)flags); }
+        public void SetUnitFlags3(UnitFlags3 flags) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Flags3), (uint)flags); }
 
-        public List<ObjectGuid> GetChannelObjects() { return GetDynamicStructuredValues<ObjectGuid>(UnitDynamicFields.ChannelObjects); }
-        public void AddChannelObject(ObjectGuid guid) { AddDynamicStructuredValue(UnitDynamicFields.ChannelObjects, guid); }
+        public void SetCreatedBySpell(uint spellId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CreatedBySpell), spellId); }
 
-        public void SetOwnerGUID(ObjectGuid owner)
-        {
-            if (GetOwnerGUID() == owner)
-                return;
+        public Emote GetEmoteState() { return (Emote)(int)m_unitData.EmoteState; }
+        public void SetEmoteState(Emote emote) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.EmoteState), (int)emote); }
 
-            SetGuidValue(UnitFields.SummonedBy, owner);
-            if (owner.IsEmpty())
-                return;
-
-            // Update owner dependent fields
-            Player player = Global.ObjAccessor.GetPlayer(this, owner);
-            if (player == null || !player.HaveAtClient(this)) // if player cannot see this unit yet, he will receive needed data with create object
-                return;
-
-            SetFieldNotifyFlag(UpdateFieldFlags.Owner);
-
-            UpdateData udata = new UpdateData(GetMapId());
-            UpdateObject packet;
-            BuildValuesUpdateBlockForPlayer(udata, player);
-            udata.BuildPacket(out packet);
-            player.SendPacket(packet);
-
-            RemoveFieldNotifyFlag(UpdateFieldFlags.Owner);
-        }
-        public void SetCreatorGUID(ObjectGuid creator) { SetGuidValue(UnitFields.CreatedBy, creator); }
-        void SetMinionGUID(ObjectGuid guid) { SetGuidValue(UnitFields.Summon, guid); }
-        void SetCharmerGUID(ObjectGuid owner) { SetGuidValue(UnitFields.CharmedBy, owner); }
-        public void SetPetGUID(ObjectGuid guid) { m_SummonSlot[0] = guid; }
-        void SetCritterGUID(ObjectGuid guid) { SetGuidValue(UnitFields.Critter, guid); }
+        public SheathState GetSheath() { return (SheathState)(byte)m_unitData.SheatheState; }
+        public void SetSheath(SheathState sheathed) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.SheatheState), (byte)sheathed); }
 
         public uint GetCombatTimer() { return m_CombatTimer; }
-        public bool IsPvP() { return HasByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag, UnitBytes2Flags.PvP); }
-        public bool IsFFAPvP() { return HasByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag, UnitBytes2Flags.FFAPvp); }
+        public UnitPVPStateFlags GetPvpFlags() { return (UnitPVPStateFlags)(byte)m_unitData.PvpFlags; }
+        public bool HasPvpFlag(UnitPVPStateFlags flags) { return (m_unitData.PvpFlags & (uint)flags) != 0; }
+        public void AddPvpFlag(UnitPVPStateFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PvpFlags), (byte)flags); }
+        public void RemovePvpFlag(UnitPVPStateFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PvpFlags), (byte)flags); }
+        public void SetPvpFlags(UnitPVPStateFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PvpFlags), (byte)flags); }
+        public bool IsPvP() { return HasPvpFlag(UnitPVPStateFlags.PvP); }
+        public bool IsFFAPvP() { return HasPvpFlag(UnitPVPStateFlags.FFAPvp); }
 
-        public ShapeShiftForm GetShapeshiftForm()
+        public UnitPetFlags GetPetFlags()
         {
-            return (ShapeShiftForm)GetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.ShapeshiftForm);
+            return (UnitPetFlags)(byte)m_unitData.PetFlags;
         }
+        public bool HasPetFlag(UnitPetFlags flags) { return (m_unitData.PetFlags & (byte)flags) != 0; }
+        public void AddPetFlag(UnitPetFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetFlags), (byte)flags); }
+        public void RemovePetFlag(UnitPetFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetFlags), (byte)flags); }
+        public void SetPetFlags(UnitPetFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetFlags), (byte)flags); }
+
+        public void SetPetNumberForClient(uint petNumber) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetNumber), petNumber); }
+        public void SetPetNameTimestamp(uint timestamp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetNameTimestamp), timestamp); }
+
+        public ShapeShiftForm GetShapeshiftForm() { return (ShapeShiftForm)(byte)m_unitData.ShapeshiftForm; }
         public CreatureType GetCreatureType()
         {
             if (IsTypeId(TypeId.Player))
@@ -2274,14 +2341,6 @@ namespace Game.Entities
         public void ClearUnitState(UnitState f)
         {
             m_state &= ~f;
-        }
-        public void SetStandFlags(object flags)
-        {
-            SetByteFlag(UnitFields.Bytes1, UnitBytes1Offsets.VisFlag, flags);
-        }
-        public void RemoveStandFlags(object flags)
-        {
-            RemoveByteFlag(UnitFields.Bytes1, UnitBytes1Offsets.VisFlag, flags);
         }
 
         public override bool IsAlwaysVisibleFor(WorldObject seer)
@@ -2342,9 +2401,9 @@ namespace Game.Entities
             if (GetCharmerOrOwnerOrSelf() == target.GetCharmerOrOwnerOrSelf())
                 return ReputationRank.Friendly;
 
-            if (HasFlag(UnitFields.Flags, UnitFlags.PvpAttackable))
+            if (HasUnitFlag(UnitFlags.PvpAttackable))
             {
-                if (target.HasFlag(UnitFields.Flags, UnitFlags.PvpAttackable))
+                if (target.HasUnitFlag(UnitFlags.PvpAttackable))
                 {
                     Player selfPlayerOwner = GetAffectingPlayer();
                     Player targetPlayerOwner = target.GetAffectingPlayer();
@@ -2373,7 +2432,7 @@ namespace Game.Entities
                         var targetFactionTemplateEntry = target.GetFactionTemplateEntry();
                         if (targetFactionTemplateEntry != null)
                         {
-                            if (!selfPlayerOwner.HasFlag(UnitFields.Flags2, UnitFlags2.IgnoreReputation))
+                            if (!selfPlayerOwner.HasUnitFlag2(UnitFlags2.IgnoreReputation))
                             {
                                 var targetFactionEntry = CliDB.FactionStorage.LookupByKey(targetFactionTemplateEntry.Faction);
                                 if (targetFactionEntry != null)
@@ -2382,7 +2441,7 @@ namespace Game.Entities
                                     {
                                         // check contested flags
                                         if (Convert.ToBoolean(targetFactionTemplateEntry.Flags & (uint)FactionTemplateFlags.ContestedGuard)
-                                            && selfPlayerOwner.HasFlag(PlayerFields.Flags, PlayerFlags.ContestedPVP))
+                                            && selfPlayerOwner.HasPlayerFlag(PlayerFlags.ContestedPVP))
                                             return ReputationRank.Hostile;
 
                                         // if faction has reputation, hostile state depends only from AtWar state
@@ -2414,12 +2473,12 @@ namespace Game.Entities
             {
                 // check contested flags
                 if (Convert.ToBoolean(factionTemplateEntry.Flags & (uint)FactionTemplateFlags.ContestedGuard)
-                    && targetPlayerOwner.HasFlag(PlayerFields.Flags, PlayerFlags.ContestedPVP))
+                    && targetPlayerOwner.HasPlayerFlag(PlayerFlags.ContestedPVP))
                     return ReputationRank.Hostile;
                 ReputationRank repRank = targetPlayerOwner.GetReputationMgr().GetForcedRankIfAny(factionTemplateEntry);
                 if (repRank != ReputationRank.None)
                     return repRank;
-                if (!target.HasFlag(UnitFields.Flags2, UnitFlags2.IgnoreReputation))
+                if (!target.HasUnitFlag2(UnitFlags2.IgnoreReputation))
                 {
                     var factionEntry = CliDB.FactionStorage.LookupByKey(factionTemplateEntry.Faction);
                     if (factionEntry != null)
@@ -2449,14 +2508,9 @@ namespace Game.Entities
             return ReputationRank.Neutral;
         }
 
-        public uint getFaction()
-        {
-            return GetUInt32Value(UnitFields.FactionTemplate);
-        }
-        public void SetFaction(uint faction)
-        {
-            SetUInt32Value(UnitFields.FactionTemplate, faction);
-        }
+        public uint GetFaction() { return m_unitData.FactionTemplate; }
+        public void SetFaction(uint faction) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.FactionTemplate), faction); }
+
         public void RestoreFaction()
         {
             if (IsTypeId(TypeId.Player))
@@ -2468,7 +2522,7 @@ namespace Game.Entities
                     Unit owner = GetOwner();
                     if (owner)
                     {
-                        SetFaction(owner.getFaction());
+                        SetFaction(owner.GetFaction());
                         return;
                     }
                 }
@@ -2494,8 +2548,8 @@ namespace Game.Entities
                 (u1.IsTypeId(TypeId.Player) && u2.IsTypeId(TypeId.Unit) && u2.ToCreature().GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.TreatAsRaidUnit)))
                 return true;
 
-            // else u1->GetTypeId() == u2->GetTypeId() == TYPEID_UNIT
-            return u1.getFaction() == u2.getFaction();
+            // else u1.GetTypeId() == u2.GetTypeId() == TYPEID_UNIT
+            return u1.GetFaction() == u2.GetFaction();
         }
 
         public bool IsInRaidWith(Unit unit)
@@ -2514,14 +2568,14 @@ namespace Game.Entities
                     (u1.IsTypeId(TypeId.Player) && u2.IsTypeId(TypeId.Unit) && u2.ToCreature().GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.TreatAsRaidUnit)))
                 return true;
 
-            // else u1->GetTypeId() == u2->GetTypeId() == TYPEID_UNIT
-            return u1.getFaction() == u2.getFaction();
+            // else u1.GetTypeId() == u2.GetTypeId() == TYPEID_UNIT
+            return u1.GetFaction() == u2.GetFaction();
         }
 
-        public SheathState GetSheath() { return (SheathState)GetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.SheathState); }
-        public void SetSheath(SheathState sheathed) { SetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.SheathState, (byte)sheathed); }
-
-        public UnitStandStateType GetStandState() { return (UnitStandStateType)GetByteValue(UnitFields.Bytes1, UnitBytes1Offsets.StandState); }
+        public UnitStandStateType GetStandState() { return (UnitStandStateType)(byte)m_unitData.StandState; }
+        public void AddVisFlags(UnitVisFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.VisFlags), (byte)flags); }
+        public void RemoveVisFlags(UnitVisFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.VisFlags), (byte)flags); }
+        public void SetVisFlags(UnitVisFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.VisFlags), (byte)flags); }
 
         public bool IsSitState()
         {
@@ -2540,7 +2594,7 @@ namespace Game.Entities
 
         public void SetStandState(UnitStandStateType state, uint animKitId = 0)
         {
-            SetByteValue(UnitFields.Bytes1, UnitBytes1Offsets.StandState, (byte)state);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StandState), (byte)state);
 
             if (IsStandState())
                 RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.NotSeated);
@@ -2552,59 +2606,33 @@ namespace Game.Entities
             }
         }
 
-        public uint GetDisplayId() { return GetUInt32Value(UnitFields.DisplayId); }
-
-        public void RestoreDisplayId(bool ignorePositiveAurasPreventingMounting = false)
+        public void SetAnimTier(UnitBytes1Flags animTier, bool notifyClient)
         {
-            AuraEffect handledAura = null;
-            // try to receive model from transform auras
-            var transforms = GetAuraEffectsByType(AuraType.Transform);
-            if (!transforms.Empty())
-            {
-                // iterate over already applied transform auras - from newest to oldest
-                foreach (var eff in transforms)
-                {
-                    AuraApplication aurApp = eff.GetBase().GetApplicationOfTarget(GetGUID());
-                    if (aurApp != null)
-                    {
-                        if (handledAura == null)
-                        {
-                            if (!ignorePositiveAurasPreventingMounting)
-                                handledAura = eff;
-                            else
-                            {
-                                CreatureTemplate ci = Global.ObjectMgr.GetCreatureTemplate((uint)eff.GetMiscValue());
-                                if (ci != null)
-                                    if (!IsDisallowedMountForm(eff.GetId(), ShapeShiftForm.None, ObjectManager.ChooseDisplayId(ci).CreatureDisplayID))
-                                        handledAura = eff;
-                            }
-                        }
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.AnimTier), (byte)animTier);
 
-                        // prefer negative auras
-                        if (!aurApp.IsPositive())
-                        {
-                            handledAura = eff;
-                            break;
-                        }
-                    }
-                }
-            }
-            uint modelId;
-            // transform aura was found
-            if (handledAura != null)
-                handledAura.HandleEffect(this, AuraEffectHandleModes.SendForClient, true);
-            // we've found shapeshift
-            else if ((modelId = GetModelForForm(GetShapeshiftForm())) != 0)
+            if (notifyClient)
             {
-                if (!ignorePositiveAurasPreventingMounting || !IsDisallowedMountForm(0, GetShapeshiftForm(), modelId))
-                    SetDisplayId(modelId);
-                else
-                    SetDisplayId(GetNativeDisplayId());
+                SetAnimTier setAnimTier = new SetAnimTier();
+                setAnimTier.Unit = GetGUID();
+                setAnimTier.Tier = (int)animTier;
+                SendMessageToSet(setAnimTier, true);
             }
-            // no auras found - set modelid to default
-            else
-                SetDisplayId(GetNativeDisplayId());
         }
+
+        public uint GetChannelSpellId() { return ((UnitChannel)m_unitData.ChannelData).SpellID; }
+        public void SetChannelSpellId(uint channelSpellId)
+        {
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelData)._value.SpellID, channelSpellId);
+        }
+        public uint GetChannelSpellXSpellVisualId() { return ((UnitChannel)m_unitData.ChannelData).SpellXSpellVisualID; }
+        public void SetChannelSpellXSpellVisualId(uint channelSpellXSpellVisualId)
+        {
+            UnitChannel unitChannel = m_unitData.ModifyValue(m_unitData.ChannelData);
+            SetUpdateFieldValue(ref unitChannel.SpellXSpellVisualID, channelSpellXSpellVisualId);
+        }
+        public void AddChannelObject(ObjectGuid guid) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelObjects), guid); }
+        public void SetChannelObject(int slot, ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelObjects, slot), guid); }
+        public void ClearChannelObjects() { ClearDynamicUpdateFieldValues(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelObjects)); }
 
         public bool IsDamageReducedByArmor(SpellSchoolMask schoolMask, SpellInfo spellInfo = null, sbyte effIndex = -1)
         {
@@ -2632,162 +2660,68 @@ namespace Game.Entities
             return true;
         }
 
-        public override void BuildValuesUpdate(UpdateType updatetype, ByteBuffer data, Player target)
+        public override UpdateFieldFlag GetUpdateFieldFlagsFor(Player target)
         {
-            if (target == null)
-                return;
+            UpdateFieldFlag flags = UpdateFieldFlag.None;
+            if (target == this || GetOwnerGUID() == target.GetGUID())
+                flags |= UpdateFieldFlag.Owner;
 
-            ByteBuffer fieldBuffer = new ByteBuffer();
-
-            uint valCount = valuesCount;
-
-            uint[] flags = UpdateFieldFlags.UnitUpdateFieldFlags;
-            uint visibleFlag = UpdateFieldFlags.Public;
-
-            if (target == this)
-                visibleFlag |= UpdateFieldFlags.Private;
-            else if (IsTypeId(TypeId.Player))
-                valCount = (int)PlayerFields.End;
-
-            UpdateMask updateMask = new UpdateMask(valCount);
-
-            Player plr = GetCharmerOrOwnerPlayerOrPlayerItself();
-            if (GetOwnerGUID() == target.GetGUID())
-                visibleFlag |= UpdateFieldFlags.Owner;
-
-            if (HasFlag(ObjectFields.DynamicFlags, UnitDynFlags.SpecialInfo))
+            if (HasDynamicFlag(UnitDynFlags.SpecialInfo))
                 if (HasAuraTypeWithCaster(AuraType.Empathy, target.GetGUID()))
-                    visibleFlag |= UpdateFieldFlags.SpecialInfo;
+                    flags |= UpdateFieldFlag.Empath;
 
-            if (plr != null && plr.IsInSameRaidWith(target))
-                visibleFlag |= UpdateFieldFlags.PartyMember;
+            return flags;
+        }
 
-            Creature creature = ToCreature();
-            for (var index = 0; index < valCount; ++index)
-            {
-                if (Convert.ToBoolean(_fieldNotifyFlags & flags[index]) ||
-                    Convert.ToBoolean((flags[index] & visibleFlag) & UpdateFieldFlags.SpecialInfo) ||
-                    ((updatetype == UpdateType.Values ? _changesMask.Get(index) : updateValues[index].UnsignedValue != 0) && flags[index].HasAnyFlag(visibleFlag)) ||
-                    (index == (int)UnitFields.AuraState && HasFlag(UnitFields.AuraState, AuraStateType.PerCasterAuraStateMask)))
-                {
-                    updateMask.SetBit(index);
+        public override void BuildValuesCreate(WorldPacket data, Player target)
+        {
+            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
+            WorldPacket buffer = new WorldPacket();
 
-                    if (index == (int)UnitFields.NpcFlags)
-                    {
-                        uint appendValue = GetUInt32Value(UnitFields.NpcFlags);
+            buffer.WriteUInt8((byte)flags);
+            m_objectData.WriteCreate(buffer, flags, this, target);
+            m_unitData.WriteCreate(buffer, flags, this, target);
 
-                        if (creature != null)
-                            if (!target.CanSeeSpellClickOn(creature))
-                                appendValue &= ~(uint)NPCFlags.SpellClick;
+            data.WriteUInt32(buffer.GetSize());
+            data.WriteBytes(buffer);
+        }
 
-                        fieldBuffer.WriteUInt32(appendValue);
-                    }
-                    else if (index == (int)UnitFields.AuraState)
-                    {
-                        // Check per caster aura states to not enable using a spell in client if specified aura is not by target
-                        fieldBuffer.WriteUInt32(BuildAuraStateUpdateForTarget(target));
-                    }
-                    // FIXME: Some values at server stored in float format but must be sent to client in public uint format
-                    else if ((index >= (int)UnitFields.NegStat && index < (int)UnitFields.NegStat + (int)Stats.Max) ||
-                        (index >= (int)UnitFields.PosStat && index < (int)UnitFields.PosStat + (int)Stats.Max))
-                    {
-                        fieldBuffer.WriteUInt32((uint)GetFloatValue(index));
-                    }
-                    // Gamemasters should be always able to select units - remove not selectable flag
-                    else if (index == (int)UnitFields.Flags)
-                    {
-                        UnitFlags appendValue = (UnitFlags)updateValues[index].UnsignedValue;
-                        if (target.IsGameMaster())
-                            appendValue &= ~UnitFlags.NotSelectable;
+        public override void BuildValuesUpdate(WorldPacket data, Player target)
+        {
+            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
+            WorldPacket buffer = new WorldPacket();
 
-                        fieldBuffer.WriteUInt32((uint)appendValue);
-                    }
-                    // use modelid_a if not gm, _h if gm for CREATURE_FLAG_EXTRA_TRIGGER creatures
-                    else if (index == (int)UnitFields.DisplayId)
-                    {
-                        uint displayId = updateValues[index].UnsignedValue;
-                        if (creature != null)
-                        {
-                            CreatureTemplate cinfo = creature.GetCreatureTemplate();
+            buffer.WriteUInt32(m_values.GetChangedObjectTypeMask());
+            if (m_values.HasChanged(TypeId.Object))
+                m_objectData.WriteUpdate(buffer, flags, this, target);
 
-                            // this also applies for transform auras
-                            SpellInfo transform = Global.SpellMgr.GetSpellInfo(getTransForm());
-                            if (transform != null)
-                            {
-                                foreach (SpellEffectInfo effect in transform.GetEffectsForDifficulty(GetMap().GetDifficultyID()))
-                                {
-                                    if (effect != null && effect.IsAura(AuraType.Transform))
-                                    {
-                                        CreatureTemplate transformInfo = Global.ObjectMgr.GetCreatureTemplate((uint)effect.MiscValue);
-                                        if (transformInfo != null)
-                                        {
-                                            cinfo = transformInfo;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
+            if (m_values.HasChanged(TypeId.Unit))
+                m_unitData.WriteUpdate(buffer, flags, this, target);
 
-                            if (cinfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.Trigger))
-                                if (target.IsGameMaster())
-                                    displayId = cinfo.GetFirstVisibleModel().CreatureDisplayID;
-                        }
+            data.WriteUInt32(buffer.GetSize());
+            data.WriteBytes(buffer);
+        }
 
-                        fieldBuffer.WriteUInt32(displayId);
-                    }
-                    // hide lootable animation for unallowed players
-                    else if (index == (int)ObjectFields.DynamicFlags)
-                    {
-                        UnitDynFlags dynamicFlags = (UnitDynFlags)updateValues[index].UnsignedValue & ~UnitDynFlags.Tapped;
+        void BuildValuesUpdateWithFlag(WorldPacket data, UpdateFieldFlag flags, Player target)
+        {
+            UpdateMask valuesMask = new UpdateMask(14);
+            valuesMask.Set((int)TypeId.Unit);
 
-                        if (creature != null)
-                        {
-                            if (creature.hasLootRecipient() && !creature.isTappedBy(target))
-                                dynamicFlags |= UnitDynFlags.Tapped;
+            WorldPacket buffer = new WorldPacket();
 
-                            if (!target.isAllowedToLoot(creature))
-                                dynamicFlags &= ~UnitDynFlags.Lootable;
-                        }
+            UpdateMask mask = new UpdateMask(191);
+            m_unitData.AppendAllowedFieldsMaskForFlag(mask, flags);
+            m_unitData.WriteUpdate(buffer, mask, flags, this, target);
 
-                        // unit UNIT_DYNFLAG_TRACK_UNIT should only be sent to caster of SPELL_AURA_MOD_STALKED auras
-                        if (dynamicFlags.HasAnyFlag(UnitDynFlags.TrackUnit))
-                            if (!HasAuraTypeWithCaster(AuraType.ModStalked, target.GetGUID()))
-                                dynamicFlags &= ~UnitDynFlags.TrackUnit;
+            data.WriteUInt32(buffer.GetSize());
+            data.WriteUInt32(valuesMask.GetBlock(0));
+            data.WriteBytes(buffer);
+        }
 
-                        fieldBuffer.WriteUInt32((uint)dynamicFlags);
-                    }
-                    // FG: pretend that OTHER players in own group are friendly ("blue")
-                    else if (index == (int)UnitFields.Bytes2 || index == (int)UnitFields.FactionTemplate)
-                    {
-                        if (IsControlledByPlayer() && target != this && WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGroup) && IsInRaidWith(target))
-                        {
-                            FactionTemplateRecord ft1 = GetFactionTemplateEntry();
-                            FactionTemplateRecord ft2 = target.GetFactionTemplateEntry();
-                            if (ft1 != null && ft2 != null && !ft1.IsFriendlyTo(ft2))
-                            {
-                                if (index == (int)UnitFields.Bytes2)
-                                    // Allow targetting opposite faction in party when enabled in config
-                                    fieldBuffer.WriteUInt32(updateValues[index].UnsignedValue & ((int)UnitBytes2Flags.Sanctuary << 8)); // this flag is at public byte offset 1 !!
-                                else
-                                    // pretend that all other HOSTILE players have own faction, to allow follow, heal, rezz (trade wont work)
-                                    fieldBuffer.WriteUInt32(target.getFaction());
-                            }
-                            else
-                                fieldBuffer.WriteUInt32(updateValues[index].UnsignedValue);
-                        }
-                        else
-                            fieldBuffer.WriteUInt32(updateValues[index].UnsignedValue);
-                    }
-                    else
-                    {
-                        // send in current format (float as float, public uint as uint32)
-                        fieldBuffer.WriteUInt32(updateValues[index].UnsignedValue);
-                    }
-                }
-            }
-
-            updateMask.AppendToPacket(data);
-            data.WriteBytes(fieldBuffer);
+        public override void ClearUpdateMask(bool remove)
+        {
+            m_values.ClearChangesMask(m_unitData);
+            base.ClearUpdateMask(remove);
         }
 
         public override void DestroyForPlayer(Player target)

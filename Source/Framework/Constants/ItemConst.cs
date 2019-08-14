@@ -29,7 +29,6 @@ namespace Framework.Constants
         public const int MaxOutfitItems = 24;
         public const int MaxItemExtCostItems = 5;
         public const int MaxItemExtCostCurrencies = 5;
-        public const int MaxItemRandomProperties = 5;
         public const int MaxItemEnchantmentEffects = 3;
         public const int MaxProtoSpells = 5;
         public const int MaxEquipmentSetIndex = 20;

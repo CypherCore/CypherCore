@@ -69,15 +69,15 @@ namespace Game.Entities
 
         public void LoadToys()
         {
-            foreach (var value in _toys.Keys)
-                _owner.GetPlayer().AddDynamicValue(ActivePlayerDynamicFields.Toys, value);
+            foreach (var pair in _toys)
+                _owner.GetPlayer().AddToy(pair.Key, (uint)pair.Value);
         }
 
         public bool AddToy(uint itemId, bool isFavourite, bool hasFanfare)
         {
             if (UpdateAccountToys(itemId, isFavourite, hasFanfare))
             {
-                _owner.GetPlayer().AddDynamicValue(ActivePlayerDynamicFields.Toys, itemId);
+                _owner.GetPlayer().AddToy(itemId, (uint)GetToyFlags(isFavourite, hasFanfare));
                 return true;
             }
 
@@ -92,8 +92,7 @@ namespace Game.Entities
             do
             {
                 uint itemId = result.Read<uint>(0);
-
-                _toys[itemId] = GetToyFlags(result.Read<bool>(1), result.Read<bool>(2));
+                _toys.Add(itemId, GetToyFlags(result.Read<bool>(1), result.Read<bool>(2)));
             } while (result.NextRow());
         }
 
@@ -175,7 +174,9 @@ namespace Game.Entities
 
                 uint bonusId = 0;
 
-                if (flags.HasAnyFlag(HeirloomPlayerFlags.BonusLevel110))
+                if (flags.HasAnyFlag(HeirloomPlayerFlags.BonusLevel120))
+                    bonusId = heirloom.UpgradeItemBonusListID[3];
+                else if (flags.HasAnyFlag(HeirloomPlayerFlags.BonusLevel110))
                     bonusId = heirloom.UpgradeItemBonusListID[2];
                 else if (flags.HasAnyFlag(HeirloomPlayerFlags.BonusLevel100))
                     bonusId = heirloom.UpgradeItemBonusListID[1];
@@ -220,19 +221,13 @@ namespace Game.Entities
         public void LoadHeirlooms()
         {
             foreach (var item in _heirlooms)
-            {
-                _owner.GetPlayer().AddDynamicValue(ActivePlayerDynamicFields.Heirlooms, item.Key);
-                _owner.GetPlayer().AddDynamicValue(ActivePlayerDynamicFields.HeirloomFlags, (uint)item.Value.flags);
-            }
+                _owner.GetPlayer().AddHeirloom(item.Key, (uint)item.Value.flags);
         }
 
         public void AddHeirloom(uint itemId, HeirloomPlayerFlags flags)
         {
             if (UpdateAccountHeirlooms(itemId, flags))
-            {
-                _owner.GetPlayer().AddDynamicValue(ActivePlayerDynamicFields.Heirlooms, itemId);
-                _owner.GetPlayer().AddDynamicValue(ActivePlayerDynamicFields.HeirloomFlags, (uint)flags);
-            }
+                _owner.GetPlayer().AddHeirloom(itemId, (uint)flags);
         }
 
         public void UpgradeHeirloom(uint itemId, uint castItem)
@@ -267,15 +262,20 @@ namespace Game.Entities
                 flags |= HeirloomPlayerFlags.BonusLevel110;
                 bonusId = heirloom.UpgradeItemBonusListID[2];
             }
+            if (heirloom.UpgradeItemID[3] == castItem)
+            {
+                flags |= HeirloomPlayerFlags.BonusLevel120;
+                bonusId = heirloom.UpgradeItemBonusListID[3];
+            }
 
             foreach (Item item in player.GetItemListByEntry(itemId, true))
                 item.AddBonuses(bonusId);
 
             // Get heirloom offset to update only one part of dynamic field
-            var fields = player.GetDynamicValues(ActivePlayerDynamicFields.Heirlooms);
-            ushort offset = (ushort)Array.IndexOf(fields, itemId);
+            List<uint> heirlooms = player.m_activePlayerData.Heirlooms;
+            int offset = heirlooms.IndexOf(itemId);
 
-            player.SetDynamicValue(ActivePlayerDynamicFields.HeirloomFlags, offset, (uint)flags);
+            player.SetHeirloomFlags(offset, (uint)flags);
             data.flags = flags;
             data.bonusId = bonusId;
         }
@@ -315,11 +315,11 @@ namespace Game.Entities
 
                 if (newItemId != 0)
                 {
-                    var heirloomFields = player.GetDynamicValues(ActivePlayerDynamicFields.Heirlooms);
-                    ushort offset = (ushort)Array.IndexOf(heirloomFields, item.GetEntry());
+                    List<uint> heirlooms = player.m_activePlayerData.Heirlooms;
+                    int offset = heirlooms.IndexOf(item.GetEntry());
 
-                    player.SetDynamicValue(ActivePlayerDynamicFields.Heirlooms, offset, newItemId);
-                    player.SetDynamicValue(ActivePlayerDynamicFields.HeirloomFlags, offset, 0);
+                    player.SetHeirloom(offset, newItemId);
+                    player.SetHeirloomFlags(offset, 0);
 
                     _heirlooms.Remove(item.GetEntry());
                     _heirlooms[newItemId] = null;
@@ -327,12 +327,17 @@ namespace Game.Entities
                     return;
                 }
 
-                var fields = item.GetDynamicValues(ItemDynamicFields.BonusListIds);
-                foreach (uint bonusId in fields)
+                List<uint> bonusListIDs = item.m_itemData.BonusListIDs;
+                foreach (uint bonusId in bonusListIDs)
+                {
                     if (bonusId != data.bonusId)
-                        item.ClearDynamicValue(ItemDynamicFields.BonusListIds);
+                    {
+                        item.ClearBonuses();
+                        break;
+                    }
+                }
 
-                if (!fields.Contains(data.bonusId))
+                if (!bonusListIDs.Contains(data.bonusId))
                     item.AddBonuses(data.bonusId);
             }
         }
@@ -346,6 +351,8 @@ namespace Game.Entities
             if (data == null)
                 return false;
 
+            if (data.flags.HasAnyFlag(HeirloomPlayerFlags.BonusLevel120))
+                return level <= 120;
             if (data.flags.HasAnyFlag(HeirloomPlayerFlags.BonusLevel110))
                 return level <= 110;
             if (data.flags.HasAnyFlag(HeirloomPlayerFlags.BonusLevel100))
@@ -453,13 +460,12 @@ namespace Game.Entities
 
         public void LoadItemAppearances()
         {
+            Player owner = _owner.GetPlayer();
             foreach (uint blockValue in _appearances.ToBlockRange())
-            {
-                _owner.GetPlayer().AddDynamicValue(ActivePlayerDynamicFields.Transmog, blockValue);
-            }
+                owner.AddTransmogBlock(blockValue);
 
             foreach (var value in _temporaryAppearances.Keys)
-                _owner.GetPlayer().AddDynamicValue(ActivePlayerDynamicFields.ConditionalTransmog, value);
+                owner.AddConditionalTransmog(value);
         }
 
         public void LoadAccountItemAppearances(SQLResult knownAppearances, SQLResult favoriteAppearances)
@@ -578,7 +584,7 @@ namespace Game.Entities
             if (!CanAddAppearance(itemModifiedAppearance))
                 return;
 
-            if (Convert.ToBoolean(item.GetUInt32Value(ItemFields.Flags) & (uint)(ItemFieldFlags.BopTradeable | ItemFieldFlags.Refundable)))
+            if (item.HasItemFlag(ItemFieldFlags.BopTradeable | ItemFieldFlags.Refundable))
             {
                 AddTemporaryAppearance(item.GetGUID(), itemModifiedAppearance);
                 return;
@@ -678,24 +684,24 @@ namespace Game.Entities
         //todo  check this
         void AddItemAppearance(ItemModifiedAppearanceRecord itemModifiedAppearance)
         {
+            Player owner = _owner.GetPlayer();
             if (_appearances.Count <= itemModifiedAppearance.Id)
             {
                 uint numBlocks = (uint)(_appearances.Count << 2);
                 _appearances.Length = (int)itemModifiedAppearance.Id + 1;
                 numBlocks = (uint)(_appearances.Count << 2) - numBlocks;
                 while (numBlocks-- != 0)
-                    _owner.GetPlayer().AddDynamicValue(ActivePlayerDynamicFields.Transmog, 0);
+                    owner.AddTransmogBlock(0);
             }
 
             _appearances.Set((int)itemModifiedAppearance.Id, true);
             uint blockIndex = itemModifiedAppearance.Id / 32;
             uint bitIndex = itemModifiedAppearance.Id % 32;
-            uint currentMask = _owner.GetPlayer().GetDynamicValue(ActivePlayerDynamicFields.Transmog, (ushort)blockIndex);
-            _owner.GetPlayer().SetDynamicValue(ActivePlayerDynamicFields.Transmog, (ushort)blockIndex, (uint)((int)currentMask | (1 << (int)bitIndex)));
+            owner.AddTransmogFlag((int)blockIndex, 1u << (int)bitIndex);
             var temporaryAppearance = _temporaryAppearances.LookupByKey(itemModifiedAppearance.Id);
             if (!temporaryAppearance.Empty())
             {
-                _owner.GetPlayer().RemoveDynamicValue(ActivePlayerDynamicFields.ConditionalTransmog, itemModifiedAppearance.Id);
+                owner.RemoveConditionalTransmog(itemModifiedAppearance.Id);
                 _temporaryAppearances.Remove(itemModifiedAppearance.Id);
             }
 
@@ -717,7 +723,7 @@ namespace Game.Entities
         {
             var itemsWithAppearance = _temporaryAppearances[itemModifiedAppearance.Id];
             if (itemsWithAppearance.Empty())
-                _owner.GetPlayer().AddDynamicValue(ActivePlayerDynamicFields.ConditionalTransmog, itemModifiedAppearance.Id);
+                _owner.GetPlayer().AddConditionalTransmog(itemModifiedAppearance.Id);
 
             itemsWithAppearance.Add(itemGuid);
         }
@@ -735,7 +741,7 @@ namespace Game.Entities
             guid.Remove(item.GetGUID());
             if (guid.Empty())
             {
-                _owner.GetPlayer().RemoveDynamicValue(ActivePlayerDynamicFields.ConditionalTransmog, itemModifiedAppearance.Id);
+                _owner.GetPlayer().RemoveConditionalTransmog(itemModifiedAppearance.Id);
                 _temporaryAppearances.Remove(itemModifiedAppearance.Id);
             }
         }

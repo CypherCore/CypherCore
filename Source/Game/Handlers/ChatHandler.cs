@@ -539,8 +539,7 @@ namespace Game
                 return;
 
             Global.ScriptMgr.OnPlayerClearEmote(GetPlayer());
-            if (GetPlayer().GetUInt32Value(UnitFields.NpcEmotestate) != 0)
-                GetPlayer().SetUInt32Value(UnitFields.NpcEmotestate, 0);
+            GetPlayer().SetEmoteState(Emote.OneshotNone);
         }
 
         [WorldPacketHandler(ClientOpcodes.SendTextEmote)]
@@ -573,7 +572,7 @@ namespace Game
                     break;
                 case Emote.StateDance:
                 case Emote.StateRead:
-                    GetPlayer().SetUInt32Value(UnitFields.NpcEmotestate, emote_anim);
+                    GetPlayer().SetEmoteState((Emote)emote_anim);
                     break;
                 default:
                     // Only allow text-emotes for "dead" entities (feign death included)

@@ -27,8 +27,8 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt64(QueueID);
-            _worldPacket.WriteUInt32(AreaID);
-            _worldPacket.WriteUInt32(ExpireTime);
+            _worldPacket.WriteInt32(AreaID);
+            _worldPacket.WriteUInt32((uint)ExpireTime);
         }
 
         public ulong QueueID;
@@ -57,7 +57,7 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt64(QueueID);
-            _worldPacket.WriteInt8(BattleState);
+            _worldPacket.WriteInt8((sbyte)BattleState);
             _worldPacket.WriteUInt32(Timeout);
             _worldPacket.WriteInt32(MinLevel);
             _worldPacket.WriteInt32(MaxLevel);
@@ -101,7 +101,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(AreaID);
             _worldPacket.WriteInt8(Result);
             _worldPacket.WritePackedGuid(FailedPlayerGUID);
-            _worldPacket.WriteInt8(BattleState);
+            _worldPacket.WriteInt8((sbyte)BattleState);
             _worldPacket.WriteBit(LoggingIn);
             _worldPacket.FlushBits();
         }
@@ -151,8 +151,8 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt64(QueueID);
-            _worldPacket.WriteInt8(Reason);
-            _worldPacket.WriteInt8(BattleState);
+            _worldPacket.WriteInt8((sbyte)Reason);
+            _worldPacket.WriteInt8((sbyte)BattleState);
             _worldPacket.WriteBit(Relocated);
             _worldPacket.FlushBits();
         }

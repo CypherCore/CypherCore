@@ -162,30 +162,30 @@ namespace Framework.IO
         //BitPacking
         public byte ReadBit()
         {
-            if (BitPosition == 8)
+            if (_bitPosition == 8)
             {
                 BitValue = ReadUInt8();
-                BitPosition = 0;
+                _bitPosition = 0;
             }
 
             int returnValue = BitValue;
             BitValue = (byte)(2 * returnValue);
-            ++BitPosition;
+            ++_bitPosition;
 
             return (byte)(returnValue >> 7);
         }
 
         public bool HasBit()
         {
-            if (BitPosition == 8)
+            if (_bitPosition == 8)
             {
                 BitValue = ReadUInt8();
-                BitPosition = 0;
+                _bitPosition = 0;
             }
 
             int returnValue = BitValue;
             BitValue = (byte)(2 * returnValue);
-            ++BitPosition;
+            ++_bitPosition;
 
             return Convert.ToBoolean(returnValue >> 7);
         }
@@ -203,64 +203,64 @@ namespace Framework.IO
         #endregion
 
         #region Write Methods
-        public void WriteInt8<T>(T data)
+        public void WriteInt8(sbyte data)
         {
             FlushBits();
-            writeStream.Write(Convert.ToSByte(data));
+            writeStream.Write(data);
         }
 
-        public void WriteInt16<T>(T data)
+        public void WriteInt16(short data)
         {
             FlushBits();
-            writeStream.Write(Convert.ToInt16(data));
+            writeStream.Write(data);
         }
 
-        public void WriteInt32<T>(T data)
+        public void WriteInt32(int data)
         {
             FlushBits();
-            writeStream.Write(Convert.ToInt32(data));
+            writeStream.Write(data);
         }
 
-        public void WriteInt64<T>(T data)
+        public void WriteInt64(long data)
         {
             FlushBits();
-            writeStream.Write(Convert.ToInt64(data));
+            writeStream.Write(data);
         }
 
-        public void WriteUInt8<T>(T data)
+        public void WriteUInt8(byte data)
         {
             FlushBits();
-            writeStream.Write(Convert.ToByte(data));
+            writeStream.Write(data);
         }
 
-        public void WriteUInt16<T>(T data)
+        public void WriteUInt16(ushort data)
         {
             FlushBits();
-            writeStream.Write(Convert.ToUInt16(data));
+            writeStream.Write(data);
         }
 
-        public void WriteUInt32<T>(T data)
+        public void WriteUInt32(uint data)
         {
             FlushBits();
-            writeStream.Write(Convert.ToUInt32(data));
+            writeStream.Write(data);
         }
 
-        public void WriteUInt64<T>(T data)
+        public void WriteUInt64(ulong data)
         {
             FlushBits();
-            writeStream.Write(Convert.ToUInt64(data));
+            writeStream.Write(data);
         }
 
-        public void WriteFloat<T>(T data)
+        public void WriteFloat(float data)
         {
             FlushBits();
-            writeStream.Write(Convert.ToSingle(data));
+            writeStream.Write(data);
         }
 
-        public void WriteDouble<T>(T data)
+        public void WriteDouble(double data)
         {
             FlushBits();
-            writeStream.Write(Convert.ToDouble(data));
+            writeStream.Write(data);
         }
 
         /// <summary>
@@ -329,16 +329,16 @@ namespace Framework.IO
 
         public bool WriteBit(object bit)
         {
-            --BitPosition;
+            --_bitPosition;
 
             if (Convert.ToBoolean(bit))
-                BitValue |= (byte)(1 << BitPosition);
+                BitValue |= (byte)(1 << _bitPosition);
 
-            if (BitPosition == 0)
+            if (_bitPosition == 0)
             {
                 writeStream.Write(BitValue);
 
-                BitPosition = 8;
+                _bitPosition = 8;
                 BitValue = 0;
             }
             return Convert.ToBoolean(bit);
@@ -363,22 +363,27 @@ namespace Framework.IO
         }
         #endregion
 
+        public bool HasUnfinishedBitPack()
+        {
+            return _bitPosition != 8;
+        }
+
         public void FlushBits()
         {
-            if (BitPosition == 8)
+            if (_bitPosition == 8)
                 return;
 
             writeStream.Write(BitValue);
             BitValue = 0;
-            BitPosition = 8;
+            _bitPosition = 8;
         }
 
         public void ResetBitPos()
         {
-            if (BitPosition > 7)
+            if (_bitPosition > 7)
                 return;
 
-            BitPosition = 8;
+            _bitPosition = 8;
             BitValue = 0;
         }
 
@@ -412,12 +417,12 @@ namespace Framework.IO
 
         public void Clear()
         {
-            BitPosition = 8;
+            _bitPosition = 8;
             BitValue = 0;
             writeStream = new BinaryWriter(new MemoryStream());
         }
 
-        byte BitPosition = 8;
+        byte _bitPosition = 8;
         byte BitValue;
         BinaryWriter writeStream;
         BinaryReader readStream;

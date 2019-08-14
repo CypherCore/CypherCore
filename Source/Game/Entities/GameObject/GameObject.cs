@@ -31,6 +31,7 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Game.Network;
 
 namespace Game.Entities
 {
@@ -44,13 +45,14 @@ namespace Game.Entities
             m_updateFlag.Stationary = true;
             m_updateFlag.Rotation = true;
 
-            valuesCount = (int)GameObjectFields.End;
             m_respawnDelayTime = 300;
             m_lootState = LootState.NotReady;
             m_spawnedByDefault = true;
 
             ResetLootMode(); // restore default loot mode
             m_stationaryPosition = new Position();
+
+            m_gameObjectData = new GameObjectFieldData();
         }
 
         public override void Dispose()
@@ -248,8 +250,8 @@ namespace Game.Entities
 
             if (m_goTemplateAddon != null)
             {
-                SetUInt32Value(GameObjectFields.Faction, m_goTemplateAddon.faction);
-                SetUInt32Value(GameObjectFields.Flags, m_goTemplateAddon.flags);
+                SetFaction(m_goTemplateAddon.faction);
+                SetFlags((GameObjectFlags)m_goTemplateAddon.flags);
 
                 if (m_goTemplateAddon.WorldEffectID != 0)
                 {
@@ -267,7 +269,7 @@ namespace Game.Entities
 
             m_model = CreateModel();
             if (m_model != null && m_model.isMapObject())
-                SetFlag(GameObjectFields.Flags, GameObjectFlags.MapObject);
+                AddFlag(GameObjectFlags.MapObject);
 
             // GAMEOBJECT_BYTES_1, index at 0, 1, 2 and 3
             SetGoType(goInfo.type);
@@ -275,7 +277,7 @@ namespace Game.Entities
             SetGoState(goState);
             SetGoArtKit((byte)artKit);
 
-            SetUInt32Value(GameObjectFields.StateAnimId, (uint)CliDB.AnimationDataStorage.Count);
+            SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.SpawnTrackingStateAnimID), (uint)CliDB.AnimationDataStorage.Count);
 
             switch (goInfo.type)
             {
@@ -287,7 +289,8 @@ namespace Game.Entities
                     m_goValue.Building.Health = 20000;//goinfo.DestructibleBuilding.intactNumHits + goinfo.DestructibleBuilding.damagedNumHits;
                     m_goValue.Building.MaxHealth = m_goValue.Building.Health;
                     SetGoAnimProgress(255);
-                    SetUInt32Value(GameObjectFields.ParentRotation, goInfo.DestructibleBuilding.DestructibleModelRec);
+                    // yes, even after the updatefield rewrite this garbage hack is still in client
+                    SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.ParentRotation), new Quaternion(goInfo.DestructibleBuilding.DestructibleModelRec, 0f, 0f, 0f));
                     break;
                 case GameObjectTypes.Transport:
                     m_goValue.Transport.AnimationInfo = Global.TransportMgr.GetTransportAnimInfo(goInfo.entry);
@@ -324,7 +327,7 @@ namespace Game.Entities
                     SetGoAnimProgress(animProgress);
                     break;
                 case GameObjectTypes.FishingNode:
-                    SetUInt32Value(GameObjectFields.Level, 1);
+                    SetLevel(1);
                     SetGoAnimProgress(255);
                     break;
                 case GameObjectTypes.Trap:
@@ -341,10 +344,11 @@ namespace Game.Entities
                     }
                     break;
                 case GameObjectTypes.PhaseableMo:
-                    SetByteValue(GameObjectFields.Flags, 1, (byte)(m_goInfo.PhaseableMO.AreaNameSet & 0xF));
+                    RemoveFlag((GameObjectFlags)0xF00);
+                    AddFlag((GameObjectFlags)((m_goInfo.PhaseableMO.AreaNameSet & 0xF) << 8));
                     break;
                 case GameObjectTypes.CapturePoint:
-                    SetUInt32Value(GameObjectFields.SpellVisualId, m_goInfo.CapturePoint.SpellVisual1);
+                    SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.SpellVisualID), m_goInfo.CapturePoint.SpellVisual1);
                     break;
                 default:
                     SetGoAnimProgress(animProgress);
@@ -438,15 +442,15 @@ namespace Game.Entities
                                     m_goValue.Transport.PathProgress += diff;
                                     /* TODO: Fix movement in unloaded grid - currently GO will just disappear
                                     public uint timer = m_goValue.Transport.PathProgress % GetTransportPeriod();
-                                    TransportAnimationEntry const* node = m_goValue.Transport.AnimationInfo->GetAnimNode(timer);
-                                    if (node && m_goValue.Transport.CurrentSeg != node->TimeSeg)
+                                    TransportAnimationEntry const* node = m_goValue.Transport.AnimationInfo.GetAnimNode(timer);
+                                    if (node && m_goValue.Transport.CurrentSeg != node.TimeSeg)
                                     {
-                                    m_goValue.Transport.CurrentSeg = node->TimeSeg;
+                                    m_goValue.Transport.CurrentSeg = node.TimeSeg;
 
-                                    G3D.Quat rotation = m_goValue.Transport.AnimationInfo->GetAnimRotation(timer);
+                                    G3D.Quat rotation = m_goValue.Transport.AnimationInfo.GetAnimRotation(timer);
                                     G3D.Vector3 pos = rotation.toRotationMatrix()
                                     G3D.Matrix3.fromEulerAnglesZYX(GetOrientation(), 0.0f, 0.0f)
-                                    G3D.Vector3(node->X, node->Y, node->Z);
+                                    G3D.Vector3(node.X, node.Y, node.Z);
 
                                     pos += G3D.Vector3(GetStationaryX(), GetStationaryY(), GetStationaryZ());
 
@@ -454,7 +458,7 @@ namespace Game.Entities
 
                                     TC_LOG_DEBUG("misc", "Src: {0} Dest: {1}", src.toString().c_str(), pos.toString().c_str());
 
-                                    GetMap()->GameObjectRelocation(this, pos.x, pos.y, pos.z, GetOrientation());
+                                    GetMap().GameObjectRelocation(this, pos.x, pos.y, pos.z, GetOrientation());
                                     }
                                     */
                                     if (!m_goValue.Transport.StopFrames.Empty())
@@ -464,8 +468,9 @@ namespace Game.Entities
                                         uint visualStateAfter = (m_goValue.Transport.StateUpdateTimer / 20000) & 1;
                                         if (visualStateBefore != visualStateAfter)
                                         {
-                                            ForceValuesUpdateAtIndex(GameObjectFields.Level);
-                                            ForceValuesUpdateAtIndex(GameObjectFields.Bytes1);
+                                            m_gameObjectData.ModifyValue(m_gameObjectData.Level);
+                                            m_gameObjectData.ModifyValue(m_gameObjectData.State);
+                                            ForceUpdateFieldChange();
                                         }
                                     }
                                 }
@@ -480,7 +485,7 @@ namespace Game.Entities
                                         if (caster != null && caster.IsTypeId(TypeId.Player))
                                         {
                                             SetGoState(GameObjectState.Active);
-                                            SetUInt32Value(GameObjectFields.Flags, (uint)GameObjectFlags.NoDespawn);
+                                            SetFlags(GameObjectFlags.NoDespawn);
 
                                             UpdateData udata = new UpdateData(caster.GetMapId());
                                             UpdateObject packet;
@@ -650,7 +655,7 @@ namespace Game.Entities
                             case GameObjectTypes.Goober:
                                 if (m_cooldownTime < Time.UnixTime)
                                 {
-                                    RemoveFlag(GameObjectFields.Flags, GameObjectFlags.InUse);
+                                    RemoveFlag(GameObjectFlags.InUse);
 
                                     SetLootState(LootState.JustDeactivated);
                                     m_cooldownTime = 0;
@@ -770,7 +775,7 @@ namespace Game.Entities
                             //reset flags
                             GameObjectTemplateAddon addon = GetTemplateAddon();
                             if (addon != null)
-                                SetUInt32Value(GameObjectFields.Flags, addon.flags);
+                                SetFlags((GameObjectFlags)addon.flags);
                         }
 
                         if (m_respawnDelayTime == 0)
@@ -823,7 +828,7 @@ namespace Game.Entities
             SetGoState(GameObjectState.Ready);
             GameObjectTemplateAddon addon = GetTemplateAddon();
             if (addon != null)
-                SetUInt32Value(GameObjectFields.Flags, addon.flags);
+                SetFlags((GameObjectFlags)addon.flags);
 
             uint poolid = GetSpawnId() != 0 ? Global.PoolMgr.IsPartOfAPool<GameObject>(GetSpawnId()) : 0;
             if (poolid != 0)
@@ -918,7 +923,7 @@ namespace Game.Entities
             data.animprogress = GetGoAnimProgress();
             data.go_state = GetGoState();
             data.spawnDifficulties = spawnDifficulties;
-            data.artKit = GetGoArtKit();
+            data.artKit = (byte)GetGoArtKit();
             Global.ObjectMgr.NewGOData(m_spawnId, data);
 
             data.phaseId = GetDBPhase() > 0 ? (uint)GetDBPhase() : data.phaseId;
@@ -980,7 +985,7 @@ namespace Game.Entities
 
                 if (!GetGoInfo().GetDespawnPossibility() && !GetGoInfo().IsDespawnAtAction())
                 {
-                    SetFlag(GameObjectFields.Flags, GameObjectFlags.NoDespawn);
+                    AddFlag(GameObjectFlags.NoDespawn);
                     m_respawnDelayTime = 0;
                     m_respawnTime = 0;
                 }
@@ -1104,7 +1109,7 @@ namespace Game.Entities
             if (GetGoType() == GameObjectTypes.SpellFocus && GetGoInfo().SpellFocus.serverOnly == 1)
                 return true;
 
-            if (GetUInt32Value(GameObjectFields.DisplayId) == 0)
+            if (GetDisplayId() == 0)
                 return true;
 
             return false;
@@ -1157,7 +1162,7 @@ namespace Game.Entities
             }
         }
 
-        bool ActivateToQuest(Player target)
+        public bool ActivateToQuest(Player target)
         {
             if (target.HasQuestForGO((int)GetEntry()))
                 return true;
@@ -1231,7 +1236,7 @@ namespace Game.Entities
             if (m_lootState == LootState.Ready || m_lootState == LootState.JustDeactivated)
                 return;
 
-            RemoveFlag(GameObjectFields.Flags, GameObjectFlags.InUse);
+            RemoveFlag(GameObjectFlags.InUse);
             SetGoState(m_prevGoState);
 
             SetLootState(LootState.JustDeactivated);
@@ -1254,7 +1259,7 @@ namespace Game.Entities
 
         public void SetGoArtKit(byte kit)
         {
-            SetByteValue(GameObjectFields.Bytes1, 2, kit);
+            SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.ArtKit), kit);
             GameObjectData data = Global.ObjectMgr.GetGOData(m_spawnId);
             if (data != null)
                 data.artKit = kit;
@@ -1278,9 +1283,9 @@ namespace Game.Entities
         void SwitchDoorOrButton(bool activate, bool alternative = false)
         {
             if (activate)
-                SetFlag(GameObjectFields.Flags, GameObjectFlags.InUse);
+                AddFlag(GameObjectFlags.InUse);
             else
-                RemoveFlag(GameObjectFields.Flags, GameObjectFlags.InUse);
+                RemoveFlag(GameObjectFlags.InUse);
 
             if (GetGoState() == GameObjectState.Ready)                      //if closed . open
                 SetGoState(alternative ? GameObjectState.ActiveAlternative : GameObjectState.Active);
@@ -1423,7 +1428,7 @@ namespace Game.Entities
                             {
                                 guid = player.GetGUID(); //this slot in now used by player
                                 player.TeleportTo(GetMapId(), x_lowest, y_lowest, GetPositionZ(), GetOrientation(), (TeleportToOptions.NotLeaveTransport | TeleportToOptions.NotLeaveCombat | TeleportToOptions.NotUnSummonPet));
-                                player.SetStandState(UnitStandStateType.SitLowChair + (int)info.Chair.chairheight);
+                                player.SetStandState(UnitStandStateType.SitLowChair + (byte)info.Chair.chairheight);
                                 return;
                             }
                         }
@@ -1487,7 +1492,7 @@ namespace Game.Entities
                         if (trapEntry != 0)
                             TriggeringLinkedGameObject(trapEntry, user);
 
-                        SetFlag(GameObjectFields.Flags, GameObjectFlags.InUse);
+                        AddFlag(GameObjectFlags.InUse);
                         SetLootState(LootState.Activated, user);
 
                         // this appear to be ok, however others exist in addition to this that should have custom (ex: 190510, 188692, 187389)
@@ -1864,7 +1869,7 @@ namespace Game.Entities
 
                         // fallback, will always work
                         player.TeleportTo(GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation(), (TeleportToOptions.NotLeaveTransport | TeleportToOptions.NotLeaveCombat | TeleportToOptions.NotUnSummonPet));
-                        player.SetStandState((UnitStandStateType)(UnitStandStateType.SitLowChair + (int)info.BarberChair.chairheight), info.BarberChair.SitAnimKit);
+                        player.SetStandState((UnitStandStateType.SitLowChair + (byte)info.BarberChair.chairheight), info.BarberChair.SitAnimKit);
                         return;
                     }
                 case GameObjectTypes.ArtifactForge:
@@ -1972,16 +1977,16 @@ namespace Game.Entities
                 return;
 
             // remove immunity flags, to allow spell to target anything
-            trigger.RemoveFlag(UnitFields.Flags, UnitFlags.ImmuneToNpc | UnitFlags.ImmuneToPc);
+            trigger.RemoveUnitFlag(UnitFlags.ImmuneToNpc | UnitFlags.ImmuneToPc);
 
             Unit owner = GetOwner();
             if (owner)
             {
-                trigger.SetFaction(owner.getFaction());
-                if (owner.HasFlag(UnitFields.Flags, UnitFlags.PvpAttackable))
-                    trigger.SetFlag(UnitFields.Flags, UnitFlags.PvpAttackable);
+                trigger.SetFaction(owner.GetFaction());
+                if (owner.HasUnitFlag(UnitFlags.PvpAttackable))
+                    trigger.AddUnitFlag(UnitFlags.PvpAttackable);
                 // copy pvp state flags from owner
-                trigger.SetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag, owner.GetByteValue(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag));
+                trigger.SetPvpFlags(owner.GetPvpFlags());
                 // needed for GO casts for proper target validation checks
                 trigger.SetOwnerGUID(owner.GetGUID());
                 trigger.CastSpell(target != null ? target : trigger, spellInfo, triggered, null, null, owner.GetGUID());
@@ -2097,10 +2102,7 @@ namespace Game.Entities
 
         public void SetParentRotation(Quaternion rotation)
         {
-            SetFloatValue(GameObjectFields.ParentRotation + 0, rotation.X);
-            SetFloatValue(GameObjectFields.ParentRotation + 1, rotation.Y);
-            SetFloatValue(GameObjectFields.ParentRotation + 2, rotation.Z);
-            SetFloatValue(GameObjectFields.ParentRotation + 3, rotation.W);
+            SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.ParentRotation), rotation);
         }
 
         public void SetWorldRotationAngles(float z_rot, float y_rot, float x_rot)
@@ -2165,7 +2167,7 @@ namespace Game.Entities
             switch (state)
             {
                 case GameObjectDestructibleState.Intact:
-                    RemoveFlag(GameObjectFields.Flags, GameObjectFlags.Damaged | GameObjectFlags.Destroyed);
+                    RemoveFlag(GameObjectFlags.Damaged | GameObjectFlags.Destroyed);
                     SetDisplayId(m_goInfo.displayId);
                     if (setHealth)
                     {
@@ -2179,8 +2181,8 @@ namespace Game.Entities
                         EventInform(m_goInfo.DestructibleBuilding.DamagedEvent, eventInvoker);
                         Global.ScriptMgr.OnGameObjectDamaged(this, eventInvoker);
 
-                        RemoveFlag(GameObjectFields.Flags, GameObjectFlags.Destroyed);
-                        SetFlag(GameObjectFields.Flags, GameObjectFlags.Damaged);
+                        RemoveFlag(GameObjectFlags.Destroyed);
+                        AddFlag(GameObjectFlags.Damaged);
 
                         uint modelId = m_goInfo.displayId;
                         DestructibleModelDataRecord modelData = CliDB.DestructibleModelDataStorage.LookupByKey(m_goInfo.DestructibleBuilding.DestructibleModelRec);
@@ -2211,8 +2213,8 @@ namespace Game.Entities
                                 bg.DestroyGate(eventInvoker, this);
                         }
 
-                        RemoveFlag(GameObjectFields.Flags, GameObjectFlags.Damaged);
-                        SetFlag(GameObjectFields.Flags, GameObjectFlags.Destroyed);
+                        RemoveFlag(GameObjectFlags.Damaged);
+                        AddFlag(GameObjectFlags.Destroyed);
 
                         uint modelId = m_goInfo.displayId;
                         DestructibleModelDataRecord modelData = CliDB.DestructibleModelDataStorage.LookupByKey(m_goInfo.DestructibleBuilding.DestructibleModelRec);
@@ -2232,7 +2234,7 @@ namespace Game.Entities
                 case GameObjectDestructibleState.Rebuilding:
                     {
                         EventInform(m_goInfo.DestructibleBuilding.RebuildingEvent, eventInvoker);
-                        RemoveFlag(GameObjectFields.Flags, GameObjectFlags.Damaged | GameObjectFlags.Destroyed);
+                        RemoveFlag(GameObjectFlags.Damaged | GameObjectFlags.Destroyed);
 
                         uint modelId = m_goInfo.displayId;
                         DestructibleModelDataRecord modelData = CliDB.DestructibleModelDataStorage.LookupByKey(m_goInfo.DestructibleBuilding.DestructibleModelRec);
@@ -2277,7 +2279,7 @@ namespace Game.Entities
 
         public void SetGoState(GameObjectState state)
         {
-            SetByteValue(GameObjectFields.Bytes1, 0, (byte)state);
+            SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.State), (sbyte)state);
             Global.ScriptMgr.OnGameObjectStateChanged(this, state);
             if (m_model != null && !IsTransport())
             {
@@ -2327,7 +2329,7 @@ namespace Game.Entities
 
         public void SetDisplayId(uint displayid)
         {
-            SetUInt32Value(GameObjectFields.DisplayId, displayid);
+            SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.DisplayID), displayid);
             UpdateModel();
         }
 
@@ -2357,7 +2359,8 @@ namespace Game.Entities
                 case GameObjectTypes.GarrisonBuilding:
                 case GameObjectTypes.GarrisonPlot:
                 case GameObjectTypes.PhaseableMo:
-                    return (byte)(GetByteValue(GameObjectFields.Flags, 1) & 0xF);
+                    var flags = (GameObjectFlags)(uint)m_gameObjectData.Flags;
+                    return (byte)(((int)flags >> 8) & 0xF);
                 default:
                     break;
             }
@@ -2386,7 +2389,10 @@ namespace Game.Entities
             if (m_model != null)
                 GetMap().InsertGameObjectModel(m_model);
 
-            ApplyModFlag(GameObjectFields.Flags, GameObjectFlags.MapObject, m_model != null && m_model.isMapObject());
+            if (m_model != null && m_model.isMapObject())
+                AddFlag(GameObjectFlags.MapObject);
+            else
+                RemoveFlag(GameObjectFlags.MapObject);
         }
 
         Player GetLootRecipient()
@@ -2434,7 +2440,7 @@ namespace Game.Entities
                 m_lootRecipientGroup = unitGroup.GetGUID();
         }
 
-        bool IsLootAllowedFor(Player player)
+        public bool IsLootAllowedFor(Player player)
         {
             if (m_lootRecipient.IsEmpty() && m_lootRecipientGroup.IsEmpty())
                 return true;
@@ -2455,103 +2461,39 @@ namespace Game.Entities
             return ObjectAccessor.GetGameObject(this, m_linkedTrap);
         }
 
-        public override void BuildValuesUpdate(UpdateType updateType, ByteBuffer data, Player target)
+        public override void BuildValuesCreate(WorldPacket data, Player target)
         {
-            if (!target)
-                return;
+            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
+            WorldPacket buffer = new WorldPacket();
 
-            bool isStoppableTransport = GetGoType() == GameObjectTypes.Transport && !m_goValue.Transport.StopFrames.Empty();
-            bool forcedFlags = GetGoType() == GameObjectTypes.Chest && GetGoInfo().Chest.usegrouplootrules != 0 && HasLootRecipient();
-            bool targetIsGM = target.IsGameMaster();
+            buffer.WriteUInt8((byte)flags);
+            m_objectData.WriteCreate(buffer, flags, this, target);
+            m_gameObjectData.WriteCreate(buffer, flags, this, target);
 
-            ByteBuffer fieldBuffer = new ByteBuffer();
-            UpdateMask updateMask = new UpdateMask(valuesCount);
+            data.WriteUInt32(buffer.GetSize());
+            data.WriteBytes(buffer);
+        }
 
-            uint[] flags = UpdateFieldFlags.GameObjectUpdateFieldFlags;
-            uint visibleFlag = UpdateFieldFlags.Public;
-            if (GetOwnerGUID() == target.GetGUID())
-                visibleFlag |= UpdateFieldFlags.Owner;
+        public override void BuildValuesUpdate(WorldPacket data, Player target)
+        {
+            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
+            WorldPacket buffer = new WorldPacket();
 
-            for (int index = 0; index < valuesCount; ++index)
-            {
-                if (_fieldNotifyFlags.HasAnyFlag(flags[index]) ||
-                    ((updateType == UpdateType.Values ? _changesMask.Get(index) : updateValues[index].UnsignedValue != 0) && flags[index].HasAnyFlag(visibleFlag)) ||
-                    (index == (int)GameObjectFields.Flags && forcedFlags))
-                {
-                    updateMask.SetBit(index);
+            buffer.WriteUInt32(m_values.GetChangedObjectTypeMask());
+            if (m_values.HasChanged(TypeId.Object))
+                m_objectData.WriteUpdate(buffer, flags, this, target);
 
-                    if (index == (int)ObjectFields.DynamicFlags)
-                    {
-                        GameObjectDynamicLowFlags dynFlags = 0;
-                        short pathProgress = -1;
-                        switch (GetGoType())
-                        {
-                            case GameObjectTypes.QuestGiver:
-                                if (ActivateToQuest(target))
-                                    dynFlags |= GameObjectDynamicLowFlags.Activate;
-                                break;
-                            case GameObjectTypes.Chest:
-                            case GameObjectTypes.Goober:
-                                if (ActivateToQuest(target) || targetIsGM)
-                                    dynFlags |= GameObjectDynamicLowFlags.Activate | GameObjectDynamicLowFlags.Sparkle;
-                                break;
-                            case GameObjectTypes.Generic:
-                                if (ActivateToQuest(target))
-                                    dynFlags |= GameObjectDynamicLowFlags.Sparkle;
-                                break;
-                            case GameObjectTypes.Transport:
-                            case GameObjectTypes.MapObjTransport:
-                                uint transportPeriod = GetTransportPeriod();
-                                if (transportPeriod != 0)
-                                {
-                                    float timer = (float)m_goValue.Transport.PathProgress % transportPeriod;
-                                    pathProgress = (short)(timer / transportPeriod * 65535.0f);
-                                }
-                                break;
-                            default:
-                                break;
-                        }
+            if (m_values.HasChanged(TypeId.GameObject))
+                m_gameObjectData.WriteUpdate(buffer, flags, this, target);
 
-                        fieldBuffer.WriteUInt16(dynFlags);
-                        fieldBuffer.WriteInt16(pathProgress);
-                    }
-                    else if (index == (int)GameObjectFields.Flags)
-                    {
-                        GameObjectFlags _flags = (GameObjectFlags)GetUInt32Value(GameObjectFields.Flags);
-                        if (GetGoType() == GameObjectTypes.Chest)
-                            if (GetGoInfo().Chest.usegrouplootrules != 0 && !IsLootAllowedFor(target))
-                                _flags |= GameObjectFlags.Locked | GameObjectFlags.NotSelectable;
+            data.WriteUInt32(buffer.GetSize());
+            data.WriteBytes(buffer);
+        }
 
-                        fieldBuffer.WriteUInt32(_flags);
-                    }
-                    else if (index == (int)GameObjectFields.Level)
-                    {
-                        if (isStoppableTransport)
-                            fieldBuffer.WriteUInt32(m_goValue.Transport.PathProgress);
-                        else
-                            fieldBuffer.WriteUInt32(updateValues[index].UnsignedValue);
-                    }
-                    else if (index == (int)GameObjectFields.Bytes1)
-                    {
-                        uint bytes1 = GetUInt32Value(index);
-                        if (isStoppableTransport && GetGoState() == GameObjectState.TransportActive)
-                        {
-                            if (Convert.ToBoolean((m_goValue.Transport.StateUpdateTimer / 20000) & 1))
-                            {
-                                bytes1 &= 0xFFFFFF00;
-                                bytes1 |= (int)GameObjectState.TransportStopped;
-                            }
-                        }
-
-                        fieldBuffer.WriteUInt32(bytes1);
-                    }
-                    else
-                        fieldBuffer.WriteUInt32(updateValues[index].UnsignedValue);
-                }
-            }
-
-            updateMask.AppendToPacket(data);
-            data.WriteBytes(fieldBuffer);
+        public override void ClearUpdateMask(bool remove)
+        {
+            m_values.ClearChangesMask(m_gameObjectData);
+            base.ClearUpdateMask(remove);
         }
 
         public void GetRespawnPosition(out float x, out float y, out float z, out float ori)
@@ -2632,7 +2574,8 @@ namespace Game.Entities
 
         public GameObjectTemplate GetGoInfo() { return m_goInfo; }
         public GameObjectTemplateAddon GetTemplateAddon() { return m_goTemplateAddon; }
-        GameObjectData GetGoData() { return m_goData; }
+        public GameObjectData GetGoData() { return m_goData; }
+        public GameObjectValue GetGoValue() { return m_goValue; }
 
         public ulong GetSpawnId() { return m_spawnId; }
 
@@ -2651,9 +2594,9 @@ namespace Game.Entities
                 Cypher.Assert(false);
             }
             m_spawnedByDefault = false;                     // all object with owner is despawned after delay
-            SetGuidValue(GameObjectFields.CreatedBy, owner);
+            SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.CreatedBy), owner);
         }
-        public ObjectGuid GetOwnerGUID() { return GetGuidValue(GameObjectFields.CreatedBy); }
+        public ObjectGuid GetOwnerGUID() { return m_gameObjectData.CreatedBy; }
 
         public void SetSpellId(uint id)
         {
@@ -2688,12 +2631,18 @@ namespace Game.Entities
         public void SetSpawnedByDefault(bool b) { m_spawnedByDefault = b; }
         public uint GetRespawnDelay() { return m_respawnDelayTime; }
 
-        public GameObjectTypes GetGoType() { return (GameObjectTypes)GetByteValue(GameObjectFields.Bytes1, 1); }
-        public void SetGoType(GameObjectTypes type) { SetByteValue(GameObjectFields.Bytes1, 1, (byte)type); }
-        public GameObjectState GetGoState() { return (GameObjectState)GetByteValue(GameObjectFields.Bytes1, 0); }
-        byte GetGoArtKit() { return GetByteValue(GameObjectFields.Bytes1, 2); }
-        byte GetGoAnimProgress() { return GetByteValue(GameObjectFields.Bytes1, 3); }
-        public void SetGoAnimProgress(uint animprogress) { SetByteValue(GameObjectFields.Bytes1, 3, (byte)animprogress); }
+        public bool HasFlag(GameObjectFlags flags) { return (m_gameObjectData.Flags & (uint)flags) != 0; }
+        public void AddFlag(GameObjectFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Flags), (uint)flags); }
+        public void RemoveFlag(GameObjectFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Flags), (uint)flags); }
+        public void SetFlags(GameObjectFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Flags), (uint)flags); }
+        public void SetLevel(uint level) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Level), level); }
+
+        public GameObjectTypes GetGoType() { return (GameObjectTypes)(sbyte)m_gameObjectData.TypeID; }
+        public void SetGoType(GameObjectTypes type) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.TypeID), (sbyte)type); }
+        public GameObjectState GetGoState() { return (GameObjectState)(sbyte)m_gameObjectData.State; }
+        uint GetGoArtKit() { return m_gameObjectData.ArtKit; }
+        byte GetGoAnimProgress() { return m_gameObjectData.PercentHealth; }
+        public void SetGoAnimProgress(uint animprogress) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.PercentHealth), (byte)animprogress); }
 
         public LootState getLootState() { return m_lootState; }
         public LootModes GetLootMode() { return m_LootMode; }
@@ -2732,19 +2681,19 @@ namespace Game.Entities
 
         GameObjectDestructibleState GetDestructibleState()
         {
-            if (HasFlag(GameObjectFields.Flags, GameObjectFlags.Destroyed))
+            if ((m_gameObjectData.Flags & (uint)GameObjectFlags.Destroyed) != 0)
                 return GameObjectDestructibleState.Destroyed;
-            if (HasFlag(GameObjectFields.Flags, GameObjectFlags.Damaged))
+            if ((m_gameObjectData.Flags & (uint)GameObjectFlags.Damaged) != 0)
                 return GameObjectDestructibleState.Damaged;
             return GameObjectDestructibleState.Intact;
         }
 
         public GameObjectAI GetAI() { return m_AI; }
 
-        public uint GetDisplayId() { return GetUInt32Value(GameObjectFields.DisplayId); }
+        public uint GetDisplayId() { return m_gameObjectData.DisplayID; }
 
-        uint GetFaction() { return GetUInt32Value(GameObjectFields.Faction); }
-        public void SetFaction(uint faction) { SetUInt32Value(GameObjectFields.Faction, faction); }
+        public uint GetFaction() { return m_gameObjectData.FactionTemplate; }
+        public void SetFaction(uint faction) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.FactionTemplate), faction); }
 
         public override float GetStationaryX() { return m_stationaryPosition.GetPositionX(); }
         public override float GetStationaryY() { return m_stationaryPosition.GetPositionY(); }
@@ -2766,7 +2715,8 @@ namespace Game.Entities
         }
 
         #region Fields
-        public GameObjectValue m_goValue;
+        protected GameObjectFieldData m_gameObjectData;
+        protected GameObjectValue m_goValue;
         protected GameObjectTemplate m_goInfo;
         protected GameObjectTemplateAddon m_goTemplateAddon;
         GameObjectData m_goData;

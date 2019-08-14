@@ -57,13 +57,13 @@ namespace Game.Network.Packets
             _worldPacket.WriteBit(WindowInfo.HasValue);
             _worldPacket.FlushBits();
 
-            _worldPacket.WriteUInt32(CanLandNodes.Length);
-            _worldPacket.WriteUInt32(CanUseNodes.Length);
+            _worldPacket.WriteInt32(CanLandNodes.Length);
+            _worldPacket.WriteInt32(CanUseNodes.Length);
 
             if (WindowInfo.HasValue)
             {
                 _worldPacket.WritePackedGuid(WindowInfo.Value.UnitGUID);
-                _worldPacket.WriteUInt32(WindowInfo.Value.CurrentNode);
+                _worldPacket.WriteInt32(WindowInfo.Value.CurrentNode);
             }
 
             foreach (var node in CanLandNodes)

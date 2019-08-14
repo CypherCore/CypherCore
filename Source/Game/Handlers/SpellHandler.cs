@@ -149,7 +149,7 @@ namespace Game
             }
 
             // Verify that the bag is an actual bag or wrapped item that can be used "normally"
-            if (!proto.GetFlags().HasAnyFlag(ItemFlags.HasLoot) && !item.HasFlag(ItemFields.Flags, ItemFieldFlags.Wrapped))
+            if (!proto.GetFlags().HasAnyFlag(ItemFlags.HasLoot) && !item.HasItemFlag(ItemFieldFlags.Wrapped))
             {
                 player.SendEquipError(InventoryResult.ClientLockedOut, item);
                 Log.outError(LogFilter.Network, "Possible hacking attempt: Player {0} [guid: {1}] tried to open item [guid: {2}, entry: {3}] which is not openable!",
@@ -177,7 +177,7 @@ namespace Game
                 }
             }
 
-            if (item.HasFlag(ItemFields.Flags, ItemFieldFlags.Wrapped))// wrapped?
+            if (item.HasItemFlag(ItemFieldFlags.Wrapped))// wrapped?
             {
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_GIFT_BY_ITEM);
                 stmt.AddValue(0, item.GetGUID().GetCounter());
@@ -188,9 +188,9 @@ namespace Game
                     uint entry = result.Read<uint>(0);
                     uint flags = result.Read<uint>(1);
 
-                    item.SetUInt64Value(ItemFields.GiftCreator, 0);
+                    item.SetGiftCreator(ObjectGuid.Empty);
                     item.SetEntry(entry);
-                    item.SetUInt32Value(ItemFields.Flags, flags);
+                    item.SetItemFlags((ItemFieldFlags)flags);
                     item.SetState(ItemUpdateState.Changed, player);
                 }
                 else
@@ -450,7 +450,7 @@ namespace Game
             if (_player.HasAuraType(AuraType.PreventResurrection))
                 return; // silent return, client should display error by itself and not send this opcode
 
-            var selfResSpells = _player.GetDynamicValues(ActivePlayerDynamicFields.SelfResSpells);
+            List<uint> selfResSpells = _player.m_activePlayerData.SelfResSpells;
             if (!selfResSpells.Contains(selfRes.SpellId))
                 return;
 
@@ -458,7 +458,7 @@ namespace Game
             if (spellInfo != null)
                 _player.CastSpell(_player, spellInfo, false, null);
 
-            _player.RemoveDynamicValue(ActivePlayerDynamicFields.SelfResSpells, selfRes.SpellId);
+            _player.RemoveSelfResSpell(selfRes.SpellId);
         }
 
         [WorldPacketHandler(ClientOpcodes.SpellClick)]
@@ -497,23 +497,23 @@ namespace Game
             Player player = creator.ToPlayer();
             if (player)
             {
-                MirrorImageComponentedData data = new MirrorImageComponentedData();
-                data.UnitGUID = guid;
-                data.DisplayID = (int)creator.GetDisplayId();
-                data.RaceID = (byte)creator.GetRace();
-                data.Gender = (byte)creator.GetGender();
-                data.ClassID = (byte)creator.GetClass();
+                MirrorImageComponentedData mirrorImageComponentedData = new MirrorImageComponentedData();
+                mirrorImageComponentedData.UnitGUID = guid;
+                mirrorImageComponentedData.DisplayID = (int)creator.GetDisplayId();
+                mirrorImageComponentedData.RaceID = (byte)creator.GetRace();
+                mirrorImageComponentedData.Gender = (byte)creator.GetGender();
+                mirrorImageComponentedData.ClassID = (byte)creator.GetClass();
 
                 Guild guild = player.GetGuild();
 
-                data.SkinColor = player.GetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetSkinId);
-                data.FaceVariation = player.GetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetFaceId);
-                data.HairVariation = player.GetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetHairStyleId);
-                data.HairColor = player.GetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetHairColorId);
-                data.BeardVariation = player.GetByteValue(PlayerFields.Bytes2, PlayerFieldOffsets.Bytes2OffsetFacialStyle);
+                mirrorImageComponentedData.SkinColor = player.m_playerData.SkinID;
+                mirrorImageComponentedData.FaceVariation = player.m_playerData.FaceID;
+                mirrorImageComponentedData.HairVariation = player.m_playerData.HairStyleID;
+                mirrorImageComponentedData.HairColor = player.m_playerData.HairColorID;
+                mirrorImageComponentedData.BeardVariation = player.m_playerData.FacialHairStyleID;
                 for (int i = 0; i < PlayerConst.CustomDisplaySize; ++i)
-                    data.CustomDisplay[i] = player.GetByteValue(PlayerFields.Bytes2, (byte)(PlayerFieldOffsets.Bytes2OffsetCustomDisplayOption + i));
-                data.GuildGUID = (guild ? guild.GetGUID() : ObjectGuid.Empty);
+                    mirrorImageComponentedData.CustomDisplay[i] = player.m_playerData.CustomDisplayOption[i];
+                mirrorImageComponentedData.GuildGUID = (guild ? guild.GetGUID() : ObjectGuid.Empty);
 
                 byte[] itemSlots =
                 {
@@ -535,18 +535,15 @@ namespace Game
                 {
                     uint itemDisplayId;
                     Item item = player.GetItemByPos(InventorySlots.Bag0, slot);
-                    if ((slot == EquipmentSlot.Head && player.HasFlag(PlayerFields.Flags, PlayerFlags.HideHelm)) ||
-                        (slot == EquipmentSlot.Cloak && player.HasFlag(PlayerFields.Flags, PlayerFlags.HideCloak)))
-                        itemDisplayId = 0;
-                    else if (item)
+                    if (item != null)
                         itemDisplayId = item.GetDisplayId(player);
                     else
                         itemDisplayId = 0;
 
-                    data.ItemDisplayID.Add((int)itemDisplayId);
+                    mirrorImageComponentedData.ItemDisplayID.Add((int)itemDisplayId);
                 }
 
-                SendPacket(data);
+                SendPacket(mirrorImageComponentedData);
             }
             else
             {

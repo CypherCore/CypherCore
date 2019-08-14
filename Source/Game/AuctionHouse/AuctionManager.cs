@@ -555,38 +555,6 @@ namespace Game
                     string name = proto.GetName(player.GetSession().GetSessionDbcLocale());
                     if (string.IsNullOrEmpty(name))
                         continue;
-
-                    // DO NOT use GetItemEnchantMod(proto.RandomProperty) as it may return a result
-                    //  that matches the search but it may not equal item.GetItemRandomPropertyId()
-                    //  used in BuildAuctionInfo() which then causes wrong items to be listed
-                    int propRefID = item.GetItemRandomPropertyId();
-                    if (propRefID != 0)
-                    {
-                        string suffix = null;
-                        // Append the suffix to the name (ie: of the Monkey) if one exists
-                        // These are found in ItemRandomProperties.dbc, not ItemRandomSuffix.dbc
-                        //  even though the DBC names seem misleading
-                        if (propRefID < 0)
-                        {
-                            ItemRandomSuffixRecord itemRandSuffix = CliDB.ItemRandomSuffixStorage.LookupByKey(-propRefID);
-                            if (itemRandSuffix != null)
-                                suffix = itemRandSuffix.Name[player.GetSession().GetSessionDbcLocale()];
-                        }
-                        else
-                        {
-                            ItemRandomPropertiesRecord itemRandProp = CliDB.ItemRandomPropertiesStorage.LookupByKey(propRefID);
-                            if (itemRandProp != null)
-                                suffix = itemRandProp.Name[player.GetSession().GetSessionDbcLocale()];
-                        }
-
-                        // dbc local name
-                        if (!string.IsNullOrEmpty(suffix))
-                        {
-                            // Append the suffix (ie: of the Monkey) to the name using localization
-                            // or default enUS if localization is invalid
-                            name += ' ' + suffix;
-                        }
-                    }
                 }
 
                 // Add the item if no search term or if entered search term was found
@@ -645,7 +613,7 @@ namespace Game
             }
 
             byte i = 0;
-            foreach (ItemDynamicFieldGems gemData in item.GetGems())
+            foreach (SocketedGem gemData in item.m_itemData.Gems)
             {
                 if (gemData.ItemId != 0)
                 {

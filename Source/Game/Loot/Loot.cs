@@ -40,8 +40,7 @@ namespace Game.Loots
 
             needs_quest = li.needs_quest;
 
-            randomSuffix = ItemEnchantment.GenerateEnchSuffixFactor(itemid);
-            randomPropertyId = ItemEnchantment.GenerateItemRandomPropertyId(itemid);
+            randomBonusListId = ItemEnchantmentManager.GenerateItemRandomBonusListId(itemid);
             upgradeId = Global.DB2Mgr.GetRulesetItemUpgrade(itemid);
             canSave = true;
         }
@@ -88,8 +87,7 @@ namespace Game.Loots
         public List<ObjectGuid> GetAllowedLooters() { return allowedGUIDs; }
 
         public uint itemid;
-        public uint randomSuffix;
-        public ItemRandomEnchantmentId randomPropertyId;
+        public uint randomBonusListId;
         public uint upgradeId;
         public List<uint> BonusListIDs = new List<uint>();
         public byte context;
@@ -216,7 +214,7 @@ namespace Game.Loots
                 return false;
             }
 
-            _itemContext = lootOwner.GetMap().GetDifficultyLootItemContext();
+            _itemContext = (byte)lootOwner.GetMap().GetDifficultyLootItemContext();
 
             tab.Process(this, store.IsRatesAllowed(), (byte)lootMode);          // Processing is done there, callback via Loot.AddItem()
 

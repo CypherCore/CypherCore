@@ -201,7 +201,7 @@ namespace Game.Network.Packets
             {
                 data.WriteUInt32((uint)moveSpline.splineflags.Flags);   // SplineFlags
                 data.WriteInt32(moveSpline.timePassed());               // Elapsed
-                data.WriteUInt32(moveSpline.Duration());                // Duration
+                data.WriteInt32(moveSpline.Duration());                // Duration
                 data.WriteFloat(1.0f);                                  // DurationModifier
                 data.WriteFloat(1.0f);                                  // NextDurationModifier
                 data.WriteBits((byte)moveSpline.facing.type, 2);        // Face
@@ -240,7 +240,7 @@ namespace Game.Network.Packets
                 }
 
                 if (hasFadeObjectTime)
-                    data.WriteUInt32(moveSpline.effect_start_time);     // FadeObjectTime
+                    data.WriteInt32(moveSpline.effect_start_time);     // FadeObjectTime
 
                 foreach (var vec in moveSpline.getPath())
                     data.WriteVector3(vec);
@@ -256,7 +256,7 @@ namespace Game.Network.Packets
                 if (moveSpline.splineflags.hasFlag(SplineFlag.Parabolic))
                 {
                     data.WriteFloat(moveSpline.vertical_acceleration);
-                    data.WriteUInt32(moveSpline.effect_start_time);
+                    data.WriteInt32(moveSpline.effect_start_time);
                     data.WriteUInt32(0);                                                  // Duration (override)
                 }
             }
@@ -316,7 +316,7 @@ namespace Game.Network.Packets
 
             if (splineFlags.hasFlag(SplineFlag.Animation))
             {
-                movementSpline.AnimTier = splineFlags.getAnimationId();
+                movementSpline.AnimTier = splineFlags.getAnimTier();
                 movementSpline.TierTransStartTime = (uint)moveSpline.effect_start_time;
             }
 
@@ -911,7 +911,7 @@ namespace Game.Network.Packets
             _worldPacket.WritePackedGuid(SummonerGUID);
             _worldPacket.WriteUInt32(SummonerVirtualRealmAddress);
             _worldPacket.WriteInt32(AreaID);
-            _worldPacket.WriteUInt8(Reason);
+            _worldPacket.WriteUInt8((byte)Reason);
             _worldPacket.WriteBit(SkipStartingArea);
             _worldPacket.FlushBits();
         }
@@ -978,7 +978,7 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(MoverGUID);
-            _worldPacket.WriteUInt32(StateChanges.Count);
+            _worldPacket.WriteInt32(StateChanges.Count);
             foreach (MoveStateChange stateChange in StateChanges)
                 stateChange.Write(_worldPacket);
         }
@@ -1010,7 +1010,7 @@ namespace Game.Network.Packets
 
             public void Write(WorldPacket data)
             {
-                data.WriteUInt16(MessageID);
+                data.WriteUInt16((ushort)MessageID);
                 data.WriteUInt32(SequenceIndex);
                 data.WriteBit(Speed.HasValue);
                 data.WriteBit(KnockBack.HasValue);
@@ -1076,7 +1076,7 @@ namespace Game.Network.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(FilterKeys.Count);
+            data.WriteInt32(FilterKeys.Count);
             data.WriteFloat(BaseSpeed);
             data.WriteInt16(StartOffset);
             data.WriteFloat(DistToPrevFilterKey);

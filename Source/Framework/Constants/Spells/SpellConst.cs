@@ -709,7 +709,8 @@ namespace Framework.Constants
         WrongFaction = 292,
         NotEnoughCurrency = 293,
         BattleForAzerothRidingRequirement = 294,
-        Unknown = 295,
+        MountEquipmentError = 295,
+        Unknown = 296,
 
         // Ok Cast Value - Here In Case A Future Version Removes Success And We Need To Use A Custom Value (Not Sent To Client Either Way)
         SpellCastOk = Success
@@ -1711,7 +1712,7 @@ namespace Framework.Constants
         Unk4 = 0x10, //  4
         AbsorbEnvironmentalDamage = 0x20, //  5
         Unk6 = 0x40, //  6
-        RankIgnoresCasterLevel = 0x80, //  7 Spell_C_GetSpellRank returns SpellLevels->MaxLevel * 5 instead of std::min(SpellLevels->MaxLevel, caster->Level) * 5
+        RankIgnoresCasterLevel = 0x80, //  7 Spell_C_GetSpellRank returns SpellLevels.MaxLevel * 5 instead of std::min(SpellLevels.MaxLevel, caster.Level) * 5
         Unk8 = 0x100, //  8
         Unk9 = 0x200, //  9
         Unk10 = 0x400, // 10
@@ -2090,7 +2091,17 @@ namespace Framework.Constants
         RespecAzeriteEmpoweredItem = 259,
         SummonStabledPet = 260,
         ScrapItem = 261,
-        TotalSpellEffects,
+        Unk262 = 262,
+        RepairItem = 263,
+        RemoveGem = 264,
+        LearnAzeriteEssencePower = 265,
+        Unk266 = 266,
+        Unk267 = 267,
+        ApplyMountEquipment = 268,
+        UpgradeItem = 269,
+        Unk270 = 270,
+        ApplyAreaAuraPartyNonrandom = 271,
+        TotalSpellEffects
     }
 
     public enum SpellEffectHandle

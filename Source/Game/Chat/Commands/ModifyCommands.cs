@@ -122,22 +122,22 @@ namespace Game.Chat
 
             if (!uint.TryParse(pfactionid, out uint factionid))
             {
-                uint _factionid = target.getFaction();
-                uint _flag = target.GetUInt32Value(UnitFields.Flags);
-                ulong _npcflag = target.GetUInt64Value(UnitFields.NpcFlags);
-                uint _dyflag = target.GetUInt32Value(ObjectFields.DynamicFlags);
+                uint _factionid = target.GetFaction();
+                uint _flag = target.m_unitData.Flags;
+                ulong _npcflag = (ulong)target.m_unitData.NpcFlags[0] << 32 | target.m_unitData.NpcFlags[1];
+                uint _dyflag = target.m_objectData.DynamicFlags;
                 handler.SendSysMessage(CypherStrings.CurrentFaction, target.GetGUID().ToString(), _factionid, _flag, _npcflag, _dyflag);
                 return true;
             }
 
             if (!uint.TryParse(args.NextString(), out uint flag))
-                flag = target.GetUInt32Value(UnitFields.Flags);
+                flag = target.m_unitData.Flags;
 
             if (!ulong.TryParse(args.NextString(), out ulong npcflag))
-                npcflag = target.GetUInt64Value(UnitFields.NpcFlags);
+                npcflag = (ulong)target.m_unitData.NpcFlags[0] << 32 | target.m_unitData.NpcFlags[1];
 
             if (!uint.TryParse(args.NextString(), out uint dyflag))
-                dyflag = target.GetUInt32Value(ObjectFields.DynamicFlags);
+                dyflag = target.m_objectData.DynamicFlags;
 
             if (!CliDB.FactionTemplateStorage.ContainsKey(factionid))
             {
@@ -148,9 +148,10 @@ namespace Game.Chat
             handler.SendSysMessage(CypherStrings.YouChangeFaction, target.GetGUID().ToString(), factionid, flag, npcflag, dyflag);
 
             target.SetFaction(factionid);
-            target.SetUInt32Value(UnitFields.Flags, flag);
-            target.SetUInt64Value(UnitFields.NpcFlags, npcflag);
-            target.SetUInt32Value(ObjectFields.DynamicFlags, dyflag);
+            target.SetUnitFlags((UnitFlags)flag);
+            target.SetNpcFlags((NPCFlags)(npcflag & 0xFFFFFFFF));
+            target.SetNpcFlags2((NPCFlags2)(npcflag >> 32));
+            target.SetDynamicFlags((UnitDynFlags)dyflag);
 
             return true;
         }
@@ -217,7 +218,7 @@ namespace Game.Chat
                 NotifyModification(handler, target, CypherStrings.YouChangeSize, CypherStrings.YoursSizeChanged, Scale);
                 Creature creatureTarget = target.ToCreature();
                 if (creatureTarget)
-                    creatureTarget.SetFloatValue(UnitFields.DisplayScale, Scale);
+                    creatureTarget.SetDisplayId(creatureTarget.GetDisplayId(), Scale);
                 else
                     target.SetObjectScale(Scale);
                 return true;
@@ -319,51 +320,6 @@ namespace Game.Chat
             }
 
             Log.outDebug(LogFilter.ChatSystem, Global.ObjectMgr.GetCypherString(CypherStrings.NewMoney), targetMoney, moneyToAdd, target.GetMoney());
-            return true;
-        }
-
-        [Command("bit", RBACPermissions.CommandModifyBit)]
-        static bool HandleModifyBitCommand(StringArguments args, CommandHandler handler)
-        {
-            if (args.Empty())
-                return false;
-
-            Unit target = handler.getSelectedUnit();
-            if (!target)
-            {
-                handler.SendSysMessage(CypherStrings.NoCharSelected);
-
-                return false;
-            }
-
-            // check online security
-            if (target.IsTypeId(TypeId.Player) && handler.HasLowerSecurity(target.ToPlayer(), ObjectGuid.Empty))
-                return false;
-
-            ushort field = args.NextUInt16();
-            int bit = args.NextInt32();
-
-            if (field < (int)ObjectFields.End || field >= target.valuesCount)
-            {
-                handler.SendSysMessage(CypherStrings.BadValue);
-                return false;
-            }
-            if (bit < 1 || bit > 32)
-            {
-                handler.SendSysMessage(CypherStrings.BadValue);
-                return false;
-            }
-
-            if (target.HasFlag(field, (1 << (bit - 1))))
-            {
-                target.RemoveFlag(field, (1 << (bit - 1)));
-                handler.SendSysMessage(CypherStrings.RemoveBit, bit, field);
-            }
-            else
-            {
-                target.SetFlag(field, (1 << (bit - 1)));
-                handler.SendSysMessage(CypherStrings.SetBit, bit, field);
-            }
             return true;
         }
 
@@ -591,7 +547,7 @@ namespace Game.Chat
                 return false;
 
             uint anim_id = args.NextUInt32();
-            handler.GetSession().GetPlayer().SetUInt32Value(UnitFields.NpcEmotestate, anim_id);
+            handler.GetSession().GetPlayer().SetEmoteState((Emote)anim_id);
 
             return true;
         }
@@ -637,8 +593,8 @@ namespace Game.Chat
             }
 
             // Set gender
-            target.SetByteValue(UnitFields.Bytes0, 3, (byte)gender);
-            target.SetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetGender, (byte)gender);
+            target.SetGender(gender);
+            target.SetNativeSex(gender);
 
             // Change display ID
             target.InitDisplayIds();

@@ -90,7 +90,7 @@ namespace Game.Network.Packets
         {
             _worldPacket.WritePackedGuid(VendorGUID);
             _worldPacket.WriteUInt32(Muid);
-            _worldPacket.WriteUInt8(Reason);
+            _worldPacket.WriteUInt8((byte)Reason);
         }
 
         public ObjectGuid VendorGUID;
@@ -237,7 +237,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt8(BagResult);
+            _worldPacket.WriteInt8((sbyte)BagResult);
             _worldPacket.WritePackedGuid(Item[0]);
             _worldPacket.WritePackedGuid(Item[1]);
             _worldPacket.WriteUInt8(ContainerBSlot); // bag type subclass, used with EQUIP_ERR_EVENT_AUTOEQUIP_BIND_CONFIRM and EQUIP_ERR_WRONG_BAG_TYPE_2
@@ -246,7 +246,7 @@ namespace Game.Network.Packets
             {
                 case InventoryResult.CantEquipLevelI:
                 case InventoryResult.PurchaseLevelTooLow:
-                    _worldPacket.WriteUInt32(Level);
+                    _worldPacket.WriteInt32(Level);
                     break;
                 case InventoryResult.EventAutoequipBindConfirm:
                     _worldPacket.WritePackedGuid(SrcContainer);
@@ -403,7 +403,7 @@ namespace Game.Network.Packets
         {
             _worldPacket.WritePackedGuid(VendorGUID);
             _worldPacket.WritePackedGuid(ItemGUID);
-            _worldPacket.WriteUInt8(Reason);
+            _worldPacket.WriteUInt8((byte)Reason);
         }
 
         public ObjectGuid VendorGUID;
@@ -423,7 +423,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(QuestLogItemID);
             _worldPacket.WriteUInt32(Quantity);
             _worldPacket.WriteUInt32(QuantityInInventory);
-            _worldPacket.WriteUInt32(DungeonEncounterID);
+            _worldPacket.WriteInt32(DungeonEncounterID);
             _worldPacket.WriteInt32(BattlePetSpeciesID);
             _worldPacket.WriteInt32(BattlePetBreedID);
             _worldPacket.WriteUInt32(BattlePetBreedQuality);
@@ -603,39 +603,6 @@ namespace Game.Network.Packets
         public ObjectGuid ItemGuid;
     }
 
-    class UpgradeItem : ClientPacket
-    {
-        public UpgradeItem(WorldPacket packet) : base(packet) { }
-
-        public override void Read()
-        {
-            ItemMaster = _worldPacket.ReadPackedGuid();
-            ItemGUID = _worldPacket.ReadPackedGuid();
-            UpgradeID = _worldPacket.ReadInt32();
-            ContainerSlot = _worldPacket.ReadInt32();
-            Slot = _worldPacket.ReadInt32();
-        }
-
-        public ObjectGuid ItemMaster;
-        public ObjectGuid ItemGUID;
-        public int ContainerSlot;
-        public int UpgradeID;
-        public int Slot;
-    }
-
-    class ItemUpgradeResult : ServerPacket
-    {
-        public ItemUpgradeResult() : base(ServerOpcodes.ItemUpgradeResult) { }
-
-        public override void Write()
-        {
-            _worldPacket.WriteBit(Success);
-            _worldPacket.FlushBits();
-        }
-
-        public bool Success;
-    }
-
     class SocketGems : ClientPacket
     {
         public SocketGems(WorldPacket packet) : base(packet) { }
@@ -716,7 +683,7 @@ namespace Game.Network.Packets
         public void Write(WorldPacket data)
         {
             data.WriteUInt8(Context);
-            data.WriteUInt32(BonusListIDs.Count);
+            data.WriteInt32(BonusListIDs.Count);
             foreach (uint bonusID in BonusListIDs)
                 data.WriteUInt32(bonusID);
         }
@@ -774,15 +741,15 @@ namespace Game.Network.Packets
         public ItemInstance(Item item)
         {
             ItemID = item.GetEntry();
-            var bonusListIds = item.GetDynamicValues(ItemDynamicFields.BonusListIds);
+            List<uint> bonusListIds = item.m_itemData.BonusListIDs;
             if (!bonusListIds.Empty())
             {
                 ItemBonus.HasValue = true;
                 ItemBonus.Value.BonusListIDs.AddRange(bonusListIds);
-                ItemBonus.Value.Context = (byte)item.GetUInt32Value(ItemFields.Context);
+                ItemBonus.Value.Context = (byte)item.m_itemData.Context;
             }
 
-            uint mask = item.GetUInt32Value(ItemFields.ModifiersMask);
+            uint mask = item.m_itemData.ModifiersMask;
             if (mask != 0)
             {
                 Modifications.HasValue = true;
@@ -799,11 +766,13 @@ namespace Game.Network.Packets
         {
             ItemID = lootItem.itemid;
 
-            if (!lootItem.BonusListIDs.Empty())
+            if (!lootItem.BonusListIDs.Empty() || lootItem.randomBonusListId != 0)
             {
                 ItemBonus.HasValue = true;
                 ItemBonus.Value.BonusListIDs = lootItem.BonusListIDs;
                 ItemBonus.Value.Context = lootItem.context;
+                if (lootItem.randomBonusListId != 0)
+                    ItemBonus.Value.BonusListIDs.Add(lootItem.randomBonusListId);
             }
 
             if (lootItem.upgradeId != 0)
@@ -836,7 +805,7 @@ namespace Game.Network.Packets
             }
         }
 
-        public ItemInstance(ItemDynamicFieldGems gem)
+        public ItemInstance(SocketedGem gem)
         {
             ItemID = gem.ItemId;
 

@@ -33,10 +33,10 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt32(WaveCurrent);
             _worldPacket.WriteUInt32(WaveMax);
             _worldPacket.WriteUInt32(TimerDuration);
-            _worldPacket.WriteUInt32(CriteriaProgress.Count);
-            _worldPacket.WriteUInt32(BonusObjectives.Count);
-            _worldPacket.WriteUInt32(PickedSteps.Count);
-            _worldPacket.WriteUInt32(Spells.Count);
+            _worldPacket.WriteInt32(CriteriaProgress.Count);
+            _worldPacket.WriteInt32(BonusObjectives.Count);
+            _worldPacket.WriteInt32(PickedSteps.Count);
+            _worldPacket.WriteInt32(Spells.Count);
 
             for (int i = 0; i < PickedSteps.Count; ++i)
                 _worldPacket.WriteUInt32(PickedSteps[i]);
@@ -131,12 +131,12 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(ScenarioPOIDataStats.Count);
+            _worldPacket.WriteInt32(ScenarioPOIDataStats.Count);
 
             foreach (ScenarioPOIData scenarioPOIData in ScenarioPOIDataStats)
             {
                 _worldPacket.WriteInt32(scenarioPOIData.CriteriaTreeID);
-                _worldPacket.WriteUInt32(scenarioPOIData.ScenarioPOIs.Count);
+                _worldPacket.WriteInt32(scenarioPOIData.ScenarioPOIs.Count);
 
                 foreach (ScenarioPOI scenarioPOI in scenarioPOIData.ScenarioPOIs)
                 {
@@ -147,12 +147,12 @@ namespace Game.Network.Packets
                     _worldPacket.WriteInt32(scenarioPOI.Flags);
                     _worldPacket.WriteInt32(scenarioPOI.WorldEffectID);
                     _worldPacket.WriteInt32(scenarioPOI.PlayerConditionID);
-                    _worldPacket.WriteUInt32(scenarioPOI.Points.Count);
+                    _worldPacket.WriteInt32(scenarioPOI.Points.Count);
 
                     foreach (var scenarioPOIBlobPoint in scenarioPOI.Points)
                     {
-                        _worldPacket.WriteInt32(scenarioPOIBlobPoint.X);
-                        _worldPacket.WriteInt32(scenarioPOIBlobPoint.Y);
+                        _worldPacket.WriteInt32((int)scenarioPOIBlobPoint.X);
+                        _worldPacket.WriteInt32((int)scenarioPOIBlobPoint.Y);
                     }
                 }
             }

@@ -29,7 +29,7 @@ namespace Game.Movement
         public bool isSmooth() { return Flags.HasAnyFlag(SplineFlag.Catmullrom); }
         public bool isLinear() { return !isSmooth(); }
 
-        public byte getAnimationId() { return animId; }
+        public byte getAnimTier() { return animTier; }
         public bool hasAllFlags(SplineFlag f) { return (Flags & f) == f; }
         public bool hasFlag(SplineFlag f) { return (Flags & f) != 0; }
 
@@ -50,6 +50,6 @@ namespace Game.Movement
         public void EnableTransportExit() { Flags = (Flags & ~SplineFlag.TransportEnter) | SplineFlag.TransportExit; }
 
         public SplineFlag Flags;
-        public byte animId;
+        public byte animTier;
     }
 }

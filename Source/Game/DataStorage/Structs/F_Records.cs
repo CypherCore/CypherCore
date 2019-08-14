@@ -29,7 +29,7 @@ namespace Game.DataStorage
         public short ReputationIndex;
         public ushort ParentFactionID;
         public byte Expansion;
-        public byte FriendshipRepID;
+        public uint FriendshipRepID;
         public byte Flags;
         public ushort ParagonFactionID;
         public short[] ReputationClassMask = new short[4];

@@ -62,7 +62,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.QuestGiverHello)]
         void HandleQuestgiverHello(QuestGiverHello packet)
         {
-            Creature creature = GetPlayer().GetNPCIfCanInteractWith(packet.QuestGiverGUID, NPCFlags.QuestGiver);
+            Creature creature = GetPlayer().GetNPCIfCanInteractWith(packet.QuestGiverGUID, NPCFlags.QuestGiver, NPCFlags2.None);
             if (creature == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleQuestgiverHello - {0} not found or you can't interact with him.", packet.QuestGiverGUID.ToString());
@@ -700,7 +700,7 @@ namespace Game
                     List<ItemPosCount> dest = new List<ItemPosCount>();
                     if (_player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item.Id, (uint)item.Quantity) == InventoryResult.Ok)
                     {
-                        Item newItem = _player.StoreNewItem(dest, item.Id, true, ItemEnchantment.GenerateItemRandomPropertyId(item.Id), null, 0, item.BonusListIDs);
+                        Item newItem = _player.StoreNewItem(dest, item.Id, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(item.Id), null, 0, item.BonusListIDs);
                         _player.SendNewItem(newItem, (uint)item.Quantity, true, false);
                     }
                 }

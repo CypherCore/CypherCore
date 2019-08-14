@@ -58,6 +58,8 @@ namespace Game.DataStorage
         public int ParentUiMapID;
         public int OrderIndex;
         public int ChildUiMapID;
+        public int OverrideHighlightFileDataID;
+        public int OverrideHighlightAtlasID;
     }
 
     public sealed class UiMapXMapArtRecord

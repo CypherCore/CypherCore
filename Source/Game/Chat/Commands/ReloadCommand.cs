@@ -395,12 +395,12 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("item_enchantment_template", RBACPermissions.CommandReloadItemEnchantmentTemplate, true)]
-        static bool HandleReloadItemEnchantementsCommand(StringArguments args, CommandHandler handler)
+        [Command("item_random_bonus_list_template", RBACPermissions.CommandReloadItemRandomBonusListTemplate, true)]
+        static bool HandleReloadItemRandomBonusListTemplatesCommand(StringArguments args, CommandHandler handler)
         {
-            Log.outInfo(LogFilter.Server, "Re-Loading Item Random Enchantments Table...");
-            ItemEnchantment.LoadRandomEnchantmentsTable();
-            handler.SendGlobalGMSysMessage("DB table `item_enchantment_template` reloaded.");
+            Log.outInfo(LogFilter.Server, "Re-Loading Random item bonus list definitions...");
+            ItemEnchantmentManager.LoadItemRandomBonusListTemplates();
+            handler.SendGlobalGMSysMessage("DB table `item_random_bonus_list_template` reloaded.");
             return true;
         }
 
@@ -1015,7 +1015,7 @@ namespace Game.Chat
             static bool HandleReloadAllItemCommand(StringArguments args, CommandHandler handler)
             {
                 HandleReloadPageTextsCommand(null, handler);
-                HandleReloadItemEnchantementsCommand(null, handler);
+                HandleReloadItemRandomBonusListTemplatesCommand(null, handler);
                 return true;
             }
 

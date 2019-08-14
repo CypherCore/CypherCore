@@ -121,7 +121,7 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(Delay);
-            _worldPacket.WriteUInt32(Reason);
+            _worldPacket.WriteUInt32((uint)Reason);
         }
 
         public int Delay;
@@ -153,9 +153,9 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8(Type);
+            _worldPacket.WriteUInt8((byte)Type);
             _worldPacket.WriteUInt32(MapID);
-            _worldPacket.WriteUInt32(DifficultyID);
+            _worldPacket.WriteUInt32((uint)DifficultyID);
             _worldPacket.WriteBit(Locked);
             _worldPacket.WriteBit(Extended);
             _worldPacket.FlushBits();
@@ -277,7 +277,7 @@ namespace Game.Network.Packets
             data.WriteUInt32(MapID);
             data.WriteUInt32(DifficultyID);
             data.WriteUInt64(InstanceID);
-            data.WriteUInt32(TimeRemaining);
+            data.WriteInt32(TimeRemaining);
             data.WriteUInt32(CompletedMask);
 
             data.WriteBit(Locked);

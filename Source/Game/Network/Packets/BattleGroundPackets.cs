@@ -30,14 +30,16 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(CurrentSeason);
-            _worldPacket.WriteUInt32(PreviousSeason);
-            _worldPacket.WriteUInt32(PvpSeasonID);
+            _worldPacket.WriteInt32(MythicPlusSeasonID);
+            _worldPacket.WriteInt32(CurrentSeason);
+            _worldPacket.WriteInt32(PreviousSeason);
+            _worldPacket.WriteInt32(PvpSeasonID);
         }
 
-        public uint PreviousSeason;
-        public uint CurrentSeason;
-        public uint PvpSeasonID;
+        public int MythicPlusSeasonID;
+        public int PreviousSeason;
+        public int CurrentSeason;
+        public int PvpSeasonID;
     }
 
     public class AreaSpiritHealerQuery : ClientPacket
@@ -85,23 +87,18 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteBit(Ratings.HasValue);
-            _worldPacket.WriteBit(Winner.HasValue);
-            _worldPacket.WriteUInt32(Players.Count);
+            _worldPacket.WriteInt32(Statistics.Count);
             foreach (var id in PlayerCount)
                 _worldPacket.WriteInt8(id);
 
             if (Ratings.HasValue)
                 Ratings.Value.Write(_worldPacket);
 
-            if (Winner.HasValue)
-                _worldPacket.WriteUInt8(Winner.Value);
-
-            foreach (PlayerData player in Players)
+            foreach (PVPMatchPlayerStatistics player in Statistics)
                 player.Write(_worldPacket);
         }
 
-        public Optional<byte> Winner;
-        public List<PlayerData> Players = new List<PlayerData>();
+        public List<PVPMatchPlayerStatistics> Statistics = new List<PVPMatchPlayerStatistics>();
         public Optional<RatingData> Ratings;
         public sbyte[] PlayerCount = new sbyte[2];
 
@@ -138,7 +135,7 @@ namespace Game.Network.Packets
             public uint ContributionPoints;
         }
 
-        public class PlayerData
+        public class PVPMatchPlayerStatistics
         {
             public void Write(WorldPacket data)
             {
@@ -146,10 +143,10 @@ namespace Game.Network.Packets
                 data.WriteUInt32(Kills);
                 data.WriteUInt32(DamageDone);
                 data.WriteUInt32(HealingDone);
-                data.WriteUInt32(Stats.Count);
+                data.WriteInt32(Stats.Count);
                 data.WriteInt32(PrimaryTalentTree);
                 data.WriteInt32(Sex);
-                data.WriteInt32(PlayerRace);
+                data.WriteUInt32((uint)PlayerRace);
                 data.WriteInt32(PlayerClass);
                 data.WriteInt32(CreatureID);
                 data.WriteInt32(HonorLevel);
@@ -287,7 +284,7 @@ namespace Game.Network.Packets
         {
             Ticket.Write(_worldPacket);
             _worldPacket.WriteUInt64(QueueID);
-            _worldPacket.WriteUInt32(Reason);
+            _worldPacket.WriteInt32(Reason);
             _worldPacket.WritePackedGuid(ClientID);
         }
 
@@ -374,7 +371,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(BattlemasterListID);
             _worldPacket.WriteUInt8(MinLevel);
             _worldPacket.WriteUInt8(MaxLevel);
-            _worldPacket.WriteUInt32(Battlefields.Count);
+            _worldPacket.WriteInt32(Battlefields.Count);
 
             foreach (var field in Battlefields)
                 _worldPacket.WriteInt32(field);
@@ -449,7 +446,7 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(Offender);
-            _worldPacket.WriteUInt8(Result);
+            _worldPacket.WriteUInt8((byte)Result);
             _worldPacket.WriteUInt8(NumBlackMarksOnOffender);
             _worldPacket.WriteUInt8(NumPlayersIHaveReported);
         }
@@ -474,7 +471,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(FlagCarriers.Count);
+            _worldPacket.WriteInt32(FlagCarriers.Count);
             foreach (var pos in FlagCarriers)
                 pos.Write(_worldPacket);
         }

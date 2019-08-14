@@ -56,13 +56,13 @@ namespace Game.Entities
             if (buffer.WriteBit(!outOfRangeGUIDs.Empty()))
             {
                 buffer.WriteUInt16(0); // object limit to instantly destroy - objects before this index on m_outOfRangeGUIDs list get "smoothly phased out"
-                buffer.WriteUInt32(outOfRangeGUIDs.Count);
+                buffer.WriteInt32(outOfRangeGUIDs.Count);
 
                 foreach (var guid in outOfRangeGUIDs)
                     buffer.WritePackedGuid(guid);
             }
             var bytes = data.GetData();
-            buffer.WriteUInt32(bytes.Length);
+            buffer.WriteInt32(bytes.Length);
             buffer.WriteBytes(bytes);
 
             packet.Data = buffer.GetData();

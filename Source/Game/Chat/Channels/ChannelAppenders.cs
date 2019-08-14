@@ -65,9 +65,9 @@ namespace Game.Chat
             LocaleConstant localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
 
             ChannelNotifyJoined notify = new ChannelNotifyJoined();
-            //notify->ChannelWelcomeMsg = "";
+            //notify.ChannelWelcomeMsg = "";
             notify.ChatChannelID = (int)_source.GetChannelId();
-            //notify->InstanceID = 0;
+            //notify.InstanceID = 0;
             notify.ChannelFlags = _source.GetFlags();
             notify.Channel = _source.GetName(localeIdx);
             return notify;

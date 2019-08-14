@@ -31,7 +31,7 @@ namespace Game.Movement
         public override void DoInitialize(T owner)
         {
             owner.AddUnitState(UnitState.Confused);
-            owner.SetFlag(UnitFields.Flags, UnitFlags.Confused);
+            owner.AddUnitFlag(UnitFlags.Confused);
             owner.GetPosition(out i_x, out i_y, out i_z);
 
             if (!owner.IsAlive() || owner.IsStopped())
@@ -45,13 +45,13 @@ namespace Game.Movement
         {
             if (owner.IsTypeId(TypeId.Player))
             {
-                owner.RemoveFlag(UnitFields.Flags, UnitFlags.Confused);
+                owner.RemoveUnitFlag(UnitFlags.Confused);
                 owner.ClearUnitState(UnitState.Confused | UnitState.ConfusedMove);
                 owner.StopMoving();
             }
             else if (owner.IsTypeId(TypeId.Unit))
             {
-                owner.RemoveFlag(UnitFields.Flags, UnitFlags.Confused);
+                owner.RemoveUnitFlag(UnitFlags.Confused);
                 owner.ClearUnitState(UnitState.Confused | UnitState.ConfusedMove);
                 if (owner.GetVictim())
                     owner.SetTarget(owner.GetVictim().GetGUID());

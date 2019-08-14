@@ -236,10 +236,10 @@ namespace Game
                 return;
             }
 
-            //if (raceExpansionRequirement->AchievementId && !)
+            //if (raceExpansionRequirement.AchievementId && !)
             //{
             //    TC_LOG_ERROR("entities.player.cheat", "Expansion %u account:[%d] tried to Create character without achievement %u race (%u)",
-            //        GetAccountExpansion(), GetAccountId(), raceExpansionRequirement->AchievementId, charCreate.CreateInfo->Race);
+            //        GetAccountExpansion(), GetAccountId(), raceExpansionRequirement.AchievementId, charCreate.CreateInfo.Race);
             //    SendCharCreate(CHAR_CREATE_ALLIED_RACE_ACHIEVEMENT);
             //    return;
             //}
@@ -477,7 +477,7 @@ namespace Game
 
                     Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}) Create Character: {2} {3}", GetAccountId(), GetRemoteAddress(), createInfo.Name, newChar.GetGUID().ToString());
                     Global.ScriptMgr.OnPlayerCreate(newChar);
-                    Global.WorldMgr.AddCharacterInfo(newChar.GetGUID(), GetAccountId(), newChar.GetName(), newChar.GetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetGender), (byte)newChar.GetRace(), (byte)newChar.GetClass(), (byte)newChar.getLevel(), false);
+                    Global.WorldMgr.AddCharacterInfo(newChar.GetGUID(), GetAccountId(), newChar.GetName(), newChar.m_playerData.NativeSex, (byte)newChar.GetRace(), (byte)newChar.GetClass(), (byte)newChar.getLevel(), false);
 
                     newChar.CleanupsBeforeDelete();
                 }
@@ -632,7 +632,7 @@ namespace Game
                 return;
             }
 
-            pCurrChar.SetUInt32Value(PlayerFields.VirtualRealm, Global.WorldMgr.GetVirtualRealmAddress());
+            pCurrChar.SetVirtualPlayerRealm(Global.WorldMgr.GetVirtualRealmAddress());
 
             SendTutorialsData();
 
@@ -665,10 +665,10 @@ namespace Game
             // Send PVPSeason
             {
                 PVPSeason season = new PVPSeason();
-                season.PreviousSeason = (WorldConfig.GetUIntValue(WorldCfg.ArenaSeasonId) - (WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? 1u : 0u));
+                season.PreviousSeason = (WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId) - (WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? 1 : 0));
 
                 if (WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress))
-                    season.CurrentSeason = WorldConfig.GetUIntValue(WorldCfg.ArenaSeasonId);
+                    season.CurrentSeason = WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId);
 
                 SendPacket(season);
             }
@@ -793,10 +793,10 @@ namespace Game
             pCurrChar.LoadPet();
 
             // Set FFA PvP for non GM in non-rest mode
-            if (Global.WorldMgr.IsFFAPvPRealm() && !pCurrChar.IsGameMaster() && !pCurrChar.HasFlag(PlayerFields.Flags, PlayerFlags.Resting))
-                pCurrChar.SetByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag, UnitBytes2Flags.FFAPvp);
+            if (Global.WorldMgr.IsFFAPvPRealm() && !pCurrChar.IsGameMaster() && !pCurrChar.HasPlayerFlag(PlayerFlags.Resting))
+                pCurrChar.AddPvpFlag(UnitPVPStateFlags.FFAPvp);
 
-            if (pCurrChar.HasFlag(PlayerFields.Flags, PlayerFlags.ContestedPVP))
+            if (pCurrChar.HasPlayerFlag(PlayerFlags.ContestedPVP))
                 pCurrChar.SetContestedPvP();
 
             // Apply at_login requests
@@ -945,7 +945,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SetWatchedFaction)]
         void HandleSetWatchedFaction(SetWatchedFaction packet)
         {
-            GetPlayer().SetInt32Value(ActivePlayerFields.WatchedFactionIndex, (int)packet.FactionIndex);
+            GetPlayer().SetWatchedFactionIndex(packet.FactionIndex);
         }
 
         [WorldPacketHandler(ClientOpcodes.SetFactionInactive)]
@@ -1099,19 +1099,19 @@ namespace Game
         void HandleAlterAppearance(AlterApperance packet)
         {
             BarberShopStyleRecord bs_hair = CliDB.BarberShopStyleStorage.LookupByKey(packet.NewHairStyle);
-            if (bs_hair == null || bs_hair.Type != 0 || bs_hair.Race != (byte)GetPlayer().GetRace() || bs_hair.Sex != GetPlayer().GetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetGender))
+            if (bs_hair == null || bs_hair.Type != 0 || bs_hair.Race != (byte)GetPlayer().GetRace() || bs_hair.Sex != GetPlayer().m_playerData.NativeSex)
                 return;
 
             BarberShopStyleRecord bs_facialHair = CliDB.BarberShopStyleStorage.LookupByKey(packet.NewFacialHair);
-            if (bs_facialHair == null || bs_facialHair.Type != 2 || bs_facialHair.Race != (byte)GetPlayer().GetRace() || bs_facialHair.Sex != GetPlayer().GetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetGender))
+            if (bs_facialHair == null || bs_facialHair.Type != 2 || bs_facialHair.Race != (byte)GetPlayer().GetRace() || bs_facialHair.Sex != GetPlayer().m_playerData.NativeSex)
                 return;
 
             BarberShopStyleRecord bs_skinColor = CliDB.BarberShopStyleStorage.LookupByKey(packet.NewSkinColor);
-            if (bs_skinColor != null && (bs_skinColor.Type != 3 || bs_skinColor.Race != (byte)GetPlayer().GetRace() || bs_skinColor.Sex != GetPlayer().GetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetGender)))
+            if (bs_skinColor != null && (bs_skinColor.Type != 3 || bs_skinColor.Race != (byte)GetPlayer().GetRace() || bs_skinColor.Sex != GetPlayer().m_playerData.NativeSex))
                 return;
 
             BarberShopStyleRecord bs_face = CliDB.BarberShopStyleStorage.LookupByKey(packet.NewFace);
-            if (bs_face != null && (bs_face.Type != 4 || bs_face.Race != (byte)GetPlayer().GetRace() || bs_face.Sex != GetPlayer().GetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetGender)))
+            if (bs_face != null && (bs_face.Type != 4 || bs_face.Race != (byte)GetPlayer().GetRace() || bs_face.Sex != GetPlayer().m_playerData.NativeSex))
                 return;
 
             Array<BarberShopStyleRecord> customDisplayEntries = new Array<BarberShopStyleRecord>(PlayerConst.CustomDisplaySize);
@@ -1119,16 +1119,16 @@ namespace Game
             for (int i = 0; i < PlayerConst.CustomDisplaySize; ++i)
             {
                 BarberShopStyleRecord bs_customDisplay = CliDB.BarberShopStyleStorage.LookupByKey(packet.NewCustomDisplay[i]);
-                if (bs_customDisplay != null && (bs_customDisplay.Type != 5 + i || bs_customDisplay.Race != (byte)_player.GetRace() || bs_customDisplay.Sex != _player.GetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetGender)))
+                if (bs_customDisplay != null && (bs_customDisplay.Type != 5 + i || bs_customDisplay.Race != (byte)_player.GetRace() || bs_customDisplay.Sex != _player.m_playerData.NativeSex))
                     return;
 
                 customDisplayEntries[i] = bs_customDisplay;
                 customDisplay[i] = (byte)(bs_customDisplay != null ? bs_customDisplay.Data : 0);
             }
 
-            if (!Player.ValidateAppearance(GetPlayer().GetRace(), GetPlayer().GetClass(), (Gender)GetPlayer().GetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetGender),
-                bs_hair.Data, (byte)packet.NewHairColor, bs_face != null ? bs_face.Data : GetPlayer().GetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetFaceId),
-                bs_facialHair.Data, (bs_skinColor != null ? bs_skinColor.Data : GetPlayer().GetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetSkinId)), customDisplay))
+            if (!Player.ValidateAppearance(GetPlayer().GetRace(), GetPlayer().GetClass(), (Gender)(byte)GetPlayer().m_playerData.NativeSex,
+                bs_hair.Data, (byte)packet.NewHairColor, bs_face != null ? bs_face.Data : GetPlayer().m_playerData.FaceID,
+                bs_facialHair.Data, bs_skinColor != null ? bs_skinColor.Data : GetPlayer().m_playerData.SkinID, customDisplay))
                 return;
 
             GameObject go = GetPlayer().FindNearestGameObjectOfType(GameObjectTypes.BarberChair, 5.0f);
@@ -1156,16 +1156,16 @@ namespace Game
             _player.ModifyMoney(-cost);
             _player.UpdateCriteria(CriteriaTypes.GoldSpentAtBarber, cost);
 
-            _player.SetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetHairStyleId, bs_hair.Data);
-            _player.SetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetHairColorId, (byte)packet.NewHairColor);
-            _player.SetByteValue(PlayerFields.Bytes2, PlayerFieldOffsets.Bytes2OffsetFacialStyle, bs_facialHair.Data);
+            _player.SetHairStyleId(bs_hair.Data);
+            _player.SetHairColorId((byte)packet.NewHairColor);
+            _player.SetFacialHairStyleId(bs_facialHair.Data);
             if (bs_skinColor != null)
-                GetPlayer().SetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetSkinId, bs_skinColor.Data);
+                GetPlayer().SetSkinId(bs_skinColor.Data);
             if (bs_face != null)
-                _player.SetByteValue(PlayerFields.Bytes, PlayerFieldOffsets.BytesOffsetFaceId, bs_face.Data);
+                _player.SetFaceId(bs_face.Data);
 
             for (int i = 0; i < PlayerConst.CustomDisplaySize; ++i)
-                _player.SetByteValue(PlayerFields.Bytes2, (byte)(PlayerFieldOffsets.Bytes2OffsetCustomDisplayOption + i), customDisplay[i]);
+                _player.SetCustomDisplayOption(i, customDisplay[i]);
 
             _player.UpdateCriteria(CriteriaTypes.VisitBarberShop, 1);
 
@@ -1929,20 +1929,13 @@ namespace Game
                     // Title conversion
                     if (!string.IsNullOrEmpty(knownTitlesStr))
                     {
-                        uint ktcount = PlayerConst.KnowTitlesSize * 2;
-                        uint[] knownTitles = new uint[ktcount];
+                        List<uint> knownTitles = new List<uint>();
 
                         var tokens = new StringArray(knownTitlesStr, ' ');
-                        if (tokens.Length != ktcount)
-                        {
-                            SendCharFactionChange(ResponseCodes.CharCreateError, factionChangeInfo);
-                            return;
-                        }
-
-                        for (int index = 0; index < ktcount; ++index)
+                        for (int index = 0; index < tokens.Length; ++index)
                         {
                             if (uint.TryParse(tokens[index], out uint id))
-                                knownTitles[index] = id;
+                                knownTitles.Add(id);
                         }
 
                         foreach (var it in Global.ObjectMgr.FactionChangeTitles)
@@ -1956,9 +1949,12 @@ namespace Game
                             if (newTeamId == TeamId.Alliance)
                             {
                                 uint maskID = htitleInfo.MaskID;
-                                uint index = maskID / 32;
+                                int index = (int)maskID / 32;
+                                if (index >= knownTitles.Count)
+                                    continue;
+
                                 uint old_flag = (uint)(1 << (int)(maskID % 32));
-                                uint new_flag = (uint)(1 << (int)(atitleInfo.MaskID % 32));
+                                uint new_flag = (uint)(1 << (atitleInfo.MaskID % 32));
                                 if (Convert.ToBoolean(knownTitles[index] & old_flag))
                                 {
                                     knownTitles[index] &= ~old_flag;
@@ -1969,9 +1965,12 @@ namespace Game
                             else
                             {
                                 uint maskID = atitleInfo.MaskID;
-                                uint index = maskID / 32;
+                                int index = (int)maskID / 32;
+                                if (index >= knownTitles.Count)
+                                    continue;
+
                                 uint old_flag = (uint)(1 << (int)(maskID % 32));
-                                uint new_flag = (uint)(1 << (int)(htitleInfo.MaskID % 32));
+                                uint new_flag = (uint)(1 << (htitleInfo.MaskID % 32));
                                 if (Convert.ToBoolean(knownTitles[index] & old_flag))
                                 {
                                     knownTitles[index] &= ~old_flag;
@@ -1981,7 +1980,7 @@ namespace Game
                             }
 
                             string ss = "";
-                            for (uint index = 0; index < ktcount; ++index)
+                            for (int index = 0; index < knownTitles.Count; ++index)
                                 ss += knownTitles[index] + ' ';
 
                             stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_TITLES_FACTION_CHANGE);
@@ -2009,7 +2008,7 @@ namespace Game
         void HandleOpeningCinematic(OpeningCinematic packet)
         {
             // Only players that has not yet gained any experience can use this
-            if (GetPlayer().GetUInt32Value(ActivePlayerFields.Xp) != 0)
+            if (GetPlayer().m_activePlayerData.XP != 0)
                 return;
 
             ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey(GetPlayer().GetClass());
@@ -2142,7 +2141,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RepopRequest)]
         void HandleRepopRequest(RepopRequest packet)
         {
-            if (GetPlayer().IsAlive() || GetPlayer().HasFlag(PlayerFields.Flags, PlayerFlags.Ghost))
+            if (GetPlayer().IsAlive() || GetPlayer().HasPlayerFlag(PlayerFlags.Ghost))
                 return;
 
             if (GetPlayer().HasAuraType(AuraType.PreventResurrection))
@@ -2169,7 +2168,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ClientPortGraveyard)]
         void HandlePortGraveyard(PortGraveyard packet)
         {
-            if (GetPlayer().IsAlive() || !GetPlayer().HasFlag(PlayerFields.Flags, PlayerFlags.Ghost))
+            if (GetPlayer().IsAlive() || !GetPlayer().HasPlayerFlag(PlayerFlags.Ghost))
                 return;
             GetPlayer().RepopAtGraveyard();
         }
@@ -2217,7 +2216,7 @@ namespace Game
                 return;
 
             // body not released yet
-            if (!GetPlayer().HasFlag(PlayerFields.Flags, PlayerFlags.Ghost))
+            if (!GetPlayer().HasPlayerFlag(PlayerFlags.Ghost))
                 return;
 
             Corpse corpse = GetPlayer().GetCorpse();

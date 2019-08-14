@@ -223,9 +223,9 @@ namespace Game.Entities
             if (GetFlags().HasAnyFlag(ItemFlags.IsBoundToAccount) && alwaysAllowBoundToAccount)
                 return true;
 
-            uint spec = player.GetUInt32Value(ActivePlayerFields.LootSpecId);
+            uint spec = player.GetLootSpecId();
             if (spec == 0)
-                spec = player.GetUInt32Value(PlayerFields.CurrentSpecId);
+                spec = player.GetPrimarySpecialization();
             if (spec == 0)
                 spec = player.GetDefaultSpecId();
 
@@ -295,8 +295,6 @@ namespace Game.Entities
         public uint GetPageText() { return ExtendedData.PageID; }
         public uint GetStartQuest() { return ExtendedData.StartQuestID; }
         public uint GetLockID() { return ExtendedData.LockID; }
-        public uint GetRandomProperty() { return ExtendedData.RandomSelect; }
-        public uint GetRandomSuffix() { return ExtendedData.ItemRandomSuffixGroupID; }
         public uint GetItemSet() { return ExtendedData.ItemSet; }
         public uint GetArea() { return ExtendedData.ZoneBound; }
         public uint GetMap() { return ExtendedData.InstanceBound; }
@@ -345,6 +343,7 @@ namespace Game.Entities
         public uint MaxMoneyLoot;
         public ItemFlagsCustom FlagsCu;
         public float SpellPPMRate;
+        public uint RandomBonusListTemplateId;
         public BitArray[] Specializations = new BitArray[3];
         public uint ItemSpecClassMask;
 

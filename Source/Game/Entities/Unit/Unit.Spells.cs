@@ -30,6 +30,8 @@ namespace Game.Entities
     {
         public virtual bool HasSpell(uint spellId) { return false; }
 
+
+
         // function uses real base points (typically value - 1)
         public int CalculateSpellDamage(Unit target, SpellInfo spellProto, uint effect_index, int? basePoints = null, int itemLevel = -1)
         {
@@ -45,9 +47,10 @@ namespace Game.Entities
 
         public int SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
         {
-            if (IsTypeId(TypeId.Player))
+            Player thisPlayer = ToPlayer();
+            if (thisPlayer)
             {
-                float overrideSP = GetFloatValue(ActivePlayerFields.OverrideSpellPowerByApPct);
+                float overrideSP = thisPlayer.m_activePlayerData.OverrideSpellPowerByAPPercent;
                 if (overrideSP > 0.0f)
                     return (int)(MathFunctions.CalculatePct(GetTotalAttackPowerValue(WeaponAttackType.BaseAttack), overrideSP) + 0.5f);
             }
@@ -185,12 +188,13 @@ namespace Game.Entities
                 MathFunctions.AddPct(ref DoneTotalMod, modOwner.GetRatingBonusValue(CombatRating.VersatilityDamageDone) + modOwner.GetTotalAuraModifier(AuraType.ModVersatility));
 
             float maxModDamagePercentSchool = 0.0f;
-            if (IsTypeId(TypeId.Player))
+            Player thisPlayer = ToPlayer();
+            if (thisPlayer)
             {
                 for (int i = 0; i < (int)SpellSchools.Max; ++i)
                 {
                     if (Convert.ToBoolean((int)spellProto.GetSchoolMask() & (1 << i)))
-                        maxModDamagePercentSchool = Math.Max(maxModDamagePercentSchool, GetFloatValue(ActivePlayerFields.ModDamageDonePct + i));
+                        maxModDamagePercentSchool = Math.Max(maxModDamagePercentSchool, thisPlayer.m_activePlayerData.ModDamageDonePercent[i]);
                 }
             }
             else
@@ -336,9 +340,10 @@ namespace Game.Entities
 
         public uint SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
         {
-            if (IsTypeId(TypeId.Player))
+            Player thisPlayer = ToPlayer();
+            if (thisPlayer != null)
             {
-                float overrideSP = GetFloatValue(ActivePlayerFields.OverrideSpellPowerByApPct);
+                float overrideSP = thisPlayer.m_activePlayerData.OverrideSpellPowerByAPPercent;
                 if (overrideSP > 0.0f)
                     return (uint)(MathFunctions.CalculatePct(GetTotalAttackPowerValue(WeaponAttackType.BaseAttack), overrideSP) + 0.5f);
             }
@@ -502,8 +507,9 @@ namespace Game.Entities
             if (spellProto.SpellFamilyName == SpellFamilyNames.Potion)
                 return 1.0f;
 
-            if (IsPlayer())
-                return GetFloatValue(ActivePlayerFields.ModHealingDonePct);
+            Player thisPlayer = ToPlayer();
+            if (thisPlayer != null)
+                return thisPlayer.m_activePlayerData.ModHealingDonePercent;
 
             float DoneTotalMod = 1.0f;
 
@@ -640,7 +646,7 @@ namespace Game.Entities
                             crit_chance = 0.0f;
                         // For other schools
                         else if (IsTypeId(TypeId.Player))
-                            crit_chance = GetFloatValue(ActivePlayerFields.CritPercentage);
+                            crit_chance = ToPlayer().m_activePlayerData.SpellCritPercentage;
                         else
                             crit_chance = m_baseSpellCritChance;
 
@@ -1914,7 +1920,7 @@ namespace Game.Entities
 
             if (!(spellInfo.HasAttribute(SpellAttr0.Ability | SpellAttr0.Tradespell) || spellInfo.HasAttribute(SpellAttr3.NoDoneBonus))
                 && (IsTypeId(TypeId.Player) && spellInfo.SpellFamilyName != 0) || IsTypeId(TypeId.Unit))
-                castTime = (int)(castTime * GetFloatValue(UnitFields.ModCastSpeed));
+                castTime = (int)(castTime * m_unitData.ModCastingSpeed);
             else if (spellInfo.HasAttribute(SpellAttr0.ReqAmmo) && !spellInfo.HasAttribute(SpellAttr2.AutorepeatFlag))
                 castTime = (int)(castTime * m_modAttackSpeedPct[(int)WeaponAttackType.RangedAttack]);
             else if (Global.SpellMgr.IsPartOfSkillLine(SkillType.Cooking, spellInfo.Id) && HasAura(67556)) // cooking with Chef Hat.
@@ -1935,7 +1941,7 @@ namespace Game.Entities
 
             if (!(spellInfo.HasAttribute(SpellAttr0.Ability) || spellInfo.HasAttribute(SpellAttr0.Tradespell) || spellInfo.HasAttribute(SpellAttr3.NoDoneBonus)) &&
                 (IsTypeId(TypeId.Player) && spellInfo.SpellFamilyName != 0) || IsTypeId(TypeId.Unit))
-                duration = (int)(duration * GetFloatValue(UnitFields.ModCastSpeed));
+                duration = (int)(duration * m_unitData.ModCastingSpeed);
             else if (spellInfo.HasAttribute(SpellAttr0.ReqAmmo) && !spellInfo.HasAttribute(SpellAttr2.AutorepeatFlag))
                 duration = (int)(duration * m_modAttackSpeedPct[(int)WeaponAttackType.RangedAttack]);
         }
@@ -2261,15 +2267,15 @@ namespace Game.Entities
         {
             if (val > 0)
             {
-                ApplyPercentModFloatValue(UnitFields.ModCastSpeed, val, !apply);
-                ApplyPercentModFloatValue(UnitFields.ModCastHaste, val, !apply);
-                ApplyPercentModFloatValue(UnitFields.ModHasteRegen, val, !apply);
+                ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModCastingSpeed), val, !apply);
+                ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModSpellHaste), val, !apply);
+                ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModHasteRegen), val, !apply);
             }
             else
             {
-                ApplyPercentModFloatValue(UnitFields.ModCastSpeed, -val, apply);
-                ApplyPercentModFloatValue(UnitFields.ModCastHaste, -val, apply);
-                ApplyPercentModFloatValue(UnitFields.ModHasteRegen, -val, apply);
+                ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModCastingSpeed), -val, apply);
+                ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModSpellHaste), -val, apply);
+                ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModHasteRegen), -val, apply);
             }
         }
 
@@ -3145,8 +3151,8 @@ namespace Game.Entities
                         continue;
 
                     // The charges / stack amounts don't count towards the total number of auras that can be dispelled.
-                    // Ie: A dispel on a target with 5 stacks of Winters Chill and a Polymorph has 1 / (1 + 1) -> 50% chance to dispell
-                    // Polymorph instead of 1 / (5 + 1) -> 16%.
+                    // Ie: A dispel on a target with 5 stacks of Winters Chill and a Polymorph has 1 / (1 + 1) . 50% chance to dispell
+                    // Polymorph instead of 1 / (5 + 1) . 16%.
                     bool dispelCharges = aura.GetSpellInfo().HasAttribute(SpellAttr7.DispelCharges);
                     byte charges = dispelCharges ? aura.GetCharges() : aura.GetStackAmount();
                     if (charges > 0)
@@ -3696,11 +3702,12 @@ namespace Game.Entities
 
         public void ModifyAuraState(AuraStateType flag, bool apply)
         {
+            uint mask = 1u << ((int)flag - 1);
             if (apply)
             {
-                if (!HasFlag(UnitFields.AuraState, (1u << ((int)flag - 1))))
+                if ((m_unitData.AuraState & mask) == 0)
                 {
-                    SetFlag(UnitFields.AuraState, (1u << (int)flag - 1));
+                    SetUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.AuraState), mask);
                     if (IsTypeId(TypeId.Player))
                     {
                         var sp_list = ToPlayer().GetSpellMap();
@@ -3735,9 +3742,9 @@ namespace Game.Entities
             }
             else
             {
-                if (HasFlag(UnitFields.AuraState, (1u << (int)flag - 1)))
+                if ((m_unitData.AuraState & mask) != 0)
                 {
-                    RemoveFlag(UnitFields.AuraState, (1u << (int)flag - 1));
+                    RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.AuraState), mask);
 
                     foreach (var app in GetAppliedAuras())
                     {
@@ -3773,7 +3780,7 @@ namespace Game.Entities
                 }
             }
 
-            return HasFlag(UnitFields.AuraState, (uint)(1 << (int)flag - 1));
+            return (m_unitData.AuraState & (1 << ((int)flag - 1))) != 0;
         }
 
         SpellSchools GetSpellSchoolByAuraGroup(UnitMods unitMod)
@@ -3981,9 +3988,9 @@ namespace Game.Entities
             return aurApp?.GetBase();
         }
 
-        uint BuildAuraStateUpdateForTarget(Unit target)
+        public uint BuildAuraStateUpdateForTarget(Unit target)
         {
-            uint auraStates = GetUInt32Value(UnitFields.AuraState) & ~(uint)AuraStateType.PerCasterAuraStateMask;
+            uint auraStates = m_unitData.AuraState & ~(uint)AuraStateType.PerCasterAuraStateMask;
             foreach (var state in m_auraStateAuras)
                 if (Convert.ToBoolean((1 << (int)state.Key - 1) & (uint)AuraStateType.PerCasterAuraStateMask))
                     if (state.Value.GetBase().GetCasterGUID() == target.GetGUID())
@@ -4464,7 +4471,6 @@ namespace Game.Entities
                 return false;
             });
         }
-
 
         public void _RegisterAuraEffect(AuraEffect aurEff, bool apply)
         {

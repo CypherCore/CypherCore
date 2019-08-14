@@ -52,7 +52,7 @@ namespace Game.Network.Packets
             {
                 _worldPacket.WritePackedGuid(Info.GuildGuid);
                 _worldPacket.WriteUInt32(Info.VirtualRealmAddress);
-                _worldPacket.WriteUInt32(Info.Ranks.Count);
+                _worldPacket.WriteInt32(Info.Ranks.Count);
                 _worldPacket.WriteUInt32(Info.EmblemStyle);
                 _worldPacket.WriteUInt32(Info.EmblemColor);
                 _worldPacket.WriteUInt32(Info.BorderStyle);
@@ -129,8 +129,8 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(NumAccounts);
             _worldPacket.WritePackedTime(CreateDate);
             _worldPacket.WriteInt32(GuildFlags);
-            _worldPacket.WriteUInt32(MemberData.Count);
-            _worldPacket.WriteBits(WelcomeText.GetByteCount(), 10);
+            _worldPacket.WriteInt32(MemberData.Count);
+            _worldPacket.WriteBits(WelcomeText.GetByteCount(), 11);
             _worldPacket.WriteBits(InfoText.GetByteCount(), 10);
             _worldPacket.FlushBits();
 
@@ -157,7 +157,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(MemberData.Count);
+            _worldPacket.WriteInt32(MemberData.Count);
 
             MemberData.ForEach(p => p.Write(_worldPacket));
         }
@@ -171,7 +171,7 @@ namespace Game.Network.Packets
 
         public override void Read()
         {
-            uint textLen = _worldPacket.ReadBits<uint>(10);
+            uint textLen = _worldPacket.ReadBits<uint>(11);
             MotdText = _worldPacket.ReadString(textLen);
         }
 
@@ -184,8 +184,8 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32(Result);
-            _worldPacket.WriteInt32(Command);
+            _worldPacket.WriteUInt32((uint)Result);
+            _worldPacket.WriteUInt32((uint)Command);
 
             _worldPacket.WriteBits(Name.GetByteCount(), 8);
             _worldPacket.WriteString(Name);
@@ -307,7 +307,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteBits(MotdText.GetByteCount(), 10);
+            _worldPacket.WriteBits(MotdText.GetByteCount(), 11);
             _worldPacket.WriteString(MotdText);
         }
 
@@ -386,7 +386,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Entry.Count);
+            _worldPacket.WriteInt32(Entry.Count);
 
             foreach (GuildEventEntry entry in Entry)
             {
@@ -528,7 +528,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(WithdrawGoldLimit);
             _worldPacket.WriteInt32(Flags);
             _worldPacket.WriteInt32(NumTabs);
-            _worldPacket.WriteUInt32(Tab.Count);
+            _worldPacket.WriteInt32(Tab.Count);
 
             foreach (GuildRankTabPermissions tab in Tab)
             {
@@ -648,7 +648,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Ranks.Count);
+            _worldPacket.WriteInt32(Ranks.Count);
 
             Ranks.ForEach(p => p.Write(_worldPacket));
         }
@@ -878,7 +878,7 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt32(Version);
-            _worldPacket.WriteUInt32(RewardItems.Count);
+            _worldPacket.WriteInt32(RewardItems.Count);
 
             foreach (var item in RewardItems)
                 item.Write(_worldPacket);
@@ -1016,14 +1016,14 @@ namespace Game.Network.Packets
             _worldPacket.WriteUInt64(Money);
             _worldPacket.WriteInt32(Tab);
             _worldPacket.WriteInt32(WithdrawalsRemaining);
-            _worldPacket.WriteUInt32(TabInfo.Count);
-            _worldPacket.WriteUInt32(ItemInfo.Count);
+            _worldPacket.WriteInt32(TabInfo.Count);
+            _worldPacket.WriteInt32(ItemInfo.Count);
             _worldPacket.WriteBit(FullUpdate);
             _worldPacket.FlushBits();
 
             foreach (GuildBankTabInfo tab in TabInfo)
             {
-                _worldPacket.WriteUInt32(tab.TabIndex);
+                _worldPacket.WriteInt32(tab.TabIndex);
                 _worldPacket.WriteBits(tab.Name.GetByteCount(), 7);
                 _worldPacket.WriteBits(tab.Icon.GetByteCount(), 9);
 
@@ -1121,7 +1121,7 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(Tab);
-            _worldPacket.WriteUInt32(Entry.Count);
+            _worldPacket.WriteInt32(Entry.Count);
             _worldPacket.WriteBit(WeeklyBonusMoney.HasValue);
             _worldPacket.FlushBits();
 
@@ -1222,7 +1222,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(NewsEvents.Count);
+            _worldPacket.WriteInt32(NewsEvents.Count);
             foreach (var newsEvent in NewsEvents)
                 newsEvent.Write(_worldPacket);
         }
@@ -1327,7 +1327,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32(Error);
+            _worldPacket.WriteUInt32((uint)Error);
         }
 
         public GuildEmblemError Error;
@@ -1475,10 +1475,10 @@ namespace Game.Network.Packets
         {
             data.WriteUInt32(ItemID);
             data.WriteUInt32(Unk4);
-            data.WriteUInt32(AchievementsRequired.Count);
+            data.WriteInt32(AchievementsRequired.Count);
             data.WriteUInt64(RaceMask);
-            data.WriteUInt32(MinGuildLevel);
-            data.WriteUInt32(MinGuildRep);
+            data.WriteInt32(MinGuildLevel);
+            data.WriteInt32(MinGuildRep);
             data.WriteUInt64(Cost);
 
             foreach (var achievementId in AchievementsRequired)
@@ -1538,7 +1538,7 @@ namespace Game.Network.Packets
                 data.WriteInt32(Data[i]);
 
             data.WritePackedGuid(MemberGuid);
-            data.WriteUInt32(MemberList.Count);
+            data.WriteInt32(MemberList.Count);
 
             foreach (ObjectGuid memberGuid in MemberList)
                 data.WritePackedGuid(memberGuid);

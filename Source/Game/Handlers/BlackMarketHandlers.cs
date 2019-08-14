@@ -29,7 +29,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.BlackMarketOpen)]
         void HandleBlackMarketOpen(BlackMarketOpen blackMarketOpen)
         {
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(blackMarketOpen.Guid, NPCFlags.BlackMarket | NPCFlags.BlackMarketView);
+            Creature unit = GetPlayer().GetNPCIfCanInteractWith(blackMarketOpen.Guid, NPCFlags.BlackMarket, NPCFlags2.BlackMarketView);
             if (!unit)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketHello - {0} not found or you can't interact with him.", blackMarketOpen.Guid.ToString());
@@ -57,7 +57,7 @@ namespace Game
             if (!Global.BlackMarketMgr.IsEnabled())
                 return;
 
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(blackMarketRequestItems.Guid, NPCFlags.BlackMarket | NPCFlags.BlackMarketView);
+            Creature unit = GetPlayer().GetNPCIfCanInteractWith(blackMarketRequestItems.Guid, NPCFlags.BlackMarket, NPCFlags2.BlackMarketView);
             if (!unit)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketRequestItems - {0} not found or you can't interact with him.", blackMarketRequestItems.Guid.ToString());
@@ -76,7 +76,7 @@ namespace Game
                 return;
 
             Player player = GetPlayer();
-            Creature unit = player.GetNPCIfCanInteractWith(blackMarketBidOnItem.Guid, NPCFlags.BlackMarket);
+            Creature unit = player.GetNPCIfCanInteractWith(blackMarketBidOnItem.Guid, NPCFlags.BlackMarket, NPCFlags2.None);
             if (!unit)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketBidOnItem - {0} not found or you can't interact with him.", blackMarketBidOnItem.Guid.ToString());
@@ -146,7 +146,6 @@ namespace Game
 
             packet.MarketID = entry.GetMarketId();
             packet.Item = new ItemInstance(item);
-            packet.RandomPropertiesID = item.GetItemRandomPropertyId();
 
             SendPacket(packet);
         }

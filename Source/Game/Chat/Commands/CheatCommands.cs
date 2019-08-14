@@ -245,9 +245,9 @@ namespace Game.Chat.Commands
             for (ushort i = 0; i < PlayerConst.ExploredZonesSize; ++i)
             {
                 if (flag != 0)
-                    handler.GetSession().GetPlayer().SetFlag(ActivePlayerFields.ExploredZones + i, 0xFFFFFFFF);
+                    handler.GetSession().GetPlayer().AddExploredZones(i, 0xFFFFFFFFFFFFFFFF);
                 else
-                    handler.GetSession().GetPlayer().SetFlag(ActivePlayerFields.ExploredZones + i, 0);
+                    handler.GetSession().GetPlayer().RemoveExploredZones(i, 0xFFFFFFFFFFFFFFFF);
             }
 
             return true;

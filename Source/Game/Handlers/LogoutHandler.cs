@@ -31,10 +31,10 @@ namespace Game
             if (!GetPlayer().GetLootGUID().IsEmpty())
                 GetPlayer().SendLootReleaseAll();
 
-            bool instantLogout = (pl.HasFlag(PlayerFields.Flags, PlayerFlags.Resting) && !pl.IsInCombat() ||
+            bool instantLogout = (pl.HasPlayerFlag(PlayerFlags.Resting) && !pl.IsInCombat() ||
                 pl.IsInFlight() || HasPermission(RBACPermissions.InstantLogout));
 
-            bool canLogoutInCombat = pl.HasFlag(PlayerFields.Flags, PlayerFlags.Resting);
+            bool canLogoutInCombat = pl.HasPlayerFlag(PlayerFlags.Resting);
 
             int reason = 0;
             if (pl.IsInCombat() && !canLogoutInCombat)
@@ -68,7 +68,7 @@ namespace Game
                 if (pl.GetStandState() == UnitStandStateType.Stand)
                     pl.SetStandState(UnitStandStateType.Sit);
                 pl.SetRooted(true);
-                pl.SetFlag(UnitFields.Flags, UnitFlags.Stunned);
+                pl.AddUnitFlag(UnitFlags.Stunned);
             }
 
             SetLogoutStartTime(Time.UnixTime);
@@ -95,7 +95,7 @@ namespace Game
                 GetPlayer().SetStandState(UnitStandStateType.Stand);
 
                 //! DISABLE_ROTATE
-                GetPlayer().RemoveFlag(UnitFields.Flags, UnitFlags.Stunned);
+                GetPlayer().RemoveUnitFlag(UnitFlags.Stunned);
             }
         }
     }

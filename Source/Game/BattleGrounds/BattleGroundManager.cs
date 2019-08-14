@@ -702,7 +702,7 @@ namespace Game.BattleGrounds
                 CreatureTemplate cInfo = Global.ObjectMgr.GetCreatureTemplate(entry);
                 if (cInfo != null)
                 {
-                    if (!cInfo.Npcflag.HasAnyFlag(NPCFlags.BattleMaster))
+                    if (!cInfo.Npcflag.HasAnyFlag((uint)NPCFlags.BattleMaster))
                         Log.outError(LogFilter.Sql, "Creature (Entry: {0}) listed in `battlemaster_entry` is not a battlemaster.", entry);
                 }
                 else
@@ -733,10 +733,10 @@ namespace Game.BattleGrounds
             var templates = Global.ObjectMgr.GetCreatureTemplates();
             foreach (var creature in templates)
             {
-                if (creature.Value.Npcflag.HasAnyFlag(NPCFlags.BattleMaster) && !mBattleMastersMap.ContainsKey(creature.Value.Entry))
+                if (creature.Value.Npcflag.HasAnyFlag((uint)NPCFlags.BattleMaster) && !mBattleMastersMap.ContainsKey(creature.Value.Entry))
                 {
                     Log.outError(LogFilter.Sql, "CreatureTemplate (Entry: {0}) has UNIT_NPC_FLAG_BATTLEMASTER but no data in `battlemaster_entry` table. Removing flag!", creature.Value.Entry);
-                    templates[creature.Key].Npcflag &= ~NPCFlags.BattleMaster;
+                    templates[creature.Key].Npcflag &= ~(uint)NPCFlags.BattleMaster;
                 }
             }
         }

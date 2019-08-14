@@ -33,7 +33,7 @@ namespace Game.Entities
             if (level < PlayerConst.MinSpecializationLevel)
                 ResetTalentSpecialization();
 
-            uint talentTiers = (uint)Global.DB2Mgr.GetNumTalentsAtLevel(level, GetClass());
+            uint talentTiers = Global.DB2Mgr.GetNumTalentsAtLevel(level, GetClass());
             if (level < 15)
             {
                 // Remove all talent points
@@ -50,7 +50,7 @@ namespace Game.Entities
                 }
             }
 
-            SetUInt32Value(ActivePlayerFields.MaxTalentTiers, talentTiers);
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.MaxTalentTiers), talentTiers);
 
             if (!GetSession().PlayerLoading())
                 SendTalentsInfoData();   // update at client
@@ -112,14 +112,14 @@ namespace Game.Entities
             if (IsDead())
                 return TalentLearnResult.FailedCantDoThatRightNow;
 
-            if (GetUInt32Value(PlayerFields.CurrentSpecId) == 0)
+            if (GetPrimarySpecialization() == 0)
                 return TalentLearnResult.FailedNoPrimaryTreeSelected;
 
             TalentRecord talentInfo = CliDB.TalentStorage.LookupByKey(talentId);
             if (talentInfo == null)
                 return TalentLearnResult.FailedUnknown;
 
-            if (talentInfo.SpecID != 0 && talentInfo.SpecID != GetUInt32Value(PlayerFields.CurrentSpecId))
+            if (talentInfo.SpecID != 0 && talentInfo.SpecID != GetPrimarySpecialization())
                 return TalentLearnResult.FailedUnknown;
 
             // prevent learn talent for different class (cheating)
@@ -127,7 +127,7 @@ namespace Game.Entities
                 return TalentLearnResult.FailedUnknown;
 
             // check if we have enough talent points
-            if (talentInfo.TierID >= GetUInt32Value(ActivePlayerFields.MaxTalentTiers))
+            if (talentInfo.TierID >= m_activePlayerData.MaxTalentTiers)
                 return TalentLearnResult.FailedUnknown;
 
             // TODO: prevent changing talents that are on cooldown
@@ -144,7 +144,7 @@ namespace Game.Entities
                 if (talent.SpecID == 0)
                     bestSlotMatch = talent;
 
-                else if (talent.SpecID == GetUInt32Value(PlayerFields.CurrentSpecId))
+                else if (talent.SpecID == GetPrimarySpecialization())
                 {
                     bestSlotMatch = talent;
                     break;
@@ -159,13 +159,13 @@ namespace Game.Entities
             {
                 foreach (TalentRecord talent in Global.DB2Mgr.GetTalentsByPosition(GetClass(), talentInfo.TierID, c))
                 {
-                    if (talent.SpecID != 0 && talent.SpecID != GetUInt32Value(PlayerFields.CurrentSpecId))
+                    if (talent.SpecID != 0 && talent.SpecID != GetPrimarySpecialization())
                         continue;
 
                     if (!HasTalent(talent.Id, GetActiveTalentGroup()))
                         continue;
                     
-                    if (!HasFlag(PlayerFields.Flags, PlayerFlags.Resting) && HasFlag(UnitFields.Flags2, UnitFlags2.AllowChangingTalents))
+                    if (!HasPlayerFlag(PlayerFlags.Resting) && HasUnitFlag2(UnitFlags2.AllowChangingTalents))
                         return TalentLearnResult.FailedRestArea;
 
                     if (GetSpellHistory().HasCooldown(talent.SpellID))
@@ -221,7 +221,6 @@ namespace Game.Entities
             ChrSpecializationRecord defaultSpec = Global.DB2Mgr.GetDefaultChrSpecializationForClass(GetClass());
             SetPrimarySpecialization(defaultSpec.Id);
             SetActiveTalentGroup(defaultSpec.OrderIndex);
-            SetUInt32Value(PlayerFields.CurrentSpecId, defaultSpec.Id);
 
             LearnSpecializationSpells();
 
@@ -238,14 +237,14 @@ namespace Game.Entities
         void SetTalentResetCost(uint cost) { _specializationInfo.ResetTalentsCost = cost; }
         long GetTalentResetTime() { return _specializationInfo.ResetTalentsTime; }
         void SetTalentResetTime(long time_) { _specializationInfo.ResetTalentsTime = time_; }
-        uint GetPrimarySpecialization() { return _specializationInfo.PrimarySpecialization; }
-        void SetPrimarySpecialization(uint spec) { _specializationInfo.PrimarySpecialization = spec; }
+        public uint GetPrimarySpecialization() { return m_playerData.CurrentSpecID; }
+        void SetPrimarySpecialization(uint spec) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.CurrentSpecID), spec); }
         public byte GetActiveTalentGroup() { return _specializationInfo.ActiveGroup; }
         void SetActiveTalentGroup(byte group) { _specializationInfo.ActiveGroup = group; }
 
         // Loot Spec
-        public void SetLootSpecId(uint id) { SetUInt32Value(ActivePlayerFields.LootSpecId, id); }
-        uint GetLootSpecId() { return GetUInt32Value(ActivePlayerFields.LootSpecId); }
+        public void SetLootSpecId(uint id) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LootSpecID), (ushort)id); }
+        public uint GetLootSpecId() { return m_activePlayerData.LootSpecID; }
 
         public uint GetDefaultSpecId()
         {
@@ -334,9 +333,7 @@ namespace Game.Entities
                 RemoveAurasDueToSpell(CliDB.GlyphPropertiesStorage.LookupByKey(glyphId).SpellID);
 
             SetActiveTalentGroup(spec.OrderIndex);
-            SetUInt32Value(PlayerFields.CurrentSpecId, spec.Id);
-            if (GetPrimarySpecialization() == 0)
-                SetPrimarySpecialization(spec.Id);
+            SetPrimarySpecialization(spec.Id);
 
             foreach (var talentInfo in CliDB.TalentStorage.Values)
             {

@@ -470,8 +470,8 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Enchant Spells Proc datas...");
             Global.SpellMgr.LoadSpellEnchantProcData();
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading Item Random Enchantments Table...");
-            ItemEnchantment.LoadRandomEnchantmentsTable();
+            Log.outInfo(LogFilter.ServerLoading, "Loading Random item bonus list definitions...");
+            ItemEnchantmentManager.LoadItemRandomBonusListTemplates();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Disables");                         // must be before loading quests and items
             Global.DisableMgr.LoadDisables();

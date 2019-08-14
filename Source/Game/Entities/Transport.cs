@@ -118,11 +118,11 @@ namespace Game.Entities
             if (m_goTemplateAddon != null)
             {
                 SetFaction(m_goTemplateAddon.faction);
-                SetUInt32Value(GameObjectFields.Flags, m_goTemplateAddon.flags);
+                SetFlags((GameObjectFlags)m_goTemplateAddon.flags);
             }
 
             m_goValue.Transport.PathProgress = 0;
-            SetFloatValue(ObjectFields.ScaleX, goinfo.size);
+            SetObjectScale(goinfo.size);
             SetPeriod(tInfo.pathTime);
             SetEntry(goinfo.entry);
             SetDisplayId(goinfo.displayId);
@@ -473,7 +473,7 @@ namespace Game.Entities
 
             PhasingHandler.InheritPhaseShift(summon, summoner ? (WorldObject)summoner : this);
 
-            summon.SetUInt32Value(UnitFields.CreatedBySpell, spellId);
+            summon.SetCreatedBySpell(spellId);
 
             summon.SetTransport(this);
             summon.m_movementInfo.transport.guid = GetGUID();
@@ -778,8 +778,8 @@ namespace Game.Entities
 
         public HashSet<WorldObject> GetPassengers() { return _passengers; }
 
-        public override  uint GetTransportPeriod() { return GetUInt32Value(GameObjectFields.Level); }
-        public void SetPeriod(uint period) { SetUInt32Value(GameObjectFields.Level, period); }
+        public override uint GetTransportPeriod() { return m_gameObjectData.Level; }
+        public void SetPeriod(uint period) { SetLevel(period); }
         uint GetTimer() { return m_goValue.Transport.PathProgress; }
 
         public List<KeyFrame> GetKeyFrames() { return _transportInfo.keyFrames; }

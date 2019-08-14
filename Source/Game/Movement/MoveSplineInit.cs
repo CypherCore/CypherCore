@@ -37,7 +37,7 @@ namespace Game.Movement
             args.walk = unit.HasUnitMovementFlag(MovementFlag.Walking);
             args.flags.SetUnsetFlag(SplineFlag.Flying, unit.HasUnitMovementFlag(MovementFlag.CanFly | MovementFlag.DisableGravity));
             args.flags.SetUnsetFlag(SplineFlag.SmoothGroundPath, true); // enabled by default, CatmullRom mode or client config "pathSmoothing" will disable this
-            args.flags.SetUnsetFlag(SplineFlag.Steering, unit.HasFlag64(UnitFields.NpcFlags, NPCFlags.Steering));
+            args.flags.SetUnsetFlag(SplineFlag.Steering, unit.HasNpcFlag2(NPCFlags2.Steering));
         }
 
         UnitMoveType SelectSpeedType(MovementFlag moveFlags)

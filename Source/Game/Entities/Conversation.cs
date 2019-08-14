@@ -20,6 +20,7 @@ using Game.DataStorage;
 using Game.Maps;
 using Game.Spells;
 using System.Collections.Generic;
+using Game.Network;
 
 namespace Game.Entities
 {
@@ -35,8 +36,7 @@ namespace Game.Entities
             m_updateFlag.Stationary = true;
             m_updateFlag.Conversation = true;
 
-            valuesCount = (int)ConversationFields.End;
-            _dynamicValuesCount = (int)ConversationDynamicFields.End;
+            m_conversationData = new ConversationData();
         }
 
         public override void AddToWorld()
@@ -117,7 +117,7 @@ namespace Game.Entities
             SetEntry(conversationEntry);
             SetObjectScale(1.0f);
 
-            SetUInt32Value(ConversationFields.LastLineEndTime, conversationTemplate.LastLineEndTime);
+            SetUpdateFieldValue(m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.LastLineEndTime), conversationTemplate.LastLineEndTime);
             _duration = conversationTemplate.LastLineEndTime;
             _textureKitId = conversationTemplate.TextureKitId;
 
@@ -126,11 +126,12 @@ namespace Game.Entities
                 ConversationActorTemplate actor = conversationTemplate.Actors[actorIndex];
                 if (actor != null)
                 {
-                    ConversationDynamicFieldActor actorField = new ConversationDynamicFieldActor();
-                    actorField.ActorTemplate.CreatureId = actor.CreatureId;
-                    actorField.ActorTemplate.CreatureModelId = actor.CreatureModelId;
-                    actorField.Type = ConversationDynamicFieldActor.ActorType.CreatureActor;
-                    SetDynamicStructuredValue(ConversationDynamicFields.Actors, actorIndex, actorField);
+                    ConversationActor actorField = new ConversationActor();
+                    actorField.CreatureID = actor.CreatureId;
+                    actorField.CreatureDisplayInfoID = actor.CreatureModelId;
+                    actorField.Type = ConversationActorType.CreatureActor;
+
+                    AddDynamicUpdateFieldValue(m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Actors), actorField);
                 }
             }
 
@@ -150,17 +151,30 @@ namespace Game.Entities
             Global.ScriptMgr.OnConversationCreate(this, creator);
 
             List<ushort> actorIndices = new List<ushort>();
+            List<ConversationLine> lines = new List<ConversationLine>();
             foreach (ConversationLineTemplate line in conversationTemplate.Lines)
             {
                 actorIndices.Add(line.ActorIdx);
-                AddDynamicStructuredValue(ConversationDynamicFields.Lines, line);
+
+                ConversationLine lineField = new ConversationLine();
+                lineField.ConversationLineID = line.Id;
+                lineField.StartTime = line.StartTime;
+                lineField.UiCameraID = line.UiCameraID;
+                lineField.ActorIndex = line.ActorIdx;
+                lineField.Flags = line.Flags;
+
+                lines.Add(lineField);
             }
+
+            SetUpdateFieldValue(m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Lines), lines);
+
+            Global.ScriptMgr.OnConversationCreate(this, creator);
 
             // All actors need to be set
             foreach (ushort actorIndex in actorIndices)
             {
-                ConversationDynamicFieldActor actor = GetDynamicStructuredValue<ConversationDynamicFieldActor>(ConversationDynamicFields.Actors, actorIndex);
-                if (actor == null || actor.IsEmpty())
+                ConversationActor actor = actorIndex < m_conversationData.Actors.Size() ? m_conversationData.Actors[actorIndex] : null;
+                if (actor == null || (actor.CreatureID == 0 && actor.ActorGUID.IsEmpty()))
                 {
                     Log.outError(LogFilter.Conversation, $"Failed to create conversation (Id: {conversationEntry}) due to missing actor (Idx: {actorIndex}).");
                     return false;
@@ -175,10 +189,9 @@ namespace Game.Entities
 
         void AddActor(ObjectGuid actorGuid, ushort actorIdx)
         {
-            ConversationDynamicFieldActor actorField = new ConversationDynamicFieldActor();
-            actorField.ActorGuid = actorGuid;
-            actorField.Type = ConversationDynamicFieldActor.ActorType.WorldObjectActor;
-            SetDynamicStructuredValue(ConversationDynamicFields.Actors, actorIdx, actorField);
+            ConversationActor actorField = m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Actors, actorIdx);
+            SetUpdateFieldValue(ref actorField.ActorGUID, actorGuid);
+            SetUpdateFieldValue(ref actorField.Type, ConversationActorType.WorldObjectActor);
         }
 
         void AddParticipant(ObjectGuid participantGuid)
@@ -189,6 +202,41 @@ namespace Game.Entities
         public uint GetScriptId()
         {
             return Global.ConversationDataStorage.GetConversationTemplate(GetEntry()).ScriptId;
+        }
+
+        public override void BuildValuesCreate(WorldPacket data, Player target)
+        {
+            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
+            WorldPacket buffer = new WorldPacket();
+
+            m_objectData.WriteCreate(buffer, flags, this, target);
+            m_conversationData.WriteCreate(buffer, flags, this, target);
+
+            data.WriteUInt32(buffer.GetSize());
+            data.WriteUInt8((byte)flags);
+            data.WriteBytes(buffer);
+        }
+
+        public override void BuildValuesUpdate(WorldPacket data, Player target)
+        {
+            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
+            WorldPacket buffer = new WorldPacket();
+
+            buffer.WriteUInt32(m_values.GetChangedObjectTypeMask());
+            if (m_values.HasChanged(TypeId.Object))
+                m_objectData.WriteUpdate(buffer, flags, this, target);
+
+            if (m_values.HasChanged(TypeId.Conversation))
+                m_conversationData.WriteUpdate(buffer, flags, this, target);
+
+            data.WriteUInt32(buffer.GetSize());
+            data.WriteBytes(buffer);
+        }
+
+        public override void ClearUpdateMask(bool remove)
+        {
+            m_values.ClearChangesMask(m_conversationData);
+            base.ClearUpdateMask(remove);
         }
 
         uint GetDuration() { return _duration; }
@@ -202,35 +250,12 @@ namespace Game.Entities
         public override float GetStationaryO() { return _stationaryPosition.GetOrientation(); }
         void RelocateStationaryPosition(Position pos) { _stationaryPosition.Relocate(pos); }
 
+        ConversationData m_conversationData;
+
         Position _stationaryPosition = new Position();
         ObjectGuid _creatorGuid;
         uint _duration;
         uint _textureKitId;
         List<ObjectGuid> _participants = new List<ObjectGuid>();
-    }
-
-    class ConversationDynamicFieldActor
-    {
-        public enum ActorType
-        {
-            WorldObjectActor = 0,
-            CreatureActor = 1
-        }
-
-        public bool IsEmpty()
-        {
-            return ActorGuid.IsEmpty(); // this one is good enough
-        }
-
-        public ObjectGuid ActorGuid;
-        public ActorTemplateStruct ActorTemplate;
-
-        public struct ActorTemplateStruct
-        {
-            public uint CreatureId;
-            public uint CreatureModelId;
-        }
-
-        public ActorType Type;
     }
 }

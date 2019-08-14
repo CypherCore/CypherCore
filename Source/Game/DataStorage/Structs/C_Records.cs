@@ -102,6 +102,7 @@ namespace Game.DataStorage
         public uint IconFileDataID;
         public uint LowResScreenFileDataID;
         public int StartingLevel;
+        public uint SpellTextureBlobFileDataID;
         public ushort Flags;
         public ushort CinematicSequenceID;
         public ushort DefaultSpec;
@@ -214,8 +215,14 @@ namespace Game.DataStorage
         public int MinLevel;
         public int MaxLevel;
         public int Flags;
+        public int ExpansionID;
+    }
+
+    public sealed class ContentTuningXExpectedRecord
+    {
+        public uint Id;
         public int ExpectedStatModID;
-        public int DifficultyESMID;
+        public uint ContentTuningID;
     }
 
     public sealed class ConversationLineRecord
@@ -322,6 +329,9 @@ namespace Game.DataStorage
         public float OverrideNameScale;
         public float OverrideSelectionRadius;
         public float TamedPetBaseScale;
+        public sbyte Unknown820_1;                                              // scale related
+        public float Unknown820_2;                                             // scale related
+        public float[] Unknown820_3 = new float[2];                            // scale related
     }
 
     public sealed class CreatureTypeRecord
@@ -373,6 +383,7 @@ namespace Game.DataStorage
         public uint Flags;
         public sbyte Quality;
         public int FactionID;
+        public int ItemGroupSoundsID;
     }
 
     public sealed class CurveRecord

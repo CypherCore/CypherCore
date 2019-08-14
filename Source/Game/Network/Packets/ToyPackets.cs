@@ -56,9 +56,9 @@ namespace Game.Network.Packets
             _worldPacket.FlushBits();
 
             // all lists have to have the same size
-            _worldPacket.WriteUInt32(Toys.Count);
-            _worldPacket.WriteUInt32(Toys.Count);
-            _worldPacket.WriteUInt32(Toys.Count);
+            _worldPacket.WriteInt32(Toys.Count);
+            _worldPacket.WriteInt32(Toys.Count);
+            _worldPacket.WriteInt32(Toys.Count);
 
             foreach (var pair in Toys)
                 _worldPacket.WriteUInt32(pair.Key);

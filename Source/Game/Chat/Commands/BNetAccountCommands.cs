@@ -285,7 +285,8 @@ namespace Game.Chat.Commands
         }
 
         [CommandGroup("lock", RBACPermissions.CommandBnetAccount, true)]
-        class LockCommands        {
+        class LockCommands
+        {
             [Command("country", RBACPermissions.CommandBnetAccountLockCountry, true)]
             static bool HandleLockCountryCommand(StringArguments args, CommandHandler handler)
             {
@@ -300,7 +301,7 @@ namespace Game.Chat.Commands
                 {
                     if (param == "on")
                     {
-                        PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_LOGON_COUNTRY);
+                        /*PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_LOGON_COUNTRY);
                         var ipBytes = System.Net.IPAddress.Parse(handler.GetSession().GetRemoteAddress()).GetAddressBytes();
                         Array.Reverse(ipBytes);
                         stmt.AddValue(0, BitConverter.ToUInt32(ipBytes, 0));
@@ -318,7 +319,7 @@ namespace Game.Chat.Commands
                         {
                             handler.SendSysMessage("[IP2NATION] Table empty");
                             Log.outDebug(LogFilter.Server, "[IP2NATION] Table empty");
-                        }
+                        }*/
                     }
                     else if (param == "off")
                     {

@@ -187,7 +187,7 @@ namespace Game.BattleFields
                 // Update faction of relic, only attacker can click on
                 relic.SetFaction(WGConst.WintergraspFaction[GetAttackerTeam()]);
                 // Set in use (not allow to click on before last door is broken)
-                relic.SetFlag(GameObjectFields.Flags, GameObjectFlags.InUse | GameObjectFlags.NotSelectable);
+                relic.AddFlag(GameObjectFlags.InUse | GameObjectFlags.NotSelectable);
                 m_titansRelicGUID = relic.GetGUID();
             }
             else
@@ -1157,7 +1157,7 @@ namespace Game.BattleFields
                     }
                     _wg.SetRelicInteractible(true);
                     if (_wg.GetRelic())
-                        _wg.GetRelic().RemoveFlag(GameObjectFields.Flags, GameObjectFlags.InUse | GameObjectFlags.NotSelectable);
+                        _wg.GetRelic().RemoveFlag(GameObjectFlags.InUse | GameObjectFlags.NotSelectable);
                     else
                         Log.outError(LogFilter.Server, "BattlefieldWG: Titan Relic not found.");
                     break;

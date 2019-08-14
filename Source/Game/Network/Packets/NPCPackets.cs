@@ -59,8 +59,8 @@ namespace Game.Network.Packets
             foreach (ClientGossipOptions options in GossipOptions)
             {
                 _worldPacket.WriteInt32(options.ClientOption);
-                _worldPacket.WriteInt8(options.OptionNPC);
-                _worldPacket.WriteInt8(options.OptionFlags);
+                _worldPacket.WriteUInt8(options.OptionNPC);
+                _worldPacket.WriteUInt8(options.OptionFlags);
                 _worldPacket.WriteInt32(options.OptionCost);
 
                 _worldPacket.WriteBits(options.Text.GetByteCount(), 12);
@@ -155,16 +155,16 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(Spells.Count);
             foreach (TrainerListSpell spell in Spells)
             {
-                _worldPacket.WriteInt32(spell.SpellID);
-                _worldPacket.WriteInt32(spell.MoneyCost);
-                _worldPacket.WriteInt32(spell.ReqSkillLine);
-                _worldPacket.WriteInt32(spell.ReqSkillRank);
+                _worldPacket.WriteUInt32(spell.SpellID);
+                _worldPacket.WriteUInt32(spell.MoneyCost);
+                _worldPacket.WriteUInt32(spell.ReqSkillLine);
+                _worldPacket.WriteUInt32(spell.ReqSkillRank);
 
                 for (uint i = 0; i < SharedConst.MaxTrainerspellAbilityReqs; ++i)
-                    _worldPacket.WriteInt32(spell.ReqAbility[i]);
+                    _worldPacket.WriteUInt32(spell.ReqAbility[i]);
 
-                _worldPacket.WriteInt8(spell.Usable);
-                _worldPacket.WriteInt8(spell.ReqLevel);
+                _worldPacket.WriteUInt8((byte)spell.Usable);
+                _worldPacket.WriteUInt8(spell.ReqLevel);
             }
 
             _worldPacket.WriteBits(Greeting.GetByteCount(), 11);
@@ -276,7 +276,7 @@ namespace Game.Network.Packets
         {
             _worldPacket.WritePackedGuid(TrainerGUID);
             _worldPacket.WriteUInt32(SpellID);
-            _worldPacket.WriteUInt32(TrainerFailedReason);
+            _worldPacket.WriteUInt32((uint)TrainerFailedReason);
         }
 
         public ObjectGuid TrainerGUID;
@@ -323,7 +323,7 @@ namespace Game.Network.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(MuID);
+            data.WriteInt32(MuID);
             data.WriteInt32(Type);
             data.WriteInt32(Quantity);
             data.WriteUInt64(Price);

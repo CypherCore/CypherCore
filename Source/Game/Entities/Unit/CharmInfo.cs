@@ -236,9 +236,9 @@ namespace Game.Entities
         {
             _petnumber = petnumber;
             if (statwindow)
-                _unit.SetUInt32Value(UnitFields.PetNumber, _petnumber);
+                _unit.SetPetNumberForClient(_petnumber);
             else
-                _unit.SetUInt32Value(UnitFields.PetNumber, 0);
+                _unit.SetPetNumberForClient(0);
         }
 
         public void LoadPetActionBar(string data)

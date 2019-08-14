@@ -174,8 +174,8 @@ namespace Game.Entities
             PhasingHandler.InheritPhaseShift(this, owner);
 
             setPetType(petType);
-            SetFaction(owner.getFaction());
-            SetUInt32Value(UnitFields.CreatedBySpell, summonSpellId);
+            SetFaction(owner.GetFaction());
+            SetCreatedBySpell(summonSpellId);
 
             float px, py, pz;
             if (IsCritter())
@@ -199,7 +199,8 @@ namespace Game.Entities
             SetDisplayId(result.Read<uint>(3));
             SetNativeDisplayId(result.Read<uint>(3));
             uint petlevel = result.Read<ushort>(4);
-            SetUInt64Value(UnitFields.NpcFlags, (ulong)NPCFlags.None);
+            SetNpcFlags(NPCFlags.None);
+            SetNpcFlags2(NPCFlags2.None);
             SetName(result.Read<string>(8));
 
             switch (getPetType())
@@ -207,16 +208,15 @@ namespace Game.Entities
                 case PetType.Summon:
                     petlevel = owner.getLevel();
 
-                    SetByteValue(UnitFields.Bytes0, 1, (byte)Class.Mage);
-                    SetUInt32Value(UnitFields.Flags, (uint)UnitFlags.PvpAttackable); // this enables popup window (pet dismiss, cancel)
+                    SetClass(Class.Mage);
+                    SetUnitFlags(UnitFlags.PvpAttackable); // this enables popup window (pet dismiss, cancel)
                     break;
                 case PetType.Hunter:
-                    SetByteValue(UnitFields.Bytes0, 1, (byte)Class.Warrior);
-                    SetByteValue(UnitFields.Bytes0, 3, (byte)Gender.None);
+                    SetClass(Class.Warrior);
+                    SetGender(Gender.None);
                     SetSheath(SheathState.Melee);
-                    SetByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PetFlags, (result.Read<bool>(9) ? UnitPetFlags.CanBeAbandoned : UnitPetFlags.CanBeRenamed | UnitPetFlags.CanBeAbandoned));
-
-                    SetUInt32Value(UnitFields.Flags, (uint)UnitFlags.PvpAttackable); // this enables popup window (pet abandon, cancel)
+                    SetPetFlags(result.Read<bool>(9) ? UnitPetFlags.CanBeAbandoned : UnitPetFlags.CanBeRenamed | UnitPetFlags.CanBeAbandoned);
+                    SetUnitFlags(UnitFlags.PvpAttackable); // this enables popup window (pet abandon, cancel)
                     break;
                 default:
                     if (!IsPetGhoul())
@@ -224,11 +224,11 @@ namespace Game.Entities
                     break;
             }
 
-            SetUInt32Value(UnitFields.PetNameTimestamp, (uint)Time.UnixTime); // cast can't be helped here
+            SetPetNameTimestamp((uint)Time.UnixTime); // cast can't be helped here
             SetCreatorGUID(owner.GetGUID());
 
             InitStatsForLevel(petlevel);
-            SetUInt32Value(UnitFields.PetExperience, result.Read<uint>(5));
+            SetPetExperience(result.Read<uint>(5));
 
             SynchronizeLevelWithOwner();
 
@@ -443,16 +443,16 @@ namespace Game.Entities
                 stmt.AddValue(2, ownerLowGUID);
                 stmt.AddValue(3, GetNativeDisplayId());
                 stmt.AddValue(4, getLevel());
-                stmt.AddValue(5, GetUInt32Value(UnitFields.PetExperience));
+                stmt.AddValue(5, (uint)m_unitData.PetExperience);
                 stmt.AddValue(6, GetReactState());
                 stmt.AddValue(7, mode);
                 stmt.AddValue(8, GetName());
-                stmt.AddValue(9, HasByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PetFlags, UnitPetFlags.CanBeRenamed) ? 0 : 1);
+                stmt.AddValue(9, HasPetFlag(UnitPetFlags.CanBeRenamed) ? 0 : 1);
                 stmt.AddValue(10, curhealth);
                 stmt.AddValue(11, curmana);
                 stmt.AddValue(12, GenerateActionBarData());
                 stmt.AddValue(13, Time.UnixTime);
-                stmt.AddValue(14, GetUInt32Value(UnitFields.CreatedBySpell));
+                stmt.AddValue(14, (uint)m_unitData.CreatedBySpell);
                 stmt.AddValue(15, getPetType());
                 stmt.AddValue(16, m_petSpecialization);
                 trans.Append(stmt);
@@ -510,8 +510,8 @@ namespace Game.Entities
                 if (getPetType() == PetType.Hunter)
                 {
                     // pet corpse non lootable and non skinnable
-                    SetUInt32Value(ObjectFields.DynamicFlags, (uint)UnitDynFlags.None);
-                    RemoveFlag(UnitFields.Flags, UnitFlags.Skinnable);
+                    SetDynamicFlags(UnitDynFlags.None);
+                    RemoveUnitFlag(UnitFlags.Skinnable);
                 }
             }
             else if (getDeathState() == DeathState.Alive)
@@ -626,8 +626,8 @@ namespace Game.Entities
             if (petlevel >= maxlevel)
                 return;
 
-            uint nextLvlXP = GetUInt32Value(UnitFields.PetNextLevelExp);
-            uint curXP = GetUInt32Value(UnitFields.PetExperience);
+            uint nextLvlXP = m_unitData.PetNextLevelExperience;
+            uint curXP = m_unitData.PetExperience;
             uint newXP = curXP + xp;
 
             // Check how much XP the pet should receive, and hand off have any left from previous levelups
@@ -639,10 +639,10 @@ namespace Game.Entities
 
                 GivePetLevel((int)petlevel);
 
-                nextLvlXP = GetUInt32Value(UnitFields.PetNextLevelExp);
+                nextLvlXP = m_unitData.PetNextLevelExperience;
             }
             // Not affected by special conditions - give it new XP
-            SetUInt32Value(UnitFields.PetExperience, petlevel < maxlevel ? newXP : 0);
+            SetPetExperience(petlevel < maxlevel ? newXP : 0);
         }
 
         public void GivePetLevel(int level)
@@ -652,8 +652,8 @@ namespace Game.Entities
 
             if (getPetType() == PetType.Hunter)
             {
-                SetUInt32Value(UnitFields.PetExperience, 0);
-                SetUInt32Value(UnitFields.PetNextLevelExp, (uint)(Global.ObjectMgr.GetXPForLevel((uint)level) * PetXPFactor));
+                SetPetExperience(0);
+                SetPetNextLevelExperience((uint)(Global.ObjectMgr.GetXPForLevel((uint)level) * PetXPFactor));
             }
 
             InitStatsForLevel((uint)level);
@@ -712,18 +712,19 @@ namespace Game.Entities
             if (!Create(map.GenerateLowGuid(HighGuid.Pet), map, cinfo.Entry))
                 return false;
 
-            SetUInt32Value(UnitFields.PetNameTimestamp, 0);
-            SetUInt32Value(UnitFields.PetExperience, 0);
-            SetUInt32Value(UnitFields.PetNextLevelExp, (uint)(Global.ObjectMgr.GetXPForLevel(getLevel() + 1) * PetXPFactor));
-            SetUInt64Value(UnitFields.NpcFlags, (ulong)NPCFlags.None);
+            SetPetNameTimestamp(0);
+            SetPetExperience(0);
+            SetPetNextLevelExperience((uint)(Global.ObjectMgr.GetXPForLevel(getLevel() + 1) * PetXPFactor));
+            SetNpcFlags(NPCFlags.None);
+            SetNpcFlags2(NPCFlags2.None);
 
             if (cinfo.CreatureType == CreatureType.Beast)
             {
-                SetByteValue(UnitFields.Bytes0, 1, (byte)Class.Warrior);
-                SetByteValue(UnitFields.Bytes0, 3, (byte)Gender.None);
-                SetUInt32Value(UnitFields.DisplayPower, (uint)PowerType.Focus);
+                SetClass(Class.Warrior);
+                SetGender(Gender.None);
+                SetPowerType(PowerType.Focus);
                 SetSheath(SheathState.Melee);
-                SetByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PetFlags, (UnitPetFlags.CanBeRenamed | UnitPetFlags.CanBeAbandoned));
+                SetPetFlags(UnitPetFlags.CanBeRenamed | UnitPetFlags.CanBeAbandoned);
             }
 
             return true;
@@ -1347,7 +1348,7 @@ namespace Game.Entities
                 return false;
 
             // Force regen flag for player pets, just like we do for players themselves
-            SetFlag(UnitFields.Flags2, UnitFlags2.RegeneratePower);
+            AddUnitFlag2(UnitFlags2.RegeneratePower);
             SetSheath(SheathState.Melee);
 
             return true;
@@ -1472,7 +1473,7 @@ namespace Game.Entities
         }
 
         public PetType getPetType() { return m_petType; }
-        void setPetType(PetType type) { m_petType = type; }
+        public void setPetType(PetType type) { m_petType = type; }
         public bool isControlled() { return getPetType() == PetType.Summon || getPetType() == PetType.Hunter; }
         public bool isTemporarySummoned() { return m_duration > 0; }
 
@@ -1489,6 +1490,9 @@ namespace Game.Entities
 
         public void SetDuration(uint dur) { m_duration = (int)dur; }
         public int GetDuration() { return m_duration; }
+
+        public void SetPetExperience(uint xp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetExperience), xp); }
+        public void SetPetNextLevelExperience(uint xp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PetNextLevelExperience), xp); }
 
         public ushort GetSpecialization() { return m_petSpecialization; }
 

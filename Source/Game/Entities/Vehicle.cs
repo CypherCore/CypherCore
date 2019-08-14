@@ -53,9 +53,9 @@ namespace Game.Entities
 
             // Set or remove correct flags based on available seats. Will overwrite db data (if wrong).
             if (UsableSeatNum != 0)
-                _me.SetFlag64(UnitFields.NpcFlags, (_me.IsTypeId(TypeId.Player) ? NPCFlags.PlayerVehicle : NPCFlags.SpellClick));
+                _me.AddNpcFlag(_me.IsTypeId(TypeId.Player) ? NPCFlags.PlayerVehicle : NPCFlags.SpellClick);
             else
-                _me.RemoveFlag64(UnitFields.NpcFlags, (_me.IsTypeId(TypeId.Player) ? NPCFlags.PlayerVehicle : NPCFlags.SpellClick));
+                _me.RemoveNpcFlag(_me.IsTypeId(TypeId.Player) ? NPCFlags.PlayerVehicle : NPCFlags.SpellClick);
 
             InitMovementInfoForBase();
         }
@@ -345,7 +345,7 @@ namespace Game.Entities
                 unit.GetName(), _me.GetEntry(), _vehicleInfo.Id, _me.GetGUID().ToString(), seat.Key);
 
             if (seat.Value.SeatInfo.CanEnterOrExit() && ++UsableSeatNum != 0)
-                _me.SetFlag64(UnitFields.NpcFlags, (_me.IsTypeId(TypeId.Player) ? NPCFlags.PlayerVehicle : NPCFlags.SpellClick));
+                _me.AddNpcFlag(_me.IsTypeId(TypeId.Player) ? NPCFlags.PlayerVehicle : NPCFlags.SpellClick);
 
             // Enable gravity for passenger when he did not have it active before entering the vehicle
             if (seat.Value.SeatInfo.Flags.HasAnyFlag(VehicleSeatFlags.DisableGravity) && !seat.Value.Passenger.IsGravityDisabled)
@@ -353,7 +353,7 @@ namespace Game.Entities
 
             // Remove UNIT_FLAG_NOT_SELECTABLE if passenger did not have it before entering vehicle
             if (seat.Value.SeatInfo.Flags.HasAnyFlag(VehicleSeatFlags.PassengerNotSelectable) && !seat.Value.Passenger.IsUnselectable)
-                unit.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+                unit.RemoveUnitFlag(UnitFlags.NotSelectable);
 
             seat.Value.Passenger.Reset();
 
@@ -560,7 +560,7 @@ namespace Game.Entities
 
             Passenger.SetVehicle(Target);
             Seat.Value.Passenger.Guid = Passenger.GetGUID();
-            Seat.Value.Passenger.IsUnselectable = Passenger.HasFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+            Seat.Value.Passenger.IsUnselectable = Passenger.HasUnitFlag(UnitFlags.NotSelectable);
             Seat.Value.Passenger.IsGravityDisabled = Passenger.HasUnitMovementFlag(MovementFlag.DisableGravity);
             if (Seat.Value.SeatInfo.CanEnterOrExit())
             {
@@ -569,9 +569,9 @@ namespace Game.Entities
                 if (Target.UsableSeatNum == 0)
                 {
                     if (Target.GetBase().IsTypeId(TypeId.Player))
-                        Target.GetBase().RemoveFlag64(UnitFields.NpcFlags, NPCFlags.PlayerVehicle);
+                        Target.GetBase().RemoveNpcFlag(NPCFlags.PlayerVehicle);
                     else
-                        Target.GetBase().RemoveFlag64(UnitFields.NpcFlags, NPCFlags.SpellClick);
+                        Target.GetBase().RemoveNpcFlag(NPCFlags.SpellClick);
                 }
             }
 
@@ -599,7 +599,7 @@ namespace Game.Entities
                 Passenger.SetDisableGravity(true);
 
             if (Seat.Value.SeatInfo.Flags.HasAnyFlag(VehicleSeatFlags.PassengerNotSelectable))
-                Passenger.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+                Passenger.AddUnitFlag(UnitFlags.NotSelectable);
 
             Passenger.m_movementInfo.transport.pos.Relocate(veSeat.AttachmentOffset.X, veSeat.AttachmentOffset.Y, veSeat.AttachmentOffset.Z);
             Passenger.m_movementInfo.transport.time = 0;

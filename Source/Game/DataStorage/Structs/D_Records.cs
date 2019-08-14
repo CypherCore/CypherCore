@@ -71,10 +71,12 @@ namespace Game.DataStorage
         public short MapID;
         public sbyte DifficultyID;
         public int OrderIndex;
+        public int CompleteWorldStateID;
         public sbyte Bit;
         public int CreatureDisplayID;
         public byte Flags;
         public int SpellIconFileID;
+        public int Faction;
     }
 
     public sealed class DurabilityCostsRecord

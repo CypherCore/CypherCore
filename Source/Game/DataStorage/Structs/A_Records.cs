@@ -36,6 +36,7 @@ namespace Game.DataStorage
         public AchievementFlags Flags;
         public ushort UiOrder;
         public uint IconFileID;
+        public int RewardItemID;
         public uint CriteriaTree;
         public ushort SharesCriteria;
     }
@@ -43,9 +44,9 @@ namespace Game.DataStorage
     public sealed class AnimationDataRecord
     {
         public uint Id;
-        public ushort Fallback;
+        public ushort BehaviorID;
         public byte BehaviorTier;
-        public int BehaviorID;
+        public int Fallback;
         public int[] Flags = new int[2];
     }
 
@@ -161,6 +162,7 @@ namespace Game.DataStorage
         public uint UiAltItemAppearanceID;
         public byte Flags;
         public ushort UiCameraID;
+        public uint UsablePlayerConditionID;
     }
 
     public sealed class ArtifactAppearanceSetRecord

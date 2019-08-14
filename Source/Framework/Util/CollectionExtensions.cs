@@ -103,6 +103,11 @@ namespace System.Collections.Generic
             int cur = list.Count;
             if (size < cur)
                 list.RemoveRange((int)size, cur - (int)size);
+            else
+            {
+                for (var i = list.Count; i < size; ++i)
+                    list.Add(default(T));
+            }
         }
 
         public static void RandomResize<T>(this IList<T> list, uint size)

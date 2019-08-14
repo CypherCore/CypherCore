@@ -689,9 +689,9 @@ namespace Game.BattleGrounds.Zones
                 if (dem)
                 {
                     if (start)
-                        dem.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                        dem.AddUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
                     else
-                        dem.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                        dem.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
                 }
             }
         }
@@ -768,9 +768,9 @@ namespace Game.BattleGrounds.Zones
             if (go)
             {
                 if (CanInteractWithObject(objectId))
-                    go.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                    go.RemoveFlag(GameObjectFlags.NotSelectable);
                 else
-                    go.SetFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                    go.AddFlag(GameObjectFlags.NotSelectable);
             }
         }
 
@@ -1153,7 +1153,7 @@ namespace Game.BattleGrounds.Zones
             }
         }
 
-        public override void BuildPvPLogPlayerDataPacket(out PVPLogData.PlayerData playerData)
+        public override void BuildPvPLogPlayerDataPacket(out PVPLogData.PVPMatchPlayerStatistics playerData)
         {
             base.BuildPvPLogPlayerDataPacket(out playerData);
 

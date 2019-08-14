@@ -750,7 +750,7 @@ namespace Game.Chat
                         var ipBytes = System.Net.IPAddress.Parse(handler.GetSession().GetRemoteAddress()).GetAddressBytes();
                         Array.Reverse(ipBytes);
 
-                        PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_LOGON_COUNTRY);
+                        /*PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_LOGON_COUNTRY);
                         stmt.AddValue(0, BitConverter.ToUInt32(ipBytes, 0));
 
                         SQLResult result = DB.Login.Query(stmt);
@@ -767,7 +767,7 @@ namespace Game.Chat
                         {
                             handler.SendSysMessage("[IP2NATION] Table empty");
                             Log.outDebug(LogFilter.Server, "[IP2NATION] Table empty");
-                        }
+                        }*/
                     }
                     else if (param == "off")
                     {

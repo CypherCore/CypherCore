@@ -1440,6 +1440,13 @@ namespace Game
                             }
                             break;
                         }
+                    case ScriptCommands.FieldSetDeprecated:
+                    case ScriptCommands.FlagSetDeprecated:
+                    case ScriptCommands.FlagRemoveDeprecated:
+                        {
+                            Log.outError(LogFilter.Sql, $"Table `{tableName}` uses deprecated direct updatefield modify command {tmp.command} for script id {tmp.id}");
+                            continue;
+                        }
                     default:
                         break;
                 }
@@ -1811,7 +1818,7 @@ namespace Game
             creature.RequiredExpansion = fields.Read<uint>(15);
             creature.VignetteID = fields.Read<uint>(16);
             creature.Faction = fields.Read<uint>(17);
-            creature.Npcflag = (NPCFlags)fields.Read<uint>(18);
+            creature.Npcflag = fields.Read<ulong>(18);
             creature.SpeedWalk = fields.Read<float>(19);
             creature.SpeedRun = fields.Read<float>(20);
             creature.Scale = fields.Read<float>(21);
@@ -1826,9 +1833,9 @@ namespace Game
             creature.UnitFlags2 = fields.Read<uint>(30);
             creature.UnitFlags3 = fields.Read<uint>(31);
             creature.DynamicFlags = fields.Read<uint>(32);
-            creature.Family = (CreatureFamily)fields.Read<byte>(33);
+            creature.Family = (CreatureFamily)fields.Read<uint>(33);
             creature.TrainerClass = (Class)fields.Read<byte>(34);
-            creature.CreatureType = (CreatureType)fields.Read<uint>(35);
+            creature.CreatureType = (CreatureType)fields.Read<byte>(35);
             creature.TypeFlags = (CreatureTypeFlags)fields.Read<uint>(36);
             creature.TypeFlags2 = fields.Read<uint>(37);
             creature.LootId = fields.Read<uint>(38);
@@ -4718,7 +4725,7 @@ namespace Game
             var time = Time.GetMSTime();
 
             uint count = 0;
-            SQLResult result = DB.World.Query("SELECT Id, FlagsCu, FoodType, MinMoneyLoot, MaxMoneyLoot, SpellPPMChance FROM item_template_addon");
+            SQLResult result = DB.World.Query("SELECT Id, FlagsCu, FoodType, MinMoneyLoot, MaxMoneyLoot, SpellPPMChance, RandomBonusListTemplateId FROM item_template_addon");
             if (!result.IsEmpty())
             {
                 do
@@ -4745,6 +4752,7 @@ namespace Game
                     itemTemplate.MinMoneyLoot = minMoneyLoot;
                     itemTemplate.MaxMoneyLoot = maxMoneyLoot;
                     itemTemplate.SpellPPMRate = result.Read<float>(5);
+                    itemTemplate.RandomBonusListTemplateId = result.Read<uint>(6);
                     ++count;
                 } while (result.NextRow());
             }
@@ -7156,7 +7164,7 @@ namespace Game
                 CreatureTemplate cInfo = GetCreatureTemplate(pair.Key);
                 if (cInfo == null)
                     Log.outError(LogFilter.Sql, "Table `creature_queststarter` have data for not existed creature entry ({0}) and existed quest {1}", pair.Key, pair.Value);
-                else if (!Convert.ToBoolean(cInfo.Npcflag & NPCFlags.QuestGiver))
+                else if (!Convert.ToBoolean(cInfo.Npcflag & (uint)NPCFlags.QuestGiver))
                     Log.outError(LogFilter.Sql, "Table `creature_queststarter` has creature entry ({0}) for quest {1}, but npcflag does not include UNIT_NPC_FLAG_QUESTGIVER", pair.Key, pair.Value);
             }
         }
@@ -7169,7 +7177,7 @@ namespace Game
                 CreatureTemplate cInfo = GetCreatureTemplate(pair.Key);
                 if (cInfo == null)
                     Log.outError(LogFilter.Sql, "Table `creature_questender` have data for not existed creature entry ({0}) and existed quest {1}", pair.Key, pair.Value);
-                else if (!Convert.ToBoolean(cInfo.Npcflag & NPCFlags.QuestGiver))
+                else if (!Convert.ToBoolean(cInfo.Npcflag & (uint)NPCFlags.QuestGiver))
                     Log.outError(LogFilter.Sql, "Table `creature_questender` has creature entry ({0}) for quest {1}, but npcflag does not include UNIT_NPC_FLAG_QUESTGIVER", pair.Key, pair.Value);
             }
         }
@@ -7709,10 +7717,10 @@ namespace Game
             var ctc = GetCreatureTemplates();
             foreach (var creature in ctc.Values)
             {
-                if (creature.Npcflag.HasAnyFlag(NPCFlags.SpellClick) && !_spellClickInfoStorage.ContainsKey(creature.Entry))
+                if (creature.Npcflag.HasAnyFlag((uint)NPCFlags.SpellClick) && !_spellClickInfoStorage.ContainsKey(creature.Entry))
                 {
                     Log.outError(LogFilter.Sql, "npc_spellclick_spells: Creature template {0} has UNIT_NPC_FLAG_SPELLCLICK but no data in spellclick table! Removing flag", creature.Entry);
-                    creature.Npcflag &= ~NPCFlags.SpellClick;
+                    creature.Npcflag &= ~(uint)NPCFlags.SpellClick;
                 }
             }
 

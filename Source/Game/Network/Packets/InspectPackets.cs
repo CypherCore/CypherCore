@@ -19,6 +19,7 @@ using Framework.Constants;
 using Framework.Dynamic;
 using Game.Entities;
 using System.Collections.Generic;
+using System;
 
 namespace Game.Network.Packets
 {
@@ -36,23 +37,23 @@ namespace Game.Network.Packets
 
     public class InspectResult : ServerPacket
     {
-        public InspectResult() : base(ServerOpcodes.InspectResult) { }
+        public InspectResult() : base(ServerOpcodes.InspectResult)
+        {
+            DisplayInfo = new PlayerModelDisplayInfo();
+        }
 
         public override void Write()
         {
-            _worldPacket.WritePackedGuid(InspecteeGUID);
-            _worldPacket.WriteUInt32(Items.Count);
-            _worldPacket.WriteUInt32(Glyphs.Count);
-            _worldPacket.WriteUInt32(Talents.Count);
-            _worldPacket.WriteUInt32(PvpTalents.Count);
-            _worldPacket.WriteInt32(ClassID);
-            _worldPacket.WriteInt32(SpecializationID);
-            _worldPacket.WriteInt32(GenderID);
+            DisplayInfo.Write(_worldPacket);
+            _worldPacket.WriteInt32(Glyphs.Count);
+            _worldPacket.WriteInt32(Talents.Count);
+            _worldPacket.WriteInt32(PvpTalents.Count);
+            _worldPacket.WriteInt32(ItemLevel);
             _worldPacket.WriteUInt8(LifetimeMaxRank);
             _worldPacket.WriteUInt16(TodayHK);
             _worldPacket.WriteUInt16(YesterdayHK);
-            _worldPacket.WriteInt32(LifetimeHK);
-            _worldPacket.WriteInt32(HonorLevel);
+            _worldPacket.WriteUInt32(LifetimeHK);
+            _worldPacket.WriteUInt32(HonorLevel);
 
             for (int i = 0; i < Glyphs.Count; ++i)
                 _worldPacket.WriteUInt16(Glyphs[i]);
@@ -75,22 +76,16 @@ namespace Game.Network.Packets
 
             if (AzeriteLevel.HasValue)
                 _worldPacket.WriteInt32(AzeriteLevel.Value);
-
-            foreach (InspectItemData item in Items)
-                item.Write(_worldPacket);
         }
 
-        public ObjectGuid InspecteeGUID;
-        public List<InspectItemData> Items = new List<InspectItemData>();
+        public PlayerModelDisplayInfo DisplayInfo;
         public List<ushort> Glyphs = new List<ushort>();
         public List<ushort> Talents = new List<ushort>();
         public List<ushort> PvpTalents = new List<ushort>();
-        public Class ClassID = Class.None;
-        public Gender GenderID = Gender.None;
         public Optional<InspectGuildData> GuildData = new Optional<InspectGuildData>();
         public Array<PVPBracketData> Bracket = new Array<PVPBracketData>(6);
-        public int SpecializationID;
         public Optional<int> AzeriteLevel;
+        public int ItemLevel;
         public uint LifetimeHK;
         public uint HonorLevel;
         public ushort TodayHK;
@@ -136,7 +131,7 @@ namespace Game.Network.Packets
     {
         public InspectItemData(Item item, byte index)
         {
-            CreatorGUID = item.GetGuidValue(ItemFields.Creator);
+            CreatorGUID = item.GetCreator();
 
             Item = new ItemInstance(item);
             Index = index;
@@ -150,7 +145,7 @@ namespace Game.Network.Packets
             }
 
             byte i = 0;
-            foreach (ItemDynamicFieldGems gemData in item.GetGems())
+            foreach (SocketedGem gemData in item.m_itemData.Gems)
             {
                 if (gemData.ItemId != 0)
                 {
@@ -167,7 +162,7 @@ namespace Game.Network.Packets
         {
             data.WritePackedGuid(CreatorGUID);
             data.WriteUInt8(Index);
-            data.WriteUInt32(AzeritePowers.Count);
+            data.WriteInt32(AzeritePowers.Count);
             foreach (var id in AzeritePowers)
                 data.WriteInt32(id);
 
@@ -193,6 +188,67 @@ namespace Game.Network.Packets
         public List<int> AzeritePowers = new List<int>();
     }
 
+    public class PlayerModelDisplayInfo
+    {
+        public ObjectGuid GUID;
+        public List<InspectItemData> Items = new List<InspectItemData>();
+        public string Name;
+        public uint SpecializationID;
+        public byte GenderID;
+        public byte Skin;
+        public byte HairColor;
+        public byte HairStyle;
+        public byte FacialHairStyle;
+        public byte Face;
+        public byte Race;
+        public byte ClassID;
+        public Array<byte> CustomDisplay = new Array<byte>(PlayerConst.CustomDisplaySize);
+
+        public void Initialize(Player player)
+        {
+            GUID = player.GetGUID();
+            SpecializationID = player.GetPrimarySpecialization();
+            Name = player.GetName();
+            GenderID = player.m_playerData.NativeSex;
+            Skin = player.m_playerData.SkinID;
+            HairColor = player.m_playerData.HairColorID;
+            HairStyle = player.m_playerData.HairStyleID;
+            FacialHairStyle = player.m_playerData.FacialHairStyleID;
+            Face = player.m_playerData.FaceID;
+            Race = (byte)player.GetRace();
+            ClassID = (byte)player.GetClass();
+            CustomDisplay.AddRange(player.m_playerData.CustomDisplayOption._values);
+
+            for (byte i = 0; i < EquipmentSlot.End; ++i)
+            {
+                Item item = player.GetItemByPos(InventorySlots.Bag0, i);
+                if (item != null)
+                    Items.Add(new InspectItemData(item, i));
+            }
+        }
+
+        public void Write(WorldPacket data)
+        {
+            data.WritePackedGuid(GUID);
+            data.WriteUInt32(SpecializationID);
+            data.WriteInt32(Items.Count);
+            data.WriteBits(Name.GetByteCount(), 6);
+            data.WriteUInt8(GenderID);
+            data.WriteUInt8(Skin);
+            data.WriteUInt8(HairColor);
+            data.WriteUInt8(HairStyle);
+            data.WriteUInt8(FacialHairStyle);
+            data.WriteUInt8(Face);
+            data.WriteUInt8(Race);
+            data.WriteUInt8(ClassID);
+            CustomDisplay.ForEach(id => data.WriteUInt8(id));
+
+            data.WriteString(Name);
+
+            foreach (InspectItemData item in Items)
+                item.Write(data);
+        }
+    }
     public struct InspectGuildData
     {
         public void Write(WorldPacket data)

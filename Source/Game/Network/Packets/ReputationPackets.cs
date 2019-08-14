@@ -30,7 +30,7 @@ namespace Game.Network.Packets
         {
             for (ushort i = 0; i < FactionCount; ++i)
             {
-                _worldPacket.WriteUInt8(FactionFlags[i]);
+                _worldPacket.WriteUInt8((byte)FactionFlags[i]);
                 _worldPacket.WriteInt32(FactionStandings[i]);
             }
 
@@ -58,7 +58,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Reactions.Count);
+            _worldPacket.WriteInt32(Reactions.Count);
             foreach (ForcedReaction reaction in Reactions)
                 reaction.Write(_worldPacket);
         }
@@ -75,7 +75,7 @@ namespace Game.Network.Packets
             _worldPacket.WriteFloat(ReferAFriendBonus);
             _worldPacket.WriteFloat(BonusFromAchievementSystem);
 
-            _worldPacket.WriteUInt32(Faction.Count);
+            _worldPacket.WriteInt32(Faction.Count);
             foreach (FactionStandingData factionStanding in Faction)
                 factionStanding.Write(_worldPacket);
 

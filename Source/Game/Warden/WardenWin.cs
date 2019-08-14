@@ -185,7 +185,7 @@ namespace Game
             }
 
             ByteBuffer buffer = new ByteBuffer();
-            buffer.WriteUInt8(WardenOpcodes.Smsg_CheatChecksRequest);
+            buffer.WriteUInt8((byte)WardenOpcodes.Smsg_CheatChecksRequest);
 
             for (uint i = 0; i < WorldConfig.GetUIntValue(WorldCfg.WardenNumOtherChecks); ++i)
             {
@@ -207,7 +207,7 @@ namespace Game
                     case WardenCheckType.MPQ:
                     case WardenCheckType.LuaStr:
                     case WardenCheckType.Driver:
-                        buffer.WriteUInt8(wd.Str.GetByteCount());
+                        buffer.WriteUInt8((byte)wd.Str.GetByteCount());
                         buffer.WriteString(wd.Str);
                         break;
                     default:
@@ -219,7 +219,7 @@ namespace Game
 
             // Add TIMING_CHECK
             buffer.WriteUInt8(0x00);
-            buffer.WriteUInt8((int)WardenCheckType.Timing ^ xorByte);
+            buffer.WriteUInt8((byte)((int)WardenCheckType.Timing ^ xorByte));
 
             byte index = 1;
 
@@ -228,7 +228,7 @@ namespace Game
                 wd = Global.WardenCheckMgr.GetWardenDataById(checkId);
 
                 type = wd.Type;
-                buffer.WriteUInt8((int)type ^ xorByte);
+                buffer.WriteUInt8((byte)((int)type ^ xorByte));
                 switch (type)
                 {
                     case WardenCheckType.Memory:

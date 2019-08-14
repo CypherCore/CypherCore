@@ -122,7 +122,7 @@ namespace Game.Movement
             if (owner == null)
                 return;
 
-            owner.SetFlag(UnitFields.Flags, UnitFlags.Fleeing);
+            owner.AddUnitFlag(UnitFlags.Fleeing);
             owner.AddUnitState(UnitState.Fleeing | UnitState.FleeingMove);
             _setTargetLocation(owner);
         }
@@ -131,13 +131,13 @@ namespace Game.Movement
         {
             if (owner.IsTypeId(TypeId.Player))
             {
-                owner.RemoveFlag(UnitFields.Flags, UnitFlags.Fleeing);
+                owner.RemoveUnitFlag(UnitFlags.Fleeing);
                 owner.ClearUnitState(UnitState.Fleeing | UnitState.FleeingMove);
                 owner.StopMoving();
             }
             else
             {
-                owner.RemoveFlag(UnitFields.Flags, UnitFlags.Fleeing);
+                owner.RemoveUnitFlag(UnitFlags.Fleeing);
                 owner.ClearUnitState(UnitState.Fleeing | UnitState.FleeingMove);
                 if (owner.GetVictim() != null)
                     owner.SetTarget(owner.GetVictim().GetGUID());
@@ -185,7 +185,7 @@ namespace Game.Movement
 
         public override void Finalize(Unit owner)
         {
-            owner.RemoveFlag(UnitFields.Flags, UnitFlags.Fleeing);
+            owner.RemoveUnitFlag(UnitFlags.Fleeing);
             owner.ClearUnitState(UnitState.Fleeing | UnitState.FleeingMove);
             Unit victim = owner.GetVictim();
             if (victim != null)

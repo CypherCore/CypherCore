@@ -30,13 +30,10 @@ namespace Framework.Constants
         public const int MaxMasterySpells = 2;
 
         public const int ReqPrimaryTreeTalents = 31;
-        public const int ExploredZonesSize = 320;
+        public const int ExploredZonesSize = 192;
         public const ulong MaxMoneyAmount = 99999999999UL;
         public const int MaxActionButtons = 132;
         public const int MaxActionButtonActionValue = 0x00FFFFFF + 1;
-
-        public const uint KnowTitlesSize = 6;
-        public const uint MaxTitleIndex = KnowTitlesSize * 64;
 
         public const int MaxDailyQuests = 25;
         public const int QuestsCompletedBitsSize = 1750;
@@ -45,7 +42,7 @@ namespace Framework.Constants
         public const uint infinityCooldownDelayCheck = Time.Month / 2;
         public const int MaxPlayerSummonDelay = 2 * Time.Minute;
 
-        public const int TaxiMaskSize = 286;
+        public const int TaxiMaskSize = 311;
 
         // corpse reclaim times
         public const int DeathExpireStep = (5 * Time.Minute);
@@ -76,45 +73,6 @@ namespace Framework.Constants
         public const int Gold = Silver * 100;
     }
 
-    public struct PlayerFieldOffsets
-    {
-        public const byte BytesOffsetSkinId = 0;
-        public const byte BytesOffsetFaceId = 1;
-        public const byte BytesOffsetHairStyleId = 2;
-        public const byte BytesOffsetHairColorId = 3;
-
-        public const byte Bytes2OffsetCustomDisplayOption = 0; // 3 Bytes
-        public const byte Bytes2OffsetFacialStyle = 3;
-
-        public const byte Bytes3OffsetPartyType = 0;
-        public const byte Bytes3OffsetBankBagSlots = 1;
-        public const byte Bytes3OffsetGender = 2;
-        public const byte Bytes3OffsetInebriation = 3;
-
-        public const byte Bytes4OffsetPvpTitle = 0;
-        public const byte Bytes4OffsetArenaFaction = 1;
-
-        public const byte FieldBytesOffsetRafGrantableLevel = 0;
-        public const byte FieldBytesOffsetActionBarToggles = 1;
-        public const byte FieldBytesOffsetLifetimeMaxPvpRank = 2;
-        public const byte FieldBytesOffsetNumRespecs = 3;
-
-        public const byte FieldBytes2OffsetIgnorePowerRegenPredictionMask = 0;
-        public const byte FieldBytes2OffsetAuraVision = 1;
-        public const byte FieldBytes2OffsetNumBackpackSlots = 2;
-
-        public const byte FieldBytes3OffsetOverrideSpellsId = 2;     // Uint16!
-        public const byte FieldBytes3OffsetOverrideSpellsIdUint16Offset = FieldBytes3OffsetOverrideSpellsId / 2;
-
-        public const byte FieldKillsOffsetTodayKills = 0;
-        public const byte FieldKillsOffsetYesterdayKills = 1;
-
-        public const byte RestStateXp = 0;
-        public const byte RestRestedXp = 1;
-        public const byte RestStateHonor = 2;
-        public const byte RestRestedHonor = 3;
-    }
-    
     public enum TradeSlots
     {
         Invalid = -1,
@@ -737,7 +695,8 @@ namespace Framework.Constants
         None = 0x00,
         BonusLevel90 = 0x01,
         BonusLevel100 = 0x02,
-        BonusLevel110 = 0x04
+        BonusLevel110 = 0x04,
+        BonusLevel120 = 0x08
     }
 
     public enum HeirloomItemFlags

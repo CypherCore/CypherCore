@@ -46,10 +46,10 @@ namespace Game.Network.Packets
             _worldPacket.WriteBit(IsDemonHunterCreationAllowed);
             _worldPacket.WriteBit(DisabledClassesMask.HasValue);
             _worldPacket.WriteBit(IsAlliedRacesCreationAllowed);
-            _worldPacket.WriteUInt32(Characters.Count);
+            _worldPacket.WriteInt32(Characters.Count);
             _worldPacket.WriteInt32(MaxCharacterLevel);
-            _worldPacket.WriteUInt32(RaceUnlockData.Count);
-            _worldPacket.WriteUInt32(UnlockedConditionalAppearances.Count);
+            _worldPacket.WriteInt32(RaceUnlockData.Count);
+            _worldPacket.WriteInt32(UnlockedConditionalAppearances.Count);
 
             if (DisabledClassesMask.HasValue)
                 _worldPacket.WriteUInt32(DisabledClassesMask.Value);
@@ -190,7 +190,7 @@ namespace Game.Network.Packets
                 data.WriteUInt64(GuildClubMemberID);
                 data.WriteUInt8(ListPosition);
                 data.WriteUInt8(RaceId);
-                data.WriteUInt8(ClassId);
+                data.WriteUInt8((byte)ClassId);
                 data.WriteUInt8(Sex);
                 data.WriteUInt8(Skin);
                 data.WriteUInt8(Face);
@@ -206,8 +206,8 @@ namespace Game.Network.Packets
                 data.WriteUInt32(MapId);
                 data.WriteVector3(PreLoadPosition);
                 data.WritePackedGuid(GuildGuid);
-                data.WriteUInt32(Flags);
-                data.WriteUInt32(CustomizationFlag);
+                data.WriteUInt32((uint)Flags);
+                data.WriteUInt32((uint)CustomizationFlag);
                 data.WriteUInt32(Flags3);
                 data.WriteUInt32(Pet.CreatureDisplayId);
                 data.WriteUInt32(Pet.Level);
@@ -356,7 +356,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8(Code);
+            _worldPacket.WriteUInt8((byte)Code);
             _worldPacket.WritePackedGuid(Guid);
         }
 
@@ -382,7 +382,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8(Code);
+            _worldPacket.WriteUInt8((byte)Code);
         }
 
         public ResponseCodes Code;
@@ -411,7 +411,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8(Result);
+            _worldPacket.WriteUInt8((byte)Result);
             _worldPacket.WriteBit(Guid.HasValue);
             _worldPacket.WriteBits(Name.GetByteCount(), 6);
             _worldPacket.FlushBits();
@@ -493,7 +493,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8(Result);
+            _worldPacket.WriteUInt8((byte)Result);
             _worldPacket.WritePackedGuid(Guid);
             _worldPacket.WriteBit(Display.HasValue);
             _worldPacket.FlushBits();
@@ -593,7 +593,7 @@ namespace Game.Network.Packets
         public override void Read()
         {
             UndeleteInfo = new CharacterUndeleteInfo();
-            _worldPacket.WriteUInt32(UndeleteInfo.ClientToken);
+            _worldPacket.WriteInt32(UndeleteInfo.ClientToken);
             _worldPacket.WritePackedGuid(UndeleteInfo.CharacterGuid);
         }
 
@@ -608,7 +608,7 @@ namespace Game.Network.Packets
         {
             Cypher.Assert(UndeleteInfo != null);
             _worldPacket.WriteInt32(UndeleteInfo.ClientToken);
-            _worldPacket.WriteUInt32(Result);
+            _worldPacket.WriteUInt32((uint)Result);
             _worldPacket.WritePackedGuid(UndeleteInfo.CharacterGuid);
         }
 
@@ -681,7 +681,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8(Code);
+            _worldPacket.WriteUInt8((byte)Code);
         }
 
         LoginFailureReason Code;
@@ -849,7 +849,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32(Result);
+            _worldPacket.WriteInt32((int)Result);
         }
 
         public ResultEnum Result;
@@ -871,7 +871,7 @@ namespace Game.Network.Packets
         {
             _worldPacket.WritePackedGuid(Victim);
             _worldPacket.WriteInt32(Original);
-            _worldPacket.WriteUInt8(Reason);
+            _worldPacket.WriteUInt8((byte)Reason);
             _worldPacket.WriteInt32(Amount);
             _worldPacket.WriteFloat(GroupBonus);
             _worldPacket.WriteUInt8(ReferAFriendBonusType);
@@ -1044,7 +1044,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32(ResultCode);
+            _worldPacket.WriteInt32((int)ResultCode);
             _worldPacket.WritePackedGuid(Player);
         }
 

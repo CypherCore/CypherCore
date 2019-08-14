@@ -21,6 +21,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public int DamageReplaceStat;
+        public int DamageSecondary;
         public uint[] Epic = new uint[5];
         public uint[] Superior = new uint[5];
         public uint[] Good = new uint[5];

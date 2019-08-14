@@ -110,7 +110,7 @@ namespace Framework.Constants
         Unk1 = 0x01,
     }
 
-    public enum NPCFlags : ulong
+    public enum NPCFlags : uint
     {
         None = 0x00,
         Gossip = 0x01,     // 100%
@@ -145,14 +145,19 @@ namespace Framework.Constants
         VaultKeeper = 0x20000000,     // Void Storage
         WildBattlePet = 0x40000000,     // Pet That Player Can Fight (Battle Pet)
         BlackMarket = 0x80000000,     // Black Market
-        ItemUpgradeMaster = 0x100000000,
-        GarrisonArchitect = 0x200000000,
-        Steering = 0x400000000,
-        ShipmentCrafter = 0x1000000000,
-        GarrisonMissionNpc = 0x2000000000,
-        TradeskillNpc = 0x4000000000,
-        BlackMarketView = 0x8000000000,
-        ContributionCollector = 0x40000000000,
+    }
+
+    public enum NPCFlags2
+    { 
+        None = 0x00,
+        ItemUpgradeMaster = 0x01,
+        GarrisonArchitect = 0x02,
+        Steering = 0x04,
+        ShipmentCrafter = 0x10,
+        GarrisonMissionNpc = 0x20,
+        TradeskillNpc = 0x40,
+        BlackMarketView = 0x80,
+        ContributionCollector = 0x400,
     }
 
     public enum CreatureTypeFlags : uint

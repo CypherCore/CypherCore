@@ -102,14 +102,31 @@ namespace Game.DataStorage
         public uint Id;
         public int[] Value = new int[3];
         public ushort ParentItemBonusListID;
-        public ItemBonusType Type;
+        public ItemBonusType BonusType;
         public byte OrderIndex;
+    }
+
+    public sealed class ItemBonusListGroupEntryRecord
+    {
+        public uint Id;
+        public int ItemBonusListID;
+        public int ItemLevelSelectorID;
+        public int OrderIndex;
+        public int ItemExtendedCostID;
+        public int ItemBonusListGroupID;
     }
 
     public sealed class ItemBonusListLevelDeltaRecord
     {
         public short ItemLevelDelta;
         public uint Id;
+    }
+
+    public sealed class ItemBonusSequenceSpellRecord
+    {
+        public uint Id;
+        public int SpellID;
+        public int ItemID;
     }
 
     public sealed class ItemBonusTreeNodeRecord
@@ -125,9 +142,9 @@ namespace Game.DataStorage
     public sealed class ItemChildEquipmentRecord
     {
         public uint Id;
+        public uint ParentItemID;
         public uint ChildItemID;
         public byte ChildItemEquipSlot;
-        public uint ParentItemID;
     }
 
     public sealed class ItemClassRecord
@@ -206,6 +223,7 @@ namespace Game.DataStorage
         public uint Id;
         public ushort MinItemLevel;
         public ushort ItemLevelSelectorQualitySetID;
+        public ushort AzeriteUnlockMappingSet;
     }
 
     public sealed class ItemLevelSelectorQualityRecord
@@ -255,21 +273,6 @@ namespace Game.DataStorage
         public ushort ItemLevel;
         public float Armor;
         public float Weapon;
-    }
-
-    public sealed class ItemRandomPropertiesRecord
-    {
-        public uint Id;
-        public LocalizedString Name;
-        public ushort[] Enchantment = new ushort[ItemConst.MaxItemRandomProperties];
-    }
-
-    public sealed class ItemRandomSuffixRecord
-    {
-        public uint Id;
-        public LocalizedString Name;
-        public ushort[] Enchantment = new ushort[ItemConst.MaxItemRandomProperties];
-        public ushort[] AllocationPct = new ushort[ItemConst.MaxItemRandomProperties];
     }
 
     public sealed class ItemSearchNameRecord
@@ -345,8 +348,6 @@ namespace Game.DataStorage
         public ushort InstanceBound;
         public ushort ZoneBound;
         public ushort ItemSet;
-        public ushort ItemRandomSuffixGroupID;
-        public ushort RandomSelect;
         public ushort LockID;
         public ushort StartQuestID;
         public ushort PageID;

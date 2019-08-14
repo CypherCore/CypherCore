@@ -12,7 +12,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
-    <PackageReference Include="MySqlConnector" Version="0.48.2" />
+    <PackageReference Include="MySqlConnector" Version="0.56.0" />
+    <PackageReference Include="Security.Cryptography" Version="1.7.2" />
     <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.3.0" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.2" />
   </ItemGroup>

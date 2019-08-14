@@ -131,8 +131,8 @@ namespace Game.AI
 
             if (invoker && invoker.GetTypeId() == TypeId.Player)
             {
-                mEscortNPCFlags = me.GetUInt32Value(UnitFields.NpcFlags);
-                me.SetFlag(UnitFields.NpcFlags, 0);
+                mEscortNPCFlags = me.m_unitData.NpcFlags[0];
+                me.SetNpcFlags(NPCFlags.None);
             }
 
             GetScript().ProcessEventsFor(SmartEvents.WaypointStart, null, mCurrentWPID, GetScript().GetPathId());
@@ -227,7 +227,7 @@ namespace Game.AI
 
             if (mEscortNPCFlags != 0)
             {
-                me.SetFlag(UnitFields.NpcFlags, mEscortNPCFlags);
+                me.SetNpcFlags((NPCFlags)mEscortNPCFlags);
                 mEscortNPCFlags = 0;
             }
 
@@ -591,7 +591,7 @@ namespace Game.AI
             mDespawnState = 0;
             mEscortState = SmartEscortState.None;
             me.SetVisible(true);
-            if (me.getFaction() != me.GetCreatureTemplate().Faction)
+            if (me.GetFaction() != me.GetCreatureTemplate().Faction)
                 me.RestoreFaction();
             mJustReset = true;
             JustReachedHome();
@@ -646,7 +646,7 @@ namespace Game.AI
         public override void AttackStart(Unit who)
         {
             // dont allow charmed npcs to act on their own
-            if (me.HasFlag(UnitFields.Flags, UnitFlags.PlayerControlled))
+            if (me.HasUnitFlag(UnitFlags.PlayerControlled))
             {
                 if (who && mCanAutoAttack)
                     me.Attack(who, true);

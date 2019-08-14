@@ -232,34 +232,34 @@ namespace Game.DataStorage
                 switch (Type.GetTypeCode(type))
                 {
                     case TypeCode.Boolean:
-                        buffer.WriteUInt8(fieldInfo.GetValue(entry));
+                        buffer.WriteUInt8((byte)((bool)fieldInfo.GetValue(entry) ? 1 : 0));
                         break;
                     case TypeCode.SByte:
-                        buffer.WriteInt8(fieldInfo.GetValue(entry));
+                        buffer.WriteInt8((sbyte)fieldInfo.GetValue(entry));
                         break;
                     case TypeCode.Byte:
-                        buffer.WriteUInt8(fieldInfo.GetValue(entry));
+                        buffer.WriteUInt8((byte)fieldInfo.GetValue(entry));
                         break;
                     case TypeCode.Int16:
-                        buffer.WriteInt16(fieldInfo.GetValue(entry));
+                        buffer.WriteInt16((short)fieldInfo.GetValue(entry));
                         break;
                     case TypeCode.UInt16:
-                        buffer.WriteUInt16(fieldInfo.GetValue(entry));
+                        buffer.WriteUInt16((ushort)fieldInfo.GetValue(entry));
                         break;
                     case TypeCode.Int32:
-                        buffer.WriteInt32(fieldInfo.GetValue(entry));
+                        buffer.WriteInt32((int)fieldInfo.GetValue(entry));
                         break;
                     case TypeCode.UInt32:
-                        buffer.WriteUInt32(fieldInfo.GetValue(entry));
+                        buffer.WriteUInt32((uint)fieldInfo.GetValue(entry));
                         break;
                     case TypeCode.Int64:
-                        buffer.WriteInt64(fieldInfo.GetValue(entry));
+                        buffer.WriteInt64((long)fieldInfo.GetValue(entry));
                         break;
                     case TypeCode.UInt64:
-                        buffer.WriteUInt64(fieldInfo.GetValue(entry));
+                        buffer.WriteUInt64((ulong)fieldInfo.GetValue(entry));
                         break;
                     case TypeCode.Single:
-                        buffer.WriteFloat(fieldInfo.GetValue(entry));
+                        buffer.WriteFloat((float)fieldInfo.GetValue(entry));
                         break;
                     case TypeCode.Object:
                         switch (type.Name)
@@ -294,34 +294,34 @@ namespace Game.DataStorage
                 switch (Type.GetTypeCode(type))
                 {
                     case TypeCode.Boolean:
-                        buffer.WriteUInt8(array.GetValue(i));
+                        buffer.WriteUInt8((byte)((bool)array.GetValue(i) ? 1 : 0));
                         break;
                     case TypeCode.SByte:
-                        buffer.WriteInt8(array.GetValue(i));
+                        buffer.WriteInt8((sbyte)array.GetValue(i));
                         break;
                     case TypeCode.Byte:
-                        buffer.WriteUInt8(array.GetValue(i));
+                        buffer.WriteUInt8((byte)array.GetValue(i));
                         break;
                     case TypeCode.Int16:
-                        buffer.WriteInt16(array.GetValue(i));
+                        buffer.WriteInt16((short)array.GetValue(i));
                         break;
                     case TypeCode.UInt16:
-                        buffer.WriteUInt16(array.GetValue(i));
+                        buffer.WriteUInt16((ushort)array.GetValue(i));
                         break;
                     case TypeCode.Int32:
-                        buffer.WriteInt32(array.GetValue(i));
+                        buffer.WriteInt32((int)array.GetValue(i));
                         break;
                     case TypeCode.UInt32:
-                        buffer.WriteUInt32(array.GetValue(i));
+                        buffer.WriteUInt32((uint)array.GetValue(i));
                         break;
                     case TypeCode.Int64:
-                        buffer.WriteInt64(array.GetValue(i));
+                        buffer.WriteInt64((long)array.GetValue(i));
                         break;
                     case TypeCode.UInt64:
-                        buffer.WriteUInt64(array.GetValue(i));
+                        buffer.WriteUInt64((ulong)array.GetValue(i));
                         break;
                     case TypeCode.Single:
-                        buffer.WriteFloat(array.GetValue(i));
+                        buffer.WriteFloat((float)array.GetValue(i));
                         break;
                     case TypeCode.String:
                         var str = (string)array.GetValue(i);

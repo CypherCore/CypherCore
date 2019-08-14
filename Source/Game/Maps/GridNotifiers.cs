@@ -663,7 +663,7 @@ namespace Game.Maps
                     //Caster may be NULL if DynObj is in removelist
                     Player caster = Global.ObjAccessor.FindPlayer(guid);
                     if (caster != null)
-                        if (caster.GetGuidValue(ActivePlayerFields.Farsight) == obj.GetGUID())
+                        if (caster.m_activePlayerData.FarsightObject == obj.GetGUID())
                             BuildPacket(caster);
                 }
             }

@@ -86,8 +86,8 @@ namespace Game
             }
 
             // stop some emotes at player move
-            if (plrMover && (plrMover.GetUInt32Value(UnitFields.NpcEmotestate) != 0))
-                plrMover.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotNone);
+            if (plrMover && (plrMover.GetEmoteState() != 0))
+                plrMover.SetEmoteState(Emote.OneshotNone);
 
             //handle special cases
             if (!movementInfo.transport.guid.IsEmpty())
@@ -189,7 +189,7 @@ namespace Game
                         // @todo discard movement packets after the player is rooted
                         if (plrMover.IsAlive())
                         {
-                            plrMover.SetFlag(PlayerFields.Flags, PlayerFlags.IsOutOfBounds);
+                            plrMover.AddPlayerFlag(PlayerFlags.IsOutOfBounds);
                             plrMover.EnvironmentalDamage(EnviromentalDamage.FallToVoid, (uint)GetPlayer().GetMaxHealth());
                             // player can be alive if GM/etc
                             // change the death state to CORPSE to prevent the death timer from
@@ -200,7 +200,7 @@ namespace Game
                     }
                 }
                 else
-                    plrMover.RemoveFlag(PlayerFields.Flags, PlayerFlags.IsOutOfBounds);
+                    plrMover.RemovePlayerFlag(PlayerFlags.IsOutOfBounds);
 
                 if (opcode == ClientOpcodes.MoveJump)
                 { 
@@ -264,7 +264,7 @@ namespace Game
 
             float z = loc.GetPositionZ();
             if (GetPlayer().HasUnitMovementFlag(MovementFlag.Hover))
-                z += GetPlayer().GetFloatValue(UnitFields.HoverHeight);
+                z += GetPlayer().m_unitData.HoverHeight;
 
             GetPlayer().Relocate(loc.GetPositionX(), loc.GetPositionY(), z, loc.GetOrientation());
 
@@ -393,7 +393,7 @@ namespace Game
                 GetPlayer().CastSpell(GetPlayer(), 2479, true);
 
             // in friendly area
-            else if (GetPlayer().IsPvP() && !GetPlayer().HasFlag(PlayerFields.Flags, PlayerFlags.InPVP))
+            else if (GetPlayer().IsPvP() && !GetPlayer().HasPlayerFlag(PlayerFlags.InPVP))
                 GetPlayer().UpdatePvP(false, false);
 
             // resummon pet
@@ -459,7 +459,7 @@ namespace Game
                     plMover.CastSpell(plMover, 2479, true);
 
                 // in friendly area
-                else if (plMover.IsPvP() && !plMover.HasFlag(PlayerFields.Flags, PlayerFlags.InPVP))
+                else if (plMover.IsPvP() && !plMover.HasPlayerFlag(PlayerFlags.InPVP))
                     plMover.UpdatePvP(false, false);
             }
 

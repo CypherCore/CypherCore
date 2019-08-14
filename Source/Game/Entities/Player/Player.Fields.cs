@@ -184,6 +184,10 @@ namespace Game.Entities
 
         //Core
         WorldSession Session;
+
+        public PlayerData m_playerData;
+        public ActivePlayerData m_activePlayerData;
+
         uint m_nextSave;
         byte m_cinematic;
 
@@ -330,7 +334,6 @@ namespace Game.Entities
         public List<uint>[] Glyphs = new List<uint>[PlayerConst.MaxSpecializations];
         public uint ResetTalentsCost;
         public long ResetTalentsTime;
-        public uint PrimarySpecialization;
         public byte ActiveGroup;
     }
 
@@ -442,13 +445,12 @@ namespace Game.Entities
 
     public class VoidStorageItem
     {
-        public VoidStorageItem(ulong id, uint entry, ObjectGuid creator, ItemRandomEnchantmentId randomPropertyId, uint suffixFactor, uint upgradeId, uint fixedScalingLevel, uint artifactKnowledgeLevel, byte context, ICollection<uint> bonuses)
+        public VoidStorageItem(ulong id, uint entry, ObjectGuid creator, uint randomBonusListId, uint upgradeId, uint fixedScalingLevel, uint artifactKnowledgeLevel, byte context, List<uint> bonuses)
         {
             ItemId = id;
             ItemEntry = entry;
             CreatorGuid = creator;
-            ItemRandomPropertyId = randomPropertyId;
-            ItemSuffixFactor = suffixFactor;
+            RandomBonusListId = randomBonusListId;
             ItemUpgradeId = upgradeId;
             FixedScalingLevel = fixedScalingLevel;
             ArtifactKnowledgeLevel = artifactKnowledgeLevel;
@@ -461,8 +463,7 @@ namespace Game.Entities
         public ulong ItemId;
         public uint ItemEntry;
         public ObjectGuid CreatorGuid;
-        public ItemRandomEnchantmentId ItemRandomPropertyId;
-        public uint ItemSuffixFactor;
+        public uint RandomBonusListId;
         public uint ItemUpgradeId;
         public uint FixedScalingLevel;
         public uint ArtifactKnowledgeLevel;

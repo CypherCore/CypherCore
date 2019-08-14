@@ -413,7 +413,7 @@ namespace Game
             if (unit)
             {
                 response.Allow = true;
-                response.Timestamp = unit.GetUInt32Value(UnitFields.PetNameTimestamp);
+                response.Timestamp = unit.m_unitData.PetNameTimestamp;
                 response.Name = unit.GetName();
 
                 Pet pet = unit.ToPet();
@@ -445,7 +445,7 @@ namespace Game
             // stable master case
             else
             {
-                if (!GetPlayer().GetNPCIfCanInteractWith(guid, NPCFlags.StableMaster))
+                if (!GetPlayer().GetNPCIfCanInteractWith(guid, NPCFlags.StableMaster, NPCFlags2.None))
                 {
                     Log.outDebug(LogFilter.Network, "Stablemaster {0} not found or you can't interact with him.", guid.ToString());
                     return false;
@@ -526,7 +526,7 @@ namespace Game
 
             Pet pet = ObjectAccessor.GetPet(GetPlayer(), petguid);
             // check it!
-            if (!pet || !pet.IsPet() || pet.ToPet().getPetType() != PetType.Hunter || !pet.HasByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PetFlags, UnitPetFlags.CanBeRenamed) ||
+            if (!pet || !pet.IsPet() || pet.ToPet().getPetType() != PetType.Hunter || !pet.HasPetFlag(UnitPetFlags.CanBeRenamed) ||
                 pet.GetOwnerGUID() != GetPlayer().GetGUID() || pet.GetCharmInfo() == null)
                 return;
 
@@ -545,7 +545,7 @@ namespace Game
 
             pet.SetName(name);
             pet.SetGroupUpdateFlag(GroupUpdatePetFlags.Name);
-            pet.RemoveByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PetFlags, UnitPetFlags.CanBeRenamed);
+            pet.RemovePetFlag(UnitPetFlags.CanBeRenamed);
 
             PreparedStatement stmt;
             SQLTransaction trans = new SQLTransaction();
@@ -573,7 +573,7 @@ namespace Game
 
             DB.Characters.CommitTransaction(trans);
 
-            pet.SetUInt32Value(UnitFields.PetNameTimestamp, (uint)Time.UnixTime); // cast can't be helped
+            pet.SetPetNameTimestamp((uint)Time.UnixTime); // cast can't be helped
         }
 
         [WorldPacketHandler(ClientOpcodes.PetAbandon)]

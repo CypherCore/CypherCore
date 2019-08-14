@@ -431,7 +431,7 @@ namespace Game.Spells
             {
                 case Targets.UnitChannelTarget:
                     {
-                        foreach (ObjectGuid channelTarget in m_originalCaster.GetChannelObjects())
+                        foreach (ObjectGuid channelTarget in m_originalCaster.m_unitData.ChannelObjects)
                         {
                             WorldObject target = Global.ObjAccessor.GetUnit(m_caster, channelTarget);
                             CallScriptObjectTargetSelectHandlers(ref target, effIndex, targetType);
@@ -450,7 +450,7 @@ namespace Game.Spells
                             m_targets.SetDst(channeledSpell.m_targets);
                         else
                         {
-                            var channelObjects = m_originalCaster.GetChannelObjects();
+                            List<ObjectGuid> channelObjects = m_originalCaster.m_unitData.ChannelObjects;
                             WorldObject target = channelObjects.Count > 0 ? Global.ObjAccessor.GetWorldObject(m_caster, channelObjects[0]) : null;
                             if (target != null)
                             {
@@ -2090,7 +2090,7 @@ namespace Game.Spells
             if (m_caster != unit)
             {
                 // Recheck  UNIT_FLAG_NON_ATTACKABLE for delayed spells
-                if (m_spellInfo.Speed > 0.0f && unit.HasFlag(UnitFields.Flags, UnitFlags.NonAttackable) && unit.GetCharmerOrOwnerGUID() != m_caster.GetGUID())
+                if (m_spellInfo.Speed > 0.0f && unit.HasUnitFlag(UnitFlags.NonAttackable) && unit.GetCharmerOrOwnerGUID() != m_caster.GetGUID())
                     return SpellMissInfo.Evade;
 
                 if (m_caster._IsValidAttackTarget(unit, m_spellInfo))
@@ -2214,7 +2214,7 @@ namespace Game.Spells
 
                                     // if there is no periodic effect
                                     if (duration == 0)
-                                        duration = (int)(origDuration * m_originalCaster.GetFloatValue(UnitFields.ModCastSpeed));
+                                        duration = (int)(origDuration * m_originalCaster.m_unitData.ModCastingSpeed);
                                 }
                             }
 
@@ -2504,7 +2504,7 @@ namespace Game.Spells
             else
                 m_casttime = m_spellInfo.CalcCastTime(m_caster.getLevel(), this);
 
-            if (m_caster.IsTypeId(TypeId.Unit) && !m_caster.HasFlag(UnitFields.Flags, UnitFlags.PlayerControlled)) // _UNIT actually means creature. for some reason.
+            if (m_caster.IsTypeId(TypeId.Unit) && !m_caster.HasUnitFlag(UnitFlags.PlayerControlled)) // _UNIT actually means creature. for some reason.
             {
                 if (!(m_spellInfo.IsNextMeleeSwingSpell() || IsAutoRepeat() || _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreSetFacing)))
                 {
@@ -2566,7 +2566,7 @@ namespace Game.Spells
                     TriggerGlobalCooldown();
 
                 //item: first cast may destroy item and second cast causes crash
-                // commented out !m_spellInfo->StartRecoveryTime, it forces instant spells with global cooldown to be processed in spell::update
+                // commented out !m_spellInfo.StartRecoveryTime, it forces instant spells with global cooldown to be processed in spell::update
                 // as a result a spell that passed CheckCast and should be processed instantly may suffer from this delayed process
                 // the easiest bug to observe is LoS check in AddUnitTarget, even if spell passed the CheckCast LoS check the situation can change in spell::update
                 // because target could be relocated in the meantime, making the spell fly to the air (no targets can be registered, so no effects processed, nothing in combat log)
@@ -2731,7 +2731,7 @@ namespace Game.Spells
 
             // if the spell allows the creature to turn while casting, then adjust server-side orientation to face the target now
             // client-side orientation is handled by the client itself, as the cast target is targeted due to Creature::FocusTarget
-            if (m_caster.IsTypeId(TypeId.Unit) && !m_caster.HasFlag(UnitFields.Flags, UnitFlags.PlayerControlled))
+            if (m_caster.IsTypeId(TypeId.Unit) && !m_caster.HasUnitFlag(UnitFlags.PlayerControlled))
             {
                 if (!m_spellInfo.HasAttribute(SpellAttr5.DontTurnDuringCast))
                 {
@@ -3203,7 +3203,7 @@ namespace Game.Spells
                 Unit charm = m_caster.GetCharm();
                 if (charm != null)
                     if (charm.IsTypeId(TypeId.Unit) && charm.ToCreature().HasUnitTypeMask(UnitTypeMask.Puppet)
-                        && charm.GetUInt32Value(UnitFields.CreatedBySpell) == m_spellInfo.Id)
+                        && charm.m_unitData.CreatedBySpell == m_spellInfo.Id)
                         ((Puppet)charm).UnSummon();
             }
 
@@ -3216,7 +3216,7 @@ namespace Game.Spells
             if (m_caster.IsTypeId(TypeId.Unit) && m_caster.ToCreature().IsSummon())
             {
                 // Unsummon statue
-                uint spell = m_caster.GetUInt32Value(UnitFields.CreatedBySpell);
+                uint spell = m_caster.m_unitData.CreatedBySpell;
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell);
                 if (spellInfo != null && spellInfo.IconFileDataId == 134230)
                 {
@@ -3961,7 +3961,7 @@ namespace Game.Spells
         {
             if (time == 0)
             {
-                m_caster.ClearDynamicValue(UnitDynamicFields.ChannelObjects);
+                m_caster.ClearChannelObjects();
                 m_caster.SetChannelSpellId(0);
                 m_caster.SetChannelSpellXSpellVisualId(0);
             }
@@ -4357,7 +4357,7 @@ namespace Game.Spells
                 if (m_caster.IsTypeId(TypeId.Player))
                 {
                     //can cast triggered (by aura only?) spells while have this flag
-                    if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreCasterAurastate) && m_caster.ToPlayer().HasFlag(PlayerFields.Flags, PlayerFlags.AllowOnlyAbility))
+                    if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreCasterAurastate) && m_caster.ToPlayer().HasPlayerFlag(PlayerFlags.AllowOnlyAbility))
                         return SpellCastResult.SpellInProgress;
 
                     // check if we are using a potion in combat for the 2nd+ time. Cooldown is added only after caster gets out of combat
@@ -4374,7 +4374,7 @@ namespace Game.Spells
                 }
             }
 
-            if (m_spellInfo.HasAttribute(SpellAttr7.IsCheatSpell) && !m_caster.HasFlag(UnitFields.Flags2, UnitFlags2.AllowCheatSpells))
+            if (m_spellInfo.HasAttribute(SpellAttr7.IsCheatSpell) && !m_caster.HasUnitFlag2(UnitFlags2.AllowCheatSpells))
             {
                 m_customError = SpellCustomErrors.GmOnly;
                 return SpellCastResult.CustomError;
@@ -4785,10 +4785,10 @@ namespace Game.Spells
                                 List<uint> glyphRequiredSpecs = Global.DB2Mgr.GetGlyphRequiredSpecs(glyphId);
                                 if (!glyphRequiredSpecs.Empty())
                                 {
-                                    if (caster.GetUInt32Value(PlayerFields.CurrentSpecId) == 0)
+                                    if (caster.GetPrimarySpecialization() == 0)
                                         return SpellCastResult.GlyphNoSpec;
 
-                                    if (!glyphRequiredSpecs.Contains(caster.GetUInt32Value(PlayerFields.CurrentSpecId)))
+                                    if (!glyphRequiredSpecs.Contains(caster.GetPrimarySpecialization()))
                                         return SpellCastResult.GlyphInvalidSpec;
                                 }
 
@@ -4903,7 +4903,7 @@ namespace Game.Spells
                             if (!m_caster.IsTypeId(TypeId.Player) || m_targets.GetUnitTarget() == null || !m_targets.GetUnitTarget().IsTypeId(TypeId.Unit))
                                 return SpellCastResult.BadTargets;
 
-                            if (!Convert.ToBoolean(m_targets.GetUnitTarget().GetUInt32Value(UnitFields.Flags) & (uint)UnitFlags.Skinnable))
+                            if (!m_targets.GetUnitTarget().HasUnitFlag(UnitFlags.Skinnable))
                                 return SpellCastResult.TargetUnskinnable;
 
                             Creature creature = m_targets.GetUnitTarget().ToCreature();
@@ -5395,7 +5395,7 @@ namespace Game.Spells
             // Check whether the cast should be prevented by any state you might have.
             SpellCastResult result = SpellCastResult.SpellCastOk;
             // Get unit state
-            UnitFlags unitflag = (UnitFlags)m_caster.GetUInt32Value(UnitFields.Flags);
+            UnitFlags unitflag = (UnitFlags)(byte)m_caster.m_unitData.Flags;
 
             // this check should only be done when player does cast directly
             // (ie not when it's called from a script) Breaks for example PlayerAI when charmed
@@ -5447,7 +5447,7 @@ namespace Game.Spells
                 result = SpellCastResult.Fleeing;
             else if (unitflag.HasAnyFlag(UnitFlags.Confused) && !usableWhileConfused && !CheckSpellCancelsConfuse(ref param1))
                 result = SpellCastResult.Confused;
-            else if (m_caster.HasFlag(UnitFields.Flags2, UnitFlags2.NoActions) && m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.NoActions))
+            else if (m_caster.HasUnitFlag2(UnitFlags2.NoActions) && m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.NoActions))
                 result = SpellCastResult.NoActions;
 
             // Attr must make flag drop spell totally immune from all effects
@@ -6993,13 +6993,13 @@ namespace Game.Spells
                 // Apply haste rating
                 if (gcd > 750 && ((m_spellInfo.StartRecoveryCategory == 133 && !isMeleeOrRangedSpell) || m_caster.HasAuraTypeWithAffectMask(AuraType.ModGlobalCooldownByHaste, m_spellInfo)))
                 {
-                    gcd = (int)(gcd * m_caster.GetFloatValue(UnitFields.ModCastHaste));
+                    gcd = (int)(gcd * m_caster.m_unitData.ModSpellHaste);
                     MathFunctions.RoundToInterval(ref gcd, 750, 1500);
                 }
 
                 if (gcd > 750 && m_caster.HasAuraTypeWithAffectMask(AuraType.ModGlobalCooldownByHasteRegen, m_spellInfo))
                 {
-                    gcd = (int)(gcd * m_caster.GetFloatValue(UnitFields.ModHasteRegen));
+                    gcd = (int)(gcd * m_caster.m_unitData.ModHasteRegen);
                     MathFunctions.RoundToInterval(ref gcd, 750, 1500);
                 }
             }
@@ -7663,8 +7663,8 @@ namespace Game.Spells
             else
             {
                 if (!_caster.IsWithinBoundaryRadius(target.ToUnit()))
-                    // ConeAngle > 0 -> select targets in front
-                    // ConeAngle < 0 -> select targets in back
+                    // ConeAngle > 0 . select targets in front
+                    // ConeAngle < 0 . select targets in back
                     if (_caster.HasInArc(_coneAngle, target) != MathFunctions.fuzzyGe(_coneAngle, 0.0f))
                         return false;
             }

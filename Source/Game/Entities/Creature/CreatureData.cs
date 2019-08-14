@@ -42,7 +42,7 @@ namespace Game.Entities
         public uint RequiredExpansion;
         public uint VignetteID; // @todo Read Vignette.db2
         public uint Faction;
-        public NPCFlags Npcflag;
+        public ulong Npcflag;
         public float SpeedWalk;
         public float SpeedRun;
         public float Scale;

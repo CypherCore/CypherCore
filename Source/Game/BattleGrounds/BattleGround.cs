@@ -426,7 +426,7 @@ namespace Game.BattleGrounds
                             player.SendPacket(battlefieldStatus);
 
                             // Correctly display EnemyUnitFrame
-                            player.SetByteValue(PlayerFields.Bytes4, 3, (byte)player.GetBGTeam());
+                            player.SetArenaFaction((byte)player.GetBGTeam());
 
                             player.RemoveAurasDueToSpell(BattlegroundConst.SpellArenaPreparation);
                             player.ResetAllPowers();
@@ -974,7 +974,7 @@ namespace Game.BattleGrounds
         public virtual void AddPlayer(Player player)
         {
             // remove afk from player
-            if (player.HasFlag(PlayerFields.Flags, PlayerFlags.AFK))
+            if (player.isAFK())
                 player.ToggleAFK();
 
             // score struct must be created in inherited class
@@ -985,7 +985,7 @@ namespace Game.BattleGrounds
             BattlegroundPlayer bp = new BattlegroundPlayer();
             bp.OfflineRemoveTime = 0;
             bp.Team = team;
-            bp.ActiveSpec = player.GetInt32Value(PlayerFields.CurrentSpecId);
+            bp.ActiveSpec = (int)player.GetPrimarySpecialization();
 
             // Add to list/maps
             m_Players[guid] = bp;
@@ -1221,12 +1221,9 @@ namespace Game.BattleGrounds
         {
             pvpLogData = new PVPLogData();
 
-            if (GetStatus() == BattlegroundStatus.WaitLeave)
-                pvpLogData.Winner.Set((byte)GetWinner());
-
             foreach (var score in PlayerScores)
             {
-                PVPLogData.PlayerData playerData;
+                PVPLogData.PVPMatchPlayerStatistics playerData;
 
                 score.Value.BuildPvPLogPlayerDataPacket(out playerData);
 
@@ -1234,14 +1231,14 @@ namespace Game.BattleGrounds
                 if (player)
                 {
                     playerData.IsInWorld = true;
-                    playerData.PrimaryTalentTree = (int)player.GetUInt32Value(PlayerFields.CurrentSpecId);
+                    playerData.PrimaryTalentTree = (int)player.GetPrimarySpecialization();
                     playerData.Sex = (int)player.GetGender();
                     playerData.PlayerRace = player.GetRace();
                     playerData.PlayerClass = (int)player.GetClass();
                     playerData.HonorLevel = (int)player.GetHonorLevel();
                 }
 
-                pvpLogData.Players.Add(playerData);
+                pvpLogData.Statistics.Add(playerData);
             }
 
             pvpLogData.PlayerCount[(int)BattlegroundTeamId.Horde] = (sbyte)GetPlayersCountByTeam(Team.Horde);
@@ -1534,9 +1531,6 @@ namespace Game.BattleGrounds
                 // casting visual effect
                 creature.SetChannelSpellId(BattlegroundConst.SpellSpiritHealChannel);
                 creature.SetChannelSpellXSpellVisualId(BattlegroundConst.SpellSpiritHealChannelVisual);
-                // correct cast speed
-                creature.SetFloatValue(UnitFields.ModCastSpeed, 1.0f);
-                creature.SetFloatValue(UnitFields.ModCastHaste, 1.0f);
                 //creature.CastSpell(creature, SPELL_SPIRIT_HEAL_CHANNEL, true);
                 return true;
             }
@@ -1649,7 +1643,7 @@ namespace Game.BattleGrounds
             if (!isArena())
             {
                 // To be able to remove insignia -- ONLY IN Battlegrounds
-                victim.SetFlag(UnitFields.Flags, UnitFlags.Skinnable);
+                victim.AddUnitFlag(UnitFlags.Skinnable);
                 RewardXPAtKill(killer, victim);
             }
         }

@@ -166,6 +166,7 @@ namespace Game.DataStorage
         public float Gem3;
         public float Health;
         public float DamageReplaceStat;
+        public float DamageSecondary;
     }
 
     public sealed class GtXpRecord

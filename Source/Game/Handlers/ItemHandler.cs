@@ -226,7 +226,7 @@ namespace Game
                     return;
                 }
 
-                if (!dstItem.HasFlag(ItemFields.Flags, ItemFieldFlags.Child))
+                if (!dstItem.HasItemFlag(ItemFieldFlags.Child))
                 {
                     // check dest.src move possibility
                     List<ItemPosCount> sSrc = new List<ItemPosCount>();
@@ -283,7 +283,7 @@ namespace Game
                 }
                 else
                 {
-                    Item parentItem = _player.GetItemByGuid(dstItem.GetGuidValue(ItemFields.Creator));
+                    Item parentItem = _player.GetItemByGuid(dstItem.GetCreator());
                     if (parentItem)
                     {
                         if (Player.IsEquipmentPos(dest))
@@ -361,7 +361,7 @@ namespace Game
                 {
                     // @todo: 6.x research new values
                     /*WorldPackets.Item.ReadItemResultFailed packet;
-                    packet.Item = item->GetGUID();
+                    packet.Item = item.GetGUID();
                     packet.Subcode = ??;
                     packet.Delay = ??;
                     SendPacket(packet);*/
@@ -382,7 +382,7 @@ namespace Game
 
             var pl = GetPlayer();
 
-            Creature creature = pl.GetNPCIfCanInteractWith(packet.VendorGUID, NPCFlags.Vendor);
+            Creature creature = pl.GetNPCIfCanInteractWith(packet.VendorGUID, NPCFlags.Vendor, NPCFlags2.None);
             if (creature == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleSellItemOpcode - {0} not found or you can not interact with him.", packet.VendorGUID.ToString());
@@ -421,7 +421,7 @@ namespace Game
                 // prevent selling item for sellprice when the item is still refundable
                 // this probably happens when right clicking a refundable item, the client sends both
                 // CMSG_SELL_ITEM and CMSG_REFUND_ITEM (unverified)
-                if (pItem.HasFlag(ItemFields.Flags, ItemFieldFlags.Refundable))
+                if (pItem.HasItemFlag(ItemFieldFlags.Refundable))
                     return; // Therefore, no feedback to client
 
                 // special case at auto sell (sell all)
@@ -492,7 +492,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.BuyBackItem)]
         void HandleBuybackItem(BuyBackItem packet)
         {
-            Creature creature = _player.GetNPCIfCanInteractWith(packet.VendorGUID, NPCFlags.Vendor);
+            Creature creature = _player.GetNPCIfCanInteractWith(packet.VendorGUID, NPCFlags.Vendor, NPCFlags2.None);
             if (creature == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleBuybackItem - {0} not found or you can not interact with him.", packet.VendorGUID.ToString());
@@ -507,7 +507,7 @@ namespace Game
             Item pItem = _player.GetItemFromBuyBackSlot(packet.Slot);
             if (pItem != null)
             {
-                uint price = _player.GetUInt32Value(ActivePlayerFields.BuyBackPrice + (int)(packet.Slot - InventorySlots.BuyBackStart));
+                uint price = _player.m_activePlayerData.BuybackPrice[(int)(packet.Slot - InventorySlots.BuyBackStart)];
                 if (!_player.HasEnoughMoney(price))
                 {
                     _player.SendBuyError(BuyResult.NotEnoughtMoney, creature, pItem.GetEntry());
@@ -684,7 +684,7 @@ namespace Game
                 return;
             }
 
-            if (item.GetUInt64Value(ItemFields.GiftCreator) != 0) // HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_WRAPPED);
+            if (!item.GetGiftCreator().IsEmpty()) // HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_WRAPPED);
             {
                 GetPlayer().SendEquipError(InventoryResult.CantWrapWrapped, item);
                 return;
@@ -721,7 +721,7 @@ namespace Game
             stmt.AddValue(0, item.GetOwnerGUID().GetCounter());
             stmt.AddValue(1, item.GetGUID().GetCounter());
             stmt.AddValue(2, item.GetEntry());
-            stmt.AddValue(3, item.GetUInt32Value(ItemFields.Flags));
+            stmt.AddValue(3, (uint)item.m_itemData.DynamicFlags);
             trans.Append(stmt);
 
             item.SetEntry(gift.GetEntry());
@@ -748,8 +748,8 @@ namespace Game
                     break;
             }
 
-            item.SetGuidValue(ItemFields.GiftCreator, GetPlayer().GetGUID());
-            item.SetUInt32Value(ItemFields.Flags, (uint)ItemFieldFlags.Wrapped);
+            item.SetGiftCreator(GetPlayer().GetGUID());
+            item.SetItemFlags(ItemFieldFlags.Wrapped);
             item.SetState(ItemUpdateState.Changed, GetPlayer());
 
             if (item.GetState() == ItemUpdateState.New) // save new item, to have alway for `character_gifts` record in `item_instance`
@@ -789,7 +789,7 @@ namespace Game
             Item[] gems = new Item[ItemConst.MaxGemSockets];
             ItemDynamicFieldGems[] gemData = new ItemDynamicFieldGems[ItemConst.MaxGemSockets];
             GemPropertiesRecord[] gemProperties = new GemPropertiesRecord[ItemConst.MaxGemSockets];
-            ItemDynamicFieldGems[] oldGemData = new ItemDynamicFieldGems[ItemConst.MaxGemSockets];
+            SocketedGem[] oldGemData = new SocketedGem[ItemConst.MaxGemSockets];
 
 
             for (int i = 0; i < ItemConst.MaxGemSockets; ++i)
@@ -799,9 +799,9 @@ namespace Game
                 {
                     gems[i] = gem;
                     gemData[i].ItemId = gem.GetEntry();
-                    gemData[i].Context = (byte)gem.GetUInt32Value(ItemFields.Context);
-                    for (ushort b = 0; b < gem.GetDynamicValues(ItemDynamicFields.BonusListIds).Length && b < 16; ++b)
-                        gemData[i].BonusListIDs[b] = (ushort)gem.GetDynamicValue(ItemDynamicFields.BonusListIds, b);
+                    gemData[i].Context = (byte)gem.m_itemData.Context;
+                    for (int b = 0; b < ((List<uint>)gem.m_itemData.BonusListIDs).Count && b < 16; ++b)
+                        gemData[i].BonusListIDs[b] = (ushort)((List<uint>)gem.m_itemData.BonusListIDs)[b];
 
                     gemProperties[i] = CliDB.GemPropertiesStorage.LookupByKey(gem.GetTemplate().GetGemProperties());
                 }
@@ -1037,7 +1037,7 @@ namespace Game
 
             if (!isUsingBankCommand)
             {
-                Creature creature = GetPlayer().GetNPCIfCanInteractWith(bankerGUID, NPCFlags.Banker);
+                Creature creature = GetPlayer().GetNPCIfCanInteractWith(bankerGUID, NPCFlags.Banker, NPCFlags2.None);
                 if (!creature)
                     return false;
             }
@@ -1067,69 +1067,6 @@ namespace Game
             }
 
             GetPlayer().DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
-        }
-
-        [WorldPacketHandler(ClientOpcodes.UpgradeItem)]
-        void HandleUpgradeItem(UpgradeItem upgradeItem)
-        {
-            ItemUpgradeResult itemUpgradeResult = new ItemUpgradeResult();
-            if (!_player.GetNPCIfCanInteractWith(upgradeItem.ItemMaster, NPCFlags.ItemUpgradeMaster))
-            {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleUpgradeItems - {0} not found or player can't interact with it.", upgradeItem.ItemMaster.ToString());
-                itemUpgradeResult.Success = false;
-                SendPacket(itemUpgradeResult);
-                return;
-            }
-
-            Item item = _player.GetItemByGuid(upgradeItem.ItemGUID);
-            if (!item)
-            {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleUpgradeItems: Item {0} not found!", upgradeItem.ItemGUID.ToString());
-                itemUpgradeResult.Success = false;
-                SendPacket(itemUpgradeResult);
-                return;
-            }
-
-            ItemUpgradeRecord itemUpgradeEntry = CliDB.ItemUpgradeStorage.LookupByKey(upgradeItem.UpgradeID);
-            if (itemUpgradeEntry == null)
-            {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleUpgradeItems - ItemUpgradeEntry ({0}) not found.", upgradeItem.UpgradeID);
-                itemUpgradeResult.Success = false;
-                SendPacket(itemUpgradeResult);
-                return;
-            }
-
-            // Check if player has enough currency
-            if (!_player.HasCurrency(itemUpgradeEntry.CurrencyType, itemUpgradeEntry.CurrencyAmount))
-            {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleUpgradeItems - Player has not enougth currency (ID: {0}, Cost: {1}) not found.", itemUpgradeEntry.CurrencyType, itemUpgradeEntry.CurrencyAmount);
-                itemUpgradeResult.Success = false;
-                SendPacket(itemUpgradeResult);
-                return;
-            }
-
-            uint currentUpgradeId = item.GetModifier(ItemModifier.UpgradeId);
-            if (currentUpgradeId != itemUpgradeEntry.PrerequisiteID)
-            {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleUpgradeItems - ItemUpgradeEntry ({0}) is not related to this ItemUpgradePath ({1}).", itemUpgradeEntry.Id, currentUpgradeId);
-                itemUpgradeResult.Success = false;
-                SendPacket(itemUpgradeResult);
-                return;
-            }
-
-            itemUpgradeResult.Success = true;
-            SendPacket(itemUpgradeResult);
-
-            if (item.IsEquipped())
-                _player._ApplyItemBonuses(item, item.GetSlot(), false);
-
-            item.SetModifier(ItemModifier.UpgradeId, itemUpgradeEntry.Id);
-
-            if (item.IsEquipped())
-                _player._ApplyItemBonuses(item, item.GetSlot(), true);
-
-            item.SetState(ItemUpdateState.Changed, _player);
-            _player.ModifyCurrency((CurrencyTypes)itemUpgradeEntry.CurrencyType, -(int)itemUpgradeEntry.CurrencyAmount);
         }
 
         [WorldPacketHandler(ClientOpcodes.SortBags)]
@@ -1166,9 +1103,9 @@ namespace Game
                 return;
             }
 
-            if (item.HasFlag(ItemFields.Flags, ItemFieldFlags.NewItem))
+            if (item.HasItemFlag(ItemFieldFlags.NewItem))
             {
-                item.RemoveFlag(ItemFields.Flags, ItemFieldFlags.NewItem);
+                item.RemoveItemFlag(ItemFieldFlags.NewItem);
                 item.SetState(ItemUpdateState.Changed, _player);
             }
         }

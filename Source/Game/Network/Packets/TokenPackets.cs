@@ -38,9 +38,9 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket .WriteUInt32( UnkInt);
-            _worldPacket .WriteUInt32( Result);
-            _worldPacket .WriteUInt32(AuctionableTokenAuctionableList.Count);
+            _worldPacket.WriteUInt32(UnkInt);
+            _worldPacket.WriteUInt32((uint)Result);
+            _worldPacket.WriteInt32(AuctionableTokenAuctionableList.Count);
 
             foreach (AuctionableTokenAuctionable auctionableTokenAuctionable in AuctionableTokenAuctionableList)
             {
@@ -86,7 +86,7 @@ namespace Game.Network.Packets
         {
             _worldPacket.WriteUInt64(CurrentMarketPrice);
             _worldPacket.WriteUInt32(UnkInt);
-            _worldPacket.WriteUInt32(Result);
+            _worldPacket.WriteUInt32((uint)Result);
             _worldPacket.WriteUInt32(AuctionDuration);
         }
 

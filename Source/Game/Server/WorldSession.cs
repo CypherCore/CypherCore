@@ -161,12 +161,12 @@ namespace Game
                 // some save parts only correctly work in case player present in map/player_lists (pets, etc)
                 if (save)
                 {
-                    for (int j = InventorySlots.BuyBackStart; j < InventorySlots.BuyBackEnd; ++j)
+                    for (uint j = InventorySlots.BuyBackStart; j < InventorySlots.BuyBackEnd; ++j)
                     {
-                        int eslot = j - InventorySlots.BuyBackStart;
-                        _player.SetGuidValue(ActivePlayerFields.InvSlotHead + (j * 4), ObjectGuid.Empty);
-                        _player.SetUInt32Value(ActivePlayerFields.BuyBackPrice + eslot, 0);
-                        _player.SetUInt32Value(ActivePlayerFields.BuyBackTimestamp + eslot, 0);
+                        uint eslot = j - InventorySlots.BuyBackStart;
+                        _player.SetInvSlot(j, ObjectGuid.Empty);
+                        _player.SetBuybackPrice(eslot, 0);
+                        _player.SetBuybackTimestamp(eslot, 0);
                     }
                     _player.SaveToDB();
                 }
@@ -455,7 +455,6 @@ namespace Game
         public void SendConnectToInstance(ConnectToSerial serial)
         {
             var instanceAddress = Global.WorldMgr.GetRealm().GetAddressForClient(System.Net.IPAddress.Parse(GetRemoteAddress()));
-            instanceAddress.Port = WorldConfig.GetIntValue(WorldCfg.PortInstance);
 
             _instanceConnectKey.AccountId = GetAccountId();
             _instanceConnectKey.connectionType = ConnectionType.Instance;
@@ -464,8 +463,19 @@ namespace Game
             ConnectTo connectTo = new ConnectTo();
             connectTo.Key = _instanceConnectKey.Raw;
             connectTo.Serial = serial;
-            connectTo.Payload.Where = instanceAddress;
+            connectTo.Payload.Port = (ushort)WorldConfig.GetIntValue(WorldCfg.PortInstance);
             connectTo.Con = (byte)ConnectionType.Instance;
+
+            if (instanceAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+            {
+                connectTo.Payload.Where.IPv4 = instanceAddress.Address.GetAddressBytes();
+                connectTo.Payload.Where.Type = ConnectTo.AddressType.IPv4;
+            }
+            else
+            {
+                connectTo.Payload.Where.IPv6 = instanceAddress.Address.GetAddressBytes();
+                connectTo.Payload.Where.Type = ConnectTo.AddressType.IPv6;
+            }
 
             SendPacket(connectTo);
         }

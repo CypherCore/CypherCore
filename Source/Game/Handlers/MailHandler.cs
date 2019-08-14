@@ -48,7 +48,7 @@ namespace Game
             }
             else if (guid.IsAnyTypeCreature())
             {
-                if (!GetPlayer().GetNPCIfCanInteractWith(guid, NPCFlags.Mailbox))
+                if (!GetPlayer().GetNPCIfCanInteractWith(guid, NPCFlags.Mailbox, NPCFlags2.None))
                     return false;
             }
             else
@@ -237,13 +237,13 @@ namespace Game
                     return;
                 }
 
-                if (item.GetTemplate().GetFlags().HasAnyFlag(ItemFlags.Conjured) || item.GetUInt32Value(ItemFields.Duration) != 0)
+                if (item.GetTemplate().GetFlags().HasAnyFlag(ItemFlags.Conjured) || item.m_itemData.Expiration != 0)
                 {
                     player.SendMailResult(0, MailResponseType.Send, MailResponseResult.EquipError, InventoryResult.MailBoundItem);
                     return;
                 }
 
-                if (packet.Info.Cod != 0 && item.HasFlag(ItemFields.Flags, ItemFieldFlags.Wrapped))
+                if (packet.Info.Cod != 0 && item.HasItemFlag(ItemFieldFlags.Wrapped))
                 {
                     player.SendMailResult(0, MailResponseType.Send, MailResponseResult.CantSendWrappedCod);
                     return;
@@ -624,9 +624,9 @@ namespace Game
                 bodyItem.SetText(m.body);
 
             if (m.messageType == MailMessageType.Normal)
-                bodyItem.SetGuidValue(ItemFields.Creator, ObjectGuid.Create(HighGuid.Player, m.sender));
+                bodyItem.SetCreator(ObjectGuid.Create(HighGuid.Player, m.sender));
 
-            bodyItem.SetFlag(ItemFields.Flags, ItemFieldFlags.Readable);
+            bodyItem.AddItemFlag(ItemFieldFlags.Readable);
 
             Log.outInfo(LogFilter.Network, "HandleMailCreateTextItem mailid={0}", packet.MailID);
 

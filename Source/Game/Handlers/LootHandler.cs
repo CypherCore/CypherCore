@@ -318,7 +318,7 @@ namespace Game
                 player.SetLootGUID(ObjectGuid.Empty);
             player.SendLootRelease(lguid);
 
-            player.RemoveFlag(UnitFields.Flags, UnitFlags.Looting);
+            player.RemoveUnitFlag(UnitFlags.Looting);
 
             if (!player.IsInWorld)
                 return;
@@ -343,7 +343,7 @@ namespace Game
                     if (go.GetGoType() == GameObjectTypes.FishingHole)
                     {                                               // The fishing hole used once more
                         go.AddUse();                               // if the max usage is reached, will be despawned in next tick
-                        if (go.GetUseCount() >= go.m_goValue.FishingHole.MaxOpens)
+                        if (go.GetUseCount() >= go.GetGoValue().FishingHole.MaxOpens)
                             go.SetLootState(LootState.JustDeactivated);
                         else
                             go.SetLootState(LootState.Ready);
@@ -374,7 +374,7 @@ namespace Game
                 if (loot.isLooted())
                 {
                     loot.clear();
-                    corpse.RemoveFlag(CorpseFields.DynamicFlags, 0x0001);
+                    corpse.RemoveCorpseDynamicFlag(CorpseDynFlags.Lootable);
                 }
             }
             else if (lguid.IsItem())
@@ -417,7 +417,7 @@ namespace Game
                 loot = creature.loot;
                 if (loot.isLooted())
                 {
-                    creature.RemoveFlag(ObjectFields.DynamicFlags, UnitDynFlags.Lootable);
+                    creature.RemoveDynamicFlag(UnitDynFlags.Lootable);
 
                     // skip pickpocketing loot for speed, skinning timer reduction is no-op in fact
                     if (!creature.IsAlive())
@@ -437,11 +437,10 @@ namespace Game
                         {
                             if (group.GetLootMethod() != LootMethod.MasterLoot)
                                 group.SendLooter(creature, null);
-
-
                         }
                         // force dynflag update to update looter and lootable info
-                        creature.ForceValuesUpdateAtIndex(ObjectFields.DynamicFlags);
+                        creature.m_values.ModifyValue(creature.m_objectData).ModifyValue(creature.m_objectData.DynamicFlags);
+                        creature.ForceUpdateFieldChange();
                     }
                 }
             }
@@ -542,7 +541,7 @@ namespace Game
             }
 
             // not move item from loot to target inventory
-            Item newitem = target.StoreNewItem(dest, item.itemid, true, item.randomPropertyId, item.GetAllowedLooters(), item.context, item.BonusListIDs);
+            Item newitem = target.StoreNewItem(dest, item.itemid, true, item.randomBonusListId, item.GetAllowedLooters(), item.context, item.BonusListIDs);
             target.SendNewItem(newitem, item.count, false, false, true);
             target.UpdateCriteria(CriteriaTypes.LootItem, item.itemid, item.count);
             target.UpdateCriteria(CriteriaTypes.LootType, item.itemid, item.count, (ulong)loot.loot_type);

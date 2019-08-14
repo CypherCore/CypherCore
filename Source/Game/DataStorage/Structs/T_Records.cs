@@ -48,10 +48,11 @@ namespace Game.DataStorage
         public Vector2 FlightMapOffset;
         public uint Id;
         public ushort ContinentID;
-        public ushort ConditionID;
+        public uint ConditionID;
         public ushort CharacterBitNumber;
         public TaxiNodeFlags Flags;
         public int UiTextureKitID;
+        public int MinimapAtlasMemberID;
         public float Facing;
         public uint SpecialIconConditionID;
         public uint VisibilityConditionID;
@@ -75,8 +76,8 @@ namespace Game.DataStorage
         public ushort ContinentID;
         public TaxiPathNodeFlags Flags;
         public uint Delay;
-        public ushort ArrivalEventID;
-        public ushort DepartureEventID;
+        public uint ArrivalEventID;
+        public uint DepartureEventID;
     }
 
     public sealed class TotemCategoryRecord
@@ -112,7 +113,9 @@ namespace Game.DataStorage
         public uint TransmogSetGroupID;
         public int ItemNameDescriptionID;
         public ushort ParentTransmogSetID;
+        public byte Unknown810;
         public byte ExpansionID;
+        public int PatchID;
         public short UiOrder;
     }
 

@@ -29,8 +29,8 @@ namespace Game.DataStorage
         public sbyte SourceTypeEnum;
         public byte Flags;
         public int LegacyItemID;
-        public int[] UpgradeItemID = new int[3];
-        public ushort[] UpgradeItemBonusListID = new ushort[3];
+        public int[] UpgradeItemID = new int[4];
+        public ushort[] UpgradeItemBonusListID = new ushort[4];
     }
 
     public sealed class HolidaysRecord

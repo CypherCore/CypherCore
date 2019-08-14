@@ -32,7 +32,7 @@ namespace Game
         void HandlePetitionBuy(PetitionBuy packet)
         {
             // prevent cheating
-            Creature creature = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Petitioner);
+            Creature creature = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Petitioner, NPCFlags2.None);
             if (!creature)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandlePetitionBuyOpcode - {0} not found or you can't interact with him.", packet.Unit.ToString());
@@ -88,9 +88,7 @@ namespace Game
             if (!charter)
                 return;
 
-            charter.SetUInt32Value(ItemFields.Enchantment, (uint)charter.GetGUID().GetCounter());
-            // ITEM_FIELD_ENCHANTMENT_1_1 is guild/arenateam id
-            // ITEM_FIELD_ENCHANTMENT_1_1+1 is current signatures count (showed on item)
+            charter.SetPetitionId((uint)charter.GetGUID().GetCounter());
             charter.SetState(ItemUpdateState.Changed, GetPlayer());
             GetPlayer().SendNewItem(charter, 1, true, false);
 
@@ -249,7 +247,7 @@ namespace Game
             }
 
             ObjectGuid ownerGuid = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(0));
-            //ulong signs = result.Read<ulong>(1);
+            ulong signs = result.Read<ulong>(1);
 
             if (ownerGuid == GetPlayer().GetGUID())
                 return;
@@ -305,6 +303,13 @@ namespace Game
 
             // close at signer side
             SendPacket(signResult);
+
+            Item item = _player.GetItemByGuid(packet.PetitionGUID);
+            if (item != null)
+            {
+                item.SetPetitionNumSignatures((uint)signs);
+                item.SetState(ItemUpdateState.Changed, _player);
+            }
 
             // update for owner if online
             Player owner = Global.ObjAccessor.FindPlayer(ownerGuid);
@@ -503,7 +508,7 @@ namespace Game
 
         public void SendPetitionShowList(ObjectGuid guid)
         {
-            Creature creature = GetPlayer().GetNPCIfCanInteractWith(guid, NPCFlags.Petitioner);
+            Creature creature = GetPlayer().GetNPCIfCanInteractWith(guid, NPCFlags.Petitioner, NPCFlags2.None);
             if (!creature)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandlePetitionShowListOpcode - {0} not found or you can't interact with him.", guid.ToString());

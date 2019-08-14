@@ -54,13 +54,13 @@ namespace Game.Entities
         public virtual bool CanSwim()
         {
             // Mirror client behavior, if this method returns false then client will not use swimming animation and for players will apply gravity as if there was no water
-            if (HasFlag(UnitFields.Flags, UnitFlags.CannotSwim))
+            if (HasUnitFlag(UnitFlags.CannotSwim))
                 return false;
-            if (HasFlag(UnitFields.Flags, UnitFlags.PvpAttackable)) // is player
+            if (HasUnitFlag(UnitFlags.PvpAttackable)) // is player
                 return true;
-            if (HasFlag(UnitFields.Flags2, 0x1000000))
+            if (HasUnitFlag2((UnitFlags2)0x1000000))
                 return false;
-            return HasFlag(UnitFields.Flags, UnitFlags.PetInCombat | UnitFlags.Rename | UnitFlags.Unk15);
+            return HasUnitFlag(UnitFlags.PetInCombat | UnitFlags.Rename | UnitFlags.Unk15);
         }
         public virtual bool IsInWater()
         {
@@ -593,7 +593,7 @@ namespace Game.Entities
             if (!obj || !IsInMap(obj) || !IsInPhase(obj))
                 return false;
 
-            float objBoundaryRadius = Math.Max(obj.GetBoundaryRadius(), SharedConst.MinMeleeReach);
+            float objBoundaryRadius = Math.Max(obj.GetBoundingRadius(), SharedConst.MinMeleeReach);
 
             return IsInDist(obj, objBoundaryRadius);
         }
@@ -736,6 +736,15 @@ namespace Game.Entities
 
                 if (mountCapability.ReqSpellKnownID != 0 && !HasSpell(mountCapability.ReqSpellKnownID))
                     continue;
+
+                Player thisPlayer = ToPlayer();
+                if (thisPlayer != null)
+                {
+                    PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(mountCapability.PlayerConditionID);
+                    if (playerCondition != null)
+                        if (!ConditionManager.IsPlayerMeetingCondition(thisPlayer, playerCondition))
+                            continue;
+                }
 
                 return mountCapability;
             }
@@ -944,7 +953,7 @@ namespace Game.Entities
             if (enable == HasUnitMovementFlag(MovementFlag.Hover))
                 return false;
 
-            float hoverHeight = GetFloatValue(UnitFields.HoverHeight);
+            float hoverHeight = m_unitData.HoverHeight;
 
             if (enable)
             {
@@ -1133,7 +1142,7 @@ namespace Game.Entities
             if (apply)
             {
                 SetTarget(ObjectGuid.Empty);
-                SetFlag(UnitFields.Flags, UnitFlags.Stunned);
+                AddUnitFlag(UnitFlags.Stunned);
 
                 StopMoving();
 
@@ -1152,7 +1161,7 @@ namespace Game.Entities
                 // don't remove UNIT_FLAG_STUNNED for pet when owner is mounted (disabled pet's interface)
                 Unit owner = GetCharmerOrOwner();
                 if (owner == null || !owner.IsTypeId(TypeId.Player) || !owner.ToPlayer().IsMounted())
-                    RemoveFlag(UnitFields.Flags, UnitFlags.Stunned);
+                    RemoveUnitFlag(UnitFlags.Stunned);
 
                 if (!HasUnitState(UnitState.Root))         // prevent moving if it also has root effect
                     SetRooted(false);
@@ -1260,9 +1269,9 @@ namespace Game.Entities
         public void Mount(uint mount, uint VehicleId = 0, uint creatureEntry = 0)
         {
             if (mount != 0)
-                SetUInt32Value(UnitFields.MountDisplayId, mount);
+                SetMountDisplayId(mount);
 
-            SetFlag(UnitFields.Flags, UnitFlags.Mount);
+            AddUnitFlag(UnitFlags.Mount);
 
             Player player = ToPlayer();
             if (player != null)
@@ -1286,7 +1295,7 @@ namespace Game.Entities
                     Battleground bg = ToPlayer().GetBattleground();
                     // don't unsummon pet in arena but SetFlag UNIT_FLAG_STUNNED to disable pet's interface
                     if (bg && bg.isArena())
-                        pet.SetFlag(UnitFields.Flags, UnitFlags.Stunned);
+                        pet.AddUnitFlag(UnitFlags.Stunned);
                     else
                         player.UnsummonPetTemporaryIfAny();
                 }
@@ -1295,7 +1304,7 @@ namespace Game.Entities
                 Unit charm = player.GetCharm();
                 if (charm)
                     if (charm.GetTypeId() == TypeId.Unit)
-                        charm.SetFlag(UnitFields.Flags, UnitFlags.Stunned);
+                        charm.AddUnitFlag(UnitFlags.Stunned);
 
                 player.SendMovementSetCollisionHeight(player.GetCollisionHeight(true));
             }
@@ -1308,8 +1317,8 @@ namespace Game.Entities
             if (!IsMounted())
                 return;
 
-            SetUInt32Value(UnitFields.MountDisplayId, 0);
-            RemoveFlag(UnitFields.Flags, UnitFlags.Mount);
+            SetMountDisplayId(0);
+            RemoveUnitFlag(UnitFlags.Mount);
 
             Player thisPlayer = ToPlayer();
             if (thisPlayer != null)
@@ -1337,8 +1346,8 @@ namespace Game.Entities
                 Pet pPet = player.GetPet();
                 if (pPet != null)
                 {
-                    if (pPet.HasFlag(UnitFields.Flags, UnitFlags.Stunned) && !pPet.HasUnitState(UnitState.Stunned))
-                        pPet.RemoveFlag(UnitFields.Flags, UnitFlags.Stunned);
+                    if (pPet.HasUnitFlag(UnitFlags.Stunned) && !pPet.HasUnitState(UnitState.Stunned))
+                        pPet.RemoveUnitFlag(UnitFlags.Stunned);
                 }
                 else
                     player.ResummonPetTemporaryUnSummonedIfAny();
@@ -1346,8 +1355,8 @@ namespace Game.Entities
                 // if we have charmed npc, remove stun also
                 Unit charm = player.GetCharm();
                 if (charm)
-                    if (charm.GetTypeId() == TypeId.Unit && charm.HasFlag(UnitFields.Flags, UnitFlags.Stunned) && !charm.HasUnitState(UnitState.Stunned))
-                        charm.RemoveFlag(UnitFields.Flags, UnitFlags.Stunned);
+                    if (charm.GetTypeId() == TypeId.Unit && charm.HasUnitFlag(UnitFlags.Stunned) && !charm.HasUnitState(UnitState.Stunned))
+                        charm.RemoveUnitFlag(UnitFlags.Stunned);
             }
         }
 
@@ -1381,7 +1390,7 @@ namespace Game.Entities
 
             m_updateFlag.Vehicle = false;
             m_unitTypeMask &= ~UnitTypeMask.Vehicle;
-            RemoveFlag64(UnitFields.NpcFlags, NPCFlags.SpellClick | NPCFlags.PlayerVehicle);
+            RemoveNpcFlag(NPCFlags.SpellClick | NPCFlags.PlayerVehicle);
         }
 
         void SendSetVehicleRecId(uint vehicleId)
@@ -1415,7 +1424,7 @@ namespace Game.Entities
         {
             float offset = 0.0f;
             if (HasUnitMovementFlag(MovementFlag.Hover))
-                offset = GetFloatValue(UnitFields.HoverHeight);
+                offset = m_unitData.HoverHeight;
 
             return GetPositionZ() - offset;
         }

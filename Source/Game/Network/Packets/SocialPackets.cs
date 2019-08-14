@@ -43,7 +43,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Flags);
+            _worldPacket.WriteUInt32((uint)Flags);
             _worldPacket.WriteBits(Contacts.Count, 8);
             _worldPacket.FlushBits();
 
@@ -73,15 +73,16 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8(FriendResult);
+            _worldPacket.WriteUInt8((byte)FriendResult);
             _worldPacket.WritePackedGuid(Guid);
             _worldPacket.WritePackedGuid(WowAccountGuid);
             _worldPacket.WriteUInt32(VirtualRealmAddress);
-            _worldPacket.WriteUInt8(Status);
+            _worldPacket.WriteUInt8((byte)Status);
             _worldPacket.WriteUInt32(AreaID);
             _worldPacket.WriteUInt32(Level);
-            _worldPacket.WriteUInt32(ClassID);
+            _worldPacket.WriteUInt32((uint)ClassID);
             _worldPacket.WriteBits(Notes.GetByteCount(), 10);
+            _worldPacket.WriteBit(Mobile);
             _worldPacket.FlushBits();
             _worldPacket.WriteString(Notes);
         }
@@ -95,6 +96,7 @@ namespace Game.Network.Packets
         public uint Level;
         public uint AreaID;
         public FriendsResult FriendResult;
+        public bool Mobile;
     }
 
     public class AddFriend : ClientPacket
@@ -186,12 +188,13 @@ namespace Game.Network.Packets
             data.WritePackedGuid(WowAccountGuid);
             data.WriteUInt32(VirtualRealmAddr);
             data.WriteUInt32(NativeRealmAddr);
-            data.WriteUInt32(TypeFlags);
-            data.WriteUInt8(Status);
+            data.WriteUInt32((uint)TypeFlags);
+            data.WriteUInt8((byte)Status);
             data.WriteUInt32(AreaID);
             data.WriteUInt32(Level);
-            data.WriteUInt32(ClassID);
+            data.WriteUInt32((uint)ClassID);
             data.WriteBits(Notes.GetByteCount(), 10);
+            data.WriteBit(Mobile);
             data.FlushBits();
             data.WriteString(Notes);
         }
@@ -205,7 +208,8 @@ namespace Game.Network.Packets
         FriendStatus Status;
         uint AreaID;
         uint Level;
-        Class ClassID = Class.None;
+        Class ClassID;
+        bool Mobile;
     }
 
     public struct QualifiedGUID

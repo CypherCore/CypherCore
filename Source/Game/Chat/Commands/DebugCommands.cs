@@ -435,78 +435,6 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("getitemvalue", RBACPermissions.CommandDebugGetitemvalue)]
-        static bool HandleDebugGetItemValueCommand(StringArguments args, CommandHandler handler)
-        {
-            if (args.Empty())
-                return false;
-
-            if (!ulong.TryParse(args.NextString(), out ulong guid))
-                return false;
-
-            if (!uint.TryParse(args.NextString(), out uint index))
-                return false;
-
-            Item item = handler.GetSession().GetPlayer().GetItemByGuid(ObjectGuid.Create(HighGuid.Item, guid));
-            if (!item)
-                return false;
-
-            if (index >= item.valuesCount)
-                return false;
-
-            uint value = item.GetUInt32Value(index);
-
-            handler.SendSysMessage("Item {0}: value at {1} is {2}", guid, index, value);
-
-            return true;
-        }
-
-        [Command("getvalue", RBACPermissions.CommandDebugGetvalue)]
-        static bool HandleDebugGetValueCommand(StringArguments args, CommandHandler handler)
-        {
-            if (args.Empty())
-                return false;
-
-            string fieldStr = args.NextString();
-            string valueStr = args.NextString();
-
-            if (string.IsNullOrEmpty(fieldStr))
-                return false;
-
-            Unit target = handler.getSelectedUnit();
-            if (!target)
-            {
-                handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
-                return false;
-            }
-
-            if (!uint.TryParse(fieldStr, out uint field))
-                return false;
-
-            ObjectGuid guid = target.GetGUID();
-            if (field >= target.valuesCount)
-            {
-                handler.SendSysMessage(CypherStrings.TooBigIndex, field, guid.ToString(), target.valuesCount);
-                return false;
-            }
-
-            if (!bool.TryParse(valueStr, out bool isInt32))
-                isInt32 = true;
-
-            if (isInt32)
-            {
-                uint value = target.GetUInt32Value(field);
-                handler.SendSysMessage(CypherStrings.GetUintField, guid.ToString(), field, value);
-            }
-            else
-            {
-                float value = target.GetFloatValue(field);
-                handler.SendSysMessage(CypherStrings.GetFloatField, guid.ToString(), field, value);
-            }
-
-            return true;
-        }
-
         [Command("hostil", RBACPermissions.CommandDebugHostil)]
         static bool HandleDebugHostileRefListCommand(StringArguments args, CommandHandler handler)
         {
@@ -567,31 +495,6 @@ namespace Game.Chat
             Unit unit = handler.getSelectedUnit();
             if (unit)
                 handler.SendSysMessage("Unit {0} (GuidLow: {1}) is {2}in LoS", unit.GetName(), unit.GetGUID().ToString(), handler.GetSession().GetPlayer().IsWithinLOSInMap(unit) ? "" : "not ");
-            return true;
-        }
-
-        [Command("Mod32Value", RBACPermissions.CommandDebugMod32value)]
-        static bool HandleDebugMod32ValueCommand(StringArguments args, CommandHandler handler)
-        {
-            if (args.Empty())
-                return false;
-
-            uint field = args.NextUInt32();
-            int value = args.NextInt32();
-
-            if (field >= handler.GetSession().GetPlayer().valuesCount)
-            {
-                handler.SendSysMessage(CypherStrings.TooBigIndex, field, handler.GetSession().GetPlayer().GetGUID().ToString(), handler.GetSession().GetPlayer().valuesCount);
-                return false;
-            }
-
-            uint currentValue = handler.GetSession().GetPlayer().GetUInt32Value(field);
-
-            currentValue += (uint)value;
-            handler.GetSession().GetPlayer().SetUInt32Value(field, currentValue);
-
-            handler.SendSysMessage(CypherStrings.Change32bitField, field, currentValue);
-
             return true;
         }
 
@@ -794,103 +697,6 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("setbit", RBACPermissions.CommandDebugSetbit)]
-        static bool HandleDebugSet32BitCommand(StringArguments args, CommandHandler handler)
-        {
-            if (args.Empty())
-                return false;
-
-            WorldObject target = handler.GetSelectedObject();
-            if (!target)
-            {
-                handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
-                return false;
-            }
-
-            uint field = args.NextUInt32();
-            uint val = args.NextUInt32();
-            if (val > 32)                                         //uint = 32 bits
-                return false;
-
-            uint value = (uint)(val != 0 ? 1 << ((int)val - 1) : 0);
-            target.SetUInt32Value(field, value);
-
-            handler.SendSysMessage(CypherStrings.Set32bitField, field, value);
-            return true;
-        }
-
-        [Command("setitemvalue", RBACPermissions.CommandDebugSetitemvalue)]
-        static bool HandleDebugSetItemValueCommand(StringArguments args, CommandHandler handler)
-        {
-            if (args.Empty())
-                return false;
-
-            if (!ulong.TryParse(args.NextString(), out ulong guid))
-                return false;
-
-            if (!uint.TryParse(args.NextString(), out uint index))
-                return false;
-
-            if (!uint.TryParse(args.NextString(), out uint value))
-             return false;
-
-            Item item = handler.GetSession().GetPlayer().GetItemByGuid(ObjectGuid.Create(HighGuid.Item, guid));
-            if (!item)
-                return false;
-
-            if (index >= item.valuesCount)
-                return false;
-
-            item.SetUInt32Value(index, value);
-            return true;
-        }
-
-        [Command("setvalue", RBACPermissions.CommandDebugSetvalue)]
-        static bool HandleDebugSetValueCommand(StringArguments args, CommandHandler handler)
-        {
-            if (args.Empty())
-                return false;
-
-            WorldObject target = handler.GetSelectedObject();
-            if (!target)
-            {
-                handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
-                return false;
-            }
-
-            ObjectGuid guid = target.GetGUID();
-
-            uint field = args.NextUInt32();
-            if (field >= target.valuesCount)
-            {
-                handler.SendSysMessage(CypherStrings.TooBigIndex, field, guid.ToString(), target.valuesCount);
-                return false;
-            }
-
-            string valueStr = args.NextString();
-            if (!bool.TryParse(args.NextString(), out bool isInt32))
-                isInt32 = true;
-
-            if (isInt32)
-            {
-                if (!uint.TryParse(valueStr, out uint value))
-                    return false;
-
-                target.SetUInt32Value(field, value);
-                handler.SendSysMessage(CypherStrings.SetUintField, guid.ToString(), field, value);
-            }
-            else
-            {
-                if (!float.TryParse(valueStr, out float value))
-                    return false;
-
-                target.SetFloatValue(field, value);
-                handler.SendSysMessage(CypherStrings.SetFloatField, guid.ToString(), field, value);
-            }
-
-            return true;
-        }
-
         [Command("setvid", RBACPermissions.CommandDebugSetvid)]
         static bool HandleDebugSetVehicleIdCommand(StringArguments args, CommandHandler handler)
         {
@@ -989,49 +795,6 @@ namespace Game.Chat
             }
 
             handler.SendSysMessage("Transport {0} {1}", transport.GetName(), start ? "started" : "stopped");
-            return true;
-        }
-
-        [Command("update", RBACPermissions.CommandDebugUpdate)]
-        static bool HandleDebugUpdateCommand(StringArguments args, CommandHandler handler)
-        {
-            if (args.Empty())
-                return false;
-
-            Unit unit = handler.getSelectedUnit();
-            if (!unit)
-            {
-                handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
-                return false;
-            }
-
-            uint updateIndex = args.NextUInt32();
-
-            //check updateIndex
-            if (unit.IsTypeId(TypeId.Player))
-            {
-                if (updateIndex >= (int)PlayerFields.End)
-                    return true;
-            }
-            else if (updateIndex >= (int)UnitFields.End)
-                return true;
-
-            uint value;
-            string valueStr = args.NextString();
-            if (string.IsNullOrEmpty(valueStr))
-            {
-                value = unit.GetUInt32Value(updateIndex);
-
-                handler.SendSysMessage(CypherStrings.Update, unit.GetGUID().ToString(), updateIndex, value);
-                return true;
-            }
-
-            if (!uint.TryParse(valueStr, out value))
-                return false;
-
-            handler.SendSysMessage(CypherStrings.UpdateChange, unit.GetGUID().ToString(), updateIndex, value);
-            unit.SetUInt32Value(updateIndex, value);
-
             return true;
         }
 

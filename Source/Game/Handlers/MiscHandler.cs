@@ -130,7 +130,7 @@ namespace Game
                 return;
             }
 
-            GetPlayer().SetByteValue(ActivePlayerFields.Bytes, PlayerFieldOffsets.FieldBytesOffsetActionBarToggles, packet.Mask);
+            GetPlayer().SetMultiActionBars(packet.Mask);
         }
 
         [WorldPacketHandler(ClientOpcodes.CompleteCinematic)]
@@ -229,7 +229,7 @@ namespace Game
                 player.GetRestMgr().SetRestFlag(RestFlag.Tavern, atEntry.Id);
 
                 if (Global.WorldMgr.IsFFAPvPRealm())
-                    player.RemoveByteFlag(UnitFields.Bytes2, UnitBytes2Offsets.PvpFlag, UnitBytes2Flags.FFAPvp);
+                    player.RemovePvpFlag(UnitPVPStateFlags.FFAPvp);
 
                 return;
             }
@@ -455,41 +455,38 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.TogglePvp)]
         void HandleTogglePvP(TogglePvP packet)
         {
-            Player player = GetPlayer();
-
-            bool inPvP = player.HasFlag(PlayerFields.Flags, PlayerFlags.InPVP);
-            player.ApplyModFlag(PlayerFields.Flags, PlayerFlags.InPVP, !inPvP);
-            player.ApplyModFlag(PlayerFields.Flags, PlayerFlags.PVPTimer, inPvP);
-
-            if (player.HasFlag(PlayerFields.Flags, PlayerFlags.InPVP))
+            if (GetPlayer().HasPlayerFlag(PlayerFlags.InPVP))
             {
-                if (!player.IsPvP() || player.pvpInfo.EndTimer != 0)
-                    player.UpdatePvP(true, true);
+                GetPlayer().RemovePlayerFlag(PlayerFlags.InPVP);
+                GetPlayer().AddPlayerFlag(PlayerFlags.PVPTimer);
+                if (!GetPlayer().pvpInfo.IsHostile && GetPlayer().IsPvP())
+                    GetPlayer().pvpInfo.EndTimer = Time.UnixTime; // start toggle-off
             }
             else
             {
-                if (!player.pvpInfo.IsHostile && player.IsPvP())
-                    player.pvpInfo.EndTimer = Time.UnixTime;     // start toggle-off
+                GetPlayer().AddPlayerFlag(PlayerFlags.InPVP);
+                GetPlayer().RemovePlayerFlag(PlayerFlags.PVPTimer);
+                if (!GetPlayer().IsPvP() || GetPlayer().pvpInfo.EndTimer != 0)
+                    GetPlayer().UpdatePvP(true, true);
             }
         }
 
         [WorldPacketHandler(ClientOpcodes.SetPvp)]
         void HandleSetPvP(SetPvP packet)
         {
-            Player player = GetPlayer();
-
-            player.ApplyModFlag(PlayerFields.Flags, PlayerFlags.InPVP, packet.EnablePVP);
-            player.ApplyModFlag(PlayerFields.Flags, PlayerFlags.PVPTimer, !packet.EnablePVP);
-
-            if (player.HasFlag(PlayerFields.Flags, PlayerFlags.InPVP))
+            if (!packet.EnablePVP)
             {
-                if (!player.IsPvP() || player.pvpInfo.EndTimer != 0)
-                    player.UpdatePvP(true, true);
+                GetPlayer().RemovePlayerFlag(PlayerFlags.InPVP);
+                GetPlayer().AddPlayerFlag(PlayerFlags.PVPTimer);
+                if (!GetPlayer().pvpInfo.IsHostile && GetPlayer().IsPvP())
+                    GetPlayer().pvpInfo.EndTimer = Time.UnixTime; // start toggle-off
             }
             else
             {
-                if (!player.pvpInfo.IsHostile && player.IsPvP())
-                    player.pvpInfo.EndTimer = Time.UnixTime; // start set-off
+                GetPlayer().AddPlayerFlag(PlayerFlags.InPVP);
+                GetPlayer().RemovePlayerFlag(PlayerFlags.PVPTimer);
+                if (!GetPlayer().IsPvP() || GetPlayer().pvpInfo.EndTimer != 0)
+                    GetPlayer().UpdatePvP(true, true);
             }
         }
 
@@ -498,12 +495,12 @@ namespace Game
         {
             if (farSight.Enable)
             {
-                Log.outDebug(LogFilter.Network, "Added FarSight {0} to player {1}", GetPlayer().GetUInt64Value(ActivePlayerFields.Farsight), GetPlayer().GetGUID().ToString());
+                Log.outDebug(LogFilter.Network, "Added FarSight {0} to player {1}", GetPlayer().m_activePlayerData.FarsightObject.ToString(), GetPlayer().GetGUID().ToString());
                 WorldObject target = GetPlayer().GetViewpoint();
                 if (target)
                     GetPlayer().SetSeer(target);
                 else
-                    Log.outDebug(LogFilter.Network, "Player {0} (GUID: {1}) requests non-existing seer {2}", GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), GetPlayer().GetUInt64Value(ActivePlayerFields.Farsight));
+                    Log.outDebug(LogFilter.Network, "Player {0} (GUID: {1}) requests non-existing seer {2}", GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), GetPlayer().m_activePlayerData.FarsightObject.ToString());
             }
             else
             {
@@ -518,7 +515,7 @@ namespace Game
         void HandleSetTitle(SetTitle packet)
         {
             // -1 at none
-            if (packet.TitleID > 0 && packet.TitleID < PlayerConst.MaxTitleIndex)
+            if (packet.TitleID > 0)
             {
                 if (!GetPlayer().HasTitle((uint)packet.TitleID))
                     return;
@@ -526,7 +523,7 @@ namespace Game
             else
                 packet.TitleID = 0;
 
-            GetPlayer().SetUInt32Value(PlayerFields.ChosenTitle, (uint)packet.TitleID);
+            GetPlayer().SetChosenTitle((uint)packet.TitleID);
         }
 
         [WorldPacketHandler(ClientOpcodes.ResetInstances)]
@@ -602,7 +599,7 @@ namespace Game
                         }
                     }
                     // the difficulty is set even if the instances can't be reset
-                    //_player->SendDungeonDifficulty(true);
+                    //_player.SendDungeonDifficulty(true);
                     group.ResetInstances(InstanceResetMethod.ChangeDifficulty, false, false, GetPlayer());
                     group.SetDungeonDifficultyID(difficultyID);
                 }
@@ -703,7 +700,10 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SetTaxiBenchmarkMode, Processing = PacketProcessing.Inplace)]
         void HandleSetTaxiBenchmark(SetTaxiBenchmarkMode packet)
         {
-            _player.ApplyModFlag(PlayerFields.Flags, PlayerFlags.TaxiBenchmark, packet.Enable);
+            if (packet.Enable)
+                _player.AddPlayerFlag(PlayerFlags.TaxiBenchmark);
+            else
+                _player.RemovePlayerFlag(PlayerFlags.TaxiBenchmark);
         }
 
         [WorldPacketHandler(ClientOpcodes.GuildSetFocusedAchievement)]

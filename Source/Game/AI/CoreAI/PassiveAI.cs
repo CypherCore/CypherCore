@@ -65,14 +65,14 @@ namespace Game.AI
         public override void JustDied(Unit unit)
         {
             // We died while possessed, disable our loot
-            me.RemoveFlag(ObjectFields.DynamicFlags, UnitDynFlags.Lootable);
+            me.RemoveDynamicFlag(UnitDynFlags.Lootable);
         }
 
         public override void KilledUnit(Unit victim)
         {
             // We killed a creature, disable victim's loot
             if (victim.IsTypeId(TypeId.Unit))
-                victim.RemoveFlag(ObjectFields.DynamicFlags, UnitDynFlags.Lootable);
+                me.RemoveDynamicFlag(UnitDynFlags.Lootable);
         }
 
         public override void OnCharmed(bool apply)

@@ -901,9 +901,9 @@ namespace Game.Maps
 
             //! If hovering, always increase our server-side Z position
             //! Client automatically projects correct position based on Z coord sent in monster move
-            //! and UNIT_FIELD_HOVERHEIGHT sent in object updates
+            //! and HoverHeight sent in object updates
             if (player.HasUnitMovementFlag(MovementFlag.Hover))
-                z += player.GetFloatValue(UnitFields.HoverHeight);
+                z += player.m_unitData.HoverHeight;
 
             player.Relocate(x, y, z, orientation);
             if (player.IsVehicle())
@@ -937,9 +937,9 @@ namespace Game.Maps
 
             //! If hovering, always increase our server-side Z position
             //! Client automatically projects correct position based on Z coord sent in monster move
-            //! and UNIT_FIELD_HOVERHEIGHT sent in object updates
+            //! and HoverHeight sent in object updates
             if (creature.HasUnitMovementFlag(MovementFlag.Hover))
-                z += creature.GetFloatValue(UnitFields.HoverHeight);
+                z += creature.m_unitData.HoverHeight;
 
             // delay creature move for grid/cell to grid/cell moves
             if (old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell))
@@ -2728,13 +2728,28 @@ namespace Game.Maps
                 bones = new Corpse();
                 bones.Create(corpse.GetGUID().GetCounter(), this);
 
-                for (int i = (int)ObjectFields.Guid + 4; i < (int)CorpseFields.End; ++i)                    // don't overwrite guid
-                    bones.SetUInt32Value(i, corpse.GetUInt32Value(i));
+                bones.SetCorpseDynamicFlags((CorpseDynFlags)(byte)corpse.m_corpseData.DynamicFlags);
+                bones.SetOwnerGUID(corpse.m_corpseData.Owner);
+                bones.SetPartyGUID(corpse.m_corpseData.PartyGUID);
+                bones.SetGuildGUID(corpse.m_corpseData.GuildGUID);
+                bones.SetDisplayId(corpse.m_corpseData.DisplayID);
+                bones.SetRace((Race)(byte)corpse.m_corpseData.RaceID);
+                bones.SetSex((Gender)(byte)corpse.m_corpseData.Sex);
+                bones.SetSkin(corpse.m_corpseData.SkinID);
+                bones.SetFace(corpse.m_corpseData.FaceID);
+                bones.SetHairStyle(corpse.m_corpseData.HairStyleID);
+                bones.SetHairColor(corpse.m_corpseData.HairColorID);
+                bones.SetFacialHairStyle(corpse.m_corpseData.FacialHairStyleID);
+                bones.SetFlags((CorpseFlags)(corpse.m_corpseData.Flags | (uint)CorpseFlags.Bones));
+                bones.SetFactionTemplate(corpse.m_corpseData.FactionTemplate);
+                for (int i = 0; i < EquipmentSlot.End; ++i)
+                    bones.SetItem((uint)i, corpse.m_corpseData.Items[i]);
+
+                for (int i = 0; i < PlayerConst.CustomDisplaySize; ++i)
+                    bones.SetCustomDisplayOption((uint)i, corpse.m_corpseData.CustomDisplayOption[i]);
 
                 bones.SetCellCoord(corpse.GetCellCoord());
                 bones.Relocate(corpse.GetPositionX(), corpse.GetPositionY(), corpse.GetPositionZ(), corpse.GetOrientation());
-
-                bones.SetUInt32Value(CorpseFields.Flags, corpse.GetUInt32Value(CorpseFields.Flags) | (uint)CorpseFlags.Bones);
 
                 PhasingHandler.InheritPhaseShift(bones, corpse);
 
@@ -2999,7 +3014,7 @@ namespace Game.Maps
             return Global.DB2Mgr.GetMapDifficultyData(GetId(), GetDifficultyID());
         }
 
-        public byte GetDifficultyLootItemContext()
+        public int GetDifficultyLootItemContext()
         {
             MapDifficultyRecord mapDifficulty = GetMapDifficulty();
             if (mapDifficulty != null && mapDifficulty.ItemContext != 0)
@@ -3353,7 +3368,7 @@ namespace Game.Maps
             if (summoner)
                 PhasingHandler.InheritPhaseShift(summon, summoner);
 
-            summon.SetUInt32Value(UnitFields.CreatedBySpell, spellId);
+            summon.SetCreatedBySpell(spellId);
             summon.SetHomePosition(pos);
             summon.InitStats(duration);
             summon.SetVisibleBySummonerOnly(visibleBySummonerOnly);
@@ -3779,27 +3794,9 @@ namespace Game.Maps
                             if (cSource)
                             {
                                 if (step.script.Emote.Flags.HasAnyFlag(eScriptFlags.EmoteUseState))
-                                    cSource.SetUInt32Value(UnitFields.NpcEmotestate, step.script.Emote.EmoteID);
+                                    cSource.SetEmoteState((Emote)step.script.Emote.EmoteID);
                                 else
                                     cSource.HandleEmoteCommand((Emote)step.script.Emote.EmoteID);
-                            }
-                            break;
-                        }
-                    case ScriptCommands.FieldSet:
-                        {
-                            // Source or target must be Creature.
-                            Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script);
-                            if (cSource)
-                            {
-                                // Validate field number.
-                                if (step.script.FieldSet.FieldID <= (int)ObjectFields.Entry ||
-                                    step.script.FieldSet.FieldID >= cSource.valuesCount)
-                                    Log.outError(LogFilter.Scripts,
-                                        "{0} wrong field {1} (max count: {2}) in object (TypeId: {3}, Entry: {4}, GUID: {5}) specified, skipping.",
-                                        step.script.GetDebugInfo(), step.script.FieldSet.FieldID,
-                                        cSource.valuesCount, cSource.GetTypeId(), cSource.GetEntry(), cSource.GetGUID().ToString());
-                                else
-                                    cSource.SetUInt32Value(step.script.FieldSet.FieldID, step.script.FieldSet.FieldValue);
                             }
                             break;
                         }
@@ -3821,42 +3818,6 @@ namespace Game.Maps
                                 else
                                     unit.NearTeleportTo(step.script.MoveTo.DestX, step.script.MoveTo.DestY,
                                         step.script.MoveTo.DestZ, unit.GetOrientation());
-                            }
-                            break;
-                        }
-                    case ScriptCommands.FlagSet:
-                        {
-                            // Source or target must be Creature.
-                            Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script);
-                            if (cSource)
-                            {
-                                // Validate field number.
-                                if (step.script.FlagToggle.FieldID <= (int)ObjectFields.Entry ||
-                                    step.script.FlagToggle.FieldID >= cSource.valuesCount)
-                                    Log.outError(LogFilter.Scripts,
-                                        "{0} wrong field {1} (max count: {2}) in object (TypeId: {3}, Entry: {4}, GUID: {5}) specified, skipping.",
-                                        step.script.GetDebugInfo(), step.script.FlagToggle.FieldID,
-                                        cSource.valuesCount, cSource.GetTypeId(), cSource.GetEntry(), cSource.GetGUID().ToString());
-                                else
-                                    cSource.SetFlag(step.script.FlagToggle.FieldID, step.script.FlagToggle.FieldValue);
-                            }
-                            break;
-                        }
-                    case ScriptCommands.FlagRemove:
-                        {
-                            // Source or target must be Creature.
-                            Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script);
-                            if (cSource)
-                            {
-                                // Validate field number.
-                                if (step.script.FlagToggle.FieldID <= (int)ObjectFields.Entry ||
-                                    step.script.FlagToggle.FieldID >= cSource.valuesCount)
-                                    Log.outError(LogFilter.Scripts,
-                                        "{0} wrong field {1} (max count: {2}) in object (TypeId: {3}, Entry: {4}, GUID: {5}) specified, skipping.",
-                                        step.script.GetDebugInfo(), step.script.FlagToggle.FieldID,
-                                        cSource.valuesCount, cSource.GetTypeId(), cSource.GetEntry(), cSource.GetGUID().ToString());
-                                else
-                                    cSource.RemoveFlag(step.script.FlagToggle.FieldID, step.script.FlagToggle.FieldValue);
                             }
                             break;
                         }

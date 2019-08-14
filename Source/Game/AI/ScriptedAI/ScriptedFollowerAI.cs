@@ -168,7 +168,7 @@ namespace Game.AI
             if (!IsCombatMovementAllowed())
                 SetCombatMovement(true);
 
-            if (me.getFaction() != me.GetCreatureTemplate().Faction)
+            if (me.GetFaction() != me.GetCreatureTemplate().Faction)
                 me.SetFaction(me.GetCreatureTemplate().Faction);
 
             Reset();
@@ -318,7 +318,8 @@ namespace Game.AI
                 Log.outDebug(LogFilter.Scripts, "FollowerAI start with WAYPOINT_MOTION_TYPE, set to MoveIdle.");
             }
 
-            me.SetUInt64Value(UnitFields.NpcFlags, (uint)NPCFlags.None);
+            me.SetNpcFlags(NPCFlags.None);
+            me.SetNpcFlags2(NPCFlags2.None);
 
             AddFollowState(eFollowState.Inprogress);
 

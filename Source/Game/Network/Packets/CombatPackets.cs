@@ -156,7 +156,7 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(UnitGUID);
-            _worldPacket.WriteUInt32(Reaction);
+            _worldPacket.WriteUInt32((uint)Reaction);
         }
 
         public ObjectGuid UnitGUID;
@@ -180,7 +180,7 @@ namespace Game.Network.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(Guid);
-            _worldPacket.WriteUInt32(Powers.Count);
+            _worldPacket.WriteInt32(Powers.Count);
             foreach (var power in Powers)
             {
                 _worldPacket.WriteInt32(power.Power);

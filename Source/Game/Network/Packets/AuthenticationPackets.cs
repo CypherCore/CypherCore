@@ -23,6 +23,8 @@ using Game.DataStorage;
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Security.Cryptography;
+using System.Linq;
 
 namespace Game.Network.Packets
 {
@@ -113,7 +115,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Result);
+            _worldPacket.WriteUInt32((uint)Result);
             _worldPacket.WriteBit(SuccessInfo.HasValue);
             _worldPacket.WriteBit(WaitInfo.HasValue);
             _worldPacket.FlushBits();
@@ -121,13 +123,13 @@ namespace Game.Network.Packets
             if (SuccessInfo.HasValue)
             {
                 _worldPacket.WriteUInt32(SuccessInfo.Value.VirtualRealmAddress);
-                _worldPacket.WriteUInt32(SuccessInfo.Value.VirtualRealms.Count);
+                _worldPacket.WriteInt32(SuccessInfo.Value.VirtualRealms.Count);
                 _worldPacket.WriteUInt32(SuccessInfo.Value.TimeRested);
                 _worldPacket.WriteUInt8(SuccessInfo.Value.ActiveExpansionLevel);
                 _worldPacket.WriteUInt8(SuccessInfo.Value.AccountExpansionLevel);
                 _worldPacket.WriteUInt32(SuccessInfo.Value.TimeSecondsUntilPCKick);
-                _worldPacket.WriteUInt32(SuccessInfo.Value.AvailableClasses.Count);
-                _worldPacket.WriteUInt32(SuccessInfo.Value.Templates.Count);
+                _worldPacket.WriteInt32(SuccessInfo.Value.AvailableClasses.Count);
+                _worldPacket.WriteInt32(SuccessInfo.Value.Templates.Count);
                 _worldPacket.WriteUInt32(SuccessInfo.Value.CurrencyID);
                 _worldPacket.WriteUInt32(SuccessInfo.Value.Time);
 
@@ -170,11 +172,11 @@ namespace Game.Network.Packets
                 foreach (var templat in SuccessInfo.Value.Templates)
                 {
                     _worldPacket.WriteUInt32(templat.TemplateSetId);
-                    _worldPacket.WriteUInt32(templat.Classes.Count);
+                    _worldPacket.WriteInt32(templat.Classes.Count);
                     foreach (var templateClass in templat.Classes)
                     {
                         _worldPacket.WriteUInt8(templateClass.ClassID);
-                        _worldPacket.WriteUInt8(templateClass.FactionGroup);
+                        _worldPacket.WriteUInt8((byte)templateClass.FactionGroup);
                     }
 
                     _worldPacket.WriteBits(templat.Name.GetByteCount(), 7);
@@ -252,53 +254,41 @@ namespace Game.Network.Packets
         public ConnectTo() : base(ServerOpcodes.ConnectTo)
         {
             Payload = new ConnectPayload();
-            Payload.PanamaKey = "F41DCB2D728CF3337A4FF338FA89DB01BBBE9C3B65E9DA96268687353E48B94C".ToByteArray();
-            Payload.Adler32 = 0xA0A66C10;
-
-            Crypt = new RsaCrypt();
-            Crypt.InitializeEncryption(RsaStore.P, RsaStore.Q, RsaStore.DP, RsaStore.DQ, RsaStore.InverseQ);
         }
 
         public override void Write()
         {
-            byte[] port = BitConverter.GetBytes((ushort)Payload.Where.Port);
-            byte[] address = new byte[16];
-            byte addressType = 3;
-            if (Payload.Where.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+            ByteBuffer whereBuffer = new ByteBuffer();
+            whereBuffer.WriteUInt8((byte)Payload.Where.Type);
+
+            switch (Payload.Where.Type)
             {
-                Buffer.BlockCopy(Payload.Where.Address.GetAddressBytes(), 0, address, 0, 4);
-                addressType = 1;
+                case AddressType.IPv4:
+                    whereBuffer.WriteBytes(Payload.Where.IPv4);
+                    break;
+                case AddressType.IPv6:
+                    whereBuffer.WriteBytes(Payload.Where.IPv6);
+                    break;
+                case AddressType.NamedSocket:
+                    whereBuffer.WriteString(Payload.Where.NameSocket);
+                    break;
+                default:
+                    break;
             }
-            else
-            {
-                Buffer.BlockCopy(Payload.Where.Address.GetAddressBytes(), 0, address, 0, 16);
-                addressType = 2;
-            }
 
-            HmacHash hmacHash = new HmacHash(RsaStore.WherePacketHmac);
-            hmacHash.Process(address, 16);
-            hmacHash.Process(BitConverter.GetBytes(addressType), 1);
-            hmacHash.Process(port, 2);
-            hmacHash.Process(Haiku);
-            hmacHash.Process(Payload.PanamaKey, 32);
-            hmacHash.Process(PiDigits, 108);
-            hmacHash.Finish(BitConverter.GetBytes(Payload.XorMagic), 1);
+            Sha256 hash = new Sha256();
+            hash.Process(whereBuffer.GetData(), (int)whereBuffer.GetSize());
+            hash.Process((uint)Payload.Where.Type);
+            hash.Finish(BitConverter.GetBytes(Payload.Port));
 
-            ByteBuffer payload = new ByteBuffer();
-            payload.WriteUInt32(Payload.Adler32);
-            payload.WriteUInt8(addressType);
-            payload.WriteBytes(address, 16);
-            payload.WriteUInt16(Payload.Where.Port);
-            payload.WriteString(Haiku);
-            payload.WriteBytes(Payload.PanamaKey, 32);
-            payload.WriteBytes(PiDigits, 108);
-            payload.WriteUInt8(Payload.XorMagic);
-            payload.WriteBytes(hmacHash.Digest);
+            Payload.Signature = RsaCrypt.RSA.SignHash(hash.Digest, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1).Reverse().ToArray();
 
-            _worldPacket.WriteUInt64(Key);
-            _worldPacket.WriteUInt32(Serial);
-            _worldPacket.WriteBytes(Crypt.Encrypt(payload.GetData()), 256);
+            _worldPacket.WriteBytes(Payload.Signature, (uint)Payload.Signature.Length);
+            _worldPacket.WriteBytes(whereBuffer);
+            _worldPacket.WriteUInt16(Payload.Port);
+            _worldPacket.WriteUInt32((uint)Serial);
             _worldPacket.WriteUInt8(Con);
+            _worldPacket.WriteUInt64(Key);
         }
 
         public ulong Key;
@@ -306,24 +296,29 @@ namespace Game.Network.Packets
         public ConnectPayload Payload;
         public byte Con;
 
-        public string Haiku = "An island of peace\nCorruption is brought ashore\nPandarens will rise\n\0\0\0";
-        public byte[] PiDigits = { 0x31, 0x41, 0x59, 0x26, 0x53, 0x58, 0x97, 0x93, 0x23, 0x84, 0x62, 0x64, 0x33, 0x83, 0x27, 0x95, 0x02, 0x88, 0x41, 0x97,
-            0x16, 0x93, 0x99, 0x37, 0x51, 0x05, 0x82, 0x09, 0x74, 0x94, 0x45, 0x92, 0x30, 0x78, 0x16, 0x40, 0x62, 0x86, 0x20, 0x89,
-            0x98, 0x62, 0x80, 0x34, 0x82, 0x53, 0x42, 0x11, 0x70, 0x67, 0x98, 0x21, 0x48, 0x08, 0x65, 0x13, 0x28, 0x23, 0x06, 0x64,
-            0x70, 0x93, 0x84, 0x46, 0x09, 0x55, 0x05, 0x82, 0x23, 0x17, 0x25, 0x35, 0x94, 0x08, 0x12, 0x84, 0x81, 0x11, 0x74, 0x50,
-            0x28, 0x41, 0x02, 0x70, 0x19, 0x38, 0x52, 0x11, 0x05, 0x55, 0x96, 0x44, 0x62, 0x29, 0x48, 0x95, 0x49, 0x30, 0x38, 0x19,
-            0x64, 0x42, 0x88, 0x10, 0x97, 0x56, 0x65, 0x93, 0x34, 0x46, 0x12, 0x84, 0x75, 0x64, 0x82, 0x33, 0x78, 0x67, 0x83, 0x16,
-            0x52, 0x71, 0x20, 0x19, 0x09, 0x14, 0x56, 0x48, 0x56, 0x69 };
-
         public class ConnectPayload
         {
-            public IPEndPoint Where;
-            public uint Adler32;
-            public byte XorMagic = 0x2A;
-            public byte[] PanamaKey = new byte[32];
+            public SocketAddress Where;
+            public ushort Port;
+            public byte[] Signature = new byte[256];
         }
 
-        RsaCrypt Crypt;
+        public struct SocketAddress
+        {
+            public AddressType Type;
+
+            public byte[] IPv4;
+            public byte[] IPv6;
+            public string NameSocket;
+
+        }
+
+        public enum AddressType
+        {
+            IPv4 = 1,
+            IPv6 = 2,
+            NamedSocket = 3 // not supported by windows client
+        }
     }
 
     class AuthContinuedSession : ClientPacket
@@ -367,9 +362,27 @@ namespace Game.Network.Packets
 
     class EnableEncryption : ServerPacket
     {
-        public EnableEncryption() : base(ServerOpcodes.EnableEncryption) { }
+        byte[] EncryptionKey;
+        bool Enabled;
 
-        public override void Write() { }
+        static byte[] EnableEncryptionSeed = { 0x90, 0x9C, 0xD0, 0x50, 0x5A, 0x2C, 0x14, 0xDD, 0x5C, 0x2C, 0xC0, 0x64, 0x14, 0xF3, 0xFE, 0xC9 };
+
+        public EnableEncryption(byte[] encryptionKey, bool enabled) : base(ServerOpcodes.EnableEncryption)
+        {
+            EncryptionKey = encryptionKey;
+            Enabled = enabled;
+        }
+
+        public override void Write()
+        {
+            HmacSha256 hash = new HmacSha256(EncryptionKey);
+            hash.Process(BitConverter.GetBytes(Enabled), 1);
+            hash.Finish(EnableEncryptionSeed, 16);
+
+            _worldPacket.WriteBytes(RsaCrypt.RSA.SignHash(hash.Digest, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1).Reverse().ToArray());
+            _worldPacket.WriteBit(Enabled);
+            _worldPacket.FlushBits();
+        }
     }
 
     //Structs

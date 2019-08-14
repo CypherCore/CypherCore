@@ -61,21 +61,21 @@ namespace Game
                     tradeItem.Slot = i;
                     tradeItem.Item = new ItemInstance(item);
                     tradeItem.StackCount = (int)item.GetCount();
-                    tradeItem.GiftCreator = item.GetGuidValue(ItemFields.GiftCreator);
-                    if (!item.HasFlag(ItemFields.Flags, ItemFieldFlags.Wrapped))
+                    tradeItem.GiftCreator = item.GetGiftCreator();
+                    if (!item.HasItemFlag(ItemFieldFlags.Wrapped))
                     {
                         tradeItem.Unwrapped.HasValue = true;
                         TradeUpdated.UnwrappedTradeItem unwrappedItem = tradeItem.Unwrapped.Value;
                         unwrappedItem.EnchantID = (int)item.GetEnchantmentId(EnchantmentSlot.Perm);
                         unwrappedItem.OnUseEnchantmentID = (int)item.GetEnchantmentId(EnchantmentSlot.Use);
-                        unwrappedItem.Creator = item.GetGuidValue(ItemFields.Creator);
+                        unwrappedItem.Creator = item.GetCreator();
                         unwrappedItem.Charges = item.GetSpellCharges();
-                        unwrappedItem.Lock = item.GetTemplate().GetLockID() != 0 && !item.HasFlag(ItemFields.Flags, ItemFieldFlags.Unlocked);
-                        unwrappedItem.MaxDurability = item.GetUInt32Value(ItemFields.MaxDurability);
-                        unwrappedItem.Durability = item.GetUInt32Value(ItemFields.Durability);
+                        unwrappedItem.Lock = item.GetTemplate().GetLockID() != 0 && !item.HasItemFlag(ItemFieldFlags.Unlocked);
+                        unwrappedItem.MaxDurability = item.m_itemData.MaxDurability;
+                        unwrappedItem.Durability = item.m_itemData.Durability;
 
                         byte g = 0;
-                        foreach (ItemDynamicFieldGems gemData in item.GetGems())
+                        foreach (SocketedGem gemData in item.m_itemData.Gems)
                         {
                             if (gemData.ItemId != 0)
                             {
@@ -124,8 +124,8 @@ namespace Game
                         }
 
                         // adjust time (depends on /played)
-                        if (myItems[i].HasFlag(ItemFields.Flags, ItemFieldFlags.BopTradeable))
-                            myItems[i].SetUInt32Value(ItemFields.CreatePlayedTime, trader.GetTotalPlayedTime() - (GetPlayer().GetTotalPlayedTime() - myItems[i].GetUInt32Value(ItemFields.CreatePlayedTime)));
+                        if (myItems[i].HasItemFlag(ItemFieldFlags.BopTradeable))
+                            myItems[i].SetCreatePlayedTime(trader.GetTotalPlayedTime() - (GetPlayer().GetTotalPlayedTime() - myItems[i].m_itemData.CreatePlayedTime));
                         // store
                         trader.MoveItemToInventory(traderDst, myItems[i], true, true);
                     }
@@ -143,8 +143,8 @@ namespace Game
                         
 
                         // adjust time (depends on /played)
-                        if (hisItems[i].HasFlag(ItemFields.Flags, ItemFieldFlags.BopTradeable))
-                            hisItems[i].SetUInt32Value(ItemFields.CreatePlayedTime, GetPlayer().GetTotalPlayedTime() - (trader.GetTotalPlayedTime() - hisItems[i].GetUInt32Value(ItemFields.CreatePlayedTime)));
+                        if (hisItems[i].HasItemFlag(ItemFieldFlags.BopTradeable))
+                            hisItems[i].SetCreatePlayedTime(GetPlayer().GetTotalPlayedTime() - (trader.GetTotalPlayedTime() - hisItems[i].m_itemData.CreatePlayedTime));
                         // store
                         GetPlayer().MoveItemToInventory(playerDst, hisItems[i], true, true);
                     }
@@ -453,12 +453,12 @@ namespace Game
                 {
                     if (myItems[i])
                     {
-                        myItems[i].SetGuidValue(ItemFields.GiftCreator, GetPlayer().GetGUID());
+                        myItems[i].SetGiftCreator(GetPlayer().GetGUID());
                         GetPlayer().MoveItemFromInventory(myItems[i].GetBagSlot(), myItems[i].GetSlot(), true);
                     }
                     if (hisItems[i])
                     {
-                        hisItems[i].SetGuidValue(ItemFields.GiftCreator, trader.GetGUID());
+                        hisItems[i].SetGiftCreator(trader.GetGUID());
                         trader.MoveItemFromInventory(hisItems[i].GetBagSlot(), hisItems[i].GetSlot(), true);
                     }
                 }
@@ -650,8 +650,8 @@ namespace Game
             }
 
             if ((pOther.GetTeam() != GetPlayer().GetTeam() || 
-                pOther.HasFlag(PlayerFields.FlagsEx, PlayerFlagsEx.MercenaryMode) ||
-                GetPlayer().HasFlag(PlayerFields.FlagsEx, PlayerFlagsEx.MercenaryMode)) &&
+                pOther.HasPlayerFlagEx(PlayerFlagsEx.MercenaryMode) ||
+                GetPlayer().HasPlayerFlagEx(PlayerFlagsEx.MercenaryMode)) &&
                 (!WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideTrade) &&
                 !HasPermission(RBACPermissions.AllowTwoSideTrade)))
             {

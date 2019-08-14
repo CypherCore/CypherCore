@@ -36,7 +36,7 @@ namespace Game.DataStorage
         public string DisplayName;
         public string Description;
         public uint Id;
-        public byte Type;                                                     // value 0 -> hair, value 2 -> facialhair
+        public byte Type;                                                     // value 0 . hair, value 2 . facialhair
         public float CostModifier;
         public byte Race;
         public byte Sex;
@@ -76,7 +76,7 @@ namespace Game.DataStorage
     public sealed class BattlePetSpeciesStateRecord
     {
         public uint Id;
-        public byte BattlePetStateID;
+        public ushort BattlePetStateID;
         public int Value;
         public uint BattlePetSpeciesID;
     }

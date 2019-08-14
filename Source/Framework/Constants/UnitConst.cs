@@ -242,7 +242,7 @@ namespace Framework.Constants
     /// <summary>
     /// UnitStandStateType
     /// </summary>
-    public enum UnitStandStateType
+    public enum UnitStandStateType : byte
     {
         Stand = 0,
         Sit = 1,
@@ -256,23 +256,7 @@ namespace Framework.Constants
         Submerged = 9
     }
 
-    public struct UnitBytes0Offsets
-    {
-        public const byte Race = 0;
-        public const byte Class = 1;
-        public const byte PlayerClass = 2;
-        public const byte Gender = 3;
-    }
-
-    public struct UnitBytes1Offsets
-    {
-        public const byte StandState = 0;
-        public const byte PetTalents = 1;    // unused
-        public const byte VisFlag = 2;
-        public const byte AnimTier = 3;
-    }
-
-    public enum UnitStandFlags
+    public enum UnitVisFlags
     {
         Unk1 = 0x01,
         Creep = 0x02,
@@ -284,22 +268,16 @@ namespace Framework.Constants
 
     public enum UnitBytes1Flags
     {
+        None = 0x00,
         AlwaysStand = 0x01,
         Hover = 0x02,
         Unk3 = 0x04,
         All = 0xFF
     }
 
-    public struct UnitBytes2Offsets
+    public enum UnitPVPStateFlags
     {
-        public const byte SheathState = 0;
-        public const byte PvpFlag = 1;
-        public const byte PetFlags = 2;
-        public const byte ShapeshiftForm = 3;
-    }
-
-    public enum UnitBytes2Flags
-    {
+        None = 0x00,
         PvP = 0x01,
         Unk1 = 0x02,
         FFAPvp = 0x04,
@@ -310,8 +288,9 @@ namespace Framework.Constants
         Unk7 = 0x80,
     }
 
-    public enum UnitPetFlags
-    { 
+    public enum UnitPetFlags : byte
+    {
+        None = 0x00,
         CanBeRenamed = 0x01,
         CanBeAbandoned = 0x02
     }

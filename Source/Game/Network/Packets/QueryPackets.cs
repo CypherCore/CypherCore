@@ -47,7 +47,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt8(Result);
+            _worldPacket.WriteInt8((sbyte)Result);
             _worldPacket.WritePackedGuid(Player);
 
             if (Result == ResponseCodes.Success)
@@ -112,7 +112,7 @@ namespace Game.Network.Packets
                 for (var i = 0; i < SharedConst.MaxCreatureKillCredit; ++i)
                     _worldPacket.WriteUInt32(Stats.ProxyCreatureID[i]);
 
-                _worldPacket.WriteUInt32(Stats.Display.CreatureDisplay.Count);
+                _worldPacket.WriteInt32(Stats.Display.CreatureDisplay.Count);
                 _worldPacket.WriteFloat(Stats.Display.TotalProbability);
 
                 foreach (CreatureXDisplay display in Stats.Display.CreatureDisplay)
@@ -125,11 +125,11 @@ namespace Game.Network.Packets
                 _worldPacket.WriteFloat(Stats.HpMulti);
                 _worldPacket.WriteFloat(Stats.EnergyMulti);
 
-                _worldPacket.WriteUInt32(Stats.QuestItems.Count);
+                _worldPacket.WriteInt32(Stats.QuestItems.Count);
                 _worldPacket.WriteUInt32(Stats.CreatureMovementInfoID);
                 _worldPacket.WriteInt32(Stats.HealthScalingExpansion);
                 _worldPacket.WriteUInt32(Stats.RequiredExpansion);
-                _worldPacket.WriteInt32(Stats.VignetteID);
+                _worldPacket.WriteUInt32(Stats.VignetteID);
                 _worldPacket.WriteInt32(Stats.Class);
                 _worldPacket.WriteFloat(Stats.FadeRegionRadius);
                 _worldPacket.WriteInt32(Stats.WidgetSetID);
@@ -145,7 +145,7 @@ namespace Game.Network.Packets
                     _worldPacket.WriteCString(Stats.CursorName);
 
                 foreach (var questItem in Stats.QuestItems)
-                    _worldPacket.WriteInt32(questItem);
+                    _worldPacket.WriteUInt32(questItem);
             }
         }
 
@@ -180,7 +180,7 @@ namespace Game.Network.Packets
 
             if (Allow)
             {
-                _worldPacket.WriteUInt32(Pages.Count);
+                _worldPacket.WriteInt32(Pages.Count);
                 foreach (PageTextInfo pageText in Pages)
                     pageText.Write(_worldPacket);
             }
@@ -292,7 +292,7 @@ namespace Game.Network.Packets
                     statsData.WriteInt32(Stats.Data[i]);
 
                 statsData.WriteFloat(Stats.Size);
-                statsData.WriteUInt8(Stats.QuestItems.Count);
+                statsData.WriteUInt8((byte)Stats.QuestItems.Count);
                 foreach (uint questItem in Stats.QuestItems)
                     statsData.WriteUInt32(questItem);
 
@@ -389,7 +389,7 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32(CurrentTime);
+            _worldPacket.WriteUInt32((uint)CurrentTime);
         }
 
         public long CurrentTime;
@@ -422,7 +422,7 @@ namespace Game.Network.Packets
 
             foreach (QuestPOIData questPOIData in QuestPOIDataStats)
             {
-                _worldPacket.WriteInt32(questPOIData.QuestID);
+                _worldPacket.WriteUInt32(questPOIData.QuestID);
 
                 _worldPacket.WriteInt32(questPOIData.QuestPOIBlobDataStats.Count);
 
@@ -478,12 +478,12 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(QuestCompletionNPCs.Count);
+            _worldPacket.WriteInt32(QuestCompletionNPCs.Count);
             foreach (var quest in QuestCompletionNPCs)
             {
                 _worldPacket.WriteUInt32(quest.QuestID);
 
-                _worldPacket.WriteUInt32(quest.NPCs.Count);
+                _worldPacket.WriteInt32(quest.NPCs.Count);
                 foreach (var npc in quest.NPCs)
                     _worldPacket.WriteUInt32(npc);
             }
@@ -636,7 +636,7 @@ namespace Game.Network.Packets
                 BnetAccountID = player.GetSession().GetBattlenetAccountGUID();
                 Name = player.GetName();
                 RaceID = player.GetRace();
-                Sex = (Gender)player.GetByteValue(PlayerFields.Bytes3, PlayerFieldOffsets.Bytes3OffsetGender);
+                Sex = (Gender)(byte)player.m_playerData.NativeSex;
                 ClassID = player.GetClass();
                 Level = (byte)player.getLevel();
 
@@ -682,9 +682,9 @@ namespace Game.Network.Packets
             data.WritePackedGuid(GuidActual);
             data.WriteUInt64(GuildClubMemberID);
             data.WriteUInt32(VirtualRealmAddress);
-            data.WriteUInt8(RaceID);
-            data.WriteUInt8(Sex);
-            data.WriteUInt8(ClassID);
+            data.WriteUInt8((byte)RaceID);
+            data.WriteUInt8((byte)Sex);
+            data.WriteUInt8((byte)ClassID);
             data.WriteUInt8(Level);
             data.WriteString(Name);
         }

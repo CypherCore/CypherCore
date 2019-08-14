@@ -139,7 +139,7 @@ namespace Game.DataStorage
     public sealed class SoundKitRecord
     {
         public uint Id;
-        public byte SoundType;
+        public uint SoundType;
         public float VolumeFloat;
         public ushort Flags;
         public float MinDistance;
@@ -331,9 +331,9 @@ namespace Game.DataStorage
         public string HordeName;
         public uint[] EffectArg = new uint[ItemConst.MaxItemEnchantmentEffects];
         public float[] EffectScalingPoints = new float[ItemConst.MaxItemEnchantmentEffects];
+        public uint TransmogPlayerConditionID;
         public uint TransmogCost;
         public uint IconFileDataID;
-        public uint TransmogPlayerConditionID;
         public ushort[] EffectPointsMin = new ushort[ItemConst.MaxItemEnchantmentEffects];
         public ushort ItemVisual;
         public EnchantmentSlotMask Flags;
@@ -392,6 +392,7 @@ namespace Game.DataStorage
         public float MinDuration;
         public uint SpellIconFileDataID;
         public uint ActiveIconFileDataID;
+        public uint ContentTuningID;
         public int[] Attributes = new int[14];
         public uint SpellID;
     }
