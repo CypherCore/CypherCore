@@ -101,18 +101,21 @@ namespace Framework.Constants
     public enum CriteriaAdditionalCondition
     {
         SourceDrunkValue = 1,
-        Unk2 = 2,
+        SourcePlayerCondition = 2,
         ItemLevel = 3,
         TargetCreatureEntry = 4,
         TargetMustBePlayer = 5,
         TargetMustBeDead = 6,
         TargetMustBeEnemy = 7,
         SourceHasAura = 8,
+        SourceHasAuraType = 9,
         TargetHasAura = 10,
         TargetHasAuraType = 11,
+        SourceAuraState = 12,
+        TargetAuraState = 13,
         ItemQualityMin = 14,
         ItemQualityEquals = 15,
-        Unk16 = 16,
+        SourceIsAlive = 16,
         SourceAreaOrZone = 17,
         TargetAreaOrZone = 18,
         MapDifficultyOld = 20,
@@ -134,7 +137,7 @@ namespace Framework.Constants
         TargetLevel = 40,
         TargetZone = 41,
         TargetHealthPercentBelow = 46,
-        Unk55 = 55,
+        TargetPlayerCondition = 55,
         MinAchievementPoints = 56,
         RequiresLfgGroup = 58,
         Unk60 = 60,
@@ -162,13 +165,16 @@ namespace Framework.Constants
         //CRITERIA_ADDITIONAL_CONDITION_UNK87                         = 87, // Achievement id
         BattlePetSpecies = 91,
         Expansion = 92,
+        RewardedQuest = 110,
+        CompletedQuest = 111,
+        CompletedQuestObjective = 112, // NYI, QuestObjectiveID
         GarrisonFollowerEntry = 144,
         GarrisonFollowerQuality = 145,
         GarrisonFollowerLevel = 146,
         GarrisonRareMission = 147, // NYI
         GarrisonBuildingLevel = 149, // NYI
         GarrisonMissionType = 167, // NYI
-        PLayerItemLevel = 169, // NYI
+        PlayerItemLevel = 169, // NYI
         GarrisonFollowILvl = 184,
         HonorLevel = 193,
         PrestigeLevel = 194

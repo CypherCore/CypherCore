@@ -1189,6 +1189,13 @@ namespace Game.Achievements
             uint reqValue = tree.Entry.Asset;
             switch ((CriteriaAdditionalCondition)reqType)
             {
+                case CriteriaAdditionalCondition.SourcePlayerCondition: // 2
+                    {
+                        PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(reqValue);
+                        if (playerCondition == null || !ConditionManager.IsPlayerMeetingCondition(referencePlayer, playerCondition))
+                            return false;
+                        break;
+                    }
                 case CriteriaAdditionalCondition.ItemLevel: // 3
                     {
                         // miscValue1 is itemid
@@ -1217,12 +1224,24 @@ namespace Game.Achievements
                     if (!referencePlayer.HasAura(reqValue))
                         return false;
                     break;
+                case CriteriaAdditionalCondition.SourceHasAuraType: // 9
+                    if (!referencePlayer.HasAuraType((AuraType)reqValue))
+                        return false;
+                    break;
                 case CriteriaAdditionalCondition.TargetHasAura: // 10
                     if (unit == null || !unit.HasAura(reqValue))
                         return false;
                     break;
                 case CriteriaAdditionalCondition.TargetHasAuraType: // 11
                     if (unit == null || !unit.HasAuraType((AuraType)reqValue))
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.SourceAuraState: // 12
+                    if (!referencePlayer.HasAuraState((AuraStateType)reqValue))
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.TargetAuraState: // 13
+                    if (!unit || !unit.HasAuraState((AuraStateType)reqValue))
                         return false;
                     break;
                 case CriteriaAdditionalCondition.ItemQualityMin: // 14
@@ -1326,6 +1345,16 @@ namespace Game.Achievements
                     if (unit == null || unit.GetHealthPct() >= reqValue)
                         return false;
                     break;
+                case CriteriaAdditionalCondition.TargetPlayerCondition: // 55
+                    {
+                        if (unit == null || !unit.IsPlayer())
+                            return false;
+
+                        PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(reqValue);
+                        if (playerCondition == null || !ConditionManager.IsPlayerMeetingCondition(unit.ToPlayer(), playerCondition))
+                            return false;
+                        break;
+                    }
                 case CriteriaAdditionalCondition.RatedBattlegroundRating: // 64
                     if (referencePlayer.GetRBGPersonalRating() < reqValue)
                         return false;
@@ -1339,6 +1368,14 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.BattlePetSpecies: // 91
                     if (miscValue1 != reqValue)
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.RewardedQuest: // 110
+                    if (!referencePlayer.GetQuestRewardStatus(reqValue))
+                        return false;
+                    break;
+                case CriteriaAdditionalCondition.CompletedQuest: // 111
+                    if (referencePlayer.GetQuestStatus(reqValue) != QuestStatus.Complete)
                         return false;
                     break;
                 case CriteriaAdditionalCondition.GarrisonFollowerEntry: // 144
