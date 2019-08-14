@@ -5388,8 +5388,16 @@ namespace Game.Spells
             if (m_spellInfo.HasAttribute(SpellAttr6.IgnoreCasterAuras))
                 return SpellCastResult.SpellCastOk;
 
+            // these attributes only show the spell as usable on the client when it has related aura applied
+            // still they need to be checked against certain mechanics
+
+            // SPELL_ATTR5_USABLE_WHILE_STUNNED by default only MECHANIC_STUN (ie no sleep, knockout, freeze, etc.)
             bool usableWhileStunned = m_spellInfo.HasAttribute(SpellAttr5.UsableWhileStunned);
+
+            // SPELL_ATTR5_USABLE_WHILE_FEARED by default only fear (ie no horror)
             bool usableWhileFeared = m_spellInfo.HasAttribute(SpellAttr5.UsableWhileFeared);
+
+            // SPELL_ATTR5_USABLE_WHILE_CONFUSED by default only disorient (ie no polymorph)
             bool usableWhileConfused = m_spellInfo.HasAttribute(SpellAttr5.UsableWhileConfused);
 
             // Check whether the cast should be prevented by any state you might have.
@@ -5407,35 +5415,54 @@ namespace Game.Spells
                         result = SpellCastResult.Charmed;
             }*/
 
+            // spell has attribute usable while having a cc state, check if caster has allowed mechanic auras, another mechanic types must prevent cast spell
+            SpellCastResult mechanicCheck(AuraType auraType, ref uint _param1)
+            {
+                bool foundNotMechanic = false;
+                var auras = m_caster.GetAuraEffectsByType(auraType);
+                foreach (AuraEffect aurEff in auras)
+                {
+                    uint mechanicMask = aurEff.GetSpellInfo().GetAllEffectsMechanicMask();
+                    if (mechanicMask != 0 && !Convert.ToBoolean(mechanicMask & GetSpellInfo().GetAllowedMechanicMask()))
+                    {
+                        foundNotMechanic = true;
+
+                        // fill up aura mechanic info to send client proper error message
+                        _param1 = (uint)aurEff.GetSpellInfo().GetEffect(aurEff.GetEffIndex()).Mechanic;
+                        if (_param1 == 0)
+                            _param1 = (uint)aurEff.GetSpellInfo().Mechanic;
+
+                        break;
+                    }
+                }
+
+                if (foundNotMechanic)
+                {
+                    switch (auraType)
+                    {
+                        case AuraType.ModStun:
+                            return SpellCastResult.Stunned;
+                        case AuraType.ModFear:
+                            return SpellCastResult.Fleeing;
+                        case AuraType.ModConfuse:
+                            return SpellCastResult.Confused;
+                        default:
+                            //ABORT();
+                            return SpellCastResult.NotKnown;
+                    }
+                }
+
+                return SpellCastResult.SpellCastOk;
+            }
+
             if (unitflag.HasAnyFlag(UnitFlags.Stunned))
             {
-                // spell is usable while stunned, check if caster has allowed stun auras, another stun types must prevent cast spell
                 if (usableWhileStunned)
                 {
-                    uint allowedStunMask = 1 << (int)Mechanics.Stun | 1 << (int)Mechanics.Sleep;
-
-                    bool foundNotStun = false;
-                    var stunAuras = m_caster.GetAuraEffectsByType(AuraType.ModStun);
-                    foreach (AuraEffect stunEff in stunAuras)
-                    {
-                        uint stunMechanicMask = stunEff.GetSpellInfo().GetAllEffectsMechanicMask();
-                        if (stunMechanicMask != 0 && !Convert.ToBoolean(stunMechanicMask & allowedStunMask))
-                        {
-                            foundNotStun = true;
-
-                            // fill up aura mechanic info to send client proper error message
-                            param1 = (uint)stunEff.GetSpellInfo().GetEffect(stunEff.GetEffIndex()).Mechanic;
-                            if (param1 == 0)
-                                param1 = (uint)stunEff.GetSpellInfo().Mechanic;
-
-                            break;
-                        }
-                    }
-
-                    if (foundNotStun)
-                        result = SpellCastResult.Stunned;
+                    SpellCastResult mechanicResult = mechanicCheck(AuraType.ModStun, ref param1);
+                    if (mechanicResult != SpellCastResult.SpellCastOk)
+                        result = mechanicResult;
                 }
-                // Not usable while stunned, however spell might provide some immunity that allows to cast it anyway
                 else if (!CheckSpellCancelsStun(ref param1))
                     result = SpellCastResult.Stunned;
             }
@@ -5443,16 +5470,35 @@ namespace Game.Spells
                 result = SpellCastResult.Silenced;
             else if (unitflag.HasAnyFlag(UnitFlags.Pacified) && m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Pacify) && !CheckSpellCancelsPacify(ref param1))
                 result = SpellCastResult.Pacified;
-            else if (unitflag.HasAnyFlag(UnitFlags.Fleeing) && !usableWhileFeared && !CheckSpellCancelsFear(ref param1))
-                result = SpellCastResult.Fleeing;
-            else if (unitflag.HasAnyFlag(UnitFlags.Confused) && !usableWhileConfused && !CheckSpellCancelsConfuse(ref param1))
-                result = SpellCastResult.Confused;
-            else if (m_caster.HasUnitFlag2(UnitFlags2.NoActions) && m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.NoActions))
+            else if (unitflag.HasAnyFlag(UnitFlags.Fleeing))
+            {
+                if (usableWhileFeared)
+                {
+                    SpellCastResult mechanicResult = mechanicCheck(AuraType.ModFear, ref param1);
+                    if (mechanicResult != SpellCastResult.SpellCastOk)
+                        result = mechanicResult;
+                }
+                else if (!CheckSpellCancelsFear(ref param1))
+                    result = SpellCastResult.Fleeing;
+            }
+            else if (unitflag.HasAnyFlag(UnitFlags.Confused))
+            {
+                if (usableWhileConfused)
+                {
+                    SpellCastResult mechanicResult = mechanicCheck(AuraType.ModConfuse, ref param1);
+                    if (mechanicResult != SpellCastResult.SpellCastOk)
+                        result = mechanicResult;
+                }
+                else if (!CheckSpellCancelsConfuse(ref param1))
+                    result = SpellCastResult.Confused;
+            }
+            else if (m_caster.HasUnitFlag2(UnitFlags2.NoActions) && m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.NoActions) && !CheckSpellCancelsNoActions(ref param1))
                 result = SpellCastResult.NoActions;
 
             // Attr must make flag drop spell totally immune from all effects
             if (result != SpellCastResult.SpellCastOk)
                 return (param1 != 0) ? SpellCastResult.PreventedByMechanic : result;
+
             return SpellCastResult.SpellCastOk;
         }
 
@@ -5511,6 +5557,11 @@ namespace Game.Spells
         bool CheckSpellCancelsConfuse(ref uint param1)
         {
             return CheckSpellCancelsAuraEffect(AuraType.ModConfuse, ref param1);
+        }
+
+        bool CheckSpellCancelsNoActions(ref uint param1)
+        {
+            return CheckSpellCancelsAuraEffect(AuraType.ModNoActions, ref param1);
         }
 
         SpellCastResult CheckArenaAndRatedBattlegroundCastRules()

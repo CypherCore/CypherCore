@@ -2371,6 +2371,8 @@ namespace Game.Spells
                 immuneInfo.MechanicImmuneMask = mechanicImmunityMask;
                 immuneInfo.DispelImmune = dispelImmunity;
                 immuneInfo.DamageSchoolMask = damageImmunityMask;
+
+                _allowedMechanicMask |= immuneInfo.MechanicImmuneMask;
             });
 
             foreach (var effects in _effects)
@@ -2383,6 +2385,31 @@ namespace Game.Spells
                     loadImmunityInfoFn(effect);
                 }
             }
+
+            if (HasAttribute(SpellAttr5.UsableWhileStunned))
+            {
+                switch (Id)
+                {
+                    case 22812: // Barkskin
+                        _allowedMechanicMask |=
+                            (1 << (int)Mechanics.Stun) |
+                            (1 << (int)Mechanics.Freeze) |
+                            (1 << (int)Mechanics.Knockout) |
+                            (1 << (int)Mechanics.Sleep);
+                        break;
+                    case 49039: // Lichborne, don't allow normal stuns
+                        break;
+                    default:
+                        _allowedMechanicMask |= (1 << (int)Mechanics.Stun);
+                        break;
+                }
+            }
+
+            if (HasAttribute(SpellAttr5.UsableWhileConfused))
+                _allowedMechanicMask |= (1 << (int)Mechanics.Disoriented);
+
+            if (HasAttribute(SpellAttr5.UsableWhileFeared))
+                _allowedMechanicMask |= (1 << (int)Mechanics.Fear);
         }
 
         public void ApplyAllSpellImmunitiesTo(Unit target, SpellEffectInfo effect, bool apply)
@@ -2588,6 +2615,11 @@ namespace Game.Spells
             }
 
             return false;
+        }
+
+        public uint GetAllowedMechanicMask()
+        {
+            return _allowedMechanicMask;
         }
 
         public float GetMinRange(bool positive = false)
@@ -3733,6 +3765,7 @@ namespace Game.Spells
         AuraStateType _auraState;
 
         SpellDiminishInfo _diminishInfo;
+        uint _allowedMechanicMask;
         #endregion
 
         public struct ScalingInfo
