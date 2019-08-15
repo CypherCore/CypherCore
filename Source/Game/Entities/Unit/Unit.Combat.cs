@@ -235,6 +235,10 @@ namespace Game.Entities
             if (IsTypeId(TypeId.Player))
                 ToPlayer().SendAttackSwingCancelAttack();     // melee and ranged forced attack cancel
             ClearInCombat();
+
+            // just in case
+            if (IsPetInCombat() && GetTypeId() != TypeId.Player)
+                ClearInPetCombat();
         }
         public void CombatStopWithPets(bool includingCast = false)
         {
@@ -270,8 +274,15 @@ namespace Game.Entities
             else
                 ToPlayer().OnCombatExit();
 
-            RemoveUnitFlag(UnitFlags.PetInCombat);
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.LeaveCombat);
+        }
+
+        public void ClearInPetCombat()
+        {
+            RemoveUnitFlag(UnitFlags.PetInCombat);
+            Unit owner = GetOwner();
+            if (owner != null)
+                owner.RemoveUnitFlag(UnitFlags.PetInCombat);
         }
 
         void RemoveAllAttackers()
@@ -327,10 +338,10 @@ namespace Game.Entities
         {
             return m_deathState;
         }
-        public bool IsInCombat()
-        {
-            return HasUnitFlag(UnitFlags.InCombat);
-        }
+
+        public bool IsInCombat() { return HasUnitFlag(UnitFlags.InCombat); }
+        public bool IsPetInCombat() { return HasUnitFlag(UnitFlags.PetInCombat); }
+
         public bool Attack(Unit victim, bool meleeAttack)
         {
             if (victim == null || victim.GetGUID() == GetGUID())
@@ -1323,10 +1334,7 @@ namespace Game.Entities
             }
 
             foreach (var unit in m_Controlled)
-            {
                 unit.SetInCombatState(PvP, enemy);
-                unit.AddUnitFlag(UnitFlags.PetInCombat);
-            }
 
             ProcSkillsAndAuras(enemy, ProcFlags.EnterCombat, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
         }

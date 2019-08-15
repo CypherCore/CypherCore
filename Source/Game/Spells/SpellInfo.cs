@@ -1054,19 +1054,9 @@ namespace Game.Spells
             // creature/player specific target checks
             if (unitTarget != null)
             {
-                if (HasAttribute(SpellAttr1.CantTargetInCombat))
-                {
-                    if (unitTarget.IsInCombat())
-                        return SpellCastResult.TargetAffectingCombat;
-                    // player with active pet counts as a player in combat
-                    else if (unitTarget.IsTypeId(TypeId.Player))
-                    {
-                        Pet pet = unitTarget.ToPlayer().GetPet();
-                        if (pet)
-                            if (pet.GetVictim() && !pet.HasUnitState(UnitState.Controlled))
-                                return SpellCastResult.TargetAffectingCombat;
-                    }
-                }
+                // spells cannot be cast if player is in fake combat also
+                if (HasAttribute(SpellAttr1.CantTargetInCombat) && (unitTarget.IsInCombat() || unitTarget.IsPetInCombat()))
+                    return SpellCastResult.TargetAffectingCombat;
 
                 // only spells with SPELL_ATTR3_ONLY_TARGET_GHOSTS can target ghosts
                 if (HasAttribute(SpellAttr3.OnlyTargetGhosts) != unitTarget.HasAuraType(AuraType.Ghost))

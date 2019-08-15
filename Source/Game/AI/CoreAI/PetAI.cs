@@ -63,7 +63,6 @@ namespace Game.AI
 
             me.AttackStop();
             me.InterruptNonMeleeSpells(false);
-            me.SendMeleeAttackStop(); // Should stop pet's attack button from flashing
             me.GetCharmInfo().SetIsCommandAttack(false);
             ClearCharmInfoFlags();
             HandleReturnMovement();
@@ -299,7 +298,6 @@ namespace Game.AI
             // next target selection
             me.AttackStop();
             me.InterruptNonMeleeSpells(false);
-            me.SendMeleeAttackStop();  // Stops the pet's 'Attack' button from flashing
 
             // Before returning to owner, see if there are more things to attack
             Unit nextTarget = SelectNextTarget(false);
@@ -445,6 +443,8 @@ namespace Game.AI
                     me.GetMotionMaster().MoveFollow(me.GetCharmerOrOwner(), SharedConst.PetFollowDist, me.GetFollowAngle());
                 }
             }
+
+            me.ClearInPetCombat();
         }
 
         void DoAttack(Unit target, bool chase)
@@ -454,9 +454,12 @@ namespace Game.AI
 
             if (me.Attack(target, true))
             {
+                // properly fix fake combat after pet is sent to attack
                 Unit owner = me.GetOwner();
-                if (owner)
-                    owner.SetInCombatWith(target);
+                if (owner != null)
+                    owner.AddUnitFlag(UnitFlags.PetInCombat);
+
+                me.AddUnitFlag(UnitFlags.PetInCombat);
 
                 // Play sound to let the player know the pet is attacking something it picked on its own
                 if (me.HasReactState(ReactStates.Aggressive) && !me.GetCharmInfo().IsCommandAttack())
@@ -525,10 +528,10 @@ namespace Game.AI
 
             if (!victim.IsAlive())
             {
+                // if target is invalid, pet should evade automaticly
                 // Clear target to prevent getting stuck on dead targets
-                me.AttackStop();
-                me.InterruptNonMeleeSpells(false);
-                me.SendMeleeAttackStop();
+                //me.AttackStop();
+                //me.InterruptNonMeleeSpells(false);
                 return false;
             }
 
