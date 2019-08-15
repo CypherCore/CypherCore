@@ -1843,12 +1843,19 @@ namespace Game.Spells
 
                     // The spell that this effect will trigger. It has SPELL_AURA_CONTROL_VEHICLE
                     uint spellId = SharedConst.VehicleSpellRideHardcoded;
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)effectInfo.CalcValue());
-                    if (spellInfo != null && spellInfo.HasAura(m_originalCaster.GetMap().GetDifficultyID(), AuraType.ControlVehicle))
-                        spellId = spellInfo.Id;
+                    int basePoints = effectInfo.CalcValue();
+                    if (basePoints > SharedConst.MaxVehicleSeats)
+                    {
+                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)basePoints);
+                        if (spellInfo != null && spellInfo.HasAura(m_originalCaster.GetMap().GetDifficultyID(), AuraType.ControlVehicle))
+                            spellId = spellInfo.Id;
+                    }
 
-                    // Hard coded enter vehicle spell
-                    m_originalCaster.CastSpell(summon, spellId, true);
+                    // if we have small value, it indicates seat position
+                    if (basePoints > 0 && basePoints < SharedConst.MaxVehicleSeats)
+                        m_originalCaster.CastCustomSpell(spellId, SpellValueMod.BasePoint0, basePoints, summon, true);
+                    else
+                        m_originalCaster.CastSpell(summon, spellId, true);
 
                     uint faction = properties.Faction;
                     if (faction == 0)
