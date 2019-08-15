@@ -213,6 +213,12 @@ namespace Game.Chat.Commands
                 return false;
 
             string name = args.NextString();
+            if (!ObjectManager.NormalizePlayerName(ref name))
+            {
+                handler.SendSysMessage(CypherStrings.BaninfoNocharacter);
+                return false;
+            }
+
             Player target = Global.ObjAccessor.FindPlayerByName(name);
             ObjectGuid targetGuid;
 

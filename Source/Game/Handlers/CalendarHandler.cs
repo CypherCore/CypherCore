@@ -241,6 +241,9 @@ namespace Game
             Team inviteeTeam = 0;
             ulong inviteeGuildId = 0;
 
+            if (!ObjectManager.NormalizePlayerName(ref calendarEventInvite.Name))
+                return;
+
             Player player = Global.ObjAccessor.FindPlayerByName(calendarEventInvite.Name);
             if (player)
             {
