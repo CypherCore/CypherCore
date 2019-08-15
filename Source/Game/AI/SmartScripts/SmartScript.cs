@@ -1064,19 +1064,28 @@ namespace Game.AI
                         if (targets == null)
                             break;
 
+                        // there should be at least a world update tick before despawn, to avoid breaking linked actions
+                        uint respawnDelay = Math.Max(e.Action.forceDespawn.delay, 1u);
+
                         foreach (var obj in targets)
                         {
-                            if (obj.IsTypeId(TypeId.Unit))
+                            Creature creatureTarget = obj.ToCreature();
+                            if (creatureTarget != null)
                             {
-                                Creature target = obj.ToCreature();
-                                if (target)
-                                    target.DespawnOrUnsummon(e.Action.forceDespawn.delay, TimeSpan.FromSeconds(e.Action.forceDespawn.respawn));
+                                SmartAI smartAI = (SmartAI)creatureTarget.GetAI();
+                                if (smartAI != null)
+                                {
+                                    smartAI.SetDespawnTime(respawnDelay);
+                                    smartAI.StartDespawn();
+                                }
+                                else
+                                    creatureTarget.DespawnOrUnsummon(respawnDelay);
                             }
-                            else if (obj.IsTypeId(TypeId.GameObject))
+                            else
                             {
                                 GameObject goTarget = obj.ToGameObject();
-                                if (goTarget)
-                                    goTarget.SetRespawnTime((int)e.Action.forceDespawn.delay + 1);
+                                if (goTarget != null)
+                                    goTarget.SetRespawnTime((int)respawnDelay);
                             }
                         }
 
