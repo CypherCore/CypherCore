@@ -2387,7 +2387,7 @@ namespace Framework.Constants
         Unk126 = 126,
         Unk127 = 127,
         Unk128 = 128,
-        Unk129 = 129,
+        ConeEntry129 = 129,
         Unk130 = 130,
         Unk131 = 131,
         Unk132 = 132,
