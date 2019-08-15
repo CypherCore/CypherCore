@@ -323,7 +323,7 @@ namespace Game.Entities
         }
 
         public bool IsPotion() { return GetClass() == ItemClass.Consumable && GetSubClass() == (uint)ItemSubClassConsumable.Potion; }
-        public bool IsVellum() { return GetClass() == ItemClass.TradeGoods && GetSubClass() == (uint)ItemSubClassTradeGoods.Enchantment; }
+        public bool IsVellum() { return GetFlags3().HasAnyFlag(ItemFlags3.CanStoreEnchants); }
         public bool IsConjuredConsumable() { return GetClass() == ItemClass.Consumable && GetFlags().HasAnyFlag(ItemFlags.Conjured); }
         public bool IsCraftingReagent() { return GetFlags2().HasAnyFlag(ItemFlags2.UsedInATradeskill); }
 
