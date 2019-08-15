@@ -1198,6 +1198,10 @@ namespace Game.Scripting
         {
             ForEach<PlayerScript>(p => p.OnUpdateZone(player, newZone, newArea));
         }
+        public void OnPlayerRepop(Player player)
+        {
+            ForEach<PlayerScript>(p => p.OnPlayerRepop(player));
+        }
         public void OnQuestStatusChange(Player player, uint questId)
         {
             ForEach<PlayerScript>(p => p.OnQuestStatusChange(player, questId));

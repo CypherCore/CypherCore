@@ -4260,6 +4260,9 @@ namespace Game.Entities
 
             // set and clear other
             SetAnimTier(UnitBytes1Flags.AlwaysStand, false);
+
+            // OnPlayerRepop hook
+            Global.ScriptMgr.OnPlayerRepop(this);
         }
 
         public void StopMirrorTimers()

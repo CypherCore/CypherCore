@@ -663,6 +663,9 @@ namespace Game.Scripting
         // Called after a player's quest status has been changed
         public virtual void OnQuestStatusChange(Player player, uint questId) { }
 
+        // Called when a player presses release when he died
+        public virtual void OnPlayerRepop(Player player) { }
+
         // Called when a player completes a movie
         public virtual void OnMovieComplete(Player player, uint movieId) { }
 
