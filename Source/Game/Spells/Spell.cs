@@ -290,7 +290,8 @@ namespace Game.Spells
                 }
                 else if (m_spellInfo.Speed > 0.0f)
                 {
-                    float dist = m_caster.GetDistance(m_targets.GetDstPos());
+                    // We should not subtract caster size from dist calculation (fixes execution time desync with animation on client, eg. Malleable Goo cast by PP)
+                    float dist = m_caster.GetExactDist(m_targets.GetDstPos());
                     if (!m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
                         m_delayMoment = (ulong)Math.Floor(dist / m_spellInfo.Speed * 1000.0f);
                     else
