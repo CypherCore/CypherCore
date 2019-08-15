@@ -357,10 +357,10 @@ namespace Game.Spells
                 Player modOwner = _owner.GetSpellModOwner();
                 if (modOwner)
                 {
-                    if (cooldown > 0)
+                    if (cooldown >= 0)
                         modOwner.ApplySpellMod(spellInfo.Id, SpellModOp.Cooldown, ref cooldown, spell);
 
-                    if (categoryCooldown > 0 && !spellInfo.HasAttribute(SpellAttr6.IgnoreCategoryCooldownMods))
+                    if (categoryCooldown >= 0 && !spellInfo.HasAttribute(SpellAttr6.IgnoreCategoryCooldownMods))
                         modOwner.ApplySpellMod(spellInfo.Id, SpellModOp.Cooldown, ref categoryCooldown, spell);
                 }
 
