@@ -137,7 +137,7 @@ namespace Game.Entities
 
             // Should get removed later, just keep "compatibility" with scripts
             if (setSpawnTime)
-                m_respawnTime = Time.UnixTime + respawnDelay;
+                m_respawnTime = Math.Max(Time.UnixTime + respawnDelay, m_respawnTime);
 
             // if corpse was removed during falling, the falling will continue and override relocation to respawn position
             if (IsFalling())
@@ -773,6 +773,9 @@ namespace Game.Entities
                 return false;
 
             cinfo = GetCreatureTemplate(); // might be different than initially requested
+            if (cinfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.DungeonBoss) && map.IsDungeon())
+                m_respawnDelay = 0; // special value, prevents respawn for dungeon bosses unless overridden
+
             switch (cinfo.Rank)
             {
                 case CreatureEliteType.Rare:
@@ -1518,7 +1521,10 @@ namespace Game.Entities
             if (s == DeathState.JustDied)
             {
                 m_corpseRemoveTime = Time.UnixTime + m_corpseDelay;
-                m_respawnTime = Time.UnixTime + m_respawnDelay + m_corpseDelay;
+                if (IsDungeonBoss() && m_respawnDelay == 0)
+                    m_respawnTime = long.MaxValue; // never respawn in this instance
+                else
+                    m_respawnTime = Time.UnixTime + m_respawnDelay + m_corpseDelay;
 
                 // always save boss respawn time at death to prevent crash cheating
                 if (WorldConfig.GetBoolValue(WorldCfg.SaveRespawnTimeImmediately) || isWorldBoss())
@@ -2299,7 +2305,7 @@ namespace Game.Entities
             else
                 m_corpseRemoveTime = now + (uint)(m_corpseDelay * decayRate);
 
-            m_respawnTime = m_corpseRemoveTime + m_respawnDelay;
+            m_respawnTime = Math.Max(m_corpseRemoveTime + m_respawnDelay, m_respawnTime);
         }
 
         public bool HasScalableLevels()
@@ -2932,15 +2938,14 @@ namespace Game.Entities
 
             m_spawnId = spawnId;
             m_creatureData = data;
+            m_respawnradius = data.spawndist;
+            m_respawnDelay = data.spawntimesecs;
             if (!Create(map.GenerateLowGuid(HighGuid.Creature), map, data.id, data.posX, data.posY, data.posZ, data.orientation, data, 0))
                 return false;
 
             //We should set first home position, because then AI calls home movement
             SetHomePosition(data.posX, data.posY, data.posZ, data.orientation);
 
-            m_respawnradius = data.spawndist;
-
-            m_respawnDelay = data.spawntimesecs;
             m_deathState = DeathState.Alive;
 
             m_respawnTime = GetMap().GetCreatureRespawnTime(m_spawnId);
