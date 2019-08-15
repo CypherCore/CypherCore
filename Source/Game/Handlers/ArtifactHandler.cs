@@ -30,7 +30,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ArtifactAddPower)]
         void HandleArtifactAddPower(ArtifactAddPower artifactAddPower)
         {
-            if (!_player.GetGameObjectIfCanInteractWith(artifactAddPower.ForgeGUID, GameObjectTypes.ArtifactForge))
+            if (!_player.GetGameObjectIfCanInteractWith(artifactAddPower.ForgeGUID, GameObjectTypes.ItemForge))
                 return;
 
             Item artifact = _player.GetItemByGuid(artifactAddPower.ArtifactGUID);
@@ -160,7 +160,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ArtifactSetAppearance)]
         void HandleArtifactSetAppearance(ArtifactSetAppearance artifactSetAppearance)
         {
-            if (!_player.GetGameObjectIfCanInteractWith(artifactSetAppearance.ForgeGUID, GameObjectTypes.ArtifactForge))
+            if (!_player.GetGameObjectIfCanInteractWith(artifactSetAppearance.ForgeGUID, GameObjectTypes.ItemForge))
                 return;
 
             ArtifactAppearanceRecord artifactAppearance = CliDB.ArtifactAppearanceStorage.LookupByKey(artifactSetAppearance.ArtifactAppearanceID);

@@ -66,7 +66,7 @@ namespace Framework.Constants
         GarrisonMonument = 44,
         GarrisonShipment = 45,
         GarrisonMonumentPlaque = 46,
-        ArtifactForge = 47,
+        ItemForge = 47,
         UILink = 48,
         KeystoneReceptacle = 49,
         GatheringNode = 50,

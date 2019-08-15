@@ -180,7 +180,7 @@ namespace Game.Entities
         public garrisonmonumentplaque GarrisonMonumentPlaque;
 
         [FieldOffset(68)]
-        public artifactforge ArtifactForge;
+        public itemforge ItemForge;
 
         [FieldOffset(68)]
         public uilink UILink;
@@ -381,8 +381,6 @@ namespace Game.Entities
                     return FishingHole.chestLoot;
                 case GameObjectTypes.GatheringNode:
                     return GatheringNode.chestLoot;
-                case GameObjectTypes.ChallengeModeReward:
-                    return ChallengeModeReward.chestLoot;
                 default: return 0;
             }
         }
@@ -507,8 +505,8 @@ namespace Game.Entities
                     return DungeonDifficulty.LargeAOI != 0;
                 case GameObjectTypes.GarrisonShipment:
                     return GarrisonShipment.LargeAOI != 0;
-                case GameObjectTypes.ArtifactForge:
-                    return ArtifactForge.LargeAOI != 0;
+                case GameObjectTypes.ItemForge:
+                    return ItemForge.LargeAOI != 0;
                 case GameObjectTypes.GatheringNode:
                     return GatheringNode.LargeAOI != 0;
                 default: return false;
@@ -644,6 +642,8 @@ namespace Game.Entities
             public uint playerCast;                              // 16 playerCast, enum { false, true, }; Default: false
             public uint SummonerTriggered;                       // 17 Summoner Triggered, enum { false, true, }; Default: false
             public uint requireLOS;                              // 18 require LOS, enum { false, true, }; Default: false
+            public uint TriggerCondition;                        // 19 Trigger Condition, References: PlayerCondition, NoValue = 0
+            public uint Checkallunits;                           // 20 Check all units (spawned traps only check players), enum { false, true, }; Default: false
         }
 
 
@@ -908,6 +908,7 @@ namespace Game.Entities
             public uint speedWorldState2;                        // 24 speedWorldState2, References: WorldState, NoValue = 0
             public uint UncontestedTime;                         // 25 Uncontested Time, int, Min value: 0, Max value: 65535, Default value: 0
             public uint FrequentHeartbeat;                       // 26 Frequent Heartbeat, enum { false, true, }; Default: false
+            public uint EnablingWorldStateExpression;            // 27 Enabling World State Expression, References: WorldStateExpression, NoValue = 0
         }
 
 
@@ -972,6 +973,10 @@ namespace Game.Entities
             public int Unused9;                                  // 20 Unused, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
             public int Unused10;                                 // 21 Unused, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
             public uint DamageEvent;                             // 22 Damage Event, References: GameEvents, NoValue = 0
+            public uint Displaymouseoverasanameplate;            // 23 Display mouseover as a nameplate, enum { false, true, }; Default: false
+            public int Thexoffsetofthedestructiblenameplateifitisenabled;// 24 The x offset (in hundredths) of the destructible nameplate, if it is enabled, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
+            public int Theyoffsetofthedestructiblenameplateifitisenabled;// 25 The y offset (in hundredths) of the destructible nameplate, if it is enabled, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
+            public int Thezoffsetofthedestructiblenameplateifitisenabled;// 26 The z offset (in hundredths) of the destructible nameplate, if it is enabled, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
         }
 
 
@@ -993,7 +998,6 @@ namespace Game.Entities
             public uint DoorisOpaque;                            // 7 Door is Opaque (Disable portal on close), enum { false, true, }; Default: false
         }
 
-
         public struct newflag
         {
             public uint open;                                    // 0 open, References: Lock_, NoValue = 0
@@ -1009,27 +1013,25 @@ namespace Game.Entities
             public int ExclusiveCategory;                        // 10 Exclusive Category (BGs Only), int, Min value: -2147483648, Max value: 2147483647, Default value: 0
             public uint worldState1;                             // 11 worldState1, References: WorldState, NoValue = 0
             public uint ReturnonDefenderInteract;                // 12 Return on Defender Interact, enum { false, true, }; Default: false
+            public uint SpawnVignette;                           // 13 Spawn Vignette, References: vignette, NoValue = 0
         }
-
 
         public struct newflagdrop
         {
             public uint open;                                    // 0 open, References: Lock_, NoValue = 0
+            public uint SpawnVignette;                           // 1 Spawn Vignette, References: vignette, NoValue = 0
         }
-
 
         public struct Garrisonbuilding
         {
             public int SpawnMap;                                 // 0 Spawn Map, References: Map, NoValue = -1
         }
 
-
         public struct garrisonplot
         {
             public uint PlotInstance;                            // 0 Plot Instance, References: GarrPlotInstance, NoValue = 0
             public int SpawnMap;                                 // 1 Spawn Map, References: Map, NoValue = -1
         }
-
 
         public struct clientcreature
         {
@@ -1038,12 +1040,10 @@ namespace Game.Entities
             public uint creatureID;                              // 2 creatureID, References: Creature, NoValue = 0
         }
 
-
         public struct clientitem
         {
             public uint Item;                                    // 0 Item, References: Item, NoValue = 0
         }
-
 
         public struct capturepoint
         {
@@ -1072,7 +1072,6 @@ namespace Game.Entities
             public uint SpawnVignette;                           // 22 Spawn Vignette, References: vignette, NoValue = 0
         }
 
-
         public struct phaseablemo
         {
             public int SpawnMap;                                 // 0 Spawn Map, References: Map, NoValue = -1
@@ -1081,13 +1080,11 @@ namespace Game.Entities
             public uint DoodadSetB;                              // 3 Doodad Set B, int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
-
         public struct garrisonmonument
         {
             public uint TrophyTypeID;                            // 0 Trophy Type ID, References: TrophyType, NoValue = 0
             public uint TrophyInstanceID;                        // 1 Trophy Instance ID, References: TrophyInstance, NoValue = 0
         }
-
 
         public struct garrisonshipment
         {
@@ -1096,20 +1093,19 @@ namespace Game.Entities
             public uint LargeAOI;                                // 2 Large AOI, enum { false, true, }; Default: false
         }
 
-
         public struct garrisonmonumentplaque
         {
             public uint TrophyInstanceID;                        // 0 Trophy Instance ID, References: TrophyInstance, NoValue = 0
         }
 
-        public struct artifactforge
+        public struct itemforge
         {
             public uint conditionID1;                            // 0 conditionID1, References: PlayerCondition, NoValue = 0
             public uint LargeAOI;                                // 1 Large AOI, enum { false, true, }; Default: false
             public uint IgnoreBoundingBox;                       // 2 Ignore Bounding Box, enum { false, true, }; Default: false
             public uint CameraMode;                              // 3 Camera Mode, References: CameraMode, NoValue = 0
             public uint FadeRegionRadius;                        // 4 Fade Region Radius, int, Min value: 0, Max value: 2147483647, Default value: 0
-            public uint ForgeType;                               // 5 Forge Type, enum { Artifact Forge, Relic Forge, }; Default: Relic Forge
+            public uint ForgeType;                               // 5 Forge Type, enum { Artifact Forge, Relic Forge, Heart Forge }; Default: Relic Forge
         }
 
         public struct uilink
@@ -1147,11 +1143,12 @@ namespace Game.Entities
             public uint logloot;                                 // 19 log loot, enum { false, true, }; Default: false
             public uint linkedTrap;                              // 20 linkedTrap, References: GameObjects, NoValue = 0
             public uint PlayOpenAnimationonOpening;              // 21 Play Open Animation on Opening, enum { false, true, }; Default: false
+            public uint turnpersonallootsecurityoff;             // 22 turn personal loot security off, enum { false, true, }; Default: false
         }
 
         public struct challengemodereward
         {
-            public uint chestLoot;                               // 0 chestLoot, References: Treasure, NoValue = 0
+            public int Unused;                                   // 0 Unused, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
             public uint WhenAvailable;                           // 1 When Available, References: GameObjectDisplayInfo, NoValue = 0
             public uint open;                                    // 2 open, References: Lock_, NoValue = 0
             public uint openTextID;                              // 3 openTextID, References: BroadcastText, NoValue = 0
@@ -1180,7 +1177,7 @@ namespace Game.Entities
 
         public struct pvpReward
         {
-            public uint chestLoot;                               // 0 chestLoot, References: Treasure, NoValue = 0
+            public int Unused;                                   // 0 Unused, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
             public uint WhenAvailable;                           // 1 When Available, References: GameObjectDisplayInfo, NoValue = 0
             public uint open;                                    // 2 open, References: Lock_, NoValue = 0
             public uint openTextID;                              // 3 openTextID, References: BroadcastText, NoValue = 0

@@ -1872,7 +1872,7 @@ namespace Game.Entities
                         player.SetStandState((UnitStandStateType.SitLowChair + (byte)info.BarberChair.chairheight), info.BarberChair.SitAnimKit);
                         return;
                     }
-                case GameObjectTypes.ArtifactForge:
+                case GameObjectTypes.ItemForge:
                     {
                         GameObjectTemplate info = GetGoInfo();
                         if (info == null)
@@ -1882,7 +1882,7 @@ namespace Game.Entities
                             return;
 
                         Player player = user.ToPlayer();
-                        PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(info.ArtifactForge.conditionID1);
+                        PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(info.ItemForge.conditionID1);
                         if (playerCondition != null)
                             if (!ConditionManager.IsPlayerMeetingCondition(player, playerCondition))
                                 return;
