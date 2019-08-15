@@ -3052,8 +3052,7 @@ namespace Game.Entities
 
             // PvP case - can't attack when attacker or target are in sanctuary
             // however, 13850 client doesn't allow to attack when one of the unit's has sanctuary flag and is pvp
-            if (target.HasUnitFlag(UnitFlags.PvpAttackable) && HasUnitFlag(UnitFlags.PvpAttackable)
-                && (target.HasPvpFlag(UnitPVPStateFlags.Sanctuary) || HasPvpFlag(UnitPVPStateFlags.Sanctuary)))
+            if (target.HasUnitFlag(UnitFlags.PvpAttackable) && HasUnitFlag(UnitFlags.PvpAttackable) && (target.IsInSanctuary() || IsInSanctuary()))
                 return false;
 
             // additional checks - only PvP case
@@ -3148,7 +3147,7 @@ namespace Game.Entities
                         return false;
                     // can't assist player out of sanctuary from sanctuary if has pvp enabled
                     if (target.HasPvpFlag(UnitPVPStateFlags.PvP))
-                        if (HasPvpFlag(UnitPVPStateFlags.Sanctuary) && !target.HasPvpFlag(UnitPVPStateFlags.Sanctuary))
+                        if (IsInSanctuary() && !target.IsInSanctuary())
                             return false;
                 }
             }

@@ -4528,6 +4528,18 @@ namespace Game.Spells
             Unit unitTarget = m_targets.GetUnitTarget();
             if (unitTarget != null)
             {
+                // do not allow to cast on hostile targets in sanctuary
+                if (!m_caster.IsFriendlyTo(unitTarget))
+                {
+                    if (m_caster.IsInSanctuary() || unitTarget.IsInSanctuary())
+                    {
+                        // fix for duels
+                        Player playerDuel = m_caster.ToPlayer();
+                        if (!playerDuel || playerDuel.duel == null || unitTarget != playerDuel.duel.opponent)
+                            return SpellCastResult.NothingToDispel;
+                    }
+                }
+
                 castResult = m_spellInfo.CheckTarget(m_caster, unitTarget, m_caster.GetEntry() == SharedConst.WorldTrigger); // skip stealth checks for GO casts
                 if (castResult != SpellCastResult.SpellCastOk)
                     return castResult;
@@ -5109,8 +5121,29 @@ namespace Game.Spells
                         }
                     case SpellEffectName.StealBeneficialBuff:
                         {
-                            if (m_targets.GetUnitTarget() == m_caster)
+                            if (m_targets.GetUnitTarget() == null || m_targets.GetUnitTarget() == m_caster)
                                 return SpellCastResult.BadTargets;
+
+                            uint dispelMask = SpellInfo.GetDispelMask((DispelType)effect.MiscValue);
+                            bool hasStealableAura = false;
+                            foreach (AuraApplication visibleAura in m_targets.GetUnitTarget().GetVisibleAuras())
+                            {
+                                if (!visibleAura.IsPositive())
+                                    continue;
+
+                                Aura aura = visibleAura.GetBase();
+                                if (!aura.GetSpellInfo().GetDispelMask().HasAnyFlag(dispelMask))
+                                    continue;
+
+                                if (aura.IsPassive() || aura.GetSpellInfo().HasAttribute(SpellAttr4.NotStealable))
+                                    continue;
+
+                                hasStealableAura = true;
+                                break;
+                            }
+
+                            if (!hasStealableAura)
+                                return SpellCastResult.NothingToSteal;
                             break;
                         }
                     case SpellEffectName.LeapBack:
@@ -5122,6 +5155,13 @@ namespace Game.Spells
                                 else
                                     return SpellCastResult.DontReport;
                             }
+                            break;
+                        }
+                    case SpellEffectName.Jump:
+                    case SpellEffectName.JumpDest:
+                        {
+                            if (m_caster.HasUnitState(UnitState.Root))
+                                return SpellCastResult.Rooted;
                             break;
                         }
                     case SpellEffectName.TalentSpecSelect:
