@@ -647,15 +647,10 @@ namespace Game.Maps
                 
                 VisitNearbyCellsOf(player, grid_object_update, world_object_update);
 
-                // If player is using far sight, visit that object too
+                // If player is using far sight or mind vision, visit that object too
                 WorldObject viewPoint = player.GetViewpoint();
                 if (viewPoint)
-                {
-                    if (viewPoint.IsTypeId(TypeId.Unit))
-                        VisitNearbyCellsOf(viewPoint.ToCreature(), grid_object_update, world_object_update);
-                    else if (viewPoint.IsTypeId(TypeId.DynamicObject))
-                        VisitNearbyCellsOf(viewPoint.ToDynamicObject(), grid_object_update, world_object_update);
-                }
+                    VisitNearbyCellsOf(viewPoint, grid_object_update, world_object_update);
 
                 // Handle updates for creatures in combat with player and are more than 60 yards away
                 if (player.IsInCombat())

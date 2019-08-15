@@ -1023,24 +1023,18 @@ namespace Game.Entities
 
         public float GetGridActivationRange()
         {
-            if (IsTypeId(TypeId.Player))
+            if (isActiveObject())
             {
-                if (ToPlayer().GetCinematicMgr().IsOnCinematic())
-                    return SharedConst.DefaultVisibilityInstance;
+                if (GetTypeId() == TypeId.Player && ToPlayer().GetCinematicMgr().IsOnCinematic())
+                    return Math.Max(SharedConst.DefaultVisibilityInstance, GetMap().GetVisibilityRange());
 
                 return GetMap().GetVisibilityRange();
             }
-            else if (IsTypeId(TypeId.Unit))
-                return ToCreature().m_SightDistance;
-            else if (IsTypeId(TypeId.DynamicObject))
-            {
-                if (isActiveObject())
-                    return GetMap().GetVisibilityRange();
-                else
-                    return 0.0f;
-            }
-            else
-                return 0.0f;
+            Creature thisCreature = ToCreature();
+            if (thisCreature != null)
+                return thisCreature.m_SightDistance;
+
+            return 0.0f;
         }
 
         public float GetVisibilityRange()
