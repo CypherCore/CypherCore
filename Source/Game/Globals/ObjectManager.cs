@@ -2612,8 +2612,6 @@ namespace Game
 
             if (cInfo.Models.Empty())
                 Log.outError(LogFilter.Sql, $"Creature (Entry: {cInfo.Entry}) does not have any existing display id in creature_template_model.");
-            else if (cInfo.Models.Sum(p => p.Probability) <= 0.0f)
-                Log.outError(LogFilter.Sql, $"Creature (Entry: {cInfo.Entry}) has zero total chance for all models in creature_template_model.");
 
             if (cInfo.UnitClass == 0 || ((1 << ((int)cInfo.UnitClass - 1)) & (int)Class.ClassMaskAllCreatures) == 0)
             {
