@@ -2788,7 +2788,7 @@ namespace Game.Entities
             Spell spell = m_currentSpells.LookupByKey(spellType);
             if (spell != null
                 && (withDelayed || spell.getState() != SpellState.Delayed)
-                && (withInstant || spell.GetCastTime() > 0))
+                && (withInstant || spell.GetCastTime() > 0 || spell.getState() == SpellState.Casting))
             {
                 // for example, do not let self-stun aura interrupt itself
                 if (!spell.IsInterruptable())

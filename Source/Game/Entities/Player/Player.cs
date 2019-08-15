@@ -7453,7 +7453,7 @@ namespace Game.Entities
         {
             CancelAutoRepeat cancelAutoRepeat = new CancelAutoRepeat();
             cancelAutoRepeat.Guid = target.GetGUID();                     // may be it's target guid
-            SendMessageToSet(cancelAutoRepeat, false);
+            SendMessageToSet(cancelAutoRepeat, true);
         }
 
         public override void BuildCreateUpdateBlockForPlayer(UpdateData data, Player target)

@@ -1814,20 +1814,22 @@ namespace Game.Entities
 
         void _UpdateAutoRepeatSpell()
         {
+            SpellInfo autoRepeatSpellInfo = m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo;
+
             // check "realtime" interrupts
             // don't cancel spells which are affected by a SPELL_AURA_CAST_WHILE_WALKING effect
-            if (((IsTypeId(TypeId.Player) && ToPlayer().isMoving()) || IsNonMeleeSpellCast(false, false, true, GetCurrentSpell(CurrentSpellTypes.AutoRepeat).m_spellInfo.Id == 75)) &&
-                !HasAuraTypeWithAffectMask(AuraType.CastWhileWalking, m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo))
+            if (((IsTypeId(TypeId.Player) && ToPlayer().isMoving()) || IsNonMeleeSpellCast(false, false, true, autoRepeatSpellInfo.Id == 75)) &&
+                !HasAuraTypeWithAffectMask(AuraType.CastWhileWalking, autoRepeatSpellInfo))
             {
                 // cancel wand shoot
-                if (m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo.Id != 75)
+                if (autoRepeatSpellInfo.Id != 75)
                     InterruptSpell(CurrentSpellTypes.AutoRepeat);
                 m_AutoRepeatFirstCast = true;
                 return;
             }
 
             // apply delay (Auto Shot (spellID 75) not affected)
-            if (m_AutoRepeatFirstCast && getAttackTimer(WeaponAttackType.RangedAttack) < 500 && m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo.Id != 75)
+            if (m_AutoRepeatFirstCast && getAttackTimer(WeaponAttackType.RangedAttack) < 500 && autoRepeatSpellInfo.Id != 75)
                 setAttackTimer(WeaponAttackType.RangedAttack, 500);
             m_AutoRepeatFirstCast = false;
 
@@ -1835,14 +1837,19 @@ namespace Game.Entities
             if (isAttackReady(WeaponAttackType.RangedAttack))
             {
                 // Check if able to cast
-                if (m_currentSpells[CurrentSpellTypes.AutoRepeat].CheckCast(true) != SpellCastResult.SpellCastOk)
+                SpellCastResult result = m_currentSpells[CurrentSpellTypes.AutoRepeat].CheckCast(true);
+                if (result != SpellCastResult.SpellCastOk)
                 {
-                    InterruptSpell(CurrentSpellTypes.AutoRepeat);
+                    if (autoRepeatSpellInfo.Id != 75)
+                        InterruptSpell(CurrentSpellTypes.AutoRepeat);
+                    else if (GetTypeId() == TypeId.Player)
+                        Spell.SendCastResult(ToPlayer(), autoRepeatSpellInfo, m_currentSpells[CurrentSpellTypes.AutoRepeat].m_SpellVisual, m_currentSpells[CurrentSpellTypes.AutoRepeat].m_castId, result);
+
                     return;
                 }
 
                 // we want to shoot
-                Spell spell = new Spell(this, m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo, TriggerCastFlags.FullMask);
+                Spell spell = new Spell(this, autoRepeatSpellInfo, TriggerCastFlags.FullMask);
                 spell.prepare(m_currentSpells[CurrentSpellTypes.AutoRepeat].m_targets);
 
                 // all went good, reset attack
