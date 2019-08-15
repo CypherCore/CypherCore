@@ -96,6 +96,20 @@ namespace Framework.Dynamic
             m_events.Add(e_time, Event);
         }
 
+        public void ModifyEventTime(BasicEvent Event, ulong newTime)
+        {
+            foreach (var pair in m_events)
+            {
+                if (pair.Value != Event)
+                    continue;
+
+                Event.m_execTime = newTime;
+                m_events.Remove(pair);
+                m_events.Add(newTime, Event);
+                break;
+            }
+        }
+
         public ulong CalculateTime(ulong t_offset)
         {
             return (m_time + t_offset);

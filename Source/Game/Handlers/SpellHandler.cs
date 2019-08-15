@@ -569,6 +569,9 @@ namespace Game
             pos.Relocate(packet.CollisionPos);
             spell.m_targets.ModDst(pos);
 
+            // we changed dest, recalculate flight time
+            spell.RecalculateDelayMomentForDst();
+
             NotifyMissileTrajectoryCollision data = new NotifyMissileTrajectoryCollision();
             data.Caster = packet.Target;
             data.CastID = packet.CastID;

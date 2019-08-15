@@ -961,6 +961,7 @@ namespace Game
                                 case SpellTargetSelectionCategories.Nearby:
                                 case SpellTargetSelectionCategories.Cone:
                                 case SpellTargetSelectionCategories.Area:
+                                case SpellTargetSelectionCategories.Traj:
                                     continue;
                                 default:
                                     break;
@@ -971,6 +972,7 @@ namespace Game
                                 case SpellTargetSelectionCategories.Nearby:
                                 case SpellTargetSelectionCategories.Cone:
                                 case SpellTargetSelectionCategories.Area:
+                                case SpellTargetSelectionCategories.Traj:
                                     continue;
                                 default:
                                     break;

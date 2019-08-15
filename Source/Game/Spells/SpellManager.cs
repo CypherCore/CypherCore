@@ -2261,6 +2261,21 @@ namespace Game.Entities
                     if (effect == null)
                         continue;
 
+                    if (effect.IsEffect() && (effect.TargetA.GetTarget() == Targets.DestTraj || effect.TargetB.GetTarget() == Targets.DestTraj))
+                    {
+                        // Get triggered spell if any
+                        SpellInfo spellInfoTrigger = GetSpellInfo(effect.TriggerSpell);
+                        if (spellInfoTrigger != null)
+                        {
+                            float maxRangeMain = spellInfo.GetMaxRange();
+                            float maxRangeTrigger = spellInfoTrigger.GetMaxRange();
+
+                            // check if triggered spell has enough max range to cover trajectory
+                            if (maxRangeTrigger < maxRangeMain)
+                                spellInfoTrigger.RangeEntry = spellInfo.RangeEntry;
+                        }
+                    }
+
                     switch (effect.Effect)
                     {
                         case SpellEffectName.Charge:

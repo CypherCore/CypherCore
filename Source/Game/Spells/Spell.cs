@@ -279,25 +279,39 @@ namespace Game.Spells
                     }
                 }
             }
+            ulong dstDelay = CalculateDelayMomentForDst();
+            if (dstDelay != 0)
+                m_delayMoment = dstDelay;
+        }
 
+        ulong CalculateDelayMomentForDst()
+        {
             if (m_targets.HasDst())
             {
                 if (m_targets.HasTraj())
                 {
                     float speed = m_targets.GetSpeedXY();
                     if (speed > 0.0f)
-                        m_delayMoment = (ulong)Math.Floor(m_targets.GetDist2d() / speed * 1000.0f);
+                        return (ulong)Math.Floor(m_targets.GetDist2d() / speed * 1000.0f);
                 }
                 else if (m_spellInfo.Speed > 0.0f)
                 {
                     // We should not subtract caster size from dist calculation (fixes execution time desync with animation on client, eg. Malleable Goo cast by PP)
                     float dist = m_caster.GetExactDist(m_targets.GetDstPos());
                     if (!m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
-                        m_delayMoment = (ulong)Math.Floor(dist / m_spellInfo.Speed * 1000.0f);
+                        return (ulong)Math.Floor(dist / m_spellInfo.Speed * 1000.0f);
                     else
-                        m_delayMoment = (ulong)(m_spellInfo.Speed * 1000.0f);
+                        return (ulong)(m_spellInfo.Speed * 1000.0f);
                 }
             }
+
+            return 0;
+        }
+
+        public void RecalculateDelayMomentForDst()
+        {
+            m_delayMoment = CalculateDelayMomentForDst();
+            m_caster.m_Events.ModifyEventTime(_spellEvent, GetDelayStart() + m_delayMoment);
         }
 
         void SelectEffectImplicitTargets(uint effIndex, SpellImplicitTargetInfo targetType, uint processedEffectMask)
@@ -355,6 +369,12 @@ namespace Game.Spells
                     break;
                 case SpellTargetSelectionCategories.Area:
                     SelectImplicitAreaTargets(effIndex, targetType, effectMask);
+                    break;
+                case SpellTargetSelectionCategories.Traj:
+                    // just in case there is no dest, explanation in SelectImplicitDestDestTargets
+                    CheckDst();
+
+                    SelectImplicitTrajTargets(effIndex, targetType);
                     break;
                 case SpellTargetSelectionCategories.Default:
                     switch (targetType.GetObjectType())
@@ -901,9 +921,6 @@ namespace Game.Spells
                 case Targets.DestDynobjNone:
                 case Targets.DestDest:
                     return;
-                case Targets.DestTraj:
-                    SelectImplicitTrajTargets(effIndex);
-                    return;
                 default:
                     SpellEffectInfo effect = GetEffect(effIndex);
                     if (effect != null)
@@ -1037,7 +1054,7 @@ namespace Game.Spells
             return 0.0f;
         }
 
-        void SelectImplicitTrajTargets(uint effIndex)
+        void SelectImplicitTrajTargets(uint effIndex, SpellImplicitTargetInfo targetType)
         {
             if (!m_targets.HasTraj())
                 return;
@@ -1046,12 +1063,15 @@ namespace Game.Spells
             if (dist2d == 0)
                 return;
 
-            float srcToDestDelta = m_targets.GetDstPos().posZ - m_targets.GetSrcPos().posZ;
+            Position srcPos = m_targets.GetSrcPos();
+            srcPos.SetOrientation(m_caster.GetOrientation());
+            float srcToDestDelta = m_targets.GetDstPos().posZ - srcPos.posZ;
 
+            SpellEffectInfo effect = m_spellInfo.GetEffect(effIndex);
             List<WorldObject> targets = new List<WorldObject>();
-            var spellTraj = new WorldObjectSpellTrajTargetCheck(dist2d, m_targets.GetSrcPos(), m_caster, m_spellInfo);
+            var spellTraj = new WorldObjectSpellTrajTargetCheck(dist2d, srcPos, m_caster, m_spellInfo, targetType.GetCheckType(), effect.ImplicitTargetConditions);
             var searcher = new WorldObjectListSearcher(m_caster, targets, spellTraj);
-            SearchTargets(searcher, GridMapTypeMask.All, m_caster, m_targets.GetSrcPos(), dist2d);
+            SearchTargets(searcher, GridMapTypeMask.All, m_caster, srcPos, dist2d);
             if (targets.Empty())
                 return;
 
@@ -1061,15 +1081,16 @@ namespace Game.Spells
             float a = (srcToDestDelta - dist2d * b) / (dist2d * dist2d);
             if (a > -0.0001f)
                 a = 0;
-            Log.outError(LogFilter.Spells, "Spell.SelectTrajTargets: a {0} b {1}", a, b);
 
+            // We should check if triggered spell has greater range (which is true in many cases, and initial spell has too short max range)
+            // limit max range to 300 yards, sometimes triggered spells can have 50000yds
             float bestDist = m_spellInfo.GetMaxRange(false);
+            SpellInfo triggerSpellInfo = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell);
+            if (triggerSpellInfo != null)
+                bestDist = Math.Min(Math.Max(bestDist, triggerSpellInfo.GetMaxRange(false)), Math.Min(dist2d, 300.0f));
 
             foreach (var obj in targets)
             {
-                if (!m_caster.HasInLine(obj, 5.0f))
-                    continue;
-
                 if (m_spellInfo.CheckTarget(m_caster, obj, true) != SpellCastResult.SpellCastOk)
                     continue;
 
@@ -1087,133 +1108,34 @@ namespace Game.Spells
                     }
                 }
 
-                float size = Math.Max(obj.GetObjectSize() * 0.7f, 1.0f); // 1/sqrt(3)
-                // @todo all calculation should be based on src instead of m_caster
-                float objDist2d = (float)(m_targets.GetSrcPos().GetExactDist2d(obj) * Math.Cos(m_targets.GetSrcPos().GetRelativeAngle(obj)));
-                float dz = obj.GetPositionZ() - m_targets.GetSrcPos().posZ;
+                float size = Math.Max(obj.GetObjectSize(), 1.0f);
+                float objDist2d = srcPos.GetExactDist2d(obj);
+                float dz = obj.GetPositionZ() - srcPos.posZ;
 
-                Log.outError(LogFilter.Spells, "Spell.SelectTrajTargets: check {0}, dist between {1} {2}, height between {3} {4}.", obj.GetEntry(), objDist2d - size, objDist2d + size, dz - size, dz + size);
+                float horizontalDistToTraj = (float)Math.Abs(objDist2d * Math.Sin(srcPos.GetRelativeAngle(obj)));
+                float sizeFactor = (float)Math.Cos((horizontalDistToTraj / size) * (Math.PI / 2.0f));
+                float distToHitPoint = (float)Math.Max(objDist2d * Math.Cos(srcPos.GetRelativeAngle(obj)) - size * sizeFactor, 0.0f);
+                float height = distToHitPoint * (a * distToHitPoint + b);
 
-                float dist = objDist2d - size;
-                float height = dist * (a * dist + b);
-                Log.outError(LogFilter.Spells, "Spell.SelectTrajTargets: dist {0}, height {1}.", dist, height);
-                if (dist < bestDist && height < dz + size && height > dz - size)
-                {
-                    bestDist = dist > 0 ? dist : 0;
-                    break;
-                }
-
-                if (a == 0)
-                {
-                    height = dz - size;
-                    dist = height / b;
-
-                    if (dist > bestDist)
-                        continue;
-                    if (dist < objDist2d + size && dist > objDist2d - size)
-                    {
-                        bestDist = dist;
-                        break;
-                    }
-
-                    height = dz + size;
-                    dist = height / b;
-
-                    if (dist > bestDist)
-                        continue;
-                    if (dist < objDist2d + size && dist > objDist2d - size)
-                    {
-                        bestDist = dist;
-                        break;
-                    }
-
+                if (Math.Abs(dz - height) > size + b / 2.0f + SpellConst.TrajectoryMissileSize)
                     continue;
-                }
 
-                height = dz - size;
-                float sqrt1 = b * b + 4 * a * height;
-                if (sqrt1 > 0)
+                if (distToHitPoint < bestDist)
                 {
-                    sqrt1 = (float)Math.Sqrt(sqrt1);
-                    dist = (sqrt1 - b) / (2 * a);
+                    bestDist = distToHitPoint;
+                    break;
 
-                    if (dist > bestDist)
-                        continue;
-                    if (dist < objDist2d + size && dist > objDist2d - size)
-                    {
-                        bestDist = dist;
-                        break;
-                    }
-                }
-
-                height = dz + size;
-                float sqrt2 = b * b + 4 * a * height;
-                if (sqrt2 > 0)
-                {
-                    sqrt2 = (float)Math.Sqrt(sqrt2);
-                    dist = (sqrt2 - b) / (2 * a);
-
-                    if (dist > bestDist)
-                        continue;
-                    if (dist < objDist2d + size && dist > objDist2d - size)
-                    {
-                        bestDist = dist;
-                        break;
-                    }
-
-                    dist = (-sqrt2 - b) / (2 * a);
-
-                    if (dist > bestDist)
-                        continue;
-                    if (dist < objDist2d + size && dist > objDist2d - size)
-                    {
-                        bestDist = dist;
-                        break;
-                    }
-                }
-
-                if (sqrt1 > 0)
-                {
-                    dist = (-sqrt1 - b) / (2 * a);
-
-                    if (dist > bestDist)
-                        continue;
-                    if (dist < objDist2d + size && dist > objDist2d - size)
-                    {
-                        bestDist = dist;
-                        break;
-                    }
                 }
             }
 
-            if (m_targets.GetSrcPos().GetExactDist2d(m_targets.GetDstPos()) > bestDist)
+            if (dist2d > bestDist)
             {
                 float x = (float)(m_targets.GetSrcPos().posX + Math.Cos(m_caster.GetOrientation()) * bestDist);
                 float y = (float)(m_targets.GetSrcPos().posY + Math.Sin(m_caster.GetOrientation()) * bestDist);
                 float z = m_targets.GetSrcPos().posZ + bestDist * (a * bestDist + b);
-                var obj = targets[0];
-                if (obj != null)
-                {
-                    float distSq = obj.GetExactDistSq(x, y, z);
-                    float sizeSq = obj.GetObjectSize();
-                    sizeSq *= sizeSq;
-                    if (distSq > sizeSq)
-                    {
-                        float factor = 1 - (float)Math.Sqrt(sizeSq / distSq);
-                        x += factor * (obj.GetPositionX() - x);
-                        y += factor * (obj.GetPositionY() - y);
-                        z += factor * (obj.GetPositionZ() - z);
 
-                        distSq = obj.GetExactDistSq(x, y, z);
-                    }
-                }
-
-                Position trajDst = new Position();
-                trajDst.Relocate(x, y, z, m_caster.GetOrientation());
-                SpellDestination dest = m_targets.GetDst();
-                dest.Relocate(trajDst);
-
-                CallScriptDestinationTargetSelectHandlers(ref dest, effIndex, new SpellImplicitTargetInfo(Targets.DestTraj));
+                SpellDestination dest = new SpellDestination(x, y, z, m_caster.GetOrientation());
+                CallScriptDestinationTargetSelectHandlers(ref dest, effIndex, targetType);
                 m_targets.ModDst(dest);
             }
 
@@ -2425,8 +2347,8 @@ namespace Game.Spells
             }
 
             // create and add update event for this spell
-            SpellEvent Event = new SpellEvent(this);
-            m_caster.m_Events.AddEvent(Event, m_caster.m_Events.CalculateTime(1));
+            _spellEvent = new SpellEvent(this);
+            m_caster.m_Events.AddEvent(_spellEvent, m_caster.m_Events.CalculateTime(1));
 
             //Prevent casting at cast another spell (ServerSide check)
             if (!Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnoreCastInProgress) && m_caster.IsNonMeleeSpellCast(false, true, true) && !m_castId.IsEmpty())
@@ -7360,6 +7282,7 @@ namespace Game.Spells
         SpellState m_spellState;
         int m_timer;
 
+        SpellEvent _spellEvent;
         TriggerCastFlags _triggeredCastFlags;
 
         // if need this can be replaced by Aura copy
@@ -7749,7 +7672,7 @@ namespace Game.Spells
             }
             else if (_spellInfo.HasAttribute(SpellCustomAttributes.ConeLine))
             {
-                if (!_caster.HasInLine(target, _caster.GetObjectSize() + target.GetObjectSize()))
+                if (!_caster.HasInLine(target, target.GetObjectSize(), _caster.GetObjectSize()))
                     return false;
             }
             else
@@ -7766,16 +7689,27 @@ namespace Game.Spells
         float _coneAngle;
     }
 
-    public class WorldObjectSpellTrajTargetCheck : WorldObjectSpellAreaTargetCheck
+    public class WorldObjectSpellTrajTargetCheck : WorldObjectSpellTargetCheck
     {
-        public WorldObjectSpellTrajTargetCheck(float range, Position position, Unit caster, SpellInfo spellInfo)
-            : base(range, position, caster, caster, spellInfo, SpellTargetCheckTypes.Default, null) { }
+        float _range;
+        Position _position;
+
+        public WorldObjectSpellTrajTargetCheck(float range, Position position, Unit caster, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList)
+            : base(caster, caster, spellInfo, selectionType, condList)
+        {
+            _range = range;
+            _position = position;
+        }
 
         public override bool Invoke(WorldObject target)
         {
             // return all targets on missile trajectory (0 - size of a missile)
-            if (!_caster.HasInLine(target, target.GetObjectSize()))
+            if (!_caster.HasInLine(target, target.GetObjectSize(), SpellConst.TrajectoryMissileSize))
                 return false;
+
+            if (target.GetExactDist2d(_position) > _range)
+                return false;
+
             return base.Invoke(target);
         }
     }

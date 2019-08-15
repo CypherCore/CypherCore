@@ -288,11 +288,12 @@ namespace Game.Entities
             return ((angle >= lborder) && (angle <= rborder));
         }
 
-        public bool HasInLine(Position pos, float width)
+        public bool HasInLine(Position pos, float objSize, float width)
         {
             if (!HasInArc(MathFunctions.PI, pos))
                 return false;
 
+            width += objSize;
             float angle = GetRelativeAngle(pos);
             return Math.Abs(Math.Sin(angle)) * GetExactDist2d(pos.GetPositionX(), pos.GetPositionY()) < width;
         }

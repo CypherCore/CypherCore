@@ -30,6 +30,8 @@ namespace Framework.Constants
 
         public const int EffectFirstFound = 254;
         public const int EffectAll = 255;
+
+        public const float TrajectoryMissileSize = 3.0f;
     }
 
 
@@ -2416,7 +2418,8 @@ namespace Framework.Constants
         Channel,
         Nearby,
         Cone,
-        Area
+        Area,
+        Traj
     }
 
     public enum SpellTargetReferenceTypes
