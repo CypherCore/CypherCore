@@ -858,6 +858,8 @@ namespace Game
 
             blackmarket_timer = 0;
 
+            m_timers[WorldTimers.WhoList].SetInterval(5 * Time.InMilliseconds); // update who list cache every 5 seconds
+
             //to set mailtimer to return mails every day between 4 and 5 am
             //mailtimer is increased when updating auctions
             //one second is 1000 -(tested on win system)
@@ -1161,6 +1163,14 @@ namespace Game
                     m_timers[i].SetCurrent(0);
             }
 
+            // Update Who List Storage
+            if (m_timers[WorldTimers.WhoList].Passed())
+            {
+                m_timers[WorldTimers.WhoList].Reset();
+                Global.WhoListStorageMgr.Update();
+            }
+
+            // Update the game time and check for shutdown time
             _UpdateGameTime();
 
             // Handle daily quests reset time
@@ -2473,6 +2483,7 @@ namespace Game
         PingDB,
         GuildSave,
         Blackmarket,
+        WhoList,
         Max
     }
 

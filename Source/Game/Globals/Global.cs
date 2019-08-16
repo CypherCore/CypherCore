@@ -52,6 +52,7 @@ public static class Global
     //Social
     public static CalendarManager CalendarMgr { get { return CalendarManager.Instance; } }
     public static SocialManager SocialMgr { get { return SocialManager.Instance; } }
+    public static WhoListStorageManager WhoListStorageMgr { get { return WhoListStorageManager.Instance; } }
 
     //Scripts
     public static ScriptManager ScriptMgr { get { return ScriptManager.Instance; } }

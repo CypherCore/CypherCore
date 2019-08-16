@@ -29,7 +29,7 @@ namespace Game
 {
     public partial class WorldSession
     {
-        [WorldPacketHandler(ClientOpcodes.Who)]
+        [WorldPacketHandler(ClientOpcodes.Who, Processing = PacketProcessing.ThreadSafe)]
         void HandleWho(WhoRequestPkt whoRequest)
         {
             WhoRequest request = whoRequest.Request;
@@ -66,61 +66,53 @@ namespace Game
             uint gmLevelInWhoList = WorldConfig.GetUIntValue(WorldCfg.GmLevelInWhoList);
 
             WhoResponsePkt response = new WhoResponsePkt();
-            foreach (var target in Global.ObjAccessor.GetPlayers())
+            List<WhoListPlayerInfo> whoList = Global.WhoListStorageMgr.GetWhoList();
+            foreach (WhoListPlayerInfo target in whoList)
             {
                 // player can see member of other team only if CONFIG_ALLOW_TWO_SIDE_WHO_LIST
-                if (target.GetTeam() != team && !HasPermission(RBACPermissions.TwoSideWhoList))
+                if (target.Team != team && !HasPermission(RBACPermissions.TwoSideWhoList))
                     continue;
 
                 // player can see MODERATOR, GAME MASTER, ADMINISTRATOR only if CONFIG_GM_IN_WHO_LIST
-                if (target.GetSession().GetSecurity() > (AccountTypes)gmLevelInWhoList && !HasPermission(RBACPermissions.WhoSeeAllSecLevels))
-                    continue;
-
-                // do not process players which are not in world
-                if (!target.IsInWorld)
+                if (target.Security > (AccountTypes)gmLevelInWhoList && !HasPermission(RBACPermissions.WhoSeeAllSecLevels))
                     continue;
 
                 // check if target is globally visible for player
-                if (!target.IsVisibleGloballyFor(GetPlayer()))
-                    continue;
+                if (_player.GetGUID() != target.Guid && !target.IsVisible)
+                    if (Global.AccountMgr.IsPlayerAccount(_player.GetSession().GetSecurity()) || target.Security > _player.GetSession().GetSecurity())
+                        continue;
 
                 // check if target's level is in level range
-                uint lvl = target.getLevel();
+                uint lvl = target.Level;
                 if (lvl < request.MinLevel || lvl > request.MaxLevel)
                     continue;
 
                 // check if class matches classmask
-                int class_ = (byte)target.GetClass();
-                if (!Convert.ToBoolean(request.ClassFilter & (1 << class_)))
+                if (!Convert.ToBoolean(request.ClassFilter & (1 << target.Class)))
                     continue;
 
                 // check if race matches racemask
-                int race = (int)target.GetRace();
-                if (!Convert.ToBoolean(request.RaceFilter & (1 << race)))
+                if (!Convert.ToBoolean(request.RaceFilter & (1 << target.Race)))
                     continue;
 
                 if (!whoRequest.Areas.Empty())
                 {
-                    if (whoRequest.Areas.Contains((int)target.GetZoneId()))
+                    if (whoRequest.Areas.Contains((int)target.ZoneId))
                         continue;
                 }
 
-                string wTargetName = target.GetName().ToLower();
-                if (!string.IsNullOrEmpty(request.Name) && !wTargetName.Equals(request.Name))
+                string wTargetName = target.PlayerName.ToLower();
+                if (!(request.Name.IsEmpty() || wTargetName.Equals(request.Name)))
                     continue;
 
-                string wTargetGuildName = "";
-                Guild targetGuild = target.GetGuild();
-                if (targetGuild)
-                    wTargetGuildName = targetGuild.GetName().ToLower();
-
-                if (!string.IsNullOrEmpty(request.Guild) && !wTargetGuildName.Equals(request.Guild))
+                string wTargetGuildName = target.GuildName.ToLower();
+                if (!request.Guild.IsEmpty() && !wTargetGuildName.Equals(request.Guild))
                     continue;
 
                 if (!request.Words.Empty())
                 {
                     string aname = "";
-                    AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(target.GetZoneId());
+                    AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(target.ZoneId);
                     if (areaEntry != null)
                         aname = areaEntry.AreaName[GetSessionDbcLocale()].ToLower();
 
@@ -144,18 +136,18 @@ namespace Game
                 }
 
                 WhoEntry whoEntry = new WhoEntry();
-                if (!whoEntry.PlayerData.Initialize(target.GetGUID(), target))
+                if (!whoEntry.PlayerData.Initialize(target.Guid, null))
                     continue;
 
-                if (targetGuild)
+                if (!target.GuildGuid.IsEmpty())
                 {
-                    whoEntry.GuildGUID = targetGuild.GetGUID();
+                    whoEntry.GuildGUID = target.GuildGuid;
                     whoEntry.GuildVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
-                    whoEntry.GuildName = targetGuild.GetName();
+                    whoEntry.GuildName = target.GuildName;
                 }
 
-                whoEntry.AreaID = (int)target.GetZoneId();
-                whoEntry.IsGM = target.IsGameMaster();
+                whoEntry.AreaID = (int)target.ZoneId;
+                whoEntry.IsGM = target.IsGamemaster;
 
                 response.Response.Add(whoEntry);
 
