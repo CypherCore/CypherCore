@@ -321,7 +321,7 @@ namespace Game
             {
                 // Leader info MUST be sent 1st :S
                 byte roles = (byte)roleCheck.roles.Find(roleCheck.leader).Value;
-                lfgRoleCheckUpdate.Members.Add(new LFGRoleCheckUpdateMember(roleCheck.leader, roles, Global.WorldMgr.GetCharacterInfo(roleCheck.leader).Level, roles > 0));
+                lfgRoleCheckUpdate.Members.Add(new LFGRoleCheckUpdateMember(roleCheck.leader, roles, Global.CharacterCacheStorage.GetCharacterCacheByGuid(roleCheck.leader).Level, roles > 0));
 
                 foreach (var it in roleCheck.roles)
                 {
@@ -329,7 +329,7 @@ namespace Game
                         continue;
 
                     roles = (byte)it.Value;
-                    lfgRoleCheckUpdate.Members.Add(new LFGRoleCheckUpdateMember(it.Key, roles, Global.WorldMgr.GetCharacterInfo(it.Key).Level, roles > 0));
+                    lfgRoleCheckUpdate.Members.Add(new LFGRoleCheckUpdateMember(it.Key, roles, Global.CharacterCacheStorage.GetCharacterCacheByGuid(it.Key).Level, roles > 0));
                 }
             }
 

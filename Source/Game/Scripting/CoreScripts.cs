@@ -646,7 +646,10 @@ namespace Game.Scripting
         public virtual void OnCreate(Player player) { }
 
         // Called when a player is deleted.
-        public virtual void OnDelete(ObjectGuid guid) { }
+        public virtual void OnDelete(ObjectGuid guid, uint accountId) { }
+
+        // Called when a player delete failed
+        public virtual void OnFailedDelete(ObjectGuid guid, uint accountId) { }
 
         // Called when a player is about to be saved.
         public virtual void OnSave(Player player) { }

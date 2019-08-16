@@ -1626,12 +1626,12 @@ namespace Game.Entities
             if (!qInfo.IsSeasonal() || m_seasonalquests.Empty())
                 return true;
 
-            ushort eventId = Global.GameEventMgr.GetEventIdForQuest(qInfo);
-            if (!m_seasonalquests.ContainsKey(eventId) || m_seasonalquests[eventId].Empty())
+            var list = m_seasonalquests.LookupByKey(qInfo.GetEventIdForQuest());
+            if (list == null || list.Empty())
                 return true;
 
             // if not found in cooldown list
-            return !m_seasonalquests[eventId].Contains(qInfo.Id);
+            return !list.Contains(qInfo.Id);
         }
 
         public bool SatisfyQuestMonth(Quest qInfo, bool msg)
@@ -1719,13 +1719,7 @@ namespace Game.Entities
             if (qInfo != null)
             {
                 if (qInfo.IsSeasonal() && !qInfo.IsRepeatable())
-                {
-                    ushort eventId = Global.GameEventMgr.GetEventIdForQuest(qInfo);
-                    if (m_seasonalquests.ContainsKey(eventId))
-                        return m_seasonalquests[eventId].Contains(quest_id);
-
-                    return false;
-                }
+                    return !SatisfyQuestSeasonal(qInfo, false);
 
                 // for repeatable quests: rewarded field is set after first reward only to prevent getting XP more than once
                 if (!qInfo.IsRepeatable())
@@ -1748,12 +1742,9 @@ namespace Game.Entities
                 if (quest != null)
                 {
                     if (quest.IsSeasonal() && !quest.IsRepeatable())
-                    {
-                        ushort eventId = Global.GameEventMgr.GetEventIdForQuest(quest);
-                        if (!m_seasonalquests.ContainsKey(eventId) || !m_seasonalquests[eventId].Contains(questId))
-                            return QuestStatus.None;
-                    }
-                    if (!quest.IsRepeatable() && m_RewardedQuests.Contains(questId))
+                        return SatisfyQuestSeasonal(quest, false) ? QuestStatus.None : QuestStatus.Rewarded;
+
+                    if (!quest.IsRepeatable() && IsQuestRewarded(questId))
                         return QuestStatus.Rewarded;
                 }
             }
@@ -3049,7 +3040,7 @@ namespace Game.Entities
             if (quest == null)
                 return;
 
-            m_seasonalquests.Add(Global.GameEventMgr.GetEventIdForQuest(quest), quest_id);
+            m_seasonalquests.Add(quest.GetEventIdForQuest(), quest_id);
             m_SeasonalQuestChanged = true;
         }
 

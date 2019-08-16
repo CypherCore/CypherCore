@@ -35,6 +35,7 @@ using Game.Scenarios;
 using Game.Scripting;
 using Game.SupportSystem;
 using Game.Services;
+using Game.Cache;
 
 public static class Global
 {
@@ -93,6 +94,7 @@ public static class Global
     public static AreaTriggerDataStorage AreaTriggerDataStorage { get { return AreaTriggerDataStorage.Instance; } }
     public static CharacterTemplateDataStorage CharacterTemplateDataStorage { get { return CharacterTemplateDataStorage.Instance; } }
     public static ConversationDataStorage ConversationDataStorage { get { return ConversationDataStorage.Instance; } }
+    public static CharacterCache CharacterCacheStorage { get { return CharacterCache.Instance; } }
 
     //Misc
     public static ConditionManager ConditionMgr { get { return ConditionManager.Instance; } }

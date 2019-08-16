@@ -2073,7 +2073,8 @@ namespace Game.Entities
             {
                 if (player.GetGroup())
                     player.SetGroupUpdateFlag(GroupUpdateFlags.Level);
-                Global.WorldMgr.UpdateCharacterInfoLevel(ToPlayer().GetGUID(), (byte)lvl);
+
+                Global.CharacterCacheStorage.UpdateCharacterLevel(ToPlayer().GetGUID(), (byte)lvl);
             }
         }
         public uint getLevel() { return m_unitData.Level; }

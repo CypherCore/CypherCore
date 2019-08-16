@@ -20,6 +20,7 @@ using Framework.Constants;
 using Framework.Database;
 using Game.Arenas;
 using Game.BattleGrounds;
+using Game.Cache;
 using Game.DataStorage;
 using Game.Garrisons;
 using Game.Groups;
@@ -629,6 +630,13 @@ namespace Game.Entities
 
                 _currencyStorage.Add(currencyID, cur);
             } while (result.NextRow());
+        }
+        void LoadActions(SQLResult result)
+        {
+            if (!result.IsEmpty())
+                _LoadActions(result);
+
+            SendActionButtons(1);
         }
         void _LoadActions(SQLResult result)
         {
@@ -2333,7 +2341,7 @@ namespace Game.Entities
             if (result.IsEmpty())
             {
                 string name;
-                ObjectManager.GetPlayerNameByGUID(guid, out name);
+                Global.CharacterCacheStorage.GetCharacterNameByGuid(guid, out name);
                 Log.outError(LogFilter.Player, "Player {0} {1} not found in table `characters`, can't load. ", name, guid.ToString());
                 return false;
             }
@@ -3462,26 +3470,6 @@ namespace Game.Entities
             DB.Characters.Execute(stmt);
         }
 
-        public static uint GetGuildIdFromDB(ObjectGuid guid)
-        {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GUILD_MEMBER);
-            stmt.AddValue(0, guid.GetCounter());
-            SQLResult result = DB.Characters.Query(stmt);
-            if (!result.IsEmpty())
-                return result.Read<uint>(0);
-
-            return 0;
-        }
-        public static byte GetRankFromDB(ObjectGuid guid)
-        {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GUILD_MEMBER);
-            stmt.AddValue(0, guid.GetCounter());
-            SQLResult result = DB.Characters.Query(stmt);
-            if (!result.IsEmpty())
-                return result.Read<byte>(1);
-
-            return 0;
-        }
         public static uint GetZoneIdFromDB(ObjectGuid guid)
         {
             ulong guidLow = guid.GetCounter();
@@ -3527,17 +3515,6 @@ namespace Game.Entities
 
             return zone;
         }
-        public static uint GetLevelFromDB(ObjectGuid guid)
-        {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_LEVEL);
-            stmt.AddValue(0, guid.GetCounter());
-            SQLResult result = DB.Characters.Query(stmt);
-
-            if (result.IsEmpty())
-                return 0;
-
-            return result.Read<byte>(0);
-        }
         public static void RemovePetitionsAndSigns(ObjectGuid guid)
         {
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PETITION_SIG_BY_GUID);
@@ -3582,18 +3559,21 @@ namespace Game.Entities
             // Convert guid to low GUID for CharacterNameData, but also other methods on success
             ulong guid = playerGuid.GetCounter();
             CharDeleteMethod charDelete_method = (CharDeleteMethod)WorldConfig.GetIntValue(WorldCfg.ChardeleteMethod);
+            CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(playerGuid);
+            string name = "<Unknown>";
+            if (characterInfo != null)
+                name = characterInfo.Name;
 
-            CharacterInfo characterInfo;
             if (deleteFinally)
                 charDelete_method = CharDeleteMethod.Remove;
-            else if ((characterInfo = Global.WorldMgr.GetCharacterInfo(playerGuid)) != null)    // To avoid a Select, we select loaded data. If it doesn't exist, return.
+            else if (characterInfo != null)    // To avoid a Select, we select loaded data. If it doesn't exist, return.
             {
                 // Define the required variables
                 uint charDeleteMinLvl;
 
-                if (characterInfo.ClassID == Class.Deathknight)
+                if (characterInfo.ClassId == Class.Deathknight)
                     charDeleteMinLvl = WorldConfig.GetUIntValue(WorldCfg.ChardeleteDeathKnightMinLevel);
-                else if (characterInfo.ClassID == Class.DemonHunter)
+                else if (characterInfo.ClassId == Class.DemonHunter)
                     charDeleteMinLvl = WorldConfig.GetUIntValue(WorldCfg.ChardeleteDemonHunterMinLevel);
                 else
                     charDeleteMinLvl = WorldConfig.GetUIntValue(WorldCfg.ChardeleteMinLevel);
@@ -3605,7 +3585,7 @@ namespace Game.Entities
             }
 
             SQLTransaction trans = new SQLTransaction();
-            uint guildId = GetGuildIdFromDB(playerGuid);
+            ulong guildId = Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(playerGuid);
             if (guildId != 0)
             {
                 Guild guild = Global.GuildMgr.GetGuildById(guildId);
@@ -3714,7 +3694,7 @@ namespace Game.Entities
                                 stmt.AddValue(0, mail_id);
                                 trans.Append(stmt);
 
-                                uint pl_account = ObjectManager.GetPlayerAccountIdByGUID(ObjectGuid.Create(HighGuid.Player, guid));
+                                uint pl_account = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(ObjectGuid.Create(HighGuid.Player, guid));
 
                                 draft.AddMoney(money).SendReturnToSender(pl_account, guid, sender, trans);
                             }
@@ -3955,7 +3935,7 @@ namespace Game.Entities
 
                         Garrison.DeleteFromDB(guid, trans);
 
-                        Global.WorldMgr.DeleteCharacterInfo(playerGuid);
+                        Global.CharacterCacheStorage.DeleteCharacterCacheEntry(playerGuid, name);
                         break;
                     }
                 // The character gets unlinked from the account, the name gets freed up and appears as deleted ingame
@@ -3965,7 +3945,7 @@ namespace Game.Entities
                         stmt.AddValue(0, guid);
                         trans.Append(stmt);
 
-                        Global.WorldMgr.UpdateCharacterInfoDeleted(playerGuid, true);
+                        Global.CharacterCacheStorage.UpdateCharacterInfoDeleted(playerGuid, true);
                         break;
                     }
                 default:

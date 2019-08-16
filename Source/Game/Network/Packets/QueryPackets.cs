@@ -20,6 +20,7 @@ using Framework.Constants;
 using Framework.Dynamic;
 using Framework.GameMath;
 using Framework.IO;
+using Game.Cache;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
@@ -624,7 +625,7 @@ namespace Game.Network.Packets
     {
         public bool Initialize(ObjectGuid guid, Player player = null)
         {
-            CharacterInfo characterInfo = Global.WorldMgr.GetCharacterInfo(guid);
+            CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(guid);
             if (characterInfo == null)
                 return false;
 
@@ -646,15 +647,15 @@ namespace Game.Network.Packets
             }
             else
             {
-                uint accountId = ObjectManager.GetPlayerAccountIdByGUID(guid);
+                uint accountId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(guid);
                 uint bnetAccountId = Global.BNetAccountMgr.GetIdByGameAccount(accountId);
 
                 AccountID = ObjectGuid.Create(HighGuid.WowAccount, accountId);
                 BnetAccountID = ObjectGuid.Create(HighGuid.BNetAccount, bnetAccountId);
                 Name = characterInfo.Name;
-                RaceID = characterInfo.RaceID;
+                RaceID = characterInfo.RaceId;
                 Sex = characterInfo.Sex;
-                ClassID = characterInfo.ClassID;
+                ClassID = characterInfo.ClassId;
                 Level = characterInfo.Level;
             }
 

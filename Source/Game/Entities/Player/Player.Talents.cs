@@ -381,9 +381,15 @@ namespace Game.Entities
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_ACTIONS_SPEC);
             stmt.AddValue(0, GetGUID().GetCounter());
             stmt.AddValue(1, GetActiveTalentGroup());
-            _LoadActions(DB.Characters.Query(stmt));
 
-            SendActionButtons(1);
+            WorldSession mySess = GetSession();
+            mySess.GetQueryProcessor().AddQuery(DB.Characters.AsyncQuery(stmt).WithCallback(result =>
+            {
+                // in case player logs out before db response (player would be deleted in that case)
+                Player thisPlayer = mySess.GetPlayer();
+                if (thisPlayer != null)
+                    thisPlayer.LoadActions(result);
+            }));
 
             UpdateDisplayPower();
             PowerType pw = GetPowerType();

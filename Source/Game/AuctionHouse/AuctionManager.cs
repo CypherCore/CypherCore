@@ -93,10 +93,10 @@ namespace Game
             }
             else
             {
-                bidderAccId = ObjectManager.GetPlayerAccountIdByGUID(bidderGuid);
+                bidderAccId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(bidderGuid);
                 logGmTrade = Global.AccountMgr.HasPermission(bidderAccId, RBACPermissions.LogGmTrade, Global.WorldMgr.GetRealm().Id.Realm);
 
-                if (logGmTrade && !ObjectManager.GetPlayerNameByGUID(bidderGuid, out bidderName))
+                if (logGmTrade && !Global.CharacterCacheStorage.GetCharacterNameByGuid(bidderGuid, out bidderName))
                     bidderName = Global.ObjectMgr.GetCypherString(CypherStrings.Unknown);
             }
 
@@ -104,10 +104,10 @@ namespace Game
             {
                 ObjectGuid ownerGuid = ObjectGuid.Create(HighGuid.Player, auction.owner);
                 string ownerName;
-                if (!ObjectManager.GetPlayerNameByGUID(ownerGuid, out ownerName))
+                if (!Global.CharacterCacheStorage.GetCharacterNameByGuid(ownerGuid, out ownerName))
                     ownerName = Global.ObjectMgr.GetCypherString(CypherStrings.Unknown);
 
-                uint ownerAccId = ObjectManager.GetPlayerAccountIdByGUID(ownerGuid);
+                uint ownerAccId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(ownerGuid);
 
                 Log.outCommand(bidderAccId, $"GM {bidderName} (Account: {bidderAccId}) won item in auction: {item.GetTemplate().GetName()} (Entry: {item.GetEntry()} Count: {item.GetCount()}) and pay money: {auction.bid}. Original owner {ownerName} (Account: {ownerAccId})");
             }
@@ -144,7 +144,7 @@ namespace Game
         {
             ObjectGuid owner_guid = ObjectGuid.Create(HighGuid.Player, auction.owner);
             Player owner = Global.ObjAccessor.FindPlayer(owner_guid);
-            uint owner_accId = ObjectManager.GetPlayerAccountIdByGUID(owner_guid);
+            uint owner_accId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(owner_guid);
             // owner exist (online or offline)
             if (owner || owner_accId != 0)
                 new MailDraft(auction.BuildAuctionMailSubject(MailAuctionAnswers.SalePending), AuctionEntry.BuildAuctionMailBody(auction.bidder, auction.bid, auction.buyout, auction.deposit, auction.GetAuctionCut()))
@@ -156,7 +156,7 @@ namespace Game
         {
             ObjectGuid owner_guid = ObjectGuid.Create(HighGuid.Player, auction.owner);
             Player owner = Global.ObjAccessor.FindPlayer(owner_guid);
-            uint owner_accId = ObjectManager.GetPlayerAccountIdByGUID(owner_guid);
+            uint owner_accId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(owner_guid);
             Item item = GetAItem(auction.itemGUIDLow);
 
             // owner exist
@@ -189,7 +189,7 @@ namespace Game
 
             ObjectGuid owner_guid = ObjectGuid.Create(HighGuid.Player, auction.owner);
             Player owner = Global.ObjAccessor.FindPlayer(owner_guid);
-            uint owner_accId = ObjectManager.GetPlayerAccountIdByGUID(owner_guid);
+            uint owner_accId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(owner_guid);
             // owner exist
             if (owner || owner_accId != 0)
             {
@@ -215,7 +215,7 @@ namespace Game
 
             uint oldBidder_accId = 0;
             if (oldBidder == null)
-                oldBidder_accId = ObjectManager.GetPlayerAccountIdByGUID(oldBidder_guid);
+                oldBidder_accId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(oldBidder_guid);
 
             Item item = GetAItem(auction.itemGUIDLow);
 
@@ -239,7 +239,7 @@ namespace Game
 
             uint bidder_accId = 0;
             if (!bidder)
-                bidder_accId = ObjectManager.GetPlayerAccountIdByGUID(bidder_guid);
+                bidder_accId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(bidder_guid);
 
             // bidder exist
             if (bidder || bidder_accId != 0)
@@ -599,7 +599,7 @@ namespace Game
             auctionItem.ItemGuid = item.GetGUID();
             auctionItem.MinBid = startbid;
             auctionItem.Owner = ObjectGuid.Create(HighGuid.Player, owner);
-            auctionItem.OwnerAccountID = ObjectGuid.Create(HighGuid.WowAccount, ObjectManager.GetPlayerAccountIdByGUID(auctionItem.Owner));
+            auctionItem.OwnerAccountID = ObjectGuid.Create(HighGuid.WowAccount, Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(auctionItem.Owner));
             auctionItem.MinIncrement = bidder != 0 ? GetAuctionOutBid() : 0;
             auctionItem.Bidder = bidder != 0 ? ObjectGuid.Create(HighGuid.Player, bidder) : ObjectGuid.Empty;
             auctionItem.BidAmount = bidder != 0 ? bid : 0;

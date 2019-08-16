@@ -23,6 +23,7 @@ using Game.Network;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Game.Cache;
 
 namespace Game.Arenas
 {
@@ -87,24 +88,24 @@ namespace Game.Arenas
             if (GetMembersSize() >= GetArenaType() * 2)
                 return false;
 
-            // Get player name and class either from db or ObjectMgr
-            CharacterInfo characterInfo;
+            // Get player name and class either from db or character cache
+            CharacterCacheEntry characterInfo;
             Player player = Global.ObjAccessor.FindPlayer(playerGuid);
             if (player)
             {
                 playerClass = player.GetClass();
                 playerName = player.GetName();
             }
-            else if ((characterInfo = Global.WorldMgr.GetCharacterInfo(playerGuid)) != null)
+            else if ((characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(playerGuid)) != null)
             {
                 playerName = characterInfo.Name;
-                playerClass = characterInfo.ClassID;
+                playerClass = characterInfo.ClassId;
             }
             else
                 return false;
 
             // Check if player is already in a similar arena team
-            if ((player && player.GetArenaTeamId(GetSlot()) != 0) || Player.GetArenaTeamIdFromDB(playerGuid, GetArenaType()) != 0)
+            if ((player && player.GetArenaTeamId(GetSlot()) != 0) || Global.CharacterCacheStorage.GetCharacterArenaTeamIdByGuid(playerGuid, GetArenaType()) != 0)
             {
                 Log.outDebug(LogFilter.Arena, "Arena: {0} {1} already has an arena team of type {2}", playerGuid.ToString(), playerName, GetArenaType());
                 return false;
@@ -147,6 +148,7 @@ namespace Game.Arenas
             newMember.MatchMakerRating = (ushort)matchMakerRating;
 
             Members.Add(newMember);
+            Global.CharacterCacheStorage.UpdateCharacterArenaTeamId(playerGuid, GetSlot(), GetId());
 
             // Save player's arena team membership to db
             stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ARENA_TEAM_MEMBER);
@@ -234,6 +236,7 @@ namespace Game.Arenas
 
                 // Put the player in the team
                 Members.Add(newMember);
+                Global.CharacterCacheStorage.UpdateCharacterArenaTeamId(newMember.Guid, GetSlot(), GetId());
             }
             while (result.NextRow());
 
@@ -294,11 +297,14 @@ namespace Game.Arenas
         {
             // Remove member from team
             foreach (var member in Members)
+            {
                 if (member.Guid == guid)
                 {
                     Members.Remove(member);
+                    Global.CharacterCacheStorage.UpdateCharacterArenaTeamId(guid, GetSlot(), 0);
                     break;
                 }
+            }
 
             // Remove arena team info from player data
             Player player = Global.ObjAccessor.FindPlayer(guid);
@@ -347,7 +353,7 @@ namespace Game.Arenas
 
             DB.Characters.CommitTransaction(trans);
 
-            // Remove arena team from ObjectMgr
+            // Remove arena team from ArenaTeamMgr
             Global.ArenaTeamMgr.RemoveArenaTeam(teamId);
         }
 
@@ -370,7 +376,7 @@ namespace Game.Arenas
 
             DB.Characters.CommitTransaction(trans);
 
-            // Remove arena team from ObjectMgr
+            // Remove arena team from ArenaTeamMgr
             Global.ArenaTeamMgr.RemoveArenaTeam(teamId);
         }
 

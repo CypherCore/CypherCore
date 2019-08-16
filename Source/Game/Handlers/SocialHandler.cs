@@ -17,9 +17,9 @@
 
 using Framework.Constants;
 using Framework.Database;
+using Game.Cache;
 using Game.DataStorage;
 using Game.Entities;
-using Game.Guilds;
 using Game.Network;
 using Game.Network.Packets;
 using System;
@@ -220,28 +220,15 @@ namespace Game
             if (!ObjectManager.NormalizePlayerName(ref packet.Name))
                 return;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GUID_RACE_ACC_BY_NAME);
-            stmt.AddValue(0, packet.Name);
-
-            _queryProcessor.AddQuery(DB.Characters.AsyncQuery(stmt).WithCallback(HandleAddFriendCallBack, packet.Notes));
-        }
-
-        void HandleAddFriendCallBack(string friendNote, SQLResult result)
-        {
-            if (!GetPlayer())
-                return;
-
-            ObjectGuid friendGuid = ObjectGuid.Empty;
             FriendsResult friendResult = FriendsResult.NotFound;
-
-            if (!result.IsEmpty())
+            ObjectGuid friendGuid = Global.CharacterCacheStorage.GetCharacterGuidByName(packet.Name);
+            if (!friendGuid.IsEmpty())
             {
-                ulong lowGuid = result.Read<ulong>(0);
-                if (lowGuid != 0)
+                CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(friendGuid);
+                if (characterInfo != null)
                 {
-                    friendGuid = ObjectGuid.Create(HighGuid.Player, lowGuid);
-                    Team team = Player.TeamForRace((Race)result.Read<byte>(1));
-                    uint friendAccountId = result.Read<uint>(2);
+                    Team team = Player.TeamForRace(characterInfo.RaceId);
+                    uint friendAccountId = characterInfo.AccountId;
 
                     if (HasPermission(RBACPermissions.AllowGmFriend) || Global.AccountMgr.IsPlayerAccount(Global.AccountMgr.GetSecurity(friendAccountId, (int)Global.WorldMgr.GetRealm().Id.Realm)))
                     {
@@ -260,7 +247,7 @@ namespace Game
                                 friendResult = FriendsResult.AddedOffline;
 
                             if (GetPlayer().GetSocial().AddToSocialList(friendGuid, SocialFlag.Friend))
-                                GetPlayer().GetSocial().SetFriendNote(friendGuid, friendNote);
+                                GetPlayer().GetSocial().SetFriendNote(friendGuid, packet.Notes);
                             else
                                 friendResult = FriendsResult.ListFull;
                         }
@@ -286,39 +273,21 @@ namespace Game
             if (!ObjectManager.NormalizePlayerName(ref packet.Name))
                 return;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GUID_BY_NAME);
-            stmt.AddValue(0, packet.Name);
-
-            _queryProcessor.AddQuery(DB.Characters.AsyncQuery(stmt).WithCallback(HandleAddIgnoreCallBack));
-        }
-
-        void HandleAddIgnoreCallBack(SQLResult result)
-        {
-            if (!GetPlayer())
-                return;
-
-            ObjectGuid IgnoreGuid = ObjectGuid.Empty;
+            ObjectGuid IgnoreGuid = Global.CharacterCacheStorage.GetCharacterGuidByName(packet.Name);
             FriendsResult ignoreResult = FriendsResult.IgnoreNotFound;
-
-            if (result.IsEmpty())
+            if (IgnoreGuid.IsEmpty())
             {
-                ulong lowGuid = result.Read<ulong>(0);
-                if (lowGuid != 0)
+                if (IgnoreGuid == GetPlayer().GetGUID())              //not add yourself
+                    ignoreResult = FriendsResult.IgnoreSelf;
+                else if (GetPlayer().GetSocial().HasIgnore(IgnoreGuid))
+                    ignoreResult = FriendsResult.IgnoreAlready;
+                else
                 {
-                    IgnoreGuid = ObjectGuid.Create(HighGuid.Player, lowGuid);
+                    ignoreResult = FriendsResult.IgnoreAdded;
 
-                    if (IgnoreGuid == GetPlayer().GetGUID())              //not add yourself
-                        ignoreResult = FriendsResult.IgnoreSelf;
-                    else if (GetPlayer().GetSocial().HasIgnore(IgnoreGuid))
-                        ignoreResult = FriendsResult.IgnoreAlready;
-                    else
-                    {
-                        ignoreResult = FriendsResult.IgnoreAdded;
-
-                        // ignore list full
-                        if (!GetPlayer().GetSocial().AddToSocialList(IgnoreGuid, SocialFlag.Ignored))
-                            ignoreResult = FriendsResult.IgnoreFull;
-                    }
+                    // ignore list full
+                    if (!GetPlayer().GetSocial().AddToSocialList(IgnoreGuid, SocialFlag.Ignored))
+                        ignoreResult = FriendsResult.IgnoreFull;
                 }
             }
 

@@ -249,7 +249,7 @@ namespace Game.Chat
             ObjectGuid parseGUID = ObjectGuid.Create(HighGuid.Player, args.NextUInt64());
 
             // ... and try to extract a player out of it.
-            if (ObjectManager.GetPlayerNameByGUID(parseGUID, out nameTarget))
+            if (Global.CharacterCacheStorage.GetCharacterNameByGuid(parseGUID, out nameTarget))
             {
                 playerTarget = Global.ObjAccessor.FindPlayer(parseGUID);
                 guidTarget = parseGUID;

@@ -268,7 +268,11 @@ namespace Game.Achievements
                                 foreach (var skill in bounds)
                                 {
                                     if (skill.SkillLine == criteria.Entry.Asset)
-                                        spellCount++;
+                                    {
+                                        // do not add couter twice if by any chance skill is listed twice in dbc (eg. skill 777 and spell 22717)
+                                        ++spellCount;
+                                        break;
+                                    }
                                 }
                             }
                             SetCriteriaProgress(criteria, spellCount, referencePlayer);

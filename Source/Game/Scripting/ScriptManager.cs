@@ -1182,9 +1182,13 @@ namespace Game.Scripting
         {
             ForEach<PlayerScript>(p => p.OnCreate(player));
         }
-        public void OnPlayerDelete(ObjectGuid guid)
+        public void OnPlayerDelete(ObjectGuid guid, uint accountId)
         {
-            ForEach<PlayerScript>(p => p.OnDelete(guid));
+            ForEach<PlayerScript>(p => p.OnDelete(guid, accountId));
+        }
+        public void OnPlayerFailedDelete(ObjectGuid guid, uint accountId)
+        {
+            ForEach<PlayerScript>(p => p.OnFailedDelete(guid, accountId));
         }
         public void OnPlayerSave(Player player)
         {

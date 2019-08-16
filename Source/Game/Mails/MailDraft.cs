@@ -99,7 +99,7 @@ namespace Game.Mails
 
             uint rc_account = 0;
             if (receiver == null)
-                rc_account = ObjectManager.GetPlayerAccountIdByGUID(receiverGuid);
+                rc_account = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(receiverGuid);
 
             if (receiver == null && rc_account == 0)                            // sender not exist
             {

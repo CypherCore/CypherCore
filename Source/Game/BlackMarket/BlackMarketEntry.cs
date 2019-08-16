@@ -128,7 +128,7 @@ namespace Game.BlackMarket
             _bidder = fields.Read<ulong>(4);
 
             // Either no bidder or existing player
-            if (_bidder != 0 && ObjectManager.GetPlayerAccountIdByGUID(ObjectGuid.Create(HighGuid.Player, _bidder)) == 0) // Probably a better way to check if player exists
+            if (_bidder != 0 && Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(ObjectGuid.Create(HighGuid.Player, _bidder)) == 0) // Probably a better way to check if player exists
             {
                 Log.outError(LogFilter.Misc, "Black market auction {0} does not have a valid bidder (GUID: {1}).", _marketId, _bidder);
                 return false;

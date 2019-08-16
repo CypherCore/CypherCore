@@ -18,6 +18,7 @@
 using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
+using Game.Cache;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
@@ -97,8 +98,8 @@ namespace Game
                     if (!charInfo.Flags.HasAnyFlag(CharacterFlags.CharacterLockedForTransfer | CharacterFlags.LockedByBilling))
                         _legitCharacters.Add(charInfo.Guid);
 
-                    if (!Global.WorldMgr.HasCharacterInfo(charInfo.Guid)) // This can happen if characters are inserted into the database manually. Core hasn't loaded name data yet.
-                        Global.WorldMgr.AddCharacterInfo(charInfo.Guid, GetAccountId(), charInfo.Name, charInfo.Sex, charInfo.RaceId, (byte)charInfo.ClassId, charInfo.Level, false);
+                    if (!Global.CharacterCacheStorage.HasCharacterCacheEntry(charInfo.Guid)) // This can happen if characters are inserted into the database manually. Core hasn't loaded name data yet.
+                        Global.CharacterCacheStorage.AddCharacterCacheEntry(charInfo.Guid, GetAccountId(), charInfo.Name, charInfo.Sex, charInfo.RaceId, (byte)charInfo.ClassId, charInfo.Level, false);
 
                     if (charInfo.ClassId == Class.DemonHunter)
                         demonHunterCount++;
@@ -161,8 +162,8 @@ namespace Game
 
                     Log.outInfo(LogFilter.Network, "Loading undeleted char guid {0} from account {1}.", charInfo.Guid.ToString(), GetAccountId());
 
-                    if (!Global.WorldMgr.HasCharacterInfo(charInfo.Guid)) // This can happen if characters are inserted into the database manually. Core hasn't loaded name data yet.
-                        Global.WorldMgr.AddCharacterInfo(charInfo.Guid, GetAccountId(), charInfo.Name, charInfo.Sex, charInfo.RaceId, (byte)charInfo.ClassId, charInfo.Level, true);
+                    if (!Global.CharacterCacheStorage.HasCharacterCacheEntry(charInfo.Guid)) // This can happen if characters are inserted into the database manually. Core hasn't loaded name data yet.
+                        Global.CharacterCacheStorage.AddCharacterCacheEntry(charInfo.Guid, GetAccountId(), charInfo.Name, charInfo.Sex, charInfo.RaceId, (byte)charInfo.ClassId, charInfo.Level, true);
 
                     charEnum.Characters.Add(charInfo);
                 }
@@ -477,7 +478,7 @@ namespace Game
 
                     Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}) Create Character: {2} {3}", GetAccountId(), GetRemoteAddress(), createInfo.Name, newChar.GetGUID().ToString());
                     Global.ScriptMgr.OnPlayerCreate(newChar);
-                    Global.WorldMgr.AddCharacterInfo(newChar.GetGUID(), GetAccountId(), newChar.GetName(), newChar.m_playerData.NativeSex, (byte)newChar.GetRace(), (byte)newChar.GetClass(), (byte)newChar.getLevel(), false);
+                    Global.CharacterCacheStorage.AddCharacterCacheEntry(newChar.GetGUID(), GetAccountId(), newChar.GetName(), newChar.m_playerData.NativeSex, (byte)newChar.GetRace(), (byte)newChar.GetClass(), (byte)newChar.getLevel(), false);
 
                     newChar.CleanupsBeforeDelete();
                 }
@@ -498,13 +499,20 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.CharDelete, Status = SessionStatus.Authed)]
         void HandleCharDelete(CharDelete charDelete)
         {
+            // Initiating
+            uint initAccountId = GetAccountId();
+
             // can't delete loaded character
             if (Global.ObjAccessor.FindPlayer(charDelete.Guid))
+            {
+                Global.ScriptMgr.OnPlayerFailedDelete(charDelete.Guid, initAccountId);
                 return;
+            }
 
             // is guild leader
             if (Global.GuildMgr.GetGuildByLeader(charDelete.Guid))
             {
+                Global.ScriptMgr.OnPlayerFailedDelete(charDelete.Guid, initAccountId);
                 SendCharDelete(ResponseCodes.CharDeleteFailedGuildLeader);
                 return;
             }
@@ -512,14 +520,15 @@ namespace Game
             // is arena team captain
             if (Global.ArenaTeamMgr.GetArenaTeamByCaptain(charDelete.Guid) != null)
             {
+                Global.ScriptMgr.OnPlayerFailedDelete(charDelete.Guid, initAccountId);
                 SendCharDelete(ResponseCodes.CharDeleteFailedArenaCaptain);
                 return;
             }
 
-            CharacterInfo characterInfo = Global.WorldMgr.GetCharacterInfo(charDelete.Guid);
+            CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(charDelete.Guid);
             if (characterInfo == null)
             {
-                //Global.ScriptMgr.OnPlayerFailedDelete(charDelete.Guid, initAccountId);
+                Global.ScriptMgr.OnPlayerFailedDelete(charDelete.Guid, initAccountId);
                 return;
             }
 
@@ -529,11 +538,17 @@ namespace Game
 
             // prevent deleting other players' characters using cheating tools
             if (accountId != GetAccountId())
+            {
+                Global.ScriptMgr.OnPlayerFailedDelete(charDelete.Guid, initAccountId);
                 return;
+            }
 
             string IP_str = GetRemoteAddress();
             Log.outInfo(LogFilter.Player, "Account: {0}, IP: {1} deleted character: {2}, {3}, Level: {4}", accountId, IP_str, name, charDelete.Guid.ToString(), level);
-            Global.ScriptMgr.OnPlayerDelete(charDelete.Guid);
+
+            // To prevent hook failure, place hook before removing reference from DB
+            Global.ScriptMgr.OnPlayerDelete(charDelete.Guid, initAccountId); // To prevent race conditioning, but as it also makes sense, we hand the accountId over for successful delete.
+            // Shouldn't interfere with character deletion though
 
             Global.GuildFinderMgr.RemoveAllMembershipRequestsFromPlayer(charDelete.Guid);
             Global.CalendarMgr.RemoveAllPlayerEventsAndInvites(charDelete.Guid);
@@ -1038,7 +1053,7 @@ namespace Game
 
             SendCharRename(ResponseCodes.Success, renameInfo);
 
-            Global.WorldMgr.UpdateCharacterInfo(renameInfo.Guid, renameInfo.NewName);
+            Global.CharacterCacheStorage.UpdateCharacterData(renameInfo.Guid, renameInfo.NewName);
         }
 
         [WorldPacketHandler(ClientOpcodes.SetPlayerDeclinedNames, Status = SessionStatus.Authed)]
@@ -1046,7 +1061,7 @@ namespace Game
         {
             // not accept declined names for unsupported languages
             string name;
-            if (!ObjectManager.GetPlayerNameByGUID(packet.Player, out name))
+            if (!Global.CharacterCacheStorage.GetCharacterNameByGuid(packet.Player, out name))
             {
                 SendSetPlayerDeclinedNamesResult(DeclinedNameResult.Error, packet.Player);
                 return;
@@ -1248,7 +1263,7 @@ namespace Game
 
             // character with this name already exist
             // @todo: make async
-            ObjectGuid newGuid = ObjectManager.GetPlayerGUIDByName(customizeInfo.CharName);
+            ObjectGuid newGuid = Global.CharacterCacheStorage.GetCharacterGuidByName(customizeInfo.CharName);
             if (!newGuid.IsEmpty())
             {
                 if (newGuid != customizeInfo.CharGUID)
@@ -1296,7 +1311,7 @@ namespace Game
 
             DB.Characters.CommitTransaction(trans);
 
-            Global.WorldMgr.UpdateCharacterInfo(customizeInfo.CharGUID, customizeInfo.CharName, customizeInfo.SexID);
+            Global.CharacterCacheStorage.UpdateCharacterData(customizeInfo.CharGUID, customizeInfo.CharName, (byte)customizeInfo.SexID);
 
             SendCharCustomize(ResponseCodes.Success, customizeInfo);
 
@@ -1479,7 +1494,7 @@ namespace Game
             }
 
             // get the players old (at this moment current) race
-            CharacterInfo characterInfo = Global.WorldMgr.GetCharacterInfo(factionChangeInfo.Guid);
+            CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(factionChangeInfo.Guid);
             if (characterInfo == null)
             {
                 SendCharFactionChange(ResponseCodes.CharCreateError, factionChangeInfo);
@@ -1487,8 +1502,8 @@ namespace Game
             }
 
             string oldName = characterInfo.Name;
-            Race oldRace = characterInfo.RaceID;
-            Class playerClass = characterInfo.ClassID;
+            Race oldRace = characterInfo.RaceId;
+            Class playerClass = characterInfo.ClassId;
             byte level = characterInfo.Level;
 
             if (Global.ObjectMgr.GetPlayerInfo(factionChangeInfo.RaceID, playerClass) == null)
@@ -1559,7 +1574,7 @@ namespace Game
             }
 
             // character with this name already exist
-            ObjectGuid newGuid = ObjectManager.GetPlayerGUIDByName(factionChangeInfo.Name);
+            ObjectGuid newGuid = Global.CharacterCacheStorage.GetCharacterGuidByName(factionChangeInfo.Name);
             if (!newGuid.IsEmpty())
             {
                 if (newGuid != factionChangeInfo.Guid)
@@ -1625,7 +1640,7 @@ namespace Game
                 trans.Append(stmt);
             }
 
-            Global.WorldMgr.UpdateCharacterInfo(factionChangeInfo.Guid, factionChangeInfo.Name, factionChangeInfo.SexID, factionChangeInfo.RaceID);
+            Global.CharacterCacheStorage.UpdateCharacterData(factionChangeInfo.Guid, factionChangeInfo.Name, (byte)factionChangeInfo.SexID, (byte)factionChangeInfo.RaceID);
 
             if (oldRace != factionChangeInfo.RaceID)
             {
@@ -1730,20 +1745,12 @@ namespace Game
                         trans.Append(stmt);
                     }
 
-                    // @todo: make this part asynch
                     if (!WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGuild))
                     {
                         // Reset guild
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GUILD_MEMBER);
-                        stmt.AddValue(0, lowGuid);
-
-                        result = DB.Characters.Query(stmt);
-                        if (!result.IsEmpty())
-                        {
-                            Guild guild = Global.GuildMgr.GetGuildById(result.Read<ulong>(0));
-                            if (guild)
-                                guild.DeleteMember(trans, factionChangeInfo.Guid, false, false, true);
-                        }
+                        Guild guild = Global.GuildMgr.GetGuildById(characterInfo.GuildId);
+                        if (guild != null)
+                            guild.DeleteMember(trans, factionChangeInfo.Guid, false, false, true);
 
                         Player.LeaveAllArenaTeams(factionChangeInfo.Guid);
                     }
@@ -2132,7 +2139,7 @@ namespace Game
                 stmt.AddValue(0, GetBattlenetAccountId());
                 DB.Login.Execute(stmt);
 
-                Global.WorldMgr.UpdateCharacterInfoDeleted(undeleteInfo.CharacterGuid, false, undeleteInfo.Name);
+                Global.CharacterCacheStorage.UpdateCharacterInfoDeleted(undeleteInfo.CharacterGuid, false, undeleteInfo.Name);
 
                 SendUndeleteCharacterResponse(CharacterUndeleteResult.Ok, undeleteInfo);
             }));

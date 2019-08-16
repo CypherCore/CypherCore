@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Framework.Database;
+using Game.Cache;
 using Game.Entities;
 using Game.Guilds;
 using Game.Maps;
@@ -255,14 +256,16 @@ namespace Game
             else
             {
                 // Invitee offline, get data from database
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GUID_RACE_ACC_BY_NAME);
-                stmt.AddValue(0, calendarEventInvite.Name);
-                SQLResult result = DB.Characters.Query(stmt);
-                if (!result.IsEmpty())
+                ObjectGuid guid = Global.CharacterCacheStorage.GetCharacterGuidByName(calendarEventInvite.Name);
+                if (!guid.IsEmpty())
                 {
-                    inviteeGuid = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(0));
-                    inviteeTeam = Player.TeamForRace((Race)result.Read<byte>(1));
-                    inviteeGuildId = Player.GetGuildIdFromDB(inviteeGuid);
+                    CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(guid);
+                    if (characterInfo != null)
+                    {
+                        inviteeGuid = guid;
+                        inviteeTeam = Player.TeamForRace(characterInfo.RaceId);
+                        inviteeGuildId = characterInfo.GuildId;
+                    }
                 }
             }
 

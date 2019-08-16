@@ -405,7 +405,7 @@ namespace Game.Chat
                 }
 
                 player = Global.ObjAccessor.FindPlayerByName(name);
-                ObjectGuid guid = player == null ? ObjectManager.GetPlayerGUIDByName(name) : ObjectGuid.Empty;
+                ObjectGuid guid = player == null ? Global.CharacterCacheStorage.GetCharacterGuidByName(name) : ObjectGuid.Empty;
 
                 playerGuid = player != null ? player.GetGUID() : guid;
                 playerName = player != null || !guid.IsEmpty() ? name : "";
@@ -455,7 +455,7 @@ namespace Game.Chat
                         if (player)
                             return player.GetGUID().GetCounter();
 
-                        ObjectGuid guid = ObjectManager.GetPlayerGUIDByName(idS);
+                        ObjectGuid guid = Global.CharacterCacheStorage.GetCharacterGuidByName(idS);
                         if (guid.IsEmpty())
                             return 0;
 
@@ -664,7 +664,7 @@ namespace Game.Chat
             if (target != null)
                 target_session = target.GetSession();
             else if (!guid.IsEmpty())
-                target_account = ObjectManager.GetPlayerAccountIdByGUID(guid);
+                target_account = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(guid);
 
             if (target_session == null && target_account == 0)
             {
@@ -811,7 +811,7 @@ namespace Game.Chat
 
                 player = Global.ObjAccessor.FindPlayerByName(name);
                 if (offline)
-                    guid = ObjectManager.GetPlayerGUIDByName(name);
+                    guid = Global.CharacterCacheStorage.GetCharacterGuidByName(name);
             }
 
             if (player)

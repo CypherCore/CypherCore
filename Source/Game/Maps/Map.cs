@@ -818,10 +818,15 @@ namespace Game.Maps
         {
             Global.ScriptMgr.OnPlayerLeaveMap(this, player);
 
+            player.getHostileRefManager().deleteReferences(); // multithreading crashfix
+
+            bool inWorld = player.IsInWorld;
             player.RemoveFromWorld();
             SendRemoveTransports(player);
 
-            player.UpdateObjectVisibility(true);
+            if (!inWorld) // if was in world, RemoveFromWorld() called DestroyForNearbyPlayers()
+                player.DestroyForNearbyPlayers(); // previous player->UpdateObjectVisibility(true)
+
             Cell cell = player.GetCurrentCell();
             RemoveFromGrid(player, cell);
 
@@ -833,11 +838,14 @@ namespace Game.Maps
 
         public void RemoveFromMap(WorldObject obj, bool remove)
         {
+            bool inWorld = obj.IsInWorld && obj.GetTypeId() >= TypeId.Unit && obj.GetTypeId() <= TypeId.GameObject;
             obj.RemoveFromWorld();
             if (obj.isActiveObject())
                 RemoveFromActive(obj);
 
-            obj.UpdateObjectVisibility(true);
+            if (!inWorld) // if was in world, RemoveFromWorld() called DestroyForNearbyPlayers()
+                obj.DestroyForNearbyPlayers(); // previous obj->UpdateObjectVisibility(true)
+
             Cell cell = obj.GetCurrentCell();
             RemoveFromGrid(obj, cell);
 

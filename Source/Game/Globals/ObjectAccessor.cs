@@ -201,7 +201,11 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
 
         return player;
     }
-
+    public Player FindPlayerByLowGUID(ulong lowguid)
+    {
+        ObjectGuid guid = ObjectGuid.Create(HighGuid.Player, lowguid);
+        return FindPlayer(guid);
+    }
     // this returns Player even if he is not in world, for example teleporting
     public Player FindConnectedPlayer(ObjectGuid guid)
     {

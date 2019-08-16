@@ -224,7 +224,7 @@ namespace Game.Chat.Commands
 
             if (!target)
             {
-                targetGuid = ObjectManager.GetPlayerGUIDByName(name);
+                targetGuid = Global.CharacterCacheStorage.GetCharacterGuidByName(name);
                 if (targetGuid.IsEmpty())
                 {
                     handler.SendSysMessage(CypherStrings.BaninfoNocharacter);

@@ -732,4 +732,11 @@ namespace Framework.Constants
         FailedCantDoThatChallengeModeActive = 7,
         FailedRestArea = 8
     }
+
+    public enum TutorialsFlag 
+    {
+        None = 0x00,
+        Changed = 0x01,
+        LoadedFromDB = 0x02
+    }
 }

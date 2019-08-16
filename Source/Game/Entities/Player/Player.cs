@@ -791,7 +791,7 @@ namespace Game.Entities
         {
             base.DestroyForPlayer(target);
 
-            for (byte i = 0; i < InventorySlots.BagEnd; ++i)
+            for (byte i = 0; i < EquipmentSlot.End; ++i)
             {
                 if (m_items[i] == null)
                     continue;
@@ -5279,6 +5279,8 @@ namespace Game.Entities
                 SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.GuildGUID), ObjectGuid.Empty);
                 RemovePlayerFlag(PlayerFlags.GuildLevelEnabled);
             }
+
+            Global.CharacterCacheStorage.UpdateCharacterGuildId(GetGUID(), guildId);
         }
         public void SetGuildRank(byte rankId) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.GuildRankID), rankId); }
         public uint GetGuildRank() { return m_playerData.GuildRankID; }

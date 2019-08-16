@@ -129,7 +129,7 @@ namespace Game.Entities
             m_corpseRemoveTime = Time.UnixTime;
             setDeathState(DeathState.Dead);
             RemoveAllAuras();
-            UpdateObjectVisibility();
+            DestroyForNearbyPlayers(); // old UpdateObjectVisibility()
             loot.clear();
             uint respawnDelay = m_respawnDelay;
             if (IsAIEnabled)

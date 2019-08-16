@@ -125,7 +125,7 @@ namespace Game.Groups
             m_leaderGuid = ObjectGuid.Create(HighGuid.Player, field.Read<ulong>(0));
 
             // group leader not exist
-            if (!ObjectManager.GetPlayerNameByGUID(m_leaderGuid, out m_leaderName))
+            if (!Global.CharacterCacheStorage.GetCharacterNameByGuid(m_leaderGuid, out m_leaderName))
                 return;
 
             m_lootMethod = (LootMethod)field.Read<byte>(1);
@@ -155,7 +155,7 @@ namespace Game.Groups
             member.guid = ObjectGuid.Create(HighGuid.Player, guidLow);
 
             // skip non-existed member
-            if (!ObjectManager.GetPlayerNameAndClassByGUID(member.guid, out member.name, out member._class))
+            if (!Global.CharacterCacheStorage.GetCharacterNameAndClassByGUID(member.guid, out member.name, out member._class))
             {
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GROUP_MEMBER);
                 stmt.AddValue(0, guidLow);

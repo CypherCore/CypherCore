@@ -51,7 +51,7 @@ namespace Game.Chat
             string nameTarget;
 
             ObjectGuid parseGUID = ObjectGuid.Create(HighGuid.Player, args.NextUInt64());
-            if (ObjectManager.GetPlayerNameByGUID(parseGUID, out nameTarget))
+            if (Global.CharacterCacheStorage.GetCharacterNameByGuid(parseGUID, out nameTarget))
             {
                 playerTarget = Global.ObjAccessor.FindPlayer(parseGUID);
                 guidTarget = parseGUID;

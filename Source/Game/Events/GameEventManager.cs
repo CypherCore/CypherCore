@@ -714,7 +714,8 @@ namespace Game
                         uint questId = result.Read<uint>(0);
                         ushort eventEntry = result.Read<byte>(1); // @todo Change to byte
 
-                        if (Global.ObjectMgr.GetQuestTemplate(questId) == null)
+                        Quest questTemplate = Global.ObjectMgr.GetQuestTemplate(questId);
+                        if (questTemplate == null)
                         {
                             Log.outError(LogFilter.Sql, "`game_event_seasonal_questrelation` quest id ({0}) does not exist in `quest_template`", questId);
                             continue;
@@ -726,7 +727,7 @@ namespace Game
                             continue;
                         }
 
-                        _questToEventLinks[questId] = eventEntry;
+                        questTemplate.SetEventIdForQuest(eventEntry);
                         ++count;
                     }
                     while (result.NextRow());
@@ -1562,14 +1563,6 @@ namespace Game
             });
         }
 
-        public ushort GetEventIdForQuest(Quest quest)
-        {
-            if (quest == null)
-                return 0;
-
-            return _questToEventLinks.LookupByKey(quest.Id);
-        }
-
         public bool IsHolidayActive(HolidayIds id)
         {
             if (id == HolidayIds.None)
@@ -1610,7 +1603,6 @@ namespace Game
         Dictionary<uint, GameEventQuestToEventConditionNum> mQuestToEventConditions = new Dictionary<uint, GameEventQuestToEventConditionNum>();
         List<(ulong guid, ulong npcflag)>[] mGameEventNPCFlags;
         List<ushort> m_ActiveEvents = new List<ushort>();
-        Dictionary<uint, ushort> _questToEventLinks = new Dictionary<uint, ushort>();
         bool isSystemInit;
 
         public List<ulong>[] mGameEventCreatureGuids;

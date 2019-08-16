@@ -625,7 +625,7 @@ namespace Game.Guilds
         {
             Player player = session.GetPlayer();
             if (!WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGuild) &&
-                player.GetTeam() != ObjectManager.GetPlayerTeamByGUID(GetLeaderGUID()))
+                player.GetTeam() != Global.CharacterCacheStorage.GetCharacterTeamByGuid(GetLeaderGUID()))
                 return;
 
             AddMember(null, player.GetGUID());
@@ -1209,12 +1209,14 @@ namespace Game.Guilds
         public bool LoadMemberFromDB(SQLFields field)
         {
             ulong lowguid = field.Read<ulong>(1);
-            Member member = new Member(m_id, ObjectGuid.Create(HighGuid.Player, lowguid), field.Read<byte>(2));
+            ObjectGuid playerGuid = ObjectGuid.Create(HighGuid.Player, lowguid);
+            Member member = new Member(m_id, playerGuid, field.Read<byte>(2));
             if (!member.LoadFromDB(field))
             {
                 _DeleteMemberFromDB(null, lowguid);
                 return false;
             }
+            Global.CharacterCacheStorage.UpdateCharacterGuildId(playerGuid, GetId());
             m_members[member.GetGUID()] = member;
             return true;
         }
@@ -1477,7 +1479,7 @@ namespace Game.Guilds
                     return;
                 }
 
-                uint level = Player.GetLevelFromDB(member.GetGUID());
+                uint level = Global.CharacterCacheStorage.GetCharacterLevelByGuid(member.GetGUID());
 
                 if (member.GetGUID() != session.GetPlayer().GetGUID() && level >= minLevel && level <= maxLevel && member.IsRankNotLower(minRank))
                     packet.Invites.Add(new CalendarEventInitialInviteInfo(member.GetGUID(), (byte)level));
@@ -1495,7 +1497,7 @@ namespace Game.Guilds
                 if (player.GetGuildId() != 0)
                     return false;
             }
-            else if (Player.GetGuildIdFromDB(guid) != 0)
+            else if (Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(guid) != 0)
                 return false;
 
             // Remove all player signs from another petitions
@@ -1548,6 +1550,7 @@ namespace Game.Guilds
                     return false;
 
                 m_members[guid] = member;
+                Global.CharacterCacheStorage.UpdateCharacterGuildId(guid, GetId());
             }
 
             member.SaveToDB(trans);
@@ -1617,6 +1620,8 @@ namespace Game.Guilds
                 foreach (var entry in CliDB.GuildPerkSpellsStorage.Values)
                         player.RemoveSpell(entry.SpellID, false, false);
             }
+            else
+                Global.CharacterCacheStorage.UpdateCharacterGuildId(guid, 0);
 
             _DeleteMemberFromDB(trans, guid.GetCounter());
             if (!isDisbanding)

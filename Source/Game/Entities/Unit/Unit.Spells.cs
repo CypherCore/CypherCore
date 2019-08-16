@@ -986,10 +986,7 @@ namespace Game.Entities
             // Increase hit chance from attacker SPELL_AURA_MOD_SPELL_HIT_CHANCE and attacker ratings
             HitChance += (int)(modHitChance * 100.0f);
 
-            if (HitChance < 100)
-                HitChance = 100;
-            else if (HitChance > 10000)
-                HitChance = 10000;
+            MathFunctions.RoundToInterval(ref HitChance, 0, 10000);
 
             int tmp = 10000 - HitChance;
 

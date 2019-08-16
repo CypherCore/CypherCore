@@ -103,7 +103,7 @@ namespace Game.Chat
             if (!handler.extractPlayerTarget(args, out target, out targetGuid))
                 return false;
 
-            ulong guildId = target != null ? target.GetGuildId() : Player.GetGuildIdFromDB(targetGuid);
+            ulong guildId = target != null ? target.GetGuildId() : Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(targetGuid);
             if (guildId == 0)
                 return false;
 
@@ -130,7 +130,7 @@ namespace Game.Chat
             if (!handler.extractPlayerTarget(new StringArguments(nameStr), out target, out targetGuid, out target_name))
                 return false;
 
-            ulong guildId = target ? target.GetGuildId() : Player.GetGuildIdFromDB(targetGuid);
+            ulong guildId = target ? target.GetGuildId() : Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(targetGuid);
             if (guildId == 0)
                 return false;
 
@@ -210,7 +210,7 @@ namespace Game.Chat
             handler.SendSysMessage(CypherStrings.GuildInfoName, guild.GetName(), guild.GetId()); // Guild Id + Name
 
             string guildMasterName;
-            if (ObjectManager.GetPlayerNameByGUID(guild.GetLeaderGUID(), out guildMasterName))
+            if (Global.CharacterCacheStorage.GetCharacterNameByGuid(guild.GetLeaderGUID(), out guildMasterName))
                 handler.SendSysMessage(CypherStrings.GuildInfoGuildMaster, guildMasterName, guild.GetLeaderGUID().ToString()); // Guild Master
 
             // Format creation date

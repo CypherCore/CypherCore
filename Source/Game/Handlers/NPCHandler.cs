@@ -289,13 +289,7 @@ namespace Game
 
                 if (corpseGrave != ghostGrave)
                     GetPlayer().TeleportTo(corpseGrave.MapID, corpseGrave.Loc.X, corpseGrave.Loc.Y, corpseGrave.Loc.Z, GetPlayer().GetOrientation());
-                // or update at original position
-                else
-                    GetPlayer().UpdateObjectVisibility();
             }
-            // or update at original position
-            else
-                GetPlayer().UpdateObjectVisibility();
         }
 
         [WorldPacketHandler(ClientOpcodes.BinderActivate)]

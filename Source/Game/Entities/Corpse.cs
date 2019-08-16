@@ -206,7 +206,7 @@ namespace Game.Entities
         public bool IsExpired(long t)
         {
             // Deleted character
-            if (Global.WorldMgr.GetCharacterInfo(GetOwnerGUID()) == null)
+            if (!Global.CharacterCacheStorage.HasCharacterCacheEntry(GetOwnerGUID()))
                 return true;
 
             if (m_type == CorpseType.Bones)

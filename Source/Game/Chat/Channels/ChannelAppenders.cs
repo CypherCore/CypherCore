@@ -19,6 +19,7 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Network;
 using Game.Network.Packets;
+using Game.Cache;
 
 namespace Game.Chat
 {
@@ -399,9 +400,9 @@ namespace Game.Chat
             _ownerGuid = ownerGuid;
             _ownerName = "";
 
-            CharacterInfo characterInfo = Global.WorldMgr.GetCharacterInfo(_ownerGuid);
-            if (characterInfo != null)
-                _ownerName = characterInfo.Name;
+            CharacterCacheEntry characterCacheEntry = Global.CharacterCacheStorage.GetCharacterCacheByGuid(_ownerGuid);
+            if (characterCacheEntry != null)
+                _ownerName = characterCacheEntry.Name;
         }
 
         public ChatNotify GetNotificationType() => ChatNotify.ChannelOwnerNotice;

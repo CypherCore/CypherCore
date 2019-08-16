@@ -784,7 +784,7 @@ namespace Game.Entities
                         if (!m_spawnedByDefault)
                         {
                             m_respawnTime = 0;
-                            UpdateObjectVisibility();
+                            DestroyForNearbyPlayers(); // old UpdateObjectVisibility()
                             return;
                         }
 
@@ -794,8 +794,7 @@ namespace Game.Entities
                         if (WorldConfig.GetBoolValue(WorldCfg.SaveRespawnTimeImmediately))
                             SaveRespawnTime();
 
-                        UpdateObjectVisibility();
-
+                        DestroyForNearbyPlayers(); // old UpdateObjectVisibility()
                         break;
                     }
             }

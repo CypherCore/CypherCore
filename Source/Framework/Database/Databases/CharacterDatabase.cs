@@ -32,7 +32,6 @@ namespace Framework.Database
             PrepareStatement(CharStatements.INS_QUEST_POOL_SAVE, "INSERT INTO pool_quest_save (pool_id, quest_id) VALUES (?, ?)");
             PrepareStatement(CharStatements.DEL_NONEXISTENT_GUILD_BANK_ITEM, "DELETE FROM guild_bank_item WHERE guildid = ? AND TabId = ? AND SlotId = ?");
             PrepareStatement(CharStatements.DEL_EXPIRED_BANS, "UPDATE character_banned SET active = 0 WHERE unbandate <= UNIX_TIMESTAMP() AND unbandate <> bandate");
-            PrepareStatement(CharStatements.SEL_GUID_BY_NAME, "SELECT guid FROM characters WHERE name = ?");
             PrepareStatement(CharStatements.SEL_CHECK_NAME, "SELECT 1 FROM characters WHERE name = ?");
             PrepareStatement(CharStatements.SEL_CHECK_GUID, "SELECT 1 FROM characters WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_SUM_CHARS, "SELECT COUNT(guid) FROM characters WHERE account = ?");
@@ -67,8 +66,6 @@ namespace Framework.Database
                 "LEFT JOIN character_declinedname AS cd ON c.guid = cd.guid LEFT JOIN guild_member AS gm ON c.guid = gm.guid " +
                 "LEFT JOIN character_banned AS cb ON c.guid = cb.guid AND cb.active = 1 WHERE c.deleteInfos_Account = ? AND c.deleteInfos_Name IS NOT NULL");
             PrepareStatement(CharStatements.SEL_FREE_NAME, "SELECT name, at_login FROM characters WHERE guid = ? AND NOT EXISTS (SELECT NULL FROM characters WHERE name = ?)");
-            PrepareStatement(CharStatements.SEL_GUID_RACE_ACC_BY_NAME, "SELECT guid, race, account FROM characters WHERE name = ?");
-            PrepareStatement(CharStatements.SEL_CHAR_LEVEL, "SELECT level FROM characters WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHAR_ZONE, "SELECT zone FROM characters WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHAR_POSITION_XYZ, "SELECT map, position_x, position_y, position_z FROM characters WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHAR_POSITION, "SELECT position_x, position_y, position_z, orientation, map, taxi_path FROM characters WHERE guid = ?");
@@ -358,7 +355,6 @@ namespace Framework.Database
             PrepareStatement(CharStatements.UPD_ARENA_TEAM_MEMBER, "UPDATE arena_team_member SET personalRating = ?, weekGames = ?, weekWins = ?, seasonGames = ?, seasonWins = ? WHERE arenaTeamId = ? AND guid = ?");
             PrepareStatement(CharStatements.DEL_CHARACTER_ARENA_STATS, "DELETE FROM character_arena_stats WHERE guid = ?");
             PrepareStatement(CharStatements.REP_CHARACTER_ARENA_STATS, "REPLACE INTO character_arena_stats (guid, slot, matchMakerRating) VALUES (?, ?, ?)");
-            PrepareStatement(CharStatements.SEL_PLAYER_ARENA_TEAMS, "SELECT arena_team_member.arenaTeamId FROM arena_team_member JOIN arena_team ON arena_team_member.arenaTeamId = arena_team.arenaTeamId WHERE guid = ?");
             PrepareStatement(CharStatements.UPD_ARENA_TEAM_NAME, "UPDATE arena_team SET name = ? WHERE arenaTeamId = ?");
 
             // Character battleground data
@@ -501,7 +497,6 @@ namespace Framework.Database
             PrepareStatement(CharStatements.SEL_CHAR_COD_ITEM_MAIL, "SELECT id, messageType, mailTemplateId, sender, subject, body, money, has_items FROM mail WHERE receiver = ? AND has_items <> 0 AND cod <> 0");
             PrepareStatement(CharStatements.SEL_CHAR_SOCIAL, "SELECT DISTINCT guid FROM character_social WHERE friend = ?");
             PrepareStatement(CharStatements.SEL_CHAR_OLD_CHARS, "SELECT guid, deleteInfos_Account FROM characters WHERE deleteDate IS NOT NULL AND deleteDate < ?");
-            PrepareStatement(CharStatements.SEL_ARENA_TEAM_ID_BY_PLAYER_GUID, "SELECT arena_team_member.arenateamid FROM arena_team_member JOIN arena_team ON arena_team_member.arenateamid = arena_team.arenateamid WHERE guid = ? AND type = ? LIMIT 1");
             PrepareStatement(CharStatements.SEL_MAIL, "SELECT id, messageType, sender, receiver, subject, body, has_items, expire_time, deliver_time, money, cod, checked, stationery, mailTemplateId FROM mail WHERE receiver = ? ORDER BY id DESC");
             PrepareStatement(CharStatements.DEL_CHAR_AURA_FROZEN, "DELETE FROM character_aura WHERE spell = 9454 AND guid = ?");
             PrepareStatement(CharStatements.SEL_CHAR_INVENTORY_COUNT_ITEM, "SELECT COUNT(itemEntry) FROM character_inventory ci INNER JOIN item_instance ii ON ii.guid = ci.item WHERE itemEntry = ?");
@@ -752,7 +747,6 @@ namespace Framework.Database
         INS_QUEST_POOL_SAVE,
         DEL_NONEXISTENT_GUILD_BANK_ITEM,
         DEL_EXPIRED_BANS,
-        SEL_GUID_BY_NAME,
         SEL_CHECK_NAME,
         SEL_CHECK_GUID,
         SEL_SUM_CHARS,
@@ -772,8 +766,6 @@ namespace Framework.Database
         SEL_UNDELETE_ENUM,
         SEL_UNDELETE_ENUM_DECLINED_NAME,
         SEL_FREE_NAME,
-        SEL_GUID_RACE_ACC_BY_NAME,
-        SEL_CHAR_LEVEL,
         SEL_CHAR_ZONE,
         SEL_CHAR_POSITION_XYZ,
         SEL_CHAR_POSITION,
@@ -1000,7 +992,6 @@ namespace Framework.Database
         UPD_ARENA_TEAM_MEMBER,
         DEL_CHARACTER_ARENA_STATS,
         REP_CHARACTER_ARENA_STATS,
-        SEL_PLAYER_ARENA_TEAMS,
         UPD_ARENA_TEAM_NAME,
 
         SEL_PETITION,
@@ -1133,7 +1124,6 @@ namespace Framework.Database
         SEL_CHAR_COD_ITEM_MAIL,
         SEL_CHAR_SOCIAL,
         SEL_CHAR_OLD_CHARS,
-        SEL_ARENA_TEAM_ID_BY_PLAYER_GUID,
         SEL_MAIL,
         DEL_CHAR_AURA_FROZEN,
         SEL_CHAR_INVENTORY_COUNT_ITEM,

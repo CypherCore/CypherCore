@@ -704,6 +704,10 @@ namespace Game
                 Global.BlackMarketMgr.LoadAuctions();
             }
 
+            // Load before guilds and arena teams
+            Log.outInfo(LogFilter.ServerLoading, "Loading character cache store...");
+            Global.CharacterCacheStorage.LoadCharacterCacheStorage();
+
             Log.outInfo(LogFilter.ServerLoading, "Loading Guild rewards...");
             Global.GuildMgr.LoadGuildRewards();
 
@@ -934,8 +938,6 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Calculate next currency reset time...");
             InitCurrencyResetTime();
-
-            LoadCharacterInfoStorage();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading race and class expansion requirements...");
             Global.ObjectMgr.LoadRaceAndClassExpansionRequirements();
@@ -1564,14 +1566,7 @@ namespace Game
                 if (mode == BanMode.Account)
                     account = Global.AccountMgr.GetId(nameOrIP);
                 else if (mode == BanMode.Character)
-                {
-                    stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_ACCOUNT_BY_NAME);
-                    stmt.AddValue(0, nameOrIP);
-
-                    SQLResult result = DB.Characters.Query(stmt);
-                    if (!result.IsEmpty())
-                        account = result.Read<uint>(0);
-                }
+                    account = Global.CharacterCacheStorage.GetCharacterAccountIdByName(nameOrIP);
 
                 if (account == 0)
                     return false;
@@ -1595,7 +1590,7 @@ namespace Game
             // Pick a player to ban if not online
             if (!pBanned)
             {
-                guid = ObjectManager.GetPlayerGUIDByName(name);
+                guid = Global.CharacterCacheStorage.GetCharacterGuidByName(name);
                 if (guid.IsEmpty())
                     return BanReturn.Notfound;                                    // Nobody to ban
             }
@@ -1633,7 +1628,7 @@ namespace Game
             // Pick a player to ban if not online
             if (!pBanned)
             {
-                guid = ObjectManager.GetPlayerGUIDByName(name);
+                guid = Global.CharacterCacheStorage.GetCharacterGuidByName(name);
                 if (guid.IsEmpty())
                     return false;                                    // Nobody to ban
             }
@@ -2180,93 +2175,6 @@ namespace Game
             _queryProcessor.ProcessReadyQueries();
         }
 
-        public CharacterInfo GetCharacterInfo(ObjectGuid guid) { return _characterInfoStorage.LookupByKey(guid); }
-
-        public void LoadCharacterInfoStorage()
-        {
-            Log.outInfo(LogFilter.ServerLoading, "Loading character name data");
-
-            _characterInfoStorage.Clear();
-
-            SQLResult result = DB.Characters.Query("SELECT guid, name, account, race, gender, class, level, deleteDate FROM characters");
-            if (result.IsEmpty())
-            {
-                Log.outInfo(LogFilter.ServerLoading, "No character name data loaded, empty query");
-                return;
-            }
-
-            uint count = 0;
-            do
-            {
-                AddCharacterInfo(ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(0)), result.Read<uint>(2), result.Read<string>(1),
-                    result.Read<byte>(4), result.Read<byte>(3), result.Read<byte>(5), result.Read<byte>(6), result.Read<uint>(7) != 0);
-                ++count;
-            } while (result.NextRow());
-
-            Log.outInfo(LogFilter.ServerLoading, "Loaded name data for {0} characters", count);
-        }
-
-        public void AddCharacterInfo(ObjectGuid guid, uint accountId, string name, byte gender, byte race, byte playerClass, byte level, bool isDeleted)
-        {
-            CharacterInfo data = new CharacterInfo();
-            data.Name = name;
-            data.AccountId = accountId;
-            data.RaceID = (Race)race;
-            data.Sex = (Gender)gender;
-            data.ClassID = (Class)playerClass;
-            data.Level = level;
-            data.IsDeleted = isDeleted;
-            _characterInfoStorage[guid] = data;
-        }
-
-        public void DeleteCharacterInfo(ObjectGuid guid) { _characterInfoStorage.Remove(guid); }
-
-        public void UpdateCharacterInfo(ObjectGuid guid, string name, Gender gender = Gender.None, Race race = Race.None)
-        {
-            if (!_characterInfoStorage.ContainsKey(guid))
-                return;
-
-            var charData = _characterInfoStorage[guid];
-            charData.Name = name;
-
-            if (gender != Gender.None)
-                charData.Sex = gender;
-
-            if (race != Race.None)
-                charData.RaceID = race;
-
-            InvalidatePlayer data = new InvalidatePlayer();
-            data.Guid = guid;
-            SendGlobalMessage(data);
-        }
-
-        public void UpdateCharacterInfoLevel(ObjectGuid guid, byte level)
-        {
-            if (!_characterInfoStorage.ContainsKey(guid))
-                return;
-
-            _characterInfoStorage[guid].Level = level;
-        }
-
-        public void UpdateCharacterInfoAccount(ObjectGuid guid, uint accountId)
-        {
-            if (!_characterInfoStorage.ContainsKey(guid))
-                return;
-
-            _characterInfoStorage[guid].AccountId = accountId;
-        }
-
-        public void UpdateCharacterInfoDeleted(ObjectGuid guid, bool deleted, string name = null)
-        {
-            if (!_characterInfoStorage.ContainsKey(guid))
-                return;
-
-            _characterInfoStorage[guid].IsDeleted = deleted;
-
-            if (!string.IsNullOrEmpty(name))
-                _characterInfoStorage[guid].Name = name;
-        }
-
         public void ReloadRBAC()
         {
             // Passive reload, we mark the data as invalidated and next time a permission is checked it will be reloaded
@@ -2274,8 +2182,6 @@ namespace Game
             foreach (var session in m_sessions.Values)
                 session.InvalidateRBACData();
         }
-
-        public bool HasCharacterInfo(ObjectGuid guid) { return _characterInfoStorage.ContainsKey(guid); }
 
         public List<WorldSession> GetAllSessions()
         {
@@ -2409,8 +2315,6 @@ namespace Game
 
         Dictionary<byte, Autobroadcast> m_Autobroadcasts = new Dictionary<byte, Autobroadcast>();
 
-        Dictionary<ObjectGuid, CharacterInfo> _characterInfoStorage = new Dictionary<ObjectGuid, CharacterInfo>();
-
         CleaningFlags m_CleaningFlags;
 
         float m_MaxVisibleDistanceOnContinents = SharedConst.DefaultVisibilityDistance;
@@ -2517,17 +2421,6 @@ namespace Game
         Shutdown = 0,
         Error = 1,
         Restart = 2,
-    }
-
-    public class CharacterInfo
-    {
-        public string Name;
-        public uint AccountId;
-        public Class ClassID;
-        public Race RaceID;
-        public Gender Sex;
-        public byte Level;
-        public bool IsDeleted;
     }
 
     public class WorldWorldTextBuilder : MessageBuilder

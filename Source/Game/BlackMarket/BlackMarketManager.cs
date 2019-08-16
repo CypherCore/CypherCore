@@ -229,13 +229,13 @@ namespace Game.BlackMarket
             }
             else
             {
-                bidderAccId = ObjectManager.GetPlayerAccountIdByGUID(bidderGuid);
+                bidderAccId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(bidderGuid);
                 if (bidderAccId == 0) // Account exists
                     return;
 
                 logGmTrade = Global.AccountMgr.HasPermission(bidderAccId, RBACPermissions.LogGmTrade, Global.WorldMgr.GetRealmId().Realm);
 
-                if (logGmTrade && !ObjectManager.GetPlayerNameByGUID(bidderGuid, out bidderName))
+                if (logGmTrade && !Global.CharacterCacheStorage.GetCharacterNameByGuid(bidderGuid, out bidderName))
                     bidderName = Global.ObjectMgr.GetCypherString(CypherStrings.Unknown);
             }
 
@@ -277,7 +277,7 @@ namespace Game.BlackMarket
 
             uint oldBidder_accId = 0;
             if (!oldBidder)
-                oldBidder_accId = ObjectManager.GetPlayerAccountIdByGUID(oldBidder_guid);
+                oldBidder_accId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(oldBidder_guid);
 
             // old bidder exist
             if (!oldBidder && oldBidder_accId == 0)

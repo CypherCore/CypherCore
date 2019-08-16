@@ -16,6 +16,7 @@
  */
 
 using Framework.Constants;
+using Game.Cache;
 using Game.Entities;
 using Game.Guilds;
 using Game.Network;
@@ -193,12 +194,12 @@ namespace Game
                     recruitData.SecondsSinceCreated = (uint)(now - recruitRequestPair.Value.GetSubmitTime());
                     recruitData.SecondsUntilExpiration = (uint)(recruitRequestPair.Value.GetExpiryTime() - now);
 
-                    CharacterInfo charInfo = Global.WorldMgr.GetCharacterInfo(recruitRequestPair.Key);
+                    CharacterCacheEntry charInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(recruitRequestPair.Key);
                     if (charInfo != null)
                     {
                         recruitData.Name = charInfo.Name;
-                        recruitData.CharacterClass = (int)charInfo.ClassID;
-                        recruitData.CharacterGender = (int)charInfo.Sex;
+                        recruitData.CharacterClass = (byte)charInfo.ClassId;
+                        recruitData.CharacterGender = (byte)charInfo.Sex;
                         recruitData.CharacterLevel = charInfo.Level;
                     }
 

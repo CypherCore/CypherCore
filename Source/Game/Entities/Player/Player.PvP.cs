@@ -20,6 +20,7 @@ using Framework.Database;
 using Game.Arenas;
 using Game.BattleFields;
 using Game.BattleGrounds;
+using Game.Cache;
 using Game.DataStorage;
 using Game.Network.Packets;
 using Game.PvP;
@@ -887,31 +888,15 @@ namespace Game.Entities
             SetArenaTeamInfoField(slot, ArenaTeamInfoType.Type, type);
         }
 
-        public static uint GetArenaTeamIdFromDB(ObjectGuid guid, byte type)
-        {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_ARENA_TEAM_ID_BY_PLAYER_GUID);
-            stmt.AddValue(0, guid.GetCounter());
-            stmt.AddValue(1, type);
-            SQLResult result = DB.Characters.Query(stmt);
-
-            if (result.IsEmpty())
-                return 0;
-
-            return result.Read<uint>(0);
-        }
-
         public static void LeaveAllArenaTeams(ObjectGuid guid)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PLAYER_ARENA_TEAMS);
-            stmt.AddValue(0, guid.GetCounter());
-            SQLResult result = DB.Characters.Query(stmt);
-
-            if (result.IsEmpty())
+            CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(guid);
+            if (characterInfo == null)
                 return;
 
-            do
+            for (byte i = 0; i < SharedConst.MaxArenaSlot; ++i)
             {
-                uint arenaTeamId = result.Read<uint>(0);
+                uint arenaTeamId = characterInfo.ArenaTeamId[i];
                 if (arenaTeamId != 0)
                 {
                     ArenaTeam arenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(arenaTeamId);
@@ -919,7 +904,6 @@ namespace Game.Entities
                         arenaTeam.DelMember(guid, true);
                 }
             }
-            while (result.NextRow());
         }
         public uint GetArenaTeamId(byte slot) { return 0; }
         public uint GetArenaPersonalRating(byte slot) { return m_activePlayerData.PvpInfo[slot].Rating; }

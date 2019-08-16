@@ -134,6 +134,13 @@ namespace Game
             if (player.m_unitMovedByMe != player)
                 return;
 
+            // additional check, client outputs message on its own
+            if (!player.IsAlive())
+            {
+                player.SendEquipError(InventoryResult.PlayerDead);
+                return;
+            }
+
             Item item = player.GetItemByPos(packet.Slot, packet.PackSlot);
             if (!item)
             {
@@ -181,31 +188,49 @@ namespace Game
             {
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_GIFT_BY_ITEM);
                 stmt.AddValue(0, item.GetGUID().GetCounter());
-                SQLResult result = DB.Characters.Query(stmt);
-
-                if (!result.IsEmpty())
-                {
-                    uint entry = result.Read<uint>(0);
-                    uint flags = result.Read<uint>(1);
-
-                    item.SetGiftCreator(ObjectGuid.Empty);
-                    item.SetEntry(entry);
-                    item.SetItemFlags((ItemFieldFlags)flags);
-                    item.SetState(ItemUpdateState.Changed, player);
-                }
-                else
-                {
-                    Log.outError(LogFilter.Network, "Wrapped item {0} don't have record in character_gifts table and will deleted", item.GetGUID().ToString());
-                    player.DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
-                    return;
-                }
-
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GIFT);
-                stmt.AddValue(0, item.GetGUID().GetCounter());
-                DB.Characters.Execute(stmt);
+                _queryProcessor.AddQuery(DB.Characters.AsyncQuery(stmt)
+                    .WithCallback(result => HandleOpenWrappedItemCallback(item.GetPos(), item.GetGUID(), result)));
             }
             else
                 player.SendLoot(item.GetGUID(), LootType.Corpse);
+        }
+
+        void HandleOpenWrappedItemCallback(ushort pos, ObjectGuid itemGuid, SQLResult result)
+        {
+            if (!GetPlayer())
+                return;
+
+            Item item = GetPlayer().GetItemByPos(pos);
+            if (!item)
+                return;
+
+            if (item.GetGUID() != itemGuid || !item.HasItemFlag(ItemFieldFlags.Wrapped)) // during getting result, gift was swapped with another item
+                return;
+
+            if (result.IsEmpty())
+            {
+                Log.outError(LogFilter.Network, $"Wrapped item {item.GetGUID().ToString()} don't have record in character_gifts table and will deleted");
+                GetPlayer().DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
+                return;
+            }
+
+            SQLTransaction trans = new SQLTransaction();
+
+            uint entry = result.Read<uint>(0);
+            uint flags = result.Read<uint>(1);
+
+            item.SetGiftCreator(ObjectGuid.Empty);
+            item.SetEntry(entry);
+            item.SetItemFlags((ItemFieldFlags)flags);
+            item.SetState(ItemUpdateState.Changed, GetPlayer());
+
+            GetPlayer().SaveInventoryAndGoldToDB(trans);
+
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GIFT);
+            stmt.AddValue(0, itemGuid.GetCounter());
+            trans.Append(stmt);
+
+            DB.Characters.CommitTransaction(trans);
         }
 
         [WorldPacketHandler(ClientOpcodes.GameObjUse)]

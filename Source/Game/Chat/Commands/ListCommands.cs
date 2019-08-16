@@ -345,7 +345,7 @@ namespace Game.Chat.Commands
             PreparedStatement stmt = null;
 
             ObjectGuid parseGUID = ObjectGuid.Create(HighGuid.Player, args.NextUInt64());
-            if (ObjectManager.GetPlayerNameByGUID(parseGUID, out targetName))
+            if (Global.CharacterCacheStorage.GetCharacterNameByGuid(parseGUID, out targetName))
             {
                 target = Global.ObjAccessor.FindPlayer(parseGUID);
                 targetGuid = parseGUID;

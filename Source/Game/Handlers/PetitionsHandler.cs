@@ -142,7 +142,7 @@ namespace Game
             ServerPetitionShowSignatures signaturesPacket = new ServerPetitionShowSignatures();
             signaturesPacket.Item = packet.Item;
             signaturesPacket.Owner = GetPlayer().GetGUID();
-            signaturesPacket.OwnerAccountID = ObjectGuid.Create(HighGuid.WowAccount, ObjectManager.GetPlayerAccountIdByGUID(GetPlayer().GetGUID()));
+            signaturesPacket.OwnerAccountID = ObjectGuid.Create(HighGuid.WowAccount, Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(GetPlayer().GetGUID()));
             signaturesPacket.PetitionID = (int)packet.Item.GetCounter();  // @todo verify that...
 
             do
@@ -253,7 +253,7 @@ namespace Game
                 return;
 
             // not let enemies sign guild charter
-            if (!WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGuild) && GetPlayer().GetTeam() != ObjectManager.GetPlayerTeamByGUID(ownerGuid))
+            if (!WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGuild) && GetPlayer().GetTeam() != Global.CharacterCacheStorage.GetCharacterTeamByGuid(ownerGuid))
             {
                 Guild.SendCommandResult(this, GuildCommandType.CreateGuild, GuildCommandError.NotAllied);
                 return;

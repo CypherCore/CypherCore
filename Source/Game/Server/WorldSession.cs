@@ -428,28 +428,28 @@ namespace Game
         public void LoadTutorialsData(SQLResult result)
         {
             if (!result.IsEmpty())
+            {
                 for (var i = 0; i < SharedConst.MaxAccountTutorialValues; i++)
                     tutorials[i] = result.Read<uint>(i);
+                tutorialsChanged |= TutorialsFlag.LoadedFromDB;
+            }
 
-            tutorialsChanged = false;
+            tutorialsChanged &= ~TutorialsFlag.Changed;
         }
 
         public void SaveTutorialsData(SQLTransaction trans)
         {
-            if (!tutorialsChanged)
+            if (!tutorialsChanged.HasAnyFlag(TutorialsFlag.Changed))
                 return;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_HAS_TUTORIALS);
-            stmt.AddValue(0, GetAccountId());
-            bool hasTutorials = !DB.Characters.Query(stmt).IsEmpty();
-            // Modify data in DB
-            stmt = DB.Characters.GetPreparedStatement(hasTutorials ? CharStatements.UPD_TUTORIALS : CharStatements.INS_TUTORIALS);
+            bool hasTutorialsInDB = tutorialsChanged.HasAnyFlag(TutorialsFlag.LoadedFromDB);
+            PreparedStatement stmt = DB.Characters.GetPreparedStatement(hasTutorialsInDB ? CharStatements.UPD_TUTORIALS : CharStatements.INS_TUTORIALS);
             for (var i = 0; i < SharedConst.MaxAccountTutorialValues; ++i)
                 stmt.AddValue(i, tutorials[i]);
             stmt.AddValue(SharedConst.MaxAccountTutorialValues, GetAccountId());
             trans.Append(stmt);
 
-            tutorialsChanged = false;
+            tutorialsChanged &= ~TutorialsFlag.Changed;
         }
 
         public void SendConnectToInstance(ConnectToSerial serial)
@@ -622,6 +622,8 @@ namespace Game
 
         public ulong GetConnectToInstanceKey() { return _instanceConnectKey.Raw; }
 
+        public QueryCallbackProcessor GetQueryProcessor() { return _queryProcessor; }
+
         void SetLogoutStartTime(long requestTime)
         {
             _logoutTime = requestTime;
@@ -780,7 +782,7 @@ namespace Game
             if (tutorials[index] != value)
             {
                 tutorials[index] = value;
-                tutorialsChanged = true;
+                tutorialsChanged |= TutorialsFlag.Changed;
             }
         }
 
@@ -855,7 +857,7 @@ namespace Game
         uint m_clientTimeDelay;
         AccountData[] _accountData = new AccountData[(int)AccountDataTypes.Max];
         uint[] tutorials = new uint[SharedConst.MaxAccountTutorialValues];
-        bool tutorialsChanged;
+        TutorialsFlag tutorialsChanged;
 
         Array<byte> _realmListSecret = new Array<byte>(32);
         Dictionary<uint /*realmAddress*/, byte> _realmCharacterCounts = new Dictionary<uint, byte>();

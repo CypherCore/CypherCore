@@ -384,7 +384,7 @@ namespace Game
             // impossible have online own another character (use this for speedup check in case online owner)
             ObjectGuid ownerGuid = ObjectGuid.Create(HighGuid.Player, auction.owner);
             Player auction_owner = Global.ObjAccessor.FindPlayer(ownerGuid);
-            if (!auction_owner && ObjectManager.GetPlayerAccountIdByGUID(ownerGuid) == player.GetSession().GetAccountId())
+            if (!auction_owner && Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(ownerGuid) == player.GetSession().GetAccountId())
             {
                 //you cannot bid your another character auction:
                 SendAuctionCommandResult(null, AuctionAction.PlaceBid, AuctionError.BidOwn);

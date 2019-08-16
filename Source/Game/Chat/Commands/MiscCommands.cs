@@ -1291,7 +1291,7 @@ namespace Game.Chat
             ObjectGuid parseGUID = ObjectGuid.Create(HighGuid.Player, args.NextUInt64());
 
             // ... and make sure we get a target, somehow.
-            if (ObjectManager.GetPlayerNameByGUID(parseGUID, out targetName))
+            if (Global.CharacterCacheStorage.GetCharacterNameByGuid(parseGUID, out targetName))
             {
                 target = Global.ObjAccessor.FindPlayer(parseGUID);
                 targetGuid = parseGUID;
@@ -1673,7 +1673,7 @@ namespace Game.Chat
             if (!handler.extractPlayerTarget(new StringArguments(nameStr), out target, out targetGuid, out targetName))
                 return false;
 
-            uint accountId = target ? target.GetSession().GetAccountId() : ObjectManager.GetPlayerAccountIdByGUID(targetGuid);
+            uint accountId = target ? target.GetSession().GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(targetGuid);
 
             // find only player from same account if any
             if (!target)
@@ -1745,7 +1745,7 @@ namespace Game.Chat
             if (!handler.extractPlayerTarget(args, out target, out targetGuid, out targetName))
                 return false;
 
-            uint accountId = target ? target.GetSession().GetAccountId() : ObjectManager.GetPlayerAccountIdByGUID(targetGuid);
+            uint accountId = target ? target.GetSession().GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(targetGuid);
 
             // find only player from same account if any
             if (!target)
@@ -2259,7 +2259,7 @@ namespace Game.Chat
                 if (!string.IsNullOrEmpty(targetName))
                 {
                     // Check for offline players
-                    ObjectGuid guid = ObjectManager.GetPlayerGUIDByName(name);
+                    ObjectGuid guid = Global.CharacterCacheStorage.GetCharacterGuidByName(name);
                     if (guid.IsEmpty())
                     {
                         handler.SendSysMessage(CypherStrings.CommandFreezeWrong);

@@ -427,6 +427,9 @@ namespace Game
         public uint GetRewItemsCount() { return _rewItemsCount; }
         public uint GetRewCurrencyCount() { return _rewCurrencyCount; }
 
+        public void SetEventIdForQuest(ushort eventId) { _eventIdForQuest = eventId; }
+        public ushort GetEventIdForQuest() { return _eventIdForQuest; }
+
         #region Fields
         public uint Id;
         public QuestType Type;
@@ -542,6 +545,7 @@ namespace Game
         uint _rewChoiceItemsCount;
         uint _rewItemsCount;
         uint _rewCurrencyCount;
+        ushort _eventIdForQuest;
         #endregion
     }
 

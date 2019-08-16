@@ -51,7 +51,7 @@ namespace Game.Chat
 
             if (type == 2 || type == 3 || type == 5)
             {
-                if (Player.GetArenaTeamIdFromDB(target.GetGUID(), type) != 0)
+                if (Global.CharacterCacheStorage.GetCharacterArenaTeamIdByGuid(target.GetGUID(), type) != 0)
                 {
                     handler.SendSysMessage(CypherStrings.ArenaErrorSize, target.GetName());
                     return false;
@@ -222,11 +222,11 @@ namespace Game.Chat
 
             arena.SetCaptain(targetGuid);
 
-            CharacterInfo oldCaptainNameData = Global.WorldMgr.GetCharacterInfo(arena.GetCaptain());
-            if (oldCaptainNameData == null)
+            string oldCaptainName;
+            if (!Global.CharacterCacheStorage.GetCharacterNameByGuid(arena.GetCaptain(), out oldCaptainName))
                 return false;
 
-            handler.SendSysMessage(CypherStrings.ArenaCaptain, arena.GetName(), arena.GetId(), oldCaptainNameData.Name, target.GetName());
+            handler.SendSysMessage(CypherStrings.ArenaCaptain, arena.GetName(), arena.GetId(), oldCaptainName, target.GetName());
             if (handler.GetSession() != null)
                 Log.outDebug(LogFilter.Arena, "GameMaster: {0} [GUID: {1}] promoted player: {2} [GUID: {3}] to leader of arena team \"{4}\"[Id: {5}]",
                     handler.GetSession().GetPlayer().GetName(), handler.GetSession().GetPlayer().GetGUID().ToString(), target.GetName(), target.GetGUID().ToString(), arena.GetName(), arena.GetId());

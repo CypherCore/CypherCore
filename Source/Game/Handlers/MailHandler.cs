@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Framework.Database;
+using Game.Cache;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Guilds;
@@ -81,7 +82,7 @@ namespace Game
 
             ObjectGuid receiverGuid = ObjectGuid.Empty;
             if (ObjectManager.NormalizePlayerName(ref packet.Info.Target))
-                receiverGuid = ObjectManager.GetPlayerGUIDByName(packet.Info.Target);
+                receiverGuid = Global.CharacterCacheStorage.GetCharacterGuidByName(packet.Info.Target);
 
             if (receiverGuid.IsEmpty())
             {
@@ -143,6 +144,7 @@ namespace Game
             byte mailsCount = 0;                                  //do not allow to send to one player more than 100 mails
             byte receiverLevel = 0;
             uint receiverAccountId = 0;
+            uint receiverBnetAccountId = 0;
 
             if (receiver)
             {
@@ -150,10 +152,17 @@ namespace Game
                 mailsCount = (byte)receiver.GetMails().Count;
                 receiverLevel = (byte)receiver.getLevel();
                 receiverAccountId = receiver.GetSession().GetAccountId();
+                receiverBnetAccountId = receiver.GetSession().GetBattlenetAccountId();
             }
             else
             {
-                receiverTeam = ObjectManager.GetPlayerTeamByGUID(receiverGuid);
+                CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(receiverGuid);
+                if (characterInfo != null)
+                {
+                    receiverTeam = Player.TeamForRace(characterInfo.RaceId);
+                    receiverLevel = characterInfo.Level;
+                    receiverAccountId = characterInfo.AccountId;
+                }
 
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAIL_COUNT);
                 stmt.AddValue(0, receiverGuid.GetCounter());
@@ -162,14 +171,7 @@ namespace Game
                 if (!result.IsEmpty())
                     mailsCount = (byte)result.Read<ulong>(0);
 
-                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_LEVEL);
-                stmt.AddValue(0, receiverGuid.GetCounter());
-
-                result = DB.Characters.Query(stmt);
-                if (!result.IsEmpty())
-                    receiverLevel = result.Read<byte>(0);
-
-                receiverAccountId = ObjectManager.GetPlayerAccountIdByGUID(receiverGuid);
+                receiverBnetAccountId = Global.BNetAccountMgr.GetIdByGameAccount(receiverAccountId);
             }
 
             // do not allow to have more than 100 mails in mailbox.. mails count is in opcode byte!!! - so max can be 255..
@@ -233,8 +235,11 @@ namespace Game
 
                 if (item.IsBoundAccountWide() && item.IsSoulBound() && player.GetSession().GetAccountId() != receiverAccountId)
                 {
-                    player.SendMailResult(0, MailResponseType.Send, MailResponseResult.EquipError, InventoryResult.NotSameAccount);
-                    return;
+                    if (!item.IsBattlenetAccountBound() || player.GetSession().GetBattlenetAccountId() == 0 || player.GetSession().GetBattlenetAccountId() != receiverBnetAccountId)
+                    {
+                        player.SendMailResult(0, MailResponseType.Send, MailResponseResult.EquipError, InventoryResult.NotSameAccount);
+                        return;
+                    }
                 }
 
                 if (item.GetTemplate().GetFlags().HasAnyFlag(ItemFlags.Conjured) || item.m_itemData.Expiration != 0)
@@ -476,16 +481,16 @@ namespace Game
                         else
                         {
                             // can be calculated early
-                            sender_accId = ObjectManager.GetPlayerAccountIdByGUID(sender_guid);
+                            sender_accId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(sender_guid);
 
-                            if (!ObjectManager.GetPlayerNameByGUID(sender_guid, out sender_name))
+                            if (!Global.CharacterCacheStorage.GetCharacterNameByGuid(sender_guid, out sender_name))
                                 sender_name = Global.ObjectMgr.GetCypherString(CypherStrings.Unknown);
                         }
                         Log.outCommand(GetAccountId(), "GM {0} (Account: {1}) receiver mail item: {2} (Entry: {3} Count: {4}) and send COD money: {5} to player: {6} (Account: {7})",
                             GetPlayerName(), GetAccountId(), it.GetTemplate().GetName(), it.GetEntry(), it.GetCount(), m.COD, sender_name, sender_accId);
                     }
                     else if (!receiver)
-                        sender_accId = ObjectManager.GetPlayerAccountIdByGUID(sender_guid);
+                        sender_accId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(sender_guid);
 
                     // check player existence
                     if (receiver || sender_accId != 0)
