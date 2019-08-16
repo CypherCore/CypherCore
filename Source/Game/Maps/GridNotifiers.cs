@@ -468,6 +468,93 @@ namespace Game.Maps
         Player skipped_receiver;
     }
 
+    public class MessageDistDelivererToHostile : Notifier
+    {
+        Unit i_source;
+        ServerPacket i_message;
+        float i_distSq;
+
+        public MessageDistDelivererToHostile(Unit src, ServerPacket msg, float dist)
+        {
+            i_source = src;
+            i_message = msg;
+            i_distSq = dist * dist;
+        }
+
+        public override void Visit(IList<Player> objs)
+        {
+            foreach (var target in objs)
+            {
+                if (!target.IsInPhase(i_source))
+                    continue;
+
+                if (target.GetExactDist2dSq(i_source) > i_distSq)
+                    continue;
+
+                // Send packet to all who are sharing the player's vision
+                if (target.HasSharedVision())
+                {
+                    foreach (var player in target.GetSharedVisionList())
+                        if (player.seerView == target)
+                            SendPacket(player);
+                }
+
+                if (target.seerView == target || target.GetVehicle())
+                    SendPacket(target);
+            }
+        }
+
+        public override void Visit(IList<Creature> objs)
+        {
+            foreach (var target in objs)
+            {
+                if (!target.IsInPhase(i_source))
+                    continue;
+
+                if (target.GetExactDist2dSq(i_source) > i_distSq)
+                    continue;
+
+                // Send packet to all who are sharing the creature's vision
+                if (target.HasSharedVision())
+                {
+                    foreach (var player in target.GetSharedVisionList())
+                        if (player.seerView == target)
+                            SendPacket(player);
+                }
+            }
+        }
+
+        public override void Visit(IList<DynamicObject> objs)
+        {
+            foreach (var target in objs)
+            {
+                if (!target.IsInPhase(i_source))
+                    continue;
+
+                if (target.GetExactDist2dSq(i_source) > i_distSq)
+                    continue;
+
+                Unit caster = target.GetCaster();
+                if (caster != null)
+                {
+                    // Send packet back to the caster if the caster has vision of dynamic object
+                    Player player = caster.ToPlayer();
+                    if (player && player.seerView == target)
+                        SendPacket(player);
+                }
+            }
+        }
+
+        void SendPacket(Player player)
+        {
+            // never send packet to self
+            if (player == i_source || !player.HaveAtClient(i_source) || player.IsFriendlyTo(i_source))
+                return;
+
+            player.SendPacket(i_message);
+        }
+    }
+
     public class UpdaterNotifier : Notifier
     {
         public UpdaterNotifier(uint diff)

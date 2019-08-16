@@ -4010,9 +4010,28 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.Hit)
                 return;
 
+            float dist = m_caster.GetVisibilityRange();
+
+            // clear focus
+            BreakTarget breakTarget = new BreakTarget();
+            breakTarget.UnitGUID = m_caster.GetGUID();
+            MessageDistDelivererToHostile notifierBreak = new MessageDistDelivererToHostile(m_caster, breakTarget, dist);
+            Cell.VisitWorldObjects(m_caster, notifierBreak, dist);
+
+            // and selection
             ClearTarget clearTarget = new ClearTarget();
             clearTarget.Guid = m_caster.GetGUID();
-            m_caster.SendMessageToSet(clearTarget, true);
+            MessageDistDelivererToHostile notifierClear = new MessageDistDelivererToHostile(m_caster, clearTarget, dist);
+            Cell.VisitWorldObjects(m_caster, notifierClear, dist);
+
+            // we should also force pets to remove us from current target
+            List<Unit> attackerSet = new List<Unit>();
+            foreach (var unit in m_caster.getAttackers())
+                if (unit.GetTypeId() == TypeId.Unit && !unit.CanHaveThreatList())
+                    attackerSet.Add(unit);
+
+            foreach (var unit in attackerSet)
+                unit.AttackStop();
         }
 
         [SpellEffectHandler(SpellEffectName.SelfResurrect)]
