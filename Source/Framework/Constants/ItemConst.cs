@@ -899,7 +899,7 @@ namespace Framework.Constants
         UsedInATradeskill = 0x80000000
     }
 
-    public enum ItemFlags3
+    public enum ItemFlags3 : uint
     {
         DontDestroyOnQuestAccept = 0x01,
         ItemCanBeUpgraded = 0x02,
@@ -925,7 +925,29 @@ namespace Framework.Constants
         ActsAsTransmogHiddenVisualOption = 0x200000,
         ExpireOnWeeklyReset = 0x400000,
         DoesntShowUpInTransmogUntilCollected = 0x800000,
-        CanStoreEnchants = 0x1000000
+        CanStoreEnchants = 0x1000000,
+        HideQuestItemFromObjectTooltip = 0x2000000,
+        DoNotToast = 0x4000000,
+        IgnoreCreationContextForProgressiveWinHistory = 0x8000000,
+        ForceAllSpecsForItemHistory = 0x10000000,
+        SaveOnConsume = 0x20000000,
+        ContainerSavesPlayerData = 0x40000000,
+        NoVoidStorage = 0x80000000
+    }
+
+    public enum ItemFlags4
+    {
+        HandleOnUseEffectImmediately = 0x01,
+        AlwaysShowItemLevelInTooltip = 0x02,
+        ShowsGenerationWithRandomStats = 0x04,
+        ActivateOnEquipEffectsWhenTransmogrified = 0x08,
+        EnforceTransmogWithChildItem = 0x10,
+        Scrapable = 0x20,
+        BypassRepRequirementsForTransmog = 0x40,
+        DisplayOnlyOnDefinedRaces = 0x80,
+        RegulatedCommodity = 0x100,
+        CreateLootImmediately = 0x200,
+        GenerateLootSpecItem = 0x400
     }
 
     public enum ItemFlagsCustom
