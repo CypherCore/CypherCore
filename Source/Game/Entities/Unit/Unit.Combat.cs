@@ -589,23 +589,56 @@ namespace Game.Entities
                 // attack can be redirected to another target
                 victim = GetMeleeHitRedirectTarget(victim);
 
-                CalcDamageInfo damageInfo;
-                CalculateMeleeDamage(victim, 0, out damageInfo, attType);
-                // Send log damage message to client
-                DealDamageMods(victim, ref damageInfo.damage, ref damageInfo.absorb);
-                SendAttackStateUpdate(damageInfo);
-
-                DealMeleeDamage(damageInfo, true);
-
-                DamageInfo dmgInfo = new DamageInfo(damageInfo);
-                ProcSkillsAndAuras(damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, ProcFlagsSpellType.None, ProcFlagsSpellPhase.None, dmgInfo.GetHitMask(), null, dmgInfo, null);
-
-                if (IsTypeId(TypeId.Player))
-                    Log.outDebug(LogFilter.Unit, "AttackerStateUpdate: (Player) {0} attacked {1} (TypeId: {2}) for {3} dmg, absorbed {4}, blocked {5}, resisted {6}.",
-                        GetGUID().ToString(), victim.GetGUID().ToString(), victim.GetTypeId(), damageInfo.damage, damageInfo.absorb, damageInfo.blocked_amount, damageInfo.resist);
+                var meleeAttackOverrides = GetAuraEffectsByType(AuraType.OverrideAutoattackWithMeleeSpell);
+                AuraEffect meleeAttackAuraEffect = null;
+                uint meleeAttackSpellId = 0;
+                if (attType == WeaponAttackType.BaseAttack)
+                {
+                    if (!meleeAttackOverrides.Empty())
+                    {
+                        meleeAttackAuraEffect = meleeAttackOverrides.First();
+                        meleeAttackSpellId = meleeAttackAuraEffect.GetSpellEffectInfo().TriggerSpell;
+                    }
+                }
                 else
-                    Log.outDebug(LogFilter.Unit, "AttackerStateUpdate: (NPC) {0} attacked {1} (TypeId: {2}) for {3} dmg, absorbed {4}, blocked {5}, resisted {6}.",
-                        GetGUID().ToString(), victim.GetGUID().ToString(), victim.GetTypeId(), damageInfo.damage, damageInfo.absorb, damageInfo.blocked_amount, damageInfo.resist);
+                {
+                    var auraEffect = meleeAttackOverrides.Find(aurEff =>
+                    {
+                        return aurEff.GetSpellEffectInfo().MiscValue != 0;
+                    });
+
+                    if (auraEffect != null)
+                    {
+                        meleeAttackAuraEffect = auraEffect;
+                        meleeAttackSpellId = (uint)meleeAttackAuraEffect.GetSpellEffectInfo().MiscValue;
+                    }
+                }
+
+                if (meleeAttackAuraEffect == null)
+                {
+                    CalcDamageInfo damageInfo;
+                    CalculateMeleeDamage(victim, 0, out damageInfo, attType);
+                    // Send log damage message to client
+                    DealDamageMods(victim, ref damageInfo.damage, ref damageInfo.absorb);
+                    SendAttackStateUpdate(damageInfo);
+
+                    DealMeleeDamage(damageInfo, true);
+
+                    DamageInfo dmgInfo = new DamageInfo(damageInfo);
+                    ProcSkillsAndAuras(damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, ProcFlagsSpellType.None, ProcFlagsSpellPhase.None, dmgInfo.GetHitMask(), null, dmgInfo, null);
+                    Log.outDebug(LogFilter.Unit, "AttackerStateUpdate: {0} attacked {1} for {2} dmg, absorbed {3}, blocked {4}, resisted {5}.",
+                        GetGUID().ToString(), victim.GetGUID().ToString(), damageInfo.damage, damageInfo.absorb, damageInfo.blocked_amount, damageInfo.resist);
+                }
+                else
+                {
+                    CastSpell(victim, meleeAttackSpellId, true, null, meleeAttackAuraEffect);
+
+                    HitInfo hitInfo = HitInfo.AffectsVictim | HitInfo.NoAnimation;
+                    if (attType == WeaponAttackType.OffAttack)
+                        hitInfo |= HitInfo.OffHand;
+
+                    SendAttackStateUpdate(hitInfo, victim, GetMeleeDamageSchoolMask(), 0, 0, 0, VictimState.Hit, 0);
+                }
             }
         }
 
