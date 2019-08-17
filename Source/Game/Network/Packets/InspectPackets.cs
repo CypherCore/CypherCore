@@ -163,6 +163,7 @@ namespace Game.Network.Packets
             data.WritePackedGuid(CreatorGUID);
             data.WriteUInt8(Index);
             data.WriteInt32(AzeritePowers.Count);
+            data.WriteInt32(AzeriteEssences.Count);
             foreach (var id in AzeritePowers)
                 data.WriteInt32(id);
 
@@ -172,11 +173,14 @@ namespace Game.Network.Packets
             data.WriteBits(Gems.Count, 2);
             data.FlushBits();
 
+            foreach (var azeriteEssenceData in AzeriteEssences)
+                azeriteEssenceData.Write(data);
+
+            foreach (var enchantData in Enchants)
+                enchantData.Write(data);
+
             foreach (var gem in Gems)
                 gem.Write(data);
-
-            for (int i = 0; i < Enchants.Count; ++i)
-                Enchants[i].Write(data);
         }
 
         public ObjectGuid CreatorGUID;
@@ -186,6 +190,7 @@ namespace Game.Network.Packets
         public List<InspectEnchantData> Enchants = new List<InspectEnchantData>();
         public List<ItemGemData> Gems = new List<ItemGemData>();
         public List<int> AzeritePowers = new List<int>();
+        public List<AzeriteEssenceData> AzeriteEssences = new List<AzeriteEssenceData>();
     }
 
     public class PlayerModelDisplayInfo
@@ -249,6 +254,7 @@ namespace Game.Network.Packets
                 item.Write(data);
         }
     }
+
     public struct InspectGuildData
     {
         public void Write(WorldPacket data)
@@ -292,6 +298,23 @@ namespace Game.Network.Packets
         public int Unk801_1;
         public byte Bracket;
         public bool Unk801_2;
+    }
+
+    public struct AzeriteEssenceData
+    {
+        public uint Index;
+        public uint AzeriteEssenceID;
+        public uint Rank;
+        public bool SlotUnlocked;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(Index);
+            data.WriteUInt32(AzeriteEssenceID);
+            data.WriteUInt32(Rank);
+            data.WriteBit(SlotUnlocked);
+            data.FlushBits();
+        }
     }
 }
 
