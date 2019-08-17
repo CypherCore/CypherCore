@@ -5167,7 +5167,17 @@ namespace Game
                                 continue;
                             }
                             creatureInfo.FlagsExtra |= CreatureFlagsExtra.DungeonBoss;
-                            break;
+                            for (byte diff = 0; diff < SharedConst.MaxCreatureDifficulties; ++diff)
+                            {
+                                uint diffEntry = creatureInfo.DifficultyEntry[diff];
+                                if (diffEntry != 0)
+                                {
+                                    CreatureTemplate diffInfo = GetCreatureTemplate(diffEntry);
+                                    if (diffInfo != null)
+                                        diffInfo.FlagsExtra |= CreatureFlagsExtra.DungeonBoss;
+                                }
+                        }
+                        break;
                         }
                     case EncounterCreditType.CastSpell:
                         if (!Global.SpellMgr.HasSpellInfo(creditEntry))

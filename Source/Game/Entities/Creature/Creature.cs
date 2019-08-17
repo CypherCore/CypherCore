@@ -2585,12 +2585,6 @@ namespace Game.Entities
                 GetVehicleKit().RelocatePassengers();
         }
 
-        public bool IsDungeonBoss()
-        {
-            CreatureTemplate cinfo = Global.ObjectMgr.GetCreatureTemplate(GetEntry());
-            return cinfo != null && (cinfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.DungeonBoss));
-        }
-
         public float GetAggroRange(Unit target)
         {
             // Determines the aggro range for creatures (usually pets), used mainly for aggressive pet target selection.
@@ -2879,6 +2873,7 @@ namespace Game.Entities
         {
             return GetCreatureTemplate().InhabitType.HasAnyFlag(InhabitType.Air);
         }
+        public bool IsDungeonBoss() { return (GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.DungeonBoss); }
 
         public void SetReactState(ReactStates st)
         {
