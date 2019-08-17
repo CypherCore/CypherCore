@@ -438,7 +438,7 @@ namespace Game.PvP
             {
                 // Don't save respawn time
                 creature.SetRespawnTime(0);
-                creature.RemoveCorpse();
+                creature.DespawnOrUnsummon();
                 creature.AddObjectToRemoveList();
             }
 

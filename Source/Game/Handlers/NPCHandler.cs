@@ -143,8 +143,9 @@ namespace Game
 
             GetPlayer().RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Talk);
 
-            if (unit.IsArmorer() || unit.IsCivilian() || unit.IsQuestGiver() || unit.IsServiceProvider() || unit.IsGuard())
-                unit.StopMoving();
+            // and if he has pure gossip or is banker and moves or is tabard designer?
+            //if (unit->IsArmorer() || unit->IsCivilian() || unit->IsQuestGiver() || unit->IsServiceProvider() || unit->IsGuard())
+            unit.StopMoving();
 
             // If spiritguide, no need for gossip menu, just put player into resurrect queue
             if (unit.IsSpiritGuide())

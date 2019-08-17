@@ -33,6 +33,7 @@ namespace Game.Entities
         ObjectGuid m_suppressedTarget; // Stores the creature's "real" target while casting
         float m_suppressedOrientation; // Stores the creature's "real" orientation while casting
 
+        long _lastDamagedTime; // Part of Evade mechanics
         MultiMap<byte, byte> m_textRepeat = new MultiMap<byte, byte>();
 
         public ulong m_PlayerDamageReq;

@@ -1047,13 +1047,14 @@ namespace Game.Entities
                 victim.ModifyHealth(-(int)damage);
 
                 if (damagetype == DamageEffectType.Direct || damagetype == DamageEffectType.SpellDirect)
-                {
                     victim.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.DirectDamage, spellProto != null ? spellProto.Id : 0);
-                    victim.UpdateLastDamagedTime(spellProto);
-                }
 
                 if (!victim.IsTypeId(TypeId.Player))
                 {
+                    // Part of Evade mechanics. DoT's and Thorns / Retribution Aura do not contribute to this
+                    if (damagetype != DamageEffectType.DOT && damage > 0 && !victim.GetOwnerGUID().IsPlayer() && (spellProto == null || !spellProto.HasAura(GetMap().GetDifficultyID(), AuraType.DamageShield)))
+                        victim.ToCreature().SetLastDamagedTime(Global.WorldMgr.GetGameTime() + SharedConst.MaxAggroResetTime);
+
                     victim.AddThreat(this, damage, damageSchoolMask, spellProto);
                 }
                 else                                                // victim is a player
@@ -3206,9 +3207,5 @@ namespace Game.Entities
             }
             return true;
         }
-
-        // Part of Evade mechanics
-        public long GetLastDamagedTime() { return _lastDamagedTime; }
-        public void SetLastDamagedTime(long val) { _lastDamagedTime = val; }
     }
 }

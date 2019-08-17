@@ -101,10 +101,7 @@ namespace Game.Entities
 
         public void DisappearAndDie()
         {
-            DestroyForNearbyPlayers();
-            if (IsAlive())
-                setDeathState(DeathState.JustDied);
-            RemoveCorpse(false);
+            ForcedDespawn(0);
         }
 
         public void SearchFormation()
@@ -121,7 +118,7 @@ namespace Game.Entities
                 FormationMgr.AddCreatureToGroup(frmdata.leaderGUID, this);
         }
 
-        public void RemoveCorpse(bool setSpawnTime = true)
+        public void RemoveCorpse(bool setSpawnTime = true, bool destroyForNearbyPlayers = true)
         {
             if (getDeathState() != DeathState.Corpse)
                 return;
@@ -135,6 +132,9 @@ namespace Game.Entities
             if (IsAIEnabled)
                 GetAI().CorpseRemoved(respawnDelay);
 
+            if (destroyForNearbyPlayers)
+                DestroyForNearbyPlayers();
+
             // Should get removed later, just keep "compatibility" with scripts
             if (setSpawnTime)
                 m_respawnTime = Math.Max(Time.UnixTime + respawnDelay, m_respawnTime);
@@ -145,6 +145,21 @@ namespace Game.Entities
 
             float x, y, z, o;
             GetRespawnPosition(out x, out y, out z, out o);
+
+            // We were spawned on transport, calculate real position
+            if (IsSpawnedOnTransport())
+            {
+                Position pos = m_movementInfo.transport.pos;
+                pos.posX = x;
+                pos.posY = y;
+                pos.posZ = z;
+                pos.SetOrientation(o);
+
+                ITransport transport = GetDirectTransport();
+                if (transport != null)
+                    transport.CalculatePassengerPosition(ref x, ref y, ref z, ref o);
+            }
+
             SetHomePosition(x, y, z, o);
             GetMap().CreatureRelocation(this, x, y, z, o);
         }
@@ -275,6 +290,11 @@ namespace Game.Entities
             SetNpcFlags((NPCFlags)(npcFlags & 0xFFFFFFFF));
             SetNpcFlags2((NPCFlags2)(npcFlags >> 32));
 
+            // if unit is in combat, keep this flag
+            unitFlags &= ~(uint)UnitFlags.InCombat;
+            if (IsInCombat())
+                unitFlags |= (uint)UnitFlags.InCombat;
+
             SetUnitFlags((UnitFlags)unitFlags);
             SetUnitFlags2((UnitFlags2)unitFlags2);
             SetUnitFlags3((UnitFlags3)unitFlags3);
@@ -282,8 +302,6 @@ namespace Game.Entities
             SetDynamicFlags((UnitDynFlags)dynamicFlags);
 
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StateAnimID), (uint)CliDB.AnimationDataStorage.Count);
-
-            RemoveUnitFlag(UnitFlags.InCombat);
 
             SetBaseAttackTime(WeaponAttackType.BaseAttack, cInfo.BaseAttackTime);
             SetBaseAttackTime(WeaponAttackType.OffAttack, cInfo.BaseAttackTime);
@@ -518,13 +536,11 @@ namespace Game.Entities
                         if (!IsInEvadeMode() && (!bInCombat || IsPolymorphed() || CanNotReachTarget())) // regenerate health if not in combat or if polymorphed
                             RegenerateHealth();
 
-                        if (HasUnitFlag2(UnitFlags2.RegeneratePower))
-                        {
-                            if (GetPowerType() == PowerType.Energy)
-                                Regenerate(PowerType.Energy);
-                            else
-                                RegenerateMana();
-                        }
+                        if (GetPowerType() == PowerType.Energy)
+                            Regenerate(PowerType.Energy);
+                        else
+                            Regenerate(PowerType.Mana);
+
                         m_regenTimer = SharedConst.CreatureRegenInterval;
                     }
 
@@ -541,65 +557,13 @@ namespace Game.Entities
 
         }
 
-        void RegenerateMana()
-        {
-            int curValue = GetPower(PowerType.Mana);
-            int maxValue = GetMaxPower(PowerType.Mana);
-
-            if (curValue >= maxValue)
-                return;
-
-            int addvalue = 0;
-
-            // Combat and any controlled creature
-            if (IsInCombat() || !GetCharmerOrOwnerGUID().IsEmpty())
-            {
-                float ManaIncreaseRate = WorldConfig.GetFloatValue(WorldCfg.RatePowerMana);
-                addvalue = (int)((27.0f / 5.0f + 17.0f) * ManaIncreaseRate);
-            }
-            else
-                addvalue = maxValue / 3;
-
-            // Apply modifiers (if any).
-            addvalue *= (int)GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)PowerType.Mana);
-            addvalue += GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)PowerType.Mana) * SharedConst.CreatureRegenInterval / (5 * Time.InMilliseconds);
-
-            ModifyPower(PowerType.Mana, addvalue);
-        }
-
-        void RegenerateHealth()
-        {
-            if (!isRegeneratingHealth())
-                return;
-
-            ulong curValue = GetHealth();
-            ulong maxValue = GetMaxHealth();
-
-            if (curValue >= maxValue)
-                return;
-
-            long addvalue = 0;
-
-            // Not only pet, but any controlled creature
-            if (!GetCharmerOrOwnerGUID().IsEmpty())
-            {
-                float HealthIncreaseRate = WorldConfig.GetFloatValue(WorldCfg.RateHealth);
-                addvalue = (uint)(0.015f * GetMaxHealth() * HealthIncreaseRate);
-            }
-            else
-                addvalue = (long)maxValue / 3;
-
-            // Apply modifiers (if any).
-            addvalue *= (int)GetTotalAuraMultiplier(AuraType.ModHealthRegenPercent);
-            addvalue += GetTotalAuraModifier(AuraType.ModRegen) * SharedConst.CreatureRegenInterval / (5 * Time.InMilliseconds);
-
-            ModifyHealth(addvalue);
-        }
-
         public void Regenerate(PowerType power)
         {
             int curValue = GetPower(power);
             int maxValue = GetMaxPower(power);
+
+            if (!HasUnitFlag2(UnitFlags2.RegeneratePower))
+                return;
 
             if (curValue >= maxValue)
                 return;
@@ -620,6 +584,19 @@ namespace Game.Entities
                         addvalue = 20;
                         break;
                     }
+                case PowerType.Mana:
+                    {
+                        // Combat and any controlled creature
+                        if (IsInCombat() || GetCharmerOrOwnerGUID().IsEmpty())
+                        {
+                            float ManaIncreaseRate = WorldConfig.GetFloatValue(WorldCfg.RatePowerMana);
+                            addvalue = (27.0f / 5.0f + 17.0f) * ManaIncreaseRate;
+                        }
+                        else
+                            addvalue = maxValue / 3;
+
+                        break;
+                    }
                 default:
                     return;
             }
@@ -629,6 +606,35 @@ namespace Game.Entities
             addvalue += GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)power) * (IsHunterPet() ? SharedConst.PetFocusRegenInterval : SharedConst.CreatureRegenInterval) / (5 * Time.InMilliseconds);
 
             ModifyPower(power, (int)addvalue);
+        }
+
+        void RegenerateHealth()
+        {
+            if (!isRegeneratingHealth())
+                return;
+
+            ulong curValue = GetHealth();
+            ulong maxValue = GetMaxHealth();
+
+            if (curValue >= maxValue)
+                return;
+
+            long addvalue = 0;
+
+            // Not only pet, but any controlled creature (and not polymorphed)
+            if (!GetCharmerOrOwnerGUID().IsEmpty() && !IsPolymorphed())
+            {
+                float HealthIncreaseRate = WorldConfig.GetFloatValue(WorldCfg.RateHealth);
+                addvalue = (uint)(0.015f * GetMaxHealth() * HealthIncreaseRate);
+            }
+            else
+                addvalue = (long)maxValue / 3;
+
+            // Apply modifiers (if any).
+            addvalue *= (int)GetTotalAuraMultiplier(AuraType.ModHealthRegenPercent);
+            addvalue += GetTotalAuraModifier(AuraType.ModRegen) * SharedConst.CreatureRegenInterval / (5 * Time.InMilliseconds);
+
+            ModifyHealth(addvalue);
         }
 
         public void DoFleeToGetAssistance()
@@ -769,6 +775,10 @@ namespace Game.Entities
                 Log.outError(LogFilter.Unit, "Creature.Create: given coordinates for creature (guidlow {0}, entry {1}) are not valid (X: {2}, Y: {3}, Z: {4}, O: {5})", guidlow, entry, x, y, z, ang);
                 return false;
             }
+
+            // Allow players to see those units while dead, do it here (mayby altered by addon auras)
+            if (cinfo.TypeFlags.HasAnyFlag(CreatureTypeFlags.GhostVisible))
+                m_serverSideVisibility.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive | GhostVisibilityType.Ghost);
 
             if (!CreateFromProto(guidlow, entry, data, vehId))
                 return false;
@@ -1615,7 +1625,7 @@ namespace Game.Entities
                     setDeathState(DeathState.Corpse);
             }
 
-            RemoveCorpse(false);
+            RemoveCorpse(false, false);
 
             if (getDeathState() == DeathState.Dead)
             {
@@ -1672,33 +1682,21 @@ namespace Game.Entities
                 return;
             }
 
+            // do it before killing creature
+            DestroyForNearbyPlayers();
+
+            if (IsAlive())
+                setDeathState(DeathState.JustDied);
+
+            bool overrideRespawnTime = true;
             if (forceRespawnTimer > TimeSpan.Zero)
             {
-                if (IsAlive())
-                {
-                    uint respawnDelay = m_respawnDelay;
-                    uint corpseDelay = m_corpseDelay;
-                    m_respawnDelay = (uint)forceRespawnTimer.TotalSeconds;
-                    m_corpseDelay = 0;
-                    setDeathState(DeathState.JustDied);
-
-                    m_respawnDelay = respawnDelay;
-                    m_corpseDelay = corpseDelay;
-                }
-                else
-                {
-                    m_corpseRemoveTime = Time.UnixTime;
-                    m_respawnTime = Time.UnixTime + (long)forceRespawnTimer.TotalMilliseconds;
-                }
-
-            }
-            else
-            {
-                if (IsAlive())
-                    setDeathState(DeathState.JustDied);
+                SetRespawnTime((uint)forceRespawnTimer.TotalSeconds);
+                overrideRespawnTime = false;
             }
 
-            RemoveCorpse(false);
+            // Skip corpse decay time
+            RemoveCorpse(overrideRespawnTime, false);
         }
 
         public void DespawnOrUnsummon(TimeSpan time, TimeSpan forceRespawnTimer = default(TimeSpan)) { DespawnOrUnsummon((uint)time.TotalMilliseconds, forceRespawnTimer); }
@@ -1979,6 +1977,14 @@ namespace Game.Entities
             if (!IsAlive())
                 return false;
 
+            // we cannot assist in evade mode
+            if (IsInEvadeMode())
+                return false;
+
+            // or if enemy is in evade mode
+            if (enemy.GetTypeId() == TypeId.Unit && enemy.ToCreature().IsInEvadeMode())
+                return false;
+
             // we don't need help from non-combatant ;)
             if (IsCivilian())
                 return false;
@@ -2066,22 +2072,41 @@ namespace Game.Entities
             if (IsAIEnabled && !GetAI().CanAIAttack(victim))
                 return false;
 
-            if (GetMap().IsDungeon())
-                return true;
+            // we cannot attack in evade mode
+            if (IsInEvadeMode())
+                return false;
 
-            // if the mob is actively being damaged, do not reset due to distance unless it's a world boss
-            if (!isWorldBoss())
-                if (Time.UnixTime - GetLastDamagedTime() <= SharedConst.MaxAggroResetTime)
+            // or if enemy is in evade mode
+            if (victim.GetTypeId() == TypeId.Unit && victim.ToCreature().IsInEvadeMode())
+                return false;
+
+            if (!GetCharmerOrOwnerGUID().IsPlayer())
+            {
+                if (GetMap().IsDungeon())
                     return true;
 
-            //Use AttackDistance in distance check if threat radius is lower. This prevents creature bounce in and out of combat every update tick.
-            float dist = Math.Max(GetAttackDistance(victim), (WorldConfig.GetFloatValue(WorldCfg.ThreatRadius) + m_CombatDistance));
+                // don't check distance to home position if recently damaged, this should include taunt auras
+                if (!isWorldBoss() && (GetLastDamagedTime() > Global.WorldMgr.GetGameTime() || HasAuraType(AuraType.ModTaunt)))
+                    return true;
+            }
+
+            // Map visibility range, but no more than 2*cell size
+            float dist = Math.Min(GetMap().GetVisibilityRange(), MapConst.SizeofCells * 2);
 
             Unit unit = GetCharmerOrOwner();
             if (unit != null)
                 return victim.IsWithinDist(unit, dist);
             else
-                return victim.IsInDist(m_homePosition, dist);
+            {
+                // include sizes for huge npcs
+                dist += GetObjectSize() + victim.GetObjectSize();
+
+                // to prevent creatures in air ignore attacks because distance is already too high...
+                if (GetCreatureTemplate().InhabitType.HasAnyFlag(InhabitType.Air))
+                    return victim.IsInDist2d(m_homePosition, dist);
+                else
+                    return victim.IsInDist(m_homePosition, dist);
+            }
         }
 
         CreatureAddon GetCreatureAddon()
@@ -2242,40 +2267,17 @@ namespace Game.Entities
 
         public void GetRespawnPosition(out float x, out float y, out float z)
         {
-            if (m_spawnId != 0)
-            {
-                CreatureData data = Global.ObjectMgr.GetCreatureData(GetSpawnId());
-                if (data != null)
-                {
-                    x = data.posX;
-                    y = data.posY;
-                    z = data.posZ;
-                    return;
-                }
-            }
-
-            GetPosition(out x, out y, out z);
+            float notUsed;
+            GetRespawnPosition(out x, out y, out z, out notUsed, out notUsed);
         }
         public void GetRespawnPosition(out float x, out float y, out float z, out float ori)
         {
-            if (m_spawnId != 0)
-            {
-                CreatureData data = Global.ObjectMgr.GetCreatureData(GetSpawnId());
-                if (data != null)
-                {
-                    x = data.posX;
-                    y = data.posY;
-                    z = data.posZ;
-                    ori = data.orientation;
-
-                    return;
-                }
-            }
-
-            GetPosition(out x, out y, out z, out ori);
+            float notUsed;
+            GetRespawnPosition(out x, out y, out z, out ori, out notUsed);
         }
         public void GetRespawnPosition(out float x, out float y, out float z, out float ori, out float dist)
         {
+            // for npcs on transport, this will return transport offset
             if (m_spawnId != 0)
             {
                 CreatureData data = Global.ObjectMgr.GetCreatureData(GetSpawnId());
@@ -2291,9 +2293,16 @@ namespace Game.Entities
                 }
             }
 
-            GetPosition(out x, out y, out z, out ori);
+            // changed this from current position to home position, fixes world summons with infinite duration (wg npcs for example)
+            Position homePos = GetHomePosition();
+            x = homePos.GetPositionX();
+            y = homePos.GetPositionY();
+            z = homePos.GetPositionZ();
+            ori = homePos.GetOrientation();
             dist = 0;
         }
+
+        bool IsSpawnedOnTransport() { return m_creatureData != null && m_creatureData.mapid != GetMapId(); }
 
         public void AllLootRemovedFromCorpse()
         {
@@ -3055,6 +3064,10 @@ namespace Game.Entities
         void SetDisableReputationGain(bool disable) { DisableReputationGain = disable; }
         public bool IsReputationGainDisabled() { return DisableReputationGain; }
         public bool IsDamageEnoughForLootingAndReward() { return m_creatureInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoPlayerDamageReq) || m_PlayerDamageReq == 0; }
+
+        // Part of Evade mechanics
+        long GetLastDamagedTime() { return _lastDamagedTime; }
+        public void SetLastDamagedTime(long val) { _lastDamagedTime = val; }
 
         public void ResetPlayerDamageReq() { m_PlayerDamageReq = (uint)(GetHealth() / 2); }
 

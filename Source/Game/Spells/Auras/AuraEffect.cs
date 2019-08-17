@@ -2587,7 +2587,7 @@ namespace Game.Spells
                 {
                     target.Kill(caster);
                     if (caster.IsTypeId(TypeId.Unit))
-                        caster.ToCreature().RemoveCorpse();
+                        caster.ToCreature().DespawnOrUnsummon();
                 }
 
                 if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmount))

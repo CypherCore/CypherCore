@@ -175,8 +175,8 @@ namespace Framework.Constants
         public const int MaxCreatureModelIds = 4;
         public const int MaxTrainerspellAbilityReqs = 3;
         public const int CreatureRegenInterval = 2 * Time.InMilliseconds;
-        public const int CreatureNoPathEvadeTime = 5 * Time.InMilliseconds;
         public const int PetFocusRegenInterval = 4 * Time.InMilliseconds;
+        public const int CreatureNoPathEvadeTime = 5 * Time.InMilliseconds;
         public const int BoundaryVisualizeCreature = 15425;
         public const float BoundaryVisualizeCreatureScale = 0.25f;
         public const int BoundaryVisualizeStepSize = 1;

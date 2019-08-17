@@ -2956,10 +2956,7 @@ namespace Game.Spells
                                     caster.RewardPlayerAndGroupAtEvent(18388, unitTarget);
                                     Creature target = unitTarget.ToCreature();
                                     if (target != null)
-                                    {
-                                        target.setDeathState(DeathState.Corpse);
-                                        target.RemoveCorpse();
-                                    }
+                                        target.DespawnOrUnsummon();
                                 }
                                 break;
                             // Mug Transformation

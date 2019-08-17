@@ -4262,17 +4262,6 @@ namespace Game.Entities
             return val;
         }
 
-        void UpdateLastDamagedTime(SpellInfo spellProto)
-        {
-            if (!IsTypeId(TypeId.Unit) || IsPet())
-                return;
-
-            if (spellProto != null && spellProto.HasAura(Difficulty.None, AuraType.DamageShield))
-                return;
-
-            SetLastDamagedTime(Time.UnixTime);
-        }
-
         public bool IsHighestExclusiveAura(Aura aura, bool removeOtherAuraApplications = false)
         {
             foreach (AuraEffect aurEff in aura.GetAuraEffects())
