@@ -315,7 +315,6 @@ namespace Framework.Database
 
             // Tutorials
             PrepareStatement(CharStatements.SEL_TUTORIALS, "SELECT tut0, tut1, tut2, tut3, tut4, tut5, tut6, tut7 FROM account_tutorial WHERE accountId = ?");
-            PrepareStatement(CharStatements.SEL_HAS_TUTORIALS, "SELECT 1 FROM account_tutorial WHERE accountId = ?");
             PrepareStatement(CharStatements.INS_TUTORIALS, "INSERT INTO account_tutorial(tut0, tut1, tut2, tut3, tut4, tut5, tut6, tut7, accountId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
             PrepareStatement(CharStatements.UPD_TUTORIALS, "UPDATE account_tutorial SET tut0 = ?, tut1 = ?, tut2 = ?, tut3 = ?, tut4 = ?, tut5 = ?, tut6 = ?, tut7 = ? WHERE accountId = ?");
             PrepareStatement(CharStatements.DEL_TUTORIALS, "DELETE FROM account_tutorial WHERE accountId = ?");
@@ -967,7 +966,6 @@ namespace Framework.Database
         DEL_PLAYER_ACCOUNT_DATA,
 
         SEL_TUTORIALS,
-        SEL_HAS_TUTORIALS,
         INS_TUTORIALS,
         UPD_TUTORIALS,
         DEL_TUTORIALS,

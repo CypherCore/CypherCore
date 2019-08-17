@@ -449,6 +449,10 @@ namespace Game
             stmt.AddValue(SharedConst.MaxAccountTutorialValues, GetAccountId());
             trans.Append(stmt);
 
+            // now has, set flag so next save uses update query
+            if (!hasTutorialsInDB)
+                tutorialsChanged |= TutorialsFlag.LoadedFromDB;
+
             tutorialsChanged &= ~TutorialsFlag.Changed;
         }
 
