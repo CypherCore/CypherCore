@@ -622,7 +622,8 @@ namespace Game.Spells
         public bool IsRangedWeaponSpell()
         {
             return (SpellFamilyName == SpellFamilyNames.Hunter && !SpellFamilyFlags[1].HasAnyFlag(0x10000000u)) // for 53352, cannot find better way
-                || Convert.ToBoolean(EquippedItemSubClassMask & (int)ItemSubClassWeapon.MaskRanged);
+                || Convert.ToBoolean(EquippedItemSubClassMask & (int)ItemSubClassWeapon.MaskRanged)
+                || Attributes.HasAnyFlag(SpellAttr0.ReqAmmo);
         }
 
         public bool IsAutoRepeatRangedSpell()
