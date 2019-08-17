@@ -281,7 +281,6 @@ namespace Game.Entities
 
         public Loot loot = new Loot();
         public Player lootRecipient;
-        public bool lootForBody;
 
         CorpseType m_type;
         long m_time;

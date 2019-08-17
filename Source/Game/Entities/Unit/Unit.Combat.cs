@@ -1422,7 +1422,8 @@ namespace Game.Entities
                     if (lootid != 0)
                         loot.FillLoot(lootid, LootStorage.Creature, looter, false, false, creature.GetLootMode());
 
-                    loot.generateMoneyLoot(creature.GetCreatureTemplate().MinGold, creature.GetCreatureTemplate().MaxGold);
+                    if (creature.GetLootMode() > 0)
+                        loot.generateMoneyLoot(creature.GetCreatureTemplate().MinGold, creature.GetCreatureTemplate().MaxGold);
 
                     if (group)
                     {

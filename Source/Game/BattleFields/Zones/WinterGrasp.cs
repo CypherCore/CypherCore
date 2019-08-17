@@ -567,7 +567,11 @@ namespace Game.BattleFields
                 return;
 
             if (victim.IsTypeId(TypeId.Player))
+            {
                 HandlePromotion(killer, victim);
+                // Allow to Skin non-released corpse
+                victim.AddUnitFlag(UnitFlags.Skinnable);
+            }
 
             // @todo Recent PvP activity worldstate
         }

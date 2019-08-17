@@ -4046,9 +4046,9 @@ namespace Game.Spells
 
             SkillType skill = creature.GetCreatureTemplate().GetRequiredLootSkill();
 
-            m_caster.ToPlayer().SendLoot(creature.GetGUID(), LootType.Skinning);
             creature.RemoveUnitFlag(UnitFlags.Skinnable);
             creature.AddDynamicFlag(UnitDynFlags.Lootable);
+            m_caster.ToPlayer().SendLoot(creature.GetGUID(), LootType.Skinning);
 
             if (skill == SkillType.Skinning)
             {

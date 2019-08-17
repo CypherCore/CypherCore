@@ -90,6 +90,9 @@ namespace Game.Loots
             foreach (var id in lootIdSetUsed)
                 lootIdSet.Remove(id);
 
+            // 1 means loot for player corpse
+            lootIdSet.Remove(SharedConst.PlayerCorpseLootEntry);
+
             // output error for any still listed (not referenced from appropriate table) ids
             Creature.ReportUnusedIds(lootIdSet);
 

@@ -3664,7 +3664,7 @@ namespace Game.Entities
                 return false;
 
             if (loot.loot_type == LootType.Skinning)
-                return creature.GetSkinner() == GetGUID();
+                return creature.GetLootRecipientGUID() == GetGUID();
 
             Group thisGroup = GetGroup();
             if (!thisGroup)

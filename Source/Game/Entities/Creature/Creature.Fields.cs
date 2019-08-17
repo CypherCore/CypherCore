@@ -93,7 +93,6 @@ namespace Game.Entities
         public ObjectGuid lootingGroupLowGUID;                         // used to find group which is looting corpse
         ObjectGuid m_lootRecipient;
         ObjectGuid m_lootRecipientGroup;
-        ObjectGuid _skinner;
     }
 
     public enum ObjectCellMoveState

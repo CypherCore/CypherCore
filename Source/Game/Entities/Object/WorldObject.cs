@@ -1015,6 +1015,19 @@ namespace Game.Entities
             GetMap().GetZoneAndAreaId(GetPhaseShift(), out zoneid, out areaid, posX, posY, posZ);
         }
 
+        public bool IsInWorldPvpZone()
+        {
+            switch (GetZoneId())
+            {
+                case 4197: // Wintergrasp
+                case 5095: // Tol Barad
+                case 6941: // Ashran
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         public InstanceScript GetInstanceScript()
         {
             Map map = GetMap();

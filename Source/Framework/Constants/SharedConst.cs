@@ -70,6 +70,7 @@ namespace Framework.Constants
         /// </summary>
         public const int MaxNRLootItems = 16;
         public const int MaxNRQuestItems = 32;
+        public const int PlayerCorpseLootEntry = 1;
 
         /// <summary>
         /// Movement Const

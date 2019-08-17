@@ -6411,18 +6411,51 @@ namespace Game.Spells
 
             // @todo shit below shouldn't be here, but it's temporary
             //Check targets for LOS visibility
-            if (losPosition != null)
-                return target.IsWithinLOS(losPosition.GetPositionX(), losPosition.GetPositionY(), losPosition.GetPositionZ(), ModelIgnoreFlags.M2);
-            else
+            switch (effect.Effect)
             {
-                // Get GO cast coordinates if original caster . GO
-                WorldObject caster = null;
-                if (m_originalCasterGUID.IsGameObject())
-                    caster = m_caster.GetMap().GetGameObject(m_originalCasterGUID);
-                if (!caster)
-                    caster = m_caster;
-                if (target != m_caster && !target.IsWithinLOSInMap(caster, ModelIgnoreFlags.M2))
-                    return false;
+                case SpellEffectName.SkinPlayerCorpse:
+                    {
+                        if (m_targets.GetCorpseTargetGUID().IsEmpty())
+                        {
+                            if (target.IsWithinLOSInMap(m_caster, ModelIgnoreFlags.M2) && target.HasUnitFlag(UnitFlags.Skinnable))
+                                return true;
+
+                            return false;
+                        }
+
+                        Corpse corpse = ObjectAccessor.GetCorpse(m_caster, m_targets.GetCorpseTargetGUID());
+                        if (!corpse)
+                            return false;
+
+                        if (target.GetGUID() != corpse.GetOwnerGUID())
+                            return false;
+
+                        if (!corpse.HasDynamicFlag(UnitDynFlags.Lootable))
+                            return false;
+
+                        if (!corpse.IsWithinLOSInMap(m_caster, ModelIgnoreFlags.M2))
+                            return false;
+
+                        break;
+                    }
+                default:
+                    {
+                        if (losPosition != null)
+                            return target.IsWithinLOS(losPosition.GetPositionX(), losPosition.GetPositionY(), losPosition.GetPositionZ(), ModelIgnoreFlags.M2);
+                        else
+                        {
+                            // Get GO cast coordinates if original caster -> GO
+                            WorldObject caster = null;
+                            if (m_originalCasterGUID.IsGameObject())
+                                caster = m_caster.GetMap().GetGameObject(m_originalCasterGUID);
+                            if (!caster)
+                                caster = m_caster;
+                            if (target != m_caster && !target.IsWithinLOSInMap(caster, ModelIgnoreFlags.M2))
+                                return false;
+                        }
+
+                        break;
+                    }
             }
 
             return true;

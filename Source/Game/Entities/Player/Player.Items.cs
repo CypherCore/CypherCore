@@ -31,6 +31,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Game.BattleFields;
 
 namespace Game.Entities
 {
@@ -6164,7 +6165,8 @@ namespace Game.Entities
         /// <param name="looterPlr"></param>
         public void RemovedInsignia(Player looterPlr)
         {
-            if (GetBattlegroundId() == 0)
+            // If player is not in battleground and not in worldpvpzone
+            if (GetBattlegroundId() == 0 && !IsInWorldPvpZone())
                 return;
 
             // If not released spirit, do it !
@@ -6262,9 +6264,12 @@ namespace Game.Entities
                             group.UpdateLooterGuid(go);
                     }
 
-                    GameObjectTemplateAddon addon = go.GetTemplateAddon();
-                    if (addon != null)
-                        loot.generateMoneyLoot(addon.mingold, addon.maxgold);
+                    if (go.GetLootMode() > 0)
+                    {
+                        GameObjectTemplateAddon addon = go.GetTemplateAddon();
+                        if (addon != null)
+                            loot.generateMoneyLoot(addon.mingold, addon.maxgold);
+                    }
 
                     if (loot_type == LootType.Fishing)
                         go.getFishLoot(loot, this);
@@ -6373,15 +6378,21 @@ namespace Game.Entities
 
                 loot = bones.loot;
 
-                if (!bones.lootForBody)
+                if (loot.loot_type == LootType.None)
                 {
-                    bones.lootForBody = true;
                     uint pLevel = bones.loot.gold;
                     bones.loot.clear();
+
+                    // For AV Achievement
                     Battleground bg = GetBattleground();
                     if (bg)
+                    {
                         if (bg.GetTypeID(true) == BattlegroundTypeId.AV)
-                            loot.FillLoot(1, LootStorage.Creature, this, true);
+                            loot.FillLoot(SharedConst.PlayerCorpseLootEntry, LootStorage.Creature, this, true);
+                    }
+                    else if (GetZoneId() == WintergraspAreaIds.Wintergrasp)
+                        loot.FillLoot(SharedConst.PlayerCorpseLootEntry, LootStorage.Creature, this, true);
+
                     // It may need a better formula
                     // Now it works like this: lvl10: ~6copper, lvl70: ~9silver
                     bones.loot.gold = (uint)(RandomHelper.URand(50, 150) * 0.016f * Math.Pow(pLevel / 5.76f, 2.5f) * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
@@ -6439,6 +6450,22 @@ namespace Game.Entities
                 }
                 else
                 {
+                    // exploit fix
+                    if (!creature.HasDynamicFlag(UnitDynFlags.Lootable))
+                    {
+                        SendLootError(loot.GetGUID(), guid, LootError.DidntKill);
+                        return;
+                    }
+
+                    // the player whose group may loot the corpse
+                    Player recipient = creature.GetLootRecipient();
+                    Group recipientGroup = creature.GetLootRecipientGroup();
+                    if (!recipient && !recipientGroup)
+                    {
+                        SendLootError(loot.GetGUID(), guid, LootError.DidntKill);
+                        return;
+                    }
+
                     if (loot.loot_type == LootType.None)
                     {
                         // for creature, loot is filled when creature is killed.
@@ -6463,14 +6490,16 @@ namespace Game.Entities
                     if (loot.loot_type == LootType.Skinning)
                     {
                         loot_type = LootType.Skinning;
-                        permission = creature.GetSkinner() == GetGUID() ? PermissionTypes.Owner : PermissionTypes.None;
+                        permission = creature.GetLootRecipientGUID() == GetGUID() ? PermissionTypes.Owner : PermissionTypes.None;
                     }
                     else if (loot_type == LootType.Skinning)
                     {
                         loot.clear();
                         loot.FillLoot(creature.GetCreatureTemplate().SkinLootId, LootStorage.Skinning, this, true);
-                        creature.SetSkinner(GetGUID());
                         permission = PermissionTypes.Owner;
+
+                        // Set new loot recipient
+                        creature.SetLootRecipient(this, false);
                     }
                     // set group rights only for loot_type != LOOT_SKINNING
                     else
@@ -6554,12 +6583,12 @@ namespace Game.Entities
                 // add 'this' player as one of the players that are looting 'loot'
                 loot.AddLooter(GetGUID());
                 m_AELootView[loot.GetGUID()] = guid;
+
+                if (loot_type == LootType.Corpse && !guid.IsItem())
+                    SetUnitFlags(UnitFlags.Looting);
             }
             else
                 SendLootError(loot.GetGUID(), guid, LootError.DidntKill);
-
-            if (loot_type == LootType.Corpse && !guid.IsItem())
-                AddUnitFlag(UnitFlags.Looting);
         }
 
         public void SendLootError(ObjectGuid lootObj, ObjectGuid owner, LootError error)

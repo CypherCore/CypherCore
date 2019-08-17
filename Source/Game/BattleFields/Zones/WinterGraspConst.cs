@@ -548,7 +548,7 @@ namespace Game.BattleFields
         public const uint Max = 7;
     }
 
-    struct WintergraspAreaIds
+    public struct WintergraspAreaIds
     {
         public const uint WintergraspFortress = 4575;
         public const uint TheSunkenRing = 4538;

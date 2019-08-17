@@ -940,8 +940,7 @@ namespace Game.Entities
         }
         public void ResetPickPocketRefillTimer() { _pickpocketLootRestore = 0; }
         public bool CanGeneratePickPocketLoot() { return _pickpocketLootRestore <= Time.UnixTime; }
-        public void SetSkinner(ObjectGuid guid) { _skinner = guid; }
-        public ObjectGuid GetSkinner() { return _skinner; } // Returns the player who skinned this creature    
+        public ObjectGuid GetLootRecipientGUID() { return m_lootRecipient; }
 
         public Player GetLootRecipient()
         {
@@ -958,7 +957,7 @@ namespace Game.Entities
             return Global.GroupMgr.GetGroupByGUID(m_lootRecipientGroup);
         }
 
-        public void SetLootRecipient(Unit unit)
+        public void SetLootRecipient(Unit unit, bool withGroup = true)
         {
             // set the player whose group should receive the right
             // to loot the creature after it dies
@@ -980,9 +979,14 @@ namespace Game.Entities
                 return;
 
             m_lootRecipient = player.GetGUID();
-            Group group = player.GetGroup();
-            if (group)
-                m_lootRecipientGroup = group.GetGUID();
+            if (withGroup)
+            {
+                Group group = player.GetGroup();
+                if (group)
+                    m_lootRecipientGroup = group.GetGUID();
+            }
+            else
+                m_lootRecipientGroup = ObjectGuid.Empty;
 
             AddDynamicFlag(UnitDynFlags.Tapped);
         }
