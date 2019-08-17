@@ -2366,13 +2366,9 @@ namespace Game.Spells
             }
             LoadScripts();
 
-            if (m_caster.IsTypeId(TypeId.Player))
-                m_caster.ToPlayer().SetSpellModTakingSpell(this, true);
             // Fill cost data (not use power for item casts
-            if (!m_CastItem)
-                m_powerCost = m_spellInfo.CalcPowerCost(m_caster, m_spellSchoolMask);
-            if (m_caster.IsTypeId(TypeId.Player))
-                m_caster.ToPlayer().SetSpellModTakingSpell(this, false);
+            if (m_CastItem)
+                m_powerCost = m_spellInfo.CalcPowerCost(m_caster, m_spellSchoolMask, this);
 
             // Set combo point requirement
             if (Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnoreComboPoints) || m_CastItem != null || m_caster.m_playerMovingMe == null)
@@ -2396,11 +2392,6 @@ namespace Game.Spells
                     triggeredByAura.GetBase().SetDuration(0);
                 }
 
-                // cleanup after mod system
-                // triggered spell pointer can be not removed in some cases
-                if (m_caster.IsTypeId(TypeId.Player))
-                    m_caster.ToPlayer().SetSpellModTakingSpell(this, false);
-
                 if (param1 != 0 || param2 != 0)
                     SendCastResult(result, param1, param2);
                 else
@@ -2417,9 +2408,8 @@ namespace Game.Spells
             {
                 if (!m_caster.ToPlayer().GetCommandStatus(PlayerCommandStates.Casttime))
                 {
-                    m_caster.ToPlayer().SetSpellModTakingSpell(this, true);
+                    // calculate cast time (calculated after first CheckCast check to prevent charge counting for first CheckCast fail)
                     m_casttime = m_spellInfo.CalcCastTime(m_caster.getLevel(), this);
-                    m_caster.ToPlayer().SetSpellModTakingSpell(this, false);
                 }
                 else
                     m_casttime = 0;
@@ -2555,6 +2545,23 @@ namespace Game.Spells
 
         public void cast(bool skipCheck = false)
         {
+            Player modOwner = m_caster.GetSpellModOwner();
+            Spell lastSpellMod = null;
+            if (modOwner)
+            {
+                lastSpellMod = modOwner.m_spellModTakingSpell;
+                if (lastSpellMod)
+                    modOwner.SetSpellModTakingSpell(lastSpellMod, false);
+            }
+
+            _cast(skipCheck);
+
+            if (lastSpellMod)
+                modOwner.SetSpellModTakingSpell(lastSpellMod, true);
+        }
+
+        void _cast(bool skipCheck = false)
+        {
             if (!UpdatePointers())
             {
                 // cancel the spell if UpdatePointers() returned false, something wrong happened there
@@ -2614,8 +2621,6 @@ namespace Game.Spells
                     SendCastResult(castResult, param1, param2);
                     SendInterrupted(0);
 
-                    // cleanup after mod system
-                    // triggered spell pointer can be not removed in some cases
                     if (m_caster.IsTypeId(TypeId.Player))
                         m_caster.ToPlayer().SetSpellModTakingSpell(this, false);
 
@@ -2640,7 +2645,6 @@ namespace Game.Spells
                                 SendCastResult(SpellCastResult.DontReport);
                                 SendInterrupted(0);
 
-                                // cleanup after mod system
                                 m_caster.ToPlayer().SetSpellModTakingSpell(this, false);
 
                                 finish(false);
@@ -2671,8 +2675,6 @@ namespace Game.Spells
             {
                 SendInterrupted(0);
 
-                // cleanup after mod system
-                // triggered spell pointer can be not removed in some cases
                 if (m_caster.IsTypeId(TypeId.Player))
                     m_caster.ToPlayer().SetSpellModTakingSpell(this, false);
 
@@ -6613,15 +6615,7 @@ namespace Game.Spells
                 }
             }
 
-            Player modOwner = m_caster.GetSpellModOwner();
-            if (modOwner)
-                modOwner.SetSpellModTakingSpell(this, true);
-
             targetInfo.crit = m_caster.IsSpellCrit(unit, m_spellInfo, m_spellSchoolMask, m_attackType);
-
-            modOwner = m_caster.GetSpellModOwner();
-            if (modOwner)
-                modOwner.SetSpellModTakingSpell(this, false);
         }
 
         SpellCastResult CanOpenLock(uint effIndex, uint lockId, ref SkillType skillId, ref int reqSkillValue, ref int skillValue)

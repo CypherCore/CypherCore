@@ -446,13 +446,6 @@ namespace Game.Entities
                 // It will be recalculate at mailbox open (for unReadMails important non-0 until mailbox open, it also will be recalculated)
                 m_nextMailDelivereTime = 0;
             }
-            // If this is set during update SetSpellModTakingSpell call is missing somewhere in the code
-            // Having this would prevent more aura charges to be dropped, so let's crash
-            if (m_spellModTakingSpell != null)
-            {
-                Log.outFatal(LogFilter.Spells, "Player has m_spellModTakingSpell {0} during update!", m_spellModTakingSpell.m_spellInfo.Id);
-                m_spellModTakingSpell = null;
-            }
 
             // Update cinematic location, if 500ms have passed and we're doing a cinematic now.
             _cinematicMgr.m_cinematicDiff += diff;

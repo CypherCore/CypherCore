@@ -2969,10 +2969,10 @@ namespace Game.Entities
 
         public void SetSpellModTakingSpell(Spell spell, bool apply)
         {
-            if (spell == null || (m_spellModTakingSpell != null && m_spellModTakingSpell != spell))
+            if (apply && m_spellModTakingSpell != null)
                 return;
 
-            if (apply && spell.getState() == SpellState.Finished)
+            if (!apply && (m_spellModTakingSpell == null || m_spellModTakingSpell != spell))
                 return;
 
             m_spellModTakingSpell = apply ? spell : null;

@@ -2749,7 +2749,7 @@ namespace Game.Spells
             return RecoveryTime > CategoryRecoveryTime ? RecoveryTime : CategoryRecoveryTime;
         }
 
-        public List<SpellPowerCost> CalcPowerCost(Unit caster, SpellSchoolMask schoolMask)
+        public List<SpellPowerCost> CalcPowerCost(Unit caster, SpellSchoolMask schoolMask, Spell spell = null)
         {
             List<SpellPowerCost> costs = new List<SpellPowerCost>();
 
@@ -2857,9 +2857,9 @@ namespace Game.Spells
                     if (modOwner)
                     {
                         if (power.OrderIndex == 0)
-                            modOwner.ApplySpellMod(Id, SpellModOp.Cost, ref powerCost);
+                            modOwner.ApplySpellMod(Id, SpellModOp.Cost, ref powerCost, spell);
                         else if (power.OrderIndex == 1)
-                            modOwner.ApplySpellMod(Id, SpellModOp.SpellCost2, ref powerCost);
+                            modOwner.ApplySpellMod(Id, SpellModOp.SpellCost2, ref powerCost, spell);
                     }
 
                     if (!caster.IsControlledByPlayer() && MathFunctions.fuzzyEq(power.PowerCostPct, 0.0f) && SpellLevel != 0)
