@@ -6585,7 +6585,7 @@ namespace Game.Entities
                 m_AELootView[loot.GetGUID()] = guid;
 
                 if (loot_type == LootType.Corpse && !guid.IsItem())
-                    SetUnitFlags(UnitFlags.Looting);
+                    AddUnitFlag(UnitFlags.Looting);
             }
             else
                 SendLootError(loot.GetGUID(), guid, LootError.DidntKill);

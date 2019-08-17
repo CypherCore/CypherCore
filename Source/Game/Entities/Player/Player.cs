@@ -4211,7 +4211,8 @@ namespace Game.Entities
             packet.PlayerGUID = GetGUID();
             SendPacket(packet);
 
-            if (GetRace() == Race.NightElf)
+            // If the player has the Wisp racial then cast the Wisp aura on them
+            if (HasSpell(20585))
                 CastSpell(this, 20584, true);
             CastSpell(this, 8326, true);
 

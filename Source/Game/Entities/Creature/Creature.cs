@@ -2873,7 +2873,7 @@ namespace Game.Entities
         {
             return GetCreatureTemplate().InhabitType.HasAnyFlag(InhabitType.Air);
         }
-        public bool IsDungeonBoss() { return (GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.DungeonBoss); }
+        public bool IsDungeonBoss() { return (GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.DungeonBoss)); }
 
         public void SetReactState(ReactStates st)
         {
