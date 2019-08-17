@@ -125,24 +125,24 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.BoundsRadius2D), GetTemplate().MaxSearchRadius);
             SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.DecalPropertiesID), GetMiscTemplate().DecalPropertiesId);
 
-            ScaleCurve extraScaleCurve = m_areaTriggerData.ModifyValue(m_areaTriggerData.ExtraScaleCurve);
+            ScaleCurve extraScaleCurve = m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.ExtraScaleCurve);
 
             if (GetMiscTemplate().ExtraScale.Structured.StartTimeOffset != 0)
-                SetUpdateFieldValue(ref extraScaleCurve.StartTimeOffset, GetMiscTemplate().ExtraScale.Structured.StartTimeOffset);
+                SetUpdateFieldValue(extraScaleCurve.ModifyValue(extraScaleCurve.StartTimeOffset), GetMiscTemplate().ExtraScale.Structured.StartTimeOffset);
             if (GetMiscTemplate().ExtraScale.Structured.X != 0 || GetMiscTemplate().ExtraScale.Structured.Y != 0)
             {
                 Vector2 point = new Vector2(GetMiscTemplate().ExtraScale.Structured.X, GetMiscTemplate().ExtraScale.Structured.Y);
-                SetUpdateFieldValue(ref extraScaleCurve.Points[0], point);
+                SetUpdateFieldValue(ref extraScaleCurve.ModifyValue(extraScaleCurve.Points, 0), point);
             }
             if (GetMiscTemplate().ExtraScale.Structured.Z != 0 || GetMiscTemplate().ExtraScale.Structured.W != 0)
             {
                 Vector2 point = new Vector2(GetMiscTemplate().ExtraScale.Structured.Z, GetMiscTemplate().ExtraScale.Structured.W);
-                SetUpdateFieldValue(ref extraScaleCurve.Points[1], point);
+                SetUpdateFieldValue(ref extraScaleCurve.ModifyValue(extraScaleCurve.Points, 1), point);
             }
             if (GetMiscTemplate().ExtraScale.Raw.Data[5] != 0)
-                SetUpdateFieldValue(ref extraScaleCurve.ParameterCurve, GetMiscTemplate().ExtraScale.Raw.Data[5]);
+                SetUpdateFieldValue(extraScaleCurve.ModifyValue(extraScaleCurve.ParameterCurve), GetMiscTemplate().ExtraScale.Raw.Data[5]);
             if (GetMiscTemplate().ExtraScale.Structured.OverrideActive != 0)
-                SetUpdateFieldValue(ref extraScaleCurve.OverrideActive, GetMiscTemplate().ExtraScale.Structured.OverrideActive != 0 ? true : false);
+                SetUpdateFieldValue(extraScaleCurve.ModifyValue(extraScaleCurve.OverrideActive), GetMiscTemplate().ExtraScale.Structured.OverrideActive != 0 ? true : false);
 
 
             PhasingHandler.InheritPhaseShift(this, caster);
