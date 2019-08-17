@@ -2784,7 +2784,7 @@ namespace Game.Spells
                         {
                             int duration = m_spellInfo.GetDuration();
                             unitTarget.GetSpellHistory().LockSpellSchool(curSpellInfo.GetSchoolMask(), (uint)unitTarget.ModSpellDuration(m_spellInfo, unitTarget, duration, false, (uint)(1 << (int)effIndex)));
-                            m_originalCaster.ProcSkillsAndAuras(unitTarget, ProcFlags.DoneSpellMagicDmgClassNeg, ProcFlags.TakenSpellMagicDmgClassNeg, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Hit, ProcFlagsHit.Interrupt, null, null, null);
+                            m_originalCaster.ProcSkillsAndAuras(unitTarget, ProcFlags.DoneSpellMagicDmgClassNeg | ProcFlags.DoneSpellMeleeDmgClass, ProcFlags.TakenSpellMagicDmgClassNeg | ProcFlags.TakenSpellMeleeDmgClass, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Hit, ProcFlagsHit.Interrupt, null, null, null);
                         }
                         ExecuteLogEffectInterruptCast(effIndex, unitTarget, curSpellInfo.Id);
                         unitTarget.InterruptSpell(i, false);
