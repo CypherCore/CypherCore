@@ -1716,7 +1716,7 @@ namespace Game.Entities
 
         bool HasMechanicTemplateImmunity(uint mask)
         {
-            return !GetOwnerGUID().IsPlayer() && GetCreatureTemplate().MechanicImmuneMask.HasAnyFlag(mask);
+            return (!GetOwnerGUID().IsPlayer() || !IsHunterPet()) && GetCreatureTemplate().MechanicImmuneMask.HasAnyFlag(mask);
         }
 
         public override bool IsImmunedToSpell(SpellInfo spellInfo, Unit caster)
