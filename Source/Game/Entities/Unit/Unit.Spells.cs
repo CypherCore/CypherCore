@@ -1566,8 +1566,8 @@ namespace Game.Entities
             if (mechanic != 0)
             {
                 var mechanicList = m_spellImmune[(int)SpellImmunity.Mechanic];
-                    if (mechanicList.ContainsKey(mechanic))
-                        return true;
+                if (mechanicList.ContainsKey(mechanic))
+                    return true;
             }
 
             bool immuneToAllEffects = true;
@@ -1588,6 +1588,7 @@ namespace Game.Entities
             if (immuneToAllEffects) //Return immune only if the target is immune to all spell effects.
                 return true;
 
+            uint schoolImmunityMask = 0;
             var schoolList = m_spellImmune[(int)SpellImmunity.School];
             foreach (var pair in schoolList)
             {
@@ -1597,16 +1598,28 @@ namespace Game.Entities
                 SpellInfo immuneSpellInfo = Global.SpellMgr.GetSpellInfo(pair.Value);
                 if (!(immuneSpellInfo != null && immuneSpellInfo.IsPositive() && spellInfo.IsPositive() && caster && IsFriendlyTo(caster)))
                     if (!spellInfo.CanPierceImmuneAura(immuneSpellInfo))
-                        return true;
+                        schoolImmunityMask |= pair.Key;
             }
+
+            if (((SpellSchoolMask)schoolImmunityMask & spellInfo.GetSchoolMask()) == spellInfo.GetSchoolMask())
+                return true;
 
             return false;
         }
         public uint GetSchoolImmunityMask()
         {
             uint mask = 0;
-            var mechanicList = m_spellImmune[(int)SpellImmunity.School];
-            foreach (var pair in mechanicList)
+            var schoolList = m_spellImmune[(int)SpellImmunity.School];
+            foreach (var pair in schoolList)
+                mask |= pair.Key;
+
+            return mask;
+        }
+        public uint GetDamageImmunityMask()
+        {
+            uint mask = 0;
+            var damageList = m_spellImmune[(int)SpellImmunity.Damage];
+            foreach (var pair in damageList)
                 mask |= pair.Key;
 
             return mask;
@@ -1669,16 +1682,14 @@ namespace Game.Entities
         public bool IsImmunedToDamage(SpellSchoolMask schoolMask)
         {
             // If m_immuneToSchool type contain this school type, IMMUNE damage.
-            var schoolList = m_spellImmune[(int)SpellImmunity.School];
-            foreach (var immune in schoolList)
-                if (Convert.ToBoolean(immune.Key & (uint)schoolMask))
-                    return true;
+            uint schoolImmunityMask = GetSchoolImmunityMask();
+            if (((SpellSchoolMask)schoolImmunityMask & schoolMask) == schoolMask) // We need to be immune to all types
+                return true;
 
             // If m_immuneToDamage type contain magic, IMMUNE damage.
-            var damageList = m_spellImmune[(int)SpellImmunity.Damage];
-            foreach (var immune in damageList)
-                if (Convert.ToBoolean(immune.Key & (uint)schoolMask))
-                    return true;
+            uint damageImmunityMask = GetDamageImmunityMask();
+            if (((SpellSchoolMask)damageImmunityMask & schoolMask) == schoolMask) // We need to be immune to all types
+                return true;
 
             return false;
         }
@@ -2330,8 +2341,12 @@ namespace Game.Entities
                         // Physical Damage
                         if (damageSchoolMask.HasAnyFlag(SpellSchoolMask.Normal))
                         {
-                            // Get blocked status
-                            blocked = isSpellBlocked(victim, spellInfo, attackType);
+                            // Spells with this attribute were already calculated in MeleeSpellHitResult
+                            if (!spellInfo.HasAttribute(SpellAttr3.BlockableSpell))
+                            {
+                                // Get blocked status
+                                blocked = isSpellBlocked(victim, spellInfo, attackType);
+                            }
                         }
 
                         if (crit)
@@ -2567,9 +2582,31 @@ namespace Game.Entities
                     RemoveOwnedAura(pair, AuraRemoveMode.Death);
             }
         }
-        public void RemoveMovementImpairingAuras()
+        public void RemoveMovementImpairingAuras(bool withRoot)
         {
-            RemoveAurasWithMechanic((1 << (int)Mechanics.Snare) | (1 << (int)Mechanics.Root));
+            if (withRoot)
+                RemoveAurasWithMechanic(1 << (int)Mechanics.Root);
+
+            // Snares
+            foreach (var pair in m_appliedAuras)
+            {
+                Aura aura = pair.Value.GetBase();
+                if (aura.GetSpellInfo().Mechanic == Mechanics.Snare)
+                {
+                    RemoveAura(pair);
+                    continue;
+                }
+
+                // turn off snare auras by setting amount to 0
+                foreach (SpellEffectInfo effect in aura.GetSpellInfo().GetEffectsForDifficulty(GetMap().GetDifficultyID()))
+                {
+                    if (effect == null || !effect.IsEffect())
+                        continue;
+
+                    if (Convert.ToBoolean((1 << (int)effect.EffectIndex) & pair.Value.GetEffectMask()))
+                        aura.GetEffect(effect.EffectIndex).ChangeAmount(0);
+                }
+            }
         }
         public void RemoveAllAurasRequiringDeadTarget()
         {
@@ -3610,6 +3647,20 @@ namespace Game.Entities
                     RemoveAura(aurApp);
                     if (m_removedAurasCount > removedAuras + 1)
                         i = 0;
+                }
+            }
+        }
+
+        public void RemoveAurasByShapeShift()
+        {
+            uint mechanic_mask = (1 << (int)Mechanics.Snare) | (1 << (int)Mechanics.Root);
+            foreach (var pair in m_appliedAuras)
+            {
+                Aura aura = pair.Value.GetBase();
+                if ((aura.GetSpellInfo().GetAllEffectsMechanicMask() & mechanic_mask) != 0 && !aura.GetSpellInfo().HasAttribute(SpellCustomAttributes.AuraCC))
+                {
+                    RemoveAura(pair);
+                    continue;
                 }
             }
         }

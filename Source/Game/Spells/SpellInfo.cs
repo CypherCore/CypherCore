@@ -2433,7 +2433,13 @@ namespace Game.Spells
                         target.ApplySpellImmune(Id, SpellImmunity.Mechanic, i, apply);
 
                 if (apply && HasAttribute(SpellAttr1.DispelAurasOnImmunity))
-                    target.RemoveAurasWithMechanic(mechanicImmunity, AuraRemoveMode.Default, Id);
+                {
+                    // exception for purely snare mechanic (eg. hands of freedom)!
+                    if (mechanicImmunity == (1 << (int)Mechanics.Snare))
+                        target.RemoveMovementImpairingAuras(false);
+                    else
+                        target.RemoveAurasWithMechanic(mechanicImmunity, AuraRemoveMode.Default, Id);
+                }
             }
 
             uint dispelImmunity = immuneInfo.DispelImmune;

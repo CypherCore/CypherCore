@@ -1712,13 +1712,18 @@ namespace Game.Entities
                 ForcedDespawn(msTimeToDespawn, forceRespawnTimer);
         }
 
+        bool HasMechanicTemplateImmunity(uint mask)
+        {
+            return !GetOwnerGUID().IsPlayer() && GetCreatureTemplate().MechanicImmuneMask.HasAnyFlag(mask);
+        }
+
         public override bool IsImmunedToSpell(SpellInfo spellInfo, Unit caster)
         {
             if (spellInfo == null)
                 return false;
 
             // Creature is immune to main mechanic of the spell
-            if (Convert.ToBoolean(GetCreatureTemplate().MechanicImmuneMask & (1 << ((int)spellInfo.Mechanic - 1))))
+            if (spellInfo.Mechanic > Mechanics.None && HasMechanicTemplateImmunity(1u << ((int)spellInfo.Mechanic - 1)))
                 return true;
 
             // This check must be done instead of 'if (GetCreatureTemplate().MechanicImmuneMask & (1 << (spellInfo.Mechanic - 1)))' for not break
@@ -1735,6 +1740,7 @@ namespace Game.Entities
                     break;
                 }
             }
+
             if (immunedToAllEffects)
                 return true;
 
@@ -1746,7 +1752,8 @@ namespace Game.Entities
             SpellEffectInfo effect = spellInfo.GetEffect(GetMap().GetDifficultyID(), index);
             if (effect == null)
                 return true;
-            if (Convert.ToBoolean(GetCreatureTemplate().MechanicImmuneMask & (1 << ((int)effect.Mechanic - 1))))
+
+            if (effect.Mechanic > Mechanics.None && HasMechanicTemplateImmunity(1u << ((int)effect.Mechanic - 1)))
                 return true;
 
             if (GetCreatureTemplate().CreatureType == CreatureType.Mechanical && effect.Effect == SpellEffectName.Heal)

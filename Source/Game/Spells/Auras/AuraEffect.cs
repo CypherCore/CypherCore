@@ -1310,7 +1310,7 @@ namespace Game.Spells
                     case ShapeShiftForm.MoonkinForm:
                         {
                             // remove movement affects
-                            target.RemoveMovementImpairingAuras();
+                            target.RemoveAurasByShapeShift();
 
                             // and polymorphic affects
                             if (target.IsPolymorphed())
@@ -1351,7 +1351,7 @@ namespace Game.Spells
                     if (target.GetClass() == Class.Druid)
                     {
                         // Remove movement impairing effects also when shifting out
-                        target.RemoveMovementImpairingAuras();
+                        target.RemoveAurasByShapeShift();
                     }
                 }
 

@@ -346,14 +346,14 @@ namespace Game.Spells
                     // Vanish (not exist)
                     case 18461:
                         {
-                            unitTarget.RemoveMovementImpairingAuras();
+                            unitTarget.RemoveMovementImpairingAuras(true);
                             unitTarget.RemoveAurasByType(AuraType.ModStalked);
                             return;
                         }
                     // Demonic Empowerment -- succubus
                     case 54437:
                         {
-                            unitTarget.RemoveMovementImpairingAuras();
+                            unitTarget.RemoveMovementImpairingAuras(true);
                             unitTarget.RemoveAurasByType(AuraType.ModStalked);
                             unitTarget.RemoveAurasByType(AuraType.ModStun);
 
@@ -1300,49 +1300,6 @@ namespace Game.Spells
             }
 
             m_caster.EnergizeBySpell(unitTarget, m_spellInfo.Id, damage, power);
-
-            // Mad Alchemist's Potion
-            if (m_spellInfo.Id == 45051)
-            {
-                // find elixirs on target
-                bool guardianFound = false;
-                bool battleFound = false;
-                foreach (var app in unitTarget.GetAppliedAuras())
-                {
-                    uint spell_id = app.Value.GetBase().GetId();
-                    if (!guardianFound)
-                        if (Global.SpellMgr.IsSpellMemberOfSpellGroup(spell_id, SpellGroup.ElixirGuardian))
-                            guardianFound = true;
-                    if (!battleFound)
-                        if (Global.SpellMgr.IsSpellMemberOfSpellGroup(spell_id, SpellGroup.ElixirBattle))
-                            battleFound = true;
-                    if (battleFound && guardianFound)
-                        break;
-                }
-
-                // get all available elixirs by mask and spell level
-                List<int> avalibleElixirs = new List<int>();
-                if (!guardianFound)
-                    Global.SpellMgr.GetSetOfSpellsInSpellGroup(SpellGroup.ElixirGuardian, out avalibleElixirs);
-                if (!battleFound)
-                    Global.SpellMgr.GetSetOfSpellsInSpellGroup(SpellGroup.ElixirBattle, out avalibleElixirs);
-                foreach (int spellId in avalibleElixirs)
-                {
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)spellId);
-                    if (spellInfo.SpellLevel < m_spellInfo.SpellLevel || spellInfo.SpellLevel > unitTarget.getLevel())
-                        avalibleElixirs.Remove(spellId);
-                    else if (Global.SpellMgr.IsSpellMemberOfSpellGroup((uint)spellId, SpellGroup.ElixirShattrath))
-                        avalibleElixirs.Remove(spellId);
-                    else if (Global.SpellMgr.IsSpellMemberOfSpellGroup((uint)spellId, SpellGroup.ElixirUnstable))
-                        avalibleElixirs.Remove(spellId);
-                }
-
-                if (!avalibleElixirs.Empty())
-                {
-                    // cast random elixir on target
-                    m_caster.CastSpell(unitTarget, (uint)avalibleElixirs.SelectRandom(), true, m_CastItem);
-                }
-            }
         }
 
         [SpellEffectHandler(SpellEffectName.EnergizePct)]
@@ -2988,7 +2945,7 @@ namespace Game.Spells
                             case 30918: // Improved Sprint
                                 {
                                     // Removes snares and roots.
-                                    unitTarget.RemoveMovementImpairingAuras();
+                                    unitTarget.RemoveMovementImpairingAuras(true);
                                     break;
                                 }
                             // Plant Warmaul Ogre Banner

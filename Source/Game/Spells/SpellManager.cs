@@ -2155,6 +2155,14 @@ namespace Game.Entities
 
                     switch (effect.ApplyAuraName)
                     {
+                        case AuraType.ModPossess:
+                        case AuraType.ModConfuse:
+                        case AuraType.ModCharm:
+                        case AuraType.AoeCharm:
+                        case AuraType.ModFear:
+                        case AuraType.ModStun:
+                            spellInfo.AttributesCu |= SpellCustomAttributes.AuraCC;
+                            break;
                         case AuraType.PeriodicHeal:
                         case AuraType.PeriodicDamage:
                         case AuraType.PeriodicDamagePercent:
@@ -2232,6 +2240,89 @@ namespace Game.Entities
                     }
                 }
 
+                // spells ignoring hit result should not be binary
+                if (!spellInfo.HasAttribute(SpellAttr3.IgnoreHitResult))
+                {
+                    bool setFlag = false;
+                    foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(Difficulty.None))
+                    {
+                        if (effect == null)
+                            continue;
+
+                        if (effect.IsEffect())
+                        {
+                            switch (effect.Effect)
+                            {
+                                case SpellEffectName.SchoolDamage:
+                                case SpellEffectName.WeaponDamage:
+                                case SpellEffectName.WeaponDamageNoschool:
+                                case SpellEffectName.NormalizedWeaponDmg:
+                                case SpellEffectName.WeaponPercentDamage:
+                                case SpellEffectName.TriggerSpell:
+                                case SpellEffectName.TriggerSpellWithValue:
+                                    break;
+                                case SpellEffectName.PersistentAreaAura:
+                                case SpellEffectName.ApplyAura:
+                                case SpellEffectName.ApplyAreaAuraParty:
+                                case SpellEffectName.ApplyAreaAuraRaid:
+                                case SpellEffectName.ApplyAreaAuraFriend:
+                                case SpellEffectName.ApplyAreaAuraEnemy:
+                                case SpellEffectName.ApplyAreaAuraPet:
+                                case SpellEffectName.ApplyAreaAuraOwner:
+                                    {
+                                        if (effect.ApplyAuraName == AuraType.PeriodicDamage ||
+                                            effect.ApplyAuraName == AuraType.PeriodicDamagePercent ||
+                                            effect.ApplyAuraName == AuraType.PeriodicDummy ||
+                                            effect.ApplyAuraName == AuraType.PeriodicLeech ||
+                                            effect.ApplyAuraName == AuraType.PeriodicHealthFunnel ||
+                                            effect.ApplyAuraName == AuraType.PeriodicDummy)
+                                            break;
+
+                                        goto default;
+                                    }
+                                default:
+                                    {
+                                        // No value and not interrupt cast or crowd control without SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY flag
+                                        if (effect.CalcValue() == 0 && !((effect.Effect == SpellEffectName.InterruptCast || spellInfo.HasAttribute(SpellCustomAttributes.AuraCC)) && !spellInfo.HasAttribute(SpellAttr0.UnaffectedByInvulnerability)))
+                                            break;
+
+                                        // Sindragosa Frost Breath
+                                        if (spellInfo.Id == 69649 || spellInfo.Id == 71056 || spellInfo.Id == 71057 || spellInfo.Id == 71058 || spellInfo.Id == 73061 || spellInfo.Id == 73062 || spellInfo.Id == 73063 || spellInfo.Id == 73064)
+                                            break;
+
+                                        // Frostbolt
+                                        if (spellInfo.SpellFamilyName == SpellFamilyNames.Mage && spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x20u))
+                                            break;
+
+                                        // Frost Fever
+                                        if (spellInfo.Id == 55095)
+                                            break;
+
+                                        // Haunt
+                                        if (spellInfo.SpellFamilyName == SpellFamilyNames.Warlock && spellInfo.SpellFamilyFlags[1].HasAnyFlag(0x40000u))
+                                            break;
+
+                                        setFlag = true;
+                                        break;
+                                    }
+                            }
+
+                            if (setFlag)
+                            {
+                                spellInfo.AttributesCu |= SpellCustomAttributes.BinarySpell;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // Remove normal school mask to properly calculate damage
+                if (spellInfo.SchoolMask.HasAnyFlag(SpellSchoolMask.Normal) && spellInfo.SchoolMask.HasAnyFlag(SpellSchoolMask.Magic))
+                {
+                    spellInfo.SchoolMask &= ~SpellSchoolMask.Normal;
+                    spellInfo.AttributesCu |= SpellCustomAttributes.SchoolmaskNormalWithMagic;
+                }
+
                 if (!spellInfo._IsPositiveEffect(0, false))
                     spellInfo.AttributesCu |= SpellCustomAttributes.NegativeEff0;
 
@@ -2244,7 +2335,65 @@ namespace Game.Entities
                 if (talentSpells.Contains(spellInfo.Id))
                     spellInfo.AttributesCu |= SpellCustomAttributes.IsTalent;
 
+                switch (spellInfo.SpellFamilyName)
+                {
+                    case SpellFamilyNames.Warrior:
+                        // Shout / Piercing Howl
+                        if (spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x20000u)/* || spellInfo->SpellFamilyFlags[1] & 0x20*/)
+                            spellInfo.AttributesCu |= SpellCustomAttributes.AuraCC;
+                        break;
+                    case SpellFamilyNames.Druid:
+                        // Roar
+                        if (spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x8u))
+                            spellInfo.AttributesCu |= SpellCustomAttributes.AuraCC;
+                        break;
+                    case SpellFamilyNames.Generic:
+                        // Stoneclaw Totem effect
+                        if (spellInfo.Id == 5729)
+                            spellInfo.AttributesCu |= SpellCustomAttributes.AuraCC;
+                        break;
+                    default:
+                        break;
+                }
+
                 spellInfo._InitializeExplicitTargetMask();
+            }
+
+            // addition for binary spells, ommit spells triggering other spells
+            foreach (var spellInfo in mSpellInfoMap.Values)
+            {
+                if (spellInfo.HasAttribute(SpellCustomAttributes.BinarySpell))
+                    continue;
+
+                bool allNonBinary = true;
+                bool overrideAttr = false;
+                foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(Difficulty.None))
+                {
+                    if (effect == null)
+                        continue;
+
+                    if (effect.IsAura() && effect.TriggerSpell != 0)
+                    {
+                        switch (effect.ApplyAuraName)
+                        {
+                            case AuraType.PeriodicTriggerSpell:
+                            case AuraType.PeriodicTriggerSpellWithValue:
+                                SpellInfo triggerSpell = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell);
+                                if (triggerSpell != null)
+                                {
+                                    overrideAttr = true;
+                                    if (triggerSpell.HasAttribute(SpellCustomAttributes.BinarySpell))
+                                        allNonBinary = false;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+
+                if (overrideAttr && allNonBinary)
+                    spellInfo.AttributesCu &= ~SpellCustomAttributes.BinarySpell;
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded spell custom attributes in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
