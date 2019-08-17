@@ -3228,7 +3228,10 @@ namespace Game.Maps
         {
             return (Conversation)_objectsStore.LookupByKey(guid);
         }
-
+        public Player GetPlayer(ObjectGuid guid)
+        {
+            return Global.ObjAccessor.GetPlayer(this, guid);
+        }
         public Corpse GetCorpse(ObjectGuid guid)
         {
             if (!guid.IsCorpse())
@@ -3681,7 +3684,7 @@ namespace Game.Maps
                     switch (step.sourceGUID.GetHigh())
                     {
                         case HighGuid.Item: // as well as HIGHGUID_CONTAINER
-                            Player player = Global.ObjAccessor.FindPlayer(step.ownerGUID);
+                            Player player = GetPlayer(step.ownerGUID);
                             if (player != null)
                                 source = player.GetItemByGuid(step.sourceGUID);
                             break;
@@ -3693,7 +3696,7 @@ namespace Game.Maps
                             source = GetPet(step.sourceGUID);
                             break;
                         case HighGuid.Player:
-                            source = Global.ObjAccessor.FindPlayer(step.sourceGUID);
+                            source = GetPlayer(step.sourceGUID);
                             break;
                         case HighGuid.GameObject:
                         case HighGuid.Transport:
@@ -3722,7 +3725,7 @@ namespace Game.Maps
                             target = GetPet(step.targetGUID);
                             break;
                         case HighGuid.Player:
-                            target = Global.ObjAccessor.FindPlayer(step.targetGUID);
+                            target = GetPlayer(step.targetGUID);
                             break;
                         case HighGuid.GameObject:
                         case HighGuid.Transport:

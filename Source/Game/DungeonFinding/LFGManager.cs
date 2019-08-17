@@ -1280,18 +1280,18 @@ namespace Game.DungeonFinding
             Log.outDebug(LogFilter.Lfg, "TeleportPlayer: Player {0} is being teleported in to map {1} (x: {2}, y: {3}, z: {4}) Result: {5}", player.GetName(), dungeon.map, dungeon.x, dungeon.y, dungeon.z, error);
         }
 
-        public void FinishDungeon(ObjectGuid gguid, uint dungeonId)
+        public void FinishDungeon(ObjectGuid gguid, uint dungeonId, Map currMap)
         {
             uint gDungeonId = GetDungeon(gguid);
             if (gDungeonId != dungeonId)
             {
-                Log.outDebug(LogFilter.Lfg, "FinishDungeon: [{0}] Finished dungeon {1} but group queued for {2}. Ignoring", gguid, dungeonId, gDungeonId);
+                Log.outDebug(LogFilter.Lfg, $"Group {gguid.ToString()} finished dungeon {dungeonId} but queued for {gDungeonId}. Ignoring");
                 return;
             }
 
             if (GetState(gguid) == LfgState.FinishedDungeon) // Shouldn't happen. Do not reward multiple times
             {
-                Log.outDebug(LogFilter.Lfg, "FinishDungeon: [{0}] Already rewarded group. Ignoring", gguid);
+                Log.outDebug(LogFilter.Lfg, $"Group {gguid.ToString()} already rewarded");
                 return;
             }
 
@@ -1302,7 +1302,7 @@ namespace Game.DungeonFinding
             {
                 if (GetState(guid) == LfgState.FinishedDungeon)
                 {
-                    Log.outDebug(LogFilter.Lfg, "FinishDungeon: [{0}] Already rewarded player. Ignoring", guid);
+                    Log.outDebug(LogFilter.Lfg, $"Group: {gguid.ToString()}, Player: {guid.ToString()} already rewarded");
                     continue;
                 }
 
@@ -1318,14 +1318,14 @@ namespace Game.DungeonFinding
 
                 if (dungeon == null || (dungeon.type != LfgType.RandomDungeon && !dungeon.seasonal))
                 {
-                    Log.outDebug(LogFilter.Lfg, "FinishDungeon: [{0}] dungeon {1} is not random or seasonal", guid, rDungeonId);
+                    Log.outDebug(LogFilter.Lfg, $"Group: {gguid.ToString()}, Player: {guid.ToString()} dungeon {rDungeonId} is not random or seasonal");
                     continue;
                 }
 
                 Player player = Global.ObjAccessor.FindPlayer(guid);
-                if (!player || !player.IsInWorld)
+                if (!player || player.GetMap() != currMap)
                 {
-                    Log.outDebug(LogFilter.Lfg, "FinishDungeon: [{0}] not found in world", guid);
+                    Log.outDebug(LogFilter.Lfg, $"Group: {gguid.ToString()}, Player: {guid.ToString()} not found in world");
                     continue;
                 }
 
@@ -1334,7 +1334,7 @@ namespace Game.DungeonFinding
 
                 if (player.GetMapId() != mapId)
                 {
-                    Log.outDebug(LogFilter.Lfg, "FinishDungeon: [{0}] is in map {1} and should be in {2} to get reward", guid, player.GetMapId(), mapId);
+                    Log.outDebug(LogFilter.Lfg, $"Group: {gguid.ToString()}, Player: {guid.ToString()} is in map {player.GetMapId()} and should be in {mapId} to get reward");
                     continue;
                 }
 
@@ -1365,7 +1365,8 @@ namespace Game.DungeonFinding
                 }
 
                 // Give rewards
-                Log.outDebug(LogFilter.Lfg, "FinishDungeon: [{0}] done dungeon {1}, {2} previously done.", player.GetGUID(), GetDungeon(gguid), done ? " " : " not");
+                string doneString = done ? "" : "not";
+                Log.outDebug(LogFilter.Lfg, $"Group: {gguid.ToString()}, Player: {guid.ToString()} done dungeon {GetDungeon(gguid)}, {doneString} previously done.");
                 LfgPlayerRewardData data = new LfgPlayerRewardData(dungeon.Entry(), GetDungeon(gguid, false), done, quest);
                 player.GetSession().SendLfgPlayerReward(data);
             }

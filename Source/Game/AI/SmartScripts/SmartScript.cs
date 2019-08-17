@@ -441,7 +441,7 @@ namespace Game.AI
                                 if (vehicle != null)
                                     foreach (var seat in vehicle.Seats)
                                     {
-                                        Player player = Global.ObjAccessor.FindPlayer(seat.Value.Passenger.Guid);
+                                        Player player = Global.ObjAccessor.GetPlayer(obj, seat.Value.Passenger.Guid);
                                         if (player != null)
                                             player.AreaExploredOrEventHappens(e.Action.quest.questId);
                                     }
@@ -540,7 +540,7 @@ namespace Game.AI
                     }
                 case SmartActions.InvokerCast:
                     {
-                        Unit tempLastInvoker = GetLastInvoker();
+                        Unit tempLastInvoker = GetLastInvoker(unit);
                         if (tempLastInvoker == null)
                             break;
 
@@ -795,7 +795,7 @@ namespace Game.AI
                         {
                             foreach (var seat in vehicle.Seats)
                             {
-                                Player player = Global.ObjAccessor.FindPlayer(seat.Value.Passenger.Guid);
+                                Player player = Global.ObjAccessor.GetPlayer(unit, seat.Value.Passenger.Guid);
                                 if (player != null)
                                     player.GroupEventHappens(e.Action.quest.questId, GetBaseObject());
                             }
@@ -935,7 +935,7 @@ namespace Game.AI
                                     {
                                         foreach (var seat in vehicle.Seats)
                                         {
-                                            Player player = Global.ObjAccessor.FindPlayer(seat.Value.Passenger.Guid);
+                                            Player player = Global.ObjAccessor.GetPlayer(obj, seat.Value.Passenger.Guid);
                                             if (player != null)
                                                 player.KilledMonsterCredit(e.Action.killedMonster.creature);
                                         }
@@ -3919,16 +3919,17 @@ namespace Game.AI
             }
         }
 
-        Unit GetLastInvoker()
+        Unit GetLastInvoker(Unit invoker = null)
         {
-            WorldObject lookupRoot = me;
-            if (!lookupRoot)
-                lookupRoot = go;
+            // Look for invoker only on map of base object... Prevents multithreaded crashes
+            WorldObject baseObject = GetBaseObject();
+            if (baseObject != null)
+                return Global.ObjAccessor.GetUnit(baseObject, mLastInvoker);
+            // used for area triggers invoker cast
+            else if (invoker != null)
+                return Global.ObjAccessor.GetUnit(invoker, mLastInvoker);
 
-            if (lookupRoot)
-                return Global.ObjAccessor.GetUnit(lookupRoot, mLastInvoker);
-
-            return Global.ObjAccessor.FindPlayer(mLastInvoker);
+            return null;
         }
 
         public void SetPathId(uint id) { mPathId = id; }

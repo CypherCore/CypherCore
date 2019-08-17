@@ -4284,7 +4284,7 @@ namespace Game.Spells
                         return SpellCastResult.SpellInProgress;
 
                     // check if we are using a potion in combat for the 2nd+ time. Cooldown is added only after caster gets out of combat
-                    if (m_caster.ToPlayer().GetLastPotionId() != 0 && m_CastItem && (m_CastItem.IsPotion() || m_spellInfo.IsCooldownStartedOnEvent()))
+                    if (!IsIgnoringCooldowns() && m_caster.ToPlayer().GetLastPotionId() != 0 && m_CastItem && (m_CastItem.IsPotion() || m_spellInfo.IsCooldownStartedOnEvent()))
                         return SpellCastResult.NotReady;
                 }
 

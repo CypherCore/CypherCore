@@ -928,7 +928,8 @@ namespace Game.Spells
             if (IsPassive())
                 return false;
 
-            if (GetCasterGUID() != GetOwner().GetGUID())
+            // Check if aura is single target, not only spell info
+            if (GetCasterGUID() != GetOwner().GetGUID() || IsSingleTarget())
                 if (GetSpellInfo().IsSingleTarget())
                     return false;
 
@@ -938,6 +939,18 @@ namespace Game.Spells
 
             // Can't save vehicle auras, it requires both caster & target to be in world
             if (HasEffectType(AuraType.ControlVehicle))
+                return false;
+
+            // do not save bind sight auras
+            if (HasEffectType(AuraType.BindSight))
+                return false;
+
+            // no charming auras (taking direct control)
+            if (HasEffectType(AuraType.ModPossess) || HasEffectType(AuraType.ModPossessPet))
+                return false;
+
+            // no charming auras can be saved
+            if (HasEffectType(AuraType.ModCharm) || HasEffectType(AuraType.AoeCharm))
                 return false;
 
             // Incanter's Absorbtion - considering the minimal duration and problems with aura stacking

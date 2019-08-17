@@ -29,7 +29,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.Inspect)]
         void HandleInspect(Inspect inspect)
         {
-            Player player = Global.ObjAccessor.FindPlayer(inspect.Target);
+            Player player = Global.ObjAccessor.GetPlayer(_player, inspect.Target);
             if (!player)
             {
                 Log.outDebug(LogFilter.Network, "WorldSession.HandleInspectOpcode: Target {0} not found.", inspect.Target.ToString());
@@ -79,7 +79,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.QueryInspectAchievements)]
         void HandleQueryInspectAchievements(QueryInspectAchievements inspect)
         {
-            Player player = Global.ObjAccessor.FindPlayer(inspect.Guid);
+            Player player = Global.ObjAccessor.GetPlayer(_player, inspect.Guid);
             if (!player)
             {
                 Log.outDebug(LogFilter.Network, "WorldSession.HandleQueryInspectAchievements: [{0}] inspected unknown Player [{1}]", GetPlayer().GetGUID().ToString(), inspect.Guid.ToString());

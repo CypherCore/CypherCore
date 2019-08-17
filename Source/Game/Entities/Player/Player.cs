@@ -863,6 +863,9 @@ namespace Game.Entities
                 StopCastingBindSight();
                 UnsummonPetTemporaryIfAny();
                 ClearComboPoints();
+                ObjectGuid lootGuid = GetLootGUID();
+                if (!lootGuid.IsEmpty())
+                    GetSession().DoLootRelease(lootGuid);
                 Global.OutdoorPvPMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
                 Global.BattleFieldMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
             }

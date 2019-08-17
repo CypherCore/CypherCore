@@ -719,7 +719,7 @@ namespace Game.Maps
                     if (grp != null)
                         if (grp.isLFGGroup())
                         {
-                            Global.LFGMgr.FinishDungeon(grp.GetGUID(), dungeonId);
+                            Global.LFGMgr.FinishDungeon(grp.GetGUID(), dungeonId, instance);
                             return;
                         }
                 }

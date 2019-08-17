@@ -3860,8 +3860,7 @@ namespace Game.Spells
         {
             return (Effect == SpellEffectName.SummonPlayer)
                 || (Effect == SpellEffectName.SummonRafFriend)
-                || (Effect == SpellEffectName.Resurrect)
-                || (Effect == SpellEffectName.SkinPlayerCorpse);
+                || (Effect == SpellEffectName.Resurrect);
         }
 
         bool IsFarDestTargetEffect()

@@ -144,7 +144,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RideVehicleInteract)]
         void HandleRideVehicleInteract(RideVehicleInteract packet)
         {
-            Player player = Global.ObjAccessor.FindPlayer(packet.Vehicle);
+            Player player = Global.ObjAccessor.GetPlayer(_player, packet.Vehicle);
             if (player)
             {
                 if (!player.GetVehicleKit())
@@ -152,6 +152,9 @@ namespace Game
                 if (!player.IsInRaidWith(GetPlayer()))
                     return;
                 if (!player.IsWithinDistInMap(GetPlayer(), SharedConst.InteractionDistance))
+                    return;
+                // Dont' allow players to enter player vehicle on arena
+                if (!_player.GetMap() || _player.GetMap().IsBattleArena())
                     return;
 
                 GetPlayer().EnterVehicle(player);

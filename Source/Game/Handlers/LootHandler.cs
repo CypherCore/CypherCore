@@ -470,7 +470,8 @@ namespace Game
                 return;
             }
 
-            Player target = Global.ObjAccessor.FindPlayer(target_playerguid);
+            // player on other map
+            Player target = Global.ObjAccessor.GetPlayer(_player, target_playerguid);
             if (!target)
             {
                 GetPlayer().SendLootError(lootguid, ObjectGuid.Empty, LootError.PlayerNotFound);

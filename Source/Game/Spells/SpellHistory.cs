@@ -189,6 +189,9 @@ namespace Game.Spells
 
         public void HandleCooldowns(SpellInfo spellInfo, uint itemId, Spell spell = null)
         {
+            if (spell != null && spell.IsIgnoringCooldowns())
+                return;
+
             if (ConsumeCharge(spellInfo.ChargeCategoryId))
                 return;
 
@@ -207,7 +210,7 @@ namespace Game.Spells
                 }
             }
 
-            if (spellInfo.IsCooldownStartedOnEvent() || spellInfo.IsPassive() || (spell && spell.IsIgnoringCooldowns()))
+            if (spellInfo.IsCooldownStartedOnEvent() || spellInfo.IsPassive())
                 return;
 
             StartCooldown(spellInfo, itemId, spell);

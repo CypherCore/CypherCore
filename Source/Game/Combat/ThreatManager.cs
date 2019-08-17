@@ -81,7 +81,8 @@ namespace Game.Combat
                 {
                     float redirectThreat = MathFunctions.CalculatePct(threat, redirectThreadPct);
                     threat -= redirectThreat;
-                    _addThreat(redirectTarget, redirectThreat);
+                    if (isValidProcess(redirectTarget, GetOwner()))
+                        _addThreat(redirectTarget, redirectThreat);
                 }
             }
 
@@ -286,7 +287,7 @@ namespace Game.Combat
             return hatedUnit.ApplyTotalThreatModifier(threat, schoolMask);
         }
 
-        public static bool isValidProcess(Unit hatedUnit, Unit hatingUnit, SpellInfo threatSpell)
+        public static bool isValidProcess(Unit hatedUnit, Unit hatingUnit, SpellInfo threatSpell = null)
         {
             //function deals with adding threat and adding players and pets into ThreatList
             //mobs, NPCs, guards have ThreatList and HateOfflineList
