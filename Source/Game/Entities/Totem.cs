@@ -135,7 +135,7 @@ namespace Game.Entities
                     for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.next())
                     {
                         Player target = refe.GetSource();
-                        if (target && group.SameSubGroup(owner, target))
+                        if (target && target.IsInMap(owner) && group.SameSubGroup(owner, target))
                             target.RemoveAurasDueToSpell(GetSpell(), GetGUID());
                     }
                 }

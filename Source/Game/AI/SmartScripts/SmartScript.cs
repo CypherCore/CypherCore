@@ -2614,7 +2614,8 @@ namespace Game.AI
                                 {
                                     Player member = groupRef.GetSource();
                                     if (member)
-                                        l.Add(member);
+                                        if (member.IsInMap(player))
+                                            l.Add(member);
                                 }
                             }
                             // We still add the player to the list if there is no group. If we do
@@ -2838,7 +2839,8 @@ namespace Game.AI
                                 {
                                     Player recipient = refe.GetSource();
                                     if (recipient)
-                                        l.Add(recipient);
+                                        if (recipient.IsInMap(me))
+                                            l.Add(recipient);
                                 }
                             }
                             else

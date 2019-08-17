@@ -153,7 +153,8 @@ namespace Game.AI
                     {
                         Player member = groupRef.GetSource();
                         if (member)
-                            member.FailQuest(m_pQuestForFollow.Id);
+                            if (member.IsInMap(player))
+                                member.FailQuest(m_pQuestForFollow.Id);
                     }
                 }
                 else
@@ -343,8 +344,7 @@ namespace Game.AI
                         for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.next())
                         {
                             Player member = groupRef.GetSource();
-
-                            if (member && member.IsAlive() && me.IsWithinDistInMap(member, 100.0f))
+                            if (member &&  me.IsWithinDistInMap(member, 100.0f) && member.IsAlive())
                             {
                                 Log.outDebug(LogFilter.Scripts, "FollowerAI GetLeader changed and returned new leader.");
                                 m_uiLeaderGUID = member.GetGUID();

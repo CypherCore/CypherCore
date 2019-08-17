@@ -560,7 +560,7 @@ namespace Game.Groups
                     roll.playerVote.Remove(guid);
 
                     if (roll.totalPass + roll.totalNeed + roll.totalGreed >= roll.totalPlayersRolling)
-                        CountTheRoll(roll);
+                        CountTheRoll(roll, null);
                 }
 
                 // Update subgroups
@@ -1110,21 +1110,21 @@ namespace Game.Groups
             }
 
             if (roll.totalPass + roll.totalNeed + roll.totalGreed >= roll.totalPlayersRolling)
-                CountTheRoll(roll);
+                CountTheRoll(roll, null);
         }
 
-        public void EndRoll(Loot pLoot)
+        public void EndRoll(Loot pLoot, Map allowedMap)
         {
             foreach (var roll in RollId)
             {
                 if (roll.getLoot() == pLoot)
                 {
-                    CountTheRoll(roll);           //i don't have to edit player votes, who didn't vote ... he will pass
+                    CountTheRoll(roll, allowedMap);           //i don't have to edit player votes, who didn't vote ... he will pass
                 }
             }
         }
 
-        void CountTheRoll(Roll roll)
+        void CountTheRoll(Roll roll, Map allowedMap)
         {
             if (!roll.isValid())                                   // is loot already deleted ?
             {
@@ -1138,12 +1138,20 @@ namespace Game.Groups
                 if (!roll.playerVote.Empty())
                 {
                     byte maxresul = 0;
-                    ObjectGuid maxguid = roll.playerVote.First().Key;
+                    ObjectGuid maxguid = ObjectGuid.Empty;
+                    Player player = null;
 
                     foreach (var pair in roll.playerVote)
                     {
                         if (pair.Value != RollType.Need)
                             continue;
+
+                        player = Global.ObjAccessor.FindPlayer(pair.Key);
+                        if (!player || (allowedMap != null && player.GetMap() != allowedMap))
+                        {
+                            --roll.totalNeed;
+                            continue;
+                        }
 
                         byte randomN = (byte)RandomHelper.IRand(1, 100);
                         SendLootRoll(pair.Key, randomN, RollType.Need, roll);
@@ -1153,66 +1161,18 @@ namespace Game.Groups
                             maxresul = randomN;
                         }
                     }
-                    SendLootRollWon(maxguid, maxresul, RollType.Need, roll);
-                    Player player = Global.ObjAccessor.FindPlayer(maxguid);
 
-                    if (player && player.GetSession() != null)
+                    if (!maxguid.IsEmpty())
                     {
-                        player.UpdateCriteria(CriteriaTypes.RollNeedOnLoot, roll.itemid, maxresul);
+                        SendLootRollWon(maxguid, maxresul, RollType.Need, roll);
+                        player = Global.ObjAccessor.FindConnectedPlayer(maxguid);
 
-                        List<ItemPosCount> dest = new List<ItemPosCount>();
-                        LootItem item = (roll.itemSlot >= roll.getLoot().items.Count ? roll.getLoot().quest_items[roll.itemSlot - roll.getLoot().items.Count] : roll.getLoot().items[roll.itemSlot]);
-                        InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, roll.itemid, item.count);
-                        if (msg == InventoryResult.Ok)
+                        if (player && player.GetSession())
                         {
-                            item.is_looted = true;
-                            roll.getLoot().NotifyItemRemoved(roll.itemSlot);
-                            roll.getLoot().unlootedCount--;
-                            player.StoreNewItem(dest, roll.itemid, true, item.randomBonusListId, item.GetAllowedLooters(), item.context, item.BonusListIDs);
-                        }
-                        else
-                        {
-                            item.is_blocked = false;
-                            item.rollWinnerGUID = player.GetGUID();
-                            player.SendEquipError(msg, null, null, roll.itemid);
-                        }
-                    }
-                }
-            }
-            else if (roll.totalGreed > 0)
-            {
-                if (!roll.playerVote.Empty())
-                {
-                    byte maxresul = 0;
-                    ObjectGuid maxguid = roll.playerVote.First().Key;
-                    RollType rollVote = RollType.NotValid;
+                            player.UpdateCriteria(CriteriaTypes.RollNeedOnLoot, roll.itemid, maxresul);
 
-                    foreach (var pair in roll.playerVote)
-                    {
-                        if (pair.Value != RollType.Greed && pair.Value != RollType.Disenchant)
-                            continue;
-
-                        byte randomN = (byte)RandomHelper.IRand(1, 100);
-                        SendLootRoll(pair.Key, randomN, pair.Value, roll);
-                        if (maxresul < randomN)
-                        {
-                            maxguid = pair.Key;
-                            maxresul = randomN;
-                            rollVote = pair.Value;
-                        }
-                    }
-                    SendLootRollWon(maxguid, maxresul, rollVote, roll);
-                    Player player = Global.ObjAccessor.FindPlayer(maxguid);
-
-                    if (player && player.GetSession() != null)
-                    {
-                        player.UpdateCriteria(CriteriaTypes.RollGreedOnLoot, roll.itemid, maxresul);
-
-                        LootItem item = roll.itemSlot >= roll.getLoot().items.Count ? roll.getLoot().quest_items[roll.itemSlot - roll.getLoot().items.Count] : roll.getLoot().items[roll.itemSlot];
-
-                        if (rollVote == RollType.Greed)
-                        {
                             List<ItemPosCount> dest = new List<ItemPosCount>();
+                            LootItem item = (roll.itemSlot >= roll.getLoot().items.Count ? roll.getLoot().quest_items[roll.itemSlot - roll.getLoot().items.Count] : roll.getLoot().items[roll.itemSlot]);
                             InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, roll.itemid, item.count);
                             if (msg == InventoryResult.Ok)
                             {
@@ -1228,37 +1188,107 @@ namespace Game.Groups
                                 player.SendEquipError(msg, null, null, roll.itemid);
                             }
                         }
-                        else if (rollVote == RollType.Disenchant)
+                    }
+                    else
+                        roll.totalNeed = 0;
+                }
+            }
+
+            if (roll.totalNeed == 0 && roll.totalGreed > 0) // if (roll->totalNeed == 0 && ...), not else if, because numbers can be modified above if player is on a different map
+            {
+                if (!roll.playerVote.Empty())
+                {
+                    byte maxresul = 0;
+                    ObjectGuid maxguid = ObjectGuid.Empty;
+                    Player player = null;
+                    RollType rollVote = RollType.NotValid;
+
+                    foreach (var pair in roll.playerVote)
+                    {
+                        if (pair.Value != RollType.Greed && pair.Value != RollType.Disenchant)
+                            continue;
+
+                        player = Global.ObjAccessor.FindPlayer(pair.Key);
+                        if (!player || (allowedMap != null && player.GetMap() != allowedMap))
                         {
-                            item.is_looted = true;
-                            roll.getLoot().NotifyItemRemoved(roll.itemSlot);
-                            roll.getLoot().unlootedCount--;
-                            player.UpdateCriteria(CriteriaTypes.CastSpell, 13262); // Disenchant
+                            --roll.totalGreed;
+                            continue;
+                        }
 
-                            ItemDisenchantLootRecord disenchant = roll.GetItemDisenchantLoot(player);
+                        byte randomN = (byte)RandomHelper.IRand(1, 100);
+                        SendLootRoll(pair.Key, randomN, pair.Value, roll);
+                        if (maxresul < randomN)
+                        {
+                            maxguid = pair.Key;
+                            maxresul = randomN;
+                            rollVote = pair.Value;
+                        }
+                    }
 
-                            List<ItemPosCount> dest = new List<ItemPosCount>();
-                            InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, roll.itemid, item.count);
-                            if (msg == InventoryResult.Ok)
-                                player.AutoStoreLoot(disenchant.Id, LootStorage.Disenchant, true);
-                            else // If the player's inventory is full, send the disenchant result in a mail.
+                    if (!maxguid.IsEmpty())
+                    {
+                        SendLootRollWon(maxguid, maxresul, rollVote, roll);
+                        player = Global.ObjAccessor.FindConnectedPlayer(maxguid);
+
+                        if (player && player.GetSession() != null)
+                        {
+                            player.UpdateCriteria(CriteriaTypes.RollGreedOnLoot, roll.itemid, maxresul);
+
+                            LootItem item = roll.itemSlot >= roll.getLoot().items.Count ? roll.getLoot().quest_items[roll.itemSlot - roll.getLoot().items.Count] : roll.getLoot().items[roll.itemSlot];
+
+                            if (rollVote == RollType.Greed)
                             {
-                                Loot loot = new Loot();
-                                loot.FillLoot(disenchant.Id, LootStorage.Disenchant, player, true);
-
-                                uint max_slot = loot.GetMaxSlotInLootFor(player);
-                                for (uint i = 0; i < max_slot; ++i)
+                                List<ItemPosCount> dest = new List<ItemPosCount>();
+                                InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, roll.itemid, item.count);
+                                if (msg == InventoryResult.Ok)
                                 {
-                                    LootItem lootItem = loot.LootItemInSlot(i, player);
-                                    player.SendEquipError(msg, null, null, lootItem.itemid);
-                                    player.SendItemRetrievalMail(lootItem.itemid, lootItem.count);
+                                    item.is_looted = true;
+                                    roll.getLoot().NotifyItemRemoved(roll.itemSlot);
+                                    roll.getLoot().unlootedCount--;
+                                    player.StoreNewItem(dest, roll.itemid, true, item.randomBonusListId, item.GetAllowedLooters(), item.context, item.BonusListIDs);
+                                }
+                                else
+                                {
+                                    item.is_blocked = false;
+                                    item.rollWinnerGUID = player.GetGUID();
+                                    player.SendEquipError(msg, null, null, roll.itemid);
+                                }
+                            }
+                            else if (rollVote == RollType.Disenchant)
+                            {
+                                item.is_looted = true;
+                                roll.getLoot().NotifyItemRemoved(roll.itemSlot);
+                                roll.getLoot().unlootedCount--;
+                                player.UpdateCriteria(CriteriaTypes.CastSpell, 13262); // Disenchant
+
+                                ItemDisenchantLootRecord disenchant = roll.GetItemDisenchantLoot(player);
+
+                                List<ItemPosCount> dest = new List<ItemPosCount>();
+                                InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, roll.itemid, item.count);
+                                if (msg == InventoryResult.Ok)
+                                    player.AutoStoreLoot(disenchant.Id, LootStorage.Disenchant, true);
+                                else // If the player's inventory is full, send the disenchant result in a mail.
+                                {
+                                    Loot loot = new Loot();
+                                    loot.FillLoot(disenchant.Id, LootStorage.Disenchant, player, true);
+
+                                    uint max_slot = loot.GetMaxSlotInLootFor(player);
+                                    for (uint i = 0; i < max_slot; ++i)
+                                    {
+                                        LootItem lootItem = loot.LootItemInSlot(i, player);
+                                        player.SendEquipError(msg, null, null, lootItem.itemid);
+                                        player.SendItemRetrievalMail(lootItem.itemid, lootItem.count);
+                                    }
                                 }
                             }
                         }
                     }
+                    else
+                        roll.totalGreed = 0;
                 }
             }
-            else
+
+            if (roll.totalNeed == 0 && roll.totalGreed == 0) // if, not else, because numbers can be modified above if player is on a different map
             {
                 SendLootAllPassed(roll);
 

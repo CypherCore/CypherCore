@@ -228,7 +228,8 @@ namespace Game.Loots
                 {
                     Player player = refe.GetSource();
                     if (player)   // should actually be looted object instead of lootOwner but looter has to be really close so doesnt really matter
-                        FillNotNormalLootFor(player, player.IsAtGroupRewardDistance(lootOwner));
+                        if (player.IsInMap(lootOwner))
+                            FillNotNormalLootFor(player, player.IsAtGroupRewardDistance(lootOwner));
                 }
 
                 for (byte i = 0; i < items.Count; ++i)

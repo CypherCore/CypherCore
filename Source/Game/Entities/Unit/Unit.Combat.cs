@@ -1741,17 +1741,17 @@ namespace Game.Entities
 
             for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.next())
             {
-                Player Target = refe.GetSource();
-                if (Target)
+                Player target = refe.GetSource();
+                if (target)
                 {
                     // IsHostileTo check duel and controlled by enemy
-                    if (Target != this && Target.IsAlive() && IsWithinDistInMap(Target, radius) && !IsHostileTo(Target))
-                        nearMembers.Add(Target);
+                    if (target != this && IsWithinDistInMap(target, radius) && target.IsAlive() && !IsHostileTo(target))
+                        nearMembers.Add(target);
 
                     // Push player's pet to vector
-                    Unit pet = Target.GetGuardianPet();
+                    Unit pet = target.GetGuardianPet();
                     if (pet)
-                        if (pet != this && pet.IsAlive() && IsWithinDistInMap(pet, radius) && !IsHostileTo(pet))
+                        if (pet != this && IsWithinDistInMap(pet, radius) && pet.IsAlive() && !IsHostileTo(pet))
                             nearMembers.Add(pet);
                 }
             }

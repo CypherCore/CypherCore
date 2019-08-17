@@ -1525,6 +1525,10 @@ namespace Game.Entities
                         stmt.AddValue(2, GetGUID().GetCounter());
                         trans.Append(stmt);
 
+                        RemoveTradeableItem(item);
+                        RemoveEnchantmentDurationsReferences(item);
+                        RemoveItemDurations(item);
+
                         // also THIS item should be somewhere else, cheat attempt
                         item.FSetState(ItemUpdateState.Removed); // we are IN updateQueue right now, can't use SetState which modifies the queue
                         DeleteRefundReference(item.GetGUID());

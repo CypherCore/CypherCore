@@ -400,7 +400,8 @@ namespace Game.Entities
                         {
                             Group group = Global.GroupMgr.GetGroupByGUID(lootingGroupLowGUID);
                             if (group)
-                                group.EndRoll(loot);
+                                group.EndRoll(loot, GetMap());
+
                             m_groupLootTimer = 0;
                             lootingGroupLowGUID.Clear();
                         }

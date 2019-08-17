@@ -271,14 +271,14 @@ namespace Game.AI
             {
                 for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.next())
                 {
-                    Player Target = refe.GetSource();
-                    if (!Target || !group.SameSubGroup(owner.ToPlayer(), Target))
+                    Player target = refe.GetSource();
+                    if (!target || !target.IsInMap(owner) || !group.SameSubGroup(owner.ToPlayer(), target))
                         continue;
 
-                    if (Target.GetGUID() == owner.GetGUID())
+                    if (target.GetGUID() == owner.GetGUID())
                         continue;
 
-                    m_AllySet.Add(Target.GetGUID());
+                    m_AllySet.Add(target.GetGUID());
                 }
             }
             else                                                    //remove group

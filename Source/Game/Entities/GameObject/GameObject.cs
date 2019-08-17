@@ -668,7 +668,7 @@ namespace Game.Entities
                                     {
                                         Group group = Global.GroupMgr.GetGroupByGUID(lootingGroupLowGUID);
                                         if (group)
-                                            group.EndRoll(loot);
+                                            group.EndRoll(loot, GetMap());
 
                                         m_groupLootTimer = 0;
                                         lootingGroupLowGUID.Clear();
@@ -1396,7 +1396,7 @@ namespace Game.Entities
 
                             if (!slot.Value.IsEmpty())
                             {
-                                Player ChairUser = Global.ObjAccessor.FindPlayer(slot.Value);
+                                Player ChairUser = Global.ObjAccessor.GetPlayer(this, slot.Value);
                                 if (ChairUser != null)
                                     if (ChairUser.IsSitState() && ChairUser.GetStandState() != UnitStandStateType.Sit && ChairUser.GetExactDist2d(x_i, y_i) < 0.1f)
                                         continue;        // This seat is already occupied by ChairUser. NOTE: Not sure if the ChairUser.getStandState() != UNIT_STAND_STATE_SIT check is required.

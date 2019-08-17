@@ -862,6 +862,7 @@ namespace Game.Entities
                 StopCastingCharm();
                 StopCastingBindSight();
                 UnsummonPetTemporaryIfAny();
+                ClearComboPoints();
                 Global.OutdoorPvPMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
                 Global.BattleFieldMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
             }
@@ -7031,14 +7032,12 @@ namespace Game.Entities
 
         bool IsAtRecruitAFriendDistance(WorldObject pOther)
         {
-            if (!pOther)
+            if (!pOther || !IsInMap(pOther))
                 return false;
+
             WorldObject player = GetCorpse();
             if (!player || IsAlive())
                 player = this;
-
-            if (player.GetMapId() != pOther.GetMapId() || player.GetInstanceId() != pOther.GetInstanceId())
-                return false;
 
             return pOther.GetDistance(player) <= WorldConfig.GetFloatValue(WorldCfg.MaxRecruitAFriendDistance);
         }

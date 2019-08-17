@@ -239,6 +239,10 @@ namespace Game.Combat
         {
             return threatContainer.empty();
         }
+        public bool areThreatListsEmpty()
+        {
+            return threatContainer.empty() && threatOfflineContainer.empty();
+        }
 
         public HostileReference getCurrentVictim()
         {

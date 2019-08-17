@@ -967,6 +967,16 @@ namespace Game.Entities
                 }
             }
         }
+
+        void RemoveEnchantmentDurationsReferences(Item item)
+        {
+            foreach (var enchantDuration in m_enchantDuration)
+            {
+                if (enchantDuration.item == item)
+                    m_enchantDuration.Remove(enchantDuration);
+            }
+        }
+
         public void RemoveArenaEnchantments(EnchantmentSlot slot)
         {
             // remove enchantments from equipped items first to clean up the m_enchantDuration list
@@ -1043,7 +1053,12 @@ namespace Game.Entities
             }
             // from spell cases (m_lastPotionId set in Spell.SendSpellCooldown)
             else
-                GetSpellHistory().SendCooldownEvent(spell.m_spellInfo, m_lastPotionId, spell);
+            {
+                if (spell.IsIgnoringCooldowns())
+                    return;
+                else
+                    GetSpellHistory().SendCooldownEvent(spell.m_spellInfo, m_lastPotionId, spell);
+            }
 
             m_lastPotionId = 0;
         }

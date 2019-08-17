@@ -167,7 +167,7 @@ namespace Game.Maps
                 creature.RemoveAllDynObjects();
                 creature.RemoveAllAreaTriggers();
 
-                if (creature.IsInCombat())
+                if (creature.IsInCombat() || !creature.GetThreatManager().areThreatListsEmpty())
                 {
                     creature.CombatStop();
                     creature.DeleteThreatList();

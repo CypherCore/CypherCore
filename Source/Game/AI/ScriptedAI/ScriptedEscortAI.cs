@@ -115,7 +115,8 @@ namespace Game.AI
                     {
                         Player member = groupRef.GetSource();
                         if (member)
-                            member.FailQuest(m_pQuestForEscort.Id);
+                            if (member.IsInMap(player))
+                                member.FailQuest(m_pQuestForEscort.Id);
                     }
                 }
                 else

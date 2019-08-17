@@ -76,7 +76,7 @@ namespace Game.Entities
 
                 // @todo Should also be sent when anyone has recently left combat, with an aprox ~5 seconds timer.
                 for (GroupReference refe = grp.GetFirstMember(); refe != null; refe = refe.next())
-                    if (refe.GetSource() && refe.GetSource().IsInCombat())
+                    if (refe.GetSource() && refe.GetSource().IsInMap(this) && refe.GetSource().IsInCombat())
                         return PartyResult.PartyLfgBootInCombat;
 
                 /* Missing support for these types
@@ -192,14 +192,12 @@ namespace Game.Entities
 
         public bool IsAtGroupRewardDistance(WorldObject pRewardSource)
         {
-            if (!pRewardSource)
+            if (!pRewardSource || !IsInMap(pRewardSource))
                 return false;
+
             WorldObject player = GetCorpse();
             if (!player || IsAlive())
                 player = this;
-
-            if (player.GetMapId() != pRewardSource.GetMapId() || player.GetInstanceId() != pRewardSource.GetInstanceId())
-                return false;
 
             if (player.GetMap().IsDungeon())
                 return true;

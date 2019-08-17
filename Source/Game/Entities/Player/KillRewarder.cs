@@ -104,7 +104,7 @@ namespace Game.Entities
                     Player member = refe.GetSource();
                     if (member)
                     {
-                        if (member.IsAlive() && member.IsAtGroupRewardDistance(_victim))
+                        if (_killer == member || (member.IsAtGroupRewardDistance(_victim) && member.IsAlive()))
                         {
                             uint lvl = member.getLevel();
                             // 2.1. _count - number of alive group members within reward distance;
@@ -254,7 +254,8 @@ namespace Game.Entities
                         Player member = refe.GetSource();
                         if (member)
                         {
-                            if (member.IsAtGroupRewardDistance(_victim))
+                            // Killer may not be at reward distance, check directly
+                            if (_killer == member || member.IsAtGroupRewardDistance(_victim))
                             {
                                 _RewardPlayer(member, isDungeon);
                                 member.UpdateCriteria(CriteriaTypes.SpecialPvpKill, 1, 0, 0, _victim);
