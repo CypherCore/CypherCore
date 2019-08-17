@@ -1588,21 +1588,25 @@ namespace Game.Entities
             if (immuneToAllEffects) //Return immune only if the target is immune to all spell effects.
                 return true;
 
-            uint schoolImmunityMask = 0;
-            var schoolList = m_spellImmune[(int)SpellImmunity.School];
-            foreach (var pair in schoolList)
+            uint schoolMask = (uint)spellInfo.GetSchoolMask();
+            if (schoolMask != 0)
             {
-                if ((pair.Key & (uint)spellInfo.GetSchoolMask()) == 0)
-                    continue;
+                uint schoolImmunityMask = 0;
+                var schoolList = m_spellImmune[(int)SpellImmunity.School];
+                foreach (var pair in schoolList)
+                {
+                    if ((pair.Key & schoolMask) == 0)
+                        continue;
 
-                SpellInfo immuneSpellInfo = Global.SpellMgr.GetSpellInfo(pair.Value);
-                if (!(immuneSpellInfo != null && immuneSpellInfo.IsPositive() && spellInfo.IsPositive() && caster && IsFriendlyTo(caster)))
-                    if (!spellInfo.CanPierceImmuneAura(immuneSpellInfo))
-                        schoolImmunityMask |= pair.Key;
+                    SpellInfo immuneSpellInfo = Global.SpellMgr.GetSpellInfo(pair.Value);
+                    if (!(immuneSpellInfo != null && immuneSpellInfo.IsPositive() && spellInfo.IsPositive() && caster && IsFriendlyTo(caster)))
+                        if (!spellInfo.CanPierceImmuneAura(immuneSpellInfo))
+                            schoolImmunityMask |= pair.Key;
+                }
+
+                if ((schoolImmunityMask & schoolMask) == schoolMask)
+                    return true;
             }
-
-            if (((SpellSchoolMask)schoolImmunityMask & spellInfo.GetSchoolMask()) == spellInfo.GetSchoolMask())
-                return true;
 
             return false;
         }
@@ -1681,6 +1685,9 @@ namespace Game.Entities
         }
         public bool IsImmunedToDamage(SpellSchoolMask schoolMask)
         {
+            if (schoolMask == SpellSchoolMask.None)
+                return false;
+
             // If m_immuneToSchool type contain this school type, IMMUNE damage.
             uint schoolImmunityMask = GetSchoolImmunityMask();
             if (((SpellSchoolMask)schoolImmunityMask & schoolMask) == schoolMask) // We need to be immune to all types
@@ -1706,17 +1713,24 @@ namespace Game.Entities
                 return false;
 
             uint schoolMask = (uint)spellInfo.GetSchoolMask();
-            // If m_immuneToSchool type contain this school type, IMMUNE damage.
-            var schoolList = m_spellImmune[(int)SpellImmunity.School];
-            foreach (var pair in schoolList)
-                if (Convert.ToBoolean(pair.Key & schoolMask) && !spellInfo.CanPierceImmuneAura(Global.SpellMgr.GetSpellInfo(pair.Value)))
+            if (schoolMask != 0)
+            {
+                // If m_immuneToSchool type contain this school type, IMMUNE damage.
+                uint schoolImmunityMask = 0;
+                var schoolList = m_spellImmune[(int)SpellImmunity.School];
+                foreach (var pair in schoolList)
+                    if (Convert.ToBoolean(pair.Key & schoolMask) && !spellInfo.CanPierceImmuneAura(Global.SpellMgr.GetSpellInfo(pair.Value)))
+                        schoolImmunityMask |= pair.Key;
+
+                // // We need to be immune to all types
+                if ((schoolImmunityMask & schoolMask) == schoolMask)
                     return true;
 
-            // If m_immuneToDamage type contain magic, IMMUNE damage.
-            var damageList = m_spellImmune[(int)SpellImmunity.Damage];
-            foreach (var immune in damageList)
-                if (Convert.ToBoolean(immune.Key & schoolMask))
+                // If m_immuneToDamage type contain magic, IMMUNE damage.
+                uint damageImmunityMask = GetDamageImmunityMask();
+                if ((damageImmunityMask & schoolMask) == schoolMask) // We need to be immune to all types
                     return true;
+            }
 
             return false;
         }
