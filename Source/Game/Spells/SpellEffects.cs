@@ -4095,6 +4095,10 @@ namespace Game.Spells
 
             if (effectHandleMode == SpellEffectHandleMode.LaunchTarget)
             {
+                // charge changes fall time
+                if (m_caster.GetTypeId() == TypeId.Player)
+                    m_caster.ToPlayer().SetFallInformation(0, m_caster.GetPositionZ());
+
                 float speed = MathFunctions.fuzzyGt(m_spellInfo.Speed, 0.0f) ? m_spellInfo.Speed : MotionMaster.SPEED_CHARGE;
                 SpellEffectExtraData spellEffectExtraData = null;
                 if (effectInfo.MiscValueB != 0)
@@ -4204,6 +4208,10 @@ namespace Game.Spells
             float speedz = damage / 10.0f;
             // Disengage
             unitTarget.JumpTo(speedxy, speedz, m_spellInfo.IconFileDataId != 132572);
+
+            // changes fall time
+            if (m_caster.GetTypeId() == TypeId.Player)
+                m_caster.ToPlayer().SetFallInformation(0, m_caster.GetPositionZ());
         }
 
         [SpellEffectHandler(SpellEffectName.ClearQuest)]

@@ -1790,7 +1790,7 @@ namespace Game.Entities
                 // this will be used instead of the current location in SaveToDB
                 teleportDest = new WorldLocation(mapid, x, y, z, orientation);
                 m_teleport_options = options;
-                SetFallInformation(0, z);
+                SetFallInformation(0, GetPositionZ());
 
                 // code for finish transfer called in WorldSession.HandleMovementOpcodes()
                 // at client packet CMSG_MOVE_TELEPORT_ACK
@@ -1902,7 +1902,7 @@ namespace Game.Entities
 
                 teleportDest = new WorldLocation(mapid, x, y, z, orientation);
                 m_teleport_options = options;
-                SetFallInformation(0, z);
+                SetFallInformation(0, GetPositionZ());
                 // if the player is saved before worldportack (at logout for example)
                 // this will be used instead of the current location in SaveToDB
 

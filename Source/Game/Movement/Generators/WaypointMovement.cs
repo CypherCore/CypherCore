@@ -442,6 +442,7 @@ namespace Game.Movement
                 // this prevent cheating with landing  point at lags
                 // when client side flight end early in comparison server side
                 owner.StopMoving();
+                owner.SetFallInformation(0, owner.GetPositionZ());
             }
 
             owner.RemovePlayerFlag(PlayerFlags.TaxiBenchmark);

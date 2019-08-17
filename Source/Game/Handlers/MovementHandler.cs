@@ -92,7 +92,11 @@ namespace Game
             //handle special cases
             if (!movementInfo.transport.guid.IsEmpty())
             {
-                if (movementInfo.transport.pos.GetPositionX() > 50 || movementInfo.transport.pos.GetPositionY() > 50 || movementInfo.transport.pos.GetPositionZ() > 50)
+                // We were teleported, skip packets that were broadcast before teleport
+                if (movementInfo.Pos.GetExactDist2d(mover) > MapConst.SizeofGrids)
+                    return;
+
+                if (Math.Abs(movementInfo.transport.pos.GetPositionX()) > 75f || Math.Abs(movementInfo.transport.pos.GetPositionY()) > 75f || Math.Abs(movementInfo.transport.pos.GetPositionZ()) > 75f)
                     return;
 
                 if (!GridDefines.IsValidMapCoord(movementInfo.Pos.posX + movementInfo.transport.pos.posX, movementInfo.Pos.posY + movementInfo.transport.pos.posY,
@@ -267,6 +271,7 @@ namespace Game
                 z += GetPlayer().m_unitData.HoverHeight;
 
             GetPlayer().Relocate(loc.GetPositionX(), loc.GetPositionY(), z, loc.GetOrientation());
+            GetPlayer().SetFallInformation(0, GetPlayer().GetPositionZ());
 
             GetPlayer().ResetMap();
             GetPlayer().SetMap(newMap);
@@ -446,6 +451,7 @@ namespace Game
             WorldLocation dest = plMover.GetTeleportDest();
 
             plMover.UpdatePosition(dest, true);
+            plMover.SetFallInformation(0, GetPlayer().GetPositionZ());
 
             uint newzone, newarea;
             plMover.GetZoneAndAreaId(out newzone, out newarea);

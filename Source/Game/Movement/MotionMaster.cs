@@ -525,7 +525,10 @@ namespace Game.Movement
 
             // don't run spline movement for players
             if (_owner.IsTypeId(TypeId.Player))
+            {
+                _owner.ToPlayer().SetFallInformation(0, _owner.GetPositionZ());
                 return;
+            }
 
             MoveSplineInit init = new MoveSplineInit(_owner);
             init.MoveTo(_owner.GetPositionX(), _owner.GetPositionY(), tz, false);

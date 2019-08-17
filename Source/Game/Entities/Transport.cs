@@ -305,8 +305,12 @@ namespace Game.Entities
                 passenger.m_movementInfo.transport.Reset();
                 Log.outDebug(LogFilter.Transport, "Object {0} removed from transport {1}.", passenger.GetName(), GetName());
 
-                if (passenger.IsTypeId(TypeId.Player))
-                    Global.ScriptMgr.OnRemovePassenger(this, passenger.ToPlayer());
+                Player plr = passenger.ToPlayer();
+                if (plr != null)
+                {
+                    Global.ScriptMgr.OnRemovePassenger(this, plr);
+                    plr.SetFallInformation(0, plr.GetPositionZ());
+                }
             }
         }
 
@@ -727,8 +731,11 @@ namespace Game.Entities
                             break;
                         }
                     case TypeId.Player:
-                        if (passenger.IsInWorld)
+                        if (passenger.IsInWorld && !passenger.ToPlayer().IsBeingTeleported())
+                        {
                             GetMap().PlayerRelocation(passenger.ToPlayer(), x, y, z, o);
+                            passenger.ToPlayer().SetFallInformation(0, passenger.GetPositionZ());
+                        }
                         break;
                     case TypeId.GameObject:
                         GetMap().GameObjectRelocation(passenger.ToGameObject(), x, y, z, o, false);
