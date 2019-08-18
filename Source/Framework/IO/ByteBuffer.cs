@@ -347,7 +347,7 @@ namespace Framework.IO
         public void WriteBits(object bit, int count)
         {
             for (int i = count - 1; i >= 0; --i)
-                WriteBit((Convert.ToInt32(bit) >> i) & 1);
+                WriteBit((Convert.ToUInt32(bit) >> i) & 1);
         }
 
         public void WritePackedTime(long time)

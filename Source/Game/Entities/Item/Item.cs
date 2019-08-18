@@ -1091,7 +1091,7 @@ namespace Game.Entities
 
         public byte GetGemCountWithLimitCategory(uint limitCategory)
         {
-            var list = (List<SocketedGem>)m_itemData.Gems.GetEnumerator();
+            var list = (List<SocketedGem>)m_itemData.Gems;
             return (byte)list.Count(gemData =>
             {
                 ItemTemplate gemProto = Global.ObjectMgr.GetItemTemplate(gemData.ItemId);

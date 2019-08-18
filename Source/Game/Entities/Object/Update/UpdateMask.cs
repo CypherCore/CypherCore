@@ -34,7 +34,6 @@ namespace Game.Entities
             _blockCount = (bits + 31) / 32;
             _blocksMaskCount = (_blockCount + 31) / 32;
 
-
             _blocks = new uint[_blockCount];
             _blocksMask = new uint[_blocksMaskCount];
 

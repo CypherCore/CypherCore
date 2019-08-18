@@ -285,7 +285,7 @@ namespace Game.Entities
                 owner.RemoveUnitFlag(UnitFlags.PetInCombat);
         }
 
-        void RemoveAllAttackers()
+        public void RemoveAllAttackers()
         {
             while (!attackerList.Empty())
             {
@@ -2420,7 +2420,7 @@ namespace Game.Entities
 
             victimResistance = Math.Max(victimResistance, 0.0f);
             if (owner)
-                victimResistance += Math.Max((victim.GetLevelForTarget(owner) - owner.GetLevelForTarget(victim)) * 5.0f, 0.0f);
+                victimResistance += Math.Max(((float)victim.GetLevelForTarget(owner) - (float)owner.GetLevelForTarget(victim)) * 5.0f, 0.0f);
 
             uint bossLevel = 83;
             float bossResistanceConstant = 510.0f;

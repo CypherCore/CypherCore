@@ -555,7 +555,7 @@ namespace Game.Entities
         public UpdateField<uint> NumSlots = new UpdateField<uint>(0, 1);
         public UpdateFieldArray<ObjectGuid> Slots = new UpdateFieldArray<ObjectGuid>(36, 2, 3);
 
-        public ContainerData() : base(0, TypeId.Item, 39) { }
+        public ContainerData() : base(0, TypeId.Container, 39) { }
 
         public override void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Bag owner, Player receiver)
         {
@@ -1064,7 +1064,7 @@ namespace Game.Entities
         public UpdateFieldArray<int> PowerCostModifier = new UpdateFieldArray<int>(7, 162, 177);
         public UpdateFieldArray<float> PowerCostMultiplier = new UpdateFieldArray<float>(7, 162, 184);
 
-        public UnitData() : base(191) { }
+        public UnitData() : base(0, TypeId.Unit, 191) { }
 
         public override void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Unit owner, Player receiver)
         {
@@ -2251,7 +2251,7 @@ namespace Game.Entities
         public UpdateFieldArray<VisibleItem> VisibleItems = new UpdateFieldArray<VisibleItem>(19, 136, 137);
         public UpdateFieldArray<float> AvgItemLevel = new UpdateFieldArray<float>(4, 156, 157);
 
-        public PlayerData() : base(161) { }
+        public PlayerData() : base(0, TypeId.Player, 161) { }
 
         public override void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
         {
@@ -2959,7 +2959,7 @@ namespace Game.Entities
         public UpdateFieldArray<uint> BankBagSlotFlags = new UpdateFieldArray<uint>(7, 603, 604);
         public UpdateFieldArray<ulong> QuestCompleted = new UpdateFieldArray<ulong>(875, 611, 612);
 
-        public ActivePlayerData() : base(1487) { }
+        public ActivePlayerData() : base(0, TypeId.ActivePlayer, 1487) { }
 
         public override void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
         {
@@ -4070,7 +4070,7 @@ namespace Game.Entities
         public UpdateField<uint> ArtKit = new UpdateField<uint>(0, 18);
         public UpdateField<uint> CustomParam = new UpdateField<uint>(0, 19);
 
-        public GameObjectFieldData() : base(20) { }
+        public GameObjectFieldData() : base(0, TypeId.GameObject, 20) { }
 
         public override void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, GameObject owner, Player receiver)
         {
@@ -4276,7 +4276,7 @@ namespace Game.Entities
         public UpdateField<uint> CastTime = new UpdateField<uint>(0, 5);
         public UpdateField<byte> Type = new UpdateField<byte>(0, 6);
 
-        public DynamicObjectData() : base(7) { }
+        public DynamicObjectData() : base(0, TypeId.DynamicObject, 7) { }
 
         public override void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, DynamicObject owner, Player receiver)
         {
@@ -4353,7 +4353,7 @@ namespace Game.Entities
         public UpdateFieldArray<uint> Items = new UpdateFieldArray<uint>(19, 16, 17);
         public UpdateFieldArray<byte> CustomDisplayOption = new UpdateFieldArray<byte>(3, 36, 37);
 
-        public CorpseData() : base(40) { }
+        public CorpseData() : base(0, TypeId.Corpse, 40) { }
 
         public override void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Corpse owner, Player receiver)
         {
@@ -4579,7 +4579,7 @@ namespace Game.Entities
         public UpdateField<uint> DecalPropertiesID = new UpdateField<uint>(0, 12);
         public UpdateField<ObjectGuid> CreatingEffectGUID = new UpdateField<ObjectGuid>(0, 13);
 
-        public AreaTriggerFieldData() : base(14) { }
+        public AreaTriggerFieldData() : base(0, TypeId.AreaTrigger, 14) { }
 
         public override void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, AreaTrigger owner, Player receiver)
         {
@@ -4793,7 +4793,7 @@ namespace Game.Entities
         public UpdateField<uint> LastLineEndTime = new UpdateField<uint>(0, 3);
         public UpdateField<uint> Field_1C = new UpdateField<uint>(0, 4);
 
-        public ConversationData() : base(5) { }
+        public ConversationData() : base(0, TypeId.Conversation, 5) { }
 
         public override void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Conversation owner, Player receiver)
         {
