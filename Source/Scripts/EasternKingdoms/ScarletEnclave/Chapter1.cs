@@ -153,7 +153,7 @@ namespace Scripts.EasternKingdoms
             Initialize();
             _events.Reset();
             me.SetFaction(7);
-            me.SetFlag(UnitFields.Flags, UnitFlags.ImmuneToPc);
+            me.AddUnitFlag(UnitFlags.ImmuneToPc);
             me.SetStandState(UnitStandStateType.Kneel);
             me.LoadEquipment(0, true);
         }
@@ -261,7 +261,7 @@ namespace Scripts.EasternKingdoms
                         else
                         {
                             me.SetFaction(14);
-                            me.RemoveFlag(UnitFields.Flags, UnitFlags.ImmuneToPc);
+                            me.RemoveUnitFlag(UnitFlags.ImmuneToPc);
                             phase = UnworthyInitiatePhase.Attacking;
 
                             Player target = Global.ObjAccessor.GetPlayer(me, playerGUID);
@@ -468,7 +468,7 @@ namespace Scripts.EasternKingdoms
 
                 me.RestoreFaction();
                 base.Reset();
-                me.SetFlag(UnitFields.Flags, UnitFlags.Unk15);
+                me.AddUnitFlag(UnitFlags.Unk15);
             }
 
             public override void SpellHit(Unit pCaster, SpellInfo pSpell)
@@ -569,8 +569,8 @@ namespace Scripts.EasternKingdoms
                         return true;
                 }
 
-                creature.RemoveFlag(UnitFields.Flags, UnitFlags.ImmuneToPc);
-                creature.RemoveFlag(UnitFields.Flags, UnitFlags.Unk15);
+                creature.RemoveUnitFlag(UnitFlags.ImmuneToPc);
+                creature.RemoveUnitFlag(UnitFlags.Unk15);
 
                 player.CastSpell(creature, SpellIds.Duel, false);
                 player.CastSpell(player, SpellIds.DuelFlag, true);
@@ -703,7 +703,7 @@ namespace Scripts.EasternKingdoms
                         if (charmer.HasAura(SpellIds.EffectStolenHorse))
                         {
                             charmer.RemoveAurasDueToSpell(SpellIds.EffectStolenHorse);
-                            caster.RemoveFlag(UnitFields.NpcFlags, NPCFlags.SpellClick);
+                            caster.RemoveNpcFlag(NPCFlags.SpellClick);
                             caster.SetFaction(35);
                             DoCast(caster, SpellIds.CallDarkRider, true);
                             Creature Dark_Rider = me.FindNearestCreature(CreatureIds.DarkRiderOfAcherus, 15);
@@ -765,8 +765,8 @@ namespace Scripts.EasternKingdoms
                 return;
 
             deathcharger.RestoreFaction();
-            deathcharger.RemoveFlag(UnitFields.NpcFlags, NPCFlags.SpellClick);
-            deathcharger.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+            deathcharger.RemoveNpcFlag(NPCFlags.SpellClick);
+            deathcharger.AddUnitFlag(UnitFlags.NotSelectable);
             if (!me.GetVehicle() && deathcharger.IsVehicle() && deathcharger.GetVehicleKit().HasEmptySeat(0))
                 me.EnterVehicle(deathcharger);
         }
@@ -779,8 +779,8 @@ namespace Scripts.EasternKingdoms
 
             if (killer.IsTypeId(TypeId.Player) && deathcharger.IsTypeId(TypeId.Unit) && deathcharger.IsVehicle())
             {
-                deathcharger.SetFlag(UnitFields.NpcFlags, NPCFlags.SpellClick);
-                deathcharger.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+                deathcharger.AddNpcFlag(NPCFlags.SpellClick);
+                deathcharger.RemoveUnitFlag(UnitFlags.NotSelectable);
                 deathcharger.SetFaction(2096);
             }
         }

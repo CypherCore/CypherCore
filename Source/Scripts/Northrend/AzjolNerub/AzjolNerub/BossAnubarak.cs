@@ -105,7 +105,7 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.Anubarak
         public override void Reset()
         {
             base.Reset();
-            me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+            me.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
             instance.DoStopCriteriaTimer(CriteriaTimedTypes.Event, Misc.AchievGottaGoStartEvent);
             _nextSubmerge = 75;
             _petCount = 0;
@@ -332,7 +332,7 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.Anubarak
                     {
                         me.RemoveAurasDueToSpell(SpellIds.Submerge);
                         me.RemoveAurasDueToSpell(SpellIds.ImpaleAura);
-                        me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                        me.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
                         DoCastSelf(SpellIds.Emerge);
                         _events.SetPhase(Misc.PhaseEmerge);
                         _events.ScheduleEvent(EventIds.Pound, TimeSpan.FromSeconds(13), TimeSpan.FromSeconds(18), 0, Misc.PhaseEmerge);
@@ -363,7 +363,7 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.Anubarak
         {
             if (spell.Id == SpellIds.Submerge)
             {
-                me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                me.AddUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
                 me.RemoveAurasDueToSpell(SpellIds.LeechingSwarm);
                 DoCastSelf(SpellIds.ImpaleAura, true);
 

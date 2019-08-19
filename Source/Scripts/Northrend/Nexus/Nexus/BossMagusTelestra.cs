@@ -86,7 +86,7 @@ namespace Scripts.Northrend.Nexus.Nexus
         {
             Initialize();
 
-            me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+            me.RemoveUnitFlag(UnitFlags.NotSelectable);
 
             instance.SetBossState(DataTypes.MagusTelestra, EncounterState.NotStarted);
 
@@ -135,7 +135,7 @@ namespace Scripts.Northrend.Nexus.Nexus
                 if (uiIsWaitingToAppearTimer <= diff)
                 {
                     me.CastSpell(me, 47714, true);
-                    me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+                    me.RemoveUnitFlag(UnitFlags.NotSelectable);
                     bIsWaitingToAppear = false;
                     InVanish = false;
                     me.SendAIReaction(AiReaction.Hostile);
@@ -174,7 +174,7 @@ namespace Scripts.Northrend.Nexus.Nexus
                 me.CastStop();
                 me.RemoveAllAuras();
                 me.CastSpell(me, 47710, false);
-                me.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+                me.AddUnitFlag(UnitFlags.NotSelectable);
                 bFireMagusDead = false;
                 bFrostMagusDead = false;
                 bArcaneMagusDead = false;
@@ -188,7 +188,7 @@ namespace Scripts.Northrend.Nexus.Nexus
                 Phase = 3;
                 me.CastStop();
                 me.RemoveAllAuras();
-                me.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+                me.AddUnitFlag(UnitFlags.NotSelectable);
                 bFireMagusDead = false;
                 bFrostMagusDead = false;
                 bArcaneMagusDead = false;

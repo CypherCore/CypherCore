@@ -28,19 +28,6 @@ namespace Scripts.EasternKingdoms.Karazhan
     {
         public const uint MaxEncounter = 12;
 
-        public const uint BossAttumen = 1;
-        public const uint BossMoroes = 2;
-        public const uint BossMaiden = 3;
-        public const uint OptionalBoss = 4;
-        public const uint BossOpera = 5;
-        public const uint Curator = 6;
-        public const uint Aran = 7;
-        public const uint Terestian = 8;
-        public const uint Netherspite = 9;
-        public const uint Chess = 10;
-        public const uint Malchezzar = 11;
-        public const uint Nightbane = 12;
-
         public static Dialogue[] OzDialogue =
         {
             new Dialogue(0, 6000),
@@ -108,6 +95,15 @@ namespace Scripts.EasternKingdoms.Karazhan
 
         public const uint NpcArcanagos = 17652;
         public const uint NpcSpotlight = 19525;
+
+        public static Position[] OptionalSpawn =
+        {
+            new Position(-10960.981445f, -1940.138428f, 46.178097f, 4.12f), // Hyakiss the Lurker
+            new Position(-10945.769531f, -2040.153320f, 49.474438f, 0.077f), // Shadikith the Glider
+            new Position(-10899.903320f, -2085.573730f, 49.474449f, 1.38f)  // Rokad the Ravager
+        };
+
+        public const uint OptionalBossRequiredDeathCount = 50;
     }
 
     struct Dialogue
@@ -124,12 +120,22 @@ namespace Scripts.EasternKingdoms.Karazhan
 
     struct DataTypes
     {
-        public const uint OperaPerformance = 13;
+        public const uint Attumen = 1;
+        public const uint Moroes = 2;
+        public const uint MaidenOfVirtue = 3;
+        public const uint OptionalBoss = 4;
+        public const uint OperaPerformance = 5;
+        public const uint Curator = 6;
+        public const uint Aran = 7;
+        public const uint Terestian = 8;
+        public const uint Netherspite = 9;
+        public const uint Chess = 10;
+        public const uint Malchezzar = 11;
+        public const uint Nightbane = 12;
+
         public const uint OperaOzDeathcount = 14;
 
         public const uint Kilrek = 15;
-        public const uint Terestian = 16;
-        public const uint Moroes = 17;
         public const uint GoCurtains = 18;
         public const uint GoStagedoorleft = 19;
         public const uint GoStagedoorright = 20;
@@ -143,6 +149,7 @@ namespace Scripts.EasternKingdoms.Karazhan
         public const uint MastersTerraceDoor1 = 27;
         public const uint MastersTerraceDoor2 = 28;
         public const uint GoSideEntranceDoor = 29;
+        public const uint GoBlackenedUrn = 30;
     }
 
     struct OperaEvents
@@ -150,6 +157,47 @@ namespace Scripts.EasternKingdoms.Karazhan
         public const uint Oz = 1;
         public const uint Hood = 2;
         public const uint RAJ = 3;
+    }
+
+    struct CreatureIds
+    {
+        public const uint HyakissTheLurker = 16179;
+        public const uint RokadTheRavager = 16181;
+        public const uint ShadikithTheGlider = 16180;
+        public const uint TerestianIllhoof = 15688;
+        public const uint Moroes = 15687;
+        public const uint Nightbane = 17225;
+        public const uint AttumenUnmounted = 15550;
+        public const uint AttumenMounted = 16152;
+        public const uint Midnight = 16151;
+
+        // Trash
+        public const uint ColdmistWidow = 16171;
+        public const uint ColdmistStalker = 16170;
+        public const uint Shadowbat = 16173;
+        public const uint VampiricShadowbat = 16175;
+        public const uint GreaterShadowbat = 16174;
+        public const uint PhaseHound = 16178;
+        public const uint Dreadbeast = 16177;
+        public const uint Shadowbeast = 16176;
+        public const uint Kilrek = 17229;
+    }
+
+    struct GameObjectIds
+    {
+        public const uint StageCurtain = 183932;
+        public const uint StageDoorLeft = 184278;
+        public const uint StageDoorRight = 184279;
+        public const uint PrivateLibraryDoor = 184517;
+        public const uint MassiveDoor = 185521;
+        public const uint GamesmanHallDoor = 184276;
+        public const uint GamesmanHallExitDoor = 184277;
+        public const uint NetherspaceDoor = 185134;
+        public const uint MastersTerraceDoor = 184274;
+        public const uint MastersTerraceDoor2 = 184280;
+        public const uint SideEntranceDoor = 184275;
+        public const uint DustCoveredChest = 185119;
+        public const uint BlackenedUrn = 194092;
     }
 
     [Script]
@@ -162,33 +210,70 @@ namespace Scripts.EasternKingdoms.Karazhan
             public instance_karazhan_InstanceMapScript(InstanceMap map) : base(map)
             {
                 SetHeaders("KZ");
+                SetBossNumber(karazhanConst.MaxEncounter);
 
                 // 1 - OZ, 2 - HOOD, 3 - RAJ, this never gets altered.
-                m_uiOperaEvent = RandomHelper.URand(1, 3);
-                m_uiOzDeathCount = 0;
-            }
-
-            public override bool IsEncounterInProgress()
-            {
-                for (byte i = 0; i < karazhanConst.MaxEncounter; ++i)
-                    if (m_auiEncounter[i] == (uint)EncounterState.InProgress)
-                        return true;
-
-                return false;
+                OperaEvent = RandomHelper.URand(1, 3);
+                OzDeathCount = 0;
+                OptionalBossCount = 0;
             }
 
             public override void OnCreatureCreate(Creature creature)
             {
                 switch (creature.GetEntry())
                 {
-                    case 17229:
-                        m_uiKilrekGUID = creature.GetGUID();
+                    case CreatureIds.Kilrek:
+                        KilrekGUID = creature.GetGUID();
                         break;
-                    case 15688:
-                        m_uiTerestianGUID = creature.GetGUID();
+                    case CreatureIds.TerestianIllhoof:
+                        TerestianGUID = creature.GetGUID();
                         break;
-                    case 15687:
-                        m_uiMoroesGUID = creature.GetGUID();
+                    case CreatureIds.Moroes:
+                        MoroesGUID = creature.GetGUID();
+                        break;
+                    case CreatureIds.Nightbane:
+                        NightbaneGUID = creature.GetGUID();
+                        break;
+                }
+            }
+
+            public override void OnUnitDeath(Unit unit)
+            {
+                Creature creature = unit.ToCreature();
+                if (creature == null)
+                    return;
+
+                switch (creature.GetEntry())
+                {
+                    case CreatureIds.ColdmistWidow:
+                    case CreatureIds.ColdmistStalker:
+                    case CreatureIds.Shadowbat:
+                    case CreatureIds.VampiricShadowbat:
+                    case CreatureIds.GreaterShadowbat:
+                    case CreatureIds.PhaseHound:
+                    case CreatureIds.Dreadbeast:
+                    case CreatureIds.Shadowbeast:
+                        if (GetBossState(DataTypes.OptionalBoss) == EncounterState.ToBeDecided)
+                        {
+                            ++OptionalBossCount;
+                            if (OptionalBossCount == karazhanConst.OptionalBossRequiredDeathCount)
+                            {
+                                switch (RandomHelper.URand(CreatureIds.HyakissTheLurker, CreatureIds.RokadTheRavager))
+                                {
+                                    case CreatureIds.HyakissTheLurker:
+                                        instance.SummonCreature(CreatureIds.HyakissTheLurker, karazhanConst.OptionalSpawn[0]);
+                                        break;
+                                    case CreatureIds.ShadikithTheGlider:
+                                        instance.SummonCreature(CreatureIds.ShadikithTheGlider, karazhanConst.OptionalSpawn[1]);
+                                        break;
+                                    case CreatureIds.RokadTheRavager:
+                                        instance.SummonCreature(CreatureIds.RokadTheRavager, karazhanConst.OptionalSpawn[2]);
+                                        break;
+                                }
+                            }
+                        }
+                        break;
+                    default:
                         break;
                 }
             }
@@ -197,67 +282,42 @@ namespace Scripts.EasternKingdoms.Karazhan
             {
                 switch (type)
                 {
-                    case karazhanConst.BossAttumen:
-                        m_auiEncounter[0] = uiData;
-                        break;
-                    case karazhanConst.BossMoroes:
-                        if (m_auiEncounter[1] == (uint)EncounterState.Done)
-                            break;
-                        m_auiEncounter[1] = uiData;
-                        break;
-                    case karazhanConst.BossMaiden:
-                        m_auiEncounter[2] = uiData;
-                        break;
-                    case karazhanConst.OptionalBoss:
-                        m_auiEncounter[3] = uiData;
-                        break;
-                    case karazhanConst.BossOpera:
-                        m_auiEncounter[4] = uiData;
-                        if (uiData == (uint)EncounterState.Done)
-                            UpdateEncounterStateForKilledCreature(16812, null);
-                        break;
-                    case karazhanConst.Curator:
-                        m_auiEncounter[5] = uiData;
-                        break;
-                    case karazhanConst.Aran:
-                        m_auiEncounter[6] = uiData;
-                        break;
-                    case karazhanConst.Terestian:
-                        m_auiEncounter[7] = uiData;
-                        break;
-                    case karazhanConst.Netherspite:
-                        m_auiEncounter[8] = uiData;
-                        break;
-                    case karazhanConst.Chess:
-                        if (uiData == (uint)EncounterState.Done)
-                            DoRespawnGameObject(DustCoveredChest, Time.Day);
-                        m_auiEncounter[9] = uiData;
-                        break;
-                    case karazhanConst.Malchezzar:
-                        m_auiEncounter[10] = uiData;
-                        break;
-                    case karazhanConst.Nightbane:
-                        if (m_auiEncounter[11] != (uint)EncounterState.Done)
-                            m_auiEncounter[11] = uiData;
-                        break;
                     case DataTypes.OperaOzDeathcount:
                         if (uiData == (uint)EncounterState.Special)
-                            ++m_uiOzDeathCount;
+                            ++OzDeathCount;
                         else if (uiData == (uint)EncounterState.InProgress)
-                            m_uiOzDeathCount = 0;
+                            OzDeathCount = 0;
+                        break;
+                }
+            }
+
+            public override bool SetBossState(uint id, EncounterState state)
+            {
+                if (!base.SetBossState(id, state))
+                    return false;
+
+                switch (id)
+                {
+                    case DataTypes.OperaPerformance:
+                        if (state == EncounterState.Done)
+                        {
+                            HandleGameObject(StageDoorLeftGUID, true);
+                            HandleGameObject(StageDoorRightGUID, true);
+                            GameObject sideEntrance = instance.GetGameObject(SideEntranceDoor);
+                            if (sideEntrance != null)
+                                sideEntrance.RemoveFlag(GameObjectFlags.Locked);
+                            UpdateEncounterStateForKilledCreature(16812, null);
+                        }
+                        break;
+                    case DataTypes.Chess:
+                        if (state == EncounterState.Done)
+                            DoRespawnGameObject(DustCoveredChest, Time.Day);
+                        break;
+                    default:
                         break;
                 }
 
-                if (uiData == (uint)EncounterState.Done)
-                {
-                    OUT_SAVE_INST_DATA();
-
-                    strSaveData =
-                        $"{m_auiEncounter[0]} {m_auiEncounter[1]} {m_auiEncounter[2]} {m_auiEncounter[3]} {m_auiEncounter[4]} {m_auiEncounter[5]} {m_auiEncounter[6]} {m_auiEncounter[7]} {m_auiEncounter[8]} {m_auiEncounter[9]} {m_auiEncounter[10]} {m_auiEncounter[11]}";
-
-                    SaveToDB();
-                    OUT_SAVE_INST_DATA_COMPLETE();
-                }
+                return true;
             }
 
             public override void SetGuidData(uint identifier, ObjectGuid data)
@@ -270,53 +330,56 @@ namespace Scripts.EasternKingdoms.Karazhan
             {
                 switch (go.GetEntry())
                 {
-                    case 183932:
-                        m_uiCurtainGUID = go.GetGUID();
+                    case GameObjectIds.StageCurtain:
+                        CurtainGUID = go.GetGUID();
                         break;
-                    case 184278:
-                        m_uiStageDoorLeftGUID = go.GetGUID();
-                        if (m_auiEncounter[4] == (uint)EncounterState.Done)
+                    case GameObjectIds.StageDoorLeft:
+                        StageDoorLeftGUID = go.GetGUID();
+                        if (GetBossState(DataTypes.OperaPerformance) == EncounterState.Done)
                             go.SetGoState(GameObjectState.Active);
                         break;
-                    case 184279:
-                        m_uiStageDoorRightGUID = go.GetGUID();
-                        if (m_auiEncounter[4] == (uint)EncounterState.Done)
+                    case GameObjectIds.StageDoorRight:
+                        StageDoorRightGUID = go.GetGUID();
+                        if (GetBossState(DataTypes.OperaPerformance) == EncounterState.Done)
                             go.SetGoState(GameObjectState.Active);
                         break;
-                    case 184517:
-                        m_uiLibraryDoor = go.GetGUID();
+                    case GameObjectIds.PrivateLibraryDoor:
+                        LibraryDoor = go.GetGUID();
                         break;
-                    case 185521:
-                        m_uiMassiveDoor = go.GetGUID();
+                    case GameObjectIds.MassiveDoor:
+                        MassiveDoor = go.GetGUID();
                         break;
-                    case 184276:
-                        m_uiGamesmansDoor = go.GetGUID();
+                    case GameObjectIds.GamesmanHallDoor:
+                        GamesmansDoor = go.GetGUID();
                         break;
-                    case 184277:
-                        m_uiGamesmansExitDoor = go.GetGUID();
+                    case GameObjectIds.GamesmanHallExitDoor:
+                        GamesmansExitDoor = go.GetGUID();
                         break;
-                    case 185134:
-                        m_uiNetherspaceDoor = go.GetGUID();
+                    case GameObjectIds.NetherspaceDoor:
+                        NetherspaceDoor = go.GetGUID();
                         break;
-                    case 184274:
+                    case GameObjectIds.MastersTerraceDoor:
                         MastersTerraceDoor[0] = go.GetGUID();
                         break;
-                    case 184280:
+                    case GameObjectIds.MastersTerraceDoor2:
                         MastersTerraceDoor[1] = go.GetGUID();
                         break;
-                    case 184275:
-                        m_uiSideEntranceDoor = go.GetGUID();
-                        if (m_auiEncounter[4] == (uint)EncounterState.Done)
-                            go.SetFlag(GameObjectFields.Flags, GameObjectFlags.Locked);
+                    case GameObjectIds.SideEntranceDoor:
+                        SideEntranceDoor = go.GetGUID();
+                        if (GetBossState(DataTypes.OperaPerformance) == EncounterState.Done)
+                            go.AddFlag(GameObjectFlags.Locked);
                         else
-                            go.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.Locked);
+                            go.RemoveFlag(GameObjectFlags.Locked);
                         break;
-                    case 185119:
+                    case GameObjectIds.DustCoveredChest:
                         DustCoveredChest = go.GetGUID();
+                        break;
+                    case GameObjectIds.BlackenedUrn:
+                        BlackenedUrnGUID = go.GetGUID();
                         break;
                 }
 
-                switch (m_uiOperaEvent)
+                switch (OperaEvent)
                 {
                     // @todo Set Object visibilities for Opera based on performance
                     case OperaEvents.Oz:
@@ -330,43 +393,14 @@ namespace Scripts.EasternKingdoms.Karazhan
                 }
             }
 
-            public override string GetSaveData()
-            {
-                return strSaveData;
-            }
-
             public override uint GetData(uint uiData)
             {
                 switch (uiData)
                 {
-                    case karazhanConst.BossAttumen:
-                        return m_auiEncounter[0];
-                    case karazhanConst.BossMoroes:
-                        return m_auiEncounter[1];
-                    case karazhanConst.BossMaiden:
-                        return m_auiEncounter[2];
-                    case karazhanConst.OptionalBoss:
-                        return m_auiEncounter[3];
-                    case karazhanConst.BossOpera:
-                        return m_auiEncounter[4];
-                    case karazhanConst.Curator:
-                        return m_auiEncounter[5];
-                    case karazhanConst.Aran:
-                        return m_auiEncounter[6];
-                    case karazhanConst.Terestian:
-                        return m_auiEncounter[7];
-                    case karazhanConst.Netherspite:
-                        return m_auiEncounter[8];
-                    case karazhanConst.Chess:
-                        return m_auiEncounter[9];
-                    case karazhanConst.Malchezzar:
-                        return m_auiEncounter[10];
-                    case karazhanConst.Nightbane:
-                        return m_auiEncounter[11];
                     case DataTypes.OperaPerformance:
-                        return m_uiOperaEvent;
+                        return OperaEvent;
                     case DataTypes.OperaOzDeathcount:
-                        return m_uiOzDeathCount;
+                        return OzDeathCount;
                 }
 
                 return 0;
@@ -377,82 +411,64 @@ namespace Scripts.EasternKingdoms.Karazhan
                 switch (uiData)
                 {
                     case DataTypes.Kilrek:
-                        return m_uiKilrekGUID;
+                        return KilrekGUID;
                     case DataTypes.Terestian:
-                        return m_uiTerestianGUID;
+                        return TerestianGUID;
                     case DataTypes.Moroes:
-                        return m_uiMoroesGUID;
+                        return MoroesGUID;
+                    case DataTypes.Nightbane:
+                        return NightbaneGUID;
                     case DataTypes.GoStagedoorleft:
-                        return m_uiStageDoorLeftGUID;
+                        return StageDoorLeftGUID;
                     case DataTypes.GoStagedoorright:
-                        return m_uiStageDoorRightGUID;
+                        return StageDoorRightGUID;
                     case DataTypes.GoCurtains:
-                        return m_uiCurtainGUID;
+                        return CurtainGUID;
                     case DataTypes.GoLibraryDoor:
-                        return m_uiLibraryDoor;
+                        return LibraryDoor;
                     case DataTypes.GoMassiveDoor:
-                        return m_uiMassiveDoor;
+                        return MassiveDoor;
                     case DataTypes.GoSideEntranceDoor:
-                        return m_uiSideEntranceDoor;
+                        return SideEntranceDoor;
                     case DataTypes.GoGameDoor:
-                        return m_uiGamesmansDoor;
+                        return GamesmansDoor;
                     case DataTypes.GoGameExitDoor:
-                        return m_uiGamesmansExitDoor;
+                        return GamesmansExitDoor;
                     case DataTypes.GoNetherDoor:
-                        return m_uiNetherspaceDoor;
+                        return NetherspaceDoor;
                     case DataTypes.MastersTerraceDoor1:
                         return MastersTerraceDoor[0];
                     case DataTypes.MastersTerraceDoor2:
                         return MastersTerraceDoor[1];
                     case DataTypes.ImageOfMedivh:
                         return ImageGUID;
+                    case DataTypes.GoBlackenedUrn:
+                        return BlackenedUrnGUID;
                 }
 
                 return ObjectGuid.Empty;
             }
 
-            public override void Load(string str)
-            {
-                if (string.IsNullOrEmpty(str))
-                {
-                    OUT_LOAD_INST_DATA_FAIL();
-                    return;
-                }
-
-                OUT_LOAD_INST_DATA(str);
-                StringArguments loadStream = new StringArguments(str);
-
-                for (byte i = 0; i < karazhanConst.MaxEncounter; ++i)
-                {
-                    var state = (EncounterState)loadStream.NextUInt32();
-                    // Do not load an encounter as "In Progress" - reset it instead.
-                    m_auiEncounter[i] = (uint)(state == EncounterState.InProgress ? EncounterState.NotStarted : state);
-                }
-
-                OUT_LOAD_INST_DATA_COMPLETE();
-            }
-
-            uint[] m_auiEncounter = new uint[karazhanConst.MaxEncounter];
-            string strSaveData;
-
-            uint m_uiOperaEvent;
-            uint m_uiOzDeathCount;
-
-            ObjectGuid m_uiCurtainGUID;
-            ObjectGuid m_uiStageDoorLeftGUID;
-            ObjectGuid m_uiStageDoorRightGUID;
-            ObjectGuid m_uiKilrekGUID;
-            ObjectGuid m_uiTerestianGUID;
-            ObjectGuid m_uiMoroesGUID;
-            ObjectGuid m_uiLibraryDoor;                                     // Door at Shade of Aran
-            ObjectGuid m_uiMassiveDoor;                                     // Door at Netherspite
-            ObjectGuid m_uiSideEntranceDoor;                                // Side Entrance
-            ObjectGuid m_uiGamesmansDoor;                                   // Door before Chess
-            ObjectGuid m_uiGamesmansExitDoor;                               // Door after Chess
-            ObjectGuid m_uiNetherspaceDoor;                                // Door at Malchezaar
+            uint OperaEvent;
+            uint OzDeathCount;
+            uint OptionalBossCount;
+            ObjectGuid CurtainGUID;
+            ObjectGuid StageDoorLeftGUID;
+            ObjectGuid StageDoorRightGUID;
+            ObjectGuid KilrekGUID;
+            ObjectGuid TerestianGUID;
+            ObjectGuid MoroesGUID;
+            ObjectGuid NightbaneGUID;
+            ObjectGuid LibraryDoor;                 // Door at Shade of Aran
+            ObjectGuid MassiveDoor;                 // Door at Netherspite
+            ObjectGuid SideEntranceDoor;            // Side Entrance
+            ObjectGuid GamesmansDoor;               // Door before Chess
+            ObjectGuid GamesmansExitDoor;           // Door after Chess
+            ObjectGuid NetherspaceDoor;             // Door at Malchezaar
             ObjectGuid[] MastersTerraceDoor = new ObjectGuid[2];
             ObjectGuid ImageGUID;
             ObjectGuid DustCoveredChest;
+            ObjectGuid BlackenedUrnGUID;
         }
 
         public override InstanceScript GetInstanceScript(InstanceMap map)

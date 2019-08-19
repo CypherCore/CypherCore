@@ -24,6 +24,7 @@ using Game.Scripting;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using Game.Network.Packets;
 
 namespace Scripts.Northrend.Ulduar.Xt002
 {
@@ -143,7 +144,7 @@ namespace Scripts.Northrend.Ulduar.Xt002
         {
             _Reset();
 
-            me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+            me.RemoveUnitFlag(UnitFlags.NotSelectable);
             me.SetReactState(ReactStates.Aggressive);
             DoCastSelf(SpellIds.Stand);
 
@@ -225,7 +226,7 @@ namespace Scripts.Northrend.Ulduar.Xt002
         {
             Talk(Texts.Death);
             _JustDied();
-            me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+            me.RemoveUnitFlag(UnitFlags.NotSelectable);
         }
 
         public override void DamageTaken(Unit attacker, ref uint damage)
@@ -306,8 +307,8 @@ namespace Scripts.Northrend.Ulduar.Xt002
                 heart.CastSpell(me, SpellIds.HeartLightningTether);
                 heart.CastSpell(heart, SpellIds.HeartHealToFull, true);
                 heart.CastSpell(me, SpellIds.RideVehicleExposed, true);
-                heart.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
-                heart.SetFlag(UnitFields.Flags, UnitFlags.Unk29);
+                heart.RemoveUnitFlag(UnitFlags.NotSelectable);
+                heart.AddUnitFlag(UnitFlags.Unk29);
             }
             _scheduler.DelayGroup(Misc.PhaseOneGroup, TimeSpan.FromSeconds(30));
 
@@ -330,7 +331,7 @@ namespace Scripts.Northrend.Ulduar.Xt002
             Talk(Texts.HeartClosed);
             Talk(Texts.EmoteHeartClosed);
 
-            me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+            me.RemoveUnitFlag(UnitFlags.NotSelectable);
             me.SetReactState(ReactStates.Aggressive);
             DoCastSelf(SpellIds.Stand);
 
@@ -343,8 +344,8 @@ namespace Scripts.Northrend.Ulduar.Xt002
                 return;
 
             heart.CastSpell(me, SpellIds.HeartRideVehicle, true);
-            heart.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable);
-            heart.RemoveFlag(UnitFields.Flags, UnitFlags.Unk29);
+            heart.AddUnitFlag(UnitFlags.NotSelectable);
+            heart.RemoveUnitFlag(UnitFlags.Unk29);
             heart.RemoveAurasDueToSpell(SpellIds.ExposedHeart);
 
             if (!_hardMode)
@@ -529,12 +530,6 @@ namespace Scripts.Northrend.Ulduar.Xt002
 
             DoCast(SpellIds.AuraBoombot); // For achievement
 
-            // HACK/workaround:
-            // these values aren't confirmed - lack of data - and the values in DB are incorrect
-            // these values are needed for correct damage of Boom spell
-            me.SetFloatValue(UnitFields.MinDamage, 15000.0f);
-            me.SetFloatValue(UnitFields.MaxDamage, 18000.0f);
-
             // @todo proper waypoints?
             Creature pXT002 = ObjectAccessor.GetCreature(me, _instance.GetGuidData(BossIds.Xt002));
             if (pXT002)
@@ -547,20 +542,22 @@ namespace Scripts.Northrend.Ulduar.Xt002
             {
                 _boomed = true; // Prevent recursive calls
 
-                //me.SendSpellInstakillLog(Spells.Boom, me);
+                SpellInstakillLog instakill = new SpellInstakillLog();
+                instakill.Caster = me.GetGUID();
+                instakill.Target = me.GetGUID();
+                instakill.SpellID = SpellIds.Boom;
+                me.SendMessageToSet(instakill, false);
 
-                //me.DealDamage(me, me.GetHealth(), null, DamageEffectType.NoDamage, SpellSchoolMask.Normal, null, false);
+                me.DealDamage(me, (uint)me.GetHealth(), null, DamageEffectType.NoDamage, SpellSchoolMask.Normal, null, false);
 
                 damage = 0;
-
-                me.CastSpell(me, SpellIds.Boom, false);
 
                 // Visual only seems to work if the instant kill event is delayed or the spell itself is delayed
                 // Casting done from player and caster source has the same targetinfo flags,
                 // so that can't be the issue
                 // See BoomEvent class
                 // Schedule 1s delayed
-                //me.m_Events.AddEvent(new BoomEvent(me), me.m_Events.CalculateTime(1 * Time.InMilliseconds));
+                me.m_Events.AddEvent(new BoomEvent(me), me.m_Events.CalculateTime(1 * Time.InMilliseconds));
             }
         }
 
@@ -801,7 +798,7 @@ namespace Scripts.Northrend.Ulduar.Xt002
             if (!target)
                 return;
 
-            target.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+            target.AddUnitFlag(UnitFlags.NotSelectable);
             target.SetStandState(UnitStandStateType.Submerged);
         }
 

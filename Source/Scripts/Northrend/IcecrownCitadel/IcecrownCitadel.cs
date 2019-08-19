@@ -502,6 +502,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             Creature crok = ObjectAccessor.GetCreature(me, instance.GetGuidData(DataTypes.CrokScourgebane));
             if (crok)
                 crok.GetAI().Talk(Texts.SayCrokCombatSvalna);
+            DoCastSelf(InstanceSpells.DivineSurge, true);
             _events.ScheduleEvent(EventTypes.SvalnaCombat, 9000);
             _events.ScheduleEvent(EventTypes.ImpalingSpear, RandomHelper.URand(40000, 50000));
             _events.ScheduleEvent(EventTypes.AetherShield, RandomHelper.URand(100000, 110000));
@@ -550,7 +551,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                 case Actions.StartGauntlet:
                     me.setActive(true);
                     _isEventInProgress = true;
-                    me.SetFlag(UnitFields.Flags, UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc);
+                    me.AddUnitFlag(UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc);
                     _events.ScheduleEvent(EventTypes.SvalnaStart, 25000);
                     break;
                 case Actions.ResurrectCaptains:
@@ -584,7 +585,7 @@ namespace Scripts.Northrend.IcecrownCitadel
 
             _isEventInProgress = false;
             me.setActive(false);
-            me.RemoveFlag(UnitFields.Flags, UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc);
+            me.RemoveUnitFlag(UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc);
             me.SetDisableGravity(false);
             me.SetHover(false);
         }
@@ -602,7 +603,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                     {
                         Talk(Texts.EmoteSvalnaImpale, target);
                         summon.CastCustomSpell(SharedConst.VehicleSpellRideHardcoded, SpellValueMod.BasePoint0, 1, target, false);
-                        summon.SetFlag(UnitFields.Flags2, UnitFlags2.Unk1 | UnitFlags2.AllowEnemyInteract);
+                        summon.AddUnitFlag2(UnitFlags2.Unk1 | UnitFlags2.AllowEnemyInteract);
                     }
                     break;
                 default:
@@ -744,6 +745,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             {
                 // pause pathing until trash pack is cleared
                 case 0:
+                    me.RemoveUnitFlag(UnitFlags.ImmuneToNpc);
                     Talk(Texts.SayCrokCombatWp0);
                     if (!_aliveTrash.Empty())
                         SetEscortPaused(true);
@@ -1392,8 +1394,8 @@ namespace Scripts.Northrend.IcecrownCitadel
             if (target)
             {
                 target.SetReactState(ReactStates.Passive);
-                target.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.ImmuneToPc);
-                target.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotCustomSpell02);
+                target.AddUnitFlag(UnitFlags.NotSelectable | UnitFlags.ImmuneToPc);
+                target.SetEmoteState(Emote.OneshotCustomSpell02);
             }
         }
 
@@ -1403,8 +1405,8 @@ namespace Scripts.Northrend.IcecrownCitadel
             if (target)
             {
                 target.SetReactState(ReactStates.Aggressive);
-                target.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.ImmuneToPc);
-                target.SetUInt32Value(UnitFields.NpcEmotestate, 0);
+                target.RemoveUnitFlag(UnitFlags.NotSelectable | UnitFlags.ImmuneToPc);
+                target.SetEmoteState(Emote.StateCustomSpell02);
             }
         }
 

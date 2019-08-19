@@ -246,7 +246,7 @@ namespace Scripts.Spells.Hunter
 
             // Do a mini Spell::CheckCasterAuras on the pet, no other way of doing this
             SpellCastResult result = SpellCastResult.SpellCastOk;
-            UnitFlags unitflag = (UnitFlags)pet.GetUInt32Value(UnitFields.Flags);
+            UnitFlags unitflag = (UnitFlags)(uint)pet.m_unitData.Flags;
             if (!pet.GetCharmerGUID().IsEmpty())
                 result = SpellCastResult.Charmed;
             else if (unitflag.HasAnyFlag(UnitFlags.Stunned))

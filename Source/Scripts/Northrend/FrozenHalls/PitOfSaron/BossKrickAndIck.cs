@@ -299,7 +299,7 @@ namespace Scripts.Northrend.FrozenHalls.PitOfSaron.BossKrickAndIck
             Initialize();
 
             me.SetReactState(ReactStates.Passive);
-            me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+            me.AddUnitFlag(UnitFlags.NonAttackable);
         }
 
         Creature GetIck()

@@ -365,7 +365,7 @@ namespace Game.AI
 
         public virtual void OnCharmed(bool apply) { }
 
-        public virtual void DoAction(int param) { }
+        public virtual void DoAction(int action) { }
         public virtual uint GetData(uint id = 0) { return 0; }
         public virtual void SetData(uint id, uint value) { }
         public virtual void SetGUID(ObjectGuid guid, int id = 0) { }

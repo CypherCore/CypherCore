@@ -112,12 +112,12 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             if (me.IsAlive())
                 SpawnAdds();
 
-            instance.SetData(karazhanConst.BossMoroes, (uint)EncounterState.NotStarted);
+            instance.SetBossState(DataTypes.Moroes, EncounterState.NotStarted);
         }
 
         void StartEvent()
         {
-            instance.SetData(karazhanConst.BossMoroes, (uint)EncounterState.InProgress);
+            instance.SetBossState(DataTypes.Moroes, EncounterState.InProgress);
 
             DoZoneInCombat();
         }
@@ -140,7 +140,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
         {
             Talk(TextIds.Death);
 
-            instance.SetData(karazhanConst.BossMoroes, (uint)EncounterState.Done);
+            instance.SetBossState(DataTypes.Moroes, EncounterState.Done);
 
             DeSpawnAdds();
 
@@ -229,7 +229,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
             if (!UpdateVictim())
                 return;
 
-            if (instance.GetData(karazhanConst.BossMoroes) == 0)
+            if (instance.GetData(DataTypes.Moroes) == 0)
             {
                 EnterEvadeMode();
                 return;
@@ -338,7 +338,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
 
         public override void Reset()
         {
-            instance.SetData(karazhanConst.BossMoroes, (uint)EncounterState.NotStarted);
+            instance.SetBossState(DataTypes.Moroes, EncounterState.NotStarted);
         }
 
         public void AcquireGUID()
@@ -371,7 +371,7 @@ namespace Scripts.EasternKingdoms.Karazhan.Moroes
 
         public override void UpdateAI(uint diff)
         {
-            if (instance.GetData(karazhanConst.BossMoroes) == 0)
+            if (instance.GetData(DataTypes.Moroes) == 0)
                 EnterEvadeMode();
 
             DoMeleeAttackIfReady();

@@ -77,12 +77,12 @@ namespace Scripts.Northrend.Ulduar
                     {
                         case ACTION_HARPOON_BUILD:
                             events.ScheduleEvent(EVENT_BUILD_HARPOON_1, 50000);
-                            if (me->GetMap()->GetSpawnMode() == DIFFICULTY_25_N)
+                            if (me.GetMap().GetSpawnMode() == DIFFICULTY_25_N)
                                 events.ScheduleEvent(EVENT_BUILD_HARPOON_3, 90000);
                             break;
                         case ACTION_PLACE_BROKEN_HARPOON:
                             for (uint8 n = 0; n < RAID_MODE(2, 4); n++)
-                                me->SummonGameObject(GO_RAZOR_BROKEN_HARPOON, PosHarpoon[n].GetPositionX(), PosHarpoon[n].GetPositionY(), PosHarpoon[n].GetPositionZ(), 2.286f, 0, 0, 0, 0, 180);
+                                me.SummonGameObject(GO_RAZOR_BROKEN_HARPOON, PosHarpoon[n].GetPositionX(), PosHarpoon[n].GetPositionY(), PosHarpoon[n].GetPositionZ(), 2.286f, 0, 0, 0, 0, 180);
                             break;
                     }
                 }
@@ -97,39 +97,39 @@ namespace Scripts.Northrend.Ulduar
                         {
                             case EVENT_BUILD_HARPOON_1:
                                 Talk(EMOTE_HARPOON);
-                                if (GameObject * Harpoon = me->SummonGameObject(GO_RAZOR_HARPOON_1, PosHarpoon[0].GetPositionX(), PosHarpoon[0].GetPositionY(), PosHarpoon[0].GetPositionZ(), 4.790f, 0.0f, 0.0f, 0.0f, 0.0f, uint32(me->GetRespawnTime())))
+                                if (GameObject * Harpoon = me.SummonGameObject(GO_RAZOR_HARPOON_1, PosHarpoon[0].GetPositionX(), PosHarpoon[0].GetPositionY(), PosHarpoon[0].GetPositionZ(), 4.790f, 0.0f, 0.0f, 0.0f, 0.0f, uint32(me.GetRespawnTime())))
                                 {
-                                    if (GameObject * BrokenHarpoon = Harpoon->FindNearestGameObject(GO_RAZOR_BROKEN_HARPOON, 5.0f)) //only nearest broken harpoon
-                                        BrokenHarpoon->RemoveFromWorld();
+                                    if (GameObject * BrokenHarpoon = Harpoon.FindNearestGameObject(GO_RAZOR_BROKEN_HARPOON, 5.0f)) //only nearest broken harpoon
+                                        BrokenHarpoon.RemoveFromWorld();
                                     events.ScheduleEvent(EVENT_BUILD_HARPOON_2, 20000);
                                     events.CancelEvent(EVENT_BUILD_HARPOON_1);
                                 }
                                 return;
                             case EVENT_BUILD_HARPOON_2:
                                 Talk(EMOTE_HARPOON);
-                                if (GameObject * Harpoon = me->SummonGameObject(GO_RAZOR_HARPOON_2, PosHarpoon[1].GetPositionX(), PosHarpoon[1].GetPositionY(), PosHarpoon[1].GetPositionZ(), 4.659f, 0, 0, 0, 0, uint32(me->GetRespawnTime())))
+                                if (GameObject * Harpoon = me.SummonGameObject(GO_RAZOR_HARPOON_2, PosHarpoon[1].GetPositionX(), PosHarpoon[1].GetPositionY(), PosHarpoon[1].GetPositionZ(), 4.659f, 0, 0, 0, 0, uint32(me.GetRespawnTime())))
                                 {
-                                    if (GameObject * BrokenHarpoon = Harpoon->FindNearestGameObject(GO_RAZOR_BROKEN_HARPOON, 5.0f))
-                                        BrokenHarpoon->RemoveFromWorld();
+                                    if (GameObject * BrokenHarpoon = Harpoon.FindNearestGameObject(GO_RAZOR_BROKEN_HARPOON, 5.0f))
+                                        BrokenHarpoon.RemoveFromWorld();
                                     events.CancelEvent(EVENT_BUILD_HARPOON_2);
                                 }
                                 return;
                             case EVENT_BUILD_HARPOON_3:
                                 Talk(EMOTE_HARPOON);
-                                if (GameObject * Harpoon = me->SummonGameObject(GO_RAZOR_HARPOON_3, PosHarpoon[2].GetPositionX(), PosHarpoon[2].GetPositionY(), PosHarpoon[2].GetPositionZ(), 5.382f, 0, 0, 0, 0, uint32(me->GetRespawnTime())))
+                                if (GameObject * Harpoon = me.SummonGameObject(GO_RAZOR_HARPOON_3, PosHarpoon[2].GetPositionX(), PosHarpoon[2].GetPositionY(), PosHarpoon[2].GetPositionZ(), 5.382f, 0, 0, 0, 0, uint32(me.GetRespawnTime())))
                                 {
-                                    if (GameObject * BrokenHarpoon = Harpoon->FindNearestGameObject(GO_RAZOR_BROKEN_HARPOON, 5.0f))
-                                        BrokenHarpoon->RemoveFromWorld();
+                                    if (GameObject * BrokenHarpoon = Harpoon.FindNearestGameObject(GO_RAZOR_BROKEN_HARPOON, 5.0f))
+                                        BrokenHarpoon.RemoveFromWorld();
                                     events.ScheduleEvent(EVENT_BUILD_HARPOON_4, 20000);
                                     events.CancelEvent(EVENT_BUILD_HARPOON_3);
                                 }
                                 return;
                             case EVENT_BUILD_HARPOON_4:
                                 Talk(EMOTE_HARPOON);
-                                if (GameObject * Harpoon = me->SummonGameObject(GO_RAZOR_HARPOON_4, PosHarpoon[3].GetPositionX(), PosHarpoon[3].GetPositionY(), PosHarpoon[3].GetPositionZ(), 4.266f, 0, 0, 0, 0, uint32(me->GetRespawnTime())))
+                                if (GameObject * Harpoon = me.SummonGameObject(GO_RAZOR_HARPOON_4, PosHarpoon[3].GetPositionX(), PosHarpoon[3].GetPositionY(), PosHarpoon[3].GetPositionZ(), 4.266f, 0, 0, 0, 0, uint32(me.GetRespawnTime())))
                                 {
-                                    if (GameObject * BrokenHarpoon = Harpoon->FindNearestGameObject(GO_RAZOR_BROKEN_HARPOON, 5.0f))
-                                        BrokenHarpoon->RemoveFromWorld();
+                                    if (GameObject * BrokenHarpoon = Harpoon.FindNearestGameObject(GO_RAZOR_BROKEN_HARPOON, 5.0f))
+                                        BrokenHarpoon.RemoveFromWorld();
                                     events.CancelEvent(EVENT_BUILD_HARPOON_4);
                                 }
                                 return;

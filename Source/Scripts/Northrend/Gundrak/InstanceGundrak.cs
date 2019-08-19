@@ -163,7 +163,7 @@ namespace Scripts.Northrend.Gundrak
                         if (GetBossState(GDDataTypes.SladRan) == EncounterState.Done)
                         {
                             if (SladRanStatueState == GameObjectState.Active)
-                                go.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                                go.RemoveFlag(GameObjectFlags.NotSelectable);
                             else
                                 go.SetGoState(GameObjectState.Active);
                         }
@@ -172,7 +172,7 @@ namespace Scripts.Northrend.Gundrak
                         if (GetBossState(GDDataTypes.Moorabi) == EncounterState.Done)
                         {
                             if (MoorabiStatueState == GameObjectState.Active)
-                                go.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                                go.RemoveFlag(GameObjectFlags.NotSelectable);
                             else
                                 go.SetGoState(GameObjectState.Active);
                         }
@@ -181,7 +181,7 @@ namespace Scripts.Northrend.Gundrak
                         if (GetBossState(GDDataTypes.DrakkariColossus) == EncounterState.Done)
                         {
                             if (DrakkariColossusStatueState == GameObjectState.Active)
-                                go.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                                go.RemoveFlag(GameObjectFlags.NotSelectable);
                             else
                                 go.SetGoState(GameObjectState.Active);
                         }
@@ -239,7 +239,7 @@ namespace Scripts.Northrend.Gundrak
                         {
                             GameObject go = GetGameObject(GDDataTypes.SladRanAltar);
                             if (go)
-                                go.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                                go.RemoveFlag(GameObjectFlags.NotSelectable);
                         }
                         break;
                     case GDDataTypes.DrakkariColossus:
@@ -247,7 +247,7 @@ namespace Scripts.Northrend.Gundrak
                         {
                             GameObject go = GetGameObject(GDDataTypes.DrakkariColossusAltar);
                             if (go)
-                                go.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                                go.RemoveFlag(GameObjectFlags.NotSelectable);
                         }
                         break;
                     case GDDataTypes.Moorabi:
@@ -255,7 +255,7 @@ namespace Scripts.Northrend.Gundrak
                         {
                             GameObject go = GetGameObject(GDDataTypes.MoorabiAltar);
                             if (go)
-                                go.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                                go.RemoveFlag(GameObjectFlags.NotSelectable);
                         }
                         break;
                     default:
@@ -423,7 +423,7 @@ namespace Scripts.Northrend.Gundrak
 
         public override bool OnGossipHello(Player player, GameObject go)
         {
-            go.SetFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+            go.AddFlag(GameObjectFlags.NotSelectable);
             go.SetGoState(GameObjectState.Active);
 
             InstanceScript instance = go.GetInstanceScript();

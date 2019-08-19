@@ -40,7 +40,7 @@ namespace Scripts.Pets
             me.SetMaxHealth((uint)(107 * (me.getLevel() - 40) * 0.025f));
             // Add delta to make them not all hit the same time
             uint delta = (RandomHelper.Rand32() % 7) * 100;
-            me.SetStatFloatValue(UnitFields.BaseAttackTime, Info.BaseAttackTime + delta);
+            me.SetBaseAttackTime(WeaponAttackType.BaseAttack, Info.BaseAttackTime + delta);
             //me.SetStatFloatValue(UnitFields.RangedAttackPower, (float)Info.AttackPower);
 
             // Start attacking attacker of owner on first ai update after spawn - move in line of sight may choose better target

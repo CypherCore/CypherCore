@@ -33,7 +33,7 @@ namespace Scripts.Northrend.Gundrak.EckTheFerocious
         public const uint Berserk = 55816; // Eck goes berserk, increasing his attack speed by 150% and all damage he deals by 500%.
         public const uint Bite = 55813; // Eck bites down hard, inflicting 150% of his normal damage to an enemy.
         public const uint Spit = 55814; // Eck spits toxic bile at enemies in a cone in front of him, inflicting 2970 Nature damage and draining 220 mana every 1 sec for 3 sec.
-        public const uint Spring1 = 55815; // Eck leaps at a distant target.  --> Drops aggro and charges a random player. Tank can simply taunt him back.
+        public const uint Spring1 = 55815; // Eck leaps at a distant target.  -. Drops aggro and charges a random player. Tank can simply taunt him back.
         public const uint Spring2 = 55837;  // Eck leaps at a distant target.
     }
 

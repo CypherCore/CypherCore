@@ -783,7 +783,7 @@ namespace Scripts.Spells.Priest
         void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            GetTarget().RemoveMovementImpairingAuras();
+            GetTarget().RemoveMovementImpairingAuras(true);
         }
 
         public override void Register()

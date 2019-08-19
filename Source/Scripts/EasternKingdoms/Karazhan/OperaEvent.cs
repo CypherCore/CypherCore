@@ -25,8 +25,7 @@ using System.Collections.Generic;
 
 namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 {
-    #region Wizard of Oz
-    struct WizardOfOz
+    struct TextIds
     {
         public const uint SayDorotheeDeath = 0;
         public const uint SayDorotheeSummon = 1;
@@ -49,52 +48,70 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
         public const uint SayCroneAggro = 0;
         public const uint SayCroneDeath = 1;
         public const uint SayCroneSlay = 2;
-
-        // Dorothee
-        public const uint SpellWaterbolt = 31012;
-        public const uint SpellScream = 31013;
-        public const uint SpellSummontito = 31014;
-
-        // Tito
-        public const uint SpellYipping = 31015;
-
-        // Strawman
-        public const uint SpellBrainBash = 31046;
-        public const uint SpellBrainWipe = 31069;
-        public const uint SpellBurningStraw = 31075;
-
-        // Tinhead
-        public const uint SpellCleave = 31043;
-        public const uint SpellRust = 31086;
-
-        // Roar
-        public const uint SpellMangle = 31041;
-        public const uint SpellShred = 31042;
-        public const uint SpellFrightenedScream = 31013;
-
-        // Crone
-        public const uint SpellChainLightning = 32337;
-
-        // Cyclone
-        public const uint SpellKnockback = 32334;
-        public const uint SpellCycloneVisual = 32332;
-
-        public const uint NpcTito = 17548;
-        public const uint NpcCyclone = 18412;
-        public const uint NpcCrone = 18168;
     }
 
-    public class WizardofOzBase : ScriptedAI
+    struct SpellIds
     {
-        public WizardofOzBase(Creature creature) : base(creature) { }
+        // Dorothee
+        public const uint Waterbolt = 31012;
+        public const uint Scream = 31013;
+        public const uint Summontito = 31014;
+
+        // Tito
+        public const uint Yipping = 31015;
+
+        // Strawman
+        public const uint BrainBash = 31046;
+        public const uint BrainWipe = 31069;
+        public const uint BurningStraw = 31075;
+
+        // Tinhead
+        public const uint Cleave = 31043;
+        public const uint Rust = 31086;
+
+        // Roar
+        public const uint Mangle = 31041;
+        public const uint Shred = 31042;
+        public const uint FrightenedScream = 31013;
+
+        // Crone
+        public const uint ChainLightning = 32337;
+
+        // Cyclone
+        public const uint Knockback = 32334;
+        public const uint CycloneVisual = 32332;
+    }
+
+    struct CreatureIds
+    {
+        public const uint Tito = 17548;
+        public const uint Cyclone = 18412;
+        public const uint Crone = 18168;
+    }
+
+    #region Wizard of Oz
+    public abstract class WizardofOzBase : ScriptedAI
+    {
+        public WizardofOzBase(Creature creature) : base(creature)
+        {
+            Initialize();
+            instance = creature.GetInstanceScript();
+        }
+
+        public abstract void Initialize();
+
+        public override void Reset()
+        {
+            Initialize();
+        }
 
         public void SummonCroneIfReady(InstanceScript instance, Creature creature)
         {
-            instance.SetData(DataTypes.OperaOzDeathcount, (uint)EncounterState.Special);  // Increment DeathCount
+            instance.SetBossState(DataTypes.OperaOzDeathcount, EncounterState.Special);  // Increment DeathCount
 
             if (instance.GetData(DataTypes.OperaOzDeathcount) == 4)
             {
-                Creature pCrone = creature.SummonCreature(WizardOfOz.NpcCrone, -10891.96f, -1755.95f, creature.GetPositionZ(), 4.64f, TempSummonType.TimedOrDeadDespawn, Time.Hour * 2 * Time.InMilliseconds);
+                Creature pCrone = creature.SummonCreature(CreatureIds.Crone, -10891.96f, -1755.95f, creature.GetPositionZ(), 4.64f, TempSummonType.TimedOrDeadDespawn, Time.Hour * 2 * Time.InMilliseconds);
                 if (pCrone)
                 {
                     if (creature.GetVictim())
@@ -106,17 +123,16 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
         public bool TitoDied;
         public ObjectGuid DorotheeGUID;
         public uint AggroTimer;
+
+        public InstanceScript instance;
     }
 
     [Script]
     public class boss_dorothee : WizardofOzBase
     {
-        public boss_dorothee(Creature creature) : base(creature)
-        {
-            instance = creature.GetInstanceScript();
-        }
+        public boss_dorothee(Creature creature) : base(creature) { }
 
-        public override void Reset()
+        public override void Initialize()
         {
             AggroTimer = 500;
 
@@ -130,7 +146,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
         public override void EnterCombat(Unit who)
         {
-            Talk(WizardOfOz.SayDorotheeAggro);
+            Talk(TextIds.SayDorotheeAggro);
         }
 
         public override void JustReachedHome()
@@ -140,14 +156,14 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
         public override void JustDied(Unit killer)
         {
-            Talk(WizardOfOz.SayDorotheeDeath);
+            Talk(TextIds.SayDorotheeDeath);
 
             SummonCroneIfReady(instance, me);
         }
 
         public override void AttackStart(Unit who)
         {
-            if (me.HasFlag(UnitFields.Flags, UnitFlags.NonAttackable))
+            if (me.HasUnitFlag(UnitFlags.NonAttackable))
                 return;
 
             base.AttackStart(who);
@@ -155,7 +171,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
         public override void MoveInLineOfSight(Unit who)
         {
-            if (me.HasFlag(UnitFields.Flags, UnitFlags.NonAttackable))
+            if (me.HasUnitFlag(UnitFlags.NonAttackable))
                 return;
 
             base.MoveInLineOfSight(who);
@@ -167,7 +183,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
             {
                 if (AggroTimer <= diff)
                 {
-                    me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+                    me.RemoveUnitFlag(UnitFlags.NonAttackable);
                     AggroTimer = 0;
                 }
                 else AggroTimer -= diff;
@@ -178,14 +194,14 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
             if (WaterBoltTimer <= diff)
             {
-                DoCast(SelectTarget(SelectAggroTarget.Random, 0), WizardOfOz.SpellWaterbolt);
+                DoCast(SelectTarget(SelectAggroTarget.Random, 0), SpellIds.Waterbolt);
                 WaterBoltTimer = (uint)(TitoDied ? 1500 : 5000);
             }
             else WaterBoltTimer -= diff;
 
             if (FearTimer <= diff)
             {
-                DoCastVictim(WizardOfOz.SpellScream);
+                DoCastVictim(SpellIds.Scream);
                 FearTimer = 30000;
             }
             else FearTimer -= diff;
@@ -202,18 +218,16 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
         void SummonTito()
         {
-            Creature pTito = me.SummonCreature(WizardOfOz.NpcTito, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawnOOC, 30000);
+            Creature pTito = me.SummonCreature(CreatureIds.Tito, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedDespawnOOC, 30000);
             if (pTito)
             {
-                Talk(WizardOfOz.SayDorotheeSummon);
+                Talk(TextIds.SayDorotheeSummon);
                 DorotheeGUID = me.GetGUID();
                 pTito.GetAI().AttackStart(me.GetVictim());
                 SummonedTito = true;
                 TitoDied = false;
             }
         }
-
-        InstanceScript instance;
 
         uint WaterBoltTimer;
         uint FearTimer;
@@ -225,9 +239,12 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
     [Script]
     public class npc_tito : WizardofOzBase
     {
-        public npc_tito(Creature creature) : base(creature) { }
+        public npc_tito(Creature creature) : base(creature)
+        {
+            Initialize();
+        }
 
-        public override void Reset()
+        public override void Initialize()
         {
             DorotheeGUID.Clear();
             YipTimer = 10000;
@@ -243,7 +260,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
                 if (Dorothee && Dorothee.IsAlive())
                 {
                     TitoDied = true;
-                    Talk(WizardOfOz.SayDorotheeTitoDeath, Dorothee);
+                    Talk(TextIds.SayDorotheeTitoDeath, Dorothee);
                 }
             }
         }
@@ -255,7 +272,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
             if (YipTimer <= diff)
             {
-                DoCastVictim(WizardOfOz.SpellYipping);
+                DoCastVictim(SpellIds.Yipping);
                 YipTimer = 10000;
             }
             else YipTimer -= diff;
@@ -271,10 +288,11 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
     {
         public boss_strawman(Creature creature) : base(creature)
         {
+            Initialize();
             instance = creature.GetInstanceScript();
         }
 
-        public override void Reset()
+        public override void Initialize()
         {
             AggroTimer = 13000;
             BrainBashTimer = 5000;
@@ -283,7 +301,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
         public override void AttackStart(Unit who)
         {
-            if (me.HasFlag(UnitFields.Flags, UnitFlags.NonAttackable))
+            if (me.HasUnitFlag(UnitFlags.NonAttackable))
                 return;
 
             base.AttackStart(who);
@@ -291,7 +309,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
         public override void MoveInLineOfSight(Unit who)
         {
-            if (me.HasFlag(UnitFields.Flags, UnitFlags.NonAttackable))
+            if (me.HasUnitFlag(UnitFlags.NonAttackable))
                 return;
 
             base.MoveInLineOfSight(who);
@@ -299,27 +317,27 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
         public override void EnterCombat(Unit who)
         {
-            Talk(WizardOfOz.SayStrawmanAggro);
+            Talk(TextIds.SayStrawmanAggro);
         }
 
         public override void SpellHit(Unit caster, SpellInfo Spell)
         {
             if ((Spell.SchoolMask == SpellSchoolMask.Fire) && ((RandomHelper.randChance() % 10) == 0))
             {
-                DoCast(me, WizardOfOz.SpellBurningStraw, true);
+                DoCast(me, SpellIds.BurningStraw, true);
             }
         }
 
         public override void JustDied(Unit killer)
         {
-            Talk(WizardOfOz.SayStrawmanDeath);
+            Talk(TextIds.SayStrawmanDeath);
 
             SummonCroneIfReady(instance, me);
         }
 
         public override void KilledUnit(Unit victim)
         {
-            Talk(WizardOfOz.SayStrawmanSlay);
+            Talk(TextIds.SayStrawmanSlay);
         }
 
         public override void UpdateAI(uint diff)
@@ -328,7 +346,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
             {
                 if (AggroTimer <= diff)
                 {
-                    me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+                    me.RemoveUnitFlag(UnitFlags.NonAttackable);
                     AggroTimer = 0;
                 }
                 else AggroTimer -= diff;
@@ -339,7 +357,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
             if (BrainBashTimer <= diff)
             {
-                DoCastVictim(WizardOfOz.SpellBrainBash);
+                DoCastVictim(SpellIds.BrainBash);
                 BrainBashTimer = 15000;
             }
             else BrainBashTimer -= diff;
@@ -348,15 +366,13 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
             {
                 Unit target = SelectTarget(SelectAggroTarget.Random, 0, 100, true);
                 if (target)
-                    DoCast(target, WizardOfOz.SpellBrainWipe);
+                    DoCast(target, SpellIds.BrainWipe);
                 BrainWipeTimer = 20000;
             }
             else BrainWipeTimer -= diff;
 
             DoMeleeAttackIfReady();
         }
-
-        InstanceScript instance;
 
         uint BrainBashTimer;
         uint BrainWipeTimer;
@@ -365,12 +381,9 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
     [Script]
     class boss_tinhead : WizardofOzBase
     {
-        public boss_tinhead(Creature creature) : base(creature)
-        {
-            instance = creature.GetInstanceScript();
-        }
+        public boss_tinhead(Creature creature) : base(creature) { }
 
-        public override void Reset()
+        public override void Initialize()
         {
             AggroTimer = 15000;
             CleaveTimer = 5000;
@@ -381,7 +394,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
         public override void EnterCombat(Unit who)
         {
-            Talk(WizardOfOz.SayTinheadAggro);
+            Talk(TextIds.SayTinheadAggro);
         }
 
         public override void JustReachedHome()
@@ -391,7 +404,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
         public override void AttackStart(Unit who)
         {
-            if (me.HasFlag(UnitFields.Flags, UnitFlags.NonAttackable))
+            if (me.HasUnitFlag(UnitFlags.NonAttackable))
                 return;
 
             base.AttackStart(who);
@@ -399,7 +412,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
         public override void MoveInLineOfSight(Unit who)
         {
-            if (me.HasFlag(UnitFields.Flags, UnitFlags.NonAttackable))
+            if (me.HasUnitFlag(UnitFlags.NonAttackable))
                 return;
 
             base.MoveInLineOfSight(who);
@@ -407,14 +420,14 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
         public override void JustDied(Unit killer)
         {
-            Talk(WizardOfOz.SayTinheadDeath);
+            Talk(TextIds.SayTinheadDeath);
 
             SummonCroneIfReady(instance, me);
         }
 
         public override void KilledUnit(Unit victim)
         {
-            Talk(WizardOfOz.SayTinheadSlay);
+            Talk(TextIds.SayTinheadSlay);
         }
 
         public override void UpdateAI(uint diff)
@@ -423,7 +436,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
             {
                 if (AggroTimer <= diff)
                 {
-                    me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+                    me.RemoveUnitFlag(UnitFlags.NonAttackable);
                     AggroTimer = 0;
                 }
                 else AggroTimer -= diff;
@@ -434,7 +447,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
             if (CleaveTimer <= diff)
             {
-                DoCastVictim(WizardOfOz.SpellCleave);
+                DoCastVictim(SpellIds.Cleave);
                 CleaveTimer = 5000;
             }
             else CleaveTimer -= diff;
@@ -444,8 +457,8 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
                 if (RustTimer <= diff)
                 {
                     ++RustCount;
-                    Talk(WizardOfOz.EmoteRust);
-                    DoCast(me, WizardOfOz.SpellRust);
+                    Talk(TextIds.EmoteRust);
+                    DoCast(me, SpellIds.Rust);
                     RustTimer = 6000;
                 }
                 else RustTimer -= diff;
@@ -453,8 +466,6 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
             DoMeleeAttackIfReady();
         }
-
-        InstanceScript instance;
 
         uint CleaveTimer;
         uint RustTimer;
@@ -465,12 +476,9 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
     [Script]
     class boss_roar : WizardofOzBase
     {
-        public boss_roar(Creature creature) : base(creature)
-        {
-            instance = creature.GetInstanceScript();
-        }
+        public boss_roar(Creature creature) : base(creature) { }
 
-        public override void Reset()
+        public override void Initialize()
         {
             AggroTimer = 20000;
             MangleTimer = 5000;
@@ -478,25 +486,25 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
             ScreamTimer = 15000;
         }
 
-        public override void MoveInLineOfSight(Unit who)
-        {
-            if (me.HasFlag(UnitFields.Flags, UnitFlags.NonAttackable))
-                return;
-
-            base.MoveInLineOfSight(who);
-        }
-
         public override void AttackStart(Unit who)
         {
-            if (me.HasFlag(UnitFields.Flags, UnitFlags.NonAttackable))
+            if (me.HasUnitFlag(UnitFlags.NonAttackable))
                 return;
 
             base.AttackStart(who);
         }
 
+        public override void MoveInLineOfSight(Unit who)
+        {
+            if (me.HasUnitFlag(UnitFlags.NonAttackable))
+                return;
+
+            base.MoveInLineOfSight(who);
+        }
+
         public override void EnterCombat(Unit who)
         {
-            Talk(WizardOfOz.SayRoarAggro);
+            Talk(TextIds.SayRoarAggro);
         }
 
         public override void JustReachedHome()
@@ -506,14 +514,14 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
         public override void JustDied(Unit killer)
         {
-            Talk(WizardOfOz.SayRoarDeath);
+            Talk(TextIds.SayRoarDeath);
 
             SummonCroneIfReady(instance, me);
         }
 
         public override void KilledUnit(Unit victim)
         {
-            Talk(WizardOfOz.SayRoarSlay);
+            Talk(TextIds.SayRoarSlay);
         }
 
         public override void UpdateAI(uint diff)
@@ -522,7 +530,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
             {
                 if (AggroTimer <= diff)
                 {
-                    me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+                    me.RemoveUnitFlag(UnitFlags.NonAttackable);
                     AggroTimer = 0;
                 }
                 else AggroTimer -= diff;
@@ -533,29 +541,27 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
             if (MangleTimer <= diff)
             {
-                DoCastVictim(WizardOfOz.SpellMangle);
+                DoCastVictim(SpellIds.Mangle);
                 MangleTimer = RandomHelper.URand(5000, 8000);
             }
             else MangleTimer -= diff;
 
             if (ShredTimer <= diff)
             {
-                DoCastVictim(WizardOfOz.SpellShred);
+                DoCastVictim(SpellIds.Shred);
                 ShredTimer = RandomHelper.URand(10000, 15000);
             }
             else ShredTimer -= diff;
 
             if (ScreamTimer <= diff)
             {
-                DoCastVictim(WizardOfOz.SpellFrightenedScream);
+                DoCastVictim(SpellIds.FrightenedScream);
                 ScreamTimer = RandomHelper.URand(20000, 30000);
             }
             else ScreamTimer -= diff;
 
             DoMeleeAttackIfReady();
         }
-
-        InstanceScript instance;
 
         uint MangleTimer;
         uint ShredTimer;
@@ -570,8 +576,9 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
             instance = creature.GetInstanceScript();
         }
 
-        public override void Reset()
+        public override void Initialize()
         {
+            me.RemoveUnitFlag(UnitFlags.ImmuneToPc | UnitFlags.NonAttackable);
             CycloneTimer = 30000;
             ChainLightningTimer = 10000;
         }
@@ -583,27 +590,21 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
         public override void KilledUnit(Unit victim)
         {
-            Talk(WizardOfOz.SayCroneSlay);
+            Talk(TextIds.SayCroneSlay);
         }
 
         public override void EnterCombat(Unit who)
         {
-            Talk(WizardOfOz.SayCroneAggro);
-            me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable);
-            me.RemoveFlag(UnitFields.Flags, UnitFlags.ImmuneToPc);
+            Talk(TextIds.SayCroneAggro);
+            me.RemoveUnitFlag(UnitFlags.NonAttackable);
+            me.RemoveUnitFlag(UnitFlags.ImmuneToPc);
         }
 
         public override void JustDied(Unit killer)
         {
-            Talk(WizardOfOz.SayCroneDeath);
+            Talk(TextIds.SayCroneDeath);
 
-            instance.SetData(karazhanConst.BossOpera, (uint)EncounterState.Done);
-            instance.HandleGameObject(instance.GetGuidData(DataTypes.GoStagedoorleft), true);
-            instance.HandleGameObject(instance.GetGuidData(DataTypes.GoStagedoorright), true);
-
-            GameObject pSideEntrance = instance.instance.GetGameObject(instance.GetGuidData(DataTypes.GoSideEntranceDoor));
-            if (pSideEntrance)
-                pSideEntrance.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.Locked);
+            instance.SetBossState(DataTypes.OperaPerformance, EncounterState.Done);
         }
 
         public override void UpdateAI(uint diff)
@@ -611,29 +612,27 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
             if (!UpdateVictim())
                 return;
 
-            if (me.HasFlag(UnitFields.Flags, UnitFlags.NonAttackable))
-                me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+            if (me.HasUnitFlag(UnitFlags.NonAttackable))
+                me.RemoveUnitFlag(UnitFlags.NonAttackable);
 
             if (CycloneTimer <= diff)
             {
-                Creature Cyclone = DoSpawnCreature(WizardOfOz.NpcCyclone, RandomHelper.FRand(0, 9), RandomHelper.FRand(0, 9), 0, 0, TempSummonType.TimedDespawn, 15000);
+                Creature Cyclone = DoSpawnCreature(CreatureIds.Cyclone, RandomHelper.FRand(0, 9), RandomHelper.FRand(0, 9), 0, 0, TempSummonType.TimedDespawn, 15000);
                 if (Cyclone)
-                    Cyclone.CastSpell(Cyclone, WizardOfOz.SpellCycloneVisual, true);
+                    Cyclone.CastSpell(Cyclone, SpellIds.CycloneVisual, true);
                 CycloneTimer = 30000;
             }
             else CycloneTimer -= diff;
 
             if (ChainLightningTimer <= diff)
             {
-                DoCastVictim(WizardOfOz.SpellChainLightning);
+                DoCastVictim(SpellIds.ChainLightning);
                 ChainLightningTimer = 15000;
             }
             else ChainLightningTimer -= diff;
 
             DoMeleeAttackIfReady();
         }
-
-        InstanceScript instance;
 
         uint CycloneTimer;
         uint ChainLightningTimer;
@@ -655,8 +654,8 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
         public override void UpdateAI(uint diff)
         {
-            if (!me.HasAura(WizardOfOz.SpellKnockback))
-                DoCast(me, WizardOfOz.SpellKnockback, true);
+            if (!me.HasAura(SpellIds.Knockback))
+                DoCast(me, SpellIds.Knockback, true);
 
             if (MoveTimer <= diff)
             {
@@ -746,14 +745,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
         public override void JustDied(Unit killer)
         {
             DoPlaySoundToSet(me, RedRidingHood.SoundWolfDeath);
-
-            instance.SetData(karazhanConst.BossOpera, (uint)EncounterState.Done);
-            instance.HandleGameObject(instance.GetGuidData(DataTypes.GoStagedoorleft), true);
-            instance.HandleGameObject(instance.GetGuidData(DataTypes.GoStagedoorright), true);
-
-            GameObject pSideEntrance = instance.instance.GetGameObject(instance.GetGuidData(DataTypes.GoSideEntranceDoor));
-            if (pSideEntrance)
-                pSideEntrance.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.Locked);
+            instance.SetBossState(DataTypes.OperaPerformance, EncounterState.Done);
         }
 
         public override void UpdateAI(uint diff)
@@ -884,7 +876,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
         public override void MoveInLineOfSight(Unit who)
         {
-            if (me.HasFlag(UnitFields.Flags, UnitFlags.NonAttackable))
+            if (me.HasUnitFlag(UnitFlags.NonAttackable))
                 return;
 
             base.MoveInLineOfSight(who);
@@ -895,7 +887,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
             me.InterruptNonMeleeSpells(true);
             me.RemoveAllAuras();
             me.SetHealth(0);
-            me.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+            me.AddUnitFlag(UnitFlags.NotSelectable);
             me.GetMotionMaster().MovementExpired(false);
             me.GetMotionMaster().MoveIdle();
             me.SetStandState(UnitStandStateType.Dead);
@@ -903,7 +895,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
         public void Resurrect(Creature target)
         {
-            target.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+            target.RemoveUnitFlag(UnitFlags.NotSelectable);
             target.SetFullHealth();
             target.SetStandState(UnitStandStateType.Stand);
             target.CastSpell(target, JulianneRomulo.SpellResVisual, true);
@@ -972,7 +964,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
         public override void AttackStart(Unit who)
         {
-            if (me.HasFlag(UnitFields.Flags, UnitFlags.NonAttackable))
+            if (me.HasUnitFlag(UnitFlags.NonAttackable))
                 return;
 
             base.AttackStart(who);
@@ -1026,12 +1018,12 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
                     Romulo = ObjectAccessor.GetCreature(me, RomuloGUID);
                     if (Romulo)
                     {
-                        Romulo.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+                        Romulo.RemoveUnitFlag(UnitFlags.NotSelectable);
                         Romulo.GetMotionMaster().Clear();
                         Romulo.setDeathState(DeathState.JustDied);
                         Romulo.CombatStop(true);
                         Romulo.DeleteThreatList();
-                        Romulo.SetUInt32Value(ObjectFields.DynamicFlags, (uint)UnitDynFlags.Lootable);
+                        Romulo.SetDynamicFlags(UnitDynFlags.Lootable);
                     }
 
                     return;
@@ -1055,14 +1047,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
         public override void JustDied(Unit killer)
         {
             Talk(JulianneRomulo.SayJulianneDeath02);
-
-            instance.SetData(karazhanConst.BossOpera, (uint)EncounterState.Done);
-            instance.HandleGameObject(instance.GetGuidData(DataTypes.GoStagedoorleft), true);
-            instance.HandleGameObject(instance.GetGuidData(DataTypes.GoStagedoorright), true);
-
-            GameObject pSideEntrance = instance.instance.GetGameObject(instance.GetGuidData(DataTypes.GoSideEntranceDoor));
-            if (pSideEntrance)
-                pSideEntrance.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.Locked);
+            instance.SetBossState(DataTypes.OperaPerformance, EncounterState.Done);
         }
 
         public override void KilledUnit(Unit victim)
@@ -1087,7 +1072,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
                 if (AggroYellTimer <= diff)
                 {
                     Talk(JulianneRomulo.SayJulianneAggro);
-                    me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+                    me.RemoveUnitFlag(UnitFlags.NonAttackable);
                     me.SetFaction(16);
                     AggroYellTimer = 0;
                 }
@@ -1271,12 +1256,12 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
                     Julianne = ObjectAccessor.GetCreature(me, JulianneGUID);
                     if (Julianne)
                     {
-                        Julianne.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+                        Julianne.RemoveUnitFlag(UnitFlags.NotSelectable);
                         Julianne.GetMotionMaster().Clear();
                         Julianne.setDeathState(DeathState.JustDied);
                         Julianne.CombatStop(true);
                         Julianne.DeleteThreatList();
-                        Julianne.SetUInt32Value(ObjectFields.DynamicFlags, (uint)UnitDynFlags.Lootable);
+                        Julianne.SetDynamicFlags(UnitDynFlags.Lootable);
                     }
                     return;
                 }
@@ -1313,14 +1298,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
         public override void JustDied(Unit killer)
         {
             Talk(JulianneRomulo.SayRomuloDeath);
-
-            instance.SetData(karazhanConst.BossOpera, (uint)EncounterState.Done);
-            instance.HandleGameObject(instance.GetGuidData(DataTypes.GoStagedoorleft), true);
-            instance.HandleGameObject(instance.GetGuidData(DataTypes.GoStagedoorright), true);
-
-            GameObject pSideEntrance = instance.instance.GetGameObject(instance.GetGuidData(DataTypes.GoSideEntranceDoor));
-            if (pSideEntrance)
-                pSideEntrance.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.Locked);
+            instance.SetBossState(DataTypes.OperaPerformance, EncounterState.Done);
         }
 
         public override void KilledUnit(Unit victim)
@@ -1428,7 +1406,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
             public void StartEvent()
             {
-                instance.SetData(karazhanConst.BossOpera, (uint)EncounterState.InProgress);
+                instance.SetBossState(DataTypes.OperaPerformance, EncounterState.InProgress);
 
                 //resets count for this event, in case earlier failed
                 if (m_uiEventId == OperaEvents.Oz)
@@ -1454,7 +1432,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
                         Creature spotlight = me.SummonCreature(karazhanConst.NpcSpotlight, me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), 0.0f, TempSummonType.TimedOrDeadDespawn, 60000);
                         if (spotlight)
                         {
-                            spotlight.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+                            spotlight.AddUnitFlag(UnitFlags.NotSelectable);
                             spotlight.CastSpell(spotlight, karazhanConst.SpellSpotlight, false);
                             m_uiSpotlightGUID = spotlight.GetGUID();
                         }
@@ -1530,11 +1508,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
 
                     Creature creature = me.SummonCreature(entry, PosX, karazhanConst.SPAWN_Y, karazhanConst.SPAWN_Z, karazhanConst.SPAWN_O, TempSummonType.TimedOrDeadDespawn, Time.Hour * 2 * Time.InMilliseconds);
                     if (creature)
-                    {
-                        // In case database has bad flags
-                        creature.SetUInt32Value(UnitFields.Flags, 0);
-                        creature.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable);
-                    }
+                        creature.AddUnitFlag(UnitFlags.NonAttackable);
                 }
 
                 RaidWiped = false;
@@ -1654,7 +1628,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
             if (instance != null)
             {
                 // Check for death of Moroes and if opera event is not done already
-                if (instance.GetData(karazhanConst.BossMoroes) == (uint)EncounterState.Done && instance.GetData(karazhanConst.BossOpera) != (uint)EncounterState.Done)
+                if (instance.GetBossState(DataTypes.Moroes) == EncounterState.Done && instance.GetBossState(DataTypes.OperaPerformance) != EncounterState.Done)
                 {
                     player.ADD_GOSSIP_ITEM(GossipOptionIcon.Chat, karazhanConst.OZ_GOSSIP1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
 

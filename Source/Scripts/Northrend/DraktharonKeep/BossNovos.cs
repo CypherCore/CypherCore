@@ -229,15 +229,15 @@ namespace Scripts.Northrend.DraktharonKeep.Novos
             _bubbled = state;
             if (!state)
             {
-                if (me.HasFlag(UnitFields.Flags, UnitFlags.NonAttackable))
-                    me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+                if (me.HasUnitFlag(UnitFlags.NonAttackable))
+                    me.RemoveUnitFlag(UnitFlags.NonAttackable);
                 if (me.HasUnitState(UnitState.Casting))
                     me.CastStop();
             }
             else
             {
-                if (!me.HasFlag(UnitFields.Flags, UnitFlags.NonAttackable))
-                    me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+                if (!me.HasUnitFlag(UnitFlags.NonAttackable))
+                    me.AddUnitFlag(UnitFlags.NonAttackable);
                 DoCast(SpellIds.ArcaneField);
             }
         }

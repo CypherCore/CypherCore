@@ -206,7 +206,7 @@ namespace Scripts.Northrend.FrozenHalls.ForgeOfSouls
         public npc_sylvanas_fos(Creature creature) : base(creature)
         {
             Initialize();
-            me.SetFlag(UnitFields.NpcFlags, NPCFlags.Gossip);
+            me.AddNpcFlag(NPCFlags.Gossip);
         }
 
         void Initialize()
@@ -226,7 +226,7 @@ namespace Scripts.Northrend.FrozenHalls.ForgeOfSouls
             {
                 player.CLOSE_GOSSIP_MENU();
                 phase = Phase.Intro;
-                me.RemoveFlag(UnitFields.NpcFlags, NPCFlags.Gossip);
+                me.RemoveNpcFlag(NPCFlags.Gossip);
 
                 _events.Reset();
                 _events.ScheduleEvent(EventIds.Intro1, 1000);
@@ -290,7 +290,7 @@ namespace Scripts.Northrend.FrozenHalls.ForgeOfSouls
         public npc_jaina_fos(Creature creature) : base(creature)
         {
             Initialize();
-            me.SetFlag(UnitFields.NpcFlags, NPCFlags.Gossip);
+            me.AddNpcFlag(NPCFlags.Gossip);
         }
 
         void Initialize()
@@ -310,7 +310,7 @@ namespace Scripts.Northrend.FrozenHalls.ForgeOfSouls
             {
                 player.CLOSE_GOSSIP_MENU();
                 phase = Phase.Intro;
-                me.RemoveFlag(UnitFields.NpcFlags, NPCFlags.Gossip);
+                me.RemoveNpcFlag(NPCFlags.Gossip);
                 _events.Reset();
                 _events.ScheduleEvent(EventIds.Intro1, 1000);
             }

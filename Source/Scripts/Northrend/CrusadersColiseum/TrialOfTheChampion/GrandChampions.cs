@@ -242,7 +242,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
 
             me.SetReactState(ReactStates.Passive);
             // THIS IS A HACK, SHOULD BE REMOVED WHEN THE EVENT IS FULL SCRIPTED
-            me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.ImmuneToPc);
+            me.AddUnitFlag(UnitFlags.NonAttackable | UnitFlags.ImmuneToPc);
         }
 
         public abstract void Initialize();
@@ -320,7 +320,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheChampion
 
                     if (player.IsAlive())
                     {
-                        temp.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.ImmuneToPc);
+                        temp.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.ImmuneToPc);
                         temp.SetReactState(ReactStates.Aggressive);
                         temp.SetInCombatWith(player);
                         player.SetInCombatWith(temp);

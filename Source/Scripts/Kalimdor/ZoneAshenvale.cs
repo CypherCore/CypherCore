@@ -147,7 +147,7 @@ namespace Scripts.Kalimdor.ZoneAshenvale
             switch (waypointId)
             {
                 case 0:
-                    me.SetUInt32Value(UnitFields.Bytes1, 0);
+                    me.SetStandState(UnitStandStateType.Stand);
                     GameObject cage = me.FindNearestGameObject(GameObjectIds.Cage, 20);
                     if (cage)
                         cage.SetGoState(GameObjectState.Active);
@@ -244,7 +244,7 @@ namespace Scripts.Kalimdor.ZoneAshenvale
                         GameObject go = GetClosestGameObjectWithEntry(me, GameObjectIds.NagaBrazier, SharedConst.InteractionDistance * 2);
                         if (go)
                         {
-                            go.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                            go.RemoveFlag(GameObjectFlags.NotSelectable);
                             SetEscortPaused(true);
                         }
                         break;

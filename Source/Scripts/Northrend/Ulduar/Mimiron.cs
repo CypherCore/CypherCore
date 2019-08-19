@@ -389,7 +389,7 @@ namespace Scripts.Northrend.Ulduar
             {
                 _Reset();
                 me.SetReactState(ReactStates.Passive);
-                me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+                me.RemoveUnitFlag(UnitFlags.NonAttackable);
 
                 GameObject elevator = ObjectAccessor.GetGameObject(me, instance.GetGuidData(InstanceData.MimironElevator));
                 if (elevator)
@@ -406,7 +406,7 @@ namespace Scripts.Northrend.Ulduar
                 if (button)
                 {
                     button.SetGoState(GameObjectState.Ready);
-                    button.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                    button.RemoveFlag(GameObjectFlags.NotSelectable);
                 }
 
                 _fireFighter = false;
@@ -457,13 +457,13 @@ namespace Scripts.Northrend.Ulduar
                 //PLay Sound number 15612
 
                 _EnterCombat();
-                me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+                me.AddUnitFlag(UnitFlags.NonAttackable);
                 me.RemoveAurasDueToSpell(Spells.Weld);
                 DoCast(me.GetVehicleBase(), Spells.Seat6);
 
                 GameObject button = ObjectAccessor.GetGameObject(me, instance.GetGuidData(InstanceData.MimironButton));
                 if (button)
-                    button.SetFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                    button.AddFlag(GameObjectFlags.NotSelectable);
 
                 if (_fireFighter)
                     _events.ScheduleEvent(Events.SummonFlames, 3000);
@@ -528,7 +528,7 @@ namespace Scripts.Northrend.Ulduar
                                 {
                                     DoCast(mkii, Spells.Seat7);
                                     mkii.RemoveAurasDueToSpell(Spells.FreezeAnim);
-                                    mkii.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                                    mkii.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
                                 }
                                 _events.ScheduleEvent(Events.Intro3, 2000);
                             }
@@ -676,7 +676,7 @@ namespace Scripts.Northrend.Ulduar
                                     if (aerial)
                                     {
                                         aerial.GetMotionMaster().MoveLand(0, new Position(aerial.GetPositionX(), aerial.GetPositionY(), aerial.GetPositionZMinusOffset()));
-                                        aerial.SetByteValue(UnitFields.Bytes1, UnitBytes1Offsets.AnimTier, 0);
+                                        aerial.SetAnimTier(UnitBytes1Flags.None, false);
                                         aerial.CastSpell(vx001, Spells.MountVx001);
                                         aerial.CastSpell(aerial, Spells.HalfHeal);
                                     }
@@ -725,7 +725,7 @@ namespace Scripts.Northrend.Ulduar
                             break;
                         case Events.Outtro3:
                             DoCast(me, Spells.TeleportVisual);
-                            me.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+                            me.AddUnitFlag(UnitFlags.NotSelectable);
                             me.DespawnOrUnsummon(1000); // sniffs say 6 sec after, but it doesnt matter.
                             break;
                         default:
@@ -756,7 +756,7 @@ namespace Scripts.Northrend.Ulduar
             void SetupEncounter()
             {
                 _Reset();
-                me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                me.AddUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
                 me.SetReactState(ReactStates.Passive);
                 _fireFighter = false;
                 _setupMine = true;
@@ -770,7 +770,7 @@ namespace Scripts.Northrend.Ulduar
                 if (damage >= me.GetHealth())
                 {
                     damage = (uint)(me.GetHealth() - 1); // Let creature fall to 1 hp, but do not let it die or damage itself with SetHealth().
-                    me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+                    me.AddUnitFlag(UnitFlags.NonAttackable);
                     DoCast(me, Spells.VehicleDamaged, true);
                     me.AttackStop();
                     me.SetReactState(ReactStates.Passive);
@@ -821,7 +821,7 @@ namespace Scripts.Northrend.Ulduar
                         break;
                     case Actions.AssembledCombat:
                         me.SetStandState(UnitStandStateType.Stand);
-                        me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                        me.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
                         me.SetReactState(ReactStates.Aggressive);
 
                         _events.SetPhase(Phases.Vol7ron);
@@ -874,7 +874,7 @@ namespace Scripts.Northrend.Ulduar
                 {
                     case Waypoints.MkiiP1Idle:
                         {
-                            me.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+                            me.AddUnitFlag(UnitFlags.NotSelectable);
                             DoCast(me, Spells.HalfHeal);
 
                             Creature mimiron = ObjectAccessor.GetCreature(me, instance.GetGuidData(BossIds.Mimiron));
@@ -999,7 +999,7 @@ namespace Scripts.Northrend.Ulduar
             public boss_vx_001(Creature creature) : base(creature, BossIds.Mimiron)
             {
                 me.SetDisableGravity(true); // This is the unfold visual state of VX-001, it has to be set on create as it requires an objectupdate if set later.
-                me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.StateSpecialUnarmed); // This is a hack to force the yet to be unfolded visual state.
+                me.SetEmoteState(Emote.StateSpecialUnarmed); // This is a hack to force the yet to be unfolded visual state.
                 me.SetReactState(ReactStates.Passive);
                 _fireFighter = false;
             }
@@ -1017,7 +1017,7 @@ namespace Scripts.Northrend.Ulduar
                     if (_events.IsInPhase(Phases.Vx001))
                     {
                         me.CastStop();
-                        me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                        me.AddUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
                         DoCast(me, Spells.HalfHeal); // has no effect, wat
                         DoCast(me, Spells.TorsoDisabled);
                         Creature mimiron = ObjectAccessor.GetCreature(me, instance.GetGuidData(BossIds.Mimiron));
@@ -1027,7 +1027,7 @@ namespace Scripts.Northrend.Ulduar
                     else if (_events.IsInPhase(Phases.Vol7ron))
                     {
                         me.SetStandState(UnitStandStateType.Dead);
-                        me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+                        me.AddUnitFlag(UnitFlags.NonAttackable);
 
                         if (MimironConst.IsEncounterFinished(who))
                             return;
@@ -1050,9 +1050,9 @@ namespace Scripts.Northrend.Ulduar
                         _events.ScheduleEvent(Events.FlameSuppressantVx, 6000);
                         goto case Actions.StartVx001;
                     case Actions.StartVx001:
-                        me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                        me.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
                         me.RemoveAurasDueToSpell(Spells.FreezeAnim);
-                        me.SetUInt32Value(UnitFields.NpcEmotestate, (uint)Emote.OneshotNone); // Remove emotestate.
+                        me.SetEmoteState(Emote.OneshotNone); // Remove emotestate.
                                                                                               //me.SetuintValue(UnitFields.Bytes1, UnitBytes1Offsets.AnimTier, UnitBytes1Flags.AlwaysStand | UnitBytes1Flags.Hover); Blizzard handles hover animation like this it seems.
                         DoCast(me, Spells.HeatWaveAura);
 
@@ -1063,7 +1063,7 @@ namespace Scripts.Northrend.Ulduar
                         break;
                     case Actions.AssembledCombat:
                         me.SetStandState(UnitStandStateType.Stand);
-                        me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                        me.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
 
                         _events.SetPhase(Phases.Vol7ron);
                         _events.ScheduleEvent(Events.RocketStrike, 20000);
@@ -1115,7 +1115,7 @@ namespace Scripts.Northrend.Ulduar
                 // Handle rotation during SPELL_SPINNING_UP, SPELL_P3WX2_LASER_BARRAGE, SPELL_RAPID_BURST, and SPELL_HAND_PULSE_LEFT/RIGHT
                 if (me.HasUnitState(UnitState.Casting))
                 {
-                    List<ObjectGuid> channelObjects = me.GetChannelObjects();
+                    List<ObjectGuid> channelObjects = me.m_unitData.ChannelObjects;
                     Unit channelTarget = (channelObjects.Count == 1 ? Global.ObjAccessor.GetUnit(me, channelObjects[0]) : null);
                     if (channelTarget)
                         me.SetFacingToObject(channelTarget);
@@ -1191,7 +1191,7 @@ namespace Scripts.Northrend.Ulduar
                 if (damage >= me.GetHealth())
                 {
                     damage = (uint)(me.GetHealth() - 1); // Let creature fall to 1 hp, but do not let it die or damage itself with SetHealth().
-                    me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+                    me.AddUnitFlag(UnitFlags.NonAttackable);
                     me.AttackStop();
                     me.SetReactState(ReactStates.Passive);
                     DoCast(me, Spells.VehicleDamaged, true);
@@ -1226,7 +1226,7 @@ namespace Scripts.Northrend.Ulduar
                         _events.ScheduleEvent(Events.SummonFireBots, 1000, 0, Phases.AerialCommandUnit);
                         goto case Actions.StartAerial;
                     case Actions.StartAerial:
-                        me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                        me.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
                         me.SetReactState(ReactStates.Aggressive);
 
                         _events.SetPhase(Phases.AerialCommandUnit);
@@ -1245,7 +1245,7 @@ namespace Scripts.Northrend.Ulduar
                         me.SetReactState(ReactStates.Aggressive);
                         break;
                     case Actions.AssembledCombat:
-                        me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                        me.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
                         me.SetReactState(ReactStates.Aggressive);
                         me.SetStandState(UnitStandStateType.Stand);
                         _events.SetPhase(Phases.Vol7ron);
@@ -1281,7 +1281,7 @@ namespace Scripts.Northrend.Ulduar
             {
                 if (type == MovementGeneratorType.Point && point == Waypoints.AerialP4Pos)
                 {
-                    me.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+                    me.AddUnitFlag(UnitFlags.NotSelectable);
 
                     Creature mimiron = ObjectAccessor.GetCreature(me, instance.GetGuidData(BossIds.Mimiron));
                     if (mimiron)
@@ -1596,7 +1596,7 @@ namespace Scripts.Northrend.Ulduar
 
             public override bool OnGossipHello(Player player, GameObject go)
             {
-                if (go.HasFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable))
+                if (go.HasFlag(GameObjectFlags.NotSelectable))
                     return true;
 
                 InstanceScript instance = go.GetInstanceScript();
@@ -1607,7 +1607,7 @@ namespace Scripts.Northrend.Ulduar
                 if (computer)
                     computer.GetAI().DoAction(Actions.ActivateComputer);
                 go.SetGoState(GameObjectState.Active);
-                go.SetFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                go.AddFlag(GameObjectFlags.NotSelectable);
                 return true;
             }
         }
@@ -1634,7 +1634,7 @@ namespace Scripts.Northrend.Ulduar
                 Creature target = GetHitCreature();
                 if (target)
                 {
-                    target.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.Pacified);
+                    target.AddUnitFlag(UnitFlags.NotSelectable | UnitFlags.Pacified);
                     target.DespawnOrUnsummon(1000);
                 }
             }
@@ -1741,7 +1741,7 @@ namespace Scripts.Northrend.Ulduar
         {
             void FilterTargets(List<WorldObject> targets)
             {
-                targets.RemoveAll(obj => obj.ToUnit() && (obj.ToUnit().GetVehicleBase() || obj.HasFlag(UnitFields.Flags, UnitFlags.NonAttackable)));
+                targets.RemoveAll(obj => obj.IsUnit() && (obj.ToUnit().GetVehicleBase() || obj.ToUnit().HasUnitFlag(UnitFlags.NonAttackable)));
             }
 
             public override void Register()

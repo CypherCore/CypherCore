@@ -135,19 +135,19 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet
                         if (SpheresState[0] != 0)
                         {
                             go.SetGoState(GameObjectState.Active);
-                            go.SetFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                            go.AddFlag(GameObjectFlags.NotSelectable);
                         }
                         else
-                            go.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                            go.RemoveFlag(GameObjectFlags.NotSelectable);
                         break;
                     case GameObjectIds.Sphere2:
                         if (SpheresState[1] != 0)
                         {
                             go.SetGoState(GameObjectState.Active);
-                            go.SetFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                            go.AddFlag(GameObjectFlags.NotSelectable);
                         }
                         else
-                            go.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                            go.RemoveFlag(GameObjectFlags.NotSelectable);
                         break;
                     case GameObjectIds.PrinceTaldaramGate:
                         AddDoor(go, true);

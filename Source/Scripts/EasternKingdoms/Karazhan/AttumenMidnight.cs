@@ -35,271 +35,339 @@ namespace Scripts.EasternKingdoms.Karazhan.Midnight
 
     struct TextIds
     {
-        public const uint SayMidnightKill = 0;
-        public const uint SayAppear = 1;
-        public const uint SayMount = 2;
-
         public const uint SayKill = 0;
-        public const uint SayDisarmed = 1;
-        public const uint SayDeath = 2;
-        public const uint SayRandom = 3;
+        public const uint SayRandom = 1;
+        public const uint SayDisarmed = 2;
+        public const uint SayMidnightKill = 3;
+        public const uint SayAppear = 4;
+        public const uint SayMount = 5;
+
+        public const uint SayDeath = 3;
+
+        // Midnight
+        public const uint EmoteCallAttumen = 0;
+        public const uint EmoteMountUp = 1;
     }
 
     struct SpellIds
     {
         public const uint Shadowcleave = 29832;
         public const uint IntangiblePresence = 29833;
-        public const uint BerserkerCharge = 26561;                   //Only When Mounted
+        public const uint SpawnSmoke = 10389;
+        public const uint Charge = 29847;
+
+        // Midnight
+        public const uint Knockdown = 29711;
+        public const uint SummonAttumen = 29714;
+        public const uint Mount = 29770;
+        public const uint SummonAttumenMounted = 29799;
+    }
+
+    enum Phases
+    {
+        None,
+        AttumenEngages,
+        Mounted
     }
 
     [Script]
-    public class boss_attumen : ScriptedAI
+    public class boss_attumen : BossAI
     {
-        public boss_attumen(Creature creature) : base(creature)
+        public boss_attumen(Creature creature) : base(creature, DataTypes.Attumen)
         {
-            CleaveTimer = RandomHelper.URand(10000, 15000);
-            CurseTimer = 30000;
-            RandomYellTimer = RandomHelper.URand(30000, 60000);              //Occasionally yell
-            ChargeTimer = 20000;
-            ResetTimer = 0;
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            _midnightGUID.Clear();
+            _phase = Phases.None;
         }
 
         public override void Reset()
         {
-            ResetTimer = 0;
-            Midnight.Clear();
+            Initialize();
+            base.Reset();
         }
 
         public override void EnterEvadeMode(EvadeReason why)
         {
-            base.EnterEvadeMode(why);
-            ResetTimer = 2000;
+            Creature midnight = ObjectAccessor.GetCreature(me, _midnightGUID);
+            if (midnight != null)
+                _DespawnAtEvade(10, midnight);
+
+            me.DespawnOrUnsummon();
         }
 
-        public override void EnterCombat(Unit who) { }
+        public override void ScheduleTasks()
+        {
+            _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(25), task =>
+            {
+                DoCastVictim(SpellIds.Shadowcleave);
+                task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(25));
+            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(45), task =>
+            {
+                Unit target = SelectTarget(SelectAggroTarget.Random, 0);
+                if (target != null)
+                    DoCast(target, SpellIds.IntangiblePresence);
+
+                task.Repeat(TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(45));
+            });
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(60), task =>
+            {
+                Talk(TextIds.SayRandom);
+                task.Repeat(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(60));
+            });
+        }
+
+        public override void DamageTaken(Unit attacker, ref uint damage)
+        {
+            // Attumen does not die until he mounts Midnight, let health fall to 1 and prevent further damage.
+            if (damage >= me.GetHealth() && _phase != Phases.Mounted)
+                damage = (uint)(me.GetHealth() - 1);
+
+            if (_phase == Phases.AttumenEngages && me.HealthBelowPctDamaged(25, damage))
+            {
+                _phase = Phases.None;
+
+                Creature midnight = ObjectAccessor.GetCreature(me, _midnightGUID);
+                if (midnight != null)
+                    midnight.GetAI().DoCastAOE(SpellIds.Mount, true);
+            }
+        }
 
         public override void KilledUnit(Unit victim)
         {
             Talk(TextIds.SayKill);
         }
 
+        public override void JustSummoned(Creature summon)
+        {
+            if (summon.GetEntry() == CreatureIds.AttumenMounted)
+            {
+                Creature midnight = ObjectAccessor.GetCreature(me, _midnightGUID);
+                if (midnight != null)
+                {
+                    if (midnight.GetHealth() > me.GetHealth())
+                        summon.SetHealth(midnight.GetHealth());
+                    else
+                        summon.SetHealth(me.GetHealth());
+
+                    summon.GetAI().DoZoneInCombat();
+                    summon.GetAI().SetGUID(_midnightGUID, (int)CreatureIds.Midnight);
+                }
+            }
+
+            base.JustSummoned(summon);
+        }
+
+        public override void IsSummonedBy(Unit summoner)
+        {
+            if (summoner.GetEntry() == CreatureIds.Midnight)
+                _phase = Phases.AttumenEngages;
+
+            if (summoner.GetEntry() == CreatureIds.AttumenUnmounted)
+            {
+                _phase = Phases.Mounted;
+                DoCastSelf(SpellIds.SpawnSmoke);
+
+                _scheduler.Schedule(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(25), task =>
+                {
+                    Unit target = null;
+                    var t_list = me.GetThreatManager().getThreatList();
+                    List<Unit> target_list = new List<Unit>();
+
+                    foreach (var itr in t_list)
+                    {
+                        target = Global.ObjAccessor.GetUnit(me, itr.getUnitGuid());
+                        if (target && !target.IsWithinDist(me, 8.00f, false) && target.IsWithinDist(me, 25.0f, false))
+                            target_list.Add(target);
+
+                        target = null;
+                    }
+
+                    if (!target_list.Empty())
+                        target = target_list.SelectRandom();
+
+                    DoCast(target, SpellIds.Charge);
+                    task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(25));
+                });
+
+                _scheduler.Schedule(TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(35), task =>
+                {
+                    DoCastVictim(SpellIds.Knockdown);
+                    task.Repeat(TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(35));
+                });
+            }
+        }
+
         public override void JustDied(Unit killer)
         {
             Talk(TextIds.SayDeath);
-            Unit midnight = Global.ObjAccessor.GetUnit(me, Midnight);
+            Unit midnight = Global.ObjAccessor.GetUnit(me, _midnightGUID);
             if (midnight)
                 midnight.KillSelf();
+
+            base.JustDied(killer);
+        }
+
+        public override void SetGUID(ObjectGuid guid, int id = 0)
+        {
+            if (id == CreatureIds.Midnight)
+                _midnightGUID = guid;
         }
 
         public override void UpdateAI(uint diff)
         {
-            if (ResetTimer != 0)
-            {
-                if (ResetTimer <= diff)
-                {
-                    ResetTimer = 0;
-                    Unit pMidnight = Global.ObjAccessor.GetUnit(me, Midnight);
-                    if (pMidnight)
-                    {
-                        pMidnight.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable);
-                        pMidnight.SetVisible(true);
-                    }
-                    Midnight.Clear();
-                    me.SetVisible(false);
-                    me.KillSelf();
-                }
-                else ResetTimer -= diff;
-            }
-
-            //Return since we have no target
-            if (!UpdateVictim())
+            if (!UpdateVictim() && _phase != Phases.None)
                 return;
 
-            if (me.HasFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable))
-                return;
-
-            if (CleaveTimer <= diff)
-            {
-                DoCastVictim(SpellIds.Shadowcleave);
-                CleaveTimer = RandomHelper.URand(10000, 15000);
-            }
-            else CleaveTimer -= diff;
-
-            if (CurseTimer <= diff)
-            {
-                DoCastVictim(SpellIds.IntangiblePresence);
-                CurseTimer = 30000;
-            }
-            else CurseTimer -= diff;
-
-            if (RandomYellTimer <= diff)
-            {
-                Talk(TextIds.SayRandom);
-                RandomYellTimer = RandomHelper.URand(30000, 60000);
-            }
-            else RandomYellTimer -= diff;
-
-            if (me.GetUInt32Value(UnitFields.DisplayId) == Misc.MountedDisplayid)
-            {
-                if (ChargeTimer <= diff)
-                {
-                    var t_list = me.GetThreatManager().getThreatList();
-                    List<Unit> target_list = new List<Unit>();
-                    foreach (var hostileRefe in t_list)
-                    {
-                        var unit = Global.ObjAccessor.GetUnit(me, hostileRefe.getUnitGuid());
-                        if (unit && !unit.IsWithinDist(me, SharedConst.AttackDistance, false))
-                            target_list.Add(unit);
-                        unit = null;
-                    }
-                    Unit target = null;
-                    if (!target_list.Empty())
-                        target = target_list.SelectRandom();
-
-                    DoCast(target, SpellIds.BerserkerCharge);
-                    ChargeTimer = 20000;
-                }
-                else ChargeTimer -= diff;
-            }
-            else
-            {
-                if (HealthBelowPct(25))
-                {
-                    Creature pMidnight = ObjectAccessor.GetCreature(me, Midnight);
-                    if (pMidnight && pMidnight.IsTypeId(TypeId.Unit))
-                    {
-                        ((boss_midnight)pMidnight.GetAI()).Mount(me);
-                        me.SetHealth(pMidnight.GetHealth());
-                        DoResetThreat();
-                    }
-                }
-            }
-
-            DoMeleeAttackIfReady();
+            _scheduler.Update(diff, DoMeleeAttackIfReady);
         }
 
         public override void SpellHit(Unit source, SpellInfo spell)
         {
             if (spell.Mechanic == Mechanics.Disarm)
                 Talk(TextIds.SayDisarmed);
+
+            if (spell.Id == SpellIds.Mount)
+            {
+                Creature midnight = ObjectAccessor.GetCreature(me, _midnightGUID);
+                if (midnight != null)
+                {
+                    _phase = Phases.None;
+                    _scheduler.CancelAll();
+
+                    midnight.AttackStop();
+                    midnight.RemoveAllAttackers();
+                    midnight.SetReactState(ReactStates.Passive);
+                    midnight.GetMotionMaster().MoveChase(me);
+                    midnight.GetAI().Talk(TextIds.EmoteMountUp);
+
+                    me.AttackStop();
+                    me.RemoveAllAttackers();
+                    me.SetReactState(ReactStates.Passive);
+                    me.GetMotionMaster().MoveChase(midnight);
+                    Talk(TextIds.SayMount);
+
+                    _scheduler.Schedule(TimeSpan.FromSeconds(3), task =>
+                    {
+                        Creature midnight1 = ObjectAccessor.GetCreature(me, _midnightGUID);
+                        if (midnight1 != null)
+                        {
+                            if (me.IsWithinMeleeRange(midnight1))
+                            {
+                                DoCastAOE(SpellIds.SummonAttumenMounted);
+                                me.SetVisible(false);
+                                midnight1.SetVisible(false);
+                            }
+                            else
+                            {
+                                midnight1.GetMotionMaster().MoveChase(me);
+                                me.GetMotionMaster().MoveChase(midnight1);
+                                task.Repeat(TimeSpan.FromSeconds(3));
+                            }
+                        }
+                    });
+                }
+            }
         }
 
-        public ObjectGuid Midnight;
-        uint CleaveTimer;
-        uint CurseTimer;
-        uint RandomYellTimer;
-        uint ChargeTimer;                                     //only when mounted
-        uint ResetTimer;
+        ObjectGuid _midnightGUID;
+        Phases _phase;
     }
 
     [Script]
-    public class boss_midnight : ScriptedAI
+    public class boss_midnight : BossAI
     {
-        public boss_midnight(Creature creature) : base(creature) { }
+        public boss_midnight(Creature creature) : base(creature, DataTypes.Attumen)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            _phase = Phases.None;
+        }
 
         public override void Reset()
         {
-            Phase = 1;
-            Attumen.Clear();
-            mountTimer = 0;
-
-            me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+            Initialize();
+            base.Reset();
             me.SetVisible(true);
+            me.SetReactState(ReactStates.Defensive);
         }
 
-        public override void EnterCombat(Unit who) { }
+        public override void DamageTaken(Unit attacker, ref uint damage)
+        {
+            // Midnight never dies, let health fall to 1 and prevent further damage.
+            if (damage >= me.GetHealth())
+                damage = (uint)(me.GetHealth() - 1);
+
+            if (_phase == Phases.None && me.HealthBelowPctDamaged(95, damage))
+            {
+                _phase = Phases.AttumenEngages;
+                Talk(TextIds.EmoteCallAttumen);
+                DoCastAOE(SpellIds.SummonAttumen);
+            }
+            else if (_phase == Phases.AttumenEngages && me.HealthBelowPctDamaged(25, damage))
+            {
+                _phase = Phases.Mounted;
+                DoCastAOE(SpellIds.Mount, true);
+            }
+        }
+
+        public override void JustSummoned(Creature summon)
+        {
+            if (summon.GetEntry() == CreatureIds.AttumenUnmounted)
+            {
+                _attumenGUID = summon.GetGUID();
+                summon.GetAI().SetGUID(me.GetGUID(), (int)CreatureIds.Midnight);
+                summon.GetAI().AttackStart(me.GetVictim());
+                summon.GetAI().Talk(TextIds.SayAppear);
+            }
+
+            base.JustSummoned(summon);
+        }
+
+        public override void EnterCombat(Unit who)
+        {
+            base.EnterCombat(who);
+
+            _scheduler.Schedule(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(25), task =>
+            {
+                DoCastVictim(SpellIds.Knockdown);
+                task.Repeat(TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(25));
+            });
+        }
+
+        public override void EnterEvadeMode(EvadeReason why = EvadeReason.Other)
+        {
+            base._DespawnAtEvade(10);
+        }
 
         public override void KilledUnit(Unit victim)
         {
-            if (Phase == 2)
+            if (_phase == Phases.AttumenEngages)
             {
-                Unit unit = Global.ObjAccessor.GetUnit(me, Attumen);
-                if (unit)
+                Unit unit = Global.ObjAccessor.GetUnit(me, _attumenGUID);
+                if (unit != null)
                     Talk(TextIds.SayMidnightKill, unit);
             }
         }
 
         public override void UpdateAI(uint diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() || _phase == Phases.Mounted)
                 return;
 
-            if (Phase == 1 && HealthBelowPct(95))
-            {
-                Phase = 2;
-                Creature attumen = me.SummonCreature(Misc.SummonAttumen, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType.TimedOrDeadDespawn, 30000);
-                if (attumen)
-                {
-                    Attumen = attumen.GetGUID();
-                    attumen.GetAI().AttackStart(me.GetVictim());
-                    SetMidnight(attumen, me.GetGUID());
-                    Talk(TextIds.SayAppear, attumen);
-                }
-            }
-            else if (Phase == 2 && HealthBelowPct(25))
-            {
-                Unit pAttumen = Global.ObjAccessor.GetUnit(me, Attumen);
-                if (pAttumen)
-                    Mount(pAttumen);
-            }
-            else if (Phase == 3)
-            {
-                if (mountTimer != 0)
-                {
-                    if (mountTimer <= diff)
-                    {
-                        mountTimer = 0;
-                        me.SetVisible(false);
-                        me.GetMotionMaster().MoveIdle();
-                        Unit pAttumen = Global.ObjAccessor.GetUnit(me, Attumen);
-                        if (pAttumen)
-                        {
-                            pAttumen.SetDisplayId(Misc.MountedDisplayid);
-                            pAttumen.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable);
-                            if (pAttumen.GetVictim())
-                            {
-                                pAttumen.GetMotionMaster().MoveChase(pAttumen.GetVictim());
-                                pAttumen.SetTarget(pAttumen.GetVictim().GetGUID());
-                            }
-                            pAttumen.SetObjectScale(1);
-                        }
-                    }
-                    else mountTimer -= diff;
-                }
-            }
-
-            if (Phase != 3)
-                DoMeleeAttackIfReady();
+            _scheduler.Update(diff, DoMeleeAttackIfReady);
         }
 
-        public void Mount(Unit pAttumen)
-        {
-            Talk(TextIds.SayMount, pAttumen);
-            Phase = 3;
-            me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable);
-            pAttumen.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable);
-            float angle = me.GetAngle(pAttumen);
-            float distance = me.GetDistance2d(pAttumen);
-            float newX = me.GetPositionX() + (float)Math.Cos(angle) * (distance / 2);
-            float newY = me.GetPositionY() + (float)Math.Sin(angle) * (distance / 2);
-            float newZ = 50;
-            me.GetMotionMaster().Clear();
-            me.GetMotionMaster().MovePoint(0, newX, newY, newZ);
-            distance += 10;
-            newX = me.GetPositionX() + (float)Math.Cos(angle) * (distance / 2);
-            newY = me.GetPositionY() + (float)Math.Sin(angle) * (distance / 2);
-            pAttumen.GetMotionMaster().Clear();
-            pAttumen.GetMotionMaster().MovePoint(0, newX, newY, newZ);
-            mountTimer = 1000;
-        }
-
-        void SetMidnight(Creature pAttumen, ObjectGuid value)
-        {
-            ((boss_attumen)pAttumen.GetAI()).Midnight = value;
-        }
-
-        ObjectGuid Attumen;
-        byte Phase;
-        uint mountTimer;
+        ObjectGuid _attumenGUID;
+        Phases _phase;
     }
 }

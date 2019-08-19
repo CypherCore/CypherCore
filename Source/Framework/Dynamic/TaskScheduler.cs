@@ -569,7 +569,7 @@ namespace Framework.Dynamic
         /// Returns the repeat counter which increases every time the task is repeated.
         /// </summary>
         /// <returns></returns>
-        uint GetRepeatCounter()
+        public uint GetRepeatCounter()
         {
             return _task._repeated;
         }

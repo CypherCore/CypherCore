@@ -957,7 +957,7 @@ namespace Scripts.Northrend.IcecrownCitadel
 
         public override void sGossipSelect(Player player, uint menuId, uint gossipListId)
         {
-            me.RemoveFlag64(UnitFields.NpcFlags, NPCFlags.Gossip);
+            me.RemoveNpcFlag(NPCFlags.Gossip);
             me.GetTransport().EnableMovement(true);
             _events.SetPhase(GunshipMiscData.PhaseIntro);
             _events.ScheduleEvent(GunshipEvents.IntroH1, 5000, 0, GunshipMiscData.PhaseIntro);
@@ -1202,7 +1202,7 @@ namespace Scripts.Northrend.IcecrownCitadel
 
         public override void sGossipSelect(Player player, uint menuId, uint gossipListId)
         {
-            me.RemoveFlag64(UnitFields.NpcFlags, NPCFlags.Gossip);
+            me.RemoveNpcFlag(NPCFlags.Gossip);
             me.GetTransport().EnableMovement(true);
             _events.SetPhase(GunshipMiscData.PhaseIntro);
             _events.ScheduleEvent(GunshipEvents.IntroA1, 5000);

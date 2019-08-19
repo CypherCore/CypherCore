@@ -182,7 +182,7 @@ namespace Scripts.Northrend.DraktharonKeep.Trollgore
             if (type == MovementGeneratorType.Point && pointId == Misc.PointLanding)
             {
                 me.Dismount();
-                me.RemoveFlag(UnitFields.Flags, UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc);
+                me.RemoveUnitFlag(UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc);
                 DoCastAOE(SpellIds.InvaderTaunt);
             }
         }

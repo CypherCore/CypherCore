@@ -47,7 +47,7 @@ namespace Scripts.Outlands
             envelopingWinds_Timer = 9000;
             shock_Timer = 5000;
 
-            me.RemoveFlag64(UnitFields.NpcFlags, NPCFlags.QuestGiver);
+            me.RemoveNpcFlag(NPCFlags.QuestGiver);
             me.SetFaction(Aeranas.FactionFriendly);
 
             Talk(Aeranas.SaySummon);
@@ -72,7 +72,7 @@ namespace Scripts.Outlands
             if (HealthBelowPct(30))
             {
                 me.SetFaction(Aeranas.FactionFriendly);
-                me.SetFlag64(UnitFields.NpcFlags, NPCFlags.QuestGiver);
+                me.AddNpcFlag(NPCFlags.QuestGiver);
                 me.RemoveAllAuras();
                 me.DeleteThreatList();
                 me.CombatStop(true);

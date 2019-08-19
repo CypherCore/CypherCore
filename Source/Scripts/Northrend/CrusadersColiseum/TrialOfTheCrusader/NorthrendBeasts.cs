@@ -182,7 +182,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                     if (snobold)
                     {
                         snobold.ExitVehicle();
-                        snobold.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                        snobold.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
                         snobold.ToCreature().GetAI().DoAction(Actions.DisableFireBomb);
                         snobold.CastSpell(me, SpellIds.JumpToHand, true);
                         break;
@@ -209,7 +209,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             {
                 case 0:
                     instance.DoUseDoorOrButton(instance.GetGuidData(GameObjectIds.MainGateDoor));
-                    me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                    me.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
                     me.SetReactState(ReactStates.Aggressive);
                     me.SetInCombatWithZone();
                     break;
@@ -300,7 +300,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
 
         public override void Reset()
         {
-            me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+            me.AddUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
             me.SetInCombatWithZone();
             _events.ScheduleEvent(Events.CheckMount, TimeSpan.FromSeconds(1));
             _events.ScheduleEvent(Events.FireBomb, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(30));
@@ -530,7 +530,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             if (!Enraged && instance.GetData(DataTypes.NorthrendBeasts) == NorthrendBeasts.SnakesSpecial)
             {
                 me.RemoveAurasDueToSpell(SpellIds.Submerge);
-                me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                me.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
                 DoCast(SpellIds.Enrage);
                 Enraged = true;
                 Talk(TextIds.EmoteEnrage);
@@ -567,7 +567,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                         Creature acidmaw = me.SummonCreature(CreatureIds.Acidmaw, MiscData.ToCCommonLoc[9].GetPositionX(), MiscData.ToCCommonLoc[9].GetPositionY(), MiscData.ToCCommonLoc[9].GetPositionZ(), 5, TempSummonType.ManualDespawn);
                         if (acidmaw)
                         {
-                            acidmaw.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                            acidmaw.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
                             acidmaw.SetReactState(ReactStates.Aggressive);
                             acidmaw.SetInCombatWithZone();
                             acidmaw.CastSpell(acidmaw, SpellIds.Emerge);
@@ -603,7 +603,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             me.SetInCombatWithZone();
             _events.SetPhase(Misc.PhaseSubmerged);
             _events.ScheduleEvent(Events.Emerge, TimeSpan.FromSeconds(5), 0, Misc.PhaseSubmerged);
-            me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+            me.AddUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
             me.GetMotionMaster().MovePoint(0, MiscData.ToCCommonLoc[1].GetPositionX() + RandomHelper.FRand(-40.0f, 40.0f), MiscData.ToCCommonLoc[1].GetPositionY() + RandomHelper.FRand(-40.0f, 40.0f), MiscData.ToCCommonLoc[1].GetPositionZ());
             WasMobile = !WasMobile;
         }
@@ -615,7 +615,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             me.SetDisplayId(ModelMobile);
             me.RemoveAurasDueToSpell(SpellIds.Submerge);
             me.RemoveAurasDueToSpell(SpellIds.GroundVisual0);
-            me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+            me.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
 
             // if the worm was mobile before submerging, make him stationary now
             if (WasMobile)
@@ -710,7 +710,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             {
                 case 0:
                     instance.DoUseDoorOrButton(instance.GetGuidData(GameObjectIds.MainGateDoor));
-                    me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                    me.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
                     me.SetReactState(ReactStates.Aggressive);
                     me.SetInCombatWithZone();
                     break;
@@ -840,7 +840,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                     break;
                 case 2:
                     instance.DoUseDoorOrButton(instance.GetGuidData(GameObjectIds.MainGateDoor));
-                    me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+                    me.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
                     me.SetReactState(ReactStates.Aggressive);
                     me.SetInCombatWithZone();
                     break;
@@ -944,7 +944,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                             me.SetTarget(_trampleTargetGUID);
                             _trampleCast = false;
                             SetCombatMovement(false);
-                            me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+                            me.AddUnitFlag(UnitFlags.NonAttackable);
                             me.SetControlled(true, UnitState.Root);
                             me.GetMotionMaster().Clear();
                             me.GetMotionMaster().MoveIdle();
@@ -1033,7 +1033,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
                         Talk(TextIds.EmoteTrampleFail);
                     }
                     _movementStarted = false;
-                    me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+                    me.RemoveUnitFlag(UnitFlags.NonAttackable);
                     SetCombatMovement(true);
                     me.GetMotionMaster().MovementExpired();
                     me.GetMotionMaster().Clear();

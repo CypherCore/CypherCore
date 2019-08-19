@@ -3350,4 +3350,111 @@ namespace Scripts.Spells.Items
             OnEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ProcTriggerSpell, AuraEffectHandleModes.Real));
         }
     }
+
+    [Script]// 45051 - Mad Alchemist's Potion (34440)
+    class mad_alchemists_potion_SpellScript : SpellScript
+    {
+        void SecondaryEffect()
+        {
+            List<uint> availableElixirs = new List<uint>()
+            {
+                // Battle Elixirs
+                33720, // Onslaught Elixir (28102)
+                54452, // Adept's Elixir (28103)
+                33726, // Elixir of Mastery (28104)
+                28490, // Elixir of Major Strength (22824)
+                28491, // Elixir of Healing Power (22825)
+                28493, // Elixir of Major Frost Power (22827)
+                54494, // Elixir of Major Agility (22831)
+                28501, // Elixir of Major Firepower (22833)
+                28503,// Elixir of Major Shadow Power (22835)
+                38954, // Fel Strength Elixir (31679)
+                // Guardian Elixirs
+                39625, // Elixir of Major Fortitude (32062)
+                39626, // Earthen Elixir (32063)
+                39627, // Elixir of Draenic Wisdom (32067)
+                39628, // Elixir of Ironskin (32068)
+                28502, // Elixir of Major Defense (22834)
+                28514, // Elixir of Empowerment (22848)
+                // Other
+                28489, // Elixir of Camouflage (22823)
+                28496  // Elixir of the Searching Eye (22830)
+            };
+
+            Unit target = GetCaster();
+
+            if (target.GetPowerType() == PowerType.Mana)
+                availableElixirs.Add(28509); // Elixir of Major Mageblood (22840)
+
+            uint chosenElixir = availableElixirs.SelectRandom();
+
+            bool useElixir = true;
+
+            SpellGroup chosenSpellGroup = SpellGroup.None;
+            if (Global.SpellMgr.IsSpellMemberOfSpellGroup(chosenElixir, SpellGroup.ElixirBattle))
+                chosenSpellGroup = SpellGroup.ElixirBattle;
+            if (Global.SpellMgr.IsSpellMemberOfSpellGroup(chosenElixir, SpellGroup.ElixirGuardian))
+                chosenSpellGroup = SpellGroup.ElixirGuardian;
+            // If another spell of the same group is already active the elixir should not be cast
+            if (chosenSpellGroup != 0)
+            {
+                var Auras = target.GetAppliedAuras();
+                foreach (var pair in Auras)
+                {
+                    uint spell_id = pair.Value.GetBase().GetId();
+                    if (Global.SpellMgr.IsSpellMemberOfSpellGroup(spell_id, chosenSpellGroup) && spell_id != chosenElixir)
+                    {
+                        useElixir = false;
+                        break;
+                    }
+                }
+            }
+
+            if (useElixir)
+                target.CastSpell(target, chosenElixir, true, GetCastItem());
+        }
+
+        public override void Register()
+        {
+            AfterCast.Add(new CastHandler(SecondaryEffect));
+        }
+    }
+
+    [Script]// 53750 - Crazy Alchemist's Potion (40077)
+    class crazy_alchemists_potion_SpellScript : SpellScript
+    {
+        void SecondaryEffect()
+        {
+            List<uint> availableElixirs = new List<uint>()
+            {
+                43185, // Runic Healing Potion (33447)
+                53750, // Crazy Alchemist's Potion (40077)
+                53761, // Powerful Rejuvenation Potion (40087)
+                53762, // Indestructible Potion (40093)
+                53908, // Potion of Speed (40211)
+                53909, // Potion of Wild Magic (40212)
+                53910, // Mighty Arcane Protection Potion (40213)
+                53911, // Mighty Fire Protection Potion (40214)
+                53913, // Mighty Frost Protection Potion (40215)
+                53914, // Mighty Nature Protection Potion (40216)
+                53915  // Mighty Shadow Protection Potion (40217)
+            };
+
+            Unit target = GetCaster();
+
+            if (!target.IsInCombat())
+                availableElixirs.Add(53753); // Potion of Nightmares (40081)
+            if (target.GetPowerType() == PowerType.Mana)
+                availableElixirs.Add(43186); // Runic Mana Potion(33448)
+
+            uint chosenElixir = availableElixirs.SelectRandom();
+
+            target.CastSpell(target, chosenElixir, true, GetCastItem());
+        }
+
+        public override void Register()
+        {
+            AfterCast.Add(new CastHandler(SecondaryEffect));
+        }
+    }
 }

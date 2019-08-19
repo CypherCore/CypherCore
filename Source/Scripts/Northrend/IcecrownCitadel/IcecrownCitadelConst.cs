@@ -136,6 +136,7 @@ namespace Scripts.Northrend.IcecrownCitadel
         public const uint ImpalingSpear = 71443;
         public const uint AetherShield = 71463;
         public const uint HurlSpear = 71466;
+        public const uint DivineSurge = 71465;
 
         // Captain Arnath
         public const uint DominateMind = 14515;

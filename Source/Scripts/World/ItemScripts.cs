@@ -206,7 +206,7 @@ namespace Scripts.World
             List<ItemPosCount> dest = new List<ItemPosCount>();
             InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, 39883, 1); // Cracked Egg
             if (msg == InventoryResult.Ok)
-                player.StoreNewItem(dest, 39883, true, ItemEnchantment.GenerateItemRandomPropertyId(39883));
+                player.StoreNewItem(dest, 39883, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(39883));
 
             return true;
         }
@@ -222,7 +222,7 @@ namespace Scripts.World
             List<ItemPosCount> dest = new List<ItemPosCount>();
             InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, 44718, 1); // Ripe Disgusting Jar
             if (msg == InventoryResult.Ok)
-                player.StoreNewItem(dest, 44718, true, ItemEnchantment.GenerateItemRandomPropertyId(44718));
+                player.StoreNewItem(dest, 44718, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(44718));
 
             return true;
         }
@@ -257,7 +257,7 @@ namespace Scripts.World
             {
                 summon.SetVisible(false);
                 summon.SetReactState(ReactStates.Passive);
-                summon.SetFlag(UnitFields.Flags, UnitFlags.ImmuneToPc);
+                summon.AddUnitFlag(UnitFlags.ImmuneToPc);
             }
             return false;
         }

@@ -142,7 +142,7 @@ namespace Scripts.Outlands
         {
             public npc_cooshcooshAI(Creature creature) : base(creature)
             {
-                m_uiNormFaction = creature.getFaction();
+                m_uiNormFaction = creature.GetFaction();
             }
 
             uint m_uiNormFaction;
@@ -150,7 +150,7 @@ namespace Scripts.Outlands
             public override void Reset()
             {
                 _events.ScheduleEvent(Event_LightningBolt, 2000);
-                if (me.getFaction() != m_uiNormFaction)
+                if (me.GetFaction() != m_uiNormFaction)
                     me.SetFaction(m_uiNormFaction);
             }
 

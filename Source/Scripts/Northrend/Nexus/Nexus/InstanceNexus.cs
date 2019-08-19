@@ -135,17 +135,17 @@ namespace Scripts.Northrend.Nexus.Nexus
                     case GameObjectIds.AnomalusContainmetSphere:
                         AnomalusContainmentSphere = go.GetGUID();
                         if (GetBossState(DataTypes.Anomalus) == EncounterState.Done)
-                            go.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                            go.RemoveFlag(GameObjectFlags.NotSelectable);
                         break;
                     case GameObjectIds.OrmoroksContainmetSphere:
                         OrmoroksContainmentSphere = go.GetGUID();
                         if (GetBossState(DataTypes.Ormorok) == EncounterState.Done)
-                            go.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                            go.RemoveFlag(GameObjectFlags.NotSelectable);
                         break;
                     case GameObjectIds.TelestrasContainmetSphere:
                         TelestrasContainmentSphere = go.GetGUID();
                         if (GetBossState(DataTypes.MagusTelestra) == EncounterState.Done)
-                            go.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                            go.RemoveFlag(GameObjectFlags.NotSelectable);
                         break;
                     default:
                         break;
@@ -164,7 +164,7 @@ namespace Scripts.Northrend.Nexus.Nexus
                         {
                             GameObject sphere = instance.GetGameObject(TelestrasContainmentSphere);
                             if (sphere)
-                                sphere.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                                sphere.RemoveFlag(GameObjectFlags.NotSelectable);
                         }
                         break;
                     case DataTypes.Anomalus:
@@ -172,7 +172,7 @@ namespace Scripts.Northrend.Nexus.Nexus
                         {
                             GameObject sphere = instance.GetGameObject(AnomalusContainmentSphere);
                             if (sphere)
-                                sphere.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                                sphere.RemoveFlag(GameObjectFlags.NotSelectable);
                         }
                         break;
                     case DataTypes.Ormorok:
@@ -180,7 +180,7 @@ namespace Scripts.Northrend.Nexus.Nexus
                         {
                             GameObject sphere = instance.GetGameObject(OrmoroksContainmentSphere);
                             if (sphere)
-                                sphere.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                                sphere.RemoveFlag(GameObjectFlags.NotSelectable);
                         }
                         break;
                     default:

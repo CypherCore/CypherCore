@@ -363,7 +363,7 @@ namespace Scripts.World
                         if (Spell != 0)
                             creature.CastSpell(player, Spell, false);
                         else
-                            Log.outError(LogFilter.Scripts, "go_ethereum_prison summoned Creature (entry {0}) but faction ({1}) are not expected by script.", creature.GetEntry(), creature.getFaction());
+                            Log.outError(LogFilter.Scripts, "go_ethereum_prison summoned Creature (entry {0}) but faction ({1}) are not expected by script.", creature.GetEntry(), creature.GetFaction());
                     }
                 }
             }

@@ -402,7 +402,7 @@ namespace Game.Network.Packets
         public int OverEnergize;
     }
 
-    class SpellInstakillLog : ServerPacket
+    public class SpellInstakillLog : ServerPacket
     {
         public SpellInstakillLog() : base(ServerOpcodes.SpellInstakillLog, ConnectionType.Instance) { }
 

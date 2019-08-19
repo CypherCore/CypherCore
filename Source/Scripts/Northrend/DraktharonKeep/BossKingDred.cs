@@ -30,7 +30,7 @@ namespace Scripts.Northrend.DraktharonKeep.KingDred
         public const uint GrievousBite = 48920;
         public const uint ManglingSlash = 48873; // Cast On The Current Tank; Adds Debuf
         public const uint FearsomeRoar = 48849;
-        public const uint PiercingSlash = 48878; // Debuff --> Armor Reduced By 75%
+        public const uint PiercingSlash = 48878; // Debuff -. Armor Reduced By 75%
         public const uint RaptorCall = 59416; // Dummy
         public const uint GutRip = 49710;
         public const uint Rend = 13738;

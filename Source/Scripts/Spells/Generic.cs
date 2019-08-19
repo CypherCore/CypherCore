@@ -1058,8 +1058,8 @@ namespace Scripts.Spells.Generic
         void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
-            target.SetFlag(ObjectFields.DynamicFlags, UnitDynFlags.Dead);
-            target.SetFlag(UnitFields.Flags2, UnitFlags2.FeignDeath);
+            target.AddDynamicFlag(UnitDynFlags.Dead);
+            target.AddUnitFlag2(UnitFlags2.FeignDeath);
 
             if (target.IsTypeId(TypeId.Unit))
                 target.ToCreature().SetReactState(ReactStates.Passive);
@@ -1068,8 +1068,8 @@ namespace Scripts.Spells.Generic
         void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
-            target.RemoveFlag(ObjectFields.DynamicFlags, UnitDynFlags.Dead);
-            target.RemoveFlag(UnitFields.Flags2, UnitFlags2.FeignDeath);
+            target.RemoveDynamicFlag(UnitDynFlags.Dead);
+            target.RemoveUnitFlag2(UnitFlags2.FeignDeath);
         }
 
         public override void Register()
@@ -2873,7 +2873,7 @@ namespace Scripts.Spells.Generic
                 player.CombatStop();
                 if (player.IsNonMeleeSpellCast(true))
                     player.InterruptNonMeleeSpells(true);
-                player.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+                player.AddUnitFlag(UnitFlags.NonAttackable);
 
                 // if player class = hunter || warlock remove pet if alive
                 if ((player.GetClass() == Class.Hunter) || (player.GetClass() == Class.Warlock))
@@ -2898,7 +2898,7 @@ namespace Scripts.Spells.Generic
             {
                 // Reset player faction + allow combat + allow duels
                 player.setFactionForRace(player.GetRace());
-                player.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+                player.RemoveUnitFlag(UnitFlags.NonAttackable);
                 // save player
                 player.SaveToDB();
             }

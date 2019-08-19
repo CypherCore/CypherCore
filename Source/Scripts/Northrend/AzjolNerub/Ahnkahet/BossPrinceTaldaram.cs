@@ -262,7 +262,7 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.PrinceTaldaram
 
         void RemovePrison()
         {
-            me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable);
+            me.RemoveUnitFlag(UnitFlags.NotSelectable);
             me.RemoveAurasDueToSpell(SpellIds.BeamVisual);
             me.SetHomePosition(me.GetPositionX(), me.GetPositionY(), Misc.DataGroundPositionZ, me.GetOrientation());
             DoCast(SpellIds.HoverFall);
@@ -373,7 +373,7 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.PrinceTaldaram
             Creature PrinceTaldaram = ObjectAccessor.GetCreature(go, instance.GetGuidData(DataTypes.PrinceTaldaram));
             if (PrinceTaldaram && PrinceTaldaram.IsAlive())
             {
-                go.SetFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                go.AddFlag(GameObjectFlags.NotSelectable);
                 go.SetGoState(GameObjectState.Active);
 
                 switch (go.GetEntry())

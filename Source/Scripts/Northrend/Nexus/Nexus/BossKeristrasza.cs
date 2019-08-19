@@ -99,7 +99,7 @@ namespace Scripts.Northrend.Nexus.Nexus
             Initialize();
             _intenseColdList.Clear();
 
-            me.RemoveFlag(UnitFields.Flags, UnitFlags.Stunned);
+            me.RemoveUnitFlag(UnitFlags.Stunned);
 
             RemovePrison(CheckContainmentSpheres());
             _Reset();
@@ -141,15 +141,15 @@ namespace Scripts.Northrend.Nexus.Nexus
         {
             if (remove)
             {
-                me.RemoveFlag(UnitFields.Flags, UnitFlags.ImmuneToPc);
-                me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+                me.RemoveUnitFlag(UnitFlags.ImmuneToPc);
+                me.RemoveUnitFlag(UnitFlags.NonAttackable);
                 if (me.HasAura(KeristraszaConst.SpellFrozenPrison))
                     me.RemoveAurasDueToSpell(KeristraszaConst.SpellFrozenPrison);
             }
             else
             {
-                me.SetFlag(UnitFields.Flags, UnitFlags.ImmuneToPc);
-                me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+                me.AddUnitFlag(UnitFlags.ImmuneToPc);
+                me.AddUnitFlag(UnitFlags.NonAttackable);
                 DoCast(me, KeristraszaConst.SpellFrozenPrison, false);
             }
         }
@@ -202,7 +202,7 @@ namespace Scripts.Northrend.Nexus.Nexus
             if (pKeristrasza && pKeristrasza.IsAlive())
             {
                 // maybe these are hacks :(
-                go.SetFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                go.AddFlag(GameObjectFlags.NotSelectable);
                 go.SetGoState(GameObjectState.Active);
 
                 ((boss_keristrasza)pKeristrasza.GetAI()).CheckContainmentSpheres(true);

@@ -184,7 +184,7 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.JedogaShadowseeker
             me.GetMotionMaster().MovePoint(1, Misc.JedogaPosition[1]);
             me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Normal, false);
             me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Magic, false);
-            me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.NonAttackable);
+            me.RemoveUnitFlag(UnitFlags.NotSelectable | UnitFlags.NonAttackable);
 
             me.RemoveAurasDueToSpell(SpellIds.SphereVisual);
 
@@ -214,7 +214,7 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.JedogaShadowseeker
         {
             me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Normal, true);
             me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Magic, true);
-            me.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.NonAttackable);
+            me.AddUnitFlag(UnitFlags.NotSelectable | UnitFlags.NonAttackable);
 
             me.AttackStop();
             me.RemoveAllAuras();
@@ -350,14 +350,14 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.JedogaShadowseeker
                 me.RemoveAurasDueToSpell(SpellIds.SphereVisual);
                 me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Normal, false);
                 me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Magic, false);
-                me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.NonAttackable);
+                me.RemoveUnitFlag(UnitFlags.NotSelectable | UnitFlags.NonAttackable);
             }
             else
             {
                 DoCast(me, SpellIds.SphereVisual, false);
                 me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Normal, true);
                 me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Magic, true);
-                me.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.NonAttackable);
+                me.AddUnitFlag(UnitFlags.NotSelectable | UnitFlags.NonAttackable);
             }
         }
 
@@ -434,7 +434,7 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.JedogaShadowseeker
                     me.RemoveAurasDueToSpell(SpellIds.SphereVisual);
                     me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Normal, false);
                     me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Magic, false);
-                    me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.NonAttackable);
+                    me.RemoveUnitFlag(UnitFlags.NotSelectable | UnitFlags.NonAttackable);
 
                     float distance = me.GetDistance(Misc.JedogaPosition[1]);
 
@@ -456,14 +456,14 @@ namespace Scripts.Northrend.AzjolNerub.Ahnkahet.JedogaShadowseeker
                         me.RemoveAurasDueToSpell(SpellIds.SphereVisual);
                         me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Normal, false);
                         me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Magic, false);
-                        me.RemoveFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.NonAttackable);
+                        me.RemoveUnitFlag(UnitFlags.NotSelectable | UnitFlags.NonAttackable);
                     }
                     if (instance.GetBossState(DataTypes.JedogaShadowseeker) == EncounterState.InProgress && !me.HasAura(SpellIds.SphereVisual))
                     {
                         DoCast(me, SpellIds.SphereVisual, false);
                         me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Normal, true);
                         me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Magic, true);
-                        me.SetFlag(UnitFields.Flags, UnitFlags.NotSelectable | UnitFlags.NonAttackable);
+                        me.AddUnitFlag(UnitFlags.NotSelectable | UnitFlags.NonAttackable);
                     }
                 }
                 bCheckTimer = 2 * Time.InMilliseconds;

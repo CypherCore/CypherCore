@@ -356,8 +356,8 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.Nadronox
 
         public void Initialize()
         {
-            me.SetFloatValue(UnitFields.BoundingRadius, 9.0f);
-            me.SetFloatValue(UnitFields.CombatReach, 9.0f);
+            me.SetBoundingRadius(9.0f);
+            me.SetCombatReach(9.0f);
             _enteredCombat = false;
             _doorsWebbed = false;
             _lastPlayerCombatState = false;

@@ -35,124 +35,135 @@ namespace Scripts.EasternKingdoms.Karazhan.Curator
 
     struct SpellIds
     {
-        //Flare spell info
-        public const uint AstralFlarePassive = 30234;               //Visual effect + Flare damage
-
-        //Curator spell info
         public const uint HatefulBolt = 30383;
         public const uint Evocation = 30254;
-        public const uint Enrage = 30403;               //Arcane Infusion: Transforms Curator and adds damage.
+        public const uint ArcaneInfusion = 30403;
         public const uint Berserk = 26662;
+        public const uint SummonAstralFlareNE = 30236;
+        public const uint SummonAstralFlareNW = 30239;
+        public const uint SummonAstralFlareSE = 30240;
+        public const uint SummonAstralFlareSW = 30241;
+    }
+
+    struct EventIds
+    {
+        public const uint HatefulBolt = 1;
+        public const uint SummonAstralFlare = 2;
+        public const uint ArcaneInfusion = 3;
+        public const uint Berserk = 4;
     }
 
     [Script]
-    class boss_curator : ScriptedAI
+    class boss_curator : BossAI
     {
-        public boss_curator(Creature creature) : base(creature)
-        {
-            Initialize();
-        }
-
-        void Initialize()
-        {
-            _scheduler.Schedule(TimeSpan.FromSeconds(10), task =>
-            {
-                //Summon Astral Flare
-                Creature AstralFlare = DoSpawnCreature(17096, RandomHelper.Rand32() % 37, RandomHelper.Rand32() % 37, 0, 0, TempSummonType.TimedDespawnOOC, 5000);
-                Unit target = SelectTarget(SelectAggroTarget.Random, 0);
-
-                if (AstralFlare && target)
-                {
-                    AstralFlare.CastSpell(AstralFlare, SpellIds.AstralFlarePassive, false);
-                    AstralFlare.GetAI().AttackStart(target);
-                }
-
-                //Reduce Mana by 10% of max health
-                int mana = me.GetMaxPower(PowerType.Mana);
-                if (mana != 0)
-                {
-                    mana /= 10;
-                    me.ModifyPower(PowerType.Mana, -mana);
-
-                    //if this get's us below 10%, then we evocate (the 10th should be summoned now)
-                    if (me.GetPower(PowerType.Mana) * 100 / me.GetMaxPower(PowerType.Mana) < 10)
-                    {
-                        Talk(TextIds.SayEvocate);
-                        me.InterruptNonMeleeSpells(false);
-                        DoCast(me, SpellIds.Evocation);
-                        _scheduler.DelayAll(TimeSpan.FromSeconds(20));
-                        //Evocating = true;
-                        //no AddTimer cooldown, this will make first flare appear instantly after evocate end, like expected
-                        return;
-                    }
-                    else
-                    {
-                        if (RandomHelper.URand(0, 1) == 0)
-                        {
-                            Talk(TextIds.SaySummon);
-                        }
-                    }
-                }
-
-                task.Repeat();
-            });
-
-            _scheduler.Schedule(TimeSpan.FromSeconds(15), task =>
-            {
-                if (Enraged)
-                    task.Repeat(TimeSpan.FromSeconds(7));
-                else
-                    task.Repeat();
-
-                Unit target = SelectTarget(SelectAggroTarget.TopAggro, 1);
-                if (target)
-                    DoCast(target, SpellIds.HatefulBolt);
-            });
-
-            Enraged = false;
-        }
+        public boss_curator(Creature creature) : base(creature, DataTypes.Curator) { }
 
         public override void Reset()
         {
-            Initialize();
-
+            _Reset();
+            _infused = false;
             me.ApplySpellImmune(0, SpellImmunity.Damage, SpellSchoolMask.Arcane, true);
         }
 
         public override void KilledUnit(Unit victim)
         {
-            Talk(TextIds.SayKill);
+            if (victim.GetTypeId() == TypeId.Player)
+                Talk(TextIds.SayKill);
         }
 
         public override void JustDied(Unit killer)
         {
+            _JustDied();
             Talk(TextIds.SayDeath);
         }
 
         public override void EnterCombat(Unit victim)
         {
+            _EnterCombat();
             Talk(TextIds.SayAggro);
+
+            _events.ScheduleEvent(EventIds.HatefulBolt, TimeSpan.FromSeconds(12));
+            _events.ScheduleEvent(EventIds.SummonAstralFlare, TimeSpan.FromSeconds(10));
+            _events.ScheduleEvent(EventIds.Berserk, TimeSpan.FromMinutes(12));
+        }
+
+        public override void DamageTaken(Unit attacker, ref uint damage)
+        {
+            if (!HealthAbovePct(15) && !_infused)
+            {
+                _infused = true;
+                _events.ScheduleEvent(EventIds.ArcaneInfusion, TimeSpan.FromMilliseconds(1));
+                _events.CancelEvent(EventIds.SummonAstralFlare);
+            }
+        }
+
+        public override void ExecuteEvent(uint eventId)
+        {
+            switch (eventId)
+            {
+                case EventIds.HatefulBolt:
+                    Unit target = SelectTarget(SelectAggroTarget.TopAggro, 1);
+                    if (target != null)
+                        DoCast(target, SpellIds.HatefulBolt);
+                    _events.Repeat(TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(15));
+                    break;
+                case EventIds.ArcaneInfusion:
+                    DoCastSelf(SpellIds.ArcaneInfusion, true);
+                    break;
+                case EventIds.SummonAstralFlare:
+                    if (RandomHelper.randChance(50))
+                        Talk(TextIds.SaySummon);
+
+
+                    DoCastSelf(RandomHelper.RAND(SpellIds.SummonAstralFlareNE, SpellIds.SummonAstralFlareNW, SpellIds.SummonAstralFlareSE, SpellIds.SummonAstralFlareSW), true);
+
+                    int mana = me.GetMaxPower(PowerType.Mana) / 10;
+                    if (mana != 0)
+                    {
+                        me.ModifyPower(PowerType.Mana, -mana);
+
+                        if (me.GetPower(PowerType.Mana) * 100 / me.GetMaxPower(PowerType.Mana) < 10)
+                        {
+                            Talk(TextIds.SayEvocate);
+                            me.InterruptNonMeleeSpells(false);
+                            DoCastSelf(SpellIds.Evocation);
+                        }
+                    }
+                    _events.Repeat(TimeSpan.FromSeconds(10));
+                    break;
+                case EventIds.Berserk:
+                    Talk(TextIds.SayEnrage);
+                    DoCastSelf(SpellIds.Berserk, true);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        bool _infused;
+    }
+
+    [Script]
+    class npc_curator_astral_flareAI : ScriptedAI
+    {
+        public npc_curator_astral_flareAI(Creature creature) : base(creature)
+        {
+            me.SetReactState(ReactStates.Passive);
+        }
+
+        public override void Reset()
+        {
+            _scheduler.Schedule(TimeSpan.FromSeconds(2), task =>
+            {
+                me.SetReactState(ReactStates.Aggressive);
+                me.RemoveUnitFlag(UnitFlags.NotSelectable);
+                DoZoneInCombat();
+            });
         }
 
         public override void UpdateAI(uint diff)
         {
-            if (!UpdateVictim())
-                return;
-
             _scheduler.Update(diff);
-
-            if (!Enraged)
-            {
-                if (!HealthAbovePct(15))
-                {
-                    Enraged = true;
-                    DoCast(me, SpellIds.Enrage);
-                    Talk(TextIds.SayEnrage);
-                }
-            }
-
         }
-
-        bool Enraged;
     }
 }

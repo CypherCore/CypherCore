@@ -159,12 +159,12 @@ namespace Scripts.Northrend.IcecrownCitadel
             {
                 if (usable)
                 {
-                    go.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                    go.RemoveFlag(GameObjectFlags.NotSelectable);
                     go.SetGoState(GameObjectState.Active);
                 }
                 else
                 {
-                    go.SetFlag(GameObjectFields.Flags, GameObjectFlags.NotSelectable);
+                    go.AddFlag(GameObjectFlags.NotSelectable);
                     go.SetGoState(GameObjectState.Ready);
                 }
             }
@@ -639,7 +639,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                         Creature valithria = instance.GetCreature(ValithriaDreamwalkerGUID);
                         if (valithria)
                             go.SetLootRecipient(valithria.GetLootRecipient(), valithria.GetLootRecipientGroup());
-                        go.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.Locked | GameObjectFlags.NotSelectable | GameObjectFlags.NoDespawn);
+                        go.RemoveFlag(GameObjectFlags.Locked | GameObjectFlags.NotSelectable | GameObjectFlags.NoDespawn);
                         break;
                     case GameObjectIds.ArthasPlatform:
                         ArthasPlatformGUID = go.GetGUID();
@@ -851,7 +851,7 @@ namespace Scripts.Northrend.IcecrownCitadel
 
                             GameObject loot = instance.GetGameObject(GunshipArmoryGUID);
                             if (loot)
-                                loot.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.Locked | GameObjectFlags.NotSelectable | GameObjectFlags.NoDespawn);
+                                loot.RemoveFlag(GameObjectFlags.Locked | GameObjectFlags.NotSelectable | GameObjectFlags.NoDespawn);
                         }
                         else if (state == EncounterState.Fail)
                             _events.ScheduleEvent(TimedEvents.RespawnGunship, 30000);
@@ -867,7 +867,7 @@ namespace Scripts.Northrend.IcecrownCitadel
                                         Creature deathbringer = instance.GetCreature(DeathbringerSaurfangGUID);
                                         if (deathbringer)
                                             loot.SetLootRecipient(deathbringer.GetLootRecipient(), deathbringer.GetLootRecipientGroup());
-                                        loot.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.Locked | GameObjectFlags.NotSelectable | GameObjectFlags.NoDespawn);
+                                        loot.RemoveFlag(GameObjectFlags.Locked | GameObjectFlags.NotSelectable | GameObjectFlags.NoDespawn);
                                     }
 
                                     GameObject teleporter = instance.GetGameObject(TeleporterUpperSpireGUID);

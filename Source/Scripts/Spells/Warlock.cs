@@ -257,7 +257,7 @@ namespace Scripts.Spells.Warlock
                 if (circle)
                 {
                     player.NearTeleportTo(circle.GetPositionX(), circle.GetPositionY(), circle.GetPositionZ(), circle.GetOrientation());
-                    player.RemoveMovementImpairingAuras();
+                    player.RemoveMovementImpairingAuras(false);
                 }
             }
         }

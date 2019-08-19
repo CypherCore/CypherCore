@@ -435,13 +435,13 @@ namespace Scripts.Spells.Quest
         void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
-            target.SetFlag(UnitFields.Flags, UnitFlags.ImmuneToPc);
+            target.AddUnitFlag(UnitFlags.ImmuneToPc);
             target.AddUnitState(UnitState.Root);
         }
 
         void HandleEffectRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            GetTarget().RemoveFlag(UnitFields.Flags, UnitFlags.ImmuneToPc);
+            GetTarget().RemoveUnitFlag(UnitFlags.ImmuneToPc);
         }
 
         public override void Register()
@@ -789,8 +789,8 @@ namespace Scripts.Spells.Quest
                 if (target.HasAura(SpellIds.PermanentFeignDeath))
                 {
                     target.RemoveAurasDueToSpell(SpellIds.PermanentFeignDeath);
-                    target.SetUInt32Value(ObjectFields.DynamicFlags, 0);
-                    target.SetUInt32Value(UnitFields.Flags2, 0);
+                    target.SetDynamicFlags(0);
+                    target.SetUnitFlags2(0);
                     target.SetHealth(target.GetMaxHealth() / 2);
                     target.SetPower(PowerType.Mana, (int)(target.GetMaxPower(PowerType.Mana) * 0.75f));
                 }

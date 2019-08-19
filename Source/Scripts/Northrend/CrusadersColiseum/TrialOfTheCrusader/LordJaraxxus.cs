@@ -106,7 +106,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             _JustReachedHome();
             instance.SetBossState(DataTypes.BossJaraxxus, EncounterState.Fail);
             DoCast(me, Spells.JaraxxusChains);
-            me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable);
+            me.AddUnitFlag(UnitFlags.NonAttackable);
         }
 
         public override void KilledUnit(Unit who)
@@ -218,7 +218,7 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
 
         public override void Reset()
         {
-            me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable);
+            me.AddUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable);
             me.SetInCombatWithZone();
             DoCast(Jaraxxus.SpellLegionFlameEffect);
         }
@@ -247,9 +247,9 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             me.SetReactState(ReactStates.Passive);
 
             if (!IsHeroic())
-                me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable | UnitFlags.Pacified);
+                me.AddUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable | UnitFlags.Pacified);
             else
-                me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable | UnitFlags.Pacified);
+                me.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable | UnitFlags.Pacified);
 
             _summons.DespawnAll();
         }
@@ -332,9 +332,9 @@ namespace Scripts.Northrend.CrusadersColiseum.TrialOfTheCrusader
             me.SetReactState(ReactStates.Passive);
 
             if (!IsHeroic())
-                me.SetFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable | UnitFlags.Pacified);
+                me.AddUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable | UnitFlags.Pacified);
             else
-                me.RemoveFlag(UnitFields.Flags, UnitFlags.NonAttackable | UnitFlags.NotSelectable | UnitFlags.Pacified);
+                me.RemoveUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable | UnitFlags.Pacified);
 
             _summons.DespawnAll();
         }

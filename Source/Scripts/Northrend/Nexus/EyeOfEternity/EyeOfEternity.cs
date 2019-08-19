@@ -131,7 +131,7 @@ namespace Scripts.Northrend.Nexus.EyeOfEternity
 
                         GameObject platform = instance.GetGameObject(platformGUID);
                         if (platform)
-                            platform.RemoveFlag(GameObjectFields.Flags, GameObjectFlags.Destroyed);
+                            platform.RemoveFlag(GameObjectFlags.Destroyed);
                     }
                     else if (state == EncounterState.Done)
                         SpawnGameObject(InstanceGameObjects.ExitPortal, exitPortalPosition);
@@ -218,7 +218,7 @@ namespace Scripts.Northrend.Nexus.EyeOfEternity
 
                     GameObject iris = instance.GetGameObject(irisGUID);
                     if (iris)
-                        iris.SetFlag(GameObjectFields.Flags, GameObjectFlags.InUse);
+                        iris.AddFlag(GameObjectFlags.InUse);
 
                     Creature malygos = instance.GetCreature(malygosGUID);
                     if (malygos)
