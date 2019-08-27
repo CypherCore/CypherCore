@@ -2137,6 +2137,9 @@ namespace Game.Entities
 
         public void SetBonuses(List<uint> bonusListIDs)
         {
+            if (bonusListIDs == null)
+                bonusListIDs = new List<uint>();
+
             SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.BonusListIDs), bonusListIDs);
 
             foreach (uint bonusListID in (List<uint>)m_itemData.BonusListIDs)

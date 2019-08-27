@@ -381,7 +381,7 @@ namespace Game.Entities
         {
             var fieldInfo = ((MemberExpression)expression.Body).Member as FieldInfo;
             if (fieldInfo == null)
-                throw new ArgumentException("The lambda expression 'property' should point to a valid Property");
+                throw new ArgumentException("The lambda expression should point to a valid Field");
 
             var updateFieldArray = (UpdateFieldArray<UU>)fieldInfo.GetValue(this);
             _changesMask.Set(updateFieldArray.Bit);

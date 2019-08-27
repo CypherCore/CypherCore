@@ -380,7 +380,6 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.ChatAddonMessage)]
-        [WorldPacketHandler(ClientOpcodes.ChatAddonMessageTargeted)]
         void HandleChatAddonMessage(ChatAddonMessage chatAddonMessage)
         {
             HandleChatAddon(chatAddonMessage.Params.Type, chatAddonMessage.Params.Prefix, chatAddonMessage.Params.Text, chatAddonMessage.Params.IsLogged);

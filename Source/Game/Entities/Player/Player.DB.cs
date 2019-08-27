@@ -3094,7 +3094,7 @@ namespace Game.Entities
             stmt.AddValue(0, GetGUID().GetCounter());
             trans.Append(stmt);
 
-            float finiteAlways(float f) { return float.IsInfinity(f) ? f : 0.0f; };
+            float finiteAlways(float f) { return !float.IsInfinity(f) ? f : 0.0f; };
 
             if (create)
             {
@@ -3170,7 +3170,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, (ushort)m_activePlayerData.TodayHonorableKills);
                 stmt.AddValue(index++, (ushort)m_activePlayerData.YesterdayHonorableKills);
                 stmt.AddValue(index++, (uint)m_playerData.PlayerTitle);
-                stmt.AddValue(index++, (int)m_activePlayerData.WatchedFactionIndex);
+                stmt.AddValue(index++, (uint)m_activePlayerData.WatchedFactionIndex);
                 stmt.AddValue(index++, GetDrunkValue());
                 stmt.AddValue(index++, GetHealth());
 
@@ -3320,7 +3320,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, (ushort)m_activePlayerData.TodayHonorableKills);
                 stmt.AddValue(index++, (ushort)m_activePlayerData.YesterdayHonorableKills);
                 stmt.AddValue(index++, (uint)m_playerData.PlayerTitle);
-                stmt.AddValue(index++, (int)m_activePlayerData.WatchedFactionIndex);
+                stmt.AddValue(index++, (uint)m_activePlayerData.WatchedFactionIndex);
                 stmt.AddValue(index++, GetDrunkValue());
                 stmt.AddValue(index++, GetHealth());
 

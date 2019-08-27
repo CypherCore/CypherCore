@@ -2916,7 +2916,7 @@ namespace Game.Entities
         public UpdateField<ushort> TodayHonorableKills = new UpdateField<ushort>(66, 73);
         public UpdateField<ushort> YesterdayHonorableKills = new UpdateField<ushort>(66, 74);
         public UpdateField<uint> LifetimeHonorableKills = new UpdateField<uint>(66, 75);
-        public UpdateField<int> WatchedFactionIndex = new UpdateField<int>(66, 76);
+        public UpdateField<uint> WatchedFactionIndex = new UpdateField<uint>(66, 76);
         public UpdateField<int> MaxLevel = new UpdateField<int>(66, 77);
         public UpdateField<int> ScalingPlayerLevelDelta = new UpdateField<int>(66, 78);
         public UpdateField<int> MaxCreatureScalingLevel = new UpdateField<int>(66, 79);
@@ -3048,7 +3048,7 @@ namespace Game.Entities
             data.WriteUInt16(TodayHonorableKills);
             data.WriteUInt16(YesterdayHonorableKills);
             data.WriteUInt32(LifetimeHonorableKills);
-            data.WriteInt32(WatchedFactionIndex);
+            data.WriteUInt32(WatchedFactionIndex);
             for (int i = 0; i < 32; ++i)
             {
                 data.WriteUInt32(CombatRatings[i]);
@@ -3671,7 +3671,7 @@ namespace Game.Entities
                 }
                 if (_changesMask[76])
                 {
-                    data.WriteInt32(WatchedFactionIndex);
+                    data.WriteUInt32(WatchedFactionIndex);
                 }
                 if (_changesMask[77])
                 {

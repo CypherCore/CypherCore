@@ -460,7 +460,7 @@ namespace Game.DataStorage
                                 int[] strIdx = GetFieldValueArray<int>(fieldIndex, atr.Length);
 
                                 for (int i = 0; i < array.Length; i++)
-                                    array[i] = _stringsTable[pos + i * 4 + strIdx[i]];
+                                    array[i] = _stringsTable.LookupByKey(pos + i * 4 + strIdx[i]);
                             }
 
                             f.SetValue(obj, array);
@@ -524,7 +524,7 @@ namespace Game.DataStorage
                             {
                                 var pos = _recordsOffset + _data.Offset + (_data.Position >> 3);
                                 int ofs = GetFieldValue<int>(fieldIndex);
-                                f.SetValue(obj, _stringsTable[pos + ofs]);
+                                f.SetValue(obj, _stringsTable.LookupByKey(pos + ofs));
                             }
                             break;
                         case TypeCode.Object:
@@ -539,7 +539,7 @@ namespace Game.DataStorage
                                 {
                                     var pos = _recordsOffset + _data.Offset + (_data.Position >> 3);
                                     int ofs = GetFieldValue<int>(fieldIndex);
-                                    localized[LocaleConstant.enUS] = _stringsTable[pos + ofs];
+                                    localized[LocaleConstant.enUS] = _stringsTable.LookupByKey(pos + ofs);
                                 }
 
                                 f.SetValue(obj, localized);
