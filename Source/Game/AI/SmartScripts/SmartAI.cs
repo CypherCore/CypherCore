@@ -42,19 +42,19 @@ namespace Game.AI
             mCurrentWPID = 0;//first wp id is 1 !!
             mWPReached = false;
             mWPPauseTimer = 0;
-            mOOCReached = false;
-            mEscortNPCFlags = 0;
-
             mCanRepeatPath = false;
 
             // Spawn in run mode
+            me.SetWalk(false);
             mRun = true;
-            m_Ended = false;
+
+            mLastOOCPos = me.GetPosition();
 
             mCanAutoAttack = true;
             mCanCombatMove = true;
 
             mForcedPaused = false;
+            mLastWPIDReached = 0;
             mEscortQuestID = 0;
 
             mDespawnTime = 0;
@@ -102,6 +102,25 @@ namespace Game.AI
             GetScript().OnReset();
         }
 
+        WayPoint GetNextWayPoint()
+        {
+            if (mWayPoints.Empty())
+                return null;
+
+            mCurrentWPID++;
+            var wayPoint = mWayPoints.Find(p => p.Id == mCurrentWPID);
+            if (wayPoint != null)
+            {
+                mLastWP = wayPoint;
+                if (mLastWP.Id != mCurrentWPID)
+                {
+                    Log.outError(LogFilter.Misc, "SmartAI.GetNextWayPoint: Got not expected waypoint id {mLastWP.id}, expected {mCurrentWPID}");
+                }
+                return wayPoint;
+            }
+            return null;
+        }
+
         public void StartPath(bool run = false, uint path = 0, bool repeat = false, Unit invoker = null)
         {
             if (me.IsInCombat())// no wp movement in combat
@@ -113,31 +132,25 @@ namespace Game.AI
             if (HasEscortState(SmartEscortState.Escorting))
                 StopPath();
 
-            SetRun(run);
-
             if (path != 0)
                 if (!LoadPath(path))
                     return;
 
-            if (_path.nodes.Empty())
+            if (mWayPoints.Empty())
                 return;
 
-            mCurrentWPID = 1;
-            m_Ended = false;
-
-            // Do not use AddEscortState, removing everything from previous cycle
-            mEscortState = SmartEscortState.Escorting;
+            AddEscortState(SmartEscortState.Escorting);
             mCanRepeatPath = repeat;
 
-            if (invoker && invoker.GetTypeId() == TypeId.Player)
+            SetRun(run);
+
+            WayPoint wp = GetNextWayPoint();
+            if (wp != null)
             {
-                mEscortNPCFlags = me.m_unitData.NpcFlags[0];
-                me.SetNpcFlags(NPCFlags.None);
+                mLastOOCPos = me.GetPosition();
+                me.GetMotionMaster().MovePoint(wp.Id, wp.X, wp.Y, wp.Z);
+                GetScript().ProcessEventsFor(SmartEvents.WaypointStart, null, wp.Id, GetScript().GetPathId());
             }
-
-            GetScript().ProcessEventsFor(SmartEvents.WaypointStart, null, mCurrentWPID, GetScript().GetPathId());
-
-            me.GetMotionMaster().MovePath(_path, mCanRepeatPath);
         }
 
         bool LoadPath(uint entry)
@@ -145,34 +158,11 @@ namespace Game.AI
             if (HasEscortState(SmartEscortState.Escorting))
                 return false;
 
-            var path = Global.SmartAIMgr.GetPath(entry);
-            if (path.Empty())
+            mWayPoints = Global.SmartAIMgr.GetPath(entry);
+            if (mWayPoints == null)
             {
                 GetScript().SetPathId(0);
                 return false;
-            }
-
-            foreach (WayPoint waypoint in path)
-            {
-                float x = waypoint.x;
-                float y = waypoint.y;
-                float z = waypoint.z;
-
-                GridDefines.NormalizeMapCoord(ref x);
-                GridDefines.NormalizeMapCoord(ref y);
-
-                WaypointNode wp = new WaypointNode();
-                wp.id = waypoint.id;
-                wp.x = x;
-                wp.y = y;
-                wp.z = z;
-                wp.orientation = 0.0f;
-                wp.moveType = mRun ? WaypointMoveType.Run : WaypointMoveType.Walk;
-                wp.delay = 0;
-                wp.eventId = 0;
-                wp.eventChance = 100;
-
-                _path.nodes.Add(wp);
             }
 
             GetScript().SetPathId(entry);
@@ -186,19 +176,21 @@ namespace Game.AI
 
             if (HasEscortState(SmartEscortState.Paused))
             {
-                Log.outError(LogFilter.Server, $"SmartAI.PausePath: Creature entry {me.GetEntry()} wanted to pause waypoint (current waypoint: {mCurrentWPID}) movement while already paused, ignoring.");
+                Log.outError(LogFilter.Server, $"SmartAI.PausePath: Creature entry {me.GetEntry()} wanted to pause waypoint movement while already paused, ignoring.");
                 return;
             }
 
+            mForcedPaused = forced;
+            mLastOOCPos = me.GetPosition();
             AddEscortState(SmartEscortState.Paused);
             mWPPauseTimer = delay;
-            if (forced && !mWPReached)
+            if (forced)
             {
-                mForcedPaused = forced;
                 SetRun(mRun);
-                me.StopMoving();
+                me.StopMoving();//force stop
+                me.GetMotionMaster().MoveIdle();//force stop
             }
-            GetScript().ProcessEventsFor(SmartEvents.WaypointPaused, null, mCurrentWPID, GetScript().GetPathId());
+            GetScript().ProcessEventsFor(SmartEvents.WaypointPaused, null, mLastWP.Id, GetScript().GetPathId());
         }
 
         public void StopPath(uint DespawnTime = 0, uint quest = 0, bool fail = false)
@@ -209,27 +201,33 @@ namespace Game.AI
             if (quest != 0)
                 mEscortQuestID = quest;
 
-            if (mDespawnState != 2)
-                SetDespawnTime(DespawnTime);
+            SetDespawnTime(DespawnTime);
+            //mDespawnTime = DespawnTime;
 
-            me.StopMoving();
-            me.GetMotionMaster().MovementExpired(false);
+            mLastOOCPos = me.GetPosition();
+            me.StopMoving();//force stop
             me.GetMotionMaster().MoveIdle();
-            GetScript().ProcessEventsFor(SmartEvents.WaypointStopped, null, mCurrentWPID, GetScript().GetPathId());
+            GetScript().ProcessEventsFor(SmartEvents.WaypointStopped, null, mLastWP.Id, GetScript().GetPathId());
             EndPath(fail);
         }
 
         public void EndPath(bool fail = false)
         {
-            RemoveEscortState(SmartEscortState.Escorting | SmartEscortState.Paused | SmartEscortState.Returning);
-            _path.nodes.Clear();
-            mWPPauseTimer = 0;
+            GetScript().ProcessEventsFor(SmartEvents.WaypointEnded, null, mLastWP.Id, GetScript().GetPathId());
 
-            if (mEscortNPCFlags != 0)
+            RemoveEscortState(SmartEscortState.Escorting | SmartEscortState.Paused | SmartEscortState.Returning);
+            mWayPoints = null;
+            mCurrentWPID = 0;
+            mWPPauseTimer = 0;
+            mLastWP = null;
+
+            if (mCanRepeatPath)
             {
-                me.SetNpcFlags((NPCFlags)mEscortNPCFlags);
-                mEscortNPCFlags = 0;
+                if (IsAIControlled())
+                    StartPath(mRun, GetScript().GetPathId(), true);
             }
+            else
+                GetScript().SetPathId(0);
 
             List<WorldObject> targets = GetScript().GetTargetList(SharedConst.SmartEscortTargets);
             if (targets != null && mEscortQuestID != 0)
@@ -275,36 +273,16 @@ namespace Game.AI
                 }
             }
 
-            // End Path events should be only processed if it was SUCCESSFUL stop or stop called by SMART_ACTION_WAYPOINT_STOP
-            if (fail)
-                return;
-
-            GetScript().ProcessEventsFor(SmartEvents.WaypointEnded, null, mCurrentWPID, GetScript().GetPathId());
-
-            if (mCanRepeatPath)
-            {
-                if (IsAIControlled())
-                    StartPath(mRun, GetScript().GetPathId(), mCanRepeatPath);
-            }
-            else
-                GetScript().SetPathId(0);
-
             if (mDespawnState == 1)
                 StartDespawn();
         }
 
         public void ResumePath()
         {
-            GetScript().ProcessEventsFor(SmartEvents.WaypointResumed, null, mCurrentWPID, GetScript().GetPathId());
-            RemoveEscortState(SmartEscortState.Paused);
-            mForcedPaused = false;
-            mWPReached = false;
-            mWPPauseTimer = 0;
             SetRun(mRun);
 
-            WaypointMovementGenerator move = (WaypointMovementGenerator)me.GetMotionMaster().top();
-            if (move != null)
-                move.GetTrackerTimer().Reset(1);
+            if (mLastWP != null)
+                me.GetMotionMaster().MovePoint(mLastWP.Id, mLastWP.X, mLastWP.Y, mLastWP.Z);
         }
 
         void ReturnToLastOOCPos()
@@ -312,10 +290,8 @@ namespace Game.AI
             if (!IsAIControlled())
                 return;
 
-            me.SetWalk(false);
-            float x, y, z, o;
-            me.GetHomePosition(out x, out y, out z, out o);
-            me.GetMotionMaster().MovePoint(EventId.SmartEscortLastOCCPoint, x, y, z);
+            SetRun(mRun);
+            me.GetMotionMaster().MovePoint(EventId.SmartEscortLastOCCPoint, mLastOOCPos);
         }
 
         void UpdatePath(uint diff)
@@ -327,12 +303,7 @@ namespace Game.AI
             {
                 if (!IsEscortInvokerInRange())
                 {
-                    StopPath(0, mEscortQuestID, true);
-
-                    // allow to properly hook out of range despawn action, which in most cases should perform the same operation as dying
-                    GetScript().ProcessEventsFor(SmartEvents.Death, me);
-                    me.DespawnOrUnsummon(1);
-                    return;
+                    StopPath(mDespawnTime, mEscortQuestID, true);
                 }
                 mEscortInvokerCheckTimer = 1000;
             }
@@ -342,29 +313,56 @@ namespace Game.AI
             // handle pause
             if (HasEscortState(SmartEscortState.Paused))
             {
-                if (mWPPauseTimer <= diff)
+                if (mWPPauseTimer < diff)
                 {
-                    if (!me.IsInCombat() && !HasEscortState(SmartEscortState.Returning) && (mWPReached || mForcedPaused))
-                        ResumePath();
+                    if (!me.IsInCombat() && !HasEscortState(SmartEscortState.Returning) && (mWPReached || mLastWPIDReached == EventId.SmartEscortLastOCCPoint || mForcedPaused))
+                    {
+                        GetScript().ProcessEventsFor(SmartEvents.WaypointResumed, null, mLastWP.Id, GetScript().GetPathId());
+                        RemoveEscortState(SmartEscortState.Paused);
+                        if (mForcedPaused)// if paused between 2 wps resend movement
+                        {
+                            ResumePath();
+                            mWPReached = false;
+                            mForcedPaused = false;
+                        }
+                        if (mLastWPIDReached == EventId.SmartEscortLastOCCPoint)
+                            mWPReached = true;
+                    }
+                    mWPPauseTimer = 0;
                 }
                 else
                     mWPPauseTimer -= diff;
             }
-            else if (m_Ended) // end path
-            {
-                m_Ended = false;
-                StopPath();
-                return;
-            }
 
             if (HasEscortState(SmartEscortState.Returning))
             {
-                if (mOOCReached)//reached OOC WP
+                if (mWPReached)//reached OOC WP
                 {
-                    mOOCReached = false;
                     RemoveEscortState(SmartEscortState.Returning);
                     if (!HasEscortState(SmartEscortState.Paused))
                         ResumePath();
+                    mWPReached = false;
+                }
+            }
+
+            if ((!me.HasReactState(ReactStates.Passive) && me.IsInCombat()) || HasEscortState(SmartEscortState.Paused | SmartEscortState.Returning))
+                return;
+            // handle next wp
+            if (mWPReached)//reached WP
+            {
+                mWPReached = false;
+                if (mCurrentWPID == GetWPCount())
+                {
+                    EndPath();
+                }
+                else
+                {
+                    WayPoint wp = GetNextWayPoint();
+                    if (wp != null)
+                    {
+                        SetRun(mRun);
+                        me.GetMotionMaster().MovePoint(wp.Id, wp.X, wp.Y, wp.Z);
+                    }
                 }
             }
         }
@@ -426,44 +424,23 @@ namespace Game.AI
 
         void MovepointReached(uint id)
         {
-            // override the id, path can be resumed any time and counter will reset
-            // mCurrentWPID holds proper id
+            if (id != EventId.SmartEscortLastOCCPoint && mLastWPIDReached != id)
+                GetScript().ProcessEventsFor(SmartEvents.WaypointReached, null, id);
 
-            // both point movement and escort generator can enter this function
-            if (id == EventId.SmartEscortLastOCCPoint)
-            {
-                mOOCReached = true;
-                return;
-            }
-
-            mCurrentWPID = id + 1; // in SmartAI increase by 1
-
+            mLastWPIDReached = id;
             mWPReached = true;
-            GetScript().ProcessEventsFor(SmartEvents.WaypointReached, null, mCurrentWPID, GetScript().GetPathId());
-
-            if (HasEscortState(SmartEscortState.Paused))
-                me.StopMoving();
-            else if (HasEscortState(SmartEscortState.Escorting) && me.GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Waypoint)
-            {
-                mWPReached = false;
-                if (mCurrentWPID == _path.nodes.Count)
-                    m_Ended = true;
-                else
-                    SetRun(mRun);
-            }
         }
 
         public override void MovementInform(MovementGeneratorType MovementType, uint Data)
         {
-            if (MovementType == MovementGeneratorType.Point && Data == EventId.SmartEscortLastOCCPoint)
+            if ((MovementType == MovementGeneratorType.Point && Data == EventId.SmartEscortLastOCCPoint) || MovementType == MovementGeneratorType.Follow)
                 me.ClearUnitState(UnitState.Evade);
 
             GetScript().ProcessEventsFor(SmartEvents.Movementinform, null, (uint)MovementType, Data);
-            if (!HasEscortState(SmartEscortState.Escorting))
+            if (MovementType != MovementGeneratorType.Point || !HasEscortState(SmartEscortState.Escorting))
                 return;
 
-            if (MovementType == MovementGeneratorType.Waypoint || (MovementType == MovementGeneratorType.Point && Data == EventId.SmartEscortLastOCCPoint))
-                MovepointReached(Data);
+            MovepointReached(Data);
         }
 
         void RemoveAuras()
@@ -509,7 +486,6 @@ namespace Game.AI
                     me.GetMotionMaster().MoveFollow(target, mFollowDist, mFollowAngle);
                     // evade is not cleared in MoveFollow, so we can't keep it
                     me.ClearUnitState(UnitState.Evade);
-                    GetScript().OnReset();
                 }
                 else if (owner)
                 {
@@ -520,8 +496,8 @@ namespace Game.AI
                     me.GetMotionMaster().MoveTargetedHome();
             }
 
-            if (!me.HasUnitState(UnitState.Evade))
-                GetScript().OnReset();
+            if (!HasEscortState(SmartEscortState.Escorting)) //dont mess up escort movement after combat
+                SetRun(mRun);
         }
 
         public override void MoveInLineOfSight(Unit who)
@@ -625,13 +601,25 @@ namespace Game.AI
                 me.InterruptNonMeleeSpells(false); // must be before ProcessEvents
 
             GetScript().ProcessEventsFor(SmartEvents.Aggro, victim);
+
+            if (!IsAIControlled())
+                return;
+
+            mLastOOCPos = me.GetPosition();
+            SetRun(mRun);
+            if (me.GetMotionMaster().GetMotionSlotType(MovementSlot.Active) == MovementGeneratorType.Point)
+                me.GetMotionMaster().MovementExpired();
         }
 
         public override void JustDied(Unit killer)
         {
             GetScript().ProcessEventsFor(SmartEvents.Death, killer);
             if (HasEscortState(SmartEscortState.Escorting))
+            { 
                 EndPath(true);
+                me.StopMoving();//force stop
+                me.GetMotionMaster().MoveIdle();
+            }
         }
 
         public override void KilledUnit(Unit victim)
@@ -646,26 +634,10 @@ namespace Game.AI
 
         public override void AttackStart(Unit who)
         {
-            // dont allow charmed npcs to act on their own
-            if (me.HasUnitFlag(UnitFlags.PlayerControlled))
-            {
-                if (who && mCanAutoAttack)
-                    me.Attack(who, true);
-                return;
-            }
-
             if (who && me.Attack(who, me.IsWithinMeleeRange(who)))
             {
                 if (mCanCombatMove)
-                {
-                    SetRun(mRun);
-
-                    MovementGeneratorType type = me.GetMotionMaster().GetMotionSlotType(MovementSlot.Active);
-                    if (type == MovementGeneratorType.Waypoint || type == MovementGeneratorType.Point)
-                        me.StopMoving();
-
                     me.GetMotionMaster().MoveChase(who);
-                }
             }
         }
 
@@ -852,9 +824,12 @@ namespace Game.AI
                 }
                 else
                 {
+                    if (me.HasUnitState(UnitState.ConfusedMove | UnitState.FleeingMove))
+                        return;
+
+                    me.GetMotionMaster().MovementExpired();
+                    me.GetMotionMaster().Clear(true);
                     me.StopMoving();
-                    if (me.GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Chase)
-                        me.GetMotionMaster().Clear(false);
                     me.GetMotionMaster().MoveIdle();
                 }
             }
@@ -951,6 +926,8 @@ namespace Game.AI
 
         public void StartDespawn() { mDespawnState = 2; }
 
+        uint GetWPCount() { return (uint)mWayPoints?.Count; }
+
         bool mIsCharmed;
         uint mFollowCreditType;
         uint mFollowArrivedTimer;
@@ -961,13 +938,14 @@ namespace Game.AI
         float mFollowAngle;
 
         SmartScript mScript = new SmartScript();
+        List<WayPoint> mWayPoints;
         SmartEscortState mEscortState;
         uint mCurrentWPID;
+        uint mLastWPIDReached;
         bool mWPReached;
-        bool mOOCReached;
-        bool m_Ended;
         uint mWPPauseTimer;
-        uint mEscortNPCFlags;
+        WayPoint mLastWP;
+        Position mLastOOCPos;//set on enter combat
         bool mCanRepeatPath;
         bool mRun;
         bool mEvadeDisabled;
@@ -976,7 +954,6 @@ namespace Game.AI
         bool mForcedPaused;
         uint mInvincibilityHpLevel;
 
-        WaypointPath _path = new WaypointPath();
         uint mDespawnTime;
         uint mRespawnTime;
         uint mDespawnState;

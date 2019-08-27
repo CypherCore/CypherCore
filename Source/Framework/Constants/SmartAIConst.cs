@@ -317,7 +317,7 @@ namespace Framework.Constants
         RemovePower = 110,    // PowerType, newPower
         GameEventStop = 111,    // GameEventId
         GameEventStart = 112,    // GameEventId
-        // Not used 
+        StartClosestWaypoint = 113, // wp1, wp2, wp3, wp4, wp5, wp6, wp7
         MoveOffset = 114,
         RandomSound = 115,    // SoundId1, SoundId2, SoundId3, SoundId4, SoundId5, onlySelf
         SetCorpseDelay = 116,    // timer

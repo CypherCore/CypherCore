@@ -31,11 +31,10 @@ namespace Game.AI
         public npc_escortAI(Creature creature) : base(creature)
         {
             m_uiPlayerGUID = ObjectGuid.Empty;
-            m_uiWPWaitTimer = 1000;
-            m_uiPlayerCheckTimer = 0;
+            m_uiWPWaitTimer = 2500;
+            m_uiPlayerCheckTimer = 1000;
             m_uiEscortState = eEscortState.None;
             MaxPlayerDistance = 50;
-            LastWP = 0;
             m_pQuestForEscort = null;
             m_bIsActiveAttacker = true;
             m_bIsRunning = false;
@@ -45,8 +44,21 @@ namespace Game.AI
             DespawnAtFar = true;
             ScriptWP = false;
             HasImmuneToNPCFlags = false;
-            m_bStarted = false;
-            m_bEnded = false;
+        }
+
+        public override void AttackStart(Unit target)
+        {
+            if (target == null)
+                return;
+
+            if (me.Attack(target, true))
+            {
+                if (me.GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Point)
+                    me.GetMotionMaster().MovementExpired();
+
+                if (IsCombatMovementAllowed())
+                    me.GetMotionMaster().MoveChase(target);
+            }
         }
 
         //see followerAI
@@ -89,15 +101,38 @@ namespace Game.AI
 
         public override void MoveInLineOfSight(Unit who)
         {
-            if (me.GetVictim())
-                return;
-
             if (me.HasReactState(ReactStates.Aggressive) && !me.HasUnitState(UnitState.Stunned) && who.isTargetableForAttack() && who.isInAccessiblePlaceFor(me))
+            {
                 if (HasEscortState(eEscortState.Escorting) && AssistPlayerInCombatAgainst(who))
                     return;
 
-            if (me.CanStartAttack(who, false))
-                AttackStart(who);
+                if (!me.CanFly() && me.GetDistanceZ(who) > SharedConst.CreatureAttackRangeZ)
+                    return;
+
+                if (me.IsHostileTo(who))
+                {
+                    float fAttackRadius = me.GetAttackDistance(who);
+                    if (me.IsWithinDistInMap(who, fAttackRadius) && me.IsWithinLOSInMap(who))
+                    {
+                        if (!me.GetVictim())
+                        {
+                            // Clear distracted state on combat
+                            if (me.HasUnitState(UnitState.Distracted))
+                            {
+                                me.ClearUnitState(UnitState.Distracted);
+                                me.GetMotionMaster().Clear();
+                            }
+
+                            AttackStart(who);
+                        }
+                        else if (me.GetMap().IsDungeon())
+                        {
+                            who.SetInCombatWith(me);
+                            me.AddThreat(who, 0.0f);
+                        }
+                    }
+                }
+            }
         }
 
         public override void JustDied(Unit killer)
@@ -126,13 +161,13 @@ namespace Game.AI
 
         public override void JustRespawned()
         {
-            RemoveEscortState(eEscortState.Escorting | eEscortState.Returning | eEscortState.Paused);
+            m_uiEscortState = eEscortState.None;
 
             if (!IsCombatMovementAllowed())
                 SetCombatMovement(true);
 
             //add a small delay before going to first waypoint, normal in near all cases
-            m_uiWPWaitTimer = 1000;
+            m_uiWPWaitTimer = 2500;
 
             if (me.GetFaction() != me.GetCreatureTemplate().Faction)
                 me.RestoreFaction();
@@ -142,7 +177,6 @@ namespace Game.AI
 
         void ReturnToLastPoint()
         {
-            me.SetWalk(false);
             me.GetMotionMaster().MovePoint(0xFFFFFF, me.GetHomePosition());
         }
 
@@ -193,75 +227,73 @@ namespace Game.AI
 
         public override void UpdateAI(uint diff)
         {
+            //Waypoint Updating
             if (HasEscortState(eEscortState.Escorting) && !me.GetVictim() && m_uiWPWaitTimer != 0 && !HasEscortState(eEscortState.Returning))
             {
                 if (m_uiWPWaitTimer <= diff)
                 {
-                    if (!HasEscortState(eEscortState.Paused))
+                    //End of the line
+                    if (WaypointList[CurrentWPIndex] == null)
                     {
                         m_uiWPWaitTimer = 0;
 
-                        if (m_bEnded)
+                        if (DespawnAtEnd)
                         {
-                            me.StopMoving();
-                            me.GetMotionMaster().Clear(false);
-                            me.GetMotionMaster().MoveIdle();
+                            Log.outDebug(LogFilter.Scripts, "EscortAI reached end of waypoints");
 
-                            m_bEnded = false;
-
-                            if (DespawnAtEnd)
+                            if (m_bCanReturnToStart)
                             {
-                                Log.outDebug(LogFilter.Scripts, "EscortAI reached end of waypoints");
+                                float fRetX, fRetY, fRetZ;
+                                me.GetRespawnPosition(out fRetX, out fRetY, out fRetZ);
 
-                                if (m_bCanReturnToStart)
-                                {
-                                    float fRetX, fRetY, fRetZ;
-                                    me.GetRespawnPosition(out fRetX, out fRetY, out fRetZ);
+                                me.GetMotionMaster().MovePoint(EscortPointIds.Home, fRetX, fRetY, fRetZ);
 
-                                    me.GetMotionMaster().MovePoint(EscortPointIds.Home, fRetX, fRetY, fRetZ);
+                                m_uiWPWaitTimer = 0;
 
-                                    Log.outDebug(LogFilter.Scripts, $"EscortAI are returning home to spawn location: {EscortPointIds.Home}, {fRetX}, {fRetY}, {fRetZ}");
-                                }
-                                else if (m_bCanInstantRespawn)
-                                {
-                                    me.setDeathState(DeathState.JustDied);
-                                    me.Respawn();
-                                }
-                                else
-                                    me.DespawnOrUnsummon();
+                                Log.outDebug(LogFilter.Scripts, $"EscortAI are returning home to spawn location: {EscortPointIds.Home}, {fRetX}, {fRetY}, {fRetZ}");
+                                return;
+                            }
+
+                            if (m_bCanInstantRespawn)
+                            {
+                                me.setDeathState(DeathState.JustDied);
+                                me.Respawn();
                             }
                             else
-                                Log.outDebug(LogFilter.Scripts, "EscortAI reached end of waypoints with Despawn off");
+                                me.DespawnOrUnsummon();
 
-                            RemoveEscortState(eEscortState.Escorting);
                             return;
-                        }
-
-                        if (!m_bStarted)
-                        {
-                            m_bStarted = true;
-                            me.GetMotionMaster().MovePath(_path, false);
                         }
                         else
                         {
-                            WaypointMovementGenerator move = (WaypointMovementGenerator)me.GetMotionMaster().top();
-                            if (move != null)
-                                WaypointStart(move.GetCurrentNode());
+                            Log.outDebug(LogFilter.Scripts, "EscortAI reached end of waypoints with Despawn off");
+                            return;
                         }
+
+                    }
+
+                    if (!HasEscortState(eEscortState.Paused))
+                    {
+                        var currentWp = WaypointList[CurrentWPIndex];
+                        me.GetMotionMaster().MovePoint(currentWp.Id, currentWp.X, currentWp.Y, currentWp.Z);
+                        Log.outDebug(LogFilter.Scripts, $"EscortAI start waypoint {currentWp.Id} ({currentWp.X}, {currentWp.Y}, {currentWp.Z}).");
+
+                        WaypointStart(currentWp.Id);
+
+                        m_uiWPWaitTimer = 0;
                     }
                 }
-                else
-                    m_uiWPWaitTimer -= diff;
             }
 
             //Check if player or any member of his group is within range
             if (HasEscortState(eEscortState.Escorting) && !m_uiPlayerGUID.IsEmpty() && !me.GetVictim() && !HasEscortState(eEscortState.Returning))
             {
-                m_uiPlayerCheckTimer += diff;
-                if (m_uiPlayerCheckTimer > 1000)
+                if (m_uiPlayerCheckTimer <= diff)
                 {
                     if (DespawnAtFar && !IsPlayerOrGroupInRange())
                     {
+                        Log.outDebug(LogFilter.Scripts, "EscortAI failed because player/group was to far away or not found");
+
                         if (m_bCanInstantRespawn)
                         {
                             me.setDeathState(DeathState.JustDied);
@@ -273,8 +305,10 @@ namespace Game.AI
                         return;
                     }
 
-                    m_uiPlayerCheckTimer = 0;
+                    m_uiPlayerCheckTimer = 1000;
                 }
+                else
+                    m_uiPlayerCheckTimer -= diff;
             }
 
             UpdateEscortAI(diff);
@@ -290,84 +324,53 @@ namespace Game.AI
 
         public override void MovementInform(MovementGeneratorType moveType, uint pointId)
         {
-            // no action allowed if there is no escort
-            if (!HasEscortState(eEscortState.Escorting))
+            if (moveType != MovementGeneratorType.Point || !HasEscortState(eEscortState.Escorting))
                 return;
 
-            if (moveType == MovementGeneratorType.Point)
+            //Combat start position reached, continue waypoint movement
+            if (pointId == EscortPointIds.LastPoint)
             {
+                Log.outDebug(LogFilter.Scripts, "EscortAI has returned to original position before combat");
+
+                me.SetWalk(!m_bIsRunning);
+                RemoveEscortState(eEscortState.Returning);
+
                 if (m_uiWPWaitTimer == 0)
                     m_uiWPWaitTimer = 1;
-
-                //Combat start position reached, continue waypoint movement
-                if (pointId == EscortPointIds.LastPoint)
-                {
-                    Log.outDebug(LogFilter.Scripts, "EscortAI has returned to original position before combat");
-
-                    me.SetWalk(!m_bIsRunning);
-                    RemoveEscortState(eEscortState.Returning);
-                }
-                else if (pointId == EscortPointIds.Home)
-                {
-                    Log.outDebug(LogFilter.Scripts, "EscortAI has returned to original home location and will continue from beginning of waypoint list.");
-
-                    m_bStarted = false;
-                }
             }
-            else if (moveType == MovementGeneratorType.Waypoint)
+            else if (pointId == EscortPointIds.Home)
             {
-                //Call WP function
-                WaypointReached(pointId);
+                Log.outDebug(LogFilter.Scripts, "EscortAI has returned to original home location and will continue from beginning of waypoint list.");
 
-                //End of the line
-                if (LastWP != 0 && LastWP == pointId)
+                CurrentWPIndex = 0;
+                m_uiWPWaitTimer = 1;
+            }
+            else
+            {
+                var currentWp = WaypointList[CurrentWPIndex];
+                //Make sure that we are still on the right waypoint
+                if (currentWp.Id != pointId)
                 {
-                    LastWP = 0;
-
-                    m_bStarted = false;
-                    m_bEnded = true;
-
-                    m_uiWPWaitTimer = 50;
-
+                    Log.outError(LogFilter.Misc, $"TSCR ERROR: EscortAI reached waypoint out of order {pointId}, expected {currentWp.Id}, creature entry {me.GetEntry()}");
                     return;
                 }
 
-                Log.outDebug(LogFilter.Scripts, $"EscortAI Waypoint {pointId} reached");
+                Log.outDebug(LogFilter.Scripts, $"EscortAI Waypoint {currentWp.Id} reached");
 
-                WaypointMovementGenerator move = (WaypointMovementGenerator)me.GetMotionMaster().top();
-                if (move != null)
-                    m_uiWPWaitTimer = (uint)move.GetTrackerTimer().GetExpiry();
+                //Call WP function
+                WaypointReached(currentWp.Id);
 
-                //Call WP start function
-                if (m_uiWPWaitTimer == 0 && !HasEscortState(eEscortState.Paused) && move != null)
-                    WaypointStart(move.GetCurrentNode());
+                m_uiWPWaitTimer = currentWp.WaitTimeMs + 1;
 
-                if (m_bIsRunning)
-                    me.SetWalk(false);
-                else
-                    me.SetWalk(true);
+                ++CurrentWPIndex;
             }
         }
 
         public void AddWaypoint(uint id, float x, float y, float z, uint waitTime = 0)
         {
-            GridDefines.NormalizeMapCoord(ref x);
-            GridDefines.NormalizeMapCoord(ref y);
+            Escort_Waypoint t = new Escort_Waypoint(id, x, y, z, waitTime);
 
-            WaypointNode wp = new WaypointNode();
-            wp.id = id;
-            wp.x = x;
-            wp.y = y;
-            wp.z = z;
-            wp.orientation = 0.0f;
-            wp.moveType = m_bIsRunning ? WaypointMoveType.Run : WaypointMoveType.Walk;
-            wp.delay = waitTime;
-            wp.eventId = 0;
-            wp.eventChance = 100;
-
-            _path.nodes.Add(wp);
-
-            LastWP = id;
+            WaypointList.Add(t);
 
             ScriptWP = true;
         }
@@ -378,29 +381,10 @@ namespace Game.AI
             if (movePoints.Empty())
                 return;
 
-            LastWP = movePoints.Last().uiPointId;
-
             foreach (var point in movePoints)
             {
-                float x = point.fX;
-                float y = point.fY;
-                float z = point.fZ;
-
-                GridDefines.NormalizeMapCoord(ref x);
-                GridDefines.NormalizeMapCoord(ref y);
-
-                WaypointNode wp = new WaypointNode();
-                wp.id = point.uiPointId;
-                wp.x = x;
-                wp.y = y;
-                wp.z = z;
-                wp.orientation = 0.0f;
-                wp.moveType = m_bIsRunning ? WaypointMoveType.Run : WaypointMoveType.Walk;
-                wp.delay = point.uiWaitTime;
-                wp.eventId = 0;
-                wp.eventChance = 100;
-
-                _path.nodes.Add(wp);
+                Escort_Waypoint wayPoint = new Escort_Waypoint(point.uiPointId, point.fX, point.fY, point.fZ, point.uiWaitTime);
+                WaypointList.Add(wayPoint);
             }
         }
 
@@ -439,6 +423,20 @@ namespace Game.AI
                 return;
             }
 
+            if (!ScriptWP && resetWaypoints)
+            {
+                if (!WaypointList.Empty())
+                    WaypointList.Clear();
+                FillPointMovementListForCreature();
+            }
+
+
+            if (WaypointList.Empty())
+            {
+                Log.outError(LogFilter.Scripts, $"EscortAI (script: {me.GetScriptName()}, creature entry: {me.GetEntry()}) starts with 0 waypoints (possible missing entry in script_waypoint. Quest: {(quest != null ? quest.Id : 0)}).");
+                return;
+            }
+
             //set variables
             m_bIsActiveAttacker = isActiveAttacker;
             m_bIsRunning = run;
@@ -449,16 +447,12 @@ namespace Game.AI
             m_bCanInstantRespawn = instantRespawn;
             m_bCanReturnToStart = canLoopPath;
 
-            if (!ScriptWP && resetWaypoints) // sd2 never adds wp in script, but tc does
-                FillPointMovementListForCreature();
-
             if (m_bCanReturnToStart && m_bCanInstantRespawn)
                 Log.outDebug(LogFilter.Scripts, "EscortAI is set to return home after waypoint end and instant respawn at waypoint end. Creature will never despawn.");
 
             if (me.GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Waypoint)
             {
-                me.StopMoving();
-                me.GetMotionMaster().Clear(false);
+                me.GetMotionMaster().MovementExpired();
                 me.GetMotionMaster().MoveIdle();
                 Log.outDebug(LogFilter.Scripts, "EscortAI start with WAYPOINT_MOTION_TYPE, changed to MoveIdle.");
             }
@@ -474,13 +468,13 @@ namespace Game.AI
 
             Log.outDebug(LogFilter.Scripts, $"EscortAI started. ActiveAttacker = {m_bIsActiveAttacker}, Run = {m_bIsRunning}, PlayerGUID = {m_uiPlayerGUID.ToString()}");
 
+            CurrentWPIndex = 0;
+
             //Set initial speed
             if (m_bIsRunning)
                 me.SetWalk(false);
             else
                 me.SetWalk(true);
-
-            m_bStarted = false;
 
             AddEscortState(eEscortState.Escorting);
         }
@@ -491,17 +485,75 @@ namespace Game.AI
                 return;
 
             if (on)
-            {
                 AddEscortState(eEscortState.Paused);
-                me.StopMoving();
-            }
             else
-            {
                 RemoveEscortState(eEscortState.Paused);
-                WaypointMovementGenerator move = (WaypointMovementGenerator)me.GetMotionMaster().top();
-                if (move != null)
-                    move.GetTrackerTimer().Reset(1);
+        }
+
+        bool SetNextWaypoint(uint pointId, float x, float y, float z, float orientation)
+        {
+            me.UpdatePosition(x, y, z, orientation);
+            return SetNextWaypoint(pointId, false, true);
+        }
+
+        bool SetNextWaypoint(uint pointId, bool setPosition, bool resetWaypointsOnFail)
+        {
+            if (!WaypointList.Empty())
+                WaypointList.Clear();
+
+            FillPointMovementListForCreature();
+
+            if (WaypointList.Empty())
+                return false;
+
+            int size = WaypointList.Count;
+            Escort_Waypoint waypoint = new Escort_Waypoint(0, 0, 0, 0, 0);
+            do
+            {
+                waypoint = WaypointList.First();
+                WaypointList.RemoveAt(0);
+                if (waypoint.Id == pointId)
+                {
+                    if (setPosition)
+                        me.UpdatePosition(waypoint.X, waypoint.Y, waypoint.Z, me.GetOrientation());
+
+                    CurrentWPIndex = 0;
+                    return true;
+                }
             }
+            while (!WaypointList.Empty());
+
+            // we failed.
+            // we reset the waypoints in the start; if we pulled any, reset it again
+            if (resetWaypointsOnFail && size != WaypointList.Count)
+            {
+                if (!WaypointList.Empty())
+                    WaypointList.Clear();
+
+                FillPointMovementListForCreature();
+            }
+
+            return false;
+        }
+
+        bool GetWaypointPosition(uint pointId, ref float x, ref float y, ref float z)
+        {
+            var waypoints = Global.ScriptMgr.GetPointMoveList(me.GetEntry());
+            if (waypoints == null)
+                return false;
+
+            foreach (var pointMove in waypoints)
+            {
+                if (pointMove.uiPointId == pointId)
+                {
+                    x = pointMove.fX;
+                    y = pointMove.fY;
+                    z = pointMove.fZ;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public virtual void WaypointReached(uint pointId) { }
@@ -518,7 +570,6 @@ namespace Game.AI
         public bool GetAttack() { return m_bIsActiveAttacker; }//used in EnterEvadeMode override
         public void SetCanAttack(bool attack) { m_bIsActiveAttacker = attack; }
         public ObjectGuid GetEventStarterGUID() { return m_uiPlayerGUID; }
-        public void SetWaitTimer(uint Timer) { m_uiWPWaitTimer = Timer; }
 
         public Player GetPlayerForEscort() { return Global.ObjAccessor.GetPlayer(me, m_uiPlayerGUID); }
 
@@ -530,11 +581,11 @@ namespace Game.AI
         uint m_uiPlayerCheckTimer;
         eEscortState m_uiEscortState;
         float MaxPlayerDistance;
-        uint LastWP;
-
-        WaypointPath _path = new WaypointPath();
 
         Quest m_pQuestForEscort;                     //generally passed in Start() when regular escort script.
+
+        List<Escort_Waypoint> WaypointList = new List<Escort_Waypoint>();
+        int CurrentWPIndex;
 
         bool m_bIsActiveAttacker;                           //obsolete, determined by faction.
         bool m_bIsRunning;                                  //all creatures are walking by default (has flag MOVEMENTFLAG_WALK)
@@ -544,8 +595,6 @@ namespace Game.AI
         bool DespawnAtFar;
         bool ScriptWP;
         bool HasImmuneToNPCFlags;
-        bool m_bStarted;
-        bool m_bEnded;
     }
 
     public enum eEscortState
@@ -554,6 +603,24 @@ namespace Game.AI
         Escorting = 0x001,                        //escort are in progress
         Returning = 0x002,                        //escort is returning after being in combat
         Paused = 0x004                         //will not proceed with waypoints before state is removed
+    }
+
+    class Escort_Waypoint
+    {
+        public Escort_Waypoint(uint id, float x, float y, float z, uint w)
+        {
+            Id = id;
+            X = x;
+            Y = y;
+            Z = z;
+            WaitTimeMs = w;
+        }
+
+        public uint Id;
+        public float X;
+        public float Y;
+        public float Z;
+        public uint WaitTimeMs;
     }
 
     struct EscortPointIds

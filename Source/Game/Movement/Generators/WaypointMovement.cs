@@ -37,23 +37,12 @@ namespace Game.Movement
             isArrivalDone = false;
             pathId = pathid;
             repeating = _repeating;
-            loadedFromDB = true;
-        }
-
-        public WaypointMovementGenerator(WaypointPath _path, bool _repeating = true)
-        {
-            nextMoveTime = new TimeTrackerSmall(0);
-            isArrivalDone = false;
-            pathId = 0;
-            repeating = _repeating;
-            loadedFromDB = false;
-            path = _path;
         }
 
         public override void DoReset(Creature creature)
         {
-            if (!Stopped())
-                StartMoveNow(creature);
+            creature.AddUnitState(UnitState.Roaming | UnitState.RoamingMove);
+            StartMoveNow(creature);
         }
 
         public override void DoFinalize(Creature creature)
@@ -65,13 +54,11 @@ namespace Game.Movement
         public override void DoInitialize(Creature creature)
         {
             LoadPath(creature);
+            creature.AddUnitState(UnitState.Roaming | UnitState.RoamingMove);
         }
 
         public override bool DoUpdate(Creature creature, uint time_diff)
         {
-            if (!creature || !creature.IsAlive())
-                return false;
-
             // Waypoint movement can be switched on/off
             // This is quite handy for escort quests and other stuff
             if (creature.HasUnitState(UnitState.NotMove))
@@ -81,13 +68,13 @@ namespace Game.Movement
             }
 
             // prevent a crash at empty waypoint path.
-            if (path == null || path.nodes.Empty())
+            if (path == null || path.Empty())
                 return false;
 
             if (Stopped())
             {
                 if (CanMove((int)time_diff))
-                    return StartMoveNow(creature);
+                    return StartMove(creature);
             }
             else
             {
@@ -96,41 +83,11 @@ namespace Game.Movement
                     creature.SetHomePosition(creature.GetPosition());
 
                 if (creature.IsStopped())
-                    Stop(loadedFromDB ? WorldConfig.GetIntValue(WorldCfg.CreatureStopForPlayer) : 2 * Time.Hour * Time.InMilliseconds);
+                    Stop(WorldConfig.GetIntValue(WorldCfg.CreatureStopForPlayer));
                 else if (creature.moveSpline.Finalized())
                 {
                     OnArrived(creature);
-
-                    isArrivalDone = true;
-
-                    if (!Stopped())
-                    {
-                        if (creature.IsStopped())
-                            Stop(loadedFromDB ? WorldConfig.GetIntValue(WorldCfg.CreatureStopForPlayer) : 2 * Time.Hour * Time.InMilliseconds);
-                        else
-                            return StartMove(creature);
-                    }
-                }
-                else
-                {
-                    // speed changed during path execution, calculate remaining path and launch it once more
-                    if (recalculateSpeed)
-                    {
-                        recalculateSpeed = false;
-
-                        if (!Stopped())
-                            return StartMove(creature);
-                    }
-                    else
-                    {
-                        uint pointId = (uint)creature.moveSpline.currentPathIdx();
-                        if (pointId > currentNode)
-                        {
-                            OnArrived(creature);
-                            currentNode = pointId;
-                            FormationMove(creature);
-                        }
-                    }
+                    return StartMove(creature);
                 }
             }
 
@@ -141,6 +98,20 @@ namespace Game.Movement
         {
             if (creature.IsAIEnabled)
                 creature.GetAI().MovementInform(MovementGeneratorType.Waypoint, currentNode);
+        }
+
+        public override bool GetResetPosition(Unit u, out float x, out float y, out float z)
+        {
+            x = y = z = 0;
+            // prevent a crash at empty waypoint path.
+            if (path == null || path.Empty())
+                return false;
+
+            var node = path.LookupByIndex((int)currentNode);
+            x = node.x;
+            y = node.y;
+            z = node.z;
+            return true;
         }
 
         void Stop(int time)
@@ -159,18 +130,15 @@ namespace Game.Movement
             return nextMoveTime.Passed();
         }
 
-        bool StartMoveNow(Creature creature)
+        void StartMoveNow(Creature creature)
         {
             nextMoveTime.Reset(0);
-            return StartMove(creature);
+            StartMove(creature);
         }
 
         bool StartMove(Creature creature)
         {
-            if (!creature || !creature.IsAlive())
-                return false;
-
-            if (path == null || path.nodes.Empty())
+            if (path == null || path.Empty())
                 return false;
 
             if (Stopped())
@@ -180,9 +148,9 @@ namespace Game.Movement
 
             if (isArrivalDone)
             {
-                if ((currentNode == path.nodes.Count - 1) && !repeating) // If that's our last waypoint
+                if ((currentNode == path.Count - 1) && !repeating) // If that's our last waypoint
                 {
-                    WaypointNode waypoint = path.nodes.LookupByIndex((int)currentNode);
+                    WaypointData waypoint = path.LookupByIndex((int)currentNode);
 
                     float x = waypoint.x;
                     float y = waypoint.y;
@@ -206,43 +174,21 @@ namespace Game.Movement
                         // else if (vehicle) - this should never happen, vehicle offsets are const
                     }
 
+                    creature.GetMotionMaster().Initialize();
                     return false;
                 }
 
-                currentNode = (uint)((currentNode + 1) % path.nodes.Count);
+                currentNode = (uint)((currentNode + 1) % path.Count);
             }
 
-            float finalOrient = 0.0f;
-            WaypointMoveType finalMove = WaypointMoveType.Walk;
-
-            List<Vector3> pathing = new List<Vector3>();
-
-            pathing.Add(new Vector3(creature.GetPositionX(), creature.GetPositionY(), creature.GetPositionZ()));
-            for (int i = (int)currentNode; i < path.nodes.Count; ++i)
-            {
-                WaypointNode waypoint = path.nodes.LookupByIndex(i);
-
-                pathing.Add(new Vector3(waypoint.x, waypoint.y, waypoint.z));
-
-                finalOrient = waypoint.orientation;
-                finalMove = waypoint.moveType;
-
-                if (waypoint.delay != 0)
-                    break;
-            }
-
-            // if we have only 1 point, only current position, we shall return
-            if (pathing.Count < 2)
-                return false;
+            var node = path.LookupByIndex((int)currentNode);
 
             isArrivalDone = false;
-            recalculateSpeed = false;
 
             creature.AddUnitState(UnitState.RoamingMove);
 
-            MoveSplineInit init = new MoveSplineInit(creature);
-            var node = path.nodes.LookupByIndex((int)currentNode);
             Position formationDest = new Position(node.x, node.y, node.z, 0.0f);
+            MoveSplineInit init = new MoveSplineInit(creature);
 
             //! If creature is on transport, we assume waypoints set in DB are already transport offsets
             if (transportPath)
@@ -253,8 +199,15 @@ namespace Game.Movement
                     trans.CalculatePassengerPosition(ref formationDest.posX, ref formationDest.posY, ref formationDest.posZ, ref formationDest.Orientation);
             }
 
-            init.MovebyPath(pathing.ToArray(), (int)currentNode);
-            switch (finalMove)
+            //! Do not use formationDest here, MoveTo requires transport offsets due to DisableTransportPathTransformations() call
+            //! but formationDest contains global coordinates
+            init.MoveTo(node.x, node.y, node.z);
+
+            //! Accepts angles such as 0.00001 and -0.00001, 0 must be ignored, default value in waypoint table
+            if (node.orientation != 0 && node.delay != 0)
+                init.SetFacing(node.orientation);
+
+            switch (node.moveType)
             {
                 case WaypointMoveType.Land:
                     init.SetAnimation(AnimType.ToGround);
@@ -270,27 +223,24 @@ namespace Game.Movement
                     break;
             }
 
-            if (finalOrient != 0.0f)
-                init.SetFacing(finalOrient);
-
             init.Launch();
 
             //Call for creature group update
             if (creature.GetFormation() != null && creature.GetFormation().getLeader() == creature)
+            {
+                creature.SetWalk(node.moveType != WaypointMoveType.Run);
                 creature.GetFormation().LeaderMoveTo(formationDest.posX, formationDest.posY, formationDest.posZ);
+            }
 
             return true;
         }
 
         void LoadPath(Creature creature)
         {
-            if (loadedFromDB)
-            {
-                if (pathId == 0)
-                    pathId = creature.GetWaypointPath();
+            if (pathId == 0)
+                pathId = creature.GetWaypointPath();
 
-                path = Global.WaypointMgr.GetPath(pathId);
-            }
+            path = Global.WaypointMgr.GetPath(pathId);
 
             if (path == null)
             {
@@ -299,58 +249,37 @@ namespace Game.Movement
                 return;
             }
 
-            if (!Stopped())
-                StartMoveNow(creature);
+            StartMoveNow(creature);
         }
 
         void OnArrived(Creature creature)
         {
-            if (path == null || path.nodes.Empty())
+            if (path == null || path.Empty())
                 return;
 
-            WaypointNode waypoint = path.nodes.LookupByIndex((int)currentNode);
-            if (waypoint.delay != 0)
-            {
-                creature.ClearUnitState(UnitState.RoamingMove);
-                Stop((int)waypoint.delay);
-            }
+            if (isArrivalDone)
+                return;
 
-            if (waypoint.eventId != 0 && RandomHelper.URand(0, 99) < waypoint.eventChance)
+            isArrivalDone = true;
+
+            var current = path.LookupByIndex((int)currentNode);
+
+            if (current.eventId != 0 && RandomHelper.URand(0, 99) < current.eventChance)
             {
-                Log.outDebug(LogFilter.Unit, "Creature movement start script {0} at point {1} for {2}.", waypoint.eventId, currentNode, creature.GetGUID());
+                Log.outDebug(LogFilter.Unit, "Creature movement start script {0} at point {1} for {2}.", current.eventId, currentNode, creature.GetGUID());
                 creature.ClearUnitState(UnitState.RoamingMove);
-                creature.GetMap().ScriptsStart(ScriptsType.Waypoint, waypoint.eventId, creature, null);
+                creature.GetMap().ScriptsStart(ScriptsType.Waypoint, current.eventId, creature, null);
             }
 
             // Inform script
             MovementInform(creature);
             creature.UpdateWaypointID(currentNode);
 
-            creature.SetWalk(waypoint.moveType != WaypointMoveType.Run);
-        }
-
-        void FormationMove(Creature creature)
-        {
-            if (path == null || path.nodes.Empty())
-                return;
-
-            bool transportPath = creature.GetTransport() != null;
-
-            WaypointNode waypoint = path.nodes.LookupByIndex((int)currentNode);
-
-            Position formationDest = new Position(waypoint.x, waypoint.y, waypoint.z, 0.0f);
-
-            //! If creature is on transport, we assume waypoints set in DB are already transport offsets
-            if (transportPath)
+            if (current.delay != 0)
             {
-                ITransport trans = creature.GetDirectTransport();
-                if (trans != null)
-                    trans.CalculatePassengerPosition(ref formationDest.posX, ref formationDest.posY, ref formationDest.posZ, ref formationDest.Orientation);
+                creature.ClearUnitState(UnitState.RoamingMove);
+                Stop((int)current.delay);
             }
-
-            // Call for creature group update
-            if (creature.GetFormation() != null && creature.GetFormation().getLeader() == creature)
-                creature.GetFormation().LeaderMoveTo(formationDest.posX, formationDest.posY, formationDest.posZ);
         }
 
         public override MovementGeneratorType GetMovementGeneratorType()
@@ -358,20 +287,14 @@ namespace Game.Movement
             return MovementGeneratorType.Waypoint;
         }
 
-        public TimeTrackerSmall GetTrackerTimer() { return nextMoveTime; }
-
-        public void UnitSpeedChanged() { recalculateSpeed = true; }
-
         public uint GetCurrentNode() { return currentNode; }
 
         TimeTrackerSmall nextMoveTime;
-        bool recalculateSpeed;
 
         bool isArrivalDone;
         uint pathId;
         bool repeating;
-        bool loadedFromDB;
-        WaypointPath path;
+        List<WaypointData> path;
         uint currentNode;
     }
 
@@ -458,12 +381,12 @@ namespace Game.Movement
             MoveSplineInit init = new MoveSplineInit(owner);
             uint end = GetPathAtMapEnd();
             init.args.path = new Vector3[end];
-            for (int i = i_currentNode; i != end; ++i)
+            for (int i = (int)GetCurrentNode(); i != end; ++i)
             {
                 Vector3 vertice = new Vector3(i_path[i].Loc.X, i_path[i].Loc.Y, i_path[i].Loc.Z);
                 init.args.path[i] = vertice;
             }
-            init.SetFirstPointId(i_currentNode);
+            init.SetFirstPointId((int)GetCurrentNode());
             init.SetFly();
             init.SetSmooth();
             init.SetUncompressed();

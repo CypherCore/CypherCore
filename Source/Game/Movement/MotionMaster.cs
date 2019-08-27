@@ -598,11 +598,6 @@ namespace Game.Movement
             StartMovement(new WaypointMovementGenerator(path_id, repeatable), MovementSlot.Idle);
         }
 
-        public void MovePath(WaypointPath path, bool repeatable)
-        {
-            StartMovement(new WaypointMovementGenerator(path, repeatable), MovementSlot.Idle);
-        }
-
         void MoveRotate(uint time, RotateDirection direction)
         {
             if (time == 0)

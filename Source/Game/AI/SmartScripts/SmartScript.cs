@@ -2293,6 +2293,58 @@ namespace Game.AI
                         Global.GameEventMgr.StartEvent(eventId, true);
                         break;
                     }
+                case SmartActions.StartClosestWaypoint:
+                    {
+                        uint[] waypoints = new uint[SharedConst.SmartActionParamCount];
+                        waypoints[0] = e.Action.closestWaypointFromList.wp1;
+                        waypoints[1] = e.Action.closestWaypointFromList.wp2;
+                        waypoints[2] = e.Action.closestWaypointFromList.wp3;
+                        waypoints[3] = e.Action.closestWaypointFromList.wp4;
+                        waypoints[4] = e.Action.closestWaypointFromList.wp5;
+                        waypoints[5] = e.Action.closestWaypointFromList.wp6;
+                        float distanceToClosest = float.MaxValue;
+                        WayPoint closestWp = null;
+
+                        var targets = GetTargets(e, unit);
+                        if (targets != null)
+                        {
+                            foreach (var obj in targets)
+                            {
+                                Creature target = obj.ToCreature();
+                                if (target != null)
+                                {
+                                    if (IsSmart(target))
+                                    {
+                                        for (byte i = 0; i < SharedConst.SmartActionParamCount; i++)
+                                        {
+                                            if (waypoints[i] == 0)
+                                                continue;
+
+                                            var path = Global.SmartAIMgr.GetPath(waypoints[i]);
+                                            if (path == null || path.Empty())
+                                                continue;
+
+                                            WayPoint wp = path[0];
+                                            if (wp != null)
+                                            {
+                                                float distToThisPath = target.GetDistance(wp.X, wp.Y, wp.Z);
+
+                                                if (distToThisPath < distanceToClosest)
+                                                {
+                                                    distanceToClosest = distToThisPath;
+                                                    closestWp = wp;
+                                                }
+                                            }
+                                        }
+
+                                        if (closestWp != null)
+                                            ((SmartAI)target.GetAI()).StartPath(false, closestWp.Id, true);
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
                 case SmartActions.RandomSound:
                     {
                         uint[] sounds = new uint[SharedConst.SmartActionParamCount - 1];

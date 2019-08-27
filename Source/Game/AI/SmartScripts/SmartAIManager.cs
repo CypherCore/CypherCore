@@ -248,13 +248,7 @@ namespace Game.AI
 
                 last_id++;
 
-                WayPoint point = new WayPoint();
-                point.id = id;
-                point.x = x;
-                point.y = y;
-                point.z = z;
-
-                waypoint_map.Add(entry, point);
+                waypoint_map.Add(entry, new WayPoint(id, x, y, z));
 
                 last_entry = entry;
                 total++;
@@ -1163,6 +1157,7 @@ namespace Game.AI
 
                         break;
                     }
+                case SmartActions.StartClosestWaypoint:
                 case SmartActions.Follow:
                 case SmartActions.SetOrientation:
                 case SmartActions.StoreTargetList:
@@ -1544,10 +1539,18 @@ namespace Game.AI
 
     public class WayPoint
     {
-        public uint id;
-        public float x;
-        public float y;
-        public float z;
+        public WayPoint(uint id, float x, float y, float z)
+        {
+            Id = id;
+            X = x;
+            Y = y;
+            Z = z;
+        }
+
+        public uint Id;
+        public float X;
+        public float Y;
+        public float Z;
     }
 
     public class SmartScriptHolder
