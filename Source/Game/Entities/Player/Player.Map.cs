@@ -110,8 +110,13 @@ namespace Game.Entities
             m_areaUpdateId = newArea;
 
             AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(newArea);
+            bool oldFFAPvPArea = pvpInfo.IsInFFAPvPArea;
             pvpInfo.IsInFFAPvPArea = area != null && area.Flags[0].HasAnyFlag(AreaFlags.Arena);
             UpdatePvPState(true);
+
+            // check if we were in ffa arena and we left
+            if (oldFFAPvPArea && !pvpInfo.IsInFFAPvPArea)
+                ValidateAttackersAndOwnTarget();
 
             PhasingHandler.OnAreaChange(this);
             UpdateAreaDependentAuras(newArea);

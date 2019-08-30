@@ -225,6 +225,24 @@ namespace Game.Entities
             }
         }
 
+        public void ValidateAttackersAndOwnTarget()
+        {
+            // iterate attackers
+            List<Unit> toRemove = new List<Unit>();
+            foreach (Unit attacker in getAttackers())
+                if (!attacker.IsValidAttackTarget(this))
+                    toRemove.Add(attacker);
+
+            foreach (Unit attacker in toRemove)
+                attacker.AttackStop();
+
+            // remove our own victim
+            Unit victim = GetVictim();
+            if (victim != null)
+                if (!IsValidAttackTarget(victim))
+                    AttackStop();
+        }
+
         public void CombatStop(bool includingCast = false)
         {
             if (includingCast && IsNonMeleeSpellCast(false))
