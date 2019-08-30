@@ -30,20 +30,11 @@ namespace Game.AI
 {
     public class SmartAI : CreatureAI
     {
-        const int SMART_ESCORT_MAX_PLAYER_DIST = 50;
+        const int SMART_ESCORT_MAX_PLAYER_DIST = 60;
         const int SMART_MAX_AID_DIST = SMART_ESCORT_MAX_PLAYER_DIST / 2;
 
         public SmartAI(Creature creature) : base(creature)
         {
-            mIsCharmed = false;
-            // copy script to local (protection for table reload)
-
-            mEscortState = SmartEscortState.None;
-            mCurrentWPID = 0;//first wp id is 1 !!
-            mWPReached = false;
-            mWPPauseTimer = 0;
-            mCanRepeatPath = false;
-
             // Spawn in run mode
             me.SetWalk(false);
             mRun = true;
@@ -53,21 +44,10 @@ namespace Game.AI
             mCanAutoAttack = true;
             mCanCombatMove = true;
 
-            mForcedPaused = false;
-            mLastWPIDReached = 0;
-            mEscortQuestID = 0;
-
-            mDespawnTime = 0;
-            mDespawnState = 0;
-
             mEscortInvokerCheckTimer = 1000;
             mFollowGuid = ObjectGuid.Empty;
-            mFollowDist = 0;
-            mFollowAngle = 0;
-            mFollowCredit = 0;
-            mFollowArrivedEntry = 0;
-            mFollowCreditType = 0;
-            mInvincibilityHpLevel = 0;
+
+            mHasConditions = Global.ConditionMgr.HasConditionsForNotGroupedEntry(ConditionSourceType.CreatureTemplateVehicle, creature.GetEntry());
         }
 
         bool IsAIControlled()
@@ -133,20 +113,28 @@ namespace Game.AI
                 StopPath();
 
             if (path != 0)
+            {
                 if (!LoadPath(path))
                     return;
+            }
 
             if (mWayPoints.Empty())
                 return;
 
-            AddEscortState(SmartEscortState.Escorting);
-            mCanRepeatPath = repeat;
-
-            SetRun(run);
-
             WayPoint wp = GetNextWayPoint();
             if (wp != null)
             {
+                AddEscortState(SmartEscortState.Escorting);
+                mCanRepeatPath = repeat;
+
+                SetRun(run);
+
+                if (invoker != null && invoker.GetTypeId() == TypeId.Player)
+                {
+                    mEscortNPCFlags = me.m_unitData.NpcFlags[0];
+                    me.SetNpcFlags(NPCFlags.None);
+                }
+
                 mLastOOCPos = me.GetPosition();
                 me.GetMotionMaster().MovePoint(wp.Id, wp.X, wp.Y, wp.Z);
                 GetScript().ProcessEventsFor(SmartEvents.WaypointStart, null, wp.Id, GetScript().GetPathId());
@@ -220,6 +208,12 @@ namespace Game.AI
             mCurrentWPID = 0;
             mWPPauseTimer = 0;
             mLastWP = null;
+
+            if (mEscortNPCFlags != 0)
+            {
+                me.SetNpcFlags((NPCFlags)mEscortNPCFlags);
+                mEscortNPCFlags = 0;
+            }
 
             if (mCanRepeatPath)
             {
@@ -301,9 +295,15 @@ namespace Game.AI
 
             if (mEscortInvokerCheckTimer < diff)
             {
+                // Escort failed, no players in range 
                 if (!IsEscortInvokerInRange())
                 {
-                    StopPath(mDespawnTime, mEscortQuestID, true);
+                    StopPath(0, mEscortQuestID, true);
+
+                    // allow to properly hook out of range despawn action, which in most cases should perform the same operation as dying
+                    GetScript().ProcessEventsFor(SmartEvents.Death, me);
+                    me.DespawnOrUnsummon(1);
+                    return;
                 }
                 mEscortInvokerCheckTimer = 1000;
             }
@@ -347,6 +347,7 @@ namespace Game.AI
 
             if ((!me.HasReactState(ReactStates.Passive) && me.IsInCombat()) || HasEscortState(SmartEscortState.Paused | SmartEscortState.Returning))
                 return;
+
             // handle next wp
             if (mWPReached)//reached WP
             {
@@ -369,6 +370,7 @@ namespace Game.AI
 
         public override void UpdateAI(uint diff)
         {
+            CheckConditions(diff);
             GetScript().OnUpdate(diff);
             UpdatePath(diff);
             UpdateDespawn(diff);
@@ -390,10 +392,11 @@ namespace Game.AI
             var targets = GetScript().GetTargetList(SharedConst.SmartEscortTargets);
             if (targets != null)
             {
+                float checkDist = me.GetInstanceScript() != null ? SMART_ESCORT_MAX_PLAYER_DIST * 2 : SMART_ESCORT_MAX_PLAYER_DIST;
                 if (targets.Count == 1 && GetScript().IsPlayer(targets.First()))
                 {
                     Player player = targets.First().ToPlayer();
-                    if (me.GetDistance(player) <= SMART_ESCORT_MAX_PLAYER_DIST)
+                    if (me.GetDistance(player) <= checkDist)
                         return true;
 
                     Group group = player.GetGroup();
@@ -402,7 +405,7 @@ namespace Game.AI
                         for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.next())
                         {
                             Player groupGuy = groupRef.GetSource();
-                            if (groupGuy.IsInMap(player) && me.GetDistance(groupGuy) <= SMART_ESCORT_MAX_PLAYER_DIST)
+                            if (groupGuy.IsInMap(player) && me.GetDistance(groupGuy) <= checkDist)
                                 return true;
                         }
                     }
@@ -413,13 +416,18 @@ namespace Game.AI
                     {
                         if (GetScript().IsPlayer(obj))
                         {
-                            if (me.GetDistance(obj.ToPlayer()) <= SMART_ESCORT_MAX_PLAYER_DIST)
+                            if (me.GetDistance(obj.ToPlayer()) <= checkDist)
                                 return true;
                         }
                     }
                 }
+
+                // no valid target found
+                return false;
             }
-            return true;//escort targets were not set, ignore range check
+
+            // no player invoker was stored, just ignore range check
+            return true;
         }
 
         void MovepointReached(uint id)
@@ -459,6 +467,12 @@ namespace Game.AI
             if (mEvadeDisabled)
             {
                 GetScript().ProcessEventsFor(SmartEvents.Evade);
+                return;
+            }
+
+            if (!IsAIControlled())
+            {
+                me.AttackStop();
                 return;
             }
 
@@ -538,7 +552,7 @@ namespace Game.AI
                 return false;
 
             //never attack friendly
-            if (me.IsFriendlyTo(who))
+            if (!me.IsValidAssistTarget(who.GetVictim()))
                 return false;
 
             //too far away and no free sight?
@@ -634,7 +648,15 @@ namespace Game.AI
 
         public override void AttackStart(Unit who)
         {
-            if (who && me.Attack(who, me.IsWithinMeleeRange(who)))
+            // dont allow charmed npcs to act on their own
+            if (!IsAIControlled())
+            {
+                if (who != null && mCanAutoAttack)
+                    me.Attack(who, true);
+                return;
+            }
+
+            if (who != null && me.Attack(who, me.IsWithinMeleeRange(who)))
             {
                 if (mCanCombatMove)
                     me.GetMotionMaster().MoveChase(who);
@@ -701,9 +723,11 @@ namespace Game.AI
         {
             mScript.OnInitialize(me);
             if (!me.IsDead())
+            {
                 mJustReset = true;
-            JustReachedHome();
-            GetScript().ProcessEventsFor(SmartEvents.Respawn);
+                JustReachedHome();
+                GetScript().ProcessEventsFor(SmartEvents.Respawn);
+            }
         }
 
         public override void OnCharmed(bool apply)
@@ -759,9 +783,14 @@ namespace Game.AI
             mRun = run;
         }
 
-        public void SetFly(bool fly)
+        public void SetDisableGravity(bool disable = true)
         {
-            me.SetDisableGravity(fly);
+            me.SetDisableGravity(disable);
+        }
+
+        public void SetCanFly(bool fly = true)
+        {
+            me.SetCanFly(fly);
         }
 
         public void SetSwim(bool swim)
@@ -838,17 +867,49 @@ namespace Game.AI
         public void SetFollow(Unit target, float dist, float angle, uint credit, uint end, uint creditType)
         {
             if (target == null)
+            {
+                StopFollow(false);
                 return;
+            }
 
             mFollowGuid = target.GetGUID();
-            mFollowDist = dist >= 0.0f ? dist : SharedConst.PetFollowDist;
-            mFollowAngle = angle >= 0.0f ? angle : me.GetFollowAngle();
+            mFollowDist = dist;
+            mFollowAngle = angle;
             mFollowArrivedTimer = 1000;
             mFollowCredit = credit;
             mFollowArrivedEntry = end;
             mFollowCreditType = creditType;
             SetRun(mRun);
             me.GetMotionMaster().MoveFollow(target, mFollowDist, mFollowAngle);
+        }
+
+        public void StopFollow(bool complete)
+        {
+            mFollowGuid.Clear();
+            mFollowDist = 0;
+            mFollowAngle = 0;
+            mFollowCredit = 0;
+            mFollowArrivedTimer = 1000;
+            mFollowArrivedEntry = 0;
+            mFollowCreditType = 0;
+            me.StopMoving();
+            me.GetMotionMaster().MoveIdle();
+
+            if (!complete)
+                return;
+
+            Player player = Global.ObjAccessor.GetPlayer(me, mFollowGuid);
+            if (player != null)
+            {
+                if (mFollowCreditType == 0)
+                    player.RewardPlayerAndGroupAtEvent(mFollowCredit, me);
+                else
+                    player.GroupEventHappens(mFollowCredit, me);
+            }
+
+            SetDespawnTime(5000);
+            StartDespawn();
+            GetScript().ProcessEventsFor(SmartEvents.FollowCompleted);
         }
 
         public void SetScript9(SmartScriptHolder e, uint entry, Unit invoker)
@@ -871,6 +932,40 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.OnSpellclick, clicker);
         }
 
+        void CheckConditions(uint diff)
+        {
+            if (!mHasConditions)
+                return;
+
+            if (mConditionsTimer <= diff)
+            {
+                Vehicle vehicleKit = me.GetVehicleKit();
+                if (vehicleKit != null)
+                {
+                    foreach (var pair in vehicleKit.Seats)
+                    {
+                        Unit passenger = Global.ObjAccessor.GetUnit(me, pair.Value.Passenger.Guid);
+                        if (passenger != null)
+                        {
+                            Player player = passenger.ToPlayer();
+                            if (player != null)
+                            {
+                                if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.CreatureTemplateVehicle, me.GetEntry(), player, me))
+                                {
+                                    player.ExitVehicle();
+                                    return; // check other pessanger in next tick
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mConditionsTimer = 1000;
+            }
+            else
+                mConditionsTimer -= diff;
+        }
+
         public void UpdateFollow(uint diff)
         {
             if (!mFollowGuid.IsEmpty())
@@ -879,31 +974,14 @@ namespace Game.AI
                 {
                     if (me.FindNearestCreature(mFollowArrivedEntry, SharedConst.InteractionDistance, true) != null)
                     {
-                        Player player = Global.ObjAccessor.GetPlayer(me, mFollowGuid);
-                        if (player != null)
-                        {
-                            if (mFollowCreditType == 0)
-                                player.RewardPlayerAndGroupAtEvent(mFollowCredit, me);
-                            else
-                                player.GroupEventHappens(mFollowCredit, me);
-                        }
-                        mFollowGuid.Clear();
-                        mFollowDist = 0;
-                        mFollowAngle = 0;
-                        mFollowCredit = 0;
-                        mFollowArrivedTimer = 1000;
-                        mFollowArrivedEntry = 0;
-                        mFollowCreditType = 0;
-                        SetDespawnTime(5000);
-                        me.StopMoving();
-                        me.GetMotionMaster().MoveIdle();
-                        StartDespawn();
-                        GetScript().ProcessEventsFor(SmartEvents.FollowCompleted);
+                        StopFollow(true);
                         return;
                     }
+
                     mFollowArrivedTimer = 1000;
                 }
-                else mFollowArrivedTimer -= diff;
+                else
+                    mFollowArrivedTimer -= diff;
             }
         }
 
@@ -928,6 +1006,8 @@ namespace Game.AI
 
         uint GetWPCount() { return (uint)mWayPoints?.Count; }
 
+        public void SetWPPauseTimer(uint time) { mWPPauseTimer = time; }
+
         bool mIsCharmed;
         uint mFollowCreditType;
         uint mFollowArrivedTimer;
@@ -944,6 +1024,7 @@ namespace Game.AI
         uint mLastWPIDReached;
         bool mWPReached;
         uint mWPPauseTimer;
+        uint mEscortNPCFlags;
         WayPoint mLastWP;
         Position mLastOOCPos;//set on enter combat
         bool mCanRepeatPath;
@@ -962,6 +1043,10 @@ namespace Game.AI
 
         uint mEscortInvokerCheckTimer;
         bool mJustReset;
+
+        // Vehicle conditions
+        bool mHasConditions;
+        uint mConditionsTimer;
     }
 
     public class SmartGameObjectAI : GameObjectAI
@@ -979,18 +1064,23 @@ namespace Game.AI
         public override void InitializeAI()
         {
             GetScript().OnInitialize(go);
-            GetScript().ProcessEventsFor(SmartEvents.Respawn);
+            // do not call respawn event if go is not spawned
+            if (go.isSpawned())
+                GetScript().ProcessEventsFor(SmartEvents.Respawn);
         }
 
         public override void Reset()
         {
+            // call respawn event on reset
+            GetScript().ProcessEventsFor(SmartEvents.Respawn);
+
             GetScript().OnReset();
         }
 
-        public override bool GossipHello(Player player, bool isUse)
+        public override bool GossipHello(Player player, bool reportUse)
         {
             Log.outDebug(LogFilter.ScriptsAi, "SmartGameObjectAI.GossipHello");
-            GetScript().ProcessEventsFor(SmartEvents.GossipHello, player, 0, 0, false, null, go);
+            GetScript().ProcessEventsFor(SmartEvents.GossipHello, player, reportUse ? 1 : 0u, 0, false, null, go);
             return false;
         }
 
@@ -1052,6 +1142,11 @@ namespace Game.AI
         public override void EventInform(uint eventId)
         {
             GetScript().ProcessEventsFor(SmartEvents.GoEventInform, null, eventId);
+        }
+
+        public override void SpellHit(Unit unit, SpellInfo spellInfo)
+        {
+            GetScript().ProcessEventsFor(SmartEvents.SpellHit, unit, 0, 0, false, spellInfo);
         }
 
         public SmartScript GetScript() { return mScript; }

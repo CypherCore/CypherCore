@@ -1350,7 +1350,7 @@ namespace Game.Spells
                 if (Global.ScriptMgr.OnGossipHello(player, gameObjTarget))
                     return;
 
-                if (gameObjTarget.GetAI().GossipHello(player, true))
+                if (gameObjTarget.GetAI().GossipHello(player, false))
                     return;
 
                 switch (gameObjTarget.GetGoType())

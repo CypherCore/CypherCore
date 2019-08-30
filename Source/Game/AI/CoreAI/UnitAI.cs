@@ -571,4 +571,74 @@ namespace Game.AI
         Unit _source;
         bool _playerOnly;
     }
+
+    // Simple selector for units using mana
+    class PowerUsersSelector : ISelector
+    {
+        public PowerUsersSelector(Unit unit, PowerType power, float dist, bool playerOnly)
+        {
+            _me = unit;
+            _power = power;
+            _dist = dist;
+            _playerOnly = playerOnly;
+        }
+
+        public bool Check(Unit target)
+        {
+            if (_me == null || target == null)
+                return false;
+
+            if (target.GetPowerType() != _power)
+                return false;
+
+            if (_playerOnly && target.GetTypeId() != TypeId.Player)
+                return false;
+
+            if (_dist > 0.0f && !_me.IsWithinCombatRange(target, _dist))
+                return false;
+
+            if (_dist < 0.0f && _me.IsWithinCombatRange(target, -_dist))
+                return false;
+
+            return true;
+        }
+
+        Unit _me;
+        PowerType _power;
+        float _dist;
+        bool _playerOnly;
+    }
+
+    class FarthestTargetSelector : ISelector
+    {
+        public FarthestTargetSelector(Unit unit, float dist, bool playerOnly, bool inLos)
+        {
+            _me = unit;
+            _dist = dist;
+            _playerOnly = playerOnly;
+            _inLos = inLos;
+        }
+
+        public bool Check(Unit target)
+        {
+            if (_me == null || target == null)
+                return false;
+
+            if (_playerOnly && target.GetTypeId() != TypeId.Player)
+                return false;
+
+            if (_dist > 0.0f && !_me.IsWithinCombatRange(target, _dist))
+                return false;
+
+            if (_inLos && !_me.IsWithinLOSInMap(target))
+                return false;
+
+            return true;
+        }
+
+        Unit _me;
+        float _dist;
+        bool _playerOnly;
+        bool _inLos;
+    }
 }

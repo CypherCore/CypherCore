@@ -129,7 +129,7 @@ namespace Game.AI
                 temp.event_id = result.Read<ushort>(2);
                 temp.link = result.Read<ushort>(3);
                 temp.Event.type = (SmartEvents)result.Read<byte>(4);
-                temp.Event.event_phase_mask = result.Read<byte>(5);
+                temp.Event.event_phase_mask = result.Read<ushort>(5);
                 temp.Event.event_chance = result.Read<byte>(6);
                 temp.Event.event_flags = (SmartEventFlags)result.Read<ushort>(7);
 
@@ -164,6 +164,47 @@ namespace Game.AI
                 // check all event and action params
                 if (!IsEventValid(temp))
                     continue;
+
+                // specific check for timed events
+                switch (temp.Event.type)
+                {
+                    case SmartEvents.Update:
+                    case SmartEvents.UpdateOoc:
+                    case SmartEvents.UpdateIc:
+                    case SmartEvents.HealthPct:
+                    case SmartEvents.TargetHealthPct:
+                    case SmartEvents.ManaPct:
+                    case SmartEvents.TargetManaPct:
+                    case SmartEvents.Range:
+                    case SmartEvents.FriendlyHealth:
+                    case SmartEvents.FriendlyHealthPCT:
+                    case SmartEvents.FriendlyMissingBuff:
+                    case SmartEvents.HasAura:
+                    case SmartEvents.TargetBuffed:
+                        if (temp.Event.minMaxRepeat.repeatMin == 0 && temp.Event.minMaxRepeat.repeatMax == 0 && !temp.Event.event_flags.HasAnyFlag(SmartEventFlags.NotRepeatable) && temp.source_type != SmartScriptType.TimedActionlist)
+                        {
+                            temp.Event.event_flags |= SmartEventFlags.NotRepeatable;
+                            Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: Entry {temp.entryOrGuid} SourceType {temp.GetScriptType()}, Event {temp.event_id}, Missing Repeat flag.");
+                        }
+                        break;
+                    case SmartEvents.VictimCasting:
+                    case SmartEvents.IsBehindTarget:
+                        if (temp.Event.minMaxRepeat.min == 0 && temp.Event.minMaxRepeat.max == 0 && !temp.Event.event_flags.HasAnyFlag(SmartEventFlags.NotRepeatable) && temp.source_type != SmartScriptType.TimedActionlist)
+                        {
+                            temp.Event.event_flags |= SmartEventFlags.NotRepeatable;
+                            Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: Entry {temp.entryOrGuid} SourceType {temp.GetScriptType()}, Event {temp.event_id}, Missing Repeat flag.");
+                        }
+                        break;
+                    case SmartEvents.FriendlyIsCc:
+                        if (temp.Event.friendlyCC.repeatMin == 0 && temp.Event.friendlyCC.repeatMax == 0 && !temp.Event.event_flags.HasAnyFlag(SmartEventFlags.NotRepeatable) && temp.source_type != SmartScriptType.TimedActionlist)
+                        {
+                            temp.Event.event_flags |= SmartEventFlags.NotRepeatable;
+                            Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: Entry {temp.entryOrGuid} SourceType {temp.GetScriptType()}, Event {temp.event_id}, Missing Repeat flag.");
+                        }
+                        break;
+                    default:
+                        break;
+                }
 
                 // creature entry / guid not found in storage, create empty event list for it and increase counters
                 if (!mEventMap[(int)source_type].ContainsKey(temp.entryOrGuid))
@@ -331,6 +372,7 @@ namespace Game.AI
                 case SmartTargets.ClosestFriendly:
                 case SmartTargets.Stored:
                 case SmartTargets.LootRecipients:
+                case SmartTargets.Farthest:
                 case SmartTargets.VehicleAccessory:
                 case SmartTargets.SpellTarget:
                     break;
@@ -360,7 +402,7 @@ namespace Game.AI
                 Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: EntryOrGuid {0} using event({1}) has invalid action type ({2}), skipped.", e.entryOrGuid, e.event_id, e.GetActionType());
                 return false;
             }
-            if (e.Event.event_phase_mask > (uint)SmartPhase.All)
+            if (e.Event.event_phase_mask > (uint)PhaseBits.All)
             {
                 Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: EntryOrGuid {0} using event({1}) has invalid phase mask ({2}), skipped.", e.entryOrGuid, e.event_id, e.Event.event_phase_mask);
                 return false;
@@ -391,7 +433,7 @@ namespace Game.AI
                     case SmartEvents.Update:
                     case SmartEvents.UpdateIc:
                     case SmartEvents.UpdateOoc:
-                    case SmartEvents.HealtPct:
+                    case SmartEvents.HealthPct:
                     case SmartEvents.ManaPct:
                     case SmartEvents.TargetHealthPct:
                     case SmartEvents.TargetManaPct:
@@ -768,7 +810,7 @@ namespace Game.AI
 
                     if (e.Action.animKit.type > 3)
                     {
-                        Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses invalid AnimKit type {4}, skipped.", 
+                        Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses invalid AnimKit type {4}, skipped.",
                             e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.Action.animKit.type);
                         return false;
                     }
@@ -830,6 +872,12 @@ namespace Game.AI
                         }
                         break;
                     }
+                case SmartActions.CrossCast:
+                    {
+                        if (!IsSpellValid(e, e.Action.crossCast.spell))
+                            return false;
+                        break;
+                    }
                 case SmartActions.AddAura:
                 case SmartActions.InvokerCast:
                     if (!IsSpellValid(e, e.Action.cast.spell))
@@ -871,7 +919,7 @@ namespace Game.AI
                         return false;
                     }
                     break;
-                case SmartActions.Removeaurasfromspell:
+                case SmartActions.RemoveAurasFromSpell:
                     if (e.Action.removeAura.spell != 0 && !IsSpellValid(e, e.Action.removeAura.spell))
                         return false;
                     break;
@@ -965,20 +1013,6 @@ namespace Game.AI
                         Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent Map entry {4}, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.Action.teleport.mapID);
                         return false;
                     }
-                    break;
-                case SmartActions.SetCounter:
-                    if (e.Action.setCounter.counterId == 0)
-                    {
-                        Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses wrong counterId {4}, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.Action.setCounter.counterId);
-                        return false;
-                    }
-
-                    if (e.Action.setCounter.value == 0)
-                    {
-                        Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses wrong value {4}, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.Action.setCounter.value);
-                        return false;
-                    }
-
                     break;
                 case SmartActions.InstallAiTemplate:
                     if (e.Action.installTtemplate.id >= (uint)SmartAITemplate.End)
@@ -1157,6 +1191,15 @@ namespace Game.AI
 
                         break;
                     }
+                case SmartActions.RemoveAurasByType:
+                    {
+                        if (e.Action.auraType.type >= (uint)AuraType.Total)
+                        {
+                            Log.outError(LogFilter.Sql, $"Entry {e.entryOrGuid} SourceType {e.GetScriptType()} Event {e.event_id} Action {e.GetActionType()} uses invalid data type {e.Action.auraType.type} (value range 0-TOTAL_AURAS), skipped.");
+                            return false;
+                        }
+                        break;
+                    }
                 case SmartActions.StartClosestWaypoint:
                 case SmartActions.Follow:
                 case SmartActions.SetOrientation:
@@ -1181,7 +1224,8 @@ namespace Game.AI
                 case SmartActions.SetData:
                 case SmartActions.SetVisibility:
                 case SmartActions.WpPause:
-                case SmartActions.SetFly:
+                case SmartActions.SetDisableGravity:
+                case SmartActions.SetCanFly:
                 case SmartActions.SetRun:
                 case SmartActions.SetSwim:
                 case SmartActions.ForceDespawn:
@@ -1202,7 +1246,6 @@ namespace Game.AI
                 case SmartActions.SetNpcFlag:
                 case SmartActions.AddNpcFlag:
                 case SmartActions.RemoveNpcFlag:
-                case SmartActions.CrossCast:
                 case SmartActions.CallRandomTimedActionlist:
                 case SmartActions.RandomMove:
                 case SmartActions.SetUnitFieldBytes1:
@@ -1227,6 +1270,13 @@ namespace Game.AI
                 case SmartActions.MoveOffset:
                 case SmartActions.SetCorpseDelay:
                 case SmartActions.DisableEvade:
+                case SmartActions.SetSightDist:
+                case SmartActions.Flee:
+                case SmartActions.AddThreat:
+                case SmartActions.LoadEquipment:
+                case SmartActions.TriggerRandomTimedEvent:
+                case SmartActions.SetCounter:
+                case SmartActions.RemoveAllGameobjects:
                     break;
                 default:
                     Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Not handled action_type({0}), event_type({1}), Entry {2} SourceType {3} Event {4}, skipped.", e.GetActionType(), e.GetEventType(), e.entryOrGuid, e.GetScriptType(), e.event_id);
@@ -1452,7 +1502,7 @@ namespace Game.AI
         {
             { SmartEvents.UpdateIc,                 SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.TimedActionlist },
             { SmartEvents.UpdateOoc,                SmartScriptTypeMaskId.Creature + SmartScriptTypeMaskId.Gameobject + SmartScriptTypeMaskId.Instance },
-            { SmartEvents.HealtPct,                 SmartScriptTypeMaskId.Creature },
+            { SmartEvents.HealthPct,                 SmartScriptTypeMaskId.Creature },
             { SmartEvents.ManaPct,                  SmartScriptTypeMaskId.Creature },
             { SmartEvents.Aggro,                    SmartScriptTypeMaskId.Creature },
             { SmartEvents.Kill,                     SmartScriptTypeMaskId.Creature },
@@ -1680,6 +1730,9 @@ namespace Game.AI
         public TimedEvent timedEvent;
 
         [FieldOffset(16)]
+        public GossipHello gossipHello;
+
+        [FieldOffset(16)]
         public Gossip gossip;
 
         [FieldOffset(16)]
@@ -1864,6 +1917,10 @@ namespace Game.AI
         public struct TimedEvent
         {
             public uint id;
+        }
+        public struct GossipHello
+        {
+            public uint noReportUse;
         }
         public struct Gossip
         {
@@ -2084,6 +2141,9 @@ namespace Game.AI
         public SetRun setRun;
 
         [FieldOffset(4)]
+        public SetDisableGravity setDisableGravity;
+
+        [FieldOffset(4)]
         public SetFly setFly;
 
         [FieldOffset(4)]
@@ -2136,6 +2196,9 @@ namespace Game.AI
 
         [FieldOffset(4)]
         public Jump jump;
+
+        [FieldOffset(4)]
+        public FleeAssist fleeAssist;
 
         [FieldOffset(4)]
         public Flee flee;
@@ -2193,6 +2256,21 @@ namespace Game.AI
 
         [FieldOffset(4)]
         public DisableEvade disableEvade;
+
+        [FieldOffset(4)]
+        public AuraType auraType;
+
+        [FieldOffset(4)]
+        public SightDistance sightDistance;
+
+        [FieldOffset(4)]
+        public LoadEquipment loadEquipment;
+
+        [FieldOffset(4)]
+        public RandomTimedEvent randomTimedEvent;
+
+        [FieldOffset(4)]
+        public StopMotion stopMotion;
 
         [FieldOffset(4)]
         public AnimKit animKit;
@@ -2255,6 +2333,7 @@ namespace Game.AI
             public uint spell;
             public uint castFlags;
             public uint triggerFlags;
+            public uint targetsLimit;
         }
         public struct CrossCast
         {
@@ -2460,6 +2539,10 @@ namespace Game.AI
         {
             public uint run;
         }
+        public struct SetDisableGravity
+        {
+            public uint disable;
+        }
         public struct SetFly
         {
             public uint fly;
@@ -2557,9 +2640,13 @@ namespace Game.AI
             public uint speedxy;
             public uint speedz;
         }
-        public struct Flee
+        public struct FleeAssist
         {
             public uint withEmote;
+        }
+        public struct Flee
+        {
+            public uint fleeTime;
         }
         public struct RespawnTarget
         {
@@ -2650,6 +2737,29 @@ namespace Game.AI
         {
             public uint disable;
         }
+        public struct AuraType
+        {
+            public uint type;
+        }
+        public struct SightDistance
+        {
+            public uint dist;
+        }
+        public struct LoadEquipment
+        {
+            public uint id;
+            public uint force;
+        }
+        public struct RandomTimedEvent
+        {
+            public uint minId;
+            public uint maxId;
+        }
+        public struct StopMotion
+        {
+            public uint stopMovement;
+            public uint movementExpired;
+        }
         public struct AnimKit
         {
             public uint animKit;
@@ -2688,6 +2798,12 @@ namespace Game.AI
 
         [FieldOffset(16)]
         public float o;
+
+        [FieldOffset(20)]
+        public HostilRandom hostilRandom;
+
+        [FieldOffset(20)]
+        public Farthest farthest;
 
         [FieldOffset(20)]
         public UnitRange unitRange;
@@ -2729,13 +2845,27 @@ namespace Game.AI
         public ClosestFriendly closestFriendly;
 
         [FieldOffset(20)]
+        public Owner owner;
+
+        [FieldOffset(20)]
         public Vehicle vehicle;
 
         [FieldOffset(20)]
         public Raw raw;
 
         #region Structs
-
+        public struct HostilRandom
+        {
+            public uint maxDist;
+            public uint playerOnly;
+            public uint powerType;
+        }
+        public struct Farthest
+        {
+            public uint maxDist;
+            public uint playerOnly;
+            public uint isInLos;
+        }
         public struct UnitRange
         {
             public uint creature;
@@ -2798,6 +2928,10 @@ namespace Game.AI
         public struct ClosestFriendly
         {
             public uint maxDist;
+        }
+        public struct Owner
+        {
+            public uint useCharmerOrOwner;
         }
         public struct Vehicle
         {

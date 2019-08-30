@@ -1544,6 +1544,14 @@ namespace Game.Entities
             return searcher.GetTarget();
         }
 
+        public Player SelectNearestPlayer(float distance)
+        {
+            var checker = new NearestPlayerInObjectRangeCheck(this, distance);
+            var searcher = new PlayerLastSearcher(this, checker);
+            Cell.VisitAllObjects(this, searcher, distance);
+            return searcher.GetTarget();
+        }
+
         public void GetGameObjectListWithEntryInGrid(List<GameObject> gameobjectList, uint entry = 0, float maxSearchRange = 250.0f)
         {
             var check = new AllGameObjectsWithEntryInRange(this, entry, maxSearchRange);

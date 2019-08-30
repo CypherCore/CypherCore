@@ -569,6 +569,11 @@ namespace Game.Entities
                                     SetLootState(LootState.JustDeactivated);
                                     return;
                                 }
+
+                                // Call AI Reset (required for example in SmartAI to clear one time events)
+                                if (GetAI() != null)
+                                    GetAI().Reset();
+
                                 // respawn timer
                                 uint poolid = GetSpawnId() != 0 ? Global.PoolMgr.IsPartOfAPool<GameObject>(GetSpawnId()) : 0;
                                 if (poolid != 0)
@@ -1305,7 +1310,7 @@ namespace Game.Entities
                 if (Global.ScriptMgr.OnGossipHello(playerUser, this))
                     return;
 
-                if (GetAI().GossipHello(playerUser, true))
+                if (GetAI().GossipHello(playerUser, false))
                     return;
             }
 

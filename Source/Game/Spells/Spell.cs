@@ -2232,6 +2232,9 @@ namespace Game.Spells
                 if (effect != null && Convert.ToBoolean(effectMask & (1 << (int)effect.EffectIndex)))
                     HandleEffects(null, null, go, effect.EffectIndex, SpellEffectHandleMode.HitTarget);
 
+            if (go.GetAI() != null)
+                go.GetAI().SpellHit(m_caster, m_spellInfo);
+
             CallScriptOnHitHandlers();
             CallScriptAfterHitHandlers();
         }

@@ -3147,7 +3147,7 @@ namespace Game.Entities
             return true;
         }
 
-        bool IsValidAssistTarget(Unit target)
+        public bool IsValidAssistTarget(Unit target)
         {
             return _IsValidAssistTarget(target, null);
         }

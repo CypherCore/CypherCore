@@ -1909,14 +1909,6 @@ namespace Game.Entities
             return searcher.GetTarget();
         }
 
-        public Player SelectNearestPlayer(float distance)
-        {
-            var checker = new NearestPlayerInObjectRangeCheck(this, distance);
-            var searcher = new PlayerLastSearcher(this, checker);
-            Cell.VisitAllObjects(this, searcher, distance);
-            return searcher.GetTarget();
-        }
-
         public void SendAIReaction(AiReaction reactionType)
         {
             AIReaction packet = new AIReaction();

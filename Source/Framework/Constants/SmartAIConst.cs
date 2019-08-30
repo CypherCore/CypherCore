@@ -50,17 +50,42 @@ namespace Framework.Constants
 
     public enum SmartPhase
     {
-        ALWAYS = 0,
+        Always = 0,
         Phase1 = 1,
         Phase2 = 2,
         Phase3 = 3,
         Phase4 = 4,
         Phase5 = 5,
         Phase6 = 6,
-        Max = 7,
-        All = (Phase1 | Phase2  | Phase3  | Phase4  | Phase5  | Phase6),
+        Phase7 = 7,
+        Phase8 = 8,
+        Phase9 = 9,
+        Phase10 = 10,
+        Phase11 = 11,
+        Phase12 = 12,
+        Max = 13,
 
-        Count = 6
+        Count = 12
+    }
+
+    public enum PhaseBits
+    {
+        PhaseAlwaysBit = 0,
+        Phase1Bit = 1,
+        Phase2Bit = 2,
+        Phase3Bit = 4,
+        Phase4Bit = 8,
+        Phase5Bit = 16,
+        Phase6Bit = 32,
+        Phase7Bit = 64,
+        Phase8Bit = 128,
+        Phase9Bit = 256,
+        Phase10Bit = 512,
+        Phase11Bit = 1024,
+        Phase12Bit = 2048,
+        All = Phase1Bit + Phase2Bit + Phase3Bit + Phase4Bit + Phase5Bit +
+                                         Phase6Bit + Phase7Bit + Phase8Bit + Phase9Bit + Phase10Bit +
+                                         Phase11Bit + Phase12Bit
     }
 
     public enum SmartEventFlags
@@ -114,7 +139,7 @@ namespace Framework.Constants
     {
         UpdateIc = 0,       // Initialmin, Initialmax, Repeatmin, Repeatmax
         UpdateOoc = 1,       // Initialmin, Initialmax, Repeatmin, Repeatmax
-        HealtPct = 2,       // Hpmin%, Hpmax%,  Repeatmin, Repeatmax
+        HealthPct = 2,       // Hpmin%, Hpmax%,  Repeatmin, Repeatmax
         ManaPct = 3,       // Manamin%, Manamax%, Repeatmin, Repeatmax
         Aggro = 4,       // None
         Kill = 5,       // Cooldownmin0, Cooldownmax1, Playeronly2, Else Creature Entry3
@@ -176,7 +201,7 @@ namespace Framework.Constants
         Link = 61,      // Internal Usage, No Params, Used To Link Together Multiple Events, Does Not Use Any Extra Resources To Iterate Event Lists Needlessly
         GossipSelect = 62,      // Menuid, Actionid
         JustCreated = 63,      // None
-        GossipHello = 64,      // None
+        GossipHello = 64,      // noReportUse (for GOs)
         FollowCompleted = 65,      // None
         DummyEffect = 66,      // Spellid, Effectindex
         IsBehindTarget = 67,      // Cooldownmin, Cooldownmax
@@ -232,7 +257,7 @@ namespace Framework.Constants
         FleeForAssist = 25,     // With Emote
         CallGroupeventhappens = 26,     // Questid
         CombatStop = 27,     //
-        Removeaurasfromspell = 28,     // Spellid, 0 Removes All Auras
+        RemoveAurasFromSpell = 28,     // Spellid, 0 Removes All Auras
         Follow = 29,     // Distance (0 = Default), Angle (0 = Default), Endcreatureentry, Credit, Credittype (0monsterkill, 1event)
         RandomPhase = 30,     // Phaseid1, Phaseid2, Phaseid3...
         RandomPhaseRange = 31,     // Phasemin, Phasemax
@@ -264,7 +289,7 @@ namespace Framework.Constants
         RemoveItem = 57,     // Itemid, Count
         InstallAiTemplate = 58,     // Aitemplateid
         SetRun = 59,     // 0/1
-        SetFly = 60,     // 0/1
+        SetDisableGravity = 60,     // 0/1
         SetSwim = 61,     // 0/1
         Teleport = 62,     // Mapid,
         SetCounter = 63,   // id, value, reset (0/1)
@@ -323,7 +348,15 @@ namespace Framework.Constants
         SetCorpseDelay = 116,    // timer
         DisableEvade = 117,    // 0/1 (1 = disabled, 0 = enabled)
         GoSetGoState = 118,
-        // 119 - 127 : 3.3.5 reserved
+        SetCanFly = 119,    // 0/1
+        RemoveAurasByType = 120,    // type
+        SetSightDist = 121,    // sightDistance
+        Flee = 122,    // fleeTime
+        AddThreat = 123,    // +threat, -threat
+        LoadEquipment = 124,    // id
+        TriggerRandomTimedEvent = 125,    // id min range, id max range
+        RemoveAllGameobjects = 126,
+        StopMotion = 127,	  // stopMoving, movementExpired
         PlayAnimkit = 128,
         ScenePlay = 129,    // sceneId
         SceneCancel = 130,    // sceneId
@@ -337,10 +370,10 @@ namespace Framework.Constants
         None = 0,    // None, Defaulting To Invoket
         Self = 1,    // Self Cast
         Victim = 2,    // Our Current Target (Ie: Highest Aggro)
-        HostileSecondAggro = 3,    // Second Highest Aggro
-        HostileLastAggro = 4,    // Dead Last On Aggro
-        HostileRandom = 5,    // Just Any Random Target On Our Threat List
-        HostileRandomNotTop = 6,    // Any Random Target Except Top Threat
+        HostileSecondAggro = 3,    // Second highest aggro, maxdist, playerOnly, powerType + 1
+        HostileLastAggro = 4,    // Dead last on aggro, maxdist, playerOnly, powerType + 1
+        HostileRandom = 5,    // Just any random target on our threat list, maxdist, playerOnly, powerType + 1
+        HostileRandomNotTop = 6,    // Any random target except top threat, maxdist, playerOnly, powerType + 1
         ActionInvoker = 7,    // Unit Who Caused This Event To Occur
         Position = 8,    // Use Xyz From Event Params
         CreatureRange = 9,    // Creatureentry(0any), Mindist, Maxdist
@@ -357,8 +390,8 @@ namespace Framework.Constants
         ClosestGameobject = 20,   // Entry(0any), Maxdist
         ClosestPlayer = 21,   // Maxdist
         ActionInvokerVehicle = 22,   // Unit'S Vehicle Who Caused This Event To Occur
-        OwnerOrSummoner = 23,   // Unit'S Owner Or Summoner
-        ThreatList = 24,   // All Units On Creature'S Threat List
+        OwnerOrSummoner = 23,   // Unit's owner or summoner, Use Owner/Charmer of this unit
+        ThreatList = 24,   // All units on creature's threat list, maxdist
         ClosestEnemy = 25,   // maxDist, playerOnly
         ClosestFriendly = 26,   // maxDist, playerOnly
         LootRecipients = 27,   // all players that have tagged this creature (for kill credit)

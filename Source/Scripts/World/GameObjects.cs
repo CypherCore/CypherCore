@@ -760,9 +760,9 @@ namespace Scripts.World
         {
             public go_soulwellAI(GameObject go) : base(go) { }
 
-            public override bool GossipHello(Player player, bool isUse)
+            public override bool GossipHello(Player player, bool reportUse)
             {
-                if (!isUse)
+                if (!reportUse)
                     return true;
 
                 Unit owner = go.GetOwner();
