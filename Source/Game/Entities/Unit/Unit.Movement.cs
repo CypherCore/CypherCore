@@ -522,7 +522,11 @@ namespace Game.Entities
             float minSpeedMod = GetMaxPositiveAuraModifier(AuraType.ModMinimumSpeed);
             if (minSpeedMod != 0)
             {
-                float min_speed = minSpeedMod / 100.0f;
+                float baseMinSpeed = 1.0f;
+                if (!GetOwnerGUID().IsPlayer() && !IsHunterPet() && GetTypeId() == TypeId.Unit)
+                    baseMinSpeed = ToCreature().GetCreatureTemplate().SpeedRun;
+
+                float min_speed = MathFunctions.CalculatePct(baseMinSpeed, minSpeedMod);
                 if (speed < min_speed)
                     speed = min_speed;
             }
