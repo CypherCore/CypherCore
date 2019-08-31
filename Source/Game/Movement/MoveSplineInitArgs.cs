@@ -66,7 +66,7 @@ namespace Game.Movement
 
             if (!CHECK(path.Length > 1))
                 return false;
-            if (!CHECK(velocity > 0.01f))
+            if (!CHECK(velocity >= 0.01f))
                 return false;
             if (!CHECK(time_perc >= 0.0f && time_perc <= 1.0f))
                 return false;

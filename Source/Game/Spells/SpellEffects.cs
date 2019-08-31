@@ -4179,7 +4179,7 @@ namespace Game.Spells
             float ratio = 0.1f;
             float speedxy = effectInfo.MiscValue * ratio;
             float speedz = damage * ratio;
-            if (speedxy < 0.1f && speedz < 0.1f)
+            if (speedxy < 0.01f && speedz < 0.01f)
                 return;
 
             float x, y;

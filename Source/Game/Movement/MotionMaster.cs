@@ -351,6 +351,9 @@ namespace Game.Movement
             if (_owner.IsTypeId(TypeId.Player))
                 return;
 
+            if (speedXY < 0.01f)
+                return;
+
             float x, y, z;
             float moveTimeHalf = (float)(speedZ / gravity);
             float dist = 2 * moveTimeHalf * speedXY;
@@ -393,6 +396,8 @@ namespace Game.Movement
             JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null)
         {
             Log.outDebug(LogFilter.Server, "Unit ({0}) jump to point (X: {1} Y: {2} Z: {3})", _owner.GetGUID().ToString(), x, y, z);
+            if (speedXY < 0.01f)
+                return;
 
             float moveTimeHalf = (float)(speedZ / gravity);
             float max_height = -MoveSpline.computeFallElevation(moveTimeHalf, false, -speedZ);
