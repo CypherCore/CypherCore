@@ -5318,8 +5318,8 @@ namespace Game.Spells
                     }
                 }
             }
-            else
-                damage = (uint)target.CountPctFromMaxHealth((int)damage);
+            else // ceil obtained value, it may happen that 10 ticks for 10% damage may not kill owner
+                damage = (uint)Math.Ceiling((float)MathFunctions.CalculatePct(target.GetMaxHealth(), damage));
 
             if (!m_spellInfo.HasAttribute(SpellAttr4.FixedDamage))
             {
