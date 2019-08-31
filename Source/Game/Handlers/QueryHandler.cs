@@ -67,128 +67,76 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.QueryGameObject, Processing = PacketProcessing.Inplace)]
         void HandleGameObjectQuery(QueryGameObject packet)
         {
-            QueryGameObjectResponse response = new QueryGameObjectResponse();
-            response.GameObjectID = packet.GameObjectID;
-
-            GameObjectTemplate gameObjectInfo = Global.ObjectMgr.GetGameObjectTemplate(packet.GameObjectID);
-            if (gameObjectInfo != null)
+            GameObjectTemplate info = Global.ObjectMgr.GetGameObjectTemplate(packet.GameObjectID);
+            if (info != null)
             {
-                response.Allow = true;
-                GameObjectStats stats = new GameObjectStats();
+                if (!WorldConfig.GetBoolValue(WorldCfg.CacheDataQueries))
+                    info.InitializeQueryData();
 
-                stats.Type = (uint)gameObjectInfo.type;
-                stats.DisplayID = gameObjectInfo.displayId;
+                QueryGameObjectResponse queryGameObjectResponse = info.QueryData;
 
-                stats.Name[0] = gameObjectInfo.name;
-                stats.IconName = gameObjectInfo.IconName;
-                stats.CastBarCaption = gameObjectInfo.castBarCaption;
-                stats.UnkString = gameObjectInfo.unk1;
-
-                LocaleConstant localeConstant = GetSessionDbLocaleIndex();
-                if (localeConstant != LocaleConstant.enUS)
+                LocaleConstant loc = GetSessionDbLocaleIndex();
+                if (loc != LocaleConstant.enUS)
                 {
-                    GameObjectLocale gameObjectLocale = Global.ObjectMgr.GetGameObjectLocale(packet.GameObjectID);
+                    GameObjectLocale gameObjectLocale = Global.ObjectMgr.GetGameObjectLocale(queryGameObjectResponse.GameObjectID);
                     if (gameObjectLocale != null)
                     {
-                        ObjectManager.GetLocaleString(gameObjectLocale.Name, localeConstant, ref stats.Name[0]);
-                        ObjectManager.GetLocaleString(gameObjectLocale.CastBarCaption, localeConstant, ref stats.CastBarCaption);
-                        ObjectManager.GetLocaleString(gameObjectLocale.Unk1, localeConstant, ref stats.UnkString);
+                        ObjectManager.GetLocaleString(gameObjectLocale.Name, loc, ref queryGameObjectResponse.Stats.Name[0]);
+                        ObjectManager.GetLocaleString(gameObjectLocale.CastBarCaption, loc, ref queryGameObjectResponse.Stats.CastBarCaption);
+                        ObjectManager.GetLocaleString(gameObjectLocale.Unk1, loc, ref queryGameObjectResponse.Stats.UnkString);
                     }
                 }
 
-                var items = Global.ObjectMgr.GetGameObjectQuestItemList(packet.GameObjectID);                
-                foreach (uint item in items)
-                    stats.QuestItems.Add(item);
-
-                unsafe
-                {
-                    fixed (int* ptr = gameObjectInfo.Raw.data)
-                    {
-                        for (int i = 0; i < SharedConst.MaxGOData; i++)
-                            stats.Data[i] = ptr[i];
-                    }
-                }
-                stats.RequiredLevel = (uint)gameObjectInfo.RequiredLevel;
-                response.Stats = stats;
+                SendPacket(queryGameObjectResponse);
             }
+            else
+            {
+                Log.outDebug(LogFilter.Network, $"WORLD: CMSG_GAMEOBJECT_QUERY - Missing gameobject info for (ENTRY: {packet.GameObjectID})");
 
-            SendPacket(response);
+                QueryGameObjectResponse response = new QueryGameObjectResponse();
+                response.GameObjectID = packet.GameObjectID;
+                SendPacket(response);
+            }
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryCreature, Processing = PacketProcessing.Inplace)]
         void HandleCreatureQuery(QueryCreature packet)
         {
-            QueryCreatureResponse response = new QueryCreatureResponse();
-
-            response.CreatureID = packet.CreatureID;
-
-            CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(packet.CreatureID);
-            if (creatureInfo != null)
+            CreatureTemplate ci = Global.ObjectMgr.GetCreatureTemplate(packet.CreatureID);
+            if (ci != null)
             {
-                response.Allow = true;
+                if (!WorldConfig.GetBoolValue(WorldCfg.CacheDataQueries))
+                    ci.InitializeQueryData();
 
-                CreatureStats stats = new CreatureStats();
+                QueryCreatureResponse queryCreatureResponse = ci.QueryData;
 
-                stats.Leader = creatureInfo.RacialLeader;
-
-                string name = creatureInfo.Name;
-                string nameAlt = creatureInfo.FemaleName;
-
-                stats.Flags[0] = (uint)creatureInfo.TypeFlags;
-                stats.Flags[1] = creatureInfo.TypeFlags2;
-
-                stats.CreatureType = (int)creatureInfo.CreatureType;
-                stats.CreatureFamily = (int)creatureInfo.Family;
-                stats.Classification = (int)creatureInfo.Rank;
-
-                for (uint i = 0; i < SharedConst.MaxCreatureKillCredit; ++i)
-                    stats.ProxyCreatureID[i] = creatureInfo.KillCredit[i];
-
-                foreach (var model in creatureInfo.Models)
+                LocaleConstant loc = GetSessionDbLocaleIndex();
+                if (loc != LocaleConstant.enUS)
                 {
-                    stats.Display.TotalProbability += model.Probability;
-                    stats.Display.CreatureDisplay.Add(new CreatureXDisplay(model.CreatureDisplayID, model.DisplayScale, model.Probability));
-                }
-
-                stats.HpMulti = creatureInfo.ModHealth;
-                stats.EnergyMulti = creatureInfo.ModMana;
-
-                stats.CreatureMovementInfoID = creatureInfo.MovementId;
-                stats.RequiredExpansion = creatureInfo.RequiredExpansion;
-                stats.HealthScalingExpansion = creatureInfo.HealthScalingExpansion;
-                stats.VignetteID = creatureInfo.VignetteID;
-                stats.Class = (int)creatureInfo.UnitClass;
-                stats.FadeRegionRadius = creatureInfo.FadeRegionRadius;
-                stats.WidgetSetID = creatureInfo.WidgetSetID;
-                stats.WidgetSetUnitConditionID = creatureInfo.WidgetSetUnitConditionID;
-
-                stats.Title = creatureInfo.SubName;
-                stats.TitleAlt = creatureInfo.TitleAlt;
-                stats.CursorName = creatureInfo.IconName;
-
-                var items = Global.ObjectMgr.GetCreatureQuestItemList(packet.CreatureID);
-                foreach (uint item in items)
-                    stats.QuestItems.Add(item);
-
-                LocaleConstant localeConstant = GetSessionDbLocaleIndex();
-                if (localeConstant != LocaleConstant.enUS)
-                {
-                    CreatureLocale creatureLocale = Global.ObjectMgr.GetCreatureLocale(packet.CreatureID);
+                    CreatureLocale creatureLocale = Global.ObjectMgr.GetCreatureLocale(ci.Entry);
                     if (creatureLocale != null)
                     {
-                        ObjectManager.GetLocaleString(creatureLocale.Name, localeConstant, ref name);
-                        ObjectManager.GetLocaleString(creatureLocale.NameAlt, localeConstant, ref nameAlt);
-                        ObjectManager.GetLocaleString(creatureLocale.Title, localeConstant, ref stats.Title);
-                        ObjectManager.GetLocaleString(creatureLocale.TitleAlt, localeConstant, ref stats.TitleAlt);
+                        string name = queryCreatureResponse.Stats.Name[0];
+                        string nameAlt = queryCreatureResponse.Stats.NameAlt[0];
+
+                        ObjectManager.GetLocaleString(creatureLocale.Name, loc, ref name);
+                        ObjectManager.GetLocaleString(creatureLocale.NameAlt, loc, ref nameAlt);
+                        ObjectManager.GetLocaleString(creatureLocale.Title, loc, ref queryCreatureResponse.Stats.Title);
+                        ObjectManager.GetLocaleString(creatureLocale.TitleAlt, loc, ref queryCreatureResponse.Stats.TitleAlt);
+
+                        queryCreatureResponse.Stats.Name[0] = name;
+                        queryCreatureResponse.Stats.NameAlt[0] = nameAlt;
                     }
                 }
-                stats.Name[0] = name;
-                stats.NameAlt[0] = nameAlt;
-
-                response.Stats = stats;
             }
+            else
+            {
+                Log.outDebug(LogFilter.Network, $"WORLD: CMSG_QUERY_CREATURE - NO CREATURE INFO! (ENTRY: {packet.CreatureID})");
 
-            SendPacket(response);
+                QueryCreatureResponse response = new QueryCreatureResponse();
+                response.CreatureID = packet.CreatureID;
+                SendPacket(response);
+            }
         }
 
         [WorldPacketHandler(ClientOpcodes.QueryNpcText)]
@@ -368,49 +316,13 @@ namespace Game
 
             QuestPOIQueryResponse response = new QuestPOIQueryResponse();
 
-            foreach (var QuestID in questIds)
+            foreach (uint questId in questIds)
             {
-                bool questOk = false;
-
-                ushort questSlot = GetPlayer().FindQuestSlot(QuestID);
-
-                if (questSlot != SharedConst.MaxQuestLogSize)
-                    questOk = GetPlayer().GetQuestSlotQuestId(questSlot) == QuestID;
-
-                if (questOk)
+                if (_player.FindQuestSlot(questId) != SharedConst.MaxQuestLogSize)
                 {
-                    var poiData = Global.ObjectMgr.GetQuestPOIList(QuestID);
+                    QuestPOIData poiData = Global.ObjectMgr.GetQuestPOIData(questId);
                     if (poiData != null)
-                    {
-                        QuestPOIData questPOIData = new QuestPOIData();
-
-                        questPOIData.QuestID = QuestID;
-
-                        foreach (var data in poiData)
-                        {
-                            QuestPOIBlobData questPOIBlobData = new QuestPOIBlobData();
-
-                            questPOIBlobData.BlobIndex = data.BlobIndex;
-                            questPOIBlobData.ObjectiveIndex = data.ObjectiveIndex;
-                            questPOIBlobData.QuestObjectiveID = data.QuestObjectiveID;
-                            questPOIBlobData.QuestObjectID = data.QuestObjectID;
-                            questPOIBlobData.MapID = data.MapID;
-                            questPOIBlobData.UiMapID = data.UiMapID;
-                            questPOIBlobData.Priority = data.Priority;
-                            questPOIBlobData.Flags = data.Flags;
-                            questPOIBlobData.WorldEffectID = data.WorldEffectID;
-                            questPOIBlobData.PlayerConditionID = data.PlayerConditionID;
-                            questPOIBlobData.SpawnTrackingID = data.SpawnTrackingID;
-                            questPOIBlobData.AlwaysAllowMergingBlobs = data.AlwaysAllowMergingBlobs;
-
-                            foreach (var point in data.points)
-                                questPOIBlobData.QuestPOIBlobPointStats.Add(new QuestPOIBlobPoint(point.X, point.Y));
-
-                            questPOIData.QuestPOIBlobDataStats.Add(questPOIBlobData);
-                        }
-
-                        response.QuestPOIDataStats.Add(questPOIData);
-                    }
+                        response.QuestPOIDataStats.Add(poiData);
                 }
             }
 

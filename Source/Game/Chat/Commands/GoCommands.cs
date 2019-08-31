@@ -265,15 +265,15 @@ namespace Game.Chat.Commands
             float x, y, z = 0;
             uint mapId = 0;
 
-            var poiData = Global.ObjectMgr.GetQuestPOIList(questID);
+            var poiData = Global.ObjectMgr.GetQuestPOIData(questID);
             if (poiData != null)
             {
-                var data = poiData[0];
+                var data = poiData.QuestPOIBlobDataStats[0];
 
                 mapId = (uint)data.MapID;
 
-                x = data.points[0].X;
-                y = data.points[0].Y;
+                x = data.QuestPOIBlobPointStats[0].X;
+                y = data.QuestPOIBlobPointStats[0].Y;
             }
             else
             {

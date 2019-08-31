@@ -836,6 +836,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Calendar data...");
             Global.CalendarMgr.LoadFromDB();
 
+            Log.outInfo(LogFilter.ServerLoading, "Initialize query data...");
+            Global.ObjectMgr.InitializeQueriesData(QueryDataGroup.All);
+
             // Initialize game time and timers
             Log.outInfo(LogFilter.ServerLoading, "Initialize game time and timers");
             m_gameTime = Time.UnixTime;

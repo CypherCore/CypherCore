@@ -467,145 +467,38 @@ namespace Game.Misc
 
         public void SendQuestQueryResponse(Quest quest)
         {
-            QueryQuestInfoResponse packet = new QueryQuestInfoResponse();
+            if (!WorldConfig.GetBoolValue(WorldCfg.CacheDataQueries))
+                quest.InitializeQueryData();
 
-            packet.Allow = true;
-            packet.QuestID = quest.Id;
+            QueryQuestInfoResponse queryQuestInfoResponse = quest.QueryData;
 
-            packet.Info.LogTitle = quest.LogTitle;
-            packet.Info.LogDescription = quest.LogDescription;
-            packet.Info.QuestDescription = quest.QuestDescription;
-            packet.Info.AreaDescription = quest.AreaDescription;
-            packet.Info.QuestCompletionLog = quest.QuestCompletionLog;
-            packet.Info.PortraitGiverText = quest.PortraitGiverText;
-            packet.Info.PortraitGiverName = quest.PortraitGiverName;
-            packet.Info.PortraitTurnInText = quest.PortraitTurnInText;
-            packet.Info.PortraitTurnInName = quest.PortraitTurnInName;
-
-            LocaleConstant locale = _session.GetSessionDbLocaleIndex();
-            if (locale != LocaleConstant.enUS)
+            LocaleConstant loc = _session.GetSessionDbLocaleIndex();
+            if (loc != LocaleConstant.enUS)
             {
-                QuestTemplateLocale questTemplateLocale = Global.ObjectMgr.GetQuestLocale(quest.Id);
+                QuestTemplateLocale questTemplateLocale = Global.ObjectMgr.GetQuestLocale(queryQuestInfoResponse.QuestID);
                 if (questTemplateLocale != null)
                 {
-                    ObjectManager.GetLocaleString(questTemplateLocale.LogTitle, locale, ref packet.Info.LogTitle);
-                    ObjectManager.GetLocaleString(questTemplateLocale.LogDescription, locale, ref packet.Info.LogDescription);
-                    ObjectManager.GetLocaleString(questTemplateLocale.QuestDescription, locale, ref packet.Info.QuestDescription);
-                    ObjectManager.GetLocaleString(questTemplateLocale.AreaDescription, locale, ref packet.Info.AreaDescription);
-                    ObjectManager.GetLocaleString(questTemplateLocale.QuestCompletionLog, locale, ref packet.Info.QuestCompletionLog);
-                    ObjectManager.GetLocaleString(questTemplateLocale.PortraitGiverText, locale, ref packet.Info.PortraitGiverText);
-                    ObjectManager.GetLocaleString(questTemplateLocale.PortraitGiverName, locale, ref packet.Info.PortraitGiverName);
-                    ObjectManager.GetLocaleString(questTemplateLocale.PortraitTurnInText, locale, ref packet.Info.PortraitTurnInText);
-                    ObjectManager.GetLocaleString(questTemplateLocale.PortraitTurnInName, locale, ref packet.Info.PortraitTurnInName);
+                    ObjectManager.GetLocaleString(questTemplateLocale.LogTitle, loc, ref queryQuestInfoResponse.Info.LogTitle);
+                    ObjectManager.GetLocaleString(questTemplateLocale.LogDescription, loc, ref queryQuestInfoResponse.Info.LogDescription);
+                    ObjectManager.GetLocaleString(questTemplateLocale.QuestDescription, loc, ref queryQuestInfoResponse.Info.QuestDescription);
+                    ObjectManager.GetLocaleString(questTemplateLocale.AreaDescription, loc, ref queryQuestInfoResponse.Info.AreaDescription);
+                    ObjectManager.GetLocaleString(questTemplateLocale.QuestCompletionLog, loc, ref queryQuestInfoResponse.Info.QuestCompletionLog);
+                    ObjectManager.GetLocaleString(questTemplateLocale.PortraitGiverText, loc, ref queryQuestInfoResponse.Info.PortraitGiverText);
+                    ObjectManager.GetLocaleString(questTemplateLocale.PortraitGiverName, loc, ref queryQuestInfoResponse.Info.PortraitGiverName);
+                    ObjectManager.GetLocaleString(questTemplateLocale.PortraitTurnInText, loc, ref queryQuestInfoResponse.Info.PortraitTurnInText);
+                    ObjectManager.GetLocaleString(questTemplateLocale.PortraitTurnInName, loc, ref queryQuestInfoResponse.Info.PortraitTurnInName);
                 }
-            }
 
-            packet.Info.QuestID = quest.Id;
-            packet.Info.QuestType = (int)quest.Type;
-            packet.Info.QuestLevel = quest.Level;
-            packet.Info.QuestScalingFactionGroup = quest.ScalingFactionGroup;
-            packet.Info.QuestMaxScalingLevel = quest.MaxScalingLevel;
-            packet.Info.QuestPackageID = quest.PackageID;
-            packet.Info.QuestMinLevel = quest.MinLevel;
-            packet.Info.QuestSortID = quest.QuestSortID;
-            packet.Info.QuestInfoID = quest.QuestInfoID;
-            packet.Info.SuggestedGroupNum = quest.SuggestedPlayers;
-            packet.Info.RewardNextQuest = quest.NextQuestInChain;
-            packet.Info.RewardXPDifficulty = quest.RewardXPDifficulty;
-            packet.Info.RewardXPMultiplier = quest.RewardXPMultiplier;
-
-            if (!quest.HasFlag(QuestFlags.HiddenRewards))
-                packet.Info.RewardMoney = quest.RewardMoney < 0 ? quest.RewardMoney : (int)_session.GetPlayer().GetQuestMoneyReward(quest);
-
-            packet.Info.RewardMoneyDifficulty = quest.RewardMoneyDifficulty;
-            packet.Info.RewardMoneyMultiplier = quest.RewardMoneyMultiplier;
-            packet.Info.RewardBonusMoney = quest.RewardBonusMoney;
-            for (byte i = 0; i < SharedConst.QuestRewardDisplaySpellCount; ++i)
-                packet.Info.RewardDisplaySpell[i] = quest.RewardDisplaySpell[i];
-
-            packet.Info.RewardSpell = quest.RewardSpell;
-
-            packet.Info.RewardHonor = quest.RewardHonor;
-            packet.Info.RewardKillHonor = quest.RewardKillHonor;
-
-            packet.Info.RewardArtifactXPDifficulty = (int)quest.RewardArtifactXPDifficulty;
-            packet.Info.RewardArtifactXPMultiplier = quest.RewardArtifactXPMultiplier;
-            packet.Info.RewardArtifactCategoryID = (int)quest.RewardArtifactCategoryID;
-
-            packet.Info.StartItem = quest.SourceItemId;
-            packet.Info.Flags = (uint)quest.Flags;
-            packet.Info.FlagsEx = (uint)quest.FlagsEx;
-            packet.Info.FlagsEx2 = (uint)quest.FlagsEx2;
-            packet.Info.RewardTitle = quest.RewardTitleId;
-            packet.Info.RewardArenaPoints = quest.RewardArenaPoints;
-            packet.Info.RewardSkillLineID = quest.RewardSkillId;
-            packet.Info.RewardNumSkillUps = quest.RewardSkillPoints;
-            packet.Info.RewardFactionFlags = quest.RewardReputationMask;
-            packet.Info.PortraitGiver = quest.QuestGiverPortrait;
-            packet.Info.PortraitGiverMount = quest.QuestGiverPortraitMount;
-            packet.Info.PortraitTurnIn = quest.QuestTurnInPortrait;
-
-            for (byte i = 0; i < SharedConst.QuestItemDropCount; ++i)
-            {
-                packet.Info.ItemDrop[i] = (int)quest.ItemDrop[i];
-                packet.Info.ItemDropQuantity[i] = (int)quest.ItemDropQuantity[i];
-            }
-
-            if (!quest.HasFlag(QuestFlags.HiddenRewards))
-            {
-                for (byte i = 0; i < SharedConst.QuestRewardItemCount; ++i)
-                {
-                    packet.Info.RewardItems[i] = quest.RewardItemId[i];
-                    packet.Info.RewardAmount[i] = quest.RewardItemCount[i];
-                }
-                for (byte i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
-                {
-                    packet.Info.UnfilteredChoiceItems[i].ItemID = quest.RewardChoiceItemId[i];
-                    packet.Info.UnfilteredChoiceItems[i].Quantity = quest.RewardChoiceItemCount[i];
-                }
-            }
-
-            for (byte i = 0; i < SharedConst.QuestRewardReputationsCount; ++i)
-            {
-                packet.Info.RewardFactionID[i] = quest.RewardFactionId[i];
-                packet.Info.RewardFactionValue[i] = quest.RewardFactionValue[i];
-                packet.Info.RewardFactionOverride[i] = quest.RewardFactionOverride[i];
-                packet.Info.RewardFactionCapIn[i] = (int)quest.RewardFactionCapIn[i];
-            }
-
-            packet.Info.POIContinent = quest.POIContinent;
-            packet.Info.POIx = quest.POIx;
-            packet.Info.POIy = quest.POIy;
-            packet.Info.POIPriority = quest.POIPriority;
-
-            packet.Info.AllowableRaces = quest.AllowableRaces;
-            packet.Info.TreasurePickerID = (int)quest.TreasurePickerID;
-            packet.Info.Expansion = quest.Expansion;
-
-            foreach (QuestObjective questObjective in quest.Objectives)
-            {
-                if (locale != LocaleConstant.enUS)
+                foreach (QuestObjective questObjective in queryQuestInfoResponse.Info.Objectives)
                 {
                     QuestObjectivesLocale questObjectivesLocaleData = Global.ObjectMgr.GetQuestObjectivesLocale(questObjective.ID);
                     if (questObjectivesLocaleData != null)
-                        ObjectManager.GetLocaleString(questObjectivesLocaleData.Description, locale, ref questObjective.Description);
+                        ObjectManager.GetLocaleString(questObjectivesLocaleData.Description, loc, ref questObjective.Description);
                 }
 
-                packet.Info.Objectives.Add(questObjective);
             }
 
-            for (int i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
-            {
-                packet.Info.RewardCurrencyID[i] = quest.RewardCurrencyId[i];
-                packet.Info.RewardCurrencyQty[i] = quest.RewardCurrencyCount[i];
-            }
-
-            packet.Info.AcceptedSoundKitID = quest.SoundAccept;
-            packet.Info.CompleteSoundKitID = quest.SoundTurnIn;
-            packet.Info.AreaGroupID = quest.AreaGroupID;
-            packet.Info.TimeAllowed = quest.LimitTime;
-
-            _session.SendPacket(packet);
+            _session.SendPacket(queryQuestInfoResponse);
         }
 
         public void SendQuestGiverOfferReward(Quest quest, ObjectGuid npcGUID, bool autoLaunched)

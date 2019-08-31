@@ -20,6 +20,8 @@ using Framework.Constants;
 using Framework.GameMath;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Game.Network;
+using Game.Network.Packets;
 
 namespace Game.Entities
 {
@@ -208,6 +210,9 @@ namespace Game.Entities
 
         [FieldOffset(68)]
         public raw Raw;
+
+        [FieldOffset(208)]
+        public QueryGameObjectResponse QueryData;
 
         // helpers
         public bool IsDespawnAtAction()
@@ -511,6 +516,41 @@ namespace Game.Entities
                     return GatheringNode.LargeAOI != 0;
                 default: return false;
             }
+        }
+
+        public void InitializeQueryData()
+        {
+            QueryData = new QueryGameObjectResponse();
+
+            QueryData.GameObjectID = entry;
+            QueryData.Allow = true;
+
+            GameObjectStats stats = new GameObjectStats();
+            stats.Type = (uint)type;
+            stats.DisplayID = displayId;
+
+            stats.Name[0] = name;
+            stats.IconName = IconName;
+            stats.CastBarCaption = castBarCaption;
+            stats.UnkString = unk1;
+
+            stats.Size = size;
+
+            var items = Global.ObjectMgr.GetGameObjectQuestItemList(entry);
+            foreach (uint item in items)
+                stats.QuestItems.Add(item);
+
+            unsafe
+            {
+                fixed (int* ptr = Raw.data)
+                {
+                    for (int i = 0; i < SharedConst.MaxGOData; i++)
+                        stats.Data[i] = ptr[i];
+                }
+            }
+            stats.RequiredLevel = (uint)RequiredLevel;
+
+            QueryData.Stats = stats;
         }
 
         #region TypeStructs

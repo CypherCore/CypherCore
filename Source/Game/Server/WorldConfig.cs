@@ -910,6 +910,9 @@ namespace Game
             // Allow 5-man parties to use raid warnings
             Values[WorldCfg.ChatPartyRaidWarnings] = GetDefaultValue("PartyRaidWarnings", false);
 
+            // Allow to cache data queries
+            Values[WorldCfg.CacheDataQueries] = GetDefaultValue("CacheDataQueries", true);
+
             // Check Invalid Position
             Values[WorldCfg.CreatureCheckInvalidPostion] = GetDefaultValue("Creature.CheckInvalidPosition", false);
             Values[WorldCfg.GameobjectCheckInvalidPostion] = GetDefaultValue("GameObject.CheckInvalidPosition", false);

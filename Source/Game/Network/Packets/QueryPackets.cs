@@ -421,36 +421,14 @@ namespace Game.Network.Packets
             _worldPacket.WriteInt32(QuestPOIDataStats.Count);
             _worldPacket.WriteInt32(QuestPOIDataStats.Count);
 
+            bool useCache = WorldConfig.GetBoolValue(WorldCfg.CacheDataQueries);
+
             foreach (QuestPOIData questPOIData in QuestPOIDataStats)
             {
-                _worldPacket.WriteUInt32(questPOIData.QuestID);
-
-                _worldPacket.WriteInt32(questPOIData.QuestPOIBlobDataStats.Count);
-
-                foreach (QuestPOIBlobData questPOIBlobData in questPOIData.QuestPOIBlobDataStats)
-                {
-                    _worldPacket.WriteInt32(questPOIBlobData.BlobIndex);
-                    _worldPacket.WriteInt32(questPOIBlobData.ObjectiveIndex);
-                    _worldPacket.WriteInt32(questPOIBlobData.QuestObjectiveID);
-                    _worldPacket.WriteInt32(questPOIBlobData.QuestObjectID);
-                    _worldPacket.WriteInt32(questPOIBlobData.MapID);
-                    _worldPacket.WriteInt32(questPOIBlobData.UiMapID);
-                    _worldPacket.WriteInt32(questPOIBlobData.Priority);
-                    _worldPacket.WriteInt32(questPOIBlobData.Flags);
-                    _worldPacket.WriteInt32(questPOIBlobData.WorldEffectID);
-                    _worldPacket.WriteInt32(questPOIBlobData.PlayerConditionID);
-                    _worldPacket.WriteInt32(questPOIBlobData.SpawnTrackingID);
-                    _worldPacket.WriteInt32(questPOIBlobData.QuestPOIBlobPointStats.Count);
-
-                    foreach (QuestPOIBlobPoint questPOIBlobPoint in questPOIBlobData.QuestPOIBlobPointStats)
-                    {
-                        _worldPacket.WriteInt32(questPOIBlobPoint.X);
-                        _worldPacket.WriteInt32(questPOIBlobPoint.Y);
-                    }
-
-                    _worldPacket.WriteBit(questPOIBlobData.AlwaysAllowMergingBlobs);
-                    _worldPacket.FlushBits();
-                }
+                if (useCache)
+                    _worldPacket.WriteBytes(questPOIData.QueryDataBuffer);
+                else
+                    questPOIData.Write(_worldPacket);
             }
         }
 
@@ -769,41 +747,6 @@ namespace Game.Network.Packets
         public float Size;
         public List<uint> QuestItems = new List<uint>();
         public uint RequiredLevel;
-    }
-
-    public struct QuestPOIBlobPoint
-    {
-        public QuestPOIBlobPoint(int x, int y)
-        {
-            X = x;
-            Y = y;
-        }
-
-        public int X;
-        public int Y;
-    }
-
-    public class QuestPOIBlobData
-    {
-        public int BlobIndex;
-        public int ObjectiveIndex;
-        public int QuestObjectiveID;
-        public int QuestObjectID;
-        public int MapID;
-        public int UiMapID;
-        public int Priority;
-        public int Flags;
-        public int WorldEffectID;
-        public int PlayerConditionID;
-        public int SpawnTrackingID;
-        public List<QuestPOIBlobPoint> QuestPOIBlobPointStats = new List<QuestPOIBlobPoint>();
-        public bool AlwaysAllowMergingBlobs;
-    }
-
-    public class QuestPOIData
-    {
-        public uint QuestID;
-        public List<QuestPOIBlobData> QuestPOIBlobDataStats = new List<QuestPOIBlobData>();
     }
 
     class QuestCompletionNPC

@@ -23,6 +23,7 @@ using Game.Entities;
 using Game.Network.Packets;
 using System;
 using System.Collections.Generic;
+using Game.Network;
 
 namespace Game
 {
@@ -402,6 +403,120 @@ namespace Game
             return (!IsDFQuest() && !IsDaily() && (!IsRepeatable() || IsWeekly() || IsMonthly() || IsSeasonal()));
         }
 
+        public void InitializeQueryData()
+        {
+            QueryData = new QueryQuestInfoResponse();
+
+            QueryData.Allow = true;
+            QueryData.QuestID = Id;
+
+            QueryData.Info.LogTitle = LogTitle;
+            QueryData.Info.LogDescription = LogDescription;
+            QueryData.Info.QuestDescription = QuestDescription;
+            QueryData.Info.AreaDescription = AreaDescription;
+            QueryData.Info.QuestCompletionLog = QuestCompletionLog;
+            QueryData.Info.PortraitGiverText = PortraitGiverText;
+            QueryData.Info.PortraitGiverName = PortraitGiverName;
+            QueryData.Info.PortraitTurnInText = PortraitTurnInText;
+            QueryData.Info.PortraitTurnInName = PortraitTurnInName;
+
+            QueryData.Info.QuestID = Id;
+            QueryData.Info.QuestType = (int)Type;
+            QueryData.Info.QuestLevel = Level;
+            QueryData.Info.QuestScalingFactionGroup = ScalingFactionGroup;
+            QueryData.Info.QuestMaxScalingLevel = MaxScalingLevel;
+            QueryData.Info.QuestPackageID = PackageID;
+            QueryData.Info.QuestMinLevel = MinLevel;
+            QueryData.Info.QuestSortID = QuestSortID;
+            QueryData.Info.QuestInfoID = QuestInfoID;
+            QueryData.Info.SuggestedGroupNum = SuggestedPlayers;
+            QueryData.Info.RewardNextQuest = NextQuestInChain;
+            QueryData.Info.RewardXPDifficulty = RewardXPDifficulty;
+            QueryData.Info.RewardXPMultiplier = RewardXPMultiplier;
+
+            if (!HasFlag(QuestFlags.HiddenRewards))
+                QueryData.Info.RewardMoney = RewardMoney;
+
+            QueryData.Info.RewardMoneyDifficulty = RewardMoneyDifficulty;
+            QueryData.Info.RewardMoneyMultiplier = RewardMoneyMultiplier;
+            QueryData.Info.RewardBonusMoney = RewardBonusMoney;
+            for (byte i = 0; i < SharedConst.QuestRewardDisplaySpellCount; ++i)
+                QueryData.Info.RewardDisplaySpell[i] = RewardDisplaySpell[i];
+
+            QueryData.Info.RewardSpell = RewardSpell;
+
+            QueryData.Info.RewardHonor = RewardHonor;
+            QueryData.Info.RewardKillHonor = RewardKillHonor;
+
+            QueryData.Info.RewardArtifactXPDifficulty = (int)RewardArtifactXPDifficulty;
+            QueryData.Info.RewardArtifactXPMultiplier = RewardArtifactXPMultiplier;
+            QueryData.Info.RewardArtifactCategoryID = (int)RewardArtifactCategoryID;
+
+            QueryData.Info.StartItem = SourceItemId;
+            QueryData.Info.Flags = (uint)Flags;
+            QueryData.Info.FlagsEx = (uint)FlagsEx;
+            QueryData.Info.FlagsEx2 = (uint)FlagsEx2;
+            QueryData.Info.RewardTitle = RewardTitleId;
+            QueryData.Info.RewardArenaPoints = RewardArenaPoints;
+            QueryData.Info.RewardSkillLineID = RewardSkillId;
+            QueryData.Info.RewardNumSkillUps = RewardSkillPoints;
+            QueryData.Info.RewardFactionFlags = RewardReputationMask;
+            QueryData.Info.PortraitGiver = QuestGiverPortrait;
+            QueryData.Info.PortraitGiverMount = QuestGiverPortraitMount;
+            QueryData.Info.PortraitTurnIn = QuestTurnInPortrait;
+
+            for (byte i = 0; i < SharedConst.QuestItemDropCount; ++i)
+            {
+                QueryData.Info.ItemDrop[i] = (int)ItemDrop[i];
+                QueryData.Info.ItemDropQuantity[i] = (int)ItemDropQuantity[i];
+            }
+
+            if (!HasFlag(QuestFlags.HiddenRewards))
+            {
+                for (byte i = 0; i < SharedConst.QuestRewardItemCount; ++i)
+                {
+                    QueryData.Info.RewardItems[i] = RewardItemId[i];
+                    QueryData.Info.RewardAmount[i] = RewardItemCount[i];
+                }
+                for (byte i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
+                {
+                    QueryData.Info.UnfilteredChoiceItems[i].ItemID = RewardChoiceItemId[i];
+                    QueryData.Info.UnfilteredChoiceItems[i].Quantity = RewardChoiceItemCount[i];
+                }
+            }
+
+            for (byte i = 0; i < SharedConst.QuestRewardReputationsCount; ++i)
+            {
+                QueryData.Info.RewardFactionID[i] = RewardFactionId[i];
+                QueryData.Info.RewardFactionValue[i] = RewardFactionValue[i];
+                QueryData.Info.RewardFactionOverride[i] = RewardFactionOverride[i];
+                QueryData.Info.RewardFactionCapIn[i] = (int)RewardFactionCapIn[i];
+            }
+
+            QueryData.Info.POIContinent = POIContinent;
+            QueryData.Info.POIx = POIx;
+            QueryData.Info.POIy = POIy;
+            QueryData.Info.POIPriority = POIPriority;
+
+            QueryData.Info.AllowableRaces = AllowableRaces;
+            QueryData.Info.TreasurePickerID = (int)TreasurePickerID;
+            QueryData.Info.Expansion = Expansion;
+
+            foreach (QuestObjective questObjective in Objectives)
+                QueryData.Info.Objectives.Add(questObjective);
+
+            for (int i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
+            {
+                QueryData.Info.RewardCurrencyID[i] = RewardCurrencyId[i];
+                QueryData.Info.RewardCurrencyQty[i] = RewardCurrencyCount[i];
+            }
+
+            QueryData.Info.AcceptedSoundKitID = SoundAccept;
+            QueryData.Info.CompleteSoundKitID = SoundTurnIn;
+            QueryData.Info.AreaGroupID = AreaGroupID;
+            QueryData.Info.TimeAllowed = LimitTime;
+        }
+
         public bool HasFlag(QuestFlags flag) { return (Flags & flag) != 0; }
         public bool HasFlagEx(QuestFlagsEx flag) { return (FlagsEx & flag) != 0; }
         public bool HasFlagEx(QuestFlagsEx2 flag) { return (FlagsEx2 & flag) != 0; }
@@ -541,6 +656,7 @@ namespace Game
 
         public List<int> prevQuests = new List<int>();
         public List<uint> prevChainQuests = new List<uint>();
+        public QueryQuestInfoResponse QueryData;
 
         uint _rewChoiceItemsCount;
         uint _rewItemsCount;

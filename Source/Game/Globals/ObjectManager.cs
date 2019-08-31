@@ -32,6 +32,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Framework.Dynamic;
+using Framework.IO;
+using Game.Network;
 
 namespace Game
 {
@@ -1422,7 +1424,7 @@ namespace Game
 
             List<uint> evt_scripts = new List<uint>();
             // Load all possible script entries from gameobjects
-            foreach (var go in gameObjectTemplateStorage)
+            foreach (var go in _gameObjectTemplateStorage)
             {
                 uint eventId = go.Value.GetEventScriptId();
                 if (eventId != 0)
@@ -1720,10 +1722,10 @@ namespace Game
             LoadCreatureTemplateModels();
 
             // Checking needs to be done after loading because of the difficulty self referencing
-            foreach (var template in creatureTemplateStorage.Values)
+            foreach (var template in _creatureTemplateStorage.Values)
                 CheckCreatureTemplate(template);
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creature definitions in {1} ms", creatureTemplateStorage.Count, Time.GetMSTimeDiffToNow(time));
+            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creature definitions in {1} ms", _creatureTemplateStorage.Count, Time.GetMSTimeDiffToNow(time));
         }
         public void LoadCreatureTemplate(SQLFields fields)
         {
@@ -1804,7 +1806,7 @@ namespace Game
             creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(76);
             creature.ScriptID = GetScriptId(fields.Read<string>(77));
 
-            creatureTemplateStorage.Add(entry, creature);
+            _creatureTemplateStorage.Add(entry, creature);
         }
 
         void LoadCreatureTemplateModels()
@@ -2095,7 +2097,7 @@ namespace Game
                 uint item = result.Read<uint>(1);
                 uint idx = result.Read<uint>(2);
 
-                if (!creatureTemplateStorage.ContainsKey(entry))
+                if (!_creatureTemplateStorage.ContainsKey(entry))
                 {
                     Log.outError(LogFilter.Sql, "Table `creature_questitem` has data for nonexistent creature (entry: {0}, idx: {1}), skipped", entry, idx);
                     continue;
@@ -2246,7 +2248,7 @@ namespace Game
                 ++count;
             } while (result.NextRow());
 
-            foreach (var creatureTemplate in creatureTemplateStorage.Values)
+            foreach (var creatureTemplate in _creatureTemplateStorage.Values)
             {
                 for (short lvl = creatureTemplate.Minlevel; lvl <= creatureTemplate.Maxlevel; ++lvl)
                 {
@@ -2339,7 +2341,7 @@ namespace Game
             {
                 uint entry = result.Read<uint>(0);
 
-                var template = creatureTemplateStorage.LookupByKey(entry);
+                var template = _creatureTemplateStorage.LookupByKey(entry);
                 if (template == null)
                 {
                     Log.outError(LogFilter.Sql, $"Creature template (Entry: {entry}) does not exist but has a record in `creature_template_scaling`");
@@ -3465,7 +3467,7 @@ namespace Game
         }
         public CreatureTemplate GetCreatureTemplate(uint entry)
         {
-            return creatureTemplateStorage.LookupByKey(entry);
+            return _creatureTemplateStorage.LookupByKey(entry);
         }
         public CreatureAddon GetCreatureTemplateAddon(uint entry)
         {
@@ -3477,7 +3479,7 @@ namespace Game
         }
         public Dictionary<uint, CreatureTemplate> GetCreatureTemplates()
         {
-            return creatureTemplateStorage;
+            return _creatureTemplateStorage;
         }
         public CreatureData GetCreatureData(ulong guid)
         {
@@ -3627,7 +3629,7 @@ namespace Game
                 go.RequiredLevel = 0;
                 go.ScriptId = 0;
 
-                gameObjectTemplateStorage[db2go.Id] = go;
+                _gameObjectTemplateStorage[db2go.Id] = go;
             }
 
             //                                          0      1     2          3     4         5               6     7
@@ -3796,7 +3798,7 @@ namespace Game
                             break;
                     }
 
-                    gameObjectTemplateStorage[entry] = got;
+                    _gameObjectTemplateStorage[entry] = got;
                     ++count;
                 }
                 while (result.NextRow());
@@ -4184,7 +4186,7 @@ namespace Game
                 uint item = result.Read<uint>(1);
                 uint idx = result.Read<uint>(2);
 
-                if (!gameObjectTemplateStorage.ContainsKey(entry))
+                if (!_gameObjectTemplateStorage.ContainsKey(entry))
                 {
                     Log.outError(LogFilter.Sql, "Table `gameobject_questitem` has data for nonexistent gameobject (entry: {0}, idx: {1}), skipped", entry, idx);
                     continue;
@@ -4362,7 +4364,7 @@ namespace Game
         }
         public GameObjectTemplate GetGameObjectTemplate(uint entry)
         {
-            return gameObjectTemplateStorage.LookupByKey(entry);
+            return _gameObjectTemplateStorage.LookupByKey(entry);
         }
         public GameObjectTemplateAddon GetGameObjectTemplateAddon(uint entry)
         {
@@ -4370,7 +4372,7 @@ namespace Game
         }
         public Dictionary<uint, GameObjectTemplate> GetGameObjectTemplates()
         {
-            return gameObjectTemplateStorage;
+            return _gameObjectTemplateStorage;
         }
         public bool IsGameObjectForQuests(uint entry)
         {
@@ -7185,7 +7187,7 @@ namespace Game
 
             //                                         0        1    2  3 
             SQLResult points = DB.World.Query("SELECT QuestID, Idx1, X, Y FROM quest_poi_points ORDER BY QuestID DESC, Idx1, Idx2");
-            Dictionary<uint, MultiMap<int, QuestPOIPoint>> POIs = new Dictionary<uint, MultiMap<int, QuestPOIPoint>>();
+            Dictionary<uint, MultiMap<int, QuestPOIBlobPoint>> POIs = new Dictionary<uint, MultiMap<int, QuestPOIBlobPoint>>();
 
             if (!points.IsEmpty())
             {
@@ -7197,9 +7199,9 @@ namespace Game
                     int y = points.Read<int>(3);
 
                     if (!POIs.ContainsKey(questId))
-                        POIs[questId] = new MultiMap<int, QuestPOIPoint>();
+                        POIs[questId] = new MultiMap<int, QuestPOIBlobPoint>();
 
-                    QuestPOIPoint point = new QuestPOIPoint(x, y);
+                    QuestPOIBlobPoint point = new QuestPOIBlobPoint(x, y);
                     POIs[questId].Add(Idx1, point);
                 } while (points.NextRow());
             }
@@ -7224,14 +7226,17 @@ namespace Game
                 if (Global.ObjectMgr.GetQuestTemplate(questID) == null)
                     Log.outError(LogFilter.Sql, "`quest_poi` quest id ({0}) Idx1 ({1}) does not exist in `quest_template`", questID, idx1);
 
-                QuestPOI POI = new QuestPOI(blobIndex, objectiveIndex, questObjectiveID, questObjectID, mapID, uiMapId, priority, flags, worldEffectID, playerConditionID, spawnTrackingID, alwaysAllowMergingBlobs);
                 if (!POIs.ContainsKey(questID) || !POIs[questID].ContainsKey(idx1))
                 {
                     Log.outError(LogFilter.Sql, "Table quest_poi references unknown quest points for quest {0} POI id {1}", questID, blobIndex);
                     continue;
                 }
-                POI.points = POIs[questID][idx1];
-                _questPOIStorage.Add(questID, POI);
+
+                if (!_questPOIStorage.ContainsKey(questID))
+                    _questPOIStorage[questID] = new QuestPOIData(questID);
+
+                QuestPOIData poiData = _questPOIStorage[questID];
+                poiData.QuestPOIBlobDataStats.Add(new QuestPOIBlobData(blobIndex, objectiveIndex, questObjectiveID, questObjectID, mapID, uiMapId, priority, flags, worldEffectID, playerConditionID, spawnTrackingID, POIs[questID][idx1], alwaysAllowMergingBlobs));
 
                 ++count;
             } while (result.NextRow());
@@ -7395,7 +7400,7 @@ namespace Game
         {
             return _creatureQuestInvolvedRelationsReverse.LookupByKey(questId);
         }
-        public List<QuestPOI> GetQuestPOIList(uint questId)
+        public QuestPOIData GetQuestPOIData(uint questId)
         {
             return _questPOIStorage.LookupByKey(questId);
         }
@@ -9123,6 +9128,32 @@ namespace Game
                 Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Player Choice Response locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
             }
         }
+        public void InitializeQueriesData(QueryDataGroup mask)
+        {
+            // cache disabled
+            if (!WorldConfig.GetBoolValue(WorldCfg.CacheDataQueries))
+                return;
+
+            // Initialize Query data for creatures
+            if (mask.HasAnyFlag(QueryDataGroup.Creatures))
+                foreach (var creaturePair in _creatureTemplateStorage)
+                    creaturePair.Value.InitializeQueryData();
+
+            // Initialize Query Data for gameobjects
+            if (mask.HasAnyFlag(QueryDataGroup.Gameobjects))
+                foreach (var gameobjectPair in _gameObjectTemplateStorage)
+                    gameobjectPair.Value.InitializeQueryData();
+
+            // Initialize Query Data for quests
+            if (mask.HasAnyFlag(QueryDataGroup.Quests))
+                foreach (var questPair in _questTemplates)
+                    questPair.Value.InitializeQueryData();
+
+            // Initialize Quest POI data
+            if (mask.HasAnyFlag(QueryDataGroup.POIs))
+                foreach (var poiPair in _questPOIStorage)
+                    poiPair.Value.InitializeQueryData();
+        }
 
         public MailLevelReward GetMailLevelReward(uint level, ulong raceMask)
         {
@@ -9644,7 +9675,7 @@ namespace Game
         MultiMap<uint, uint> _creatureQuestInvolvedRelations = new MultiMap<uint, uint>();
         MultiMap<uint, uint> _creatureQuestInvolvedRelationsReverse = new MultiMap<uint, uint>();
         public MultiMap<int, uint> _exclusiveQuestGroups = new MultiMap<int, uint>();
-        MultiMap<uint, QuestPOI> _questPOIStorage = new MultiMap<uint, QuestPOI>();
+        Dictionary<uint, QuestPOIData> _questPOIStorage = new Dictionary<uint, QuestPOIData>();
         MultiMap<uint, uint> _questAreaTriggerStorage = new MultiMap<uint, uint>();
         Dictionary<uint, QuestObjective> _questObjectives = new Dictionary<uint, QuestObjective>();
         Dictionary<uint, QuestGreeting>[] _questGreetingStorage = new Dictionary<uint, QuestGreeting>[2];
@@ -9680,7 +9711,7 @@ namespace Game
         Dictionary<uint, PointOfInterest> pointsOfInterestStorage = new Dictionary<uint, PointOfInterest>();
 
         //Creature
-        Dictionary<uint, CreatureTemplate> creatureTemplateStorage = new Dictionary<uint, CreatureTemplate>();
+        Dictionary<uint, CreatureTemplate> _creatureTemplateStorage = new Dictionary<uint, CreatureTemplate>();
         Dictionary<uint, CreatureModelInfo> creatureModelStorage = new Dictionary<uint, CreatureModelInfo>();
         Dictionary<ulong, CreatureData> creatureDataStorage = new Dictionary<ulong, CreatureData>();
         Dictionary<ulong, CreatureAddon> creatureAddonStorage = new Dictionary<ulong, CreatureAddon>();
@@ -9697,7 +9728,7 @@ namespace Game
         Dictionary<uint, NpcText> _npcTextStorage = new Dictionary<uint, NpcText>();
 
         //GameObject
-        Dictionary<uint, GameObjectTemplate> gameObjectTemplateStorage = new Dictionary<uint, GameObjectTemplate>();
+        Dictionary<uint, GameObjectTemplate> _gameObjectTemplateStorage = new Dictionary<uint, GameObjectTemplate>();
         Dictionary<ulong, GameObjectData> gameObjectDataStorage = new Dictionary<ulong, GameObjectData>();
         Dictionary<ulong, GameObjectTemplateAddon> _gameObjectTemplateAddonStore = new Dictionary<ulong, GameObjectTemplateAddon>();
         Dictionary<ulong, GameObjectAddon> _gameObjectAddonStorage = new Dictionary<ulong, GameObjectAddon>();
@@ -10126,10 +10157,10 @@ namespace Game
         public uint team;
     }
 
-    public class QuestPOI
+    public class QuestPOIBlobData
     {
-        public QuestPOI(int blobIndex, int objectiveIndex, int questObjectiveID, int questObjectID, int mapID, int uiMapID, int priority, int flags, 
-            int worldEffectID, int playerConditionID, int spawnTrackingID, bool alwaysAllowMergingBlobs)
+        public QuestPOIBlobData(int blobIndex, int objectiveIndex, int questObjectiveID, int questObjectID, int mapID, int uiMapID, int priority, int flags, 
+            int worldEffectID, int playerConditionID, int spawnTrackingID, List<QuestPOIBlobPoint> questPOIBlobPointStats, bool alwaysAllowMergingBlobs)
         {
             BlobIndex = blobIndex;
             ObjectiveIndex = objectiveIndex;
@@ -10142,6 +10173,7 @@ namespace Game
             WorldEffectID = worldEffectID;
             PlayerConditionID = playerConditionID;
             SpawnTrackingID = spawnTrackingID;
+            QuestPOIBlobPointStats = questPOIBlobPointStats;
             AlwaysAllowMergingBlobs = alwaysAllowMergingBlobs;
         }
 
@@ -10156,13 +10188,13 @@ namespace Game
         public int WorldEffectID;
         public int PlayerConditionID;
         public int SpawnTrackingID;
-        public List<QuestPOIPoint> points = new List<QuestPOIPoint>();
+        public List<QuestPOIBlobPoint> QuestPOIBlobPointStats;
         public bool AlwaysAllowMergingBlobs;
     }
 
-    public class QuestPOIPoint
+    public class QuestPOIBlobPoint
     {
-        public QuestPOIPoint(int _x, int _y)
+        public QuestPOIBlobPoint(int _x, int _y)
         {
             X = _x;
             Y = _y;
@@ -10170,6 +10202,54 @@ namespace Game
 
         public int X;
         public int Y;
+    }
+
+    public class QuestPOIData
+    {
+        public uint QuestID;
+        public List<QuestPOIBlobData> QuestPOIBlobDataStats = new List<QuestPOIBlobData>();
+        public ByteBuffer QueryDataBuffer = new ByteBuffer();
+
+        public QuestPOIData(uint questId)
+        {
+            QuestID = questId;
+        }
+
+        public void InitializeQueryData()
+        {
+            Write(QueryDataBuffer);
+        }
+
+        public void Write(ByteBuffer data)
+        {
+            data.WriteUInt32(QuestID);
+            data.WriteInt32(QuestPOIBlobDataStats.Count);
+
+            foreach (QuestPOIBlobData questPOIBlobData in QuestPOIBlobDataStats)
+            {
+                data.WriteInt32(questPOIBlobData.BlobIndex);
+                data.WriteInt32(questPOIBlobData.ObjectiveIndex);
+                data.WriteInt32(questPOIBlobData.QuestObjectiveID);
+                data.WriteInt32(questPOIBlobData.QuestObjectID);
+                data.WriteInt32(questPOIBlobData.MapID);
+                data.WriteInt32(questPOIBlobData.UiMapID);
+                data.WriteInt32(questPOIBlobData.Priority);
+                data.WriteInt32(questPOIBlobData.Flags);
+                data.WriteInt32(questPOIBlobData.WorldEffectID);
+                data.WriteInt32(questPOIBlobData.PlayerConditionID);
+                data.WriteInt32(questPOIBlobData.SpawnTrackingID);
+                data.WriteInt32(questPOIBlobData.QuestPOIBlobPointStats.Count);
+
+                foreach (QuestPOIBlobPoint questPOIBlobPoint in questPOIBlobData.QuestPOIBlobPointStats)
+                {
+                    data.WriteInt32(questPOIBlobPoint.X);
+                    data.WriteInt32(questPOIBlobPoint.Y);
+                }
+
+                data.WriteBit(questPOIBlobData.AlwaysAllowMergingBlobs);
+                data.FlushBits();
+            }
+        }
     }
 
     public class AreaTriggerStruct

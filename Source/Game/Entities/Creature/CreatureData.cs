@@ -20,6 +20,8 @@ using Framework.Constants;
 using System;
 using System.Collections.Generic;
 using Framework.Dynamic;
+using Game.Network.Packets;
+using Game.Network;
 
 namespace Game.Entities
 {
@@ -90,6 +92,8 @@ namespace Game.Entities
         public uint MechanicImmuneMask;
         public CreatureFlagsExtra FlagsExtra;
         public uint ScriptID;
+
+        public QueryCreatureResponse QueryData;
 
         public CreatureModel GetModelByIdx(int idx)
         {
@@ -209,6 +213,58 @@ namespace Game.Entities
                 default:
                     return -1;
             }
+        }
+
+        public void InitializeQueryData()
+        {
+            QueryData = new QueryCreatureResponse();
+
+            QueryData.CreatureID = Entry;
+            QueryData.Allow = true;
+
+            CreatureStats stats = new CreatureStats();
+            stats.Leader = RacialLeader;
+
+            stats.Name[0] = Name;
+            stats.NameAlt[0] = FemaleName;
+
+            stats.Flags[0] = (uint)TypeFlags;
+            stats.Flags[1] = TypeFlags2;
+
+            stats.CreatureType = (int)CreatureType;
+            stats.CreatureFamily = (int)Family;
+            stats.Classification = (int)Rank;
+
+            for (uint i = 0; i < SharedConst.MaxCreatureKillCredit; ++i)
+                stats.ProxyCreatureID[i] = KillCredit[i];
+
+            foreach (var model in Models)
+            {
+                stats.Display.TotalProbability += model.Probability;
+                stats.Display.CreatureDisplay.Add(new CreatureXDisplay(model.CreatureDisplayID, model.DisplayScale, model.Probability));
+            }
+
+            stats.HpMulti = ModHealth;
+            stats.EnergyMulti = ModMana;
+
+            stats.CreatureMovementInfoID = MovementId;
+            stats.RequiredExpansion = RequiredExpansion;
+            stats.HealthScalingExpansion = HealthScalingExpansion;
+            stats.VignetteID = VignetteID;
+            stats.Class = (int)UnitClass;
+            stats.FadeRegionRadius = FadeRegionRadius;
+            stats.WidgetSetID = WidgetSetID;
+            stats.WidgetSetUnitConditionID = WidgetSetUnitConditionID;
+
+            stats.Title = SubName;
+            stats.TitleAlt = TitleAlt;
+            stats.CursorName = IconName;
+
+            var items = Global.ObjectMgr.GetCreatureQuestItemList(Entry);
+            if (items != null)
+                stats.QuestItems.AddRange(items);
+
+            QueryData.Stats = stats;
         }
     }
 
