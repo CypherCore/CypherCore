@@ -1868,9 +1868,6 @@ namespace Game.Entities
                 if (quest == null)
                     continue;
 
-                if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.QuestAvailable, quest.Id, this))
-                    continue;
-
                 QuestStatus status = GetQuestStatus(questId);
                 if (status == QuestStatus.Complete && !GetQuestRewardStatus(questId))
                     result2 = QuestGiverStatus.Reward;
