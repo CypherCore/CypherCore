@@ -3304,7 +3304,7 @@ namespace Game.Entities
                     else if (chance > 100.0f)
                         chance = GetWeaponProcChance();
 
-                    if (RandomHelper.randChance(chance))
+                    if (RandomHelper.randChance(chance) && Global.ScriptMgr.OnCastItemCombatSpell(this, damageInfo.GetVictim(), spellInfo, item))
                         CastSpell(damageInfo.GetVictim(), spellInfo.Id, true, item);
                 }
             }

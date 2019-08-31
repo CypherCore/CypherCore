@@ -360,4 +360,27 @@ namespace Scripts.World
             return true;
         }
     }
+
+    // Only used currently for
+    [Script]// 19169: Nightfall
+    class item_generic_limit_chance_above_60 : ItemScript
+    {
+        public item_generic_limit_chance_above_60() : base("item_generic_limit_chance_above_60") { }
+
+        public override bool OnCastItemCombatSpell(Player player, Unit victim, SpellInfo spellInfo, Item item)
+        {
+            // spell proc chance gets severely reduced on victims > 60 (formula unknown)
+            if (victim.getLevel() > 60)
+            {
+                // gives ~0.1% proc chance at lvl 70
+                float lvlPenaltyFactor = 9.93f;
+                float failureChance = (victim.GetLevelForTarget(player) - 60) * lvlPenaltyFactor;
+
+                // base ppm chance was already rolled, only roll success chance
+                return !RandomHelper.randChance(failureChance);
+            }
+
+            return true;
+        }
+    }
 }

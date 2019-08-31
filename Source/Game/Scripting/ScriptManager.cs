@@ -738,6 +738,22 @@ namespace Game.Scripting
 
             return RunScriptRet<ItemScript>(p => p.OnExpire(player, proto), proto.ScriptId);
         }
+        public bool OnItemRemove(Player player, Item item)
+        {
+            Cypher.Assert(player != null);
+            Cypher.Assert(item != null);
+
+            return RunScriptRet<ItemScript>(tmpscript => tmpscript.OnRemove(player, item), item.GetScriptId());
+        }
+        public bool OnCastItemCombatSpell(Player player, Unit victim, SpellInfo spellInfo, Item item)
+        {
+            Cypher.Assert(player != null);
+            Cypher.Assert(victim != null);
+            Cypher.Assert(spellInfo != null);
+            Cypher.Assert(item != null);
+
+            return RunScriptRet<ItemScript>(tmpscript => tmpscript.OnCastItemCombatSpell(player, victim, spellInfo, item), item.GetScriptId());
+        }
 
         //CreatureScript
         public bool OnDummyEffect(Unit caster, uint spellId, uint effIndex, Creature target)

@@ -279,6 +279,12 @@ namespace Game.Scripting
 
         // Called when the item expires (is destroyed).
         public virtual bool OnExpire(Player player, ItemTemplate proto) { return false; }
+
+        // Called when the item is destroyed.
+        public virtual bool OnRemove(Player player, Item item) { return false; }
+
+        // Called before casting a combat spell from this item (chance on hit spells of item template, can be used to prevent cast if returning false)
+        public virtual bool OnCastItemCombatSpell(Player player, Unit victim, SpellInfo spellInfo, Item item) { return true; }
     }
 
     public class UnitScript : ScriptObject
