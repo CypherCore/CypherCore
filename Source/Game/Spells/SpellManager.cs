@@ -1548,8 +1548,8 @@ namespace Game.Entities
 
             mSpellEnchantProcEventMap.Clear();                             // need for reload case
 
-            //                                                  0         1           2         3
-            SQLResult result = DB.World.Query("SELECT entry, customChance, PPMChance, procEx FROM spell_enchant_proc_data");
+            //                                         0          1       2               3        4
+            SQLResult result = DB.World.Query("SELECT EnchantID, Chance, ProcsPerMinute, HitMask, AttributesMask FROM spell_enchant_proc_data");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell enchant proc event conditions. DB table `spell_enchant_proc_data` is empty.");
@@ -1569,9 +1569,10 @@ namespace Game.Entities
                 }
 
                 SpellEnchantProcEntry spe = new SpellEnchantProcEntry();
-                spe.customChance = result.Read<uint>(1);
-                spe.PPMChance = result.Read<float>(2);
-                spe.procEx = result.Read<uint>(3);
+                spe.Chance = result.Read<uint>(1);
+                spe.ProcsPerMinute = result.Read<float>(2);
+                spe.HitMask = result.Read<uint>(3);
+                spe.AttributesMask = (EnchantProcAttributes)result.Read<uint>(4);
 
                 mSpellEnchantProcEventMap[enchantId] = spe;
 
@@ -3609,9 +3610,10 @@ namespace Game.Entities
 
     public class SpellEnchantProcEntry
     {
-        public uint customChance;
-        public float PPMChance;
-        public uint procEx;
+        public float Chance;         // if nonzero - overwrite SpellItemEnchantment value
+        public float ProcsPerMinute; // if nonzero - chance to proc is equal to value * aura caster's weapon speed / 60
+        public uint HitMask;        // if nonzero - bitmask for matching proc condition based on hit result, see enum ProcFlagsHit
+        public EnchantProcAttributes AttributesMask; // bitmask, see EnchantProcAttributes
     }
 
     public class SpellTargetPosition

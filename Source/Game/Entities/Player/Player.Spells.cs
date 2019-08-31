@@ -3324,10 +3324,10 @@ namespace Game.Entities
 
                     SpellEnchantProcEntry entry = Global.SpellMgr.GetSpellEnchantProcEvent(enchant_id);
 
-                    if (entry != null && entry.procEx != 0)
+                    if (entry != null && entry.HitMask != 0)
                     {
                         // Check hit/crit/dodge/parry requirement
-                        if (((uint)entry.procEx & (uint)damageInfo.GetHitMask()) == 0)
+                        if (((uint)entry.HitMask & (uint)damageInfo.GetHitMask()) == 0)
                             continue;
                     }
                     else
@@ -3336,6 +3336,10 @@ namespace Game.Entities
                         if (!canTrigger)
                             continue;
                     }
+
+                    // check if enchant procs only on white hits
+                    if (entry != null && entry.AttributesMask.HasAnyFlag(EnchantProcAttributes.WhiteHit) && damageInfo.GetSpellInfo() != null)
+                        continue;
 
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(pEnchant.EffectArg[s]);
                     if (spellInfo == null)
@@ -3349,10 +3353,10 @@ namespace Game.Entities
 
                     if (entry != null)
                     {
-                        if (entry.PPMChance != 0)
-                            chance = GetPPMProcChance(proto.GetDelay(), entry.PPMChance, spellInfo);
-                        else if (entry.customChance != 0)
-                            chance = entry.customChance;
+                        if (entry.ProcsPerMinute != 0)
+                            chance = GetPPMProcChance(proto.GetDelay(), entry.ProcsPerMinute, spellInfo);
+                        else if (entry.Chance != 0)
+                            chance = entry.Chance;
                     }
 
                     // Apply spell mods
@@ -3368,6 +3372,29 @@ namespace Game.Entities
                             CastSpell(this, spellInfo, true, item);
                         else
                             CastSpell(damageInfo.GetVictim(), spellInfo, true, item);
+                    }
+
+                    if (RandomHelper.randChance(chance))
+                    {
+                        Unit target = spellInfo.IsPositive() ? this : damageInfo.GetVictim();
+
+                        // reduce effect values if enchant is limited
+                        Dictionary<SpellValueMod, int> values = new Dictionary<SpellValueMod, int>();
+                        if (entry != null && entry.AttributesMask.HasAnyFlag(EnchantProcAttributes.Limit60) && target.GetLevelForTarget(this) > 60)
+                        {
+                            int lvlDifference = (int)target.GetLevelForTarget(this) - 60;
+                            int lvlPenaltyFactor = 4; // 4% lost effectiveness per level
+
+                            int effectPct = Math.Max(0, 100 - (lvlDifference * lvlPenaltyFactor));
+
+                            for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+                            {
+                                if (spellInfo.GetEffect(Difficulty.None, i).IsEffect())
+                                    values.Add(SpellValueMod.BasePoint0 + i, MathFunctions.CalculatePct(spellInfo.GetEffect(Difficulty.None, i).CalcValue(this), effectPct));
+                            }
+                        }
+
+                        CastCustomSpell(spellInfo.Id, values, target, TriggerCastFlags.FullMask, item);
                     }
                 }
             }
