@@ -1031,7 +1031,7 @@ namespace Game.AI
 
                         foreach (var obj in targets)
                             if (IsCreature(obj))
-                                obj.ToCreature().UpdateEntry(e.Action.updateTemplate.creature, null, e.Action.updateTemplate.updateLevel != 0);
+                                obj.ToCreature().UpdateEntry(e.Action.updateTemplate.creature, obj.ToCreature().GetCreatureData(), e.Action.updateTemplate.updateLevel != 0);
                         break;
                     }
                 case SmartActions.Die:

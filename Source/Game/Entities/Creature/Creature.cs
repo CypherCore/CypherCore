@@ -255,7 +255,7 @@ namespace Game.Entities
             SetHoverHeight(cinfo.HoverHeight);
 
             // checked at loading
-            m_defaultMovementType = (MovementGeneratorType)cinfo.MovementType;
+            m_defaultMovementType = (MovementGeneratorType)(data != null ? data.movementType : cinfo.MovementType);
             if (m_respawnradius == 0 && m_defaultMovementType == MovementGeneratorType.Random)
                 m_defaultMovementType = MovementGeneratorType.Idle;
 
