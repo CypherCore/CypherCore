@@ -2078,7 +2078,6 @@ namespace Game.Entities
                         movementInfo.Pos.posZ, height, GetPositionZ(), movementInfo.jump.fallTime, height, damage, safe_fall);
                 }
             }
-            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Landing); // No fly zone - Parachute
         }
         public void UpdateFallInformationIfNeed(MovementInfo minfo, ClientOpcodes opcode)
         {

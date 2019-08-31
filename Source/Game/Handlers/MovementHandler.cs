@@ -136,6 +136,10 @@ namespace Game
             if (opcode == ClientOpcodes.MoveFallLand && plrMover && !plrMover.IsInFlight())
                 plrMover.HandleFall(movementInfo);
 
+            // interrupt parachutes upon falling or landing in water
+            if (opcode == ClientOpcodes.MoveFallLand || opcode == ClientOpcodes.MoveStartSwim)
+                mover.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Landing); // Parachutes
+
             if (plrMover && movementInfo.HasMovementFlag(MovementFlag.Swimming) != plrMover.IsInWater())
             {
                 // now client not include swimming flag in case jumping under water
