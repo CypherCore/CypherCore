@@ -6233,6 +6233,11 @@ namespace Game.Entities
 
                 loot = go.loot;
 
+                // loot was generated and respawntime has passed since then, allow to recreate loot
+                // to avoid bugs, this rule covers spawned gameobjects only
+                if (go.isSpawnedByDefault() && go.getLootState() == LootState.Activated && !go.loot.isLooted() && go.GetLootGenerationTime() + go.GetRespawnDelay() < Time.UnixTime)
+                    go.SetLootState(LootState.Ready);
+
                 if (go.getLootState() == LootState.Ready)
                 {
                     uint lootid = go.GetGoInfo().GetLootId();
@@ -6258,6 +6263,7 @@ namespace Game.Entities
                             group.UpdateLooterGuid(go, true);
 
                         loot.FillLoot(lootid, LootStorage.Gameobject, this, !groupRules, false, go.GetLootMode());
+                        go.SetLootGenerationTime();
 
                         // get next RR player (for next loot)
                         if (groupRules)

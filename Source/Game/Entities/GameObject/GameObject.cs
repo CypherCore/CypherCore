@@ -2655,6 +2655,8 @@ namespace Game.Entities
         void AddLootMode(LootModes lootMode) { m_LootMode |= lootMode; }
         void RemoveLootMode(LootModes lootMode) { m_LootMode &= ~lootMode; }
         void ResetLootMode() { m_LootMode = LootModes.Default; }
+        public void SetLootGenerationTime() { m_lootGenerationTime = (uint)Time.UnixTime; }
+        public uint GetLootGenerationTime() { return m_lootGenerationTime; }
 
         public void AddToSkillupList(ObjectGuid PlayerGuid) { m_SkillupList.Add(PlayerGuid); }
         public bool IsInSkillupList(ObjectGuid PlayerGuid)
@@ -2741,6 +2743,7 @@ namespace Game.Entities
         ObjectGuid m_lootRecipient;
         ObjectGuid m_lootRecipientGroup;
         LootModes m_LootMode;                                  // bitmask, default LOOT_MODE_DEFAULT, determines what loot will be lootable
+        uint m_lootGenerationTime;
         public uint m_groupLootTimer;                            // (msecs)timer used for group loot
         public ObjectGuid lootingGroupLowGUID;                         // used to find group which is looting
         long m_packedRotation;
