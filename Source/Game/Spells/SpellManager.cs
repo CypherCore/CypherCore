@@ -1159,7 +1159,7 @@ namespace Game.Entities
             //                                            0        1           2                3                 4                 5                 6
             SQLResult result = DB.World.Query("SELECT SpellId, SchoolMask, SpellFamilyName, SpellFamilyMask0, SpellFamilyMask1, SpellFamilyMask2, SpellFamilyMask3, " +
             //           7              8               9       10              11              12      13        14      15
-                "ProcFlags, SpellTypeMask, SpellPhaseMask, HitMask, AttributesMask, ProcsPerMinute, Chance, Cooldown, Charges FROM spell_proc");
+                "ProcFlags, SpellTypeMask, SpellPhaseMask, HitMask, AttributesMask, DisableEffectsMask, ProcsPerMinute, Chance, Cooldown, Charges FROM spell_proc");
 
             uint count = 0;
             if (!result.IsEmpty())
@@ -1201,10 +1201,11 @@ namespace Game.Entities
                     baseProcEntry.SpellPhaseMask = (ProcFlagsSpellPhase)result.Read<uint>(9);
                     baseProcEntry.HitMask = (ProcFlagsHit)result.Read<uint>(10);
                     baseProcEntry.AttributesMask = (ProcAttributes)result.Read<uint>(11);
-                    baseProcEntry.ProcsPerMinute = result.Read<float>(12);
-                    baseProcEntry.Chance = result.Read<float>(13);
-                    baseProcEntry.Cooldown = result.Read<uint>(14);
-                    baseProcEntry.Charges = result.Read<uint>(15);
+                    baseProcEntry.DisableEffectsMask = result.Read<uint>(12);
+                    baseProcEntry.ProcsPerMinute = result.Read<float>(13);
+                    baseProcEntry.Chance = result.Read<float>(14);
+                    baseProcEntry.Cooldown = result.Read<uint>(15);
+                    baseProcEntry.Charges = result.Read<uint>(16);
 
                     while (spellInfo != null)
                     {
@@ -1383,6 +1384,7 @@ namespace Game.Entities
                 }
 
                 procEntry.AttributesMask = 0;
+                procEntry.DisableEffectsMask = 0;
                 if (spellInfo.ProcFlags.HasAnyFlag(ProcFlags.Kill))
                     procEntry.AttributesMask |= ProcAttributes.ReqExpOrHonor;
                 if (addTriggerFlag)
@@ -3438,6 +3440,7 @@ namespace Game.Entities
         public ProcFlagsSpellPhase SpellPhaseMask { get; set; }                             // if nonzero - bitmask for matching phase of a spellcast on which proc occurs, see enum ProcFlagsSpellPhase
         public ProcFlagsHit HitMask { get; set; }                                    // if nonzero - bitmask for matching proc condition based on hit result, see enum ProcFlagsHit
         public ProcAttributes AttributesMask { get; set; }                             // bitmask, see ProcAttributes
+        public uint DisableEffectsMask { get; set; }                            // bitmask
         public float ProcsPerMinute { get; set; }                              // if nonzero - chance to proc is equal to value * aura caster's weapon speed / 60
         public float Chance { get; set; }                                     // if nonzero - owerwrite procChance field for given Spell.dbc entry, defines chance of proc to occur, not used if ProcsPerMinute set
         public uint Cooldown { get; set; }                                   // if nonzero - cooldown in secs for aura proc, applied to aura

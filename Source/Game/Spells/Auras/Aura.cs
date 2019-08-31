@@ -1646,7 +1646,7 @@ namespace Game.Spells
             SetLastProcSuccessTime(now);
         }
 
-        public uint IsProcTriggeredOnEvent(AuraApplication aurApp, ProcEventInfo eventInfo, DateTime now)
+        public uint GetProcEffectMask(AuraApplication aurApp, ProcEventInfo eventInfo, DateTime now)
         {
             SpellProcEntry procEntry = Global.SpellMgr.GetSpellProcEntry(GetId());
             // only auras with spell proc entry can trigger proc
@@ -1712,9 +1712,9 @@ namespace Game.Spells
             // At least one effect has to pass checks to proc aura
             uint procEffectMask = 0;
             for (byte i = 0; i < SpellConst.MaxEffects; ++i)
-                if (aurApp.HasEffect(i))
-                    if (GetEffect(i).CheckEffectProc(aurApp, eventInfo))
-                        procEffectMask |= (1u << i);
+                if ((procEffectMask & (1u << i)) != 0)
+                    if ((procEntry.DisableEffectsMask & (1u << i)) != 0 || !GetEffect(i).CheckEffectProc(aurApp, eventInfo))
+                        procEffectMask &= ~(1u << i);
 
             if (procEffectMask == 0)
                 return 0;

@@ -1817,7 +1817,7 @@ namespace Game.Entities
                 foreach (AuraApplication aurApp in procAuras)
                 {
                     Cypher.Assert(aurApp.GetTarget() == this);
-                    uint procEffectMask = aurApp.GetBase().IsProcTriggeredOnEvent(aurApp, eventInfo, now);
+                    uint procEffectMask = aurApp.GetBase().GetProcEffectMask(aurApp, eventInfo, now);
                     if (procEffectMask != 0)
                     {
                         aurApp.GetBase().PrepareProcToTrigger(aurApp, eventInfo, now);
@@ -1830,7 +1830,7 @@ namespace Game.Entities
             {
                 foreach (var pair in GetAppliedAuras())
                 {
-                    uint procEffectMask = pair.Value.GetBase().IsProcTriggeredOnEvent(pair.Value, eventInfo, now);
+                    uint procEffectMask = pair.Value.GetBase().GetProcEffectMask(pair.Value, eventInfo, now);
                     if (procEffectMask != 0)
                     {
                         pair.Value.GetBase().PrepareProcToTrigger(pair.Value, eventInfo, now);
