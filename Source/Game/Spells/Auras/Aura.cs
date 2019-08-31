@@ -1798,6 +1798,11 @@ namespace Game.Spells
                 if (modOwner != null)
                     modOwner.ApplySpellMod(GetId(), SpellModOp.ChanceOfSuccess, ref chance);
             }
+
+            // proc chance is reduced by an additional 3.333% per level past 60
+            if (procEntry.AttributesMask.HasAnyFlag(ProcAttributes.ReduceProc60) && eventInfo.GetActor().getLevel() > 60)
+                chance = Math.Max(0.0f, (1.0f - ((eventInfo.GetActor().getLevel() - 60) * 1.0f / 30.0f)) * chance);
+
             return chance;
         }
 

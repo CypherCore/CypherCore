@@ -2228,7 +2228,8 @@ namespace Framework.Constants
         ReqExpOrHonor = 0x01, // requires proc target to give exp or honor for aura proc
         TriggeredCanProc = 0x02, // aura can proc even with triggered spells
         ReqPowerCost = 0x04, // requires triggering spell to have a power cost for aura proc
-        ReqSpellmod = 0x08  // requires triggering spell to be affected by proccing aura to drop charges
+        ReqSpellmod = 0x08,  // requires triggering spell to be affected by proccing aura to drop charges
+        ReduceProc60 = 0x80  // aura should have a reduced chance to proc if level of proc Actor > 60
     }
 
     // Spell aura states
