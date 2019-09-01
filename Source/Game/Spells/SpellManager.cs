@@ -2473,6 +2473,13 @@ namespace Game.Entities
                         spellInfo.GetEffect(0).TargetA = new SpellImplicitTargetInfo(Targets.UnitCaster);
                         spellInfo.GetEffect(0).TargetB = new SpellImplicitTargetInfo();
                         break;
+                    case 56690: // Thrust Spear
+                    case 60586: // Mighty Spear Thrust
+                    case 60776: // Claw Swipe
+                    case 60881: // Fatal Strike
+                    case 60864:  // Jaws of Death
+                        spellInfo.AttributesEx4 |= SpellAttr4.FixedDamage;
+                        break;
                     case 31344: // Howl of Azgalor
                         spellInfo.GetEffect(0).RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards100); // 100yards instead of 50000?!
                         break;
@@ -3002,6 +3009,10 @@ namespace Game.Entities
                         if (MathFunctions.fuzzyEq(spellInfo.ConeAngle, 0.0f))
                             spellInfo.ConeAngle = 90.0f;
                 }
+
+                // disable proc for magnet auras, they're handled differently
+                if (spellInfo.HasAura(Difficulty.None, AuraType.SpellMagnet))
+                    spellInfo.ProcFlags = 0;
 
                 if (spellInfo.ActiveIconFileDataId == 135754)  // flight
                     spellInfo.Attributes |= SpellAttr0.Passive;
