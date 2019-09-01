@@ -225,7 +225,6 @@ namespace Game.Entities
 
             SetDisplayId(model.CreatureDisplayID, model.DisplayScale);
             SetNativeDisplayId(model.CreatureDisplayID, model.DisplayScale);
-            SetGender((Gender)minfo.gender);
 
             // Load creature equipment
             if (data == null || data.equipmentId == 0)
@@ -326,12 +325,7 @@ namespace Game.Entities
             // checked and error show at loading templates
             var factionTemplate = CliDB.FactionTemplateStorage.LookupByKey(cInfo.Faction);
             if (factionTemplate != null)
-            {
-                if (Convert.ToBoolean(factionTemplate.Flags & (uint)FactionTemplateFlags.PVP))
-                    SetPvP(true);
-                else
-                    SetPvP(false);
-            }
+                SetPvP(factionTemplate.Flags.HasAnyFlag((ushort)FactionTemplateFlags.PVP));
 
             // updates spell bars for vehicles and set player's faction - should be called here, to overwrite faction that is set from the new template
             if (IsVehicle())
@@ -814,18 +808,6 @@ namespace Game.Entities
 
                 //! Relocate again with updated Z coord
                 Relocate(x, y, z, ang);
-            }
-
-            CreatureModel display = new CreatureModel(GetNativeDisplayId(), GetNativeDisplayScale(), 1.0f);
-            CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelRandomGender(ref display, cinfo);
-            if (minfo != null && !IsTotem())                               // Cancel load if no model defined or if totem
-            {
-                SetNativeDisplayId(display.CreatureDisplayID, display.DisplayScale);
-
-                var transformAuras = GetAuraEffectsByType(AuraType.Transform);
-                var shapeshiftAuras = GetAuraEffectsByType(AuraType.ModShapeshift);
-                if (transformAuras.Empty() && shapeshiftAuras.Empty())
-                    SetDisplayId(display.CreatureDisplayID, display.DisplayScale);
             }
 
             LastUsedScriptID = GetScriptId();
@@ -1652,13 +1634,7 @@ namespace Game.Entities
                 setDeathState(DeathState.JustRespawned);
 
                 CreatureModel display = new CreatureModel(GetNativeDisplayId(), GetNativeDisplayScale(), 1.0f);
-                CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelRandomGender(ref display, GetCreatureTemplate());
-                if (minfo != null)                                             // Cancel load if no model defined
-                {
-                    SetDisplayId(display.CreatureDisplayID, display.DisplayScale);
-                    SetNativeDisplayId(display.CreatureDisplayID, display.DisplayScale);
-                    SetGender((Gender)minfo.gender);
-                }
+                SetDisplayId(display.CreatureDisplayID, display.DisplayScale);
 
                 GetMotionMaster().InitDefault();
                 //Re-initialize reactstate that could be altered by movementgenerators
