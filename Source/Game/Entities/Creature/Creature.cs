@@ -2035,8 +2035,13 @@ namespace Game.Entities
             Unit targetVictim = target.getAttackerForHelper();
 
             // if I'm already fighting target, or I'm hostile towards the target, the target is acceptable
-            if (myVictim == target || targetVictim == this || IsHostileTo(target))
+            if (GetVictim() == target || IsHostileTo(target))
                 return true;
+
+            // a player is targeting me, but I'm not hostile towards it, and not currently attacking it, the target is not acceptable
+            // (players may set their victim from a distance, and doesn't mean we should attack)
+            if (target.GetTypeId() == TypeId.Player && targetVictim == this)
+                return false;
 
             // if the target's victim is friendly, and the target is neutral, the target is acceptable
             if (targetVictim != null && IsFriendlyTo(targetVictim))
