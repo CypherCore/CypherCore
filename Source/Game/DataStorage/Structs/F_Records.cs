@@ -99,6 +99,5 @@ namespace Game.DataStorage
             return EnemyGroup == 0 && FriendGroup == 0;
         }
         public bool IsContestedGuardFaction() { return (Flags & (ushort)FactionTemplateFlags.ContestedGuard) != 0; }
-        public bool ShouldSparAttack() { return (Flags & (ushort)FactionTemplateFlags.EnemySpar) != 0; }
     }
 }
