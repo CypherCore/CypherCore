@@ -820,9 +820,12 @@ namespace Game.Entities
             CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelRandomGender(ref display, cinfo);
             if (minfo != null && !IsTotem())                               // Cancel load if no model defined or if totem
             {
-                SetDisplayId(display.CreatureDisplayID, display.DisplayScale);
                 SetNativeDisplayId(display.CreatureDisplayID, display.DisplayScale);
-                SetGender((Gender)minfo.gender);
+
+                var transformAuras = GetAuraEffectsByType(AuraType.Transform);
+                var shapeshiftAuras = GetAuraEffectsByType(AuraType.ModShapeshift);
+                if (transformAuras.Empty() && shapeshiftAuras.Empty())
+                    SetDisplayId(display.CreatureDisplayID, display.DisplayScale);
             }
 
             LastUsedScriptID = GetScriptId();
