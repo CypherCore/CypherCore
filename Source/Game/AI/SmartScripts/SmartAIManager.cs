@@ -118,10 +118,57 @@ namespace Game.AI
                 }
                 else
                 {
-                    if (Global.ObjectMgr.GetCreatureData((uint)Math.Abs(temp.entryOrGuid)) == null)
+                    switch (source_type)
                     {
-                        Log.outError(LogFilter.Sql, "SmartAIMgr.LoadSmartAI: Creature guid ({0}) does not exist, skipped loading.", Math.Abs(temp.entryOrGuid));
-                        continue;
+                        case SmartScriptType.Creature:
+                            {
+                                CreatureData creature = Global.ObjectMgr.GetCreatureData((ulong)-temp.entryOrGuid);
+                                if (creature == null)
+                                {
+                                    Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: Creature guid ({-temp.entryOrGuid}) does not exist, skipped loading.");
+                                    continue;
+                                }
+
+                                CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(creature.id);
+                                if (creatureInfo == null)
+                                {
+                                    Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: Creature entry ({creature.id}) guid ({-temp.entryOrGuid}) does not exist, skipped loading.");
+                                    continue;
+                                }
+
+                                if (creatureInfo.AIName != "SmartAI")
+                                {
+                                    Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: Creature entry ({creature.id}) guid ({-temp.entryOrGuid}) is not using SmartAI, skipped loading.");
+                                    continue;
+                                }
+                                break;
+                            }
+                        case SmartScriptType.GameObject:
+                            {
+                                GameObjectData gameObject = Global.ObjectMgr.GetGOData((ulong)-temp.entryOrGuid);
+                                if (gameObject == null)
+                                {
+                                    Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: GameObject guid ({-temp.entryOrGuid}) does not exist, skipped loading.");
+                                    continue;
+                                }
+
+                                GameObjectTemplate gameObjectInfo = Global.ObjectMgr.GetGameObjectTemplate(gameObject.id);
+                                if (gameObjectInfo == null)
+                                {
+                                    Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: GameObject entry ({gameObject.id}) guid ({-temp.entryOrGuid}) does not exist, skipped loading.");
+                                    continue;
+                                }
+
+                                if (gameObjectInfo.AIName != "SmartGameObjectAI")
+                                {
+                                    Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: GameObject entry ({gameObject.id}) guid ({-temp.entryOrGuid}) is not using SmartGameObjectAI, skipped loading.");
+                                    continue;
+                                }
+                                break;
+                            }
+                        default:
+                            Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: GUID-specific scripting not yet implemented for source_type {source_type}");
+                            continue;
                     }
                 }
 
