@@ -1297,6 +1297,10 @@ namespace Game.Spells
 
             switch (GetId())
             {
+                // Bear Form
+                case 7090:
+                    modelid = 29414;
+                    break;
                 // Roc Form
                 case 35200:
                     modelid = 4877;
