@@ -1293,7 +1293,18 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
             ShapeShiftForm form = (ShapeShiftForm)GetMiscValue();
 
-            uint modelid = target.GetModelForForm(form);
+            uint modelid = 0;
+
+            switch (GetId())
+            {
+                // Roc Form
+                case 35200:
+                    modelid = 4877;
+                    break;
+                default:
+                    modelid = target.GetModelForForm(form);
+                    break;
+            }
 
             if (apply)
             {
