@@ -2661,7 +2661,7 @@ namespace Scripts.Spells.Generic
         void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             // store stack apply times, so we can pop them while they expire
-            _applyTimes.Add(Time.GetMSTime());
+            _applyTimes.Add(GameTime.GetGameTimeMS());
             Unit target = GetTarget();
 
             // on stack 15 cast the achievement crediting spell
@@ -2675,7 +2675,7 @@ namespace Scripts.Spells.Generic
                 return;
 
             // pop stack if it expired for us
-            if (_applyTimes.First() + GetMaxDuration() < Time.GetMSTime())
+            if (_applyTimes.First() + GetMaxDuration() < GameTime.GetGameTimeMS())
                 ModStackAmount(-1, AuraRemoveMode.Expire);
         }
 

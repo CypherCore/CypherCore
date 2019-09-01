@@ -1809,7 +1809,7 @@ namespace Game.Entities
 
         void GetProcAurasTriggeredOnEvent(List<Tuple<uint, AuraApplication>> aurasTriggeringProc, List<AuraApplication> procAuras, ProcEventInfo eventInfo)
         {
-            DateTime now = DateTime.Now;
+            DateTime now = GameTime.GetGameTimeSteadyPoint();
 
             // use provided list of auras which can proc
             if (procAuras != null)
@@ -2788,7 +2788,7 @@ namespace Game.Entities
 
                 // Remember time after last aura from group removed
                 if (diminish.Stack == 0)
-                    diminish.HitTime = Time.GetMSTime();
+                    diminish.HitTime = GameTime.GetGameTimeMS();
             }
         }
 

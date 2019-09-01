@@ -1449,7 +1449,7 @@ namespace Scripts.Northrend.IcecrownCitadel
 
             GameObject trap = GetCaster().FindNearestGameObject(trapId, 5.0f);
             if (trap)
-                trap.SetRespawnTime((int)trap.GetGoInfo().GetAutoCloseTime());
+                trap.SetRespawnTime((int)trap.GetGoInfo().GetAutoCloseTime() / Time.InMilliseconds);
 
             List<Creature> wards = new List<Creature>();
             GetCaster().GetCreatureListWithEntryInGrid(wards, CreatureIds.DeathboundWard, 150.0f);

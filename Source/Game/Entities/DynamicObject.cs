@@ -97,7 +97,7 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.SpellXSpellVisualID), spellXSpellVisualId);
             SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.SpellID), spell.Id);
             SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.Radius), radius);
-            SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.CastTime), Time.GetMSTime());
+            SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.CastTime), GameTime.GetGameTimeMS());
 
             if (IsWorldObject())
                 setActive(true);    //must before add to map to be put in world container

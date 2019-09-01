@@ -276,7 +276,7 @@ namespace Scripts.World
         {
             uint triggerId = trigger.Id;
             // Second trigger happened too early after first, skip for now
-            if (Global.WorldMgr.GetGameTime() - _triggerTimes[triggerId] < AreaTriggerConst.AreatriggerTalkCooldown)
+            if (GameTime.GetGameTime() - _triggerTimes[triggerId] < AreaTriggerConst.AreatriggerTalkCooldown)
                 return false;
 
             switch (triggerId)
@@ -295,7 +295,7 @@ namespace Scripts.World
                     break;
             }
 
-            _triggerTimes[triggerId] = Global.WorldMgr.GetGameTime();
+            _triggerTimes[triggerId] = GameTime.GetGameTime();
             return false;
         }
 
@@ -318,7 +318,7 @@ namespace Scripts.World
                 return false;
 
             uint triggerId = trigger.Id;
-            if (Global.WorldMgr.GetGameTime() - _triggerTimes[trigger.Id] < AreaTriggerConst.SummonCooldown)
+            if (GameTime.GetGameTime() - _triggerTimes[trigger.Id] < AreaTriggerConst.SummonCooldown)
                 return false;
 
             switch (triggerId)
@@ -347,7 +347,7 @@ namespace Scripts.World
 
             player.SummonCreature(AreaTriggerConst.NpcSpotlight, x, y, z, 0.0f, TempSummonType.TimedDespawn, 5000);
             player.AddAura(AreaTriggerConst.SpellA52Neuralyzer, player);
-            _triggerTimes[trigger.Id] = Global.WorldMgr.GetGameTime();
+            _triggerTimes[trigger.Id] = GameTime.GetGameTime();
             return false;
         }
 

@@ -3400,7 +3400,7 @@ namespace Game.Spells
                     unit.AttackStop();
             }
 
-            unitTarget.m_lastSanctuaryTime = Time.GetMSTime();
+            unitTarget.m_lastSanctuaryTime = GameTime.GetGameTimeMS();
 
             // Vanish allows to remove all threat and cast regular stealth so other spells can be used
             if (m_caster.IsTypeId(TypeId.Player)

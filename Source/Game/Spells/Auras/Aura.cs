@@ -1835,7 +1835,7 @@ namespace Game.Spells
             float ppm = m_spellInfo.CalcProcPPM(actor, m_castItemLevel);
             float averageProcInterval = 60.0f / ppm;
 
-            var currentTime = DateTime.Now;
+            var currentTime = GameTime.GetGameTimeSteadyPoint();
             float secondsSinceLastAttempt = Math.Min((float)(currentTime - m_lastProcAttemptTime).TotalSeconds, 10.0f);
             float secondsSinceLastProc = Math.Min((float)(currentTime - m_lastProcSuccessTime).TotalSeconds, 1000.0f);
 

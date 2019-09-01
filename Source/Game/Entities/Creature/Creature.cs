@@ -2082,7 +2082,7 @@ namespace Game.Entities
                     return true;
 
                 // don't check distance to home position if recently damaged, this should include taunt auras
-                if (!isWorldBoss() && (GetLastDamagedTime() > Global.WorldMgr.GetGameTime() || HasAuraType(AuraType.ModTaunt)))
+                if (!isWorldBoss() && (GetLastDamagedTime() > GameTime.GetGameTime() || HasAuraType(AuraType.ModTaunt)))
                     return true;
             }
 
@@ -2824,7 +2824,7 @@ namespace Game.Entities
                 ClearUnitState(UnitState.CannotTurn);
 
             _focusSpell = null;
-            _focusDelay = (!IsPet() && withDelay) ? Time.GetMSTime() : 0; // don't allow re-target right away to prevent visual bugs
+            _focusDelay = (!IsPet() && withDelay) ? GameTime.GetGameTimeMS() : 0; // don't allow re-target right away to prevent visual bugs
         }
 
         public void MustReacquireTarget() { m_shouldReacquireTarget = true; } // flags the Creature for forced (client displayed) target reacquisition in the next Update call

@@ -438,7 +438,7 @@ namespace Game
 
         public void Update()
         {
-            long curTime = Global.WorldMgr.GetGameTime();
+            long curTime = GameTime.GetGameTime();
             // Handle expired auctions
 
             // If storage is empty, no need to update. next == NULL in this case.
@@ -507,7 +507,7 @@ namespace Game
 
         public void BuildListAuctionItems(AuctionListItemsResult packet, Player player, string searchedname, uint listfrom, byte levelmin, byte levelmax, bool usable, Optional<AuctionSearchFilters> filters, uint quality)
         {
-            long curTime = Global.WorldMgr.GetGameTime();
+            long curTime = GameTime.GetGameTime();
 
             foreach (var Aentry in AuctionsMap.Values)
             {

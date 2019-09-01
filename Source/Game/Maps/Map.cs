@@ -3446,7 +3446,7 @@ namespace Game.Maps
                 sa.ownerGUID = ownerGUID;
 
                 sa.script = script.Value;
-                m_scriptSchedule.Add(Global.WorldMgr.GetGameTime() + script.Key, sa);
+                m_scriptSchedule.Add(GameTime.GetGameTime() + script.Key, sa);
                 if (script.Key == 0)
                     immedScript = true;
 
@@ -3476,7 +3476,7 @@ namespace Game.Maps
             sa.ownerGUID = ownerGUID;
 
             sa.script = script;
-            m_scriptSchedule.Add(Global.WorldMgr.GetGameTime() + delay, sa);
+            m_scriptSchedule.Add(GameTime.GetGameTime() + delay, sa);
 
             Global.MapMgr.IncreaseScheduledScriptsCount();
 
@@ -3674,7 +3674,7 @@ namespace Game.Maps
 
             // Process overdue queued scripts
             KeyValuePair<long, ScriptAction> iter = m_scriptSchedule.First();
-            while (!m_scriptSchedule.Empty() && (iter.Key <= Global.WorldMgr.GetGameTime()))
+            while (!m_scriptSchedule.Empty() && (iter.Key <= GameTime.GetGameTime()))
             {
                 ScriptAction step = iter.Value;
 

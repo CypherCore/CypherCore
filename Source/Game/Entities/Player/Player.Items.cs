@@ -4309,7 +4309,7 @@ namespace Game.Entities
             if (proto.GetFlags().HasAnyFlag(ItemFlags.NoEquipCooldown))
                 return;
 
-            DateTime now = DateTime.Now;
+            DateTime now = GameTime.GetGameTimeSteadyPoint();
             for (byte i = 0; i < proto.Effects.Count; ++i)
             {
                 var effectData = proto.Effects[i];

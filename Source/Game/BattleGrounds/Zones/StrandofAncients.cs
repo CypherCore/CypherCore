@@ -1008,11 +1008,11 @@ namespace Game.BattleGrounds.Zones
                             // Demolisher is not in list
                             if (!DemoliserRespawnList.ContainsKey(i))
                             {
-                                DemoliserRespawnList[i] = Time.GetMSTime() + 30000;
+                                DemoliserRespawnList[i] = GameTime.GetGameTimeMS() + 30000;
                             }
                             else
                             {
-                                if (DemoliserRespawnList[i] < Time.GetMSTime())
+                                if (DemoliserRespawnList[i] < GameTime.GetGameTimeMS())
                                 {
                                     Demolisher.Relocate(SAMiscConst.NpcSpawnlocs[i]);
                                     Demolisher.Respawn();

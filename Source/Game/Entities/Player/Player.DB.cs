@@ -694,10 +694,10 @@ namespace Game.Entities
                         {
                             AddTimedQuest(quest_id);
 
-                            if (quest_time <= Global.WorldMgr.GetGameTime())
+                            if (quest_time <= GameTime.GetGameTime())
                                 questStatusData.Timer = 1;
                             else
-                                questStatusData.Timer = (uint)((quest_time - Global.WorldMgr.GetGameTime()) * Time.InMilliseconds);
+                                questStatusData.Timer = (uint)((quest_time - GameTime.GetGameTime()) * Time.InMilliseconds);
                         }
                         else
                             quest_time = 0;
@@ -1824,7 +1824,7 @@ namespace Game.Entities
                         stmt.AddValue(0, GetGUID().GetCounter());
                         stmt.AddValue(1, save.Key);
                         stmt.AddValue(2, data.Status);
-                        stmt.AddValue(3, data.Timer / Time.InMilliseconds + Global.WorldMgr.GetGameTime());
+                        stmt.AddValue(3, data.Timer / Time.InMilliseconds + GameTime.GetGameTime());
                         trans.Append(stmt);
 
                         // Save objectives

@@ -446,7 +446,7 @@ namespace Game.Entities
                 return 10 * MoneyConstants.Gold;
             else
             {
-                ulong months = (ulong)(Global.WorldMgr.GetGameTime() - GetTalentResetTime()) / Time.Month;
+                ulong months = (ulong)(GameTime.GetGameTime() - GetTalentResetTime()) / Time.Month;
                 if (months > 0)
                 {
                     // This cost will be reduced by a rate of 5 gold per month

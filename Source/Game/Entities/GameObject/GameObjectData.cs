@@ -373,7 +373,7 @@ namespace Game.Entities
                 default:
                     break;
             }
-            return autoCloseTime / Time.InMilliseconds;   // prior to 3.0.3, conversion was / 0x10000;
+            return autoCloseTime;   // prior to 3.0.3, conversion was / 0x10000;
         }
 
         public uint GetLootId()

@@ -97,7 +97,7 @@ namespace Scripts.World
                 // remove cooldowns on spells that have < 10 min CD > 30 sec and has no onHold
                 player.GetSpellHistory().ResetCooldowns(pair =>
                 {
-                    DateTime now = DateTime.Now;
+                    DateTime now = GameTime.GetGameTimeSystemPoint();
                     uint cooldownDuration = pair.Value.CooldownEnd > now ? (uint)(pair.Value.CooldownEnd - now).TotalMilliseconds : 0;
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(pair.Key);
                     return spellInfo.RecoveryTime < 10 * Time.Minute * Time.InMilliseconds

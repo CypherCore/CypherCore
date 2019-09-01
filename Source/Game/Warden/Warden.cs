@@ -87,7 +87,7 @@ namespace Game
         {
             if (_initialized)
             {
-                uint currentTimestamp = Time.GetMSTime();
+                uint currentTimestamp = GameTime.GetGameTimeMS();
                 uint diff = currentTimestamp - _previousTimestamp;
                 _previousTimestamp = currentTimestamp;
 

@@ -382,7 +382,7 @@ namespace Game.Entities
                 if (go1 && go1.ToTransport())                                    // ServerTime
                     data.WriteUInt32(go1.GetGoValue().Transport.PathProgress);
                 else
-                    data.WriteUInt32(Time.GetMSTime());
+                    data.WriteUInt32(GameTime.GetGameTimeMS());
             }
 
             if (flags.Vehicle)

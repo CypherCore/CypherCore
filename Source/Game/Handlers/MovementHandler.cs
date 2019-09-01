@@ -146,7 +146,7 @@ namespace Game
                 plrMover.SetInWater(!plrMover.IsInWater() || plrMover.GetMap().IsUnderWater(plrMover.GetPhaseShift(), movementInfo.Pos.posX, movementInfo.Pos.posY, movementInfo.Pos.posZ));
             }
 
-            uint mstime = Time.GetMSTime();
+            uint mstime = GameTime.GetGameTimeMS();
 
             if (m_clientTimeDelay == 0)
                 m_clientTimeDelay = mstime - movementInfo.Time;

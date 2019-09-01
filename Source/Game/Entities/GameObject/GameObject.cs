@@ -422,11 +422,11 @@ namespace Game.Entities
                                     // Bombs
                                     Unit owner = GetOwner();
                                     if (goInfo.Trap.charges == 2)
-                                        m_cooldownTime = (uint)Time.UnixTime + 10;   // Hardcoded tooltip value
+                                        m_cooldownTime = GameTime.GetGameTimeMS() + 10 * Time.InMilliseconds;   // Hardcoded tooltip value
                                     else if (owner)
                                     {
                                         if (owner.IsInCombat())
-                                            m_cooldownTime = (uint)Time.UnixTime + goInfo.Trap.startDelay;
+                                            m_cooldownTime = GameTime.GetGameTimeMS() + goInfo.Trap.startDelay * Time.InMilliseconds;
                                     }
                                     m_lootState = LootState.Ready;
                                     break;
@@ -589,7 +589,7 @@ namespace Game.Entities
                             uint max_charges;
                             if (goInfo.type == GameObjectTypes.Trap)
                             {
-                                if (m_cooldownTime >= Time.UnixTime)
+                                if (GameTime.GetGameTimeMS() < m_cooldownTime)
                                     break;
 
                                 // Type 2 (bomb) does not need to be triggered by a unit and despawns after casting its spell.
@@ -654,11 +654,11 @@ namespace Game.Entities
                         {
                             case GameObjectTypes.Door:
                             case GameObjectTypes.Button:
-                                if (GetGoInfo().GetAutoCloseTime() != 0 && (m_cooldownTime < Time.UnixTime))
+                                if (m_cooldownTime != 0 && GameTime.GetGameTimeMS() >= m_cooldownTime)
                                     ResetDoorOrButton();
                                 break;
                             case GameObjectTypes.Goober:
-                                if (m_cooldownTime < Time.UnixTime)
+                                if (GameTime.GetGameTimeMS() >= m_cooldownTime)
                                 {
                                     RemoveFlag(GameObjectFlags.InUse);
 
@@ -699,7 +699,7 @@ namespace Game.Entities
                                             CastSpell(target, goInfo.Trap.spell);
 
                                         // Template value or 4 seconds
-                                        m_cooldownTime = (uint)(Time.UnixTime + (goInfo.Trap.cooldown != 0 ? goInfo.Trap.cooldown : 4u));
+                                        m_cooldownTime = (GameTime.GetGameTimeMS() + (goInfo.Trap.cooldown != 0 ? goInfo.Trap.cooldown : 4u)) * Time.InMilliseconds;
 
                                         if (goInfo.Trap.charges == 1)
                                             SetLootState(LootState.JustDeactivated);
@@ -1258,7 +1258,7 @@ namespace Game.Entities
             SwitchDoorOrButton(true, alternative);
             SetLootState(LootState.Activated, user);
 
-            m_cooldownTime = time_to_restore != 0 ? (uint)Time.UnixTime + time_to_restore : 0;
+            m_cooldownTime = time_to_restore != 0 ? GameTime.GetGameTimeMS() + time_to_restore : 0;
         }
 
         public void SetGoArtKit(byte kit)
@@ -1318,10 +1318,10 @@ namespace Game.Entities
             uint cooldown = GetGoInfo().GetCooldown();
             if (cooldown != 0)
             {
-                if (m_cooldownTime > Global.WorldMgr.GetGameTime())
+                if (m_cooldownTime > GameTime.GetGameTime())
                     return;
 
-                m_cooldownTime = (uint)(Global.WorldMgr.GetGameTime() + cooldown);
+                m_cooldownTime = GameTime.GetGameTimeMS() + cooldown * Time.InMilliseconds;
             }
 
             switch (GetGoType())
@@ -1348,7 +1348,7 @@ namespace Game.Entities
                         if (goInfo.Trap.spell != 0)
                             CastSpell(user, goInfo.Trap.spell);
 
-                        m_cooldownTime = (uint)Time.UnixTime + (goInfo.Trap.cooldown != 0 ? goInfo.Trap.cooldown : 4);   // template or 4 seconds
+                        m_cooldownTime = GameTime.GetGameTimeMS() + (goInfo.Trap.cooldown != 0 ? goInfo.Trap.cooldown : 4) * Time.InMilliseconds;   // template or 4 seconds
 
                         if (goInfo.Trap.charges == 1)         // Deactivate after trigger
                             SetLootState(LootState.JustDeactivated);
@@ -1505,7 +1505,7 @@ namespace Game.Entities
                         else
                             SetGoState(GameObjectState.Active);
 
-                        m_cooldownTime = (uint)Time.UnixTime + info.GetAutoCloseTime();
+                        m_cooldownTime = GameTime.GetGameTimeMS() + info.GetAutoCloseTime();
 
                         // cast this spell later if provided
                         spellId = info.Goober.spell;

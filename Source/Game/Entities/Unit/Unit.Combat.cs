@@ -1104,7 +1104,7 @@ namespace Game.Entities
                 {
                     // Part of Evade mechanics. DoT's and Thorns / Retribution Aura do not contribute to this
                     if (damagetype != DamageEffectType.DOT && damage > 0 && !victim.GetOwnerGUID().IsPlayer() && (spellProto == null || !spellProto.HasAura(GetMap().GetDifficultyID(), AuraType.DamageShield)))
-                        victim.ToCreature().SetLastDamagedTime(Global.WorldMgr.GetGameTime() + SharedConst.MaxAggroResetTime);
+                        victim.ToCreature().SetLastDamagedTime(GameTime.GetGameTime() + SharedConst.MaxAggroResetTime);
 
                     victim.AddThreat(this, damage, damageSchoolMask, spellProto);
                 }

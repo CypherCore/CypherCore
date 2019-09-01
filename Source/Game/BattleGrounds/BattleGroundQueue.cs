@@ -66,7 +66,7 @@ namespace Game.BattleGrounds
             ginfo.ArenaTeamId = arenateamid;
             ginfo.IsRated = isRated;
             ginfo.IsInvitedToBGInstanceGUID = 0;
-            ginfo.JoinTime = Time.GetMSTime();
+            ginfo.JoinTime = GameTime.GetGameTimeMS();
             ginfo.RemoveInviteTime = 0;
             ginfo.Team = leader.GetTeam();
             ginfo.ArenaTeamRating = ArenaRating;
@@ -84,7 +84,7 @@ namespace Game.BattleGrounds
                 index++;
             Log.outDebug(LogFilter.Battleground, "Adding Group to BattlegroundQueue bgTypeId : {0}, bracket_id : {1}, index : {2}", BgTypeId, bracketId, index);
 
-            uint lastOnlineTime = Time.GetMSTime();
+            uint lastOnlineTime = GameTime.GetGameTimeMS();
 
             //announce world (this don't need mutex)
             if (isRated && WorldConfig.GetBoolValue(WorldCfg.ArenaQueueAnnouncerEnable))
@@ -169,7 +169,7 @@ namespace Game.BattleGrounds
 
         void PlayerInvitedToBGUpdateAverageWaitTime(GroupQueueInfo ginfo, BattlegroundBracketId bracket_id)
         {
-            uint timeInQueue = Time.GetMSTimeDiff(ginfo.JoinTime, Time.GetMSTime());
+            uint timeInQueue = Time.GetMSTimeDiff(ginfo.JoinTime, GameTime.GetGameTimeMS());
             uint team_index = TeamId.Alliance;                    //default set to TeamIndex.Alliance - or non rated arenas!
             if (ginfo.ArenaType == 0)
             {
@@ -388,7 +388,7 @@ namespace Game.BattleGrounds
                 if (bg.isArena() && bg.isRated())
                     bg.SetArenaTeamIdForTeam(ginfo.Team, ginfo.ArenaTeamId);
 
-                ginfo.RemoveInviteTime = Time.GetMSTime() + BattlegroundConst.InviteAcceptWaitTime;
+                ginfo.RemoveInviteTime = GameTime.GetGameTimeMS() + BattlegroundConst.InviteAcceptWaitTime;
 
                 // loop through the players
                 foreach (var guid in ginfo.Players.Keys)
@@ -586,7 +586,7 @@ namespace Game.BattleGrounds
             // this could be 2 cycles but i'm checking only first team in queue - it can cause problem -
             // if first is invited to BG and seconds timer expired, but we can ignore it, because players have only 80 seconds to click to enter bg
             // and when they click or after 80 seconds the queue info is removed from queue
-            uint time_before = (uint)(Time.GetMSTime() - WorldConfig.GetIntValue(WorldCfg.BattlegroundPremadeGroupWaitForMatch));
+            uint time_before = (uint)(GameTime.GetGameTimeMS() - WorldConfig.GetIntValue(WorldCfg.BattlegroundPremadeGroupWaitForMatch));
             for (uint i = 0; i < SharedConst.BGTeamsCount; i++)
             {
                 if (!m_QueuedGroups[(int)bracket_id][BattlegroundConst.BgQueuePremadeAlliance + i].Empty())
@@ -881,7 +881,7 @@ namespace Game.BattleGrounds
                 // (after what time the ratings aren't taken into account when making teams) then
                 // the discard time is current_time - time_to_discard, teams that joined after that, will have their ratings taken into account
                 // else leave the discard time on 0, this way all ratings will be discarded
-                int discardTime = (int)(Time.GetMSTime() - Global.BattlegroundMgr.GetRatingDiscardTimer());
+                int discardTime = (int)(GameTime.GetGameTimeMS() - Global.BattlegroundMgr.GetRatingDiscardTimer());
 
                 // we need to find 2 teams which will play next game
                 GroupQueueInfo[] queueArray = new GroupQueueInfo[SharedConst.BGTeamsCount];

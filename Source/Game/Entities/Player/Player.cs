@@ -72,6 +72,8 @@ namespace Game.Entities
             m_logintime = Time.UnixTime;
             m_Last_tick = m_logintime;
 
+            m_timeSyncServer = GameTime.GetGameTimeMS();
+
             m_dungeonDifficulty = Difficulty.Normal;
             m_raidDifficulty = Difficulty.NormalRaid;
             m_legacyRaidDifficulty = Difficulty.Raid10N;
@@ -451,7 +453,7 @@ namespace Game.Entities
             _cinematicMgr.m_cinematicDiff += diff;
             if (_cinematicMgr.m_activeCinematicCameraId != 0 && Time.GetMSTimeDiffToNow(_cinematicMgr.m_lastCinematicCheck) > 500)
             {
-                _cinematicMgr.m_lastCinematicCheck = Time.GetMSTime();
+                _cinematicMgr.m_lastCinematicCheck = GameTime.GetGameTimeMS();
                 _cinematicMgr.UpdateCinematicLocation(diff);
             }
 
@@ -951,7 +953,7 @@ namespace Game.Entities
         {
             m_timeSyncTimer = 0;
             m_timeSyncClient = 0;
-            m_timeSyncServer = Time.GetMSTime();
+            m_timeSyncServer = GameTime.GetGameTimeMS();
         }
         void SendTimeSync()
         {
@@ -963,7 +965,7 @@ namespace Game.Entities
 
             // Schedule next sync in 10 sec
             m_timeSyncTimer = 10000;
-            m_timeSyncServer = Time.GetMSTime();
+            m_timeSyncServer = GameTime.GetGameTimeMS();
 
             if (m_timeSyncQueue.Count > 3)
                 Log.outError(LogFilter.Network, "Not received CMSG_TIME_SYNC_RESP for over 30 seconds from player {0} ({1}), possible cheater", GetGUID().ToString(), GetName());
@@ -5640,8 +5642,8 @@ namespace Game.Entities
             float TimeSpeed = 0.01666667f;
             LoginSetTimeSpeed loginSetTimeSpeed = new LoginSetTimeSpeed();
             loginSetTimeSpeed.NewSpeed = TimeSpeed;
-            loginSetTimeSpeed.GameTime = (uint)Global.WorldMgr.GetGameTime();
-            loginSetTimeSpeed.ServerTime = (uint)Global.WorldMgr.GetGameTime();
+            loginSetTimeSpeed.GameTime = (uint)GameTime.GetGameTime();
+            loginSetTimeSpeed.ServerTime = (uint)GameTime.GetGameTime();
             loginSetTimeSpeed.GameTimeHolidayOffset = 0; // @todo
             loginSetTimeSpeed.ServerTimeHolidayOffset = 0; // @todo
             SendPacket(loginSetTimeSpeed);

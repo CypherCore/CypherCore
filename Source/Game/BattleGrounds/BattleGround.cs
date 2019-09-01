@@ -206,7 +206,7 @@ namespace Game.BattleGrounds
                 var bgPlayer = m_Players.LookupByKey(guid);
                 if (bgPlayer != null)
                 {
-                    if (bgPlayer.OfflineRemoveTime <= Global.WorldMgr.GetGameTime())
+                    if (bgPlayer.OfflineRemoveTime <= GameTime.GetGameTime())
                     {
                         RemovePlayerAtLeave(guid, true, true);// remove player from BG
                         m_OfflineQueue.RemoveAt(0);                 // remove from offline queue
@@ -1113,7 +1113,7 @@ namespace Game.BattleGrounds
 
             // player is correct pointer, it is checked in WorldSession.LogoutPlayer()
             m_OfflineQueue.Add(player.GetGUID());
-            m_Players[guid].OfflineRemoveTime = Global.WorldMgr.GetGameTime() + BattlegroundConst.MaxOfflineTime;
+            m_Players[guid].OfflineRemoveTime = GameTime.GetGameTime() + BattlegroundConst.MaxOfflineTime;
             if (GetStatus() == BattlegroundStatus.InProgress)
             {
                 // drop flag and handle other cleanups

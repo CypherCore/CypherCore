@@ -1729,7 +1729,7 @@ namespace Game.Spells
             if (unit.IsAlive() != target.alive)
                 return;
 
-            if (getState() == SpellState.Delayed && !m_spellInfo.IsPositive() && (Time.GetMSTime() - target.timeDelay) <= unit.m_lastSanctuaryTime)
+            if (getState() == SpellState.Delayed && !m_spellInfo.IsPositive() && (GameTime.GetGameTimeMS() - target.timeDelay) <= unit.m_lastSanctuaryTime)
                 return;                                             // No missinfo in that case
 
             // Get original caster (if exist) and calculate damage/healing from him data

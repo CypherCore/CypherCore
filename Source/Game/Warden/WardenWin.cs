@@ -148,7 +148,7 @@ namespace Game
 
             _initialized = true;
 
-            _previousTimestamp = Time.GetMSTime();
+            _previousTimestamp = GameTime.GetGameTimeMS();
         }
 
         public override void RequestData()
@@ -162,7 +162,7 @@ namespace Game
             if (_otherChecksTodo.Empty())
                 _otherChecksTodo.AddRange(Global.WardenCheckMgr.OtherChecksIdPool);
 
-            _serverTicks = Time.GetMSTime();
+            _serverTicks = GameTime.GetGameTimeMS();
 
             ushort id;
             WardenCheckType type;
@@ -323,7 +323,7 @@ namespace Game
 
                 uint newClientTicks = buff.ReadUInt32();
 
-                uint ticksNow = Time.GetMSTime();
+                uint ticksNow = GameTime.GetGameTimeMS();
                 uint ourTicks = newClientTicks + (ticksNow - _serverTicks);
 
                 Log.outDebug(LogFilter.Warden, "ServerTicks {0}", ticksNow);         // Now

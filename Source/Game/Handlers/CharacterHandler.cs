@@ -663,7 +663,7 @@ namespace Game
 
             AccountDataTimes accountDataTimes = new AccountDataTimes();
             accountDataTimes.PlayerGuid = playerGuid;
-            accountDataTimes.ServerTime = (uint)Global.WorldMgr.GetGameTime();
+            accountDataTimes.ServerTime = (uint)GameTime.GetGameTime();
             for (AccountDataTypes i = 0; i < AccountDataTypes.Max; ++i)
                 accountDataTimes.AccountTimes[(int)i] = (uint)GetAccountData(i).Time;
 
@@ -759,7 +759,7 @@ namespace Game
             stmt.AddValue(0, GetAccountId());
             DB.Login.Execute(stmt);
 
-            pCurrChar.SetInGameTime(Time.GetMSTime());
+            pCurrChar.SetInGameTime(GameTime.GetGameTimeMS());
 
             // announce group about member online (must be after add to player list to receive announce to self)
             Group group = pCurrChar.GetGroup();
