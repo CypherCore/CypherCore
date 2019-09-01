@@ -355,6 +355,7 @@ namespace Game.Entities
 
             UpdateMovementFlags();
             LoadCreaturesAddon();
+            LoadMechanicTemplateImmunity();
             return true;
         }
 
@@ -1693,9 +1694,29 @@ namespace Game.Entities
                 ForcedDespawn(msTimeToDespawn, forceRespawnTimer);
         }
 
-        bool HasMechanicTemplateImmunity(uint mask)
+        void LoadMechanicTemplateImmunity()
         {
-            return (!GetOwnerGUID().IsPlayer() || !IsHunterPet()) && GetCreatureTemplate().MechanicImmuneMask.HasAnyFlag(mask);
+            // uint32 max used for "spell id", the immunity system will not perform SpellInfo checks against invalid spells
+            // used so we know which immunities were loaded from template
+            uint placeholderSpellId = uint.MaxValue;
+
+            // unapply template immunities (in case we're updating entry)
+            for (uint i = 1; i < (int)Mechanics.Max; ++i)
+                ApplySpellImmune(placeholderSpellId, SpellImmunity.Mechanic, i, false);
+
+            // don't inherit immunities for hunter pets
+            if (GetOwnerGUID().IsPlayer() && IsHunterPet())
+                return;
+
+            uint mask = GetCreatureTemplate().MechanicImmuneMask;
+            if (mask != 0)
+            {
+                for (uint i = 0 + 1; i < (int)Mechanics.Max; ++i)
+                {
+                    if ((mask & (1u << ((int)i - 1))) != 0)
+                        ApplySpellImmune(placeholderSpellId, SpellImmunity.Mechanic, i, true);
+                }
+            }
         }
 
         public override bool IsImmunedToSpell(SpellInfo spellInfo, Unit caster)
@@ -1703,12 +1724,6 @@ namespace Game.Entities
             if (spellInfo == null)
                 return false;
 
-            // Creature is immune to main mechanic of the spell
-            if (spellInfo.Mechanic > Mechanics.None && HasMechanicTemplateImmunity(1u << ((int)spellInfo.Mechanic - 1)))
-                return true;
-
-            // This check must be done instead of 'if (GetCreatureTemplate().MechanicImmuneMask & (1 << (spellInfo.Mechanic - 1)))' for not break
-            // the check of mechanic immunity on DB (tested) because GetCreatureTemplate().MechanicImmuneMask and m_spellImmune[IMMUNITY_MECHANIC] don't have same data.
             bool immunedToAllEffects = true;
             foreach (SpellEffectInfo effect in spellInfo.GetEffectsForDifficulty(GetMap().GetDifficultyID()))
             {
@@ -1732,9 +1747,6 @@ namespace Game.Entities
         {
             SpellEffectInfo effect = spellInfo.GetEffect(GetMap().GetDifficultyID(), index);
             if (effect == null)
-                return true;
-
-            if (effect.Mechanic > Mechanics.None && HasMechanicTemplateImmunity(1u << ((int)effect.Mechanic - 1)))
                 return true;
 
             if (GetCreatureTemplate().CreatureType == CreatureType.Mechanical && effect.Effect == SpellEffectName.Heal)
