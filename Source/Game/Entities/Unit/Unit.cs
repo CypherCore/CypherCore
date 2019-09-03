@@ -1155,8 +1155,19 @@ namespace Game.Entities
             }
         }
 
-        public uint GetModelForForm(ShapeShiftForm form)
+        public uint GetModelForForm(ShapeShiftForm form, uint spellId)
         {
+            // Hardcoded cases
+            switch (spellId)
+            {
+                case 7090: // Bear Form
+                    return 29414;
+                case 35200: // Roc Form
+                    return 4877;
+                default:
+                    break;
+            }
+
             Player thisPlayer = ToPlayer();
             if (thisPlayer != null)
             {
@@ -2134,17 +2145,24 @@ namespace Game.Entities
                     }
                 }
             }
-            uint modelId;
+
+            var shapeshiftAura = GetAuraEffectsByType(AuraType.ModShapeshift);
+
             // transform aura was found
             if (handledAura != null)
                 handledAura.HandleEffect(this, AuraEffectHandleModes.SendForClient, true);
             // we've found shapeshift
-            else if ((modelId = GetModelForForm(GetShapeshiftForm())) != 0)
+            else if (!shapeshiftAura.Empty()) // we've found shapeshift
             {
-                if (!ignorePositiveAurasPreventingMounting || !IsDisallowedMountForm(0, GetShapeshiftForm(), modelId))
-                    SetDisplayId(modelId);
-                else
-                    SetDisplayId(GetNativeDisplayId());
+                // only one such aura possible at a time
+                uint modelId = GetModelForForm(GetShapeshiftForm(), shapeshiftAura[0].GetId());
+                if (modelId != 0)
+                {
+                    if (!ignorePositiveAurasPreventingMounting || !IsDisallowedMountForm(0, GetShapeshiftForm(), modelId))
+                        SetDisplayId(modelId);
+                    else
+                        SetDisplayId(GetNativeDisplayId());
+                }
             }
             // no auras found - set modelid to default
             else
