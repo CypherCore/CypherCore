@@ -3121,7 +3121,13 @@ namespace Game.Spells
 
             // save current health state
             float healthPct = target.GetHealthPct();
-            bool alive = target.IsAlive();
+            bool zeroHealth = !target.IsAlive();
+
+            // players in corpse state may mean two different states:
+            /// 1. player just died but did not release (in this case health == 0)
+            /// 2. player is corpse running (ie ghost) (in this case health == 1)
+            if (target.getDeathState() == DeathState.Corpse)
+                zeroHealth = target.GetHealth() == 0;
 
             for (int i = (int)Stats.Strength; i < (int)Stats.Max; i++)
             {
@@ -3147,7 +3153,7 @@ namespace Game.Spells
             // recalculate current HP/MP after applying aura modifications (only for spells with SPELL_ATTR0_UNK4 0x00000010 flag)
             // this check is total bullshit i think
             if (Convert.ToBoolean(GetMiscValueB() & 1 << (int)Stats.Stamina) && m_spellInfo.HasAttribute(SpellAttr0.Ability))
-                target.SetHealth((uint)Math.Max((healthPct * target.GetMaxHealth() * 0.01f), (alive ? 1 : 0)));
+                target.SetHealth(Math.Max(MathFunctions.CalculatePct(target.GetMaxHealth(), healthPct), (zeroHealth ? 0 : 1ul)));
         }
 
         [AuraEffectHandler(AuraType.ModResistanceOfStatPercent)]
