@@ -1432,9 +1432,11 @@ namespace Game.Spells
 
             if (apply)
             {
-                // update active transform spell only when transform or shapeshift not set or not overwriting negative by positive case
-                if (target.GetModelForForm(target.GetShapeshiftForm()) == 0 || !GetSpellInfo().IsPositive())
+                // update active transform spell only when transform not set or not overwriting negative by positive case
+                SpellInfo transformSpellInfo = Global.SpellMgr.GetSpellInfo(target.getTransForm());
+                if (transformSpellInfo == null || !GetSpellInfo().IsPositive() || transformSpellInfo.IsPositive())
                 {
+                    target.setTransForm(GetId());
                     // special case (spell specific functionality)
                     if (GetMiscValue() == 0)
                     {
@@ -1596,11 +1598,6 @@ namespace Game.Spells
                         }
                     }
                 }
-
-                // update active transform spell only when transform or shapeshift not set or not overwriting negative by positive case
-                SpellInfo transformSpellInfo = Global.SpellMgr.GetSpellInfo(target.GetTransForm());
-                if (transformSpellInfo == null || !GetSpellInfo().IsPositive() || transformSpellInfo.IsPositive())
-                    target.setTransForm(GetId());
 
                 // polymorph case
                 if (mode.HasAnyFlag(AuraEffectHandleModes.Real) && target.IsTypeId(TypeId.Player) && target.IsPolymorphed())
