@@ -5957,10 +5957,12 @@ namespace Game.Spells
                     case SpellEffectName.CreateItem:
                     case SpellEffectName.CreateLoot:
                         {
-                            if (!IsTriggered() && effect.ItemType != 0)
+                            // m_targets.GetUnitTarget() means explicit cast, otherwise we dont check for possible equip error
+                            Unit target = m_targets.GetUnitTarget() ? m_targets.GetUnitTarget() : m_caster;
+                            if (target != null && target.GetTypeId() == TypeId.Player && !IsTriggered() && effect.ItemType != 0)
                             {
                                 List<ItemPosCount> dest = new List<ItemPosCount>();
-                                InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, effect.ItemType, 1);
+                                InventoryResult msg = target.ToPlayer().CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, effect.ItemType, 1);
                                 if (msg != InventoryResult.Ok)
                                 {
                                     ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(effect.ItemType);
@@ -5975,8 +5977,11 @@ namespace Game.Spells
                                         SpellEffectInfo efi;
                                         if (!(m_spellInfo.SpellFamilyName == SpellFamilyNames.Mage && m_spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x40000000u)))
                                             return SpellCastResult.TooManyOfItem;
-                                        else if (!player.HasItemCount(effect.ItemType))
-                                            return SpellCastResult.TooManyOfItem;
+                                        else if (!target.ToPlayer().HasItemCount(effect.ItemType))
+                                        {
+                                            player.SendEquipError(msg, null, null, effect.ItemType);
+                                            return SpellCastResult.DontReport;
+                                        }
                                         else if ((efi = GetEffect(1)) != null)
                                             player.CastSpell(m_caster, (uint)efi.CalcValue(), false);        // move this to anywhere
                                         return SpellCastResult.DontReport;
@@ -6009,7 +6014,8 @@ namespace Game.Spells
                             if (targetItem == null)
                                 return SpellCastResult.ItemNotFound;
 
-                            if (targetItem.GetTemplate().GetBaseItemLevel() < m_spellInfo.BaseLevel)
+                            // required level has to be checked also! Exploit fix
+                            if (targetItem.GetTemplate().GetBaseItemLevel() < m_spellInfo.BaseLevel || (targetItem.GetTemplate().GetBaseRequiredLevel() != 0 && (uint)targetItem.GetTemplate().GetBaseRequiredLevel() < m_spellInfo.BaseLevel))
                                 return SpellCastResult.Lowlevel;
 
                             bool isItemUsable = false;
@@ -6074,6 +6080,15 @@ namespace Game.Spells
                                     return SpellCastResult.Error;
                                 if (pEnchant.Flags.HasAnyFlag(EnchantmentSlotMask.CanSouldBound))
                                     return SpellCastResult.NotTradeable;
+                            }
+
+                            // Apply item level restriction if the enchanting spell has max level restrition set
+                            if (m_CastItem != null && m_spellInfo.MaxLevel > 0)
+                            {
+                                if (item.GetTemplate().GetBaseItemLevel() < m_CastItem.GetTemplate().GetBaseRequiredLevel())
+                                    return SpellCastResult.Lowlevel;
+                                if (item.GetTemplate().GetBaseItemLevel() > m_spellInfo.MaxLevel)
+                                    return SpellCastResult.Highlevel;
                             }
                             break;
                         }
