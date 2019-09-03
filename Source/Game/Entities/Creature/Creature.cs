@@ -1635,7 +1635,11 @@ namespace Game.Entities
                 setDeathState(DeathState.JustRespawned);
 
                 CreatureModel display = new CreatureModel(GetNativeDisplayId(), GetNativeDisplayScale(), 1.0f);
-                SetDisplayId(display.CreatureDisplayID, display.DisplayScale);
+                if (Global.ObjectMgr.GetCreatureModelRandomGender(ref display, GetCreatureTemplate()) != null)
+                {
+                    SetDisplayId(display.CreatureDisplayID, display.DisplayScale);
+                    SetNativeDisplayId(display.CreatureDisplayID, display.DisplayScale);
+                }
 
                 GetMotionMaster().InitDefault();
                 //Re-initialize reactstate that could be altered by movementgenerators
