@@ -1080,6 +1080,9 @@ namespace Framework.Database
             // WorldSafeLocs.db2
             PrepareStatement(HotfixStatements.SEL_WORLD_SAFE_LOCS, "SELECT ID, AreaName, LocX, LocY, LocZ, MapID, Facing FROM world_safe_locs ORDER BY ID DESC");
             PrepareStatement(HotfixStatements.SEL_WORLD_SAFE_LOCS_LOCALE, "SELECT ID, AreaName_lang FROM world_safe_locs_locale WHERE locale = ?");
+
+            // WorldStateExpression.db2
+            PrepareStatement(HotfixStatements.SEL_WORLD_STATE_EXPRESSION, "SELECT ID, Expression FROM world_state_expression ORDER BY ID DESC");
         }
     }
 
@@ -1627,6 +1630,8 @@ namespace Framework.Database
 
         SEL_WORLD_SAFE_LOCS,
         SEL_WORLD_SAFE_LOCS_LOCALE,
+
+        SEL_WORLD_STATE_EXPRESSION,
 
         MAX_HOTFIXDATABASE_STATEMENTS
     }

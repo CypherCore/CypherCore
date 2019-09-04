@@ -1421,7 +1421,7 @@ namespace Framework.Constants
     }
 
     // PhaseUseFlags fields in different db2s
-    public  enum PhaseUseFlagsValues : byte
+    public enum PhaseUseFlagsValues : byte
     {
         None = 0x0,
         AlwaysVisible = 0x1,
@@ -1818,5 +1818,85 @@ namespace Framework.Constants
         Dungeon = 4,
         Micro = 5,
         Orphan = 6
+    }
+
+    public enum WorldStateExpressionValueType
+    {
+        Constant = 1,
+        WorldState = 2,
+        Function = 3
+    }
+
+    public enum WorldStateExpressionLogic
+    {
+        None = 0,
+        And = 1,
+        Or = 2,
+        Xor = 3,
+    }
+
+    public enum WorldStateExpressionComparisonType
+    {
+        None = 0,
+        Equal = 1,
+        NotEqual = 2,
+        Less = 3,
+        LessOrEqual = 4,
+        Greater = 5,
+        GreaterOrEqual = 6,
+    }
+
+    public enum WorldStateExpressionOperatorType
+    {
+        None = 0,
+        Sum = 1,
+        Substraction = 2,
+        Multiplication = 3,
+        Division = 4,
+        Remainder = 5,
+    }
+
+    public enum WorldStateExpressionFunctions
+    {
+        None = 0,
+        Random,
+        Month,
+        Day,
+        TimeOfDay,
+        Region,
+        ClockHour,
+        OldDifficultyId,
+        HolidayStart,
+        HolidayLeft,
+        HolidayActive,
+        TimerCurrentTime,
+        WeekNumber,
+        Unk13,
+        Unk14,
+        DifficultyId,
+        WarModeActive,
+        Unk17,
+        Unk18,
+        Unk19,
+        Unk20,
+        Unk21,
+        WorldStateExpression,
+        KeystoneAffix,
+        Unk24,
+        Unk25,
+        Unk26,
+        Unk27,
+        KeystoneLevel,
+        Unk29,
+        Unk30,
+        Unk31,
+        Unk32,
+        MersenneRandom,
+        Unk34,
+        Unk35,
+        Unk36,
+        UiWidgetData,
+
+        Max,
     }
 }

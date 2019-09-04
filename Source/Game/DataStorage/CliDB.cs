@@ -63,6 +63,7 @@ namespace Game.DataStorage
             BattlePetSpeciesStateStorage = DBReader.Read<BattlePetSpeciesStateRecord>("BattlePetSpeciesState.db2", HotfixStatements.SEL_BATTLE_PET_SPECIES_STATE);
             BattlemasterListStorage = DBReader.Read<BattlemasterListRecord>("BattlemasterList.db2", HotfixStatements.SEL_BATTLEMASTER_LIST, HotfixStatements.SEL_BATTLEMASTER_LIST_LOCALE);
             BroadcastTextStorage = DBReader.Read<BroadcastTextRecord>("BroadcastText.db2", HotfixStatements.SEL_BROADCAST_TEXT, HotfixStatements.SEL_BROADCAST_TEXT_LOCALE);
+            CfgRegionsStorage = DBReader.Read<Cfg_RegionsRecord>("Cfg_Regions.db2", HotfixStatements.SEL_CFG_REGIONS);
             CharacterFacialHairStylesStorage = DBReader.Read<CharacterFacialHairStylesRecord>("CharacterFacialHairStyles.db2", HotfixStatements.SEL_CHARACTER_FACIAL_HAIR_STYLES);
             CharBaseSectionStorage = DBReader.Read<CharBaseSectionRecord>("CharBaseSection.db2", HotfixStatements.SEL_CHAR_BASE_SECTION);
             CharSectionsStorage = DBReader.Read<CharSectionsRecord>("CharSections.db2", HotfixStatements.SEL_CHAR_SECTIONS);
@@ -273,6 +274,7 @@ namespace Game.DataStorage
             WorldEffectStorage = DBReader.Read<WorldEffectRecord>("WorldEffect.db2", HotfixStatements.SEL_WORLD_EFFECT);
             WorldMapOverlayStorage = DBReader.Read<WorldMapOverlayRecord>("WorldMapOverlay.db2", HotfixStatements.SEL_WORLD_MAP_OVERLAY);
             WorldSafeLocsStorage = DBReader.Read<WorldSafeLocsRecord>("WorldSafeLocs.db2", HotfixStatements.SEL_WORLD_SAFE_LOCS, HotfixStatements.SEL_WORLD_SAFE_LOCS_LOCALE);
+            WorldStateExpressionStorage = DBReader.Read<WorldStateExpressionRecord>("WorldStateExpression.db2", HotfixStatements.SEL_WORLD_STATE_EXPRESSION);
 
             Global.DB2Mgr.LoadStores();
 
@@ -406,6 +408,7 @@ namespace Game.DataStorage
         public static DB6Storage<BattlePetSpeciesStateRecord> BattlePetSpeciesStateStorage;
         public static DB6Storage<BattlemasterListRecord> BattlemasterListStorage;
         public static DB6Storage<BroadcastTextRecord> BroadcastTextStorage;
+        public static DB6Storage<Cfg_RegionsRecord> CfgRegionsStorage;
         public static DB6Storage<CharacterFacialHairStylesRecord> CharacterFacialHairStylesStorage;
         public static DB6Storage<CharBaseSectionRecord> CharBaseSectionStorage;
         public static DB6Storage<CharSectionsRecord> CharSectionsStorage;
@@ -616,6 +619,7 @@ namespace Game.DataStorage
         public static DB6Storage<WorldEffectRecord> WorldEffectStorage;
         public static DB6Storage<WorldMapOverlayRecord> WorldMapOverlayStorage;
         public static DB6Storage<WorldSafeLocsRecord> WorldSafeLocsStorage;
+        public static DB6Storage<WorldStateExpressionRecord> WorldStateExpressionStorage;
         #endregion
 
         #region GameTables

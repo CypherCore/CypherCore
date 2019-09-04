@@ -26,6 +26,7 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Framework.IO;
 
 namespace Game
 {
@@ -1946,7 +1947,17 @@ namespace Game
             }
 
             // TODO: time condition
-            // TODO (or not): world state expression condition
+
+            if (condition.WorldStateExpressionID != 0)
+            {
+                var worldStateExpression = CliDB.WorldStateExpressionStorage.LookupByKey(condition.WorldStateExpressionID);
+                if (worldStateExpression == null)
+                    return false;
+
+                if (!IsPlayerMeetingExpression(player, worldStateExpression))
+                    return false;
+            }
+
             // TODO: weather condition
 
             if (condition.Achievement[0] != 0)
@@ -2032,6 +2043,228 @@ namespace Game
                 return false;
 
             return true;
+        }
+
+        public static bool IsPlayerMeetingExpression(Player player, WorldStateExpressionRecord expression)
+        {
+            ByteBuffer buffer = new ByteBuffer(expression.Expression.ToByteArray());
+            if (buffer.GetSize() == 0)
+                return false;
+
+            bool enabled = buffer.ReadBool();
+            if (!enabled)
+                return false;
+
+            bool finalResult = EvalRelOp(buffer, player);
+            WorldStateExpressionLogic resultLogic = (WorldStateExpressionLogic)buffer.ReadUInt8();
+
+            while (resultLogic != WorldStateExpressionLogic.None)
+            {
+                bool secondResult = EvalRelOp(buffer, player);
+
+                switch (resultLogic)
+                {
+                    case WorldStateExpressionLogic.And:
+                        finalResult = finalResult && secondResult;
+                        break;
+                    case WorldStateExpressionLogic.Or:
+                        finalResult = finalResult || secondResult;
+                        break;
+                    case WorldStateExpressionLogic.Xor:
+                        finalResult = finalResult != secondResult;
+                        break;
+                    default:
+                        break;
+                }
+
+                if (buffer.GetCurrentStream().Position < buffer.GetSize())
+                    break;
+
+                resultLogic = (WorldStateExpressionLogic)buffer.ReadUInt8();
+            }
+
+            return finalResult;
+        }
+
+        static int EvalSingleValue(ByteBuffer buffer, Player player)
+        {
+            WorldStateExpressionValueType valueType = (WorldStateExpressionValueType)buffer.ReadUInt8();
+            int value = 0;
+
+            switch (valueType)
+            {
+                case WorldStateExpressionValueType.Constant:
+                    {
+                        value = buffer.ReadInt32();
+                        break;
+                    }
+                case WorldStateExpressionValueType.WorldState:
+                    {
+                        uint worldStateId = buffer.ReadUInt32();
+                        value = (int)Global.WorldMgr.getWorldState(worldStateId);
+                        break;
+                    }
+                case WorldStateExpressionValueType.Function:
+                    {
+                        var functionType = (WorldStateExpressionFunctions)buffer.ReadUInt32();
+                        int arg1 = EvalSingleValue(buffer, player);
+                        int arg2 = EvalSingleValue(buffer, player);
+
+                        if (functionType >= WorldStateExpressionFunctions.Max)
+                            return 0;
+
+                        value = WorldStateExpressionFunction(functionType, player, arg1, arg2);
+                        break;
+                    }
+                default:
+                    break;
+            }
+
+            return value;
+        }
+
+        static int WorldStateExpressionFunction(WorldStateExpressionFunctions functionType, Player player, int arg1, int arg2)
+        {
+            switch (functionType)
+            {
+                case WorldStateExpressionFunctions.Random:
+                    return (int)RandomHelper.URand(Math.Min(arg1, arg2), Math.Max(arg1, arg2));
+                case WorldStateExpressionFunctions.Month:
+                    return GameTime.GetDateAndTime().Month + 1;
+                case WorldStateExpressionFunctions.Day:
+                    return GameTime.GetDateAndTime().Day + 1;
+                case WorldStateExpressionFunctions.TimeOfDay:
+                    DateTime localTime = GameTime.GetDateAndTime();
+                    return localTime.Hour * Time.Minute + localTime.Minute;
+                case WorldStateExpressionFunctions.Region:
+                    return Global.WorldMgr.GetRealmId().Region;
+                case WorldStateExpressionFunctions.ClockHour:
+                    int currentHour = GameTime.GetDateAndTime().Hour + 1;
+                    return currentHour <= 12 ? (currentHour != 0 ? currentHour : 12) : currentHour - 12;
+                case WorldStateExpressionFunctions.OldDifficultyId:
+                    var difficulty = CliDB.DifficultyStorage.LookupByKey(player.GetMap().GetDifficultyID());
+                    if (difficulty != null)
+                        return difficulty.OldEnumValue;
+
+                    return -1;
+                case WorldStateExpressionFunctions.HolidayActive:
+                    return Global.GameEventMgr.IsHolidayActive((HolidayIds)arg1) ? 1 : 0;
+                case WorldStateExpressionFunctions.TimerCurrentTime:
+                    return (int)GameTime.GetGameTime();
+                case WorldStateExpressionFunctions.WeekNumber:
+                    long now = GameTime.GetGameTime();
+                    uint raidOrigin = 1135695600;
+                    Cfg_RegionsRecord region = CliDB.CfgRegionsStorage.LookupByKey(Global.WorldMgr.GetRealmId().Region);
+                    if (region != null)
+                        raidOrigin = region.Raidorigin;
+
+                    return (int)(now - raidOrigin) / Time.Week;
+                case WorldStateExpressionFunctions.DifficultyId:
+                    return (int)player.GetMap().GetDifficultyID();
+                case WorldStateExpressionFunctions.WarModeActive:
+                    return player.HasPlayerFlag(PlayerFlags.WarModeActive) ? 1 : 0;
+                case WorldStateExpressionFunctions.WorldStateExpression:
+                    var worldStateExpression = CliDB.WorldStateExpressionStorage.LookupByKey(arg1);
+                    if (worldStateExpression != null)
+                        return IsPlayerMeetingExpression(player, worldStateExpression) ? 1 : 0;
+
+                    return 0;
+                case WorldStateExpressionFunctions.MersenneRandom:
+                    if (arg1 == 1)
+                        return 1;
+
+                    //todo fix me
+                    // init with predetermined seed                      
+                    //std::mt19937 mt(arg2? arg2 : 1);
+                    //value = mt() % arg1 + 1;
+                    return 0;
+                case WorldStateExpressionFunctions.None:
+                case WorldStateExpressionFunctions.HolidayStart:
+                case WorldStateExpressionFunctions.HolidayLeft:
+                case WorldStateExpressionFunctions.Unk13:
+                case WorldStateExpressionFunctions.Unk14:
+                case WorldStateExpressionFunctions.Unk17:
+                case WorldStateExpressionFunctions.Unk18:
+                case WorldStateExpressionFunctions.Unk19:
+                case WorldStateExpressionFunctions.Unk20:
+                case WorldStateExpressionFunctions.Unk21:
+                case WorldStateExpressionFunctions.KeystoneAffix:
+                case WorldStateExpressionFunctions.Unk24:
+                case WorldStateExpressionFunctions.Unk25:
+                case WorldStateExpressionFunctions.Unk26:
+                case WorldStateExpressionFunctions.Unk27:
+                case WorldStateExpressionFunctions.KeystoneLevel:
+                case WorldStateExpressionFunctions.Unk29:
+                case WorldStateExpressionFunctions.Unk30:
+                case WorldStateExpressionFunctions.Unk31:
+                case WorldStateExpressionFunctions.Unk32:
+                case WorldStateExpressionFunctions.Unk34:
+                case WorldStateExpressionFunctions.Unk35:
+                case WorldStateExpressionFunctions.Unk36:
+                case WorldStateExpressionFunctions.UiWidgetData:
+                default:
+                    return 0;
+            }
+        }
+
+        static int EvalValue(ByteBuffer buffer, Player player)
+        {
+            int leftValue = EvalSingleValue(buffer, player);
+
+            WorldStateExpressionOperatorType operatorType = (WorldStateExpressionOperatorType)buffer.ReadUInt8();
+            if (operatorType == WorldStateExpressionOperatorType.None)
+                return leftValue;
+
+            int rightValue = EvalSingleValue(buffer, player);
+
+            switch (operatorType)
+            {
+                case WorldStateExpressionOperatorType.Sum:
+                    return leftValue + rightValue;
+                case WorldStateExpressionOperatorType.Substraction:
+                    return leftValue - rightValue;
+                case WorldStateExpressionOperatorType.Multiplication:
+                    return leftValue * rightValue;
+                case WorldStateExpressionOperatorType.Division:
+                    return rightValue == 0 ? 0 : leftValue / rightValue;
+                case WorldStateExpressionOperatorType.Remainder:
+                    return rightValue == 0 ? 0 : leftValue % rightValue;
+                default:
+                    break;
+            }
+
+            return leftValue;
+        }
+
+        static bool EvalRelOp(ByteBuffer buffer, Player player)
+        {
+            int leftValue = EvalValue(buffer, player);
+
+            WorldStateExpressionComparisonType compareLogic = (WorldStateExpressionComparisonType)buffer.ReadUInt8();
+            if (compareLogic == WorldStateExpressionComparisonType.None)
+                return leftValue != 0;
+
+            int rightValue = EvalValue(buffer, player);
+
+            switch (compareLogic)
+            {
+                case WorldStateExpressionComparisonType.Equal:
+                    return leftValue == rightValue;
+                case WorldStateExpressionComparisonType.NotEqual:
+                    return leftValue != rightValue;
+                case WorldStateExpressionComparisonType.Less:
+                    return leftValue < rightValue;
+                case WorldStateExpressionComparisonType.LessOrEqual:
+                    return leftValue <= rightValue;
+                case WorldStateExpressionComparisonType.Greater:
+                    return leftValue > rightValue;
+                case WorldStateExpressionComparisonType.GreaterOrEqual:
+                    return leftValue >= rightValue;
+                default:
+                    break;
+            }
+
+            return false;
         }
 
         Dictionary<ConditionSourceType, MultiMap<uint, Condition>> ConditionStore = new Dictionary<ConditionSourceType, MultiMap<uint, Condition>>();

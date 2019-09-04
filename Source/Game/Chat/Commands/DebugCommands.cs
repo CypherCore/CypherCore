@@ -640,7 +640,7 @@ namespace Game.Chat
         [Command("raidreset", RBACPermissions.CommandInstanceUnbind)]
         static bool HandleDebugRaidResetCommand(StringArguments args, CommandHandler handler)
         {
-           string map_str = args.NextString();
+            string map_str = args.NextString();
             string difficulty_str = args.NextString();
 
             if (!int.TryParse(map_str, out int map) || map <= 0)
@@ -809,6 +809,82 @@ namespace Game.Chat
             return true;
         }
 
+        [CommandNonGroup("wpgps", RBACPermissions.CommandWpgps)]
+        static bool HandleWPGPSCommand(StringArguments args, CommandHandler handler)
+        {
+            Player player = handler.GetSession().GetPlayer();
+
+            Log.outInfo(LogFilter.SqlDev, "(@PATH, XX, {0}, {1}, {2}, 0, 0, 0, 100, 0),", player.GetPositionX(), player.GetPositionY(), player.GetPositionZ());
+
+            handler.SendSysMessage("Waypoint SQL written to SQL Developer log");
+            return true;
+        }
+
+        [Command("worldstate", RBACPermissions.CommandDebug)]
+        static bool HandleDebugWorldStateCommand(StringArguments args, CommandHandler handler)
+        {
+            if (args.Empty())
+                return false;
+
+            string worldStateIdStr = args.NextString();
+            string valueStr = args.NextString();
+
+            if (worldStateIdStr.IsEmpty())
+                return false;
+
+            Player target = handler.getSelectedPlayerOrSelf();
+            if (target == null)
+            {
+                handler.SendSysMessage(CypherStrings.PlayerNotFound);
+                return false;
+            }
+
+            uint worldStateId = uint.Parse(worldStateIdStr);
+            uint value = valueStr.IsEmpty() ? 0 : uint.Parse(valueStr);
+
+            if (value != 0)
+            {
+                Global.WorldMgr.setWorldState(worldStateId, value);
+                target.SendUpdateWorldState(worldStateId, value);
+            }
+            else
+                handler.SendSysMessage($"Worldstate {worldStateId} actual value : {Global.WorldMgr.getWorldState(worldStateId)}");
+
+            return true;
+        }
+
+        [Command("wsexpression", RBACPermissions.CommandDebug)]
+        static bool HandleDebugWSExpressionCommand(StringArguments args, CommandHandler handler)
+        {
+            if (args.Empty())
+                return false;
+
+            string expressionIdStr = args.NextString();
+
+            if (expressionIdStr.IsEmpty())
+                return false;
+
+            uint expressionId = uint.Parse(expressionIdStr);
+
+            Player target = handler.getSelectedPlayerOrSelf();
+            if (target == null)
+            {
+                handler.SendSysMessage(CypherStrings.PlayerNotFound);
+                return false;
+            }
+
+            WorldStateExpressionRecord wsExpressionEntry = CliDB.WorldStateExpressionStorage.LookupByKey(expressionId);
+            if (wsExpressionEntry == null)
+                return false;
+
+            if (ConditionManager.IsPlayerMeetingExpression(target, wsExpressionEntry))
+                handler.SendSysMessage($"Expression {expressionId} meet");
+            else
+                handler.SendSysMessage($"Expression {expressionId} not meet");
+
+            return true;
+        }
+
         [CommandGroup("send", RBACPermissions.CommandDebugSend)]
         class SendCommands
         {
@@ -948,7 +1024,7 @@ namespace Game.Chat
                 if (args.Empty())
                     return false;
 
-                if (!byte.TryParse(args.NextString(), out byte failNum) ||failNum == 0)
+                if (!byte.TryParse(args.NextString(), out byte failNum) || failNum == 0)
                     return false;
 
                 int failArg1 = args.NextInt32();
@@ -1065,17 +1141,6 @@ namespace Game.Chat
                 handler.SendSysMessage(CypherStrings.YouHearSound, soundId);
                 return true;
             }
-        }
-
-        [CommandNonGroup("wpgps", RBACPermissions.CommandWpgps)]
-        static bool HandleWPGPSCommand(StringArguments args, CommandHandler handler)
-        {
-            Player player = handler.GetSession().GetPlayer();
-
-            Log.outInfo(LogFilter.SqlDev, "(@PATH, XX, {0}, {1}, {2}, 0, 0, 0, 100, 0),", player.GetPositionX(), player.GetPositionY(), player.GetPositionZ());
-
-            handler.SendSysMessage("Waypoint SQL written to SQL Developer log");
-            return true;
         }
     }
 }

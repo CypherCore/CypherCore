@@ -75,4 +75,10 @@ namespace Game.DataStorage
         public ushort MapID;
         public float Facing;
     }
+
+    public sealed class WorldStateExpressionRecord
+    {
+        public uint Id;
+        public string Expression;
+    }
 }

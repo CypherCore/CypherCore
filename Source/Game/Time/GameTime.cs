@@ -12,6 +12,8 @@ public class GameTime
     static DateTime _gameTimeSystemPoint = DateTime.MinValue;
     static DateTime _gameTimeSteadyPoint = DateTime.MinValue;
 
+    static DateTime _dateTime;
+
     public static long GetStartTime()
     {
         return StartTime;
@@ -42,11 +44,18 @@ public class GameTime
         return (uint)(_gameTime - StartTime);
     }
 
+    public static DateTime GetDateAndTime()
+    {
+        return _dateTime;
+    }
+
     public static void UpdateGameTimers()
     {
         _gameTime = Time.UnixTime;
         _gameMSTime = Time.GetMSTime();
         _gameTimeSystemPoint = DateTime.Now;
         _gameTimeSteadyPoint = DateTime.Now;
+
+        _dateTime = Time.UnixTimeToDateTime(_gameTime);
     }
 }

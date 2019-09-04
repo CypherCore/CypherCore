@@ -121,12 +121,6 @@ namespace Game.Network.Packets
                 if (atLoginFlags.HasAnyFlag(AtLoginFlags.Resurrect))
                     playerFlags &= ~PlayerFlags.Ghost;
 
-                if (playerFlags.HasAnyFlag(PlayerFlags.HideHelm))
-                    Flags |= CharacterFlags.HideHelm;
-
-                if (playerFlags.HasAnyFlag(PlayerFlags.HideCloak))
-                    Flags |= CharacterFlags.HideCloak;
-
                 if (playerFlags.HasAnyFlag(PlayerFlags.Ghost))
                     Flags |= CharacterFlags.Ghost;
 
