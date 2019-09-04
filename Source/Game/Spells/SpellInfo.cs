@@ -3648,6 +3648,30 @@ namespace Game.Spells
             return null;
         }
 
+        public bool HasTargetType(Targets target)
+        {
+            foreach (var pair in _effects)
+            {
+                foreach (SpellEffectInfo effect in pair.Value)
+                {
+                    if (effect != null && (effect.TargetA.GetTarget() == target || effect.TargetB.GetTarget() == target))
+                        return true;
+                }
+            }
+            return false;
+        }
+
+        public bool HasTargetType(Difficulty difficulty, Targets target)
+        {
+            var effects = GetEffectsForDifficulty(difficulty);
+            foreach (SpellEffectInfo effect in effects)
+            {
+                if (effect != null && (effect.TargetA.GetTarget() == target || effect.TargetB.GetTarget() == target))
+                    return true;
+            }
+            return false;
+        }
+
         public bool HasAttribute(SpellAttr0 attribute) { return Convert.ToBoolean(Attributes & attribute); }
         public bool HasAttribute(SpellAttr1 attribute) { return Convert.ToBoolean(AttributesEx & attribute); }
         public bool HasAttribute(SpellAttr2 attribute) { return Convert.ToBoolean(AttributesEx2 & attribute); }

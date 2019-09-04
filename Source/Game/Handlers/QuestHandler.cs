@@ -187,9 +187,6 @@ namespace Game
 
                     _player.PlayerTalkClass.SendCloseGossip();
 
-                    if (quest.SourceSpellID > 0)
-                        _player.CastSpell(_player, quest.SourceSpellID, true);
-
                     return;
                 }
             }

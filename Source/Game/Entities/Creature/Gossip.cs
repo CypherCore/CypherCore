@@ -22,8 +22,8 @@ using Game.Conditions;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Network.Packets;
+using Game.Spells;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Game.Misc
 {
@@ -440,8 +440,20 @@ namespace Game.Misc
             packet.QuestFlags[1] = (uint)quest.FlagsEx;
             packet.SuggestedPartyMembers = quest.SuggestedPlayers;
 
-            if (quest.SourceSpellID != 0)
-                packet.LearnSpells.Add(quest.SourceSpellID);
+            // RewardSpell can teach multiple spells in trigger spell effects. But not all effects must be SPELL_EFFECT_LEARN_SPELL. See example spell 33950
+            if (quest.RewardSpell != 0)
+            {
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.RewardSpell);
+                if (spellInfo.HasEffect(SpellEffectName.LearnSpell))
+                {
+                    var effects = spellInfo.GetEffectsForDifficulty(Difficulty.None);
+                    foreach (var spellEffectInfo in effects)
+                    {
+                        if (spellEffectInfo.IsEffect(SpellEffectName.LearnSpell))
+                            packet.LearnSpells.Add(spellEffectInfo.TriggerSpell);
+                    }
+                }
+            }
 
             quest.BuildQuestRewards(packet.Rewards, _session.GetPlayer());
 
