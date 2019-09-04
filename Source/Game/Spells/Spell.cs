@@ -292,17 +292,18 @@ namespace Game.Spells
                 {
                     float speed = m_targets.GetSpeedXY();
                     if (speed > 0.0f)
-                        return (ulong)Math.Floor(m_targets.GetDist2d() / speed * 1000.0f);
+                        return (ulong)(Math.Floor((m_targets.GetDist2d() / speed + m_spellInfo.LaunchDelay) * 1000.0f));
                 }
+                else if (m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
+                    return (ulong)(Math.Floor((m_spellInfo.Speed + m_spellInfo.LaunchDelay) * 1000.0f));
                 else if (m_spellInfo.Speed > 0.0f)
                 {
                     // We should not subtract caster size from dist calculation (fixes execution time desync with animation on client, eg. Malleable Goo cast by PP)
                     float dist = m_caster.GetExactDist(m_targets.GetDstPos());
-                    if (!m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
-                        return (ulong)Math.Floor(dist / m_spellInfo.Speed * 1000.0f);
-                    else
-                        return (ulong)(m_spellInfo.Speed * 1000.0f);
+                    return (ulong)(Math.Floor((dist / m_spellInfo.Speed + m_spellInfo.LaunchDelay) * 1000.0f));
                 }
+
+                return (ulong)(Math.Floor(m_spellInfo.LaunchDelay * 1000.0f));
             }
 
             return 0;
@@ -1554,19 +1555,20 @@ namespace Game.Spells
 
             // Spell have speed - need calculate incoming time
             // Incoming time is zero for self casts. At least I think so.
-            if (m_spellInfo.Speed > 0.0f && m_caster != target)
+            if (m_caster != target)
             {
-                // calculate spell incoming interval
-                // @todo this is a hack
-                float dist = m_caster.GetDistance(target.GetPositionX(), target.GetPositionY(), target.GetPositionZ());
+                float hitDelay = m_spellInfo.LaunchDelay;
+                if (m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
+                    hitDelay += m_spellInfo.Speed;
+                else if (m_spellInfo.Speed > 0.0f)
+                {
+                    // calculate spell incoming interval
+                    /// @todo this is a hack
+                    float dist = Math.Max(m_caster.GetDistance(target.GetPositionX(), target.GetPositionY(), target.GetPositionZ()), 5.0f);
+                    hitDelay += dist / m_spellInfo.Speed;
+                }
 
-                if (dist < 5.0f)
-                    dist = 5.0f;
-
-                if (!(m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation)))
-                    targetInfo.timeDelay = (ulong)Math.Floor((dist / m_spellInfo.Speed) * 1000.0f);
-                else
-                    targetInfo.timeDelay = (ulong)(m_spellInfo.Speed * 1000.0f);
+                targetInfo.timeDelay = (ulong)Math.Floor(hitDelay * 1000.0f);
             }
             else
                 targetInfo.timeDelay = 0L;
@@ -1626,23 +1628,22 @@ namespace Game.Spells
             target.processed = false;                              // Effects not apply on target
 
             // Spell have speed - need calculate incoming time
-            if (m_spellInfo.Speed > 0.0f)
+            if (m_caster != go)
             {
-                // calculate spell incoming interval
-                float dist = m_caster.GetDistance(go.GetPositionX(), go.GetPositionY(), go.GetPositionZ());
-                if (dist < 5.0f)
-                    dist = 5.0f;
+                float hitDelay = m_spellInfo.LaunchDelay;
+                if (m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
+                    hitDelay += m_spellInfo.Speed;
+                else if (m_spellInfo.Speed > 0.0f)
+                {
+                    // calculate spell incoming interval
+                    float dist = Math.Max(m_caster.GetDistance(go.GetPositionX(), go.GetPositionY(), go.GetPositionZ()), 5.0f);
+                    hitDelay += dist / m_spellInfo.Speed;
+                }
 
-                if (!m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
-                    target.timeDelay = (ulong)Math.Floor(dist / m_spellInfo.Speed * 1000.0f);
-                else
-                    target.timeDelay = (ulong)(m_spellInfo.Speed * 1000.0f);
-
-                if (m_delayMoment == 0 || m_delayMoment > target.timeDelay)
-                    m_delayMoment = target.timeDelay;
+                target.timeDelay = (ulong)Math.Floor(hitDelay * 1000.0f);
             }
             else
-                target.timeDelay = 0L;
+                target.timeDelay = 0UL;
 
             // Add target to list
             m_UniqueGOTargetInfo.Add(target);
@@ -1982,7 +1983,7 @@ namespace Game.Spells
                 return SpellMissInfo.Evade;
 
             // For delayed spells immunity may be applied between missile launch and hit - check immunity for that case
-            if (m_spellInfo.Speed != 0.0f && unit.IsImmunedToSpell(m_spellInfo, m_caster))
+            if (m_spellInfo.HasHitDelay() && unit.IsImmunedToSpell(m_spellInfo, m_caster))
                 return SpellMissInfo.Immune;
 
             // disable effects to which unit is immune
@@ -2013,7 +2014,7 @@ namespace Game.Spells
             if (m_caster != unit)
             {
                 // Recheck  UNIT_FLAG_NON_ATTACKABLE for delayed spells
-                if (m_spellInfo.Speed > 0.0f && unit.HasUnitFlag(UnitFlags.NonAttackable) && unit.GetCharmerOrOwnerGUID() != m_caster.GetGUID())
+                if (m_spellInfo.HasHitDelay() && unit.HasUnitFlag(UnitFlags.NonAttackable) && unit.GetCharmerOrOwnerGUID() != m_caster.GetGUID())
                     return SpellMissInfo.Evade;
 
                 if (m_caster._IsValidAttackTarget(unit, m_spellInfo))
@@ -2023,7 +2024,7 @@ namespace Game.Spells
                     // for delayed spells ignore negative spells (after duel end) for friendly targets
                     // @todo this cause soul transfer bugged
                     // 63881 - Malady of the Mind jump spell (Yogg-Saron)
-                    if (m_spellInfo.Speed > 0.0f && unit.IsTypeId(TypeId.Player) && !m_spellInfo.IsPositive() && m_spellInfo.Id != 63881)
+                    if (m_spellInfo.HasHitDelay() && unit.IsTypeId(TypeId.Player) && !m_spellInfo.IsPositive() && m_spellInfo.Id != 63881)
                         return SpellMissInfo.Evade;
 
                     // assisting case, healing and resurrection
@@ -2738,7 +2739,7 @@ namespace Game.Spells
             SendSpellGo();
 
             // Okay, everything is prepared. Now we need to distinguish between immediate and evented delayed spells
-            if ((m_spellInfo.Speed > 0.0f && !m_spellInfo.IsChanneled()) || m_spellInfo.HasAttribute(SpellAttr4.Unk4))
+            if ((m_spellInfo.HasHitDelay() && !m_spellInfo.IsChanneled()) || m_spellInfo.HasAttribute(SpellAttr4.Unk4))
             {
                 // Remove used for cast item if need (it can be already NULL after TakeReagents call
                 // in case delayed spell remove item at cast delay start
@@ -6524,7 +6525,7 @@ namespace Game.Spells
         bool IsNeedSendToClient()
         {
             return m_SpellVisual != 0 || m_spellInfo.IsChanneled() ||
-                m_spellInfo.HasAttribute(SpellAttr8.AuraSendAmount) || m_spellInfo.Speed > 0.0f || (m_triggeredByAuraSpell == null && !IsTriggered());
+                m_spellInfo.HasAttribute(SpellAttr8.AuraSendAmount) || m_spellInfo.HasHitDelay() || (m_triggeredByAuraSpell == null && !IsTriggered());
         }
 
         bool HaveTargetsForEffect(byte effect)

@@ -4114,10 +4114,21 @@ namespace Game.Spells
                 if (m_preGeneratedPath.GetPathType() == PathType.Blank)
                 {
                     Position pos = unitTarget.GetFirstCollisionPosition(unitTarget.GetObjectSize(), unitTarget.GetRelativeAngle(m_caster.GetPosition()));
+                    if (m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
+                        speed = pos.GetExactDist(m_caster) / speed;
+
                     m_caster.GetMotionMaster().MoveCharge(pos.posX, pos.posY, pos.posZ, speed, EventId.Charge, false, unitTarget, spellEffectExtraData);
                 }
                 else
+                {
+                    if (m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
+                    {
+                        Vector3 pos = m_preGeneratedPath.GetActualEndPosition();
+                        speed = new Position(pos.X, pos.Y, pos.Z).GetExactDist(m_caster) / speed;
+                    }
+
                     m_caster.GetMotionMaster().MoveCharge(m_preGeneratedPath, speed, unitTarget, spellEffectExtraData);
+                }
             }
 
             if (effectHandleMode == SpellEffectHandleMode.HitTarget)

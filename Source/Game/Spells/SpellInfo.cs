@@ -78,6 +78,7 @@ namespace Game.Spells
                 RangeIndex = _misc.RangeIndex;
                 RangeEntry = CliDB.SpellRangeStorage.LookupByKey(_misc.RangeIndex);
                 Speed = _misc.Speed;
+                LaunchDelay = _misc.LaunchDelay;
                 SchoolMask = (SpellSchoolMask)_misc.SchoolMask;
                 AttributesCu = 0;
 
@@ -634,6 +635,11 @@ namespace Game.Spells
         public bool HasInitialAggro()
         {
             return !(HasAttribute(SpellAttr1.NoThreat) || HasAttribute(SpellAttr3.NoInitialAggro));
+        }
+
+        public bool HasHitDelay()
+        {
+            return Speed > 0.0f || LaunchDelay > 0.0f;
         }
 
         public WeaponAttackType GetAttackType()
@@ -3751,6 +3757,7 @@ namespace Game.Spells
         public uint RangeIndex { get; set; }
         public SpellRangeRecord RangeEntry { get; set; }
         public float Speed { get; set; }
+        public float LaunchDelay { get; set; }
         public uint StackAmount { get; set; }
         public uint[] Totem = new uint[SpellConst.MaxTotems];
         public int[] Reagent = new int[SpellConst.MaxReagents];

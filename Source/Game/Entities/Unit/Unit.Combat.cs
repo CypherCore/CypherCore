@@ -723,10 +723,16 @@ namespace Game.Entities
                     if (spellInfo.CheckExplicitTarget(this, magnet) == SpellCastResult.SpellCastOk && _IsValidAttackTarget(magnet, spellInfo))
                     {
                         // @todo handle this charge drop by proc in cast phase on explicit target
-                        if (spellInfo.Speed > 0.0f)
+                        if (spellInfo.HasHitDelay())
                         {
                             // Set up missile speed based delay
-                            uint delay = (uint)Math.Floor(Math.Max(victim.GetDistance(this), 5.0f) / spellInfo.Speed * 1000.0f);
+                            float hitDelay = spellInfo.LaunchDelay;
+                            if (spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
+                                hitDelay += spellInfo.Speed;
+                            else if (spellInfo.Speed > 0.0f)
+                                hitDelay += Math.Max(victim.GetDistance(this), 5.0f) / spellInfo.Speed;
+
+                            uint delay = (uint)Math.Floor(hitDelay * 1000.0f);
                             // Schedule charge drop
                             eff.GetBase().DropChargeDelayed(delay, AuraRemoveMode.Expire);
                         }
