@@ -122,7 +122,7 @@ namespace Game.Network.Packets
                 MissingScenarioPOIs[i] = _worldPacket.ReadInt32();
         }
 
-        public Array<int> MissingScenarioPOIs = new Array<int>(35);
+        public Array<int> MissingScenarioPOIs = new Array<int>(50);
     }
 
     class ScenarioPOIs : ServerPacket
