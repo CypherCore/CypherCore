@@ -302,6 +302,8 @@ namespace Game.Spells
                     float dist = m_caster.GetExactDist(m_targets.GetDstPos());
                     return (ulong)(Math.Floor((dist / m_spellInfo.Speed + launchDelay) * 1000.0f));
                 }
+
+                return (ulong)Math.Floor(launchDelay * 1000.0f);
             }
 
             return 0;
@@ -2912,6 +2914,9 @@ namespace Game.Spells
                     }
                 }
             }
+
+            if (single_missile && t_offset == 0)
+                return m_delayMoment;
 
             if (m_caster.IsTypeId(TypeId.Player))
                 m_caster.ToPlayer().SetSpellModTakingSpell(this, true);
