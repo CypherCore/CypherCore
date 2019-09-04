@@ -1247,6 +1247,22 @@ namespace Game.AI
                         }
                         break;
                     }
+                case SmartActions.SetMovementSpeed:
+                    {
+                        if (e.Action.movementSpeed.movementType >= (int)MovementGeneratorType.Max)
+                        {
+                            Log.outError(LogFilter.Sql, $"SmartAIMgr: Entry {e.entryOrGuid} SourceType {e.GetScriptType()} Event {e.event_id} Action {e.GetActionType()} uses invalid movementType {e.Action.movementSpeed.movementType}, skipped.");
+                            return false;
+                        }
+
+                        if (e.Action.movementSpeed.speedInteger == 0 && e.Action.movementSpeed.speedFraction == 0)
+                        {
+                            Log.outError(LogFilter.Sql, $"SmartAIMgr: Entry {e.entryOrGuid} SourceType {e.GetScriptType()} Event {e.event_id} Action {e.GetActionType()} uses speed 0, skipped.");
+                            return false;
+                        }
+
+                        break;
+                    }
                 case SmartActions.StartClosestWaypoint:
                 case SmartActions.Follow:
                 case SmartActions.SetOrientation:
@@ -2326,6 +2342,9 @@ namespace Game.AI
         public Scene scene;
 
         [FieldOffset(4)]
+        public MovementSpeed movementSpeed;
+
+        [FieldOffset(4)]
         public Raw raw;
 
         #region Stucts
@@ -2815,6 +2834,12 @@ namespace Game.AI
         public struct Scene
         {
             public uint sceneId;
+        }
+        public struct MovementSpeed
+        {
+            public uint movementType;
+            public uint speedInteger;
+            public uint speedFraction;
         }
         public struct Raw
         {

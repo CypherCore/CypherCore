@@ -2624,6 +2624,22 @@ namespace Game.AI
 
                         break;
                     }
+                case SmartActions.SetMovementSpeed:
+                    {
+                        var targets = GetTargets(e, unit);
+                        if (targets.Empty())
+                            break;
+
+                        uint speedInteger = e.Action.movementSpeed.speedInteger;
+                        uint speedFraction = e.Action.movementSpeed.speedFraction;
+                        float speed = (float)((float)speedInteger + (float)speedFraction / Math.Pow(10, Math.Floor(Math.Log10((float)(speedFraction != 0 ? speedFraction : 1)) + 1)));
+
+                        foreach (WorldObject target in targets)
+                            if (IsCreature(target))
+                                me.SetSpeed((UnitMoveType)e.Action.movementSpeed.movementType, speed);
+
+                        break;
+                    }
                 default:
                     Log.outError(LogFilter.Sql, "SmartScript.ProcessAction: Entry {0} SourceType {1}, Event {2}, Unhandled Action type {3}", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType());
                     break;

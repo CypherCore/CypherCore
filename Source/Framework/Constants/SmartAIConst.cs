@@ -360,8 +360,9 @@ namespace Framework.Constants
         PlayAnimkit = 128,
         ScenePlay = 129,    // sceneId
         SceneCancel = 130,    // sceneId
-        // 131 - 135 : 3.3.5 reserved
+        // 131 - 134 : 3.3.5 reserved
         PlayCinematic = 135,    // reserved for future uses
+        SetMovementSpeed = 136,    // movementType, speedInteger, speedFraction
         End = 131
     }
 
