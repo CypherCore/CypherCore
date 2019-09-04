@@ -2435,7 +2435,7 @@ namespace Game.Entities
                         case SpellEffectName.Jump:
                         case SpellEffectName.JumpDest:
                         case SpellEffectName.LeapBack:
-                            if (spellInfo.Speed == 0 && spellInfo.SpellFamilyName == 0)
+                            if (spellInfo.Speed == 0 && spellInfo.SpellFamilyName == 0 && !spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
                                 spellInfo.Speed = MotionMaster.SPEED_CHARGE;
                             break;
                     }

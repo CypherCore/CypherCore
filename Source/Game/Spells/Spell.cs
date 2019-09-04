@@ -279,12 +279,12 @@ namespace Game.Spells
                     }
                 }
             }
-            ulong dstDelay = CalculateDelayMomentForDst();
+            ulong dstDelay = CalculateDelayMomentForDst(m_spellInfo.LaunchDelay);
             if (dstDelay != 0)
                 m_delayMoment = dstDelay;
         }
 
-        ulong CalculateDelayMomentForDst()
+        ulong CalculateDelayMomentForDst(float launchDelay)
         {
             if (m_targets.HasDst())
             {
@@ -292,18 +292,16 @@ namespace Game.Spells
                 {
                     float speed = m_targets.GetSpeedXY();
                     if (speed > 0.0f)
-                        return (ulong)(Math.Floor((m_targets.GetDist2d() / speed + m_spellInfo.LaunchDelay) * 1000.0f));
+                        return (ulong)(Math.Floor((m_targets.GetDist2d() / speed + launchDelay) * 1000.0f));
                 }
                 else if (m_spellInfo.HasAttribute(SpellAttr9.SpecialDelayCalculation))
-                    return (ulong)(Math.Floor((m_spellInfo.Speed + m_spellInfo.LaunchDelay) * 1000.0f));
+                    return (ulong)(Math.Floor((m_spellInfo.Speed + launchDelay) * 1000.0f));
                 else if (m_spellInfo.Speed > 0.0f)
                 {
                     // We should not subtract caster size from dist calculation (fixes execution time desync with animation on client, eg. Malleable Goo cast by PP)
                     float dist = m_caster.GetExactDist(m_targets.GetDstPos());
-                    return (ulong)(Math.Floor((dist / m_spellInfo.Speed + m_spellInfo.LaunchDelay) * 1000.0f));
+                    return (ulong)(Math.Floor((dist / m_spellInfo.Speed + launchDelay) * 1000.0f));
                 }
-
-                return (ulong)(Math.Floor(m_spellInfo.LaunchDelay * 1000.0f));
             }
 
             return 0;
@@ -311,7 +309,7 @@ namespace Game.Spells
 
         public void RecalculateDelayMomentForDst()
         {
-            m_delayMoment = CalculateDelayMomentForDst();
+            m_delayMoment = CalculateDelayMomentForDst(0.0f);
             m_caster.m_Events.ModifyEventTime(_spellEvent, GetDelayStart() + m_delayMoment);
         }
 
@@ -1645,6 +1643,10 @@ namespace Game.Spells
             else
                 target.timeDelay = 0UL;
 
+            // Calculate minimum incoming time
+            if (target.timeDelay != 0 && (m_delayMoment == 0 || m_delayMoment > target.timeDelay))
+                m_delayMoment = target.timeDelay;
+
             // Add target to list
             m_UniqueGOTargetInfo.Add(target);
         }
@@ -2733,7 +2735,11 @@ namespace Game.Spells
 
             PrepareScriptHitHandlers();
 
-            HandleLaunchPhase();
+            if (m_spellInfo.LaunchDelay == 0)
+            {
+                HandleLaunchPhase();
+                m_launchHandled = true;
+            }
 
             // we must send smsg_spell_go packet before m_castItem delete in TakeCastItem()...
             SendSpellGo();
@@ -2883,20 +2889,40 @@ namespace Game.Spells
                 return 0;
             }
 
+            bool single_missile = m_targets.HasDst();
+            ulong next_time = 0;
+
+            if (!m_launchHandled)
+            {
+                ulong launchMoment = (ulong)Math.Floor(m_spellInfo.LaunchDelay * 1000.0f);
+                if (launchMoment > t_offset)
+                    return launchMoment;
+
+                HandleLaunchPhase();
+                m_launchHandled = true;
+                if (m_delayMoment > t_offset)
+                {
+                    if (single_missile)
+                        return m_delayMoment;
+
+                    next_time = m_delayMoment;
+                    if ((m_UniqueTargetInfo.Count > 2 || (m_UniqueTargetInfo.Count == 1 && m_UniqueTargetInfo[0].targetGUID == m_caster.GetGUID())) || !m_UniqueGOTargetInfo.Empty())
+                    {
+                        t_offset = 0; // if LaunchDelay was present then the only target that has timeDelay = 0 is m_caster - and that is the only target we want to process now
+                    }
+                }
+            }
+
             if (m_caster.IsTypeId(TypeId.Player))
                 m_caster.ToPlayer().SetSpellModTakingSpell(this, true);
 
-            ulong next_time = 0;
-
             PrepareTargetProcessing();
 
-            if (!m_immediateHandled)
+            if (!m_immediateHandled && t_offset != 0)
             {
                 _handle_immediate_phase();
                 m_immediateHandled = true;
             }
-
-            bool single_missile = m_targets.HasDst();
 
             // now recheck units targeting correctness (need before any effects apply to prevent adding immunity at first effect not allow apply second spell effect and similar cases)
             foreach (var ihit in m_UniqueTargetInfo)
@@ -7274,6 +7300,7 @@ namespace Game.Spells
         // Delayed spells system
         ulong m_delayStart;                                // time of spell delay start, filled by event handler, zero = just started
         ulong m_delayMoment;                               // moment of next delay call, used internally
+        bool m_launchHandled;                               // were launch actions handled
         bool m_immediateHandled;                            // were immediate actions handled? (used by delayed spells only)
 
         // These vars are used in both delayed spell system and modified immediate spell system
@@ -7809,11 +7836,12 @@ namespace Game.Spells
                             // delaying had just started, record the moment
                             m_Spell.SetDelayStart(e_time);
                             // handle effects on caster if the spell has travel time but also affects the caster in some way
-                            if (!m_Spell.m_targets.HasDst())
-                            {
-                                ulong n_offset = m_Spell.handle_delayed(0);
+                            ulong n_offset = m_Spell.handle_delayed(0);
+                            if (m_Spell.m_spellInfo.LaunchDelay != 0)
+                                Cypher.Assert(n_offset == (ulong)Math.Floor(m_Spell.m_spellInfo.LaunchDelay * 1000.0f));
+                            else
                                 Cypher.Assert(n_offset == m_Spell.GetDelayMoment());
-                            }
+
                             // re-plan the event for the delay moment
                             m_Spell.GetCaster().m_Events.AddEvent(this, e_time + m_Spell.GetDelayMoment(), false);
                             return false;                               // event not complete
