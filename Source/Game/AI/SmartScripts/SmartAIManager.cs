@@ -430,6 +430,16 @@ namespace Game.AI
             return true;
         }
 
+        bool IsSpellVisualKitValid(SmartScriptHolder e, uint entry)
+        {
+            if (!CliDB.SpellVisualKitStorage.ContainsKey(entry))
+            {
+                Log.outError(LogFilter.Sql, $"SmartAIMgr: Entry {e.entryOrGuid} SourceType {e.GetScriptType()} Event {e.event_id} Action {e.GetActionType()} uses non-existent SpellVisualKit entry {entry}, skipped.");
+                return false;
+            }
+            return true;
+        }
+
         bool IsEventValid(SmartScriptHolder e)
         {
             if (e.Event.type >= SmartEvents.End)
@@ -861,6 +871,10 @@ namespace Game.AI
                             e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.Action.animKit.type);
                         return false;
                     }
+                    break;
+                case SmartActions.PlaySpellVisualKit:
+                    if (e.Action.spellVisualKit.spellVisualKitId != 0 && !IsSpellVisualKitValid(e, e.Action.spellVisualKit.spellVisualKitId))
+                        return false;
                     break;
                 case SmartActions.FailQuest:
                 case SmartActions.OfferQuest:
@@ -2345,6 +2359,9 @@ namespace Game.AI
         public MovementSpeed movementSpeed;
 
         [FieldOffset(4)]
+        public SpellVisualKit spellVisualKit;
+
+        [FieldOffset(4)]
         public Raw raw;
 
         #region Stucts
@@ -2840,6 +2857,12 @@ namespace Game.AI
             public uint movementType;
             public uint speedInteger;
             public uint speedFraction;
+        }
+        public struct SpellVisualKit
+        {
+            public uint spellVisualKitId;
+            public uint kitType;
+            public uint duration;
         }
         public struct Raw
         {

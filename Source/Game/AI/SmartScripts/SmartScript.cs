@@ -2640,6 +2640,23 @@ namespace Game.AI
 
                         break;
                     }
+                case SmartActions.PlaySpellVisualKit:
+                    {
+                        var targets = GetTargets(e, unit);
+                        if (targets.Empty())
+                            break;
+
+                        foreach (var obj in targets)
+                        {
+                            if (IsUnit(obj))
+                            {
+                                obj.ToUnit().SendPlaySpellVisualKit(e.Action.spellVisualKit.spellVisualKitId, e.Action.spellVisualKit.kitType, e.Action.spellVisualKit.duration);
+
+                                Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.ProcessAction:: SMART_ACTION_PLAY_SPELL_VISUAL_KIT: target: {obj.GetName()} ({obj.GetGUID().ToString()}), SpellVisualKit: {e.Action.spellVisualKit.spellVisualKitId}");
+                            }
+                        }
+                        break;
+                    }
                 default:
                     Log.outError(LogFilter.Sql, "SmartScript.ProcessAction: Entry {0} SourceType {1}, Event {2}, Unhandled Action type {3}", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType());
                     break;

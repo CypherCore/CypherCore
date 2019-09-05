@@ -363,7 +363,8 @@ namespace Framework.Constants
         // 131 - 134 : 3.3.5 reserved
         PlayCinematic = 135,    // reserved for future uses
         SetMovementSpeed = 136,    // movementType, speedInteger, speedFraction
-        End = 131
+        PlaySpellVisualKit = 137, // spellVisualKitId, kitType (unknown values, copypaste from packet dumps), duration
+        End = 138
     }
 
     public enum SmartTargets

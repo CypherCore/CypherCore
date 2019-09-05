@@ -527,6 +527,16 @@ namespace Game.DataStorage
         public uint[] Totem = new uint[SpellConst.MaxTotems];
     }
 
+    public sealed class SpellVisualKitRecord
+    {
+        public uint Id;
+        public int Flags;
+        public sbyte FallbackPriority;
+        public uint FallbackSpellVisualKitId;
+        public ushort DelayMin;
+        public ushort DelayMax;
+    }
+
     public sealed class SpellXSpellVisualRecord
     {
         public uint Id;

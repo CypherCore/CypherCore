@@ -963,6 +963,10 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_SPELL_TOTEMS, "SELECT ID, SpellID, RequiredTotemCategoryID1, RequiredTotemCategoryID2, Totem1, Totem2" +        
                 " FROM spell_totems ORDER BY ID DESC");
 
+            // SpellVisualKit.db2
+            PrepareStatement(HotfixStatements.SEL_SPELL_VISUAL_KIT, "SELECT ID, Flags, FallbackPriority, FallbackSpellVisualKitId, DelayMin, DelayMax" +
+                " FROM spell_visual_kit ORDER BY ID DESC");
+
             // SpellXSpellVisual.db2
             PrepareStatement(HotfixStatements.SEL_SPELL_X_SPELL_VISUAL, "SELECT ID, DifficultyID, SpellVisualID, Probability, Flags, Priority, SpellIconFileID, " +        
                 "ActiveIconFileID, ViewerUnitConditionID, ViewerPlayerConditionID, CasterUnitConditionID, CasterPlayerConditionID, SpellID" +        
@@ -1568,6 +1572,8 @@ namespace Framework.Database
         SEL_SPELL_TARGET_RESTRICTIONS,
 
         SEL_SPELL_TOTEMS,
+
+        SEL_SPELL_VISUAL_KIT,
 
         SEL_SPELL_X_SPELL_VISUAL,
 
