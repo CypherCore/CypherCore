@@ -64,21 +64,22 @@ namespace Game.Entities
         }
         public static ObjectGuid Create(HighGuid type, uint mapId, uint entry, ulong counter)
         {
-            if (type == HighGuid.Transport)
-                return ObjectGuid.Empty;
-
             return MapSpecificCreate(type, 0, (ushort)mapId, 0, entry, counter);
         }
-
-        public static ObjectGuid Create(HighGuid type, SpellCastSource subType, uint mapId, uint entry, ulong counter) { return MapSpecificCreate(type, (byte)subType, (ushort)mapId, 0, entry, counter); }
-
+        public static ObjectGuid Create(HighGuid type, SpellCastSource subType, uint mapId, uint entry, ulong counter)
+        {
+            return MapSpecificCreate(type, (byte)subType, (ushort)mapId, 0, entry, counter);
+        }
         static ObjectGuid GlobalCreate(HighGuid type, ulong counter)
         {
-            return new ObjectGuid(((ulong)type << 58), counter);
+            return new ObjectGuid((ulong)type << 58, counter);
         }
         static ObjectGuid RealmSpecificCreate(HighGuid type, ulong counter)
         {
-            return new ObjectGuid(((ulong)type << 58 | (ulong)Global.WorldMgr.GetRealm().Id.Realm << 42), counter);
+            if (type == HighGuid.Transport)
+                return new ObjectGuid((ulong)type << 58 | (counter << 38), 0);
+            else
+                return new ObjectGuid((ulong)type << 58 | (ulong)Global.WorldMgr.GetRealm().Id.Realm << 42, counter);
         }
         static ObjectGuid MapSpecificCreate(HighGuid type, byte subType, ushort mapId, uint serverId, uint entry, ulong counter)
         {
@@ -122,7 +123,20 @@ namespace Game.Entities
         uint GetServerId() { return (uint)((_low >> 40) & 0x1FFF); }
         uint GetMapId() { return (uint)((_high >> 29) & 0x1FFF); }
         public uint GetEntry() { return (uint)((_high >> 6) & 0x7FFFFF); }
-        public ulong GetCounter() { return _low & 0xFFFFFFFFFF; }
+        public ulong GetCounter()
+        {
+            if (GetHigh() == HighGuid.Transport)
+                return (_high >> 38) & 0xFFFFF;
+            else
+                return _low & 0xFFFFFFFFFF;
+        }
+        public static ulong GetMaxCounter(HighGuid highGuid)
+        {
+            if (highGuid == HighGuid.Transport)
+                return 0xFFFFF;
+            else
+                return 0xFFFFFFFFFF;
+        }
 
         public bool IsEmpty() { return _low == 0 && _high == 0; }
         public bool IsCreature() { return GetHigh() == HighGuid.Creature; }
@@ -324,7 +338,7 @@ namespace Game.Entities
 
         public ulong Generate()
         {
-            if (_nextGuid >= ulong.MaxValue - 1)
+            if (_nextGuid >= ObjectGuid.GetMaxCounter(_highGuid) - 1)
                 HandleCounterOverflow();
             return _nextGuid++;
         }
