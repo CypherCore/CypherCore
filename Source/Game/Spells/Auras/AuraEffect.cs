@@ -2330,6 +2330,23 @@ namespace Game.Spells
             target.SetCanTurnWhileFalling(apply);
         }
 
+        [AuraEffectHandler(AuraType.IgnoreMovementForces)]
+        void HandleIgnoreMovementForces(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
+                return;
+
+            Unit target = aurApp.GetTarget();
+            if (!apply)
+            {
+                // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
+                if (target.HasAuraType(GetAuraType()))
+                    return;
+            }
+
+            target.SetIgnoreMovementForces(apply);
+        }
+
         /****************************/
         /***        THREAT        ***/
         /****************************/
@@ -2720,6 +2737,15 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             target.UpdateSpeed(UnitMoveType.Run);
+        }
+
+        [AuraEffectHandler(AuraType.ModMovementForceMagnitude)]
+        void HandleModMovementForceMagnitude(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
+                return;
+
+            aurApp.GetTarget().UpdateMovementForcesModMagnitude();
         }
 
         /*********************************************************/
@@ -6027,7 +6053,7 @@ namespace Game.Spells
                         uint summonEntry = (uint)spellEffect.MiscValue;
                         if (summonEntry != 0)
                             summonedEntries.Add(summonEntry);
-                        
+
                     }
                 }
 

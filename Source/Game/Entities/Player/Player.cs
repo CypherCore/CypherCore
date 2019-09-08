@@ -1972,7 +1972,7 @@ namespace Game.Entities
                 }
             });
 
-            if (!GetVehicleBase() || !GetVehicle().GetVehicleInfo().Flags.HasAnyFlag(VehicleFlags.FixedPosition))
+            if (!m_unitMovedByMe.GetVehicleBase() || !m_unitMovedByMe.GetVehicle().GetVehicleInfo().Flags.HasAnyFlag(VehicleFlags.FixedPosition))
                 RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.Root), MovementFlag.Root);
 
             /*! This must be a packet spoofing attempt. MOVEMENTFLAG_ROOT sent from the client is not valid
@@ -1982,7 +1982,7 @@ namespace Game.Entities
             RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.Root) && mi.HasMovementFlag(MovementFlag.MaskMoving), MovementFlag.MaskMoving);
 
             //! Cannot hover without SPELL_AURA_HOVER
-            RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.Hover) && !HasAuraType(AuraType.Hover),
+            RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.Hover) && !m_unitMovedByMe.HasAuraType(AuraType.Hover),
                 MovementFlag.Hover);
 
             //! Cannot ascend and descend at the same time
@@ -2007,10 +2007,10 @@ namespace Game.Entities
 
             //! Cannot walk on water without SPELL_AURA_WATER_WALK except for ghosts
             RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.WaterWalk) &&
-                !HasAuraType(AuraType.WaterWalk) && !HasAuraType(AuraType.Ghost), MovementFlag.WaterWalk);
+                !m_unitMovedByMe.HasAuraType(AuraType.WaterWalk) && !m_unitMovedByMe.HasAuraType(AuraType.Ghost), MovementFlag.WaterWalk);
 
             //! Cannot feather fall without SPELL_AURA_FEATHER_FALL
-            RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.FallingSlow) && !HasAuraType(AuraType.FeatherFall),
+            RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.FallingSlow) && !m_unitMovedByMe.HasAuraType(AuraType.FeatherFall),
                 MovementFlag.FallingSlow);
 
             /*! Cannot fly if no fly auras present. Exception is being a GM.
@@ -7443,7 +7443,6 @@ namespace Game.Entities
         public void AddAuraVision(PlayerFieldByte2Flags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.AuraVision), (byte)flags); }
         public void RemoveAuraVision(PlayerFieldByte2Flags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.AuraVision), (byte)flags); }
 
-
         public bool CanTameExoticPets() { return IsGameMaster() || HasAuraType(AuraType.AllowTamePetType); }
 
         void SendAttackSwingDeadTarget() { SendPacket(new AttackSwingError(AttackSwingErr.DeadTarget)); }
@@ -7528,7 +7527,7 @@ namespace Game.Entities
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
             WorldPacket buffer = new WorldPacket();
 
-            buffer.WriteUInt32((uint)(m_values.GetChangedObjectTypeMask() & ~((target != this) ? 1 : 0 << (int)TypeId.ActivePlayer)));
+            buffer.WriteUInt32((uint)(m_values.GetChangedObjectTypeMask() & ~((target != this ? 1 : 0) << (int)TypeId.ActivePlayer)));
             if (m_values.HasChanged(TypeId.Object))
                 m_objectData.WriteUpdate(buffer, flags, this, target);
 

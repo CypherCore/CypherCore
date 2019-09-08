@@ -46,6 +46,7 @@ namespace Game.Entities
         public uint m_movementCounter;       //< Incrementing counter used in movement packets
         TimeTrackerSmall movesplineTimer;
         public Player m_playerMovingMe;
+        MovementForces _movementForces;
 
         //Combat
         protected List<Unit> attackerList = new List<Unit>();

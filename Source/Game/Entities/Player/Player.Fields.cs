@@ -89,6 +89,7 @@ namespace Game.Entities
         //Movement
         public PlayerTaxi m_taxi = new PlayerTaxi();
         public byte[] m_forced_speed_changes = new byte[(int)UnitMoveType.Max];
+        public byte m_movementForceModMagnitudeChanges;
         uint m_lastFallTime;
         float m_lastFallZ;
         WorldLocation teleportDest;

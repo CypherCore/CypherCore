@@ -506,7 +506,7 @@ namespace Framework.Constants
         Unk482 = 482,
         SuppressTransforms = 483, // NYI
         Unk484 = 484,
-        Unk485 = 485,
+        ModMovementForceMagnitude = 485,
         Unk486 = 486,
         Unk487 = 487,
         Unk488 = 488,

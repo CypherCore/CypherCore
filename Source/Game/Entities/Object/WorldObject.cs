@@ -336,21 +336,24 @@ namespace Game.Entities
                 data.WriteFloat(unit.GetSpeed(UnitMoveType.TurnRate));
                 data.WriteFloat(unit.GetSpeed(UnitMoveType.PitchRate));
 
-                data.WriteUInt32(0); // unit.m_movementInfo.forces.size()
-                data.WriteFloat(1.0f); // MovementForcesModMagnitude
+                MovementForces movementForces = unit.GetMovementForces();
+                if (movementForces != null)
+                {
+                    data.WriteInt32(movementForces.GetForces().Count);
+                    data.WriteFloat(movementForces.GetModMagnitude());          // MovementForcesModMagnitude
+                }
+                else
+                {
+                    data.WriteUInt32(0);
+                    data.WriteFloat(1.0f);                                       // MovementForcesModMagnitude
+                }
 
                 data.WriteBit(HasSpline);
                 data.FlushBits();
 
-                //for (public uint i = 0; i < unit.m_movementInfo.forces.Count; ++i)
-                //{
-                //    *data << ObjectGuid(ID);
-                //    *data << Vector3(Origin);
-                //    *data << Vector3(Direction);
-                //    *data << uint32(TransportID);
-                //    *data.WriteFloat(Magnitude);
-                //    *data.WriteBits(Type, 2);
-                //}
+                if (movementForces != null)
+                    foreach (MovementForce force in movementForces.GetForces())
+                        MovementExtensions.WriteMovementForceWithDirection(force, data, unit);
 
                 // HasMovementSpline - marks that spline data is present in packet
                 if (HasSpline)
@@ -2457,6 +2460,74 @@ namespace Game.Entities
             public float sinAngle;
             public float cosAngle;
             public float xyspeed;
+        }
+    }
+
+    public class MovementForce
+    {
+        public ObjectGuid ID;
+        public Vector3 Origin;
+        public Vector3 Direction;
+        public uint TransportID;
+        public float Magnitude;
+        public byte Type;
+
+        public void Read(WorldPacket data)
+        {
+            ID = data.ReadPackedGuid();
+            Origin = data.ReadVector3();
+            Direction = data.ReadVector3();
+            TransportID = data.ReadUInt32();
+            Magnitude = data.ReadFloat();
+            Type = data.ReadBits<byte>(2);
+            
+        }
+
+        public void Write(WorldPacket data)
+        {
+            MovementExtensions.WriteMovementForceWithDirection(this, data);
+        }
+    }
+
+    public class MovementForces
+    {
+        List<MovementForce> _forces = new List<MovementForce>();
+        float _modMagnitude = 1.0f;
+
+        public List<MovementForce> GetForces() { return _forces; }
+
+        public bool Add(MovementForce newForce)
+        {
+            var movementForce = FindMovementForce(newForce.ID);
+            if (movementForce == null)
+            {
+                _forces.Add(newForce);
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool Remove(ObjectGuid id)
+        {
+            var movementForce = FindMovementForce(id);
+            if (movementForce != null)
+            {
+                _forces.Remove(movementForce);
+                return true;
+            }
+
+            return false;
+        }
+
+        public float GetModMagnitude() { return _modMagnitude; }
+        public void SetModMagnitude(float modMagnitude) { _modMagnitude = modMagnitude; }
+
+        public bool IsEmpty() { return _forces.Empty() && _modMagnitude == 1.0f; }
+
+        MovementForce FindMovementForce(ObjectGuid id)
+        {
+            return _forces.Find(force => force.ID == id);
         }
     }
 

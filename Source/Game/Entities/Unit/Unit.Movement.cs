@@ -1415,6 +1415,138 @@ namespace Game.Entities
             SendMessageToSet(setVehicleRec, true);
         }
 
+        public MovementForces GetMovementForces() { return _movementForces; }
+
+        void ApplyMovementForce(ObjectGuid id, Vector3 origin, float magnitude, byte type, Vector3 direction, ObjectGuid transportGuid = default)
+        {
+            if (_movementForces == null)
+                _movementForces = new MovementForces();
+
+            MovementForce force = new MovementForce();
+            force.ID = id;
+            force.Origin = origin;
+            force.Direction = direction;
+            if (transportGuid.IsMOTransport())
+                force.TransportID = (uint)transportGuid.GetCounter();
+
+            force.Magnitude = magnitude;
+            force.Type = type;
+
+            if (_movementForces.Add(force))
+            {
+                Player movingPlayer = GetPlayerMovingMe();
+                if (movingPlayer != null)
+                {
+                    MoveApplyMovementForce applyMovementForce = new MoveApplyMovementForce();
+                    applyMovementForce.MoverGUID = GetGUID();
+                    applyMovementForce.SequenceIndex = (int)m_movementCounter++;
+                    applyMovementForce.Force = force;
+                    movingPlayer.SendPacket(applyMovementForce);
+                }
+                else
+                {
+                    MoveUpdateApplyMovementForce updateApplyMovementForce = new MoveUpdateApplyMovementForce();
+                    updateApplyMovementForce.Status = m_movementInfo;
+                    updateApplyMovementForce.Force = force;
+                    SendMessageToSet(updateApplyMovementForce, true);
+                }
+            }
+        }
+
+        void RemoveMovementForce(ObjectGuid id)
+        {
+            if (_movementForces == null)
+                return;
+
+            if (_movementForces.Remove(id))
+            {
+                Player movingPlayer = GetPlayerMovingMe();
+                if (movingPlayer != null)
+                {
+                    MoveRemoveMovementForce moveRemoveMovementForce = new MoveRemoveMovementForce();
+                    moveRemoveMovementForce.MoverGUID = GetGUID();
+                    moveRemoveMovementForce.SequenceIndex = (int)m_movementCounter++;
+                    moveRemoveMovementForce.ID = id;
+                    movingPlayer.SendPacket(moveRemoveMovementForce);
+                }
+                else
+                {
+                    MoveUpdateRemoveMovementForce updateRemoveMovementForce = new MoveUpdateRemoveMovementForce();
+                    updateRemoveMovementForce.Status = m_movementInfo;
+                    updateRemoveMovementForce.TriggerGUID = id;
+                    SendMessageToSet(updateRemoveMovementForce, true);
+                }
+            }
+
+            if (_movementForces.IsEmpty())
+                _movementForces = new MovementForces();
+        }
+
+        public bool SetIgnoreMovementForces(bool ignore)
+        {
+            if (ignore == HasUnitMovementFlag2(MovementFlag2.IgnoreMovementForces))
+                return false;
+
+            if (ignore)
+                AddUnitMovementFlag2(MovementFlag2.IgnoreMovementForces);
+            else
+                RemoveUnitMovementFlag2(MovementFlag2.IgnoreMovementForces);
+
+            ServerOpcodes[] ignoreMovementForcesOpcodeTable =
+            {
+                ServerOpcodes.MoveUnsetIgnoreMovementForces,
+                ServerOpcodes.MoveSetIgnoreMovementForces
+            };
+
+            Player movingPlayer = GetPlayerMovingMe();
+            if (movingPlayer != null)
+            {
+                MoveSetFlag packet = new MoveSetFlag(ignoreMovementForcesOpcodeTable[ignore ? 1 : 0]);
+                packet.MoverGUID = GetGUID();
+                packet.SequenceIndex = m_movementCounter++;
+                movingPlayer.SendPacket(packet);
+
+                MoveUpdate moveUpdate = new MoveUpdate();
+                moveUpdate.Status = m_movementInfo;
+                SendMessageToSet(moveUpdate, movingPlayer);
+            }
+
+            return true;
+        }
+
+        public void UpdateMovementForcesModMagnitude()
+        {
+            float modMagnitude = GetTotalAuraMultiplier(AuraType.ModMovementForceMagnitude);
+
+            Player movingPlayer = GetPlayerMovingMe();
+            if (movingPlayer != null)
+            {
+                MoveSetSpeed setModMovementForceMagnitude = new MoveSetSpeed(ServerOpcodes.MoveSetModMovementForceMagnitude);
+                setModMovementForceMagnitude.MoverGUID = GetGUID();
+                setModMovementForceMagnitude.SequenceIndex = m_movementCounter++;
+                setModMovementForceMagnitude.Speed = modMagnitude;
+                movingPlayer.SendPacket(setModMovementForceMagnitude);
+                ++movingPlayer.m_movementForceModMagnitudeChanges;
+            }
+            else
+            {
+                MoveUpdateSpeed updateModMovementForceMagnitude = new MoveUpdateSpeed(ServerOpcodes.MoveUpdateModMovementForceMagnitude);
+                updateModMovementForceMagnitude.Status = m_movementInfo;
+                updateModMovementForceMagnitude.Speed = modMagnitude;
+                SendMessageToSet(updateModMovementForceMagnitude, true);
+            }
+
+            if (modMagnitude != 1.0f && _movementForces == null)
+                _movementForces = new MovementForces();
+
+            if (_movementForces != null)
+            {
+                _movementForces.SetModMagnitude(modMagnitude);
+                if (_movementForces.IsEmpty())
+                    _movementForces = new MovementForces();
+            }
+        }
+
         void SendSetPlayHoverAnim(bool enable)
         {
             SetPlayHoverAnim data = new SetPlayHoverAnim();
@@ -1562,6 +1694,8 @@ namespace Game.Entities
 
             MoveUpdateTeleport moveUpdateTeleport = new MoveUpdateTeleport();
             moveUpdateTeleport.Status = m_movementInfo;
+            if (_movementForces != null)
+                moveUpdateTeleport.MovementForces = _movementForces.GetForces();
             Unit broadcastSource = this;
 
             Player playerMover = GetPlayerBeingMoved();

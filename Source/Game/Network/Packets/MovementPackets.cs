@@ -268,6 +268,44 @@ namespace Game.Network.Packets
             foreach (var point in spline.getPoints())
                 data.WriteVector3(point);
         }
+
+        public static void WriteMovementForceWithDirection(MovementForce movementForce, WorldPacket data, Position objectPosition = null)
+        {
+            data.WritePackedGuid(movementForce.ID);
+            data.WriteVector3(movementForce.Origin);
+            if (movementForce.Type == 1 && objectPosition != null) // gravity
+            {
+                Vector3 direction = Vector3.Zero;
+                if (movementForce.Magnitude != 0.0f)
+                {
+                    Position tmp = new Position(movementForce.Origin.X - objectPosition.GetPositionX(),
+                        movementForce.Origin.Y - objectPosition.GetPositionY(),
+                        movementForce.Origin.Z - objectPosition.GetPositionZ());
+                    float lengthSquared = tmp.GetExactDistSq(0.0f, 0.0f, 0.0f);
+                    if (lengthSquared > 0.0f)
+                    {
+                        float mult = 1.0f / (float)Math.Sqrt(lengthSquared) * movementForce.Magnitude;
+                        tmp.posX *= mult;
+                        tmp.posY *= mult;
+                        tmp.posZ *= mult;
+                        float minLengthSquared = (tmp.GetPositionX() * tmp.GetPositionX() * 0.04f) +
+                            (tmp.GetPositionY() * tmp.GetPositionY() * 0.04f) +
+                            (tmp.GetPositionZ() * tmp.GetPositionZ() * 0.04f);
+                        if (lengthSquared > minLengthSquared)
+                            direction = new Vector3(tmp.posX, tmp.posY, tmp.posZ);
+                    }
+                }
+
+                data.WriteVector3(direction);
+            }
+            else
+                data.WriteVector3(movementForce.Direction);
+
+            data.WriteUInt32(movementForce.TransportID);
+            data.WriteFloat(movementForce.Magnitude);
+            data.WriteBits(movementForce.Type, 2);
+            data.FlushBits();
+        }
     }
 
     public class ClientPlayerMovement : ClientPacket
@@ -588,7 +626,7 @@ namespace Game.Network.Packets
         {
             MovementExtensions.WriteMovementInfo(_worldPacket, Status);
 
-            _worldPacket.WriteInt32(MovementForces.Count);
+            _worldPacket.WriteInt32(MovementForces != null ? MovementForces.Count : 0);
             _worldPacket.WriteBit(WalkSpeed.HasValue);
             _worldPacket.WriteBit(RunSpeed.HasValue);
             _worldPacket.WriteBit(RunBackSpeed.HasValue);
@@ -600,8 +638,9 @@ namespace Game.Network.Packets
             _worldPacket.WriteBit(PitchRate.HasValue);
             _worldPacket.FlushBits();
 
-            foreach (MovementForce force in MovementForces)
-                force.Write(_worldPacket);
+            if (MovementForces != null)
+                foreach (MovementForce force in MovementForces)
+                    force.Write(_worldPacket);
 
             if (WalkSpeed.HasValue)
                 _worldPacket.WriteFloat(WalkSpeed.Value);
@@ -632,7 +671,7 @@ namespace Game.Network.Packets
         }
 
         public MovementInfo Status;
-        public List<MovementForce> MovementForces = new List<MovementForce>();
+        public List<MovementForce> MovementForces;
         public Optional<float> SwimBackSpeed;
         public Optional<float> FlightSpeed;
         public Optional<float> SwimSpeed;
@@ -644,18 +683,78 @@ namespace Game.Network.Packets
         public Optional<float> PitchRate;
     }
 
+    class MoveApplyMovementForce : ServerPacket
+    {
+        public MoveApplyMovementForce() : base(ServerOpcodes.MoveApplyMovementForce, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(MoverGUID);
+            _worldPacket.WriteInt32(SequenceIndex);
+            Force.Write(_worldPacket);
+        }
+
+        public ObjectGuid MoverGUID;
+        public int SequenceIndex;
+        public MovementForce Force;
+    }
+
+    class MoveApplyMovementForceAck : ClientPacket
+    {
+        public MoveApplyMovementForceAck(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Ack.Read(_worldPacket);
+            Force.Read(_worldPacket);
+        }
+
+        public MovementAck Ack = new MovementAck();
+        public MovementForce Force = new MovementForce();
+    }
+
+    class MoveRemoveMovementForce : ServerPacket
+    {
+        public MoveRemoveMovementForce() : base(ServerOpcodes.MoveRemoveMovementForce, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(MoverGUID);
+            _worldPacket.WriteInt32(SequenceIndex);
+            _worldPacket.WritePackedGuid(ID);
+        }
+
+        public ObjectGuid MoverGUID;
+        public int SequenceIndex;
+        public ObjectGuid ID;
+    }
+
+    class MoveRemoveMovementForceAck : ClientPacket
+    {
+        public MoveRemoveMovementForceAck(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Ack.Read(_worldPacket);
+            ID = _worldPacket.ReadPackedGuid();
+        }
+
+        public MovementAck Ack = new MovementAck();
+        public ObjectGuid ID;
+    }
+
     class MoveUpdateApplyMovementForce : ServerPacket
     {
         public MoveUpdateApplyMovementForce() : base(ServerOpcodes.MoveUpdateApplyMovementForce) { }
 
         public override void Write()
         {
-            MovementExtensions.WriteMovementInfo(_worldPacket, movementInfo);
+            MovementExtensions.WriteMovementInfo(_worldPacket, Status);
             Force.Write(_worldPacket);
         }
 
-        MovementInfo movementInfo = new MovementInfo();
-        MovementForce Force = new MovementForce();
+        public MovementInfo Status = new MovementInfo();
+        public MovementForce Force = new MovementForce();
     }
 
     class MoveUpdateRemoveMovementForce : ServerPacket
@@ -664,12 +763,12 @@ namespace Game.Network.Packets
 
         public override void Write()
         {
-            MovementExtensions.WriteMovementInfo(_worldPacket, movementInfo);
+            MovementExtensions.WriteMovementInfo(_worldPacket, Status);
             _worldPacket.WritePackedGuid(TriggerGUID);
         }
 
-        MovementInfo movementInfo = new MovementInfo();
-        ObjectGuid TriggerGUID;
+        public MovementInfo Status = new MovementInfo();
+        public ObjectGuid TriggerGUID;
     }
 
     class MoveTeleportAck : ClientPacket
@@ -1060,6 +1159,18 @@ namespace Game.Network.Packets
     }
 
     //Structs
+    public struct MovementAck
+    {
+        public void Read(WorldPacket data)
+        {
+            Status = MovementExtensions.ReadMovementInfo(data);
+            AckIndex = data.ReadInt32();
+        }
+
+        public MovementInfo Status;
+        public int AckIndex;
+    }
+
     public struct MonsterSplineFilterKey
     {
         public void Write(WorldPacket data)
@@ -1230,39 +1341,6 @@ namespace Game.Network.Packets
         public byte VehicleSeatIndex;
         public bool VehicleExitVoluntary;
         public bool VehicleExitTeleport;
-    }
-
-    public struct MovementForce
-    {
-        public void Write(WorldPacket data)
-        {
-            data.WritePackedGuid(ID);
-            data.WriteVector3(Origin);
-            data.WriteVector3(Direction);
-            data.WriteUInt32(TransportID);
-            data.WriteFloat(Magnitude);
-            data.WriteBits(Type, 2);
-            data.FlushBits();
-        }
-
-        public ObjectGuid ID;
-        public Vector3 Origin;
-        public Vector3 Direction;
-        public uint TransportID;
-        public float Magnitude;
-        public byte Type;
-    }
-
-    public struct MovementAck
-    {
-        public void Read(WorldPacket data)
-        {
-            Status = MovementExtensions.ReadMovementInfo(data);
-            AckIndex = data.ReadInt32();
-        }
-
-        public MovementInfo Status;
-        public int AckIndex;
     }
 
     public struct MoveKnockBackSpeeds
