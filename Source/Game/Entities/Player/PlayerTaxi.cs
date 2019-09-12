@@ -21,6 +21,7 @@ using Game.DataStorage;
 using Game.Network.Packets;
 using System.Collections.Generic;
 using System.Text;
+using System;
 
 namespace Game.Entities
 {
@@ -116,15 +117,18 @@ namespace Game.Entities
 
         public void AppendTaximaskTo(ShowTaxiNodes data, bool all)
         {
+            data.CanLandNodes = new byte[PlayerConst.TaxiMaskSize];
+            data.CanUseNodes = new byte[PlayerConst.TaxiMaskSize];
+
             if (all)
             {
-                data.CanLandNodes = CliDB.TaxiNodesMask;              // all existed nodes
-                data.CanUseNodes = CliDB.TaxiNodesMask;
+                Buffer.BlockCopy(CliDB.TaxiNodesMask, 0, data.CanLandNodes, 0, PlayerConst.TaxiMaskSize);  // all existed nodes
+                Buffer.BlockCopy(CliDB.TaxiNodesMask, 0, data.CanLandNodes, 0, PlayerConst.TaxiMaskSize);
             }
             else
             {
-                data.CanLandNodes = m_taximask;                  // known nodes
-                data.CanUseNodes = m_taximask;
+                Buffer.BlockCopy(m_taximask, 0, data.CanLandNodes, 0, PlayerConst.TaxiMaskSize); // known nodes
+                Buffer.BlockCopy(m_taximask, 0, data.CanUseNodes, 0, PlayerConst.TaxiMaskSize);
             }
         }
 

@@ -1233,7 +1233,7 @@ namespace Game.Entities
             data.WriteBytes(buffer);
         }
 
-        void BuildValuesUpdateWithFlag(ByteBuffer data, UpdateFieldFlag flags, Player target)
+        public override void BuildValuesUpdateWithFlag(WorldPacket data, UpdateFieldFlag flags, Player target)
         {
             UpdateMask valuesMask = new UpdateMask(14);
             valuesMask.Set((int)TypeId.Item);

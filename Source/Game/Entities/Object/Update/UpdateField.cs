@@ -38,6 +38,7 @@ namespace Game.Entities
         public void ClearChangesMask<T>(BaseUpdateData<T> updateData)
         {
             _changesMask.Reset(updateData.Bit);
+            updateData.ClearChangesMask();
         }
 
         public void ClearChangesMask<T, U>(BaseUpdateData<T> updateData, ref UpdateField<U> updateField) where T : new() where U : new()
@@ -341,13 +342,13 @@ namespace Game.Entities
 
         public void ClearChangesMask<U>(UpdateField<U> updateField) where U : new()
         {
-            if (typeof(U).BaseType == typeof(IHasChangesMask))
+            if (typeof(U).GetInterfaces().Any(x => typeof(IHasChangesMask) == x))
                 ((IHasChangesMask)updateField._value).ClearChangesMask();
         }
 
         public void ClearChangesMask<U>(UpdateFieldArray<U> updateField) where U : new()
         {
-            if (typeof(U).BaseType == typeof(IHasChangesMask))
+            if (typeof(U).GetInterfaces().Any(x => typeof(IHasChangesMask) == x))
             {
                 for (int i = 0; i < updateField.GetSize(); ++i)
                     ((IHasChangesMask)updateField[i]).ClearChangesMask();
@@ -356,7 +357,7 @@ namespace Game.Entities
 
         public void ClearChangesMask<U>(DynamicUpdateField<U> updateField) where U : new()
         {
-            if (typeof(U).BaseType == typeof(IHasChangesMask))
+            if (typeof(U).GetInterfaces().Any(x => typeof(IHasChangesMask) == x))
             {
                 for (int i = 0; i < updateField.Size(); ++i)
                     ((IHasChangesMask)updateField[i]).ClearChangesMask();

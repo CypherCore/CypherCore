@@ -1032,7 +1032,7 @@ namespace Game.Network.Packets
         public void Write(WorldPacket data)
         {
             data.WriteBits(Name.GetByteCount(), 6);
-            data.WriteBits(VoiceStateID.GetByteCount(), 6);
+            data.WriteBits(VoiceStateID.GetByteCount() + 1, 6);
             data.WriteBit(FromSocialQueue);
             data.WriteBit(VoiceChatSilenced);
             data.WritePackedGuid(GUID);

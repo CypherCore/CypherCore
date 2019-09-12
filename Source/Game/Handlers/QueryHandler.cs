@@ -128,6 +128,8 @@ namespace Game
                         queryCreatureResponse.Stats.NameAlt[0] = nameAlt;
                     }
                 }
+
+                SendPacket(queryCreatureResponse);
             }
             else
             {

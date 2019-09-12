@@ -7544,7 +7544,7 @@ namespace Game.Entities
             data.WriteBytes(buffer);
         }
 
-        void BuildValuesUpdateWithFlag(WorldPacket data, UpdateFieldFlag flags, Player target)
+        public override void BuildValuesUpdateWithFlag(WorldPacket data, UpdateFieldFlag flags, Player target)
         {
             UpdateMask valuesMask = new UpdateMask((int)TypeId.Max);
             valuesMask.Set((int)TypeId.Unit);

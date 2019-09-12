@@ -133,7 +133,7 @@ namespace Game.Groups
             m_lootThreshold = (ItemQuality)field.Read<byte>(3);
 
             for (byte i = 0; i < MapConst.TargetIconsCount; ++i)
-                m_targetIcons[i].SetRawValue(field.Read<string>(4 + i).ToByteArray());
+                m_targetIcons[i].SetRawValue(field.Read<byte[]>(4 + i));
 
             m_groupFlags = (GroupFlags)field.Read<byte>(12);
             if (m_groupFlags.HasAnyFlag(GroupFlags.Raid))
@@ -910,19 +910,20 @@ namespace Game.Groups
         public void GroupLoot(Loot loot, WorldObject lootedObject)
         {
             byte itemSlot = 0;
-            foreach (var i in loot.items)
+            for (var i = 0; i < loot.items.Count; ++i, ++itemSlot)
             {
-                if (i.freeforall)
+                LootItem lootItem = loot.items[i];
+                if (lootItem.freeforall)
                     continue;
 
-                ItemTemplate item = Global.ObjectMgr.GetItemTemplate(i.itemid);
+                ItemTemplate item = Global.ObjectMgr.GetItemTemplate(lootItem.itemid);
                 if (item == null)
                     continue;
 
                 //roll for over-threshold item if it's one-player loot
                 if (item.GetQuality() >= m_lootThreshold)
                 {
-                    Roll r = new Roll(i);
+                    Roll r = new Roll(lootItem);
 
                     for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.next())
                     {
@@ -930,7 +931,7 @@ namespace Game.Groups
                         if (!playerToRoll || playerToRoll.GetSession() == null)
                             continue;
 
-                        bool allowedForPlayer = i.AllowedForPlayer(playerToRoll);
+                        bool allowedForPlayer = lootItem.AllowedForPlayer(playerToRoll);
                         if (allowedForPlayer && playerToRoll.IsAtGroupRewardDistance(lootedObject))
                         {
                             r.totalPlayersRolling++;
@@ -984,7 +985,7 @@ namespace Game.Groups
                     }
                 }
                 else
-                    i.is_underthreshold = true;
+                    lootItem.is_underthreshold = true;
             }
 
             foreach (var i in loot.quest_items)
@@ -1076,15 +1077,15 @@ namespace Game.Groups
             if (roll == null)
                 return;
 
-            var rollType = roll.playerVote.LookupByKey(playerGuid);
             // this condition means that player joins to the party after roll begins
-            if (rollType == 0)
+            if (!roll.playerVote.ContainsKey(playerGuid))
                 return;
 
             if (roll.getLoot() != null)
                 if (roll.getLoot().items.Empty())
                     return;
 
+            RollType rollType = RollType.MaxTypes;
             switch (choice)
             {
                 case RollType.Pass:                                     // Player choose pass
@@ -1109,13 +1110,15 @@ namespace Game.Groups
                     break;
             }
 
+            roll.playerVote[playerGuid] = rollType;
+
             if (roll.totalPass + roll.totalNeed + roll.totalGreed >= roll.totalPlayersRolling)
                 CountTheRoll(roll, null);
         }
 
         public void EndRoll(Loot pLoot, Map allowedMap)
         {
-            foreach (var roll in RollId)
+            foreach (var roll in RollId.ToList())
             {
                 if (roll.getLoot() == pLoot)
                 {
@@ -1902,7 +1905,7 @@ namespace Game.Groups
             if (difficultyDic == null)
                 return;
 
-            foreach (var pair in difficultyDic)
+            foreach (var pair in difficultyDic.ToList())
             {
                 InstanceSave instanceSave = pair.Value.save;
                 MapRecord entry = CliDB.MapStorage.LookupByKey(pair.Key);
@@ -2484,7 +2487,7 @@ namespace Game.Groups
         Roll GetRoll(ObjectGuid lootObjectGuid, byte lootListId)
         {
             foreach (var roll in RollId)
-                if (roll.getTarget().GetGUID() == lootObjectGuid && roll.itemSlot == lootListId && roll.isValid())
+                if (roll.getTarget() != null && roll.getTarget().GetGUID() == lootObjectGuid && roll.itemSlot == lootListId && roll.isValid())
                     return roll;
             return null;
         }

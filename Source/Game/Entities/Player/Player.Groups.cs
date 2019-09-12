@@ -186,8 +186,7 @@ namespace Game.Entities
 
         public int NextGroupUpdateSequenceNumber(GroupCategory category)
         {
-            var groupUpdate = m_groupUpdateSequences[(int)category];
-            return groupUpdate.UpdateSequenceNumber++;
+            return m_groupUpdateSequences[(int)category].UpdateSequenceNumber++;
         }
 
         public bool IsAtGroupRewardDistance(WorldObject pRewardSource)

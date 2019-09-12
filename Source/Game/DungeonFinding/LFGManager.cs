@@ -1688,6 +1688,9 @@ namespace Game.DungeonFinding
 
         public void AddPlayerToGroup(ObjectGuid gguid, ObjectGuid guid)
         {
+            if (!GroupsStore.ContainsKey(gguid))
+                GroupsStore[gguid] = new LFGGroupData();
+
             GroupsStore[gguid].AddPlayer(guid);
         }
 
@@ -1695,6 +1698,7 @@ namespace Game.DungeonFinding
         {
             if (!GroupsStore.ContainsKey(gguid))
                 GroupsStore[gguid] = new LFGGroupData();
+
             GroupsStore[gguid].SetLeader(leader);
         }
 

@@ -738,7 +738,7 @@ namespace Game.Entities
             return UpdateFieldFlag.None;
         }
 
-        void BuildValuesUpdateWithFlag(ByteBuffer data, UpdateFieldFlag flags, Player target)
+        public virtual void BuildValuesUpdateWithFlag(WorldPacket data, UpdateFieldFlag flags, Player target)
         {
             data.WriteUInt32(0);
             data.WriteUInt32(0);

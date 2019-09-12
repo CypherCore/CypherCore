@@ -71,10 +71,7 @@ namespace Game.Groups
 
         public Group GetGroupByDbStoreId(uint storageId)
         {
-            if (storageId < GroupDbStore.Count)
-                return GroupDbStore[storageId];
-
-            return null;
+            return GroupDbStore.LookupByKey(storageId);
         }
 
         public ulong GenerateGroupId()
