@@ -42,7 +42,7 @@ namespace Game.Entities
         public bool m_isTempWorldObject; //true when possessed
 
         ReactStates reactState;                           // for AI, not charmInfo
-        public MovementGeneratorType m_defaultMovementType { get; set; }
+        public MovementGeneratorType DefaultMovementType { get; set; }
         public ulong m_spawnId;
         byte m_equipmentId;
         sbyte m_originalEquipmentId; // can be -1

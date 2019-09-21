@@ -19,7 +19,6 @@ using Framework.Constants;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
-using Game.Guilds;
 using Game.Loots;
 using Game.Maps;
 using Game.Network;
@@ -259,7 +258,7 @@ namespace Game
                 if (!_looter.IsWithinDist(creature, LootDistance))
                     return false;
 
-                return _looter.isAllowedToLoot(creature);
+                return _looter.IsAllowedToLoot(creature);
             }
 
             Player _looter;

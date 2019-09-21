@@ -25,7 +25,6 @@ using Game.Network;
 using Game.Network.Packets;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Game.BattleFields
 {
@@ -270,7 +269,7 @@ namespace Game.BattleFields
             }
 
             // If the player does not match minimal level requirements for the battlefield, kick him
-            if (player.getLevel() < m_MinLevel)
+            if (player.GetLevel() < m_MinLevel)
             {
                 if (!m_PlayersWillBeKick[player.GetTeamId()].ContainsKey(player.GetGUID()))
                     m_PlayersWillBeKick[player.GetTeamId()][player.GetGUID()] = Time.UnixTime + 10;
@@ -303,7 +302,7 @@ namespace Game.BattleFields
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
                     if (player)
-                        if (player.isAFK())
+                        if (player.IsAFK())
                             KickPlayerFromBattlefield(guid);
                 }
             }
@@ -402,7 +401,7 @@ namespace Game.BattleFields
                 m_PlayersInWar[player.GetTeamId()].Add(player.GetGUID());
                 m_InvitedPlayers[player.GetTeamId()].Remove(player.GetGUID());
 
-                if (player.isAFK())
+                if (player.IsAFK())
                     player.ToggleAFK();
 
                 OnPlayerJoinWar(player);                               //for scripting
@@ -689,7 +688,7 @@ namespace Game.BattleFields
 
             // Set creature in world
             map.AddToMap(creature);
-            creature.setActive(true);
+            creature.SetActive(true);
 
             return creature;
         }
@@ -718,7 +717,7 @@ namespace Game.BattleFields
 
             // Add to world
             map.AddToMap(go);
-            go.setActive(true);
+            go.SetActive(true);
 
             return go;
         }

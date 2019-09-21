@@ -18,8 +18,6 @@
 using Framework.Constants;
 using Game.Entities;
 using System.Collections.Generic;
-using System.Linq;
-using System.Collections.Concurrent;
 
 namespace Game.Maps
 {
@@ -101,7 +99,7 @@ namespace Game.Maps
         {
             map.AddToGrid(obj, new Cell(cellCoord));
             obj.AddToWorld();
-            if (obj.isActiveObject())
+            if (obj.IsActiveObject())
                 map.AddToActive(obj);
 
             ++count;

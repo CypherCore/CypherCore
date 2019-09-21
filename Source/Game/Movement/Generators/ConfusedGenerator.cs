@@ -79,7 +79,7 @@ namespace Game.Movement
                 // currently moving, update location
                 owner.AddUnitState(UnitState.ConfusedMove);
 
-                if (owner.moveSpline.Finalized())
+                if (owner.MoveSpline.Finalized())
                     i_nextMoveTime.Reset(RandomHelper.IRand(800, 1500));
             }
             else

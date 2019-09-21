@@ -4,6 +4,12 @@ namespace Game.Entities
 {
     public class RestMgr
     {
+        Player _player;
+        long _restTime;
+        uint _innAreaTriggerId;
+        float[] _restBonus = new float[(int)RestTypes.Max];
+        RestFlag _restFlagMask;
+
         public RestMgr(Player player)
         {
             _player = player;
@@ -18,7 +24,7 @@ namespace Game.Entities
             {
                 case RestTypes.XP:
                     // Reset restBonus (XP only) for max level players
-                    if (_player.getLevel() >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+                    if (_player.GetLevel() >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
                         restBonus = 0;
 
                     next_level_xp = _player.m_activePlayerData.NextLevelXP;
@@ -67,7 +73,7 @@ namespace Game.Entities
         public void AddRestBonus(RestTypes restType, float restBonus)
         {
             // Don't add extra rest bonus to max level players. Note: Might need different condition in next expansion for honor XP (PLAYER_LEVEL_MIN_HONOR perhaps).
-            if (_player.getLevel() >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+            if (_player.GetLevel() >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
                 restBonus = 0;
 
             float totalRestBonus = GetRestBonus(restType) + restBonus;
@@ -153,11 +159,5 @@ namespace Game.Entities
         public float GetRestBonus(RestTypes restType) { return _restBonus[(int)restType]; }
         public bool HasRestFlag(RestFlag restFlag) { return (_restFlagMask & restFlag) != 0; }
         public uint GetInnTriggerId() { return _innAreaTriggerId; }
-
-        Player _player;
-        long _restTime;
-        uint _innAreaTriggerId;
-        float[] _restBonus = new float[(int)RestTypes.Max];
-        RestFlag _restFlagMask;
     }
 }

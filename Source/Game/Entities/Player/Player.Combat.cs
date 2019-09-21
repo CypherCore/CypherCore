@@ -94,7 +94,7 @@ namespace Game.Entities
 
         float GetRatingMultiplier(CombatRating cr)
         {
-            GtCombatRatingsRecord Rating = CliDB.CombatRatingsGameTable.GetRow(getLevel());
+            GtCombatRatingsRecord Rating = CliDB.CombatRatingsGameTable.GetRow(GetLevel());
             if (Rating == null)
                 return 1.0f;
 

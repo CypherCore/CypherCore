@@ -44,7 +44,7 @@ namespace Game.AI
 
         public override bool DoUpdate(T owner, uint time_diff)
         {
-            arrived = skipToHome || owner.moveSpline.Finalized();
+            arrived = skipToHome || owner.MoveSpline.Finalized();
             return !arrived;
         }
 

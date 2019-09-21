@@ -216,7 +216,7 @@ namespace Game.Chat
             if (!handler.extractPlayerTarget(new StringArguments(nameStr), out target, out targetGuid, out targetName))
                 return false;
 
-            int oldlevel = (int)(target ? target.getLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(targetGuid));
+            int oldlevel = (int)(target ? target.GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(targetGuid));
 
             if (!int.TryParse(levelStr, out int newlevel))
                 newlevel = oldlevel;
@@ -750,7 +750,7 @@ namespace Game.Chat
             if (!handler.extractPlayerTarget(new StringArguments(nameStr), out target, out targetGuid, out targetName))
                 return false;
 
-            int oldlevel = (int)(target ? target.getLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(targetGuid));
+            int oldlevel = (int)(target ? target.GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(targetGuid));
             if (!int.TryParse(levelStr, out int addlevel))
                 addlevel = 1;
 

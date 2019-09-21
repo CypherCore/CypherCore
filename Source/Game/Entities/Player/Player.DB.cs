@@ -813,7 +813,7 @@ namespace Game.Entities
                             {
                                 ItemTemplate rewardProto = Global.ObjectMgr.GetItemTemplate(questPackageItem.ItemID);
                                 if (rewardProto != null)
-                                    if (rewardProto.ItemSpecClassMask.HasAnyFlag(getClassMask()))
+                                    if (rewardProto.ItemSpecClassMask.HasAnyFlag(GetClassMask()))
                                         GetSession().GetCollectionMgr().AddItemAppearance(questPackageItem.ItemID);
                             }
                         }
@@ -2085,7 +2085,7 @@ namespace Game.Entities
         void _SaveStats(SQLTransaction trans)
         {
             // check if stat saving is enabled and if char level is high enough
-            if (WorldConfig.GetIntValue(WorldCfg.MinLevelStatSave) == 0 || getLevel() < WorldConfig.GetIntValue(WorldCfg.MinLevelStatSave))
+            if (WorldConfig.GetIntValue(WorldCfg.MinLevelStatSave) == 0 || GetLevel() < WorldConfig.GetIntValue(WorldCfg.MinLevelStatSave))
                 return;
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_STATS);
@@ -2886,7 +2886,7 @@ namespace Game.Entities
             InitTalentForLevel();
             LearnDefaultSkills();
             LearnCustomSpells();
-            if (getLevel() < PlayerConst.LevelMinHonor)
+            if (GetLevel() < PlayerConst.LevelMinHonor)
                 ResetPvpTalents();
 
             // must be before inventory (some items required reputation check)
@@ -3107,7 +3107,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, (byte)GetRace());
                 stmt.AddValue(index++, (byte)GetClass());
                 stmt.AddValue(index++, (byte)m_playerData.NativeSex);   // save gender from PLAYER_BYTES_3, UNIT_BYTES_0 changes with every transform effect
-                stmt.AddValue(index++, getLevel());
+                stmt.AddValue(index++, GetLevel());
                 stmt.AddValue(index++, (uint)m_activePlayerData.XP);
                 stmt.AddValue(index++, GetMoney());
                 stmt.AddValue(index++, (byte)m_playerData.SkinID);
@@ -3238,7 +3238,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, (byte)GetRace());
                 stmt.AddValue(index++, (byte)GetClass());
                 stmt.AddValue(index++, (byte)m_playerData.NativeSex);   // save gender from PLAYER_BYTES_3, UNIT_BYTES_0 changes with every transform effect
-                stmt.AddValue(index++, getLevel());
+                stmt.AddValue(index++, GetLevel());
                 stmt.AddValue(index++, (uint)m_activePlayerData.XP);
                 stmt.AddValue(index++, GetMoney());
                 stmt.AddValue(index++, (byte)m_playerData.SkinID);

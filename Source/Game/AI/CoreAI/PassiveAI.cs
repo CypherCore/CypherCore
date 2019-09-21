@@ -30,7 +30,7 @@ namespace Game.AI
 
         public override void UpdateAI(uint diff)
         {
-            if (me.IsInCombat() && me.getAttackers().Empty())
+            if (me.IsInCombat() && me.GetAttackers().Empty())
                 EnterEvadeMode(EvadeReason.NoHostiles);
         }
 

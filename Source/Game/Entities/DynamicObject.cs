@@ -25,8 +25,8 @@ namespace Game.Entities
     {
         public DynamicObject(bool isWorldObject) : base(isWorldObject)
         {
-            objectTypeMask |= TypeMask.DynamicObject;
-            objectTypeId = TypeId.DynamicObject;
+            ObjectTypeMask |= TypeMask.DynamicObject;
+            ObjectTypeId = TypeId.DynamicObject;
 
             m_updateFlag.Stationary = true;
 
@@ -100,7 +100,7 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_dynamicObjectData).ModifyValue(m_dynamicObjectData.CastTime), GameTime.GetGameTimeMS());
 
             if (IsWorldObject())
-                setActive(true);    //must before add to map to be put in world container
+                SetActive(true);    //must before add to map to be put in world container
 
             Transport transport = caster.GetTransport();
             if (transport)

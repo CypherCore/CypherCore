@@ -471,7 +471,7 @@ namespace Game.Groups
             return true;
         }
 
-        public bool RemoveMember(ObjectGuid guid, RemoveMethod method = RemoveMethod.Default, ObjectGuid kicker = default(ObjectGuid), string reason = null)
+        public bool RemoveMember(ObjectGuid guid, RemoveMethod method = RemoveMethod.Default, ObjectGuid kicker = default, string reason = null)
         {
             BroadcastGroupUpdate();
 
@@ -1478,7 +1478,7 @@ namespace Game.Groups
             }
         }
 
-        public void BroadcastAddonMessagePacket(ServerPacket packet, string prefix, bool ignorePlayersInBGRaid, int group = -1, ObjectGuid ignore = default(ObjectGuid))
+        public void BroadcastAddonMessagePacket(ServerPacket packet, string prefix, bool ignorePlayersInBGRaid, int group = -1, ObjectGuid ignore = default)
         {
             for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.next())
             {
@@ -1492,7 +1492,7 @@ namespace Game.Groups
             }
         }
 
-        public void BroadcastPacket(ServerPacket packet, bool ignorePlayersInBGRaid, int group = -1, ObjectGuid ignore = default(ObjectGuid))
+        public void BroadcastPacket(ServerPacket packet, bool ignorePlayersInBGRaid, int group = -1, ObjectGuid ignore = default)
         {
             for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.next())
             {
@@ -1732,7 +1732,7 @@ namespace Game.Groups
             if (!reference)
                 return GroupJoinBattlegroundResult.JoinFailed;
 
-            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bgOrTemplate.GetMapId(), reference.getLevel());
+            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bgOrTemplate.GetMapId(), reference.GetLevel());
             if (bracketEntry == null)
                 return GroupJoinBattlegroundResult.JoinFailed;
 
@@ -1756,7 +1756,7 @@ namespace Game.Groups
                     return GroupJoinBattlegroundResult.JoinTimedOut;
                 }
                 // not in the same Battleground level braket, don't let join
-                PvpDifficultyRecord memberBracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bracketEntry.MapID, member.getLevel());
+                PvpDifficultyRecord memberBracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bracketEntry.MapID, member.GetLevel());
                 if (memberBracketEntry != bracketEntry)
                     return GroupJoinBattlegroundResult.JoinRangeIndex;
                 // don't let join rated matches if the arena team id doesn't match
@@ -1778,7 +1778,7 @@ namespace Game.Groups
                 if (!member.HasFreeBattlegroundQueueId())
                     return GroupJoinBattlegroundResult.TooManyQueues;        // not blizz-like
                 // check if someone in party is using dungeon system
-                if (member.isUsingLfg())
+                if (member.IsUsingLfg())
                     return GroupJoinBattlegroundResult.LfgCantUseBattleground;
                 // check Freeze debuff
                 if (member.HasAura(9454))
@@ -2258,7 +2258,7 @@ namespace Game.Groups
                 member.readyChecked = false;
         }
 
-        public void AddRaidMarker(byte markerId, uint mapId, float positionX, float positionY, float positionZ, ObjectGuid transportGuid = default(ObjectGuid))
+        public void AddRaidMarker(byte markerId, uint mapId, float positionX, float positionY, float positionZ, ObjectGuid transportGuid = default)
         {
             if (markerId >= MapConst.RaidMarkersCount || m_markers[markerId] != null)
                 return;
@@ -2678,7 +2678,7 @@ namespace Game.Groups
                 BonusData bonusData = new BonusData(itemInstance);
 
                 ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemid);
-                uint itemLevel = Item.GetItemLevel(itemTemplate, bonusData, player.getLevel(), 0, lootItemInSlot.upgradeId, 0, 0, 0, false);
+                uint itemLevel = Item.GetItemLevel(itemTemplate, bonusData, player.GetLevel(), 0, lootItemInSlot.upgradeId, 0, 0, 0, false);
                 return Item.GetDisenchantLoot(itemTemplate, (uint)bonusData.Quality, itemLevel);
             }
 
@@ -2710,7 +2710,7 @@ namespace Game.Groups
 
     public class RaidMarker
     {
-        public RaidMarker(uint mapId, float positionX, float positionY, float positionZ, ObjectGuid transportGuid = default(ObjectGuid))
+        public RaidMarker(uint mapId, float positionX, float positionY, float positionZ, ObjectGuid transportGuid = default)
         {
             Location = new WorldLocation(mapId, positionX, positionY, positionZ);
             TransportGUID = transportGuid;

@@ -25,7 +25,6 @@ using Game.Loots;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Framework.IO;
 
 namespace Game
@@ -1677,16 +1676,16 @@ namespace Game
 
         public static bool IsPlayerMeetingCondition(Player player, PlayerConditionRecord condition)
         {
-            if (condition.MinLevel != 0 && player.getLevel() < condition.MinLevel)
+            if (condition.MinLevel != 0 && player.GetLevel() < condition.MinLevel)
                 return false;
 
-            if (condition.MaxLevel != 0 && player.getLevel() > condition.MaxLevel)
+            if (condition.MaxLevel != 0 && player.GetLevel() > condition.MaxLevel)
                 return false;
 
-            if (condition.RaceMask != 0 && !Convert.ToBoolean(player.getRaceMask() & condition.RaceMask))
+            if (condition.RaceMask != 0 && !Convert.ToBoolean(player.GetRaceMask() & condition.RaceMask))
                 return false;
 
-            if (condition.ClassMask != 0 && !Convert.ToBoolean(player.getClassMask() & condition.ClassMask))
+            if (condition.ClassMask != 0 && !Convert.ToBoolean(player.GetClassMask() & condition.ClassMask))
                 return false;
 
             if (condition.Gender >= 0 && (int)player.GetGender() != condition.Gender)

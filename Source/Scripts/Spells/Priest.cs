@@ -350,7 +350,7 @@ namespace Scripts.Spells.Priest
             if (aegis != null)
                 absorb += aegis.GetAmount();
 
-            absorb = (int)Math.Min(absorb, eventInfo.GetProcTarget().getLevel() * 125);
+            absorb = (int)Math.Min(absorb, eventInfo.GetProcTarget().GetLevel() * 125);
 
             GetTarget().CastCustomSpell(SpellIds.DivineAegis, SpellValueMod.BasePoint0, absorb, eventInfo.GetProcTarget(), true, null, aurEff);
         }
@@ -748,7 +748,7 @@ namespace Scripts.Spells.Priest
                     if (!caster.IsValidAttackTarget(target))
                         return SpellCastResult.BadTargets;
 
-                    if (!caster.isInFront(target))
+                    if (!caster.IsInFront(target))
                         return SpellCastResult.NotInfront;
                 }
                 else
@@ -757,7 +757,7 @@ namespace Scripts.Spells.Priest
                     if (!caster.HasAura(SpellIds.ThePenitentAura))
                         return SpellCastResult.BadTargets;
 
-                    if (!caster.isInFront(target))
+                    if (!caster.IsInFront(target))
                         return SpellCastResult.UnitNotInfront;
                 }
             }

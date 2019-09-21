@@ -37,7 +37,7 @@ namespace Scripts.Pets
 
             _isViper = Info.Entry == NpcViper ? true : false;
 
-            me.SetMaxHealth((uint)(107 * (me.getLevel() - 40) * 0.025f));
+            me.SetMaxHealth((uint)(107 * (me.GetLevel() - 40) * 0.025f));
             // Add delta to make them not all hit the same time
             uint delta = (RandomHelper.Rand32() % 7) * 100;
             me.SetBaseAttackTime(WeaponAttackType.BaseAttack, Info.BaseAttackTime + delta);
@@ -48,8 +48,8 @@ namespace Scripts.Pets
             {
                 Unit owner = me.ToTempSummon().GetSummoner();
                 if (owner)
-                    if (owner.getAttackerForHelper())
-                        AttackStart(owner.getAttackerForHelper());
+                    if (owner.GetAttackerForHelper())
+                        AttackStart(owner.GetAttackerForHelper());
             }
 
             if (!_isViper)
@@ -69,7 +69,7 @@ namespace Scripts.Pets
                 {
                     if ((RandomHelper.Rand32() % 5) == 0)
                     {
-                        me.setAttackTimer(WeaponAttackType.BaseAttack, (RandomHelper.Rand32() % 10) * 100);
+                        me.SetAttackTimer(WeaponAttackType.BaseAttack, (RandomHelper.Rand32() % 10) * 100);
                         _spellTimer = (RandomHelper.Rand32() % 10) * 100;
                         AttackStart(who);
                     }

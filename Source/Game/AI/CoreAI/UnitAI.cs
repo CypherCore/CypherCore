@@ -73,22 +73,22 @@ namespace Game.AI
                 return;
 
             //Make sure our attack is ready and we aren't currently casting before checking distance
-            if (me.isAttackReady())
+            if (me.IsAttackReady())
             {
                 me.AttackerStateUpdate(victim);
-                me.resetAttackTimer();
+                me.ResetAttackTimer();
             }
 
-            if (me.haveOffhandWeapon() && me.isAttackReady(WeaponAttackType.OffAttack))
+            if (me.HaveOffhandWeapon() && me.IsAttackReady(WeaponAttackType.OffAttack))
             {
                 me.AttackerStateUpdate(victim, WeaponAttackType.OffAttack);
-                me.resetAttackTimer(WeaponAttackType.OffAttack);
+                me.ResetAttackTimer(WeaponAttackType.OffAttack);
             }
         }
 
         public bool DoSpellAttackIfReady(uint spell)
         {
-            if (me.HasUnitState(UnitState.Casting) || !me.isAttackReady())
+            if (me.HasUnitState(UnitState.Casting) || !me.IsAttackReady())
                 return true;
 
             var spellInfo = Global.SpellMgr.GetSpellInfo(spell);
@@ -97,7 +97,7 @@ namespace Game.AI
                 if (me.IsWithinCombatRange(me.GetVictim(), spellInfo.GetMaxRange(false)))
                 {
                     me.CastSpell(me.GetVictim(), spellInfo, TriggerCastFlags.None);
-                    me.resetAttackTimer();
+                    me.ResetAttackTimer();
                     return true;
                 }
             }
@@ -507,7 +507,7 @@ namespace Game.AI
                         minRange += rangeMod;
                 }
 
-                if (_caster.isMoving() && target.isMoving() && !_caster.IsWalking() && !target.IsWalking() &&
+                if (_caster.IsMoving() && target.IsMoving() && !_caster.IsWalking() && !target.IsWalking() &&
                     (_spellInfo.RangeEntry.Flags.HasAnyFlag(SpellRangeFlag.Melee) || target.IsTypeId(TypeId.Player)))
                     rangeMod += 8.0f / 3.0f;
             }

@@ -58,7 +58,7 @@ namespace Game.Chat
             string defRespawnDelayStr = Time.secsToTimeString(target.GetRespawnDelay(), true);
 
             handler.SendSysMessage(CypherStrings.NpcinfoChar, target.GetSpawnId(), target.GetGUID().ToString(), faction, npcflags, Entry, displayid, nativeid);
-            handler.SendSysMessage(CypherStrings.NpcinfoLevel, target.getLevel());
+            handler.SendSysMessage(CypherStrings.NpcinfoLevel, target.GetLevel());
             handler.SendSysMessage(CypherStrings.NpcinfoEquipment, target.GetCurrentEquipmentId(), target.GetOriginalEquipmentId());
             handler.SendSysMessage(CypherStrings.NpcinfoHealth, target.GetCreateHealth(), target.GetMaxHealth(), target.GetHealth());
             handler.SendSysMessage(CypherStrings.NpcinfoInhabitType, cInfo.InhabitType);
@@ -166,7 +166,7 @@ namespace Game.Chat
                 creature.GetMotionMaster().Initialize();
                 if (creature.IsAlive())                            // dead creature will reset movement generator at respawn
                 {
-                    creature.setDeathState(DeathState.JustDied);
+                    creature.SetDeathState(DeathState.JustDied);
                     creature.Respawn();
                 }
             }
@@ -399,7 +399,7 @@ namespace Game.Chat
             pet.SetReactState(ReactStates.Defensive);
 
             // calculate proper level
-            uint level = (creatureTarget.getLevel() < (player.getLevel() - 5)) ? (player.getLevel() - 5) : creatureTarget.getLevel();
+            uint level = (creatureTarget.GetLevel() < (player.GetLevel() - 5)) ? (player.GetLevel() - 5) : creatureTarget.GetLevel();
 
             // prepare visual effect for levelup
             pet.SetLevel(level - 1);
@@ -893,7 +893,7 @@ namespace Game.Chat
                     creature.GetMotionMaster().Initialize();
                     if (creature.IsAlive())                            // dead creature will reset movement generator at respawn
                     {
-                        creature.setDeathState(DeathState.JustDied);
+                        creature.SetDeathState(DeathState.JustDied);
                         creature.Respawn();
                     }
                     creature.SaveToDB();
@@ -992,7 +992,7 @@ namespace Game.Chat
                 creature.GetMotionMaster().Initialize();
                 if (creature.IsAlive())                                // dead creature will reset movement generator at respawn
                 {
-                    creature.setDeathState(DeathState.JustDied);
+                    creature.SetDeathState(DeathState.JustDied);
                     creature.Respawn();
                 }
 

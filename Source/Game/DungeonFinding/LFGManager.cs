@@ -649,7 +649,7 @@ namespace Game.DungeonFinding
             return null;
         }
 
-        public void UpdateRoleCheck(ObjectGuid gguid, ObjectGuid guid = default(ObjectGuid), LfgRoles roles = LfgRoles.None)
+        public void UpdateRoleCheck(ObjectGuid gguid, ObjectGuid guid = default, LfgRoles roles = LfgRoles.None)
         {
             if (gguid.IsEmpty())
                 return;
@@ -1342,7 +1342,7 @@ namespace Game.DungeonFinding
                 if (dungeon.difficulty == Difficulty.Heroic)
                     player.UpdateCriteria(CriteriaTypes.UseLfdToGroupWithPlayers, 1);
 
-                LfgReward reward = GetRandomDungeonReward(rDungeonId, player.getLevel());
+                LfgReward reward = GetRandomDungeonReward(rDungeonId, player.GetLevel());
                 if (reward == null)
                     continue;
 
@@ -1496,7 +1496,7 @@ namespace Game.DungeonFinding
                 return lockDic;
             }
 
-            uint level = player.getLevel();
+            uint level = player.GetLevel();
             Expansion expansion = player.GetSession().GetExpansion();
             var dungeons = GetDungeonsByRandom(0);
             bool denyJoin = !player.GetSession().HasPermission(RBACPermissions.JoinDungeonFinder);

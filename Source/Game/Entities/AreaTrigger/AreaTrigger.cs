@@ -24,7 +24,6 @@ using Game.Network.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using Game;
 using Framework.Dynamic;
 using Game.Network;
 
@@ -37,8 +36,8 @@ namespace Game.Entities
             _previousCheckOrientation = float.PositiveInfinity;
             _reachedDestination = true;
 
-            objectTypeMask |= TypeMask.AreaTrigger;
-            objectTypeId = TypeId.AreaTrigger;
+            ObjectTypeMask |= TypeMask.AreaTrigger;
+            ObjectTypeId = TypeId.AreaTrigger;
 
             m_updateFlag.Stationary = true;
             m_updateFlag.AreaTrigger = true;
@@ -79,7 +78,7 @@ namespace Game.Entities
             }
         }
 
-        public static AreaTrigger CreateAreaTrigger(uint spellMiscId, Unit caster, Unit target, SpellInfo spell, Position pos, int duration, uint spellXSpellVisualId, ObjectGuid castId = default(ObjectGuid), AuraEffect aurEff = null)
+        public static AreaTrigger CreateAreaTrigger(uint spellMiscId, Unit caster, Unit target, SpellInfo spell, Position pos, int duration, uint spellXSpellVisualId, ObjectGuid castId = default, AuraEffect aurEff = null)
         {
             AreaTrigger at = new AreaTrigger();
             if (!at.Create(spellMiscId, caster, target, spell, pos, duration, spellXSpellVisualId, castId, aurEff))
@@ -393,7 +392,7 @@ namespace Game.Entities
             {
                 Player player = unit.ToPlayer();
                 if (player)
-                    if (player.isDebugAreaTriggers)
+                    if (player.IsDebugAreaTriggers)
                         player.SendSysMessage(CypherStrings.DebugAreatriggerEntered, GetTemplate().Id);
 
                 DoActions(unit);
@@ -408,7 +407,7 @@ namespace Game.Entities
                 {
                     Player player = leavingUnit.ToPlayer();
                     if (player)
-                        if (player.isDebugAreaTriggers)
+                        if (player.IsDebugAreaTriggers)
                             player.SendSysMessage(CypherStrings.DebugAreatriggerLeft, GetTemplate().Id);
 
                     UndoActions(leavingUnit);
@@ -887,7 +886,7 @@ namespace Game.Entities
             {
                 Player player = caster.ToPlayer();
                 if (player)
-                    if (player.isDebugAreaTriggers)
+                    if (player.IsDebugAreaTriggers)
                         player.SummonCreature(1, this, TempSummonType.TimedDespawn, GetTimeToTarget());
             }
         }

@@ -21,8 +21,6 @@ using Game.Groups;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Game.Movement;
-using Game.Maps;
 
 namespace Game.AI
 {
@@ -101,7 +99,7 @@ namespace Game.AI
 
         public override void MoveInLineOfSight(Unit who)
         {
-            if (me.HasReactState(ReactStates.Aggressive) && !me.HasUnitState(UnitState.Stunned) && who.isTargetableForAttack() && who.isInAccessiblePlaceFor(me))
+            if (me.HasReactState(ReactStates.Aggressive) && !me.HasUnitState(UnitState.Stunned) && who.IsTargetableForAttack() && who.IsInAccessiblePlaceFor(me))
             {
                 if (HasEscortState(eEscortState.Escorting) && AssistPlayerInCombatAgainst(who))
                     return;
@@ -256,7 +254,7 @@ namespace Game.AI
 
                             if (m_bCanInstantRespawn)
                             {
-                                me.setDeathState(DeathState.JustDied);
+                                me.SetDeathState(DeathState.JustDied);
                                 me.Respawn();
                             }
                             else
@@ -296,7 +294,7 @@ namespace Game.AI
 
                         if (m_bCanInstantRespawn)
                         {
-                            me.setDeathState(DeathState.JustDied);
+                            me.SetDeathState(DeathState.JustDied);
                             me.Respawn();
                         }
                         else
@@ -409,7 +407,7 @@ namespace Game.AI
         }
 
         /// todo get rid of this many variables passed in function.
-        public void Start(bool isActiveAttacker = true, bool run = false, ObjectGuid playerGUID = default(ObjectGuid), Quest quest = null, bool instantRespawn = false, bool canLoopPath = false, bool resetWaypoints = true)
+        public void Start(bool isActiveAttacker = true, bool run = false, ObjectGuid playerGUID = default, Quest quest = null, bool instantRespawn = false, bool canLoopPath = false, bool resetWaypoints = true)
         {
             if (me.GetVictim())
             {

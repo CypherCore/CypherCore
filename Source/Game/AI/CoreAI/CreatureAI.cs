@@ -72,7 +72,7 @@ namespace Game.AI
                     Unit summoner = creature.ToTempSummon().GetSummoner();
                     if (summoner != null)
                     {
-                        Unit target = summoner.getAttackerForHelper();
+                        Unit target = summoner.GetAttackerForHelper();
                         if (target == null && summoner.CanHaveThreatList() && !summoner.GetThreatManager().isThreatListEmpty())
                             target = summoner.GetThreatManager().getHostilTarget();
                         if (target != null && (creature.IsFriendlyTo(summoner) || creature.IsHostileTo(target)))

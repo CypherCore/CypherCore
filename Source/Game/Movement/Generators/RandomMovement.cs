@@ -75,7 +75,7 @@ namespace Game.Movement
                 return true;
             }
 
-            if (creature.moveSpline.Finalized())
+            if (creature.MoveSpline.Finalized())
             {
                 i_nextMoveTime.Update((int)diff);
                 if (i_nextMoveTime.Passed())
@@ -167,7 +167,7 @@ namespace Game.Movement
             init.Launch();
 
             //Call for creature group update
-            if (creature.GetFormation() != null && creature.GetFormation().getLeader() == creature)
+            if (creature.GetFormation() != null && creature.GetFormation().GetLeader() == creature)
                 creature.GetFormation().LeaderMoveTo(destX, destY, destZ);
         }
 

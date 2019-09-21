@@ -72,7 +72,7 @@ namespace Game.Chat
             if (!player.HasAuraType(AuraType.ModShapeshift))
                 player.SetShapeshiftForm(ShapeShiftForm.None);
 
-            player.setFactionForRace(player.GetRace());
+            player.SetFactionForRace(player.GetRace());
             player.SetPowerType(powerType);
 
             // reset only if player not in some form;
@@ -98,7 +98,7 @@ namespace Game.Chat
             if (!HandleResetStatsOrLevelHelper(target))
                 return false;
 
-            byte oldLevel = (byte)target.getLevel();
+            byte oldLevel = (byte)target.GetLevel();
 
             // set starting level
             uint startLevel = (uint)(target.GetClass() != Class.Deathknight ? WorldConfig.GetIntValue(WorldCfg.StartPlayerLevel) : WorldConfig.GetIntValue(WorldCfg.StartDeathKnightPlayerLevel));

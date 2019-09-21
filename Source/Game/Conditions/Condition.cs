@@ -91,11 +91,11 @@ namespace Game.Conditions
                     break;
                 case ConditionTypes.Class:
                     if (unit != null)
-                        condMeets = Convert.ToBoolean(unit.getClassMask() & ConditionValue1);
+                        condMeets = Convert.ToBoolean(unit.GetClassMask() & ConditionValue1);
                     break;
                 case ConditionTypes.Race:
                     if (unit != null)
-                        condMeets = Convert.ToBoolean(unit.getRaceMask() & ConditionValue1);
+                        condMeets = Convert.ToBoolean(unit.GetRaceMask() & ConditionValue1);
                     break;
                 case ConditionTypes.Gender:
                     if (player != null)
@@ -169,7 +169,7 @@ namespace Game.Conditions
                     break;
                 case ConditionTypes.Level:
                     if (unit != null)
-                        condMeets = MathFunctions.CompareValues((ComparisionType)ConditionValue2, unit.getLevel(), ConditionValue1);
+                        condMeets = MathFunctions.CompareValues((ComparisionType)ConditionValue2, unit.GetLevel(), ConditionValue1);
                     break;
                 case ConditionTypes.DrunkenState:
                     if (player != null)
@@ -201,7 +201,7 @@ namespace Game.Conditions
                     }
                     break;
                 case ConditionTypes.TypeMask:
-                    condMeets = Convert.ToBoolean((TypeMask)ConditionValue1 & obj.objectTypeMask);
+                    condMeets = Convert.ToBoolean((TypeMask)ConditionValue1 & obj.ObjectTypeMask);
                     break;
                 case ConditionTypes.RelationTo:
                     {
@@ -332,7 +332,7 @@ namespace Game.Conditions
                         {
                             Pet pet = player.GetPet();
                             if (pet)
-                                condMeets = (((1 << (int)pet.getPetType()) & ConditionValue1) != 0);
+                                condMeets = (((1 << (int)pet.GetPetType()) & ConditionValue1) != 0);
                         }
                         break;
                     }

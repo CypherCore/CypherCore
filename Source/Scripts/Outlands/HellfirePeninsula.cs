@@ -20,7 +20,6 @@ using Game;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
-using Game.PvP;
 
 namespace Scripts.Outlands
 {

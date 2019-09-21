@@ -722,7 +722,7 @@ namespace Game.BattleGrounds
                 {
                     //needed cause else in av some creatures will kill the players at the end
                     player.CombatStop();
-                    player.getHostileRefManager().deleteReferences();
+                    player.GetHostileRefManager().deleteReferences();
                 }
 
                 // remove temporary currency bonus auras before rewarding player
@@ -974,7 +974,7 @@ namespace Game.BattleGrounds
         public virtual void AddPlayer(Player player)
         {
             // remove afk from player
-            if (player.isAFK())
+            if (player.IsAFK())
                 player.ToggleAFK();
 
             // score struct must be created in inherited class
@@ -1356,7 +1356,7 @@ namespace Game.BattleGrounds
             if (obj)
             {
                 // If doors are open, close it
-                if (obj.getLootState() == LootState.Activated && obj.GetGoState() != GameObjectState.Ready)
+                if (obj.GetLootState() == LootState.Activated && obj.GetGoState() != GameObjectState.Ready)
                 {
                     obj.SetLootState(LootState.Ready);
                     obj.SetGoState(GameObjectState.Ready);
@@ -1416,7 +1416,7 @@ namespace Game.BattleGrounds
                         obj.SetLootState(LootState.JustDeactivated);
                     else
                     {
-                        if (obj.getLootState() == LootState.JustDeactivated)
+                        if (obj.GetLootState() == LootState.JustDeactivated)
                             // Change state from GO_JUST_DEACTIVATED to GO_READY in case Battleground is starting again
                             obj.SetLootState(LootState.Ready);
                     }
@@ -1523,7 +1523,7 @@ namespace Game.BattleGrounds
             Creature creature = AddCreature(entry, type, x, y, z, o);
             if (creature)
             {
-                creature.setDeathState(DeathState.Dead);
+                creature.SetDeathState(DeathState.Dead);
                 creature.AddChannelObject(creature.GetGUID());
                 // aura
                 //todo Fix display here
@@ -1578,7 +1578,7 @@ namespace Game.BattleGrounds
         public void HandleTriggerBuff(ObjectGuid goGuid)
         {
             GameObject obj = GetBgMap().GetGameObject(goGuid);
-            if (!obj || obj.GetGoType() != GameObjectTypes.Trap || !obj.isSpawned())
+            if (!obj || obj.GetGoType() != GameObjectTypes.Trap || !obj.IsSpawned())
                 return;
 
             // Change buff type, when buff is used:

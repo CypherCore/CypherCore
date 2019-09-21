@@ -1191,7 +1191,7 @@ namespace Game.Network.Packets
             PlayerLevelDelta = (short)target.m_activePlayerData.ScalingPlayerLevelDelta;
             PlayerItemLevel = (ushort)target.GetAverageItemLevel();
             ScalingHealthItemLevelCurveID = (ushort)target.m_unitData.ScalingHealthItemLevelCurveID;
-            TargetLevel = (byte)target.getLevel();
+            TargetLevel = (byte)target.GetLevel();
             Expansion = (byte)creatureTemplate.RequiredExpansion;
             TargetMinScalingLevel = (byte)creatureTemplate.levelScaling.Value.MinLevel;
             TargetMaxScalingLevel = (byte)creatureTemplate.levelScaling.Value.MaxLevel;
@@ -1207,7 +1207,7 @@ namespace Game.Network.Packets
             PlayerLevelDelta = (short)attacker.m_activePlayerData.ScalingPlayerLevelDelta;
             PlayerItemLevel = (ushort)attacker.GetAverageItemLevel();
             ScalingHealthItemLevelCurveID = (ushort)target.m_unitData.ScalingHealthItemLevelCurveID;
-            TargetLevel = (byte)target.getLevel();
+            TargetLevel = (byte)target.GetLevel();
             Expansion = (byte)creatureTemplate.RequiredExpansion;
             TargetMinScalingLevel = (byte)creatureTemplate.levelScaling.Value.MinLevel;
             TargetMaxScalingLevel = (byte)creatureTemplate.levelScaling.Value.MaxLevel;
@@ -1223,7 +1223,7 @@ namespace Game.Network.Packets
             TuningType = ContentTuningType.CreatureToCreatureDamage;
             PlayerLevelDelta = 0;
             PlayerItemLevel = 0;
-            TargetLevel = (byte)target.getLevel();
+            TargetLevel = (byte)target.GetLevel();
             Expansion = (byte)creatureTemplate.RequiredExpansion;
             TargetMinScalingLevel = (byte)creatureTemplate.levelScaling.Value.MinLevel;
             TargetMaxScalingLevel = (byte)creatureTemplate.levelScaling.Value.MaxLevel;

@@ -1272,7 +1272,7 @@ namespace Game.AI
                             break;
 
                         foreach (var obj in targets)
-                            obj.setActive(e.Action.active.state != 0);
+                            obj.SetActive(e.Action.active.state != 0);
 
                         break;
                     }
@@ -1635,7 +1635,7 @@ namespace Game.AI
                             else if (IsGameObject(obj))
                             {
                                 // do not modify respawndelay of already spawned gameobjects
-                                if (obj.ToGameObject().isSpawnedByDefault())
+                                if (obj.ToGameObject().IsSpawnedByDefault())
                                     obj.ToGameObject().Respawn();
                                 else
                                     obj.ToGameObject().SetRespawnTime((int)e.Action.respawnTarget.goRespawnTime);
@@ -2256,7 +2256,7 @@ namespace Game.AI
 
                         foreach (var obj in targets)
                             if (IsCreature(obj))
-                                obj.ToCreature().setRegeneratingHealth(e.Action.setHealthRegen.regenHealth != 0 ? true : false);
+                                obj.ToCreature().SetRegeneratingHealth(e.Action.setHealthRegen.regenHealth != 0 ? true : false);
                         break;
                     }
                 case SmartActions.SetRoot:

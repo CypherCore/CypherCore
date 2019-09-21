@@ -50,15 +50,15 @@ namespace Game.Chat
         static bool HandleDebugAreaTriggersCommand(StringArguments args, CommandHandler handler)
         {
             Player player = handler.GetSession().GetPlayer();
-            if (!player.isDebugAreaTriggers)
+            if (!player.IsDebugAreaTriggers)
             {
                 handler.SendSysMessage(CypherStrings.DebugAreatriggerOn);
-                player.isDebugAreaTriggers = true;
+                player.IsDebugAreaTriggers = true;
             }
             else
             {
                 handler.SendSysMessage(CypherStrings.DebugAreatriggerOff);
-                player.isDebugAreaTriggers = false;
+                player.IsDebugAreaTriggers = false;
             }
             return true;
         }
@@ -441,7 +441,7 @@ namespace Game.Chat
             Unit target = handler.getSelectedUnit();
             if (!target)
                 target = handler.GetSession().GetPlayer();
-            HostileReference refe = target.getHostileRefManager().getFirst();
+            HostileReference refe = target.GetHostileRefManager().getFirst();
             uint count = 0;
             handler.SendSysMessage("Hostil reference list of {0} (guid {1})", target.GetName(), target.GetGUID().ToString());
             while (refe != null)
@@ -485,7 +485,7 @@ namespace Game.Chat
                 return false;
 
             handler.SendSysMessage("Loot recipient for creature {0} (GUID {1}, DB GUID {2}) is {3}", target.GetName(), target.GetGUID().ToString(), target.GetSpawnId(),
-                target.hasLootRecipient() ? (target.GetLootRecipient() ? target.GetLootRecipient().GetName() : "offline") : "no loot recipient");
+                target.HasLootRecipient() ? (target.GetLootRecipient() ? target.GetLootRecipient().GetName() : "offline") : "no loot recipient");
             return true;
         }
 

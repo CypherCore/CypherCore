@@ -20,7 +20,6 @@ using Game.Entities;
 using Game.Guilds;
 using Game.Network;
 using Game.Network.Packets;
-using System.Collections.Generic;
 
 namespace Game
 {

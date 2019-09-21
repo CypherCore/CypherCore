@@ -40,13 +40,13 @@ namespace Game
                 error = ReferAFriendError.NotReferredBy;
             else if (target.GetTeamId() != GetPlayer().GetTeamId())
                 error = ReferAFriendError.DifferentFaction;
-            else if (target.getLevel() >= GetPlayer().getLevel())
+            else if (target.GetLevel() >= GetPlayer().GetLevel())
                 error = ReferAFriendError.TargetTooHigh;
-            else if (target.getLevel() >= WorldConfig.GetIntValue(WorldCfg.MaxRecruitAFriendBonusPlayerLevel))
+            else if (target.GetLevel() >= WorldConfig.GetIntValue(WorldCfg.MaxRecruitAFriendBonusPlayerLevel))
                 error = ReferAFriendError.GrantLevelMaxI;
             else if (target.GetGroup() != GetPlayer().GetGroup())
                 error = ReferAFriendError.NotInGroup;
-            else if (target.getLevel() >= Global.ObjectMgr.GetMaxLevelForExpansion(target.GetSession().GetExpansion()))
+            else if (target.GetLevel() >= Global.ObjectMgr.GetMaxLevelForExpansion(target.GetSession().GetExpansion()))
                 error = ReferAFriendError.InsufExpanLvl;
 
             if (error != 0)
@@ -80,7 +80,7 @@ namespace Game
             else
                 return;
 
-            GetPlayer().GiveLevel(GetPlayer().getLevel() + 1);
+            GetPlayer().GiveLevel(GetPlayer().GetLevel() + 1);
         }
     }
 }

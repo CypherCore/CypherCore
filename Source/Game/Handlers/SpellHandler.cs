@@ -308,7 +308,7 @@ namespace Game
                 return;
 
             // can't use our own spells when we're in possession of another unit,
-            if (GetPlayer().isPossessing())
+            if (GetPlayer().IsPossessing())
                 return;
 
             // client provided targets

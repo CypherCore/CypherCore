@@ -456,9 +456,9 @@ namespace Game.Entities
 
                 if (!WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreLevel))
                 {
-                    if (ar.levelMin != 0 && getLevel() < ar.levelMin)
+                    if (ar.levelMin != 0 && GetLevel() < ar.levelMin)
                         LevelMin = ar.levelMin;
-                    if (ar.levelMax != 0 && getLevel() > ar.levelMax)
+                    if (ar.levelMax != 0 && GetLevel() > ar.levelMax)
                         LevelMax = ar.levelMax;
                 }
 

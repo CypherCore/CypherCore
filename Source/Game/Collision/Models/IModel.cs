@@ -16,15 +16,14 @@
  */
 
 using Framework.GameMath;
-using System.Collections.Generic;
 using Framework.Constants;
 
 namespace Game.Collision
 {
     public class IModel
     {
-        public virtual Vector3 getPosition() { return default(Vector3); }
-        public virtual AxisAlignedBox getBounds() { return default(AxisAlignedBox); }
+        public virtual Vector3 getPosition() { return default; }
+        public virtual AxisAlignedBox getBounds() { return default; }
 
         public virtual bool IntersectRay(Ray ray, ref float maxDist, bool stopAtFirstHit, PhaseShift phaseShift, ModelIgnoreFlags ignoreFlags) { return false; }
         public virtual bool IntersectRay(Ray ray, ref float distance, bool stopAtFirstHit, ModelIgnoreFlags ignoreFlags) { return false; }

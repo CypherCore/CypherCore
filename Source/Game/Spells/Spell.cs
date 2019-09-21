@@ -31,13 +31,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using Game.AI;
 
 namespace Game.Spells
 {
     public partial class Spell : IDisposable
     {
-        public Spell(Unit caster, SpellInfo info, TriggerCastFlags triggerFlags, ObjectGuid originalCasterGUID = default(ObjectGuid), bool skipcheck = false)
+        public Spell(Unit caster, SpellInfo info, TriggerCastFlags triggerFlags, ObjectGuid originalCasterGUID = default, bool skipcheck = false)
         {
             m_spellInfo = info;
             m_caster = (info.HasAttribute(SpellAttr6.CastByCharmer) && caster.GetCharmerOrOwner() != null ? caster.GetCharmerOrOwner() : caster);
@@ -60,7 +59,7 @@ namespace Game.Spells
 
             if (m_attackType == WeaponAttackType.RangedAttack)
             {
-                if ((m_caster.getClassMask() & (uint)Class.ClassMaskWandUsers) != 0 && m_caster.IsTypeId(TypeId.Player))
+                if ((m_caster.GetClassMask() & (uint)Class.ClassMaskWandUsers) != 0 && m_caster.IsTypeId(TypeId.Player))
                 {
                     Item pItem = m_caster.ToPlayer().GetWeaponForAttack(WeaponAttackType.RangedAttack);
                     if (pItem != null)
@@ -1734,7 +1733,7 @@ namespace Game.Spells
             if (unit.IsAlive() != target.alive)
                 return;
 
-            if (getState() == SpellState.Delayed && !m_spellInfo.IsPositive() && (GameTime.GetGameTimeMS() - target.timeDelay) <= unit.m_lastSanctuaryTime)
+            if (getState() == SpellState.Delayed && !m_spellInfo.IsPositive() && (GameTime.GetGameTimeMS() - target.timeDelay) <= unit.LastSanctuaryTime)
                 return;                                             // No missinfo in that case
 
             // Get original caster (if exist) and calculate damage/healing from him data
@@ -1870,7 +1869,7 @@ namespace Game.Spells
 
                 HealInfo healInfo = new HealInfo(caster, unitTarget, addhealth, m_spellInfo, m_spellInfo.GetSchoolMask());
                 caster.HealBySpell(healInfo, crit);
-                unitTarget.getHostileRefManager().threatAssist(caster, healInfo.GetEffectiveHeal() * 0.5f, m_spellInfo);
+                unitTarget.GetHostileRefManager().threatAssist(caster, healInfo.GetEffectiveHeal() * 0.5f, m_spellInfo);
                 m_healing = (int)healInfo.GetEffectiveHeal();
 
                 // Do triggers for unit
@@ -1896,7 +1895,7 @@ namespace Game.Spells
                     caster.CalculateSpellDamageTaken(damageInfo, m_damage, m_spellInfo, m_attackType, target.crit);
                     caster.DealDamageMods(damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
 
-                    hitMask |= Unit.createProcHitMask(damageInfo, missInfo);
+                    hitMask |= Unit.CreateProcHitMask(damageInfo, missInfo);
                     procVictim |= ProcFlags.TakenDamage;
 
                     m_damage = (int)damageInfo.damage;
@@ -1923,7 +1922,7 @@ namespace Game.Spells
             {
                 // Fill base damage struct (unitTarget - is real spell target)
                 SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(caster, unitTarget, m_spellInfo.Id, m_SpellVisual, m_spellSchoolMask);
-                hitMask |= Unit.createProcHitMask(damageInfo, missInfo);
+                hitMask |= Unit.CreateProcHitMask(damageInfo, missInfo);
                 // Do triggers for unit
                 if (canEffectTrigger)
                 {
@@ -2041,7 +2040,7 @@ namespace Game.Spells
                     if (unit.IsInCombat() && m_spellInfo.HasInitialAggro())
                     {
                         m_caster.SetInCombatState(unit.GetCombatTimer() > 0, unit);
-                        unit.getHostileRefManager().threatAssist(m_caster, 0.0f);
+                        unit.GetHostileRefManager().threatAssist(m_caster, 0.0f);
                     }
                 }
             }
@@ -2417,13 +2416,13 @@ namespace Game.Spells
                 if (!m_caster.ToPlayer().GetCommandStatus(PlayerCommandStates.Casttime))
                 {
                     // calculate cast time (calculated after first CheckCast check to prevent charge counting for first CheckCast fail)
-                    m_casttime = m_spellInfo.CalcCastTime(m_caster.getLevel(), this);
+                    m_casttime = m_spellInfo.CalcCastTime(m_caster.GetLevel(), this);
                 }
                 else
                     m_casttime = 0;
             }
             else
-                m_casttime = m_spellInfo.CalcCastTime(m_caster.getLevel(), this);
+                m_casttime = m_spellInfo.CalcCastTime(m_caster.GetLevel(), this);
 
             if (m_caster.IsTypeId(TypeId.Unit) && !m_caster.HasUnitFlag(UnitFlags.PlayerControlled)) // _UNIT actually means creature. for some reason.
             {
@@ -2440,7 +2439,7 @@ namespace Game.Spells
             // exception are only channeled spells that have no casttime and SPELL_ATTR5_CAN_CHANNEL_WHEN_MOVING
             // (even if they are interrupted on moving, spells with almost immediate effect get to have their effect processed before movement interrupter kicks in)
             // don't cancel spells which are affected by a SPELL_AURA_CAST_WHILE_WALKING effect
-            if (((m_spellInfo.IsChanneled() || m_casttime != 0) && m_caster.IsTypeId(TypeId.Player) && !(m_caster.IsCharmed() && m_caster.GetCharmerGUID().IsCreature()) && m_caster.isMoving() &&
+            if (((m_spellInfo.IsChanneled() || m_casttime != 0) && m_caster.IsTypeId(TypeId.Player) && !(m_caster.IsCharmed() && m_caster.GetCharmerGUID().IsCreature()) && m_caster.IsMoving() &&
                 m_spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.Movement) && !m_caster.HasAuraTypeWithAffectMask(AuraType.CastWhileWalking, m_spellInfo)))
             {
                 // 1. Has casttime, 2. Or doesn't have flag to allow movement during channel
@@ -2598,7 +2597,7 @@ namespace Game.Spells
                 {
                     Pet playerPet = playerCaster.GetPet();
                     if (playerPet != null)
-                        if (playerPet.IsAlive() && playerPet.isControlled() && Convert.ToBoolean(m_targets.GetTargetMask() & SpellCastTargetFlags.Unit))
+                        if (playerPet.IsAlive() && playerPet.IsControlled() && Convert.ToBoolean(m_targets.GetTargetMask() & SpellCastTargetFlags.Unit))
                             playerPet.GetAI().OwnerAttacked(m_targets.GetUnitTarget());
                 }
             }
@@ -3017,13 +3016,13 @@ namespace Game.Spells
                     m_caster.m_playerMovingMe.GainSpellComboPoints(m_comboPointGain);
             }
 
-            if (m_caster.m_extraAttacks != 0 && m_spellInfo.HasEffect(SpellEffectName.AddExtraAttacks))
+            if (m_caster.ExtraAttacks != 0 && m_spellInfo.HasEffect(SpellEffectName.AddExtraAttacks))
             {
                 Unit victim = Global.ObjAccessor.GetUnit(m_caster, m_targets.GetOrigUnitTargetGUID());
                 if (victim)
                     m_caster.HandleProcExtraAttackFor(victim);
                 else
-                    m_caster.m_extraAttacks = 0;
+                    m_caster.ExtraAttacks = 0;
             }
 
             // Handle procs on finish
@@ -3070,7 +3069,7 @@ namespace Game.Spells
             // with the exception of spells affected with SPELL_AURA_CAST_WHILE_WALKING effect
             SpellEffectInfo effect = GetEffect(0);
             if ((m_caster.IsTypeId(TypeId.Player) && m_timer != 0) &&
-                m_caster.isMoving() && m_spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.Movement) &&
+                m_caster.IsMoving() && m_spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.Movement) &&
                 ((effect != null && effect.Effect != SpellEffectName.Stuck) || !m_caster.HasUnitMovementFlag(MovementFlag.FallingFar)) &&
                 !m_caster.HasAuraTypeWithAffectMask(AuraType.CastWhileWalking, m_spellInfo))
             {
@@ -3181,7 +3180,7 @@ namespace Game.Spells
                 if (spellInfo != null && spellInfo.IconFileDataId == 134230)
                 {
                     Log.outDebug(LogFilter.Spells, "Statue {0} is unsummoned in spell {1} finish", m_caster.GetGUID().ToString(), m_spellInfo.Id);
-                    m_caster.setDeathState(DeathState.JustDied);
+                    m_caster.SetDeathState(DeathState.JustDied);
                     return;
                 }
             }
@@ -3200,10 +3199,10 @@ namespace Game.Spells
                 }
                 if (!found && !m_spellInfo.HasAttribute(SpellAttr2.NotResetAutoActions))
                 {
-                    m_caster.resetAttackTimer(WeaponAttackType.BaseAttack);
-                    if (m_caster.haveOffhandWeapon())
-                        m_caster.resetAttackTimer(WeaponAttackType.OffAttack);
-                    m_caster.resetAttackTimer(WeaponAttackType.RangedAttack);
+                    m_caster.ResetAttackTimer(WeaponAttackType.BaseAttack);
+                    if (m_caster.HaveOffhandWeapon())
+                        m_caster.ResetAttackTimer(WeaponAttackType.OffAttack);
+                    m_caster.ResetAttackTimer(WeaponAttackType.RangedAttack);
                 }
             }
 
@@ -4259,7 +4258,7 @@ namespace Game.Spells
 
                 // positive spells distribute threat among all units that are in combat with target, like healing
                 if (m_spellInfo.IsPositive())
-                    target.getHostileRefManager().threatAssist(m_caster, threatToAdd, m_spellInfo);
+                    target.GetHostileRefManager().threatAssist(m_caster, threatToAdd, m_spellInfo);
                 // for negative spells threat gets distributed among affected targets
                 else
                 {
@@ -4432,7 +4431,7 @@ namespace Game.Spells
             // cancel autorepeat spells if cast start when moving
             // (not wand currently autorepeat cast delayed to moving stop anyway in spell update code)
             // Do not cancel spells which are affected by a SPELL_AURA_CAST_WHILE_WALKING effect
-            if (m_caster.IsTypeId(TypeId.Player) && m_caster.ToPlayer().isMoving() && (!m_caster.IsCharmed() || !m_caster.GetCharmerGUID().IsCreature()) && !m_caster.HasAuraTypeWithAffectMask(AuraType.CastWhileWalking, m_spellInfo))
+            if (m_caster.IsTypeId(TypeId.Player) && m_caster.ToPlayer().IsMoving() && (!m_caster.IsCharmed() || !m_caster.GetCharmerGUID().IsCreature()) && !m_caster.HasAuraTypeWithAffectMask(AuraType.CastWhileWalking, m_spellInfo))
             {
                 // skip stuck spell to allow use it in falling case and apply spell limitations at movement
                 SpellEffectInfo effect = GetEffect(0);
@@ -4670,7 +4669,7 @@ namespace Game.Spells
                                     return SpellCastResult.DontReport;
 
                                 Unit target = m_targets.GetUnitTarget();
-                                if (target == null || !target.IsFriendlyTo(m_caster) || target.getAttackers().Empty())
+                                if (target == null || !target.IsFriendlyTo(m_caster) || target.GetAttackers().Empty())
                                     return SpellCastResult.BadTargets;
 
                             }
@@ -4694,7 +4693,7 @@ namespace Game.Spells
                             if (learn_spellproto == null)
                                 return SpellCastResult.NotKnown;
 
-                            if (m_spellInfo.SpellLevel > pet.getLevel())
+                            if (m_spellInfo.SpellLevel > pet.GetLevel())
                                 return SpellCastResult.Lowlevel;
 
                             break;
@@ -4726,7 +4725,7 @@ namespace Game.Spells
                                 if (learn_spellproto == null)
                                     return SpellCastResult.NotKnown;
 
-                                if (m_spellInfo.SpellLevel > pet.getLevel())
+                                if (m_spellInfo.SpellLevel > pet.GetLevel())
                                     return SpellCastResult.Lowlevel;
                             }
                             break;
@@ -5136,7 +5135,7 @@ namespace Game.Spells
                             if (spec.IsPetSpecialization())
                             {
                                 Pet pet = player.GetPet();
-                                if (!pet || pet.getPetType() != PetType.Hunter || pet.GetCharmInfo() == null)
+                                if (!pet || pet.GetPetType() != PetType.Hunter || pet.GetCharmInfo() == null)
                                     return SpellCastResult.NoPet;
                             }
 
@@ -5734,7 +5733,7 @@ namespace Game.Spells
                     }
                 }
 
-                if (target && m_caster.isMoving() && target.isMoving() && !m_caster.IsWalking() && !target.IsWalking() &&
+                if (target && m_caster.IsMoving() && target.IsMoving() && !m_caster.IsWalking() && !target.IsWalking() &&
                     (m_spellInfo.RangeEntry.Flags.HasAnyFlag(SpellRangeFlag.Melee) || target.IsTypeId(TypeId.Player)))
                     rangeMod += 8.0f / 3.0f;
             }
@@ -6715,7 +6714,7 @@ namespace Game.Spells
                                 if (!m_CastItem && m_caster.IsTypeId(TypeId.Player))
                                     skillValue = m_caster.ToPlayer().GetSkillValue(skillId);
                                 else if (lockInfo.Index[j] == (uint)LockType.Lockpicking)
-                                    skillValue = (int)m_caster.getLevel() * 5;
+                                    skillValue = (int)m_caster.GetLevel() * 5;
 
                                 // skill bonus provided by casting spell (mostly item spells)
                                 // add the effect base points modifier from the spell cast (cheat lock / skeleton key etc.)
@@ -7745,7 +7744,7 @@ namespace Game.Spells
         {
             if (_spellInfo.HasAttribute(SpellCustomAttributes.ConeBack))
             {
-                if (!_caster.isInBack(target, _coneAngle))
+                if (!_caster.IsInBack(target, _coneAngle))
                     return false;
             }
             else if (_spellInfo.HasAttribute(SpellCustomAttributes.ConeLine))

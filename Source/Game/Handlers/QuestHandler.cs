@@ -23,7 +23,6 @@ using Game.Network;
 using Game.Network.Packets;
 using Game.DataStorage;
 using System.Collections.Generic;
-using System;
 
 namespace Game
 {
@@ -122,7 +121,7 @@ namespace Game
             }
             else
             {
-                if (!obj.hasQuest(packet.QuestID))
+                if (!obj.HasQuest(packet.QuestID))
                 {
                     CLOSE_GOSSIP_CLEAR_DIVIDER();
                     return;
@@ -199,7 +198,7 @@ namespace Game
         {
             // Verify that the guid is valid and is a questgiver or involved in the requested quest
             var obj = Global.ObjAccessor.GetObjectByTypeMask(GetPlayer(), packet.QuestGiverGUID, (TypeMask.Unit | TypeMask.GameObject | TypeMask.Item));
-            if (!obj || (!obj.hasQuest(packet.QuestID) && !obj.hasInvolvedQuest(packet.QuestID)))
+            if (!obj || (!obj.HasQuest(packet.QuestID) && !obj.HasInvolvedQuest(packet.QuestID)))
             {
                 GetPlayer().PlayerTalkClass.SendCloseGossip();
                 return;
@@ -308,7 +307,7 @@ namespace Game
             if (!quest.HasFlag(QuestFlags.AutoComplete))
             {
                 obj = Global.ObjAccessor.GetObjectByTypeMask(GetPlayer(), packet.QuestGiverGUID, TypeMask.Unit | TypeMask.GameObject);
-                if (!obj || !obj.hasInvolvedQuest(packet.QuestID))
+                if (!obj || !obj.HasInvolvedQuest(packet.QuestID))
                     return;
 
                 // some kind of WPE protection
@@ -389,7 +388,7 @@ namespace Game
         void HandleQuestgiverRequestReward(QuestGiverRequestReward packet)
         {
             WorldObject obj = Global.ObjAccessor.GetObjectByTypeMask(GetPlayer(), packet.QuestGiverGUID, TypeMask.Unit | TypeMask.GameObject);
-            if (obj == null || !obj.hasInvolvedQuest(packet.QuestID))
+            if (obj == null || !obj.HasInvolvedQuest(packet.QuestID))
                 return;
 
             // some kind of WPE protection
@@ -509,7 +508,7 @@ namespace Game
 
             if (!autoCompleteMode)
             {
-                if (!obj.hasInvolvedQuest(packet.QuestID))
+                if (!obj.HasInvolvedQuest(packet.QuestID))
                     return;
 
                 // some kind of WPE protection

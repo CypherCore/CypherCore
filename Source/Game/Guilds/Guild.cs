@@ -2480,7 +2480,7 @@ namespace Game.Guilds
             public void SetStats(Player player)
             {
                 m_name = player.GetName();
-                m_level = (byte)player.getLevel();
+                m_level = (byte)player.GetLevel();
                 m_class = player.GetClass();
                 _gender = (Gender)(byte)player.m_playerData.NativeSex;
                 m_zoneId = player.GetZoneId();
@@ -3751,7 +3751,7 @@ namespace Game.Guilds
 
                 // Reserve space
                 ItemPosCount pos = new ItemPosCount(slotId, requiredSpace);
-                if (!pos.isContainedIn(m_vec))
+                if (!pos.IsContainedIn(m_vec))
                 {
                     m_vec.Add(pos);
                     count -= requiredSpace;

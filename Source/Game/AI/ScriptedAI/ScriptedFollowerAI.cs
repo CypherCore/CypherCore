@@ -103,7 +103,7 @@ namespace Game.AI
 
         public override void MoveInLineOfSight(Unit who)
         {
-            if (me.HasReactState(ReactStates.Aggressive) && !me.HasUnitState(UnitState.Stunned) && who.isTargetableForAttack() && who.isInAccessiblePlaceFor(me))
+            if (me.HasReactState(ReactStates.Aggressive) && !me.HasUnitState(UnitState.Stunned) && who.IsTargetableForAttack() && who.IsInAccessiblePlaceFor(me))
             {
                 if (HasFollowState(eFollowState.Inprogress) && AssistPlayerInCombatAgainst(who))
                     return;

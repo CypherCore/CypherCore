@@ -258,17 +258,17 @@ namespace Game.Network.Packets
             if (player.IsFFAPvP())
                 MemberStats.Status |= GroupMemberOnlineStatus.PVPFFA;
 
-            if (player.isAFK())
+            if (player.IsAFK())
                 MemberStats.Status |= GroupMemberOnlineStatus.AFK;
 
-            if (player.isDND())
+            if (player.IsDND())
                 MemberStats.Status |= GroupMemberOnlineStatus.DND;
 
             if (player.GetVehicle())
                 MemberStats.Status |= GroupMemberOnlineStatus.Vehicle;
 
             // Level
-            MemberStats.Level = (ushort)player.getLevel();
+            MemberStats.Level = (ushort)player.GetLevel();
 
             // Health
             MemberStats.CurrentHealth = (int)player.GetHealth();

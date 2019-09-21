@@ -149,15 +149,15 @@ namespace Game
             {
                 float xpMod = 1.0f;
 
-                gain = BaseGain(player.getLevel(), u.GetLevelForTarget(player));
+                gain = BaseGain(player.GetLevel(), u.GetLevelForTarget(player));
 
                 if (gain != 0 && creature)
                 {
                     // Players get only 10% xp for killing creatures of lower expansion levels than himself
-                    if ((creature.GetCreatureTemplate().HealthScalingExpansion < (int)GetExpansionForLevel(player.getLevel())))
+                    if ((creature.GetCreatureTemplate().HealthScalingExpansion < (int)GetExpansionForLevel(player.GetLevel())))
                         gain = (uint)Math.Round(gain / 10.0f);
 
-                    if (creature.isElite())
+                    if (creature.IsElite())
                     {
                         // Elites in instances have a 2.75x XP bonus instead of the regular 2x world bonus.
                         if (u.GetMap().IsDungeon())

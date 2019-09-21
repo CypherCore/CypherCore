@@ -1202,7 +1202,7 @@ namespace Game
                         if (pGameobject)
                         {
                             // @todo find out when it is add to map
-                            if (pGameobject.isSpawnedByDefault())
+                            if (pGameobject.IsSpawnedByDefault())
                                 map.AddToMap(pGameobject);
                         }
                     }

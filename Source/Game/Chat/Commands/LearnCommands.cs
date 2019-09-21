@@ -208,7 +208,7 @@ namespace Game.Chat.Commands
 
             static void HandleLearnSkillRecipesHelper(Player player, uint skillId)
             {
-                uint classmask = player.getClassMask();
+                uint classmask = player.GetClassMask();
 
                 foreach (var skillLine in CliDB.SkillLineAbilityStorage.Values)
                 {

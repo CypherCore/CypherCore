@@ -20,7 +20,6 @@ using Game.DataStorage;
 using Game.Groups;
 using Game.Network.Packets;
 using Game.Spells;
-using System.Linq;
 
 namespace Game.Entities
 {
@@ -28,7 +27,7 @@ namespace Game.Entities
     {
         public Totem(SummonPropertiesRecord properties, Unit owner) : base(properties, owner, false)
         {
-            m_unitTypeMask |= UnitTypeMask.Totem;
+            UnitTypeMask |= UnitTypeMask.Totem;
             m_type = TotemType.Passive;
         }
 
@@ -78,12 +77,12 @@ namespace Game.Entities
             // Get spell cast by totem
             SpellInfo totemSpell = Global.SpellMgr.GetSpellInfo(GetSpell());
             if (totemSpell != null)
-                if (totemSpell.CalcCastTime(getLevel()) != 0)   // If spell has cast time . its an active totem
+                if (totemSpell.CalcCastTime(GetLevel()) != 0)   // If spell has cast time . its an active totem
                     m_type = TotemType.Active;
 
             m_duration = duration;
 
-            SetLevel(GetOwner().getLevel());
+            SetLevel(GetOwner().GetLevel());
         }
 
         public override void InitSummon()

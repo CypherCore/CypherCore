@@ -342,7 +342,7 @@ namespace Game.Entities
                 {
                     SpecializationSpellsRecord specSpell = specSpells[j];
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(specSpell.SpellID);
-                    if (spellInfo == null || spellInfo.SpellLevel > getLevel())
+                    if (spellInfo == null || spellInfo.SpellLevel > GetLevel())
                         continue;
 
                     LearnSpell(specSpell.SpellID, false);
@@ -568,7 +568,7 @@ namespace Game.Entities
             if (!ignore_condition && pEnchant.ConditionID != 0 && !EnchantmentFitsRequirements(pEnchant.ConditionID, -1))
                 return;
 
-            if (pEnchant.MinLevel > getLevel())
+            if (pEnchant.MinLevel > GetLevel())
                 return;
 
             if (pEnchant.RequiredSkillID > 0 && pEnchant.RequiredSkillRank > GetSkillValue((SkillType)pEnchant.RequiredSkillID))
@@ -640,12 +640,12 @@ namespace Game.Entities
                                     scalingClass = pEnchant.ScalingClassRestricted;
 
                                 uint minLevel = ((uint)(pEnchant.Flags)).HasAnyFlag(0x20u) ? 1 : 60u;
-                                uint scalingLevel = getLevel();
+                                uint scalingLevel = GetLevel();
                                 byte maxLevel = (byte)(pEnchant.MaxLevel != 0 ? pEnchant.MaxLevel : CliDB.SpellScalingGameTable.GetTableRowCount() - 1);
 
-                                if (minLevel > getLevel())
+                                if (minLevel > GetLevel())
                                     scalingLevel = minLevel;
-                                else if (maxLevel < getLevel())
+                                else if (maxLevel < GetLevel())
                                     scalingLevel = maxLevel;
 
                                 GtSpellScalingRecord spellScaling = CliDB.SpellScalingGameTable.GetRow(scalingLevel);
@@ -665,12 +665,12 @@ namespace Game.Entities
                                         scalingClass = pEnchant.ScalingClassRestricted;
 
                                     uint minLevel = ((uint)(pEnchant.Flags)).HasAnyFlag(0x20u) ? 1 : 60u;
-                                    uint scalingLevel = getLevel();
+                                    uint scalingLevel = GetLevel();
                                     byte maxLevel = (byte)(pEnchant.MaxLevel != 0 ? pEnchant.MaxLevel : CliDB.SpellScalingGameTable.GetTableRowCount() - 1);
 
-                                    if (minLevel > getLevel())
+                                    if (minLevel > GetLevel())
                                         scalingLevel = minLevel;
-                                    else if (maxLevel < getLevel())
+                                    else if (maxLevel < GetLevel())
                                         scalingLevel = maxLevel;
 
                                     GtSpellScalingRecord spellScaling = CliDB.SpellScalingGameTable.GetRow(scalingLevel);
@@ -911,7 +911,7 @@ namespace Game.Entities
             WorldObject target = GetViewpoint();
             if (target)
             {
-                if (target.isTypeMask(TypeMask.Unit))
+                if (target.IsTypeMask(TypeMask.Unit))
                 {
                     ((Unit)target).RemoveAurasByType(AuraType.BindSight, GetGUID());
                     ((Unit)target).RemoveAurasByType(AuraType.ModPossess, GetGUID());
@@ -1610,8 +1610,8 @@ namespace Game.Entities
 
         void LearnSkillRewardedSpells(uint skillId, uint skillValue)
         {
-            ulong raceMask = getRaceMask();
-            uint classMask = getClassMask();
+            ulong raceMask = GetRaceMask();
+            uint classMask = GetClassMask();
 
             List<SkillLineAbilityRecord> skillLineAbilities = Global.DB2Mgr.GetSkillLineAbilitiesBySkill(skillId);
             foreach (var ability in skillLineAbilities)
@@ -1639,7 +1639,7 @@ namespace Game.Entities
                     continue;
 
                 // check level, skip class spells if not high enough
-                if (getLevel() < spellInfo.SpellLevel)
+                if (GetLevel() < spellInfo.SpellLevel)
                     continue;
 
                 // need unlearn spell
@@ -1932,7 +1932,7 @@ namespace Game.Entities
                 if (HasSkill((SkillType)rcInfo.SkillID))
                     continue;
 
-                if (rcInfo.MinLevel > getLevel())
+                if (rcInfo.MinLevel > GetLevel())
                     continue;
 
                 LearnDefaultSkill(rcInfo);
@@ -1954,7 +1954,7 @@ namespace Game.Entities
                         if (rcInfo.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
                             skillValue = maxValue;
                         else if (GetClass() == Class.Deathknight)
-                            skillValue = (ushort)Math.Min(Math.Max(1, (getLevel() - 1) * 5), maxValue);
+                            skillValue = (ushort)Math.Min(Math.Max(1, (GetLevel() - 1) * 5), maxValue);
                         else if (skillId == SkillType.FistWeapons)
                             skillValue = Math.Max((ushort)1, GetSkillValue(SkillType.Unarmed));
 
@@ -1972,7 +1972,7 @@ namespace Game.Entities
                         if (rcInfo.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
                             skillValue = maxValue;
                         else if (GetClass() == Class.Deathknight)
-                            skillValue = (ushort)Math.Min(Math.Max(1, (getLevel() - 1) * 5), maxValue);
+                            skillValue = (ushort)Math.Min(Math.Max(1, (GetLevel() - 1) * 5), maxValue);
 
                         SetSkill(skillId, 1, skillValue, maxValue);
                         break;
@@ -3291,7 +3291,7 @@ namespace Game.Entities
                     }
 
                     // not allow proc extra attack spell at extra attack
-                    if (m_extraAttacks != 0 && spellInfo.HasEffect(SpellEffectName.AddExtraAttacks))
+                    if (ExtraAttacks != 0 && spellInfo.HasEffect(SpellEffectName.AddExtraAttacks))
                         return;
 
                     float chance = spellInfo.ProcChance;
@@ -3404,9 +3404,9 @@ namespace Game.Entities
         {
             // normalized proc chance for weapon attack speed
             // (odd formula...)
-            if (isAttackReady(WeaponAttackType.BaseAttack))
+            if (IsAttackReady(WeaponAttackType.BaseAttack))
                 return (GetBaseAttackTime(WeaponAttackType.BaseAttack) * 1.8f / 1000.0f);
-            else if (haveOffhandWeapon() && isAttackReady(WeaponAttackType.OffAttack))
+            else if (HaveOffhandWeapon() && IsAttackReady(WeaponAttackType.OffAttack))
                 return (GetBaseAttackTime(WeaponAttackType.OffAttack) * 1.6f / 1000.0f);
             return 0;
         }

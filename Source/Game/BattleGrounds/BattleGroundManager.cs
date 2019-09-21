@@ -180,7 +180,7 @@ namespace Game.BattleGrounds
             battlefieldStatus.WaitTime = Time.GetMSTimeDiffToNow(joinTime);
         }
 
-        public void BuildBattlegroundStatusFailed(out BattlefieldStatusFailed battlefieldStatus, Battleground bg, Player pPlayer, uint ticketId, ArenaTypes arenaType, GroupJoinBattlegroundResult result, ObjectGuid errorGuid = default(ObjectGuid))
+        public void BuildBattlegroundStatusFailed(out BattlefieldStatusFailed battlefieldStatus, Battleground bg, Player pPlayer, uint ticketId, ArenaTypes arenaType, GroupJoinBattlegroundResult result, ObjectGuid errorGuid = default)
         {
             battlefieldStatus = new BattlefieldStatusFailed();
             battlefieldStatus.Ticket.RequesterGuid = pPlayer.GetGUID();

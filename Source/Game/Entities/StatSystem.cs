@@ -344,9 +344,9 @@ namespace Game.Entities
         public ulong GetHealth() { return m_unitData.Health; }
         public void SetHealth(ulong val)
         {
-            if (getDeathState() == DeathState.JustDied)
+            if (GetDeathState() == DeathState.JustDied)
                 val = 0;
-            else if (IsTypeId(TypeId.Player) && getDeathState() == DeathState.Dead)
+            else if (IsTypeId(TypeId.Player) && GetDeathState() == DeathState.Dead)
                 val = 1;
             else
             {
@@ -367,7 +367,7 @@ namespace Game.Entities
             else if (IsPet())
             {
                 Pet pet = ToCreature().ToPet();
-                if (pet.isControlled())
+                if (pet.IsControlled())
                     pet.SetGroupUpdateFlag(GroupUpdatePetFlags.CurHp);
             }
         }
@@ -389,7 +389,7 @@ namespace Game.Entities
             else if (IsPet())
             {
                 Pet pet = ToCreature().ToPet();
-                if (pet.isControlled())
+                if (pet.IsControlled())
                     pet.SetGroupUpdateFlag(GroupUpdatePetFlags.MaxHp);
             }
 
@@ -605,7 +605,7 @@ namespace Game.Entities
             //calculate miss chance
             float missChance = victim.GetUnitMissChance(attType);
 
-            if (spellId == 0 && haveOffhandWeapon() && !IsInFeralForm())
+            if (spellId == 0 && HaveOffhandWeapon() && !IsInFeralForm())
                 missChance += 19;
 
             // Calculate hit chance
@@ -622,9 +622,9 @@ namespace Game.Entities
             missChance += hitChance - 100.0f;
 
             if (attType == WeaponAttackType.RangedAttack)
-                missChance -= m_modRangedHitChance;
+                missChance -= ModRangedHitChance;
             else
-                missChance -= m_modMeleeHitChance;
+                missChance -= ModMeleeHitChance;
 
             // Limit miss chance from 0 to 77%
             if (missChance < 0.0f)
@@ -1024,7 +1024,7 @@ namespace Game.Entities
 
             // Get base of Mana Pool in sBaseMPGameTable
             uint basemana;
-            Global.ObjectMgr.GetPlayerClassLevelInfo(GetClass(), getLevel(), out basemana);
+            Global.ObjectMgr.GetPlayerClassLevelInfo(GetClass(), GetLevel(), out basemana);
             float base_regen = basemana / 100.0f;
 
             base_regen += GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)PowerType.Mana);
@@ -1070,7 +1070,7 @@ namespace Game.Entities
         public override void UpdateAttackPowerAndDamage(bool ranged = false)
         {
             float val2 = 0.0f;
-            float level = getLevel();
+            float level = GetLevel();
 
             var entry = CliDB.ChrClassesStorage.LookupByKey(GetClass());
             UnitMods unitMod = ranged ? UnitMods.AttackPowerRanged : UnitMods.AttackPower;
@@ -1626,20 +1626,20 @@ namespace Game.Entities
 
         public void UpdateMeleeHitChances()
         {
-            m_modMeleeHitChance = 7.5f + GetTotalAuraModifier(AuraType.ModHitChance);
-            m_modMeleeHitChance += GetRatingBonusValue(CombatRating.HitMelee);
+            ModMeleeHitChance = 7.5f + GetTotalAuraModifier(AuraType.ModHitChance);
+            ModMeleeHitChance += GetRatingBonusValue(CombatRating.HitMelee);
         }
 
         public void UpdateRangedHitChances()
         {
-            m_modRangedHitChance = 7.5f + GetTotalAuraModifier(AuraType.ModHitChance);
-            m_modRangedHitChance += GetRatingBonusValue(CombatRating.HitRanged);
+            ModRangedHitChance = 7.5f + GetTotalAuraModifier(AuraType.ModHitChance);
+            ModRangedHitChance += GetRatingBonusValue(CombatRating.HitRanged);
         }
 
         public void UpdateSpellHitChances()
         {
-            m_modSpellHitChance = 15.0f + GetTotalAuraModifier(AuraType.ModSpellHitChance);
-            m_modSpellHitChance += GetRatingBonusValue(CombatRating.HitSpell);
+            ModSpellHitChance = 15.0f + GetTotalAuraModifier(AuraType.ModSpellHitChance);
+            ModSpellHitChance += GetRatingBonusValue(CombatRating.HitSpell);
         }
         public override void UpdateMaxHealth()
         {
@@ -1656,7 +1656,7 @@ namespace Game.Entities
         {
             // Taken from PaperDollFrame.lua - 6.0.3.19085
             float ratio = 10.0f;
-            GtHpPerStaRecord hpBase = CliDB.HpPerStaGameTable.GetRow(getLevel());
+            GtHpPerStaRecord hpBase = CliDB.HpPerStaGameTable.GetRow(GetLevel());
             if (hpBase != null)
                 ratio = hpBase.Health;
 
@@ -1869,7 +1869,7 @@ namespace Game.Entities
                     break;
             }
 
-            if (attType == WeaponAttackType.OffAttack && !haveOffhandWeapon())
+            if (attType == WeaponAttackType.OffAttack && !HaveOffhandWeapon())
             {
                 minDamage = 0.0f;
                 maxDamage = 0.0f;

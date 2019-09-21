@@ -41,8 +41,8 @@ namespace Game.Entities
         void AddTimedQuest(uint questId) { m_timedquests.Add(questId); }
         public void RemoveTimedQuest(uint questId) { m_timedquests.Remove(questId); }
 
-        public List<uint> getRewardedQuests() { return m_RewardedQuests; }
-        Dictionary<uint, QuestStatusData> getQuestStatusMap() { return m_QuestStatus; }
+        public List<uint> GetRewardedQuests() { return m_RewardedQuests; }
+        Dictionary<uint, QuestStatusData> GetQuestStatusMap() { return m_QuestStatus; }
 
         public int GetQuestMinLevel(Quest quest)
         {
@@ -65,7 +65,7 @@ namespace Game.Entities
             {
                 int minLevel = GetQuestMinLevel(quest);
                 int maxLevel = quest.MaxScalingLevel;
-                int level = (int)getLevel();
+                int level = (int)GetLevel();
                 if (level >= minLevel)
                     return Math.Min(level, maxLevel);
                 return minLevel;
@@ -325,7 +325,7 @@ namespace Game.Entities
                     // @todo verify if check for !quest.IsDaily() is really correct (possibly not)
                     else
                     {
-                        if (!source.hasQuest(questId) && !source.hasInvolvedQuest(questId))
+                        if (!source.HasQuest(questId) && !source.HasInvolvedQuest(questId))
                         {
                             PlayerTalkClass.SendCloseGossip();
                             return;
@@ -410,7 +410,7 @@ namespace Game.Entities
                 SatisfyQuestPrevChain(quest, false) && SatisfyQuestDay(quest, false) && SatisfyQuestWeek(quest, false) &&
                 SatisfyQuestMonth(quest, false) && SatisfyQuestSeasonal(quest, false))
             {
-                return getLevel() + WorldConfig.GetIntValue(WorldCfg.QuestHighLevelHideDiff) >= GetQuestMinLevel(quest);
+                return GetLevel() + WorldConfig.GetIntValue(WorldCfg.QuestHighLevelHideDiff) >= GetQuestMinLevel(quest);
             }
 
             return false;
@@ -778,7 +778,7 @@ namespace Game.Entities
             {
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.SourceSpellID);
                 Unit caster = this;
-                if (questGiver != null && questGiver.isTypeMask(TypeMask.Unit) && !quest.HasFlag(QuestFlags.PlayerCastOnAccept) && !spellInfo.HasTargetType(Targets.UnitCaster) && !spellInfo.HasTargetType(Targets.DestCasterSummon))
+                if (questGiver != null && questGiver.IsTypeMask(TypeMask.Unit) && !quest.HasFlag(QuestFlags.PlayerCastOnAccept) && !spellInfo.HasTargetType(Targets.UnitCaster) && !spellInfo.HasTargetType(Targets.DestCasterSummon))
                 {
                     Unit unit = questGiver.ToUnit();
                     if (unit != null)
@@ -867,7 +867,7 @@ namespace Game.Entities
                 case QuestPackageFilter.LootSpecialization:
                     return rewardProto.IsUsableByLootSpecialization(this, true);
                 case QuestPackageFilter.Class:
-                    return rewardProto.ItemSpecClassMask == 0 || (rewardProto.ItemSpecClassMask & getClassMask()) != 0;
+                    return rewardProto.ItemSpecClassMask == 0 || (rewardProto.ItemSpecClassMask & GetClassMask()) != 0;
                 case QuestPackageFilter.Everyone:
                     return true;
                 default:
@@ -1017,7 +1017,7 @@ namespace Game.Entities
             uint XP = GetQuestXPReward(quest);
 
             int moneyRew = 0;
-            if (getLevel() < WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+            if (GetLevel() < WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
                 GiveXP(XP, null);
             else
                 moneyRew = (int)(quest.GetRewMoneyMaxLevel() * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
@@ -1033,7 +1033,7 @@ namespace Game.Entities
             }
 
             // honor reward
-            uint honor = quest.CalculateHonorGain(getLevel());
+            uint honor = quest.CalculateHonorGain(GetLevel());
             if (honor != 0)
                 RewardHonor(null, 0, (int)honor);
 
@@ -1091,7 +1091,7 @@ namespace Game.Entities
             {
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.RewardSpell);
                 Unit caster = this;
-                if (questGiver != null && questGiver.isTypeMask(TypeMask.Unit) && !quest.HasFlag(QuestFlags.PlayerCastOnComplete) && !spellInfo.HasTargetType(Targets.UnitCaster))
+                if (questGiver != null && questGiver.IsTypeMask(TypeMask.Unit) && !quest.HasFlag(QuestFlags.PlayerCastOnComplete) && !spellInfo.HasTargetType(Targets.UnitCaster))
                 {
                     Unit unit = questGiver.ToUnit();
                     if (unit != null)
@@ -1108,7 +1108,7 @@ namespace Game.Entities
                     {
                         SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.RewardDisplaySpell[i]);
                         Unit caster = this;
-                        if (questGiver != null && questGiver.isTypeMask(TypeMask.Unit) && !quest.HasFlag(QuestFlags.PlayerCastOnComplete) && !spellInfo.HasTargetType(Targets.UnitCaster))
+                        if (questGiver != null && questGiver.IsTypeMask(TypeMask.Unit) && !quest.HasFlag(QuestFlags.PlayerCastOnComplete) && !spellInfo.HasTargetType(Targets.UnitCaster))
                         {
                             Unit unit = questGiver.ToUnit();
                             if (unit != null)
@@ -1263,7 +1263,7 @@ namespace Game.Entities
 
         public bool SatisfyQuestLevel(Quest qInfo, bool msg)
         {
-            if (getLevel() < GetQuestMinLevel(qInfo))
+            if (GetLevel() < GetQuestMinLevel(qInfo))
             {
                 if (msg)
                 {
@@ -1273,7 +1273,7 @@ namespace Game.Entities
                 return false;
             }
 
-            if (qInfo.MaxLevel > 0 && getLevel() > qInfo.MaxLevel)
+            if (qInfo.MaxLevel > 0 && GetLevel() > qInfo.MaxLevel)
             {
                 if (msg)
                 {
@@ -1392,7 +1392,7 @@ namespace Game.Entities
             if (reqClass == 0)
                 return true;
 
-            if ((reqClass & getClassMask()) == 0)
+            if ((reqClass & GetClassMask()) == 0)
             {
                 if (msg)
                 {
@@ -1412,7 +1412,7 @@ namespace Game.Entities
             if (reqraces == -1)
                 return true;
 
-            if ((reqraces & (long)getRaceMask()) == 0)
+            if ((reqraces & (long)GetRaceMask()) == 0)
             {
                 if (msg)
                 {
@@ -1909,7 +1909,7 @@ namespace Game.Entities
                     {
                         if (SatisfyQuestLevel(quest, false))
                         {
-                            if (getLevel() <= (GetQuestLevel(quest) + WorldConfig.GetIntValue(WorldCfg.QuestLowLevelHideDiff)))
+                            if (GetLevel() <= (GetQuestLevel(quest) + WorldConfig.GetIntValue(WorldCfg.QuestLowLevelHideDiff)))
                             {
                                 if (quest.IsDaily())
                                     result2 = QuestGiverStatus.AvailableRep;
@@ -2189,7 +2189,7 @@ namespace Game.Entities
                     KilledMonsterCredit(cInfo.KillCredit[i]);
         }
 
-        public void KilledMonsterCredit(uint entry, ObjectGuid guid = default(ObjectGuid))
+        public void KilledMonsterCredit(uint entry, ObjectGuid guid = default)
         {
             ushort addKillCount = 1;
             uint real_entry = entry;
@@ -2287,7 +2287,7 @@ namespace Game.Entities
             }
         }
 
-        public void KillCreditGO(uint entry, ObjectGuid guid = default(ObjectGuid))
+        public void KillCreditGO(uint entry, ObjectGuid guid = default)
         {
             ushort addCastCount = 1;
             for (byte i = 0; i < SharedConst.MaxQuestLogSize; ++i)
@@ -2747,7 +2747,7 @@ namespace Game.Entities
 
             uint moneyReward;
 
-            if (getLevel() < WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+            if (GetLevel() < WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
             {
                 moneyReward = GetQuestMoneyReward(quest);
             }

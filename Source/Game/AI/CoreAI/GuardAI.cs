@@ -34,7 +34,7 @@ namespace Game.AI
 
         public override bool CanSeeAlways(WorldObject obj)
         {
-            if (!obj.isTypeMask(TypeMask.Unit))
+            if (!obj.IsTypeMask(TypeMask.Unit))
                 return false;
 
             var threatList = me.GetThreatManager().getThreatList();

@@ -569,7 +569,7 @@ namespace Scripts.Spells.Hunter
             if (playerTarget)
             {
                 int baseAmount = aurEff.GetBaseAmount();
-                int amount = playerTarget.isMoving() ?
+                int amount = playerTarget.IsMoving() ?
                 playerTarget.CalculateSpellDamage(playerTarget, GetSpellInfo(), aurEff.GetEffIndex(), baseAmount) :
                 aurEff.GetAmount() - 1;
                 aurEff.SetAmount(amount);
@@ -624,7 +624,7 @@ namespace Scripts.Spells.Hunter
             Creature target = GetExplTargetUnit().ToCreature();
             if (target)
             {
-                if (target.getLevel() > caster.getLevel())
+                if (target.GetLevel() > caster.GetLevel())
                     return SpellCastResult.Highlevel;
 
                 // use SMSG_PET_TAME_FAILURE?

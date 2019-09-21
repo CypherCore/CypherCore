@@ -97,7 +97,7 @@ namespace Game
             if (curloc == 0)
                 return;
 
-            bool lastTaxiCheaterState = GetPlayer().isTaxiCheater();
+            bool lastTaxiCheaterState = GetPlayer().IsTaxiCheater();
             if (unit.GetEntry() == 29480)
                 GetPlayer().SetTaxiCheater(true); // Grimwing in Ebon Hold, special case. NOTE: Not perfect, Zul'Aman should not be included according to WoWhead, and I think taxicheat includes it.
 
@@ -186,7 +186,7 @@ namespace Game
             if (to == null)
                 return;
 
-            if (!GetPlayer().isTaxiCheater())
+            if (!GetPlayer().IsTaxiCheater())
             {
                 if (!GetPlayer().m_taxi.IsTaximaskNodeKnown(curloc) || !GetPlayer().m_taxi.IsTaximaskNodeKnown(activateTaxi.Node))
                 {

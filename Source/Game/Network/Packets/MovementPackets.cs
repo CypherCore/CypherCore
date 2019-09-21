@@ -21,7 +21,6 @@ using Framework.GameMath;
 using Game.Entities;
 using Game.Movement;
 using System.Collections.Generic;
-using System.Linq;
 using System;
 
 namespace Game.Network.Packets

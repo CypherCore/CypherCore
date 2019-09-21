@@ -88,7 +88,7 @@ namespace Game
                 return;
             }
 
-            if (!player.GetSocial().HasFriend(GetPlayer().GetGUID()) && GetPlayer().getLevel() < WorldConfig.GetIntValue(WorldCfg.PartyLevelReq))
+            if (!player.GetSocial().HasFriend(GetPlayer().GetGUID()) && GetPlayer().GetLevel() < WorldConfig.GetIntValue(WorldCfg.PartyLevelReq))
             {
                 SendPartyResult(PartyOperation.Invite, player.GetName(), PartyResult.InviteRestricted);
                 return;

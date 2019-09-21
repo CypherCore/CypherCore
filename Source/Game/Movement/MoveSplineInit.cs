@@ -70,7 +70,7 @@ namespace Game.Movement
 
         public int Launch()
         {
-            MoveSpline move_spline = unit.moveSpline;
+            MoveSpline move_spline = unit.MoveSpline;
 
             bool transport = !unit.GetTransGUID().IsEmpty();
             Vector4 real_position = new Vector4();            
@@ -146,7 +146,7 @@ namespace Game.Movement
 
         public void Stop()
         {
-            MoveSpline move_spline = unit.moveSpline;
+            MoveSpline move_spline = unit.MoveSpline;
 
             // No need to stop if we are not moving
             if (move_spline.Finalized())

@@ -218,7 +218,7 @@ namespace Game.Chat
             bool newChannel = _playersStore.Empty();
 
             PlayerInfo playerInfo = new PlayerInfo();
-            playerInfo.SetInvisible(!player.isGMVisible());
+            playerInfo.SetInvisible(!player.IsGMVisible());
             _playersStore[guid] = playerInfo;
 
             /*
@@ -696,7 +696,7 @@ namespace Game.Chat
             }
 
             Player newp = Global.ObjAccessor.FindPlayerByName(newname);
-            if (!newp || !newp.isGMVisible())
+            if (!newp || !newp.IsGMVisible())
             {
                 ChannelNameBuilder builder = new ChannelNameBuilder(this, new PlayerNotFoundAppend(newname));
                 SendToOne(builder, guid);
@@ -830,7 +830,7 @@ namespace Game.Chat
             }
         }
 
-        void SendToAll(MessageBuilder builder, ObjectGuid guid = default(ObjectGuid))
+        void SendToAll(MessageBuilder builder, ObjectGuid guid = default)
         {
             LocalizedPacketDo localizer = new LocalizedPacketDo(builder);
 
@@ -867,7 +867,7 @@ namespace Game.Chat
                 localizer.Invoke(player);
         }
 
-        void SendToAllWithAddon(MessageBuilder builder, string addonPrefix, ObjectGuid guid = default(ObjectGuid))
+        void SendToAllWithAddon(MessageBuilder builder, string addonPrefix, ObjectGuid guid = default)
         {
             LocalizedPacketDo localizer = new LocalizedPacketDo(builder);
 

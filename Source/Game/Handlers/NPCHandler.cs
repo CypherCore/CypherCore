@@ -366,14 +366,14 @@ namespace Game
 
             uint petSlot = 0;
             // not let move dead pet in slot
-            if (pet && pet.IsAlive() && pet.getPetType() == PetType.Hunter)
+            if (pet && pet.IsAlive() && pet.GetPetType() == PetType.Hunter)
             {
                 PetStableInfo stableEntry;// = new PetStableInfo();
                 stableEntry.PetSlot = petSlot;
                 stableEntry.PetNumber = pet.GetCharmInfo().GetPetNumber();
                 stableEntry.CreatureID = pet.GetEntry();
                 stableEntry.DisplayID = pet.GetDisplayId();
-                stableEntry.ExperienceLevel = pet.getLevel();
+                stableEntry.ExperienceLevel = pet.GetLevel();
                 stableEntry.PetFlags = PetStableinfo.Active;
                 stableEntry.PetName = pet.GetName();
                 ++petSlot;
@@ -498,7 +498,7 @@ namespace Game
                     int leftInStock = vendorItem.maxcount == 0 ? -1 : (int)vendor.GetVendorItemCurrentCount(vendorItem);
                     if (!GetPlayer().IsGameMaster())
                     {
-                        if (!Convert.ToBoolean(itemTemplate.GetAllowableClass() & GetPlayer().getClassMask()) && itemTemplate.GetBonding() == ItemBondingType.OnAcquire)
+                        if (!Convert.ToBoolean(itemTemplate.GetAllowableClass() & GetPlayer().GetClassMask()) && itemTemplate.GetBonding() == ItemBondingType.OnAcquire)
                             continue;
 
                         if ((itemTemplate.GetFlags2().HasAnyFlag(ItemFlags2.FactionHorde) && GetPlayer().GetTeam() == Team.Alliance) ||

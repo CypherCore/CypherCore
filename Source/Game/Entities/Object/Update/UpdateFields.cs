@@ -19,9 +19,7 @@ using Framework.Constants;
 using Game.Network;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Framework.GameMath;
-using System.Runtime.CompilerServices;
 using Game.Spells;
 using Game.DataStorage;
 
@@ -84,10 +82,10 @@ namespace Game.Entities
                 Creature creature = obj.ToCreature();
                 if (creature != null)
                 {
-                    if (creature.hasLootRecipient() && !creature.isTappedBy(receiver))
+                    if (creature.HasLootRecipient() && !creature.IsTappedBy(receiver))
                         unitDynFlags |= UnitDynFlags.Tapped;
 
-                    if (!receiver.isAllowedToLoot(creature))
+                    if (!receiver.IsAllowedToLoot(creature))
                         unitDynFlags &= ~UnitDynFlags.Lootable;
                 }
 
@@ -1998,7 +1996,7 @@ namespace Game.Entities
                 CreatureTemplate cinfo = unit.ToCreature().GetCreatureTemplate();
 
                 // this also applies for transform auras
-                SpellInfo transform = Global.SpellMgr.GetSpellInfo(unit.getTransForm());
+                SpellInfo transform = Global.SpellMgr.GetSpellInfo(unit.GetTransForm());
                 if (transform != null)
                 {
                     foreach (SpellEffectInfo effect in transform.GetEffectsForDifficulty(unit.GetMap().GetDifficultyID()))

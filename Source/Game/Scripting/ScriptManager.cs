@@ -1415,7 +1415,7 @@ namespace Game.Scripting
         {
             return RunScriptRet<T, bool>(func, id, ret);
         }
-        public U RunScriptRet<T, U>(Func<T, U> func, uint id, U ret = default(U)) where T : ScriptObject
+        public U RunScriptRet<T, U>(Func<T, U> func, uint id, U ret = default) where T : ScriptObject
         {
             var reg = GetScriptRegistry<T>();
             if (reg == null || reg.Empty())

@@ -25,6 +25,9 @@ namespace Game.Entities
         public static ObjectGuid Empty = new ObjectGuid();
         public static ObjectGuid TradeItem = Create(HighGuid.Uniq, 10ul);
 
+        ulong _low;
+        ulong _high;
+
         public ObjectGuid(ulong high, ulong low)
         {
             _low = low;
@@ -321,13 +324,13 @@ namespace Game.Entities
                     return false;
             }
         }
-
-        ulong _low;
-        ulong _high;
     }
 
     public class ObjectGuidGenerator
     {
+        ulong _nextGuid;
+        HighGuid _highGuid;
+
         public ObjectGuidGenerator(HighGuid highGuid, ulong start = 1)
         {
             _highGuid = highGuid;
@@ -350,8 +353,5 @@ namespace Game.Entities
             Log.outFatal(LogFilter.Server, "{0} guid overflow!! Can't continue, shutting down server. ", _highGuid);
             Global.WorldMgr.StopNow();
         }
-
-        ulong _nextGuid;
-        HighGuid _highGuid;
     }
 }

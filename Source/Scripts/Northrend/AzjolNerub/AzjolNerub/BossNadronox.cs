@@ -305,7 +305,7 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.Nadronox
                 task.Repeat(TimeSpan.FromSeconds(1));
             });
 
-            me.setActive(true);
+            me.SetActive(true);
         }
 
         public override void DoAction(int action)

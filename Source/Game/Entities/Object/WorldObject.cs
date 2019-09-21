@@ -15,26 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Framework.Collections;
 using Framework.Constants;
 using Framework.Dynamic;
 using Framework.GameMath;
-using Framework.IO;
 using Game.AI;
 using Game.BattleFields;
-using Game.DataStorage;
 using Game.Maps;
 using Game.Network;
 using Game.Network.Packets;
 using Game.Scenarios;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Linq.Expressions;
-using System.Reflection;
 
 namespace Game.Entities
 {
@@ -48,8 +39,8 @@ namespace Game.Entities
             m_serverSideVisibility.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive | GhostVisibilityType.Ghost);
             m_serverSideVisibilityDetect.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive);
 
-            objectTypeId = TypeId.Object;
-            objectTypeMask = TypeMask.Object;
+            ObjectTypeId = TypeId.Object;
+            ObjectTypeMask = TypeMask.Object;
 
             m_values = new UpdateFieldHolder(this);
 
@@ -75,7 +66,7 @@ namespace Game.Entities
             if (IsInWorld)
             {
                 Log.outFatal(LogFilter.Misc, "WorldObject.Dispose() {0} deleted but still in world!!", GetGUID().ToString());
-                if (isTypeMask(TypeMask.Item))
+                if (IsTypeMask(TypeMask.Item))
                     Log.outFatal(LogFilter.Misc, "Item slot {0}", ((Item)this).GetSlot());
                 Cypher.Assert(false);
             }
@@ -107,7 +98,7 @@ namespace Game.Entities
             if (!IsInWorld)
                 return;
 
-            if (!objectTypeMask.HasAnyFlag(TypeMask.Item | TypeMask.Container))
+            if (!ObjectTypeMask.HasAnyFlag(TypeMask.Item | TypeMask.Container))
                 DestroyForNearbyPlayers();
 
             IsInWorld = false;
@@ -120,8 +111,8 @@ namespace Game.Entities
                 return;
 
             UpdateType updateType = UpdateType.CreateObject;
-            TypeId tempObjectType = objectTypeId;
-            TypeMask tempObjectTypeMask = objectTypeMask;
+            TypeId tempObjectType = ObjectTypeId;
+            TypeMask tempObjectTypeMask = ObjectTypeMask;
             CreateObjectBits flags = m_updateFlag;
 
             if (target == this)
@@ -164,7 +155,7 @@ namespace Game.Entities
             if (flags.Stationary)
             {
                 // UPDATETYPE_CREATE_OBJECT2 for some gameobject types...
-                if (isTypeMask(TypeMask.GameObject))
+                if (IsTypeMask(TypeMask.GameObject))
                 {
                     switch (ToGameObject().GetGoType())
                     {
@@ -357,7 +348,7 @@ namespace Game.Entities
 
                 // HasMovementSpline - marks that spline data is present in packet
                 if (HasSpline)
-                    MovementExtensions.WriteCreateObjectSplineDataBlock(unit.moveSpline, data);
+                    MovementExtensions.WriteCreateObjectSplineDataBlock(unit.MoveSpline, data);
             }
 
             data.WriteInt32(PauseTimesCount);
@@ -949,7 +940,7 @@ namespace Game.Entities
 
             GetMap().AddObjectToSwitchList(this, on);
         }
-        public void setActive(bool on)
+        public void SetActive(bool on)
         {
             if (m_isActive == on)
                 return;
@@ -1039,7 +1030,7 @@ namespace Game.Entities
 
         public float GetGridActivationRange()
         {
-            if (isActiveObject())
+            if (IsActiveObject())
             {
                 if (GetTypeId() == TypeId.Player && ToPlayer().GetCinematicMgr().IsOnCinematic())
                     return Math.Max(SharedConst.DefaultVisibilityInstance, GetMap().GetVisibilityRange());
@@ -1057,7 +1048,7 @@ namespace Game.Entities
         {
             if (IsVisibilityOverridden() && !IsTypeId(TypeId.Player))
                 return m_visibilityDistanceOverride.Value;
-            else if (isActiveObject() && !IsTypeId(TypeId.Player))
+            else if (IsActiveObject() && !IsTypeId(TypeId.Player))
                 return SharedConst.MaxVisibilityDistance;
             else
                 return GetMap().GetVisibilityRange();
@@ -1071,7 +1062,7 @@ namespace Game.Entities
                 {
                     if (target != null && target.IsVisibilityOverridden() && !target.IsTypeId(TypeId.Player))
                         return target.m_visibilityDistanceOverride.Value;
-                    else if (target != null && target.isActiveObject() && !target.IsTypeId(TypeId.Player))
+                    else if (target != null && target.IsActiveObject() && !target.IsTypeId(TypeId.Player))
                         return SharedConst.MaxVisibilityDistance;
                     else if (ToPlayer().GetCinematicMgr().IsOnCinematic())
                         return SharedConst.DefaultVisibilityInstance;
@@ -1084,7 +1075,7 @@ namespace Game.Entities
                     return SharedConst.SightRangeUnit;
             }
 
-            if (IsTypeId(TypeId.DynamicObject) && isActiveObject())
+            if (IsTypeId(TypeId.DynamicObject) && IsActiveObject())
             {
                 return GetMap().GetVisibilityRange();
             }
@@ -1493,7 +1484,7 @@ namespace Game.Entities
             if (IsTypeId(TypeId.Player) || IsTypeId(TypeId.Unit))
             {
                 summon.SetFaction(ToUnit().GetFaction());
-                summon.SetLevel(ToUnit().getLevel());
+                summon.SetLevel(ToUnit().GetLevel());
             }
 
             if (AI != null)
@@ -1647,7 +1638,7 @@ namespace Game.Entities
                 if (!player.HaveAtClient(this))
                     continue;
 
-                if (isTypeMask(TypeMask.Unit) && (ToUnit().GetCharmerGUID() == player.GetGUID()))// @todo this is for puppet
+                if (IsTypeMask(TypeMask.Unit) && (ToUnit().GetCharmerGUID() == player.GetGUID()))// @todo this is for puppet
                     continue;
 
                 DestroyForPlayer(player);
@@ -1707,17 +1698,17 @@ namespace Game.Entities
         public void RemoveDynamicFlag(UnitDynFlags flag) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags), (uint)flag); }
         public void SetDynamicFlags(UnitDynFlags flag) { SetUpdateFieldValue(m_values.ModifyValue(m_objectData).ModifyValue(m_objectData.DynamicFlags), (uint)flag); }
 
-        public TypeId GetTypeId() { return objectTypeId; }
+        public TypeId GetTypeId() { return ObjectTypeId; }
         public bool IsTypeId(TypeId typeId) { return GetTypeId() == typeId; }
-        public bool isTypeMask(TypeMask mask) { return Convert.ToBoolean(mask & objectTypeMask); }
+        public bool IsTypeMask(TypeMask mask) { return Convert.ToBoolean(mask & ObjectTypeMask); }
 
-        public virtual bool hasQuest(uint questId) { return false; }
-        public virtual bool hasInvolvedQuest(uint questId) { return false; }
+        public virtual bool HasQuest(uint questId) { return false; }
+        public virtual bool HasInvolvedQuest(uint questId) { return false; }
 
         public bool IsCreature() { return GetTypeId() == TypeId.Unit; }
         public bool IsPlayer() { return GetTypeId() == TypeId.Player; }
         public bool IsGameObject() { return GetTypeId() == TypeId.GameObject; }
-        public bool IsUnit() { return isTypeMask(TypeMask.Unit); }
+        public bool IsUnit() { return IsTypeMask(TypeMask.Unit); }
         public bool IsCorpse() { return GetTypeId() == TypeId.Corpse; }
         public bool IsDynObject() { return GetTypeId() == TypeId.DynamicObject; }
         public bool IsAreaTrigger() { return GetTypeId() == TypeId.AreaTrigger; }
@@ -1741,13 +1732,13 @@ namespace Game.Entities
         public ZoneScript GetZoneScript() { return m_zoneScript; }
 
         public void AddToNotify(NotifyFlags f) { m_notifyflags |= f; }
-        public bool isNeedNotify(NotifyFlags f) { return Convert.ToBoolean(m_notifyflags & f); }
+        public bool IsNeedNotify(NotifyFlags f) { return Convert.ToBoolean(m_notifyflags & f); }
         NotifyFlags GetNotifyFlags() { return m_notifyflags; }
         bool NotifyExecuted(NotifyFlags f) { return Convert.ToBoolean(m_executed_notifies & f); }
         void SetNotified(NotifyFlags f) { m_executed_notifies |= f; }
         public void ResetAllNotifies() { m_notifyflags = 0; m_executed_notifies = 0; }
 
-        public bool isActiveObject() { return m_isActive; }
+        public bool IsActiveObject() { return m_isActive; }
         public bool IsPermanentWorldObject() { return m_isWorldObject; }
 
         public Transport GetTransport() { return m_transport; }
@@ -2007,12 +1998,12 @@ namespace Game.Entities
             return (size * size) >= GetExactDist2dSq(pos1.GetPositionX() + (float)Math.Cos(angle) * dist, pos1.GetPositionY() + (float)Math.Sin(angle) * dist);
         }
 
-        public bool isInFront(WorldObject target, float arc = MathFunctions.PI)
+        public bool IsInFront(WorldObject target, float arc = MathFunctions.PI)
         {
             return HasInArc(arc, target);
         }
 
-        public bool isInBack(WorldObject target, float arc = MathFunctions.PI)
+        public bool IsInBack(WorldObject target, float arc = MathFunctions.PI)
         {
             return !HasInArc(2 * MathFunctions.PI - arc, target);
         }
@@ -2333,8 +2324,8 @@ namespace Game.Entities
         public void SetLocationInstanceId(uint _instanceId) { instanceId = _instanceId; }
 
         #region Fields
-        public TypeMask objectTypeMask { get; set; }
-        protected TypeId objectTypeId { get; set; }
+        public TypeMask ObjectTypeMask { get; set; }
+        protected TypeId ObjectTypeId { get; set; }
         protected CreateObjectBits m_updateFlag;
         ObjectGuid m_guid;
 
@@ -2381,11 +2372,21 @@ namespace Game.Entities
 
     public class MovementInfo
     {
+        public ObjectGuid Guid { get; set; }
+        MovementFlag flags;
+        MovementFlag2 flags2;
+        public Position Pos { get; set; }
+        public uint Time { get; set; }
+        public TransportInfo transport;
+        public float Pitch { get; set; }
+        public JumpInfo jump;
+        public float SplineElevation { get; set; }
+
         public MovementInfo()
         {
             Guid = ObjectGuid.Empty;
-            Flags = MovementFlag.None;
-            Flags2 = MovementFlag2.None;
+            flags = MovementFlag.None;
+            flags2 = MovementFlag2.None;
             Time = 0;
             Pitch = 0.0f;
 
@@ -2394,17 +2395,17 @@ namespace Game.Entities
             jump.Reset();
         }
 
-        public MovementFlag GetMovementFlags() { return Flags; }
-        public void SetMovementFlags(MovementFlag f) { Flags = f; }
-        public void AddMovementFlag(MovementFlag f) { Flags |= f; }
-        public void RemoveMovementFlag(MovementFlag f) { Flags &= ~f; }
-        public bool HasMovementFlag(MovementFlag f) { return Convert.ToBoolean(Flags & f); }
+        public MovementFlag GetMovementFlags() { return flags; }
+        public void SetMovementFlags(MovementFlag f) { flags = f; }
+        public void AddMovementFlag(MovementFlag f) { flags |= f; }
+        public void RemoveMovementFlag(MovementFlag f) { flags &= ~f; }
+        public bool HasMovementFlag(MovementFlag f) { return Convert.ToBoolean(flags & f); }
 
-        public MovementFlag2 GetMovementFlags2() { return Flags2; }
-        public void SetMovementFlags2(MovementFlag2 f) { Flags2 = f; }
-        public void AddMovementFlag2(MovementFlag2 f) { Flags2 |= f; }
-        public void RemoveMovementFlag2(MovementFlag2 f) { Flags2 &= ~f; }
-        public bool HasMovementFlag2(MovementFlag2 f) { return Convert.ToBoolean(Flags2 & f); }
+        public MovementFlag2 GetMovementFlags2() { return flags2; }
+        public void SetMovementFlags2(MovementFlag2 f) { flags2 = f; }
+        public void AddMovementFlag2(MovementFlag2 f) { flags2 |= f; }
+        public void RemoveMovementFlag2(MovementFlag2 f) { flags2 &= ~f; }
+        public bool HasMovementFlag2(MovementFlag2 f) { return Convert.ToBoolean(flags2 & f); }
 
         public void SetFallTime(uint time) { jump.fallTime = time; }
 
@@ -2418,15 +2419,7 @@ namespace Game.Entities
             jump.Reset();
         }
 
-        public ObjectGuid Guid { get; set; }
-        MovementFlag Flags { get; set; }
-        MovementFlag2 Flags2 { get; set; }
-        public Position Pos { get; set; }
-        public uint Time { get; set; }
-        public TransportInfo transport;
-        public float Pitch { get; set; }
-        public JumpInfo jump;
-        public float SplineElevation { get; set; }
+
 
         public struct TransportInfo
         {

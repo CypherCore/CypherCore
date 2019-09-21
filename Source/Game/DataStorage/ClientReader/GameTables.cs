@@ -83,7 +83,7 @@ namespace Game.DataStorage
         public T GetRow(uint row)
         {
             if (row >= _data.Count)
-                return default(T);
+                return default;
 
             return _data[(int)row];
         }

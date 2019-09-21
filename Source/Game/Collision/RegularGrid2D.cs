@@ -18,7 +18,6 @@
 using Framework.GameMath;
 using System;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
 
 namespace Game.Collision
 {

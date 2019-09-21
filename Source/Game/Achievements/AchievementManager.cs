@@ -1048,7 +1048,7 @@ namespace Game.Achievements
         public bool IsRealmCompleted(AchievementRecord achievement)
         {
             var time = _allCompletedAchievements.LookupByKey(achievement.Id);
-            if (time == default(DateTime))
+            if (time == default)
                 return false;
 
             if (time == DateTime.MinValue)

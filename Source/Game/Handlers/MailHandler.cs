@@ -74,7 +74,7 @@ namespace Game
                 return;
 
             Player player = GetPlayer();
-            if (player.getLevel() < WorldConfig.GetIntValue(WorldCfg.MailLevelReq))
+            if (player.GetLevel() < WorldConfig.GetIntValue(WorldCfg.MailLevelReq))
             {
                 SendNotification(CypherStrings.MailSenderReq, WorldConfig.GetIntValue(WorldCfg.MailLevelReq));
                 return;
@@ -150,7 +150,7 @@ namespace Game
             {
                 receiverTeam = receiver.GetTeam();
                 mailsCount = (byte)receiver.GetMails().Count;
-                receiverLevel = (byte)receiver.getLevel();
+                receiverLevel = (byte)receiver.GetLevel();
                 receiverAccountId = receiver.GetSession().GetAccountId();
                 receiverBnetAccountId = receiver.GetSession().GetBattlenetAccountId();
             }

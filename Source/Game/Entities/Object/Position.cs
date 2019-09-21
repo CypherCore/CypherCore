@@ -23,6 +23,11 @@ namespace Game.Entities
 {
     public class Position
     {
+        public float posX;
+        public float posY;
+        public float posZ;
+        public float Orientation;
+
         public Position(float x = 0f, float y = 0f, float z = 0f, float o = 0f)
         {
             posX = x;
@@ -321,15 +326,16 @@ namespace Game.Entities
         {
             return $"X: {posX} Y: {posY} Z: {posZ} O: {Orientation}";
         }
-
-        public float posX;
-        public float posY;
-        public float posZ;
-        public float Orientation;
     }
 
     public class WorldLocation : Position
     {
+        uint _mapId;
+        Cell currentCell;
+        public ObjectCellMoveState _moveState;
+
+        public Position _newPosition = new Position();
+
         public WorldLocation(uint mapId = 0xFFFFFFFF, float x = 0, float y = 0, float z = 0, float o = 0)
         {
             _mapId = mapId;
@@ -384,11 +390,5 @@ namespace Game.Entities
         {
             return this;
         }
-
-        uint _mapId;
-        Cell currentCell;
-        public ObjectCellMoveState _moveState;
-
-        public Position _newPosition = new Position();
     }
 }

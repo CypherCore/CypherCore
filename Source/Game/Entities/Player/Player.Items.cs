@@ -1284,7 +1284,7 @@ namespace Game.Entities
 
                 item = StoreItem(pos, item, update);
 
-                item.SetFixedLevel(getLevel());
+                item.SetFixedLevel(GetLevel());
                 item.SetItemRandomBonusList(randomPropertyId);
 
                 if (allowedLooters != null && allowedLooters.Count > 1 && item.GetTemplate().GetMaxStackSize() == 1 && item.IsSoulBound())
@@ -1412,7 +1412,7 @@ namespace Game.Entities
                     if (pItem.IsBindedNotWith(this))
                         return InventoryResult.NotOwner;
 
-                    if (getLevel() < pItem.GetRequiredLevel())
+                    if (GetLevel() < pItem.GetRequiredLevel())
                         return InventoryResult.CantEquipLevelI;
 
                     InventoryResult res = CanUseItem(pProto);
@@ -1468,7 +1468,7 @@ namespace Game.Entities
             if (Convert.ToBoolean(proto.GetFlags2() & ItemFlags2.FactionAlliance) && GetTeam() != Team.Alliance)
                 return InventoryResult.CantEquipEver;
 
-            if ((proto.GetAllowableClass() & getClassMask()) == 0 || (proto.GetAllowableRace() & (long)getRaceMask()) == 0)
+            if ((proto.GetAllowableClass() & GetClassMask()) == 0 || (proto.GetAllowableRace() & (long)GetRaceMask()) == 0)
                 return InventoryResult.CantEquipEver;
 
             if (proto.GetRequiredSkill() != 0)
@@ -1482,7 +1482,7 @@ namespace Game.Entities
             if (proto.GetRequiredSpell() != 0 && !HasSpell(proto.GetRequiredSpell()))
                 return InventoryResult.ProficiencyNeeded;
 
-            if (getLevel() < proto.GetBaseRequiredLevel())
+            if (GetLevel() < proto.GetBaseRequiredLevel())
                 return InventoryResult.CantEquipLevelI;
 
             // If World Event is not active, prevent using event dependant items
@@ -3321,7 +3321,7 @@ namespace Game.Entities
                 return InventoryResult.ItemNotFound;
 
             // Used by group, function GroupLoot, to know if a prototype can be used by a player
-            if ((proto.GetAllowableClass() & getClassMask()) == 0 || (proto.GetAllowableRace() & (long)getRaceMask()) == 0)
+            if ((proto.GetAllowableClass() & GetClassMask()) == 0 || (proto.GetAllowableRace() & (long)GetRaceMask()) == 0)
                 return InventoryResult.CantEquipEver;
 
             if (proto.GetRequiredSpell() != 0 && !HasSpell(proto.GetRequiredSpell()))
@@ -3344,7 +3344,7 @@ namespace Game.Entities
             {
                 if (_class == Class.Warrior || _class == Class.Paladin || _class == Class.Deathknight)
                 {
-                    if (getLevel() < 40)
+                    if (GetLevel() < 40)
                     {
                         if (proto.GetSubClass() != (uint)ItemSubClassArmor.Mail)
                             return InventoryResult.ClientLockedOut;
@@ -3354,7 +3354,7 @@ namespace Game.Entities
                 }
                 else if (_class == Class.Hunter || _class == Class.Shaman)
                 {
-                    if (getLevel() < 40)
+                    if (GetLevel() < 40)
                     {
                         if (proto.GetSubClass() != (uint)ItemSubClassArmor.Leather)
                             return InventoryResult.ClientLockedOut;
@@ -3605,7 +3605,7 @@ namespace Game.Entities
                 return false;
             }
 
-            if (!Convert.ToBoolean(pProto.GetAllowableClass() & getClassMask()) && pProto.GetBonding() == ItemBondingType.OnAcquire && !IsGameMaster())
+            if (!Convert.ToBoolean(pProto.GetAllowableClass() & GetClassMask()) && pProto.GetBonding() == ItemBondingType.OnAcquire && !IsGameMaster())
             {
                 SendBuyError(BuyResult.CantFindItem, null, item);
                 return false;
@@ -4251,7 +4251,7 @@ namespace Game.Entities
                 if (spellproto == null)
                     continue;
 
-                if (spellproto.HasAura(GetMap().GetDifficultyID(), AuraType.ModXpPct) && !GetSession().GetCollectionMgr().CanApplyHeirloomXpBonus(item.GetEntry(), getLevel())
+                if (spellproto.HasAura(GetMap().GetDifficultyID(), AuraType.ModXpPct) && !GetSession().GetCollectionMgr().CanApplyHeirloomXpBonus(item.GetEntry(), GetLevel())
                     && Global.DB2Mgr.GetHeirloomByItemId(item.GetEntry()) != null)
                     continue;
 
@@ -4520,7 +4520,7 @@ namespace Game.Entities
                     need_space = count;
 
                 ItemPosCount newPosition = new ItemPosCount((ushort)(InventorySlots.Bag0 << 8 | j), need_space);
-                if (!newPosition.isContainedIn(dest))
+                if (!newPosition.IsContainedIn(dest))
                 {
                     dest.Add(newPosition);
                     count -= need_space;
@@ -4598,7 +4598,7 @@ namespace Game.Entities
                 need_space = count;
 
             ItemPosCount newPosition = new ItemPosCount((ushort)(bag << 8 | slot), need_space);
-            if (!newPosition.isContainedIn(dest))
+            if (!newPosition.IsContainedIn(dest))
             {
                 dest.Add(newPosition);
                 count -= need_space;
@@ -4938,7 +4938,7 @@ namespace Game.Entities
                     need_space = count;
 
                 ItemPosCount newPosition = new ItemPosCount((ushort)(bag << 8 | j), need_space);
-                if (!newPosition.isContainedIn(dest))
+                if (!newPosition.IsContainedIn(dest))
                 {
                     dest.Add(newPosition);
                     count -= need_space;
@@ -5151,7 +5151,7 @@ namespace Game.Entities
 
                     ScalingStatDistributionRecord ssd = CliDB.ScalingStatDistributionStorage.LookupByKey(pItem.GetScalingStatDistribution());
                     // check allowed level (extend range to upper values if MaxLevel more or equal max player level, this let GM set high level with 1...max range items)
-                    if (ssd != null && ssd.MaxLevel < WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel) && ssd.MaxLevel < getLevel() && Global.DB2Mgr.GetHeirloomByItemId(pProto.GetId()) == null)
+                    if (ssd != null && ssd.MaxLevel < WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel) && ssd.MaxLevel < GetLevel() && Global.DB2Mgr.GetHeirloomByItemId(pProto.GetId()) == null)
                         return InventoryResult.NotEquippable;
 
                     byte eslot = FindEquipSlot(pProto, slot, swap);
@@ -6190,7 +6190,7 @@ namespace Game.Entities
 
             // We store the level of our player in the gold field
             // We retrieve this information at Player.SendLoot()
-            bones.loot.gold = getLevel();
+            bones.loot.gold = GetLevel();
             bones.lootRecipient = looterPlr;
             looterPlr.SendLoot(bones.GetGUID(), LootType.Insignia);
         }
@@ -6225,7 +6225,7 @@ namespace Game.Entities
                 // not check distance for GO in case owned GO (fishing bobber case, for example)
                 // And permit out of range GO with no owner in case fishing hole
                 if (!go || (loot_type != LootType.Fishinghole && ((loot_type != LootType.Fishing && loot_type != LootType.FishingJunk) || go.GetOwnerGUID() != GetGUID())
-                    && !go.IsWithinDistInMap(this, SharedConst.InteractionDistance)) || (loot_type == LootType.Corpse && go.GetRespawnTime() != 0 && go.isSpawnedByDefault()))
+                    && !go.IsWithinDistInMap(this, SharedConst.InteractionDistance)) || (loot_type == LootType.Corpse && go.GetRespawnTime() != 0 && go.IsSpawnedByDefault()))
                 {
                     SendLootRelease(guid);
                     return;
@@ -6235,10 +6235,10 @@ namespace Game.Entities
 
                 // loot was generated and respawntime has passed since then, allow to recreate loot
                 // to avoid bugs, this rule covers spawned gameobjects only
-                if (go.isSpawnedByDefault() && go.getLootState() == LootState.Activated && !go.loot.isLooted() && go.GetLootGenerationTime() + go.GetRespawnDelay() < Time.UnixTime)
+                if (go.IsSpawnedByDefault() && go.GetLootState() == LootState.Activated && !go.loot.isLooted() && go.GetLootGenerationTime() + go.GetRespawnDelay() < Time.UnixTime)
                     go.SetLootState(LootState.Ready);
 
-                if (go.getLootState() == LootState.Ready)
+                if (go.GetLootState() == LootState.Ready)
                 {
                     uint lootid = go.GetGoInfo().GetLootId();
                     Battleground bg = GetBattleground();
@@ -6278,9 +6278,9 @@ namespace Game.Entities
                     }
 
                     if (loot_type == LootType.Fishing)
-                        go.getFishLoot(loot, this);
+                        go.GetFishLoot(loot, this);
                     else if (loot_type == LootType.FishingJunk)
-                        go.getFishLootJunk(loot, this);
+                        go.GetFishLootJunk(loot, this);
 
                     if (go.GetGoInfo().type == GameObjectTypes.Chest && go.GetGoInfo().Chest.usegrouplootrules != 0)
                     {
@@ -6305,7 +6305,7 @@ namespace Game.Entities
                     go.SetLootState(LootState.Activated, this);
                 }
 
-                if (go.getLootState() == LootState.Activated)
+                if (go.GetLootState() == LootState.Activated)
                 {
                     Group group = GetGroup();
                     if (group)
@@ -6442,8 +6442,8 @@ namespace Game.Entities
                                 loot.FillLoot(lootid, LootStorage.Pickpocketing, this, true);
 
                             // Generate extra money for pick pocket loot
-                            uint a = RandomHelper.URand(0, creature.getLevel() / 2);
-                            uint b = RandomHelper.URand(0, getLevel() / 2);
+                            uint a = RandomHelper.URand(0, creature.GetLevel() / 2);
+                            uint b = RandomHelper.URand(0, GetLevel() / 2);
                             loot.gold = (uint)(10 * (a + b) * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney));
                             permission = PermissionTypes.Owner;
                         }

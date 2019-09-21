@@ -41,11 +41,11 @@ namespace Game.Entities
             m_corpseDelay = 60;
             m_boundaryCheckTime = 2500;
             reactState = ReactStates.Aggressive;
-            m_defaultMovementType = MovementGeneratorType.Idle;
+            DefaultMovementType = MovementGeneratorType.Idle;
             m_regenHealth = true;
             m_meleeDamageSchoolMask = SpellSchoolMask.Normal;
 
-            m_regenTimer = SharedConst.CreatureRegenInterval;
+            RegenTimer = SharedConst.CreatureRegenInterval;
 
             m_SightDistance = SharedConst.SightRangeUnit;
 
@@ -120,11 +120,11 @@ namespace Game.Entities
 
         public void RemoveCorpse(bool setSpawnTime = true, bool destroyForNearbyPlayers = true)
         {
-            if (getDeathState() != DeathState.Corpse)
+            if (GetDeathState() != DeathState.Corpse)
                 return;
 
             m_corpseRemoveTime = Time.UnixTime;
-            setDeathState(DeathState.Dead);
+            SetDeathState(DeathState.Dead);
             RemoveAllAuras();
             DestroyForNearbyPlayers(); // old UpdateObjectVisibility()
             loot.clear();
@@ -254,9 +254,9 @@ namespace Game.Entities
             SetHoverHeight(cinfo.HoverHeight);
 
             // checked at loading
-            m_defaultMovementType = (MovementGeneratorType)(data != null ? data.movementType : cinfo.MovementType);
-            if (m_respawnradius == 0 && m_defaultMovementType == MovementGeneratorType.Random)
-                m_defaultMovementType = MovementGeneratorType.Idle;
+            DefaultMovementType = (MovementGeneratorType)(data != null ? data.movementType : cinfo.MovementType);
+            if (m_respawnradius == 0 && DefaultMovementType == MovementGeneratorType.Random)
+                DefaultMovementType = MovementGeneratorType.Idle;
 
             for (byte i = 0; i < SharedConst.MaxCreatureSpells; ++i)
                 m_spells[i] = GetCreatureTemplate().Spells[i];
@@ -365,8 +365,8 @@ namespace Game.Entities
             {
                 TriggerJustRespawned = false;
                 GetAI().JustRespawned();
-                if (m_vehicleKit != null)
-                    m_vehicleKit.Reset();
+                if (VehicleKit != null)
+                    VehicleKit.Reset();
             }
 
             UpdateMovementFlags();
@@ -514,15 +514,15 @@ namespace Game.Entities
                     if (!IsAlive())
                         break;
 
-                    if (m_regenTimer > 0)
+                    if (RegenTimer > 0)
                     {
-                        if (diff >= m_regenTimer)
-                            m_regenTimer = 0;
+                        if (diff >= RegenTimer)
+                            RegenTimer = 0;
                         else
-                            m_regenTimer -= diff;
+                            RegenTimer -= diff;
                     }
 
-                    if (m_regenTimer == 0)
+                    if (RegenTimer == 0)
                     {
                         bool bInCombat = IsInCombat() && (!GetVictim() ||                                        // if IsInCombat() is true and this has no victim
                                                           !GetVictim().GetCharmerOrOwnerPlayerOrPlayerItself() ||                // or the victim/owner/charmer is not a player
@@ -536,7 +536,7 @@ namespace Game.Entities
                         else
                             Regenerate(PowerType.Mana);
 
-                        m_regenTimer = SharedConst.CreatureRegenInterval;
+                        RegenTimer = SharedConst.CreatureRegenInterval;
                     }
 
                     if (CanNotReachTarget() && !IsInEvadeMode() && !GetMap().IsRaid())
@@ -605,7 +605,7 @@ namespace Game.Entities
 
         void RegenerateHealth()
         {
-            if (!isRegeneratingHealth())
+            if (!IsRegeneratingHealth())
                 return;
 
             ulong curValue = GetHealth();
@@ -703,12 +703,12 @@ namespace Game.Entities
         {
             if (m_formation == null)
                 GetMotionMaster().Initialize();
-            else if (m_formation.getLeader() == this)
+            else if (m_formation.GetLeader() == this)
             {
                 m_formation.FormationReset(false);
                 GetMotionMaster().Initialize();
             }
-            else if (m_formation.isFormed())
+            else if (m_formation.IsFormed())
                 GetMotionMaster().MoveIdle(); //wait the order of leader
             else
                 GetMotionMaster().Initialize();
@@ -840,7 +840,7 @@ namespace Game.Entities
                 SetReactState(ReactStates.Aggressive);
         }
 
-        public bool isCanInteractWithBattleMaster(Player player, bool msg)
+        public bool CanInteractWithBattleMaster(Player player, bool msg)
         {
             if (!IsBattleMaster())
                 return false;
@@ -882,7 +882,7 @@ namespace Game.Entities
 
         public bool CanResetTalents(Player player)
         {
-            return player.getLevel() >= 15 && player.GetClass() == GetCreatureTemplate().TrainerClass;
+            return player.GetLevel() >= 15 && player.GetClass() == GetCreatureTemplate().TrainerClass;
         }
 
         public void SetTextRepeatId(byte textGroup, byte id)
@@ -977,7 +977,7 @@ namespace Game.Entities
             AddDynamicFlag(UnitDynFlags.Tapped);
         }
 
-        public bool isTappedBy(Player player)
+        public bool IsTappedBy(Player player)
         {
             if (player.GetGUID() == m_lootRecipient)
                 return true;
@@ -1138,7 +1138,7 @@ namespace Game.Entities
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
             CreatureEliteType rank = IsPet() ? 0 : cInfo.Rank;
-            CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(getLevel(), cInfo.UnitClass);
+            CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(GetLevel(), cInfo.UnitClass);
 
             // health
             float healthmod = _GetHealthMod(rank);
@@ -1357,7 +1357,7 @@ namespace Game.Entities
             SetHealth((m_deathState == DeathState.Alive || m_deathState == DeathState.JustRespawned) ? curhealth : 0);
         }
 
-        public override bool hasQuest(uint quest_id)
+        public override bool HasQuest(uint quest_id)
         {
             var qr = Global.ObjectMgr.GetCreatureQuestRelationBounds(GetEntry());
             foreach (var id in qr)
@@ -1368,7 +1368,7 @@ namespace Game.Entities
             return false;
         }
 
-        public override bool hasInvolvedQuest(uint quest_id)
+        public override bool HasInvolvedQuest(uint quest_id)
         {
             var qir = Global.ObjectMgr.GetCreatureQuestInvolvedRelationBounds(GetEntry());
             foreach (var id in qir)
@@ -1455,7 +1455,7 @@ namespace Game.Entities
 
                 if (who.IsInCombat() && IsWithinDist(who, SharedConst.AttackDistance))
                 {
-                    Unit victim = who.getAttackerForHelper();
+                    Unit victim = who.GetAttackerForHelper();
                     if (victim != null)
                         if (IsWithinDistInMap(victim, WorldConfig.GetFloatValue(WorldCfg.CreatureFamilyAssistanceRadius)))
                             force = true;
@@ -1515,9 +1515,9 @@ namespace Game.Entities
             return (aggroRadius * aggroRate);
         }
 
-        public override void setDeathState(DeathState s)
+        public override void SetDeathState(DeathState s)
         {
-            base.setDeathState(s);
+            base.SetDeathState(s);
 
             if (s == DeathState.JustDied)
             {
@@ -1528,7 +1528,7 @@ namespace Game.Entities
                     m_respawnTime = Time.UnixTime + m_respawnDelay + m_corpseDelay;
 
                 // always save boss respawn time at death to prevent crash cheating
-                if (WorldConfig.GetBoolValue(WorldCfg.SaveRespawnTimeImmediately) || isWorldBoss())
+                if (WorldConfig.GetBoolValue(WorldCfg.SaveRespawnTimeImmediately) || IsWorldBoss())
                     SaveRespawnTime();
 
                 ReleaseFocus(null, false);               // remove spellcast focus
@@ -1540,7 +1540,7 @@ namespace Game.Entities
 
                 SetMountDisplayId(0); // if creature is mounted on a virtual mount, remove it at death
 
-                setActive(false);
+                SetActive(false);
 
                 if (HasSearchedAssistance())
                 {
@@ -1549,13 +1549,13 @@ namespace Game.Entities
                 }
 
                 //Dismiss group if is leader
-                if (m_formation != null && m_formation.getLeader() == this)
+                if (m_formation != null && m_formation.GetLeader() == this)
                     m_formation.FormationReset(true);
 
                 if ((CanFly() || IsFlying()))
                     GetMotionMaster().MoveFall();
 
-                base.setDeathState(DeathState.Corpse);
+                base.SetDeathState(DeathState.Corpse);
             }
             else if (s == DeathState.JustRespawned)
             {
@@ -1598,7 +1598,7 @@ namespace Game.Entities
                 }
 
                 InitializeMovementAI();
-                base.setDeathState(DeathState.Alive);
+                base.SetDeathState(DeathState.Alive);
                 LoadCreaturesAddon();
             }
         }
@@ -1610,14 +1610,14 @@ namespace Game.Entities
             if (force)
             {
                 if (IsAlive())
-                    setDeathState(DeathState.JustDied);
-                else if (getDeathState() != DeathState.Corpse)
-                    setDeathState(DeathState.Corpse);
+                    SetDeathState(DeathState.JustDied);
+                else if (GetDeathState() != DeathState.Corpse)
+                    SetDeathState(DeathState.Corpse);
             }
 
             RemoveCorpse(false, false);
 
-            if (getDeathState() == DeathState.Dead)
+            if (GetDeathState() == DeathState.Dead)
             {
                 if (m_spawnId != 0)
                     GetMap().RemoveCreatureRespawnTime(m_spawnId);
@@ -1632,7 +1632,7 @@ namespace Game.Entities
                 else
                     SelectLevel();
 
-                setDeathState(DeathState.JustRespawned);
+                SetDeathState(DeathState.JustRespawned);
 
                 CreatureModel display = new CreatureModel(GetNativeDisplayId(), GetNativeDisplayScale(), 1.0f);
                 if (Global.ObjectMgr.GetCreatureModelRandomGender(ref display, GetCreatureTemplate()) != null)
@@ -1660,7 +1660,7 @@ namespace Game.Entities
             UpdateObjectVisibility();
         }
 
-        public void ForcedDespawn(uint timeMSToDespawn = 0, TimeSpan forceRespawnTimer = default(TimeSpan))
+        public void ForcedDespawn(uint timeMSToDespawn = 0, TimeSpan forceRespawnTimer = default)
         {
             if (timeMSToDespawn != 0)
             {
@@ -1674,7 +1674,7 @@ namespace Game.Entities
             DestroyForNearbyPlayers();
 
             if (IsAlive())
-                setDeathState(DeathState.JustDied);
+                SetDeathState(DeathState.JustDied);
 
             bool overrideRespawnTime = true;
             if (forceRespawnTimer > TimeSpan.Zero)
@@ -1687,9 +1687,9 @@ namespace Game.Entities
             RemoveCorpse(overrideRespawnTime, false);
         }
 
-        public void DespawnOrUnsummon(TimeSpan time, TimeSpan forceRespawnTimer = default(TimeSpan)) { DespawnOrUnsummon((uint)time.TotalMilliseconds, forceRespawnTimer); }
+        public void DespawnOrUnsummon(TimeSpan time, TimeSpan forceRespawnTimer = default) { DespawnOrUnsummon((uint)time.TotalMilliseconds, forceRespawnTimer); }
 
-        public void DespawnOrUnsummon(uint msTimeToDespawn = 0, TimeSpan forceRespawnTimer = default(TimeSpan))
+        public void DespawnOrUnsummon(uint msTimeToDespawn = 0, TimeSpan forceRespawnTimer = default)
         {
             TempSummon summon = ToTempSummon();
             if (summon != null)
@@ -1759,7 +1759,7 @@ namespace Game.Entities
             return base.IsImmunedToSpellEffect(spellInfo, index, caster);
         }
 
-        public bool isElite()
+        public bool IsElite()
         {
             if (IsPet())
                 return false;
@@ -1768,7 +1768,7 @@ namespace Game.Entities
             return rank != CreatureEliteType.Elite && rank != CreatureEliteType.RareElite;
         }
 
-        public bool isWorldBoss()
+        public bool IsWorldBoss()
         {
             if (IsPet())
                 return false;
@@ -1776,7 +1776,7 @@ namespace Game.Entities
             return Convert.ToBoolean(GetCreatureTemplate().TypeFlags & CreatureTypeFlags.BossMob);
         }
 
-        public SpellInfo reachWithSpellAttack(Unit victim)
+        public SpellInfo ReachWithSpellAttack(Unit victim)
         {
             if (victim == null)
                 return null;
@@ -1825,7 +1825,7 @@ namespace Game.Entities
             return null;
         }
 
-        SpellInfo reachWithSpellCure(Unit victim)
+        SpellInfo ReachWithSpellCure(Unit victim)
         {
             if (victim == null)
                 return null;
@@ -2013,7 +2013,7 @@ namespace Game.Entities
         public bool _IsTargetAcceptable(Unit target)
         {
             // if the target cannot be attacked, the target is not acceptable
-            if (IsFriendlyTo(target) || !target.isTargetableForAttack(false)
+            if (IsFriendlyTo(target) || !target.IsTargetableForAttack(false)
                 || (m_vehicle != null && (IsOnVehicle(target) || m_vehicle.GetBase().IsOnVehicle(target))))
                 return false;
 
@@ -2026,8 +2026,8 @@ namespace Game.Entities
                     return false;
             }
 
-            Unit myVictim = getAttackerForHelper();
-            Unit targetVictim = target.getAttackerForHelper();
+            Unit myVictim = GetAttackerForHelper();
+            Unit targetVictim = target.GetAttackerForHelper();
 
             // if I'm already fighting target, or I'm hostile towards the target, the target is acceptable
             if (GetVictim() == target || IsHostileTo(target))
@@ -2062,7 +2062,7 @@ namespace Game.Entities
             if (!IsValidAttackTarget(victim))
                 return false;
 
-            if (!victim.isInAccessiblePlaceFor(this))
+            if (!victim.IsInAccessiblePlaceFor(this))
                 return false;
 
             if (IsAIEnabled && !GetAI().CanAIAttack(victim))
@@ -2082,7 +2082,7 @@ namespace Game.Entities
                     return true;
 
                 // don't check distance to home position if recently damaged, this should include taunt auras
-                if (!isWorldBoss() && (GetLastDamagedTime() > GameTime.GetGameTime() || HasAuraType(AuraType.ModTaunt)))
+                if (!IsWorldBoss() && (GetLastDamagedTime() > GameTime.GetGameTime() || HasAuraType(AuraType.ModTaunt)))
                     return true;
             }
 
@@ -2302,7 +2302,7 @@ namespace Game.Entities
 
         public void AllLootRemovedFromCorpse()
         {
-            if (loot.loot_type != LootType.Skinning && !IsPet() && GetCreatureTemplate().SkinLootId != 0 && hasLootRecipient())
+            if (loot.loot_type != LootType.Skinning && !IsPet() && GetCreatureTemplate().SkinLootId != 0 && HasLootRecipient())
                 if (LootStorage.Skinning.HaveLootFor(GetCreatureTemplate().SkinLootId))
                     AddUnitFlag(UnitFlags.Skinnable);
 
@@ -2340,7 +2340,7 @@ namespace Game.Entities
                 return 1.0f;
 
             uint levelForTarget = GetLevelForTarget(target);
-            if (getLevel() < levelForTarget)
+            if (GetLevel() < levelForTarget)
                 return 1.0f;
 
             return (float)GetMaxHealthByLevel(levelForTarget) / GetCreateHealth();
@@ -2360,7 +2360,7 @@ namespace Game.Entities
 
             uint levelForTarget = GetLevelForTarget(target);
 
-            return GetBaseDamageForLevel(levelForTarget) / GetBaseDamageForLevel(getLevel());
+            return GetBaseDamageForLevel(levelForTarget) / GetBaseDamageForLevel(GetLevel());
         }
 
         float GetBaseArmorForLevel(uint level)
@@ -2377,7 +2377,7 @@ namespace Game.Entities
 
             uint levelForTarget = GetLevelForTarget(target);
 
-            return GetBaseArmorForLevel(levelForTarget) / GetBaseArmorForLevel(getLevel());
+            return GetBaseArmorForLevel(levelForTarget) / GetBaseArmorForLevel(GetLevel());
         }
 
         public override uint GetLevelForTarget(WorldObject target)
@@ -2385,9 +2385,9 @@ namespace Game.Entities
             Unit unitTarget = target.ToUnit();
             if (unitTarget)
             {
-                if (isWorldBoss())
+                if (IsWorldBoss())
                 {
-                    int level = (int)(unitTarget.getLevel() + WorldConfig.GetIntValue(WorldCfg.WorldBossLevelDiff));
+                    int level = (int)(unitTarget.GetLevel() + WorldConfig.GetIntValue(WorldCfg.WorldBossLevelDiff));
                     return (uint)MathFunctions.RoundToInterval(ref level, 1u, 255u);
                 }
 
@@ -2395,7 +2395,7 @@ namespace Game.Entities
                 // between UNIT_FIELD_SCALING_LEVEL_MIN and UNIT_FIELD_SCALING_LEVEL_MAX
                 if (HasScalableLevels())
                 {
-                    int targetLevelWithDelta = (int)unitTarget.getLevel() + m_unitData.ScalingLevelDelta;
+                    int targetLevelWithDelta = (int)unitTarget.GetLevel() + m_unitData.ScalingLevelDelta;
 
                     if (target.IsPlayer())
                         targetLevelWithDelta += target.ToPlayer().m_activePlayerData.ScalingPlayerLevelDelta;
@@ -2975,7 +2975,7 @@ namespace Game.Entities
 
             SetSpawnHealth();
 
-            m_defaultMovementType = (MovementGeneratorType)data.movementType;
+            DefaultMovementType = (MovementGeneratorType)data.movementType;
 
             loot.SetGUID(ObjectGuid.Create(HighGuid.LootObject, data.mapid, data.id, GetMap().GenerateLowGuid(HighGuid.LootObject)));
 
@@ -2984,7 +2984,7 @@ namespace Game.Entities
             return true;
         }
 
-        public bool hasLootRecipient() { return !m_lootRecipient.IsEmpty() || !m_lootRecipientGroup.IsEmpty(); }
+        public bool HasLootRecipient() { return !m_lootRecipient.IsEmpty() || !m_lootRecipientGroup.IsEmpty(); }
 
         public LootModes GetLootMode() { return m_LootMode; }
         public bool HasLootMode(LootModes lootMode) { return Convert.ToBoolean(m_LootMode & lootMode); }
@@ -2997,8 +2997,8 @@ namespace Game.Entities
         public void SetNoSearchAssistance(bool val) { m_AlreadySearchedAssistance = val; }
         public bool HasSearchedAssistance() { return m_AlreadySearchedAssistance; }
 
-        MovementGeneratorType GetDefaultMovementType() { return m_defaultMovementType; }
-        public void SetDefaultMovementType(MovementGeneratorType mgt) { m_defaultMovementType = mgt; }
+        MovementGeneratorType GetDefaultMovementType() { return DefaultMovementType; }
+        public void SetDefaultMovementType(MovementGeneratorType mgt) { DefaultMovementType = mgt; }
 
         public long GetRespawnTime() { return m_respawnTime; }
         public void SetRespawnTime(uint respawn) { m_respawnTime = respawn != 0 ? Time.UnixTime + respawn : 0; }
@@ -3018,8 +3018,8 @@ namespace Game.Entities
                 m_combatPulseTime = delay;
         }
 
-        bool isRegeneratingHealth() { return m_regenHealth; }
-        public void setRegeneratingHealth(bool regenHealth) { m_regenHealth = regenHealth; }
+        bool IsRegeneratingHealth() { return m_regenHealth; }
+        public void SetRegeneratingHealth(bool regenHealth) { m_regenHealth = regenHealth; }
 
         public void SetHomePosition(float x, float y, float z, float o)
         {
@@ -3097,7 +3097,7 @@ namespace Game.Entities
                     for (var i = tauntAuras.Count - 1; i >= 0; i--)
                     {
                         caster = tauntAuras[i].GetCaster();
-                        if (caster != null && CanSeeOrDetect(caster, true) && IsValidAttackTarget(caster) && caster.isInAccessiblePlaceFor(ToCreature()))
+                        if (caster != null && CanSeeOrDetect(caster, true) && IsValidAttackTarget(caster) && caster.IsInAccessiblePlaceFor(ToCreature()))
                         {
                             target = caster;
                             break;
@@ -3117,21 +3117,21 @@ namespace Game.Entities
             else if (!HasReactState(ReactStates.Passive))
             {
                 // We have player pet probably
-                target = getAttackerForHelper();
+                target = GetAttackerForHelper();
                 if (target == null && IsSummon())
                 {
                     Unit owner = ToTempSummon().GetOwner();
                     if (owner != null)
                     {
                         if (owner.IsInCombat())
-                            target = owner.getAttackerForHelper();
+                            target = owner.GetAttackerForHelper();
                         if (target == null)
                         {
                             foreach (var unit in owner.m_Controlled)
                             {
                                 if (unit.IsInCombat())
                                 {
-                                    target = unit.getAttackerForHelper();
+                                    target = unit.GetAttackerForHelper();
                                     if (target)
                                         break;
                                 }
@@ -3247,7 +3247,7 @@ namespace Game.Entities
 
     public class ForcedDespawnDelayEvent : BasicEvent
     {
-        public ForcedDespawnDelayEvent(Creature owner, TimeSpan respawnTimer = default(TimeSpan))
+        public ForcedDespawnDelayEvent(Creature owner, TimeSpan respawnTimer = default)
         {
             m_owner = owner;
             m_respawnTimer = respawnTimer;

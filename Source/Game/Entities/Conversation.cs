@@ -30,8 +30,8 @@ namespace Game.Entities
         {
             _duration = 0;
 
-            objectTypeMask |= TypeMask.Conversation;
-            objectTypeId = TypeId.Conversation;
+            ObjectTypeMask |= TypeMask.Conversation;
+            ObjectTypeId = TypeId.Conversation;
 
             m_updateFlag.Stationary = true;
             m_updateFlag.Conversation = true;

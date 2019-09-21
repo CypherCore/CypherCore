@@ -25,8 +25,8 @@ namespace Game.Entities
     {
         public Bag()
         {
-            objectTypeMask |= TypeMask.Container;
-            objectTypeId = TypeId.Container;
+            ObjectTypeMask |= TypeMask.Container;
+            ObjectTypeId = TypeId.Container;
 
             m_containerData = new ContainerData();
         }

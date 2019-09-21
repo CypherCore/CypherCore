@@ -16,7 +16,6 @@
  */
 
 using Framework.Constants;
-using Game;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
@@ -839,8 +838,8 @@ namespace Scripts.EasternKingdoms
 
             foreach (TempSummon summon in MinionList)
                 if (summon.GetOwnerGUID() == me.GetOwnerGUID())
-                    if (summon.IsInCombat() && summon.getAttackerForHelper())
-                        AttackStart(summon.getAttackerForHelper());
+                    if (summon.IsInCombat() && summon.GetAttackerForHelper())
+                        AttackStart(summon.GetAttackerForHelper());
         }
 
         public override void UpdateAI(uint diff)
@@ -853,8 +852,8 @@ namespace Scripts.EasternKingdoms
                     Player plrOwner = owner.ToPlayer();
                     if (plrOwner && plrOwner.IsInCombat())
                     {
-                        if (plrOwner.getAttackerForHelper() && plrOwner.getAttackerForHelper().GetEntry() == CreatureIds.Ghosts)
-                            AttackStart(plrOwner.getAttackerForHelper());
+                        if (plrOwner.GetAttackerForHelper() && plrOwner.GetAttackerForHelper().GetEntry() == CreatureIds.Ghosts)
+                            AttackStart(plrOwner.GetAttackerForHelper());
                         else
                             FindMinions(owner);
                     }
@@ -868,13 +867,13 @@ namespace Scripts.EasternKingdoms
             //Check if we have a current target
             if (me.GetVictim().GetEntry() == CreatureIds.Ghosts)
             {
-                if (me.isAttackReady())
+                if (me.IsAttackReady())
                 {
                     //If we are within range melee the target
                     if (me.IsWithinMeleeRange(me.GetVictim()))
                     {
                         me.AttackerStateUpdate(me.GetVictim());
-                        me.resetAttackTimer();
+                        me.ResetAttackTimer();
                     }
                 }
             }

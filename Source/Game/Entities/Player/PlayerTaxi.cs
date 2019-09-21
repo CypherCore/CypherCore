@@ -27,6 +27,10 @@ namespace Game.Entities
 {
     public class PlayerTaxi
     {
+        public byte[] m_taximask = new byte[PlayerConst.TaxiMaskSize];
+        List<uint> m_TaxiDestinations = new List<uint>();
+        uint m_flightMasterFactionId;
+
         public void InitTaxiNodesForLevel(Race race, Class chrClass, uint level)
         {
             // class specific initial known nodes
@@ -261,10 +265,6 @@ namespace Game.Entities
             return GetTaxiDestination();
         }
         public List<uint> GetPath() { return m_TaxiDestinations; }
-        public bool empty() { return m_TaxiDestinations.Empty(); }
-
-        public byte[] m_taximask = new byte[PlayerConst.TaxiMaskSize];
-        List<uint> m_TaxiDestinations = new List<uint>();
-        uint m_flightMasterFactionId;
+        public bool Empty() { return m_TaxiDestinations.Empty(); }
     }
 }

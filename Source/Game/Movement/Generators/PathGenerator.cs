@@ -20,7 +20,6 @@ using Framework.GameMath;
 using Game.Entities;
 using Game.Maps;
 using System;
-using System.Linq;
 
 namespace Game.Movement
 {

@@ -16,7 +16,6 @@
  */
 
 using Framework.Constants;
-using Framework.Cryptography;
 using Framework.Database;
 using Framework.Rest;
 using Framework.Serialization;

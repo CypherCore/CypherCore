@@ -883,7 +883,7 @@ namespace Game
                             GameObject go = GameObject.CreateGameObjectFromDB(obj.guid, map, false);
                             if (go)
                             {
-                                if (go.isSpawnedByDefault())
+                                if (go.IsSpawnedByDefault())
                                     map.AddToMap(go);
                             }
                         }

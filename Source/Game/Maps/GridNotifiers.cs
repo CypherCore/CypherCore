@@ -24,7 +24,6 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Collections.Concurrent;
 
 namespace Game.Maps
 {
@@ -119,7 +118,7 @@ namespace Game.Maps
                                 break;
                             case TypeId.Player:
                                 i_player.UpdateVisibilityOf(obj.ToPlayer(), i_data, i_visibleNow);
-                                if (!obj.isNeedNotify(NotifyFlags.VisibilityChanged))
+                                if (!obj.IsNeedNotify(NotifyFlags.VisibilityChanged))
                                     obj.ToPlayer().UpdateVisibilityOf(i_player);
                                 break;
                             case TypeId.Unit:
@@ -143,7 +142,7 @@ namespace Game.Maps
                 if (guid.IsPlayer())
                 {
                     Player pl = Global.ObjAccessor.FindPlayer(guid);
-                    if (pl != null && pl.IsInWorld && !pl.isNeedNotify(NotifyFlags.VisibilityChanged))
+                    if (pl != null && pl.IsInWorld && !pl.IsNeedNotify(NotifyFlags.VisibilityChanged))
                         pl.UpdateVisibilityOf(i_player);
                 }
             }
@@ -236,7 +235,7 @@ namespace Game.Maps
 
                 i_player.UpdateVisibilityOf(player, i_data, i_visibleNow);
 
-                if (player.seerView.isNeedNotify(NotifyFlags.VisibilityChanged))
+                if (player.seerView.IsNeedNotify(NotifyFlags.VisibilityChanged))
                     continue;
 
                 player.UpdateVisibilityOf(i_player);
@@ -255,7 +254,7 @@ namespace Game.Maps
 
                 i_player.UpdateVisibilityOf(creature, i_data, i_visibleNow);
 
-                if (relocated_for_ai && !creature.isNeedNotify(NotifyFlags.VisibilityChanged))
+                if (relocated_for_ai && !creature.IsNeedNotify(NotifyFlags.VisibilityChanged))
                     CreatureUnitRelocationWorker(creature, i_player);
             }
         }
@@ -272,7 +271,7 @@ namespace Game.Maps
         {
             foreach (var player in objs)
             {
-                if (!player.seerView.isNeedNotify(NotifyFlags.VisibilityChanged))
+                if (!player.seerView.IsNeedNotify(NotifyFlags.VisibilityChanged))
                     player.UpdateVisibilityOf(i_creature);
 
                 CreatureUnitRelocationWorker(i_creature, player);
@@ -288,7 +287,7 @@ namespace Game.Maps
             {
                 CreatureUnitRelocationWorker(i_creature, creature);
 
-                if (!creature.isNeedNotify(NotifyFlags.VisibilityChanged))
+                if (!creature.IsNeedNotify(NotifyFlags.VisibilityChanged))
                     CreatureUnitRelocationWorker(creature, i_creature);
             }
         }
@@ -312,7 +311,7 @@ namespace Game.Maps
             {
                 WorldObject viewPoint = player.seerView;
 
-                if (!viewPoint.isNeedNotify(NotifyFlags.VisibilityChanged))
+                if (!viewPoint.IsNeedNotify(NotifyFlags.VisibilityChanged))
                     continue;
 
                 if (player != viewPoint && !viewPoint.IsPositionValid())
@@ -329,7 +328,7 @@ namespace Game.Maps
         {
             foreach (var creature in objs)
             {
-                if (!creature.isNeedNotify(NotifyFlags.VisibilityChanged))
+                if (!creature.IsNeedNotify(NotifyFlags.VisibilityChanged))
                     continue;
 
                 CreatureRelocationNotifier relocate = new CreatureRelocationNotifier(creature);
@@ -1519,7 +1518,7 @@ namespace Game.Maps
         public bool Invoke(Creature u)
         {
             if (u.IsAlive() && u.IsInCombat() && !i_obj.IsHostileTo(u) && i_obj.IsWithinDistInMap(u, i_range) &&
-                (u.isFeared() || u.IsCharmed() || u.isFrozen() || u.HasUnitState(UnitState.Stunned) || u.HasUnitState(UnitState.Confused)))
+                (u.IsFeared() || u.IsCharmed() || u.IsFrozen() || u.HasUnitState(UnitState.Stunned) || u.HasUnitState(UnitState.Confused)))
                 return true;
             return false;
         }
@@ -1594,7 +1593,7 @@ namespace Game.Maps
             if (u.IsTypeId(TypeId.Unit) && u.IsTotem())
                 return false;
 
-            if (!u.isTargetableForAttack(false))
+            if (!u.IsTargetableForAttack(false))
                 return false;
 
             if (!i_obj.IsWithinDistInMap(u, i_range) || i_funit._IsValidAttackTarget(u, null, i_obj))
@@ -1701,7 +1700,7 @@ namespace Game.Maps
 
         public bool Invoke(Unit u)
         {
-            if (u.isTargetableForAttack() && i_obj.IsWithinDistInMap(u, i_range) &&
+            if (u.IsTargetableForAttack() && i_obj.IsWithinDistInMap(u, i_range) &&
                 (i_funit.IsInCombatWith(u) || i_funit.IsHostileTo(u)) && i_obj.CanSeeOrDetect(u))
             {
                 i_range = i_obj.GetDistance(u);        // use found unit range as new range limit for next check
@@ -1927,7 +1926,7 @@ namespace Game.Maps
 
         public bool Invoke(Creature u)
         {
-            if (u.getDeathState() != DeathState.Dead && u.GetEntry() == i_entry && u.IsAlive() == i_alive && i_obj.IsWithinDistInMap(u, i_range))
+            if (u.GetDeathState() != DeathState.Dead && u.GetEntry() == i_entry && u.IsAlive() == i_alive && i_obj.IsWithinDistInMap(u, i_range))
             {
                 i_range = i_obj.GetDistance(u);         // use found unit range as new range limit for next check
                 return true;
@@ -2171,7 +2170,7 @@ namespace Game.Maps
 
     public class UnitAuraCheck<T> : ICheck<T> where T : WorldObject
     {
-        public UnitAuraCheck(bool present, uint spellId, ObjectGuid casterGUID = default(ObjectGuid))
+        public UnitAuraCheck(bool present, uint spellId, ObjectGuid casterGUID = default)
         {
             _present = present;
             _spellId = spellId;
@@ -2209,7 +2208,7 @@ namespace Game.Maps
             if (go.GetGoInfo().SpellFocus.spellFocusType != i_focusId)
                 return false;
 
-            if (!go.isSpawned())
+            if (!go.IsSpawned())
                 return false;
 
             float dist = go.GetGoInfo().SpellFocus.radius / 2.0f;
@@ -2232,7 +2231,7 @@ namespace Game.Maps
 
         public bool Invoke(GameObject go)
         {
-            if (go.GetGoInfo().type == GameObjectTypes.FishingHole && go.isSpawned() && i_obj.IsWithinDistInMap(go, i_range) && i_obj.IsWithinDistInMap(go, go.GetGoInfo().FishingHole.radius))
+            if (go.GetGoInfo().type == GameObjectTypes.FishingHole && go.IsSpawned() && i_obj.IsWithinDistInMap(go, i_range) && i_obj.IsWithinDistInMap(go, go.GetGoInfo().FishingHole.radius))
             {
                 i_range = i_obj.GetDistance(go);
                 return true;

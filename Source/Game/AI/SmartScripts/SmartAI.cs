@@ -18,9 +18,6 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Groups;
-using Game.Maps;
-using Game.Movement;
-using Game.Scripting;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -1065,7 +1062,7 @@ namespace Game.AI
         {
             GetScript().OnInitialize(go);
             // do not call respawn event if go is not spawned
-            if (go.isSpawned())
+            if (go.IsSpawned())
                 GetScript().ProcessEventsFor(SmartEvents.Respawn);
         }
 

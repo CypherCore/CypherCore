@@ -18,7 +18,6 @@
 using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
-using Framework.IO;
 using Game.DataStorage;
 using Game.Loots;
 using Game.Network;
@@ -36,8 +35,8 @@ namespace Game.Entities
     {
         public Item() : base(false)
         {
-            objectTypeMask |= TypeMask.Item;
-            objectTypeId = TypeId.Item;
+            ObjectTypeMask |= TypeMask.Item;
+            ObjectTypeId = TypeId.Item;
 
             m_itemData = new ItemData();
 
@@ -911,7 +910,7 @@ namespace Game.Entities
             return true;
         }
 
-        public void SetEnchantment(EnchantmentSlot slot, uint id, uint duration, uint charges, ObjectGuid caster = default(ObjectGuid))
+        public void SetEnchantment(EnchantmentSlot slot, uint id, uint duration, uint charges, ObjectGuid caster = default)
         {
             // Better lost small time at check in comparison lost time at item save to DB.
             if ((GetEnchantmentId(slot) == id) && (GetEnchantmentDuration(slot) == duration) && (GetEnchantmentCharges(slot) == charges))
@@ -922,7 +921,7 @@ namespace Game.Entities
             {
                 uint oldEnchant = GetEnchantmentId(slot);
                 if (oldEnchant != 0)
-                    owner.GetSession().SendEnchantmentLog(GetOwnerGUID(), ObjectGuid.Empty, GetGUID(), GetEntry(), (uint)oldEnchant, (uint)slot);
+                    owner.GetSession().SendEnchantmentLog(GetOwnerGUID(), ObjectGuid.Empty, GetGUID(), GetEntry(), oldEnchant, (uint)slot);
 
                 if (id != 0)
                     owner.GetSession().SendEnchantmentLog(GetOwnerGUID(), caster, GetGUID(), GetEntry(), id, (uint)slot);
@@ -1893,7 +1892,7 @@ namespace Game.Entities
             uint minItemLevelCutoff = owner.m_unitData.MinItemLevelCutoff;
             uint maxItemLevel = GetTemplate().GetFlags3().HasAnyFlag(ItemFlags3.IgnoreItemLevelCapInPvp) ? 0u : owner.m_unitData.MaxItemLevel;
             bool pvpBonus = owner.IsUsingPvpItemLevels();
-            return GetItemLevel(GetTemplate(), _bonusData, owner.getLevel(), GetModifier(ItemModifier.ScalingStatDistributionFixedLevel), GetModifier(ItemModifier.UpgradeId),
+            return GetItemLevel(GetTemplate(), _bonusData, owner.GetLevel(), GetModifier(ItemModifier.ScalingStatDistributionFixedLevel), GetModifier(ItemModifier.UpgradeId),
                 minItemLevel, minItemLevelCutoff, maxItemLevel, pvpBonus);
         }
 
@@ -2607,8 +2606,8 @@ namespace Game.Entities
             uState = state;
         }
 
-        public override bool hasQuest(uint quest_id) { return GetTemplate().GetStartQuest() == quest_id; }
-        public override bool hasInvolvedQuest(uint quest_id) { return false; }
+        public override bool HasQuest(uint quest_id) { return GetTemplate().GetStartQuest() == quest_id; }
+        public override bool HasInvolvedQuest(uint quest_id) { return false; }
         public bool IsPotion() { return GetTemplate().IsPotion(); }
         public bool IsVellum() { return GetTemplate().IsVellum(); }
         public bool IsConjuredConsumable() { return GetTemplate().IsConjuredConsumable(); }
@@ -2762,7 +2761,7 @@ namespace Game.Entities
             count = _count;
         }
 
-        public bool isContainedIn(List<ItemPosCount> vec)
+        public bool IsContainedIn(List<ItemPosCount> vec)
         {
             foreach (var posCount in vec)
                 if (posCount.pos == pos)

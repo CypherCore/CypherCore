@@ -949,7 +949,7 @@ namespace Game.BattleFields
                 {
                     Player player = Global.ObjAccessor.FindPlayer(guid);
                     if (player)
-                        if (player.getLevel() >= m_MinLevel)
+                        if (player.GetLevel() >= m_MinLevel)
                             player.RemoveAurasDueToSpell(WGSpells.Tenacity);
                 }
 

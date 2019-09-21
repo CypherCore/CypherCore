@@ -22,11 +22,22 @@ using Game.Network.Packets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections;
 
 namespace Game.Entities
 {
     public class CollectionMgr
     {
+        static Dictionary<uint, uint> FactionSpecificMounts = new Dictionary<uint, uint>();
+
+        WorldSession _owner;
+        Dictionary<uint, ToyFlags> _toys = new Dictionary<uint, ToyFlags>();
+        Dictionary<uint, HeirloomData> _heirlooms = new Dictionary<uint, HeirloomData>();
+        Dictionary<uint, MountStatusFlags> _mounts = new Dictionary<uint, MountStatusFlags>();
+        BitSet _appearances;
+        MultiMap<uint, ObjectGuid> _temporaryAppearances = new MultiMap<uint, ObjectGuid>();
+        Dictionary<uint, FavoriteAppearanceState> _favoriteAppearances = new Dictionary<uint, FavoriteAppearanceState>();
+
         public static void LoadMountDefinitions()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -64,7 +75,7 @@ namespace Game.Entities
         public CollectionMgr(WorldSession owner)
         {
             _owner = owner;
-            _appearances = new System.Collections.BitSet(0);
+            _appearances = new BitSet(0);
         }
 
         public void LoadToys()
@@ -483,7 +494,7 @@ namespace Game.Entities
 
                 } while (knownAppearances.NextRow());
 
-                _appearances = new System.Collections.BitSet(blocks);
+                _appearances = new BitSet(blocks);
             }
 
             if (!favoriteAppearances.IsEmpty())
@@ -664,7 +675,7 @@ namespace Game.Entities
                                 return false;
                         }
                         if (itemTemplate.GetInventoryType() != InventoryType.Cloak)
-                            if (!Convert.ToBoolean(PlayerClassByArmorSubclass[itemTemplate.GetSubClass()] & _owner.GetPlayer().getClassMask()))
+                            if (!Convert.ToBoolean(PlayerClassByArmorSubclass[itemTemplate.GetSubClass()] & _owner.GetPlayer().GetClassMask()))
                                 return false;
                         break;
                     }
@@ -857,17 +868,6 @@ namespace Game.Entities
         public Dictionary<uint, ToyFlags> GetAccountToys() { return _toys; }
         public Dictionary<uint, HeirloomData> GetAccountHeirlooms() { return _heirlooms; }
         public Dictionary<uint, MountStatusFlags> GetAccountMounts() { return _mounts; }
-
-        WorldSession _owner;
-
-        Dictionary<uint, ToyFlags> _toys = new Dictionary<uint, ToyFlags>();
-        Dictionary<uint, HeirloomData> _heirlooms = new Dictionary<uint, HeirloomData>();
-        Dictionary<uint, MountStatusFlags> _mounts = new Dictionary<uint, MountStatusFlags>();
-        System.Collections.BitSet _appearances;
-        MultiMap<uint, ObjectGuid> _temporaryAppearances = new MultiMap<uint, ObjectGuid>();
-        Dictionary<uint, FavoriteAppearanceState> _favoriteAppearances = new Dictionary<uint, FavoriteAppearanceState>();
-
-        static Dictionary<uint, uint> FactionSpecificMounts = new Dictionary<uint, uint>();
     }
 
     enum FavoriteAppearanceState
@@ -879,13 +879,13 @@ namespace Game.Entities
 
     public class HeirloomData
     {
+        public HeirloomPlayerFlags flags;
+        public uint bonusId;
+
         public HeirloomData(HeirloomPlayerFlags _flags = 0, uint _bonusId = 0)
         {
             flags = _flags;
             bonusId = _bonusId;
         }
-
-        public HeirloomPlayerFlags flags;
-        public uint bonusId;
     }
 }

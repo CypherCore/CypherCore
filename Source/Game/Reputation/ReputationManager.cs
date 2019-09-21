@@ -91,8 +91,8 @@ namespace Game
             if (factionEntry == null)
                 return 0;
 
-            ulong raceMask = _player.getRaceMask();
-            uint classMask = _player.getClassMask();
+            ulong raceMask = _player.GetRaceMask();
+            uint classMask = _player.GetClassMask();
             for (var i = 0; i < 4; i++)
             {
                 if ((Convert.ToBoolean(factionEntry.ReputationRaceMask[i] & raceMask) ||
@@ -149,8 +149,8 @@ namespace Game
             if (factionEntry == null)
                 return 0;
 
-            ulong raceMask = _player.getRaceMask();
-            uint classMask = _player.getClassMask();
+            ulong raceMask = _player.GetRaceMask();
+            uint classMask = _player.GetClassMask();
             for (int i = 0; i < 4; i++)
             {
                 if ((Convert.ToBoolean(factionEntry.ReputationRaceMask[i] & raceMask) ||
@@ -399,7 +399,7 @@ namespace Game
             var factionEntry = CliDB.FactionStorage.LookupByKey(factionTemplateEntry.Faction);
             if (factionEntry.Id != 0)
                 // Never show factions of the opposing team
-                if (!Convert.ToBoolean(factionEntry.ReputationRaceMask[1] & _player.getRaceMask()) && factionEntry.ReputationBase[1] == Reputation_Bottom)
+                if (!Convert.ToBoolean(factionEntry.ReputationRaceMask[1] & _player.GetRaceMask()) && factionEntry.ReputationBase[1] == Reputation_Bottom)
                     SetVisible(factionEntry);
         }
 

@@ -36,7 +36,6 @@ using System;
 using System.Diagnostics;
 using dtPolyRef = System.UInt64;
 using dtStatus = System.UInt32;
-using System.Linq;
 
 // Define DT_VIRTUAL_QUERYFILTER if you wish to derive a custom filter from dtQueryFilter.
 // On certain platforms indirect or virtual function call is expensive. The default

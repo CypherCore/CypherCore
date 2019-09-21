@@ -511,7 +511,7 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.Anubarak
 
             if (diff >= _backstabTimer)
             {
-                if (me.GetVictim() && me.GetVictim().isInBack(me))
+                if (me.GetVictim() && me.GetVictim().IsInBack(me))
                     DoCastVictim(SpellIds.Backstab);
                 _backstabTimer = 6 * Time.InMilliseconds;
             }

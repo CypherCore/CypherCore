@@ -18,7 +18,6 @@
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.DataStorage;
-using System;
 using System.Collections.Generic;
 
 namespace Game.Entities
@@ -31,7 +30,7 @@ namespace Game.Entities
             m_type = TempSummonType.ManualDespawn;
 
             m_summonerGUID = owner != null ? owner.GetGUID() : ObjectGuid.Empty;
-            m_unitTypeMask |= UnitTypeMask.Summon;
+            UnitTypeMask |= UnitTypeMask.Summon;
         }
 
         public Unit GetSummoner()
@@ -188,7 +187,7 @@ namespace Game.Entities
             if (owner != null && IsTrigger() && m_spells[0] != 0)
             {
                 SetFaction(owner.GetFaction());
-                SetLevel(owner.getLevel());
+                SetLevel(owner.GetLevel());
                 if (owner.IsTypeId(TypeId.Player))
                   m_ControlledByPlayer = true;
             }
@@ -314,7 +313,7 @@ namespace Game.Entities
         {
             m_owner = owner;
             Cypher.Assert(m_owner);
-            m_unitTypeMask |= UnitTypeMask.Minion;
+            UnitTypeMask |= UnitTypeMask.Minion;
             m_followAngle = SharedConst.PetFollowAngle;
             /// @todo: Find correct way
             InitCharmInfo();
@@ -378,10 +377,10 @@ namespace Game.Entities
         {
             m_bonusSpellDamage = 0;
 
-            m_unitTypeMask |= UnitTypeMask.Guardian;
+            UnitTypeMask |= UnitTypeMask.Guardian;
             if (properties != null && (properties.Title == SummonType.Pet || properties.Control == SummonCategory.Pet))
             {
-                m_unitTypeMask |= UnitTypeMask.ControlableGuardian;
+                UnitTypeMask |= UnitTypeMask.ControlableGuardian;
                 InitCharmInfo();
             }
         }
@@ -390,7 +389,7 @@ namespace Game.Entities
         {
             base.InitStats(duration);
 
-            InitStatsForLevel(GetOwner().getLevel());
+            InitStatsForLevel(GetOwner().GetLevel());
 
             if (GetOwner().IsTypeId(TypeId.Player) && HasUnitTypeMask(UnitTypeMask.ControlableGuardian))
                 GetCharmInfo().InitCharmCreateSpells();
@@ -430,7 +429,7 @@ namespace Game.Entities
                 else if (GetOwner().GetClass() == Class.Hunter)
                 {
                     petType = PetType.Hunter;
-                    m_unitTypeMask |= UnitTypeMask.HunterPet;
+                    UnitTypeMask |= UnitTypeMask.HunterPet;
                 }
                 else
                 {
@@ -453,12 +452,12 @@ namespace Game.Entities
             if (cFamily != null && cFamily.MinScale > 0.0f && petType == PetType.Hunter)
             {
                 float scale;
-                if (getLevel() >= cFamily.MaxScaleLevel)
+                if (GetLevel() >= cFamily.MaxScaleLevel)
                     scale = cFamily.MaxScale;
-                else if (getLevel() <= cFamily.MinScaleLevel)
+                else if (GetLevel() <= cFamily.MinScaleLevel)
                     scale = cFamily.MinScale;
                 else
-                    scale = cFamily.MinScale + (float)(getLevel() - cFamily.MinScaleLevel) / cFamily.MaxScaleLevel * (cFamily.MaxScale - cFamily.MinScale);
+                    scale = cFamily.MinScale + (float)(GetLevel() - cFamily.MinScaleLevel) / cFamily.MaxScaleLevel * (cFamily.MaxScale - cFamily.MinScale);
 
                 SetObjectScale(scale);
             }
@@ -979,14 +978,14 @@ namespace Game.Entities
         public Puppet(SummonPropertiesRecord properties, Unit owner) : base(properties, owner, false)
         {
             Cypher.Assert(owner.IsTypeId(TypeId.Player));
-            m_unitTypeMask |= UnitTypeMask.Puppet;
+            UnitTypeMask |= UnitTypeMask.Puppet;
         }
 
         public override void InitStats(uint duration)
         {
             base.InitStats(duration);
 
-            SetLevel(GetOwner().getLevel());
+            SetLevel(GetOwner().GetLevel());
             SetReactState(ReactStates.Passive);
         }
 

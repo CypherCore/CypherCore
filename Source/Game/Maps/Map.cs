@@ -518,7 +518,7 @@ namespace Game.Maps
             }
 
             var cell = new Cell(cellCoord);
-            if (obj.isActiveObject())
+            if (obj.IsActiveObject())
                 EnsureGridLoadedForActiveObject(cell, obj);
             else
                 EnsureGridCreated(new GridCoord(cell.GetGridX(), cell.GetGridY()));
@@ -529,7 +529,7 @@ namespace Game.Maps
 
             InitializeObject(obj);
 
-            if (obj.isActiveObject())
+            if (obj.IsActiveObject())
                 AddToActive(obj);
 
             //something, such as vehicle, needs to be update immediately
@@ -656,7 +656,7 @@ namespace Game.Maps
                 if (player.IsInCombat())
                 {
                     List<Creature> updateList = new List<Creature>();
-                    HostileReference refe = player.getHostileRefManager().getFirst();
+                    HostileReference refe = player.GetHostileRefManager().getFirst();
 
                     while (refe != null)
                     {
@@ -818,7 +818,7 @@ namespace Game.Maps
         {
             Global.ScriptMgr.OnPlayerLeaveMap(this, player);
 
-            player.getHostileRefManager().deleteReferences(); // multithreading crashfix
+            player.GetHostileRefManager().deleteReferences(); // multithreading crashfix
 
             bool inWorld = player.IsInWorld;
             player.RemoveFromWorld();
@@ -840,7 +840,7 @@ namespace Game.Maps
         {
             bool inWorld = obj.IsInWorld && obj.GetTypeId() >= TypeId.Unit && obj.GetTypeId() <= TypeId.GameObject;
             obj.RemoveFromWorld();
-            if (obj.isActiveObject())
+            if (obj.IsActiveObject())
                 RemoveFromActive(obj);
 
             if (!inWorld) // if was in world, RemoveFromWorld() called DestroyForNearbyPlayers()
@@ -1323,7 +1323,7 @@ namespace Game.Maps
             }
 
             // in diff. grids but active creature
-            if (c.isActiveObject())
+            if (c.IsActiveObject())
             {
                 EnsureGridLoadedForActiveObject(new_cell, c);
 
@@ -1367,7 +1367,7 @@ namespace Game.Maps
             }
 
             // in diff. grids but active GameObject
-            if (go.isActiveObject())
+            if (go.IsActiveObject())
             {
                 EnsureGridLoadedForActiveObject(new_cell, go);
 
@@ -1424,7 +1424,7 @@ namespace Game.Maps
             }
 
             // in diff. grids but active GameObject
-            if (go.isActiveObject())
+            if (go.IsActiveObject())
             {
                 EnsureGridLoadedForActiveObject(new_cell, go);
 
@@ -1476,7 +1476,7 @@ namespace Game.Maps
             }
 
             // in diff. grids but active AreaTrigger
-            if (at.isActiveObject())
+            if (at.IsActiveObject())
             {
                 EnsureGridLoadedForActiveObject(new_cell, at);
 
@@ -3549,7 +3549,7 @@ namespace Game.Maps
             if (obj == null)
                 Log.outError(LogFilter.Scripts, "{0} {1} object is NULL.", scriptInfo.GetDebugInfo(),
                     isSource ? "source" : "target");
-            else if (!obj.isTypeMask(TypeMask.Unit))
+            else if (!obj.IsTypeMask(TypeMask.Unit))
                 Log.outError(LogFilter.Scripts,
                     "{0} {1} object is not unit (TypeId: {2}, Entry: {3}, GUID: {4}), skipping.", scriptInfo.GetDebugInfo(), isSource ? "source" : "target", obj.GetTypeId(), obj.GetEntry(), obj.GetGUID().ToString());
             else
@@ -3627,7 +3627,7 @@ namespace Game.Maps
                 Log.outError(LogFilter.Scripts, "{0} door guid is not specified.", scriptInfo.GetDebugInfo());
             else if (source == null)
                 Log.outError(LogFilter.Scripts, "{0} source object is NULL.", scriptInfo.GetDebugInfo());
-            else if (!source.isTypeMask(TypeMask.Unit))
+            else if (!source.IsTypeMask(TypeMask.Unit))
                 Log.outError(LogFilter.Scripts,
                     "{0} source object is not unit (TypeId: {1}, Entry: {2}, GUID: {3}), skipping.", scriptInfo.GetDebugInfo(), source.GetTypeId(), source.GetEntry(), source.GetGUID().ToString());
             else
@@ -3646,7 +3646,7 @@ namespace Game.Maps
                     {
                         pDoor.UseDoorOrButton((uint)nTimeToToggle);
 
-                        if (target != null && target.isTypeMask(TypeMask.GameObject))
+                        if (target != null && target.IsTypeMask(TypeMask.GameObject))
                         {
                             GameObject goTarget = target.ToGameObject();
                             if (goTarget != null && goTarget.GetGoType() == GameObjectTypes.Button)
@@ -3947,7 +3947,7 @@ namespace Game.Maps
                                 }
 
                                 // Check that GO is not spawned
-                                if (!pGO.isSpawned())
+                                if (!pGO.IsSpawned())
                                 {
                                     int nTimeToDespawn = Math.Max(5, (int)step.script.RespawnGameObject.DespawnDelay);
                                     pGO.SetLootState(LootState.Ready);
@@ -4055,13 +4055,13 @@ namespace Game.Maps
                                     break;
                             }
 
-                            if (uSource == null || !uSource.isTypeMask(TypeMask.Unit))
+                            if (uSource == null || !uSource.IsTypeMask(TypeMask.Unit))
                             {
                                 Log.outError(LogFilter.Scripts, "{0} no source unit found for spell {1}", step.script.GetDebugInfo(), step.script.CastSpell.SpellID);
                                 break;
                             }
 
-                            if (uTarget == null || !uTarget.isTypeMask(TypeMask.Unit))
+                            if (uTarget == null || !uTarget.IsTypeMask(TypeMask.Unit))
                             {
                                 Log.outError(LogFilter.Scripts, "{0} no target unit found for spell {1}", step.script.GetDebugInfo(), step.script.CastSpell.SpellID);
                                 break;
@@ -4180,7 +4180,7 @@ namespace Game.Maps
                                     Log.outError(LogFilter.Scripts, "{0} creature is already dead (Entry: {1}, GUID: {2})", step.script.GetDebugInfo(), cSource.GetEntry(), cSource.GetGUID().ToString());
                                 else
                                 {
-                                    cSource.setDeathState(DeathState.JustDied);
+                                    cSource.SetDeathState(DeathState.JustDied);
                                     if (step.script.Kill.RemoveCorpse == 1)
                                         cSource.RemoveCorpse();
                                 }

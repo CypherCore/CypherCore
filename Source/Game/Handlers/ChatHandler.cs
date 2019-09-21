@@ -192,7 +192,7 @@ namespace Game
                     if (!sender.IsAlive())
                         return;
 
-                    if (sender.getLevel() < WorldConfig.GetIntValue(WorldCfg.ChatSayLevelReq))
+                    if (sender.GetLevel() < WorldConfig.GetIntValue(WorldCfg.ChatSayLevelReq))
                     {
                         SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.SayReq), WorldConfig.GetIntValue(WorldCfg.ChatSayLevelReq));
                         return;
@@ -205,7 +205,7 @@ namespace Game
                     if (!sender.IsAlive())
                         return;
 
-                    if (sender.getLevel() < WorldConfig.GetIntValue(WorldCfg.ChatEmoteLevelReq))
+                    if (sender.GetLevel() < WorldConfig.GetIntValue(WorldCfg.ChatEmoteLevelReq))
                     {
                         SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.SayReq), WorldConfig.GetIntValue(WorldCfg.ChatEmoteLevelReq));
                         return;
@@ -218,7 +218,7 @@ namespace Game
                     if (!sender.IsAlive())
                         return;
 
-                    if (sender.getLevel() < WorldConfig.GetIntValue(WorldCfg.ChatYellLevelReq))
+                    if (sender.GetLevel() < WorldConfig.GetIntValue(WorldCfg.ChatYellLevelReq))
                     {
                         SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.SayReq), WorldConfig.GetIntValue(WorldCfg.ChatYellLevelReq));
                         return;
@@ -237,12 +237,12 @@ namespace Game
                     }
 
                     Player receiver = Global.ObjAccessor.FindPlayerByName(extName.Name);
-                    if (!receiver || (lang != Language.Addon && !receiver.isAcceptWhispers() && receiver.GetSession().HasPermission(RBACPermissions.CanFilterWhispers) && !receiver.IsInWhisperWhiteList(sender.GetGUID())))
+                    if (!receiver || (lang != Language.Addon && !receiver.IsAcceptWhispers() && receiver.GetSession().HasPermission(RBACPermissions.CanFilterWhispers) && !receiver.IsInWhisperWhiteList(sender.GetGUID())))
                     {
                         SendChatPlayerNotfoundNotice(target);
                         return;
                     }
-                    if (!sender.IsGameMaster() && sender.getLevel() < WorldConfig.GetIntValue(WorldCfg.ChatWhisperLevelReq) && !receiver.IsInWhisperWhiteList(sender.GetGUID()))
+                    if (!sender.IsGameMaster() && sender.GetLevel() < WorldConfig.GetIntValue(WorldCfg.ChatWhisperLevelReq) && !receiver.IsInWhisperWhiteList(sender.GetGUID()))
                     {
                         SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.WhisperReq), WorldConfig.GetIntValue(WorldCfg.ChatWhisperLevelReq));
                         return;
@@ -260,8 +260,8 @@ namespace Game
                         return;
                     }
 
-                    if (receiver.getLevel() < WorldConfig.GetIntValue(WorldCfg.ChatWhisperLevelReq) ||
-                        (HasPermission(RBACPermissions.CanFilterWhispers) && !sender.isAcceptWhispers() && !sender.IsInWhisperWhiteList(receiver.GetGUID())))
+                    if (receiver.GetLevel() < WorldConfig.GetIntValue(WorldCfg.ChatWhisperLevelReq) ||
+                        (HasPermission(RBACPermissions.CanFilterWhispers) && !sender.IsAcceptWhispers() && !sender.IsInWhisperWhiteList(receiver.GetGUID())))
                         sender.AddWhisperWhiteList(receiver.GetGUID());
 
                     GetPlayer().Whisper(msg, lang, receiver);
@@ -344,7 +344,7 @@ namespace Game
                 case ChatMsg.Channel:
                     if (!HasPermission(RBACPermissions.SkipCheckChatChannelReq))
                     {
-                        if (GetPlayer().getLevel() < WorldConfig.GetIntValue(WorldCfg.ChatChannelLevelReq))
+                        if (GetPlayer().GetLevel() < WorldConfig.GetIntValue(WorldCfg.ChatChannelLevelReq))
                         {
                             SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.ChannelReq), WorldConfig.GetIntValue(WorldCfg.ChatChannelLevelReq));
                             return;
@@ -477,7 +477,7 @@ namespace Game
                 return;
             }
 
-            if (sender.isAFK()) // Already AFK
+            if (sender.IsAFK()) // Already AFK
             {
                 if (string.IsNullOrEmpty(packet.Text))
                     sender.ToggleAFK(); // Remove AFK
@@ -488,7 +488,7 @@ namespace Game
             {
                 sender.autoReplyMsg = string.IsNullOrEmpty(packet.Text) ? Global.ObjectMgr.GetCypherString(CypherStrings.PlayerAfkDefault) : packet.Text;
 
-                if (sender.isDND())
+                if (sender.IsDND())
                     sender.ToggleDND();
 
                 sender.ToggleAFK();
@@ -511,7 +511,7 @@ namespace Game
                 return;
             }
 
-            if (sender.isDND()) // Already DND
+            if (sender.IsDND()) // Already DND
             {
                 if (string.IsNullOrEmpty(packet.Text))
                     sender.ToggleDND(); // Remove DND
@@ -522,7 +522,7 @@ namespace Game
             {
                 sender.autoReplyMsg = string.IsNullOrEmpty(packet.Text) ? Global.ObjectMgr.GetCypherString(CypherStrings.PlayerDndDefault) : packet.Text;
 
-                if (sender.isAFK())
+                if (sender.IsAFK())
                     sender.ToggleAFK();
 
                 sender.ToggleDND();

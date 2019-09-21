@@ -161,7 +161,7 @@ namespace Game.Movement
             }
 
             i_nextCheckTime.Update(time_diff);
-            if (i_nextCheckTime.Passed() && owner.moveSpline.Finalized())
+            if (i_nextCheckTime.Passed() && owner.MoveSpline.Finalized())
                 _setTargetLocation(owner);
 
             return true;

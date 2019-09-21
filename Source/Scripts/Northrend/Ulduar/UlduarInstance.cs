@@ -17,7 +17,6 @@
 
 using Framework.Constants;
 using Framework.IO;
-using Game.AI;
 using Game.Entities;
 using Game.Maps;
 using Game.Network.Packets;

@@ -519,7 +519,7 @@ namespace Game.Entities
             Cell oldCell = new Cell(GetPositionX(), GetPositionY());
 
             Relocate(x, y, z, o);
-            m_stationaryPosition.SetOrientation(o);
+            StationaryPosition.SetOrientation(o);
             UpdateModelPosition();
 
             UpdatePassengerPositions(_passengers);

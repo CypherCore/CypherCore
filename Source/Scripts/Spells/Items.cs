@@ -626,7 +626,7 @@ namespace Scripts.Spells.Items
     {
         void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
-            int diff = (int)GetUnitOwner().getLevel() - 60;
+            int diff = (int)GetUnitOwner().GetLevel() - 60;
             if (diff > 0)
                 amount += 2 * diff;
         }
@@ -1619,7 +1619,7 @@ namespace Scripts.Spells.Items
                     break;
             }
 
-            if (caster.getLevel() > maxSafeLevel)
+            if (caster.GetLevel() > maxSafeLevel)
             {
                 caster.CastSpell(caster, SpellIds.Lost, true);
 
@@ -1840,7 +1840,7 @@ namespace Scripts.Spells.Items
     {
         void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
-            int diff = (int)GetUnitOwner().getLevel() - 60;
+            int diff = (int)GetUnitOwner().GetLevel() - 60;
             if (diff > 0)
                 amount += diff;
         }
@@ -2165,7 +2165,7 @@ namespace Scripts.Spells.Items
         {
             Creature target = GetHitCreature();
             if (target)
-                target.setDeathState(DeathState.JustRespawned);
+                target.SetDeathState(DeathState.JustRespawned);
         }
 
         public override void Register()

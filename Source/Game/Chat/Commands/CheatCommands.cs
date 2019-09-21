@@ -145,7 +145,7 @@ namespace Game.Chat.Commands
             handler.SendSysMessage(CypherStrings.CommandCheatCt, player.GetCommandStatus(PlayerCommandStates.Casttime) ? enabled : disabled);
             handler.SendSysMessage(CypherStrings.CommandCheatPower, player.GetCommandStatus(PlayerCommandStates.Power) ? enabled : disabled);
             handler.SendSysMessage(CypherStrings.CommandCheatWw, player.GetCommandStatus(PlayerCommandStates.Waterwalk) ? enabled : disabled);
-            handler.SendSysMessage(CypherStrings.CommandCheatTaxinodes, player.isTaxiCheater() ? enabled : disabled);
+            handler.SendSysMessage(CypherStrings.CommandCheatTaxinodes, player.IsTaxiCheater() ? enabled : disabled);
             return true;
         }
 
@@ -191,7 +191,7 @@ namespace Game.Chat.Commands
                 return false;
 
             if (args.Empty())
-                argstr = (chr.isTaxiCheater()) ? "off" : "on";
+                argstr = (chr.IsTaxiCheater()) ? "off" : "on";
 
             if (argstr == "off")
             {

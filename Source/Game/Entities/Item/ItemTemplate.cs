@@ -234,9 +234,9 @@ namespace Game.Entities
                 return false;
 
             int levelIndex = 0;
-            if (player.getLevel() >= 110)
+            if (player.GetLevel() >= 110)
                 levelIndex = 2;
-            else if (player.getLevel() > 40)
+            else if (player.GetLevel() > 40)
                 levelIndex = 1;
 
             return Specializations[levelIndex].Get(CalculateItemSpecBit(chrSpecialization));

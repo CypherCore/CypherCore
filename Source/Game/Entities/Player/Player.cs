@@ -45,8 +45,8 @@ namespace Game.Entities
     {
         public Player(WorldSession session) : base(true)
         {
-            objectTypeMask |= TypeMask.Player;
-            objectTypeId = TypeId.Player;
+            ObjectTypeMask |= TypeMask.Player;
+            ObjectTypeId = TypeId.Player;
 
             m_playerData = new PlayerData();
             m_activePlayerData = new ActivePlayerData();
@@ -536,11 +536,11 @@ namespace Game.Entities
                     // default combat reach 10
                     // TODO add weapon, skill check
 
-                    if (isAttackReady(WeaponAttackType.BaseAttack))
+                    if (IsAttackReady(WeaponAttackType.BaseAttack))
                     {
                         if (!IsWithinMeleeRange(victim))
                         {
-                            setAttackTimer(WeaponAttackType.BaseAttack, 100);
+                            SetAttackTimer(WeaponAttackType.BaseAttack, 100);
                             if (m_swingErrorMsg != 1)               // send single time (client auto repeat)
                             {
                                 SendAttackSwingNotInRange();
@@ -550,7 +550,7 @@ namespace Game.Entities
                         //120 degrees of radiant range, if player is not in boundary radius
                         else if (!IsWithinBoundaryRadius(victim) && !HasInArc(2 * MathFunctions.PI / 3, victim))
                         {
-                            setAttackTimer(WeaponAttackType.BaseAttack, 100);
+                            SetAttackTimer(WeaponAttackType.BaseAttack, 100);
                             if (m_swingErrorMsg != 2)               // send single time (client auto repeat)
                             {
                                 SendAttackSwingBadFacingAttack();
@@ -562,31 +562,31 @@ namespace Game.Entities
                             m_swingErrorMsg = 0;                    // reset swing error state
 
                             // prevent base and off attack in same time, delay attack at 0.2 sec
-                            if (haveOffhandWeapon())
-                                if (getAttackTimer(WeaponAttackType.OffAttack) < SharedConst.AttackDisplayDelay)
-                                    setAttackTimer(WeaponAttackType.OffAttack, SharedConst.AttackDisplayDelay);
+                            if (HaveOffhandWeapon())
+                                if (GetAttackTimer(WeaponAttackType.OffAttack) < SharedConst.AttackDisplayDelay)
+                                    SetAttackTimer(WeaponAttackType.OffAttack, SharedConst.AttackDisplayDelay);
 
                             // do attack
                             AttackerStateUpdate(victim, WeaponAttackType.BaseAttack);
-                            resetAttackTimer(WeaponAttackType.BaseAttack);
+                            ResetAttackTimer(WeaponAttackType.BaseAttack);
                         }
                     }
 
-                    if (!IsInFeralForm() && haveOffhandWeapon() && isAttackReady(WeaponAttackType.OffAttack))
+                    if (!IsInFeralForm() && HaveOffhandWeapon() && IsAttackReady(WeaponAttackType.OffAttack))
                     {
                         if (!IsWithinMeleeRange(victim))
-                            setAttackTimer(WeaponAttackType.OffAttack, 100);
+                            SetAttackTimer(WeaponAttackType.OffAttack, 100);
                         else if (!IsWithinBoundaryRadius(victim) && !HasInArc(2 * MathFunctions.PI / 3, victim))
-                            setAttackTimer(WeaponAttackType.BaseAttack, 100);
+                            SetAttackTimer(WeaponAttackType.BaseAttack, 100);
                         else
                         {
                             // prevent base and off attack in same time, delay attack at 0.2 sec
-                            if (getAttackTimer(WeaponAttackType.BaseAttack) < SharedConst.AttackDisplayDelay)
-                                setAttackTimer(WeaponAttackType.BaseAttack, SharedConst.AttackDisplayDelay);
+                            if (GetAttackTimer(WeaponAttackType.BaseAttack) < SharedConst.AttackDisplayDelay)
+                                SetAttackTimer(WeaponAttackType.BaseAttack, SharedConst.AttackDisplayDelay);
 
                             // do attack
                             AttackerStateUpdate(victim, WeaponAttackType.OffAttack);
-                            resetAttackTimer(WeaponAttackType.OffAttack);
+                            ResetAttackTimer(WeaponAttackType.OffAttack);
                         }
                     }
                 }
@@ -643,7 +643,7 @@ namespace Game.Entities
 
             if (IsAlive())
             {
-                m_regenTimer += diff;
+                RegenTimer += diff;
                 RegenerateAll();
             }
 
@@ -722,7 +722,7 @@ namespace Game.Entities
             SendUpdateToOutOfRangeGroupMembers();
 
             Pet pet = GetPet();
-            if (pet != null && !pet.IsWithinDistInMap(this, GetMap().GetVisibilityRange()) && !pet.isPossessed())
+            if (pet != null && !pet.IsWithinDistInMap(this, GetMap().GetVisibilityRange()) && !pet.IsPossessed())
                 RemovePet(pet, PetSaveMode.NotInSlot, true);
 
             if (IsAlive())
@@ -731,7 +731,7 @@ namespace Game.Entities
                 {
                     m_hostileReferenceCheckTimer = 15 * Time.InMilliseconds;
                     if (!GetMap().IsDungeon())
-                        getHostileRefManager().deleteReferencesOutOfRange(GetVisibilityRange());
+                        GetHostileRefManager().deleteReferencesOutOfRange(GetVisibilityRange());
                 }
                 else
                     m_hostileReferenceCheckTimer -= diff;
@@ -743,7 +743,7 @@ namespace Game.Entities
                 TeleportTo(teleportDest, m_teleport_options);
         }
 
-        public override void setDeathState(DeathState s)
+        public override void SetDeathState(DeathState s)
         {
             bool oldIsAlive = IsAlive();
 
@@ -775,7 +775,7 @@ namespace Game.Entities
                 ResetCriteria(CriteriaTypes.GetKillingBlows, (uint)CriteriaCondition.NoDeath);
             }
 
-            base.setDeathState(s);
+            base.SetDeathState(s);
 
             if (IsAlive() && !oldIsAlive)
                 //clear aura case after resurrection by another way (spells will be applied before next death)
@@ -1001,7 +1001,7 @@ namespace Game.Entities
         public void SetInvSlot(uint slot, ObjectGuid guid) { SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.InvSlots, (int)slot), guid); }
 
         //Taxi
-        public void InitTaxiNodesForLevel() { m_taxi.InitTaxiNodesForLevel(GetRace(), GetClass(), getLevel()); }
+        public void InitTaxiNodesForLevel() { m_taxi.InitTaxiNodesForLevel(GetRace(), GetClass(), GetLevel()); }
 
         //Cheat Commands
         public bool GetCommandStatus(PlayerCommandStates command) { return (_activeCheats & command) != 0; }
@@ -1031,7 +1031,7 @@ namespace Game.Entities
             if (!pet)
                 return;
 
-            if (m_temporaryUnsummonedPetNumber == 0 && pet.isControlled() && !pet.isTemporarySummoned())
+            if (m_temporaryUnsummonedPetNumber == 0 && pet.IsControlled() && !pet.IsTemporarySummoned())
             {
                 m_temporaryUnsummonedPetNumber = pet.GetCharmInfo().GetPetNumber();
                 m_oldpetspell = pet.m_unitData.CreatedBySpell;
@@ -1528,7 +1528,7 @@ namespace Game.Entities
                     break;
             }
 
-            if (rate != 1.0f && creatureOrQuestLevel < Formulas.GetGrayLevel(getLevel()))
+            if (rate != 1.0f && creatureOrQuestLevel < Formulas.GetGrayLevel(GetLevel()))
                 percent *= rate;
 
             if (percent <= 0.0f)
@@ -1958,7 +1958,7 @@ namespace Game.Entities
             // remove auras that need water/land
             RemoveAurasWithInterruptFlags((apply ? SpellAuraInterruptFlags.NotAbovewater : SpellAuraInterruptFlags.NotUnderwater));
 
-            getHostileRefManager().updateThreatTables();
+            GetHostileRefManager().updateThreatTables();
         }
         public void ValidateMovementInfo(MovementInfo mi)
         {
@@ -2177,7 +2177,7 @@ namespace Game.Entities
         }
 
         //GM
-        public bool isAcceptWhispers() { return m_ExtraFlags.HasAnyFlag(PlayerExtraFlags.AcceptWhispers); }
+        public bool IsAcceptWhispers() { return m_ExtraFlags.HasAnyFlag(PlayerExtraFlags.AcceptWhispers); }
         public void SetAcceptWhispers(bool on)
         {
             if (on)
@@ -2200,13 +2200,13 @@ namespace Game.Entities
                 if (pet != null)
                 {
                     pet.SetFaction(35);
-                    pet.getHostileRefManager().setOnlineOfflineState(false);
+                    pet.GetHostileRefManager().setOnlineOfflineState(false);
                 }
 
                 RemovePvpFlag(UnitPVPStateFlags.FFAPvp);
                 ResetContestedPvP();
 
-                getHostileRefManager().setOnlineOfflineState(false);
+                GetHostileRefManager().setOnlineOfflineState(false);
                 CombatStopWithPets();
 
                 PhasingHandler.SetAlwaysVisible(GetPhaseShift(), true);
@@ -2225,7 +2225,7 @@ namespace Game.Entities
                 if (pet != null)
                 {
                     pet.SetFaction(GetFaction());
-                    pet.getHostileRefManager().setOnlineOfflineState(true);
+                    pet.GetHostileRefManager().setOnlineOfflineState(true);
                 }
 
                 // restore FFA PvP Server state
@@ -2235,13 +2235,13 @@ namespace Game.Entities
                 // restore FFA PvP area state, remove not allowed for GM mounts
                 UpdateArea(m_areaUpdateId);
 
-                getHostileRefManager().setOnlineOfflineState(true);
+                GetHostileRefManager().setOnlineOfflineState(true);
                 m_serverSideVisibilityDetect.SetValue(ServerSideVisibilityType.GM, AccountTypes.Player);
             }
 
             UpdateObjectVisibility();
         }
-        public bool isGMChat() { return m_ExtraFlags.HasAnyFlag(PlayerExtraFlags.GMChat); }
+        public bool IsGMChat() { return m_ExtraFlags.HasAnyFlag(PlayerExtraFlags.GMChat); }
         public void SetGMChat(bool on)
         {
             if (on)
@@ -2249,7 +2249,7 @@ namespace Game.Entities
             else
                 m_ExtraFlags &= ~PlayerExtraFlags.GMChat;
         }
-        public bool isTaxiCheater() { return m_ExtraFlags.HasAnyFlag(PlayerExtraFlags.TaxiCheat); }
+        public bool IsTaxiCheater() { return m_ExtraFlags.HasAnyFlag(PlayerExtraFlags.TaxiCheat); }
         public void SetTaxiCheater(bool on)
         {
             if (on)
@@ -2257,7 +2257,7 @@ namespace Game.Entities
             else
                 m_ExtraFlags &= ~PlayerExtraFlags.TaxiCheat;
         }
-        public bool isGMVisible() { return !m_ExtraFlags.HasAnyFlag(PlayerExtraFlags.GMInvisible); }
+        public bool IsGMVisible() { return !m_ExtraFlags.HasAnyFlag(PlayerExtraFlags.GMInvisible); }
         public void SetGMVisible(bool on)
         {
             if (on)
@@ -2347,7 +2347,7 @@ namespace Game.Entities
                                 return;
                             break;
                         case GossipOption.Battlefield:
-                            if (!creature.isCanInteractWithBattleMaster(this, false))
+                            if (!creature.CanInteractWithBattleMaster(this, false))
                                 canTalk = false;
                             break;
                         case GossipOption.Stablepet:
@@ -3506,7 +3506,7 @@ namespace Game.Entities
                 (newCustomDisplay[2] == null || (newCustomDisplay[2].Data == customDisplay[2])))
                 return 0;
 
-            GtBarberShopCostBaseRecord bsc = CliDB.BarberShopCostBaseGameTable.GetRow(getLevel());
+            GtBarberShopCostBaseRecord bsc = CliDB.BarberShopCostBaseGameTable.GetRow(GetLevel());
             if (bsc == null)                                                // shouldn't happen
                 return 0xFFFFFFFF;
 
@@ -3535,7 +3535,7 @@ namespace Game.Entities
 
         uint GetChampioningFaction() { return m_ChampioningFaction; }
         public void SetChampioningFaction(uint faction) { m_ChampioningFaction = faction; }
-        public void setFactionForRace(Race race)
+        public void SetFactionForRace(Race race)
         {
             m_team = TeamForRace(race);
 
@@ -3643,7 +3643,7 @@ namespace Game.Entities
             SendPacket(packet);
         }
 
-        public bool isAllowedToLoot(Creature creature)
+        public bool IsAllowedToLoot(Creature creature)
         {
             if (!creature.IsDead() || !creature.IsDamageEnoughForLootingAndReward())
                 return false;
@@ -3706,7 +3706,7 @@ namespace Game.Entities
 
         void RegenerateAll()
         {
-            m_regenTimerCount += m_regenTimer;
+            m_regenTimerCount += RegenTimer;
 
             for (PowerType power = PowerType.Mana; power < PowerType.Max; power++)// = power + 1)
                 if (power != PowerType.Runes)
@@ -3721,9 +3721,9 @@ namespace Game.Entities
                 {
                     byte runeToRegen = m_runes.CooldownOrder[regenIndex];
                     uint runeCooldown = GetRuneCooldown(runeToRegen);
-                    if (runeCooldown > m_regenTimer)
+                    if (runeCooldown > RegenTimer)
                     {
-                        SetRuneCooldown(runeToRegen, runeCooldown - m_regenTimer);
+                        SetRuneCooldown(runeToRegen, runeCooldown - RegenTimer);
                         ++regenIndex;
                     }
                     else
@@ -3742,7 +3742,7 @@ namespace Game.Entities
                 m_regenTimerCount -= 2000;
             }
 
-            m_regenTimer = 0;
+            RegenTimer = 0;
         }
         void Regenerate(PowerType power)
         {
@@ -3769,10 +3769,10 @@ namespace Game.Entities
                 if (powerType.RegenInterruptTimeMS != 0 && Time.GetMSTimeDiffToNow(m_combatExitTime) < powerType.RegenInterruptTimeMS)
                     return;
 
-                addvalue = (powerType.RegenPeace + m_unitData.PowerRegenFlatModifier[(int)powerIndex]) * 0.001f * m_regenTimer;
+                addvalue = (powerType.RegenPeace + m_unitData.PowerRegenFlatModifier[(int)powerIndex]) * 0.001f * RegenTimer;
             }
             else
-                addvalue = (powerType.RegenCombat + m_unitData.PowerRegenInterruptedFlatModifier[(int)powerIndex]) * 0.001f * m_regenTimer;
+                addvalue = (powerType.RegenCombat + m_unitData.PowerRegenInterruptedFlatModifier[(int)powerIndex]) * 0.001f * RegenTimer;
 
             WorldCfg[] RatesForPower =
             {
@@ -3804,7 +3804,7 @@ namespace Game.Entities
             if (power != PowerType.Mana)
             {
                 addvalue *= GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)power);
-                addvalue += GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)power) * ((power != PowerType.Energy) ? m_regenTimerCount : m_regenTimer) / (5 * Time.InMilliseconds);
+                addvalue += GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)power) * ((power != PowerType.Energy) ? m_regenTimerCount : RegenTimer) / (5 * Time.InMilliseconds);
             }
 
             int minPower = powerType.MinPower;
@@ -3898,8 +3898,8 @@ namespace Game.Entities
                 addValue = HealthIncreaseRate;
                 if (!IsInCombat())
                 {
-                    if (getLevel() < 15)
-                        addValue = (0.20f * (GetMaxHealth()) / getLevel() * HealthIncreaseRate);
+                    if (GetLevel() < 15)
+                        addValue = (0.20f * (GetMaxHealth()) / GetLevel() * HealthIncreaseRate);
                     else
                         addValue = 0.015f * (GetMaxHealth()) * HealthIncreaseRate;
 
@@ -4116,7 +4116,7 @@ namespace Game.Entities
         bool IsImmuneToEnvironmentalDamage()
         {
             // check for GM and death state included in isAttackableByAOE
-            return (!isTargetableForAttack(false));
+            return (!IsTargetableForAttack(false));
         }
         public uint EnvironmentalDamage(EnviromentalDamage type, uint damage)
         {
@@ -4168,7 +4168,7 @@ namespace Game.Entities
             return final_damage;
         }
 
-        bool isTotalImmune()
+        bool IsTotalImmune()
         {
             var immune = GetAuraEffectsByType(AuraType.SchoolImmunity);
 
@@ -4273,7 +4273,7 @@ namespace Game.Entities
 
         public bool IsMirrorTimerActive(MirrorTimerType type)
         {
-            return m_MirrorTimer[(int)type] == getMaxTimer(type);
+            return m_MirrorTimer[(int)type] == GetMaxTimer(type);
         }
 
         void HandleDrowning(uint time_diff)
@@ -4291,7 +4291,7 @@ namespace Game.Entities
                 // Breath timer not activated - activate it
                 if (m_MirrorTimer[breathTimer] == -1)
                 {
-                    m_MirrorTimer[breathTimer] = getMaxTimer(MirrorTimerType.Breath);
+                    m_MirrorTimer[breathTimer] = GetMaxTimer(MirrorTimerType.Breath);
                     SendMirrorTimer(MirrorTimerType.Breath, m_MirrorTimer[breathTimer], m_MirrorTimer[breathTimer], -1);
                 }
                 else                                                              // If activated - do tick
@@ -4303,16 +4303,16 @@ namespace Game.Entities
                         m_MirrorTimer[breathTimer] += 1 * Time.InMilliseconds;
                         // Calculate and deal damage
                         // @todo Check this formula
-                        uint damage = (uint)(GetMaxHealth() / 5 + RandomHelper.URand(0, getLevel() - 1));
+                        uint damage = (uint)(GetMaxHealth() / 5 + RandomHelper.URand(0, GetLevel() - 1));
                         EnvironmentalDamage(EnviromentalDamage.Drowning, damage);
                     }
                     else if (!m_MirrorTimerFlagsLast.HasAnyFlag(PlayerUnderwaterState.InWater))      // Update time in client if need
-                        SendMirrorTimer(MirrorTimerType.Breath, getMaxTimer(MirrorTimerType.Breath), m_MirrorTimer[breathTimer], -1);
+                        SendMirrorTimer(MirrorTimerType.Breath, GetMaxTimer(MirrorTimerType.Breath), m_MirrorTimer[breathTimer], -1);
                 }
             }
             else if (m_MirrorTimer[breathTimer] != -1)        // Regen timer
             {
-                int UnderWaterTime = getMaxTimer(MirrorTimerType.Breath);
+                int UnderWaterTime = GetMaxTimer(MirrorTimerType.Breath);
                 // Need breath regen
                 m_MirrorTimer[breathTimer] += (int)(10 * time_diff);
                 if (m_MirrorTimer[breathTimer] >= UnderWaterTime || !IsAlive())
@@ -4327,7 +4327,7 @@ namespace Game.Entities
                 // Fatigue timer not activated - activate it
                 if (m_MirrorTimer[fatigueTimer] == -1)
                 {
-                    m_MirrorTimer[fatigueTimer] = getMaxTimer(MirrorTimerType.Fatigue);
+                    m_MirrorTimer[fatigueTimer] = GetMaxTimer(MirrorTimerType.Fatigue);
                     SendMirrorTimer(MirrorTimerType.Fatigue, m_MirrorTimer[fatigueTimer], m_MirrorTimer[fatigueTimer], -1);
                 }
                 else
@@ -4339,19 +4339,19 @@ namespace Game.Entities
                         m_MirrorTimer[fatigueTimer] += 1 * Time.InMilliseconds;
                         if (IsAlive())                                            // Calculate and deal damage
                         {
-                            uint damage = (uint)(GetMaxHealth() / 5 + RandomHelper.URand(0, getLevel() - 1));
+                            uint damage = (uint)(GetMaxHealth() / 5 + RandomHelper.URand(0, GetLevel() - 1));
                             EnvironmentalDamage(EnviromentalDamage.Exhausted, damage);
                         }
                         else if (HasPlayerFlag(PlayerFlags.Ghost))       // Teleport ghost to graveyard
                             RepopAtGraveyard();
                     }
                     else if (!m_MirrorTimerFlagsLast.HasAnyFlag(PlayerUnderwaterState.InDarkWater))
-                        SendMirrorTimer(MirrorTimerType.Fatigue, getMaxTimer(MirrorTimerType.Fatigue), m_MirrorTimer[fatigueTimer], -1);
+                        SendMirrorTimer(MirrorTimerType.Fatigue, GetMaxTimer(MirrorTimerType.Fatigue), m_MirrorTimer[fatigueTimer], -1);
                 }
             }
             else if (m_MirrorTimer[fatigueTimer] != -1)       // Regen timer
             {
-                int DarkWaterTime = getMaxTimer(MirrorTimerType.Fatigue);
+                int DarkWaterTime = GetMaxTimer(MirrorTimerType.Fatigue);
                 m_MirrorTimer[fatigueTimer] += (int)(10 * time_diff);
                 if (m_MirrorTimer[fatigueTimer] >= DarkWaterTime || !IsAlive())
                     StopMirrorTimer(MirrorTimerType.Fatigue);
@@ -4363,7 +4363,7 @@ namespace Game.Entities
             {
                 // Breath timer not activated - activate it
                 if (m_MirrorTimer[fireTimer] == -1)
-                    m_MirrorTimer[fireTimer] = getMaxTimer(MirrorTimerType.Fire);
+                    m_MirrorTimer[fireTimer] = GetMaxTimer(MirrorTimerType.Fire);
                 else
                 {
                     m_MirrorTimer[fireTimer] -= (int)time_diff;
@@ -4425,7 +4425,7 @@ namespace Game.Entities
             SendPacket(new StopMirrorTimer(Type));
         }
 
-        int getMaxTimer(MirrorTimerType timer)
+        int GetMaxTimer(MirrorTimerType timer)
         {
             switch (timer)
             {
@@ -4476,7 +4476,7 @@ namespace Game.Entities
             if (GetSession().IsARecruiter() || (GetSession().GetRecruiterId() != 0))
                 AddDynamicFlag(UnitDynFlags.ReferAFriend);
 
-            setDeathState(DeathState.Alive);
+            SetDeathState(DeathState.Alive);
 
             // add the flag to make sure opcode is always sent
             AddUnitMovementFlag(MovementFlag.WaterWalk);
@@ -4525,15 +4525,15 @@ namespace Game.Entities
             //Characters level 20 and up suffer from ten minutes of sickness.
             int startLevel = WorldConfig.GetIntValue(WorldCfg.DeathSicknessLevel);
 
-            if (getLevel() >= startLevel)
+            if (GetLevel() >= startLevel)
             {
                 // set resurrection sickness
                 CastSpell(this, 15007, true);
 
                 // not full duration
-                if (getLevel() < startLevel + 9)
+                if (GetLevel() < startLevel + 9)
                 {
-                    int delta = (int)(getLevel() - startLevel + 1) * Time.Minute;
+                    int delta = (int)(GetLevel() - startLevel + 1) * Time.Minute;
                     Aura aur = GetAura(15007, GetGUID());
                     if (aur != null)
                         aur.SetDuration(delta * Time.InMilliseconds);
@@ -4551,7 +4551,7 @@ namespace Game.Entities
 
             StopMirrorTimers();                                     //disable timers(bars)
 
-            setDeathState(DeathState.Corpse);
+            SetDeathState(DeathState.Corpse);
 
             SetDynamicFlags(UnitDynFlags.None);
             if (!CliDB.MapStorage.LookupByKey(GetMapId()).Instanceable() && !HasAuraType(AuraType.PreventResurrection))
@@ -4847,7 +4847,7 @@ namespace Game.Entities
             pet.SetFaction(GetFaction());
             pet.SetNpcFlags(NPCFlags.None);
             pet.SetNpcFlags2(NPCFlags2.None);
-            pet.InitStatsForLevel(getLevel());
+            pet.InitStatsForLevel(GetLevel());
 
             SetMinion(pet, true);
 
@@ -4954,7 +4954,7 @@ namespace Game.Entities
             pet.AddObjectToRemoveList();
             pet.m_removed = true;
 
-            if (pet.isControlled())
+            if (pet.IsControlled())
             {
                 SendPacket(new PetSpells());
 
@@ -5149,10 +5149,10 @@ namespace Game.Entities
         }
 
         // Used in triggers for check "Only to targets that grant experience or honor" req
-        public bool isHonorOrXPTarget(Unit victim)
+        public bool IsHonorOrXPTarget(Unit victim)
         {
             uint v_level = victim.GetLevelForTarget(this);
-            uint k_grey = Formulas.GetGrayLevel(getLevel());
+            uint k_grey = Formulas.GetGrayLevel(GetLevel());
 
             // Victim level less gray level
             if (v_level < k_grey)
@@ -5167,8 +5167,8 @@ namespace Game.Entities
             return true;
         }
 
-        public void setRegenTimerCount(uint time) { m_regenTimerCount = time; }
-        void setWeaponChangeTimer(uint time) { m_weaponChangeTimer = time; }
+        public void SetRegenTimerCount(uint time) { m_regenTimerCount = time; }
+        void SetWeaponChangeTimer(uint time) { m_weaponChangeTimer = time; }
 
         //Team
         public static Team TeamForRace(Race race)
@@ -5257,13 +5257,6 @@ namespace Game.Entities
                 DB.Characters.Execute(stmt);
             }
         }
-        void SetFactionForRace(Race race)
-        {
-            m_team = TeamForRace(race);
-
-            var rEntry = CliDB.ChrRacesStorage.LookupByKey(race);
-            SetFaction(rEntry.FactionID);
-        }
 
         //Guild
         public void SetInGuild(ulong guildId)
@@ -5301,7 +5294,7 @@ namespace Game.Entities
         public void SetFreePrimaryProfessions(uint profs) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterPoints), profs); }
         public void GiveLevel(uint level)
         {
-            var oldLevel = getLevel();
+            var oldLevel = GetLevel();
             if (level == oldLevel)
                 return;
 
@@ -5384,7 +5377,7 @@ namespace Game.Entities
             if (pet)
                 pet.SynchronizeLevelWithOwner();
 
-            MailLevelReward mailReward = Global.ObjectMgr.GetMailLevelReward(level, (uint)getRaceMask());
+            MailLevelReward mailReward = Global.ObjectMgr.GetMailLevelReward(level, (uint)GetRaceMask());
             if (mailReward != null)
             {
                 //- TODO: Poor design of mail system
@@ -5423,33 +5416,33 @@ namespace Game.Entities
 
         public void ToggleAFK()
         {
-            if (isAFK())
+            if (IsAFK())
                 RemovePlayerFlag(PlayerFlags.AFK);
             else
                 AddPlayerFlag(PlayerFlags.AFK);
 
             // afk player not allowed in Battleground
-            if (!IsGameMaster() && isAFK() && InBattleground() && !InArena())
+            if (!IsGameMaster() && IsAFK() && InBattleground() && !InArena())
                 LeaveBattleground();
         }
         public void ToggleDND()
         {
-            if (isDND())
+            if (IsDND())
                 RemovePlayerFlag(PlayerFlags.DND);
             else
                 AddPlayerFlag(PlayerFlags.DND);
         }
-        public bool isAFK() { return HasPlayerFlag(PlayerFlags.AFK); }
-        public bool isDND() { return HasPlayerFlag(PlayerFlags.DND); }
+        public bool IsAFK() { return HasPlayerFlag(PlayerFlags.AFK); }
+        public bool IsDND() { return HasPlayerFlag(PlayerFlags.DND); }
         public ChatFlags GetChatFlags()
         {
             ChatFlags tag = ChatFlags.None;
 
-            if (isGMChat())
+            if (IsGMChat())
                 tag |= ChatFlags.GM;
-            if (isDND())
+            if (IsDND())
                 tag |= ChatFlags.DND;
-            if (isAFK())
+            if (IsAFK())
                 tag |= ChatFlags.AFK;
             if (HasPlayerFlag(PlayerFlags.Developer))
                 tag |= ChatFlags.Dev;
@@ -5823,12 +5816,12 @@ namespace Game.Entities
                 _RemoveAllStatBonuses();
 
             uint basemana;
-            Global.ObjectMgr.GetPlayerClassLevelInfo(GetClass(), getLevel(), out basemana);
+            Global.ObjectMgr.GetPlayerClassLevelInfo(GetClass(), GetLevel(), out basemana);
 
-            PlayerLevelInfo info = Global.ObjectMgr.GetPlayerLevelInfo(GetRace(), GetClass(), getLevel());
+            PlayerLevelInfo info = Global.ObjectMgr.GetPlayerLevelInfo(GetRace(), GetClass(), GetLevel());
 
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.MaxLevel), WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel));
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.NextLevelXP), Global.ObjectMgr.GetXPForLevel(getLevel()));
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.NextLevelXP), Global.ObjectMgr.GetXPForLevel(GetLevel()));
 
             // reset before any aura state sources (health set/aura apply)
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.AuraState), 0u);
@@ -6052,7 +6045,7 @@ namespace Game.Entities
 
                     // target aura duration for caster show only if target exist at caster client
                     // send data at target visibility change (adding to client)
-                    if (target.isTypeMask(TypeMask.Unit))
+                    if (target.IsTypeMask(TypeMask.Unit))
                         SendInitialVisiblePackets(target.ToUnit());
                 }
             }
@@ -6311,17 +6304,17 @@ namespace Game.Entities
 
                 if (areaEntry.ExplorationLevel > 0)
                 {
-                    if (getLevel() >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
+                    if (GetLevel() >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
                     {
                         SendExplorationExperience(areaId, 0);
                     }
                     else
                     {
-                        int diff = (int)(getLevel() - areaEntry.ExplorationLevel);
+                        int diff = (int)(GetLevel() - areaEntry.ExplorationLevel);
                         uint XP = 0;
                         if (diff < -5)
                         {
-                            XP = (uint)(Global.ObjectMgr.GetBaseXP(getLevel() + 5) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
+                            XP = (uint)(Global.ObjectMgr.GetBaseXP(GetLevel() + 5) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
                         }
                         else if (diff > 5)
                         {
@@ -6453,16 +6446,16 @@ namespace Game.Entities
             data.Initialize(ChatMsg.WhisperInform, language, target, target, text);
             SendPacket(data);
 
-            if (!isAcceptWhispers() && !IsGameMaster() && !target.IsGameMaster())
+            if (!IsAcceptWhispers() && !IsGameMaster() && !target.IsGameMaster())
             {
                 SetAcceptWhispers(true);
                 SendSysMessage(CypherStrings.CommandWhisperon);
             }
 
             // announce afk or dnd message
-            if (target.isAFK())
+            if (target.IsAFK())
                 SendSysMessage(CypherStrings.PlayerAfk, target.GetName(), target.autoReplyMsg);
-            else if (target.isDND())
+            else if (target.IsDND())
                 SendSysMessage(CypherStrings.PlayerDnd, target.GetName(), target.autoReplyMsg);
         }
 
@@ -6496,8 +6489,8 @@ namespace Game.Entities
             m_lastFallZ = z;
         }
 
-        public byte getCinematic() { return m_cinematic; }
-        public void setCinematic(byte cine) { m_cinematic = cine; }
+        public byte GetCinematic() { return m_cinematic; }
+        public void SetCinematic(byte cine) { m_cinematic = cine; }
 
         public uint GetMovie() { return m_movie; }
         public void SetMovie(uint movie) { m_movie = movie; }
@@ -6536,7 +6529,7 @@ namespace Game.Entities
             int playerLevelDelta = 0;
 
             // If XP < 50%, player should see scaling creature with -1 level except for level max
-            if (getLevel() < SharedConst.MaxLevel && xp < (m_activePlayerData.NextLevelXP / 2))
+            if (GetLevel() < SharedConst.MaxLevel && xp < (m_activePlayerData.NextLevelXP / 2))
                 playerLevelDelta = -1;
 
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ScalingPlayerLevelDelta), playerLevelDelta);
@@ -6553,10 +6546,10 @@ namespace Game.Entities
             if (HasPlayerFlag(PlayerFlags.NoXPGain))
                 return;
 
-            if (victim != null && victim.IsTypeId(TypeId.Unit) && !victim.ToCreature().hasLootRecipient())
+            if (victim != null && victim.IsTypeId(TypeId.Unit) && !victim.ToCreature().HasLootRecipient())
                 return;
 
-            uint level = getLevel();
+            uint level = GetLevel();
 
             Global.ScriptMgr.OnGivePlayerXP(this, xp, victim);
 
@@ -6593,7 +6586,7 @@ namespace Game.Entities
                 if (level < WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
                     GiveLevel(level + 1);
 
-                level = getLevel();
+                level = GetLevel();
                 nextLvlXP = m_activePlayerData.NextLevelXP;
             }
 
@@ -6757,7 +6750,7 @@ namespace Game.Entities
                 if (GetDisplayId() != GetNativeDisplayId())
                     RestoreDisplayId(true);
 
-                if (IsDisallowedMountForm(getTransForm(), ShapeShiftForm.None, GetDisplayId()))
+                if (IsDisallowedMountForm(GetTransForm(), ShapeShiftForm.None, GetDisplayId()))
                 {
                     GetSession().SendActivateTaxiReply(ActivateTaxiReply.PlayerShapeshifted);
                     return false;
@@ -6931,7 +6924,7 @@ namespace Game.Entities
             m_taxi.ClearTaxiDestinations();        // not destinations, clear source node
             Dismount();
             RemoveUnitFlag(UnitFlags.RemoveClientControl | UnitFlags.TaxiFlight);
-            getHostileRefManager().setOnlineOfflineState(true);
+            GetHostileRefManager().setOnlineOfflineState(true);
         }
 
         public void ContinueTaxiFlight()
@@ -6989,7 +6982,7 @@ namespace Game.Entities
         public bool GetsRecruitAFriendBonus(bool forXP)
         {
             bool recruitAFriend = false;
-            if (getLevel() <= WorldConfig.GetIntValue(WorldCfg.MaxRecruitAFriendBonusPlayerLevel) || !forXP)
+            if (GetLevel() <= WorldConfig.GetIntValue(WorldCfg.MaxRecruitAFriendBonusPlayerLevel) || !forXP)
             {
                 Group group = GetGroup();
                 if (group)
@@ -7006,12 +6999,12 @@ namespace Game.Entities
                         if (forXP)
                         {
                             // level must be allowed to get RaF bonus
-                            if (player.getLevel() > WorldConfig.GetIntValue(WorldCfg.MaxRecruitAFriendBonusPlayerLevel))
+                            if (player.GetLevel() > WorldConfig.GetIntValue(WorldCfg.MaxRecruitAFriendBonusPlayerLevel))
                                 continue;
 
                             // level difference must be small enough to get RaF bonus, UNLESS we are lower level
-                            if (player.getLevel() < getLevel())
-                                if (getLevel() - player.getLevel() > WorldConfig.GetIntValue(WorldCfg.MaxRecruitAFriendBonusPlayerLevelDifference))
+                            if (player.GetLevel() < GetLevel())
+                                if (GetLevel() - player.GetLevel() > WorldConfig.GetIntValue(WorldCfg.MaxRecruitAFriendBonusPlayerLevelDifference))
                                     continue;
                         }
 
@@ -7109,8 +7102,8 @@ namespace Game.Entities
         }
         public bool IsSpellFitByClassAndRace(uint spell_id)
         {
-            ulong racemask = getRaceMask();
-            uint classmask = getClassMask();
+            ulong racemask = GetRaceMask();
+            uint classmask = GetClassMask();
 
             var bounds = Global.SpellMgr.GetSkillLineAbilityMapBounds(spell_id);
 
@@ -7202,7 +7195,7 @@ namespace Game.Entities
                 // farsight dynobj or puppet may be very far away
                 UpdateVisibilityOf(target);
 
-                if (target.isTypeMask(TypeMask.Unit) && target != GetVehicleBase())
+                if (target.IsTypeMask(TypeMask.Unit) && target != GetVehicleBase())
                     target.ToUnit().AddPlayerToVision(this);
                 SetSeer(target);
             }
@@ -7218,7 +7211,7 @@ namespace Game.Entities
 
                 SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.FarsightObject), ObjectGuid.Empty);
 
-                if (target.isTypeMask(TypeMask.Unit) && target != GetVehicleBase())
+                if (target.IsTypeMask(TypeMask.Unit) && target != GetVehicleBase())
                     target.ToUnit().RemovePlayerFromVision(this);
 
                 //must immediately set seer back otherwise may crash

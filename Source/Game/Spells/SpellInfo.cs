@@ -1083,7 +1083,7 @@ namespace Game.Spells
                         {
                             Creature targetCreature = unitTarget.ToCreature();
                             if (targetCreature != null)
-                                if (targetCreature.hasLootRecipient() && !targetCreature.isTappedBy(caster.ToPlayer()))
+                                if (targetCreature.HasLootRecipient() && !targetCreature.IsTappedBy(caster.ToPlayer()))
                                     return SpellCastResult.CantCastOnTapped;
                         }
 
@@ -2681,7 +2681,7 @@ namespace Game.Spells
             int castTime = 0;
             if (CastTimeEntry != null)
             {
-                int calcLevel = spell != null ? (int)spell.GetCaster().getLevel() : 0;
+                int calcLevel = spell != null ? (int)spell.GetCaster().GetLevel() : 0;
                 if (MaxLevel != 0 && calcLevel > MaxLevel)
                     calcLevel = (int)MaxLevel;
 
@@ -2873,7 +2873,7 @@ namespace Game.Spells
                         if (HasAttribute(SpellAttr0.LevelDamageCalculation))
                         {
                             GtNpcManaCostScalerRecord spellScaler = CliDB.NpcManaCostScalerGameTable.GetRow(SpellLevel);
-                            GtNpcManaCostScalerRecord casterScaler = CliDB.NpcManaCostScalerGameTable.GetRow(caster.getLevel());
+                            GtNpcManaCostScalerRecord casterScaler = CliDB.NpcManaCostScalerGameTable.GetRow(caster.GetLevel());
                             if (spellScaler != null && casterScaler != null)
                                 powerCost *= (int)(casterScaler.Scaler / spellScaler.Scaler);
                         }
@@ -3023,7 +3023,7 @@ namespace Game.Spells
                         }
                     case SpellProcsPerMinuteModType.Class:
                         {
-                            if (caster.getClassMask().HasAnyFlag(mod.Param))
+                            if (caster.GetClassMask().HasAnyFlag(mod.Param))
                                 ppm *= 1.0f + mod.Coeff;
                             break;
                         }
@@ -3037,7 +3037,7 @@ namespace Game.Spells
                         }
                     case SpellProcsPerMinuteModType.Race:
                         {
-                            if (caster.getRaceMask().HasAnyFlag(mod.Param))
+                            if (caster.GetRaceMask().HasAnyFlag(mod.Param))
                                 ppm *= 1.0f + mod.Coeff;
                             break;
                         }
@@ -3938,7 +3938,7 @@ namespace Game.Spells
             {
                 if (GetScalingExpectedStat() == ExpectedStatType.None)
                 {
-                    int level = caster ? (int)caster.getLevel() : 0;
+                    int level = caster ? (int)caster.GetLevel() : 0;
                     if (level > (int)_spellInfo.MaxLevel && _spellInfo.MaxLevel > 0)
                         level = (int)_spellInfo.MaxLevel;
                     level -= (int)_spellInfo.BaseLevel;
@@ -3970,9 +3970,9 @@ namespace Game.Spells
             {
                 uint level = _spellInfo.SpellLevel;
                 if (target && _spellInfo.IsPositiveEffect(EffectIndex) && (Effect == SpellEffectName.ApplyAura))
-                    level = target.getLevel();
+                    level = target.GetLevel();
                 else if (caster)
-                    level = caster.getLevel();
+                    level = caster.GetLevel();
 
                 if (_spellInfo.BaseLevel != 0 && !_spellInfo.HasAttribute(SpellAttr11.ScalesWithItemLevel) && _spellInfo.HasAttribute(SpellAttr10.UseSpellBaseLevelForScaling))
                     level = _spellInfo.BaseLevel;
@@ -4040,7 +4040,7 @@ namespace Game.Spells
                     if (contentTuning != null)
                         expansion = contentTuning.ExpansionID;
 
-                    uint level = caster ? caster.getLevel() : 1;
+                    uint level = caster ? caster.GetLevel() : 1;
                     tempValue = Global.DB2Mgr.EvaluateExpectedStat(stat, level, expansion, 0, Class.None) * BasePoints / 100.0f;
                 }
 
@@ -4093,7 +4093,7 @@ namespace Game.Spells
 
             if (caster != null)
             {
-                radius += entry.RadiusPerLevel * caster.getLevel();
+                radius += entry.RadiusPerLevel * caster.GetLevel();
                 radius = Math.Min(radius, entry.RadiusMax);
                 Player modOwner = caster.GetSpellModOwner();
                 if (modOwner != null)

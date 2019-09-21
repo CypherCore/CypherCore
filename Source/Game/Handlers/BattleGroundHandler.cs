@@ -92,7 +92,7 @@ namespace Game
                 return;
 
             // expected bracket entry
-            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bg.GetMapId(), GetPlayer().getLevel());
+            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bg.GetMapId(), GetPlayer().GetLevel());
             if (bracketEntry == null)
                 return;
 
@@ -104,7 +104,7 @@ namespace Game
             // check queue conditions
             if (grp == null)
             {
-                if (GetPlayer().isUsingLfg())
+                if (GetPlayer().IsUsingLfg())
                 {
                     Global.BattlegroundMgr.BuildBattlegroundStatusFailed(out battlefieldStatusFailed, bg, GetPlayer(), 0, 0, GroupJoinBattlegroundResult.LfgCantUseBattleground);
                     SendPacket(battlefieldStatusFailed);
@@ -303,7 +303,7 @@ namespace Game
             bgTypeId = bg.GetTypeID();
 
             // expected bracket entry
-            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bg.GetMapId(), GetPlayer().getLevel());
+            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bg.GetMapId(), GetPlayer().GetLevel());
             if (bracketEntry == null)
                 return;
 
@@ -321,10 +321,10 @@ namespace Game
                     Log.outDebug(LogFilter.Battleground, "Player {0} ({1}) has a deserter debuff, do not port him to Battleground!", GetPlayer().GetName(), GetPlayer().GetGUID().ToString());
                 }
                 //if player don't match Battlegroundmax level, then do not allow him to enter! (this might happen when player leveled up during his waiting in queue
-                if (GetPlayer().getLevel() > bg.GetMaxLevel())
+                if (GetPlayer().GetLevel() > bg.GetMaxLevel())
                 {
                     Log.outDebug(LogFilter.Network, "Player {0} ({1}) has level ({2}) higher than maxlevel ({3}) of Battleground({4})! Do not port him to Battleground!",
-                        GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), GetPlayer().getLevel(), bg.GetMaxLevel(), bg.GetTypeID());
+                        GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), GetPlayer().GetLevel(), bg.GetMaxLevel(), bg.GetTypeID());
                     battlefieldPort.AcceptedInvite = false;
                 }
             }
@@ -467,7 +467,7 @@ namespace Game
                         continue;
 
                     // expected bracket entry
-                    PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bg.GetMapId(), GetPlayer().getLevel());
+                    PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bg.GetMapId(), GetPlayer().GetLevel());
                     if (bracketEntry == null)
                         continue;
 
@@ -504,7 +504,7 @@ namespace Game
 
             BattlegroundTypeId bgTypeId = bg.GetTypeID();
             BattlegroundQueueTypeId bgQueueTypeId = Global.BattlegroundMgr.BGQueueTypeId(bgTypeId, arenatype);
-            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bg.GetMapId(), GetPlayer().getLevel());
+            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bg.GetMapId(), GetPlayer().GetLevel());
             if (bracketEntry == null)
                 return;
 

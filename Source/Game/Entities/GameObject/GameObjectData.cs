@@ -20,7 +20,6 @@ using Framework.Constants;
 using Framework.GameMath;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using Game.Network;
 using Game.Network.Packets;
 
 namespace Game.Entities

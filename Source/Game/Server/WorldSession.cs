@@ -101,7 +101,7 @@ namespace Game
                 //FIXME: logout must be delayed in case lost connection with client in time of combat
                 if (GetPlayer().GetDeathTimer() != 0)
                 {
-                    _player.getHostileRefManager().deleteReferences();
+                    _player.GetHostileRefManager().deleteReferences();
                     _player.BuildPlayerRepop();
                     _player.RepopAtGraveyard();
                 }
@@ -202,7 +202,7 @@ namespace Game
                 // calls to GetMap in this case may cause crashes
                 GetPlayer().CleanupsBeforeDelete();
                 Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}) Logout Character:[{2}] (GUID: {3}) Level: {4}",
-                    GetAccountId(), GetRemoteAddress(), _player.GetName(), _player.GetGUID().ToString(), _player.getLevel());
+                    GetAccountId(), GetRemoteAddress(), _player.GetName(), _player.GetGUID().ToString(), _player.GetLevel());
 
                 Map map = GetPlayer().GetMap();
                 if (map != null)

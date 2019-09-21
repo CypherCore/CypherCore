@@ -103,7 +103,7 @@ namespace Game.Entities
                     if (GetTeam() == plrVictim.GetTeam() && !Global.WorldMgr.IsFFAPvPRealm())
                         return false;
 
-                    byte k_level = (byte)getLevel();
+                    byte k_level = (byte)GetLevel();
                     byte k_grey = (byte)Formulas.GetGrayLevel(k_level);
                     byte v_level = (byte)victim.GetLevelForTarget(this);
 
@@ -263,7 +263,7 @@ namespace Game.Entities
             uint newHonorXP = currentHonorXP + xp;
             uint honorLevel = GetHonorLevel();
 
-            if (xp < 1 || getLevel() < PlayerConst.LevelMinHonor || IsMaxHonorLevel())
+            if (xp < 1 || GetLevel() < PlayerConst.LevelMinHonor || IsMaxHonorLevel())
                 return;
 
             while (newHonorXP >= nextHonorLevelXP)
@@ -340,10 +340,10 @@ namespace Game.Entities
             if (talentInfo.SpecID != GetPrimarySpecialization())
                 return TalentLearnResult.FailedUnknown;
 
-            if (talentInfo.LevelRequired > getLevel())
+            if (talentInfo.LevelRequired > GetLevel())
                 return TalentLearnResult.FailedUnknown;
 
-            if (Global.DB2Mgr.GetRequiredLevelForPvpTalentSlot(slot, GetClass()) > getLevel())
+            if (Global.DB2Mgr.GetRequiredLevelForPvpTalentSlot(slot, GetClass()) > GetLevel())
                 return TalentLearnResult.FailedUnknown;
 
             PvpTalentCategoryRecord talentCategory = CliDB.PvpTalentCategoryStorage.LookupByKey(talentInfo.PvpTalentCategoryID);
@@ -654,7 +654,7 @@ namespace Game.Entities
 
             // BUG: sometimes when player clicks on flag in AB - client won't send gameobject_use, only gameobject_report_use packet
             // Note: Mount, stealth and invisibility will be removed when used
-            return (!isTotalImmune() &&                            // Damage immune
+            return (!IsTotalImmune() &&                            // Damage immune
             !HasAura(BattlegroundConst.SpellRecentlyDroppedFlag) &&       // Still has recently held flag debuff
             IsAlive());                                    // Alive
         }
@@ -669,7 +669,7 @@ namespace Game.Entities
         public void SetBattlegroundEntryPoint()
         {
             // Taxi path store
-            if (!m_taxi.empty())
+            if (!m_taxi.Empty())
             {
                 m_bgData.mountSpell = 0;
                 m_bgData.taxiPath[0] = m_taxi.GetTaxiSource();
@@ -830,7 +830,7 @@ namespace Game.Entities
                 return false;
 
             // limit check leel to dbc compatible level range
-            uint level = getLevel();
+            uint level = GetLevel();
             if (level > WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
                 level = WorldConfig.GetUIntValue(WorldCfg.MaxPlayerLevel);
 

@@ -195,7 +195,7 @@ namespace Scripts.Spells.Warlock
             if (removeMode != AuraRemoveMode.Death || !IsExpired())
                 return;
 
-            if (GetCaster().ToPlayer().isHonorOrXPTarget(GetTarget()))
+            if (GetCaster().ToPlayer().IsHonorOrXPTarget(GetTarget()))
                 GetCaster().CastSpell(GetTarget(), SpellIds.BaneOfDoomEffect, true, null, aurEff);
         }
 

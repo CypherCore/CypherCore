@@ -288,7 +288,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             }
 
             me.SetCombatPulseDelay(5);
-            me.setActive(true);
+            me.SetActive(true);
             DoZoneInCombat();
             _phase = Phases.One;
             _scheduler.CancelGroup(GroupIds.Intro);

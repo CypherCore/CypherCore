@@ -152,7 +152,7 @@ namespace Scripts.Northrend.IcecrownCitadel
             {
                 Talk(Texts.SayAggro);
 
-                me.setActive(true);
+                me.SetActive(true);
                 DoZoneInCombat();
                 instance.SetBossState(Bosses.LordMarrowgar, EncounterState.InProgress);
             }

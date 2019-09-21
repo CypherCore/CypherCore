@@ -99,7 +99,7 @@ namespace Game.AI
 
         public static IMovementGenerator SelectMovementAI(Creature creature)
         {
-            switch (creature.m_defaultMovementType)
+            switch (creature.DefaultMovementType)
             {
                 case MovementGeneratorType.Random:
                     return new RandomMovementGenerator();

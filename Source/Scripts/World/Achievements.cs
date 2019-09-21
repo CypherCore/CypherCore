@@ -301,7 +301,7 @@ namespace Scripts.World
 
         public override bool OnCheck(Player player, Unit target)
         {
-            return target && player.isHonorOrXPTarget(target);
+            return target && player.IsHonorOrXPTarget(target);
         }
     }
 }

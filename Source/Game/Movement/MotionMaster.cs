@@ -174,10 +174,10 @@ namespace Game.Movement
             x = 0f;
             y = 0f;
             z = 0f;
-            if (_owner.moveSpline.Finalized())
+            if (_owner.MoveSpline.Finalized())
                 return false;
 
-            Vector3 dest = _owner.moveSpline.FinalDestination();
+            Vector3 dest = _owner.MoveSpline.FinalDestination();
             x = dest.X;
             y = dest.Y;
             z = dest.Z;

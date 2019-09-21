@@ -171,7 +171,7 @@ namespace Game.Achievements
                         SetCriteriaProgress(criteria, miscValue1, referencePlayer, ProgressType.Highest);
                         break;
                     case CriteriaTypes.ReachLevel:
-                        SetCriteriaProgress(criteria, referencePlayer.getLevel(), referencePlayer);
+                        SetCriteriaProgress(criteria, referencePlayer.GetLevel(), referencePlayer);
                         break;
                     case CriteriaTypes.ReachSkillLevel:
                         uint skillvalue = referencePlayer.GetBaseSkillValue((SkillType)criteria.Entry.Asset);
@@ -220,7 +220,7 @@ namespace Game.Achievements
                         {
                             uint counter = 0;
 
-                            var rewQuests = referencePlayer.getRewardedQuests();
+                            var rewQuests = referencePlayer.GetRewardedQuests();
                             foreach (var id in rewQuests)
                             {
                                 Quest quest = Global.ObjectMgr.GetQuestTemplate(id);
@@ -1334,7 +1334,7 @@ namespace Game.Achievements
                         return false;
                     break;
                 case CriteriaAdditionalCondition.SourceLevel: // 39
-                    if (referencePlayer.getLevel() != reqValue)
+                    if (referencePlayer.GetLevel() != reqValue)
                         return false;
                     break;
                 case CriteriaAdditionalCondition.TargetLevel: // 40
@@ -1515,7 +1515,7 @@ namespace Game.Achievements
             }
 
             if (obj == null)
-                return default(T);
+                return default;
 
             return obj;
         }

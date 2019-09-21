@@ -294,7 +294,7 @@ namespace Game.Spells
             m_owner = owner;
             m_timeCla = 0;
             m_updateTargetMapInterval = 0;
-            m_casterLevel = caster != null ? caster.getLevel() : m_spellInfo.SpellLevel;
+            m_casterLevel = caster != null ? caster.GetLevel() : m_spellInfo.SpellLevel;
             m_procCharges = 0;
             m_stackAmount = 1;
             m_isRemoved = false;
@@ -1800,8 +1800,8 @@ namespace Game.Spells
             }
 
             // proc chance is reduced by an additional 3.333% per level past 60
-            if (procEntry.AttributesMask.HasAnyFlag(ProcAttributes.ReduceProc60) && eventInfo.GetActor().getLevel() > 60)
-                chance = Math.Max(0.0f, (1.0f - ((eventInfo.GetActor().getLevel() - 60) * 1.0f / 30.0f)) * chance);
+            if (procEntry.AttributesMask.HasAnyFlag(ProcAttributes.ReduceProc60) && eventInfo.GetActor().GetLevel() > 60)
+                chance = Math.Max(0.0f, (1.0f - ((eventInfo.GetActor().GetLevel() - 60) * 1.0f / 30.0f)) * chance);
 
             return chance;
         }
@@ -2388,12 +2388,12 @@ namespace Game.Spells
             }
             return (effMask & availableEffectMask);
         }
-        public static Aura TryRefreshStackOrCreate(SpellInfo spellproto, ObjectGuid castId, uint tryEffMask, WorldObject owner, Unit caster, int[] baseAmount = null, Item castItem = null, ObjectGuid casterGUID = default(ObjectGuid), bool resetPeriodicTimer = true, ObjectGuid castItemGuid = default(ObjectGuid), int castItemLevel = -1)
+        public static Aura TryRefreshStackOrCreate(SpellInfo spellproto, ObjectGuid castId, uint tryEffMask, WorldObject owner, Unit caster, int[] baseAmount = null, Item castItem = null, ObjectGuid casterGUID = default, bool resetPeriodicTimer = true, ObjectGuid castItemGuid = default, int castItemLevel = -1)
         {
             bool throwway;
             return TryRefreshStackOrCreate(spellproto, castId, tryEffMask, owner, caster, out throwway, baseAmount, castItem, casterGUID, resetPeriodicTimer, castItemGuid, castItemLevel);
         }
-        public static Aura TryRefreshStackOrCreate(SpellInfo spellproto, ObjectGuid castId, uint tryEffMask, WorldObject owner, Unit caster, out bool refresh, int[] baseAmount, Item castItem = null, ObjectGuid casterGUID = default(ObjectGuid), bool resetPeriodicTimer = true, ObjectGuid castItemGuid = default(ObjectGuid), int castItemLevel = -1)
+        public static Aura TryRefreshStackOrCreate(SpellInfo spellproto, ObjectGuid castId, uint tryEffMask, WorldObject owner, Unit caster, out bool refresh, int[] baseAmount, Item castItem = null, ObjectGuid casterGUID = default, bool resetPeriodicTimer = true, ObjectGuid castItemGuid = default, int castItemLevel = -1)
         {
             Cypher.Assert(spellproto != null);
             Cypher.Assert(owner != null);
@@ -2418,7 +2418,7 @@ namespace Game.Spells
             else
                 return Create(spellproto, castId, effMask, owner, caster, baseAmount, castItem, casterGUID, castItemGuid, castItemLevel);
         }
-        public static Aura TryCreate(SpellInfo spellproto, ObjectGuid castId, uint tryEffMask, WorldObject owner, Unit caster, int[] baseAmount, Item castItem = null, ObjectGuid casterGUID = default(ObjectGuid), ObjectGuid castItemGuid = default(ObjectGuid), int castItemLevel = -1)
+        public static Aura TryCreate(SpellInfo spellproto, ObjectGuid castId, uint tryEffMask, WorldObject owner, Unit caster, int[] baseAmount, Item castItem = null, ObjectGuid casterGUID = default, ObjectGuid castItemGuid = default, int castItemLevel = -1)
         {
             Cypher.Assert(spellproto != null);
             Cypher.Assert(owner != null);
@@ -2448,7 +2448,7 @@ namespace Game.Spells
                 casterGUID = caster.GetGUID();
 
             // check if aura can be owned by owner
-            if (owner.isTypeMask(TypeMask.Unit))
+            if (owner.IsTypeMask(TypeMask.Unit))
                 if (!owner.IsInWorld || owner.ToUnit().IsDuringRemoveFromWorld())
                     // owner not in world so don't allow to own not self casted single target auras
                     if (casterGUID != owner.GetGUID() && spellproto.IsSingleTarget())

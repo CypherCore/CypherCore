@@ -526,13 +526,13 @@ namespace Scripts.Northrend.Ulduar.FlameLeviathan
         //! I also removed the spellInfo check
         void DoBatteringRamIfReady()
         {
-            if (me.isAttackReady())
+            if (me.IsAttackReady())
             {
                 Unit target = Global.ObjAccessor.GetUnit(me, _pursueTarget);
                 if (me.IsWithinCombatRange(target, 30.0f))
                 {
                     DoCast(target, Spells.BatteringRam);
-                    me.resetAttackTimer();
+                    me.ResetAttackTimer();
                 }
             }
         }

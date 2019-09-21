@@ -212,7 +212,7 @@ namespace Game.Entities
 
         PlayerExtraFlags m_ExtraFlags;
 
-        public bool isDebugAreaTriggers { get; set; }
+        public bool IsDebugAreaTriggers { get; set; }
         uint m_zoneUpdateId;
         uint m_areaUpdateId;
         uint m_zoneUpdateTimer;

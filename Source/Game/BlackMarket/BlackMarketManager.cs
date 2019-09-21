@@ -21,7 +21,6 @@ using Game.Entities;
 using Game.Mails;
 using Game.Network.Packets;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Game.BlackMarket
 {

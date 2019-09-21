@@ -23,7 +23,6 @@ using Game.Entities;
 using Game.Network.Packets;
 using System;
 using System.Collections.Generic;
-using Game.Network;
 
 namespace Game
 {
@@ -263,10 +262,10 @@ namespace Game
                     return 0;
 
                 float multiplier = 1.0f;
-                if (questLevel != player.getLevel())
-                    multiplier = CliDB.XpGameTable.GetRow(Math.Min(player.getLevel(), questLevel)).Divisor / CliDB.XpGameTable.GetRow(player.getLevel()).Divisor;
+                if (questLevel != player.GetLevel())
+                    multiplier = CliDB.XpGameTable.GetRow(Math.Min(player.GetLevel(), questLevel)).Divisor / CliDB.XpGameTable.GetRow(player.GetLevel()).Divisor;
 
-                int diffFactor = (int)(2 * (questLevel + (Level == -1 ? 0 : 5) - player.getLevel()) + 10);
+                int diffFactor = (int)(2 * (questLevel + (Level == -1 ? 0 : 5) - player.GetLevel()) + 10);
                 if (diffFactor < 1)
                     diffFactor = 1;
                 else if (diffFactor > 10)

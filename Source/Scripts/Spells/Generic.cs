@@ -2067,8 +2067,8 @@ namespace Scripts.Spells.Generic
                 if (newPet.LoadPetFromDB(player, 0, player.GetLastPetNumber(), true))
                 {
                     // revive the pet if it is dead
-                    if (newPet.getDeathState() == DeathState.Dead)
-                        newPet.setDeathState(DeathState.Alive);
+                    if (newPet.GetDeathState() == DeathState.Dead)
+                        newPet.SetDeathState(DeathState.Alive);
 
                     newPet.SetFullHealth();
                     newPet.SetFullPower(newPet.GetPowerType());
@@ -2897,7 +2897,7 @@ namespace Scripts.Spells.Generic
             if (player)
             {
                 // Reset player faction + allow combat + allow duels
-                player.setFactionForRace(player.GetRace());
+                player.SetFactionForRace(player.GetRace());
                 player.RemoveUnitFlag(UnitFlags.NonAttackable);
                 // save player
                 player.SaveToDB();

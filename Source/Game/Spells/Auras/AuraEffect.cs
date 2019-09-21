@@ -690,7 +690,7 @@ namespace Game.Spells
                         uint triggerSpellId = GetSpellEffectInfo().TriggerSpell;
                         SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId);
                         if (triggeredSpellInfo != null)
-                            if (aurApp.GetTarget().m_extraAttacks != 0 && triggeredSpellInfo.HasEffect(SpellEffectName.AddExtraAttacks))
+                            if (aurApp.GetTarget().ExtraAttacks != 0 && triggeredSpellInfo.HasEffect(SpellEffectName.AddExtraAttacks))
                                 return false;
                         break;
                     }
@@ -1216,7 +1216,7 @@ namespace Game.Spells
             // die at aura end
             else if (target.IsAlive())
                 // call functions which may have additional effects after chainging state of unit
-                target.setDeathState(DeathState.JustDied);
+                target.SetDeathState(DeathState.JustDied);
         }
 
         [AuraEffectHandler(AuraType.Ghost)]
@@ -1443,10 +1443,10 @@ namespace Game.Spells
             if (apply)
             {
                 // update active transform spell only when transform not set or not overwriting negative by positive case
-                SpellInfo transformSpellInfo = Global.SpellMgr.GetSpellInfo(target.getTransForm());
+                SpellInfo transformSpellInfo = Global.SpellMgr.GetSpellInfo(target.GetTransForm());
                 if (transformSpellInfo == null || !GetSpellInfo().IsPositive() || transformSpellInfo.IsPositive())
                 {
-                    target.setTransForm(GetId());
+                    target.SetTransForm(GetId());
                     // special case (spell specific functionality)
                     if (GetMiscValue() == 0)
                     {
@@ -1615,7 +1615,7 @@ namespace Game.Spells
                     // for players, start regeneration after 1s (in polymorph fast regeneration case)
                     // only if caster is Player (after patch 2.4.2)
                     if (GetCasterGUID().IsPlayer())
-                        target.ToPlayer().setRegenTimerCount(1 * Time.InMilliseconds);
+                        target.ToPlayer().SetRegenTimerCount(1 * Time.InMilliseconds);
 
                     //dismount polymorphed target (after patch 2.4.2)
                     if (target.IsMounted())
@@ -1625,7 +1625,7 @@ namespace Game.Spells
             else
             {
                 if (target.GetTransForm() == GetId())
-                    target.setTransForm(0);
+                    target.SetTransForm(0);
 
                 target.RestoreDisplayId(target.IsMounted());
 
@@ -1727,7 +1727,7 @@ namespace Game.Spells
                 if (GetCasterGUID() == target.GetGUID() && target.GetCurrentSpell(CurrentSpellTypes.Generic) != null)
                     target.FinishSpell(CurrentSpellTypes.Generic, false);
                 target.InterruptNonMeleeSpells(true);
-                target.getHostileRefManager().deleteReferences();
+                target.GetHostileRefManager().deleteReferences();
 
                 // stop handling the effect if it was removed by linked event
                 if (aurApp.HasRemoveMode())
@@ -2375,7 +2375,7 @@ namespace Game.Spells
 
             Unit caster = GetCaster();
             if (caster != null && caster.IsAlive())
-                target.getHostileRefManager().addTempThreat(GetAmount(), apply);
+                target.GetHostileRefManager().addTempThreat(GetAmount(), apply);
         }
 
         [AuraEffectHandler(AuraType.ModTaunt)]
@@ -3162,7 +3162,7 @@ namespace Game.Spells
             // players in corpse state may mean two different states:
             /// 1. player just died but did not release (in this case health == 0)
             /// 2. player is corpse running (ie ghost) (in this case health == 1)
-            if (target.getDeathState() == DeathState.Corpse)
+            if (target.GetDeathState() == DeathState.Corpse)
                 zeroHealth = target.GetHealth() == 0;
 
             for (int i = (int)Stats.Strength; i < (int)Stats.Max; i++)
@@ -3640,8 +3640,8 @@ namespace Game.Spells
             }
             else
             {
-                target.m_modMeleeHitChance += (apply) ? GetAmount() : (-GetAmount());
-                target.m_modRangedHitChance += (apply) ? GetAmount() : (-GetAmount());
+                target.ModMeleeHitChance += (apply) ? GetAmount() : (-GetAmount());
+                target.ModRangedHitChance += (apply) ? GetAmount() : (-GetAmount());
             }
         }
 
@@ -3656,7 +3656,7 @@ namespace Game.Spells
             if (target.IsTypeId(TypeId.Player))
                 target.ToPlayer().UpdateSpellHitChances();
             else
-                target.m_modSpellHitChance += (apply) ? GetAmount() : (-GetAmount());
+                target.ModSpellHitChance += (apply) ? GetAmount() : (-GetAmount());
         }
 
         [AuraEffectHandler(AuraType.ModSpellCritChance)]
@@ -3670,7 +3670,7 @@ namespace Game.Spells
             if (target.IsTypeId(TypeId.Player))
                 target.ToPlayer().UpdateSpellCritChance();
             else
-                target.m_baseSpellCritChance += (apply) ? GetAmount() : -GetAmount();
+                target.BaseSpellCritChance += (apply) ? GetAmount() : -GetAmount();
         }
 
         [AuraEffectHandler(AuraType.ModCritPct)]
@@ -3683,7 +3683,7 @@ namespace Game.Spells
 
             if (!target.IsTypeId(TypeId.Player))
             {
-                target.m_baseSpellCritChance += (apply) ? GetAmount() : -GetAmount();
+                target.BaseSpellCritChance += (apply) ? GetAmount() : -GetAmount();
                 return;
             }
 
@@ -3874,7 +3874,7 @@ namespace Game.Spells
 
             Unit target = aurApp.GetTarget();
 
-            if ((target.getClassMask() & (uint)Class.ClassMaskWandUsers) != 0)
+            if ((target.GetClassMask() & (uint)Class.ClassMaskWandUsers) != 0)
                 return;
 
             target.HandleStatModifier(UnitMods.AttackPowerRanged, UnitModifierType.TotalValue, GetAmount(), apply);
@@ -3900,7 +3900,7 @@ namespace Game.Spells
 
             Unit target = aurApp.GetTarget();
 
-            if ((target.getClassMask() & (uint)Class.ClassMaskWandUsers) != 0)
+            if ((target.GetClassMask() & (uint)Class.ClassMaskWandUsers) != 0)
                 return;
 
             //UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER = multiplier - 1
@@ -4485,8 +4485,8 @@ namespace Game.Spells
             if (GetSpellEffectInfo().ItemType == 6265)
             {
                 // Soul Shard only from units that grant XP or honor
-                if (!plCaster.isHonorOrXPTarget(target) ||
-                    (target.IsTypeId(TypeId.Unit) && !target.ToCreature().isTappedBy(plCaster)))
+                if (!plCaster.IsHonorOrXPTarget(target) ||
+                    (target.IsTypeId(TypeId.Unit) && !target.ToCreature().IsTappedBy(plCaster)))
                     return;
             }
 
@@ -5338,7 +5338,7 @@ namespace Game.Spells
                 // There is a Chance to make a Soul Shard when Drain soul does damage
                 if (GetSpellInfo().SpellFamilyName == SpellFamilyNames.Warlock && GetSpellInfo().SpellFamilyFlags[0].HasAnyFlag(0x00004000u))
                 {
-                    if (caster.IsTypeId(TypeId.Player) && caster.ToPlayer().isHonorOrXPTarget(target))
+                    if (caster.IsTypeId(TypeId.Player) && caster.ToPlayer().IsHonorOrXPTarget(target))
                         caster.CastSpell(caster, 95810, true, null, this);
                 }
                 if (GetSpellInfo().SpellFamilyName == SpellFamilyNames.Generic)
@@ -5511,7 +5511,7 @@ namespace Game.Spells
                 HealInfo healInfo = new HealInfo(caster, caster, heal, GetSpellInfo(), GetSpellInfo().GetSchoolMask());
                 caster.HealBySpell(healInfo);
 
-                caster.getHostileRefManager().threatAssist(caster, healInfo.GetEffectiveHeal() * 0.5f, GetSpellInfo());
+                caster.GetHostileRefManager().threatAssist(caster, healInfo.GetEffectiveHeal() * 0.5f, GetSpellInfo());
                 caster.ProcSkillsAndAuras(caster, ProcFlags.DonePeriodic, ProcFlags.TakenPeriodic, ProcFlagsSpellType.Heal, ProcFlagsSpellPhase.None, hitMask, null, null, healInfo);
             }
 
@@ -5634,7 +5634,7 @@ namespace Game.Spells
             SpellPeriodicAuraLogInfo pInfo = new SpellPeriodicAuraLogInfo(this, heal, (uint)damage, heal - healInfo.GetEffectiveHeal(), healInfo.GetAbsorb(), 0, 0.0f, crit);
             target.SendPeriodicAuraLog(pInfo);
 
-            target.getHostileRefManager().threatAssist(caster, healInfo.GetEffectiveHeal() * 0.5f, GetSpellInfo());
+            target.GetHostileRefManager().threatAssist(caster, healInfo.GetEffectiveHeal() * 0.5f, GetSpellInfo());
 
             // %-based heal - does not proc auras
             if (GetAuraType() == AuraType.ObsModHealth)
@@ -5728,7 +5728,7 @@ namespace Game.Spells
             int gain = target.ModifyPower(powerType, amount);
 
             if (caster != null)
-                target.getHostileRefManager().threatAssist(caster, gain * 0.5f, GetSpellInfo());
+                target.GetHostileRefManager().threatAssist(caster, gain * 0.5f, GetSpellInfo());
 
             target.SendPeriodicAuraLog(pInfo);
         }
@@ -5756,7 +5756,7 @@ namespace Game.Spells
             int gain = target.ModifyPower(powerType, amount);
 
             if (caster != null)
-                target.getHostileRefManager().threatAssist(caster, gain * 0.5f, GetSpellInfo());
+                target.GetHostileRefManager().threatAssist(caster, gain * 0.5f, GetSpellInfo());
 
             target.SendPeriodicAuraLog(pInfo);
         }
@@ -5792,7 +5792,7 @@ namespace Game.Spells
             // Set trigger flag
             ProcFlags procAttacker = ProcFlags.DonePeriodic;
             ProcFlags procVictim = ProcFlags.TakenPeriodic;
-            ProcFlagsHit hitMask = Unit.createProcHitMask(damageInfo, SpellMissInfo.None);
+            ProcFlagsHit hitMask = Unit.CreateProcHitMask(damageInfo, SpellMissInfo.None);
             ProcFlagsSpellType spellTypeMask = ProcFlagsSpellType.NoDmgHeal;
             if (damageInfo.damage != 0)
             {

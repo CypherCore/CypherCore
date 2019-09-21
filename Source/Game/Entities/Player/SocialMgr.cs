@@ -26,6 +26,8 @@ namespace Game.Entities
 {
     public class SocialManager : Singleton<SocialManager>
     {
+        Dictionary<ObjectGuid, PlayerSocial> _socialMap = new Dictionary<ObjectGuid, PlayerSocial>();
+
         SocialManager() { }
 
         public const int FriendLimit = 50;
@@ -62,15 +64,15 @@ namespace Game.Entities
 
             if (target.IsVisibleGloballyFor(player))
             {
-                if (target.isDND())
+                if (target.IsDND())
                     friendInfo.Status = FriendStatus.DND;
-                else if (target.isAFK())
+                else if (target.IsAFK())
                     friendInfo.Status = FriendStatus.AFK;
                 else
                     friendInfo.Status = FriendStatus.Online;
 
                 friendInfo.Area = target.GetZoneId();
-                friendInfo.Level = target.getLevel();
+                friendInfo.Level = target.GetLevel();
                 friendInfo.Class = target.GetClass();
             }
         }
@@ -141,12 +143,13 @@ namespace Game.Entities
         }
 
         public void RemovePlayerSocial(ObjectGuid guid) { _socialMap.Remove(guid); }
-
-        Dictionary<ObjectGuid, PlayerSocial> _socialMap = new Dictionary<ObjectGuid, PlayerSocial>();
     }
 
     public class PlayerSocial
     {
+        public Dictionary<ObjectGuid, FriendInfo> _playerSocialMap = new Dictionary<ObjectGuid, FriendInfo>();
+        ObjectGuid m_playerGUID;
+
         uint GetNumberOfSocialsWithFlag(SocialFlag flag)
         {
             uint counter = 0;
@@ -277,13 +280,18 @@ namespace Game.Entities
         ObjectGuid GetPlayerGUID() { return m_playerGUID; }
 
         public void SetPlayerGUID(ObjectGuid guid) { m_playerGUID = guid; }
-
-        public Dictionary<ObjectGuid, FriendInfo> _playerSocialMap = new Dictionary<ObjectGuid, FriendInfo>();
-        ObjectGuid m_playerGUID;
     }
 
     public class FriendInfo
     {
+        public ObjectGuid WowAccountGuid;
+        public FriendStatus Status;
+        public SocialFlag Flags;
+        public uint Area;
+        public uint Level;
+        public Class Class;
+        public string Note;
+
         public FriendInfo()
         {
             Status = FriendStatus.Offline;
@@ -297,14 +305,6 @@ namespace Game.Entities
             Flags = flags;
             Note = note;
         }
-
-        public ObjectGuid WowAccountGuid;
-        public FriendStatus Status;
-        public SocialFlag Flags;
-        public uint Area;
-        public uint Level;
-        public Class Class;
-        public string Note;
     }
 
     public enum FriendStatus

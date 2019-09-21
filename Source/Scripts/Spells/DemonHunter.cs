@@ -19,7 +19,6 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
-using System.Collections.Generic;
 
 namespace Scripts.Spells.DemonHunter
 {

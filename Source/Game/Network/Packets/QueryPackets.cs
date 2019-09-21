@@ -617,7 +617,7 @@ namespace Game.Network.Packets
                 RaceID = player.GetRace();
                 Sex = (Gender)(byte)player.m_playerData.NativeSex;
                 ClassID = player.GetClass();
-                Level = (byte)player.getLevel();
+                Level = (byte)player.GetLevel();
 
                 DeclinedName names = player.GetDeclinedNames();
                 if (names != null)

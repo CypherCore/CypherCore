@@ -732,7 +732,7 @@ namespace Scripts.Spells.Druid
             if (player.IsInWater()) // Aquatic form
                 triggeredSpellId = SpellIds.FormAquatic;
             else if (player.GetSkillValue(SkillType.Riding) >= 225 && CheckLocationForForm(SpellIds.FormFlight) == SpellCastResult.SpellCastOk) // Flight form
-                triggeredSpellId = player.getLevel() >= 71 ? SpellIds.FormSwiftFlight : SpellIds.FormFlight;
+                triggeredSpellId = player.GetLevel() >= 71 ? SpellIds.FormSwiftFlight : SpellIds.FormFlight;
             else // Stag form (riding skill already checked in CheckCast)
                 triggeredSpellId = SpellIds.FormStag;
 

@@ -1020,7 +1020,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
                     {
                         Romulo.RemoveUnitFlag(UnitFlags.NotSelectable);
                         Romulo.GetMotionMaster().Clear();
-                        Romulo.setDeathState(DeathState.JustDied);
+                        Romulo.SetDeathState(DeathState.JustDied);
                         Romulo.CombatStop(true);
                         Romulo.DeleteThreatList();
                         Romulo.SetDynamicFlags(UnitDynFlags.Lootable);
@@ -1258,7 +1258,7 @@ namespace Scripts.EasternKingdoms.Karazhan.OperaEvent
                     {
                         Julianne.RemoveUnitFlag(UnitFlags.NotSelectable);
                         Julianne.GetMotionMaster().Clear();
-                        Julianne.setDeathState(DeathState.JustDied);
+                        Julianne.SetDeathState(DeathState.JustDied);
                         Julianne.CombatStop(true);
                         Julianne.DeleteThreatList();
                         Julianne.SetDynamicFlags(UnitDynFlags.Lootable);

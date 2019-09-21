@@ -74,7 +74,7 @@ namespace Game
                 return;
             }
 
-            if (_player.isPossessing())
+            if (_player.IsPossessing())
                 return;
 
             SpellCastTargets targets = new SpellCastTargets(_player, packet.Cast);

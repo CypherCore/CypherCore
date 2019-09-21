@@ -310,9 +310,9 @@ namespace Game.Entities
         public void SaveStayPosition()
         {
             //! At this point a new spline destination is enabled because of Unit.StopMoving()
-            Vector3 stayPos = _unit.moveSpline.FinalDestination();
+            Vector3 stayPos = _unit.MoveSpline.FinalDestination();
 
-            if (_unit.moveSpline.onTransport)
+            if (_unit.MoveSpline.onTransport)
             {
                 float o = 0;
                 ITransport transport = _unit.GetDirectTransport();

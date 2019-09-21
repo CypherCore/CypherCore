@@ -22,7 +22,6 @@ using Game.Entities;
 using Game.Network.Packets;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Game.Guilds
 {

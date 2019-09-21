@@ -28,7 +28,7 @@ namespace Game.Entities
     {
         public void InitTalentForLevel()
         {
-            uint level = getLevel();
+            uint level = GetLevel();
             // talents base at level diff (talents = level - 9 but some can be used already)
             if (level < PlayerConst.MinSpecializationLevel)
                 ResetTalentSpecialization();

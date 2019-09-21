@@ -115,7 +115,7 @@ namespace Game.Combat
             {
                 HostileReference nextRef = refe.next();
                 Unit owner = refe.GetSource().GetOwner();
-                if (!owner.isActiveObject() && owner.GetExactDist2dSq(getOwner()) > range)
+                if (!owner.IsActiveObject() && owner.GetExactDist2dSq(getOwner()) > range)
                 {
                     refe.removeReference();
                 }
@@ -207,11 +207,11 @@ namespace Game.Combat
 
         public override void targetObjectBuildLink()
         {
-            getTarget().addHatedBy(this);
+            getTarget().AddHatedBy(this);
         }
         public override void targetObjectDestroyLink()
         {
-            getTarget().removeHatedBy(this);
+            getTarget().RemoveHatedBy(this);
         }
         public override void sourceObjectDestroyLink()
         {
@@ -277,7 +277,7 @@ namespace Game.Combat
                 )
             {
                 Creature creature = getSourceUnit().ToCreature();
-                online = getTarget().isInAccessiblePlaceFor(creature);
+                online = getTarget().IsInAccessiblePlaceFor(creature);
                 if (!online)
                 {
                     if (creature.IsWithinCombatRange(getTarget(), creature.m_CombatDistance))

@@ -88,7 +88,7 @@ namespace Game.Entities
                         if (IsCharmed())
                         {
                             i_disabledAI = i_AI;
-                            if (isPossessed() || IsVehicle())
+                            if (IsPossessed() || IsVehicle())
                                 i_AI = new PossessedAI(ToCreature());
                             else
                                 i_AI = new PetAI(ToCreature());
@@ -381,7 +381,7 @@ namespace Game.Entities
                 Player player = ToPlayer();
                 if (player)
                 {
-                    if (player.isAFK())
+                    if (player.IsAFK())
                         player.ToggleAFK();
 
                     if (charmer.IsTypeId(TypeId.Unit)) // we are charmed by a creature
@@ -477,7 +477,7 @@ namespace Game.Entities
 
             CastStop();
             CombatStop(); // @todo CombatStop(true) may cause crash (interrupt spells)
-            getHostileRefManager().deleteReferences();
+            GetHostileRefManager().deleteReferences();
             DeleteThreatList();
 
             if (_oldFactionId != 0)
@@ -760,7 +760,7 @@ namespace Game.Entities
             if (!pet.CreateBaseAtCreature(creatureTarget))
                 return null;
 
-            uint level = creatureTarget.GetLevelForTarget(this) + 5 < getLevel() ? (getLevel() - 5) : creatureTarget.GetLevelForTarget(this);
+            uint level = creatureTarget.GetLevelForTarget(this) + 5 < GetLevel() ? (GetLevel() - 5) : creatureTarget.GetLevelForTarget(this);
 
             InitTamedPet(pet, level, spell_id);
 
@@ -778,7 +778,7 @@ namespace Game.Entities
 
             Pet pet = new Pet(ToPlayer(), PetType.Hunter);
 
-            if (!pet.CreateBaseAtCreatureInfo(creatureInfo, this) || !InitTamedPet(pet, getLevel(), spell_id))
+            if (!pet.CreateBaseAtCreatureInfo(creatureInfo, this) || !InitTamedPet(pet, GetLevel(), spell_id))
                 return null;
 
             return pet;

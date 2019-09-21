@@ -450,7 +450,7 @@ namespace Game
                     }
 
                     if ((haveSameRace && skipCinematics == 1) || skipCinematics == 2)
-                        newChar.setCinematic(1);                          // not show intro
+                        newChar.SetCinematic(1);                          // not show intro
 
                     newChar.atLoginFlags = AtLoginFlags.FirstLogin;               // First login
 
@@ -478,7 +478,7 @@ namespace Game
 
                     Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}) Create Character: {2} {3}", GetAccountId(), GetRemoteAddress(), createInfo.Name, newChar.GetGUID().ToString());
                     Global.ScriptMgr.OnPlayerCreate(newChar);
-                    Global.CharacterCacheStorage.AddCharacterCacheEntry(newChar.GetGUID(), GetAccountId(), newChar.GetName(), newChar.m_playerData.NativeSex, (byte)newChar.GetRace(), (byte)newChar.GetClass(), (byte)newChar.getLevel(), false);
+                    Global.CharacterCacheStorage.AddCharacterCacheEntry(newChar.GetGUID(), GetAccountId(), newChar.GetName(), newChar.m_playerData.NativeSex, (byte)newChar.GetRace(), (byte)newChar.GetClass(), (byte)newChar.GetLevel(), false);
 
                     newChar.CleanupsBeforeDelete();
                 }
@@ -710,9 +710,9 @@ namespace Game
             pCurrChar.SendInitialPacketsBeforeAddToMap();
 
             //Show cinematic at the first time that player login
-            if (pCurrChar.getCinematic() == 0)
+            if (pCurrChar.GetCinematic() == 0)
             {
-                pCurrChar.setCinematic(1);
+                pCurrChar.SetCinematic(1);
                 ChrClassesRecord cEntry = CliDB.ChrClassesStorage.LookupByKey(pCurrChar.GetClass());
                 if (cEntry != null)
                 {
@@ -776,7 +776,7 @@ namespace Game
             pCurrChar.LoadCorpse(holder.GetResult(PlayerLoginQueryLoad.CorpseLocation));
 
             // setting Ghost+speed if dead
-            if (pCurrChar.getDeathState() != DeathState.Alive)
+            if (pCurrChar.GetDeathState() != DeathState.Alive)
             {
                 // not blizz like, we must correctly save and load player instead...
                 if (pCurrChar.GetRace() == Race.NightElf && !pCurrChar.HasAura(20584))
@@ -850,7 +850,7 @@ namespace Game
 
             string IP_str = GetRemoteAddress();
             Log.outDebug(LogFilter.Network, "Account: {0} (IP: {1}) Login Character:[{2}] ({3}) Level: {4}",
-                GetAccountId(), IP_str, pCurrChar.GetName(), pCurrChar.GetGUID().ToString(), pCurrChar.getLevel());
+                GetAccountId(), IP_str, pCurrChar.GetName(), pCurrChar.GetGUID().ToString(), pCurrChar.GetLevel());
 
             if (!pCurrChar.IsStandState() && !pCurrChar.HasUnitState(UnitState.Stunned))
                 pCurrChar.SetStandState(UnitStandStateType.Stand);
@@ -2159,7 +2159,7 @@ namespace Game
             // creatures can kill players
             // so if the server is lagging enough the player can
             // release spirit after he's killed but before he is updated
-            if (GetPlayer().getDeathState() == DeathState.JustDied)
+            if (GetPlayer().GetDeathState() == DeathState.JustDied)
             {
                 Log.outDebug(LogFilter.Network, "HandleRepopRequestOpcode: got request after player {0} ({1}) was killed and before he was updated",
                     GetPlayer().GetName(), GetPlayer().GetGUID().ToString());
@@ -2284,7 +2284,7 @@ namespace Game
             GetPlayer().SetStandState(packet.StandState);
         }
 
-        void SendCharCreate(ResponseCodes result, ObjectGuid guid = default(ObjectGuid))
+        void SendCharCreate(ResponseCodes result, ObjectGuid guid = default)
         {
             CreateChar response = new CreateChar();
             response.Code = result;

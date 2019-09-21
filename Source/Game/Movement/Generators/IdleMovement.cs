@@ -31,7 +31,7 @@ namespace Game.Movement
 
         public override void Reset(Unit owner)
         {
-            if (!owner.isStopped())
+            if (!owner.IsStopped())
                 owner.StopMoving();
         }
         public override void Initialize(Unit owner)

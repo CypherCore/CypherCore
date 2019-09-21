@@ -49,7 +49,7 @@ namespace Game.SupportSystem
                     return _suggestionTicketList.LookupByKey(Id) as T;
             }
 
-            return default(T);
+            return default;
         }
 
         public uint GetOpenTicketCount<T>() where T : Ticket

@@ -397,7 +397,7 @@ namespace Game
             ObjectGuid invitee = invite.InviteeGuid;
             Player player = Global.ObjAccessor.FindPlayer(invitee);
 
-            uint level = player ? player.getLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(invitee);
+            uint level = player ? player.GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(invitee);
 
             SCalendarEventInvite packet = new SCalendarEventInvite();
             packet.EventID = calendarEvent != null ? calendarEvent.EventId : 0;
@@ -545,7 +545,7 @@ namespace Game
                 ObjectGuid inviteeGuid = calendarInvite.InviteeGuid;
                 Player invitee = Global.ObjAccessor.FindPlayer(inviteeGuid);
 
-                uint inviteeLevel = invitee ? invitee.getLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(inviteeGuid);
+                uint inviteeLevel = invitee ? invitee.GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(inviteeGuid);
                 ulong inviteeGuildId = invitee ? invitee.GetGuildId() : Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(inviteeGuid);
 
                 CalendarEventInviteInfo inviteInfo = new CalendarEventInviteInfo();

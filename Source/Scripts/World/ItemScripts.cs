@@ -370,7 +370,7 @@ namespace Scripts.World
         public override bool OnCastItemCombatSpell(Player player, Unit victim, SpellInfo spellInfo, Item item)
         {
             // spell proc chance gets severely reduced on victims > 60 (formula unknown)
-            if (victim.getLevel() > 60)
+            if (victim.GetLevel() > 60)
             {
                 // gives ~0.1% proc chance at lvl 70
                 float lvlPenaltyFactor = 9.93f;

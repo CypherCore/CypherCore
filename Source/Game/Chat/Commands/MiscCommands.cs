@@ -1394,7 +1394,7 @@ namespace Game.Chat
                 accId = target.GetSession().GetAccountId();
                 money = target.GetMoney();
                 totalPlayerTime = target.GetTotalPlayedTime();
-                level = target.getLevel();
+                level = target.GetLevel();
                 latency = target.GetSession().GetLatency();
                 raceid = target.GetRace();
                 classid = target.GetClass();
@@ -2108,7 +2108,7 @@ namespace Game.Chat
                 return false;
 
             target.CombatStop();
-            target.getHostileRefManager().deleteReferences();
+            target.GetHostileRefManager().deleteReferences();
             return true;
         }
 
@@ -2380,7 +2380,7 @@ namespace Game.Chat
         {
             Player player = handler.GetSession().GetPlayer();
 
-            if (player.isPossessing())
+            if (player.IsPossessing())
                 return false;
 
             player.StopCastingBindSight();

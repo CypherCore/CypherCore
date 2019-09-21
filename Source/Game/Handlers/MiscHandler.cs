@@ -190,7 +190,7 @@ namespace Game
                 return;
             }
 
-            if (player.isDebugAreaTriggers)
+            if (player.IsDebugAreaTriggers)
                 player.SendSysMessage(packet.Entered ? CypherStrings.DebugAreatriggerEntered : CypherStrings.DebugAreatriggerLeft, packet.AreaTriggerID);
 
             if (Global.ScriptMgr.OnAreaTrigger(player, atEntry, packet.Entered))

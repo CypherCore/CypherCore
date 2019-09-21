@@ -193,7 +193,7 @@ namespace Game.Spells
                                 case 51963:
                                     {
                                         // about +4 base spell dmg per level
-                                        damage = (int)(m_caster.getLevel() - 60) * 4 + 60;
+                                        damage = (int)(m_caster.GetLevel() - 60) * 4 + 60;
                                         break;
                                     }
                             }
@@ -282,7 +282,7 @@ namespace Game.Spells
                                     hit.effectMask &= ~Convert.ToUInt32(1 << 1);
 
                                 // not empty (checked), copy
-                                var attackers = unitTarget.getAttackers();
+                                var attackers = unitTarget.GetAttackers();
 
                                 // remove invalid attackers
                                 foreach (var att in attackers)
@@ -1281,11 +1281,11 @@ namespace Game.Spells
             {
                 case 24571:                                         // Blood Fury
                                                                     // Instantly increases your rage by ${(300-10*$max(0,$PL-60))/10}.
-                    damage -= 10 * (int)Math.Max(0, Math.Min(30, m_caster.getLevel() - 60));
+                    damage -= 10 * (int)Math.Max(0, Math.Min(30, m_caster.GetLevel() - 60));
                     break;
                 case 24532:                                         // Burst of Energy
                                                                     // Instantly increases your energy by ${60-4*$max(0,$min(15,$PL-60))}.
-                    damage -= 4 * (int)Math.Max(0, Math.Min(15, m_caster.getLevel() - 60));
+                    damage -= 4 * (int)Math.Max(0, Math.Min(15, m_caster.GetLevel() - 60));
                     break;
                 case 67490:                                         // Runic Mana Injector (mana gain increased by 25% for engineers - 3.2.0 patch change)
                     {
@@ -1334,7 +1334,7 @@ namespace Game.Spells
             if (gameObjTarget != null)
             {
                 // Players shouldn't be able to loot gameobjects that are currently despawned
-                if (!gameObjTarget.isSpawned() && !player.IsGameMaster())
+                if (!gameObjTarget.IsSpawned() && !player.IsGameMaster())
                 {
                     Log.outError(LogFilter.Spells, "Possible hacking attempt: Player {0} [{1}] tried to loot a gameobject [{2}] which is on respawn time without being in GM mode!",
                                     player.GetName(), player.GetGUID().ToString(), gameObjTarget.GetGUID().ToString());
@@ -2408,14 +2408,14 @@ namespace Game.Spells
 
                     OldSummon.NearTeleportTo(px, py, pz, OldSummon.GetOrientation());
 
-                    if (owner.IsTypeId(TypeId.Player) && OldSummon.isControlled())
+                    if (owner.IsTypeId(TypeId.Player) && OldSummon.IsControlled())
                         owner.ToPlayer().PetSpellInitialize();
 
                     return;
                 }
 
                 if (owner.IsTypeId(TypeId.Player))
-                    owner.ToPlayer().RemovePet(OldSummon, (OldSummon.getPetType() == PetType.Hunter ? PetSaveMode.AsDeleted : PetSaveMode.NotInSlot), false);
+                    owner.ToPlayer().RemovePet(OldSummon, (OldSummon.GetPetType() == PetType.Hunter ? PetSaveMode.AsDeleted : PetSaveMode.NotInSlot), false);
                 else
                     return;
             }
@@ -2466,7 +2466,7 @@ namespace Game.Spells
             if (learn_spellproto == null)
                 return;
 
-            pet.learnSpell(learn_spellproto.Id);
+            pet.LearnSpell(learn_spellproto.Id);
             pet.SavePetToDB(PetSaveMode.AsCurrent);
             pet.GetOwner().PetSpellInitialize();
         }
@@ -3391,16 +3391,16 @@ namespace Game.Spells
             if (unitTarget == null)
                 return;
 
-            unitTarget.getHostileRefManager().UpdateVisibility();
+            unitTarget.GetHostileRefManager().UpdateVisibility();
 
-            var attackers = unitTarget.getAttackers();
+            var attackers = unitTarget.GetAttackers();
             foreach (var unit in attackers)
             {
                 if (!unit.CanSeeOrDetect(unitTarget))
                     unit.AttackStop();
             }
 
-            unitTarget.m_lastSanctuaryTime = GameTime.GetGameTimeMS();
+            unitTarget.LastSanctuaryTime = GameTime.GetGameTimeMS();
 
             // Vanish allows to remove all threat and cast regular stealth so other spells can be used
             if (m_caster.IsTypeId(TypeId.Player)
@@ -3481,7 +3481,7 @@ namespace Game.Spells
             PhasingHandler.InheritPhaseShift(go, m_caster);
 
             go.SetFaction(m_caster.GetFaction());
-            go.SetLevel(m_caster.getLevel() + 1);
+            go.SetLevel(m_caster.GetLevel() + 1);
             int duration = m_spellInfo.CalcDuration(m_caster);
             go.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
             go.SetSpellId(m_spellInfo.Id);
@@ -3867,10 +3867,10 @@ namespace Game.Spells
             if (!unitTarget || !unitTarget.IsAlive())
                 return;
 
-            if (unitTarget.m_extraAttacks != 0)
+            if (unitTarget.ExtraAttacks != 0)
                 return;
 
-            unitTarget.m_extraAttacks = (uint)damage;
+            unitTarget.ExtraAttacks = (uint)damage;
 
             ExecuteLogEffectExtraAttacks(effIndex, unitTarget, (uint)damage);
         }
@@ -3983,7 +3983,7 @@ namespace Game.Spells
 
             // we should also force pets to remove us from current target
             List<Unit> attackerSet = new List<Unit>();
-            foreach (var unit in m_caster.getAttackers())
+            foreach (var unit in m_caster.GetAttackers())
                 if (unit.GetTypeId() == TypeId.Unit && !unit.CanHaveThreatList())
                     attackerSet.Add(unit);
 
@@ -4086,7 +4086,7 @@ namespace Game.Spells
                 // tied to one of existing expansion fields in creature_template?
 
                 // Double chances for elites
-                m_caster.ToPlayer().UpdateGatherSkill(skill, (uint)damage, (uint)reqValue, (uint)(creature.isElite() ? 2 : 1));
+                m_caster.ToPlayer().UpdateGatherSkill(skill, (uint)damage, (uint)reqValue, (uint)(creature.IsElite() ? 2 : 1));
             }
         }
 
@@ -4176,7 +4176,7 @@ namespace Game.Spells
 
             Creature creatureTarget = unitTarget.ToCreature();
             if (creatureTarget)
-                if (creatureTarget.isWorldBoss() || creatureTarget.IsDungeonBoss())
+                if (creatureTarget.IsWorldBoss() || creatureTarget.IsDungeonBoss())
                     return;
 
             // Spells with SPELL_EFFECT_KNOCK_BACK (like Thunderstorm) can't knockback target if target has ROOT/STUN
@@ -4401,7 +4401,7 @@ namespace Game.Spells
 
             pet.SetDynamicFlags(UnitDynFlags.HideModel);
             pet.RemoveUnitFlag(UnitFlags.Skinnable);
-            pet.setDeathState(DeathState.Alive);
+            pet.SetDeathState(DeathState.Alive);
             pet.ClearUnitState(UnitState.AllState);
             pet.SetHealth(pet.CountPctFromMaxHealth(damage));
 
@@ -5061,7 +5061,7 @@ namespace Game.Spells
                 caster = caster.ToTotem().GetOwner();
 
             // in another case summon new
-            uint level = caster.getLevel();
+            uint level = caster.GetLevel();
 
             // level of pet summoned using engineering item based at engineering skill level
             if (m_CastItem != null && caster.IsTypeId(TypeId.Player))
@@ -5128,7 +5128,7 @@ namespace Game.Spells
                 return;
 
             if (unitTarget == null || !unitTarget.IsTypeId(TypeId.Unit) ||
-                !unitTarget.IsPet() || unitTarget.ToPet().getPetType() != PetType.Hunter)
+                !unitTarget.IsPet() || unitTarget.ToPet().GetPetType() != PetType.Hunter)
                 return;
 
             unitTarget.AddPetFlag(UnitPetFlags.CanBeRenamed);

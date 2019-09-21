@@ -18,7 +18,6 @@
 using Framework.Constants;
 using Framework.Database;
 using Framework.GameMath;
-using Framework.IO;
 using Game.AI;
 using Game.BattleGrounds;
 using Game.Collision;
@@ -39,8 +38,8 @@ namespace Game.Entities
     {
         public GameObject() : base(false)
         {
-            objectTypeMask |= TypeMask.GameObject;
-            objectTypeId = TypeId.GameObject;
+            ObjectTypeMask |= TypeMask.GameObject;
+            ObjectTypeId = TypeId.GameObject;
 
             m_updateFlag.Stationary = true;
             m_updateFlag.Rotation = true;
@@ -50,7 +49,7 @@ namespace Game.Entities
             m_spawnedByDefault = true;
 
             ResetLootMode(); // restore default loot mode
-            m_stationaryPosition = new Position();
+            StationaryPosition = new Position();
 
             m_gameObjectData = new GameObjectFieldData();
         }
@@ -125,7 +124,7 @@ namespace Game.Entities
                     GetMap().GetGameObjectBySpawnIdStore().Add(m_spawnId, this);
 
                 // The state can be changed after GameObject.Create but before GameObject.AddToWorld
-                bool toggledState = GetGoType() == GameObjectTypes.Chest ? getLootState() == LootState.Ready : (GetGoState() == GameObjectState.Ready || IsTransport());
+                bool toggledState = GetGoType() == GameObjectTypes.Chest ? GetLootState() == LootState.Ready : (GetGoState() == GameObjectState.Ready || IsTransport());
                 if (m_model != null)
                 {
                     Transport trans = ToTransport();
@@ -188,7 +187,7 @@ namespace Game.Entities
             SetMap(map);
 
             Relocate(pos);
-            m_stationaryPosition.Relocate(pos);
+            StationaryPosition.Relocate(pos);
             if (!IsPositionValid())
             {
                 Log.outError(LogFilter.Server, "Gameobject (Spawn id: {0} Entry: {1}) not created. Suggested coordinates isn't valid (X: {2} Y: {3})", GetSpawnId(), entry, pos.GetPositionX(), pos.GetPositionY());
@@ -583,7 +582,7 @@ namespace Game.Entities
                             }
                         }
 
-                        if (isSpawned())
+                        if (IsSpawned())
                         {
                             GameObjectTemplate goInfo = GetGoInfo();
                             uint max_charges;
@@ -812,7 +811,7 @@ namespace Game.Entities
             if (m_respawnTime > 0 && m_spawnedByDefault)
                 return;
 
-            if (isSpawned())
+            if (IsSpawned())
                 GetMap().AddToMap(this);
         }
 
@@ -848,7 +847,7 @@ namespace Game.Entities
             SendMessageToSet(packet, true);
         }
 
-        public void getFishLoot(Loot fishloot, Player loot_owner)
+        public void GetFishLoot(Loot fishloot, Player loot_owner)
         {
             fishloot.clear();
 
@@ -868,7 +867,7 @@ namespace Game.Entities
             }
         }
 
-        public void getFishLootJunk(Loot fishloot, Player loot_owner)
+        public void GetFishLootJunk(Loot fishloot, Player loot_owner)
         {
             fishloot.clear();
 
@@ -1039,7 +1038,7 @@ namespace Game.Entities
             DB.World.Execute(stmt);
         }
 
-        public override bool hasQuest(uint quest_id)
+        public override bool HasQuest(uint quest_id)
         {
 
             var qr = Global.ObjectMgr.GetGOQuestRelationBounds(GetEntry());
@@ -1051,7 +1050,7 @@ namespace Game.Entities
             return false;
         }
 
-        public override bool hasInvolvedQuest(uint quest_id)
+        public override bool HasInvolvedQuest(uint quest_id)
         {
             var qir = Global.ObjectMgr.GetGOQuestInvolvedRelationBounds(GetEntry());
             foreach (var id in qir)
@@ -1138,7 +1137,7 @@ namespace Game.Entities
                     return true;
 
                 Unit owner = GetOwner();
-                if (owner != null && seer.isTypeMask(TypeMask.Unit) && owner.IsFriendlyTo(seer.ToUnit()))
+                if (owner != null && seer.IsTypeMask(TypeMask.Unit) && owner.IsFriendlyTo(seer.ToUnit()))
                     return true;
             }
 
@@ -1151,7 +1150,7 @@ namespace Game.Entities
                 return true;
 
             // Despawned
-            if (!isSpawned())
+            if (!IsSpawned())
                 return true;
 
             return false;
@@ -1545,7 +1544,7 @@ namespace Game.Entities
                         if (player.GetGUID() != GetOwnerGUID())
                             return;
 
-                        switch (getLootState())
+                        switch (GetLootState())
                         {
                             case LootState.Ready:                              // ready for loot
                                 {
@@ -1752,10 +1751,10 @@ namespace Game.Entities
                             return;
 
                         //required lvl checks!
-                        uint level = player.getLevel();
+                        uint level = player.GetLevel();
                         if (level < info.MeetingStone.minLevel)
                             return;
-                        level = targetPlayer.getLevel();
+                        level = targetPlayer.GetLevel();
                         if (level < info.MeetingStone.minLevel)
                             return;
 
@@ -2625,13 +2624,13 @@ namespace Game.Entities
             m_respawnDelayTime = (uint)(respawn > 0 ? respawn : 0);
         }
 
-        public bool isSpawned()
+        public bool IsSpawned()
         {
             return m_respawnDelayTime == 0 ||
                 (m_respawnTime > 0 && !m_spawnedByDefault) ||
                 (m_respawnTime == 0 && m_spawnedByDefault);
         }
-        public bool isSpawnedByDefault() { return m_spawnedByDefault; }
+        public bool IsSpawnedByDefault() { return m_spawnedByDefault; }
         public void SetSpawnedByDefault(bool b) { m_spawnedByDefault = b; }
         public uint GetRespawnDelay() { return m_respawnDelayTime; }
 
@@ -2648,7 +2647,7 @@ namespace Game.Entities
         byte GetGoAnimProgress() { return m_gameObjectData.PercentHealth; }
         public void SetGoAnimProgress(uint animprogress) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.PercentHealth), (byte)animprogress); }
 
-        public LootState getLootState() { return m_lootState; }
+        public LootState GetLootState() { return m_lootState; }
         public LootModes GetLootMode() { return m_LootMode; }
         bool HasLootMode(LootModes lootMode) { return Convert.ToBoolean(m_LootMode & lootMode); }
         void SetLootMode(LootModes lootMode) { m_LootMode = lootMode; }
@@ -2701,12 +2700,12 @@ namespace Game.Entities
         public uint GetFaction() { return m_gameObjectData.FactionTemplate; }
         public void SetFaction(uint faction) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.FactionTemplate), faction); }
 
-        public override float GetStationaryX() { return m_stationaryPosition.GetPositionX(); }
-        public override float GetStationaryY() { return m_stationaryPosition.GetPositionY(); }
-        public override float GetStationaryZ() { return m_stationaryPosition.GetPositionZ(); }
-        public override float GetStationaryO() { return m_stationaryPosition.GetOrientation(); }
+        public override float GetStationaryX() { return StationaryPosition.GetPositionX(); }
+        public override float GetStationaryY() { return StationaryPosition.GetPositionY(); }
+        public override float GetStationaryZ() { return StationaryPosition.GetPositionZ(); }
+        public override float GetStationaryO() { return StationaryPosition.GetOrientation(); }
 
-        public void RelocateStationaryPosition(float x, float y, float z, float o) { m_stationaryPosition.Relocate(x, y, z, o); }
+        public void RelocateStationaryPosition(float x, float y, float z, float o) { StationaryPosition.Relocate(x, y, z, o); }
 
         //! Object distance/size - overridden from Object._IsWithinDist. Needs to take in account proper GO size.
         public override bool _IsWithinDist(WorldObject obj, float dist2compare, bool is3D)
@@ -2748,7 +2747,7 @@ namespace Game.Entities
         public ObjectGuid lootingGroupLowGUID;                         // used to find group which is looting
         long m_packedRotation;
         Quaternion m_worldRotation;
-        public Position m_stationaryPosition { get; set; }
+        public Position StationaryPosition { get; set; }
 
         GameObjectAI m_AI;
         ushort _animKitId;
@@ -2774,7 +2773,7 @@ namespace Game.Entities
             _owner = owner;
         }
 
-        public override bool IsSpawned() { return _owner.isSpawned(); }
+        public override bool IsSpawned() { return _owner.IsSpawned(); }
         public override uint GetDisplayId() { return _owner.GetDisplayId(); }
         public override byte GetNameSetId() { return _owner.GetNameSetId(); }
         public override bool IsInPhase(PhaseShift phaseShift) { return _owner.GetPhaseShift().CanSee(phaseShift); }

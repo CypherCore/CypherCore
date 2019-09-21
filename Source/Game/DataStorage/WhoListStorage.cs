@@ -85,7 +85,7 @@ namespace Game.DataStorage
                 if (guild)
                     guildGuid = guild.GetGUID();
 
-                _whoListStorage.Add(new WhoListPlayerInfo(player.GetGUID(), player.GetTeam(), player.GetSession().GetSecurity(), player.getLevel(),
+                _whoListStorage.Add(new WhoListPlayerInfo(player.GetGUID(), player.GetTeam(), player.GetSession().GetSecurity(), player.GetLevel(),
                     player.GetClass(), player.GetRace(), player.GetZoneId(), player.m_playerData.NativeSex, player.IsVisible(),
                     player.IsGameMaster(), playerName, guildName, guildGuid));
             }

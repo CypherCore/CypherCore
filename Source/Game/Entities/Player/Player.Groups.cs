@@ -49,7 +49,7 @@ namespace Game.Entities
             return nearMembers[randTarget];
         }
 
-        public PartyResult CanUninviteFromGroup(ObjectGuid guidMember = default(ObjectGuid))
+        public PartyResult CanUninviteFromGroup(ObjectGuid guidMember = default)
         {
             Group grp = GetGroup();
             if (!grp)
@@ -99,12 +99,12 @@ namespace Game.Entities
             return PartyResult.Ok;
         }
 
-        public bool isUsingLfg()
+        public bool IsUsingLfg()
         {
             return Global.LFGMgr.GetState(GetGUID()) != LfgState.None;
         }
 
-        bool inRandomLfgDungeon()
+        bool InRandomLfgDungeon()
         {
             if (Global.LFGMgr.selectedRandomLfgDungeon(GetGUID()))
             {
@@ -263,7 +263,7 @@ namespace Game.Entities
         }
 
         public void RemoveFromGroup(RemoveMethod method = RemoveMethod.Default) { RemoveFromGroup(GetGroup(), GetGUID(), method); }
-        public static void RemoveFromGroup(Group group, ObjectGuid guid, RemoveMethod method = RemoveMethod.Default, ObjectGuid kicker = default(ObjectGuid), string reason = null)
+        public static void RemoveFromGroup(Group group, ObjectGuid guid, RemoveMethod method = RemoveMethod.Default, ObjectGuid kicker = default, string reason = null)
         {
             if (!group)
                 return;

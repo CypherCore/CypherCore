@@ -475,7 +475,7 @@ namespace Game.AI
             }
 
             me.SetCombatPulseDelay(5);
-            me.setActive(true);
+            me.SetActive(true);
             DoZoneInCombat();
             ScheduleTasks();
         }
@@ -565,7 +565,7 @@ namespace Game.AI
 
         public override bool CanAIAttack(Unit victim) { return CheckBoundary(victim); }
 
-        public void _JustReachedHome() { me.setActive(false); }
+        public void _JustReachedHome() { me.SetActive(false); }
 
         public InstanceScript instance;
         public SummonList summons;

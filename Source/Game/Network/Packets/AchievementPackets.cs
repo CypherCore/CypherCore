@@ -19,7 +19,6 @@ using Framework.Constants;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Game.Network.Packets
 {

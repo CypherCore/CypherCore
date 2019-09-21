@@ -23,7 +23,6 @@ using Game.Scripting;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Scripts.Northrend.AzjolNerub.AzjolNerub.KrikthirTheGatewatcher
 {
@@ -624,7 +623,7 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.KrikthirTheGatewatcher
 
             _scheduler.Schedule(TimeSpan.FromSeconds(7), TimeSpan.FromSeconds(9), task =>
             {
-                if (me.GetVictim() && me.GetVictim().isInBack(me))
+                if (me.GetVictim() && me.GetVictim().IsInBack(me))
                     DoCastVictim(SpellIds.Backstab);
                 task.Repeat(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(13));
             });
@@ -704,7 +703,7 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.KrikthirTheGatewatcher
             Creature gatewatcher = me.GetInstanceScript().GetCreature(ANDataTypes.KrikthirTheGatewatcher);
             if (gatewatcher)
             {
-                Unit target = gatewatcher.getAttackerForHelper();
+                Unit target = gatewatcher.GetAttackerForHelper();
                 if (target)
                     AttackStart(target);
                 gatewatcher.GetAI().JustSummoned(me);
@@ -723,7 +722,7 @@ namespace Scripts.Northrend.AzjolNerub.AzjolNerub.KrikthirTheGatewatcher
             Creature gatewatcher = me.GetInstanceScript().GetCreature(ANDataTypes.KrikthirTheGatewatcher);
             if (gatewatcher)
             {
-                Unit target = gatewatcher.getAttackerForHelper();
+                Unit target = gatewatcher.GetAttackerForHelper();
                 if (target)
                     AttackStart(target);
                 gatewatcher.GetAI().JustSummoned(me);

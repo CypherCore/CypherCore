@@ -592,7 +592,7 @@ namespace Game
                 return;
             }
 
-            if (GetPlayer().getLevel() < WorldConfig.GetIntValue(WorldCfg.TradeLevelReq))
+            if (GetPlayer().GetLevel() < WorldConfig.GetIntValue(WorldCfg.TradeLevelReq))
             {
                 SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.TradeReq), WorldConfig.GetIntValue(WorldCfg.TradeLevelReq));
                 return;
@@ -667,7 +667,7 @@ namespace Game
                 return;
             }
 
-            if (pOther.getLevel() < WorldConfig.GetIntValue(WorldCfg.TradeLevelReq))
+            if (pOther.GetLevel() < WorldConfig.GetIntValue(WorldCfg.TradeLevelReq))
             {
                 SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.TradeOtherReq), WorldConfig.GetIntValue(WorldCfg.TradeLevelReq));
                 return;

@@ -75,12 +75,12 @@ namespace Game.Movement
     {
         public override void targetObjectBuildLink()
         {
-            getTarget().addFollower(this);
+            getTarget().AddFollower(this);
         }
 
         public override void targetObjectDestroyLink()
         {
-            getTarget().removeFollower(this);
+            getTarget().RemoveFollower(this);
         }
 
         public override void sourceObjectDestroyLink()

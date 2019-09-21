@@ -106,7 +106,7 @@ namespace Scripts.World
         {
             GameObject go = player.FindNearestGameObject(AreaTriggerConst.GoCoilfangWaterfall, 35.0f);
             if (go)
-                if (go.getLootState() == LootState.Ready)
+                if (go.GetLootState() == LootState.Ready)
                     go.UseDoorOrButton();
 
             return false;

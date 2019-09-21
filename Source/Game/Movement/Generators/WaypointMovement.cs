@@ -84,7 +84,7 @@ namespace Game.Movement
 
                 if (creature.IsStopped())
                     Stop(WorldConfig.GetIntValue(WorldCfg.CreatureStopForPlayer));
-                else if (creature.moveSpline.Finalized())
+                else if (creature.MoveSpline.Finalized())
                 {
                     OnArrived(creature);
                     return StartMove(creature);
@@ -226,7 +226,7 @@ namespace Game.Movement
             init.Launch();
 
             //Call for creature group update
-            if (creature.GetFormation() != null && creature.GetFormation().getLeader() == creature)
+            if (creature.GetFormation() != null && creature.GetFormation().GetLeader() == creature)
             {
                 creature.SetWalk(node.moveType != WaypointMoveType.Run);
                 creature.GetFormation().LeaderMoveTo(formationDest.posX, formationDest.posY, formationDest.posZ);
@@ -358,9 +358,9 @@ namespace Game.Movement
             owner.Dismount();
             owner.RemoveUnitFlag(UnitFlags.RemoveClientControl | UnitFlags.TaxiFlight);
 
-            if (owner.m_taxi.empty())
+            if (owner.m_taxi.Empty())
             {
-                owner.getHostileRefManager().setOnlineOfflineState(true);
+                owner.GetHostileRefManager().setOnlineOfflineState(true);
                 // update z position to ground and orientation for landing point
                 // this prevent cheating with landing  point at lags
                 // when client side flight end early in comparison server side
@@ -374,7 +374,7 @@ namespace Game.Movement
 
         public override void DoReset(Player owner)
         {
-            owner.getHostileRefManager().setOnlineOfflineState(false);
+            owner.GetHostileRefManager().setOnlineOfflineState(false);
             owner.AddUnitState(UnitState.InFlight);
             owner.AddUnitFlag(UnitFlags.RemoveClientControl | UnitFlags.TaxiFlight);
 
@@ -397,7 +397,7 @@ namespace Game.Movement
 
         public override bool DoUpdate(Player player, uint time_diff)
         {
-            uint pointId = (uint)player.moveSpline.currentPathIdx();
+            uint pointId = (uint)player.MoveSpline.currentPathIdx();
             if (pointId > i_currentNode)
             {
                 bool departureEvent = true;

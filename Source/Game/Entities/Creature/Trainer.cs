@@ -123,7 +123,7 @@ namespace Game.Entities
                     return TrainerSpellState.Unavailable;
 
             // check level requirement
-            if (player.getLevel() < trainerSpell.ReqLevel)
+            if (player.GetLevel() < trainerSpell.ReqLevel)
                 return TrainerSpellState.Unavailable;
 
             // check ranks

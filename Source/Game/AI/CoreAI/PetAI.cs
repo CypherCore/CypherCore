@@ -56,7 +56,7 @@ namespace Game.AI
                 me.GetMotionMaster().Clear();
                 me.GetMotionMaster().MoveIdle();
                 me.CombatStop();
-                me.getHostileRefManager().deleteReferences();
+                me.GetHostileRefManager().deleteReferences();
 
                 return;
             }
@@ -163,9 +163,9 @@ namespace Game.AI
 
                         // Some spells can target enemy or friendly (DK Ghoul's Leap)
                         // Check for enemy first (pet then owner)
-                        Unit target = me.getAttackerForHelper();
+                        Unit target = me.GetAttackerForHelper();
                         if (!target && owner)
-                            target = owner.getAttackerForHelper();
+                            target = owner.GetAttackerForHelper();
 
                         if (target)
                         {
@@ -372,7 +372,7 @@ namespace Game.AI
                 return null;
 
             // Check pet attackers first so we don't drag a bunch of targets to the owner
-            Unit myAttacker = me.getAttackerForHelper();
+            Unit myAttacker = me.GetAttackerForHelper();
             if (myAttacker)
                 if (!myAttacker.HasBreakableByDamageCrowdControlAura())
                     return myAttacker;
@@ -382,7 +382,7 @@ namespace Game.AI
                 return null;
 
             // Check owner attackers
-            Unit ownerAttacker = me.GetCharmerOrOwner().getAttackerForHelper();
+            Unit ownerAttacker = me.GetCharmerOrOwner().GetAttackerForHelper();
             if (ownerAttacker)
                 if (!ownerAttacker.HasBreakableByDamageCrowdControlAura())
                     return ownerAttacker;

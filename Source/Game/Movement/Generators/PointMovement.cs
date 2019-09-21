@@ -61,7 +61,7 @@ namespace Game.Movement
             // Call for creature group update
             Creature creature = owner.ToCreature();
             if (creature != null)
-            if (creature.GetFormation() != null && creature.GetFormation().getLeader() == creature)
+            if (creature.GetFormation() != null && creature.GetFormation().GetLeader() == creature)
                 creature.GetFormation().LeaderMoveTo(i_x, i_y, i_z);
         }
 
@@ -78,7 +78,7 @@ namespace Game.Movement
 
             owner.AddUnitState(UnitState.RoamingMove);
 
-            if (id != EventId.ChargePrepath && i_recalculateSpeed && !owner.moveSpline.Finalized())
+            if (id != EventId.ChargePrepath && i_recalculateSpeed && !owner.MoveSpline.Finalized())
             {
                 i_recalculateSpeed = false;
                 MoveSplineInit init = new MoveSplineInit(owner);
@@ -90,11 +90,11 @@ namespace Game.Movement
                 // Call for creature group update
                 Creature creature = owner.ToCreature();
                 if (creature != null)
-                    if (creature.GetFormation() != null && creature.GetFormation().getLeader() == creature)
+                    if (creature.GetFormation() != null && creature.GetFormation().GetLeader() == creature)
                         creature.GetFormation().LeaderMoveTo(i_x, i_y, i_z);
             }
 
-            return !owner.moveSpline.Finalized();
+            return !owner.MoveSpline.Finalized();
         }
 
         public override void DoFinalize(T owner)
@@ -102,7 +102,7 @@ namespace Game.Movement
             if (!owner.HasUnitState(UnitState.Charging))
                 owner.ClearUnitState(UnitState.Roaming | UnitState.RoamingMove);
 
-            if (owner.moveSpline.Finalized())
+            if (owner.MoveSpline.Finalized())
                 MovementInform(owner);
         }
 
@@ -160,7 +160,7 @@ namespace Game.Movement
     // Does almost nothing - just doesn't allows previous movegen interrupt current effect.
     public class EffectMovementGenerator : IMovementGenerator
     {
-        public EffectMovementGenerator(uint Id, uint arrivalSpellId = 0, ObjectGuid arrivalSpellTargetGuid = default(ObjectGuid))
+        public EffectMovementGenerator(uint Id, uint arrivalSpellId = 0, ObjectGuid arrivalSpellTargetGuid = default)
         {
             _Id = Id;
             _arrivalSpellId = arrivalSpellId;
@@ -191,7 +191,7 @@ namespace Game.Movement
 
         public override bool Update(Unit owner, uint time_diff)
         {
-            return !owner.moveSpline.Finalized();
+            return !owner.MoveSpline.Finalized();
         }
 
         public override void Initialize(Unit owner) { }

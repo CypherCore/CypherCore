@@ -66,7 +66,7 @@ namespace Game.Movement
             // prevent movement while casting spells with cast time or channel time
             if (owner.IsMovementPreventedByCasting())
             {
-                if (!owner.isStopped())
+                if (!owner.IsStopped())
                     owner.StopMoving();
                 return true;
             }
@@ -91,8 +91,8 @@ namespace Game.Movement
                 else
                     allowed_dist = owner.GetCombatReach() + WorldConfig.GetFloatValue(WorldCfg.RateTargetPosRecalculationRange);
 
-                Vector3 dest = owner.moveSpline.FinalDestination();
-                if (owner.moveSpline.onTransport)
+                Vector3 dest = owner.MoveSpline.FinalDestination();
+                if (owner.MoveSpline.onTransport)
                 {
                     float o = 0;
                     ITransport transport = owner.GetDirectTransport();
@@ -115,7 +115,7 @@ namespace Game.Movement
             if (recalculateTravel || targetMoved)
                 _setTargetLocation(owner, targetMoved);
 
-            if (owner.moveSpline.Finalized())
+            if (owner.MoveSpline.Finalized())
             {
                 MovementInform(owner);
                 if (angle == 0.0f && !owner.HasInArc(0.01f, target))
@@ -147,7 +147,7 @@ namespace Game.Movement
             if (owner.IsMovementPreventedByCasting())
                 return;
 
-            if (owner.IsTypeId(TypeId.Unit) && !target.isInAccessiblePlaceFor(owner.ToCreature()))
+            if (owner.IsTypeId(TypeId.Unit) && !target.IsInAccessiblePlaceFor(owner.ToCreature()))
             {
                 owner.ToCreature().SetCannotReachTarget(true);
                 return;

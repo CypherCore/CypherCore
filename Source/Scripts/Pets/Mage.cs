@@ -169,7 +169,7 @@ namespace Scripts.Pets
             if (!owner)
                 return;
 
-            Unit target = owner.getAttackerForHelper();
+            Unit target = owner.GetAttackerForHelper();
 
             _events.Update(diff);
 

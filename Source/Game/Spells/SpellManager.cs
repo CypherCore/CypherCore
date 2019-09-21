@@ -460,7 +460,7 @@ namespace Game.Entities
             {
                 Player actor = eventInfo.GetActor().ToPlayer();
                 if (actor)
-                    if (eventInfo.GetActionTarget() && !actor.isHonorOrXPTarget(eventInfo.GetActionTarget()))
+                    if (eventInfo.GetActionTarget() && !actor.IsHonorOrXPTarget(eventInfo.GetActionTarget()))
                         return false;
             }
 
@@ -3485,7 +3485,7 @@ namespace Game.Entities
                     return false;
 
             if (raceMask != 0)                                // not in expected race
-                if (player == null || !Convert.ToBoolean(raceMask & player.getRaceMask()))
+                if (player == null || !Convert.ToBoolean(raceMask & player.GetRaceMask()))
                     return false;
 
             if (areaId != 0)                                  // not in expected zone

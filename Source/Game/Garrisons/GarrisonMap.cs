@@ -19,7 +19,6 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Game.Garrisons
 {

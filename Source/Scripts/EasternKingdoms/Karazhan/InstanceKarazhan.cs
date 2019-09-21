@@ -16,11 +16,9 @@
  */
 
 using Framework.Constants;
-using Framework.IO;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
-using Game.AI;
 
 namespace Scripts.EasternKingdoms.Karazhan
 {

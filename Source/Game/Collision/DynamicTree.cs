@@ -16,7 +16,6 @@
  */
 
 using Framework.GameMath;
-using System.Collections.Generic;
 
 namespace Game.Collision
 {

@@ -64,7 +64,7 @@ namespace Game.Chat
             {
                 if (args.Empty())
                 {
-                    if (session.HasPermission(RBACPermissions.ChatUseStaffBadge) && session.GetPlayer().isGMChat())
+                    if (session.HasPermission(RBACPermissions.ChatUseStaffBadge) && session.GetPlayer().IsGMChat())
                         session.SendNotification(CypherStrings.GmChatOn);
                     else
                         session.SendNotification(CypherStrings.GmChatOff);
@@ -206,7 +206,7 @@ namespace Game.Chat
 
             if (args.Empty())
             {
-                handler.SendSysMessage(CypherStrings.YouAre, _player.isGMVisible() ? Global.ObjectMgr.GetCypherString(CypherStrings.Visible) : Global.ObjectMgr.GetCypherString(CypherStrings.Invisible));
+                handler.SendSysMessage(CypherStrings.YouAre, _player.IsGMVisible() ? Global.ObjectMgr.GetCypherString(CypherStrings.Visible) : Global.ObjectMgr.GetCypherString(CypherStrings.Invisible));
                 return true;
             }
 

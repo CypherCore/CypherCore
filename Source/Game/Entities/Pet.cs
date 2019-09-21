@@ -40,13 +40,13 @@ namespace Game.Entities
 
             Cypher.Assert(GetOwner().IsTypeId(TypeId.Player));
 
-            m_unitTypeMask |= UnitTypeMask.Pet;
+            UnitTypeMask |= UnitTypeMask.Pet;
             if (type == PetType.Hunter)
-                m_unitTypeMask |= UnitTypeMask.HunterPet;
+                UnitTypeMask |= UnitTypeMask.HunterPet;
 
-            if (!m_unitTypeMask.HasAnyFlag(UnitTypeMask.ControlableGuardian))
+            if (!UnitTypeMask.HasAnyFlag(UnitTypeMask.ControlableGuardian))
             {
-                m_unitTypeMask |= UnitTypeMask.ControlableGuardian;
+                UnitTypeMask |= UnitTypeMask.ControlableGuardian;
                 InitCharmInfo();
             }
 
@@ -173,7 +173,7 @@ namespace Game.Entities
 
             PhasingHandler.InheritPhaseShift(this, owner);
 
-            setPetType(petType);
+            SetPetType(petType);
             SetFaction(owner.GetFaction());
             SetCreatedBySpell(summonSpellId);
 
@@ -203,10 +203,10 @@ namespace Game.Entities
             SetNpcFlags2(NPCFlags2.None);
             SetName(result.Read<string>(8));
 
-            switch (getPetType())
+            switch (GetPetType())
             {
                 case PetType.Summon:
-                    petlevel = owner.getLevel();
+                    petlevel = owner.GetLevel();
 
                     SetClass(Class.Mage);
                     SetUnitFlags(UnitFlags.PvpAttackable); // this enables popup window (pet dismiss, cancel)
@@ -220,7 +220,7 @@ namespace Game.Entities
                     break;
                 default:
                     if (!IsPetGhoul())
-                        Log.outError(LogFilter.Pet, "Pet have incorrect type ({0}) for pet loading.", getPetType());
+                        Log.outError(LogFilter.Pet, "Pet have incorrect type ({0}) for pet loading.", GetPetType());
                     break;
             }
 
@@ -244,14 +244,14 @@ namespace Game.Entities
             SetReactState((ReactStates)result.Read<byte>(6));
             SetCanModifyStats(true);
 
-            if (getPetType() == PetType.Summon && !current)              //all (?) summon pets come with full health when called, but not when they are current
+            if (GetPetType() == PetType.Summon && !current)              //all (?) summon pets come with full health when called, but not when they are current
                 SetFullPower(PowerType.Mana);
             else
             {
                 uint savedhealth = result.Read<uint>(10);
                 uint savedmana = result.Read<uint>(11);
-                if (savedhealth == 0 && getPetType() == PetType.Hunter)
-                    setDeathState(DeathState.JustDied);
+                if (savedhealth == 0 && GetPetType() == PetType.Hunter)
+                    SetDeathState(DeathState.JustDied);
                 else
                 {
                     SetHealth(savedhealth);
@@ -335,7 +335,7 @@ namespace Game.Entities
 
             SetGroupUpdateFlag(GroupUpdatePetFlags.Full);
 
-            if (getPetType() == PetType.Hunter)
+            if (GetPetType() == PetType.Hunter)
             {
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_DECLINED_NAME);
                 stmt.AddValue(0, owner.GetGUID().GetCounter());
@@ -353,7 +353,7 @@ namespace Game.Entities
             }
 
             //set last used pet number (for use in BG's)
-            if (owner.IsTypeId(TypeId.Player) && isControlled() && !isTemporarySummoned() && (getPetType() == PetType.Summon || getPetType() == PetType.Hunter))
+            if (owner.IsTypeId(TypeId.Player) && IsControlled() && !IsTemporarySummoned() && (GetPetType() == PetType.Summon || GetPetType() == PetType.Hunter))
                 owner.ToPlayer().SetLastPetNumber(petId);
 
             m_loading = false;
@@ -367,7 +367,7 @@ namespace Game.Entities
                 return;
 
             // save only fully controlled creature
-            if (!isControlled())
+            if (!IsControlled())
                 return;
 
             // not save not player pets
@@ -383,7 +383,7 @@ namespace Game.Entities
                 owner.GetTemporaryUnsummonedPetNumber() != GetCharmInfo().GetPetNumber())
             {
                 // pet will lost anyway at restore temporary unsummoned
-                if (getPetType() == PetType.Hunter)
+                if (GetPetType() == PetType.Hunter)
                     return;
 
                 // for warlock case
@@ -427,7 +427,7 @@ namespace Game.Entities
                 }
 
                 // prevent existence another hunter pet in PET_SAVE_AS_CURRENT and PET_SAVE_NOT_IN_SLOT
-                if (getPetType() == PetType.Hunter && (mode == PetSaveMode.AsCurrent || mode > PetSaveMode.LastStableSlot))
+                if (GetPetType() == PetType.Hunter && (mode == PetSaveMode.AsCurrent || mode > PetSaveMode.LastStableSlot))
                 {
                     stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_PET_BY_SLOT);
                     stmt.AddValue(0, ownerLowGUID);
@@ -442,7 +442,7 @@ namespace Game.Entities
                 stmt.AddValue(1, GetEntry());
                 stmt.AddValue(2, ownerLowGUID);
                 stmt.AddValue(3, GetNativeDisplayId());
-                stmt.AddValue(4, getLevel());
+                stmt.AddValue(4, GetLevel());
                 stmt.AddValue(5, (uint)m_unitData.PetExperience);
                 stmt.AddValue(6, GetReactState());
                 stmt.AddValue(7, mode);
@@ -453,7 +453,7 @@ namespace Game.Entities
                 stmt.AddValue(12, GenerateActionBarData());
                 stmt.AddValue(13, Time.UnixTime);
                 stmt.AddValue(14, (uint)m_unitData.CreatedBySpell);
-                stmt.AddValue(15, getPetType());
+                stmt.AddValue(15, GetPetType());
                 stmt.AddValue(16, m_petSpecialization);
                 trans.Append(stmt);
 
@@ -502,19 +502,19 @@ namespace Game.Entities
             DB.Characters.CommitTransaction(trans);
         }
 
-        public override void setDeathState(DeathState s)
+        public override void SetDeathState(DeathState s)
         {
-            base.setDeathState(s);
-            if (getDeathState() == DeathState.Corpse)
+            base.SetDeathState(s);
+            if (GetDeathState() == DeathState.Corpse)
             {
-                if (getPetType() == PetType.Hunter)
+                if (GetPetType() == PetType.Hunter)
                 {
                     // pet corpse non lootable and non skinnable
                     SetDynamicFlags(UnitDynFlags.None);
                     RemoveUnitFlag(UnitFlags.Skinnable);
                 }
             }
-            else if (getDeathState() == DeathState.Alive)
+            else if (GetDeathState() == DeathState.Alive)
             {
                 CastPetAuras(true);
             }
@@ -532,7 +532,7 @@ namespace Game.Entities
             {
                 case DeathState.Corpse:
                     {
-                        if (getPetType() != PetType.Hunter || m_corpseRemoveTime <= Time.UnixTime)
+                        if (GetPetType() != PetType.Hunter || m_corpseRemoveTime <= Time.UnixTime)
                         {
                             Remove(PetSaveMode.NotInSlot);               //hunters' pets never get removed because of death, NEVER!
                             return;
@@ -543,18 +543,18 @@ namespace Game.Entities
                     {
                         // unsummon pet that lost owner
                         Player owner = GetOwner();
-                        if (owner == null || (!IsWithinDistInMap(owner, GetMap().GetVisibilityRange()) && !isPossessed()) || (isControlled() && owner.GetPetGUID().IsEmpty()))
+                        if (owner == null || (!IsWithinDistInMap(owner, GetMap().GetVisibilityRange()) && !IsPossessed()) || (IsControlled() && owner.GetPetGUID().IsEmpty()))
                         {
                             Remove(PetSaveMode.NotInSlot, true);
                             return;
                         }
 
-                        if (isControlled())
+                        if (IsControlled())
                         {
                             if (owner.GetPetGUID() != GetGUID())
                             {
                                 Log.outError(LogFilter.Pet, "Pet {0} is not pet of owner {1}, removed", GetEntry(), GetOwner().GetName());
-                                Remove(getPetType() == PetType.Hunter ? PetSaveMode.AsDeleted : PetSaveMode.NotInSlot);
+                                Remove(GetPetType() == PetType.Hunter ? PetSaveMode.AsDeleted : PetSaveMode.NotInSlot);
                                 return;
                             }
                         }
@@ -565,7 +565,7 @@ namespace Game.Entities
                                 m_duration -= (int)diff;
                             else
                             {
-                                Remove(getPetType() != PetType.Summon ? PetSaveMode.AsDeleted : PetSaveMode.NotInSlot);
+                                Remove(GetPetType() != PetType.Summon ? PetSaveMode.AsDeleted : PetSaveMode.NotInSlot);
                                 return;
                             }
                         }
@@ -610,7 +610,7 @@ namespace Game.Entities
 
         public void GivePetXP(uint xp)
         {
-            if (getPetType() != PetType.Hunter)
+            if (GetPetType() != PetType.Hunter)
                 return;
 
             if (xp < 1)
@@ -619,8 +619,8 @@ namespace Game.Entities
             if (!IsAlive())
                 return;
 
-            uint maxlevel = Math.Min(WorldConfig.GetUIntValue(WorldCfg.MaxPlayerLevel), GetOwner().getLevel());
-            uint petlevel = getLevel();
+            uint maxlevel = Math.Min(WorldConfig.GetUIntValue(WorldCfg.MaxPlayerLevel), GetOwner().GetLevel());
+            uint petlevel = GetLevel();
 
             // If pet is detected to be at, or above(?) the players level, don't hand out XP
             if (petlevel >= maxlevel)
@@ -647,10 +647,10 @@ namespace Game.Entities
 
         public void GivePetLevel(int level)
         {
-            if (level == 0 || level == getLevel())
+            if (level == 0 || level == GetLevel())
                 return;
 
-            if (getPetType() == PetType.Hunter)
+            if (GetPetType() == PetType.Hunter)
             {
                 SetPetExperience(0);
                 SetPetNextLevelExperience((uint)(Global.ObjectMgr.GetXPForLevel((uint)level) * PetXPFactor));
@@ -714,7 +714,7 @@ namespace Game.Entities
 
             SetPetNameTimestamp(0);
             SetPetExperience(0);
-            SetPetNextLevelExperience((uint)(Global.ObjectMgr.GetXPForLevel(getLevel() + 1) * PetXPFactor));
+            SetPetNextLevelExperience((uint)(Global.ObjectMgr.GetXPForLevel(GetLevel() + 1) * PetXPFactor));
             SetNpcFlags(NPCFlags.None);
             SetNpcFlags2(NPCFlags2.None);
 
@@ -751,13 +751,13 @@ namespace Game.Entities
         public uint GetCurrentFoodBenefitLevel(uint itemlevel)
         {
             // -5 or greater food level
-            if (getLevel() <= itemlevel + 5)                         //possible to feed level 60 pet with level 55 level food for full effect
+            if (GetLevel() <= itemlevel + 5)                         //possible to feed level 60 pet with level 55 level food for full effect
                 return 35000;
             // -10..-6
-            else if (getLevel() <= itemlevel + 10)                   //pure guess, but sounds good
+            else if (GetLevel() <= itemlevel + 10)                   //pure guess, but sounds good
                 return 17000;
             // -14..-11
-            else if (getLevel() <= itemlevel + 14)                   //level 55 food gets green on 70, makes sense to me
+            else if (GetLevel() <= itemlevel + 14)                   //level 55 food gets green on 70, makes sense to me
                 return 8000;
             // -15 or less
             else
@@ -786,7 +786,7 @@ namespace Game.Entities
             {
                 do
                 {
-                    addSpell(result.Read<uint>(0), (ActiveStates)result.Read<byte>(1), PetSpellState.Unchanged);
+                    AddSpell(result.Read<uint>(0), (ActiveStates)result.Read<byte>(1), PetSpellState.Unchanged);
                 }
                 while (result.NextRow());
             }
@@ -992,7 +992,7 @@ namespace Game.Entities
             }
         }
 
-        bool addSpell(uint spellId, ActiveStates active = ActiveStates.Decide, PetSpellState state = PetSpellState.New, PetSpellType type = PetSpellType.Normal)
+        bool AddSpell(uint spellId, ActiveStates active = ActiveStates.Decide, PetSpellState state = PetSpellState.New, PetSpellType type = PetSpellType.Normal)
         {
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
             if (spellInfo == null)
@@ -1075,7 +1075,7 @@ namespace Game.Entities
                             if (newspell.active == ActiveStates.Enabled)
                                 ToggleAutocast(oldRankSpellInfo, false);
 
-                            unlearnSpell(pair.Key, false, false);
+                            UnlearnSpell(pair.Key, false, false);
                             break;
                         }
                         // ignore new lesser rank
@@ -1098,29 +1098,29 @@ namespace Game.Entities
             return true;
         }
 
-        public bool learnSpell(uint spell_id)
+        public bool LearnSpell(uint spellId)
         {
             // prevent duplicated entires in spell book
-            if (!addSpell(spell_id))
+            if (!AddSpell(spellId))
                 return false;
 
             if (!m_loading)
             {
                 PetLearnedSpells packet = new PetLearnedSpells();
-                packet.Spells.Add(spell_id);
+                packet.Spells.Add(spellId);
                 GetOwner().SendPacket(packet);
                 GetOwner().PetSpellInitialize();
             }
             return true;
         }
 
-        void learnSpells(List<uint> spellIds)
+        void LearnSpells(List<uint> spellIds)
         {
             PetLearnedSpells packet = new PetLearnedSpells();
 
             foreach (uint spell in spellIds)
             {
-                if (!addSpell(spell))
+                if (!AddSpell(spell))
                     continue;
 
                 packet.Spells.Add(spell);
@@ -1132,7 +1132,7 @@ namespace Game.Entities
 
         void InitLevelupSpellsForLevel()
         {
-            uint level = getLevel();
+            uint level = GetLevel();
             var levelupSpells = GetCreatureTemplate().Family != 0 ? Global.SpellMgr.GetPetLevelupSpellList(GetCreatureTemplate().Family) : null;
             if (levelupSpells != null)
             {
@@ -1141,10 +1141,10 @@ namespace Game.Entities
                 {
                     // will called first if level down
                     if (pair.Key > level)
-                        unlearnSpell(pair.Value, true);                 // will learn prev rank if any
+                        UnlearnSpell(pair.Value, true);                 // will learn prev rank if any
                     // will called if level up
                     else
-                        learnSpell(pair.Value);                        // will unlearn prev rank if any
+                        LearnSpell(pair.Value);                        // will unlearn prev rank if any
                 }
             }
 
@@ -1160,22 +1160,22 @@ namespace Game.Entities
 
                     // will called first if level down
                     if (spellInfo.SpellLevel > level)
-                        unlearnSpell(spellInfo.Id, true);
+                        UnlearnSpell(spellInfo.Id, true);
                     // will called if level up
                     else
-                        learnSpell(spellInfo.Id);
+                        LearnSpell(spellInfo.Id);
                 }
             }
         }
 
-        bool unlearnSpell(uint spell_id, bool learn_prev, bool clear_ab = true)
+        bool UnlearnSpell(uint spellId, bool learnPrev, bool clearActionBar = true)
         {
-            if (removeSpell(spell_id, learn_prev, clear_ab))
+            if (RemoveSpell(spellId, learnPrev, clearActionBar))
             {
                 if (!m_loading)
                 {
                     PetUnlearnedSpells packet = new PetUnlearnedSpells();
-                    packet.Spells.Add(spell_id);
+                    packet.Spells.Add(spellId);
                     GetOwner().SendPacket(packet);
                 }
                 return true;
@@ -1183,13 +1183,13 @@ namespace Game.Entities
             return false;
         }
 
-        void unlearnSpells(List<uint> spellIds, bool learn_prev, bool clear_ab)
+        void UnlearnSpells(List<uint> spellIds, bool learnPrev, bool clearActionBar)
         {
             PetUnlearnedSpells packet = new PetUnlearnedSpells();
 
             foreach (uint spell in spellIds)
             {
-                if (!removeSpell(spell, learn_prev, clear_ab))
+                if (!RemoveSpell(spell, learnPrev, clearActionBar))
                     continue;
 
                 packet.Spells.Add(spell);
@@ -1199,9 +1199,9 @@ namespace Game.Entities
                 GetOwner().SendPacket(packet);
         }
 
-        public bool removeSpell(uint spell_id, bool learn_prev, bool clear_ab = true)
+        public bool RemoveSpell(uint spellId, bool learnPrev, bool clearActionBar = true)
         {
-            var petSpell = m_spells.LookupByKey(spell_id);
+            var petSpell = m_spells.LookupByKey(spellId);
             if (petSpell == null)
                 return false;
 
@@ -1209,23 +1209,23 @@ namespace Game.Entities
                 return false;
 
             if (petSpell.state == PetSpellState.New)
-                m_spells.Remove(spell_id);
+                m_spells.Remove(spellId);
             else
                 petSpell.state = PetSpellState.Removed;
 
-            RemoveAurasDueToSpell(spell_id);
+            RemoveAurasDueToSpell(spellId);
 
-            if (learn_prev)
+            if (learnPrev)
             {
-                uint prev_id = Global.SpellMgr.GetPrevSpellInChain(spell_id);
+                uint prev_id = Global.SpellMgr.GetPrevSpellInChain(spellId);
                 if (prev_id != 0)
-                    learnSpell(prev_id);
+                    LearnSpell(prev_id);
                 else
-                    learn_prev = false;
+                    learnPrev = false;
             }
 
             // if remove last rank or non-ranked then update action bar at server and client if need
-            if (GetCharmInfo().RemoveSpellFromActionBar(spell_id) && !learn_prev && clear_ab)
+            if (GetCharmInfo().RemoveSpellFromActionBar(spellId) && !learnPrev && clearActionBar)
             {
                 if (!m_loading)
                 {
@@ -1313,7 +1313,7 @@ namespace Game.Entities
 
         public bool IsPermanentPetFor(Player owner)
         {
-            switch (getPetType())
+            switch (GetPetType())
             {
                 case PetType.Summon:
                     switch (owner.GetClass())
@@ -1378,7 +1378,7 @@ namespace Game.Entities
                 // Passive 01~10, Passive 00 (20782, not used), Ferocious Inspiration (34457)
                 // Scale 01~03 (34902~34904, bonus from owner, not used)
                 foreach (var petSet in petStore)
-                    addSpell(petSet, ActiveStates.Decide, PetSpellState.New, PetSpellType.Family);
+                    AddSpell(petSet, ActiveStates.Decide, PetSpellState.New, PetSpellType.Family);
             }
         }
 
@@ -1431,12 +1431,12 @@ namespace Game.Entities
             return false;
         }
 
-        void learnSpellHighRank(uint spellid)
+        void LearnSpellHighRank(uint spellid)
         {
-            learnSpell(spellid);
+            LearnSpell(spellid);
             uint next = Global.SpellMgr.GetNextSpellInChain(spellid);
             if (next != 0)
-                learnSpellHighRank(next);
+                LearnSpellHighRank(next);
         }
 
         public void SynchronizeLevelWithOwner()
@@ -1445,12 +1445,12 @@ namespace Game.Entities
             if (!owner || !owner.IsTypeId(TypeId.Player))
                 return;
 
-            switch (getPetType())
+            switch (GetPetType())
             {
                 // always same level
                 case PetType.Summon:
                 case PetType.Hunter:
-                    GivePetLevel((int)owner.getLevel());
+                    GivePetLevel((int)owner.GetLevel());
                     break;
                 default:
                     break;
@@ -1466,16 +1466,16 @@ namespace Game.Entities
         {
             base.SetDisplayId(modelId, displayScale);
 
-            if (!isControlled())
+            if (!IsControlled())
                 return;
 
             SetGroupUpdateFlag(GroupUpdatePetFlags.ModelId);
         }
 
-        public PetType getPetType() { return m_petType; }
-        public void setPetType(PetType type) { m_petType = type; }
-        public bool isControlled() { return getPetType() == PetType.Summon || getPetType() == PetType.Hunter; }
-        public bool isTemporarySummoned() { return m_duration > 0; }
+        public PetType GetPetType() { return m_petType; }
+        public void SetPetType(PetType type) { m_petType = type; }
+        public bool IsControlled() { return GetPetType() == PetType.Summon || GetPetType() == PetType.Hunter; }
+        public bool IsTemporarySummoned() { return m_duration > 0; }
 
         public override bool IsLoading() { return m_loading; }
 
@@ -1522,14 +1522,14 @@ namespace Game.Entities
                 foreach (var specSpell in specSpells)
                 {
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(specSpell.SpellID);
-                    if (spellInfo == null || spellInfo.SpellLevel > getLevel())
+                    if (spellInfo == null || spellInfo.SpellLevel > GetLevel())
                         continue;
 
                     learnedSpells.Add(specSpell.SpellID);
                 }
             }
 
-            learnSpells(learnedSpells);
+            LearnSpells(learnedSpells);
         }
 
         void RemoveSpecializationSpells(bool clearActionBar)
@@ -1561,7 +1561,7 @@ namespace Game.Entities
                 }
             }
 
-            unlearnSpells(unlearnedSpells, true, clearActionBar);
+            UnlearnSpells(unlearnedSpells, true, clearActionBar);
         }
 
         public void SetSpecialization(uint spec)

@@ -120,7 +120,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.DfGetJoinStatus, Processing = PacketProcessing.ThreadSafe)]
         void HandleDfGetJoinStatus(DFGetJoinStatus packet)
         {
-            if (!GetPlayer().isUsingLfg())
+            if (!GetPlayer().IsUsingLfg())
                 return;
 
             ObjectGuid guid = GetPlayer().GetGUID();
@@ -143,7 +143,7 @@ namespace Game
         public void SendLfgPlayerLockInfo()
         {
             // Get Random dungeons that can be done at a certain level and expansion
-            uint level = GetPlayer().getLevel();
+            uint level = GetPlayer().GetLevel();
             List<uint> randomDungeons = Global.LFGMgr.GetRandomAndSeasonalDungeons(level, (uint)GetExpansion());
 
             LfgPlayerInfo lfgPlayerInfo = new LfgPlayerInfo();

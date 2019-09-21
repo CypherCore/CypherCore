@@ -93,7 +93,7 @@ namespace Scripts.Northrend
                     {
                         if (GetClosestCreatureWithEntry(me, DalaranConst.NpcAplleboughA, 32.0f))
                         {
-                            if (me.isInBackInMap(who, 12.0f))   // In my line of sight, "outdoors", and behind me
+                            if (me.IsInBackInMap(who, 12.0f))   // In my line of sight, "outdoors", and behind me
                                 DoCast(who, DalaranConst.SpellTrespasserA); // Teleport the Horde unit out
                         }
                         else                                      // In my line of sight, and "indoors"
@@ -105,7 +105,7 @@ namespace Scripts.Northrend
                     {
                         if (GetClosestCreatureWithEntry(me, DalaranConst.NpcSweetberryH, 32.0f))
                         {
-                            if (me.isInBackInMap(who, 12.0f))   // In my line of sight, "outdoors", and behind me
+                            if (me.IsInBackInMap(who, 12.0f))   // In my line of sight, "outdoors", and behind me
                                 DoCast(who, DalaranConst.SpellTrespasserH); // Teleport the Alliance unit out
                         }
                         else                                      // In my line of sight, and "indoors"
@@ -125,7 +125,7 @@ namespace Scripts.Northrend
     {
         public npc_minigob_manabonk(Creature creature) : base(creature)
         {
-            me.setActive(true);
+            me.SetActive(true);
         }
 
         public override void Reset()

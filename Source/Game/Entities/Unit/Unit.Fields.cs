@@ -41,7 +41,7 @@ namespace Game.Entities
         //Movement
         protected float[] m_speed_rate = new float[(int)UnitMoveType.Max];
         RefManager<Unit, TargetedMovementGeneratorBase> m_FollowingRefManager;
-        public MoveSpline moveSpline { get; set; }
+        public MoveSpline MoveSpline { get; set; }
         MotionMaster i_motionMaster;
         public uint m_movementCounter;       //< Incrementing counter used in movement packets
         TimeTrackerSmall movesplineTimer;
@@ -59,18 +59,18 @@ namespace Game.Entities
         protected uint[] m_attackTimer = new uint[(int)WeaponAttackType.Max];
 
         ThreatManager threatManager;
-        HostileRefManager m_HostileRefManager;
+        HostileRefManager hostileRefManager;
         RedirectThreatInfo _redirectThreatInfo;
-        protected Unit m_attacking;
+        protected Unit attacking;
 
-        public float m_modMeleeHitChance { get; set; }
-        public float m_modRangedHitChance { get; set; }
-        public float m_modSpellHitChance { get; set; }
+        public float ModMeleeHitChance { get; set; }
+        public float ModRangedHitChance { get; set; }
+        public float ModSpellHitChance { get; set; }
         bool m_canDualWield;
-        public int m_baseSpellCritChance { get; set; }
-        public uint m_regenTimer { get; set; }
-        uint m_CombatTimer;
-        public uint m_extraAttacks { get; set; }
+        public int BaseSpellCritChance { get; set; }
+        public uint RegenTimer { get; set; }
+        uint combatTimer;
+        public uint ExtraAttacks { get; set; }
 
         //Charm
         public List<Unit> m_Controlled = new List<Unit>();
@@ -119,14 +119,14 @@ namespace Game.Entities
         public ObjectGuid[] m_SummonSlot = new ObjectGuid[7];
         public ObjectGuid[] m_ObjectSlot = new ObjectGuid[4];
         public EventSystem m_Events = new EventSystem();
-        public UnitTypeMask m_unitTypeMask { get; set; }
+        public UnitTypeMask UnitTypeMask { get; set; }
         UnitState m_state;
         protected LiquidTypeRecord _lastLiquid;
         protected DeathState m_deathState;
         public Vehicle m_vehicle { get; set; }
-        public Vehicle m_vehicleKit { get; set; }
+        public Vehicle VehicleKit { get; set; }
         bool canModifyStats;
-        public uint m_lastSanctuaryTime { get; set; }
+        public uint LastSanctuaryTime { get; set; }
         uint m_transform;
         bool m_cleanupDone; // lock made to not add stuff after cleanup before delete
         bool m_duringRemoveFromWorld; // lock made to not add stuff after begining removing from world
@@ -449,7 +449,7 @@ namespace Game.Entities
 
     public class SpellNonMeleeDamage
     {
-        public SpellNonMeleeDamage(Unit _attacker, Unit _target, uint _SpellID, uint _SpellXSpellVisualID, SpellSchoolMask _schoolMask, ObjectGuid _castId = default(ObjectGuid))
+        public SpellNonMeleeDamage(Unit _attacker, Unit _target, uint _SpellID, uint _SpellXSpellVisualID, SpellSchoolMask _schoolMask, ObjectGuid _castId = default)
         {
             target = _target;
             attacker = _attacker;

@@ -648,7 +648,7 @@ namespace Game.Entities
                         else if (IsTypeId(TypeId.Player))
                             crit_chance = ToPlayer().m_activePlayerData.SpellCritPercentage;
                         else
-                            crit_chance = m_baseSpellCritChance;
+                            crit_chance = BaseSpellCritChance;
 
                         // taken
                         if (victim)
@@ -703,7 +703,7 @@ namespace Game.Entities
                             // Spell crit suppression
                             if (victim.GetTypeId() == TypeId.Unit)
                             {
-                                int levelDiff = (int)(victim.GetLevelForTarget(this) - getLevel());
+                                int levelDiff = (int)(victim.GetLevelForTarget(this) - GetLevel());
                                 crit_chance -= levelDiff * 1.0f;
                             }
                         }
@@ -1019,7 +1019,7 @@ namespace Game.Entities
             return SpellMissInfo.None;
         }
 
-        public void CastSpell(SpellCastTargets targets, SpellInfo spellInfo, Dictionary<SpellValueMod, int> values, TriggerCastFlags triggerFlags = TriggerCastFlags.None, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default(ObjectGuid))
+        public void CastSpell(SpellCastTargets targets, SpellInfo spellInfo, Dictionary<SpellValueMod, int> values, TriggerCastFlags triggerFlags = TriggerCastFlags.None, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
         {
             if (spellInfo == null)
             {
@@ -1036,11 +1036,11 @@ namespace Game.Entities
             spell.m_CastItem = castItem;
             spell.prepare(targets, triggeredByAura);
         }
-        public void CastSpell(Unit victim, uint spellId, bool triggered, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default(ObjectGuid))
+        public void CastSpell(Unit victim, uint spellId, bool triggered, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
         {
             CastSpell(victim, spellId, triggered ? TriggerCastFlags.FullMask : TriggerCastFlags.None, castItem, triggeredByAura, originalCaster);
         }
-        public void CastSpell(Unit victim, uint spellId, TriggerCastFlags triggerFlags = TriggerCastFlags.None, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default(ObjectGuid))
+        public void CastSpell(Unit victim, uint spellId, TriggerCastFlags triggerFlags = TriggerCastFlags.None, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
         {
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
             if (spellInfo == null)
@@ -1051,17 +1051,17 @@ namespace Game.Entities
 
             CastSpell(victim, spellInfo, triggerFlags, castItem, triggeredByAura, originalCaster);
         }
-        public void CastSpell(Unit victim, SpellInfo spellInfo, bool triggered, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default(ObjectGuid))
+        public void CastSpell(Unit victim, SpellInfo spellInfo, bool triggered, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
         {
             CastSpell(victim, spellInfo, triggered ? TriggerCastFlags.FullMask : TriggerCastFlags.None, castItem, triggeredByAura, originalCaster);
         }
-        public void CastSpell(Unit victim, SpellInfo spellInfo, TriggerCastFlags triggerFlags = TriggerCastFlags.None, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default(ObjectGuid))
+        public void CastSpell(Unit victim, SpellInfo spellInfo, TriggerCastFlags triggerFlags = TriggerCastFlags.None, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
         {
             SpellCastTargets targets = new SpellCastTargets();
             targets.SetUnitTarget(victim);
             CastSpell(targets, spellInfo, null, triggerFlags, castItem, triggeredByAura, originalCaster);
         }
-        public void CastSpell(float x, float y, float z, uint spellId, bool triggered, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default(ObjectGuid))
+        public void CastSpell(float x, float y, float z, uint spellId, bool triggered, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
         {
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
             if (spellInfo == null)
@@ -1074,7 +1074,7 @@ namespace Game.Entities
 
             CastSpell(targets, spellInfo, null, triggered ? TriggerCastFlags.FullMask : TriggerCastFlags.None, castItem, triggeredByAura, originalCaster);
         }
-        public void CastSpell(GameObject go, uint spellId, bool triggered, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default(ObjectGuid))
+        public void CastSpell(GameObject go, uint spellId, bool triggered, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
         {
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
             if (spellInfo == null)
@@ -1088,7 +1088,7 @@ namespace Game.Entities
             CastSpell(targets, spellInfo, null, triggered ? TriggerCastFlags.FullMask : TriggerCastFlags.None, castItem, triggeredByAura, originalCaster);
         }
 
-        public void CastCustomSpell(Unit target, uint spellId, int bp0, int bp1, int bp2, bool triggered, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default(ObjectGuid))
+        public void CastCustomSpell(Unit target, uint spellId, int bp0, int bp1, int bp2, bool triggered, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
         {
             Dictionary<SpellValueMod, int> values = new Dictionary<SpellValueMod, int>();
             if (bp0 != 0)
@@ -1099,19 +1099,19 @@ namespace Game.Entities
                 values.Add(SpellValueMod.BasePoint2, bp2);
             CastCustomSpell(spellId, values, target, triggered ? TriggerCastFlags.FullMask : TriggerCastFlags.None, castItem, triggeredByAura, originalCaster);
         }
-        public void CastCustomSpell(uint spellId, SpellValueMod mod, int value, Unit target, bool triggered, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default(ObjectGuid))
+        public void CastCustomSpell(uint spellId, SpellValueMod mod, int value, Unit target, bool triggered, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
         {
             Dictionary<SpellValueMod, int> values = new Dictionary<SpellValueMod, int>();
             values.Add(mod, value);
             CastCustomSpell(spellId, values, target, triggered ? TriggerCastFlags.FullMask : TriggerCastFlags.None, castItem, triggeredByAura, originalCaster);
         }
-        public void CastCustomSpell(uint spellId, SpellValueMod mod, int value, Unit target = null, TriggerCastFlags triggerFlags = TriggerCastFlags.None, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default(ObjectGuid))
+        public void CastCustomSpell(uint spellId, SpellValueMod mod, int value, Unit target = null, TriggerCastFlags triggerFlags = TriggerCastFlags.None, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
         {
             Dictionary<SpellValueMod, int> values = new Dictionary<SpellValueMod, int>();
             values.Add(mod, value);
             CastCustomSpell(spellId, values, target, triggerFlags, castItem, triggeredByAura, originalCaster);
         }
-        public void CastCustomSpell(uint spellId, Dictionary<SpellValueMod, int> values, Unit victim = null, TriggerCastFlags triggerFlags = TriggerCastFlags.None, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default(ObjectGuid))
+        public void CastCustomSpell(uint spellId, Dictionary<SpellValueMod, int> values, Unit victim = null, TriggerCastFlags triggerFlags = TriggerCastFlags.None, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
         {
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
             if (spellInfo == null)
@@ -1273,7 +1273,7 @@ namespace Game.Entities
 
         public SpellHistory GetSpellHistory() { return _spellHistory; }
 
-        public static ProcFlagsHit createProcHitMask(SpellNonMeleeDamage damageInfo, SpellMissInfo missCondition)
+        public static ProcFlagsHit CreateProcHitMask(SpellNonMeleeDamage damageInfo, SpellMissInfo missCondition)
         {
             ProcFlagsHit hitMask = ProcFlagsHit.None;
             // Check victim state
@@ -1501,7 +1501,7 @@ namespace Game.Entities
             int overEnergize = damage - gain;
 
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId);
-            victim.getHostileRefManager().threatAssist(this, damage * 0.5f, spellInfo);
+            victim.GetHostileRefManager().threatAssist(this, damage * 0.5f, spellInfo);
 
             SendEnergizeSpellLog(victim, spellId, damage, overEnergize, powerType);
         }
@@ -1997,7 +1997,7 @@ namespace Game.Entities
 
         public ushort GetMaxSkillValueForLevel(Unit target = null)
         {
-            return (ushort)(target != null ? GetLevelForTarget(target) : getLevel() * 5);
+            return (ushort)(target != null ? GetLevelForTarget(target) : GetLevel() * 5);
         }
         public Player GetSpellModOwner()
         {
@@ -2044,7 +2044,7 @@ namespace Game.Entities
                                 InterruptSpell(CurrentSpellTypes.AutoRepeat);
                             m_AutoRepeatFirstCast = true;
                         }
-                        if (pSpell.m_spellInfo.CalcCastTime(getLevel()) > 0)
+                        if (pSpell.m_spellInfo.CalcCastTime(GetLevel()) > 0)
                             AddUnitState(UnitState.Casting);
 
                         break;
@@ -2163,7 +2163,7 @@ namespace Game.Entities
             return (uint)crit_bonus;
         }
 
-        bool isSpellBlocked(Unit victim, SpellInfo spellProto, WeaponAttackType attackType = WeaponAttackType.BaseAttack)
+        bool IsSpellBlocked(Unit victim, SpellInfo spellProto, WeaponAttackType attackType = WeaponAttackType.BaseAttack)
         {
             // These spells can't be blocked
             if (spellProto != null && (spellProto.HasAttribute(SpellAttr0.ImpossibleDodgeParryBlock) || spellProto.HasAttribute(SpellAttr3.IgnoreHitResult)))
@@ -2190,15 +2190,13 @@ namespace Game.Entities
             }
         }
 
-        public uint getTransForm() { return m_transform; }
-
         public bool HasStealthAura() { return HasAuraType(AuraType.ModStealth); }
         public bool HasInvisibilityAura() { return HasAuraType(AuraType.ModInvisibility); }
-        public bool isFeared() { return HasAuraType(AuraType.ModFear); }
-        public bool isFrozen() { return HasAuraState(AuraStateType.Frozen); }
+        public bool IsFeared() { return HasAuraType(AuraType.ModFear); }
+        public bool IsFrozen() { return HasAuraState(AuraStateType.Frozen); }
         public bool IsPolymorphed()
         {
-            uint transformId = getTransForm();
+            uint transformId = GetTransForm();
             if (transformId == 0)
                 return false;
 
@@ -2359,7 +2357,7 @@ namespace Game.Entities
                             if (!spellInfo.HasAttribute(SpellAttr3.BlockableSpell))
                             {
                                 // Get blocked status
-                                blocked = isSpellBlocked(victim, spellInfo, attackType);
+                                blocked = IsSpellBlocked(victim, spellInfo, attackType);
                             }
                         }
 
@@ -2387,7 +2385,7 @@ namespace Game.Entities
                         {
                             // double blocked amount if block is critical
                             uint value = victim.GetBlockPercent();
-                            if (victim.isBlockCritical())
+                            if (victim.IsBlockCritical())
                                 value *= 2; // double blocked percent
                             damageInfo.blocked = (uint)MathFunctions.CalculatePct(damage, value);
                             if (damage <= damageInfo.blocked)
@@ -3008,13 +3006,13 @@ namespace Game.Entities
             return result;
         }
 
-        public bool HasAura(uint spellId, ObjectGuid casterGUID = default(ObjectGuid), ObjectGuid itemCasterGUID = default(ObjectGuid), uint reqEffMask = 0)
+        public bool HasAura(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0)
         {
             if (GetAuraApplication(spellId, casterGUID, itemCasterGUID, reqEffMask) != null)
                 return true;
             return false;
         }
-        public bool HasAuraEffect(uint spellId, uint effIndex, ObjectGuid casterGUID = default(ObjectGuid))
+        public bool HasAuraEffect(uint spellId, uint effIndex, ObjectGuid casterGUID = default)
         {
             var range = m_appliedAuras.LookupByKey(spellId);
             if (!range.Empty())
@@ -3103,17 +3101,17 @@ namespace Game.Entities
             return false;
         }
 
-        public bool HasNegativeAuraWithInterruptFlag(SpellAuraInterruptFlags flag, ObjectGuid guid = default(ObjectGuid))
+        public bool HasNegativeAuraWithInterruptFlag(SpellAuraInterruptFlags flag, ObjectGuid guid = default)
         {
             return HasNegativeAuraWithInterruptFlag((uint)flag, 0, guid);
         }
 
-        public bool HasNegativeAuraWithInterruptFlag(SpellAuraInterruptFlags2 flag, ObjectGuid guid = default(ObjectGuid))
+        public bool HasNegativeAuraWithInterruptFlag(SpellAuraInterruptFlags2 flag, ObjectGuid guid = default)
         {
             return HasNegativeAuraWithInterruptFlag((uint)flag, 1, guid);
         }
 
-        public bool HasNegativeAuraWithInterruptFlag(uint flag, int index, ObjectGuid guid = default(ObjectGuid))
+        public bool HasNegativeAuraWithInterruptFlag(uint flag, int index, ObjectGuid guid = default)
         {
             if (!Convert.ToBoolean(m_interruptMask[index] & flag))
                 return false;
@@ -3126,7 +3124,7 @@ namespace Game.Entities
             }
             return false;
         }
-        bool HasNegativeAuraWithAttribute(SpellAttr0 flag, ObjectGuid guid = default(ObjectGuid))
+        bool HasNegativeAuraWithAttribute(SpellAttr0 flag, ObjectGuid guid = default)
         {
             foreach (var list in GetAppliedAuras())
             {
@@ -3151,12 +3149,12 @@ namespace Game.Entities
 
             return count;
         }
-        public Aura GetAuraOfRankedSpell(uint spellId, ObjectGuid casterGUID = default(ObjectGuid), ObjectGuid itemCasterGUID = default(ObjectGuid), uint reqEffMask = 0)
+        public Aura GetAuraOfRankedSpell(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0)
         {
             var aurApp = GetAuraApplicationOfRankedSpell(spellId, casterGUID, itemCasterGUID, reqEffMask);
             return aurApp?.GetBase();
         }
-        AuraApplication GetAuraApplicationOfRankedSpell(uint spellId, ObjectGuid casterGUID = default(ObjectGuid), ObjectGuid itemCasterGUID = default(ObjectGuid), uint reqEffMask = 0, AuraApplication except = null)
+        AuraApplication GetAuraApplicationOfRankedSpell(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0, AuraApplication except = null)
         {
             uint rankSpell = Global.SpellMgr.GetFirstSpellInChain(spellId);
             while (rankSpell != 0)
@@ -3358,7 +3356,7 @@ namespace Game.Entities
                 }
             }
         }
-        public void RemoveAurasByType(AuraType auraType, ObjectGuid casterGUID = default(ObjectGuid), Aura except = null, bool negative = true, bool positive = true)
+        public void RemoveAurasByType(AuraType auraType, ObjectGuid casterGUID = default, Aura except = null, bool negative = true, bool positive = true)
         {
             var list = m_modAuras[auraType];
             for (var i = 0; i < list.Count; i++)
@@ -3427,7 +3425,7 @@ namespace Game.Entities
 
             aura._Remove(removeMode);
         }
-        public void RemoveOwnedAura(uint spellId, ObjectGuid casterGUID = default(ObjectGuid), uint reqEffMask = 0, AuraRemoveMode removeMode = AuraRemoveMode.Default)
+        public void RemoveOwnedAura(uint spellId, ObjectGuid casterGUID = default, uint reqEffMask = 0, AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
             foreach (var pair in GetOwnedAuras())
             {
@@ -3467,7 +3465,7 @@ namespace Game.Entities
             Cypher.Assert(false);
         }
 
-        public void RemoveAurasDueToSpell(uint spellId, ObjectGuid casterGUID = default(ObjectGuid), uint reqEffMask = 0, AuraRemoveMode removeMode = AuraRemoveMode.Default)
+        public void RemoveAurasDueToSpell(uint spellId, ObjectGuid casterGUID = default, uint reqEffMask = 0, AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
             foreach (var pair in GetAppliedAuras())
             {
@@ -3507,7 +3505,7 @@ namespace Game.Entities
                 }
             }
         }
-        public void RemoveAuraFromStack(uint spellId, ObjectGuid casterGUID = default(ObjectGuid), AuraRemoveMode removeMode = AuraRemoveMode.Default, ushort num = 1)
+        public void RemoveAuraFromStack(uint spellId, ObjectGuid casterGUID = default, AuraRemoveMode removeMode = AuraRemoveMode.Default, ushort num = 1)
         {
             var range = m_ownedAuras.LookupByKey(spellId);
             foreach (var aura in range)
@@ -3531,7 +3529,7 @@ namespace Game.Entities
             if (aura.GetOwner() == this)
                 aura.Remove(mode);
         }
-        public void RemoveAura(uint spellId, ObjectGuid caster = default(ObjectGuid), uint reqEffMask = 0, AuraRemoveMode removeMode = AuraRemoveMode.Default)
+        public void RemoveAura(uint spellId, ObjectGuid caster = default, uint reqEffMask = 0, AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
             var range = m_appliedAuras.LookupByKey(spellId);
             foreach (var iter in range)
@@ -3685,7 +3683,7 @@ namespace Game.Entities
             foreach (var pair in GetOwnedAuras())
             {
                 var appMap = pair.Value.GetApplicationMap();
-                foreach (var aurApp in appMap.Values)
+                foreach (var aurApp in appMap.Values.ToList())
                 {
                     Unit target = aurApp.GetTarget();
                     if (target == this)
@@ -3951,7 +3949,7 @@ namespace Game.Entities
             if (aurApp.GetRemoveMode() == AuraRemoveMode.Expire && IsTypeId(TypeId.Unit) && IsTotem())
             {
                 if (ToTotem().GetSpell() == aura.GetId() && ToTotem().GetTotemType() == TotemType.Passive)
-                    ToTotem().setDeathState(DeathState.JustDied);
+                    ToTotem().SetDeathState(DeathState.JustDied);
             }
 
             // Remove aurastates only if were not found
@@ -3980,7 +3978,7 @@ namespace Game.Entities
             Cypher.Assert(false);
         }
 
-        public AuraEffect GetAuraEffect(uint spellId, uint effIndex, ObjectGuid casterGUID = default(ObjectGuid))
+        public AuraEffect GetAuraEffect(uint spellId, uint effIndex, ObjectGuid casterGUID = default)
         {
             var range = m_appliedAuras.LookupByKey(spellId);
             if (!range.Empty())
@@ -3996,7 +3994,7 @@ namespace Game.Entities
             }
             return null;
         }
-        public AuraEffect GetAuraEffectOfRankedSpell(uint spellId, uint effIndex, ObjectGuid casterGUID = default(ObjectGuid))
+        public AuraEffect GetAuraEffectOfRankedSpell(uint spellId, uint effIndex, ObjectGuid casterGUID = default)
         {
             uint rankSpell = Global.SpellMgr.GetFirstSpellInChain(spellId);
             while (rankSpell != 0)
@@ -4010,7 +4008,7 @@ namespace Game.Entities
         }
         
         // spell mustn't have familyflags
-        public AuraEffect GetAuraEffect(AuraType type, SpellFamilyNames family, FlagArray128 familyFlag, ObjectGuid casterGUID = default(ObjectGuid))
+        public AuraEffect GetAuraEffect(AuraType type, SpellFamilyNames family, FlagArray128 familyFlag, ObjectGuid casterGUID = default)
         {
             var auras = GetAuraEffectsByType(type);
             foreach (var aura in auras)
@@ -4027,7 +4025,7 @@ namespace Game.Entities
 
         }
 
-        public AuraApplication GetAuraApplication(uint spellId, ObjectGuid casterGUID = default(ObjectGuid), ObjectGuid itemCasterGUID = default(ObjectGuid), uint reqEffMask = 0, AuraApplication except = null)
+        public AuraApplication GetAuraApplication(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0, AuraApplication except = null)
         {
             var range = m_appliedAuras.LookupByKey(spellId);
             if (!range.Empty())
@@ -4044,7 +4042,7 @@ namespace Game.Entities
             }
             return null;
         }
-        public Aura GetAura(uint spellId, ObjectGuid casterGUID = default(ObjectGuid), ObjectGuid itemCasterGUID = default(ObjectGuid), uint reqEffMask = 0)
+        public Aura GetAura(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0)
         {
             AuraApplication aurApp = GetAuraApplication(spellId, casterGUID, itemCasterGUID, reqEffMask);
             return aurApp?.GetBase();
@@ -4144,7 +4142,7 @@ namespace Game.Entities
                 }
             }
         }
-        public Aura _TryStackingOrRefreshingExistingAura(SpellInfo newAura, uint effMask, Unit caster, int[] baseAmount = null, Item castItem = null, ObjectGuid casterGUID = default(ObjectGuid), bool resetPeriodicTimer = true, ObjectGuid castItemGuid = default(ObjectGuid), int castItemLevel = -1)
+        public Aura _TryStackingOrRefreshingExistingAura(SpellInfo newAura, uint effMask, Unit caster, int[] baseAmount = null, Item castItem = null, ObjectGuid casterGUID = default, bool resetPeriodicTimer = true, ObjectGuid castItemGuid = default, int castItemLevel = -1)
         {
             Cypher.Assert(!casterGUID.IsEmpty() || caster);
 
@@ -4323,7 +4321,7 @@ namespace Game.Entities
             return true;
         }
 
-        public Aura GetOwnedAura(uint spellId, ObjectGuid casterGUID = default(ObjectGuid), ObjectGuid itemCasterGUID = default(ObjectGuid), uint reqEffMask = 0, Aura except = null)
+        public Aura GetOwnedAura(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0, Aura except = null)
         {
             var range = m_ownedAuras.LookupByKey(spellId);
             foreach (var aura in range)
@@ -4574,7 +4572,7 @@ namespace Game.Entities
             else if (IsPet())
             {
                 Pet pet = ToPet();
-                if (pet.isControlled())
+                if (pet.IsControlled())
                     pet.SetGroupUpdateFlag(GroupUpdatePetFlags.Auras);
             }
         }

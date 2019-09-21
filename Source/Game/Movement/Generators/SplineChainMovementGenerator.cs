@@ -20,7 +20,6 @@ using Framework.GameMath;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Game.Movement
 {
@@ -131,7 +130,7 @@ namespace Game.Movement
             // _msToNext being zero here means we're on the final spline
             if (_msToNext == 0)
             {
-                finished = me.moveSpline.Finalized();
+                finished = me.MoveSpline.Finalized();
                 return !finished;
             }
 
@@ -158,14 +157,14 @@ namespace Game.Movement
         {
             if (_nextIndex == 0)
                 return new SplineChainResumeInfo(_id, _chain, _walk, 0, 0, _msToNext);
-            if (me.moveSpline.Finalized())
+            if (me.MoveSpline.Finalized())
             {
                 if (_nextIndex < _chainSize)
                     return new SplineChainResumeInfo(_id, _chain, _walk, _nextIndex, 0, 1u);
                 else
                     return new SplineChainResumeInfo();
             }
-            return new SplineChainResumeInfo(_id, _chain, _walk, (byte)(_nextIndex - 1), (byte)(me.moveSpline._currentSplineIdx()), _msToNext);
+            return new SplineChainResumeInfo(_id, _chain, _walk, (byte)(_nextIndex - 1), (byte)(me.MoveSpline._currentSplineIdx()), _msToNext);
         }
 
         public override void Reset(Unit owner) { }

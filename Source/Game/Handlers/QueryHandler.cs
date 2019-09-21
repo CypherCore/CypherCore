@@ -23,7 +23,6 @@ using Game.Maps;
 using Game.Misc;
 using Game.Network;
 using Game.Network.Packets;
-using System;
 using System.Collections.Generic;
 
 namespace Game
